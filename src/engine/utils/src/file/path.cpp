@@ -303,6 +303,11 @@ void Path::removeFile(const Path& path)
 	std::remove(path.string().c_str());
 }
 
+bool Path::isPrefixOf(const Path& other) const
+{
+	return other.getFront(getNumberPaths()) == *this;
+}
+
 Path Path::makeRelativeTo(const Path& path) const
 {
 	const Path& me = *this;

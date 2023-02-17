@@ -102,6 +102,7 @@ namespace Halley
 		std::optional<Metadata> getMetadata(AssetType type, const String& assetId) const;
 
 		void markInputPresent(const Path& path);
+		void markInputMissing(const Path& path);
 		void markAllInputFilesAsMissing();
 		bool purgeMissingInputs();
 
@@ -112,7 +113,7 @@ namespace Halley
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
-		void markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets);
+		void markAssetsAsStillPresent(const HashMap<String, ImportAssetsDatabaseEntry>& assets);
 		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
 		Vector<AssetResource> getOutFiles(String assetId) const;

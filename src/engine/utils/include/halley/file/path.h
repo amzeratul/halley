@@ -58,6 +58,7 @@ namespace Halley
 		static Bytes readFile(const Path& path);
 		static void removeFile(const Path& path);
 
+		bool isPrefixOf(const Path& other) const;
 		Path makeRelativeTo(const Path& path) const;
 		Path changeRelativeRoot(const Path& currentParent, const Path& newParent) const;
 

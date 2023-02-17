@@ -184,6 +184,13 @@ void ImportAssetsDatabase::markInputPresent(const Path& path)
 	input.missing = false;
 }
 
+void ImportAssetsDatabase::markInputMissing(const Path& path)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	auto& input = inputFiles[path.toString()];
+	input.missing = true;
+}
+
 void ImportAssetsDatabase::markAllInputFilesAsMissing()
 {
 	std::lock_guard<std::mutex> lock(mutex);
@@ -376,7 +383,7 @@ void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
 	assetsFailed[asset.assetId] = entry;
 }
 
-void ImportAssetsDatabase::markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets)
+void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<String, ImportAssetsDatabaseEntry>& assets)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	for (auto& e: assetsImported) {

@@ -116,7 +116,7 @@ void ProjectComments::update(Time t)
 
 	if (monitorTime > threshold) {
 		monitorTime = 0;
-		if (monitor.poll()) {
+		if (monitor.pollAny()) {
 			loadAll();
 		}
 	}

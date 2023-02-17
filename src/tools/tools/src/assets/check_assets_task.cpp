@@ -61,30 +61,32 @@ void CheckAssetsTask::run()
 			sleep(5);
 		}
 
-		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
-			logInfo("Scanning for asset changes...");
-			const auto assets = checkAllAssets(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true);
-			if (!isCancelled()) {
-				importing |= requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
-			}
-		}
-		
-		const bool sharedGenSrcResult = first | monitorSharedGenSrc.poll();
-		if (sharedGenSrcResult | monitorGen.poll() | monitorGenSrc.poll()) {
-			logInfo("Scanning for codegen changes...");
-			const auto assets = checkAllAssets(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false);
-			if (!isCancelled()) {
-				importing |= requestImport(project.getCodegenDatabase(), assets, project.getGenPath(), "Generating code", false);
+		// First run
+		if (first) {
+			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
+			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+			while (hasPendingTasks()) {
+				sleep(5);
 			}
 		}
 
-		if (sharedGenSrcResult | monitorSharedGen.poll()) {
-			logInfo("Scanning for Halley codegen changes...");
-			const auto assets = checkAllAssets(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false);
-			if (!isCancelled()) {
-				importing |= requestImport(project.getSharedCodegenDatabase(), assets, project.getSharedGenPath(), "Generating code", false);
-			}
-		}
+		// Check if any files changed
+		Vector<DirectoryMonitor::Event> assetsChanged;
+		monitorAssetsSrc.poll(assetsChanged);
+		monitorSharedAssetsSrc.poll(assetsChanged);
+		monitorAssets.poll(assetsChanged);
+		Vector<DirectoryMonitor::Event> sharedGenChanged;
+		monitorSharedGenSrc.poll(sharedGenChanged);
+		monitorSharedGen.poll(sharedGenChanged);
+		Vector<DirectoryMonitor::Event> genChanged = sharedGenChanged; // Copy
+		monitorGenSrc.poll(genChanged);
+		monitorGen.poll(sharedGenChanged);
+
+		// Re-import any changes
+		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+		importing |= importChanged(genChanged, project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
+		importing |= importChanged(sharedGenChanged, project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
 
 		while (hasPendingTasks()) {
 			sleep(5);
@@ -96,21 +98,74 @@ void CheckAssetsTask::run()
 				project->onAllAssetsImported();
 			});
 		}
-		first = false;
 		
 		if (oneShot) {
 			return;
 		} else {
+			first = false;
 			setVisible(false);
 		}
 
 		if (pending.empty()) {
-			sleep(monitorAssets.hasRealImplementation() ? 100 : 1000);
+			sleep(monitorAssets.hasRealImplementation() ? 20 : 1000);
 		}
 	}
 }
 
-bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter)
+{
+	if (isCancelled()) {
+		return false;
+	}
+	const auto assets = checkAllAssets(db, srcPaths, collectDirMeta);
+
+	if (isCancelled()) {
+		return false;
+	}
+	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
+}
+
+bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter)
+{
+	if (changes.empty()) {
+		return false;
+	}
+
+	// If we have a wildcard change, reimport all
+	if (std::any_of(changes.begin(), changes.end(), [&](const auto& c) { return c.type == DirectoryMonitor::ChangeType::Unknown || c.name == "_dir.meta"; })) {
+		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter);
+	}
+
+	// Otherwise we'll only import the ones that changed
+	if (isCancelled()) {
+		return false;
+	}
+
+	const auto assets = checkChangedAssets(db, filterDuplicateChanges(changes), srcPaths, dstPath, collectDirMeta);
+	if (isCancelled()) {
+		return false;
+	}
+	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
+}
+
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry>& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
+{
+	if (filePath.getExtension() == ".meta") {
+		return false;
+	}
+
+	const bool isCodegen = srcPath == project.getGenSrcPath() || srcPath == project.getSharedGenSrcPath();
+	const bool skipGen = srcPath == project.getSharedGenSrcPath() && srcPaths.size() > 1;
+
+	const auto& basePath = skipGen ? project.getGenSrcPath() : srcPath;
+	const auto& newPath = skipGen ? srcPath.makeRelativeTo(basePath) / filePath : filePath;
+
+	Vector<Path> dummyDirMetas;
+
+	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath);
+}
+
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -195,12 +250,12 @@ void CheckAssetsTask::sleep(int timeMs)
 	inbox.clear();
 }
 
-std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
+HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
 {
-	std::map<String, ImportAssetsDatabaseEntry> assets;
+	HashMap<String, ImportAssetsDatabaseEntry> assets;
 	bool dbChanged = false;
 	for (auto& path: paths) {
-		dbChanged = importFile(db, assets, false, false, directoryMetas, project.getAssetsSrcPath(), path) || dbChanged;
+		dbChanged = importFile(db, assets, true, project.getAssetsSrcPath(), { project.getAssetsSrcPath() }, path) || dbChanged;
 	}
 	if (dbChanged) {
 		db.save();
@@ -208,16 +263,71 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets
 	return assets;
 }
 
-std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, Vector<Path> srcPaths, bool collectDirMeta)
+HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta)
 {
-	std::map<String, ImportAssetsDatabaseEntry> assets;
+	HashMap<String, ImportAssetsDatabaseEntry> assets;
+
+	bool dbChanged = false;
+
+	for (const auto& change: changes) {
+		if (isCancelled()) {
+			return {};
+		}
+
+		Logger::logDev("Path: " + change.name + " has " + toString(int(change.type)));
+
+		// Find paths
+		const Path* srcPathPtr = nullptr;
+		for (auto& srcPath: srcPaths) {
+			if (srcPath.isPrefixOf(change.name)) {
+				srcPathPtr = &srcPath;
+				break;
+			}
+		}
+		if (!srcPathPtr) {
+			if (dstPath.isPrefixOf(change.name)) {
+				if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
+					// TODO: notify output removed
+					
+				}
+			} else {
+				Logger::logWarning("Ignored file change: " + change.name);
+			}
+			continue;
+		}
+		const Path& srcPath = *srcPathPtr;
+		Path filePath = Path(change.name).makeRelativeTo(srcPath);
+
+		if (change.type == DirectoryMonitor::ChangeType::FileAdded || change.type == DirectoryMonitor::ChangeType::FileModified || change.type == DirectoryMonitor::ChangeType::FileRenamed) {
+			dbChanged = importFile(db, assets, useDirMeta, srcPath, srcPaths, filePath) || dbChanged;
+
+			if (change.type == DirectoryMonitor::ChangeType::FileRenamed) {
+				Path oldFilePath = change.oldName.isEmpty() ? Path() : Path(change.oldName).makeRelativeTo(srcPath);
+				db.markInputMissing(oldFilePath);
+			}
+		} else if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
+			db.markInputMissing(filePath);
+		}
+	}
+
+	dbChanged = db.purgeMissingInputs() || dbChanged;
+	
+	if (dbChanged) {
+		db.save();
+	}
+
+	return assets;
+}
+
+HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta)
+{
+	HashMap<String, ImportAssetsDatabaseEntry> assets;
 
 	bool dbChanged = false;
 
 	if (collectDirMeta) {
 		directoryMetas.clear();
 	}
-	Vector<Path> dummyDirMetas;
 
 	db.markAllInputFilesAsMissing();
 
@@ -235,23 +345,12 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 		}
 
 		// Next, go through normal files
-		const bool isCodegen = srcPath == project.getGenSrcPath() || srcPath == project.getSharedGenSrcPath();
-		const bool skipGen = srcPath == project.getSharedGenSrcPath() && srcPaths.size() > 1;
 		for (const auto& filePath : allFiles) {
-			if (filePath.getExtension() == ".meta") {
-				continue;
-			}
 			if (isCancelled()) {
 				return {};
 			}
 
-			if (skipGen) {
-				const auto basePath = project.getGenSrcPath();
-				const auto newPath = srcPath.makeRelativeTo(basePath) / filePath;
-				dbChanged = importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, basePath, newPath) || dbChanged;
-			} else {
-				dbChanged = importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, srcPath, filePath) || dbChanged;
-			}
+			dbChanged = importFile(db, assets, collectDirMeta, srcPath, srcPaths, filePath) || dbChanged;
 		}
 	}
 
@@ -265,7 +364,21 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 	return assets;
 }
 
-bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
+Vector<DirectoryMonitor::Event> CheckAssetsTask::filterDuplicateChanges(const Vector<DirectoryMonitor::Event>& changes) const
+{
+	Vector<DirectoryMonitor::Event> result;
+	HashSet<DirectoryMonitor::Event> index;
+
+	for (auto& change: changes) {
+		if (!index.contains(change)) {
+			index.emplace(change);
+			result.push_back(change);
+		}
+	}
+	return result;
+}
+
+bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
 {
 	// Check for missing input files
 	auto toDelete = db.getAllMissing();
@@ -299,7 +412,7 @@ void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 	condition.notify_one();
 }
 
-bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
+bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const HashMap<String, ImportAssetsDatabaseEntry>& assets)
 {
 	for (const auto& a: assets) {
 		if (db.needsImporting(a.second, false)) {
@@ -309,7 +422,7 @@ bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const std::map
 	return false;
 }
 
-Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
+Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const HashMap<String, ImportAssetsDatabaseEntry>& assets)
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
