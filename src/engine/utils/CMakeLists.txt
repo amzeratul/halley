@@ -141,6 +141,7 @@ set(HEADERS
         
         "include/halley/file/directory_monitor.h"
         "include/halley/file/path.h"
+        "include/halley/file/path.natvis"
         
         "src/file_formats/config_file_serialization_state.h"
         "include/halley/file_formats/binary_file.h"
