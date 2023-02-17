@@ -274,8 +274,6 @@ HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkChangedAssets(I
 			return {};
 		}
 
-		Logger::logDev("Path: " + change.name + " has " + toString(int(change.type)));
-
 		// Find paths
 		const Path* srcPathPtr = nullptr;
 		for (auto& srcPath: srcPaths) {
