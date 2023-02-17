@@ -55,7 +55,6 @@ void MainLoop::runLoop()
 		const Time measuredElapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
 		const Time tickLength = std::min(snapElapsedTime(measuredElapsed, elapsedTarget, frameTimes), 0.100);
 
-		Logger::logDev(toString(tickLength));
 		target.onTick(tickLength);
 
 		if (fps > 0) {
