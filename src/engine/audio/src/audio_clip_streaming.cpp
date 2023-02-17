@@ -71,6 +71,11 @@ void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst
 
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
+	if (paused) {
+		AudioMixer::zero(dst);
+		return len;
+	}
+
 	auto& buffer = buffers[channelN];
 
 	std::unique_lock<std::mutex> lock(mutex);
@@ -88,7 +93,7 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 	AudioMixer::copy(dst, samples, gain0, gain1);
 
 	if (toWrite < len) {
-		Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
+		//Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
 		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
 	}
 
@@ -126,6 +131,11 @@ void AudioClipStreaming::setLatencyTarget(size_t samples)
 size_t AudioClipStreaming::getLatencyTarget() const
 {
 	return latencyTarget;
+}
+
+void AudioClipStreaming::setPaused(bool paused)
+{
+	this->paused = paused;
 }
 
 void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst origSrc)

@@ -23,6 +23,8 @@ namespace Halley
 		void setLatencyTarget(size_t samples);
 		size_t getLatencyTarget() const;
 
+		void setPaused(bool paused);
+
 	private:
 		std::atomic_size_t length;
 		mutable std::atomic_size_t samplesLeft;
@@ -31,6 +33,7 @@ namespace Halley
 
 		uint8_t numChannels = 0;
 		bool ready = false;
+		bool paused = false;
 		size_t latencyTarget = 512;
 
 		std::unique_ptr<AudioResampler> resampler;
