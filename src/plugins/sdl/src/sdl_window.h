@@ -29,6 +29,8 @@ namespace Halley
 		void* getNativeHandle() const override;
 		String getNativeHandleType() const override;
 
+		void setTitleColour(Colour4f bgCol, Colour4f textCol) override;
+
 	private:
 		SDL_Window* window;
 		std::unique_ptr<WindowDefinition> curDefinition;

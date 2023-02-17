@@ -3,12 +3,19 @@
 #include <SDL_syswm.h>
 #include "halley/core/game/game_platform.h"
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <dwmapi.h>
+#pragma comment(lib, "Dwmapi.lib")
+
 // win32 crap
 #ifdef max
 #undef max
 #endif
 #ifdef min
 #undef min
+#endif
+
 #endif
 
 using namespace Halley;
@@ -166,4 +173,21 @@ Rect4i SDLWindow::getWindowRect() const
 	SDL_GetWindowPosition(window, &x, &y);
 	SDL_GetWindowSize(window, &w, &h);
 	return Rect4i(x, y, w, h);
+}
+
+void SDLWindow::setTitleColour(Colour4f bgCol, Colour4f textCol)
+{
+#ifdef _WIN32
+#if WINVER >= 0x0A00
+	const auto b = Colour4c(bgCol);
+	const auto t = Colour4c(textCol);
+	const COLORREF bgColour = RGB(b.r, b.g, b.b);
+	const COLORREF texColour = RGB(t.r, t.g, t.b);
+
+	HWND hwnd = static_cast<HWND>(getNativeHandle());
+	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, &bgColour, sizeof(bgColour));
+	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, &bgColour, sizeof(bgColour));
+	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR, &texColour, sizeof(texColour));
+#endif
+#endif
 }

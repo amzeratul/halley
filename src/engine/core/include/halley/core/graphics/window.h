@@ -5,6 +5,8 @@
 #include <halley/file/path.h>
 #include <halley/data_structures/maybe.h>
 
+#include "halley/maths/colour.h"
+
 namespace Halley
 {
 	class String;
@@ -129,5 +131,7 @@ namespace Halley
 
 		virtual void* getNativeHandle() const { return nullptr; }
 		virtual String getNativeHandleType() const { return ""; }
+
+		virtual void setTitleColour(Colour4f bgCol, Colour4f textCol) {}
 	};
 }

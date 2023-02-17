@@ -135,6 +135,8 @@ void EditorRootStage::initSprites()
 	background = colourScheme->getBackground();
 	backgroundParticles = colourScheme->getBackgroundParticles();
 
+	getVideoAPI().getWindow().setTitleColour(colourScheme->getColour("background0"), colourScheme->getColour("background0"));
+
 	{
 		// Halley logo
 		auto col = colourScheme->getColour("backgroundLogo");
