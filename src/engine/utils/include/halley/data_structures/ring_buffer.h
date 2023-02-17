@@ -17,6 +17,23 @@ namespace Halley {
             entries.resize(capacity);
     	}
 
+        // Copy is not thread-safe
+        RingBuffer(const RingBuffer& other)
+	        : readPos(other.readPos)
+			, writePos(other.writePos)
+			, numEntries(other.numEntries.load())
+			, entries(other.entries)
+        {}
+
+        RingBuffer& operator=(const RingBuffer& other)
+    	{
+            readPos = other.readPos;
+            writePos = other.writePos;
+            numEntries = other.numEntries.load();
+            entries = other.entries;
+            return *this;
+    	}
+
     	size_t availableToRead() const
     	{
             return numEntries.load();

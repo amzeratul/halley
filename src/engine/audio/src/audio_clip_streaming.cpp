@@ -13,9 +13,9 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	, samplesLeft(0)
 	, numChannels(numChannels)
 	, latencyTarget(2048)
-	, samplesLeftAvg(8)
+	, samplesLeftAvg(20)
 {
-	buffers.resize(numChannels);
+	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
 }
 
 void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
@@ -23,13 +23,20 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	std::unique_lock<std::mutex> lock(mutex);
 
 	const size_t nSamples = src.size() / numChannels;
+	std::array<float, 2048> tmp;
+	assert(nSamples < tmp.size());
 
 	for (size_t i = 0; i < numChannels; ++i) {
-		const size_t startSize = buffers[i].size();
-		buffers[i].resize(startSize + nSamples);
+		// For each channel, deinterleave
+		auto srcSamples = src.data() + i;
 		for (size_t j = 0; j < nSamples; ++j) {
-			buffers[i][j + startSize] = src[i + j * numChannels];
+			tmp[j] = *srcSamples;
+			srcSamples += numChannels;
 		}
+
+		// Add to buffer
+		const auto n = std::min(nSamples, buffers[i].availableToWrite());
+		buffers[i].write(gsl::span<float>(tmp).subspan(0, n));
 	}
 
 	length += nSamples;
@@ -57,28 +64,32 @@ void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst
 		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 1.0f);
 	}
 
-	updateSync(maxPitchShift, sourceSampleRate);
-
 	doAddInterleavedSamplesWithResample(src);
+
+	updateSync(maxPitchShift, sourceSampleRate);
 }
 
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
-	std::unique_lock<std::mutex> lock(mutex);
-
 	auto& buffer = buffers[channelN];
-	const size_t toWrite = std::min(len, buffer.size());
 
-	AudioMixer::copy(dst, buffer, gain0, gain1);
-	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
-
-	if (toWrite < len) {
-		//Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
-		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
-	}
-
+	std::unique_lock<std::mutex> lock(mutex);
+	const size_t toWrite = std::min(len, buffer.availableToRead());
 	if (channelN == 0) {
 		samplesLeft -= toWrite;
+		lastSamplesSent = toWrite;
+		lastSamplesSentTime = std::chrono::steady_clock::now();
+	}
+	lock.unlock();
+
+	std::array<float, 2048> tmp;
+	auto samples = gsl::span<float>(tmp).subspan(0, toWrite);
+	buffer.read(samples);
+	AudioMixer::copy(dst, samples, gain0, gain1);
+
+	if (toWrite < len) {
+		Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
+		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
 	}
 
 	return len;
@@ -107,6 +118,9 @@ bool AudioClipStreaming::isLoaded() const
 void AudioClipStreaming::setLatencyTarget(size_t samples)
 {
 	latencyTarget = samples;
+	buffers.clear();
+	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
+	samplesLeft = 0;
 }
 
 size_t AudioClipStreaming::getLatencyTarget() const
@@ -155,7 +169,16 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 	// December 12, 2012
 	// https://raw.githubusercontent.com/libretro/docs/master/archive/ratecontrol.pdf
 
-	const auto playbackSamplesLeft = samplesLeft.load();
+	const auto now = std::chrono::steady_clock::now();
+
+	std::unique_lock<std::mutex> lock(mutex);
+	const auto timeSinceLastSubmission = lastSamplesSent > 0 ? std::chrono::duration<double>(now - lastSamplesSentTime).count() : 0;
+	const auto consumedSinceLastSubmission = static_cast<int64_t>(outSampleRate * timeSinceLastSubmission);
+	const int64_t sentSamplesLeft = static_cast<int64_t>(lastSamplesSent) - consumedSinceLastSubmission;
+	const int64_t bufferedSamplesLeft = static_cast<int64_t>(buffers[0].availableToRead());
+	const int64_t playbackSamplesLeft = sentSamplesLeft + bufferedSamplesLeft;
+	lock.unlock();
+
 	samplesLeftAvg.add(playbackSamplesLeft);
 
 	if (samplesLeftAvg.size() >= 3) {
@@ -164,9 +187,8 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(2 * latencyTarget), 0.0f, 1.0f));
 		const auto fromRate = sourceSampleRate * ratio;
 
-		//Logger::logDev(toString(int(playbackSamplesLeft)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
+		//Logger::logDev(toString(int(playbackSamplesLeft)) + " = " + toString(bufferedSamplesLeft) + " + " + toString(sentSamplesLeft) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
 		resampler->setRate(fromRate, outSampleRate);
-		//resampler->setRateFrac(lroundl(fromRate * 1000), 48'000'000, lroundl(sourceSampleRate), outSampleRate);
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
 	}

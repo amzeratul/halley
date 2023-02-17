@@ -26,11 +26,12 @@ namespace Halley
 	private:
 		std::atomic_size_t length;
 		mutable std::atomic_size_t samplesLeft;
-		mutable Vector<Vector<AudioSample>> buffers;
+		mutable Vector<RingBuffer<float>> buffers;
 		mutable std::mutex mutex;
+
 		uint8_t numChannels = 0;
 		bool ready = false;
-		size_t latencyTarget;
+		size_t latencyTarget = 512;
 
 		std::unique_ptr<AudioResampler> resampler;
 		Vector<float> pending;
@@ -38,6 +39,9 @@ namespace Halley
 		Vector<float> resampleSrcBuffer;
 
 		RollingDataSet<size_t> samplesLeftAvg;
+		mutable size_t lastSamplesSent = 0;
+		mutable std::chrono::steady_clock::time_point lastSamplesSentTime;
+		mutable std::chrono::steady_clock::time_point lastSyncTime;
 
 		void doAddInterleavedSamplesWithResample(AudioSamplesConst src);
 		void updateSync(float maxPitchShift, float sourceSampleRate);
