@@ -24,6 +24,7 @@ namespace Halley
 		ID3D11DepthStencilView* getDepthStencilView() const;
 
 		void present(bool useVsync);
+		void waitForVsync();
 		void resize(Vector2i size);
 
 	private:

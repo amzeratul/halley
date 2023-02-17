@@ -31,6 +31,14 @@ void DX11SwapChain::present(bool useVsync)
 	curBuffer = (curBuffer + 1) % numBuffers;
 }
 
+void DX11SwapChain::waitForVsync()
+{
+	IDXGIOutput* output = nullptr;
+	if (swapChain->GetContainingOutput(&output) == S_OK) {
+		output->WaitForVBlank();
+	}
+}
+
 void DX11SwapChain::resize(Vector2i newSize)
 {
 	clearRenderTarget();

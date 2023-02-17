@@ -114,6 +114,11 @@ void DX11Video::finishRender()
 	swapChain->present(useVsync);
 }
 
+void DX11Video::waitForVsync()
+{
+	swapChain->waitForVsync();
+}
+
 void DX11Video::setWindow(WindowDefinition&& windowDescriptor)
 {
 	if (!window) {
@@ -137,6 +142,11 @@ bool DX11Video::hasWindow() const
 void DX11Video::setVsync(bool vsync)
 {
 	useVsync = vsync;
+}
+
+bool DX11Video::hasVsync() const
+{
+	return useVsync;
 }
 
 std::unique_ptr<Texture> DX11Video::createTexture(Vector2i size)

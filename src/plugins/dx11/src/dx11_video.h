@@ -20,11 +20,13 @@ namespace Halley {
 
 		void startRender() override;
 		void finishRender() override;
+		void waitForVsync() override;
 		
 		void setWindow(WindowDefinition&& windowDescriptor) override;
 		Window& getWindow() const override;
 		bool hasWindow() const override;
 		void setVsync(bool vsync) override;
+		bool hasVsync() const override;
 		
 		std::unique_ptr<Texture> createTexture(Vector2i size) override;
 		std::unique_ptr<Shader> createShader(const ShaderDefinition& definition) override;

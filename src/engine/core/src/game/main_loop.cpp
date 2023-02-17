@@ -37,34 +37,50 @@ void MainLoop::runLoop()
 
 	Clock::time_point lastFrameStartTime = Clock::now();
 	auto frameTimes = RollingDataSet<Clock::time_point>(13);
+	double lastSpareTime = 0;
 
 	while (isRunning()) {
 		if (target.transitionStage()) {
 			frameTimes.clear();
+			lastSpareTime = 0;
 		}
 
 		Clock::time_point curFrameStartTime = Clock::now();
 		frameTimes.add(curFrameStartTime);
 
+		// Compute the real elapsed time and the tick length
+		// The latter will be fudged to account for timing jitter, as it leads to smoother gameplay
 		const double fps = target.getTargetFPS();
 		const std::optional<Time> elapsedTarget = fps > 0 ? 1.0 / fps : std::optional<Time>();
 		const Time measuredElapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
-		Time elapsed = snapElapsedTime(measuredElapsed, elapsedTarget, frameTimes);
+		const Time tickLength = std::min(snapElapsedTime(measuredElapsed, elapsedTarget, frameTimes), 0.100);
 
-		const auto delta = std::min(elapsed, 0.100); // Never step by more than 100ms
-		target.onTick(delta, [&] (bool vsync)
-		{
-			if (fps > 0) {
-				const Time tolerance = vsync ? 0.003 : 0.0; // 3 ms tolerance if vsync is on. This is to make sure we don't overshoot and miss vsync
+		Logger::logDev(toString(tickLength));
+		target.onTick(tickLength);
+
+		if (fps > 0) {
+			// Framerate targetting is enabled, so we need to get rid of any excess time
+			while (true) {
 				const auto now = Clock::now();
-				const Time wait = (1.0 * frameTimes.size()) / fps - std::chrono::duration<double>(now - frameTimes.getOldest()).count() - tolerance;
+				const auto totalFrameTime = std::chrono::duration<double>(now - curFrameStartTime).count();
+				const auto spareTime = elapsedTarget.value_or(0) + lastSpareTime - totalFrameTime;
 
-				if (wait > 0) {
-					using namespace std::chrono_literals;
-					std::this_thread::sleep_for(1.0s * wait);
+				if (spareTime > 0.002) {
+					// We have too much spare time
+					if (target.hasVsync()) {
+						// Wait for another vsync
+						target.waitForVsync();
+					} else {
+						// Wait the remaining time
+						std::this_thread::sleep_for(1.0s * spareTime);
+					}
+				} else {
+					// Accumulate spare time to adjust next frame
+					lastSpareTime = spareTime;
+					break;
 				}
 			}
-		});
+		}
 
 		lastFrameStartTime = curFrameStartTime;
 	}

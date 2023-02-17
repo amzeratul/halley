@@ -20,7 +20,7 @@ namespace Halley
 		virtual const HalleyAPI& getAPI() const = 0;
 		virtual bool transitionStage() = 0;
 		virtual bool isRunning() const = 0;
-		virtual void onTick(Time delta, std::function<void(bool)> preVsyncWait) = 0;
+		virtual void onTick(Time delta) = 0;
 
 		virtual void init() = 0;
 		virtual void onSuspended() = 0;
@@ -28,6 +28,8 @@ namespace Halley
 		virtual void onTerminatedInError(const std::string& error) = 0;
 
 		virtual double getTargetFPS() = 0;
+		virtual bool hasVsync() = 0;
+		virtual void waitForVsync() = 0;
 	};
 
 	class MainLoop

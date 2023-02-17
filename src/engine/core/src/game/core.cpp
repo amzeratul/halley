@@ -172,6 +172,18 @@ void Core::onTerminatedInError(const std::string& error)
 	hasError = true;
 }
 
+bool Core::hasVsync()
+{
+	return api && api->video && api->video->hasVsync();
+}
+
+void Core::waitForVsync()
+{
+	if (api && api->video) {
+		api->video->waitForVsync();
+	}
+}
+
 double Core::getTargetFPS()
 {
 	if (api && api->video && api->video->hasWindow()) {
@@ -351,7 +363,7 @@ void Core::updatePlatform()
 	}
 }
 
-void Core::onTick(Time delta, std::function<void(bool)> preVsyncWait)
+void Core::onTick(Time delta)
 {
 	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
@@ -359,7 +371,7 @@ void Core::onTick(Time delta, std::function<void(bool)> preVsyncWait)
 	
 	processEvents(delta);
 
-	tickFrame(delta, std::move(preVsyncWait));
+	tickFrame(delta);
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
@@ -367,7 +379,7 @@ void Core::onTick(Time delta, std::function<void(bool)> preVsyncWait)
 	}
 }
 
-void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
+void Core::tickFrame(Time time)
 {
 	if (!isRunning()) {
 		return;
@@ -387,7 +399,7 @@ void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 			assert(curStageFrames > 0);
 			IFrameData::setThreadFrameData(frameDataRender.get());
 			render();
-			waitForRenderEnd(std::move(preVsyncWait));
+			waitForRenderEnd();
 		}
 		updateTask.wait();
 	} else {
@@ -395,7 +407,7 @@ void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 		update(time);
 		if (isRunning()) { // Check again, it might have changed
 			render();
-			waitForRenderEnd(std::move(preVsyncWait));
+			waitForRenderEnd();
 		}
 	}
 
@@ -518,16 +530,13 @@ void Core::render()
 	}
 }
 
-void Core::waitForRenderEnd(std::function<void(bool)> preVsyncWait)
+void Core::waitForRenderEnd()
 {
 	if (api->video) {
 		bool hasVsync = true; // TODO
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
-		preVsyncWait(hasVsync);
 		api->video->finishRender();
 		painter->onFinishRender();
-	} else {
-		preVsyncWait(false);
 	}
 }
 

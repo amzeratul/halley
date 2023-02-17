@@ -42,7 +42,7 @@ namespace Halley
 		const Environment& getEnvironment() override;
 		bool isDevMode() override;
 		
-		void onTick(Time delta, std::function<void(bool)> preVsyncWait) override;
+		void onTick(Time delta) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
@@ -53,6 +53,9 @@ namespace Halley
 		void onSuspended() override;
 		void onReloaded() override;
 		void onTerminatedInError(const std::string& error) override;
+
+		bool hasVsync() override;
+		void waitForVsync() override;
 		double getTargetFPS() override;
 
 		void registerDefaultPlugins();
@@ -77,9 +80,9 @@ namespace Halley
 		void initResources();
 		void setOutRedirect(bool appendToExisting);
 
-		void tickFrame(Time time, std::function<void(bool)> preVsyncWait);
+		void tickFrame(Time time);
 		void render();
-		void waitForRenderEnd(std::function<void(bool)> preVsyncWait);
+		void waitForRenderEnd();
 		void updateFrameData(bool multithreaded);
 
 		void showComputerInfo() const;
