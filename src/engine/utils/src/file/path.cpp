@@ -298,6 +298,26 @@ Bytes Path::readFile(const Path& path)
 	return result;
 }
 
+Vector<String> Path::readFileLines(const Path& path)
+{
+	const auto bytes = readFile(path);
+	Vector<String> result;
+
+	std::string_view remaining(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+	while (!remaining.empty()) {
+		auto end = remaining.find('\n');
+		std::string_view current = remaining.substr(0, end);
+		if (!current.empty() && current.back() == '\r') {
+			current = current.substr(0, current.size() - 1);
+		}
+		remaining = remaining.substr(end + 1);
+
+		result.push_back(current);
+	}
+
+	return result;
+}
+
 void Path::removeFile(const Path& path)
 {
 	std::remove(path.string().c_str());

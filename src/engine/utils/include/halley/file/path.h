@@ -55,7 +55,10 @@ namespace Halley
 		static void writeFile(const Path& path, gsl::span<const gsl::byte> data);
 		static void writeFile(const Path& path, const Bytes& data);
 		static void writeFile(const Path& path, const String& data);
+
 		static Bytes readFile(const Path& path);
+		static Vector<String> readFileLines(const Path& path);
+
 		static void removeFile(const Path& path);
 
 		bool isPrefixOf(const Path& other) const;
