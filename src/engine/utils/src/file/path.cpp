@@ -334,7 +334,7 @@ Vector<String> Path::readFileLines(const Path& path)
 		if (!current.empty() && current.back() == '\r') {
 			current = current.substr(0, current.size() - 1);
 		}
-		remaining = remaining.substr(end + 1);
+		remaining = remaining.substr(std::min(remaining.size(), end == std::string_view::npos ? end : end + 1));
 
 		result.push_back(current);
 	}
