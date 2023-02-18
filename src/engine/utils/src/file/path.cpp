@@ -325,6 +325,9 @@ String Path::readFileString(const Path& path)
 Vector<String> Path::readFileLines(const Path& path)
 {
 	const auto bytes = readFile(path);
+	if (bytes.empty()) {
+		return {};
+	}
 	Vector<String> result;
 
 	std::string_view remaining(reinterpret_cast<const char*>(bytes.data()), bytes.size());
