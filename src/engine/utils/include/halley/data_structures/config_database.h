@@ -80,6 +80,16 @@ namespace Halley {
             return keys;
         }
 
+        Vector<const T*> getValues() const
+        {
+            Vector<const T*> result;
+            result.reserve(entries.size());
+            for (const auto& [k, v]: entries) {
+                result.push_back(&v);
+            }
+            return result;
+        }
+
         const HashMap<String, T>& getEntries() const
         {
             return entries;
@@ -160,6 +170,12 @@ namespace Halley {
         Vector<String> getKeys() const
         {
             return of<T>().getKeys();
+        }
+
+        template <typename T>
+        Vector<const T*> getValues() const
+        {
+            return of<T>().getValues();
         }
 
         template <typename T>
