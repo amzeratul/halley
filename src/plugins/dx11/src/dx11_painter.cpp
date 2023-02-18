@@ -32,6 +32,14 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	}
 }
 
+void DX11Painter::resetState()
+{
+	Painter::resetState();
+	curRaster = nullptr;
+	curDepthStencil = nullptr;
+	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
+}
+
 void DX11Painter::doStartRender()
 {
 }

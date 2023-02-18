@@ -77,6 +77,13 @@ void Painter::flush()
 	flushPending();
 }
 
+void Painter::resetState()
+{
+	curClip = Rect4i(0, 0, 1, 1);
+	setClip();
+	updateClip();
+}
+
 Rect4f Painter::getWorldViewAABB() const
 {
 	Vector2f size = Vector2f(viewPort.getSize()) / camera.getZoom();

@@ -164,8 +164,7 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 	const auto startCamera = painter.camera;
 	const auto startRenderTarget = painter.activeRenderTarget;
 
-	painter.setClip();
-	painter.updateClip();
+	painter.resetState();
 
 	const size_t n = std::min(commands.size(), maxCommands.value_or(commands.size()));
 

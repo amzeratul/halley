@@ -53,6 +53,7 @@ namespace Halley
 		virtual ~Painter();
 
 		void flush();
+		virtual void resetState();
 
 		Rect4i getViewPort() const { return viewPort; }
 		const Camera& getCurrentCamera() const { return camera; }
