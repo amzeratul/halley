@@ -298,6 +298,30 @@ Bytes Path::readFile(const Path& path)
 	return result;
 }
 
+String Path::readFileString(const Path& path)
+{
+	String result;
+
+#ifdef _WIN32
+	std::ifstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::in);
+#else
+	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
+#endif
+	if (!fp.is_open()) {
+		return result;
+	}
+
+	fp.seekg(0, std::ios::end);
+	const auto size = fp.tellg();
+	fp.seekg(0, std::ios::beg);
+	result.setSize(size);
+
+	fp.read(&result[0], size);
+	fp.close();
+
+	return result;	
+}
+
 Vector<String> Path::readFileLines(const Path& path)
 {
 	const auto bytes = readFile(path);

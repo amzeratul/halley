@@ -57,6 +57,7 @@ namespace Halley
 		static void writeFile(const Path& path, const String& data);
 
 		static Bytes readFile(const Path& path);
+		static String readFileString(const Path& path);
 		static Vector<String> readFileLines(const Path& path);
 
 		static void removeFile(const Path& path);
