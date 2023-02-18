@@ -17,6 +17,9 @@ namespace Halley
 {
 	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0>
 	using Vector = VectorSize32<T, Allocator, Padding>;
+
+	using Byte = unsigned char;
+	using Bytes = Vector<Byte>;
 }
 
 #endif

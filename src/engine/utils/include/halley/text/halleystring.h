@@ -63,6 +63,7 @@ namespace Halley {
 		explicit String(int character);
 		explicit String(float number);
 		explicit String(double number);
+		explicit String(const Bytes& bytes);
 
 		String& operator=(const char* utf8);
 		String& operator=(std::basic_string<Character>&& str);
@@ -129,6 +130,10 @@ namespace Halley {
 		size_t size() const;
 		const char& operator[](size_t pos) const;
 		char& operator[](size_t pos);
+
+		Bytes toBytes() const;
+		gsl::span<const char> asSpan() const;
+		gsl::span<char> asSpan();
 
 		static const Character* stringPtrTrim(Character *chr,size_t len,size_t startPos);
 		static const Character* stringTrim(String &str,size_t startPos);

@@ -7,6 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include <stdexcept>
+#include <gsl/span>
 
 #ifdef max
 #undef max
@@ -560,6 +561,26 @@ namespace Halley {
 			} else {
 				return 0;
 			}
+		}
+
+		[[nodiscard]] gsl::span<const T> span() const
+		{
+			return gsl::span<const T>(data(), size());
+		}
+
+		[[nodiscard]] gsl::span<T> span()
+		{
+			return gsl::span<T>(data(), size());
+		}
+
+		[[nodiscard]] gsl::span<const gsl::byte> byte_span() const
+		{
+			return gsl::as_bytes(span());
+		}
+
+		[[nodiscard]] gsl::span<gsl::byte> byte_span()
+		{
+			return gsl::as_writable_bytes(span());
 		}
 
 	private:

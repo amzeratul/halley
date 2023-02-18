@@ -134,6 +134,12 @@ String::String(double number)
 	*this = Halley::toString(number);
 }
 
+String::String(const Bytes& bytes)
+{
+	setSize(bytes.size());
+	memcpy(&(*this)[0], bytes.data(), bytes.size());
+}
+
 String& String::operator=(const char* utf8) {
 	if (utf8) {
 		str = utf8;
@@ -1138,5 +1144,23 @@ const char& String::operator[](size_t pos) const
 char& String::operator[](size_t pos)
 {
 	return str[pos];
+}
+
+Bytes String::toBytes() const
+{
+	Bytes result;
+	result.resize(length());
+	memcpy(result.data(), c_str(), length());
+	return result;
+}
+
+gsl::span<const char> String::asSpan() const
+{
+	return gsl::span<const char>(&(*this)[0], length());
+}
+
+gsl::span<char> String::asSpan()
+{
+	return gsl::span<char>(&(*this)[0], length());
 }
 

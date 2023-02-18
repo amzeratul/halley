@@ -61,9 +61,6 @@
 #endif
 
 namespace Halley {
-	// General aliases
-	using Byte = unsigned char;
-	using Bytes = Vector<Byte>;
 	
 	template <typename T>
 	constexpr inline T clamp(T value, T minValue, T maxValue)
