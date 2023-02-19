@@ -6,6 +6,7 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	class Texture;
 	class VideoAPI;
 	class Material;
 	class TextureRenderTarget;
@@ -15,6 +16,7 @@ namespace Halley {
 	struct RenderSurfaceOptions {
 		bool useFiltering = false;
 		bool createDepthStencil = true;
+		bool powerOfTwo = true;
 		String name;
 	};
 
@@ -31,6 +33,12 @@ namespace Halley {
 
 		TextureRenderTarget& getRenderTarget() const;
 
+		void createNewColourTarget();
+		void createNewDepthStencilTarget();
+		void setColourTarget(std::shared_ptr<Texture> texture);
+		void setDepthStencilTarget(std::shared_ptr<Texture> texture);
+
+
 	private:
 		VideoAPI& video;
 		RenderSurfaceOptions options;
@@ -42,5 +50,7 @@ namespace Halley {
 		std::shared_ptr<Material> material;
 
 		int version = 0;
+		bool hasColourTarget = false;
+		bool hasDepthStencil = false;
 	};
 }

@@ -14,6 +14,7 @@ RenderSurface::RenderSurface(VideoAPI& video, RenderSurfaceOptions options)
 	: video(video)
 	, options(options)
 {
+	renderTarget = video.createTextureRenderTarget();
 }
 
 RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName, RenderSurfaceOptions options)
@@ -21,52 +22,41 @@ RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String
 	, options(options)
 {
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
+	renderTarget = video.createTextureRenderTarget();
 }
 
 void RenderSurface::setSize(Vector2i size)
 {
-	if (size != curRenderSize && size.x > 0 && size.y > 0) {
+	bool needsNewBuffers = false;
+	const bool hasValidSize = size.x > 0 && size.y > 0;
+	
+	if (size != curRenderSize) {
 		curRenderSize = size;
 
-		const auto textureSize = Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y));
-		if (textureSize != curTextureSize) {
-			curTextureSize = textureSize;
-
-			std::shared_ptr<Texture> colourTarget = video.createTexture(textureSize);
-			if (!options.name.isEmpty()) {
-				colourTarget->setAssetId(options.name + "_colour0_v" + toString(version));
+		if (hasValidSize) {
+			const auto textureSize = options.powerOfTwo ? Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y)) : size;
+			if (textureSize != curTextureSize) {
+				curTextureSize = textureSize;
+				needsNewBuffers = true;
 			}
-			auto colourDesc = TextureDescriptor(textureSize, TextureFormat::RGBA);
-			colourDesc.isRenderTarget = true;
-			colourDesc.useFiltering = options.useFiltering;
-			colourTarget->load(std::move(colourDesc));
-			
-			if (!renderTarget) {
-				renderTarget = video.createTextureRenderTarget();
-			}
-			renderTarget->setTarget(0, colourTarget);
-
-			if (options.createDepthStencil) {
-				std::shared_ptr<Texture> depthTarget = video.createTexture(textureSize);
-				if (!options.name.isEmpty()) {
-					depthTarget->setAssetId(options.name + "_depth_v" + toString(version));
-				}
-				auto depthDesc = TextureDescriptor(textureSize, TextureFormat::Depth);
-				depthDesc.isDepthStencil = true;
-				depthTarget->load(std::move(depthDesc));
-				renderTarget->setDepthTexture(depthTarget);
-			}
-
-			version++;
 		}
 
 		renderTarget->setViewPort(Rect4i(Vector2i(), size));
+	}
+
+	if (hasValidSize) {
+		if (needsNewBuffers || !hasColourTarget) {
+			createNewColourTarget();
+		}
+		if (options.createDepthStencil && (needsNewBuffers || !hasDepthStencil)) {
+			createNewDepthStencilTarget();
+		}
 	}
 }
 
 bool RenderSurface::isReady() const
 {
-	return static_cast<bool>(renderTarget);
+	return hasColourTarget && (!options.createDepthStencil || hasDepthStencil);
 }
 
 Sprite RenderSurface::getSurfaceSprite() const
@@ -89,4 +79,45 @@ Sprite RenderSurface::getSurfaceSprite(std::shared_ptr<Material> material) const
 TextureRenderTarget& RenderSurface::getRenderTarget() const
 {
 	return *renderTarget;
+}
+
+void RenderSurface::createNewColourTarget()
+{
+	std::shared_ptr<Texture> colourTarget = video.createTexture(curTextureSize);
+	if (!options.name.isEmpty()) {
+		colourTarget->setAssetId(options.name + "_colour0_v" + toString(version));
+	}
+	auto colourDesc = TextureDescriptor(curTextureSize, TextureFormat::RGBA);
+	colourDesc.isRenderTarget = true;
+	colourDesc.useFiltering = options.useFiltering;
+	colourTarget->load(std::move(colourDesc));
+
+	setColourTarget(std::move(colourTarget));
+}
+
+void RenderSurface::createNewDepthStencilTarget()
+{
+	std::shared_ptr<Texture> depthTarget = video.createTexture(curTextureSize);
+	if (!options.name.isEmpty()) {
+		depthTarget->setAssetId(options.name + "_depth_v" + toString(version));
+	}
+	auto depthDesc = TextureDescriptor(curTextureSize, TextureFormat::Depth);
+	depthDesc.isDepthStencil = true;
+	depthTarget->load(std::move(depthDesc));
+
+	setDepthStencilTarget(std::move(depthTarget));
+}
+
+void RenderSurface::setColourTarget(std::shared_ptr<Texture> texture)
+{
+	hasColourTarget = !!texture;
+	renderTarget->setTarget(0, std::move(texture));
+	version++;
+}
+
+void RenderSurface::setDepthStencilTarget(std::shared_ptr<Texture> texture)
+{
+	hasDepthStencil = !!texture;
+	renderTarget->setDepthTexture(std::move(texture));
+	version++;
 }
