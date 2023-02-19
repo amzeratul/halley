@@ -40,12 +40,10 @@ void RenderSurface::setSize(Vector2i size)
 			colourDesc.isRenderTarget = true;
 			colourDesc.useFiltering = options.useFiltering;
 			colourTarget->load(std::move(colourDesc));
-
-			if (material) {
-				material->set(0, colourTarget);
+			
+			if (!renderTarget) {
+				renderTarget = video.createTextureRenderTarget();
 			}
-
-			renderTarget = video.createTextureRenderTarget();
 			renderTarget->setTarget(0, colourTarget);
 
 			if (options.createDepthStencil) {
@@ -73,9 +71,15 @@ bool RenderSurface::isReady() const
 
 Sprite RenderSurface::getSurfaceSprite() const
 {
+	return getSurfaceSprite(material);
+}
+
+Sprite RenderSurface::getSurfaceSprite(std::shared_ptr<Material> material) const
+{
 	Expects(material);
 	
 	const auto& tex = renderTarget->getTexture(0);
+	material->set(0, tex);
 	return Sprite()
 		.setMaterial(material)
 		.setSize(Vector2f(curRenderSize))

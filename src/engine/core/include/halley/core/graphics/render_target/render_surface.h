@@ -27,6 +27,7 @@ namespace Halley {
 
 		bool isReady() const;
 		Sprite getSurfaceSprite() const;
+		Sprite getSurfaceSprite(std::shared_ptr<Material> material) const;
 
 		TextureRenderTarget& getRenderTarget() const;
 
