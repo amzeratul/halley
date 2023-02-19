@@ -123,6 +123,7 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 		case ShaderParameterType::Matrix2: return 16;
 		case ShaderParameterType::Matrix3: return 36;
 		case ShaderParameterType::Matrix4: return 64;
+		case ShaderParameterType::UInt: return 4;
 		default: throw Exception("Unknown type: " + toString(int(type)), HalleyExceptions::Resources);
 	}
 }
