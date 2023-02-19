@@ -46,6 +46,8 @@ static D3D11_TEXTURE_ADDRESS_MODE getAddressMode(TextureAddressMode mode)
 		return D3D11_TEXTURE_ADDRESS_MIRROR;
 	case TextureAddressMode::Repeat:
 		return D3D11_TEXTURE_ADDRESS_WRAP;
+	case TextureAddressMode::Border:
+		return D3D11_TEXTURE_ADDRESS_BORDER;
 	}
 	throw Exception("Unknown TextureAddressMode: " + toString(mode), HalleyExceptions::VideoPlugin);
 }

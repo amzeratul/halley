@@ -43,17 +43,19 @@ namespace Halley
 	enum class TextureAddressMode
 	{
 		Repeat,
-		Clamp,
-		Mirror
+		Clamp,  // Clamp to edge
+		Mirror,
+		Border  // Clamp to border
 	};
 
 	template <>
 	struct EnumNames<TextureAddressMode> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"repeat",
 				"clamp",
-				"mirror"
+				"mirror",
+				"border"
 			}};
 		}
 	};
