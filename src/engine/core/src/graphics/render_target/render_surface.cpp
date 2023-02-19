@@ -111,13 +111,25 @@ void RenderSurface::createNewDepthStencilTarget()
 void RenderSurface::setColourTarget(std::shared_ptr<Texture> texture)
 {
 	hasColourTarget = !!texture;
-	renderTarget->setTarget(0, std::move(texture));
+	if (texture) {
+		if (texture->getSize() == curTextureSize) {
+			renderTarget->setTarget(0, std::move(texture));
+		} else {
+			createNewColourTarget();
+		}
+	}
 	version++;
 }
 
 void RenderSurface::setDepthStencilTarget(std::shared_ptr<Texture> texture)
 {
 	hasDepthStencil = !!texture;
-	renderTarget->setDepthTexture(std::move(texture));
+	if (texture) {
+		if (texture->getSize() == curTextureSize) {
+			renderTarget->setDepthTexture(std::move(texture));
+		} else {
+			createNewDepthStencilTarget();
+		}
+	}
 	version++;
 }
