@@ -179,18 +179,27 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	for (auto& p: passes) {
 		p.createShader(loader, name + "/pass" + toString(i++), attributes);
 	}
-	columnMajor = loader.getAPI().video->isColumnMajor();
 
-	// Load textures
 	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
 	for (auto& tex: textures) {
 		if (!tex.defaultTextureName.isEmpty()) {
 			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
 		}
+	}
+
+	initialize(*loader.getAPI().video);
+}
+
+void MaterialDefinition::initialize(VideoAPI& video)
+{
+	columnMajor = video.isColumnMajor();
+
+	// Load textures
+	for (auto& tex: textures) {
 		tex.loadAddresses(*this);
 	}
 
-	// Load attributes and blocks
+	// Load uniform blocks
 	uint16_t blockNumber = 0;
 	for (auto& uniformBlock: uniformBlocks) {
 		uniformBlock.addresses.resize(getNumPasses() * shaderStageCount);
@@ -206,7 +215,11 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 			auto size = MaterialAttribute::getAttributeSize(uniform.type);
 			curOffset = alignUp(curOffset, std::min(static_cast<size_t>(16), size));
 			uniform.blockNumber = blockNumber;
-			uniform.offset = static_cast<uint32_t>(curOffset);
+			if (uniform.predefinedOffset) {
+				curOffset = uniform.offset;
+			} else {
+				uniform.offset = static_cast<uint32_t>(curOffset);
+			}
 			curOffset += size;
 		}
 		uniformBlock.offset = curOffset;
@@ -264,9 +277,19 @@ gsl::span<MaterialPass> MaterialDefinition::getPasses()
 	return passes;
 }
 
+void MaterialDefinition::setName(String name)
+{
+	this->name = std::move(name);
+}
+
 const String& MaterialDefinition::getName() const
 {
 	return name;
+}
+
+void MaterialDefinition::setDefaultMask(int mask)
+{
+	defaultMask = mask;
 }
 
 size_t MaterialDefinition::getVertexSize() const
@@ -288,6 +311,22 @@ size_t MaterialDefinition::getVertexPosOffset() const
 	return size_t(vertexPosOffset);
 }
 
+void MaterialDefinition::setAttributes(Vector<MaterialAttribute> attributes)
+{
+	this->attributes = std::move(attributes);
+	assignAttributeOffsets();
+}
+
+void MaterialDefinition::setUniformBlocks(Vector<MaterialUniformBlock> uniformBlocks)
+{
+	this->uniformBlocks = std::move(uniformBlocks);
+}
+
+void MaterialDefinition::setTextures(Vector<MaterialTexture> textures)
+{
+	this->textures = std::move(textures);
+}
+
 bool MaterialDefinition::hasTexture(const String& name) const
 {
 	return std_ex::contains_if(textures, [&] (const auto& t) { return t.name == name; });
@@ -303,14 +342,19 @@ int MaterialDefinition::getDefaultMask() const
 	return defaultMask;
 }
 
-void MaterialDefinition::addPass(const MaterialPass& materialPass)
+void MaterialDefinition::addPass(MaterialPass materialPass)
 {
-	passes.push_back(materialPass);
+	passes.push_back(std::move(materialPass));
 }
 
 std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<MaterialDefinition>(loader);
+}
+
+void MaterialDefinition::setTags(Vector<String> tags)
+{
+	this->tags = std::move(tags);
 }
 
 bool MaterialDefinition::hasTag(const String& tag) const
@@ -422,9 +466,6 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 
 void MaterialDefinition::loadAttributes(const ConfigNode& node)
 {
-	int location = int(attributes.size());
-	int offset = vertexSize;
-
 	for (const auto& attribEntry: node.asSequence()) {
 		const ShaderParameterType type = parseParameterType(attribEntry["type"].asString());
 		String semantic = attribEntry["semantic"].asString();
@@ -440,18 +481,28 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 		a.type = type;
 		a.semantic = semantic;
 		a.semanticIndex = semanticIndex;
+		a.isVertexPos = attribEntry["special"].asString("") == "vertPos";
+	}
+
+	assignAttributeOffsets();
+}
+
+void MaterialDefinition::assignAttributeOffsets()
+{
+	int location = 0;
+	vertexSize = 0;
+
+	for (auto& a: attributes) {
 		a.location = location++;
-		a.offset = offset;
+		a.offset = vertexSize;
 
-		const int size = int(MaterialAttribute::getAttributeSize(type));
-		offset += size;
+		const int size = int(MaterialAttribute::getAttributeSize(a.type));
+		vertexSize += size;
 
-		if (attribEntry["special"].asString("") == "vertPos") {
+		if (a.isVertexPos) {
 			vertexPosOffset = a.offset;
 		}
 	}
-
-	vertexSize = offset;
 }
 
 ShaderParameterType MaterialDefinition::parseParameterType(const String& rawType) const
@@ -646,6 +697,13 @@ MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 	if (node.hasKey("stencil")) {
 		depthStencil.loadStencil(node["stencil"]);
 	}
+}
+
+MaterialPass::MaterialPass(std::shared_ptr<Shader> shader, BlendMode, MaterialDepthStencil depthStencil, CullingMode cull)
+	: shader(std::move(shader))
+	, depthStencil(std::move(depthStencil))
+	, cull(cull)
+{
 }
 
 void MaterialPass::serialize(Serializer& s) const

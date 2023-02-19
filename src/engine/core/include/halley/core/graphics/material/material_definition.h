@@ -22,6 +22,7 @@ namespace Halley
 
 	enum class ShaderParameterType : uint8_t
 	{
+		Invalid,
 		Float,
 		Float2,
 		Float3,
@@ -33,7 +34,7 @@ namespace Halley
 		Matrix2,
 		Matrix3,
 		Matrix4,
-		Invalid
+		UInt
 	};
 
 	enum class DepthStencilComparisonFunction : uint8_t
@@ -49,6 +50,7 @@ namespace Halley
 	};
 
 	enum class TextureSamplerType: uint8_t {
+		Invalid,
 		Texture1D,
 		Texture2D,
 		Texture3D,
@@ -129,6 +131,7 @@ namespace Halley
 		uint32_t offset = 0;
 		uint16_t blockNumber = 0;
 		bool editable = true;
+		bool predefinedOffset = false;
 		ShaderParameterType type;
 		ConfigNode defaultValue;
 
@@ -165,6 +168,7 @@ namespace Halley
 		int semanticIndex = 0;
 		int location = 0;
 		int offset = 0;
+		bool isVertexPos = false;
 
 		MaterialAttribute();
 		MaterialAttribute(String name, ShaderParameterType type, int location, int offset = 0);
@@ -214,28 +218,38 @@ namespace Halley
 
 		void reload(Resource&& resource) override;
 		void load(const ConfigNode& node);
+		void initialize(VideoAPI& video);
 
-		void addPass(const MaterialPass& materialPass);
+		void addPass(MaterialPass materialPass);
 		int getNumPasses() const;
 		const MaterialPass& getPass(int n) const;
 		MaterialPass& getPass(int n);
 		gsl::span<const MaterialPass> getPasses() const;
 		gsl::span<MaterialPass> getPasses();
 
+		void setName(String name);
 		const String& getName() const;
+		void setDefaultMask(int mask);
+		int getDefaultMask() const;
+
 		size_t getVertexSize() const;
 		size_t getVertexStride() const;
 		size_t getVertexPosOffset() const;
+
+		void setAttributes(Vector<MaterialAttribute> attributes);
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
+		void setUniformBlocks(Vector<MaterialUniformBlock> uniformBlocks);
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
+		void setTextures(Vector<MaterialTexture> textures);
 		const Vector<MaterialTexture>& getTextures() const { return textures; }
+
 		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
-		int getDefaultMask() const;
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
-		
+
+		void setTags(Vector<String> tags);
 		const Vector<String>& getTags() const { return tags; }
 		bool hasTag(const String& tag) const;
 		
@@ -265,6 +279,7 @@ namespace Halley
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
 		void loadAttributes(const ConfigNode& node);
+		void assignAttributeOffsets();
 		ShaderParameterType parseParameterType(const String& rawType) const;
 		TextureSamplerType parseSamplerType(const String& rawType) const;
 	};
@@ -327,7 +342,8 @@ namespace Halley
 
 	public:
 		MaterialPass();
-		explicit MaterialPass(const String& shaderAssetId, const ConfigNode& node);
+		MaterialPass(const String& shaderAssetId, const ConfigNode& node);
+		explicit MaterialPass(std::shared_ptr<Shader> shader, BlendMode = BlendMode::Opaque, MaterialDepthStencil depthStencil = {}, CullingMode cull = CullingMode::None);
 
 		BlendType getBlend() const { return blend; }
 		void setBlend(BlendType type) { blend = type; }
