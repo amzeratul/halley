@@ -30,6 +30,9 @@ namespace Halley
 		bool set(Vector4f p);
 		bool set(int p);
 		bool set(Vector2i p);
+		bool set(Vector3i p);
+		bool set(Vector4i p);
+		bool set(uint32_t p);
 		bool set(const Matrix4f& m);
 
 	private:

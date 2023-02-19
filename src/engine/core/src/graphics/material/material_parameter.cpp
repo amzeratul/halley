@@ -57,6 +57,24 @@ bool MaterialParameter::set(Vector2i p)
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int2, &p);
 }
 
+bool MaterialParameter::set(Vector3i p)
+{
+	Expects(type == ShaderParameterType::Int3);
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Int3, &p);	
+}
+
+bool MaterialParameter::set(Vector4i p)
+{
+	Expects(type == ShaderParameterType::Int4);
+	return material->setUniform(blockNumber, offset, ShaderParameterType::Int4, &p);	
+}
+
+bool MaterialParameter::set(uint32_t p)
+{
+	Expects(type == ShaderParameterType::UInt);
+	return material->setUniform(blockNumber, offset, ShaderParameterType::UInt, &p);
+}
+
 bool MaterialParameter::set(const Matrix4f& m)
 {
 	Expects(type == ShaderParameterType::Matrix4);
