@@ -2,6 +2,7 @@
 #include <memory>
 #include <memory>
 
+#include "halley/core/graphics/texture_descriptor.h"
 #include "halley/maths/vector2.h"
 #include "halley/text/halleystring.h"
 
@@ -18,6 +19,7 @@ namespace Halley {
 		bool createDepthStencil = true;
 		bool powerOfTwo = true;
 		String name;
+		TextureFormat colourBufferFormat = TextureFormat::RGBA;
 	};
 
 	class RenderSurface {

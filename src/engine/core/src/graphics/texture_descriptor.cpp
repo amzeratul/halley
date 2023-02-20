@@ -154,6 +154,7 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 	switch (format) {
 	case TextureFormat::RGBA:
 	case TextureFormat::BGRX:
+	case TextureFormat::SRGBA:
 		return 4;
 	case TextureFormat::Depth:
 	case TextureFormat::RGB:
@@ -164,6 +165,8 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 	case TextureFormat::Indexed:
 	case TextureFormat::Red:
 		return 1;
+	case TextureFormat::RGBAFloat16:
+		return 8;
 	}
 	throw Exception("Unknown image format: " + toString(format), HalleyExceptions::Graphics);
 }

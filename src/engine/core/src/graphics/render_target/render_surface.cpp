@@ -87,7 +87,7 @@ void RenderSurface::createNewColourTarget()
 	if (!options.name.isEmpty()) {
 		colourTarget->setAssetId(options.name + "_colour0_v" + toString(version));
 	}
-	auto colourDesc = TextureDescriptor(curTextureSize, TextureFormat::RGBA);
+	auto colourDesc = TextureDescriptor(curTextureSize, options.colourBufferFormat);
 	colourDesc.isRenderTarget = true;
 	colourDesc.useFiltering = options.useFiltering;
 	colourTarget->load(std::move(colourDesc));
