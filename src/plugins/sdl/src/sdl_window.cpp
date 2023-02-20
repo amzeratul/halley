@@ -185,9 +185,9 @@ void SDLWindow::setTitleColour(Colour4f bgCol, Colour4f textCol)
 	const COLORREF texColour = RGB(t.r, t.g, t.b);
 
 	HWND hwnd = static_cast<HWND>(getNativeHandle());
-	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR, &bgColour, sizeof(bgColour));
-	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, &bgColour, sizeof(bgColour));
-	DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR, &texColour, sizeof(texColour));
+	DwmSetWindowAttribute(hwnd, 34 /*DWMWINDOWATTRIBUTE::DWMWA_BORDER_COLOR*/, &bgColour, sizeof(bgColour));
+	DwmSetWindowAttribute(hwnd, 35 /*DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR*/, &bgColour, sizeof(bgColour));
+	DwmSetWindowAttribute(hwnd, 36 /*DWMWINDOWATTRIBUTE::DWMWA_TEXT_COLOR*/, &texColour, sizeof(texColour));
 #endif
 #endif
 }
