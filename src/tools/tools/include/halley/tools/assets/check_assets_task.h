@@ -42,7 +42,7 @@ namespace Halley
 		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const HashMap<String, ImportAssetsDatabaseEntry>& assets);
 		
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter);
-		bool importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter);
+		bool importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodegen, Path dstPath, String taskName, bool packAfter);
 
 		HashMap<String, ImportAssetsDatabaseEntry> checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
 		HashMap<String, ImportAssetsDatabaseEntry> checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta);

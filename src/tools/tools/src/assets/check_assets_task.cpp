@@ -84,9 +84,9 @@ void CheckAssetsTask::run()
 		monitorGen.poll(sharedGenChanged);
 
 		// Re-import any changes
-		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
-		importing |= importChanged(genChanged, project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
-		importing |= importChanged(sharedGenChanged, project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);
+		importing |= importChanged(genChanged, project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, true, project.getGenPath(), "Generating code", false);
+		importing |= importChanged(sharedGenChanged, project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, true, project.getSharedGenPath(), "Generating code", false);
 
 		while (hasPendingTasks()) {
 			sleep(5);
@@ -125,14 +125,14 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
 }
 
-bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter)
+bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodeGen, Path dstPath, String taskName, bool packAfter)
 {
 	if (changes.empty()) {
 		return false;
 	}
-
+	
 	// If we have a wildcard change, reimport all
-	if (std::any_of(changes.begin(), changes.end(), [&](const auto& c) { return c.type == DirectoryMonitor::ChangeType::Unknown || c.name == "_dir.meta"; })) {
+	if (isCodeGen || std::any_of(changes.begin(), changes.end(), [&](const auto& c) { return c.type == DirectoryMonitor::ChangeType::Unknown || c.name == "_dir.meta"; })) {
 		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter);
 	}
 
