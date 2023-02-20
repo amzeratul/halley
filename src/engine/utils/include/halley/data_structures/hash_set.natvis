@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="ska::flat_hash_set&lt;*,*,*&gt;">
+		<DisplayString>{{size = {num_elements}}}</DisplayString>
+		<Expand>
+			<CustomListItems MaxItemsPerView="5000" ExcludeView="Test">
+				<Variable Name="iter" InitialValue="entries" />
+				<Size>num_elements</Size>
+				<Loop>
+					<If Condition="iter->distance_from_desired >= 0">
+						<Item Name="[{iter->value}]">iter->value</Item>
+					</If>
+					<Exec>iter++</Exec>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+</AutoVisualizer>
