@@ -149,7 +149,7 @@ void AnimationEditor::setupWindow()
 		animationDisplay->setDirection(event.getStringData());
 	});
 
-	setHandle(UIEventType::DropdownSelectionChanged, "points", [=] (const UIEvent& event)
+	setHandle(UIEventType::DropdownSelectionChanged, "actionPoints", [=] (const UIEvent& event)
 	{
 		animationDisplay->setActionPoint(event.getStringData());
 	});
@@ -427,6 +427,22 @@ std::optional<Vector2i> AnimationEditorDisplay::getCurrentActionPoint() const
 		return getCurrentPivot() - origPivot.value_or(Vector2i());
 	}
 
+	const auto actionPoints = metadataEditor->getValue("actionPoints");
+	if (actionPoints.hasKey(actionPointId)) {
+		const auto& pointConfig = actionPoints[actionPointId];
+		const auto& key = animationPlayer.getCurrentSequenceName() + ":" + animationPlayer.getCurrentDirectionName();
+		if (pointConfig.hasKey(key)) {
+			const auto& seqConfig = pointConfig[key];
+			if (seqConfig.asSequence().size() > animationPlayer.getCurrentSequenceFrame()) {
+				const auto& value = seqConfig[animationPlayer.getCurrentSequenceFrame()];
+				if (value.getType() != ConfigNodeType::Undefined) {
+					return value.asVector2i() - origPivot.value_or(Vector2i());
+				}
+			}
+		}
+
+	}
+
 	return {};
 }
 
@@ -436,6 +452,18 @@ void AnimationEditorDisplay::setCurrentActionPoint(Vector2i pos)
 		metadataEditor->setPivot(pos);
 		refresh();
 	}
+
+	auto actionPoints = metadataEditor->getValue("actionPoints");
+	auto& pointConfig = actionPoints[actionPointId];
+	pointConfig.ensureType(ConfigNodeType::Map);
+	auto& seqConfig = pointConfig[animationPlayer.getCurrentSequenceName() + ":" + animationPlayer.getCurrentDirectionName()];
+	seqConfig.ensureType(ConfigNodeType::Sequence);
+	if (seqConfig.getSequenceSize() <= animationPlayer.getCurrentSequenceFrame()) {
+		seqConfig.asSequence().resize(animationPlayer.getCurrentSequenceFrame() + 1);
+	}
+	seqConfig[animationPlayer.getCurrentSequenceFrame()] = pos;
+
+	metadataEditor->setValue("actionPoints", std::move(actionPoints));
 }
 
 std::optional<Vector4f> AnimationEditorDisplay::getCurrentSlices() const
