@@ -32,11 +32,41 @@ void AnimationEditor::refreshAssets()
 	loadAssetData();
 }
 
+void AnimationEditor::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void AnimationEditor::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+bool AnimationEditor::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Space)) {
+		togglePlay();
+		return true;
+	}
+
+	if (key.is(KeyCode::Left)) {
+		animationDisplay->prevFrame();
+		return true;
+	}
+
+	if (key.is(KeyCode::Right)) {
+		animationDisplay->nextFrame();
+		return true;
+	}
+
+	return false;
+}
+
 void AnimationEditor::update(Time t, bool moved)
 {
 	const auto mousePos = Vector2i(animationDisplay->getMousePos());
 	const auto size = animationDisplay->getBounds().getSize();
-	String str = String("x: ") + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";
+	String str = "Frame: " + toString(animationDisplay->getFrameNumber()) +  ", x: " + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";
 
 #ifdef ENABLE_HOT_RELOAD
 	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
@@ -93,6 +123,21 @@ void AnimationEditor::setupWindow()
 		refresh();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "play", [=] (const UIEvent& event)
+	{
+		togglePlay();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "prevFrame", [=] (const UIEvent& event)
+	{
+		animationDisplay->prevFrame();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "nextFrame", [=] (const UIEvent& event)
+	{
+		animationDisplay->nextFrame();
+	});
+
 	setHandle(UIEventType::DropdownSelectionChanged, "sequence", [=] (const UIEvent& event)
 	{
 		animationDisplay->setSequence(event.getStringData());
@@ -102,6 +147,8 @@ void AnimationEditor::setupWindow()
 	{
 		animationDisplay->setDirection(event.getStringData());
 	});
+
+	updatePlayIcon();
 }
 
 void AnimationEditor::loadAssetData()
@@ -130,6 +177,17 @@ void AnimationEditor::loadAssetData()
 	} else {
 		getWidget("animControls")->setActive(false);
 	}
+}
+
+void AnimationEditor::togglePlay()
+{
+	animationDisplay->setPlaying(!animationDisplay->isPlaying());
+	updatePlayIcon();
+}
+
+void AnimationEditor::updatePlayIcon()
+{
+	getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(gameResources, animationDisplay->isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png"));
 }
 
 AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
@@ -268,6 +326,33 @@ void AnimationEditorDisplay::onMouseOver(Vector2f mousePos)
 void AnimationEditorDisplay::setMetadataEditor(MetadataEditor& metadataEditor)
 {
 	this->metadataEditor = &metadataEditor;
+}
+
+bool AnimationEditorDisplay::isPlaying() const
+{
+	return animationPlayer.getPlaybackSpeed() > 0.01f;
+}
+
+void AnimationEditorDisplay::setPlaying(bool play)
+{
+	animationPlayer.setPlaybackSpeed(play ? 1.0f : 0.0f);
+}
+
+void AnimationEditorDisplay::nextFrame()
+{
+	const auto n = animationPlayer.getCurrentSequenceLength();
+	animationPlayer.setTiming(modulo(animationPlayer.getCurrentSequenceFrame() + 1, n), 0);
+}
+
+void AnimationEditorDisplay::prevFrame()
+{
+	const auto n = animationPlayer.getCurrentSequenceLength();
+	animationPlayer.setTiming(modulo(animationPlayer.getCurrentSequenceFrame() - 1, n), 0);
+}
+
+int AnimationEditorDisplay::getFrameNumber() const
+{
+	return animationPlayer.getCurrentSequenceFrame();
 }
 
 void AnimationEditorDisplay::updateBounds()

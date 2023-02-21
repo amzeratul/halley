@@ -5,13 +5,34 @@ children:
 - widget: { id: animControls, class: widget }
   sizer: { type: horizontal }
   children:
-  - widget: { class: label, text: "Sequence:" }
-    border: [5, 0, 5, 0]
-    fill: centre
+  - uuid: 1f31e183-70ce-4714-af8c-828334516c18
+    sizer:
+      columnProportions: []
+    widget:
+      class: button
+      icon: halley_ui/icon_play.png
+      id: play
+      style: buttonThin
+      tooltip: Play/Pause [Space]
+  - uuid: 7f0e545a-dfc4-4687-9166-10a126588195
+    sizer:
+      columnProportions: []
+    widget:
+      class: button
+      icon: halley_ui/icon_previous.png
+      id: prevFrame
+      style: buttonThin
+      tooltip: Previous frame [Left]
+  - uuid: 2f9fe79d-0557-4411-9a02-91338401223f
+    sizer:
+      columnProportions: []
+    widget:
+      class: button
+      icon: halley_ui/icon_next.png
+      id: nextFrame
+      style: buttonThin
+      tooltip: Next frame [Right]
   - widget: { id: sequence, class: dropdown, size: [200, 22] }
-  - widget: { class: label, text: "Direction:" }
-    border: [10, 0, 5, 0]
-    fill: centre
   - widget: { id: direction, class: dropdown, size: [200, 22] }
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1

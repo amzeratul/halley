@@ -20,6 +20,10 @@ namespace Halley {
         void refresh();
         void reload() override;
         void refreshAssets() override;
+
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
+		bool onKeyPress(KeyboardKeyPress key) override;
 	
     protected:
         void update(Time t, bool moved) override;
@@ -30,6 +34,9 @@ namespace Halley {
 
 		void setupWindow();
 		void loadAssetData();
+
+		void togglePlay();
+		void updatePlayIcon();
 
         std::shared_ptr<AnimationEditorDisplay> animationDisplay;
         std::shared_ptr<UILabel> info;
@@ -54,6 +61,12 @@ namespace Halley {
 		void onMouseOver(Vector2f mousePos) override;
 
 		void setMetadataEditor(MetadataEditor& metadataEditor);
+
+		bool isPlaying() const;
+		void setPlaying(bool play);
+		void nextFrame();
+		void prevFrame();
+		int getFrameNumber() const;
 
 	protected:
 		void update(Time t, bool moved) override;
