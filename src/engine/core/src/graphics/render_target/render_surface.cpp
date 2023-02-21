@@ -90,6 +90,7 @@ void RenderSurface::createNewColourTarget()
 	auto colourDesc = TextureDescriptor(curTextureSize, options.colourBufferFormat);
 	colourDesc.isRenderTarget = true;
 	colourDesc.useFiltering = options.useFiltering;
+	colourDesc.useMipMap = options.mipMap;
 	colourTarget->load(std::move(colourDesc));
 
 	setColourTarget(std::move(colourTarget));

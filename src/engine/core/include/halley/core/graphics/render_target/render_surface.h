@@ -18,6 +18,7 @@ namespace Halley {
 		bool useFiltering = false;
 		bool createDepthStencil = true;
 		bool powerOfTwo = true;
+		bool mipMap = false;
 		String name;
 		TextureFormat colourBufferFormat = TextureFormat::RGBA;
 	};

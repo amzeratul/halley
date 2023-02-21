@@ -105,6 +105,10 @@ const Image* Texture::tryGetOriginalImage() const
 	}
 }
 
+void Texture::generateMipMaps()
+{
+}
+
 ResourceMemoryUsage Texture::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;

@@ -61,7 +61,8 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	CD3D11_TEXTURE2D_DESC desc;
 	desc.Width = size.x;
 	desc.Height = size.y;
-	desc.MipLevels = desc.ArraySize = 1;
+	desc.MipLevels = descriptor.useMipMap ? fastLog2Floor(static_cast<uint32_t>(std::max(size.x, size.y))) : 1;
+	desc.ArraySize = 1;
 
 	switch (descriptor.format) {
 	case TextureFormat::Indexed:
@@ -111,7 +112,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 
 	desc.SampleDesc.Count = 1;
 	desc.SampleDesc.Quality = 0;
-	desc.MiscFlags = 0;
+	desc.MiscFlags = desc.MipLevels > 1 ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
 	format = desc.Format;
 
 	D3D11_SUBRESOURCE_DATA* res = nullptr;
@@ -146,7 +147,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		srvDesc.Format = desc.Format;
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = 1;
+		srvDesc.Texture2D.MipLevels = desc.MipLevels;
 		srvDesc.Texture2D.MostDetailedMip = 0;
 
 		if (descriptor.format == TextureFormat::Depth) {
@@ -166,6 +167,10 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 			if (result != S_OK) {
 				throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
 			}
+		}
+
+		if (desc.MipLevels > 1 && res) {
+			generateMipMaps();
 		}
 
 		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
@@ -193,6 +198,13 @@ void DX11Texture::bind(DX11Video& video, int textureUnit, TextureSamplerType sam
 	ID3D11SamplerState* samplers[] = { samplerState };
 	video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
 	video.getDeviceContext().PSSetSamplers(textureUnit, 1, samplers);
+}
+
+void DX11Texture::generateMipMaps()
+{
+	if (descriptor.useMipMap && srv) {
+		video.getDeviceContext().GenerateMips(srv);
+	}
 }
 
 void DX11Texture::doCopyToTexture(Painter& painter, Texture& otherRaw) const

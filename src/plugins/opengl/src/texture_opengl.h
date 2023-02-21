@@ -23,6 +23,8 @@ namespace Halley
 		void doLoad(TextureDescriptor& descriptor) override;
 		void reload(Resource&& resource) override;
 
+		void generateMipMaps() override;
+
 	private:
 		void updateImage(TextureDescriptorImageData& pixelData, TextureFormat format, bool useMipMap);
 		void create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, TextureAddressMode addressMode, TextureDescriptorImageData& imgData);

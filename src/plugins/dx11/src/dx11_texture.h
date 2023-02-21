@@ -21,6 +21,7 @@ namespace Halley
 		void doLoad(TextureDescriptor& descriptor) override;
 		void reload(Resource&& resource) override;
 		void bind(DX11Video& video, int textureUnit, TextureSamplerType samplerType) const;
+		void generateMipMaps() override;
 
 		DXGI_FORMAT getFormat() const;
 		ID3D11Texture2D* getTexture() const;

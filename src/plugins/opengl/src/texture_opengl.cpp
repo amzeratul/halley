@@ -59,6 +59,18 @@ void TextureOpenGL::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<TextureOpenGL&>(resource));
 }
 
+void TextureOpenGL::generateMipMaps()
+{
+	if (descriptor.useMipMap) {
+		GLUtils glUtils;
+	    glUtils.setTextureUnit(0);
+		glUtils.bindTexture(textureId);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glCheckError();
+	}
+}
+
 unsigned TextureOpenGL::getNativeId() const
 {
 	return textureId;

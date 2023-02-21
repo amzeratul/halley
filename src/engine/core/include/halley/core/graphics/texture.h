@@ -34,6 +34,8 @@ namespace Halley
 
 		const Image* tryGetOriginalImage() const;
 
+		virtual void generateMipMaps();
+
 		ResourceMemoryUsage getMemoryUsage() const final override;
 
 	protected:
