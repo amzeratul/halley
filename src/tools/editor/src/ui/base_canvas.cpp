@@ -64,13 +64,15 @@ void BaseCanvas::doSetState(State state)
 
 void BaseCanvas::update(Time t, bool moved)
 {
-	const Vector2f startPos = getScrollPosition();
 	const auto scale = Vector2f(1, 1) / (bgSize * getZoomLevel());
+
+	const auto centrePos = getScrollPosition() * scale;
+	const auto size = getSize() * scale;
 
 	bg
 		.setPos(getPosition())
 		.setSize(getSize())
-		.setTexRect(Rect4f(startPos * scale, (startPos + getSize()) * scale));
+		.setTexRect(Rect4f(centrePos - 0.5f * size, centrePos + 0.5f * size));
 
 	border
 		.setPos(getPosition())
