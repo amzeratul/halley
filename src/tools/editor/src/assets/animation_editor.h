@@ -37,6 +37,7 @@ namespace Halley {
 
 		void togglePlay();
 		void updatePlayIcon();
+		void updateActionPointList();
 
         std::shared_ptr<AnimationEditorDisplay> animationDisplay;
         std::shared_ptr<UILabel> info;
@@ -68,6 +69,9 @@ namespace Halley {
 		void prevFrame();
 		int getFrameNumber() const;
 
+		void onDoubleClick();
+		void setActionPoint(const String& pointId);
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -83,13 +87,14 @@ namespace Halley {
 		Sprite boundsSprite;
 		Sprite nineSliceVSprite;
 		Sprite nineSliceHSprite;
-		Sprite pivotSprite;
+		Sprite actionPointSprite;
 		Sprite crossHairH;
 		Sprite crossHairV;
 
 		std::optional<Vector2i> origPivot;
 		Rect4i origBounds;
 		Rect4f bounds;
+		String actionPointId;
 
 		float zoom = 1.0f;
 		Vector2f mousePos;
@@ -98,8 +103,11 @@ namespace Halley {
 		void updateBounds();
 		Vector2f imageToScreenSpace(Vector2f pos) const;
 		Vector2f screenToImageSpace(Vector2f pos) const;
-		Vector2i getCurrentPivot() const;
 		std::optional<Vector4f> getCurrentSlices() const;
+
+		Vector2i getCurrentPivot() const;
+		std::optional<Vector2i> getCurrentActionPoint() const;
+		void setCurrentActionPoint(Vector2i pos);
 
 		int getMetaIntOr(const String& key, int defaultValue) const;
 	};

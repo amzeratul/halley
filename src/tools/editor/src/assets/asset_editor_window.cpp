@@ -77,16 +77,16 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				}
 			}
 
-			for (auto& asset: assets) {
-				createEditorTab(Path(name), asset.first, asset.second);
-			}
-
 			if (assets.empty()) {
 				metadataEditor->clear();
 			} else {
 				const auto type = assets.at(0).first;
 				auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
 				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
+			}
+
+			for (auto& asset: assets) {
+				createEditorTab(Path(name), asset.first, asset.second);
 			}
 		} else {
 			metadataEditor->clear();

@@ -107,6 +107,8 @@ void AnimationEditor::setupWindow()
 	info = getWidgetAs<UILabel>("info");
 	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
 
+	updateActionPointList();
+
 	scrollBg->setZoomListener([=] (float zoom)
 	{
 		animationDisplay->setZoom(zoom);
@@ -119,8 +121,7 @@ void AnimationEditor::setupWindow()
 
 	setHandle(UIEventType::CanvasDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
 	{
-		metadataEditor.setPivot(Vector2i(animationDisplay->getMousePos()));
-		refresh();
+		animationDisplay->onDoubleClick();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "play", [=] (const UIEvent& event)
@@ -146,6 +147,11 @@ void AnimationEditor::setupWindow()
 	setHandle(UIEventType::DropdownSelectionChanged, "direction", [=] (const UIEvent& event)
 	{
 		animationDisplay->setDirection(event.getStringData());
+	});
+
+	setHandle(UIEventType::DropdownSelectionChanged, "points", [=] (const UIEvent& event)
+	{
+		animationDisplay->setActionPoint(event.getStringData());
 	});
 
 	updatePlayIcon();
@@ -190,6 +196,22 @@ void AnimationEditor::updatePlayIcon()
 	getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(gameResources, animationDisplay->isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png"));
 }
 
+void AnimationEditor::updateActionPointList()
+{
+	Vector<String> actionPointIds;
+
+	auto actionPointData = metadataEditor.getValue("actionPoints");
+	if (actionPointData.getType() == ConfigNodeType::Map) {
+		for (const auto& [k, v]: actionPointData.asMap()) {
+			actionPointIds.push_back(k);
+		}
+	}
+	std::sort(actionPointIds.begin(), actionPointIds.end());
+	actionPointIds.insert(actionPointIds.begin(), "pivot");
+
+	getWidgetAs<UIDropdown>("actionPoints")->setOptions(actionPointIds);
+}
+
 AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	: UIWidget(std::move(id))
 	, resources(resources)
@@ -197,9 +219,11 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	boundsSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceVSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceHSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
-	pivotSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
+	actionPointSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
 	crossHairH.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
 	crossHairV.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
+
+	actionPointId = "pivot";
 }
 
 void AnimationEditorDisplay::setZoom(float z)
@@ -275,11 +299,17 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 	}
 
 	const Vector2f pivotPos = imageToScreenSpace(-bounds.getTopLeft());
-	const Vector2f displayPivotPos = imageToScreenSpace(-bounds.getTopLeft() + Vector2f(getCurrentPivot() - origPivot.value_or(Vector2i())));
-
 	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
-	pivotSprite.setPos(displayPivotPos);
 	boundsSprite.setPos(getPosition()).scaleTo((bounds.getSize() * zoom).round());
+
+	const auto actionPointPos = getCurrentActionPoint();
+	if (actionPointPos) {
+		const Vector2f displayPivotPos = imageToScreenSpace(-bounds.getTopLeft() + Vector2f(*actionPointPos));
+		actionPointSprite.setPos(displayPivotPos);
+		actionPointSprite.setVisible(true);
+	} else {
+		actionPointSprite.setVisible(false);
+	}
 
 	const auto slices = getCurrentSlices();
 	if (slices) {
@@ -298,8 +328,8 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 {
 	painter.draw(drawSprite);
 	painter.draw(boundsSprite);
-	if (origPivot.has_value()) {
-		painter.draw(pivotSprite);
+	if (actionPointSprite.isVisible()) {
+		painter.draw(actionPointSprite);
 	}
 	if (nineSliceHSprite.isVisible()) {
 		painter.draw(nineSliceHSprite);
@@ -355,6 +385,16 @@ int AnimationEditorDisplay::getFrameNumber() const
 	return animationPlayer.getCurrentSequenceFrame();
 }
 
+void AnimationEditorDisplay::onDoubleClick()
+{
+	setCurrentActionPoint(Vector2i(getMousePos()));
+}
+
+void AnimationEditorDisplay::setActionPoint(const String& pointId)
+{
+	actionPointId = pointId;
+}
+
 void AnimationEditorDisplay::updateBounds()
 {
 	bounds = Rect4f(origBounds);
@@ -381,6 +421,23 @@ Vector2i AnimationEditorDisplay::getCurrentPivot() const
 	return Vector2i(getMetaIntOr("pivotX", origPivot->x), getMetaIntOr("pivotY", origPivot->y));
 }
 
+std::optional<Vector2i> AnimationEditorDisplay::getCurrentActionPoint() const
+{
+	if (actionPointId == "pivot") {
+		return getCurrentPivot() - origPivot.value_or(Vector2i());
+	}
+
+	return {};
+}
+
+void AnimationEditorDisplay::setCurrentActionPoint(Vector2i pos)
+{
+	if (actionPointId == "pivot") {
+		metadataEditor->setPivot(pos);
+		refresh();
+	}
+}
+
 std::optional<Vector4f> AnimationEditorDisplay::getCurrentSlices() const
 {
 	const auto s = Vector4i(origSprite.getSlices());
@@ -393,7 +450,7 @@ std::optional<Vector4f> AnimationEditorDisplay::getCurrentSlices() const
 
 int AnimationEditorDisplay::getMetaIntOr(const String& key, int defaultValue) const
 {
-	const auto result = metadataEditor->getMetaValue(key);
+	const auto result = metadataEditor->getString(key);
 	if (result.isEmpty() || !result.isInteger()) {
 		return defaultValue;
 	}

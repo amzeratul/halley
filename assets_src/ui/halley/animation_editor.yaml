@@ -2,38 +2,58 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: animControls, class: widget }
-  sizer: { type: horizontal }
+- sizer: { type: horizontal }
   children:
-  - uuid: 1f31e183-70ce-4714-af8c-828334516c18
-    sizer:
-      columnProportions: []
-    widget:
-      class: button
-      icon: halley_ui/icon_play.png
-      id: play
-      style: buttonThin
-      tooltip: Play/Pause [Space]
-  - uuid: 7f0e545a-dfc4-4687-9166-10a126588195
-    sizer:
-      columnProportions: []
-    widget:
-      class: button
-      icon: halley_ui/icon_previous.png
-      id: prevFrame
-      style: buttonThin
-      tooltip: Previous frame [Left]
-  - uuid: 2f9fe79d-0557-4411-9a02-91338401223f
-    sizer:
-      columnProportions: []
-    widget:
-      class: button
-      icon: halley_ui/icon_next.png
-      id: nextFrame
-      style: buttonThin
-      tooltip: Next frame [Right]
-  - widget: { id: sequence, class: dropdown, size: [200, 22] }
-  - widget: { id: direction, class: dropdown, size: [200, 22] }
+  - widget: { id: animControls, class: widget }
+    sizer: { type: horizontal }
+    children:
+    - uuid: 1f31e183-70ce-4714-af8c-828334516c18
+      widget:
+        class: button
+        icon: halley_ui/icon_play.png
+        id: play
+        style: buttonThin
+        tooltip: Play/Pause [Space]
+    - uuid: 7f0e545a-dfc4-4687-9166-10a126588195
+      widget:
+        class: button
+        icon: halley_ui/icon_previous.png
+        id: prevFrame
+        style: buttonThin
+        tooltip: Previous frame [Left]
+    - uuid: 2f9fe79d-0557-4411-9a02-91338401223f
+      widget:
+        class: button
+        icon: halley_ui/icon_next.png
+        id: nextFrame
+        style: buttonThin
+        tooltip: Next frame [Right]
+    - widget: { id: sequence, class: dropdown, size: [200, 22] }
+    - widget: { id: direction, class: dropdown, size: [200, 22] }
+  - spacer: {}
+    proportion: 1
+  - widget: { id: pointControls, class: widget }
+    sizer: { type: horizontal }
+    children:
+    - widget: 
+        id: actionPoints
+        class: dropdown
+        size: [200, 22]
+        options:
+        - id: pivot
+          text: Pivot (Global)
+    - widget:
+        class: button
+        text: "+"
+        id: addPoint
+        style: buttonThin
+        tooltip: Add Point
+    - widget:
+        class: button
+        text: "-"
+        id: removePoint
+        style: buttonThin
+        tooltip: Remove Point
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1
   fill: fill
