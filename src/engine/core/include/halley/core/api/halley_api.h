@@ -13,7 +13,8 @@ namespace Halley
 			Input = 4,
 			Network = 8,
 			Platform = 16,
-			Movie = 32
+			Movie = 32,
+			Analytics = 64
 		};
 	}
 
@@ -29,6 +30,7 @@ namespace Halley
 		std::shared_ptr<PlatformAPIInternal> platformInternal;
 		std::shared_ptr<NetworkAPIInternal> networkInternal;
 		std::shared_ptr<MovieAPIInternal> movieInternal;
+		std::shared_ptr<AnalyticsAPIInternal> analyticsInternal;
 
 	public:
 		CoreAPI* core;
@@ -40,6 +42,7 @@ namespace Halley
 		PlatformAPI* platform;
 		NetworkAPI* network;
 		MovieAPI* movie;
+		AnalyticsAPI* analytics;
 
 		std::unique_ptr<HalleyAPI> clone() const;
 		void replaceCoreAPI(CoreAPIInternal* core);

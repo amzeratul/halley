@@ -17,7 +17,8 @@ namespace Halley
 		InputAPI,
 		NetworkAPI,
 		PlatformAPI,
-		MovieAPI
+		MovieAPI,
+		AnalyticsAPI
 	};
 
 	class Plugin

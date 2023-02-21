@@ -111,6 +111,12 @@ MovieAPI& Stage::getMovieAPI() const
 	return *api->movie;
 }
 
+AnalyticsAPI& Stage::getAnalyticsAPI() const
+{
+	Expects(api->analytics);
+	return *api->analytics;
+}
+
 Resources& Stage::getResources() const
 {
 	Expects(resources);

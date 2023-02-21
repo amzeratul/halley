@@ -5,6 +5,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../uti
 set(SOURCES
         "src/api/halley_api.cpp"
 
+        "src/dummy/dummy_analytics.cpp"
         "src/dummy/dummy_audio.cpp"
         "src/dummy/dummy_input.cpp"
         "src/dummy/dummy_network.cpp"
@@ -91,6 +92,7 @@ set(SOURCES
 
 set(HEADERS
 
+        "src/dummy/dummy_analytics.h"
         "src/dummy/dummy_audio.h"
         "src/dummy/dummy_input.h"
         "src/dummy/dummy_plugins.h"
@@ -100,6 +102,7 @@ set(HEADERS
         "src/dummy/dummy_system.h"
         "src/dummy/dummy_video.h"
 
+        "include/halley/core/api/analytics_api.h"
         "include/halley/core/api/audio_api.h"
         "include/halley/core/api/clipboard.h"
         "include/halley/core/api/core_api.h"

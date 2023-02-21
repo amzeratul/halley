@@ -9,6 +9,7 @@
 #include "network_api.h"
 #include "platform_api.h"
 #include "movie_api.h"
+#include "analytics_api.h"
 
 namespace Halley
 {
@@ -89,6 +90,12 @@ namespace Halley
 	{
 	public:
 		virtual ~MovieAPIInternal() {}
+	};
+
+	class AnalyticsAPIInternal : public AnalyticsAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~AnalyticsAPIInternal() {}
 	};
 }
 

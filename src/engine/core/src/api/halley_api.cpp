@@ -36,6 +36,9 @@ void HalleyAPI::assign()
 	if (movieInternal) {
 		movie = movieInternal.get();
 	}
+	if (analyticsInternal) {
+		analytics = analyticsInternal.get();
+	}
 }
 
 void HalleyAPI::init()
@@ -64,10 +67,16 @@ void HalleyAPI::init()
 	if (movieInternal) {
 		movieInternal->init();
 	}
+	if (analyticsInternal) {
+		analyticsInternal->init();
+	}
 }
 
 void HalleyAPI::deInit()
 {
+	if (analyticsInternal) {
+		analyticsInternal->deInit();
+	}
 	if (movieInternal) {
 		movieInternal->deInit();
 	}
@@ -99,9 +108,9 @@ std::unique_ptr<HalleyAPI> HalleyAPI::create(CoreAPIInternal* core, int flags)
 	auto api = std::make_unique<HalleyAPI>();
 	api->coreInternal = core;
 
-	HalleyAPIFlags::Flags flagList[] = { HalleyAPIFlags::System, HalleyAPIFlags::Video, HalleyAPIFlags::Input, HalleyAPIFlags::Audio, HalleyAPIFlags::Network, HalleyAPIFlags::Platform, HalleyAPIFlags::Movie };
-	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI };
-	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie" };
+	HalleyAPIFlags::Flags flagList[] = { HalleyAPIFlags::System, HalleyAPIFlags::Video, HalleyAPIFlags::Input, HalleyAPIFlags::Audio, HalleyAPIFlags::Network, HalleyAPIFlags::Platform, HalleyAPIFlags::Movie, HalleyAPIFlags::Analytics };
+	PluginType pluginTypes[] = { PluginType::SystemAPI, PluginType::GraphicsAPI, PluginType::InputAPI, PluginType::AudioOutputAPI, PluginType::NetworkAPI, PluginType::PlatformAPI, PluginType::MovieAPI, PluginType::AnalyticsAPI };
+	String names[] = { "System", "Graphics", "Input", "AudioOutput", "Network", "Platform", "Movie", "Analytics" };
 
 	constexpr size_t n = std::end(flagList) - std::begin(flagList);
 	for (size_t i = 0; i < n; ++i) {
@@ -144,6 +153,9 @@ void HalleyAPI::setAPI(PluginType pluginType, HalleyAPIInternal* api)
 		return;
 	case PluginType::MovieAPI:
 		movieInternal.reset(dynamic_cast<MovieAPIInternal*>(api));
+		return;
+	case PluginType::AnalyticsAPI:
+		analyticsInternal.reset(dynamic_cast<AnalyticsAPIInternal*>(api));
 		return;
 	}
 }

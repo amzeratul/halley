@@ -36,6 +36,7 @@ namespace Halley {
 			NetworkPlugin = 104,
 			InputPlugin = 105,
 			MoviePlugin = 106,
+			AnalyticsPlugin = 107,
 			
 			Core = 200,
 			Entity = 201,

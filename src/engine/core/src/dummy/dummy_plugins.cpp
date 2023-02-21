@@ -6,6 +6,7 @@
 #include "dummy_network.h"
 #include "dummy_platform.h"
 #include "dummy_movie.h"
+#include "dummy_analytics.h"
 
 using namespace Halley;
 
@@ -145,6 +146,26 @@ HalleyAPIInternal* DummyMoviePlugin::createAPI(SystemAPI*)
 }
 
 int DummyMoviePlugin::getPriority() const
+{
+	return -1;
+}
+
+PluginType DummyAnalyticsPlugin::getType()
+{
+	return PluginType::AnalyticsAPI;
+}
+
+String DummyAnalyticsPlugin::getName()
+{
+	return "Analytics/Dummy";
+}
+
+HalleyAPIInternal* DummyAnalyticsPlugin::createAPI(SystemAPI*)
+{
+	return new DummyAnalyticsAPI();
+}
+
+int DummyAnalyticsPlugin::getPriority() const
 {
 	return -1;
 }
