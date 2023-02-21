@@ -6,140 +6,113 @@
 
 using namespace Halley;
 
-Metadata::Metadata() {}
+Metadata::Metadata()
+	: entries(ConfigNode::MapType())
+{
+}
 
 Metadata::~Metadata() {}
 
-bool Metadata::hasKey(const String& key) const
+bool Metadata::hasKey(std::string_view key) const
 {
-	const auto iter = entries.find(key);
-	return iter != entries.end() && !iter->second.isEmpty();
+	return entries.hasKey(key);
 }
 
-bool Metadata::getBool(const String& key) const
+bool Metadata::getBool(std::string_view key) const
 {
-	return getString(key) == "true";
+	return entries[key].asBool();
 }
 
-int Metadata::getInt(const String& key) const
+int Metadata::getInt(std::string_view key) const
 {
-	return getString(key).toInteger();
+	return entries[key].asInt();
 }
 
-float Metadata::getFloat(const String& key) const
+float Metadata::getFloat(std::string_view key) const
 {
-	return getString(key).toFloat();
+	return entries[key].asFloat();
 }
 
-String Metadata::getString(const String& key) const
+String Metadata::getString(std::string_view key) const
 {
-	auto result = entries.find(key);
-	if (result != entries.end()) {
-		return result->second;
-	} else {
-		throw Exception("Key " + key + " not found in metafile.", HalleyExceptions::Resources);
-	}
+	return entries[key].asString();
 }
 
-bool Metadata::getBool(const String& key, bool v) const
+ConfigNode Metadata::getValue(std::string_view key) const
 {
-	if (hasKey(key)) {
-		return getBool(key);
-	} else {
-		return v;
-	}
+	return ConfigNode(entries[key]);
 }
 
-int Metadata::getInt(const String& key, int v) const
+bool Metadata::getBool(std::string_view key, bool v) const
 {
-	if (hasKey(key)) {
-		return getInt(key);
-	} else {
-		return v;
-	}
+	return entries[key].asBool(v);
 }
 
-float Metadata::getFloat(const String& key, float v) const
+int Metadata::getInt(std::string_view key, int v) const
 {
-	if (hasKey(key)) {
-		return getFloat(key);
-	} else {
-		return v;
-	}
+	return entries[key].asInt(v);
 }
 
-String Metadata::getString(const String& key, String v) const
+float Metadata::getFloat(std::string_view key, float v) const
 {
-	if (hasKey(key)) {
-		return getString(key);
-	} else {
-		return v;
-	}
+	return entries[key].asFloat(v);
 }
 
-const std::map<String, String>& Metadata::getEntries() const
+String Metadata::getString(std::string_view key, String v) const
+{
+	return entries[key].asString(v);
+}
+
+const ConfigNode& Metadata::getEntries() const
 {
 	return entries;
 }
 
-bool Metadata::set(String key, bool value)
+bool Metadata::set(std::string_view key, std::string_view value)
 {
-	return set(std::move(key), value ? "true" : "false");
-}
-
-bool Metadata::set(String key, int value)
-{
-	return set(std::move(key), Halley::toString(value));
-}
-
-bool Metadata::set(String key, float value)
-{
-	return set(std::move(key), Halley::toString(value));
-}
-
-bool Metadata::set(String key, const char* value)
-{
-	return set(std::move(key), String(value));
-}
-
-bool Metadata::set(String key, const std::string& value)
-{
-	return set(std::move(key), String(value));
-}
-
-bool Metadata::set(String key, String value)
-{
-	const auto iter = entries.find(key);
-	if (iter != entries.end()) {
+	auto& es = entries.asMap();
+	const auto iter = es.find(key);
+	if (iter != es.end()) {
 		// Value exists
-		if (value.isEmpty()) {
+		if (value.empty()) {
 			erase(key);
 			return true;
 		}
 
-		if (iter->second == value) {
+		auto v = ConfigNode(value);
+		if (iter->second == v) {
 			return false;
 		}
-		iter->second = std::move(value);
+		iter->second = std::move(v);
 	} else {
 		// Value didn't exist
-		if (value.isEmpty()) {
+		if (value.empty()) {
 			return false;
 		}
 
-		entries[std::move(key)] = std::move(value);
+		es[key] = ConfigNode(value);
 	}
 	return true;
 }
 
-bool Metadata::erase(const String& key)
+bool Metadata::set(std::string_view key, const char* value)
 {
-	const auto iter = entries.find(key);
-	if (iter != entries.end()) {
-		entries.erase(iter);
-		return true;
-	}
-	return false;
+	return set(key, std::string_view(value));
+}
+
+bool Metadata::set(std::string_view key, const std::string& value)
+{
+	return set(key, std::string_view(value));
+}
+
+bool Metadata::set(std::string_view key, const String& value)
+{
+	return set(key, std::string_view(value));
+}
+
+bool Metadata::erase(std::string_view key)
+{
+	return entries.removeKey(key);
 }
 
 void Metadata::convertToLatestVersion()
@@ -179,20 +152,10 @@ bool Metadata::operator!=(const Metadata& rhs) const
 
 String Metadata::toString() const
 {
-	std::stringstream ss;
-	ss << "{ ";
-	for (auto& e: entries) {
-		ss << "\"" << e.first << "\": \"" << e.second << "\" ";
-	}
-	ss << "}";
-	return ss.str();
+	return entries.asString();
 }
 
 ConfigNode Metadata::toConfig() const
 {
-	ConfigNode::MapType result;
-	for (auto& e: entries) {
-		result[e.first] = e.second;
-	}
-	return ConfigNode(std::move(result));
+	return ConfigNode(entries);
 }

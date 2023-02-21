@@ -139,11 +139,15 @@ ConfigNode::ConfigNode(IdxType value)
 	operator=(value);
 }
 
-void ConfigNode::removeKey(std::string_view key)
+bool ConfigNode::removeKey(std::string_view key)
 {
 	auto& map = asMap();
 	const auto iter = map.find(key);
-	map.erase(iter);
+	if (iter != map.end()) {
+		map.erase(iter);
+		return true;
+	}
+	return false;
 }
 
 ConfigNode::~ConfigNode()
@@ -593,7 +597,7 @@ void ConfigNode::deserialize(Deserializer& s)
 			break;
 		}
 		default:
-			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
+			throw Exception("Unknown configuration node type: " + toString(int(incomingType)), HalleyExceptions::Resources);
 	}
 
 	type = incomingType;

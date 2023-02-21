@@ -23,7 +23,9 @@ namespace Halley
 
 		void setPivot(Vector2i pos);
 
-		String getMetaValue(const String& key) const;
+		String getString(const String& key) const;
+		ConfigNode getValue(const String& key) const;
+		void setValue(const String& key, ConfigNode value);
 
 	private:
 		UIFactory& factory;

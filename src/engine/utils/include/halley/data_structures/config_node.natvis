@@ -16,7 +16,9 @@
     <DisplayString Condition="type == ConfigNodeType::DeltaMap">(Map){*mapData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Sequence">(Sequence){*sequenceData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::DeltaSequence">(Sequence){*sequenceData}</DisplayString>
-    <DisplayString>Undefined</DisplayString>
+	<DisplayString Condition="type == ConfigNodeType::Bool &amp;&amp; intData == 0">false</DisplayString>
+	<DisplayString Condition="type == ConfigNodeType::Bool &amp;&amp; intData == 1">true</DisplayString>
+	  <DisplayString>Undefined</DisplayString>
     <Expand>
 	    <Item Name="[Int]" Condition="type == ConfigNodeType::Int">intData</Item>
 		<Item Name="[Int64]" Condition="type == ConfigNodeType::Int64">int64Data</Item>

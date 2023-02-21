@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/data_structures/config_node.h"
+#include "halley/resources/resource.h"
 
 namespace Halley
 {

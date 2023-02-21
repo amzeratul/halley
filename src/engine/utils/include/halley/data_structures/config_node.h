@@ -3,7 +3,6 @@
 #include <gsl/span>
 
 #include "halley/text/halleystring.h"
-#include "halley/resources/resource.h"
 #include "halley/maths/range.h"
 #include "halley/maths/vector4.h"
 #include "halley/data_structures/maybe.h"
@@ -439,7 +438,7 @@ namespace Halley {
 		void ensureType(ConfigNodeType type);
 
 		bool hasKey(std::string_view key) const;
-		void removeKey(std::string_view key);
+		bool removeKey(std::string_view key);
 
 		ConfigNode& operator[](std::string_view key);
 		ConfigNode& operator[](size_t idx);

@@ -2,17 +2,18 @@
 #include "halley/resources/resource_data.h"
 #include "halley/file_formats/halley-yamlcpp.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/text/string_converter.h"
 using namespace Halley;
 
-static void loadMetaTable(Metadata& meta, const YAML::Node& root, bool dirMeta)
+static void loadMetaTable(Metadata& meta, const ConfigNode& root, bool dirMeta)
 {
-	for (YAML::const_iterator it = root.begin(); it != root.end(); ++it) {
-		String key = it->first.as<std::string>();
-		String value = it->second.as<std::string>();
-		meta.set(key, value);
-		if (dirMeta) {
-			meta.set(":" + key, value);
+	if (root.getType() == ConfigNodeType::Map) {
+		for (const auto& [key, value] : root.asMap()) {
+			meta.set(key, ConfigNode(value));
+			if (dirMeta) {
+				meta.set(":" + key, ConfigNode(value));
+			}
 		}
 	}
 }
@@ -20,24 +21,25 @@ static void loadMetaTable(Metadata& meta, const YAML::Node& root, bool dirMeta)
 void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, const Path& inputFilePath)
 {
 	const auto data = ResourceDataStatic::loadFromFileSystem(path);
-	auto root = YAML::Load(data ? data->getString() : "");
+	const auto configFile = YAMLConvert::parseConfig(data ? data->getSpan() : gsl::span<const gsl::byte>());
+	const auto& root = configFile.getRoot();
 
 	const String inputFilePathStr = inputFilePath.toString();
 
 	if (isDirectoryMeta) {
 		for (const auto& rootList: root) {
 			bool matches = true;
-			if (rootList["match"]) {
+			if (rootList.hasKey("match")) {
 				matches = false;
 				for (auto& pattern: rootList["match"]) {
-					auto p = pattern.as<std::string>();
+					auto p = pattern.asString();
 					if (inputFilePathStr.contains(p)) {
 						matches = true;
 						break;
 					}
 				}
 			}
-			if (matches && rootList["data"]) {
+			if (matches && rootList.hasKey("data")) {
 				loadMetaTable(meta, rootList["data"], true);
 				return;
 			}

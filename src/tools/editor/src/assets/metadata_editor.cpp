@@ -201,9 +201,20 @@ void MetadataEditor::setPivot(Vector2i pos)
 	getWidgetAs<UITextInput>("pivotY")->setText(toString(pos.y));
 }
 
-String MetadataEditor::getMetaValue(const String& key) const
+String MetadataEditor::getString(const String& key) const
 {
 	return metadata.getString(key, effectiveMetadata.getString(key, ""));
+}
+
+void MetadataEditor::setValue(const String& key, ConfigNode value)
+{
+	metadata.set(key, std::move(value));
+	onMetadataChanged();
+}
+
+ConfigNode MetadataEditor::getValue(const String& key) const
+{
+	return metadata.getValue(key);
 }
 
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
