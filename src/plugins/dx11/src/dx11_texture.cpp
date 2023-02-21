@@ -176,6 +176,9 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
 		samplerDesc.Filter = descriptor.useFiltering ? D3D11_FILTER_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_POINT;
 		samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = getAddressMode(descriptor.addressMode);
+		for (int i = 0; i < 4; ++i) {
+			samplerDesc.BorderColor[i] = 0.0f;
+		}
 		result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
 		if (result != S_OK) {
 			throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);

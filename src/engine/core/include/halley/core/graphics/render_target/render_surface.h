@@ -21,6 +21,7 @@ namespace Halley {
 		bool mipMap = false;
 		String name;
 		TextureFormat colourBufferFormat = TextureFormat::RGBA;
+		TextureAddressMode addressMode = TextureAddressMode::Clamp;
 	};
 
 	class RenderSurface {

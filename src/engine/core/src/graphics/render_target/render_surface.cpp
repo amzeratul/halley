@@ -91,6 +91,7 @@ void RenderSurface::createNewColourTarget()
 	colourDesc.isRenderTarget = true;
 	colourDesc.useFiltering = options.useFiltering;
 	colourDesc.useMipMap = options.mipMap;
+	colourDesc.addressMode = options.addressMode;
 	colourTarget->load(std::move(colourDesc));
 
 	setColourTarget(std::move(colourTarget));
