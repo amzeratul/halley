@@ -130,9 +130,20 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 	if (changes.empty()) {
 		return false;
 	}
+
+	// Check for full reimport
+	bool reimportAll = isCodeGen;
+	if (!reimportAll) {
+		for (const auto& change : changes) {
+			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta" || change.name.endsWith(".ase") || change.name.endsWith(".aseprite")) {
+				reimportAll = true;
+				break;
+			}
+		}
+	}
 	
 	// If we have a wildcard change, reimport all
-	if (isCodeGen || std::any_of(changes.begin(), changes.end(), [&](const auto& c) { return c.type == DirectoryMonitor::ChangeType::Unknown || c.name == "_dir.meta"; })) {
+	if (reimportAll) {
 		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter);
 	}
 
