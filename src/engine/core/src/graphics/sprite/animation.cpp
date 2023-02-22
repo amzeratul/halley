@@ -394,7 +394,10 @@ std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, int
 {
 	for (const auto& ap: actionPoints) {
 		if (ap.getName() == actionPoint) {
-			return ap.getPoint(sequenceIdx, directionIdx, frameNumber);
+			auto p = ap.getPoint(sequenceIdx, directionIdx, frameNumber);
+			if (p) {
+				return *p - getPivot();
+			}
 		}
 	}
 	return {};

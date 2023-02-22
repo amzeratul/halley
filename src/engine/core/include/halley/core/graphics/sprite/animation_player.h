@@ -62,7 +62,7 @@ namespace Halley
 		void setTiming(int currentFrame, Time currentFrameTime);
 		void stepFrames(int amount);
 
-		std::optional<Vector2i> getCurrentActionPoint(const String& actionPointId);
+		std::optional<Vector2i> getCurrentActionPoint(const String& actionPointId) const;
 
 	private:
 		void resolveSprite();
@@ -76,6 +76,7 @@ namespace Halley
 		std::shared_ptr<const Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 
+		const AnimationFrame* curFrame = nullptr;
 		const AnimationSequence* curSeq = nullptr;
 		const AnimationDirection* curDir = nullptr;
 
@@ -87,12 +88,11 @@ namespace Halley
 
 		Time curSeqTime;
 		Time curFrameTime;
-		Time curFrameLen;
 
 		size_t seqLen;
 
 		int dirId;
-		int curFrame;
+		int curFrameN;
 		int curLoopCount = 0;
 		float playbackSpeed = 1.0f;
 

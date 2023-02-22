@@ -48,6 +48,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 		}
 		curDir = nullptr;
 		curSeq = nullptr;
+		curFrame = nullptr;
 		dirId = -1;
 	}
 
@@ -69,8 +70,8 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
 	if (animation && (!curSeq || curSeq->getName() != curSeqName)) {
 		curSeqTime = 0;
 		curFrameTime = 0;
-		curFrame = 0;
-		curFrameLen = 0;
+		curFrameN = 0;
+		curFrame = nullptr;
 		curLoopCount = 0;
 		curSeq = &animation->getSequence(curSeqName);
 
@@ -152,31 +153,58 @@ void AnimationPlayer::update(Time time)
 		dirty = false;
 	}
 
-	const int prevFrame = curFrame;
+	const int prevFrame = curFrameN;
 
 	curSeqTime += time * playbackSpeed;
 	curFrameTime += time * playbackSpeed;
-		
-	// Next frame time!
-	if (curFrameTime >= curFrameLen) {
-		for (int i = 0; i < 5 && curFrameTime >= curFrameLen; ++i) {
-			curFrame++;
-			curFrameTime -= curFrameLen;
+
+	// Prev frame time!
+	if (curFrameTime < 0) {
+		for (int i = 0; i < 5 && curFrameTime < 0; ++i) {
+			--curFrameN;
+			const int actualFrame = curFrameN >= 0 ? curFrameN : (seqLooping ? static_cast<int>(seqLen) - 1 : 0);
+			curFrameTime += std::max(curSeq->getFrame(actualFrame).getDuration(), 1) * 0.001;
 			
-			if (curFrame >= int(seqLen)) {
+			if (curFrameN < 0) {
+				curFrameN = actualFrame;
 				if (seqLooping) {
-					curFrame = 0;
 					curSeqTime = curFrameTime;
+					for (int i = 0; i < curFrameN; ++i) {
+						// Add the time of previous frames
+						curSeqTime += std::max(curSeq->getFrame(i).getDuration(), 1) * 0.001;
+					}
 					curLoopCount++;
 				} else {
-					curFrame = int(seqLen - 1);
 					onSequenceDone();
 				}
 			}
 		}
 	}
 
-	if (curFrame != prevFrame) {
+	// Next frame time!
+	else {
+		const auto curFrameLen = std::max(curFrame ? curFrame->getDuration() : 100, 1) * 0.001;
+		if (curFrameTime >= curFrameLen) {
+			for (int i = 0; i < 5 && curFrameTime >= curFrameLen; ++i) {
+				curFrameN++;
+				curFrameTime -= curFrameLen;
+
+				if (curFrameN >= int(seqLen)) {
+					if (seqLooping) {
+						curFrameN = 0;
+						curSeqTime = curFrameTime;
+						curLoopCount++;
+					}
+					else {
+						curFrameN = int(seqLen - 1);
+						onSequenceDone();
+					}
+				}
+			}
+		}
+	}
+
+	if (curFrameN != prevFrame) {
 		resolveSprite();
 	}
 }
@@ -257,7 +285,7 @@ Time AnimationPlayer::getCurrentSequenceTime() const
 
 int AnimationPlayer::getCurrentSequenceFrame() const
 {
-	return curFrame;
+	return curFrameN;
 }
 
 Time AnimationPlayer::getCurrentSequenceFrameTime() const
@@ -320,7 +348,7 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
 {
-	setState(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrame, masterAnimator.curFrameTime, hideIfNotSynchronized);
+	setState(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrameN, masterAnimator.curFrameTime, hideIfNotSynchronized);
 }
 
 void AnimationPlayer::setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
@@ -329,13 +357,13 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 	setDirection(directionName);
 
 	const auto oldVisibleOverride = visibleOverride;
-	const auto oldCurFrame = curFrame;
+	const auto oldCurFrame = curFrameN;
 	
 	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == sequenceName;
-	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
+	curFrameN = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
 
-	if (dirty || oldVisibleOverride != visibleOverride || oldCurFrame != curFrame) {
+	if (dirty || oldVisibleOverride != visibleOverride || oldCurFrame != curFrameN) {
 		dirty = false;
 		resolveSprite();
 	}
@@ -343,7 +371,7 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 
 void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
 {
-	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
+	curFrameN = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
 	dirty = false;
 	resolveSprite();
@@ -353,17 +381,17 @@ void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
 void AnimationPlayer::stepFrames(int amount)
 {
 	if (amount != 0) {
-		curFrame = modulo(curFrame + amount, static_cast<int>(seqLen));
+		curFrameN = modulo(curFrameN + amount, static_cast<int>(seqLen));
 		curFrameTime = 0;
 
 		resolveSprite();
 	}
 }
 
-std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& actionPointId)
+std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& actionPointId) const
 {
 	if (animation && curSeq && curDir) {
-		return animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrame);
+		return animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);
 	}
 	return {};
 }
@@ -373,9 +401,8 @@ void AnimationPlayer::resolveSprite()
 	updateIfNeeded();
 
 	if (curSeq && curSeq->numFrames() > 0) {
-		const auto& frame = curSeq->getFrame(curFrame);
-		curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
-		spriteData = &frame.getSprite(dirId);
+		curFrame = &curSeq->getFrame(curFrameN);
+		spriteData = &(curFrame->getSprite(dirId));
 		hasUpdate = true;
 	}
 }
