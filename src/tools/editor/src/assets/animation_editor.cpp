@@ -451,6 +451,7 @@ void AnimationEditorDisplay::setCurrentActionPoint(Vector2i pos)
 	if (actionPointId == "pivot") {
 		metadataEditor->setPivot(pos);
 		refresh();
+		return;
 	}
 
 	auto actionPoints = metadataEditor->getValue("actionPoints");

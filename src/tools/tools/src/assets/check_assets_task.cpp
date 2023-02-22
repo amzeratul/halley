@@ -132,7 +132,7 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 	}
 
 	// Check for full reimport
-	bool reimportAll = isCodeGen;
+	bool reimportAll = isCodeGen || true;
 	if (!reimportAll) {
 		for (const auto& change : changes) {
 			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta" || change.name.endsWith(".ase") || change.name.endsWith(".aseprite")) {
