@@ -68,6 +68,7 @@ namespace Halley
 			return frames[n];
 		}
 		const String& getName() const { return name; }
+		int getId() const { return id; }
 		bool isLooping() const { return loop; }
 		bool isNoFlip() const { return noFlip; }
 		bool isFallback() const { return fallback; }
@@ -83,6 +84,7 @@ namespace Halley
 		Vector<AnimationFrame> frames;
 		Vector<AnimationFrameDefinition> frameDefinitions;
 		String name;
+		int id;
 		bool loop = false;
 		bool noFlip = false;
 		bool fallback = false;
@@ -94,7 +96,7 @@ namespace Halley
 
 	public:
 		AnimationDirection();
-		AnimationDirection(String name, String fileName, bool flip, int id);
+		AnimationDirection(String name, String fileName, bool flip);
 
 		const String& getName() const { return name; }
 		const String& getFileName() const { return fileName; }
@@ -110,8 +112,8 @@ namespace Halley
 	private:
 		String name;
 		String fileName;
-		int id;
-		bool flip;
+		int id = -1;
+		bool flip = false;
 	};
 
 	class AnimationActionPoint {
@@ -128,7 +130,7 @@ namespace Halley
 
 	private:
 		String name;
-		int id;
+		int id = -1;
 		HashMap<std::tuple<int, int, int>, Vector2i> points; // Key is (SequenceIdx, DirectionIdx, FrameNumber)
 	};
 	
@@ -168,8 +170,8 @@ namespace Halley
 		void setName(const String& name);
 		void setMaterialName(const String& name);
 		void setSpriteSheetName(const String& name);
-		void addSequence(const AnimationSequence& sequence);
-		void addDirection(const AnimationDirection& direction);
+		void addSequence(AnimationSequence sequence);
+		void addDirection(AnimationDirection direction, std::optional<int> idx = {});
 		void addActionPoints(const ConfigNode& config);
 
 	private:

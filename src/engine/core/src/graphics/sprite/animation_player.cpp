@@ -360,6 +360,14 @@ void AnimationPlayer::stepFrames(int amount)
 	}
 }
 
+std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& actionPointId)
+{
+	if (animation && curSeq && curDir) {
+		return animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrame);
+	}
+	return {};
+}
+
 void AnimationPlayer::resolveSprite()
 {
 	updateIfNeeded();

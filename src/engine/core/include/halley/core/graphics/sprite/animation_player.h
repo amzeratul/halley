@@ -62,6 +62,8 @@ namespace Halley
 		void setTiming(int currentFrame, Time currentFrameTime);
 		void stepFrames(int amount);
 
+		std::optional<Vector2i> getCurrentActionPoint(const String& actionPointId);
+
 	private:
 		void resolveSprite();
 

@@ -29,17 +29,15 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 		animation.setMaterialName(root["material"].as<std::string>());
 	}
 
-	size_t nDirections = 0;
 	if (root["directions"].IsDefined()) {
 		for (auto directionNode : root["directions"]) {
 			String name = directionNode["name"].as<std::string>("default");
 			String fileName = directionNode["fileName"].as<std::string>(name);
 			bool flip = directionNode["flip"].as<bool>(false);
-			animation.addDirection(AnimationDirection(name, fileName, flip, int(nDirections)));
-			nDirections++;
+			animation.addDirection(AnimationDirection(name, fileName, flip));
 		}
 	} else {
-		animation.addDirection(AnimationDirection("default", "default", false, 0));
+		animation.addDirection(AnimationDirection("default", "default", false));
 	}
 
 	for (auto sequenceNode : root["sequences"]) {

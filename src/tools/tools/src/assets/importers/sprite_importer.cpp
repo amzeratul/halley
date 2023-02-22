@@ -217,9 +217,8 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 			directionNames.insert("right");
 		}
 
-		int i = 0;
 		for (const auto& dir: directionNames) {
-			animation.addDirection(AnimationDirection(dir, dir, false, i++));
+			animation.addDirection(AnimationDirection(dir, dir, false));
 		}
 
 		auto hasAnim = [&](const String& name)
@@ -229,7 +228,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 		auto replaceAnim = [&](const String& toAdd, const String& base)
 		{
 			if (!hasAnim(toAdd) && hasAnim(base)) {
-				animation.addDirection(AnimationDirection(toAdd, base, true, animation.getDirection(base).getId()));
+				animation.addDirection(AnimationDirection(toAdd, base, true), animation.getDirection(base).getId());
 			}
 		};
 

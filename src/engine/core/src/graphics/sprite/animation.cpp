@@ -68,6 +68,7 @@ AnimationSequence::AnimationSequence() {}
 
 AnimationSequence::AnimationSequence(String name, bool loop, bool noFlip, bool fallback)
 	: name(std::move(name))
+	, id(-1)
 	, loop(loop)
 	, noFlip(noFlip)
 	, fallback(fallback)
@@ -77,6 +78,7 @@ void AnimationSequence::serialize(Serializer& s) const
 {
 	s << frameDefinitions;
 	s << name;
+	s << id;
 	s << loop;
 	s << noFlip;
 	s << fallback;
@@ -86,6 +88,7 @@ void AnimationSequence::deserialize(Deserializer& s)
 {
 	s >> frameDefinitions;
 	s >> name;
+	s >> id;
 	s >> loop;
 	s >> noFlip;
 	s >> fallback;
@@ -120,10 +123,10 @@ AnimationDirection::AnimationDirection()
 	, flip(false)
 {}
 
-AnimationDirection::AnimationDirection(String name, String fileName, bool flip, int id)
+AnimationDirection::AnimationDirection(String name, String fileName, bool flip)
 	: name(std::move(name))
 	, fileName(std::move(fileName))
-	, id(id)
+	, id(-1)
 	, flip(flip)
 {
 }
@@ -276,14 +279,16 @@ void Animation::setSpriteSheetName(const String& n)
 	spriteSheetName = n;
 }
 
-void Animation::addSequence(const AnimationSequence& sequence)
+void Animation::addSequence(AnimationSequence sequence)
 {
-	sequences.push_back(sequence);
+	sequence.id = static_cast<int>(sequences.size());
+	sequences.push_back(std::move(sequence));
 }
 
-void Animation::addDirection(const AnimationDirection& direction)
+void Animation::addDirection(AnimationDirection direction, std::optional<int> idx)
 {
-	directions.push_back(direction);
+	direction.id = idx.value_or(static_cast<int>(directions.size()));
+	directions.push_back(std::move(direction));
 }
 
 void Animation::addActionPoints(const ConfigNode& config)
