@@ -42,6 +42,8 @@ namespace Halley
 	class WindowDefinition
 	{
 	public:
+		WindowDefinition() = default;
+
 		WindowDefinition(WindowType windowType, Vector2i size, String title, bool showOnCreation = true, int screen = 0)
 			: windowType(windowType)
 			, size(size)
