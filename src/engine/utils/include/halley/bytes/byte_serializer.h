@@ -196,6 +196,12 @@ namespace Halley {
 		{
 			return *this << p.first << p.second;
 		}
+
+		template <typename A, typename B, typename C>
+		Serializer& operator<<(const std::tuple<A, B, C>& p)
+		{
+			return *this << std::get<0>(p) << std::get<1>(p) << std::get<2>(p);
+		}
 		
 		template <typename T>
 		Serializer& operator<<(const std::optional<T>& p)
@@ -450,6 +456,12 @@ namespace Halley {
 		Deserializer& operator>>(std::pair<T, U>& p)
 		{
 			return *this >> p.first >> p.second;
+		}
+
+		template <typename A, typename B, typename C>
+		Deserializer& operator>>(std::tuple<A, B, C>& p)
+		{
+			return *this >> std::get<0>(p) >> std::get<1>(p) >> std::get<2>(p);
 		}
 
 		template <typename T>
