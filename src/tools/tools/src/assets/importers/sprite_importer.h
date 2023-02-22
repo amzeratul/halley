@@ -20,7 +20,7 @@ namespace Halley
 		String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const override;
 
 	private:
-		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData, const String& fallbackSequenceName);
+		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const Metadata& meta, const Vector<ImageData>& frameData);
 
 		Vector<ImageData> splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid);
 	};

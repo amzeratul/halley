@@ -108,7 +108,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			
 			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
 			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
-			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", MaterialDefinition::defaultMaterial), frames.second, meta.getString("fallbackSequence", ""));
+			Animation animation = generateAnimation(spriteName, spriteSheetName, meta, frames.second);
 			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
 			Vector<ImageData> totalFrames;
@@ -192,12 +192,12 @@ String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata
 	return IAssetImporter::getAssetId(file, metadata);
 }
 
-Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData, const String& fallbackSequenceName)
+Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const Metadata& meta, const Vector<ImageData>& frameData)
 {
 	Animation animation;
 
 	animation.setName(spriteName);
-	animation.setMaterialName(materialName);
+	animation.setMaterialName(meta.getString("material", MaterialDefinition::defaultMaterial));
 	animation.setSpriteSheetName(spriteSheetName);
 
 	// Generate directions
@@ -241,10 +241,11 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	std::map<String, AnimationSequence> sequences;
 	std::map<String, std::set<String>> directionsPerSequence;
 
+	const auto fallbackSequenceName = meta.getString("fallbackSequence", "");
 	for (const auto& frame : frameData) {
 		String sequence = frame.sequenceName;
 
-		auto i = sequences.find(sequence);
+		const auto i = sequences.find(sequence);
 		if (i == sequences.end()) {
 			sequences[sequence] = AnimationSequence(sequence, true, false, sequence == fallbackSequenceName);
 		}
@@ -267,6 +268,8 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	for (auto& seq: sequences) {
 		animation.addSequence(seq.second);
 	}
+
+	animation.addActionPoints(meta.getValue("actionPoints"));
 
 	return animation;
 }

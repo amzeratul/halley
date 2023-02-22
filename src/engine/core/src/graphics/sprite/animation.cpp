@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -174,6 +175,55 @@ void AnimationDirection::deserialize(Deserializer& s)
 	s >> flip;
 }
 
+
+AnimationActionPoint::AnimationActionPoint(const ConfigNode& config, String name, int id, gsl::span<const AnimationSequence> sequences, gsl::span<const AnimationDirection> directions)
+	: name(std::move(name))
+	, id(id)
+{
+	for (const auto& [k, v]: config.asMap()) {
+		const auto split = k.split(':');
+		const auto& seqName = split[0];
+		const auto& dirName = split[1];
+
+		const auto seqIter = std_ex::find_if(sequences, [&](const AnimationSequence& seq) { return seq.getName() == seqName; });
+		const auto dirIter = std_ex::find_if(directions, [&](const AnimationDirection& dir) { return dir.getName() == dirName; });
+
+		if (seqIter != sequences.end() && dirIter != directions.end()) {
+			const int seqIdx = static_cast<int>(seqIter - sequences.begin());
+			const int dirIdx = static_cast<int>(dirIter - directions.begin());
+
+			for (int i = 0; i < static_cast<int>(v.asSequence().size()); ++i) {
+				points[std::tuple<int, int, int>(seqIdx, dirIdx, i)] = v[i].asVector2i();
+			}
+		}
+	}
+}
+
+std::optional<Vector2i> AnimationActionPoint::getPoint(int sequenceIdx, int directionIdx, int frameNumber) const
+{
+	const auto iter = points.find(std::tuple<int, int, int>(sequenceIdx, directionIdx, frameNumber));
+	if (iter != points.end()) {
+		return iter->second;
+	}
+
+	return {};
+}
+
+void AnimationActionPoint::serialize(Serializer& s) const
+{
+	s << name;
+	s << id;
+	s << points;
+}
+
+void AnimationActionPoint::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> id;
+	s >> points;
+}
+
+
 Animation::Animation() 
 {}
 
@@ -234,6 +284,16 @@ void Animation::addSequence(const AnimationSequence& sequence)
 void Animation::addDirection(const AnimationDirection& direction)
 {
 	directions.push_back(direction);
+}
+
+void Animation::addActionPoints(const ConfigNode& config)
+{
+	int idx = static_cast<int>(actionPoints.size());
+	if (config.getType() == ConfigNodeType::Map) {
+		for (const auto& [k, v]: config.asMap()) {
+			actionPoints.emplace_back(v, k, idx++, sequences, directions);
+		}
+	}
 }
 
 const AnimationSequence& Animation::getSequence(const String& seqName) const
@@ -298,6 +358,43 @@ Vector<String> Animation::getDirectionNames() const
 	return result;
 }
 
+std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, const String& sequenceName, const String& directionName, int frameNumber) const
+{
+	int sequenceIndex = -1;
+	for (int i = 0; i < static_cast<int>(sequences.size()); ++i) {
+		if (sequences[i].getName() == sequenceName) {
+			sequenceIndex = i;
+			break;
+		}
+	}
+	if (sequenceIndex == -1) {
+		return {};
+	}
+
+	int directionIndex = -1;
+	for (int i = 0; i < static_cast<int>(directions.size()); ++i) {
+		if (directions[i].getName() == directionName) {
+			directionIndex = i;
+			break;
+		}
+	}
+	if (directionIndex == -1) {
+		return {};
+	}
+
+	return getActionPoint(actionPoint, sequenceIndex, directionIndex, frameNumber);
+}
+
+std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, int sequenceIdx, int directionIdx, int frameNumber) const
+{
+	for (const auto& ap: actionPoints) {
+		if (ap.getName() == actionPoint) {
+			return ap.getPoint(sequenceIdx, directionIdx, frameNumber);
+		}
+	}
+	return {};
+}
+
 Vector2i Animation::getPivot() const
 {
 	if (!hasPivot) {
@@ -336,6 +433,7 @@ void Animation::serialize(Serializer& s) const
 	s << materialName;
 	s << sequences;
 	s << directions;
+	s << actionPoints;
 }
 
 void Animation::deserialize(Deserializer& s)
@@ -345,4 +443,5 @@ void Animation::deserialize(Deserializer& s)
 	s >> materialName;
 	s >> sequences;
 	s >> directions;
+	s >> actionPoints;
 }

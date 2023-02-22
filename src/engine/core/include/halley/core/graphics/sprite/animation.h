@@ -28,6 +28,7 @@ namespace Halley
 			Expects(dir >= 0 && dir < int(sprites.size()));
 			return *sprites[dir];
 		}
+
 		int getDuration() const;
 
 	private:
@@ -95,8 +96,8 @@ namespace Halley
 		AnimationDirection();
 		AnimationDirection(String name, String fileName, bool flip, int id);
 
-		String getName() const { return name; }
-		String getFileName() const { return fileName; }
+		const String& getName() const { return name; }
+		const String& getFileName() const { return fileName; }
 		bool shouldFlip() const { return flip; }
 		int getId() const { return id; }
 
@@ -111,6 +112,24 @@ namespace Halley
 		String fileName;
 		int id;
 		bool flip;
+	};
+
+	class AnimationActionPoint {
+	public:
+		AnimationActionPoint() = default;
+		AnimationActionPoint(const ConfigNode& config, String name, int id, gsl::span<const AnimationSequence> sequences, gsl::span<const AnimationDirection> directions);
+
+		const String& getName() const { return name; }
+		int getId() const { return id; }
+		std::optional<Vector2i> getPoint(int sequenceIdx, int directionIdx, int frameNumber) const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
+	private:
+		String name;
+		int id;
+		HashMap<std::tuple<int, int, int>, Vector2i> points; // Key is (SequenceIdx, DirectionIdx, FrameNumber)
 	};
 	
 	class Animation final : public Resource
@@ -133,6 +152,9 @@ namespace Halley
 		const AnimationDirection& getDirection(int id) const;
 		Vector<String> getSequenceNames() const;
 		Vector<String> getDirectionNames() const;
+
+		std::optional<Vector2i> getActionPoint(const String& actionPoint, const String& sequenceName, const String& directionName, int frameNumber) const;
+		std::optional<Vector2i> getActionPoint(const String& actionPoint, int sequenceIdx, int directionIdx, int frameNumber) const;
 		
 		Vector2i getPivot() const;
 		Rect4i getBounds() const;
@@ -148,6 +170,7 @@ namespace Halley
 		void setSpriteSheetName(const String& name);
 		void addSequence(const AnimationSequence& sequence);
 		void addDirection(const AnimationDirection& direction);
+		void addActionPoints(const ConfigNode& config);
 
 	private:
 		mutable bool hasPivot = false;
@@ -160,6 +183,7 @@ namespace Halley
 
 		Vector<AnimationSequence> sequences;
 		Vector<AnimationDirection> directions;
+		Vector<AnimationActionPoint> actionPoints;
 
 		String name;
 		String spriteSheetName;
