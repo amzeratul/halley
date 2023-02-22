@@ -42,7 +42,10 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 
 	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (gsl::span<const String> assets)
 	{
-		std_ex::erase_if(assetReloadCallbacks, [&] (auto& callback) { return callback(assets); });
+		std_ex::erase_if(assetReloadCallbacks, [&] (auto& callback)
+		{
+			return callback(assets);
+		});
 	});
 }
 

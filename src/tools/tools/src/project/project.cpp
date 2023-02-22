@@ -221,12 +221,21 @@ size_t Project::addAssetPackReloadCallback(AssetReloadCallback callback)
 
 void Project::removeAssetReloadCallback(size_t idx)
 {
-	std_ex::erase_if(assetReloadCallbacks, [=] (const auto& e) { return e.first == idx; });
+	// Don't erase immediately as this can be called whilst iterating this list
+	for (auto& callback: assetReloadCallbacks) {
+		if (callback.first == idx) {
+			callback.second = {};
+		}
+	}
 }
 
 void Project::removeAssetPackReloadCallback(size_t idx)
 {
-	std_ex::erase_if(assetPackedReloadCallbacks, [=] (const auto& e) { return e.first == idx; });
+	for (auto& callback: assetPackedReloadCallbacks) {
+		if (callback.first == idx) {
+			callback.second = {};
+		}
+	}
 }
 
 void Project::addAssetLoadedListener(IAssetLoadListener* listener)
@@ -353,9 +362,17 @@ void Project::reloadAssets(const std::set<String>& assets, bool packed)
 		gameResources->reloadAssets(assetIds);
 	}
 
-	// Notify callbacks
-	for (auto& callback: (packed ? assetPackedReloadCallbacks : assetReloadCallbacks)) {
-		callback.second(assetIds);
+	// Erase any callbacks that got deleted (i.e. set to empty), then call remaining ones
+	auto& callbackList = (packed ? assetPackedReloadCallbacks : assetReloadCallbacks);
+	std_ex::erase_if(callbackList, [&] (const auto& c)
+	{
+		return !c.second;
+	});
+	for (auto& callback : callbackList) {
+		// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
+		if (callback.second) {
+			callback.second(assetIds);
+		}
 	}
 }
 
