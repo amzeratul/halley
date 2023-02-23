@@ -54,7 +54,7 @@ namespace Halley
 
 namespace std {
 	template <>
-	struct std::hash<Halley::DirectoryMonitor::Event> {
+	struct hash<Halley::DirectoryMonitor::Event> {
 	public:
 		size_t operator()(const Halley::DirectoryMonitor::Event& event) const
 		{
