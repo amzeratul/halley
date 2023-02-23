@@ -154,6 +154,23 @@ void AnimationEditor::setupWindow()
 		animationDisplay->setActionPoint(event.getStringData());
 	});
 
+	setHandle(UIEventType::ButtonClicked, "addPoint", [=] (const UIEvent& event)
+	{
+		// TODO
+		//animationDisplay->addPoint();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removePoint", [=] (const UIEvent& event)
+	{
+		// TODO
+		//animationDisplay->removePoint();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "clearPoint", [=] (const UIEvent& event)
+	{
+		animationDisplay->clearPoint();
+	});
+
 	updatePlayIcon();
 }
 
@@ -395,6 +412,11 @@ void AnimationEditorDisplay::setActionPoint(const String& pointId)
 	actionPointId = pointId;
 }
 
+void AnimationEditorDisplay::clearPoint()
+{
+	setCurrentActionPoint(std::nullopt);
+}
+
 void AnimationEditorDisplay::updateBounds()
 {
 	bounds = Rect4f(origBounds);
@@ -446,10 +468,10 @@ std::optional<Vector2i> AnimationEditorDisplay::getCurrentActionPoint() const
 	return {};
 }
 
-void AnimationEditorDisplay::setCurrentActionPoint(Vector2i pos)
+void AnimationEditorDisplay::setCurrentActionPoint(std::optional<Vector2i> pos)
 {
-	if (actionPointId == "pivot") {
-		metadataEditor->setPivot(pos);
+	if (actionPointId == "pivot" && pos) {
+		metadataEditor->setPivot(*pos);
 		refresh();
 		return;
 	}
@@ -457,12 +479,22 @@ void AnimationEditorDisplay::setCurrentActionPoint(Vector2i pos)
 	auto actionPoints = metadataEditor->getValue("actionPoints");
 	auto& pointConfig = actionPoints[actionPointId];
 	pointConfig.ensureType(ConfigNodeType::Map);
-	auto& seqConfig = pointConfig[animationPlayer.getCurrentSequenceName() + ":" + animationPlayer.getCurrentDirectionName()];
+	const auto key = animationPlayer.getCurrentSequenceName() + ":" + animationPlayer.getCurrentDirectionName();
+	auto& seqConfig = pointConfig[key];
 	seqConfig.ensureType(ConfigNodeType::Sequence);
 	if (seqConfig.getSequenceSize() <= animationPlayer.getCurrentSequenceFrame()) {
 		seqConfig.asSequence().resize(animationPlayer.getCurrentSequenceFrame() + 1);
 	}
-	seqConfig[animationPlayer.getCurrentSequenceFrame()] = pos;
+
+	auto& config = seqConfig[animationPlayer.getCurrentSequenceFrame()];
+	if (pos) {
+		config = *pos;
+	} else {
+		config = ConfigNode();
+		if (std::all_of(seqConfig.asSequence().begin(), seqConfig.asSequence().end(), [](const ConfigNode& e) { return e.getType() == ConfigNodeType::Undefined; })) {
+			pointConfig.removeKey(key);
+		}
+	}
 
 	metadataEditor->setValue("actionPoints", std::move(actionPoints));
 }

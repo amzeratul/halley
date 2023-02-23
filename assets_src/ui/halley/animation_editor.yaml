@@ -54,6 +54,12 @@ children:
         id: removePoint
         style: buttonThin
         tooltip: Remove Point
+    - widget:
+        class: button
+        text: "x"
+        id: clearPoint
+        style: buttonThin
+        tooltip: Clear Point from Frame
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1
   fill: fill

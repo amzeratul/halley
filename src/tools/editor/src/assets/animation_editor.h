@@ -71,6 +71,7 @@ namespace Halley {
 
 		void onDoubleClick();
 		void setActionPoint(const String& pointId);
+		void clearPoint();
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -107,7 +108,7 @@ namespace Halley {
 
 		Vector2i getCurrentPivot() const;
 		std::optional<Vector2i> getCurrentActionPoint() const;
-		void setCurrentActionPoint(Vector2i pos);
+		void setCurrentActionPoint(std::optional<Vector2i> pos);
 
 		int getMetaIntOr(const String& key, int defaultValue) const;
 	};
