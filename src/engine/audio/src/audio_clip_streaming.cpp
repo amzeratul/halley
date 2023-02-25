@@ -22,9 +22,9 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
-	const size_t nSamples = src.size() / numChannels;
 	std::array<float, 2048> tmp;
-	assert(nSamples < tmp.size());
+	//assert(src.size() / numChannels < tmp.size());
+	const size_t nSamples = std::min(src.size() / numChannels, tmp.size());
 
 	for (size_t i = 0; i < numChannels; ++i) {
 		// For each channel, deinterleave
