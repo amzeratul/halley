@@ -252,12 +252,13 @@ std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_
 std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
 {
 	initVideo();
-	bool openGL = true;
+
+	const auto glVersion = windowDef.getWindowGLVersion();
 
 	// Set flags and GL attributes
 	auto windowType = windowDef.getWindowType();
 	int flags = SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
-	if (openGL) {
+	if (glVersion) {
 		flags |= SDL_WINDOW_OPENGL;
 	}
 	if (windowType == WindowType::BorderlessWindow) {
@@ -280,7 +281,7 @@ std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& 
 	}
 
 	// Context options
-	if (openGL) {
+	if (glVersion) {
 #if defined(WITH_OPENGL_ES2)
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -300,8 +301,8 @@ std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& 
 		//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glVersion->versionMajor);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glVersion->versionMinor);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 	}

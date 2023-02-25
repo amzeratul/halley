@@ -38,27 +38,34 @@ namespace Halley
 			}};
 		}
 	};
+
+	struct WindowGLVersion {
+		int versionMajor = 3;
+		int versionMinor = 3;
+	};
 	
 	class WindowDefinition
 	{
 	public:
 		WindowDefinition() = default;
 
-		WindowDefinition(WindowType windowType, Vector2i size, String title, bool showOnCreation = true, int screen = 0)
+		WindowDefinition(WindowType windowType, Vector2i size, String title, bool showOnCreation = true, int screen = 0, std::optional<WindowGLVersion> glVersion = WindowGLVersion())
 			: windowType(windowType)
 			, size(size)
 			, title(std::move(title))
 			, showOnCreation(showOnCreation)
 			, screen(screen)
+			, glVersion(glVersion)
 		{}
 
-		WindowDefinition(WindowType windowType, std::optional<Vector2i> position, Vector2i size, String title, bool showOnCreation = true, int screen = 0)
+		WindowDefinition(WindowType windowType, std::optional<Vector2i> position, Vector2i size, String title, bool showOnCreation = true, int screen = 0, std::optional<WindowGLVersion> glVersion = WindowGLVersion())
 			: windowType(windowType)
 			, position(position)
 			, size(size)
 			, title(std::move(title))
 			, showOnCreation(showOnCreation)
 			, screen(screen)
+			, glVersion(glVersion)
 		{}
 
 		WindowType getWindowType() const { return windowType; }
@@ -70,6 +77,7 @@ namespace Halley
 		bool isShowOnCreation() const { return showOnCreation; }
 		int getScreen() const { return screen; }
 		bool isFocusLost() const { return focusLost; }
+		std::optional<WindowGLVersion> getWindowGLVersion() const { return *glVersion; }
 
 		WindowDefinition withPosition(std::optional<Vector2i> newPos) const
 		{
@@ -116,6 +124,7 @@ namespace Halley
 		bool showOnCreation = true;
 		int screen = 0;
 		bool focusLost = false;
+		std::optional<WindowGLVersion> glVersion;
 	};
 
 	class Window
