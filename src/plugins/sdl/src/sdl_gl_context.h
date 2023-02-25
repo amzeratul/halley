@@ -13,6 +13,7 @@ namespace Halley
 
 		void bind() override;
 		std::unique_ptr<GLContext> createSharedContext() override;
+		void* getGLProcAddress(const char* name) override;
 
 	private:
 		SDL_Window* window;

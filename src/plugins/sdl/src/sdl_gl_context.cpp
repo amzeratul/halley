@@ -37,3 +37,8 @@ std::unique_ptr<GLContext> SDLGLContext::createSharedContext()
 {
 	return std::make_unique<SDLGLContext>(window, sharedContext);
 }
+
+void* SDLGLContext::getGLProcAddress(const char* name)
+{
+	return SDL_GL_GetProcAddress(name);
+}

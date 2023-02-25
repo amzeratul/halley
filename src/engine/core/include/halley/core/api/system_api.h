@@ -22,6 +22,7 @@ namespace Halley
 		virtual ~GLContext() {}
 		virtual void bind() = 0;
 		virtual std::unique_ptr<GLContext> createSharedContext() = 0;
+		virtual void* getGLProcAddress(const char* name) = 0;
 	};
 
 	class SystemAPI
