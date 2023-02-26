@@ -14,6 +14,7 @@ namespace Halley
 		bool getViewportFlipVertical() const override;
 		
 		void onBind(Painter& painter) override;
+		void update();
 
 		ID3D11RenderTargetView* getRenderTargetView() override;
 		ID3D11DepthStencilView* getDepthStencilView() override;
@@ -23,7 +24,6 @@ namespace Halley
 		Vector<ID3D11RenderTargetView*> views;
 		ID3D11DepthStencilView* depthStencilView = nullptr;
 
-		void update();
 		void clear();
 		void createViews();
 	};
