@@ -81,6 +81,11 @@ TextureRenderTarget& RenderSurface::getRenderTarget() const
 	return *renderTarget;
 }
 
+std::shared_ptr<TextureRenderTarget> RenderSurface::getRenderTargetPtr() const
+{
+	return renderTarget;
+}
+
 void RenderSurface::createNewColourTarget()
 {
 	std::shared_ptr<Texture> colourTarget = video.createTexture(curTextureSize);
@@ -89,6 +94,7 @@ void RenderSurface::createNewColourTarget()
 	}
 	auto colourDesc = TextureDescriptor(curTextureSize, options.colourBufferFormat);
 	colourDesc.isRenderTarget = true;
+	colourDesc.canBeUpdated = options.canBeUpdatedOnCPU;
 	colourDesc.useFiltering = options.useFiltering;
 	colourDesc.useMipMap = options.mipMap;
 	colourDesc.addressMode = options.addressMode;
@@ -104,6 +110,7 @@ void RenderSurface::createNewDepthStencilTarget()
 		depthTarget->setAssetId(options.name + "_depth_v" + toString(version));
 	}
 	auto depthDesc = TextureDescriptor(curTextureSize, TextureFormat::Depth);
+	depthDesc.canBeUpdated = options.canBeUpdatedOnCPU;
 	depthDesc.isDepthStencil = true;
 	depthTarget->load(std::move(depthDesc));
 

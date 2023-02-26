@@ -19,6 +19,7 @@ namespace Halley {
 		bool createDepthStencil = true;
 		bool powerOfTwo = true;
 		bool mipMap = false;
+		bool canBeUpdatedOnCPU = false;
 		String name;
 		TextureFormat colourBufferFormat = TextureFormat::RGBA;
 		TextureAddressMode addressMode = TextureAddressMode::Clamp;
@@ -36,6 +37,7 @@ namespace Halley {
 		Sprite getSurfaceSprite(std::shared_ptr<Material> material) const;
 
 		TextureRenderTarget& getRenderTarget() const;
+		std::shared_ptr<TextureRenderTarget> getRenderTargetPtr() const;
 
 		void createNewColourTarget();
 		void createNewDepthStencilTarget();

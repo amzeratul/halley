@@ -35,6 +35,8 @@ namespace Halley {
 
 		bool isLoaderThread() const;
 
+		static void initGLBindings();
+
 	protected:
 		void init() override;
 		void deInit() override;
@@ -44,7 +46,6 @@ namespace Halley {
 
 	private:
 		void initOpenGL();
-		void initGLBindings();
 		void clearScreen();
 		void startLoaderThread();
 		void flip();
