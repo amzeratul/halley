@@ -10,6 +10,27 @@ DX11Texture::DX11Texture(DX11Video& video, Vector2i size)
 	startLoading();
 }
 
+DX11Texture::DX11Texture(DX11Video& video, Vector2i size, ID3D11ShaderResourceView* srv)
+	: Texture(size)
+	, video(video)
+	, srv(srv)
+{
+	auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+	samplerDesc.AddressU = samplerDesc.AddressV = samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	for (int i = 0; i < 4; ++i) {
+		samplerDesc.BorderColor[i] = 0.0f;
+	}
+	const auto result = video.getDevice().CreateSamplerState(&samplerDesc, &samplerState);
+	if (result != S_OK) {
+		throw Exception("Error creating sampler", HalleyExceptions::VideoPlugin);
+	}
+
+	format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	doneLoading();
+}
+
 DX11Texture::~DX11Texture()
 {
 	clear();

@@ -14,6 +14,7 @@ namespace Halley
 	{
 	public:
 		DX11Texture(DX11Video& video, Vector2i size);
+		DX11Texture(DX11Video& video, Vector2i size, ID3D11ShaderResourceView* srv);
 		~DX11Texture();
 
 		DX11Texture& operator=(DX11Texture&& other) noexcept;
