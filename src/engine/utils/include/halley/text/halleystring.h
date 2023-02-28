@@ -161,6 +161,17 @@ namespace Halley {
 
 		static String concatList(gsl::span<const String> list, std::string_view separator);
 
+		template <typename T>
+		static String concat(gsl::span<const T> list, std::string_view separator)
+		{
+			Vector<String> text;
+			text.reserve(list.size());
+			for (const auto& l: list) {
+				text.push_back(l.toString());
+			}
+			return concatList(text, separator);
+		}
+
 		//////////
 
 		String& operator += (const String &p);
