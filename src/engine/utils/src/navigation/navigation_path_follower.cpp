@@ -52,6 +52,14 @@ const std::optional<NavigationPath>& NavigationPathFollower::getPath() const
 	return path;
 }
 
+gsl::span<const Vector2f> NavigationPathFollower::getNextPathPoints() const
+{
+	if (!path) {
+		return {};
+	}
+	return path->path.span().subspan(nextPathIdx);
+}
+
 void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold)
 {
 	this->curPos = curPos;

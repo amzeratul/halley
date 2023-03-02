@@ -280,8 +280,6 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 		return;
 	}
 
-	const Vector4f col(colour.r, colour.g, colour.b, colour.a);
-
 	constexpr float normalPos[] = { -1, 1, 1, -1 };
 	constexpr size_t pointIdxOffset[] = { 0, 0, 1, 1 };
 
@@ -323,7 +321,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 		for (size_t j = 0; j < 4; ++j) {
 			const size_t idx = i * 4 + j;
 			auto& v = vertices[idx];
-			v.colour = col;
+			v.colour = colour.toVector4();
 			v.position = points[(i + pointIdxOffset[j]) % nPoints];
 			v.normal = j <= 1 ? v0n : v1n;
 			v.width.x = width;
