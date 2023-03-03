@@ -135,11 +135,14 @@ String Path::getExtension() const
 	return filename.substr(dotPos);
 }
 
-String Path::getString() const
+String Path::getString(bool includeDot) const
 {
 	std::stringstream s;
 	bool first = true;
 	for (auto& p : pathParts) {
+		if (&p == &pathParts.back() && p == "." && !includeDot) {
+			break;
+		}
 		if (first) {
 			first = false;
 		} else {
@@ -150,9 +153,9 @@ String Path::getString() const
 	return s.str();
 }
 
-String Path::getNativeString() const
+String Path::getNativeString(bool includeDot) const
 {
-	auto str = getString();
+	auto str = getString(includeDot);
 #ifdef _WIN32
 	for (auto& c: str.cppStr()) {
 		if (c == '/') {
