@@ -17,7 +17,7 @@ namespace Halley
 		explicit ConsoleWindow(UIFactory& ui, const HalleyAPI& api);
 		~ConsoleWindow();
 
-		void log(LoggerLevel level, const String& msg) override;
+		void log(LoggerLevel level, const std::string_view msg) override;
 
 	protected:
 		void update(Time t, bool moved) override;

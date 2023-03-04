@@ -62,7 +62,7 @@ namespace Halley
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
 
-		void log(LoggerLevel level, const String& msg) override;
+		void log(LoggerLevel level, const std::string_view msg) override;
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;

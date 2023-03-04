@@ -54,7 +54,7 @@ void BuildProjectTask::run()
 	}
 }
 
-void BuildProjectTask::log(LoggerLevel level, const String& msg)
+void BuildProjectTask::log(LoggerLevel level, const std::string_view msg)
 {
 	if (buildSystem == BuildSystem::Unknown) {
 		tryToIdentifyBuildSystem(msg);

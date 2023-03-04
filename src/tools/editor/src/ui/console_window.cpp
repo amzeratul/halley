@@ -19,7 +19,7 @@ ConsoleWindow::~ConsoleWindow()
 	Logger::removeSink(*this);
 }
 
-void ConsoleWindow::log(LoggerLevel level, const String& msg)
+void ConsoleWindow::log(LoggerLevel level, const std::string_view msg)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	buffer.emplace_back(level, msg);

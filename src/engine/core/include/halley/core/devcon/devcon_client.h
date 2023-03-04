@@ -76,6 +76,6 @@ namespace Halley
 		std::unique_ptr<DevConInterest> interest;
 
 		void connect();
-		void log(LoggerLevel level, const String& msg) override;
+		void log(LoggerLevel level, const std::string_view msg) override;
 	};
 }

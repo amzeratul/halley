@@ -688,7 +688,7 @@ Vector<Plugin*> Core::getPlugins(PluginType type)
 	return result;
 }
 
-void Core::log(LoggerLevel level, const String& msg)
+void Core::log(LoggerLevel level, const std::string_view msg)
 {
 	if (level == LoggerLevel::Dev && (!game || !game->isDevMode())) {
 		return;

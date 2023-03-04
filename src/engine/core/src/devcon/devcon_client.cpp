@@ -171,7 +171,7 @@ void DevConClient::connect()
 	DevCon::setupMessageQueue(*queue);
 }
 
-void DevConClient::log(LoggerLevel level, const String& msg)
+void DevConClient::log(LoggerLevel level, const std::string_view msg)
 {
 	if (level != LoggerLevel::Dev) {
 		if (queue->isConnected()) {

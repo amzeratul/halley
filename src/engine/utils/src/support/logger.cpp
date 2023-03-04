@@ -3,6 +3,7 @@
 #include <gsl/gsl_assert>
 #include <iostream>
 #include "halley/support/console.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -16,7 +17,7 @@ StdOutSink::~StdOutSink()
 	std::cout.flush();
 }
 
-void StdOutSink::log(LoggerLevel level, const String& msg)
+void StdOutSink::log(LoggerLevel level, std::string_view msg)
 {
 	if (level == LoggerLevel::Dev && !devMode) {
 		return;
@@ -57,9 +58,22 @@ void Logger::removeSink(ILoggerSink& sink)
 	instance->sinks.erase(&sink);
 }
 
-void Logger::log(LoggerLevel level, const String& msg)
+void Logger::log(LoggerLevel level, std::string_view msg, bool once)
 {
 	if (instance) {
+		if (once) {
+			Hash::Hasher hasher;
+			hasher.feed(level);
+			hasher.feed(msg);
+			const auto hash = hasher.digest();
+
+			if (instance->logOnce.contains(hash)) {
+				return;
+			} else {
+				instance->logOnce.emplace(hash);
+			}
+		}
+
 		for (const auto& s: instance->sinks) {
 			s->log(level, msg);
 		}
@@ -68,7 +82,7 @@ void Logger::log(LoggerLevel level, const String& msg)
 	}
 }
 
-void Logger::logTo(ILoggerSink* sink, LoggerLevel level, const String& msg)
+void Logger::logTo(ILoggerSink* sink, LoggerLevel level, std::string_view msg)
 {
 	if (sink) {
 		sink->log(level, msg);
@@ -77,24 +91,24 @@ void Logger::logTo(ILoggerSink* sink, LoggerLevel level, const String& msg)
 	}
 }
 
-void Logger::logDev(const String& msg)
+void Logger::logDev(std::string_view msg, bool once)
 {
-	log(LoggerLevel::Dev, msg);
+	log(LoggerLevel::Dev, msg, once);
 }
 
-void Logger::logInfo(const String& msg)
+void Logger::logInfo(std::string_view msg, bool once)
 {
-	log(LoggerLevel::Info, msg);
+	log(LoggerLevel::Info, msg, once);
 }
 
-void Logger::logWarning(const String& msg)
+void Logger::logWarning(std::string_view msg, bool once)
 {
-	log(LoggerLevel::Warning, msg);
+	log(LoggerLevel::Warning, msg, once);
 }
 
-void Logger::logError(const String& msg)
+void Logger::logError(std::string_view msg, bool once)
 {
-	log(LoggerLevel::Error, msg);
+	log(LoggerLevel::Error, msg, once);
 }
 
 void Logger::logException(const std::exception& e)

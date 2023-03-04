@@ -12,7 +12,7 @@ namespace Halley {
 
     protected:
         void run() override;
-        void log(LoggerLevel level, const String& msg) override;
+        void log(LoggerLevel level, const std::string_view msg) override;
 		
 	private:
 		enum class BuildSystem {

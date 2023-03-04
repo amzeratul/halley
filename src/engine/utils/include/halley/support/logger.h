@@ -4,6 +4,8 @@
 #include <set>
 #include <mutex>
 
+#include "halley/data_structures/hash_map.h"
+
 namespace Halley
 {
 	class String;
@@ -20,14 +22,14 @@ namespace Halley
 	{
 	public:
 		virtual ~ILoggerSink() {}
-		virtual void log(LoggerLevel level, const String& msg) = 0;
+		virtual void log(LoggerLevel level, std::string_view msg) = 0;
 	};
 
 	class StdOutSink final : public ILoggerSink {
 	public:
 		explicit StdOutSink(bool devMode);
 		~StdOutSink();
-		void log(LoggerLevel level, const String& msg) override;
+		void log(LoggerLevel level, std::string_view msg) override;
 
 	private:
 		std::mutex mutex;
@@ -42,17 +44,18 @@ namespace Halley
 		static void addSink(ILoggerSink& sink);
 		static void removeSink(ILoggerSink& sink);
 
-		static void log(LoggerLevel level, const String& msg);
-		static void logTo(ILoggerSink* sink, LoggerLevel level, const String& msg);
-		static void logDev(const String& msg);
-		static void logInfo(const String& msg);
-		static void logWarning(const String& msg);
-		static void logError(const String& msg);
+		static void log(LoggerLevel level, std::string_view msg, bool once = false);
+		static void logTo(ILoggerSink* sink, LoggerLevel level, std::string_view msg);
+		static void logDev(std::string_view msg, bool once = false);
+		static void logInfo(std::string_view msg, bool once = false);
+		static void logWarning(std::string_view msg, bool once = false);
+		static void logError(std::string_view msg, bool once = false);
 		static void logException(const std::exception& e);
 
 	private:
 		static Logger* instance;
 
 		std::set<ILoggerSink*> sinks;
+		HashSet<uint64_t> logOnce;
 	};
 }

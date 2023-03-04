@@ -34,6 +34,11 @@ namespace Halley {
 				feedBytes(gsl::as_bytes(gsl::span<const char>(string.c_str(), string.length())));
 			}
 
+			void feed(std::string_view string)
+			{
+				feedBytes(gsl::as_bytes(gsl::span<const char>(string.data(), string.size())));
+			}
+
 			template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
 			void feed(const T& data)
 			{
