@@ -1,9 +1,5 @@
 #pragma once
-#include <halley/maths/rect.h>
-#include <halley/core/input/input_device.h>
-#include <halley/core/graphics/text/font.h>
 #include <halley/support/logger.h>
-#include <halley/ui/ui_factory.h>
 #include <halley/ui/ui_widget.h>
 #include <halley/ui/widgets/ui_debug_console.h>
 
