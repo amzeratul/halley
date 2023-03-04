@@ -568,6 +568,12 @@ namespace Halley {
 			return asVector<T>();
 		}
 
+		template <typename T>
+		HashMap<String, T> convertTo(Tag<HashMap<String, T>> tag) const
+		{
+			return asHashMap<String, T>();
+		}
+
 		bool isNullOrEmpty() const;
 
 		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
