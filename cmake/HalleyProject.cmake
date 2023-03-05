@@ -170,8 +170,10 @@ if (APPLE)
 endif ()
 
 # Libs
+SET(CMAKE_INCLUDE_PATH "${HALLEY_PATH}/deps/include;${CMAKE_INCLUDE_PATH}")
+SET(CMAKE_LIBRARY_PATH "${HALLEY_PATH}/deps/lib64;${CMAKE_LIBRARY_PATH}")
 if (CMAKE_LIBRARY_PATH)
-	link_directories(${CMAKE_LIBRARY_PATH})
+	link_directories("${CMAKE_LIBRARY_PATH}")
 endif()
 
 # SDL2
