@@ -133,7 +133,10 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 
 std::string InputJoystickSDL::getName() const
 {
-	return SDL_JoystickName(reinterpret_cast<SDL_Joystick*>(joystick));
+	return String(SDL_JoystickName(reinterpret_cast<SDL_Joystick*>(joystick)))
+		+ " [" + toString(SDL_JoystickGetDeviceVendor(index), 16, 4)
+		+ ":" + toString(SDL_JoystickGetDeviceProduct(index), 16, 4)
+		+ "]";
 }
 
 int InputJoystickSDL::getSDLAxisIndex(int axis)

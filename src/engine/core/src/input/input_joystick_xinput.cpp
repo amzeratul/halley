@@ -22,6 +22,8 @@
 #include "input/input_joystick_xinput.h"
 #include <iostream>
 #include <halley/utils/utils.h>
+
+#include "halley/support/logger.h"
 #ifdef XINPUT_AVAILABLE
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -48,35 +50,50 @@ namespace {
 	    SHORT sThumbRY;
 	};
 
-	int __stdcall xinputGetStateExPtr(int, XINPUT_STATE_EX*);
+	struct XINPUT_CAPABILITIES_EX
+	{
+	    XINPUT_CAPABILITIES Capabilities;
+	    WORD vendorId;
+	    WORD productId;
+	    WORD revisionId;
+	    DWORD a4; //unknown
+	};
 
-	void* getXInputGetStateSecret()
+	typedef int (__stdcall* _XInputGetStateEx)(int, XINPUT_STATE_EX*);
+	typedef DWORD(_stdcall* _XInputGetCapabilitiesEx)(DWORD a1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities);
+	_XInputGetStateEx XInputGetStateExPtr;
+	_XInputGetCapabilitiesEx XInputGetCapabilitiesExPtr;
+
+	void initXInputDLL()
 	{
 		static bool opened = false;
 		static HMODULE dll = nullptr;
-		static FARPROC proc = nullptr;
 
 		if (!opened) {
 			opened = true;
 			wchar_t systemPath[MAX_PATH];
 			GetSystemDirectoryW(systemPath, sizeof(systemPath));
-			const auto dllPath = StringUTF16(systemPath) + L"\\XInput1_3.dll";
-			dll = LoadLibraryW(dllPath.c_str());
+			const auto xinput14Path = StringUTF16(systemPath) + L"\\XInput1_4.dll";
+			const auto xinput13Path = StringUTF16(systemPath) + L"\\XInput1_3.dll";
+			dll = LoadLibraryW(xinput14Path.c_str());
+			if (!dll) {
+				dll = LoadLibraryW(xinput13Path.c_str());
+			}
 
 			if (dll) {
-				proc = GetProcAddress(dll, reinterpret_cast<LPCSTR>(100));
+				XInputGetStateExPtr = reinterpret_cast<_XInputGetStateEx>(GetProcAddress(dll, reinterpret_cast<LPCSTR>(100)));
+				XInputGetCapabilitiesExPtr = reinterpret_cast<_XInputGetCapabilitiesEx>(GetProcAddress(dll, reinterpret_cast<LPCSTR>(108)));
 			}
 		}
-		return proc;
 	}
-
+	
 	DWORD XInputGetStateEx(DWORD index, XINPUT_STATE* state)
 	{
-		auto f = static_cast<decltype(&xinputGetStateExPtr)>(getXInputGetStateSecret());
-		if (f) {
+		initXInputDLL();
+		if (XInputGetStateExPtr) {
 			XINPUT_STATE_EX stateEx;
 			ZeroMemory(&stateEx, sizeof(stateEx));
-			const auto result = f(index, &stateEx);
+			const auto result = XInputGetStateExPtr(index, &stateEx);
 			if (result != ERROR_SUCCESS) {
 				return result;
 			}
@@ -92,6 +109,15 @@ namespace {
 			return 0;
 		}
 		return XInputGetState(index, state);
+	}
+
+	DWORD XInputGetCapabilitiesEx(DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities)
+	{
+		initXInputDLL();
+		if (XInputGetCapabilitiesExPtr) {
+			return XInputGetCapabilitiesExPtr(1, dwUserIndex, dwFlags, pCapabilities);
+		}
+		return 0;
 	}
 }
 
@@ -120,9 +146,13 @@ InputJoystickXInput::~InputJoystickXInput()
 
 std::string InputJoystickXInput::getName() const
 {
-	std::stringstream str;
-	str << "XInput Controller #" << (index+1);
-	return str.str();
+	XINPUT_CAPABILITIES_EX capabilities;
+	const auto result = XInputGetCapabilitiesEx(index, 0, &capabilities);
+	if (SUCCEEDED(result)) {
+		return "XInput Controller #" + toString(index + 1) + " [" + toString(capabilities.vendorId, 16, 4) + ":" + toString(capabilities.productId, 16, 4) + "]";
+	} else {
+		return "XInput Controller #" + toString(index + 1);
+	}
 }
 
 
@@ -148,8 +178,7 @@ void InputJoystickXInput::update(Time t)
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
 		if (!isEnabled()) {
 			setEnabled(true);
-			if (t == 0) std::cout << "\t"; // Just so it aligns on the console during initialization
-			std::cout << "XInput controller connected on port " << (index+1) << std::endl;
+			Logger::logInfo("XInput controller connected: " + getName());
 		}
 
 		auto& gamepad = state.Gamepad;
@@ -190,7 +219,7 @@ void InputJoystickXInput::update(Time t)
 	} else {
 		if (isEnabled()) {
 			setEnabled(false);
-			std::cout << "XInput controller disconnected from port " << (index+1) << std::endl;
+			Logger::logInfo("XInput controller disconnected from port " + toString(index + 1));
 		}
 		cooldown = 30;
 
