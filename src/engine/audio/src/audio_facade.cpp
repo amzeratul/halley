@@ -209,7 +209,7 @@ AudioHandle AudioFacade::doPostEvent(const AudioEvent& event, AudioEmitterId emi
 {
 	const auto id = curEventId++;
 
-	enqueue([=]() {
+	enqueue([=, &event]() {
 		engine->postEvent(id, event, emitterId);
 	});
 	playingSounds.push_back(id);

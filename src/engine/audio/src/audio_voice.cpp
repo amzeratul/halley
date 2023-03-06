@@ -106,7 +106,7 @@ bool AudioVoice::isPlaying() const
 
 bool AudioVoice::isReady() const
 {
-	return source->isReady();
+	return source && source->isReady();
 }
 
 bool AudioVoice::isDone() const
