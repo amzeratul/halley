@@ -204,6 +204,8 @@ namespace Halley
 
 		virtual AudioHandle postEvent(const String& name) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
+		virtual AudioHandle postEvent(const AudioEvent& event) = 0;
+		virtual AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) = 0;
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume = 1.0f, bool loop = false) = 0;
 
 		// Start old API, avoid in new code

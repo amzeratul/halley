@@ -191,21 +191,42 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitte
 	return doPostEvent(name, emitter->getId());
 }
 
-AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterId)
+AudioHandle AudioFacade::postEvent(const AudioEvent& event)
+{
+	return doPostEvent(event, 0);
+}
+
+AudioHandle AudioFacade::postEvent(const AudioEvent& event, AudioEmitterHandle emitter)
+{
+	if (!emitter) {
+		Logger::logError("Cannot post event \"" + event.getAssetId() + "\" to invalid emitter.");
+		return std::make_shared<AudioHandleImpl>(*this, curEventId++, 0);
+	}
+	return doPostEvent(event, emitter->getId());
+}
+
+AudioHandle AudioFacade::doPostEvent(const AudioEvent& event, AudioEmitterId emitterId)
 {
 	const auto id = curEventId++;
 
-	if (resources->exists<AudioEvent>(name)) {
-		const auto event = resources->get<AudioEvent>(name);
-		enqueue([=]() {
-			engine->postEvent(id, *event, emitterId);
-		});
-		playingSounds.push_back(id);
-	} else {
-		Logger::logError("Unknown audio event: \"" + name + "\"");
-	}
+	enqueue([=]() {
+		engine->postEvent(id, event, emitterId);
+	});
+	playingSounds.push_back(id);
 
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+}
+
+AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterId)
+{
+	if (resources->exists<AudioEvent>(name)) {
+		const auto event = resources->get<AudioEvent>(name);
+		return doPostEvent(*event, emitterId);
+	} else {
+		Logger::logError("Unknown audio event: \"" + name + "\"");
+		const auto id = curEventId++;
+		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+	}
 }
 
 AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop)
