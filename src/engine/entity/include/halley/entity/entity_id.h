@@ -21,6 +21,8 @@ namespace Halley {
 		bool operator<=(const EntityId& other) const { return value <= other.value; }
 		bool operator>=(const EntityId& other) const { return value >= other.value; }
 
+		operator bool() const { return isValid(); }
+
 		String toString() const;
 
 		void serialize(Serializer& s) const;
