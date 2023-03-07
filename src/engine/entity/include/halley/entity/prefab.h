@@ -20,7 +20,7 @@ namespace Halley {
 		void parseYAML(gsl::span<const gsl::byte> yaml);
 		String toYAML() const;
 
-		void parseConfigNode(ConfigNode node);
+		void parseConfigNode(const ConfigNode& node);
 		virtual ConfigNode toConfigNode() const;
 
 		virtual bool isScene() const;
@@ -50,6 +50,8 @@ namespace Halley {
 		void preloadDependencies(Resources& resources) const;
 
 		ResourceMemoryUsage getMemoryUsage() const override;
+
+		void generateUUIDs();
 
 	protected:
 		struct Deltas {

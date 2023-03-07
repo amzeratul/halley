@@ -87,7 +87,7 @@ String Prefab::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
-void Prefab::parseConfigNode(ConfigNode node)
+void Prefab::parseConfigNode(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map && node.hasKey("entity")) {
 		entityData = makeEntityData(node["entity"]);
@@ -266,6 +266,13 @@ ResourceMemoryUsage Prefab::getMemoryUsage() const
 	ResourceMemoryUsage result;
 	result.ramUsage = entityData.getSizeBytes() + gameData.getSizeBytes();
 	return result;
+}
+
+void Prefab::generateUUIDs()
+{
+	HashMap<UUID, UUID> changes;
+	entityData.generateUUIDs(changes);
+	entityData.updateComponentUUIDs(changes);
 }
 
 void Prefab::doPreloadDependencies(const EntityData& data, Resources& resources) const

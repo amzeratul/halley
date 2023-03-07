@@ -73,6 +73,13 @@ bool FileSystem::remove(const Path& path)
 	return nRemoved > 0 && ec.value() == 0;
 }
 
+bool FileSystem::rename(const Path& src, const Path& dst)
+{
+	boost::system::error_code ec;
+	boost::filesystem::rename(getNative(src), getNative(dst), ec);
+	return ec.value() == 0;
+}
+
 void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
 {
 	createParentDir(path);

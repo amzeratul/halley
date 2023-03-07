@@ -8,12 +8,14 @@ namespace Halley {
 	public:
 		using Callback = std::function<void(std::optional<String>)>;
 		
-		NewAssetWindow(UIFactory& factory, Callback callback);
+		NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, Callback callback);
 
 		void onAddedToRoot(UIRoot& root) override;
 		
 	private:
 		UIFactory& factory;
+		LocalisedString label;
+		String startValue;
 		Callback callback;
 
 		void makeUI();

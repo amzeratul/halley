@@ -117,6 +117,11 @@ void AssetsBrowser::makeUI()
 		loadAsset(event.getStringData(), true);
 	});
 
+	setHandle(UIEventType::ListItemRightClicked, "assetList", [=] (const UIEvent& event)
+	{
+		openContextMenu(event.getStringData());
+	});
+
 	setHandle(UIEventType::TextChanged, "assetSearch", [=] (const UIEvent& event)
 	{
 		setFilter(event.getStringData());
@@ -174,7 +179,7 @@ void AssetsBrowser::listAssetSources()
 			filteredList.push_back(r.getString());
 		}
 		setListContents(filteredList, curSrcPath, true);
-	}	
+	}
 }
 
 void AssetsBrowser::listAssets(AssetType type)
@@ -301,11 +306,15 @@ void AssetsBrowser::addFileToList(const Path& path)
 
 void AssetsBrowser::refreshList()
 {
+	auto id = assetList->getSelectedOptionId();
+	assetList->setCanSendEvents(false);
 	if (assetSrcMode) {
 		listAssetSources();
 	} else {
 		listAssets(curType);
 	}
+	assetList->setSelectedOptionId(id);
+	assetList->setCanSendEvents(true);
 }
 
 void AssetsBrowser::setFilter(const String& f)
@@ -341,6 +350,62 @@ void AssetsBrowser::refreshAssets(gsl::span<const String> assets)
 	assetTabs->refreshAssets();
 }
 
+void AssetsBrowser::openContextMenu(const String& assetId)
+{
+	auto menuOptions = Vector<UIPopupMenuItem>();
+	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
+	{
+		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));
+		menuOptions.push_back(UIPopupMenuItem(id, LocalisedString::fromHardcodedString(text), std::move(iconSprite), LocalisedString::fromHardcodedString(toolTip)));
+		menuOptions.back().enabled = enabled;
+	};
+
+	const bool isDirectory = assetId.endsWith("/.");
+	const bool isFile = !assetId.isEmpty() && !isDirectory;
+	makeEntry("rename", "Rename", "Rename Asset.", "", isFile);
+	makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "", isFile);
+	makeEntry("delete", "Delete", "Delete Asset.", "delete.png", isFile);
+
+	auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+	menu->spawnOnRoot(*getRoot());
+
+	menu->setHandle(UIEventType::PopupAccept, [this, assetId] (const UIEvent& e) {
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
+			onContextMenuAction(assetId, e.getStringData());
+		});
+	});
+}
+
+void AssetsBrowser::onContextMenuAction(const String& assetId, const String& action)
+{
+	const auto filename = Path(assetId).getFilename().replaceExtension("").toString();
+	if (action == "rename") {
+		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename asset to"), filename, [=](std::optional<String> newName)
+		{
+			if (newName) {
+				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(Path(assetId).getExtension());
+				renameAsset(assetId, newPath.toString());
+			}
+		}));
+	} else if (action == "duplicate") {
+		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Enter name of new asset"), filename, [=](std::optional<String> newName)
+		{
+			if (newName) {
+				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(Path(assetId).getExtension());
+				duplicateAsset(assetId, newPath.toString());
+			}
+		}));
+	} else if (action == "delete") {
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Delete Asset?", "Are you sure you want to delete " + assetId + "?", buttons, [=](UIConfirmationPopup::ButtonType result)
+		{
+			if (result == UIConfirmationPopup::ButtonType::Yes) {
+				removeAsset(assetId);
+			}
+		}));
+	}
+}
+
 void AssetsBrowser::updateAddRemoveButtons()
 {
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
@@ -359,7 +424,7 @@ void AssetsBrowser::addAsset()
 	
 	const auto assetType = curSrcPath.getFront(1).string();
 
-	auto window = std::make_shared<NewAssetWindow>(factory, [=](std::optional<String> newName)
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Asset"), "", [=](std::optional<String> newName)
 	{
 		if (newName) {
 			if (assetType == "prefab") {
@@ -393,9 +458,7 @@ void AssetsBrowser::addAsset()
 				addAsset(newName.value() + ".comet", graph.toYAML());
 			}
 		}
-	});
-	window->setChildLayerAdjustment(10);
-	getRoot()->addChild(std::move(window));
+	}));
 }
 
 void AssetsBrowser::addAsset(Path path, std::string_view data)
@@ -403,13 +466,76 @@ void AssetsBrowser::addAsset(Path path, std::string_view data)
 	const auto fullPath = curSrcPath / path;
 	pendingOpen = fullPath;
 	project.writeAssetToDisk(fullPath, data);
+
+	if (assetNames) {
+		assetNames->push_back(fullPath.toString());
+	}
+	refreshList();
 }
 
 void AssetsBrowser::removeAsset()
 {
-	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
-	assetList->setItemActive(lastClickedAsset, false);
-	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
+	removeAsset(lastClickedAsset);
+}
+
+void AssetsBrowser::removeAsset(const String& assetId)
+{
+	FileSystem::remove(project.getAssetsSrcPath() / assetId);
+	if (assetNames) {
+		std_ex::erase(*assetNames, assetId);
+	}
+	refreshList();
+}
+
+void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
+{
+	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
+	if (assetNames) {
+		std_ex::erase(*assetNames, oldName);
+		assetNames->push_back(newName);
+	}
+	refreshList();
+}
+
+void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
+{
+	const auto assetType = curSrcPath.getFront(1).string();
+	auto srcFile = Path::readFile(project.getAssetsSrcPath() / srcId);
+	if (srcFile.empty()) {
+		return;
+	}
+
+	const auto configRoot = YAMLConvert::parseConfig(srcFile);
+	const auto& configNode = configRoot.getRoot();
+
+	if (assetType == "prefab") {
+		Prefab prefab;
+		prefab.parseConfigNode(configNode);
+		prefab.generateUUIDs();
+		addAsset(dstId + ".prefab", prefab.toYAML());
+	}
+	else if (assetType == "scene") {
+		Scene scene;
+		scene.parseConfigNode(configNode);
+		scene.generateUUIDs();
+		addAsset(dstId + ".scene", scene.toYAML());
+	}
+	else if (assetType == "audio_object") {
+		auto object = AudioObject(configNode);
+		addAsset(dstId + ".yaml", object.toYAML());
+	}
+	else if (assetType == "audio_event") {
+		auto audioEvent = AudioEvent(configNode);
+		addAsset(dstId + ".yaml", audioEvent.toYAML());
+	}
+	else if (assetType == "ui") {
+		auto ui = UIDefinition(ConfigNode(configNode));
+		addAsset(dstId + ".yaml", ui.toYAML());
+	}
+	else if (assetType == "comet") {
+		auto graph = ScriptGraph(configNode);
+		addAsset(dstId + ".comet", graph.toYAML());
+	}
 }
 
 void AssetsBrowser::setCollapsed(bool collapsed)

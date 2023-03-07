@@ -35,13 +35,12 @@ UUID::UUID(const Bytes& b)
 	memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
 }
 
-UUID::UUID(const String& str)
+UUID::UUID(std::string_view strView)
 {
-	if (str.length() != 36) {
+	if (strView.length() != 36) {
 		throw Exception("Invalid UUID format", HalleyExceptions::Utils);
 	}
 	const auto span = getWriteableBytes();
-	const std::string_view strView = str;
 	Encode::decodeBase16(strView.substr(0, 8), span.subspan(0, 4));
 	Encode::decodeBase16(strView.substr(9, 4), span.subspan(4, 2));
 	Encode::decodeBase16(strView.substr(14, 4), span.subspan(6, 2));
@@ -52,6 +51,30 @@ UUID::UUID(const String& str)
 UUID::UUID(const ConfigNode& node)
 	: UUID(node.asString())
 {
+}
+
+bool UUID::isUUID(std::string_view strView)
+{
+	if (strView.length() != 36) {
+		return false;
+	}
+	if (strView[8] != '-' || strView[13] != '-' || strView[18] != '-' || strView[23] != '-') {
+		return false;
+	}
+	for (auto c: strView) {
+		if (!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F') && c != '-') {
+			return false;
+		}
+	}
+	return true;
+}
+
+std::optional<UUID> UUID::tryParse(std::string_view strView)
+{
+	if (!isUUID(strView)) {
+		return {};
+	}
+	return UUID(strView);
 }
 
 bool UUID::operator==(const UUID& other) const

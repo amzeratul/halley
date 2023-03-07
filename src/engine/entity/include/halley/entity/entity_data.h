@@ -135,6 +135,9 @@ namespace Halley {
 
         size_t getSizeBytes() const;
 
+        void generateUUIDs(HashMap<UUID, UUID>& changes);
+        void updateComponentUUIDs(const HashMap<UUID, UUID>& changes);
+
     private:
 
     	String name;

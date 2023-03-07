@@ -23,6 +23,7 @@ namespace Halley {
 
 		static void copyFile(const Path& src, const Path& dst);
 		static bool remove(const Path& path);
+		static bool rename(const Path& src, const Path& dst);
 
 		static void writeFile(const Path& path, gsl::span<const gsl::byte> data);
 		static void writeFile(const Path& path, const Bytes& data);

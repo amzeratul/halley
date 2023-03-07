@@ -72,9 +72,15 @@ namespace Halley {
 		void loadAsset(const String& name, bool doubleClick);
 		void refreshAssets(gsl::span<const String> assets);
 
+		void openContextMenu(const String& assetId);
+		void onContextMenuAction(const String& assetId, const String& action);
+
 		void addAsset();
 		void addAsset(Path path, std::string_view data);
 		void removeAsset();
+		void removeAsset(const String& assetId);
+		void renameAsset(const String& oldName, const String& newName);
+		void duplicateAsset(const String& srcId, const String& dstId);
 
 		void setCollapsed(bool collapsed);
 		void doSetCollapsed(bool collapsed);

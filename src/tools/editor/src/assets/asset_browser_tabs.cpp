@@ -376,7 +376,7 @@ void AssetBrowserTabs::openContextMenu(const String& tabId)
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->spawnOnRoot(*getRoot());
 
-	menu->setHandle(UIEventType::PopupAccept, [this, tabId] (const UIEvent& e) {\
+	menu->setHandle(UIEventType::PopupAccept, [this, tabId] (const UIEvent& e) {
 		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 			onContextMenuAction(e.getStringData(), tabId);
 		});

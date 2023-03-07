@@ -16,8 +16,11 @@ namespace Halley {
         UUID(std::array<Byte, 16> bytes);
         explicit UUID(gsl::span<const gsl::byte> bytes);
 		explicit UUID(const Bytes& bytes);
-        explicit UUID(const String& str);
+        explicit UUID(std::string_view str);
         explicit UUID(const ConfigNode& node);
+
+        static bool isUUID(std::string_view str);
+        static std::optional<UUID> tryParse(std::string_view str);
 
         bool operator==(const UUID& other) const;
         bool operator!=(const UUID& other) const;

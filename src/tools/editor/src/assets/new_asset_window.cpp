@@ -1,14 +1,17 @@
 #include "new_asset_window.h"
 using namespace Halley;
 
-NewAssetWindow::NewAssetWindow(UIFactory& factory, Callback callback)
+NewAssetWindow::NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, Callback callback)
 	: UIWidget("new_asset", Vector2f(), UISizer())
 	, factory(factory)
+	, label(std::move(label))
+	, startValue(std::move(startValue))
 	, callback(std::move(callback))
 {
 	makeUI();
 	setModal(true);
 	setAnchor(UIAnchor());
+	setChildLayerAdjustment(10);
 }
 
 void NewAssetWindow::onAddedToRoot(UIRoot& root)
@@ -20,7 +23,10 @@ void NewAssetWindow::makeUI()
 {
 	add(factory.makeUI("halley/new_asset_window"));
 
+	getWidgetAs<UILabel>("title")->setText(label);
+
 	const auto name = getWidgetAs<UITextInput>("name");
+	name->setText(startValue);
 	getWidget("ok")->setEnabled(false);
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)

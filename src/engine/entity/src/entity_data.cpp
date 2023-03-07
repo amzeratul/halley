@@ -561,3 +561,49 @@ size_t EntityData::getSizeBytes() const
 
 	return result;
 }
+
+void EntityData::generateUUIDs(HashMap<UUID, UUID>& changes)
+{
+	const auto newValue = UUID::generate();
+	instanceUUID = newValue;
+	changes[instanceUUID] = newValue;
+
+	if (parentUUID.isValid()) {
+		parentUUID = changes.at(parentUUID);
+	}
+
+	for (auto& c: children) {
+		c.generateUUIDs(changes);
+	}
+}
+
+namespace {
+	void replaceUUIDInConfigNode(ConfigNode& value, const HashMap<UUID, UUID>& changes)
+	{
+		if (value.getType() == ConfigNodeType::String) {
+			const auto uuid = UUID::tryParse(value.asString());
+			if (uuid) {
+				value = changes.at(*uuid).toString();
+			}
+		} else if (value.getType() == ConfigNodeType::Sequence) {
+			for (auto& v: value.asSequence()) {
+				replaceUUIDInConfigNode(v, changes);
+			}
+		} else if (value.getType() == ConfigNodeType::Map) {
+			for (auto& [k, v]: value.asMap()) {
+				replaceUUIDInConfigNode(v, changes);
+			}
+		}
+	}
+}
+
+void EntityData::updateComponentUUIDs(const HashMap<UUID, UUID>& changes)
+{
+	for (auto& [k, v]: components) {
+		replaceUUIDInConfigNode(v, changes);
+	}
+
+	for (auto& c: children) {
+		c.updateComponentUUIDs(changes);
+	}
+}
