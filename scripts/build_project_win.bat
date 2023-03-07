@@ -5,7 +5,7 @@ if not exist %targetDllDir% (
     mkdir %targetDllDir%
 )
 set targetDllPath="%~1\bin\SDL2.dll"
-xcopy SDL2.dll %targetDllPath% /C /Q /Y
+xcopy SDL2.dll %targetDllPath% /C /-I /Q /Y
 
 cd /d %1
 if not exist build mkdir build

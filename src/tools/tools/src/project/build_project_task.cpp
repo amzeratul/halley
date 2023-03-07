@@ -28,7 +28,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 	}();
 	const auto buildScript = project.getHalleyRootPath() / "scripts" / scriptName;
 	const String buildConfig = Debug::isDebug() ? "Debug" : "RelWithDebInfo";
-	command = "\"" + buildScript + "\" \"" + project.getRootPath() + "\" " + project.getProperties().getBinName() + " " + buildConfig;
+	command = "\"" + buildScript + "\" \"" + project.getRootPath().getNativeString(false) + "\" " + project.getProperties().getBinName() + " " + buildConfig;
 }
 
 void BuildProjectTask::run()
