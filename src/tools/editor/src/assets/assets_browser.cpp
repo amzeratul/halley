@@ -158,9 +158,7 @@ void AssetsBrowser::listAssetSources()
 {
 	if (!assetNames) {
 		assetNames = project.getAssetSrcList();
-		std::sort(assetNames->begin(), assetNames->end()); // Is this even needed?
-		fuzzyMatcher.clear();
-		fuzzyMatcher.addStrings(assetNames.value());
+		refreshAssetNames();
 	}
 
 	if (filter.isEmpty()) {
@@ -175,6 +173,13 @@ void AssetsBrowser::listAssetSources()
 		}
 		setListContents(filteredList, curSrcPath, true);
 	}
+}
+
+void AssetsBrowser::refreshAssetNames()
+{
+	std::sort(assetNames->begin(), assetNames->end());
+	fuzzyMatcher.clear();
+	fuzzyMatcher.addStrings(assetNames.value());
 }
 
 void AssetsBrowser::listAssets(AssetType type)
@@ -357,8 +362,11 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 
 	const bool isDirectory = assetId.endsWith("/.");
 	const bool isFile = !assetId.isEmpty() && !isDirectory;
+	const auto stem = curSrcPath.getFront(1).string();
+	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
+	
 	makeEntry("rename", "Rename", "Rename Asset.", "", isFile);
-	makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "", isFile);
+	makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "", isFile && canAdd);
 	makeEntry("delete", "Delete", "Delete Asset.", "delete.png", isFile);
 
 	auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
@@ -407,7 +415,6 @@ void AssetsBrowser::updateAddRemoveButtons()
 	
 	const auto stem = curSrcPath.getFront(1).string();
 	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
-	const bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
 
 	getWidget("addAsset")->setEnabled(canAdd);
 }
@@ -463,6 +470,7 @@ void AssetsBrowser::addAsset(Path path, std::string_view data, bool isFullPath)
 
 	if (assetNames) {
 		assetNames->push_back(fullPath.toString());
+		refreshAssetNames();
 	}
 	refreshList();
 }
@@ -474,19 +482,23 @@ void AssetsBrowser::removeAsset()
 
 void AssetsBrowser::removeAsset(const String& assetId)
 {
+	assetTabs->closeTab(assetId);
 	FileSystem::remove(project.getAssetsSrcPath() / assetId);
 	if (assetNames) {
 		std_ex::erase(*assetNames, assetId);
+		refreshAssetNames();
 	}
 	refreshList();
 }
 
 void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
 {
+	assetTabs->renameTab(oldName, newName);
 	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
 	if (assetNames) {
 		std_ex::erase(*assetNames, oldName);
 		assetNames->push_back(newName);
+		refreshAssetNames();
 	}
 	refreshList();
 }

@@ -21,6 +21,8 @@ namespace Halley {
 		void saveCurrentTab();
 		void saveAllTabs();
 		void closeCurrentTab();
+		bool closeTab(const String& key);
+		void renameTab(const String& id, const String& newId);
 		void moveTabFocus(int delta);
 		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
 
@@ -43,7 +45,6 @@ namespace Halley {
 
 		void makeUI();
 		void openTab(std::optional<AssetType> assetType, const String& name, bool selected);
-		bool closeTab(const String& key);
 		void doCloseTab(const String& key);
 		void populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key);
 

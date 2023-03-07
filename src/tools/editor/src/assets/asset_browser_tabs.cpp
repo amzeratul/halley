@@ -96,6 +96,11 @@ bool AssetBrowserTabs::closeTab(const String& key)
 	return true;
 }
 
+void AssetBrowserTabs::renameTab(const String& id, const String& newId)
+{
+	//tabs->getItem(id)->setId(newId);
+}
+
 void AssetBrowserTabs::doCloseTab(const String& key)
 {
 	const auto idx = tabs->tryGetItemId(key);

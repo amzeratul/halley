@@ -63,6 +63,7 @@ namespace Halley {
 		void listAssets(AssetType type);
 		void setListContents(Vector<String> files, const Path& curPath, bool flat);
 		void refreshList();
+		void refreshAssetNames();
 		void setFilter(const String& filter);
 
 		void clearAssetList();
