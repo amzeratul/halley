@@ -280,12 +280,18 @@ ConstEntityRef World::getEntity(EntityId id) const
 
 EntityRef World::tryGetEntity(EntityId id)
 {
+	if (!id) {
+		return EntityRef();
+	}
 	Entity* entity = tryGetRawEntity(id);
 	return entity ? EntityRef(*entity, *this) : EntityRef();
 }
 
 ConstEntityRef World::tryGetEntity(EntityId id) const
 {
+	if (!id) {
+		return EntityRef();
+	}
 	const Entity* entity = tryGetRawEntity(id);
 	return entity ? ConstEntityRef(*entity, *this) : ConstEntityRef();
 }
