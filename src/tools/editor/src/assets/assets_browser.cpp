@@ -132,11 +132,6 @@ void AssetsBrowser::makeUI()
 		addAsset();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "removeAsset", [=] (const UIEvent& event)
-	{
-		removeAsset();
-	});
-
 	setHandle(UIEventType::ButtonClicked, "collapseButton", [=] (const UIEvent& event)
 	{
 		setCollapsed(!collapsed);
@@ -415,7 +410,6 @@ void AssetsBrowser::updateAddRemoveButtons()
 	const bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
 
 	getWidget("addAsset")->setEnabled(canAdd);
-	getWidget("removeAsset")->setEnabled(canRemove);
 }
 
 void AssetsBrowser::addAsset()
@@ -461,9 +455,9 @@ void AssetsBrowser::addAsset()
 	}));
 }
 
-void AssetsBrowser::addAsset(Path path, std::string_view data)
+void AssetsBrowser::addAsset(Path path, std::string_view data, bool isFullPath)
 {
-	const auto fullPath = curSrcPath / path;
+	const auto fullPath = isFullPath ? path : curSrcPath / path;
 	pendingOpen = fullPath;
 	project.writeAssetToDisk(fullPath, data);
 
@@ -512,29 +506,29 @@ void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 		Prefab prefab;
 		prefab.parseConfigNode(configNode);
 		prefab.generateUUIDs();
-		addAsset(dstId + ".prefab", prefab.toYAML());
+		addAsset(dstId, prefab.toYAML(), true);
 	}
 	else if (assetType == "scene") {
 		Scene scene;
 		scene.parseConfigNode(configNode);
 		scene.generateUUIDs();
-		addAsset(dstId + ".scene", scene.toYAML());
+		addAsset(dstId, scene.toYAML(), true);
 	}
 	else if (assetType == "audio_object") {
 		auto object = AudioObject(configNode);
-		addAsset(dstId + ".yaml", object.toYAML());
+		addAsset(dstId, object.toYAML(), true);
 	}
 	else if (assetType == "audio_event") {
 		auto audioEvent = AudioEvent(configNode);
-		addAsset(dstId + ".yaml", audioEvent.toYAML());
+		addAsset(dstId, audioEvent.toYAML(), true);
 	}
 	else if (assetType == "ui") {
 		auto ui = UIDefinition(ConfigNode(configNode));
-		addAsset(dstId + ".yaml", ui.toYAML());
+		addAsset(dstId, ui.toYAML(), true);
 	}
 	else if (assetType == "comet") {
 		auto graph = ScriptGraph(configNode);
-		addAsset(dstId + ".comet", graph.toYAML());
+		addAsset(dstId, graph.toYAML(), true);
 	}
 }
 

@@ -565,8 +565,8 @@ size_t EntityData::getSizeBytes() const
 void EntityData::generateUUIDs(HashMap<UUID, UUID>& changes)
 {
 	const auto newValue = UUID::generate();
-	instanceUUID = newValue;
 	changes[instanceUUID] = newValue;
+	instanceUUID = newValue;
 
 	if (parentUUID.isValid()) {
 		parentUUID = changes.at(parentUUID);
@@ -583,7 +583,10 @@ namespace {
 		if (value.getType() == ConfigNodeType::String) {
 			const auto uuid = UUID::tryParse(value.asString());
 			if (uuid) {
-				value = changes.at(*uuid).toString();
+				const auto iter = changes.find(*uuid);
+				if (iter != changes.end()) {
+					value = iter->second.toString();
+				}
 			}
 		} else if (value.getType() == ConfigNodeType::Sequence) {
 			for (auto& v: value.asSequence()) {

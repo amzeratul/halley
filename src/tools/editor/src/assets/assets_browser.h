@@ -76,7 +76,7 @@ namespace Halley {
 		void onContextMenuAction(const String& assetId, const String& action);
 
 		void addAsset();
-		void addAsset(Path path, std::string_view data);
+		void addAsset(Path path, std::string_view data, bool fullPath = false);
 		void removeAsset();
 		void removeAsset(const String& assetId);
 		void renameAsset(const String& oldName, const String& newName);
