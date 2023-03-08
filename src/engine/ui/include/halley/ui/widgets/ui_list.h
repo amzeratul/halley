@@ -121,6 +121,8 @@ namespace Halley {
 		void reassignIds();
 		void resetSelectionIfInvalid();
 
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+
 		Vector<std::shared_ptr<UIListItem>> items;
 		int curOption = -1;
 		int curHover = -1;

@@ -96,9 +96,12 @@ bool AssetBrowserTabs::closeTab(const String& key)
 	return true;
 }
 
-void AssetBrowserTabs::renameTab(const String& id, const String& newId)
+void AssetBrowserTabs::renameTab(const String& id, const String& newId, std::optional<AssetType> assetType)
 {
-	//tabs->getItem(id)->setId(newId);
+	const String key = assetType ? (toString(assetType) + ":" + newId) : newId;
+	auto tab = tabs->getItem(id);
+	updateTab(*tab->getWidget("tabContents"), newId, key);
+	tab->setId(newId);
 }
 
 void AssetBrowserTabs::doCloseTab(const String& key)
@@ -173,6 +176,16 @@ void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> asset
 	}
 	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
 	tab.getWidgetAs<UIImage>("icon")->setSprite(icon);
+	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
+	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
+	{
+		toClose.push_back(key);
+	});
+}
+
+void AssetBrowserTabs::updateTab(UIWidget& tab, const String& name, const String& key)
+{
+	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
 	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
 	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
 	{

@@ -31,6 +31,8 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), "", -1));
 		}
 	});
+
+	setInteractWithMouse(true);
 }
 
 void UIList::setOrientation(UISizerType orientation, int nColumns)
@@ -397,6 +399,17 @@ void UIList::resetSelectionIfInvalid()
 		if (shouldResetSelection) {
 			setSelectedOption(0);
 		}
+	}
+}
+
+void UIList::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	if (button == 0) {
+		sendEvent(UIEvent(UIEventType::ListBackgroundLeftClicked, getId()));
+	} else if (button == 1) {
+		sendEvent(UIEvent(UIEventType::ListBackgroundMiddleClicked, getId()));
+	} else if (button == 2) {
+		sendEvent(UIEvent(UIEventType::ListBackgroundRightClicked, getId()));
 	}
 }
 

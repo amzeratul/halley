@@ -117,6 +117,11 @@ void AssetsBrowser::makeUI()
 		loadAsset(event.getStringData(), true);
 	});
 
+	setHandle(UIEventType::ListBackgroundRightClicked, "assetList", [=] (const UIEvent& event)
+	{
+		openContextMenu("");
+	});
+
 	setHandle(UIEventType::ListItemRightClicked, "assetList", [=] (const UIEvent& event)
 	{
 		openContextMenu(event.getStringData());
@@ -360,14 +365,19 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 		menuOptions.back().enabled = enabled;
 	};
 
-	const bool isDirectory = assetId.endsWith("/.");
-	const bool isFile = !assetId.isEmpty() && !isDirectory;
 	const auto stem = curSrcPath.getFront(1).string();
 	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
-	
-	makeEntry("rename", "Rename", "Rename Asset.", "", isFile);
-	makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "", isFile && canAdd);
-	makeEntry("delete", "Delete", "Delete Asset.", "delete.png", isFile);
+
+	if (assetId.isEmpty()) {
+		makeEntry("add", "Add", "Add new asset.", "add.png", canAdd);
+	} else {
+		const bool isDirectory = assetId.endsWith("/.");
+		const bool isFile = !assetId.isEmpty() && !isDirectory;
+		
+		makeEntry("rename", "Rename", "Rename Asset.", "rename.png", isFile);
+		makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", isFile && canAdd);
+		makeEntry("delete", "Delete", "Delete Asset.", "delete.png", isFile);
+	}
 
 	auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->spawnOnRoot(*getRoot());
@@ -382,7 +392,9 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 void AssetsBrowser::onContextMenuAction(const String& assetId, const String& action)
 {
 	const auto filename = Path(assetId).getFilename().replaceExtension("").toString();
-	if (action == "rename") {
+	if (action == "add") {
+		addAsset();
+	} else if (action == "rename") {
 		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename asset to"), filename, [=](std::optional<String> newName)
 		{
 			if (newName) {
@@ -493,7 +505,8 @@ void AssetsBrowser::removeAsset(const String& assetId)
 
 void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
 {
-	assetTabs->renameTab(oldName, newName);
+	//assetTabs->renameTab(oldName, newName, assetSrcMode ? std::optional<AssetType>() : curType);
+	assetTabs->closeTab(oldName);
 	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
 	if (assetNames) {
 		std_ex::erase(*assetNames, oldName);
