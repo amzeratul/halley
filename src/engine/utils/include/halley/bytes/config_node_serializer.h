@@ -192,6 +192,62 @@ namespace Halley {
     };
 
 	template <>
+    class ConfigNodeSerializer<Vector3i> {
+    public:
+        ConfigNode serialize(Vector3i value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Vector3i deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asVector3i(Vector3i());
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<Vector3f> {
+    public:
+        ConfigNode serialize(Vector3f value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Vector3f deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asVector3f(Vector3f());
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<Vector4i> {
+    public:
+        ConfigNode serialize(Vector4i value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Vector4i deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asVector4i(Vector4i());
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<Vector4f> {
+    public:
+        ConfigNode serialize(Vector4f value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Vector4f deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asVector4f(Vector4f());
+        }
+    };
+
+	template <>
     class ConfigNodeSerializer<Angle1f> {
     public:
         ConfigNode serialize(Angle1f value, const EntitySerializationContext& context)

@@ -378,6 +378,8 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 				if (!result.created) {
 					existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
 				}
+			} catch (const std::exception& e) {
+				Logger::logException(e);
 			} catch (...) {
 				Logger::logError("Unable to update component \"" + componentName + "\".");
 			}
