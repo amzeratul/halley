@@ -243,7 +243,9 @@ String ScriptFence::getPinDescription(const ScriptGraphNode& node, PinType eleme
 
 void ScriptFence::doInitData(ScriptFenceData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data.signaled = nodeData.asBool(false);
+	if (nodeData.getType() == ConfigNodeType::Bool) {
+		data.signaled = nodeData.asBool(false);
+	}
 }
 
 void ScriptFence::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptFenceData& curData) const
