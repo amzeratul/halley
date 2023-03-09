@@ -97,7 +97,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 
 uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets)
 {
-	std::array<gsl::byte, 2048> buffer;
+	std::array<gsl::byte, 4096> buffer;
 	const auto dst = gsl::span<gsl::byte>(buffer);
 
 	auto s = Serializer(dst, SerializerOptions(SerializerOptions::maxVersion));
@@ -182,7 +182,7 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 			}
 
 			// Extract data
-			std::array<char, 2048> buffer;
+			std::array<char, 4096> buffer;
 			if (size > buffer.size() || size > s.getBytesLeft()) {
 				throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, " + toString(s.getBytesLeft()) + " bytes remaining.", HalleyExceptions::Network);
 			}
