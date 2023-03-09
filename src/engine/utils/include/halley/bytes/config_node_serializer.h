@@ -10,6 +10,7 @@
 
 
 #include "halley/core/resources/resource_reference.h"
+#include "halley/support/logger.h"
 
 namespace Halley {
 	namespace Detail {
@@ -508,7 +509,16 @@ namespace Halley {
         ResourceReference<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			const auto assetId = node.hasKey("asset") ? node["asset"].asString("") : (node.getType() == ConfigNodeType::String ? node.asString("") : "");
-			return ResourceReference<T>(assetId.isEmpty() ? std::shared_ptr<const T>() : context.resources->get<T>(assetId));
+			if (assetId.isEmpty()) {
+				return {};
+			} else {
+				if (context.resources->exists<T>(assetId)) {
+					return ResourceReference<T>(context.resources->get<T>(assetId));
+				} else {
+					Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId);
+					return {};
+				}				
+			}
 		}
 	};
 	
