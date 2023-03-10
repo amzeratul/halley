@@ -84,11 +84,13 @@ void UIScrollPane::update(Time t, bool moved)
 		const auto p1 = *targetScrollTo;
 		const auto delta = p1 - p0;
 		const auto dist = delta.length();
+		const auto speed = std::max(scrollSpeed, dist / 0.1f);
+
 		if (dist < 1) {
 			scrollTo(p1);
 			targetScrollTo = {};
 		} else {
-			const auto p = lerp(p0, p1, clamp(static_cast<float>(scrollSpeed * t) / dist, 0.0f, 1.0f));
+			const auto p = lerp(p0, p1, clamp(static_cast<float>(speed * t) / dist, 0.0f, 1.0f));
 			if ((p - p1).length() < 1) {
 				scrollTo(p1);
 				targetScrollTo = {};
