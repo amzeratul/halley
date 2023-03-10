@@ -46,7 +46,7 @@ namespace Halley {
 		MouseReleaseMiddle,
 		MakeAreaVisible,
 		MakeAreaVisibleCentered,
-		MakeAreaVisibleSmooth,
+		MakeAreaVisibleContinuous,
 		NavigateToAsset,
 		NavigateToFile,
 		PopupAccept,

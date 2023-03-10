@@ -20,8 +20,8 @@ namespace Halley {
 
     class UIScrollPane : public UIWidget {
     public:
-		UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
-		UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
+		UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true, float scrollSpeed = 50.0f, bool alwaysSmooth = false);
+		[[deprecated]] UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
 
 		Vector2f getScrollPosition() const;
 		Vector2f getRelativeScrollPosition() const;
@@ -29,7 +29,7 @@ namespace Halley {
 
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
-		void scrollToShow(Rect4f rect, bool center, bool smooth = false);
+		void scrollToShow(Rect4f rect, bool center, bool continuous);
 		void setRelativeScroll(float position, UIScrollDirection direction);
 
 		float getScrollSpeed() const;
@@ -61,7 +61,9 @@ namespace Halley {
 		Vector2f clipSize;
 		Vector2f contentsSize;
 		Vector2f scrollPos;
+		std::optional<Vector2f> targetScrollTo;
 		float scrollSpeed = 0;
+		bool alwaysSmooth = false;
 		bool scrollHorizontal = false;
 		bool scrollVertical = false;
 		bool scrollWheelEnabled = true;

@@ -953,7 +953,7 @@ void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 		}
 	}
 
-	sendEvent(UIEvent(UIEventType::MakeAreaVisibleSmooth, getId(), Rect4f(pos, pos + item.getSize()) - getPosition()));
+	sendEvent(UIEvent(UIEventType::MakeAreaVisibleContinuous, getId(), Rect4f(pos, pos + item.getSize()) - getPosition()));
 }
 
 void UIList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)

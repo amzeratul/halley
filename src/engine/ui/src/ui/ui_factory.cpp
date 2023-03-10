@@ -1035,6 +1035,8 @@ UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
 	result.entries.emplace_back("Clip Size", "clipSize", "Halley::Vector2f", "");
 	result.entries.emplace_back("Scroll Horizontal", "scrollHorizontal", "bool", "false");
 	result.entries.emplace_back("Scroll Vertical", "scrollVertical", "bool", "true");
+	result.entries.emplace_back("Scroll Speed", "scrollSpeed", "float", "50");
+	result.entries.emplace_back("Smooth Go To", "smoothGoTo", "bool", "false");
 	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
 
 	return result;
@@ -1048,8 +1050,10 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
+	auto scrollSpeed = node["scrollSpeed"].asFloat(50.0f);
+	auto smoothGoTo = node["smoothGoTo"].asBool(false);
 
-	auto result = std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
+	auto result = std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, scrollSpeed, smoothGoTo);
 	result->setScrollWheelEnabled(mouseWheelEnabled);
 	return result;
 }
@@ -1086,6 +1090,8 @@ UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<scrollbar>", "scrollbar");
 	result.entries.emplace_back("Scroll Horizontal", "scrollHorizontal", "bool", "false");
 	result.entries.emplace_back("Scroll Vertical", "scrollVertical", "bool", "true");
+	result.entries.emplace_back("Scroll Speed", "scrollSpeed", "float", "50");
+	result.entries.emplace_back("Smooth Go To", "smoothGoTo", "bool", "false");
 	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
 	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
 
@@ -1102,8 +1108,10 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto alwaysShow = !node["autoHide"].asBool(false);
 	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
+	auto scrollSpeed = node["scrollSpeed"].asFloat(50.0f);
+	auto smoothGoTo = node["smoothGoTo"].asBool(false);
 
-	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow, Vector2f(), scrollSpeed, smoothGoTo);
 	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
 	return result;
 }

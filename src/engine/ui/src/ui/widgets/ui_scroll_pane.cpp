@@ -4,10 +4,11 @@
 
 using namespace Halley;
 
-UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
+UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical, float scrollSpeed, bool alwaysSmooth)
 	: UIWidget(std::move(id), Vector2f(), std::move(sizer))
 	, clipSize(clipSize)
-	, scrollSpeed(50.0f)
+	, scrollSpeed(scrollSpeed)
+	, alwaysSmooth(alwaysSmooth)
 	, scrollHorizontal(scrollHorizontal)
 	, scrollVertical(scrollVertical)
 {
@@ -19,16 +20,16 @@ UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool s
 	setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
 	{
 		refresh();
-		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false);
+		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false, false);
 	});
 
 	setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
 	{
 		refresh();
-		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), true);
+		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), true, false);
 	});
 
-	setHandle(UIEventType::MakeAreaVisibleSmooth, [this] (const UIEvent& event)
+	setHandle(UIEventType::MakeAreaVisibleContinuous, [this] (const UIEvent& event)
 	{
 		refresh();
 		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false, true);
@@ -78,6 +79,25 @@ void UIScrollPane::setScrollSpeed(float speed)
 
 void UIScrollPane::update(Time t, bool moved)
 {
+	if (targetScrollTo) {
+		const auto p0 = scrollPos;
+		const auto p1 = *targetScrollTo;
+		const auto delta = p1 - p0;
+		const auto dist = delta.length();
+		if (dist < 1) {
+			scrollTo(p1);
+			targetScrollTo = {};
+		} else {
+			const auto p = lerp(p0, p1, clamp(static_cast<float>(scrollSpeed * t) / dist, 0.0f, 1.0f));
+			if ((p - p1).length() < 1) {
+				scrollTo(p1);
+				targetScrollTo = {};
+			} else {
+				scrollTo(p);
+			}
+		}
+	}
+
 	refresh();
 	if (t > 0.0001) {
 		lastDeltaT = t;
@@ -185,8 +205,10 @@ Vector2f UIScrollPane::getLayoutOriginPosition() const
 	return getPosition() - scrollPos.floor();
 }
 
-void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool smooth)
+void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool continuous)
 {
+	targetScrollTo = {};
+
 	auto size = getSize();
 
 	float maxX = rect.getLeft();
@@ -196,14 +218,17 @@ void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool smooth)
 	const auto target = center ? (rect.getCenter() - 0.5f * size) : scrollPos;
 	auto dst = Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY));
 
-	if (smooth) {
+	if (continuous) {
 		const auto maxPixelsPerSecond = 600.0f;
 		const auto maxDelta = static_cast<float>(lastDeltaT) * maxPixelsPerSecond;
 		dst.x = clamp(dst.x, scrollPos.x - maxDelta, scrollPos.x + maxDelta);
 		dst.y = clamp(dst.y, scrollPos.y - maxDelta, scrollPos.y + maxDelta);
+		scrollTo(dst);
+	} else if (alwaysSmooth) {
+		targetScrollTo = dst;
+	} else {
+		scrollTo(dst);
 	}
-
-	scrollTo(dst);
 }
 
 float UIScrollPane::getScrollSpeed() const
