@@ -670,22 +670,6 @@ UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Scroll Pane";
-	//result.iconName = "widget_icons/scrollPane.png";
-	return result;
-}
-
-UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Scrollbar";
-	result.iconName = "widget_icons/scrollBar.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -1042,6 +1026,20 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 	return result;
 }
 
+UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scroll Pane";
+	//result.iconName = "widget_icons/scrollPane.png";
+
+	result.entries.emplace_back("Clip Size", "clipSize", "Halley::Vector2f", "");
+	result.entries.emplace_back("Scroll Horizontal", "scrollHorizontal", "bool", "false");
+	result.entries.emplace_back("Scroll Vertical", "scrollVertical", "bool", "true");
+	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
+
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -1053,6 +1051,17 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 
 	auto result = std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical);
 	result->setScrollWheelEnabled(mouseWheelEnabled);
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scrollbar";
+	result.iconName = "widget_icons/scrollBar.png";
+	result.entries.emplace_back("Scroll Direction", "scrollDirection", "Halley::UIScrollDirection", "vertical");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<scrollbar>", "scrollbar");
+	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
 	return result;
 }
 

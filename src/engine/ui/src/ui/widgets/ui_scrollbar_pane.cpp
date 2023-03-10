@@ -4,8 +4,6 @@ using namespace Halley;
 
 UISizer makeSizer(bool scrollHorizontal, bool scrollVertical)
 {
-	Expects(scrollHorizontal || scrollVertical);
-
 	if (scrollHorizontal && scrollVertical) {
 		auto sizer = UISizer(UISizerType::Grid, 1, 2);
 		sizer.setColumnProportions({{ 1.0f, 0.0f }});
