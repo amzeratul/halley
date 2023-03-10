@@ -174,13 +174,6 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		srvDesc.Texture2D.MipLevels = descriptor.useMipMap ? -1 : 1;
 		srvDesc.Texture2D.MostDetailedMip = 0;
 
-		if (descriptor.useMipMap) {
-			if (hasPixelData) {
-				video.getDeviceContext().UpdateSubresource(texture, 0, nullptr, subResData.pSysMem, subResData.SysMemPitch, 0);
-			}
-			generateMipMaps();
-		}
-
 		if (descriptor.format == TextureFormat::Depth) {
 			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 			result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
@@ -198,6 +191,13 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 			if (result != S_OK) {
 				throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
 			}
+		}
+		
+		if (descriptor.useMipMap) {
+			if (hasPixelData) {
+				video.getDeviceContext().UpdateSubresource(texture, 0, nullptr, subResData.pSysMem, subResData.SysMemPitch, 0);
+			}
+			generateMipMaps();
 		}
 
 		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
