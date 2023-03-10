@@ -258,13 +258,17 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	buttons.at(n).push_back(Bind(std::move(device), deviceN, false));
+	buttons.at(n).push_back(Bind(std::move(device), deviceN, -1, false));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton)
+void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods)
 {
-	bindButton(n, std::move(device), static_cast<int>(deviceButton));
+	if (!lastDevice) {
+		setLastDevice(device.get());
+	}
+	buttons.at(n).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, false, mods));
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1)
@@ -281,7 +285,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 	if (!lastDevice) {
 		setLastDevice(device.get());
 	}
-	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, true));
+	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, -1, true));
 	exclusiveDirty = true;
 }
 
@@ -294,9 +298,13 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton)
+void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods)
 {
-	bindAxisButton(n, std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton));
+	if (!lastDevice) {
+		setLastDevice(device.get());
+	}
+	axes.at(n).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), true, mods));
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindVibrationOverride(spInputDevice joy)
@@ -491,24 +499,20 @@ void InputVirtual::updateLastDevice()
 	}
 }
 
-InputVirtual::Bind::Bind(spInputDevice d, int n, bool axis)
+InputVirtual::Bind::Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods)
 	: device(std::move(d))
-	, a(n)
-	, b(-1)
+	, a(a)
+	, b(b)
 	, isAxis(axis)
-	, isAxisEmulation(false)
-{}
-
-InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b, bool axis)
-	: device(std::move(d))
-	, a(_a)
-	, b(_b)
-	, isAxis(axis)
-	, isAxisEmulation(axis)
+	, isAxisEmulation(axis && b != -1)
+	, mods(mods)
 {}
 
 bool InputVirtual::Bind::isButtonPressed() const
 {
+	if (!checkMods()) {
+		return false;
+	}
 	if (b == -1) {
 		// Single bind
 		if (device->isButtonPressed(a)) {
@@ -525,6 +529,9 @@ bool InputVirtual::Bind::isButtonPressed() const
 
 bool InputVirtual::Bind::isButtonPressedRepeat() const
 {
+	if (!checkMods()) {
+		return false;
+	}
 	if (b == -1) {
 		// Single bind
 		if (device->isButtonPressedRepeat(a)) {
@@ -541,6 +548,9 @@ bool InputVirtual::Bind::isButtonPressedRepeat() const
 
 bool InputVirtual::Bind::isButtonReleased() const
 {
+	if (!checkMods()) {
+		return false;
+	}
 	if (b == -1) {
 		// Single bind
 		if (device->isButtonReleased(a)) {
@@ -559,6 +569,9 @@ bool InputVirtual::Bind::isButtonReleased() const
 
 bool InputVirtual::Bind::isButtonDown() const
 {
+	if (!checkMods()) {
+		return false;
+	}
 	if (b == -1) {
 		if (device->isButtonDown(a)) {
 			return true;
@@ -569,6 +582,11 @@ bool InputVirtual::Bind::isButtonDown() const
 		}
 	}
 	return false;
+}
+
+bool InputVirtual::Bind::checkMods() const
+{
+	return !mods || device->getKeyMods() == *mods;
 }
 
 float InputVirtual::Bind::getAxis() const

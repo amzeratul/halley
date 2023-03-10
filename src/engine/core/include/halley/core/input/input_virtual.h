@@ -27,6 +27,7 @@
 #include "halley/data_structures/maybe.h"
 #include <set>
 
+#include "input_keys.h"
 #include "halley/data_structures/hash_map.h"
 
 namespace Halley {
@@ -88,11 +89,11 @@ namespace Halley {
 		int getWheelMove() const override;
 
 		void bindButton(int n, spInputDevice device, int deviceButton);
-		void bindButton(int n, spInputDevice device, KeyCode deviceButton);
+		void bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});
 		void bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1);
 		void bindAxis(int n, spInputDevice device, int deviceButton);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
-		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton);
+		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods = {});
 		void bindVibrationOverride(spInputDevice joy);
 		void bindHat(int leftRight, int upDown, spInputDevice hat);
 		void bindPosition(spInputDevice device);
@@ -134,14 +135,15 @@ namespace Halley {
 			int b = -1;
 			bool isAxis = false;
 			bool isAxisEmulation = false;
+			std::optional<KeyMods> mods;
 
-			Bind(spInputDevice d, int a, bool axis);
-			Bind(spInputDevice d, int a, int b, bool axis);
+			Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods = {});
 
 			bool isButtonPressed() const;
 			bool isButtonPressedRepeat() const;
 			bool isButtonReleased() const;
 			bool isButtonDown() const;
+			bool checkMods() const;
 
 			float getAxis() const;
 

@@ -160,7 +160,7 @@ namespace Halley {
 
 	using Keys [[deprecated]] = KeyCode;
 
-	enum class KeyMods {
+	enum class KeyMods : uint8_t {
 		None = 0,
 		Shift = 1,
 		Ctrl = 2,

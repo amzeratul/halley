@@ -24,6 +24,8 @@
 #include "input_vibration.h"
 #include <halley/text/halleystring.h>
 #include <halley/text/string_converter.h>
+
+#include "input_keys.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
@@ -113,6 +115,7 @@ namespace Halley {
 		virtual bool isButtonPressedRepeat(InputButton code);
 		virtual bool isButtonReleased(InputButton code);
 		virtual bool isButtonDown(InputButton code);
+		virtual KeyMods getKeyMods();
 
 		virtual void clearButton(InputButton code);
 		virtual void clearButtonPress(InputButton code);

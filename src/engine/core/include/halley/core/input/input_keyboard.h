@@ -29,6 +29,8 @@ namespace Halley {
 		void onKeyPressed(KeyCode code, KeyMods mods);
 		void onKeyReleased(KeyCode code, KeyMods mods);
 
+		KeyMods getKeyMods() override;
+
 		gsl::span<const KeyboardKeyPress> getPendingKeys() const;
 
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);

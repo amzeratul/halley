@@ -72,6 +72,11 @@ bool InputDevice::isButtonDown(InputButton code)
 	return false;
 }
 
+KeyMods InputDevice::getKeyMods()
+{
+	return KeyMods::None;
+}
+
 void InputDevice::clearButton(InputButton code)
 {
 }

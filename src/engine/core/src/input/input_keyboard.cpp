@@ -52,6 +52,26 @@ void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
 	onButtonReleased(static_cast<int>(code));
 }
 
+KeyMods InputKeyboard::getKeyMods()
+{
+	uint8_t result = 0;
+
+	if (isButtonDown(KeyCode::LCtrl) || isButtonDown(KeyCode::RCtrl)) {
+		result |= static_cast<uint8_t>(KeyMods::Ctrl);
+	}
+	if (isButtonDown(KeyCode::LAlt) || isButtonDown(KeyCode::RAlt)) {
+		result |= static_cast<uint8_t>(KeyMods::Alt);
+	}
+	if (isButtonDown(KeyCode::LShift) || isButtonDown(KeyCode::RShift)) {
+		result |= static_cast<uint8_t>(KeyMods::Shift);
+	}
+	if (isButtonDown(KeyCode::LMod) || isButtonDown(KeyCode::RMod)) {
+		result |= static_cast<uint8_t>(KeyMods::Mod);
+	}
+
+	return static_cast<KeyMods>(result);
+}
+
 gsl::span<const KeyboardKeyPress> InputKeyboard::getPendingKeys() const
 {
 	return { keyPresses };

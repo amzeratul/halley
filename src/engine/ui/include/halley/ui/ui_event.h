@@ -6,7 +6,7 @@
 
 namespace Halley {
 	enum class KeyCode;
-	enum class KeyMods;
+	enum class KeyMods : uint8_t;
 	class UIWidget;
 
 	enum class UIEventType {
