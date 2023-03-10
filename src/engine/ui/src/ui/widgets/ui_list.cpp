@@ -1359,7 +1359,7 @@ Rect4f UIList::getOptionRect(int curOption) const
 		return Rect4f();
 	} else {
 		const auto item = getItem(clamp(curOption, 0, int(getNumberOfItems()) - 1));
-		return item->getRawRect() - getPosition();
+		return item->getRawRect().grow(styles[0].getBorder("scrollBorder", Vector4f())) - getPosition();
 	}
 }
 

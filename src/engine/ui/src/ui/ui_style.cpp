@@ -56,6 +56,11 @@ Vector4f UIStyle::getBorder(const String& name) const
 	return style->getBorder(name);
 }
 
+Vector4f UIStyle::getBorder(const String& name, Vector4f defaultValue) const
+{
+	return style->getBorder(name, defaultValue);
+}
+
 const String& UIStyle::getString(const String& name) const
 {
 	return style->getString(name);

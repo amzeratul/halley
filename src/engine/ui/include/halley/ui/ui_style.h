@@ -18,6 +18,7 @@ namespace Halley {
 		const TextRenderer& getTextRenderer(const String& name) const;
 		bool hasTextRenderer(const String& name) const;
 		Vector4f getBorder(const String& name) const;
+		Vector4f getBorder(const String& name, Vector4f defaultValue) const;
 		const String& getString(const String& name) const;
 		float getFloat(const String& name) const;
 		float getFloat(const String& name, float defaultValue) const;

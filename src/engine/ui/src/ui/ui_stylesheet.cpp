@@ -230,6 +230,15 @@ Vector4f UIStyleDefinition::getBorder(const String& name) const
 	return getValue(node, styleSheet, styleName, name, pimpl->borders);
 }
 
+Vector4f UIStyleDefinition::getBorder(const String& name, Vector4f defaultValue) const
+{
+	if (hasValue(node, name, pimpl->borders, { ConfigNodeType::Sequence })) {
+		return getBorder(name);
+	}
+
+	return defaultValue;
+}
+
 const String& UIStyleDefinition::getString(const String& name) const
 {
 	return getValue(node, styleSheet, styleName, name, pimpl->strings);
