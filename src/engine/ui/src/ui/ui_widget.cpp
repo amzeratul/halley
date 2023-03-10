@@ -812,6 +812,18 @@ ConfigNode UIWidget::getResultValue()
 	return ConfigNode();
 }
 
+void UIWidget::fitToRoot()
+{
+	if (root) {
+		auto rect = root->getRect();
+		if (getRect() != rect) {
+			setPosition(rect.getP1());
+			setMinSize(rect.getSize());
+			layout();
+		}
+	}
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }

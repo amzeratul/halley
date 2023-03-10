@@ -186,6 +186,8 @@ namespace Halley {
 		virtual void setResultValue(ConfigNode data);
 		virtual ConfigNode getResultValue();
 
+		void fitToRoot();
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
