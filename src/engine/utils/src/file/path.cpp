@@ -1,4 +1,6 @@
 #include "halley/file/path.h"
+
+#include <filesystem>
 #include <sstream>
 #include <fstream>
 #include "halley/os/os.h"
@@ -275,6 +277,12 @@ void Path::writeFile(const Path& path, const Bytes& data)
 void Path::writeFile(const Path& path, const String& data)
 {
 	OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+}
+
+bool Path::exists(const Path& path)
+{
+	std::error_code ec;
+	return std::filesystem::exists(path.string(), ec);
 }
 
 Bytes Path::readFile(const Path& path)

@@ -15,6 +15,7 @@ Texture::Texture(Vector2i size)
 void Texture::load(TextureDescriptor desc)
 {
 	descriptor = std::move(desc);
+	size = descriptor.size;
 	doLoad(descriptor);
 
 	if (!descriptor.retainPixelData) {
