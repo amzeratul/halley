@@ -64,6 +64,7 @@ namespace Halley {
 
 		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
+		static std::optional<Vector2i> getBufferImageSize(gsl::span<const gsl::byte> bytes);
 
 		gsl::span<unsigned char> getPixelBytes();
 		gsl::span<const unsigned char> getPixelBytes() const;

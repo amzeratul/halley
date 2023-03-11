@@ -324,6 +324,7 @@ namespace Halley
 
 		void set()
 		{
+			Expects(futureData != nullptr);
 			futureData->set(VoidWrapper());
 		}
 
@@ -441,6 +442,22 @@ namespace Halley
 	private:
 		std::function<T(U&&)> f;
 		U v;
+	};
+
+	template <typename T>
+	class MovableBoundFunction<T, VoidWrapper> final : public MovableFunctionBase<T>
+	{
+	public:
+		MovableBoundFunction(std::function<T()> f, VoidWrapper&& v)
+			: f(f)
+		{}
+
+		T operator()() override {
+			return f();
+		}
+
+	private:
+		std::function<T()> f;
 	};
 
 	template <typename T>

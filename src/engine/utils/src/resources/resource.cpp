@@ -147,11 +147,18 @@ void AsyncResource::startLoading()
 
 void AsyncResource::doneLoading()
 {
-	{
-		std::unique_lock<std::mutex> lock(loadMutex);
-		loading = false;
+	if (loading) {
+		Vector<Promise<void>> promises;
+		{
+			std::unique_lock<std::mutex> lock(loadMutex);
+			loading = false;
+			promises = std::move(pendingPromises);
+		}
+		loadWait.notify_all();
+		for (auto& p: promises) {
+			p.set();
+		}
 	}
-	loadWait.notify_all();
 }
 
 void AsyncResource::loadingFailed()
@@ -170,6 +177,17 @@ void AsyncResource::waitForLoad(bool acceptFailed) const
 	}
 	if (failed && !acceptFailed) {
 		throw Exception("Resource failed to load.", HalleyExceptions::Resources);
+	}
+}
+
+Future<void> AsyncResource::onLoad() const
+{
+	std::unique_lock<std::mutex> lock(loadMutex);
+	if (loading) {
+		pendingPromises.push_back({});
+		return pendingPromises.back().getFuture();
+	} else {
+		return Future<void>::makeImmediate({});
 	}
 }
 

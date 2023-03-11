@@ -701,3 +701,15 @@ bool Image::isPNG(gsl::span<const gsl::byte> bytes)
 	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;
 }
+
+std::optional<Vector2i> Image::getBufferImageSize(gsl::span<const gsl::byte> bytes)
+{
+	if (isQOI(bytes)) {
+		// TODO
+		return {};
+	} else {
+		int x, y, comp;
+		auto result = stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<int>(bytes.size_bytes()), &x, &y, &comp);
+		return Vector2i(x, y);
+	}
+}

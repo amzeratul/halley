@@ -5,6 +5,7 @@
 #include <array>
 #include <condition_variable>
 #include "metadata.h"
+#include "halley/concurrency/future.h"
 #include "halley/text/enum_names.h"
 
 #if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
@@ -232,6 +233,7 @@ namespace Halley
 		void doneLoading();  // call from worker thread when done loading
 		void loadingFailed(); // Call from worker thread if loading fails
 		void waitForLoad(bool acceptFailed = false) const;
+		Future<void> onLoad() const;
 
 		bool isLoaded() const;
 		bool hasSucceeded() const;
@@ -242,6 +244,7 @@ namespace Halley
 		std::atomic<bool> loading;
 		mutable std::condition_variable loadWait;
 		mutable std::mutex loadMutex;
+		mutable Vector<Promise<void>> pendingPromises;
 	};
 
 	struct ResourceOptions {
