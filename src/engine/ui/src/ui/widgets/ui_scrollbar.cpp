@@ -67,10 +67,12 @@ void UIScrollBar::update(Time t, bool moved)
 			sz = thumbMinSize[axis];
 		}
 
-		Vector2f thumbPos;
 		auto thumbSize = bar->getSize();
-		thumbPos[axis] = round(pane->getRelativeScrollPosition()[axis] * (barSize - szAdjustment));
 		thumbSize[axis] = sz;
+		thumbSize[1 - axis] = thumbMinSize[1 - axis];
+		Vector2f thumbPos;
+		thumbPos[axis] = round(pane->getRelativeScrollPosition()[axis] * (barSize - szAdjustment));
+		thumbPos[1 - axis] = std::round((bar->getSize()[1 - axis] - thumbSize[1 - axis]) / 2);
 
 		thumb->setPosition(bar->getPosition() + thumbPos);
 		thumb->setMinSize(thumbSize);

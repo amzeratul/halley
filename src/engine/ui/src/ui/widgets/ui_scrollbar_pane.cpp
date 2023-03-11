@@ -26,12 +26,12 @@ UIScrollBarPane::UIScrollBarPane(String id, Vector2f clipSize, UIStyle style, UI
 	if (scrollVertical) {
 		vBar = std::make_shared<UIScrollBar>(id + "_vbar", UIScrollDirection::Vertical, style, alwaysShow);
 		vBar->setScrollPane(*pane);
-		UIWidget::add(vBar);
+		UIWidget::add(vBar, 0, style.getBorder("horizontalBorder", Vector4f()));
 	}
 	if (scrollHorizontal) {
 		hBar = std::make_shared<UIScrollBar>(id + "_hbar", UIScrollDirection::Horizontal, style, alwaysShow);
 		hBar->setScrollPane(*pane);
-		UIWidget::add(hBar);
+		UIWidget::add(hBar, 0,  style.getBorder("horizontalBorder", Vector4f()));
 	}
 }
 
