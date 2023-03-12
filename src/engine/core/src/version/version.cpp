@@ -5,9 +5,49 @@
 
 using namespace Halley;
 
+bool HalleyVersion::operator==(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) == std::tuple(other.major, other.minor, other.revision);
+}
+
+bool HalleyVersion::operator!=(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) != std::tuple(other.major, other.minor, other.revision);
+}
+
+bool HalleyVersion::operator<(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) < std::tuple(other.major, other.minor, other.revision);
+}
+
+bool HalleyVersion::operator<=(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) <= std::tuple(other.major, other.minor, other.revision);
+}
+
+bool HalleyVersion::operator>(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) > std::tuple(other.major, other.minor, other.revision);
+}
+
+bool HalleyVersion::operator>=(const HalleyVersion& other) const
+{
+	return std::tuple(major, minor, revision) >= std::tuple(other.major, other.minor, other.revision);
+}
+
 String HalleyVersion::toString() const
 {
 	return Halley::toString(static_cast<int>(major)) + "." + Halley::toString(static_cast<int>(minor)) + "." + Halley::toString(static_cast<int>(revision));
+}
+
+void HalleyVersion::parse(const String& string)
+{
+	const auto split = string.split('.');
+	if (split.size() == 3) {
+		major = split[0].toInteger();
+		minor = split[1].toInteger();
+		revision = split[2].toInteger();
+	}
 }
 
 uint32_t Halley::getHalleyDLLAPIVersion()

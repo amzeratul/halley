@@ -77,4 +77,6 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "devcon/devcon_client.h"
 #include "devcon/devcon_server.h"
 
+#include "version/version.h"
+
 #include <halley/halley_utils.h>
