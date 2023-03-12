@@ -4,6 +4,7 @@
 #include "halley/data_structures/vector.h"
 #include <cstdint>
 #include "halley/core/game/main_loop.h"
+#include "../version/version.h"
 
 #ifdef _WIN32
 #define HALLEY_STDCALL __stdcall
@@ -16,8 +17,6 @@ namespace Halley
 	class Game;
 	class Core;
 	class HalleyStatics;
-
-	uint32_t getHalleyDLLAPIVersion();
 
 	class IHalleyEntryPoint
 	{

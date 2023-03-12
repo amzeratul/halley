@@ -85,12 +85,15 @@ set(SOURCES
 
         "src/stage/stage.cpp"
 
+        "src/version/version.cpp"
+
         "src/devcon/devcon_client.cpp"
         "src/devcon/devcon_messages.cpp"
         "src/devcon/devcon_server.cpp"
         )
 
 set(HEADERS
+        "../../../include/halley_version.hpp"
 
         "src/dummy/dummy_analytics.h"
         "src/dummy/dummy_audio.h"
@@ -207,6 +210,8 @@ set(HEADERS
 
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
+
+        "include/halley/core/version/version.h"
 
         "include/halley/core/devcon/devcon_client.h"
         "include/halley/core/devcon/devcon_messages.h"
