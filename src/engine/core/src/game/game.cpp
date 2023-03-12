@@ -91,6 +91,10 @@ std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const H
 std::unique_ptr<UIFactory> Game::createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 {
 	auto factory = std::make_unique<UIFactory>(api, resources, i18n);
+	const auto colourScheme = getDefaultColourScheme();
+	if (!colourScheme.isEmpty()) {
+		factory->setColourScheme(colourScheme);
+	}
 	factory->loadStyleSheetsFromResources();
 	return factory;
 }
@@ -103,6 +107,11 @@ std::unique_ptr<ScriptNodeTypeCollection> Game::createScriptNodeTypeCollection()
 Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories(Resources& gameResources)
 {
 	return {};
+}
+
+String Game::getDefaultColourScheme()
+{
+	return "";
 }
 
 void Game::attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project)

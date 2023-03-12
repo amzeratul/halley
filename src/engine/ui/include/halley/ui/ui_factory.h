@@ -107,6 +107,8 @@ namespace Halley
 		static UISizerAlignFlags::Type parseSizerAlignFlags(const ConfigNode& node, UISizerAlignFlags::Type defaultValue = UISizerAlignFlags::Fill);
 		static ConfigNode makeSizerAlignFlagsNode(UISizerAlignFlags::Type align);
 		static UISizerAlignFlags::Type normalizeDirection(UISizerAlignFlags::Type align, bool removeFill);
+
+		void setColourScheme(const String& assetId);
 		
 		struct ParsedOption {
 			String text;

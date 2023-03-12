@@ -1535,3 +1535,10 @@ void UIFactory::loadDefaultColourScheme()
 		colourScheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
 	}
 }
+
+void UIFactory::setColourScheme(const String& assetId)
+{
+	if (resources.exists<ConfigFile>(assetId)) {
+		colourScheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(assetId)->getRoot(), resources);
+	}
+}

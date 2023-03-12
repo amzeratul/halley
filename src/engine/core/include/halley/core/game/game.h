@@ -64,6 +64,8 @@ namespace Halley
 		virtual std::unique_ptr<ScriptNodeTypeCollection> createScriptNodeTypeCollection();
 		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomEditorFieldFactories(Resources& resources);
 
+		virtual String getDefaultColourScheme();
+
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
 
