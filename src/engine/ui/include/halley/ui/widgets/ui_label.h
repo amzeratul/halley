@@ -46,6 +46,8 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
+		void setFontSize(float size);
+
 	protected:
 		void onParentChanged() override;
 

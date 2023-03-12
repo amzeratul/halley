@@ -53,6 +53,12 @@ void UILabel::update(Time t, bool moved)
 	}
 }
 
+void UILabel::setFontSize(float size)
+{
+	renderer.setSize(size);
+	updateMinSize();
+}
+
 void UILabel::setMarquee(bool enabled)
 {
 	marquee = enabled;

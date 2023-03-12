@@ -612,7 +612,7 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 		label->setColour(getColour(node["colour"].asString()));
 	}
 	if (node.hasKey("fontSize")) {
-		label->getTextRenderer().setSize(node["fontSize"].asFloat());
+		label->setFontSize(node["fontSize"].asFloat());
 	}
 	return label;
 }
