@@ -5,7 +5,7 @@ ChooseProject::ChooseProject(UIFactory& factory)
 	: UIWidget("choose_project", {}, UISizer())
 	, factory(factory)
 {
-	factory.loadUI(*this, "load_project");
+	factory.loadUI(*this, "launcher/load_project");
 
 	loadPaths();
 }

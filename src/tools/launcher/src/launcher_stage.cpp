@@ -56,18 +56,12 @@ void LauncherStage::makeSprites()
 
 void LauncherStage::makeUI()
 {
-	auto styleSheet = std::make_shared<UIStyleSheet>(getResources());
-	for (auto& style: getResources().enumerate<ConfigFile>()) {
-		if (style.startsWith("ui_style/")) {
-			styleSheet->load(*getResources().get<ConfigFile>(style));
-		}
-	}
+	uiFactory = getGame().createUIFactory(getAPI(), getResources(), i18n);
 
-	uiFactory = std::make_unique<UIFactory>(getAPI(), getResources(), i18n, styleSheet);
 	ui = std::make_unique<UIRoot>(getAPI());
 	ui->makeToolTip(uiFactory->getStyle("tooltip"));
 
-	topLevelUI = uiFactory->makeUI("background");
+	topLevelUI = uiFactory->makeUI("launcher/background");
 	ui->addChild(topLevelUI);
 
 	setCurrentUI(std::make_shared<ChooseProject>(*uiFactory));

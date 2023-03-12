@@ -36,6 +36,7 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 template <>
 void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, Sprite& data)
 {
+	assert(styleSheet.getColourScheme() != nullptr);
 	if (node.getType() == ConfigNodeType::String) {
 		if (!node.asString().isEmpty()) {
 			data = styleSheet.getColourScheme()->getSprite(styleSheet.getResources(), node.asString(), "");
