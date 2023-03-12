@@ -13,8 +13,8 @@ void LauncherStage::init()
 {
 	saveData = std::make_shared<LauncherSaveData>(getSystemAPI().getStorageContainer(SaveDataType::SaveLocal));
 	
-	makeSprites();
 	makeUI();
+	makeSprites();
 }
 
 void LauncherStage::onVariableUpdate(Time time)
@@ -33,8 +33,10 @@ void LauncherStage::onRender(RenderContext& context) const
 		auto view = Rect4f(painter.getViewPort());
 
 		// Background
-		Sprite bg = background;
-		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
+		background.clone().setTexRect(view).setSize(view.getSize()).draw(painter);
+
+		// Logo
+		halleyLogo.clone().setPosition(view.getTopCenter() + Vector2f(0, 40)).draw(painter);
 		
 		// UI
 		SpritePainter spritePainter;
@@ -51,7 +53,18 @@ void LauncherStage::makeSprites()
 		->set("u_col0", Colour4f(0.08f))
 		.set("u_col1", Colour4f(0.07f))
 		.set("u_distance", 6.0f);
-	background = Sprite().setMaterial(mat).setPos(Vector2f(0, 0));
+	background = uiFactory->getColourScheme()->getBackground();
+
+	const auto col = uiFactory->getColourScheme()->getColour("logo");
+	halleyLogo = Sprite()
+		.setImage(getResources(), "halley/halley_logo_dist.png", "Halley/DistanceFieldSprite")
+		.setPivot(Vector2f(0.5f, 0.5f))
+		.setScale(Vector2f(0.8f, 0.8f))
+		.setColour(col);
+	halleyLogo.getMutableMaterial()
+		.set("u_smoothness", 16.0f)
+		.set("u_outline", 0.0f)
+		.set("u_outlineColour", col);
 }
 
 void LauncherStage::makeUI()
@@ -65,14 +78,20 @@ void LauncherStage::makeUI()
 	ui->addChild(topLevelUI);
 
 	setCurrentUI(std::make_shared<ChooseProject>(*uiFactory));
+
+	const auto bgCol = uiFactory->getColourScheme()->getColour("background0");
+	getVideoAPI().getWindow().setTitleColour(bgCol, bgCol);
 }
 
 void LauncherStage::updateUI(Time time)
 {
 	const auto kb = getInputAPI().getKeyboard();
 	const auto size = getVideoAPI().getWindow().getDefinition().getSize();
-	topLevelUI->setMinSize(Vector2f(size));
-	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
+	const auto uiRect = Rect4f(Vector2f(), Vector2f(size)).grow(0, -60, 0, 0);
+
+	topLevelUI->setMinSize(uiRect.getSize());
+	topLevelUI->setPosition(uiRect.getTopLeft());
+	ui->setRect(uiRect);
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
 }
 

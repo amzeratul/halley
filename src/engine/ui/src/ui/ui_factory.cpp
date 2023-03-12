@@ -1530,7 +1530,7 @@ Colour4f UIFactory::getColour(const String& key) const
 
 void UIFactory::loadDefaultColourScheme()
 {
-	const String defaultColourScheme = "colour_schemes/default";
+	const String defaultColourScheme = "colour_schemes/flat_halley_dark";
 	if (resources.exists<ConfigFile>(defaultColourScheme)) {
 		colourScheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
 	}
