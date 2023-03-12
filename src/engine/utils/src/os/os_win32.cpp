@@ -500,6 +500,19 @@ Future<int> OSWin32::runCommandAsync(const String& rawCommand, const String& raw
 	return future;
 }
 
+bool OSWin32::runCommandDetached(const String& rawCommand, const String& rawCwd)
+{
+	Promise<int> promise;
+	auto future = promise.getFuture();
+
+	auto command = rawCommand.getUTF16();
+	auto cwd = rawCwd.getUTF16();
+
+	runCommand(command, cwd, promise, nullptr);
+
+	return future.get() == 0;
+}
+
 void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> promise, ILoggerSink* sink)
 {
 	// Create the commandline
@@ -516,44 +529,55 @@ void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> prom
 	memcpy(cwdBuffer, cwd.c_str(), cwd.size() * sizeof(wchar_t));
 	cwdBuffer[cwd.size()] = 0;
 
-	// Create pipes for reading process output
-	SECURITY_ATTRIBUTES saAttr;
-	saAttr.nLength = sizeof(SECURITY_ATTRIBUTES); 
-	saAttr.bInheritHandle = TRUE; 
-	saAttr.lpSecurityDescriptor = nullptr;
-	HANDLE inRead;
-	HANDLE inWrite;
-	HANDLE outRead;
-	HANDLE outWrite;
-	HANDLE errorRead;
-	HANDLE errorWrite;
-	if (!CreatePipe(&outRead, &outWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stdout pipe", HalleyExceptions::OS);
+	HANDLE inRead = nullptr;
+	HANDLE inWrite = nullptr;
+	HANDLE outRead = nullptr;
+	HANDLE outWrite = nullptr;
+	HANDLE errorRead = nullptr;
+	HANDLE errorWrite = nullptr;
+	if (sink) {
+		// Create pipes for reading process output
+		SECURITY_ATTRIBUTES saAttr;
+		saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		saAttr.bInheritHandle = TRUE;
+		saAttr.lpSecurityDescriptor = nullptr;
+		if (!CreatePipe(&outRead, &outWrite, &saAttr, 0)) {
+			throw Exception("Unable to create stdout pipe", HalleyExceptions::OS);
+		}
+		SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
+		if (!CreatePipe(&errorRead, &errorWrite, &saAttr, 0)) {
+			throw Exception("Unable to create stderr pipe", HalleyExceptions::OS);
+		}
+		SetHandleInformation(errorRead, HANDLE_FLAG_INHERIT, 0);
+		if (!CreatePipe(&inRead, &inWrite, &saAttr, 0)) {
+			throw Exception("Unable to create stdin pipe", HalleyExceptions::OS);
+		}
+		SetHandleInformation(inWrite, HANDLE_FLAG_INHERIT, 0);
 	}
-	SetHandleInformation(outRead, HANDLE_FLAG_INHERIT, 0);
-	if (!CreatePipe(&errorRead, &errorWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stderr pipe", HalleyExceptions::OS);
-	}
-	SetHandleInformation(errorRead, HANDLE_FLAG_INHERIT, 0);
-	if (!CreatePipe(&inRead, &inWrite, &saAttr, 0)) {
-		throw Exception("Unable to create stdin pipe", HalleyExceptions::OS);
-	}
-	SetHandleInformation(inWrite, HANDLE_FLAG_INHERIT, 0);
 
 	// Startup info
 	STARTUPINFOW si;
 	memset(&si, 0, sizeof(STARTUPINFO));
 	si.cb = sizeof(STARTUPINFO);
-	si.hStdOutput = outWrite;
-	si.hStdError = errorWrite;
-	si.hStdInput = inRead;
-	si.dwFlags |= STARTF_USESTDHANDLES;
+	if (sink) {
+		si.hStdOutput = outWrite;
+		si.hStdError = errorWrite;
+		si.hStdInput = inRead;
+		si.dwFlags |= STARTF_USESTDHANDLES;
+	}
 
 	// Create the process
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
 	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
 		promise.setValue(-1);
+		return;
+	}
+
+	if (!sink) {
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		promise.setValue(0);
 		return;
 	}
 

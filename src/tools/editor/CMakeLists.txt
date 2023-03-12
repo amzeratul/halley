@@ -214,3 +214,5 @@ target_link_libraries (halley-editor
 		${EXTRA_LIBS}
 		${ShaderConductor_LIBRARY}
         )
+
+add_custom_command(TARGET halley-editor POST_BUILD COMMAND ${HALLEY_PATH}/bin/halley-cmd write_version ${targetDir}/..)

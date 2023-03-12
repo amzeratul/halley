@@ -136,6 +136,11 @@ Future<int> OS::runCommandAsync(const String& string, const String& cwd, ILogger
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }
 
+bool OS::runCommandDetached(const String& string, const String& cwd)
+{
+	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
+}
+
 std::shared_ptr<IClipboard> OS::getClipboard()
 {
 	return {};

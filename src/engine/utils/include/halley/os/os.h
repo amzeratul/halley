@@ -79,6 +79,7 @@ namespace Halley {
 		virtual void setConsoleColor(int foreground, int background);
 		virtual int runCommand(String command, String cwd = "", ILoggerSink* sink = nullptr);
 		virtual Future<int> runCommandAsync(const String& string, const String& cwd = "", ILoggerSink* sink = nullptr);
+		virtual bool runCommandDetached(const String& string, const String& cwd = "");
 
 		virtual std::shared_ptr<IClipboard> getClipboard();
 

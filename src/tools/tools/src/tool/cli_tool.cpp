@@ -9,6 +9,7 @@
 #include "halley/core/game/halley_statics.h"
 #include "halley/tools/vs_project/vs_project_tool.h"
 #include "halley/tools/packer/asset_pack_inspector.h"
+#include "halley/tools/project/write_version_tool.h"
 #include "halley/tools/runner/runner_tool.h"
 
 using namespace Halley;
@@ -23,6 +24,7 @@ CommandLineTools::CommandLineTools()
 	factories["pack-inspector"] = []() { return std::make_unique<AssetPackInspectorTool>(); };
 	factories["vs_project"] = []() { return std::make_unique<VSProjectTool>(); };
 	factories["run"] = []() { return std::make_unique<RunnerTool>(); };
+	factories["write_version"] = []() { return std::make_unique<WriteVersionTool>(); };
 }
 
 Vector<std::string> CommandLineTools::getToolNames()

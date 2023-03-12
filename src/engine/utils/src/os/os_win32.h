@@ -52,6 +52,7 @@ namespace Halley {
 
 		int runCommand(String command, String cwd, ILoggerSink* sink) override;
 		Future<int> runCommandAsync(const String& string, const String& cwd, ILoggerSink* sink) override;
+		bool runCommandDetached(const String& string, const String& cwd) override;
 		void runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> promise, ILoggerSink* sink);
 
 		std::shared_ptr<IClipboard> getClipboard() override;

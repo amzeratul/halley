@@ -124,6 +124,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 	std::unique_ptr<Project> project;
 
 	if (gotProjectPath) {
+		Logger::logInfo("Loading " + projectPath);
 		project = loadProject(Path(projectPath));
 	}
 
@@ -134,6 +135,9 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 
 std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 {
+	if (!path.isDirectory()) {
+		path = path / ".";
+	}
 	auto project = projectLoader->loadProject(path);
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
