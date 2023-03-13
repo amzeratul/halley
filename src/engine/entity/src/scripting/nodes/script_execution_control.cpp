@@ -86,23 +86,22 @@ IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Ti
 
 ConfigNode ScriptStart::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto other = getOtherPin(environment, node, pinN);
-	if (other) {
+	if (const auto other = getOtherPin(environment, node, pinN)) {
 		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
 		return environment.readInputDataPin(returnNode, other->second);
 	} else {
-		return {};
+		return ConfigNode(environment.getStartParams()[pinN - 1]);
 	}
 }
 
 EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	const auto other = getOtherPin(environment, node, pinN);
-	if (other) {
+	if (const auto other = getOtherPin(environment, node, pinN)) {
 		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
 		return environment.readInputEntityIdRaw(returnNode, other->second);
 	} else {
-		return {};
+		const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
+		return EntityId(environment.getStartParams()[pinN - 1 - nDataInput].asEntityId().value);
 	}
 }
 
@@ -198,13 +197,29 @@ IScriptNodeType::Result ScriptSpinwait::doUpdate(ScriptEnvironment& environment,
 }
 
 
-
 Vector<IScriptNodeType::SettingType> ScriptStartScript::getSettingTypes() const
 {
 	return {
 		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
 		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} },
 	};
+}
+
+void ScriptStartScript::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
+{
+	auto& settings = node.getSettings();
+	const auto& scriptName = settings["script"].asString("");
+	if (scriptName.isEmpty() || !resources.exists<ScriptGraph>(scriptName)) {
+		settings["nDataInput"] = 0;
+		settings["nTargetInput"] = 0;
+		settings.removeKey("inputNames");
+	} else {
+		const auto script = resources.get<ScriptGraph>(scriptName);
+		const auto pars = script->getFunctionParameters();
+		settings["nDataInput"] = pars.nDataInput;
+		settings["nTargetInput"] = pars.nTargetInput;
+		settings["inputNames"] = pars.inputNames;
+	}
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -223,8 +238,37 @@ gsl::span<const IScriptNodeType::PinType> ScriptStartScript::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
-	return data;
+
+	auto& settings = node.getSettings();
+
+	const size_t nDataInput = settings["nDataInput"].asInt(0);
+	const size_t nTargetInput = settings["nTargetInput"].asInt(0);
+
+	static thread_local std::vector<PinType> pins;
+	pins.clear();
+	pins.reserve(16);
+
+	pins.emplace_back(ET::FlowPin, PD::Input);
+	pins.emplace_back(ET::FlowPin, PD::Output);
+	pins.emplace_back(ET::TargetPin, PD::Input);
+
+	for (size_t i = 0; i < nDataInput; ++i) {
+		pins.emplace_back(ET::ReadDataPin, PD::Input);
+	}
+	for (size_t i = 0; i < nTargetInput; ++i) {
+		pins.emplace_back(ET::TargetPin, PD::Input);
+	}
+
+	return pins;
+}
+
+String ScriptStartScript::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx < 3) {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	} else {
+		return node.getSettings()["inputNames"].asSequence()[elementIdx - 3].asString("");
+	}
 }
 
 IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
@@ -234,7 +278,17 @@ IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environme
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!script.isEmpty()) {
-		environment.startScript(target, script, tags);
+		Vector<ConfigNode> params;
+		const size_t nDataInput = node.getSettings()["nDataInput"].asInt(0);
+		const size_t nTargetInput = node.getSettings()["nTargetInput"].asInt(0);
+		for (size_t i = 0; i < nDataInput; ++i) {
+			params.push_back(readDataPin(environment, node, 3 + i));
+		}
+		for (size_t i = 0; i < nTargetInput; ++i) {
+			params.push_back(ConfigNode(EntityIdHolder{ readEntityId(environment, node, 3 + nDataInput + i).value } ));
+		}
+
+		environment.startScript(target, script, tags, params);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);
@@ -275,7 +329,7 @@ IScriptNodeType::Result ScriptStartScriptName::doUpdate(ScriptEnvironment& envir
 	const auto& tags = node.getSettings()["tags"].asVector<String>({});
 
 	if (!script.isEmpty()) {
-		environment.startScript(target, script, tags);
+		environment.startScript(target, script, tags, {});
 	}
 
 	return Result(ScriptNodeExecutionState::Done);

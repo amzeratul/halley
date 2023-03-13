@@ -78,8 +78,12 @@ namespace Halley {
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
 		Vector<SettingType> getSettingTypes() const override;
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		void updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const override;
+
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
 

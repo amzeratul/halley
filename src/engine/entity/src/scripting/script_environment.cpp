@@ -634,9 +634,9 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 	world.sendSystemMessage(std::move(context), message.targetSystem, dst);
 }
 
-void ScriptEnvironment::startScript(EntityId target, const String& scriptName, Vector<String> tags)
+void ScriptEnvironment::startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags) });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params) });
 }
 
 void ScriptEnvironment::stopScript(EntityId target, const String& scriptName)
@@ -685,6 +685,11 @@ EntityId ScriptEnvironment::getScriptTarget(const String& id) const
 void ScriptEnvironment::setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever)
 {
 	this->scriptTargetRetriever = std::move(scriptTargetRetriever);
+}
+
+gsl::span<const ConfigNode> ScriptEnvironment::getStartParams() const
+{
+	return currentState ? currentState->getStartParams() : gsl::span<const ConfigNode>();
 }
 
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)

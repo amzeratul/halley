@@ -377,4 +377,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptFunctionCallExternal>());
 	addScriptNode(std::make_unique<ScriptFunctionReturn>());
 	addScriptNode(std::make_unique<ScriptComment>());
+	addScriptNode(std::make_unique<ScriptHasTags>());
 }

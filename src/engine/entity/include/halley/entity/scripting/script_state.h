@@ -143,6 +143,8 @@ namespace Halley {
 		ScriptState(std::shared_ptr<const ScriptGraph> script);
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+        uint64_t getGraphHash() const { return graphHash; }
 
 		String getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
@@ -150,7 +152,10 @@ namespace Halley {
 
 		void setTags(Vector<String> tags);
 		bool hasTag(const String& tag) const;
-		
+
+		void setStartParams(Vector<ConfigNode> params);
+		gsl::span<const ConfigNode> getStartParams() const;
+
 		bool hasStarted() const { return started; }
 		bool isDone() const;
 		bool isDead() const;
@@ -167,9 +172,6 @@ namespace Halley {
 		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
-
-		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
-        uint64_t getGraphHash() const { return graphHash; }
 
     	bool hasThreadAt(GraphNodeId node) const;
 
@@ -216,6 +218,7 @@ namespace Halley {
 
 		Vector<String> tags;
 		Vector<ScriptMessage> inbox;
+		Vector<ConfigNode> startParams;
 
     	void onNodeStartedIntrospection(GraphNodeId nodeId);
     	void onNodeEndedIntrospection(GraphNodeId nodeId);

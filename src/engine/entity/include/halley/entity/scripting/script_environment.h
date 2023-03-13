@@ -80,6 +80,7 @@ namespace Halley {
             EntityId target;
             String value;
             Vector<String> startTags;
+            Vector<ConfigNode> params;
         };
 
         using ScriptTargetRetriever = std::function<EntityId(const String&)>;
@@ -140,7 +141,7 @@ namespace Halley {
         void sendEntityMessage(EntityMessageData message);
         void sendSystemMessage(SystemMessageData message);
 
-        void startScript(EntityId target, const String& scriptName, Vector<String> tags);
+        void startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params);
         void stopScript(EntityId target, const String& scriptName);
         void stopScriptTag(EntityId target, const String& tag);
 
@@ -153,6 +154,8 @@ namespace Halley {
 
         EntityId getScriptTarget(const String& id) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
+
+        gsl::span<const ConfigNode> getStartParams() const;
         
 		template <typename T>
 		T& getInterface()

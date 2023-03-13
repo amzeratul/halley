@@ -316,6 +316,10 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 		}
 		needsStateLoading = true;
 	}
+
+	if (node.hasKey("startParams")) {
+		ConfigNodeSerializer<decltype(startParams)>().deserialize(context, node["startParams"], startParams);
+	}
 }
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
@@ -346,6 +350,9 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	if (!tags.empty()) {
 		node["tags"] = tags;
 	}
+	if (!startParams.empty()) {
+		node["startParams"] = ConfigNodeSerializer<decltype(startParams)>().serialize(startParams, context);
+	}
 
 	return node;
 }
@@ -375,6 +382,16 @@ void ScriptState::setTags(Vector<String> tags)
 bool ScriptState::hasTag(const String& tag) const
 {
 	return std_ex::contains(tags, tag);
+}
+
+void ScriptState::setStartParams(Vector<ConfigNode> params)
+{
+	startParams = std::move(params);
+}
+
+gsl::span<const ConfigNode> ScriptState::getStartParams() const
+{
+	return startParams;
 }
 
 bool ScriptState::isDone() const

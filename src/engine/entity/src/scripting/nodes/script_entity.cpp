@@ -1,5 +1,7 @@
 #include "script_entity.h"
 
+#include <components/scriptable_component.h>
+
 #include "world.h"
 #include "components/transform_2d_component.h"
 #include "halley/navigation/world_position.h"
@@ -260,3 +262,52 @@ ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, cons
 		return {};
 	}
 }
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptHasTags::getSettingTypes() const
+{
+	return {
+		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptHasTags::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptHasTags::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Checks if ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(" has tags ");
+	str.append("[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]", settingColour);
+	return str.moveResults();
+}
+
+String ScriptHasTags::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return getConnectedNodeName(world, node, graph, 0) + " has tags " + "[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]";
+}
+
+ConfigNode ScriptHasTags::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto* scriptable = environment.tryGetComponent<ScriptableComponent>(readEntityId(environment, node, 0));
+	if (!scriptable) {
+		return ConfigNode(false);
+	}
+
+	for (const auto& tag: node.getSettings()["tags"].asSequence()) {
+		if (!std_ex::contains(scriptable->tags, tag.asString())) {
+			return ConfigNode(false);
+		}
+	}
+
+	return ConfigNode(true);
+}
+
