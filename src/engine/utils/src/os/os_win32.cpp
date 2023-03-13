@@ -569,14 +569,19 @@ void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> prom
 	// Create the process
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
+	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, CREATE_SUSPENDED | CREATE_NO_WINDOW, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
 		promise.setValue(-1);
 		return;
 	}
 
+	auto job = CreateJobObject(nullptr, nullptr);
+	AssignProcessToJobObject(job, pi.hProcess);
+	ResumeThread(pi.hThread);
+
 	if (!sink) {
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
+		CloseHandle(job);
 		promise.setValue(0);
 		return;
 	}
@@ -616,11 +621,13 @@ void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> prom
 		CloseHandle(outWrite);
 		CloseHandle(errorRead);
 		CloseHandle(errorWrite);
+		CloseHandle(job);
 	};
 
 	while (true) {
 		if (promise.isCancelled()) {
-			TerminateProcess(pi.hProcess, -1);
+			TerminateJobObject(job, -1);
+			//TerminateProcess(pi.hProcess, -1);
 			cleanup();
 			return;
 		}
