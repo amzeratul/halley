@@ -5,7 +5,6 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/assets/delete_assets_task.h"
-#include <boost/filesystem/operations.hpp>
 #include "halley/tools/file/filesystem.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/assets/metadata_importer.h"

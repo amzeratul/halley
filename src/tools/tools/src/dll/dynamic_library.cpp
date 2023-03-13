@@ -1,7 +1,7 @@
 #include "halley/tools/dll/dynamic_library.h"
 
-#include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
+#include <filesystem>
 
 #include "halley/maths/random.h"
 #include "halley/maths/uuid.h"
@@ -19,7 +19,7 @@
 #endif
 
 using namespace Halley;
-using namespace boost::filesystem;
+using namespace std::filesystem;
 
 DynamicLibrary::DynamicLibrary(std::string originalPath, bool includeDebugSymbols)
 	: libOrigPath(originalPath)
@@ -38,7 +38,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 	unload();
 
 	// Does the path exist?
-	if (boost::system::error_code ec; !exists(libOrigPath, ec) || ec.failed()) {
+	if (std::error_code ec; !exists(libOrigPath, ec) || ec) {
 		Logger::logError("Library doesn't exist: " + libOrigPath);
 		return false;
 	}
@@ -49,13 +49,13 @@ bool DynamicLibrary::load(bool withAnotherName)
 		auto tmpPath = getTempPath();
 		create_directories(tmpPath);
 		
-		libPath = (boost::filesystem::path(tmpPath) / String("halley-" + UUID::generate().toString() + ".dll").cppStr()).string();
+		libPath = (std::filesystem::path(tmpPath) / String("halley-" + UUID::generate().toString() + ".dll").cppStr()).string();
 
-		boost::system::error_code ec;
+		std::error_code ec;
 		bool success = false;
 		for (int i = 0; i < 3 && !success; ++i) {
 			copy_file(libOrigPath, libPath, ec);
-			if (ec.failed()) {
+			if (ec) {
 				using namespace std::chrono_literals;
 				std::this_thread::sleep_for((i + 1) * 0.1s);
 			} else {
@@ -75,7 +75,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 	if (includeDebugSymbols) {
 		debugSymbolsOrigPath = libOrigPath;
 		#ifdef _WIN32
-		debugSymbolsOrigPath = boost::filesystem::path(debugSymbolsOrigPath).replace_extension("pdb").string();
+		debugSymbolsOrigPath = std::filesystem::path(debugSymbolsOrigPath).replace_extension("pdb").string();
 		#endif
 		hasDebugSymbols = exists(debugSymbolsOrigPath);
 	}
@@ -95,7 +95,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 
 	// Load
 	#ifdef _WIN32
-	handle = LoadLibraryW(boost::filesystem::path(libPath).wstring().c_str());
+	handle = LoadLibraryW(std::filesystem::path(libPath).wstring().c_str());
 	#endif
 	if (!handle) {
 		Logger::logError("Unable to load library: " + libPath);
@@ -105,13 +105,13 @@ bool DynamicLibrary::load(bool withAnotherName)
 
 	// Store write times
 	for (size_t i = 0; i < 3; ++i) {
-		boost::system::error_code ec0;
-		boost::system::error_code ec1;
+		std::error_code ec0;
+		std::error_code ec1;
 		libLastWrite = last_write_time(libOrigPath, ec0);
 		if (hasDebugSymbols) {
 			debugLastWrite = last_write_time(debugSymbolsOrigPath, ec1);
 		}
-		if (!ec0.failed() && !ec1.failed()) {
+		if (!ec0 && !ec1) {
 			loaded = true;
 			return true;
 		}
@@ -193,9 +193,9 @@ bool DynamicLibrary::hasChanged() const
 	}
 
 	// If BOTH the dll and debug symbols files have changed, we're ready to reload
-	boost::system::error_code ec;
+	std::error_code ec;
 	const auto libWrite = last_write_time(libOrigPath, ec);
-	if (ec.failed()) {
+	if (ec) {
 		return false;
 	}
 	if (libWrite <= libLastWrite) {
@@ -204,7 +204,7 @@ bool DynamicLibrary::hasChanged() const
 
 	if (includeDebugSymbols) {
 		const auto debugWrite = last_write_time(debugSymbolsOrigPath, ec);
-		if (ec.failed()) {
+		if (ec) {
 			return false;
 		}
 		if (debugWrite <= debugLastWrite) {
@@ -257,8 +257,8 @@ void DynamicLibrary::removeReloadListener(IDynamicLibraryListener& listener)
 
 void DynamicLibrary::clearTempDirectory()
 {
-	boost::system::error_code ec;
-	boost::filesystem::remove_all(getTempPath(), ec);
+	std::error_code ec;
+	std::filesystem::remove_all(getTempPath(), ec);
 }
 
 void DynamicLibrary::flushLoaded() const
@@ -267,8 +267,8 @@ void DynamicLibrary::flushLoaded() const
 	decltype(toDelete) remaining;
 	
 	for (auto& f: toDelete) {
-		boost::system::error_code ec;
-		if (!boost::filesystem::remove(f, ec)) {
+		std::error_code ec;
+		if (!std::filesystem::remove(f, ec)) {
 			remaining.push_back(std::move(f));
 		}
 	}
@@ -278,5 +278,5 @@ void DynamicLibrary::flushLoaded() const
 
 std::string DynamicLibrary::getTempPath() const
 {
-	return (boost::filesystem::path(libOrigPath).parent_path() / "halley_tmp").string();
+	return (std::filesystem::path(libOrigPath).parent_path() / "halley_tmp").string();
 }

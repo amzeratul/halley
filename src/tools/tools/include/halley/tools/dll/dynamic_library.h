@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <set>
 
 using LibHandleType = void*;
@@ -45,8 +46,8 @@ namespace Halley
 
 		LibHandleType handle = nullptr;
 
-		time_t libLastWrite = 0;
-		time_t debugLastWrite = 0;
+		std::filesystem::file_time_type libLastWrite;
+		std::filesystem::file_time_type debugLastWrite;
 
 		bool hasTempPath = false;
 		bool hasDebugSymbols = false;

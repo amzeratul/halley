@@ -1,16 +1,17 @@
 #include "halley/tools/file/filesystem.h"
-#include <boost/filesystem.hpp>
 #include <halley/file/path.h>
 #include "halley/os/os.h"
 #include "halley/maths/random.h"
 #include <cstdio>
+#include <filesystem>
+#include <fstream>
 
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
 using namespace Halley;
-using namespace boost::filesystem;
+using namespace std::filesystem;
 
 static path getNative(const Path& p)
 {
@@ -42,12 +43,12 @@ bool FileSystem::createParentDir(const Path& p)
 
 int64_t FileSystem::getLastWriteTime(const Path& p)
 {
-	boost::system::error_code ec;
+	std::error_code ec;
 	const auto result = last_write_time(getNative(p), ec);
-	if (ec.failed()) {
+	if (ec) {
 		return 0;
 	}
-	return result;
+	return result.time_since_epoch().count();
 }
 
 bool FileSystem::isFile(const Path& p)
@@ -63,20 +64,20 @@ bool FileSystem::isDirectory(const Path& p)
 void FileSystem::copyFile(const Path& src, const Path& dst)
 {
 	createParentDir(dst);
-	copy_file(getNative(src), getNative(src), copy_option::overwrite_if_exists);
+	copy_file(getNative(src), getNative(src), copy_options::overwrite_existing);
 }
 
 bool FileSystem::remove(const Path& path)
 {
-	boost::system::error_code ec;
-	int nRemoved = boost::filesystem::remove_all(getNative(path), ec) > 0;
+	std::error_code ec;
+	int nRemoved = std::filesystem::remove_all(getNative(path), ec) > 0;
 	return nRemoved > 0 && ec.value() == 0;
 }
 
 bool FileSystem::rename(const Path& src, const Path& dst)
 {
-	boost::system::error_code ec;
-	boost::filesystem::rename(getNative(src), getNative(dst), ec);
+	std::error_code ec;
+	std::filesystem::rename(getNative(src), getNative(dst), ec);
 	return ec.value() == 0;
 }
 
