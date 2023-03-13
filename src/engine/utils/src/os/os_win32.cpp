@@ -566,17 +566,25 @@ void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> prom
 		si.dwFlags |= STARTF_USESTDHANDLES;
 	}
 
+	HANDLE job = nullptr;
+	DWORD flags = CREATE_NO_WINDOW;
+	if (sink) {
+		flags |= CREATE_SUSPENDED;
+		job = CreateJobObject(nullptr, nullptr);
+	}
+
 	// Create the process
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, CREATE_SUSPENDED | CREATE_NO_WINDOW, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
+	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, flags, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
 		promise.setValue(-1);
 		return;
 	}
 
-	auto job = CreateJobObject(nullptr, nullptr);
-	AssignProcessToJobObject(job, pi.hProcess);
-	ResumeThread(pi.hThread);
+	if (job) {
+		AssignProcessToJobObject(job, pi.hProcess);
+		ResumeThread(pi.hThread);
+	}
 
 	if (!sink) {
 		CloseHandle(pi.hProcess);
@@ -626,8 +634,11 @@ void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> prom
 
 	while (true) {
 		if (promise.isCancelled()) {
-			TerminateJobObject(job, -1);
-			//TerminateProcess(pi.hProcess, -1);
+			if (job) {
+				TerminateJobObject(job, -1);
+			} else {
+				TerminateProcess(pi.hProcess, -1);
+			}
 			cleanup();
 			return;
 		}
