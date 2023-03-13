@@ -30,13 +30,14 @@ namespace Halley {
 		void linkNavmeshes();
 		void reportUnlinkedPortals(std::function<String(Vector2i)> getChunkName) const;
 
-		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr) const;
+		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr, float anisotropy = 1.0f, float nudge = 0.1f) const;
 		std::optional<NavigationPath> pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const;
 		std::optional<NavigationPath> pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal, NavigationQuery::PostProcessingType postProcessing) const;
 
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
 		const Navmesh* getNavMeshAt(WorldPosition pos) const;
 		size_t getNavMeshIdxAt(WorldPosition pos) const;
+		std::pair<size_t, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float anisotropy = 1.0f, float nudge = 0.1f) const;
 		std::optional<WorldPosition> getClosestPointTo(WorldPosition pos, float anisotropy = 1.0f, float nudge = 0.1f) const;
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;

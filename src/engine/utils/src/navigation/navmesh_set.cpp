@@ -80,10 +80,10 @@ void NavmeshSet::clearSubWorld(int subWorld)
 	navmeshes.erase(std::remove_if(navmeshes.begin(), navmeshes.end(), [&] (const Navmesh& nav) { return nav.getSubWorld() == subWorld; }), navmeshes.end());
 }
 
-std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut) const
+std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut, float anisotropy, float nudge) const
 {
-	const size_t fromRegion = getNavMeshIdxAt(query.from);
-	const size_t toRegion = getNavMeshIdxAt(query.to);
+	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(query.from, anisotropy, nudge);
+	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(query.to, anisotropy, nudge);
 	constexpr size_t notFound = std::numeric_limits<size_t>::max();
 
 	if (fromRegion == notFound || toRegion == notFound) {
@@ -103,11 +103,11 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		return pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
 	} else {
 		// Gotta path between regions first
-		auto regionPath = findRegionPath(query.from.pos, query.to.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
+		auto regionPath = findRegionPath(fromPos.pos, toPos.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
 		if (regionPath.size() <= 1) {
 			// Failed
 			if (errorOut) {
-				*errorOut = "no path from " + query.from + " to " + query.to;
+				*errorOut = "no path from " + fromPos + " to " + toPos;
 			}
 			return {};
 		} else {
@@ -153,6 +153,21 @@ size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 	}
 	
 	return std::numeric_limits<size_t>::max();
+}
+
+std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldPosition pos, float anisotropy, float nudge) const
+{
+	auto navMeshIdx = getNavMeshIdxAt(pos);
+	if (navMeshIdx != std::numeric_limits<size_t>::max()) {
+		return { navMeshIdx, pos };
+	}
+
+	// Find closest and try again
+	if (auto p = getClosestPointTo(pos, anisotropy, nudge)) {
+		return { getNavMeshIdxAt(*p), *p };
+	}
+
+	return { std::numeric_limits<size_t>::max(), pos };
 }
 
 std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float anisotropy, float nudge) const
