@@ -113,10 +113,10 @@ namespace Halley
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
-		void markAssetsAsStillPresent(const HashMap<String, ImportAssetsDatabaseEntry>& assets);
+		void markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets);
 		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
-		Vector<AssetResource> getOutFiles(String assetId) const;
+		Vector<AssetResource> getOutFiles(ImportAssetType assetType, const String& assetId) const;
 		Vector<String> getInputFiles() const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
 
@@ -130,8 +130,8 @@ namespace Halley
 		Path assetsDbFile;
 		const int version;
 
-		std::map<String, AssetEntry> assetsImported;
-		std::map<String, AssetEntry> assetsFailed; // Ephemeral
+		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsImported;
+		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsFailed; // Ephemeral
 		std::map<String, InputFileEntry> inputFiles;
 
 		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;

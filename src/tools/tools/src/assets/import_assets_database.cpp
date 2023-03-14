@@ -284,7 +284,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	std::lock_guard<std::mutex> lock(mutex);
 	
 	// Check if it failed loading last time
-	auto iter = assetsFailed.find(asset.assetId);
+	auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	const bool failed = iter != assetsFailed.end();
 	if (failed && includeFailed) {
 		return true;
@@ -292,7 +292,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	
 	// Check if this was imported before
 	if (!failed) {
-		iter = assetsImported.find(asset.assetId);
+		iter = assetsImported.find(std::pair{ asset.assetType, asset.assetId });
 		if (iter == assetsImported.end()) {
 			// Asset didn't even exist before
 			return true;
@@ -357,10 +357,10 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 	entry.present = true;
 
 	std::lock_guard<std::mutex> lock(mutex);
-	assetsImported[asset.assetId] = entry;
+	assetsImported[std::pair{ asset.assetType, asset.assetId }] = entry;
 	indexDirty = true;
 	
-	auto failIter = assetsFailed.find(asset.assetId);
+	auto failIter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
 	if (failIter != assetsFailed.end()) {
 		assetsFailed.erase(failIter);
 	}
@@ -369,7 +369,7 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	assetsImported.erase(asset.assetId);
+	assetsImported.erase(std::pair{ asset.assetType, asset.assetId });
 	indexDirty = true;
 }
 
@@ -380,10 +380,10 @@ void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
 	entry.present = true;
 
 	std::lock_guard<std::mutex> lock(mutex);
-	assetsFailed[asset.assetId] = entry;
+	assetsFailed[std::pair{ asset.assetType, asset.assetId }] = entry;
 }
 
-void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<String, ImportAssetsDatabaseEntry>& assets)
+void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	for (auto& e: assetsImported) {
@@ -403,10 +403,10 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	return result;
 }
 
-Vector<AssetResource> ImportAssetsDatabase::getOutFiles(String assetId) const
+Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	auto iter = assetsImported.find(assetId);
+	auto iter = assetsImported.find(std::pair{ assetType, assetId });
 	if (iter != assetsImported.end()) {
 		return iter->second.asset.outputFiles;
 	} else {

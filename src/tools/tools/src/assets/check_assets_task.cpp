@@ -158,7 +158,7 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
 }
 
-bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry>& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath)
 {
 	if (filePath.getExtension() == ".meta") {
 		return false;
@@ -175,7 +175,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, HashMap<String, Impor
 	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath);
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -217,15 +217,16 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, HashMap<String, Imp
 		return false;
 	}
 	String assetId = assetImporter.getAssetId(filePath, db.getMetadata(filePath));
+	const auto assetKey = std::pair{ assetImporter.getType(), assetId };
 
 	// Build timestamped path
 	auto input = TimestampedPath(filePath, std::max(timestamps[0], std::max(timestamps[1], timestamps[2])));
 
 	// Build the asset
-	auto iter = assets.find(assetId);
+	auto iter = assets.find(assetKey);
 	if (iter == assets.end()) {
 		// New; create it
-		auto& asset = assets[assetId];
+		auto& asset = assets[assetKey];
 		asset.assetId = assetId;
 		asset.assetType = assetImporter.getType();
 		asset.srcDir = srcPath;
@@ -260,9 +261,9 @@ void CheckAssetsTask::sleep(int timeMs)
 	inbox.clear();
 }
 
-HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
+CheckAssetsTask::AssetTable CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
 {
-	HashMap<String, ImportAssetsDatabaseEntry> assets;
+	AssetTable assets;
 	bool dbChanged = false;
 	for (auto& path: paths) {
 		dbChanged = importFile(db, assets, true, project.getAssetsSrcPath(), { project.getAssetsSrcPath() }, path) || dbChanged;
@@ -273,9 +274,9 @@ HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(
 	return assets;
 }
 
-HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta)
+CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta)
 {
-	HashMap<String, ImportAssetsDatabaseEntry> assets;
+	AssetTable assets;
 
 	bool dbChanged = false;
 
@@ -327,9 +328,9 @@ HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkChangedAssets(I
 	return assets;
 }
 
-HashMap<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta)
+CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta)
 {
-	HashMap<String, ImportAssetsDatabaseEntry> assets;
+	AssetTable assets;
 
 	bool dbChanged = false;
 
@@ -386,7 +387,7 @@ Vector<DirectoryMonitor::Event> CheckAssetsTask::filterDuplicateChanges(const Ve
 	return result;
 }
 
-bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, HashMap<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter)
+bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter)
 {
 	// Check for missing input files
 	auto toDelete = db.getAllMissing();
@@ -420,7 +421,7 @@ void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 	condition.notify_one();
 }
 
-bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const HashMap<String, ImportAssetsDatabaseEntry>& assets)
+bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)
 {
 	for (const auto& a: assets) {
 		if (db.needsImporting(a.second, false)) {
@@ -430,7 +431,7 @@ bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const HashMap<
 	return false;
 }
 
-Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const HashMap<String, ImportAssetsDatabaseEntry>& assets)
+Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 

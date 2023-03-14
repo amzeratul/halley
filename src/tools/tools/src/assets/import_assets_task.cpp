@@ -114,7 +114,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	}
 
 	// Retrieve previous output from this asset, and remove any files which went missing
-	auto previous = db.getOutFiles(asset.assetId);
+	auto previous = db.getOutFiles(asset.assetType, asset.assetId);
 	for (auto& f: previous) {
 		for (auto& v: f.platformVersions) {
 			if (std::find_if(result.outFiles.begin(), result.outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == result.outFiles.end()) {
