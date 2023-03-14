@@ -614,6 +614,17 @@ Vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePo
 		result.emplace_back(UIPopupMenuItem{ "entity:" + e.getInstanceUUID(), name, icon, tooltip });
 	}
 
+	if (const auto clipboard = getAPI().system->getClipboard()) {
+		const auto worldOffset = getWorldOffset();
+		const Vector2i scenePos = Vector2i(mousePos.round());
+		const Vector2i worldPos = scenePos + Vector2i(worldOffset.value_or(Vector2f()));
+
+		result.emplace_back(UIPopupMenuItem{ "copyToClipboard:" + toString(scenePos), LocalisedString::fromUserString("Copy Scene Coordinates"), {}, LocalisedString::fromUserString("Copy scene coordinates at mouse cursor to clipboard.") });
+		if (worldOffset) {
+			result.emplace_back(UIPopupMenuItem{ "copyToClipboard:" + toString(worldPos), LocalisedString::fromUserString("Copy World Coordinates"), {}, LocalisedString::fromUserString("Copy world coordinates at mouse cursor to clipboard.") });
+		}
+	}
+
 	return result;
 }
 
@@ -625,6 +636,10 @@ void SceneEditor::onSceneContextMenuSelection(const String& id)
 		editorInterface->openAssetHere(AssetType::Scene, id.mid(11));
 	} else if (id.startsWith("entity:")) {
 		editorInterface->selectEntity(id.mid(7));
+	} else if (id.startsWith("copyToClipboard:")) {
+		if (const auto clipboard = getAPI().system->getClipboard()) {
+			clipboard->setData(id.mid(16));
+		}
 	}
 }
 
