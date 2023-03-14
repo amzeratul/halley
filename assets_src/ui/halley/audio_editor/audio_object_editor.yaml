@@ -16,7 +16,11 @@ children:
       proportion: 1
     - widget: { class: button, id: remove, text: Remove }
       proportion: 1
-- widget: { id: contents, class: widget }
+- widget: { class: scrollBarPane, size: [300, 200], scrollVertical: true, autoHide: true }
   proportion: 1
   sizer: { type: vertical }
-  children: []
+  children:
+  - widget: { id: contents, class: widget }
+    proportion: 1
+    sizer: { type: vertical }
+    children: []
