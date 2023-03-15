@@ -1,8 +1,8 @@
 #include "avf_movie_player.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
-#include "halley/core/graphics/texture_descriptor.h"
-#include "halley/core/api/video_api.h"
+#include "halley/graphics/texture_descriptor.h"
+#include "halley/api/video_api.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <fstream>

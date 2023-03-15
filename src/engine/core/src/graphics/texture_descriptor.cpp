@@ -6,27 +6,27 @@ TextureDescriptorImageData::TextureDescriptorImageData()
 {}
 
 TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> img)
-	: imgUnique(move(img))
+	: imgUnique(std::move(img))
 	, isRaw(false)
 {
 }
 
 TextureDescriptorImageData::TextureDescriptorImageData(std::shared_ptr<Image> img)
-	: imgShared(move(img))
+	: imgShared(std::move(img))
 	, isRaw(false)
 {
 }
 
 TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, std::optional<int> stride)
-	: rawBytes(move(bytes))
+	: rawBytes(std::move(bytes))
 	, stride(stride)
 	, isRaw(true)
 {}
 
 TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept
-	: imgUnique(move(other.imgUnique))
-	, imgShared(move(other.imgShared))
-	, rawBytes(move(other.rawBytes))
+	: imgUnique(std::move(other.imgUnique))
+	, imgShared(std::move(other.imgShared))
+	, rawBytes(std::move(other.rawBytes))
 	, stride(other.stride)
 	, isRaw(other.isRaw)
 {}
@@ -41,9 +41,9 @@ TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte
 
 TextureDescriptorImageData& TextureDescriptorImageData::operator=(TextureDescriptorImageData&& other) noexcept
 {
-	imgUnique = move(other.imgUnique);
-	imgShared = move(other.imgShared);
-	rawBytes = move(other.rawBytes);
+	imgUnique = std::move(other.imgUnique);
+	imgShared = std::move(other.imgShared);
+	rawBytes = std::move(other.rawBytes);
 	stride = other.stride;
 	isRaw = other.isRaw;
 	return *this;
@@ -71,7 +71,7 @@ gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
 Bytes TextureDescriptorImageData::moveBytes()
 {
 	if (isRaw) {
-		return move(rawBytes);
+		return std::move(rawBytes);
 	} else {
 		auto* img = getImage();
 		if (!img || img->getByteSize() == 0) {

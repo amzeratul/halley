@@ -4,8 +4,8 @@
 #include "metal_texture.h"
 #include "metal_video.h"
 
-#include <halley/core/graphics/texture.h>
-#include <halley/core/graphics/shader.h>
+#include <halley/graphics/texture.h>
+#include <halley/graphics/shader.h>
 #include <SDL2/SDL.h>
 #include <iostream>
 
