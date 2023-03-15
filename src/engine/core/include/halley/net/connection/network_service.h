@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <functional>
 #include <halley/text/halleystring.h>
 #include "iconnection.h"
 #include "halley/time/halleytime.h"
