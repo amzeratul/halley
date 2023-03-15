@@ -1,6 +1,6 @@
 #include "script_graph_importer.h"
 
-#include "halley/entity/scripting/script_graph.h"
+#include "halley/scripting/script_graph.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/file_formats/yaml_convert.h"
