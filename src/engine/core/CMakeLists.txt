@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include" "../ui/include" "../editor_extensions/include" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -339,17 +339,17 @@ set(SOURCES
         "src/utils/hash.cpp"
         "src/utils/variable.cpp"
 
-        "src/asset_preview_generator.cpp"
-        "src/choose_asset_window.cpp"
-        "src/component_editor_context.cpp"
-        "src/component_field_parameters.cpp"
-        "src/entity_validator.cpp"
-        "src/field_factories.cpp"
-        "src/polygon_gizmo.cpp"
-        "src/scene_editor.cpp"
-        "src/scene_editor_gizmo.cpp"
-        "src/standard_entity_validators.cpp"
-        "src/vertex_gizmo.cpp"
+        "src/editor_extensions/asset_preview_generator.cpp"
+        "src/editor_extensions/choose_asset_window.cpp"
+        "src/editor_extensions/component_editor_context.cpp"
+        "src/editor_extensions/component_field_parameters.cpp"
+        "src/editor_extensions/entity_validator.cpp"
+        "src/editor_extensions/field_factories.cpp"
+        "src/editor_extensions/polygon_gizmo.cpp"
+        "src/editor_extensions/scene_editor.cpp"
+        "src/editor_extensions/scene_editor_gizmo.cpp"
+        "src/editor_extensions/standard_entity_validators.cpp"
+        "src/editor_extensions/vertex_gizmo.cpp"
 
         "src/lua/lua_function_bind.cpp"
         "src/lua/lua_reference.cpp"
