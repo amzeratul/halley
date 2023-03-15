@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include" "../ui/include" "../editor_extensions/include" "../../../shared_gen/cpp")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include" "../ui/include" "../editor_extensions/include" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -218,6 +218,34 @@ set(SOURCES
         "src/ui/widgets/ui_textinput.cpp"
         "src/ui/widgets/ui_tooltip.cpp"
         "src/ui/widgets/ui_tree_list.cpp"
+
+        "src/audio/audio_buffer.cpp"
+        "src/audio/audio_clip.cpp"
+        "src/audio/audio_clip_streaming.cpp"
+        "src/audio/audio_emitter.cpp"
+        "src/audio/audio_emitter_handle_impl.cpp"
+        "src/audio/audio_engine.cpp"
+        "src/audio/audio_event.cpp"
+        "src/audio/audio_expression.cpp"
+        "src/audio/audio_facade.cpp"
+        "src/audio/audio_fade.cpp"
+        "src/audio/audio_filter_biquad.cpp"
+        "src/audio/audio_filter_resample.cpp"
+        "src/audio/audio_handle_impl.cpp"
+        "src/audio/audio_mixer.cpp"
+        "src/audio/audio_object.cpp"
+        "src/audio/audio_position.cpp"
+        "src/audio/audio_sub_object.cpp"
+        "src/audio/audio_voice.cpp"
+        "src/audio/audio_sources/audio_source_clip.cpp"
+        "src/audio/audio_sources/audio_source_delay.cpp"
+        "src/audio/audio_sources/audio_source_layers.cpp"
+        "src/audio/audio_sources/audio_source_sequence.cpp"
+        "src/audio/sub_objects/audio_sub_object_clips.cpp"
+        "src/audio/sub_objects/audio_sub_object_layers.cpp"
+        "src/audio/sub_objects/audio_sub_object_sequence.cpp"
+        "src/audio/sub_objects/audio_sub_object_switch.cpp"
+        "src/audio/vorbis_dec.cpp"
         )
 
 set(HEADERS
@@ -371,7 +399,7 @@ set(HEADERS
         "include/halley/net/session/network_session.h"
         "include/halley/net/session/shared_data.h"
 
-        "include/halley/halley_entity.h"
+        "include/halley/entity/halley_entity.h"
 
         "include/halley/entity/component.h"
         "include/halley/entity/component_reflector.h"
@@ -493,6 +521,36 @@ set(HEADERS
         "include/halley/ui/widgets/ui_textinput.h"
         "include/halley/ui/widgets/ui_tooltip.h"
         "include/halley/ui/widgets/ui_tree_list.h"
+
+        "include/halley/audio/audio_buffer.h"
+        "include/halley/audio/audio_clip.h"
+        "include/halley/audio/audio_clip_streaming.h"
+        "include/halley/audio/audio_event.h"
+        "include/halley/audio/audio_expression.h"
+        "include/halley/audio/audio_facade.h"
+        "include/halley/audio/audio_fade.h"
+        "include/halley/audio/audio_filter_biquad.h"
+        "include/halley/audio/audio_object.h"
+        "include/halley/audio/audio_position.h"
+        "include/halley/audio/audio_source.h"
+        "include/halley/audio/audio_sub_object.h"
+        "include/halley/audio/halley_audio.h"
+        "include/halley/audio/vorbis_dec.h"
+        "include/halley/audio/sub_objects/audio_sub_object_clips.h"
+        "include/halley/audio/sub_objects/audio_sub_object_layers.h"
+        "include/halley/audio/sub_objects/audio_sub_object_sequence.h"
+        "include/halley/audio/sub_objects/audio_sub_object_switch.h"
+        "src/audio/audio_sources/audio_source_clip.h"
+        "src/audio/audio_sources/audio_source_delay.h"
+        "src/audio/audio_sources/audio_source_layers.h"
+        "src/audio/audio_sources/audio_source_sequence.h"
+        "src/audio/audio_emitter.h"
+        "src/audio/audio_emitter_handle_impl.h"
+        "src/audio/audio_engine.h"
+        "src/audio/audio_filter_resample.h"
+        "src/audio/audio_handle_impl.h"
+        "src/audio/audio_mixer.h"
+        "src/audio/audio_voice.h"
         
         "src/prec.h"
         )
@@ -501,7 +559,7 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})
-target_link_libraries(halley-core halley-utils halley-audio)
+target_link_libraries(halley-core halley-utils)
 
 add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 
@@ -509,3 +567,10 @@ add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 if (USE_ANDROID)
     target_link_libraries(halley-core log android)
 endif ()
+
+if (MSVC)
+        set_source_files_properties(src/audio/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS /arch:AVX)
+else ()
+        set_source_files_properties(src/audio/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS -mavx)
+endif ()
+

@@ -1,6 +1,6 @@
 #include "script_ui.h"
 
-#include "../../../../ui/include/halley/ui/ui_widget.h"
+#include "halley/ui/ui_widget.h"
 using namespace Halley;
 
 ConfigNode ScriptUIModalData::toConfigNode(const EntitySerializationContext& context)

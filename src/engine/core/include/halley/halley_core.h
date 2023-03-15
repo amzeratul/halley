@@ -81,5 +81,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include <halley/halley_utils.h>
 
-#include "halley_entity.h"
+#include "entity/halley_entity.h"
 #include "net/halley_net.h"
+#include "audio/halley_audio.h"
+#include "ui/halley_ui.h"

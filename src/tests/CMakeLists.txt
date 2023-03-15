@@ -34,5 +34,5 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(halley-tests-exe ${SOURCES} ${HEADERS})
-target_link_libraries(halley-tests-exe halley-core halley-utils halley-audio halley-editor-extensions ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(halley-tests-exe halley-core halley-utils halley-editor-extensions ${GTEST_BOTH_LIBRARIES})
 add_test(halley-tests COMMAND halley-tests)

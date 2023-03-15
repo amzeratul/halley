@@ -20,7 +20,6 @@ add_library (halley-avf ${SOURCES} ${HEADERS})
 set_target_properties(halley-avf PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
 target_link_libraries(halley-avf
 	halley-core
-	halley-audio
 	"-framework AVFoundation"
 	"-framework CoreMedia"
 )

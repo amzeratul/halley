@@ -19,4 +19,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-mf ${SOURCES} ${HEADERS})
-target_link_libraries(halley-mf halley-core halley-audio)
+target_link_libraries(halley-mf halley-core)

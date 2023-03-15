@@ -35,4 +35,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-android ${SOURCES} ${HEADERS})
-target_link_libraries(halley-android halley-core halley-audio android log EGL)
+target_link_libraries(halley-android halley-core android log EGL)

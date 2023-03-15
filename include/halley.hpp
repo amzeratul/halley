@@ -3,9 +3,7 @@
 #include <halley/halley_core.h>
 #include <halley/game/halley_main.h>
 #include <halley/halley_utils.h>
-#include <halley/audio/halley_audio.h>
 #include <halley/lua/halley_lua.h>
-#include <halley/ui/halley_ui.h>
 #include <halley/editor_extensions/halley_editor_extensions.h>
 
 #ifdef __glew_h__
