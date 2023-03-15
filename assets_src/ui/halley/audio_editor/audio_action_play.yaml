@@ -26,6 +26,14 @@ children:
     - widget: { class: label, text: " ~ " }
       fill: centre
     - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }
+  - sizer: { horizontal: }
+    children:
+    - widget: { class: label, text: "Pitch: " }
+      fill: centre
+    - widget: { id: pitchMin, class: textInput, size: [40, 20], validator: numericPositive }
+    - widget: { class: label, text: " ~ " }
+      fill: centre
+    - widget: { id: pitchMax, class: textInput, size: [40, 20], validator: numericPositive }
   - sizer: { horizontal }
     children:
     - widget: { class: label, text: "Singleton: " }

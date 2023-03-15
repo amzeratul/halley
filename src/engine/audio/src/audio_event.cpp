@@ -352,9 +352,11 @@ void AudioEventActionPlay::load(const ConfigNode& node)
 		obj->loadLegacyEvent(node);
 		object = obj;
 		playGain = Range<float>(1, 1);
+		playPitch = Range<float>(1, 1);
 	} else {
 		objectName = node["object"].asString();
 		playGain = node["gain"].asFloatRange(Range<float>(1, 1));
+		playPitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 		singleton = node["singleton"].asBool(false);
 	}
 
@@ -378,8 +380,8 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 
 	const auto gainRange = object->getGain() * playGain;
 	const float gain = engine.getRNG().getFloat(gainRange);
-	const auto pitchRange = object->getPitch();
-	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
+	const auto pitchRange = object->getPitch() * playPitch;
+	const float pitch = clamp(engine.getRNG().getFloat(pitchRange), 0.1f, 4.0f);
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
 
 	auto source = object->makeSource(engine, emitter);
@@ -421,6 +423,21 @@ void AudioEventActionPlay::setGain(Range<float> gain)
 	playGain = gain;
 }
 
+Range<float> AudioEventActionPlay::getPitch() const
+{
+	return playPitch;
+}
+
+Range<float>& AudioEventActionPlay::getPitch()
+{
+	return playPitch;
+}
+
+void AudioEventActionPlay::setPitch(Range<float> pitch)
+{
+	playPitch = pitch;
+}
+
 bool AudioEventActionPlay::isSingleton() const
 {
 	return singleton;
@@ -441,6 +458,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 		AudioEventActionObject::serialize(s);
 	}
 	s << playGain;
+	s << playPitch;
 	s << delay;
 }
 
@@ -456,6 +474,7 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 		AudioEventActionObject::deserialize(s);
 	}
 	s >> playGain;
+	s >> playPitch;
 	s >> delay;
 }
 
@@ -484,7 +503,10 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 	} else {
 		if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
 			result["gain"] = playGain;
-		}		
+		}
+		if (std::abs(playPitch.start - 1.0f) > 0.0001f && std::abs(playPitch.end - 1.0f) > 0.0001f) {
+			result["pitch"] = playPitch;
+		}
 	}
 	
 	return result;

@@ -241,6 +241,18 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 		editor.markModified();
 	});	
 	
+	bindData("pitchMin", action.getPitch().start, [=, &action] (float value)
+	{
+		action.getPitch().start = value;
+		editor.markModified();
+	});	
+	
+	bindData("pitchMax", action.getPitch().end, [=, &action] (float value)
+	{
+		action.getPitch().end = value;
+		editor.markModified();
+	});	
+	
 	bindData("singleton", action.isSingleton(), [=, &action] (bool value)
 	{
 		action.setSingleton(value);

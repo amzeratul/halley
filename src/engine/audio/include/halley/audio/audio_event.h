@@ -177,6 +177,9 @@ namespace Halley
 		Range<float> getGain() const;
 		Range<float>& getGain();
 		void setGain(Range<float> gain);
+		Range<float> getPitch() const;
+		Range<float>& getPitch();
+		void setPitch(Range<float> pitch);
 		bool isSingleton() const;
 		void setSingleton(bool value);
 
@@ -191,6 +194,7 @@ namespace Halley
 		bool legacy = false;
 		bool singleton = false;
 		Range<float> playGain;
+		Range<float> playPitch;
 		float delay = 0;
 	};
 
