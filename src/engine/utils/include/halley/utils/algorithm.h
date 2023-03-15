@@ -102,7 +102,7 @@ namespace Halley
 			return end;
 		}
 
-		const WeightType pick = rng.get(0, totalWeight);
+		const WeightType pick = rng.get(WeightType(0), totalWeight);
 		WeightType accum = 0;
 		for (Iter iter = begin; iter != end; ) {
 			accum += weightFunc(deRefFunc(iter));
