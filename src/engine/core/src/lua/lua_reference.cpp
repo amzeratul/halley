@@ -1,6 +1,6 @@
 #include <lua.hpp>
-#include "lua_reference.h"
-#include "lua_state.h"
+#include "halley/lua/lua_reference.h"
+#include "halley/lua/lua_state.h"
 #include "halley/support/exception.h"
 
 using namespace Halley;

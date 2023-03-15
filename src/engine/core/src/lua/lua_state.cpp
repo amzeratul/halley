@@ -1,5 +1,5 @@
 #include <lua.hpp>
-#include "lua_state.h"
+#include "halley/lua/lua_state.h"
 #include "halley/support/exception.h"
 #include "halley/support/logger.h"
 #include "halley/resources/resources.h"

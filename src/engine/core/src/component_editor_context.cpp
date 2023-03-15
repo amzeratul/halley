@@ -1,4 +1,4 @@
-#include "component_editor_context.h"
+#include "halley/editor_extensions/component_editor_context.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/editor_extensions/component_field_parameters.h"
 

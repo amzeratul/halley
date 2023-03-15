@@ -1,8 +1,6 @@
-#include "vertex_gizmo.h"
+#include "halley/editor_extensions/vertex_gizmo.h"
 #include "halley/game/scene_editor_interface.h"
 #include "halley/graphics/painter.h"
-
-#define DONT_INCLUDE_HALLEY_HPP
 #include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;

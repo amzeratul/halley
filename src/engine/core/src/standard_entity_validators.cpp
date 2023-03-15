@@ -1,9 +1,7 @@
-#include "standard_entity_validators.h"
+#include "halley/editor_extensions/standard_entity_validators.h"
 #include "halley/entity/entity.h"
 #include "halley/entity/world.h"
-
-#define DONT_INCLUDE_HALLEY_HPP
-#include "component_editor_context.h"
+#include "halley/editor_extensions/component_editor_context.h"
 #include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;

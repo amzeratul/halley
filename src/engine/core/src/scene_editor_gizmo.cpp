@@ -1,5 +1,5 @@
-#include "scene_editor_gizmo.h"
-#include "scene_editor_input_state.h"
+#include "halley/editor_extensions/scene_editor_gizmo.h"
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/game/scene_editor_interface.h"
 #include "halley/graphics/camera.h"
 #include "halley/entity/entity_data.h"

@@ -1,6 +1,4 @@
-#define DONT_INCLUDE_HALLEY_HPP
-
-#include "asset_preview_generator.h"
+#include "halley/editor_extensions/asset_preview_generator.h"
 
 #include <components/sprite_component.h>
 

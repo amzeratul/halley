@@ -1,4 +1,4 @@
-#include "choose_asset_window.h"
+#include "halley/editor_extensions/choose_asset_window.h"
 
 #include "halley/input/input_keyboard.h"
 #include "halley/ui/ui_anchor.h"

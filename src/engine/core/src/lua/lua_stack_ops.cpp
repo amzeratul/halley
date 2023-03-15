@@ -1,6 +1,6 @@
 #include "../../../../../contrib/lua/src/lua.hpp"
-#include "lua_stack_ops.h"
-#include "lua_state.h"
+#include "halley/lua/lua_stack_ops.h"
+#include "halley/lua/lua_state.h"
 
 using namespace Halley;
 

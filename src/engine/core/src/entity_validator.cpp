@@ -1,5 +1,5 @@
-#include "entity_validator.h"
-#include "standard_entity_validators.h"
+#include "halley/editor_extensions/entity_validator.h"
+#include "halley/editor_extensions/standard_entity_validators.h"
 #include "halley/entity/entity.h"
 #include "halley/support/logger.h"
 

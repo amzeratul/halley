@@ -1,8 +1,6 @@
-#define DONT_INCLUDE_HALLEY_HPP
+#include "halley/editor_extensions/scene_editor.h"
 
-#include "scene_editor.h"
-
-#include "entity_validator.h"
+#include "halley/editor_extensions/entity_validator.h"
 #include "halley/entity/world.h"
 #include "halley/api/halley_api.h"
 #include "halley/game/halley_statics.h"
