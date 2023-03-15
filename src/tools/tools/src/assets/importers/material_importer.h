@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/plugin/iasset_importer.h"
 #include <yaml-cpp/node/node.h>
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include <gsl/span>
 
 namespace Halley

@@ -1,6 +1,6 @@
 #include "dx11_shader.h"
 #include "dx11_video.h"
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/plugin/iasset_importer.h"
 #include "halley/file_formats/image.h"
-#include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
 #include "halley/data_structures/bin_pack.h"
 
 namespace Halley

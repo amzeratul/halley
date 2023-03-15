@@ -1,6 +1,6 @@
 #pragma once
 #include "dx11_render_target.h"
-#include "halley/core/graphics/render_target/render_target_screen.h"
+#include "halley/graphics/render_target/render_target_screen.h"
 
 namespace Halley
 {

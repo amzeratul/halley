@@ -3,7 +3,7 @@
 #include "audio_sub_object.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 #include "halley/maths/range.h"
 
 namespace Halley {

@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/graphics/window.h"
+#include "halley/graphics/window.h"
 #include <SDL.h>
 
 namespace Halley

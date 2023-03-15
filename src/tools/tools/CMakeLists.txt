@@ -206,8 +206,6 @@ add_library (halley-tools ${SOURCES} ${HEADERS} ${ShaderConductor_LIBRARY})
 target_link_libraries (halley-tools
     halley-core
     halley-audio
-    halley-net
-    halley-entity
     halley-ui
     ${FREETYPE_LIBRARIES}
     ${YAMLCPP_LIBRARY}

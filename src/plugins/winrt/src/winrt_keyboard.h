@@ -1,6 +1,6 @@
 #pragma once
 
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 #include <winrt/Windows.UI.Text.Core.h>
 #include <winrt/Windows.UI.Core.h>
 #include <winrt/Windows.System.h>

@@ -5,10 +5,10 @@
 #include <jni.h>
 #include <string>
 #include <halley/runner/game_loader.h>
-#include <halley/core/game/core.h>
+#include <halley/game/core.h>
 #include <halley/runner/main_loop.h>
 #include <halley/runner/entry_point.h>
-#include "input/android_input_api.h"
+#include "halley/input/android_input_api.h"
 
 using namespace Halley;
 

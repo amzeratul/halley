@@ -1,6 +1,6 @@
-#include "stage/stage.h"
+#include "halley/stage/stage.h"
 
-#include "game/game.h"
+#include "halley/game/game.h"
 
 using namespace Halley;
 

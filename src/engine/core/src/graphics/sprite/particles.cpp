@@ -1,4 +1,4 @@
-#include "graphics/sprite/particles.h"
+#include "halley/graphics/sprite/particles.h"
 
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"

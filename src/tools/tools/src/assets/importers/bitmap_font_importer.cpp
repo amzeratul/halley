@@ -1,7 +1,7 @@
 #include "bitmap_font_importer.h"
 #include "halley/support/exception.h"
 #include "../contrib/tinyxml/ticpp.h"
-#include "halley/core/graphics/text/font.h"
+#include "halley/graphics/text/font.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/image.h"

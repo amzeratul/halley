@@ -1,6 +1,6 @@
 #pragma once
 #include <gsl/span>
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 #include "audio_buffer.h"
 
 namespace Halley

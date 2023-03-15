@@ -1,6 +1,6 @@
 #include "halley/tools/runner/runner_tool.h"
 #include "halley/tools/runner/dynamic_loader.h"
-#include "halley/core/game/halley_main.h"
+#include "halley/game/halley_main.h"
 
 using namespace Halley;
 

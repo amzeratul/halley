@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../ui_widget.h"
-#include "halley/core/graphics/sprite/sprite.h"
-#include "halley/core/graphics/text/text_renderer.h"
-#include "halley/core/input/input_device.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/text/text_renderer.h"
+#include "halley/input/input_device.h"
 #include "halley/text/i18n.h"
-#include "halley/core/input/input_keyboard.h"
-#include "halley/core/input/text_input_data.h"
+#include "halley/input/input_keyboard.h"
+#include "halley/input/text_input_data.h"
 
 namespace Halley {
 	class UIStyle;

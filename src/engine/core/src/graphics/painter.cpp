@@ -1,24 +1,24 @@
-#include "halley/core/graphics/painter.h"
+#include "halley/graphics/painter.h"
 
 #include <cassert>
 
-#include "halley/core/graphics/render_context.h"
-#include "halley/core/graphics/render_target/render_target.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material_parameter.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/render_target/render_target.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
 #include <cstring> // memmove
 #include <gsl/gsl_assert>
 
 
-#include "api/video_api.h"
-#include "graphics/render_snapshot.h"
+#include "halley/api/video_api.h"
+#include "halley/graphics/render_snapshot.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/polygon.h"
 #include "halley/support/logger.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
-#include "resources/resources.h"
+#include "halley/resources/resources.h"
 
 using namespace Halley;
 

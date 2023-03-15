@@ -1,4 +1,4 @@
-#include "halley/core/devcon/devcon_messages.h"
+#include "halley/devcon/devcon_messages.h"
 #include "halley/text/halleystring.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/net/connection/message_queue.h"

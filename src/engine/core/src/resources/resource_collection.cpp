@@ -1,10 +1,10 @@
-#include "resources/resource_collection.h"
-#include "resources/resource_locator.h"
-#include "resources/resources.h"
+#include "halley/resources/resource_collection.h"
+#include "halley/resources/resource_locator.h"
+#include "halley/resources/resources.h"
 #include <halley/resources/resource.h>
 #include <utility>
 
-#include "graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;

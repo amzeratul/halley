@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/plugin/iasset_importer.h"
 #include "halley/maths/vector2.h"
-#include "halley/core/graphics/text/font.h"
+#include "halley/graphics/text/font.h"
 
 namespace Halley
 {

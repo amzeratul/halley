@@ -1,6 +1,6 @@
 #pragma once
 #include "../ui_widget.h"
-#include "halley/core/input/input_keys.h"
+#include "halley/input/input_keys.h"
 
 namespace Halley {
 	class UIStyle;

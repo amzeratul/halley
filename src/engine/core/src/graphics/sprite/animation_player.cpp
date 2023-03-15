@@ -1,10 +1,10 @@
-#include "graphics/sprite/animation.h"
-#include "graphics/sprite/animation_player.h"
-#include "graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/animation.h"
+#include "halley/graphics/sprite/animation_player.h"
+#include "halley/graphics/sprite/sprite.h"
 #include <gsl/gsl_assert>
 
-#include "graphics/material/material.h"
-#include "resources/resources.h"
+#include "halley/graphics/material/material.h"
+#include "halley/resources/resources.h"
 
 using namespace Halley;
 

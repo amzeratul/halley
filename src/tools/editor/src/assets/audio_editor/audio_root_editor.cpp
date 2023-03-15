@@ -2,7 +2,7 @@
 
 #include "audio_object_editor.h"
 #include "halley/audio/audio_object.h"
-#include "halley/core/properties/audio_properties.h"
+#include "halley/properties/audio_properties.h"
 using namespace Halley;
 
 AudioRootEditor::AudioRootEditor(UIFactory& factory, AudioObjectEditor& editor, AudioObject& object)

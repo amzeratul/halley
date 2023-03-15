@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/concurrency/future.h"
-#include "halley/core/graphics/render_target/render_target_texture.h"
-#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/graphics/render_target/render_target_texture.h"
+#include "halley/graphics/sprite/sprite.h"
 #include "halley/entity/world.h"
 #include "halley/maths/vector2.h"
 #include "halley/resources/resource.h"

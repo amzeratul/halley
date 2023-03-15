@@ -1,8 +1,8 @@
-#include "halley/core/graphics/render_snapshot.h"
+#include "halley/graphics/render_snapshot.h"
 
-#include "graphics/render_context.h"
-#include "graphics/material/material_definition.h"
-#include "graphics/render_target/render_target_texture.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/render_target/render_target_texture.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 

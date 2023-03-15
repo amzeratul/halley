@@ -1,1 +1,1 @@
-#include "halley/core/graphics/mesh/mesh_animation.h"
+#include "halley/graphics/mesh/mesh_animation.h"

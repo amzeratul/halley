@@ -1,7 +1,7 @@
 #include "resource_pack.h"
 #include <utility>
-#include "resources/asset_pack.h"
-#include "api/system_api.h"
+#include "halley/resources/asset_pack.h"
+#include "halley/api/system_api.h"
 using namespace Halley;
 
 PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad, std::optional<int> priority)

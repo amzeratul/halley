@@ -1,10 +1,10 @@
-#include "graphics/text/font.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material_parameter.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/graphics/text/font.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
+#include "halley/api/halley_api.h"
 #include "halley/bytes/byte_serializer.h"
-#include "resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/text/string_converter.h"
 #include <iostream>
 

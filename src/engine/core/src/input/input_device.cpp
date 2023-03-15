@@ -1,4 +1,4 @@
-#include "halley/core/input/input_device.h"
+#include "halley/input/input_device.h"
 
 #include "halley/support/logger.h"
 

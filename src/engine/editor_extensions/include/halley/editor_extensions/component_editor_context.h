@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite.h"
 #include "halley/maths/uuid.h"
 
 namespace Halley {

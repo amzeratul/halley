@@ -2,7 +2,7 @@
 #include <memory>
 #include "halley/data_structures/vector.h"
 
-#include "halley/core/input/text_input_capture.h"
+#include "halley/input/text_input_capture.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"

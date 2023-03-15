@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/input/input_joystick.h"
+#include "halley/input/input_joystick.h"
 
 namespace Halley
 {

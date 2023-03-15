@@ -1,7 +1,7 @@
-#include "halley/core/game/game.h"
+#include "halley/game/game.h"
 
 #include "halley/editor_extensions/asset_preview_generator.h"
-#include "halley/entity/scripting/script_node_type.h"
+#include "halley/scripting/script_node_type.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
 

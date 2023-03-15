@@ -1,10 +1,10 @@
 #include "material_importer.h"
 #include "halley/bytes/byte_serializer.h"
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 #include "shader_importer.h"
-#include "halley/core/graphics/shader.h"
+#include "halley/graphics/shader.h"
 #include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;

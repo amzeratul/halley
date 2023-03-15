@@ -1,6 +1,6 @@
 #include "halley/tools/project/write_version_tool.h"
 
-#include "halley/core/version/version.h"
+#include "halley/version/version.h"
 #include "halley/tools/file/filesystem.h"
 
 using namespace Halley;

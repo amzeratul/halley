@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <utility>
 #include "asset_importer.h"
-#include "halley/core/resources/asset_database.h"
+#include "halley/resources/asset_database.h"
 
 namespace Halley
 {

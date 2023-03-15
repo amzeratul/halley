@@ -1,15 +1,15 @@
 #include <cstring>
-#include "graphics/sprite/sprite.h"
-#include "graphics/sprite/sprite_sheet.h"
-#include "halley/core/graphics/painter.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material_parameter.h"
-#include "halley/core/graphics/texture.h"
-#include "resources/resources.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
+#include "halley/graphics/texture.h"
+#include "halley/resources/resources.h"
 #include <gsl/gsl_assert>
 
-#include "api/video_api.h"
+#include "halley/api/video_api.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/logger.h"
 

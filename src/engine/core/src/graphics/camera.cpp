@@ -19,8 +19,8 @@
 
 \*****************************************************************/
 
-#include "halley/core/graphics/camera.h"
-#include "graphics/render_target/render_target.h"
+#include "halley/graphics/camera.h"
+#include "halley/graphics/render_target/render_target.h"
 
 using namespace Halley;
 

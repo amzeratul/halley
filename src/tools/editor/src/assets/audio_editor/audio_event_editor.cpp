@@ -1,7 +1,7 @@
 #include "audio_event_editor.h"
 
 #include "audio_fade_editor.h"
-#include "halley/core/properties/game_properties.h"
+#include "halley/properties/game_properties.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;

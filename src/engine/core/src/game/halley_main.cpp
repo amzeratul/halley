@@ -1,7 +1,7 @@
-#include "halley/core/game/halley_main.h"
-#include "halley/core/game/core.h"
+#include "halley/game/halley_main.h"
+#include "halley/game/core.h"
 #include "halley/support/console.h"
-#include "game/halley_main.h"
+#include "halley/game/halley_main.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

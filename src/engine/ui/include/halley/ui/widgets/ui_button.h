@@ -1,7 +1,7 @@
 #pragma once
 #include "ui_clickable.h"
 #include "ui_label.h"
-#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite.h"
 
 namespace Halley {
 	class UIImage;

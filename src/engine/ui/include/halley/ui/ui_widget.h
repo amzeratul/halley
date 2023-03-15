@@ -7,7 +7,7 @@
 #include "halley/maths/vector4.h"
 #include "ui_input.h"
 #include "ui_data_bind.h"
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 #include "ui_style.h"
 #include "halley/text/i18n.h"
 

@@ -7,11 +7,11 @@
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
 #include <halley/support/debug.h>
-#include <halley/core/graphics/window.h>
+#include <halley/graphics/window.h>
 #include "halley/text/string_converter.h"
 #include "constant_buffer_opengl.h"
-#include "halley/core/game/game_platform.h"
-#include "halley/core/graphics/material/uniform_type.h"
+#include "halley/game/game_platform.h"
+#include "halley/graphics/material/uniform_type.h"
 using namespace Halley;
 
 #ifdef _MSC_VER

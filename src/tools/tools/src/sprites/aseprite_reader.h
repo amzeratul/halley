@@ -5,7 +5,7 @@
 
 
 #include "aseprite_file.h"
-#include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector4.h"
 

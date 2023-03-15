@@ -1,6 +1,6 @@
 #include "selection_box_gizmo.h"
-#include "halley/core/graphics/painter.h"
-#include "halley/core/resources/resources.h"
+#include "halley/graphics/painter.h"
+#include "halley/resources/resources.h"
 using namespace Halley;
 
 SelectionBoxGizmo::SelectionBoxGizmo(SnapRules snapRules, Resources& resources)

@@ -1,11 +1,11 @@
 #pragma once
-#include "halley/core/api/movie_api.h"
+#include "halley/api/movie_api.h"
 #include "halley/resources/resource_data.h"
 #include "halley/time/halleytime.h"
-#include "halley/core/graphics/texture.h"
-#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/sprite/sprite.h"
 #include <halley/audio/audio_clip.h>
-#include "halley/core/graphics/movie/movie_player.h"
+#include "halley/graphics/movie/movie_player.h"
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 

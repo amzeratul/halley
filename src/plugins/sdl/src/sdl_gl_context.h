@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/api/system_api.h"
+#include "halley/api/system_api.h"
 #include <SDL.h>
 
 namespace Halley

@@ -1,5 +1,5 @@
 #include <halley/os/os.h>
-#include "halley/core/game/environment.h"
+#include "halley/game/environment.h"
 #include "halley/file/path.h"
 #include "halley/utils/algorithm.h"
 

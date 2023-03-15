@@ -2,7 +2,7 @@
 #include "audio_clip.h"
 
 #include "halley/bytes/byte_serializer.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/maths/random.h"

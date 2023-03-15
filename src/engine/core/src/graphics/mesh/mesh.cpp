@@ -1,11 +1,11 @@
-#include "halley/core/graphics/mesh/mesh.h"
-#include "halley/core/graphics/texture.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_parameter.h"
+#include "halley/graphics/mesh/mesh.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_parameter.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/api/halley_api.h"
 
 using namespace Halley;
 

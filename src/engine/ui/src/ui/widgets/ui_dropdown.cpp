@@ -6,7 +6,7 @@
 #include "widgets/ui_list.h"
 #include "halley/text/i18n.h"
 #include "halley/ui/ui_data_bind.h"
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 
 using namespace Halley;
 

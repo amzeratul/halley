@@ -1,7 +1,7 @@
 #include "ui_painter.h"
-#include "halley/core/graphics/sprite/sprite_painter.h"
-#include "halley/core/graphics/sprite/sprite.h"
-#include "halley/core/graphics/text/text_renderer.h"
+#include "halley/graphics/sprite/sprite_painter.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/text/text_renderer.h"
 using namespace Halley;
 
 UIPainter::UIPainter(SpritePainter& painter, int mask, int layer)

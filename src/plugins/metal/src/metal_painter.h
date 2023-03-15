@@ -1,5 +1,5 @@
 #pragma once
-#include <halley/core/graphics/painter.h>
+#include <halley/graphics/painter.h>
 #include <Metal/Metal.h>
 
 namespace Halley {

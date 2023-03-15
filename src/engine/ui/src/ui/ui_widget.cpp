@@ -5,7 +5,7 @@
 #include "ui_anchor.h"
 #include "ui_behaviour.h"
 #include "ui_event_handler.h"
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 
 using namespace Halley;
 

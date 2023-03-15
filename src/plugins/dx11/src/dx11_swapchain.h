@@ -5,8 +5,8 @@
 #include <DXGI1_2.h>
 #undef min
 #undef max
-#include "halley/core/api/halley_api_internal.h"
-#include "halley/core/graphics/window.h"
+#include "halley/api/halley_api_internal.h"
+#include "halley/graphics/window.h"
 
 namespace Halley
 {

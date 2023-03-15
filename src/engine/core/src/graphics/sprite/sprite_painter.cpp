@@ -1,10 +1,10 @@
-#include "graphics/sprite/sprite_painter.h"
-#include "graphics/sprite/sprite.h"
-#include "graphics/painter.h"
+#include "halley/graphics/sprite/sprite_painter.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/painter.h"
 #include <gsl/gsl>
 
-#include "graphics/material/material.h"
-#include "graphics/text/text_renderer.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/text/text_renderer.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;

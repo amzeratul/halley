@@ -1,7 +1,7 @@
 #pragma once
 
-#include "halley/core/api/halley_api_internal.h"
-#include "halley/core/graphics/window.h"
+#include "halley/api/halley_api_internal.h"
+#include "halley/graphics/window.h"
 #include <d3d11.h>
 #include <D3D11_1.h>
 #include <DXGI1_2.h>

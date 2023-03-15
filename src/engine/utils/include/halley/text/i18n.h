@@ -3,8 +3,8 @@
 #include "halleystring.h"
 #include <map>
 
-#include "halley/core/graphics/text/text_renderer.h"
-#include "halley/core/resources/resources.h"
+#include "halley/graphics/text/text_renderer.h"
+#include "halley/resources/resources.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 

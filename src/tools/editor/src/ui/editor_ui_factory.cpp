@@ -1,5 +1,5 @@
 #include "editor_ui_factory.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include <halley/file_formats/config_file.h>
 
 #include "colour_picker.h"

@@ -2,8 +2,8 @@
 
 
 
-#include "halley/core/api/halley_api.h"
-#include "halley/core/entry/entry_point.h"
+#include "halley/api/halley_api.h"
+#include "halley/entry/entry_point.h"
 #include "halley/file/path.h"
 #include "halley/support/logger.h"
 

@@ -4,7 +4,7 @@
 #include "widgets/ui_scrollbar_pane.h"
 #include "ui_factory.h"
 #include "halley/concurrency/concurrent.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/api/halley_api.h"
 #include "halley/utils/algorithm.h"
 #include "halley/audio/audio_event.h"
 

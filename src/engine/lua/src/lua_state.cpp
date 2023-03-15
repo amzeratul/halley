@@ -2,7 +2,7 @@
 #include "lua_state.h"
 #include "halley/support/exception.h"
 #include "halley/support/logger.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/file_formats/binary_file.h"
 
 using namespace Halley;

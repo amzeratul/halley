@@ -1,9 +1,9 @@
-#include "halley/core/input/text_input_data.h"
+#include "halley/input/text_input_data.h"
 
-#include "api/clipboard.h"
+#include "halley/api/clipboard.h"
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
-#include "input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 
 using namespace Halley;
 

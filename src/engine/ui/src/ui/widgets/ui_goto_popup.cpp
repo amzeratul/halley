@@ -2,7 +2,7 @@
 
 #include "ui_anchor.h"
 #include "ui_factory.h"
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 #include "widgets/ui_spin_control2.h"
 using namespace Halley;
 

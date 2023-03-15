@@ -1,8 +1,8 @@
 #pragma once
 
 #include "metal_render_target.h"
-#include <halley/core/graphics/texture.h>
-#include <halley/core/graphics/texture_descriptor.h>
+#include <halley/graphics/texture.h>
+#include <halley/graphics/texture_descriptor.h>
 
 #include <Metal/Metal.h>
 

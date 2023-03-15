@@ -1,5 +1,5 @@
 #include "entity_editor_factories.h"
-#include "halley/core/graphics/sprite/animation.h"
+#include "halley/graphics/sprite/animation.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_validator.h"
 #include "halley/ui/widgets/ui_checkbox.h"

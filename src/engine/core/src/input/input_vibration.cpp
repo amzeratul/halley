@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <halley/utils/utils.h>
-#include "input/input_vibration.h"
+#include "halley/input/input_vibration.h"
 
 using namespace Halley;
 

@@ -1,7 +1,7 @@
 #include "audio_expression_editor.h"
 
 #include "audio_object_editor.h"
-#include "halley/core/properties/audio_properties.h"
+#include "halley/properties/audio_properties.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_list.h"

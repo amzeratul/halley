@@ -1,7 +1,7 @@
 #pragma once
 #include "../ui_behaviour.h"
 #include "../ui_widget.h"
-#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/graphics/sprite/sprite.h"
 
 namespace Halley {
 	class UIImage : public UIWidget {

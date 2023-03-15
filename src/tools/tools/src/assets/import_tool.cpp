@@ -7,7 +7,7 @@
 #include <chrono>
 #include "halley/tools/file/filesystem.h"
 #include "halley/os/os.h"
-#include "halley/core/game/halley_statics.h"
+#include "halley/game/halley_statics.h"
 #include "halley/support/logger.h"
 #include "halley/tools/project/project_loader.h"
 

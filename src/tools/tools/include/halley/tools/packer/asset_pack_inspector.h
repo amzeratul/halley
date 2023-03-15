@@ -3,7 +3,7 @@
 #include "halley/utils/utils.h"
 #include "halley/tools/cli_tool.h"
 #include "halley/bytes/byte_serializer.h"
-#include "halley/core/resources/asset_database.h"
+#include "halley/resources/asset_database.h"
 
 namespace Halley {
     class AssetPackInspector {

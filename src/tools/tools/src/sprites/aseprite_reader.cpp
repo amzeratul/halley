@@ -1,6 +1,6 @@
 #include "aseprite_reader.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
 #include "halley/file/path.h"
 #include "halley/file_formats/image.h"
 #include "../assets/importers/sprite_importer.h"

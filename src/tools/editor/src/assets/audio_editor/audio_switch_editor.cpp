@@ -2,7 +2,7 @@
 
 #include "audio_object_editor.h"
 #include "halley/audio/sub_objects/audio_sub_object_switch.h"
-#include "halley/core/properties/audio_properties.h"
+#include "halley/properties/audio_properties.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 
 using namespace Halley;

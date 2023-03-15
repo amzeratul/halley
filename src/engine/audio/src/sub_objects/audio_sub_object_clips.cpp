@@ -1,6 +1,6 @@
 #include "sub_objects/audio_sub_object_clips.h"
 
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/support/logger.h"
 #include "halley/bytes/byte_serializer.h"
 #include "../audio_engine.h"

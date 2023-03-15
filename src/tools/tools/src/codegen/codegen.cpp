@@ -7,7 +7,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 #include "halley/tools/ecs/ecs_data.h"
 
 #ifdef _MSC_VER

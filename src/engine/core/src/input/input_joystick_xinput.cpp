@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "input/input_joystick_xinput.h"
+#include "halley/input/input_joystick_xinput.h"
 #include <iostream>
 #include <halley/utils/utils.h>
 

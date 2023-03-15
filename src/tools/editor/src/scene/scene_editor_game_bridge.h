@@ -1,6 +1,6 @@
 #pragma once
 #include "choose_window.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/game/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 
 class Transform2DComponent;

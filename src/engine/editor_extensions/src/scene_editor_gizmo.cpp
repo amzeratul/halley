@@ -1,7 +1,7 @@
 #include "scene_editor_gizmo.h"
 #include "scene_editor_input_state.h"
-#include "halley/core/game/scene_editor_interface.h"
-#include "halley/core/graphics/camera.h"
+#include "halley/game/scene_editor_interface.h"
+#include "halley/graphics/camera.h"
 #include "halley/entity/entity_data.h"
 #include "halley/support/logger.h"
 using namespace Halley;

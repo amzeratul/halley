@@ -330,18 +330,14 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-contrib
 	optimized halley-ui
 	optimized halley-core
-	optimized halley-entity
 	optimized halley-audio
-	optimized halley-net
 	optimized halley-lua
 	optimized halley-utils
 	optimized halley-editor-extensions
 	debug halley-contrib_d
 	debug halley-ui_d
 	debug halley-core_d
-	debug halley-entity_d
 	debug halley-audio_d
-	debug halley-net_d
 	debug halley-lua_d
 	debug halley-utils_d
 	debug halley-editor-extensions_d
@@ -514,7 +510,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 
 	SET(LINK_LIBRARIES "")
 	if (EMBED)
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils halley-editor-extensions ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-ui halley-core halley-audio halley-lua halley-utils halley-editor-extensions ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-opengl)
 		endif ()

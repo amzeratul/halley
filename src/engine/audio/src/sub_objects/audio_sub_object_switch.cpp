@@ -2,7 +2,7 @@
 
 #include "../audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
-#include "halley/core/properties/audio_properties.h"
+#include "halley/properties/audio_properties.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 

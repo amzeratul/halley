@@ -1,8 +1,8 @@
 #include "dummy_video.h"
-#include <halley/core/graphics/painter.h>
-#include <halley/core/graphics/texture.h>
-#include <halley/core/graphics/shader.h>
-#include <halley/core/graphics/render_target/render_target_texture.h>
+#include <halley/graphics/painter.h>
+#include <halley/graphics/texture.h>
+#include <halley/graphics/shader.h>
+#include <halley/graphics/render_target/render_target_texture.h>
 #include "dummy_system.h"
 
 using namespace Halley;

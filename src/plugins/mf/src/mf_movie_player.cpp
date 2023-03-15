@@ -1,13 +1,13 @@
 #include "mf_movie_player.h"
 #include "halley/resources/resource_data.h"
-#include "halley/core/api/audio_api.h"
-#include "halley/core/api/video_api.h"
+#include "halley/api/audio_api.h"
+#include "halley/api/video_api.h"
 #include "resource_data_byte_stream.h"
-#include "halley/core/graphics/texture_descriptor.h"
+#include "halley/graphics/texture_descriptor.h"
 #include "halley/concurrency/concurrent.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/support/logger.h"
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 #include "halley/maths/random.h"
 
 using namespace Halley;

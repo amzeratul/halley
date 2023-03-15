@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../ui_widget.h"
-#include "halley/core/graphics/sprite/sprite.h"
-#include "halley/core/graphics/text/text_renderer.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/text/text_renderer.h"
 #include "ui_clickable.h"
 
 namespace Halley {

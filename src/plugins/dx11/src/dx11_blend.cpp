@@ -1,7 +1,7 @@
 #include "dx11_blend.h"
 #include <gsl/gsl>
 #include "dx11_video.h"
-#include "halley/core/graphics/blend.h"
+#include "halley/graphics/blend.h"
 using namespace Halley;
 
 DX11Blend::DX11Blend(DX11Video& video, BlendType blend)

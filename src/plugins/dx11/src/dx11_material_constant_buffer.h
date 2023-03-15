@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/graphics/material/material.h"
+#include "halley/graphics/material/material.h"
 #include "dx11_buffer.h"
 
 namespace Halley

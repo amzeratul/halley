@@ -1,16 +1,16 @@
-#include "graphics/render_target/render_graph_node.h"
+#include "halley/graphics/render_target/render_graph_node.h"
 
 #include <cassert>
 
-#include "graphics/render_target/render_graph.h"
-#include "api/video_api.h"
-#include "graphics/render_context.h"
-#include "graphics/texture.h"
-#include "graphics/material/material.h"
-#include "graphics/material/material_definition.h"
-#include "graphics/render_target/render_target.h"
-#include "graphics/render_target/render_target_texture.h"
-#include "graphics/sprite/sprite.h"
+#include "halley/graphics/render_target/render_graph.h"
+#include "halley/api/video_api.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/render_target/render_target.h"
+#include "halley/graphics/render_target/render_target_texture.h"
+#include "halley/graphics/sprite/sprite.h"
 
 using namespace Halley;
 

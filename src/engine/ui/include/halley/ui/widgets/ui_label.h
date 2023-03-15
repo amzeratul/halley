@@ -1,6 +1,6 @@
 #pragma once
 #include "../ui_widget.h"
-#include "halley/core/graphics/text/text_renderer.h"
+#include "halley/graphics/text/text_renderer.h"
 #include <climits>
 #include "halley/text/i18n.h"
 #include "halley/concurrency/future.h"

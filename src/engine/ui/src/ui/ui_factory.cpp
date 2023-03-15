@@ -1,6 +1,6 @@
 #include <utility>
 #include "halley/file_formats/config_file.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
 
 #include "ui_definition.h"
@@ -22,7 +22,7 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "halley/ui/widgets/ui_framed_image.h"
 #include "halley/ui/widgets/ui_hybrid_list.h"
 #include "widgets/ui_spin_list.h"

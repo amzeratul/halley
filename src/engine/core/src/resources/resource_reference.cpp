@@ -1,3 +1,3 @@
-#include "halley/core/resources/resource_reference.h"
+#include "halley/resources/resource_reference.h"
 
 using namespace Halley;

@@ -1,9 +1,9 @@
 #include "halley/ui/ui_colour_scheme.h"
 
 
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/resources/resources.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/resources/resources.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/logger.h"

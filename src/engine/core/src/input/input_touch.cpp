@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include "input/input_touch.h"
+#include "halley/input/input_touch.h"
 
 using namespace Halley;
 

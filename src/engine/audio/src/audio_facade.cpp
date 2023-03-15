@@ -5,9 +5,9 @@
 #include "audio_handle_impl.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "audio_event.h"
-#include "halley/core/properties/game_properties.h"
+#include "halley/properties/game_properties.h"
 
 using namespace Halley;
 

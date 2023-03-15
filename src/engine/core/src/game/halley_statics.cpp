@@ -1,4 +1,4 @@
-#include "game/halley_statics.h"
+#include "halley/game/halley_statics.h"
 #include <halley/entity/type_deleter.h>
 #include <halley/data_structures/vector.h>
 #include <halley/entity/family_mask.h>
@@ -7,7 +7,7 @@
 #include <halley/concurrency/concurrent.h>
 #include <thread>
 #include "halley/support/logger.h"
-#include "api/system_api.h"
+#include "halley/api/system_api.h"
 
 using namespace Halley;
 

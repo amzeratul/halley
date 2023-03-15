@@ -1,6 +1,6 @@
-#include "resources/resources.h"
-#include "resources/resource_locator.h"
-#include "api/halley_api.h"
+#include "halley/resources/resources.h"
+#include "halley/resources/resource_locator.h"
+#include "halley/api/halley_api.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;

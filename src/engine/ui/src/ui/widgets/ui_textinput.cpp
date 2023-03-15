@@ -5,8 +5,8 @@
 #include "halley/text/i18n.h"
 #include "halley/ui/ui_data_bind.h"
 #include "halley/support/logger.h"
-#include "halley/core/input/input_keys.h"
-#include "halley/core/api/system_api.h"
+#include "halley/input/input_keys.h"
+#include "halley/api/system_api.h"
 
 using namespace Halley;
 

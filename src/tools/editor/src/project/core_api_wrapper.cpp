@@ -1,6 +1,6 @@
 #include "core_api_wrapper.h"
 
-#include "halley/core/stage/stage.h"
+#include "halley/stage/stage.h"
 
 using namespace Halley;
 

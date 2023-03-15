@@ -1,6 +1,4 @@
 add_subdirectory(utils)
-add_subdirectory(net)
-add_subdirectory(entity)
 add_subdirectory(audio)
 add_subdirectory(core)
 add_subdirectory(lua)

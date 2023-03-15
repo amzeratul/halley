@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/data_structures/vector.h"
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 
 namespace Halley
 {

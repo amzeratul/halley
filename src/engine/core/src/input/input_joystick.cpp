@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include <cmath>
-#include "input/input_joystick.h"
+#include "halley/input/input_joystick.h"
 using namespace Halley;
 
 

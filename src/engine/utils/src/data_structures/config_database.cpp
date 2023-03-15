@@ -1,6 +1,6 @@
 #include "halley/data_structures/config_database.h"
 
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/utils/algorithm.h"
 

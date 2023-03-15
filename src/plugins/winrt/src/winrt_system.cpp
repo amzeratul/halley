@@ -1,7 +1,7 @@
 #include "winrt_platform.h"
 #include "xbl_manager.h"
 
-#include "api/halley_api.h"
+#include "halley/api/halley_api.h"
 
 #ifdef WINDOWS_STORE
 

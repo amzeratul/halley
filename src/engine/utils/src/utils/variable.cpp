@@ -1,5 +1,5 @@
 #include "halley/utils/variable.h"
-#include "halley/core/resources/resource_collection.h"
+#include "halley/resources/resource_collection.h"
 #include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 

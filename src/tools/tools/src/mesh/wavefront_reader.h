@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/graphics/mesh/mesh.h"
+#include "halley/graphics/mesh/mesh.h"
 
 namespace Halley
 {

@@ -5,7 +5,7 @@
 #include "halley/tools/make_font/font_generator.h"
 #include "halley/file_formats/image.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/core/graphics/text/font.h"
+#include "halley/graphics/text/font.h"
 
 using namespace Halley;
 

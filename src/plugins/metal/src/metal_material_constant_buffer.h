@@ -1,6 +1,6 @@
 #pragma once
 #include "metal_buffer.h"
-#include <halley/core/graphics/material/material.h>
+#include <halley/graphics/material/material.h>
 
 namespace Halley
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "asset_browser_tabs.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_list.h"

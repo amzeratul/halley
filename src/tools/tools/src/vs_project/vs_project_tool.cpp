@@ -4,7 +4,7 @@
 #include "halley/tools/vs_project/vs_project_manipulator.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/file/path.h"
-#include "halley/core/game/environment.h"
+#include "halley/game/environment.h"
 #include "halley/os/os.h"
 using namespace Halley;
 

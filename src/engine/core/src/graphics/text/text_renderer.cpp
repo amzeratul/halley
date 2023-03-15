@@ -1,8 +1,8 @@
-#include "graphics/text/text_renderer.h"
-#include "graphics/text/font.h"
-#include "halley/core/graphics/painter.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_parameter.h"
+#include "halley/graphics/text/text_renderer.h"
+#include "halley/graphics/text/font.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_parameter.h"
 #include <gsl/gsl_assert>
 
 #include "halley/support/logger.h"

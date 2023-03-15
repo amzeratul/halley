@@ -1,7 +1,7 @@
 #include <iostream>
 #include <halley/data_structures/vector.h>
 #include <halley/tools/cli_tool.h>
-#include "halley/core/game/environment.h"
+#include "halley/game/environment.h"
 
 int main(int argc, char** argv)
 {

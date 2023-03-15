@@ -5,7 +5,7 @@
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
-#include "halley/core/graphics/camera.h"
+#include "halley/graphics/camera.h"
 using namespace Halley;
 
 SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resources& resources, ISceneEditorWindow& sceneEditorWindow)

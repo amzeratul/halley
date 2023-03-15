@@ -2,7 +2,7 @@
 
 #include "halley/text/halleystring.h"
 #include "halley/resources/resource.h"
-#include "halley/core/resources/asset_database.h"
+#include "halley/resources/asset_database.h"
 #include "halley/data_structures/maybe.h"
 #include <set>
 

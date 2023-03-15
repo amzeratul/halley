@@ -1,6 +1,6 @@
 #include "choose_asset_window.h"
 
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 #include "halley/ui/ui_anchor.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "halley/utils/algorithm.h"

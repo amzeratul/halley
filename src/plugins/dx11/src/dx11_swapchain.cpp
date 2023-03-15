@@ -1,9 +1,9 @@
 #include "dx11_swapchain.h"
-#include "halley/core/graphics/window.h"
+#include "halley/graphics/window.h"
 #include "dx11_video.h"
-#include "halley/core/graphics/texture.h"
+#include "halley/graphics/texture.h"
 #include "dx11_texture.h"
-#include "halley/core/graphics/texture_descriptor.h"
+#include "halley/graphics/texture_descriptor.h"
 using namespace Halley;
 
 constexpr static int numBuffers = 2;

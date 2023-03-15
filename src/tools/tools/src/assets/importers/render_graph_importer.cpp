@@ -1,5 +1,5 @@
 #include "render_graph_importer.h"
-#include "halley/core/graphics/render_target/render_graph_definition.h"
+#include "halley/graphics/render_target/render_graph_definition.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/file_formats/yaml_convert.h"

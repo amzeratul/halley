@@ -19,14 +19,14 @@
 
 \*****************************************************************/
 
-#include "input/input_virtual.h"
-#include "input/input_manual.h"
+#include "halley/input/input_virtual.h"
+#include "halley/input/input_manual.h"
 #include <set>
 #include <algorithm>
 #include <utility>
 
 #include "halley/utils/algorithm.h"
-#include "input/input_exclusive.h"
+#include "halley/input/input_exclusive.h"
 
 using namespace Halley;
 

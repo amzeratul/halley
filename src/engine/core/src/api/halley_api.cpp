@@ -1,9 +1,9 @@
 #include <utility>
-#include "api/halley_api.h"
+#include "halley/api/halley_api.h"
 #include <halley/plugin/plugin.h>
 #include "halley/audio/audio_facade.h"
 #include "halley/support/logger.h"
-#include "entry/entry_point.h"
+#include "halley/entry/entry_point.h"
 
 using namespace Halley;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component_field_parameters.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/game/scene_editor_interface.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {

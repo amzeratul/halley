@@ -11,7 +11,7 @@
 #include "halley/file/path.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/core/graphics/text/font.h"
+#include "halley/graphics/text/font.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;

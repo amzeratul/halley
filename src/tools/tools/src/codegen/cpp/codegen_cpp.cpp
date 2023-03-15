@@ -5,7 +5,7 @@
 #include <halley/support/exception.h>
 #include <algorithm>
 #include "halley/text/string_converter.h"
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 #include "halley/tools/ecs/system_message_schema.h"
 #include "halley/utils/algorithm.h"
 

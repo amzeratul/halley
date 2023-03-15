@@ -1,5 +1,5 @@
 #include "winrt_keyboard.h"
-#include <halley/core/input/input_keys.h>
+#include <halley/input/input_keys.h>
 
 using namespace Halley;
 

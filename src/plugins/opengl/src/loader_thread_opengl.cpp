@@ -1,7 +1,7 @@
 #include "loader_thread_opengl.h"
-#include "halley/core/api/system_api.h"
+#include "halley/api/system_api.h"
 #include "halley_gl.h"
-#include "halley/core/halley_core.h"
+#include "halley/halley_core.h"
 #include "halley/concurrency/concurrent.h"
 
 using namespace Halley;

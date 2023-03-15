@@ -1,8 +1,8 @@
 #pragma once
 #include "dynamic_library.h"
-#include "halley/core/entry/entry_point.h"
+#include "halley/entry/entry_point.h"
 #include "halley/file/path.h"
-#include "halley/core/game/game.h"
+#include "halley/game/game.h"
 
 namespace Halley {
 	class IProjectDLLListener;

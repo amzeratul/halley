@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../ui_widget.h"
-#include "halley/core/graphics/sprite/animation_player.h"
+#include "halley/graphics/sprite/animation_player.h"
 
 namespace Halley
 {

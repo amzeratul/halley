@@ -1,7 +1,7 @@
 #include "polygon_gizmo.h"
 #include "halley/ui/ui_event.h"
 #include "halley/editor_extensions/scene_editor_input_state.h"
-#include "halley/core/graphics/painter.h"
+#include "halley/graphics/painter.h"
 #include "halley/maths/line.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_list.h"

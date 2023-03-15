@@ -1,10 +1,10 @@
 #pragma once
-#include "api/halley_api_internal.h"
-#include "graphics/texture.h"
-#include "graphics/render_target/render_target_texture.h"
-#include "graphics/render_target/render_target_screen.h"
-#include "graphics/shader.h"
-#include "graphics/painter.h"
+#include "halley/api/halley_api_internal.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/render_target/render_target_texture.h"
+#include "halley/graphics/render_target/render_target_screen.h"
+#include "halley/graphics/shader.h"
+#include "halley/graphics/painter.h"
 
 namespace Halley {
 	class DummyVideoAPI : public VideoAPIInternal {

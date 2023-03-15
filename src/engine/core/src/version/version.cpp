@@ -1,4 +1,4 @@
-#include "halley/core/version/version.h"
+#include "halley/version/version.h"
 #include "../../../../../include/halley_version.hpp"
 #include "halley/text/halleystring.h"
 #include "halley/text/string_converter.h"

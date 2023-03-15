@@ -1,5 +1,5 @@
 #pragma once
-#include "input/input_button_base.h"
+#include "halley/input/input_button_base.h"
 #include <winrt/Windows.UI.Core.h>
 #include "halley/data_structures/maybe.h"
 

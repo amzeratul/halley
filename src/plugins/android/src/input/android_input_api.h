@@ -1,7 +1,7 @@
 #pragma once
 
-#include "halley/core/api/halley_api_internal.h"
-#include "halley/core/input/input_touch.h"
+#include "halley/api/halley_api_internal.h"
+#include "halley/input/input_touch.h"
 #include "halley/data_structures/vector.h"
 #include <memory>
 #include <android/input.h>

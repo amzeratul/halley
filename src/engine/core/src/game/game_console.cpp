@@ -1,4 +1,4 @@
-#include "halley/core/game/game_console.h"
+#include "halley/game/game_console.h"
 #include "halley/text/halleystring.h"
 
 using namespace Halley;

@@ -1,7 +1,7 @@
-#include <halley/core/input/input_keyboard.h>
-#include "input/input_keys.h"
-#include "input/text_input_capture.h"
-#include "input/text_input_data.h"
+#include <halley/input/input_keyboard.h>
+#include "halley/input/input_keys.h"
+#include "halley/input/text_input_capture.h"
+#include "halley/input/text_input_data.h"
 using namespace Halley;
 
 KeyboardKeyPress::KeyboardKeyPress(KeyCode key, KeyMods mod)

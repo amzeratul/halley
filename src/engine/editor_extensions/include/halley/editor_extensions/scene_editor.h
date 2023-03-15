@@ -1,10 +1,10 @@
 #pragma once
 
 #include "asset_preview_generator.h"
-#include "halley/core/game/scene_editor_interface.h"
-#include "halley/core/graphics/camera.h"
+#include "halley/game/scene_editor_interface.h"
+#include "halley/graphics/camera.h"
 #include "halley/entity/entity.h"
-#include "halley/core/graphics/text/text_renderer.h"
+#include "halley/graphics/text/text_renderer.h"
 
 namespace Halley {
 	class IFrameData;

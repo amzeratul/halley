@@ -1,6 +1,6 @@
 #pragma once
 
-#include "halley/core/graphics/shader.h"
+#include "halley/graphics/shader.h"
 #include <halley/data_structures/hash_map.h>
 
 namespace Halley

@@ -1,4 +1,4 @@
-#include "halley/core/graphics/blend.h"
+#include "halley/graphics/blend.h"
 #include <halley/text/string_converter.h>
 #include <halley/bytes/byte_serializer.h>
 

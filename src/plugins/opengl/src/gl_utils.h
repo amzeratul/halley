@@ -24,9 +24,9 @@
 
 #include "halley/maths/rect.h"
 #include "halley/maths/colour.h"
-#include <halley/core/graphics/blend.h>
+#include <halley/graphics/blend.h>
 
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 
 namespace Halley {
 

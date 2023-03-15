@@ -5,7 +5,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/text/string_converter.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 #include "audio_filter_resample.h"
 #include "audio_object.h"
 #include "halley/file_formats/yaml_convert.h"

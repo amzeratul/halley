@@ -82,9 +82,9 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "plugin/plugin.h"
 
-#include "resources/metadata.h"
-#include "resources/resource.h"
-#include "resources/resource_data.h"
+#include "halley/resources/metadata.h"
+#include "halley/resources/resource.h"
+#include "halley/resources/resource_data.h"
 
 #include "support/assert.h"
 #include "support/console.h"

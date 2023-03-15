@@ -5,7 +5,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 #include "ui_parent.h"
-#include "halley/core/input/input_keys.h"
+#include "halley/input/input_keys.h"
 #include "ui_event.h"
 
 namespace Halley {

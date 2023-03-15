@@ -5,7 +5,7 @@
 #include <memory>
 #include <functional>
 #include <map>
-#include "halley/core/game/environment.h"
+#include "halley/game/environment.h"
 
 namespace Halley
 {

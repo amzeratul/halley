@@ -2,18 +2,18 @@
 #include <SDL.h>
 #include <fstream>
 
-#include "halley/core/api/halley_api_internal.h"
+#include "halley/api/halley_api_internal.h"
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
 #include "sdl_rw_ops.h"
-#include "halley/core/graphics/window.h"
+#include "halley/graphics/window.h"
 #include "halley/os/os.h"
 #include "sdl_window.h"
 #include "sdl_gl_context.h"
 #include "input_sdl.h"
 #include "halley/support/logger.h"
 #include "sdl_save.h"
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 
 #ifdef _WIN32
 #define WIN32_WIN_AND_MEAN

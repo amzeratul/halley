@@ -2,12 +2,12 @@
 
 
 #include "scene_editor_game_bridge.h"
-#include "halley/core/graphics/render_context.h"
-#include "halley/core/graphics/render_target/render_surface.h"
-#include "halley/core/input/input_keyboard.h"
-#include "halley/core/input/input_keys.h"
+#include "halley/graphics/render_context.h"
+#include "halley/graphics/render_target/render_surface.h"
+#include "halley/input/input_keyboard.h"
+#include "halley/input/input_keys.h"
 #include "scene_editor_gizmo_collection.h"
-#include "halley/core/game/scene_editor_interface.h"
+#include "halley/game/scene_editor_interface.h"
 #include "scene_editor_window.h"
 #include "halley/tools/project/project.h"
 #include "src/project/core_api_wrapper.h"

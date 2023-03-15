@@ -1,6 +1,6 @@
 #pragma once
 
-#include <halley/core/input/input_button_base.h>
+#include <halley/input/input_button_base.h>
 
 namespace Halley {
     class AndroidMouse : public InputButtonBase {

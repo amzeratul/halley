@@ -1,10 +1,10 @@
 #include <utility>
-#include "halley/core/graphics/mesh/mesh_renderer.h"
-#include "halley/core/graphics/painter.h"
-#include "halley/core/graphics/mesh/mesh.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material_parameter.h"
+#include "halley/graphics/mesh/mesh_renderer.h"
+#include "halley/graphics/painter.h"
+#include "halley/graphics/mesh/mesh.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
 
 using namespace Halley;
 

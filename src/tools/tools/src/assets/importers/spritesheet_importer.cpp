@@ -1,5 +1,5 @@
 #include "spritesheet_importer.h"
-#include "halley/core/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/yaml_convert.h"

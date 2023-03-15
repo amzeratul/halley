@@ -5,7 +5,7 @@
 #include "ui_parent.h"
 #include "halley/ui/ui_definition.h"
 #include "halley/support/logger.h"
-#include "halley/core/resources/resources.h"
+#include "halley/resources/resources.h"
 
 using namespace Halley;
 

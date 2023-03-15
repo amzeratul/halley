@@ -1,4 +1,4 @@
-#include "halley/core/resources/asset_database.h"
+#include "halley/resources/asset_database.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource.h"

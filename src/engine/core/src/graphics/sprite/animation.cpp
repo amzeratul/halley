@@ -1,10 +1,10 @@
-#include "halley/core/graphics/sprite/animation.h"
-#include "halley/core/graphics/sprite/sprite_sheet.h"
-#include "halley/core/graphics/material/material.h"
-#include "halley/core/graphics/material/material_definition.h"
-#include "halley/core/graphics/material/material_parameter.h"
-#include "halley/core/api/halley_api.h"
-#include "resources/resources.h"
+#include "halley/graphics/sprite/animation.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_parameter.h"
+#include "halley/api/halley_api.h"
+#include "halley/resources/resources.h"
 #include "halley/bytes/byte_serializer.h"
 #include <gsl/gsl_assert>
 #include <utility>

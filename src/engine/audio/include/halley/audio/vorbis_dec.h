@@ -25,7 +25,7 @@
 #include "halley/data_structures/vector.h"
 #include <gsl/gsl>
 
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 
 struct OggVorbis_File;
 

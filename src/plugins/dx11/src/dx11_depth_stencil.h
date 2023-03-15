@@ -2,7 +2,7 @@
 #include <D3D11_1.h>
 #undef min
 #undef max
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 
 namespace Halley
 {

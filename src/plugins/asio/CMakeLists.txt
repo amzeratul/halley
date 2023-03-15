@@ -23,4 +23,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-asio ${SOURCES} ${HEADERS})
-target_link_libraries(halley-asio halley-core halley-net)
+target_link_libraries(halley-asio halley-core)

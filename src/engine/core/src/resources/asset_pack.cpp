@@ -1,5 +1,5 @@
-#include "resources/asset_pack.h"
-#include "resources/asset_database.h"
+#include "halley/resources/asset_pack.h"
+#include "halley/resources/asset_database.h"
 #include "halley/resources/resource_data.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/compression.h"

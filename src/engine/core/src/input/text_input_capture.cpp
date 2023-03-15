@@ -1,9 +1,9 @@
-#include "input/text_input_capture.h"
+#include "halley/input/text_input_capture.h"
 #include <memory>
 
 
-#include "input/input_keyboard.h"
-#include "input/text_input_data.h"
+#include "halley/input/input_keyboard.h"
+#include "halley/input/text_input_data.h"
 
 using namespace Halley;
 

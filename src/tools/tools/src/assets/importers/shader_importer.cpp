@@ -3,7 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/metadata.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/core/graphics/shader.h"
+#include "halley/graphics/shader.h"
 #include "halley/support/logger.h"
 
 #include <ShaderConductor/ShaderConductor.hpp>

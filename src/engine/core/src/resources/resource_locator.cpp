@@ -1,9 +1,9 @@
 #include "resource_filesystem.h"
-#include "resources/resource_locator.h"
+#include "halley/resources/resource_locator.h"
 #include <halley/support/exception.h>
 #include "resource_pack.h"
 #include "halley/support/logger.h"
-#include "api/system_api.h"
+#include "halley/api/system_api.h"
 #include "halley/text/string_converter.h"
 #include "halley/resources/resource.h"
 

@@ -23,7 +23,7 @@
 
 #include "halley/text/halleystring.h"
 #include "halley/file/path.h"
-#include "halley/core/api/system_api.h"
+#include "halley/api/system_api.h"
 
 namespace Halley {
 	class ILoggerSink;

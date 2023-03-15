@@ -2,7 +2,7 @@
 #include "halley/support/exception.h"
 #include "halley/support/console.h"
 #include "shader_opengl.h"
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "gl_utils.h"
 #include "halley_gl.h"
 

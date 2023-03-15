@@ -1,7 +1,7 @@
-#include "graphics/render_target/render_graph_definition.h"
+#include "halley/graphics/render_target/render_graph_definition.h"
 #include "halley/bytes/byte_serializer.h"
-#include "resources/resources.h"
-#include "graphics/material/material_definition.h"
+#include "halley/resources/resources.h"
+#include "halley/graphics/material/material_definition.h"
 
 using namespace Halley;
 

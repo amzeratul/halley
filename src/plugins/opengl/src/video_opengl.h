@@ -3,8 +3,8 @@
 #include <map>
 #include <mutex>
 #include <halley/data_structures/flat_map.h>
-#include "halley/core/api/halley_api_internal.h"
-#include "halley/core/graphics/window.h"
+#include "halley/api/halley_api_internal.h"
+#include "halley/graphics/window.h"
 #include "loader_thread_opengl.h"
 
 namespace Halley {

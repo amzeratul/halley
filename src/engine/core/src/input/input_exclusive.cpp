@@ -1,5 +1,5 @@
-#include "input/input_exclusive.h"
-#include "input/input_virtual.h"
+#include "halley/input/input_exclusive.h"
+#include "halley/input/input_virtual.h"
 
 using namespace Halley;
 

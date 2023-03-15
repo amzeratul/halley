@@ -2,7 +2,7 @@
 #include <thread>
 #include <atomic>
 #include "halley/data_structures/vector.h"
-#include "halley/core/api/halley_api_internal.h"
+#include "halley/api/halley_api_internal.h"
 #include <map>
 
 #include "halley/data_structures/ring_buffer.h"

@@ -1,6 +1,6 @@
 #include "curve_editor.h"
 
-#include "halley/core/graphics/painter.h"
+#include "halley/graphics/painter.h"
 
 using namespace Halley;
 

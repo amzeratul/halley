@@ -1,6 +1,6 @@
 #include "game_properties_importer.h"
 
-#include "halley/core/properties/game_properties.h"
+#include "halley/properties/game_properties.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/file_formats/yaml_convert.h"

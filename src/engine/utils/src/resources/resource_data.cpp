@@ -4,7 +4,7 @@
 #include "halley/support/exception.h"
 #include <halley/concurrency/concurrent.h>
 #include "halley/bytes/compression.h"
-#include "halley/core/api/halley_api.h"
+#include "halley/api/halley_api.h"
 #include "halley/support/profiler.h"
 
 using namespace Halley;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <set>
-#include "halley/core/input/input_keyboard.h"
-#include "halley/core/api/clipboard.h"
+#include "halley/input/input_keyboard.h"
+#include "halley/api/clipboard.h"
 struct SDL_KeyboardEvent;
 
 namespace Halley {

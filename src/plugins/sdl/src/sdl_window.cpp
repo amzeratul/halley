@@ -1,7 +1,7 @@
 #include "sdl_window.h"
 #include "halley/os/os.h"
 #include <SDL_syswm.h>
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN

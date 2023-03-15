@@ -1,11 +1,11 @@
 #pragma once
 #include "metal_loader.h"
 #include "metal_shader.h"
-#include <halley/core/api/halley_api_internal.h>
-#include <halley/core/graphics/painter.h>
-#include <halley/core/graphics/material/material_definition.h>
-#include <halley/core/graphics/render_target/render_target_texture.h>
-#include <halley/core/graphics/render_target/render_target_screen.h>
+#include <halley/api/halley_api_internal.h>
+#include <halley/graphics/painter.h>
+#include <halley/graphics/material/material_definition.h>
+#include <halley/graphics/render_target/render_target_texture.h>
+#include <halley/graphics/render_target/render_target_screen.h>
 #include <QuartzCore/CAMetalLayer.h>
 
 namespace Halley {

@@ -1,11 +1,11 @@
-#include "devcon/devcon_server.h"
+#include "halley/devcon/devcon_server.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/support/logger.h"
 #include <memory>
 #include "halley/net/connection/message_queue_tcp.h"
 #include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
-#include "devcon/devcon_messages.h"
+#include "halley/devcon/devcon_messages.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;

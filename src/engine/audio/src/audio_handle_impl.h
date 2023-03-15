@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/api/audio_api.h"
+#include "halley/api/audio_api.h"
 #include <functional>
 
 namespace Halley

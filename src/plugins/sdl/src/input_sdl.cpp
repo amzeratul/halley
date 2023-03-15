@@ -25,13 +25,13 @@
 #include "input_keyboard_sdl.h"
 #include "system_sdl.h"
 #include "sdl_window.h"
-#include "halley/core/input/input_touch.h"
+#include "halley/input/input_touch.h"
 #include <SDL.h>
 #include "halley/support/console.h"
 #include "halley/text/string_converter.h"
 
 #ifdef _MSC_VER
-#include "halley/core/input/input_joystick_xinput.h"
+#include "halley/input/input_joystick_xinput.h"
 #endif
 
 using namespace Halley;

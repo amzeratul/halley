@@ -1,4 +1,4 @@
-#include "halley/core/graphics/texture_descriptor.h"
+#include "halley/graphics/texture_descriptor.h"
 
 using namespace Halley;
 

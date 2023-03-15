@@ -1,5 +1,5 @@
 #include "halley/tools/project/build_project_task.h"
-#include "halley/core/game/game_platform.h"
+#include "halley/game/game_platform.h"
 #include "halley/os/os.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"

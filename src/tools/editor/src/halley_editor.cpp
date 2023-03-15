@@ -2,7 +2,7 @@
 #include "editor_root_stage.h"
 #include "halley/tools/project/project.h"
 #include "preferences.h"
-#include "halley/core/game/environment.h"
+#include "halley/game/environment.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project_loader.h"
 

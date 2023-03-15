@@ -1,4 +1,4 @@
-#include "properties/audio_properties.h"
+#include "halley/properties/audio_properties.h"
 
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/config_node.h"

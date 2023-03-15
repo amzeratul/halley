@@ -1,10 +1,8 @@
 #pragma once
 
-#include <halley/core/halley_core.h>
-#include <halley/core/game/halley_main.h>
-#include <halley/halley_entity.h>
+#include <halley/halley_core.h>
+#include <halley/game/halley_main.h>
 #include <halley/halley_utils.h>
-#include <halley/net/halley_net.h>
 #include <halley/audio/halley_audio.h>
 #include <halley/lua/halley_lua.h>
 #include <halley/ui/halley_ui.h>

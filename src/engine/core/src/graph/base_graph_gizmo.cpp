@@ -1,7 +1,7 @@
-#include "halley/core/graph/base_graph_gizmo.h"
+#include "halley/graph/base_graph_gizmo.h"
 
-#include "graph/base_graph.h"
-#include "graph/base_graph_renderer.h"
+#include "halley/graph/base_graph.h"
+#include "halley/graph/base_graph_renderer.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
 

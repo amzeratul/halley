@@ -1,12 +1,12 @@
-#include "graphics/render_target/render_surface.h"
-#include "graphics/render_target/render_target_texture.h"
-#include "graphics/texture.h"
-#include "graphics/texture_descriptor.h"
-#include "graphics/material/material.h"
-#include "graphics/material/material_definition.h"
-#include "api/video_api.h"
-#include "graphics/sprite/sprite.h"
-#include "resources/resources.h"
+#include "halley/graphics/render_target/render_surface.h"
+#include "halley/graphics/render_target/render_target_texture.h"
+#include "halley/graphics/texture.h"
+#include "halley/graphics/texture_descriptor.h"
+#include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
+#include "halley/api/video_api.h"
+#include "halley/graphics/sprite/sprite.h"
+#include "halley/resources/resources.h"
 
 using namespace Halley;
 

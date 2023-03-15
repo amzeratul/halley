@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/graphics/shader.h"
+#include "halley/graphics/shader.h"
 
 #include <d3d11.h>
 #undef min

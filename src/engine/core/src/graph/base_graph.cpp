@@ -1,4 +1,4 @@
-#include "halley/core/graph/base_graph.h"
+#include "halley/graph/base_graph.h"
 #include "halley/utils/hash.h"
 #include "halley/bytes/byte_serializer.h"
 

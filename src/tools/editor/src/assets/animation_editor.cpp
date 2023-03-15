@@ -1,7 +1,7 @@
 #include "animation_editor.h"
 
 #include "metadata_editor.h"
-#include "halley/core/graphics/material/material_definition.h"
+#include "halley/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_animation.h"
 #include "halley/ui/widgets/ui_dropdown.h"

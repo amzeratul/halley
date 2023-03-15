@@ -6,7 +6,7 @@
 #include "halley/tools/assets/import_tool.h"
 #include "halley/tools/packer/asset_packer_tool.h"
 #include "halley/support/logger.h"
-#include "halley/core/game/halley_statics.h"
+#include "halley/game/halley_statics.h"
 #include "halley/tools/vs_project/vs_project_tool.h"
 #include "halley/tools/packer/asset_pack_inspector.h"
 #include "halley/tools/project/write_version_tool.h"

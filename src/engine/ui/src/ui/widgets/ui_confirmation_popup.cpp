@@ -1,7 +1,7 @@
 #include "widgets/ui_confirmation_popup.h"
 #include "ui_anchor.h"
 #include "ui_factory.h"
-#include "halley/core/input/input_keyboard.h"
+#include "halley/input/input_keyboard.h"
 #include "halley/utils/algorithm.h"
 #include "widgets/ui_label.h"
 using namespace Halley;

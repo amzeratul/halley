@@ -1,6 +1,6 @@
 #include "dx11_texture.h"
 #include "dx11_video.h"
-#include "halley/core/graphics/texture_descriptor.h"
+#include "halley/graphics/texture_descriptor.h"
 using namespace Halley;
 
 DX11Texture::DX11Texture(DX11Video& video, Vector2i size)

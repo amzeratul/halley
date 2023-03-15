@@ -73,6 +73,8 @@ set(SOURCES
         )
 
 set(HEADERS
+        "cpp-httplib/httplib.h"
+
         "gsl/gsl"
         "gsl/gsl_algorithm"
         "gsl/gsl_assert"

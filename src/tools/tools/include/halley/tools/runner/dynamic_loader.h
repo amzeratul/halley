@@ -2,8 +2,8 @@
 #include <memory>
 #include "halley/tools/dll/dynamic_library.h"
 #include "symbol_loader.h"
-#include <halley/core/game/main_loop.h>
-#include "halley/core/entry/game_loader.h"
+#include <halley/game/main_loop.h>
+#include "halley/entry/game_loader.h"
 
 namespace Halley
 {

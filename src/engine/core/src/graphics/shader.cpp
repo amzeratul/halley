@@ -1,4 +1,4 @@
-#include "halley/core/graphics/shader.h"
+#include "halley/graphics/shader.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
 

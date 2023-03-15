@@ -1,7 +1,7 @@
 #pragma once
 
-#include "resources/resource_locator.h"
-#include "resources/asset_database.h"
+#include "halley/resources/resource_locator.h"
+#include "halley/resources/asset_database.h"
 
 namespace Halley {
 	class SystemAPI;

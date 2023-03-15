@@ -12,7 +12,7 @@
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
 #include "halley/audio/sub_objects/audio_sub_object_sequence.h"
 #include "halley/audio/sub_objects/audio_sub_object_switch.h"
-#include "halley/core/properties/game_properties.h"
+#include "halley/properties/game_properties.h"
 using namespace Halley;
 
 AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
