@@ -29,7 +29,7 @@ namespace Halley {
 	template<typename Key, typename Hash = std::hash<Key>>
 	using HashSet = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type>;
 
-	static size_t combineHash(size_t a, size_t b)
+	static inline size_t combineHash(size_t a, size_t b)
 	{
 		// From https://stackoverflow.com/a/27952689
 		return a ^ (b + 0x517cc1b727220a95ull + (a << 6) + (a >> 2));
