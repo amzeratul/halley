@@ -38,4 +38,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-editor-extensions ${SOURCES} ${HEADERS})
-target_link_libraries(halley-editor-extensions halley-core halley-utils)
+target_link_libraries(halley-editor-extensions halley-core)

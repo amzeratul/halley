@@ -17,7 +17,6 @@ add_executable (halley-cmd ${SOURCES})
 
 target_link_libraries (halley-cmd
         halley-tools
-        halley-utils
         ${FREETYPE_LIBRARIES}
         ${EXTRA_LIBS}
         ${ShaderConductor_LIBRARY}

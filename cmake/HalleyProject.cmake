@@ -316,7 +316,6 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/shared_gen/cpp
 	${HALLEY_PATH}/src/contrib
 	${HALLEY_PATH}/src/engine/core/include
-	${HALLEY_PATH}/src/engine/utils/include
 	${HALLEY_PATH}/src/engine/lua/include
 	${HALLEY_PATH}/src/engine/editor_extensions/include
 	${Boost_INCLUDE_DIR} 
@@ -326,12 +325,10 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-contrib
 	optimized halley-core
 	optimized halley-lua
-	optimized halley-utils
 	optimized halley-editor-extensions
 	debug halley-contrib_d
 	debug halley-core_d
 	debug halley-lua_d
-	debug halley-utils_d
 	debug halley-editor-extensions_d
 	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
@@ -502,7 +499,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 
 	SET(LINK_LIBRARIES "")
 	if (EMBED)
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-core halley-lua halley-utils halley-editor-extensions ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-core halley-lua halley-editor-extensions ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-opengl)
 		endif ()

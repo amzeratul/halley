@@ -41,4 +41,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-dx11 ${SOURCES} ${HEADERS})
-target_link_libraries(halley-dx11 halley-core halley-utils)
+target_link_libraries(halley-dx11 halley-core)

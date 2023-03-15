@@ -1,4 +1,4 @@
-project (halley-utils)
+project (halley-contrib)
 
 include_directories("libogg/include" "libvorbis/include" "libvorbis/lib" "yaml-cpp/include")
 
