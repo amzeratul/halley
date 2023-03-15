@@ -208,7 +208,6 @@ endif()
 target_link_libraries (halley-editor
         halley-tools
         ${FREETYPE_LIBRARIES}
-        ${YAMLCPP_LIBRARY}
 		${EXTRA_LIBS}
 		${ShaderConductor_LIBRARY}
         )

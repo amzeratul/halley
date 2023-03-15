@@ -19,7 +19,6 @@ target_link_libraries (halley-cmd
         halley-tools
         halley-utils
         ${FREETYPE_LIBRARIES}
-        ${YAMLCPP_LIBRARY}
         ${EXTRA_LIBS}
         ${ShaderConductor_LIBRARY}
         )

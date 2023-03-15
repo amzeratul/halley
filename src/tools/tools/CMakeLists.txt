@@ -206,6 +206,5 @@ add_library (halley-tools ${SOURCES} ${HEADERS} ${ShaderConductor_LIBRARY})
 target_link_libraries (halley-tools
     halley-core
     ${FREETYPE_LIBRARIES}
-    ${YAMLCPP_LIBRARY}
     ${CMAKE_DL_LIBS}
     )
