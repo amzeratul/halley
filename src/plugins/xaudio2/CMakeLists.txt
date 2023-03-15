@@ -16,4 +16,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-xaudio2 ${SOURCES} ${HEADERS})
-target_link_libraries(halley-xaudio2 halley-core)
+target_link_libraries(halley-xaudio2 halley-engine)

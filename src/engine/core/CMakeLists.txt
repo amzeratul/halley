@@ -1,4 +1,4 @@
-project (halley-core)
+project (halley-engine)
 
 include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
 
@@ -839,14 +839,14 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
-add_library (halley-core ${SOURCES} ${HEADERS})
-target_link_libraries(halley-core halley-contrib)
+add_library (halley-engine ${SOURCES} ${HEADERS})
+target_link_libraries(halley-engine halley-contrib)
 
 add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 
 # Hack, there should be no platform specific stuff in core...
 if (USE_ANDROID)
-    target_link_libraries(halley-core log android)
+    target_link_libraries(halley-engine log android)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -859,4 +859,4 @@ else ()
         set_source_files_properties(src/audio/audio_mixer_avx.cpp PROPERTIES COMPILE_FLAGS -mavx)
 endif ()
 
-target_precompile_headers(halley-core PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/prec.h>")
+target_precompile_headers(halley-engine PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/prec.h>")

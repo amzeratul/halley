@@ -204,7 +204,7 @@ assign_source_group(${HEADERS})
 add_library (halley-tools ${SOURCES} ${HEADERS} ${ShaderConductor_LIBRARY})
 
 target_link_libraries (halley-tools
-    halley-core
+    halley-engine
     ${FREETYPE_LIBRARIES}
     ${CMAKE_DL_LIBS}
     )

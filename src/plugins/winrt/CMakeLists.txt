@@ -23,4 +23,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-winrt ${SOURCES} ${HEADERS})
-target_link_libraries(halley-winrt halley-core)
+target_link_libraries(halley-winrt halley-engine)

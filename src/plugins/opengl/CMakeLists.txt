@@ -38,4 +38,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-opengl ${SOURCES} ${HEADERS})
-target_link_libraries(halley-opengl halley-core ${OPENGL_LIBRARIES})
+target_link_libraries(halley-opengl halley-engine ${OPENGL_LIBRARIES})

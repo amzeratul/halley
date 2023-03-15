@@ -194,7 +194,7 @@ endif()
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
 halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_resources}" "${editor_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
-add_dependencies(halley-editor halley-cmd halley-core halley-sdl halley-opengl)
+add_dependencies(halley-editor halley-cmd halley-engine halley-sdl halley-opengl)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_dependencies(halley-editor halley-metal)
 endif()
