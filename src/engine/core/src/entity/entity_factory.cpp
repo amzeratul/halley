@@ -329,7 +329,8 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
 			entity.setEnabled((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
 		}
-		entity.setPrefab(context->getPrefab(), delta.getPrefabUUID().value_or(entity.getPrefabUUID()));
+		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
+		entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 		updateEntityComponentsDelta(entity, delta, *context);
 		updateEntityChildrenDelta(entity, delta, context);
 	} else {

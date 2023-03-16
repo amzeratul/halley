@@ -226,7 +226,9 @@ bool EntityData::fillEntityDataStack(Vector<const EntityData*>& stack, const UUI
 
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 {
-	Expects(uuid.isValid());
+	if (!uuid.isValid()) {
+		return nullptr;
+	}
 	
 	if (uuid == prefabUUID) {
 		return this;
