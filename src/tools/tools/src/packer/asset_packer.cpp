@@ -200,7 +200,8 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		const size_t pos = data.size();
 		const size_t size = fileData.size();
 		if (size == 0) {
-			throw Exception("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.", HalleyExceptions::Tools);
+			Logger::logError("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.", HalleyExceptions::Tools);
+			continue;
 		}
 		
 		// Read data into pack data
