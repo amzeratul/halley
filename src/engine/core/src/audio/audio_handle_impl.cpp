@@ -29,11 +29,11 @@ void AudioHandleImpl::setVolume(float volume)
 	setGain(volumeToGain(volume));
 }
 
-void AudioHandleImpl::setPosition(Vector2f pos)
+void AudioHandleImpl::setPosition(AudioPosition pos)
 {
 	enqueue([pos] (AudioEmitter& src)
 	{
-		src.setPosition(AudioPosition::makePositional(Vector3f(pos)));
+		src.setPosition(pos);
 	});
 }
 

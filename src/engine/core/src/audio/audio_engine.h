@@ -31,7 +31,6 @@ namespace Halley {
 
 		void createEmitter(AudioEmitterId id, AudioPosition position, bool temporary);
 		void destroyEmitter(AudioEmitterId id);
-		void setEmitterPosition(AudioEmitterId id, AudioPosition position);
 
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
 	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop);

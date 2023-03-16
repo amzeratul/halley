@@ -19,12 +19,18 @@ namespace Halley {
         void legacyToConfigNode(ConfigNode& result) const;
 
         AudioObjectId getAudioObjectId() const;
+
 		const String& getBus() const;
-		Range<float> getPitch() const;
-		Range<float> getGain() const;
-		Range<float>& getPitch();
-		Range<float>& getGain();
         void setBus(String bus);
+
+		Range<float> getPitch() const;
+		Range<float>& getPitch();
+
+		Range<float> getGain() const;
+		Range<float>& getGain();
+
+		float getDopplerScale() const;
+		void setDopplerScale(float scale);
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
@@ -56,6 +62,7 @@ namespace Halley {
 		String bus;
 		Range<float> pitch;
 		Range<float> gain;
+		float dopplerScale = 0.0f;
 
 		void generateId();
     };

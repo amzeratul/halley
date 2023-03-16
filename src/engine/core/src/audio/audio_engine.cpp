@@ -41,16 +41,6 @@ void AudioEngine::destroyEmitter(AudioEmitterId id)
 	emitters.erase(id);
 }
 
-void AudioEngine::setEmitterPosition(AudioEmitterId id, AudioPosition position)
-{
-	const auto iter = emitters.find(id);
-	if (iter == emitters.end()) {
-		Logger::logError("Unknown audio emitter.");
-	} else {
-		iter->second->setPosition(std::move(position));
-	}
-}
-
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
 {
 	const auto iter = emitters.find(emitterId);
@@ -73,7 +63,7 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 		return;
 	}
 
-	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), volume, 1.0f, 0, getBusId(""));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), volume, 1.0f, 0.0f, 0, getBusId(""));
 	voice->setIds(id);
 	iter->second->addVoice(std::move(voice));
 }

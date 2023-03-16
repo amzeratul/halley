@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-AudioFilterResample::AudioFilterResample(std::shared_ptr<AudioSource> source, int fromHz, int toHz, AudioBufferPool& pool)
+AudioFilterResample::AudioFilterResample(std::shared_ptr<AudioSource> source, float fromHz, float toHz, AudioBufferPool& pool)
 	: pool(pool)
 	, source(std::move(source))
 	, fromHz(fromHz)
@@ -27,11 +27,11 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 	const size_t additionalPaddingSamples = 2;
 	const size_t nLeftOver = leftoverSamples[0].n;
 	const size_t samplesToGenerate = numSamples - nLeftOver;
-	const size_t numSamplesSrc = samplesToGenerate * fromHz / toHz + additionalPaddingSamples;
+	const size_t numSamplesSrc = lroundl(samplesToGenerate * fromHz / toHz) + additionalPaddingSamples;
 
 	if (resamplers.empty()) {
 		for (size_t i = 0; i < nChannels; ++i) {
-			resamplers.push_back(std::make_unique<AudioResampler>(static_cast<float>(fromHz), static_cast<float>(toHz), 1, 0.0f));
+			resamplers.push_back(std::make_unique<AudioResampler>(fromHz, toHz, 1, 0.0f));
 		}
 	}
 
@@ -72,7 +72,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 
 size_t AudioFilterResample::getSamplesLeft() const
 {
-	return source->getSamplesLeft() * toHz / fromHz;
+	return lroundl(source->getSamplesLeft() * toHz / fromHz);
 }
 
 void AudioFilterResample::restart()
@@ -81,9 +81,10 @@ void AudioFilterResample::restart()
 	resamplers.clear();
 }
 
-void AudioFilterResample::setFromHz(int fromHz)
+void AudioFilterResample::setFromHz(float fromHz)
 {
+	this->fromHz = fromHz;
 	for (auto& r: resamplers) {
-		r->setFromHz(static_cast<float>(fromHz));
+		r->setFromHz(fromHz);
 	}
 }

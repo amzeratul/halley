@@ -8,7 +8,7 @@ namespace Halley
 	class AudioFilterResample final : public AudioSource
 	{
 	public:
-		AudioFilterResample(std::shared_ptr<AudioSource> source, int fromHz, int toHz, AudioBufferPool& pool);
+		AudioFilterResample(std::shared_ptr<AudioSource> source, float fromHz, float toHz, AudioBufferPool& pool);
 
 		uint8_t getNumberOfChannels() const override;
 		bool isReady() const override;
@@ -16,14 +16,14 @@ namespace Halley
 		size_t getSamplesLeft() const override;
 		void restart() override;
 
-		void setFromHz(int fromHz);
+		void setFromHz(float fromHz);
 
 	private:
 		AudioBufferPool& pool;
 		std::shared_ptr<AudioSource> source;
 		Vector<std::unique_ptr<AudioResampler>> resamplers;
-		int fromHz;
-		int toHz;
+		float fromHz;
+		float toHz;
 
 		struct LeftOverData
 		{

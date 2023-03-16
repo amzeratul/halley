@@ -28,3 +28,7 @@ children:
       - widget: { id: pitchMin, class: textInput, size: [50, 20], validator: numericPositive }
       - widget: { class: label, text: " ~ " }
       - widget: { id: pitchMax, class: textInput, size: [50, 20], validator: numericPositive }
+    - widget: { class: label, text: "Doppler Effect Scale:" }
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: dopplerScale, class: textInput, size: [50, 20], validator: numericPositive }

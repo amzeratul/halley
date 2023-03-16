@@ -15,7 +15,7 @@ namespace Halley
 
 		void setGain(float gain) override;
 		void setVolume(float volume) override;
-		void setPosition(Vector2f pos) override;
+		void setPosition(AudioPosition pos) override;
 		void setPan(float pan) override;
 
 		void play(const AudioFade& audioFade) override;

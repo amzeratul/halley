@@ -85,12 +85,16 @@ namespace Halley
 	{
 	public:
 		Vector3f position;
+		Vector3f velocity;
 		float referenceDistance = 100.0f;
+		float speedOfSound = 343.0f;
 
 		AudioListenerData() {}
-		AudioListenerData(Vector3f position, float referenceDistance = 100.0f)
+		AudioListenerData(Vector3f position, Vector3f velocity = {}, float referenceDistance = 100.0f, float speedOfSound = 343.0f)
 			: position(position)
+			, velocity(velocity)
 			, referenceDistance(referenceDistance)
+			, speedOfSound(speedOfSound)
 		{}
 	};
 
@@ -157,7 +161,7 @@ namespace Halley
 
 		virtual void setGain(float gain) = 0;
 		virtual void setVolume(float volume) = 0;
-		virtual void setPosition(Vector2f pos) = 0;
+		virtual void setPosition(AudioPosition pos) = 0;
 		virtual void setPan(float pan) = 0;
 
 		virtual void play(const AudioFade& audioFade) = 0;

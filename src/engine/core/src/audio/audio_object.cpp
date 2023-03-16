@@ -26,6 +26,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 	bus = node[node.hasKey("bus") ? "bus" : "group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 	gain = node["gain"].asFloatRange(Range<float>(1, 1));
+	dopplerScale = node["dopplerScale"].asFloat(0.0f);
 	objects = node["objects"].asVector<AudioSubObjectHandle>({});
 }
 
@@ -42,6 +43,9 @@ ConfigNode AudioObject::toConfigNode() const
 	if (gain != Range<float>(1, 1)) {
 		result["gain"] = gain;
 	}
+	if (std::abs(dopplerScale) > 0.0001f) {
+		result["dopplerScale"] = dopplerScale;
+	}
 	result["objects"] = objects;
 	
 	return result;
@@ -56,6 +60,7 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 	} else {
 		gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	}
+	dopplerScale = node["dopplerScale"].asFloat(0.0f);
 
 	auto clips = std::make_unique<AudioSubObjectClips>();
 	clips->load(node);
@@ -108,6 +113,16 @@ Range<float>& AudioObject::getGain()
 	return gain;
 }
 
+float AudioObject::getDopplerScale() const
+{
+	return dopplerScale;
+}
+
+void AudioObject::setDopplerScale(float scale)
+{
+	dopplerScale = scale;
+}
+
 void AudioObject::setBus(String bus)
 {
 	this->bus = std::move(bus);
@@ -132,6 +147,7 @@ void AudioObject::serialize(Serializer& s) const
 	s << bus;
 	s << pitch;
 	s << gain;
+	s << dopplerScale;
 	s << objects;
 }
 
@@ -140,6 +156,7 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> bus;
 	s >> pitch;
 	s >> gain;
+	s >> dopplerScale;
 	s >> objects;
 }
 

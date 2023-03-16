@@ -30,7 +30,7 @@ namespace Halley {
 
         T getSum() const
         {
-	        T a = 0;
+	        T a = {};
             for (auto& v: data) {
                 a += v;
             }

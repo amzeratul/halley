@@ -97,8 +97,10 @@ namespace Halley {
 
 		constexpr inline Vector3D operator - () const { return Vector3D(-x, -y, -z); }
 
-		constexpr inline Vector3D operator * (const float p) const { return Vector3D(T(x * p), T(y * p), T(z * p)); }
-		constexpr inline Vector3D operator / (const T p) const { return Vector3D(x / p,y / p, z / p); }
+		template<typename U>
+		constexpr inline auto operator * (U p) const -> std::enable_if_t<std::is_scalar_v<U>, Vector3D> { return Vector3D(T(x * p), T(y * p), T(z * p)); }
+		template<typename U>
+		constexpr inline auto operator / (U p) const -> std::enable_if_t<std::is_scalar_v<U>, Vector3D> { return Vector3D(x / p,y / p, z / p); }
 
 		// In-place operations
 		constexpr inline Vector3D operator += (const Vector3D &p) { x += p.x; y += p.y; z += p.z; return *this; }

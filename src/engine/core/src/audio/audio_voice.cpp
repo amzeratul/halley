@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint32_t delaySamples, uint8_t bus) 
+AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, float dopplerScale, uint32_t delaySamples, uint8_t bus) 
 	: engine(engine)
 	, bus(bus)
 	, playing(false)
@@ -18,11 +18,13 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	, isFirstUpdate(true)
 	, baseGain(gain)
 	, userGain(1.0f)
+	, basePitch(pitch)
+	, dopplerScale(dopplerScale)
 	, delaySamples(delaySamples)
 	, source(std::move(src))
 {
 	fader.stopAndSetValue(1);
-	setPitch(pitch);
+	setPitch(basePitch);
 }
 
 AudioVoice::~AudioVoice() = default;
@@ -142,13 +144,13 @@ float AudioVoice::getUserGain() const
 
 void AudioVoice::setPitch(float pitch)
 {
-	if (resample || std::abs(pitch - 1.0f) > 0.01f) {
-		const auto freq = static_cast<int>(lround(AudioConfig::sampleRate * pitch));
+	if (resample || std::abs(pitch - 1.0f) > 0.001f) {
+		const auto freq = AudioConfig::sampleRate * pitch;
 		
 		if (resample) {
 			resample->setFromHz(freq);
 		} else {
-			resample = std::make_shared<AudioFilterResample>(source, freq, AudioConfig::sampleRate, engine.getPool());
+			resample = std::make_shared<AudioFilterResample>(source, freq, static_cast<float>(AudioConfig::sampleRate), engine.getPool());
 			source = resample;
 		}
 	}
@@ -169,10 +171,15 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		}
 	}
 
-	const auto dynamicGain = fader.getCurrentValue();
+	// Doppler shift
+	if (dopplerScale > 0) {
+		const auto dopplerShift = sourcePos.getDopplerShift(listener) * dopplerScale;
+		setPitch(clamp((dopplerShift + 1.0f) * basePitch, 0.1f, 4.0f));
+	}
 	
+	// Mix
+	const float dynamicGain = fader.getCurrentValue();
 	const float pauseGain = paused ? 0.0f : 1.0f;
-	
 	prevChannelMix = channelMix;
 	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * busGain * pauseGain, listener);
 	

@@ -10,15 +10,17 @@ AudioPosition::SpatialSource::SpatialSource()
 {
 }
 
-AudioPosition::SpatialSource::SpatialSource(Vector2f pos, float referenceDistance, float maxDistance)
+AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, float referenceDistance, float maxDistance)
 	: pos(pos)
+	, velocity(vel)
 	, referenceDistance(referenceDistance)
 	, maxDistance(maxDistance)
 {
 }
 
-AudioPosition::SpatialSource::SpatialSource(Vector3f pos, float referenceDistance, float maxDistance)
+AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, float referenceDistance, float maxDistance)
 	: pos(pos)
+	, velocity(vel)
 	, referenceDistance(referenceDistance)
 	, maxDistance(maxDistance)
 {
@@ -39,15 +41,15 @@ AudioPosition AudioPosition::makeUI(float pan)
 	return result;
 }
 
-AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance)
+AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance, Vector2f velocity)
 {
-	return makePositional(Vector3f(pos), referenceDistance, maxDistance);
+	return makePositional(Vector3f(pos), referenceDistance, maxDistance, Vector3f(velocity));
 }
 
-AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance)
+AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance, Vector3f velocity)
 {
 	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, referenceDistance, maxDistance);
+	sources.emplace_back(pos, velocity, referenceDistance, maxDistance);
 	return makePositional(std::move(sources));
 }
 
@@ -80,6 +82,24 @@ void AudioPosition::setPosition(Vector3f position)
 	if (!sources.empty()) {
 		sources[0].pos = position;
 	}
+}
+
+float AudioPosition::getDopplerShift(const AudioListenerData& listener) const
+{
+	if (sources.empty()) {
+		return 0.0f;
+	}
+
+	// TODO: use closest source?
+	const auto srcVel = sources[0].velocity;
+	const auto listenerVel = listener.velocity;
+	const auto dir = (sources[0].pos - listener.position).normalized(); // Towards source
+	const auto c = listener.speedOfSound;
+
+	const auto srcSpeed = clamp(srcVel.dot(dir), -0.8f * c, 0.8f * c);
+	const auto listenerSpeed = clamp(listenerVel.dot(dir), -0.8f * c, 0.8f * c);
+
+	return (c + listenerSpeed) / (c + srcSpeed) - 1.0f;
 }
 
 static float gain2DPan(float srcPan, float dstPan)

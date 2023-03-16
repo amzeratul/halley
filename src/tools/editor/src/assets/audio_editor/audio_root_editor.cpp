@@ -47,4 +47,10 @@ void AudioRootEditor::onMakeUI()
 		object.getPitch().end = value;
 		editor.markModified(false);
 	});
+
+	bindData("dopplerScale", object.getDopplerScale(), [=] (float value)
+	{
+		object.setDopplerScale(value);
+		editor.markModified(false);
+	});
 }
