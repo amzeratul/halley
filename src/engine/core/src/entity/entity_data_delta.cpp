@@ -56,7 +56,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Potentially modified
 				auto delta = EntityDataDelta(*fromIter, toChild, options);
 				if (delta.hasChange()) {
-					childrenChanged.emplace_back(toChild.prefabUUID, std::move(delta));
+					childrenChanged.emplace_back(toChild.prefabUUID.isValid() ? toChild.prefabUUID : toChild.instanceUUID, std::move(delta));
 				}
 			} else {
 				// Inserted
@@ -67,8 +67,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.matchesUUID(fromChild); }) != to.children.end();
 			if (!stillExists) {
 				// Removed
-				assert(fromChild.getPrefabUUID().isValid());
-				childrenRemoved.emplace_back(fromChild.getPrefabUUID());
+				childrenRemoved.emplace_back(fromChild.prefabUUID.isValid() ? fromChild.prefabUUID : fromChild.instanceUUID);
 			}
 		}
 	}
