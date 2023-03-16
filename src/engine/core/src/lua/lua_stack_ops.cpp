@@ -1,4 +1,4 @@
-#include "../../../../../contrib/lua/src/lua.hpp"
+#include "lua/src/lua.hpp"
 #include "halley/lua/lua_stack_ops.h"
 #include "halley/lua/lua_state.h"
 

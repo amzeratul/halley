@@ -1,6 +1,9 @@
 #include "halley/file/path.h"
 
+#ifndef _LIBCPP_HAS_NO_FILESYSTEM_LIBRARY
 #include <filesystem>
+#endif
+
 #include <sstream>
 #include <fstream>
 #include "halley/os/os.h"
@@ -281,8 +284,12 @@ void Path::writeFile(const Path& path, const String& data)
 
 bool Path::exists(const Path& path)
 {
+#ifndef	_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY
 	std::error_code ec;
 	return std::filesystem::exists(path.string(), ec);
+#else
+	return false;
+#endif
 }
 
 Bytes Path::readFile(const Path& path)

@@ -1,4 +1,4 @@
-#include <lua.hpp>
+#include <lua/src/lua.hpp>
 #include "halley/lua/lua_reference.h"
 #include "halley/lua/lua_state.h"
 #include "halley/support/exception.h"

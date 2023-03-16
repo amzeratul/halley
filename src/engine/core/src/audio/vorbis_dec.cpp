@@ -22,7 +22,7 @@
 #include "halley/utils/utils.h"
 #include "halley/audio/vorbis_dec.h"
 
-#include "ogg/ogg.h"
+#include "libogg/include/ogg/ogg.h"
 #include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 #include <gsl/gsl_assert>
@@ -31,8 +31,8 @@
 	#include "ivorbiscodec.h"
 	#include "ivorbisfile.h"
 #else
-	#include "vorbis/codec.h"
-	#include "vorbis/vorbisfile.h"
+	#include "libvorbis/include/vorbis/codec.h"
+	#include "libvorbis/include/vorbis/vorbisfile.h"
 #endif
 
 using namespace Halley;
