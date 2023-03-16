@@ -10,10 +10,45 @@
 using namespace Halley;
 
 
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#undef max
+#undef min
+
+namespace {
+	HMODULE getCurrentModuleHandle()
+	{
+		HMODULE hMod = nullptr;
+		GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPCWSTR>(&getCurrentModuleHandle), &hMod);
+		return hMod;
+	}
+
+	bool isRunningFromDLL()
+	{
+		char name[1024];
+		GetModuleFileNameA(getCurrentModuleHandle(), name, sizeof(name));
+		auto str = std::string_view(name);
+		return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll";
+	}
+}
+#else
+namespace {
+	bool isRunningFromDLL()
+	{
+		return false;
+	}
+}
+#endif
+
+
+
 ResourceCollectionBase::ResourceCollectionBase(Resources& parent, AssetType type)
 	: parent(parent)
 	, type(type)
 {
+	//assert(!isRunningFromDLL());
 }
 
 void ResourceCollectionBase::clear()
@@ -161,35 +196,9 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
 	return usage;
 }
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#undef max
-#undef min
-
-namespace {
-	HMODULE getCurrentModuleHandle()
-	{
-		HMODULE hMod = nullptr;
-		GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPCWSTR>(&getCurrentModuleHandle), &hMod);
-		return hMod;
-	}
-
-	bool isRunningFromDLL()
-	{
-		char name[1024];
-		GetModuleFileNameA(getCurrentModuleHandle(), name, sizeof(name));
-		auto str = std::string_view(name);
-		return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll";
-	}
-}
-#endif
-
 std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {
-#ifdef _WIN32
 	//assert(!isRunningFromDLL());
-#endif
 
 	std::shared_ptr<Resource> newRes;
 
