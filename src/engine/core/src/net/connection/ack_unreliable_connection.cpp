@@ -117,17 +117,19 @@ Vector<uint16_t> AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliab
 		sent = SentPacketData{};
 
 		// Add subpackets
+		bool first = true;
 		while (!subPacketsLeft.empty()) {
 			const auto& subPacket = subPacketsLeft.front();
 
 			const size_t sizeNeeded = 2 + (subPacket.resends ? 2 : 0) + subPacket.data.size();
 			const size_t sizeLeft = buffer.size() - s.getPosition();
 			if (sizeNeeded > sizeLeft) {
-				if (sizeNeeded > buffer.size()) {
+				if (first) {
 					throw Exception("Attempting to send packet that's too large for the network: " + String::prettySize(sizeNeeded), HalleyExceptions::Network);
 				}
 				break;
 			}
+			first = false;
 
 			const uint16_t sizeAndResend = static_cast<uint16_t>(subPacket.data.size() << 1) | static_cast<uint16_t>(subPacket.resends ? 1 : 0);
 			s << sizeAndResend;
