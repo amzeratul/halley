@@ -178,10 +178,11 @@ void MessageQueueUDP::sendAll()
 
 	// Send and update sequences
 	if (!toSend.empty()) {
-		const auto seq = connection->sendTagged(toSend);
-		for (auto& packet: toSend) {
+		const auto seqs = connection->sendTagged(toSend);
+		for (size_t i = 0; i < toSend.size(); ++i) {
+			auto& packet = toSend[i];
 			if (packet.tag != -1) {
-				pendingPackets[packet.tag].seq = seq;
+				pendingPackets[packet.tag].seq = seqs[i];
 			}
 		}
 	}

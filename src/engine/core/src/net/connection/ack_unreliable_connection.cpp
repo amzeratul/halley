@@ -67,8 +67,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 	subPacket.resends = false;
 	subPacket.tag = -1;
 
-	const auto seq = sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
-	static_cast<void>(seq);
+	sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
 }
 
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
@@ -95,50 +94,70 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 	return false;
 }
 
-uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets)
+Vector<uint16_t> AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets)
 {
-	std::array<gsl::byte, 4096> buffer;
-	const auto dst = gsl::span<gsl::byte>(buffer);
+	Vector<uint16_t> result;
+	auto subPacketsLeft = subPackets;
 
-	auto s = Serializer(dst, SerializerOptions(SerializerOptions::maxVersion));
+	while (!subPacketsLeft.empty()) {
+		std::array<gsl::byte, 4096> buffer;
+		const auto dst = gsl::span<gsl::byte>(buffer);
 
-	// Add header
-	const auto seq = nextSequenceToSend++;
-	AckUnreliableHeader header;
-	header.sequence = seq;
-	header.ack = highestReceived;
-	header.ackBits = generateAckBits();
-	s << header;
+		auto s = Serializer(dst, SerializerOptions(SerializerOptions::maxVersion));
 
-	auto& sent = sentPackets[seq % BUFFER_SIZE];
-	sent = SentPacketData{};
+		// Add header
+		const auto seq = nextSequenceToSend++;
+		AckUnreliableHeader header;
+		header.sequence = seq;
+		header.ack = highestReceived;
+		header.ackBits = generateAckBits();
+		s << header;
 
-	// Add subpackets
-	for (auto& subPacket : subPackets) {
-		const uint16_t sizeAndResend = static_cast<uint16_t>(subPacket.data.size() << 1) | static_cast<uint16_t>(subPacket.resends ? 1 : 0);
-		s << sizeAndResend;
-		if (subPacket.resends) {
-			s << subPacket.resendSeq;
+		auto& sent = sentPackets[seq % BUFFER_SIZE];
+		sent = SentPacketData{};
+
+		// Add subpackets
+		while (!subPacketsLeft.empty()) {
+			const auto& subPacket = subPacketsLeft.front();
+
+			const size_t sizeNeeded = 2 + (subPacket.resends ? 2 : 0) + subPacket.data.size();
+			const size_t sizeLeft = buffer.size() - s.getPosition();
+			if (sizeNeeded > sizeLeft) {
+				if (sizeNeeded > buffer.size()) {
+					throw Exception("Attempting to send packet that's too large for the network: " + String::prettySize(sizeNeeded), HalleyExceptions::Network);
+				}
+				break;
+			}
+
+			const uint16_t sizeAndResend = static_cast<uint16_t>(subPacket.data.size() << 1) | static_cast<uint16_t>(subPacket.resends ? 1 : 0);
+			s << sizeAndResend;
+			if (subPacket.resends) {
+				s << subPacket.resendSeq;
+			}
+			s << gsl::span<const gsl::byte>(subPacket.data);
+
+			sent.tags.push_back(subPacket.tag);
+
+			if (subPacket.resends) {
+				notifyResend(subPacket.resendSeq);
+			}
+
+			subPacketsLeft = subPacketsLeft.subspan(1);
+
+			result.push_back(seq);
 		}
-		s << gsl::span<const gsl::byte>(subPacket.data);
 
-		sent.tags.push_back(subPacket.tag);
+		// Mark waiting
+		sent.waiting = true;
+		lastSend = sent.timestamp = Clock::now();
 
-		if (subPacket.resends) {
-			notifyResend(subPacket.resendSeq);
-		}
+		// Send
+		parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
+		notifySend(header.sequence, s.getSize());
+		earliestUnackedMsg = {};
 	}
 
-	// Mark waiting
-	sent.waiting = true;
-	lastSend = sent.timestamp = Clock::now();
-
-	// Send
-	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
-	notifySend(header.sequence, s.getSize());
-	earliestUnackedMsg = {};
-
-	return seq;
+	return result;
 }
 
 void AckUnreliableConnection::sendAckPacketsIfNeeded()
@@ -148,8 +167,7 @@ void AckUnreliableConnection::sendAckPacketsIfNeeded()
 		const float deltaTime = std::chrono::duration<float>(Clock::now() - earliestUnackedMsg.value()).count();
 		if (deltaTime > maxAckTime) {
 			// Send empty
-			const auto seq = sendTagged(gsl::span<AckUnreliableSubPacket>());
-			static_cast<void>(seq);
+			sendTagged(gsl::span<AckUnreliableSubPacket>());
 		}
 	}
 }

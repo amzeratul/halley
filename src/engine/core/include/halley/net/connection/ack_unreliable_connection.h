@@ -78,7 +78,7 @@ namespace Halley
 		[[nodiscard]] bool receive(InboundNetworkPacket& packet) override;
 
 		void send(TransmissionType type, OutboundNetworkPacket packet) override;
-		[[nodiscard]] uint16_t sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
+		Vector<uint16_t> sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
 		void sendAckPacketsIfNeeded();
 
 		void addAckListener(IAckUnreliableConnectionListener& listener);
