@@ -9,6 +9,8 @@
 #include <condition_variable>
 #include <halley/support/exception.h>
 
+#include "halley/support/logger.h"
+
 namespace Halley
 {
 	struct VoidWrapper
@@ -292,8 +294,12 @@ namespace Halley
 
 		void setValue(T value)
 		{
-			Expects(futureData != nullptr);
-			futureData->set(std::move(value));
+			if (futureData) {
+				futureData->set(std::move(value));
+				futureData = {};
+			} else {
+				Logger::logError("Attempting to set value on promise twice");
+			}
 		}
 
 		Future<T> getFuture()
@@ -303,8 +309,11 @@ namespace Halley
 
 		bool isCancelled() const
 		{
-			Expects(futureData != nullptr);
-			return futureData->isCancelled();
+			if (futureData) {
+				return futureData->isCancelled();
+			} else {
+				return false;
+			}
 		}
 
 	private:
