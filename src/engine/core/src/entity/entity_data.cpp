@@ -441,8 +441,13 @@ bool EntityData::matchesUUID(const UUID& uuid) const
 
 bool EntityData::matchesUUID(const EntityData& other) const
 {
-	return (prefabUUID.isValid() && prefabUUID == other.getPrefabUUID())
-		|| (instanceUUID.isValid() && instanceUUID == other.getInstanceUUID());
+	if (instanceUUID.isValid()) {
+		return instanceUUID == other.getInstanceUUID();
+	} else if (prefabUUID.isValid()) {
+		return prefabUUID == other.getPrefabUUID();
+	} else {
+		return false; // ?
+	}
 }
 
 void EntityData::instantiate(const UUID& uuid)
