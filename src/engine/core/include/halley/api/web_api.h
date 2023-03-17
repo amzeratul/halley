@@ -20,6 +20,7 @@ namespace Halley
 
 		virtual int getResponseCode() const = 0;
 		virtual const Bytes& getBody() const = 0;
+		virtual Bytes moveBody() { return getBody(); }
 
 		void setCancelled() { cancelled = true; }
 		bool isCancelled() const { return cancelled; }
@@ -31,8 +32,11 @@ namespace Halley
 	class HTTPRequest {
 	public:
 		virtual ~HTTPRequest() {}
+
 		virtual void setPostData(const String& contentType, const Bytes& data) = 0;
 		virtual void setHeader(const String& headerName, const String& headerValue) = 0;
+		virtual void setProgressCallback(std::function<bool(uint64_t, uint64_t)> callback) {}
+
 		virtual Future<std::unique_ptr<HTTPResponse>> send() = 0;
 	};
 

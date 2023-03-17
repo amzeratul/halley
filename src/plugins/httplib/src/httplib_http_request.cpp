@@ -31,6 +31,10 @@ HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, Stri
 	, host(hostAndPath.first)
 	, path(hostAndPath.second)
 {
+	progress = [](uint64_t cur, uint64_t total)
+	{
+		return true;
+	};
 }
 
 void HTTPLibHTTPRequest::setPostData(const String& contentType, const Bytes& data)
@@ -44,11 +48,16 @@ void HTTPLibHTTPRequest::setHeader(const String& headerName, const String& heade
 	headers.emplace(headerName.cppStr(), headerValue.cppStr());
 }
 
+void HTTPLibHTTPRequest::setProgressCallback(std::function<bool(uint64_t, uint64_t)> callback)
+{
+	progress = callback;
+}
+
 httplib::Result HTTPLibHTTPRequest::run()
 {
 	httplib::Client client(host.cppStr());
 	if (method == HTTPMethod::GET) {
-		return client.Get(path.cppStr(), headers);
+		return client.Get(path.cppStr(), headers, progress);
 	} else if (method == HTTPMethod::POST) {
 		return client.Post(path.cppStr(), headers, reinterpret_cast<const char*>(postData.data()), postData.size(), contentType.cppStr());
 	} else if (method == HTTPMethod::PUT) {
@@ -88,4 +97,9 @@ int HTTPLibHTTPResponse::getResponseCode() const
 const Bytes& HTTPLibHTTPResponse::getBody() const
 {
 	return body;
+}
+
+Bytes HTTPLibHTTPResponse::moveBody()
+{
+	return std::move(body);
 }

@@ -106,6 +106,16 @@ String ZipFile::getFileName(size_t idx) const
 	return String(buffer, size - 1);
 }
 
+size_t ZipFile::getFileSize(size_t idx) const
+{
+	mz_zip_archive_file_stat stat;
+	const auto result = mz_zip_reader_file_stat(static_cast<mz_zip_archive*>(archive.get()), static_cast<mz_uint>(idx), &stat);
+	if (!result) {
+		return 0;
+	}
+	return stat.m_uncomp_size;
+}
+
 Vector<String> ZipFile::getFileNames() const
 {
 	if (!isOpen) {

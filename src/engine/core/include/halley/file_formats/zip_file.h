@@ -22,6 +22,7 @@ namespace Halley {
 
 		size_t getNumFiles() const;
 		String getFileName(size_t idx) const;
+		size_t getFileSize(size_t idx) const;
 		Vector<String> getFileNames() const;
 		Bytes extractFile(size_t idx) const;
 

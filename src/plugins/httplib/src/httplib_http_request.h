@@ -14,10 +14,13 @@ namespace Halley {
 
 		void setPostData(const String& contentType, const Bytes& data) override;
 		void setHeader(const String& headerName, const String& headerValue) override;
+		void setProgressCallback(std::function<bool(uint64_t current, uint64_t total)> callback) override;
+		
 		Future<std::unique_ptr<HTTPResponse>> send() override;
 
 	private:
 		httplib::Headers headers;
+		httplib::Progress progress;
 
 		HTTPMethod method;
 		String host;
@@ -35,6 +38,7 @@ namespace Halley {
 
 		int getResponseCode() const override;
 		const Bytes& getBody() const override;
+		Bytes moveBody() override;
 
 	private:
 		int responseCode;

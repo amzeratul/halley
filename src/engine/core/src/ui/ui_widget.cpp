@@ -641,11 +641,13 @@ void UIWidget::setParent(UIParent* p)
 
 void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 {
-	this->root = &root;
-	onAddedToRoot(root);
-	
-	for (auto& c: getChildren()) {
-		c->notifyTreeAddedToRoot(root);
+	if (this->root != &root) {
+		this->root = &root;
+		onAddedToRoot(root);
+
+		for (auto& c : getChildren()) {
+			c->notifyTreeAddedToRoot(root);
+		}
 	}
 }
 
