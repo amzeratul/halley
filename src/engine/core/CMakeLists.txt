@@ -282,6 +282,7 @@ set(SOURCES
         "src/file_formats/text_reader.cpp"
         "src/file_formats/xml_file.cpp"
         "src/file_formats/yaml_convert.cpp"
+        "src/file_formats/zip_file.cpp"
         
         "src/maths/base_transform.cpp"
         "src/maths/bezier.cpp"
@@ -724,6 +725,7 @@ set(HEADERS
         "include/halley/file_formats/xml_file.h"
         "include/halley/file_formats/xml_forward.h"
         "include/halley/file_formats/yaml_convert.h"
+        "include/halley/file_formats/zip_file.h"
         
         "include/halley/halley_json.h"
         "include/halley/halley_utils.h"

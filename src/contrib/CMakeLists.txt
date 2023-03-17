@@ -15,6 +15,8 @@ set(SOURCES
         "lz4/lz4frame.c"
         "lz4/lz4hc.c"
 
+        "miniz/miniz.c"
+
         "speex/resample.c"
 
         "stb_image/stb_image.c"
@@ -96,6 +98,8 @@ set(HEADERS
         "lz4/lz4frame_static.h"
         "lz4/lz4frame.h"
         "lz4/lz4hc.h"
+
+        "miniz/miniz.h"
 
         "stb_image/stb_image.h"
         
