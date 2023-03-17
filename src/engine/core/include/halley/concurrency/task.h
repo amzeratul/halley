@@ -53,6 +53,9 @@ namespace Halley
 
 		void setVisible(bool visible);
 
+		virtual std::optional<String> getAction();
+		virtual void doAction();
+
 	private:
 		Vector<std::unique_ptr<Task>> continuations;
 		Vector<std::unique_ptr<Task>> pendingTasks;

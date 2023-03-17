@@ -437,6 +437,8 @@ namespace Halley {
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
 		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
         virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
+		virtual void buildGame() = 0;
+		virtual void updateEditor() = 0;
 	};
 
     class IEditorCustomTools { 

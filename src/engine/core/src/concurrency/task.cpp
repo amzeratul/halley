@@ -160,3 +160,12 @@ void Task::setVisible(bool visible)
 {
 	isVisible = visible;
 }
+
+std::optional<String> Task::getAction()
+{
+	return {};
+}
+
+void Task::doAction()
+{
+}

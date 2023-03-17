@@ -3,14 +3,17 @@
 #include <halley.hpp>
 
 namespace Halley {
-    class CheckUpdateTask : public Task {
+	class ProjectWindow;
+
+	class CheckUpdateTask : public Task {
     public:
-        CheckUpdateTask(Path projectPath);
+        CheckUpdateTask(ProjectWindow& projectWindow, Path projectPath);
 
 	protected:
         void run() override;
 
     private:
+        ProjectWindow& projectWindow;
         Path projectPath;
         DirectoryMonitor monitorAssets;
         bool firstCheck = true;
@@ -21,9 +24,14 @@ namespace Halley {
 
     class UpdateEditorTask : public Task {
     public:
-        UpdateEditorTask();
+        UpdateEditorTask(ProjectWindow& projectWindow);
 
 	protected:
         void run() override;
+        std::optional<String> getAction() override;
+        void doAction() override;
+
+    private:
+        ProjectWindow& projectWindow;
     };
 }

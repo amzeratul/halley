@@ -80,6 +80,6 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
-		projectWindow.getTasks().addTask(std::make_unique<BuildProjectTask>(project));
+		projectWindow.buildGame();
 	});
 }

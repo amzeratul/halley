@@ -172,3 +172,15 @@ Vector<std::unique_ptr<Task>> TaskAnchor::getPendingTasks()
 	
 	return {};
 }
+
+std::optional<String> TaskAnchor::getAction()
+{
+	std::lock_guard<std::mutex> lock(task->mutex);
+	return task->getAction();	
+}
+
+void TaskAnchor::doAction()
+{
+	std::lock_guard<std::mutex> lock(task->mutex);
+	task->doAction();
+}

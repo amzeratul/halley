@@ -9,6 +9,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/tools/dll/load_dll_task.h"
+#include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project_properties.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
@@ -34,7 +35,6 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
 	tasks = std::make_unique<TaskSet>();
-	tasks->addTask(std::make_unique<CheckUpdateTask>(project.getRootPath()));
 
 	entityEditorFactoryRoot = std::make_shared<EntityEditorFactoryRoot>(*this, factory);
 	entityEditorFactoryRoot->addStandardFieldFactories();
@@ -49,6 +49,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	project.addAssetLoadedListener(this);
 
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
+	tasks->addTask(std::make_unique<CheckUpdateTask>(*this, project.getRootPath()));
 }
 
 ProjectWindow::~ProjectWindow()
@@ -396,7 +397,7 @@ void ProjectWindow::updateDLLStatus(ProjectDLL::Status status)
 {
 	if (status != ProjectDLL::Status::Unloaded) {
 		if (!firstDLLLoad || status != ProjectDLL::Status::Loaded) {
-			addTask(std::make_unique<LoadDLLTask>(status));
+			addTask(std::make_unique<LoadDLLTask>(*this, status));
 		}
 	}
 
@@ -568,6 +569,16 @@ EntityEditorFactoryRoot& ProjectWindow::getEntityEditorFactoryRoot()
 std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
 {
 	return project.getGameInstance()->createScriptNodeTypeCollection();
+}
+
+void ProjectWindow::buildGame()
+{
+	addTask(std::make_unique<BuildProjectTask>(project));
+}
+
+void ProjectWindow::updateEditor()
+{
+	closeProject();
 }
 
 

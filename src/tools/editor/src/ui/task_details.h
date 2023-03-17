@@ -32,5 +32,6 @@ namespace Halley {
 
 		void updateMessages();
 		void copyToClipboard(bool verbose);
+		void doAction();
 	};
 }

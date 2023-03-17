@@ -62,6 +62,9 @@ namespace Halley {
     	EntityEditorFactoryRoot& getEntityEditorFactoryRoot();
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
+        void buildGame() override;
+        void updateEditor() override;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

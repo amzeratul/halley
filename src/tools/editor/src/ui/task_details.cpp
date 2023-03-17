@@ -17,6 +17,11 @@ void TaskDetails::onMakeUI()
 	{
 		copyToClipboard(false);
 	});
+
+	setHandle(UIEventType::ButtonClicked, "action", [=] (const UIEvent& event)
+	{
+		doAction();
+	});	
 }
 
 void TaskDetails::show(const TaskDisplay& display)
@@ -132,7 +137,14 @@ void TaskDetails::updateMessages()
 		msgLabel->setText(LocalisedString::fromUserString(String(message)));
 		msgLabel->getTextRenderer().setColourOverride(colours);
 
-		getWidget("copyToClipboard")->setActive(clipboard && endedInError);
+		const auto action = task->getAction();
+
+		getWidget("copyToClipboard")->setActive(clipboard && endedInError && !action);
+		if (action) {
+			const auto actionButton = getWidgetAs<UIButton>("action");
+			actionButton->setLabel(LocalisedString::fromUserString(*action));
+			actionButton->setActive(true);
+		}
 	}
 }
 
@@ -155,4 +167,9 @@ void TaskDetails::copyToClipboard(bool verbose)
 		
 		clipboard->setData(result);
 	}
+}
+
+void TaskDetails::doAction()
+{
+	taskDisplay->getTask()->doAction();
 }

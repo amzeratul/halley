@@ -1,9 +1,12 @@
 #include "check_update_task.h"
 
+#include "src/ui/project_window.h"
+
 using namespace Halley;
 
-CheckUpdateTask::CheckUpdateTask(Path projectPath)
+CheckUpdateTask::CheckUpdateTask(ProjectWindow& projectWindow, Path projectPath)
 	: Task("Check Update", true, false)
+	, projectWindow(projectWindow)
 	, projectPath(std::move(projectPath))
 	, monitorAssets(projectPath / "halley" / "include")
 {
@@ -19,7 +22,7 @@ void CheckUpdateTask::run()
 		std::this_thread::sleep_for(100ms);
 	}
 
-	addContinuation(std::make_unique<UpdateEditorTask>());
+	addContinuation(std::make_unique<UpdateEditorTask>(projectWindow));
 }
 
 bool CheckUpdateTask::needsUpdate()
@@ -38,12 +41,23 @@ bool CheckUpdateTask::versionMatches()
 	return !projectVersion.isValid() || getHalleyVersion() == projectVersion;
 }
 
-UpdateEditorTask::UpdateEditorTask()
+UpdateEditorTask::UpdateEditorTask(ProjectWindow& projectWindow)
 	: Task("Update Editor", false, true)
+	, projectWindow(projectWindow)
 {
 }
 
 void UpdateEditorTask::run()
 {
 	logError("Editor needs updating.");
+}
+
+std::optional<String> UpdateEditorTask::getAction()
+{
+	return "Update";
+}
+
+void UpdateEditorTask::doAction()
+{
+	projectWindow.updateEditor();
 }

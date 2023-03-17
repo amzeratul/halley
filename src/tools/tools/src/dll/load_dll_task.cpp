@@ -2,8 +2,9 @@
 
 using namespace Halley;
 
-LoadDLLTask::LoadDLLTask(ProjectDLL::Status status)
+LoadDLLTask::LoadDLLTask(IProjectWindow& projectWindow, ProjectDLL::Status status)
 	: Task("Loading Game DLL", false, true)
+	, projectWindow(projectWindow)
 	, status(status)
 {
 }
@@ -28,7 +29,7 @@ void LoadDLLTask::run()
 		return;
 
 	case ProjectDLL::Status::DLLVersionTooHigh:
-		logError("Editor is out of date. Try building the editor.");
+		logError("Editor is out of date. Try updating the editor.");
 		return;
 
 	case ProjectDLL::Status::DLLCrash:
@@ -37,6 +38,37 @@ void LoadDLLTask::run()
 
 	case ProjectDLL::Status::InvalidDLL:
 		logError("Game DLL does not seem to be a Halley DLL. Try building the game.");
+		return;
+	}
+}
+
+std::optional<String> LoadDLLTask::getAction()
+{
+	switch (status) {
+	case ProjectDLL::Status::DLLNotFound:
+	case ProjectDLL::Status::DLLVersionTooLow:
+	case ProjectDLL::Status::InvalidDLL:
+		return "Build Project";
+
+	case ProjectDLL::Status::DLLVersionTooHigh:
+		return "Update";
+
+	default:
+		return std::nullopt;
+	}
+}
+
+void LoadDLLTask::doAction()
+{
+	switch (status) {
+	case ProjectDLL::Status::DLLNotFound:
+	case ProjectDLL::Status::DLLVersionTooLow:
+	case ProjectDLL::Status::InvalidDLL:
+		projectWindow.buildGame();
+		return;
+
+	case ProjectDLL::Status::DLLVersionTooHigh:
+		projectWindow.updateEditor();
 		return;
 	}
 }
