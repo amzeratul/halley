@@ -37,3 +37,7 @@ endif ()
 if (USE_ANDROID)
     add_subdirectory(android)
 endif ()
+
+if (USE_HTTPLIB)
+    add_subdirectory(httplib)
+endif()

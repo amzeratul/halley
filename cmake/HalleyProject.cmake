@@ -128,6 +128,7 @@ set(USE_XAUDIO2 0)
 set(USE_MEDIA_FOUNDATION 0)
 set(USE_AVFOUNDATION 0)
 set(USE_ANDROID 0)
+set(USE_HTTPLIB 1)
 
 if (EMSCRIPTEN)
 	set(USE_SDL2 0)
@@ -259,6 +260,11 @@ endif()
 # Microsoft Media Foundation
 if (USE_MEDIA_FOUNDATION)
 	add_definitions(-DWITH_MEDIA_FOUNDATION)
+endif()
+
+# General Web
+if (USE_HTTPLIB)
+	add_definitions(-DWITH_HTTPLIB)
 endif()
 
 # Apple AVFoundation
@@ -405,6 +411,14 @@ if (USE_ANDROID)
 set(HALLEY_PROJECT_LIBS
 	optimized halley-android
 	debug halley-android_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
+if (USE_HTTPLIB)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-httplib
+	debug halley-httplib_d
 	${HALLEY_PROJECT_LIBS}
 	)
 endif ()
