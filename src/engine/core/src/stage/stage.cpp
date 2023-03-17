@@ -117,6 +117,12 @@ AnalyticsAPI& Stage::getAnalyticsAPI() const
 	return *api->analytics;
 }
 
+WebAPI& Stage::getWebAPI() const
+{
+	Expects(api->web);
+	return *api->web;
+}
+
 Resources& Stage::getResources() const
 {
 	Expects(resources);

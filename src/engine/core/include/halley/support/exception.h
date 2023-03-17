@@ -54,6 +54,7 @@ namespace Halley {
 			Input = 213,
 			Compression = 214,
 			Scripting = 215,
+			Web = 216,
 
 			LastHalleyReserved = 999
 		};

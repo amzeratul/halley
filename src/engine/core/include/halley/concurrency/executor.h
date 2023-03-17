@@ -26,6 +26,8 @@ namespace Halley
 		void onDetached();
 		void abort();
 
+		void setImmediate(bool immediate);
+
 		static ExecutionQueue& getDefault();
 
 	private:
@@ -36,11 +38,15 @@ namespace Halley
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
 		std::atomic<bool> aborted;
+
+		bool immediate = false;
 	};
 
 	class Executors
 	{
 	public:
+		Executors();
+
 		static Executors& get();
 		static void setInstance(Executors& e);
 
@@ -50,6 +56,7 @@ namespace Halley
 		static ExecutionQueue& getMainUpdateThread() { return instance->mainUpdateThread; }
 		static ExecutionQueue& getMainRenderThread() { return instance->mainRenderThread; }
 		static ExecutionQueue& getDiskIO() { return instance->diskIO; }
+		static ExecutionQueue& getImmediate() { return instance->immediate; }
 
 		[[deprecated]] static ExecutionQueue& getMainThread() { return instance->mainUpdateThread; }
 
@@ -62,6 +69,7 @@ namespace Halley
 		ExecutionQueue mainUpdateThread;
 		ExecutionQueue mainRenderThread;
 		ExecutionQueue diskIO;
+		ExecutionQueue immediate;
 	};
 
 	class Executor

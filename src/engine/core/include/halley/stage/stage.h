@@ -50,6 +50,7 @@ namespace Halley
 		NetworkAPI& getNetworkAPI() const;
 		MovieAPI& getMovieAPI() const;
 		AnalyticsAPI& getAnalyticsAPI() const;
+		WebAPI& getWebAPI() const;
 		Resources& getResources() const;
 
 		Game& getGame() const;

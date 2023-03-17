@@ -43,15 +43,20 @@ Vector<TaskBase> ExecutionQueue::getAll()
 
 void ExecutionQueue::addToQueue(TaskBase task)
 {
-#if HAS_THREADS
-	std::unique_lock<std::mutex> lock(mutex);
-	queue.emplace_back(task);
-	hasTasks.store(true);
+	if (immediate) {
+		task();
+	} else {
+		std::unique_lock<std::mutex> lock(mutex);
+		queue.emplace_back(task);
+		hasTasks.store(true);
 
-	condition.notify_one();
-#else
-	task();
-#endif
+		condition.notify_one();
+	}
+}
+
+Executors::Executors()
+{
+	immediate.setImmediate(true);
 }
 
 Executors& Executors::get()
@@ -92,6 +97,11 @@ void ExecutionQueue::abort()
 		aborted = true;
 	}
 	condition.notify_all();
+}
+
+void ExecutionQueue::setImmediate(bool immediate)
+{
+	this->immediate = immediate;
 }
 
 ExecutionQueue& ExecutionQueue::getDefault()
