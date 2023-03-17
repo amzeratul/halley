@@ -11,7 +11,7 @@ namespace Halley {
 	class EditorRootStage final : public Stage
 	{
 	public:
-		EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project);
+		EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project, std::optional<String> launcherPath);
 		~EditorRootStage();
 
 		void init() override;
@@ -29,6 +29,7 @@ namespace Halley {
 		Executor mainThreadExecutor;
 
 		std::unique_ptr<Project> project;
+		std::optional<String> launcherPath;
 
 		Sprite halleyLogo;
 		Sprite cursor;

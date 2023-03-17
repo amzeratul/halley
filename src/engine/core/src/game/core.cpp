@@ -41,7 +41,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 
 	// Set paths
 	environment = std::make_unique<Environment>();
-	if (_args.size() > 0) {
+	if (!_args.empty()) {
 		environment->parseProgramPath(_args[0]);
 		args.resize(_args.size() - 1);
 		std::copy(_args.begin() + 1, _args.end(), args.begin());

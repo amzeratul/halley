@@ -97,17 +97,36 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 
 void HalleyEditor::parseArguments(const Vector<String>& args)
 {
-	gotProjectPath = false;
+	enum class ArgType {
+		None,
+		ProjectPath,
+		LauncherPath
+	};
+
+	ArgType type = ArgType::None;
+	projectPath = {};
+	launcherPath = {};
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
-			std::cout << "Unknown argument \"" << arg << "\".\n";
+			if (arg == "--project") {
+				type = ArgType::ProjectPath;
+			} else if (arg == "--launcher") {
+				type = ArgType::LauncherPath;
+			}
 		} else {
-			if (!gotProjectPath) {
-				projectPath = arg.cppStr();
-				gotProjectPath = true;
-			} else {
-				std::cout << "Unknown argument \"" << arg << "\".\n";
+			if (type == ArgType::ProjectPath) {
+				if (!projectPath) {
+					projectPath = arg;
+				} else {
+					*projectPath += " " + arg;
+				}
+			} else if (type == ArgType::LauncherPath) {
+				if (!launcherPath) {
+					launcherPath = arg;
+				} else {
+					*launcherPath += " " + arg;
+				}
 			}
 		}
 	}
@@ -123,14 +142,14 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath, preferences->getDisabledPlatforms());
 	std::unique_ptr<Project> project;
 
-	if (gotProjectPath) {
-		Logger::logInfo("Loading " + projectPath);
-		project = loadProject(Path(projectPath));
+	if (projectPath) {
+		Logger::logInfo("Loading " + *projectPath);
+		project = loadProject(Path(*projectPath));
 	}
 
 	api.video->setWindow(preferences->getWindowDefinition());
 	api.video->setVsync(true);
-	return std::make_unique<EditorRootStage>(*this, std::move(project));
+	return std::make_unique<EditorRootStage>(*this, std::move(project), launcherPath);
 }
 
 std::unique_ptr<Project> HalleyEditor::loadProject(Path path)

@@ -39,8 +39,8 @@ namespace Halley
 		std::unique_ptr<Preferences> preferences;
 		Path rootPath;
 
-		String projectPath;
-		bool gotProjectPath = false;
+		std::optional<String> projectPath;
+		std::optional<String> launcherPath;
 
 		void parseArguments(const Vector<String>& args);
 	};

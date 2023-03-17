@@ -13,10 +13,11 @@
 
 using namespace Halley;
 
-EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project)
+EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project, std::optional<String> launcherPath)
 	: editor(editor)
 	, mainThreadExecutor(Executors::getMainUpdateThread())
 	, project(std::move(project))
+	, launcherPath(std::move(launcherPath))
 {
 }
 
@@ -172,17 +173,22 @@ void EditorRootStage::createUI()
 
 void EditorRootStage::createLoadProjectUI()
 {
-	setTopLevelUI(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
-	{
-		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
-			project = editor.loadProject(str);
-			if (project) {
-				loadProject();
-			} else {
-				createLoadProjectUI();
-			}
-		});
-	}));
+	if (launcherPath) {
+		getCoreAPI().quit(0);
+		OS::get().runCommandDetached(*launcherPath);
+	} else {
+		setTopLevelUI(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
+		{
+			Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
+				project = editor.loadProject(str);
+				if (project) {
+					loadProject();
+				} else {
+					createLoadProjectUI();
+				}
+			});
+		}));
+	}
 }
 
 void EditorRootStage::updateUI(Time time)
