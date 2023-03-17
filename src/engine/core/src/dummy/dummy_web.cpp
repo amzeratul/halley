@@ -10,7 +10,7 @@ void DummyWebAPI::deInit()
 {
 }
 
-std::unique_ptr<HTTPRequest> DummyWebAPI::makeHTTPRequest(HTTPMethod method, String url)
+std::unique_ptr<HTTPRequest> DummyWebAPI::makeHTTPRequest(HTTPMethod method, const String& url)
 {
 	return {};	
 }

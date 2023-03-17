@@ -67,6 +67,6 @@ namespace Halley
 	public:
 		virtual ~WebAPI() {}
 
-		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(HTTPMethod method, String url) = 0;
+		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(HTTPMethod method, const String& url) = 0;
 	};
 }
