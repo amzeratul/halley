@@ -10,6 +10,7 @@
 #include "platform_api.h"
 #include "movie_api.h"
 #include "analytics_api.h"
+#include "web_api.h"
 
 namespace Halley
 {
@@ -96,6 +97,12 @@ namespace Halley
 	{
 	public:
 		virtual ~AnalyticsAPIInternal() {}
+	};
+
+	class WebAPIInternal : public WebAPI, public HalleyAPIInternal
+	{
+	public:
+		virtual ~WebAPIInternal() {}
 	};
 }
 

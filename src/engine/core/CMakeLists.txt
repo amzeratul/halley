@@ -14,6 +14,7 @@ set(SOURCES
         "src/dummy/dummy_plugins.cpp"
         "src/dummy/dummy_system.cpp"
         "src/dummy/dummy_video.cpp"
+        "src/dummy/dummy_web.cpp"
 
         "src/game/core.cpp"
         "src/game/environment.cpp"
@@ -369,6 +370,7 @@ set(HEADERS
         "src/dummy/dummy_platform.h"
         "src/dummy/dummy_system.h"
         "src/dummy/dummy_video.h"
+        "src/dummy/dummy_web.h"
 
         "include/halley/api/analytics_api.h"
         "include/halley/api/audio_api.h"

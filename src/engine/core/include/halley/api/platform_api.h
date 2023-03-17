@@ -14,28 +14,6 @@ namespace Halley
 	class InputKeyboard;
 	class NetworkService;
 
-	class HTTPResponse {
-	public:
-		virtual ~HTTPResponse() {}
-
-		virtual int getResponseCode() const = 0;
-		virtual const Bytes& getBody() const = 0;
-
-		void setCancelled() { cancelled = true; }
-		bool isCancelled() const { return cancelled; }
-
-	private:
-		bool cancelled = false;
-	};
-
-	class HTTPRequest {
-	public:
-		virtual ~HTTPRequest() {}
-		virtual void setPostData(const String& contentType, const Bytes& data) = 0;
-		virtual void setHeader(const String& headerName, const String& headerValue) = 0;
-		virtual Future<std::unique_ptr<HTTPResponse>> send() = 0;
-	};
-
 	class AuthorisationToken {
 	public:
 		virtual ~AuthorisationToken() {}
@@ -178,13 +156,7 @@ namespace Halley
 
 		virtual String getId() = 0; // Platform id
 		virtual void update() = 0;
-
 		
-		////////
-		// HTTP
-
-		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
-
 		
 		//////////////////////////
 		// Login & authentication
