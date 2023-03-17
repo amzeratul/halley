@@ -14,6 +14,7 @@
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
 #include "src/assets/asset_editor_window.h"
+#include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
 #include "src/ui/editor_ui_factory.h"
@@ -33,6 +34,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
 	tasks = std::make_unique<TaskSet>();
+	tasks->addTask(std::make_unique<CheckUpdateTask>(project.getRootPath()));
 
 	entityEditorFactoryRoot = std::make_shared<EntityEditorFactoryRoot>(*this, factory);
 	entityEditorFactoryRoot->addStandardFieldFactories();

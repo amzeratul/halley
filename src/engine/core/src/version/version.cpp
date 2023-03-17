@@ -50,6 +50,36 @@ void HalleyVersion::parse(const String& string)
 	}
 }
 
+void HalleyVersion::parseHeader(gsl::span<const String> lines)
+{
+	major = 0;
+	minor = 0;
+	revision = 0;
+	for (auto& line: lines) {
+		if (line.startsWith("#define")) { 
+			int value = 0;
+			for (const auto& v: line.split(' ')) {
+				if (v.isInteger()) {
+					value = v.toInteger();
+					break;
+				}
+			}
+			if (line.contains("HALLEY_VERSION_MAJOR")) {
+				major = value;
+			} else if (line.contains("HALLEY_VERSION_MINOR")) {
+				minor = value;
+			} else if (line.contains("HALLEY_VERSION_REVISION")) {
+				revision = value;
+			}
+		}
+	}
+}
+
+bool HalleyVersion::isValid() const
+{
+	return major > 0;
+}
+
 uint32_t Halley::getHalleyDLLAPIVersion()
 {
 	const auto version = getHalleyVersion();

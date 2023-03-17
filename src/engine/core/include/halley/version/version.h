@@ -19,6 +19,9 @@ namespace Halley {
 
 		String toString() const;
 		void parse(const String& string);
+		void parseHeader(gsl::span<const String> lines);
+
+		bool isValid() const;
 	};
 
 	uint32_t getHalleyDLLAPIVersion();
