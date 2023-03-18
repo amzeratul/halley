@@ -1,6 +1,6 @@
 project (halley-engine)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
+include_directories(${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -336,6 +336,7 @@ set(SOURCES
         
         "src/time/stopwatch.cpp"
         
+        "src/utils/cryptography.cpp"
         "src/utils/encrypt.cpp"
         "src/utils/hash.cpp"
         "src/utils/variable.cpp"
@@ -796,6 +797,7 @@ set(HEADERS
 
         "include/halley/utils/algorithm.h"
         "include/halley/utils/attributes.h"
+        "include/halley/utils/cryptography.h"
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
         "include/halley/utils/halley_iostream.h"
@@ -842,7 +844,7 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-engine ${SOURCES} ${HEADERS})
-target_link_libraries(halley-engine halley-contrib)
+target_link_libraries(halley-engine halley-contrib  ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
 add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 
