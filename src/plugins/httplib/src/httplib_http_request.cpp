@@ -87,6 +87,11 @@ HTTPLibHTTPResponse::HTTPLibHTTPResponse(httplib::Result result)
 {
 	responseCode = result->status;
 	body = Bytes(std::begin(result->body), std::end(result->body));
+	if (responseCode == 301) {
+		if (result->has_header("Location")) {
+			location = result->get_header_value("Location");
+		}
+	}
 }
 
 int HTTPLibHTTPResponse::getResponseCode() const
@@ -102,4 +107,9 @@ const Bytes& HTTPLibHTTPResponse::getBody() const
 Bytes HTTPLibHTTPResponse::moveBody()
 {
 	return std::move(body);
+}
+
+String HTTPLibHTTPResponse::getRedirectLocation()
+{
+	return location;
 }

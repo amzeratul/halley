@@ -21,6 +21,7 @@ namespace Halley
 		virtual int getResponseCode() const = 0;
 		virtual const Bytes& getBody() const = 0;
 		virtual Bytes moveBody() { return getBody(); }
+		virtual String getRedirectLocation() { return ""; }
 
 		void setCancelled() { cancelled = true; }
 		bool isCancelled() const { return cancelled; }

@@ -39,9 +39,11 @@ namespace Halley {
 		int getResponseCode() const override;
 		const Bytes& getBody() const override;
 		Bytes moveBody() override;
+		String getRedirectLocation() override;
 
 	private:
 		int responseCode;
 		Bytes body;
+		String location;
 	};
 }
