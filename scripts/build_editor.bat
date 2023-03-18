@@ -3,9 +3,20 @@
 taskkill /IM halley-editor.exe /F 2>NUL
 taskkill /IM halley-cmd.exe /F 2>NUL
 
+if "%1"=="--clean" (
+    echo Cleaning previous build...
+    rmdir /s /q build 2>NUL
+)
+
+if exist halley_deps (
+    echo Removing old dependencies...
+    rmdir /s /q halley_deps 2>NUL
+)
+
 if not exist build mkdir build
 cd build
 
+echo Copying DLLs...
 mkdir "%~dp0..\bin\" 2>NUL
 xcopy "%~dp0..\deps\bin\SDL2.dll" "%~dp0..\bin\" /C /Q /Y
 xcopy "%~dp0..\deps\bin\dxcompiler.dll" "%~dp0..\bin\" /C /Q /Y
