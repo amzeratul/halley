@@ -1,6 +1,6 @@
 project (halley-httplib)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/core/include")
+include_directories(${OPENSSL_INCLUDE_DIR} "../../engine/core/include" "../../contrib/zlib")
 
 set(SOURCES
     "contrib/cpp-httplib/httplib.cc"
@@ -20,5 +20,11 @@ set(HEADERS
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
+if (USE_SSL)
+    add_definitions(-DCPPHTTPLIB_OPENSSL_SUPPORT)
+endif()
+
+add_definitions(-DCPPHTTPLIB_ZLIB_SUPPORT)
+
 add_library (halley-httplib ${SOURCES} ${HEADERS})
-target_link_libraries(halley-httplib halley-engine)
+target_link_libraries(halley-httplib halley-engine ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})

@@ -262,9 +262,17 @@ if (USE_MEDIA_FOUNDATION)
 	add_definitions(-DWITH_MEDIA_FOUNDATION)
 endif()
 
-# General Web
+# cpp-httplib
 if (USE_HTTPLIB)
 	add_definitions(-DWITH_HTTPLIB)
+endif()
+
+# SSL
+if (USE_SSL)
+	set(OPENSSL_USE_STATIC_LIBS TRUE)
+	set(OPENSSL_MSVC_STATIC_RT TRUE)
+	find_Package(OpenSSL REQUIRED)
+	add_definitions(-DWITH_SSL)
 endif()
 
 # Apple AVFoundation
@@ -313,6 +321,7 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 set(HALLEY_PROJECT_EXTERNAL_LIBS
 	${SDL2_LIBRARIES}
 	${OPENGL_LIBRARIES}
+	${OPENSSL_LIBRARIES}
 	${X11_LIBRARIES}
 	${EXTRA_LIBS}
 	)
@@ -325,6 +334,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/src/engine/lua/include
 	${HALLEY_PATH}/src/engine/editor_extensions/include
 	${Boost_INCLUDE_DIR} 
+	${OPENSSL_INCLUDE_DIR}
 	)
 
 set(HALLEY_PROJECT_LIBS
