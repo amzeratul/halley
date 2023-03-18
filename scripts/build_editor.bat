@@ -18,7 +18,7 @@ cmake -A x64 ^
     -DHALLEY_IGNORE_CONSOLES=1 ^
     -DCMAKE_INCLUDE_PATH="%~dp0..\deps\include" ^
     -DCMAKE_LIBRARY_PATH="%~dp0..\deps\lib64" ^
-    -DBOOST_INCLUDEDIR="%~dp0..\deps\Boost\include\boost-1_72" ^
+    -DBOOST_INCLUDEDIR="%~dp0..\deps\Boost\include\boost-1_81" ^
     .. || goto ERROR
 
 cmake.exe --build . --target halley-cmd --config RelWithDebInfo || goto ERROR

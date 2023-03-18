@@ -4,7 +4,6 @@ namespace Halley {}
 
 #include <halley/net/connection/ack_unreliable_connection.h>
 #include <halley/net/connection/ack_unreliable_connection_stats.h>
-#include <halley/net/connection/http.h>
 #include <halley/net/connection/iconnection.h>
 #include <halley/net/connection/imessage_stream.h>
 #include <halley/net/connection/instability_simulator.h>

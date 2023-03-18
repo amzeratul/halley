@@ -95,7 +95,6 @@ set(SOURCES
 
         "src/net/connection/ack_unreliable_connection.cpp"
         "src/net/connection/ack_unreliable_connection_stats.cpp"
-        "src/net/connection/http.cpp"
         "src/net/connection/instability_simulator.cpp"
         "src/net/connection/message_queue.cpp"
         "src/net/connection/message_queue_tcp.cpp"
@@ -489,7 +488,6 @@ set(HEADERS
 
         "include/halley/net/connection/ack_unreliable_connection.h"
         "include/halley/net/connection/ack_unreliable_connection_stats.h"
-        "include/halley/net/connection/http.h"
         "include/halley/net/connection/iconnection.h"
         "include/halley/net/connection/imessage_stream.h"
         "include/halley/net/connection/instability_simulator.h"

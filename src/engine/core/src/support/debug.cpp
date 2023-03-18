@@ -90,11 +90,6 @@ private:
 
 #endif
 
-#if false
-#define HAS_STACKTRACE
-#include <boost/stacktrace.hpp>
-#endif
-
 #if !defined(__NX_TOOLCHAIN_MAJOR__) && !defined(__ORBIS__)
 #define HAS_SIGNAL
 #include <csignal>
@@ -157,8 +152,6 @@ static void terminateHandler()
 #if defined(HAS_STACKWALKER)
 	OStreamStackWalker walker(ss, 3);
 	walker.ShowCallstack();
-#elif defined(HAS_STACKTRACE)
-	ss << boost::stacktrace::stacktrace(3, 99);
 #endif
 
 	errorHandler(ss.str());
@@ -187,8 +180,6 @@ String Debug::getCallStack(int skip)
 #if defined(HAS_STACKWALKER)
 	OStreamStackWalker walker(ss, skip);
 	walker.ShowCallstack();
-#elif defined(HAS_STACKTRACE)
-	ss << boost::stacktrace::stacktrace(skip, 99);
 #endif
 	return ss.str();
 }
