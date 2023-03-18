@@ -22,6 +22,7 @@ namespace Halley
 		ProjectLoader& getProjectLoader();
 
 		double getTargetBackgroundFPS() const override;
+		void updateEditor();
 
 	protected:
 		void init(const Environment& environment, const Vector<String>& args) override;

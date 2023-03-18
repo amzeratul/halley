@@ -145,5 +145,7 @@ namespace Halley {
 
         void setupConsole(Game& game);
         void destroyConsole();
+
+    	void doUpdateEditor();
 	};
 }

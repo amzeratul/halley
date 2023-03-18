@@ -578,7 +578,14 @@ void ProjectWindow::buildGame()
 
 void ProjectWindow::updateEditor()
 {
-	closeProject();
+	if (requestQuit([=] () { doUpdateEditor(); })) {
+		doUpdateEditor();
+	}
+}
+
+void ProjectWindow::doUpdateEditor()
+{
+	editor.updateEditor();
 }
 
 

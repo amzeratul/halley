@@ -77,3 +77,6 @@ _ReSharper*/
 /shared_gen/*.db
 /shared_gen/cpp/*.cpp
 /shared_gen/cpp/*.h
+
+# External dependencies
+/halley_deps/
