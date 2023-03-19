@@ -27,6 +27,7 @@ void Task::updateOnMain(float time)
 void Task::addContinuation(std::unique_ptr<Task> task)
 {
 	std::lock_guard<std::mutex> lock(mutex);
+	task->parent = parent;
 	continuations.emplace_back(std::move(task));
 }
 
@@ -143,11 +144,11 @@ void Task::addPendingTask(std::unique_ptr<Task> task)
 	Ensures(pendingTaskCount > 0);
 }
 
-void Task::onPendingTaskDone()
+void Task::onPendingTaskDone(size_t numContinuations)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	Expects(pendingTaskCount > 0);
-	--pendingTaskCount;
+	pendingTaskCount += static_cast<int>(numContinuations) - 1;
 	Ensures(pendingTaskCount >= 0);
 }
 

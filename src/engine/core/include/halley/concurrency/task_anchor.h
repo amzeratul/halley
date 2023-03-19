@@ -31,7 +31,7 @@ namespace Halley
 		TaskAnchor& operator=(TaskAnchor&& other) noexcept;
 		TaskAnchor& operator=(const TaskAnchor& other) = delete;
 
-		void terminate();
+		void terminate(size_t numContinuations);
 		void update(TaskSet& taskSet, float time);
 
 		TaskStatus getStatus() const;

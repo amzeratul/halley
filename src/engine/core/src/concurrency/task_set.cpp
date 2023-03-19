@@ -46,10 +46,11 @@ void TaskSet::update(Time time)
 
 		if (task->getStatus() == TaskStatus::Done) {
 			auto newTasks = task->getContinuations();
-			for (auto& t : newTasks) {
+			const size_t numContinuations = newTasks.size();
+			for (auto& t: newTasks) {
 				toAdd.push_back(std::move(t));
 			}
-			task->terminate();
+			task->terminate(numContinuations);
 			if (listener) {
 				if (task->hasError()) {
 					listener->onTaskError(task);

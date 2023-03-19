@@ -47,7 +47,7 @@ namespace Halley
 
 		bool hasPendingTasks() const;
 		void addPendingTask(std::unique_ptr<Task> task);
-		void onPendingTaskDone();
+		void onPendingTaskDone(size_t numContinuations);
 
 		Task* getParent() const;
 

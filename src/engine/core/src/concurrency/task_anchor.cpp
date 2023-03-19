@@ -24,10 +24,10 @@ TaskAnchor& TaskAnchor::operator=(TaskAnchor&& other) noexcept = default;
 
 TaskAnchor::~TaskAnchor()
 {
-	terminate();
+	terminate(0);
 }
 
-void TaskAnchor::terminate()
+void TaskAnchor::terminate(size_t numContinuations)
 {
 	if (!terminated) {
 		terminated = true;
@@ -48,7 +48,7 @@ void TaskAnchor::terminate()
 
 			auto* parent = task->getParent();
 			if (parent) {
-				parent->onPendingTaskDone();
+				parent->onPendingTaskDone(numContinuations);
 			}
 		}
 	}
