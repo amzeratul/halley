@@ -362,7 +362,9 @@ namespace Halley {
 
 		void reserve(size_t size)
 		{
-			change_capacity(static_cast<size_type>(std::max(size, capacity())));
+			if (size > capacity()) {
+				change_capacity(static_cast<size_type>(std::max(size, static_cast<size_t>(capacity() * growth_factor))));
+			}
 		}
 
 		void shrink_to_fit()
