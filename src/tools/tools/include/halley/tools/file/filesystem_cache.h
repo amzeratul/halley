@@ -13,6 +13,7 @@ namespace Halley {
 
     private:
         HashMap<String, Bytes> cache;
+        mutable std::mutex mutex;
 
         bool shouldCache(const Path& path, size_t size);
     };

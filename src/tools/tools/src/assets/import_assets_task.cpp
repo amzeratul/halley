@@ -129,7 +129,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	// Write files
 	for (auto& outFile: result.outFiles) {
 		auto path = assetsPath / outFile.first;
-		logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
+		//logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
 		fs.writeFile(path, std::move(outFile.second));
 	}
 

@@ -8,6 +8,7 @@ void FileSystemCache::writeFile(const Path& path, Bytes data)
 	FileSystem::writeFile(path, data);
 
 	if (shouldCache(path, data.size())) {
+		auto lock = std::unique_lock<std::mutex>(mutex);
 		const auto key = path.getString();
 		cache[key] = std::move(data);
 	}
@@ -16,13 +17,17 @@ void FileSystemCache::writeFile(const Path& path, Bytes data)
 const Bytes& FileSystemCache::readFile(const Path& path)
 {
 	const auto key = path.getString();
-	const auto iter = cache.find(key);
-	if (iter != cache.end()) {
-		return iter->second;
+	{
+		auto lock = std::unique_lock<std::mutex>(mutex);
+		const auto iter = cache.find(key);
+		if (iter != cache.end()) {
+			return iter->second;
+		}
 	}
 
 	auto bytes = FileSystem::readFile(path);
 
+	auto lock = std::unique_lock<std::mutex>(mutex);
 	if (shouldCache(path, bytes.size())) {
 		cache[key] = std::move(bytes);
 		return cache.at(key);
@@ -36,9 +41,12 @@ const Bytes& FileSystemCache::readFile(const Path& path)
 void FileSystemCache::remove(const Path& path)
 {
 	const auto key = path.getString();
-	const auto iter = cache.find(key);
-	if (iter != cache.end()) {
-		cache.erase(iter);
+	{
+		auto lock = std::unique_lock<std::mutex>(mutex);
+		const auto iter = cache.find(key);
+		if (iter != cache.end()) {
+			cache.erase(iter);
+		}
 	}
 
 	FileSystem::remove(path);
@@ -46,6 +54,7 @@ void FileSystemCache::remove(const Path& path)
 
 bool FileSystemCache::hasCached(const Path& path) const
 {
+	auto lock = std::unique_lock<std::mutex>(mutex);
 	const auto key = path.getString();
 	return cache.contains(key);
 }
