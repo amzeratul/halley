@@ -23,7 +23,9 @@ namespace Halley {
 			dirHandle = CreateFileW(path.getNativeString().getUTF16().c_str(), FILE_LIST_DIRECTORY, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 				nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED, nullptr);
 
-			if (dirHandle != INVALID_HANDLE_VALUE) {
+			if (dirHandle == INVALID_HANDLE_VALUE) {
+				dirHandle = nullptr;
+			} else {
 				buffer.resize(16 * 1024);
 
 				ZeroMemory(&overlapped, sizeof(overlapped));
