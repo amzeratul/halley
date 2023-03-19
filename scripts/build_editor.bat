@@ -22,11 +22,17 @@ xcopy "%~dp0..\deps\bin\SDL2.dll" "%~dp0..\bin\" /C /Q /Y
 xcopy "%~dp0..\deps\bin\dxcompiler.dll" "%~dp0..\bin\" /C /Q /Y
 xcopy "%~dp0..\deps\bin\ShaderConductor.dll" "%~dp0..\bin\" /C /Q /Y
 
+set ignoreconsoles=1
+if defined NINTENDO_SDK_ROOT (
+    echo Nintendo SDK detected
+    set ignoreconsoles=0
+)
+
 cmake -A x64 ^
     -DHALLEY_PATH=../halley ^
     -DBUILD_HALLEY_TOOLS=1 ^
     -DBUILD_HALLEY_TESTS=0 ^
-    -DHALLEY_IGNORE_CONSOLES=1 ^
+    -DHALLEY_IGNORE_CONSOLES=%ignoreconsoles% ^
     -DCMAKE_INCLUDE_PATH="%~dp0..\deps\include" ^
     -DCMAKE_LIBRARY_PATH="%~dp0..\deps\lib64" ^
     -DBOOST_INCLUDEDIR="%~dp0..\deps\Boost\include\boost-1_81" ^
