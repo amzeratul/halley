@@ -75,6 +75,9 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 
 AssetPack::~AssetPack()
 {
+	if (aliveToken) {
+		*aliveToken = false;
+	}
 }
 
 AssetPack& AssetPack::operator=(AssetPack&& other) noexcept
@@ -211,10 +214,19 @@ std::unique_ptr<ResourceDataReader> AssetPack::extractReader()
 	return std::move(reader);
 }
 
+std::shared_ptr<bool> AssetPack::getAliveToken() const
+{
+	if (!aliveToken) {
+		aliveToken = std::make_shared<bool>(true);
+	}
+	return aliveToken;
+}
+
 PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize)
 	: pack(pack)
 	, startPos(startPos)
 	, fileSize(fileSize)
+	, aliveToken(pack.getAliveToken())
 {
 }
 
@@ -225,6 +237,10 @@ size_t PackDataReader::size() const
 
 int PackDataReader::read(gsl::span<gsl::byte> dst)
 {
+	if (!*aliveToken) {
+		return 0;
+	}
+
 	std::unique_lock<std::mutex> lock(mutex);
 	size_t available = fileSize - curPos;
 	size_t toRead = std::min(available, size_t(dst.size()));
@@ -237,6 +253,10 @@ int PackDataReader::read(gsl::span<gsl::byte> dst)
 
 void PackDataReader::seek(int64_t pos, int whence)
 {
+	if (!*aliveToken) {
+		return;
+	}
+
 	std::unique_lock<std::mutex> lock(mutex);
 	switch (whence) {
 	case SEEK_SET:
@@ -253,11 +273,20 @@ void PackDataReader::seek(int64_t pos, int whence)
 
 size_t PackDataReader::tell() const
 {
+	if (!*aliveToken) {
+		return 0;
+	}
+
 	std::unique_lock<std::mutex> lock(mutex);
 	return curPos;
 }
 
 void PackDataReader::close()
 {
+}
+
+bool PackDataReader::isAvailable() const
+{
+	return *aliveToken;
 }
 

@@ -95,8 +95,14 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float
 				}
 			}
 
-			auto& vorbis = getVorbisData(pos);
-			vorbis.read(buffer);
+			auto* vorbis = getVorbisData(pos);
+			if (vorbis) {
+				vorbis->read(buffer);
+			} else {
+				for (auto& b : buffer) {
+					AudioMixer::zero(b);
+				}
+			}
 			streamPos = pos + len;
 		}
 
@@ -107,12 +113,16 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float
 	return len;
 }
 
-VorbisData& AudioClip::getVorbisData(size_t targetPos) const
+VorbisData* AudioClip::getVorbisData(size_t targetPos) const
 {
 	// This chooses which of the two vorbis data readers to use. This allows two simultaneous reads of the stream without insane seeking, needed for self-overlapping music loops.
 	// It'll basically pick whichever of the two readers is closer to the target position, and seek if needed.
 
 	const size_t nSamples = vorbisData[0]->getNumSamples();
+	if (nSamples == 0) {
+		// Happens when resource is unloaded, e.g. due to hot reload
+		return nullptr;
+	}
 	size_t bestDist = std::numeric_limits<size_t>::max();
 	size_t bestIdx = 0;
 
@@ -129,7 +139,7 @@ VorbisData& AudioClip::getVorbisData(size_t targetPos) const
 		vorbisData[bestIdx]->seek(targetPos);
 	}
 	
-	return *vorbisData[bestIdx];
+	return vorbisData[bestIdx].get();
 }
 
 size_t AudioClip::getLength() const

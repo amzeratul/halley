@@ -58,6 +58,6 @@ namespace Halley
 		mutable Vector<Vector<AudioSample>> samples;
 		mutable Vector<Vector<AudioSample>> buffer;
 
-		VorbisData& getVorbisData(size_t targetPos) const;
+		VorbisData* getVorbisData(size_t targetPos) const;
 	};
 }

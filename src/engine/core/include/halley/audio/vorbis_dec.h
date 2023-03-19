@@ -72,5 +72,6 @@ namespace Halley {
 		
 		bool streaming;
 		long long pos;
+		bool error = false;
 	};
 }

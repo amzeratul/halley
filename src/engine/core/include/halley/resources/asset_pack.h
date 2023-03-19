@@ -50,6 +50,8 @@ namespace Halley {
 
 		std::unique_ptr<ResourceDataReader> extractReader();
 
+		std::shared_ptr<bool> getAliveToken() const;
+
     private:
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;
@@ -58,6 +60,7 @@ namespace Halley {
 		size_t dataOffset = 0;
 		Bytes data;
 		std::array<char, 16> iv;
+		mutable std::shared_ptr<bool> aliveToken;
     };
 
 
@@ -70,6 +73,7 @@ namespace Halley {
 		void seek(int64_t pos, int whence) override;
 		size_t tell() const override;
 		void close() override;
+		bool isAvailable() const override;
 
 	private:
 		AssetPack& pack;
@@ -77,5 +81,6 @@ namespace Halley {
 		const size_t fileSize;
 		size_t curPos = 0;
 		mutable std::mutex mutex;
+		std::shared_ptr<bool> aliveToken;
 	};
 }

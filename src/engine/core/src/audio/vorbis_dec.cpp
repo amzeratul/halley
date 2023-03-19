@@ -75,6 +75,15 @@ void VorbisData::open()
 {
 	close();
 
+	if (stream && !stream->isAvailable()) {
+		error = true;
+		return;
+	}
+
+	if (error) {
+		return;
+	}
+
 	if (streaming) {
 		stream = std::dynamic_pointer_cast<ResourceDataStream>(resource)->getReader();
 	}
@@ -122,6 +131,15 @@ size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
 		open();
 	}
 
+	if (stream && !stream->isAvailable()) {
+		error = true;
+		close();
+	}
+
+	if (error) {
+		return 0;
+	}
+
 	Expects(nChannels == getNumChannels());
 
 	int bitstream;
@@ -150,12 +168,20 @@ size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
 
 size_t VorbisData::getNumSamples() const
 {
+	if (error || (stream && !stream->isAvailable())) {
+		return 0;
+	}
+
 	Expects(file);
 	return size_t(ov_pcm_total(file, -1));
 }
 
 int VorbisData::getSampleRate() const
 {
+	if (error || (stream && !stream->isAvailable())) {
+		return 0;
+	}
+
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);
 	return info->rate;
@@ -163,6 +189,10 @@ int VorbisData::getSampleRate() const
 
 int VorbisData::getNumChannels() const
 {
+	if (error || (stream && !stream->isAvailable())) {
+		return 0;
+	}
+
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);
 	return info->channels;
@@ -173,6 +203,9 @@ void VorbisData::seek(double t)
 	if (!file) {
 		open();
 	}
+	if (error) {
+		return;
+	}
 	ov_time_seek(file, t);
 }
 
@@ -180,6 +213,9 @@ void VorbisData::seek(size_t sample)
 {
 	if (!file) {
 		open();
+	}
+	if (error) {
+		return;
 	}
 	ov_pcm_seek(file, ogg_int64_t(sample));
 }
