@@ -55,7 +55,11 @@ void HTTPLibHTTPRequest::setProgressCallback(std::function<bool(uint64_t, uint64
 
 httplib::Result HTTPLibHTTPRequest::run()
 {
+	using namespace std::chrono_literals;
 	httplib::Client client(host.cppStr());
+	client.set_write_timeout(2s);
+	client.set_read_timeout(2s);
+
 	if (method == HTTPMethod::GET) {
 		return client.Get(path.cppStr(), headers, progress);
 	} else if (method == HTTPMethod::POST) {
@@ -85,12 +89,16 @@ Future<std::unique_ptr<HTTPResponse>> HTTPLibHTTPRequest::send()
 
 HTTPLibHTTPResponse::HTTPLibHTTPResponse(httplib::Result result)
 {
-	responseCode = result->status;
-	body = Bytes(std::begin(result->body), std::end(result->body));
-	if (responseCode == 301) {
-		if (result->has_header("Location")) {
-			location = result->get_header_value("Location");
+	if (result) {
+		responseCode = result->status;
+		body = Bytes(std::begin(result->body), std::end(result->body));
+		if (responseCode == 301) {
+			if (result->has_header("Location")) {
+				location = result->get_header_value("Location");
+			}
 		}
+	} else {
+		responseCode = 0;
 	}
 }
 
