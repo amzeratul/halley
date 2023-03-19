@@ -125,7 +125,6 @@ void ResourceLocator::addPack(const Path& path, const String& encryptionKey, boo
 	if (dataReader) {
 		auto resourceLocator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, preLoad, priority);
 		add(std::move(resourceLocator), path);
-
 	} else {
 		if (allowFailure) {
 			Logger::logWarning("Resource pack not found: \"" + path.string() + "\"");

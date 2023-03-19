@@ -8,6 +8,7 @@
 #include "halley/resources/asset_pack.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
+#include "halley/tools/file/filesystem_cache.h"
 using namespace Halley;
 
 
@@ -26,9 +27,9 @@ AssetPackListing::AssetPackListing(String name, String encryptionKey)
 {
 }
 
-void AssetPackListing::addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry)
+void AssetPackListing::addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry, bool modified)
 {
-	entries.push_back(Entry{ type, name, entry.path, entry.meta });
+	entries.push_back(Entry{ type, name, entry.path, entry.meta, modified });
 }
 
 const Vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
@@ -80,7 +81,7 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	const std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
-	generatePacks(packs, src, dst, std::move(progress));
+	generatePacks(project, packs, src, dst, std::move(progress));
 }
 
 std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
@@ -115,14 +116,18 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			}
 
 			// Activate the pack if this asset was actually supposed to be packed
+			bool fileModified = false;
 			if (assetsToPack) {
 				if (assetsToPack->find(assetName) != assetsToPack->end()) {
 					iter->second.setActive(true);
+					fileModified = true;
 				}
+			} else {
+				fileModified = true;
 			}
 
 			// Add file to pack
-			iter->second.addFile(type, assetEntry.first, assetEntry.second);
+			iter->second.addFile(type, assetEntry.first, assetEntry.second, fileModified);
 		}
 	}
 
@@ -149,7 +154,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 	return packs;
 }
 
-void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress)
+void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress)
 {
 	struct Entry {
 		String name;
@@ -176,28 +181,53 @@ void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const 
 
 	size_t n = toPack.size();
 	for (size_t i = 0; i < n; ++i) {
-		generatePack(toPack[i].name, *toPack[i].listing, src, toPack[i].dstPack, [=] (float p, const String& s)
+		generatePack(project, toPack[i].name, *toPack[i].listing, src, toPack[i].dstPack, [=] (float p, const String& s)
 		{
 			progress((p + i) * (1.0f / n), s);
 		});
 	}
 }
 
-void AssetPacker::generatePack(const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst, ProgressCallback progress)
+void AssetPacker::generatePack(Project& project, const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst, ProgressCallback progress)
 {
 	AssetPack pack;
 	AssetDatabase& db = pack.getAssetDatabase();
 	Bytes& data = pack.getData();
+	auto& fs = project.getFileSystemCache();
+
+	// Read old version of this pack, if available
+	std::unique_ptr<AssetPack> oldPack;
+	auto reader = std::make_unique<ResourceDataReaderFileSystem>(dst);
+	if (reader->size() > 0) {
+		oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
+	}
+	reader = {};
 
 	const size_t n = packListing.getEntries().size();
 	size_t i = 0;
 
 	for (auto& entry: packListing.getEntries()) {
-		//Logger::logDev("  [" + toString(entry.type) + "] " + entry.name);
-
 		// Read original file
-		auto fileData = FileSystem::readFile(src / entry.path);
-		const size_t pos = data.size();
+		// Priority:
+		// 1. Cache
+		// 2. Old pack
+		// 3. Filesystem (via cache)
+		Bytes fileData;
+		if (entry.modified || fs.hasCached(src / entry.path)) {
+			// Read from cache or filesystem
+			fileData = fs.readFile(src / entry.path);
+		} else {
+			// Read from pack
+			auto oldData = oldPack->getData(entry.name, entry.type, false);
+			if (oldData) {
+				auto data = dynamic_cast<ResourceDataStatic*>(oldData.get())->getSpan();
+				fileData = Bytes(reinterpret_cast<const Byte*>(data.data()), reinterpret_cast<const Byte*>(data.data()) + data.size());
+			} else {
+				// Read from cache after all...
+				fileData = fs.readFile(src / entry.path);
+			}
+		}
+
 		const size_t size = fileData.size();
 		if (size == 0) {
 			Logger::logError("Unable to pack: \"" + (src / entry.path) + "\". File not found or empty.");
@@ -205,6 +235,7 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		}
 		
 		// Read data into pack data
+		const size_t pos = data.size();
 		data.reserve(nextPowerOf2(pos + size));
 		data.resize(pos + size);
 		memcpy(data.data() + pos, fileData.data(), size);

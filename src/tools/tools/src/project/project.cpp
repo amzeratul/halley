@@ -19,6 +19,7 @@
 #include "halley/properties/game_properties.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/tools/codegen/codegen.h"
+#include "halley/tools/file/filesystem_cache.h"
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 
@@ -491,6 +492,14 @@ void Project::setCachedAssetPreview(AssetType type, const String& id, AssetPrevi
 void Project::clearCachedAssetPreviews()
 {
 	previewCache.clear();
+}
+
+FileSystemCache& Project::getFileSystemCache()
+{
+	if (!fileSystemCache) {
+		fileSystemCache = std::make_unique<FileSystemCache>();
+	}
+	return *fileSystemCache;
 }
 
 void Project::loadECSData()

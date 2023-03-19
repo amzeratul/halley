@@ -16,6 +16,67 @@ Bytes ResourceDataReader::readAll()
 	return result;
 }
 
+ResourceDataReaderFileSystem::ResourceDataReaderFileSystem(Path path)
+{
+#ifdef WIN32
+	FILE* f;
+	_wfopen_s(&f, path.getNativeString().getUTF16().c_str(), L"rb");
+#else
+	f = fopen(path.getNativeString().c_str(), "rb");
+#endif
+
+	if (f) {
+		fseek(f, 0, SEEK_END);
+		fileSize = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		fp = f;
+	} else {
+		fileSize = 0;
+	}
+}
+
+size_t ResourceDataReaderFileSystem::size() const
+{
+	return fileSize;
+}
+
+int ResourceDataReaderFileSystem::read(gsl::span<gsl::byte> dst)
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		return static_cast<int>(fread(dst.data(), 1, dst.size(), f));
+	} else {
+		return 0;
+	}
+}
+
+void ResourceDataReaderFileSystem::seek(int64_t pos, int whence)
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		fseek(f, static_cast<long>(pos), SEEK_SET);
+	}
+}
+
+size_t ResourceDataReaderFileSystem::tell() const
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		return ftell(f);
+	} else {
+		return 0;
+	}
+}
+
+void ResourceDataReaderFileSystem::close()
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		fclose(f);
+	}
+}
+
+
 ResourceData::ResourceData(String p)
 	: path(p)
 {

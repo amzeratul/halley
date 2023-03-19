@@ -44,6 +44,20 @@ namespace Halley {
 		Bytes readAll();
 	};
 
+	class ResourceDataReaderFileSystem : public ResourceDataReader {
+	public:
+		ResourceDataReaderFileSystem(Path path);
+		size_t size() const override;
+		int read(gsl::span<gsl::byte> dst) override;
+		void seek(int64_t pos, int whence) override;
+		size_t tell() const override;
+		void close() override;
+
+	private:
+		void* fp = nullptr;
+		size_t fileSize = 0;
+	};
+
 	class ResourceData {
 	public:
 		ResourceData(String path);

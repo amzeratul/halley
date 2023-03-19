@@ -15,6 +15,7 @@
 
 namespace Halley
 {
+	class FileSystemCache;
 	class ProjectComments;
 	class GameProperties;
 	class IHalleyEntryPoint;
@@ -138,6 +139,8 @@ namespace Halley
 		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
 		void clearCachedAssetPreviews();
 
+		FileSystemCache& getFileSystemCache();
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;
@@ -163,6 +166,8 @@ namespace Halley
 		Vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
+
+		std::unique_ptr<FileSystemCache> fileSystemCache;
 
 		bool assetNotifyImportEnabled = true;
 		Vector<Path> assetsToNotifyImport;

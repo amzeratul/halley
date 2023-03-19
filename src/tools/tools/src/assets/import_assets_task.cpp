@@ -10,6 +10,7 @@
 #include "halley/tools/packer/asset_packer_task.h"
 #include "halley/time/stopwatch.h"
 #include "halley/support/debug.h"
+#include "halley/tools/file/filesystem_cache.h"
 
 using namespace Halley;
 
@@ -96,6 +97,7 @@ void ImportAssetsTask::run()
 bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 {
 	logInfo("Importing " + asset.assetId);
+	auto& fs = project.getFileSystemCache();
 	Stopwatch timer;
 
 	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, *importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
@@ -119,7 +121,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 		for (auto& v: f.platformVersions) {
 			if (std::find_if(result.outFiles.begin(), result.outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == result.outFiles.end()) {
 				// File no longer exists as part of this asset, remove it
-				FileSystem::remove(assetsPath / v.second.filepath);
+				fs.remove(assetsPath / v.second.filepath);
 			}
 		}
 	}
@@ -128,7 +130,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	for (auto& outFile: result.outFiles) {
 		auto path = assetsPath / outFile.first;
 		logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
-		FileSystem::writeFile(path, outFile.second);
+		fs.writeFile(path, std::move(outFile.second));
 	}
 
 	// Add to list of output assets

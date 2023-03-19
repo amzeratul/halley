@@ -69,6 +69,7 @@ set(SOURCES
     "src/distance_field/distance_field_tool.cpp"
     
     "src/file/filesystem.cpp"
+    "src/file/filesystem_cache.cpp"
 
     "src/make_font/font_face.cpp"
     "src/make_font/font_generator.cpp"
@@ -119,6 +120,7 @@ set(HEADERS
     "include/halley/tools/distance_field/distance_field_tool.h"
     
     "include/halley/tools/file/filesystem.h"
+    "include/halley/tools/file/filesystem_cache.h"
 
     "include/halley/tools/make_font/font_face.h"
     "include/halley/tools/make_font/font_generator.h"

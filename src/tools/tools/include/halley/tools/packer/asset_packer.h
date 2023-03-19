@@ -18,6 +18,7 @@ namespace Halley {
 			String name;
 			String path;
 			Metadata metadata;
+			bool modified;
 
 			bool operator<(const Entry& other) const;
 		};
@@ -25,7 +26,7 @@ namespace Halley {
 		AssetPackListing();
 		AssetPackListing(String name, String encryptionKey);
 		
-		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry);
+		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry, bool modified);
 		const Vector<Entry>& getEntries() const;
 		const String& getEncryptionKey() const;
 		
@@ -51,7 +52,7 @@ namespace Halley {
 
 	private:
 		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets);
-		static void generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress);
-		static void generatePack(const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePack(Project& project, const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
 	};
 }
