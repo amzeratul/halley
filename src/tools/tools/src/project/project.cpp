@@ -356,7 +356,11 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 	if (packed && gameResources) {
 		if (gameResources->getLocator().getLocatorCount() == 0) {
 			try {
-				gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
+				if (getGameInstance()) {
+					getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), gameResources->getLocator());
+				} else {
+					gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
+				}
 			} catch (...) {}
 		}
 
@@ -450,8 +454,13 @@ Path Project::getExecutablePath() const
 void Project::loadGameResources(const HalleyAPI& api)
 {
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
+
 	try {
-		locator->addFileSystem(getUnpackedAssetsPath());
+		if (getGameInstance()) {
+			getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
+		} else {
+			locator->addFileSystem(getUnpackedAssetsPath());
+		}
 	} catch (...) {}
 
 	gameResources = std::make_unique<Resources>(std::move(locator), api, ResourceOptions(true));
