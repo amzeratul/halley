@@ -81,22 +81,27 @@ bool FileSystem::rename(const Path& src, const Path& dst)
 	return ec.value() == 0;
 }
 
-void FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+bool FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
 {
 	createParentDir(path);
 	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-	fp.close();
+	if (fp.is_open()) {
+		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+		fp.close();
+		return true;
+	} else {
+		return false;
+	}
 }
 
-void FileSystem::writeFile(const Path& path, const Bytes& data)
+bool FileSystem::writeFile(const Path& path, const Bytes& data)
 {
-	writeFile(path, as_bytes(gsl::span<const Byte>(data)));
+	return writeFile(path, as_bytes(gsl::span<const Byte>(data)));
 }
 
-void FileSystem::writeFile(const Path& path, const String& data)
+bool FileSystem::writeFile(const Path& path, const String& data)
 {
-	writeFile(path, as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+	return writeFile(path, as_bytes(gsl::span<const char>(data.c_str(), data.length())));
 }
 
 Bytes FileSystem::readFile(const Path& path)

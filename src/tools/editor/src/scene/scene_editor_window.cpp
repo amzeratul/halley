@@ -40,7 +40,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 		dll.addReloadListener(*this);
 	});
 
-	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (gsl::span<const String> assets)
+	assetReloadCallbackIdx = project.addAssetPackReloadCallback([=] (gsl::span<const String> assets, gsl::span<const String> packIds)
 	{
 		std_ex::erase_if(assetReloadCallbacks, [&] (auto& callback)
 		{

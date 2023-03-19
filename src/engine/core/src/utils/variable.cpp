@@ -189,7 +189,7 @@ void Internal::VariableStorage::deserialize(Deserializer& s)
 		stringValue = new String();
 		s >> *stringValue;
 	default:
-		throw Exception("Unknown variable type " + type, HalleyExceptions::Utils);
+		Logger::logError("Unknown variable type " + type);
 	}
 }
 

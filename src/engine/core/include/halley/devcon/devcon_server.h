@@ -33,7 +33,7 @@ namespace Halley
 		bool isAlive() const;
 		size_t getId() const;
 		
-		void reloadAssets(gsl::span<const String> assetIds);
+		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
 
 		void registerInterest(const String& id, const ConfigNode& params, uint32_t handle);
 		void updateInterest(uint32_t handle, const ConfigNode& params);
@@ -61,7 +61,7 @@ namespace Halley
 		
 		void update(Time t);
 
-		void reloadAssets(gsl::span<const String> assetIds);
+		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
 
 		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback);
 		void updateInterest(InterestHandle handle, ConfigNode params);

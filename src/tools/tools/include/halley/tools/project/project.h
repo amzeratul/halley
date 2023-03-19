@@ -41,6 +41,7 @@ namespace Halley
 		};
 		
 		using AssetReloadCallback = std::function<void(gsl::span<const String>)>;
+		using AssetPackedReloadCallback = std::function<void(gsl::span<const String>, gsl::span<const String>)>;
 
 		Project(Path projectRootPath, Path halleyRootPath);
 		~Project() override;
@@ -80,9 +81,9 @@ namespace Halley
 		void setDevConServer(DevConServer* server);
 		DevConServer* getDevConServer() const;
 
-		size_t addAssetReloadCallback(AssetReloadCallback callback);
+		[[deprecated]] size_t addAssetReloadCallback(AssetReloadCallback callback);
 		void removeAssetReloadCallback(size_t idx);
-		size_t addAssetPackReloadCallback(AssetReloadCallback callback);
+		size_t addAssetPackReloadCallback(AssetPackedReloadCallback callback);
 		void removeAssetPackReloadCallback(size_t idx);
 		void addAssetLoadedListener(IAssetLoadListener* listener);
 		void removeAssetLoadedListener(IAssetLoadListener* listener);
@@ -104,7 +105,7 @@ namespace Halley
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void onAllAssetsImported();
-		void reloadAssets(const std::set<String>& assets, bool packed);
+		void reloadAssets(const std::set<String>& assets, const Vector<String>& packs, bool packed);
 		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFilesModified(gsl::span<const Path> paths);
@@ -149,7 +150,7 @@ namespace Halley
 		size_t callbackIdx = 0;
 
 		Vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
-		Vector<std::pair<size_t, AssetReloadCallback>> assetPackedReloadCallbacks;
+		Vector<std::pair<size_t, AssetPackedReloadCallback>> assetPackedReloadCallbacks;
 		Vector<IAssetLoadListener*> assetLoadedListeners;
 		CheckAssetsTask* checkAssetsTask = nullptr;
 

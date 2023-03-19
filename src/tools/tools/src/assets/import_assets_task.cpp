@@ -72,7 +72,7 @@ void ImportAssetsTask::run()
 		if (!hasError()) {
 			if (!outputAssets.empty()) {
 				Concurrent::execute(Executors::getMainUpdateThread(), [project = &project, assets = outputAssets] () {
-					project->reloadAssets(assets, false);
+					project->reloadAssets(assets, {}, false);
 				});
 			}
 

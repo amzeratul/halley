@@ -48,6 +48,7 @@ namespace Halley {
 	class ResourceDataReaderFileSystem : public ResourceDataReader {
 	public:
 		ResourceDataReaderFileSystem(Path path);
+		~ResourceDataReaderFileSystem() override;
 		size_t size() const override;
 		int read(gsl::span<gsl::byte> dst) override;
 		void seek(int64_t pos, int whence) override;

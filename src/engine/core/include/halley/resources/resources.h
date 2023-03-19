@@ -115,7 +115,7 @@ namespace Halley {
 			return *locator;
 		}
 
-		void reloadAssets(const Vector<String>& ids); // ids are in "type:name" format
+		void reloadAssets(const Vector<String>& assetIds, const Vector<String>& packIds); // assetIds are in "type:name" format
 		void reloadAssets(const std::map<AssetType, Vector<String>>& byType);
 
 		const ResourceOptions& getOptions() const { return options; }

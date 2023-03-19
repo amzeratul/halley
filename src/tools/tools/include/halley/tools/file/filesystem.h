@@ -25,9 +25,9 @@ namespace Halley {
 		static bool remove(const Path& path);
 		static bool rename(const Path& src, const Path& dst);
 
-		static void writeFile(const Path& path, gsl::span<const gsl::byte> data);
-		static void writeFile(const Path& path, const Bytes& data);
-		static void writeFile(const Path& path, const String& data);
+		static bool writeFile(const Path& path, gsl::span<const gsl::byte> data);
+		static bool writeFile(const Path& path, const Bytes& data);
+		static bool writeFile(const Path& path, const String& data);
 		static Bytes readFile(const Path& path);
 
 		static Vector<Path> enumerateDirectory(const Path& path);

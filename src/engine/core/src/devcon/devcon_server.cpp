@@ -49,9 +49,9 @@ size_t DevConServerConnection::getId() const
 	return id;
 }
 
-void DevConServerConnection::reloadAssets(gsl::span<const String> ids)
+void DevConServerConnection::reloadAssets(Vector<String> assetIds, Vector<String> packIds)
 {
-	queue->enqueue(std::make_unique<DevCon::ReloadAssetsMsg>(ids), 0);
+	queue->enqueue(std::make_unique<DevCon::ReloadAssetsMsg>(std::move(assetIds), std::move(packIds)), 0);
 }
 
 void DevConServerConnection::registerInterest(const String& id, const ConfigNode& params, uint32_t handle)
@@ -106,10 +106,10 @@ void DevConServer::update(Time t)
 	std_ex::erase_if(connections, [=](const auto& c) { return !c->isAlive(); });
 }
 
-void DevConServer::reloadAssets(gsl::span<const String> ids)
+void DevConServer::reloadAssets(Vector<String> assetIds, Vector<String> packIds)
 {
 	for (const auto& c: connections) {
-		c->reloadAssets(ids);
+		c->reloadAssets(std::move(assetIds), std::move(packIds));
 	}
 }
 

@@ -9,6 +9,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/file/filesystem_cache.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 
@@ -57,18 +58,20 @@ void AssetPackListing::sort()
 	std::sort(entries.begin(), entries.end());
 }
 
-void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
+Vector<String> AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
 {
+	Vector<String> packed;
 	const auto& platforms = project.getPlatforms();
 	const size_t n = platforms.size();
 	for (size_t i = 0; i < n; ++i) {
 		packPlatform(project, assetsToPack, deletedAssets, platforms[i], [=] (float p, const String& s) {
 			progress((p + i) * (1.0f / n), s);
-		});
+		}, packed);
 	}
+	return packed;
 }
 
-void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress)
+void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed)
 {
 	const auto src = project.getUnpackedAssetsPath();
 	const auto dst = project.getPackedAssetsPath(platform);
@@ -81,7 +84,7 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	const std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
-	generatePacks(project, packs, src, dst, std::move(progress));
+	generatePacks(project, packs, src, dst, std::move(progress), packed);
 }
 
 std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
@@ -154,7 +157,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 	return packs;
 }
 
-void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress)
+void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed)
 {
 	struct Entry {
 		String name;
@@ -181,6 +184,9 @@ void AssetPacker::generatePacks(Project& project, std::map<String, AssetPackList
 
 	size_t n = toPack.size();
 	for (size_t i = 0; i < n; ++i) {
+		if (!std_ex::contains(packed, toPack[i].name)) {
+			packed.push_back(toPack[i].name);
+		}
 		generatePack(project, toPack[i].name, *toPack[i].listing, src, toPack[i].dstPack, [=] (float p, const String& s)
 		{
 			progress((p + i) * (1.0f / n), s);
@@ -213,7 +219,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 		// 2. Old pack
 		// 3. Filesystem (via cache)
 		Bytes fileData;
-		if (entry.modified || fs.hasCached(src / entry.path)) {
+		if (entry.modified || fs.hasCached(src / entry.path) || !oldPack) {
 			// Read from cache or filesystem
 			fileData = fs.readFile(src / entry.path);
 		} else {
@@ -246,12 +252,18 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 		i++;
 	}
 
+	oldPack = {}; // Release file handle!
+
 	if (!packListing.getEncryptionKey().isEmpty()) {
 		Logger::logInfo("- Encrypting \"" + packId + "\"...");
 		pack.encrypt(packListing.getEncryptionKey());
 	}
 
 	// Write pack
-	FileSystem::writeFile(dst, pack.writeOut());
-	Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
+	const bool packed = FileSystem::writeFile(dst, pack.writeOut());
+	if (packed) {
+		Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
+	} else {
+		Logger::logError("Unable to write pack file " + dst.getNativeString());
+	}
 }

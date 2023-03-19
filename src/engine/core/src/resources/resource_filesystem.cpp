@@ -46,9 +46,15 @@ int FileSystemResourceLocator::getPriority() const
 	return 1;
 }
 
-void FileSystemResourceLocator::purge(SystemAPI& system)
+void FileSystemResourceLocator::purgeAll(SystemAPI& system)
 {
 	assetDb.reset();
+}
+
+bool FileSystemResourceLocator::purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds)
+{
+	assetDb.reset();
+	return true;
 }
 
 void FileSystemResourceLocator::loadAssetDb()

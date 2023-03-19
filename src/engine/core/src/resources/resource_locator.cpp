@@ -6,6 +6,7 @@
 #include "halley/api/system_api.h"
 #include "halley/text/string_converter.h"
 #include "halley/resources/resource.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -37,7 +38,7 @@ void ResourceLocator::purge(const String& asset, AssetType type)
 	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
 		// Found the locator for this file, purge it
-		result->second->purge(system);
+		result->second->purgeAll(system);
 	} else {
 		// Couldn't find a locator (new file?), purge everything
 		purgeAll();
@@ -48,8 +49,19 @@ void ResourceLocator::purgeAll()
 {
 	assetToLocator.clear();
 	for (auto& locator: locators) {
-		locator->purge(system);
+		locator->purgeAll(system);
 		loadLocatorData(*locator);
+	}
+}
+
+void ResourceLocator::purgePacks(gsl::span<const String> assetIds, gsl::span<const String> packs)
+{
+	for (auto& locator: locators) {
+		const bool affected = locator->purgeIfAffected(system, assetIds, packs);
+		if (affected) {
+			std_ex::erase_if_value(assetToLocator, [&] (IResourceLocatorProvider* v) { return v == locator.get(); });
+			loadLocatorData(*locator);
+		}
 	}
 }
 

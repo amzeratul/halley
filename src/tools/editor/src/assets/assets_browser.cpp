@@ -86,7 +86,7 @@ std::shared_ptr<AssetEditorWindow> AssetsBrowser::getActiveWindow() const
 
 void AssetsBrowser::loadResources()
 {
-	project.addAssetReloadCallback([=] (gsl::span<const String> assets)
+	project.addAssetPackReloadCallback([=] (gsl::span<const String> assets, gsl::span<const String> packs)
 	{
 		refreshAssets(assets);
 	});

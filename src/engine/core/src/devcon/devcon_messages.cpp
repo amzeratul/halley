@@ -37,18 +37,22 @@ void LogMsg::deserialize(Deserializer& s)
 }
 
 
-ReloadAssetsMsg::ReloadAssetsMsg(gsl::span<const String> ids)
-	: ids(ids.begin(), ids.end())
-{}
+ReloadAssetsMsg::ReloadAssetsMsg(Vector<String> assetIds, Vector<String> packIds)
+	: assetIds(std::move(assetIds))
+	, packIds(std::move(packIds))
+{
+}
 
 void ReloadAssetsMsg::serialize(Serializer& s) const
 {
-	s << ids;
+	s << assetIds;
+	s << packIds;
 }
 
 void ReloadAssetsMsg::deserialize(Deserializer& s)
 {
-	s >> ids;
+	s >> assetIds;
+	s >> packIds;
 }
 
 RegisterInterestMsg::RegisterInterestMsg(String id, ConfigNode params, uint32_t handle)

@@ -47,12 +47,12 @@ namespace Halley {
 	public:
 		using ProgressCallback = std::function<void(float, const String&)>;
 		
-		static void pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress);
-		static void packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress);
+		static Vector<String> pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress);
+		static void packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress, Vector<String>& packed);
 
 	private:
 		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets);
-		static void generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePacks(Project& project, std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress, Vector<String>& packed);
 		static void generatePack(Project& project, const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
 	};
 }

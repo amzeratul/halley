@@ -71,12 +71,13 @@ namespace Halley
 		{
 		public:
 			ReloadAssetsMsg() = default;
-			ReloadAssetsMsg(gsl::span<const String> ids);
+			ReloadAssetsMsg(Vector<String> assetIds, Vector<String> packIds);
 
 			void serialize(Serializer& s) const override;
 			void deserialize(Deserializer& s) override;
 			
-			Vector<String> ids;
+			Vector<String> assetIds;
+			Vector<String> packIds;
 		};
 
 		class RegisterInterestMsg final : public DevConMessageBase<MessageType::RegisterInterest>

@@ -40,7 +40,8 @@ namespace Halley {
 		virtual std::unique_ptr<ResourceData> getData(const String& path, AssetType type, bool stream) = 0;
 		virtual const AssetDatabase& getAssetDatabase() = 0;
 		virtual int getPriority() const { return 0; }
-		virtual void purge(SystemAPI& system) = 0;
+		virtual void purgeAll(SystemAPI& system) = 0;
+		virtual bool purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds) = 0;
 	};
 
 	class ResourceLocator final : public IResourceLocator
@@ -59,6 +60,7 @@ namespace Halley {
 
 		void purge(const String& asset, AssetType type);
 		void purgeAll();
+		void purgePacks(gsl::span<const String> assetIds, gsl::span<const String> packs);
 
 		Vector<String> enumerate(AssetType type);
 		bool exists(const String& asset, AssetType type);

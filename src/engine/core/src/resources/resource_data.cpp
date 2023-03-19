@@ -35,6 +35,15 @@ ResourceDataReaderFileSystem::ResourceDataReaderFileSystem(Path path)
 	}
 }
 
+ResourceDataReaderFileSystem::~ResourceDataReaderFileSystem()
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		fclose(f);
+		fp = nullptr;
+	}
+}
+
 size_t ResourceDataReaderFileSystem::size() const
 {
 	return fileSize;

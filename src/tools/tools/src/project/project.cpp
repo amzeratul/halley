@@ -198,8 +198,8 @@ void Project::setAssetPackManifest(const Path& path)
 void Project::setDevConServer(DevConServer* server)
 {
 	devConServer = server;
-	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds) {
-		devConServer->reloadAssets(assetIds);
+	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds, gsl::span<const String> packIds) {
+		devConServer->reloadAssets(Vector<String>(assetIds.begin(), assetIds.end()), Vector<String>(packIds.begin(), packIds.end()));
 	});
 }
 
@@ -214,7 +214,7 @@ size_t Project::addAssetReloadCallback(AssetReloadCallback callback)
 	return callbackIdx;
 }
 
-size_t Project::addAssetPackReloadCallback(AssetReloadCallback callback)
+size_t Project::addAssetPackReloadCallback(AssetPackedReloadCallback callback)
 {
 	assetPackedReloadCallbacks.emplace_back(++callbackIdx, std::move(callback));
 	return callbackIdx;
@@ -343,7 +343,7 @@ void Project::onAllAssetsImported()
 	}
 }
 
-void Project::reloadAssets(const std::set<String>& assets, bool packed)
+void Project::reloadAssets(const std::set<String>& assets, const Vector<String>& packIds, bool packed)
 {
 	// Build name list
 	Vector<String> assetIds;
@@ -353,26 +353,38 @@ void Project::reloadAssets(const std::set<String>& assets, bool packed)
 	}
 
 	// Reload game assets
-	if (!packed && gameResources) {
+	if (packed && gameResources) {
 		if (gameResources->getLocator().getLocatorCount() == 0) {
 			try {
 				gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
 			} catch (...) {}
 		}
 
-		gameResources->reloadAssets(assetIds);
+		gameResources->reloadAssets(assetIds, packIds);
 	}
 
 	// Erase any callbacks that got deleted (i.e. set to empty), then call remaining ones
-	auto& callbackList = (packed ? assetPackedReloadCallbacks : assetReloadCallbacks);
-	std_ex::erase_if(callbackList, [&] (const auto& c)
+	std_ex::erase_if(assetPackedReloadCallbacks, [&] (const auto& c)
 	{
 		return !c.second;
 	});
-	for (auto& callback : callbackList) {
-		// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
-		if (callback.second) {
-			callback.second(assetIds);
+	std_ex::erase_if(assetReloadCallbacks, [&] (const auto& c)
+	{
+		return !c.second;
+	});
+	if (packed) {
+		for (auto& callback : assetPackedReloadCallbacks) {
+			// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
+			if (callback.second) {
+				callback.second(assetIds, packIds);
+			}
+		}
+	} else {
+		for (auto& callback : assetReloadCallbacks) {
+			// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
+			if (callback.second) {
+				callback.second(assetIds);
+			}
 		}
 	}
 }

@@ -12,7 +12,7 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& 
 {
 }
 
-void Resources::reloadAssets(const Vector<String>& ids)
+void Resources::reloadAssets(const Vector<String>& ids, const Vector<String>& packIds)
 {
 	// Early out
 	if (ids.empty()) {
@@ -32,7 +32,7 @@ void Resources::reloadAssets(const Vector<String>& ids)
 
 	reloadAssets(byType);
 
-	locator->purgeAll();
+	locator->purgePacks(ids, packIds);
 }
 
 void Resources::reloadAssets(const std::map<AssetType, Vector<String>>& byType)
