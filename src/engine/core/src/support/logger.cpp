@@ -7,8 +7,9 @@
 
 using namespace Halley;
 
-StdOutSink::StdOutSink(bool devMode)
+StdOutSink::StdOutSink(bool devMode, bool forceFlush)
 	: devMode(devMode)
+	, forceFlush(forceFlush)
 {
 }
 
@@ -38,7 +39,12 @@ void StdOutSink::log(LoggerLevel level, std::string_view msg)
 	case LoggerLevel::Info:
 		break;
 	}
-	std::cout << msg << ConsoleColour() << '\n';
+	std::cout << msg << ConsoleColour();
+	if (forceFlush) {
+		std::cout << std::endl;
+	} else {
+		std::cout << "\n";
+	}
 }
 
 void Logger::setInstance(Logger& logger)

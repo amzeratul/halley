@@ -27,13 +27,14 @@ namespace Halley
 
 	class StdOutSink final : public ILoggerSink {
 	public:
-		explicit StdOutSink(bool devMode);
+		explicit StdOutSink(bool devMode, bool forceFlush = false);
 		~StdOutSink();
 		void log(LoggerLevel level, std::string_view msg) override;
 
 	private:
 		std::mutex mutex;
 		bool devMode;
+		bool forceFlush;
 	};
 
 	class Logger

@@ -16,16 +16,16 @@ using namespace std::chrono_literals;
 
 int ImportTool::run(Vector<std::string> args)
 {
-	std::cout << "Importing with " << toString(args.size()) << " args." << std::endl;
 	if (args.size() >= 2) {
 		const Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
-		std::cout << "About to log some info :D" << std::endl;
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath);
-		std::cout << "Logged it!" << std::endl;
+		std::cout << std::endl;
 
+		Logger::logInfo("Loading project...");
 		ProjectLoader loader(*statics, halleyRootPath);
 		auto proj = loader.loadProject(projectPath);
+		Logger::logInfo("Project loaded.");
 
 		if (args.size() >= 3) {
 			const Path manifestPath = FileSystem::getAbsolute(Path(args[2]));
@@ -37,6 +37,7 @@ int ImportTool::run(Vector<std::string> args)
 		tasks->setListener(*this);
 		tasks->addTask(std::make_unique<CheckAssetsTask>(*proj, true));
 		auto last = std::chrono::steady_clock::now();
+		Logger::logInfo("Waiting on tasks...");
 
 		while (!tasks->getTasks().empty()) {
 			std::this_thread::sleep_for(50ms);
