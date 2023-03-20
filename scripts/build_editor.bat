@@ -36,18 +36,25 @@ cmake -A x64 ^
     -DCMAKE_INCLUDE_PATH="%~dp0..\deps\include" ^
     -DCMAKE_LIBRARY_PATH="%~dp0..\deps\lib64" ^
     -DBOOST_INCLUDEDIR="%~dp0..\deps\Boost\include\boost-1_81" ^
-    .. || goto ERROR
+    .. || goto ERROR_CONFIGURE
 
 cmake.exe --build . --target halley-cmd --config RelWithDebInfo || goto ERROR
-"%~dp0..\bin\halley-cmd.exe" import %~dp0..\ %~dp0..\halley\
+"%~dp0..\bin\halley-cmd.exe" import %~dp0..\ %~dp0..\halley\ || goto ERROR_IMPORT
+sleep 1
+taskkill /IM halley-cmd.exe /F 2>NUL
 cmake.exe --build . --target halley-editor --config RelWithDebInfo || goto ERROR
 
 echo Build successful.
-pause
 exit /b 0
 
 :ERROR
 echo Build failed.
-pause
 exit /b 1
 
+:ERROR_IMPORT
+echo Import editor failed.
+exit /b 2
+
+:ERROR_CONFIGURE
+echo CMake configure failed.
+exit /b 3
