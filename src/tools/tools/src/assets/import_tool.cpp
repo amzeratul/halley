@@ -20,9 +20,7 @@ int ImportTool::run(Vector<std::string> args)
 		const Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath);
-		std::cout << std::endl;
 
-		Logger::logInfo("Loading project...");
 		ProjectLoader loader(*statics, halleyRootPath);
 		auto proj = loader.loadProject(projectPath);
 		Logger::logInfo("Project loaded.");

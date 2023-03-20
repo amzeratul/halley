@@ -7,6 +7,7 @@
 #include "halley/tools/packer/asset_packer_tool.h"
 #include "halley/support/logger.h"
 #include "halley/game/halley_statics.h"
+#include "halley/support/debug.h"
 #include "halley/tools/vs_project/vs_project_tool.h"
 #include "halley/tools/packer/asset_pack_inspector.h"
 #include "halley/tools/project/write_version_tool.h"
@@ -72,6 +73,8 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	}
 	std::cout << std::endl;
 
+	Debug::setErrorHandling("stack.dmp", [=](const std::string& error) { onTerminatedInError(error); });
+	
 	const auto result = run(args);
 	std::cout << "halley-cmd done." << std::endl;
 	return result;
@@ -80,4 +83,10 @@ int CommandLineTool::runRaw(int argc, char** argv)
 int CommandLineTool::run(Vector<std::string> args)
 {
 	throw Exception("Tool's run() method not implemented", HalleyExceptions::Tools);
+}
+
+void CommandLineTool::onTerminatedInError(const std::string& error)
+{
+	Logger::logError("Terminating in error: " + error);
+	std::cout.flush();
 }

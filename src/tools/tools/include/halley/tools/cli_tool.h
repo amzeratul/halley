@@ -22,6 +22,9 @@ namespace Halley
 	protected:
 		std::unique_ptr<HalleyStatics> statics;
 		Environment env;
+
+	private:
+		void onTerminatedInError(const std::string& error);
 	};
 
 	class CommandLineTools

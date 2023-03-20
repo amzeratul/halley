@@ -55,7 +55,6 @@ static String getDLLExtension()
 
 void ProjectLoader::loadPlugins()
 {
-	Logger::logInfo("Loading plugins...");
 	knownPlatforms.clear();
 	//knownPlatforms.push_back("pc");
 
@@ -78,7 +77,6 @@ void ProjectLoader::loadPlugins()
 			}
 		}
 	}
-	Logger::logInfo("Got " + toString(plugins.size()) + " plugins.");
 }
 
 Vector<HalleyPluginPtr> ProjectLoader::getPlugins(Vector<String> platforms) const

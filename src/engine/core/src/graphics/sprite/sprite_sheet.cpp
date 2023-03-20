@@ -416,7 +416,7 @@ std::unique_ptr<Image> SpriteSheet::generateAtlas(Vector<ImageData>& images, Con
 			throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.", HalleyExceptions::Tools);
 		}
 
-		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
+		//Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
 		//auto res = entries.size() < 50 ? BinPack::pack(entries, size) : BinPack::fastPack(entries, size);
 		auto res = BinPack::fastPack(entries, size);
 		if (res) {
