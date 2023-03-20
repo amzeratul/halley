@@ -68,7 +68,15 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	Logger::addSink(logSink);
 	env.parseProgramPath(argv[0]);
 
-	return run(args);
+	std::cout << "Running with args: ";
+	for (auto& arg: args) {
+		std::cout << "\"" << arg << "\" ";
+	}
+	std::cout << std::endl;
+
+	const auto result = run(args);
+	std::cout << "halley-cmd done." << std::endl;
+	return result;
 }
 
 int CommandLineTool::run(Vector<std::string> args)
