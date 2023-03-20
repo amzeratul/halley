@@ -52,9 +52,9 @@ namespace Halley
 
 		std::string string() const;
 
-		static void writeFile(const Path& path, gsl::span<const gsl::byte> data);
-		static void writeFile(const Path& path, const Bytes& data);
-		static void writeFile(const Path& path, const String& data);
+		static bool writeFile(const Path& path, gsl::span<const gsl::byte> data);
+		static bool writeFile(const Path& path, const Bytes& data);
+		static bool writeFile(const Path& path, const String& data);
 
 		static bool exists(const Path& path);
 		static Bytes readFile(const Path& path);

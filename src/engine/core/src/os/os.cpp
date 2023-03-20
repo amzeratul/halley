@@ -110,11 +110,15 @@ void OS::createDirectories(const Path& path)
 {
 }
 
-void OS::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
+bool OS::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
 {
 	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
-	fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-	fp.close();
+	if (!fp.is_open()) {
+		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+		fp.close();
+		return false;
+	}
+	return true;
 }
 
 Vector<Path> OS::enumerateDirectory(const Path& path)

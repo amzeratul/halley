@@ -333,7 +333,7 @@ void OSWin32::createDirectories(const Path& path)
 	}
 }
 
-static void writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
+static bool writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 {
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
 	//fp.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -346,7 +346,7 @@ static void writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 				if (i > 0) {
 					continue;
 				}
-				throw Exception("Unable to write file " + String(str), HalleyExceptions::File);
+				return false;
 			}
 			DWORD written = 0;
 			WriteFile(file, data.data(), DWORD(data.size()), &written, nullptr);
@@ -361,7 +361,7 @@ static void writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 				if (i > 0) {
 					continue;
 				}
-				throw Exception("Unable to read file " + String(str), HalleyExceptions::File);
+				return false;
 			}
 			DWORD read = 0;
 			DWORD highSize;
@@ -376,31 +376,38 @@ static void writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 				if (i > 0) {
 					continue;
 				}
-				throw Exception("Unable to correctly write file " + String(str), HalleyExceptions::File);
+				return false;
 			}
 
 			// All good
-			return;
+			return true;
 		}
 	}
+
+	return false;
 }
 
-void OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
+bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
 	if (PathFileExistsW(dstPath.c_str())) {
 		auto temp = path.replaceExtension(path.getExtension() + ".tmp");
 		auto tempPath = temp.getString().replaceAll("/", "\\").getUTF16();
 		auto backupPath = backupOldVersionPath ? backupOldVersionPath->getString().replaceAll("/", "\\").getUTF16() : StringUTF16();
-		writeFile(tempPath.c_str(), data);
+		bool ok = writeFile(tempPath.c_str(), data);
+		if (!ok) {
+			return false;
+		}
 
 		const int result = ReplaceFileW(dstPath.c_str(), tempPath.c_str(), backupOldVersionPath ? backupPath.c_str() : nullptr, REPLACEFILE_IGNORE_MERGE_ERRORS, nullptr, nullptr);
 		if (result == 0) {
 			Logger::logWarning("Unable to safely overwrite file " + path.getString());
-			writeFile(dstPath.c_str(), data);
+			return writeFile(dstPath.c_str(), data);
+		} else {
+			return false;
 		}
 	} else {
-		writeFile(dstPath.c_str(), data);
+		return writeFile(dstPath.c_str(), data);
 	}
 }
 
