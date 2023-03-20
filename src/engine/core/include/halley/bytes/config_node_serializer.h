@@ -515,7 +515,7 @@ namespace Halley {
 				if (context.resources->exists<T>(assetId)) {
 					return ResourceReference<T>(context.resources->get<T>(assetId));
 				} else {
-					Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId);
+					Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId, true);
 					return {};
 				}				
 			}
