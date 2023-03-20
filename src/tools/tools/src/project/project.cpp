@@ -42,6 +42,8 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms, currentAssetVersion);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
+
+	fileSystemCache = std::make_unique<FileSystemCache>();
 }
 
 Project::~Project()
@@ -517,9 +519,6 @@ void Project::clearCachedAssetPreviews()
 
 FileSystemCache& Project::getFileSystemCache()
 {
-	if (!fileSystemCache) {
-		fileSystemCache = std::make_unique<FileSystemCache>();
-	}
 	return *fileSystemCache;
 }
 
