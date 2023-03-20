@@ -19,7 +19,8 @@ int ImportTool::run(Vector<std::string> args)
 	if (args.size() >= 2) {
 		const Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
-		
+		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath);
+
 		ProjectLoader loader(*statics, halleyRootPath);
 		auto proj = loader.loadProject(projectPath);
 
@@ -27,7 +28,7 @@ int ImportTool::run(Vector<std::string> args)
 			const Path manifestPath = FileSystem::getAbsolute(Path(args[2]));
 			proj->setAssetPackManifest(manifestPath);
 		}
-		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\" and manifest at \"" + proj->getAssetPackManifestPath() + "\"");
+		Logger::logInfo("Using manifest at \"" + proj->getAssetPackManifestPath() + "\"");
 
 		auto tasks = std::make_unique<TaskSet>();
 		tasks->setListener(*this);
