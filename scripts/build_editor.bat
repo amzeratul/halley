@@ -40,6 +40,8 @@ cmake -A x64 ^
 
 cmake.exe --build . --target halley-editor --config RelWithDebInfo || goto ERROR
 
+cd ..
+
 echo Build successful.
 exit /b 0
 
