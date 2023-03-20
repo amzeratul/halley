@@ -38,7 +38,6 @@ cmake -A x64 ^
     -DBOOST_INCLUDEDIR="%~dp0..\deps\Boost\include\boost-1_81" ^
     .. || goto ERROR_CONFIGURE
 
-cmake.exe --build . --target halley-cmd --config RelWithDebInfo || goto ERROR
 cmake.exe --build . --target halley-editor --config RelWithDebInfo || goto ERROR
 
 echo Build successful.
