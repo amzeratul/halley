@@ -33,6 +33,7 @@ using namespace Halley;
 
 OS& Halley::OS::get()
 {
+	assert(osInstance != nullptr);
 	return *osInstance;
 }
 

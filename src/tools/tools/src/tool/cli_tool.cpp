@@ -52,8 +52,6 @@ CommandLineTool::~CommandLineTool()
 
 int CommandLineTool::runRaw(int argc, char** argv)
 {
-	std::cout << "halley-cmd running..." << std::endl;
-
 	Vector<std::string> args;
 	for (int i = 2; i < argc; i++) {
 		String arg = argv[i];
