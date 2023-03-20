@@ -51,7 +51,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 
 SceneEditorWindow::~SceneEditorWindow()
 {
-	project.removeAssetReloadCallback(assetReloadCallbackIdx);
+	project.removeAssetPackReloadCallback(assetReloadCallbackIdx);
 	
 	unloadScene();
 
