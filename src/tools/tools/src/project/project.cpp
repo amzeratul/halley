@@ -356,7 +356,7 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 	if (packed && gameResources) {
 		if (gameResources->getLocator().getLocatorCount() == 0) {
 			try {
-				if (getGameInstance()) {
+				if (false && getGameInstance()) {
 					getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), gameResources->getLocator());
 				} else {
 					gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
@@ -456,7 +456,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
 
 	try {
-		if (getGameInstance()) {
+		if (false && getGameInstance()) {
 			getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
 		} else {
 			locator->addFileSystem(getUnpackedAssetsPath());
