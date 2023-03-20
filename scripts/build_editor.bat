@@ -40,7 +40,6 @@ cmake -A x64 ^
 
 cmake.exe --build . --target halley-cmd --config RelWithDebInfo || goto ERROR
 "%~dp0..\bin\halley-cmd.exe" import %~dp0..\ %~dp0..\halley\ || goto ERROR_IMPORT
-sleep 1
 taskkill /IM halley-cmd.exe /F 2>NUL
 cmake.exe --build . --target halley-editor --config RelWithDebInfo || goto ERROR
 
