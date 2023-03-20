@@ -73,7 +73,7 @@ void ProjectLoader::loadPlugins()
 					}
 				}
 				plugins.push_back(std::move(plugin));
-				Logger::logInfo("- " + pluginPath / file);
+				Logger::logInfo("With plugin: " + pluginPath / file);
 			}
 		}
 	}

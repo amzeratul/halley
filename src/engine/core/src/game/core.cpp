@@ -61,7 +61,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	}
 	setOutRedirect(false);
 
-	std::cout << ConsoleColour(Console::GREEN) << "Halley is initializing..." << ConsoleColour() << std::endl;
+	std::cout << ConsoleColour(Console::GREEN) << "Halley v" << getHalleyVersion().toString() << " is initializing..." << ConsoleColour() << std::endl;
 
 	// Debugging initialization
 	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=] (const std::string& error) { onTerminatedInError(error); });
