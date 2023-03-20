@@ -442,6 +442,9 @@ namespace Halley {
 
 		iterator erase(const_iterator first, const_iterator last)
 		{
+			if (first == last) {
+				return de_const_iter(last);
+			}
 			const auto idx = first - begin();
 			std::rotate(de_const_iter(first), de_const_iter(last), end());
 			resize_down(static_cast<size_type>(size() - (last - first)));
@@ -450,6 +453,7 @@ namespace Halley {
 
 		iterator erase(const_iterator pos)
 		{
+			assert(pos != end());
 			return erase(pos, pos + 1);
 		}
 
