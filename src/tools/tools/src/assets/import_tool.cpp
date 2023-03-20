@@ -16,10 +16,13 @@ using namespace std::chrono_literals;
 
 int ImportTool::run(Vector<std::string> args)
 {
+	std::cout << "Importing with " << toString(args.size()) << " args." << std::endl;
 	if (args.size() >= 2) {
 		const Path projectPath = FileSystem::getAbsolute(Path(args[0]));
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
+		std::cout << "About to log some info :D" << std::endl;
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath);
+		std::cout << "Logged it!" << std::endl;
 
 		ProjectLoader loader(*statics, halleyRootPath);
 		auto proj = loader.loadProject(projectPath);
