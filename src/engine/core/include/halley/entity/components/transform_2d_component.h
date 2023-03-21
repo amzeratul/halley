@@ -60,6 +60,8 @@ public:
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
 
+	void markDirty();
+
 private:
 	friend class Halley::EntityRef;
 
@@ -88,7 +90,7 @@ private:
 	};
 
 	void updateParentTransform();
-	void markDirty(DirtyPropagationMode mode = DirtyPropagationMode::Changed, int depth = 0) const;
+	void markDirty(DirtyPropagationMode mode, int depth = 0) const;
 	void markDirtyShallow() const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;

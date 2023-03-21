@@ -6,7 +6,10 @@
 #include <components/network_component.h>
 
 #include "halley/entity/entity_factory.h"
+#include "halley/entity/world.h"
+#include "halley/entity/components/transform_2d_component.h"
 
+class Transform2DComponent;
 using namespace Halley;
 
 void DataInterpolatorSet::setInterpolator(std::shared_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName)
@@ -57,10 +60,17 @@ void DataInterpolatorSet::markReady()
 	ready = true;
 }
 
-void DataInterpolatorSet::update(Time time) const
+void DataInterpolatorSet::update(Time time, World& world) const
 {
 	for (auto& e: interpolators) {
 		e.second->update(time);
+
+		// This hack is needed to make sure that transform 2D gets marked as dirty properly
+		if (std::get<1>(e.first) == "Transform2D") {
+			auto entity = world.getEntity(std::get<0>(e.first));
+			auto& transform = entity.getComponent<Transform2DComponent>();
+			transform.markDirty();
+		}
 	}
 }
 

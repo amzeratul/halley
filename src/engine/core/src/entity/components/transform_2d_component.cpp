@@ -192,6 +192,11 @@ void Transform2DComponent::deserialize(const EntitySerializationContext& context
 	markDirty();
 }
 
+void Transform2DComponent::markDirty()
+{
+	markDirty(DirtyPropagationMode::Changed);
+}
+
 void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 {
 	// For "Changed" mode only:

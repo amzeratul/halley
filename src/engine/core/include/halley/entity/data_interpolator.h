@@ -14,7 +14,7 @@ namespace Halley {
 		bool isReady() const;
 		void markReady();
 		
-		void update(Time time) const;
+		void update(Time time, World& world) const;
 		size_t count() const;
 
 	private:
