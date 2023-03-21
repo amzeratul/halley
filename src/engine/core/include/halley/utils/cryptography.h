@@ -1,5 +1,8 @@
 #pragma once
 
+#include <halley/data_structures/vector.h>
+#include <gsl/span>
+
 namespace Halley {
     class Cryptography {
     public:

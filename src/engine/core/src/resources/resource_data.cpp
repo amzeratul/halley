@@ -18,8 +18,8 @@ Bytes ResourceDataReader::readAll()
 
 ResourceDataReaderFileSystem::ResourceDataReaderFileSystem(Path path)
 {
-#ifdef WIN32
 	FILE* f;
+#ifdef WIN32
 	_wfopen_s(&f, path.getNativeString().getUTF16().c_str(), L"rb");
 #else
 	f = fopen(path.getNativeString().c_str(), "rb");

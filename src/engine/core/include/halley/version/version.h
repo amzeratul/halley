@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <gsl/span>
 
 namespace Halley {
 	class String;

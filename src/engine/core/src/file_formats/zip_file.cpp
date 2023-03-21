@@ -37,8 +37,8 @@ bool ZipFile::open(Path p, bool inMemory)
 			compressedData.clear();
 		}
 	} else {
-#ifdef _WIN32
 		FILE* file;
+#ifdef _WIN32
 		_wfopen_s(&file, path.toString().getUTF16().c_str(), L"rb");
 #else
 		file = fopen(path.toString().c_str(), "rb");
