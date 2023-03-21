@@ -444,7 +444,12 @@ bool EntityData::matchesUUID(const UUID& uuid) const
 bool EntityData::matchesUUID(const EntityData& other) const
 {
 	if (instanceUUID.isValid()) {
-		return instanceUUID == other.getInstanceUUID();
+		if (instanceUUID == other.getInstanceUUID()) {
+			return true;
+		}
+
+		// Got an instance UUID and no match on instance UUID... but we'll still accept a hybrid match
+		return (instanceUUID == other.getPrefabUUID() || (prefabUUID.isValid() && prefabUUID == other.instanceUUID));
 	} else if (prefabUUID.isValid()) {
 		return prefabUUID == other.getPrefabUUID();
 	} else {
