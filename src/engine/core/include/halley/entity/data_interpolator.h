@@ -15,6 +15,7 @@ namespace Halley {
 		void markReady();
 		
 		void update(Time time) const;
+		size_t count() const;
 
 	private:
 		using Key = std::tuple<EntityId, std::string_view, std::string_view>;

@@ -307,6 +307,11 @@ void EntityNetworkSession::onRemoteEntityCreated(EntityRef entity, NetworkSessio
 void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
 {
 	interpolatorSet.markReady();
+
+	if (!entity.isSerializable()) {
+		return;
+	}
+
 	if (listener) {
 		listener->setupInterpolators(interpolatorSet, entity, remote);
 
@@ -318,6 +323,10 @@ void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interp
 
 void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 {
+	if (!entity.isSerializable()) {
+		return;
+	}
+
 	if (listener) {
 		auto& interpolatorSet = entity.setupNetwork(session->getMyPeerId().value());
 		if (!interpolatorSet.isReady()) {

@@ -64,6 +64,11 @@ void DataInterpolatorSet::update(Time time) const
 	}
 }
 
+size_t DataInterpolatorSet::count() const
+{
+	return interpolators.size();
+}
+
 DataInterpolatorSet::Key DataInterpolatorSet::makeKey(EntityId entity, std::string_view componentName, std::string_view fieldName) const
 {
 	return Key(entity, componentName, fieldName);
