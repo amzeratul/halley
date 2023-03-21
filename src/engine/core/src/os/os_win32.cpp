@@ -404,7 +404,7 @@ bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data,
 			Logger::logWarning("Unable to safely overwrite file " + path.getString());
 			return writeFile(dstPath.c_str(), data);
 		} else {
-			return false;
+			return true;
 		}
 	} else {
 		return writeFile(dstPath.c_str(), data);
