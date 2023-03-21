@@ -48,6 +48,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	// Properties
 	result.setName(entity.getName());
 	result.setFlag(EntityData::Flag::NotSelectable, !entity.isSelectable());
+	result.setFlag(EntityData::Flag::NotSerializable, !entity.isSerializable());
 	result.setFlag(EntityData::Flag::Disabled, !entity.isEnabled());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
@@ -327,6 +328,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		}
 		if (delta.getFlags()) {
 			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
+			entity.setSerializable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
 			entity.setEnabled((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
 		}
 		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
@@ -337,6 +339,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
 		entity.setName(data.getName());
 		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
+		entity.setSerializable(!data.getFlag(EntityData::Flag::NotSerializable));
 		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled));
 		if (data.getPrefabUUID().isValid()) {
 			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
@@ -590,7 +593,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
-		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta);
+		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
 		
 		entityData.setInstanceUUID(uuid);
 
@@ -615,7 +618,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	return std::make_pair(entity, parentUUID);
 }
 
-std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta)
+std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
 {
 	if (delta.getPrefab()) {
 		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
@@ -626,7 +629,9 @@ std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefa
 			throw Exception("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString(), 0);
 		}
 
-		auto entityData = EntityData::applyDelta(*prefabData, delta);
+		auto entityData = *prefabData;
+		entityData.instantiate(entityUUID);
+		entityData.applyDelta(delta);
 		entityData.setPrefab("");
 
 		return { std::move(entityData), std::move(prefab), prefabUUID };

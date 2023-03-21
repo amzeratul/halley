@@ -37,7 +37,8 @@ namespace Halley {
         enum class Flag : uint8_t {
 	        NotSelectable = 1,
             Disabled = 2,
-            TreeViewCollapsed = 4
+            TreeViewCollapsed = 4,
+            NotSerializable = 8
         };
 
     	virtual const String& getName() const = 0;

@@ -112,6 +112,11 @@ void EntityEditor::makeUI()
 		setSelectable(event.getBoolData());
 	});
 
+	setHandle(UIEventType::CheckboxUpdated, "serializable", [=] (const UIEvent& event)
+	{
+		setSerializable(event.getBoolData());
+	});
+
 	setHandle(UIEventType::CheckboxUpdated, "enabled", [=] (const UIEvent& event)
 	{
 		setEntityEnabled(event.getBoolData());
@@ -201,6 +206,7 @@ void EntityEditor::reloadEntity()
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
+		getWidgetAs<UICheckbox>("serializable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSerializable));
 		getWidgetAs<UICheckbox>("enabled")->setChecked(!getEntityData().getFlag(EntityData::Flag::Disabled));
 		setCanSendEvents(true);
 
@@ -587,6 +593,14 @@ void EntityEditor::setSelectable(bool selectable)
 {
 	if (getEntityData().getFlag(EntityData::Flag::NotSelectable) == selectable) {
 		getEntityData().setFlag(EntityData::Flag::NotSelectable, !selectable);
+		onEntityUpdated();
+	}
+}
+
+void EntityEditor::setSerializable(bool serializable)
+{
+	if (getEntityData().getFlag(EntityData::Flag::NotSerializable) == serializable) {
+		getEntityData().setFlag(EntityData::Flag::NotSerializable, !serializable);
 		onEntityUpdated();
 	}
 }

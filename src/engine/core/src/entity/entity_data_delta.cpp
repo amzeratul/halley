@@ -51,6 +51,10 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	// Children
 	if (!options.shallow) {
 		for (const auto& toChild: to.children) {
+			if (!options.allowNonSerializable && toChild.getFlag(IEntityConcreteData::Flag::NotSerializable)) {
+				// Ignore non-serializables
+				continue;
+			}
 			const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.matchesUUID(toChild); });
 			if (fromIter != from.children.end()) {
 				// Potentially modified
@@ -64,6 +68,10 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		}
 		for (const auto& fromChild: from.children) {
+			if (!options.allowNonSerializable && fromChild.getFlag(IEntityConcreteData::Flag::NotSerializable)) {
+				// Ignore non-serializables
+				continue;
+			}
 			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.matchesUUID(fromChild); }) != to.children.end();
 			if (!stillExists) {
 				// Removed

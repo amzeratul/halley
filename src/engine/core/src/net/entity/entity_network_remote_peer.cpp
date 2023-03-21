@@ -126,7 +126,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + EntityData(deltaData).toYAML() + "\n");
+	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + EntityData(deltaData).toYAML() + "\n");
 
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
 	
@@ -191,7 +191,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 	//Logger::logDev("Instantiating from network:\n\n" + EntityData(delta).toYAML());
 
-	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta);
+	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 
 	if (parentUUID) {

@@ -18,6 +18,7 @@ namespace Halley {
 	        bool preserveOrder = false;
 			bool shallow = false;
             bool deltaComponents = true;
+			bool allowNonSerializable = true;
         	std::set<String> ignoreComponents;
 			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
         };

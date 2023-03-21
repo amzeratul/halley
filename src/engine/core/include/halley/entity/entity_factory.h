@@ -45,7 +45,7 @@ namespace Halley {
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 
 		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask); // Returns entity and parent UUID
-		std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta);
+		std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID);
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true);

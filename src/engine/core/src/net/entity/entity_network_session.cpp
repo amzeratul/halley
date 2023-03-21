@@ -29,6 +29,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	deltaOptions.preserveOrder = false;
 	deltaOptions.shallow = false;
 	deltaOptions.deltaComponents = true;
+	deltaOptions.allowNonSerializable = false;
 	deltaOptions.ignoreComponents = std::move(ignoreComponents);
 
 	setupDictionary();

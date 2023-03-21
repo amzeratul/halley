@@ -41,5 +41,6 @@ component:
   - lastPos:
       type: Halley::Vector3f
       canEdit: false
+      canSave: false
 
 ...
