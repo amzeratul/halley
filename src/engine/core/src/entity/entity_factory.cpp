@@ -360,6 +360,9 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 			const auto& [componentName, componentData] = data.getComponent(i);
 			try {
 				func(context, componentName, entity, componentData);
+			} catch (const std::exception& e) {
+				Logger::logError("Unable to create component \"" + componentName + "\":");
+				Logger::logException(e);
 			} catch (...) {
 				Logger::logError("Unable to create component \"" + componentName + "\".");
 			}
@@ -380,6 +383,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 					existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
 				}
 			} catch (const std::exception& e) {
+				Logger::logError("Unable to create component \"" + componentName + "\":");
 				Logger::logException(e);
 			} catch (...) {
 				Logger::logError("Unable to update component \"" + componentName + "\".");
