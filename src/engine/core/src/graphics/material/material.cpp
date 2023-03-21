@@ -5,6 +5,7 @@
 #include "halley/graphics/painter.h"
 #include "halley/graphics/shader.h"
 #include "halley/api/video_api.h"
+#include "halley/graphics/sprite/sprite_sheet.h"
 #include "halley/utils/hash.h"
 
 using namespace Halley;
@@ -91,6 +92,7 @@ Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
+	, texUnitAssetId(other.texUnitAssetId)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
 {
@@ -100,6 +102,7 @@ Material::Material(Material&& other) noexcept
 	: materialDefinition(std::move(other.materialDefinition))
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
+	, texUnitAssetId(std::move(other.texUnitAssetId))
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
 {
@@ -333,7 +336,21 @@ std::optional<uint8_t> Material::getStencilReferenceOverride() const
 	return stencilReferenceOverride;
 }
 
-Material& Material::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
+void Material::doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
+{
+	const auto& texs = materialDefinition->getTextures();
+	if (textureUnit < texs.size()) {
+		if (textures[textureUnit] != texture) {
+			textures[textureUnit] = texture;
+			needToUpdateHash = true;
+		}
+		return;
+	}
+
+	throw Exception("Texture unit \"" + toString(textureUnit) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+}
+
+size_t Material::doSet(std::string_view name, const std::shared_ptr<const Texture>& texture)
 {
 	const auto& texs = materialDefinition->getTextures();
 	for (size_t i = 0; i < texs.size(); ++i) {
@@ -343,35 +360,74 @@ Material& Material::set(std::string_view name, const std::shared_ptr<const Textu
 				textures[textureUnit] = texture;
 				needToUpdateHash = true;
 			}
-			return *this;
+			return i;
 		}
 	}
 
 	throw Exception("Texture sampler \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
+Material& Material::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
+{
+	const auto textureUnit = doSet(name, texture);
+	setTexUnitAssetId(textureUnit, "");
+	return *this;
+}
+
 Material& Material::set(std::string_view name, const std::shared_ptr<Texture>& texture)
 {
-	return set(name, std::shared_ptr<const Texture>(texture));
+	const auto textureUnit = doSet(name, std::shared_ptr<const Texture>(texture));
+	setTexUnitAssetId(textureUnit, "");
+	return *this;
+}
+
+Material& Material::set(std::string_view name, const SpriteResource& spriteResource)
+{
+	const auto textureUnit = doSet(name, std::shared_ptr<const Texture>(spriteResource.getSpriteSheet()->getTexture()));
+	setTexUnitAssetId(textureUnit, spriteResource.getAssetId());
+	return *this;
 }
 
 Material& Material::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
 {
-	const auto& texs = materialDefinition->getTextures();
-	if (textureUnit < texs.size()) {
-		if (textures[textureUnit] != texture) {
-			textures[textureUnit] = texture;
-			needToUpdateHash = true;
-		}
-		return *this;
-	}
-
-	throw Exception("Texture unit \"" + toString(textureUnit) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+	doSet(textureUnit, texture);
+	setTexUnitAssetId(textureUnit, "");
+	return *this;
 }
 
 Material& Material::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
 {
-	return set(textureUnit, std::shared_ptr<const Texture>(texture));
+	doSet(textureUnit, std::shared_ptr<const Texture>(texture));
+	setTexUnitAssetId(textureUnit, "");
+	return *this;
+}
+
+Material& Material::set(size_t textureUnit, const SpriteResource& spriteResource)
+{
+	doSet(textureUnit, spriteResource.getSpriteSheet()->getTexture());
+	setTexUnitAssetId(textureUnit, spriteResource.getAssetId());
+	return *this;
+}
+
+void Material::setTexUnitAssetId(size_t texUnit, const String& id)
+{
+	if (texUnitAssetId.size() != textures.size()) {
+		texUnitAssetId.resize(textures.size());
+	}
+	texUnitAssetId[texUnit] = id;
+}
+
+const String& Material::getTexUnitAssetId(int texUnit) const
+{
+	if (texUnit < static_cast<int>(texUnitAssetId.size())) {
+		if (!texUnitAssetId[texUnit].isEmpty()) {
+			return texUnitAssetId[texUnit];
+		}
+	}
+	if (texUnit < static_cast<int>(textures.size())) {
+		return textures[texUnit]->getAssetId();
+	}
+	return String::emptyString();
 }
 
 bool Material::hasParameter(std::string_view name) const
@@ -475,6 +531,12 @@ MaterialUpdater& MaterialUpdater::set(std::string_view name, const std::shared_p
 	return *this;
 }
 
+MaterialUpdater& MaterialUpdater::set(std::string_view name, const SpriteResource& sprite)
+{
+	material->set(name, sprite);
+	return *this;
+}
+
 MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
 {
 	material->set(textureUnit, texture);
@@ -484,6 +546,12 @@ MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<
 MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
 {
 	material->set(textureUnit, texture);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const SpriteResource& sprite)
+{
+	material->set(textureUnit, sprite);
 	return *this;
 }
 

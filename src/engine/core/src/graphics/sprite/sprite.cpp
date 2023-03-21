@@ -362,20 +362,23 @@ Sprite& Sprite::setImage(Resources& resources, std::string_view imageName, std::
 		materialName = sprite->getDefaultMaterialName();
 	}
 
-	setMaterial(sprite->getMaterial(materialName));
+	auto mat = sprite->getMaterial(materialName);
+	mat->set(0, *sprite);
+	setMaterial(mat);
 	doSetSprite(sprite->getSprite(), true);
-		
+	
 #ifdef ENABLE_HOT_RELOAD
 	setHotReload(sprite.get(), 0);
 #endif
-	
+
 	return *this;
 }
 
 Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
-	const auto spriteSheet = sprite.getSpriteSheet();
-	setImage(spriteSheet->getTexture(), std::move(materialDefinition));
+	auto mat = std::make_shared<Material>(materialDefinition);
+	mat->set(0, sprite);
+	setMaterial(mat);
 	doSetSprite(sprite.getSprite(), true);
 	
 #ifdef ENABLE_HOT_RELOAD
@@ -658,10 +661,10 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const E
 		}
 		const auto& texs = materialDef.getTextures();
 		for (size_t i = 0; i < texs.size(); ++i) {
-			const auto& tex = sprite.getMaterial().getTexture(static_cast<int>(i));
+			const auto& assetId = sprite.getMaterial().getTexUnitAssetId(static_cast<int>(i));
 			const auto& texDef = texs[i];
-			if (tex && tex->getAssetId() != texDef.name && tex->getAssetId() != texDef.defaultTextureName) {
-				node["tex_" + texDef.name] = tex->getAssetId();
+			if (!assetId.isEmpty() && assetId != texDef.name && assetId != texDef.defaultTextureName) {
+				node["tex_" + texDef.name] = assetId;
 			}
 		}
 		for (const auto& ub: materialDef.getUniformBlocks()) {
@@ -748,7 +751,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		} else {
 			const auto image = context.resources->get<SpriteResource>(imageNode.asStringView());
 			sprite.setTexRect1(image->getSprite().coords);
-			sprite.getMutableMaterial().set(texUnit, image->getSpriteSheet()->getTexture());
+			sprite.getMutableMaterial().set(texUnit, *image);
 		}
 		return true;
 	};

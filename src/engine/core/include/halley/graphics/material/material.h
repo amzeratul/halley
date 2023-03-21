@@ -9,6 +9,7 @@
 
 namespace Halley
 {
+	class SpriteResource;
 	class MaterialDepthStencil;
 	enum class ShaderType;
 	class MaterialDataBlock;
@@ -103,8 +104,10 @@ namespace Halley
 
 		Material& set(std::string_view name, const std::shared_ptr<const Texture>& texture);
 		Material& set(std::string_view name, const std::shared_ptr<Texture>& texture);
+		Material& set(std::string_view name, const SpriteResource& spriteResource);
 		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
+		Material& set(size_t textureUnit, const SpriteResource& spriteResource);
 		
 		MaterialParameter getParameter(std::string_view name);
 		bool hasParameter(std::string_view name) const;
@@ -119,17 +122,24 @@ namespace Halley
 		uint64_t getPartialHash() const; // Not including textures
 		uint64_t getFullHash() const; // Including textures
 
+		const String& getTexUnitAssetId(int texUnit) const;
+
 	private:
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
+		Vector<String> texUnitAssetId;
 
 		mutable bool needToUpdateHash = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
 		mutable uint64_t fullHashValue = 0;
 		mutable uint64_t partialHashValue = 0;
+
+		void doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
+		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
+		void setTexUnitAssetId(size_t texUnit, const String& id);
 
 		void initUniforms(bool forceLocalBlocks);
 
@@ -154,8 +164,10 @@ namespace Halley
 
 		MaterialUpdater& set(std::string_view name, const std::shared_ptr<const Texture>& texture);
 		MaterialUpdater& set(std::string_view name, const std::shared_ptr<Texture>& texture);
+		MaterialUpdater& set(std::string_view name, const SpriteResource& sprite);
 		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
+		MaterialUpdater& set(size_t textureUnit, const SpriteResource& sprite);
 
 		template <typename T>
 		MaterialUpdater& set(std::string_view name, const T& value)
