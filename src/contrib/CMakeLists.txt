@@ -173,6 +173,10 @@ set(HEADERS
         "zlib/zutil.h"
         )
 
+if(NOT BUILD_HALLEY_TOOLS)
+        add_definitions(-DZ_SOLO)
+endif()
+
 if(MSVC)
         add_definitions("-wd4996 -wd4244 -wd4100 -wd4267 -wd4189 -wd4305 -wd4127 -wd4703 -wd4706")
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
