@@ -4,6 +4,7 @@
 #include "halley/utils/utils.h"
 #include <gsl/gsl>
 #include <array>
+#include <optional>
 
 namespace Halley {
 	class ConfigNode;
