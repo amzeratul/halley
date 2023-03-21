@@ -63,10 +63,10 @@ void DataInterpolatorSet::markReady()
 void DataInterpolatorSet::update(Time time, World& world) const
 {
 	for (auto& e: interpolators) {
-		e.second->update(time);
+		const bool modified = e.second->update(time);
 
 		// This hack is needed to make sure that transform 2D gets marked as dirty properly
-		if (std::get<1>(e.first) == "Transform2D") {
+		if (modified && std::get<1>(e.first) == "Transform2D") {
 			auto entity = world.getEntity(std::get<0>(e.first));
 			auto& transform = entity.getComponent<Transform2DComponent>();
 			transform.markDirty();
@@ -141,8 +141,9 @@ void DataInterpolatorSetRetriever::collectUUIDs(EntityRef entity)
 
 
 
-void DeadReckoningInterpolator::update(Time time)
+bool DeadReckoningInterpolator::update(Time time)
 {
+	return false;
 }
 
 std::optional<ConfigNode> DeadReckoningInterpolator::prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue)
@@ -169,8 +170,9 @@ DeadReckoningVelocityInterpolator::DeadReckoningVelocityInterpolator(std::shared
 {
 }
 
-void DeadReckoningVelocityInterpolator::update(Time time)
+bool DeadReckoningVelocityInterpolator::update(Time time)
 {
+	return false;
 }
 
 std::optional<ConfigNode> DeadReckoningVelocityInterpolator::prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue)

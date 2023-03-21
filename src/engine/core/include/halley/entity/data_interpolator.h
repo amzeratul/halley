@@ -98,7 +98,7 @@ namespace Halley {
 			, length(length)
 		{}
 
-		void update(Time t) override
+		bool update(Time t) override
 		{
 			if (targetValue) {
 				const Time stepT = std::min(t, timeLeft);
@@ -110,7 +110,12 @@ namespace Halley {
 					}
 				}
 				timeLeft -= stepT;
+				if (timeLeft <= 0) {
+					targetValue = nullptr;
+				}
+				return true;
 			}
+			return false;
 		}
 
 	protected:
@@ -156,7 +161,7 @@ namespace Halley {
 
 	class DeadReckoningInterpolator : public DataInterpolator<Vector2f> {
 	public:
-		void update(Time t) override;
+		bool update(Time t) override;
 		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
 
 		void setVelocity(Vector2f vel);
@@ -174,7 +179,7 @@ namespace Halley {
 	public:
 		DeadReckoningVelocityInterpolator(std::shared_ptr<DeadReckoningInterpolator> parent);
 
-		void update(Time t) override;
+		bool update(Time t) override;
 		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
 
 	protected:

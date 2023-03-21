@@ -57,7 +57,7 @@ namespace Halley {
 		virtual void setEnabled(bool enabled) {}
 		virtual bool isEnabled() const { return true; }
 
-		virtual void update(Time t) {}
+		virtual bool update(Time t) { return false; }
 		
 		virtual void deserialize(void* value, const void* defaultValue, const EntitySerializationContext& context, const ConfigNode& node) = 0;
 		virtual std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) { return {}; } // Return nullopt if "toValue" is good to go
