@@ -2,6 +2,7 @@
 #include "../utils/utils.h"
 #include <gsl/gsl>
 #include <limits>
+#include <optional>
 
 namespace Halley {
 	class Compression {

@@ -2,6 +2,7 @@
 #include <halley/time/halleytime.h>
 #include <string>
 #include <chrono>
+#include <optional>
 
 #include "halley/maths/rolling_data_set.h"
 
