@@ -84,8 +84,7 @@ const String& AudioEmitter::getSwitchValue(const String& id) const
 {
 	const auto iter = switchValues.find(id);
 	if (iter == switchValues.end()) {
-		static String emptyString;
-		return emptyString;
+		return String::emptyString();
 	}
 	return iter->second;
 }

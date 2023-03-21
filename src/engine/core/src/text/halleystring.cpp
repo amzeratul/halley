@@ -1048,6 +1048,12 @@ size_t String::getSizeBytes() const
 	return length() + 1;
 }
 
+const String& String::emptyString()
+{
+	static String str;
+	return str;
+}
+
 String Halley::operator+ (const String& lhp, const String& rhp)
 {
 	return String(lhp.cppStr() + rhp.cppStr());
