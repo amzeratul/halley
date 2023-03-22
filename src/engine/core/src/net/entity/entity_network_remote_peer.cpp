@@ -34,7 +34,10 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	for (auto& e: outboundEntities) {
 		e.second.alive = false;
 	}
-	
+
+	Vector<EntityRef> toCreate;
+	Vector<std::pair<EntityRef, OutboundEntity*>> toUpdate;
+
 	for (auto entry: entityIds) {
 		if (entry.ownerId == peerId) {
 			// Don't send updates back to the owner
@@ -45,15 +48,16 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 		if (peerId == 0 || parent->isEntityInView(entity, clientData)) { // Always send to host
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parent->setupOutboundInterpolators(entity);
-				sendCreateEntity(entity);
+				toCreate.push_back(entity);
 			} else {
 				iter->second.alive = true;
-				if (entry.sendUpdates) {
-					sendUpdateEntity(t, iter->second, entity);
-				}
+				toUpdate.emplace_back(entity, &iter->second);
 			}
 		}
 	}
+
+	// Order is important here, we need to first destroy, then create, then update
+	// This is so we don't run into an issue where an entity is moved inside another and we attempt to create/update the new one while the old one is still present
 
 	// Destroy dead entities
 	for (auto& e: outboundEntities) {
@@ -61,6 +65,17 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 			sendDestroyEntity(e.second);
 		}
 	}
+
+	// Create new entities
+	for (auto& e: toCreate) {
+		sendCreateEntity(e);
+	}
+
+	// Update existing entities
+	for (auto& [e, oe]: toUpdate) {
+		sendUpdateEntity(t, *oe, e);
+	}
+
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
 
 	if (timeSinceSend > maxSendInterval) {

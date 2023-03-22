@@ -16,7 +16,6 @@ namespace Halley {
     struct EntityNetworkUpdateInfo {
 		EntityId entityId;
 		uint8_t ownerId;
-		bool sendUpdates;
 	};
 
     class EntityNetworkRemotePeer {
