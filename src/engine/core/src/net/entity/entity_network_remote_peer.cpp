@@ -250,7 +250,12 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	auto retriever = DataInterpolatorSetRetriever(entity, false);
 
 	//Logger::logDev("Updating entity:\n" + delta.toYAML());
-	parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
+	try {
+		parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
+	} catch (const std::exception& e) {
+		Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
+		Logger::logException(e);
+	}
 	remote.data.applyDelta(delta);
 }
 
