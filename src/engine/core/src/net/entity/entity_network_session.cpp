@@ -316,7 +316,9 @@ void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interp
 		listener->setupInterpolators(interpolatorSet, entity, remote);
 
 		for (const auto& c: entity.getChildren()) {
-			requestSetupInterpolators(interpolatorSet, c, remote);
+			if (!c.getOwnerPeerId()) {
+				requestSetupInterpolators(interpolatorSet, c, remote);
+			}
 		}
 	}
 }
