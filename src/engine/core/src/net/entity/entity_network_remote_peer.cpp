@@ -263,7 +263,11 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	}
 	auto& remote = iter->second;
 
+	//const auto entityRef = parent->getWorld().getEntity(remote.worldId);
+	//Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()));
+
 	parent->getWorld().destroyEntity(remote.worldId);
+	parent->getWorld().spawnPending();
 
 	inboundEntities.erase(msg.entityId);
 }
