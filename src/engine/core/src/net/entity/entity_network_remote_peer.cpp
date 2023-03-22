@@ -47,6 +47,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 				parent->setupOutboundInterpolators(entity);
 				sendCreateEntity(entity);
 			} else {
+				iter->second.alive = true;
 				if (entry.sendUpdates) {
 					sendUpdateEntity(t, iter->second, entity);
 				}
@@ -138,7 +139,6 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity)
 {
-	remote.alive = true; // Important: mark it back alive
 	remote.timeSinceSend += t;
 	if (remote.timeSinceSend < parent->getMinSendInterval()) {
 		return;
