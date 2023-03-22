@@ -13,6 +13,12 @@ namespace Halley {
 	struct EntityId;
     class EntityData;
 
+    struct EntityNetworkUpdateInfo {
+		EntityId entityId;
+		uint8_t ownerId;
+		bool sendUpdates;
+	};
+
     class EntityNetworkRemotePeer {
         constexpr static Time maxSendInterval = 1.0;
     	
@@ -23,7 +29,7 @@ namespace Halley {
         bool isAlive() const;
     	void destroy();
 
-    	void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
+    	void sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
     private:

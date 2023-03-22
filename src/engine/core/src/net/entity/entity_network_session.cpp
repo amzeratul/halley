@@ -56,7 +56,7 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	}
 }
 
-void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
+void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds)
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();

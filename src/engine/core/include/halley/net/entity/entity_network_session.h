@@ -45,7 +45,7 @@ namespace Halley {
 
 		void setWorld(World& world, SystemMessageBridge bridge);
 		
-		void sendUpdates(Time t, Rect4i viewRect, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
+		void sendUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds); // Takes pairs of entity id and owner peer id
 		void receiveUpdates();
 
 		World& getWorld() const;

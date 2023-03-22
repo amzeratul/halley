@@ -20,7 +20,7 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 	return peerId;
 }
 
-void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData)
+void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
 {
 	Expects(isAlive());
 
@@ -35,19 +35,21 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 		e.second.alive = false;
 	}
 	
-	for (auto [entityId, ownerId]: entityIds) {
-		if (ownerId == peerId) {
+	for (auto entry: entityIds) {
+		if (entry.ownerId == peerId) {
 			// Don't send updates back to the owner
 			continue;
 		}
 
-		const auto entity = parent->getWorld().getEntity(entityId);
+		const auto entity = parent->getWorld().getEntity(entry.entityId);
 		if (peerId == 0 || parent->isEntityInView(entity, clientData)) { // Always send to host
-			if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
+			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parent->setupOutboundInterpolators(entity);
 				sendCreateEntity(entity);
 			} else {
-				sendUpdateEntity(t, iter->second, entity);
+				if (entry.sendUpdates) {
+					sendUpdateEntity(t, iter->second, entity);
+				}
 			}
 		}
 	}
