@@ -419,7 +419,7 @@ void Material::setTexUnitAssetId(size_t texUnit, const String& id)
 
 const String& Material::getTexUnitAssetId(int texUnit) const
 {
-	if (texUnit < static_cast<int>(texUnitAssetId.size())) {
+	if (false && texUnit < static_cast<int>(texUnitAssetId.size())) {
 		if (!texUnitAssetId[texUnit].isEmpty()) {
 			return texUnitAssetId[texUnit];
 		}
