@@ -146,9 +146,6 @@ void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 			if (worldPartition != newParent->worldPartition) {
 				propagateChildWorldPartition(newParent->worldPartition);
 			}
-			if (!fromNetwork && newParent->fromNetwork) {
-				Logger::logWarning("Local entity added as a child of network entity, this can cause all sorts of misbehaviour");
-			}
 			propagateEnabled(enabled, newParent->enabled && newParent->parentEnabled);
 			if (childIdx >= parent->children.size()) {
 				parent->children.push_back(this);

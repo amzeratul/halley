@@ -45,6 +45,7 @@ EntityNetworkSession::~EntityNetworkSession()
 void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
+	factory->setNetworkFactory(true);
 	messageBridge = bridge;
 
 	// Clear queue
