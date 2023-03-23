@@ -55,7 +55,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 		}
 	}
 
-	// Order is important here, we need to first destroy, then create, then update
+	// Order is important here, we need to first destroy, then update, then create
 	// This is so we don't run into an issue where an entity is moved inside another and we attempt to create/update the new one while the old one is still present
 
 	// Destroy dead entities
@@ -65,14 +65,14 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 		}
 	}
 
+	// Update existing entities
+	for (auto& [e, oe] : toUpdate) {
+		sendUpdateEntity(t, *oe, e);
+	}
+
 	// Create new entities
 	for (auto& e: toCreate) {
 		sendCreateEntity(e);
-	}
-
-	// Update existing entities
-	for (auto& [e, oe]: toUpdate) {
-		sendUpdateEntity(t, *oe, e);
 	}
 
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
@@ -209,7 +209,11 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 	stripNestedNetworkComponents(entity);
-	Logger::logDev("Created entity " + entity.getName() + " (" + toString(msg.entityId) + ") from network:\n\n" + EntityData(delta).toYAML());
+	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") from network:\n\n" + EntityData(delta).toYAML());
+	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") Instance UUID " + toString(entity.getInstanceUUID()));
+	//if (entity.getParent().isValid()) {
+	//	Logger::logDev("with parent " + entity.getParent().getName());
+	//}
 
 	if (parentUUID) {
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
@@ -240,7 +244,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 
 	auto entity = parent->getWorld().tryGetEntity(remote.worldId);
 	if (!entity.isValid()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not alive in the world from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId (" + toString(remote.worldId) + ") not alive in the world from peer " + toString(static_cast<int>(peerId)));
 		const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 		Logger::logWarning("Caused by trying to update entity:\n" + delta.toYAML());
 		return;
@@ -249,8 +253,9 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
 	auto retriever = DataInterpolatorSetRetriever(entity, false);
+	//Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
+	//Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
 
-	//Logger::logDev("Updating entity:\n" + delta.toYAML());
 	try {
 		parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
 		stripNestedNetworkComponents(entity);
@@ -271,7 +276,7 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	auto& remote = iter->second;
 
 	//const auto entityRef = parent->getWorld().getEntity(remote.worldId);
-	//Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()));
+	//Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()) + " NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
 
 	destroyRemoteEntity(remote.worldId);
 
