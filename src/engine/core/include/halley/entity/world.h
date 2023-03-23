@@ -162,6 +162,7 @@ namespace Halley {
 		bool isEditor() const;
 
 		void onEntityDestroyed(const UUID& uuid);
+		bool isTerminating() const;
 
 	private:
 		const HalleyAPI& api;
@@ -172,6 +173,7 @@ namespace Halley {
 		bool entityReloaded = false;
 		bool editor = false;
 		bool devMode = false;
+		bool terminating = false;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;

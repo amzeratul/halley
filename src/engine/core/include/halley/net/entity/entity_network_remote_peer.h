@@ -74,5 +74,7 @@ namespace Halley {
 
         bool isRemoteReady() const;
         void onFirstDataBatchSent();
+
+        void stripNestedNetworkComponents(EntityRef entity, int depth = 0);
 	};
 }

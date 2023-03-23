@@ -1,13 +1,12 @@
 #include "halley/net/entity/entity_network_remote_peer.h"
-
 #include "halley/net/entity/entity_network_session.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/entity/data_interpolator.h"
+#include "components/network_component.h"
 
-class NetworkComponent;
 using namespace Halley;
 
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId)
@@ -206,10 +205,11 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	}
 
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
-	//Logger::logDev("Instantiating from network:\n\n" + EntityData(delta).toYAML());
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
+	stripNestedNetworkComponents(entity);
+	Logger::logDev("Created entity " + entity.getName() + " (" + toString(msg.entityId) + ") from network:\n\n" + EntityData(delta).toYAML());
 
 	if (parentUUID) {
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
@@ -253,6 +253,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	//Logger::logDev("Updating entity:\n" + delta.toYAML());
 	try {
 		parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
+		stripNestedNetworkComponents(entity);
 	} catch (const std::exception& e) {
 		Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
 		Logger::logException(e);
@@ -298,6 +299,19 @@ void EntityNetworkRemotePeer::onFirstDataBatchSent()
 {
 	if (parent->getSession().getType() == NetworkSessionType::Host) {
 		send(EntityNetworkMessage(EntityNetworkMessageReadyToStart()));
+	}
+}
+
+void EntityNetworkRemotePeer::stripNestedNetworkComponents(EntityRef entity, int depth)
+{
+	if (depth > 0) {
+		if (entity.hasComponent<NetworkComponent>()) {
+			entity.removeComponent<NetworkComponent>();
+		}
+	}
+
+	for (auto c: entity.getChildren()) {
+		stripNestedNetworkComponents(c, depth + 1);
 	}
 }
 

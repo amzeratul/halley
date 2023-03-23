@@ -366,7 +366,9 @@ void Entity::doDestroy(World& world, bool updateParenting)
 	Expects(alive);
 
 	if (fromNetwork) {
-		Logger::logError("Destroying entity that was created from network, will cause network issues!");
+		if (world.isTerminating()) {
+			throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
+		}
 	}
 	
 	if (updateParenting) {

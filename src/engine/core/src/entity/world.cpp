@@ -33,6 +33,8 @@ World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflect
 
 World::~World()
 {
+	terminating = true;
+
 	for (auto& tl: systems) {
 		for (auto& s: tl) {
 			s->deInit();
@@ -472,6 +474,11 @@ bool World::isEditor() const
 void World::onEntityDestroyed(const UUID& uuid)
 {
 	uuidMap.erase(uuid);
+}
+
+bool World::isTerminating() const
+{
+	return terminating;
 }
 
 void World::deleteEntity(Entity* entity)
