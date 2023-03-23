@@ -106,9 +106,8 @@ void EntityNetworkRemotePeer::destroy()
 	if (alive) {
 		// Don't destroy host entities. Host disconnecting means that the session is terminating, and destroying host entities could lead to bugs.
 		if (parent->hasWorld() && peerId != 0) {
-			auto& world = parent->getWorld();
 			for (const auto& [k, v] : inboundEntities) {
-				world.destroyEntity(v.worldId);
+				destroyRemoteEntity(v.worldId);
 			}
 		}
 		
@@ -211,6 +210,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
+	entity.setFromNetwork(true);
 
 	if (parentUUID) {
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
@@ -254,6 +254,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	//Logger::logDev("Updating entity:\n" + delta.toYAML());
 	try {
 		parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
+		entity.setFromNetwork(true);
 	} catch (const std::exception& e) {
 		Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
 		Logger::logException(e);
@@ -273,9 +274,20 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	//const auto entityRef = parent->getWorld().getEntity(remote.worldId);
 	//Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()));
 
-	parent->getWorld().destroyEntity(remote.worldId);
+	destroyRemoteEntity(remote.worldId);
 
 	inboundEntities.erase(msg.entityId);
+}
+
+void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id)
+{
+	auto entity = parent->getWorld().tryGetEntity(id);
+	if (entity.isValid()) {
+		entity.setFromNetwork(false);
+		parent->getWorld().destroyEntity(entity);
+	} else {
+		Logger::logWarning("Network entity has gone missing.");
+	}
 }
 
 bool EntityNetworkRemotePeer::isRemoteReady() const

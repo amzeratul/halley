@@ -256,8 +256,7 @@ void World::doDestroyEntity(EntityId id)
 
 void World::doDestroyEntity(Entity* e)
 {
-	uuidMap.erase(e->getInstanceUUID());
-	e->destroy();
+	e->destroy(*this);
 	entityDirty = true;
 }
 
@@ -468,6 +467,11 @@ void World::setEditor(bool isEditor)
 bool World::isEditor() const
 {
 	return editor;
+}
+
+void World::onEntityDestroyed(const UUID& uuid)
+{
+	uuidMap.erase(uuid);
 }
 
 void World::deleteEntity(Entity* entity)

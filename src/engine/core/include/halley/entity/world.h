@@ -161,6 +161,8 @@ namespace Halley {
 		void setEditor(bool isEditor);
 		bool isEditor() const;
 
+		void onEntityDestroyed(const UUID& uuid);
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;

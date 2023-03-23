@@ -70,6 +70,8 @@ namespace Halley {
         void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
         void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
+        void destroyRemoteEntity(EntityId id);
+
         bool isRemoteReady() const;
         void onFirstDataBatchSent();
 	};
