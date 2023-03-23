@@ -142,7 +142,7 @@ void ImportAssetsDatabase::save() const
 	std::lock_guard<std::mutex> lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
 
-	const auto pcAssetDatabase = makeAssetDatabase("pc");
+	const auto pcAssetDatabase = doMakeAssetDatabase("pc");
 	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
 }
 
@@ -488,6 +488,12 @@ const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetTyp
 }
 
 std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase(const String& platform) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	return doMakeAssetDatabase(platform);
+}
+
+std::unique_ptr<AssetDatabase> ImportAssetsDatabase::doMakeAssetDatabase(const String& platform) const
 {
 	auto result = std::make_unique<AssetDatabase>();
 	for (auto& a: assetsImported) {

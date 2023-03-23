@@ -140,5 +140,6 @@ namespace Halley
 		mutable std::mutex mutex;
 
 		const AssetEntry* findEntry(AssetType type, const String& id) const;
+		std::unique_ptr<AssetDatabase> doMakeAssetDatabase(const String& platform) const;
 	};
 }
