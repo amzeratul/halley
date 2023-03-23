@@ -239,13 +239,15 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	}
 	auto& remote = iter->second;
 
-	auto entity = parent->getWorld().getEntity(remote.worldId);
+	auto entity = parent->getWorld().tryGetEntity(remote.worldId);
 	if (!entity.isValid()) {
 		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not alive in the world from peer " + toString(static_cast<int>(peerId)));
+		const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
+		Logger::logWarning("Caused by trying to update entity:\n" + delta.toYAML());
 		return;
 	}
 	
-	auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
+	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
 	auto retriever = DataInterpolatorSetRetriever(entity, false);
 
