@@ -7,10 +7,12 @@ void FileSystemCache::writeFile(const Path& path, Bytes data)
 {
 	FileSystem::writeFile(path, data);
 
+	auto lock = std::unique_lock<std::mutex>(mutex);
+	const auto key = path.getString();
 	if (shouldCache(path, data.size())) {
-		auto lock = std::unique_lock<std::mutex>(mutex);
-		const auto key = path.getString();
 		cache[key] = std::move(data);
+	} else {
+		cache.erase(key);
 	}
 }
 
@@ -32,6 +34,7 @@ const Bytes& FileSystemCache::readFile(const Path& path)
 		cache[key] = std::move(bytes);
 		return cache.at(key);
 	} else {
+		cache.erase(key);
 		static thread_local Bytes temp;
 		temp = std::move(bytes);
 		return temp;

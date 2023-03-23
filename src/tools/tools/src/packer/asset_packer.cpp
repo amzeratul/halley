@@ -15,7 +15,7 @@ using namespace Halley;
 
 bool AssetPackListing::Entry::operator<(const Entry& other) const
 {
-	return name < other.name;
+	return std::tie(name, type) < std::tie(other.name, other.type);
 }
 
 AssetPackListing::AssetPackListing()
@@ -205,7 +205,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 	std::unique_ptr<AssetPack> oldPack;
 	auto reader = std::make_unique<ResourceDataReaderFileSystem>(dst);
 	if (reader->size() > 0) {
-		//oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
+		oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
 	}
 	reader = {};
 
