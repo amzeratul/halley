@@ -16,11 +16,25 @@ namespace Halley {
 		static gsl::span<gsl::byte> compressRaw(gsl::span<const gsl::byte> inBytes, gsl::span<gsl::byte> outBytes, bool insertLength, int level = -1);
 		static Bytes decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize = 0);
 
-		static size_t lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst);
-		static size_t lz4Compress(gsl::span<const char> src, gsl::span<char> dst);
-		static size_t lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst);
+		enum class LZ4Mode {
+			Normal,
+			HC
+		};
+
+		struct LZ4Options {
+			LZ4Mode mode = LZ4Mode::Normal;
+			int level = 9;
+		};
+
+		static Bytes lz4Compress(gsl::span<const gsl::byte> src, LZ4Options options = {});
+		static size_t lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst, LZ4Options options = {});
+		static size_t lz4Compress(gsl::span<const char> src, gsl::span<char> dst, LZ4Options options = {});
+		static size_t lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst, LZ4Options options = {});
 		static std::optional<size_t> lz4Decompress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst);
 		static std::optional<size_t> lz4Decompress(gsl::span<const char> src, gsl::span<char> dst);
 		static std::optional<size_t> lz4Decompress(gsl::span<const Byte> src, gsl::span<Byte> dst);
+
+		static Bytes lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<const gsl::byte> header, LZ4Options options = {});
+		static Bytes lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header);
 	};
 }

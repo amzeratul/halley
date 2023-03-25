@@ -35,7 +35,7 @@ namespace Halley {
 
 	class Image final : public Resource {
 	public:
-		enum class Format {
+		enum class Format : uint8_t {
 			Undefined,
 			Indexed,
 			RGB,
@@ -56,12 +56,16 @@ namespace Halley {
 		void setSize(Vector2i size);
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
+
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;
+		Bytes saveLZ4ToBytes() const;
+
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		void setFormat(Format format);
 
+		static bool isLZ4(gsl::span<const gsl::byte> bytes);
 		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 		static std::optional<Vector2i> getBufferImageSize(gsl::span<const gsl::byte> bytes);

@@ -27,8 +27,17 @@
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/compression.h"
 #include "halley/support/logger.h"
 #include "qoi/qoi.h"
+
+namespace {
+	struct SimpleImageHeader {
+		uint16_t width;
+		uint16_t height;
+		Halley::Image::Format format;
+	};
+}
 
 using namespace Halley;
 
@@ -461,7 +470,16 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		targetChannels = 4;
 	}
 
-	if (isQOI(bytes)) {
+	if (isLZ4(bytes)) {
+		SimpleImageHeader header;
+		auto raw = Compression::lz4DecompressFile(bytes, gsl::as_writable_bytes(gsl::span<SimpleImageHeader>(&header, 1)));
+		format = header.format;
+		w = header.width;
+		h = header.height;
+		dataLen = raw.size();
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(new unsigned char[dataLen], [](unsigned char* data) { delete[] data; });
+		memcpy(px.get(), raw.data(), dataLen);
+	} else if (isQOI(bytes)) {
 		qoi_desc desc;
 		auto* result = qoi_decode(bytes.data(), static_cast<int>(bytes.size()), &desc, targetChannels);
 		if (!result) {
@@ -648,9 +666,23 @@ Bytes Image::saveQOIToBytes() const
 	return result;
 }
 
+Bytes Image::saveLZ4ToBytes() const
+{
+	SimpleImageHeader header;
+	header.width = w;
+	header.height = h;
+	header.format = format;
+
+	Compression::LZ4Options options;
+	options.mode = Compression::LZ4Mode::HC;
+	return Compression::lz4CompressFile(gsl::as_bytes(gsl::span<unsigned char>(px.get(), dataLen)), gsl::as_bytes(gsl::span<SimpleImageHeader>(&header, 1)), options);
+}
+
 Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
-	if (isPNG(bytes))	{
+	if (isLZ4(bytes)) {
+		throw Exception("Unsupported: reading image size from LZ4 file", HalleyExceptions::Utils);
+	} else if (isPNG(bytes))	{
 		unsigned w, h;
 		lodepng::State state;
 		lodepng_inspect(&w, &h, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
@@ -688,6 +720,12 @@ void Image::setFormat(Format f)
 	if (bpp0 != bpp1) {
 		throw Exception("Unable to convert between formats, BPP doesn't match.", HalleyExceptions::Utils);
 	}
+}
+
+bool Image::isLZ4(gsl::span<const gsl::byte> bytes)
+{
+	unsigned char header[] = { 'L', 'Z', '4', '\0' };
+	return bytes.size() >= 8 && memcmp(bytes.data(), header, 4) == 0;
 }
 
 bool Image::isQOI(gsl::span<const gsl::byte> bytes)
