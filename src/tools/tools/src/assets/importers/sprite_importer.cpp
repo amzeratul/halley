@@ -25,7 +25,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	std::optional<String> palette;
 	bool powerOfTwo = true;
-
+	
 	for (auto& inputFile: asset.inputFiles) {
 		auto fileInputId = Path(inputFile.name).dropFront(1);
 		const String baseSpriteName = fileInputId.replaceExtension("").string();

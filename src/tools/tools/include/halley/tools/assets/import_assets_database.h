@@ -127,6 +127,8 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		void setPlatforms(Vector<String> platforms);
+
 	private:
 		Vector<String> platforms;
 		Path directory;

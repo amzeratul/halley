@@ -498,6 +498,14 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	}
 }
 
+void ImportAssetsDatabase::setPlatforms(Vector<String> platforms)
+{
+	if (platforms != this->platforms) {
+		this->platforms = std::move(platforms);
+		load();
+	}
+}
+
 const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetType type, const String& id) const
 {
 	if (indexDirty) {
