@@ -131,10 +131,10 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 	}
 
 	// Check for full reimport
-	bool reimportAll = isCodeGen || true;
+	bool reimportAll = isCodeGen;
 	if (!reimportAll) {
 		for (const auto& change : changes) {
-			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta" || change.name.endsWith(".ase") || change.name.endsWith(".aseprite")) {
+			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta") {
 				reimportAll = true;
 				break;
 			}
@@ -240,9 +240,11 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		asset.srcDir = srcPath;
 		asset.inputFiles.push_back(input);
 
-		for (const auto& additional: db.getInputFiles(asset.assetType, asset.assetId)) {
-			if (additional != filePath) {
-				//additionalFilesToImport.push_back(additional);
+		if (!isCodegen) {
+			for (const auto& additional: db.getInputFiles(asset.assetType, asset.assetId)) {
+				if (additional != filePath) {
+					additionalFilesToImport.push_back(additional);
+				}
 			}
 		}
 	} else {

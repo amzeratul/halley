@@ -40,8 +40,8 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	platforms = properties->getPlatforms();
 
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms, currentAssetVersion);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
-	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
+	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
 
 	fileSystemCache = std::make_unique<FileSystemCache>();
 }
