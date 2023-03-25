@@ -172,10 +172,18 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	Vector<Path> dummyDirMetas;
 
-	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath);
+	bool dbChanged = false;
+	Vector<Path> additionalFilesToImport;
+	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath, additionalFilesToImport) || dbChanged;
+	for (const auto& additional: additionalFilesToImport) {
+		Vector<Path> dummy;
+		const auto& newPath2 = skipGen ? srcPath.makeRelativeTo(basePath) / additional : additional;
+		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath2, dummy) || dbChanged;
+	}
+	return dbChanged;
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<Path>& additionalFilesToImport) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -231,6 +239,12 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		asset.assetType = assetImporter.getType();
 		asset.srcDir = srcPath;
 		asset.inputFiles.push_back(input);
+
+		for (const auto& additional: db.getInputFiles(asset.assetType, asset.assetId)) {
+			if (additional != filePath) {
+				//additionalFilesToImport.push_back(additional);
+			}
+		}
 	} else {
 		// Already exists
 		auto& asset = iter->second;
@@ -238,10 +252,10 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
 		if (asset.srcDir == srcPath) {
-			asset.inputFiles.push_back(input);
+			asset.addInputFile(input);
 		} else {
 			auto relPath = (srcPath / input.first).makeRelativeTo(asset.srcDir);
-			asset.inputFiles.emplace_back(input, relPath);
+			asset.addInputFile(input, relPath);
 
 			// Don't mix files from two different source paths
 			//throw Exception("Mixed source dir input for " + assetId, HalleyExceptions::Tools);

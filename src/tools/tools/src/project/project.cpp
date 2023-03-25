@@ -330,7 +330,7 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 
 Vector<String> Project::getAssetSrcList() const
 {
-	return importAssetsDatabase->getInputFiles();
+	return importAssetsDatabase->getAllInputFiles();
 }
 
 Vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
@@ -530,7 +530,7 @@ void Project::loadECSData()
 		ecsData->clear();
 	}
 
-	const auto& inputFiles = codegenDatabase->getInputFiles();
+	const auto& inputFiles = codegenDatabase->getAllInputFiles();
 	const auto n = inputFiles.size();
 	Vector<CodegenSourceInfo> sources(n);
 	Vector<Bytes> inputData(n);

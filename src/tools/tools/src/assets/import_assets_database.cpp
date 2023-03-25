@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -78,6 +79,20 @@ int64_t ImportAssetsDatabaseEntry::getLatestTimestamp() const
 		t = std::max(t, additional.second);
 	}
 	return t;
+}
+
+void ImportAssetsDatabaseEntry::addInputFile(TimestampedPath path)
+{
+	if (!std_ex::contains_if(inputFiles, [&] (const AssetPath& entry) { return entry.getPath() == path.first; })) {
+		inputFiles.push_back(std::move(path));
+	}
+}
+
+void ImportAssetsDatabaseEntry::addInputFile(TimestampedPath path, Path dataPath)
+{
+	if (!std_ex::contains_if(inputFiles, [&] (const AssetPath& entry) { return entry.getPath() == path.first; })) {
+		inputFiles.emplace_back(std::move(path), std::move(dataPath));
+	}
 }
 
 void ImportAssetsDatabase::AssetEntry::serialize(Serializer& s) const
@@ -256,9 +271,9 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	if (const auto * entry = findEntry(type, assetId); entry) {
+	if (const auto* entry = findEntry(type, assetId); entry) {
 		const auto& asset = entry->asset;
-		for (auto& o: asset.outputFiles) {
+		for (const auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 			}
@@ -403,6 +418,21 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	return result;
 }
 
+Vector<Path> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	const auto iter = assetsImported.find(std::pair{ assetType, assetId });
+	if (iter != assetsImported.end()) {
+		Vector<Path> result;
+		for (const auto& inputFile: iter->second.asset.inputFiles) {
+			result.push_back(inputFile.getDataPath());
+		}
+		return result;
+	} else {
+		return {};
+	}
+}
+
 Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
@@ -414,7 +444,7 @@ Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetTyp
 	}
 }
 
-Vector<String> ImportAssetsDatabase::getInputFiles() const
+Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	Vector<String> result;
