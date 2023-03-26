@@ -29,7 +29,8 @@ namespace Halley {
 		};
 
         enum class Flags {
-	        Premultiplied = 1
+	        Premultiplied = 1,
+            HasPalette = 2,
         };
 
 		struct Header {
@@ -51,11 +52,14 @@ namespace Halley {
             Paeth = 4
         };
         
-    	static void decodeLines(Format format, Vector2i size, gsl::span<const uint8_t> lineData, gsl::span<uint8_t> pixelData);
-    	static void encodeLines(Format format, Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData);
+    	static void decodeLines(Vector2i size, gsl::span<const uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp);
+    	static void encodeLines(Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp);
         static LineEncoding findBestLineEncoding(gsl::span<const uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp);
         static void encodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp);
         static void decodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp);
         static int getBPP(Format format);
+
+        static std::optional<std::pair<Vector<int>, Bytes>> makePalette(gsl::span<const int> pixels);
+        static void decodePalette(gsl::span<const uint8_t> palettedImage, gsl::span<const int> palette, gsl::span<int> dst);
     };
 }

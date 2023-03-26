@@ -16,8 +16,9 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	}
 	memcpy(&header, bytes.data(), sizeof(header));
 
-	const int bpp = getBPP(header.format);
-	if (header.uncompressedSize != static_cast<uint32_t>(header.width * header.height * bpp + header.height)) {
+	const bool hasPalette = header.flags & static_cast<uint8_t>(Flags::HasPalette);
+	const int bpp = hasPalette ? 1 : getBPP(header.format);
+	if (header.uncompressedSize != static_cast<uint32_t>(header.width * header.height * bpp + header.height + (hasPalette ? 1024 : 0))) {
 		throw Exception("Invalid HLIF file encoding.", HalleyExceptions::Utils);
 	}
 
@@ -30,17 +31,24 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	decompressedData.resize(*decompressedSize);
 
 	const auto dataSpan = gsl::span<Byte>(decompressedData);
-	const auto lineData = dataSpan.subspan(0, header.height);
-	const auto pixelData = dataSpan.subspan(header.height);
+	const auto paletteData = dataSpan.subspan(0, hasPalette ? 1024 : 0);
+	const auto lineData = dataSpan.subspan(paletteData.size(), header.height);
+	const auto pixelData = dataSpan.subspan(paletteData.size() + lineData.size());
 	const auto imgFormat = header.format == Format::RGBA ?
 		((header.flags & static_cast<uint8_t>(Flags::Premultiplied)) ? Image::Format::RGBAPremultiplied : Image::Format::RGBA) :
 		(header.format == Format::SingleChannel ? Image::Format::SingleChannel : Image::Format::Indexed);
 	const auto imgSize = Vector2i(header.width, header.height);
 
-	decodeLines(header.format, imgSize, lineData, pixelData);
+	decodeLines(imgSize, lineData, pixelData, bpp);
 
 	dst = Image(imgFormat, imgSize);
-	memcpy(dst.getPixelBytes().data(), pixelData.data(), pixelData.size_bytes());
+	if (hasPalette) {
+		std::array<int, 256> palette;
+		memcpy(palette.data(), paletteData.data(), paletteData.size());
+		decodePalette(pixelData, palette, dst.getPixels4BPP());
+	} else {
+		memcpy(dst.getPixelBytes().data(), pixelData.data(), pixelData.size_bytes());
+	}
 }
 
 Bytes HLIFFile::encode(const Image& image)
@@ -67,16 +75,35 @@ Bytes HLIFFile::encode(const Image& image)
 	}
 	header.width = static_cast<uint16_t>(image.getWidth());
 	header.height = static_cast<uint16_t>(image.getHeight());
-	const int bpp = getBPP(header.format);
-	header.uncompressedSize = header.width * header.height * bpp + header.height;
+
+	// Try to generate palette
+	Vector<int> palette;
+	Bytes palettedImage;
+	if (header.format == Format::RGBA && static_cast<size_t>(header.width) * static_cast<size_t>(header.height) > 512) {
+		if (auto result = makePalette(image.getPixels4BPP())) {
+			palette = std::move(result->first);
+			palettedImage = std::move(result->second);
+			header.flags |= static_cast<uint8_t>(Flags::HasPalette);
+		}
+	}
+
+	// Figure out full size
+	const int bpp = palettedImage.empty() ? getBPP(header.format) : 1;
+	header.uncompressedSize = header.width * header.height * bpp + header.height + static_cast<uint32_t>(palette.size() * 4);
 
 	// Prepare uncompressed data
 	Bytes uncompressed(header.uncompressedSize);
 	const auto dataSpan = gsl::span<Byte>(uncompressed);
-	const auto lineSpan = dataSpan.subspan(0, header.height);
-	const auto pixelSpan = dataSpan.subspan(header.height);
+	const auto paletteSpan = dataSpan.subspan(0, palette.size() * 4);
+	const auto lineSpan = dataSpan.subspan(paletteSpan.size(), header.height);
+	const auto pixelSpan = dataSpan.subspan(paletteSpan.size() + lineSpan.size());
+	if (palette.empty()) {
+		memcpy(pixelSpan.data(), image.getPixelBytes().data(), pixelSpan.size());
+	} else {
+		memcpy(paletteSpan.data(), palette.data(), paletteSpan.size());
+		memcpy(pixelSpan.data(), palettedImage.data(), pixelSpan.size());
+	}
 	memset(lineSpan.data(), 0, lineSpan.size_bytes());
-	memcpy(pixelSpan.data(), image.getPixelBytes().data(), pixelSpan.size());
 
 	// Try compressing with no filters first
 	Compression::LZ4Options options;
@@ -84,7 +111,7 @@ Bytes HLIFFile::encode(const Image& image)
 	auto compressedUnfiltered = Compression::lz4Compress(gsl::as_bytes(dataSpan), options);
 
 	// Filter and compress again
-	encodeLines(header.format, image.getSize(), lineSpan, pixelSpan);
+	encodeLines(image.getSize(), lineSpan, pixelSpan, bpp);
 	auto compressedFiltered = Compression::lz4Compress(gsl::as_bytes(dataSpan), options);
 	uncompressed = {};
 
@@ -124,9 +151,8 @@ bool HLIFFile::isHLIF(gsl::span<const gsl::byte> bytes)
 	return bytes.size() >= 8 && memcmp(bytes.data(), hlifId, 8) == 0;
 }
 
-void HLIFFile::decodeLines(Format format, Vector2i size, gsl::span<const uint8_t> lineData, gsl::span<uint8_t> pixelData)
+void HLIFFile::decodeLines(Vector2i size, gsl::span<const uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp)
 {
-	const auto bpp = getBPP(format);
 	const auto stride = bpp * size.x;
 
 	Bytes blankLine(stride, 0);
@@ -139,9 +165,8 @@ void HLIFFile::decodeLines(Format format, Vector2i size, gsl::span<const uint8_t
 	}
 }
 
-void HLIFFile::encodeLines(Format format, Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData)
+void HLIFFile::encodeLines(Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp)
 {
-	const auto bpp = getBPP(format);
 	const auto stride = bpp * size.x;
 	assert(lineData.size_bytes() == size.y);
 	assert(pixelData.size_bytes() == stride * size.y);
@@ -287,4 +312,46 @@ void HLIFFile::decodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine,
 int HLIFFile::getBPP(Format format)
 {
 	return format == Format::RGBA ? 4 : 1;
+}
+
+std::optional<std::pair<Vector<int>, Bytes>> HLIFFile::makePalette(gsl::span<const int> pixels)
+{
+	HashMap<int, uint8_t> paletteEntries;
+	Vector<int> palette;
+	palette.reserve(256);
+	paletteEntries.reserve(256);
+	Bytes output(pixels.size());
+
+	for (size_t i = 0; i < pixels.size(); ++i) {
+		const auto c = pixels[i];
+		const auto iter = paletteEntries.find(c);
+		if (iter == paletteEntries.end()) {
+			// New entry
+			if (palette.size() >= 256) {
+				// Too many colours
+				return {};
+			}
+
+			const auto idx = static_cast<uint8_t>(palette.size());
+			paletteEntries[c] = idx;
+			output[i] = idx;
+			palette.push_back(c);
+		} else {
+			output[i] = iter->second;
+		}
+	}
+
+	palette.resize(256, 0);
+	return std::pair{ std::move(palette), std::move(output) };
+}
+
+void HLIFFile::decodePalette(gsl::span<const uint8_t> palettedImage, gsl::span<const int> palette, gsl::span<int> dst)
+{
+	assert(palettedImage.size() == dst.size());
+	assert(palette.size() == 256);
+
+	const auto n = palettedImage.size();
+	for (size_t i = 0; i < n; ++i) {
+		dst[i] = palette[palettedImage[i]];
+	}
 }
