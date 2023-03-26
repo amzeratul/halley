@@ -71,5 +71,7 @@ namespace Halley {
         static std::optional<std::pair<Vector<Palette>, Bytes>> makePalettes(gsl::span<const int> pixels, std::string_view name = {});
         static void optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> pixels);
         static void decodePalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst);
+        static void deltaEncodePalettes(gsl::span<Palette> palettes);
+        static void deltaDecodePalettes(gsl::span<Palette> palettes);
     };
 }

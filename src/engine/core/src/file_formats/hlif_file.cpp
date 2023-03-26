@@ -44,6 +44,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	if (header.numPalettes > 0) {
 		Vector<Palette> palettes(header.numPalettes);
 		memcpy(palettes.data(), paletteData.data(), paletteData.size());
+		deltaDecodePalettes(palettes);
 		decodePalettes(pixelData, palettes, dst.getPixels4BPP());
 	} else {
 		memcpy(dst.getPixelBytes().data(), pixelData.data(), pixelData.size_bytes());
@@ -81,6 +82,7 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name)
 	if (header.format == Format::RGBA && static_cast<size_t>(header.width) * static_cast<size_t>(header.height) > 512) {
 		if (auto result = makePalettes(image.getPixels4BPP(), name)) {
 			optimizePalettes(result->first, result->second);
+			deltaEncodePalettes(result->first);
 			palettes = std::move(result->first);
 			palettedImage = std::move(result->second);
 			header.numPalettes = static_cast<uint8_t>(palettes.size());
@@ -416,13 +418,35 @@ void HLIFFile::decodePalettes(gsl::span<const uint8_t> palettedImage, gsl::span<
 	assert(palettedImage.size() == dst.size());
 	assert(palettes.size() == 256);
 
-	const auto n = palettedImage.size();
-	size_t curPalette = 0;
-	for (size_t i = 0; i < n; ++i) {
-		if (palettes[curPalette].endPixel == i) {
-			++curPalette;
+	size_t startPos = 0;
+	for (size_t i = 0; i < palettes.size(); ++i) {
+		const auto& palette = palettes[i];
+		for (size_t j = startPos; j < palette.endPixel; ++j) {
+			dst[j] = palette.entries[palettedImage[j]];
 		}
-		dst[i] = palettes[curPalette].entries[palettedImage[i]];
+		startPos = palette.endPixel;
+	}
+}
+
+void HLIFFile::deltaEncodePalettes(gsl::span<Palette> palettes)
+{
+	for (int i = static_cast<int>(palettes.size()); --i >= 1; ) {
+		auto* cur = reinterpret_cast<char*>(palettes[i].entries.data());
+		auto* prev = reinterpret_cast<const char*>(palettes[i - 1].entries.data());
+		for (size_t j = 0; j < 1024; ++j) {
+			cur[j] -= prev[j];
+		}
+	}
+}
+
+void HLIFFile::deltaDecodePalettes(gsl::span<Palette> palettes)
+{
+	for (int i = 1; i < int(palettes.size()); ++i) {
+		auto* cur = reinterpret_cast<char*>(palettes[i].entries.data());
+		auto* prev = reinterpret_cast<const char*>(palettes[i - 1].entries.data());
+		for (size_t j = 0; j < 1024; ++j) {
+			cur[j] += prev[j];
+		}
 	}
 }
 
