@@ -417,7 +417,6 @@ void HLIFFile::optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> 
 void HLIFFile::applyPalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst)
 {
 	assert(palettedImage.size() == dst.size());
-	assert(palettes.size() == 256);
 
 	size_t startPos = 0;
 	for (size_t i = 0; i < palettes.size(); ++i) {
