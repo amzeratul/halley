@@ -274,6 +274,7 @@ set(SOURCES
         
         "src/file_formats/binary_file.cpp"
         "src/file_formats/config_file.cpp"
+        "src/file_formats/hlif_file.cpp"
         "src/file_formats/ini_reader.cpp"
         "src/file_formats/json_file.cpp"
         "src/file_formats/image.cpp"
@@ -714,6 +715,7 @@ set(HEADERS
         "include/halley/file_formats/binary_file.h"
         "include/halley/file_formats/config_file.h"
         "include/halley/file_formats/halley-yamlcpp.h"
+        "include/halley/file_formats/hlif_file.h"
         "include/halley/file_formats/image.h"
         "include/halley/file_formats/ini_reader.h"
         "include/halley/file_formats/json_file.h"

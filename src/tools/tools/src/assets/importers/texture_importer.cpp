@@ -16,11 +16,11 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 	auto meta = asset.inputFiles.at(0).metadata;
 
 	const bool useQOI = false;
-	const bool useLZ4 = false;
+	const bool useHLIF = false;
 
-	if (useLZ4) {
-		meta.set("compression", "lz4");
-		collector.output(asset.assetId, AssetType::Texture, image.saveLZ4ToBytes(), meta);
+	if (useHLIF) {
+		meta.set("compression", "hlif");
+		collector.output(asset.assetId, AssetType::Texture, image.saveHLIFToBytes(), meta);
 	} else if (useQOI && (image.getFormat() == Image::Format::RGB || image.getFormat() == Image::Format::RGBA || image.getFormat() == Image::Format::RGBAPremultiplied)) {
 		meta.set("compression", "qoi");
 		collector.output(asset.assetId, AssetType::Texture, image.saveQOIToBytes(), meta);

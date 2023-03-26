@@ -28,6 +28,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/compression.h"
+#include "halley/file_formats/hlif_file.h"
 #include "halley/support/logger.h"
 #include "qoi/qoi.h"
 
@@ -470,15 +471,8 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		targetChannels = 4;
 	}
 
-	if (isLZ4(bytes)) {
-		SimpleImageHeader header;
-		auto raw = Compression::lz4DecompressFile(bytes, gsl::as_writable_bytes(gsl::span<SimpleImageHeader>(&header, 1)));
-		format = header.format;
-		w = header.width;
-		h = header.height;
-		dataLen = raw.size();
-		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(new unsigned char[dataLen], [](unsigned char* data) { delete[] data; });
-		memcpy(px.get(), raw.data(), dataLen);
+	if (HLIFFile::isHLIF(bytes)) {
+		HLIFFile::decode(*this, bytes);
 	} else if (isQOI(bytes)) {
 		qoi_desc desc;
 		auto* result = qoi_decode(bytes.data(), static_cast<int>(bytes.size()), &desc, targetChannels);
@@ -666,22 +660,16 @@ Bytes Image::saveQOIToBytes() const
 	return result;
 }
 
-Bytes Image::saveLZ4ToBytes() const
+Bytes Image::saveHLIFToBytes() const
 {
-	SimpleImageHeader header;
-	header.width = w;
-	header.height = h;
-	header.format = format;
-
-	Compression::LZ4Options options;
-	options.mode = Compression::LZ4Mode::HC;
-	return Compression::lz4CompressFile(gsl::as_bytes(gsl::span<unsigned char>(px.get(), dataLen)), gsl::as_bytes(gsl::span<SimpleImageHeader>(&header, 1)), options);
+	return HLIFFile::encode(*this);
 }
 
 Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
-	if (isLZ4(bytes)) {
-		throw Exception("Unsupported: reading image size from LZ4 file", HalleyExceptions::Utils);
+	if (HLIFFile::isHLIF(bytes)) {
+		const auto info = HLIFFile::getInfo(bytes);
+		return info.size;
 	} else if (isPNG(bytes))	{
 		unsigned w, h;
 		lodepng::State state;
@@ -691,24 +679,6 @@ Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 		int w, h, comp;
 		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), int(bytes.size()), &w, &h, &comp);
 		return Vector2i(w, h);
-	}
-}
-
-Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
-{
-	unsigned int x, y;
-	LodePNGState state;
-	lodepng_inspect(&x, &y, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
-	LodePNGColorType colorFormat = state.info_png.color.colortype;
-	switch (colorFormat) {
-	case LCT_GREY:
-		return Format::SingleChannel;
-	case LCT_PALETTE:
-		return Format::Indexed;
-	case LCT_RGB:
-		return Format::RGB;
-	default:
-		return Format::RGBA;
 	}
 }
 
@@ -722,12 +692,6 @@ void Image::setFormat(Format f)
 	}
 }
 
-bool Image::isLZ4(gsl::span<const gsl::byte> bytes)
-{
-	unsigned char header[] = { 'L', 'Z', '4', '\0' };
-	return bytes.size() >= 8 && memcmp(bytes.data(), header, 4) == 0;
-}
-
 bool Image::isQOI(gsl::span<const gsl::byte> bytes)
 {
 	unsigned char header[] = { 'q', 'o', 'i', 'f' };
@@ -738,16 +702,4 @@ bool Image::isPNG(gsl::span<const gsl::byte> bytes)
 {
 	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;
-}
-
-std::optional<Vector2i> Image::getBufferImageSize(gsl::span<const gsl::byte> bytes)
-{
-	if (isQOI(bytes)) {
-		// TODO
-		return {};
-	} else {
-		int x, y, comp;
-		auto result = stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<int>(bytes.size_bytes()), &x, &y, &comp);
-		return Vector2i(x, y);
-	}
 }

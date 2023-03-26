@@ -59,16 +59,13 @@ namespace Halley {
 
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;
-		Bytes saveLZ4ToBytes() const;
+		Bytes saveHLIFToBytes() const;
 
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
-		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		void setFormat(Format format);
 
-		static bool isLZ4(gsl::span<const gsl::byte> bytes);
 		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
-		static std::optional<Vector2i> getBufferImageSize(gsl::span<const gsl::byte> bytes);
 
 		gsl::span<unsigned char> getPixelBytes();
 		gsl::span<const unsigned char> getPixelBytes() const;
