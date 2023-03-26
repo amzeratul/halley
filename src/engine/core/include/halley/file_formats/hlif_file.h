@@ -29,8 +29,7 @@ namespace Halley {
 		};
 
         enum class Flags {
-	        Premultiplied = 1,
-            HasPalette = 2,
+	        Premultiplied = 1
         };
 
 		struct Header {
@@ -41,6 +40,8 @@ namespace Halley {
 			uint32_t uncompressedSize = 0;
 			Format format = Format::RGBA;
             uint8_t flags = 0;
+            uint8_t numPalettes = 0;
+            uint8_t reserved = 0;
 		};
 
         // Same as PNG
@@ -51,6 +52,14 @@ namespace Halley {
             Average = 3,
             Paeth = 4
         };
+
+        class Palette {
+        public:
+            uint32_t endPixel = 0;
+            std::array<int, 256> entries;
+
+            Palette();
+        };
         
     	static void decodeLines(Vector2i size, gsl::span<const uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp);
     	static void encodeLines(Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp);
@@ -59,7 +68,7 @@ namespace Halley {
         static void decodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp);
         static int getBPP(Format format);
 
-        static std::optional<std::pair<Vector<int>, Bytes>> makePalette(gsl::span<const int> pixels, std::string_view name = {});
-        static void decodePalette(gsl::span<const uint8_t> palettedImage, gsl::span<const int> palette, gsl::span<int> dst);
+        static std::optional<std::pair<Vector<Palette>, Bytes>> makePalettes(gsl::span<const int> pixels, std::string_view name = {});
+        static void decodePalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst);
     };
 }
