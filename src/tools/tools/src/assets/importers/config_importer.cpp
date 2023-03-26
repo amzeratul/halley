@@ -12,7 +12,7 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ConfigFile config = YAMLConvert::parseConfig(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 	
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ConfigFile, Serializer::toBytes(config), meta);
 }
@@ -23,7 +23,7 @@ void PrefabImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	prefab.parseYAML(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Prefab, Serializer::toBytes(prefab, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
@@ -34,7 +34,7 @@ void SceneImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	scene.parseYAML(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Scene, Serializer::toBytes(scene, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
@@ -45,7 +45,7 @@ void NavmeshSetImporter::import(const ImportingAsset& asset, IAssetCollector& co
 	auto navmeshSet = NavmeshSet(config.getRoot());
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 
 	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::NavmeshSet, Serializer::toBytes(navmeshSet, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }

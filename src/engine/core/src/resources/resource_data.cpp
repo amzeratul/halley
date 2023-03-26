@@ -152,6 +152,11 @@ void ResourceDataStatic::inflate()
 	data = Compression::decompressToSharedPtr(getSpan(), size);
 }
 
+void ResourceDataStatic::lz4Decompress()
+{
+	data = Compression::lz4DecompressFileToSharedPtr(getSpan(), {}, size);
+}
+
 std::unique_ptr<ResourceDataStatic> ResourceDataStatic::loadFromFileSystem(Path path)
 {
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
@@ -214,15 +219,17 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic(bool throwOnFail)
 {
 	auto result = locator.getStatic(name, type, throwOnFail);
 	if (result) {
-		if (metadata && metadata->getString("asset_compression", "") == "deflate") {
-			try {
+		try {
+			if (metadata && metadata->getString("asset_compression", "") == "lz4") {
+				result->lz4Decompress();
+			} else if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 				result->inflate();
-			} catch (Exception &e) {
-				if (throwOnFail) {
-					throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what(), HalleyExceptions::Resources);
-				} else {
-					return nullptr;
-				}
+			}
+		} catch (Exception &e) {
+			if (throwOnFail) {
+				throw Exception("Failed to load resource \"" + getName() + "\" due to decompression exception: " + e.what(), HalleyExceptions::Resources);
+			} else {
+				return nullptr;
 			}
 		}
 		loaded = true;
@@ -249,7 +256,9 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync(bool throwO
 	{
 		ProfilerEvent event(ProfilerEventType::DiskIO);
 		auto result = loc.get().getStatic(n, t, throwOnFail);
-		if (meta.getString("asset_compression", "") == "deflate") {
+		if (meta.getString("asset_compression", "") == "lz4") {
+			result->lz4Decompress();
+		} else if (meta.getString("asset_compression", "") == "deflate") {
 			result->inflate();
 		}
 		return result;

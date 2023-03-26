@@ -16,7 +16,7 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 	auto meta = asset.inputFiles.at(0).metadata;
 
 	const bool useQOI = false;
-	const bool useHLIF = false;
+	const bool useHLIF = true;
 
 	if (useHLIF) {
 		meta.set("compression", "hlif");

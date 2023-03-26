@@ -45,7 +45,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 		Vector<Palette> palettes(header.numPalettes);
 		memcpy(palettes.data(), paletteData.data(), paletteData.size());
 		deltaDecodePalettes(palettes);
-		decodePalettes(pixelData, palettes, dst.getPixels4BPP());
+		applyPalettes(pixelData, palettes, dst.getPixels4BPP());
 	} else {
 		memcpy(dst.getPixelBytes().data(), pixelData.data(), pixelData.size_bytes());
 	}
@@ -110,6 +110,7 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name)
 	// Try compressing with no filters first
 	Compression::LZ4Options options;
 	options.mode = Compression::LZ4Mode::HC;
+	//options.level = 12;
 	auto compressedUnfiltered = Compression::lz4Compress(gsl::as_bytes(dataSpan), options);
 
 	// Filter and compress again
@@ -413,7 +414,7 @@ void HLIFFile::optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> 
 	}
 }
 
-void HLIFFile::decodePalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst)
+void HLIFFile::applyPalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst)
 {
 	assert(palettedImage.size() == dst.size());
 	assert(palettes.size() == 256);

@@ -22,7 +22,11 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 	Path filePath = Path(toString(type)) / id;
 	Path fullPath = Path(platform) / filePath;
 
-	if (metadata && metadata->getString("asset_compression", "") == "deflate") {
+	if (metadata && metadata->getString("asset_compression", "") == "lz4") {
+		Compression::LZ4Options options;
+		options.mode = Compression::LZ4Mode::HC;
+		outFiles.emplace_back(fullPath, Compression::lz4CompressFile(data.byte_span(), {}, options));
+	} else if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 		auto newData = Compression::compress(data);
 		outFiles.emplace_back(fullPath, newData);
 	} else {

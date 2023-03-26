@@ -208,7 +208,9 @@ Bytes Compression::lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<con
 	lz4Header.size = static_cast<uint32_t>(src.size_bytes());
 	memcpy(result.data(), &lz4Header, sizeof(lz4Header));
 
-	memcpy(result.data() + lz4HeaderSize, header.data(), header.size_bytes());
+	if (!header.empty()) {
+		memcpy(result.data() + lz4HeaderSize, header.data(), header.size_bytes());
+	}
 
 	return result;
 }
@@ -227,12 +229,41 @@ Bytes Compression::lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<g
 	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
 		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
 	}
-
-	memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
+	
+	if (!header.empty()) {
+		memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
+	}
 
 	auto output = Bytes(lz4Header.size);
 	const auto outSize = lz4Decompress(src.subspan(totalHeaderSize), output.byte_span());
 	output.resize(outSize.value_or(0));
+	return output;
+}
+
+std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header, size_t& outSize)
+{
+	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
+	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
+
+	if (src.size() < totalHeaderSize) {
+		throw Exception("File too small to be LZ4 file", HalleyExceptions::Utils);
+	}
+
+	LZ4FileHeader lz4Header;
+	memcpy(&lz4Header, src.data(), sizeof(lz4Header));
+	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
+		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
+	}
+
+	memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
+
+	auto output = std::shared_ptr<char>(new char[lz4Header.size], deleter);
+	const auto sz = lz4Decompress(src.subspan(totalHeaderSize), gsl::as_writable_bytes(gsl::span<char>(output.get(), lz4Header.size)));
+	if (!sz) {
+		throw Exception("Failed to decompress LZ4 file", HalleyExceptions::Utils);
+	}
+	assert(sz == lz4Header.size);
+	outSize = *sz;
 	return output;
 }
 
