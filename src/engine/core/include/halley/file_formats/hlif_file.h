@@ -44,7 +44,8 @@ namespace Halley {
             uint8_t reserved = 0;
 		};
 
-        // Same as PNG
+    public:
+    	// Same as PNG
         enum class LineEncoding: uint8_t {
             None = 0,
             Sub = 1,
@@ -52,6 +53,7 @@ namespace Halley {
             Average = 3,
             Paeth = 4
         };
+    private:
 
         class Palette {
         public:

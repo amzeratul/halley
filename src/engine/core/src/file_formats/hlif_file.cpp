@@ -22,7 +22,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	}
 
 	Bytes decompressedData;
-	decompressedData.resize(header.uncompressedSize);
+	decompressedData.resize_no_init(header.uncompressedSize);
 	const auto decompressedSize = Compression::lz4Decompress(bytes.subspan(sizeof(header), header.compressedSize), decompressedData.byte_span());
 	if (!decompressedSize) {
 		throw Exception("Error decoding HLIF file.", HalleyExceptions::Utils);
@@ -40,7 +40,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 
 	decodeLines(imgSize, lineData, pixelData, bpp);
 
-	dst = Image(imgFormat, imgSize);
+	dst = Image(imgFormat, imgSize, false);
 	if (header.numPalettes > 0) {
 		Vector<Palette> palettes(header.numPalettes);
 		memcpy(palettes.data(), paletteData.data(), paletteData.size());
@@ -94,7 +94,8 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name)
 	header.uncompressedSize = header.width * header.height * bpp + header.height + static_cast<uint32_t>(palettes.size() * sizeof(Palette));
 
 	// Prepare uncompressed data
-	Bytes uncompressed(header.uncompressedSize);
+	Bytes uncompressed;
+	uncompressed.resize_no_init(header.uncompressedSize);
 	const auto dataSpan = gsl::span<Byte>(uncompressed);
 	const auto paletteSpan = dataSpan.subspan(0, palettes.size() * sizeof(Palette));
 	const auto lineSpan = dataSpan.subspan(paletteSpan.size(), header.height);
@@ -283,41 +284,54 @@ void HLIFFile::encodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine,
 	}
 }
 
+namespace {
+	template<int BPP>
+	void doDecodeLine(HLIFFile::LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine)
+	{
+		using LineEncoding = HLIFFile::LineEncoding;
+		const size_t n = curLine.size();
+
+		switch (lineEncoding) {
+		case LineEncoding::None:
+			break;
+		case LineEncoding::Sub:
+			for (size_t x = BPP; x < n; ++x) {
+				curLine[x] += curLine[x - BPP];
+			}
+			break;
+		case LineEncoding::Up:
+			for (size_t x = 0; x < n; ++x) {
+				curLine[x] += prevLine[x];
+			}
+			break;
+		case LineEncoding::Average:
+			for (size_t x = BPP; x < n; ++x) {
+				const uint8_t a = curLine[x - BPP];
+				const uint8_t b = prevLine[x];
+				const uint8_t avg = static_cast<uint8_t>((static_cast<uint16_t>(a) + static_cast<uint16_t>(b)) / 2);
+				curLine[x] += avg;
+			}
+			break;
+		case LineEncoding::Paeth:
+			for (size_t x = BPP; x < n; ++x) {
+				const uint8_t a = curLine[x - BPP];
+				const uint8_t b = prevLine[x];
+				const uint8_t c = prevLine[x - BPP];
+				const int16_t p = static_cast<int16_t>(a) + static_cast<int16_t>(b) - static_cast<int16_t>(c);
+				const uint8_t pc = static_cast<uint8_t>(getClosest(a, b, c, p));
+				curLine[x] += pc;
+			}
+			break;
+		}
+	}
+}
+
 void HLIFFile::decodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp)
 {
-	const size_t n = curLine.size();
-
-	switch (lineEncoding) {
-	case LineEncoding::None:
-		break;
-	case LineEncoding::Sub:
-		for (size_t x = bpp; x < n; ++x) {
-			curLine[x] += curLine[x - bpp];
-		}
-		break;
-	case LineEncoding::Up:
-		for (size_t x = 0; x < n; ++x) {
-			curLine[x] += prevLine[x];
-		}
-		break;
-	case LineEncoding::Average:
-		for (size_t x = bpp; x < n; ++x) {
-			const uint8_t a = curLine[x - bpp];
-			const uint8_t b = prevLine[x];
-			const uint8_t avg = static_cast<uint8_t>((static_cast<uint16_t>(a) + static_cast<uint16_t>(b)) / 2);
-			curLine[x] += avg;
-		}
-		break;
-	case LineEncoding::Paeth:
-		for (size_t x = bpp; x < n; ++x) {
-			const uint8_t a = curLine[x - bpp];
-			const uint8_t b = prevLine[x];
-			const uint8_t c = prevLine[x - bpp];
-			const int16_t p = static_cast<int16_t>(a) + static_cast<int16_t>(b) - static_cast<int16_t>(c);
-			const uint8_t pc = static_cast<uint8_t>(getClosest(a, b, c, p));
-			curLine[x] += pc;
-		}
-		break;
+	if (bpp == 1) {
+		doDecodeLine<1>(lineEncoding, curLine, prevLine);
+	} else if (bpp == 4) {
+		doDecodeLine<4>(lineEncoding, curLine, prevLine);
 	}
 }
 
@@ -332,7 +346,8 @@ std::optional<std::pair<Vector<HLIFFile::Palette>, Bytes>> HLIFFile::makePalette
 	paletteEntries.reserve(256);
 	Vector<Palette> palettes;
 	palettes.push_back(Palette());
-	Bytes output(pixels.size());
+	Bytes output;
+	output.resize_no_init(pixels.size());
 	size_t curPaletteCount = 0;
 
 	for (size_t i = 0; i < pixels.size(); ++i) {
@@ -419,12 +434,12 @@ void HLIFFile::applyPalettes(gsl::span<const uint8_t> palettedImage, gsl::span<c
 	assert(palettedImage.size() == dst.size());
 
 	size_t startPos = 0;
-	for (size_t i = 0; i < palettes.size(); ++i) {
-		const auto& palette = palettes[i];
-		for (size_t j = startPos; j < palette.endPixel; ++j) {
-			dst[j] = palette.entries[palettedImage[j]];
+	for (const auto& palette: palettes) {
+		const size_t endPos = palette.endPixel;
+		for (size_t i = startPos; i < endPos; ++i) {
+			dst[i] = palette.entries[palettedImage[i]];
 		}
-		startPos = palette.endPixel;
+		startPos = endPos;
 	}
 }
 

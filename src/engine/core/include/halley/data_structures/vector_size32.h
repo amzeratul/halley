@@ -352,6 +352,11 @@ namespace Halley {
 			});
 		}
 
+		void resize_no_init(size_t size)
+		{
+			do_resize(size, [] (pointer bytes) {});
+		}
+
 		void resize(size_t size, T defaultValue)
 		{
 			do_resize(size, [&] (pointer bytes)

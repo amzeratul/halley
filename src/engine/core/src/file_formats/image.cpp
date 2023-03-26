@@ -42,12 +42,12 @@ namespace {
 
 using namespace Halley;
 
-Image::Image(Format format, Vector2i size)
+Image::Image(Format format, Vector2i size, bool clear)
 	: px(nullptr, [](unsigned char*){})
 	, dataLen(0)
 	, format(format)
 {
-	setSize(size);
+	setSize(size, clear);
 }
 
 Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
@@ -83,7 +83,7 @@ std::unique_ptr<Image> Image::clone()
 	return result;
 }
 
-void Image::setSize(Vector2i size)
+void Image::setSize(Vector2i size, bool clear)
 {
 	w = size.x;
 	h = size.y;
@@ -94,8 +94,9 @@ void Image::setSize(Vector2i size)
 		if (getBytesPerPixel() == 4) {
 			Ensures(size_t(px.get()) % 4 == 0);
 		}
-		Ensures(px.get() != nullptr);
-		memset(px.get(), 0, dataLen);
+		if (clear) {
+			memset(px.get(), 0, dataLen);
+		}
 	} else {
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(nullptr, [](unsigned char*) {});
 	}

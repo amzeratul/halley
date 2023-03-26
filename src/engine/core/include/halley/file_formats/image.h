@@ -44,7 +44,7 @@ namespace Halley {
 			SingleChannel
 		};
 
-		Image(Format format = Format::RGBA, Vector2i size = {});
+		Image(Format format = Format::RGBA, Vector2i size = {}, bool clear = true);
 		Image(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);
@@ -53,7 +53,7 @@ namespace Halley {
 
 		std::unique_ptr<Image> clone();
 
-		void setSize(Vector2i size);
+		void setSize(Vector2i size, bool clear = true);
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 

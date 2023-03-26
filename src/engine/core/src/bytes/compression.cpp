@@ -183,7 +183,8 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 Bytes Compression::lz4Compress(gsl::span<const gsl::byte> src, LZ4Options options)
 {
 	const auto size = LZ4_compressBound(static_cast<int>(src.size()));
-	auto result = Bytes(size);
+	Bytes result;
+	result.resize_no_init(size);
 	const auto outSize = lz4Compress(src, result.byte_span(), options);
 	result.resize(outSize);
 	return result;
@@ -200,7 +201,8 @@ Bytes Compression::lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<con
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
 
 	const auto size = LZ4_compressBound(static_cast<int>(src.size()));
-	auto result = Bytes(size + totalHeaderSize);
+	Bytes result;
+	result.resize_no_init(size + totalHeaderSize);
 	const auto outSize = lz4Compress(src, result.byte_span().subspan(totalHeaderSize), options);
 	result.resize(outSize + totalHeaderSize);
 
@@ -234,7 +236,8 @@ Bytes Compression::lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<g
 		memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
 	}
 
-	auto output = Bytes(lz4Header.size);
+	Bytes output;
+	output.resize_no_init(lz4Header.size);
 	const auto outSize = lz4Decompress(src.subspan(totalHeaderSize), output.byte_span());
 	output.resize(outSize.value_or(0));
 	return output;
