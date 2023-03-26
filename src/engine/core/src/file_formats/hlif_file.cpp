@@ -51,7 +51,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	}
 }
 
-Bytes HLIFFile::encode(const Image& image)
+Bytes HLIFFile::encode(const Image& image, std::string_view name)
 {
 	// Fill header
 	Header header;
@@ -80,7 +80,7 @@ Bytes HLIFFile::encode(const Image& image)
 	Vector<int> palette;
 	Bytes palettedImage;
 	if (header.format == Format::RGBA && static_cast<size_t>(header.width) * static_cast<size_t>(header.height) > 512) {
-		if (auto result = makePalette(image.getPixels4BPP())) {
+		if (auto result = makePalette(image.getPixels4BPP(), name)) {
 			palette = std::move(result->first);
 			palettedImage = std::move(result->second);
 			header.flags |= static_cast<uint8_t>(Flags::HasPalette);
@@ -212,6 +212,14 @@ HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> c
 	// Try all five filters and accumulate the values
 	std::array<uint32_t, 5> accumulator;
 	accumulator.fill(0);
+	//std::array<HashSet<uint8_t>, 5> uniqueValues;
+
+	auto report = [&](LineEncoding type, uint32_t dist)
+	{
+		const auto idx = static_cast<uint8_t>(type);
+		accumulator[idx] += dist;
+		//uniqueValues[idx].emplace(static_cast<uint8_t>(dist));
+	};
 	
 	const size_t n = curLine.size();
 	for (size_t x = bpp; x < n; ++x) {
@@ -223,13 +231,14 @@ HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> c
 		const uint8_t pc = static_cast<uint8_t>(getClosest(a, b, c, p));
 		const uint8_t avg = static_cast<uint8_t>((static_cast<uint16_t>(a) + static_cast<uint16_t>(b)) / 2);
 
-		accumulator[static_cast<uint8_t>(LineEncoding::None)] += getAbsDistance(cur);
-		accumulator[static_cast<uint8_t>(LineEncoding::Sub)] += getAbsDistance(cur - a);
-		accumulator[static_cast<uint8_t>(LineEncoding::Up)] += getAbsDistance(cur - b);
-		accumulator[static_cast<uint8_t>(LineEncoding::Average)] += getAbsDistance(cur - avg);
-		accumulator[static_cast<uint8_t>(LineEncoding::Paeth)] += getAbsDistance(cur - pc);
+		report(LineEncoding::None, getAbsDistance(cur));
+		report(LineEncoding::Sub, getAbsDistance(cur - a));
+		report(LineEncoding::Up, getAbsDistance(cur - b));
+		report(LineEncoding::Average, getAbsDistance(cur - avg));
+		report(LineEncoding::Paeth, getAbsDistance(cur - pc));
 	}
 
+	//return static_cast<LineEncoding>(std::min_element(uniqueValues.begin(), uniqueValues.end(), [&](const auto& a, const auto& b) { return a.size() < b.size(); }) - uniqueValues.begin());
 	return static_cast<LineEncoding>(std::min_element(accumulator.begin(), accumulator.end()) - accumulator.begin());
 }
 
@@ -314,7 +323,7 @@ int HLIFFile::getBPP(Format format)
 	return format == Format::RGBA ? 4 : 1;
 }
 
-std::optional<std::pair<Vector<int>, Bytes>> HLIFFile::makePalette(gsl::span<const int> pixels)
+std::optional<std::pair<Vector<int>, Bytes>> HLIFFile::makePalette(gsl::span<const int> pixels, std::string_view name)
 {
 	HashMap<int, uint8_t> paletteEntries;
 	Vector<int> palette;
@@ -329,6 +338,7 @@ std::optional<std::pair<Vector<int>, Bytes>> HLIFFile::makePalette(gsl::span<con
 			// New entry
 			if (palette.size() >= 256) {
 				// Too many colours
+				//Logger::logWarning("Too many colours after " + toString(i) + " pixels on image \"" + name + "\"");
 				return {};
 			}
 

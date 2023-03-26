@@ -15,7 +15,7 @@ namespace Halley {
         };
 
         static void decode(Image& dst, gsl::span<const gsl::byte> data);
-        static Bytes encode(const Image& image);
+        static Bytes encode(const Image& image, std::string_view name = {});
         static Info getInfo(gsl::span<const gsl::byte> data);
         static bool isHLIF(gsl::span<const gsl::byte> data);
 
@@ -59,7 +59,7 @@ namespace Halley {
         static void decodeLine(LineEncoding lineEncoding, gsl::span<uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp);
         static int getBPP(Format format);
 
-        static std::optional<std::pair<Vector<int>, Bytes>> makePalette(gsl::span<const int> pixels);
+        static std::optional<std::pair<Vector<int>, Bytes>> makePalette(gsl::span<const int> pixels, std::string_view name = {});
         static void decodePalette(gsl::span<const uint8_t> palettedImage, gsl::span<const int> palette, gsl::span<int> dst);
     };
 }

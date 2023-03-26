@@ -59,7 +59,7 @@ namespace Halley {
 
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;
-		Bytes saveHLIFToBytes() const;
+		Bytes saveHLIFToBytes(std::string_view name = {}) const;
 
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		void setFormat(Format format);

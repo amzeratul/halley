@@ -20,7 +20,7 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 
 	if (useHLIF) {
 		meta.set("compression", "hlif");
-		collector.output(asset.assetId, AssetType::Texture, image.saveHLIFToBytes(), meta);
+		collector.output(asset.assetId, AssetType::Texture, image.saveHLIFToBytes(asset.assetId), meta);
 	} else if (useQOI && (image.getFormat() == Image::Format::RGB || image.getFormat() == Image::Format::RGBA || image.getFormat() == Image::Format::RGBAPremultiplied)) {
 		meta.set("compression", "qoi");
 		collector.output(asset.assetId, AssetType::Texture, image.saveQOIToBytes(), meta);
