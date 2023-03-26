@@ -290,13 +290,19 @@ namespace {
 	{
 		using LineEncoding = HLIFFile::LineEncoding;
 		const size_t n = curLine.size();
+		uint8_t prev = curLine[0];
 
 		switch (lineEncoding) {
 		case LineEncoding::None:
 			break;
 		case LineEncoding::Sub:
 			for (size_t x = BPP; x < n; ++x) {
-				curLine[x] += curLine[x - BPP];
+				if constexpr (BPP == 1) {
+					prev += curLine[x];
+					curLine[x] = prev;
+				} else {
+					curLine[x] += curLine[x - BPP];
+				}
 			}
 			break;
 		case LineEncoding::Up:
