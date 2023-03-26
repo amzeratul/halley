@@ -80,6 +80,7 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name)
 	Bytes palettedImage;
 	if (header.format == Format::RGBA && static_cast<size_t>(header.width) * static_cast<size_t>(header.height) > 512) {
 		if (auto result = makePalettes(image.getPixels4BPP(), name)) {
+			optimizePalettes(result->first, result->second);
 			palettes = std::move(result->first);
 			palettedImage = std::move(result->second);
 			header.numPalettes = static_cast<uint8_t>(palettes.size());
@@ -362,6 +363,52 @@ std::optional<std::pair<Vector<HLIFFile::Palette>, Bytes>> HLIFFile::makePalette
 	palettes.back().endPixel = static_cast<uint32_t>(pixels.size());
 
 	return std::pair{ std::move(palettes), std::move(output) };
+}
+
+void HLIFFile::optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> pixels)
+{
+	// For each palette after the first, re-organize it so that repeated entries match the previous palette (and update pixels on image to match)
+
+	for (size_t p = 1; p < palettes.size(); ++p) {
+		// Read old palette
+		const auto& prevPalette = palettes[p - 1];
+		HashMap<int, uint8_t> oldMapping;
+		for (size_t i = 0; i < 256; ++i) {
+			oldMapping[prevPalette.entries[i]] = static_cast<uint8_t>(i);
+		}
+
+		// Re-arrange new palette
+		auto& curPalette = palettes[p];
+		Palette newPalette;
+		newPalette.endPixel = curPalette.endPixel;
+		Vector<std::pair<uint8_t, int>> newEntries;
+		Vector<uint8_t> remap(256);
+		Vector<char> taken(256, 0);
+		for (size_t i = 0; i < 256; ++i) {
+			const auto iter = oldMapping.find(curPalette.entries[i]);
+			if (iter != oldMapping.end()) {
+				const auto j = iter->second;
+				newPalette.entries[j] = curPalette.entries[i];
+				taken[j] = 1;
+				remap[i] = j;
+			} else {
+				newEntries.emplace_back(static_cast<uint8_t>(i), curPalette.entries[i]);
+			}
+		}
+		size_t insertIdx = 0;
+		for (const auto [idx, col]: newEntries) {
+			while (taken[insertIdx++]) {}
+			taken[insertIdx - 1] = 1;
+			newPalette.entries[insertIdx - 1] = col;
+			remap[idx] = static_cast<uint8_t>(insertIdx - 1);
+		}
+		curPalette = newPalette;
+
+		// Update pixels
+		for (size_t i = prevPalette.endPixel; i < curPalette.endPixel; ++i) {
+			pixels[i] = remap[pixels[i]];
+		}
+	}
 }
 
 void HLIFFile::decodePalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst)
