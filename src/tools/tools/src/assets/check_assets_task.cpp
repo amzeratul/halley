@@ -72,15 +72,15 @@ void CheckAssetsTask::run()
 
 		// Check if any files changed
 		Vector<DirectoryMonitor::Event> assetsChanged;
-		monitorAssetsSrc.poll(assetsChanged);
-		monitorSharedAssetsSrc.poll(assetsChanged);
-		monitorAssets.poll(assetsChanged);
+		monitorAssetsSrc.poll(assetsChanged, true);
+		monitorSharedAssetsSrc.poll(assetsChanged, true);
+		monitorAssets.poll(assetsChanged, true);
 		Vector<DirectoryMonitor::Event> sharedGenChanged;
-		monitorSharedGenSrc.poll(sharedGenChanged);
-		monitorSharedGen.poll(sharedGenChanged);
+		monitorSharedGenSrc.poll(sharedGenChanged, true);
+		monitorSharedGen.poll(sharedGenChanged, true);
 		Vector<DirectoryMonitor::Event> genChanged = sharedGenChanged; // Copy
-		monitorGenSrc.poll(genChanged);
-		monitorGen.poll(sharedGenChanged);
+		monitorGenSrc.poll(genChanged, true);
+		monitorGen.poll(sharedGenChanged, true);
 
 		// Re-import any changes
 		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);

@@ -269,17 +269,27 @@ std::string Path::string() const
 
 bool Path::writeFile(const Path& path, gsl::span<const gsl::byte> data)
 {
-	return OS::get().atomicWriteFile(path, data);
+#ifdef _WIN32
+	std::ofstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::out);
+#else
+	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
+#endif
+	if (fp.is_open()) {
+		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
+		fp.close();
+		return true;
+	}
+	return false;
 }
 
 bool Path::writeFile(const Path& path, const Bytes& data)
 {
-	return OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const Byte>(data)));
+	return writeFile(path, gsl::as_bytes(gsl::span<const Byte>(data)));
 }
 
 bool Path::writeFile(const Path& path, const String& data)
 {
-	return OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+	return writeFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
 }
 
 bool Path::exists(const Path& path)
