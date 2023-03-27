@@ -243,7 +243,11 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		if (!isCodegen) {
 			for (const auto& additional: db.getInputFiles(asset.assetType, asset.assetId)) {
 				if (additional != filePath) {
-					additionalFilesToImport.push_back(additional);
+					if (Path::exists(srcPath / additional)) {
+						additionalFilesToImport.push_back(additional);
+					} else {
+						Logger::logInfo("File deleted: " + additional);
+					}
 				}
 			}
 		}

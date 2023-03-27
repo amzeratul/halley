@@ -48,6 +48,15 @@ const AssetDatabase::Entry& AssetDatabase::TypedDB::get(const String& name) cons
 	return i->second;
 }
 
+const AssetDatabase::Entry* AssetDatabase::TypedDB::tryGet(const String& name) const
+{
+	auto i = assets.find(name);
+	if (i == assets.end()) {
+		return nullptr;
+	}
+	return &i->second;
+}
+
 void AssetDatabase::TypedDB::serialize(Serializer& s) const
 {
 	s << type;

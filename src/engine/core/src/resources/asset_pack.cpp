@@ -133,7 +133,11 @@ Bytes AssetPack::writeOut() const
 std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType type, bool stream)
 {
 	auto path = asset;
-	auto ps = assetDb->getDatabase(type).get(asset).path.split(':');
+	const auto* assetInfo = assetDb->getDatabase(type).tryGet(asset);
+	if (!assetInfo) {
+		return {};
+	}
+	auto ps = assetInfo->path.split(':');
 	size_t pos = size_t(ps.at(0).toInteger());
 	size_t size = size_t(ps.at(1).toInteger());
 
