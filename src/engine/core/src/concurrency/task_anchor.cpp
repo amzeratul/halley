@@ -179,8 +179,8 @@ std::optional<String> TaskAnchor::getAction()
 	return task->getAction();	
 }
 
-void TaskAnchor::doAction()
+void TaskAnchor::doAction(TaskSet& taskSet)
 {
 	std::lock_guard<std::mutex> lock(task->mutex);
-	task->doAction();
+	task->doAction(taskSet);
 }

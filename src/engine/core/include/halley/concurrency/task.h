@@ -11,6 +11,7 @@
 
 namespace Halley
 {
+	class TaskSet;
 	enum class LoggerLevel;
 
 	class TaskAnchor;
@@ -28,6 +29,7 @@ namespace Halley
 		virtual void run() = 0;
 		virtual void updateOnMain(float time);
 		void addContinuation(std::unique_ptr<Task> task);
+		void addReplacement(std::unique_ptr<Task> task);
 
 		void setName(String name);
 		void setProgress(float progress, String label = "");
@@ -54,7 +56,7 @@ namespace Halley
 		void setVisible(bool visible);
 
 		virtual std::optional<String> getAction();
-		virtual void doAction();
+		virtual void doAction(TaskSet& taskSet);
 
 	private:
 		Vector<std::unique_ptr<Task>> continuations;

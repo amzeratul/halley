@@ -23,7 +23,9 @@ namespace Halley
 
 		void onMouseOver(Vector2f mousePos) override;
 		bool canInteractWithMouse() const override;
-	
+
+		TaskSet& getTaskSet() const;
+
 	private:
 		UIFactory& factory;
 		std::shared_ptr<TaskAnchor> task;

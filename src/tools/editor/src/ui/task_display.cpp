@@ -109,3 +109,8 @@ bool TaskDisplay::canInteractWithMouse() const
 {
 	return true;
 }
+
+TaskSet& TaskDisplay::getTaskSet() const
+{
+	return taskBar.getTaskSet();
+}

@@ -57,7 +57,7 @@ std::optional<String> UpdateEditorTask::getAction()
 	return "Update";
 }
 
-void UpdateEditorTask::doAction()
+void UpdateEditorTask::doAction(TaskSet& taskSet)
 {
 	projectWindow.updateEditor();
 }

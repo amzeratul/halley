@@ -2,6 +2,7 @@
 #include "halley/tools/project/project.h"
 #include "halley/support/logger.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/concurrency/task_set.h"
 
 using namespace Halley;
 
@@ -30,8 +31,29 @@ void AssetPackerTask::run()
 			}
 		}
 	} catch (const std::exception& e) {
-		Logger::logException(e);
+		logError("Exception packing assets: " + String(e.what()));
 	} catch (...) {
-		Logger::logError("Unknown exception.");
+		logError("Unknown exception.");
 	}
+}
+
+std::optional<String> AssetPackerTask::getAction()
+{
+	if (hasError()) {
+		return "Repack";
+	} else {
+		return std::nullopt;
+	}
+}
+
+void AssetPackerTask::doAction(TaskSet& taskSet)
+{
+	auto task = std::make_unique<AssetPackerTask>(project, std::move(assetsToPack), std::move(deletedAssets));
+	Concurrent::execute(Executors::getImmediate(), [&]()
+	{
+		return std::move(task);
+	}).then(Executors::getMainUpdateThread(), [&taskSet] (std::unique_ptr<Task> task)
+	{
+		taskSet.addTask(std::move(task));
+	});
 }

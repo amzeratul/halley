@@ -118,6 +118,11 @@ void TaskBar::showTaskDetails(const TaskDisplay& taskDisplay)
 	waitingToShowTaskDisplay = true;
 }
 
+TaskSet& TaskBar::getTaskSet()
+{
+	return taskSet;
+}
+
 std::shared_ptr<TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<TaskAnchor>& task)
 {
 	for (auto& t: tasks) {
