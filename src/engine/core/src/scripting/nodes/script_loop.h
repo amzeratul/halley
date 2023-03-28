@@ -43,7 +43,8 @@ namespace Halley {
 
 	class ScriptLerpLoopData : public ScriptStateData<ScriptLerpLoopData> {
 	public:
-		std::optional<float> time;
+		bool running = false;
+		float time;
 
 		ScriptLerpLoopData() = default;
 		ScriptLerpLoopData(const ConfigNode& node);
