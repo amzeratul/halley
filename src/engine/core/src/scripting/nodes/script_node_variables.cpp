@@ -179,7 +179,10 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 
 	if (value.startsWith("(") && value.endsWith(")")) { // well this is hacky
 		const auto string = value.mid(1, value.length() - 2);
-		const auto strings = string.split(",");
+		auto strings = string.split(",");
+		for (auto& s: strings) {
+			s.trimBoth();
+		}
 		if (strings.size() == 2 && strings[0].isNumber() && strings[1].isNumber()) {
 			return ConfigNode(Vector2f(strings[0].toFloat(), strings[1].toFloat()));
 		}
