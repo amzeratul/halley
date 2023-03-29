@@ -5,8 +5,8 @@ float2 getTexCoord(float4 texCoords, float2 vertPos, float texCoordRotation) {
     return float2(lerp(texCoords.xy, texCoords.zw, texPos.xy));
 }
 
-void getColours(float4 inColour, out float4 baseColour, out float4 addColour) {
-    float4 inputCol = float4(inColour.rgb * inColour.a, inColour.a); // Premultiply alpha
+void getColours(float4 inColour, out float4 baseColour, out float4 addColour, bool premultiply) {
+    float4 inputCol = premultiply ? float4(inColour.rgb * inColour.a, inColour.a) : inColour;
     float4 baseCol = clamp(inputCol, float4(0, 0, 0, 0), float4(1, 1, 1, 1));
     baseColour = baseCol;
     addColour = clamp(inputCol - baseCol, float4(0, 0, 0, 0), float4(1, 1, 1, 0));
@@ -21,7 +21,7 @@ float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vert
     return mul(u_mvp, float4(pos, 0.0, 1.0));
 }
 
-void basicVertex(VIn input, out VOut output) {
+void basicVertex(VIn input, out VOut output, bool premultiply) {
     output.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
     output.texCoord1 = getTexCoord(input.texCoord1, input.vertPos.zw, input.textureRotation);
     output.pixelTexCoord0 = output.texCoord0 * input.size;
@@ -33,7 +33,7 @@ void basicVertex(VIn input, out VOut output) {
     output.pixelPos = input.size * input.scale * input.vertPos.xy;
     output.pivot = input.pivot;
     output.scale = input.scale;
-    getColours(input.colour, output.colour, output.colourAdd);
+    getColours(input.colour, output.colour, output.colourAdd, premultiply);
     output.colourNoPremultiply = input.colour;
     output.position = getVertexPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
     output.size = input.size.xy;

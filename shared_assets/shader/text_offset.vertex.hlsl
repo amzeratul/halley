@@ -13,6 +13,6 @@ cbuffer MaterialBlock : register(b1) {
 VOut main(VIn input) {
     input.position += u_shadowDistance.xx;
     VOut result;
-    basicVertex(input, result);
+    basicVertex(input, result, true);
     return result;
 }
