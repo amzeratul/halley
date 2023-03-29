@@ -418,16 +418,17 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	return result;
 }
 
-Vector<Path> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
+std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	const auto iter = assetsImported.find(std::pair{ assetType, assetId });
 	if (iter != assetsImported.end()) {
 		Vector<Path> result;
+		auto srcDir = iter->second.asset.srcDir;
 		for (const auto& inputFile: iter->second.asset.inputFiles) {
 			result.push_back(inputFile.getDataPath());
 		}
-		return result;
+		return { srcDir, std::move(result) };
 	} else {
 		return {};
 	}
@@ -468,6 +469,31 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 						result.emplace_back(out.type, out.name);
 					}
 				}
+			}
+		}
+	}
+
+	return result;
+}
+
+Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	Vector<std::pair<Path, Path>> result;
+
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
+
+		bool ok = false;
+		for (const auto& additional: asset.additionalInputFiles) {
+			if (additional.first == inputFile) {
+				ok = true;
+			}
+		}
+
+		if (ok) {
+			for (const auto& input: asset.inputFiles) {
+				result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
 			}
 		}
 	}

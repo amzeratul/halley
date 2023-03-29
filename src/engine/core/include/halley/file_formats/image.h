@@ -73,6 +73,8 @@ namespace Halley {
 		
 		int getPixel4BPP(Vector2i pos) const;
 		int getPixelAlpha(Vector2i pos) const;
+		gsl::span<unsigned char> getPixels1BPP();
+		gsl::span<const unsigned char> getPixels1BPP() const;
 		gsl::span<int> getPixels4BPP();
 		gsl::span<const int> getPixels4BPP() const;
 		gsl::span<const int> getPixelRow4BPP(int x0, int x1, int y) const;

@@ -12,7 +12,7 @@ namespace Halley
 	public:
 		CheckAssetsTask(Project& project, bool oneShot);
 		~CheckAssetsTask();
-		
+
 		void requestRefreshAssets(gsl::span<const Path> paths);
 
 	protected:
@@ -42,7 +42,7 @@ namespace Halley
 
 		static bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
-		
+
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter);
 		bool importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodegen, Path dstPath, String taskName, bool packAfter);
 
@@ -53,7 +53,7 @@ namespace Halley
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
 		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;
-		bool doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<Path>& additionalFilesToImport);
+		bool doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport);
 		bool importFile(ImportAssetsDatabase& db, AssetTable& assets, bool useDirMetas, const Path& srcPath, const Vector<Path>& srcPaths, const Path& filePath);
 		void sleep(int ms);
 	};

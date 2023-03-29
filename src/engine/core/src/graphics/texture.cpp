@@ -67,6 +67,18 @@ bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
 						}
 					}
 				}
+			} else if (img->getFormat() == Image::Format::SingleChannel || img->getFormat() == Image::Format::Indexed) {
+				auto pxs = img->getPixels1BPP();
+
+				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
+					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
+						const auto px = pxs[x + y * w];
+						// Assume px 0 = transparent
+						if (px > 0) {
+							return true;
+						}
+					}
+				}
 			}
 		}
 	}

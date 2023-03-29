@@ -550,6 +550,23 @@ gsl::span<const unsigned char> Image::getPixelBytesRow(int x0, int x1, int y) co
 	return getPixelBytes().subspan((x0 + y * w) * size_t(getBytesPerPixel()), (x1 - x0) * size_t(getBytesPerPixel()));
 }
 
+
+gsl::span<unsigned char> Image::getPixels1BPP()
+{
+	Expects(getBytesPerPixel() == 1);
+	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+
+	return gsl::span<unsigned char>(px.get(), w * h);
+}
+
+gsl::span<const unsigned char> Image::getPixels1BPP() const
+{
+	Expects(getBytesPerPixel() == 1);
+	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+
+	return gsl::span<const unsigned char>(px.get(), w * h);
+}
+
 gsl::span<int> Image::getPixels4BPP()
 {
 	Expects(getBytesPerPixel() == 4);

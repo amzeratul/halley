@@ -173,17 +173,15 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 	Vector<Path> dummyDirMetas;
 
 	bool dbChanged = false;
-	Vector<Path> additionalFilesToImport;
-	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath, additionalFilesToImport) || dbChanged;
+	Vector<std::pair<Path, Path>> additionalFilesToImport;
+	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath, &additionalFilesToImport) || dbChanged;
 	for (const auto& additional: additionalFilesToImport) {
-		Vector<Path> dummy;
-		const auto& newPath2 = skipGen ? srcPath.makeRelativeTo(basePath) / additional : additional;
-		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath2, dummy) || dbChanged;
+		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, additional.first, additional.second, nullptr) || dbChanged;
 	}
 	return dbChanged;
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<Path>& additionalFilesToImport) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -219,6 +217,17 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		db.markInputPresent(filePath);
 	}
 
+	// If this file was already imported, check any previous dependencies it had too
+	if (additionalFilesToImport) {
+		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath / filePath)) {
+			if (Path::exists(inputSrc / inputFile)) {
+				additionalFilesToImport->emplace_back(inputSrc, inputFile);
+			} else {
+				Logger::logWarning("Missing original input file: " + (inputSrc / inputFile));
+			}
+		}
+	}
+
 	// Figure out the right importer and assetId for this file
 	auto& assetImporter = isCodegen ? projectAssetImporter->getImporters(ImportAssetType::Codegen).at(0).get() : projectAssetImporter->getRootImporter(filePath);
 	if (assetImporter.getType() == ImportAssetType::Skip) {
@@ -240,13 +249,15 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		asset.srcDir = srcPath;
 		asset.inputFiles.push_back(input);
 
-		if (!isCodegen) {
-			for (const auto& additional: db.getInputFiles(asset.assetType, asset.assetId)) {
+		// Check all other input files for this asset
+		if (!isCodegen && additionalFilesToImport) {
+			const auto [addSrcPath, addSrcFiles] = db.getInputFiles(asset.assetType, asset.assetId);
+			for (const auto& additional: addSrcFiles) {
 				if (additional != filePath) {
-					if (Path::exists(srcPath / additional)) {
-						additionalFilesToImport.push_back(additional);
+					if (Path::exists(addSrcPath / additional)) {
+						additionalFilesToImport->emplace_back(addSrcPath, additional);
 					} else {
-						Logger::logInfo("File deleted: " + additional);
+						Logger::logInfo("File deleted: " + (addSrcPath / additional));
 					}
 				}
 			}
