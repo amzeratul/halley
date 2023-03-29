@@ -149,7 +149,7 @@ TextureDescriptor& TextureDescriptor::operator=(TextureDescriptor&& other) noexc
 	return *this;
 }
 
-int TextureDescriptor::getBitsPerPixel(TextureFormat format)
+int TextureDescriptor::getBytesPerPixel(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::RGBA:

@@ -124,7 +124,7 @@ namespace Halley
 
 		TextureDescriptor& operator=(TextureDescriptor&& other) noexcept;
 
-		static int getBitsPerPixel(TextureFormat format);
+		static int getBytesPerPixel(TextureFormat format);
 
 		size_t getMemoryUsage() const;
 	};

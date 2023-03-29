@@ -77,7 +77,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 {
 	clear();
 
-	int bpp = TextureDescriptor::getBitsPerPixel(descriptor.format);
+	int bpp = TextureDescriptor::getBytesPerPixel(descriptor.format);
 
 	CD3D11_TEXTURE2D_DESC desc;
 	desc.Width = size.x;

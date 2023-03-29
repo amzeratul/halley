@@ -102,7 +102,8 @@ void SelectedBoundsGizmo::drawStencilSprite(Painter& painter, const Sprite& spri
 {
 	Sprite s = sprite;
 	s.setMaterial(stencilMaterial);
-	s.getMutableMaterial().set(0, sprite.getMaterial().getTexture(0));
+	const auto tex = sprite.getMaterial().getTexture(0);
+	s.getMutableMaterial().set(0, tex).set("u_texBPP0", TextureDescriptor::getBytesPerPixel(tex->getDescriptor().format));
 	s.draw(painter);
 }
 
@@ -126,7 +127,7 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 	Sprite s = sprite;
 	s.setMaterial(outlineMaterial);
 	s.setColour(colour);
-	s.getMutableMaterial().set(0, tex0);
+	s.getMutableMaterial().set(0, tex0).set("u_texBPP0", TextureDescriptor::getBytesPerPixel(tex0->getDescriptor().format));
 	s.setCustom0(texGrads);
 	s.setTexRect1(Rect4f(0, 0, 1, 1));
 	s.crop(Vector4f(-padding, -padding, -padding, -padding));

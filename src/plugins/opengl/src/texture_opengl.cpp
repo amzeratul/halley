@@ -155,7 +155,7 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 
 	if (format != TextureFormat::Depth) {
 		const int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
+		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format));
 		glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 		glCheckError();
 	}
@@ -175,7 +175,7 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 	int stride = pixelData.getStrideOr(size.x);
 
 #if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
-	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
+	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format));
 	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 #endif
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, size.x, size.y, getGLPixelFormat(format), GL_UNSIGNED_BYTE, pixelData.getBytes());
