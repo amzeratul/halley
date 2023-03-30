@@ -5,6 +5,8 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
+#include <thread>
+
 using namespace Halley;
 
 #if defined(_WIN32) && !defined(WINDOWS_STORE)
