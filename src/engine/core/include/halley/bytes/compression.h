@@ -24,7 +24,7 @@ namespace Halley {
 		struct LZ4Options {
 			LZ4Mode mode = LZ4Mode::Normal;
 			int level = 9;
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
             // work around "error: default member initializer for 'mode' needed within definition
             // of enclosing class 'Compression' outside of member functions"
             LZ4Options() noexcept {}
