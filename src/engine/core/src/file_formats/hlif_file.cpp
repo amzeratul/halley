@@ -420,7 +420,7 @@ void HLIFFile::optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> 
 			}
 		}
 		size_t insertIdx = 0;
-		for (const auto [idx, col]: newEntries) {
+		for (const auto& [idx, col]: newEntries) {
 			while (taken[insertIdx++]) {}
 			taken[insertIdx - 1] = 1;
 			newPalette.entries[insertIdx - 1] = col;
