@@ -1753,6 +1753,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<ScriptVariableScope>("Halley::ScriptVariableScope"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<MathOp>("Halley::MathOp"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<MathRelOp>("Halley::MathRelOp"));
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<TweenCurve>("Halley::TweenCurve"));
 
 	return factories;
 }

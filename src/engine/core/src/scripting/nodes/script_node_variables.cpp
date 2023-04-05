@@ -1,6 +1,7 @@
 #include "script_node_variables.h"
 
 #include "halley/maths/ops.h"
+#include "halley/maths/tween.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
@@ -419,6 +420,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 	return {
 		SettingType{ "from", "float", Vector<String>{"0"} },
 		SettingType{ "to", "float", Vector<String>{"1"} },
+		SettingType{ "curve", "Halley::TweenCurve", Vector<String>{"linear"} }
 	};
 }
 
@@ -439,6 +441,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 	str.append(toString(node.getSettings()["to"].asFloat(1)), settingColour);
 	str.append(", ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(", ");
+	str.append(node.getSettings()["curve"].asString("linear"), settingColour);
 	str.append(")");
 	return str.moveResults();
 }
@@ -447,15 +451,17 @@ String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode
 {
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
-	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
+	const auto curve = node.getSettings()["curve"].asString("linear");
+	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
 }
 
 ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
+	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
 	const auto t = readDataPin(environment, node, 0).asFloat(0);
-	return ConfigNode(lerp(from, to, t));
+	return ConfigNode(lerp(from, to, Tween<float>::applyCurve(t, curve)));
 }
 
 

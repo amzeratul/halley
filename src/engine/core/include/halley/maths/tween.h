@@ -6,12 +6,42 @@
 namespace Halley {
 	enum class TweenCurve {
 		Linear,
-		Cosine
+		Sinusoidal,
+		Sqrt,
+		Sine
+	};
+
+	template <>
+	struct EnumNames<TweenCurve> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"linear",
+				"sinusoidal",
+				"sqrt",
+				"sine"
+			}};
+		}
 	};
 
 	template <typename T>
 	class Tween {
 	public:
+
+		static T applyCurve(T t, TweenCurve curve)
+		{
+			switch (curve) {
+			case TweenCurve::Linear:
+				return t;
+			case TweenCurve::Sinusoidal:
+				return smoothCos(t);
+			case TweenCurve::Sqrt:
+				return static_cast<T>(std::sqrt(t));
+			case TweenCurve::Sine:
+				return static_cast<T>(std::sin(t * static_cast<float>(pi()) * 0.5f));
+			}
+			return t;
+		}
+
 		Tween() {}
 
 		Tween(T a, T b, Time length = 1.0, TweenCurve curve = TweenCurve::Linear)
@@ -28,19 +58,7 @@ namespace Halley {
 
 		T getValue() const
 		{
-			float t = getProgress();
-
-			switch (curve) {
-			case TweenCurve::Cosine:
-				t = smoothCos(t);
-				break;
-
-			default:
-				// Do nothing
-				break;
-			}
-
-			return interpolate(a, b, t);
+			return interpolate(a, b, applyCurve(getProgress(), curve));
 		}
 
 		void update(Time t)
