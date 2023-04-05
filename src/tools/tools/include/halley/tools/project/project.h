@@ -43,7 +43,7 @@ namespace Halley
 		using AssetReloadCallback = std::function<void(gsl::span<const String>)>;
 		using AssetPackedReloadCallback = std::function<void(gsl::span<const String>, gsl::span<const String>)>;
 
-		Project(Path projectRootPath, Path halleyRootPath);
+		Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms);
 		~Project() override;
 
 		void loadDLL(const HalleyStatics& statics);
@@ -52,6 +52,7 @@ namespace Halley
 		void update(Time time);
 		void onBuildDone();
 
+		void setPlatforms(Vector<String> platforms);
 		const Vector<String>& getPlatforms() const;
 
 		const Path& getHalleyRootPath() const;

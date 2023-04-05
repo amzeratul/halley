@@ -67,6 +67,18 @@ bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
 						}
 					}
 				}
+			} else if (img->getFormat() == Image::Format::SingleChannel || img->getFormat() == Image::Format::Indexed) {
+				auto pxs = img->getPixels1BPP();
+
+				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
+					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
+						const auto px = pxs[x + y * w];
+						// Assume px 0 = transparent
+						if (px > 0) {
+							return true;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -155,7 +167,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
 	{
 		auto& meta = texture->getMeta();
-		if (const auto& compression = meta.getString("compression"); compression == "png" || compression == "qoi") {
+		if (const auto& compression = meta.getString("compression"); compression == "png" || compression == "qoi" || compression == "hlif") {
 			return TextureDescriptorImageData(std::make_unique<Image>(*data, meta));
 		} else {
 			return TextureDescriptorImageData(data->getSpan());
@@ -194,7 +206,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.addressMode = fromString<TextureAddressMode>(meta.getString("addressMode", "clamp"));
 		descriptor.format = format;
 		descriptor.pixelData = std::move(img);
-		descriptor.pixelFormat = compression == "png" || compression == "qoi" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
+		descriptor.pixelFormat = compression == "png" || compression == "qoi" || compression == "hlif" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
 		descriptor.retainPixelData = retain;
 		texture->load(std::move(descriptor));
 	});

@@ -41,14 +41,16 @@ namespace Halley
 		explicit DirectoryMonitor(const Path& p);
 		~DirectoryMonitor();
 
-		void poll(Vector<Event>& output);
-		Vector<Event> poll();
+		void poll(Vector<Event>& output, bool waitForNoChange = false);
+		Vector<Event> poll(bool waitForNoChange = false);
 		bool pollAny();
 
 		bool hasRealImplementation() const;
 
 	private:
 		std::unique_ptr<DirectoryMonitorPimpl> pimpl;
+
+		void postProcessEvents(Vector<Event>& events);
 	};
 }
 

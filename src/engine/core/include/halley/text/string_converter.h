@@ -11,6 +11,7 @@
 #include <iomanip>
 #include "halley/data_structures/maybe.h"
 #include "enum_names.h"
+#include "halley/support/logger.h"
 
 namespace Halley
 {
@@ -114,7 +115,8 @@ namespace Halley
 				auto names = n();
 				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
 				if (res == std::end(names)) {
-					throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".", HalleyExceptions::Utils);
+					Logger::logError("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".");
+					return {};
 				}
 				return T(res - std::begin(names));
 			} else if constexpr (std::is_integral_v<T>) {

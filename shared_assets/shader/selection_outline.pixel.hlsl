@@ -3,11 +3,17 @@
 Texture2D tex0 : register(t0);
 SamplerState sampler0 : register(s0);
 
+cbuffer OutlineParams : register(b1)
+{
+	int u_texBPP0;
+};
+
 float sampleAlpha(float2 coord0, float2 coord1) {
 	if (coord1.x < 0 || coord1.y < 0 || coord1.x >= 1 || coord1.y >= 1) {
 		return 0;
 	}
-	return tex0.Sample(sampler0, coord0).a;
+	const float4 col = tex0.Sample(sampler0, coord0);
+	return u_texBPP0 == 1 ? (col.r > 0.5 / 255.0 ? 1.0 : 0.0) : col.a;
 }
 
 float4 main(VOut input) : SV_TARGET {

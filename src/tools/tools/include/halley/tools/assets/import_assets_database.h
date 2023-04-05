@@ -64,6 +64,9 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 		int64_t getLatestTimestamp() const;
+
+		void addInputFile(TimestampedPath path);
+		void addInputFile(TimestampedPath path, Path dataPath);
 	};
 
 	class ImportAssetsDatabase
@@ -116,12 +119,16 @@ namespace Halley
 		void markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets);
 		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
+		std::pair<Path, Vector<Path>> getInputFiles(ImportAssetType type, const String& assetId) const;
 		Vector<AssetResource> getOutFiles(ImportAssetType assetType, const String& assetId) const;
-		Vector<String> getInputFiles() const;
+		Vector<String> getAllInputFiles() const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
+		Vector<std::pair<Path, Path>> getFilesForAssetsThatHasAdditionalFile(const Path& additionalFile);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		void setPlatforms(Vector<String> platforms);
 
 	private:
 		Vector<String> platforms;
@@ -140,5 +147,6 @@ namespace Halley
 		mutable std::mutex mutex;
 
 		const AssetEntry* findEntry(AssetType type, const String& id) const;
+		std::unique_ptr<AssetDatabase> doMakeAssetDatabase(const String& platform) const;
 	};
 }

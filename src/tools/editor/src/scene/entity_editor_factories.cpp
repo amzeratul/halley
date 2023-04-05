@@ -1520,6 +1520,7 @@ public:
 				}
 			}
 		}
+		std::sort(messageIds.begin(), messageIds.end());
 
 		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
 		auto dropdown = std::make_shared<UIDropdown>("messageType", dropStyle);

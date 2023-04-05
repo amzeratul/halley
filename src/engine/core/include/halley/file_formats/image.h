@@ -35,7 +35,7 @@ namespace Halley {
 
 	class Image final : public Resource {
 	public:
-		enum class Format {
+		enum class Format : uint8_t {
 			Undefined,
 			Indexed,
 			RGB,
@@ -44,7 +44,7 @@ namespace Halley {
 			SingleChannel
 		};
 
-		Image(Format format = Format::RGBA, Vector2i size = {});
+		Image(Format format = Format::RGBA, Vector2i size = {}, bool clear = true);
 		Image(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);
@@ -53,18 +53,19 @@ namespace Halley {
 
 		std::unique_ptr<Image> clone();
 
-		void setSize(Vector2i size);
+		void setSize(Vector2i size, bool clear = true);
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
+
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;
+		Bytes saveHLIFToBytes(std::string_view name = {}) const;
+
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
-		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
 		void setFormat(Format format);
 
 		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
-		static std::optional<Vector2i> getBufferImageSize(gsl::span<const gsl::byte> bytes);
 
 		gsl::span<unsigned char> getPixelBytes();
 		gsl::span<const unsigned char> getPixelBytes() const;
@@ -72,6 +73,8 @@ namespace Halley {
 		
 		int getPixel4BPP(Vector2i pos) const;
 		int getPixelAlpha(Vector2i pos) const;
+		gsl::span<unsigned char> getPixels1BPP();
+		gsl::span<const unsigned char> getPixels1BPP() const;
 		gsl::span<int> getPixels4BPP();
 		gsl::span<const int> getPixels4BPP() const;
 		gsl::span<const int> getPixelRow4BPP(int x0, int x1, int y) const;

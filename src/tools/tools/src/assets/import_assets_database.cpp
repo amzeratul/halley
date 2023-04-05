@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -80,6 +81,20 @@ int64_t ImportAssetsDatabaseEntry::getLatestTimestamp() const
 	return t;
 }
 
+void ImportAssetsDatabaseEntry::addInputFile(TimestampedPath path)
+{
+	if (!std_ex::contains_if(inputFiles, [&] (const AssetPath& entry) { return entry.getPath() == path.first; })) {
+		inputFiles.push_back(std::move(path));
+	}
+}
+
+void ImportAssetsDatabaseEntry::addInputFile(TimestampedPath path, Path dataPath)
+{
+	if (!std_ex::contains_if(inputFiles, [&] (const AssetPath& entry) { return entry.getPath() == path.first; })) {
+		inputFiles.emplace_back(std::move(path), std::move(dataPath));
+	}
+}
+
 void ImportAssetsDatabase::AssetEntry::serialize(Serializer& s) const
 {
 	s << asset;
@@ -142,7 +157,7 @@ void ImportAssetsDatabase::save() const
 	std::lock_guard<std::mutex> lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
 
-	const auto pcAssetDatabase = makeAssetDatabase("pc");
+	const auto pcAssetDatabase = doMakeAssetDatabase("pc");
 	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
 }
 
@@ -256,9 +271,9 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	if (const auto * entry = findEntry(type, assetId); entry) {
+	if (const auto* entry = findEntry(type, assetId); entry) {
 		const auto& asset = entry->asset;
-		for (auto& o: asset.outputFiles) {
+		for (const auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 			}
@@ -403,6 +418,22 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	return result;
 }
 
+std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	const auto iter = assetsImported.find(std::pair{ assetType, assetId });
+	if (iter != assetsImported.end()) {
+		Vector<Path> result;
+		auto srcDir = iter->second.asset.srcDir;
+		for (const auto& inputFile: iter->second.asset.inputFiles) {
+			result.push_back(inputFile.getDataPath());
+		}
+		return { srcDir, std::move(result) };
+	} else {
+		return {};
+	}
+}
+
 Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
@@ -414,7 +445,7 @@ Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetTyp
 	}
 }
 
-Vector<String> ImportAssetsDatabase::getInputFiles() const
+Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	Vector<String> result;
@@ -445,6 +476,31 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 	return result;
 }
 
+Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	Vector<std::pair<Path, Path>> result;
+
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
+
+		bool ok = false;
+		for (const auto& additional: asset.additionalInputFiles) {
+			if (additional.first == inputFile) {
+				ok = true;
+			}
+		}
+
+		if (ok) {
+			for (const auto& input: asset.inputFiles) {
+				result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
+			}
+		}
+	}
+
+	return result;
+}
+
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
 	s << version;
@@ -468,6 +524,14 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 	}
 }
 
+void ImportAssetsDatabase::setPlatforms(Vector<String> platforms)
+{
+	if (platforms != this->platforms) {
+		this->platforms = std::move(platforms);
+		load();
+	}
+}
+
 const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetType type, const String& id) const
 {
 	if (indexDirty) {
@@ -488,6 +552,12 @@ const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetTyp
 }
 
 std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase(const String& platform) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	return doMakeAssetDatabase(platform);
+}
+
+std::unique_ptr<AssetDatabase> ImportAssetsDatabase::doMakeAssetDatabase(const String& platform) const
 {
 	auto result = std::make_unique<AssetDatabase>();
 	for (auto& a: assetsImported) {

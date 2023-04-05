@@ -3,6 +3,6 @@
 
 VOut main(VIn input) {
     VOut result;
-    basicVertex(input, result);
+    basicVertex(input, result, true);
     return result;
 }

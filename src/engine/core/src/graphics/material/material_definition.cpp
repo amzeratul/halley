@@ -516,6 +516,14 @@ ShaderParameterType MaterialDefinition::parseParameterType(const String& rawType
 		return ShaderParameterType::Float3;
 	} else if (rawType == "float4" || rawType == "vec4") {
 		return ShaderParameterType::Float4;
+	} else if (rawType == "int") {
+		return ShaderParameterType::Int;
+	} else if (rawType == "int2") {
+		return ShaderParameterType::Int2;
+	} else if (rawType == "int3") {
+		return ShaderParameterType::Int3;
+	} else if (rawType == "int4") {
+		return ShaderParameterType::Int4;
 	} else if (rawType == "float4x4" || rawType == "mat4") {
 		return ShaderParameterType::Matrix4;
 	} else {

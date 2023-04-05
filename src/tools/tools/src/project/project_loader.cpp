@@ -21,7 +21,7 @@ void ProjectLoader::setDisabledPlatforms(Vector<String> platforms)
 
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
-	auto proj = std::make_unique<Project>(path, halleyPath);
+	auto proj = std::make_unique<Project>(path, halleyPath, disabledPlatforms);
 	selectPlugins(*proj);	
 	return proj;
 }
@@ -33,7 +33,8 @@ void ProjectLoader::selectPlugins(Project& project) const
 	{
 		return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), platform) != disabledPlatforms.end();
 	}), platforms.end());
-	
+
+	project.setPlatforms(platforms);
 	project.setPlugins(getPlugins(platforms));
 }
 

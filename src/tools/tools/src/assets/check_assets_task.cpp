@@ -72,15 +72,15 @@ void CheckAssetsTask::run()
 
 		// Check if any files changed
 		Vector<DirectoryMonitor::Event> assetsChanged;
-		monitorAssetsSrc.poll(assetsChanged);
-		monitorSharedAssetsSrc.poll(assetsChanged);
-		monitorAssets.poll(assetsChanged);
+		monitorAssetsSrc.poll(assetsChanged, true);
+		monitorSharedAssetsSrc.poll(assetsChanged, true);
+		monitorAssets.poll(assetsChanged, true);
 		Vector<DirectoryMonitor::Event> sharedGenChanged;
-		monitorSharedGenSrc.poll(sharedGenChanged);
-		monitorSharedGen.poll(sharedGenChanged);
+		monitorSharedGenSrc.poll(sharedGenChanged, true);
+		monitorSharedGen.poll(sharedGenChanged, true);
 		Vector<DirectoryMonitor::Event> genChanged = sharedGenChanged; // Copy
-		monitorGenSrc.poll(genChanged);
-		monitorGen.poll(sharedGenChanged);
+		monitorGenSrc.poll(genChanged, true);
+		monitorGen.poll(sharedGenChanged, true);
 
 		// Re-import any changes
 		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);
@@ -131,10 +131,10 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 	}
 
 	// Check for full reimport
-	bool reimportAll = isCodeGen || true;
+	bool reimportAll = isCodeGen;
 	if (!reimportAll) {
 		for (const auto& change : changes) {
-			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta" || change.name.endsWith(".ase") || change.name.endsWith(".aseprite")) {
+			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta") {
 				reimportAll = true;
 				break;
 			}
@@ -172,10 +172,16 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, AssetTable& assets, b
 
 	Vector<Path> dummyDirMetas;
 
-	return doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath);
+	bool dbChanged = false;
+	Vector<std::pair<Path, Path>> additionalFilesToImport;
+	dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, basePath, newPath, &additionalFilesToImport) || dbChanged;
+	for (const auto& additional: additionalFilesToImport) {
+		dbChanged = doImportFile(db, assets, isCodegen, skipGen, useDirMetas ? directoryMetas : dummyDirMetas, additional.first, additional.second, nullptr) || dbChanged;
+	}
+	return dbChanged;
 }
 
-bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath, Vector<std::pair<Path, Path>>* additionalFilesToImport) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -211,6 +217,17 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		db.markInputPresent(filePath);
 	}
 
+	// If this file was already imported, check any previous dependencies it had too
+	if (additionalFilesToImport) {
+		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath / filePath)) {
+			if (Path::exists(inputSrc / inputFile)) {
+				additionalFilesToImport->emplace_back(inputSrc, inputFile);
+			} else {
+				Logger::logWarning("Missing original input file: " + (inputSrc / inputFile));
+			}
+		}
+	}
+
 	// Figure out the right importer and assetId for this file
 	auto& assetImporter = isCodegen ? projectAssetImporter->getImporters(ImportAssetType::Codegen).at(0).get() : projectAssetImporter->getRootImporter(filePath);
 	if (assetImporter.getType() == ImportAssetType::Skip) {
@@ -231,6 +248,20 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		asset.assetType = assetImporter.getType();
 		asset.srcDir = srcPath;
 		asset.inputFiles.push_back(input);
+
+		// Check all other input files for this asset
+		if (!isCodegen && additionalFilesToImport) {
+			const auto [addSrcPath, addSrcFiles] = db.getInputFiles(asset.assetType, asset.assetId);
+			for (const auto& additional: addSrcFiles) {
+				if (additional != filePath) {
+					if (Path::exists(addSrcPath / additional)) {
+						additionalFilesToImport->emplace_back(addSrcPath, additional);
+					} else {
+						Logger::logInfo("File deleted: " + (addSrcPath / additional));
+					}
+				}
+			}
+		}
 	} else {
 		// Already exists
 		auto& asset = iter->second;
@@ -238,10 +269,10 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 			throw Exception("AssetId conflict on " + assetId, HalleyExceptions::Tools);
 		}
 		if (asset.srcDir == srcPath) {
-			asset.inputFiles.push_back(input);
+			asset.addInputFile(input);
 		} else {
 			auto relPath = (srcPath / input.first).makeRelativeTo(asset.srcDir);
-			asset.inputFiles.emplace_back(input, relPath);
+			asset.addInputFile(input, relPath);
 
 			// Don't mix files from two different source paths
 			//throw Exception("Mixed source dir input for " + assetId, HalleyExceptions::Tools);

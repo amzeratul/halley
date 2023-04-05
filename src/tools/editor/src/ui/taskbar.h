@@ -18,6 +18,7 @@ namespace Halley
 		void draw(UIPainter& painter) const override;
 
 		void showTaskDetails(const TaskDisplay& taskDisplay);
+		TaskSet& getTaskSet();
 
 	private:
 		UIFactory& factory;

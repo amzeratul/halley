@@ -27,17 +27,27 @@
 #include "halley/resources/resource_data.h"
 #include "halley/text/string_converter.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/compression.h"
+#include "halley/file_formats/hlif_file.h"
 #include "halley/support/logger.h"
 #include "qoi/qoi.h"
 
+namespace {
+	struct SimpleImageHeader {
+		uint16_t width;
+		uint16_t height;
+		Halley::Image::Format format;
+	};
+}
+
 using namespace Halley;
 
-Image::Image(Format format, Vector2i size)
+Image::Image(Format format, Vector2i size, bool clear)
 	: px(nullptr, [](unsigned char*){})
 	, dataLen(0)
 	, format(format)
 {
-	setSize(size);
+	setSize(size, clear);
 }
 
 Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
@@ -73,7 +83,7 @@ std::unique_ptr<Image> Image::clone()
 	return result;
 }
 
-void Image::setSize(Vector2i size)
+void Image::setSize(Vector2i size, bool clear)
 {
 	w = size.x;
 	h = size.y;
@@ -84,8 +94,9 @@ void Image::setSize(Vector2i size)
 		if (getBytesPerPixel() == 4) {
 			Ensures(size_t(px.get()) % 4 == 0);
 		}
-		Ensures(px.get() != nullptr);
-		memset(px.get(), 0, dataLen);
+		if (clear) {
+			memset(px.get(), 0, dataLen);
+		}
 	} else {
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(nullptr, [](unsigned char*) {});
 	}
@@ -461,7 +472,9 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		targetChannels = 4;
 	}
 
-	if (isQOI(bytes)) {
+	if (HLIFFile::isHLIF(bytes)) {
+		HLIFFile::decode(*this, bytes);
+	} else if (isQOI(bytes)) {
 		qoi_desc desc;
 		auto* result = qoi_decode(bytes.data(), static_cast<int>(bytes.size()), &desc, targetChannels);
 		if (!result) {
@@ -535,6 +548,23 @@ gsl::span<const unsigned char> Image::getPixelBytes() const
 gsl::span<const unsigned char> Image::getPixelBytesRow(int x0, int x1, int y) const
 {
 	return getPixelBytes().subspan((x0 + y * w) * size_t(getBytesPerPixel()), (x1 - x0) * size_t(getBytesPerPixel()));
+}
+
+
+gsl::span<unsigned char> Image::getPixels1BPP()
+{
+	Expects(getBytesPerPixel() == 1);
+	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+
+	return gsl::span<unsigned char>(px.get(), w * h);
+}
+
+gsl::span<const unsigned char> Image::getPixels1BPP() const
+{
+	Expects(getBytesPerPixel() == 1);
+	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+
+	return gsl::span<const unsigned char>(px.get(), w * h);
 }
 
 gsl::span<int> Image::getPixels4BPP()
@@ -648,9 +678,17 @@ Bytes Image::saveQOIToBytes() const
 	return result;
 }
 
+Bytes Image::saveHLIFToBytes(std::string_view name) const
+{
+	return HLIFFile::encode(*this, name);
+}
+
 Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
-	if (isPNG(bytes))	{
+	if (HLIFFile::isHLIF(bytes)) {
+		const auto info = HLIFFile::getInfo(bytes);
+		return info.size;
+	} else if (isPNG(bytes))	{
 		unsigned w, h;
 		lodepng::State state;
 		lodepng_inspect(&w, &h, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
@@ -659,24 +697,6 @@ Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 		int w, h, comp;
 		stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), int(bytes.size()), &w, &h, &comp);
 		return Vector2i(w, h);
-	}
-}
-
-Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
-{
-	unsigned int x, y;
-	LodePNGState state;
-	lodepng_inspect(&x, &y, &state, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
-	LodePNGColorType colorFormat = state.info_png.color.colortype;
-	switch (colorFormat) {
-	case LCT_GREY:
-		return Format::SingleChannel;
-	case LCT_PALETTE:
-		return Format::Indexed;
-	case LCT_RGB:
-		return Format::RGB;
-	default:
-		return Format::RGBA;
 	}
 }
 
@@ -700,16 +720,4 @@ bool Image::isPNG(gsl::span<const gsl::byte> bytes)
 {
 	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;
-}
-
-std::optional<Vector2i> Image::getBufferImageSize(gsl::span<const gsl::byte> bytes)
-{
-	if (isQOI(bytes)) {
-		// TODO
-		return {};
-	} else {
-		int x, y, comp;
-		auto result = stbi_info_from_memory(reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<int>(bytes.size_bytes()), &x, &y, &comp);
-		return Vector2i(x, y);
-	}
 }

@@ -15,7 +15,7 @@ using namespace Halley;
 
 bool AssetPackListing::Entry::operator<(const Entry& other) const
 {
-	return name < other.name;
+	return std::tie(name, type) < std::tie(other.name, other.type);
 }
 
 AssetPackListing::AssetPackListing()
@@ -264,6 +264,6 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 	if (packed) {
 		Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
 	} else {
-		Logger::logError("Unable to write pack file " + dst.getNativeString());
+		throw Exception("Unable to write pack file " + dst.getNativeString(), HalleyExceptions::Tools);
 	}
 }

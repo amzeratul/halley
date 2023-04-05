@@ -11,7 +11,7 @@ using namespace Halley;
 void ScriptGraphImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 	
 	const auto scriptGraph = loadScript(asset.assetId, asset.inputFiles.at(0).data, collector);
 

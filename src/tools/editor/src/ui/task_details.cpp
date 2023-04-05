@@ -171,5 +171,5 @@ void TaskDetails::copyToClipboard(bool verbose)
 
 void TaskDetails::doAction()
 {
-	taskDisplay->getTask()->doAction();
+	taskDisplay->getTask()->doAction(taskDisplay->getTaskSet());
 }

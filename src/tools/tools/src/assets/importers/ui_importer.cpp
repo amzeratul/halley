@@ -11,7 +11,7 @@ void UIImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 	ConfigFile config = YAMLConvert::parseConfig(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 	
 	Metadata meta = asset.inputFiles.at(0).metadata;
-	meta.set("asset_compression", "deflate");
+	meta.set("asset_compression", "lz4");
 
 	auto ui = UIDefinition(std::move(config));
 

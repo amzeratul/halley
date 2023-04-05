@@ -5,6 +5,7 @@
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
 #include "lz4/lz4.h"
+#include "lz4/lz4hc.h"
 
 using namespace Halley;
 
@@ -179,19 +180,113 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 	}
 }
 
-size_t Compression::lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst)
+Bytes Compression::lz4Compress(gsl::span<const gsl::byte> src, LZ4Options options)
 {
-	return LZ4_compress_default(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
+	const auto size = LZ4_compressBound(static_cast<int>(src.size()));
+	Bytes result;
+	result.resize_no_init(size);
+	const auto outSize = lz4Compress(src, result.byte_span(), options);
+	result.resize(outSize);
+	return result;
 }
 
-size_t Compression::lz4Compress(gsl::span<const char> src, gsl::span<char> dst)
+struct LZ4FileHeader {
+	char id[4] = "LZ4";
+	uint32_t size = 0;
+};
+
+Bytes Compression::lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<const gsl::byte> header, LZ4Options options)
 {
-	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
+	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
+
+	const auto size = LZ4_compressBound(static_cast<int>(src.size()));
+	Bytes result;
+	result.resize_no_init(size + totalHeaderSize);
+	const auto outSize = lz4Compress(src, result.byte_span().subspan(totalHeaderSize), options);
+	result.resize(outSize + totalHeaderSize);
+
+	LZ4FileHeader lz4Header;
+	lz4Header.size = static_cast<uint32_t>(src.size_bytes());
+	memcpy(result.data(), &lz4Header, sizeof(lz4Header));
+
+	if (!header.empty()) {
+		memcpy(result.data() + lz4HeaderSize, header.data(), header.size_bytes());
+	}
+
+	return result;
 }
 
-size_t Compression::lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst)
+Bytes Compression::lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header)
 {
-	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
+	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
+
+	if (src.size() < totalHeaderSize) {
+		throw Exception("File too small to be LZ4 file", HalleyExceptions::Utils);
+	}
+
+	LZ4FileHeader lz4Header;
+	memcpy(&lz4Header, src.data(), sizeof(lz4Header));
+	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
+		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
+	}
+	
+	if (!header.empty()) {
+		memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
+	}
+
+	Bytes output;
+	output.resize_no_init(lz4Header.size);
+	const auto outSize = lz4Decompress(src.subspan(totalHeaderSize), output.byte_span());
+	output.resize(outSize.value_or(0));
+	return output;
+}
+
+std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header, size_t& outSize)
+{
+	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
+	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
+
+	if (src.size() < totalHeaderSize) {
+		throw Exception("File too small to be LZ4 file", HalleyExceptions::Utils);
+	}
+
+	LZ4FileHeader lz4Header;
+	memcpy(&lz4Header, src.data(), sizeof(lz4Header));
+	if (memcmp(lz4Header.id, "LZ4", 4) != 0) {
+		throw Exception("Not LZ4 header file", HalleyExceptions::Utils);
+	}
+
+	memcpy(header.data(), src.data() + lz4HeaderSize, header.size_bytes());
+
+	auto output = std::shared_ptr<char>(new char[lz4Header.size], deleter);
+	const auto sz = lz4Decompress(src.subspan(totalHeaderSize), gsl::as_writable_bytes(gsl::span<char>(output.get(), lz4Header.size)));
+	if (!sz) {
+		throw Exception("Failed to decompress LZ4 file", HalleyExceptions::Utils);
+	}
+	assert(sz == lz4Header.size);
+	outSize = *sz;
+	return output;
+}
+
+size_t Compression::lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst, LZ4Options options)
+{
+	if (options.mode == LZ4Mode::Normal) {
+		return LZ4_compress_default(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
+	} else {
+		return LZ4_compress_HC(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()), options.level);
+	}
+}
+
+size_t Compression::lz4Compress(gsl::span<const char> src, gsl::span<char> dst, LZ4Options options)
+{
+	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst), options);
+}
+
+size_t Compression::lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst, LZ4Options options)
+{
+	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst), options);
 }
 
 std::optional<size_t> Compression::lz4Decompress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst)

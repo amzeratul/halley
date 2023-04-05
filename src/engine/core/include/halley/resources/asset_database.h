@@ -33,6 +33,7 @@ namespace Halley
 			
 			void add(const String& name, Entry&& asset);
 			const Entry& get(const String& name) const;
+			const Entry* tryGet(const String& name) const;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);

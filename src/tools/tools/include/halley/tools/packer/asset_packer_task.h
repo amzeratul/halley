@@ -14,6 +14,8 @@ namespace Halley
 
 	protected:
 		void run() override;
+		std::optional<String> getAction() override;
+		void doAction(TaskSet& taskSet) override;
 
 	private:
 		Project& project;

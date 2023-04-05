@@ -33,15 +33,17 @@ int ConfigDatabase::getVersion() const
 
 void ConfigDatabase::loadConfig(const ConfigNode& node)
 {
-	for (const auto& [k, v]: node.asMap()) {
-		if (onlyLoad && !std_ex::contains(*onlyLoad, k)) {
-			continue;
-		}
+	if (node.getType() == ConfigNodeType::Map) {
+		for (const auto& [k, v]: node.asMap()) {
+			if (onlyLoad && !std_ex::contains(*onlyLoad, k)) {
+				continue;
+			}
 
-		for (auto& db: dbs) {
-			if (db && db->getKey() == k) {
-				db->loadConfigs(v);
-				break;
+			for (auto& db: dbs) {
+				if (db && db->getKey() == k) {
+					db->loadConfigs(v);
+					break;
+				}
 			}
 		}
 	}

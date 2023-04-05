@@ -167,6 +167,6 @@ std::optional<String> Task::getAction()
 	return {};
 }
 
-void Task::doAction()
+void Task::doAction(TaskSet& taskSet)
 {
 }

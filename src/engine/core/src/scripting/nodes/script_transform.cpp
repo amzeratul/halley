@@ -41,7 +41,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
@@ -50,19 +50,23 @@ std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(
 	ColourStringBuilder result;
 	result.append("Get the position of ");
 	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	result.append(" with offset ");
+	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return result.moveResults();
 }
 
 String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
-	return "Position of " + getConnectedNodeName(world, node, graph, 0);
+	return "Position of " + getConnectedNodeName(world, node, graph, 0) + " + " + getConnectedNodeName(world, node, graph, 2);
 }
 
 ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
+	const auto offset = readDataPin(environment, node, 2).asVector2f({});
+
 	const auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0));
 	if (transform) {
-		return WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()).toConfigNode();
+		return (WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()) + offset).toConfigNode();
 	}
 	return ConfigNode();
 }

@@ -25,10 +25,10 @@
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 136;
+constexpr static int currentAssetVersion = 137;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
-Project::Project(Path projectRootPath, Path halleyRootPath)
+Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms)
 	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
 {
@@ -38,10 +38,13 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	assetPackManifest = rootPath / properties->getAssetPackManifest();
 
 	platforms = properties->getPlatforms();
+	for (const auto& plat: disabledPlatforms) {
+		std_ex::erase(platforms, plat);
+	}
 
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms, currentAssetVersion);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
-	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
+	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
 
 	fileSystemCache = std::make_unique<FileSystemCache>();
 }
@@ -89,6 +92,12 @@ void Project::onBuildDone()
 			gameDll->load();
 		}
 	});
+}
+
+void Project::setPlatforms(Vector<String> platforms)
+{
+	this->platforms = std::move(platforms);
+	importAssetsDatabase->setPlatforms(this->platforms);
 }
 
 const Vector<String>& Project::getPlatforms() const
@@ -330,7 +339,7 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 
 Vector<String> Project::getAssetSrcList() const
 {
-	return importAssetsDatabase->getInputFiles();
+	return importAssetsDatabase->getAllInputFiles();
 }
 
 Vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
@@ -530,7 +539,7 @@ void Project::loadECSData()
 		ecsData->clear();
 	}
 
-	const auto& inputFiles = codegenDatabase->getInputFiles();
+	const auto& inputFiles = codegenDatabase->getAllInputFiles();
 	const auto n = inputFiles.size();
 	Vector<CodegenSourceInfo> sources(n);
 	Vector<Bytes> inputData(n);

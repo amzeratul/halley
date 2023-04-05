@@ -58,7 +58,7 @@ std::optional<String> LoadDLLTask::getAction()
 	}
 }
 
-void LoadDLLTask::doAction()
+void LoadDLLTask::doAction(TaskSet& taskSet)
 {
 	switch (status) {
 	case ProjectDLL::Status::DLLNotFound:

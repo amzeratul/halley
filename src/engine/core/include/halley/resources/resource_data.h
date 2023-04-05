@@ -84,6 +84,7 @@ namespace Halley {
 		size_t getSize() const;
 		String getString() const;
 		void inflate();
+		void lz4Decompress();
 
 		static std::unique_ptr<ResourceDataStatic> loadFromFileSystem(Path path);
 		void writeToFileSystem(String path) const;

@@ -5,6 +5,8 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
+#include <thread>
+
 using namespace Halley;
 
 #if defined(_WIN32) && !defined(WINDOWS_STORE)
@@ -166,21 +168,48 @@ DirectoryMonitor::DirectoryMonitor(const Path& p)
 
 DirectoryMonitor::~DirectoryMonitor() = default;
 
-void DirectoryMonitor::poll(Vector<Event>& output)
+void DirectoryMonitor::poll(Vector<Event>& output, bool waitForNoChange)
 {
-	pimpl->poll(output, false);
+	auto result = poll(waitForNoChange);
+	output.reserve(output.size() + result.size());
+	for (auto& e: result) {
+		output.push_back(std::move(e));
+	}
 }
 
-Vector<DirectoryMonitor::Event> DirectoryMonitor::poll()
+Vector<DirectoryMonitor::Event> DirectoryMonitor::poll(bool waitForNoChange)
 {
-	Vector<DirectoryMonitor::Event> result;
-	pimpl->poll(result, false);
-	return result;
+	Vector<Event> result;
+
+	size_t nBefore = 0;
+	while (true) {
+		pimpl->poll(result, false);
+		const auto nNow = result.size();
+
+		if (nNow != nBefore) {
+			if (result.back().type == ChangeType::Unknown) {
+				return result;
+			}
+			if (waitForNoChange) {
+				// Something got added, wait and try again
+				nBefore = nNow;
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for(100ms);
+				continue;
+			}
+		}
+
+		// If we get here, it means we don't need to wait for any more data
+		if (!result.empty()) {
+			postProcessEvents(result);
+		}
+		return result;
+	}
 }
 
 bool DirectoryMonitor::pollAny()
 {
-	Vector<DirectoryMonitor::Event> result;
+	Vector<Event> result;
 	pimpl->poll(result, true);
 	return !result.empty();
 }
@@ -188,4 +217,51 @@ bool DirectoryMonitor::pollAny()
 bool DirectoryMonitor::hasRealImplementation() const
 {
 	return pimpl->hasRealImplementation();
+}
+
+void DirectoryMonitor::postProcessEvents(Vector<Event>& events)
+{
+	for (size_t i = 0; i < events.size(); ++i) {
+		const auto& e = events[i];
+		if (e.type == ChangeType::FileAdded || e.type == ChangeType::FileModified) {
+			// Remove any file modified events of this afterwards
+			for (size_t j = i + 1; j < events.size(); ) {
+				if (events[j].type == ChangeType::FileModified && events[j].name == e.name) {
+					events.erase(events.begin() + j);
+				} else {
+					++j;
+				}
+			}
+		} else if (e.type == ChangeType::FileRemoved) {
+			// Remove any references to this file before this
+			const auto name = e.name;
+			for (size_t j = 0; j < i; ) {
+				if (events[j].type != ChangeType::FileRenamed && events[j].name == name) {
+					events.erase(events.begin() + j);
+					--i;
+				} else {
+					++j;
+				}
+			}
+		} else if (e.type == ChangeType::FileRenamed) {
+			// Remove any references to this file before or after
+			const auto prevName = e.oldName;
+			const auto name = e.name;
+			for (size_t j = 0; j < i; ) {
+				if (events[j].name == prevName) {
+					events.erase(events.begin() + j);
+					--i;
+				} else {
+					++j;
+				}
+			}
+			for (size_t j = i + 1; j < events.size(); ) {
+				if (events[j].type != ChangeType::FileRemoved && events[j].name == e.name) {
+					events.erase(events.begin() + j);
+				} else {
+					++j;
+				}
+			}
+		}
+	}
 }

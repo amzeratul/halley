@@ -56,7 +56,7 @@ namespace Halley
 		Vector<std::unique_ptr<Task>> getPendingTasks();
 
 		std::optional<String> getAction();
-		virtual void doAction();
+		virtual void doAction(TaskSet& taskSet);
 
 	private:
 		std::unique_ptr<Task> task;
