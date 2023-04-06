@@ -15,6 +15,7 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/spawn_entity.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 		bool canKeepData() const override;
+		bool hasDestructor(const ScriptGraphNode& node) const override;
 
 		Vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
@@ -23,6 +24,7 @@ namespace Halley {
 		void doInitData(ScriptSpawnEntityData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSpawnEntityData& data) const override;
 		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, ScriptSpawnEntityData& curData) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSpawnEntityData& curData) const override;
 	};
 
 	class ScriptDestroyEntity final : public ScriptNodeTypeBase<void> {

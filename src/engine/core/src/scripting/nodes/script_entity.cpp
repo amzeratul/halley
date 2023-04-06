@@ -17,12 +17,18 @@ bool ScriptSpawnEntity::canKeepData() const
 	return true;
 }
 
+bool ScriptSpawnEntity::hasDestructor(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["autoDestroy"].asBool(false);
+}
+
 Vector<IScriptNodeType::SettingType> ScriptSpawnEntity::getSettingTypes() const
 {
 	return {
 		SettingType{ "prefab", "Halley::ResourceReference<Halley::Prefab>", Vector<String>{""} },
 		SettingType{ "asChild", "bool", Vector<String>{"false"} },
-		SettingType{ "serializable", "bool", Vector<String>{"true"} }
+		SettingType{ "serializable", "bool", Vector<String>{"true"} },
+		SettingType{ "autoDestroy", "bool", Vector<String>{"false"} }
 	};
 }
 
@@ -96,6 +102,13 @@ EntityId ScriptSpawnEntity::doGetEntityId(ScriptEnvironment& environment, const 
 	return curData.entityId;
 }
 
+void ScriptSpawnEntity::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSpawnEntityData& curData) const
+{
+	if (node.getSettings()["autoDestroy"].asBool(false)) {
+		environment.getWorld().destroyEntity(curData.entityId);
+		curData.entityId = {};
+	}
+}
 
 
 gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfiguration(const ScriptGraphNode& node) const
