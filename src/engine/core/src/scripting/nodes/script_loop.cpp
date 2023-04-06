@@ -120,7 +120,7 @@ ScriptLerpLoopData::ScriptLerpLoopData(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		time = node["time"].asFloat(0.0f);
-		running = node["running"].asBool(false);
+		state = node["state"].asInt(0);
 	} else if (node.getType() != ConfigNodeType::Undefined) {
 		time = node.asFloat();
 	}
@@ -130,7 +130,7 @@ ConfigNode ScriptLerpLoopData::toConfigNode(const EntitySerializationContext& co
 {
 	ConfigNode::MapType result;
 	result["time"] = time;
-	result["running"] = running;
+	result["state"] = state;
 	return result;
 }
 
@@ -190,14 +190,19 @@ void ScriptLerpLoop::doInitData(ScriptLerpLoopData& data, const ScriptGraphNode&
 
 IScriptNodeType::Result ScriptLerpLoop::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLerpLoopData& curData) const
 {
+	if (curData.state == static_cast<uint8_t>(ScriptLerpLoopData::State::Done)) {
+		curData.state = static_cast<uint8_t>(ScriptLerpLoopData::State::Idle);
+		return Result(ScriptNodeExecutionState::Done, 0, 1);
+	}
+
 	// Important: check for done before incrementing time. This makes sure that we had at least one iteration outputting 1.0f before terminating
 	// If time is not set at all, then it's the first iteration, which we'll report as consuming 0 seconds, this is to ensure we also get a proper instant first iteration
 
 	const float length = node.getSettings()["time"].asFloat(1);
 
-	const bool firstRun = !curData.running;
+	const bool firstRun = curData.state == static_cast<uint8_t>(ScriptLerpLoopData::State::Idle);
 	if (firstRun) {
-		curData.running = true;
+		curData.state = static_cast<uint8_t>(ScriptLerpLoopData::State::Running);
 		curData.time = 0.0f;
 	}
 	const bool done = curData.time >= length;
@@ -206,10 +211,10 @@ IScriptNodeType::Result ScriptLerpLoop::doUpdate(ScriptEnvironment& environment,
 	curData.time += static_cast<float>(time);
 
 	if (done) {
-		curData.running = false;
+		curData.state = static_cast<uint8_t>(ScriptLerpLoopData::State::Done);
 	}
 
-	return Result(ScriptNodeExecutionState::Done, firstRun ? 0 : std::min(static_cast<Time>(timeLeft), time), done ? 3 : 2);
+	return Result(ScriptNodeExecutionState::Done, firstRun ? 0 : std::min(static_cast<Time>(timeLeft), time), 2);
 }
 
 ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLerpLoopData& curData) const
@@ -221,7 +226,7 @@ ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const Scrip
 
 bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptLerpLoopData& curData) const
 {
-	return curData.running && outPin == 2;
+	return outPin == 2;
 }
 
 
