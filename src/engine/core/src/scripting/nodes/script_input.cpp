@@ -45,9 +45,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 8>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
+	const static auto data = std::array<PinType, 9>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true },
-		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input } };
+		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
@@ -63,12 +63,15 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	if (node.getPin(7).hasConnection()) {
 		str.append(" and label ");
 		str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
-	}
-	else {
+	} else {
 		if (node.getSettings()["label"].asString("") != "") {
 			str.append(" and label ");
 			str.append(node.getSettings()["label"].asString(""), settingColour);
 		}
+	}
+	if (node.getPin(8).hasConnection()) {
+		str.append(" if ");
+		str.append(getConnectedNodeName(world, node, graph, 8), parameterColour);
 	}
 
 	if (node.getSettings()["bypassEnableCheck"].asBool(false)) {
@@ -93,6 +96,8 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Flow Output while input is active";
 	case 7:
 		return "Label";
+	case 8:
+		return "Enable Check";
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
@@ -111,7 +116,9 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	constexpr uint8_t notHeldPin = 8;
 	constexpr uint8_t activePin = 16;
 
-	if (!data.input) {
+	const bool enabled = readDataPin(environment, node, 8).asBool(true);
+
+	if (!data.input && enabled) {
 		const auto entity = readEntityId(environment, node, 1);
 		const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 		const auto inputDevice = environment.getInputDevice(entity, node.getSettings()["bypassEnableCheck"].asBool(false));
@@ -123,12 +130,14 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 			}
 			data.input = inputDevice->makeExclusiveButton(button, priority, label);
 		}
+	} else if (data.input && !enabled) {
+		data.input = {};
 	}
 
 	if (data.input) {
 		const auto prevMask = data.outputMask;
 
-		const bool canRead = environment.isInputEnabled() || node.getSettings()["bypassEnableCheck"].asBool(false);
+		const bool canRead = enabled && (environment.isInputEnabled() || node.getSettings()["bypassEnableCheck"].asBool(false));
 		const bool pressed = canRead && data.input->isPressed();
 		const bool released = canRead && data.input->isReleased();
 		const bool held = canRead && data.input->isDown();
