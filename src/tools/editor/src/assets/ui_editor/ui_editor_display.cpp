@@ -32,6 +32,7 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 	} else {
 		boundsSprite = {};
 		sizerSprite = {};
+		curElement = {};
 		clearDisplay();
 	}
 }
