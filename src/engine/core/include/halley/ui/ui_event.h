@@ -26,6 +26,7 @@ namespace Halley {
 		FocusGained,
 		FocusLost,
 		GroupFocusChangeRequested,
+		ImageUpdated,
 		KeyPressed,
 		ListSelectionChanged,
 		ListAccept,
