@@ -606,7 +606,11 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 		label->setAlignment(node["alignment"].asFloat());
 	}
 	if (node.hasKey("marquee")) {
-		label->setMarquee(node["marquee"].asBool());
+		if (node["marquee"].getType() == ConfigNodeType::Bool) {
+			label->setMarquee(node["marquee"].asBool() ? std::optional<float>(10.0f) : std::nullopt);
+		} else {
+			label->setMarquee(node["marquee"].asFloat());
+		}
 	}
 	if (node.hasKey("colour")) {
 		label->setColour(getColour(node["colour"].asString()));
@@ -628,7 +632,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
-	result.entries.emplace_back("Marquee", "marquee", "bool", "");
+	result.entries.emplace_back("Marquee", "marquee", "std::optional<float>", "");
 	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
 	result.entries.emplace_back("Colour", "colour", "std::optional<Halley::Colour4f>", "");
 
