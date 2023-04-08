@@ -22,7 +22,10 @@ void UIImage::draw(UIPainter& painter) const
 	
 	if (sprite.hasMaterial()) {
 		if (layerAdjustment != 0 || worldClip) {
-			auto p2 = painter.withAdjustedLayer(layerAdjustment).withClip(worldClip);
+			auto p2 = painter.withAdjustedLayer(layerAdjustment);
+			if (worldClip) {
+				p2 = p2.withClip(worldClip);
+			}
 			p2.draw(sprite);
 		} else {
 			painter.draw(sprite);
