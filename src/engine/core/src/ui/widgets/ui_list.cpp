@@ -182,7 +182,7 @@ std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, Localis
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
-	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
+	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 1, border, fillFlags);
 	return addItem(item);
 }
 
