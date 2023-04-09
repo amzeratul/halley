@@ -252,7 +252,7 @@ void DX11Texture::doCopyToImage(Painter& painter, Image& image) const
 	} else {
 		// Can't read on CPU, copy to a temporary texture first
 		auto temp = video.createTexture(getSize());
-		auto desc = TextureDescriptor(getSize(), TextureFormat::RGBA);
+		auto desc = TextureDescriptor(getSize(), descriptor.format);
 		desc.canBeReadOnCPU = true;
 		temp->startLoading();
 		temp->load(std::move(desc));
@@ -274,12 +274,30 @@ void DX11Texture::copyToImageDirectly(Image& image) const
 	const size_t w = image.getSize().x;
 	const char* src = static_cast<const char*>(subResource.pData);
 	const auto dst = image.getPixels4BPP();
-	for (size_t y = 0; y < h; ++y) {
-		const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * subResource.RowPitch);
-		const auto dstPx = dst.subspan(y * w, w);
-		for (size_t x = 0; x < w; ++x) {
-			dstPx[x] = srcPx[x];
+
+	if (descriptor.format == TextureFormat::RGBA) {
+		for (size_t y = 0; y < h; ++y) {
+			const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * subResource.RowPitch);
+			const auto dstPx = dst.subspan(y * w, w);
+			for (size_t x = 0; x < w; ++x) {
+				dstPx[x] = srcPx[x];
+			}
 		}
+	} else if (descriptor.format == TextureFormat::BGR565) {
+		for (size_t y = 0; y < h; ++y) {
+			const auto* srcPx = reinterpret_cast<const uint16_t*>(src + y * subResource.RowPitch);
+			const auto dstPx = dst.subspan(y * w, w);
+			for (size_t x = 0; x < w; ++x) {
+				const auto px = static_cast<uint32_t>(srcPx[x]);
+				const auto b = (px & 0x001F) << 19;
+				const auto g = (px & 0x07E0) << 5;
+				const auto r = (px & 0xF800) >> 8;
+				const auto a = static_cast<uint32_t>(0xFF) << 24;
+				dstPx[x] = r | g | b | a;
+			}
+		}
+	} else {
+		throw Exception("Unable to copy texture format to image: " + toString(descriptor.format), HalleyExceptions::VideoPlugin);
 	}
 
 	dc.Unmap(texture, 0);
