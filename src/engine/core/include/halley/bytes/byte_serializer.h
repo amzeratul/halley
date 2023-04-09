@@ -86,6 +86,20 @@ namespace Halley {
 		{
 			return toBytes([&value](Serializer& s) { s << value; }, options);
 		}
+		
+		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
+		static size_t getSize(const T& f, SerializerOptions options = {})
+		{
+			auto dry = Serializer(options);
+			f(dry);
+			return dry.getSize();
+		}
+
+		template <typename T, typename std::enable_if<!std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
+		static size_t getSize(const T& value, SerializerOptions options = {})
+		{
+			return getSize([&value](Serializer& s) { s << value; }, options);
+		}
 
 		size_t getSize() const { return size; }
 		size_t getPosition() const { return size; }
@@ -526,6 +540,7 @@ namespace Halley {
 
 		size_t getPosition() const { return pos; }
 		size_t getBytesLeft() const { return src.size() - pos; }
+		void skipBytes(size_t len) { pos += len; }
 
 	private:
 		size_t pos = 0;
