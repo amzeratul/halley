@@ -1,0 +1,48 @@
+uuid: 7acd8ed5-0f67-4ef9-841a-1c79bc540f08
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_debugConsole
+  image: halley_ui/ui_window.png
+  innerBorder: [5, 5, 5, 5]
+  size: [0, 0]
+children:
+  - uuid: e203a7c9-236b-4cbb-9bce-3c47d1715c25
+    proportion: 0
+    border: [0, 0, 0, 5]
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: afe89e2e-fbd4-489a-ae2d-fb83ec5d6ede
+        proportion: 3
+        widget:
+          class: label
+          text: Name
+      - uuid: a124b449-7fd3-4908-abb5-35ccdd27e487
+        proportion: 2
+        widget:
+          class: label
+          text: Value
+      - uuid: 965799a6-5c53-45dd-adda-51febc6fcad3
+        proportion: 1
+        widget:
+          class: label
+          text: Type
+      - uuid: b65c99a5-a64e-45e1-b307-386df5c3b3e2
+        proportion: 1
+        widget:
+          class: label
+          text: Scope
+  - uuid: 5562ac95-e6b9-4cbd-88dc-83a0ca1af620
+    proportion: 0
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: widget
+      id: scrollbar
+      size: [250, 0]
+    children: []

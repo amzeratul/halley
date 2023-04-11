@@ -7,6 +7,8 @@
 #include "src/ui/infini_canvas.h"
 
 namespace Halley {
+	class ScriptGraphVariableInspector;
+
 	class ScriptGraphEditor : public DrillDownAssetWindow {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
@@ -48,8 +50,10 @@ namespace Halley {
 
 		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
 		std::shared_ptr<InfiniCanvas> infiniCanvas;
+		std::shared_ptr<ScriptGraphVariableInspector> variableInspector;
 		bool modified = false;
 		bool autoAcquire = false;
+		bool variableInspectorEnabled = false;
 
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
