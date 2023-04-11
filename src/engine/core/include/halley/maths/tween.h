@@ -6,19 +6,37 @@
 namespace Halley {
 	enum class TweenCurve {
 		Linear,
-		Sinusoidal,
+		Sine,
+		SineIn,
+		SineOut,
+		Quadratic,
+		QuadraticIn,
+		QuadraticOut,
+		Cubic,
+		CubicIn,
+		CubicOut,
 		Sqrt,
-		Sine
+		SqrtIn,
+		SqrtOut
 	};
 
 	template <>
 	struct EnumNames<TweenCurve> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 13> operator()() const {
 			return{{
 				"linear",
-				"sinusoidal",
+				"sine",
+				"sineIn",
+				"sineOut",
+				"quadratic",
+				"quadraticIn",
+				"quadraticOut",
+				"cubic",
+				"cubicIn",
+				"cubicOut",
 				"sqrt",
-				"sine"
+				"sqrtIn",
+				"sqrtOut",
 			}};
 		}
 	};
@@ -27,17 +45,80 @@ namespace Halley {
 	class Tween {
 	public:
 
-		static T applyCurve(T t, TweenCurve curve)
+		template <TweenCurve curve>
+		constexpr static T applyInverseCurve(T t)
+		{
+			return 1.0f - Tween<T>::applyCurve<curve>(1.0f - t);
+		}
+
+		template <TweenCurve curve>
+		constexpr static T applyCurve(T t)
+		{
+			if constexpr (curve == TweenCurve::Linear) {
+				return t;
+			} else if constexpr (curve == TweenCurve::Sine) {
+				return (1.0f - std::cos(t * static_cast<float>(pi()))) * 0.5f;
+			} else if constexpr (curve == TweenCurve::SineIn) {
+				return applyInverseCurve<TweenCurve::SineOut>(t);
+			} else if constexpr (curve == TweenCurve::SineOut) {
+				return static_cast<T>(std::sin(t * static_cast<float>(pi()) * 0.5f));
+			} else if constexpr (curve == TweenCurve::Quadratic) {
+				return t < 0.5f ?
+					2.0f * applyCurve<TweenCurve::QuadraticIn>(t) :
+					1.0f - applyCurve<TweenCurve::QuadraticIn>(-2.0f * t + 2.0f) * 0.5f;
+			} else if constexpr (curve == TweenCurve::QuadraticIn) {
+				return t * t;
+			} else if constexpr (curve == TweenCurve::QuadraticOut) {
+				return applyInverseCurve<TweenCurve::QuadraticIn>(t);
+			} else if constexpr (curve == TweenCurve::Cubic) {
+				return t < 0.5f ?
+					4.0f * applyCurve<TweenCurve::CubicIn>(t) :
+					1.0f - applyCurve<TweenCurve::CubicIn>(-2.0f * t + 2.0f) * 0.5f;
+			} else if constexpr (curve == TweenCurve::CubicIn) {
+				return t * t * t;
+			} else if constexpr (curve == TweenCurve::CubicOut) {
+				return applyInverseCurve<TweenCurve::CubicIn>(t);
+			} else if constexpr (curve == TweenCurve::Sqrt) {
+				return t < 0.5f ?
+					applyCurve<TweenCurve::SqrtIn>(t) / sqrt(2.0f) :
+					1.0f - applyCurve<TweenCurve::SqrtIn>(-2.0f * t + 2.0f) * 0.5f;
+			} else if constexpr (curve == TweenCurve::SqrtIn) {
+				return static_cast<T>(std::sqrt(t));
+			} else if constexpr (curve == TweenCurve::SqrtOut) {
+				return applyInverseCurve<TweenCurve::SqrtIn>(t);
+			}
+			return t;
+		}
+
+		constexpr static T applyCurve(T t, TweenCurve curve)
 		{
 			switch (curve) {
 			case TweenCurve::Linear:
-				return t;
-			case TweenCurve::Sinusoidal:
-				return smoothCos(t);
-			case TweenCurve::Sqrt:
-				return static_cast<T>(std::sqrt(t));
+				return Tween<T>::applyCurve<TweenCurve::Linear>(t);
 			case TweenCurve::Sine:
-				return static_cast<T>(std::sin(t * static_cast<float>(pi()) * 0.5f));
+				return Tween<T>::applyCurve<TweenCurve::Sine>(t);
+			case TweenCurve::SineIn:
+				return Tween<T>::applyCurve<TweenCurve::SineIn>(t);
+			case TweenCurve::SineOut:
+				return Tween<T>::applyCurve<TweenCurve::SineOut>(t);
+			case TweenCurve::Quadratic:
+				return Tween<T>::applyCurve<TweenCurve::Quadratic>(t);
+			case TweenCurve::QuadraticIn:
+				return Tween<T>::applyCurve<TweenCurve::QuadraticIn>(t);
+			case TweenCurve::QuadraticOut:
+				return Tween<T>::applyCurve<TweenCurve::QuadraticOut>(t);
+			case TweenCurve::Cubic:
+				return Tween<T>::applyCurve<TweenCurve::Cubic>(t);
+			case TweenCurve::CubicIn:
+				return Tween<T>::applyCurve<TweenCurve::CubicIn>(t);
+			case TweenCurve::CubicOut:
+				return Tween<T>::applyCurve<TweenCurve::CubicOut>(t);
+			case TweenCurve::Sqrt:
+				return Tween<T>::applyCurve<TweenCurve::Sqrt>(t);
+			case TweenCurve::SqrtIn:
+				return Tween<T>::applyCurve<TweenCurve::SqrtIn>(t);
+			case TweenCurve::SqrtOut:
+				return Tween<T>::applyCurve<TweenCurve::SqrtOut>(t);
 			}
 			return t;
 		}
