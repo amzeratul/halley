@@ -16,6 +16,7 @@ UIPainter UIPainter::clone() const
 	auto result = UIPainter(*painter, mask, layer);
 	result.rootPainter = rootPainter ? rootPainter : this;
 	result.clip = clip;
+	result.currentPriority = currentPriority;
 	return result;
 }
 

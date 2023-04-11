@@ -23,10 +23,23 @@ children:
   - widget: { class: label, text: Auto Connect Pins }
     fill: centre
     border: [2, 0, 6, 10]
-- widget: { class: infiniCanvas, id: infiniCanvas }
+  - widget: { class: checkbox, id: variableInspectorEnabled }
+    fill: centre
+    border: [10, 0, 2, 10]
+  - widget: { class: label, text: Variable Inspector }
+    fill: centre
+    border: [2, 0, 6, 10]
+- widget: { class: widget }
   proportion: 1
-  sizer: { type: free }
-  children: []
+  children:
+  - widget: { class: infiniCanvas, id: infiniCanvas }
+    proportion: 1
+    sizer: { type: free }
+    children: []
+  - widget: { class: scriptingVariableInspector }
+    fill: bottom
+    border: [-510, 0, 0, 0]
+    children: []
 - widget: { class: widget, id: drillUpBar }
   sizer: { type: horizontal }
   border: [0, 6, 0, 0]
@@ -36,4 +49,5 @@ children:
   - widget: { class: button, id: ok, text: OK, size: [100, 16] }
     border: [0, 0, 3, 0]
   - widget: { class: button, id: cancel, text: Cancel, size: [100, 16] }
+
 ...

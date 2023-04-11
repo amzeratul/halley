@@ -4,6 +4,8 @@
 #include "halley/tools/project/project.h"
 #include "src/ui/infini_canvas.h"
 #include "src/ui/project_window.h"
+#include "src/assets/graph/script_graph_variable_inspector.h"
+
 using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback, Vector<String> entityTargets)
@@ -94,6 +96,8 @@ void ScriptGraphEditor::onMakeUI()
 		gizmoEditor->setZoom(zoom);
 	});
 
+	variableInspector = getWidgetAs<ScriptGraphVariableInspector>("ScriptGraphVariableInspector");
+
 	getWidget("toolbarGizmo")->clear();
 	getWidget("toolbarGizmo")->add(gizmoEditor->makeUI());
 
@@ -127,6 +131,13 @@ void ScriptGraphEditor::onMakeUI()
 	{
 		projectWindow.setSetting(EditorSettingType::Project, "autoConnectPins", ConfigNode(value));
 		gizmoEditor->setAutoConnectPins(value);
+	});
+
+	variableInspectorEnabled = projectWindow.getSetting(EditorSettingType::Project, "variableInspectorEnabled").asBool(true);
+	bindData("variableInspectorEnabled", variableInspectorEnabled, [=](bool value)
+	{
+		projectWindow.setSetting(EditorSettingType::Project, "variableInspectorEnabled", ConfigNode(value));
+		variableInspectorEnabled = value;
 	});
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=](const UIEvent& event)
@@ -262,6 +273,7 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		if (gizmoEditor) {
 			gizmoEditor->setState(nullptr);
 		}
+		variableInspector->updateVariables(ConfigNode());
 	} else {
 		if (!scriptState) {
 			scriptState = std::make_unique<ScriptState>();
@@ -281,6 +293,9 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		scriptGraph->setRoots(ScriptGraphNodeRoots(data["roots"]));
 
 		onCurNodeData(data["curNode"]);
+
+		const auto emptyNode = ConfigNode();
+		variableInspector->updateVariables(variableInspectorEnabled ? data["variables"] : emptyNode);
 	}
 }
 
@@ -316,6 +331,10 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 		if (!tryAutoAcquire()) {
 			getWidgetAs<UIDropdown>("instances")->setSelectedOption(0);
 		}
+	}
+
+	if (curEntities.empty()) {
+		variableInspector->updateVariables(ConfigNode());
 	}
 
 	refreshScriptEnum();

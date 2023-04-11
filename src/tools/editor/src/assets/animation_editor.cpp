@@ -210,7 +210,7 @@ void AnimationEditor::togglePlay()
 
 void AnimationEditor::updatePlayIcon()
 {
-	getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(gameResources, animationDisplay->isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png"));
+	getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(factory.getResources(), animationDisplay->isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png"));
 }
 
 void AnimationEditor::updateActionPointList()

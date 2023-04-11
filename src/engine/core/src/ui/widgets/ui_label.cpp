@@ -42,13 +42,13 @@ void UILabel::update(Time t, bool moved)
 	if (flowLayout && lastCellWidth != getCellWidth()) {
 		updateText();
 	}
-	if (marquee) {
+	if (marqueeSpeed) {
 		updateMarquee(t);
 	}
 	if (text.checkForUpdates()) {
 		updateText();
 	}
-	if (moved || marquee) {
+	if (moved || marqueeSpeed) {
 		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x - marqueePos, 0.0f));
 	}
 }
@@ -59,10 +59,10 @@ void UILabel::setFontSize(float size)
 	updateMinSize();
 }
 
-void UILabel::setMarquee(bool enabled)
+void UILabel::setMarquee(std::optional<float> speed)
 {
-	marquee = enabled;
-	if (marquee) {
+	marqueeSpeed = speed;
+	if (marqueeSpeed) {
 		wordWrapped = false;
 	} else {
 		marqueePos = 0;
@@ -115,7 +115,7 @@ void UILabel::updateMarquee(Time t)
 			marqueeIdle -= t;
 			return;
 		}
-		constexpr float speed = 10.0f;
+		const float speed = *marqueeSpeed;
 		const float maxMarquee = unclippedWidth - maxWidth;
 		marqueePos += float(marqueeDirection) * float(t) * speed;
 		if (marqueePos < 0 || marqueePos > maxMarquee) {

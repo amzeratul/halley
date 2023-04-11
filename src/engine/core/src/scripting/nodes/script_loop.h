@@ -43,7 +43,13 @@ namespace Halley {
 
 	class ScriptLerpLoopData : public ScriptStateData<ScriptLerpLoopData> {
 	public:
-		bool running = false;
+		enum class State : uint8_t {
+			Idle,
+			Running,
+			Done
+		};
+
+		uint8_t state = 0;
 		float time;
 
 		ScriptLerpLoopData() = default;

@@ -37,11 +37,40 @@ IScriptNodeType::Result ScriptSetPosition::doUpdate(ScriptEnvironment& environme
 
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Set the subworld of ");
+	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(" to ");
+	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	return result.moveResults();
+}
+
+IScriptNodeType::Result ScriptSetSubworld::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2));
+	const auto subWorld = readDataPin(environment, node, 3).asInt(0);
+	transform->setSubWorld(subWorld);
+
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
 gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::array<PinType, 5>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -55,9 +84,27 @@ std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(
 	return result.moveResults();
 }
 
-String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
+String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Position of " + getConnectedNodeName(world, node, graph, 0) + " + " + getConnectedNodeName(world, node, graph, 2);
+	if (elementIdx == 1 || elementIdx == 3) {
+		return "Position of " + getConnectedNodeName(world, node, graph, 0) + " + " + getConnectedNodeName(world, node, graph, 2);
+	} else {
+		return "Subworld of " + getConnectedNodeName(world, node, graph, 0);
+	}
+}
+
+String ScriptGetPosition::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "World Position";
+	} else if (elementIdx == 2) {
+		return "Offset";
+	} else if (elementIdx == 3) {
+		return "Position Vector";
+	} else if (elementIdx == 4) {
+		return "SubWorld";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
 ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -66,7 +113,13 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 
 	const auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0));
 	if (transform) {
-		return (WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()) + offset).toConfigNode();
+		if (pinN == 1) {
+			return (WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()) + offset).toConfigNode();
+		} else if (pinN == 3) {
+			return ConfigNode(transform->getGlobalPosition() + offset);
+		} else if (pinN == 4) {
+			return ConfigNode(transform->getSubWorld());
+		}
 	}
 	return ConfigNode();
 }

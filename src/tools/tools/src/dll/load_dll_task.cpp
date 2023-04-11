@@ -60,15 +60,19 @@ std::optional<String> LoadDLLTask::getAction()
 
 void LoadDLLTask::doAction(TaskSet& taskSet)
 {
-	switch (status) {
-	case ProjectDLL::Status::DLLNotFound:
-	case ProjectDLL::Status::DLLVersionTooLow:
-	case ProjectDLL::Status::InvalidDLL:
-		projectWindow.buildGame();
-		return;
+	auto& pw = projectWindow;
+	Concurrent::execute([&pw, status = status]()
+	{
+		switch (status) {
+		case ProjectDLL::Status::DLLNotFound:
+		case ProjectDLL::Status::DLLVersionTooLow:
+		case ProjectDLL::Status::InvalidDLL:
+			pw.buildGame();
+			return;
 
-	case ProjectDLL::Status::DLLVersionTooHigh:
-		projectWindow.updateEditor();
-		return;
-	}
+		case ProjectDLL::Status::DLLVersionTooHigh:
+			pw.updateEditor();
+			return;
+		}
+	});
 }

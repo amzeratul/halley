@@ -59,5 +59,9 @@ std::optional<String> UpdateEditorTask::getAction()
 
 void UpdateEditorTask::doAction(TaskSet& taskSet)
 {
-	projectWindow.updateEditor();
+	auto& pw = projectWindow;
+	Concurrent::execute([&pw]()
+	{
+		pw.updateEditor();
+	});
 }

@@ -1,0 +1,36 @@
+uuid: 0b51fb01-9a5f-4fe5-96c3-fed337b0ddbc
+proportion: 0
+border: [0, 0, 0, 0]
+sizer:
+  columnProportions: []
+widget:
+  childLayerAdjustment: 0
+  class: widget
+  fill: [fillHorizontal]
+  size: [500, 20]
+children:
+  - uuid: 03601e8b-28ea-4f29-9e05-98f5ac242e9f
+    proportion: 3
+    widget:
+      class: label
+      id: name
+      text: VariableName
+  - uuid: 238b0ecf-e514-462b-ae6d-a6580f0c068d
+    proportion: 2
+    widget:
+      class: label
+      id: value
+      text: Value
+  - uuid: 9de936ee-f9d2-4213-97cf-3048033238f2
+    proportion: 1
+    widget:
+      class: label
+      id: type
+      text: Type
+  - uuid: ba4a2b54-526a-4792-aca1-5f1349f60349
+    proportion: 1
+    widget:
+      class: label
+      id: scope
+      text: Scope
+fill: [fillHorizontal, centreVertical]

@@ -8,6 +8,7 @@ PopupWindow::PopupWindow(String id)
 	setAnchor(UIAnchor());
 	setInteractWithMouse(true);
 	setMouseBlocker(true);
+	setChildLayerAdjustment(5);
 }
 
 void PopupWindow::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)

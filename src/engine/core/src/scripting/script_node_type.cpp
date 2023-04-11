@@ -336,6 +336,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptComparison>());
 	addScriptNode(std::make_unique<ScriptArithmetic>());
 	addScriptNode(std::make_unique<ScriptValueOr>());
+	addScriptNode(std::make_unique<ScriptConditionalOperator>());
 	addScriptNode(std::make_unique<ScriptLerp>());
 	addScriptNode(std::make_unique<ScriptAdvanceTo>());
 	addScriptNode(std::make_unique<ScriptSetVariable>());
@@ -368,6 +369,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptUIModal>());
 	addScriptNode(std::make_unique<ScriptUIInWorld>());
 	addScriptNode(std::make_unique<ScriptSetPosition>());
+	addScriptNode(std::make_unique<ScriptSetSubworld>());
 	addScriptNode(std::make_unique<ScriptGetPosition>());
 	addScriptNode(std::make_unique<ScriptSpawnEntity>());
 	addScriptNode(std::make_unique<ScriptDestroyEntity>());

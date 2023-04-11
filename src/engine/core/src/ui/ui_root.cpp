@@ -308,6 +308,13 @@ Vector2f UIRoot::getLastMousePos() const
 	return lastMousePos;
 }
 
+void UIRoot::releaseWeakPtrs()
+{
+	currentFocus = {};
+	currentMouseOver = {};
+	mouseExclusive = {};
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse

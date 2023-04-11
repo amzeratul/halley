@@ -27,7 +27,7 @@ namespace Halley {
 		void setWordWrapped(bool wrapped);
 		bool isWordWrapped() const;
 		bool isClipped() const;
-		void setMarquee(bool enabled);
+		void setMarquee(std::optional<float> marqueeSpeed);
 		void setFlowLayout(bool flow);
 
 		void setAlignment(float alignment);
@@ -61,10 +61,10 @@ namespace Halley {
 		float maxHeight = std::numeric_limits<float>::infinity();
 		bool wordWrapped = true;
 		bool needsClip = false;
-		bool marquee = false;
 		bool flowLayout = false;
 
 		Time marqueeIdle;
+		std::optional<float> marqueeSpeed;
 		int marqueeDirection = -1;
 		float marqueePos = 0;
 		float unclippedWidth;

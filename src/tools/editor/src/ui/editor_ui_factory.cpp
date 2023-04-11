@@ -18,6 +18,7 @@
 #include "src/scene/entity_list.h"
 #include "src/scene/entity_validator_ui.h"
 #include "src/scene/scene_editor_canvas.h"
+#include "src/assets/graph/script_graph_variable_inspector.h"
 using namespace Halley;
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName)
@@ -45,6 +46,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); });
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
+	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node);  });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -199,6 +201,14 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeColourPickerDisplay(const ConfigN
 	auto widget = std::make_shared<ColourPickerDisplay>(std::move(id), size, getResources(), material);
 
 	return widget;	
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeScriptingVariableInspector(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto widget = std::make_shared<ScriptGraphVariableInspector>(*this);
+	return widget;
 }
 
 void EditorUIFactory::loadColourSchemes()

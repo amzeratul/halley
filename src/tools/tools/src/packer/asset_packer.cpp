@@ -205,7 +205,11 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 	std::unique_ptr<AssetPack> oldPack;
 	auto reader = std::make_unique<ResourceDataReaderFileSystem>(dst);
 	if (reader->size() > 0) {
-		oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
+		try {
+			oldPack = std::make_unique<AssetPack>(std::move(reader), packListing.getEncryptionKey(), true);
+		} catch (...) {
+			// Just ignore it if it fails to load asset pack for whatever reason
+		}
 	}
 	reader = {};
 

@@ -222,6 +222,7 @@ void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 		}
 		project.clearCachedAssetPreviews();
 		assetPreviewGenerator = {};
+		getRoot()->releaseWeakPtrs();
 	}
 
 	updateDLLStatus(status);

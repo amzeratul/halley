@@ -72,6 +72,8 @@ namespace Halley {
 
 		Vector2f getLastMousePos() const;
 
+		void releaseWeakPtrs();
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
