@@ -14,23 +14,27 @@ children:
     widget:
       class: label
       id: name
+      maxWidth: 200
       text: VariableName
   - uuid: 238b0ecf-e514-462b-ae6d-a6580f0c068d
     proportion: 2
     widget:
       class: label
       id: value
+      maxWidth: 130
       text: Value
   - uuid: 9de936ee-f9d2-4213-97cf-3048033238f2
     proportion: 1
     widget:
       class: label
       id: type
+      maxWidth: 60
       text: Type
   - uuid: ba4a2b54-526a-4792-aca1-5f1349f60349
     proportion: 1
     widget:
       class: label
       id: scope
+      maxWidth: 60
       text: Scope
 fill: [fillHorizontal, centreVertical]
