@@ -290,9 +290,9 @@ void Particles::spawn(size_t n, float time)
 	if (particles.size() < size) {
 		particles.resize(size);
 		sprites.resize(size);
-		if (isAnimated()) {
-			animationPlayers.resize(size, AnimationPlayerLite(baseAnimation));
-		}
+	}
+	if (animationPlayers.size() < size && isAnimated()) {
+		animationPlayers.resize(size, AnimationPlayerLite(baseAnimation));
 	}
 
 	const float timeSlice = time / n;
