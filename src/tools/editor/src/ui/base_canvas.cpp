@@ -147,8 +147,12 @@ void BaseCanvas::onMouseOver(Vector2f mousePos)
 
 	UIClickable::onMouseOver(mousePos);
 
-	if (mouseMirror && !dragging) {
-		mouseMirror->onMouseOver(mousePos);
+	if (mouseMirror) {
+		if (dragging) {
+			mouseMirror->onMouseLeft(mousePos);
+		} else {
+			mouseMirror->onMouseOver(mousePos);
+		}
 	}
 }
 

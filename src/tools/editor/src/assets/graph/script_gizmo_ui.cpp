@@ -170,6 +170,11 @@ void ScriptGizmoUI::onMouseOver(Vector2f mousePos)
 	updateSelectionBox();
 }
 
+void ScriptGizmoUI::onMouseLeft(Vector2f mousePos)
+{
+	inputState.mousePos = std::nullopt;
+}
+
 bool ScriptGizmoUI::ignoreClip() const
 {
 	return true;

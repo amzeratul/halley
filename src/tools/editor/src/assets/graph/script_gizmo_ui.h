@@ -36,6 +36,7 @@ namespace Halley {
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
         void onMouseOver(Vector2f mousePos) override;
+		void onMouseLeft(Vector2f mousePos) override;
 		bool ignoreClip() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canReceiveFocus() const override;
