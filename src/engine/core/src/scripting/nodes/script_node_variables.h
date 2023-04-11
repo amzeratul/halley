@@ -231,5 +231,35 @@ namespace Halley {
 
 		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
 	};
+
+	class ScriptToVector final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "toVector"; }
+		String getName() const override { return "To Vector"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/toVector.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+		
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
+	class ScriptFromVector final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "fromVector"; }
+		String getName() const override { return "From Vector"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/fromVector.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+		
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
 	
 }
