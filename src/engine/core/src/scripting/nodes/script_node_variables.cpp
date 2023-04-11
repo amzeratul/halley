@@ -322,6 +322,9 @@ String ScriptArithmetic::getShortDescription(const World* world, const ScriptGra
 	if (op[0] >= 'a' && op[0] <= 'z') {
 		// If starts with a lower case letter, assume it's in function form
 		return op + "(" + a + ", " + b + ")";
+	} else if (a == "<empty>" && op == "-") {
+		// Prefix form
+		return op + addParentheses(std::move(b));
 	} else {
 		// Otherwise, assume infix form
 		return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
@@ -370,6 +373,10 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 		return ConfigNode(MathOps::apply(op, a.asInt64(0), b.asInt64(0)));
 	} else if (type == ConfigNodeType::Int) {
 		return ConfigNode(MathOps::apply(op, a.asInt(0), b.asInt(0)));
+	} else if (type == ConfigNodeType::Float2) {
+		return ConfigNode(MathOps::apply(op, a.asVector2f({}), b.asVector2f({})));
+	} else if (type == ConfigNodeType::Int2) {
+		return ConfigNode(MathOps::apply(op, a.asVector2i({}), b.asVector2i({})));
 	} else {
 		Logger::logError("ScriptComparison node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType()));
 		return ConfigNode();
@@ -792,6 +799,99 @@ EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, con
 	EntityId result;
 	result.value = data.asEntityId({}).value;
 	return result;
+}
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptToVector::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptToVector::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "(" + getConnectedNodeName(world, node, graph, 0) + ", " + getConnectedNodeName(world, node, graph, 1) + ")";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Return (");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(", ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(")");
+	return str.moveResults();
+}
+
+String ScriptToVector::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "x";
+	} else if (elementIdx == 1) {
+		return "y";
+	} else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptToVector::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto x = readDataPin(environment, node, 0).asFloat(0);
+	const auto y = readDataPin(environment, node, 1).asFloat(0);
+	return ConfigNode(Vector2f(x, y));
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptFromVector::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return getConnectedNodeName(world, node, graph, 0) + ".x";
+	} else if (elementIdx == 2) {
+		return getConnectedNodeName(world, node, graph, 0) + ".y";
+	}
+	return "";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Split vector ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptFromVector::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "x";
+	} else if (elementIdx == 2) {
+		return "y";
+	} else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptFromVector::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	if (pinN == 1) {
+		return ConfigNode(readDataPin(environment, node, 0).asVector2f({}).x);
+	} else if (pinN == 2) {
+		return ConfigNode(readDataPin(environment, node, 0).asVector2f({}).y);
+	} else {
+		return {};
+	}
 }
 
 
