@@ -1,6 +1,7 @@
 #include "halley/audio/audio_clip_streaming.h"
 #include "audio_mixer.h"
 #include "halley/support/logger.h"
+#include "halley/time/stopwatch.h"
 
 using namespace Halley;
 
@@ -50,7 +51,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 0.0f);
 	}
 
 	resampler->setRate(sourceSampleRate, outSampleRate);
@@ -61,7 +62,7 @@ void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src
 void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 0.0f);
 	}
 
 	doAddInterleavedSamplesWithResample(src);
@@ -152,12 +153,12 @@ void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst o
 	}
 
 	const auto nOut = resampler->numOutputSamples(src.size());
-	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
+	const auto minBufferSize = nextPowerOf2(nOut + numChannels * 2); // Not sure if the extra samples per channel are needed
 	if (resampleDstBuffer.size() < minBufferSize) {
 		resampleDstBuffer.resize(minBufferSize);
 	}
 
-	const auto dst = gsl::span<float>(resampleDstBuffer.data(), nOut);
+	const auto dst = resampleDstBuffer.span();
 	const auto result = resampler->resampleInterleaved(src, dst);
 
 	const size_t srcSamplesRead = result.nRead * numChannels;
