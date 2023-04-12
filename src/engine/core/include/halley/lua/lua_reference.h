@@ -97,4 +97,19 @@ namespace Halley {
 		}
 	};
 
+	class LuaExpression {
+	public:
+		LuaExpression(String expr = "");
+		const String& getExpression() { return expression; }
+		void setExpression(String expr);
+		bool isEmpty() const;
+
+		LuaReference& get(LuaState& state) const;
+
+	private:
+		String expression;
+		mutable std::shared_ptr<LuaReference> luaRef;
+		LuaState* state = nullptr;
+	};
+
 }

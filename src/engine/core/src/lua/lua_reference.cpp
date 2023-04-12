@@ -107,3 +107,34 @@ LuaReference LuaReference::operator[](const String& name) const
 	lua_remove(lua->getRawState(), -2);
 	return LuaReference(*lua);
 }
+
+LuaExpression::LuaExpression(String expr)
+{
+	setExpression(std::move(expr));
+}
+
+void LuaExpression::setExpression(String expr)
+{
+	expression = std::move(expr);
+	expression.trimBoth();
+	luaRef.reset();
+}
+
+bool LuaExpression::isEmpty() const
+{
+	return expression.isEmpty();
+}
+
+LuaReference& LuaExpression::get(LuaState& state) const
+{
+	if (!luaRef || !luaRef->isValid()) {
+		auto stack = LuaStackOps(state);
+		if (expression.startsWith("return") || expression.contains('\n')) {
+			stack.load(expression);
+		} else {
+			stack.load("return " + expression);
+		}
+		luaRef = std::make_shared<LuaReference>(state, true);
+	}
+	return *luaRef;
+}

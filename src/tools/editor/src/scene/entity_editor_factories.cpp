@@ -15,7 +15,7 @@ using namespace Halley;
 class ComponentEditorTextFieldFactory : public IComponentEditorFieldFactory {
 public:
 	ComponentEditorTextFieldFactory(String fieldName)
-		: fieldName(fieldName)
+		: fieldName(std::move(fieldName))
 	{}
 
 	String getFieldType() override
@@ -41,6 +41,46 @@ public:
 			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
+
+		return field;
+	}
+
+private:
+	String fieldName;
+};
+
+class ComponentEditorCodeEditorFactory : public IComponentEditorFieldFactory {
+public:
+	ComponentEditorCodeEditorFactory(String fieldName)
+		: fieldName(std::move(fieldName))
+	{}
+
+	String getFieldType() override
+	{
+		return fieldName;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(String());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+		const auto& defaultValue = pars.getStringDefaultParameter();
+
+		String value = data.getFieldData().asString("");
+
+		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
+		field->bindData("textValue", value, [&context, data](String newVal)
+		{
+			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		field->setMultiLine(true);
+		field->setMinSize(Vector2f(60, 100));
 
 		return field;
 	}
@@ -1706,6 +1746,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::String"));
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::ScriptTargetId"));
+	factories.emplace_back(std::make_unique<ComponentEditorCodeEditorFactory>("Halley::LuaExpression"));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int8_t", static_cast<float>(std::numeric_limits<int8_t>::min()), static_cast<float>(std::numeric_limits<int8_t>::max())));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int16_t", static_cast<float>(std::numeric_limits<int16_t>::min()), static_cast<float>(std::numeric_limits<int16_t>::max())));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int", std::nullopt, std::nullopt));

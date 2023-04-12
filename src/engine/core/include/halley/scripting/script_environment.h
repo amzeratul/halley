@@ -8,6 +8,7 @@
 #include "halley/input/input_virtual.h"
 
 namespace Halley {
+	class LuaState;
 	class UIWidget;
 	class InputDevice;
 	class ScriptState;
@@ -54,6 +55,11 @@ namespace Halley {
         virtual LockStatus getLockStatus(EntityId playerId, EntityId targetId) const = 0;
         virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId) = 0;
 	};
+
+    class ILuaInterface : public IScriptEnvironmentInterface {
+    public:
+        virtual LuaState& getLuaState() = 0;
+    };
 
     class ScriptEnvironment: private IEntityFactoryContext {
     public:

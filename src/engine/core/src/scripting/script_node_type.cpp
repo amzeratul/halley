@@ -22,6 +22,7 @@
 #include "nodes/script_wait_for.h"
 #include "nodes/script_function.h"
 #include "nodes/script_meta.h"
+#include "nodes/script_lua.h"
 using namespace Halley;
 
 String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
@@ -382,4 +383,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptHasTags>());
 	addScriptNode(std::make_unique<ScriptToVector>());
 	addScriptNode(std::make_unique<ScriptFromVector>());
+	addScriptNode(std::make_unique<ScriptLuaExpression>());
+	addScriptNode(std::make_unique<ScriptLuaStatement>());
 }
