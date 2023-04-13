@@ -106,7 +106,7 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 	// 56 11111110 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	// 64 11111111 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	
-	const size_t nBits = size_t(std::max(fastLog2Ceil(val + 1), 1)) + (sign ? 1 : 0);
+	const size_t nBits = val == std::numeric_limits<uint64_t>::max() ? 64 : static_cast<size_t>(std::max(fastLog2Ceil(val + 1), 1)) + (sign ? 1 : 0);
 	const size_t nBytes = std::min((nBits - 1) / 7, size_t(8)) + 1; // Total length of this sequence
 	std::array<uint8_t, 9> buffer;
 	buffer.fill(0);
@@ -120,11 +120,11 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 
 	// Write header
 	// To generate the mask, we get 9 - nBytes to see how many zeroes we need (8 at 1 byte, 7 at 2 bytes, etc), generate that many "1"s, then xor that with 255 (0b11111111) to flip those bits
-	const size_t headerBits = std::min(nBytes, size_t(7));
+	const size_t headerBits = nBytes;
 	buffer[0] = uint8_t(255) ^ (uint8_t((1 << (9 - headerBits)) - 1));
 
 	// Write bits
-	size_t bitsAvailableOnByte = 8 - headerBits;
+	size_t bitsAvailableOnByte = 8 - std::min(headerBits, size_t(8));
 	size_t bitsToWrite = nBits;
 	size_t curPos = 0;
 
@@ -289,7 +289,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	} else {
 		nBytes = 9;
 	}
-	const size_t headerBits = std::min(nBytes, size_t(7));
+	const size_t headerBits = std::min(nBytes, size_t(8));
 
 	// Read rest of the data
 	if (nBytes > 1) {
