@@ -72,6 +72,10 @@ EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationCo
 		return result;
 	}
 
+	if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined) {
+		return {};
+	}
+
 	const auto& value = node.asString("");
 	const auto uuid = value.isEmpty() ? UUID() : UUID(value);
 	if (!context.entityContext || !uuid.isValid()) {
