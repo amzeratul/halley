@@ -521,6 +521,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(0.8f, 0.51f, 0.97f);
 	case ProfilerEventType::GPU:
 		return Colour4f(1.0f, 0.85f, 0.1f);
+	case ProfilerEventType::ExternalCode:
+		return Colour4f(0.8f, 0.4f, 0.8f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}

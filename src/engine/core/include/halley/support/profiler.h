@@ -42,7 +42,10 @@ namespace Halley {
 
 		StatsView,
 
-		Game
+		Game,
+
+        ExternalCode,
+        UserDefined
     };	
 
     class ProfilerData {

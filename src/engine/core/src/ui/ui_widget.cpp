@@ -156,12 +156,14 @@ void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 void UIWidget::layout(IUIElementListener* listener)
 {
 	checkActive();
-	Vector2f minimumSize = getLayoutMinimumSize(false);
-	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
-	setRect(Rect4f(getPosition(), getPosition() + targetSize), listener);
+	if (isActive()) {
+		Vector2f minimumSize = getLayoutMinimumSize(false);
+		Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
+		setRect(Rect4f(getPosition(), getPosition() + targetSize), listener);
 
-	alignAtAnchor();
-	onLayout();
+		alignAtAnchor();
+		onLayout();
+	}
 }
 
 void UIWidget::alignAt(const UIAnchor& a)
