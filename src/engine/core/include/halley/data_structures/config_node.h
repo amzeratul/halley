@@ -22,6 +22,10 @@ namespace Halley {
 	class Deserializer;
 	class ConfigNode;
 
+	namespace Hash {
+		class Hasher;
+	}
+
 	template<typename T>
 	struct HasToConfigNode
 	{
@@ -502,6 +506,8 @@ namespace Halley {
 		static ConfigNodeType getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined);
 		static bool isScalarType(ConfigNodeType type, bool acceptUndefined);
 		static bool isVector2Type(ConfigNodeType type, bool acceptUndefined);
+
+		void feedToHash(Hash::Hasher& hasher) const;
 
 	private:
 		union {

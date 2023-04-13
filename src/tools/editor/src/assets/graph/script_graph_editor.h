@@ -66,6 +66,7 @@ namespace Halley {
 		Vector<String> entityTargets;
 
 		void setListeningToClient(bool listening);
+		void refreshScriptEnumHandle();
 		void setListeningToState(std::pair<size_t, int64_t> entityId);
 
 		void onScriptEnum(size_t connId, ConfigNode data);

@@ -208,6 +208,7 @@ namespace Halley {
 
     private:
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
+        void terminateStateWith(const ScriptGraph* scriptGraph);
         void doTerminateState();
         void runDestructor(GraphNodeId nodeId);
 

@@ -104,9 +104,12 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 	s >> parentNode;
 }
 
-void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
+void ScriptGraphNode::feedToHash(Hash::Hasher& hasher) const
 {
 	BaseGraphNode::feedToHash(hasher);
+	if (parentNode) {
+		hasher.feed(*parentNode);
+	}
 }
 
 void ScriptGraphNode::offsetNodes(GraphNodeId offset)
@@ -273,7 +276,13 @@ std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
 
 void ScriptGraph::reload(Resource&& resource)
 {
+	previousVersion = {};
+	auto prev = std::make_shared<ScriptGraph>(std::move(*this));
+
 	*this = dynamic_cast<ScriptGraph&&>(resource);
+	previousVersion = std::move(prev);
+
+	Logger::logDev("Reloaded ScriptGraph " + toString(previousVersion->hash, 16) + " -> " + toString(hash, 16));
 }
 
 void ScriptGraph::makeDefault()
@@ -496,12 +505,25 @@ ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 	return result;
 }
 
+const ScriptGraph* ScriptGraph::getPreviousVersion(uint64_t hash) const
+{
+	if (!previousVersion || previousVersion->hash != hash) {
+		return nullptr;
+	}
+	return previousVersion.get();
+}
+
 void ScriptGraph::finishGraph()
 {
 	if (nodes.empty()) {
 		makeBaseGraph();
 	}
 
+	updateHash();
+}
+
+void ScriptGraph::updateHash()
+{
 	Hash::Hasher hasher;
 	GraphNodeId i = 0;
 	hasher.feed(nodes.size());

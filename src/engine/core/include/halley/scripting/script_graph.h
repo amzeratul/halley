@@ -21,7 +21,7 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void feedToHash(Hash::Hasher& hasher) override;
+		void feedToHash(Hash::Hasher& hasher) const override;
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void clearType() const;
@@ -115,6 +115,7 @@ namespace Halley {
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force = false) const;
 		void clearTypes();
 		void finishGraph();
+		void updateHash();
 
 		GraphNodeId getNodeRoot(GraphNodeId nodeId) const;
 		const ScriptGraphNodeRoots& getRoots() const;
@@ -126,6 +127,8 @@ namespace Halley {
 
 		FunctionParameters getFunctionParameters() const;
 
+		const ScriptGraph* getPreviousVersion(uint64_t hash) const;
+
 	private:
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
@@ -135,6 +138,8 @@ namespace Halley {
 		mutable uint64_t lastAssignTypeHash = 1;
 
 		ScriptGraphNodeRoots roots;
+
+		std::shared_ptr<ScriptGraph> previousVersion;
 
 		GraphNodeId findNodeRoot(GraphNodeId nodeId) const;
 		void generateRoots();

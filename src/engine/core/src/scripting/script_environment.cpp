@@ -49,6 +49,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 	const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
 	if (!graphState.hasStarted() || hashChanged) {
+		if (graphState.hasStarted()) {
+			// i.e. we're here because the script changed
+			terminateStateWith(currentGraph->getPreviousVersion(graphState.getGraphHash()));
+		}
+
 		graphState.start(currentGraph->getHash());
 		graphState.prepareStates(serializationContext, time);
 		if (currentGraph->getStartNode()) {
@@ -161,6 +166,18 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 	return true;
 }
 
+void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
+{
+	if (scriptGraph) {
+		const auto* prevGraph = currentGraph;
+		currentGraph = scriptGraph;
+		doTerminateState();
+		currentGraph = prevGraph;
+		Logger::logDev("Script restarted after changing");
+	} else {
+		Logger::logError("Could not terminate state properly, previous state is missing?");
+	}
+}
 
 void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
 {
@@ -180,59 +197,6 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentState = nullptr;
 	currentEntityVariables = nullptr;
 	currentEntity = EntityId();
-}
-
-ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
-{
-	currentGraph = graphState.getScriptGraphPtr();
-	currentState = &graphState;
-	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(nodeTypeCollection);
-	currentEntity = curEntity;
-
-	ConfigNode result = [&] () -> ConfigNode {
-		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
-		const auto& nodeType = node.getNodeType();
-		if (pinId == static_cast<GraphPinId>(-1)) {
-			return nodeType.getDevConData(*this, node, graphState.getNodeState(nodeId).data);
-		} else {
-			const auto& pinConfig = nodeType.getPinConfiguration(node)[pinId];
-			if (pinConfig.type == GraphElementType(ScriptNodeElementType::ReadDataPin)) {
-				if (pinConfig.direction == GraphNodePinDirection::Input) {
-					return readInputDataPin(node, pinId);
-				} else {
-					return readOutputDataPin(node, pinId);
-				}
-			} else if (pinConfig.type == GraphElementType(ScriptNodeElementType::TargetPin)) {
-				EntityId id;
-				if (pinConfig.direction == GraphNodePinDirection::Input) {
-					if (node.getPins()[pinId].hasConnection()) {
-						id = readInputEntityIdRaw(node, pinId);
-					} else {
-						id = readInputEntityId(node, pinId);
-					}
-				} else {
-					id = readOutputEntityId(node, pinId);
-				}
-				const auto entityRef = world.tryGetEntity(id);
-				if (id.isValid() && entityRef.isValid()) {
-					return ConfigNode("Entity \"" + entityRef.getName() + "\" (id " + toString(id.value) + ")");
-				} else {
-					return ConfigNode(String("Invalid entity"));
-				}
-			} else {
-				// No relevant data
-				return {};
-			}
-		}
-	}();
-
-	currentGraph = nullptr;
-	currentState = nullptr;
-	currentEntityVariables = nullptr;
-	currentEntity = EntityId();
-
-	return result;
 }
 
 void ScriptEnvironment::doTerminateState()
@@ -809,4 +773,57 @@ const ScriptVariables& ScriptEnvironment::getEntityVariables(EntityId entityId) 
 
 	static ScriptVariables dummy;
 	return dummy;
+}
+
+ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
+{
+	currentGraph = graphState.getScriptGraphPtr();
+	currentState = &graphState;
+	currentEntityVariables = &entityVariables;
+	currentGraph->assignTypes(nodeTypeCollection);
+	currentEntity = curEntity;
+
+	ConfigNode result = [&] () -> ConfigNode {
+		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
+		const auto& nodeType = node.getNodeType();
+		if (pinId == static_cast<GraphPinId>(-1)) {
+			return nodeType.getDevConData(*this, node, graphState.getNodeState(nodeId).data);
+		} else {
+			const auto& pinConfig = nodeType.getPinConfiguration(node)[pinId];
+			if (pinConfig.type == GraphElementType(ScriptNodeElementType::ReadDataPin)) {
+				if (pinConfig.direction == GraphNodePinDirection::Input) {
+					return readInputDataPin(node, pinId);
+				} else {
+					return readOutputDataPin(node, pinId);
+				}
+			} else if (pinConfig.type == GraphElementType(ScriptNodeElementType::TargetPin)) {
+				EntityId id;
+				if (pinConfig.direction == GraphNodePinDirection::Input) {
+					if (node.getPins()[pinId].hasConnection()) {
+						id = readInputEntityIdRaw(node, pinId);
+					} else {
+						id = readInputEntityId(node, pinId);
+					}
+				} else {
+					id = readOutputEntityId(node, pinId);
+				}
+				const auto entityRef = world.tryGetEntity(id);
+				if (id.isValid() && entityRef.isValid()) {
+					return ConfigNode("Entity \"" + entityRef.getName() + "\" (id " + toString(id.value) + ")");
+				} else {
+					return ConfigNode(String("Invalid entity"));
+				}
+			} else {
+				// No relevant data
+				return {};
+			}
+		}
+	}();
+
+	currentGraph = nullptr;
+	currentState = nullptr;
+	currentEntityVariables = nullptr;
+	currentEntity = EntityId();
+
+	return result;
 }

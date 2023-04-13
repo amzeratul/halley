@@ -3,6 +3,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/support/exception.h"
 #include "../file_formats/config_file_serialization_state.h"
+#include "halley/utils/hash.h"
 using namespace Halley;
 
 void EntityIdHolder::serialize(Serializer& s) const
@@ -1766,6 +1767,49 @@ bool ConfigNode::isScalarType(ConfigNodeType type, bool acceptUndefined)
 bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
 {
 	return type == ConfigNodeType::Int2 || type == ConfigNodeType::Float2 || (acceptUndefined && type == ConfigNodeType::Undefined);
+}
+
+void ConfigNode::feedToHash(Hash::Hasher& hasher) const
+{
+	switch (type) {
+	case ConfigNodeType::Int:
+	case ConfigNodeType::Bool:
+		hasher.feed(intData);
+		break;
+	case ConfigNodeType::Int2:
+		hasher.feed(vec2iData);
+		break;
+	case ConfigNodeType::Int64:
+	case ConfigNodeType::EntityId:
+		hasher.feed(int64Data);
+		break;
+	case ConfigNodeType::Float:
+		hasher.feed(floatData);
+		break;
+	case ConfigNodeType::Float2:
+		hasher.feed(vec2fData);
+		break;
+	case ConfigNodeType::Sequence:
+		for (const auto& e: asSequence()) {
+			e.feedToHash(hasher);
+		}
+		break;
+	case ConfigNodeType::Map:
+		for (const auto& [k, v]: asMap()) {
+			hasher.feed(k);
+			v.feedToHash(hasher);
+		}
+		break;
+	case ConfigNodeType::Bytes:
+		hasher.feedBytes(bytesData->byte_span());
+		break;
+	case ConfigNodeType::String:
+		hasher.feed(*strData);
+		break;
+	case ConfigNodeType::Undefined:
+		hasher.feed(0);
+		break;
+	}
 }
 
 void ConfigNode::applyMapDelta(const ConfigNode& delta)

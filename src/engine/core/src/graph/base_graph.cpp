@@ -5,6 +5,22 @@
 using namespace Halley;
 
 
+void BaseGraphNode::PinConnection::feedToHash(Hash::Hasher& hasher) const
+{
+	if (dstNode) {
+		hasher.feed(*dstNode);
+	}
+	hasher.feed(dstPin);
+}
+
+void BaseGraphNode::Pin::feedToHash(Hash::Hasher& hasher) const
+{
+	hasher.feed(connections.size());
+	for (auto& c: connections) {
+		c.feedToHash(hasher);
+	}
+}
+
 BaseGraphNode::BaseGraphNode()
 {}
 
@@ -55,10 +71,14 @@ void BaseGraphNode::deserialize(Deserializer& s)
 	s >> pins;
 }
 
-void BaseGraphNode::feedToHash(Hash::Hasher& hasher)
+void BaseGraphNode::feedToHash(Hash::Hasher& hasher) const
 {
 	hasher.feed(type);
-	// TODO: settings, pins
+	hasher.feed(pins.size());
+	for (const auto& pin: pins) {
+		pin.feedToHash(hasher);
+	}
+	settings.feedToHash(hasher);
 }
 
 bool BaseGraph::connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN) {

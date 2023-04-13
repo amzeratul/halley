@@ -23,6 +23,8 @@ namespace Halley {
 			void deserialize(Deserializer& s);
 
 			bool hasConnection() const;
+
+			void feedToHash(Hash::Hasher& hasher) const;
 		};
 		
 		struct Pin {
@@ -36,6 +38,8 @@ namespace Halley {
 			void deserialize(Deserializer& s);
 
 			bool hasConnection() const;
+
+			void feedToHash(Hash::Hasher& hasher) const;
 		};
 
 		BaseGraphNode();
@@ -83,7 +87,7 @@ namespace Halley {
 		virtual GraphNodePinType getPinType(GraphPinId idx) const = 0;
 		virtual gsl::span<const GraphNodePinType> getPinConfiguration() const = 0;
 
-		virtual void feedToHash(Hash::Hasher& hasher);
+		virtual void feedToHash(Hash::Hasher& hasher) const;
 
 	protected:
 		ConfigNode settings;
