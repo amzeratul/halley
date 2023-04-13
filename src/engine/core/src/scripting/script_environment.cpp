@@ -270,6 +270,11 @@ void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
 
 ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)
 {
+	if (!currentState->hasStarted()) {
+		currentState->start(currentGraph->getHash());
+		currentState->prepareStates(serializationContext, 0);
+	}
+
 	for (const auto s: thread.getStack()) {
 		auto& nThreads = currentState->getNodeState(s.node).threadCount;
 		assert(nThreads >= 1);

@@ -33,6 +33,8 @@ World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflect
 
 World::~World()
 {
+	terminating = true;
+
 	for (auto& tl: systems) {
 		for (auto& s: tl) {
 			s->deInit();
@@ -256,7 +258,7 @@ void World::doDestroyEntity(EntityId id)
 
 void World::doDestroyEntity(Entity* e)
 {
-	e->destroy();
+	e->destroy(*this);
 	entityDirty = true;
 }
 
@@ -469,6 +471,16 @@ bool World::isEditor() const
 	return editor;
 }
 
+void World::onEntityDestroyed(const UUID& uuid)
+{
+	uuidMap.erase(uuid);
+}
+
+bool World::isTerminating() const
+{
+	return terminating;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
@@ -635,7 +647,6 @@ void World::updateEntities()
 
 			// Remove
 			entityMap.freeId(entity.getEntityId().value);
-			uuidMap.erase(entity.getInstanceUUID());
 			deleteEntity(&entity);
 
 			// Put it at the back of the array, so it's removed when the array gets resized

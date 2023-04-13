@@ -53,9 +53,12 @@ namespace Halley {
 		
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
+		void setNetworkFactory(bool network);
+
 	private:
 		World& world;
 		Resources& resources;
+		bool networkFactory = false;
 
 		void updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context);
@@ -66,6 +69,7 @@ namespace Halley {
 
 		EntityRef tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
+		void destroyEntity(EntityRef entity);
 
 		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);

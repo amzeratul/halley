@@ -312,6 +312,11 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeStandaloneContext()
 	return std::make_shared<EntityFactoryContext>(world, resources, mask, true);
 }
 
+void EntityFactory::setNetworkFactory(bool network)
+{
+	networkFactory = network;
+}
+
 void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	assert(entity.isValid());
@@ -451,7 +456,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 			}
 		}
 		for (auto& c: toDelete) {
-			world.destroyEntity(c);
+			destroyEntity(c);
 		}
 	}
 	
@@ -501,7 +506,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		}
 	}
 	for (auto& c: toDelete) {
-		world.destroyEntity(c);
+		destroyEntity(c);
 	}
 }
 
@@ -539,6 +544,9 @@ EntityRef EntityFactory::instantiateEntity(const IEntityConcreteData& data, Enti
 	}
 	
 	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), context.getWorldPartition());
+	if (networkFactory) {
+		entity.setFromNetwork(true);
+	}
 	if (data.getPrefabUUID().isValid()) {
 		entity.setPrefab(context.getPrefab(), data.getPrefabUUID());
 	}
@@ -579,6 +587,14 @@ EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContex
 		throw Exception("Unable to find entity with UUID \"" + instanceUUID.toString() + "\"", HalleyExceptions::Entity);
 	}
 	return result;
+}
+
+void EntityFactory::destroyEntity(EntityRef entity)
+{
+	if (networkFactory) {
+		entity.setFromNetwork(false);
+	}
+	world.destroyEntity(entity);
 }
 
 std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask)

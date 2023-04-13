@@ -18,6 +18,7 @@ Entity::Entity()
 	, enabled(true)
 	, parentEnabled(true)
 	, selectable(true)
+	, fromNetwork(false)
 {
 
 }
@@ -268,11 +269,6 @@ EntityId Entity::getEntityId() const
 	return entityId;
 }
 
-void Entity::destroy()
-{
-	doDestroy(true);
-}
-
 void Entity::sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids)
 {
 	const size_t nChildren = children.size();
@@ -343,8 +339,7 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 
 std::optional<uint8_t> Entity::getOwnerPeerId() const
 {
-	const auto* networkComponent = tryGetComponent<NetworkComponent>();
-	if (networkComponent) {
+	if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
 		return networkComponent->ownerId;
 	} else if (parent) {
 		return parent->getOwnerPeerId();
@@ -353,18 +348,39 @@ std::optional<uint8_t> Entity::getOwnerPeerId() const
 	}
 }
 
-void Entity::doDestroy(bool updateParenting)
+void Entity::setFromNetwork(bool fromNetwork)
+{
+	this->fromNetwork = fromNetwork;
+	for (auto& c: children) {
+		c->setFromNetwork(fromNetwork);
+	}
+}
+
+void Entity::destroy(World& world)
+{
+	doDestroy(world, true);
+}
+
+void Entity::doDestroy(World& world, bool updateParenting)
 {
 	Expects(alive);
+
+	if (fromNetwork) {
+		if (!world.isTerminating()) {
+			throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
+		}
+	}
 	
 	if (updateParenting) {
 		setParent(nullptr, false);
 	}
 
 	for (auto& c: children) {
-		c->doDestroy(false);
+		c->doDestroy(world, false);
 	}
 	children.clear();
+
+	world.onEntityDestroyed(getInstanceUUID());
 	
 	alive = false;
 	dirty = true;

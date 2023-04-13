@@ -139,7 +139,6 @@ namespace Halley {
 		EntityId getEntityId() const;
 
 		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
-		void destroy();
 		
 		void sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids);
 
@@ -164,6 +163,7 @@ namespace Halley {
 		bool enabled : 1;
 		bool parentEnabled : 1;
 		bool selectable : 1;
+		bool fromNetwork : 1;
 		
 		uint8_t childrenRevision = 0;
 		uint8_t worldPartition = 0;
@@ -228,8 +228,10 @@ namespace Halley {
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
 		std::optional<uint8_t> getOwnerPeerId() const;
+		void setFromNetwork(bool fromNetwork);
 
-		void doDestroy(bool updateParenting);
+		void destroy(World& world);
+		void doDestroy(World& world, bool updateParenting);
 
 		bool hasBit(const World& world, int index) const;
 	};
@@ -818,6 +820,12 @@ namespace Halley {
 		{
 			Expects(entity);
 			return !entity->isRemote(*world);
+		}
+
+		void setFromNetwork(bool fromNetwork)
+		{
+			Expects(entity);
+			entity->setFromNetwork(fromNetwork);
 		}
 
 		bool isEmpty() const
