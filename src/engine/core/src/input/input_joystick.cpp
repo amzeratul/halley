@@ -189,6 +189,6 @@ void InputJoystick::updateVibration(Time t)
 	if (curLowVib != low || curHighVib != high) {
 		curLowVib = low;
 		curHighVib = high;
-		doSetVibration(low, high);
+		doSetVibration(clamp(low, 0.0f, 1.0f), clamp(high, 0.0f, 1.0f));
 	}
 }

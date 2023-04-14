@@ -527,6 +527,20 @@ void Image::preMultiply()
 	format = Format::RGBAPremultiplied;
 }
 
+void Image::flipVertically()
+{
+	Vector<char> buffer;
+	buffer.resize(w * getBytesPerPixel());
+
+	for (int y = 0; y < static_cast<int>(h) / 2; ++y) {
+		auto a = getPixelBytesRow(0, static_cast<int>(w), y);
+		auto b = getPixelBytesRow(0, static_cast<int>(w), static_cast<int>(h) - y - 1);
+		memcpy(buffer.data(), a.data(), a.size());
+		memcpy(a.data(), b.data(), a.size());
+		memcpy(b.data(), buffer.data(), a.size());
+	}
+}
+
 ResourceMemoryUsage Image::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
@@ -543,6 +557,11 @@ gsl::span<unsigned char> Image::getPixelBytes()
 gsl::span<const unsigned char> Image::getPixelBytes() const
 {
 	return gsl::span<const unsigned char>(px.get(), getByteSize());
+}
+
+gsl::span<unsigned char> Image::getPixelBytesRow(int x0, int x1, int y)
+{
+	return getPixelBytes().subspan((x0 + y * w) * size_t(getBytesPerPixel()), (x1 - x0) * size_t(getBytesPerPixel()));
 }
 
 gsl::span<const unsigned char> Image::getPixelBytesRow(int x0, int x1, int y) const

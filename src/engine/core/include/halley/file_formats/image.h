@@ -69,6 +69,7 @@ namespace Halley {
 
 		gsl::span<unsigned char> getPixelBytes();
 		gsl::span<const unsigned char> getPixelBytes() const;
+		gsl::span<unsigned char> getPixelBytesRow(int x0, int x1, int y);
 		gsl::span<const unsigned char> getPixelBytesRow(int x0, int x1, int y) const;
 		
 		int getPixel4BPP(Vector2i pos) const;
@@ -117,6 +118,8 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		void preMultiply();
+
+		void flipVertically();
 
 		ResourceMemoryUsage getMemoryUsage() const override;
 
