@@ -166,7 +166,10 @@ void XAudio2AudioOutput::closeAudioDevice()
 
 void XAudio2AudioOutput::startPlayback()
 {
-	voice = std::make_unique<XAudio2SourceVoice>(*this, format, callback);
+	voice = std::make_unique<XAudio2SourceVoice>(*this, format, [this] ()
+	{
+		consumeAudio();
+	});
 	voice->play();
 }
 
@@ -177,24 +180,16 @@ void XAudio2AudioOutput::stopPlayback()
 
 void XAudio2AudioOutput::onAudioAvailable()
 {
-	const size_t availableBytes = getAudioOutputInterface().getAvailable();
-	if (voice && availableBytes > 0) {
-		buffer.resize(availableBytes);
-		getAudioOutputInterface().output(gsl::as_writable_bytes(gsl::span<char>(buffer)), true);
-		const auto samples = gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4);
-		samplesSubmitted += samples.size() / format.numChannels;
-		voice->queueAudio(samples);
-	}
 }
 
 bool XAudio2AudioOutput::needsMoreAudio()
 {
-	return false;
+	return getAudioOutputInterface().getAvailable() < getAudioBytesNeeded(format, 2);
 }
 
 bool XAudio2AudioOutput::needsAudioThread() const
 {
-	return false;
+	return true;
 }
 
 uint64_t XAudio2AudioOutput::getSamplesPlayed() const
@@ -210,4 +205,31 @@ uint64_t XAudio2AudioOutput::getSamplesSubmitted() const
 IXAudio2& XAudio2AudioOutput::getXAudio2()
 {
 	return *xAudio2;
+}
+
+void XAudio2AudioOutput::consumeAudio()
+{
+	if (!voice) {
+		return;
+	}
+
+	auto sendBuffer = [&]()
+	{
+		const auto samples = gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4);
+		samplesSubmitted += samples.size() / format.numChannels;
+		voice->queueAudio(samples);
+	};
+
+	const size_t availableBytes = getAudioOutputInterface().getAvailable();
+	if (availableBytes > 0) {
+		buffer.resize(availableBytes);
+		getAudioOutputInterface().output(gsl::as_writable_bytes(gsl::span<char>(buffer)), true);
+		sendBuffer();
+
+		//Logger::logDev(toString(samplesSubmitted.load()) + " / " + toString(getSamplesPlayed()));
+	} else {
+		// Insert silence
+		buffer.resize(512, 0);
+		sendBuffer();
+	}
 }

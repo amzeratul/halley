@@ -93,5 +93,7 @@ namespace Halley
 		AudioSpec format;
 		Vector<char> buffer;
 		std::atomic_uint64_t samplesSubmitted = 0;
+
+		void consumeAudio();
 	};
 }
