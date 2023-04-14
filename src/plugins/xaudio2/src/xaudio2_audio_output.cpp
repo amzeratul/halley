@@ -41,6 +41,8 @@ XAudio2SourceVoice::XAudio2SourceVoice(XAudio2AudioOutput& audio, const AudioSpe
 	format.nAvgBytesPerSec = format.nChannels * format.nSamplesPerSec * 4;
 	format.cbSize = 0;
 
+	buffers.resize(4);
+
 	auto result = audio.getXAudio2().CreateSourceVoice(&voice, &format, 0, 1.0, this);
 	if (result != S_OK) {
 		throw Exception("Unable to create source voice", HalleyExceptions::AudioOutPlugin);
@@ -52,12 +54,6 @@ XAudio2SourceVoice::~XAudio2SourceVoice()
 	running = false;
 	voice->Stop();
 	voice->FlushSourceBuffers();
-
-	if (false) {
-		std::unique_lock<std::mutex> lock(mutex);
-		condition.wait(lock);
-	}
-
 	voice->DestroyVoice();
 }
 
@@ -66,12 +62,12 @@ void XAudio2SourceVoice::queueAudio(gsl::span<const float> samples)
 	XAUDIO2_BUFFER buffer;
 	ZeroMemory(&buffer, sizeof(buffer));
 
-	float* data = new float[samples.size()];
-	memcpy_s(data, samples.size_bytes(), samples.data(), samples.size_bytes());
+	auto* data = getBuffer(samples.size());
+	memcpy_s(data->buffer.data(), samples.size_bytes(), samples.data(), samples.size_bytes());
 
 	buffer.Flags = 0;
 	buffer.AudioBytes = static_cast<UINT32>(samples.size_bytes());
-	buffer.pAudioData = reinterpret_cast<const BYTE*>(data);
+	buffer.pAudioData = reinterpret_cast<const BYTE*>(data->buffer.data());
 	buffer.PlayBegin = 0;
 	buffer.PlayLength = 0;
 	buffer.LoopBegin = 0;
@@ -117,11 +113,28 @@ void XAudio2SourceVoice::OnBufferStart(void* pBufferContext)
 
 void XAudio2SourceVoice::OnBufferEnd(void* pBufferContext)
 {
-	delete[] reinterpret_cast<float*>(pBufferContext);
+	returnBuffer(static_cast<Buffer*>(pBufferContext));
 }
 
 void XAudio2SourceVoice::OnLoopEnd(void* pBufferContext) {}
 void XAudio2SourceVoice::OnVoiceError(void* pBufferContext, HRESULT Error) {}
+
+XAudio2SourceVoice::Buffer* XAudio2SourceVoice::getBuffer(size_t size)
+{
+	for (auto& b: buffers) {
+		if (!b.busy) {
+			b.busy = true;
+			b.buffer.resize(size);
+			return &b;
+		}
+	}
+	return nullptr;
+}
+
+void XAudio2SourceVoice::returnBuffer(Buffer* buffer)
+{
+	buffer->busy = false;
+}
 
 XAudio2AudioDevice::XAudio2AudioDevice(const String& name)
 	: name(name)
@@ -251,9 +264,10 @@ void XAudio2AudioOutput::consumeAudio()
 		const auto prevSubmitted = samplesSubmitted.load();
 		samplesSubmitted = prevSubmitted + buffer.size() / format.numChannels;
 		voice->queueAudio(buffer.span());
+		const auto samplesPlayed = voice->getSamplesPlayed();
 
 		std::unique_lock<std::mutex> lock(playbackMutex);
-		playbackPos = voice->getSamplesPlayed();
+		playbackPos = samplesPlayed;
 		lastSubmissionTime = std::chrono::high_resolution_clock::now();
 	};
 

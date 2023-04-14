@@ -42,11 +42,21 @@ void AudioResampler::setRate(float from, float to)
 {
 	this->from = from;
 	this->to = to;
-	speex_resampler_set_rate_frac(resampler.get(), lroundl(from), lroundl(to), lroundl(from), lroundl(to));
+	dirty = true;
+}
+
+void AudioResampler::applyPendingSampleRate()
+{
+	if (dirty) {
+		speex_resampler_set_rate_frac(resampler.get(), lroundl(from * 10), lroundl(to * 10), lroundl(from), lroundl(to));
+		dirty = false;
+	}
 }
 
 AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::span<float> dst, size_t channel)
 {
+	applyPendingSampleRate();
+
 	const auto origInLen = static_cast<uint32_t>(src.size() / nChannels);
 	const auto origOutLen = static_cast<uint32_t>(dst.size() / nChannels);
 	auto inLen = origInLen;
@@ -62,6 +72,8 @@ AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::s
 
 AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const float> src, gsl::span<float> dst)
 {
+	applyPendingSampleRate();
+
 	const auto origInLen = static_cast<uint32_t>(src.size() / nChannels);
 	const auto origOutLen = static_cast<uint32_t>(dst.size() / nChannels);
 	auto inLen = origInLen;
@@ -77,6 +89,8 @@ AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const float> 
 
 AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const short> src, gsl::span<short> dst)
 {
+	applyPendingSampleRate();
+
 	const auto origInLen = static_cast<uint32_t>(src.size() / nChannels);
 	const auto origOutLen = static_cast<uint32_t>(dst.size() / nChannels);
 	auto inLen = origInLen;
@@ -92,6 +106,8 @@ AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const short> 
 
 AudioResamplerResult AudioResampler::resampleNonInterleaved(gsl::span<const float> src, gsl::span<float> dst, const size_t numChannels)
 {
+	applyPendingSampleRate();
+
 	AudioResamplerResult result;
 	result.nRead = 0;
 	result.nWritten = 0;

@@ -33,9 +33,12 @@ namespace Halley
 
 	private:
 		std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> resampler;
-		size_t nChannels;
-		float from;
-		float to;
+		size_t nChannels = 0;
+		float from = 0;
+		float to = 0;
+		bool dirty = false;
+
+		void applyPendingSampleRate();
 	};
 	
 }

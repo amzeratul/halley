@@ -49,6 +49,15 @@ namespace Halley
 
 		std::condition_variable condition;
 		std::mutex mutex;
+
+		struct Buffer {
+			Vector<float> buffer;
+			bool busy = false;
+		};
+		Vector<Buffer> buffers;
+
+		Buffer* getBuffer(size_t size);
+		void returnBuffer(Buffer* buffer);
 	};
 
 	class XAudio2AudioDevice : public AudioDevice

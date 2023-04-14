@@ -15,7 +15,7 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	, samplesLeft(0)
 	, numChannels(numChannels)
 	, latencyTarget(2048)
-	, samplesLeftAvg(60)
+	, samplesLeftAvg(30)
 {
 	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
 }
@@ -208,7 +208,7 @@ void AudioClipStreaming::onStartFrame()
 		const float ratio = AB / ((1 + d) * AB - 2.0f * d * avgSamplesLeft);
 		const auto fromRate = sourceSampleRate * ratio;
 
-		//Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') /*+ " = " + toString(bufferedSamplesLeft) + " + " + toString(sentSamplesLeft)*/ + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
+		//Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
 		resampler->setRate(fromRate, outSampleRate);
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
