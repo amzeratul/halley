@@ -90,9 +90,11 @@ namespace Halley
 		void showComputerInfo() const;
 
 		void processEvents(Time time);
+		void clearPresses();
 		void runStartFrame(Time time);
 		void update(Time time);
 		void preUpdate(Time time);
+		std::pair<size_t, Time> preFixedUpdate(Time time);
 		void fixedUpdate(Time time);
 		void variableUpdate(Time time);
 		void postUpdate(Time time);

@@ -21,6 +21,7 @@
 #include "halley/entry/entry_point.h"
 #include "halley/graphics/render_snapshot.h"
 #include "halley/devcon/devcon_client.h"
+#include "halley/input/input_joystick.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
@@ -332,6 +333,23 @@ void Core::processEvents(Time time)
 	}
 }
 
+void Core::clearPresses()
+{
+	auto& input = *api->input;
+	const auto nJoy = input.getNumberOfJoysticks();
+	const auto nKey = input.getNumberOfKeyboards();
+	const auto nMice = input.getNumberOfMice();
+	for (size_t i = 0; i < nJoy; ++i) {
+		input.getJoystick(static_cast<int>(i))->clearPresses();
+	}
+	for (size_t i = 0; i < nKey; ++i) {
+		input.getKeyboard(static_cast<int>(i))->clearPresses();
+	}
+	for (size_t i = 0; i < nMice; ++i) {
+		input.getMouse(static_cast<int>(i))->clearPresses();
+	}
+}
+
 void Core::runStartFrame(Time time)
 {
 	if (currentStage) {
@@ -422,9 +440,28 @@ void Core::tickFrame(Time time)
 
 void Core::update(Time time)
 {
+	// Run pre update, then ONE fixed update (if needed), then variable, then remaining fixed updates, with input cleared. This makes sure that input is consistent.
 	preUpdate(time);
-	fixedUpdate(time);
+
+	auto [nFixed, fixedLen] = preFixedUpdate(time);
+	if (nFixed > 0) {
+		fixedUpdate(fixedLen);
+	}
+
 	variableUpdate(time);
+
+	if (nFixed > 1) {
+		clearPresses();
+		for (size_t n = 1; n < nFixed; ++n) {
+			fixedUpdate(fixedLen);
+			if (n == 4) {
+				// Don't let it run more than 5 fixed frames per variable frame
+				fixedUpdateTime = 0;
+				break;
+			}
+		}
+	}
+
 	postUpdate(time);
 }
 
@@ -443,30 +480,27 @@ void Core::postUpdate(Time time)
 	updateSystem(time);
 }
 
-void Core::fixedUpdate(Time time)
+std::pair<size_t, Time> Core::preFixedUpdate(Time time)
 {
 	if (running && currentStage) {
 		fixedUpdateTime += time;
 		const Time fixedUpdatePeriod = 1.0 / game->getFixedUpdateFPS();
-		size_t n = 0;
-		while ((fixedUpdateTime - fixedUpdatePeriod) >= -0.0001) {
-			fixedUpdateTime = std::max(fixedUpdateTime - fixedUpdatePeriod, 0.0);
+		const size_t nFixed = lroundl(std::floor((fixedUpdateTime + 0.0001) / fixedUpdatePeriod));
+		return { nFixed, fixedUpdatePeriod };
+	} else {
+		return { 0, 0 };
+	}
+}
 
-			ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
-			try {
-				currentStage->onFixedUpdate(fixedUpdatePeriod, *frameDataUpdate);
-			} catch (Exception& e) {
-				game->onUncaughtException(e, TimeLine::FixedUpdate);
-			}
+void Core::fixedUpdate(Time time)
+{
+	fixedUpdateTime = std::max(fixedUpdateTime - time, 0.0);
 
-			++n;
-			if (n == 5) {
-				// Don't let it run more than 5 fixed frames per variable frame
-				fixedUpdateTime = 0;
-			}
-		}
-
-		//Logger::logDev(toString(n));
+	ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
+	try {
+		currentStage->onFixedUpdate(time, *frameDataUpdate);
+	} catch (Exception& e) {
+		game->onUncaughtException(e, TimeLine::FixedUpdate);
 	}
 }
 
