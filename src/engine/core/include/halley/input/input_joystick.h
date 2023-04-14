@@ -73,10 +73,10 @@ namespace Halley {
 
 		virtual void update(Time t);
 
-		std::pair<float, float> getVibration() const override;
-		void setVibration(float low, float high) override;
-		void vibrate(spInputVibration vibration) override;
-		void stopVibrating() override;
+		std::pair<float, float> getVibration() const final override;
+		void setVibration(float low, float high) final override;
+		void vibrate(spInputVibration vibration) final override;
+		void stopVibrating() final override;
 
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
@@ -94,6 +94,8 @@ namespace Halley {
 		Vector<float> axes;
 		Vector<spInputButtonBase> hats;
 		std::function<float (float)> axisAdjust;
+
+		virtual void doSetVibration(float low, float high);
 
 	private:
 		Vector<spInputVibration> vibs;

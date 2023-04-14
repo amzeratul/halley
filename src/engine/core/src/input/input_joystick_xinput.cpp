@@ -141,7 +141,7 @@ InputJoystickXInput::InputJoystickXInput(int number)
 
 InputJoystickXInput::~InputJoystickXInput()
 {
-	setVibration(0, 0);
+	doSetVibration(0, 0);
 }
 
 std::string InputJoystickXInput::getName() const
@@ -283,23 +283,12 @@ String InputJoystickXInput::getButtonName(int code) const
 }
 
 
-void InputJoystickXInput::setVibration(float low, float high)
+void InputJoystickXInput::doSetVibration(float low, float high)
 {
-	InputJoystick::setVibration(low, high);
-	
 	XINPUT_VIBRATION vibration;
 	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 	vibration.wLeftMotorSpeed = static_cast<WORD>(clamp(low * 65535, 0.0f, 65535.0f));
 	vibration.wRightMotorSpeed = static_cast<WORD>(clamp(high * 65535, 0.0f, 65535.0f));
-	XInputSetState(index, &vibration);
-}
-
-void InputJoystickXInput::stopVibrating()
-{
-	InputJoystick::stopVibrating();
-
-	XINPUT_VIBRATION vibration;
-	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 	XInputSetState(index, &vibration);
 }
 

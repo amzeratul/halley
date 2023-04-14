@@ -44,8 +44,7 @@ namespace Halley {
 		int index;
 		int cooldown;
 
-		void setVibration(float low, float high) override;
-		void stopVibrating() override;
+		void doSetVibration(float low, float high) override;
 	};
 }
 

@@ -54,7 +54,8 @@ InputJoystickSDL::InputJoystickSDL(int number)
 InputJoystickSDL::~InputJoystickSDL()
 {
 	if (joystick) {
-		SDL_JoystickClose(reinterpret_cast<SDL_Joystick*>(joystick));
+		doSetVibration(0, 0);
+		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
 		joystick = nullptr;
 	}
 }
@@ -133,7 +134,7 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 
 std::string InputJoystickSDL::getName() const
 {
-	return String(SDL_JoystickName(reinterpret_cast<SDL_Joystick*>(joystick)))
+	return String(SDL_JoystickName(static_cast<SDL_Joystick*>(joystick)))
 		+ " [" + toString(SDL_JoystickGetDeviceVendor(index), 16, 4)
 		+ ":" + toString(SDL_JoystickGetDeviceProduct(index), 16, 4)
 		+ "]";
@@ -202,6 +203,11 @@ void InputJoystickSDL::processEvent(const SDL_Event& _event)
 				break;
 			}
 	}
+}
+
+void InputJoystickSDL::doSetVibration(float low, float high)
+{
+	SDL_JoystickRumble(static_cast<SDL_Joystick*>(joystick), static_cast<uint16_t>(low * 65535), static_cast<uint16_t>(high * 65535), 100);
 }
 
 
