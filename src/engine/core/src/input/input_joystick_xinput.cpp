@@ -144,15 +144,16 @@ InputJoystickXInput::~InputJoystickXInput()
 	doSetVibration(0, 0);
 }
 
-std::string InputJoystickXInput::getName() const
+std::string_view InputJoystickXInput::getName() const
 {
 	XINPUT_CAPABILITIES_EX capabilities;
 	const auto result = XInputGetCapabilitiesEx(index, 0, &capabilities);
 	if (SUCCEEDED(result)) {
-		return "XInput Controller #" + toString(index + 1) + " [" + toString(capabilities.vendorId, 16, 4) + ":" + toString(capabilities.productId, 16, 4) + "]";
+		name = "XInput Controller #" + toString(index + 1) + " [" + toString(capabilities.vendorId, 16, 4) + ":" + toString(capabilities.productId, 16, 4) + "]";
 	} else {
-		return "XInput Controller #" + toString(index + 1);
+		name = "XInput Controller #" + toString(index + 1);
 	}
+	return name;
 }
 
 
@@ -178,7 +179,7 @@ void InputJoystickXInput::update(Time t)
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
 		if (!isEnabled()) {
 			setEnabled(true);
-			Logger::logInfo("XInput controller connected: " + getName());
+			Logger::logInfo("XInput controller connected: " + String(getName()));
 		}
 
 		auto& gamepad = state.Gamepad;

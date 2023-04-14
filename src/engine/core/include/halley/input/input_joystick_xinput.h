@@ -32,7 +32,7 @@ namespace Halley {
 		InputJoystickXInput(int number);
 		~InputJoystickXInput() override;
 
-		std::string getName() const override;
+		std::string_view getName() const override;
 		JoystickType getJoystickType() const override { return JoystickType::Xbox; }
 		InputType getInputType() const override;
 	
@@ -43,6 +43,7 @@ namespace Halley {
 	private:
 		int index;
 		int cooldown;
+		mutable String name;
 
 		void doSetVibration(float low, float high) override;
 	};

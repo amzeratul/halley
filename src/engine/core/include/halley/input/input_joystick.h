@@ -58,7 +58,7 @@ namespace Halley {
 	public:
 		virtual ~InputJoystick() {}
 
-		virtual std::string getName() const = 0;
+		virtual std::string_view getName() const = 0;
 		JoystickType getJoystickType() const override;
 
 		size_t getNumberAxes() override;

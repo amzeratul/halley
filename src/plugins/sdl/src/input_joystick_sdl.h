@@ -28,15 +28,15 @@ namespace Halley {
 	class InputJoystickSDL final : public InputJoystick {
 	public:
 		~InputJoystickSDL();
-		std::string getName() const final override;
 
 		void update(Time t) override;
+		void close();
 
-		JoystickType getJoystickType() const override {
-			return JoystickType::Generic;
-		}
+		std::string_view getName() const final override;
+		JoystickType getJoystickType() const override { return JoystickType::Generic; }
+		int getSDLJoystickId() const;
 
-		virtual int getButtonAtPosition(JoystickButtonPosition position) const override;
+		int getButtonAtPosition(JoystickButtonPosition position) const override;
 
 	private:
 		InputJoystickSDL(int number);
@@ -48,7 +48,9 @@ namespace Halley {
 
 		void* joystick = nullptr;
 		int index = 0;
+		int id = 0;
 		int baseButtons = 0;
+		String name;
 
 		friend class InputSDL;
 	};

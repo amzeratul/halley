@@ -63,8 +63,11 @@ namespace Halley {
 		void deInit() override;
 		void beginEvents(Time t) override;
 
-		void processJoyEvent(int n, SDL_Event& event);
+		void processJoyEvent(int n, const SDL_Event& event);
+		void processJoyDeviceEvent(const SDL_JoyDeviceEvent& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
+
+		void addJoystick(int idx);
 
 		SystemSDL& system;
 		
@@ -72,8 +75,8 @@ namespace Halley {
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
 		Vector<std::shared_ptr<InputMouseSDL>> mice;
 
-		std::map<int, InputJoystickSDL*> sdlJoys;
-		std::map<int, std::shared_ptr<InputTouch>> touchEvents;
+		HashMap<int, InputJoystickSDL*> sdlJoys;
+		HashMap<int, std::shared_ptr<InputTouch>> touchEvents;
 
 		std::function<Vector2f(Vector2i)> mouseRemap;
 

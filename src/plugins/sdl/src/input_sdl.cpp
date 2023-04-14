@@ -36,6 +36,12 @@
 
 using namespace Halley;
 
+#ifdef XINPUT_AVAILABLE
+constexpr static bool hasXInput = true;
+#else
+constexpr static bool hasXInput = false;
+#endif
+
 InputSDL::InputSDL(SystemAPI& system)
 	: system(dynamic_cast<SystemSDL&>(system))
 {
@@ -52,29 +58,17 @@ void InputSDL::init()
 
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
-	const bool hasXInput = true;
-	for (int i = 0; i<4; i++) {
-		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickXInput(i));
-		joy->update(Time(0));
+	for (int i = 0; i < 4; i++) {
+		auto joy = std::make_unique<InputJoystickXInput>(i);
+		joy->update(0);
 		joysticks.push_back(std::move(joy));
 	}
-#else
-	const bool hasXInput = false;
 #endif
 
 	// SDL joysticks
-	int nJoy = SDL_NumJoysticks();
-	for (int i = 0; i<nJoy; i++) {
-		auto joy = std::unique_ptr<InputJoystick>(new InputJoystickSDL(i));
-		String name = joy->getName();
-
-		bool isXinputController = name.asciiLower().find("xbox 360") != String::npos || name.asciiLower().find("xinput") != String::npos;
-		if (!hasXInput || !isXinputController) {
-			joysticks.push_back(std::move(joy));
-			sdlJoys[i] = dynamic_cast<InputJoystickSDL*>(joysticks.back().get());
-
-			std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
-		}
+	const int nJoy = SDL_NumJoysticks();
+	for (int i = 0; i < nJoy; i++) {
+		addJoystick(i);
 	}
 
 	SDL_JoystickEventState(SDL_QUERY);
@@ -198,6 +192,11 @@ void InputSDL::processEvent(SDL_Event& event)
 			processTouch(event.type, event.tfinger.touchId, event.tfinger.fingerId, event.tfinger.x, event.tfinger.y);
 			break;
 
+		case SDL_JOYDEVICEADDED:
+		case SDL_JOYDEVICEREMOVED:
+			processJoyDeviceEvent(event.jdevice);
+			break;
+
 		default:
 			break;
 	}
@@ -211,11 +210,37 @@ void InputSDL::setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction
 	}
 }
 
-void InputSDL::processJoyEvent(int n, SDL_Event& event)
+void InputSDL::processJoyEvent(int n, const SDL_Event& event)
 {
-	auto iter = sdlJoys.find(n);
+	const auto iter = sdlJoys.find(n);
 	if (iter != sdlJoys.end()) {
 		iter->second->processEvent(event);
+	}
+}
+
+void InputSDL::processJoyDeviceEvent(const SDL_JoyDeviceEvent& event)
+{
+	if (event.type == SDL_JOYDEVICEADDED) {
+		addJoystick(event.which);
+	} else if (event.type == SDL_JOYDEVICEREMOVED) {
+		sdlJoys[event.which]->close();
+		sdlJoys.erase(event.which);
+	}
+}
+
+void InputSDL::addJoystick(int idx)
+{
+	auto joy = std::unique_ptr<InputJoystickSDL>(new InputJoystickSDL(idx));
+
+	const String& name = joy->getName();
+	const bool isXinputController = name.asciiLower().find("xbox 360") != String::npos || name.asciiLower().find("xinput") != String::npos;
+
+	if (!hasXInput || !isXinputController) {
+		const auto id = joy->getSDLJoystickId();
+		sdlJoys[id] = joy.get();
+		joysticks.push_back(std::move(joy));
+
+		std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
 	}
 }
 

@@ -33,8 +33,15 @@ InputJoystickSDL::InputJoystickSDL(int number)
 {
 	// Open
 	auto joy = SDL_JoystickOpen(index);
-	if (!joy) throw Exception("Could not open Joystick", HalleyExceptions::InputPlugin);
+	if (!joy) {
+		throw Exception("Could not open Joystick", HalleyExceptions::InputPlugin);
+	}
 	joystick = joy;
+	id = SDL_JoystickInstanceID(joy);
+	name = String(SDL_JoystickName(joy))
+		+ " [" + toString(SDL_JoystickGetDeviceVendor(index), 16, 4)
+		+ ":" + toString(SDL_JoystickGetDeviceProduct(index), 16, 4)
+		+ "]";
 
 	// Axes
 	axes.resize(SDL_JoystickNumAxes(joy));
@@ -48,16 +55,12 @@ InputJoystickSDL::InputJoystickSDL(int number)
 
 	// Buttons
 	baseButtons = SDL_JoystickNumButtons(joy);
-	init(std::min(baseButtons + 4, 64));
+	init(std::min(baseButtons + 4, 512));
 }
 
 InputJoystickSDL::~InputJoystickSDL()
 {
-	if (joystick) {
-		doSetVibration(0, 0);
-		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
-		joystick = nullptr;
-	}
+	close();
 }
 
 void InputJoystickSDL::update(Time t)
@@ -70,6 +73,20 @@ void InputJoystickSDL::update(Time t)
 		}
 	}
 	InputJoystick::update(t);
+}
+
+void InputJoystickSDL::close()
+{
+	if (joystick) {
+		doSetVibration(0, 0);
+		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
+		joystick = nullptr;
+	}
+}
+
+int InputJoystickSDL::getSDLJoystickId() const
+{
+	return id;
 }
 
 int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
@@ -91,6 +108,7 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
 		case JoystickButtonPosition::TriggerLeft: return 15;
 		case JoystickButtonPosition::TriggerRight: return 16;
+		case JoystickButtonPosition::System: return 17;
 #elif defined(__APPLE__)
 		// Mac OS '360Controller' driver defaults
 		case JoystickButtonPosition::FaceTop: return 3;
@@ -107,22 +125,24 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
 		case JoystickButtonPosition::TriggerLeft: return 15;
 		case JoystickButtonPosition::TriggerRight: return 16;
+		case JoystickButtonPosition::System: return 17;
 #else
 		// Windows defaults
-		case JoystickButtonPosition::FaceTop: return 0;
+		case JoystickButtonPosition::FaceTop: return 3;
 		case JoystickButtonPosition::FaceRight: return 1;
-		case JoystickButtonPosition::FaceBottom: return 2;
-		case JoystickButtonPosition::FaceLeft: return 3;
-		case JoystickButtonPosition::Select: return 4;
-		case JoystickButtonPosition::Start: return 5;
-		case JoystickButtonPosition::BumperLeft: return 6;
-		case JoystickButtonPosition::BumperRight: return 7;
-		case JoystickButtonPosition::LeftStick: return 8;
-		case JoystickButtonPosition::RightStick: return 9;
-		case JoystickButtonPosition::PlatformAcceptButton: return 2;
+		case JoystickButtonPosition::FaceBottom: return 0;
+		case JoystickButtonPosition::FaceLeft: return 2;
+		case JoystickButtonPosition::Select: return 8;
+		case JoystickButtonPosition::Start: return 9;
+		case JoystickButtonPosition::BumperLeft: return 4;
+		case JoystickButtonPosition::BumperRight: return 5;
+		case JoystickButtonPosition::LeftStick: return 6;
+		case JoystickButtonPosition::RightStick: return 7;
+		case JoystickButtonPosition::PlatformAcceptButton: return 0;
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
-		case JoystickButtonPosition::TriggerLeft: return 15;
-		case JoystickButtonPosition::TriggerRight: return 16;
+		case JoystickButtonPosition::TriggerLeft: return 10;
+		case JoystickButtonPosition::TriggerRight: return 11;
+		case JoystickButtonPosition::System: return 17;
 #endif
 		case JoystickButtonPosition::DPadUp: return baseButtons;
 		case JoystickButtonPosition::DPadRight: return baseButtons + 1;
@@ -132,12 +152,9 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 	}
 }
 
-std::string InputJoystickSDL::getName() const
+std::string_view InputJoystickSDL::getName() const
 {
-	return String(SDL_JoystickName(static_cast<SDL_Joystick*>(joystick)))
-		+ " [" + toString(SDL_JoystickGetDeviceVendor(index), 16, 4)
-		+ ":" + toString(SDL_JoystickGetDeviceProduct(index), 16, 4)
-		+ "]";
+	return name;
 }
 
 int InputJoystickSDL::getSDLAxisIndex(int axis)
@@ -207,7 +224,9 @@ void InputJoystickSDL::processEvent(const SDL_Event& _event)
 
 void InputJoystickSDL::doSetVibration(float low, float high)
 {
-	SDL_JoystickRumble(static_cast<SDL_Joystick*>(joystick), static_cast<uint16_t>(low * 65535), static_cast<uint16_t>(high * 65535), 100);
+	if (joystick) {
+		SDL_JoystickRumble(static_cast<SDL_Joystick*>(joystick), static_cast<uint16_t>(low * 65535), static_cast<uint16_t>(high * 65535), 100);
+	}
 }
 
 
