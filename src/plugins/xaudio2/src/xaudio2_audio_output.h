@@ -82,6 +82,7 @@ namespace Halley
 
 		uint64_t getSamplesPlayed() const override;
 		uint64_t getSamplesSubmitted() const override;
+		uint64_t getSamplesLeft() const override;
 
 		IXAudio2& getXAudio2();
 
@@ -91,8 +92,12 @@ namespace Halley
 		std::unique_ptr<XAudio2SourceVoice> voice;
 		AudioCallback callback;
 		AudioSpec format;
-		Vector<char> buffer;
+		Vector<float> buffer;
 		std::atomic_uint64_t samplesSubmitted = 0;
+
+		uint64_t playbackPos = 0;
+		std::chrono::high_resolution_clock::time_point lastSubmissionTime;
+		mutable std::mutex playbackMutex;
 
 		void consumeAudio();
 	};

@@ -136,6 +136,7 @@ namespace Halley
 
 		virtual uint64_t getSamplesPlayed() const { return 0; }
 		virtual uint64_t getSamplesSubmitted() const { return 0; }
+		virtual uint64_t getSamplesLeft() const { return 0; }
 
 	protected:
 		static size_t getAudioBytesNeeded(const AudioSpec& outputSpec, size_t nBuffers)

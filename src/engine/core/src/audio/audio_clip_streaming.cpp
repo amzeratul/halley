@@ -15,8 +15,7 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	, samplesLeft(0)
 	, numChannels(numChannels)
 	, latencyTarget(2048)
-	, samplesLeftAvg(20)
-	, lastFrameSamples(0)
+	, samplesLeftAvg(60)
 {
 	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
 }
@@ -52,8 +51,6 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 	samplesLeft += nSamples;
 
-	lastFrameSamples += nSamples;
-
 	if (samplesLeft >= latencyTarget) {
 		ready = true;
 	}
@@ -82,9 +79,11 @@ void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst
 		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 0.0f);
 	}
 
+	this->sourceSampleRate = sourceSampleRate;
+	this->maxPitchShift = maxPitchShift;
 	doAddInterleavedSamplesWithResample(src);
 
-	updateSync(maxPitchShift, sourceSampleRate);
+	//updateSync(maxPitchShift, sourceSampleRate);
 }
 
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
@@ -100,8 +99,6 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 	const size_t toWrite = std::min(len, buffer.availableToRead());
 	if (channelN == 0) {
 		samplesLeft -= toWrite;
-		lastSamplesSent = toWrite;
-		lastSamplesSentTime = std::chrono::steady_clock::now();
 	}
 	lock.unlock();
 
@@ -189,7 +186,7 @@ void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst o
 	addInterleavedSamples(dst.subspan(0, result.nWritten * numChannels));
 }
 
-void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
+void AudioClipStreaming::onStartFrame()
 {
 	// Based on paper
 	// "Dynamic Rate Control for Retro Game Emulators"
@@ -197,46 +194,43 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 	// December 12, 2012
 	// https://raw.githubusercontent.com/libretro/docs/master/archive/ratecontrol.pdf
 
-	const auto now = std::chrono::steady_clock::now();
-
-	std::unique_lock<std::mutex> lock(mutex);
-	const auto timeSinceLastSubmission = lastSamplesSent > 0 ? std::chrono::duration<double>(now - lastSamplesSentTime).count() : 0;
-	const auto consumedSinceLastSubmission = static_cast<int64_t>(outSampleRate * timeSinceLastSubmission);
-	const int64_t sentSamplesLeft = static_cast<int64_t>(lastSamplesSent) - consumedSinceLastSubmission;
+	const int64_t sentSamplesLeft = audioOutAPI->getSamplesLeft();//static_cast<int64_t>(lastSamplesSent) - consumedSinceLastSubmission;
 	const int64_t bufferedSamplesLeft = static_cast<int64_t>(buffers[0].availableToRead());
 	const int64_t playbackSamplesLeft = sentSamplesLeft + bufferedSamplesLeft;
-	lock.unlock();
 
 	samplesLeftAvg.add(playbackSamplesLeft);
 
 	if (samplesLeftAvg.size() >= 3) {
 		const float d = maxPitchShift;
 		const float avgSamplesLeft = samplesLeftAvg.getFloatMean();
-		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(2 * latencyTarget), 0.0f, 1.0f));
+
+		const auto AB = latencyTarget * 2;
+		const float ratio = AB / ((1 + d) * AB - 2.0f * d * avgSamplesLeft);
 		const auto fromRate = sourceSampleRate * ratio;
 
-		//Logger::logDev(toString(int(playbackSamplesLeft)) + " = " + toString(bufferedSamplesLeft) + " + " + toString(sentSamplesLeft) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
+		//Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') /*+ " = " + toString(bufferedSamplesLeft) + " + " + toString(sentSamplesLeft)*/ + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
 		resampler->setRate(fromRate, outSampleRate);
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
 	}
-}
 
-void AudioClipStreaming::onStartFrame()
-{
+	/*
 	const auto now = std::chrono::high_resolution_clock::now();
 	const auto samplesPlayedNow = audioOutAPI->getSamplesPlayed();
-
 	if (lastFrameStartTime) {
-		const auto elapsedSinceLastFrame = std::chrono::duration(now - *lastFrameStartTime).count();
-		const auto playedSinceLastFrame = static_cast<int64_t>(samplesPlayedNow - lastFrameSamplesPlayed);
-		const auto sampleDelta = static_cast<int64_t>(lastFrameSamples) - playedSinceLastFrame;
-
-		Logger::logDev("+" + toString(lastFrameSamples) + " -" + toString(playedSinceLastFrame) + " | " + toString(elapsedSinceLastFrame / 1000) + " us");
+		const float elapsedSinceLastFrame = static_cast<float>(std::chrono::duration(now - *lastFrameStartTime).count()) / 1'000'000'000.0f;
+		const int64_t playedSinceLastFrame = static_cast<int64_t>(samplesPlayedNow - lastFrameSamplesPlayed);
+		const int64_t submittedLastFrame = static_cast<int64_t>(lastFrameSamples);
+		const float timeRatio = lastFrameTimeLength / elapsedSinceLastFrame;
+		const float sampleRatio = static_cast<float>(submittedLastFrame) / static_cast<float>(playedSinceLastFrame);
+		const float overallRatio = sampleRatio / timeRatio;
+		
+		//Logger::logDev("+" + toString(submittedLastFrame) + " (" + toString(lroundl(lastFrameTimeLength * 1'000'000.0)) + "us) | -" + toString(playedSinceLastFrame) + " (" + toString(elapsedSinceLastFrame / 1000) + " us)");
+		Logger::logDev("Time: " + toString(timeRatio) + ", Samples: " + toString(sampleRatio) + ", Overall: " + toString(overallRatio));
 	}
-
 	// Setup for next frame
 	lastFrameStartTime = now;
 	lastFrameSamplesPlayed = samplesPlayedNow;
 	lastFrameSamples = 0;
+	*/
 }

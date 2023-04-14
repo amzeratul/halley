@@ -44,19 +44,12 @@ namespace Halley
 		Vector<float> resampleSrcBuffer;
 
 		RollingDataSet<size_t> samplesLeftAvg;
-		mutable size_t lastSamplesSent = 0;
-		mutable std::chrono::steady_clock::time_point lastSamplesSentTime;
-		mutable std::chrono::steady_clock::time_point lastSyncTime;
-
-		size_t lastFrameSamples = 0;
-		size_t lastFrameSamplesPlayed = 0;
-		std::optional<std::chrono::high_resolution_clock::time_point> lastFrameStartTime;
-
 		CoreAPI* coreAPI = nullptr;
 		AudioOutputAPI* audioOutAPI = nullptr;
+		float sourceSampleRate = 48000.0f;
+		float maxPitchShift = 0.001f;
 
 		void doAddInterleavedSamplesWithResample(AudioSamplesConst src);
-		void updateSync(float maxPitchShift, float sourceSampleRate);
 		void onStartFrame() override;
 	};
 }

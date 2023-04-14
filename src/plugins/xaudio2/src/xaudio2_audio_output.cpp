@@ -2,6 +2,13 @@
 #include "Xaudio2.h"
 using namespace Halley;
 
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+
 XAudio2MasteringVoice::XAudio2MasteringVoice(XAudio2AudioOutput& audio, const AudioSpec& spec, String deviceId)
 {
 	auto result = audio.getXAudio2().CreateMasteringVoice(&masteringVoice, spec.numChannels, spec.sampleRate, 0, deviceId.isEmpty() ? nullptr : deviceId.getUTF16().c_str());
@@ -194,12 +201,38 @@ bool XAudio2AudioOutput::needsAudioThread() const
 
 uint64_t XAudio2AudioOutput::getSamplesPlayed() const
 {
-	return voice->getSamplesPlayed();
+	//return voice->getSamplesPlayed();
+
+	const auto now = std::chrono::high_resolution_clock::now();
+	uint64_t pos;
+	uint64_t duration;
+	{
+		std::unique_lock<std::mutex> lock(playbackMutex);
+		pos = playbackPos;
+		duration = std::chrono::duration(now - lastSubmissionTime).count();
+	}
+	return pos + static_cast<uint64_t>(duration / 1'000'000'000.0 * format.sampleRate + 0.5);
 }
 
 uint64_t XAudio2AudioOutput::getSamplesSubmitted() const
 {
 	return samplesSubmitted;
+}
+
+uint64_t XAudio2AudioOutput::getSamplesLeft() const
+{
+	const auto now = std::chrono::high_resolution_clock::now();
+	int64_t pos;
+	int64_t duration;
+	int64_t submitted;
+	{
+		std::unique_lock<std::mutex> lock(playbackMutex);
+		pos = static_cast<int64_t>(playbackPos);
+		duration = std::chrono::duration(now - lastSubmissionTime).count();
+		submitted = static_cast<int64_t>(samplesSubmitted);
+	}
+	const auto samplesPlayed = pos + static_cast<int64_t>(duration / 1'000'000'000.0 * format.sampleRate + 0.5);
+	return std::max(0ll, submitted - samplesPlayed);
 }
 
 IXAudio2& XAudio2AudioOutput::getXAudio2()
@@ -215,21 +248,23 @@ void XAudio2AudioOutput::consumeAudio()
 
 	auto sendBuffer = [&]()
 	{
-		const auto samples = gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4);
-		samplesSubmitted += samples.size() / format.numChannels;
-		voice->queueAudio(samples);
+		const auto prevSubmitted = samplesSubmitted.load();
+		samplesSubmitted = prevSubmitted + buffer.size() / format.numChannels;
+		voice->queueAudio(buffer.span());
+
+		std::unique_lock<std::mutex> lock(playbackMutex);
+		playbackPos = voice->getSamplesPlayed();
+		lastSubmissionTime = std::chrono::high_resolution_clock::now();
 	};
 
 	const size_t availableBytes = getAudioOutputInterface().getAvailable();
 	if (availableBytes > 0) {
-		buffer.resize(availableBytes);
-		getAudioOutputInterface().output(gsl::as_writable_bytes(gsl::span<char>(buffer)), true);
+		buffer.resize(std::min(static_cast<size_t>(format.bufferSize * format.numChannels), availableBytes / sizeof(float)));
+		getAudioOutputInterface().output(buffer.byte_span(), true);
 		sendBuffer();
-
-		//Logger::logDev(toString(samplesSubmitted.load()) + " / " + toString(getSamplesPlayed()));
 	} else {
 		// Insert silence
-		buffer.resize(512, 0);
+		buffer.resize(128, 0.0f);
 		sendBuffer();
 	}
 }
