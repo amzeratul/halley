@@ -30,7 +30,7 @@ namespace Halley {
 	class InputJoystickXInput : public InputJoystick {
 	public:
 		InputJoystickXInput(int number);
-		~InputJoystickXInput();
+		~InputJoystickXInput() override;
 
 		std::string getName() const override;
 		JoystickType getJoystickType() const override { return JoystickType::Xbox; }
@@ -45,6 +45,7 @@ namespace Halley {
 		int cooldown;
 
 		void setVibration(float low, float high) override;
+		void stopVibrating() override;
 	};
 }
 

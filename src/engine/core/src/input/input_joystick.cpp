@@ -156,6 +156,8 @@ void InputJoystick::vibrate(spInputVibration vibration)
 void InputJoystick::stopVibrating()
 {
 	vibs.clear();
+	curHighVib = curLowVib = 0.0f;
+	baseHighVib = baseLowVib = 0.0f;
 }
 
 void InputJoystick::updateVibration(Time t)
@@ -190,7 +192,9 @@ void InputJoystick::updateVibration(Time t)
 		low += l;
 	}
 
-	if (curLowVib != low || curHighVib != high) {
+	if (vibs.empty()) {
+		setVibration(0.0f, 0.0f);
+	} else if (curLowVib != low || curHighVib != high) {
 		curLowVib = low;
 		curHighVib = high;
 		setVibration(low, high);

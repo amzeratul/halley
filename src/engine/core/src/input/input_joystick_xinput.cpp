@@ -294,4 +294,13 @@ void InputJoystickXInput::setVibration(float low, float high)
 	XInputSetState(index, &vibration);
 }
 
+void InputJoystickXInput::stopVibrating()
+{
+	InputJoystick::stopVibrating();
+
+	XINPUT_VIBRATION vibration;
+	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+	XInputSetState(index, &vibration);
+}
+
 #endif
