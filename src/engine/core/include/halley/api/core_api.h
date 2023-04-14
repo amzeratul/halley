@@ -32,6 +32,12 @@ namespace Halley
 			virtual Time getThreshold() const { return 0.0; }
 			virtual void onProfileData(std::shared_ptr<ProfilerData> data) = 0;
 		};
+
+		class IStartFrameCallback {
+		public:
+			virtual ~IStartFrameCallback() = default;
+			virtual void onStartFrame() = 0;
+		};
 		
 		virtual ~CoreAPI() {}
 		virtual void quit(int exitCode = 0) = 0;
@@ -45,6 +51,8 @@ namespace Halley
 
 		virtual void addProfilerCallback(IProfileCallback* callback) = 0;
 		virtual void removeProfilerCallback(IProfileCallback* callback) = 0;
+		virtual void addStartFrameCallback(IStartFrameCallback* callback) = 0;
+		virtual void removeStartFrameCallback(IStartFrameCallback* callback) = 0;
 
 		virtual Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() = 0;
 

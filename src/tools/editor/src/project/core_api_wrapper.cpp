@@ -69,6 +69,16 @@ void CoreAPIWrapper::removeProfilerCallback(IProfileCallback* callback)
 	parent.removeProfilerCallback(callback);
 }
 
+void CoreAPIWrapper::addStartFrameCallback(IStartFrameCallback* callback)
+{
+	parent.addStartFrameCallback(callback);
+}
+
+void CoreAPIWrapper::removeStartFrameCallback(IStartFrameCallback* callback)
+{
+	parent.removeStartFrameCallback(callback);
+}
+
 Future<std::unique_ptr<RenderSnapshot>> CoreAPIWrapper::requestRenderSnapshot()
 {
 	return parent.requestRenderSnapshot();

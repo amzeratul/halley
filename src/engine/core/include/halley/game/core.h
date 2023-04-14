@@ -66,6 +66,8 @@ namespace Halley
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;
+		void addStartFrameCallback(IStartFrameCallback* callback) override;
+		void removeStartFrameCallback(IStartFrameCallback* callback) override;
 
 		Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() override;
 
@@ -133,6 +135,8 @@ namespace Halley
 
 		Vector<IProfileCallback*> profileCallbacks;
 		Vector<Promise<std::unique_ptr<RenderSnapshot>>> pendingSnapshots;
+
+		Vector<IStartFrameCallback*> startFrameCallbacks;
 		
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;

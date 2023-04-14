@@ -385,6 +385,10 @@ void Core::tickFrame(Time time)
 		return;
 	}
 
+	for (auto* c: startFrameCallbacks) {
+		c->onStartFrame();
+	}
+
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 
 	updateFrameData(multithreaded);
@@ -747,6 +751,18 @@ void Core::addProfilerCallback(IProfileCallback* callback)
 void Core::removeProfilerCallback(IProfileCallback* callback)
 {
 	std_ex::erase_if(profileCallbacks, [&] (const auto& c) { return c == callback; });
+}
+
+void Core::addStartFrameCallback(IStartFrameCallback* callback)
+{
+	if (!std_ex::contains(startFrameCallbacks, callback)) {
+		startFrameCallbacks.push_back(callback);
+	}
+}
+
+void Core::removeStartFrameCallback(IStartFrameCallback* callback)
+{
+	std_ex::erase_if(startFrameCallbacks, [&] (const auto& c) { return c == callback; });
 }
 
 Future<std::unique_ptr<RenderSnapshot>> Core::requestRenderSnapshot()
