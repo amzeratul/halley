@@ -1,5 +1,6 @@
 #include "halley/audio/audio_clip_streaming.h"
 #include "audio_mixer.h"
+#include "halley/api/core_api.h"
 #include "halley/support/logger.h"
 #include "halley/time/stopwatch.h"
 
@@ -15,8 +16,16 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	, numChannels(numChannels)
 	, latencyTarget(2048)
 	, samplesLeftAvg(20)
+	, lastFrameSamples(0)
 {
 	buffers.resize(numChannels, RingBuffer<float>(latencyTarget * 2));
+}
+
+AudioClipStreaming::~AudioClipStreaming()
+{
+	if (coreAPI) {
+		coreAPI->removeStartFrameCallback(this);
+	}
 }
 
 void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
@@ -43,6 +52,8 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 	samplesLeft += nSamples;
 
+	lastFrameSamples += nSamples;
+
 	if (samplesLeft >= latencyTarget) {
 		ready = true;
 	}
@@ -59,8 +70,14 @@ void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src
 	doAddInterleavedSamplesWithResample(src);
 }
 
-void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift)
+void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, CoreAPI& core, AudioOutputAPI& audioOut)
 {
+	if (!coreAPI) {
+		coreAPI = &core;
+		coreAPI->addStartFrameCallback(this);
+	}
+	audioOutAPI = &audioOut;
+
 	if (!resampler) {
 		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 0.0f);
 	}
@@ -203,4 +220,23 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
 	}
+}
+
+void AudioClipStreaming::onStartFrame()
+{
+	const auto now = std::chrono::high_resolution_clock::now();
+	const auto samplesPlayedNow = audioOutAPI->getSamplesPlayed();
+
+	if (lastFrameStartTime) {
+		const auto elapsedSinceLastFrame = std::chrono::duration(now - *lastFrameStartTime).count();
+		const auto playedSinceLastFrame = static_cast<int64_t>(samplesPlayedNow - lastFrameSamplesPlayed);
+		const auto sampleDelta = static_cast<int64_t>(lastFrameSamples) - playedSinceLastFrame;
+
+		Logger::logDev("+" + toString(lastFrameSamples) + " -" + toString(playedSinceLastFrame) + " | " + toString(elapsedSinceLastFrame / 1000) + " us");
+	}
+
+	// Setup for next frame
+	lastFrameStartTime = now;
+	lastFrameSamplesPlayed = samplesPlayedNow;
+	lastFrameSamples = 0;
 }
