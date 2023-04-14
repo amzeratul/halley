@@ -155,17 +155,39 @@ void Halley::OSUnix::createDirectories(const Path& path)
 
 Vector<Path> Halley::OSUnix::enumerateDirectory(const Path& path)
 {
-	Vector<Path> result;
+	std::list<String> dirsToList;
+	dirsToList.emplace_back(".");
 
-	DIR* d;
-	struct dirent* dir;
-	d = opendir(path.string().c_str());
-	if (d) {
-		while ((dir = readdir(d)) != nullptr) {
-			result.push_back(Path(String(dir->d_name)));
+	Vector <Path> result;
+
+	DIR *d;
+	struct dirent *dir;
+	struct stat s = {};
+
+	while (!dirsToList.empty()) {
+		const auto curDir = dirsToList.front();
+		const auto curPath = (path / curDir).getString(false);
+		dirsToList.pop_front();
+
+		d = opendir(curPath.c_str());
+		if (d) {
+			while ((dir = readdir(d)) != nullptr) {
+				String curFile = String(dir->d_name);
+				int err = stat((path / curDir / curFile).getString().c_str(), &s);
+				if (err == 0) {
+					if (S_ISDIR(s.st_mode)) {
+						if (curFile != "." && curFile != "..") {
+							dirsToList.emplace_back(curDir + "/" + curFile);
+						}
+					} else {
+						auto res = Path(curDir) / String(dir->d_name);
+						result.emplace_back(res);
+					}
+				}
+			}
+
+			closedir(d);
 		}
-
-		closedir(d);
 	}
 
 	return result;
