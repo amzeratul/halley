@@ -5,6 +5,7 @@ include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "../../engine/utils
 set(SOURCES
     "src/audio_sdl.cpp"
     "src/input_sdl.cpp"
+    "src/input_game_controller_sdl.cpp"
     "src/input_joystick_sdl.cpp"
     "src/input_keyboard_sdl.cpp"
     "src/input_mouse_sdl.cpp"
@@ -19,6 +20,7 @@ set(SOURCES
 set(HEADERS
     "src/audio_sdl.h"
     "src/input_sdl.h"
+    "src/input_game_controller_sdl.h"
     "src/input_joystick_sdl.h"
     "src/input_keyboard_sdl.h"
     "src/input_mouse_sdl.h"

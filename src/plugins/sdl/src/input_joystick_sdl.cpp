@@ -81,6 +81,7 @@ void InputJoystickSDL::close()
 		doSetVibration(0, 0);
 		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
 		joystick = nullptr;
+		id = -1;
 	}
 }
 

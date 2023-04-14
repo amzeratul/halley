@@ -27,6 +27,7 @@
 #include "input_joystick_sdl.h"
 
 namespace Halley {
+	class InputGameControllerSDL;
 
 	class InputKeyboardSDL;
 	class InputMouseSDL;
@@ -38,6 +39,8 @@ namespace Halley {
 	public:
 		explicit InputSDL(SystemAPI& system);
 		~InputSDL();
+
+		void setResources(Resources& resources) override;
 
 		size_t getNumberOfKeyboards() const override;
 		std::shared_ptr<InputKeyboard> getKeyboard(int id=0) const override;
@@ -65,6 +68,8 @@ namespace Halley {
 
 		void processJoyEvent(int n, const SDL_Event& event);
 		void processJoyDeviceEvent(const SDL_JoyDeviceEvent& event);
+		void processGameControllerEvent(int n, const SDL_Event& event);
+		void processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 
 		void addJoystick(int idx);
@@ -76,6 +81,7 @@ namespace Halley {
 		Vector<std::shared_ptr<InputMouseSDL>> mice;
 
 		HashMap<int, InputJoystickSDL*> sdlJoys;
+		HashMap<int, InputGameControllerSDL*> sdlGameControllers;
 		HashMap<int, std::shared_ptr<InputTouch>> touchEvents;
 
 		std::function<Vector2f(Vector2i)> mouseRemap;

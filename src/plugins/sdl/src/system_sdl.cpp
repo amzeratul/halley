@@ -56,6 +56,9 @@ void SystemSDL::init()
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
 		Logger::logWarning("Couldn't initialize SDL Joystick subsystem");
 	}
+	if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == -1) {
+		Logger::logWarning("Couldn't initialize SDL GameController subsystem");
+	}
 
 	SDL_ShowCursor(SDL_DISABLE);
 	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
@@ -81,11 +84,14 @@ void SystemSDL::onResume()
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) == -1) {
 		Logger::logWarning("Couldn't initialize SDL Joystick subsystem");
 	}
+	if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == -1) {
+		Logger::logWarning("Couldn't initialize SDL Joystick subsystem");
+	}
 }
 
 void SystemSDL::onSuspend()
 {
-	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_EVENTS);
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_TIMER | SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER);
 }
 
 Path SystemSDL::getAssetsPath(const Path& gamePath) const
@@ -133,6 +139,12 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 			case SDL_FINGERUP:
 			case SDL_FINGERDOWN:
 			case SDL_FINGERMOTION:
+			case SDL_CONTROLLERAXISMOTION:
+			case SDL_CONTROLLERBUTTONDOWN:
+			case SDL_CONTROLLERBUTTONUP:
+			case SDL_CONTROLLERDEVICEADDED:
+			case SDL_CONTROLLERDEVICEREMOVED:
+			case SDL_CONTROLLERDEVICEREMAPPED:
 				{
 					if (sdlInput) {
 						sdlInput->processEvent(event);

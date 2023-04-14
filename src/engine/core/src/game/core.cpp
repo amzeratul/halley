@@ -295,6 +295,7 @@ void Core::initResources()
 	resources = std::make_unique<Resources>(std::move(locator), *api, options);
 	StandardResources::initialize(*resources);
 	api->audioInternal->setResources(*resources);
+	api->inputInternal->setResources(*resources);
 }
 
 void Core::setOutRedirect(bool appendToExisting)

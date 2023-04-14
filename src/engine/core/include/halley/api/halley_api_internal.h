@@ -45,6 +45,7 @@ namespace Halley
 		virtual ~InputAPIInternal() {}
 
 		virtual void beginEvents(Time t) = 0;
+		virtual void setResources(Resources& resources) {}
 	};
 
 	class AudioAPIInternal : public AudioAPI, public HalleyAPIInternal

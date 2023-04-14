@@ -27,6 +27,10 @@
 #include "sdl_window.h"
 #include "halley/input/input_touch.h"
 #include <SDL.h>
+
+#include "input_game_controller_sdl.h"
+#include "sdl_rw_ops.h"
+#include "halley/file_formats/binary_file.h"
 #include "halley/support/console.h"
 #include "halley/text/string_converter.h"
 
@@ -49,8 +53,16 @@ InputSDL::InputSDL(SystemAPI& system)
 
 InputSDL::~InputSDL() = default;
 
-void InputSDL::init()
+void InputSDL::setResources(Resources& resources)
 {
+	if (resources.exists<BinaryFile>("binary/sdl/gamecontrollerdb.txt")) {
+		const auto db = resources.get<BinaryFile>("binary/sdl/gamecontrollerdb.txt");
+		const auto bytes = db->getSpan();
+		auto rw = SDL_RWFromConstMem(bytes.data(), int(bytes.size()));
+		const int added = SDL_GameControllerAddMappingsFromRW(rw, 1);
+		Logger::logInfo("Loaded " + toString(added) + " SDL game controller mappings.");
+	}
+
 	mouseRemap = [] (Vector2i p) { return Vector2f(p); };
 
 	keyboards.push_back(std::unique_ptr<InputKeyboardSDL>(new InputKeyboardSDL(system.getClipboard())));
@@ -75,6 +87,10 @@ void InputSDL::init()
 	SDL_JoystickEventState(SDL_ENABLE);
 }
 
+void InputSDL::init()
+{
+}
+
 void InputSDL::deInit()
 {
 	keyboards.clear();
@@ -85,17 +101,26 @@ void InputSDL::deInit()
 
 std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 {
-	return keyboards.at(id);
+	if (id >= static_cast<int>(keyboards.size())) {
+		return {};
+	}
+	return keyboards[id];
 }
 
 std::shared_ptr<InputJoystick> InputSDL::getJoystick(int id) const
 {
-	return joysticks.at(id);
+	if (id >= static_cast<int>(joysticks.size())) {
+		return {};
+	}
+	return joysticks[id];
 }
 
 std::shared_ptr<InputDevice> InputSDL::getMouse(int id) const
 {
-	return mice.at(id);
+	if (id >= static_cast<int>(mice.size())) {
+		return {};
+	}
+	return mice[id];
 }
 
 size_t InputSDL::getNumberOfKeyboards() const
@@ -138,7 +163,7 @@ void InputSDL::beginEvents(Time t)
 	}
 
 	// Touch events
-	for (auto i=touchEvents.begin(); i!=touchEvents.end(); ) {
+	for (auto i = touchEvents.begin(); i != touchEvents.end(); ) {
 		auto next = i;
 		++next;
 
@@ -176,6 +201,24 @@ void InputSDL::processEvent(SDL_Event& event)
 		case SDL_JOYBALLMOTION:
 			processJoyEvent(event.jball.which, event);
 			break;
+		case SDL_JOYDEVICEADDED:
+		case SDL_JOYDEVICEREMOVED:
+			processJoyDeviceEvent(event.jdevice);
+			break;
+
+		case SDL_CONTROLLERAXISMOTION:
+			processGameControllerEvent(event.caxis.which, event);
+			break;
+		case SDL_CONTROLLERBUTTONDOWN:
+		case SDL_CONTROLLERBUTTONUP:
+			processGameControllerEvent(event.cbutton.which, event);
+			break;
+		case SDL_CONTROLLERDEVICEREMAPPED:
+			break;
+		case SDL_CONTROLLERDEVICEADDED:
+		case SDL_CONTROLLERDEVICEREMOVED:
+			processGameControllerDeviceEvent(event.cdevice);
+			break;
 
 		case SDL_MOUSEMOTION:
 		case SDL_MOUSEBUTTONDOWN:
@@ -190,11 +233,6 @@ void InputSDL::processEvent(SDL_Event& event)
 		case SDL_FINGERUP:
 		case SDL_FINGERMOTION:
 			processTouch(event.type, event.tfinger.touchId, event.tfinger.fingerId, event.tfinger.x, event.tfinger.y);
-			break;
-
-		case SDL_JOYDEVICEADDED:
-		case SDL_JOYDEVICEREMOVED:
-			processJoyDeviceEvent(event.jdevice);
 			break;
 
 		default:
@@ -223,24 +261,56 @@ void InputSDL::processJoyDeviceEvent(const SDL_JoyDeviceEvent& event)
 	if (event.type == SDL_JOYDEVICEADDED) {
 		addJoystick(event.which);
 	} else if (event.type == SDL_JOYDEVICEREMOVED) {
-		sdlJoys[event.which]->close();
-		sdlJoys.erase(event.which);
+		const auto iter = sdlJoys.find(event.which);
+		if (iter != sdlJoys.end()) {
+			iter->second->close();
+			sdlJoys.erase(iter);
+		}
+	}
+}
+
+void InputSDL::processGameControllerEvent(int n, const SDL_Event& event)
+{
+	const auto iter = sdlGameControllers.find(n);
+	if (iter != sdlGameControllers.end()) {
+		iter->second->processEvent(event);
+	}
+}
+
+void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
+{
+	if (event.type == SDL_JOYDEVICEADDED) {
+		addJoystick(event.which);
+	} else if (event.type == SDL_JOYDEVICEREMOVED) {
+		const auto iter = sdlGameControllers.find(event.which);
+		if (iter != sdlGameControllers.end()) {
+			iter->second->close();
+			sdlGameControllers.erase(iter);
+		}
 	}
 }
 
 void InputSDL::addJoystick(int idx)
 {
-	auto joy = std::unique_ptr<InputJoystickSDL>(new InputJoystickSDL(idx));
-
-	const String& name = joy->getName();
-	const bool isXinputController = name.asciiLower().find("xbox 360") != String::npos || name.asciiLower().find("xinput") != String::npos;
+	const auto name = String(SDL_JoystickNameForIndex(idx));
+	const bool isXinputController = name.asciiLower().contains("xbox 360") || name.asciiLower().contains("xinput");
 
 	if (!hasXInput || !isXinputController) {
-		const auto id = joy->getSDLJoystickId();
-		sdlJoys[id] = joy.get();
-		joysticks.push_back(std::move(joy));
+		if (SDL_IsGameController(idx)) {
+			auto joy = std::unique_ptr<InputGameControllerSDL>(new InputGameControllerSDL(idx));
+			const auto id = joy->getSDLJoystickId();
+			sdlGameControllers[id] = joy.get();
+			joysticks.push_back(std::move(joy));
 
-		std::cout << "\tInitialized SDL joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
+			std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
+		} else {
+			auto joy = std::unique_ptr<InputJoystickSDL>(new InputJoystickSDL(idx));
+			const auto id = joy->getSDLJoystickId();
+			sdlJoys[id] = joy.get();
+			joysticks.push_back(std::move(joy));
+
+			std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
+		}
 	}
 }
 
