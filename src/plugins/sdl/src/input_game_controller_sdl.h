@@ -26,6 +26,7 @@ namespace Halley {
 	private:
 		SDL_GameController* controller = nullptr;
 		int id;
+		int idx;
 		String name;
 
 		void processEvent(const SDL_Event& event);

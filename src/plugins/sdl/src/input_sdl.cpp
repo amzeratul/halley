@@ -33,6 +33,7 @@
 #include "halley/file_formats/binary_file.h"
 #include "halley/support/console.h"
 #include "halley/text/string_converter.h"
+#include "halley/utils/algorithm.h"
 
 #ifdef _MSC_VER
 #include "halley/input/input_joystick_xinput.h"
@@ -72,17 +73,11 @@ void InputSDL::setResources(Resources& resources)
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
 	for (int i = 0; i < 4; i++) {
-		auto joy = std::make_unique<InputJoystickXInput>(i);
+		auto joy = std::make_shared<InputJoystickXInput>(i);
 		joy->update(0);
 		joysticks.push_back(std::move(joy));
 	}
 #endif
-
-	// SDL joysticks
-	const int nJoy = SDL_NumJoysticks();
-	for (int i = 0; i < nJoy; i++) {
-		addJoystick(i);
-	}
 
 	SDL_JoystickEventState(SDL_QUERY);
 	SDL_JoystickEventState(SDL_ENABLE);
@@ -265,6 +260,7 @@ void InputSDL::processJoyDeviceEvent(const SDL_JoyDeviceEvent& event)
 		const auto iter = sdlJoys.find(event.which);
 		if (iter != sdlJoys.end()) {
 			iter->second->close();
+			std_ex::erase(joysticks, iter->second);
 			sdlJoys.erase(iter);
 		}
 	}
@@ -280,12 +276,14 @@ void InputSDL::processGameControllerEvent(int n, const SDL_Event& event)
 
 void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
 {
+	// Handled by Joystick events
 	if (event.type == SDL_CONTROLLERDEVICEADDED) {
 		addJoystick(event.which);
 	} else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
 		const auto iter = sdlGameControllers.find(event.which);
 		if (iter != sdlGameControllers.end()) {
 			iter->second->close();
+			std_ex::erase(joysticks, iter->second);
 			sdlGameControllers.erase(iter);
 		}
 	}
@@ -304,15 +302,15 @@ void InputSDL::addJoystick(int idx)
 			if (SDL_IsGameController(idx)) {
 				const auto joy = std::make_shared<InputGameControllerSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
-				std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << joy->getName() << ConsoleColour() << "\".\n";
-				std::cout << "\t* Mapping: \"" << ConsoleColour(Console::DARK_GREY) << joy->getMapping() << ConsoleColour() << "\".\n";
+				assert(!sdlGameControllers.contains(id));
+				assert(!sdlJoys.contains(id));
 				sdlGameControllers[id] = joy;
 				joysticks.push_back(joy);
-			}
-			else {
+			} else {
 				const auto joy = std::make_shared<InputJoystickSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
-				std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << joy->getName() << ConsoleColour() << "\".\n";
+				assert(!sdlGameControllers.contains(id));
+				assert(!sdlJoys.contains(id));
 				sdlJoys[id] = joy;
 				joysticks.push_back(joy);
 			}

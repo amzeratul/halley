@@ -166,8 +166,8 @@ namespace Halley {
 		virtual void setPosition(Vector2f position);
 		virtual int getWheelMove() const;
 
-		virtual void setParent(InputDevice* parent);
-		virtual InputDevice* getParent() const;
+		virtual void setParent(const std::shared_ptr<InputDevice>& parent);
+		virtual std::shared_ptr<InputDevice> getParent() const;
 
 	private:
 		uint16_t deviceId = 0;

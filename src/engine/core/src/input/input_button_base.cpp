@@ -72,14 +72,14 @@ void InputButtonBase::onButtonStatus(int code, bool down)
 	}
 }
 
-void InputButtonBase::setParent(InputDevice* p)
+void InputButtonBase::setParent(const std::shared_ptr<InputDevice>& p)
 {
 	parent = p;
 }
 
-InputDevice* InputButtonBase::getParent() const
+std::shared_ptr<InputDevice> InputButtonBase::getParent() const
 {
-	return parent;
+	return parent.lock();
 }
 
 void InputButtonBase::clearPresses()

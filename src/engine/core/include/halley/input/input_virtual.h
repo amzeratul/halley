@@ -185,7 +185,7 @@ namespace Halley {
 		Vector<spInputDevice> wheels;
 
 		spInputDevice vibrationOverride;
-		InputDevice* lastDevice = nullptr;
+		std::weak_ptr<InputDevice> lastDevice;
 		bool lastDeviceFrozen = false;
 		
 		float repeatDelayFirst;
@@ -197,7 +197,7 @@ namespace Halley {
 		Vector<InputExclusiveAxis*> exclusiveAxes;
 		bool exclusiveDirty = true;
 		
-		void setLastDevice(InputDevice* device);
+		void setLastDevice(const std::shared_ptr<InputDevice>& device);
 		void updateLastDevice();
 		std::set<spInputDevice> getAllDevices() const;
 

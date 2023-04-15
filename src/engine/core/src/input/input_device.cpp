@@ -170,13 +170,13 @@ int InputDevice::getWheelMove() const
 	return 0;
 }
 
-void InputDevice::setParent(InputDevice*)
+void InputDevice::setParent(const std::shared_ptr<InputDevice>& parent)
 {
 }
 
-InputDevice* InputDevice::getParent() const
+std::shared_ptr<InputDevice> InputDevice::getParent() const
 {
-	return nullptr;
+	return {};
 }
 
 InputAxisRepeater::InputAxisRepeater(Time firstDelay, Time repeatInterval0, Time secondDelay, Time repeatInterval1)

@@ -261,8 +261,8 @@ int InputVirtual::getAxisRepeat(int n)
 
 void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceN, -1, false));
 	exclusiveDirty = true;
@@ -270,8 +270,8 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 
 void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	buttons.at(n).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, false, mods));
 	exclusiveDirty = true;
@@ -279,8 +279,8 @@ void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton,
 
 void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceButton0, deviceButton1, false));
 	exclusiveDirty = true;
@@ -288,8 +288,8 @@ void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, -1, true));
 	exclusiveDirty = true;
@@ -297,8 +297,8 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
 	exclusiveDirty = true;
@@ -306,8 +306,8 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods)
 {
-	if (!lastDevice) {
-		setLastDevice(device.get());
+	if (!lastDevice.lock()) {
+		setLastDevice(device);
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), true, mods));
 	exclusiveDirty = true;
@@ -343,7 +343,7 @@ void InputVirtual::clearBindings()
 
 std::pair<float, float> InputVirtual::getVibration() const
 {
-	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : getLastDevice();
 	if (dev) {
 		return dev->getVibration();
 	} else {
@@ -353,7 +353,7 @@ std::pair<float, float> InputVirtual::getVibration() const
 
 void InputVirtual::setVibration(float low, float high)
 {
-	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : getLastDevice();
 	if (dev) {
 		dev->setVibration(low, high);
 	}
@@ -361,7 +361,7 @@ void InputVirtual::setVibration(float low, float high)
 
 void InputVirtual::vibrate(spInputVibration vib)
 {
-	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : getLastDevice();
 	if (dev) {
 		dev->vibrate(vib);
 	}
@@ -369,7 +369,7 @@ void InputVirtual::vibrate(spInputVibration vib)
 
 void InputVirtual::stopVibrating()
 {
-	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : getLastDevice();
 	if (dev) {
 		dev->stopVibrating();
 	}
@@ -430,7 +430,7 @@ String InputVirtual::getButtonName(int code) const
 	const auto& binds = buttons.at(code);
 	if (!binds.empty()) {
 		for (const auto& bind: binds) {
-			if (bind.device.get() == lastDevice) {
+			if (bind.device == lastDevice.lock()) {
 				return bind.device->getButtonName(bind.a);
 			}
 		}
@@ -474,7 +474,7 @@ void InputVirtual::update(Time t)
 
 InputDevice* InputVirtual::getLastDevice() const
 {
-	return lastDevice;
+	return lastDevice.lock().get();
 }
 
 void InputVirtual::updateLastDevice()
@@ -484,7 +484,7 @@ void InputVirtual::updateLastDevice()
 			for (auto& bind: buttonBinds) {
 				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
 					if (!bind.isAxisEmulation && bind.device->isButtonPressed(bind.a)) {
-						setLastDevice(bind.device.get());
+						setLastDevice(bind.device);
 						return;
 					}
 				}
@@ -496,7 +496,7 @@ void InputVirtual::updateLastDevice()
 					if ((!bind.isAxisEmulation && fabs(bind.device->getAxis(bind.a)) > 0.1f)
 						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.a))
 						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.b))) {
-						setLastDevice(bind.device.get());
+						setLastDevice(bind.device);
 						return;
 					}
 				}
@@ -688,8 +688,8 @@ void InputVirtual::setRepeat(float first, float hold)
 
 JoystickType InputVirtual::getJoystickType() const
 {
-	if (lastDevice) {
-		return lastDevice->getJoystickType();
+	if (auto ld = lastDevice.lock()) {
+		return ld->getJoystickType();
 	} else {
 		return JoystickType::None;
 	}
@@ -700,7 +700,7 @@ InputType InputVirtual::getInputType() const
 	return type;
 }
 
-void InputVirtual::setLastDevice(InputDevice* device)
+void InputVirtual::setLastDevice(const std::shared_ptr<InputDevice>& device)
 {
 	const auto parent = device->getParent();
 	if (parent) {
@@ -729,7 +729,7 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 	refreshExclusives();
 
 	if (!preferredDevice) {
-		preferredDevice = lastDevice;
+		preferredDevice = lastDevice.lock().get();
 	}
 
 	Vector<ExclusiveButtonInfo> result;
@@ -751,7 +751,7 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiveButton& button, InputDevice* device) const
 {
 	if (!device) {
-		device = lastDevice;
+		device = lastDevice.lock().get();
 	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool

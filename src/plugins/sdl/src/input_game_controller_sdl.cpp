@@ -3,6 +3,8 @@
 #include <SDL.h>
 #include <SDL_gamecontroller.h>
 
+#include "halley/support/console.h"
+
 using namespace Halley;
 
 InputGameControllerSDL::InputGameControllerSDL(int number)
@@ -12,6 +14,7 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 		throw Exception("Could not open Game Controller " + toString(number) + ": " + toString(SDL_GetError()), HalleyExceptions::InputPlugin);
 	}
 	id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
+	idx = number;
 	char buffer[64];
 	SDL_GUIDToString(SDL_JoystickGetDeviceGUID(number), buffer, 64);
 	name = String(SDL_GameControllerName(controller)) + " : " + buffer;
@@ -24,6 +27,9 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 	init(SDL_CONTROLLER_BUTTON_MAX + 2);
 
 	setEnabled(true);
+
+	std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (idx = " << idx << ")" << ConsoleColour() << "\".\n";
+	std::cout << "\t* Mapping: \"" << ConsoleColour(Console::DARK_GREY) << getMapping() << ConsoleColour() << "\".\n";
 }
 
 InputGameControllerSDL::~InputGameControllerSDL()
@@ -34,8 +40,11 @@ InputGameControllerSDL::~InputGameControllerSDL()
 void InputGameControllerSDL::close()
 {
 	if (controller) {
+		std::cout << "\tRemoved SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << getName() << " (idx = " << idx << ")" << ConsoleColour() << "\".\n";
 		SDL_GameControllerClose(controller);
+		controller = nullptr;
 		id = -1;
+		idx = -1;
 		setEnabled(false);
 	}
 }

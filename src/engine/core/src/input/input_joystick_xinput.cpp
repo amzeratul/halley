@@ -134,7 +134,6 @@ InputJoystickXInput::InputJoystickXInput(int number)
 	// Hat
 	hats.resize(1);
 	hats[0] = std::make_shared<InputButtonBase>(4);
-	hats[0]->setParent(this);
 
 	// Buttons
 	init(17);
@@ -165,6 +164,7 @@ InputType InputJoystickXInput::getInputType() const
 
 void InputJoystickXInput::update(Time t)
 {
+	hats[0]->setParent(shared_from_this());
 	clearPresses();
 
 	// If disabled, only check once every 30 steps, since XInputGetState() is fairly expensive

@@ -25,6 +25,8 @@
 #include <iostream>
 #include <halley/utils/utils.h>
 
+#include "halley/support/console.h"
+
 using namespace Halley;
 
 
@@ -56,6 +58,8 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	// Buttons
 	baseButtons = SDL_JoystickNumButtons(joy);
 	init(std::min(baseButtons + 4, 512));
+
+	std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
 }
 
 InputJoystickSDL::~InputJoystickSDL()
@@ -78,6 +82,7 @@ void InputJoystickSDL::update(Time t)
 void InputJoystickSDL::close()
 {
 	if (joystick) {
+		std::cout << "\tRemoved SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
 		doSetVibration(0, 0);
 		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
 		joystick = nullptr;

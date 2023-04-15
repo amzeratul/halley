@@ -27,7 +27,7 @@
 namespace Halley {
 
 	// XInput implementation
-	class InputJoystickXInput : public InputJoystick {
+	class InputJoystickXInput : public InputJoystick, public std::enable_shared_from_this<InputJoystickXInput> {
 	public:
 		InputJoystickXInput(int number);
 		~InputJoystickXInput() override;
