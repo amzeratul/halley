@@ -12,6 +12,11 @@ InputDevice::InputDevice()
 
 InputDevice::~InputDevice() = default;
 
+std::string_view InputDevice::getName() const
+{
+	return "InputDevice";
+}
+
 bool InputDevice::isEnabled() const
 {
 	return true;
@@ -30,6 +35,11 @@ size_t InputDevice::getNumberAxes()
 String InputDevice::getButtonName(int code) const
 {
 	return "";
+}
+
+int InputDevice::getButtonAtPosition(JoystickButtonPosition position) const
+{
+	return -1;
 }
 
 bool InputDevice::isAnyButtonPressed()
@@ -90,6 +100,10 @@ void InputDevice::clearButtonRelease(InputButton code)
 }
 
 void InputDevice::clearPresses()
+{
+}
+
+void InputDevice::clearAxes()
 {
 }
 

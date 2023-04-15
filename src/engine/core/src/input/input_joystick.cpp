@@ -44,6 +44,11 @@ float InputJoystick::defaultAxisAdjust(float value)
 	return absVal * sign;
 }
 
+std::string_view InputJoystick::getName() const
+{
+	return "Joystick";
+}
+
 JoystickType InputJoystick::getJoystickType() const
 {
 	return JoystickType::Generic;

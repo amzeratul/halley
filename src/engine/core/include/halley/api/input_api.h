@@ -27,7 +27,7 @@ namespace Halley
 		virtual std::shared_ptr<InputKeyboard> getKeyboard(int id = 0) const = 0;
 
 		virtual size_t getNumberOfJoysticks() const = 0;
-		virtual std::shared_ptr<InputJoystick> getJoystick(int id = 0) const = 0;
+		virtual std::shared_ptr<InputDevice> getJoystick(int id = 0) const = 0;
 
 		virtual size_t getNumberOfMice() const = 0;
 		virtual std::shared_ptr<InputDevice> getMouse(int id = 0) const = 0;

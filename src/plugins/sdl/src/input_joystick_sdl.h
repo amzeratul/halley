@@ -27,6 +27,7 @@ namespace Halley {
 
 	class InputJoystickSDL final : public InputJoystick {
 	public:
+		InputJoystickSDL(int number);
 		~InputJoystickSDL();
 
 		void update(Time t) override;
@@ -39,7 +40,6 @@ namespace Halley {
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
 
 	private:
-		InputJoystickSDL(int number);
 		int getSDLAxisIndex(int axis);
 		void processAxisEvent(int axis, float value);
 		void processEvent(const SDL_Event& event);

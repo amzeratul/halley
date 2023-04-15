@@ -9,9 +9,12 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 {
 	controller = SDL_GameControllerOpen(number);
 	if (!controller) {
-		throw Exception("Could not open Game Controller", HalleyExceptions::InputPlugin);
+		throw Exception("Could not open Game Controller " + toString(number) + ": " + toString(SDL_GetError()), HalleyExceptions::InputPlugin);
 	}
 	id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
+	char buffer[64];
+	SDL_GUIDToString(SDL_JoystickGetDeviceGUID(number), buffer, 64);
+	name = String(SDL_GameControllerName(controller)) + " : " + buffer;
 
 	// Axes
 	axes.resize(SDL_CONTROLLER_AXIS_MAX);
@@ -42,7 +45,12 @@ void InputGameControllerSDL::update(Time t)
 
 std::string_view InputGameControllerSDL::getName() const
 {
-	return controller ? SDL_GameControllerName(controller) : "";
+	return name;
+}
+
+String InputGameControllerSDL::getMapping() const
+{
+	return controller ? SDL_GameControllerMapping(controller) : nullptr;
 }
 
 int InputGameControllerSDL::getSDLJoystickId() const

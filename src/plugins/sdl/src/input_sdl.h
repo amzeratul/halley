@@ -43,13 +43,13 @@ namespace Halley {
 		void setResources(Resources& resources) override;
 
 		size_t getNumberOfKeyboards() const override;
-		std::shared_ptr<InputKeyboard> getKeyboard(int id=0) const override;
+		std::shared_ptr<InputKeyboard> getKeyboard(int id) const override;
 
 		size_t getNumberOfJoysticks() const override;
-		std::shared_ptr<InputJoystick> getJoystick(int id=0) const override;
+		std::shared_ptr<InputDevice> getJoystick(int id) const override;
 
 		size_t getNumberOfMice() const override;
-		std::shared_ptr<InputDevice> getMouse(int id=0) const override;
+		std::shared_ptr<InputDevice> getMouse(int id) const override;
 
 		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
@@ -80,8 +80,8 @@ namespace Halley {
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
 		Vector<std::shared_ptr<InputMouseSDL>> mice;
 
-		HashMap<int, InputJoystickSDL*> sdlJoys;
-		HashMap<int, InputGameControllerSDL*> sdlGameControllers;
+		HashMap<int, std::shared_ptr<InputJoystickSDL>> sdlJoys;
+		HashMap<int, std::shared_ptr<InputGameControllerSDL>> sdlGameControllers;
 		HashMap<int, std::shared_ptr<InputTouch>> touchEvents;
 
 		std::function<Vector2f(Vector2i)> mouseRemap;

@@ -30,35 +30,14 @@
 #endif
 
 namespace Halley {
-
-	enum class JoystickButtonPosition
-	{
-		FaceTop,
-		FaceRight,
-		FaceBottom,
-		FaceLeft,
-		BumperLeft,
-		BumperRight,
-		TriggerLeft,
-		TriggerRight,
-		LeftStick,
-		RightStick,
-		Select,
-		Start,
-		PlatformAcceptButton,
-		PlatformCancelButton,
-		DPadUp,
-		DPadRight,
-		DPadDown,
-		DPadLeft,
-		System
-	};
-
+	
 	class InputJoystick : public InputButtonBase {
 	public:
-		virtual ~InputJoystick() {}
+		static float defaultAxisAdjust(float value);
 
-		virtual std::string_view getName() const = 0;
+		virtual ~InputJoystick() override = default;
+
+		virtual std::string_view getName() const override;
 		JoystickType getJoystickType() const override;
 
 		size_t getNumberAxes() override;
@@ -66,10 +45,6 @@ namespace Halley {
 
 		float getAxis(int n) override;
 		std::shared_ptr<InputDevice> getHat(int n) override;
-
-		static float defaultAxisAdjust(float value);
-
-		virtual int getButtonAtPosition(JoystickButtonPosition position) const = 0;
 
 		virtual void update(Time t);
 
@@ -81,7 +56,7 @@ namespace Halley {
 		bool isEnabled() const override;
 		void setEnabled(bool enabled);
 
-		void clearAxes();
+		void clearAxes() override;
 		void clearPresses() override;
 
 		bool isAnyButtonPressed() override;

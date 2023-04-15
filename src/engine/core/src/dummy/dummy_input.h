@@ -7,7 +7,7 @@ namespace Halley {
 		size_t getNumberOfKeyboards() const override;
 		std::shared_ptr<InputKeyboard> getKeyboard(int id) const override;
 		size_t getNumberOfJoysticks() const override;
-		std::shared_ptr<InputJoystick> getJoystick(int id) const override;
+		std::shared_ptr<InputDevice> getJoystick(int id) const override;
 		size_t getNumberOfMice() const override;
 		std::shared_ptr<InputDevice> getMouse(int id) const override;
 		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;

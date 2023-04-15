@@ -90,6 +90,29 @@ namespace Halley {
 		}
 	};
 
+	enum class JoystickButtonPosition
+	{
+		FaceTop,
+		FaceRight,
+		FaceBottom,
+		FaceLeft,
+		BumperLeft,
+		BumperRight,
+		TriggerLeft,
+		TriggerRight,
+		LeftStick,
+		RightStick,
+		Select,
+		Start,
+		PlatformAcceptButton,
+		PlatformCancelButton,
+		DPadUp,
+		DPadRight,
+		DPadDown,
+		DPadLeft,
+		System
+	};
+
 	using InputButton = int;
 	
 	class InputDevice {
@@ -98,6 +121,7 @@ namespace Halley {
 		virtual ~InputDevice();
 
 		uint16_t getId() const { return deviceId; }
+		virtual std::string_view getName() const;
 
 		virtual bool isEnabled() const;
 
@@ -105,6 +129,7 @@ namespace Halley {
 		virtual size_t getNumberAxes();
 
 		virtual String getButtonName(int code) const;
+		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 
 		virtual bool isAnyButtonPressed();
 		virtual bool isAnyButtonPressedRepeat();
@@ -121,16 +146,17 @@ namespace Halley {
 		virtual void clearButtonPress(InputButton code);
 		virtual void clearButtonRelease(InputButton code);
 		virtual void clearPresses();
+		virtual void clearAxes();
 
-		virtual float getAxis(int /*n*/);
-		virtual int getAxisRepeat(int /*n*/);
+		virtual float getAxis(int n);
+		virtual int getAxisRepeat(int n);
 
 		virtual size_t getNumberHats();
-		virtual std::shared_ptr<InputDevice> getHat(int /*n*/);
+		virtual std::shared_ptr<InputDevice> getHat(int n);
 
 		virtual std::pair<float, float> getVibration() const;
 		virtual void setVibration(float low, float high);
-		virtual void vibrate(spInputVibration /*vib*/);
+		virtual void vibrate(spInputVibration vib);
 		virtual void stopVibrating();
 		
 		virtual JoystickType getJoystickType() const;

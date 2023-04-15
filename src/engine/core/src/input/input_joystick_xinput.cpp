@@ -23,6 +23,7 @@
 #include <iostream>
 #include <halley/utils/utils.h>
 
+#include "halley/support/console.h"
 #include "halley/support/logger.h"
 #ifdef XINPUT_AVAILABLE
 #define WIN32_LEAN_AND_MEAN
@@ -179,7 +180,7 @@ void InputJoystickXInput::update(Time t)
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
 		if (!isEnabled()) {
 			setEnabled(true);
-			Logger::logInfo("XInput controller connected: " + String(getName()));
+			std::cout << "\tXInput Controller " << ConsoleColour(Console::DARK_GREY) << (index + 1) << ConsoleColour() << " connected: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
 		}
 
 		auto& gamepad = state.Gamepad;
@@ -220,7 +221,7 @@ void InputJoystickXInput::update(Time t)
 	} else {
 		if (isEnabled()) {
 			setEnabled(false);
-			Logger::logInfo("XInput controller disconnected from port " + toString(index + 1));
+			std::cout << "\tXInput Controller " << ConsoleColour(Console::DARK_GREY) << (index + 1) << ConsoleColour() << " disconnected.\n";
 		}
 		cooldown = 30;
 

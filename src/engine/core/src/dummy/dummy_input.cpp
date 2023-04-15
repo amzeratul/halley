@@ -17,7 +17,7 @@ size_t DummyInputAPI::getNumberOfJoysticks() const
 	return 0;
 }
 
-std::shared_ptr<InputJoystick> DummyInputAPI::getJoystick(int id) const
+std::shared_ptr<InputDevice> DummyInputAPI::getJoystick(int id) const
 {
 	return {};
 }

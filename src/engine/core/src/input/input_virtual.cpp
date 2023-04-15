@@ -245,11 +245,17 @@ void InputVirtual::clearButtonRelease(InputButton code)
 
 float InputVirtual::getAxis(int n)
 {
+	if (n < 0 || n >= axes.size()) {
+		return 0;
+	}
 	return axes.at(n).getValue();
 }
 
 int InputVirtual::getAxisRepeat(int n)
 {
+	if (n < 0 || n >= axes.size()) {
+		return 0;
+	}
 	return axes.at(n).curRepeatValue;
 }
 

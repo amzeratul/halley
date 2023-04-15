@@ -55,12 +55,13 @@ InputSDL::~InputSDL() = default;
 
 void InputSDL::setResources(Resources& resources)
 {
+	std::cout << ConsoleColour(Console::GREEN) << "\nInitialized SDL input..." << ConsoleColour() << "\n";
 	if (resources.exists<BinaryFile>("binary/sdl/gamecontrollerdb.txt")) {
 		const auto db = resources.get<BinaryFile>("binary/sdl/gamecontrollerdb.txt");
 		const auto bytes = db->getSpan();
 		auto rw = SDL_RWFromConstMem(bytes.data(), int(bytes.size()));
 		const int added = SDL_GameControllerAddMappingsFromRW(rw, 1);
-		Logger::logInfo("Loaded " + toString(added) + " SDL game controller mappings.");
+		std::cout << "\tLoaded " << ConsoleColour(Console::DARK_GREY) << toString(added) << ConsoleColour() << " SDL controller mappings.\n";
 	}
 
 	mouseRemap = [] (Vector2i p) { return Vector2f(p); };
@@ -107,7 +108,7 @@ std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 	return keyboards[id];
 }
 
-std::shared_ptr<InputJoystick> InputSDL::getJoystick(int id) const
+std::shared_ptr<InputDevice> InputSDL::getJoystick(int id) const
 {
 	if (id >= static_cast<int>(joysticks.size())) {
 		return {};
@@ -292,25 +293,32 @@ void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent&
 
 void InputSDL::addJoystick(int idx)
 {
-	const auto name = String(SDL_JoystickNameForIndex(idx));
-	const bool isXinputController = name.asciiLower().contains("xbox 360") || name.asciiLower().contains("xinput");
+	try {
+		const auto nameLower = String(SDL_JoystickNameForIndex(idx)).asciiLower();
+		const auto guid = SDL_JoystickGetDeviceGUID(idx);
+		char buffer[64];
+		SDL_GUIDToString(guid, buffer, 64);
+		const bool isXinputController = String(buffer) == "xinput" || nameLower.contains("xbox") || nameLower.contains("xinput");
 
-	if (!hasXInput || !isXinputController) {
-		if (SDL_IsGameController(idx)) {
-			auto joy = std::unique_ptr<InputGameControllerSDL>(new InputGameControllerSDL(idx));
-			const auto id = joy->getSDLJoystickId();
-			sdlGameControllers[id] = joy.get();
-			joysticks.push_back(std::move(joy));
-
-			std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
-		} else {
-			auto joy = std::unique_ptr<InputJoystickSDL>(new InputJoystickSDL(idx));
-			const auto id = joy->getSDLJoystickId();
-			sdlJoys[id] = joy.get();
-			joysticks.push_back(std::move(joy));
-
-			std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << name << ConsoleColour() << "\".\n";
+		if (!hasXInput || !isXinputController) {
+			if (SDL_IsGameController(idx)) {
+				const auto joy = std::make_shared<InputGameControllerSDL>(idx);
+				const auto id = joy->getSDLJoystickId();
+				std::cout << "\tInitialized SDL Game Controller: \"" << ConsoleColour(Console::DARK_GREY) << joy->getName() << ConsoleColour() << "\".\n";
+				std::cout << "\t* Mapping: \"" << ConsoleColour(Console::DARK_GREY) << joy->getMapping() << ConsoleColour() << "\".\n";
+				sdlGameControllers[id] = joy;
+				joysticks.push_back(joy);
+			}
+			else {
+				const auto joy = std::make_shared<InputJoystickSDL>(idx);
+				const auto id = joy->getSDLJoystickId();
+				std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << joy->getName() << ConsoleColour() << "\".\n";
+				sdlJoys[id] = joy;
+				joysticks.push_back(joy);
+			}
 		}
+	} catch (const std::exception& e) {
+		Logger::logException(e);
 	}
 }
 
