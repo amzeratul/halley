@@ -102,7 +102,7 @@ void InputSDL::deInit()
 
 std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 {
-	if (id >= static_cast<int>(keyboards.size())) {
+	if (id < 0 || id >= static_cast<int>(keyboards.size())) {
 		return {};
 	}
 	return keyboards[id];
@@ -110,7 +110,7 @@ std::shared_ptr<InputKeyboard> InputSDL::getKeyboard(int id) const
 
 std::shared_ptr<InputDevice> InputSDL::getJoystick(int id) const
 {
-	if (id >= static_cast<int>(joysticks.size())) {
+	if (id < 0 || id >= static_cast<int>(joysticks.size())) {
 		return {};
 	}
 	return joysticks[id];
@@ -118,7 +118,7 @@ std::shared_ptr<InputDevice> InputSDL::getJoystick(int id) const
 
 std::shared_ptr<InputDevice> InputSDL::getMouse(int id) const
 {
-	if (id >= static_cast<int>(mice.size())) {
+	if (id < 0 || id >= static_cast<int>(mice.size())) {
 		return {};
 	}
 	return mice[id];
@@ -280,9 +280,9 @@ void InputSDL::processGameControllerEvent(int n, const SDL_Event& event)
 
 void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent& event)
 {
-	if (event.type == SDL_JOYDEVICEADDED) {
+	if (event.type == SDL_CONTROLLERDEVICEADDED) {
 		addJoystick(event.which);
-	} else if (event.type == SDL_JOYDEVICEREMOVED) {
+	} else if (event.type == SDL_CONTROLLERDEVICEREMOVED) {
 		const auto iter = sdlGameControllers.find(event.which);
 		if (iter != sdlGameControllers.end()) {
 			iter->second->close();

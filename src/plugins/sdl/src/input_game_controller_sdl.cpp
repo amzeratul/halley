@@ -22,6 +22,8 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 
 	// Buttons
 	init(SDL_CONTROLLER_BUTTON_MAX + 2);
+
+	setEnabled(true);
 }
 
 InputGameControllerSDL::~InputGameControllerSDL()
@@ -34,6 +36,7 @@ void InputGameControllerSDL::close()
 	if (controller) {
 		SDL_GameControllerClose(controller);
 		id = -1;
+		setEnabled(false);
 	}
 }
 
