@@ -840,8 +840,13 @@ void UIList::moveSelection(int dx, int dy)
 	int nCols;
 	int nRows;
 	int option = curOption;
-
 	const auto nItems = int(getNumberOfItems());
+
+	if (orientation == UISizerType::Grid && dx != 0) {
+		option += dx;
+		dx = 0;
+	}
+
 	option = modulo(option, nItems);
 
 	Vector2i cursorPos;
