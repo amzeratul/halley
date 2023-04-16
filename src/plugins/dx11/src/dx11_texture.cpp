@@ -296,6 +296,18 @@ void DX11Texture::copyToImageDirectly(Image& image) const
 				dstPx[x] = r | g | b | a;
 			}
 		}
+	} else if (descriptor.format == TextureFormat::BGRX) {
+		for (size_t y = 0; y < h; ++y) {
+			const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * subResource.RowPitch);
+			const auto dstPx = dst.subspan(y * w, w);
+			for (size_t x = 0; x < w; ++x) {
+				uint32_t px = srcPx[x];
+				const uint32_t ag = px & 0xFF00FF00u;
+				const uint32_t r = (px & 0x00FF0000u) >> 16;
+				const uint32_t b = (px & 0x000000FFu) << 16;
+				dstPx[x] = r | b | ag;
+			}
+		}
 	} else {
 		throw Exception("Unable to copy texture format to image: " + toString(descriptor.format), HalleyExceptions::VideoPlugin);
 	}
