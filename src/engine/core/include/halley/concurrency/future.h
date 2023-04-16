@@ -208,7 +208,7 @@ namespace Halley
 		Future& operator=(const Future& o) = default;
 		Future& operator=(Future&& o) = default;
 
-		DataType get()
+		DataType get() const
 		{
 			if (!data) {
 				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
@@ -219,7 +219,7 @@ namespace Halley
 			return data->get();
 		}
 
-		void wait()
+		void wait() const
 		{
 			if (!data) {
 				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
