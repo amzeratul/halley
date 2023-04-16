@@ -180,8 +180,10 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	}
-	
-	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition)));
+
+	if (api.core->isDevMode()) {
+		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition)));
+	}
 }
 
 const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String& widgetClass) const
