@@ -48,6 +48,7 @@ namespace Halley
 		bool canExit() override;
 
 		void setThreadName(const String& name) override;
+		void setThreadPriority(ThreadPriority priority) override;
 
 		void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) override;
 	

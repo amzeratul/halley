@@ -52,11 +52,13 @@ namespace Halley
 		{
 			return std::thread([=] () {
 				setThreadName(name);
+				setThreadPriority(priority);
 				runnable();
 			});
 		}
 
 		virtual void setThreadName(const String& name) {}
+		virtual void setThreadPriority(ThreadPriority priority) {}
 
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
 		virtual bool canExit() { return false; }

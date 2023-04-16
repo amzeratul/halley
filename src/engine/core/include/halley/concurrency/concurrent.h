@@ -11,9 +11,11 @@
 namespace Halley
 {
 	enum class ThreadPriority {
+		VeryLow,
 		Low,
 		Normal,
-		High
+		High,
+		VeryHigh
 	};
 
 	namespace Concurrent

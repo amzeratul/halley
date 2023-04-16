@@ -475,6 +475,32 @@ void SystemSDL::setThreadName(const String& name)
 #endif
 }
 
+void SystemSDL::setThreadPriority(ThreadPriority priority)
+{
+#if defined(_WIN32) 
+	int priorityValue = 0;
+	switch (priority) {
+	case ThreadPriority::VeryLow:
+		priorityValue = THREAD_PRIORITY_LOWEST;
+		break;
+	case ThreadPriority::Low:
+		priorityValue = THREAD_PRIORITY_BELOW_NORMAL;
+		break;
+	case ThreadPriority::Normal:
+		priorityValue = THREAD_PRIORITY_NORMAL;
+		break;
+	case ThreadPriority::High:
+		priorityValue = THREAD_PRIORITY_ABOVE_NORMAL;
+		break;
+	case ThreadPriority::VeryHigh:
+		priorityValue = THREAD_PRIORITY_HIGHEST;
+		break;
+	}
+	const HANDLE thread = GetCurrentThread();
+	SetThreadPriority(thread, priorityValue);
+#endif
+}
+
 void SystemSDL::printDebugInfo() const
 {
 	std::cout << std::endl << ConsoleColour(Console::GREEN) << "Initializing Video Display...\n" << ConsoleColour();

@@ -118,7 +118,7 @@ void AudioFacade::resumePlayback()
 		running = true;
 
 		if (ownAudioThread) {
-			audioThread = system.createThread("Audio", ThreadPriority::High, [this]() { run(); });
+			audioThread = system.createThread("Audio", ThreadPriority::VeryHigh, [this]() { run(); });
 		}
 
 		output.startPlayback();
