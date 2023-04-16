@@ -226,7 +226,7 @@ void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool continuous)
 		dst.x = clamp(dst.x, scrollPos.x - maxDelta, scrollPos.x + maxDelta);
 		dst.y = clamp(dst.y, scrollPos.y - maxDelta, scrollPos.y + maxDelta);
 		scrollTo(dst);
-	} else if (alwaysSmooth) {
+	} else if (alwaysSmooth && !center) {
 		targetScrollTo = dst;
 	} else {
 		scrollTo(dst);

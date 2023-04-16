@@ -886,7 +886,7 @@ void UIList::update(Time t, bool moved)
 		}
 	}
 
-	if (firstUpdate) {
+	if (firstUpdate && getCount() > 0) {
 		if (scrollToSelection) {
 			sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), getOptionRect(curOption)));
 		}
