@@ -9,6 +9,10 @@ void DummyAnalyticsAPI::deInit()
 {
 }
 
+void DummyAnalyticsAPI::setLocalLogPath(const Halley::String& path)
+{
+}
+
 void DummyAnalyticsAPI::setUserOptIn(bool userHasOptIn)
 {
 }
@@ -30,6 +34,7 @@ void DummyAnalyticsAPI::reportProgressionEvent(
 {
 }
 
-void DummyAnalyticsAPI::reportDesignEvent(String eventId) const
+void DummyAnalyticsAPI::reportDesignEvent(
+		const String& eventId) const
 {
 }

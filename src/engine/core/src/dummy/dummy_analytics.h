@@ -9,9 +9,11 @@ namespace Halley
 		void init() override;
 		void deInit() override;
 
+		void setLocalLogPath(const String& path) override;
+
 		void setUserOptIn(bool userHasOptIn) override;
 
-		virtual void reportResourceEvent(
+		void reportResourceEvent(
 				ResourceType type,
 				const String& itemType,
 				const String& itemId,
@@ -24,6 +26,7 @@ namespace Halley
 				std::optional<String> id2,
 				std::optional<String> id3) const override;
 
-		void reportDesignEvent(String eventId) const override;
+		void reportDesignEvent(
+				const String& eventId) const override;
 	};
 }

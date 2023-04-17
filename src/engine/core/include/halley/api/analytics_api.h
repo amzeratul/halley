@@ -20,6 +20,8 @@ namespace Halley {
 			Fail
 		};
 
+		virtual void setLocalLogPath(const String& path) = 0;
+
 		// Implementations should not collect or send any data before user consent
 		// has been confirmed, and this was called with userHasOptIn == true.
 		virtual void setUserOptIn(bool userHasOptIn) = 0;
@@ -37,7 +39,8 @@ namespace Halley {
 				std::optional<String> id2,
 				std::optional<String> id3) const = 0;
 
-		virtual void reportDesignEvent(String eventId) const = 0;
+		virtual void reportDesignEvent(
+				const String& eventId) const = 0;
 	};
 
 }
