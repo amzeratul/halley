@@ -1771,6 +1771,7 @@ bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
 
 void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 {
+	hasher.feed(type);
 	switch (type) {
 	case ConfigNodeType::Int:
 	case ConfigNodeType::Bool:
@@ -1790,14 +1791,17 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		hasher.feed(vec2fData);
 		break;
 	case ConfigNodeType::Sequence:
+		hasher.feed(asSequence().size());
 		for (const auto& e: asSequence()) {
 			e.feedToHash(hasher);
 		}
 		break;
 	case ConfigNodeType::Map:
 		for (const auto& [k, v]: asMap()) {
-			hasher.feed(k);
-			v.feedToHash(hasher);
+			if (v.getType() != ConfigNodeType::Undefined) {
+				hasher.feed(k);
+				v.feedToHash(hasher);
+			}
 		}
 		break;
 	case ConfigNodeType::Bytes:
@@ -1807,7 +1811,6 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		hasher.feed(*strData);
 		break;
 	case ConfigNodeType::Undefined:
-		hasher.feed(0);
 		break;
 	}
 }

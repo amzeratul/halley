@@ -510,7 +510,7 @@ void ScriptingBaseGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::opti
 	if (nodeType && (nodeId || !nodeType->getSettingTypes().empty())) {
 		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
 	} else if (!nodeId) {
-		addNode(type, pos.value_or(Vector2f()), ConfigNode());
+		addNode(type, pos.value_or(Vector2f()), ConfigNode::MapType());
 	}
 }
 
