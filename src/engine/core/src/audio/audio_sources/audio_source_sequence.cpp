@@ -163,6 +163,7 @@ void AudioSourceSequence::PlayingTrack::initialize()
 	if (endSample > 0 && static_cast<size_t>(endSample) < nSamples) {
 		endSamplesOverlap = nSamples - static_cast<size_t>(endSample);
 	}
+	initialized = true;
 }
 
 void AudioSourceSequence::initialize()
