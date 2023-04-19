@@ -20,6 +20,15 @@ namespace Halley {
 			Fail
 		};
 
+		enum class ErrorType
+		{
+			Debug,
+			Info,
+			Warning,
+			Error,
+			Critical
+		};
+
 		virtual void setLocalLogPath(const String& path) = 0;
 
 		// Implementations should not collect or send any data before user consent
@@ -37,10 +46,16 @@ namespace Halley {
 				ProgressionType type,
 				const String& id1,
 				std::optional<String> id2,
-				std::optional<String> id3) const = 0;
+				std::optional<String> id3,
+				int score) const = 0;
 
 		virtual void reportDesignEvent(
-				const String& eventId) const = 0;
+				const String& eventId,
+				double value) const = 0;
+
+		virtual void reportErrorEvent(
+				ErrorType severity,
+				const String& message) const = 0;
 	};
 
 }

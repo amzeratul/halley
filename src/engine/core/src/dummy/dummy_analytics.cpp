@@ -30,11 +30,19 @@ void DummyAnalyticsAPI::reportProgressionEvent(
 		ProgressionType type,
 		const String& id1,
 		std::optional<String> id2,
-		std::optional<String> id3) const
+		std::optional<String> id3,
+		int score) const
 {
 }
 
 void DummyAnalyticsAPI::reportDesignEvent(
-		const String& eventId) const
+		const String& eventId,
+		double value) const
+{
+}
+
+void DummyAnalyticsAPI::reportErrorEvent(
+		ErrorType severity,
+		const String& message) const
 {
 }
