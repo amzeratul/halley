@@ -5,6 +5,7 @@
 #include <mutex>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/text/enum_names.h"
 
 namespace Halley
 {
@@ -16,6 +17,18 @@ namespace Halley
 		Info,
 		Warning,
 		Error
+	};
+
+	template <>
+	struct EnumNames<LoggerLevel> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return { {
+				"dev",
+				"info",
+				"warning",
+				"error"
+			} };
+		}
 	};
 
 	class ILoggerSink
