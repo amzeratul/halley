@@ -54,24 +54,27 @@ String ScriptLog::getLargeLabel(const ScriptGraphNode& node) const
 IScriptNodeType::Result ScriptLog::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto& severity = node.getSettings()["severity"].asEnum<LoggerLevel>(LoggerLevel::Dev);
-	const auto& message = node.getSettings()["message"].asString("");
+	auto message = node.getSettings()["message"].asString("");
 	const auto& data = readDataPin(environment, node, 2);
+	if (data.getType() != ConfigNodeType::Undefined) {
+		message += " " + data.asString();
+	}
 
 	switch(severity) {
 	case LoggerLevel::Dev:
-		Logger::logDev(message + data.asString());
+		Logger::logDev(message);
 		break;
 
 	case LoggerLevel::Info:
-		Logger::logInfo(message + data.asString());
+		Logger::logInfo(message);
 		break;
 
 	case LoggerLevel::Warning:
-		Logger::logWarning(message + data.asString());
+		Logger::logWarning(message);
 		break;
 
 	case LoggerLevel::Error:
-		Logger::logError(message + data.asString());
+		Logger::logError(message);
 		break;
 	}
 
