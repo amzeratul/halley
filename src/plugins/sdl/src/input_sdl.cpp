@@ -294,8 +294,10 @@ void InputSDL::addJoystick(int idx)
 	try {
 		const auto nameLower = String(SDL_JoystickNameForIndex(idx)).asciiLower();
 		const auto guid = SDL_JoystickGetDeviceGUID(idx);
-		char buffer[64];
+		char buffer[64] = {};
+#if SDL_VERSION_ATLEAST(2, 24, 0)
 		SDL_GUIDToString(guid, buffer, 64);
+#endif
 		const bool isXinputController = String(buffer) == "xinput" || nameLower.contains("xbox") || nameLower.contains("xinput");
 
 		if (!hasXInput || !isXinputController) {
