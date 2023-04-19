@@ -24,9 +24,15 @@ namespace Halley
 				ProgressionType type,
 				const String& id1,
 				std::optional<String> id2,
-				std::optional<String> id3) const override;
+				std::optional<String> id3,
+				int score) const override;
 
 		void reportDesignEvent(
-				const String& eventId) const override;
+				const String& eventId,
+				double value) const override;
+
+		void reportErrorEvent(
+				ErrorType severity,
+				const String& message) const override;
 	};
 }
