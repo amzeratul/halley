@@ -83,6 +83,9 @@ namespace Halley
 		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
 		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
 
+		// Draw arrow
+		void drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy = Vector2f(1, 1), std::shared_ptr<const Material> material = {});
+
 		// Circle drawing
 		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
 		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material = {});

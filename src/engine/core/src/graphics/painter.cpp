@@ -354,6 +354,21 @@ void Painter::drawLine(const BezierCubic& bezier, float width, Colour4f colour, 
 	drawLine(points, width, colour, false, material);
 }
 
+void Painter::drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy, std::shared_ptr<const Material> material)
+{
+	const auto fwd = (to - from).normalized();
+	const auto right = (fwd * anisotropy).orthoRight() / anisotropy;
+
+	const auto p0 = to;
+	const auto p3 = from;
+	const auto p1 = p0 - (headSize * fwd) + (headSize * 0.5f * right);
+	const auto p2 = p0 - (headSize * fwd) - (headSize * 0.5f * right);
+
+	drawLine(Vector<Vector2f>{{ p3, p0 }}, width, colour, false, material);
+	drawLine(Vector<Vector2f>{{ p1, to }}, width, colour, false, material);
+	drawLine(Vector<Vector2f>{{ p2, to }}, width, colour, false, material);
+}
+
 static size_t getSegmentsForArc(float radius, float arcLen)
 {
 	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
