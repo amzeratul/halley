@@ -30,6 +30,7 @@ namespace Halley {
 		void onKeyReleased(KeyCode code, KeyMods mods);
 
 		KeyMods getKeyMods() override;
+		std::string_view getName() const override;
 
 		gsl::span<const KeyboardKeyPress> getPendingKeys() const;
 

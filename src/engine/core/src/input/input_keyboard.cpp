@@ -72,6 +72,11 @@ KeyMods InputKeyboard::getKeyMods()
 	return static_cast<KeyMods>(result);
 }
 
+std::string_view InputKeyboard::getName() const
+{
+	return "Keyboard";
+}
+
 gsl::span<const KeyboardKeyPress> InputKeyboard::getPendingKeys() const
 {
 	return { keyPresses };
