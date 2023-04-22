@@ -172,8 +172,9 @@ void AudioEngine::generateBuffer()
 	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer);
 	Stopwatch timer;
 	timer.start();
-	
-	const size_t samplesToRead = alignUp(spec.bufferSize * 48000 / spec.sampleRate, 16);
+
+	const size_t targetSamples = bufferSizeController ? bufferSizeController->getTargetSamples() : spec.bufferSize;
+	const size_t samplesToRead = alignDown(targetSamples * 48000 / spec.sampleRate, static_cast<size_t>(16));
 	const size_t numChannels = spec.numChannels;
 	
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
@@ -377,6 +378,11 @@ void AudioEngine::updateBusGains()
 int64_t AudioEngine::getLastTimeElapsed()
 {
 	return lastTimeElapsed.exchange(0);
+}
+
+void AudioEngine::setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller)
+{
+	bufferSizeController = std::move(controller);
 }
 
 void AudioEngine::setBusGain(const String& name, float gain)

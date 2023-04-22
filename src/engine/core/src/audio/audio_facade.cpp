@@ -160,6 +160,13 @@ std::optional<AudioSpec> AudioFacade::getAudioSpec() const
 	return running ? audioSpec : std::optional<AudioSpec>();
 }
 
+void AudioFacade::setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller)
+{
+	enqueue([=]() {
+		engine->setBufferSizeController(controller);
+	});
+}
+
 
 AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {

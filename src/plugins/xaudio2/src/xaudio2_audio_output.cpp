@@ -174,6 +174,7 @@ AudioSpec XAudio2AudioOutput::openAudioDevice(const AudioSpec& requestedFormat, 
 	masterVoice = std::make_unique<XAudio2MasteringVoice>(*this, requestedFormat, device->getName());
 	callback = prepareAudioCallback;
 	format = requestedFormat;
+	format.bufferSize = 256;
 
 	return requestedFormat;
 }

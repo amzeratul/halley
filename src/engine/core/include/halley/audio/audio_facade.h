@@ -66,8 +66,10 @@ namespace Halley {
 
 		int64_t getLastTimeElapsed() const override;
 		std::optional<AudioSpec> getAudioSpec() const override;
-    	
-    private:
+
+		void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller) override;
+
+	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;
 		SystemAPI& system;

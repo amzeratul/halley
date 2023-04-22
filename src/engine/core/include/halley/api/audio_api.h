@@ -116,6 +116,13 @@ namespace Halley
 		virtual size_t output(gsl::span<gsl::byte> dst, bool padWithZeroes) = 0;
 	};
 
+	class IAudioBufferSizeController {
+	public:
+		virtual ~IAudioBufferSizeController() = default;
+
+		virtual size_t getTargetSamples() const = 0;
+	};
+
 	class AudioOutputAPI
 	{
 	public:		
@@ -231,5 +238,7 @@ namespace Halley
 
 		virtual int64_t getLastTimeElapsed() const = 0;
 		virtual std::optional<AudioSpec> getAudioSpec() const = 0;
+
+		virtual void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller) = 0;
 	};
 }

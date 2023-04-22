@@ -61,7 +61,9 @@ namespace Halley {
 
 		int64_t getLastTimeElapsed();
 
-    private:
+    	void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller);
+
+	private:
 		struct BusData {
 			String name;
 			float gain = 1;
@@ -93,6 +95,8 @@ namespace Halley {
 		std::atomic<int64_t> lastTimeElapsed;
 
     	Vector<uint32_t> finishedSounds;
+
+		std::shared_ptr<IAudioBufferSizeController> bufferSizeController;
 
 		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedVoices();

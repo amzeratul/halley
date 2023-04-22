@@ -6,7 +6,7 @@
 
 namespace Halley
 {
-	class AudioClipStreaming final : public IAudioClip, CoreAPI::IStartFrameCallback
+	class AudioClipStreaming final : public IAudioClip, CoreAPI::IStartFrameCallback, public IAudioBufferSizeController
 	{
 	public:
 		AudioClipStreaming(uint8_t numChannels);
@@ -26,6 +26,8 @@ namespace Halley
 		size_t getLatencyTarget() const;
 
 		void setPaused(bool paused);
+
+		size_t getTargetSamples() const override;
 
 	private:
 		std::atomic_size_t length;

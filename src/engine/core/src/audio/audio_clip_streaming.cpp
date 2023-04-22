@@ -31,7 +31,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
-	std::array<float, 2048> tmp;
+	std::array<float, 4096> tmp;
 	//assert(src.size() / numChannels < tmp.size());
 	const size_t nSamples = std::min(src.size() / numChannels, tmp.size());
 
@@ -102,7 +102,7 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 	}
 	lock.unlock();
 
-	std::array<float, 2048> tmp;
+	std::array<float, 4096> tmp;
 	auto samples = gsl::span<float>(tmp).subspan(0, toWrite);
 	buffer.read(samples);
 	AudioMixer::copy(dst, samples, gain0, gain1);
@@ -151,6 +151,11 @@ size_t AudioClipStreaming::getLatencyTarget() const
 void AudioClipStreaming::setPaused(bool paused)
 {
 	this->paused = paused;
+}
+
+size_t AudioClipStreaming::getTargetSamples() const
+{
+	return clamp<size_t>(samplesLeft.load(), 256, 2048);
 }
 
 void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst origSrc)
@@ -208,7 +213,7 @@ void AudioClipStreaming::onStartFrame()
 		const float ratio = AB / ((1 + d) * AB - 2.0f * d * avgSamplesLeft);
 		const auto fromRate = sourceSampleRate * ratio;
 
-		//Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
+		Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
 		resampler->setRate(fromRate, outSampleRate);
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
