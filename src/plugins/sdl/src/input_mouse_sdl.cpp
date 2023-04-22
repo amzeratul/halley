@@ -37,6 +37,7 @@ void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vec
 			Vector2i p;
 			p.x = event.motion.x;
 			p.y = event.motion.y;
+			relMove = Vector2f(Vector2i(event.motion.xrel, event.motion.yrel));
 			pos = remap(Vector2i(p));
 			break;
 		}
@@ -93,12 +94,19 @@ InputType InputMouseSDL::getInputType() const
 	return InputType::Mouse;
 }
 
+std::string_view InputMouseSDL::getName() const
+{
+	return "Mouse";
+}
+
 float InputMouseSDL::getAxis(int n)
 {
 	if (n == 0) {
-		return pos.x - prevPos.x;
+		return relMove.x;
+		//return pos.x - prevPos.x;
 	} else if (n == 1) {
-		return pos.y - prevPos.y;
+		return relMove.y;
+		//return pos.y - prevPos.y;
 	} else {
 		return 0.0f;
 	}
@@ -111,6 +119,7 @@ void InputMouseSDL::clearPresses()
 	if (!isMouseTrapped) {
 		prevPos = pos;
 	}
+	relMove = {};
 }
 
 void InputMouseSDL::setDeltaPos(Vector2i deltaPos)

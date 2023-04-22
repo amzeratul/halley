@@ -40,6 +40,7 @@ namespace Halley {
 
 		void update();
 		InputType getInputType() const override;
+		std::string_view getName() const override;
 
 	private:
 		InputMouseSDL();
@@ -53,6 +54,7 @@ namespace Halley {
 
 		Vector2f pos;
 		Vector2f prevPos;
+		Vector2f relMove;
 		int wheelMove = 0;
 		bool isMouseTrapped = false;
 	};

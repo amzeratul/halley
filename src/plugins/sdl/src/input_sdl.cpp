@@ -374,6 +374,7 @@ void InputSDL::setMouseCursorPos(Vector2i pos)
 
 void InputSDL::setMouseTrap(bool shouldBeTrapped)
 {
-	isMouseTrapped = shouldBeTrapped;
-	SDL_SetWindowGrab(system.getWindow(0)->getSDLWindow(), shouldBeTrapped ? SDL_TRUE : SDL_FALSE);
+	//isMouseTrapped = shouldBeTrapped;
+	//SDL_SetWindowGrab(system.getWindow(0)->getSDLWindow(), shouldBeTrapped ? SDL_TRUE : SDL_FALSE);
+	SDL_SetRelativeMouseMode(shouldBeTrapped ? SDL_TRUE : SDL_FALSE);
 }

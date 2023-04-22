@@ -91,7 +91,7 @@ namespace Halley {
 		void bindButton(int n, spInputDevice device, int deviceButton);
 		void bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});
 		void bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1);
-		void bindAxis(int n, spInputDevice device, int deviceButton);
+		void bindAxis(int n, spInputDevice device, int deviceAxis, float scale = 1.0f);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
 		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods = {});
 		void bindVibrationOverride(spInputDevice joy);
@@ -136,8 +136,9 @@ namespace Halley {
 			bool isAxis = false;
 			bool isAxisEmulation = false;
 			std::optional<KeyMods> mods;
+			float scale = 1.0f;
 
-			Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods = {});
+			Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods = {}, float scale = 1.0f);
 
 			bool isButtonPressed() const;
 			bool isButtonPressedRepeat() const;

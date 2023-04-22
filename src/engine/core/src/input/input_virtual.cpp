@@ -286,12 +286,12 @@ void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
+void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN, float scale)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, -1, true));
+	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, -1, true, {}, scale));
 	exclusiveDirty = true;
 }
 
@@ -505,13 +505,14 @@ void InputVirtual::updateLastDevice()
 	}
 }
 
-InputVirtual::Bind::Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods)
+InputVirtual::Bind::Bind(spInputDevice d, int a, int b, bool axis, std::optional<KeyMods> mods, float scale)
 	: device(std::move(d))
 	, a(a)
 	, b(b)
 	, isAxis(axis)
 	, isAxisEmulation(axis && b != -1)
 	, mods(mods)
+	, scale(scale)
 {}
 
 bool InputVirtual::Bind::isButtonPressed() const
@@ -600,9 +601,9 @@ float InputVirtual::Bind::getAxis() const
 	if (isAxisEmulation) {
 		const int left = device->isButtonDown(a) ? 1 : 0;
 		const int right = device->isButtonDown(b) ? 1 : 0;
-		return static_cast<float>(right - left);
+		return static_cast<float>(right - left) * scale;
 	} else {
-		return device->getAxis(a);
+		return device->getAxis(a) * scale;
 	}
 }
 
