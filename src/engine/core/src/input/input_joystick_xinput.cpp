@@ -146,6 +146,7 @@ InputJoystickXInput::~InputJoystickXInput()
 
 std::string_view InputJoystickXInput::getName() const
 {
+	/*
 	XINPUT_CAPABILITIES_EX capabilities;
 	const auto result = XInputGetCapabilitiesEx(index, 0, &capabilities);
 	if (SUCCEEDED(result)) {
@@ -153,6 +154,10 @@ std::string_view InputJoystickXInput::getName() const
 	} else {
 		name = "XInput Controller #" + toString(index + 1);
 	}
+	return name;
+	*/
+
+	name = "XInput Controller #" + toString(index + 1);
 	return name;
 }
 

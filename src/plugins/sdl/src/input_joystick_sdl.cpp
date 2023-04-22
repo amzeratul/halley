@@ -40,10 +40,7 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	}
 	joystick = joy;
 	id = SDL_JoystickInstanceID(joy);
-	name = String(SDL_JoystickName(joy))
-		+ " [" + toString(SDL_JoystickGetDeviceVendor(index), 16, 4)
-		+ ":" + toString(SDL_JoystickGetDeviceProduct(index), 16, 4)
-		+ "]";
+	name = String(SDL_JoystickName(joy));
 
 	// Axes
 	axes.resize(SDL_JoystickNumAxes(joy));

@@ -54,6 +54,11 @@ JoystickType InputJoystick::getJoystickType() const
 	return JoystickType::Generic;
 }
 
+InputType InputJoystick::getInputType() const
+{
+	return InputType::Gamepad;
+}
+
 size_t InputJoystick::getNumberAxes()
 {
 	return axes.size();

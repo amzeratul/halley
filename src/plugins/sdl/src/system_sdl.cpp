@@ -50,6 +50,7 @@ void SystemSDL::init()
 			throw Exception(String("Exception initializing SDL: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 		}
 	}
+	SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
 	if (SDL_InitSubSystem(SDL_INIT_TIMER) == -1) {
 		throw Exception(String("Exception initializing timer: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 	}

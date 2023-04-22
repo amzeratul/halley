@@ -39,6 +39,7 @@ namespace Halley {
 
 		virtual std::string_view getName() const override;
 		JoystickType getJoystickType() const override;
+		InputType getInputType() const override;
 
 		size_t getNumberAxes() override;
 		size_t getNumberHats() override;

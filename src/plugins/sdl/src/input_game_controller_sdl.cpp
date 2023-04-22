@@ -15,11 +15,7 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 	}
 	id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
 	idx = number;
-	char buffer[64] = {};
-#if SDL_VERSION_ATLEAST(2, 24, 0)
-	SDL_GUIDToString(SDL_JoystickGetDeviceGUID(number), buffer, 64);
-#endif
-	name = String(SDL_GameControllerName(controller)) + " : " + buffer;
+	name = String(SDL_GameControllerName(controller));
 
 	// Axes
 	axes.resize(SDL_CONTROLLER_AXIS_MAX);
