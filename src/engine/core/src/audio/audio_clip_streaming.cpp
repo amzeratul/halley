@@ -213,7 +213,7 @@ void AudioClipStreaming::onStartFrame()
 		const float ratio = AB / ((1 + d) * AB - 2.0f * d * avgSamplesLeft);
 		const auto fromRate = sourceSampleRate * ratio;
 
-		Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
+		//Logger::logDev(toString(int(playbackSamplesLeft), 10, 4, ' ') + " [" + toString(int(avgSamplesLeft), 10, 4, ' ') + "], " + toString(ratio, 4) + "x");
 		resampler->setRate(fromRate, outSampleRate);
 	} else {
 		resampler->setRate(sourceSampleRate, outSampleRate);
