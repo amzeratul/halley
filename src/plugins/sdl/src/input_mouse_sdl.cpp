@@ -107,6 +107,10 @@ float InputMouseSDL::getAxis(int n)
 	} else if (n == 1) {
 		return relMove.y;
 		//return pos.y - prevPos.y;
+	} else if (n == 2) {
+		return pos.x;
+	} else if (n == 3) {
+		return pos.y;
 	} else {
 		return 0.0f;
 	}
