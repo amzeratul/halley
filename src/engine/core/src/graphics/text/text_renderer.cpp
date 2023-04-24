@@ -226,7 +226,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 		return;
 	}
 
-	bool floorEnabled = false;
+	bool floorEnabled = font->shouldFloorGlyphPosition();
 	auto floorAlign = [floorEnabled] (Vector2f a) -> Vector2f
 	{
 		if (floorEnabled) {

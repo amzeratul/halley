@@ -116,6 +116,7 @@ void MetadataEditor::makeUI()
 		addStringField("Fallback", "fallback", "");
 		addFloatField("Fallback Scale", "replacementScale", 1.0f);
 		addStringField("Extra characters", "extraCharacters", "");
+		addBoolField("Floor Glyph Pos.", "floorGlyphPosition", false);
 		break;
 	}
 }

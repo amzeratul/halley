@@ -38,7 +38,7 @@ namespace Halley
 
 		Font() = default;
 		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize);
-		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback);
+		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition);
 
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
@@ -57,6 +57,7 @@ namespace Halley
 		float getReplacementScale() const;
 		String getName() const;
 		bool isDistanceField() const;
+		bool shouldFloorGlyphPosition() const;
 
 		void addGlyph(const Glyph& glyph);
 
@@ -79,8 +80,10 @@ namespace Halley
 		bool distanceField;
 		Vector<std::shared_ptr<const Font>> fallbackFont;
 		Vector<String> fallback;
+		bool floorGlyphPosition;
 
 		std::shared_ptr<Material> material;
 		HashMap<int, Glyph> glyphs;
 	};
+	
 }
