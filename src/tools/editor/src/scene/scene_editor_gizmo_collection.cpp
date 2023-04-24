@@ -140,7 +140,9 @@ void SceneEditorGizmoCollection::generateList(UIList& list)
 	const auto iconCol = factory.getColourScheme()->getColour("ui_text");
 	list.clear();
 	for (const auto& tool: tools) {
-		list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
+		if (tool.icon.hasMaterial()) {
+			list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
+		}
 	}
 	uiList = &list;
 }
