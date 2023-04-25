@@ -131,7 +131,6 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 			nextRegionIdx++;
 			navmeshSubWorld = subWorld;
 		} else {
-			Logger::logWarning("Failed to find path within region.");
 			setPath({});
 		}
 	} else {

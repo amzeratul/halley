@@ -126,8 +126,12 @@ std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const Navigatio
 	auto startLeg = navmeshes[startRegionId].pathfindNodes(queryStart);
 	auto endLeg = navmeshes[endRegionId].pathfindNodes(queryEnd);
 
-	if (!startLeg || !endLeg) {
-		Logger::logError("Pathfinding error, start or end leg missing");
+	if (!startLeg) {
+		Logger::logError("Pathfinding error, start leg (" + queryStart.from + " -> " + queryStart.to + ") not found in region " + toString(startRegionId));
+		return {};
+	}
+	if (!endLeg) {
+		Logger::logError("Pathfinding error, end leg (" + queryEnd.from + " -> " + queryEnd.to + ") not found in region " + toString(endRegionId));
 		return {};
 	}
 
