@@ -18,7 +18,6 @@ UIDropdown::UIDropdown(String id, UIStyle style, Vector<LocalisedString> os, int
 	styles.emplace_back(std::move(style));
 
 	setOptions(std::move(os));
-	setChildLayerAdjustment(1);
 }
 
 void UIDropdown::setSelectedOption(int option)
@@ -195,6 +194,8 @@ void UIDropdown::drawChildren(UIPainter& painter) const
 
 void UIDropdown::update(Time t, bool moved)
 {
+	setChildLayerAdjustment(openState == OpenState::Closed ? 0 : 1);
+
 	bool optionsUpdated = false;
 	for (auto& o: options) {
 		if (o.label.checkForUpdates()) {

@@ -129,7 +129,7 @@ uiStyle:
     iconGap: 4
     minSizeMargins: [ 40, 20, 0, 0 ]
     listStyle: list
-    scrollbarStyle: scrollbar
+    scrollbarStyle: scrollbarHalley
 
   dropdownLight:
     classes: [dropdown]
@@ -149,7 +149,7 @@ uiStyle:
     iconGap: 4
     minSizeMargins: [ 40, 20, 0, 0 ]
     listStyle: listLight
-    scrollbarStyle: scrollbar
+    scrollbarStyle: scrollbarHalley
 
   list:
     classes: [list]
