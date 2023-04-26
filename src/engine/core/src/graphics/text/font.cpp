@@ -50,10 +50,11 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, replacementScale(renderScale)
 	, imageSize(imageSize)
 	, distanceField(false)
+	, floorGlyphPosition(false)
 {
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback)
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition)
 	: name(std::move(name))
 	, imageName(std::move(imageName))
 	, ascender(ascender)
@@ -64,6 +65,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, imageSize(imageSize)
 	, distanceField(true)
 	, fallback(std::move(fallback))
+	, floorGlyphPosition(floorGlyphPosition)
 {
 }
 
@@ -175,6 +177,11 @@ bool Font::isDistanceField() const
 	return distanceField;
 }
 
+bool Font::shouldFloorGlyphPosition() const
+{
+	return floorGlyphPosition;	
+}
+
 void Font::addGlyph(const Glyph& glyph)
 {
 	glyphs[glyph.charcode] = glyph;
@@ -198,6 +205,7 @@ void Font::serialize(Serializer& s) const
 	s << replacementScale;
 	s << glyphs;
 	s << fallback;
+	s << floorGlyphPosition;
 }
 
 void Font::deserialize(Deserializer& s)
@@ -213,6 +221,7 @@ void Font::deserialize(Deserializer& s)
 	s >> replacementScale;
 	s >> glyphs;
 	s >> fallback;
+	s >> floorGlyphPosition;
 
 	for (auto& g: glyphs) {
 		g.second.charcode = g.first;

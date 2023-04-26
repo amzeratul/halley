@@ -223,6 +223,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	const float sizePt = float(lround(font.getSize() * scale));
 	const float smoothRadius = radius;
 	const int padding = lround(radius);
+	const bool floorGlyphPosition = meta.getBool("floorGlyphPosition", false);
 
 	Vector<String> fallback;
 	for (auto& name: meta.getString("fallback", "").split(",")) {
@@ -232,7 +233,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		}
 	}
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback, floorGlyphPosition);
 
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);
