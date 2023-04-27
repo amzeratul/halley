@@ -13,7 +13,7 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence)
+AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse)
 {
 	updateIfNeeded();
 
@@ -22,6 +22,11 @@ AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::op
 	seqLooping = false;
 
 	nextSequence = nextLoopingSequence;
+
+	this->reverse = reverse;
+	if (reverse) {
+		curFrameN = static_cast<int>(curSeq->numFrames() - 1);
+	}
 
 	return *this;
 }
@@ -155,8 +160,8 @@ void AnimationPlayer::update(Time time)
 
 	const int prevFrame = curFrameN;
 
-	curSeqTime += time * playbackSpeed;
-	curFrameTime += time * playbackSpeed;
+	curSeqTime += time * (reverse ? -playbackSpeed : playbackSpeed);
+	curFrameTime += time * (reverse ? -playbackSpeed : playbackSpeed);
 
 	// Prev frame time!
 	if (curFrameTime < 0) {
@@ -261,6 +266,11 @@ std::shared_ptr<const Material> AnimationPlayer::getMaterial() const
 void AnimationPlayer::setApplyMaterial(bool apply)
 {
 	applyMaterial = apply;
+}
+
+void AnimationPlayer::setReversePlaying(bool reverse)
+{
+	this->reverse = reverse;
 }
 
 bool AnimationPlayer::isApplyingMaterial() const
