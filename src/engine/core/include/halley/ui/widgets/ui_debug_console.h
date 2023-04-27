@@ -69,6 +69,7 @@ namespace Halley {
 	};
 
 	struct UIDebugConsoleCommandData {
+		String command;
 		UIDebugConsoleCallback callback;
 		ExecutionQueue* queue = nullptr;
 		UIDebugConsoleSyntax syntax;
@@ -103,6 +104,8 @@ namespace Halley {
 	private:
 		Vector<UIDebugConsoleCommands*> commands;
 		std::unique_ptr<UIDebugConsoleCommands> baseCommandSet;
+
+		Future<UIDebugConsoleResponse> runCommand(String command, const UIDebugConsoleCommandData& commandData, Vector<String> args);
 	};
 
     class UIDebugConsole : public UIWidget {

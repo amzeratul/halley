@@ -41,22 +41,22 @@ bool UIDebugConsoleResponse::isCloseConsole() const
 
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr, {} };
+	commands[command.asciiLower()] = UIDebugConsoleCommandData{ command, std::move(callback), nullptr, {} };
 }
 
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr, std::move(syntax) };
+	commands[command.asciiLower()] = UIDebugConsoleCommandData{ command, std::move(callback), nullptr, std::move(syntax) };
 }
 
 void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue, {} };
+	commands[command.asciiLower()] = UIDebugConsoleCommandData{ command, std::move(callback), &queue, {} };
 }
 
 void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue, std::move(syntax) };
+	commands[command.asciiLower()] = UIDebugConsoleCommandData{ command, std::move(callback), &queue, std::move(syntax) };
 }
 
 const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCommands() const
@@ -104,34 +104,37 @@ Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String comma
 {
 	for (auto& commandSet: commands) {
 		const auto& cs = commandSet->getCommands();
-		const auto iter = cs.find(command);
+		const auto iter = cs.find(command.asciiLower());
 		if (iter != cs.end()) {
-			const UIDebugConsoleCommandData& commandData = iter->second;
-
-			if (commandData.syntax.hasSyntax()) {
-				const auto result = commandData.syntax.checkSyntax(command, args);
-				if (result) {
-					// Syntax error
-					Promise<UIDebugConsoleResponse> value;
-					value.setValue(result.value());
-					return value.getFuture();
-				}
-			}
-			
-			if (commandData.queue) {
-				return Concurrent::execute(*commandData.queue, [args=std::move(args), f=commandData.callback] () -> UIDebugConsoleResponse {
-					return f(args);
-				});
-			} else {
-				Promise<UIDebugConsoleResponse> value;
-				value.setValue(commandData.callback(args));
-				return value.getFuture();
-			}
+			return runCommand(command, iter->second, std::move(args));
 		}
 	}
 	Promise<UIDebugConsoleResponse> value;
 	value.setValue("Command not found: \"" + command + "\".");
 	return value.getFuture();
+}
+
+Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, const UIDebugConsoleCommandData& commandData, Vector<String> args)
+{
+	if (commandData.syntax.hasSyntax()) {
+		const auto result = commandData.syntax.checkSyntax(command, args);
+		if (result) {
+			// Syntax error
+			Promise<UIDebugConsoleResponse> value;
+			value.setValue(result.value());
+			return value.getFuture();
+		}
+	}
+	
+	if (commandData.queue) {
+		return Concurrent::execute(*commandData.queue, [args=std::move(args), f=commandData.callback] () -> UIDebugConsoleResponse {
+			return f(args);
+		});
+	} else {
+		Promise<UIDebugConsoleResponse> value;
+		value.setValue(commandData.callback(args));
+		return value.getFuture();
+	}
 }
 
 String UIDebugConsoleController::runHelp()
@@ -168,7 +171,7 @@ Vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32&
 	
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
-			const auto& c = command.first.getUTF32();
+			const auto& c = command.second.command.getUTF32();
 			if (line.size() > c.size() && line.substr(0, c.size()) == c && line[c.size()] == ' ') {
 				// Line starts with command, autocomplete for it
 				return command.second.syntax.getAutoComplete(line);
