@@ -35,6 +35,10 @@ entityIcons:
     image: entity_icons/car.png
     name: Car
     colour: $ui_text
+  - id: chair
+    image: entity_icons/chair.png
+    name: Chair
+    colour: $ui_text
   - id: cloud
     image: entity_icons/cloud.png
     name: Cloud
