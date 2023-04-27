@@ -81,15 +81,20 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
+	const auto dir = getConnectedNodeName(world, node, graph, 3);
 	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");
-	str.append(node.getSettings()["direction"].asString("right"), settingColour);
+	if (dir != "" && dir != "<empty>") {
+		str.append(dir, parameterColour);
+	} else {
+		str.append(node.getSettings()["direction"].asString("right"), settingColour);
+	}
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
@@ -97,7 +102,9 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescript
 
 IScriptNodeType::Result ScriptSpriteDirection::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	environment.setDirection(readEntityId(environment, node, 2), node.getSettings()["direction"].asString("right"));
+	const auto dirPin = readDataPin(environment, node, 3);
+	const auto dir = dirPin.getType() == ConfigNodeType::Undefined ? node.getSettings()["direction"].asString("right") : dirPin.asString();
+	environment.setDirection(readEntityId(environment, node, 2), dir);
 	return Result(ScriptNodeExecutionState::Done);
 }
 

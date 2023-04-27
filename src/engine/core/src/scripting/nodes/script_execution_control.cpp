@@ -101,7 +101,7 @@ EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const Script
 		return environment.readInputEntityIdRaw(returnNode, other->second);
 	} else {
 		const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
-		return EntityId(environment.getStartParams()[pinN - 1 - nDataInput].asEntityId().value);
+		return EntityId(environment.getStartParams()[pinN - 1].asEntityId().value);
 	}
 }
 
