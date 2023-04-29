@@ -53,8 +53,9 @@ namespace Halley {
 		bool captureSubmit = false;
 
 		void onTextModified();
-		void onDelete();
-		void onBackspace();
+		void onDelete(bool wholeWord = false);
+		void onBackspace(bool wholeWord = false);
+		int getWordBoundary(int cursorPos, int dir) const;
 	};
 
 }

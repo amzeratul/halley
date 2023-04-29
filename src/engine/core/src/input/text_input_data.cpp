@@ -121,8 +121,18 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 		return true;
 	}
 
+	if (c.is(KeyCode::Delete, KeyMods::Ctrl)) {
+		onDelete(true);
+		return true;
+	}
+
 	if (c.is(KeyCode::Backspace, KeyMods::None)) {
 		onBackspace();
+		return true;
+	}
+
+	if (c.is(KeyCode::Backspace, KeyMods::Ctrl)) {
+		onBackspace(true);
 		return true;
 	}
 	
@@ -218,7 +228,7 @@ void TextInputData::setCaptureSubmit(bool enable)
 	captureSubmit = enable;
 }
 
-void TextInputData::onDelete()
+void TextInputData::onDelete(bool wholeWord)
 {
 	if (readOnly) {
 		return;
@@ -226,14 +236,16 @@ void TextInputData::onDelete()
 
 	if (selection.start == selection.end) {
 		if (selection.start < int(text.size())) {
-			setText(text.substr(0, selection.start) + text.substr(selection.start + 1));
+			const auto endPos = wholeWord ? getWordBoundary(selection.start, 1) : selection.start + 1;
+			setText(text.substr(0, selection.start) + text.substr(endPos));
 		}
 	} else {
 		setText(text.substr(0, selection.start) + text.substr(selection.end));
+		setSelection(selection.start);
 	}
 }
 
-void TextInputData::onBackspace()
+void TextInputData::onBackspace(bool wholeWord)
 {
 	if (readOnly) {
 		return;
@@ -241,13 +253,52 @@ void TextInputData::onBackspace()
 
 	if (selection.start == selection.end) {
 		if (selection.start > 0) { // If selection.s == 0, -1 causes it to overflow (unsigned). Shouldn't do anything in that case.
-			const auto start = selection.start;
-			setText(text.substr(0, start - 1) + text.substr(start));
-			setSelection(start - 1);
+			const auto startPos = wholeWord ? getWordBoundary(selection.start, -1) : selection.start - 1;
+			setText(text.substr(0, startPos) + text.substr(selection.start));
+			setSelection(startPos);
 		}
 	} else {
 		setText(text.substr(0, selection.start) + text.substr(selection.end));
+		setSelection(selection.start);
 	}
+}
+
+int TextInputData::getWordBoundary(int cursorPos, int dir) const
+{
+	auto classifyCharacter = [] (uint32_t c) -> int
+	{
+		if (c == '\n') {
+			return 0;
+		} else if (c == ' ' || c == '\t') {
+			return 1;
+		} else if (String::isAlphanumeric(c) || c == '_') {
+			return 2;
+		} else {
+			return 3;
+		}
+	};
+
+	const int firstPos = cursorPos + (dir == -1 ? -1 : 0);
+	const int len = static_cast<int>(text.length());
+	assert(firstPos >= 0);
+	auto category = classifyCharacter(text[firstPos]);
+
+	bool first = true;
+	for (int i = firstPos + dir; i >= 0 && i < len; i += dir) {
+		const auto cat = classifyCharacter(text[i]);
+		if (cat != category || category == 0) { // Category zero doesn't stack
+			if (first && category == 1) {
+				// Space before group, change category and keep going
+				category = cat;
+			} else {
+				return dir == -1 ? i + 1 : i;
+			}
+		}
+		first = false;
+	}
+
+	// Reached the end
+	return dir == -1 ? 0 : len;
 }
 
 void TextInputData::onTextModified()

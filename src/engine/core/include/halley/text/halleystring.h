@@ -103,6 +103,7 @@ namespace Halley {
 
 		bool isNumber() const;
 		bool isInteger() const;
+		static bool isAlphanumeric(uint32_t character);
 
 		String asciiLower() const;
 		String asciiUpper() const;

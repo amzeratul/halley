@@ -423,6 +423,13 @@ bool String::isInteger() const
 	return hasDigit;
 }
 
+bool String::isAlphanumeric(uint32_t character)
+{
+	return (character >= 'A' && character <= 'Z')
+		|| (character >= 'a' && character <= 'z')
+		|| (character >= '0' && character <= '9');
+}
+
 
 //
 
