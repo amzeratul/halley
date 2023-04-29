@@ -345,11 +345,11 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 			} else {
 				const auto& cs = getChildren();
 				if (!cs.empty()) {
-					UIEventType unhandledPressEVent;
-					if (i == 0) unhandledPressEVent = UIEventType::UnhandledMousePressLeft;
-					else if (i == 1) unhandledPressEVent = UIEventType::UnhandledMousePressMiddle;
-					else unhandledPressEVent = UIEventType::UnhandledMousePressRight;
-					cs.back()->sendEvent(UIEvent(unhandledPressEVent, "mouse", mousePos));
+					UIEventType unhandledPressEvent;
+					if (i == 0) unhandledPressEvent = UIEventType::UnhandledMousePressLeft;
+					else if (i == 1) unhandledPressEvent = UIEventType::UnhandledMousePressMiddle;
+					else unhandledPressEvent = UIEventType::UnhandledMousePressRight;
+					cs.back()->sendEvent(UIEvent(unhandledPressEvent, "mouse", mousePos));
 				}
 				setFocus({});
 			}
