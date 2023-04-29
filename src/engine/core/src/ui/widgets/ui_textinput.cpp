@@ -28,6 +28,7 @@ UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString 
 	: UIWidget(std::move(id), getInputSize(style), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
+	, selectionBg(style.getSprite("selectionBg"))
 	, label(style.getTextRenderer("label"))
 	, ghostLabel(style.getTextRenderer("labelGhost"))
 	, text(text.getUTF32())
@@ -164,6 +165,11 @@ void UITextInput::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
 		painter.draw(sprite);
+	}
+
+	const auto sel = getSelection();
+	if (sel.start != sel.end) {
+		drawSelection(sel, painter);
 	}
 	
 	if (icon.hasMaterial()) {
@@ -532,4 +538,30 @@ void UITextInput::updateHistoryOnTextModified()
 		historyCurOption.reset();
 	}
 	modifiedByHistory = false;
+}
+
+void UITextInput::drawSelection(Range<int> sel, UIPainter& painter) const
+{
+	int lastStart = sel.start;
+	for (int i = sel.start; i < sel.end; ++i) {
+		if (label.getText()[i] == '\n') {
+			drawSelectionRow(Range<int>(lastStart, i), painter);
+			lastStart = ++i;
+		}
+	}
+
+	drawSelectionRow(Range<int>(lastStart, sel.end), painter);
+}
+
+void UITextInput::drawSelectionRow(Range<int> row, UIPainter& painter) const
+{
+	if (row.end <= row.start + 1) {
+		return;
+	}
+	const auto left = label.getCharacterPosition(row.start);
+	const auto right = label.getCharacterPosition(row.end);
+	Sprite bg = selectionBg.clone()
+		.setPosition(left + label.getPosition())
+		.scaleTo(Vector2f(right.x - left.x, label.getLineHeight()));
+	painter.draw(bg, true);
 }

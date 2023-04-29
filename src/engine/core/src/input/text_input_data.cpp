@@ -147,13 +147,31 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	}
 
 	if (!text.empty()) {
-		if (c.is(KeyCode::Left, KeyMods::None)) {
-			setSelection(getSelection().start - 1);
+		if (c.is(KeyCode::Left, KeyMods::None) || c.is(KeyCode::Left, KeyMods::Ctrl)) {
+			const auto sel = getSelection();
+			if (sel.start == sel.end) {
+				if (c.is(KeyCode::Left, KeyMods::Ctrl)) {
+					setSelection(getWordBoundary(getSelection().start, -1));
+				} else {
+					setSelection(getSelection().start - 1);
+				}
+			} else {
+				setSelection(getSelection().start);
+			}
 			return true;
 		}
 		
-		if (c.is(KeyCode::Right, KeyMods::None)) {
-			setSelection(getSelection().start + 1);
+		if (c.is(KeyCode::Right, KeyMods::None) || c.is(KeyCode::Right, KeyMods::Ctrl)) {
+			const auto sel = getSelection();
+			if (sel.start == sel.end) {
+				if (c.is(KeyCode::Right, KeyMods::Ctrl)) {
+					setSelection(getWordBoundary(getSelection().start, 1));
+				} else {
+					setSelection(getSelection().start + 1);
+				}
+			} else {
+				setSelection(getSelection().end);
+			}
 			return true;
 		}
 	}
@@ -181,6 +199,10 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 			setText(StringUTF32());
 		}
 		return true;
+	}
+	
+	if (c.is(KeyCode::A, KeyMods::Ctrl)) {
+		setSelection(Range<int>(0, static_cast<int>(text.length())));
 	}
 
 	if (captureSubmit && c.is(KeyCode::Enter)) {

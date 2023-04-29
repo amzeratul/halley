@@ -99,8 +99,12 @@ namespace Halley {
 		void navigateHistory(int delta);
 		void updateHistoryOnTextModified();
 
+		void drawSelection(Range<int> sel, UIPainter& painter) const;
+		void drawSelectionRow(Range<int> row, UIPainter& painter) const;
+
 		Sprite sprite;
 		Sprite caret;
+		Sprite selectionBg;
 		Sprite icon;
 		TextRenderer label;
 		TextRenderer ghostLabel;
