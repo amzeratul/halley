@@ -76,6 +76,9 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 		
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+		void onMouseOver(Vector2f mousePos) override;
+		bool isFocusLocked() const override;
 
 		void readFromDataBind() override;
 
@@ -132,6 +135,7 @@ namespace Halley {
 		float caretTime = 0;
 		int caretPos = 0;
 		bool caretShowing = false;
+		bool mouseHeld = false;
 
 		bool multiLine = false;
 		bool clearOnSubmit = false;

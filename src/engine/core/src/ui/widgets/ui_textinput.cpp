@@ -449,9 +449,39 @@ void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
 		const auto labelClickPos = mousePos - label.getPosition();
-		text.setSelection(static_cast<int>(label.getCharacterAt(labelClickPos)));
+		const auto pos = static_cast<int>(label.getCharacterAt(labelClickPos));
+
+		if ((keyMods & KeyMods::Shift) != KeyMods::None) {
+			const auto sel = text.getSelection();
+			text.setSelection(TextInputData::Selection::fromAnchorAndCaret(sel.getAnchor(), pos));
+		} else {
+			text.setSelection(pos);
+		}
 		updateCaret();
+		mouseHeld = true;
 	}
+}
+
+void UITextInput::releaseMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		mouseHeld = false;
+	}
+}
+
+void UITextInput::onMouseOver(Vector2f mousePos)
+{
+	if (mouseHeld) {
+		const auto labelClickPos = mousePos - label.getPosition();
+		const auto pos = static_cast<int>(label.getCharacterAt(labelClickPos));
+		const auto sel = text.getSelection();
+		text.setSelection(TextInputData::Selection::fromAnchorAndCaret(sel.getAnchor(), pos));
+	}
+}
+
+bool UITextInput::isFocusLocked() const
+{
+	return mouseHeld;
 }
 
 void UITextInput::readFromDataBind()
