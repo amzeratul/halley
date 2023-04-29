@@ -512,7 +512,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
 	return getWidgetUnderMouse(lastMousePos, true);
 }
 
-void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus)
+void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus, bool byClicking)
 {
 	if (currentFocus.expired()) {
 		currentFocus.reset();
@@ -529,16 +529,16 @@ void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus)
 		currentFocus = newFocus;
 
 		if (newFocus) {
-			focusWidget(*newFocus);
+			focusWidget(*newFocus, byClicking);
 		}
 	}
 }
 
-void UIRoot::focusWidget(UIWidget& widget)
+void UIRoot::focusWidget(UIWidget& widget, bool byClicking)
 {
 	if (!widget.focused) {
 		widget.focused = true;
-		widget.onFocus();
+		widget.onFocus(byClicking);
 
 		const auto text = widget.getTextInputData();
 		if (text && keyboard) {

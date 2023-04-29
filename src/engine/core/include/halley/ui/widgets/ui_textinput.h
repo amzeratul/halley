@@ -70,7 +70,7 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
-		void onFocus() override;
+		void onFocus(bool byClicking) override;
 		TextInputData* getTextInputData() override;
 
 		bool onKeyPress(KeyboardKeyPress key) override;

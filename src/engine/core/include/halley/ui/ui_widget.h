@@ -198,7 +198,7 @@ namespace Halley {
 
 		void updateBehaviours(Time t);
 
-		virtual void onFocus();
+		virtual void onFocus(bool byClicking);
 		virtual void onFocusLost();
 		virtual TextInputData *getTextInputData();
 

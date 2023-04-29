@@ -864,7 +864,7 @@ void UIWidget::updateBehaviours(Time t)
 	behaviours.erase(firstRemoved, behaviours.end());
 }
 
-void UIWidget::onFocus()
+void UIWidget::onFocus(bool byClicking)
 {
 }
 

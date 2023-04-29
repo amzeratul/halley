@@ -167,9 +167,11 @@ void UITextInput::draw(UIPainter& painter) const
 		painter.draw(sprite);
 	}
 
-	const auto sel = getSelection();
-	if (sel.start != sel.end) {
-		drawSelection(sel, painter);
+	if (isFocused()) {
+		const auto sel = getSelection();
+		if (sel.start != sel.end) {
+			drawSelection(sel, painter);
+		}
 	}
 	
 	if (icon.hasMaterial()) {
@@ -388,10 +390,13 @@ Rect4f UITextInput::getTextBounds() const
 	return Rect4f(startPos, size.x, size.y);
 }
 
-void UITextInput::onFocus()
+void UITextInput::onFocus(bool byClicking)
 {
 	caretTime = 0;
 	caretShowing = true;
+	if (!byClicking) {
+		setSelection(text.getTotalRange());
+	}
 }
 
 TextInputData* UITextInput::getTextInputData()
