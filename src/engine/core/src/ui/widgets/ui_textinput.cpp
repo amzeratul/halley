@@ -419,13 +419,15 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 			return true;
 		}
 	} else if (multiLine) {
-		if (key.is(KeyCode::Up)) {
-			text.setSelection(static_cast<int>(label.getCharacterAt(caretPhysicalPos + Vector2f(0, -label.getLineHeight()))));
+		if (key.key == KeyCode::Up) {
+			const auto from = label.getCharacterPosition(text.getSelection().getCaret());
+			text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, -label.getLineHeight()))), key.mod);
 			return true;
 		}
 
-		if (key.is(KeyCode::Down)) {
-			text.setSelection(static_cast<int>(label.getCharacterAt(caretPhysicalPos + Vector2f(0, label.getLineHeight()))));
+		if (key.key == KeyCode::Down) {
+			const auto from = label.getCharacterPosition(text.getSelection().getCaret());
+			text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, label.getLineHeight()))), key.mod);
 			return true;
 		}
 	}

@@ -160,15 +160,15 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	
 	if (c.is(KeyCode::C, KeyMods::Ctrl)) {
 		if (clipboard) {
-			clipboard->setData(String(text));
+			const auto sel = getSelection();
+			clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
 		}
 		return true;
 	}
 	
 	if (c.is(KeyCode::V, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
-			auto str = clipboard->getStringData();
-			if (str) {
+			if (auto str = clipboard->getStringData()) {
 				insertText(str.value());
 			}
 		}
@@ -177,8 +177,9 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	
 	if (c.is(KeyCode::X, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
-			clipboard->setData(String(text));
-			setText(StringUTF32());
+			const auto sel = getSelection();
+			clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
+			onDelete();
 		}
 		return true;
 	}
@@ -333,5 +334,15 @@ void TextInputData::changeSelection(int dir, KeyMods mods)
 		setSelection(Selection::fromAnchorAndCaret(sel.getAnchor(), caret));
 	} else {
 		setSelection(caret);
+	}
+}
+
+void TextInputData::moveCursor(int position, KeyMods mods)
+{
+	if ((mods & KeyMods::Shift) != KeyMods::None) {
+		const auto sel = getSelection();
+		setSelection(Selection::fromAnchorAndCaret(sel.getAnchor(), position));
+	} else {
+		setSelection(position);
 	}
 }

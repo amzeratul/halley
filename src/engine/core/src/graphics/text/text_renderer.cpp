@@ -455,6 +455,10 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 		}
 	}
 
+	if (!gotLineMatch) {
+		return targetLine < 0 ? 0 : nChars;
+	}
+
 	return bestAnswer;
 }
 
