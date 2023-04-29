@@ -403,7 +403,10 @@ std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 		
 		auto widget = iter->second(entryNode);
 		if (widgetNode.hasKey("size")) {
-			widget->setMinSize(widgetNode["size"].asVector2f({}));
+			const auto size = widgetNode["size"].asVector2f({});
+			if (size != Vector2f()) {
+				widget->setMinSize(size);
+			}
 		}
 		if (widgetNode.hasKey("enabled")) {
 			widget->setEnabled(widgetNode["enabled"].asBool(true));
