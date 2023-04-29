@@ -161,7 +161,11 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	if (c.is(KeyCode::C, KeyMods::Ctrl)) {
 		if (clipboard) {
 			const auto sel = getSelection();
-			clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
+			if (sel.start != sel.end) {
+				clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
+			} else {
+				clipboard->setData(String(text));
+			}
 		}
 		return true;
 	}
@@ -178,8 +182,13 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	if (c.is(KeyCode::X, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
 			const auto sel = getSelection();
-			clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
-			onDelete();
+			if (sel.start != sel.end) {
+				clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
+				onDelete();
+			} else {
+				clipboard->setData(String(text));
+				setText(StringUTF32());
+			}
 		}
 		return true;
 	}
