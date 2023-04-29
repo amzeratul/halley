@@ -104,8 +104,8 @@ namespace Halley {
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
 		bool destroyWhenDone = false;
-		std::optional<size_t> maxParticles;
-		std::optional<size_t> burst;
+		std::optional<int> maxParticles;
+		std::optional<int> burst;
 		std::optional<float> minHeight;
 
 		Vector<Sprite> baseSprites;

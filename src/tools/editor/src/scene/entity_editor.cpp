@@ -805,7 +805,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) c
 	label->setMaxWidth(100);
 	label->setMarquee(true);
 	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
-	labelBox->add(label);
+	labelBox->add(label, 0, {}, UISizerAlignFlags::Centre);
 	return labelBox;
 }
 

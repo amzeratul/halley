@@ -37,17 +37,10 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
 	destroyWhenDone = node["destroyWhenDone"].asBool(false);
 	velScale = node["velScale"].asVector3f(Vector3f(1, 1, 1));
-	if (node.hasKey("minHeight")) {
-		minHeight = node["minHeight"].asFloat();
-	}
+	minHeight = node["minHeight"].asOptional<float>();
 	startHeight = node["startHeight"].asFloat(0);
-
-	if (node.hasKey("maxParticles")) {
-		maxParticles = node["maxParticles"].asInt();
-	}
-	if (node.hasKey("burst")) {
-		burst = node["burst"].asInt();
-	}
+	maxParticles = node["maxParticles"].asOptional<int>();
+	burst = node["burst"].asOptional<int>();
 }
 
 ConfigNode Particles::toConfigNode() const
@@ -73,17 +66,10 @@ ConfigNode Particles::toConfigNode() const
 	result["rotateTowardsMovement"] = rotateTowardsMovement;
 	result["destroyWhenDone"] = destroyWhenDone;
 	result["velScale"] = velScale;
-	if (minHeight) {
-		result["minHeight"] = *minHeight;
-	}
+	result["minHeight"] = minHeight;
 	result["startHeight"] = startHeight;
-
-	if (maxParticles) {
-		result["maxParticles"] = static_cast<int>(maxParticles.value());
-	}
-	if (burst) {
-		result["burst"] = static_cast<int>(burst.value());
-	}
+	result["maxParticles"] = maxParticles;
+	result["burst"] = burst;
 
 	return result;
 }
@@ -340,14 +326,16 @@ void Particles::updateParticles(float time)
 		if (particle.time >= particle.ttl) {
 			particle.alive = false;
 		} else {
-			particle.pos += (particle.vel * time + acceleration * (0.5f * time * time)) * velScale;
-			particle.vel += acceleration * time;
+			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
+			const auto a = stopped ? Vector3f() : acceleration;
+			particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
+			particle.vel += a * time;
 
 			if (minHeight && particle.pos.z < minHeight) {
 				particle.alive = false;
 			}
 			
-			if (stopTime > 0.00001f && particle.time + stopTime >= particle.ttl) {
+			if (stopped) {
 				particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
 			}
 			
