@@ -54,17 +54,17 @@ void TextInputData::setText(StringUTF32 _text)
 	}
 }
 
-Range<int> TextInputData::getSelection() const
+TextInputData::Selection TextInputData::getSelection() const
 {
 	return selection;
 }
 
 void TextInputData::setSelection(int sel)
 {
-	setSelection(Range<int>(sel, sel));
+	setSelection(Selection(sel, sel));
 }
 
-void TextInputData::setSelection(Range<int> sel)
+void TextInputData::setSelection(Selection sel)
 {
 	const int textSize = int(text.size());
 	sel.start = clamp(sel.start, 0, textSize);
@@ -147,31 +147,13 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	}
 
 	if (!text.empty()) {
-		if (c.is(KeyCode::Left, KeyMods::None) || c.is(KeyCode::Left, KeyMods::Ctrl)) {
-			const auto sel = getSelection();
-			if (sel.start == sel.end) {
-				if (c.is(KeyCode::Left, KeyMods::Ctrl)) {
-					setSelection(getWordBoundary(getSelection().start, -1));
-				} else {
-					setSelection(getSelection().start - 1);
-				}
-			} else {
-				setSelection(getSelection().start);
-			}
+		if (c.key == KeyCode::Left) {
+			changeSelection(-1, c.mod);
 			return true;
 		}
 		
-		if (c.is(KeyCode::Right, KeyMods::None) || c.is(KeyCode::Right, KeyMods::Ctrl)) {
-			const auto sel = getSelection();
-			if (sel.start == sel.end) {
-				if (c.is(KeyCode::Right, KeyMods::Ctrl)) {
-					setSelection(getWordBoundary(getSelection().start, 1));
-				} else {
-					setSelection(getSelection().start + 1);
-				}
-			} else {
-				setSelection(getSelection().end);
-			}
+		if (c.key == KeyCode::Right) {
+			changeSelection(1, c.mod);
 			return true;
 		}
 	}
@@ -202,7 +184,7 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	}
 	
 	if (c.is(KeyCode::A, KeyMods::Ctrl)) {
-		setSelection(Range<int>(0, static_cast<int>(text.length())));
+		setSelection(Selection(0, static_cast<int>(text.length())));
 	}
 
 	if (captureSubmit && c.is(KeyCode::Enter)) {
@@ -249,6 +231,12 @@ void TextInputData::setCaptureSubmit(bool enable)
 {
 	captureSubmit = enable;
 }
+
+void TextInputData::onTextModified()
+{
+	++textRevision;
+}
+
 
 void TextInputData::onDelete(bool wholeWord)
 {
@@ -323,7 +311,27 @@ int TextInputData::getWordBoundary(int cursorPos, int dir) const
 	return dir == -1 ? 0 : len;
 }
 
-void TextInputData::onTextModified()
+void TextInputData::changeSelection(int dir, KeyMods mods)
 {
-	++textRevision;
+	const auto sel = getSelection();
+	const bool shift = (mods & KeyMods::Shift) != KeyMods::None;
+	const bool ctrl = (mods & KeyMods::Ctrl) != KeyMods::None;
+
+	if (sel.end != sel.start && !shift) {
+		setSelection(dir == 1 ? sel.end : sel.start);
+		return;
+	}
+
+	int caret = shift ? sel.getCaret() : (dir == 1 ? sel.end : sel.start);
+	if (ctrl) {
+		caret = getWordBoundary(caret, dir);
+	} else {
+		caret = caret + dir;
+	}
+
+	if (shift) {
+		setSelection(Selection::fromAnchorAndCaret(sel.getAnchor(), caret));
+	} else {
+		setSelection(caret);
+	}
 }

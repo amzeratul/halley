@@ -97,7 +97,7 @@ void UITextInput::setMaxLength(std::optional<int> length)
 
 Range<int> UITextInput::getSelection() const
 {
-	return text.getSelection();
+	return text.getSelection().toRange();
 }
 
 void UITextInput::setSelection(int selection)
@@ -107,7 +107,7 @@ void UITextInput::setSelection(int selection)
 
 void UITextInput::setSelection(Range<int> selection)
 {
-	text.setSelection(selection);
+	text.setSelection(TextInputData::Selection(selection));
 }
 
 void UITextInput::selectLast()
@@ -191,7 +191,7 @@ void UITextInput::draw(UIPainter& painter) const
 
 void UITextInput::updateCaret()
 {
-	int pos = clamp(text.getSelection().end, 0, int(text.getText().size()));
+	int pos = clamp(text.getSelection().getCaret(), 0, int(text.getText().size()));
 	if (pos != caretPos) {
 		caretTime = 0;
 		caretShowing = true;
@@ -555,7 +555,7 @@ void UITextInput::drawSelection(Range<int> sel, UIPainter& painter) const
 
 void UITextInput::drawSelectionRow(Range<int> row, UIPainter& painter) const
 {
-	if (row.end <= row.start + 1) {
+	if (row.end <= row.start) {
 		return;
 	}
 	const auto left = label.getCharacterPosition(row.start);

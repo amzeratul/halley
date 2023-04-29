@@ -178,4 +178,14 @@ namespace Halley {
 		CtrlAltMod = Ctrl | Alt | Mod,
 		CtrlShiftAltMod = Ctrl | Shift | Alt | Mod,
 	};
+
+	inline KeyMods operator&(KeyMods a, KeyMods b)
+	{
+		return static_cast<KeyMods>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+	}
+
+	inline KeyMods operator|(KeyMods a, KeyMods b)
+	{
+		return static_cast<KeyMods>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+	}
 }
