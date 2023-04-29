@@ -287,8 +287,20 @@ namespace Halley {
 
 		static T parseHex(std::string_view str)
 		{
-			uint8_t out;
-			Encode::decodeBase16(str, gsl::as_writable_bytes(gsl::span<uint8_t>(&out, 1)));
+			auto decode = [] (char character) -> uint8_t
+			{
+				if (character >= '0' && character <= '9') {
+					return character - '0';
+				} else if (character >= 'A' && character <= 'F') {
+					return character - 'A' + 10;
+				} else if (character >= 'a' && character <= 'f') {
+					return character - 'a' + 10;
+				} else {
+					return 0;
+				}
+			};
+
+			const uint8_t out = static_cast<uint8_t>(decode(str[0]) << 4) | decode(str[1]);
 			return convertColour<uint8_t, T>(out);
 		}
 

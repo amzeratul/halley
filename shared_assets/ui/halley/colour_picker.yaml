@@ -59,10 +59,10 @@ children:
       - widget: { class: widget, size: [10, 10] }
       - widget: { class: label, text: Hex }
         fill: [left, centreVertical]
-      - widget: { id: hexCode, class: textInput }
+      - widget: { id: hexCode, class: textInput, selectAllOnClick: true }
       - widget: { class: label, text: Float }
         fill: [left, centreVertical]
-      - widget: { id: floatCode, class: textInput }
+      - widget: { id: floatCode, class: textInput, selectAllOnClick: true }
 - sizer: { type: horizontal }
   children:
   - stretchSpacer: {}

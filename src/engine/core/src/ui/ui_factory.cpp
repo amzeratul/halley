@@ -784,6 +784,7 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 	result.entries.emplace_back("Clear on Submit", "clearOnSubmit", "bool", "false");
 	result.entries.emplace_back("Ghost Text", "ghost", "Halley::String", "");
 	result.entries.emplace_back("Show Ghost when Focused", "showGhostWhenFocused", "bool", "false");
+	result.entries.emplace_back("Select All on Click", "selectAllOnClick", "bool", "false");
 
 	return result;
 }
@@ -824,6 +825,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	result->setClearOnSubmit(node["clearOnSubmit"].asBool(false));
 	result->setShowGhostWhenFocused(node["showGhostWhenFocused"].asBool(false));
 	result->setMultiLine(node["multiLine"].asBool(false));
+	result->setSelectAllOnClick(node["selectAllOnClick"].asBool(false));
 
 	return result;
 }

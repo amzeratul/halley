@@ -58,6 +58,9 @@ namespace Halley {
 		void setMultiLine(bool enabled);
 		bool isMultiLine() const;
 
+		void setSelectAllOnClick(bool enabled);
+		bool isSelectAllOnClick() const;
+
 		void submit();
 		void setClearOnSubmit(bool enabled);
 		bool isClearOnSubmit() const;
@@ -140,5 +143,8 @@ namespace Halley {
 		bool multiLine = false;
 		bool clearOnSubmit = false;
 		bool showGhostWhenFocused = false;
+		bool selectAllOnClick = false;
+
+		uint8_t clickTimeout = 0;
 	};
 }

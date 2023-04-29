@@ -161,6 +161,16 @@ bool UITextInput::isMultiLine() const
 	return multiLine;
 }
 
+void UITextInput::setSelectAllOnClick(bool enabled)
+{
+	selectAllOnClick = enabled;
+}
+
+bool UITextInput::isSelectAllOnClick() const
+{
+	return selectAllOnClick;
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
@@ -371,6 +381,10 @@ void UITextInput::update(Time t, bool moved)
 	if (text.isPendingSubmit()) {
 		submit();
 	}
+	
+	if (clickTimeout > 0) {
+		--clickTimeout;
+	}
 }
 
 Vector4f UITextInput::getTextInnerBorder() const
@@ -394,8 +408,12 @@ void UITextInput::onFocus(bool byClicking)
 {
 	caretTime = 0;
 	caretShowing = true;
-	if (!byClicking) {
+	if (!byClicking || selectAllOnClick) {
 		setSelection(text.getTotalRange());
+	}
+
+	if (byClicking && selectAllOnClick) {
+		clickTimeout = 2;
 	}
 }
 
@@ -447,6 +465,10 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 
 void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
+	if (clickTimeout > 0) {
+		return;
+	}
+
 	if (button == 0) {
 		const auto labelClickPos = mousePos - label.getPosition();
 		const auto pos = static_cast<int>(label.getCharacterAt(labelClickPos));
