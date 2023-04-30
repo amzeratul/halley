@@ -21,14 +21,38 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
 	spawnAreaShape = node["spawnAreaShape"].asEnum(ParticleSpawnAreaShape::Rectangle);
-	ttl = node["ttl"].asFloat(1.0f);
-	ttlScatter = node["ttlScatter"].asFloat(0.0f);
-	speed = node["speed"].asFloat(100.0f);
-	speedScatter = node["speedScatter"].asFloat(0.0f);
+
+	if (node.hasKey("ttlScatter")) {
+		// Legacy
+		const auto legacyTtl = node["ttl"].asFloat(1.0f);
+		const auto ttlScatter = node["ttlScatter"].asFloat(0.2f);
+		ttl = Range<float>(legacyTtl - ttlScatter, legacyTtl + ttlScatter);
+	} else {
+		ttl = node["ttl"].asFloatRange(Range<float>(1.0f, 1.0f));
+	}
+
+	if (node.hasKey("speedScatter")) {
+		// Legacy
+		const auto legacySpeed = node["speed"].asFloat(100.0f);
+		const auto speedScatter = node["speedScatter"].asFloat(0.0f);
+		speed = Range<float>(legacySpeed - speedScatter, legacySpeed + speedScatter);
+	} else {
+		speed = node["speed"].asFloatRange(Range<float>(100.0f, 100.0f));
+	}
+
+	if (node.hasKey("angle")) {
+		// Legacy
+		const auto angle = node["angle"].asVector2f(Vector2f());
+		const auto angleScatter = node["angleScatter"].asVector2f(Vector2f());
+		azimuth = Range<float>(angle.x - angleScatter.x, angle.x + angleScatter.x);
+		altitude = Range<float>(angle.y - angleScatter.y, angle.y + angleScatter.y);
+	} else {
+		azimuth = node["azimuth"].asFloatRange(Range<float>(0, 0));
+		altitude = node["altitude"].asFloatRange(Range<float>(0, 0));
+	}
+
 	speedDamp = node["speedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
-	angle = node["angle"].asVector2f(Vector2f());
-	angleScatter = node["angleScatter"].asVector2f(Vector2f());
 	startScale = node["startScale"].asFloat(1.0f);
 	endScale = node["endScale"].asFloat(1.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
@@ -52,13 +76,11 @@ ConfigNode Particles::toConfigNode() const
 	result["spawnArea"] = spawnArea;
 	result["spawnAreaShape"] = spawnAreaShape;
 	result["ttl"] = ttl;
-	result["ttlScatter"] = ttlScatter;
 	result["speed"] = speed;
-	result["speedScatter"] = speedScatter;
 	result["speedDamp"] = speedDamp;
 	result["acceleration"] = acceleration;
-	result["angle"] = angle;
-	result["angleScatter"] = angleScatter;
+	result["azimuth"] = azimuth;
+	result["altitude"] = altitude;
 	result["startScale"] = startScale;
 	result["endScale"] = endScale;
 	result["fadeInTime"] = fadeInTime;
@@ -146,27 +168,47 @@ ParticleSpawnAreaShape Particles::getSpawnAreaShape() const
 	return spawnAreaShape;
 }
 
-void Particles::setAngle(float newAngle)
+void Particles::setAzimuth(Range<float> azimuth)
 {
-	angle = Vector2f(newAngle, 0);
+	this->azimuth = azimuth;
 }
 
-void Particles::setAngle(Vector2f newAngle)
+void Particles::setAzimuth(float azimuth)
 {
-	angle = newAngle;
+	setAzimuth(Range<float>(azimuth, azimuth));
 }
 
-Vector2f Particles::getAngle() const
+void Particles::setAltitude(Range<float> altitudeAngle)
 {
-	return angle;
+	this->altitude = altitudeAngle;
 }
 
-void Particles::setSpeed(float newSpeed)
+void Particles::setAltitude(float altitudeAngle)
 {
-	speed = newSpeed;
+	setAltitude(Range<float>(altitudeAngle, altitudeAngle));
 }
 
-float Particles::getSpeed() const
+Range<float> Particles::getAzimuth() const
+{
+	return azimuth;
+}
+
+Range<float> Particles::getAltitude() const
+{
+	return altitude;
+}
+
+void Particles::setSpeed(Range<float> speed)
+{
+	this->speed = speed;
+}
+
+void Particles::setSpeed(float speed)
+{
+	setSpeed(Range<float>(speed, speed));
+}
+
+Range<float> Particles::getSpeed() const
 {
 	return speed;
 }
@@ -306,18 +348,18 @@ void Particles::spawn(size_t n, float time)
 
 void Particles::initializeParticle(size_t index, float time)
 {
-	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(angle.x - angleScatter.x, angle.x + angleScatter.x));
-	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(angle.y - angleScatter.y, angle.y + angleScatter.y));
+	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(azimuth));
+	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
 	
 	auto& particle = particles[index];
 	particle.alive = true;
 	particle.time = time;
-	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
+	particle.ttl = rng->getFloat(ttl);
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = startScale;
 	
-	particle.vel = Vector3f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth, startElevation);
+	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {

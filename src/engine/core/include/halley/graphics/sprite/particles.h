@@ -61,12 +61,16 @@ namespace Halley {
 		void setSpawnAreaShape(ParticleSpawnAreaShape shape);
 		ParticleSpawnAreaShape getSpawnAreaShape() const;
 
-		void setAngle(float newAngle);
-		void setAngle(Vector2f newAngle);
-		Vector2f getAngle() const;
+		void setAzimuth(Range<float> azimuth);
+		void setAzimuth(float azimuth);
+		void setAltitude(Range<float> altitudeAngle);
+		void setAltitude(float altitudeAngle);
+		Range<float> getAzimuth() const;
+		Range<float> getAltitude() const;
 
+		void setSpeed(Range<float> speed);
 		void setSpeed(float speed);
-		float getSpeed() const;
+		Range<float> getSpeed() const;
 		void setAcceleration(Vector3f acceleration);
 		Vector3f getAcceleration() const;
 
@@ -107,15 +111,13 @@ namespace Halley {
 		ParticleSpawnAreaShape spawnAreaShape = ParticleSpawnAreaShape::Rectangle;
 		float startHeight = 0;
 
-		float ttl = 1;
-		float ttlScatter = 0;
-		float speed = 100;
-		float speedScatter = 0;
+		Range<float> ttl;
+		Range<float> speed;
+		Range<float> azimuth;
+		Range<float> altitude;
 		float speedDamp = 0;
 		Vector3f acceleration;
 		Vector3f velScale;
-		Vector2f angle;
-		Vector2f angleScatter;
 		float startScale = 1;
 		float endScale = 1;
 		float fadeInTime = 0;

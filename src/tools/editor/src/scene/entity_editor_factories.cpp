@@ -1039,14 +1039,16 @@ public:
 		auto& fieldData = data.getWriteableFieldData(); // HACK
 		fieldData.ensureType(ConfigNodeType::Map);
 
+		convertLegacy(fieldData);
+
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("Spawn Rate"));
 		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Spawn Area"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Spawn Area Shape"));
 		container->add(context.makeField("Halley::ParticleSpawnAreaShape", pars.withSubKey("spawnAreaShape"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Spawn Area"));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Height"));
 		container->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Max Particles"));
@@ -1054,23 +1056,19 @@ public:
 		container->add(context.makeLabel("Burst"));
 		container->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("TTL"));
-		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("TTL Scatter"));
-		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("ttl", { "1", "1" }), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Speed"));
-		container->add(context.makeField("float", pars.withSubKey("speed", "100"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("speed", { "100", "100" }), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Velocity Scale"));
 		container->add(context.makeField("Halley::Vector3f", pars.withSubKey("velScale", {"1", "1", "1"}), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Speed Scatter"));
-		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Speed Damp"));
 		container->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Acceleration"));
 		container->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Angle"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angle", ""), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Angle Scatter"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angleScatter", {"10", "0"}), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Azimuth"));
+		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Altitude"));
+		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("altitude", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Scale"));
 		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("End Scale"));
@@ -1094,6 +1092,33 @@ public:
 
 		return container;
 	}
+
+	void convertLegacy(ConfigNode& node)
+	{
+		if (node.hasKey("ttlScatter")) {
+			const auto legacyTtl = node["ttl"].asFloat(1.0f);
+			const auto ttlScatter = node["ttlScatter"].asFloat(0.2f);
+			node["ttl"] = Range<float>(legacyTtl - ttlScatter, legacyTtl + ttlScatter);
+			node.removeKey("ttlScatter");
+		}
+
+		if (node.hasKey("speedScatter")) {
+			const auto legacySpeed = node["speed"].asFloat(100.0f);
+			const auto speedScatter = node["speedScatter"].asFloat(0.0f);
+			node["speed"] = Range<float>(legacySpeed - speedScatter, legacySpeed + speedScatter);
+			node.removeKey("speedScatter");
+		}
+
+		if (node.hasKey("angle")) {
+			const auto angle = node["angle"].asVector2f(Vector2f());
+			const auto angleScatter = node["angleScatter"].asVector2f(Vector2f());
+			node["azimuth"] = Range<float>(angle.x - angleScatter.x, angle.x + angleScatter.x);
+			node["altitude"] = Range<float>(angle.y - angleScatter.y, angle.y + angleScatter.y);
+			node.removeKey("angle");
+			node.removeKey("angleScatter");
+		}
+	}
+
 };
 
 class ComponentEditorResourceReferenceFieldFactory : public IComponentEditorFieldFactory {
@@ -1241,27 +1266,33 @@ public:
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		const auto data = pars.data;
-		const auto componentName = pars.componentName;
-
-		const bool intType = !pars.typeParameters.empty() && pars.typeParameters[0] == "int";
-
-		auto style = context.getUIFactory().getStyle("slider");
-
-		Range<float> range(0, 1);
-		float granularity = 0;
 		if (pars.typeParameters.size() >= 3 && pars.typeParameters.size() <= 4) {
-			range = Range<float>(pars.typeParameters[1].toFloat(), pars.typeParameters[2].toFloat());
+			const auto range = Range<float>(pars.typeParameters[1].toFloat(), pars.typeParameters[2].toFloat());
+			float granularity = 0.0f;
 			if (pars.typeParameters.size() == 4) {
 				granularity = pars.typeParameters[3].toFloat();
 			}
+			return makeSlider(context, pars, range, granularity);
 		} else if (pars.options.getType() == ConfigNodeType::Map) {
+			Range<float> range;
 			range.start = pars.options["start"].asFloat(0.0f);
 			range.end = pars.options["end"].asFloat(1.0f);
-			granularity = pars.options["granularity"].asFloat(0.0f);
+			const float granularity = pars.options["granularity"].asFloat(0.0f);
+			return makeSlider(context, pars, range, granularity);
+		} else {
+			const bool intType = !pars.typeParameters.empty() && pars.typeParameters[0] == "int";
+			return context.makeField(intType ? "Halley::Vector2i" : "Halley::Vector2f", pars, ComponentEditorLabelCreation::Never);
 		}
+	}
 
+	std::shared_ptr<IUIElement> makeSlider(const ComponentEditorContext& context, const ComponentFieldParameters& pars, Range<float> range, float granularity)
+	{
+		const auto data = pars.data;
+		const bool intType = !pars.typeParameters.empty() && pars.typeParameters[0] == "int";
+
+		auto style = context.getUIFactory().getStyle("slider");
 		auto field = std::make_shared<UISlider>("range", style, range.start, range.end, 0.0f, true, !intType);
+
 		if (intType) {
 			field->setGranularity(1.0f);
 		} else {
