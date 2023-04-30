@@ -6,7 +6,7 @@
 
 namespace Halley {
     
-    class CurveEditorButton : public UIWidget {
+    class CurveEditorButton : public UIImage {
     public:
         using Callback = std::function<void(InterpolationCurve)>;
 
@@ -22,6 +22,10 @@ namespace Halley {
         UIFactory& factory;
         Callback callback;
         InterpolationCurve curve;
+        Colour4f lineColour;
+        Vector<Vector2f> line;
+
+        void updateLine();
     };
 
     class CurveEditorWindow : public PopupWindow {

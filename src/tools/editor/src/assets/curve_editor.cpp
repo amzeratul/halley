@@ -6,6 +6,7 @@ using namespace Halley;
 
 CurveEditor::CurveEditor(String id, UIStyle _style)
 	: UIWidget(std::move(id))
+	, horizontalRange(0, 1)
 {
 	styles.push_back(std::move(_style));
 	setInteractWithMouse(true);

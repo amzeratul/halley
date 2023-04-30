@@ -43,6 +43,7 @@ children:
         sizer:
           columnProportions: []
         widget:
+          id: scale
           class: spinControl2
           size: [60, 0]
   - uuid: 0f786d77-2dd0-4b03-8988-20db52a89ff3
