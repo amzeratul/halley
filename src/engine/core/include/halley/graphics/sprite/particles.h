@@ -1,8 +1,8 @@
 #pragma once
 
 #include "sprite.h"
-#include <halley/time/halleytime.h>
-
+#include "halley/time/halleytime.h"
+#include "halley/maths/interpolation_curve.h"
 #include "animation_player.h"
 
 namespace Halley {
@@ -118,8 +118,7 @@ namespace Halley {
 		float speedDamp = 0;
 		Vector3f acceleration;
 		Vector3f velScale;
-		float startScale = 1;
-		float endScale = 1;
+		InterpolationCurve scaleCurve;
 		float fadeInTime = 0;
 		float fadeOutTime = 0;
 		float stopTime = 0;

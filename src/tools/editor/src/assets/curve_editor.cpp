@@ -133,7 +133,7 @@ void CurveEditor::onMouseOver(Vector2f mousePos)
 	tooltipLabel
 		.setOffset(Vector2f(left ? 0.0f : 1.0f, 0.0f))
 		.setPosition(left ? drawArea.getTopLeft() : drawArea.getTopRight())
-		.setText(toString(curPos.x, 2) + ", " + toString(curPos.y, 2));
+		.setText(toString(curPos.x, 2) + ", " + toString(curPos.y * curve.scale, 2));
 }
 
 void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)

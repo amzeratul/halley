@@ -51,10 +51,20 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 		altitude = node["altitude"].asFloatRange(Range<float>(0, 0));
 	}
 
+	if (node.hasKey("startScale") || node.hasKey("endScale")) {
+		const auto startScale = node["startScale"].asFloat(1.0f);
+		const auto endScale = node["endScale"].asFloat(1.0f);
+		const float scale = std::max(startScale, endScale);
+		scaleCurve.makeDefault();
+		scaleCurve.points[0].y = startScale / scale;
+		scaleCurve.points[1].y = endScale / scale;
+		scaleCurve.scale = scale;
+	} else {
+		scaleCurve = InterpolationCurve(node["scaleCurve"]);
+	}
+
 	speedDamp = node["speedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
-	startScale = node["startScale"].asFloat(1.0f);
-	endScale = node["endScale"].asFloat(1.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
 	stopTime = node["stopTime"].asFloat(0.0f);
@@ -81,8 +91,7 @@ ConfigNode Particles::toConfigNode() const
 	result["acceleration"] = acceleration;
 	result["azimuth"] = azimuth;
 	result["altitude"] = altitude;
-	result["startScale"] = startScale;
-	result["endScale"] = endScale;
+	result["scaleCurve"] = scaleCurve;
 	result["fadeInTime"] = fadeInTime;
 	result["fadeOutTime"] = fadeOutTime;
 	result["stopTime"] = stopTime;
@@ -357,7 +366,7 @@ void Particles::initializeParticle(size_t index, float time)
 	particle.ttl = rng->getFloat(ttl);
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
-	particle.scale = startScale;
+	particle.scale = scaleCurve.evaluate(0);
 	
 	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
 
@@ -410,7 +419,7 @@ void Particles::updateParticles(float time)
 				particle.angle = particle.vel.xy().angle();
 			}
 
-			particle.scale = lerp(startScale, endScale, particle.time / particle.ttl);
+			particle.scale = scaleCurve.evaluate(particle.time / particle.ttl);
 
 			if (fadeInTime > 0.000001f || fadeOutTime > 0.00001f) {
 				const float alpha = clamp(std::min(particle.time / fadeInTime, (particle.ttl - particle.time) / fadeOutTime), 0.0f, 1.0f);

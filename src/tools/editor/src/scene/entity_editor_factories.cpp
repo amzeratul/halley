@@ -1100,10 +1100,6 @@ public:
 		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("altitude", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Scale"));
 		container->add(context.makeField("Halley::InterpolationCurve", pars.withSubKey("scaleCurve", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Start Scale"));
-		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("End Scale"));
-		container->add(context.makeField("float", pars.withSubKey("endScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Fade-in Time"));
 		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Fade-out Time"));
@@ -1147,6 +1143,19 @@ public:
 			node["altitude"] = Range<float>(angle.y - angleScatter.y, angle.y + angleScatter.y);
 			node.removeKey("angle");
 			node.removeKey("angleScatter");
+		}
+
+		if (node.hasKey("startScale") || node.hasKey("endScale")) {
+			const auto startScale = node["startScale"].asFloat(1.0f);
+			const auto endScale = node["endScale"].asFloat(1.0f);
+			const float scale = std::max(startScale, endScale);
+			InterpolationCurve scaleCurve;
+			scaleCurve.points[0].y = startScale / scale;
+			scaleCurve.points[1].y = endScale / scale;
+			scaleCurve.scale = scale;
+			node.removeKey("startScale");
+			node.removeKey("endScale");
+			node["scaleCurve"] = scaleCurve.toConfigNode();
 		}
 	}
 
