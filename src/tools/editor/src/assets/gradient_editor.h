@@ -44,4 +44,32 @@ namespace Halley {
         void accept();
         void cancel();
     };
+
+    class GradientEditor : public UIWidget {
+    public:
+        using Callback = std::function<void(const ColourGradient&)>;
+
+        GradientEditor(UIFactory& factory, String id, UIStyle style);
+
+        void update(Time t, bool moved) override;
+        void draw(UIPainter& painter) const override;
+
+        void setGradient(ColourGradient gradient);
+        const ColourGradient& getGradient() const;
+        ColourGradient& getGradient();
+
+        void setChangeCallback(Callback callback);
+
+    protected:
+        void onMouseOver(Vector2f mousePos) override;
+        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+        void releaseMouse(Vector2f mousePos, int button) override;
+        bool isFocusLocked() const override;
+        bool canReceiveFocus() const override;
+
+    private:
+        UIFactory& factory;
+        ColourGradient gradient;
+        Callback callback;
+    };
 }

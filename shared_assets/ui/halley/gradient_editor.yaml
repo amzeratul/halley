@@ -1,0 +1,53 @@
+uuid: 095b62e6-6cdd-430a-950f-44c623da91d0
+proportion: 1
+sizer:
+  columnProportions: []
+  gap: 5
+  type: vertical
+widget:
+  class: image
+  colour: $ui_popupWindow
+  image: $ui_title_capsule
+  innerBorder: [6, 3, 6, 6]
+children:
+  - uuid: edfc4db9-62b8-49e4-8590-895dc4353b70
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: fa12e6c4-fa05-4374-97ae-5d88067eb3e2
+        proportion: 1
+        widget:
+          class: label
+          id: title
+          text: Edit Gradient
+        fill: centre
+  - uuid: ca866e02-38c5-45d5-9165-d89a8aabad18
+    border: [0, 0, 0, 0]
+    widget:
+      class: gradientEditor
+      id: gradientEditor
+      size: [400, 100]
+  - uuid: 0f786d77-2dd0-4b03-8988-20db52a89ff3
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 5
+      type: horizontal
+    children:
+      - uuid: 6d76f757-9b01-486d-9b6b-a388cb85ef8e
+        proportion: 1
+        stretchSpacer: {}
+      - uuid: b57fb047-24df-4420-afaf-dc0a0b60949b
+        widget:
+          class: button
+          id: ok
+          size: [100, 22]
+          text: OK
+      - uuid: d2840413-ae92-4830-9b6e-55f177099e1b
+        widget:
+          class: button
+          id: cancel
+          size: [100, 22]
+          text: Cancel
+fill: centre

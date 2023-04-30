@@ -440,4 +440,7 @@ uiStyle:
     gridLine: { img: whitebox.png, colour: "#0E79E440" }
     tooltipLabel: { font: Ubuntu Light, size: 12, colour: $ui_text }
 
+  gradientEditor:
+    background: { img: $ui_window, colour: $ui_popupWindow }
+
 ...

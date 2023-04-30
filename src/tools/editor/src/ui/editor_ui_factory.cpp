@@ -9,6 +9,7 @@
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/curve_editor.h"
+#include "src/assets/gradient_editor.h"
 #include "src/assets/audio_editor/audio_object_editor.h"
 #include "src/assets/metadata_editor.h"
 #include "src/assets/ui_editor/ui_editor_display.h"
@@ -44,6 +45,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
 	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
+	addFactory("gradientEditor", [=](const ConfigNode& node) { return makeGradientEditor(node); });
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); });
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
 	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node);  });
@@ -188,6 +190,17 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& ent
 	auto style = UIStyle(node["style"].asString("curveEditor"), getStyleSheet());
 
 	auto widget = std::make_shared<CurveEditor>(*this, id, style);
+
+	return widget;
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeGradientEditor(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("gradientEditor"), getStyleSheet());
+
+	auto widget = std::make_shared<GradientEditor>(*this, id, style);
 
 	return widget;
 }

@@ -94,3 +94,61 @@ void GradientEditorWindow::cancel()
 {
 	destroy();
 }
+
+
+
+GradientEditor::GradientEditor(UIFactory& factory, String id, UIStyle style)
+	: UIWidget(std::move(id), Vector2f(), UISizer())
+	, factory(factory)
+{
+}
+
+void GradientEditor::update(Time t, bool moved)
+{
+}
+
+void GradientEditor::draw(UIPainter& painter) const
+{
+}
+
+void GradientEditor::setGradient(ColourGradient gradient)
+{
+	this->gradient = std::move(gradient);
+}
+
+const ColourGradient& GradientEditor::getGradient() const
+{
+	return gradient;
+}
+
+ColourGradient& GradientEditor::getGradient()
+{
+	return gradient;
+}
+
+void GradientEditor::setChangeCallback(Callback callback)
+{
+	this->callback = std::move(callback);
+}
+
+void GradientEditor::onMouseOver(Vector2f mousePos)
+{
+}
+
+void GradientEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+}
+
+void GradientEditor::releaseMouse(Vector2f mousePos, int button)
+{
+}
+
+bool GradientEditor::isFocusLocked() const
+{
+	return false;
+}
+
+bool GradientEditor::canReceiveFocus() const
+{
+	return true;
+}
