@@ -8,6 +8,7 @@
 #include "src/ui/select_asset_widget.h"
 #include "halley/editor_extensions/component_field_parameters.h"
 #include "halley/editor_extensions/component_editor_context.h"
+#include "src/assets/curve_editor_window.h"
 #include "src/ui/colour_picker.h"
 
 using namespace Halley;
@@ -1015,6 +1016,34 @@ public:
 	}
 };
 
+class ComponentEditorInterpolationCurveFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::InterpolationCurve";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(1.0f);
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+		auto container = std::make_shared<UISizer>();
+
+		auto button = std::make_shared<CurveEditorButton>(context.getUIFactory(), InterpolationCurve(data.getFieldData()), [&context, data](InterpolationCurve curve)
+		{
+			data.getWriteableFieldData() = curve.toConfigNode();
+			context.onEntityUpdated();
+		});
+		container->add(button, 1);
+
+		return container;
+	}
+};
+
 class ComponentEditorParticlesFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1083,10 +1112,10 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("directionScatter", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Rotate Towards Movement"));
 		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("Destroy When Done"));
-		container->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Minimum Height"));
 		container->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Destroy When Done"));
+		container->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
@@ -1810,6 +1839,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorInterpolationCurveFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIStyleFieldFactory>());

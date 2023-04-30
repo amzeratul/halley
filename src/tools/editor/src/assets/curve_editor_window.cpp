@@ -1,4 +1,6 @@
 #include "curve_editor_window.h"
+
+#include "curve_editor.h"
 using namespace Halley;
 
 CurveEditorButton::CurveEditorButton(UIFactory& factory, InterpolationCurve curve, Callback callback)
@@ -61,6 +63,8 @@ void CurveEditorWindow::onMakeUI()
 	{
 		cancel();
 	});
+
+	getWidgetAs<CurveEditor>("curveEditor");
 }
 
 bool CurveEditorWindow::onKeyPress(KeyboardKeyPress key)

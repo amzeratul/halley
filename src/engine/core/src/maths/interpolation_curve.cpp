@@ -1,6 +1,45 @@
 #include "halley/maths/interpolation_curve.h"
 
+#include "halley/data_structures/config_node.h"
+
 using namespace Halley;
+
+InterpolationCurve::InterpolationCurve()
+{
+	makeDefault();
+}
+
+InterpolationCurve::InterpolationCurve(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		points = node["points"].asVector<Vector2f>({});
+		tweens = node["tweens"].asVector<TweenCurve>({});
+		scale = node["scale"].asFloat(1.0f);
+	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int) {
+		makeDefault();
+		scale = node.asFloat(1.0f);
+	} else {
+		makeDefault();
+	}
+}
+
+ConfigNode InterpolationCurve::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["points"] = points;
+	result["tweens"] = tweens;
+	result["scale"] = scale;
+	return result;
+}
+
+void InterpolationCurve::makeDefault()
+{
+	scale = 1.0f;
+	points.push_back(Vector2f(0, 1));
+	points.push_back(Vector2f(1, 1));
+	tweens.push_back(TweenCurve::Linear);
+	tweens.push_back(TweenCurve::Linear);
+}
 
 float InterpolationCurve::evaluate(float val) const
 {
@@ -54,4 +93,14 @@ float PrecomputedInterpolationCurve::evaluate(float t) const
 	} else {
 		return static_cast<float>(elements[idx0]) / 255.0f;
 	}
+}
+
+ConfigNode ConfigNodeSerializer<InterpolationCurve>::serialize(const InterpolationCurve& curve, const EntitySerializationContext& context)
+{
+	return curve.toConfigNode();
+}
+
+InterpolationCurve ConfigNodeSerializer<InterpolationCurve>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return InterpolationCurve(node);
 }

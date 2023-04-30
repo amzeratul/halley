@@ -165,6 +165,12 @@ namespace Halley {
 			*this = values;
 		}
 
+		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
+		explicit ConfigNode(T enumValue)
+		{
+			*this = toString(enumValue);
+		}
+
 		~ConfigNode();
 		
 		ConfigNode& operator=(const ConfigNode& other);
