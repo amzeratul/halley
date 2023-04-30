@@ -45,17 +45,21 @@ namespace Halley {
         Callback callback;
 
         std::optional<size_t> curAnchor;
+        std::optional<size_t> curSegment;
         std::optional<Vector2f> mouseAnchor;
         bool dragging = false;
 
         void normalizePoints();
         void notifyChange();
         Rect4f getDrawArea() const;
+
+        void drawLine(Painter& painter) const;
         void drawAnchor(Painter& painter, Vector2f pos, bool highlighted) const;
 
         Vector2f curveToMouseSpace(Vector2f curvePos) const;
         Vector2f mouseToCurveSpace(Vector2f mousePos) const;
         std::optional<size_t> getAnchorAt(Vector2f mousePos) const;
+        std::optional<size_t> getSegmentAt(Vector2f mousePos) const;
         Vector2f clampPoint(Vector2f point) const;
 
         void insertPoint(Vector2f curvePos);

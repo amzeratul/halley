@@ -56,18 +56,7 @@ void CurveEditor::draw(UIPainter& painter) const
 
 	painter.draw([this] (Painter& painter)
 	{
-		Vector<Vector2f> ps;
-		ps.resize(curve.points.size());
-
-		for (size_t i = 0; i < curve.points.size(); ++i) {
-			ps[i] = curveToMouseSpace(curve.points[i]);
-		}
-
-		painter.drawLine(ps, 1.0f, lineColour, false);
-
-		for (size_t i = 0; i < curve.points.size(); ++i) {
-			drawAnchor(painter, ps[i], curAnchor == i);
-		}
+		drawLine(painter);
 
 		if (mouseAnchor) {
 			painter.drawCircle(curveToMouseSpace(*mouseAnchor), 1.5f, 3.0f, lineColour);
@@ -131,8 +120,10 @@ void CurveEditor::onMouseOver(Vector2f mousePos)
 
 	if (curAnchor) {
 		mouseAnchor = {};
+		curSegment = {};
 	} else {
 		mouseAnchor = clampPoint(mouseToCurveSpace(mousePos));
+		curSegment = getSegmentAt(mousePos);
 	}
 
 	const auto drawArea = getDrawArea();
@@ -149,6 +140,7 @@ void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	if (button == 0) {
 		const auto anchor = getAnchorAt(mousePos);
 		curAnchor = anchor;
+		curSegment = {};
 		if (anchor) {
 			dragging = true;
 			updateDragging(mousePos);
@@ -220,6 +212,42 @@ Rect4f CurveEditor::getDrawArea() const
 	return Rect4f(getPosition(), getPosition() + getSize()).shrink(5);
 }
 
+void CurveEditor::drawLine(Painter& painter) const
+{
+	Vector<Vector2f> ps;
+	Vector<Vector2f> line;
+	ps.resize(curve.points.size());
+
+	auto flushLine = [&](bool highlighted)
+	{
+		if (!line.empty()) {
+			painter.drawLine(line, 1.0f, highlighted ? lineColour.inverseMultiplyLuma(0.5f) : lineColour, false);
+			const auto last = line.back();
+			line.clear();
+			line.push_back(last);
+		}
+	};
+
+	for (size_t i = 0; i < curve.points.size(); ++i) {
+		const auto p = curveToMouseSpace(curve.points[i]);
+		ps[i] = p;
+
+		if (curSegment == i) {
+			flushLine(false);
+		}
+		line.push_back(p);
+		if (curSegment == i) {
+			flushLine(true);
+		}
+	}
+
+	flushLine(false);
+
+	for (size_t i = 0; i < curve.points.size(); ++i) {
+		drawAnchor(painter, ps[i], curAnchor == i);
+	}
+}
+
 void CurveEditor::drawAnchor(Painter& painter, Vector2f pos, bool highlighted) const
 {
 	painter.drawCircle(pos, 2.0f, highlighted ? 5.0f : 4.0f, highlighted ? lineColour.inverseMultiplyLuma(0.5f) : lineColour);
@@ -258,6 +286,24 @@ std::optional<size_t> CurveEditor::getAnchorAt(Vector2f mousePos) const
 	}
 
 	return bestIdx;
+}
+
+std::optional<size_t> CurveEditor::getSegmentAt(Vector2f mousePos) const
+{
+	const auto x = mouseToCurveSpace(mousePos).x;
+	if (x < curve.points.front().x || x > curve.points.back().x) {
+		return std::nullopt;
+	}
+
+	for (size_t i = 1; i < curve.points.size(); ++i) {
+		const float prevX = curve.points[i - 1].x;
+		const float nextX = curve.points[i].x;
+
+		if (x >= prevX && x < nextX) {
+			return i;
+		}
+	}
+	return std::nullopt;
 }
 
 Vector2f CurveEditor::clampPoint(Vector2f p) const
