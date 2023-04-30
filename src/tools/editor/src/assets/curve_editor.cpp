@@ -56,15 +56,15 @@ void CurveEditor::draw(UIPainter& painter) const
 	painter.draw([this] (Painter& painter)
 	{
 		Vector<Vector2f> ps;
-		ps.resize(points.size());
+		ps.resize(curve.points.size());
 
-		for (size_t i = 0; i < points.size(); ++i) {
-			ps[i] = curveToMouseSpace(points[i]);
+		for (size_t i = 0; i < curve.points.size(); ++i) {
+			ps[i] = curveToMouseSpace(curve.points[i]);
 		}
 
 		painter.drawLine(ps, 1.0f, lineColour, false);
 
-		for (size_t i = 0; i < points.size(); ++i) {
+		for (size_t i = 0; i < curve.points.size(); ++i) {
 			drawAnchor(painter, ps[i], curAnchor == i);
 		}
 
@@ -77,7 +77,7 @@ void CurveEditor::draw(UIPainter& painter) const
 
 void CurveEditor::setHorizontalRange(Range<float> range)
 {
-	for (auto& p: points) {
+	for (auto& p: curve.points) {
 		p.x = lerp(range.start, range.end, invLerp(p.x, horizontalRange.start, horizontalRange.end));
 	}
 
@@ -100,20 +100,20 @@ void CurveEditor::setVerticalDividers(size_t n)
 	nVerticalDividers = n;
 }
 
-void CurveEditor::setPoints(Vector<Vector2f> pts)
+void CurveEditor::setCurve(InterpolationCurve c)
 {
-	points = std::move(pts);
+	curve = std::move(c);
 	normalizePoints();
 }
 
-const Vector<Vector2f>& CurveEditor::getPoints() const
+const InterpolationCurve& CurveEditor::getCurve() const
 {
-	return points;
+	return curve;
 }
 
-Vector<Vector2f>& CurveEditor::getPoints()
+InterpolationCurve& CurveEditor::getCurve()
 {
-	return points;
+	return curve;
 }
 
 void CurveEditor::setChangeCallback(Callback callback)
@@ -136,7 +136,7 @@ void CurveEditor::onMouseOver(Vector2f mousePos)
 
 	const auto drawArea = getDrawArea();
 	const bool left = mousePos.x > drawArea.getCenter().x;
-	const auto curPos = curAnchor ? points[*curAnchor] : *mouseAnchor;
+	const auto curPos = curAnchor ? curve.points[*curAnchor] : *mouseAnchor;
 	tooltipLabel
 		.setOffset(Vector2f(left ? 0.0f : 1.0f, 0.0f))
 		.setPosition(left ? drawArea.getTopLeft() : drawArea.getTopRight())
@@ -185,8 +185,9 @@ bool CurveEditor::canReceiveFocus() const
 
 void CurveEditor::normalizePoints()
 {
-	auto startPoints = points;
+	auto startPoints = curve;
 
+	auto& points = curve.points;
 	if (points.empty()) {
 		points.push_back(Vector2f(horizontalRange.start, 0));
 		points.push_back(Vector2f(horizontalRange.end, 1));
@@ -197,11 +198,11 @@ void CurveEditor::normalizePoints()
 	points.front().x = horizontalRange.start;
 	points.back().x = horizontalRange.end;
 
-	for (auto& p: points) {
+	for (auto& p: curve.points) {
 		p = clampPoint(p);
 	}
 
-	if (points != startPoints) {
+	if (curve != startPoints) {
 		notifyChange();
 	}
 }
@@ -209,7 +210,7 @@ void CurveEditor::normalizePoints()
 void CurveEditor::notifyChange()
 {
 	if (callback) {
-		callback(points);
+		callback(curve);
 	}
 }
 
@@ -246,8 +247,8 @@ std::optional<size_t> CurveEditor::getAnchorAt(Vector2f mousePos) const
 	float bestDist = 6.0f;
 	std::optional<size_t> bestIdx;
 
-	for (size_t i = 0; i < points.size(); ++i) {
-		const auto pos = curveToMouseSpace(points[i]);
+	for (size_t i = 0; i < curve.points.size(); ++i) {
+		const auto pos = curveToMouseSpace(curve.points[i]);
 		const float dist = (pos - mousePos).length();
 		if (dist < bestDist) {
 			bestDist = dist;
@@ -269,9 +270,10 @@ void CurveEditor::insertPoint(Vector2f curvePos)
 {
 	const auto pos = clampPoint(curvePos);
 
-	for (size_t i = 0; i < points.size() - 1; ++i) {
-		if (points[i].x > pos.x) {
-			points.insert(points.begin() + i, pos);
+	for (size_t i = 0; i < curve.points.size() - 1; ++i) {
+		if (curve.points[i].x > pos.x) {
+			curve.points.insert(curve.points.begin() + i, pos);
+			curve.tweens.insert(curve.tweens.begin() + i, TweenCurve::Linear);
 			curAnchor = i;
 			dragging = true;
 			notifyChange();
@@ -279,8 +281,9 @@ void CurveEditor::insertPoint(Vector2f curvePos)
 		}
 	}
 
-	const auto idx = points.size() - 1;
-	points.insert(points.begin() + idx, pos);
+	const auto idx = curve.points.size() - 1;
+	curve.points.insert(curve.points.begin() + idx, pos);
+	curve.tweens.insert(curve.tweens.begin() + idx, TweenCurve::Linear);
 	curAnchor = idx;
 	dragging = true;
 	notifyChange();
@@ -288,8 +291,9 @@ void CurveEditor::insertPoint(Vector2f curvePos)
 
 void CurveEditor::deletePoint(size_t idx)
 {
-	if (idx > 0 && idx < points.size() - 1) {
-		points.erase(points.begin() + idx);
+	if (idx > 0 && idx < curve.points.size() - 1) {
+		curve.points.erase(curve.points.begin() + idx);
+		curve.tweens.erase(curve.tweens.begin() + idx);
 		notifyChange();
 	}
 }
@@ -299,16 +303,18 @@ void CurveEditor::updateDragging(Vector2f mousePos)
 	if (dragging && curAnchor) {
 		const auto idx = curAnchor.value();
 
-		points[idx] = mouseToCurveSpace(mousePos);
+		curve.points[idx] = mouseToCurveSpace(mousePos);
 		normalizePoints();
 
-		if (idx > 0 && points[idx].x < points[idx - 1].x) {
-			std::swap(points[idx], points[idx - 1]);
+		if (idx > 0 && curve.points[idx].x < curve.points[idx - 1].x) {
+			std::swap(curve.points[idx], curve.points[idx - 1]);
+			std::swap(curve.tweens[idx], curve.tweens[idx - 1]);
 			curAnchor = idx - 1;
 		}
 
-		if (idx < points.size() - 1 && points[idx].x > points[idx + 1].x) {
-			std::swap(points[idx], points[idx + 1]);
+		if (idx < curve.points.size() - 1 && curve.points[idx].x > curve.points[idx + 1].x) {
+			std::swap(curve.points[idx], curve.points[idx + 1]);
+			std::swap(curve.tweens[idx], curve.tweens[idx + 1]);
 			curAnchor = idx + 1;
 		}
 

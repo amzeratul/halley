@@ -22,6 +22,12 @@ namespace Halley {
 
 		void makeDefault();
 
+        bool operator==(const InterpolationCurve& other) const;
+        bool operator!=(const InterpolationCurve& other) const;
+
+        void serialize(Serializer& s) const;
+        void deserialize(Deserializer& s);
+
         float evaluate(float t) const;
         float evaluateRaw(float t) const;
     };

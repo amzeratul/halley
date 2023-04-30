@@ -1098,6 +1098,8 @@ public:
 		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Altitude"));
 		container->add(context.makeField("Halley::Range<float>", pars.withSubKey("altitude", {"0", "0"}), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Scale"));
+		container->add(context.makeField("Halley::InterpolationCurve", pars.withSubKey("scaleCurve", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Scale"));
 		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("End Scale"));

@@ -1,6 +1,6 @@
 #include "halley/maths/interpolation_curve.h"
-
 #include "halley/data_structures/config_node.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
 
@@ -15,6 +15,10 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node)
 		points = node["points"].asVector<Vector2f>({});
 		tweens = node["tweens"].asVector<TweenCurve>({});
 		scale = node["scale"].asFloat(1.0f);
+	} else if (node.getType() == ConfigNodeType::Sequence) {
+		points = node.asVector<Vector2f>();
+		tweens.resize(points.size(), TweenCurve::Linear);
+		scale = 1.0f;
 	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int) {
 		makeDefault();
 		scale = node.asFloat(1.0f);
@@ -39,6 +43,30 @@ void InterpolationCurve::makeDefault()
 	points.push_back(Vector2f(1, 1));
 	tweens.push_back(TweenCurve::Linear);
 	tweens.push_back(TweenCurve::Linear);
+}
+
+bool InterpolationCurve::operator==(const InterpolationCurve& other) const
+{
+	return points == other.points && tweens == other.tweens && scale == other.scale;
+}
+
+bool InterpolationCurve::operator!=(const InterpolationCurve& other) const
+{
+	return !(*this == other);
+}
+
+void InterpolationCurve::serialize(Serializer& s) const
+{
+	s << points;
+	s << tweens;
+	s << scale;
+}
+
+void InterpolationCurve::deserialize(Deserializer& s)
+{
+	s >> points;
+	s >> tweens;
+	s >> scale;	
 }
 
 float InterpolationCurve::evaluate(float val) const

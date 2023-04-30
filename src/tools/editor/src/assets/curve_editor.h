@@ -1,11 +1,12 @@
 #pragma once
 
+#include "halley/maths/interpolation_curve.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
     class CurveEditor : public UIWidget {
     public:
-        using Callback = std::function<void(const Vector<Vector2f>&)>;
+        using Callback = std::function<void(const InterpolationCurve&)>;
 
         CurveEditor(String id, UIStyle style);
 
@@ -17,9 +18,9 @@ namespace Halley {
         void setHorizontalDividers(size_t n);
         void setVerticalDividers(size_t n);
 
-        void setPoints(Vector<Vector2f> pts);
-        const Vector<Vector2f>& getPoints() const;
-        Vector<Vector2f>& getPoints();
+        void setCurve(InterpolationCurve curve);
+        const InterpolationCurve& getCurve() const;
+        InterpolationCurve& getCurve();
 
         void setChangeCallback(Callback callback);
 
@@ -40,7 +41,7 @@ namespace Halley {
     	Range<float> horizontalRange;
         size_t nHorizontalDividers = 10;
         size_t nVerticalDividers = 5;
-        Vector<Vector2f> points;
+        InterpolationCurve curve;
         Callback callback;
 
         std::optional<size_t> curAnchor;

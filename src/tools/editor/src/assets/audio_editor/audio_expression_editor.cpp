@@ -205,8 +205,8 @@ void AudioExpressionEditorExpression::onMakeUI()
 
 		updateVariableProps(expression.id);
 		auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
-		curveEditor->setPoints(expression.points);
-		curveEditor->setChangeCallback([=] (const Vector<Vector2f>& points)
+		curveEditor->setCurve(expression.points);
+		curveEditor->setChangeCallback([=] (const InterpolationCurve& points)
 		{
 			auto& expr = parent.getExpressionTerm(idx);
 			expr.points = points;

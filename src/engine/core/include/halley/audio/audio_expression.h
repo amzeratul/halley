@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/data_structures/vector.h"
+#include "halley/maths/interpolation_curve.h"
 #include "halley/maths/vector2.h"
 #include "halley/text/string_converter.h"
 
@@ -45,7 +46,7 @@ namespace Halley {
         AudioExpressionTermComp op = AudioExpressionTermComp::Equals;
         String id;
         String value;
-        Vector<Vector2f> points;
+        InterpolationCurve points;
         float gain = 1;
 
         AudioExpressionTerm() = default;
