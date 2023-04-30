@@ -55,9 +55,24 @@ void CurveEditorButton::updateLine()
 {
 	const auto rect = getRect().shrink(4.0f);
 	line.clear();
-	for (const auto& p: curve.points) {
-		const auto p2 = Vector2f(lerp(rect.getLeft(), rect.getRight(), p.x), lerp(rect.getBottom(), rect.getTop(), p.y));
-		line.push_back(p2);
+	for (size_t i = 0; i < curve.points.size(); ++i) {
+		auto convert = [&](Vector2f p)
+		{
+			return Vector2f(lerp(rect.getLeft(), rect.getRight(), p.x), lerp(rect.getBottom(), rect.getTop(), p.y));
+		};
+
+		const auto tween = curve.tweens[i];
+		if (i > 0 && tween != TweenCurve::Linear) {
+			const float t0 = curve.points[i - 1].x;
+			const float t1 = curve.points[i].x;
+			const int nSteps = lroundl((t1 - t0) / 0.01f);
+			for (int j = 0; j < nSteps; ++j) {
+				const float t = static_cast<float>(j) / static_cast<float>(nSteps);
+				const float x = lerp(t0, t1, t);
+				line.push_back(convert(Vector2f(x, curve.evaluate(x))));
+			}
+		}
+		line.push_back(convert(curve.points[i]));
 	}
 }
 

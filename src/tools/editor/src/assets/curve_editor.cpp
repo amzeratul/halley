@@ -244,9 +244,9 @@ void CurveEditor::drawLine(Painter& painter) const
 
 		const auto tween = curve.tweens[i];
 		if (i > 0 && tween != TweenCurve::Linear) {
-			const int nSteps = 10;
 			const float t0 = curve.points[i - 1].x;
 			const float t1 = curve.points[i].x;
+			const int nSteps = lroundl((t1 - t0) / 0.01f);
 			for (int j = 0; j < nSteps; ++j) {
 				const float t = static_cast<float>(j) / static_cast<float>(nSteps);
 				const float x = lerp(t0, t1, t);
@@ -401,5 +401,6 @@ void CurveEditor::editSegment(size_t idx)
 
 	menu->setHandle(UIEventType::PopupAccept, [this, idx] (const UIEvent& e) {
 		curve.tweens[idx] = fromString<TweenCurve>(e.getStringData());
+		notifyChange();
 	});
 }

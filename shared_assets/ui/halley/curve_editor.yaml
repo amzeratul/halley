@@ -46,6 +46,8 @@ children:
           id: scale
           class: spinControl2
           size: [60, 0]
+          increment: 0.1
+          allowFloat: true
   - uuid: 0f786d77-2dd0-4b03-8988-20db52a89ff3
     border: [0, 0, 0, 0]
     sizer:
