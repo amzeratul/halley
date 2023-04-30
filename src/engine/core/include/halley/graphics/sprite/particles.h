@@ -8,6 +8,21 @@
 namespace Halley {
 	class Random;
 	class Animation;
+
+	enum class ParticleSpawnAreaShape : uint8_t {
+		Rectangle,
+		Ellipse
+	};
+
+	template <>
+	struct EnumNames<ParticleSpawnAreaShape> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"rectangle",
+				"ellipse"
+			}};
+		}
+	};
 	
 	class Particles {
 		struct Particle {
@@ -42,6 +57,9 @@ namespace Halley {
 		void setPosition(Vector2f pos);
 		void setPosition(Vector3f pos);
 		void setSpawnArea(Vector2f area);
+		Vector2f getSpawnArea() const;
+		void setSpawnAreaShape(ParticleSpawnAreaShape shape);
+		ParticleSpawnAreaShape getSpawnAreaShape() const;
 
 		void setAngle(float newAngle);
 		void setAngle(Vector2f newAngle);
@@ -86,7 +104,9 @@ namespace Halley {
 
 		float spawnRate = 100;
 		Vector2f spawnArea;
+		ParticleSpawnAreaShape spawnAreaShape = ParticleSpawnAreaShape::Rectangle;
 		float startHeight = 0;
+
 		float ttl = 1;
 		float ttlScatter = 0;
 		float speed = 100;

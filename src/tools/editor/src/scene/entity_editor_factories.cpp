@@ -1045,6 +1045,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Spawn Area"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Spawn Area Shape"));
+		container->add(context.makeField("Halley::ParticleSpawnAreaShape", pars.withSubKey("spawnAreaShape"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Height"));
 		container->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Max Particles"));
@@ -1796,6 +1798,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<MathRelOp>("Halley::MathRelOp"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<TweenCurve>("Halley::TweenCurve"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<LoggerLevel>("Halley::LoggerLevel"));
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<ParticleSpawnAreaShape>("Halley::ParticleSpawnAreaShape"));
 
 	return factories;
 }

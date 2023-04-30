@@ -20,6 +20,7 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 {
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
+	spawnAreaShape = node["spawnAreaShape"].asEnum(ParticleSpawnAreaShape::Rectangle);
 	ttl = node["ttl"].asFloat(1.0f);
 	ttlScatter = node["ttlScatter"].asFloat(0.0f);
 	speed = node["speed"].asFloat(100.0f);
@@ -49,6 +50,7 @@ ConfigNode Particles::toConfigNode() const
 
 	result["spawnRate"] = spawnRate;
 	result["spawnArea"] = spawnArea;
+	result["spawnAreaShape"] = spawnAreaShape;
 	result["ttl"] = ttl;
 	result["ttlScatter"] = ttlScatter;
 	result["speed"] = speed;
@@ -127,6 +129,21 @@ void Particles::setPosition(Vector3f pos)
 void Particles::setSpawnArea(Vector2f area)
 {
 	spawnArea = area;
+}
+
+Vector2f Particles::getSpawnArea() const
+{
+	return spawnArea;
+}
+
+void Particles::setSpawnAreaShape(ParticleSpawnAreaShape shape)
+{
+	spawnAreaShape = shape;
+}
+
+ParticleSpawnAreaShape Particles::getSpawnAreaShape() const
+{
+	return spawnAreaShape;
 }
 
 void Particles::setAngle(float newAngle)
@@ -369,7 +386,15 @@ void Particles::updateParticles(float time)
 
 Vector3f Particles::getSpawnPosition() const
 {
-	return position + Vector3f(rng->getFloat(-spawnArea.x * 0.5f, spawnArea.x * 0.5f), rng->getFloat(-spawnArea.y * 0.5f, spawnArea.y * 0.5f), startHeight);
+	Vector2f pos;
+	if (spawnAreaShape == ParticleSpawnAreaShape::Rectangle) {
+		pos = Vector2f(rng->getFloat(-1, 1), rng->getFloat(-1, 1)) * spawnArea * 0.5f;
+	} else if (spawnAreaShape == ParticleSpawnAreaShape::Ellipse) {
+		const float radius = std::sqrt(rng->getFloat(0, 1));
+		const float angle = rng->getFloat(0.0f, 2.0f * pif());
+		pos = Vector2f(radius, 0).rotate(Angle1f::fromRadians(angle)) * spawnArea * 0.5f;
+	}
+	return position + Vector3f(pos, startHeight);
 }
 
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const EntitySerializationContext& context)
