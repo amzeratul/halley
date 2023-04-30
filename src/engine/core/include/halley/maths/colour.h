@@ -33,6 +33,7 @@
 #include "halley/maths/vector3.h"
 #include "halley/maths/vector4.h"
 #include "halley/text/encode.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
 	// This whole class is TERRIBLE
@@ -136,6 +137,11 @@ namespace Halley {
 			if (byteRep(a) != 255) writeByte(ss, a);
 			ss.flush();
 			return ss.str();
+		}
+
+		[[nodiscard]] ConfigNode toConfigNode() const
+		{
+			return ConfigNode(toString());
 		}
 
 		[[nodiscard]] static Colour4 fromString(std::string_view str)
