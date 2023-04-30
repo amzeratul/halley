@@ -8,7 +8,9 @@
 #include "src/ui/select_asset_widget.h"
 #include "halley/editor_extensions/component_field_parameters.h"
 #include "halley/editor_extensions/component_editor_context.h"
+#include "halley/maths/colour_gradient.h"
 #include "src/assets/curve_editor_window.h"
+#include "src/assets/gradient_editor.h"
 #include "src/ui/colour_picker.h"
 
 using namespace Halley;
@@ -1044,6 +1046,34 @@ public:
 	}
 };
 
+class ComponentEditorColourGradientFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::ColourGradient";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(1.0f);
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+		auto container = std::make_shared<UISizer>();
+
+		auto button = std::make_shared<GradientEditorButton>(context.getUIFactory(), ColourGradient(data.getFieldData()), [&context, data](ColourGradient curve)
+		{
+			data.getWriteableFieldData() = curve.toConfigNode();
+			context.onEntityUpdated();
+		});
+		container->add(button, 1);
+
+		return container;
+	}
+};
+
 class ComponentEditorParticlesFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1866,6 +1896,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorColourGradientFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorInterpolationCurveFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());

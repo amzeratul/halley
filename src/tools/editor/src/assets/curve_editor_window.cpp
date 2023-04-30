@@ -136,10 +136,6 @@ bool CurveEditorWindow::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-void CurveEditorWindow::update(Time t, bool moved)
-{
-}
-
 void CurveEditorWindow::accept()
 {
 	if (callback) {

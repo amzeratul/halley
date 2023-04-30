@@ -38,8 +38,6 @@ namespace Halley {
         void onRemovedFromRoot(UIRoot& root) override;
         bool onKeyPress(KeyboardKeyPress key) override;
 
-        void update(Time t, bool moved) override;
-
     protected:
         void onMakeUI() override;
 
