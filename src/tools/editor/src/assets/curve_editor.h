@@ -8,7 +8,7 @@ namespace Halley {
     public:
         using Callback = std::function<void(const InterpolationCurve&)>;
 
-        CurveEditor(String id, UIStyle style);
+        CurveEditor(UIFactory& factory, String id, UIStyle style);
 
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
@@ -32,6 +32,8 @@ namespace Halley {
         bool canReceiveFocus() const override;
 
     private:
+        UIFactory& factory;
+
     	Sprite background;
         Sprite display;
         Sprite gridLine;
@@ -65,5 +67,6 @@ namespace Halley {
         void insertPoint(Vector2f curvePos);
         void deletePoint(size_t idx);
         void updateDragging(Vector2f mousePos);
+        void editSegment(size_t idx);
     };
 }

@@ -4,8 +4,9 @@
 
 using namespace Halley;
 
-CurveEditor::CurveEditor(String id, UIStyle _style)
+CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle _style)
 	: UIWidget(std::move(id))
+	, factory(factory)
 	, horizontalRange(0, 1)
 {
 	styles.push_back(std::move(_style));
@@ -153,6 +154,11 @@ void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		const auto anchor = getAnchorAt(mousePos);
 		if (anchor) {
 			deletePoint(anchor.value());
+		} else {
+			const auto segment = getSegmentAt(mousePos);
+			if (segment) {
+				editSegment(*segment);
+			}
 		}
 	}
 }
@@ -235,7 +241,20 @@ void CurveEditor::drawLine(Painter& painter) const
 		if (curSegment == i) {
 			flushLine(false);
 		}
+
+		const auto tween = curve.tweens[i];
+		if (i > 0 && tween != TweenCurve::Linear) {
+			const int nSteps = 10;
+			const float t0 = curve.points[i - 1].x;
+			const float t1 = curve.points[i].x;
+			for (int j = 0; j < nSteps; ++j) {
+				const float t = static_cast<float>(j) / static_cast<float>(nSteps);
+				const float x = lerp(t0, t1, t);
+				line.push_back(curveToMouseSpace(Vector2f(x, curve.evaluate(x))));
+			}
+		}
 		line.push_back(p);
+
 		if (curSegment == i) {
 			flushLine(true);
 		}
@@ -367,4 +386,20 @@ void CurveEditor::updateDragging(Vector2f mousePos)
 
 		notifyChange();
 	}
+}
+
+void CurveEditor::editSegment(size_t idx)
+{
+	auto menuOptions = Vector<UIPopupMenuItem>();
+
+	for (const auto& option: EnumNames<TweenCurve>()()) {
+		menuOptions.push_back(UIPopupMenuItem(option, LocalisedString::fromUserString(option), {}));
+	}
+
+	auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+	menu->spawnOnRoot(*getRoot());
+
+	menu->setHandle(UIEventType::PopupAccept, [this, idx] (const UIEvent& e) {
+		curve.tweens[idx] = fromString<TweenCurve>(e.getStringData());
+	});
 }

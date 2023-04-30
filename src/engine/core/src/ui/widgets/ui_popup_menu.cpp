@@ -12,6 +12,7 @@ UIPopupMenu::UIPopupMenu(String id, UIStyle style, Vector<UIPopupMenuItem> items
 	, items(std::move(items))
 {
 	makeUI();
+	setChildLayerAdjustment(10);
 }
 
 void UIPopupMenu::update(Time t, bool moved)

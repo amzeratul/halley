@@ -187,7 +187,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& ent
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("curveEditor"), getStyleSheet());
 
-	auto widget = std::make_shared<CurveEditor>(id, style);
+	auto widget = std::make_shared<CurveEditor>(*this, id, style);
 
 	return widget;
 }
