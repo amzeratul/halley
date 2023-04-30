@@ -809,6 +809,13 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) c
 	return labelBox;
 }
 
+std::shared_ptr<UIWidget> EntityEditorFactory::makeNestedField(const String& text) const
+{
+	auto field = root.factory.makeUI("halley/entity_editor_compound_field");
+	field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(text));
+	return field;
+}
+
 std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
 {
 	auto [fieldType, typeParams] = parseType(rawFieldType);
@@ -824,8 +831,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
-		auto field = root.factory.makeUI("halley/entity_editor_compound_field");
-		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getLabelName()));
+		auto field = makeNestedField(parameters.data.getLabelName());
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;
 	} else {

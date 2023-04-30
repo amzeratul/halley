@@ -143,6 +143,7 @@ namespace Halley {
 		EntityEditorFactory(EntityEditorFactoryRoot& root, IEntityEditorCallbacks* callbacks);
 
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const override;
+		std::shared_ptr<UIWidget> makeNestedField(const String& label) const override;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const override;
 		ConfigNode getDefaultNode(const String& fieldType) const override;
 

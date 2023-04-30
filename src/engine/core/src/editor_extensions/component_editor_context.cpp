@@ -1,6 +1,7 @@
 #include "halley/editor_extensions/component_editor_context.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/editor_extensions/component_field_parameters.h"
+#include "halley/ui/ui_widget.h"
 
 using namespace Halley;
 
@@ -40,6 +41,12 @@ std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fiel
 {
 	Expects(entityEditorFactory != nullptr);
 	return entityEditorFactory->makeField(fieldType, std::move(parameters), createLabel);
+}
+
+std::shared_ptr<UIWidget> ComponentEditorContext::makeNestedField(const String& label) const
+{
+	Expects(entityEditorFactory != nullptr);
+	return entityEditorFactory->makeNestedField(label);
 }
 
 ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const

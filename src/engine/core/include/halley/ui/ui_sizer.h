@@ -107,7 +107,9 @@ namespace Halley {
 
 	class UISizer final : public IUIElement, public IUISizer {
 	public:
-		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f, int nColumns = 0);
+		explicit UISizer(UISizerType type = UISizerType::Horizontal, float gap = 1.0f);
+		explicit UISizer(UISizerType type, float gap, int nColumns, Vector<float> columnProportions = {});
+		explicit UISizer(float gap, int nColumns, Vector<float> columnProportions = {});
 
 		UISizer(UISizer&& other) noexcept;
 		UISizer(const UISizer& other) = delete;

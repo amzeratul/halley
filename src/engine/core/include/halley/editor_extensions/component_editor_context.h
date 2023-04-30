@@ -59,6 +59,7 @@ namespace Halley {
 		virtual ~IEntityEditorFactory() = default;
 
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) const = 0;
+		virtual std::shared_ptr<UIWidget> makeNestedField(const String& label) const = 0;
 		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) const = 0;
 	};
@@ -75,6 +76,7 @@ namespace Halley {
     	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const;
+		std::shared_ptr<UIWidget> makeNestedField(const String& label) const;
     	ConfigNode getDefaultNode(const String& fieldType) const;
 	    void setDefaultName(const String& name, const String& prevName) const;
 

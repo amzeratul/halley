@@ -116,14 +116,30 @@ Vector2f UISizerEntry::getPosition() const
 	return position;
 }
 
-UISizer::UISizer(UISizerType type, float gap, int nColumns)
+UISizer::UISizer(UISizerType type, float gap)
+	: type(type)
+	, gap(gap)
+{
+	if (type == UISizerType::Grid) {
+		gridProportions = std::make_unique<GridProportions>();
+		gridProportions->nColumns = 0;
+	}
+}
+
+UISizer::UISizer(UISizerType type, float gap, int nColumns, Vector<float> columnProportions)
 	: type(type)
 	, gap(gap)
 {
 	if (type == UISizerType::Grid) {
 		gridProportions = std::make_unique<GridProportions>();
 		gridProportions->nColumns = nColumns;
+		gridProportions->columnProportions = std::move(columnProportions);
 	}
+}
+
+UISizer::UISizer(float gap, int nColumns, Vector<float> columnProportions)
+	: UISizer(UISizerType::Grid, gap, nColumns, std::move(columnProportions))
+{
 }
 
 UISizer::UISizer(UISizer&& other) noexcept
