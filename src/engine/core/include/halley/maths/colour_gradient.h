@@ -16,6 +16,7 @@ namespace Halley {
 
         ColourGradient();
         ColourGradient(const ConfigNode& node);
+		ColourGradient(float fadeInEnd, float fadeOutStart);
 
         ConfigNode toConfigNode() const;
 
@@ -30,6 +31,9 @@ namespace Halley {
         Colour4f evaluate(float t) const;
 
 		void render(Image& image);
+
+		void clear();
+		void add(Colour4f col, float position);
 	};
 
 	template<>

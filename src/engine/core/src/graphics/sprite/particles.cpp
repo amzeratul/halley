@@ -63,10 +63,17 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 		scaleCurve = InterpolationCurve(node["scaleCurve"]);
 	}
 
+	if (node.hasKey("fadeInTime") || node.hasKey("fadeOutTime")) {
+		const auto fadeInTime = node["fadeInTime"].asFloat(0.0f);
+		const auto fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
+		const float avgTTL = std::max((ttl.start + ttl.end) * 0.5f, 0.1f);
+		colourGradient = ColourGradient(fadeInTime / avgTTL, 1.0f - fadeOutTime / avgTTL);
+	} else {
+		colourGradient = ColourGradient(node["colourGradient"]);
+	}
+
 	speedDamp = node["speedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
-	fadeInTime = node["fadeInTime"].asFloat(0.0f);
-	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
 	stopTime = node["stopTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
@@ -92,8 +99,7 @@ ConfigNode Particles::toConfigNode() const
 	result["azimuth"] = azimuth;
 	result["altitude"] = altitude;
 	result["scaleCurve"] = scaleCurve;
-	result["fadeInTime"] = fadeInTime;
-	result["fadeOutTime"] = fadeOutTime;
+	result["colourGradient"] = colourGradient;
 	result["stopTime"] = stopTime;
 	result["directionScatter"] = directionScatter;
 	result["rotateTowardsMovement"] = rotateTowardsMovement;
@@ -419,17 +425,14 @@ void Particles::updateParticles(float time)
 				particle.angle = particle.vel.xy().angle();
 			}
 
-			particle.scale = scaleCurve.evaluate(particle.time / particle.ttl);
-
-			if (fadeInTime > 0.000001f || fadeOutTime > 0.00001f) {
-				const float alpha = clamp(std::min(particle.time / fadeInTime, (particle.ttl - particle.time) / fadeOutTime), 0.0f, 1.0f);
-				sprites[i].getColour().a = alpha;
-			}
+			const float t = particle.time / particle.ttl;
+			particle.scale = scaleCurve.evaluate(t);
 
 			sprites[i]
 				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
 				.setRotation(particle.angle)
 				.setScale(particle.scale)
+				.setColour(colourGradient.evaluate(t))
 				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
 		}
 	}

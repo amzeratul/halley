@@ -4,6 +4,7 @@
 #include "halley/time/halleytime.h"
 #include "halley/maths/interpolation_curve.h"
 #include "animation_player.h"
+#include "halley/maths/colour_gradient.h"
 
 namespace Halley {
 	class Random;
@@ -119,8 +120,7 @@ namespace Halley {
 		Vector3f acceleration;
 		Vector3f velScale;
 		InterpolationCurve scaleCurve;
-		float fadeInTime = 0;
-		float fadeOutTime = 0;
+		ColourGradient colourGradient;
 		float stopTime = 0;
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;

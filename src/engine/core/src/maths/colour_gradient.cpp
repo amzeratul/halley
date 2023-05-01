@@ -1,6 +1,7 @@
 #include "halley/maths/colour_gradient.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/config_node_serializer.h"
+#include "halley/maths/line.h"
 
 using namespace Halley;
 
@@ -16,6 +17,35 @@ ColourGradient::ColourGradient(const ConfigNode& node)
 		colours = node["colours"].asVector<Colour4f>({});
 	} else {
 		makeDefault();
+	}
+}
+
+ColourGradient::ColourGradient(float fadeInEnd, float fadeOutStart)
+{
+	float fadeInValue = 1.0f;
+	float fadeOutValue = 1.0f;
+	if (fadeInEnd < 0) {
+		fadeInEnd = 0;
+	} else if (fadeInEnd > 1) {
+		fadeInValue = 1.0f / fadeInEnd;
+		fadeInEnd = 1.0f;
+	}
+	if (fadeOutStart > 1) {
+		fadeOutStart = 1;
+	} else if (fadeOutStart < 0) {
+		fadeOutValue = 1.0f / (1 - fadeOutStart);
+		fadeOutStart = 0;
+	}
+
+	if (fadeInEnd > fadeOutStart) {
+		const auto a = Line(Vector2f(0, 0), Vector2f(fadeInEnd, fadeInValue).normalized());
+		const auto b = Line(Vector2f(1, 0), Vector2f(fadeOutStart - 1.0f, fadeOutValue).normalized());
+		if (const auto mid = a.intersection(b)) {
+			add(Colour4f(1, 1, 1, mid->x), mid->y);
+		}
+	} else {
+		add(Colour4f(1, 1, 1, fadeInValue), fadeInEnd);
+		add(Colour4f(1, 1, 1, fadeOutValue), fadeOutStart);
 	}
 }
 
@@ -60,12 +90,12 @@ void ColourGradient::deserialize(Deserializer& s)
 Colour4f ColourGradient::evaluate(float val) const
 {
 	if (positions.empty()) {
-		return Colour4f(1, 1, 1, 1);
+		return Colour4f(0, 0, 0, 0);
 	}
 
 	// Before first point
 	if (val < positions.front()) {
-		return colours.front();
+		return colours.front().multiplyAlpha(std::pow(val / positions.front(), 2.2f));
 	}
 
 	// Between two positions
@@ -87,7 +117,7 @@ Colour4f ColourGradient::evaluate(float val) const
 	}
 
 	// After last point
-	return colours.back();
+	return colours.back().multiplyAlpha(std::pow((1.0f - val) / (1.0f - positions.back()), 2.2f));
 }
 
 void ColourGradient::render(Image& image)
@@ -104,4 +134,16 @@ void ColourGradient::render(Image& image)
 		}
 	}
 	image.preMultiply();
+}
+
+void ColourGradient::clear()
+{
+	colours.clear();
+	positions.clear();
+}
+
+void ColourGradient::add(Colour4f col, float position)
+{
+	colours.push_back(col);
+	positions.push_back(position);
 }

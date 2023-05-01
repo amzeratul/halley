@@ -1135,14 +1135,12 @@ public:
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Altitude"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("altitude", {"0", "0"}), ComponentEditorLabelCreation::Never));
-		dynamicsContainer->add(context.makeLabel("TTL"));
+		dynamicsContainer->add(context.makeLabel("Lifetime"));
 		dynamicsContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("ttl", { "1", "1" }), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Colour"));
+		dynamicsContainer->add(context.makeField("Halley::ColourGradient", pars.withSubKey("colourGradient", ""), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Scale"));
 		dynamicsContainer->add(context.makeField("Halley::InterpolationCurve", pars.withSubKey("scaleCurve", "1"), ComponentEditorLabelCreation::Never));
-		dynamicsContainer->add(context.makeLabel("Fade-in Time"));
-		dynamicsContainer->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
-		dynamicsContainer->add(context.makeLabel("Fade-out Time"));
-		dynamicsContainer->add(context.makeField("float", pars.withSubKey("fadeOutTime", "0"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Acceleration"));
 		dynamicsContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Speed Damp"));
@@ -1202,6 +1200,17 @@ public:
 			node.removeKey("startScale");
 			node.removeKey("endScale");
 			node["scaleCurve"] = scaleCurve.toConfigNode();
+		}
+
+		if (node.hasKey("fadeInTime") || node.hasKey("fadeOutTime")) {
+			const auto ttl = node["ttl"].asFloatRange({});
+			const auto fadeInTime = node["fadeInTime"].asFloat(0.0f);
+			const auto fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
+			const float avgTTL = std::max((ttl.start + ttl.end) * 0.5f, 0.1f);
+			const auto colourGradient = ColourGradient(fadeInTime / avgTTL, 1.0f - fadeOutTime / avgTTL);
+			node.removeKey("fadeInTime");
+			node.removeKey("fadeOutTime");
+			node["colourGradient"] = colourGradient.toConfigNode();
 		}
 	}
 
