@@ -1,5 +1,7 @@
 #include "gradient_editor.h"
 
+#include "src/ui/colour_picker.h"
+
 using namespace Halley;
 
 GradientEditorButton::GradientEditorButton(UIFactory& factory, ColourGradient gradient, Callback callback)
@@ -223,18 +225,41 @@ std::optional<size_t> GradientEditor::getAnchorUnderMouse(Vector2f mousePos) con
 
 void GradientEditor::createAnchor(Vector2f mousePos)
 {
-	// TODO
+	const auto gradientBox = getGradientBox();
+	const auto pos = clamp((mousePos.x - gradientBox.getLeft()) / gradientBox.getWidth(), 0.0f, 1.0f);
+
+	for (size_t i = 0; i < gradient.positions.size(); ++i) {
+		if (pos < gradient.positions[i]) {
+			insertAnchorAt(pos, i);
+			return;
+		}
+	}
+	insertAnchorAt(pos, gradient.positions.size());
+}
+
+void GradientEditor::insertAnchorAt(float pos, size_t idx)
+{
+	const auto colour = gradient.evaluate(pos);
+
+	gradient.positions.insert(gradient.positions.begin() + idx, pos);
+	gradient.colours.insert(gradient.colours.begin() + idx, colour);
+	holdingAnchor = idx;
 }
 
 void GradientEditor::editAnchor(size_t idx)
 {
-	// TODO
+	getRoot()->addChild(std::make_shared<ColourPicker>(factory, gradient.colours[idx], [=] (Colour4f col, bool final)
+	{
+		if (final) {
+			gradient.colours[idx] = col;
+		}
+	}));
 }
 
 void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 {
 	const auto gradientBox = getGradientBox();
-	const auto pos = (mousePos.x - gradientBox.getLeft()) / gradientBox.getWidth();
+	const auto pos = clamp((mousePos.x - gradientBox.getLeft()) / gradientBox.getWidth(), 0.0f, 1.0f);
 
 	gradient.positions[idx] = pos;
 
@@ -248,4 +273,6 @@ void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 		std::swap(gradient.colours[idx], gradient.colours[idx + 1]);
 		++idx;
 	}
+
+	holdingAnchor = idx;
 }

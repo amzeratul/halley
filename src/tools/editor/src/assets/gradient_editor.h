@@ -83,6 +83,7 @@ namespace Halley {
         std::optional<size_t> getAnchorUnderMouse(Vector2f mousePos) const;
 
         void createAnchor(Vector2f mousePos);
+        void insertAnchorAt(float pos, size_t idx);
         void editAnchor(size_t idx);
         void dragAnchor(size_t idx, Vector2f mousePos);
     };
