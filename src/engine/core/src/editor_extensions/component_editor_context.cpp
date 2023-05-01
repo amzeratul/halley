@@ -5,12 +5,13 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
+ComponentEditorContext::ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources, const HalleyAPI* api)
 	: projectWindow(projectWindow)
 	, entityEditorFactory(&entityEditorFactory)
 	, entityEditor(entityEditor)
 	, factory(&factory)
 	, gameResources(gameResources)
+	, api(api)
 {
 }
 
@@ -18,6 +19,12 @@ Resources& ComponentEditorContext::getGameResources() const
 {
 	Expects(gameResources != nullptr);
 	return *gameResources;
+}
+
+const HalleyAPI& ComponentEditorContext::getAPI() const
+{
+	Expects(api != nullptr);
+	return *api;
 }
 
 IProjectWindow& ComponentEditorContext::getProjectWindow() const

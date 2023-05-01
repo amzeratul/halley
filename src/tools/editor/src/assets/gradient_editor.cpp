@@ -4,14 +4,16 @@
 
 using namespace Halley;
 
-GradientEditorButton::GradientEditorButton(UIFactory& factory, ColourGradient gradient, Callback callback)
-	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png"))
+GradientEditorButton::GradientEditorButton(UIFactory& factory, VideoAPI& video, ColourGradient gradient, Callback callback)
+	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png", "Halley/SpriteSlicedMask"))
 	, factory(factory)
+	, video(video)
 	, callback(std::move(callback))
 	, gradient(std::move(gradient))
 {
 	setMinSize(Vector2f(40, 22));
 	setInteractWithMouse(true);
+	updateGradient();
 }
 
 void GradientEditorButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
@@ -20,17 +22,24 @@ void GradientEditorButton::pressMouse(Vector2f mousePos, int button, KeyMods key
 		getRoot()->addChild(std::make_shared<GradientEditorWindow>(factory, gradient, [=] (ColourGradient gradient)
 		{
 			this->gradient = std::move(gradient);
+			updateGradient();
 			if (callback) {
 				callback(this->gradient);
 			}
-			updateGradient();
 		}));
 	}
 }
 
 void GradientEditorButton::updateGradient()
 {
-	// TODO
+	const auto size = Vector2i(128, 1);
+	if (!image || image->getSize() != size) {
+		image = std::make_shared<Image>(Image::Format::RGBA, size);
+	}
+	gradient.render(*image);
+
+	gradientImage.setImage(factory.getResources(), video, image);
+	getSprite().getMutableMaterial().set(1, gradientImage.getMaterial().getTexture(0));
 }
 
 
@@ -82,11 +91,16 @@ void GradientEditorWindow::onMakeUI()
 	{
 		cancel();
 	});
+
+	layout();
+	gradientEditor = getWidgetAs<GradientEditor>("gradientEditor");
+	gradientEditor->setGradient(gradient);
 }
 
 void GradientEditorWindow::accept()
 {
 	if (callback) {
+		gradient = gradientEditor->getGradient();
 		callback(gradient);
 	}
 	destroy();
@@ -140,6 +154,7 @@ void GradientEditor::draw(UIPainter& painter) const
 void GradientEditor::setGradient(ColourGradient gradient)
 {
 	this->gradient = std::move(gradient);
+	updateGradient();
 }
 
 const ColourGradient& GradientEditor::getGradient() const
@@ -291,8 +306,9 @@ void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 void GradientEditor::updateGradient()
 {
 	const auto rect = getGradientBox();
-	if (!image || image->getSize() != Vector2i(rect.getSize())) {
-		image = std::make_shared<Image>(Image::Format::RGBA, Vector2i(static_cast<int>(rect.getWidth()), 1));
+	const auto size = Vector2i(static_cast<int>(rect.getWidth()), 1);
+	if (!image || image->getSize() != size) {
+		image = std::make_shared<Image>(Image::Format::RGBA, size);
 	}
 	gradient.render(*image);
 

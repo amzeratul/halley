@@ -786,9 +786,10 @@ bool EntityEditorFactoryRoot::isEmpty() const
 	return fieldFactories.empty();
 }
 
-void EntityEditorFactoryRoot::setGameResources(Resources& resources)
+void EntityEditorFactoryRoot::setGameResources(Resources& resources, const HalleyAPI& api)
 {
 	gameResources = &resources;
+	this->api = &api;
 }
 
 
@@ -890,5 +891,5 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 
 std::unique_ptr<ComponentEditorContext> EntityEditorFactory::makeContext(IEntityEditorCallbacks* callbacks)
 {
-	return std::make_unique<ComponentEditorContext>(root.projectWindow, *this, callbacks, root.factory, root.gameResources);
+	return std::make_unique<ComponentEditorContext>(root.projectWindow, *this, callbacks, root.factory, root.gameResources, root.api);
 }

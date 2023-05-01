@@ -124,7 +124,7 @@ namespace Halley {
 	public:
 		EntityEditorFactoryRoot(ProjectWindow& projectWindow, UIFactory& factory);
 		
-		void setGameResources(Resources& resources);
+		void setGameResources(Resources& resources, const HalleyAPI& api);
 
 		void addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void addStandardFieldFactories();
@@ -135,6 +135,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		UIFactory& factory;
 		Resources* gameResources = nullptr;
+		const HalleyAPI* api = nullptr;
 		HashMap<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 	};
 

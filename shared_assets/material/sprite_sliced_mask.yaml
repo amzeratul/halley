@@ -1,0 +1,13 @@
+---
+name: Halley/SpriteSlicedMask
+base: sprite_base.yaml
+textures:
+  - image: sampler2D
+  - maskedImage: sampler2D
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite_sliced_mask.pixel.hlsl
+...

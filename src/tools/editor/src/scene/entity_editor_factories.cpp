@@ -1063,7 +1063,7 @@ public:
 		auto data = pars.data;
 		auto container = std::make_shared<UISizer>();
 
-		auto button = std::make_shared<GradientEditorButton>(context.getUIFactory(), ColourGradient(data.getFieldData()), [&context, data](ColourGradient curve)
+		auto button = std::make_shared<GradientEditorButton>(context.getUIFactory(), *context.getAPI().video, ColourGradient(data.getFieldData()), [&context, data](ColourGradient curve)
 		{
 			data.getWriteableFieldData() = curve.toConfigNode();
 			context.onEntityUpdated();

@@ -5,20 +5,26 @@
 #include "src/ui/popup_window.h"
 
 namespace Halley {
-    
+
+    class GradientEditor;
+
     class GradientEditorButton : public UIImage {
     public:
         using Callback = std::function<void(ColourGradient)>;
 
-    	GradientEditorButton(UIFactory& factory, ColourGradient gradient, Callback callback);
+    	GradientEditorButton(UIFactory& factory, VideoAPI& video, ColourGradient gradient, Callback callback);
         
     protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
     private:
         UIFactory& factory;
+        VideoAPI& video;
         Callback callback;
         ColourGradient gradient;
+
+        std::shared_ptr<Image> image;
+        Sprite gradientImage;
 
         void updateGradient();
     };
@@ -40,6 +46,7 @@ namespace Halley {
         UIFactory& factory;
         Callback callback;
         ColourGradient gradient;
+        std::shared_ptr<GradientEditor> gradientEditor;
 
         void accept();
         void cancel();

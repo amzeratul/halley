@@ -6,6 +6,7 @@
 #include "halley/maths/uuid.h"
 
 namespace Halley {
+	class HalleyAPI;
 	class IProjectWindow;
 	class ISceneEditorWindow;
 	class IUISizer;
@@ -66,10 +67,11 @@ namespace Halley {
 	
     class ComponentEditorContext {
     public:
-	    ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
+	    ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources, const HalleyAPI* api);
 
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
+		const HalleyAPI& getAPI() const;
 		IProjectWindow& getProjectWindow() const;
         void onEntityUpdated() const;
 	    void setTool(const String& tool, const String& componentName, const String& fieldName) const;
@@ -88,5 +90,6 @@ namespace Halley {
         IEntityEditorCallbacks* entityEditor = nullptr;
         UIFactory* factory = nullptr;
         Resources* gameResources = nullptr;
+		const HalleyAPI* api = nullptr;
     };
 }

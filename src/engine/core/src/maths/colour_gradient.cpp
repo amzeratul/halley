@@ -93,4 +93,5 @@ void ColourGradient::render(Image& image)
 			dst[x + y * size.x] = col;
 		}
 	}
+	image.preMultiply();
 }
