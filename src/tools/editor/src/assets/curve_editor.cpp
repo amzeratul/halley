@@ -250,7 +250,7 @@ void CurveEditor::drawLine(Painter& painter) const
 			for (int j = 0; j < nSteps; ++j) {
 				const float t = static_cast<float>(j) / static_cast<float>(nSteps);
 				const float x = lerp(t0, t1, t);
-				line.push_back(curveToMouseSpace(Vector2f(x, curve.evaluate(x))));
+				line.push_back(curveToMouseSpace(Vector2f(x, curve.evaluateRaw(x))));
 			}
 		}
 		line.push_back(p);
