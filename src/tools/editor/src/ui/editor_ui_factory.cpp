@@ -200,7 +200,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeGradientEditor(const ConfigNode& 
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("gradientEditor"), getStyleSheet());
 
-	auto widget = std::make_shared<GradientEditor>(*this, id, style);
+	auto widget = std::make_shared<GradientEditor>(*this, id, style, *api.video);
 
 	return widget;
 }

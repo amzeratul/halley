@@ -49,7 +49,7 @@ namespace Halley {
     public:
         using Callback = std::function<void(const ColourGradient&)>;
 
-        GradientEditor(UIFactory& factory, String id, UIStyle style);
+        GradientEditor(UIFactory& factory, String id, UIStyle style, VideoAPI& videoAPI);
 
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
@@ -72,12 +72,16 @@ namespace Halley {
         UIFactory& factory;
         ColourGradient gradient;
         Callback callback;
+        VideoAPI& video;
 
     	Sprite anchorSprite;
         Sprite anchorColourSprite;
 
         std::optional<size_t> currentAnchor;
         std::optional<size_t> holdingAnchor;
+
+        std::shared_ptr<Image> image;
+        Sprite gradientImage;
 
         Rect4f getGradientBox() const;
         std::optional<size_t> getAnchorUnderMouse(Vector2f mousePos) const;
@@ -86,5 +90,7 @@ namespace Halley {
         void insertAnchorAt(float pos, size_t idx);
         void editAnchor(size_t idx);
         void dragAnchor(size_t idx, Vector2f mousePos);
+
+        void updateGradient();
     };
 }

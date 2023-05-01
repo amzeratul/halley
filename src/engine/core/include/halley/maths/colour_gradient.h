@@ -3,6 +3,7 @@
 #include "halley/data_structures/vector.h"
 #include "colour.h"
 #include "halley/bytes/config_node_serializer_base.h"
+#include "halley/file_formats/image.h"
 
 namespace Halley {
 	class EntitySerializationContext;
@@ -27,7 +28,9 @@ namespace Halley {
         void deserialize(Deserializer& s);
 
         Colour4f evaluate(float t) const;
-    };
+
+		void render(Image& image);
+	};
 
 	template<>
 	class ConfigNodeSerializer<ColourGradient> {

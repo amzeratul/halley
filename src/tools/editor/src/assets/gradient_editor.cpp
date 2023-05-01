@@ -99,23 +99,30 @@ void GradientEditorWindow::cancel()
 
 
 
-GradientEditor::GradientEditor(UIFactory& factory, String id, UIStyle style)
+GradientEditor::GradientEditor(UIFactory& factory, String id, UIStyle style, VideoAPI& video)
 	: UIWidget(std::move(id), Vector2f(), UISizer())
 	, factory(factory)
+	, video(video)
 {
 	setInteractWithMouse(true);
 
 	anchorSprite = style.getSprite("anchor");
 	anchorColourSprite = style.getSprite("anchorColour");
+
+	updateGradient();
 }
 
 void GradientEditor::update(Time t, bool moved)
 {
+	const auto gradientBox = getGradientBox();
+	gradientImage.setPosition(gradientBox.getTopLeft()).setSize(gradientBox.getSize());
 }
 
 void GradientEditor::draw(UIPainter& painter) const
 {
 	const auto gradientBox = getGradientBox();
+
+	painter.draw(gradientImage);
 
 	for (size_t i = 0; i < gradient.positions.size(); ++i) {
 		const auto pos = Vector2f(lerp(gradientBox.getLeft(), gradientBox.getRight(), gradient.positions[i]), gradientBox.getTop());
@@ -244,6 +251,8 @@ void GradientEditor::insertAnchorAt(float pos, size_t idx)
 	gradient.positions.insert(gradient.positions.begin() + idx, pos);
 	gradient.colours.insert(gradient.colours.begin() + idx, colour);
 	holdingAnchor = idx;
+
+	updateGradient();
 }
 
 void GradientEditor::editAnchor(size_t idx)
@@ -252,6 +261,7 @@ void GradientEditor::editAnchor(size_t idx)
 	{
 		if (final) {
 			gradient.colours[idx] = col;
+			updateGradient();
 		}
 	}));
 }
@@ -275,4 +285,16 @@ void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 	}
 
 	holdingAnchor = idx;
+	updateGradient();
+}
+
+void GradientEditor::updateGradient()
+{
+	const auto rect = getGradientBox();
+	if (!image || image->getSize() != Vector2i(rect.getSize())) {
+		image = std::make_shared<Image>(Image::Format::RGBA, Vector2i(static_cast<int>(rect.getWidth()), 1));
+	}
+	gradient.render(*image);
+
+	gradientImage.setImage(factory.getResources(), video, image);
 }

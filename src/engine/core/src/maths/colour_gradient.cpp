@@ -80,3 +80,17 @@ Colour4f ColourGradient::evaluate(float val) const
 	// After last point
 	return colours.back();
 }
+
+void ColourGradient::render(Image& image)
+{
+	const auto size = image.getSize();
+	auto dst = image.getPixels4BPP();
+
+	for (int x = 0; x < size.x; ++x) {
+		const float pos = static_cast<float>(x) / static_cast<float>(size.x - 1);
+		const auto col = Image::convertColourToInt(evaluate(pos));
+		for (int y = 0; y < size.y; ++y) {
+			dst[x + y * size.x] = col;
+		}
+	}
+}
