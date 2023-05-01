@@ -116,6 +116,7 @@ namespace Halley {
 		Range<float> speed;
 		Range<float> azimuth;
 		Range<float> altitude;
+		Range<float> initialScale;
 		float speedDamp = 0;
 		Vector3f acceleration;
 		Vector3f velScale;

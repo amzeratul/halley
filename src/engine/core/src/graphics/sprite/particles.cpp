@@ -30,6 +30,8 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	} else {
 		ttl = node["ttl"].asFloatRange(Range<float>(1.0f, 1.0f));
 	}
+	ttl.start = std::max(ttl.start, 0.1f);
+	ttl.end = std::max(ttl.start, ttl.end);
 
 	if (node.hasKey("speedScatter")) {
 		// Legacy
@@ -72,6 +74,7 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 		colourGradient = ColourGradient(node["colourGradient"]);
 	}
 
+	initialScale = node["initialScale"].asFloatRange(Range<float>(1.0f, 1.0f));
 	speedDamp = node["speedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
 	stopTime = node["stopTime"].asFloat(0.0f);
@@ -98,6 +101,7 @@ ConfigNode Particles::toConfigNode() const
 	result["acceleration"] = acceleration;
 	result["azimuth"] = azimuth;
 	result["altitude"] = altitude;
+	result["initialScale"] = initialScale;
 	result["scaleCurve"] = scaleCurve;
 	result["colourGradient"] = colourGradient;
 	result["stopTime"] = stopTime;
@@ -372,7 +376,7 @@ void Particles::initializeParticle(size_t index, float time)
 	particle.ttl = rng->getFloat(ttl);
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
-	particle.scale = scaleCurve.evaluate(0);
+	particle.scale = rng->getFloat(initialScale);
 	
 	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
 
@@ -426,12 +430,11 @@ void Particles::updateParticles(float time)
 			}
 
 			const float t = particle.time / particle.ttl;
-			particle.scale = scaleCurve.evaluate(t);
 
 			sprites[i]
 				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
 				.setRotation(particle.angle)
-				.setScale(particle.scale)
+				.setScale(scaleCurve.evaluate(t) * particle.scale)
 				.setColour(colourGradient.evaluate(t))
 				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
 		}

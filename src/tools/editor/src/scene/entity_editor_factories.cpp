@@ -1127,9 +1127,11 @@ public:
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
 		initialContainer->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Scale"));
+		initialContainer->add(context.makeField("Halley::Vector2f", pars.withSubKey("initialScale", {"1", "1"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Speed"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("speed", { "100", "100" }), ComponentEditorLabelCreation::Never));
-		initialContainer->add(context.makeLabel("Velocity Scale"));
+		initialContainer->add(context.makeLabel("Velocity Mult"));
 		initialContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("velScale", {"1", "1", "1"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Azimuth"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
@@ -1169,7 +1171,10 @@ public:
 		if (node.hasKey("ttlScatter")) {
 			const auto legacyTtl = node["ttl"].asFloat(1.0f);
 			const auto ttlScatter = node["ttlScatter"].asFloat(0.2f);
-			node["ttl"] = Range<float>(legacyTtl - ttlScatter, legacyTtl + ttlScatter);
+			auto ttl = Range<float>(legacyTtl - ttlScatter, legacyTtl + ttlScatter);
+			ttl.start = std::max(ttl.start, 0.1f);
+			ttl.end = std::max(ttl.start, ttl.end);
+			node["ttl"] = ttl;
 			node.removeKey("ttlScatter");
 		}
 
