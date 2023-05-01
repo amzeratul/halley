@@ -86,7 +86,9 @@ namespace Halley {
 
         std::optional<size_t> currentAnchor;
         std::optional<size_t> holdingAnchor;
+        bool anchorAlive = true;
 
+        ColourGradient gradientTmp;
         std::shared_ptr<Image> image;
         Sprite gradientImage;
 
@@ -96,6 +98,7 @@ namespace Halley {
         void createAnchor(Vector2f mousePos);
         void insertAnchorAt(float pos, size_t idx);
         void editAnchor(size_t idx);
+        void deleteAnchor(size_t idx);
         void dragAnchor(size_t idx, Vector2f mousePos);
 
         void updateGradient();

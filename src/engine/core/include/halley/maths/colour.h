@@ -250,6 +250,16 @@ namespace Halley {
 			}
 		}
 
+		[[nodiscard]] constexpr Colour4 applyGamma(T gamma) const
+		{
+			return Colour4(std::pow(r, gamma), std::pow(g, gamma), std::pow(b, gamma), a);
+		}
+
+		[[nodiscard]] constexpr Colour4 applyGammaAlpha(T gamma) const
+		{
+			return Colour4(r, g, b, std::pow(a, gamma));
+		}
+
 		[[nodiscard]] constexpr float getLuma() const
 		{
 			return 0.212f * r + 0.701f * g + 0.087f * b;

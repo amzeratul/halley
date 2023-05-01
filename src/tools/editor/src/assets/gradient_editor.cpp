@@ -139,6 +139,10 @@ void GradientEditor::draw(UIPainter& painter) const
 	painter.draw(gradientImage);
 
 	for (size_t i = 0; i < gradient.positions.size(); ++i) {
+		if (i == holdingAnchor && !anchorAlive) {
+			continue;
+		}
+
 		const auto pos = Vector2f(lerp(gradientBox.getLeft(), gradientBox.getRight(), gradient.positions[i]), gradientBox.getTop());
 		auto anchor = anchorSprite.clone().setPosition(pos);
 		if (i == currentAnchor) {
@@ -191,6 +195,7 @@ void GradientEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	if (button == 0) {
 		if (currentAnchor) {
 			holdingAnchor = currentAnchor;
+			anchorAlive = true;
 		} else {
 			createAnchor(mousePos);
 		}
@@ -204,6 +209,9 @@ void GradientEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 void GradientEditor::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0) {
+		if (!anchorAlive) {
+			deleteAnchor(*holdingAnchor);
+		}
 		holdingAnchor = {};
 	}
 }
@@ -281,10 +289,19 @@ void GradientEditor::editAnchor(size_t idx)
 	}));
 }
 
+void GradientEditor::deleteAnchor(size_t idx)
+{
+	gradient.positions.erase(gradient.positions.begin() + idx);
+	gradient.colours.erase(gradient.colours.begin() + idx);
+}
+
 void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 {
 	const auto gradientBox = getGradientBox();
 	const auto pos = clamp((mousePos.x - gradientBox.getLeft()) / gradientBox.getWidth(), 0.0f, 1.0f);
+
+	const auto verticalBounds = Range<float>(gradientBox.getTop() - 30.0f, gradientBox.getTop() + 6.0f);
+	anchorAlive = verticalBounds.contains(mousePos.y);
 
 	gradient.positions[idx] = pos;
 
@@ -305,12 +322,18 @@ void GradientEditor::dragAnchor(size_t idx, Vector2f mousePos)
 
 void GradientEditor::updateGradient()
 {
+	gradientTmp = gradient;
+	if (holdingAnchor && !anchorAlive) {
+		gradientTmp.positions.erase(gradientTmp.positions.begin() + *holdingAnchor);
+		gradientTmp.colours.erase(gradientTmp.colours.begin() + *holdingAnchor);
+	}
+
 	const auto rect = getGradientBox();
 	const auto size = Vector2i(static_cast<int>(rect.getWidth()), 1);
 	if (!image || image->getSize() != size) {
 		image = std::make_shared<Image>(Image::Format::RGBA, size);
 	}
-	gradient.render(*image);
+	gradientTmp.render(*image);
 
 	gradientImage.setImage(factory.getResources(), video, image);
 }

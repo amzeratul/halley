@@ -76,6 +76,10 @@ float InterpolationCurve::evaluate(float val) const
 
 float InterpolationCurve::evaluateRaw(float val) const
 {
+	if (points.empty()) {
+		return 1.0f;
+	}
+
 	// Before first point
 	if (val < points.front().x) {
 		return points.front().y;

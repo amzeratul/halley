@@ -59,6 +59,10 @@ void ColourGradient::deserialize(Deserializer& s)
 
 Colour4f ColourGradient::evaluate(float val) const
 {
+	if (positions.empty()) {
+		return Colour4f(1, 1, 1, 1);
+	}
+
 	// Before first point
 	if (val < positions.front()) {
 		return colours.front();
@@ -73,7 +77,12 @@ Colour4f ColourGradient::evaluate(float val) const
 			const float t = (val - prevX) / (nextX - prevX);
 			assert(t >= 0.0f);
 			assert(t <= 1.0f);
-			return lerp(colours[i - 1], colours[i], t);
+			constexpr bool useGamma = true;
+			if (useGamma) {
+				return lerp(colours[i - 1].applyGammaAlpha(1.0f / 2.2f), colours[i].applyGammaAlpha(1.0f / 2.2f), t).applyGammaAlpha(2.2f);
+			} else {
+				return lerp(colours[i - 1], colours[i], t);
+			}
 		}
 	}
 
@@ -85,6 +94,7 @@ void ColourGradient::render(Image& image)
 {
 	const auto size = image.getSize();
 	auto dst = image.getPixels4BPP();
+	image.setFormat(Image::Format::RGBA);
 
 	for (int x = 0; x < size.x; ++x) {
 		const float pos = static_cast<float>(x) / static_cast<float>(size.x - 1);
