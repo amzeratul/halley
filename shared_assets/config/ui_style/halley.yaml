@@ -442,5 +442,7 @@ uiStyle:
 
   gradientEditor:
     background: { img: $ui_window, colour: $ui_popupWindow }
+    anchor: { img: ui/gradient_anchor.png, colour: $ui_listBackground }
+    anchorColour: { img: ui/gradient_anchor_colour.png, colour: "#FFFFFF" }
 
 ...

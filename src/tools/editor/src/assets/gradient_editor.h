@@ -62,6 +62,7 @@ namespace Halley {
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
+        void onMouseLeft(Vector2f mousePos) override;
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
         void releaseMouse(Vector2f mousePos, int button) override;
         bool isFocusLocked() const override;
@@ -71,5 +72,18 @@ namespace Halley {
         UIFactory& factory;
         ColourGradient gradient;
         Callback callback;
+
+    	Sprite anchorSprite;
+        Sprite anchorColourSprite;
+
+        std::optional<size_t> currentAnchor;
+        std::optional<size_t> holdingAnchor;
+
+        Rect4f getGradientBox() const;
+        std::optional<size_t> getAnchorUnderMouse(Vector2f mousePos) const;
+
+        void createAnchor(Vector2f mousePos);
+        void editAnchor(size_t idx);
+        void dragAnchor(size_t idx, Vector2f mousePos);
     };
 }
