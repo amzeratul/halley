@@ -228,7 +228,7 @@ Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() 
 }
 
 namespace {
-	constexpr static size_t maxMsgParams = 4;
+	constexpr static size_t maxMsgParams = 5;
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfiguration(const ScriptGraphNode& node) const
@@ -238,7 +238,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfigu
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
-		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return gsl::span<const PinType>(data).subspan(0, 2 + std::min(msgType.members.size(), maxMsgParams));
 }
 
@@ -316,7 +316,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfigu
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return gsl::span<const PinType>(data).subspan(0, 3 + std::min(msgType.members.size(), maxMsgParams));
 }
 
