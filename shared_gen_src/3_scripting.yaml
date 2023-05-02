@@ -43,4 +43,14 @@ component:
   - id:
       type: 'Halley::String'
 
+---
+
+component:
+  name: ScriptTagTarget
+  members:
+  - tags:
+      type: 'Halley::Vector<Halley::String>'
+      canEdit: true
+      canSave: false
+
 ...
