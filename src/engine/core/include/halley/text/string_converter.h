@@ -127,6 +127,26 @@ namespace Halley
 				return T(str);
 			}
 		}
+
+		template<typename T>
+		static std::optional<T> tryFromString(const String& str)
+		{
+			if constexpr (std::is_enum_v<T>) {
+				EnumNames<T> n;
+				auto names = n();
+				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
+				if (res == std::end(names)) {
+					return std::nullopt;
+				}
+				return T(res - std::begin(names));
+			} else if constexpr (std::is_integral_v<T>) {
+				return str.isInteger() ? std::make_optional(str.toInteger()) : std::nullopt;
+			} else if constexpr (std::is_floating_point_v<T>) {
+				return str.isNumber() ? std::make_optional(str.toFloat()) : std::nullopt;
+			} else {
+				return T(str);
+			}
+		}
 	};
 
 
@@ -143,6 +163,14 @@ namespace Halley
 		T operator()(const String& s) const
 		{
 			return UserConverter::fromString<T>(s);
+		}
+	};
+
+	template <typename T>
+	struct TryFromStringConverter {
+		std::optional<T> operator()(const String& s) const
+		{
+			return UserConverter::tryFromString<T>(s);
 		}
 	};
 
@@ -239,6 +267,12 @@ namespace Halley
 	T fromString(const String& value)
 	{
 		return FromStringConverter<T>()(value);
+	}
+
+	template <typename T>
+	std::optional<T> tryFromString(const String& value)
+	{
+		return TryFromStringConverter<T>()(value);
 	}
 
 
