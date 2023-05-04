@@ -20,10 +20,8 @@ String EntityId::toString() const
 
 void EntityId::serialize(Serializer& s) const
 {
-	auto* world = s.getOptions().world;
-	if (world) {
-		auto e = world->getEntity(*this);
-		if (e.isValid()) {
+	if (auto* world = s.getOptions().world) {
+		if (const auto e = world->tryGetEntity(*this); e.isValid()) {
 			s << e.getInstanceUUID();
 		} else {
 			s << UUID();
