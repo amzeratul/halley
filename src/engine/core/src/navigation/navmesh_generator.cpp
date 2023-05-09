@@ -498,7 +498,8 @@ size_t NavmeshGenerator::split(Vector<NavmeshNode>& nodes, size_t idx, LineSegme
 	auto polys = node.polygon.splitConvexByLine(Line(splitBy.a, (splitBy.b - splitBy.a).normalized()));
 	for (const auto& p: polys) {
 		if (!p.isConvex()) {
-			Logger::logError("Convex polygon " + node.polygon.toString() + " somehow split in non-convex polygon " + p.toString());
+			return 1;
+			//Logger::logError("Convex polygon " + node.polygon.toString() + " somehow split in non-convex polygon " + p.toString());
 		}
 	}
 

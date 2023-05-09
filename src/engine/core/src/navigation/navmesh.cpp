@@ -862,7 +862,6 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Port
 {
 	const float epsilon = 0.01f;
 	Vector<std::deque<Vector2f>> chains;
-	
 	for (auto& conn: connections) {
 		const auto edge = polygons[conn.node].getEdge(conn.connectionIdx);
 
