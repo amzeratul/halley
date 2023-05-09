@@ -27,7 +27,7 @@ children:
     widget:
       class: curveEditor
       id: curveEditor
-      size: [400, 100]
+      size: [600, 202]
   - uuid: e6c3f59c-b496-47a8-a12f-ff024827adca
     sizer:
       columnProportions: []
