@@ -562,6 +562,9 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 				const float endLen = endDelta.length();
 				const auto endRay = Ray(startCol.value(), endDelta / endLen);
 				const auto endNode = endNavmesh.getNodeAt(startCol.value());
+				if (!endNode) {
+					break;
+				}
 				const auto [endCol, endDist] = endNavmesh.findRayCollision(endRay, endLen, endNode.value());
 
 				if (endCol) {
