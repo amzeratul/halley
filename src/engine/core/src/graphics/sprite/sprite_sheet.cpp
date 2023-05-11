@@ -123,6 +123,15 @@ const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
 	return texture;
 }
 
+const std::shared_ptr<const Texture>& SpriteSheet::getPaletteTexture() const
+{
+	Expects(resources != nullptr);
+	if (!paletteTexture) {
+		loadPaletteTexture(*resources);
+	}
+	return paletteTexture;
+}
+
 const SpriteSheetEntry& SpriteSheet::getSprite(std::string_view name) const
 {
 	const auto idx = getIndex(name);
@@ -225,6 +234,13 @@ void SpriteSheet::loadTexture(Resources& resources) const
 	texture = resources.get<Texture>(textureName);
 }
 
+void SpriteSheet::loadPaletteTexture(Resources& resources) const
+{
+	if (!paletteName.isEmpty()) {
+		paletteTexture = resources.get<Texture>(paletteName);
+	}
+}
+
 void SpriteSheet::assignIds()
 {
 #ifdef ENABLE_HOT_RELOAD
@@ -267,8 +283,13 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 
 	if (!result) {
 		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
-		if (!result->getDefinition().getTextures().empty()) {
-			result->set(0, getTexture());
+		const auto& textures = result->getDefinition().getTextures();
+		for (size_t i = 0; i < textures.size(); ++i) {
+			if (textures[i].defaultTextureName == "$palette") {
+				result->set(i, getPaletteTexture());
+			} else if (i == 0) {
+				result->set(i, getTexture());
+			}
 		}
 		materials[name] = result;
 	}
@@ -284,6 +305,16 @@ void SpriteSheet::setDefaultMaterialName(String materialName)
 const String& SpriteSheet::getDefaultMaterialName() const
 {
 	return defaultMaterialName;
+}
+
+void SpriteSheet::setPaletteName(String paletteName)
+{
+	this->paletteName = paletteName;
+}
+
+const String& SpriteSheet::getPaletteName() const
+{
+	return paletteName;
 }
 
 void SpriteSheet::clearMaterialCache() const
@@ -303,14 +334,29 @@ void SpriteSheet::reload(Resource&& resource)
 	spriteIdx = std::move(reloaded.spriteIdx);
 	frameTags = std::move(reloaded.frameTags);
 
+	bool updateTextures = false;
 	if (textureName != reloaded.textureName) {
 		textureName = std::move(reloaded.textureName);
 		texture = std::move(reloaded.texture);
+		updateTextures = true;
+	}
+	if (paletteName != reloaded.paletteName) {
+		paletteName = std::move(reloaded.paletteName);
+		paletteTexture = std::move(reloaded.paletteTexture);
+		updateTextures = true;
+	}
 
+	if (updateTextures) {
 		for (auto& material: materials) {
-			auto mat = material.second.lock();
-			if (mat) {
-				mat->set(0, texture);
+			if (auto mat = material.second.lock()) {
+				const auto& textures = mat->getDefinition().getTextures();
+				for (size_t i = 0; i < textures.size(); ++i) {
+					if (textures[i].defaultTextureName == "$palette") {
+						mat->set(i, getPaletteTexture());
+					} else if (i == 0) {
+						mat->set(i, getTexture());
+					}
+				}
 			}
 		}
 	}
@@ -360,6 +406,7 @@ void SpriteSheet::serialize(Serializer& s) const
 	s << spriteIdx;
 	s << frameTags;
 	s << defaultMaterialName;
+	s << paletteName;
 }
 
 void SpriteSheet::deserialize(Deserializer& s)
@@ -380,6 +427,9 @@ void SpriteSheet::deserialize(Deserializer& s)
 
 	if (v >= 1) {
 		s >> defaultMaterialName;
+	}
+	if (v >= 2) {
+		s >> paletteName;
 	}
 
 	assignIds();

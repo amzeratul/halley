@@ -118,6 +118,7 @@ namespace Halley
 		ConfigNode toConfigNode() const;
 		
 		const std::shared_ptr<const Texture>& getTexture() const;
+		const std::shared_ptr<const Texture>& getPaletteTexture() const;
 		const SpriteSheetEntry& getSprite(std::string_view name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
 		const SpriteSheetEntry* tryGetSprite(std::string_view name) const;
@@ -137,12 +138,15 @@ namespace Halley
 		void setTextureName(String name);
 
 		std::shared_ptr<Material> getMaterial(std::string_view name) const;
-		void setDefaultMaterialName(String materialName);
-		const String& getDefaultMaterialName() const;
 		void clearMaterialCache() const;
 
+		void setDefaultMaterialName(String materialName);
+		const String& getDefaultMaterialName() const;
+		void setPaletteName(String paletteName);
+		const String& getPaletteName() const;
+
 		std::unique_ptr<Image> generateAtlas(Vector<ImageData>& images, ConfigNode& spriteInfo, bool powerOfTwo);
-	
+
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;
@@ -153,7 +157,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 	private:
-		constexpr static int version = 1;
+		constexpr static int version = 2;
 		
 		Resources* resources = nullptr;
 
@@ -163,12 +167,15 @@ namespace Halley
 		Vector<SpriteSheetFrameTag> frameTags;
 
 		String textureName;
+		String paletteName;
 		mutable std::shared_ptr<const Texture> texture;
+		mutable std::shared_ptr<const Texture> paletteTexture;
 
 		String defaultMaterialName;
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
 
 		void loadTexture(Resources& resources) const;
+		void loadPaletteTexture(Resources& resources) const;
 		void assignIds();
 
 		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, ConfigNode& spriteInfo, bool powerOfTwo);

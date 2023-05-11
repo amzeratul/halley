@@ -252,10 +252,7 @@ void Animation::reload(Resource&& resource)
 void Animation::loadDependencies(ResourceLoader& loader)
 {
 	spriteSheet = loader.getResources().get<SpriteSheet>(spriteSheetName);
-
-	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
-	material = std::make_shared<Material>(matDef);
-	material->set(0, spriteSheet->getTexture());
+	material = spriteSheet->getMaterial(materialName);
 
 	for (auto& s: sequences) {
 		for (auto& f : s.frameDefinitions) {

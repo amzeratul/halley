@@ -420,11 +420,11 @@ Sprite& Sprite::setSprite(Resources& resources, std::string_view spriteSheetName
 	Expects (!spriteSheetName.empty());
 	Expects (!imageName.empty());
 
-	if (materialName == "") {
+	if (materialName.empty()) {
 		materialName = MaterialDefinition::defaultMaterial;
 	}
 	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
-	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
+	setMaterial(spriteSheet->getMaterial(materialName));
 	setSprite(spriteSheet->getSprite(imageName), true);
 		
 	return *this;

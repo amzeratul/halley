@@ -142,6 +142,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto size = atlasImage->getSize();
 	if (palette) {
 		meta.set("palette", palette.value());
+		spriteSheet->setPaletteName(palette.value());
 	}
 	if (!powerOfTwo) {
 		meta.set("powerOfTwo", false);

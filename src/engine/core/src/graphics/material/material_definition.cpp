@@ -183,7 +183,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 
 	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
 	for (auto& tex: textures) {
-		if (!tex.defaultTextureName.isEmpty()) {
+		if (!tex.defaultTextureName.isEmpty() && !tex.defaultTextureName.startsWith("$")) {
 			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
 		}
 	}
