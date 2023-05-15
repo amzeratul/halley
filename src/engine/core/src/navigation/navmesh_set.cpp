@@ -118,7 +118,11 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 
 std::optional<NavigationPath> NavmeshSet::pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const
 {
-	return navmeshes[regionId].pathfind(query);
+	auto result = navmeshes[regionId].pathfind(query);
+	if (result) {
+		result->regions.emplace_back(regionId);
+	}
+	return result;
 }
 
 std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal, NavigationQuery::PostProcessingType postProcessing) const

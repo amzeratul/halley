@@ -24,7 +24,7 @@ namespace Halley {
 		NavigationQuery query;
 
 		NavigationPath();
-		NavigationPath(const NavigationQuery& query, Vector<Vector2f> path = {}, Vector<RegionNode> regions = {});
+		NavigationPath(const NavigationQuery& query, Vector<Vector2f> path, Vector<RegionNode> regions = {});
 		explicit NavigationPath(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;

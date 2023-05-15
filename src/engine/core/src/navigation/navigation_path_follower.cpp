@@ -157,6 +157,20 @@ size_t NavigationPathFollower::getNextPathIdx() const
 	return nextPathIdx;
 }
 
+uint16_t NavigationPathFollower::getCurrentRegionId() const
+{
+	if (!path) {
+		return std::numeric_limits<uint16_t>::max();
+	}
+	if (path->regions.empty()) {
+		return std::numeric_limits<uint16_t>::max();
+	}
+	if (path->regions.size() == 1) {
+		return path->regions[0].regionNodeId;
+	}
+	return path->regions[nextRegionIdx - 1].regionNodeId;
+}
+
 bool NavigationPathFollower::isDone() const
 {
 	return !path;
