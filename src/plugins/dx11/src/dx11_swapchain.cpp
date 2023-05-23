@@ -36,6 +36,7 @@ void DX11SwapChain::waitForVsync()
 	IDXGIOutput* output = nullptr;
 	if (swapChain->GetContainingOutput(&output) == S_OK) {
 		output->WaitForVBlank();
+		output->Release();
 	}
 }
 
