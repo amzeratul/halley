@@ -624,6 +624,7 @@ public:
         EntryPointer special_end_item = new_buckets + static_cast<ptrdiff_t>(num_buckets + new_max_lookups - 1);
         for (EntryPointer it = new_buckets; it != special_end_item; ++it)
             it->distance_from_desired = -1;
+		new_buckets->isDefault = false;
         special_end_item->distance_from_desired = Entry::special_end_value;
         std::swap(entries, new_buckets);
         std::swap(num_slots_minus_one, num_buckets);
