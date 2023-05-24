@@ -39,8 +39,9 @@ namespace Halley {
 	};
 
 	struct NetworkSessionMessageHeader {
-		NetworkSessionMessageType type;
-		uint8_t srcPeerId;
-		uint8_t dstPeerId;
+		NetworkSessionMessageType type{};
+		uint8_t srcPeerId{};
+		uint8_t dstPeerId{};
+		uint8_t padding{};
 	};
 }
