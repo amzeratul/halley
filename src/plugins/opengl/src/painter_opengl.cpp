@@ -173,7 +173,7 @@ void PainterOpenGL::setViewPort(Rect4i rect)
 
 void PainterOpenGL::onUpdateProjection(Material& material, bool hashChanged)
 {
-	if (hashChanged) {
+	if (true || hashChanged) {
 		setMaterialData(material);
 	}
 }
