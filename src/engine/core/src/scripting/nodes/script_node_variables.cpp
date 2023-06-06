@@ -895,3 +895,124 @@ ConfigNode ScriptFromVector::doGetData(ScriptEnvironment& environment, const Scr
 }
 
 
+
+gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptInsertValueIntoMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Insert value " +
+		getConnectedNodeName(world, node, graph, 1) +
+		" into map with key " +
+		getConnectedNodeName(world, node, graph, 2);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Insert value ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" into map with key ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptInsertValueIntoMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Map (can be empty)";
+	}
+	else if (elementIdx == 1) {
+		return "Value";
+	}
+	else if (elementIdx == 2) {
+		return "Key";
+	}
+	else if (elementIdx == 3) {
+		return "Map";
+	}
+	else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptInsertValueIntoMap::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto map = readDataPin(environment, node, 0);
+	if (map.getType() != ConfigNodeType::Map) {
+		map = ConfigNode::MapType();
+	}
+
+	const auto value = readDataPin(environment, node, 1);
+	const auto key = readDataPin(environment, node, 2).asString("");
+	if (key.isEmpty() || value.getType() == ConfigNodeType::Undefined) {
+		return map;
+	}
+	map[key] = value;
+
+    return map;
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptGetValueFromMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Get value with key " +
+		getConnectedNodeName(world, node, graph, 1) +
+		" from map " +
+		getConnectedNodeName(world, node, graph, 0);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Get value with key ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" from map ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptGetValueFromMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Map";
+	}
+	else if (elementIdx == 1) {
+		return "Key";
+	}
+	else if (elementIdx == 2) {
+		return "Value";
+	}
+	else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptGetValueFromMap::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto map = readDataPin(environment, node, 0);
+	if (map.getType() != ConfigNodeType::Map) {
+		return {};
+	}
+
+	const auto key = readDataPin(environment, node, 1).asString("");
+	if (key.isEmpty()) {
+		return {};
+	}
+
+	return ConfigNode(map[key]);
+}

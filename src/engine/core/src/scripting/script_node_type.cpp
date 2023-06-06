@@ -384,6 +384,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptHasTags>());
 	addScriptNode(std::make_unique<ScriptToVector>());
 	addScriptNode(std::make_unique<ScriptFromVector>());
+	addScriptNode(std::make_unique<ScriptInsertValueIntoMap>());
+	addScriptNode(std::make_unique<ScriptGetValueFromMap>());
 	addScriptNode(std::make_unique<ScriptLuaExpression>());
 	addScriptNode(std::make_unique<ScriptLuaStatement>());
 }
