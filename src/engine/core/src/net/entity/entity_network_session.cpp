@@ -150,6 +150,8 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 	case EntityNetworkHeaderType::SystemMsgResponse:
 		onReceiveSystemMessageResponse(fromPeerId, msg.getMessage<EntityNetworkMessageSystemMsgResponse>());
 		break;
+	case EntityNetworkHeaderType::KeepAlive:
+		break;
 	}
 }
 

@@ -197,6 +197,9 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 					playDraw(painter, drawDatas[idx], debugMaterial);
 				}
 				break;
+
+			case CommandType::Undefined:
+				break;
 			}
 		}
 	}

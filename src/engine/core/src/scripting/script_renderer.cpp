@@ -251,6 +251,8 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			col = col.multiplyLuma(0.3f);
 			iconCol = Colour4f(0.5f, 0.5f, 0.5f);
 			break;
+		case NodeDrawModeType::Normal:
+			break;
 		}
 
 		if (drawMode.activationTime < 1.0f) {

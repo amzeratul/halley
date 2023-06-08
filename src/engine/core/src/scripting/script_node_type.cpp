@@ -59,9 +59,9 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 		return getPinAndConnectionDescription(node, world, elementType, elementIdx, graph);
 	case ScriptNodeElementType::Node:
 		return getNodeDescription(node, world, graph);
+	default:
+		return { "?", {} };
 	}
-	
-	return { "?", {} };
 }
 
 std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
