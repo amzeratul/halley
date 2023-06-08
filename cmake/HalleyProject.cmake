@@ -1,5 +1,4 @@
 cmake_minimum_required (VERSION 3.16)
-cmake_policy(SET CMP0081 OLD)
 
 SET(FASTLINK true CACHE BOOL "Enables /DEBUG:FASTLINK else /DEBUG:FULL")
 
