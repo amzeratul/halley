@@ -246,6 +246,8 @@ void RenderGraph::Variable::apply(Material& material, const String& name) const
 	case VariableType::Float4:
 		material.set(name, var);
 		break;
+	default:
+		break;
 	}
 }
 
