@@ -252,6 +252,20 @@ namespace Halley {
 			return *this = std::move(map);
 		}
 
+		template <typename T>
+		ConfigNode& operator=(const HashSet<T>& values)
+		{
+			SequenceType seq;
+			for (const auto& v: values) {
+				if constexpr (HasToConfigNode<T>::value) {
+					seq.push_back(v.toConfigNode());
+				} else {
+					seq.push_back(ConfigNode(v));
+				}
+			}
+			return *this = std::move(seq);
+		}
+
 		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
 		ConfigNode& operator=(T enumValue)
 		{
@@ -392,6 +406,26 @@ namespace Halley {
 				return {};
 			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to HashMap<K, V>.", HalleyExceptions::Resources);
+			}
+		}
+
+		template <typename T>
+		HashSet<T> asHashSet() const
+		{
+			if (type == ConfigNodeType::Sequence) {
+				HashSet<T> result;
+				for (const auto& v : asSequence()) {
+					if constexpr (HasConfigNodeConstructor<T>::value) {
+						result.insert(T(v));
+					} else {
+						result.insert(v.convertTo(Tag<T>()));
+					}
+				}
+				return result;
+			} else if (type == ConfigNodeType::Undefined) {
+				return {};
+			} else {
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to HashSet<T>.", HalleyExceptions::Resources);
 			}
 		}
 
