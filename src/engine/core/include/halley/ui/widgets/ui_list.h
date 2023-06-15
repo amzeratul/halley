@@ -87,6 +87,9 @@ namespace Halley {
 		void setShowSelection(bool value);
 		bool canShowSelection() const;
 
+		void setAcceptKeyboardInput(bool value);
+		bool canAcceptKeyboardInput() const;
+
 		bool ignoreClip() const override;
 
 		bool canReceiveFocus() const override;
@@ -143,6 +146,7 @@ namespace Halley {
 		bool multiSelect = false;
 		bool notifyItemSelectionEnabled = true;
 		bool showSelection = true;
+		bool acceptKeyboardInput = true;
 		int itemUnderCursor = -1;
 
 		bool requiresSelection = true;

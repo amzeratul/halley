@@ -657,6 +657,16 @@ bool UIList::canShowSelection() const
 	return showSelection;
 }
 
+void UIList::setAcceptKeyboardInput(bool value)
+{
+	acceptKeyboardInput = value;
+}
+
+bool UIList::canAcceptKeyboardInput() const
+{
+	return acceptKeyboardInput;
+}
+
 void UIList::updateShowSelection()
 {
 	const auto item = tryGetItem(getSelectedOption());
@@ -803,6 +813,10 @@ void UIList::onGamepadInput(const UIInputResults& input, Time time)
 
 bool UIList::onKeyPress(KeyboardKeyPress key)
 {
+	if (!acceptKeyboardInput) {
+		return false;
+	}
+
 	if (key.is(KeyCode::Up)) {
 		moveSelection(0, -1);
 		return true;
