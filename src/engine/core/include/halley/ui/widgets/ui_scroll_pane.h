@@ -72,5 +72,6 @@ namespace Halley {
 
 		void onMouseWheel(const UIEvent& event);
 		Vector2f getBasePosition(const String& widgetId);
+		Vector2f clampScrollPos(Vector2f pos) const;
     };
 }

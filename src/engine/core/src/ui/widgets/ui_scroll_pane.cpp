@@ -57,14 +57,22 @@ Vector2f UIScrollPane::getRelativeScrollEndPosition() const
 }
 
 void UIScrollPane::scrollTo(Vector2f position)
-{	
+{
+	const auto target = clampScrollPos(position);
+
 	if (scrollHorizontal) {
-		scrollPos.x = clamp2(position.x, 0.0f, contentsSize.x - getSize().x);
+		scrollPos.x = target.x;
 	}
 	
 	if (scrollVertical) {
-		scrollPos.y = clamp2(position.y, 0.0f, contentsSize.y - getSize().y);
+		scrollPos.y = target.y;
 	}
+}
+
+Vector2f UIScrollPane::clampScrollPos(Vector2f pos) const
+{
+	return Vector2f(clamp2(pos.x, 0.0f, scrollHorizontal ? std::max(contentsSize.x - getSize().x, 0.0f) : 0.0f),
+					clamp2(pos.y, 0.0f, scrollVertical ? std::max(contentsSize.y - getSize().y, 0.0f) : 0.0f));
 }
 
 void UIScrollPane::scrollBy(Vector2f delta)
@@ -240,7 +248,7 @@ void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool continuous)
 		dst.y = clamp(dst.y, scrollPos.y - maxDelta, scrollPos.y + maxDelta);
 		scrollTo(dst);
 	} else if (alwaysSmooth && !center) {
-		targetScrollTo = dst;
+		targetScrollTo = clampScrollPos(dst);
 	} else {
 		scrollTo(dst);
 	}
