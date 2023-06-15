@@ -106,6 +106,19 @@ void UIScrollPane::update(Time t, bool moved)
 	}
 }
 
+bool UIScrollPane::isScrolling(float threshold) const
+{
+	if (targetScrollTo) {
+		const auto p0 = scrollPos;
+		const auto p1 = *targetScrollTo;
+		const auto delta = p1 - p0;
+		const auto dist = delta.length();
+		return dist > threshold;
+	} else {
+		return false;
+	}
+}
+
 bool UIScrollPane::canScroll(UIScrollDirection direction) const
 {
 	auto contentsSize = UIWidget::getLayoutMinimumSize(false);

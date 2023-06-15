@@ -35,6 +35,7 @@ namespace Halley {
 		float getScrollSpeed() const;
 		void setScrollSpeed(float speed);
 	    void update(Time t, bool moved) override;
+		bool isScrolling(float threshold = 0) const;
 
 		bool canScroll(UIScrollDirection direction) const;
 		float getCoverageSize(UIScrollDirection direction) const;
