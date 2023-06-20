@@ -906,19 +906,25 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfigu
 
 String ScriptInsertValueIntoMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Insert value " +
-		getConnectedNodeName(world, node, graph, 1) +
-		" into map with key " +
-		getConnectedNodeName(world, node, graph, 2);
+	auto startMap = getConnectedNodeName(world, node, graph, 0);
+	if (startMap.startsWith("{") && startMap.endsWith("}")) {
+		startMap = startMap.mid(1, startMap.size() - 2).trimBoth();
+	}
+	if (startMap == "<empty>") {
+		startMap = {};
+	}
+	return "{ " + (startMap.isEmpty() ? "" : startMap + ", ") + getConnectedNodeName(world, node, graph, 2) + " := " + getConnectedNodeName(world, node, graph, 1) + " }";
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Insert value ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
-	str.append(" into map with key ");
+	str.append("Insert into map ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(" key ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" with value ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
