@@ -941,7 +941,17 @@ String ConfigNode::asString() const
 		auto v = asVector2i();
 		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
 	} else if (type == ConfigNodeType::Map) {
-		return "{...}";
+		String result = "{";
+		bool first = true;
+		for (auto& [k, v] : asMap()) {
+			if (!first) {
+				result += ", ";
+			}
+			first = false;
+			result += k + ": " + v.asString();
+		}
+		result += "}";
+		return result;
 	} else if (type == ConfigNodeType::Undefined) {
 		return "null";
 	} else {
