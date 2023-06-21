@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-InputExclusiveButton::InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, String label)
+InputExclusiveButton::InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, InputLabel label)
 	: parent(&parent)
 	, button(button)
 	, priority(priority)
@@ -47,7 +47,7 @@ bool InputExclusiveButton::isActive() const
 	return !activeBinds.empty();
 }
 
-const String& InputExclusiveButton::getLabel() const
+const InputLabel& InputExclusiveButton::getLabel() const
 {
 	return label;
 }
@@ -64,7 +64,7 @@ Vector<uint32_t>& InputExclusiveButton::getActiveBinds()
 
 
 
-InputExclusiveAxis::InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, String label)
+InputExclusiveAxis::InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, InputLabel label)
 	: parent(&parent)
 	, axis(axis)
 	, priority(priority)
@@ -94,7 +94,7 @@ int InputExclusiveAxis::getAxisRepeat() const
 	return repeatValue;
 }
 
-const String& InputExclusiveAxis::getLabel() const
+const InputLabel& InputExclusiveAxis::getLabel() const
 {
 	return label;
 }
@@ -131,12 +131,12 @@ void InputExclusive::setEnabled(bool enabled)
 		if (enabled) {
 			buttonsExclusive.reserve(buttons.size());
 			for (auto button: buttons) {
-				buttonsExclusive.push_back(input->makeExclusiveButton(button, priority, ""));
+				buttonsExclusive.push_back(input->makeExclusiveButton(button, priority, {}));
 			}
 
 			axesExclusive.reserve(axes.size());
 			for (auto axis: axes) {
-				axesExclusive.push_back(input->makeExclusiveAxis(axis, priority, ""));
+				axesExclusive.push_back(input->makeExclusiveAxis(axis, priority, {}));
 			}
 		}
 	}

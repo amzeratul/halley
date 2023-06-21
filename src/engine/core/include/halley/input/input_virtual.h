@@ -114,12 +114,12 @@ namespace Halley {
 		JoystickType getJoystickType() const override;
 		InputType getInputType() const override;
 
-		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority, const String& label);
-		std::unique_ptr<InputExclusiveAxis> makeExclusiveAxis(int axis, InputPriority priority, const String& label);
+		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority, const InputLabel& label);
+		std::unique_ptr<InputExclusiveAxis> makeExclusiveAxis(int axis, InputPriority priority, const InputLabel& label);
 
 		struct ExclusiveButtonInfo {
 			InputButton button;
-			String label;
+			InputLabel label;
 			InputDevice* physicalDevice;
 			int physicalButton;
 		};

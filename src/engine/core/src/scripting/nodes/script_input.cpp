@@ -45,9 +45,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 9>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
+	const static auto data = std::array<PinType, 10>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true },
-		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
 
@@ -63,11 +63,9 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	if (node.getPin(7).hasConnection()) {
 		str.append(" and label ");
 		str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
-	} else {
-		if (node.getSettings()["label"].asString("") != "") {
-			str.append(" and label ");
-			str.append(node.getSettings()["label"].asString(""), settingColour);
-		}
+	} else if (node.getSettings()["label"].asString("") != "") {
+		str.append(" and label ");
+		str.append(node.getSettings()["label"].asString(""), settingColour);
 	}
 	if (node.getPin(8).hasConnection()) {
 		str.append(" if ");
@@ -84,6 +82,8 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	switch (elementIdx) {
+	case 1:
+		return "Entity doing the input";
 	case 2:
 		return "Flow Output when button is pressed";
 	case 3:
@@ -98,6 +98,8 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Label";
 	case 8:
 		return "Enable Check";
+	case 9:
+		return "Label Target";
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
@@ -128,7 +130,8 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 			if (label.isEmpty()) {
 				label = node.getSettings()["label"].asString("");
 			}
-			data.input = inputDevice->makeExclusiveButton(button, priority, label);
+			const auto labelTarget = readRawEntityId(environment, node, 9);
+			data.input = inputDevice->makeExclusiveButton(button, priority, InputLabel(label, labelTarget));
 		}
 	} else if (data.input && !enabled) {
 		data.input = {};

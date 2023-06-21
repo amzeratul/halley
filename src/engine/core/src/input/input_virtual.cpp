@@ -711,14 +711,14 @@ void InputVirtual::setLastDevice(const std::shared_ptr<InputDevice>& device)
 	}
 }
 
-std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority, const String& label)
+std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority, const InputLabel& label)
 {
 	auto exclusive = std::make_unique<InputExclusiveButton>(*this, priority, button, label);
 	addExclusiveButton(*exclusive);
 	return exclusive;
 }
 
-std::unique_ptr<InputExclusiveAxis> InputVirtual::makeExclusiveAxis(int axis, InputPriority priority, const String& label)
+std::unique_ptr<InputExclusiveAxis> InputVirtual::makeExclusiveAxis(int axis, InputPriority priority, const InputLabel& label)
 {
 	auto exclusive = std::make_unique<InputExclusiveAxis>(*this, priority, axis, label);
 	addExclusiveAxis(*exclusive);
@@ -737,7 +737,7 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 	for (const auto& button: exclusiveButtons) {
 		if (!button->activeBinds.empty()) {
 			const auto& label = button->getLabel();
-			if (!label.isEmpty()) {
+			if (!label.label.isEmpty()) {
 				auto [physicalDevice, physicalButton] = getPhysicalButton(*button, preferredDevice);
 				if (physicalDevice) {
 					auto info = ExclusiveButtonInfo{ button->button, label, physicalDevice, physicalButton };

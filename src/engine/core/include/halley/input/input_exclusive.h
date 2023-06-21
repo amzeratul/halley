@@ -2,9 +2,20 @@
 
 #include "input_device.h"
 #include "halley/text/string_converter.h"
+#include "halley/entity/entity_id.h"
 
 namespace Halley {
     class InputVirtual;
+
+	struct InputLabel {
+		String label;
+		EntityId target;
+
+        InputLabel(String label = "", EntityId target = {})
+	        : label(std::move(label))
+			, target(std::move(target))
+        {}
+	};
 
     class InputExclusiveBinding {
     public:
@@ -18,7 +29,7 @@ namespace Halley {
         friend class InputVirtual;
 
     public:
-		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, String label);
+		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, InputLabel label);
         ~InputExclusiveButton();
 
         void update(Time t) override;
@@ -29,14 +40,14 @@ namespace Halley {
         bool isDown() const;
         bool isActive() const;
 
-        const String& getLabel() const;
+        const InputLabel& getLabel() const;
 
 	private:
         InputVirtual* parent = nullptr;
         InputButton button = 0;
         InputPriority priority = InputPriority::Normal;
         Vector<uint32_t> activeBinds;
-        String label;
+        InputLabel label;
         
         InputPriority getPriority() const override;
         Vector<uint32_t>& getActiveBinds() override;
@@ -46,7 +57,7 @@ namespace Halley {
         friend class InputVirtual;
 
     public:
-		InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, String label);
+		InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, InputLabel label);
         ~InputExclusiveAxis();
 
         void update(Time t) override;
@@ -54,14 +65,14 @@ namespace Halley {
         float getAxis() const;
         int getAxisRepeat() const;
 
-        const String& getLabel() const;
+        const InputLabel& getLabel() const;
 
 	private:
         InputVirtual* parent = nullptr;
         int axis = 0;
         InputPriority priority = InputPriority::Normal;
         Vector<uint32_t> activeBinds;
-        String label;
+        InputLabel label;
 
         InputAxisRepeater repeater;
         int repeatValue;
