@@ -55,6 +55,7 @@ namespace Halley {
 		PopupSelectionChanged,
 		PopupCanceled,
 		ReloadData,
+		ScrollPositionChanged,
 		SetSelected,
 		SetEnabled,
 		SetHovered,

@@ -59,6 +59,7 @@ Vector2f UIScrollPane::getRelativeScrollEndPosition() const
 void UIScrollPane::scrollTo(Vector2f position)
 {
 	const auto target = clampScrollPos(position);
+	const auto old = scrollPos;
 
 	if (scrollHorizontal) {
 		scrollPos.x = target.x;
@@ -66,6 +67,10 @@ void UIScrollPane::scrollTo(Vector2f position)
 	
 	if (scrollVertical) {
 		scrollPos.y = target.y;
+	}
+
+	if (scrollPos != old) {
+		sendEventDown(UIEvent(UIEventType::ScrollPositionChanged, getId(), Vector2f(scrollPos)));
 	}
 }
 
