@@ -512,6 +512,20 @@ int ScriptEnvironment::getInputButtonByName(const String& name) const
 	return static_cast<int>(fromString<DefaultInputButtons>(name));
 }
 
+bool ScriptEnvironment::hasInputLabel(EntityId entityId) const
+{
+	for (auto& input: inputDevices) {
+		if (input.second) {
+			for (const auto& button: input.second->getExclusiveButtonLabels(nullptr)) {
+				if (button.label.target == entityId) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void ScriptEnvironment::setHostNetworkAuthority(bool host)
 {
 	isHost = host;

@@ -38,4 +38,18 @@ namespace Halley {
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const override;
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptInputButtonData& curData) const override;
 	};
+
+	class ScriptHasInputLabel final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "hasInputLabel"; }
+		String getName() const override { return "Has Input Label"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/input_button.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
 }

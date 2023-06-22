@@ -123,6 +123,7 @@ namespace Halley {
         void setInputDevice(EntityId target, std::shared_ptr<InputVirtual> input);
         std::shared_ptr<InputVirtual> getInputDevice(EntityId target, bool bypassEnableCheck) const;
         virtual int getInputButtonByName(const String& name) const;
+        bool hasInputLabel(EntityId entityId) const;
 
         template <typename T>
         T* tryGetComponent(EntityId id)

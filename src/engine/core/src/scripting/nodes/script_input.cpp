@@ -163,3 +163,36 @@ void ScriptInputButton::doDestructor(ScriptEnvironment& environment, const Scrip
 {
 	data.input.reset();
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Has input label associated with ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptHasInputLabel::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return getConnectedNodeName(world, node, graph, 0) + "has input label";
+}
+
+ConfigNode ScriptHasInputLabel::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto e = readRawEntityId(environment, node, 0);
+	if (e) {
+		return ConfigNode(environment.hasInputLabel(e));
+	} else {
+		return ConfigNode(false);
+	}
+}
