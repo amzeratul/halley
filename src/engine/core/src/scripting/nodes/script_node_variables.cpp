@@ -749,7 +749,7 @@ IScriptNodeType::Result ScriptHoldVariable::doUpdate(ScriptEnvironment& environm
 	writeDataPin(environment, node, 4, std::move(data));
 
 	if (continuous) {
-		return Result(first ? ScriptNodeExecutionState::Fork : ScriptNodeExecutionState::Executing);
+		return Result(first ? ScriptNodeExecutionState::Fork : ScriptNodeExecutionState::Executing, first ? 0 : time);
 	} else {
 		return Result(ScriptNodeExecutionState::Done);
 	}

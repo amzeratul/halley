@@ -367,3 +367,84 @@ IScriptNodeType::Result ScriptSignal::doUpdate(ScriptEnvironment& environment, T
 	writeDataPin(environment, node, 2, ConfigNode(1));
 	return Result(ScriptNodeExecutionState::Done);
 }
+
+
+
+ConfigNode ScriptLineResetData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["active"] = active;
+	result["signaled"] = signaled;
+	result["monitorVariable"] = monitorVariable;
+	return result;
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::WriteDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Resets output if signaled by ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" or if variable ");
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(" changes.");
+	return str.moveResults();
+}
+
+String ScriptLineReset::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Signal";
+	} else if (elementIdx == 3) {
+		return "Monitor Variable";
+	}
+	return ScriptNodeTypeBase<ScriptLineResetData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptLineReset::doInitData(ScriptLineResetData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data.active = false;
+	data.signaled = false;
+}
+
+void ScriptLineReset::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptLineResetData& curData) const
+{
+	curData.signaled = true;
+}
+
+IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLineResetData& curData) const
+{
+	if (!curData.active) {
+		curData.active = true;
+		curData.signaled = false;
+		curData.monitorVariable = environment.readInputDataPin(node, 3);
+		return Result(ScriptNodeExecutionState::Fork, time, 1);
+	} else {
+		bool reset = curData.signaled;
+		curData.signaled = false;
+
+		const auto var = environment.readInputDataPin(node, 3);
+		if (var != curData.monitorVariable) {
+			curData.monitorVariable = var;
+			reset = true;
+		}
+
+		if (reset) {
+			return Result(ScriptNodeExecutionState::Fork, time, 1, 1);
+		} else {
+			return Result(ScriptNodeExecutionState::Executing, time);
+		}
+	}
+}

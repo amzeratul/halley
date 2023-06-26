@@ -145,4 +145,31 @@ namespace Halley {
 
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
+
+	
+	class ScriptLineResetData final : public ScriptStateData<ScriptLineResetData> {
+	public:
+		bool active = false;
+		bool signaled = false;
+		ConfigNode monitorVariable;
+
+		ScriptLineResetData() = default;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptLineReset final : public ScriptNodeTypeBase<ScriptLineResetData> {
+	public:
+		String getId() const override { return "lineReset"; }
+		String getName() const override { return "Line Reset"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/line_reset.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::State; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptLineResetData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptLineResetData& curData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLineResetData& curData) const override;
+	};
 }

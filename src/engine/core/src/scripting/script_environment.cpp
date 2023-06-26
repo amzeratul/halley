@@ -121,6 +121,10 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 		thread.getCurNodeTime() += timeLeft;
 		timeLeft -= static_cast<float>(result.timeElapsed);
+		
+		if (result.outputsCancelled != 0) {
+			cancelOutputs(nodeId, result.outputsCancelled);
+		}
 
 		if (result.state == ScriptNodeExecutionState::Executing) {
 			// Still running this node, suspend
@@ -157,10 +161,6 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			} else if (result.state == ScriptNodeExecutionState::Return) {
 				returnFromFunction(thread, result.outputsActive, pendingThreads);
 			}
-		}
-
-		if (result.outputsCancelled != 0) {
-			cancelOutputs(nodeId, result.outputsCancelled);
 		}
 	}
 	return true;
