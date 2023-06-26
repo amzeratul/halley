@@ -70,7 +70,15 @@ namespace Halley {
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
 
-	class ScriptStartScript final : public ScriptNodeTypeBase<void> {
+	class ScriptStartScriptData final : public ScriptStateData<ScriptStartScriptData> {
+	public:
+		EntityId target;
+		String scriptName;
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptStartScript final : public ScriptNodeTypeBase<ScriptStartScriptData> {
 	public:
 		String getId() const override { return "startScript"; }
 		String getName() const override { return "Start Script"; }
@@ -82,24 +90,14 @@ namespace Halley {
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
-
+		bool hasDestructor(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+
+		void doInitData(ScriptStartScriptData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptStartScriptData& data) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptStartScriptData& data) const override;
 	};
-
-	class ScriptStartScriptName final : public ScriptNodeTypeBase<void> {
-	public:
-		String getId() const override { return "startScriptName"; }
-		String getName() const override { return "Start Script Name"; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/start.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-
-		Vector<SettingType> getSettingTypes() const override;
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
-		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
-	};
-
+	
 	class ScriptStopScript final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "stopScript"; }

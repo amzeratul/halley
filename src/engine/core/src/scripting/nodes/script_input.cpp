@@ -184,7 +184,7 @@ std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescriptio
 
 String ScriptHasInputLabel::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0) + "has input label";
+	return getConnectedNodeName(world, node, graph, 0) + " has input label";
 }
 
 ConfigNode ScriptHasInputLabel::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
