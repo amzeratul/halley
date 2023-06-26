@@ -95,7 +95,8 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescripti
 	str.append("entity:" + node.getSettings()["variable"].asString(""), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
-	return str.moveResults();}
+	return str.moveResults();
+}
 
 ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
@@ -662,13 +663,20 @@ IScriptNodeType::Result ScriptSetVariable::doUpdate(ScriptEnvironment& environme
 
 ScriptHoldVariableData::ScriptHoldVariableData(const ConfigNode& node)
 {
-	prevValue = ConfigNode(node["prevValue"]);
+	if (node.getType() == ConfigNodeType::Map) {
+		prevValue = ConfigNode(node["prevValue"]);
+		started = node["started"].asBool(false);
+	} else {
+		prevValue = ConfigNode();
+		started = false;
+	}
 }
 
 ConfigNode ScriptHoldVariableData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType result;
 	result["prevValue"] = ConfigNode(prevValue);
+	result["started"] = started;
 	return result;
 }
 
@@ -697,6 +705,7 @@ Vector<IScriptNodeType::SettingType> ScriptHoldVariable::getSettingTypes() const
 	return {
 		SettingType{ "defaultValue", "int", Vector<String>{"0"} },
 		SettingType{ "defaultPrevValue", "int", Vector<String>{"0"} },
+		SettingType{ "continuous", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -713,21 +722,37 @@ std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription
 	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
 	str.append(" := ");
 	str.append(label2.isEmpty() ? getConnectedNodeName(world, node, graph, 3) : label2, label2.isEmpty() ? parameterColour : settingColour);
+	if (node.getSettings()["continuous"].asBool(false)) {
+		str.append(" (continuously)", settingColour);
+	}
 	return str.moveResults();
 }
 
 void ScriptHoldVariable::doInitData(ScriptHoldVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
+	data = ScriptHoldVariableData(nodeData);
+	data.started = false;
 }
 
 IScriptNodeType::Result ScriptHoldVariable::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node,ScriptHoldVariableData& curData) const
 {
-	auto prevData = node.getPin(3).hasConnection() ? readDataPin(environment, node, 3) : ConfigNode(node.getSettings()["defaultPrevValue"].asInt(0));
-	curData.prevValue = std::move(prevData);
+	const bool continuous = node.getSettings()["continuous"].asBool(false);
+	const bool first = !curData.started;
+	curData.started = true;
+
+	if (first) {
+		auto prevData = node.getPin(3).hasConnection() ? readDataPin(environment, node, 3) : ConfigNode(node.getSettings()["defaultPrevValue"].asInt(0));
+		curData.prevValue = std::move(prevData);
+	}
 
 	auto data = node.getPin(2).hasConnection() ? readDataPin(environment, node, 2) : ConfigNode(node.getSettings()["defaultValue"].asInt(0));
 	writeDataPin(environment, node, 4, std::move(data));
-	return Result(ScriptNodeExecutionState::Done);
+
+	if (continuous) {
+		return Result(first ? ScriptNodeExecutionState::Fork : ScriptNodeExecutionState::Executing);
+	} else {
+		return Result(ScriptNodeExecutionState::Done);
+	}
 }
 
 void ScriptHoldVariable::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptHoldVariableData& curData) const
