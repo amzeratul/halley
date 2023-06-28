@@ -261,9 +261,9 @@ void VariableTable::reload(Resource&& resource)
 
 const Internal::VariableStorage& VariableTable::getRawStorage(const String& key) const
 {
-	auto iter = variables.find(key);
-	if (iter == variables.end()) {
-		throw Exception("Unknown variable: " + key, HalleyExceptions::Utils);
+	if (const auto iter = variables.find(key); iter != variables.end()) {
+		return iter->second;
 	}
-	return iter->second;
+	Logger::logError("Unknown variable: " + key, true);
+	return dummy;
 }

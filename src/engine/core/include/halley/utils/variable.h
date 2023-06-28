@@ -183,5 +183,6 @@ namespace Halley {
 
 	private:
 		FlatMap<String, Internal::VariableStorage> variables;
+		Internal::VariableStorage dummy;
 	};
 };
