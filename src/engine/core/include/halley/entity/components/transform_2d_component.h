@@ -16,8 +16,8 @@ namespace Halley
 class Transform2DComponent final : public Transform2DComponentBase {
 public:
 	Transform2DComponent();
-	explicit Transform2DComponent(Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0);
-	explicit Transform2DComponent(Halley::WorldPosition localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1));
+	explicit Transform2DComponent(Halley::Vector2f localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), int subWorld = 0, float height = 0);
+	explicit Transform2DComponent(Halley::WorldPosition localPosition, Halley::Angle1f localRotation = {}, Halley::Vector2f localScale = Halley::Vector2f(1, 1), float height = 0);
 	~Transform2DComponent();
 
 	const Halley::Vector2f& getLocalPosition() const { return position; }
@@ -32,7 +32,12 @@ public:
 	Halley::Angle1f& getLocalRotation() { return rotation; }
 	void setLocalRotation(Halley::Angle1f v);
 
+	float getLocalHeight() const { return height; }
+	float& getLocalHeight() { return height; }
+	void setLocalHeight(float v);
+
 	Halley::Vector2f getGlobalPosition() const;
+	Halley::Vector2f getGlobalPositionWithHeight() const;
 	Halley::WorldPosition getWorldPosition() const;
 	void setGlobalPosition(Halley::Vector2f v);
 	void setGlobalPosition(Halley::WorldPosition p);
@@ -42,6 +47,9 @@ public:
 
 	Halley::Angle1f getGlobalRotation() const;
 	void setGlobalRotation(Halley::Angle1f v);
+	
+	float getGlobalHeight() const;
+	void setGlobalHeight(float v);
 
 	int getSubWorld() const;
 	void setSubWorld(int subWorld);
@@ -73,6 +81,7 @@ private:
 	mutable Halley::Angle1f cachedGlobalRotation;
 	mutable Halley::Vector2f cachedGlobalPos;
 	mutable Halley::Vector2f cachedGlobalScale;
+	mutable float cachedGlobalHeight;
 
 	mutable Halley::EntityRef entity;
 
@@ -80,7 +89,8 @@ private:
 		Position,
 		Scale,
 		Rotation,
-		SubWorld
+		SubWorld,
+		Height
 	};
 
 	enum class DirtyPropagationMode {

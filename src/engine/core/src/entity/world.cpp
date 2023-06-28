@@ -481,6 +481,16 @@ bool World::isTerminating() const
 	return terminating;
 }
 
+float World::getTransform2DAnisotropy() const
+{
+	return transform2DAnisotropy;
+}
+
+void World::setTransform2DAnisotropy(float anisotropy)
+{
+	transform2DAnisotropy = anisotropy;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);

@@ -1,6 +1,8 @@
 #include "halley/support/logger.h"
 #include "halley/entity/components/transform_2d_component.h"
 
+#include "halley/entity/world.h"
+#include "halley/game/halley_statics.h"
 #include "halley/navigation/world_position.h"
 #include "halley/graphics/sprite/sprite.h"
 
@@ -9,13 +11,13 @@ using namespace Halley;
 Transform2DComponent::Transform2DComponent() = default;
 
 
-Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
-	: Transform2DComponentBase(localPosition, localScale, localRotation, subWorld)
+Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld, float height)
+	: Transform2DComponentBase(localPosition, localScale, localRotation, height, subWorld)
 {
 }
 
-Transform2DComponent::Transform2DComponent(WorldPosition localPosition, Angle1f localRotation, Vector2f localScale)
-	: Transform2DComponentBase(localPosition.pos, localScale, localRotation, localPosition.subWorld)
+Transform2DComponent::Transform2DComponent(WorldPosition localPosition, Angle1f localRotation, Vector2f localScale, float height)
+	: Transform2DComponentBase(localPosition.pos, localScale, localRotation, height, localPosition.subWorld)
 {
 }
 
@@ -69,6 +71,14 @@ void Transform2DComponent::setLocalRotation(Angle1f v)
 	}
 }
 
+void Transform2DComponent::setLocalHeight(float v)
+{
+	if (height != v) {
+		height = v;
+		markDirty();
+	}
+}
+
 Vector2f Transform2DComponent::getGlobalPosition() const
 {
 	if (parentTransform) {
@@ -80,6 +90,11 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 	} else {
 		return position;
 	}
+}
+
+Vector2f Transform2DComponent::getGlobalPositionWithHeight() const
+{
+	return getGlobalPosition() + Vector2f(0, -getGlobalHeight());
 }
 
 WorldPosition Transform2DComponent::getWorldPosition() const
@@ -118,14 +133,38 @@ void Transform2DComponent::setGlobalScale(Vector2f v)
 
 Angle1f Transform2DComponent::getGlobalRotation() const
 {
-	// TODO
-	return rotation;
+	if (parentTransform) {
+		if (!isCached(CachedIndices::Rotation)) {
+			setCached(CachedIndices::Rotation);
+			cachedGlobalRotation = parentTransform->getGlobalRotation() + rotation;
+		}
+		return cachedGlobalRotation;
+	} else {
+		return rotation;
+	}
 }
 
 void Transform2DComponent::setGlobalRotation(Angle1f v)
 {
-	// TODO
-	setLocalRotation(v);
+	setLocalRotation(parentTransform ? v - parentTransform->getGlobalRotation() : v);
+}
+
+float Transform2DComponent::getGlobalHeight() const
+{
+	if (parentTransform) {
+		if (!isCached(CachedIndices::Height)) {
+			setCached(CachedIndices::Height);
+			cachedGlobalHeight = parentTransform->getGlobalHeight() + height;
+		}
+		return cachedGlobalHeight;
+	} else {
+		return height;
+	}
+}
+
+void Transform2DComponent::setGlobalHeight(float v)
+{
+	setLocalHeight(parentTransform ? v - parentTransform->getGlobalHeight() : v);
 }
 
 int Transform2DComponent::getSubWorld() const
@@ -156,8 +195,15 @@ void Transform2DComponent::setSubWorld(int world)
 
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 {
-	// TODO, do this properly
-	auto pos = getGlobalPosition() + p * getGlobalScale();
+	const auto r = getGlobalRotation();
+	Vector2f pos;
+
+	if (std::abs(r.getRadians()) > 0.00001f) {
+		const float anisotropy = entity.getWorld().getTransform2DAnisotropy();
+		pos = getGlobalPosition() + (p * Vector2f(1.0f, 1.0f / anisotropy)).rotate(r) * Vector2f(1.0f, anisotropy) * getGlobalScale();
+	} else {
+		pos = getGlobalPosition() + p * getGlobalScale();
+	}
 	
 	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
 	return pos;
@@ -166,14 +212,25 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	const auto s = getGlobalScale();
-	if (std::abs(s.x) < 0.001f || std::abs(s.y) < 0.001f) {
-		return Vector2f(); // Degenerate case
-	} else {
-		// TODO, do this properly
-		auto pos = (p - getGlobalPosition()) / s;
-		setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
-		return pos;
+	const auto r = getGlobalRotation();
+
+	auto pos = (p - getGlobalPosition()) / s;
+
+	// Degenerate cases
+	if (std::abs(s.x) < 0.000001f) {
+		pos.x = 0;
 	}
+	if (std::abs(s.y) < 0.000001f) {
+		pos.y = 0;
+	}
+
+	if (std::abs(r.getRadians()) > 0.00001f) {
+		const float anisotropy = entity.getWorld().getTransform2DAnisotropy();
+		pos = (pos * Vector2f(1.0f, 1.0f / anisotropy)).rotate(-r) * Vector2f(1.0f, anisotropy);
+	}
+
+	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
+	return pos;
 }
 
 Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
@@ -181,7 +238,7 @@ Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
 	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
-Halley::Rect4f Transform2DComponent::getSpriteUncroppedAABB(const Halley::Sprite& sprite) const
+Rect4f Transform2DComponent::getSpriteUncroppedAABB(const Sprite& sprite) const
 {
 	return sprite.getUncroppedAABB() - sprite.getPosition() + getGlobalPosition();
 }

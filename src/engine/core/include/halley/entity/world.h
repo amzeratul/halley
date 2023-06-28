@@ -164,6 +164,9 @@ namespace Halley {
 		void onEntityDestroyed(const UUID& uuid);
 		bool isTerminating() const;
 
+		float getTransform2DAnisotropy() const;
+		void setTransform2DAnisotropy(float anisotropy);
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -193,6 +196,7 @@ namespace Halley {
 		std::list<SystemMessageContext> pendingSystemMessages;
 		
 		IWorldNetworkInterface* networkInterface = nullptr;
+		float transform2DAnisotropy = 1.0f;
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();
