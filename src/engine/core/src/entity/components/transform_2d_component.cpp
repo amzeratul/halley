@@ -235,12 +235,12 @@ Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 
 Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const
 {
-	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition();
+	return sprite.getAABB() - sprite.getPosition() + getGlobalPosition() + Vector2f(0, -getGlobalHeight());
 }
 
 Rect4f Transform2DComponent::getSpriteUncroppedAABB(const Sprite& sprite) const
 {
-	return sprite.getUncroppedAABB() - sprite.getPosition() + getGlobalPosition();
+	return sprite.getUncroppedAABB() - sprite.getPosition() + getGlobalPosition() + Vector2f(0, -getGlobalHeight());
 }
 
 void Transform2DComponent::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
