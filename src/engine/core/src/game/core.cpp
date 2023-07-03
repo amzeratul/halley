@@ -410,7 +410,7 @@ void Core::tickFrame(Time time)
 
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 
-	updateFrameData(multithreaded);
+	updateFrameData(multithreaded, time);
 	runStartFrame(time);
 	
 	if (multithreaded) {
@@ -579,7 +579,7 @@ void Core::waitForRenderEnd()
 	}
 }
 
-void Core::updateFrameData(bool multithreaded)
+void Core::updateFrameData(bool multithreaded, Time time)
 {
 	if (multithreaded) {
 		std::swap(frameDataUpdate, frameDataRender);
@@ -590,7 +590,7 @@ void Core::updateFrameData(bool multithreaded)
 		frameDataUpdate = game->makeFrameData();
 		assert(!!frameDataUpdate);
 	}
-	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr);
+	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr, time);
 }
 
 void Core::showComputerInfo() const

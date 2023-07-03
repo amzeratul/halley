@@ -61,7 +61,7 @@ void SceneEditor::init(SceneEditorContext& context)
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
 {
 	if (curFrameData) {
-		curFrameData->doStartFrame(false, nullptr);
+		curFrameData->doStartFrame(false, nullptr, t);
 	}
 	
 	pushThreadFrameData();

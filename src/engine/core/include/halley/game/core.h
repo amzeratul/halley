@@ -85,7 +85,7 @@ namespace Halley
 		void tickFrame(Time time);
 		void render();
 		void waitForRenderEnd();
-		void updateFrameData(bool multithreaded);
+		void updateFrameData(bool multithreaded, Time time);
 
 		void showComputerInfo() const;
 
