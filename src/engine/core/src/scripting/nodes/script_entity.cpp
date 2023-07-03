@@ -76,7 +76,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 	const auto& prefab = node.getSettings()["prefab"].asString("");
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
-	const Vector2f position = readDataPin(environment, node, 2).asVector2f(Vector2f());
+	const Vector3f position = readDataPin(environment, node, 2).asVector3f({});
 
 	if (!prefab.isEmpty()) {
 		EntityRef parent;
@@ -87,7 +87,8 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 		auto entity = factory.createEntity(prefab, parent);
 
 		if (auto* transform = entity.tryGetComponent<Transform2DComponent>()) {
-			transform->setLocalPosition(position);
+			transform->setLocalPosition(position.xy());
+			transform->setLocalHeight(position.z);
 		}
 
 		entity.setSerializable(serializable);
