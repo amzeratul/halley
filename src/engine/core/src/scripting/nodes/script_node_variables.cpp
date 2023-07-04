@@ -1051,3 +1051,125 @@ ConfigNode ScriptGetValueFromMap::doGetData(ScriptEnvironment& environment, cons
 
 	return ConfigNode(map[key]);
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptInsertValueIntoSequence::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Insert value " +
+		getConnectedNodeName(world, node, graph, 1) +
+		" into sequence " +
+		getConnectedNodeName(world, node, graph, 0);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Insert value ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" into sequence ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptInsertValueIntoSequence::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Sequence (Can be empty)";
+	}
+	else if (elementIdx == 1) {
+		return "Value";
+	}
+	else if (elementIdx == 2) {
+		return "Sequence";
+	}
+	else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptInsertValueIntoSequence::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto sequence = readDataPin(environment, node, 0);
+	const auto value = readDataPin(environment, node, 1);
+	if (value.getType() == ConfigNodeType::Undefined) {
+		return sequence;
+	}
+
+	if (sequence.getType() != ConfigNodeType::Sequence) {
+		auto newSequence = ConfigNode::SequenceType();
+		newSequence.push_back(value);
+		return newSequence;
+	}
+	sequence.asSequence().push_back(value);
+
+	return ConfigNode(sequence);
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptHasSequenceValue::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptHasSequenceValue::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Has sequence " +
+		getConnectedNodeName(world, node, graph, 0) +
+		" value " +
+		getConnectedNodeName(world, node, graph, 1);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Has sequence ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(" value ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptHasSequenceValue::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Sequence";
+	}
+	else if (elementIdx == 1) {
+		return "Value";
+	}
+	else if (elementIdx == 2) {
+		return "Bool";
+	}
+	else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+ConfigNode ScriptHasSequenceValue::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto sequence = readDataPin(environment, node, 0);
+	if (sequence.getType() != ConfigNodeType::Sequence) {
+		return {};
+	}
+
+	const auto value = readDataPin(environment, node, 1);
+	if (value.getType() == ConfigNodeType::Undefined) {
+		return {};
+	}
+
+	const auto hasValueIter = std_ex::find(sequence.asSequence(), value);
+	return ConfigNode(hasValueIter != sequence.asSequence().end());
+}
