@@ -70,7 +70,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 6>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -103,6 +103,8 @@ String ScriptGetPosition::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Position Vector";
 	} else if (elementIdx == 4) {
 		return "SubWorld";
+	} else if (elementIdx == 5) {
+		return "Global Height";
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
@@ -119,6 +121,8 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 			return ConfigNode(transform->getGlobalPosition() + offset);
 		} else if (pinN == 4) {
 			return ConfigNode(transform->getSubWorld());
+		} else if (pinN == 5) {
+			return ConfigNode(transform->getGlobalHeight());
 		}
 	}
 	return ConfigNode();
