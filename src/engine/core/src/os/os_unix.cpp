@@ -33,6 +33,8 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <fcntl.h>
+#include <sys/poll.h>
 #include "halley/utils/halley_iostream.h"
 
 using namespace Halley;
@@ -52,6 +54,22 @@ Halley::ComputerData Halley::OSUnix::getComputerData()
 	return data;
 }
 
+String Halley::OSUnix::getCurrentWorkingDir()
+{
+	String result;
+	result.setSize(PATH_MAX);
+
+	char* cwd;
+	do {
+		cwd = getcwd((char*) result.c_str(), result.size());
+		if (cwd == nullptr) {
+			result.setSize(result.size() + PATH_MAX);
+		}
+	} while (cwd == nullptr);
+
+	return result;
+}
+
 Halley::String Halley::OSUnix::getUserDataDir()
 {
 	String result;
@@ -65,33 +83,113 @@ Halley::String Halley::OSUnix::getUserDataDir()
 	return result + "/Library/";
 }
 
+static String readPipeToString(int fd)
+{
+	char buffer[4096];
+	String result;
+
+	struct pollfd pfd = {};
+	pfd.fd = fd;
+	pfd.events = POLLIN;
+
+	size_t bytesRead;
+
+	// The Windows version uses a 10ms timeout during WaitForMultipleObjects().
+	// waitpid() doesn't support that, so we wait on the poll() call instead.
+
+	while (poll(&pfd, 1, 10) == 1) {
+		bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+		buffer[bytesRead] = 0;
+		result += buffer;
+	}
+
+	return result;
+}
+
 int Halley::OSUnix::runCommand(String command, String cwd, ILoggerSink* sink)
 {
-	auto args = command.split(' ');
-	String cmd = args[0];
-	Vector<char*> argsPtr(args.size());
-	for (size_t i = 1; i < args.size(); ++i) {
-		argsPtr[i - 1] = const_cast<char*>(args[i].c_str());
-	}
-	argsPtr[args.size() - 1] = nullptr;
+	Promise<int> promise;
+	auto future = promise.getFuture();
 
-	auto pid = fork();
-	if (pid == -1) {
-		throw Exception("Unable to fork process.", HalleyExceptions::OS);
-	} else if (pid == 0) {
-		// Child
-		execvp(cmd.c_str(), argsPtr.data());
-		
-		return -1; // Will never get reached, but whatever
-	} else {
-		int status;
-		waitpid(pid, &status, 0);
-		if (WIFEXITED(status)) {
-			return WEXITSTATUS(status);
-		} else {
-			return -1;
-		}
+	runCommand(command, cwd, promise, sink);
+
+	return future.get();
+}
+
+Future<int> OSUnix::runCommandAsync(const String& command, const String& cwd, ILoggerSink* sink)
+{
+	Promise<int> promise;
+	auto future = promise.getFuture();
+
+	std::thread([this, command, cwd, promise = std::move(promise), sink] () {
+		runCommand(command, cwd, promise, sink);
+	}).detach();
+
+	return future;
+}
+
+void Halley::OSUnix::runCommand(String command, String cwd, Promise<int> promise, ILoggerSink* sink)
+{
+	auto args = command.split(' ');
+	Vector<char*> argsPtr(args.size() + 1);
+	for (size_t i = 0; i < args.size(); ++i) {
+		argsPtr[i] = const_cast<char*>(args[i].c_str());
 	}
+	argsPtr[args.size()] = nullptr;
+
+	int fd[2];
+	pid_t child;
+
+	if (pipe(fd) != 0) {
+		throw Exception("Pipe error.", HalleyExceptions::OS);
+	}
+
+	child = fork();
+
+	if (child == -1) {
+		throw Exception("Unable to fork process.", HalleyExceptions::OS);
+	} else if (child == 0) {
+		dup2(fd[1], STDOUT_FILENO);
+		dup2(fd[1], STDERR_FILENO);
+
+		close(fd[0]);
+		close(fd[1]);
+
+		execvp(argsPtr[0], argsPtr.data());
+
+		exit(1);
+	}
+
+	close(fd[1]);
+
+	String outBuffer;
+	auto readOutput = [&] (bool isFinal)
+	{
+		outBuffer += readPipeToString(fd[0]);
+
+		for (auto lineBreakPos = outBuffer.find('\n'); lineBreakPos != std::string::npos; lineBreakPos = outBuffer.find('\n')) {
+			Logger::logTo(sink, LoggerLevel::Info, outBuffer.left(lineBreakPos));
+			outBuffer = outBuffer.mid(lineBreakPos + 1);
+		}
+
+		if (isFinal && !outBuffer.isEmpty()) {
+			Logger::logTo(sink, LoggerLevel::Info, outBuffer);
+		}
+	};
+
+	pid_t wait;
+	int status = 0;
+
+	do {
+		wait = waitpid(child, &status, WNOHANG);
+		readOutput(false);
+	} while (wait == 0);
+
+	readOutput(true);
+
+	promise.setValue((wait >= 0 && WIFEXITED(status)) ? WEXITSTATUS(status) : 1);
+
+	close(fd[0]);
 }
 
 // Code by Jonathan Leffler, from http://stackoverflow.com/questions/675039/how-can-i-create-directory-tree-in-c-linux/675193#675193
