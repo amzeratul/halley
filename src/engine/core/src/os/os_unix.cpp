@@ -103,6 +103,9 @@ static String readPipeToString(int fd)
 		bytesRead = read(fd, buffer, sizeof(buffer) - 1);
 		buffer[bytesRead] = 0;
 		result += buffer;
+		if (((pfd.revents & POLLHUP) != 0) && (bytesRead == 0)) {
+			break;
+		}
 	}
 
 	return result;
