@@ -39,7 +39,6 @@ namespace Halley {
 		constexpr Angle() : value(0) {}
 		explicit constexpr Angle(T radians) : value(radians) {}
 		constexpr Angle(const Angle &angle) : value(angle.value) {}
-		constexpr Angle(Angle&& angle) noexcept : value(std::move(angle.value)) {}
 
 		// Comparison
 		constexpr bool operator== (const Angle &param) const { return value == param.value; }
@@ -73,8 +72,8 @@ namespace Halley {
 		}
 
 		// In-place operations
-		constexpr Angle& operator= (const Angle &angle) noexcept { value = angle.value; return *this; }
-		constexpr Angle& operator= (Angle&& angle) noexcept { value = angle.value; return *this; }
+		constexpr Angle& operator= (const Angle& angle) noexcept = default;
+		constexpr Angle& operator= (Angle&& angle) noexcept = default;
 		constexpr void operator+= (const Angle &angle) { value += angle.value; limit(); }
 		constexpr void operator-= (const Angle &angle) { value -= angle.value; limit(); }
 
