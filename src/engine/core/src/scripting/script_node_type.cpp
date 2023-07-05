@@ -373,6 +373,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSetPosition>());
 	addScriptNode(std::make_unique<ScriptSetSubworld>());
 	addScriptNode(std::make_unique<ScriptGetPosition>());
+	addScriptNode(std::make_unique<ScriptGetRotation>());
 	addScriptNode(std::make_unique<ScriptSpawnEntity>());
 	addScriptNode(std::make_unique<ScriptDestroyEntity>());
 	addScriptNode(std::make_unique<ScriptFindChildByName>());

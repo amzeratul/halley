@@ -38,8 +38,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
-	return gsl::span<const PinType>(data).subspan(0, asChild ? 5 : 4);
+	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input } };
+	return gsl::span<const PinType>(data).subspan(0, asChild ? 6 : 5);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -52,9 +52,11 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 	str.append(node.getSettings()["prefab"].asString(""), settingColour);
 	str.append(" at position ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" with rotation ");
+	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
 	if (asChild) {
 		str.append(" relative to parent ");
-		str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+		str.append(getConnectedNodeName(world, node, graph, 5), parameterColour);
 	}
 	if (serializable) {
 		str.append(" and serialize it ");
@@ -62,6 +64,17 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 		str.append(" and don't serialize it ");
 	}
 	return str.moveResults();
+}
+
+String ScriptSpawnEntity::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Position";
+	}
+	if (elementIdx == 4) {
+		return "Rotation (Radians)";
+	}
+	return ScriptNodeTypeBase<ScriptSpawnEntityData>::getPinDescription(node, elementType, elementIdx);
 }
 
 void ScriptSpawnEntity::doInitData(ScriptSpawnEntityData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
@@ -77,11 +90,12 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
 	const Vector3f position = readDataPin(environment, node, 2).asVector3f({});
+	const Angle1f rotation = Angle1f(readDataPin(environment, node, 4).asFloat(0.0f));
 
 	if (!prefab.isEmpty()) {
 		EntityRef parent;
 		if (asChild) {
-			parent = environment.getWorld().getEntity(readEntityId(environment, node, 4));
+			parent = environment.getWorld().getEntity(readEntityId(environment, node, 5));
 		}
 		auto factory = EntityFactory(environment.getWorld(), environment.getResources());
 		auto entity = factory.createEntity(prefab, parent);
@@ -89,6 +103,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 		if (auto* transform = entity.tryGetComponent<Transform2DComponent>()) {
 			transform->setLocalPosition(position.xy());
 			transform->setLocalHeight(position.z);
+			transform->setLocalRotation(rotation);
 		}
 
 		entity.setSerializable(serializable);

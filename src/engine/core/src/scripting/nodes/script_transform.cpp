@@ -127,3 +127,51 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 	}
 	return ConfigNode();
 }
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptGetRotation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Get the rotation of ");
+	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return result.moveResults();
+}
+
+String ScriptGetRotation::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+    return "Rotation of " + getConnectedNodeName(world, node, graph, 0);
+}
+
+String ScriptGetRotation::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Rotation (Degrees)";
+	}
+	if (elementIdx == 2) {
+		return "Rotation (Radians)";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+ConfigNode ScriptGetRotation::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0));
+	if (transform) {
+		if (pinN == 1) {
+			return ConfigNode(transform->getGlobalRotation().toDegrees());
+		}
+		if (pinN == 2) {
+			return ConfigNode(transform->getGlobalRotation().toRadians());
+		}
+	}
+	return ConfigNode();
+}
