@@ -67,6 +67,8 @@ String Halley::OSUnix::getCurrentWorkingDir()
 		}
 	} while (cwd == nullptr);
 
+	result.truncate(strlen(cwd));
+
 	return result;
 }
 
