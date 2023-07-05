@@ -92,7 +92,7 @@ namespace Halley {
 	public:
 		GLInternals()
 		{
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < 16; i++) {
 				curTex[i] = 0;
 			}
 			numUnits = 0;
@@ -104,7 +104,7 @@ namespace Halley {
 
 		int curTexUnit;
 		int numUnits;
-		std::array<unsigned int, 8> curTex;
+		std::array<unsigned int, 16> curTex;
 		BlendType curBlend;
 		Rect4i viewport;
 		bool scissoring;
@@ -229,7 +229,7 @@ void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
 
 void GLUtils::setTextureUnit(int n)
 {
-	Expects(n >= 0 && n < 8);
+	Expects(n >= 0 && n < 16);
 
 	if (!checked || (state.curTexUnit != n)) {
 		glActiveTexture(GL_TEXTURE0 + n);
