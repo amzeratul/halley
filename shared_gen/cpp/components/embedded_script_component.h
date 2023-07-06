@@ -1,4 +1,4 @@
-// Halley codegen version 118
+// Halley codegen version 121
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -20,16 +20,16 @@ public:
 	{
 	}
 
-	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
+	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
-		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(script)>::serialize(script, Halley::ScriptGraph{}, context, node, componentName, "script", makeMask(Type::Prefab));
-		return node;
+		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		Halley::EntityConfigNodeSerializer<decltype(script)>::serialize(script, Halley::ScriptGraph{}, _context, _node, componentName, "script", makeMask(Type::Prefab));
+		return _node;
 	}
 
-	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
+	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(script)>::deserialize(script, Halley::ScriptGraph{}, context, node, componentName, "script", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(script)>::deserialize(script, Halley::ScriptGraph{}, _context, _node, componentName, "script", makeMask(Type::Prefab));
 	}
 
 };

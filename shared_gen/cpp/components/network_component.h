@@ -1,4 +1,4 @@
-// Halley codegen version 120
+// Halley codegen version 121
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -18,18 +18,18 @@ public:
 	NetworkComponent() {
 	}
 
-	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
+	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
-		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::HashMap<Halley::EntityId, uint8_t>{}, context, node, componentName, "locks", makeMask(Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::serialize(sendUpdates, bool{ false }, context, node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Network));
-		return node;
+		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::HashMap<Halley::EntityId, uint8_t>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::serialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Network));
+		return _node;
 	}
 
-	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
+	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::HashMap<Halley::EntityId, uint8_t>{}, context, node, componentName, "locks", makeMask(Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::deserialize(sendUpdates, bool{ false }, context, node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::HashMap<Halley::EntityId, uint8_t>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::deserialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Network));
 	}
 
 };

@@ -1,4 +1,4 @@
-// Halley codegen version 120
+// Halley codegen version 121
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -22,24 +22,24 @@ public:
 	{
 	}
 
-	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
+	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
-		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(position)>::serialize(position, Halley::Vector2f{}, context, node, componentName, "position", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(scale)>::serialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, context, node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(rotation)>::serialize(rotation, Halley::Angle1f{}, context, node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(height)>::serialize(height, float{}, context, node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::serialize(subWorld, Halley::OptionalLite<int16_t>{}, context, node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		return node;
+		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		Halley::EntityConfigNodeSerializer<decltype(position)>::serialize(position, Halley::Vector2f{}, _context, _node, componentName, "position", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::serialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, _context, _node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::serialize(rotation, Halley::Angle1f{}, _context, _node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(height)>::serialize(height, float{}, _context, _node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::serialize(subWorld, Halley::OptionalLite<int16_t>{}, _context, _node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		return _node;
 	}
 
-	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
+	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(position)>::deserialize(position, Halley::Vector2f{}, context, node, componentName, "position", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(scale)>::deserialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, context, node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(rotation)>::deserialize(rotation, Halley::Angle1f{}, context, node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(height)>::deserialize(height, float{}, context, node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::deserialize(subWorld, Halley::OptionalLite<int16_t>{}, context, node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(position)>::deserialize(position, Halley::Vector2f{}, _context, _node, componentName, "position", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::deserialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, _context, _node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::deserialize(rotation, Halley::Angle1f{}, _context, _node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(height)>::deserialize(height, float{}, _context, _node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::deserialize(subWorld, Halley::OptionalLite<int16_t>{}, _context, _node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 	}
 
 protected:

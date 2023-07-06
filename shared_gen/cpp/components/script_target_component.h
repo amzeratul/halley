@@ -1,4 +1,4 @@
-// Halley codegen version 118
+// Halley codegen version 121
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -20,16 +20,16 @@ public:
 	{
 	}
 
-	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
+	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
-		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(id)>::serialize(id, Halley::String{}, context, node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		return node;
+		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
+		Halley::EntityConfigNodeSerializer<decltype(id)>::serialize(id, Halley::String{}, _context, _node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		return _node;
 	}
 
-	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
+	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(id)>::deserialize(id, Halley::String{}, context, node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(id)>::deserialize(id, Halley::String{}, _context, _node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 	}
 
 };
