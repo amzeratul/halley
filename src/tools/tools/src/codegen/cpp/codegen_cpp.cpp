@@ -321,7 +321,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	contents.push_back("");
 
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
-	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak + "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
+	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak + "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak;
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
@@ -342,10 +342,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			deserializeBody += lineBreak;
 		}
 
-		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, componentName, \"" + member.name + "\", " + mask + ");";
-		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, componentName, \"" + member.name + "\", " + mask + ");";
+		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
+		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
 	}
-	serializeBody += lineBreak + "return node;";
+	serializeBody += lineBreak + "return _node;";
 
 	gen
 		.setAccessLevel(MemberAccess::Public)
@@ -369,11 +369,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	// Serialize & deserialize methods
 	gen.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("Halley::ConfigNode"), {
-			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "context")
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context")
 		}, "serialize", true), serializeBody)
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
-			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
 		}, "deserialize"), deserializeBody)
 		.addBlankLine();
 

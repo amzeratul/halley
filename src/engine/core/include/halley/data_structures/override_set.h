@@ -31,6 +31,11 @@ namespace Halley {
 			return entries.back().value;
 		}
 
+		const T& getValueOr(const T& fallback) const
+		{
+			return entries.empty() ? fallback : entries.back().value;
+		}
+
 		const T* tryGetValue() const
 		{
 			return entries.empty() ? nullptr : &entries.back().value;
