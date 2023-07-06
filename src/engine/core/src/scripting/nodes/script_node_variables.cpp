@@ -1064,10 +1064,14 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinCo
 
 String ScriptInsertValueIntoSequence::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Insert value " +
-		getConnectedNodeName(world, node, graph, 1) +
-		" into sequence " +
-		getConnectedNodeName(world, node, graph, 0);
+	auto startSeq = getConnectedNodeName(world, node, graph, 0);
+	if (startSeq.startsWith("[") && startSeq.endsWith("]")) {
+		startSeq = startSeq.mid(1, startSeq.size() - 2).trimBoth();
+	}
+	if (startSeq == "<empty>") {
+		startSeq = {};
+	}
+	return "[ " + (startSeq.isEmpty() ? "" : startSeq + ", ") + getConnectedNodeName(world, node, graph, 1) + " ]";
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
