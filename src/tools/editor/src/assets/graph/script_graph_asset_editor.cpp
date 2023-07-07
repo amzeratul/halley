@@ -10,6 +10,13 @@ ScriptGraphAssetEditor::ScriptGraphAssetEditor(UIFactory& factory, Resources& ga
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
 {
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		if (!dllListenerAdded) {
+			dll.addReloadListener(*this);
+			dllListenerAdded = true;
+		}
+	});
 }
 
 ScriptGraphAssetEditor::~ScriptGraphAssetEditor()
@@ -18,17 +25,6 @@ ScriptGraphAssetEditor::~ScriptGraphAssetEditor()
 	{
 		if (dllListenerAdded) {
 			dll.removeReloadListener(*this);
-		}
-	});
-}
-
-void ScriptGraphAssetEditor::onMakeUI()
-{
-	project.withDLL([&] (ProjectDLL& dll)
-	{
-		if (!dllListenerAdded) {
-			dll.addReloadListener(*this);
-			dllListenerAdded = true;
 		}
 	});
 }

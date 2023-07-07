@@ -67,21 +67,23 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
 {
 	auto pinDesc = getPinDescription(node, elementType, elementIdx);
-	auto connected = getConnectedNodeName(world, node, graph, elementIdx);
-	if (connected == "<empty>") {
-		return { pinDesc, {} };
-	}
 
 	ColourStringBuilder builder;
 
 	const auto type = ScriptNodeElementType(elementType.type);
 	if ((type == ScriptNodeElementType::ReadDataPin || type == ScriptNodeElementType::TargetPin) && elementType.direction == GraphNodePinDirection::Input) {
+		const auto connected = getConnectedNodeName(world, node, graph, elementIdx);
 		builder.append(pinDesc);
-		builder.append(" := ");
-		builder.append(connected, settingColour);
+		if (connected != "<empty>") {
+			builder.append(" := ");
+			builder.append(connected, settingColour);
+		}
 	} else if (type == ScriptNodeElementType::WriteDataPin && elementType.direction == GraphNodePinDirection::Output) {
-		builder.append(connected, settingColour);
-		builder.append(" := ");
+		const auto connected = getConnectedNodeName(world, node, graph, elementIdx);
+		if (connected != "<empty>") {
+			builder.append(connected, settingColour);
+			builder.append(" := ");
+		}
 		builder.append(pinDesc);
 	} else {
 		builder.append(pinDesc);

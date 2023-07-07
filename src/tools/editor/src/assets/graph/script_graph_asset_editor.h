@@ -12,8 +12,7 @@ namespace Halley {
 		~ScriptGraphAssetEditor() override;
 
         void reload() override;
-        void refreshAssets() override;
-		void onMakeUI() override;
+		void refreshAssets() override;
 		
 		void save() override;
 		bool isModified() override;
