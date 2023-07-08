@@ -82,4 +82,9 @@ void Toolbar::makeUI()
 	{
 		projectWindow.buildGame();
 	});
+
+	setHandle(UIEventType::ButtonRightClicked, "buildProject", [=] (const UIEvent& event)
+	{
+		// TODO
+	});
 }

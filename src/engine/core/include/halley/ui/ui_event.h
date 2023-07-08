@@ -16,6 +16,7 @@ namespace Halley {
 		AssetsReloaded,
 		ButtonClicked,
 		ButtonDoubleClicked,
+		ButtonRightClicked,
 		CanvasDoubleClicked,
 		CheckboxUpdated,
 		Dragged,

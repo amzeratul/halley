@@ -57,6 +57,11 @@ void UIButton::onClicked(Vector2f, KeyMods keyMods)
 	sendEvent(UIEvent(UIEventType::ButtonClicked, getId(), KeyCode(0), keyMods));
 }
 
+void UIButton::onRightClicked(Vector2f mousePos, KeyMods keyMods)
+{
+	sendEvent(UIEvent(UIEventType::ButtonRightClicked, getId(), KeyCode(0), keyMods));
+}
+
 void UIButton::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
