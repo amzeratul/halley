@@ -118,6 +118,7 @@ namespace Halley
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
 		void markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets);
 		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
+		Vector<Path> getAllFailedFilenames() const;
 
 		std::pair<Path, Vector<Path>> getInputFiles(ImportAssetType type, const String& assetId) const;
 		Vector<AssetResource> getOutFiles(ImportAssetType assetType, const String& assetId) const;

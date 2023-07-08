@@ -418,6 +418,19 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 	return result;
 }
 
+Vector<Path> ImportAssetsDatabase::getAllFailedFilenames() const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	Vector<Path> result;
+	for (const auto& [k, v] : assetsFailed) {
+		for (auto& file: v.asset.inputFiles) {
+			result.push_back(v.asset.srcDir / file.getPath());
+			break; // The first file is enough
+		}
+	}
+	return result;
+}
+
 std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);

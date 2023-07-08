@@ -50,6 +50,7 @@ namespace Halley
 		AssetTable checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta);
 		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta);
 		Vector<DirectoryMonitor::Event> filterDuplicateChanges(const Vector<DirectoryMonitor::Event>& changes) const;
+		void addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const;
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
 		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;

@@ -151,7 +151,9 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 		return false;
 	}
 
-	const auto assets = checkChangedAssets(db, filterDuplicateChanges(changes), srcPaths, dstPath, collectDirMeta);
+	auto changes2 = filterDuplicateChanges(changes);
+	addFailedFiles(db, changes2);
+	const auto assets = checkChangedAssets(db, changes2, srcPaths, dstPath, collectDirMeta);
 	if (isCancelled()) {
 		return false;
 	}
@@ -416,6 +418,13 @@ Vector<DirectoryMonitor::Event> CheckAssetsTask::filterDuplicateChanges(const Ve
 		}
 	}
 	return result;
+}
+
+void CheckAssetsTask::addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const
+{
+	for (const auto& failed: db.getAllFailedFilenames()) {
+		changes.push_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileModified, failed.getString(), "" });
+	}
 }
 
 bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter)
