@@ -63,6 +63,9 @@ void Toolbar::makeUI()
 		case EditorTabs::Settings:
 			toolName = "Settings";
 			break;
+		case EditorTabs::Terminal:
+			toolName = "Terminal";
+			break;
 		}
 		toolNameWidget->setText(LocalisedString::fromHardcodedString(toolName));
 		projectWindow.setPage(tab);

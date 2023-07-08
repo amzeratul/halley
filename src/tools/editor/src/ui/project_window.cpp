@@ -130,6 +130,7 @@ void ProjectWindow::makePagedPane()
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
+	auto remotes = std::make_shared<UIWidget>();
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
@@ -139,9 +140,10 @@ void ProjectWindow::makePagedPane()
 	pagedPane->setGuardedUpdate(true);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(remotes, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Terminal))->add(consoleWindow, 1, margin);
 
 	uiMid->add(pagedPane, 1);
 }

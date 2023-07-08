@@ -26,6 +26,9 @@ children:
     - id: settings
       image: ui/toolbar_settings.png
       tooltip: Halley Settings
+    - id: terminal
+      image: ui/toolbar_terminal.png
+      tooltip: Terminal
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: $toolbarNormal }
   children:
   - widget: { class: label, id: toolName, text: Assets, style: labelToolbar }
