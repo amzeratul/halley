@@ -83,8 +83,12 @@ void ProjectWindow::makeUI()
 
 	makeToolbar();
 	makePagedPane();
+
+	auto statusBar = std::make_shared<StatusBar>(factory, *this);
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 0));
-	uiBottom->add(std::make_shared<StatusBar>(factory, *this), 0, Vector4f(8, 0, 8, 4));
+	uiBottom->add(statusBar, 0, Vector4f(8, 0, 8, 4));
+
+	consoleWindow->setStatusBar(statusBar);
 
 	setHandle(UIEventType::NavigateToAsset, [=] (const UIEvent& event)
 	{
@@ -307,6 +311,7 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 void ProjectWindow::setPage(EditorTabs tab)
 {
 	pagedPane->setPage(static_cast<int>(tab));
+	toolbar->onPageSet(toString(tab));
 }
 
 LocalisedString ProjectWindow::setCustomPage(const String& pageId)
@@ -315,6 +320,7 @@ LocalisedString ProjectWindow::setCustomPage(const String& pageId)
 	for (auto& custom: customTools) {
 		if (custom.id == pageId) {
 			pagedPane->setPage(numOfStandardTools + i);
+			toolbar->onPageSet(pageId);
 			return custom.text;
 		}
 		++i;

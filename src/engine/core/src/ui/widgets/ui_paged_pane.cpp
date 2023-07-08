@@ -42,6 +42,7 @@ void UIPagedPane::resizePages(int numPages)
 		for (int i = curPages; i < numPages; ++i) {
 			addPage();
 		}
+		setPage(currentPage);
 	} else if (numPages < curPages) {
 		// Remove
 		for (int i = numPages; i < curPages; ++i) {

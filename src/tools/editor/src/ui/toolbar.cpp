@@ -24,6 +24,11 @@ const std::shared_ptr<UIList>& Toolbar::getList() const
 	return list;
 }
 
+void Toolbar::onPageSet(const String& tabId)
+{
+	list->setSelectedOptionId(tabId);
+}
+
 void Toolbar::makeUI()
 {
 	add(factory.makeUI("halley/toolbar"), 1);

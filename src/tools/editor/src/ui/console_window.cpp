@@ -1,5 +1,7 @@
 #include "console_window.h"
 
+#include "status_bar.h"
+
 using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(UIFactory& ui, const HalleyAPI& api)
@@ -23,6 +25,11 @@ void ConsoleWindow::log(LoggerLevel level, const std::string_view msg)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	buffer.emplace_back(level, msg);
+}
+
+void ConsoleWindow::setStatusBar(std::shared_ptr<StatusBar> statusBar)
+{
+	this->statusBar = std::move(statusBar);
 }
 
 Colour4f ConsoleWindow::getColour(const UIColourScheme& colourScheme, LoggerLevel level)
@@ -51,5 +58,14 @@ void ConsoleWindow::update(Time t, bool moved)
 
 	for (auto& b: buf2) {
 		console->addLine(b.second, getColour(*colourScheme, b.first));
+	}
+}
+
+void ConsoleWindow::onActiveChanged(bool active)
+{
+	if (active) {
+		if (statusBar) {
+			statusBar->notifyConsoleOpen();
+		}
 	}
 }

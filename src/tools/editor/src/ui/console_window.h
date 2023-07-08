@@ -5,6 +5,7 @@
 
 namespace Halley
 {
+	class StatusBar;
 	class Painter;
 
 	class ConsoleWindow : public UIWidget, public ILoggerSink
@@ -14,11 +15,13 @@ namespace Halley
 		~ConsoleWindow();
 
 		void log(LoggerLevel level, const std::string_view msg) override;
+		void setStatusBar(std::shared_ptr<StatusBar> statusBar);
 
 		static Colour4f getColour(const UIColourScheme& colourScheme, LoggerLevel level);
 
 	protected:
 		void update(Time t, bool moved) override;
+		void onActiveChanged(bool active) override;
 
 	private:
 		UIFactory& factory;
@@ -27,6 +30,8 @@ namespace Halley
 		std::shared_ptr<UIDebugConsole> console;
 
 		std::shared_ptr<UIDebugConsoleController> controller;
+
+		std::shared_ptr<StatusBar> statusBar;
 
 		mutable std::mutex mutex;
 	};

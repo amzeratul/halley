@@ -446,6 +446,9 @@ void UIWidget::notifyActivationChange(bool active)
 	for (auto& c: getChildren()) {
 		c->notifyActivationChange(active);
 	}
+	for (auto& c: getChildrenWaiting()) {
+		c->notifyActivationChange(active);
+	}
 }
 
 void UIWidget::onActiveChanged(bool active)

@@ -9,20 +9,26 @@ namespace Halley {
 		StatusBar(UIFactory& factory, ProjectWindow& projectWindow);
 		~StatusBar() override;
 
-		void update(Time t, bool moved) override;
-		void draw(UIPainter& painter) const override;
+		void notifyConsoleOpen();
 
 	protected:
 		void log(LoggerLevel level, std::string_view msg) override;
+
+		void update(Time t, bool moved) override;
+		void draw(UIPainter& painter) const override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
 	private:
 		UIFactory& factory;
 		ProjectWindow& projectWindow;
 		
 		Sprite background;
+		Sprite statusLED;
 		TextRenderer statusText;
 
 		std::mutex mutex;
-		std::optional<std::pair<LoggerLevel, String>> nextStatus;
+		std::list<std::pair<LoggerLevel, String>> pendingStatus;
+
+		void resetLED();
 	};
 }

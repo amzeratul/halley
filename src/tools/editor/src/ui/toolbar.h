@@ -37,6 +37,7 @@ namespace Halley {
 		Toolbar(UIFactory& factory, ProjectWindow& projectWindow, Project& project);
 
 		const std::shared_ptr<UIList>& getList() const;
+		void onPageSet(const String& tabId);
 
 	private:
 		UIFactory& factory;
