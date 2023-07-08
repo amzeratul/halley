@@ -47,6 +47,8 @@ children:
   border: [-5, 0, 0, 0]
 - widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42], tooltip: "Build Project" }
   border: [-5, 0, 0, 0]
+- widget: { id: import, class: button, icon: ui/import.png, style: slantButton, size: [42, 42], tooltip: "Import Assets" }
+  border: [-5, 0, 0, 0]
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
   border: [-5, 3, 0, 3]
 - widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42], tooltip: "Close Project" }

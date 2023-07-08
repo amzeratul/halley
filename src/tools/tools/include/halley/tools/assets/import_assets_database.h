@@ -97,6 +97,7 @@ namespace Halley
 
 		void load();
 		void save() const;
+		void clear();
 		std::unique_ptr<AssetDatabase> makeAssetDatabase(const String& platform) const;
 
 		bool needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const;

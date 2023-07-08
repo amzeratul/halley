@@ -7,6 +7,23 @@ namespace Halley
 {
 	class Project;
 
+	enum class ReimportType {
+		ImportAll,
+		ReimportAll,
+		Codegen
+	};
+
+	template <>
+	struct EnumNames<ReimportType> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"ImportAll",
+				"ReimportAll",
+				"Codegen"
+			}};
+		}
+	};
+
 	class CheckAssetsTask : public Task
 	{
 	public:
@@ -14,6 +31,7 @@ namespace Halley
 		~CheckAssetsTask();
 
 		void requestRefreshAssets(gsl::span<const Path> paths);
+		void requestReimport(ReimportType type);
 
 	protected:
 		void run() override;
@@ -37,6 +55,7 @@ namespace Halley
 
 		Vector<Path> inbox;
 		Vector<Path> pending;
+		std::optional<ReimportType> pendingReimport;
 
 		using AssetTable = HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>;
 

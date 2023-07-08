@@ -83,8 +83,19 @@ void Toolbar::makeUI()
 		projectWindow.buildGame();
 	});
 
-	setHandle(UIEventType::ButtonRightClicked, "buildProject", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "import", [=] (const UIEvent& event)
 	{
-		// TODO
+		auto menuOptions = Vector<UIPopupMenuItem>();
+		
+		menuOptions.push_back(UIPopupMenuItem("ImportAll", LocalisedString::fromHardcodedString("Import Assets"), {}, LocalisedString::fromHardcodedString("Import all assets")));
+		menuOptions.push_back(UIPopupMenuItem("ReimportAll", LocalisedString::fromHardcodedString("Reimport All Assets"), {}, LocalisedString::fromHardcodedString("Reimport all assets from scratch")));
+		menuOptions.push_back(UIPopupMenuItem("Codegen", LocalisedString::fromHardcodedString("Re-run Codegen"), {}, LocalisedString::fromHardcodedString("Re-run codegen")));
+
+		auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+		menu->spawnOnRoot(*getRoot());
+
+		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+			project.requestReimport(fromString<ReimportType>(e.getStringData()));
+		});
 	});
 }

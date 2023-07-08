@@ -161,6 +161,15 @@ void ImportAssetsDatabase::save() const
 	FileSystem::writeFile(assetsDbFile, Serializer::toBytes(*pcAssetDatabase));
 }
 
+void ImportAssetsDatabase::clear()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	inputFiles.clear();
+	assetsImported.clear();
+	assetsFailed.clear();
+	assetIndex.clear();
+}
+
 bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
 {
 	std::lock_guard<std::mutex> lock(mutex);

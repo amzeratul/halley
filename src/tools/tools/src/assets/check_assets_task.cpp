@@ -43,9 +43,12 @@ void CheckAssetsTask::run()
 		projectAssetImporter = project.getAssetImporter();
 
 		decltype(pending) curPending;
+		decltype(pendingReimport) curPendingReimport;
 		{
 			std::unique_lock<std::mutex> lock(mutex);
 			curPending = std::move(pending);
+			curPendingReimport = pendingReimport;
+			pendingReimport = {};
 		}
 		if (!curPending.empty()) {
 			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), curPending);
@@ -60,11 +63,32 @@ void CheckAssetsTask::run()
 			sleep(5);
 		}
 
-		// First run
+		// First import
 		if (first) {
-			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
 			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
 			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+			setVisible(false);
+			while (hasPendingTasks()) {
+				sleep(5);
+			}
+		}
+
+		// Reimport
+		if (curPendingReimport) {
+			setVisible(true);
+			if (curPendingReimport == ReimportType::Codegen) {
+				project.getCodegenDatabase().clear();
+				project.getSharedCodegenDatabase().clear();
+				importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
+				importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+			}
+			if (curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll) {
+				if (curPendingReimport == ReimportType::ReimportAll) {
+					project.getImportAssetsDatabase().clear();
+				}
+				importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+			}
 			setVisible(false);
 			while (hasPendingTasks()) {
 				sleep(5);
@@ -88,6 +112,7 @@ void CheckAssetsTask::run()
 		importing |= importChanged(std::move(genChanged), project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, true, project.getGenPath(), "Generating code", false);
 		importing |= importChanged(std::move(sharedGenChanged), project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, true, project.getSharedGenPath(), "Generating code", false);
 
+		setVisible(false);
 		while (hasPendingTasks()) {
 			sleep(5);
 		}
@@ -475,6 +500,12 @@ void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 		inbox.insert(inbox.end(), paths.begin(), paths.end());
 	}
 	condition.notify_one();
+}
+
+void CheckAssetsTask::requestReimport(ReimportType type)
+{
+	std::unique_lock<std::mutex> lock(mutex);
+	pendingReimport = type;
 }
 
 bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)

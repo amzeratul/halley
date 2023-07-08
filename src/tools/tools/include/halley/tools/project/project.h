@@ -143,6 +143,8 @@ namespace Halley
 
 		FileSystemCache& getFileSystemCache();
 
+		void requestReimport(ReimportType reimport);
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;

@@ -531,6 +531,13 @@ FileSystemCache& Project::getFileSystemCache()
 	return *fileSystemCache;
 }
 
+void Project::requestReimport(ReimportType reimport)
+{
+	if (checkAssetsTask) {
+		checkAssetsTask->requestReimport(reimport);
+	}
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {
