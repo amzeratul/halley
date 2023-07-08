@@ -21,7 +21,7 @@ StatusBar::StatusBar(UIFactory& factory, ProjectWindow& projectWindow)
 	statusLED
 		.setImage(factory.getResources(), "halley_ui/ui_status_led.png");
 
-	resetLED();
+	updateLED(0.0);
 
 	setInteractWithMouse(true);
 
@@ -48,11 +48,17 @@ void StatusBar::update(Time t, bool moved)
 
 			statusText.setText(LocalisedString::fromUserString(next.second));
 			statusText.setColour(colour);
-			statusLED.setColour(colour);
+
+			if (next.first > LoggerLevel::Info) {
+				pendingLED.emplace_back(LEDState{ next.first, 0.05, 0.2 });
+				idleLEDLevel = std::max(idleLEDLevel, next.first);
+			}
 
 			pendingStatus.pop_front();
 		}
 	}
+
+	updateLED(t);
 
 	background.setPosition(getPosition()).scaleTo(getSize());
 	statusLED.setPosition(getPosition() + Vector2f(2, 2));
@@ -74,10 +80,35 @@ void StatusBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	}
 }
 
+void StatusBar::updateLED(Time t)
+{
+	LoggerLevel curLevel = idleLEDLevel;
+
+	if (!pendingLED.empty()) {
+		auto& curState = pendingLED.front();
+		if (curState.offTime > 0) {
+			curState.offTime -= t;
+			curLevel = LoggerLevel::Info;
+		} else {
+			curState.onTime -= t;
+			curLevel = curState.level;
+			if (curState.onTime < 0) {
+				pendingLED.pop_front();
+			}
+		}
+	}
+
+	const auto& colourScheme = factory.getColourScheme();
+	if (curLevel == LoggerLevel::Info) {
+		statusLED.setColour(colourScheme->getColour("ui_text").withAlpha(0.2f));
+	} else {
+		statusLED.setColour(ConsoleWindow::getColour(*colourScheme, curLevel));
+	}
+}
+
 void StatusBar::resetLED()
 {
-	const auto& colourScheme = factory.getColourScheme();
-	statusLED.setColour(colourScheme->getColour("ui_text").withAlpha(0.25f));
+	idleLEDLevel = LoggerLevel::Info;
 }
 
 void StatusBar::log(LoggerLevel level, std::string_view msg)

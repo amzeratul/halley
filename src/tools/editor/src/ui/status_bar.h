@@ -19,6 +19,12 @@ namespace Halley {
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
 	private:
+		struct LEDState {
+			LoggerLevel level;
+			Time offTime = 0;
+			Time onTime = 0;
+		};
+
 		UIFactory& factory;
 		ProjectWindow& projectWindow;
 		
@@ -29,6 +35,10 @@ namespace Halley {
 		std::mutex mutex;
 		std::list<std::pair<LoggerLevel, String>> pendingStatus;
 
+		std::list<LEDState> pendingLED;
+		LoggerLevel idleLEDLevel = LoggerLevel::Info;
+
+		void updateLED(Time t);
 		void resetLED();
 	};
 }

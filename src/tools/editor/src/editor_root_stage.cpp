@@ -8,6 +8,7 @@
 #include "ui/console_window.h"
 #include "ui/load_project_window.h"
 #include "assets/assets_browser.h"
+#include "halley/tools/project/project_properties.h"
 #include "scene/scene_editor_window.h"
 #include "ui/project_window.h"
 
@@ -213,6 +214,8 @@ void EditorRootStage::loadProject()
 	uiFactory->setProject(projectWindow.get(), &project->getGameResources());
 	projectWindow->makeUI();
 	setTopLevelUI(projectWindow);
+
+	Logger::logInfo("Project \"" + project->getProperties().getName() + "\" loaded.");
 }
 
 void EditorRootStage::unloadProject()

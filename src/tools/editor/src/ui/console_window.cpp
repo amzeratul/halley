@@ -59,13 +59,8 @@ void ConsoleWindow::update(Time t, bool moved)
 	for (auto& b: buf2) {
 		console->addLine(b.second, getColour(*colourScheme, b.first));
 	}
-}
 
-void ConsoleWindow::onActiveChanged(bool active)
-{
-	if (active) {
-		if (statusBar) {
-			statusBar->notifyConsoleOpen();
-		}
+	if (statusBar) {
+		statusBar->notifyConsoleOpen();
 	}
 }

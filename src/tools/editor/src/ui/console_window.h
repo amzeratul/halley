@@ -21,7 +21,6 @@ namespace Halley
 
 	protected:
 		void update(Time t, bool moved) override;
-		void onActiveChanged(bool active) override;
 
 	private:
 		UIFactory& factory;
