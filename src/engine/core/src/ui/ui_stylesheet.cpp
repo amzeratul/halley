@@ -132,10 +132,10 @@ const T& getValue(const ConfigNode* node, UIStyleSheet& styleSheet, const String
 		// Not found. Use a default.
 		const auto iter2 = cache.find(":default");
 		if (iter2 != cache.end()) {
-			Logger::logWarning(String(typeid(T).name()) + " not found in UI style: " + name + "." + key);
+			Logger::logWarning(name + "." + key + " (" + String(typeid(T).name()) + ") not found in UI style.");
 			return iter2->second;
 		} else {
-			throw Exception(String(typeid(T).name()) + " not found in UI style: " + name + "." + key + ". Additionally, default was not set.", HalleyExceptions::Tools);
+			throw Exception(name + "." + key + " (" + String(typeid(T).name()) + ") not found in UI style. Additionally, default was not set.", HalleyExceptions::Tools);
 		}
 	}
 }

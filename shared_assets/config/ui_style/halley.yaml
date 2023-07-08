@@ -337,6 +337,7 @@ uiStyle:
     spinControl:
       box: { img: $ui_input_thin, colour: $ui_inputNormal }
       caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
+      selectionBg: { img: whitebox.png, colour: "#FFFFFF40" }
       innerBorder: [ 6, 2, 6, 3 ]
       label: { font: Ubuntu Light, size: 14, colour: $ui_text }
       labelGhost: { font: Ubuntu Light, size: 14, colour: $ui_textGhost }
