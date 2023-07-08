@@ -62,12 +62,12 @@ namespace Halley
 		static bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 
-		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter);
+		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange);
 		bool importChanged(Vector<DirectoryMonitor::Event> changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodegen, Path dstPath, String taskName, bool packAfter);
 
 		AssetTable checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
 		AssetTable checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta);
-		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta);
+		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange);
 
 		void filterDuplicateChanges(Vector<DirectoryMonitor::Event>& changes) const;
 		void postProcessChanges(Vector<DirectoryMonitor::Event>& changes) const;

@@ -65,9 +65,9 @@ void CheckAssetsTask::run()
 
 		// First import
 		if (first) {
-			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
-			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
-			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false, Range<float>(0, 0.05f));
+			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false, Range<float>(0.05f, 0.1f));
+			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true, Range<float>(0.1f, 1.0f));
 			setVisible(false);
 			while (hasPendingTasks()) {
 				sleep(5);
@@ -77,17 +77,22 @@ void CheckAssetsTask::run()
 		// Reimport
 		if (curPendingReimport) {
 			setVisible(true);
-			if (curPendingReimport == ReimportType::Codegen) {
+			const bool hasCodeGen = curPendingReimport == ReimportType::Codegen;
+			const bool hasAssets = curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;
+
+			if (hasCodeGen) {
 				project.getCodegenDatabase().clear();
 				project.getSharedCodegenDatabase().clear();
-				importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
-				importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+				const float rangeEnd = hasAssets ? 0.1f : 1.0f;
+				importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false, Range(0.0f, rangeEnd * 0.5f));
+				importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false, Range(rangeEnd * 0.5f, rangeEnd));
 			}
-			if (curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll) {
+			if (hasAssets) {
 				if (curPendingReimport == ReimportType::ReimportAll) {
 					project.getImportAssetsDatabase().clear();
 				}
-				importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
+				const float rangeStart = hasCodeGen ? 0.1f : 0.0f;
+				importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true, Range(rangeStart, 1.0f));
 			}
 			setVisible(false);
 			while (hasPendingTasks()) {
@@ -136,12 +141,12 @@ void CheckAssetsTask::run()
 	}
 }
 
-bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter)
+bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange)
 {
 	if (isCancelled()) {
 		return false;
 	}
-	const auto assets = checkAllAssets(db, srcPaths, collectDirMeta);
+	const auto assets = checkAllAssets(db, srcPaths, collectDirMeta, progressRange);
 
 	if (isCancelled()) {
 		return false;
@@ -168,7 +173,7 @@ bool CheckAssetsTask::importChanged(Vector<DirectoryMonitor::Event> changes, Imp
 	
 	// If we have a wildcard change, reimport all
 	if (reimportAll) {
-		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter);
+		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter, Range<float>(0, 0));
 	}
 
 	// Otherwise we'll only import the ones that changed
@@ -387,7 +392,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsData
 	return assets;
 }
 
-CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta)
+CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange)
 {
 	AssetTable assets;
 
@@ -400,7 +405,13 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAllInputFilesAsMissing();
 
 	// Enumerate all potential assets
+	int i = 0;
 	for (const auto& srcPath: srcPaths) {
+		const auto rangeSize = progressRange.getLength() / static_cast<float>(srcPaths.size());
+		const auto curRange = Range<float>(i * rangeSize + progressRange.start, (i + 1) * rangeSize + progressRange.start);
+
+		setProgress(curRange.start, "Enumerating " + srcPath.getNativeString());
+
 		auto allFiles = FileSystem::enumerateDirectory(srcPath);
 
 		// First, collect all directory metas
@@ -413,13 +424,25 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 		}
 
 		// Next, go through normal files
-		for (const auto& filePath : allFiles) {
+		Path curPath;
+		size_t j = 0;
+		for (const auto& filePath: allFiles) {
+			auto parentPath = filePath.parentPath();
+			if (parentPath != curPath) {
+				curPath = parentPath;
+				const float prog = lerp(curRange.start, curRange.end, j / static_cast<float>(allFiles.size()));
+				setProgress(prog, "Checking " + curPath.getNativeString(false));
+			}
+
 			if (isCancelled()) {
 				return {};
 			}
 
 			dbChanged = importFile(db, assets, collectDirMeta, srcPath, srcPaths, filePath) || dbChanged;
+			j++;
 		}
+
+		i++;
 	}
 
 	dbChanged = db.purgeMissingInputs() || dbChanged;
