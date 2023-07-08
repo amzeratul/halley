@@ -22,6 +22,7 @@ namespace Halley {
 		void saveAllTabs();
 		void closeCurrentTab();
 		bool closeTab(const String& key);
+		bool reloadTab(const String& key);
 		void renameTab(const String& id, const String& newId, std::optional<AssetType> assetType);
 		void moveTabFocus(int delta);
 		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
@@ -38,6 +39,7 @@ namespace Halley {
 		std::shared_ptr<UIPagedPane> pages;
 		Vector<std::shared_ptr<AssetEditorWindow>> windows;
 		Vector<String> toClose;
+		Vector<String> toReload;
 
 		bool srcMode = false;
 		bool waitingLoad = true;
@@ -45,7 +47,9 @@ namespace Halley {
 
 		void makeUI();
 		void openTab(std::optional<AssetType> assetType, const String& name, bool selected);
+		bool confirmTabAction(const String& key, std::function<void(bool)> action);
 		void doCloseTab(const String& key);
+		void doReloadTab(const String& key);
 		void populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key);
 		void updateTab(UIWidget& tab, const String& name, const String& key);
 

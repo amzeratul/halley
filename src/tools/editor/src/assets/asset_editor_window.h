@@ -15,6 +15,8 @@ namespace Halley {
 		explicit AssetEditorWindow(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
 		void onMakeUI() override;
+		void reload();
+
 		void setAssetSrcMode(bool assetSrcMode);
 		void onDoubleClickAsset();
 		void refreshAssets();

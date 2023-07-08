@@ -44,6 +44,12 @@ void AssetEditorWindow::onMakeUI()
 	});
 }
 
+void AssetEditorWindow::reload()
+{
+	lastAssets = {};
+	refreshAssets();
+}
+
 void AssetEditorWindow::setAssetSrcMode(bool assetSrcMode)
 {
 	this->assetSrcMode = assetSrcMode;

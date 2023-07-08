@@ -64,7 +64,7 @@ static Vector<UIConfirmationPopup::ButtonType> makeButtons(bool canSave)
 	return buttons;
 }
 
-bool AssetBrowserTabs::closeTab(const String& key)
+bool AssetBrowserTabs::confirmTabAction(const String& key, std::function<void(bool)> action)
 {
 	tabs->setSelectedOptionId(key);
 	auto idx = tabs->getSelectedOption();
@@ -73,27 +73,46 @@ bool AssetBrowserTabs::closeTab(const String& key)
 		if (getRoot() && !getRoot()->hasModalUI()) {
 			auto buttons = makeButtons(windows[idx]->canSave(true));
 			
-			auto callback = [this, idx, key] (UIConfirmationPopup::ButtonType buttonType)
+			auto callback = [this, idx, action] (UIConfirmationPopup::ButtonType buttonType)
 			{
-				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
-					std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
-				} else {
-					if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
-						windows[idx]->save();
-					}
-					doCloseTab(key);
+				if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
+					windows[idx]->save();
 				}
+				action(buttonType != UIConfirmationPopup::ButtonType::Cancel);
 			};
 
 			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", std::move(buttons), std::move(callback)));
 		}
 
-		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 		return false;
-	} else {
-		doCloseTab(key);
 	}
+
+	action(true);
 	return true;
+}
+
+bool AssetBrowserTabs::closeTab(const String& key)
+{
+	return confirmTabAction(key, [=] (bool close)
+	{
+		if (close) {
+			doCloseTab(key);
+		} else {
+			toClose.clear();
+		}
+	});
+}
+
+bool AssetBrowserTabs::reloadTab(const String& key)
+{
+	return confirmTabAction(key, [=] (bool reload)
+	{
+		if (reload) {
+			doReloadTab(key);
+		} else {
+			toReload.clear();
+		}
+	});
 }
 
 void AssetBrowserTabs::renameTab(const String& id, const String& newId, std::optional<AssetType> assetType)
@@ -106,13 +125,22 @@ void AssetBrowserTabs::renameTab(const String& id, const String& newId, std::opt
 
 void AssetBrowserTabs::doCloseTab(const String& key)
 {
+	std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 	const auto idx = tabs->tryGetItemId(key);
 	if (idx != -1) {
 		pages->removePage(idx);
 		windows.erase(windows.begin() + idx);
 		tabs->removeItem(key);
 		saveTabs();
-		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
+	}
+}
+
+void AssetBrowserTabs::doReloadTab(const String& key)
+{
+	std_ex::erase_if(toReload, [&] (const auto& v) { return v == key; });
+	const auto idx = tabs->tryGetItemId(key);
+	if (idx != -1) {
+		windows[idx]->reload();
 	}
 }
 
@@ -307,6 +335,11 @@ void AssetBrowserTabs::update(Time t, bool moved)
 		closeTab(close);
 	}
 
+	auto reloading = toReload;
+	for (auto& reload: reloading) {
+		reloadTab(reload);
+	}
+
 	int size = static_cast<int>(windows.size());
 	for (int i = 0; i < size; ++i) {
 		tabs->getItem(i)->getWidget("modified")->setActive(windows[i]->isModified());
@@ -390,6 +423,7 @@ void AssetBrowserTabs::openContextMenu(const String& tabId)
 	makeEntry("close_other_tabs", "Close Others", "Close all other tabs.", "", true);
 	makeEntry("close_to_the_right", "Close to the Right", "Close all tabs to the right.", "", true);
 	makeEntry("close_all", "Close All", "Close all tabs.", "", true);
+	makeEntry("reload_tab", "Reload Tab", "Reload this tab.", "", true);
 
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->spawnOnRoot(*getRoot());
@@ -429,5 +463,7 @@ void AssetBrowserTabs::onContextMenuAction(const String& action, const String& t
 			const auto& id = tabs->getItem(i)->getId();
 			toClose.push_back(id);
 		}
+	} else if (action == "reload_tab") {
+		toReload.push_back(tabId);
 	}
 }
