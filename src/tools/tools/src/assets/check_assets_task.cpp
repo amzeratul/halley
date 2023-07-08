@@ -15,7 +15,7 @@ using namespace Halley;
 using namespace std::chrono_literals;
 
 CheckAssetsTask::CheckAssetsTask(Project& project, bool oneShot)
-	: Task("Checking assets", true, false)
+	: Task("Checking assets", true, true)
 	, project(project)
 	, monitorAssets(project.getUnpackedAssetsPath())
 	, monitorAssetsSrc(project.getAssetsSrcPath())
@@ -65,6 +65,7 @@ void CheckAssetsTask::run()
 			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true);
 			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false);
 			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false);
+			setVisible(false);
 			while (hasPendingTasks()) {
 				sleep(5);
 			}
@@ -102,7 +103,6 @@ void CheckAssetsTask::run()
 			return;
 		} else {
 			first = false;
-			setVisible(false);
 		}
 
 		if (pending.empty()) {
