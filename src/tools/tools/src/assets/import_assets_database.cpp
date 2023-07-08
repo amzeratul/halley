@@ -440,6 +440,12 @@ Vector<Path> ImportAssetsDatabase::getAllFailedFilenames() const
 	return result;
 }
 
+bool ImportAssetsDatabase::hasFailedFiles() const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	return !assetsFailed.empty();
+}
+
 std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
 {
 	std::lock_guard<std::mutex> lock(mutex);

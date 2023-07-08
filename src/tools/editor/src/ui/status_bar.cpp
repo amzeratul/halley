@@ -69,7 +69,7 @@ void StatusBar::draw(UIPainter& painter) const
 {
 	painter.draw(background);
 	painter.draw(statusLED);
-	auto p2 = painter.withClip(getRect().shrink(1));
+	auto p2 = painter.withClip(getRect().shrink(2));
 	p2.draw(statusText);
 }
 
