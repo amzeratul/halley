@@ -150,7 +150,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 		return result;
 	} else {
 		constexpr size_t blockSize = 256 * 1024;
-		Bytes result(std::min(blockSize, maxSize));
+		Bytes result(std::min(alignUp(bytes.size_bytes() * 2, blockSize), maxSize));
 
 		int res = 0;
 		do {
@@ -160,7 +160,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 					inflateEnd(&stream);
 					throw Exception("Unable to inflate stream, maximum size has been exceeded.", HalleyExceptions::Compression);
 				}
-				auto newSize = std::min(result.size() + blockSize, maxSize);
+				const auto newSize = std::min(result.size() * 2, maxSize);
 				result.resize(newSize);
 			}
 			stream.avail_out = uInt(result.size()) - stream.total_out;

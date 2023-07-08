@@ -635,16 +635,23 @@ namespace Halley {
 			const auto capacity = st_capacity();
 			assert(newCapacity >= size);
 			if (newCapacity != capacity) {
+				// Allocate new memory
 				const bool canUseSBO = sbo_max_objects() >= newCapacity;
 				pointer newData = canUseSBO ? sbo_data() : (newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr);
-
 				construct(newData);
-				
+
+				// Move old objects
 				auto* oldData = data();
-				for (size_type i = 0; i < size; ++i) {
-					std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
-					std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
+				if constexpr (std::is_trivially_copyable_v<T>) {
+					memcpy(newData, oldData, size * sizeof(T));
+				} else {
+					for (size_type i = 0; i < size; ++i) {
+						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
+						std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
+					}
 				}
+
+				// Deallocate old memory
 				if (!sbo_active() && oldData && capacity > 0) {
 					std::allocator_traits<Allocator>::deallocate(as_allocator(), oldData, capacity);
 				}
@@ -671,8 +678,9 @@ namespace Halley {
 				if (newSize > capacity()) {
 					change_capacity(newSize);
 				}
+				auto* d = data();
 				for (size_type i = st_size(); i < newSize; ++i) {
-					construct(data() + i);
+					construct(d + i);
 				}
 				set_size(newSize);
 			} else if (newSize < st_size()) {
@@ -683,8 +691,9 @@ namespace Halley {
 		void resize_down(size_type newSize)
 		{
 			assert(newSize <= st_size());
+			auto* d = data();
 			for (size_type i = newSize; i < st_size(); ++i) {
-				std::allocator_traits<Allocator>::destroy(as_allocator(), data() + i);
+				std::allocator_traits<Allocator>::destroy(as_allocator(), d + i);
 			}
 			set_size(newSize);
 		}
