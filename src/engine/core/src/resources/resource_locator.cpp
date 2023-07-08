@@ -80,7 +80,7 @@ std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, 
 	} else if (throwOnFail) {
 		throw Exception("Unable to locate resource: " + toString(type) + ":" + asset, HalleyExceptions::Resources);
 	} else {
-		Logger::logError("Unable to locate resource: " + toString(type) + ":" + asset);
+		//Logger::logError("Unable to locate resource: " + toString(type) + ":" + asset);
 		return {};
 	}
 }

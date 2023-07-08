@@ -334,7 +334,7 @@ namespace {
 		if (ao == 0) {
 			return Colour4c(0, 0, 0, 0);
 		}
-		auto result = (src * src.a + dst * Colour4c::mult(dst.a,  - src.a)) / ao;
+		auto result = (src * src.a + dst * Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a)) / ao;
 		result.a = ao;
 		return result;
 	}
