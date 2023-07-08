@@ -328,33 +328,8 @@ void Image::blitDownsampled(Image& srcImg, int scale)
 }
 
 namespace {
-	constexpr Colour4c alphaBlend(Colour4c src, Colour4c dst)
-	{
-		const auto ao = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
-		if (ao == 0) {
-			return Colour4c(0, 0, 0, 0);
-		}
-		auto result = (src * src.a + dst * Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a)) / ao;
-		result.a = ao;
-		return result;
-	}
-
-	constexpr Colour4c lightenBlend(Colour4c src, Colour4c dst)
-	{
-		auto result = Colour4c::max(src * src.a, dst);
-		result.a = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
-		return result;
-	}
-
-	constexpr Colour4c addBlend(Colour4c src, Colour4c dst)
-	{
-		auto result = src * src.a + dst;
-		result.a = std::max(src.a, dst.a);
-		return result;
-	}
-
 	template<typename F>
-	void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
+	void blendImages(const F& f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 	{
 		if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
 			throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
@@ -367,8 +342,8 @@ namespace {
 		const size_t rectH = srcRect.getHeight();
 		if (rectW > 0) {
 			for (size_t i = 0; i < rectH; ++i) {
-				const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
-				const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
+				const auto* __restrict srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft()).data();
+				auto* __restrict dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft()).data();
 				for (size_t j = 0; j < rectW; ++j) {
 					const auto srcCol = Image::convertIntToColour(srcData[j]).multiplyAlpha(opacity);
 					const auto dstCol = Image::convertIntToColour(dstData[j]);
@@ -384,17 +359,33 @@ namespace {
 
 void Image::drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity)
 {
-	blendImages(alphaBlend, src, *this, pos, opacity);
+	blendImages([](Colour4c src, Colour4c dst) {
+		const uint8_t ao = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
+		if (ao == 0) {
+			return Colour4c(0, 0, 0, 0);
+		}
+		auto result = (src * src.a + dst * Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a)) / ao;
+		result.a = ao;
+		return result;
+	}, src, *this, pos, opacity);
 }
 
 void Image::drawImageAdd(const Image& src, Vector2i pos, uint8_t opacity)
 {
-	blendImages(addBlend, src, *this, pos, opacity);
+	blendImages([](Colour4c src, Colour4c dst) {
+		auto result = src * src.a + dst;
+		result.a = std::max(src.a, dst.a);
+		return result;
+	}, src, *this, pos, opacity);
 }
 
 void Image::drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity)
 {
-	blendImages(lightenBlend, src, *this, pos, opacity);
+	blendImages([](Colour4c src, Colour4c dst) {
+		auto result = Colour4c::max(src * src.a, dst);
+		result.a = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
+		return result;
+	}, src, *this, pos, opacity);
 }
 
 std::unique_ptr<Image> Image::loadResource(ResourceLoader& loader)
