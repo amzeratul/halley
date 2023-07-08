@@ -220,22 +220,23 @@ namespace Halley {
 			return Vector3f(h, s, v);
 		}
 
-		[[nodiscard]] constexpr Colour4 multiplyLuma(float t) const
+		[[nodiscard]] constexpr Colour4 multiplyLuma(T t) const
 		{
-			return Colour4(r*t, g*t, b*t, a);
+			return Colour4(mult(r, t), mult(g, t), mult(b, t), a);
 		}
 
 		[[nodiscard]] constexpr Colour4 inverseMultiplyLuma(float t) const
 		{
-			return Colour4(1.0f - ((1.0f - r) * t), 1.0f - ((1.0f - g) * t), 1.0f - ((1.0f - b) * t), a);
+			const auto max = colMaxValue<T>();
+			return Colour4(max - mult(max - r, t), max - mult(max - g, t), max - mult(max - b, t), a);
 		}
 
-		[[nodiscard]] constexpr Colour4 multiplyAlpha(float t) const
+		[[nodiscard]] constexpr Colour4 multiplyAlpha(T t) const
 		{
-			return Colour4(r, g, b, a * t);
+			return Colour4(r, g, b, mult(a, t));
 		}
 
-		[[nodiscard]] constexpr Colour4 withAlpha(float newA) const
+		[[nodiscard]] constexpr Colour4 withAlpha(T newA) const
 		{
 			return Colour4(r, g, b, newA);
 		}
@@ -267,7 +268,11 @@ namespace Halley {
 
 		[[nodiscard]] constexpr Colour4 operator+(const Colour4& c) const
 		{
-			return Colour4(r+c.r, g+c.g, b+c.b, a+c.a);
+			if constexpr (std::is_integral_v<T>) {
+				return Colour4(addSat(r, c.r), addSat(g, c.g), addSat(b, c.b), addSat(a, c.a));
+			} else {
+				return Colour4(r + c.r, g + c.g, b + c.b, a + c.a);
+			}
 		}
 
 		[[nodiscard]] constexpr Colour4 operator*(const Colour4& c) const
@@ -275,9 +280,16 @@ namespace Halley {
 			return Colour4(r * c.r, g * c.g, b * c.b, a * c.a);
 		}
 
-		[[nodiscard]] constexpr Colour4 operator*(float t) const
+		template<typename U>
+		[[nodiscard]] constexpr Colour4 operator*(U t) const
 		{
-			return Colour4(r*t, g*t, b*t, a*t);
+			return Colour4(mult(r, t), mult(g, t), mult(b, t), mult(a, t));
+		}
+
+		template<typename U>
+		[[nodiscard]] constexpr Colour4 operator/(U t) const
+		{
+			return Colour4(div(r, t), div(g, t), div(b, t), div(a, t));
 		}
 
 		[[nodiscard]] constexpr bool operator==(const Colour4& c) const
@@ -293,6 +305,51 @@ namespace Halley {
 		[[nodiscard]] constexpr Vector4D<T> toVector4() const
 		{
 			return Vector4D<T>(r, g, b, a);
+		}
+
+		template<typename U>
+		[[nodiscard]] constexpr static auto mult(T a, U b) -> T
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return static_cast<T>(static_cast<int64_t>(a) * static_cast<int64_t>(b) / colMaxValue<U>());
+			} else {
+				return a * b;
+			}
+		}
+
+		template<typename U>
+		[[nodiscard]] constexpr static auto div(T a, U b) -> T
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return static_cast<T>(static_cast<int64_t>(a) * colMaxValue<U>() / static_cast<int64_t>(b));
+			} else {
+				return a / b;
+			}
+		}
+
+		template<typename U>
+		[[nodiscard]] constexpr static auto addSat(T a, U b) -> T
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return T(std::min(int64_t(a) + int64_t(b), int64_t(colMaxValue<T>())));
+			} else {
+				return std::min(a + b, colMaxValue<T>());
+			}
+		}
+
+		[[nodiscard]] constexpr static Colour4 max(Colour4 a, Colour4 b)
+		{
+			return Colour4(std::max(a.r, b.r), std::max(a.g, b.g), std::max(a.b, b.b), std::max(a.a, b.a));
+		}
+
+		[[nodiscard]] constexpr static Colour4 min(Colour4 a, Colour4 b)
+		{
+			return Colour4(std::min(a.r, b.r), std::min(a.g, b.g), std::min(a.b, b.b), std::min(a.a, b.a));
+		}
+
+		[[nodiscard]] constexpr static T getMaxValue()
+		{
+			return colMaxValue<T>();
 		}
 
 	private:

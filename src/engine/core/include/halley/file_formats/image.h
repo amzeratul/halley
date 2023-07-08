@@ -81,10 +81,33 @@ namespace Halley {
 		gsl::span<const int> getPixelRow4BPP(int x0, int x1, int y) const;
 		size_t getByteSize() const;
 
-		static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255);
-		static unsigned int convertColourToInt(Colour4c col);
-		static void convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a);
-		static Colour4c convertIntToColour(unsigned int col);
+		constexpr static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255)
+		{
+			return (a << 24) | (b << 16) | (g << 8) | r;
+		}
+
+		constexpr static unsigned int convertColourToInt(Colour4c col)
+		{
+			return (static_cast<unsigned>(col.a) << 24) | (static_cast<unsigned>(col.b) << 16) | (static_cast<unsigned>(col.g) << 8) | static_cast<unsigned>(col.r);
+		}
+
+		constexpr static void convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
+		{
+			r = col & 0xFF;
+			g = (col >> 8) & 0xFF;
+			b = (col >> 16) & 0xFF;
+			a = (col >> 24) & 0xFF;
+		}
+
+		constexpr static Colour4c convertIntToColour(unsigned int col)
+		{
+			Colour4c result;
+			result.r = col & 0xFF;
+			result.g = (col >> 8) & 0xFF;
+			result.b = (col >> 16) & 0xFF;
+			result.a = (col >> 24) & 0xFF;
+			return result;
+		}
 
 		unsigned int getWidth() const { return w; }
 		unsigned int getHeight() const { return h; }

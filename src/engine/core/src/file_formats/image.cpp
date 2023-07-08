@@ -107,34 +107,6 @@ size_t Image::getByteSize() const
 	return dataLen;
 }
 
-unsigned int Image::convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a)
-{
-	return (a << 24) | (b << 16) | (g << 8) | r;
-}
-
-unsigned Image::convertColourToInt(Colour4c col)
-{
-	return (static_cast<unsigned>(col.a) << 24) | (static_cast<unsigned>(col.b) << 16) | (static_cast<unsigned>(col.g) << 8) | static_cast<unsigned>(col.r);
-}
-
-void Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
-{
-	r = col & 0xFF;
-	g = (col >> 8) & 0xFF;
-	b = (col >> 16) & 0xFF;
-	a = (col >> 24) & 0xFF;
-}
-
-Colour4c Image::convertIntToColour(unsigned col)
-{
-	Colour4c result;
-	result.r = col & 0xFF;
-	result.g = (col >> 8) & 0xFF;
-	result.b = (col >> 16) & 0xFF;
-	result.a = (col >> 24) & 0xFF;
-	return result;
-}
-
 int Image::getBytesPerPixel() const
 {
 	switch (format) {
@@ -356,33 +328,34 @@ void Image::blitDownsampled(Image& srcImg, int scale)
 }
 
 namespace {
-	constexpr Colour4f alphaBlend(Colour4f src, Colour4f dst)
+	constexpr Colour4c alphaBlend(Colour4c src, Colour4c dst)
 	{
-		const float ao = src.a + dst.a * (1.0f - src.a);
-		auto result = (src.toVector4() * src.a + dst.toVector4() * dst.a * (1.0f - src.a)) / ao;
-		result.w = ao;
-		return Colour4f(result);
+		const auto ao = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
+		if (ao == 0) {
+			return Colour4c(0, 0, 0, 0);
+		}
+		auto result = (src * src.a + dst * Colour4c::mult(dst.a,  - src.a)) / ao;
+		result.a = ao;
+		return result;
 	}
 
-	constexpr Colour4f lightenBlend(Colour4f src, Colour4f dst)
+	constexpr Colour4c lightenBlend(Colour4c src, Colour4c dst)
 	{
-		auto result = Vector4f::max(src.toVector4() * src.a, dst.toVector4());
-		result.w = src.a + dst.a * (1.0f - src.a);
-		return Colour4f(result);
+		auto result = Colour4c::max(src * src.a, dst);
+		result.a = src.a + Colour4c::mult(dst.a, Colour4c::getMaxValue() - src.a);
+		return result;
 	}
 
-	constexpr Colour4f addBlend(Colour4f src, Colour4f dst)
+	constexpr Colour4c addBlend(Colour4c src, Colour4c dst)
 	{
-		auto result = src.toVector4() * src.a + dst.toVector4();
-		result.w = std::max(src.a, dst.a);
-		return Colour4f(result);
+		auto result = src * src.a + dst;
+		result.a = std::max(src.a, dst.a);
+		return result;
 	}
 
 	template<typename F>
 	void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 	{
-		const float opacityFloat = opacity / 255.0f;
-
 		if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
 			throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
 		}
@@ -397,12 +370,12 @@ namespace {
 				const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
 				const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
 				for (size_t j = 0; j < rectW; ++j) {
-					const auto srcCol = Colour4f(Image::convertIntToColour(srcData[j])).multiplyAlpha(opacityFloat);
-					const auto dstCol = Colour4f(Image::convertIntToColour(dstData[j]));
+					const auto srcCol = Image::convertIntToColour(srcData[j]).multiplyAlpha(opacity);
+					const auto dstCol = Image::convertIntToColour(dstData[j]);
 					
-					const auto result = f(Colour4f(srcCol), Colour4f(dstCol));
+					const auto result = f(srcCol, dstCol);
 
-					dstData[j] = Image::convertColourToInt(Colour4c(result));
+					dstData[j] = Image::convertColourToInt(result);
 				}
 			}
 		}
