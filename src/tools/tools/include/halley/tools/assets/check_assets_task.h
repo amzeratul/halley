@@ -44,12 +44,14 @@ namespace Halley
 		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter);
-		bool importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodegen, Path dstPath, String taskName, bool packAfter);
+		bool importChanged(Vector<DirectoryMonitor::Event> changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodegen, Path dstPath, String taskName, bool packAfter);
 
 		AssetTable checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
 		AssetTable checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta);
 		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta);
-		Vector<DirectoryMonitor::Event> filterDuplicateChanges(const Vector<DirectoryMonitor::Event>& changes) const;
+
+		void filterDuplicateChanges(Vector<DirectoryMonitor::Event>& changes) const;
+		void postProcessChanges(Vector<DirectoryMonitor::Event>& changes) const;
 		void addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const;
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);

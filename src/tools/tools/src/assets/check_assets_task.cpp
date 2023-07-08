@@ -83,9 +83,9 @@ void CheckAssetsTask::run()
 		monitorGen.poll(sharedGenChanged, true);
 
 		// Re-import any changes
-		importing |= importChanged(assetsChanged, project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);
-		importing |= importChanged(genChanged, project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, true, project.getGenPath(), "Generating code", false);
-		importing |= importChanged(sharedGenChanged, project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, true, project.getSharedGenPath(), "Generating code", false);
+		importing |= importChanged(std::move(assetsChanged), project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);
+		importing |= importChanged(std::move(genChanged), project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, true, project.getGenPath(), "Generating code", false);
+		importing |= importChanged(std::move(sharedGenChanged), project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, true, project.getSharedGenPath(), "Generating code", false);
 
 		while (hasPendingTasks()) {
 			sleep(5);
@@ -124,7 +124,7 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
 }
 
-bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodeGen, Path dstPath, String taskName, bool packAfter)
+bool CheckAssetsTask::importChanged(Vector<DirectoryMonitor::Event> changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodeGen, Path dstPath, String taskName, bool packAfter)
 {
 	if (changes.empty()) {
 		return false;
@@ -151,9 +151,10 @@ bool CheckAssetsTask::importChanged(const Vector<DirectoryMonitor::Event>& chang
 		return false;
 	}
 
-	auto changes2 = filterDuplicateChanges(changes);
-	addFailedFiles(db, changes2);
-	const auto assets = checkChangedAssets(db, changes2, srcPaths, dstPath, collectDirMeta);
+	postProcessChanges(changes);
+	filterDuplicateChanges(changes);
+	addFailedFiles(db, changes);
+	const auto assets = checkChangedAssets(db, changes, srcPaths, dstPath, collectDirMeta);
 	if (isCancelled()) {
 		return false;
 	}
@@ -406,7 +407,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	return assets;
 }
 
-Vector<DirectoryMonitor::Event> CheckAssetsTask::filterDuplicateChanges(const Vector<DirectoryMonitor::Event>& changes) const
+void CheckAssetsTask::filterDuplicateChanges(Vector<DirectoryMonitor::Event>& changes) const
 {
 	Vector<DirectoryMonitor::Event> result;
 	HashSet<DirectoryMonitor::Event> index;
@@ -417,7 +418,22 @@ Vector<DirectoryMonitor::Event> CheckAssetsTask::filterDuplicateChanges(const Ve
 			result.push_back(change);
 		}
 	}
-	return result;
+
+	changes = std::move(result);
+}
+
+void CheckAssetsTask::postProcessChanges(Vector<DirectoryMonitor::Event>& changes) const
+{
+	// Treat changes to a meta file as a change to the original file
+	for (auto& c: changes) {
+		if (c.name.endsWith(".meta")) {
+			c.name = c.name.left(c.name.length() - 5);
+		}
+		if (c.oldName.endsWith(".meta")) {
+			c.oldName = c.oldName.left(c.oldName.length() - 5);
+		}
+		c.type = DirectoryMonitor::ChangeType::FileModified;
+	}
 }
 
 void CheckAssetsTask::addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const
