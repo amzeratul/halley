@@ -25,7 +25,7 @@ void ConsoleWindow::log(LoggerLevel level, const std::string_view msg)
 	buffer.emplace_back(level, msg);
 }
 
-static Colour4f getColour(const UIColourScheme& colourScheme, LoggerLevel level)
+Colour4f ConsoleWindow::getColour(const UIColourScheme& colourScheme, LoggerLevel level)
 {
 	switch (level) {
 	case LoggerLevel::Info:
@@ -47,7 +47,7 @@ void ConsoleWindow::update(Time t, bool moved)
 	buffer.clear();
 	lock.unlock();
 
-	const auto colourScheme = factory.getColourScheme();
+	const auto& colourScheme = factory.getColourScheme();
 
 	for (auto& b: buf2) {
 		console->addLine(b.second, getColour(*colourScheme, b.first));

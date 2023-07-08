@@ -5,6 +5,7 @@
 #include "ecs_window.h"
 #include "editor_settings_window.h"
 #include "game_properties_window.h"
+#include "status_bar.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
@@ -75,14 +76,15 @@ void ProjectWindow::makeUI()
 {
 	uiTop = std::make_shared<UIWidget>("uiTop", Vector2f(), UISizer(UISizerType::Horizontal));
 	uiMid = std::make_shared<UIWidget>("uiMid", Vector2f(), UISizer(UISizerType::Horizontal));
-	uiBottom = std::make_shared<UIWidget>("uiBottom", Vector2f(), UISizer(UISizerType::Horizontal));
+	uiBottom = std::make_shared<UIWidget>("uiBottom", Vector2f(), UISizer(UISizerType::Vertical));
 	add(uiTop);
 	add(uiMid, 1);
 	add(uiBottom);
 
 	makeToolbar();
 	makePagedPane();
-	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 4));
+	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 0));
+	uiBottom->add(std::make_shared<StatusBar>(factory, *this), 0, Vector4f(8, 0, 8, 4));
 
 	setHandle(UIEventType::NavigateToAsset, [=] (const UIEvent& event)
 	{

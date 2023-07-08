@@ -15,6 +15,8 @@ namespace Halley
 
 		void log(LoggerLevel level, const std::string_view msg) override;
 
+		static Colour4f getColour(const UIColourScheme& colourScheme, LoggerLevel level);
+
 	protected:
 		void update(Time t, bool moved) override;
 
