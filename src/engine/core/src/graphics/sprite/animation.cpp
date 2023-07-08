@@ -318,6 +318,27 @@ const AnimationSequence& Animation::getSequence(const String& seqName) const
 	}
 }
 
+const AnimationSequence& Animation::getSequence(size_t idx) const
+{
+	return sequences.at(idx);
+}
+
+size_t Animation::getSequenceIdx(const String& name) const
+{
+	size_t fallback = 0;
+	size_t i = 0;
+	for (const auto& seq: sequences) {
+		if (seq.name == name) {
+			return i;
+		}
+		if (seq.isFallback()) {
+			fallback = i;
+		}
+	}
+
+	return fallback;
+}
+
 const AnimationDirection& Animation::getDirection(const String& dirName) const
 {
 	Expects(directions.size() > 0);

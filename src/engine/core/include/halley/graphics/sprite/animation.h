@@ -150,6 +150,8 @@ namespace Halley
 		std::shared_ptr<Material> getMaterial() const { return material; }
 
 		const AnimationSequence& getSequence(const String& name) const;
+		const AnimationSequence& getSequence(size_t idx) const;
+		size_t getSequenceIdx(const String& name) const;
 		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
 		Vector<String> getSequenceNames() const;

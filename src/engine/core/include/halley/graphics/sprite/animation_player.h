@@ -126,7 +126,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<const Animation> animation;
-		const AnimationSequence* curSeq = nullptr;
+		OptionalLite<int> curSeqIdx;
 		float curTime = 0;
 		int curFrame = -1;
 		int curDir = 0;

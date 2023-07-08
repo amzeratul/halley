@@ -460,7 +460,7 @@ AnimationPlayerLite& AnimationPlayerLite::setAnimation(std::shared_ptr<const Ani
 
 AnimationPlayerLite& AnimationPlayerLite::setSequence(const String& sequence)
 {
-	curSeq = &animation->getSequence(sequence);
+	curSeqIdx = static_cast<int>(animation->getSequenceIdx(sequence));
 	curFrame = -1;
 	return *this;
 }
@@ -483,16 +483,18 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 	bool changed = false;
 	curTime += static_cast<float>(time);
 
+	const auto& seq = animation->getSequence(curSeqIdx.value_or(0));
+
 	if (curFrame == -1) {
 		curFrame = 0;
 		curTime = 0;
 		changed = true;
 	} else {
 		while (true) {
-			const float duration = curSeq->getFrame(curFrame).getDuration() * 0.001f;
+			const float duration = seq.getFrame(curFrame).getDuration() * 0.001f;
 			if (curTime > duration) {
 				curTime -= duration;
-				curFrame = modulo(curFrame + 1, static_cast<int>(curSeq->numFrames()));
+				curFrame = modulo(curFrame + 1, static_cast<int>(seq.numFrames()));
 				changed = true;
 			} else {
 				break;
@@ -503,7 +505,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 	if (changed) {
 		sprite
 			.setMaterial(animation->getMaterial())
-			.setSprite(curSeq->getFrame(curFrame).getSprite(curDir));
+			.setSprite(seq.getFrame(curFrame).getSprite(curDir));
 	}
 }
 
