@@ -1,6 +1,6 @@
 ---
 widget: { class: widget }
-sizer: { type: horizontal }
+sizer: { type: horizontal, gap: 6 }
 children:
 - widget: { id: widgetList, class: uiWidgetList }
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }

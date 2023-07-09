@@ -9,7 +9,6 @@ InfiniCanvas::InfiniCanvas(String id, UIStyle style, UISizer sizer, std::shared_
 void InfiniCanvas::setScrollPosition(Vector2f pos)
 {
 	scrollPos = pos;
-	Logger::logInfo(toString(pos));
 }
 
 Vector2f InfiniCanvas::getScrollPosition() const

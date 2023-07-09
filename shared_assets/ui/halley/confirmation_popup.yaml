@@ -5,7 +5,7 @@ fill: centre
 proportion: 1
 children:
 - widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [500, 50] }
-  sizer: { type: vertical }
+  sizer: { type: vertical, gap: 16 }
   fill: centre
   proportion: 1
   children:
@@ -15,8 +15,8 @@ children:
       fill: centre
       proportion: 1
   - widget: { class: label, id: message, text: "Are you sure?" }
-    border: [0, 10, 0, 10]
-  - sizer: { type: horizontal }
+    border: [10, 0, 10, 0]
+  - sizer: { type: horizontal, gap: 4 }
     children:
     - stretchSpacer: {}
       proportion: 1
