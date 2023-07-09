@@ -3,15 +3,19 @@
 #include <halley/support/exception.h>
 #include <filesystem>
 
+#include "halley/concurrency/concurrent.h"
 #include "halley/maths/random.h"
 #include "halley/maths/uuid.h"
 #include "halley/support/logger.h"
 #include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
+#include "halley/tools/runner/memory_patcher.h"
+#include "halley/tools/runner/symbol_loader.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <Psapi.h>
 #ifdef min
 #undef min
 #undef max
@@ -170,6 +174,20 @@ void* DynamicLibrary::getBaseAddress() const
 	return handle;
 }
 
+size_t DynamicLibrary::getImageSize() const
+{
+#ifdef _WIN32
+	MODULEINFO info;
+	if (GetModuleInformation(GetCurrentProcess(), static_cast<HMODULE>(handle), &info, sizeof(info))) {
+		return info.SizeOfImage;
+	} else {
+		return 0;
+	}
+#else
+	return 0;
+#endif
+}
+
 bool DynamicLibrary::isLoaded() const
 {
 	return loaded;
@@ -217,9 +235,22 @@ bool DynamicLibrary::hasChanged() const
 
 void DynamicLibrary::reloadIfChanged(bool forceReload)
 {
+	constexpr bool checkMemory = false;
+
 	if (forceReload || hasChanged()) {
+		MemoryPatchingMappings mappings;
+		if (checkMemory) {
+			Logger::logDev("DLL in memory range 0x" + toString(size_t(handle), 16, 8) + " to 0x" + toString(size_t(handle) + getImageSize(), 16, 8));
+			mappings.generate(SymbolLoader::loadSymbols(*this));
+		}
+		
 		notifyUnload();
 		unload();
+
+		if (checkMemory) {
+			MemoryPatcher::patch(mappings);
+		}
+
 		waitingReload = true;
 	}
 

@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <set>
 
+#include "halley/maths/range.h"
+
 using LibHandleType = void*;
 
 namespace Halley
@@ -25,6 +27,7 @@ namespace Halley
 
 		void* getFunction(std::string name) const;
 		void* getBaseAddress() const;
+		size_t getImageSize() const;
 
 		bool isLoaded() const;
 		bool hasChanged() const;

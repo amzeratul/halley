@@ -14,6 +14,7 @@ namespace Halley
 		void* maxSrc;
 
 		void generate(const Vector<DebugSymbol>& prev, const Vector<DebugSymbol>& next);
+		void generate(const Vector<DebugSymbol>& symbols);
 	};
 
 	class MemoryPatcher

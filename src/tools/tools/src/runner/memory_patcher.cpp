@@ -6,10 +6,12 @@
 #include <gsl/gsl_assert>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/support/console.h"
 
 using namespace Halley;
 
-//#define VERBOSE_MAPPING
+constexpr static bool verboseLogging = false;
+constexpr static bool semiVerboseLogging = true;
 
 void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& prev, const Vector<DebugSymbol>& next)
 {
@@ -55,11 +57,42 @@ void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& prev, const Vec
 	}
 
 	std::cout << "Generated " << src.size() << " memory re-mappings. From " << prev.size() << " to " << next.size() << " symbols, on " << minSrc << " to " << maxSrc << " range." << std::endl;
-	#ifdef VERBOSE_MAPPING
-	for (size_t i = 0; i < src.size(); i++) {
-		std::cout << "[" << src[i] << " -> " << dst[i] << "] " << name[i] << "\n";
+	
+	if constexpr (verboseLogging) {
+		for (size_t i = 0; i < src.size(); i++) {
+			std::cout << "[" << src[i] << " -> " << dst[i] << "] " << name[i] << "\n";
+		}
 	}
-	#endif
+}
+
+void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& symbols)
+{
+	struct Mapping
+	{
+		void* from = nullptr;
+		void* to = nullptr;
+		std::string name;
+	};
+
+	// Construct mapping
+	Vector<Mapping> flatMap;
+	for (const auto& p: symbols) {
+		flatMap.push_back(Mapping{ p.getAddress(), nullptr, p.getName() });
+	}
+
+	// Sort by from address
+	std::sort(flatMap.begin(), flatMap.end(), [](const Mapping& a, const Mapping& b) -> bool { return a.from < b.from; });
+
+	// Copy to src and dst arrays
+	minSrc = reinterpret_cast<void*>(-1);
+	maxSrc = nullptr;
+	for (const auto& m: flatMap) {
+		minSrc = std::min(minSrc, m.from);
+		maxSrc = std::max(maxSrc, m.from);
+		src.push_back(m.from);
+		dst.push_back(m.to);
+		name.push_back(m.name);
+	}
 }
 
 #ifdef _WIN32
@@ -67,29 +100,31 @@ void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& prev, const Vec
 #include <Windows.h>
 #include <DbgHelp.h>
 
-static size_t scanProcessMemory(const MemoryPatchingMappings& mappings, std::function<size_t(void*, size_t, const MemoryPatchingMappings&)> patchMemory)
-{
-	size_t patchings = 0;
-	size_t totalMemory = 0;
+namespace {
+	size_t scanProcessMemory(std::function<size_t(void*, size_t)> f)
+	{
+		size_t patchings = 0;
+		size_t totalMemory = 0;
 
-	MEMORY_BASIC_INFORMATION membasic;
-	for (char* address = 0; VirtualQuery(address, &membasic, sizeof(membasic)); address += membasic.RegionSize) {
-		if (membasic.State == MEM_COMMIT) {
-			constexpr unsigned int acceptMask = 0x04 | 0x08 | 0x40 | 0x80;
-			if ((membasic.Protect & acceptMask) == membasic.Protect) {
-				patchings += patchMemory(address, membasic.RegionSize, mappings);
-				totalMemory += membasic.RegionSize;
+		MEMORY_BASIC_INFORMATION membasic;
+		for (char* address = 0; VirtualQuery(address, &membasic, sizeof(membasic)); address += membasic.RegionSize) {
+			if (membasic.State == MEM_COMMIT) {
+				constexpr unsigned int acceptMask = 0x04 | 0x08 | 0x40 | 0x80;
+				if ((membasic.Protect & acceptMask) == membasic.Protect) {
+					patchings += f(address, membasic.RegionSize);
+					totalMemory += membasic.RegionSize;
+				}
 			}
 		}
-	}
 
-	std::cout << "Total memory scanned: " << totalMemory << std::endl;
-	return patchings;
+		std::cout << "Total memory scanned: " << totalMemory << std::endl;
+		return patchings;
+	}
 }
 
 #else
 
-static size_t scanProcessMemory(const MemoryPatchingMappings&, std::function<size_t(void*, size_t, const MemoryPatchingMappings&)>)
+static size_t scanProcessMemory(std::function<size_t(void*, size_t)>)
 {
 	// TODO
 	return 0;
@@ -99,10 +134,12 @@ static size_t scanProcessMemory(const MemoryPatchingMappings&, std::function<siz
 
 void MemoryPatcher::patch(const MemoryPatchingMappings& mappings)
 {
-	if (mappings.src.size() == 0) {
+	if (mappings.src.empty()) {
 		std::cout << "Nothing to patch." << std::endl;
 	} else {
-		size_t n = scanProcessMemory(mappings, &patchMemory);
+		size_t n = scanProcessMemory([&](void* ptr, size_t size) {
+			return patchMemory(ptr, size, mappings);
+		});
 		std::cout << "Patched " << n << " pointers." << std::endl;
 	}
 }
@@ -123,12 +160,12 @@ size_t MemoryPatcher::patchMemory(void* address, size_t len, const MemoryPatchin
 	const void* avoid2start = reinterpret_cast<const void*>(&mappings);
 	const void* avoid2end = reinterpret_cast<const char*>(avoid2start) + sizeof(MemoryPatchingMappings);
 
-	#ifdef VERBOSE_MAPPING
-	bool isEvilRange = (avoid0start >= start && avoid0start <= end) || (avoid1start >= start && avoid1start <= end) || (avoid2start >= start && avoid2start <= end);
-	if (isEvilRange) std::cout << ConsoleColor(Console::RED);
-	std::cout << "[" << start << " -> " << (end - 1) << "] (" << len << " bytes)\n";
-	if (isEvilRange) std::cout << ConsoleColor(Console::BLUE);
-	#endif
+	if constexpr (verboseLogging) {
+		bool isEvilRange = (avoid0start >= start && avoid0start <= end) || (avoid1start >= start && avoid1start <= end) || (avoid2start >= start && avoid2start <= end);
+		if (isEvilRange) std::cout << ConsoleColour(Console::RED);
+		std::cout << "[" << start << " -> " << (end - 1) << "] (" << len << " bytes)\n";
+		if (isEvilRange) std::cout << ConsoleColour(Console::BLUE);
+	}
 
 	for (ptr* p = start; p < end; ++p) {
 		ptr val = *p;
@@ -138,21 +175,21 @@ size_t MemoryPatcher::patchMemory(void* address, size_t len, const MemoryPatchin
 				size_t n = iter - mappings.src.begin();
 				if (mappings.src[n] == val) {
 					if (p >= avoid0start && p < avoid0end) {
-						#ifdef VERBOSE_MAPPING
-						std::cout << "Prevent patching at " << p << ", as it's inside src mapping vector.\n";
-						#endif
+						if constexpr (verboseLogging) {
+							std::cout << "Prevent patching at " << p << ", as it's inside src mapping vector.\n";
+						}
 					} else if (p >= avoid1start && p < avoid1end) {
-						#ifdef VERBOSE_MAPPING
-						std::cout << "Prevent patching at " << p << ", as it's inside dst mapping vector.\n";
-						#endif
+						if constexpr (verboseLogging) {
+							std::cout << "Prevent patching at " << p << ", as it's inside dst mapping vector.\n";
+						}
 					} else if (p >= avoid2start && p < avoid2end) {
-						#ifdef VERBOSE_MAPPING
-						std::cout << "Prevent patching at " << p << ", as it's inside MemoryPatchingMappings.\n";
-						#endif
+						if constexpr (verboseLogging) {
+							std::cout << "Prevent patching at " << p << ", as it's inside MemoryPatchingMappings.\n";
+						}
 					} else {
-						#ifdef VERBOSE_MAPPING
-						std::cout << "! " << p << ": " << val << " -> " << mappings.dst[n] << ": " << mappings.name[n] << "\n";
-						#endif
+						if constexpr (verboseLogging || semiVerboseLogging) {
+							std::cout << "! " << p << ": " << val << " -> " << mappings.dst[n] << ": " << mappings.name[n] << "\n";
+						}
 						*p = mappings.dst[n];
 						count++;
 					}
