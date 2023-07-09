@@ -219,6 +219,15 @@ GraphPinSide ScriptRenderer::getSide(GraphNodePinType pinType) const
 	}
 }
 
+String ScriptRenderer::getDebugDisplayValue(uint16_t id) const
+{
+	const auto iter = debugDisplayValues.find(id);
+	if (iter != debugDisplayValues.end()) {
+		return iter->second;
+	}
+	return "";
+}
+
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
 {
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
@@ -298,7 +307,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		}
 
 		const auto label = nodeType->getLabel(node);
-		const auto largeLabel = nodeType->getLargeLabel(node);
+		const auto largeLabel = nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? getDebugDisplayValue(node.getId()) : nodeType->getLargeLabel(node);
 		const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, -8.0f / curZoom).round();
 
 		auto drawLabel = [&](const String& text, Vector2f pos, float size, float maxWidth, bool split)
@@ -331,7 +340,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			icon.clone()
 				.setPosition(pos + iconOffset)
 				.setScale(1.0f / curZoom)
-				.setColour(iconCol.multiplyAlpha(largeLabel.isEmpty() ? 1.0f : 0.25f))
+				.setColour(iconCol.multiplyAlpha(nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? 0.05f : (largeLabel.isEmpty() ? 1.0f : 0.25f)))
 				.draw(painter);
 		}
 
@@ -375,6 +384,8 @@ Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, const Base
 		return Vector2f(100, 40);
 	case ScriptNodeClassification::Comment:
 		return getCommentNodeSize(node, curZoom);
+	case ScriptNodeClassification::DebugDisplay:
+		return Vector2f(150, 60);
 	default:
 		return Vector2f(60, 60);
 	}
@@ -442,6 +453,11 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	return Circle(centre, radius);
 }
 
+void ScriptRenderer::setDebugDisplayData(HashMap<int, String> values)
+{
+	debugDisplayValues = std::move(values);
+}
+
 Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 {
 	switch (nodeType.getClassification()) {
@@ -461,6 +477,8 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 		return Colour4f(1.00f, 0.49f, 0.68f);
 	case ScriptNodeClassification::Comment:
 		return Colour4f(0.25f, 0.25f, 0.3f);
+	case ScriptNodeClassification::DebugDisplay:
+		return Colour4f(0.1f, 0.1f, 0.15f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }

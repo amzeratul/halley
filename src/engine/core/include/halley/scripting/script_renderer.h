@@ -23,12 +23,10 @@ namespace Halley {
 		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
 
-		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
-		Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const;
-		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
-		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
-		void setSelection(Vector<GraphNodeId> selectedNodes);
-		void setCurrentPaths(Vector<ConnectionPath> path);
+		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const override;
+		Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const override;
+		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const override;
+		void setDebugDisplayData(HashMap<int, String> values) override;
 
 		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
 
@@ -61,7 +59,8 @@ namespace Halley {
 		Sprite destructorBg;
 		Sprite destructorIcon;
 		TextRenderer labelText;
-		std::map<String, Sprite> icons;
+		HashMap<String, Sprite> icons;
+		HashMap<int, String> debugDisplayValues;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);
@@ -76,7 +75,8 @@ namespace Halley {
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;
 
 		NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const;
-
 		GraphPinSide getSide(GraphNodePinType pinType) const;
+
+		String getDebugDisplayValue(uint16_t id) const;
 	};
 }

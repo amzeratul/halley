@@ -585,6 +585,11 @@ void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 	}
 }
 
+void ScriptingBaseGizmo::setDebugDisplayData(HashMap<int, String> values)
+{
+	renderer->setDebugDisplayData(std::move(values));
+}
+
 void ScriptingBaseGizmo::updateNodes(bool force)
 {
 	if (scriptGraph && resources) {

@@ -25,6 +25,7 @@ namespace Halley {
 		Terminator, // As in start/end, not as in Arnie
 		Function,
 		Comment,
+		DebugDisplay,
 		Unknown
 	};
 

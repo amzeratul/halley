@@ -283,6 +283,7 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		if (gizmoEditor) {
 			gizmoEditor->setState(nullptr);
 		}
+		onDebugDisplayData({});
 		variableInspector->updateVariables(ConfigNode());
 	} else {
 		if (!scriptState) {
@@ -303,6 +304,7 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		scriptGraph->setRoots(ScriptGraphNodeRoots(data["roots"]));
 
 		onCurNodeData(data["curNode"]);
+		onDebugDisplayData(data["debugDisplays"]);
 
 		const auto emptyNode = ConfigNode();
 		variableInspector->updateVariables(variableInspectorEnabled ? data["variables"] : emptyNode);
@@ -326,6 +328,23 @@ void ScriptGraphEditor::setCurNodeData(const String& str)
 	}
 }
 
+void ScriptGraphEditor::onDebugDisplayData(const ConfigNode& node)
+{
+	HashMap<int, String> values;
+	if (node.getType() == ConfigNodeType::Sequence) {
+		for (const auto& n: node.asSequence()) {
+			auto val = n["value"].asString();
+			if (n["value"].getType() == ConfigNodeType::String) {
+				val = "\"" + val + "\"";
+			}
+			values[n["nodeId"].asInt()] = std::move(val);
+		}
+	}
+	if (gizmoEditor) {
+		gizmoEditor->setDebugDisplayData(std::move(values));
+	}
+}
+
 void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 {
 	std_ex::erase_if(curEntities, [&](const auto& e) { return e.connId == connId; });
@@ -344,6 +363,7 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 	}
 
 	if (curEntities.empty()) {
+		onDebugDisplayData({});
 		variableInspector->updateVariables(ConfigNode());
 	}
 

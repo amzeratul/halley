@@ -434,7 +434,8 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(GraphNodeId nod
 	result.activationTime = state.timeSinceStart;
 	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
-	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable || node.getNodeType().getClassification() == ScriptNodeClassification::Expression) {
+	const auto classification = node.getNodeType().getClassification();
+	if (classification == ScriptNodeClassification::Variable || classification == ScriptNodeClassification::Expression || classification == ScriptNodeClassification::Comment || classification == ScriptNodeClassification::DebugDisplay) {
 		result.state = NodeIntrospectionState::Visited;
 	} else {
 		for (const auto& thread: threads) {

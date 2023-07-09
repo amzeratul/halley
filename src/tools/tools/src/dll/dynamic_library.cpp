@@ -240,7 +240,7 @@ void DynamicLibrary::reloadIfChanged(bool forceReload)
 	if (forceReload || hasChanged()) {
 		MemoryPatchingMappings mappings;
 		if (checkMemory) {
-			Logger::logDev("DLL in memory range 0x" + toString(size_t(handle), 16, 8) + " to 0x" + toString(size_t(handle) + getImageSize(), 16, 8));
+			Logger::logDev("DLL in memory range 0x" + toString(size_t(handle), 16, 16).asciiUpper() + " to 0x" + toString(size_t(handle) + getImageSize(), 16, 16).asciiUpper());
 			mappings.generate(SymbolLoader::loadSymbols(*this));
 		}
 		

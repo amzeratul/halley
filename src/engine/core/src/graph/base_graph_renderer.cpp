@@ -16,3 +16,7 @@ void BaseGraphRenderer::setCurrentPaths(Vector<ConnectionPath> path)
 {
 	currentPaths = std::move(path);
 }
+
+void BaseGraphRenderer::setDebugDisplayData(HashMap<int, String> values)
+{
+}

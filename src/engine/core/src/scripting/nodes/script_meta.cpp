@@ -25,6 +25,24 @@ String ScriptComment::getLargeLabel(const ScriptGraphNode& node) const
 }
 
 
+
+std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Display the value of ");
+	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return result.moveResults();
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptDebugDisplay::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Input } };
+	return data;
+}
+
+
 Vector<IGraphNodeType::SettingType> ScriptLog::getSettingTypes() const
 {
 	return {

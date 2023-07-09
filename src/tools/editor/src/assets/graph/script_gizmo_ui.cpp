@@ -113,6 +113,11 @@ void ScriptGizmoUI::setCurNodeDevConData(const String& str)
 	gizmo.setCurNodeDevConData(str);
 }
 
+void ScriptGizmoUI::setDebugDisplayData(HashMap<int, String> values)
+{
+	gizmo.setDebugDisplayData(std::move(values));
+}
+
 void ScriptGizmoUI::updateNodes()
 {
 	gizmo.updateNodes();

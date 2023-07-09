@@ -44,6 +44,7 @@ namespace Halley {
 
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
+		void setDebugDisplayData(HashMap<int, String> values);
 
 		void updateNodes(bool force = false);
 
