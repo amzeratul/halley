@@ -573,7 +573,7 @@ void AssetsBrowser::doSetCollapsed(bool c)
 
 		auto* parent = dynamic_cast<UIWidget*>(button->getParent());
 		if (parent) {
-			parent->getSizer()[0].setBorder(collapsed ? Vector4f(-10, 0, -15, 0) : Vector4f(0, 0, 0, 5));
+			parent->getSizer()[0].setBorder(collapsed ? Vector4f(-10, 0, -15, 0) : Vector4f(0, 0, 6, 0));
 		}
 		
 		//getWidget("collapseBorder")->setActive(!collapsed);

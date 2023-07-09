@@ -28,6 +28,7 @@ children:
   sizer: { type: horizontal }
   children:
   - sizer: { type: vertical }
+    border: [0, 0, 6, 0]
     children:
     - widget: { id: collapseButton, class: button, text: "<< Collapse" }
       border: [0, 0, 0, 5]

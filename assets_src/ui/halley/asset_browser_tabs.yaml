@@ -10,5 +10,6 @@ children:
   - widget: { id: tabs, class: list, type: horizontal, style: tabs }
     proportion: 1
 - widget: { id: pages, class: pagedPane }
+  border: [-12, 0, 0, 0]
   proportion: 1
 ...

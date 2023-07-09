@@ -1,6 +1,6 @@
 ---
 widget: { class: widget }
-sizer: { type: horizontal }
+sizer: { type: horizontal, gap: 6 }
 proportion: 1
 children:
 - widget: { class: widget, id: sceneEditorLeftPanel }
