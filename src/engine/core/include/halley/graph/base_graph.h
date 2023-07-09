@@ -107,6 +107,7 @@ namespace Halley {
 		bool connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN);
 		bool disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN);
 		bool disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN);
+		Vector<std::pair<GraphNodeId, GraphPinId>> getPinConnections(GraphNodeId nodeIdx, GraphPinId pinN) const;
 		void validateNodePins(GraphNodeId nodeIdx);
 
 		virtual BaseGraphNode& getNode(size_t i) = 0;

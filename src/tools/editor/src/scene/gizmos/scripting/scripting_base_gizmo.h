@@ -80,7 +80,7 @@ namespace Halley {
 
 		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 		void onNodeDragging(const SceneEditorInputState& inputState);
-		void onPinClicked(bool rightClick, bool shiftHeld);
+		void onPinClicked(bool leftClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
 
 		void assignNodeTypes(bool force = false) const;

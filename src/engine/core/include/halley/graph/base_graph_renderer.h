@@ -35,6 +35,7 @@ namespace Halley {
 		virtual void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f) = 0;
 
 		virtual std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const = 0;
+		virtual NodeUnderMouseInfo getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const = 0;
 		virtual Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const = 0;
 		virtual Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const = 0;
 		virtual void setDebugDisplayData(HashMap<int, String> values);

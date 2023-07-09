@@ -131,6 +131,21 @@ bool BaseGraph::disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId 
 	return disconnectPin(nodeIdx, pinN);
 }
 
+Vector<std::pair<GraphNodeId, GraphPinId>> BaseGraph::getPinConnections(GraphNodeId nodeIdx, GraphPinId pinN) const
+{
+	Vector<std::pair<GraphNodeId, GraphPinId>> result;
+
+	auto& node = getNode(nodeIdx);
+	auto& pin = node.getPin(pinN);
+
+	for (auto& conn: pin.connections) {
+		if (conn.dstNode) {
+			result.emplace_back(*conn.dstNode, conn.dstPin);
+		}
+	}
+	return result;
+}
+
 void BaseGraph::validateNodePins(GraphNodeId nodeIdx) {
 	auto& node = getNode(nodeIdx);
 

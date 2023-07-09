@@ -567,6 +567,24 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnde
 	return bestResult;
 }
 
+BaseGraphRenderer::NodeUnderMouseInfo ScriptRenderer::getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const
+{
+	const auto& node = graph->getNode(nodeId);
+	const auto& pins = node.getPinConfiguration();
+	const auto& pinType = pins[pinId];
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+
+	const auto pos = basePos + node.getPosition();
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+	const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
+	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+	const auto curRect = area + pos;
+
+	const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), pinId, curZoom, 1.0f).expand(4.0f / curZoom);
+
+	return NodeUnderMouseInfo{ nodeId, pinType, pinId, curRect, circle.getCentre() };
+}
+
 Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const
 {
 	return getNodeElementArea(static_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, static_cast<const ScriptGraphNode&>(node), idx, zoom, 1.0f).getCentre();

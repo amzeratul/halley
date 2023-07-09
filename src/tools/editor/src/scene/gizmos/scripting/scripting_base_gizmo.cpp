@@ -69,9 +69,9 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 				}
 			} else {
 				if (inputState.leftClickPressed) {
-					onPinClicked(false, inputState.shiftHeld);
-				} else if (inputState.rightClickPressed) {
 					onPinClicked(true, inputState.shiftHeld);
+				} else if (inputState.rightClickPressed) {
+					onPinClicked(false, inputState.shiftHeld);
 				}
 			}
 		}
@@ -139,18 +139,34 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 	}
 }
 
-void ScriptingBaseGizmo::onPinClicked(bool rightClick, bool shiftHeld)
+void ScriptingBaseGizmo::onPinClicked(bool leftClick, bool shiftHeld)
 {
 	Expects(nodeUnderMouse);
+
+	const auto nodeId = nodeUnderMouse->nodeId;
+	const auto pinId = nodeUnderMouse->elementId;
+	const auto connections = scriptGraph->getPinConnections(nodeId, pinId);
+	bool changed = false;
 	
-	if (!rightClick) {
-		nodeEditingConnection = nodeUnderMouse;
+	if (leftClick) {
+		if (shiftHeld) {
+			changed = scriptGraph->disconnectPinIfSingleConnection(nodeId, pinId);
+		} else {
+			changed = scriptGraph->disconnectPin(nodeId, pinId);
+		}
+
+		// If this causes a disconnection and there was exactly one connection before, set anchor THERE, rather than here
+		// (so it's like I'm picking up this end of the wire)
+		if (changed && connections.size() == 1) {
+			const auto other = connections[0];
+			nodeEditingConnection = renderer->getPinInfo(basePos, getZoom(), other.first, other.second);
+		} else {
+			nodeEditingConnection = nodeUnderMouse;
+		}
+	} else {
+		changed = scriptGraph->disconnectPin(nodeId, pinId);
 	}
 
-	const bool changed = rightClick || !shiftHeld ?
-		scriptGraph->disconnectPin(nodeUnderMouse->nodeId, nodeUnderMouse->elementId) :
-		scriptGraph->disconnectPinIfSingleConnection(nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
-	
 	if (changed) {
 		onModified();
 	}
