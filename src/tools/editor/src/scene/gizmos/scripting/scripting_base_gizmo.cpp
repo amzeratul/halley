@@ -147,6 +147,7 @@ void ScriptingBaseGizmo::onPinClicked(bool leftClick, bool shiftHeld)
 	const auto pinId = nodeUnderMouse->elementId;
 	const auto connections = scriptGraph->getPinConnections(nodeId, pinId);
 	bool changed = false;
+	nodeConnectionDst = {};
 	
 	if (leftClick) {
 		if (shiftHeld) {
@@ -221,7 +222,8 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
 		GraphNodePinType dstType = srcType.getReverseDirection();
-		paths.push_back(BaseGraphRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType, false });
+		const auto pos = renderer->getPinPosition(basePos, getNode(nodeEditingConnection->nodeId), nodeEditingConnection->elementId, getZoom());
+		paths.push_back(BaseGraphRenderer::ConnectionPath{ pos, nodeConnectionDst.value(), srcType, dstType, false });
 	}
 
 	for (auto& conn: pendingAutoConnections) {
