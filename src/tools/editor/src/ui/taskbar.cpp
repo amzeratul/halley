@@ -5,7 +5,7 @@
 using namespace Halley;
 
 TaskBar::TaskBar(UIFactory& ui, TaskSet& taskSet, const HalleyAPI& api)
-	: UIWidget("taskBar", Vector2f(150.0f, 0.0f), {}, Vector4f(160, 8, 10, 4))
+	: UIWidget("taskBar", Vector2f(150.0f, 0.0f), {}, Vector4f(160, 8, 10, 8))
 	, factory(ui)
 	, resources(ui.getResources())
 	, taskSet(taskSet)
@@ -101,7 +101,7 @@ void TaskBar::update(Time time, bool moved)
 		}
 	}
 
-	setMinSize(Vector2f(150.0f, advance(getMinimumSize().y, tasks.empty() ? 0.0f : 46.0f, static_cast<float>(time) * 200.0f)));
+	setMinSize(Vector2f(150.0f, advance(getMinimumSize().y, tasks.empty() ? 0.0f : 50.0f, static_cast<float>(time) * 200.0f)));
 }
 
 void TaskBar::draw(UIPainter& painter) const
