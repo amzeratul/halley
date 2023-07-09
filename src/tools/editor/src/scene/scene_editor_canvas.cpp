@@ -58,8 +58,7 @@ void SceneEditorCanvas::update(Time t, bool moved)
 	
 	if (gameBridge) {
 		outputState.clear();
-		gameBridge->update(t, inputState, outputState);
-		ready = true;
+		ready = gameBridge->update(t, inputState, outputState) || ready;
 	}
 
 	if (inputState.rightClickPressed && !outputState.blockRightClick) {

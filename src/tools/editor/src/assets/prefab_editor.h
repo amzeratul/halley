@@ -28,6 +28,7 @@ namespace Halley {
 		Vector<std::shared_ptr<DrillDownAssetWindow>> drillDown;
 
 		bool pendingLoad = false;
+		Time elapsedTime = 0;
 
 		void open();
 	};

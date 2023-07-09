@@ -18,7 +18,7 @@ namespace Halley {
 
 		void unload();
 
-		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
+		bool update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
 		void render(RenderContext& rc) const;
 
 		bool isLoaded() const;

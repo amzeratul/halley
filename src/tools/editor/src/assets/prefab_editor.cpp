@@ -64,7 +64,7 @@ void PrefabEditor::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
 
 void PrefabEditor::update(Time t, bool moved)
 {
-	if (pendingLoad && project.isDLLLoaded()) {
+	if (pendingLoad && project.isDLLLoaded() && elapsedTime > 0.05) {
 		pendingLoad = false;
 		open();
 	}
@@ -78,11 +78,12 @@ void PrefabEditor::update(Time t, bool moved)
 	} else {
 		drillDown.back()->setActive(true);
 	}
+	elapsedTime += t;
 }
 
 std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId)
 {
-	if (project.isDLLLoaded()) {
+	if (project.isDLLLoaded() && elapsedTime > 0.05) {
 		open();
 	} else {
 		pendingLoad = true;

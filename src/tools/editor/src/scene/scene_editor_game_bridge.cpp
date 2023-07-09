@@ -38,7 +38,7 @@ ISceneEditor& SceneEditorGameBridge::getInterface() const
 	return *interface;
 }
 
-void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
+bool SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
 {
 	if (errorState) {
 		unload();
@@ -48,8 +48,10 @@ void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, Sce
 		initializeInterfaceIfNeeded(false);
 		if (interfaceReady && t > 0.0001) {
 			interface->update(t, inputState, outputState);
+			return true;
 		}
 	}
+	return false;
 }
 
 void SceneEditorGameBridge::render(RenderContext& rc) const
