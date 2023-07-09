@@ -9,6 +9,7 @@ InfiniCanvas::InfiniCanvas(String id, UIStyle style, UISizer sizer, std::shared_
 void InfiniCanvas::setScrollPosition(Vector2f pos)
 {
 	scrollPos = pos;
+	Logger::logInfo(toString(pos));
 }
 
 Vector2f InfiniCanvas::getScrollPosition() const
@@ -23,7 +24,7 @@ Vector2f InfiniCanvas::getBasePosition() const
 
 Vector2f InfiniCanvas::getLayoutOriginPosition() const
 {
-	return -scrollPos;
+	return getPosition() + getSize() / 2 - scrollPos;
 }
 
 Vector2f InfiniCanvas::getLayoutMinimumSize(bool force) const

@@ -44,3 +44,13 @@ void ScrollBackground::refresh()
 	}
 	pane->refresh();
 }
+
+float ScrollBackground::getBackgroundScrollSpeed() const
+{
+	return 0.0f;
+}
+
+Vector2f ScrollBackground::getBackgroundOffset(Vector2f size) const
+{
+	return size * 0.5f;
+}

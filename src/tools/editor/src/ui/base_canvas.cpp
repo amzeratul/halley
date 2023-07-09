@@ -66,13 +66,13 @@ void BaseCanvas::update(Time t, bool moved)
 {
 	const auto scale = Vector2f(1, 1) / (bgSize * getZoomLevel());
 
-	const auto centrePos = getScrollPosition() * scale;
+	const auto centrePos = getScrollPosition() * scale * getBackgroundScrollSpeed();
 	const auto size = getSize() * scale;
 
 	bg
 		.setPos(getPosition())
 		.setSize(getSize())
-		.setTexRect(Rect4f(centrePos - 0.5f * size, centrePos + 0.5f * size));
+		.setTexRect(Rect4f(centrePos - 0.5f * size, centrePos + 0.5f * size) + getBackgroundOffset(size));
 
 	border
 		.setPos(getPosition())
@@ -163,6 +163,16 @@ void BaseCanvas::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 	} else {
 		sendEvent(UIEvent(UIEventType::CanvasDoubleClicked, getId()));
 	}
+}
+
+float BaseCanvas::getBackgroundScrollSpeed() const
+{
+	return 1.0f;
+}
+
+Vector2f BaseCanvas::getBackgroundOffset(Vector2f size) const
+{
+	return Vector2f(0.5f, 0.5f);
 }
 
 void BaseCanvas::refresh()

@@ -33,6 +33,8 @@ namespace Halley {
         virtual void setScrollPosition(Vector2f pos) = 0;
 		virtual Vector2f getScrollPosition() const = 0;
 		virtual Vector2f getBasePosition() const = 0;
+		virtual float getBackgroundScrollSpeed() const;
+		virtual Vector2f getBackgroundOffset(Vector2f size) const;
 		virtual void refresh();
     	
     private:

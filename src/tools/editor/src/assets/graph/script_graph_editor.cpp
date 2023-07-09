@@ -94,7 +94,7 @@ void ScriptGraphEditor::onMakeUI()
 
 	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();
-	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Centre, Vector2f());
+	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Top | UISizerAlignFlags::Left, Vector2f());
 	infiniCanvas->setMouseMirror(gizmoEditor);
 	infiniCanvas->setZoomEnabled(false);
 	infiniCanvas->setLeftClickScrollKey(KeyCode::Space);

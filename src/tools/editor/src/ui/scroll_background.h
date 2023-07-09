@@ -15,6 +15,8 @@ namespace Halley {
 		Vector2f getScrollPosition() const override;
 		Vector2f getBasePosition() const override;
         void refresh() override;
+        float getBackgroundScrollSpeed() const override;
+        Vector2f getBackgroundOffset(Vector2f size) const override;
 
 	private:
 		mutable UIScrollPane* pane = nullptr;
