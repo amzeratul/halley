@@ -24,7 +24,7 @@ int DistanceFieldTool::run(Vector<std::string> args)
 	auto inputImg = std::make_unique<Image>(*data);
 
 	// Process image
-	auto result = DistanceFieldGenerator::generate(*inputImg, size, radius);
+	auto result = DistanceFieldGenerator::generateSDF(*inputImg, size, radius);
 	inputImg.reset();
 
 	// Output image

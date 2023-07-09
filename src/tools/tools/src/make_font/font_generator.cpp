@@ -171,7 +171,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 			if (!keepGoing) {
 				return;
 			}
-			auto finalGlyphImg = DistanceFieldGenerator::generate(*tmpImg, dstRect.getSize(), radius);
+			auto finalGlyphImg = DistanceFieldGenerator::generateSDF(*tmpImg, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 			tmpImg.reset();
