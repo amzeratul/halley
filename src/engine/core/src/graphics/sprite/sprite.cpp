@@ -654,6 +654,9 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const E
 	if (sprite.getColour() != Colour4f(1, 1, 1, 1)) {
 		node["colour"] = sprite.getColour().toString();
 	}
+	if (!sprite.isVisible()) {
+		node["visible"] = false;
+	}
 	if (sprite.hasMaterial()) {
 		const auto& materialDef = sprite.getMaterial().getDefinition();
 		if (materialDef.getAssetId() != MaterialDefinition::defaultMaterial) {
