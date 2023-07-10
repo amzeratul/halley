@@ -17,19 +17,23 @@ void LoadDLLTask::run()
 		return;
 
 	case ProjectDLL::Status::Unloaded:
-		logError("Game DLL was unloaded.");
+		logInfo("Game DLL was unloaded.");
+		setError();
 		return;
 
 	case ProjectDLL::Status::DLLNotFound:
-		logError("Game DLL not found. Try building the game.");
+		logInfo("Game DLL not found. Try building the game.");
+		setError();
 		return;
 
 	case ProjectDLL::Status::DLLVersionTooLow:
-		logError("Game DLL is out of date. Try building the game.");
+		logInfo("Game DLL is out of date. Try building the game.");
+		setError();
 		return;
 
 	case ProjectDLL::Status::DLLVersionTooHigh:
-		logError("Editor is out of date. Try updating the editor.");
+		logInfo("Editor is out of date. Try updating the editor.");
+		setError();
 		return;
 
 	case ProjectDLL::Status::DLLCrash:

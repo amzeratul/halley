@@ -41,6 +41,7 @@ namespace Halley
 		void log(LoggerLevel level, String message);
 		
 		bool isCancelled() const;
+		void setError();
 		bool hasError() const;
 
 		size_t getNumMessages() const;

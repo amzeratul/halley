@@ -128,6 +128,12 @@ bool Task::isCancelled() const
 	return cancelled;
 }
 
+void Task::setError()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	error = true;
+}
+
 bool Task::hasPendingTasks() const
 {
 	return pendingTaskCount != 0;
