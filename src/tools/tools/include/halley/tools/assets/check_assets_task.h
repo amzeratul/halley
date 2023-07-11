@@ -72,6 +72,7 @@ namespace Halley
 		void filterDuplicateChanges(Vector<DirectoryMonitor::Event>& changes) const;
 		void postProcessChanges(Vector<DirectoryMonitor::Event>& changes) const;
 		void addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const;
+		std::pair<Path, Path> findRelativePath(Path path, const Vector<Path>& srcPaths) const;
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
 		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;

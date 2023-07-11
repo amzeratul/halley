@@ -338,6 +338,22 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkSpecificAssets(ImportAssetsDat
 	return assets;
 }
 
+std::pair<Path, Path> CheckAssetsTask::findRelativePath(Path path, const Vector<Path>& srcPaths) const
+{
+	const Path* srcPathPtr = nullptr;
+	for (auto& srcPath: srcPaths) {
+		if (srcPath.isPrefixOf(path)) {
+			srcPathPtr = &srcPath;
+			break;
+		}
+	}
+	if (!srcPathPtr) {
+		//Logger::logWarning("Ignored file change: " + path.toString());
+		return {{}, {}};
+	}
+	return { *srcPathPtr, path.makeRelativeTo(*srcPathPtr) };
+}
+
 CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta)
 {
 	AssetTable assets;
@@ -349,27 +365,10 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsData
 			return {};
 		}
 
-		// Find paths
-		const Path* srcPathPtr = nullptr;
-		for (auto& srcPath: srcPaths) {
-			if (srcPath.isPrefixOf(change.name)) {
-				srcPathPtr = &srcPath;
-				break;
-			}
-		}
-		if (!srcPathPtr) {
-			if (dstPath.isPrefixOf(change.name)) {
-				if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
-					// TODO: notify output removed
-					
-				}
-			} else {
-				Logger::logWarning("Ignored file change: " + change.name);
-			}
+		auto [srcPath, filePath] = findRelativePath(change.name, srcPaths);
+		if (srcPath.isEmpty()) {
 			continue;
 		}
-		const Path& srcPath = *srcPathPtr;
-		Path filePath = Path(change.name).makeRelativeTo(srcPath);
 
 		if (change.type == DirectoryMonitor::ChangeType::FileAdded || change.type == DirectoryMonitor::ChangeType::FileModified || change.type == DirectoryMonitor::ChangeType::FileRenamed) {
 			dbChanged = importFile(db, assets, useDirMeta, srcPath, srcPaths, filePath) || dbChanged;
@@ -381,6 +380,15 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsData
 		} else if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
 			db.markInputMissing(filePath);
 		}
+	}
+
+	const auto toImport = db.markMissingAssetsAndGetPartial();
+	for (const auto& file: toImport) {
+		auto [srcPath, filePath] = findRelativePath(file, srcPaths);
+		if (srcPath.isEmpty()) {
+			continue;
+		}
+		dbChanged = importFile(db, assets, useDirMeta, srcPath, srcPaths, filePath) || dbChanged;
 	}
 
 	dbChanged = db.purgeMissingInputs() || dbChanged;
@@ -459,11 +467,23 @@ void CheckAssetsTask::filterDuplicateChanges(Vector<DirectoryMonitor::Event>& ch
 {
 	Vector<DirectoryMonitor::Event> result;
 	HashSet<DirectoryMonitor::Event> index;
+	HashSet<String> deleteIndex;
+
+	// Process delete changes first, since they override others
+	for (auto& change: changes) {
+		if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
+			index.insert(change);
+			deleteIndex.insert(change.name);
+			result.push_back(change);
+		}
+	}
 
 	for (auto& change: changes) {
-		if (!index.contains(change)) {
-			index.emplace(change);
-			result.push_back(change);
+		if (change.type != DirectoryMonitor::ChangeType::FileRemoved) {
+			if (!index.contains(change) && !deleteIndex.contains(change.name)) {
+				index.emplace(change);
+				result.push_back(change);
+			}
 		}
 	}
 
@@ -476,11 +496,12 @@ void CheckAssetsTask::postProcessChanges(Vector<DirectoryMonitor::Event>& change
 	for (auto& c: changes) {
 		if (c.name.endsWith(".meta")) {
 			c.name = c.name.left(c.name.length() - 5);
+			c.type = DirectoryMonitor::ChangeType::FileModified;
 		}
 		if (c.oldName.endsWith(".meta")) {
 			c.oldName = c.oldName.left(c.oldName.length() - 5);
+			c.type = DirectoryMonitor::ChangeType::FileModified;
 		}
-		c.type = DirectoryMonitor::ChangeType::FileModified;
 	}
 }
 

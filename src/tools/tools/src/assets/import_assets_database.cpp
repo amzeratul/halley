@@ -393,7 +393,9 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	assetsImported.erase(std::pair{ asset.assetType, asset.assetId });
+	const auto key = std::pair{ asset.assetType, asset.assetId };
+	assetsImported.erase(key);
+	assetsFailed.erase(key);
 	indexDirty = true;
 }
 
@@ -415,11 +417,53 @@ void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<std::pair<Impo
 	}
 }
 
+Vector<Path> ImportAssetsDatabase::markMissingAssetsAndGetPartial()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	Vector<Path> toImport;
+	HashSet<String> missingInputs;
+
+	for (const auto& i: inputFiles) {
+		if (i.second.missing) {
+			missingInputs.insert((i.second.basePath / i.first).getString());
+		}
+	}
+
+	for (auto& e: assetsImported) {
+		std::optional<Path> firstExistingFile;
+		bool missingAny = false;
+		for (const auto& file: e.second.asset.inputFiles) {
+			auto key = (e.second.asset.srcDir / file.getPath()).toString();
+			if (missingInputs.contains(key)) {
+				missingAny = true;
+			} else if (!firstExistingFile) {
+				firstExistingFile = e.second.asset.srcDir / file.getPath();
+			}
+		}
+		for (const auto& file: e.second.asset.additionalInputFiles) {
+			auto key = (e.second.asset.srcDir / file.first).toString();
+			if (missingInputs.contains(key)) {
+				missingAny = true;
+			}
+		}
+
+		if (missingAny) {
+			if (firstExistingFile) {
+				toImport.push_back(std::move(*firstExistingFile));
+			} else {
+				e.second.present = false;
+			}
+		}
+	}
+
+	return toImport;
+}
+
 Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	Vector<ImportAssetsDatabaseEntry> result;
-	for (auto& e : assetsImported) {
+	for (auto& e: assetsImported) {
 		if (!e.second.present) {
 			result.push_back(e.second.asset);
 		}
