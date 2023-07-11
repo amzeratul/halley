@@ -11,7 +11,8 @@ ConfigNode ScriptUIModalData::toConfigNode(const EntitySerializationContext& con
 Vector<IScriptNodeType::SettingType> ScriptUIModal::getSettingTypes() const
 {
 	return {
-		SettingType{ "ui", "Halley::String", Vector<String>{""} }
+		SettingType{ "ui", "Halley::String", Vector<String>{""} },
+		SettingType{ "setAnchor", "bool", Vector<String>{"true"} }
 	};
 }
 
@@ -49,7 +50,8 @@ IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, 
 {
 	if (!data.ui) {
 		const String ui = node.getSettings()["ui"].asString("");
-		data.ui = environment.createModalUI(ui, readDataPin(environment, node, 2));
+		const bool setAnchor = node.getSettings()["setAnchor"].asBool(true);
+		data.ui = environment.createModalUI(ui, readDataPin(environment, node, 2), setAnchor);
 	}
 	if (data.ui->isAlive()) {
 		return Result(ScriptNodeExecutionState::Executing, time);
