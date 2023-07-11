@@ -157,7 +157,7 @@ namespace Halley {
         Vector<ScriptExecutionRequest> getScriptExecutionRequests();
 
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
-        virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data, bool setAnchor = true);
+        virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
 
         EntityId getScriptTarget(const String& id) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);

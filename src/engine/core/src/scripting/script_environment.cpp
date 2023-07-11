@@ -652,7 +652,7 @@ std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, V
 	return {};
 }
 
-std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui, ConfigNode data, bool setAnchor)
+std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui, ConfigNode data)
 {
 	return {};
 }
