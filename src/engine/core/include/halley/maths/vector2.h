@@ -101,6 +101,9 @@ namespace Halley {
 		template <typename V>
 		[[nodiscard]] constexpr Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
 
+		template <typename V>
+		[[nodiscard]] constexpr Vector2D operator % (V param) const { return Vector2D(T(x % param), T(y % param)); }
+
 		// In-place operations
 		constexpr Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
 		constexpr Vector2D& operator -= (Vector2D param) { x -= param.x; y -= param.y; return *this; }
