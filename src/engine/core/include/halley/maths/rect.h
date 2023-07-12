@@ -29,8 +29,43 @@
 #include "vector4.h"
 
 namespace Halley {
-	//////////////////////////////
-	// Vector2D class declaration
+	template <typename T>
+	class Rect2DIterator {
+	public:
+		Rect2DIterator(Vector2D<T> origin, Vector2D<T> size, T idx = 0)
+			: origin(origin)
+			, width(size.x)
+			, idx(idx)
+		{}
+
+		Rect2DIterator& operator++()
+		{
+			++idx;
+			return *this;
+		}
+
+		bool operator==(const Rect2DIterator& other) const
+		{
+			return idx == other.idx && origin == other.origin && width == other.width;
+		}
+
+		bool operator!=(const Rect2DIterator& other) const
+		{
+			return idx != other.idx || origin != other.origin || width != other.width;
+		}
+
+		Vector2D<T> operator*() const
+		{
+			return origin + Vector2D<T>(idx % width, idx / width);
+		}
+
+	private:
+		Vector2D<T> origin;
+		T width;
+		T idx;
+	};
+
+
 	template <typename T=float>
 	class alignas(sizeof(T)*4) Rect2D {
 		Vector2D<T> p1, p2;
@@ -369,6 +404,17 @@ namespace Halley {
 			}
 			
 			return Rect2D(Vector2f(x1, y1), Vector2f(x2, y2));
+		}
+
+		Rect2DIterator<T> begin() const
+		{
+			return Rect2DIterator<T>(getTopLeft(), getSize());
+		}
+
+		Rect2DIterator<T> end() const
+		{
+			const auto size = getSize();
+			return Rect2DIterator<T>(getTopLeft(), size, size.x * size.y);
 		}
 	};
 
