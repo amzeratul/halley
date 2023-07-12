@@ -63,7 +63,10 @@ namespace Halley {
 		HashMap<String, Sprite> icons;
 		HashMap<int, String> debugDisplayValues;
 
+		static std::tuple<Colour4f, Colour4f, float> getNodeColour(const IScriptNodeType& nodeType, NodeDrawMode drawMode);
+
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
+		void drawNodeBackground(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);
 
 		Vector2f getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;

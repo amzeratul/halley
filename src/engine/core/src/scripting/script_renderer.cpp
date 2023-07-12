@@ -60,6 +60,12 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
+	for (GraphNodeId i = 0; i < static_cast<GraphNodeId>(graph->getNodes().size()); ++i) {
+		if (!graph->getNodes()[i].getParentNode()) {
+			drawNodeBackground(painter, basePos, graph->getNodes()[i], effectiveZoom, posScale, getNodeDrawMode(i));
+		}
+	}
+
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		if (!graph->getNodes()[i].getParentNode()) {
 			drawNodeOutputs(painter, basePos, static_cast<GraphNodeId>(i), *graph, effectiveZoom, posScale);
@@ -228,6 +234,31 @@ String ScriptRenderer::getDebugDisplayValue(uint16_t id) const
 	return "";
 }
 
+void ScriptRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode)
+{
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
+
+	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
+	const auto [col, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
+
+	// Destructor
+	if (nodeType->hasDestructor(node) && nodeType->showDestructor()) {
+		destructorBg.clone()
+			.setColour(col.multiplyLuma(0.6f))
+			.setPosition(pos + Vector2f(0, 29) / curZoom)
+			.setScale(1.0f / curZoom)
+			.draw(painter);
+
+		destructorIcon.clone()
+			.setPosition(pos + Vector2f(0, 36) / curZoom)
+			.setScale(1.0f / curZoom)
+			.draw(painter);
+	}
+}
+
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
 {
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
@@ -238,124 +269,76 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(*nodeType, node, curZoom);
 	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
+	const auto [col, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
 
-	{
-		const auto baseCol = getNodeColour(*nodeType);
-		Colour4f col = baseCol;
-		Colour4f iconCol = Colour4f(1, 1, 1);
-		float borderAlpha = drawMode.selected ? 1.0f : 0.0f;
-		
-		switch (drawMode.type) {
-		case NodeDrawModeType::Highlight:
-			col = col.inverseMultiplyLuma(0.5f);
-			break;
-		case NodeDrawModeType::Active:
-			{
-				const float phase = drawMode.time * 2.0f * pif();
-				col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
-				borderAlpha = 1;
-				break;
-			}
-		case NodeDrawModeType::Unvisited:
-			col = col.multiplyLuma(0.3f);
-			iconCol = Colour4f(0.5f, 0.5f, 0.5f);
-			break;
-		case NodeDrawModeType::Normal:
-			break;
-		}
+	// Node body
+	nodeBg.clone()
+		.setColour(col)
+		.setPosition(pos)
+		.scaleTo(nodeSize + border)
+		.setSize(nodeBg.getSize() / curZoom)
+		.setSliceScale(1.0f / curZoom)
+		.draw(painter);
 
-		if (drawMode.activationTime < 1.0f) {
-			const float t = drawMode.activationTime;
-			const float t2 = std::pow(t, 0.5f);
-			const float t3 = std::pow(t, 0.3f);
-			const auto baseCol2 = lerp(baseCol, col, t2);
-			iconCol = lerp(Colour4f(1, 1, 1), iconCol, t2);
-			col = lerp(Colour4f(1, 1, 1), baseCol2, t3 * 0.5f + 0.5f);
-		}
-
-		// Destructor
-		if (nodeType->hasDestructor(node) && nodeType->showDestructor()) {
-			destructorBg.clone()
-				.setColour(col.multiplyLuma(0.6f))
-				.setPosition(pos + Vector2f(0, 29) / curZoom)
-				.setScale(1.0f / curZoom)
-				.draw(painter);
-
-			destructorIcon.clone()
-				.setPosition(pos + Vector2f(0, 36) / curZoom)
-				.setScale(1.0f / curZoom)
-				.draw(painter);
-		}
-		
-		// Node body
-		nodeBg.clone()
-			.setColour(col)
+	if (borderAlpha > 0.0001f) {
+		nodeBgOutline.clone()
 			.setPosition(pos)
 			.scaleTo(nodeSize + border)
 			.setSize(nodeBg.getSize() / curZoom)
 			.setSliceScale(1.0f / curZoom)
+			.setColour(Colour4f(1, 1, 1, borderAlpha))
 			.draw(painter);
+	}
 
-		if (borderAlpha > 0.0001f) {
-			nodeBgOutline.clone()
-				.setPosition(pos)
-				.scaleTo(nodeSize + border)
-				.setSize(nodeBg.getSize() / curZoom)
-				.setSliceScale(1.0f / curZoom)
-				.setColour(Colour4f(1, 1, 1, borderAlpha))
-				.draw(painter);
-		}
+	const auto label = nodeType->getLabel(node);
+	const auto largeLabel = nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? getDebugDisplayValue(node.getId()) : nodeType->getLargeLabel(node);
+	const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, -8.0f / curZoom).round();
 
-		const auto label = nodeType->getLabel(node);
-		const auto largeLabel = nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? getDebugDisplayValue(node.getId()) : nodeType->getLargeLabel(node);
-		const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, -8.0f / curZoom).round();
+	auto drawLabel = [&, col](const String& text, Vector2f pos, float size, float maxWidth, bool split)
+	{
+		auto labelCopy = labelText.clone()
+			.setPosition(pos)
+			.setSize(size)
+			.setOutline(8.0f / curZoom)
+			.setOutlineColour(col.multiplyLuma(0.75f))
+			.setOffset(Vector2f(0.5f, 0.5f))
+			.setAlignment(0.0f);
 
-		auto drawLabel = [&](const String& text, Vector2f pos, float size, float maxWidth, bool split)
-		{
-			auto labelCopy = labelText.clone()
-				.setPosition(pos)
-				.setSize(size)
-				.setOutline(8.0f / curZoom)
-				.setOutlineColour(col.multiplyLuma(0.75f))
-				.setOffset(Vector2f(0.5f, 0.5f))
-				.setAlignment(0.0f);
-
-			if (split) {
-				labelCopy.setText(labelCopy.split(text, maxWidth));
-			} else {
-				labelCopy.setText(text);
-				const auto extents = labelCopy.getExtents();
-				if (extents.x > maxWidth) {
-					labelCopy.setSize(size * maxWidth / extents.x);
-				}
+		if (split) {
+			labelCopy.setText(labelCopy.split(text, maxWidth));
+		} else {
+			labelCopy.setText(text);
+			const auto extents = labelCopy.getExtents();
+			if (extents.x > maxWidth) {
+				labelCopy.setSize(size * maxWidth / extents.x);
 			}
-
-			labelCopy
-				.draw(painter);
-		};
-		
-		// Icon
-		const auto& icon = getIcon(*nodeType, node);
-		if (icon.hasMaterial() && nodeType->getClassification() != ScriptNodeClassification::Comment) {
-			icon.clone()
-				.setPosition(pos + iconOffset)
-				.setScale(1.0f / curZoom)
-				.setColour(iconCol.multiplyAlpha(nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? 0.05f : (largeLabel.isEmpty() ? 1.0f : 0.25f)))
-				.draw(painter);
 		}
 
-		// Large label
-		if (!largeLabel.isEmpty()) {
-			const bool isComment = nodeType->getClassification() == ScriptNodeClassification::Comment;
-			const auto fontSize = isComment ? 14.0f : 18.0f;
-			const auto margin = isComment ? 20.0f : 10.0f;
-			drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - margin) / curZoom, isComment);
-		}
+		labelCopy
+			.draw(painter);
+	};
+	
+	// Icon
+	const auto& icon = getIcon(*nodeType, node);
+	if (icon.hasMaterial() && nodeType->getClassification() != ScriptNodeClassification::Comment) {
+		icon.clone()
+			.setPosition(pos + iconOffset)
+			.setScale(1.0f / curZoom)
+			.setColour(iconCol.multiplyAlpha(nodeType->getClassification() == ScriptNodeClassification::DebugDisplay ? 0.05f : (largeLabel.isEmpty() ? 1.0f : 0.25f)))
+			.draw(painter);
+	}
 
-		// Label
-		if (!label.isEmpty()) {
-			drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
-		}
+	// Large label
+	if (!largeLabel.isEmpty()) {
+		const bool isComment = nodeType->getClassification() == ScriptNodeClassification::Comment;
+		const auto fontSize = isComment ? 14.0f : 18.0f;
+		const auto margin = isComment ? 20.0f : 10.0f;
+		drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - margin) / curZoom, isComment);
+	}
+
+	// Label
+	if (!label.isEmpty()) {
+		drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
 	}
 
 	// Draw pins
@@ -481,6 +464,44 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 		return Colour4f(0.1f, 0.1f, 0.15f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
+}
+
+std::tuple<Colour4f, Colour4f, float> ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType, NodeDrawMode drawMode)
+{
+	const auto baseCol = getNodeColour(nodeType);
+	Colour4f col = baseCol;
+	Colour4f iconCol = Colour4f(1, 1, 1);
+	float borderAlpha = drawMode.selected ? 1.0f : 0.0f;
+	
+	switch (drawMode.type) {
+	case NodeDrawModeType::Highlight:
+		col = col.inverseMultiplyLuma(0.5f);
+		break;
+	case NodeDrawModeType::Active:
+		{
+			const float phase = drawMode.time * 2.0f * pif();
+			col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
+			borderAlpha = 1;
+			break;
+		}
+	case NodeDrawModeType::Unvisited:
+		col = col.multiplyLuma(0.3f);
+		iconCol = Colour4f(0.5f, 0.5f, 0.5f);
+		break;
+	case NodeDrawModeType::Normal:
+		break;
+	}
+
+	if (drawMode.activationTime < 1.0f) {
+		const float t = drawMode.activationTime;
+		const float t2 = std::pow(t, 0.5f);
+		const float t3 = std::pow(t, 0.3f);
+		const auto baseCol2 = lerp(baseCol, col, t2);
+		iconCol = lerp(Colour4f(1, 1, 1), iconCol, t2);
+		col = lerp(Colour4f(1, 1, 1), baseCol2, t3 * 0.5f + 0.5f);
+	}
+
+	return { col, iconCol, borderAlpha };
 }
 
 Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
