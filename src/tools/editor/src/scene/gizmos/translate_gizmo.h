@@ -41,14 +41,20 @@ namespace Halley {
 		TranslateGizmoMode mode;
 		std::shared_ptr<UIList> uiMode;
 		Vector2f pendingMoveBy;
+		int pendingRotate = 0;
 
 		Circle getHandleBounds(const SceneEditorGizmoHandle& handle) const;
-		void updateEntityData(Vector2f pos, size_t idx);
+		void updatePositionData(Vector2f pos, size_t idx);
+		void updateRotationData(Angle1f rotation, size_t idx);
 		Vector2f getObjectOffset(size_t idx) const;
 		void setMode(TranslateGizmoMode mode);
+
 		void moveBy(Vector2i delta);
 		void doMoveBy();
 		void doMoveBy(Vector2f delta);
+		void rotate(int delta);
+		void doRotate();
+
 		void loadHandles();
 		bool isDescendentOf(EntityRef e, gsl::span<const EntityRef> entities) const;
 	};

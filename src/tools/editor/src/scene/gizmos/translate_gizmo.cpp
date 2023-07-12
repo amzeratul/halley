@@ -43,6 +43,7 @@ void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			pendingMoveBy += delta.value();
 		}
 		doMoveBy();
+		doRotate();
 
 		if (!handle->isHeld()) {
 			const auto n = getEntities().size();
@@ -102,6 +103,16 @@ std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 	{
 		setMode(fromString<TranslateGizmoMode>(value));
 	});
+
+	ui->setHandle(UIEventType::ButtonClicked, "turnLeft", [=] (const UIEvent& event)
+	{
+		rotate(1);
+	});
+
+	ui->setHandle(UIEventType::ButtonClicked, "turnRight", [=] (const UIEvent& event)
+	{
+		rotate(-1);
+	});
 	
 	return ui;
 }
@@ -135,6 +146,14 @@ bool TranslateGizmo::onKeyPress(KeyboardKeyPress key)
 		moveBy(-yAxis);
 		return true;
 	}
+	if (key.key == KeyCode::Q) {
+		rotate(1);
+		return true;
+	}
+	if (key.key == KeyCode::E) {
+		rotate(-1);
+		return true;
+	}
 
 	return false;
 }
@@ -155,13 +174,22 @@ Circle TranslateGizmo::getHandleBounds(const SceneEditorGizmoHandle& handle) con
 	return Circle(pos, 10.0f / getZoom());
 }
 
-void TranslateGizmo::updateEntityData(Vector2f pos, size_t idx)
+void TranslateGizmo::updatePositionData(Vector2f pos, size_t idx)
 {
 	auto* data = getComponentData("Transform2D", idx);
 	if (data) {
 		(*data)["position"] = pos;
 	}
 	markModified("Transform2D", "position", idx);
+}
+
+void TranslateGizmo::updateRotationData(Angle1f rotation, size_t idx)
+{
+	auto* data = getComponentData("Transform2D", idx);
+	if (data) {
+		(*data)["rotation"] = rotation.getDegrees();
+	}
+	markModified("Transform2D", "rotation", idx);
 }
 
 Vector2f TranslateGizmo::getObjectOffset(size_t idx) const
@@ -221,10 +249,37 @@ void TranslateGizmo::doMoveBy(Vector2f delta)
 			if (const auto transform = getComponent<Transform2DComponent>(i)) {
 				transform->setGlobalPosition(targetPos[i]);
 				const auto newLocalPos = transform->getLocalPosition();
-				updateEntityData(newLocalPos, i);
+				updatePositionData(newLocalPos, i);
 			}
 		}
 	}
+}
+
+void TranslateGizmo::rotate(int delta)
+{
+	pendingRotate += delta;
+}
+
+void TranslateGizmo::doRotate()
+{
+	if (pendingRotate == 0) {
+		return;
+	}
+
+	const auto& entities = getEntities();
+	const size_t n = entities.size();
+
+	for (size_t i = 0; i < n; ++i) {
+		if (!isDescendentOf(entities[i], entities)) {
+			if (const auto transform = getComponent<Transform2DComponent>(i)) {
+				const auto newRotation = transform->getLocalRotation() + Angle1f::fromDegrees(90.0f * pendingRotate);
+				transform->setLocalRotation(newRotation);
+				updateRotationData(newRotation, i);
+			}
+		}
+	}
+
+	pendingRotate = 0;
 }
 
 bool TranslateGizmo::isDescendentOf(EntityRef e, gsl::span<const EntityRef> entities) const

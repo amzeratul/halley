@@ -1,6 +1,8 @@
 widget: { class: widget }
-sizer: { type: vertical }
+sizer: { type: horizontal, gap: 4 }
 children:
+- widget: { id: turnLeft, class: button, style: buttonThin, icon: "halley_ui/turn_left.png", size: [22, 22], tooltip: "Rotate Left [Q]" }
+- widget: { id: turnRight, class: button, style: buttonThin, icon: "halley_ui/turn_right.png", size: [22, 22], tooltip: "Rotate Right [E]" }
 - widget:
     id: mode
     class: list
