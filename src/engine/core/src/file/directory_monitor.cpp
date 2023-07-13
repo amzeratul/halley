@@ -188,6 +188,7 @@ Vector<DirectoryMonitor::Event> DirectoryMonitor::poll(bool waitForNoChange)
 
 		if (nNow != nBefore) {
 			if (result.back().type == ChangeType::Unknown) {
+				result.clear();
 				return result;
 			}
 			if (waitForNoChange) {

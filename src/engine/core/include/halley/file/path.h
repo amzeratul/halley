@@ -25,6 +25,7 @@ namespace Halley
 		Path getRoot() const;
 		Path getFront(size_t n) const;
 		Path getFilename() const;
+		Path getDirName() const;
 		Path getStem() const;
 		String getExtension() const;
 		String getString(bool includeDot = true) const;

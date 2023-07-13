@@ -120,6 +120,14 @@ Path Path::getFilename() const
 	return pathParts.back();
 }
 
+Path Path::getDirName() const
+{
+	if (pathParts.back() == ".") {
+		return pathParts[pathParts.size() - 2];
+	}
+	return "";
+}
+
 Path Path::getStem() const
 {
 	String filename = pathParts.back();

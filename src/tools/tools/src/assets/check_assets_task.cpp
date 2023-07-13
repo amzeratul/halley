@@ -6,10 +6,10 @@
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/tools/assets/delete_assets_task.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/resources/resource_data.h"
 #include "halley/tools/assets/metadata_importer.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/support/logger.h"
+#include "halley/tools/file/filesystem_cache.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;
@@ -17,6 +17,7 @@ using namespace std::chrono_literals;
 CheckAssetsTask::CheckAssetsTask(Project& project, bool oneShot)
 	: Task("Checking assets", true, true)
 	, project(project)
+	, fileSystemCache(project.getFileSystemCache())
 	, monitorAssets(project.getUnpackedAssetsPath())
 	, monitorAssetsSrc(project.getAssetsSrcPath())
 	, monitorSharedAssetsSrc(project.getSharedAssetsSrcPath())
@@ -39,6 +40,14 @@ void CheckAssetsTask::run()
 	bool first = true;
 	while (!isCancelled()) {
 		bool importing = false;
+
+		if (first) {
+			setProgress(0, "Enumerating filesystem");
+			fileSystemCache.trackDirectory(project.getAssetsSrcPath());
+			fileSystemCache.trackDirectory(project.getSharedAssetsSrcPath());
+			fileSystemCache.trackDirectory(project.getGenSrcPath());
+			fileSystemCache.trackDirectory(project.getSharedGenSrcPath());
+		}
 
 		projectAssetImporter = project.getAssetImporter();
 
@@ -63,22 +72,26 @@ void CheckAssetsTask::run()
 			sleep(5);
 		}
 
-		// First import
-		if (first) {
-			importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false, Range<float>(0, 0.05f));
-			importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false, Range<float>(0.05f, 0.1f));
-			importing |= importAll(project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, project.getUnpackedAssetsPath(), "Importing assets", true, Range<float>(0.1f, 1.0f));
-			setVisible(false);
-			while (hasPendingTasks()) {
-				sleep(5);
-			}
-		}
+		// Check if any files changed
+		Vector<DirectoryMonitor::Event> assetsChanged;
+		monitorAssetsSrc.poll(assetsChanged, true);
+		monitorSharedAssetsSrc.poll(assetsChanged, true);
+		//monitorAssets.poll(assetsChanged, true);
+		Vector<DirectoryMonitor::Event> genChanged;
+		monitorSharedGenSrc.poll(genChanged, true);
+		monitorGenSrc.poll(genChanged, true);
+		//monitorSharedGen.poll(genChanged, true);
+		//monitorGen.poll(genChanged, true);
+		fileSystemCache.notifyChanges(assetsChanged);
+		fileSystemCache.notifyChanges(genChanged);
 
-		// Reimport
-		if (curPendingReimport) {
-			setVisible(true);
-			const bool hasCodeGen = curPendingReimport == ReimportType::Codegen;
-			const bool hasAssets = curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;
+		// First or Re-import
+		const bool hasCodeGen = first || !genChanged.empty() || curPendingReimport == ReimportType::Codegen;
+		const bool hasAssets = first || !assetsChanged.empty() || curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;
+		if (hasCodeGen || hasAssets) {
+			if (curPendingReimport) {
+				setVisible(true);
+			}
 
 			if (hasCodeGen) {
 				project.getCodegenDatabase().clear();
@@ -99,29 +112,7 @@ void CheckAssetsTask::run()
 				sleep(5);
 			}
 		}
-
-		// Check if any files changed
-		Vector<DirectoryMonitor::Event> assetsChanged;
-		monitorAssetsSrc.poll(assetsChanged, true);
-		monitorSharedAssetsSrc.poll(assetsChanged, true);
-		monitorAssets.poll(assetsChanged, true);
-		Vector<DirectoryMonitor::Event> sharedGenChanged;
-		monitorSharedGenSrc.poll(sharedGenChanged, true);
-		monitorSharedGen.poll(sharedGenChanged, true);
-		Vector<DirectoryMonitor::Event> genChanged = sharedGenChanged; // Copy
-		monitorGenSrc.poll(genChanged, true);
-		monitorGen.poll(sharedGenChanged, true);
-
-		// Re-import any changes
-		importing |= importChanged(std::move(assetsChanged), project.getImportAssetsDatabase(), { project.getAssetsSrcPath(), project.getSharedAssetsSrcPath() }, true, false, project.getUnpackedAssetsPath(), "Importing assets", true);
-		importing |= importChanged(std::move(genChanged), project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, true, project.getGenPath(), "Generating code", false);
-		importing |= importChanged(std::move(sharedGenChanged), project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, true, project.getSharedGenPath(), "Generating code", false);
-
-		setVisible(false);
-		while (hasPendingTasks()) {
-			sleep(5);
-		}
-
+		
 		if ((importing || first) && !project.getImportAssetsDatabase().hasFailedFiles()) {
 			Concurrent::execute(Executors::getMainUpdateThread(), [project = &project] () {
 				Logger::logDev("Notifying assets imported");
@@ -148,43 +139,6 @@ bool CheckAssetsTask::importAll(ImportAssetsDatabase& db, const Vector<Path>& sr
 	}
 	const auto assets = checkAllAssets(db, srcPaths, collectDirMeta, progressRange);
 
-	if (isCancelled()) {
-		return false;
-	}
-	return requestImport(db, assets, std::move(dstPath), std::move(taskName), packAfter);
-}
-
-bool CheckAssetsTask::importChanged(Vector<DirectoryMonitor::Event> changes, ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, bool isCodeGen, Path dstPath, String taskName, bool packAfter)
-{
-	if (changes.empty()) {
-		return false;
-	}
-
-	// Check for full reimport
-	bool reimportAll = isCodeGen;
-	if (!reimportAll) {
-		for (const auto& change : changes) {
-			if (change.type == DirectoryMonitor::ChangeType::Unknown || change.name == "_dir.meta") {
-				reimportAll = true;
-				break;
-			}
-		}
-	}
-	
-	// If we have a wildcard change, reimport all
-	if (reimportAll) {
-		return importAll(db, srcPaths, collectDirMeta, std::move(dstPath), std::move(taskName), packAfter, Range<float>(0, 0));
-	}
-
-	// Otherwise we'll only import the ones that changed
-	if (isCancelled()) {
-		return false;
-	}
-
-	postProcessChanges(changes);
-	filterDuplicateChanges(changes);
-	addFailedFiles(db, changes);
-	const auto assets = checkChangedAssets(db, changes, srcPaths, dstPath, collectDirMeta);
 	if (isCancelled()) {
 		return false;
 	}
@@ -219,21 +173,21 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	bool dbChanged = false;
 
 	// Collect data on main file
-	timestamps[0] = FileSystem::getLastWriteTime(srcPath / filePath);
+	timestamps[0] = fileSystemCache.getLastWriteTime(srcPath / filePath);
 
 	// Collect data on directory meta file
 	auto dirMetaPath = findDirectoryMeta(directoryMetas, filePath);
-	if (dirMetaPath && FileSystem::exists(srcPath / dirMetaPath.value())) {
+	if (dirMetaPath && fileSystemCache.exists(srcPath / dirMetaPath.value())) {
 		dirMetaPath = srcPath / dirMetaPath.value();
-		timestamps[1] = FileSystem::getLastWriteTime(dirMetaPath.value());
+		timestamps[1] = fileSystemCache.getLastWriteTime(dirMetaPath.value());
 	} else {
 		dirMetaPath = {};
 	}
 
 	// Collect data on private meta file
 	std::optional<Path> privateMetaPath = srcPath / filePath.replaceExtension(filePath.getExtension() + ".meta");
-	if (FileSystem::exists(privateMetaPath.value())) {
-		timestamps[2] = FileSystem::getLastWriteTime(privateMetaPath.value());
+	if (fileSystemCache.exists(privateMetaPath.value())) {
+		timestamps[2] = fileSystemCache.getLastWriteTime(privateMetaPath.value());
 	} else {
 		privateMetaPath = {};
 	}
@@ -253,7 +207,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 	// If this file was already imported, check any previous dependencies it had too
 	if (additionalFilesToImport) {
 		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath / filePath)) {
-			if (Path::exists(inputSrc / inputFile)) {
+			if (fileSystemCache.exists(inputSrc / inputFile)) {
 				additionalFilesToImport->emplace_back(inputSrc, inputFile);
 			} else {
 				Logger::logWarning("Missing original input file: " + (inputSrc / inputFile));
@@ -287,7 +241,7 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 			const auto [addSrcPath, addSrcFiles] = db.getInputFiles(asset.assetType, asset.assetId);
 			for (const auto& additional: addSrcFiles) {
 				if (additional != filePath) {
-					if (Path::exists(addSrcPath / additional)) {
+					if (fileSystemCache.exists(addSrcPath / additional)) {
 						additionalFilesToImport->emplace_back(addSrcPath, additional);
 					} else {
 						Logger::logInfo("File deleted: " + (addSrcPath / additional));
@@ -338,68 +292,6 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkSpecificAssets(ImportAssetsDat
 	return assets;
 }
 
-std::pair<Path, Path> CheckAssetsTask::findRelativePath(Path path, const Vector<Path>& srcPaths) const
-{
-	const Path* srcPathPtr = nullptr;
-	for (auto& srcPath: srcPaths) {
-		if (srcPath.isPrefixOf(path)) {
-			srcPathPtr = &srcPath;
-			break;
-		}
-	}
-	if (!srcPathPtr) {
-		//Logger::logWarning("Ignored file change: " + path.toString());
-		return {{}, {}};
-	}
-	return { *srcPathPtr, path.makeRelativeTo(*srcPathPtr) };
-}
-
-CheckAssetsTask::AssetTable CheckAssetsTask::checkChangedAssets(ImportAssetsDatabase& db, const Vector<DirectoryMonitor::Event>& changes, const Vector<Path>& srcPaths, const Path& dstPath, bool useDirMeta)
-{
-	AssetTable assets;
-
-	bool dbChanged = false;
-
-	for (const auto& change: changes) {
-		if (isCancelled()) {
-			return {};
-		}
-
-		auto [srcPath, filePath] = findRelativePath(change.name, srcPaths);
-		if (srcPath.isEmpty()) {
-			continue;
-		}
-
-		if (change.type == DirectoryMonitor::ChangeType::FileAdded || change.type == DirectoryMonitor::ChangeType::FileModified || change.type == DirectoryMonitor::ChangeType::FileRenamed) {
-			dbChanged = importFile(db, assets, useDirMeta, srcPath, srcPaths, filePath) || dbChanged;
-
-			if (change.type == DirectoryMonitor::ChangeType::FileRenamed) {
-				Path oldFilePath = change.oldName.isEmpty() ? Path() : Path(change.oldName).makeRelativeTo(srcPath);
-				db.markInputMissing(oldFilePath);
-			}
-		} else if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
-			db.markInputMissing(filePath);
-		}
-	}
-
-	const auto toImport = db.markMissingAssetsAndGetPartial();
-	for (const auto& file: toImport) {
-		auto [srcPath, filePath] = findRelativePath(file, srcPaths);
-		if (srcPath.isEmpty()) {
-			continue;
-		}
-		dbChanged = importFile(db, assets, useDirMeta, srcPath, srcPaths, filePath) || dbChanged;
-	}
-
-	dbChanged = db.purgeMissingInputs() || dbChanged;
-	
-	if (dbChanged) {
-		db.save();
-	}
-
-	return assets;
-}
-
 CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange)
 {
 	AssetTable assets;
@@ -420,7 +312,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 
 		setProgress(curRange.start, "Enumerating " + srcPath.getNativeString());
 
-		auto allFiles = FileSystem::enumerateDirectory(srcPath);
+		auto allFiles = fileSystemCache.enumerateDirectory(srcPath);
 
 		// First, collect all directory metas
 		if (collectDirMeta) {
@@ -461,55 +353,6 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	db.markAssetsAsStillPresent(assets);
 
 	return assets;
-}
-
-void CheckAssetsTask::filterDuplicateChanges(Vector<DirectoryMonitor::Event>& changes) const
-{
-	Vector<DirectoryMonitor::Event> result;
-	HashSet<DirectoryMonitor::Event> index;
-	HashSet<String> deleteIndex;
-
-	// Process delete changes first, since they override others
-	for (auto& change: changes) {
-		if (change.type == DirectoryMonitor::ChangeType::FileRemoved) {
-			index.insert(change);
-			deleteIndex.insert(change.name);
-			result.push_back(change);
-		}
-	}
-
-	for (auto& change: changes) {
-		if (change.type != DirectoryMonitor::ChangeType::FileRemoved) {
-			if (!index.contains(change) && !deleteIndex.contains(change.name)) {
-				index.emplace(change);
-				result.push_back(change);
-			}
-		}
-	}
-
-	changes = std::move(result);
-}
-
-void CheckAssetsTask::postProcessChanges(Vector<DirectoryMonitor::Event>& changes) const
-{
-	// Treat changes to a meta file as a change to the original file
-	for (auto& c: changes) {
-		if (c.name.endsWith(".meta")) {
-			c.name = c.name.left(c.name.length() - 5);
-			c.type = DirectoryMonitor::ChangeType::FileModified;
-		}
-		if (c.oldName.endsWith(".meta")) {
-			c.oldName = c.oldName.left(c.oldName.length() - 5);
-			c.type = DirectoryMonitor::ChangeType::FileModified;
-		}
-	}
-}
-
-void CheckAssetsTask::addFailedFiles(ImportAssetsDatabase& db, Vector<DirectoryMonitor::Event>& changes) const
-{
-	for (const auto& failed: db.getAllFailedFilenames()) {
-		changes.push_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileModified, failed.getString(), "" });
-	}
 }
 
 bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter)
