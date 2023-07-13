@@ -54,20 +54,11 @@ void CheckAssetsTask::run()
 
 		projectAssetImporter = project.getAssetImporter();
 
-		decltype(pending) curPending;
 		decltype(pendingReimport) curPendingReimport;
 		{
 			std::unique_lock<std::mutex> lock(mutex);
-			curPending = std::move(pending);
 			curPendingReimport = pendingReimport;
 			pendingReimport = {};
-		}
-		if (!curPending.empty()) {
-			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), curPending);
-			if (!isCancelled()) {
-				importing |= requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
-				sleep(10);
-			}
 		}
 
 		// Wait for the import to finish, otherwise the DB won't be updated and it'll try updating the same assets twice
@@ -135,9 +126,7 @@ void CheckAssetsTask::run()
 			first = false;
 		}
 
-		if (pending.empty()) {
-			sleep(monitorAssets.hasRealImplementation() ? 20 : 1000);
-		}
+		sleep(monitorAssets.hasRealImplementation() ? 20 : 1000);
 	}
 }
 
@@ -282,23 +271,6 @@ void CheckAssetsTask::sleep(int timeMs)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	condition.wait_for(lock, timeMs * 1ms);
-	for (auto& a: inbox) {
-		pending.push_back(std::move(a)); // This is buggy, just wake up (causes assets to import twice)
-	}
-	inbox.clear();
-}
-
-CheckAssetsTask::AssetTable CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
-{
-	AssetTable assets;
-	bool dbChanged = false;
-	for (auto& path: paths) {
-		dbChanged = importFile(db, assets, true, project.getAssetsSrcPath(), { project.getAssetsSrcPath() }, path) || dbChanged;
-	}
-	if (dbChanged) {
-		db.save();
-	}
-	return assets;
 }
 
 CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange)
@@ -392,10 +364,6 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets,
 
 void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 {
-	if (true) {
-		std::unique_lock<std::mutex> lock(mutex);
-		inbox.insert(inbox.end(), paths.begin(), paths.end());
-	}
 	condition.notify_one();
 }
 

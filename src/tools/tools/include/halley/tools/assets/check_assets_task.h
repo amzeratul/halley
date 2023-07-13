@@ -55,8 +55,6 @@ namespace Halley
 		std::mutex mutex;
 		std::condition_variable condition;
 
-		Vector<Path> inbox;
-		Vector<Path> pending;
 		std::optional<ReimportType> pendingReimport;
 
 		using AssetTable = HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>;
@@ -66,7 +64,6 @@ namespace Halley
 
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange);
 
-		AssetTable checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
 		AssetTable checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange);
 
 		bool requestImport(ImportAssetsDatabase& db, AssetTable assets, Path dstPath, String taskName, bool packAfter);
