@@ -101,8 +101,10 @@ void CheckAssetsTask::run()
 			}
 
 			if (hasCodeGen) {
-				project.getCodegenDatabase().clear();
-				project.getSharedCodegenDatabase().clear();
+				if (curPendingReimport == ReimportType::Codegen) {
+					project.getCodegenDatabase().clear();
+					project.getSharedCodegenDatabase().clear();
+				}
 				const float rangeEnd = hasAssets ? 0.1f : 1.0f;
 				importing |= importAll(project.getCodegenDatabase(), { project.getSharedGenSrcPath(), project.getGenSrcPath() }, false, project.getGenPath(), "Generating code", false, Range(0.0f, rangeEnd * 0.5f));
 				importing |= importAll(project.getSharedCodegenDatabase(), { project.getSharedGenSrcPath() }, false, project.getSharedGenPath(), "Generating code", false, Range(rangeEnd * 0.5f, rangeEnd));
