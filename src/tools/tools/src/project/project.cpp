@@ -352,6 +352,7 @@ void Project::onAllAssetsImported()
 	for (auto& listener: assetLoadedListeners) {
 		listener->onAssetsLoaded();
 	}
+	assetsImported = true;
 }
 
 void Project::reloadAssets(const std::set<String>& assets, const Vector<String>& packIds, bool packed)
@@ -486,6 +487,11 @@ Resources& Project::getGameResources()
 bool Project::isDLLLoaded() const
 {
 	return gameDll && gameDll->isLoaded();
+}
+
+bool Project::areAssetsLoaded() const
+{
+	return assetsImported;
 }
 
 ProjectDLL::Status Project::getDLLStatus() const

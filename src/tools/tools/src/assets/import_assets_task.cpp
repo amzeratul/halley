@@ -70,7 +70,8 @@ void ImportAssetsTask::run()
 	if (!isCancelled()) {
 		setProgress(1.0f, "");
 
-		if (!hasError()) {
+		// Notify even if there have been errors
+		if (true || !hasError()) {
 			if (!outputAssets.empty()) {
 				Concurrent::execute(Executors::getMainUpdateThread(), [project = &project, assets = outputAssets] () {
 					project->reloadAssets(assets, {}, false);

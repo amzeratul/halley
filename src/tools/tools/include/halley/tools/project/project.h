@@ -117,6 +117,7 @@ namespace Halley
 		Resources& getGameResources();
 
 		bool isDLLLoaded() const;
+		bool areAssetsLoaded() const;
 		ProjectDLL::Status getDLLStatus() const;
 		
 		template <typename F>
@@ -174,6 +175,7 @@ namespace Halley
 		std::unique_ptr<FileSystemCache> fileSystemCache;
 
 		bool assetNotifyImportEnabled = true;
+		bool assetsImported = false;
 		Vector<Path> assetsToNotifyImport;
 
 		DevConServer* devConServer = nullptr;
