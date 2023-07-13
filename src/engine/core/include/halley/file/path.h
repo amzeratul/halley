@@ -48,6 +48,7 @@ namespace Halley
 		bool operator==(const char* other) const;
 		bool operator==(const String& other) const;
 		bool operator==(const Path& other) const;
+		bool operator==(gsl::span<const String> other) const;
 
 		bool operator!=(const Path& other) const;
 		bool operator<(const Path& other) const;
@@ -74,13 +75,27 @@ namespace Halley
 		bool isAbsolute() const;
 		bool isEmpty() const;
 
+		size_t getHash() const;
+
 	private:
 		Vector<String> pathParts;
 		void normalise();
 		void setPath(const String& value);
+		std::string makeString(bool includeDot, char dirSeparator) const;
 
 		explicit Path(Vector<String> parts);
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;
+}
+
+namespace std {
+	template<>
+	struct hash<Halley::Path>
+	{
+		size_t operator()(const Halley::Path& v) const noexcept
+		{
+			return v.getHash();
+		}
+	};
 }

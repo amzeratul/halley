@@ -10,10 +10,21 @@ using namespace Halley;
 
 void FileSystemCache::writeFile(const Path& path, Bytes data)
 {
+	const auto key = path.getString();
+	{
+		// Check if we're not writing the same thing we wrote last time
+		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+		if (const auto iter = fileDataCache.find(key); iter != fileDataCache.end()) {
+			if (iter->second == data) {
+				// No change, nothing to do here
+				return;
+			}
+		}
+	}
+
 	FileSystem::writeFile(path, data);
 
 	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
-	const auto key = path.getString();
 	if (shouldCache(path, data.size())) {
 		fileDataCache[key] = std::move(data);
 	} else {
@@ -116,9 +127,10 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 void FileSystemCache::trackDirectory(const Path& path)
 {
 	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
-	if (!std_ex::contains(trackedDirs, path)) {
-		trackedDirs.push_back(path);
-		readDirFromFilesystem(path);
+	const auto dirPath = path.isDirectory() ? path : path / ".";
+	if (!std_ex::contains(trackedDirs, dirPath)) {
+		trackedDirs.push_back(dirPath);
+		readDirFromFilesystem(dirPath);
 	}
 }
 
@@ -128,15 +140,15 @@ FileSystemCache::DirEntry& FileSystemCache::getDirectory(const Path& path)
 		return *dir;
 	}
 
-	Logger::logError("FileSystemCache error: path \"" + path.getString(false) + "\" is not tracked by cache.");
+	Logger::logError("FileSystemCache error: path \"" + path.getString() + "\" is not tracked by cache.");
 	return emptyDir;
 }
 
 FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
 	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
-	const auto& key = dirPath.getString(false);
-	const auto iter = dirs.find(key);
+	assert(dirPath.isDirectory());
+	const auto iter = dirs.find(dirPath);
 	if (iter != dirs.end()) {
 		return &iter->second;
 	}
@@ -149,7 +161,7 @@ FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 					parent->addDir(dirPath.getDirName().getString());
 				}
 			}
-			return &dirs[key];
+			return &dirs[dirPath];
 		}
 	}
 
@@ -162,8 +174,7 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 		return;
 	}
 
-	const auto& key = rootDir.getString(false);
-	auto& dir = dirs[key];
+	auto& dir = dirs[rootDir.isDirectory() ? rootDir : (rootDir / ".")];
 	const auto nativeRootDir = std::filesystem::path(rootDir.getNativeString().cppStr());
 
 	Vector<Path> toRecurse;

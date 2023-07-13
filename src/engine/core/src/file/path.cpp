@@ -7,6 +7,7 @@
 #include <sstream>
 #include <fstream>
 #include "halley/os/os.h"
+#include "halley/utils/hash.h"
 
 using namespace Halley;
 
@@ -148,10 +149,29 @@ String Path::getExtension() const
 	return filename.substr(dotPos);
 }
 
-String Path::getString(bool includeDot) const
+std::string Path::makeString(bool includeDot, char dirSeparator) const
 {
-	std::stringstream s;
+	std::string result;
+
+	// Measure size needed
 	bool first = true;
+	size_t size = 0;
+	for (const auto& p: pathParts) {
+		if (&p == &pathParts.back() && p == "." && !includeDot) {
+			break;
+		}
+		if (first) {
+			first = false;
+		} else {
+			// Separator
+			size += 1;
+		}
+		size += p.size();
+	}
+	result.reserve(size);
+
+	// Write string
+	first = true;
 	for (auto& p : pathParts) {
 		if (&p == &pathParts.back() && p == "." && !includeDot) {
 			break;
@@ -159,29 +179,37 @@ String Path::getString(bool includeDot) const
 		if (first) {
 			first = false;
 		} else {
-			s << "/";
+			result += dirSeparator;
 		}
-		s << p;
+		result += p;
 	}
-	return s.str();
+	return result;
+}
+
+std::string Path::string() const
+{
+	return makeString(true, '/');
+}
+
+String Path::getString(bool includeDot) const
+{
+	return makeString(includeDot, '/');
 }
 
 String Path::getNativeString(bool includeDot) const
 {
-	auto str = getString(includeDot);
 #ifdef _WIN32
-	for (auto& c: str.cppStr()) {
-		if (c == '/') {
-			c = '\\';
-		}
-	}
+	constexpr char separator = '\\';
+#else
+	constexpr char separator = '/';
 #endif
-	return str;
+
+	return makeString(includeDot, separator);
 }
 
 String Path::toString() const
 {
-	return getString();
+	return makeString(true, '/');
 }
 
 gsl::span<const String> Path::getParts() const
@@ -259,15 +287,20 @@ bool Path::operator==(const String& other) const
 
 bool Path::operator==(const Path& other) const 
 {
-	if (pathParts.size() != other.pathParts.size()) {
+	return *this == other.getParts();
+}
+
+bool Path::operator==(gsl::span<const String> other) const
+{
+	if (pathParts.size() != other.size()) {
 		return false;
 	}
 
 	for (size_t i = 0; i < pathParts.size(); ++i) {
 		auto& a = pathParts[i];
-		auto& b = other.pathParts[i];
+		auto& b = other[i];
 #ifdef _WIN32
-		if (a != b && a.asciiLower() != b.asciiLower()) {
+		if (a.size() != b.size() || !a.asciiCompareNoCase(b.c_str())) {
 #else
 		if (a == b) {
 #endif
@@ -285,11 +318,6 @@ bool Path::operator!=(const Path& other) const
 bool Path::operator<(const Path& other) const
 {
 	return pathParts < other.pathParts;
-}
-
-std::string Path::string() const
-{
-	return getString().cppStr();
 }
 
 bool Path::writeFile(const Path& path, gsl::span<const gsl::byte> data)
@@ -405,7 +433,7 @@ void Path::removeFile(const Path& path)
 
 bool Path::isPrefixOf(const Path& other) const
 {
-	return other.getFront(getNumberPaths()) == *this;
+	return *this == other.getParts().subspan(0, std::min(other.getNumberPaths(), getNumberPaths()));
 }
 
 Path Path::makeRelativeTo(const Path& path) const
@@ -465,6 +493,15 @@ bool Path::isAbsolute() const
 bool Path::isEmpty() const
 {
 	return pathParts.empty() || pathParts[0].isEmpty();
+}
+
+size_t Path::getHash() const
+{
+	Hash::Hasher hasher;
+	for (const auto& p: pathParts) {
+		hasher.feed(p);
+	}
+	return hasher.digest();
 }
 
 Path Path::getRoot() const

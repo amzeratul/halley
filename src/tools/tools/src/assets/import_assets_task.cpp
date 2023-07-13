@@ -11,6 +11,7 @@
 #include "halley/time/stopwatch.h"
 #include "halley/support/debug.h"
 #include "halley/tools/file/filesystem_cache.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -116,12 +117,19 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	}
 
 	// Retrieve previous output from this asset, and remove any files which went missing
+	HashSet<Path> outFiles;
+	outFiles.reserve(result.outFiles.size());
+	for (const auto& p: result.outFiles) {
+		outFiles.insert(p.first);
+	}
 	auto previous = db.getOutFiles(asset.assetType, asset.assetId);
 	for (auto& f: previous) {
 		for (auto& v: f.platformVersions) {
-			if (std::find_if(result.outFiles.begin(), result.outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == result.outFiles.end()) {
+			const Path& curPath = v.second.filepath;
+			//if (!std_ex::contains(result.outFiles, [&] (const std::pair<Path, Bytes>& r) { return r.first == curPath; })) {
+			if (!outFiles.contains(curPath)) {
 				// File no longer exists as part of this asset, remove it
-				fs.remove(assetsPath / v.second.filepath);
+				fs.remove(assetsPath / curPath);
 			}
 		}
 	}

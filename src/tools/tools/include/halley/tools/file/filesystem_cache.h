@@ -39,7 +39,7 @@ namespace Halley {
         mutable std::mutex fileTreeMutex;
 
         HashMap<String, Bytes> fileDataCache;
-        HashMap<String, DirEntry> dirs;
+        HashMap<Path, DirEntry> dirs;
         DirEntry emptyDir;
         Vector<Path> trackedDirs;
 
