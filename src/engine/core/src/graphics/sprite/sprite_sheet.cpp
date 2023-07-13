@@ -537,6 +537,7 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 				infoEntry["offX"] = borderTL.x;
 				infoEntry["offY"] = borderTL.y;
 				infoEntry["rotated"] = packedImg.rotated;
+				infoEntry["group"] = imgData.group;
 				infoSeq.emplace_back(std::move(infoEntry));
 			}
 		};

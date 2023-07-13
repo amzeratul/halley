@@ -33,7 +33,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	if (palette != "") {
 		auto paletteBytes = collector.readAdditionalFile("image/" + palette);
 		Image paletteImage(gsl::as_bytes(gsl::span<Byte>(paletteBytes)));
-		image = convertToIndexed(mainFile.string(), *image, paletteImage, asset.options, paletteTopLineOnly);
+		image = convertToIndexed(mainFile.string(), *image, paletteImage, palette, asset.options, paletteTopLineOnly);
 	}
 
 	// Fill meta
@@ -50,7 +50,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	collector.addAdditionalAsset(std::move(imageAsset));
 }
 
-std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, const Image& image, const Image& palette, const ConfigNode& assetOptions, bool readTopLineOnly)
+std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, const Image& image, const Image& palette, const String& paletteName, const ConfigNode& assetOptions, bool readTopLineOnly)
 {
 	auto lookup = makePaletteConversion(palette, readTopLineOnly);
 
@@ -76,14 +76,14 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 	}
 
 	if (!coloursMissing.empty()) {
-		String message = "Colours missing from the palette:";
+		String message = "Colours missing from the palette \"" + paletteName + "\":";
 		const size_t nMissing = coloursMissing.size();
 		for (size_t i = 0; i < nMissing; ++i) {
 			unsigned int r, g, b, a;
 			Image::convertIntToRGBA(coloursMissing[i], r, g, b, a);
 			auto pos = lookupSpritePosition(fileName, colourMissingPos[i], assetOptions);
 			
-			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + ", " + pos.second;
+			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + " at " + pos.second;
 
 			if (i >= 20) {
 				message += "\n\t...and " + toString(nMissing - 20) + " others...";
@@ -141,7 +141,8 @@ std::pair<String, Vector2i> ImageImporter::lookupSpritePosition(const String& fi
 			}
 			relPos += Vector2i(spriteEntry["offX"].asInt(), spriteEntry["offY"].asInt());
 
-			return { "\"" + spriteEntry["origFilename"].asString() + "\", frame " + toString(spriteEntry["origFrameN"].asInt() + 1) , relPos };
+			const auto group = spriteEntry["group"].asString("");
+			return { "\"" + spriteEntry["origFilename"].asString() + "\"" + (group.isEmpty() ? "" : ", layer group \"" + group + "\"") + ", frame " + toString(spriteEntry["origFrameN"].asInt() + 1) , relPos};
 		}
 	}
 

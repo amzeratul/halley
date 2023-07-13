@@ -123,4 +123,5 @@ void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, Vecto
 		imgData.filenames.emplace_back(":img:" + spriteName + (!group->isEmpty() ? ":" + group.value() : ""));
 	}
 	imgData.origFilename = filename.toString();
+	imgData.group = group.value_or("");
 }

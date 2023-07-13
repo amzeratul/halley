@@ -100,6 +100,7 @@ namespace Halley
 			std::unique_ptr<Image> img;
 			Vector<String> filenames;
 			String origFilename;
+			String group;
 
 			bool operator==(const ImageData& other) const;
 			bool operator!=(const ImageData& other) const;
