@@ -32,6 +32,7 @@ namespace Halley
 		String getNativeString(bool includeDot = true) const;
 		String toString() const;
 
+		gsl::span<const String> getParts() const;
 		size_t getNumberPaths() const;
 
 		Path dropFront(int numberFolders) const;

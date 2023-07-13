@@ -47,6 +47,9 @@ void CheckAssetsTask::run()
 			fileSystemCache.trackDirectory(project.getSharedAssetsSrcPath());
 			fileSystemCache.trackDirectory(project.getGenSrcPath());
 			fileSystemCache.trackDirectory(project.getSharedGenSrcPath());
+			fileSystemCache.trackDirectory(project.getUnpackedAssetsPath());
+			fileSystemCache.trackDirectory(project.getSharedGenPath());
+			fileSystemCache.trackDirectory(project.getGenPath());
 		}
 
 		projectAssetImporter = project.getAssetImporter();
@@ -73,21 +76,25 @@ void CheckAssetsTask::run()
 		}
 
 		// Check if any files changed
+		Vector<DirectoryMonitor::Event> assetsSrcChanged;
+		Vector<DirectoryMonitor::Event> genSrcChanged;
 		Vector<DirectoryMonitor::Event> assetsChanged;
-		monitorAssetsSrc.poll(assetsChanged, true);
-		monitorSharedAssetsSrc.poll(assetsChanged, true);
-		//monitorAssets.poll(assetsChanged, true);
 		Vector<DirectoryMonitor::Event> genChanged;
-		monitorSharedGenSrc.poll(genChanged, true);
-		monitorGenSrc.poll(genChanged, true);
-		//monitorSharedGen.poll(genChanged, true);
-		//monitorGen.poll(genChanged, true);
+		monitorAssetsSrc.poll(assetsSrcChanged, true);
+		monitorSharedAssetsSrc.poll(assetsSrcChanged, true);
+		monitorAssets.poll(assetsChanged, true);
+		monitorSharedGenSrc.poll(genSrcChanged, true);
+		monitorGenSrc.poll(genSrcChanged, true);
+		monitorSharedGen.poll(genChanged, true);
+		monitorGen.poll(genChanged, true);
+		fileSystemCache.notifyChanges(assetsSrcChanged);
+		fileSystemCache.notifyChanges(genSrcChanged);
 		fileSystemCache.notifyChanges(assetsChanged);
 		fileSystemCache.notifyChanges(genChanged);
 
 		// First or Re-import
-		const bool hasCodeGen = first || !genChanged.empty() || curPendingReimport == ReimportType::Codegen;
-		const bool hasAssets = first || !assetsChanged.empty() || curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;
+		const bool hasCodeGen = first || !genSrcChanged.empty() || curPendingReimport == ReimportType::Codegen;
+		const bool hasAssets = first || !assetsSrcChanged.empty() || curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;
 		if (hasCodeGen || hasAssets) {
 			if (curPendingReimport) {
 				setVisible(true);
@@ -398,7 +405,7 @@ void CheckAssetsTask::requestReimport(ReimportType type)
 bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets)
 {
 	for (const auto& a: assets) {
-		if (db.needsImporting(a.second, false)) {
+		if (db.needsImporting(a.second, fileSystemCache, false)) {
 			return true;
 		}
 	}
@@ -410,7 +417,7 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
 	for (const auto& a: assets) {
-		if (db.needsImporting(a.second, true)) {
+		if (db.needsImporting(a.second, fileSystemCache, true)) {
 			toImport.push_back(a.second);
 		}
 	}
@@ -424,8 +431,8 @@ std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas
 	std::optional<Path> longestPath;
 	for (auto& m: metas) {
 		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
-			auto n = m.getNumberPaths() - 1;
-			if (m.getFront(n) == parent.getFront(n)) {
+			const auto n = m.getNumberPaths() - 1;
+			if (m.getParts().subspan(0, n) == parent.getParts().subspan(0, std::min(n, parent.getNumberPaths()))) {
 				longestPath = m;
 			}
 		}

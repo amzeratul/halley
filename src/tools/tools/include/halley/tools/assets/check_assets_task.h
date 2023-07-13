@@ -61,8 +61,8 @@ namespace Halley
 
 		using AssetTable = HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>;
 
-		static bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
-		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
+		bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
+		Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetTable& assets);
 
 		bool importAll(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Path dstPath, String taskName, bool packAfter, Range<float> progressRange);
 

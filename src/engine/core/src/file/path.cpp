@@ -184,6 +184,11 @@ String Path::toString() const
 	return getString();
 }
 
+gsl::span<const String> Path::getParts() const
+{
+	return pathParts;
+}
+
 size_t Path::getNumberPaths() const
 {
 	return pathParts.size();
@@ -196,7 +201,19 @@ Path Path::dropFront(int numberFolders) const
 
 Path Path::parentPath() const
 {
-	return Path(getString() + "/..");
+	Path result = *this;
+	if (isDirectory()) {
+		result.pathParts.pop_back();
+		if (!result.pathParts.empty()) {
+			result.pathParts.pop_back();
+		}
+		result.pathParts.push_back(".");
+	} else {
+		if (!result.pathParts.empty()) {
+			result.pathParts.back() = ".";
+		}
+	}
+	return result;
 }
 
 Path Path::replaceExtension(String newExtension) const
@@ -242,27 +259,27 @@ bool Path::operator==(const String& other) const
 
 bool Path::operator==(const Path& other) const 
 {
-	return ! operator!=(other);
-}
-
-bool Path::operator!=(const Path& other) const 
-{
 	if (pathParts.size() != other.pathParts.size()) {
-		return true;
+		return false;
 	}
 
 	for (size_t i = 0; i < pathParts.size(); ++i) {
 		auto& a = pathParts[i];
 		auto& b = other.pathParts[i];
 #ifdef _WIN32
-		if (a.asciiLower() != b.asciiLower()) {
+		if (a != b && a.asciiLower() != b.asciiLower()) {
 #else
-		if (a != b) {
+		if (a == b) {
 #endif
-			return true;
+			return false;
 		}
 	}
-	return false;
+	return true;
+}
+
+bool Path::operator!=(const Path& other) const 
+{
+	return !(*this == other);
 }
 
 bool Path::operator<(const Path& other) const

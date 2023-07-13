@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/tools/file/filesystem_cache.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -303,7 +304,7 @@ int64_t ImportAssetsDatabase::getAssetTimestamp(AssetType type, const String& as
 	return 0;
 }
 
-bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, bool includeFailed) const
+bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	
@@ -351,10 +352,10 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 
 	// Any of the additional input files changed?
 	for (const auto& i: oldAsset.additionalInputFiles) {
-		if (!FileSystem::exists(i.first)) {
+		if (!fsCache.exists(i.first)) {
 			// File removed
 			return true;
-		} else if  (FileSystem::getLastWriteTime(i.first) != i.second) {
+		} else if (fsCache.getLastWriteTime(i.first) != i.second) {
 			// Timestamp changed
 			return true;
 		}		
@@ -364,7 +365,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	if (!failed) {
 		for (const auto& o: oldAsset.outputFiles) {
 			for (const auto& version: o.platformVersions) {
-				if (!FileSystem::exists(directory / version.second.filepath)) {
+				if (!fsCache.exists(directory / version.second.filepath)) {
 					return true;
 				}
 			}

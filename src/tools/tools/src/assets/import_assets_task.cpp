@@ -96,7 +96,7 @@ void ImportAssetsTask::run()
 
 bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 {
-	//logInfo("Importing " + asset.assetId);
+	logInfo("Importing " + asset.assetId);
 	auto& fs = project.getFileSystemCache();
 	Stopwatch timer;
 

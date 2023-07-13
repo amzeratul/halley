@@ -10,6 +10,7 @@
 
 namespace Halley
 {
+	class FileSystemCache;
 	class Project;
 	class Deserializer;
 	class Serializer;
@@ -113,7 +114,7 @@ namespace Halley
 		Path getPrimaryInputFile(AssetType type, const String& assetId) const;
 		int64_t getAssetTimestamp(AssetType type, const String& assetId) const;
 
-		bool needsImporting(const ImportAssetsDatabaseEntry& asset, bool includeFailed) const;
+		bool needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
