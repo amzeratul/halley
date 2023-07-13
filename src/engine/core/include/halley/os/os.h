@@ -84,7 +84,8 @@ namespace Halley {
 		virtual std::shared_ptr<IClipboard> getClipboard();
 
 		virtual void openURL(const String& url);
-
+		virtual void openFile(const Path& path);
+		virtual void showFile(const Path& path);
 		virtual Future<std::optional<Path>> openFileChooser(FileChooserParameters parameters);
 
 	private:

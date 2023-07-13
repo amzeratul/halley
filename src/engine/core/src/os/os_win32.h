@@ -58,7 +58,8 @@ namespace Halley {
 		std::shared_ptr<IClipboard> getClipboard() override;
 
 		void openURL(const String& url) override;
-
+		void openFile(const Path& path) override;
+		void showFile(const Path& path) override;
 		Future<std::optional<Path>>	openFileChooser(FileChooserParameters parameters) override;
 		
 	private:

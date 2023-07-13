@@ -155,6 +155,14 @@ void OS::openURL(const String& url)
 {
 }
 
+void OS::openFile(const Path& path)
+{
+}
+
+void OS::showFile(const Path& path)
+{
+}
+
 Future<std::optional<Path>> OS::openFileChooser(FileChooserParameters)
 {
 	return Future<std::optional<Path>>::makeImmediate({});

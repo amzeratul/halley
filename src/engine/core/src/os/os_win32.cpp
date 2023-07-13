@@ -853,6 +853,17 @@ void OSWin32::openURL(const String& url)
 	}
 }
 
+void OSWin32::openFile(const Path& path)
+{
+	ShellExecuteW(nullptr, L"open", path.getNativeString().getUTF16().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+}
+
+void OSWin32::showFile(const Path& path)
+{
+	const auto cmd = "/select,\"" + path.getNativeString() + "\"";
+	ShellExecuteW(nullptr, L"open", L"explorer.exe", cmd.getUTF16().c_str(), nullptr, SW_SHOWNORMAL);
+}
+
 Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters parameters)
 {
 	Promise<std::optional<Path>> promise;

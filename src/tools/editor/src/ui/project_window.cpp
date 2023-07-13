@@ -494,14 +494,12 @@ void ProjectWindow::setAssetSetting(std::string_view assetKey, std::string_view 
 
 void ProjectWindow::openFileExternally(const Path& path)
 {
-	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
+	OS::get().openFile(path);
 }
 
 void ProjectWindow::showFileExternally(const Path& path)
 {
-	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
+	OS::get().showFile(path);
 }
 
 bool ProjectWindow::requestQuit(std::function<void()> callback)
