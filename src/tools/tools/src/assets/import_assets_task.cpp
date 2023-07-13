@@ -45,9 +45,10 @@ void ImportAssetsTask::run()
 				return;
 			}
 
+			setProgressLabel(files[i].assetId);
 			if (doImportAsset(files[i])) {
 				++assetsImported;
-				setProgress(float(assetsImported) * 0.98f / float(assetsToImport), files[i].assetId);
+				setProgress(float(assetsImported) * 0.98f / float(assetsToImport));
 			}
 
 			auto now = std::chrono::steady_clock::now();
@@ -64,7 +65,7 @@ void ImportAssetsTask::run()
 		}
 	}
 
-	Concurrent::whenAll(tasks.begin(), tasks.end()).get();
+	Concurrent::whenAll(tasks.begin(), tasks.end()).wait();
 	db.save();
 
 	if (!isCancelled()) {
@@ -98,7 +99,6 @@ void ImportAssetsTask::run()
 
 bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 {
-	logInfo("Importing " + asset.assetId);
 	auto& fs = project.getFileSystemCache();
 	Stopwatch timer;
 

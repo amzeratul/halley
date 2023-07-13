@@ -36,11 +36,23 @@ void Task::setName(String name)
 	this->name = std::move(name);
 }
 
+void Task::setProgress(float p)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	progress = std::max(0.0f, std::min(p, 1.0f));
+}
+
 void Task::setProgress(float p, String label)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	progress = std::max(0.0f, std::min(p, 1.0f));
-	progressLabel = label;
+	progressLabel = std::move(label);
+}
+
+void Task::setProgressLabel(String label)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	progressLabel = std::move(label);
 }
 
 void Task::logDev(String message)

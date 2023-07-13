@@ -207,8 +207,6 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 		for (const auto& [inputSrc, inputFile]: db.getFilesForAssetsThatHasAdditionalFile(srcPath / filePath)) {
 			if (fileSystemCache.exists(inputSrc / inputFile)) {
 				additionalFilesToImport->emplace_back(inputSrc, inputFile);
-			} else {
-				Logger::logWarning("Missing original input file: " + (inputSrc / inputFile));
 			}
 		}
 	}

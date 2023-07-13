@@ -32,7 +32,9 @@ namespace Halley
 		void addReplacement(std::unique_ptr<Task> task);
 
 		void setName(String name);
-		void setProgress(float progress, String label = "");
+		void setProgress(float progress);
+		void setProgress(float progress, String label);
+		void setProgressLabel(String label);
 
 		void logDev(String message);
 		void logInfo(String message);

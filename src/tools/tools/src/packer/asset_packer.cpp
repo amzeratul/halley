@@ -264,7 +264,15 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 	}
 
 	// Write pack
-	const bool packed = FileSystem::writeFile(dst, pack.writeOut());
+	const auto packData = pack.writeOut();
+	bool packed = FileSystem::writeFile(dst, packData);
+	if (!packed) {
+		// Try again
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(200ms);
+		packed = FileSystem::writeFile(dst, packData);
+	}
+
 	if (packed) {
 		Logger::logInfo("- Packed " + toString(packListing.getEntries().size()) + " entries on \"" + packId + "\" (" + String::prettySize(data.size()) + ").");
 	} else {
