@@ -128,6 +128,8 @@ namespace Halley
 		Vector<AssetResource> getOutFiles(ImportAssetType assetType, const String& assetId) const;
 		Vector<String> getAllInputFiles() const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
+
+		void updateAdditionalFileCache();
 		Vector<std::pair<Path, Path>> getFilesForAssetsThatHasAdditionalFile(const Path& additionalFile);
 
 		void serialize(Serializer& s) const;
@@ -145,6 +147,7 @@ namespace Halley
 		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsImported;
 		std::map<std::pair<ImportAssetType, String>, AssetEntry> assetsFailed; // Ephemeral
 		std::map<String, InputFileEntry> inputFiles;
+		HashMap<String, Vector<std::pair<ImportAssetType, String>>> assetsWithAdditionalFile;
 
 		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
 		mutable bool indexDirty = true;

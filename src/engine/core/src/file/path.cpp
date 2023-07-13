@@ -40,10 +40,12 @@ void Path::setPath(const String& value)
 	normalise();
 }
 
-Path::Path(Vector<String> parts)
-	: pathParts(parts)
+Path::Path(Vector<String> parts, bool normaliseAfter)
+	: pathParts(std::move(parts))
 {
-	normalise();
+	if (normaliseAfter) {
+		normalise();
+	}
 }
 
 void Path::normalise()
@@ -224,7 +226,7 @@ size_t Path::getNumberPaths() const
 
 Path Path::dropFront(int numberFolders) const
 {
-	return Path(Vector<String>(pathParts.begin() + numberFolders, pathParts.end()));
+	return Path(Vector<String>(pathParts.begin() + numberFolders, pathParts.end()), true);
 }
 
 Path Path::parentPath() const
@@ -248,7 +250,7 @@ Path Path::replaceExtension(String newExtension) const
 {
 	auto parts = pathParts;
 	parts.back() = getStem().getString() + newExtension;
-	return Path(parts);
+	return Path(parts, true);
 }
 
 Path Path::operator/(const char* other) const
@@ -258,6 +260,8 @@ Path Path::operator/(const char* other) const
 
 Path Path::operator/(const Path& other) const 
 {
+	bool needsNormalise = false;
+
 	Vector<String> parts;
 	parts.reserve(pathParts.size() + other.pathParts.size());
 	for (const auto& p: pathParts) {
@@ -267,8 +271,11 @@ Path Path::operator/(const Path& other) const
 	}
 	for (const auto& p : other.pathParts) {
 		parts.push_back(p);
+		if (p == "..") {
+			needsNormalise = true;
+		}
 	}
-	return Path(parts);
+	return Path(std::move(parts), needsNormalise);
 }
 
 Path Path::operator/(const String& other) const
@@ -471,7 +478,7 @@ Path Path::makeRelativeTo(const Path& path) const
 		result.emplace_back(me.pathParts[i]);
 	}
 
-	return Path(result);
+	return Path(result, true);
 }
 
 Path Path::changeRelativeRoot(const Path& currentParent, const Path& newParent) const
@@ -523,5 +530,5 @@ Path Path::getFront(size_t n) const
 	if (n >= pathParts.size()) {
 		return *this;
 	}
-	return Path(Vector<String>(pathParts.begin(), pathParts.begin() + n));
+	return Path(Vector<String>(pathParts.begin(), pathParts.begin() + n), true);
 }

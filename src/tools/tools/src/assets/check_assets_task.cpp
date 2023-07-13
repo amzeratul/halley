@@ -310,6 +310,7 @@ CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase
 	}
 
 	db.markAllInputFilesAsMissing();
+	db.updateAdditionalFileCache();
 
 	// Enumerate all potential assets
 	int i = 0;

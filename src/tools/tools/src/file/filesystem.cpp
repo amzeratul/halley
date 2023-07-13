@@ -20,18 +20,16 @@ static path getNative(const Path& p)
 
 bool FileSystem::exists(const Path& p)
 {
-	return ::exists(getNative(p));
+	std::error_code ec;
+	return ::exists(getNative(p), ec);
 }
 
 bool FileSystem::createDir(const Path& p)
 {
-	try {
-		if (!exists(p)) {
-			return create_directories(getNative(p));
-		} else {
-			return false;
-		}
-	} catch (...) {
+	std::error_code ec;
+	if (!exists(p)) {
+		return create_directories(getNative(p), ec);
+	} else {
 		return false;
 	}
 }
@@ -84,14 +82,21 @@ bool FileSystem::rename(const Path& src, const Path& dst)
 bool FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
 {
 	createParentDir(path);
-	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
-	if (fp.is_open()) {
-		fp.write(reinterpret_cast<const char*>(data.data()), data.size());
-		fp.close();
-		return true;
-	} else {
+
+	FILE* fp;
+#ifdef WIN32
+	_wfopen_s(&fp, path.getNativeString().getUTF16().c_str(), L"wb");
+#else
+	fp = fopen(path.getNativeString().c_str(), "wb");
+#endif
+
+	if (!fp) {
 		return false;
 	}
+
+	fwrite(data.data(), 1, data.size(), fp);
+	fclose(fp);
+	return true;
 }
 
 bool FileSystem::writeFile(const Path& path, const Bytes& data)

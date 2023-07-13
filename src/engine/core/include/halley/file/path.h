@@ -83,7 +83,7 @@ namespace Halley
 		void setPath(const String& value);
 		std::string makeString(bool includeDot, char dirSeparator) const;
 
-		explicit Path(Vector<String> parts);
+		explicit Path(Vector<String> parts, bool normaliseAfter);
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

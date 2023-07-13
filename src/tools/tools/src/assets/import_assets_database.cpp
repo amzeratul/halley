@@ -549,23 +549,34 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 	return result;
 }
 
+void ImportAssetsDatabase::updateAdditionalFileCache()
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	assetsWithAdditionalFile.clear();
+	for (auto& a : assetsImported) {
+		const auto& asset = a.second.asset;
+
+		for (const auto& additional : asset.additionalInputFiles) {
+			assetsWithAdditionalFile[additional.first.getString()].push_back(a.first);
+		}
+	}
+}
+
 Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	// CHECK ASSETS PERF BOTTLENECK: This needs to be a hashtable lookup
-	for (auto& a: assetsImported) {
-		const auto& asset = a.second.asset;
+	const auto iter = assetsWithAdditionalFile.find(inputFile.getString());
+	if (iter != assetsWithAdditionalFile.end()) {
+		Vector<std::pair<Path, Path>> result;
+		for (const auto& assetKey: iter->second) {
+			const auto& asset = assetsImported.at(assetKey).asset;
 
-		for (const auto& additional: asset.additionalInputFiles) {
-			if (additional.first == inputFile) {
-				Vector<std::pair<Path, Path>> result;
-				for (const auto& input: asset.inputFiles) {
-					result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
-				}
-				return result;
+			for (const auto& input: asset.inputFiles) {
+				result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
 			}
 		}
+		return result;
 	}
 
 	return {};
