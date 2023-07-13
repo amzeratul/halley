@@ -258,8 +258,14 @@ Path Path::operator/(const char* other) const
 
 Path Path::operator/(const Path& other) const 
 {
-	auto parts = pathParts;
-	for (auto& p : other.pathParts) {
+	Vector<String> parts;
+	parts.reserve(pathParts.size() + other.pathParts.size());
+	for (const auto& p: pathParts) {
+		if (p != ".") {
+			parts.push_back(p);
+		}
+	}
+	for (const auto& p : other.pathParts) {
 		parts.push_back(p);
 	}
 	return Path(parts);

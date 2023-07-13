@@ -552,26 +552,23 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
 {
 	std::lock_guard<std::mutex> lock(mutex);
-	Vector<std::pair<Path, Path>> result;
 
+	// CHECK ASSETS PERF BOTTLENECK: This needs to be a hashtable lookup
 	for (auto& a: assetsImported) {
 		const auto& asset = a.second.asset;
 
-		bool ok = false;
 		for (const auto& additional: asset.additionalInputFiles) {
 			if (additional.first == inputFile) {
-				ok = true;
-			}
-		}
-
-		if (ok) {
-			for (const auto& input: asset.inputFiles) {
-				result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
+				Vector<std::pair<Path, Path>> result;
+				for (const auto& input: asset.inputFiles) {
+					result.push_back(std::pair<Path, Path>(asset.srcDir, input.getDataPath()));
+				}
+				return result;
 			}
 		}
 	}
 
-	return result;
+	return {};
 }
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
