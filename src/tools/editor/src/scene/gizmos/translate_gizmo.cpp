@@ -146,11 +146,11 @@ bool TranslateGizmo::onKeyPress(KeyboardKeyPress key)
 		moveBy(-yAxis);
 		return true;
 	}
-	if (key.key == KeyCode::Q) {
+	if (key.is(KeyCode::Q)) {
 		rotate(1);
 		return true;
 	}
-	if (key.key == KeyCode::E) {
+	if (key.is(KeyCode::E)) {
 		rotate(-1);
 		return true;
 	}
