@@ -302,9 +302,12 @@ bool Path::operator==(gsl::span<const String> other) const
 		return false;
 	}
 
-	for (size_t i = 0; i < pathParts.size(); ++i) {
-		auto& a = pathParts[i];
-		auto& b = other[i];
+	const size_t n = pathParts.size();
+	for (size_t i = 0; i < n; ++i) {
+		// Scan backwards as the end of the path is much more likely to be different
+		auto& a = pathParts[n - i - 1];
+		auto& b = other[n - i - 1];
+
 #ifdef _WIN32
 		if (a.size() != b.size() || !a.asciiCompareNoCase(b.c_str())) {
 #else

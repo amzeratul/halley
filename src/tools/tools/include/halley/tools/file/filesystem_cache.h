@@ -21,12 +21,12 @@ namespace Halley {
 
     private:
         struct FileEntry {
-            String name;
             int64_t lastWriteTime = 0;
         };
 
         struct DirEntry {
-            Vector<FileEntry> files;
+            HashMap<String, FileEntry> files;
+            Vector<String> filenames; // Kept separately so it stays in order
             Vector<String> dirs;
 
             void addFile(const Path& fullPath);
