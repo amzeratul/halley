@@ -109,10 +109,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		}
 	} else if (sizeInfo.imageSize) {
 		imageSize = sizeInfo.imageSize.value();
-
-		if (verbose) {
-			std::cout << "Finding best pack size...\n";
-		}
+		
 		constexpr int minFont = 0;
 		constexpr int maxFont = 1000;
 		result = binarySearch([&](int curFontSize) -> std::optional<Vector<BinPackResult>>
@@ -152,7 +149,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 		const bool useMsdfgen = meta.getBool("msdfgen", true);
 		if (useMsdfgen) {
-			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize(), charcode, dstRect.getSize(), radius);
+			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize() / superSample, charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
