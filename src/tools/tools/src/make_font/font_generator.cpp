@@ -24,7 +24,7 @@ static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fon
 	for (int code : font.getCharCodes()) {
 		if (std::binary_search(characters.begin(), characters.end(), code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
-			int padding = int(2 * borderSuperSampled);
+			int padding = int(2 * borderSuperSampled) + 1;
 			Vector2i superSampleSize = glyphSize + Vector2i(padding, padding);
 			Vector2i finalSize(Vector2f(superSampleSize) * scale + Vector2f(1, 1));
 
@@ -132,7 +132,8 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		return FontGeneratorResult();
 	}
 
-	auto dstImg = std::make_unique<Image>(Image::Format::SingleChannel, imageSize);
+	const auto type = DistanceFieldGenerator::Type::MTSDF;
+	auto dstImg = std::make_unique<Image>(type == DistanceFieldGenerator::Type::MTSDF ? Image::Format::RGBA : Image::Format::SingleChannel, imageSize);
 	dstImg->clear(0);
 
 	Vector<CharcodeEntry> codes;
@@ -145,13 +146,13 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	for (auto& r : pack) {
 		int charcode = int(reinterpret_cast<size_t>(r.data));
-		Rect4i dstRect = r.rect;
+		Rect4i dstRect = Rect4i(r.rect.getTopLeft(), r.rect.getBottomRight() - Vector2i(1, 1));
 		Rect4i srcRect = dstRect * superSample;
 		codes.push_back(CharcodeEntry(charcode, dstRect));
 
 		const bool useMsdfgen = meta.getBool("msdfgen", true);
 		if (useMsdfgen) {
-			auto finalGlyphImg = DistanceFieldGenerator::generateSDF2(font, font.getSize(), charcode, dstRect.getSize(), radius);
+			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize(), charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));

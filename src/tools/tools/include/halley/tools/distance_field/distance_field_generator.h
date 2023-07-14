@@ -12,8 +12,11 @@ namespace Halley
 	class DistanceFieldGenerator
 	{
 	public:
+		enum class Type {
+			SDF,
+			MTSDF
+		};
 		static std::unique_ptr<Image> generateSDF(Image& src, Vector2i size, float radius);
-		static std::unique_ptr<Image> generateMSDF(Image& src, Vector2i size, float radius);
-		static std::unique_ptr<Image> generateSDF2(const FontFace& font, float fontSize, int charcode, Vector2i size, float radius);
+		static std::unique_ptr<Image> generateMSDF(Type type, const FontFace& font, float fontSize, int charcode, Vector2i size, float radius);
 	};
 }

@@ -14,12 +14,16 @@ cbuffer MaterialBlock : register(b1) {
     float4 u_shadowColour;
 };
 
+float median(float3 rgb) {
+    return max(min(rgb.r, rgb.g), min(max(rgb.r, rgb.g), rgb.b));
+}
+
 float4 main(VOut input) : SV_TARGET {
 	float dx = abs(ddx(input.texCoord0.x));
 	float dy = abs(ddy(input.texCoord0.y));
 	float texGrad = max(dx, dy);
 
-	float a = tex0.Sample(sampler0, input.texCoord0).r;
+	float a = median(tex0.Sample(sampler0, input.texCoord0).rgb);
 	float s = max(u_smoothness * texGrad, 0.001);
 	float inEdge = 0.5;
 

@@ -87,7 +87,7 @@ namespace {
 		const auto fmt = BPP == 1 ? Image::Format::SingleChannel : Image::Format::RGBA;
 		auto result = std::make_unique<Image>(fmt, Vector2i(src.width(), src.height()), false);
 
-		const auto dstPixels = result->getPixels1BPP();
+		const auto dstPixels = result->getPixelBytes();
 		const auto srcPixels = gsl::span<const float>(src(0, 0), src.width() * src.height() * BPP);
 		assert(dstPixels.size() == srcPixels.size());
 
@@ -105,13 +105,7 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF(Image& srcImg, Vector
 	return generateSDFInternal(srcImg, size, radius);
 }
 
-std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Image& src, Vector2i size, float radius)
-{
-	// TODO
-	return {};
-}
-
-std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& fontFace, float fontSize, int charcode, Vector2i size, float radius)
+std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, const FontFace& fontFace, float fontSize, int charcode, Vector2i size, float radius)
 {
 	const auto ftFace = static_cast<FT_Face>(fontFace.getFreeTypeFace());
 	const auto font = std::unique_ptr<msdfgen::FontHandle, void(*)(msdfgen::FontHandle*)>(msdfgen::adoptFreetypeFont(ftFace), [](msdfgen::FontHandle* p) { msdfgen::destroyFont(p); });
@@ -130,12 +124,19 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& font
 
 		edgeColoringSimple(shape, 3.0);
 		msdfgen::Projection projection({ scale, scale }, { pos.x - bounds.l, pos.y - bounds.b });
-		msdfgen::GeneratorConfig config;
 
-		auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
-		msdfgen::generateSDF(bmp, shape, projection, range, config);
-		return msdfgenImageToHalleyImage(bmp);
+		if (type == Type::MTSDF) {
+			msdfgen::MSDFGeneratorConfig config;
+			auto bmp = msdfgen::Bitmap<float, 4>(size.x, size.y);
+			msdfgen::generateMTSDF(bmp, shape, projection, range, config);
+			return msdfgenImageToHalleyImage(bmp);
+		} else {
+			msdfgen::GeneratorConfig config;
+			auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
+			msdfgen::generateSDF(bmp, shape, projection, range, config);
+			return msdfgenImageToHalleyImage(bmp);
+		}
     } else {
-		return std::make_unique<Image>(Image::Format::SingleChannel, size, true);
+		return std::make_unique<Image>(type == Type::MTSDF ? Image::Format::RGBA : Image::Format::SingleChannel, size, true);
     }
 }
