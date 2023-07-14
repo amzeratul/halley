@@ -116,11 +116,20 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& font
 	const auto font = msdfgen::adoptFreetypeFont(static_cast<FT_Face>(fontFace.getFreeTypeFace()));
 	auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
 
+	const double range = radius;
+	const double scale = 2.5f;
+	const auto pos = Vector2d(Vector2f(radius, radius) / scale);
+
 	msdfgen::Shape shape;
 	if (msdfgen::loadGlyph(shape, font, charcode)) {
+		shape.inverseYAxis = true;
 		shape.normalize();
+		const auto bounds = shape.getBounds();
+
 		edgeColoringSimple(shape, 3.0);
-		msdfgen::generateSDF(bmp, shape, 4.0, 1.0, { 4.0, 4.0 });
+		msdfgen::Projection projection({ scale, scale }, { pos.x - bounds.l, pos.y - bounds.b });
+		msdfgen::GeneratorConfig config;
+		msdfgen::generateSDF(bmp, shape, projection, range, config);
     }
 
 	msdfgen::destroyFont(font);
