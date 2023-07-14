@@ -136,7 +136,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 		stream.avail_out = uInt(result.size());
 		stream.next_out = result.data();
 		
-		const int res = inflate(&stream, Z_NO_FLUSH);
+		const int res = inflate(&stream, Z_FINISH);
 		const size_t totalOut = size_t(stream.total_out);
 		inflateEnd(&stream);
 

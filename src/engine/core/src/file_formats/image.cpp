@@ -168,6 +168,12 @@ Rect4i Image::getRect() const
 
 void Image::clear(int colour)
 {
+	if (colour == 0) {
+		// Special faster case
+		memset(px.get(), 0, getByteSize());
+		return;
+	}
+
 	const int bpp = getBytesPerPixel();
 	if (bpp == 4) {
 		int* dst = reinterpret_cast<int*>(px.get());

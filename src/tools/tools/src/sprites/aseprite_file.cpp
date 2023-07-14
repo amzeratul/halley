@@ -340,18 +340,19 @@ void AsepriteFile::addCelChunk(gsl::span<const gsl::byte> span)
 		readData(header, span);
 
 		cel.size = Vector2i(int(header.width), int(header.height));
+		const auto sizeBytes = cel.size.x * cel.size.y * getBPP();
 
 		// Read pixels
 		if (type == 0) {
 			// Raw
-			cel.rawData.resize(cel.size.x * cel.size.y * getBPP());
+			cel.rawData.resize(sizeBytes);
 			if (span.size() < int(cel.rawData.size())) {
 				throw Exception("Invalid cel data", HalleyExceptions::Tools);
 			}
 			memcpy(cel.rawData.data(), span.data(), cel.rawData.size());
 		} else if (type == 2) {
 			// ZLIB compressed
-			cel.rawData = Compression::decompressRaw(span, std::numeric_limits<size_t>::max());
+			cel.rawData = Compression::decompressRaw(span, sizeBytes, sizeBytes);
 		}
 	} else if (type == 1) {
 		// Linked
@@ -478,8 +479,8 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 	String currentGroup = "";
 
 	auto defaultFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
-	defaultFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));;
-	groupImages[currentGroup] = std::move(defaultFrameImage);
+	defaultFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
+	groupImages[""] = std::move(defaultFrameImage);
 	auto defaultFrameUsed = false;
 	
 	auto inGroup = false;
