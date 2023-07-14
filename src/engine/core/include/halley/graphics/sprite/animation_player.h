@@ -92,8 +92,8 @@ namespace Halley
 
 		size_t seqLen;
 
-		int dirId;
-		int curFrameN;
+		int dirId = 0;
+		int curFrameN = 0;
 		int curLoopCount = 0;
 		float playbackSpeed = 1.0f;
 
