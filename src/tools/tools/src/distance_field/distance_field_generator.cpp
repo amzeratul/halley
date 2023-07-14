@@ -119,7 +119,8 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& font
 	msdfgen::Shape shape;
 	if (msdfgen::loadGlyph(shape, font.get(), charcode) && !shape.contours.empty()) {
 		//const double scale = fontSize / (2048 / 64 * 2048 / ftFace->units_per_EM);
-		const double scale = fontSize * ftFace->units_per_EM / 65536; // ???
+		//const double scale = fontSize * ftFace->units_per_EM / 65536; // ???
+		const double scale = fontSize / (ftFace->units_per_EM / 64);
 		const double range = 2.0f * radius / scale;
 		const auto pos = Vector2d(Vector2f(radius, radius) / scale);
 

@@ -108,7 +108,6 @@ void MetadataEditor::makeUI()
 		addFloatField("Font Size", "fontSize", 0);
 		addStringField("Font Name", "fontName", "");
 		addInt2Field("Image Size", "width", "height", Vector2i(512, 512));
-		addIntField("Supersample", "supersample", 1);
 		addInt2Field("Range", "rangeStart", "rangeEnd", Vector2i(0, 255));
 		addIntField("Ascender Adj.", "ascenderAdjustment", 0);
 		addIntField("Line Spacing", "lineSpacing", 0);
@@ -117,7 +116,6 @@ void MetadataEditor::makeUI()
 		addFloatField("Fallback Scale", "replacementScale", 1.0f);
 		addStringField("Extra characters", "extraCharacters", "");
 		addBoolField("Floor Glyph Pos.", "floorGlyphPosition", false);
-		addBoolField("Use msdfgen", "msdfgen", false);
 		break;
 	}
 }
@@ -199,8 +197,12 @@ static void updateMetadata(Metadata& metadata, const String& key, MetadataEditor
 
 void MetadataEditor::setPivot(Vector2i pos)
 {
-	getWidgetAs<UITextInput>("pivotX")->setText(toString(pos.x));
-	getWidgetAs<UITextInput>("pivotY")->setText(toString(pos.y));
+	const auto px = tryGetWidgetAs<UITextInput>("pivotX");
+	const auto py = tryGetWidgetAs<UITextInput>("pivotY");
+	if (px && py) {
+		px->setText(toString(pos.x));
+		py->setText(toString(pos.y));
+	}
 }
 
 String MetadataEditor::getString(const String& key) const

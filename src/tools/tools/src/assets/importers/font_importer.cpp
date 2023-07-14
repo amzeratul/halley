@@ -13,7 +13,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 {
 	const auto& meta = asset.inputFiles.at(0).metadata;
 	const float radius = meta.getFloat("radius", 8);
-	const int supersample = meta.getInt("supersample", 4);
+	const int supersample = meta.getInt("supersample", 1);
 	Vector2i imgSize;
 	imgSize.x = meta.getInt("width", 512);
 	imgSize.y = meta.getInt("height", 512);
