@@ -108,7 +108,7 @@ void MetadataEditor::makeUI()
 		addFloatField("Font Size", "fontSize", 0);
 		addStringField("Font Name", "fontName", "");
 		addInt2Field("Image Size", "width", "height", Vector2i(512, 512));
-		addIntField("Supersample", "supersample", 4);
+		addIntField("Supersample", "supersample", 1);
 		addInt2Field("Range", "rangeStart", "rangeEnd", Vector2i(0, 255));
 		addIntField("Ascender Adj.", "ascenderAdjustment", 0);
 		addIntField("Line Spacing", "lineSpacing", 0);

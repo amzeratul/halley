@@ -149,7 +149,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		Rect4i srcRect = dstRect * superSample;
 		codes.push_back(CharcodeEntry(charcode, dstRect));
 
-		const bool useMsdfgen = meta.getBool("msdfgen", false);
+		const bool useMsdfgen = meta.getBool("msdfgen", true);
 		if (useMsdfgen) {
 			auto finalGlyphImg = DistanceFieldGenerator::generateSDF2(font, font.getSize(), charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
