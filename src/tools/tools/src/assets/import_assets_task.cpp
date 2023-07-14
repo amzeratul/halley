@@ -3,7 +3,6 @@
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/assets/import_assets_database.h"
-#include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/concurrency/concurrent.h"
@@ -16,10 +15,10 @@
 using namespace Halley;
 
 ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, Vector<String> deletedAssets, Project& project, bool packAfter)
-	: Task(taskName, true, !files.empty(), { files.size() == 1 && files[0].assetId == ":codegen" ? "code" : "assets" })
+	: Task(std::move(taskName), true, !files.empty(), { files.size() == 1 && files[0].assetId == ":codegen" ? "code" : "assets" })
 	, db(db)
-	, importer(importer)
-	, assetsPath(assetsPath)
+	, importer(std::move(importer))
+	, assetsPath(std::move(assetsPath))
 	, project(project)
 	, packAfter(packAfter)
 	, files(std::move(files))
@@ -92,8 +91,8 @@ void ImportAssetsTask::run()
 	}
 
 	timer.pause();
-	Time realTime = timer.elapsedNanoseconds() / 1000000000.0;
-	Time importTime = totalImportTime / 1000000000.0;
+	const Time realTime = timer.elapsedNanoseconds() / 1000000000.0;
+	const Time importTime = totalImportTime / 1000000000.0;
 	logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
 }
 

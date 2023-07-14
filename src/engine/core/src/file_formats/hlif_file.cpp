@@ -203,11 +203,7 @@ namespace {
 
 	static uint32_t getAbsDistance(uint8_t v)
 	{
-		if (v <= 127) {
-			return v;
-		} else {
-			return static_cast<uint8_t>(256 - static_cast<uint32_t>(v));
-		}
+		return v <= static_cast<uint8_t>(127) ? static_cast<uint32_t>(v) : static_cast<uint32_t>(256) - static_cast<uint32_t>(v);
 	}
 }
 
@@ -216,13 +212,10 @@ HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> c
 	// Try all five filters and accumulate the values
 	std::array<uint32_t, 5> accumulator;
 	accumulator.fill(0);
-	//std::array<HashSet<uint8_t>, 5> uniqueValues;
 
 	auto report = [&](LineEncoding type, uint32_t dist)
 	{
-		const auto idx = static_cast<uint8_t>(type);
-		accumulator[idx] += dist;
-		//uniqueValues[idx].emplace(static_cast<uint8_t>(dist));
+		accumulator[static_cast<uint8_t>(type)] += dist;
 	};
 	
 	const size_t n = curLine.size();
