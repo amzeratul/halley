@@ -117,6 +117,7 @@ void MetadataEditor::makeUI()
 		addFloatField("Fallback Scale", "replacementScale", 1.0f);
 		addStringField("Extra characters", "extraCharacters", "");
 		addBoolField("Floor Glyph Pos.", "floorGlyphPosition", false);
+		addBoolField("Use msdfgen", "msdfgen", false);
 		break;
 	}
 }

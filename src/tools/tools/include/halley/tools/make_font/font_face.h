@@ -45,6 +45,9 @@ namespace Halley
 
 		Vector<KerningPair> getKerning(const Vector<int>& codes) const;
 
+		void* getFreeTypeLib() const;
+		void* getFreeTypeFace() const;
+
 	private:
 		std::unique_ptr<FontFacePimpl> pimpl;
 		float size = 0;

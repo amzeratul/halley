@@ -142,9 +142,6 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	std::atomic<bool> keepGoing(true);
 
 	auto& pack = result.value();
-	if (verbose) {
-		std::cout << "Rendering " << pack.size() << " glyphs";
-	}
 
 	for (auto& r : pack) {
 		int charcode = int(reinterpret_cast<size_t>(r.data));
@@ -152,40 +149,43 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		Rect4i srcRect = dstRect * superSample;
 		codes.push_back(CharcodeEntry(charcode, dstRect));
 
-		futures.push_back(Concurrent::execute([=, &m, &font, &dstImg, &nDone, &keepGoing] {
-			if (!keepGoing) {
-				return;
-			}
-
-			if (verbose) {
-				std::cout << "+";
-			}
-
-			auto tmpImg = std::make_unique<Image>(Image::Format::RGBA, srcRect.getSize());
-			tmpImg->clear(0);
-			{
-				std::lock_guard<std::mutex> g(m);
-				font.drawGlyph(*tmpImg, charcode, Vector2i(lround(borderSuperSample), lround(borderSuperSample)));
-			}
-
-			if (!keepGoing) {
-				return;
-			}
-			auto finalGlyphImg = DistanceFieldGenerator::generateSDF(*tmpImg, dstRect.getSize(), radius);
+		const bool useMsdfgen = meta.getBool("msdfgen", false);
+		if (useMsdfgen) {
+			auto finalGlyphImg = DistanceFieldGenerator::generateSDF2(font, charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
-			tmpImg.reset();
-			finalGlyphImg.reset();
-
-			if (verbose) {
-				std::cout << "-";
-			}
-			float progress = lerp(0.1f, 0.95f, float(++nDone) / float(pack.size()));
-				
+			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
 			if (!progressReporter(progress, "Generating")) {
 				keepGoing = false;
 			}
-		}));
+		} else {
+			futures.push_back(Concurrent::execute([=, &m, &font, &dstImg, &nDone, &keepGoing] {
+				if (!keepGoing) {
+					return;
+				}
+
+				auto tmpImg = std::make_unique<Image>(Image::Format::RGBA, srcRect.getSize());
+				tmpImg->clear(0);
+				{
+					std::lock_guard<std::mutex> g(m);
+					font.drawGlyph(*tmpImg, charcode, Vector2i(lround(borderSuperSample), lround(borderSuperSample)));
+				}
+
+				if (!keepGoing) {
+					return;
+				}
+				auto finalGlyphImg = DistanceFieldGenerator::generateSDF(*tmpImg, dstRect.getSize(), radius);
+				dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
+
+				tmpImg.reset();
+				finalGlyphImg.reset();
+
+				const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
+				if (!progressReporter(progress, "Generating")) {
+					keepGoing = false;
+				}
+			}));
+		}
 	}
 	std::sort(codes.begin(), codes.end(), [](const CharcodeEntry& a, const CharcodeEntry& b) { return a.charcode < b.charcode; });
 
@@ -195,10 +195,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	if (!keepGoing) {
 		return FontGeneratorResult();
 	}
-
-	if (verbose) {
-		std::cout << " Done generating." << std::endl;
-	}
+	
 	if (!progressReporter(0.95f, "Generating files")) {
 		return FontGeneratorResult();
 	}

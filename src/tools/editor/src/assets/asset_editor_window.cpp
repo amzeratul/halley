@@ -91,7 +91,11 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
 			}
 
+			const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });
 			for (auto& asset: assets) {
+				if (asset.first == AssetType::Texture && hasSpriteSheet) {
+					continue;
+				}
 				createEditorTab(Path(name), asset.first, asset.second);
 			}
 		} else {
@@ -204,6 +208,7 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 	switch (type) {
 	case AssetType::Animation:
 	case AssetType::SpriteSheet:
+	case AssetType::Texture:
 		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project, *metadataEditor);
 	case AssetType::Prefab:
 	case AssetType::Scene:

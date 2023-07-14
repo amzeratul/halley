@@ -1,11 +1,11 @@
 #include "halley/tools/make_font/font_face.h"
 #include <ft2build.h>
+#include FT_FREETYPE_H
 #include <halley/text/halleystring.h>
 #include <memory>
 #include <halley/support/exception.h>
 #include <halley/maths/vector2.h>
 #include <halley/file_formats/image.h>
-#include FT_FREETYPE_H
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -178,4 +178,14 @@ Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 	}
 
 	return results;
+}
+
+void* FontFace::getFreeTypeLib() const
+{
+	return pimpl ? pimpl->library : nullptr;
+}
+
+void* FontFace::getFreeTypeFace() const
+{
+	return pimpl ? pimpl->face : nullptr;
 }

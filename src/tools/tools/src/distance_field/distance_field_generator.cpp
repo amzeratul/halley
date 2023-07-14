@@ -3,6 +3,12 @@
 #include <halley/file_formats/image.h>
 #include <gsl/gsl_assert>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+#include "../msdfgen/msdfgen.h"
+#include "../msdfgen/msdfgen-ext.h"
+
 using namespace Halley;
 
 namespace {
@@ -39,7 +45,7 @@ namespace {
 		return finalValue;
 	}
 
-	std::unique_ptr<Image> DistanceFieldGenerator::generateSDFInternal(Image& srcImg, Vector2i size, float radius)
+	std::unique_ptr<Image> generateSDFInternal(Image& srcImg, Vector2i size, float radius)
 	{
 		Expects(!srcImg.getPixelBytes().empty());
 		Expects(srcImg.getFormat() == Image::Format::RGBA);
@@ -74,6 +80,24 @@ namespace {
 
 		return dstImg;
 	}
+
+	template <int BPP>
+	std::unique_ptr<Image> msdfgenImageToHalleyImage(const msdfgen::Bitmap<float, BPP>& src)
+	{
+		const auto fmt = BPP == 1 ? Image::Format::SingleChannel : Image::Format::RGBA;
+		auto result = std::make_unique<Image>(fmt, Vector2i(src.width(), src.height()), false);
+
+		const auto dstPixels = result->getPixels1BPP();
+		const auto srcPixels = gsl::span<const float>(src(0, 0), src.width() * src.height() * BPP);
+		assert(dstPixels.size() == srcPixels.size());
+
+		const auto n = srcPixels.size();
+		for (size_t i = 0; i < n; ++i) {
+			dstPixels[i] = static_cast<uint8_t>(clamp(srcPixels[i] * 255.0f, 0.0f, 255.0f));
+		}
+
+		return result;
+	}
 }
 
 std::unique_ptr<Image> DistanceFieldGenerator::generateSDF(Image& srcImg, Vector2i size, float radius)
@@ -85,4 +109,21 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Image& src, Vector2i
 {
 	// TODO
 	return {};
+}
+
+std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& fontFace, int charcode, Vector2i size, float radius)
+{
+	const auto font = msdfgen::adoptFreetypeFont(static_cast<FT_Face>(fontFace.getFreeTypeFace()));
+	auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
+
+	msdfgen::Shape shape;
+	if (msdfgen::loadGlyph(shape, font, charcode)) {
+		shape.normalize();
+		edgeColoringSimple(shape, 3.0);
+		msdfgen::generateSDF(bmp, shape, 4.0, 1.0, { 4.0, 4.0 });
+    }
+
+	msdfgen::destroyFont(font);
+
+	return msdfgenImageToHalleyImage(bmp);
 }
