@@ -151,7 +151,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 		const bool useMsdfgen = meta.getBool("msdfgen", false);
 		if (useMsdfgen) {
-			auto finalGlyphImg = DistanceFieldGenerator::generateSDF2(font, charcode, dstRect.getSize(), radius);
+			auto finalGlyphImg = DistanceFieldGenerator::generateSDF2(font, font.getSize(), charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));

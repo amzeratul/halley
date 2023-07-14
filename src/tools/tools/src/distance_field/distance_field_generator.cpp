@@ -111,13 +111,14 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Image& src, Vector2i
 	return {};
 }
 
-std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& fontFace, int charcode, Vector2i size, float radius)
+std::unique_ptr<Image> DistanceFieldGenerator::generateSDF2(const FontFace& fontFace, float fontSize, int charcode, Vector2i size, float radius)
 {
-	const auto font = msdfgen::adoptFreetypeFont(static_cast<FT_Face>(fontFace.getFreeTypeFace()));
+	const auto ftFace = static_cast<FT_Face>(fontFace.getFreeTypeFace());
+	const auto font = msdfgen::adoptFreetypeFont(ftFace);
 	auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
 
-	const double range = radius;
-	const double scale = 2.5f;
+	const double scale = fontSize / (ftFace->units_per_EM / 64);
+	const double range = 2.0f * radius / scale;
 	const auto pos = Vector2d(Vector2f(radius, radius) / scale);
 
 	msdfgen::Shape shape;

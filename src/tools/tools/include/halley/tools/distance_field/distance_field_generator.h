@@ -14,6 +14,6 @@ namespace Halley
 	public:
 		static std::unique_ptr<Image> generateSDF(Image& src, Vector2i size, float radius);
 		static std::unique_ptr<Image> generateMSDF(Image& src, Vector2i size, float radius);
-		static std::unique_ptr<Image> generateSDF2(const FontFace& font, int charcode, Vector2i size, float radius);
+		static std::unique_ptr<Image> generateSDF2(const FontFace& font, float fontSize, int charcode, Vector2i size, float radius);
 	};
 }
