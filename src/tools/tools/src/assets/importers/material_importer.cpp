@@ -83,7 +83,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 				
 				Metadata meta;
 				meta.set("language", language);
-				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curTypeName, std::move(data), meta));
+				shaderAsset.inputFiles.emplace_back(ImportingAssetFile(shaderName + "." + curTypeName, std::move(data), std::move(meta)));
 			}
 		}
 		collector.addAdditionalAsset(std::move(shaderAsset));

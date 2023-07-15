@@ -200,11 +200,6 @@ namespace {
 			return c;
 		}
 	}
-
-	static uint32_t getAbsDistance(uint8_t v)
-	{
-		return v <= static_cast<uint8_t>(127) ? static_cast<uint32_t>(v) : static_cast<uint32_t>(256) - static_cast<uint32_t>(v);
-	}
 }
 
 HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> curLine, gsl::span<const uint8_t> prevLine, int bpp)
@@ -212,11 +207,6 @@ HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> c
 	// Try all five filters and accumulate the values
 	std::array<uint32_t, 5> accumulator;
 	accumulator.fill(0);
-
-	auto report = [&](LineEncoding type, uint32_t dist)
-	{
-		accumulator[static_cast<uint8_t>(type)] += dist;
-	};
 	
 	const size_t n = curLine.size();
 	for (size_t x = bpp; x < n; ++x) {
@@ -228,11 +218,11 @@ HLIFFile::LineEncoding HLIFFile::findBestLineEncoding(gsl::span<const uint8_t> c
 		const uint8_t pc = static_cast<uint8_t>(getClosest(a, b, c, p));
 		const uint8_t avg = static_cast<uint8_t>((static_cast<uint16_t>(a) + static_cast<uint16_t>(b)) / 2);
 
-		report(LineEncoding::None, getAbsDistance(cur));
-		report(LineEncoding::Sub, getAbsDistance(cur - a));
-		report(LineEncoding::Up, getAbsDistance(cur - b));
-		report(LineEncoding::Average, getAbsDistance(cur - avg));
-		report(LineEncoding::Paeth, getAbsDistance(cur - pc));
+		accumulator[0] += cur;
+		accumulator[1] += std::abs(static_cast<int8_t>(cur - a));
+		accumulator[2] += std::abs(static_cast<int8_t>(cur - b));
+		accumulator[3] += std::abs(static_cast<int8_t>(cur - avg));
+		accumulator[4] += std::abs(static_cast<int8_t>(cur - pc));
 	}
 
 	//return static_cast<LineEncoding>(std::min_element(uniqueValues.begin(), uniqueValues.end(), [&](const auto& a, const auto& b) { return a.size() < b.size(); }) - uniqueValues.begin());

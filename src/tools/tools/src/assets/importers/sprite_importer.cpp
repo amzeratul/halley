@@ -155,7 +155,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ImportingAsset image;
 	image.assetId = groupAtlasName;
 	image.assetType = ImportAssetType::Image;
-	image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), meta));
+	image.inputFiles.emplace_back(ImportingAssetFile(groupAtlasName, Serializer::toBytes(*atlasImage), std::move(meta)));
 	image.options.ensureType(ConfigNodeType::Map);
 	image.options["sprites"] = std::move(spriteInfo);
 	collector.addAdditionalAsset(std::move(image));

@@ -46,7 +46,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	ImportingAsset imageAsset;
 	imageAsset.assetId = asset.assetId;
 	imageAsset.assetType = ImportAssetType::Texture;
-	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image), meta));
+	imageAsset.inputFiles.emplace_back(ImportingAssetFile(asset.assetId, Serializer::toBytes(*image), std::move(meta)));
 	collector.addAdditionalAsset(std::move(imageAsset));
 }
 

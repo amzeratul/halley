@@ -20,10 +20,10 @@ namespace Halley
 		Metadata metadata;
 
 		ImportingAssetFile() {}
-		ImportingAssetFile(const Path& path, Bytes&& data, const Metadata& meta)
-			: name(path)
-			, data(data)
-			, metadata(meta)
+		ImportingAssetFile(Path path, Bytes data, Metadata meta)
+			: name(std::move(path))
+			, data(std::move(data))
+			, metadata(std::move(meta))
 		{}
 	};
 

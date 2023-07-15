@@ -58,7 +58,7 @@ void ImportAssetsTask::run()
 		};
 
 		if (parallelImport) {
-			tasks.push_back(Concurrent::execute(Executors::getCPUAux(), importFunc));
+			tasks.push_back(Concurrent::execute(Executors::getCPU(), importFunc));
 		} else {
 			importFunc();
 		}
@@ -185,7 +185,7 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 					logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
 				}
 			}
-			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.getPath(), std::move(data), meta ? meta.value() : Metadata()));
+			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.getPath(), std::move(data), meta ? std::move(meta.value()) : Metadata()));
 		}
 		toLoad.emplace_back(std::move(importingAsset));
 
