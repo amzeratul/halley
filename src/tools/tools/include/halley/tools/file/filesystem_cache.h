@@ -43,6 +43,8 @@ namespace Halley {
         DirEntry emptyDir;
         Vector<Path> trackedDirs;
 
+        mutable std::pair<Path, DirEntry*> lastDirCache;
+
         bool shouldCache(const Path& path, size_t size);
 
         void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst);

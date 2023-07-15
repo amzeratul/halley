@@ -123,12 +123,25 @@ Path Path::getFilename() const
 	return pathParts.back();
 }
 
+const String& Path::getFilenameStr() const
+{
+	return pathParts.back();
+}
+
 Path Path::getDirName() const
 {
 	if (pathParts.back() == ".") {
 		return pathParts[pathParts.size() - 2];
 	}
 	return "";
+}
+
+const String& Path::getDirNameStr() const
+{
+	if (pathParts.back() == ".") {
+		return pathParts[pathParts.size() - 2];
+	}
+	return String::emptyString();
 }
 
 Path Path::getStem() const
@@ -253,9 +266,32 @@ Path Path::replaceExtension(String newExtension) const
 	return Path(parts, true);
 }
 
+Path Path::operator/(std::string_view other) const
+{
+	if (other != ".." && other.find('/') == std::string_view::npos && other.find('\\') == std::string_view::npos) {
+		Path p = *this;
+		if (!p.pathParts.empty() && p.pathParts.back() == ".") {
+			p.pathParts.pop_back();
+		}
+		p.pathParts.push_back(other);
+		return p;
+	}
+	return operator/(Path(other));
+}
+
 Path Path::operator/(const char* other) const
 {
-	return operator/(Path(other));
+	return operator/(std::string_view(other));
+}
+
+Path Path::operator/(const String& other) const
+{
+	return operator/(std::string_view(other));
+}
+
+Path Path::operator/(const std::string& other) const
+{
+	return operator/(std::string_view(other));
 }
 
 Path Path::operator/(const Path& other) const 
@@ -276,16 +312,6 @@ Path Path::operator/(const Path& other) const
 		}
 	}
 	return Path(std::move(parts), needsNormalise);
-}
-
-Path Path::operator/(const String& other) const
-{
-	return operator/(Path(other));
-}
-
-Path Path::operator/(const std::string& other) const 
-{
-	return operator/(Path(other));
 }
 
 bool Path::operator==(const char* other) const

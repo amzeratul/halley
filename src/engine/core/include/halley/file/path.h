@@ -25,7 +25,9 @@ namespace Halley
 		Path getRoot() const;
 		Path getFront(size_t n) const;
 		Path getFilename() const;
+		const String& getFilenameStr() const;
 		Path getDirName() const;
+		const String& getDirNameStr() const;
 		Path getStem() const;
 		String getExtension() const;
 		String getString(bool includeDot = true) const;
@@ -40,10 +42,11 @@ namespace Halley
 		Path parentPath() const;
 		Path replaceExtension(String newExtension) const;
 
+		Path operator/(std::string_view other) const;
 		Path operator/(const char* other) const;
-		Path operator/(const Path& other) const;
 		Path operator/(const String& other) const;
 		Path operator/(const std::string& other) const;
+		Path operator/(const Path& other) const;
 
 		bool operator==(const char* other) const;
 		bool operator==(const String& other) const;

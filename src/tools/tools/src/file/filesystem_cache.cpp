@@ -107,14 +107,14 @@ bool FileSystemCache::exists(const Path& path)
 {
 	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	return dir.files.contains(path.getFilename().string());
+	return dir.files.contains(path.getFilenameStr());
 }
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
 {
 	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	const auto key = path.getFilename().string();
+	const auto key = path.getFilenameStr();
 	const auto iter = dir.files.find(key);
 	if (iter != dir.files.end()) {
 		return iter->second.lastWriteTime;
@@ -146,8 +146,13 @@ FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
 	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
 	assert(dirPath.isDirectory());
+	if (dirPath == lastDirCache.first) {
+		return lastDirCache.second;
+	}
+
 	const auto iter = dirs.find(dirPath);
 	if (iter != dirs.end()) {
+		lastDirCache = std::pair(dirPath, &iter->second);
 		return &iter->second;
 	}
 
@@ -156,9 +161,10 @@ FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 		if (dir.isPrefixOf(path)) {
 			if (dir != path) {
 				if (auto* parent = tryGetDirectory(dirPath.parentPath())) {
-					parent->addDir(dirPath.getDirName().getString());
+					parent->addDir(dirPath.getDirNameStr());
 				}
 			}
+			lastDirCache = {};
 			return &dirs[dirPath];
 		}
 	}
@@ -172,6 +178,7 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 		return;
 	}
 
+	lastDirCache = {};
 	auto& dir = dirs[rootDir.isDirectory() ? rootDir : (rootDir / ".")];
 	const auto nativeRootDir = std::filesystem::path(rootDir.getNativeString().cppStr());
 
@@ -198,7 +205,7 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 
 void FileSystemCache::DirEntry::addFile(const Path& fullPath)
 {
-	const auto name = fullPath.getFilename().getString();
+	const auto name = fullPath.getFilenameStr();
 	const auto iter = files.find(name);
 	if (iter != files.end()) {
 		iter->second.lastWriteTime = FileSystem::getLastWriteTime(fullPath);
@@ -210,12 +217,12 @@ void FileSystemCache::DirEntry::addFile(const Path& fullPath)
 
 void FileSystemCache::DirEntry::updateFile(const Path& fullPath)
 {
-	files[fullPath.getFilename().getString()] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
+	files[fullPath.getFilenameStr()] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
 }
 
 void FileSystemCache::DirEntry::removeFile(const Path& fullPath)
 {
-	const auto name = fullPath.getFilename().getString();
+	const auto name = fullPath.getFilenameStr();
 	files.erase(name);
 	std_ex::erase(filenames, name);
 }

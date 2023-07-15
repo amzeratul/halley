@@ -1,99 +1,40 @@
-editor
-- compile game
-- launch game
-- project properties
-- editor options
+UI Editor:
+- Copy/Paste
+- Undo/Redo
+- Zoom
+- Multiple selection
+- Replace element
+- Named colours
+
+Script Editor:
+- Undo/Redo
+- Figure out why sometimes it doesn't connect
+
+Metadata Editor:
+- Fix inconsistent change detection
+- Fix handling of files inside Halley folder
+
+UI:
+- Theme hot reload
+- Scaling/Transforming
+
+General tools:
 - ECS editor
-- ECS inspector
-- create project from template
-- game stats display
-- render graph editor
-- state machine editor
+- Remote connection
+- UI Style editor
+- Variables editor
+- Config editor
+- Material editor
 
-scene editor
-- scroll view
-- reload on asset reload
-- entity list
-- entity editor
+Editor Misc:
+- Crash reporter
+- Fix DLL hot reload issues
+- Hot reload own assets?
 
-entity
-- nested prefabs
-- general serialize/deserialize
-- snapshot world
-- smearing systems
-- better timelines?
-- defragment/optimize memory? [RESEARCH]
+Launcher:
+- Safe mode
+- Create project
+- Figure out freezes
 
-core
-- hot reload AudioClips
-
-graphics
-- render graph [from old Halley?]
-- convert uniforms into attributes for distance_field_sprite?
-- optimise SpritePainter
-- multi-pass: disable batching
-- fallback shaders
-- run rendering on another thread? [RESEARCH]
-- Codegen vertex attribute data? [RESEARCH]
-
-input
-- input context system [RESEARCH]
-- use GameController API, ditch XInput+Joystick (should be superceded)
-
-audio
-- refactor voice system
-- rate limiting
-- multiple "layers" (with individual listeners for them)
-- range compression/ducking
-- audio environments
-- source filters
-- listener filters
-- effects/DSP
-  - low-pass/high-pass/band-pass (standard biquad filters)
-  - reverb [RESEARCH]
-  - doppler shift [RESEARCH]
-
-ui
-- tab order
-- reduce draw calls, especially between text and images
-
-lua
-- lua bindings for C++ objects
-- lua ECS? [RESEARCH]
-
-asset importing
-- generate fonts with OpenCL
-
-utils
-- remove Boost dependencies
-- consider replacing STL with EASTL or similar?
-- improve Halley::String?
-- write my own memory pool/replace boost::pool?
-- DirectoryMonitor support on Linux and Mac
-
-system/win32:
-- window properties
-- input
-- audio
-
-samples
-- ports from my old game jam games:
-  - ggj16 ("Anu & Ki") - from Unity
-  - ggj15 ("A Horrible Night") - from Unity
-  - poh13 ("Dungeon Butler") - from Halley 1
-  - ggj13 ("Stoneheart: The Beauty in the Beast") - from Halley 1
-  - ggj12 ("Trapped: In the Chambers of Eternal Darkness") - from Halley 1 [WIP]
-  - spjam11 ("Down Goes the Phoenix") - from Halley 1
-  - ggj11 ("Planetary Plan C") - from Halley 1
-  - sh09 ("Xtreme Programming - the Literal Game") - from Allegro
-  - sh07 ("Fury of the Sky God") - from Allegro
-  - sh05 ("Bunkermaster") - from Allegro
-
-misc/refactor
-- Use C++ modules?
-
-platforms
-- Emscripten?
-
-plugins
-- Vulkan
+Engine:
+- Engine-side systems
