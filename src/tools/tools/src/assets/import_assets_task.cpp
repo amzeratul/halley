@@ -58,7 +58,7 @@ void ImportAssetsTask::run()
 		};
 
 		if (parallelImport) {
-			tasks.push_back(Concurrent::execute(Executors::getCPU(), importFunc));
+			tasks.push_back(Concurrent::execute(Executors::getCPUAux(), importFunc));
 		} else {
 			importFunc();
 		}

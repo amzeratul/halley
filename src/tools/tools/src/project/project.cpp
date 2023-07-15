@@ -67,11 +67,11 @@ void Project::loadDLL(const HalleyStatics& statics)
 	}
 }
 
-void Project::setPlugins(Vector<HalleyPluginPtr> plugins)
+void Project::setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions)
 {
 	if (plugins != this->plugins || !assetImporter) {
 		this->plugins = std::move(plugins);
-		assetImporter = std::make_shared<AssetImporter>(*this, Vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
+		assetImporter = std::make_shared<AssetImporter>(*this, Vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()}, ConfigNode(importerOptions));
 	}
 }
 

@@ -27,9 +27,12 @@
 
 using namespace Halley;
 
-AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
+AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc, ConfigNode importerOptions)
 	: assetsSrc(std::move(assetsSrc))
+	, importerOptions(std::move(importerOptions))
 {
+	this->importerOptions.ensureType(ConfigNodeType::Map);
+
 	std::unique_ptr<IAssetImporter> defaultImporters[] = {
 		std::make_unique<CopyFileImporter>(ImportAssetType::SimpleCopy, AssetType::BinaryFile),
 		std::make_unique<FontImporter>(),
@@ -48,7 +51,7 @@ AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 		std::make_unique<SpriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
 		std::make_unique<ShaderImporter>(),
-		std::make_unique<TextureImporter>(),
+		std::make_unique<TextureImporter>(this->importerOptions["lz4hc"].asBool()),
 		std::make_unique<MeshImporter>(),
 		std::make_unique<SkipAssetImporter>(),
 		std::make_unique<VariableImporter>(),

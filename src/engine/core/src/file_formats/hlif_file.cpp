@@ -51,7 +51,7 @@ void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
 	}
 }
 
-Bytes HLIFFile::encode(const Image& image, std::string_view name)
+Bytes HLIFFile::encode(const Image& image, std::string_view name, bool lz4hc)
 {
 	// Fill header
 	Header header;
@@ -110,7 +110,7 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name)
 
 	// Try compressing with no filters first
 	Compression::LZ4Options options;
-	options.mode = Compression::LZ4Mode::HC;
+	options.mode = lz4hc ? Compression::LZ4Mode::HC : Compression::LZ4Mode::Normal;
 	//options.level = 12;
 	auto compressedUnfiltered = Compression::lz4Compress(gsl::as_bytes(dataSpan), options);
 

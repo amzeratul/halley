@@ -1,6 +1,7 @@
 #pragma once
 
 #include "prec.h"
+#include "halley/tools/project/project_loader.h"
 
 namespace Halley
 {
@@ -33,7 +34,12 @@ namespace Halley
 		const String& getColourScheme() const;
 		void setColourScheme(String colourScheme);
 
+		bool isLZ4HCEnabled() const;
+		void setLZ4HCEnabled(bool enabled);
+
 		void loadEditorPreferences(const Preferences& preferences);
+
+		void applyProjectLoaderPreferences(ProjectLoader& projectLoader);
 
 	private:
 		mutable bool dirty = false;
@@ -48,5 +54,6 @@ namespace Halley
 		Vector<String> disabledPlatforms;
 
 		String colourScheme;
+		bool lz4hc;
 	};
 }

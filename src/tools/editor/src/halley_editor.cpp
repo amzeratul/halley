@@ -165,6 +165,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 	if (!path.isDirectory()) {
 		path = path / ".";
 	}
+	preferences->applyProjectLoaderPreferences(*projectLoader);
 	auto project = projectLoader->loadProject(path);
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);

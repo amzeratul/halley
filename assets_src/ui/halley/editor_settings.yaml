@@ -14,15 +14,21 @@ children:
       proportion: 1
   - widget: { id: fields, class: widget }
     proportion: 1
-    border: [1, 4, 1, 1]
-    sizer: { type: grid, columns: 2, columnProportions: [1, 1] }
+    border: [4, 10, 4, 4]
+    sizer: { type: grid, columns: 2, columnProportions: [1, 1], gap: 4 }
     children:
-    - widget: { class: label, text: "Colour Scheme:" }
+    - widget: { class: label, text: "Colour Scheme: " }
+      fill: [ left, verticalCentre ]
     - widget: { id: colourScheme, class: dropdown }
     - widget: { class: label, text: "Platforms:" }
+      fill: [ left, verticalCentre ]
     - widget: { id: platforms, class: widget }
-      sizer: { type: grid, columns: 2 }
+      sizer: { type: grid, columns: 2, gap: 4 }
       children: []
+    - widget: { class: label, text: "LZ4 HC (Slower/Smaller): " }
+      fill: [ left, verticalCentre ]
+    - widget: { id: lz4hc, class: checkbox }
+      fill: [ left, verticalCentre ]
   - sizer: { type: horizontal }
     children:
     - stretchSpacer: {}

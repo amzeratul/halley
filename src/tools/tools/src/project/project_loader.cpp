@@ -6,9 +6,9 @@
 using namespace Halley;
 
 
-ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, Vector<String> disabledPlatforms)
+ProjectLoader::ProjectLoader(const HalleyStatics& statics, Path halleyPath, Vector<String> disabledPlatforms)
 	: statics(statics)
-	, halleyPath(halleyPath)
+	, halleyPath(std::move(halleyPath))
 	, disabledPlatforms(std::move(disabledPlatforms))
 {
 	loadPlugins();
@@ -19,14 +19,20 @@ void ProjectLoader::setDisabledPlatforms(Vector<String> platforms)
 	disabledPlatforms = std::move(platforms);
 }
 
+void ProjectLoader::setImporterOption(std::string_view key, ConfigNode value)
+{
+	importerOptions.ensureType(ConfigNodeType::Map);
+	importerOptions[key] = std::move(value);
+}
+
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
 	auto proj = std::make_unique<Project>(path, halleyPath, disabledPlatforms);
-	selectPlugins(*proj);	
+	setupPlugins(*proj);	
 	return proj;
 }
 
-void ProjectLoader::selectPlugins(Project& project) const
+void ProjectLoader::setupPlugins(Project& project) const
 {
 	auto platforms = project.getPlatforms();
 	platforms.erase(std::remove_if(platforms.begin(), platforms.end(), [&] (const String& platform)
@@ -35,7 +41,7 @@ void ProjectLoader::selectPlugins(Project& project) const
 	}), platforms.end());
 
 	project.setPlatforms(platforms);
-	project.setPlugins(getPlugins(platforms));
+	project.setupImporter(getPlugins(platforms), importerOptions);
 }
 
 const Vector<String>& ProjectLoader::getKnownPlatforms() const

@@ -47,6 +47,12 @@ void EditorSettingsWindow::onMakeUI()
 		});
 	}
 
+	bindData("lz4hc", workingCopy.isLZ4HCEnabled(), [=] (bool value)
+	{
+		workingCopy.setLZ4HCEnabled(value);
+		setSaveEnabled(true);
+	});
+
 	setHandle(UIEventType::ButtonClicked, "save", [=] (const UIEvent& event)
 	{
 		save();
@@ -62,7 +68,8 @@ void EditorSettingsWindow::save()
 {
 	preferences.loadEditorPreferences(workingCopy);
 	projectLoader.setDisabledPlatforms(preferences.getDisabledPlatforms());
-	projectLoader.selectPlugins(project);
+	preferences.applyProjectLoaderPreferences(projectLoader);
+	projectLoader.setupPlugins(project);
 
 	if (factory.getColourScheme()->getName() != preferences.getColourScheme()) {
 		factory.setColourScheme(preferences.getColourScheme());

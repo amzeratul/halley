@@ -7,6 +7,11 @@
 
 using namespace Halley;
 
+TextureImporter::TextureImporter(bool lz4hc)
+	: lz4hc(lz4hc)
+{
+}
+
 void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	// Get image
@@ -20,7 +25,7 @@ void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 
 	if (useHLIF) {
 		meta.set("compression", "hlif");
-		collector.output(asset.assetId, AssetType::Texture, image.saveHLIFToBytes(asset.assetId), meta);
+		collector.output(asset.assetId, AssetType::Texture, image.saveHLIFToBytes(asset.assetId, lz4hc), meta);
 	} else if (useQOI && (image.getFormat() == Image::Format::RGB || image.getFormat() == Image::Format::RGBA || image.getFormat() == Image::Format::RGBAPremultiplied)) {
 		meta.set("compression", "qoi");
 		collector.output(asset.assetId, AssetType::Texture, image.saveQOIToBytes(), meta);

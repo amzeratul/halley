@@ -667,9 +667,9 @@ Bytes Image::saveQOIToBytes() const
 	return result;
 }
 
-Bytes Image::saveHLIFToBytes(std::string_view name) const
+Bytes Image::saveHLIFToBytes(std::string_view name, bool lz4hc) const
 {
-	return HLIFFile::encode(*this, name);
+	return HLIFFile::encode(*this, name, lz4hc);
 }
 
 Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)

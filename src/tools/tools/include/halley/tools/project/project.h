@@ -47,7 +47,7 @@ namespace Halley
 		~Project() override;
 
 		void loadDLL(const HalleyStatics& statics);
-		void setPlugins(Vector<HalleyPluginPtr> plugins);
+		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
 		
 		void update(Time time);
 		void onBuildDone();

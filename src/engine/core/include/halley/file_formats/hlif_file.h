@@ -15,7 +15,7 @@ namespace Halley {
         };
 
         static void decode(Image& dst, gsl::span<const gsl::byte> data);
-        static Bytes encode(const Image& image, std::string_view name = {});
+        static Bytes encode(const Image& image, std::string_view name = {}, bool lz4hc = true);
         static Info getInfo(gsl::span<const gsl::byte> data);
         static bool isHLIF(gsl::span<const gsl::byte> data);
 

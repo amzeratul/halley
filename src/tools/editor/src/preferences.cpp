@@ -18,6 +18,7 @@ void Preferences::loadDefaults()
 	windowSize = Vector2i(1280, 720);
 	windowState = WindowState::Normal;
 	colourScheme = "Flat Halley (Dark)";
+	lz4hc = false;
 }
 
 ConfigNode Preferences::save() const
@@ -38,6 +39,7 @@ ConfigNode Preferences::save() const
 
 	root["disabledPlatforms"] = ConfigNode(disabledPlatforms);
 	root["colourScheme"] = colourScheme;
+	root["lz4hc"] = lz4hc;
 
 	return root;
 }
@@ -60,6 +62,7 @@ void Preferences::load(const ConfigNode& root)
 	if (root.hasKey("colourScheme")) {
 		colourScheme = root["colourScheme"].asString();
 	}
+	lz4hc = root["lz4hc"].asBool(false);
 }
 
 bool Preferences::isDirty() const
@@ -157,9 +160,25 @@ void Preferences::setColourScheme(String colourScheme)
 	this->colourScheme = std::move(colourScheme);
 }
 
+bool Preferences::isLZ4HCEnabled() const
+{
+	return lz4hc;
+}
+
+void Preferences::setLZ4HCEnabled(bool enabled)
+{
+	lz4hc = enabled;
+}
+
 void Preferences::loadEditorPreferences(const Preferences& preferences)
 {
 	dirty = true;
 	disabledPlatforms = preferences.disabledPlatforms;
 	colourScheme = preferences.colourScheme;
+	lz4hc = preferences.lz4hc;
+}
+
+void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)
+{
+	projectLoader.setImporterOption("lz4hc", ConfigNode(lz4hc));
 }
