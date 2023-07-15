@@ -34,6 +34,7 @@ namespace Halley {
 
 		void loadImage(AsepriteDepth depth, const Vector<uint32_t>& palette);
 		void drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const;
+		void blit(Image& image) const;
 	};
 
 	struct AsepriteFrame

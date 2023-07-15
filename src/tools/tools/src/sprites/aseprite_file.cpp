@@ -179,6 +179,11 @@ void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode ble
 	}
 }
 
+void AsepriteCel::blit(Image& dstImage) const
+{
+	dstImage.blitFrom(pos, *imgData);
+}
+
 AsepriteFrame::AsepriteFrame(uint16_t duration)
 	: duration(duration)
 {}
@@ -475,37 +480,17 @@ const Vector<AsepriteTag>& AsepriteFile::getTags() const
 std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int frameNumber, bool groupSeparated)
 {
 	std::map<String, std::unique_ptr<Image>> groupImages;
+	Vector<String> groupsFound;
+	String currentGroup;
 	
-	String currentGroup = "";
-
-	auto defaultFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
-	defaultFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
-	groupImages[""] = std::move(defaultFrameImage);
-	auto defaultFrameUsed = false;
-	
-	auto inGroup = false;
 	for (int layerNumber = 0; layerNumber < layers.size(); ++layerNumber) {
 		auto& layer = layers[layerNumber];
 
-		if (groupSeparated) {
-			const auto newGroup = layer.type == AsepriteLayerType::Group && layer.childLevel == 0;
-			const auto outOfGroup = inGroup && layer.type != AsepriteLayerType::Group && layer.childLevel == 0;
-			if (newGroup)
-			{
+		if (groupSeparated && layer.childLevel == 0) {
+			if (layer.type == AsepriteLayerType::Group) {
 				currentGroup = layer.layerName;
-				inGroup = true;
-
-				if (groupImages.find(currentGroup) == groupImages.end())
-				{
-					auto groupFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
-					groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
-					groupImages[currentGroup] = std::move(groupFrameImage);
-				}
-			}
-
-			if (outOfGroup)
-			{
-				inGroup = false;
+				groupsFound.push_back(currentGroup);
+			} else {
 				currentGroup = "";
 			}
 		}
@@ -513,31 +498,47 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 		if (layer.visibleInHierarchy) {			
 			auto* cel = getCelAt(frameNumber, layerNumber);
 			if (cel) {
-				if (currentGroup == "")	{
-					defaultFrameUsed = true;
-				}
 				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));
 				if (!cel->imgData) {
 					cel->loadImage(colourDepth, layer.background ? paletteBg : paletteTransparent);
 				}
-				cel->drawAt(*groupImages[currentGroup], opacity, layer.blendMode);
+
+				const auto iter = groupImages.find(currentGroup);
+				if (iter != groupImages.end()) {
+					cel->drawAt(*iter->second, opacity, layer.blendMode);
+				} else {
+					auto image = std::make_unique<Image>(Image::Format::RGBA, size, true);
+
+					// If there's no previous image, and this one is just an opaque layer, blit is much faster
+					if (opacity == uint8_t(255) && layer.blendMode == AsepriteBlendMode::Normal) {
+						cel->blit(*image);
+					} else if (opacity != 0) {
+						cel->drawAt(*image, opacity, layer.blendMode);
+					}
+
+					groupImages[currentGroup] = std::move(image);
+				}
 			}
 		}
 	}
-	
-	std::map<String, std::unique_ptr<Image>> frameImages;
-	for (auto& group : groupImages)
-	{		
-		if (group.first == "" && !defaultFrameUsed && (groupImages.size() > 1))
-		{
-			continue;
+
+	// Make sure that every group has an image, even if it was blank
+	for (const auto& groupName: groupsFound) {
+		if (groupImages.find(groupName) == groupImages.end()) {
+			groupImages[groupName] = std::make_unique<Image>(Image::Format::RGBA, size, true);
 		}
-		
-		group.second->preMultiply();
-		frameImages[group.first] = std::move(group.second);
 	}
 
-	return frameImages;
+	// If nothing else was generated, at least generate an empty default
+	if (groupImages.empty()) {
+		groupImages[""] = std::make_unique<Image>(Image::Format::RGBA, size, true);
+	}
+	
+	for (auto& group: groupImages) {
+		group.second->preMultiply();
+	}
+
+	return groupImages;
 }
 
 const AsepriteFrame& AsepriteFile::getFrame(int frameNumber) const
