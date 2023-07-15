@@ -46,7 +46,7 @@ namespace Halley
 		Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms);
 		~Project() override;
 
-		void loadDLL(const HalleyStatics& statics);
+		void loadDLL(const HalleyStatics& statics, bool load);
 		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
 		
 		void update(Time time);

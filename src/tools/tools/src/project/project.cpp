@@ -58,12 +58,14 @@ Project::~Project()
 	plugins.clear();
 }
 
-void Project::loadDLL(const HalleyStatics& statics)
+void Project::loadDLL(const HalleyStatics& statics, bool load)
 {
 	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
 		gameDll = std::make_shared<ProjectDLL>(dllPath, statics);
-		gameDll->load();
+		if (load) {
+			gameDll->load();
+		}
 	}
 }
 

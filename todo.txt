@@ -8,7 +8,7 @@ UI Editor:
 
 Script Editor:
 - Undo/Redo
-- Figure out why sometimes it doesn't connect
+- Figure out why sometimes it doesn't connect to the game
 
 Metadata Editor:
 - Fix inconsistent change detection

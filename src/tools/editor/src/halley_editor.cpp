@@ -108,12 +108,14 @@ void HalleyEditor::parseArguments(const Vector<String>& args)
 	enum class ArgType {
 		None,
 		ProjectPath,
-		LauncherPath
+		LauncherPath,
+		NoDLL
 	};
 
 	ArgType type = ArgType::None;
 	projectPath = {};
 	launcherPath = {};
+	loadDLL = true;
 
 	for (auto& arg : args) {
 		if (arg.startsWith("--")) {
@@ -121,6 +123,9 @@ void HalleyEditor::parseArguments(const Vector<String>& args)
 				type = ArgType::ProjectPath;
 			} else if (arg == "--launcher") {
 				type = ArgType::LauncherPath;
+			} else if (arg == "--dont-load-dll") {
+				type = ArgType::NoDLL;
+				loadDLL = false;
 			}
 		} else {
 			if (type == ArgType::ProjectPath) {
@@ -171,7 +176,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
 	}
 
-	project->loadDLL(getAPI().core->getStatics());
+	project->loadDLL(getAPI().core->getStatics(), loadDLL);
 	project->loadGameResources(getAPI());
 
 	preferences->addRecent(path.string());

@@ -42,6 +42,7 @@ namespace Halley
 
 		std::optional<String> projectPath;
 		std::optional<String> launcherPath;
+		bool loadDLL = true;
 
 		void parseArguments(const Vector<String>& args);
 	};
