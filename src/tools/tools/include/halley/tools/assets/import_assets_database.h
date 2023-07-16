@@ -111,7 +111,7 @@ namespace Halley
 		void markAllInputFilesAsMissing();
 		bool purgeMissingInputs();
 
-		Path getPrimaryInputFile(AssetType type, const String& assetId) const;
+		Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolutePath = false) const;
 		int64_t getAssetTimestamp(AssetType type, const String& assetId) const;
 
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const;

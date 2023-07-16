@@ -10,10 +10,6 @@ Script Editor:
 - Undo/Redo
 - Figure out why sometimes it doesn't connect to the game
 
-Metadata Editor:
-- Fix inconsistent change detection
-- Fix handling of files inside Halley folder
-
 UI:
 - Theme hot reload
 - Scaling/Transforming

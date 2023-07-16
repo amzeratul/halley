@@ -87,8 +87,9 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				metadataEditor->clear();
 			} else {
 				const auto type = assets.at(0).first;
-				auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
-				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
+				const auto primaryFilePath = project.getImportAssetsDatabase().getPrimaryInputFile(type, assets.at(0).second, true);
+				auto effectiveMeta = project.getImportAssetsDatabase().getMetadata(type, assets.at(0).second).value_or(Metadata());
+				metadataEditor->setResource(project, type, primaryFilePath, std::move(effectiveMeta));
 			}
 
 			const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });

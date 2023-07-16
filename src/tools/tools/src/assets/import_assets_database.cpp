@@ -277,7 +277,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 	return {};
 }
 
-Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId) const
+Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId, bool absolutePath) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
@@ -285,7 +285,12 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 		const auto& asset = entry->asset;
 		for (const auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
-				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
+				auto path = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
+				if (absolutePath) {
+					return asset.srcDir / path;
+				} else {
+					return path;
+				}
 			}
 		}
 	}

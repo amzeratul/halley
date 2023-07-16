@@ -93,7 +93,6 @@ namespace Halley
 		ProjectComments& getComments() const;
 		GameProperties& getGameProperties() const;
 
-		Metadata getImportMetadata(AssetType type, const String& assetId) const;
 		Metadata readMetadataFromDisk(const Path& filePath) const;
 		void writeMetadataToDisk(const Path& filePath, const Metadata& metadata);
 

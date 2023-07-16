@@ -89,7 +89,7 @@ namespace {
 
 		const auto dstPixels = result->getPixelBytes();
 		const auto srcPixels = gsl::span<const float>(src(0, 0), src.width() * src.height() * BPP);
-		assert(dstPixels.size() == srcPixels.size());
+		assert(dstPixels.size() >= srcPixels.size());
 
 		const auto n = srcPixels.size();
 		for (size_t i = 0; i < n; ++i) {

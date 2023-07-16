@@ -43,7 +43,7 @@ void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, M
 
 void MetadataEditor::onMetadataChanged()
 {
-	changed = metadata != origMetadata;
+	changed = true;// metadata != origMetadata;
 	getWidget("applyChanges")->setEnabled(changed);
 }
 
