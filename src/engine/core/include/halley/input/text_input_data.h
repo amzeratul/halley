@@ -85,6 +85,9 @@ namespace Halley {
 		bool isPendingSubmit();
 		void setCaptureSubmit(bool enable);
 
+		bool isMultiline() const;
+		void setMultiline(bool enable);
+
 	private:
 		StringUTF32 text;
 		Selection selection;
@@ -95,12 +98,25 @@ namespace Halley {
 		bool readOnly = false;
 		bool pendingSubmit = false;
 		bool captureSubmit = false;
+		bool multiline = false;
+
+		enum class ChangeSelectionMode {
+			Character,
+			Word,
+			Line,
+			Page,
+			Document
+		};
 
 		void onTextModified();
 		void onDelete(bool wholeWord = false);
 		void onBackspace(bool wholeWord = false);
-		void changeSelection(int dir, KeyMods mods);
+		void changeSelection(int dir, bool shiftHeld, ChangeSelectionMode mode);
+
 		int getWordBoundary(int cursorPos, int dir) const;
+		int getLineBoundary(int cursorPos, int dir) const;
+		int getPageBoundary(int cursorPos, int dir) const;
+		int getTextBoundary(int dir) const;
 	};
 
 }

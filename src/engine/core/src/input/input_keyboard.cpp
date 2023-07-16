@@ -22,7 +22,8 @@ bool KeyboardKeyPress::is(KeyCode key, KeyMods mod) const
 
 bool KeyboardKeyPress::isPrintable() const
 {
-	return static_cast<int>(key) >= 32 && static_cast<int>(key) < 128 && (mod == KeyMods::None || mod == KeyMods::Shift);
+	const auto code = static_cast<int>(key);
+	return ((code >= 32 && code < 128) || code == '\n') && (mod == KeyMods::None || mod == KeyMods::Shift);
 }
 
 InputKeyboard::InputKeyboard(int nButtons, std::shared_ptr<IClipboard> clipboard)

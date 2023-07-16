@@ -115,45 +115,48 @@ void TextInputData::insertText(const StringUTF32& t)
 }
 
 bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
-{	
-	if (c.is(KeyCode::Delete, KeyMods::None)) {
-		onDelete();
-		return true;
-	}
+{
+	const auto ctrlHeld = (c.mod & KeyMods::Ctrl) != KeyMods::None;
+	const bool shiftHeld = (c.mod & KeyMods::Shift) != KeyMods::None;
 
-	if (c.is(KeyCode::Delete, KeyMods::Ctrl)) {
-		onDelete(true);
-		return true;
-	}
-
-	if (c.is(KeyCode::Backspace, KeyMods::None)) {
-		onBackspace();
-		return true;
-	}
-
-	if (c.is(KeyCode::Backspace, KeyMods::Ctrl)) {
-		onBackspace(true);
+	if (c.key == KeyCode::Delete) {
+		onDelete(ctrlHeld);
 		return true;
 	}
 	
-	if (c.is(KeyCode::Home, KeyMods::None) || c.is(KeyCode::PageUp, KeyMods::None)) {
-		setSelection(0);
+	if (c.key == KeyCode::Backspace) {
+		onBackspace(ctrlHeld);
 		return true;
 	}
 	
-	if (c.is(KeyCode::End, KeyMods::None) || c.is(KeyCode::PageDown, KeyMods::None)) {
-		setSelection(static_cast<int>(text.size()));
+	if (c.key == KeyCode::Home) {
+		changeSelection(-1, shiftHeld, ctrlHeld ? ChangeSelectionMode::Document : ChangeSelectionMode::Line);
+		return true;
+	}
+	
+	if (c.key == KeyCode::End) {
+		changeSelection(1, shiftHeld, ctrlHeld ? ChangeSelectionMode::Document : ChangeSelectionMode::Line);
+		return true;
+	}
+
+	if (c.key == KeyCode::PageUp) {
+		changeSelection(-1, shiftHeld, ChangeSelectionMode::Page);
+		return true;
+	}
+	
+	if (c.key == KeyCode::PageDown) {
+		changeSelection(1, shiftHeld, ChangeSelectionMode::Page);
 		return true;
 	}
 
 	if (!text.empty()) {
 		if (c.key == KeyCode::Left) {
-			changeSelection(-1, c.mod);
+			changeSelection(-1, shiftHeld, ctrlHeld ? ChangeSelectionMode::Word : ChangeSelectionMode::Character);
 			return true;
 		}
 		
 		if (c.key == KeyCode::Right) {
-			changeSelection(1, c.mod);
+			changeSelection(1, shiftHeld, ctrlHeld ? ChangeSelectionMode::Word : ChangeSelectionMode::Character);
 			return true;
 		}
 	}
@@ -197,11 +200,21 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 		setSelection(Selection(0, static_cast<int>(text.length())));
 	}
 
-	if (captureSubmit && c.is(KeyCode::Enter)) {
-		pendingSubmit = true;
+	if (c.is(KeyCode::Enter)) {
+		if (captureSubmit) {
+			pendingSubmit = true;
+			return true;
+		} else if (multiline) {
+			insertText("\n");
+			return true;
+		}
+	}
+
+	if (multiline && c.is(KeyCode::Enter, KeyMods::Shift)) {
+		insertText("\n");
 		return true;
 	}
-	
+
 	if (c.isPrintable()) {
 		// Handled by text capture
 		return true;
@@ -240,6 +253,16 @@ bool TextInputData::isPendingSubmit()
 void TextInputData::setCaptureSubmit(bool enable)
 {
 	captureSubmit = enable;
+}
+
+bool TextInputData::isMultiline() const
+{
+	return multiline;
+}
+
+void TextInputData::setMultiline(bool enable)
+{
+	multiline = enable;
 }
 
 void TextInputData::onTextModified()
@@ -321,25 +344,53 @@ int TextInputData::getWordBoundary(int cursorPos, int dir) const
 	return dir == -1 ? 0 : len;
 }
 
-void TextInputData::changeSelection(int dir, KeyMods mods)
+int TextInputData::getLineBoundary(int cursorPos, int dir) const
+{
+	// TODO
+	return getTextBoundary(dir);
+}
+
+int TextInputData::getPageBoundary(int cursorPos, int dir) const
+{
+	// TODO
+	return getTextBoundary(dir);
+}
+
+int TextInputData::getTextBoundary(int dir) const
+{
+	return dir == -1 ? 0 : static_cast<int>(text.size());
+}
+
+void TextInputData::changeSelection(int dir, bool shiftHeld, ChangeSelectionMode mode)
 {
 	const auto sel = getSelection();
-	const bool shift = (mods & KeyMods::Shift) != KeyMods::None;
-	const bool ctrl = (mods & KeyMods::Ctrl) != KeyMods::None;
 
-	if (sel.end != sel.start && !shift) {
+	if (sel.end != sel.start && !shiftHeld) {
 		setSelection(dir == 1 ? sel.end : sel.start);
 		return;
 	}
 
-	int caret = shift ? sel.getCaret() : (dir == 1 ? sel.end : sel.start);
-	if (ctrl) {
-		caret = getWordBoundary(caret, dir);
-	} else {
+	int caret = shiftHeld ? sel.getCaret() : (dir == 1 ? sel.end : sel.start);
+
+	switch (mode) {
+	case ChangeSelectionMode::Character:
 		caret = caret + dir;
+		break;
+	case ChangeSelectionMode::Word:
+		caret = getWordBoundary(caret, dir);
+		break;
+	case ChangeSelectionMode::Line:
+		caret = getLineBoundary(caret, dir);
+		break;
+	case ChangeSelectionMode::Page:
+		caret = getPageBoundary(caret, dir);
+		break;
+	case ChangeSelectionMode::Document:
+		caret = getTextBoundary(dir);
+		break;
 	}
 
-	if (shift) {
+	if (shiftHeld) {
 		setSelection(Selection::fromAnchorAndCaret(sel.getAnchor(), caret));
 	} else {
 		setSelection(caret);

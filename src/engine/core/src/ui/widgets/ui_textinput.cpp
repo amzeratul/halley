@@ -154,6 +154,8 @@ bool UITextInput::isHistoryEnabled() const
 void UITextInput::setMultiLine(bool enabled)
 {
 	multiLine = enabled;
+	text.setMultiline(enabled);
+	text.setCaptureSubmit(enabled);
 }
 
 bool UITextInput::isMultiLine() const
