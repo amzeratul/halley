@@ -123,6 +123,15 @@ TextRenderer& TextRenderer::setShadow(float distance, float smoothness, Colour c
 	return *this;
 }
 
+TextRenderer& TextRenderer::setShadowColour(Colour colour)
+{
+	if (shadowColour != colour) {
+		shadowColour = colour;
+		materialDirty = true;
+	}
+	return *this;
+}
+
 TextRenderer& TextRenderer::setAlignment(float v)
 {
 	if (align != v) {
@@ -552,6 +561,11 @@ float TextRenderer::getOutline() const
 Colour TextRenderer::getOutlineColour() const
 {
 	return outlineColour;
+}
+
+Colour TextRenderer::getShadowColour() const
+{
+	return shadowColour;
 }
 
 float TextRenderer::getSmoothness() const

@@ -26,6 +26,7 @@ namespace Halley {
 		UIPainter withClip(std::optional<Rect4f> clip) const;
 		UIPainter withMask(int mask) const;
 		UIPainter withNoClip() const;
+		UIPainter withAlpha(float alpha) const;
 
 		std::optional<Rect4f> getClip() const;
 		int getMask() const;
@@ -35,9 +36,13 @@ namespace Halley {
 		std::optional<Rect4f> clip;
 		int mask;
 		int layer;
+		std::optional<float> alphaMultiplier;
 		mutable int currentPriority = 0;
 		const UIPainter* rootPainter = nullptr;
 
 		float getCurrentPriorityAndIncrement() const;
+
+		void applyAlpha(TextRenderer& text) const;
+		void applyAlpha(Sprite& sprite) const;
 	};
 }

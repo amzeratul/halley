@@ -17,6 +17,7 @@ UIPainter UIPainter::clone() const
 	result.rootPainter = rootPainter ? rootPainter : this;
 	result.clip = clip;
 	result.currentPriority = currentPriority;
+	result.alphaMultiplier = alphaMultiplier;
 	return result;
 }
 
@@ -42,6 +43,13 @@ UIPainter UIPainter::withNoClip() const
 {
 	auto result = clone();
 	result.clip = {};
+	return result;
+}
+
+UIPainter UIPainter::withAlpha(float alpha) const
+{
+	auto result = clone();
+	result.alphaMultiplier = alpha * alphaMultiplier.value_or(1.0f);
 	return result;
 }
 
@@ -73,7 +81,11 @@ float UIPainter::getCurrentPriorityAndIncrement() const
 
 void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
-	if (forceCopy) {
+	if (alphaMultiplier) {
+		auto s = sprite;
+		applyAlpha(s);
+		painter->add(std::move(s), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	} else if (forceCopy) {
 		painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
 		painter->add(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
@@ -82,7 +94,11 @@ void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 
 void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
-	if (forceCopy) {
+	if (alphaMultiplier) {
+		auto t = text;
+		applyAlpha(t);
+		painter->add(std::move(t), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	} else if (forceCopy) {
 		painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
 		painter->add(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
@@ -91,15 +107,37 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 
 void UIPainter::draw(Sprite&& sprite)
 {
-	painter->addCopy(std::move(sprite), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	applyAlpha(sprite);
+	painter->add(std::move(sprite), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(TextRenderer&& text)
 {
-	painter->addCopy(std::move(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	applyAlpha(text);
+	painter->add(std::move(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(std::function<void(Painter&)> f)
 {
 	painter->add(std::move(f), mask, layer, getCurrentPriorityAndIncrement(), clip);
+}
+
+void UIPainter::applyAlpha(TextRenderer& text) const
+{
+	if (alphaMultiplier) {
+		const float a = *alphaMultiplier;
+		const auto c = text.getColour();
+		const auto co = text.getOutlineColour();
+		const auto cs = text.getShadowColour();
+		text.setColour(c.withAlpha(c.a * a));
+		text.setOutlineColour(co.withAlpha(c.a * a));
+		text.setShadowColour(cs.withAlpha(c.a * a));
+	}
+}
+
+void UIPainter::applyAlpha(Sprite& sprite) const
+{
+	if (alphaMultiplier) {
+		sprite.setAlpha(sprite.getAlpha() * *alphaMultiplier);
+	}
 }
