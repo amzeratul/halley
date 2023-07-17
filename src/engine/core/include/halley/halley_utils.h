@@ -109,6 +109,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "utils/algorithm.h"
 #include "utils/attributes.h"
 #include "utils/averaging.h"
+#include "utils/convertible_to.h"
 #include "utils/cryptography.h"
 #include "utils/encrypt.h"
 #include "utils/hash.h"

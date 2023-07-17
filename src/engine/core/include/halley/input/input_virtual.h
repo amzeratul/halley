@@ -29,6 +29,7 @@
 
 #include "input_keys.h"
 #include "halley/data_structures/hash_map.h"
+#include "halley/utils/convertible_to.h"
 
 namespace Halley {
 	enum class KeyCode;
@@ -88,12 +89,12 @@ namespace Halley {
 
 		int getWheelMove() const override;
 
-		void bindButton(int n, spInputDevice device, int deviceButton);
-		void bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});
-		void bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1);
-		void bindAxis(int n, spInputDevice device, int deviceAxis, float scale = 1.0f);
-		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
-		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods = {});
+		void bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton);
+		void bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});
+		void bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1);
+		void bindAxis(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceAxis, float scale = 1.0f);
+		void bindAxisButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> negativeButton, ConvertibleTo<int> positiveButton);
+		void bindAxisButton(ConvertibleTo<int> n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods = {});
 		void bindVibrationOverride(spInputDevice joy);
 		void bindHat(int leftRight, int upDown, spInputDevice hat);
 		void bindPosition(spInputDevice device);

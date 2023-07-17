@@ -113,6 +113,16 @@ namespace Halley {
 		System
 	};
 
+	enum class MouseButton {
+		Left,
+		Middle,
+		Right,
+		B4,
+		B5,
+		WheelUp,
+		WheelDown
+	};
+
 	using InputButton = int;
 	
 	class InputDevice {

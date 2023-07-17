@@ -259,57 +259,57 @@ int InputVirtual::getAxisRepeat(int n)
 	return axes.at(n).curRepeatValue;
 }
 
-void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
+void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n).push_back(Bind(std::move(device), deviceN, -1, false));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceN.value, -1, false));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods)
+void InputVirtual::bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, false, mods));
+	buttons.at(n.value).push_back(Bind(std::move(device), static_cast<int>(deviceButton), -1, false, mods));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1)
+void InputVirtual::bindButtonChord(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton0, ConvertibleTo<int> deviceButton1)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	buttons.at(n).push_back(Bind(std::move(device), deviceButton0, deviceButton1, false));
+	buttons.at(n.value).push_back(Bind(std::move(device), deviceButton0.value, deviceButton1.value, false));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN, float scale)
+void InputVirtual::bindAxis(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceN, float scale)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, -1, true, {}, scale));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), deviceN.value, -1, true, {}, scale));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
+void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> negativeButton, ConvertibleTo<int> positiveButton)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), negativeButton.value, positiveButton.value, true));
 	exclusiveDirty = true;
 }
 
-void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods)
+void InputVirtual::bindAxisButton(ConvertibleTo<int> n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton, std::optional<KeyMods> mods)
 {
 	if (!lastDevice.lock()) {
 		setLastDevice(device);
 	}
-	axes.at(n).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), true, mods));
+	axes.at(n.value).binds.push_back(Bind(std::move(device), static_cast<int>(negativeButton), static_cast<int>(positiveButton), true, mods));
 	exclusiveDirty = true;
 }
 

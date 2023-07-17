@@ -806,6 +806,8 @@ set(HEADERS
 
         "include/halley/utils/algorithm.h"
         "include/halley/utils/attributes.h"
+        "include/halley/utils/averaging.h"
+        "include/halley/utils/convertible_to.h"
         "include/halley/utils/cryptography.h"
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
