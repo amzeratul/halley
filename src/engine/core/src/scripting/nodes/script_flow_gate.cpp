@@ -27,10 +27,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(co
 
 std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	const auto desc = getConnectedNodeName(world, node, graph, 1);
 	auto str = ColourStringBuilder(true);
 	str.append("Flow while ");
-	str.append(desc, settingColour);
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
