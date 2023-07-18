@@ -31,6 +31,11 @@ namespace Halley {
 
 		bool onKeyPress(KeyboardKeyPress key) override;
 
+        void copySelection();
+        void pasteSelection();
+        void cutSelection();
+        void deleteSelection();
+
 	protected:
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 		

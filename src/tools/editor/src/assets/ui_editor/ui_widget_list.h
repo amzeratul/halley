@@ -19,6 +19,8 @@ namespace Halley {
 
         UITreeList& getList();
 
+        bool onKeyPress(KeyboardKeyPress key) override;
+
     private:
         struct MoveOperation {
             String itemId;

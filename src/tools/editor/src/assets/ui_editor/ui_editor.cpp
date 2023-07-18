@@ -256,6 +256,23 @@ void UIEditor::loadGameFactory()
 	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
 }
 
+void UIEditor::copySelection()
+{
+
+}
+
+void UIEditor::pasteSelection()
+{
+}
+
+void UIEditor::cutSelection()
+{
+}
+
+void UIEditor::deleteSelection()
+{
+}
+
 ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, factory(factory)

@@ -45,6 +45,31 @@ UITreeList& UIWidgetList::getList()
 	return *list;
 }
 
+bool UIWidgetList::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		uiEditor->copySelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
+		uiEditor->pasteSelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
+		uiEditor->cutSelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::Delete)) {
+		uiEditor->deleteSelection();
+		return true;
+	}
+
+	return false;
+}
+
 void UIWidgetList::populateList()
 {
 	if (list && definition) {
