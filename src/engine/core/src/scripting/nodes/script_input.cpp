@@ -152,7 +152,7 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		data.outputMask = curMask;
 
 		if (activate != 0 || cancel != 0) {
-			return Result(ScriptNodeExecutionState::Fork, time, activate, cancel);
+			return Result(ScriptNodeExecutionState::Fork, 0, activate, cancel);
 		}
 	}
 

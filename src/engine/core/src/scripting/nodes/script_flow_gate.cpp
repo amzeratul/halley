@@ -429,7 +429,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 		curData.active = true;
 		curData.signaled = false;
 		curData.monitorVariable = environment.readInputDataPin(node, 3);
-		return Result(ScriptNodeExecutionState::Fork, time, 1);
+		return Result(ScriptNodeExecutionState::Fork, 0, 1);
 	} else {
 		bool reset = curData.signaled;
 		curData.signaled = false;
@@ -441,7 +441,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 		}
 
 		if (reset) {
-			return Result(ScriptNodeExecutionState::Fork, time, 1, 1);
+			return Result(ScriptNodeExecutionState::Fork, 0, 1, 1);
 		} else {
 			return Result(ScriptNodeExecutionState::Executing, time);
 		}
