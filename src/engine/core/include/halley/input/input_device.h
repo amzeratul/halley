@@ -120,7 +120,8 @@ namespace Halley {
 		B4,
 		B5,
 		WheelUp,
-		WheelDown
+		WheelDown,
+		WheelUpDown
 	};
 
 	using InputButton = int;

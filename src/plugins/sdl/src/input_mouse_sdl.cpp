@@ -26,7 +26,7 @@ using namespace Halley;
 
 InputMouseSDL::InputMouseSDL()
 {
-	init(7);
+	init(8);
 }
 
 void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vector2f(Vector2i)>& remap)
@@ -61,8 +61,10 @@ void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vec
 			wheelMove += event.wheel.y;
 			if (event.wheel.y > 0) {
 				onButtonStatus(static_cast<int>(MouseButton::WheelUp), true);
+				onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), true);
 			} else if (event.wheel.y < 0) {
 				onButtonStatus(static_cast<int>(MouseButton::WheelDown), true);
+				onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), true);
 			}
 		}
 	}
@@ -94,6 +96,7 @@ void InputMouseSDL::update()
 	clearPresses();
 	onButtonStatus(static_cast<int>(MouseButton::WheelUp), false);
 	onButtonStatus(static_cast<int>(MouseButton::WheelDown), false);
+	onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), false);
 }
 
 InputType InputMouseSDL::getInputType() const
