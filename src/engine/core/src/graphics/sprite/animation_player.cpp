@@ -15,7 +15,7 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 
 AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse)
 {
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	curSeq = nullptr;
 	setSequence(sequence);
@@ -36,7 +36,7 @@ AnimationPlayer& AnimationPlayer::stop()
 	curSeq = nullptr;
 	playing = false;
 
-	updateIfNeeded();
+	updateResourceIfNeeded();
 	
 	return *this;
 }
@@ -57,7 +57,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 		dirId = -1;
 	}
 
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (animation) {
 		setSequence(sequence);
@@ -70,7 +70,7 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
 {
 	curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
 	nextSequence = {};
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (animation && (!curSeq || curSeq->getName() != curSeqName)) {
 		curSeqTime = 0;
@@ -93,7 +93,7 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
 
 AnimationPlayer& AnimationPlayer::setDirection(int direction)
 {
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (animation && dirId != direction) {
 		auto newDir = &animation->getDirection(direction);
@@ -110,7 +110,7 @@ AnimationPlayer& AnimationPlayer::setDirection(int direction)
 AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 {
 	curDirName = direction;
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (animation && (!curDir || curDir->getName() != direction)) {
 		auto newDir = &animation->getDirection(direction);
@@ -126,7 +126,7 @@ AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 
 bool AnimationPlayer::trySetSequence(const String& sequence)
 {
-	updateIfNeeded();
+	updateResourceIfNeeded();
 	if (animation && animation->hasSequence(sequence)) {
 		setSequence(sequence);
 		return true;
@@ -147,7 +147,7 @@ bool AnimationPlayer::isApplyingPivot() const
 
 void AnimationPlayer::update(Time time)
 {
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (!animation) {
 		return;
@@ -408,7 +408,7 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 
 void AnimationPlayer::resolveSprite()
 {
-	updateIfNeeded();
+	updateResourceIfNeeded();
 
 	if (curSeq && curSeq->numFrames() > 0) {
 		curFrame = &curSeq->getFrame(curFrameN);
@@ -431,7 +431,7 @@ void AnimationPlayer::onSequenceDone()
 	}
 }
 
-void AnimationPlayer::updateIfNeeded()
+void AnimationPlayer::updateResourceIfNeeded()
 {
 #ifdef ENABLE_HOT_RELOAD
 	if (observer.needsUpdate()) {
