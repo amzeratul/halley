@@ -11,6 +11,7 @@ using namespace Halley;
 UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api)
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
 	, projectWindow(projectWindow)
+	, api(api)
 {
 	project.withDLL([&] (ProjectDLL& dll)
 	{
@@ -204,10 +205,72 @@ void UIEditor::addWidget(const String& widgetClass)
 	}
 	data["uuid"] = UUID::generate().toString();
 
-	addWidget(curSelection, false, std::move(data));
+	addWidgetsAt(curSelection, false, Vector<ConfigNode>{{ std::move(data) }});
 }
 
-void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, ConfigNode data)
+void UIEditor::removeWidget()
+{
+	deleteWidgets(Vector<String>{ curSelection });
+}
+
+void UIEditor::loadGameFactory()
+{
+	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
+	auto* game = project.getGameInstance();
+	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
+}
+
+void UIEditor::reassignUUIDs(ConfigNode& node) const
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		node["uuid"] = UUID::generate().toString();
+		if (node.hasKey("children")) {
+			reassignUUIDs(node["children"]);
+		}
+	} else if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& n: node) {
+			reassignUUIDs(n);
+		}
+	}
+}
+
+void UIEditor::copyWidgets(const Vector<String>& uuids)
+{
+	ConfigNode::SequenceType result;
+
+	for (const auto& uuid: uuids) {
+		const auto widget = uiDefinition->findUUID(uuid);
+		if (widget.result) {
+			result.push_back(*widget.result);
+		}
+	}
+
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = { "uuid", "widget", "fill", "sizer", "children" };
+	const auto str = YAMLConvert::generateYAML(ConfigNode(std::move(result)), options);
+	api.system->getClipboard()->setData(str);
+}
+
+void UIEditor::cutWidgets(const Vector<String>& uuids)
+{
+	copyWidgets(uuids);
+	deleteWidgets(uuids);
+}
+
+void UIEditor::pasteAt(const String& referenceId, bool asChild)
+{
+	const auto str = api.system->getClipboard()->getStringData();
+	if (str) {
+		auto config = YAMLConvert::parseConfig(*str);
+		if (config.getType() == ConfigNodeType::Sequence) {
+			reassignUUIDs(config);
+
+			addWidgetsAt(referenceId, asChild, config.asSequence());
+		}
+	}
+}
+
+void UIEditor::addWidgetsAt(const String& referenceId, bool requestedAsChild, Vector<ConfigNode> datas)
 {
 	auto result = uiDefinition->findUUID(referenceId);
 	if (result.result) {
@@ -226,52 +289,34 @@ void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, Confi
 		auto& parentChildren = parent["children"].asSequence();
 		const auto childIdx = std::min(parentChildren.size(), asChild ? std::numeric_limits<size_t>::max() : size_t(result.childIdx + 1));
 
-		widgetList->addWidget(data, parent["uuid"].asString(), childIdx);
-		parentChildren.insert(parentChildren.begin() + childIdx, std::move(data));
+		int i = 0;
+		for (auto& data: datas) {
+			widgetList->addWidget(data, parent["uuid"].asString(), childIdx + i);
+			parentChildren.insert(parentChildren.begin() + childIdx + i, std::move(data));
+			i++;
+		}
 
 		markModified();
 	}
 }
 
-void UIEditor::removeWidget()
+void UIEditor::deleteWidgets(const Vector<String>& uuids)
 {
-	removeWidget(curSelection);
-}
-
-void UIEditor::removeWidget(const String& id)
-{
-	auto result = uiDefinition->findUUID(id);
-	if (result.result && result.parent) {
-		auto& parentChildren = (*result.parent)["children"].asSequence();
-		std_ex::erase_if(parentChildren, [=] (const ConfigNode& n) { return &n == result.result; });
+	bool modified = false;
+	for (auto& id : uuids) {
+		auto result = uiDefinition->findUUID(id);
+		if (result.result && result.parent) {
+			auto& parentChildren = (*result.parent)["children"].asSequence();
+			std_ex::erase_if(parentChildren, [=](const ConfigNode& n) { return &n == result.result; });
+			widgetList->getList().removeItem(id);
+			modified = true;
+		}
+	}
+	if (modified) {
 		markModified();
-		widgetList->getList().removeItem(id);
 	}
 }
 
-void UIEditor::loadGameFactory()
-{
-	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
-	auto* game = project.getGameInstance();
-	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
-}
-
-void UIEditor::copySelection()
-{
-
-}
-
-void UIEditor::pasteSelection()
-{
-}
-
-void UIEditor::cutSelection()
-{
-}
-
-void UIEditor::deleteSelection()
-{
-}
 
 ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})

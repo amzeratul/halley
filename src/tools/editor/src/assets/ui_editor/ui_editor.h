@@ -31,10 +31,11 @@ namespace Halley {
 
 		bool onKeyPress(KeyboardKeyPress key) override;
 
-        void copySelection();
-        void pasteSelection();
-        void cutSelection();
-        void deleteSelection();
+        void copyWidgets(const Vector<String>& ids);
+        void cutWidgets(const Vector<String>& ids);
+        void pasteAt(const String& referenceId, bool asChild);
+        void addWidgetsAt(const String& referenceId, bool asChild, Vector<ConfigNode> datas);
+        void deleteWidgets(const Vector<String>& ids);
 
 	protected:
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
@@ -47,6 +48,7 @@ namespace Halley {
 		std::shared_ptr<UIWidgetList> widgetList;
 		std::shared_ptr<UIWidgetEditor> widgetEditor;
 		ProjectWindow& projectWindow;
+		const HalleyAPI& api;
 
 		std::shared_ptr<UIDefinition> uiDefinition;
 		std::shared_ptr<UIEditorDisplay> display;
@@ -62,11 +64,11 @@ namespace Halley {
 
 		void addWidget();
 		void addWidget(const String& widgetClass);
-		void addWidget(const String& referenceId, bool asChild, ConfigNode data);
 		void removeWidget();
-		void removeWidget(const String& id);
 
 		void loadGameFactory();
+
+		void reassignUUIDs(ConfigNode& node) const;
 	};
 
 	class ChooseUIWidgetWindow : public ChooseAssetWindow {

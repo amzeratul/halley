@@ -48,22 +48,22 @@ UITreeList& UIWidgetList::getList()
 bool UIWidgetList::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
-		uiEditor->copySelection();
+		uiEditor->copyWidgets(getSelectionUUIDs());
 		return true;
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		uiEditor->pasteSelection();
+		uiEditor->pasteAt(getSelectionUUID(), false);
 		return true;
 	}
 
 	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
-		uiEditor->cutSelection();
+		uiEditor->cutWidgets(getSelectionUUIDs());
 		return true;
 	}
 
 	if (key.is(KeyCode::Delete)) {
-		uiEditor->deleteSelection();
+		uiEditor->deleteWidgets(getSelectionUUIDs());
 		return true;
 	}
 
@@ -177,4 +177,14 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 	}
 
 	return result;
+}
+
+Vector<String> UIWidgetList::getSelectionUUIDs() const
+{
+	return list->getSelectedOptionIds();
+}
+
+String UIWidgetList::getSelectionUUID() const
+{
+	return list->getSelectedOptionId();
 }

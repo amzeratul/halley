@@ -43,5 +43,8 @@ namespace Halley {
 
         void moveItems(gsl::span<const MoveOperation> changes);
         EntryInfo getEntryInfo(const ConfigNode& data) const;
+
+        Vector<String> getSelectionUUIDs() const;
+        String getSelectionUUID() const;
     };
 }
