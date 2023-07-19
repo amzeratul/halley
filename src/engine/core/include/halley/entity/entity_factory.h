@@ -137,6 +137,8 @@ namespace Halley {
 		void setCurrentEntity(EntityId entity);
 		EntityId getCurrentEntityId() const override;
 
+		UUID getRootUUID() const;
+
 	private:
 		EntitySerializationContext entitySerializationContext;
 		std::shared_ptr<const Prefab> prefab;

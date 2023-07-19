@@ -55,7 +55,11 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Ignore non-serializables
 				continue;
 			}
-			const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.matchesUUID(toChild); });
+			const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e)
+			{
+				const auto combined = UUID::generateFromUUIDs(e.getPrefabUUID(), to.getInstanceUUID());
+			    return e.matchesUUID(toChild) || combined == toChild.getInstanceUUID();
+			});
 			if (fromIter != from.children.end()) {
 				// Potentially modified
 				auto delta = EntityDataDelta(*fromIter, toChild, options);
@@ -72,7 +76,11 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Ignore non-serializables
 				continue;
 			}
-			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.matchesUUID(fromChild); }) != to.children.end();
+			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e)
+			{
+				const auto combined = UUID::generateFromUUIDs(e.getPrefabUUID(), to.getInstanceUUID());
+			    return e.matchesUUID(fromChild) || combined == e.getInstanceUUID();
+			}) != to.children.end();
 			if (!stillExists) {
 				// Removed
 				childrenRemoved.emplace_back(fromChild.instanceUUID.isValid() ? fromChild.instanceUUID : fromChild.prefabUUID);

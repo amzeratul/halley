@@ -185,9 +185,10 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 	if (!uuid.isValid()) {
 		return EntityRef();
 	}
-	
+
+	const auto combined = UUID::generateFromUUIDs(uuid, getRootUUID());
 	for (const auto& e: entities) {
-		if (e.getInstanceUUID() == uuid || (allowPrefabUUID && e.getPrefabUUID() == uuid)) {
+ 		if (e.getInstanceUUID() == uuid || (allowPrefabUUID && (e.getPrefabUUID() == uuid || e.getInstanceUUID() == combined))) {
 			return e;
 		}
 	}
@@ -234,6 +235,18 @@ void EntityFactoryContext::setWorldPartition(uint8_t partition)
 EntityId EntityFactoryContext::getCurrentEntityId() const
 {
 	return curEntity;
+}
+
+UUID EntityFactoryContext::getRootUUID() const
+{
+	UUID rootUUID;
+	if (entityData->getType() == IEntityData::Type::Data) {
+		const auto* rootEntity = dynamic_cast<const EntityData*>(entityData);
+		if (rootEntity) {
+			rootUUID = rootEntity->getInstanceUUID();
+		}
+	}
+	return rootUUID;
 }
 
 void EntityFactoryContext::setCurrentEntity(EntityId entity)
@@ -542,7 +555,7 @@ EntityRef EntityFactory::instantiateEntity(const IEntityConcreteData& data, Enti
 	if (existing.isValid()) {
 		return existing;
 	}
-	
+
 	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), context.getWorldPartition());
 	if (networkFactory) {
 		entity.setFromNetwork(true);
@@ -603,7 +616,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	
 	const UUID& uuid = uuidSrc.value_or(delta.getInstanceUUID().value_or(UUID::generate()));
 	EntityRef entity = uuidSrc ? getWorld().findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
-	
+
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
 		// Apply delta to existing entity
 		updateEntity(entity, delta, mask);
