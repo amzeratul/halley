@@ -6,9 +6,8 @@ namespace Halley {
 
 	class UICheckbox : public UIClickable {
 	public:
-		explicit UICheckbox(String id, UIStyle style, bool checked = false);
+		explicit UICheckbox(String id, UIStyle style, bool checked = false, LocalisedString label = {});
 
-		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
         bool isChecked() const;
@@ -22,8 +21,11 @@ namespace Halley {
 
 		void readFromDataBind() override;
 
+		void setLabel(LocalisedString str);
+
 	private:
-		Sprite sprite;
+		std::shared_ptr<UIImage> image;
+		std::shared_ptr<UILabel> label;
         bool checked = false;
 	};
 }

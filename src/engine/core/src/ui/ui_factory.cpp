@@ -663,14 +663,6 @@ UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Checkbox";
-	result.iconName = "widget_icons/checkbox.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -912,14 +904,29 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	return widget;
 }
 
+UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Checkbox";
+	result.iconName = "widget_icons/checkbox.png";
+
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<checkbox>", "checkbox");
+	result.entries.emplace_back("Checked", "checked", "bool", "false");
+	result.entries.emplace_back("Label", "label", "Halley::String", "");
+	result.entries.emplace_back("Label (Loc Key)", "labelKey", "Halley::String", "");
+
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeCheckbox(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("checkbox"), styleSheet);
-	auto checked = node["checked"].asBool(false);
+	const auto checked = node["checked"].asBool(false);
+	auto label = parseLabel(node, "", "label");
 
-	return std::make_shared<UICheckbox>(id, style, checked);
+	return std::make_shared<UICheckbox>(std::move(id), std::move(style), checked, std::move(label));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)

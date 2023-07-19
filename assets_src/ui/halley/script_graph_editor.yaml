@@ -8,27 +8,18 @@ children:
   - widget: { class: widget, id: toolbarGizmo }
     children: []
     border: [0, 0, 10, 10]
-  - widget: { class: checkbox, id: autoAcquire }
+  - widget: { class: checkbox, id: autoAcquire, label: Auto Acquire }
     fill: centre
-    border: [0, 0, 2, 10]
-  - widget: { class: label, text: Auto Acquire }
-    fill: centre
-    border: [2, 0, 6, 10]
+    border: [0, 0, 4, 10]
   - widget: { class: dropdown, id: instances, size: [200, 16] }
     fill: centre
     border: [0, 0, 0, 10]
-  - widget: { class: checkbox, id: autoConnectPins }
+  - widget: { class: checkbox, id: autoConnectPins, label: Auto Connect Pins }
     fill: centre
-    border: [10, 0, 2, 10]
-  - widget: { class: label, text: Auto Connect Pins }
+    border: [6, 0, 2, 10]
+  - widget: { class: checkbox, id: variableInspectorEnabled, label: Variable Inspector }
     fill: centre
-    border: [2, 0, 6, 10]
-  - widget: { class: checkbox, id: variableInspectorEnabled }
-    fill: centre
-    border: [10, 0, 2, 10]
-  - widget: { class: label, text: Variable Inspector }
-    fill: centre
-    border: [2, 0, 6, 10]
+    border: [6, 0, 2, 10]
 - widget: { class: widget }
   proportion: 1
   children:

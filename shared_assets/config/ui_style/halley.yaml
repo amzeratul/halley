@@ -60,6 +60,8 @@ uiStyle:
     checkedHover: { img: $ui_checkbox_checked, colour: $ui_inputHover }
     disabled: { img: $ui_checkbox, colour: $ui_inputDisabled }
     checkedDisabled: { img: $ui_checkbox_checked, colour: $ui_inputDisabled }
+    label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
+    gap: 4
 
   input:
     classes: [textInput]

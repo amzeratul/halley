@@ -1,30 +1,27 @@
 #include "halley/ui/widgets/ui_checkbox.h"
 #include "halley/ui/ui_style.h"
 #include "halley/ui/ui_data_bind.h"
+#include "halley/ui/widgets/ui_image.h"
 
 using namespace Halley;
 
-UICheckbox::UICheckbox(String id, UIStyle style, bool checked)
-	: UIClickable(id, {})
+UICheckbox::UICheckbox(String id, UIStyle style, bool checked, LocalisedString labelText)
+	: UIClickable(id, {}, UISizer(UISizerType::Horizontal, style.getFloat("gap")))
 	, checked(checked)
 {
+	label = std::make_shared<UILabel>(id + "_label", style, std::move(labelText));
+	image = std::make_shared<UIImage>(id + "_image", checked ? style.getSprite("checked") : style.getSprite("normal"));
+
+	UIWidget::add(image, 1);
+	UIWidget::add(label, 0, {}, UISizerAlignFlags::Centre);
+
 	styles.emplace_back(std::move(style));
 	UICheckbox::doSetState(State::Up);
-	setMinSize(sprite.getScaledSize().abs());
-}
-
-void UICheckbox::draw(UIPainter& painter) const
-{
-	painter.draw(sprite);
 }
 
 void UICheckbox::update(Time t, bool moved)
 {
-	bool dirty = updateButton() | moved;
-	if (dirty) {
-		sprite.scaleTo(getSize()).setPos(getPosition());
-	}
-
+	updateButton();
 	UIClickable::update(t, moved);
 }
 
@@ -53,12 +50,12 @@ void UICheckbox::doSetState(State state)
 	const auto& style = styles.at(0);
 	if (isEnabled()) {
 		if (state == State::Hover || state == State::Down) {
-			sprite = checked ? style.getSprite("checkedHover") : style.getSprite("hover");
+			image->setSprite(checked ? style.getSprite("checkedHover") : style.getSprite("hover"));
 		} else {
-			sprite = checked ? style.getSprite("checked") : style.getSprite("normal");
+			image->setSprite(checked ? style.getSprite("checked") : style.getSprite("normal"));
 		}
 	} else {
-		sprite = checked ? style.getSprite("checkedDisabled") : style.getSprite("disabled");
+		image->setSprite(checked ? style.getSprite("checkedDisabled") : style.getSprite("disabled"));
 	}
 }
 
@@ -79,4 +76,9 @@ void UICheckbox::onManualControlActivate()
 void UICheckbox::readFromDataBind()
 {
 	setChecked(getDataBind()->getIntData() != 0);
+}
+
+void UICheckbox::setLabel(LocalisedString str)
+{
+	label->setText(std::move(str));
 }
