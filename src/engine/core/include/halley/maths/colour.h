@@ -275,6 +275,15 @@ namespace Halley {
 			}
 		}
 
+		constexpr Colour4& operator+=(const Colour4& c)
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return *this = Colour4(addSat(r, c.r), addSat(g, c.g), addSat(b, c.b), addSat(a, c.a));
+			} else {
+				return *this = Colour4(r + c.r, g + c.g, b + c.b, a + c.a);
+			}
+		}
+
 		[[nodiscard]] constexpr Colour4 operator*(const Colour4& c) const
 		{
 			return Colour4(r * c.r, g * c.g, b * c.b, a * c.a);
