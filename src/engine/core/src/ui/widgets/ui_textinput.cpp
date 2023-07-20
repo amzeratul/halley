@@ -387,6 +387,7 @@ void UITextInput::update(Time t, bool moved)
 	if (clickTimeout > 0) {
 		--clickTimeout;
 	}
+	timeSinceLastClick += t;
 }
 
 Vector4f UITextInput::getTextInnerBorder() const
@@ -471,18 +472,40 @@ void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		return;
 	}
 
+	if (timeSinceLastClick < 0.2) {
+		consecutiveClickCount++;
+	} else {
+		consecutiveClickCount = 0;
+	}
+	timeSinceLastClick = 0;
+
 	if (button == 0) {
 		const auto labelClickPos = mousePos - label.getPosition();
 		const auto pos = static_cast<int>(label.getCharacterAt(labelClickPos));
+		const bool shiftHeld = (keyMods & KeyMods::Shift) != KeyMods::None;
 
-		if ((keyMods & KeyMods::Shift) != KeyMods::None) {
-			const auto sel = text.getSelection();
-			text.setSelection(TextInputData::Selection::fromAnchorAndCaret(sel.getAnchor(), pos));
-		} else {
-			text.setSelection(pos);
+		if (consecutiveClickCount == 0) {
+			// Single click
+			if (shiftHeld) {
+				const auto sel = text.getSelection();
+				text.setSelection(TextInputData::Selection::fromAnchorAndCaret(sel.getAnchor(), pos));
+			} else {
+				text.setSelection(pos);
+			}
+
+			mouseHeld = true; // Hack? Should be set for all, but causes problems with selection overriding
+		} else if (consecutiveClickCount == 1) {
+			// Double click
+			text.setSelection(TextInputData::Selection(text.getWordBoundary(pos, -1), text.getWordBoundary(pos, 1)));
+		} else if (consecutiveClickCount == 2) {
+			// Triple click
+			text.setSelection(TextInputData::Selection(text.getLineBoundary(pos, -1), text.getLineBoundary(pos, 1)));
+		} else if (consecutiveClickCount == 3) {
+			// Quadruple click
+			text.setSelection(TextInputData::Selection(text.getTextBoundary(-1), text.getTextBoundary(1)));
 		}
+
 		updateCaret();
-		mouseHeld = true;
 	}
 }
 

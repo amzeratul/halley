@@ -146,5 +146,7 @@ namespace Halley {
 		bool selectAllOnClick = false;
 
 		uint8_t clickTimeout = 0;
+		Time timeSinceLastClick = 1;
+		int consecutiveClickCount = 0;
 	};
 }

@@ -88,6 +88,11 @@ namespace Halley {
 		bool isMultiline() const;
 		void setMultiline(bool enable);
 
+		int getWordBoundary(int cursorPos, int dir) const;
+		int getLineBoundary(int cursorPos, int dir) const;
+		int getPageBoundary(int cursorPos, int dir) const;
+		int getTextBoundary(int dir) const;
+
 	private:
 		StringUTF32 text;
 		Selection selection;
@@ -112,11 +117,6 @@ namespace Halley {
 		void onDelete(bool wholeWord = false);
 		void onBackspace(bool wholeWord = false);
 		void changeSelection(int dir, bool shiftHeld, ChangeSelectionMode mode);
-
-		int getWordBoundary(int cursorPos, int dir) const;
-		int getLineBoundary(int cursorPos, int dir) const;
-		int getPageBoundary(int cursorPos, int dir) const;
-		int getTextBoundary(int dir) const;
 	};
 
 }
