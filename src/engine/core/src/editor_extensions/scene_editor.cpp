@@ -301,7 +301,7 @@ Vector<EntityId> SceneEditor::createCamera()
 	return Vector<EntityId>({
 		getWorld().createEntity("editorCamera")
 			.addComponent(Transform2DComponent(Vector2f(0, 0)))
-			.addComponent(CameraComponent(1.0f, "main"))
+			.addComponent(CameraComponent(1.0f, "main", Vector2f()))
 			.getEntityId()
 	});
 }

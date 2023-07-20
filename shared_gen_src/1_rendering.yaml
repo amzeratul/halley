@@ -57,6 +57,9 @@ component:
   - id:
       type: 'Halley::String'
       displayName: Id
+  - offset:
+      type: 'Halley::Vector2f'
+      displayName: Offset
 
 ---
 
