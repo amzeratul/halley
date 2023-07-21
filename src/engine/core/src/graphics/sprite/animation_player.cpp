@@ -285,6 +285,7 @@ bool AnimationPlayer::isPlaying() const
 
 const String& AnimationPlayer::getCurrentSequenceName() const
 {
+	updateResourceIfNeeded();
 	return curSeq ? curSeq->getName() : curSeqName;
 }
 
@@ -315,6 +316,7 @@ int AnimationPlayer::getCurrentSequenceLength() const
 
 String AnimationPlayer::getCurrentDirectionName() const
 {
+	updateResourceIfNeeded();
 	return curDir ? curDir->getName() : "default";
 }
 
@@ -358,6 +360,7 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
 {
+	updateResourceIfNeeded();
 	setState(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrameN, masterAnimator.curFrameTime, hideIfNotSynchronized);
 }
 
@@ -381,6 +384,7 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 
 void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
 {
+	updateResourceIfNeeded();
 	curFrameN = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
 	dirty = false;
@@ -400,6 +404,7 @@ void AnimationPlayer::stepFrames(int amount)
 
 std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& actionPointId) const
 {
+	updateResourceIfNeeded();
 	if (animation && curSeq && curDir) {
 		return animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);
 	}
@@ -431,18 +436,23 @@ void AnimationPlayer::onSequenceDone()
 	}
 }
 
-void AnimationPlayer::updateResourceIfNeeded()
+void AnimationPlayer::updateResourceIfNeeded() const
 {
 #ifdef ENABLE_HOT_RELOAD
 	if (observer.needsUpdate()) {
-		observer.update();
-		dirId = -1;
-		curDir = nullptr;
-		curSeq = nullptr;
-		setSequence(curSeqName);
-		setDirection(curDirName);
+		const_cast<AnimationPlayer*>(this)->doUpdateResource();
 	}
 #endif
+}
+
+void AnimationPlayer::doUpdateResource()
+{
+	observer.update();
+	dirId = -1;
+	curDir = nullptr;
+	curSeq = nullptr;
+	setSequence(curSeqName);
+	setDirection(curDirName);
 }
 
 AnimationPlayerLite::AnimationPlayerLite(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)

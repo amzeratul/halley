@@ -28,7 +28,6 @@ namespace Halley
 		bool isApplyingPivot() const;
 
 		void update(Time time);
-		void updateResourceIfNeeded();
 		void updateSprite(Sprite& sprite) const;
 
 		AnimationPlayer& setMaterialOverride(std::shared_ptr<const Material> material);
@@ -67,6 +66,8 @@ namespace Halley
 
 	private:
 		void resolveSprite();
+		void updateResourceIfNeeded() const;
+		void doUpdateResource();
 
 		void onSequenceStarted();
 		void onSequenceDone();
