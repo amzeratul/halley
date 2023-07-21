@@ -425,7 +425,7 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 					if (uniformEntry.hasKey("range")) {
 						range = uniformEntry["range"].asFloatRange();
 					}
-					const auto granularity = uniformEntry["granularity"].asFloat(0);
+					const auto granularity = uniformEntry["granularity"].asFloat(1);
 					const bool editable = uniformEntry["canEdit"].asBool(true);
 					const auto autoVariable = uniformEntry["autoVariable"].asString("");
 					uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
