@@ -56,7 +56,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	// Components
 	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type), false);
 	for (auto [componentId, component]: entity) {
-		auto& reflector = world.getComponentReflector(componentId);
+		const auto& reflector = world.getReflection().getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getEntitySerializationContext(), *component));
 	}
 
@@ -372,7 +372,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 
 void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context)
 {
-	const auto& func = world.getCreateComponentFunction();
+	const auto& reflection = world.getReflection();
 	const size_t nComponents = data.getNumComponents();
 
 	if (entity.getNumComponents() == 0) {
@@ -380,7 +380,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 		for (size_t i = 0; i < nComponents; ++i) {
 			const auto& [componentName, componentData] = data.getComponent(i);
 			try {
-				func(context, componentName, entity, componentData);
+				reflection.createComponent(context, componentName, entity, componentData);
 			} catch (const std::exception& e) {
 				Logger::logError("Unable to create component \"" + componentName + "\":");
 				Logger::logException(e);
@@ -399,7 +399,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 		for (size_t i = 0; i < nComponents; ++i) {
 			const auto& [componentName, componentData] = data.getComponent(i);
 			try {
-				const auto result = func(context, componentName, entity, componentData);
+				const auto result = reflection.createComponent(context, componentName, entity, componentData);
 				if (!result.created) {
 					existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
 				}
@@ -420,15 +420,15 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 
 void EntityFactory::updateEntityComponentsDelta(EntityRef entity, const EntityDataDelta& delta, const EntityFactoryContext& context)
 {
-	const auto& func = world.getCreateComponentFunction();
+	const auto& reflection = world.getReflection();
 
 	for (const auto& [componentName, componentData]: delta.getComponentsChanged()) {
 		auto overriden = getComponentsWithPrefabDefaults(entity, context, componentData, componentName);		
-		func(context, componentName, entity, overriden ? *overriden : componentData);
+		reflection.createComponent(context, componentName, entity, overriden ? *overriden : componentData);
 	}
 
 	for (const auto& componentName: delta.getComponentsRemoved()) {
-		func(context, componentName, entity, ConfigNode(ConfigNode::DelType()));
+		reflection.createComponent(context, componentName, entity, ConfigNode(ConfigNode::DelType()));
 	}
 }
 

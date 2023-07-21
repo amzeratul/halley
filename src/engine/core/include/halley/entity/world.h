@@ -130,8 +130,7 @@ namespace Halley {
 			return addFamily(std::make_unique<FamilyImpl<T>>(*maskStorage));
 		}
 
-		CreateComponentFunction getCreateComponentFunction() const;
-		ComponentReflector& getComponentReflector(int id) const;
+		const WorldReflection& getReflection() const;
 
 		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();

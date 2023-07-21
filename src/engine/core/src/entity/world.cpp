@@ -378,17 +378,9 @@ void World::setEntityReloaded()
 	entityDirty = true;
 }
 
-CreateComponentFunction World::getCreateComponentFunction() const
+const WorldReflection& World::getReflection() const
 {
-	return [=](const EntityFactoryContext& context, const String& componentName, EntityRef& entity, const ConfigNode& componentData)
-	{
-		return reflection.createComponent(context, componentName, entity, componentData);
-	};
-}
-
-ComponentReflector& World::getComponentReflector(int id) const
-{
-	return reflection.getComponentReflector(id);
+	return reflection;
 }
 
 MaskStorage& World::getMaskStorage() const noexcept
