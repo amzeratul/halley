@@ -474,14 +474,25 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			.addBlankLine()
 			.setAccessLevel(MemberAccess::Private)
 			.addMember(MemberSchema(service.name + "*", lowerFirst(service.name), "nullptr"))
-			.setAccessLevel(MemberAccess::Protected)
-			.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
+			.setAccessLevel(MemberAccess::Protected);
+
+		if (service.optional) {
+			sysClassGen
+				.addMethodDefinition(MethodSchema(TypeSchema(service.name + "*"), {}, "tryGet" + service.name, true), "return " + lowerFirst(service.name) + ";");
+		} else {
+			sysClassGen
+				.addMethodDefinition(MethodSchema(TypeSchema(service.name + "&"), {}, "get" + service.name, true), "return *" + lowerFirst(service.name) + ";");
+		}
 	}
 
 	// Construct initBase();
 	Vector<String> initBaseMethodBody;
 	for (auto& service: system.services) {
-		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
+		if (service.optional) {
+			initBaseMethodBody.push_back(lowerFirst(service.name) + " = doGetWorld().template tryGetService<" + service.name + ">(getName());");
+		} else {
+			initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
+		}
 	}
 	initBaseMethodBody.push_back("invokeInit<T>(static_cast<T*>(this));");
 	for (auto& family: system.families) {

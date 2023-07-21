@@ -65,6 +65,10 @@ namespace Halley
 	{
 	public:
 		String name;
+		bool optional = false;
+
+		ServiceSchema() = default;
+		ServiceSchema(const String& value);
 	};
 
 	enum class CodegenLanguage

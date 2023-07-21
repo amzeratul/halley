@@ -63,28 +63,32 @@ namespace Halley {
 
 		Service& addService(std::shared_ptr<Service> service);
 		void loadSystems(const ConfigNode& config);
-
-		template <typename T>
-		T& getService()
-		{
-			return getService<T>("");
-		}
 		
 		template <typename T>
-		T& getService(const String& systemName)
+		T* tryGetService(std::string_view systemName = "")
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
 
 			const auto serviceName = typeid(T).name();
-			const auto rawService = tryGetService(serviceName);
+			const auto rawService = doTryGetService(serviceName);
 			if (!rawService) {
 				if constexpr (std::is_default_constructible_v<T>) {
-					return dynamic_cast<T&>(addService(std::make_shared<T>()));
+					return dynamic_cast<T*>(&addService(std::make_shared<T>()));
 				} else {
-					throw Exception(String("Service \"") + serviceName + "\" required by \"" + (systemName.isEmpty() ? "" : (systemName + "System")) + "\" not found, and it cannot be default constructed.", HalleyExceptions::Entity);
+					return nullptr;
 				}
 			}
-			return *dynamic_cast<T*>(rawService);
+			return dynamic_cast<T*>(rawService);
+		}
+		
+		template <typename T>
+		T& getService(std::string_view systemName = "")
+		{
+			if (T* service = tryGetService<T>(systemName)) {
+				return *service;
+			}
+			const auto serviceName = typeid(T).name();
+			throw Exception(String("Service \"") + serviceName + "\" required by \"" + (systemName.empty() ? "" : (String(systemName) + "System")) + "\" not found, and it cannot be default constructed.", HalleyExceptions::Entity);
 		}
 
 		EntityRef createEntity(String name = "", std::optional<EntityRef> parent = {});
@@ -204,7 +208,7 @@ namespace Halley {
 		NOINLINE Family& addFamily(std::unique_ptr<Family> family) noexcept;
 		void onAddFamily(Family& family) noexcept;
 
-		Service* tryGetService(const String& name) const;
+		Service* doTryGetService(const String& name) const;
 
 		const Vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 

@@ -25,6 +25,17 @@ MessageReferenceSchema::MessageReferenceSchema(String name, const String& parame
 	}
 }
 
+ServiceSchema::ServiceSchema(const String& value)
+{
+	auto split = value.split(' ', 2);
+	if (!split.empty()) {
+		name = split[0];
+	}
+	if (split.size() >= 2) {
+		optional = split[1] == "optional";
+	}
+}
+
 SystemSchema::SystemSchema() {}
 
 SystemSchema::SystemSchema(YAML::Node node, bool generate)
@@ -151,9 +162,7 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 
 	if (node["services"].IsDefined()) {
 		for (auto serviceEntry : node["services"]) {
-			ServiceSchema service;
-			service.name = serviceEntry.as<std::string>();
-			services.push_back(service);
+			services.push_back(ServiceSchema(serviceEntry.as<std::string>()));
 		}
 	}
 }

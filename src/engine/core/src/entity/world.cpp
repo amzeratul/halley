@@ -160,7 +160,7 @@ void World::loadSystems(const ConfigNode& root)
 	}
 }
 
-Service* World::tryGetService(const String& name) const
+Service* World::doTryGetService(const String& name) const
 {
 	const auto iter = services.find(name);
 	if (iter == services.end()) {
