@@ -20,11 +20,12 @@
 
 using namespace Halley;
 
-ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection)
+ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost)
 	: api(api)
 	, world(world)
 	, resources(resources)
 	, nodeTypeCollection(std::move(nodeTypeCollection))
+	, isHost(isHost)
 {
 	serializationContext.entityContext = this;
 }
