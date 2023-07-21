@@ -20,11 +20,11 @@
 
 using namespace Halley;
 
-ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection)
+ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection)
 	: api(api)
 	, world(world)
 	, resources(resources)
-	, nodeTypeCollection(nodeTypeCollection)
+	, nodeTypeCollection(std::move(nodeTypeCollection))
 {
 	serializationContext.entityContext = this;
 }
@@ -42,7 +42,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 	currentState = &graphState;
 	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(nodeTypeCollection);
+	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
 	auto& threads = graphState.getThreads();
@@ -188,7 +188,7 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 
 	currentState = &graphState;
 	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(nodeTypeCollection);
+	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
 	doTerminateState();
@@ -675,6 +675,11 @@ gsl::span<const ConfigNode> ScriptEnvironment::getStartParams() const
 	return currentState ? currentState->getStartParams() : gsl::span<const ConfigNode>();
 }
 
+const ScriptNodeTypeCollection& ScriptEnvironment::getNodeTypeCollection() const
+{
+	return *nodeTypeCollection;
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;
@@ -682,7 +687,7 @@ IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 
 void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
 {
-	graph.assignTypes(nodeTypeCollection);
+	graph.assignTypes(*nodeTypeCollection);
 }
 
 ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN)
@@ -794,7 +799,7 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 	currentGraph = graphState.getScriptGraphPtr();
 	currentState = &graphState;
 	currentEntityVariables = &entityVariables;
-	currentGraph->assignTypes(nodeTypeCollection);
+	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
 	ConfigNode result = [&] () -> ConfigNode {

@@ -91,7 +91,7 @@ namespace Halley {
 
         using ScriptTargetRetriever = std::function<EntityId(const String&)>;
 
-    	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
+    	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
@@ -163,6 +163,8 @@ namespace Halley {
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
 
         gsl::span<const ConfigNode> getStartParams() const;
+
+        const ScriptNodeTypeCollection& getNodeTypeCollection() const;
         
 		template <typename T>
 		T& getInterface()
@@ -187,7 +189,7 @@ namespace Halley {
     	World& world;
     	Resources& resources;
         HashMap<EntityId, std::shared_ptr<InputVirtual>> inputDevices;
-    	const ScriptNodeTypeCollection& nodeTypeCollection;
+    	std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection;
         bool isHost = false;
         bool inputEnabled = true;
 
