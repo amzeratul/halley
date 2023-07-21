@@ -1,21 +1,19 @@
 #pragma once
 
 #include <memory>
+#include "ecs_reflection.h"
+#include "ecs_reflection_impl.h"
 
 namespace Halley {
-    class System;
-	class Message;
-    class String;
-    class ConfigNode;
-    class CreateComponentFunctionResult;
-	class ComponentReflector;
-	class EntityFactoryContext;
+	class CodegenFunctions {
+	public:
+		virtual ~CodegenFunctions() = default;
 
-	std::unique_ptr<System> createSystem(String name);
-	CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, const String& name, EntityRef& entity, const ConfigNode& componentData);
-	ComponentReflector& getComponentReflector(int componentId);
-	std::unique_ptr<Message> createMessage(int msgId);
-	std::unique_ptr<Message> createMessageByName(const String& msgName);
-	std::unique_ptr<SystemMessage> createSystemMessage(int msgId);
-	std::unique_ptr<SystemMessage> createSystemMessageByName(const String& msgName);
+		virtual Vector<SystemReflector> makeSystemReflectors() = 0;
+		virtual Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() = 0;
+		virtual Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() = 0;
+		virtual Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() = 0;
+	};
+
+	std::unique_ptr<CodegenFunctions> createCodegenFunctions();
 }

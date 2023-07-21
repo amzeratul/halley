@@ -35,12 +35,7 @@ namespace Halley
 	
 	template <typename T> constexpr static void InitEntities()
 	{
-		CreateEntityFunctions::getCreateComponent() = createComponent;
-		CreateEntityFunctions::getCreateSystem() = createSystem;
-		CreateEntityFunctions::getCreateMessage() = createMessage;
-		CreateEntityFunctions::getCreateMessageByName() = createMessageByName;
-		CreateEntityFunctions::getCreateSystemMessage() = createSystemMessage;
-		CreateEntityFunctions::getCreateSystemMessageByName() = createSystemMessageByName;
+		CreateEntityFunctions::getCodegenFunctions() = createCodegenFunctions();
 	}
 }
 

@@ -14,6 +14,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/uuid.h"
 #include "halley/api/halley_api.h"
+#include "halley/entity/world_reflection.h"
 #include "halley/graphics/render_context.h"
 #include "halley/support/logger.h"
 #include "halley/support/profiler.h"
@@ -60,16 +61,7 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto reflection = WorldReflection {
-		CreateEntityFunctions::getCreateComponent(),
-		CreateEntityFunctions::getCreateMessage(),
-		CreateEntityFunctions::getCreateMessageByName(),
-		CreateEntityFunctions::getCreateSystemMessage(),
-		CreateEntityFunctions::getCreateSystemMessageByName(),
-		CreateEntityFunctions::getCreateSystem()
-	};
-
-	auto world = std::make_unique<World>(api, resources, std::move(reflection));
+	auto world = std::make_unique<World>(api, resources, WorldReflection(*CreateEntityFunctions::getCodegenFunctions()));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig);
 	return world;
@@ -386,9 +378,17 @@ void World::setEntityReloaded()
 	entityDirty = true;
 }
 
-const CreateComponentFunction& World::getCreateComponentFunction() const
+CreateComponentFunction World::getCreateComponentFunction() const
 {
-	return reflection.createComponent;
+	return [=](const EntityFactoryContext& context, const String& componentName, EntityRef& entity, const ConfigNode& componentData)
+	{
+		return reflection.createComponent(context, componentName, entity, componentData);
+	};
+}
+
+ComponentReflector& World::getComponentReflector(int id) const
+{
+	return reflection.getComponentReflector(id);
 }
 
 MaskStorage& World::getMaskStorage() const noexcept
@@ -810,7 +810,7 @@ std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const st
 
 std::unique_ptr<Message> World::deserializeMessage(const String& messageName, const ConfigNode& data)
 {
-	auto msg = reflection.createMessageByName(messageName);
+	auto msg = reflection.createMessage(messageName);
 
 	EntitySerializationContext context;
 	context.resources = &resources;
@@ -832,7 +832,7 @@ std::unique_ptr<SystemMessage> World::deserializeSystemMessage(int msgId, gsl::s
 
 std::unique_ptr<SystemMessage> World::deserializeSystemMessage(const String& messageName, const ConfigNode& data)
 {
-	auto msg = reflection.createSystemMessageByName(messageName);
+	auto msg = reflection.createSystemMessage(messageName);
 
 	EntitySerializationContext context;
 	context.resources = &resources;

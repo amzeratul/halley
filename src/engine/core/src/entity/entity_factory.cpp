@@ -3,7 +3,7 @@
 #include <cassert>
 
 
-#include "halley/entity/component_reflector.h"
+#include "halley/entity/ecs_reflection.h"
 #include "halley/entity/entity_scene.h"
 #include "halley/support/logger.h"
 #include "halley/entity/entity_data_instanced.h"
@@ -56,7 +56,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	// Components
 	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type), false);
 	for (auto [componentId, component]: entity) {
-		auto& reflector = getComponentReflector(componentId);
+		auto& reflector = world.getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getEntitySerializationContext(), *component));
 	}
 

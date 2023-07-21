@@ -130,6 +130,7 @@ set(SOURCES
         "src/entity/prefab_scene_data.cpp"
         "src/entity/system.cpp"
         "src/entity/world.cpp"
+        "src/entity/world_reflection.cpp"
         "src/entity/world_scene_data.cpp"
 
         "src/entity/components/transform_2d_component.cpp"
@@ -517,9 +518,10 @@ set(HEADERS
         "include/halley/entity/halley_entity.h"
 
         "include/halley/entity/component.h"
-        "include/halley/entity/component_reflector.h"
         "include/halley/entity/create_functions.h"
         "include/halley/entity/data_interpolator.h"
+        "include/halley/entity/ecs_reflection.h"
+        "include/halley/entity/ecs_reflection_impl.h"
         "include/halley/entity/entity.h"
         "include/halley/entity/entity.natvis"
         "include/halley/entity/entity_data.h"
@@ -544,6 +546,7 @@ set(HEADERS
         "include/halley/entity/system_message.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"
+        "include/halley/entity/world_reflection.h"
         "include/halley/entity/world_scene_data.h"
 
         "include/halley/entity/components/transform_2d_component.h"

@@ -18,6 +18,7 @@
 #include <halley/data_structures/memory_pool.h>
 
 #include "system_message.h"
+#include "world_reflection.h"
 
 namespace Halley {
 	class SystemMessage;
@@ -39,15 +40,6 @@ namespace Halley {
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
 		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) = 0;
 		virtual bool isHost() = 0;
-	};
-
-	struct WorldReflection {
-		CreateComponentFunction createComponent;
-		CreateMessageFunction createMessage;
-		CreateMessageByNameFunction createMessageByName;
-		CreateSystemMessageFunction createSystemMessage;
-		CreateSystemMessageByNameFunction createSystemMessageByName;
-		CreateSystemFunction createSystem;
 	};
 
 	class World
@@ -138,7 +130,8 @@ namespace Halley {
 			return addFamily(std::make_unique<FamilyImpl<T>>(*maskStorage));
 		}
 
-		const CreateComponentFunction& getCreateComponentFunction() const;
+		CreateComponentFunction getCreateComponentFunction() const;
+		ComponentReflector& getComponentReflector(int id) const;
 
 		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();

@@ -100,191 +100,76 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		registryCpp.push_back("System* halleyCreate" + sys.name + "System();");
 	}
 
-	// System factory
+	// GameCodegenFunctions class
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"",
-		"using SystemFactoryPtr = System* (*)();",
-		"using SystemFactoryMap = HashMap<String, SystemFactoryPtr>;",
-		"",
-		"static SystemFactoryMap makeSystemFactories() {",
-		"	SystemFactoryMap result;"
+		"class GameCodegenFunctions : public CodegenFunctions {",
+		"public:",
+		"	Vector<SystemReflector> makeSystemReflectors() override {",
+		"		Vector<SystemReflector> result;"
 	});
-
+	registryCpp.push_back("		result.reserve(" + toString(systems.size()) + ");");
 	for (auto& sys : systems) {
-		registryCpp.push_back("	result[\"" + sys.name + "System\"] = &halleyCreate" + sys.name + "System;");
+		registryCpp.push_back("		result.push_back(SystemReflector(\"" + sys.name + "System\", &halleyCreate" + sys.name + "System));");
 	}
-
 	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
-	});
-
-	// Component factory
-	registryCpp.insert(registryCpp.end(), {
+		"		return result;",
+		"	}"
 		"",
-		"",
-		"using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(const EntityFactoryContext&, EntityRef&, const ConfigNode&)>;",
-		"using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;",
-		"",
-		"static ComponentFactoryMap makeComponentFactories() {",
-		"	ComponentFactoryMap result;"
-	});
-
-	for (auto& comp : components) {
-		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<" + comp.name + "Component>(e, node); };");
-	}
-
-	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
 	});
 
 	// Component reflectors
 	registryCpp.insert(registryCpp.end(), {
-		"",
-		"",
-		"using ComponentReflectorList = Vector<std::unique_ptr<ComponentReflector>>;",
-		"",
-		"static ComponentReflectorList makeComponentReflectors() {",
-		"	ComponentReflectorList result;"
+		"	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {",
+		"		Vector<std::unique_ptr<ComponentReflector>> result;"
 	});
-
-	registryCpp.push_back("	result.reserve(" + toString(components.size()) + ");");
-
+	registryCpp.push_back("		result.reserve(" + toString(components.size()) + ");");
 	for (auto& comp : components) {
-		registryCpp.push_back("	result.push_back(std::make_unique<ComponentReflectorImpl<" + comp.name + "Component>>());");
+		registryCpp.push_back("		result.push_back(std::make_unique<ComponentReflectorImpl<" + comp.name + "Component>>());");
 	}
-
 	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
+		"		return result;",
+		"	}"
+		"",
 	});
 
-	// Message factories
+	// Message reflectors
 	registryCpp.insert(registryCpp.end(), {
-		"",
-		"",
-		"using MessageFactory = std::function<std::unique_ptr<Halley::Message>()>;",
-		"using MessageFactoryList = Vector<MessageFactory>;",
-		"",
-		"static MessageFactoryList makeMessageFactories() {",
-		"	MessageFactoryList result;"
+		"	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {",
+		"		Vector<std::unique_ptr<MessageReflector>> result;"
 	});
-
-	registryCpp.push_back("	result.reserve(" + toString(messages.size()) + ");");
-
+	registryCpp.push_back("		result.reserve(" + toString(messages.size()) + ");");
 	for (auto& msg : messages) {
-		registryCpp.push_back("	result.push_back([] () { return std::make_unique<" + msg.name + "Message>(); });");
+		registryCpp.push_back("		result.push_back(std::make_unique<MessageReflectorImpl<" + msg.name + "Message>>());");
 	}
-
 	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
+		"		return result;",
+		"	}"
+		"",
 	});
 
-	// System Message factories
+	// System Message reflectors
 	registryCpp.insert(registryCpp.end(), {
-		"",
-		"",
-		"using SystemMessageFactory = std::function<std::unique_ptr<Halley::SystemMessage>()>;",
-		"using SystemMessageFactoryList = Vector<SystemMessageFactory>;",
-		"",
-		"static SystemMessageFactoryList makeSystemMessageFactories() {",
-		"	SystemMessageFactoryList result;"
+		"	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {",
+		"		Vector<std::unique_ptr<SystemMessageReflector>> result;"
 	});
-
-	registryCpp.push_back("	result.reserve(" + toString(systemMessages.size()) + ");");
-
-	for (auto& sysMsg : systemMessages) {
-		registryCpp.push_back("	result.push_back([] () { return std::make_unique<" + sysMsg.name + "SystemMessage>(); });");
+	registryCpp.push_back("		result.reserve(" + toString(systemMessages.size()) + ");");
+	for (auto& msg : systemMessages) {
+		registryCpp.push_back("		result.push_back(std::make_unique<SystemMessageReflectorImpl<" + msg.name + "SystemMessage>>());");
 	}
-
 	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
+		"		return result;",
+		"	}",
+		"};",
 	});
 
-	// Message names
-	registryCpp.insert(registryCpp.end(), {
-		"",
-		"",
-		"using MessageNames = Halley::HashMap<Halley::String, size_t>;",
-		"",
-		"static MessageNames makeMessageNames() {",
-		"	MessageNames result;"
-	});
-
-	for (size_t i = 0; i < messages.size(); ++i) {
-		registryCpp.push_back("	result[\"" + messages[i].name + "\"] = " + toString(i) + ";");
-	}
-
-	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
-	});
-
-	// System message names
-	registryCpp.insert(registryCpp.end(), {
-		"",
-		"static MessageNames makeSystemMessageNames() {",
-		"	MessageNames result;"
-	});
-
-	for (size_t i = 0; i < systemMessages.size(); ++i) {
-		registryCpp.push_back("	result[\"" + systemMessages[i].name + "\"] = " + toString(i) + ";");
-	}
-
-	registryCpp.insert(registryCpp.end(), {
-		"	return result;",
-		"}"
-	});
-	
-	// Create system and component methods
+	// Create interface method
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"namespace Halley {",
-		"	std::unique_ptr<System> createSystem(String name) {",
-		"		static SystemFactoryMap factories = makeSystemFactories();",
-		"		auto result = factories.find(name);",
-		"		if (result == factories.end()) {",
-		"			throw Exception(\"System not found: \" + name, HalleyExceptions::Entity);",
-		"		}",
-		"		return std::unique_ptr<System>(result->second());",
-		"	}",
-		"",
-		"	CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
-		"		static ComponentFactoryMap factories = makeComponentFactories();",
-		"		auto result = factories.find(name);",
-		"		if (result == factories.end()) {",
-		"			throw Exception(\"Component not found: \" + name, HalleyExceptions::Entity);",
-		"		}",
-		"		return result->second(context, entity, componentData);",
-		"	}",
-		"",
-		"	std::unique_ptr<Halley::Message> createMessage(int msgId) {",
-		"		static MessageFactoryList factories = makeMessageFactories();",
-		"		return factories.at(msgId)();",
-		"	}",
-		"",
-		"	std::unique_ptr<Halley::Message> createMessageByName(const Halley::String& msgName) {",
-		"		static MessageNames names = makeMessageNames();",
-		"		return createMessage(static_cast<int>(names.at(msgName)));",
-		"	}",
-		"",
-		"	std::unique_ptr<Halley::SystemMessage> createSystemMessage(int msgId) {",
-		"		static SystemMessageFactoryList factories = makeSystemMessageFactories();",
-		"		return factories.at(msgId)();",
-		"	}",
-		"",
-		"	std::unique_ptr<Halley::SystemMessage> createSystemMessageByName(const Halley::String& msgName) {",
-		"		static MessageNames names = makeSystemMessageNames();",
-		"		return createSystemMessage(static_cast<int>(names.at(msgName)));",
-		"	}",
-		"",
-		"	ComponentReflector& getComponentReflector(int componentId) {",
-		"		static ComponentReflectorList reflectors = makeComponentReflectors();",
-		"		return *reflectors.at(componentId);",
+		"	std::unique_ptr<CodegenFunctions> createCodegenFunctions() {",
+		"		return std::make_unique<GameCodegenFunctions>();",
 		"	}",
 		"}"
 	});
@@ -799,7 +684,8 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 	auto gen = CPPClassGenerator(message.name + suffix, "Halley::" + suffix, MemberAccess::Public, true)
 		.setAccessLevel(MemberAccess::Public);
 
-	gen.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)));
+	gen.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
+		.addMember(MemberSchema(TypeSchema("char*", true, true, true), "messageName", message.name));
 
 	if (sysMessage) {
 		gen.addMember(MemberSchema(TypeSchema("Halley::SystemMessageDestination", false, true, true), "messageDestination", "Halley::SystemMessageDestination::" + upperFirst(toString(sysMessage->destination))))
