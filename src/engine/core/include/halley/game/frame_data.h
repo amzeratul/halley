@@ -8,9 +8,8 @@
 namespace Halley {
 	class ScriptState;
 
-	class DebugLine
+	struct DebugLine
 	{
-	public:
 		DebugLine(Vector<Vector2f> points, Colour4f colour, float thickness, bool loop)
 			: points(std::move(points))
 			, colour(colour)

@@ -14,6 +14,12 @@ type:
 
 type:
   name: SessionService
-  include: "src/services/session_service.h"
+  include: "halley/entity/services/session_service.h"
+
+---
+
+type:
+  name: DevService
+  include: "halley/entity/services/dev_service.h"
 
 ...

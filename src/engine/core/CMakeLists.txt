@@ -368,6 +368,8 @@ set(SOURCES
         "src/lua/lua_reference.cpp"
         "src/lua/lua_stack_ops.cpp"
         "src/lua/lua_state.cpp"
+
+        "src/storage/options.cpp"
         )
 
 set(HEADERS
@@ -863,6 +865,8 @@ set(HEADERS
         "include/halley/lua/lua_reference.h"
         "include/halley/lua/lua_stack_ops.h"
         "include/halley/lua/lua_state.h"
+
+        "include/halley/storage/options.h"
         
         "src/prec.h"
         )
