@@ -33,7 +33,7 @@ std::unique_ptr<Stage> Game::makeStage(StageID)
 	return {};
 }
 
-std::unique_ptr<IFrameData> Game::makeFrameData()
+std::unique_ptr<BaseFrameData> Game::makeFrameData()
 {
 	return std::make_unique<EmptyFrameData>();
 }

@@ -516,7 +516,7 @@ void SceneEditor::saveCameraPos()
 void SceneEditor::pushThreadFrameData() const
 {
 	if (curFrameDataDepth == 0) {
-		IFrameData::setThreadFrameData(curFrameData.get());
+		BaseFrameData::setThreadFrameData(curFrameData.get());
 	}
 	++curFrameDataDepth;
 }
@@ -526,7 +526,7 @@ void SceneEditor::popThreadFrameData() const
 	assert(curFrameDataDepth > 0);
 	--curFrameDataDepth;
 	if (curFrameDataDepth == 0) {
-		IFrameData::setThreadFrameData(nullptr);
+		BaseFrameData::setThreadFrameData(nullptr);
 	}
 }
 
@@ -690,7 +690,7 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	}
 }
 
-std::unique_ptr<IFrameData> SceneEditor::makeFrameData()
+std::unique_ptr<BaseFrameData> SceneEditor::makeFrameData()
 {
 	return {};
 }

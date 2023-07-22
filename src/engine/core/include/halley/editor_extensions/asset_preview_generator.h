@@ -8,7 +8,7 @@
 #include "halley/text/i18n.h"
 
 namespace Halley {
-	class IFrameData;
+	class BaseFrameData;
 	class Game;
 	class EntityFactory;
 	class Image;
@@ -18,7 +18,7 @@ namespace Halley {
 		Rect4i rect;
 		float zoom;
 		String name;
-		std::unique_ptr<IFrameData> frameData;
+		std::unique_ptr<BaseFrameData> frameData;
 	};
 
 	struct AssetPreviewData {

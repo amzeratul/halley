@@ -42,7 +42,7 @@ namespace Halley
 		virtual void endGame();
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
-		virtual std::unique_ptr<IFrameData> makeFrameData();
+		virtual std::unique_ptr<BaseFrameData> makeFrameData();
 
 		virtual double getTargetFPS() const;
 		virtual double getTargetBackgroundFPS() const;

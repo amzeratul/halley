@@ -7,7 +7,7 @@
 #include "halley/graphics/text/text_renderer.h"
 
 namespace Halley {
-	class IFrameData;
+	class BaseFrameData;
 	struct SceneEditorOutputState;
 	class EntityRef;
 	class World;
@@ -113,7 +113,7 @@ namespace Halley {
     	Vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
-		virtual std::unique_ptr<IFrameData> makeFrameData();
+		virtual std::unique_ptr<BaseFrameData> makeFrameData();
 
 	private:
 		struct CameraAnimation {
@@ -158,7 +158,7 @@ namespace Halley {
 
 		AssetPreviewGenerator* assetPreviewGenerator = nullptr;
 
-		std::unique_ptr<IFrameData> curFrameData;
+		std::unique_ptr<BaseFrameData> curFrameData;
 		mutable uint8_t curFrameDataDepth = 0;
 
     	void moveCameraTo2D(Vector2f pos);

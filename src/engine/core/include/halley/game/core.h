@@ -123,8 +123,8 @@ namespace Halley
 		bool pendingStageTransition = false;
 		Time fixedUpdateTime = 0;
 
-		std::unique_ptr<IFrameData> frameDataUpdate;
-		std::unique_ptr<IFrameData> frameDataRender;
+		std::unique_ptr<BaseFrameData> frameDataUpdate;
+		std::unique_ptr<BaseFrameData> frameDataRender;
 
 		bool initialized = false;
 		bool running = true;

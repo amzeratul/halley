@@ -29,22 +29,22 @@ void Stage::onRender(RenderContext& rc) const
 {
 }
 
-void Stage::onStartFrame(Time dt, IFrameData& frameData)
+void Stage::onStartFrame(Time dt, BaseFrameData& frameData)
 {
 	onStartFrame(dt);
 }
 
-void Stage::onFixedUpdate(Time dt, IFrameData& frameData)
+void Stage::onFixedUpdate(Time dt, BaseFrameData& frameData)
 {
 	onFixedUpdate(dt);
 }
 
-void Stage::onVariableUpdate(Time dt, IFrameData& frameData)
+void Stage::onVariableUpdate(Time dt, BaseFrameData& frameData)
 {
 	onVariableUpdate(dt);
 }
 
-void Stage::onRender(RenderContext& rc, IFrameData& frameData) const
+void Stage::onRender(RenderContext& rc, BaseFrameData& frameData) const
 {
 	onRender(rc);
 }
@@ -59,7 +59,7 @@ bool Stage::onQuitRequested()
 	return true;
 }
 
-std::unique_ptr<IFrameData> Stage::makeFrameData()
+std::unique_ptr<BaseFrameData> Stage::makeFrameData()
 {
 	return game->makeFrameData();
 }

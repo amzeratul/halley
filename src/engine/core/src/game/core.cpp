@@ -415,18 +415,18 @@ void Core::tickFrame(Time time)
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
-			IFrameData::setThreadFrameData(frameDataUpdate.get());
+			BaseFrameData::setThreadFrameData(frameDataUpdate.get());
 			update(time);
 		});
 		if (frameDataRender) {
 			assert(curStageFrames > 0);
-			IFrameData::setThreadFrameData(frameDataRender.get());
+			BaseFrameData::setThreadFrameData(frameDataRender.get());
 			render();
 			waitForRenderEnd();
 		}
 		updateTask.wait();
 	} else {
-		IFrameData::setThreadFrameData(frameDataUpdate.get());
+		BaseFrameData::setThreadFrameData(frameDataUpdate.get());
 		update(time);
 		if (isRunning()) { // Check again, it might have changed
 			render();
@@ -434,7 +434,7 @@ void Core::tickFrame(Time time)
 		}
 	}
 
-	IFrameData::setThreadFrameData(nullptr);
+	BaseFrameData::setThreadFrameData(nullptr);
 
 	curStageFrames++;
 }
@@ -806,4 +806,4 @@ Future<std::unique_ptr<RenderSnapshot>> Core::requestRenderSnapshot()
 	return promise.getFuture();
 }
 
-thread_local IFrameData* IFrameData::threadInstance = nullptr;
+thread_local BaseFrameData* BaseFrameData::threadInstance = nullptr;

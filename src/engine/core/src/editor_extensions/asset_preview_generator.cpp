@@ -105,10 +105,10 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 	return Concurrent::execute(previewExecutor->getQueue(), [this, id, size] () -> AssetPreviewInfo {
 		// Frame data
 		auto frameData = game.makeFrameData();
-		IFrameData::setThreadFrameData(frameData.get());
+		BaseFrameData::setThreadFrameData(frameData.get());
 		auto guard = ScopedGuard([&] ()
 		{
-			IFrameData::setThreadFrameData(nullptr);
+			BaseFrameData::setThreadFrameData(nullptr);
 		});
 		
 		// Create world
@@ -158,9 +158,9 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 	{
 		auto guard = ScopedGuard([&] ()
 		{
-			IFrameData::setThreadFrameData(nullptr);
+			BaseFrameData::setThreadFrameData(nullptr);
 		});
-		IFrameData::setThreadFrameData(info.frameData.get());
+		BaseFrameData::setThreadFrameData(info.frameData.get());
 		auto rc2 = curRC->with(*worldRenderTarget);
 		return renderAssetPreview(info, rc2);
 	});

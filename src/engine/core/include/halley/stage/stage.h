@@ -27,16 +27,16 @@ namespace Halley
 		virtual void onVariableUpdate(Time dt);
 		virtual void onRender(RenderContext& rc) const;
 
-		virtual void onStartFrame(Time dt, IFrameData& frameData);
-		virtual void onFixedUpdate(Time dt, IFrameData& frameData);
-		virtual void onVariableUpdate(Time dt, IFrameData& frameData);
-		virtual void onRender(RenderContext& rc, IFrameData& frameData) const;
+		virtual void onStartFrame(Time dt, BaseFrameData& frameData);
+		virtual void onFixedUpdate(Time dt, BaseFrameData& frameData);
+		virtual void onVariableUpdate(Time dt, BaseFrameData& frameData);
+		virtual void onRender(RenderContext& rc, BaseFrameData& frameData) const;
 
 		const HalleyAPI& getAPI() const;
 
 		virtual bool onQuitRequested(); // Return true if OK to quit
 
-		virtual std::unique_ptr<IFrameData> makeFrameData();
+		virtual std::unique_ptr<BaseFrameData> makeFrameData();
 		virtual bool hasMultithreadedRendering() const;
 
 	protected:
