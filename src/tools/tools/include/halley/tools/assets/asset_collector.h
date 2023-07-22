@@ -10,7 +10,8 @@ namespace Halley {
 		AssetCollector(const ImportingAsset& asset, const Path& dstDir, const Vector<Path>& assetsSrc, ProgressReporter reporter);
 
 		void output(const String& name, AssetType type, const Bytes& data, std::optional<Metadata> metadata, const String& platform, const Path& primaryInputFile) override;
-		void output(const Path& path, gsl::span<const gsl::byte> data) override;
+		void output(const String& name, AssetType type, const Path& path, gsl::span<const gsl::byte> data) override;
+		void output(const String& name, AssetType type, const Path& path) override;
 
 		void addAdditionalAsset(ImportingAsset&& asset) override;
 		bool reportProgress(float progress, const String& label) override;
@@ -18,7 +19,7 @@ namespace Halley {
 		Bytes readAdditionalFile(const Path& filePath) override;
 
 		Vector<ImportingAsset> collectAdditionalAssets();
-		Vector<std::pair<Path, Bytes>> collectOutFiles();
+		Vector<std::pair<Path, std::optional<Bytes>>> collectOutFiles();
 		const Vector<AssetResource>& getAssets() const;
 		const Vector<TimestampedPath>& getAdditionalInputs() const;
 		
@@ -31,6 +32,8 @@ namespace Halley {
 		Vector<AssetResource> assets;
 		Vector<ImportingAsset> additionalAssets;
 		Vector<TimestampedPath> additionalInputs;
-		Vector<std::pair<Path, Bytes>> outFiles;
+		Vector<std::pair<Path, std::optional<Bytes>>> outFiles;
+
+		AssetResource& getAsset(const String& name, AssetType type, const Path& primaryInputFile = {});
 	};
 }

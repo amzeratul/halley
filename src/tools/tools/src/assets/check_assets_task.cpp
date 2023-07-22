@@ -93,8 +93,10 @@ void CheckAssetsTask::run()
 
 			if (hasCodeGen) {
 				if (curPendingReimport == ReimportType::Codegen) {
+					using namespace std::chrono_literals;
 					FileSystem::remove(project.getGenPath());
 					FileSystem::remove(project.getSharedGenPath());
+					std::this_thread::sleep_for(1s);
 					project.getCodegenDatabase().clear();
 					project.getSharedCodegenDatabase().clear();
 				}

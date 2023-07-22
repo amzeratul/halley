@@ -91,9 +91,10 @@ void Codegen::writeFiles(const Path& outputDir, const Path& prefix, const CodeGe
 		const auto data = gsl::span<const char>(finalData.data(), finalData.size());
 		if (needsToWriteFile(filePath, data, f.stub)) {
 			const auto data2 = gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(data.data()), data.size());
-			collector->output(prefix / f.fileName, data2);
+			collector->output(":codegen:" + f.fileName, AssetType::BinaryFile, prefix / f.fileName, data2);
 			stats.written++;
 		} else {
+			collector->output(":codegen:" + f.fileName, AssetType::BinaryFile, prefix / f.fileName);
 			stats.skipped++;
 		}
 		if (!f.stub) {

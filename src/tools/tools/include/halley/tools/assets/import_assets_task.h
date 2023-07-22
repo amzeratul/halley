@@ -16,7 +16,7 @@ namespace Halley
 	public:
 		struct ImportResult {
 			Vector<AssetResource> out;
-			Vector<std::pair<Path, Bytes>> outFiles;
+			Vector<std::pair<Path, std::optional<Bytes>>> outFiles;
 			Vector<TimestampedPath> additionalInputs;
 			bool success = false;
 			String errorMsg;

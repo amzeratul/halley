@@ -13,7 +13,7 @@ AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, 
 	: asset(asset)
 	, dstDir(dstDir)
 	, assetsSrc(assetsSrc)
-	, reporter(reporter)
+	, reporter(std::move(reporter))
 {}
 
 void AssetCollector::output(const String& name, AssetType type, const Bytes& data, std::optional<Metadata> metadata, const String& platform, const Path& primaryInputFile)
@@ -32,8 +32,18 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 	} else {
 		outFiles.emplace_back(fullPath, data);
 	}
+	
+	// Store information about this asset version
+	AssetResource::PlatformVersion version;
+	version.filepath = fullPath.string();
+	if (metadata) {
+		version.metadata = metadata.value();
+	}
+	getAsset(name, type, primaryInputFile).platformVersions[platform] = std::move(version);
+}
 
-	// Find existing entry, otherwise create a new one
+AssetResource& AssetCollector::getAsset(const String& name, AssetType type, const Path& primaryInputFile)
+{
 	AssetResource* result = nullptr;
 	for (auto& a: assets) {
 		if (a.name == name && a.type == type) {
@@ -47,22 +57,28 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 		result->type = type;
 		result->primaryInputFile = primaryInputFile;
 	}
-
-	// Store information about this asset version
-	AssetResource::PlatformVersion version;
-	version.filepath = fullPath.string();
-	if (metadata) {
-		version.metadata = metadata.value();
-	}
-	result->platformVersions[platform] = std::move(version);
+	return *result;
 }
 
-void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data)
+void AssetCollector::output(const String& name, AssetType type, const Path& path, gsl::span<const gsl::byte> data)
 {
 	Bytes result;
 	result.resize(data.size());
 	memcpy(result.data(), data.data(), data.size());
-	outFiles.push_back(std::pair<Path, Bytes>(path, std::move(result)));
+	outFiles.emplace_back(path, std::move(result));
+
+	AssetResource::PlatformVersion version;
+	version.filepath = path.getString();
+	getAsset(name, type).platformVersions[""] = std::move(version);
+}
+
+void AssetCollector::output(const String& name, AssetType type, const Path& path)
+{
+	outFiles.emplace_back(path, std::nullopt);
+
+	AssetResource::PlatformVersion version;
+	version.filepath = path.getString();
+	getAsset(name, type).platformVersions[""] = std::move(version);
 }
 
 void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)
@@ -104,7 +120,7 @@ Vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
 	return std::move(additionalAssets);
 }
 
-Vector<std::pair<Path, Bytes>> AssetCollector::collectOutFiles()
+Vector<std::pair<Path, std::optional<Bytes>>> AssetCollector::collectOutFiles()
 {
 	return std::move(outFiles);
 }
