@@ -9,12 +9,15 @@ include_directories(
 )
 
 set(SOURCES
+    "src/systems/network_lock_system.cpp"
+    "src/systems/network_receive_system.cpp"
+    "src/systems/network_send_system.cpp"
     "src/systems/script_system.cpp"
-        )
+)
 
 set(HEADERS
     ""
-        )
+)
 
 assign_source_group(${SOURCES})
 

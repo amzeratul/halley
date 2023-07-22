@@ -81,3 +81,65 @@ system:
   - SendScriptMsg: send receive scriptable
   systemMessages:
   - TerminateScriptsWithTag: receive
+
+---
+
+systemMessage:
+  name: NetworkEntityLock
+  members:
+    - target: Halley::EntityId
+    - lock: bool
+    - peerId: uint8_t
+  destination: host
+  serializable: true
+  returnType: bool
+
+---
+
+system:
+  name: NetworkReceive
+  families:
+  - network:
+    - Network: write
+  strategy: global
+  services:
+    - SessionService
+    - DevService
+  access:
+    - world
+    - resources
+    - messageBridge
+    - api
+
+---
+
+system:
+  name: NetworkLock
+  families:
+  - network:
+    - Network: write
+  strategy: global
+  systemMessages:
+    - NetworkEntityLock: send receive
+  services:
+    - SessionService
+    - ScriptingService optional
+  access:
+    - world
+
+---
+
+system:
+  name: NetworkSend
+  families:
+  - network:
+    - Network: write
+  strategy: global
+  services:
+    - SessionService
+    - ScreenService
+  access:
+    - world
+    - resources
+
+...

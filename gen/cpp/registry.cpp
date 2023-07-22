@@ -20,8 +20,12 @@ using namespace Halley;
 #include "messages/terminate_scripts_with_tag_message.h"
 #include "messages/send_script_msg_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
+#include "system_messages/network_entity_lock_system_message.h"
 
 // System factory functions
+System* halleyCreateNetworkLockSystem();
+System* halleyCreateNetworkReceiveSystem();
+System* halleyCreateNetworkSendSystem();
 System* halleyCreateScriptSystem();
 
 
@@ -29,7 +33,10 @@ class GameCodegenFunctions : public CodegenFunctions {
 public:
 	Vector<SystemReflector> makeSystemReflectors() override {
 		Vector<SystemReflector> result;
-		result.reserve(1);
+		result.reserve(4);
+		result.push_back(SystemReflector("NetworkLockSystem", &halleyCreateNetworkLockSystem));
+		result.push_back(SystemReflector("NetworkReceiveSystem", &halleyCreateNetworkReceiveSystem));
+		result.push_back(SystemReflector("NetworkSendSystem", &halleyCreateNetworkSendSystem));
 		result.push_back(SystemReflector("ScriptSystem", &halleyCreateScriptSystem));
 		return result;
 	}
@@ -62,8 +69,9 @@ public:
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(1);
+		result.reserve(2);
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<NetworkEntityLockSystemMessage>>());
 		return result;
 	}
 };
