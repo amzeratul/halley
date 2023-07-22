@@ -135,6 +135,11 @@ set(SOURCES
 
         "src/entity/components/transform_2d_component.cpp"
 
+        "src/entity/services/dev_service.cpp"
+        "src/entity/services/screen_service.cpp"
+        "src/entity/services/scripting_service.cpp"
+        "src/entity/services/session_service.cpp"
+
         "src/diagnostics/frame_debugger.cpp"
         "src/diagnostics/performance_stats.cpp"
         "src/diagnostics/stats_view.cpp"
@@ -550,6 +555,11 @@ set(HEADERS
         "include/halley/entity/world_scene_data.h"
 
         "include/halley/entity/components/transform_2d_component.h"
+
+        "include/halley/entity/services/dev_service.h"
+        "include/halley/entity/services/screen_service.h"
+        "include/halley/entity/services/scripting_service.h"
+        "include/halley/entity/services/session_service.h"
 
         "include/halley/diagnostics/frame_debugger.h"
         "include/halley/diagnostics/performance_stats.h"

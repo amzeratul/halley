@@ -1,0 +1,13 @@
+---
+
+type:
+  name: ScreenService
+  include: "halley/entity/services/screen_service.h"
+
+---
+
+type:
+  name: ScriptingService
+  include: "halley/entity/services/scripting_service.h"
+
+...

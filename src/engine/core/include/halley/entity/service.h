@@ -1,6 +1,7 @@
 #pragma once
 
 #include <typeinfo>
+#include "halley/text/halleystring.h"
 
 namespace Halley
 {
