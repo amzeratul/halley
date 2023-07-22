@@ -57,6 +57,14 @@ void AssetCollector::output(const String& name, AssetType type, const Bytes& dat
 	result->platformVersions[platform] = std::move(version);
 }
 
+void AssetCollector::output(const Path& path, gsl::span<const gsl::byte> data)
+{
+	Bytes result;
+	result.resize(data.size());
+	memcpy(result.data(), data.data(), data.size());
+	outFiles.push_back(std::pair<Path, Bytes>(path, std::move(result)));
+}
+
 void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)
 {
 	additionalAssets.emplace_back(std::move(additionalAsset));

@@ -8,6 +8,7 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 #include "halley/game/game_platform.h"
+#include "halley/plugin/iasset_importer.h"
 #include "halley/tools/ecs/ecs_data.h"
 
 #ifdef _MSC_VER
@@ -44,53 +45,42 @@ int Codegen::getHeaderVersion(gsl::span<const char> data, size_t& endOfHeader)
 	}
 }
 
-bool Codegen::writeFile(const Path& filePath, gsl::span<const char> data, bool stub)
+bool Codegen::needsToWriteFile(const Path& filePath, gsl::span<const char> data, bool stub)
 {
-	if (FileSystem::exists(filePath)) {
-		if (stub) {
-			return false;
-		}
-
-		// Read existing file
-		std::ifstream in(filePath.string(), std::ofstream::in | std::ofstream::binary);
-		Vector<char> buffer(data.size());
-		in.read(&buffer[0], data.size());
-		in.close();
-
-		// End of headers
-		size_t oldHeaderEnd = 0;
-		size_t newHeaderEnd = 0;
-
-		// Check if existing file is more recent
-		if (getHeaderVersion(buffer, oldHeaderEnd) > currentCodegenVersion) {
-			throw Exception("Codegen is out of date, please build editor.", HalleyExceptions::Tools);
-		}
-
-		// Check if contents are identical
-		getHeaderVersion(data, newHeaderEnd);
-		if (std::equal(buffer.begin() + oldHeaderEnd, buffer.end(), data.begin() + newHeaderEnd, data.end())) {
-			return false;
-		}
-	} else {
-		FileSystem::createParentDir(filePath);
+	if (!FileSystem::exists(filePath)) {
+		return true;
 	}
 
-	// Write file
-	std::ofstream out(filePath.string(), std::ofstream::out | std::ofstream::binary);
-	out.write(data.data(), data.size());
-	out.close();
+	if (stub) {
+		return false;
+	}
 
-	return true;
+	// Read existing file
+	std::ifstream in(filePath.string(), std::ofstream::in | std::ofstream::binary);
+	Vector<char> buffer(data.size());
+	in.read(&buffer[0], data.size());
+	in.close();
+
+	// End of headers
+	size_t oldHeaderEnd = 0;
+	size_t newHeaderEnd = 0;
+
+	// Check if existing file is more recent
+	if (getHeaderVersion(buffer, oldHeaderEnd) > currentCodegenVersion) {
+		throw Exception("Codegen is out of date, please build editor.", HalleyExceptions::Tools);
+	}
+
+	// Check if contents are identical
+	getHeaderVersion(data, newHeaderEnd);
+	return !std::equal(buffer.begin() + oldHeaderEnd, buffer.end(), data.begin() + newHeaderEnd, data.end());
 }
 
-void Codegen::writeFiles(const Path& dir, const CodeGenResult& files, Stats& stats)
+void Codegen::writeFiles(const Path& outputDir, const Path& prefix, const CodeGenResult& files, Stats& stats, IAssetCollector* collector)
 {
-	FileSystem::createDir(dir);
-	
 	constexpr const char* lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n" : "\n";
 	
-	for (auto& f : files) {
-		Path filePath = dir / f.fileName;
+	for (auto& f: files) {
+		Path filePath = outputDir / prefix / f.fileName;
 		std::stringstream ss;
 		ss << "// Halley codegen version " << currentCodegenVersion << lineBreak;
 		for (auto& line: f.fileContents) {
@@ -98,8 +88,10 @@ void Codegen::writeFiles(const Path& dir, const CodeGenResult& files, Stats& sta
 		}
 		auto finalData = ss.str();
 
-		const bool wrote = writeFile(filePath, gsl::span<const char>(&finalData[0], finalData.size()), f.stub);
-		if (wrote) {
+		const auto data = gsl::span<const char>(finalData.data(), finalData.size());
+		if (needsToWriteFile(filePath, data, f.stub)) {
+			const auto data2 = gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(data.data()), data.size());
+			collector->output(prefix / f.fileName, data2);
 			stats.written++;
 		} else {
 			stats.skipped++;
@@ -110,13 +102,12 @@ void Codegen::writeFiles(const Path& dir, const CodeGenResult& files, Stats& sta
 	}
 }
 
-Vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
+Vector<Path> Codegen::generateCode(const ECSData& data, Path directory, IAssetCollector* collector)
 {
 	auto components = data.getComponents();
 	auto systems = data.getSystems();
 	auto messages = data.getMessages();
 	auto systemMessages = data.getSystemMessages();
-	auto types = data.getCustomTypes();
 
 	for (auto& system : systems) {
 		auto& sys = system.second;
@@ -134,7 +125,7 @@ Vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 	Stats stats;
 
 	for (auto& gen : gens) {
-		Path genDir = directory / gen->getDirectory();
+		const auto prefix = gen->getDirectory();
 		Vector<ComponentSchema> comps;
 		Vector<SystemSchema> syss;
 		Vector<MessageSchema> msgs;
@@ -142,31 +133,31 @@ Vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 
 		for (auto& comp: components) {
 			if (comp.second.generate) {
-				writeFiles(genDir, gen->generateComponent(comp.second), stats);
+				writeFiles(directory, prefix, gen->generateComponent(comp.second), stats, collector);
 			}
 			comps.push_back(comp.second);
 		}
 		for (auto& sys: systems) {
 			if (sys.second.generate && sys.second.language == gen->getLanguage()) {
-				writeFiles(genDir, gen->generateSystem(sys.second, components, messages, systemMessages), stats);
+				writeFiles(directory, prefix, gen->generateSystem(sys.second, components, messages, systemMessages), stats, collector);
 			}
 			syss.push_back(sys.second);
 		}
 		for (auto& msg: messages) {
 			if (msg.second.generate) {
-				writeFiles(genDir, gen->generateMessage(msg.second), stats);
+				writeFiles(directory, prefix, gen->generateMessage(msg.second), stats, collector);
 			}
 			msgs.push_back(msg.second);
 		}
 		for (auto& sysMsg: systemMessages) {
 			if (sysMsg.second.generate) {
-				writeFiles(genDir, gen->generateSystemMessage(sysMsg.second), stats);
+				writeFiles(directory, prefix, gen->generateSystemMessage(sysMsg.second), stats, collector);
 			}
 			sysMsgs.push_back(sysMsg.second);
 		}
 
 		// Registry
-		writeFiles(genDir, gen->generateRegistry(comps, syss, msgs, sysMsgs), stats);
+		writeFiles(directory, prefix, gen->generateRegistry(comps, syss, msgs, sysMsgs), stats, collector);
 	}
 
 	// Has changes

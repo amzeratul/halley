@@ -93,6 +93,8 @@ void CheckAssetsTask::run()
 
 			if (hasCodeGen) {
 				if (curPendingReimport == ReimportType::Codegen) {
+					FileSystem::remove(project.getGenPath());
+					FileSystem::remove(project.getSharedGenPath());
 					project.getCodegenDatabase().clear();
 					project.getSharedCodegenDatabase().clear();
 				}

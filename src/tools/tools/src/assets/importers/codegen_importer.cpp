@@ -27,8 +27,8 @@ void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 	if (!collector.reportProgress(0.5f, "Generating code")) {
 		return;
 	}
-	Codegen::generateCode(data, collector.getDestinationDirectory());
-
+	Codegen::generateCode(data, collector.getDestinationDirectory(), &collector);
+	
 	if (!collector.reportProgress(0.999f, "")) {
 		return;
 	}
