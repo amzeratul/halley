@@ -10,4 +10,10 @@ type:
   name: ScriptingService
   include: "halley/entity/services/scripting_service.h"
 
+---
+
+type:
+  name: SessionService
+  include: "src/services/session_service.h"
+
 ...

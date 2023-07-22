@@ -437,11 +437,11 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				};
 
 				Vector<String> body;
-				body.emplace_back("String targetSystem = \"\";");
+				body.emplace_back("Halley::String targetSystem = \"\";");
 				body.emplace_back(String(sysMsg.multicast ? "return " : "const size_t n = ") + "sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);");
 				if (!sysMsg.multicast) {
 					body.emplace_back("if (n != 1) {");
-					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + toString(n) + \" systems receiving it (expecting exactly one).\", HalleyExceptions::Entity);");
+					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + Halley::toString(n) + \" systems receiving it (expecting exactly one).\", Halley::HalleyExceptions::Entity);");
 					body.emplace_back("}");
 				}
 
@@ -596,7 +596,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					onReceivedBody.emplace_back("        context.callback(nullptr, {});");
 				} else {
 					onReceivedBody.emplace_back("        if (context.remote) {");
-					onReceivedBody.emplace_back("            context.callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));");
+					onReceivedBody.emplace_back("            context.callback(nullptr, Halley::Serializer::toBytes(result, Halley::SerializerOptions(Halley::SerializerOptions::maxVersion)));");
 					onReceivedBody.emplace_back("        } else {");
 					onReceivedBody.emplace_back("            context.callback(reinterpret_cast<std::byte*>(&result), {});");
 					onReceivedBody.emplace_back("        }");

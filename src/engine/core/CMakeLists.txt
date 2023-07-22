@@ -109,6 +109,7 @@ set(SOURCES
 
         "src/net/session/network_session_control_messages.cpp"
         "src/net/session/network_session.cpp"
+        "src/net/session/session_multiplayer.cpp"
         "src/net/session/shared_data.cpp"
 
         "src/entity/component.cpp"
@@ -518,6 +519,8 @@ set(HEADERS
         "include/halley/net/session/network_session_messages.h"
         "include/halley/net/session/network_session_peer.h"
         "include/halley/net/session/network_session.h"
+        "include/halley/net/session/session.h"
+        "include/halley/net/session/session_multiplayer.h"
         "include/halley/net/session/shared_data.h"
 
         "include/halley/entity/halley_entity.h"
