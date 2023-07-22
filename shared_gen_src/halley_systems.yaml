@@ -142,4 +142,67 @@ system:
     - world
     - resources
 
+---
+
+message:
+  name: PlayAnimation
+  members:
+  - sequence: 'Halley::String'
+
+---
+
+message:
+  name: PlayAnimationOnce
+  members:
+  - sequence: 'Halley::String'
+
+---
+
+component:
+  name: SpriteAnimationReplicator
+
+---
+
+system:
+  name: SpriteAnimation
+  families:
+  - main:
+    - Transform2D: read
+    - Sprite: write
+    - SpriteAnimation: write
+  - replicator:
+    - Sprite: write
+    - SpriteAnimationReplicator: read
+    - SpriteAnimation: write
+  strategy: global
+  access:
+  - world
+  messages:
+  - PlayAnimation: receive
+  - PlayAnimationOnce: receive
+  services:
+  - ScreenService
+
+---
+
+message:
+    name: StopParticles
+    serializable: true
+
+---
+
+system:
+  name: Particle
+  families:
+  - particle:
+    - Transform2D: read
+    - Particles: write
+  strategy: global
+  access:
+  - world
+  services:
+  - DevService
+  messages:
+  - StopParticles: receive particle
+
 ...
