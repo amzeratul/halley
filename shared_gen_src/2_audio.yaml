@@ -16,6 +16,11 @@ component:
       defaultValue: 5
       canEdit: false
       canSave: false
+  - speedOfSound:
+      type: float
+      defaultValue: 343
+      displayName: Speed of Sound
+      canSave: false
 
 ---
 
@@ -42,5 +47,37 @@ component:
       type: Halley::Vector3f
       canEdit: false
       canSave: false
+  - canAutoVel:
+      type: bool
+      canSave: false
+      defaultValue: false
 
+---
+
+systemMessage:
+  name: PlayNetworkSound
+  members:
+  - emitter: Halley::EntityId
+  - event: Halley::String
+  destination: allClients
+  serializable: true
+  multicast: true
+
+---
+
+system:
+  name: Audio
+  families:
+  - listener:
+    - Transform2D: read
+    - AudioListener: write
+  - source:
+    - Transform2D: read
+    - AudioSource: write
+    - Velocity: optional read
+  strategy: global
+  systemMessages:
+  - PlayNetworkSound: receive
+  access:
+  - api
 ...

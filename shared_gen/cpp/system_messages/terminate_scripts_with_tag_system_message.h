@@ -1,4 +1,4 @@
-// Halley codegen version 122
+// Halley codegen version 123
 #pragma once
 
 #include <halley.hpp>
@@ -6,7 +6,7 @@
 
 class TerminateScriptsWithTagSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 0 };
+	static constexpr int messageIndex{ 1 };
 	static const constexpr char* messageName{ "TerminateScriptsWithTag" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::AllClients };
 	using ReturnType = void;

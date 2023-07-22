@@ -9,6 +9,7 @@ include_directories(
 )
 
 set(SOURCES
+    "src/systems/audio_system.cpp"
     "src/systems/network_lock_system.cpp"
     "src/systems/network_receive_system.cpp"
     "src/systems/network_send_system.cpp"

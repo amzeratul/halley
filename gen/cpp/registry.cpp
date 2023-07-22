@@ -24,10 +24,12 @@ using namespace Halley;
 #include "messages/terminate_script_message.h"
 #include "messages/terminate_scripts_with_tag_message.h"
 #include "messages/send_script_msg_message.h"
+#include "system_messages/play_network_sound_system_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/network_entity_lock_system_message.h"
 
 // System factory functions
+System* halleyCreateAudioSystem();
 System* halleyCreateNetworkLockSystem();
 System* halleyCreateNetworkReceiveSystem();
 System* halleyCreateNetworkSendSystem();
@@ -40,7 +42,8 @@ class GameCodegenFunctions : public CodegenFunctions {
 public:
 	Vector<SystemReflector> makeSystemReflectors() override {
 		Vector<SystemReflector> result;
-		result.reserve(6);
+		result.reserve(7);
+		result.push_back(SystemReflector("AudioSystem", &halleyCreateAudioSystem));
 		result.push_back(SystemReflector("NetworkLockSystem", &halleyCreateNetworkLockSystem));
 		result.push_back(SystemReflector("NetworkReceiveSystem", &halleyCreateNetworkReceiveSystem));
 		result.push_back(SystemReflector("NetworkSendSystem", &halleyCreateNetworkSendSystem));
@@ -83,7 +86,8 @@ public:
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(2);
+		result.reserve(3);
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkSoundSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<NetworkEntityLockSystemMessage>>());
 		return result;

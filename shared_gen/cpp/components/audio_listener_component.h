@@ -13,12 +13,14 @@ public:
 	float referenceDistance{ 500 };
 	Halley::Vector3f lastPos{};
 	Halley::RollingDataSet<Halley::Vector3f> velAverage{ 5 };
+	float speedOfSound{ 343 };
 
 	AudioListenerComponent() {
 	}
 
-	AudioListenerComponent(float referenceDistance)
+	AudioListenerComponent(float referenceDistance, float speedOfSound)
 		: referenceDistance(std::move(referenceDistance))
+		, speedOfSound(std::move(speedOfSound))
 	{
 	}
 
@@ -27,6 +29,7 @@ public:
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::serialize(referenceDistance, float{ 500 }, _context, _node, componentName, "referenceDistance", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(lastPos)>::serialize(lastPos, Halley::Vector3f{}, _context, _node, componentName, "lastPos", makeMask(Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(speedOfSound)>::serialize(speedOfSound, float{ 343 }, _context, _node, componentName, "speedOfSound", makeMask(Type::Prefab));
 		return _node;
 	}
 
@@ -34,6 +37,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, float{ 500 }, _context, _node, componentName, "referenceDistance", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(lastPos)>::deserialize(lastPos, Halley::Vector3f{}, _context, _node, componentName, "lastPos", makeMask(Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(speedOfSound)>::deserialize(speedOfSound, float{ 343 }, _context, _node, componentName, "speedOfSound", makeMask(Type::Prefab));
 	}
 
 };
