@@ -340,8 +340,10 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 set(HALLEY_PROJECT_LIBS
 	optimized halley-contrib
 	optimized halley-engine
+	optimized halley-ecs-standard
 	debug halley-contrib_d
 	debug halley-engine_d
+	debug halley-ecs-standard_d
 	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
 
@@ -519,7 +521,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 
 	SET(LINK_LIBRARIES "")
 	if (EMBED)
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-engine ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-engine halley-ecs-standard ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-opengl)
 		endif ()

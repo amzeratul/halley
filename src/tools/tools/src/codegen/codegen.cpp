@@ -148,7 +148,7 @@ Vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 		}
 		for (auto& sys: systems) {
 			if (sys.second.generate && sys.second.language == gen->getLanguage()) {
-				writeFiles(genDir, gen->generateSystem(sys.second, components, systemMessages), stats);
+				writeFiles(genDir, gen->generateSystem(sys.second, components, messages, systemMessages), stats);
 			}
 			syss.push_back(sys.second);
 		}

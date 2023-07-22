@@ -36,12 +36,12 @@ CodeGenResult CodegenCPP::generateComponent(ComponentSchema component)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages)
+CodeGenResult CodegenCPP::generateSystem(SystemSchema system, const HashMap<String, ComponentSchema>& components, const HashMap<String, MessageSchema>& messages, const HashMap<String, SystemMessageSchema>& systemMessages)
 {
 	const String className = system.name + "System";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components, systemMessages)));
+	result.emplace_back(CodeGenFile(makePath("systems", className, "h"), generateSystemHeader(system, components, messages, systemMessages)));
 	//result.emplace_back(CodeGenFile(makePath("../../src/systems", className, "cpp"), generateSystemStub(system), true));
 	return result;
 }
@@ -323,7 +323,7 @@ public:
 	bool methodConst;
 };
 
-Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) const
+Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components, const HashMap<String, MessageSchema>& messages, const HashMap<String, SystemMessageSchema>& systemMessages) const
 {
 	auto info = SystemInfo(system);
 
@@ -353,11 +353,14 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			}
 		}
 	}
-	for (auto& msg : system.messages) {
-		contents.emplace_back("#include \"../messages/" + toFileName(msg.name + "Message") + ".h\"");
+	
+	for (const auto& msgType: system.messages) {
+		auto& msg = messages.at(msgType.name);
+		contents.emplace_back("#include \"" + getMessageFileName(msg) + "\"");
 	}
-	for (auto& msg : system.systemMessages) {
-		contents.emplace_back("#include \"../system_messages/" + toFileName(msg.name + "SystemMessage") + ".h\"");
+	for (const auto& msgType: system.systemMessages) {
+		const auto& msg = systemMessages.at(msgType.name);
+		contents.emplace_back("#include \"" + getSystemMessageFileName(msg) + "\"");
 	}
 
 	contents.insert(contents.end(), {

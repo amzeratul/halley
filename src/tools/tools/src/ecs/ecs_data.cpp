@@ -8,9 +8,16 @@
 using namespace Halley;
 
 
+bool CodegenSourceInfo::operator<(const CodegenSourceInfo& other) const
+{
+	return filename < other.filename;
+}
+
 void ECSData::loadSources(Vector<CodegenSourceInfo> files, bool throwOnValidationError)
 {
 	++revision;
+
+	std::sort(files.begin(), files.end());
 	for (auto& f : files) {
 		addSource(f);
 	}
@@ -136,41 +143,29 @@ std::optional<String> ECSData::validate()
 
 void ECSData::process()
 {
-	{
-		for (auto& comp : components) {
-			for (auto& m : comp.second.members) {
-				String i = getInclude(m.type.name);
-				if (i != "") {
-					comp.second.includeFiles.insert(i);
-				}
+	for (auto& comp : components) {
+		for (auto& m : comp.second.members) {
+			String i = getInclude(m.type.name);
+			if (i != "") {
+				comp.second.includeFiles.insert(i);
+			}
+		}
+	}
+	
+	for (auto& msg : messages) {
+		for (auto& m : msg.second.members) {
+			String i = getInclude(m.type.name);
+			if (i != "") {
+				msg.second.includeFiles.insert(i);
 			}
 		}
 	}
 
-	{
-		int id = 0;
-		for (auto& msg : messages) {
-			msg.second.id = id++;
-
-			for (auto& m : msg.second.members) {
-				String i = getInclude(m.type.name);
-				if (i != "") {
-					msg.second.includeFiles.insert(i);
-				}
-			}
-		}
-	}
-
-	{
-		int id = 0;
-		for (auto& msg : systemMessages) {
-			msg.second.id = id++;
-
-			for (auto& m : msg.second.members) {
-				String i = getInclude(m.type.name);
-				if (i != "") {
-					msg.second.includeFiles.insert(i);
-				}
+	for (auto& msg : systemMessages) {
+		for (auto& m : msg.second.members) {
+			String i = getInclude(m.type.name);
+			if (i != "") {
+				msg.second.includeFiles.insert(i);
 			}
 		}
 	}
@@ -182,7 +177,7 @@ void ECSData::process()
 			// Sorting the components ensures that different systems which use the same family will not corrupt memory by accessing them in different orders
 			std::sort(fam.components.begin(), fam.components.end(), [](const ComponentReferenceSchema& a, const ComponentReferenceSchema& b) -> bool {
 				return a.name < b.name;
-				});
+			});
 		}
 
 		for (auto& service : sys.services) {
@@ -254,9 +249,10 @@ void ECSData::addSystem(YAML::Node rootNode, bool generate)
 
 void ECSData::addMessage(YAML::Node rootNode, bool generate)
 {
-	const auto msg = MessageSchema(rootNode["message"], generate);
+	auto msg = MessageSchema(rootNode["message"], generate);
 
 	if (messages.find(msg.name) == messages.end()) {
+		msg.id = int(messages.size());
 		messages[msg.name] = msg;
 	} else {
 		throw Exception("Message already declared: " + msg.name, HalleyExceptions::Tools);
@@ -265,9 +261,10 @@ void ECSData::addMessage(YAML::Node rootNode, bool generate)
 
 void ECSData::addSystemMessage(YAML::Node rootNode, bool generate)
 {
-	const auto msg = SystemMessageSchema(rootNode["systemMessage"], generate);
+	auto msg = SystemMessageSchema(rootNode["systemMessage"], generate);
 
 	if (systemMessages.find(msg.name) == systemMessages.end()) {
+		msg.id = int(systemMessages.size());
 		systemMessages[msg.name] = msg;
 	} else {
 		throw Exception("System message already declared: " + msg.name, HalleyExceptions::Tools);

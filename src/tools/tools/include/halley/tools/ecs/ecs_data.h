@@ -19,6 +19,8 @@ namespace Halley {
 		String filename;
 		gsl::span<const gsl::byte> data;
 		bool generate = false;
+
+		bool operator<(const CodegenSourceInfo& other) const;
 	};
 
 	class Codegen;

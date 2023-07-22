@@ -61,6 +61,13 @@ namespace Halley {
         virtual LuaState& getLuaState() = 0;
     };
 
+	class IScriptSystemInterface : public IScriptEnvironmentInterface {
+	public:
+		virtual ~IScriptSystemInterface() = default;
+
+		virtual Vector<EntityId> findScriptables(Vector2f pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, Vector2f)>& getDistance) const = 0;
+	};
+
     class ScriptEnvironment: private IEntityFactoryContext {
     public:
         struct EntityMessageData {

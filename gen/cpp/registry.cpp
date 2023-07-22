@@ -1,4 +1,4 @@
-// Halley codegen version 122
+// Halley codegen version 123
 #include <halley.hpp>
 using namespace Halley;
 
@@ -15,15 +15,22 @@ using namespace Halley;
 #include "components/script_target_component.h"
 #include "components/script_tag_target_component.h"
 #include "components/network_component.h"
+#include "messages/start_script_message.h"
+#include "messages/terminate_script_message.h"
+#include "messages/terminate_scripts_with_tag_message.h"
+#include "messages/send_script_msg_message.h"
+#include "system_messages/terminate_scripts_with_tag_system_message.h"
 
 // System factory functions
+System* halleyCreateScriptSystem();
 
 
 class GameCodegenFunctions : public CodegenFunctions {
 public:
 	Vector<SystemReflector> makeSystemReflectors() override {
 		Vector<SystemReflector> result;
-		result.reserve(0);
+		result.reserve(1);
+		result.push_back(SystemReflector("ScriptSystem", &halleyCreateScriptSystem));
 		return result;
 	}
 	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {
@@ -46,12 +53,17 @@ public:
 	}
 	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {
 		Vector<std::unique_ptr<MessageReflector>> result;
-		result.reserve(0);
+		result.reserve(4);
+		result.push_back(std::make_unique<MessageReflectorImpl<StartScriptMessage>>());
+		result.push_back(std::make_unique<MessageReflectorImpl<TerminateScriptMessage>>());
+		result.push_back(std::make_unique<MessageReflectorImpl<TerminateScriptsWithTagMessage>>());
+		result.push_back(std::make_unique<MessageReflectorImpl<SendScriptMsgMessage>>());
 		return result;
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(0);
+		result.reserve(1);
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
 		return result;
 	}
 };
