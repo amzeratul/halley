@@ -32,4 +32,15 @@ component:
       canSave: false
       defaultValue: 0
 
+---
+
+component:
+  name: Velocity
+  members:
+  - velocity:
+      type: 'Halley::Vector2f'
+      canEdit: true
+      canSave: true
+      canNetwork: true
+
 ...

@@ -1,4 +1,4 @@
-// Halley codegen version 121
+// Halley codegen version 123
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class TextLabelComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 2 };
+	static constexpr int componentIndex{ 3 };
 	static const constexpr char* componentName{ "TextLabel" };
 
 	Halley::TextRenderer text{};

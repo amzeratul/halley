@@ -52,5 +52,87 @@ component:
       type: 'Halley::Vector<Halley::String>'
       canEdit: true
       canSave: false
+---
+
+message:
+  name: StartScript
+  members:
+  - name: 'Halley::String'
+  - tags: 'Halley::Vector<Halley::String>'
+  - params: 'Halley::Vector<Halley::ConfigNode>'
+  serializable: true
+
+---
+
+message:
+  name: TerminateScript
+  members:
+  - name: 'Halley::String'
+  serializable: true
+
+---
+
+message:
+  name: TerminateScriptsWithTag
+  members:
+  - tag: 'Halley::String'
+  serializable: true
+  destination: allClients
+
+---
+
+systemMessage:
+  name: TerminateScriptsWithTag
+  members:
+  - scriptableId: 'Halley::EntityId'
+  - tag: 'Halley::String'
+  destination: allClients
+  multicast: true
+  serializable: true
+
+---
+
+type:
+  name: ScriptMessage
+  include: halley/scripting/script_message.h
+
+---
+
+message:
+  name: SendScriptMsg
+  members:
+  - msg: 'Halley::ScriptMessage'
+  serializable: true
+
+---
+
+system:
+  name: Script
+  families:
+  - scriptable:
+    - Scriptable: write
+  - embeddedScript:
+    - Scriptable: write
+    - EmbeddedScript: write
+  - target:
+    - ScriptTarget: read
+  - tagTargets:
+    - ScriptTagTarget: read
+  strategy: global
+  services:
+  - ScriptingService
+  - DevService
+  access:
+  - world
+  - resources
+  - api
+  - messageBridge
+  messages:
+  - StartScript: receive scriptable
+  - TerminateScript: receive scriptable
+  - TerminateScriptsWithTag: receive scriptable
+  - SendScriptMsg: send receive scriptable
+  systemMessages:
+  - TerminateScriptsWithTag: receive
 
 ...

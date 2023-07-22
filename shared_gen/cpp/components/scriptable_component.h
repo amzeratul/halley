@@ -1,4 +1,4 @@
-// Halley codegen version 121
+// Halley codegen version 123
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class ScriptableComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 8 };
+	static constexpr int componentIndex{ 10 };
 	static const constexpr char* componentName{ "Scriptable" };
 
 	Halley::HashMap<Halley::String, std::shared_ptr<Halley::ScriptState>> activeStates{};

@@ -1,4 +1,4 @@
-// Halley codegen version 121
+// Halley codegen version 123
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,12 +7,12 @@
 
 class AudioListenerComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 6 };
+	static constexpr int componentIndex{ 8 };
 	static const constexpr char* componentName{ "AudioListener" };
 
 	float referenceDistance{ 500 };
 	Halley::Vector3f lastPos{};
-	RollingDataSet<Vector3f> velAverage{ 5 };
+	Halley::RollingDataSet<Halley::Vector3f> velAverage{ 5 };
 
 	AudioListenerComponent() {
 	}

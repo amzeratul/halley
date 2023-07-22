@@ -1,4 +1,4 @@
-// Halley codegen version 121
+// Halley codegen version 123
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class EmbeddedScriptComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 9 };
+	static constexpr int componentIndex{ 11 };
 	static const constexpr char* componentName{ "EmbeddedScript" };
 
 	Halley::ScriptGraph script{};

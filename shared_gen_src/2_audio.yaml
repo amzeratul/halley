@@ -12,7 +12,7 @@ component:
       type: Halley::Vector3f
       canEdit: false
   - velAverage:
-      type: RollingDataSet<Vector3f>
+      type: Halley::RollingDataSet<Halley::Vector3f>
       defaultValue: 5
       canEdit: false
       canSave: false

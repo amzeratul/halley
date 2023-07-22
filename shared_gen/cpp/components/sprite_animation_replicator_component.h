@@ -7,7 +7,7 @@
 
 class SpriteAnimationReplicatorComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 13 };
+	static constexpr int componentIndex{ 7 };
 	static const constexpr char* componentName{ "SpriteAnimationReplicator" };
 
 

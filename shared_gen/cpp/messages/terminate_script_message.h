@@ -1,4 +1,4 @@
-// Halley codegen version 122
+// Halley codegen version 123
 #pragma once
 
 #include <halley.hpp>
@@ -6,7 +6,7 @@
 
 class TerminateScriptMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 1 };
+	static constexpr int messageIndex{ 4 };
 	static const constexpr char* messageName{ "TerminateScript" };
 
 	Halley::String name{};

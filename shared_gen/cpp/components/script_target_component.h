@@ -1,4 +1,4 @@
-// Halley codegen version 121
+// Halley codegen version 123
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,7 +7,7 @@
 
 class ScriptTargetComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 10 };
+	static constexpr int componentIndex{ 12 };
 	static const constexpr char* componentName{ "ScriptTarget" };
 
 	Halley::String id{};

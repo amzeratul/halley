@@ -6,7 +6,7 @@
 
 class PlayAnimationMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 4 };
+	static constexpr int messageIndex{ 0 };
 	static const constexpr char* messageName{ "PlayAnimation" };
 
 	Halley::String sequence{};

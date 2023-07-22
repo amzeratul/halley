@@ -6,7 +6,7 @@
 
 class StopParticlesMessage final : public Halley::Message {
 public:
-	static constexpr int messageIndex{ 6 };
+	static constexpr int messageIndex{ 2 };
 	static const constexpr char* messageName{ "StopParticles" };
 
 
