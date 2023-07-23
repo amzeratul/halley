@@ -344,7 +344,7 @@ bool Path::operator==(gsl::span<const String> other) const
 #ifdef _WIN32
 		if (a.size() != b.size() || !a.asciiCompareNoCase(b.c_str())) {
 #else
-		if (a == b) {
+		if (a != b) {
 #endif
 			return false;
 		}
