@@ -67,6 +67,8 @@ namespace Halley {
 		void updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context);
 		std::optional<ConfigNode> getComponentsWithPrefabDefaults(EntityRef entity, const EntityFactoryContext& context, const ConfigNode& componentData, const String& componentName);
 
+		EntityData doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab);
+
 		EntityRef tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		void destroyEntity(EntityRef entity);
