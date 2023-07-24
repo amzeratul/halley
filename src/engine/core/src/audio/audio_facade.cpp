@@ -440,10 +440,10 @@ void AudioFacade::pump()
 		if (!outbox.empty()) {
 			if (commandQueue.canWrite(1)) {
 				commandQueue.writeOne(std::move(outbox));
+				outbox.clear();
 			} else {
 				Logger::logError("Out of space on audio command queue.");
 			}
-			outbox.clear();
 		}
 
 		while (finishedSoundsQueue.canRead(1)) {
