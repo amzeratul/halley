@@ -7,7 +7,7 @@
 
 class AudioListenerComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 8 };
+	static constexpr int componentIndex{ 9 };
 	static const constexpr char* componentName{ "AudioListener" };
 
 	float referenceDistance{ 500 };

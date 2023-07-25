@@ -7,7 +7,7 @@
 
 class ParticlesComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 6 };
+	static constexpr int componentIndex{ 7 };
 	static const constexpr char* componentName{ "Particles" };
 
 	Halley::Particles particles{};

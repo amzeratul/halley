@@ -19,6 +19,16 @@ component:
 ---
 
 component:
+  name: Colour
+  members:
+  - colour:
+      type: 'Halley::Colour4f'
+      defaultValue: '#FFFFFF'
+      displayName: "Colour"
+
+---
+
+component:
   name: TextLabel
   componentDependencies: [Transform2D]
   members:

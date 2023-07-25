@@ -162,7 +162,7 @@ namespace Halley {
 
 		inline Vector4D normalized() const
 		{
-			return unit();
+ 			return unit();
 		}
 
 		inline void normalize()

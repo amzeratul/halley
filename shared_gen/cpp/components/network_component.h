@@ -7,7 +7,7 @@
 
 class NetworkComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 14 };
+	static constexpr int componentIndex{ 15 };
 	static const constexpr char* componentName{ "Network" };
 
 	std::optional<uint8_t> ownerId{};

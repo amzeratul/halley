@@ -7,7 +7,7 @@
 
 class ScriptableComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 10 };
+	static constexpr int componentIndex{ 11 };
 	static const constexpr char* componentName{ "Scriptable" };
 
 	Halley::HashMap<Halley::String, std::shared_ptr<Halley::ScriptState>> activeStates{};

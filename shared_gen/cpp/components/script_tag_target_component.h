@@ -7,7 +7,7 @@
 
 class ScriptTagTargetComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 13 };
+	static constexpr int componentIndex{ 14 };
 	static const constexpr char* componentName{ "ScriptTagTarget" };
 
 	Halley::Vector<Halley::String> tags{};

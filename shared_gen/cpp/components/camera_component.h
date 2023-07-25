@@ -7,7 +7,7 @@
 
 class CameraComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 5 };
+	static constexpr int componentIndex{ 6 };
 	static const constexpr char* componentName{ "Camera" };
 
 	float zoom{ 1 };

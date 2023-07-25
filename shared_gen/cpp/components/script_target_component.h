@@ -7,7 +7,7 @@
 
 class ScriptTargetComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 12 };
+	static constexpr int componentIndex{ 13 };
 	static const constexpr char* componentName{ "ScriptTarget" };
 
 	Halley::String id{};
