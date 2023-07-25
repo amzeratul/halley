@@ -177,6 +177,7 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 	: data(nullptr)
 {
 	threadCount = static_cast<uint8_t>(node["threadCount"].asInt(0));
+	watcherCount = static_cast<uint8_t>(node["watcherCount"].asInt(0));
 	if (node.hasKey("pendingData")) {
 		pendingData = new ConfigNode(node["pendingData"]);
 		hasPendingData = true;
@@ -202,6 +203,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 
 	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
+	watcherCount = other.watcherCount;
 	timeSinceStart = other.timeSinceStart;
 
 	if (other.hasPendingData) {
@@ -222,6 +224,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
 	releaseData();
 
 	threadCount = other.threadCount;
+	watcherCount = other.watcherCount;
 	timeSinceStart = other.timeSinceStart;
 
 	data = other.data;
@@ -237,6 +240,7 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 {
 	ConfigNode::MapType result;
 	result["threadCount"] = threadCount;
+	result["watcherCount"] = watcherCount;
 
 	if (context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::DevCon))) {
 		result["timeSinceStart"] = timeSinceStart;

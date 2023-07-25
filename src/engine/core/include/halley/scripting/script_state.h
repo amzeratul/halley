@@ -116,6 +116,7 @@ namespace Halley {
 
 		struct NodeState {
 			uint8_t threadCount = 0;
+			uint8_t watcherCount = 0;
 			bool hasPendingData = false;
 			float timeSinceStart = std::numeric_limits<float>::infinity();
 			union {
