@@ -184,7 +184,6 @@ private:
 				}
 			}
 
-			sendMessages();
 			eraseDeadScripts(e);
 		}
 	}
