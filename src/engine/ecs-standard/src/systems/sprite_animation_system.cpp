@@ -57,16 +57,45 @@ private:
 
 	void updateReplicators()
 	{
-		for (auto& e : replicatorFamily) {
-			auto entity = getWorld().getEntity(e.entityId);
-			auto parent = entity.tryGetParent();
-			if (parent) {
-				const auto parentAnimation = parent.value().tryGetComponent<SpriteAnimationComponent>();
-				if (parentAnimation) {
-					e.spriteAnimation.player.syncWith(parentAnimation->player, false);
-					e.spriteAnimation.player.updateSprite(e.sprite.sprite);
+		// Because replicators can be nested, this needs to be a multi-step algorithm
+		// This ensures that a parent's replicator is always updated before the child's, avoiding introducing frame delays
+
+		HashSet<EntityId> replicatorsUpdated;
+		std::list<EntityId> toReplicate;
+
+		auto tryReplicating = [&] (EntityId id)
+		{
+			auto entity = getWorld().getEntity(id);
+			if (const auto parent = entity.tryGetParent()) {
+				if (const auto* parentAnimation = parent->tryGetComponent<SpriteAnimationComponent>()) {
+					const bool parentHasReplicator = parent->hasComponent<SpriteAnimationReplicatorComponent>();
+					if (parentHasReplicator && !replicatorsUpdated.contains(parent->getEntityId())) {
+						// We'll do this one later
+						toReplicate.push_back(id);
+						return;
+					}
+
+					// These two are guaranteed to be here by the family
+					auto& spriteAnimation = entity.getComponent<SpriteAnimationComponent>();
+					auto& sprite = entity.getComponent<SpriteComponent>();
+
+					spriteAnimation.player.syncWith(parentAnimation->player, false);
+					spriteAnimation.player.updateSprite(sprite.sprite);
+					replicatorsUpdated.emplace(id);
 				}
 			}
+		};
+
+		// Try the originals...
+		for (auto& e : replicatorFamily) {
+			tryReplicating(e.entityId);
+		}
+
+		// Anything that needed to wait on parent is waiting here, keep going until this is empty
+		while (!toReplicate.empty()) {
+			const auto e = toReplicate.front();
+			toReplicate.pop_front();
+			tryReplicating(e);
 		}
 	}
 };
