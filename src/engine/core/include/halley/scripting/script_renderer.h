@@ -19,9 +19,9 @@ namespace Halley {
 	public:
 		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
-		void setGraph(const BaseGraph* graph);
+		void setGraph(const BaseGraph* graph) override;
 		void setState(const ScriptState* scriptState);
-		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
+		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f) override;
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const override;
 		NodeUnderMouseInfo getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const override;

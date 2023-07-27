@@ -20,7 +20,7 @@ namespace Halley
 	class TaskSet;
 	class TaskExclusivityHandle;
 
-	class TaskAnchor
+	class TaskAnchor final
 	{
 	public:
 		TaskAnchor(std::unique_ptr<Task> task, float delay = 0);
@@ -56,7 +56,7 @@ namespace Halley
 		Vector<std::unique_ptr<Task>> getPendingTasks();
 
 		std::optional<String> getAction();
-		virtual void doAction(TaskSet& taskSet);
+		void doAction(TaskSet& taskSet);
 
 	private:
 		std::unique_ptr<Task> task;

@@ -269,7 +269,8 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(*nodeType, node, curZoom);
 	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
-	const auto [col, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
+	const auto [c, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
+	auto col = c; // Clang doesn't seem to like lambda capturing (drawLabel, below) from a structured binding
 
 	// Node body
 	nodeBg.clone()

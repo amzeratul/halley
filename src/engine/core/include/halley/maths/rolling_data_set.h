@@ -39,11 +39,10 @@ namespace Halley {
 
         T getMean() const
         {
-            const auto a = getSum();
             if constexpr (std::is_integral_v<T>) {
                 return (getSum() + data.size() / 2) / data.size();
             } else {
-	           return getSum() / data.size();
+            	return getSum() / data.size();
             }
         }
 
