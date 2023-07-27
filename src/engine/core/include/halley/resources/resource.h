@@ -157,11 +157,16 @@ namespace Halley
 
 		String toString() const
 		{
-			String result = String::prettySize(ramUsage) + " RAM";
 			if (vramUsage > 0) {
-				result += " + " + String::prettySize(vramUsage) + " VRAM";
+				return String::prettySize(ramUsage + vramUsage) + " (" + String::prettySize(ramUsage) + " RAM + " + String::prettySize(vramUsage) + " VRAM)";
+			} else {
+				return String::prettySize(ramUsage);
 			}
-			return result;
+		}
+
+		size_t getTotal() const
+		{
+			return ramUsage + vramUsage;
 		}
 	};
 

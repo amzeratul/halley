@@ -157,6 +157,9 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+	protected:
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	private:
 		constexpr static int version = 2;
 		
@@ -206,6 +209,9 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+	protected:
+		ResourceMemoryUsage getMemoryUsage() const override;
 
 	private:
 		std::weak_ptr<const SpriteSheet> spriteSheet;

@@ -65,15 +65,25 @@ void Resources::reloadAssets(const std::map<AssetType, Vector<String>>& byType)
 
 void Resources::generateMemoryReport()
 {
-	Logger::logInfo("Memory usage:");
+	Vector<std::pair<AssetType, ResourceMemoryUsage>> usage;
+	ResourceMemoryUsage total;
+
 	for (auto& res: resources) {
 		if (res) {
-			auto memoryUsage = res->getMemoryUsage();
-			if (memoryUsage.ramUsage > 0 || memoryUsage.vramUsage > 0) {
-				Logger::logInfo(String("\t") + toString(res->getAssetType()) + ": " + memoryUsage.toString());
-			}
+			usage.emplace_back(res->getAssetType(), res->getMemoryUsage());
+			total += usage.back().second;
 		}
-	}	
+	}
+
+	std::sort(usage.begin(), usage.end(), [](const auto& a, const auto& b) { return a.second.getTotal() > b.second.getTotal(); });
+
+	Logger::logInfo("Memory usage: " + total.toString());
+
+	for (const auto& [assetType, memoryUsage] : usage) {
+		if (memoryUsage.ramUsage > 0 || memoryUsage.vramUsage > 0) {
+			Logger::logInfo(String("\t") + toString(assetType) + ": " + memoryUsage.toString());
+		}
+	}
 }
 
 Resources::~Resources() = default;

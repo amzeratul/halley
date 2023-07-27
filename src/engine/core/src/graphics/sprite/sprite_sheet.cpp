@@ -435,6 +435,22 @@ void SpriteSheet::deserialize(Deserializer& s)
 	assignIds();
 }
 
+ResourceMemoryUsage SpriteSheet::getMemoryUsage() const
+{
+	size_t total = 0;
+
+	total += sprites.capacity() * sizeof(SpriteSheetEntry);
+	total += frameTags.capacity() * sizeof(SpriteSheetFrameTag);
+
+	for (const auto& [k, v]: spriteIdx) {
+		total += sizeof(String) + k.size() + 16;
+	}
+
+	ResourceMemoryUsage result;
+	result.ramUsage = total;
+	return result;
+}
+
 std::unique_ptr<Image> SpriteSheet::generateAtlas(Vector<ImageData>& images, ConfigNode& spriteInfo, bool powerOfTwo)
 {
 	markDuplicates(images);
@@ -699,6 +715,13 @@ void SpriteResource::deserialize(Deserializer& s)
 	spriteSheet = resources->get<SpriteSheet>(ssName);
 
 	s >> idx;
+}
+
+ResourceMemoryUsage SpriteResource::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage = sizeof(SpriteResource);
+	return result;
 }
 
 #ifdef ENABLE_HOT_RELOAD
