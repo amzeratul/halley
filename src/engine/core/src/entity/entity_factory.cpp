@@ -43,6 +43,11 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 
 EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent)
 {
+	return doSerializeEntity(entity, options, canStoreParent, entity.getPrefabAssetId().value_or(""));
+}
+
+EntityData EntityFactory::doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab)
+{
 	EntityData result;
 
 	// Properties
@@ -52,6 +57,10 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	result.setFlag(EntityData::Flag::Disabled, !entity.isEnabled());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
+	const auto prefabId = entity.getPrefabAssetId().value_or("");
+	if (prefabId != lastPrefab) {
+		result.setPrefab(prefabId);
+	}
 
 	// Components
 	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type), false);
@@ -67,7 +76,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 				// Store just a stub
 				result.getChildren().emplace_back(child.getInstanceUUID());
 			} else {
-				result.getChildren().push_back(serializeEntity(child, options, false));
+				result.getChildren().push_back(doSerializeEntity(child, options, false, prefabId));
 			}
 		}
 	}

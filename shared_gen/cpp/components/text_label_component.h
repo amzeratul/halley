@@ -7,7 +7,7 @@
 
 class TextLabelComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 3 };
+	static constexpr int componentIndex{ 4 };
 	static const constexpr char* componentName{ "TextLabel" };
 
 	Halley::TextRenderer text{};

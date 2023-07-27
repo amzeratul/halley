@@ -5,6 +5,7 @@ using namespace Halley;
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/velocity_component.h"
 #include "components/sprite_component.h"
+#include "components/colour_component.h"
 #include "components/text_label_component.h"
 #include "components/sprite_animation_component.h"
 #include "components/camera_component.h"
@@ -54,10 +55,11 @@ public:
 	}
 	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {
 		Vector<std::unique_ptr<ComponentReflector>> result;
-		result.reserve(15);
+		result.reserve(16);
 		result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<VelocityComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
+		result.push_back(std::make_unique<ComponentReflectorImpl<ColourComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<TextLabelComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteAnimationComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<CameraComponent>>());

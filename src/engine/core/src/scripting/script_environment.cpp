@@ -113,7 +113,7 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		currentInputPin = thread.getCurInputPin();
 
 		// Dead watcher
-		if (nodeState.threadCount == 0 && thread.isWatcher()) {
+		if (nodeState.threadCount == nodeState.watcherCount && thread.isWatcher()) {
 			terminateThread(thread, false);
 			continue;
 		}
@@ -327,10 +327,13 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 			thread.advanceToNode(nodeId, threadStack[i - 1].outputPin, threadStack[i - 1].inputPin);
 			return;
 		}
+		
+		assert(nodeState.threadCount > 0);
+		nodeState.threadCount--;
 
-		if (!thread.isWatcher()) {
-			assert(nodeState.threadCount > 0);
-			nodeState.threadCount--;
+		if (thread.isWatcher()) {
+			assert(nodeState.watcherCount > 0);
+			nodeState.watcherCount--;
 		}
 
 		if (nodeState.threadCount == 0) {
@@ -351,8 +354,8 @@ void ScriptEnvironment::removeStoppedThreads()
 void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 {
 	if (thread.isWatcher() != newState) {
-		if (newState && (!thread.getCurNode() || currentState->getNodeState(*thread.getCurNode()).threadCount == 1)) {
-			// If this is the last thread on this node, don't bother setting as watcher, terminate instead
+		if (newState && (!thread.getCurNode() || currentState->getNodeState(*thread.getCurNode()).threadCount == currentState->getNodeState(*thread.getCurNode()).watcherCount + 1)) {
+			// If this is the last non-watcher thread on this node, don't bother setting as watcher, terminate instead
 			terminateThread(thread, false);
 			return;
 		}
@@ -361,14 +364,15 @@ void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 
 		auto updateNode = [&](int nodeId)
 		{
-			auto& nThreads = currentState->getNodeState(nodeId).threadCount;
+			const auto& nThreads = currentState->getNodeState(nodeId).threadCount;
+			auto& nWatchers = currentState->getNodeState(nodeId).watcherCount;
 			if (newState) {
-				assert(nThreads >= 2);
-				--nThreads;
+				++nWatchers;
 			} else {
-				assert(nThreads >= 1);
-				++nThreads;
+				assert(nWatchers >= 1);
+				--nWatchers;
 			}
+			assert(nWatchers <= nThreads);
 		};
 
 		for (const auto s: thread.getStack()) {

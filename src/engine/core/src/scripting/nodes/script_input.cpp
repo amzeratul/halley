@@ -108,6 +108,7 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 void ScriptInputButton::doInitData(ScriptInputButtonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
 	data.outputMask = static_cast<uint8_t>(nodeData.asInt(0));
+	data.lastFrame = -1;
 }
 
 IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const
@@ -140,16 +141,20 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	if (data.input) {
 		const auto prevMask = data.outputMask;
 
+		const auto curFrame = environment.getCurrentFrameNumber();
+
 		const bool canRead = enabled && (environment.isInputEnabled() || node.getSettings()["bypassEnableCheck"].asBool(false));
-		const bool pressed = canRead && data.input->isPressed();
-		const bool released = canRead && data.input->isReleased();
+		const bool pressed = canRead && curFrame != data.lastFrame && data.input->isPressed();
+		const bool released = canRead && curFrame != data.lastFrame && data.input->isReleased();
 		const bool held = canRead && data.input->isDown();
 		const bool isActive = data.input->isActive();
 
 		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin) | (isActive ? activePin : 0);
 		const uint8_t activate = curMask & ~prevMask;
 		const uint8_t cancel = (prevMask & ~curMask) & (heldPin | notHeldPin | activePin);
+
 		data.outputMask = curMask;
+		data.lastFrame = curFrame;
 
 		if (activate != 0 || cancel != 0) {
 			return Result(ScriptNodeExecutionState::Fork, 0, activate, cancel);

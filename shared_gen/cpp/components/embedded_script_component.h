@@ -7,7 +7,7 @@
 
 class EmbeddedScriptComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 11 };
+	static constexpr int componentIndex{ 12 };
 	static const constexpr char* componentName{ "EmbeddedScript" };
 
 	Halley::ScriptGraph script{};

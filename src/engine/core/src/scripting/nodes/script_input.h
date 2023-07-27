@@ -7,6 +7,7 @@ namespace Halley {
 	public:
 		uint8_t outputMask = 0;
 		std::unique_ptr<InputExclusiveButton> input;
+		int lastFrame = -1;
 
 		ScriptInputButtonData() = default;
 		ScriptInputButtonData(const ScriptInputButtonData& other);

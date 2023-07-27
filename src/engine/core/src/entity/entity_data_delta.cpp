@@ -58,7 +58,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e)
 			{
 				const auto combined = UUID::generateFromUUIDs(e.getPrefabUUID(), to.getInstanceUUID());
-			    return e.matchesUUID(toChild) || combined == toChild.getInstanceUUID();
+			    return e.matchesUUID(toChild) || toChild.matchesUUID(combined);
 			});
 			if (fromIter != from.children.end()) {
 				// Potentially modified
@@ -78,8 +78,8 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e)
 			{
-				const auto combined = UUID::generateFromUUIDs(e.getPrefabUUID(), to.getInstanceUUID());
-			    return e.matchesUUID(fromChild) || combined == e.getInstanceUUID();
+				const auto combined = UUID::generateFromUUIDs(fromChild.getPrefabUUID(), to.getInstanceUUID());
+			    return e.matchesUUID(fromChild) || e.matchesUUID(combined);
 			}) != to.children.end();
 			if (!stillExists) {
 				// Removed

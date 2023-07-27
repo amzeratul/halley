@@ -7,7 +7,7 @@
 
 class AudioSourceComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 9 };
+	static constexpr int componentIndex{ 10 };
 	static const constexpr char* componentName{ "AudioSource" };
 
 	Halley::AudioEmitterHandle emitter{};
