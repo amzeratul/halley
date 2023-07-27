@@ -27,14 +27,6 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, in
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
-	: data(other.data)
-	, dataBlockType(other.dataBlockType)
-	, needToUpdateHash(other.needToUpdateHash)
-	, bindPoint(other.bindPoint)
-	, hash(other.hash)
-{}
-
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	: data(std::move(other.data))
 	, dataBlockType(other.dataBlockType)
@@ -291,6 +283,11 @@ std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
 }
 
 const Vector<MaterialDataBlock>& Material::getDataBlocks() const
+{
+	return dataBlocks;
+}
+
+Vector<MaterialDataBlock>& Material::getDataBlocks()
 {
 	return dataBlocks;
 }

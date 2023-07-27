@@ -855,8 +855,40 @@ Sprite::~Sprite()
 
 void Sprite::reloadSprite(const SpriteResource& sprite)
 {
-	setMaterial(sprite.getMaterial(material->getDefinition().getName()));
+	setMaterial(copyMaterialParameters(material, sprite.getMaterial(material->getDefinition().getName())));
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
+}
+
+std::shared_ptr<Material> Sprite::copyMaterialParameters(const std::shared_ptr<const Material>& oldMaterial, std::shared_ptr<Material> newMaterial)
+{
+	Vector<size_t> compatibleBlocks;
+
+	const size_t nBlocks = newMaterial->getDataBlocks().size();
+	if (oldMaterial->getDataBlocks().size() == nBlocks) {
+		for (size_t i = 0; i < nBlocks; ++i) {
+			const auto& oldBlock = oldMaterial->getDataBlocks()[i];
+			const auto& newBlock = newMaterial->getDataBlocks()[i];
+			if (oldBlock.getType() == MaterialDataBlockType::Local && newBlock.getType() == MaterialDataBlockType::Local) {
+				if (oldBlock.getData().size() == newBlock.getData().size() && memcmp(oldBlock.getData().data(), newBlock.getData().data(), newBlock.getData().size()) != 0) {
+					compatibleBlocks.push_back(i);
+				}
+			}
+		}
+	}
+
+	if (compatibleBlocks.empty()) {
+		return newMaterial;
+	}
+
+	auto result = newMaterial->clone();
+
+	for (auto i: compatibleBlocks) {
+		const auto& oldBlock = oldMaterial->getDataBlocks()[i];
+		auto& newBlock = result->getDataBlocks()[i];
+		newBlock = oldBlock;
+	}
+
+	return result;
 }
 
 Sprite::Sprite(const Sprite& other)
@@ -946,4 +978,5 @@ void Sprite::setHotReload(const SpriteHotReloader* ref, uint32_t index)
 	hotReloadRef = ref;
 	hotReloadIdx = index;
 }
+
 #endif

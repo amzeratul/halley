@@ -211,6 +211,7 @@ namespace Halley
 		const SpriteHotReloader* hotReloadRef = nullptr;
 
 		void setHotReload(const SpriteHotReloader* ref, uint32_t index);
+		std::shared_ptr<Material> copyMaterialParameters(const std::shared_ptr<const Material>& oldMaterial, std::shared_ptr<Material> newMaterial);
 #else
 	public:
 		Sprite(const Sprite& other) = default;

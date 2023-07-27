@@ -43,13 +43,16 @@ namespace Halley
 	public:
 		MaterialDataBlock();
 		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def);
-		MaterialDataBlock(const MaterialDataBlock& other);
+		MaterialDataBlock(const MaterialDataBlock& other) = default;
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
 		int getBindPoint() const { return bindPoint; }
 		gsl::span<const gsl::byte> getData() const;
 		MaterialDataBlockType getType() const { return dataBlockType; }
 		uint64_t getHash() const;
+
+		MaterialDataBlock& operator=(const MaterialDataBlock& other) = default;
+		MaterialDataBlock& operator=(MaterialDataBlock&& other) = default;
 
 		bool operator==(const MaterialDataBlock& other) const;
 		bool operator!=(const MaterialDataBlock& other) const;
@@ -93,6 +96,7 @@ namespace Halley
 		size_t getNumTextureUnits() const;
 
 		const Vector<MaterialDataBlock>& getDataBlocks() const;
+		Vector<MaterialDataBlock>& getDataBlocks();
 
 		void setPassEnabled(int pass, bool enabled);
 		bool isPassEnabled(int pass) const;
