@@ -138,6 +138,8 @@ void ResourceCollectionBase::age(float time)
 
 	for (auto& r: resources) {
 		const auto& resourcePtr = r.second.res;
+		// This code is dodgy
+		// It's designed for Texture, but that's held by a shared_ptr in SpriteSheet
 		if (resourcePtr.use_count() <= 2) {
 			resourcePtr->increaseAge(time);
 		} else {
