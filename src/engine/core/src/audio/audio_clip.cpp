@@ -173,7 +173,12 @@ ResourceMemoryUsage AudioClip::getMemoryUsage() const
 			result.ramUsage += v->getSizeBytes() + sizeof(VorbisData);
 		}
 	}
-	result.ramUsage += samples.size() * sizeof(AudioSample);
+	for (auto& s: samples) {
+		result.ramUsage += s.byte_span().size();
+	}
+	for (auto& b: buffer) {
+		result.ramUsage += b.byte_span().size();
+	}
 	result.ramUsage += sizeof(*this);
 
 	return result;
