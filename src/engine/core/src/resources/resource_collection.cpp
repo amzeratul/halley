@@ -161,6 +161,7 @@ ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
 			auto& resourcePtr = iter->second.res;
 			if (resourcePtr.use_count() <= 2 && resourcePtr->getAge() > maxAge) {
 				usage += resourcePtr->getMemoryUsage();
+				resourcePtr->setUnloaded();
 				toDelete.push_back(iter);
 			}
 
@@ -176,6 +177,15 @@ ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
 	toDelete.clear();
 
 	return usage;
+}
+
+void ResourceCollectionBase::notifyResourcesUnloaded()
+{
+	std::shared_lock lock(mutex);
+
+	for (auto& r: resources) {
+		r.second.res->onOtherResourcesUnloaded();
+	}
 }
 
 ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)

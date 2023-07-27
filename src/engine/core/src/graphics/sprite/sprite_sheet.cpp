@@ -435,6 +435,16 @@ void SpriteSheet::deserialize(Deserializer& s)
 	assignIds();
 }
 
+void SpriteSheet::onOtherResourcesUnloaded()
+{
+	if (texture && texture->isUnloaded()) {
+		texture = {};
+	}
+	if (paletteTexture && paletteTexture->isUnloaded()) {
+		paletteTexture = {};
+	}
+}
+
 ResourceMemoryUsage SpriteSheet::getMemoryUsage() const
 {
 	size_t total = 0;

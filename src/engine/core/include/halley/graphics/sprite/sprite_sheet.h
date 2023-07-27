@@ -157,6 +157,8 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		void onOtherResourcesUnloaded() override;
+
 	protected:
 		ResourceMemoryUsage getMemoryUsage() const override;
 

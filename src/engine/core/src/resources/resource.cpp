@@ -56,6 +56,20 @@ float Resource::getAge() const
 	return age;
 }
 
+void Resource::setUnloaded()
+{
+	unloaded = true;
+}
+
+bool Resource::isUnloaded() const
+{
+	return unloaded;
+}
+
+void Resource::onOtherResourcesUnloaded()
+{
+}
+
 void Resource::reload(Resource&& resource)
 {
 }

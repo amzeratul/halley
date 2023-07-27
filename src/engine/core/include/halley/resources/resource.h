@@ -193,6 +193,10 @@ namespace Halley
 		void resetAge();
 		float getAge() const;
 
+		void setUnloaded();
+		bool isUnloaded() const;
+		virtual void onOtherResourcesUnloaded();
+
 	protected:
 		virtual void reload(Resource&& resource);
 
@@ -202,6 +206,7 @@ namespace Halley
 		int assetVersion = 0;
 		float age = 0;
 		bool metaSet = false;
+		bool unloaded = false;
 	};
 
 	class ResourceObserver

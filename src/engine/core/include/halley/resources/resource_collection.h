@@ -63,6 +63,7 @@ namespace Halley
 
 		/// <returns>How much memory was freed</returns>
 		ResourceMemoryUsage clearOldResources(float maxAge);
+		void notifyResourcesUnloaded();
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
