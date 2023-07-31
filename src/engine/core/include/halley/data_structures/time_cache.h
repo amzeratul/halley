@@ -7,8 +7,13 @@ namespace Halley {
     template <typename K, typename V, typename Time>
     class TimeCache {
     public:
-        template <typename F>
-        const V& get(const K& key, const F& make)
+        struct Entry {
+            V value;
+            Time age = 0;
+        };
+
+    	template <typename F>
+        V& get(const K& key, const F& make)
         {
             if (const auto iter = values.find(key);  iter != values.end()) {
                 iter->second.age = 0;
@@ -28,11 +33,17 @@ namespace Halley {
             std_ex::erase_if_value(values, [&](const Entry& e) { return e.age > maxAge; });
         }
 
+        const HashMap<K, Entry>& getHashMap() const
+    	{
+            return values;
+    	}
+
+        HashMap<K, Entry>& getHashMap()
+    	{
+            return values;
+    	}
+
     private:
-        struct Entry {
-            V value;
-            Time age = 0;
-        };
         HashMap<K, Entry> values;
     };
 }
