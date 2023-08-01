@@ -3,7 +3,6 @@
 #include "metadata_editor.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
-#include "halley/ui/widgets/ui_animation.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "src/ui/scroll_background.h"
 
@@ -237,8 +236,6 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	nineSliceVSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceHSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	actionPointSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
-	crossHairH.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
-	crossHairV.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
 
 	actionPointId = "pivot";
 }
@@ -336,9 +333,6 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 		nineSliceVSprite.setVisible(false);
 		nineSliceHSprite.setVisible(false);
 	}
-
-	//crossHairH.setSize(Vector2f(getSize().x, 1.0f)).setPosition(Vector2f(getPosition().x, screenSpaceMousePos.y));
-	//crossHairV.setSize(Vector2f(1.0f, getSize().y)).setPosition(Vector2f(screenSpaceMousePos.x, getPosition().y));
 }
 
 namespace {
@@ -395,15 +389,6 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 		p.drawLine(LineSegment(p0, p1) + off, 1.0f, colour);
 		p.drawLine(LineSegment(p2, p3) + off, 1.0f, colour);
 	});
-
-	/*
-	if (rect.getVertical().contains(crossHairH.getPosition().y)) {
-		painter.draw(crossHairH);
-	}
-	if (rect.getHorizontal().contains(crossHairV.getPosition().x)) {
-		painter.draw(crossHairV);
-	}
-	*/
 }
 
 void AnimationEditorDisplay::onMouseOver(Vector2f mousePos, KeyMods keyMods)

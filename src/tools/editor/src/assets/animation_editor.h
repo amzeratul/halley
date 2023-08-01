@@ -89,8 +89,6 @@ namespace Halley {
 		Sprite nineSliceVSprite;
 		Sprite nineSliceHSprite;
 		Sprite actionPointSprite;
-		Sprite crossHairH;
-		Sprite crossHairV;
 
 		std::optional<Vector2i> origPivot;
 		Rect4i origBounds;
