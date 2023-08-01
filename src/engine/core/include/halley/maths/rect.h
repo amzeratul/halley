@@ -416,6 +416,20 @@ namespace Halley {
 			const auto size = getSize();
 			return Rect2DIterator<T>(getTopLeft(), size, size.x * size.y);
 		}
+
+		Vector2D<T> getVertex(size_t i) const
+		{
+			if (i == 0) {
+				return p1;
+			} else if (i == 1) {
+				return Vector2D<T>(p2.x, p1.y);
+			} else if (i == 2) {
+				return p2;
+			} else if (i == 3) {
+				return Vector2D<T>(p1.x, p2.y);
+			}
+			return {};
+		}
 	};
 
 	template <typename T>

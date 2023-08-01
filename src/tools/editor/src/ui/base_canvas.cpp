@@ -129,12 +129,12 @@ void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
 	}
 	
 	if (dragging && !shouldDrag) {
-		onMouseOver(mousePos);
+		onMouseOver(mousePos, KeyMods::None); // Hmmm
 		dragging = false;
 	}
 }
 
-void BaseCanvas::onMouseOver(Vector2f mousePos)
+void BaseCanvas::onMouseOver(Vector2f mousePos, KeyMods keyMods)
 {
 	lastMousePos = mousePos;
 	if (dragging) {
@@ -142,7 +142,7 @@ void BaseCanvas::onMouseOver(Vector2f mousePos)
 	}
 
 	if (mousePosListener) {
-		mousePosListener(mousePos);
+		mousePosListener(mousePos, keyMods);
 	}
 
 	UIClickable::onMouseOver(mousePos);

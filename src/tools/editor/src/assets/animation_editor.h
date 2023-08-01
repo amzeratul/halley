@@ -59,7 +59,7 @@ namespace Halley {
 
 		const Rect4f& getBounds() const;
 		Vector2f getMousePos() const;
-		void onMouseOver(Vector2f mousePos) override;
+		void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
 
 		void setMetadataEditor(MetadataEditor& metadataEditor);
 
@@ -98,6 +98,7 @@ namespace Halley {
 		String actionPointId;
 
 		float zoom = 1.0f;
+		bool isoMode = false;
 		Vector2f mousePos;
 		Vector2f screenSpaceMousePos;
 

@@ -114,9 +114,9 @@ void AnimationEditor::setupWindow()
 		animationDisplay->setZoom(zoom);
 	});
 
-	scrollBg->setMousePosListener([=] (Vector2f mousePos)
+	scrollBg->setMousePosListener([=] (Vector2f mousePos, KeyMods keyMods)
 	{
-		animationDisplay->onMouseOver(mousePos);
+		animationDisplay->onMouseOver(mousePos, keyMods);
 	});
 
 	setHandle(UIEventType::CanvasDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
@@ -337,8 +337,29 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 		nineSliceHSprite.setVisible(false);
 	}
 
-	crossHairH.setSize(Vector2f(getSize().x, 1.0f)).setPosition(Vector2f(getPosition().x, screenSpaceMousePos.y));
-	crossHairV.setSize(Vector2f(1.0f, getSize().y)).setPosition(Vector2f(screenSpaceMousePos.x, getPosition().y));
+	//crossHairH.setSize(Vector2f(getSize().x, 1.0f)).setPosition(Vector2f(getPosition().x, screenSpaceMousePos.y));
+	//crossHairV.setSize(Vector2f(1.0f, getSize().y)).setPosition(Vector2f(screenSpaceMousePos.x, getPosition().y));
+}
+
+namespace {
+	Vector2f findPoint(Vector2f origin, Angle1f dir, Rect4f bounds)
+	{
+		const auto ray = Ray(origin, Vector2f(1, 0).rotate(dir));
+		Vector<Ray::RayCastResult> results;
+		results.reserve(4);
+		for (int i = 0; i < 4; ++i) {
+			const auto seg = LineSegment(bounds.getVertex(i), bounds.getVertex((i + 1) % 4));
+			if (auto r = ray.castLineSegment(seg)) {
+				results.push_back(*r);
+			}
+		}
+		if (results.empty()) {
+			return origin;
+		}
+
+		std::sort(results.begin(), results.end());
+		return results.back().pos;
+	}
 }
 
 void AnimationEditorDisplay::draw(UIPainter& painter) const
@@ -355,19 +376,41 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 		painter.draw(nineSliceVSprite);
 	}
 	
+	const auto mousePos = screenSpaceMousePos;
+	const bool iso = isoMode;
 	const auto rect = getRect();
+	auto p2 = painter.withClip(rect);
+	p2.draw([rect, mousePos, iso] (Painter& p)
+	{
+		const auto colour = Colour4f(1, 0, 1, 0.4f);
+		const auto a0 = Angle1f::fromDegrees(iso ? 26.5650512f : 0.0f);
+		const auto a1 = Angle1f::fromDegrees(iso ? -26.5650512f : 90.0f);
+		const auto a180 = Angle1f::fromDegrees(180);
+		const auto p0 = findPoint(mousePos, a0, rect);
+		const auto p1 = findPoint(mousePos, a0 + a180, rect);
+		const auto p2 = findPoint(mousePos, a1, rect);
+		const auto p3 = findPoint(mousePos, a1 + a180, rect);
+		const auto off = Vector2f(0.5f, 0.5f);
+		
+		p.drawLine(LineSegment(p0, p1) + off, 1.0f, colour);
+		p.drawLine(LineSegment(p2, p3) + off, 1.0f, colour);
+	});
+
+	/*
 	if (rect.getVertical().contains(crossHairH.getPosition().y)) {
 		painter.draw(crossHairH);
 	}
 	if (rect.getHorizontal().contains(crossHairV.getPosition().x)) {
 		painter.draw(crossHairV);
 	}
+	*/
 }
 
-void AnimationEditorDisplay::onMouseOver(Vector2f mousePos)
+void AnimationEditorDisplay::onMouseOver(Vector2f mousePos, KeyMods keyMods)
 {
 	this->screenSpaceMousePos = mousePos;
 	this->mousePos = screenToImageSpace(mousePos);
+	isoMode = (keyMods & KeyMods::Ctrl) != KeyMods::None;
 }
 
 void AnimationEditorDisplay::setMetadataEditor(MetadataEditor& metadataEditor)

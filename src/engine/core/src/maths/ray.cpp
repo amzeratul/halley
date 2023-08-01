@@ -2,6 +2,11 @@
 #include "halley/maths/polygon.h"
 using namespace Halley;
 
+bool Ray::RayCastResult::operator<(const RayCastResult& other) const
+{
+	return distance < other.distance;
+}
+
 Ray::Ray()
 {
 }

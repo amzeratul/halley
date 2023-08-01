@@ -20,6 +20,8 @@ namespace Halley {
 			RayCastResult(float distance, Vector2f normal, Vector2f pos)
 				: distance(distance), normal(normal), pos(pos)
 			{}
+
+			bool operator<(const RayCastResult& other) const;
 		};
 
 		Vector2f p;
