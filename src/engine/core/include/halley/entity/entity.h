@@ -589,7 +589,7 @@ namespace Halley {
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
-		void setParent(EntityRef& parent, size_t childIdx = -1)
+		void setParent(const EntityRef& parent, size_t childIdx = -1)
 		{
 			validate();
 			entity->setParent(parent.entity, true, childIdx);
