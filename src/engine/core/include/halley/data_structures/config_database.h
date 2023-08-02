@@ -80,6 +80,13 @@ namespace Halley {
             return keys;
         }
 
+        Vector<String> getSortedKeys() const
+        {
+            auto keys = getKeys();
+            std::sort(keys.begin(), keys.end());
+            return keys;
+        }
+
         Vector<const T*> getValues() const
         {
             Vector<const T*> result;
@@ -170,6 +177,12 @@ namespace Halley {
         Vector<String> getKeys() const
         {
             return of<T>().getKeys();
+        }
+
+        template <typename T>
+        Vector<String> getSortedKeys() const
+        {
+            return of<T>().getSortedKeys();
         }
 
         template <typename T>
