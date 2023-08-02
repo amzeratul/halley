@@ -102,7 +102,9 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		selBox.reset();
 		selBoxStartSelectedEntities.clear();
 	}
-	if (!gizmoCollection->canSelectEntities()) {
+
+	const bool canSelectEntities = gizmoCollection->canSelectEntities();
+	if (!canSelectEntities) {
 		outputState.newSelection = Vector<UUID>();
 		outputState.selectionMode = UIList::SelectionMode::Normal;
 	}
@@ -112,7 +114,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	outputState.blockRightClick = gizmoUpdateResult.blockRightClick;
 	if (!gizmoUpdateResult.hasHighlight && inputState.leftClickPressed) {
 		gizmoCollection->deselect();
-		onClick(inputState, outputState, gizmoUpdateResult.allowEntitySpriteSelection);
+		onClick(inputState, outputState, gizmoUpdateResult.allowEntitySpriteSelection, canSelectEntities);
 	}
 
 	// Start dragging
@@ -769,12 +771,15 @@ EntityRef SceneEditor::getRootEntityAt(Vector2f point, bool allowUnselectable, E
 	return entities.at(highlightDelta);
 }
 
-void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite)
+void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite, bool canSelectEntities)
 {
 	if (!input.mousePos) {
 		return;
 	} 
 	if (input.spaceHeld || input.shiftHeld || (input.altHeld && !input.ctrlHeld)) {
+		return;
+	}
+	if (!canSelectEntities) {
 		return;
 	}
 	

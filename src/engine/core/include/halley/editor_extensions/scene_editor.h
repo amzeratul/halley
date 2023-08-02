@@ -167,7 +167,7 @@ namespace Halley {
     	EntityRef getEntity(const UUID& uuid) const;
 
     	bool doesAreaOverlapSprite(EntityRef& e, Rect4f area) const;
-    	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite);
+    	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite, bool canSelectEntities);
 		void onStartSelectionBox();
 		void onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output);
 
