@@ -90,7 +90,7 @@ void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
 
 void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption)
 {
-	setAssetIds(std::move(ids), std::move(names), defaultOption, "", {}, {});
+	setAssetIds(std::move(ids), std::move(names), std::move(defaultOption), "", {}, {});
 }
 
 void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption, String prefix, Callback callback, HighlightCallback highlightCallback)
