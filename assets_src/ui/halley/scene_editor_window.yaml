@@ -59,5 +59,8 @@ children:
     - widget: { id: customUI, class: widget }
       sizer: { type: vertical }
       children: []
+- widget: { id: majorCustomTool, active: false, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+  children: []
+  sizer: { type: vertical }
 - widget: { id: entityEditor, class: entityEditor }
 ...

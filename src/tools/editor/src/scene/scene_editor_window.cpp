@@ -1329,14 +1329,25 @@ void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
 	}
 	curToolUI = ui;
 
-	auto customUIField = canvas->getWidget("currentToolUI");
+	const auto customUIField = canvas->getWidget("currentToolUI");
+	const auto majorToolField = getWidget("majorCustomTool");
 	customUIField->setShrinkOnLayout(true);
 	customUIField->clear();
-	if (ui) {
-		customUIField->add(ui, 1);
-	}
-	customUIField->setActive(!!ui);
 	customUIField->setInteractWithMouse(true);
+	majorToolField->setShrinkOnLayout(true);
+	majorToolField->clear();
+
+	const bool isMajorTool = ui && dynamic_cast<IEditorMajorCustomTool*>(ui.get()) != nullptr;
+
+	if (ui) {
+		if (isMajorTool) {
+			majorToolField->add(ui, 1);
+		} else {
+			customUIField->add(ui, 1);
+		}
+	}
+	customUIField->setActive(ui && !isMajorTool);
+	majorToolField->setActive(ui && isMajorTool);
 }
 
 void SceneEditorWindow::setModified(bool enabled)

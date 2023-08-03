@@ -144,4 +144,9 @@ namespace Halley {
 		std::optional<Line> findSnapLine(Vector2f cur, Vector2f ref) const;
 		void copyEntityDatasToOldIfNeeded();
 	};
+
+	class IEditorMajorCustomTool {
+	public:
+		virtual ~IEditorMajorCustomTool() = default;
+	};
 }
