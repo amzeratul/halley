@@ -29,7 +29,7 @@ ChooseUIStyleWindow::ChooseUIStyleWindow(Vector2f minSize, UIFactory& factory, S
 	setTitle(LocalisedString::fromHardcodedString("Choose UI Style"));
 }
 
-PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback callback)
+PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, std::optional<String> initialQuery, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, project(project)
 {
@@ -39,6 +39,10 @@ PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback call
 	setAssetIds(std::move(assetNames), "");
 	setTitle(LocalisedString::fromHardcodedString("Open asset"));
 	setAnchor(UIAnchor(Vector2f(0.5f, 0.0f), Vector2f(0.5f, 0.0f)));
+
+	if (initialQuery) {
+		setSearch(*initialQuery);
+	}
 }
 
 void PaletteWindow::setIconRetriever(IconRetriever retriever)

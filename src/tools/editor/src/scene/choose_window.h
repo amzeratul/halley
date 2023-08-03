@@ -53,7 +53,7 @@ namespace Halley {
 	public:
 		using IconRetriever = std::function<Sprite(const String& prefix, const String& id)>;
 
-		PaletteWindow(UIFactory& factory, Project& project, Callback callback);
+		PaletteWindow(UIFactory& factory, Project& project, std::optional<String> initialQuery, Callback callback);
 		void setIconRetriever(IconRetriever retriever);
 
 	protected:

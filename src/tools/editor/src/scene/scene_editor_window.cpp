@@ -145,6 +145,11 @@ void SceneEditorWindow::makeUI()
 	{
 		entityList->getList().setAllExpanded(false);
 	});
+
+	setHandle(UIEventType::ButtonClicked, "searchEntities", [=] (const UIEvent& event)
+	{
+		projectWindow.openAssetFinder("@");
+	});
 }
 
 void SceneEditorWindow::onAddedToRoot(UIRoot& root)
@@ -498,7 +503,7 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	const auto cameraStartPos = gameBridge->getCameraPos();
 	const auto initialSelection = entityList->getCurrentSelection();
 
-	assetFinder.setAssetIds(std::move(ids), std::move(names), "@", [=](std::optional<String> result)
+	assetFinder.setAssetIds(std::move(ids), std::move(names), initialSelection, "@", [=](std::optional<String> result)
 	{
 		if (result) {
 			selectEntity(*result);

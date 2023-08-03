@@ -22,11 +22,12 @@ namespace Halley {
         void onAddedToRoot(UIRoot& root) override;
 		void setAssetIds(Vector<String> ids, String defaultOption);
 		void setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption);
-		void setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback, HighlightCallback highlightCallback);
+		void setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption, String prefix, Callback callback, HighlightCallback highlightCallback);
 
 		void setTitle(LocalisedString title);
 		void setInputGhostText(LocalisedString text);
 		void setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption);
+		void setSearch(String text);
 
     protected:
         std::shared_ptr<UIList> options;
@@ -58,6 +59,7 @@ namespace Halley {
 		struct DataSet {
 			Vector<String> origIds;
 			Vector<String> origNames;
+			String defaultOption;
 			String prefix;
 			Callback callback;
 			HighlightCallback highlightCallback;
@@ -65,7 +67,6 @@ namespace Halley {
 
 		Vector<String> ids;
 		Vector<String> names;
-        String defaultOption;
 
     	UIFactory& factory;
 		UISizerType orientation;

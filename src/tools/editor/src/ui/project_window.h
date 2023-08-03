@@ -65,6 +65,8 @@ namespace Halley {
         void buildGame() override;
         void updateEditor() override;
 
+    	void openAssetFinder(std::optional<String> initialQuery);
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
@@ -136,8 +138,6 @@ namespace Halley {
     	void tryLoadCustomUI();
     	bool loadCustomUI();
 		void destroyCustomUI();
-
-    	void openAssetFinder();
 
         void toggleDebugConsole();
     	void updateDLLStatus(ProjectDLL::Status status);

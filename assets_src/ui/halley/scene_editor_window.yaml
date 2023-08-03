@@ -1,66 +1,74 @@
 ---
 widget: { class: widget }
-sizer: { type: horizontal, gap: 6 }
+sizer: { type: vertical, gap: 6 }
 proportion: 1
 children:
-- widget: { class: widget, id: sceneEditorLeftPanel }
-  sizer: { type: vertical }
+- sizer: { type: horizontal, gap: 6 }
+  border: [0, -6, 0, 0]
   children:
-    - sizer: { type: horizontal }
-      children:
-      - widget: { id: expandAll, class: button, text: Expand All, size: [60, 20] }
-        proportion: 1
-      - widget: { id: collapseAll, class: button, text: Collapse All, size: [60, 20] }
-        proportion: 1
-    - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 22] }
-      sizer: { type: vertical }
-      proportion: 1
-      children:
-        - widget: { id: entityList, class: entityList }
-          proportion: 1
-    - widget: { id: entityValidatorListUI, class: entityValidatorList }
-    - sizer: { type: horizontal }
-      children:
-        - widget: { id: addEntity, class: button, text: Add Entity, tooltip: "Adds a blank new entity as a child of the current selection. [Ctrl+N]" }
-          proportion: 1
-        - widget: { id: addPrefab, class: button, text: Add Prefab, tooltip: "Adds a Prefab as a child of the current selection. [Ctrl+Shift+N]" }
-          proportion: 1
-        - widget: { id: removeEntity, class: button, text: Remove, tooltip: "Removes the currently selected entity. [Delete]" }
-          proportion: 1
-- sizer: { type: vertical}
+  - widget: { id: sceneEditorToolbarButtons, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [350, 20] }
+    sizer: { type: horizontal, gap: 4 }
+    children:
+      - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
+        border: [0, 0, 10, 0]
+      - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
+      - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
+  - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+    sizer: { type: horizontal }
+    proportion: 1
+    children:
+      - widget:
+          id: toolMode
+          class: list
+          type: horizontal
+          options: []
+- sizer: { type: horizontal }
   proportion: 1
   children:
-    - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
-      sizer: { type: horizontal }
-      children:
-        - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
-          border: [0, 0, 10, 0]
-        - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
-        - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
-        - border: [10, 0, 0, 0]
-          widget:
-            id: toolMode
-            class: list
-            type: horizontal
-            options: []
-    - widget: { id: canvas, class: sceneEditorCanvas }
-      proportion: 1
-      sizer: { type: vertical }
-      children:
-        - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [100, 32] }
-          sizer: { type: horizontal }
-          border: [10, 10, 10, 10]
-          fill: right
-          children: []
-        - widget: { id: debugConsole, class: debugConsole, size: [640, 320], active: false }
+  - widget: { class: widget, id: sceneEditorLeftPanel }
+    sizer: { type: vertical, gap: 4 }
+    children:
+      - sizer: { type: horizontal, gap: 4 }
+        children:
+        - widget: { id: expandAll, class: button, style: buttonThin, text: Expand All, size: [60, 20] }
           proportion: 1
-          border: [10, 10, 10, 10]
-          fill: [ bottom, left ]
-    - widget: { id: customUI, class: widget }
-      sizer: { type: vertical }
-      children: []
-- widget: { id: majorCustomTool, active: false, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
-  children: []
+        - widget: { id: collapseAll, class: button, style: buttonThin, text: Collapse All, size: [60, 20] }
+          proportion: 1
+        - widget: { id: searchEntities, class: button, style: buttonThin, text: Search, tooltip: "Searches entities [Ctrl+P, @]", size: [60, 20] }
+          proportion: 1
+      - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 22] }
+        sizer: { type: vertical }
+        proportion: 1
+        children:
+          - widget: { id: entityList, class: entityList }
+            proportion: 1
+      - widget: { id: entityValidatorListUI, class: entityValidatorList }
+      - sizer: { type: horizontal, gap: 4 }
+        children:
+          - widget: { id: addEntity, class: button, style: buttonThin, text: Add Entity, tooltip: "Adds a blank new entity as a child of the current selection. [Ctrl+N]" }
+            proportion: 1
+          - widget: { id: addPrefab, class: button, style: buttonThin, text: Add Prefab, tooltip: "Adds a Prefab as a child of the current selection. [Ctrl+Shift+N]" }
+            proportion: 1
+          - widget: { id: removeEntity, class: button, style: buttonThin, text: Remove, tooltip: "Removes the currently selected entity. [Delete]" }
+            proportion: 1
+  - widget: { id: canvas, class: sceneEditorCanvas }
+    proportion: 1
+    sizer: { type: vertical }
+    children:
+      - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [100, 32] }
+        sizer: { type: horizontal }
+        border: [10, 10, 10, 10]
+        fill: right
+        children: []
+      - widget: { id: debugConsole, class: debugConsole, size: [640, 320], active: false }
+        proportion: 1
+        border: [10, 10, 10, 10]
+        fill: [ bottom, left ]
+  - widget: { id: majorCustomTool, active: false, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+    children: []
+    sizer: { type: vertical }
+  - widget: { id: entityEditor, class: entityEditor }
+- widget: { id: customUI, class: widget }
   sizer: { type: vertical }
-- widget: { id: entityEditor, class: entityEditor }
+  children: []
 ...

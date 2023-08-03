@@ -269,7 +269,7 @@ void ProjectWindow::update(Time t, bool moved)
 bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::P, KeyMods::Ctrl)) {
-		openAssetFinder();
+		openAssetFinder("");
 		return true;
 	}
 
@@ -366,10 +366,10 @@ TaskSet& ProjectWindow::getTasks() const
 	return *tasks;
 }
 
-void ProjectWindow::openAssetFinder()
+void ProjectWindow::openAssetFinder(std::optional<String> initialQuery)
 {
 	if (!assetFinder) {
-		assetFinder = std::make_shared<PaletteWindow>(factory, project, [=] (std::optional<String> result)
+		assetFinder = std::make_shared<PaletteWindow>(factory, project, initialQuery, [=] (std::optional<String> result)
 		{
 			if (result) {
 				openFile(result.value());

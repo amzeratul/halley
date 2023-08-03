@@ -90,16 +90,16 @@ void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
 
 void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption)
 {
-	this->defaultOption = std::move(defaultOption);
-	setAssetIds(std::move(ids), std::move(names), "", {}, {});
+	setAssetIds(std::move(ids), std::move(names), defaultOption, "", {}, {});
 }
 
-void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback, HighlightCallback highlightCallback)
+void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption, String prefix, Callback callback, HighlightCallback highlightCallback)
 {
 	auto& e = getEntry(prefix);
 
 	e.origIds = std::move(ids);
 	e.origNames = std::move(names);
+	e.defaultOption = std::move(defaultOption);
 	if (e.origNames.empty()) {
 		e.origNames = e.origIds;
 	}
@@ -192,7 +192,7 @@ void ChooseAssetWindow::populateList()
 	if (hasFilter) {
 		options->setSelectedOption(0);
 	} else {
-		options->setSelectedOptionId(defaultOption);
+		options->setSelectedOptionId(entries[curEntry].defaultOption);
 	}
 
 	if (options->getCount() > 0) {
@@ -336,6 +336,11 @@ void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, 
 	});
 	
 	setCategoryFilter(defaultOption);
+}
+
+void ChooseAssetWindow::setSearch(String text)
+{
+	getWidgetAs<UITextInput>("search")->setText(text);
 }
 
 void ChooseAssetWindow::setUserFilter(const String& str)
