@@ -102,6 +102,8 @@ namespace Halley {
     	virtual ~ScriptEnvironment() = default;
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
+
+    	void stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads);
     	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
 		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId);
 
@@ -156,7 +158,7 @@ namespace Halley {
         void sendSystemMessage(SystemMessageData message);
 
         void startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params);
-        void stopScript(EntityId target, const String& scriptName);
+        void stopScript(EntityId target, const String& scriptName, bool allThreads = true);
         void stopScriptTag(EntityId target, const String& tag);
 
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();

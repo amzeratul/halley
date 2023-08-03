@@ -210,6 +210,7 @@ Vector<IScriptNodeType::SettingType> ScriptStartScript::getSettingTypes() const
 		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
 		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} },
 		SettingType{ "terminateOnDestruction", "bool", Vector<String>{"false"} },
+		SettingType{ "terminateAllThreadsOnDestruction", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -275,7 +276,13 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 	str.append(" with tags ");
 	str.append(node.getSettings()["tags"].asString("{}"), settingColour);
 	if (hasDestructor(node)) {
-		str.append(" and terminate on destruction", parameterColour);
+		str.append(" and ");
+		if (node.getSettings()["terminateAllThreadsOnDestruction"].asBool(false)) {
+			str.append("terminate all threads", parameterColour);
+		} else {
+			str.append("terminate main thread", parameterColour);
+		}
+		str.append(" on destruction");
 	}
 	return str.moveResults();
 }
@@ -339,7 +346,7 @@ IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environme
 void ScriptStartScript::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptStartScriptData& data) const
 {
 	if (hasDestructor(node) && data.target.isValid() && !data.scriptName.isEmpty()) {
-		environment.stopScript(data.target, data.scriptName);
+		environment.stopScript(data.target, data.scriptName, node.getSettings()["terminateAllThreadsOnDestruction"].asBool(false));
 	}
 }
 

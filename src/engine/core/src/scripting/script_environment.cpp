@@ -180,7 +180,7 @@ void ScriptEnvironment::terminateStateWith(const ScriptGraph* scriptGraph)
 	}
 }
 
-void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
+void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, bool allThreads)
 {
 	currentGraph = graphState.getScriptGraphPtr();
 	if (!currentGraph) {
@@ -192,12 +192,23 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
-	doTerminateState();
+	if (allThreads) {
+		doTerminateState();
+	} else {
+		if (const auto startNodeId = currentGraph->getStartNode()) {
+			abortCodePath(*startNodeId, {});
+		}
+	}
 
 	currentGraph = nullptr;
 	currentState = nullptr;
 	currentEntityVariables = nullptr;
 	currentEntity = EntityId();
+}
+
+void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
+{
+	stopState(graphState, curEntity, entityVariables, true);
 }
 
 void ScriptEnvironment::doTerminateState()
@@ -627,9 +638,9 @@ void ScriptEnvironment::startScript(EntityId target, const String& scriptName, V
 	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params) });
 }
 
-void ScriptEnvironment::stopScript(EntityId target, const String& scriptName)
+void ScriptEnvironment::stopScript(EntityId target, const String& scriptName, bool allThreads)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName, {}, { ConfigNode(allThreads) } });
 }
 
 void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag)

@@ -202,11 +202,12 @@ private:
 		// Run all stop requests first (otherwise you might try to stop-start a script and it'll fail because it's already running)
 		for (const auto& r: requests) {
 			if (r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop || r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag) {
+				const bool allThreads = r.params.front().asBool();
 				if (auto* scriptable = scriptableFamily.tryFind(r.target)) {
 					for (auto& state: scriptable->scriptable.activeStates) {
 						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state.first == r.value)
 							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state.second->hasTag(r.value))) {
-							getScriptingService().getEnvironment().terminateState(*state.second, scriptable->entityId, scriptable->scriptable.variables);
+							getScriptingService().getEnvironment().stopState(*state.second, scriptable->entityId, scriptable->scriptable.variables, allThreads);
 						}
 					}
 					eraseDeadScripts(*scriptable);
