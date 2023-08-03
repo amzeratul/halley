@@ -94,6 +94,7 @@ namespace Halley {
             String value;
             Vector<String> startTags;
             Vector<ConfigNode> params;
+            bool allThreads = false;
         };
 
         using ScriptTargetRetriever = std::function<EntityId(const String&)>;
@@ -159,7 +160,7 @@ namespace Halley {
 
         void startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params);
         void stopScript(EntityId target, const String& scriptName, bool allThreads = true);
-        void stopScriptTag(EntityId target, const String& tag);
+        void stopScriptTag(EntityId target, const String& tag, bool allThreads = true);
 
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();

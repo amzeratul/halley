@@ -635,17 +635,17 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 
 void ScriptEnvironment::startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params) });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params), false });
 }
 
 void ScriptEnvironment::stopScript(EntityId target, const String& scriptName, bool allThreads)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName, {}, { ConfigNode(allThreads) } });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName, {}, {}, allThreads });
 }
 
-void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag)
+void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag, bool allThreads)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag, {}, {}, allThreads });
 }
 
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()
