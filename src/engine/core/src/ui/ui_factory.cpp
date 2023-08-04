@@ -30,6 +30,7 @@
 #include "halley/ui/widgets/ui_tree_list.h"
 #include "halley/ui/behaviours/ui_reload_ui_behaviour.h"
 #include "halley/ui/widgets/ui_debug_console.h"
+#include "halley/ui/widgets/ui_render_surface.h"
 #include "halley/ui/widgets/ui_spin_control2.h"
 
 using namespace Halley;
@@ -87,6 +88,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); }, getOptionListMorpherProperties());
 	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); }, getTreeListProperties());
 	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
+	addFactory("renderSurface", [=](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
 }
 
 UIFactory::~UIFactory()
@@ -1508,6 +1510,24 @@ std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNod
 	auto id = node["id"].asString();
 	
 	auto widget = std::make_shared<UIDebugConsole>(id, *this, std::make_shared<UIDebugConsoleController>(getResources(), api));
+
+	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Render Surface";
+	result.iconName = "widget_icons/render_surface.png";
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	
+	auto widget = std::make_shared<UIRenderSurface>(id, Vector2f(), makeSizer(entryNode));
 
 	return widget;
 }

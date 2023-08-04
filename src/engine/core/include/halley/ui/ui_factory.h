@@ -174,6 +174,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeDebugConsole(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeRenderSurface(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
@@ -203,6 +204,7 @@ namespace Halley
 		UIFactoryWidgetProperties getBaseListProperties() const;
 		UIFactoryWidgetProperties getListProperties() const;
 		UIFactoryWidgetProperties getTreeListProperties() const;
+		UIFactoryWidgetProperties getRenderSurfaceProperties() const;
 		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
