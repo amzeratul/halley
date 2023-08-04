@@ -237,6 +237,8 @@ namespace Halley {
 		void updateActive(bool wasActiveBefore);
 		void notifyActivationChange(bool active);
 
+		void removeSizerDeadChildren();
+
 		UIParent* parent = nullptr;
 		UIRoot* root = nullptr;
 		String id;

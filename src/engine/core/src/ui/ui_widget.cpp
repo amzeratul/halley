@@ -84,17 +84,20 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		addNewChildren(inputType);
-
 		updateChildren(updateType, t, inputType, joystickType);
+		removeSizerDeadChildren();
+		removeDeadChildren();
+	}
+}
 
-		if (sizer) {
-			for (auto& c : getChildren()) {
-				if (!c->isAlive()) {
-					sizer->remove(*c);
-				}
+void UIWidget::removeSizerDeadChildren()
+{
+	if (sizer) {
+		for (auto& c : getChildren()) {
+			if (!c->isAlive()) {
+				sizer->remove(*c);
 			}
 		}
-		removeDeadChildren();
 	}
 }
 
@@ -110,12 +113,12 @@ void UIWidget::doRender(RenderContext& rc)
 	if (!isActive()) {
 		return;
 	}
-	
-	render(rc);
 
+	// Render children first
 	for (auto& c: getChildren()) {
 		c->doRender(rc);
 	}
+	render(rc);
 }
 
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const
