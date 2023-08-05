@@ -847,7 +847,7 @@ void UIWidget::fitToRoot()
 	}
 }
 
-Vector2f UIWidget::transformToChildSpace(Vector2f pos) const
+std::optional<Vector2f> UIWidget::transformToChildSpace(Vector2f pos) const
 {
 	return pos;
 }

@@ -71,6 +71,11 @@ void UIEditor::onMakeUI()
 		setSelectedWidget(event.getStringData());
 	});
 
+	setHandle(UIEventType::ListAccept, "widgetsList", [=] (const UIEvent& event)
+	{
+		goToWidget(event.getStringData());
+	});
+
 	setHandle(UIEventType::ButtonClicked, "addWidget", [=] (const UIEvent& event)
 	{
 		addWidget();
@@ -178,7 +183,7 @@ void UIEditor::doLoadUI()
 		display->loadDisplay(*uiDefinition);
 		layout();
 		if (firstLoad) {
-			infiniCanvas->setScrollPosition((display->getSize() / 2).round());
+			infiniCanvas->setScrollPosition(display->getSize() / 2);
 			firstLoad = false;
 		}
 		loaded = true;
@@ -191,6 +196,11 @@ void UIEditor::setSelectedWidget(const String& id)
 	const auto result = uiDefinition->findUUID(id);
 	widgetEditor->setSelectedWidget(id, result.result, result.parent);
 	display->setSelectedWidget(id);
+}
+
+void UIEditor::goToWidget(const String& id)
+{
+	infiniCanvas->setScrollPosition(display->getCurWidgetRect().getCenter());
 }
 
 void UIEditor::addWidget()

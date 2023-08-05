@@ -430,7 +430,7 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 		cellSize[otherAxis] = rect.getSize()[otherAxis] - border[otherAxis] - border[otherAxis + 2];
 
 		Vector2f curPos = pos + border.xy() + gapOffset;
-		const auto rect = Rect4f(curPos, curPos + cellSize);
+		const auto rect = Rect4f(curPos.floor(), (curPos + cellSize).floor());
 		const auto origRect = Rect4f(rect.getTopLeft() - border.xy(), rect.getBottomRight() + border.zw());
 		e.placeInside(rect, origRect, minSize, listener, *this);
 

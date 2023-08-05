@@ -69,6 +69,11 @@ bool UIEditorDisplay::ignoreClip() const
 	return true;
 }
 
+Rect4f UIEditorDisplay::getCurWidgetRect() const
+{
+	return curRect - getPosition();
+}
+
 void UIEditorDisplay::update(Time time, bool moved)
 {
 	if (moved) {

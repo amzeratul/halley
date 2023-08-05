@@ -191,7 +191,7 @@ namespace Halley {
 
 		void fitToRoot();
 
-		virtual Vector2f transformToChildSpace(Vector2f pos) const;
+		virtual std::optional<Vector2f> transformToChildSpace(Vector2f pos) const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;

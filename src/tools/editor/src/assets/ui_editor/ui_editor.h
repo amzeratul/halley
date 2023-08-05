@@ -64,6 +64,7 @@ namespace Halley {
 		void open();
 		void doLoadUI();
 		void setSelectedWidget(const String& id);
+		void goToWidget(const String& id);
 
 		void addWidget();
 		void addWidget(const String& widgetClass);

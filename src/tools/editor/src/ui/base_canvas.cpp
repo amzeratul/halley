@@ -58,6 +58,15 @@ void BaseCanvas::setMouseMirror(std::shared_ptr<UIWidget> widget)
 	mouseMirror = widget;
 }
 
+std::optional<Vector2f> BaseCanvas::transformToChildSpace(Vector2f pos) const
+{
+	if (getRect().contains(pos)) {
+		return pos;
+	} else {
+		return std::nullopt;
+	}
+}
+
 void BaseCanvas::doSetState(State state)
 {
 }

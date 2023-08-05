@@ -21,6 +21,9 @@ namespace Halley {
 		
         virtual void setScrollPosition(Vector2f pos) = 0;
 		virtual Vector2f getScrollPosition() const = 0;
+		virtual Vector2f getBasePosition() const = 0;
+
+		std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
 
     protected:
 		void doSetState(State state) override;
@@ -33,7 +36,6 @@ namespace Halley {
         void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
 		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
 
-		virtual Vector2f getBasePosition() const = 0;
 		virtual float getBackgroundScrollSpeed() const;
 		virtual Vector2f getBackgroundOffset(Vector2f size) const;
 		virtual void refresh();

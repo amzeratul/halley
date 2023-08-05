@@ -103,7 +103,7 @@ void UIRenderSurface::onPreNotifySetRect(IUIElementListener& listener)
 	}
 }
 
-Vector2f UIRenderSurface::transformToChildSpace(Vector2f pos) const
+std::optional<Vector2f> UIRenderSurface::transformToChildSpace(Vector2f pos) const
 {
 	if (isEnabled()) {
 		const auto p0 = getPosition();

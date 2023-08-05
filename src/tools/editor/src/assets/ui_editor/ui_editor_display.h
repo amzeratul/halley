@@ -24,6 +24,7 @@ namespace Halley {
 
 		void setZoom(float zoom);
 		bool ignoreClip() const override;
+		Rect4f getCurWidgetRect() const;
 
 	private:
 		UIEditor* editor = nullptr;
