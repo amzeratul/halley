@@ -73,7 +73,19 @@ Camera& Camera::setRotation(Quaternion quat)
 
 Camera& Camera::setZoom(float zoom)
 {
-	this->zoom = zoom;
+	scale = Vector3f(zoom, zoom, zoom);
+	return *this;
+}
+
+Camera& Camera::setScale(Vector2f scale)
+{
+	this->scale = Vector3f(scale, 1.0f);
+	return *this;
+}
+
+Camera& Camera::setScale(Vector3f scale)
+{
+	this->scale = scale;
 	return *this;
 }
 
@@ -128,8 +140,8 @@ void Camera::updateProjection(bool flipVertical)
 	}
 
 	// Camera properties
-	if (zoom != 1.0f) {
-		projection.scale(Vector3f(zoom, zoom, zoom));
+	if (scale != Vector3f(1.0f, 1.0f, 1.0f)) {
+		projection.scale(scale);
 	}
 	if (rotation != Quaternion()) {
 		projection.rotate(rotation.conjugated());
@@ -157,7 +169,7 @@ Rect4f Camera::getClippingRectangle() const
 {
 	const auto angle = getZAngle();
 	auto vp = getActiveViewPort();
-	auto halfSize = Vector2f(vp.getSize()) / (zoom * 2);
+	auto halfSize = Vector2f(vp.getSize()) / (scale.xy() * 2);
 	auto a = halfSize.rotate(angle);
 	auto b = Vector2f(-halfSize.x, halfSize.y).rotate(angle);
 	auto rotatedHalfSize = Vector2f(std::max(std::abs(a.x), std::abs(b.x)), std::max(std::abs(a.y), std::abs(b.y)));
@@ -169,12 +181,12 @@ Vector2f Camera::screenToWorld(Vector2f p, Rect4f viewport) const
 {
 	const auto angle = getZAngle();
 	Vector2f pos2d(pos.x, pos.y);
-	return ((p - viewport.getCenter()) / zoom).rotate(angle) + pos2d;
+	return ((p - viewport.getCenter()) / scale.xy()).rotate(angle) + pos2d;
 }
 
 Vector2f Camera::worldToScreen(Vector2f p, Rect4f viewport) const
 {
 	const auto angle = getZAngle();
 	Vector2f pos2d(pos.x, pos.y);
-	return (p - pos2d).rotate(-angle) * zoom + viewport.getCenter();
+	return (p - pos2d).rotate(-angle) * scale.xy() + viewport.getCenter();
 }

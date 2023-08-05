@@ -146,9 +146,10 @@ void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 {
 	setWidgetRect(rect);
 	if (sizer) {
-		auto border = getInnerBorder();
-		auto p0 = getLayoutOriginPosition();
-		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)), listener);
+		const auto border = getInnerBorder();
+		const auto p0 = getLayoutOriginPosition();
+		const auto size = getLayoutSize(rect.getSize());
+		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + size - Vector2f(border.z, border.w)), listener);
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();
@@ -1131,6 +1132,11 @@ void UIWidget::setShrinkOnLayout(bool shrink)
 Vector2f UIWidget::getLayoutOriginPosition() const
 {
 	return getPosition();
+}
+
+Vector2f UIWidget::getLayoutSize(Vector2f size) const
+{
+	return size;
 }
 
 void UIWidget::updateInputDevice(const InputDevice& inputDevice)

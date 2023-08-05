@@ -18,7 +18,8 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 // Update thread
 void UIRenderSurface::update(Time t, bool moved)
 {
-	params.bounds = getRect();
+	params.pos = getPosition();
+	params.size = childrenMinSize;
 	params.colour = colour;
 	params.scale = scale;
 }
@@ -54,13 +55,14 @@ void UIRenderSurface::draw(UIPainter& painter) const
 // Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
-	if (!isEnabled()) {
+	if (!isEnabled() || params.size.x <= 0.1f || params.size.y <= 0.1f) {
 		return;
 	}
 	Camera cam = rc.getCamera();
-	cam.setPosition(params.bounds.getCenter().round());
+	cam.setPosition((params.pos + params.size / 2).round());
+	cam.setScale(params.scale);
 
-	renderSurface->setSize(Vector2i(params.bounds.getSize()));
+	renderSurface->setSize(Vector2i(params.size * params.scale));
 
 	rc.with(renderSurface->getRenderTarget()).with(cam).bind([=](Painter& painter)
 	{
@@ -79,14 +81,24 @@ void UIRenderSurface::setScale(Vector2f scale)
 	this->scale = scale;
 }
 
+Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const
+{
+	childrenMinSize = UIWidget::getLayoutMinimumSize(force);
+	return childrenMinSize * scale;
+}
+
+Vector2f UIRenderSurface::getLayoutSize(Vector2f size) const
+{
+	return childrenMinSize;
+}
+
 // Render thread
 void UIRenderSurface::drawOnPainter(Painter& painter) const
 {
 	if (renderSurface->isReady()) {
 		renderSurface->getSurfaceSprite().clone()
-			.setPosition(params.bounds.getTopLeft())
+			.setPosition(params.pos)
 			.setColour(params.colour)
-			.setScale(params.scale)
 			.draw(painter);
 	}
 }

@@ -17,18 +17,23 @@ namespace Halley {
         void setColour(Colour4f col);
         void setScale(Vector2f scale);
 
+        Vector2f getLayoutMinimumSize(bool force) const override;
+        Vector2f getLayoutSize(Vector2f size) const override;
+
     private:
         std::unique_ptr<SpritePainter> spritePainter;
         std::unique_ptr<RenderSurface> renderSurface;
 
         Colour4f colour;
         Vector2f scale;
-
+        mutable Vector2f childrenMinSize;
+        
         struct RenderParams {
             int mask;
-            Rect4f bounds;
+            Vector2f pos;
+            Vector2f size;
+            Vector2f scale;
 		    Colour4f colour;
-		    Vector2f scale;
         };
         mutable RenderParams params;
 

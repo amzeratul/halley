@@ -49,6 +49,8 @@ namespace Halley {
 		Camera& setRotation(Angle1f angle);
 		Camera& setRotation(Quaternion quat);
 		Camera& setZoom(float zoom);
+		Camera& setScale(Vector2f scale);
+		Camera& setScale(Vector3f scale);
 		Camera& setCameraType(CameraType type);
 		Camera& setFieldOfView(Angle1f fov);
 		Camera& setClippingPlanes(float near, float far);
@@ -59,7 +61,8 @@ namespace Halley {
 		Vector3f getPosition() const { return pos; }
 		Quaternion getRotation() const { return rotation; }
 		Angle1f getZAngle() const;
-		float getZoom() const { return zoom; }
+		float getZoom() const { return 0.5f * (scale.x + scale.y); }
+		Vector3f getScale() const { return scale; }
 		std::optional<Rect4i> getViewPort() const { return viewPort; }
 
 		Vector2f screenToWorld(Vector2f p, Rect4f viewport) const;
@@ -78,7 +81,7 @@ namespace Halley {
 
 		Matrix4f projection;
 		Vector3f pos;
-		float zoom = 1.0f;
+		Vector3f scale = Vector3f(1.0f, 1.0f, 1.0f);
 		Quaternion rotation;
 		std::optional<Rect4i> viewPort;
 		CameraType type = CameraType::Orthographic;

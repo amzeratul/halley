@@ -79,6 +79,7 @@ namespace Halley {
 
 		Vector2f getPosition() const;
 		virtual Vector2f getLayoutOriginPosition() const;
+		virtual Vector2f getLayoutSize(Vector2f size) const;
 		Vector2f getSize() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
