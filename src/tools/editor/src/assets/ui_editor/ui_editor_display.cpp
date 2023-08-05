@@ -4,10 +4,18 @@
 
 using namespace Halley;
 
-UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
+UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, const HalleyAPI& api, Resources& resources)
 	: UIWidget(std::move(id), minSize, std::move(sizer))
 {
 	setCanSendEvents(false);
+
+	RenderSurfaceOptions options;
+	options.createDepthStencil = false;
+	options.useFiltering = false;
+
+	displayRoot = std::make_shared<UIRenderSurface>("displayRoot", Vector2f(), UISizer(), api, resources, "Halley/Sprite", options);
+	displayRoot->setScale(Vector2f(1, 1));
+	UIWidget::add(displayRoot, 0, Vector4f(), UISizerAlignFlags::Centre);
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
@@ -37,11 +45,6 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 	}
 }
 
-void UIEditorDisplay::onMakeUI()
-{
-	updateCurWidget();
-}
-
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 {
 	if (curElement) {
@@ -53,6 +56,12 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 
 		p.draw(boundsSprite);
 	}
+}
+
+void UIEditorDisplay::setZoom(float zoom)
+{
+	displayRoot->setScale(Vector2f(zoom, zoom));
+	doLayout();
 }
 
 void UIEditorDisplay::update(Time time, bool moved)
@@ -75,7 +84,7 @@ void UIEditorDisplay::setSelectedWidget(const String& id)
 
 void UIEditorDisplay::clearDisplay()
 {
-	clear();
+	displayRoot->clear();
 	elements.clear();
 	maxAdjustment = 0;
 }
@@ -83,7 +92,8 @@ void UIEditorDisplay::clearDisplay()
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clearDisplay();
-	editor->getGameFactory().loadUI(*this, uiDefinition);
+	editor->getGameFactory().loadUI(*displayRoot, uiDefinition);
+	updateCurWidget();
 }
 
 void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)

@@ -168,7 +168,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeUIEditorDisplay(const ConfigNode&
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	return std::make_shared<UIEditorDisplay>(id, Vector2f{}, makeSizer(entryNode).value_or(UISizer()));
+	return std::make_shared<UIEditorDisplay>(id, Vector2f{}, makeSizer(entryNode).value_or(UISizer()), api, resources);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAudioObjectTreeList(const ConfigNode& entryNode)

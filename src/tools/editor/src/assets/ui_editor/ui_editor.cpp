@@ -6,6 +6,7 @@
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
 #include "src/ui/project_window.h"
+#include "src/ui/scroll_background.h"
 using namespace Halley;
 
 UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api)
@@ -57,6 +58,11 @@ void UIEditor::onMakeUI()
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setUIEditor(*this, projectWindow);
 	widgetEditor->setGameResources(gameResources);
+
+	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=](float zoom)
+	{
+		display->setZoom(zoom);
+	});
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{

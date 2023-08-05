@@ -7,11 +7,10 @@ namespace Halley {
 
 	class UIEditorDisplay : public UIWidget, IUIElement::IUIElementListener {
 	public:
-		UIEditorDisplay(String id, Vector2f minSize, UISizer sizer);
+		UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, const HalleyAPI& api, Resources& resources);
 
 		void setUIEditor(UIEditor* uiEditor);
 
-		void onMakeUI() override;
 		void drawAfterChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 		void onLayout() override;
@@ -22,6 +21,8 @@ namespace Halley {
 
 		void onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) override;
 		void applyTransform(const Matrix4f& matrix) override;
+
+		void setZoom(float zoom);
 
 	private:
 		UIEditor* editor = nullptr;
@@ -37,6 +38,8 @@ namespace Halley {
 		Rect4f curRect;
 		std::map<UISizer*, Vector<std::pair<Rect4f, bool>>> sizerRects;
 		UISizer* curSizer = nullptr;
+
+		std::shared_ptr<UIRenderSurface> displayRoot;
 
 		Matrix4f transform;
 
