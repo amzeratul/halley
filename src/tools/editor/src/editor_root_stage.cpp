@@ -75,6 +75,9 @@ void EditorRootStage::onVariableUpdate(Time time)
 
 void EditorRootStage::onRender(RenderContext& context) const
 {
+	SpritePainter spritePainter;
+	spritePainter.start();
+	ui->draw(spritePainter, 1, 0);
 	ui->render(context);
 	
 	context.bind([&](Painter& painter)
@@ -96,9 +99,6 @@ void EditorRootStage::onRender(RenderContext& context) const
 		Sprite::draw(backgroundParticles.getSprites(), painter);
 
 		// UI
-		SpritePainter spritePainter;
-		spritePainter.start();
-		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
 
 		// Cursor

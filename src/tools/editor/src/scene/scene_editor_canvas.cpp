@@ -71,27 +71,29 @@ void SceneEditorCanvas::update(Time t, bool moved)
 	surface->setSize(getCanvasSize());
 }
 
-void SceneEditorCanvas::draw(UIPainter& painter) const
+void SceneEditorCanvas::draw(UIPainter& p) const
 {
-	const auto pos = getPosition();
-	const auto size = getSize();
+	p.draw([=, holdThis = shared_from_this()] (Painter& painter) {
+		const auto pos = getPosition();
+		const auto size = getSize();
 
-	Sprite canvas;
+		Sprite canvas;
 
-	if (surface->isReady()) {
-		canvas = surface->getSurfaceSprite();
-	} else {
-		canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
-	}
+		if (surface->isReady()) {
+			canvas = surface->getSurfaceSprite();
+		} else {
+			canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
+		}
 
-	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(Vector2f(getCanvasSize()));
+		canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(Vector2f(getCanvasSize()));
 
-	painter.draw(canvas, true);
+		canvas.draw(painter);
 
-	painter.draw(border.clone().setPos(pos).setSize(Vector2f(size.x, 1)), true);
-	painter.draw(border.clone().setPos(pos + Vector2f(0, size.y - 1)).setSize(Vector2f(size.x, 1)), true);
-	painter.draw(border.clone().setPos(pos).setSize(Vector2f(1, size.y)), true);
-	painter.draw(border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)), true);
+		border.clone().setPos(pos).setSize(Vector2f(size.x, 1)).draw(painter);
+		border.clone().setPos(pos + Vector2f(0, size.y - 1)).setSize(Vector2f(size.x, 1)).draw(painter);
+		border.clone().setPos(pos).setSize(Vector2f(1, size.y)).draw(painter);
+		border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)).draw(painter);
+	});
 }
 
 void SceneEditorCanvas::render(RenderContext& rc) const

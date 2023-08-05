@@ -1522,6 +1522,8 @@ UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
 
 	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
 	result.entries.emplace_back("Use Filtering", "useFilter", "bool", "false");
+	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Scale", "scale", "Halley::Vector2f", "");
 
 	return result;
 }
@@ -1539,8 +1541,13 @@ std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNo
 	options.createDepthStencil = false;
 	options.mipMap = false;
 	options.powerOfTwo = false;
+
+	const auto colour = Colour4f::fromString(node["colour"].asString("#FFFFFF"));
+	const auto scale = node["scale"].asVector2f(Vector2f(1, 1));
 	
 	auto widget = std::make_shared<UIRenderSurface>(std::move(id), Vector2f(), makeSizer(entryNode), api, resources, material, options);
+	widget->setColour(colour);
+	widget->setScale(scale);
 
 	return widget;
 }

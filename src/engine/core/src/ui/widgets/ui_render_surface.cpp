@@ -10,6 +10,8 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 	: UIWidget(std::move(id), minSize, std::move(sizer))
 	, spritePainter(std::make_unique<SpritePainter>())
 	, renderSurface(std::make_unique<RenderSurface>(*api.video, resources, materialName, options))
+	, colour(1, 1, 1, 1)
+	, scale(1, 1)
 {
 }
 
@@ -17,21 +19,31 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 void UIRenderSurface::update(Time t, bool moved)
 {
 	params.bounds = getRect();
+	params.colour = colour;
+	params.scale = scale;
 }
 
 // Update thread
 void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 {
-	// TODO: sync threads
-	spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
-	params.mask = origPainter.getMask();
-	auto painter = UIPainter(*spritePainter, origPainter.getMask(), 0);
-	UIWidget::drawChildren(painter);
+	if (isEnabled()) {
+		// TODO: sync threads
+		spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
+		params.mask = origPainter.getMask();
+		auto painter = UIPainter(*spritePainter, origPainter.getMask(), 0);
+		UIWidget::drawChildren(painter);
+	} else {
+		UIWidget::drawChildren(origPainter);
+	}
 }
 
 // Update thread
 void UIRenderSurface::draw(UIPainter& painter) const
 {
+	if (!isEnabled()) {
+		return;
+	}
+
 	auto sharedThis = shared_from_this();
 	painter.draw([sharedThis] (Painter& painter)
 	{
@@ -42,9 +54,11 @@ void UIRenderSurface::draw(UIPainter& painter) const
 // Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
+	if (!isEnabled()) {
+		return;
+	}
 	Camera cam = rc.getCamera();
-	cam.setPosition(params.bounds.getCenter());
-	//cam.setViewPort(Rect4i(params.bounds));
+	cam.setPosition(params.bounds.getCenter().round());
 
 	renderSurface->setSize(Vector2i(params.bounds.getSize()));
 
@@ -55,12 +69,24 @@ void UIRenderSurface::render(RenderContext& rc) const
 	});
 }
 
+void UIRenderSurface::setColour(Colour4f col)
+{
+	colour = col;
+}
+
+void UIRenderSurface::setScale(Vector2f scale)
+{
+	this->scale = scale;
+}
+
 // Render thread
 void UIRenderSurface::drawOnPainter(Painter& painter) const
 {
 	if (renderSurface->isReady()) {
 		renderSurface->getSurfaceSprite().clone()
 			.setPosition(params.bounds.getTopLeft())
+			.setColour(params.colour)
+			.setScale(params.scale)
 			.draw(painter);
 	}
 }

@@ -14,13 +14,21 @@ namespace Halley {
         void drawChildren(UIPainter& painter) const override;
         void render(RenderContext& rc) const override;
 
+        void setColour(Colour4f col);
+        void setScale(Vector2f scale);
+
     private:
         std::unique_ptr<SpritePainter> spritePainter;
         std::unique_ptr<RenderSurface> renderSurface;
 
+        Colour4f colour;
+        Vector2f scale;
+
         struct RenderParams {
             int mask;
             Rect4f bounds;
+		    Colour4f colour;
+		    Vector2f scale;
         };
         mutable RenderParams params;
 
