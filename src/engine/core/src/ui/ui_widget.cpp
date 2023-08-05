@@ -34,7 +34,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	if (!isActive()) {
 		return;
 	}
-
+	
 	auto clip = painter.getClip();
 	if (clip && !ignoreClip()) {
 		if (!clip->overlaps(getRect())) {

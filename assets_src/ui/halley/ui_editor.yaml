@@ -3,7 +3,7 @@ widget: { class: widget }
 sizer: { type: horizontal, gap: 6 }
 children:
 - widget: { id: widgetList, class: uiWidgetList }
-- widget: { class: infiniCanvas, id: scrollBackground }
+- widget: { class: infiniCanvas, id: infiniCanvas }
   proportion: 1
   sizer: { type: free }
   children:

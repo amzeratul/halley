@@ -23,6 +23,7 @@ namespace Halley {
 		void applyTransform(const Matrix4f& matrix) override;
 
 		void setZoom(float zoom);
+		bool ignoreClip() const override;
 
 	private:
 		UIEditor* editor = nullptr;

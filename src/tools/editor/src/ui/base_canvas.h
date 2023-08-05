@@ -19,7 +19,10 @@ namespace Halley {
 		void setLeftClickScrollKey(std::optional<KeyCode> key);
 		void setMouseMirror(std::shared_ptr<UIWidget> mouseMirror);
 		
-	protected:
+        virtual void setScrollPosition(Vector2f pos) = 0;
+		virtual Vector2f getScrollPosition() const = 0;
+
+    protected:
 		void doSetState(State state) override;
 		void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
@@ -30,8 +33,6 @@ namespace Halley {
         void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
 		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
 
-        virtual void setScrollPosition(Vector2f pos) = 0;
-		virtual Vector2f getScrollPosition() const = 0;
 		virtual Vector2f getBasePosition() const = 0;
 		virtual float getBackgroundScrollSpeed() const;
 		virtual Vector2f getBackgroundOffset(Vector2f size) const;

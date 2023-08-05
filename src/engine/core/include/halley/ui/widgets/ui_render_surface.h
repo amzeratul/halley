@@ -22,7 +22,7 @@ namespace Halley {
         void onPreNotifySetRect(IUIElementListener& listener) override;
 
         Vector2f transformToChildSpace(Vector2f pos) const override;
-
+        
     private:
         std::unique_ptr<SpritePainter> spritePainter;
         std::unique_ptr<RenderSurface> renderSurface;

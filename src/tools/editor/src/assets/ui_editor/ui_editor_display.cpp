@@ -64,6 +64,11 @@ void UIEditorDisplay::setZoom(float zoom)
 	doLayout();
 }
 
+bool UIEditorDisplay::ignoreClip() const
+{
+	return true;
+}
+
 void UIEditorDisplay::update(Time time, bool moved)
 {
 	if (moved) {

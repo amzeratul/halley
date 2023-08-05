@@ -6,6 +6,7 @@
 #include "../asset_editor.h"
 #include "halley/tools/dll/project_dll.h"
 #include "src/scene/choose_window.h"
+#include "src/ui/infini_canvas.h"
 
 namespace Halley {
 	class UIEditorDisplay;
@@ -47,6 +48,7 @@ namespace Halley {
 		std::unique_ptr<I18N> gameI18N;
 		std::shared_ptr<UIWidgetList> widgetList;
 		std::shared_ptr<UIWidgetEditor> widgetEditor;
+		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		ProjectWindow& projectWindow;
 		const HalleyAPI& api;
 
@@ -55,6 +57,7 @@ namespace Halley {
 		bool loaded = false;
 		bool modified = false;
 		bool pendingLoad = false;
+		bool firstLoad = true;
 
 		String curSelection;
 

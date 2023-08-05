@@ -59,8 +59,9 @@ void UIEditor::onMakeUI()
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setUIEditor(*this, projectWindow);
 	widgetEditor->setGameResources(gameResources);
+	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 
-	getWidgetAs<InfiniCanvas>("scrollBackground")->setZoomListener([=](float zoom)
+	infiniCanvas->setZoomListener([=](float zoom)
 	{
 		display->setZoom(zoom);
 	});
@@ -175,6 +176,11 @@ void UIEditor::doLoadUI()
 {
 	if (uiDefinition && display && !loaded) {
 		display->loadDisplay(*uiDefinition);
+		layout();
+		if (firstLoad) {
+			infiniCanvas->setScrollPosition((display->getSize() / 2).round());
+			firstLoad = false;
+		}
 		loaded = true;
 	}
 }

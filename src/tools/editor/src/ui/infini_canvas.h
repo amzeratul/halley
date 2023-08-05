@@ -7,9 +7,10 @@ namespace Halley {
     public:
         InfiniCanvas(String id, UIStyle style, UISizer sizer, std::shared_ptr<InputKeyboard> keyboard);
 
-	protected:
     	void setScrollPosition(Vector2f pos) override;
 		Vector2f getScrollPosition() const override;
+
+	protected:
 		Vector2f getBasePosition() const override;
 		Vector2f getLayoutOriginPosition() const override;
 		Vector2f getLayoutMinimumSize(bool force) const override;
