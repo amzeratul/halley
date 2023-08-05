@@ -27,6 +27,8 @@ namespace Halley {
 		const String& getString(const String& name) const;
 		float getFloat(const String& name) const;
 		float getFloat(const String& name, float defaultValue) const;
+		Time getTime(const String& name) const;
+		Time getTime(const String& name, Time defaultValue) const;
 		Vector2f getVector2f(const String& name) const;
 		Vector2f getVector2f(const String& name, Vector2f defaultValue) const;
 		Colour4f getColour(const String& name) const;
@@ -84,12 +86,16 @@ namespace Halley {
 
 		void applyStyles(const UIStyleSheet& other);
 
+		float getUIScale() const;
+		void setUIScale(float scale);
+
 	private:
 		Resources& resources;
 		HashMap<String, std::shared_ptr<UIStyleDefinition>> styles;
 		std::map<String, ConfigObserver> observers;
 		HashMap<String, String> styleToObserver;
 		std::shared_ptr<const UIColourScheme> lastColourScheme = nullptr;
+		float uiScale = 1;
 
 		void load(const ConfigNode& node, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme);
 

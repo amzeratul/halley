@@ -22,6 +22,8 @@ namespace Halley {
 		const String& getString(const String& name) const;
 		float getFloat(const String& name) const;
 		float getFloat(const String& name, float defaultValue) const;
+		Time getTime(const String& name) const;
+		Time getTime(const String& name, Time defaultValue) const;
 		Vector2f getVector2f(const String& name) const;
 		Vector2f getVector2f(const String& name, Vector2f defaultValue) const;
 		Colour4f getColour(const String& name) const;

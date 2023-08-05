@@ -50,16 +50,17 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 template <>
 void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, TextRenderer& data)
 {
+	const auto scale = styleSheet.getUIScale();
 	data = TextRenderer()
 		.setFont(styleSheet.getResources().get<Font>(node["font"].asString()))
-		.setSize(node["size"].asFloat())
+		.setSize(node["size"].asFloat() * scale)
 		.setColour(getColour(node["colour"], styleSheet.getColourScheme()))
-		.setOutline(node["outline"].asFloat(0.0f))
+		.setOutline(node["outline"].asFloat(0.0f) * scale)
 		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))
-		.setShadow(node["shadowDistance"].asFloat(0), node["shadowSmoothness"].asFloat(1), Colour4f::fromString(node["shadowColour"].asString("#00000000")))
+		.setShadow(node["shadowDistance"].asFloat(0) * scale, node["shadowSmoothness"].asFloat(1) * scale, Colour4f::fromString(node["shadowColour"].asString("#00000000")))
 		.setAlignment(node["alignment"].asFloat(0.0f))
 		.setSmoothness(node["smoothness"].asFloat(1.0))
-		.setLineSpacing(node["lineSpacing"].asFloat(0));
+		.setLineSpacing(node["lineSpacing"].asFloat(0) * scale);
 }
 
 template <>
@@ -81,6 +82,12 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 
 template <>
 void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, float& data)
+{
+	data = node.asFloat();
+}
+
+template <>
+void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, Time& data)
 {
 	data = node.asFloat();
 }
@@ -159,6 +166,7 @@ public:
 	mutable HashMap<String, Vector4f> borders;
 	mutable HashMap<String, String> strings;
 	mutable HashMap<String, float> floats;
+	mutable HashMap<String, Time> times;
 	mutable HashMap<String, Vector2f> vector2fs;
 	mutable HashMap<String, Colour4f> colours;
 	mutable HashMap<String, std::shared_ptr<UIStyleDefinition>> subStyles;
@@ -247,7 +255,7 @@ const String& UIStyleDefinition::getString(const String& name) const
 
 float UIStyleDefinition::getFloat(const String& name) const
 {
-	return getValue(node, styleSheet, styleName, name, pimpl->floats);
+	return getValue(node, styleSheet, styleName, name, pimpl->floats) * styleSheet.getUIScale();
 }
 
 float UIStyleDefinition::getFloat(const String& name, float defaultValue) const
@@ -256,12 +264,26 @@ float UIStyleDefinition::getFloat(const String& name, float defaultValue) const
 		return getFloat(name);
 	}
 
-	return defaultValue;
+	return defaultValue * styleSheet.getUIScale();
+}
+
+Time UIStyleDefinition::getTime(const String& name) const
+{
+	return getValue(node, styleSheet, styleName, name, pimpl->times);
+}
+
+Time UIStyleDefinition::getTime(const String& name, Time defaultValue) const
+{
+	if (hasValue(node, name, pimpl->times, { ConfigNodeType::Int, ConfigNodeType::Float })) {
+		return getTime(name);
+	}
+
+	return defaultValue;	
 }
 
 Vector2f UIStyleDefinition::getVector2f(const String& name) const
 {
-	return getValue(node, styleSheet, styleName, name, pimpl->vector2fs);
+	return getValue(node, styleSheet, styleName, name, pimpl->vector2fs) * styleSheet.getUIScale();
 }
 
 Vector2f UIStyleDefinition::getVector2f(const String& name, Vector2f defaultValue) const
@@ -270,7 +292,7 @@ Vector2f UIStyleDefinition::getVector2f(const String& name, Vector2f defaultValu
 		return getVector2f(name);
 	}
 
-	return defaultValue;
+	return defaultValue * styleSheet.getUIScale();
 }
 
 Colour4f UIStyleDefinition::getColour(const String& name) const
@@ -442,4 +464,14 @@ void UIStyleSheet::applyStyles(const UIStyleSheet& other)
 	for (const auto& [k, v]: other.styles) {
 		styles[k] = v;
 	}
+}
+
+float UIStyleSheet::getUIScale() const
+{
+	return uiScale;
+}
+
+void UIStyleSheet::setUIScale(float scale)
+{
+	uiScale = scale;
 }

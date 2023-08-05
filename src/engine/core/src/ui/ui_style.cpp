@@ -76,6 +76,16 @@ float UIStyle::getFloat(const String& name, float defaultValue) const
 	return style->getFloat(name, defaultValue);
 }
 
+Time UIStyle::getTime(const String& name) const
+{
+	return style->getTime(name);
+}
+
+Time UIStyle::getTime(const String& name, Time defaultValue) const
+{
+	return style->getTime(name, defaultValue);
+}
+
 Vector2f UIStyle::getVector2f(const String& name) const
 {
 	return style->getVector2f(name);

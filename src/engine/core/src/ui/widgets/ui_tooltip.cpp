@@ -8,7 +8,7 @@ UIToolTip::UIToolTip(const UIStyle& style)
 	background = style.getSprite("background");
 	text = style.getTextRenderer("label");
 	border = style.getBorder("innerBorder");
-	delay = style.getFloat("delay");
+	delay = style.getTime("delay");
 	maxWidth = style.getFloat("maxWidth");
 
 	setModal(false);
