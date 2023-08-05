@@ -149,12 +149,19 @@ void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 		const auto border = getInnerBorder();
 		const auto p0 = getLayoutOriginPosition();
 		const auto size = getLayoutSize(rect.getSize());
+		if (listener) {
+			onPreNotifySetRect(*listener);
+		}
 		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + size - Vector2f(border.z, border.w)), listener);
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();
 		}
 	}
+}
+
+void UIWidget::onPreNotifySetRect(IUIElementListener& listener)
+{
 }
 
 void UIWidget::layout(IUIElementListener* listener)
@@ -838,6 +845,11 @@ void UIWidget::fitToRoot()
 			layout();
 		}
 	}
+}
+
+Vector2f UIWidget::transformToChildSpace(Vector2f pos) const
+{
+	return pos;
 }
 
 void UIWidget::draw(UIPainter& painter) const

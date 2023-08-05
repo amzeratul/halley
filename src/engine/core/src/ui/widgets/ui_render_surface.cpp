@@ -84,12 +84,33 @@ void UIRenderSurface::setScale(Vector2f scale)
 Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const
 {
 	childrenMinSize = UIWidget::getLayoutMinimumSize(force);
-	return childrenMinSize * scale;
+	return isEnabled() ? childrenMinSize * scale : childrenMinSize;
 }
 
 Vector2f UIRenderSurface::getLayoutSize(Vector2f size) const
 {
 	return childrenMinSize;
+}
+
+void UIRenderSurface::onPreNotifySetRect(IUIElementListener& listener)
+{
+	if (isEnabled()) {
+		auto m = Matrix4f::makeIdentity();
+		m.translate(getPosition());
+		m.scale(scale);
+		m.translate(-getPosition());
+		listener.applyTransform(m);
+	}
+}
+
+Vector2f UIRenderSurface::transformToChildSpace(Vector2f pos) const
+{
+	if (isEnabled()) {
+		const auto p0 = getPosition();
+		return (pos - p0) / scale + p0;
+	} else {
+		return pos;
+	}
 }
 
 // Render thread

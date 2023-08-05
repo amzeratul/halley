@@ -472,9 +472,10 @@ std::pair<std::shared_ptr<UIWidget>, int> UIRoot::getWidgetUnderMouse(const std:
 
 	// Depth first
 	const int adjustmentForChildren = childLayerAdjustment + curWidget->getChildLayerAdjustment();
+	const auto childMousePos = curWidget->transformToChildSpace(mousePos);
 	std::pair<std::shared_ptr<UIWidget>, int> bestResult;
 	for (auto& c: curWidget->getChildren()) {
-		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled, adjustmentForChildren);
+		auto result = getWidgetUnderMouse(c, childMousePos, includeDisabled, adjustmentForChildren);
 		if (result.first && (!bestResult.first || result.second > bestResult.second)) {
 			bestResult = result;
 		}

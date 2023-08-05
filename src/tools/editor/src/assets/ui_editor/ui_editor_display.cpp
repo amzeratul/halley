@@ -58,7 +58,7 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 void UIEditorDisplay::update(Time time, bool moved)
 {
 	if (moved) {
-		layout(this);
+		doLayout();
 	}
 }
 
@@ -102,10 +102,15 @@ void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::sha
 	}
 
 	if (element == curElement) {
-		curRect = rect;
+		curRect = transformRect(rect);
 		curSizer = &sizer;
 	}
-	sizerRects[&sizer].emplace_back(origRect, element == curElement);
+	sizerRects[&sizer].emplace_back(transformRect(origRect), element == curElement);
+}
+
+void UIEditorDisplay::applyTransform(const Matrix4f& matrix)
+{
+	transform *= matrix;
 }
 
 void UIEditorDisplay::updateCurWidget()
@@ -121,7 +126,7 @@ void UIEditorDisplay::updateCurWidget()
 			curElement = iter->second;
 		}
 
-		layout(this);
+		doLayout();
 	}
 }
 
@@ -142,4 +147,15 @@ void UIEditorDisplay::makeSizerSprites()
 	boundsSprite
 		.setPosition(curRect.getTopLeft())
 		.scaleTo(curRect.getSize());
+}
+
+void UIEditorDisplay::doLayout()
+{
+	transform = Matrix4f::makeIdentity();
+	layout(this);
+}
+
+Rect4f UIEditorDisplay::transformRect(Rect4f r) const
+{
+	return Rect4f(transform * r.getP1(), transform * r.getP2());
 }

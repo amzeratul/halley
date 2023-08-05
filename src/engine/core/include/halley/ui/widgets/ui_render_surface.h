@@ -19,6 +19,9 @@ namespace Halley {
 
         Vector2f getLayoutMinimumSize(bool force) const override;
         Vector2f getLayoutSize(Vector2f size) const override;
+        void onPreNotifySetRect(IUIElementListener& listener) override;
+
+        Vector2f transformToChildSpace(Vector2f pos) const override;
 
     private:
         std::unique_ptr<SpritePainter> spritePainter;

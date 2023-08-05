@@ -41,6 +41,7 @@ namespace Halley {
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect, IUIElementListener* listener) final override;
+		virtual void onPreNotifySetRect(IUIElementListener& listener);
 
 		UIRoot* getRoot() final override;
 		const UIRoot* getRoot() const final override;
@@ -189,6 +190,8 @@ namespace Halley {
 		virtual ConfigNode getResultValue();
 
 		void fitToRoot();
+
+		virtual Vector2f transformToChildSpace(Vector2f pos) const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;

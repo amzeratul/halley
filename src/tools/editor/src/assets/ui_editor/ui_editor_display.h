@@ -21,6 +21,7 @@ namespace Halley {
 		void loadDisplay(const UIDefinition& uiDefinition);
 
 		void onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) override;
+		void applyTransform(const Matrix4f& matrix) override;
 
 	private:
 		UIEditor* editor = nullptr;
@@ -37,7 +38,12 @@ namespace Halley {
 		std::map<UISizer*, Vector<std::pair<Rect4f, bool>>> sizerRects;
 		UISizer* curSizer = nullptr;
 
+		Matrix4f transform;
+
 		void updateCurWidget();
 		void makeSizerSprites();
+		void doLayout();
+
+		Rect4f transformRect(Rect4f r) const;
 	};
 }

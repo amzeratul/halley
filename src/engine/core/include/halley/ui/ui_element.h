@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/maths/matrix4.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 
@@ -12,6 +13,7 @@ namespace Halley {
 		public:
 			virtual ~IUIElementListener() = default;
 			virtual void onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) = 0;
+			virtual void applyTransform(const Matrix4f& matrix) = 0;
 		};
 
 		virtual ~IUIElement() {}
