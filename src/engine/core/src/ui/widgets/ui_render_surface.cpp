@@ -15,18 +15,13 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 }
 
 // Update thread
-void UIRenderSurface::update(Time t, bool moved)
-{
-}
-
-// Update thread
 void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 {
 	if (isEnabled()) {
 		RenderParams params;
 		params.spritePainter = std::make_unique<SpritePainter>();
 		params.pos = getPosition();
-		params.size = childrenMinSize;
+		params.size = innerSize;
 		params.colour = colour;
 		params.scale = scale;
 		params.mask = origPainter.getMask();
@@ -60,22 +55,38 @@ void UIRenderSurface::draw(UIPainter& painter) const
 // Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
-	renderParams = paramsSync.read();
 	if (!renderParams) {
 		return;
 	}
 
 	Camera cam = rc.getCamera();
+	origScale = cam.getScale().xy();
 	cam.setPosition((renderParams->pos + renderParams->size / 2).round());
-	cam.setScale(renderParams->scale);
+	cam.setScale(renderParams->scale * origScale);
 
-	renderSurface->setSize(Vector2i(renderParams->size * renderParams->scale));
+	renderSurface->setSize(Vector2i(renderParams->size * renderParams->scale * origScale));
 
 	rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
 	{
 		painter.clear(Colour4f(0, 0, 0, 0));
 		renderParams->spritePainter->draw(renderParams->mask, painter);
 	});
+}
+
+// Render thread
+void UIRenderSurface::renderChildren(RenderContext& rc) const
+{
+	// renderChildren runs before render, so we acquire renderParams here
+	renderParams = paramsSync.read();
+
+	if (renderParams) {
+		auto cam = rc.getCamera();
+		cam.setScale(cam.getScale().xy() * renderParams->scale);
+		auto rc2 = rc.with(cam);
+		UIWidget::renderChildren(rc2);
+	} else {
+		UIWidget::renderChildren(rc);
+	}
 }
 
 // Render thread
@@ -87,6 +98,7 @@ void UIRenderSurface::drawOnPainter(Painter& painter) const
 		renderSurface->getSurfaceSprite().clone()
 			.setPosition(renderParams->pos)
 			.setColour(renderParams->colour)
+			.setScale(Vector2f(1.0f, 1.0f) / origScale)
 			.draw(painter);
 
 		renderParams = {};
@@ -105,13 +117,14 @@ void UIRenderSurface::setScale(Vector2f scale)
 
 Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const
 {
-	childrenMinSize = UIWidget::getLayoutMinimumSize(force);
-	return isEnabled() ? childrenMinSize * scale : childrenMinSize;
+	const auto sz = UIWidget::getLayoutMinimumSize(force);
+	return isEnabled() ? sz * scale : sz;
 }
 
 Vector2f UIRenderSurface::getLayoutSize(Vector2f size) const
 {
-	return childrenMinSize;
+	innerSize = isEnabled() ? (size / scale).round() : size;
+	return innerSize;
 }
 
 void UIRenderSurface::onPreNotifySetRect(IUIElementListener& listener)

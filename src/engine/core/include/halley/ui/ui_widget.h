@@ -198,6 +198,7 @@ namespace Halley {
 		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
 		virtual void render(RenderContext& rc) const;
+		virtual void renderChildren(RenderContext& rc) const;
 		virtual void update(Time t, bool moved);
 		virtual void updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick);
 

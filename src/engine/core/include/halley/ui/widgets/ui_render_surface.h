@@ -10,10 +10,10 @@ namespace Halley {
     public:
         UIRenderSurface(String id, Vector2f minSize, std::optional<UISizer> sizer, const HalleyAPI& api, Resources& resources, const String& materialName, RenderSurfaceOptions options);
 
-        void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
         void drawChildren(UIPainter& painter) const override;
         void render(RenderContext& rc) const override;
+        void renderChildren(RenderContext& rc) const override;
 
         void setColour(Colour4f col);
         void setScale(Vector2f scale);
@@ -29,8 +29,8 @@ namespace Halley {
 
         Colour4f colour;
         Vector2f scale;
-        mutable Vector2f childrenMinSize;
-        
+        mutable Vector2f innerSize;
+
         struct RenderParams {
             int mask;
             Vector2f pos;
@@ -42,6 +42,7 @@ namespace Halley {
 
         mutable FrameDataSync<RenderParams> paramsSync;
         mutable std::optional<RenderParams> renderParams;
+        mutable Vector2f origScale;
 
         void drawOnPainter(Painter& painter) const;
     };

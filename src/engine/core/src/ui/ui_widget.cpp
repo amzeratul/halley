@@ -115,9 +115,7 @@ void UIWidget::doRender(RenderContext& rc)
 	}
 
 	// Render children first
-	for (auto& c: getChildren()) {
-		c->doRender(rc);
-	}
+	renderChildren(rc);
 	render(rc);
 }
 
@@ -869,6 +867,13 @@ void UIWidget::drawChildren(UIPainter& painter) const
 
 void UIWidget::render(RenderContext& render) const
 {
+}
+
+void UIWidget::renderChildren(RenderContext& rc) const
+{
+	for (auto& c: getChildren()) {
+		c->doRender(rc);
+	}
 }
 
 void UIWidget::update(Time t, bool moved)
