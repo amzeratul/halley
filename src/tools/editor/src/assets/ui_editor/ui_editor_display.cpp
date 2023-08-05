@@ -15,7 +15,7 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 
 	displayRoot = std::make_shared<UIRenderSurface>("displayRoot", Vector2f(), UISizer(), api, resources, "Halley/Sprite", options);
 	displayRoot->setScale(Vector2f(1, 1));
-	UIWidget::add(displayRoot, 0, Vector4f(), UISizerAlignFlags::Centre);
+	UIWidget::add(displayRoot, 1, Vector4f(), UISizerAlignFlags::Centre);
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
