@@ -1519,6 +1519,10 @@ UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Render Surface";
 	result.iconName = "widget_icons/render_surface.png";
+
+	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
+	result.entries.emplace_back("Use Filtering", "useFilter", "bool", "false");
+
 	return result;
 }
 
@@ -1526,8 +1530,17 @@ std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNo
 {
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
+	const auto material = node["material"].asString("Halley/Sprite");
+	const auto useFilter = node["useFilter"].asBool(false);
+
+	RenderSurfaceOptions options;
+	options.useFiltering = useFilter;
+	options.canBeUpdatedOnCPU = false;
+	options.createDepthStencil = false;
+	options.mipMap = false;
+	options.powerOfTwo = false;
 	
-	auto widget = std::make_shared<UIRenderSurface>(id, Vector2f(), makeSizer(entryNode));
+	auto widget = std::make_shared<UIRenderSurface>(std::move(id), Vector2f(), makeSizer(entryNode), api, resources, material, options);
 
 	return widget;
 }
