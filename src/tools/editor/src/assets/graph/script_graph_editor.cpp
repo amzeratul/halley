@@ -91,6 +91,7 @@ void ScriptGraphEditor::onMakeUI()
 	if (scriptGraph) {
 		gizmoEditor->load(*scriptGraph);
 	}
+	const auto assetKey = scriptGraph ? (toString(AssetType::ScriptGraph) + ":" + scriptGraph->getAssetId()) : "";
 
 	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();
@@ -102,6 +103,11 @@ void ScriptGraphEditor::onMakeUI()
 	infiniCanvas->setZoomListener([=] (float zoom)
 	{
 		gizmoEditor->setZoom(zoom);
+	});
+	infiniCanvas->setScrollPosition(projectWindow.getAssetSetting(assetKey, "position").asVector2f({}));
+	infiniCanvas->setScrollListener([=] (Vector2f pos)
+	{
+		projectWindow.setAssetSetting(assetKey, "position", ConfigNode(pos));
 	});
 
 	variableInspector = getWidgetAs<ScriptGraphVariableInspector>("ScriptGraphVariableInspector");
@@ -123,7 +129,6 @@ void ScriptGraphEditor::onMakeUI()
 		}
 	});
 
-	const auto assetKey = toString(AssetType::ScriptGraph) + ":" + scriptGraph->getAssetId();
 	autoAcquire = projectWindow.getAssetSetting(assetKey, "autoAcquire").asBool(true);
 	bindData("autoAcquire", autoAcquire, [=](bool value)
 	{

@@ -7,11 +7,13 @@ namespace Halley {
     public:
 		using ZoomListener = std::function<void(float)>;
     	using MousePosListener = std::function<void(Vector2f, KeyMods)>;
+    	using ScrollListener = std::function<void(Vector2f)>;
 
         BaseCanvas(String id, UIStyle style, UISizer sizer, std::shared_ptr<InputKeyboard> keyboard);
 		float getZoomLevel() const;
 		void setZoomListener(ZoomListener listener);
     	void setMousePosListener(MousePosListener listener);
+		void setScrollListener(ScrollListener listener);
 
     	void setZoomEnabled(bool enabled);
 		void setScrollEnabled(bool enabled);
@@ -36,6 +38,7 @@ namespace Halley {
         void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
 		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
 
+    	void onNewScrollPosition(Vector2f pos) const;
 		virtual float getBackgroundScrollSpeed() const;
 		virtual Vector2f getBackgroundOffset(Vector2f size) const;
 		virtual void refresh();
@@ -61,6 +64,7 @@ namespace Halley {
 
 		ZoomListener zoomListener;
     	MousePosListener mousePosListener;
+		ScrollListener scrollListener;
 		std::shared_ptr<UIWidget> mouseMirror;
 
 		void onMouseWheel(const UIEvent& event);

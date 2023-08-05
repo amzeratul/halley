@@ -33,6 +33,11 @@ void BaseCanvas::setMousePosListener(MousePosListener listener)
 	mousePosListener = listener;
 }
 
+void BaseCanvas::setScrollListener(ScrollListener listener)
+{
+	scrollListener = listener;
+}
+
 void BaseCanvas::setZoomEnabled(bool enabled)
 {
 	zoomEnabled = enabled;
@@ -171,6 +176,13 @@ void BaseCanvas::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 		mouseMirror->sendEvent(UIEvent(UIEventType::CanvasDoubleClicked, getId()));
 	} else {
 		sendEvent(UIEvent(UIEventType::CanvasDoubleClicked, getId()));
+	}
+}
+
+void BaseCanvas::onNewScrollPosition(Vector2f pos) const
+{
+	if (scrollListener) {
+		scrollListener(pos);
 	}
 }
 

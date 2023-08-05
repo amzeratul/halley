@@ -9,7 +9,11 @@ InfiniCanvas::InfiniCanvas(String id, UIStyle style, UISizer sizer, std::shared_
 void InfiniCanvas::setScrollPosition(Vector2f pos)
 {
 	const auto zoom = getZoomLevel();
-	scrollPos = (pos * zoom).round() / zoom;
+	auto newPos = (pos * zoom).round() / zoom;
+	if (scrollPos != newPos) {
+		scrollPos = newPos;
+		onNewScrollPosition(scrollPos);
+	}
 }
 
 Vector2f InfiniCanvas::getScrollPosition() const
