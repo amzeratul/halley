@@ -76,13 +76,15 @@ Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	return std::make_shared<ScrollBackground>("scrollBackground", getStyle(node["style"].asString("scrollBackground")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
+	auto id = node["id"].asString();
+	return std::make_shared<ScrollBackground>(id, getStyle(node["style"].asString("scrollBackground")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeInfiniCanvas(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	return std::make_shared<InfiniCanvas>("infiniCanvas", getStyle(node["style"].asString("infiniCanvas")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
+	auto id = node["id"].asString();
+	return std::make_shared<InfiniCanvas>(id, getStyle(node["style"].asString("infiniCanvas")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const ConfigNode& entryNode)

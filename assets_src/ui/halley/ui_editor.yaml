@@ -3,18 +3,14 @@ widget: { class: widget }
 sizer: { type: horizontal, gap: 6 }
 children:
 - widget: { id: widgetList, class: uiWidgetList }
-- widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
+- widget: { class: infiniCanvas, id: scrollBackground }
   proportion: 1
-  fill: fill
-  sizer: { type: vertical }
+  sizer: { type: free }
   children:
-  - widget: { class: scrollBackground, id: scrollBackground }
-    proportion: 1
-    children:
-    - widget: { class: uiEditorDisplay, id: display }
-      proportion: 1
-      fill: centre
-      sizer: { type: vertical }
-      children: []
+  - widget: { class: uiEditorDisplay, id: display }
+    proportion: 0
+    fill: [top, left]
+    sizer: { type: vertical }
+    children: []
 - widget: { id: widgetEditor, class: uiWidgetEditor }
 ...

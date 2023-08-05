@@ -189,26 +189,23 @@ void BaseCanvas::onMouseWheel(const UIEvent& event)
 		return;
 	}
 	
-	const float oldZoom = getZoomLevel();
+	const float zoom0 = getZoomLevel();
 	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
-	const float zoom = getZoomLevel();
+	const float zoom1 = getZoomLevel();
 
-	if (zoom != oldZoom) {
-		const Vector2f childPos = getChildren().at(0)->getPosition() - getPosition();
-
-		const Vector2f panelScrollPos = getScrollPosition();
+	if (zoom1 != zoom0) {
+		const Vector2f scrollPos0 = getScrollPosition();
 
 		if (zoomListener) {
-			zoomListener(zoom);
+			zoomListener(zoom1);
 		}
 
 		refresh();
 
 		const Vector2f relMousePos = lastMousePos - getBasePosition();
-		const Vector2f oldMousePos = (relMousePos - childPos + panelScrollPos) / oldZoom;
-		const Vector2f newScrollPos = oldMousePos * zoom - relMousePos;
+		const Vector2f scrollPos1 = (relMousePos + scrollPos0) / zoom0 * zoom1 - relMousePos;
 
-		setScrollPosition(newScrollPos);
+		setScrollPosition(scrollPos1);
 	}
 }
 

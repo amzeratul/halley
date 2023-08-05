@@ -5,6 +5,7 @@
 #include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
+#include "src/ui/infini_canvas.h"
 #include "src/ui/project_window.h"
 #include "src/ui/scroll_background.h"
 using namespace Halley;
@@ -59,7 +60,7 @@ void UIEditor::onMakeUI()
 	widgetEditor->setUIEditor(*this, projectWindow);
 	widgetEditor->setGameResources(gameResources);
 
-	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=](float zoom)
+	getWidgetAs<InfiniCanvas>("scrollBackground")->setZoomListener([=](float zoom)
 	{
 		display->setZoom(zoom);
 	});

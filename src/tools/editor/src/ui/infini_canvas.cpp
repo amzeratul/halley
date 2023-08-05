@@ -18,7 +18,7 @@ Vector2f InfiniCanvas::getScrollPosition() const
 
 Vector2f InfiniCanvas::getBasePosition() const
 {
-	return getPosition();
+	return getPosition() + getSize() / 2;
 }
 
 Vector2f InfiniCanvas::getLayoutOriginPosition() const

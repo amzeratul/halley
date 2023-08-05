@@ -368,7 +368,7 @@ Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 
 		float p = e.getProportion();
 		if (p > 0.0001f) {
-			float s = sz[mainAxis] / p;
+			float s = std::floor(sz[mainAxis] / p);
 			biggestProportional = std::max(biggestProportional, s);
 		} else {
 			main += sz[mainAxis];
