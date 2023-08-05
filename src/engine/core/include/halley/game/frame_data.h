@@ -4,6 +4,7 @@
 
 #include "halley/maths/polygon.h"
 #include "halley/data_structures/tree_map.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	class ScriptState;
@@ -94,7 +95,7 @@ namespace Halley {
 
 		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) {}
 
-
+		int frameIdx = 0;
 		Vector<DebugLine> debugLines;
 		Vector<DebugPoint> debugPoints;
 		Vector<DebugPolygon> debugPolygons;
@@ -104,6 +105,8 @@ namespace Halley {
 
 	protected:
 		static thread_local BaseFrameData* threadInstance;
+
+		void baseStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime);
 	};
 
 	template <typename T>
@@ -120,6 +123,7 @@ namespace Halley {
 	protected:
 		void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) override
 		{
+			baseStartFrame(multithreaded, previous, deltaTime);
 			startFrame(multithreaded, static_cast<T*>(previous), deltaTime);
 		}
 	};

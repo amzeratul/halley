@@ -9,6 +9,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "halley/game/core.h"
 #include "halley/game/environment.h"
 #include "halley/game/frame_data.h"
+#include "halley/game/frame_data_sync.h"
 #include "halley/game/game.h"
 #include "halley/game/game_console.h"
 #include "halley/game/game_platform.h"

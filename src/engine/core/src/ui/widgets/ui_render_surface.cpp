@@ -8,7 +8,6 @@ using namespace Halley;
 
 UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISizer> sizer, const HalleyAPI& api, Resources& resources, const String& materialName, RenderSurfaceOptions options)
 	: UIWidget(std::move(id), minSize, std::move(sizer))
-	, spritePainter(std::make_unique<SpritePainter>())
 	, renderSurface(std::make_unique<RenderSurface>(*api.video, resources, materialName, options))
 	, colour(1, 1, 1, 1)
 	, scale(1, 1)
@@ -18,21 +17,27 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 // Update thread
 void UIRenderSurface::update(Time t, bool moved)
 {
-	params.pos = getPosition();
-	params.size = childrenMinSize;
-	params.colour = colour;
-	params.scale = scale;
 }
 
 // Update thread
 void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 {
 	if (isEnabled()) {
-		// TODO: sync threads
-		spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
+		RenderParams params;
+		params.spritePainter = std::make_unique<SpritePainter>();
+		params.pos = getPosition();
+		params.size = childrenMinSize;
+		params.colour = colour;
+		params.scale = scale;
 		params.mask = origPainter.getMask();
-		auto painter = UIPainter(*spritePainter, origPainter.getMask(), 0);
-		UIWidget::drawChildren(painter);
+
+		if (params.size.x > 0.1f && params.size.y > 0.1f) {
+			params.spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
+			auto painter = UIPainter(*params.spritePainter, origPainter.getMask(), 0);
+			UIWidget::drawChildren(painter);
+
+			paramsSync.write(std::move(params));
+		}
 	} else {
 		UIWidget::drawChildren(origPainter);
 	}
@@ -55,20 +60,37 @@ void UIRenderSurface::draw(UIPainter& painter) const
 // Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
-	if (!isEnabled() || params.size.x <= 0.1f || params.size.y <= 0.1f) {
+	renderParams = paramsSync.read();
+	if (!renderParams) {
 		return;
 	}
+
 	Camera cam = rc.getCamera();
-	cam.setPosition((params.pos + params.size / 2).round());
-	cam.setScale(params.scale);
+	cam.setPosition((renderParams->pos + renderParams->size / 2).round());
+	cam.setScale(renderParams->scale);
 
-	renderSurface->setSize(Vector2i(params.size * params.scale));
+	renderSurface->setSize(Vector2i(renderParams->size * renderParams->scale));
 
-	rc.with(renderSurface->getRenderTarget()).with(cam).bind([=](Painter& painter)
+	rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
 	{
 		painter.clear(Colour4f(0, 0, 0, 0));
-		spritePainter->draw(params.mask, painter);
+		renderParams->spritePainter->draw(renderParams->mask, painter);
 	});
+}
+
+// Render thread
+void UIRenderSurface::drawOnPainter(Painter& painter) const
+{
+	if (renderParams) {
+		assert(renderSurface->isReady());
+
+		renderSurface->getSurfaceSprite().clone()
+			.setPosition(renderParams->pos)
+			.setColour(renderParams->colour)
+			.draw(painter);
+
+		renderParams = {};
+	}
 }
 
 void UIRenderSurface::setColour(Colour4f col)
@@ -110,16 +132,5 @@ std::optional<Vector2f> UIRenderSurface::transformToChildSpace(Vector2f pos) con
 		return (pos - p0) / scale + p0;
 	} else {
 		return pos;
-	}
-}
-
-// Render thread
-void UIRenderSurface::drawOnPainter(Painter& painter) const
-{
-	if (renderSurface->isReady()) {
-		renderSurface->getSurfaceSprite().clone()
-			.setPosition(params.pos)
-			.setColour(params.colour)
-			.draw(painter);
 	}
 }

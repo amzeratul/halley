@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ui_widget.h"
+#include "halley/game/frame_data_sync.h"
 #include "halley/graphics/render_target/render_surface.h"
 #include "halley/graphics/sprite/sprite_painter.h"
 
@@ -24,7 +25,6 @@ namespace Halley {
         std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
         
     private:
-        std::unique_ptr<SpritePainter> spritePainter;
         std::unique_ptr<RenderSurface> renderSurface;
 
         Colour4f colour;
@@ -37,8 +37,11 @@ namespace Halley {
             Vector2f size;
             Vector2f scale;
 		    Colour4f colour;
+			std::unique_ptr<SpritePainter> spritePainter;
         };
-        mutable RenderParams params;
+
+        mutable FrameDataSync<RenderParams> paramsSync;
+        mutable std::optional<RenderParams> renderParams;
 
         void drawOnPainter(Painter& painter) const;
     };
