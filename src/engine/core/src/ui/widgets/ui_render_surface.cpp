@@ -31,6 +31,17 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 			auto painter = UIPainter(*params.spritePainter, origPainter.getMask(), 0);
 			UIWidget::drawChildren(painter);
 
+			// Check sprite bounds and enlarge border if needed
+			const auto tryBounds = params.spritePainter->getBounds();
+			if (tryBounds) {
+				const auto bounds = *tryBounds;
+				const auto myRect = Rect4f(params.pos, params.pos + params.size);
+				params.border.x = std::abs(myRect.getLeft() - bounds.getLeft());
+				params.border.y = std::abs(myRect.getTop() - bounds.getTop());
+				params.border.z = std::abs(bounds.getRight() - myRect.getRight());
+				params.border.w = std::abs(bounds.getBottom() - myRect.getBottom());
+			}
+
 			paramsSync.write(std::move(params));
 		}
 	} else {
@@ -61,10 +72,12 @@ void UIRenderSurface::render(RenderContext& rc) const
 
 	Camera cam = rc.getCamera();
 	origScale = cam.getScale().xy();
-	cam.setPosition((renderParams->pos + renderParams->size / 2).round());
-	cam.setScale(renderParams->scale * origScale);
+	const auto scale = renderParams->scale * origScale;
+	cam.setPosition((renderParams->pos - renderParams->border.xy() / 2 + renderParams->size / 2).round());
+	cam.setScale(scale);
 
-	renderSurface->setSize(Vector2i(renderParams->size * renderParams->scale * origScale));
+	const auto borderSize = renderParams->border.xy() + renderParams->border.zw();
+	renderSurface->setSize(Vector2i((renderParams->size + borderSize) * scale));
 
 	rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
 	{
@@ -95,8 +108,10 @@ void UIRenderSurface::drawOnPainter(Painter& painter) const
 	if (renderParams) {
 		assert(renderSurface->isReady());
 
+		const auto scale = renderParams->scale * origScale;
+		
 		renderSurface->getSurfaceSprite().clone()
-			.setPosition(renderParams->pos)
+			.setPosition(renderParams->pos - renderParams->border.xy() * scale)
 			.setColour(renderParams->colour)
 			.setScale(Vector2f(1.0f, 1.0f) / origScale)
 			.draw(painter);

@@ -226,6 +226,19 @@ void SpritePainter::draw(int mask, Painter& painter)
 	painter.flush();
 }
 
+std::optional<Rect4f> SpritePainter::getBounds() const
+{
+	std::optional<Rect4f> result;
+
+	// NB: this only includes cached sprites
+	for (const auto& sprite: cachedSprites) {
+		const auto aabb = sprite.getAABB();
+		result = result ? result->merge(aabb) : aabb;
+	}
+
+	return result;
+}
+
 void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& sprite: sprites) {

@@ -71,6 +71,7 @@ namespace Halley
 		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		
 		void draw(int mask, Painter& painter);
+		std::optional<Rect4f> getBounds() const;
 
 	private:
 		Vector<SpritePainterEntry> sprites;

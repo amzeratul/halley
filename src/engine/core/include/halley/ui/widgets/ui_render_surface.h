@@ -36,6 +36,7 @@ namespace Halley {
             Vector2f pos;
             Vector2f size;
             Vector2f scale;
+            Vector4f border;
 		    Colour4f colour;
 			std::unique_ptr<SpritePainter> spritePainter;
         };
