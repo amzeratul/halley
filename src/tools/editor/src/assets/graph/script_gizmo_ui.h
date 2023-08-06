@@ -4,11 +4,11 @@
 #include "src/scene/gizmos/scripting/scripting_base_gizmo.h"
 
 namespace Halley {
+	class ScriptGraphEditor;
+
 	class ScriptGizmoUI : public UIWidget {
 	public:
-		using ModifiedCallback = ScriptingBaseGizmo::ModifiedCallback;
-
-		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ModifiedCallback modifiedCallback);
+		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ScriptGraphEditor& graphEditor);
 
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
@@ -48,7 +48,7 @@ namespace Halley {
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<IClipboard> clipboard;
 		ScriptingBaseGizmo gizmo;
-		ModifiedCallback modifiedCallback;
+		ScriptGraphEditor& graphEditor;
 
 		SceneEditorInputState inputState;
 		std::optional<Vector2f> dragStart;

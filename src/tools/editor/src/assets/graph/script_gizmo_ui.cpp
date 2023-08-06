@@ -1,14 +1,16 @@
 #include "script_gizmo_ui.h"
+
+#include "script_graph_editor.h"
 using namespace Halley;
 
-ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ModifiedCallback modifiedCallback)
+ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ScriptGraphEditor& graphEditor)
 	: UIWidget("scriptGizmoUI", {}, {})
 	, factory(factory)
 	, resources(resources)
 	, keyboard(std::move(keyboard))
 	, clipboard(std::move(clipboard))
 	, gizmo(factory, entityEditorFactory, nullptr, resources, scriptNodeTypes)
-	, modifiedCallback(std::move(modifiedCallback))
+	, graphEditor(graphEditor)
 {
 	gizmo.setModifiedCallback([=] ()
 	{
@@ -217,6 +219,16 @@ bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
+		graphEditor.undo();
+		return true;
+	}
+
+	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
+		graphEditor.redo();
+		return true;
+	}
+
 	return false;
 }
 
@@ -227,9 +239,7 @@ bool ScriptGizmoUI::canReceiveFocus() const
 
 void ScriptGizmoUI::onModified()
 {
-	if (modifiedCallback) {
-		modifiedCallback();
-	}
+	graphEditor.onModified();
 }
 
 void ScriptGizmoUI::updateSelectionBox()

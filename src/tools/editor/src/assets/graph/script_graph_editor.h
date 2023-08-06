@@ -5,6 +5,7 @@
 #include "halley/tools/dll/project_dll.h"
 #include "src/scene/entity_editor.h"
 #include "src/ui/infini_canvas.h"
+#include "src/assets/config_undo_stack.h"
 
 namespace Halley {
 	class ScriptGraphVariableInspector;
@@ -28,6 +29,10 @@ namespace Halley {
 
 		const Vector<String>& getScriptTargetIds() const;
 
+		void onModified();
+		void undo();
+		void redo();
+
 	protected:
     	void update(Time t, bool moved) override;
 
@@ -44,6 +49,8 @@ namespace Halley {
 		Resources& gameResources;
 		Project& project;
 		Callback callback;
+
+		ConfigUndoStack undoStack;
 
     	std::shared_ptr<ScriptGraph> scriptGraph;
 		std::unique_ptr<ScriptState> scriptState;
@@ -80,5 +87,7 @@ namespace Halley {
 		ConfigNode getCurrentNodeConfig();
 
 		bool tryAutoAcquire();
+
+		void initUndoStack();
 	};
 }

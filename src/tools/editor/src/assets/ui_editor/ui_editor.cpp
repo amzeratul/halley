@@ -14,7 +14,7 @@ UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& projec
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
 	, projectWindow(projectWindow)
 	, api(api)
-	, undoStack(16)
+	, undoStack(32)
 {
 	project.withDLL([&] (ProjectDLL& dll)
 	{

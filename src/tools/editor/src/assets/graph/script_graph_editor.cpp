@@ -17,9 +17,11 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 	, callback(std::move(callback))
 	, scriptGraph(std::move(scriptGraph))
 	, entityTargets(std::move(entityTargets))
+	, undoStack(32)
 {
 	factory.loadUI(*this, "halley/script_graph_editor");
 	setListeningToClient(true);
+	initUndoStack();
 }
 
 ScriptGraphEditor::~ScriptGraphEditor()
@@ -32,6 +34,7 @@ ScriptGraphEditor::~ScriptGraphEditor()
 void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
 {
 	scriptGraph = std::move(graph);
+	initUndoStack();
 }
 
 void ScriptGraphEditor::onActiveChanged(bool active)
@@ -81,10 +84,7 @@ void ScriptGraphEditor::onMakeUI()
 	}
 
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
-		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
-		{
-			setModified(true);
-		}
+		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), *this
 	);
 	gizmoEditor->setEntityTargets(entityTargets);
 	
@@ -169,6 +169,37 @@ void ScriptGraphEditor::onMakeUI()
 const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
 {
 	return entityTargets;
+}
+
+void ScriptGraphEditor::onModified()
+{
+	setModified(true);
+	if (scriptGraph) {
+		undoStack.update(scriptGraph->toConfigNode());
+	}
+}
+
+void ScriptGraphEditor::undo()
+{
+	if (scriptGraph && undoStack.canUndo()) {
+		*scriptGraph = ScriptGraph(undoStack.undo());
+	}
+}
+
+void ScriptGraphEditor::redo()
+{
+	if (scriptGraph && undoStack.canRedo()) {
+		*scriptGraph = ScriptGraph(undoStack.redo());
+	}
+}
+
+void ScriptGraphEditor::initUndoStack()
+{
+	if (scriptGraph) {
+		undoStack.loadInitialValue(scriptGraph->toConfigNode());
+	} else {
+		undoStack.clear();
+	}
 }
 
 void ScriptGraphEditor::update(Time t, bool moved)
