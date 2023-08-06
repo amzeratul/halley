@@ -14,6 +14,7 @@ UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& projec
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
 	, projectWindow(projectWindow)
 	, api(api)
+	, undoStack(16)
 {
 	project.withDLL([&] (ProjectDLL& dll)
 	{
@@ -86,7 +87,7 @@ void UIEditor::onMakeUI()
 		removeWidget();
 	});
 
-	doLoadUI();
+	doLoadUI(false);
 	reselectWidget();
 }
 
@@ -94,6 +95,7 @@ void UIEditor::markModified()
 {
 	uiDefinition->increaseAssetVersion();
 	modified = true;
+	undoStack.update(uiDefinition->getRoot());
 }
 
 void UIEditor::onWidgetModified(const String& id)
@@ -138,6 +140,17 @@ bool UIEditor::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::Delete)) {
 		removeWidget();
+		return true;
+	}
+
+	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
+		undo();
+		return true;
+	}
+
+	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
+		redo();
+		return true;
 	}
 
 	return false;
@@ -157,13 +170,13 @@ void UIEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 		if (display) {
 			display->setUIEditor(this);
 		}
-		doLoadUI();
+		doLoadUI(false);
 	}
 }
 
 void UIEditor::reload()
 {
-	doLoadUI();
+	doLoadUI(false);
 }
 
 std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
@@ -177,14 +190,17 @@ std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 	}
 }
 
-void UIEditor::doLoadUI()
+void UIEditor::doLoadUI(bool force)
 {
-	if (uiDefinition && display && !loaded) {
+	if (uiDefinition && display && (force || !loaded)) {
 		display->loadDisplay(*uiDefinition);
 		layout();
 		if (firstLoad) {
 			infiniCanvas->setScrollPosition(display->getSize() / 2);
 			firstLoad = false;
+		}
+		if (!loaded) {
+			undoStack.loadInitialValue(uiDefinition->getRoot());
 		}
 		loaded = true;
 	}
@@ -255,6 +271,29 @@ void UIEditor::reassignUUIDs(ConfigNode& node) const
 			reassignUUIDs(n);
 		}
 	}
+}
+
+void UIEditor::undo()
+{
+	if (undoStack.canUndo()) {
+		uiDefinition->getRoot() = undoStack.undo();
+		reloadUI();
+	}
+}
+
+void UIEditor::redo()
+{
+	if (undoStack.canRedo()) {
+		uiDefinition->getRoot() = undoStack.redo();
+		reloadUI();
+	}
+}
+
+void UIEditor::reloadUI()
+{
+	display->loadDisplay(*uiDefinition);
+	widgetList->setDefinition(uiDefinition);
+	layout();
 }
 
 void UIEditor::copyWidgets(const Vector<String>& uuids)

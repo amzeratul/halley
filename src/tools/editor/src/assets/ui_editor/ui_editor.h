@@ -5,6 +5,7 @@
 #include "ui_widget_list.h"
 #include "../asset_editor.h"
 #include "halley/tools/dll/project_dll.h"
+#include "src/assets/config_undo_stack.h"
 #include "src/scene/choose_window.h"
 #include "src/ui/infini_canvas.h"
 
@@ -61,8 +62,10 @@ namespace Halley {
 
 		String curSelection;
 
+		ConfigUndoStack undoStack;
+
 		void open();
-		void doLoadUI();
+		void doLoadUI(bool force);
 		void setSelectedWidget(const String& id);
 		void goToWidget(const String& id);
 
@@ -73,6 +76,10 @@ namespace Halley {
 		void loadGameFactory();
 
 		void reassignUUIDs(ConfigNode& node) const;
+
+		void undo();
+		void redo();
+		void reloadUI();
 	};
 
 	class ChooseUIWidgetWindow : public ChooseAssetWindow {

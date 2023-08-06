@@ -73,6 +73,7 @@ bool UIWidgetList::onKeyPress(KeyboardKeyPress key)
 void UIWidgetList::populateList()
 {
 	if (list && definition) {
+		list->clear();
 		addWidget(definition->getRoot(), "");
 	}
 }
