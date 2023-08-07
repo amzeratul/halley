@@ -169,12 +169,12 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const UIDefinition& definition)
 	return std::dynamic_pointer_cast<UIWidget>(makeWidget(definition.getRoot()));
 }
 
-void UIFactory::loadUI(UIWidget& target, const String& configName)
+void UIFactory::loadUI(UIWidget& target, const String& configName, IUIReloadObserver* observer)
 {
-	loadUI(target, *resources.get<UIDefinition>(configName));
+	loadUI(target, *resources.get<UIDefinition>(configName), observer);
 }
 
-void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
+void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition, IUIReloadObserver* observer)
 {
 	try {
 		target.add(makeUI(uiDefinition), 1);
@@ -184,7 +184,7 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
 	}
 
 	if (api.core->isDevMode()) {
-		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition)));
+		target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition), observer));
 	}
 }
 

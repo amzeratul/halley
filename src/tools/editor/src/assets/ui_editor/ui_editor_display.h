@@ -5,7 +5,7 @@
 namespace Halley {
 	class UIEditor;
 
-	class UIEditorDisplay : public UIWidget, IUIElement::IUIElementListener {
+	class UIEditorDisplay : public UIWidget, IUIElement::IUIElementListener, IUIReloadObserver {
 	public:
 		UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, const HalleyAPI& api, Resources& resources);
 
@@ -25,7 +25,7 @@ namespace Halley {
 		void setZoom(float zoom);
 		bool ignoreClip() const override;
 		Rect4f getCurWidgetRect() const;
-
+		
 	private:
 		UIEditor* editor = nullptr;
 		std::map<UUID, std::shared_ptr<IUIElement>> elements;
@@ -44,11 +44,13 @@ namespace Halley {
 		std::shared_ptr<UIRenderSurface> displayRoot;
 
 		Matrix4f transform;
-
+		
 		void updateCurWidget();
 		void makeSizerSprites();
 		void doLayout();
+		void onOtherUIReloaded(UIWidget& ui) override;
 
+	private:
 		Rect4f transformRect(Rect4f r) const;
 	};
 }

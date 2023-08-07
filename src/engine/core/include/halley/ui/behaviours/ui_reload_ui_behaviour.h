@@ -2,6 +2,7 @@
 
 #include "../ui_behaviour.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/ui/ui_factory.h"
 
 namespace Halley {
 	class ConfigObserver;
@@ -10,7 +11,7 @@ namespace Halley {
 
 	class UIReloadUIBehaviour final : public UIBehaviour {
 	public:
-		UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer);
+		UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver = nullptr);
 
 		void init() override;
 		void update(Time time) override;
@@ -19,6 +20,7 @@ namespace Halley {
 		UIFactory& factory;
 		ResourceObserver observer;
 		Vector<std::pair<String, int>> uiStyleObservers;
+		IUIReloadObserver* reloadObserver = nullptr;
 
 		bool requireStyleUpdate() const;
 		bool styleObserverNeedsUpdate(const std::pair<String, int>& observer) const;

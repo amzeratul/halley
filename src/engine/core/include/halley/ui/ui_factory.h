@@ -45,6 +45,13 @@ namespace Halley
 		bool canHaveChildren = true;
 	};
 
+	class IUIReloadObserver {
+	public:
+		virtual ~IUIReloadObserver() = default;
+
+		virtual void onOtherUIReloaded(UIWidget& ui) = 0;
+	};
+
 	class UIFactory
 	{
 	public:
@@ -72,8 +79,8 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeUI(const String& configName, Vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition);
 
-		void loadUI(UIWidget& target, const String& configName);
-		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);
+		void loadUI(UIWidget& target, const String& configName, IUIReloadObserver* observer = nullptr);
+		void loadUI(UIWidget& target, const UIDefinition& uiDefinition, IUIReloadObserver* observer = nullptr);
 
 		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
 		UIFactoryWidgetProperties getGlobalWidgetProperties() const;

@@ -102,7 +102,7 @@ void UIEditorDisplay::clearDisplay()
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clearDisplay();
-	editor->getGameFactory().loadUI(*displayRoot, uiDefinition);
+	editor->getGameFactory().loadUI(*displayRoot, uiDefinition, this);
 	updateCurWidget();
 }
 
@@ -173,6 +173,11 @@ void UIEditorDisplay::doLayout()
 {
 	transform = Matrix4f::makeIdentity();
 	layout(this);
+}
+
+void UIEditorDisplay::onOtherUIReloaded(UIWidget& ui)
+{
+	updateCurWidget();
 }
 
 Rect4f UIEditorDisplay::transformRect(Rect4f r) const

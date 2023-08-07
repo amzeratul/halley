@@ -9,9 +9,10 @@
 
 using namespace Halley;
 
-UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer)
+UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer, IUIReloadObserver* reloadObserver)
 	: factory(factory)
 	, observer(observer)
+	, reloadObserver(reloadObserver)
 {}
 
 void UIReloadUIBehaviour::init()
@@ -33,6 +34,10 @@ void UIReloadUIBehaviour::update(Time time)
 			widget.add(std::move(ui), 1);
 			widget.onMakeUI();
 			widget.layout();
+
+			if (reloadObserver) {
+				reloadObserver->onOtherUIReloaded(widget);
+			}
 
 			setupUIStyleObservers(); // Different styles may be used, so need to reset
 		} catch (const std::exception& e) {
