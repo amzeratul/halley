@@ -722,13 +722,17 @@ namespace Halley {
 		template <typename F>
 		iterator do_insert(const_iterator pos, F f)
 		{
-			const auto idx = pos - begin();
 			const auto prevSize = size();
+			const auto idx = pos - begin();
 
 			f(prevSize);
 
-			std::rotate(begin() + idx, begin() + prevSize, end());
-			return begin() + idx;
+			if (pos != end()) {
+				std::rotate(begin() + idx, begin() + prevSize, end());
+				return begin() + idx;
+			} else {
+				return begin() + prevSize;
+			}
 		}
 
 		void move_data_from(VectorStd& other)

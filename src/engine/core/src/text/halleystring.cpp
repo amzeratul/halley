@@ -92,7 +92,9 @@ String::String(const String& other) noexcept
 
 String::String(String&& other) noexcept
 {
-	str = std::move(other.str);
+	if (this != &other) {
+		str = std::move(other.str);
+	}
 }
 
 String::String(char character)
