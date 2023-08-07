@@ -436,6 +436,22 @@ uiStyle:
     disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
     gap: 1
 
+  dragListSmall:
+    classes: [list]
+    background: ""
+    item:
+      normal: { img: "halley_ui/drag_item_small.png", colour: $ui_listBackground }
+      hover: { img: "halley_ui/drag_item_small.png", colour: $ui_listDrag }
+      drag: { img: "halley_ui/drag_item_small.png", colour: $ui_listDrag }
+      innerBorder: [ 20, 0, 0, 0 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
+    disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
+    gap: 1
+
   curveEditor:
     background: { img: $ui_window, colour: $ui_popupWindow }
     display: { img: whitebox.png, colour: $ui_listBackground }
