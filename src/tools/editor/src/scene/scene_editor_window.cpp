@@ -17,6 +17,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/tools/project/project_properties.h"
 #include "halley/ui/widgets/ui_goto_popup.h"
+#include "src/assets/new_asset_window.h"
 #include "src/assets/prefab_editor.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
@@ -1622,6 +1623,11 @@ Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetT
 	return projectWindow.getAssetPreviewData(assetType, id, size);
 }
 
+ConfigNode& SceneEditorWindow::getGameData(const String& key)
+{
+	return prefab->getGameData(key);
+}
+
 World& SceneEditorWindow::getWorld() const
 {
 	return gameBridge->getWorld();
@@ -1630,6 +1636,19 @@ World& SceneEditorWindow::getWorld() const
 IProject& SceneEditorWindow::getProject() const
 {
 	return project;
+}
+
+Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedString label, String defaultValue)
+{
+	Promise<std::optional<String>> promise;
+	auto future = promise.getFuture();
+
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(uiFactory, std::move(label), std::move(defaultValue), [=, promise = std::move(promise)](std::optional<String> result) mutable
+	{
+		promise.setValue(std::move(result));
+	}));
+
+	return future;
 }
 
 void SceneEditorWindow::openGoToDialogue()

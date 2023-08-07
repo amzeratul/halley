@@ -139,9 +139,12 @@ namespace Halley {
 		void drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor);
 
 		Vector<const EntityData*> queryEntityDatas(const String& containComponent) const;
+		ConfigNode& getGameData(const String& key) override;
 
 		World& getWorld() const;
 		IProject& getProject() const override;
+
+		Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue) override;
 
 	protected:
 		void update(Time t, bool moved) override;

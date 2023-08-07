@@ -27,7 +27,7 @@ void NewAssetWindow::makeUI()
 
 	const auto name = getWidgetAs<UITextInput>("name");
 	name->setText(startValue);
-	getWidget("ok")->setEnabled(false);
+	getWidget("ok")->setEnabled(!startValue.isEmpty());
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{

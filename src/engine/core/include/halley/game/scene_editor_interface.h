@@ -418,6 +418,9 @@ namespace Halley {
 		virtual Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const = 0;
 
 		virtual IProject& getProject() const = 0;
+		virtual ConfigNode& getGameData(const String& key) = 0;
+
+		virtual Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue) = 0;
 	};
 
 	class Game;
