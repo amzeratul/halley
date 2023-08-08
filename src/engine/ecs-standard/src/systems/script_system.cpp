@@ -385,6 +385,7 @@ private:
 
 	bool shouldNotifyDuplicateScript(const ScriptGraph& script)
 	{
+		// HACK
 		// TODO, make this a script property
 		return script.getAssetId() != "interactions/pickup";
 	}

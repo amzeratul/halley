@@ -198,6 +198,10 @@ void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, S
 		if (const auto startNodeId = currentGraph->getStartNode()) {
 			abortCodePath(*startNodeId, {});
 		}
+		const auto& threads = currentState->getThreads();
+		if (std::none_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isRunning(); })) {
+			doTerminateState();
+		}
 	}
 
 	currentGraph = nullptr;
