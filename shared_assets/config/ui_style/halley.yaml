@@ -445,7 +445,7 @@ uiStyle:
       drag: { img: "halley_ui/drag_item_small.png", colour: $ui_listDrag }
       innerBorder: [ 20, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
-    extraMouseBorder: [ 1, 1, 1, 1 ]
+    extraMouseBorder: [ 1, 0, 0, 0 ]
     selectionChangedSound: ""
     label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
     selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
