@@ -222,8 +222,9 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Setup tools
 		gameBridge->getGizmos().resetTools();
+		const auto initialTool = getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"); // Needs to be stored before setupTools below
 		interface.setupTools(*toolMode, gameBridge->getGizmos());
-		setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
+		setTool(initialTool);
 
 		// Move camera
 		if (!gameBridge->loadCameraPos()) {
