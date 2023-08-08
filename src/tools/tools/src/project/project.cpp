@@ -18,6 +18,7 @@
 #include "halley/game/game.h"
 #include "halley/properties/game_properties.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/os/os.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/tools/file/filesystem_cache.h"
 #include "halley/tools/project/project_comments.h"
@@ -539,6 +540,12 @@ void Project::requestReimport(ReimportType reimport)
 	if (checkAssetsTask) {
 		checkAssetsTask->requestReimport(reimport);
 	}
+}
+
+void Project::launchGame(Vector<String> params) const
+{
+	const String args = String::concatList(params, " ");
+	OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
 }
 
 void Project::loadECSData()

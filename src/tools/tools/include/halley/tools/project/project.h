@@ -145,6 +145,8 @@ namespace Halley
 
 		void requestReimport(ReimportType reimport);
 
+		void launchGame(Vector<String> params) const override;
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;

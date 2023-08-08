@@ -83,7 +83,7 @@ namespace Halley {
 
 		void markModified() override;
 		void clearModifiedFlag();
-		bool isModified() const;
+		bool isModified() const override;
 		void saveScene();
 		bool canSave(bool forceInstantCheck) const;
 
