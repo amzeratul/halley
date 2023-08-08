@@ -76,6 +76,7 @@ namespace Halley
 		void popConditions();
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
+		std::shared_ptr<UIWidget> makeUIWithHotReload(const String& configName, IUIReloadObserver* observer = nullptr);
 		std::shared_ptr<UIWidget> makeUI(const String& configName, Vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition);
 

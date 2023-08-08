@@ -151,6 +151,16 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 	return makeUI(*resources.get<UIDefinition>(configName));
 }
 
+std::shared_ptr<UIWidget> UIFactory::makeUIWithHotReload(const String& configName, IUIReloadObserver* observer)
+{
+	auto uiDefinition = resources.get<UIDefinition>(configName);
+	auto ui = makeUI(*uiDefinition);
+	if (api.core->isDevMode()) {
+		ui->addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(*uiDefinition), observer));
+	}
+	return ui;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, Vector<String> conditions)
 {
 	pushConditions(std::move(conditions));
