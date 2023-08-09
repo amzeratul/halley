@@ -17,6 +17,11 @@ Ray::Ray(Vector2f start, Vector2f dir)
 {
 }
 
+String Ray::toString() const
+{
+	return "Ray(p=" + Halley::toString(p) + ", d=" + Halley::toString(dir) + ")";
+}
+
 std::optional<Ray::RayCastResult> Ray::castCircle(Vector2f centre, float radius) const
 {
 	const Vector2f localCentre = centre - p;

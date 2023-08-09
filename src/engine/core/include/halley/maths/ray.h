@@ -35,5 +35,7 @@ namespace Halley {
 		std::optional<RayCastResult> castLineSegment(Vector2f a, Vector2f b) const;
 		std::optional<RayCastResult> castLineSegment(const LineSegment& lineSegment) const;
 		std::optional<RayCastResult> castPolygon(const Polygon& polygon) const;
+
+		String toString() const;
 	};
 }
