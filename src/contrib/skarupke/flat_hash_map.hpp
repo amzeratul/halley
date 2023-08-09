@@ -14,6 +14,8 @@
 #include <type_traits>
 #include <stdexcept>
 
+#include <halley/support/exception.h>
+
 #ifdef _MSC_VER
 #define SKA_NOINLINE(...) __declspec(noinline) __VA_ARGS__
 #else
@@ -1337,14 +1339,14 @@ public:
     {
         auto found = this->find(key);
         if (found == this->end())
-            throw std::out_of_range("Argument passed to at() was not in the map.");
+            throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
         return found->second;
     }
     const V & at(const K & key) const
     {
         auto found = this->find(key);
         if (found == this->end())
-            throw std::out_of_range("Argument passed to at() was not in the map.");
+            throw Halley::Exception("Argument passed to at() was not in the map.", Halley::HalleyExceptions::Utils);
         return found->second;
     }
 
