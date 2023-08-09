@@ -895,6 +895,7 @@ UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<dropdown>", "dropdown");
 	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
 	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
+	result.entries.emplace_back("Notify on Hover", "notifyOnHover", "bool", "");
 
 	return result;
 }
@@ -920,6 +921,9 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	auto widget = std::make_shared<UIDropdown>(id, style);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(entries);
+
+	widget->setNotifyOnHover(node["notifyOnHover"].asBool(false));
+
 	return widget;
 }
 

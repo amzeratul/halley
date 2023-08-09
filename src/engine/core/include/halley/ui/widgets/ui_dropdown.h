@@ -26,6 +26,11 @@ namespace Halley {
 				, label(std::move(label))
 				, icon(std::move(icon))
 			{}
+			Entry(String id, const String& label, Sprite icon = Sprite())
+				: id(std::move(id))
+				, label(LocalisedString::fromUserString(label))
+				, icon(std::move(icon))
+			{}
 		};
 		
 		UIDropdown(String id, UIStyle style, Vector<LocalisedString> options = {}, int defaultOption = 0);
@@ -50,6 +55,8 @@ namespace Halley {
 		void onManualControlActivate() override;
 
 		bool canReceiveFocus() const override;
+
+		void setNotifyOnHover(bool enabled);
 
 	protected:		
 		Vector<Entry> options;
@@ -90,6 +97,8 @@ namespace Halley {
 		std::shared_ptr<UIScrollPane> scrollPane;
 		
 		OpenState openState = OpenState::Closed;
+
+		bool notifyOnHover = false;
 
 		void open();
 		void close();

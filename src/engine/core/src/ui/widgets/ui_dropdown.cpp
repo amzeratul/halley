@@ -177,6 +177,11 @@ bool UIDropdown::canReceiveFocus() const
 	return true;
 }
 
+void UIDropdown::setNotifyOnHover(bool enabled)
+{
+	notifyOnHover = enabled;
+}
+
 void UIDropdown::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
@@ -360,6 +365,14 @@ void UIDropdown::open()
 				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), getSelectedOptionId(), getSelectedOption()));
 			} else {
 				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(idx).id, idx));
+			}
+
+			if (notifyOnHover) {
+				if (getDataBindFormat() == UIDataBind::Format::String) {
+					notifyDataBind(idx == -1 ? getSelectedOptionId() : options.at(idx).id);
+				} else {
+					notifyDataBind(idx == -1 ? getSelectedOption() : idx);
+				}
 			}
 		});
 
