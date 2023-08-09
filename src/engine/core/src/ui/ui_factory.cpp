@@ -667,14 +667,6 @@ UIFactoryWidgetProperties UIFactory::getSpinControlProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Spin Control 2";
-	result.iconName = "widget_icons/spinControl.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -854,6 +846,21 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode
 	if (node.hasKey("increment")) {
 		result->setIncrement(node["increment"].asFloat());
 	}
+
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Spin Control 2";
+	result.iconName = "widget_icons/spinControl.png";
+
+	result.entries.emplace_back("Allow Float", "allowFloat", "bool", "false");
+	result.entries.emplace_back("Min Value", "minValue", "std::optional<float>", "");
+	result.entries.emplace_back("Max Value", "maxValue", "std::optional<float>", "");
+	result.entries.emplace_back("Increment", "increment", "std::optional<float>", "");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<spinControl>", "label");
 
 	return result;
 }
