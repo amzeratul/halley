@@ -13,7 +13,7 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 		
-		void setPath(std::optional<NavigationPath> p);
+		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
 		const std::optional<NavigationPath>& getPath() const;
 		gsl::span<const Vector2f> getNextPathPoints() const;
 
@@ -25,6 +25,10 @@ namespace Halley {
 		bool isDone() const;
 		int getNavmeshSubWorld() const;
 
+		const ConfigNode& getParams() const;
+
+		bool isRunning() const;
+
 	private:
 		WorldPosition curPos;
 		size_t nextPathIdx = 0;
@@ -32,7 +36,9 @@ namespace Halley {
 		std::optional<NavigationPath> path;
 		bool needsToReEvaluatePath = false;
 		int navmeshSubWorld = 0;
+		ConfigNode params;
 
+		void doSetPath(std::optional<NavigationPath> p);
 		void goToNextRegion(const NavmeshSet& navmeshSet);
 		void reEvaluatePath(const NavmeshSet& navmeshSet);
 	};

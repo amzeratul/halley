@@ -13,6 +13,7 @@ Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
 	curPos = node["curPos"].asVector2f(Vector2f());
 	nextPathIdx = node["nextPathIdx"].asInt(0);
 	nextRegionIdx = node["nextRegionIdx"].asInt(0);
+	params = node["params"];
 }
 
 ConfigNode NavigationPathFollower::toConfigNode() const
@@ -31,11 +32,21 @@ ConfigNode NavigationPathFollower::toConfigNode() const
 	if (nextRegionIdx != 0) {
 		result["nextRegionIdx"] = static_cast<int>(nextRegionIdx);
 	}
+	if (params.getType() == ConfigNodeType::Map && !params.asMap().empty()) {
+		result["params"] = params;
+	}
 	
 	return result;
 }
 
-void NavigationPathFollower::setPath(std::optional<NavigationPath> p)
+void NavigationPathFollower::setPath(std::optional<NavigationPath> p, ConfigNode params)
+{
+	doSetPath(std::move(p));
+	this->params = std::move(params);
+	this->params.ensureType(ConfigNodeType::Map);
+}
+
+void NavigationPathFollower::doSetPath(std::optional<NavigationPath> p)
 {
 	path = std::move(p);
 	nextPathIdx = 0;
@@ -131,11 +142,11 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 			nextRegionIdx++;
 			navmeshSubWorld = subWorld;
 		} else {
-			setPath({});
+			doSetPath({});
 		}
 	} else {
 		// No more regions
-		setPath({});
+		doSetPath({});
 	}
 }
 
@@ -144,7 +155,7 @@ void NavigationPathFollower::reEvaluatePath(const NavmeshSet& navmeshSet)
 	needsToReEvaluatePath = false;
 	auto query = path->query;
 	query.from = curPos;
-	setPath(navmeshSet.pathfind(query));
+	doSetPath(navmeshSet.pathfind(query));
 }
 
 Vector2f NavigationPathFollower::getNextPosition() const
@@ -179,6 +190,11 @@ bool NavigationPathFollower::isDone() const
 int NavigationPathFollower::getNavmeshSubWorld() const
 {
 	return navmeshSubWorld;
+}
+
+const ConfigNode& NavigationPathFollower::getParams() const
+{
+	return params;
 }
 
 ConfigNode ConfigNodeSerializer<NavigationPathFollower>::serialize(const NavigationPathFollower& follower, const EntitySerializationContext& context)
