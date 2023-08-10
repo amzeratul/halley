@@ -136,6 +136,31 @@ void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
 	});
 }
 
+void UIImage::setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour, Colour4f selColour)
+{
+	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite.setColour(selColour);
+		} else {
+			sprite.setColour(normalColour);
+		}
+	});
+
+	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
+	{
+		const bool hovered = event.getBoolData();
+		const bool selected = event.getBoolData2();
+		if (!selected) {
+			if (hovered) {
+				sprite.setColour(hoverColour);
+			} else {
+				sprite.setColour(normalColour);
+			}
+		}
+	});
+}
+
 bool UIImage::isDrawing() const
 {
 	return drawing > 0;

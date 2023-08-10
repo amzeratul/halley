@@ -23,6 +23,15 @@ UIEvent::UIEvent(UIEventType type, String sourceId, bool data)
 	configData["bool"] = data;
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, bool data1, bool data2)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
+{
+	configData["bool"] = data1;
+	configData["bool2"] = data2;
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 	: type(type)
 	, sourceId(std::move(sourceId))
@@ -121,6 +130,11 @@ UIEvent::UIEvent(UIEventType type, String sourceId, ConfigNode data)
 bool UIEvent::getBoolData() const
 {
 	return configData["bool"].asBool();
+}
+
+bool UIEvent::getBoolData2() const
+{
+	return configData["bool2"].asBool();
 }
 
 int UIEvent::getIntData() const

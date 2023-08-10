@@ -174,7 +174,7 @@ void UIButton::doSetState(State state)
 			playSound(style.getString("upSound"));
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetSelected, getId(), false));
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false, false));
 		} else if (state == State::Down) {
 			sprite = style.getSprite("down");
 			playSound(style.getString("downSound"));
@@ -183,7 +183,7 @@ void UIButton::doSetState(State state)
 		} else if (state == State::Hover) {
 			sprite = style.getSprite("hover");
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true, false));
 			playSound(style.getString("hoverSound"));
 		}
 	}

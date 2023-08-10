@@ -28,7 +28,7 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), curHover));
 		} else if (curHover == childIdx) {
 			curHover = -1;
-			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), "", -1));
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), String(), -1));
 		}
 	});
 
@@ -1174,13 +1174,13 @@ void UIListItem::doSetState(State state)
 		switch (state) {
 		case State::Up:
 			sprite = style.getSprite("normal");
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
-			sendEvent(UIEvent(UIEventType::SetHovered, getId(), false));
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false, selected));
+			sendEvent(UIEvent(UIEventType::SetHovered, getId(), false, selected));
 			break;
 		case State::Hover:
 			sprite = style.getSprite("hover");
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
-			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true));
+			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true, selected));
+			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true, selected));
 			break;
 		case State::Down:
 			sprite = style.hasSprite("selected") ? style.getSprite("selected") : style.getSprite("hover");

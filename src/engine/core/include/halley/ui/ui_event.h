@@ -83,6 +83,7 @@ namespace Halley {
 		UIEvent();
 		UIEvent(UIEventType type, String sourceId, String data = "");
 		UIEvent(UIEventType type, String sourceId, bool data);
+		UIEvent(UIEventType type, String sourceId, bool data1, bool data2);
 		UIEvent(UIEventType type, String sourceId, int data);
 		UIEvent(UIEventType type, String sourceId, int data1, int data2);
 		UIEvent(UIEventType type, String sourceId, int data, KeyMods keyMods);
@@ -101,6 +102,7 @@ namespace Halley {
     	String getStringData() const;
     	String getStringData2() const;
 		bool getBoolData() const;
+		bool getBoolData2() const;
 		int getIntData() const;
 		int getIntData2() const;
     	KeyCode getKeyCode() const;

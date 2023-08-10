@@ -20,11 +20,12 @@ namespace Halley {
 
 		void setLayerAdjustment(int adjustment);
 		void setWorldClip(std::optional<Rect4f> worldClip);
-		void setHoverable(Colour4f normalColour, Colour4f selColour);
-		void setHoverable(Sprite normalSprite, Sprite selectedSprite);
+		void setHoverable(Colour4f normalColour, Colour4f hoverColour);
+		void setHoverable(Sprite normalSprite, Sprite hoverSprite);
 		void setSelectable(Colour4f normalColour, Colour4f selColour);
 		void setSelectable(Sprite normalSprite, Sprite selectedSprite);
 		void setDisablable(Colour4f normalColour, Colour4f disabledColour);
+		void setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour, Colour4f selColour);
 
 		bool isDrawing() const;
 
