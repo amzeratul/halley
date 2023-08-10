@@ -918,8 +918,12 @@ void UIList::onItemClicked(UIListItem& item, int button, KeyMods keyMods)
 			setSelectedOption(item.getIndex(), mode);
 		}
 	}
-	if (button == 0 && singleClickAccept) {
-		onAccept();
+
+	if (button == 0) {
+		sendEvent(UIEvent(UIEventType::ListItemLeftClicked, getId(), item.getId(), curOption));
+		if (singleClickAccept) {
+			onAccept();
+		}
 	}
 	if (button == 1) {
 		sendEvent(UIEvent(UIEventType::ListItemMiddleClicked, getId(), item.getId(), curOption));
