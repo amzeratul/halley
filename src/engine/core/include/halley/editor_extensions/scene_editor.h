@@ -89,7 +89,7 @@ namespace Halley {
 
 		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	
-		virtual void createServices(World& world);
+		virtual void createServices(World& world, std::shared_ptr<const UIColourScheme> colourScheme);
 		virtual void createEntities(World& world);
 
 		virtual String getSceneEditorStageName() const;

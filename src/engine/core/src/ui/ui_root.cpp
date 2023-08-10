@@ -79,7 +79,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		addNewChildren(activeInputType);
 
 		// Update input
-		if (activeInputType == UIInputType::Mouse) {
+		if (mouse && activeInputType == UIInputType::Mouse) {
 			updateMouse(mouse, getKeyMods());
 		}
 		updateGamepadInput(manual);
