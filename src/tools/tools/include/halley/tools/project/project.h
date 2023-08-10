@@ -97,7 +97,8 @@ namespace Halley
 		Metadata readMetadataFromDisk(const Path& filePath) const;
 		void writeMetadataToDisk(const Path& filePath, const Metadata& metadata);
 
-		void setAssetSaveNotification(bool enabled);
+		void setAssetSaveNotification(bool enabled) override;
+		bool isAssetSaveNotificationEnabled() const;
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) override;
 		bool writeAssetToDisk(const Path& filePath, const Bytes& data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;

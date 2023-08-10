@@ -55,8 +55,9 @@ void CheckAssetsTask::run()
 			}
 		}
 
-		// Wait for the import to finish, otherwise the DB won't be updated and it'll try updating the same assets twice
-		while (hasPendingTasks()) {
+		// Wait for the import to finish, otherwise the DB won't be updated and it'll try updating the
+		// same assets twice. Also wait if project save notifications are disabled.
+		while (hasPendingTasks() || !project.isAssetSaveNotificationEnabled()) {
 			sleep(5);
 		}
 
