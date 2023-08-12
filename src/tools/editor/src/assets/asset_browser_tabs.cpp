@@ -16,9 +16,9 @@ AssetBrowserTabs::AssetBrowserTabs(EditorUIFactory& factory, Project& project, P
 	makeUI();
 }
 
-void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& name)
+void AssetBrowserTabs::load(const String& name)
 {
-	openTab(assetType, name, true);
+	openTab(std::nullopt, name, true);
 	saveTabs();
 }
 
@@ -40,7 +40,6 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 
 	// Create window
 	auto window = std::make_shared<AssetEditorWindow>(factory, project, projectWindow);
-	window->setAssetSrcMode(srcMode);
 	window->loadAsset(name, assetType);
 	windows.push_back(window);
 
@@ -269,16 +268,6 @@ void AssetBrowserTabs::refreshAssets()
 	}
 }
 
-void AssetBrowserTabs::setAssetSrcMode(bool srcMode)
-{
-	this->srcMode = srcMode;
-
-	if (waitingLoad) {
-		waitingLoad = false;
-		loadTabs();
-	}
-}
-
 void AssetBrowserTabs::saveCurrentTab()
 {
 	const int curPage = pages->getCurrentPage();
@@ -376,6 +365,8 @@ void AssetBrowserTabs::makeUI()
 		pages->swapPages(a, b);
 		std::swap(windows[a], windows[b]);
 	});
+
+	loadTabs();
 }
 
 void AssetBrowserTabs::saveTabs()

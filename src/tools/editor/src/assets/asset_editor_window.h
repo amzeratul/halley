@@ -17,7 +17,6 @@ namespace Halley {
 		void onMakeUI() override;
 		void reload();
 
-		void setAssetSrcMode(bool assetSrcMode);
 		void onDoubleClickAsset();
 		void refreshAssets();
 
@@ -37,7 +36,6 @@ namespace Halley {
 		Project& project;
 		ProjectWindow& projectWindow;
 		std::shared_ptr<MetadataEditor> metadataEditor;
-		bool assetSrcMode = false;
 		
 		String loadedAsset;
 		std::optional<AssetType> loadedType;

@@ -37,7 +37,6 @@ namespace Halley {
 		Path curSrcPath;
 		AssetType curType = AssetType::Sprite;
 
-		bool assetSrcMode = true;
 		std::optional<Vector<String>> assetNames;
 		std::optional<Path> pendingOpen;
 

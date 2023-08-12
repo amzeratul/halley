@@ -12,9 +12,8 @@ namespace Halley {
 	public:
 		AssetBrowserTabs(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
-		void load(std::optional<AssetType> assetType, const String& name);
+		void load(const String& name);
 		void refreshAssets();
-		void setAssetSrcMode(bool srcMode);
 		void replaceAssetTab(const String& oldName, const String& newName);
 		bool requestQuit(std::function<void()>);
 		bool proceedQuitRequested(size_t idx, bool invoke);
@@ -41,8 +40,6 @@ namespace Halley {
 		Vector<String> toClose;
 		Vector<String> toReload;
 
-		bool srcMode = false;
-		bool waitingLoad = true;
 		std::function<void()> quittingCallback;
 
 		void makeUI();

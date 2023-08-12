@@ -27,7 +27,9 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 {
 	loadResources();
 	makeUI();
-	setAssetSrcMode(true);
+
+	getWidget("assetType")->setActive(false);
+	listAssetSources();
 }
 
 void AssetsBrowser::openAsset(AssetType type, const String& assetId)
@@ -145,18 +147,6 @@ void AssetsBrowser::makeUI()
 	updateAddRemoveButtons();
 
 	doSetCollapsed(projectWindow.getSetting(EditorSettingType::Editor, "assetBrowserCollapse").asBool(false));
-}
-
-void AssetsBrowser::setAssetSrcMode(bool enabled)
-{
-	assetSrcMode = enabled;
-	assetTabs->setAssetSrcMode(enabled);
-	getWidget("assetType")->setActive(!assetSrcMode);
-	if (assetSrcMode) {
-		listAssetSources();
-	} else {
-		listAssets(AssetType::Sprite);
-	}
 }
 
 void AssetsBrowser::listAssetSources()
@@ -313,11 +303,7 @@ void AssetsBrowser::refreshList()
 {
 	auto id = assetList->getSelectedOptionId();
 	assetList->setCanSendEvents(false);
-	if (assetSrcMode) {
-		listAssetSources();
-	} else {
-		listAssets(curType);
-	}
+	listAssetSources();
 	assetList->setSelectedOptionId(id);
 	assetList->setCanSendEvents(true);
 }
@@ -335,7 +321,7 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 	lastClickedAsset = name;
 	updateAddRemoveButtons();
 	
-	auto& curPath = assetSrcMode ? curSrcPath : curPaths[curType];
+	auto& curPath = curSrcPath;
 	if (name.endsWith("/.")) {
 		if (doubleClick) {
 			curPath = curPath / name;
@@ -343,7 +329,7 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 		}
 	} else {
 		if (doubleClick) {
-			assetTabs->load(assetSrcMode ? std::optional<AssetType>() : curType, name);
+			assetTabs->load(name);
 		}
 	}
 }

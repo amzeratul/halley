@@ -50,11 +50,6 @@ void AssetEditorWindow::reload()
 	refreshAssets();
 }
 
-void AssetEditorWindow::setAssetSrcMode(bool assetSrcMode)
-{
-	this->assetSrcMode = assetSrcMode;
-}
-
 void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> type, bool force)
 {
 	bool showMetadataEditor = true;
@@ -67,41 +62,36 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 		contentList->clear();
 		curEditors.clear();
 
-		if (assetSrcMode) {
-			auto assets = project.getAssetsFromFile(Path(name));
-			lastAssets = assets;
+		auto assets = project.getAssetsFromFile(Path(name));
+		lastAssets = assets;
 
-			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
-			{
-				return b.first < a.first;
-			});
+		std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
+		{
+			return b.first < a.first;
+		});
 
-			showMetadataEditor = false;
-			for (const auto& asset: assets) {
-				if (MetadataEditor::hasEditorForType(asset.first)) {
-					showMetadataEditor = true;
-				}
+		showMetadataEditor = false;
+		for (const auto& asset: assets) {
+			if (MetadataEditor::hasEditorForType(asset.first)) {
+				showMetadataEditor = true;
 			}
+		}
 
-			if (assets.empty()) {
-				metadataEditor->clear();
-			} else {
-				const auto type = assets.at(0).first;
-				const auto primaryFilePath = project.getImportAssetsDatabase().getPrimaryInputFile(type, assets.at(0).second, true);
-				auto effectiveMeta = project.getImportAssetsDatabase().getMetadata(type, assets.at(0).second).value_or(Metadata());
-				metadataEditor->setResource(project, type, primaryFilePath, std::move(effectiveMeta));
-			}
-
-			const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });
-			for (auto& asset: assets) {
-				if (asset.first == AssetType::Texture && hasSpriteSheet) {
-					continue;
-				}
-				createEditorTab(Path(name), asset.first, asset.second);
-			}
-		} else {
+		if (assets.empty()) {
 			metadataEditor->clear();
-			createEditorTab(Path(name), type.value(), name);
+		} else {
+			const auto type = assets.at(0).first;
+			const auto primaryFilePath = project.getImportAssetsDatabase().getPrimaryInputFile(type, assets.at(0).second, true);
+			auto effectiveMeta = project.getImportAssetsDatabase().getMetadata(type, assets.at(0).second).value_or(Metadata());
+			metadataEditor->setResource(project, type, primaryFilePath, std::move(effectiveMeta));
+		}
+
+		const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });
+		for (auto& asset: assets) {
+			if (asset.first == AssetType::Texture && hasSpriteSheet) {
+				continue;
+			}
+			createEditorTab(Path(name), asset.first, asset.second);
 		}
 	}
 
