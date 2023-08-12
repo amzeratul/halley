@@ -56,7 +56,7 @@ void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInputState();
 	
-	if (gameBridge) {
+	if (frameN > 0 && gameBridge) {
 		outputState.clear();
 		ready = gameBridge->update(t, inputState, outputState) || ready;
 	}
@@ -69,6 +69,7 @@ void SceneEditorCanvas::update(Time t, bool moved)
 	clearInputState();
 
 	surface->setSize(getCanvasSize());
+	++frameN;
 }
 
 void SceneEditorCanvas::draw(UIPainter& p) const

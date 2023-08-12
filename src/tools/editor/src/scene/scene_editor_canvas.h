@@ -48,6 +48,7 @@ namespace Halley {
 
 		std::shared_ptr<RenderSurface> surface;
 		bool ready = false;
+		int frameN = 0;
 
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<InputDevice> mouse;

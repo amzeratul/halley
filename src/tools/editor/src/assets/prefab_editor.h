@@ -22,6 +22,8 @@ namespace Halley {
 		void onTabbedIn() override;
 	
 	private:
+		constexpr static Time minLoadTime = 0;
+
 		Project& project;
 		ProjectWindow& projectWindow;
 		std::shared_ptr<SceneEditorWindow> window;
