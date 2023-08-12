@@ -94,6 +94,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, String data, bool boolData);
 		UIEvent(UIEventType type, String sourceId, String data, String data2, int intData);
 		UIEvent(UIEventType type, String sourceId, Vector2f data);
+		UIEvent(UIEventType type, String sourceId, Vector2f data, int intData, KeyMods keyMods);
 		UIEvent(UIEventType type, String sourceId, Rect4f data);
 		UIEvent(UIEventType type, String sourceId, ConfigNode data);
 		

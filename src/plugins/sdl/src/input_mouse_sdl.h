@@ -34,7 +34,8 @@ namespace Halley {
 	public:
 		Vector2f getPosition() const override;
 		void setPosition(Vector2f position) override;
-		int getWheelMove() const override;
+		Vector2f getWheelMove() const override;
+		Vector2i getWheelMoveDiscrete() const override;
 		float getAxis(int n) override;
 		void clearPresses() override;
 
@@ -55,7 +56,8 @@ namespace Halley {
 		Vector2f pos;
 		Vector2f prevPos;
 		Vector2f relMove;
-		int wheelMove = 0;
+		Vector2f wheelMove;
+		Vector2i wheelMoveDiscrete;
 		bool isMouseTrapped = false;
 	};
 

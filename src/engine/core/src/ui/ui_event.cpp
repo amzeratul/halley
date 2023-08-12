@@ -111,6 +111,16 @@ UIEvent::UIEvent(UIEventType type, String sourceId, Vector2f data)
 	configData["vector"] = data;
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, Vector2f data, int intData, KeyMods keyMods)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
+{
+	configData["vector"] = data;
+	configData["int"] = intData;
+	configData["keyMods"] = static_cast<int>(keyMods);
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
 	: type(type)
 	, sourceId(std::move(sourceId))

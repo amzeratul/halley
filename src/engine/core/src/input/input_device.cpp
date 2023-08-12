@@ -165,9 +165,14 @@ void InputDevice::setPosition(Vector2f position)
 {
 }
 
-int InputDevice::getWheelMove() const
+Vector2f InputDevice::getWheelMove() const
 {
-	return 0;
+	return {};
+}
+
+Vector2i InputDevice::getWheelMoveDiscrete() const
+{
+	return {};
 }
 
 void InputDevice::setParent(const std::shared_ptr<InputDevice>& parent)

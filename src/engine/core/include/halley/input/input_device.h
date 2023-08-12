@@ -121,7 +121,10 @@ namespace Halley {
 		B5,
 		WheelUp,
 		WheelDown,
-		WheelUpDown
+		WheelUpDown,
+		WheelLeft,
+		WheelRight,
+		WheelLeftRight
 	};
 
 	using InputButton = int;
@@ -175,7 +178,8 @@ namespace Halley {
 
 		virtual Vector2f getPosition() const;
 		virtual void setPosition(Vector2f position);
-		virtual int getWheelMove() const;
+		virtual Vector2f getWheelMove() const;
+		virtual Vector2i getWheelMoveDiscrete() const;
 
 		virtual void setParent(const std::shared_ptr<InputDevice>& parent);
 		virtual std::shared_ptr<InputDevice> getParent() const;

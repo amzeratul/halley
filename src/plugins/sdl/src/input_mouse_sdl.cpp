@@ -26,7 +26,7 @@ using namespace Halley;
 
 InputMouseSDL::InputMouseSDL()
 {
-	init(8);
+	init(11);
 }
 
 void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vector2f(Vector2i)>& remap)
@@ -58,13 +58,23 @@ void InputMouseSDL::processEvent(const SDL_Event& event, const std::function<Vec
 
 	case SDL_MOUSEWHEEL:
 		{
-			wheelMove += event.wheel.y;
+			wheelMove += Vector2f(event.wheel.preciseX, event.wheel.preciseY);
+			wheelMoveDiscrete += Vector2i(event.wheel.x, event.wheel.y);
+
 			if (event.wheel.y > 0) {
 				onButtonStatus(static_cast<int>(MouseButton::WheelUp), true);
 				onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), true);
 			} else if (event.wheel.y < 0) {
 				onButtonStatus(static_cast<int>(MouseButton::WheelDown), true);
 				onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), true);
+			}
+
+			if (event.wheel.x > 0) {
+				onButtonStatus(static_cast<int>(MouseButton::WheelLeft), true);
+				onButtonStatus(static_cast<int>(MouseButton::WheelLeftRight), true);
+			} else if (event.wheel.x < 0) {
+				onButtonStatus(static_cast<int>(MouseButton::WheelRight), true);
+				onButtonStatus(static_cast<int>(MouseButton::WheelLeftRight), true);
 			}
 		}
 	}
@@ -86,9 +96,14 @@ void InputMouseSDL::setPosition(Vector2f position)
 	SDL_WarpMouseInWindow(nullptr, static_cast<int>(position.x), static_cast<int>(position.y));
 }
 
-int InputMouseSDL::getWheelMove() const
+Vector2f InputMouseSDL::getWheelMove() const
 {
 	return wheelMove;
+}
+
+Vector2i InputMouseSDL::getWheelMoveDiscrete() const
+{
+	return wheelMoveDiscrete;
 }
 
 void InputMouseSDL::update()
@@ -97,6 +112,9 @@ void InputMouseSDL::update()
 	onButtonStatus(static_cast<int>(MouseButton::WheelUp), false);
 	onButtonStatus(static_cast<int>(MouseButton::WheelDown), false);
 	onButtonStatus(static_cast<int>(MouseButton::WheelUpDown), false);
+	onButtonStatus(static_cast<int>(MouseButton::WheelLeft), false);
+	onButtonStatus(static_cast<int>(MouseButton::WheelRight), false);
+	onButtonStatus(static_cast<int>(MouseButton::WheelLeftRight), false);
 }
 
 InputType InputMouseSDL::getInputType() const
@@ -129,7 +147,8 @@ float InputMouseSDL::getAxis(int n)
 void InputMouseSDL::clearPresses()
 {
 	InputButtonBase::clearPresses();
-	wheelMove = 0;
+	wheelMove = {};
+	wheelMoveDiscrete = {};
 	if (!isMouseTrapped) {
 		prevPos = pos;
 	}

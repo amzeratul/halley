@@ -87,7 +87,8 @@ namespace Halley {
 		void setPositionLimits(Rect4f limits);
 		void setPositionLimits();
 
-		int getWheelMove() const override;
+		Vector2f getWheelMove() const override;
+		Vector2i getWheelMoveDiscrete() const override;
 
 		void bindButton(ConvertibleTo<int> n, spInputDevice device, ConvertibleTo<int> deviceButton);
 		void bindButton(ConvertibleTo<int> n, spInputDevice device, KeyCode deviceButton, std::optional<KeyMods> mods = {});

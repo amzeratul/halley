@@ -209,11 +209,9 @@ void UIScrollPane::onLayout()
 void UIScrollPane::onMouseWheel(const UIEvent& event)
 {
 	if (scrollWheelEnabled) {
-		const float delta = scrollSpeed * float(event.getIntData());
-		if (scrollVertical) {
-			scrollBy(Vector2f(0.0f, -delta));
-		} else {
-			scrollBy(Vector2f(-delta, 0.0f));
+		const auto delta = scrollSpeed * event.getVectorData() * Vector2f(scrollHorizontal ? 1.0f : 0.0f, scrollVertical ? -1.0f : 0.0f);
+		if (delta.squaredLength() > 0.00001f) {
+			scrollBy(delta);
 		}
 	}
 }

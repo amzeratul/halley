@@ -395,11 +395,20 @@ void InputVirtual::setPositionLimits()
 	positionLimits.reset();
 }
 
-int InputVirtual::getWheelMove() const
+Vector2f InputVirtual::getWheelMove() const
 {
-	int val = 0;
+	Vector2f val;
 	for (const auto& w: wheels) {
 		val += w->getWheelMove();
+	}
+	return val;
+}
+
+Vector2i InputVirtual::getWheelMoveDiscrete() const
+{
+	Vector2i val;
+	for (const auto& w: wheels) {
+		val += w->getWheelMoveDiscrete();
 	}
 	return val;
 }
