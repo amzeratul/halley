@@ -63,7 +63,7 @@ children:
       - widget: { class: label, text: Float }
         fill: [left, centreVertical]
       - widget: { id: floatCode, class: textInput, selectAllOnClick: true }
-- sizer: { type: horizontal }
+- sizer: { type: horizontal, gap: 4 }
   children:
   - stretchSpacer: {}
     proportion: 1

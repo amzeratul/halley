@@ -12,8 +12,8 @@ UICheckbox::UICheckbox(String id, UIStyle style, bool checked, LocalisedString l
 	label = std::make_shared<UILabel>(id + "_label", style, std::move(labelText));
 	image = std::make_shared<UIImage>(id + "_image", checked ? style.getSprite("checked") : style.getSprite("normal"));
 
-	UIWidget::add(image, 1);
-	UIWidget::add(label, 0, {}, UISizerAlignFlags::Centre);
+	UIWidget::add(image, 0);
+	UIWidget::add(label, 1, {}, UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Left);
 
 	styles.emplace_back(std::move(style));
 	UICheckbox::doSetState(State::Up);

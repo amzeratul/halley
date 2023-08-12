@@ -6,6 +6,7 @@
 #include "src/scene/entity_editor.h"
 #include "src/ui/infini_canvas.h"
 #include "src/assets/config_undo_stack.h"
+#include "src/ui/popup_window.h"
 
 namespace Halley {
 	class ScriptGraphVariableInspector;
@@ -32,6 +33,7 @@ namespace Halley {
 		void onModified();
 		void undo();
 		void redo();
+		void openProperties();
 
 	protected:
     	void update(Time t, bool moved) override;
@@ -90,5 +92,20 @@ namespace Halley {
 		bool tryAutoAcquire();
 
 		void initUndoStack();
+	};
+
+	class ScriptGraphProperties : public PopupWindow {
+	public:
+		using Callback = std::function<void()>;
+		ScriptGraphProperties(UIFactory& factory, ScriptGraph& script, Callback callback);
+
+		void onMakeUI() override;
+
+	private:
+		UIFactory& factory;
+		ScriptGraph& scriptGraph;
+		Callback callback;
+
+		ConfigNode properties;
 	};
 }

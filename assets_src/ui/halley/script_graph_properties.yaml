@@ -1,0 +1,25 @@
+---
+widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow }
+sizer: { type: vertical }
+fill: centre
+proportion: 1
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, id: title, text: "Script Properties" }
+    fill: centre
+    proportion: 1
+- sizer: { type: vertical, gap: 4 }
+  border: [10, 10, 10, 10]
+  children:
+  - widget: { class: checkbox, id: persistent, label: Persist state on entity despawn }
+  - widget: { class: checkbox, id: multiCopy, label: Allow multiple instances per entity }
+  - widget: { class: checkbox, id: supressDuplicateWarning, label: Supress warning when trying to add extra instances }
+  - widget: { class: checkbox, id: network, label: Synchronise over the network }
+- sizer: { type: horizontal, gap: 4 }
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { id: ok, class: button, text: OK, size: [100, 22] }
+  - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
+...

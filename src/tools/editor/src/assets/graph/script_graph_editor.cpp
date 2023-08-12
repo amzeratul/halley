@@ -176,9 +176,13 @@ void ScriptGraphEditor::onMakeUI()
 		redo();
 	});
 
-	if (assetEditor) {
-		getWidget("saveButton")->setActive(assetEditor);
+	setHandle(UIEventType::ButtonClicked, "propertiesButton", [=](const UIEvent& event)
+	{
+		openProperties();
+	});
 
+	getWidget("saveButton")->setActive(assetEditor);
+	if (assetEditor) {
 		setHandle(UIEventType::ButtonClicked, "saveButton", [=](const UIEvent& event)
 		{
 			assetEditor->save();
@@ -210,6 +214,16 @@ void ScriptGraphEditor::redo()
 {
 	if (scriptGraph && undoStack.canRedo()) {
 		*scriptGraph = ScriptGraph(undoStack.redo());
+	}
+}
+
+void ScriptGraphEditor::openProperties()
+{
+	if (scriptGraph) {
+		getRoot()->addChild(std::make_shared<ScriptGraphProperties>(factory, *scriptGraph, [=] ()
+		{
+			onModified();
+		}));
 	}
 }
 
@@ -470,4 +484,49 @@ bool ScriptGraphEditor::tryAutoAcquire()
 	}
 
 	return false;
+}
+
+ScriptGraphProperties::ScriptGraphProperties(UIFactory& factory, ScriptGraph& script, Callback callback)
+	: PopupWindow("scriptGraphProperties")
+	, factory(factory)
+	, scriptGraph(script)
+	, callback(std::move(callback))
+	, properties(script.getProperties())
+{
+	factory.loadUI(*this, "halley/script_graph_properties");
+}
+
+void ScriptGraphProperties::onMakeUI()
+{
+	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	{
+		scriptGraph.getProperties() = std::move(properties);
+		callback();
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "cancel", [=] (const UIEvent& event)
+	{
+		destroy();
+	});
+
+	bindData("persistent", scriptGraph.isPersistent(), [=] (bool value)
+	{
+		properties["persistent"] = value;
+	});
+
+	bindData("multiCopy", scriptGraph.isMultiCopy(), [=] (bool value)
+	{
+		properties["multiCopy"] = value;
+	});
+
+	bindData("supressDuplicateWarning", scriptGraph.isSupressDuplicateWarning(), [=] (bool value)
+	{
+		properties["supressDuplicateWarning"] = value;
+	});
+
+	bindData("network", scriptGraph.isNetwork(), [=] (bool value)
+	{
+		properties["network"] = value;
+	});
 }

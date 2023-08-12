@@ -86,6 +86,9 @@ namespace Halley {
 		bool isSupressDuplicateWarning() const;
 		bool isNetwork() const;
 
+		ConfigNode& getProperties();
+		const ConfigNode& getProperties() const;
+
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 		String toYAML() const;
@@ -130,9 +133,6 @@ namespace Halley {
 		FunctionParameters getFunctionParameters() const;
 
 		const ScriptGraph* getPreviousVersion(uint64_t hash) const;
-
-		ConfigNode& getProperties();
-		const ConfigNode& getProperties() const;
 
 	private:
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;

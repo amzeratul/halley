@@ -216,6 +216,7 @@ ScriptGraph::ScriptGraph(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		nodes = node["nodes"].asVector<ScriptGraphNode>({});
+		properties = node["properties"];
 	}
 	finishGraph();
 }
