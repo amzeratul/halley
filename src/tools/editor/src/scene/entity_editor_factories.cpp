@@ -1007,9 +1007,9 @@ public:
 
 		auto container = std::make_shared<UISizer>();
 
-		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), Colour4f::fromString(value), [&context, data](Colour4f col, bool final)
+		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), value, [&context, data](String colour, bool final)
 		{
-			data.getWriteableFieldData() = ConfigNode(toString(col));
+			data.getWriteableFieldData() = ConfigNode(colour);
 			context.onEntityUpdated();
 		});
 		container->add(colourPreview, 1);

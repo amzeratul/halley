@@ -1,12 +1,14 @@
 #include "colour_picker.h"
 using namespace Halley;
 
-ColourPickerButton::ColourPickerButton(UIFactory& factory, Colour4f colour, Callback callback)
-	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png").setColour(colour))
+ColourPickerButton::ColourPickerButton(UIFactory& factory, String colour, Callback callback)
+	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png"))
 	, factory(factory)
 	, callback(std::move(callback))
-	, colour(colour)
+	, colour(std::move(colour))
 {
+	getSprite().setColour(readColour(this->colour));
+
 	setMinSize(Vector2f(40, 22));
 	setInteractWithMouse(true);
 
@@ -21,12 +23,13 @@ void ColourPickerButton::update(Time t, bool moved)
 {
 	UIImage::update(t, moved);
 
-	const auto hsv = colour.toHSV();
+	const auto col = readColour(colour);
+	const auto hsv = col.toHSV();
 	const bool isBrightCol = (Vector2f(0, 1) - hsv.yz()).length() < 0.5f;
 
-	String labelStr = colour.withAlpha(1).toString();
-	if (colour.a < 0.9999f) {
-		labelStr += " [" + toString(lroundl(colour.a * 100)) + "%]";
+	String labelStr = colour.startsWith("$") ? colour : col.withAlpha(1).toString();
+	if (!colour.startsWith("$") && col.a < 0.9999f) {
+		labelStr += " [" + toString(lroundl(col.a * 100)) + "%]";
 	}
 
 	label
@@ -41,10 +44,10 @@ void ColourPickerButton::draw(UIPainter& painter) const
 	painter.draw(label);
 }
 
-void ColourPickerButton::setColour(Colour4f colour, bool final)
+void ColourPickerButton::setColour(String colour, bool final)
 {
 	this->colour = colour;
-	getSprite().setColour(colour);
+	getSprite().setColour(readColour(colour));
 	if (callback) {
 		callback(colour, final);
 	}
@@ -55,8 +58,17 @@ void ColourPickerButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMo
 	if (button == 0 && keyMods == KeyMods::None) {
 		getRoot()->addChild(std::make_shared<ColourPicker>(factory, getSprite().getColour(), [=] (Colour4f col, bool final)
 		{
-			setColour(col, final);
+			setColour(col.toString(), final);
 		}));
+	}
+}
+
+Colour4f ColourPickerButton::readColour(const String& col)
+{
+	if (col.startsWith("$")) {
+		return factory.getColourScheme()->getColour(col);
+	} else {
+		return Colour4f::fromString(col);
 	}
 }
 

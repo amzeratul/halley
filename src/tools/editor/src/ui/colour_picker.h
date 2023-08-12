@@ -9,14 +9,14 @@ namespace Halley {
 
 	class ColourPickerButton : public UIImage {
     public:
-        using Callback = std::function<void(Colour4f, bool)>;
+        using Callback = std::function<void(String, bool)>;
 
-    	ColourPickerButton(UIFactory& factory, Colour4f colour, Callback callback);
+    	ColourPickerButton(UIFactory& factory, String colour, Callback callback);
 
         void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
         
-    	void setColour(Colour4f colour, bool final);
+    	void setColour(String colour, bool final);
 
     protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
@@ -25,8 +25,10 @@ namespace Halley {
         UIFactory& factory;
         Callback callback;
         TextRenderer label;
-        Colour4f colour;
-    };
+        String colour;
+
+        Colour4f readColour(const String& col);
+	};
 
     class ColourPicker : public PopupWindow {
     public:
