@@ -85,7 +85,7 @@ namespace Halley
 
 		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
 		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
-		Vector<String> getWidgetClassList() const;
+		Vector<String> getWidgetClassList(bool mustAllowChildren = false) const;
 
 		const HashMap<String, UIInputButtons>& getInputButtons() const;
 		void setInputButtons(HashMap<String, UIInputButtons> buttons);

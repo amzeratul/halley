@@ -207,12 +207,14 @@ const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String&
 	return iter->second;
 }
 
-Vector<String> UIFactory::getWidgetClassList() const
+Vector<String> UIFactory::getWidgetClassList(bool mustAllowChildren) const
 {
 	Vector<String> result;
 	result.reserve(properties.size());
 	for (auto& p: properties) {
-		result.push_back(p.first);
+		if (!mustAllowChildren || p.second.canHaveChildren) {
+			result.push_back(p.first);
+		}
 	}
 	return result;
 }
@@ -663,6 +665,7 @@ UIFactoryWidgetProperties UIFactory::getSpinControlProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Spin Control";
+	result.canHaveChildren = false;
 	result.iconName = "widget_icons/spinControl.png";
 	return result;
 }
@@ -679,6 +682,7 @@ UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Slider";
+	result.canHaveChildren = false;
 	result.iconName = "widget_icons/slider.png";
 	return result;
 }
@@ -695,6 +699,7 @@ UIFactoryWidgetProperties UIFactory::getHybridListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Hybrid List";
+	result.canHaveChildren = false;
 	result.iconName = "widget_icons/hybridList.png";
 	return result;
 }
@@ -703,6 +708,7 @@ UIFactoryWidgetProperties UIFactory::getSpinListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Spin List";
+	result.canHaveChildren = false;
 	//result.iconName = "widget_icons/spinList.png";
 	return result;
 }
@@ -711,6 +717,7 @@ UIFactoryWidgetProperties UIFactory::getOptionListMorpherProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Option List Morpher";
+	result.canHaveChildren = false;
 	//result.iconName = "widget_icons/optionListMorpher.png";
 	return result;
 }
@@ -719,6 +726,7 @@ UIFactoryWidgetProperties UIFactory::getDebugConsoleProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Debug Console";
+	result.canHaveChildren = false;
 	result.iconName = "widget_icons/debugConsole.png";
 	return result;
 }
@@ -775,6 +783,7 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Text Input";
 	result.iconName = "widget_icons/textInput.png";
+	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Max Length", "maxLength", "std::optional<int>", "");
 	result.entries.emplace_back("History", "history", "bool", "false");
@@ -855,6 +864,7 @@ UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Spin Control 2";
 	result.iconName = "widget_icons/spinControl.png";
+	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Allow Float", "allowFloat", "bool", "false");
 	result.entries.emplace_back("Min Value", "minValue", "std::optional<float>", "");
@@ -891,6 +901,7 @@ UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Dropdown";
 	result.iconName = "widget_icons/dropdown.png";
+	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<dropdown>", "dropdown");
 	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
@@ -932,6 +943,7 @@ UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Checkbox";
 	result.iconName = "widget_icons/checkbox.png";
+	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<checkbox>", "checkbox");
 	result.entries.emplace_back("Checked", "checked", "bool", "false");
@@ -1060,6 +1072,8 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Animation";
 	result.iconName = "widget_icons/animation.png";
+	result.canHaveChildren = false;
+
 	result.entries.emplace_back("Animation", "animation", "Halley::ResourceReference<Halley::Animation>", "");
 	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
 	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
@@ -1104,6 +1118,8 @@ UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Scrollbar";
 	result.iconName = "widget_icons/scrollBar.png";
+	result.canHaveChildren = false;
+
 	result.entries.emplace_back("Scroll Direction", "scrollDirection", "Halley::UIScrollDirection", "vertical");
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<scrollbar>", "scrollbar");
 	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
@@ -1182,6 +1198,7 @@ UIFactoryWidgetProperties UIFactory::getHorizontalDivProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Horizontal Divider";
 	result.iconName = "widget_icons/horizontalDiv.png";
+	result.canHaveChildren = false;
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<horizontalDiv>", "horizontalDiv");
 	return result;
 }
@@ -1196,6 +1213,7 @@ UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Vertical Divider";
 	result.iconName = "widget_icons/verticalDiv.png";
+	result.canHaveChildren = false;
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<verticalDiv>", "verticalDiv");
 	return result;
 }
@@ -1512,6 +1530,7 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "List";
 	result.iconName = "widget_icons/list.png";
+	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Can Drag", "canDrag", "bool", "false");
 	result.entries.emplace_back("Multi-select", "multiSelect", "bool", "false");

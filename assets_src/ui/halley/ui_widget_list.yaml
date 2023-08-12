@@ -10,7 +10,9 @@ children:
     proportion: 1
 - sizer: { type: horizontal }
   children:
-  - widget: { class: button, id: addWidget, text: Add Widget }
+  - widget: { class: button, id: addWidget, text: Add }
     proportion: 1
-  - widget: { class: button, id: removeWidget, text: Remove Widget }
+  - widget: { class: button, id: removeWidget, text: Remove }
+    proportion: 1
+  - widget: { class: button, id: replaceWidget, text: Replace }
     proportion: 1

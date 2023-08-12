@@ -72,6 +72,7 @@ namespace Halley {
 		void addWidget();
 		void addWidget(const String& widgetClass);
 		void removeWidget();
+		void replaceWidget();
 
 		void loadGameFactory();
 
@@ -84,7 +85,7 @@ namespace Halley {
 
 	class ChooseUIWidgetWindow : public ChooseAssetWindow {
 	public:
-		ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback);
+		ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, bool mustAllowChildren, Callback callback);
 
 	protected:
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;

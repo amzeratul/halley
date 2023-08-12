@@ -87,6 +87,11 @@ void UIEditor::onMakeUI()
 		removeWidget();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "replaceWidget", [=] (const UIEvent& event)
+	{
+		replaceWidget();
+	});
+
 	doLoadUI(false);
 	reselectWidget();
 }
@@ -221,7 +226,7 @@ void UIEditor::goToWidget(const String& id)
 
 void UIEditor::addWidget()
 {
-	const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, *gameFactory, [=] (std::optional<String> result)
+	const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, *gameFactory, false, [=] (std::optional<String> result)
 	{
 		if (result) {
 			addWidget(result.value());
@@ -250,6 +255,39 @@ void UIEditor::addWidget(const String& widgetClass)
 void UIEditor::removeWidget()
 {
 	deleteWidgets(Vector<String>{ curSelection });
+}
+
+void UIEditor::replaceWidget()
+{
+	if (curSelection.isEmpty()) {
+		return;
+	}
+
+	const auto& cur = uiDefinition->findUUID(curSelection);
+	if (cur.result) {
+		auto& curData = *cur.result;
+		const bool mustAllowChildren = curData.hasKey("children") && !curData["children"].asSequence().empty();
+
+		const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, *gameFactory, mustAllowChildren, [&] (std::optional<String> result)
+		{
+			if (result) {
+				const auto oldWidget = std::move(curData["widget"]);
+				ConfigNode::MapType widget;
+				widget["id"] = oldWidget["id"];
+				widget["size"] = oldWidget["size"];
+				widget["enabled"] = oldWidget["enabled"];
+				widget["active"] = oldWidget["active"];
+				widget["tooltip"] = oldWidget["tooltip"];
+				widget["tooltipKey"] = oldWidget["tooltipKey"];
+				widget["childLayerAdjustment"] = oldWidget["childLayerAdjustment"];
+				widget["class"] = result.value();
+				curData["widget"] = widget;
+				onWidgetModified(curSelection);
+				setSelectedWidget(curSelection);
+			}
+		});
+		getRoot()->addChild(window);
+	}
 }
 
 void UIEditor::loadGameFactory()
@@ -380,12 +418,13 @@ void UIEditor::deleteWidgets(const Vector<String>& uuids)
 }
 
 
-ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)
+ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, bool mustAllowChildren, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, factory(factory)
 	, gameFactory(gameFactory)
 {
-	auto ids = gameFactory.getWidgetClassList();
+	auto ids = gameFactory.getWidgetClassList(mustAllowChildren);
+	std::sort(ids.begin(), ids.end());
 	ids.push_back("sizer");
 	ids.push_back("spacer");
 
