@@ -104,6 +104,13 @@ SceneEditorGizmoCollection& SceneEditorGameBridge::getGizmos()
 	return *gizmos;
 }
 
+void SceneEditorGameBridge::adjustView(int zoomChange, bool zoomToFit, bool centre)
+{
+	if (interfaceReady) {
+		interface->adjustView(zoomChange, zoomToFit, centre);
+	}
+}
+
 void SceneEditorGameBridge::changeZoom(int amount, Vector2f mousePos)
 {
 	if (interfaceReady) {

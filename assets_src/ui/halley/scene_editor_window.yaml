@@ -13,6 +13,11 @@ children:
         border: [0, 0, 10, 0]
       - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
       - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
+        border: [0, 0, 10, 0]
+      - widget: { id: zoomOutButton, class: button, style: buttonThin, icon: "entity_icons/zoom_out.png", size: [22, 22], tooltip: "Zoom Out [Ctrl+-]" }
+      - widget: { id: zoomInButton, class: button, style: buttonThin, icon: "entity_icons/zoom_in.png", size: [22, 22], tooltip: "Zoom In [Ctrl+=]" }
+      - widget: { id: zoomFitButton, class: button, style: buttonThin, icon: "entity_icons/zoom_fit.png", size: [22, 22], tooltip: "Zoom To Fit", active: false }
+      - widget: { id: centreViewButton, class: button, style: buttonThin, icon: "entity_icons/centre_view.png", size: [22, 22], tooltip: "Centre View" }
   - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
     sizer: { type: horizontal }
     proportion: 1

@@ -40,6 +40,7 @@ namespace Halley {
 		void dragCamera(Vector2f amount) override;
 		void moveCamera(Vector2f pos) override;
     	bool loadCameraPos() override;
+        void adjustView(int zoomChange, bool zoomToFit, bool centre) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
     	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;

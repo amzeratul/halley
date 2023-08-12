@@ -27,6 +27,7 @@ namespace Halley {
 
 		SceneEditorGizmoCollection& getGizmos();
 
+		void adjustView(int zoomChange, bool zoomToFit, bool centre);
 		void changeZoom(int amount, Vector2f mousePos);
 		void dragCamera(Vector2f pos);
 		void moveCamera(Vector2f pos);

@@ -426,6 +426,28 @@ void SceneEditor::moveCameraTo2D(Vector2f pos)
 	saveCameraPos();
 }
 
+void SceneEditor::adjustView(int zoomChange, bool zoomToFit, bool centre)
+{
+	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
+	auto& camera = cameraEntity.getComponent<CameraComponent>();
+	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
+	const float prevZoom = camera.zoom;
+
+	float targetZoom = prevZoom;
+	if (zoomToFit) {
+		// TODO
+		targetZoom = 1.0f;
+	} else if (zoomChange != 0) {
+		const int curLevel = lroundf(std::log2f(clamp(camera.zoom, 1.0f / 32.0f, 32.0f)));
+		targetZoom = std::pow(2.0f, float(clamp(curLevel + zoomChange, -5, 5)));
+	}
+
+	const Vector2f prevPos = transform.getGlobalPosition();
+	const Vector2f targetPos = centre ? Vector2f() : prevPos;
+
+	cameraAnimation = CameraAnimation{ prevPos, targetPos, prevZoom, targetZoom, 0 };
+}
+
 void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 {
 	if (amount == 0) {

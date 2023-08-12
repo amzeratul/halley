@@ -213,6 +213,7 @@ namespace Halley {
         virtual void dragCamera(Vector2f amount) = 0;
     	virtual void moveCamera(Vector2f pos) = 0;
     	virtual bool loadCameraPos() = 0;
+        virtual void adjustView(int zoomChange, bool zoomToFit, bool centre) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 		virtual float getZoom() const = 0;
 
