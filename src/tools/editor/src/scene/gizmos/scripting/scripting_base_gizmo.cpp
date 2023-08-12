@@ -556,7 +556,7 @@ GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, Config
 {
 	const auto id = scriptGraph->addNode(type, pos, std::move(settings));
 	assignNodeTypes();
-	onModified();
+	//onModified(); // Placing after dragging will modify
 
 	selectedNodes.directSelect(id, SelectionSetModifier::None);
 	dragging = Dragging{ { id }, { scriptGraph->getNodes()[id].getPosition() }, {}, true };
