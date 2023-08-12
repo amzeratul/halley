@@ -117,6 +117,11 @@ void SceneEditorWindow::makeUI()
 		undo();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "redoButton", [=] (const UIEvent& event)
+	{
+		redo();
+	});
+
 	setHandle(UIEventType::ButtonClicked, "zoomInButton", [=] (const UIEvent& event)
 	{
 		gameBridge->adjustView(1, false, false);
@@ -135,11 +140,6 @@ void SceneEditorWindow::makeUI()
 	setHandle(UIEventType::ButtonClicked, "centreViewButton", [=] (const UIEvent& event)
 	{
 		gameBridge->adjustView(0, false, true);
-	});
-
-	setHandle(UIEventType::ButtonClicked, "redoButton", [=] (const UIEvent& event)
-	{
-		redo();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)

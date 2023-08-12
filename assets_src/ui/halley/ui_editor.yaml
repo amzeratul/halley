@@ -1,16 +1,32 @@
 ---
 widget: { class: widget }
-sizer: { type: horizontal, gap: 6 }
+sizer: { type: vertical, gap: 6 }
 children:
-- widget: { id: widgetList, class: uiWidgetList }
-- widget: { class: infiniCanvas, id: infiniCanvas }
-  proportion: 1
-  sizer: { type: free }
+- widget: { id: toolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [50, 35] }
+  sizer: { type: horizontal, gap: 4 }
+  border: [0, -6, 0, 0]
   children:
-  - widget: { class: uiEditorDisplay, id: display }
-    proportion: 0
-    fill: [top, left]
-    sizer: { type: vertical }
-    children: []
-- widget: { id: widgetEditor, class: uiWidgetEditor }
+  - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
+    border: [0, 0, 10, 0]
+  - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
+  - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
+    border: [0, 0, 10, 0]
+  - widget: { id: zoomOutButton, class: button, style: buttonThin, icon: "entity_icons/zoom_out.png", size: [22, 22], tooltip: "Zoom Out [Ctrl+-]" }
+  - widget: { id: zoomInButton, class: button, style: buttonThin, icon: "entity_icons/zoom_in.png", size: [22, 22], tooltip: "Zoom In [Ctrl+=]" }
+  - widget: { id: zoomFitButton, class: button, style: buttonThin, icon: "entity_icons/zoom_fit.png", size: [22, 22], tooltip: "Zoom To Fit", active: false }
+  - widget: { id: centreViewButton, class: button, style: buttonThin, icon: "entity_icons/centre_view.png", size: [22, 22], tooltip: "Centre View" }
+- sizer: { type: horizontal, gap: 6 }
+  proportion: 1
+  children:
+  - widget: { id: widgetList, class: uiWidgetList }
+  - widget: { class: infiniCanvas, id: infiniCanvas }
+    proportion: 1
+    sizer: { type: free }
+    children:
+    - widget: { class: uiEditorDisplay, id: display }
+      proportion: 0
+      fill: [top, left]
+      sizer: { type: vertical }
+      children: []
+  - widget: { id: widgetEditor, class: uiWidgetEditor }
 ...

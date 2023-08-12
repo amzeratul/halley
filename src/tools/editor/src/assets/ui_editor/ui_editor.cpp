@@ -36,6 +36,10 @@ void UIEditor::update(Time time, bool moved)
 		open();
 		pendingLoad = false;
 	}
+
+	getWidget("saveButton")->setEnabled(isModified());
+	getWidget("undoButton")->setEnabled(undoStack.canUndo());
+	getWidget("redoButton")->setEnabled(undoStack.canRedo());
 }
 
 void UIEditor::open()
@@ -90,6 +94,41 @@ void UIEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "replaceWidget", [=] (const UIEvent& event)
 	{
 		replaceWidget();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "saveButton", [=] (const UIEvent& event)
+	{
+		save();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "undoButton", [=] (const UIEvent& event)
+	{
+		undo();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "redoButton", [=] (const UIEvent& event)
+	{
+		redo();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "zoomInButton", [=] (const UIEvent& event)
+	{
+		infiniCanvas->changeZoom(1, infiniCanvas->getRect().getCenter());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "zoomOutButton", [=] (const UIEvent& event)
+	{
+		infiniCanvas->changeZoom(-1, infiniCanvas->getRect().getCenter());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "zoomFitButton", [=] (const UIEvent& event)
+	{
+		// TODO
+	});
+
+	setHandle(UIEventType::ButtonClicked, "centreViewButton", [=] (const UIEvent& event)
+	{
+		infiniCanvas->setScrollPosition(display->getSize() / 2 * infiniCanvas->getZoomLevel());
 	});
 
 	doLoadUI(false);

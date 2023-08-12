@@ -25,6 +25,8 @@ namespace Halley {
 		virtual Vector2f getScrollPosition() const = 0;
 		virtual Vector2f getBasePosition() const = 0;
 
+		void changeZoom(int amount, std::optional<Vector2f> anchor = std::nullopt);
+
 		std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
 
     protected:

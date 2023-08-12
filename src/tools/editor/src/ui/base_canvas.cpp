@@ -206,12 +206,17 @@ void BaseCanvas::onMouseWheel(const UIEvent& event)
 		mouseMirror->sendEventDown(event);
 	}
 
+	changeZoom(signOf(event.getIntData()), lastMousePos);
+}
+
+void BaseCanvas::changeZoom(int amount, std::optional<Vector2f> anchor)
+{
 	if (!zoomEnabled) {
 		return;
 	}
 	
 	const float zoom0 = getZoomLevel();
-	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
+	zoomExp = clamp(zoomExp + amount, -5, 5);
 	const float zoom1 = getZoomLevel();
 
 	if (zoom1 != zoom0) {
@@ -223,10 +228,12 @@ void BaseCanvas::onMouseWheel(const UIEvent& event)
 
 		refresh();
 
-		const Vector2f relMousePos = lastMousePos - getBasePosition();
-		const Vector2f scrollPos1 = (relMousePos + scrollPos0) / zoom0 * zoom1 - relMousePos;
+		if (anchor) {
+			const Vector2f relMousePos = *anchor - getBasePosition();
+			const Vector2f scrollPos1 = (relMousePos + scrollPos0) / zoom0 * zoom1 - relMousePos;
 
-		setScrollPosition(scrollPos1);
+			setScrollPosition(scrollPos1);
+		}
 	}
 }
 

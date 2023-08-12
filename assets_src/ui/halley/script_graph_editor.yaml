@@ -3,9 +3,9 @@ widget: { class: widget }
 sizer: { type: vertical }
 children:
 - sizer: { type: horizontal, gap: 8 }
-  border: [0, 0, 0, 4]
+  border: [0, -6, 0, 4]
   children:
-  - widget: { id: saveToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+  - widget: { id: saveToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [30, 35] }
     sizer: { type: horizontal, gap: 4 }
     children:
       - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
@@ -22,6 +22,7 @@ children:
     - widget: { class: button, id: propertiesButton, text: Properties }
   - widget: { id: debugToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
     sizer: { type: horizontal, gap: 8 }
+    proportion: 1
     children:
     - widget: { class: checkbox, id: autoAcquire, label: Auto Acquire }
       fill: centre
