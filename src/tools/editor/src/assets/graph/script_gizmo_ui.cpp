@@ -224,6 +224,11 @@ bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::Z, KeyMods::CtrlShift)) {
+		graphEditor.redo();
+		return true;
+	}
+
 	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
 		graphEditor.redo();
 		return true;

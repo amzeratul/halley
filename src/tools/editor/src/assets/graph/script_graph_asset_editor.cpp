@@ -41,6 +41,9 @@ void ScriptGraphAssetEditor::save()
 {
 	if (isModified()) {
 		const auto scriptGraph = graphEditor->getScriptGraph();
+		if (scriptGraph->getAssetId().isEmpty()) {
+			throw Exception("Trying to save Comet script with no name", HalleyExceptions::Tools);
+		}
 
 		const auto assetPath = Path("comet/" + scriptGraph->getAssetId() + ".comet");
 		const auto strData = scriptGraph->toYAML();
@@ -103,7 +106,7 @@ void ScriptGraphAssetEditor::open()
 	if (graphEditor) {
 		graphEditor->setScriptGraph(std::move(scriptGraph));
 	} else {
-		graphEditor = std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::move(scriptGraph));
+		graphEditor = std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::move(scriptGraph), this);
 		add(graphEditor, 1);
 	}
 	if (modified) {

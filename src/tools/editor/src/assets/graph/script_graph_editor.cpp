@@ -8,12 +8,13 @@
 
 using namespace Halley;
 
-ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback, Vector<String> entityTargets)
+ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, Callback callback, Vector<String> entityTargets)
 	: DrillDownAssetWindow("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
 	, project(projectWindow.getProject())
+	, assetEditor(assetEditor)
 	, callback(std::move(callback))
 	, scriptGraph(std::move(scriptGraph))
 	, entityTargets(std::move(entityTargets))
@@ -164,6 +165,25 @@ void ScriptGraphEditor::onMakeUI()
 		callback(false, scriptGraph);
 		destroy();
 	});
+
+	setHandle(UIEventType::ButtonClicked, "undoButton", [=](const UIEvent& event)
+	{
+		undo();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "redoButton", [=](const UIEvent& event)
+	{
+		redo();
+	});
+
+	if (assetEditor) {
+		getWidget("saveButton")->setActive(assetEditor);
+
+		setHandle(UIEventType::ButtonClicked, "saveButton", [=](const UIEvent& event)
+		{
+			assetEditor->save();
+		});
+	}
 }
 
 const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
@@ -210,6 +230,12 @@ void ScriptGraphEditor::update(Time t, bool moved)
 
 		updateNodeUnderCursor();
 	}
+
+	if (assetEditor) {
+		getWidget("saveButton")->setEnabled(assetEditor->isModified());
+	}
+	getWidget("undoButton")->setEnabled(undoStack.canUndo());
+	getWidget("redoButton")->setEnabled(undoStack.canRedo());
 }
 
 void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)

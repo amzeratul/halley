@@ -17,7 +17,7 @@ std::optional<Vector2f> SceneEditorGizmoHandle::update(const SceneEditorInputSta
 	const bool overAnother = std::any_of(handles.begin(), handles.end(), [&] (const SceneEditorGizmoHandle& handle) { return &handle != this && handle.isOver(); });
 	
 	if (!holding) {
-		over = !overAnother && enabled && boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
+		over = !overAnother && enabled && boundsCheck && inputState.mousePos && boundsCheck(pos, inputState.mousePos.value());
 		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
 			startOffset = pos - inputState.mousePos.value();

@@ -228,26 +228,36 @@ ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContex
 void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	nodes = node["nodes"].asVector<ScriptGraphNode>({});
+	properties = node["properties"];
 	lastAssignTypeHash = 0;
 	finishGraph();
 }
 
 bool ScriptGraph::isPersistent() const
 {
-	// TODO
-	return false;
+	return properties["persistent"].asBool(false);
 }
 
-bool ScriptGraph::isSingleton() const
+bool ScriptGraph::isMultiCopy() const
 {
-	// TODO
-	return true;
+	return properties["multiCopy"].asBool(false);
+}
+
+bool ScriptGraph::isSupressDuplicateWarning() const
+{
+	return properties["supressDuplicateWarning"].asBool(false);
+}
+
+bool ScriptGraph::isNetwork() const
+{
+	return properties["network"].asBool(true);
 }
 
 ConfigNode ScriptGraph::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["nodes"] = nodes;
+	result["properties"] = properties;
 	return result;
 }
 
@@ -255,13 +265,14 @@ ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) 
 {
 	ConfigNode::MapType result;
 	result["nodes"] = nodes;
+	result["properties"] = properties;
 	return result;
 }
 
 String ScriptGraph::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = { "type", "settings", "position", "pins" };
+	options.mapKeyOrder = { "type", "settings", "position", "pins", "properties", "nodes" };
 	options.compactMaps = true;
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
@@ -297,6 +308,7 @@ void ScriptGraph::serialize(Serializer& s) const
 	s << callerToCallee;
 	s << returnToCaller;
 	s << subGraphs;
+	s << properties;
 }
 
 void ScriptGraph::deserialize(Deserializer& s)
@@ -305,6 +317,7 @@ void ScriptGraph::deserialize(Deserializer& s)
 	s >> callerToCallee;
 	s >> returnToCaller;
 	s >> subGraphs;
+	s >> properties;
 	finishGraph();
 }
 
@@ -513,11 +526,23 @@ const ScriptGraph* ScriptGraph::getPreviousVersion(uint64_t hash) const
 	return previousVersion.get();
 }
 
+ConfigNode& ScriptGraph::getProperties()
+{
+	return properties;
+}
+
+const ConfigNode& ScriptGraph::getProperties() const
+{
+	return properties;
+}
+
 void ScriptGraph::finishGraph()
 {
 	if (nodes.empty()) {
 		makeBaseGraph();
 	}
+
+	properties.ensureType(ConfigNodeType::Map);
 
 	updateHash();
 }

@@ -82,7 +82,9 @@ namespace Halley {
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
 
 		bool isPersistent() const;
-		bool isSingleton() const;
+		bool isMultiCopy() const;
+		bool isSupressDuplicateWarning() const;
+		bool isNetwork() const;
 
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
@@ -129,15 +131,20 @@ namespace Halley {
 
 		const ScriptGraph* getPreviousVersion(uint64_t hash) const;
 
+		ConfigNode& getProperties();
+		const ConfigNode& getProperties() const;
+
 	private:
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
 		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;
-		uint64_t hash = 0;
 
+		uint64_t hash = 0;
 		mutable uint64_t lastAssignTypeHash = 1;
 
 		ScriptGraphNodeRoots roots;
+
+		ConfigNode properties;
 
 		std::shared_ptr<ScriptGraph> previousVersion;
 

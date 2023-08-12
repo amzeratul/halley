@@ -14,7 +14,7 @@ namespace Halley {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
-		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback = {}, Vector<String> entityTargets = {});
+		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, Callback callback = {}, Vector<String> entityTargets = {});
 		~ScriptGraphEditor() override;
 
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
@@ -48,6 +48,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		Resources& gameResources;
 		Project& project;
+		AssetEditor* assetEditor = nullptr;
 		Callback callback;
 
 		ConfigUndoStack undoStack;

@@ -348,8 +348,8 @@ private:
 
 	std::shared_ptr<ScriptState> addScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<const ScriptGraph> script, Vector<String> tags = {}, Vector<ConfigNode> params = {})
 	{
-		if (hasScript(scriptable, script->getAssetId())) {
-			if (shouldNotifyDuplicateScript(*script)) {
+		if (hasScript(scriptable, script->getAssetId()) && !script->isMultiCopy()) {
+			if (!script->isSupressDuplicateWarning()) {
 				Logger::logWarning("Script " + script->getAssetId() + " already exists on entity " + getWorld().getEntity(entityId).getName());
 			}
 			return {};
@@ -359,8 +359,8 @@ private:
 
 	std::shared_ptr<ScriptState> addScript(EntityId entityId, ScriptableComponent& scriptable, const ScriptGraph& script, Vector<String> tags = {}, Vector<ConfigNode> params = {})
 	{
-		if (hasScript(scriptable, script.getAssetId())) {
-			if (shouldNotifyDuplicateScript(script)) {
+		if (hasScript(scriptable, script.getAssetId()) && !script.isMultiCopy()) {
+			if (!script.isSupressDuplicateWarning()) {
 				Logger::logWarning("Script " + script.getAssetId() + " already exists on entity " + getWorld().getEntity(entityId).getName());
 			}
 			return {};
@@ -381,13 +381,6 @@ private:
 	bool hasScript(ScriptableComponent& scriptable, const String& id)
 	{
 		return scriptable.activeStates.contains(id);
-	}
-
-	bool shouldNotifyDuplicateScript(const ScriptGraph& script)
-	{
-		// HACK
-		// TODO, make this a script property
-		return script.getAssetId() != "interactions/pickup";
 	}
 
 	void updateDevCon()
