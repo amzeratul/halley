@@ -81,9 +81,9 @@ IEntityEditorCallbacks* ComponentEditorContext::getEntityEditorCallbacks() const
 	return entityEditor;
 }
 
-void ComponentEditorContext::onEntityUpdated() const
+void ComponentEditorContext::onEntityUpdated(bool temporary) const
 {
 	if (entityEditor) {
-		entityEditor->onEntityUpdated();
+		entityEditor->onEntityUpdated(temporary);
 	}
 }

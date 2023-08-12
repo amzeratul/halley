@@ -22,8 +22,8 @@ namespace Halley {
 
 		void reload() override;
 		void onMakeUI() override;
-		void markModified();
-		void onWidgetModified(const String& id);
+		void markModified(bool temporary = false);
+		void onWidgetModified(const String& id, bool temporary = false);
 		void reselectWidget();
 
 		bool isModified() override;

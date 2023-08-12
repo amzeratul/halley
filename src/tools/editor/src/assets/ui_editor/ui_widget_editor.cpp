@@ -33,9 +33,9 @@ void UIWidgetEditor::setUIEditor(UIEditor& editor, ProjectWindow& project)
 	entityFieldFactory = std::make_shared<EntityEditorFactory>(projectWindow->getEntityEditorFactoryRoot(), static_cast<IEntityEditorCallbacks*>(this));
 }
 
-void UIWidgetEditor::onEntityUpdated()
+void UIWidgetEditor::onEntityUpdated(bool temporary)
 {
-	uiEditor->onWidgetModified(curId);
+	uiEditor->onWidgetModified(curId, temporary);
 }
 
 void UIWidgetEditor::reloadEntity()

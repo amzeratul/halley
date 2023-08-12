@@ -81,7 +81,7 @@ ColourPicker::ColourPicker(UIFactory& factory, String initialColourName, bool al
 	, allowNamedColour(allowNamedColour)
 {
 	colour = initialColour = readColour(this->initialColourName);
-	if (this->initialColourName.startsWith("$")) {
+	if (allowNamedColour && this->initialColourName.startsWith("$")) {
 		namedColour = this->initialColourName;
 	}
 
@@ -243,22 +243,26 @@ void ColourPicker::onMakeUI()
 
 	bindData("useNamedColour", allowNamedColour && initialColourName.startsWith("$"), [=] (bool value)
 	{
-		const auto dropdown = getWidgetAs<UIDropdown>("namedColour");
-		dropdown->setActive(value);
-		if (value) {
-			namedColour = "$" + dropdown->getSelectedOptionId();
-			setColour(*namedColour);
-		} else {
-			namedColour = std::nullopt;
-			setColour(colour);
-			onColourChanged();
+		if (allowNamedColour) {
+			const auto dropdown = getWidgetAs<UIDropdown>("namedColour");
+			dropdown->setActive(value);
+			if (value) {
+				namedColour = "$" + dropdown->getSelectedOptionId();
+				setColour(*namedColour);
+			} else {
+				namedColour = std::nullopt;
+				setColour(colour);
+				onColourChanged();
+			}
 		}
 	});
 
 	bindData("namedColour", initialColourName.mid(1), [=](String value)
 	{
-		namedColour = "$" + value;
-		setColour(*namedColour);
+		if (allowNamedColour && getWidgetAs<UICheckbox>("useNamedColour")->isChecked()) {
+			namedColour = "$" + value;
+			setColour(*namedColour);
+		}
 	});
 
 	updateUI();

@@ -1010,7 +1010,7 @@ public:
 		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), value, allowNamedColour(), [&context, data](String colour, bool final)
 		{
 			data.getWriteableFieldData() = ConfigNode(colour);
-			context.onEntityUpdated();
+			context.onEntityUpdated(!final);
 		});
 		container->add(colourPreview, 1);
 

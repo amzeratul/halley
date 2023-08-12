@@ -29,7 +29,7 @@ namespace Halley {
 	public:
 		virtual ~IEntityEditorCallbacks() = default;
 
-		virtual void onEntityUpdated() = 0;
+		virtual void onEntityUpdated(bool temporary) = 0;
 		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
@@ -73,7 +73,7 @@ namespace Halley {
 	    Resources& getGameResources() const;
 		const HalleyAPI& getAPI() const;
 		IProjectWindow& getProjectWindow() const;
-        void onEntityUpdated() const;
+        void onEntityUpdated(bool temporary = false) const;
 	    void setTool(const String& tool, const String& componentName, const String& fieldName) const;
     	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const;

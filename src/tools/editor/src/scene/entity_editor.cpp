@@ -629,7 +629,7 @@ void EntityEditor::refreshEntityData()
 	}
 }
 
-void EntityEditor::onEntityUpdated()
+void EntityEditor::onEntityUpdated(bool temporary)
 {
 	if (currentEntityData) {
 		sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);

@@ -16,7 +16,7 @@ namespace Halley {
         void setUIEditor(UIEditor& uiEditor, ProjectWindow& projectWindow);
 
     protected:
-        void onEntityUpdated() override;
+        void onEntityUpdated(bool temporary) override;
         void reloadEntity() override;
         void setTool(const String& tool, const String& componentName, const String& fieldName) override;
         void setDefaultName(const String& name, const String& prevName) override;

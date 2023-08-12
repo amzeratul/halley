@@ -96,20 +96,21 @@ void UIEditor::onMakeUI()
 	reselectWidget();
 }
 
-void UIEditor::markModified()
+void UIEditor::markModified(bool temporary)
 {
 	uiDefinition->increaseAssetVersion();
-	modified = true;
-	undoStack.update(uiDefinition->getRoot());
+	if (!temporary) {
+		modified = true;
+		undoStack.update(uiDefinition->getRoot());
+	}
 }
 
-void UIEditor::onWidgetModified(const String& id)
+void UIEditor::onWidgetModified(const String& id, bool temporary)
 {
-	auto data = uiDefinition->findUUID(id);
-	if (data.result) {
+	if (auto data = uiDefinition->findUUID(id); data.result) {
 		widgetList->onWidgetModified(id, *data.result);
 	}
-	markModified();
+	markModified(temporary);
 }
 
 void UIEditor::reselectWidget()
