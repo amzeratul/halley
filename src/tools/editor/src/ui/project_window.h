@@ -67,6 +67,8 @@ namespace Halley {
 
     	void openAssetFinder(std::optional<String> initialQuery);
 
+        UIDebugConsoleController* getDebugConsoleController();
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

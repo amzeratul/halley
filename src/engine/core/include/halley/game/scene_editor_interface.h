@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class UIDebugConsoleCommands;
 	class UIRoot;
 	struct AssetPreviewData;
 	class IEntityEditor;
@@ -222,7 +223,7 @@ namespace Halley {
         virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;
 
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
-    	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
+    	virtual void setupConsoleCommands(UIDebugConsoleCommands& commands, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(Prefab& scene) = 0;
     	virtual void onSceneSaved() = 0;
         virtual void refreshAssets() = 0;

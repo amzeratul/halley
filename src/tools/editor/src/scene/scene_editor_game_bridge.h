@@ -38,7 +38,7 @@ namespace Halley {
 		void onToolSet(String& tool, String& componentName, String& fieldName);
 		void onSceneLoaded(Prefab& scene);
 		void onSceneSaved();
-		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
+		void setupConsoleCommands(UIDebugConsoleCommands& commands, ISceneEditorWindow& sceneEditor);
 		void cycleHighlight(int delta);
 		std::optional<Vector2f> getMousePos() const;
 		Vector2f getCameraPos() const;

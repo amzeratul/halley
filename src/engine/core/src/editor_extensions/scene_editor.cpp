@@ -594,7 +594,7 @@ void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldNa
 {
 }
 
-void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
+void SceneEditor::setupConsoleCommands(UIDebugConsoleCommands& commands, ISceneEditorWindow& sceneEditor)
 {
 }
 

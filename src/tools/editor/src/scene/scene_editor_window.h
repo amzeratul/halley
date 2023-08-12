@@ -156,6 +156,7 @@ namespace Halley {
 		void onEntitiesAdded(gsl::span<const EntityChangeOperation> patches);
 		void onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas);
 		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData);
+		void onActiveChanged(bool active) override;
 
 	private:		
 		const HalleyAPI& api;
@@ -198,6 +199,9 @@ namespace Halley {
 
 		mutable std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 
+		UIDebugConsoleCommands consoleCommands;
+		bool consoleCommandsAttached = false;
+
 		void makeUI();
 		void onEntitiesSelected(Vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);
@@ -223,8 +227,9 @@ namespace Halley {
 		Vector2f getPositionClosestToAverage(gsl::span<const EntityData> datas) const;
 		bool isValidEntityTree(const ConfigNode& node) const;
 
-		void toggleConsole();
 		void setupConsoleCommands();
+		void clearConsoleCommands();
+		void setConsoleCommandsAttached(bool attached);
 
 		void updateButtons();
 

@@ -83,6 +83,7 @@ namespace Halley {
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 
 		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
+		void clear();
 
 	private:
 		std::map<String, UIDebugConsoleCommandData> commands;

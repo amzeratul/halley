@@ -7,6 +7,7 @@
 #include "halley/graphics/text/text_renderer.h"
 
 namespace Halley {
+	class UIDebugConsoleCommands;
 	class BaseFrameData;
 	struct SceneEditorOutputState;
 	class EntityRef;
@@ -59,7 +60,7 @@ namespace Halley {
 		std::optional<Vector2f> getWorldOffset() const override;
 		float getZoom() const override;
     	
-    	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
+    	void setupConsoleCommands(UIDebugConsoleCommands& commands, ISceneEditorWindow& sceneEditor) override;
 
 		void refreshAssets() override;
 

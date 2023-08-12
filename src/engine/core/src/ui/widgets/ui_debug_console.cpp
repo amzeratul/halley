@@ -64,6 +64,11 @@ const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCo
 	return commands;
 }
 
+void UIDebugConsoleCommands::clear()
+{
+	commands.clear();
+}
+
 UIDebugConsoleController::UIDebugConsoleController(Resources& resources, const HalleyAPI& api)
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
@@ -150,12 +155,14 @@ String UIDebugConsoleController::runHelp()
 
 void UIDebugConsoleController::addCommands(UIDebugConsoleCommands& commandSet)
 {
-	commands.push_back(&commandSet);
+	if (!std_ex::contains(commands, &commandSet)) {
+		commands.push_back(&commandSet);
+	}
 }
 
 void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet)
 {
-	commands.erase(std::remove(commands.begin(), commands.end(), &commandSet), commands.end());
+	std_ex::erase(commands, &commandSet);
 }
 
 void UIDebugConsoleController::clearCommands()

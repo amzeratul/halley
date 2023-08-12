@@ -187,10 +187,10 @@ void SceneEditorGameBridge::onSceneSaved()
 	}
 }
 
-void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
+void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleCommands& commands, ISceneEditorWindow& sceneEditor)
 {
 	if (interfaceReady) {
-		interface->setupConsoleCommands(controller, sceneEditor);
+		interface->setupConsoleCommands(commands, sceneEditor);
 	}
 }
 

@@ -251,6 +251,7 @@ void SceneEditorWindow::unloadScene()
 {
 	setCustomUI({});
 	setToolUI({});
+	clearConsoleCommands();
 
 	currentEntityIds = {};
 	if (gameBridge->isLoaded()) {
@@ -393,11 +394,6 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::N, KeyMods::CtrlShift)) {
 		addNewPrefab();
-		return true;
-	}
-
-	if (key.is(KeyCode::F1)) {
-		toggleConsole();
 		return true;
 	}
 
@@ -917,6 +913,11 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 			markModified();
 		}
 	}
+}
+
+void SceneEditorWindow::onActiveChanged(bool active)
+{
+	setConsoleCommandsAttached(active);
 }
 
 void SceneEditorWindow::onComponentRemoved(const String& name)
@@ -1517,23 +1518,30 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 	return true;
 }
 
-void SceneEditorWindow::toggleConsole()
-{
-	auto console = getWidgetAs<UIDebugConsole>("debugConsole");
-	const bool newState = !console->isActive();
-
-	if (newState) {
-		console->show();
-	} else {
-		console->hide();
-	}
-}
-
 void SceneEditorWindow::setupConsoleCommands()
 {
-	auto controller = getWidgetAs<UIDebugConsole>("debugConsole")->getController();
-	controller->clearCommands();
-	gameBridge->setupConsoleCommands(*controller, *this);
+	gameBridge->setupConsoleCommands(consoleCommands, *this);
+	setConsoleCommandsAttached(true);
+}
+
+void SceneEditorWindow::clearConsoleCommands()
+{
+	setConsoleCommandsAttached(false);
+	consoleCommands.clear();
+}
+
+void SceneEditorWindow::setConsoleCommandsAttached(bool attached)
+{
+	if (consoleCommandsAttached != attached) {
+		if (auto* controller = projectWindow.getDebugConsoleController()) {
+			if (attached) {
+				controller->addCommands(consoleCommands);
+			} else {
+				controller->removeCommands(consoleCommands);
+			}
+		}
+		consoleCommandsAttached = attached;
+	}
 }
 
 void SceneEditorWindow::updateButtons()

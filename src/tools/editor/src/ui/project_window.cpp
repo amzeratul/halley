@@ -386,6 +386,11 @@ void ProjectWindow::openAssetFinder(std::optional<String> initialQuery)
 	}
 }
 
+UIDebugConsoleController* ProjectWindow::getDebugConsoleController()
+{
+	return debugConsoleController.get();
+}
+
 void ProjectWindow::toggleDebugConsole()
 {
 	if (debugConsole && debugConsole->isActive()) {
