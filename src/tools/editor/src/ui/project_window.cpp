@@ -334,6 +334,12 @@ void ProjectWindow::openFile(const String& assetId)
 	assetEditorWindow->openFile(assetId);
 }
 
+void ProjectWindow::showFile(const String& assetId)
+{
+	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+	assetEditorWindow->showFile(assetId);
+}
+
 void ProjectWindow::openAsset(AssetType type, const String& assetId, bool inEditor)
 {
 	if (inEditor) {

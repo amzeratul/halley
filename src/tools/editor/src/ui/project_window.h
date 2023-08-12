@@ -28,6 +28,7 @@ namespace Halley {
         void setPage(EditorTabs tab);
         LocalisedString setCustomPage(const String& pageId);
     	void openFile(const String& assetId);
+    	void showFile(const String& assetId);
     	void openAsset(AssetType type, const String& assetId, bool inEditor);
         void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 

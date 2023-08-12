@@ -1,13 +1,7 @@
 #include "assets_browser.h"
 #include "halley/tools/project/project.h"
-#include "halley/resources/resource_locator.h"
-#include "halley/resources/standard_resources.h"
-#include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
-#include "animation_editor.h"
-#include "asset_editor.h"
 #include "asset_editor_window.h"
-#include "metadata_editor.h"
 #include "new_asset_window.h"
 #include "prefab_editor.h"
 #include "halley/audio/audio_object.h"
@@ -23,29 +17,32 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, project(project)
 	, projectWindow(projectWindow)
 	, curSrcPath(".")
-	, fuzzyMatcher(false, 100)
 {
 	loadResources();
 	makeUI();
-
-	getWidget("assetType")->setActive(false);
 	listAssetSources();
 }
 
 void AssetsBrowser::openAsset(AssetType type, const String& assetId)
 {
-	getWidgetAs<UITextInput>("assetSearch")->setText("");
-	auto target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
-	openFile(std::move(target));
+	const auto target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
+	openFile(target);
 }
 
 void AssetsBrowser::openFile(const Path& path)
 {
 	if (!path.isEmpty()) {
+		showFile(path);
+		loadAsset(path.toString());
+	}
+}
+
+void AssetsBrowser::showFile(const Path& path)
+{
+	if (!path.isEmpty()) {
 		curSrcPath = path.parentPath();
 		refreshList();
 		assetList->setSelectedOptionId(path.toString());
-		loadAsset(path.toString(), true);
 	}
 }
 
@@ -104,19 +101,14 @@ void AssetsBrowser::makeUI()
 	assetTabs = std::make_shared<AssetBrowserTabs>(factory, project, projectWindow);
 	getWidget("assetEditorContainer")->add(assetTabs, 1);
 
-	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
-	{
-		listAssets(fromString<AssetType>(event.getStringData()));
-	});
-
 	setHandle(UIEventType::ListSelectionChanged, "assetList", [=] (const UIEvent& event)
 	{
-		loadAsset(event.getStringData(), false);
+		setSelectedAsset(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListAccept, "assetList", [=] (const UIEvent& event)
 	{
-		loadAsset(event.getStringData(), true);
+		loadAsset(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListBackgroundRightClicked, "assetList", [=] (const UIEvent& event)
@@ -128,12 +120,7 @@ void AssetsBrowser::makeUI()
 	{
 		openContextMenu(event.getStringData());
 	});
-
-	setHandle(UIEventType::TextChanged, "assetSearch", [=] (const UIEvent& event)
-	{
-		setFilter(event.getStringData());
-	});
-
+	
 	setHandle(UIEventType::ButtonClicked, "addAsset", [=] (const UIEvent& event)
 	{
 		addAsset();
@@ -149,6 +136,11 @@ void AssetsBrowser::makeUI()
 	doSetCollapsed(projectWindow.getSetting(EditorSettingType::Editor, "assetBrowserCollapse").asBool(false));
 }
 
+void AssetsBrowser::refreshAssetNames()
+{
+	std::sort(assetNames->begin(), assetNames->end());
+}
+
 void AssetsBrowser::listAssetSources()
 {
 	if (!assetNames) {
@@ -156,42 +148,10 @@ void AssetsBrowser::listAssetSources()
 		refreshAssetNames();
 	}
 
-	if (filter.isEmpty()) {
-		setListContents(assetNames.value(), curSrcPath, false);
-	} else {
-		Vector<String> filteredList;
-		auto result = fuzzyMatcher.match(filter);
-		
-		filteredList.reserve(result.size());
-		for (const auto& r: result) {
-			filteredList.push_back(r.getString());
-		}
-		setListContents(filteredList, curSrcPath, true);
-	}
+	setListContents(assetNames.value(), curSrcPath);
 }
 
-void AssetsBrowser::refreshAssetNames()
-{
-	std::sort(assetNames->begin(), assetNames->end());
-	fuzzyMatcher.clear();
-	fuzzyMatcher.addStrings(assetNames.value());
-}
-
-void AssetsBrowser::listAssets(AssetType type)
-{
-	curType = type;
-	if (curPaths.find(type) == curPaths.end()) {
-		curPaths[type] = Path(".");
-	}
-	const auto curPath = curPaths[type];
-
-	auto assets = project.getGameResources().ofType(type).enumerate();
-	std::sort(assets.begin(), assets.end());
-
-	setListContents(assets, curPath, false);
-}
-
-void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath, bool flat)
+void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath)
 {
 	{
 		Hash::Hasher hasher;
@@ -222,30 +182,24 @@ void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath, 
 	assetList->setScrollToSelection(false);
 	clearAssetList();
 
-	if (flat) {
-		for (auto& a: assets) {
-			addFileToList(a);
-		}
-	} else {
-		std::set<String> dirs;
-		Vector<String> files;
+	std::set<String> dirs;
+	Vector<String> files;
 
-		for (auto& a: assets) {
-			auto relPath = Path("./" + a).makeRelativeTo(curPath);
-			if (relPath.getNumberPaths() == 1) {
-				files.emplace_back(a);
-			} else {
-				auto start = relPath.getFront(1);
-				dirs.insert(start.toString());
-			}
+	for (auto& a: assets) {
+		auto relPath = Path("./" + a).makeRelativeTo(curPath);
+		if (relPath.getNumberPaths() == 1) {
+			files.emplace_back(a);
+		} else {
+			auto start = relPath.getFront(1);
+			dirs.insert(start.toString());
 		}
+	}
 
-		for (const auto& dir: dirs) {
-			addDirToList(curPath, dir);
-		}
-		for (const auto& file: files) {
-			addFileToList(file);
-		}
+	for (const auto& dir: dirs) {
+		addDirToList(curPath, dir);
+	}
+	for (const auto& file: files) {
+		addFileToList(file);
 	}
 
 	if (selectOption) {
@@ -255,7 +209,7 @@ void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath, 
 
 	if (pendingOpen) {
 		assetList->setSelectedOptionId(pendingOpen->toString());
-		loadAsset(pendingOpen->toString(), true);
+		loadAsset(pendingOpen->toString());
 		pendingOpen.reset();
 	}
 }
@@ -268,18 +222,6 @@ void AssetsBrowser::clearAssetList()
 void AssetsBrowser::addDirToList(const Path& curPath, const String& dir)
 {
 	const auto icon = std::make_shared<UIImage>(factory.makeDirectoryIcon(dir == ".."));
-
-	/*
-	std::optional<ImportAssetType> assetTypeDir;
-	if (curPath == ".") {
-		if (dir == "shader") {
-			assetTypeDir = ImportAssetType::Shader;
-		}
-	}
-	if (assetTypeDir) {
-		icon->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(assetTypeDir.value())), 1, {}, UISizerAlignFlags::Centre);
-	}
-	*/
 	
 	auto sizer = std::make_shared<UISizer>();
 	sizer->add(icon, 0, Vector4f(0, 0, 4, 0));
@@ -295,8 +237,6 @@ void AssetsBrowser::addFileToList(const Path& path)
 	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(type)), 0, Vector4f(0, 0, 4, 0));
 	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilename().toString())));
 	assetList->addItem(path.toString(), std::move(sizer));
-	
-	//assetList->addTextItem(path.toString(), LocalisedString::fromUserString(path.getFilename().toString()));
 }
 
 void AssetsBrowser::refreshList()
@@ -308,29 +248,20 @@ void AssetsBrowser::refreshList()
 	assetList->setCanSendEvents(true);
 }
 
-void AssetsBrowser::setFilter(const String& f)
-{
-	if (filter != f) {
-		filter = f.asciiLower();
-		refreshList();
-	}
-}
-
-void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
+void AssetsBrowser::setSelectedAsset(const String& name)
 {
 	lastClickedAsset = name;
 	updateAddRemoveButtons();
-	
+}
+
+void AssetsBrowser::loadAsset(const String& name)
+{
 	auto& curPath = curSrcPath;
 	if (name.endsWith("/.")) {
-		if (doubleClick) {
-			curPath = curPath / name;
-			refreshList();
-		}
+		curPath = curPath / name;
+		refreshList();
 	} else {
-		if (doubleClick) {
-			assetTabs->load(name);
-		}
+		assetTabs->load(name);
 	}
 }
 

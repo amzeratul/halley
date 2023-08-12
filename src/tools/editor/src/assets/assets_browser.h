@@ -18,14 +18,18 @@ namespace Halley {
 	class AssetsBrowser : public UIWidget {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
-        void openAsset(AssetType type, const String& assetId);
+
+		void openAsset(AssetType type, const String& assetId);
 		void openFile(const Path& path);
+		void showFile(const Path& path);
         void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
-        bool requestQuit(std::function<void()> callback);
+
+		bool requestQuit(std::function<void()> callback);
         void saveTab();
 		void saveAllTabs();
 		void closeTab();
         void moveTabFocus(int delta);
+
 		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
 
     private:
@@ -39,9 +43,6 @@ namespace Halley {
 
 		std::optional<Vector<String>> assetNames;
 		std::optional<Path> pendingOpen;
-
-		FuzzyTextMatcher fuzzyMatcher;
-		String filter;
         
 		std::shared_ptr<UIList> assetList;
 		std::shared_ptr<AssetBrowserTabs> assetTabs;
@@ -60,16 +61,16 @@ namespace Halley {
 
 		void listAssetSources();
 		void listAssets(AssetType type);
-		void setListContents(Vector<String> files, const Path& curPath, bool flat);
+		void setListContents(Vector<String> files, const Path& curPath);
 		void refreshList();
 		void refreshAssetNames();
-		void setFilter(const String& filter);
 
 		void clearAssetList();
 		void addDirToList(const Path& curPath, const String& dir);
 		void addFileToList(const Path& path);
 
-		void loadAsset(const String& name, bool doubleClick);
+		void setSelectedAsset(const String& name);
+		void loadAsset(const String& name);
 		void refreshAssets(gsl::span<const String> assets);
 
 		void openContextMenu(const String& assetId);

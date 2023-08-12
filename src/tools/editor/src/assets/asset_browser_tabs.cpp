@@ -346,6 +346,7 @@ void AssetBrowserTabs::makeUI()
 	{
 		pages->setPage(event.getIntData());
 		saveTabs();
+		projectWindow.showFile(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListItemMiddleClicked, "tabs", [=] (const UIEvent& event)
