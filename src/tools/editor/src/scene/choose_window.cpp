@@ -85,7 +85,14 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factor
 	, type(type)
 	, hasPreview(hasPreview)
 {
-	setAssetIds(gameResources.ofType(type).enumerate(), defaultOption);
+	auto ids = gameResources.ofType(type).enumerate();
+	if (type == AssetType::Sprite) {
+		for (const auto& id: factory.getColourScheme()->getSpriteNames()) {
+			ids.push_back("$" + id);
+		}
+	}
+
+	setAssetIds(std::move(ids), defaultOption);
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 

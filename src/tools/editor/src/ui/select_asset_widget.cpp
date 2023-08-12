@@ -187,6 +187,9 @@ bool SelectAssetWidget::hasGoTo() const
 
 bool SelectAssetWidget::currentValueExists()
 {
+	if (type == AssetType::Sprite && value.startsWith("$")) {
+		return factory.getColourScheme()->hasSprite(value);
+	}
 	return gameResources.ofType(type).exists(value);
 }
 

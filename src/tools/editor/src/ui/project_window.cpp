@@ -529,6 +529,7 @@ AssetPreviewGenerator& ProjectWindow::getAssetPreviewGenerator()
 			project.withLoadedDLL([&] (ProjectDLL& dll)
 			{
 				assetPreviewGenerator = dll.getGame().createAssetPreviewGenerator(getAPI(), project.getGameResources());
+				assetPreviewGenerator->setColourScheme(factory.getColourScheme());
 			});
 		} else {
 			throw Exception("Unable to create Asset Preview Generator", HalleyExceptions::Core);

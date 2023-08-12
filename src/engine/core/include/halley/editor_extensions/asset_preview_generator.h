@@ -6,6 +6,7 @@
 #include "halley/maths/vector2.h"
 #include "halley/resources/resource.h"
 #include "halley/text/i18n.h"
+#include "halley/ui/ui_colour_scheme.h"
 
 namespace Halley {
 	class BaseFrameData;
@@ -57,12 +58,15 @@ namespace Halley {
 		Rect4f getSpriteTreeBounds(const EntityRef& e) const;
 		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;
 
+		void setColourScheme(std::shared_ptr<const UIColourScheme> colourScheme);
+
 		void render(RenderContext& rc);
-		
+
 	protected:
 		Game& game;
 		const HalleyAPI& api;
 		Resources& resources;
+		std::shared_ptr<const UIColourScheme> colourScheme;
 
 		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);
 		virtual Future<AssetPreviewData> getSpritePreviewData(AssetType assetType, const String& id, Vector2i size);

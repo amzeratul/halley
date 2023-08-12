@@ -117,6 +117,35 @@ const Particles& UIColourScheme::getBackgroundParticles() const
 	return backgroundParticles;
 }
 
+Vector<String> UIColourScheme::getSpriteNames() const
+{
+	Vector<String> result;
+	result.reserve(sprites.size());
+	for (const auto& [k, v]: sprites) {
+		result.push_back(k);
+	}
+	return result;
+}
+
+bool UIColourScheme::hasSprite(const String& name) const
+{
+	if (name.startsWith("$")) {
+		return sprites.contains(name.mid(1));
+	} else {
+		return sprites.contains(name);
+	}
+}
+
+Vector<String> UIColourScheme::getColourNames() const
+{
+	Vector<String> result;
+	result.reserve(colours.size());
+	for (const auto& [k, v]: colours) {
+		result.push_back(k);
+	}
+	return result;
+}
+
 const String& UIColourScheme::getName() const
 {
 	return name;

@@ -60,7 +60,9 @@ AssetPreviewData AssetPreviewGenerator::makeSpritePreviewData(AssetType assetTyp
 	auto image = std::make_shared<Image>(Image::Format::RGBA, size);
 
 	Sprite sprite;
-	if (assetType == AssetType::Sprite) {
+	if (id.startsWith("$")) {
+		sprite = colourScheme->getSprite(resources, id, "Halley/Sprite");
+	} else if (assetType == AssetType::Sprite) {
 		sprite = Sprite().setImage(resources, id);
 	} else if (assetType == AssetType::Animation) {
 		auto player = AnimationPlayer(resources.get<Animation>(id));
@@ -220,6 +222,11 @@ std::optional<Rect4f> AssetPreviewGenerator::getSpriteBounds(const EntityRef& e)
 		}
 	}
 	return {};
+}
+
+void AssetPreviewGenerator::setColourScheme(std::shared_ptr<const UIColourScheme> colourScheme)
+{
+	this->colourScheme = std::move(colourScheme);
 }
 
 bool AssetPreviewGenerator::isSpriteVisibleOnCamera(const Sprite& sprite, int mask) const
