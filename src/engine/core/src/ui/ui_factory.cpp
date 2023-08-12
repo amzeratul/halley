@@ -1013,7 +1013,7 @@ UIFactoryWidgetProperties UIFactory::getImageProperties() const
 	UIFactoryWidgetProperties result;
 	result.entries.emplace_back("Image", "image", "Halley::ResourceReference<Halley::SpriteResource>", "");
 	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
-	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Colour", "colour", "Halley::UIColour", "#FFFFFF");
 	result.entries.emplace_back("Flip", "flip", "bool", "false");
 	result.entries.emplace_back("Pivot", "pivot", "std::optional<Halley::Vector2f>", "");
 	result.entries.emplace_back("Rotation", "rotation", "Halley::Angle1f", "0");
@@ -1562,7 +1562,7 @@ UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
 
 	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
 	result.entries.emplace_back("Use Filtering", "useFilter", "bool", "false");
-	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Colour", "colour", "Halley::UIColour", "#FFFFFF");
 	result.entries.emplace_back("Scale", "scale", "Halley::Vector2f", Vector<String>{ "1", "1" });
 
 	return result;

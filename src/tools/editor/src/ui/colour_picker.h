@@ -11,7 +11,7 @@ namespace Halley {
     public:
         using Callback = std::function<void(String, bool)>;
 
-    	ColourPickerButton(UIFactory& factory, String colour, Callback callback);
+    	ColourPickerButton(UIFactory& factory, String colour, bool allowNamedColour, Callback callback);
 
         void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -26,15 +26,16 @@ namespace Halley {
         Callback callback;
         TextRenderer label;
         String colour;
+        const bool allowNamedColour;
 
         Colour4f readColour(const String& col);
 	};
 
     class ColourPicker : public PopupWindow {
     public:
-        using Callback = std::function<void(Colour4f, bool)>;
+        using Callback = std::function<void(String, bool)>;
 
-    	ColourPicker(UIFactory& factory, Colour4f initialColour, Callback callback);
+    	ColourPicker(UIFactory& factory, String initialColour, bool allowNamedColour, Callback callback);
 
         void onAddedToRoot(UIRoot& root) override;
         void onRemovedFromRoot(UIRoot& root) override;
@@ -42,13 +43,18 @@ namespace Halley {
 
         Colour4f getColour() const;
         void setColour(Colour4f col);
+        void setColour(const String& col);
 
         void update(Time t, bool moved) override;
 
     private:
+        UIFactory& factory;
+        String initialColourName;
         Colour4f initialColour;
         Colour4f colour;
+        std::optional<String> namedColour;
         Callback callback;
+        const bool allowNamedColour;
 
         std::shared_ptr<ColourPickerDisplay> mainDisplay;
         std::shared_ptr<ColourPickerDisplay> ribbonDisplay;
@@ -71,6 +77,7 @@ namespace Halley {
         void onColourChanged();
 
         void updateUI();
+        Colour4f readColour(const String& col) const;
     };
 
     class ColourPickerDisplay : public UIImage {

@@ -280,10 +280,10 @@ void GradientEditor::insertAnchorAt(float pos, size_t idx)
 
 void GradientEditor::editAnchor(size_t idx)
 {
-	getRoot()->addChild(std::make_shared<ColourPicker>(factory, gradient.colours[idx], [=] (Colour4f col, bool final)
+	getRoot()->addChild(std::make_shared<ColourPicker>(factory, gradient.colours[idx].toString(), false, [=] (String col, bool final)
 	{
 		if (final) {
-			gradient.colours[idx] = col;
+			gradient.colours[idx] = Colour4f::fromString(col);
 			updateGradient();
 		}
 	}));

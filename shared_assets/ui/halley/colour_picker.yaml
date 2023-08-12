@@ -63,6 +63,13 @@ children:
       - widget: { class: label, text: Float }
         fill: [left, centreVertical]
       - widget: { id: floatCode, class: textInput, selectAllOnClick: true }
+- widget: { class: widget, id: namedColourBox }
+  sizer: { type: horizontal, gap: 4 }
+  border: [10, 10, 10, 10]
+  children:
+  - widget: { class: checkbox, id: useNamedColour, label: Use Named Colour }
+  - widget: { class: dropdown, id: namedColour }
+    proportion: 1
 - sizer: { type: horizontal, gap: 4 }
   children:
   - stretchSpacer: {}

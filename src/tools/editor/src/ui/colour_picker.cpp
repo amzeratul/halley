@@ -1,11 +1,12 @@
 #include "colour_picker.h"
 using namespace Halley;
 
-ColourPickerButton::ColourPickerButton(UIFactory& factory, String colour, Callback callback)
+ColourPickerButton::ColourPickerButton(UIFactory& factory, String colour, bool allowNamedColour, Callback callback)
 	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png"))
 	, factory(factory)
 	, callback(std::move(callback))
 	, colour(std::move(colour))
+	, allowNamedColour(allowNamedColour)
 {
 	getSprite().setColour(readColour(this->colour));
 
@@ -56,9 +57,9 @@ void ColourPickerButton::setColour(String colour, bool final)
 void ColourPickerButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0 && keyMods == KeyMods::None) {
-		getRoot()->addChild(std::make_shared<ColourPicker>(factory, getSprite().getColour(), [=] (Colour4f col, bool final)
+		getRoot()->addChild(std::make_shared<ColourPicker>(factory, colour, allowNamedColour, [=] (String col, bool final)
 		{
-			setColour(col.toString(), final);
+			setColour(col, final);
 		}));
 	}
 }
@@ -72,12 +73,18 @@ Colour4f ColourPickerButton::readColour(const String& col)
 	}
 }
 
-ColourPicker::ColourPicker(UIFactory& factory, Colour4f initialColour, Callback callback)
+ColourPicker::ColourPicker(UIFactory& factory, String initialColourName, bool allowNamedColour, Callback callback)
 	: PopupWindow("colourPicker")
-	, initialColour(initialColour)
-	, colour(initialColour)
+	, factory(factory)
+	, initialColourName(std::move(initialColourName))
 	, callback(std::move(callback))
+	, allowNamedColour(allowNamedColour)
 {
+	colour = initialColour = readColour(this->initialColourName);
+	if (this->initialColourName.startsWith("$")) {
+		namedColour = this->initialColourName;
+	}
+
 	factory.loadUI(*this, "halley/colour_picker");
 	setModal(true);
 	setAnchor(UIAnchor());
@@ -119,6 +126,13 @@ void ColourPicker::onMakeUI()
 	{
 		cancel();
 	});
+
+	getWidget("namedColourBox")->setActive(allowNamedColour);
+	getWidget("namedColour")->setActive(allowNamedColour && initialColourName.startsWith("$"));
+
+	if (allowNamedColour) {
+		getWidgetAs<UIDropdown>("namedColour")->setOptions(factory.getColourScheme()->getColourNames());
+	}
 
 	const auto hsv = colour.toHSV();
 
@@ -227,6 +241,26 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
+	bindData("useNamedColour", allowNamedColour && initialColourName.startsWith("$"), [=] (bool value)
+	{
+		const auto dropdown = getWidgetAs<UIDropdown>("namedColour");
+		dropdown->setActive(value);
+		if (value) {
+			namedColour = "$" + dropdown->getSelectedOptionId();
+			setColour(*namedColour);
+		} else {
+			namedColour = std::nullopt;
+			setColour(colour);
+			onColourChanged();
+		}
+	});
+
+	bindData("namedColour", initialColourName.mid(1), [=](String value)
+	{
+		namedColour = "$" + value;
+		setColour(*namedColour);
+	});
+
 	updateUI();
 }
 
@@ -246,14 +280,30 @@ void ColourPicker::setColour(Colour4f col)
 	}
 }
 
+void ColourPicker::setColour(const String& col)
+{
+	setColour(readColour(col));
+}
+
 void ColourPicker::update(Time t, bool moved)
 {
+	const auto e = !namedColour;
+	getWidget("hexCode")->setEnabled(e);
+	getWidget("rSlider")->setEnabled(e);
+	getWidget("gSlider")->setEnabled(e);
+	getWidget("bSlider")->setEnabled(e);
+	getWidget("aSlider")->setEnabled(e);
+	getWidget("hSlider")->setEnabled(e);
+	getWidget("sSlider")->setEnabled(e);
+	getWidget("vSlider")->setEnabled(e);
+	mainDisplay->setEnabled(e);
+	ribbonDisplay->setEnabled(e);
 }
 
 void ColourPicker::accept()
 {
 	if (callback) {
-		callback(colour, true);
+		callback(namedColour.value_or(colour.toString()), true);
 	}
 	destroy();
 }
@@ -261,7 +311,7 @@ void ColourPicker::accept()
 void ColourPicker::cancel()
 {
 	if (callback) {
-		callback(initialColour, false);
+		callback(initialColourName, false);
 	}
 	destroy();
 }
@@ -269,7 +319,7 @@ void ColourPicker::cancel()
 void ColourPicker::onColourChanged()
 {
 	if (callback) {
-		callback(colour, false);
+		callback(namedColour.value_or(colour.toString()), false);
 	}
 }
 
@@ -304,6 +354,15 @@ void ColourPicker::updateUI()
 	floatCode->setText(Vector4f(colour.r, colour.g, colour.b, colour.a).toString(3));
 
 	updatingUI = false;
+}
+
+Colour4f ColourPicker::readColour(const String& col) const
+{
+	if (col.startsWith("$")) {
+		return factory.getColourScheme()->getColour(col);
+	} else {
+		return Colour4f::fromString(col);
+	}
 }
 
 ColourPickerDisplay::ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material)

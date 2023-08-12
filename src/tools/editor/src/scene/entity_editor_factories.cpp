@@ -1007,7 +1007,7 @@ public:
 
 		auto container = std::make_shared<UISizer>();
 
-		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), value, [&context, data](String colour, bool final)
+		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), value, allowNamedColour(), [&context, data](String colour, bool final)
 		{
 			data.getWriteableFieldData() = ConfigNode(colour);
 			context.onEntityUpdated();
@@ -1015,6 +1015,24 @@ public:
 		container->add(colourPreview, 1);
 
 		return container;
+	}
+
+	virtual bool allowNamedColour() const
+	{
+		return false;
+	}
+};
+
+class ComponentEditorUIColourFieldFactory : public ComponentEditorColourFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UIColour";
+	}
+
+	bool allowNamedColour() const override
+	{
+		return true;
 	}
 };
 
@@ -1910,6 +1928,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorUIColourFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourGradientFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorInterpolationCurveFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
