@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "halley/scripting/script_state.h"
 
 #include "halley/bytes/byte_serializer.h"
@@ -283,7 +285,7 @@ ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
 }
 
 ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
-	: scriptGraph(script)
+	: scriptGraph(std::move(script))
 {
 }
 
@@ -294,7 +296,13 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 
 void ScriptState::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	if (!context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network))) {
+	const bool isNetwork = context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
+
+	if (isNetwork) {
+		if (!getScriptGraphPtr()->isNetwork()) {
+			return;
+		}
+	} else {
 		started = node["started"].asBool(false);
 		threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 		nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
@@ -328,9 +336,15 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
 {
+	const bool isNetwork = context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
+
 	ConfigNode::MapType node;
 
-	if (!context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network))) {
+	if (isNetwork) {
+		if (!getScriptGraphPtr()->isNetwork()) {
+			return ConfigNode();
+		}
+	} else {
 		if (started) {
 			node["started"] = started;
 		}
