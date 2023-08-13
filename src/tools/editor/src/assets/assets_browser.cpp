@@ -18,9 +18,10 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, projectWindow(projectWindow)
 	, curSrcPath(".")
 {
-	loadResources();
 	makeUI();
 	listAssetSources();
+
+	project.addAssetSrcChangeListener(*this);
 }
 
 void AssetsBrowser::openAsset(AssetType type, const String& assetId)
@@ -83,12 +84,9 @@ std::shared_ptr<AssetEditorWindow> AssetsBrowser::getActiveWindow() const
 	return assetTabs->getActiveWindow();
 }
 
-void AssetsBrowser::loadResources()
+void AssetsBrowser::onAssetsSrcChanged()
 {
-	project.addAssetPackReloadCallback([=] (gsl::span<const String> assets, gsl::span<const String> packs)
-	{
-		refreshAssets(assets);
-	});
+	refreshList();
 }
 
 void AssetsBrowser::makeUI()
@@ -136,29 +134,25 @@ void AssetsBrowser::makeUI()
 	doSetCollapsed(projectWindow.getSetting(EditorSettingType::Editor, "assetBrowserCollapse").asBool(false));
 }
 
-void AssetsBrowser::refreshAssetNames()
-{
-	std::sort(assetNames->begin(), assetNames->end());
-}
-
 void AssetsBrowser::listAssetSources()
 {
-	if (!assetNames) {
-		assetNames = project.getAssetSrcList();
-		refreshAssetNames();
+	assetNames = project.getAssetSrcList(true, curSrcPath, false);
+	if (curSrcPath != Path(".")) {
+		assetNames.push_back((project.getAssetsSrcPath() / curSrcPath / "..").toString());
 	}
-
-	setListContents(assetNames.value(), curSrcPath);
+	std::sort(assetNames.begin(), assetNames.end());
+	
+	setListContents();
 }
 
-void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath)
+void AssetsBrowser::setListContents()
 {
 	{
 		Hash::Hasher hasher;
-		for (const auto& asset: assets) {
+		for (const auto& asset: assetNames) {
 			hasher.feed(asset);
 		}
-		hasher.feed(curPath.toString());
+		hasher.feed(curSrcPath.toString());
 		const auto hash = hasher.digest();
 
 		if (curHash == hash) {
@@ -170,7 +164,7 @@ void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath)
 	std::optional<String> selectOption;
 	{
 		Hash::Hasher hasher;
-		hasher.feed(curPath.toString());
+		hasher.feed(curSrcPath.toString());
 		const auto hash = hasher.digest();
 
 		if (curDirHash == hash) {
@@ -185,8 +179,8 @@ void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath)
 	std::set<String> dirs;
 	Vector<String> files;
 
-	for (auto& a: assets) {
-		auto relPath = Path("./" + a).makeRelativeTo(curPath);
+	for (auto& a: assetNames) {
+		auto relPath = Path("./" + a).makeRelativeTo(curSrcPath);
 		if (relPath.getNumberPaths() == 1) {
 			files.emplace_back(a);
 		} else {
@@ -196,7 +190,7 @@ void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath)
 	}
 
 	for (const auto& dir: dirs) {
-		addDirToList(curPath, dir);
+		addDirToList(curSrcPath, dir);
 	}
 	for (const auto& file: files) {
 		addFileToList(file);
@@ -263,13 +257,6 @@ void AssetsBrowser::loadAsset(const String& name)
 	} else {
 		assetTabs->load(name);
 	}
-}
-
-void AssetsBrowser::refreshAssets(gsl::span<const String> assets)
-{
-	assetNames.reset();
-	refreshList();
-	assetTabs->refreshAssets();
 }
 
 void AssetsBrowser::openContextMenu(const String& assetId)
@@ -397,10 +384,6 @@ void AssetsBrowser::addAsset(Path path, std::string_view data, bool isFullPath)
 	pendingOpen = fullPath;
 	project.writeAssetToDisk(fullPath, data);
 
-	if (assetNames) {
-		assetNames->push_back(fullPath.toString());
-		refreshAssetNames();
-	}
 	refreshList();
 }
 
@@ -413,23 +396,13 @@ void AssetsBrowser::removeAsset(const String& assetId)
 {
 	assetTabs->closeTab(assetId);
 	FileSystem::remove(project.getAssetsSrcPath() / assetId);
-	if (assetNames) {
-		std_ex::erase(*assetNames, assetId);
-		refreshAssetNames();
-	}
 	refreshList();
 }
 
 void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
 {
-	//assetTabs->renameTab(oldName, newName, assetSrcMode ? std::optional<AssetType>() : curType);
 	assetTabs->closeTab(oldName);
 	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
-	if (assetNames) {
-		std_ex::erase(*assetNames, oldName);
-		assetNames->push_back(newName);
-		refreshAssetNames();
-	}
 	refreshList();
 }
 
@@ -493,7 +466,6 @@ void AssetsBrowser::doSetCollapsed(bool c)
 			parent->getSizer()[0].setBorder(collapsed ? Vector4f(-10, 0, -15, 0) : Vector4f(0, 0, 6, 0));
 		}
 		
-		//getWidget("collapseBorder")->setActive(!collapsed);
 		getWidget("assetBrowsePanel")->setActive(!collapsed);
 	}
 }

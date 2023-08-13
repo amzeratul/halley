@@ -83,23 +83,30 @@ bool FileSystemCache::shouldCache(const Path& path, size_t size)
 	return size < 2048;
 }
 
-Vector<Path> FileSystemCache::enumerateDirectory(const Path& path)
+Vector<Path> FileSystemCache::enumerateDirectory(const Path& path, bool includeDirs, bool recursive)
 {
 	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
 	Vector<Path> result;
 	const auto root = path.isDirectory() ? path : path / ".";
-	doEnumerate(root, root, result);
+	doEnumerate(root, root, result, includeDirs, recursive);
 	return result;
 }
 
-void FileSystemCache::doEnumerate(const Path& root, const Path& path, Vector<Path>& dst)
+void FileSystemCache::doEnumerate(const Path& root, const Path& path, Vector<Path>& dst, bool includeDirs, bool recursive)
 {
 	const auto& dir = getDirectory(path);
 	for (const auto& fileName: dir.filenames) {
 		dst.push_back((path / fileName).makeRelativeTo(root));
 	}
+
 	for (const auto& dirName: dir.dirs) {
-		doEnumerate(root, path / dirName / ".", dst);
+		const auto dirPath = path / dirName / ".";
+		if (includeDirs) {
+			dst.push_back(dirPath.makeRelativeTo(root));
+		}
+		if (recursive) {
+			doEnumerate(root, dirPath, dst, includeDirs, recursive);
+		}
 	}
 }
 
@@ -236,20 +243,45 @@ bool FileSystemCache::DirEntry::addDir(const String& name)
 	return false;
 }
 
+void FileSystemCache::DirEntry::removeDir(const String& name)
+{
+	std_ex::erase(dirs, name);
+}
+
 void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> events)
 {
 	for (const auto& event: events) {
 		const auto filePath = Path(event.name);
-		if (event.type == DirectoryMonitor::ChangeType::FileAdded) {
-			getDirectory(event.name).addFile(filePath);
-		} else if (event.type == DirectoryMonitor::ChangeType::FileModified) {
-			getDirectory(event.name).updateFile(filePath);
-		} else if (event.type == DirectoryMonitor::ChangeType::FileRemoved) {
-			getDirectory(event.name).removeFile(filePath);
-		} else if (event.type == DirectoryMonitor::ChangeType::FileRenamed) {
-			const auto oldFilePath = Path(event.oldName);
-			getDirectory(event.name).addFile(filePath);
-			getDirectory(event.oldName).removeFile(oldFilePath);
+		if (event.isDir) {
+			const auto& name = filePath.getFilename().getString(false);
+			auto parentDir = filePath.parentPath();
+			if (event.type == DirectoryMonitor::ChangeType::FileAdded) {
+				getDirectory(parentDir).addDir(name);
+				readDirFromFilesystem(filePath);
+			} else if (event.type == DirectoryMonitor::ChangeType::FileModified) {
+				// Nothing to do here
+			} else if (event.type == DirectoryMonitor::ChangeType::FileRemoved) {
+				getDirectory(parentDir).removeDir(name);
+				dirs.erase(filePath);
+			} else if (event.type == DirectoryMonitor::ChangeType::FileRenamed) {
+				const auto oldFilePath = Path(event.oldName);
+				getDirectory(parentDir).addDir(name);
+				getDirectory(Path(event.oldName).parentPath()).removeDir(oldFilePath.getFilename().getString(false));
+				dirs.erase(Path(event.oldName));
+				readDirFromFilesystem(filePath);
+			}
+		} else {
+			if (event.type == DirectoryMonitor::ChangeType::FileAdded) {
+				getDirectory(event.name).addFile(filePath);
+			} else if (event.type == DirectoryMonitor::ChangeType::FileModified) {
+				getDirectory(event.name).updateFile(filePath);
+			} else if (event.type == DirectoryMonitor::ChangeType::FileRemoved) {
+				getDirectory(event.name).removeFile(filePath);
+			} else if (event.type == DirectoryMonitor::ChangeType::FileRenamed) {
+				const auto oldFilePath = Path(event.oldName);
+				getDirectory(event.name).addFile(filePath);
+				getDirectory(event.oldName).removeFile(oldFilePath);
+			}
 		}
 	}
 }

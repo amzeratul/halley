@@ -52,6 +52,13 @@ void SceneEditorCanvas::onProjectDLLStatusChange(ProjectDLL::Status status)
 	}
 }
 
+void SceneEditorCanvas::onActiveChanged(bool active)
+{
+	if (!active) {
+		ready = false;
+	}
+}
+
 void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInputState();

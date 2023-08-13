@@ -77,8 +77,9 @@ namespace Halley {
 
 		void queueEvent()
 		{
-			validHandle = ReadDirectoryChangesW(dirHandle, buffer.data(), static_cast<DWORD>(buffer.size()), true,
-						FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, nullptr, &overlapped, nullptr);
+			validHandle = ReadDirectoryChangesExW(dirHandle, buffer.data(), static_cast<DWORD>(buffer.size()), true,
+						FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE, nullptr,
+						&overlapped, nullptr, ReadDirectoryNotifyExtendedInformation);
 		}
 
 		void processEvents(Vector<DirectoryMonitor::Event>& output, bool any)
@@ -91,7 +92,7 @@ namespace Halley {
 				size_t pos = 0;
 
 				while (true) {
-					const auto* event = reinterpret_cast<FILE_NOTIFY_INFORMATION*>(buffer.data() + pos);
+					const auto* event = reinterpret_cast<FILE_NOTIFY_EXTENDED_INFORMATION*>(buffer.data() + pos);
 
 					processEvent(*event, output);
 
@@ -106,36 +107,35 @@ namespace Halley {
 			queueEvent();
 		}
 
-		void processEvent(const FILE_NOTIFY_INFORMATION& event, Vector<DirectoryMonitor::Event>& output)
+		void processEvent(const FILE_NOTIFY_EXTENDED_INFORMATION& event, Vector<DirectoryMonitor::Event>& output)
 		{
 			const auto srcStr = std::wstring(event.FileName, event.FileNameLength / sizeof(wchar_t));
 			const auto curPath = (path / Path(String(srcStr.c_str())));
 			const auto nativePath = curPath.getNativeString().getUTF16();
-			if (PathIsDirectoryW(nativePath.c_str())) {
-				// Don't care
-				return;
-			}
+			const bool isDir = event.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
 			auto curPathStr = curPath.getString();
+
+			using CT = DirectoryMonitor::ChangeType;
 
 			switch (event.Action) {
 			case FILE_ACTION_ADDED:
-				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileAdded, std::move(curPathStr), {} });
+				output.emplace_back(DirectoryMonitor::Event{ CT::FileAdded, isDir, std::move(curPathStr), {} });
 				break;
 
 			case FILE_ACTION_REMOVED:
-				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileRemoved, std::move(curPathStr), {} });
+				output.emplace_back(DirectoryMonitor::Event{ CT::FileRemoved, isDir, std::move(curPathStr), {} });
 				break;
 
 			case FILE_ACTION_MODIFIED:
-				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileModified, std::move(curPathStr), {} });
+				output.emplace_back(DirectoryMonitor::Event{ CT::FileModified, isDir, std::move(curPathStr), {} });
 				break;
 
 			case FILE_ACTION_RENAMED_OLD_NAME:
-				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::FileRenamed, {}, std::move(curPathStr) });
+				output.emplace_back(DirectoryMonitor::Event{ CT::FileRenamed, isDir, {}, std::move(curPathStr) });
 				break;
 
 			case FILE_ACTION_RENAMED_NEW_NAME:
-				if (!output.empty() && output.back().type == DirectoryMonitor::ChangeType::FileRenamed) {
+				if (!output.empty() && output.back().type == CT::FileRenamed) {
 					output.back().name = std::move(curPathStr);
 				}
 				break;

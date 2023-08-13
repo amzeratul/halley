@@ -14,6 +14,11 @@ AssetBrowserTabs::AssetBrowserTabs(EditorUIFactory& factory, Project& project, P
 	, projectWindow(projectWindow)
 {
 	makeUI();
+
+	project.addAssetPackReloadCallback([this](gsl::span<const String> assets, gsl::span<const String> packs)
+	{
+		refreshAssets();
+	});
 }
 
 void AssetBrowserTabs::load(const String& name)
@@ -346,7 +351,7 @@ void AssetBrowserTabs::makeUI()
 	{
 		pages->setPage(event.getIntData());
 		saveTabs();
-		projectWindow.showFile(event.getStringData());
+		//projectWindow.showFile(event.getStringData());
 	});
 
 	setHandle(UIEventType::ListItemMiddleClicked, "tabs", [=] (const UIEvent& event)

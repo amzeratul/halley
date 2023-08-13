@@ -35,6 +35,7 @@ namespace Halley {
 		void onMouseWheel(const UIEvent& event);
 		
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
+		void onActiveChanged(bool active) override;
 
 	private:
 		UIFactory& factory;

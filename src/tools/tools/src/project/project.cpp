@@ -263,6 +263,32 @@ void Project::removeAssetLoadedListener(IAssetLoadListener* listener)
 	assetLoadedListeners.erase(std::remove(assetLoadedListeners.begin(), assetLoadedListeners.end(), listener), assetLoadedListeners.end());
 }
 
+void Project::notifyAssetsSrcChanged()
+{
+	for (auto& listener: assetSrcChangeListeners) {
+		listener->onAssetsSrcChanged();
+	}
+}
+
+void Project::notifyGenSrcChanged()
+{
+	for (auto& listener: assetSrcChangeListeners) {
+		listener->onGenSrcChanged();
+	}
+}
+
+void Project::addAssetSrcChangeListener(IAssetSrcChangeListener& listener)
+{
+	if (!std_ex::contains(assetSrcChangeListeners, &listener)) {
+		assetSrcChangeListeners.push_back(&listener);
+	}
+}
+
+void Project::removeAssetSrcChangeListener(IAssetSrcChangeListener& listener)
+{
+	std_ex::erase(assetSrcChangeListeners, &listener);
+}
+
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
@@ -335,9 +361,18 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const char>(str)));
 }
 
-Vector<String> Project::getAssetSrcList() const
+Vector<String> Project::getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const
 {
-	return importAssetsDatabase->getAllInputFiles();
+	Vector<String> result;
+	const auto srcRoot = getAssetsSrcPath();
+	const auto dir = srcRoot / relPath;
+	fileSystemCache->trackDirectory(srcRoot);
+	for (const auto& p: fileSystemCache->enumerateDirectory(dir, includeDirs, recursive)) {
+		if (!p.getExtension().endsWith(".meta")) {
+			result.push_back((relPath / p).toString());
+		}
+	}
+	return result;
 }
 
 Vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const

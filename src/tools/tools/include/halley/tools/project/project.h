@@ -39,6 +39,13 @@ namespace Halley
 			virtual ~IAssetLoadListener() = default;
 			virtual void onAssetsLoaded() {}
 		};
+
+		class IAssetSrcChangeListener {
+		public:
+			virtual ~IAssetSrcChangeListener() = default;
+			virtual void onAssetsSrcChanged() {}
+			virtual void onGenSrcChanged() {}
+		};
 		
 		using AssetReloadCallback = std::function<void(gsl::span<const String>)>;
 		using AssetPackedReloadCallback = std::function<void(gsl::span<const String>, gsl::span<const String>)>;
@@ -88,7 +95,11 @@ namespace Halley
 		void removeAssetPackReloadCallback(size_t idx);
 		void addAssetLoadedListener(IAssetLoadListener* listener);
 		void removeAssetLoadedListener(IAssetLoadListener* listener);
-		
+		void notifyAssetsSrcChanged();
+		void notifyGenSrcChanged();
+		void addAssetSrcChangeListener(IAssetSrcChangeListener& listener);
+		void removeAssetSrcChangeListener(IAssetSrcChangeListener& listener);
+
 		ProjectProperties& getProperties() const;
 		ProjectComments& getComments() const;
 		GameProperties& getGameProperties() const;
@@ -101,7 +112,7 @@ namespace Halley
 		bool writeAssetToDisk(const Path& filePath, const Bytes& data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
 
-		Vector<String> getAssetSrcList() const;
+		Vector<String> getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void onAllAssetsImported();
@@ -157,6 +168,7 @@ namespace Halley
 		Vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
 		Vector<std::pair<size_t, AssetPackedReloadCallback>> assetPackedReloadCallbacks;
 		Vector<IAssetLoadListener*> assetLoadedListeners;
+		Vector<IAssetSrcChangeListener*> assetSrcChangeListeners;
 		CheckAssetsTask* checkAssetsTask = nullptr;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;

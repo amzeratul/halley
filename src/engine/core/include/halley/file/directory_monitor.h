@@ -14,7 +14,7 @@ namespace Halley
 	class DirectoryMonitor
 	{
 	public:
-		enum class ChangeType {
+		enum class ChangeType : uint8_t {
 			Unknown, // Assume that anything might have changed
 			FileAdded,
 			FileRemoved,
@@ -24,12 +24,13 @@ namespace Halley
 
 		struct Event {
 			ChangeType type;
+			bool isDir = false;
 			String name;
 			String oldName;
 
 			bool operator==(const Event& other) const
 			{
-				return type == other.type && name == other.name && oldName == other.oldName;
+				return type == other.type && name == other.name && oldName == other.oldName && isDir == other.isDir;
 			}
 
 			bool operator!=(const Event& other) const
@@ -64,6 +65,7 @@ namespace std {
 			hasher.feed(event.name);
 			hasher.feed(event.oldName);
 			hasher.feed(event.type);
+			hasher.feed(event.isDir);
 			return hasher.digest();
 		}
 	};

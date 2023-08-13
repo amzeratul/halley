@@ -12,7 +12,7 @@ namespace Halley {
         void remove(const Path& path);
         bool hasCached(const Path& path) const;
 
-    	Vector<Path> enumerateDirectory(const Path& path);
+    	Vector<Path> enumerateDirectory(const Path& path, bool includeDirs = false, bool recursive = true);
 		bool exists(const Path& path);
 		int64_t getLastWriteTime(const Path& path);
 
@@ -33,6 +33,7 @@ namespace Halley {
             void updateFile(const Path& fullPath);
             void removeFile(const Path& fullPath);
             bool addDir(const String& name);
+            void removeDir(const String& name);
         };
 
         mutable std::mutex fileDataMutex;
@@ -47,7 +48,7 @@ namespace Halley {
 
         bool shouldCache(const Path& path, size_t size);
 
-        void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst);
+        void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst, bool includeDirs, bool recursive);
 
         DirEntry& getDirectory(const Path& path);
         DirEntry* tryGetDirectory(const Path& path);

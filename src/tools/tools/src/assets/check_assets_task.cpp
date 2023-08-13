@@ -83,6 +83,19 @@ void CheckAssetsTask::run()
 		fileSystemCache.notifyChanges(assetsChanged);
 		fileSystemCache.notifyChanges(genChanged);
 
+		if (!assetsSrcChanged.empty()) {
+			Concurrent::execute(Executors::getMainUpdateThread(), [=]()
+			{
+				project.notifyAssetsSrcChanged();
+			});
+		}
+		if (!genSrcChanged.empty()) {
+			Concurrent::execute(Executors::getMainUpdateThread(), [=]()
+			{
+				project.notifyGenSrcChanged();
+			});
+		}
+
 		// First or Re-import
 		const bool hasCodeGen = first || !genSrcChanged.empty() || curPendingReimport == ReimportType::Codegen;
 		const bool hasAssets = first || !assetsSrcChanged.empty() || curPendingReimport == ReimportType::ImportAll || curPendingReimport == ReimportType::ReimportAll;

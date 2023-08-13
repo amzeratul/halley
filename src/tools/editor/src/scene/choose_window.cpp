@@ -33,7 +33,7 @@ PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, std::optional
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, project(project)
 {
-	auto assetNames = project.getAssetSrcList();
+	auto assetNames = project.getAssetSrcList(false, Path("."), true);
 	std::sort(assetNames.begin(), assetNames.end());
 	
 	setAssetIds(std::move(assetNames), "");

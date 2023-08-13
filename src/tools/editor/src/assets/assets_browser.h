@@ -2,6 +2,7 @@
 
 #include "asset_browser_tabs.h"
 #include "halley/api/halley_api.h"
+#include "halley/tools/project/project.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_list.h"
@@ -15,7 +16,7 @@ namespace Halley {
 	class AssetEditor;
 	class AssetEditorWindow;
 	
-	class AssetsBrowser : public UIWidget {
+	class AssetsBrowser : public UIWidget, public Project::IAssetSrcChangeListener {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
@@ -32,6 +33,8 @@ namespace Halley {
 
 		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
 
+		void onAssetsSrcChanged() override;
+
     private:
 		EditorUIFactory& factory;
 		Project& project;
@@ -41,7 +44,7 @@ namespace Halley {
 		Path curSrcPath;
 		AssetType curType = AssetType::Sprite;
 
-		std::optional<Vector<String>> assetNames;
+		Vector<String> assetNames;
 		std::optional<Path> pendingOpen;
         
 		std::shared_ptr<UIList> assetList;
@@ -61,9 +64,8 @@ namespace Halley {
 
 		void listAssetSources();
 		void listAssets(AssetType type);
-		void setListContents(Vector<String> files, const Path& curPath);
+		void setListContents();
 		void refreshList();
-		void refreshAssetNames();
 
 		void clearAssetList();
 		void addDirToList(const Path& curPath, const String& dir);
