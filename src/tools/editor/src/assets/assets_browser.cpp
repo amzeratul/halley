@@ -134,6 +134,11 @@ void AssetsBrowser::makeUI()
 		addAsset();
 	});
 	
+	setHandle(UIEventType::ButtonClicked, "addFolder", [=] (const UIEvent& event)
+	{
+		addFolder();
+	});
+	
 	setHandle(UIEventType::ButtonClicked, "goToAssetButton", [=] (const UIEvent& event)
 	{
 		showFile(assetTabs->getCurrentAssetId());
@@ -238,7 +243,7 @@ void AssetsBrowser::addDirToList(const Path& curPath, const String& dir)
 	auto sizer = std::make_shared<UISizer>();
 	sizer->add(icon, 0, Vector4f(0, 0, 4, 0));
 	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(dir)));
-	assetList->addItem(dir + "/.", std::move(sizer));
+	assetList->addItem(curPath / dir + "/.", std::move(sizer));
 }
 
 void AssetsBrowser::addFileToList(const Path& path)
@@ -269,7 +274,7 @@ void AssetsBrowser::setSelectedAsset(const String& name)
 void AssetsBrowser::loadAsset(const String& name)
 {
 	if (name.endsWith("/.")) {
-		curSrcPath = curSrcPath / name;
+		curSrcPath = name;
 		refreshList();
 	} else {
 		assetTabs->load(name);
@@ -290,14 +295,19 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
 
 	if (assetId.isEmpty()) {
-		makeEntry("add", "Add", "Add new asset.", "add.png", canAdd);
+		makeEntry("add", "New asset...", "Create new asset.", "new_file.png", canAdd);
+		makeEntry("addFolder", "New folder...", "Create new folder.", "new_folder.png", true);
 	} else {
 		const bool isDirectory = assetId.endsWith("/.");
-		const bool isFile = !assetId.isEmpty() && !isDirectory;
-		
-		makeEntry("rename", "Rename", "Rename Asset.", "rename.png", isFile);
-		makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", isFile && canAdd);
-		makeEntry("delete", "Delete", "Delete Asset.", "delete.png", isFile);
+
+		if (isDirectory) {
+			makeEntry("renameFolder", "Rename", "Rename folder.", "rename.png", true);
+			makeEntry("deleteFolder", "Delete", "Delete folder.", "delete.png", true);
+		} else {
+			makeEntry("rename", "Rename", "Rename Asset.", "rename.png", true);
+			makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", canAdd);
+			makeEntry("delete", "Delete", "Delete Asset.", "delete.png", true);
+		}
 	}
 
 	auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
@@ -312,7 +322,7 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 
 void AssetsBrowser::onContextMenuAction(const String& assetId, const String& action)
 {
-	const auto filename = Path(assetId).getFilename().replaceExtension("").toString();
+	const auto filename = Path(assetId).getFilename().replaceExtension("").getString(false);
 	if (action == "add") {
 		addAsset();
 	} else if (action == "rename") {
@@ -339,6 +349,25 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 		{
 			if (result == UIConfirmationPopup::ButtonType::Yes) {
 				removeAsset(assetId);
+			}
+		}));
+	} else if (action == "addFolder") {
+		addFolder();
+	} else if (action == "renameFolder") {
+		const auto dirName = Path(assetId).getDirNameStr();
+		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename folder to"), dirName, "", [=](std::optional<String> newName)
+		{
+			if (newName) {
+				const auto newPath = Path(assetId).parentPath() / Path(*newName);
+				renameFolder(assetId, newPath.toString());
+			}
+		}));
+	} else if (action == "deleteFolder") {
+		const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No }};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Delete folder?", "Are you sure you want to delete " + assetId + "?", buttons, [=](UIConfirmationPopup::ButtonType result)
+		{
+			if (result == UIConfirmationPopup::ButtonType::Yes) {
+				removeFolder(assetId);
 			}
 		}));
 	}
@@ -446,6 +475,18 @@ void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
 	refreshList();
 }
 
+void AssetsBrowser::removeFolder(const String& assetId)
+{
+	FileSystem::remove(project.getAssetsSrcPath() / assetId);
+	refreshList();
+}
+
+void AssetsBrowser::renameFolder(const String& oldName, const String& newName)
+{
+	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
+	refreshList();
+}
+
 void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 {
 	const auto assetType = curSrcPath.getFront(1).string();
@@ -485,6 +526,19 @@ void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 		auto graph = ScriptGraph(configNode);
 		addAsset(dstId, graph.toYAML(), true);
 	}
+}
+
+void AssetsBrowser::addFolder()
+{
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Folder"), "", "", [=](std::optional<String> newName)
+	{
+		addFolder(project.getAssetsSrcPath() / curSrcPath / *newName / ".");
+	}));
+}
+
+void AssetsBrowser::addFolder(Path path)
+{
+	FileSystem::createDir(path);
 }
 
 void AssetsBrowser::setCollapsed(bool collapsed)

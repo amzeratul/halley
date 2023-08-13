@@ -41,6 +41,8 @@ children:
         children:
           - widget: { id: addAsset, class: button, text: Add }
             proportion: 1
+          - widget: { id: addFolder, class: button, text: Add Folder }
+            proportion: 1
   - widget: { class: widget, id: assetEditorContainer }
     proportion: 1
     border: [10, 0, 0, 0]

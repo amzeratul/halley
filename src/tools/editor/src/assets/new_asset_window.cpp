@@ -15,6 +15,25 @@ NewAssetWindow::NewAssetWindow(UIFactory& factory, LocalisedString label, String
 void NewAssetWindow::onAddedToRoot(UIRoot& root)
 {
 	root.setFocus(getWidget("name"));
+	root.registerKeyPressListener(shared_from_this(), 1);
+}
+
+void NewAssetWindow::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+bool NewAssetWindow::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Enter)) {
+		accept();
+	}
+
+	if (key.is(KeyCode::Esc)) {
+		cancel();
+	}
+
+	return true;
 }
 
 void NewAssetWindow::makeUI()
@@ -33,14 +52,12 @@ void NewAssetWindow::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
-		callback(name->getText().isEmpty() ? std::optional<String>() : String(name->getText()));
-		destroy();
+		accept();
 	});
 	
 	setHandle(UIEventType::ButtonClicked, "cancel", [=] (const UIEvent& event)
 	{
-		callback({});
-		destroy();
+		cancel();
 	});
 
 	setHandle(UIEventType::TextChanged, "name", [=] (const UIEvent& event)
@@ -53,6 +70,19 @@ void NewAssetWindow::makeUI()
 		callback(event.getStringData().isEmpty() ? std::optional<String>() : event.getStringData());
 		destroy();
 	});
+}
+
+void NewAssetWindow::accept()
+{
+	const auto name = getWidgetAs<UITextInput>("name");
+	callback(name->getText().isEmpty() ? std::optional<String>() : String(name->getText()));
+	destroy();
+}
+
+void NewAssetWindow::cancel()
+{
+	callback({});
+	destroy();
 }
 
 StringUTF32 FileNameValidator::onTextChanged(StringUTF32 changedTo)

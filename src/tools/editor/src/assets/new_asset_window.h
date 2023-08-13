@@ -11,7 +11,10 @@ namespace Halley {
 		NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, String extension, Callback callback);
 
 		void onAddedToRoot(UIRoot& root) override;
-		
+		void onRemovedFromRoot(UIRoot& root) override;
+
+		bool onKeyPress(KeyboardKeyPress key) override;
+
 	private:
 		UIFactory& factory;
 		LocalisedString label;
@@ -20,6 +23,8 @@ namespace Halley {
 		Callback callback;
 
 		void makeUI();
+		void accept();
+		void cancel();
 	};
 
 	class FileNameValidator : public UIValidator {

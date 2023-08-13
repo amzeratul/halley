@@ -86,7 +86,11 @@ namespace Halley {
 		void removeAsset();
 		void removeAsset(const String& assetId);
 		void renameAsset(const String& oldName, const String& newName);
+		void removeFolder(const String& assetId);
+		void renameFolder(const String& oldName, const String& newName);
 		void duplicateAsset(const String& srcId, const String& dstId);
+		void addFolder();
+		void addFolder(Path path);
 
 		void setCollapsed(bool collapsed);
 		void doSetCollapsed(bool collapsed);
