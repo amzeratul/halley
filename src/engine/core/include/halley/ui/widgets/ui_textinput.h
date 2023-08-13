@@ -30,6 +30,7 @@ namespace Halley {
 
 		String getText() const;
 		UITextInput& setGhostText(LocalisedString text);
+		UITextInput& setAppendText(LocalisedString text);
 		LocalisedString getGhostText() const;
 		void setShowGhostWhenFocused(bool show);
 		
@@ -118,6 +119,7 @@ namespace Halley {
 
 		TextInputData text;
 		LocalisedString ghostText;
+		LocalisedString appendText;
 		StringUTF32 lastText;
 		
 		AutoCompleteHandle autoCompleteHandle;

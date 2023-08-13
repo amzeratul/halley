@@ -1,17 +1,15 @@
 #include "new_asset_window.h"
 using namespace Halley;
 
-NewAssetWindow::NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, Callback callback)
-	: UIWidget("new_asset", Vector2f(), UISizer())
+NewAssetWindow::NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, String extension, Callback callback)
+	: PopupWindow("new_asset")
 	, factory(factory)
 	, label(std::move(label))
 	, startValue(std::move(startValue))
+	, extension(std::move(extension))
 	, callback(std::move(callback))
 {
 	makeUI();
-	setModal(true);
-	setAnchor(UIAnchor());
-	setChildLayerAdjustment(10);
 }
 
 void NewAssetWindow::onAddedToRoot(UIRoot& root)
@@ -26,7 +24,11 @@ void NewAssetWindow::makeUI()
 	getWidgetAs<UILabel>("title")->setText(label);
 
 	const auto name = getWidgetAs<UITextInput>("name");
+	name->setValidator(std::make_shared<FileNameValidator>());
 	name->setText(startValue);
+	name->setGhostText(LocalisedString::fromUserString(startValue.isEmpty() ? "" : (startValue + extension)));
+	name->setAppendText(LocalisedString::fromUserString(extension));
+
 	getWidget("ok")->setEnabled(!startValue.isEmpty());
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
@@ -51,4 +53,18 @@ void NewAssetWindow::makeUI()
 		callback(event.getStringData().isEmpty() ? std::optional<String>() : event.getStringData());
 		destroy();
 	});
+}
+
+StringUTF32 FileNameValidator::onTextChanged(StringUTF32 changedTo)
+{
+	const StringUTF32 illegalChars = U"./\\?:\"<>|*";
+
+	StringUTF32 result;
+	result.reserve(changedTo.size());
+	for (auto c: changedTo) {
+		if (c >= 32 && illegalChars.find(c) == StringUTF32::npos) {
+			result.push_back(c);
+		}
+	}
+	return result;
 }

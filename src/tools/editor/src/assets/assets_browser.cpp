@@ -258,19 +258,18 @@ void AssetsBrowser::refreshList()
 	listAssetSources();
 	assetList->setSelectedOptionId(id);
 	assetList->setCanSendEvents(true);
+	updateAddRemoveButtons();
 }
 
 void AssetsBrowser::setSelectedAsset(const String& name)
 {
 	lastClickedAsset = name;
-	updateAddRemoveButtons();
 }
 
 void AssetsBrowser::loadAsset(const String& name)
 {
-	auto& curPath = curSrcPath;
 	if (name.endsWith("/.")) {
-		curPath = curPath / name;
+		curSrcPath = curSrcPath / name;
 		refreshList();
 	} else {
 		assetTabs->load(name);
@@ -317,18 +316,20 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 	if (action == "add") {
 		addAsset();
 	} else if (action == "rename") {
-		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename asset to"), filename, [=](std::optional<String> newName)
+		const auto extension = Path(assetId).getExtension();
+		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Rename asset to"), filename, extension, [=](std::optional<String> newName)
 		{
 			if (newName) {
-				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(Path(assetId).getExtension());
+				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(extension);
 				renameAsset(assetId, newPath.toString());
 			}
 		}));
 	} else if (action == "duplicate") {
-		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Enter name of new asset"), filename, [=](std::optional<String> newName)
+		const auto extension = Path(assetId).getExtension();
+		getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("Enter name of new asset"), filename, extension, [=](std::optional<String> newName)
 		{
 			if (newName) {
-				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(Path(assetId).getExtension());
+				const auto newPath = Path(assetId).parentPath() / Path(*newName).replaceExtension(extension);
 				duplicateAsset(assetId, newPath.toString());
 			}
 		}));
@@ -358,39 +359,60 @@ void AssetsBrowser::addAsset()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
 	const auto assetType = curSrcPath.getFront(1).string();
+	String extension;
+	String typeName;
+	if (assetType == "prefab") {
+		extension = ".prefab";
+		typeName = "Prefab";
+	} else if (assetType == "scene") {
+		extension = ".scene";
+		typeName = "Scene";
+	} else if (assetType == "audio_object") {
+		extension = ".yaml";
+		typeName = "Audio Object";
+	} else if (assetType == "audio_event") {
+		extension = ".yaml";
+		typeName = "Audio Event";
+	} else if (assetType == "ui") {
+		extension = ".yaml";
+		typeName = "UI";
+	} else if (assetType == "comet") {
+		extension = ".comet";
+		typeName = "Comet Script";
+	}
 
-	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Asset"), "", [=](std::optional<String> newName)
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New " + typeName), "", extension, [=](std::optional<String> newName)
 	{
 		if (newName) {
 			if (assetType == "prefab") {
 				Prefab prefab;
 				prefab.makeDefault();
-				addAsset(newName.value() + ".prefab", prefab.toYAML());
+				addAsset(newName.value() + extension, prefab.toYAML());
 			}
 			else if (assetType == "scene") {
 				Scene scene;
 				scene.makeDefault();
-				addAsset(newName.value() + ".scene", scene.toYAML());
+				addAsset(newName.value() + extension, scene.toYAML());
 			}
 			else if (assetType == "audio_object") {
 				AudioObject object;
 				object.makeDefault();
-				addAsset(newName.value() + ".yaml", object.toYAML());
+				addAsset(newName.value() + extension, object.toYAML());
 			}
 			else if (assetType == "audio_event") {
 				AudioEvent audioEvent;
 				audioEvent.makeDefault();
-				addAsset(newName.value() + ".yaml", audioEvent.toYAML());
+				addAsset(newName.value() + extension, audioEvent.toYAML());
 			}
 			else if (assetType == "ui") {
 				UIDefinition ui;
 				ui.makeDefault();
-				addAsset(newName.value() + ".yaml", ui.toYAML());
+				addAsset(newName.value() + extension, ui.toYAML());
 			}
 			else if (assetType == "comet") {
 				ScriptGraph graph;
 				graph.makeDefault();
-				addAsset(newName.value() + ".comet", graph.toYAML());
+				addAsset(newName.value() + extension, graph.toYAML());
 			}
 		}
 	}));

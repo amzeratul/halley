@@ -1677,12 +1677,12 @@ IProject& SceneEditorWindow::getProject() const
 	return project;
 }
 
-Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedString label, String defaultValue)
+Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedString label, String defaultValue, String extension)
 {
 	Promise<std::optional<String>> promise;
 	auto future = promise.getFuture();
 
-	getRoot()->addChild(std::make_shared<NewAssetWindow>(uiFactory, std::move(label), std::move(defaultValue), [=, promise = std::move(promise)](std::optional<String> result) mutable
+	getRoot()->addChild(std::make_shared<NewAssetWindow>(uiFactory, std::move(label), std::move(defaultValue), std::move(extension), [=, promise = std::move(promise)](std::optional<String> result) mutable
 	{
 		promise.setValue(std::move(result));
 	}));

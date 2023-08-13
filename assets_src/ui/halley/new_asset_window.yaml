@@ -7,9 +7,9 @@ children:
   - widget: { id: title, class: label, text: "New Asset" }
     fill: centre
     proportion: 1
-- widget: { id: name, class: textInput, size: [300, 22], ghostText: Name }
-  border: [1, 4, 1, 1]
-- sizer: { type: horizontal }
+- widget: { id: name, class: textInput, size: [400, 22], ghostText: Name }
+  border: [10, 13, 10, 10]
+- sizer: { type: horizontal, gap: 4 }
   children:
   - widget: { id: ok, class: button, text: "OK" }
     proportion: 1

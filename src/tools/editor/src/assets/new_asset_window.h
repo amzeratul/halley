@@ -1,14 +1,14 @@
 #pragma once
-#include "halley/ui/ui_widget.h"
+#include "src/ui/popup_window.h"
 
 namespace Halley {
 	class UIFactory;
 
-	class NewAssetWindow : public UIWidget {
+	class NewAssetWindow : public PopupWindow {
 	public:
 		using Callback = std::function<void(std::optional<String>)>;
 		
-		NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, Callback callback);
+		NewAssetWindow(UIFactory& factory, LocalisedString label, String startValue, String extension, Callback callback);
 
 		void onAddedToRoot(UIRoot& root) override;
 		
@@ -16,8 +16,14 @@ namespace Halley {
 		UIFactory& factory;
 		LocalisedString label;
 		String startValue;
+		String extension;
 		Callback callback;
 
 		void makeUI();
+	};
+
+	class FileNameValidator : public UIValidator {
+	public:
+		StringUTF32 onTextChanged(StringUTF32 changedTo) override;
 	};
 }

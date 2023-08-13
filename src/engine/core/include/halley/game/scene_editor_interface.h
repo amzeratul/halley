@@ -423,7 +423,7 @@ namespace Halley {
 		virtual IProject& getProject() const = 0;
 		virtual ConfigNode& getGameData(const String& key) = 0;
 
-		virtual Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue) = 0;
+		virtual Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue, String extension) = 0;
 	};
 
 	class Game;

@@ -70,6 +70,12 @@ UITextInput& UITextInput::setGhostText(LocalisedString t)
 	return *this;
 }
 
+UITextInput& UITextInput::setAppendText(LocalisedString text)
+{
+	appendText = std::move(text);
+	return *this;
+}
+
 LocalisedString UITextInput::getGhostText() const
 {
 	return ghostText;
@@ -303,10 +309,11 @@ void UITextInput::setAutoSize(std::optional<Range<float>> range)
 void UITextInput::update(Time t, bool moved)
 {
 	// Update auto text
-	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
 	const bool showAutoComplete = autoCompleteCurOption.has_value();
+	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
+	const bool showAppend = !showGhost && !appendText.getString().isEmpty();
 	ghostText.checkForUpdates();
-	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
+	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : (showAppend ? appendText.getString().getUTF32() : StringUTF32())));
 
 	// Update text
 	const auto textBounds = getTextBounds();
@@ -366,7 +373,7 @@ void UITextInput::update(Time t, bool moved)
 	}
 	const auto textPos = textBounds.getTopLeft() - textScrollPos;
 	label.setPosition(textPos);
-	ghostLabel.setPosition(textPos);
+	ghostLabel.setPosition(showAppend ? textPos + Vector2f(label.getExtents().x, 0) : textPos);
 
 	// Position the caret
 	caret.setPos(textPos + caretPhysicalPos);

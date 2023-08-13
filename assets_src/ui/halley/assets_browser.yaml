@@ -10,12 +10,12 @@ children:
     border: [0, 0, 6, 0]
     children:
     - widget: { id: collapseButton, class: button, text: "<< Collapse" }
-      border: [0, 0, 0, 5]
+      border: [0, 0, 0, 6]
     - widget: { id: assetBrowsePanel, class: widget }
       sizer: { type: vertical, gap: 4 }
       proportion: 1
       children:
-      - widget: { class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [350, 20] }
+      - widget: { class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [30, 35] }
         sizer: { type: horizontal, gap: 4 }
         children:
           - widget: { id: curDir, class: label, style: labelLight, text: assets_src, maxWidth: 305, maxHeight: 25 }
@@ -23,6 +23,7 @@ children:
             proportion: 1
           - widget: { id: goToAssetButton, class: button, style: buttonThin, icon: "entity_icons/sync.png", size: [22, 22], tooltip: "Go to asset" }
       - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, autoHide: true, size: [255, 50] }
+        border: [0, 2, 0, 0]
         proportion: 1
         children:
         - proportion: 1
