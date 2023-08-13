@@ -25,6 +25,7 @@ namespace Halley {
 		void renameTab(const String& id, const String& newId, std::optional<AssetType> assetType);
 		void moveTabFocus(int delta);
 		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
+		String getCurrentAssetId() const;
 
 	protected:
 		void update(Time t, bool moved) override;

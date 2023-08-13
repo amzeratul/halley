@@ -644,6 +644,11 @@ void UIList::setScrollToSelection(bool value)
 	scrollToSelection = value;
 }
 
+void UIList::showCurSelection(bool centre)
+{
+	sendEvent(UIEvent(centre ? UIEventType::MakeAreaVisibleCentered : UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+}
+
 void UIList::setShowSelection(bool value)
 {
 	if (showSelection != value) {

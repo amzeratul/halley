@@ -20,6 +20,8 @@ namespace Halley {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
+		void update(Time t, bool moved) override;
+
 		void openAsset(AssetType type, const String& assetId);
 		void openFile(const Path& path);
 		void showFile(const Path& path);
@@ -56,6 +58,7 @@ namespace Halley {
 		uint64_t curDirHash = 0;
 
 		bool collapsed = false;
+        int waitingToShowSel = 0;
 
         void loadResources();
         void makeUI();

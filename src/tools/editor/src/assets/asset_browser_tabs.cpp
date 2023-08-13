@@ -322,6 +322,11 @@ std::shared_ptr<AssetEditorWindow> AssetBrowserTabs::getActiveWindow() const
 	return {};
 }
 
+String AssetBrowserTabs::getCurrentAssetId() const
+{
+	return tabs->getSelectedOptionId();
+}
+
 void AssetBrowserTabs::update(Time t, bool moved)
 {
 	auto closing = toClose;

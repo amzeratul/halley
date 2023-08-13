@@ -24,6 +24,15 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	project.addAssetSrcChangeListener(*this);
 }
 
+void AssetsBrowser::update(Time t, bool moved)
+{
+	if (waitingToShowSel) {
+		if (--waitingToShowSel == 0) {
+			assetList->showCurSelection(true);
+		}
+	}
+}
+
 void AssetsBrowser::openAsset(AssetType type, const String& assetId)
 {
 	const auto target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
@@ -44,6 +53,7 @@ void AssetsBrowser::showFile(const Path& path)
 		curSrcPath = path.parentPath();
 		refreshList();
 		assetList->setSelectedOptionId(path.toString());
+		waitingToShowSel = 2;
 	}
 }
 
@@ -123,6 +133,11 @@ void AssetsBrowser::makeUI()
 	{
 		addAsset();
 	});
+	
+	setHandle(UIEventType::ButtonClicked, "goToAssetButton", [=] (const UIEvent& event)
+	{
+		showFile(assetTabs->getCurrentAssetId());
+	});
 
 	setHandle(UIEventType::ButtonClicked, "collapseButton", [=] (const UIEvent& event)
 	{
@@ -200,6 +215,9 @@ void AssetsBrowser::setListContents()
 		assetList->setSelectedOptionId(selectOption.value());
 	}
 	assetList->setScrollToSelection(true);
+
+	const auto pathStr = curSrcPath.getString(false);
+	getWidgetAs<UILabel>("curDir")->setText(LocalisedString::fromUserString(pathStr.isEmpty() ? "assets_src" : pathStr));
 
 	if (pendingOpen) {
 		assetList->setSelectedOptionId(pendingOpen->toString());

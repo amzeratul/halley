@@ -83,6 +83,7 @@ namespace Halley {
 		void setUniformSizedItems(bool value);
 
         void setScrollToSelection(bool value);
+		void showCurSelection(bool centre);
 
 		void setShowSelection(bool value);
 		bool canShowSelection() const;
