@@ -273,21 +273,24 @@ void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)
 
 void ScriptGraphEditor::setListeningToClient(bool listening)
 {
-	auto& devConServer = *project.getDevConServer();
+	auto* devConServer = project.getDevConServer();
+	if (!devConServer) {
+		return;
+	}
 
 	if (listening) {
 		refreshScriptEnum();
 		ConfigNode::MapType params;
 		params["scriptId"] = scriptGraph->getAssetId();
 		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getHash());
-		scriptEnumHandle = devConServer.registerInterest("scriptEnum", std::move(params), [=] (size_t connId, ConfigNode result)
+		scriptEnumHandle = devConServer->registerInterest("scriptEnum", std::move(params), [=] (size_t connId, ConfigNode result)
 		{
 			onScriptEnum(connId, std::move(result));
 		});
 		setListeningToState(curEntityId.value_or(std::pair<size_t, int64_t>(0, -1)));
 	} else {
 		if (scriptEnumHandle) {
-			devConServer.unregisterInterest(scriptEnumHandle.value());
+			devConServer->unregisterInterest(scriptEnumHandle.value());
 			scriptEnumHandle.reset();
 			curEntities.clear();
 			refreshScriptEnum();
