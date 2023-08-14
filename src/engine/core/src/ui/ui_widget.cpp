@@ -166,7 +166,7 @@ void UIWidget::layout(IUIElementListener* listener)
 {
 	checkActive();
 	if (isActive()) {
-		Vector2f minimumSize = getLayoutMinimumSize(false);
+		Vector2f minimumSize = getLayoutMinimumSize(false).ceil();
 		Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
 		setRect(Rect4f(getPosition(), getPosition() + targetSize), listener);
 

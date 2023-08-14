@@ -430,6 +430,21 @@ namespace Halley {
 			}
 			return {};
 		}
+
+		Rect2D round() const
+		{
+			return Rect2D(p1.round(), p2.round());
+		}
+
+		Rect2D floor() const
+		{
+			return Rect2D(p1.floor(), p2.floor());
+		}
+
+		Rect2D ceil() const
+		{
+			return Rect2D(p1.ceil(), p2.ceil());
+		}
 	};
 
 	template <typename T>
