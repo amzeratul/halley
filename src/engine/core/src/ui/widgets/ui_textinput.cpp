@@ -301,9 +301,10 @@ void UITextInput::setIcon(Sprite icon, Vector4f border)
 	iconBorder = border;
 }
 
-void UITextInput::setAutoSize(std::optional<Range<float>> range)
+void UITextInput::setAutoSize(std::optional<Range<float>> range, bool horizontal)
 {
 	autoSizeRange = range;
+	autoSizeHorizontal = horizontal;
 }
 
 void UITextInput::update(Time t, bool moved)
@@ -350,7 +351,11 @@ void UITextInput::update(Time t, bool moved)
 	auto textSize = label.empty() ? ghostLabel.getExtents() : label.getExtents();
 	if (autoSizeRange) {
 		const auto border = getTextInnerBorder();
-		setMinSize(Vector2f(std::clamp(textSize.x + border.x + border.z, autoSizeRange->start, autoSizeRange->end), getMinimumSize().y));
+		if (autoSizeHorizontal) {
+			setMinSize(Vector2f(std::clamp(textSize.x + border.x + border.z, autoSizeRange->start, autoSizeRange->end), getMinimumSize().y));
+		} else {
+			setMinSize(Vector2f(getMinimumSize().x, std::clamp(textSize.y + border.y + border.w, autoSizeRange->start, autoSizeRange->end)));
+		}
 	}
 
 	// Position the text
@@ -410,7 +415,11 @@ Rect4f UITextInput::getTextBounds() const
 {
 	const auto border = getTextInnerBorder();
 	const Vector2f startPos = getPosition() + Vector2f(border.x, border.y);
-	const auto size = getSize() - border.xy() - border.zw();
+	auto widgetSize = getSize();
+	if (autoSizeRange && !autoSizeHorizontal) {
+		widgetSize.y = autoSizeRange->end;
+	}
+	const auto size = widgetSize - border.xy() - border.zw();
 	return Rect4f(startPos, size.x, size.y);
 }
 

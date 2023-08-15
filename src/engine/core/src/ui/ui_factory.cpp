@@ -793,6 +793,8 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 	result.entries.emplace_back("Ghost Text", "ghost", "Halley::String", "");
 	result.entries.emplace_back("Show Ghost when Focused", "showGhostWhenFocused", "bool", "false");
 	result.entries.emplace_back("Select All on Click", "selectAllOnClick", "bool", "false");
+	result.entries.emplace_back("Auto Size", "autoSize", "std::optional<Halley::Range<float>>", "");
+	result.entries.emplace_back("Auto Size Horizontally", "autoSizeHorizontal", "bool", "true");
 
 	return result;
 }
@@ -834,6 +836,10 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	result->setShowGhostWhenFocused(node["showGhostWhenFocused"].asBool(false));
 	result->setMultiLine(node["multiLine"].asBool(false));
 	result->setSelectAllOnClick(node["selectAllOnClick"].asBool(false));
+
+	if (node.hasKey("autoSize")) {
+		result->setAutoSize(node["autoSize"].asFloatRange(), node["autoSizeHorizontal"].asBool(true));
+	}
 
 	return result;
 }

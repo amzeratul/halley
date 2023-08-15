@@ -68,7 +68,7 @@ namespace Halley {
 
 		void setIcon(Sprite icon, Vector4f border);
 
-		void setAutoSize(std::optional<Range<float>> range);
+		void setAutoSize(std::optional<Range<float>> range, bool horizontal = true);
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -133,6 +133,7 @@ namespace Halley {
 		bool historyEnabled = false;
 		bool modifiedByHistory = false;
 
+		bool autoSizeHorizontal = true;
 		std::optional<Range<float>> autoSizeRange;
 
 		Vector2f textScrollPos;
