@@ -227,6 +227,8 @@ void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)
 		} else {
 			sprite.setColour(normalColour);
 		}
+
+		sendEventDown(event, false);
 	});
 }
 
@@ -240,6 +242,8 @@ void UIImage::setHoverable(Sprite normalSprite, Sprite selectedSprite)
 			sprite = normalSprite;
 		}
 		dirty = true;
+
+		sendEventDown(event, false);
 	});
 }
 
