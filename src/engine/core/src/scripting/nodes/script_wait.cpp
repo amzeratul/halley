@@ -37,7 +37,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const 
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -66,12 +66,15 @@ String ScriptWait::getPinDescription(const ScriptGraphNode& node, PinType elemen
 	if (elementIdx == 2) {
 		return "Time Override";
 	}
+	if (elementIdx == 3) {
+		return "Progress %";
+	}
 	return ScriptNodeTypeBase<ScriptWaitData>::getPinDescription(node, elementType, elementIdx);
 }
 
 IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
-	if (!curData.setFromInput && readDataPin(environment, node, 2).getType() == ConfigNodeType::Float) {
+	if (!curData.setFromInput && (readDataPin(environment, node, 2).getType() == ConfigNodeType::Float || readDataPin(environment, node, 2).getType() == ConfigNodeType::Int)) {
 		curData.setFromInput = true;
 		curData.timeLeft = readDataPin(environment, node, 2).asFloat();
 	}
@@ -81,4 +84,15 @@ IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Tim
 	const float elapsed = done ? curData.timeLeft : t;
 	curData.timeLeft -= elapsed;
 	return Result(done ? ScriptNodeExecutionState::Done : ScriptNodeExecutionState::Executing, elapsed);
+}
+
+ConfigNode ScriptWait::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptWaitData& curData) const
+{
+	if (readDataPin(environment, node, 2).getType() == ConfigNodeType::Float || readDataPin(environment, node, 2).getType() == ConfigNodeType::Int) {
+		const float goal = readDataPin(environment, node, 2).asFloat();
+		return ConfigNode(1.0f - (curData.timeLeft / goal));
+	}
+
+	const float goal = node.getSettings()["time"].asFloat(0.0f);
+	return ConfigNode(1.0f - (curData.timeLeft / goal));
 }
