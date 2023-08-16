@@ -107,14 +107,12 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 
 void UIPainter::draw(Sprite&& sprite)
 {
-	applyAlpha(sprite);
-	painter->add(std::move(sprite), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	painter->add(applyAlpha(std::move(sprite)), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(TextRenderer&& text)
 {
-	applyAlpha(text);
-	painter->add(std::move(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	painter->add(applyAlpha(std::move(text)), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(std::function<void(Painter&)> f)
@@ -122,7 +120,7 @@ void UIPainter::draw(std::function<void(Painter&)> f)
 	painter->add(std::move(f), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
-void UIPainter::applyAlpha(TextRenderer& text) const
+TextRenderer UIPainter::applyAlpha(TextRenderer text) const
 {
 	if (alphaMultiplier) {
 		const float a = *alphaMultiplier;
@@ -133,11 +131,13 @@ void UIPainter::applyAlpha(TextRenderer& text) const
 		text.setOutlineColour(co.withAlpha(c.a * a));
 		text.setShadowColour(cs.withAlpha(c.a * a));
 	}
+	return text;
 }
 
-void UIPainter::applyAlpha(Sprite& sprite) const
+Sprite UIPainter::applyAlpha(Sprite sprite) const
 {
 	if (alphaMultiplier) {
 		sprite.setAlpha(sprite.getAlpha() * *alphaMultiplier);
 	}
+	return sprite;
 }
