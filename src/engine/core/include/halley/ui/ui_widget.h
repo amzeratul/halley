@@ -158,8 +158,8 @@ namespace Halley {
 		void setNoClipChildren(bool noClip);
 		bool getNoClipChildren() const;
 
-		void sendEvent(UIEvent event) const override;
-		void sendEventDown(const UIEvent& event) const;
+		void sendEvent(UIEvent event, bool includeSelf = true) const override;
+		void sendEventDown(const UIEvent& event, bool includeSelf = true) const;
 		void forceAddChildren(UIInputType inputType, bool forceRecursive);
 
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);

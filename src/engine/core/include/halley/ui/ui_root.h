@@ -44,7 +44,7 @@ namespace Halley {
 		void runLayout();
 		
 		std::optional<std::shared_ptr<IAudioHandle>> playSound(const String& eventName);
-		void sendEvent(UIEvent event) const override;
+		void sendEvent(UIEvent event, bool includeSelf) const override;
 
 		bool hasModalUI() const;
 		String getModalUIName() const;

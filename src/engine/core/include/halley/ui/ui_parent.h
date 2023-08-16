@@ -21,7 +21,7 @@ namespace Halley {
 		virtual UIRoot* getRoot() = 0;
 		virtual const UIRoot* getRoot() const = 0;
 
-		virtual void sendEvent(UIEvent event) const = 0;
+		virtual void sendEvent(UIEvent event, bool includeSelf = true) const = 0;
 		virtual void receiveKeyPress(KeyboardKeyPress key) = 0;
 
 		virtual Rect4f getRect() const = 0;

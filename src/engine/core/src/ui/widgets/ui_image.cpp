@@ -108,6 +108,8 @@ void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
 		} else {
 			sprite.setColour(normalColour);
 		}
+
+		sendEventDown(event, false);
 	});
 }
 
@@ -121,6 +123,8 @@ void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
 			sprite = normalSprite;
 		}
 		dirty = true;
+
+		sendEventDown(event, false);
 	});
 }
 
@@ -133,6 +137,8 @@ void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
 		} else {
 			sprite.setColour(disabledColour);
 		}
+
+		sendEventDown(event, false);
 	});
 }
 
@@ -145,6 +151,8 @@ void UIImage::setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour
 		} else {
 			sprite.setColour(normalColour);
 		}
+
+		sendEventDown(event, false);
 	});
 
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)
@@ -158,6 +166,8 @@ void UIImage::setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour
 				sprite.setColour(normalColour);
 			}
 		}
+
+		sendEventDown(event, false);
 	});
 }
 

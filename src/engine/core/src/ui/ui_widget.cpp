@@ -915,27 +915,27 @@ bool UIWidget::onDestroyRequested()
 	return true;
 }
 
-void UIWidget::sendEvent(UIEvent event) const
+void UIWidget::sendEvent(UIEvent event, bool includeSelf) const
 {
 	if (canSendEvents) {
-		if (eventHandler && eventHandler->canHandle(event)) {
+		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
 			eventHandler->queue(event);
 		} else if (parent) {
-			parent->sendEvent(std::move(event));
+			parent->sendEvent(std::move(event), true);
 		}
 	}
 }
 
-void UIWidget::sendEventDown(const UIEvent& event) const
+void UIWidget::sendEventDown(const UIEvent& event, bool includeSelf) const
 {
-	if (eventHandler && eventHandler->canHandle(event)) {
+	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
 		eventHandler->queue(event);
 	} else {
 		for (const auto& c: getChildren()) {
-			c->sendEventDown(event);
+			c->sendEventDown(event, true);
 		}
 		for (const auto& c: getChildrenWaiting()) {
-			c->sendEventDown(event);
+			c->sendEventDown(event, true);
 		}
 	}
 }

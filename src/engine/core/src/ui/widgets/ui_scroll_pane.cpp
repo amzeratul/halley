@@ -209,7 +209,12 @@ void UIScrollPane::onLayout()
 void UIScrollPane::onMouseWheel(const UIEvent& event)
 {
 	if (scrollWheelEnabled) {
-		const auto delta = scrollSpeed * event.getVectorData() * Vector2f(scrollHorizontal ? 1.0f : 0.0f, scrollVertical ? -1.0f : 0.0f);
+		auto baseScroll = scrollSpeed * event.getVectorData();
+		if (!scrollVertical && std::abs(baseScroll.x) < 0.01f) {
+			baseScroll.x = -baseScroll.y;
+		}
+		const auto delta = baseScroll * Vector2f(scrollHorizontal ? 1.0f : 0.0f, scrollVertical ? -1.0f : 0.0f);
+
 		if (delta.squaredLength() > 0.00001f) {
 			scrollBy(delta);
 		}

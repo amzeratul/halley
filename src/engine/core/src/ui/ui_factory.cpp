@@ -1529,6 +1529,8 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 	list.setMultiSelect(node["multiSelect"].asBool(false));
 	list.setAcceptKeyboardInput(node["acceptKeyboardInput"].asBool(true));
 	list.setFocusable(node["focusable"].asBool(true));
+	list.setRequiresSelection(node["requiresSelection"].asBool(true));
+	list.setShowSelection(node["showSelection"].asBool(true));
 }
 
 UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
@@ -1544,6 +1546,8 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
 	result.entries.emplace_back("Uniform Sized Items", "uniformSizedItems", "bool", "false");
 	result.entries.emplace_back("Accept Keyboard Input", "acceptKeyboardInput", "bool", "true");
 	result.entries.emplace_back("Focusable", "focusable", "bool", "true");
+	result.entries.emplace_back("Requires Selection", "requiresSelection", "bool", "true");
+	result.entries.emplace_back("Show Selection", "showSelection", "bool", "true");
 
 	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
 
