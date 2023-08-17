@@ -146,12 +146,20 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerpLoop::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 5>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
 String ScriptLerpLoop::getLabel(const ScriptGraphNode& node) const
 {
+	if (node.getPin(4).hasConnection()) {
+		return "";
+	}
 	return toString(node.getSettings()["time"].asFloat(1)) + "s";
 }
 
@@ -159,7 +167,14 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Loop over ");
-	str.append(toString(node.getSettings()["time"].asFloat(1)) + "s", settingColour);
+
+	if (node.getPin(4).hasConnection()) {
+		str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	}
+	else {
+		str.append(toString(node.getSettings()["time"].asFloat(1)) + "s", settingColour);
+	}
+
 	str.append(" whilst outputting from 0 to 1 (");
 	str.append(node.getSettings()["curve"].asString("linear"), settingColour);
 	str.append(")");
@@ -173,6 +188,8 @@ String ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType el
 		return "Flow output for each loop iteration";
 	} else if (elementIdx == 3) {
 		return "Loop progress (0..1)";
+	} else if (elementIdx == 4) {
+		return "Time";
 	} else {
 		return ScriptNodeTypeBase<ScriptLerpLoopData>::getPinDescription(node, element, elementIdx);
 	}
@@ -198,7 +215,10 @@ IScriptNodeType::Result ScriptLerpLoop::doUpdate(ScriptEnvironment& environment,
 	// Important: check for done before incrementing time. This makes sure that we had at least one iteration outputting 1.0f before terminating
 	// If time is not set at all, then it's the first iteration, which we'll report as consuming 0 seconds, this is to ensure we also get a proper instant first iteration
 
-	const float length = node.getSettings()["time"].asFloat(1);
+	float length = node.getSettings()["time"].asFloat(1);
+	if (node.getPin(4).hasConnection()) {
+		length = readDataPin(environment, node, 4).asFloat();
+	}
 
 	const bool firstRun = curData.state == static_cast<uint8_t>(ScriptLerpLoopData::State::Idle);
 	if (firstRun) {
@@ -219,7 +239,11 @@ IScriptNodeType::Result ScriptLerpLoop::doUpdate(ScriptEnvironment& environment,
 
 ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLerpLoopData& curData) const
 {
-	const float length = node.getSettings()["time"].asFloat(1);
+	float length = node.getSettings()["time"].asFloat(1);
+	if (node.getPin(4).hasConnection()) {
+		length = readDataPin(environment, node, 4).asFloat();
+	}
+
 	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
 	return ConfigNode(Tween<float>::applyCurve(clamp(curData.time / length, 0.0f, 1.0f), curve));
 }
