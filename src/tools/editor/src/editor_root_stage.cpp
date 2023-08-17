@@ -199,7 +199,7 @@ void EditorRootStage::updateUI(Time time)
 
 	//uiMainPanel->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
-	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
+	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), {});
 
 	backgroundParticles.setPosition(Vector2f(size) * Vector2f(0.6f, 0.4f));
 	backgroundParticles.setSpawnArea(Vector2f(size) * 1.2f);
