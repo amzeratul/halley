@@ -124,7 +124,15 @@ std::shared_ptr<UIWidget> UIFactory::makeWidgetFromFactory(const String& key, co
 	if (iter != factories.end()) {
 		return iter->second(config);
 	}
+	if (fallbackFactory) {
+		fallbackFactory->makeWidgetFromFactory(key, config);
+	}
 	return {};
+}
+
+void UIFactory::setFallbackFactory(UIFactory& factory)
+{
+	fallbackFactory = &factory;
 }
 
 void UIFactory::pushConditions(Vector<String> conds)
@@ -201,10 +209,13 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition, IUIRe
 const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String& widgetClass) const
 {
 	const auto iter = properties.find(widgetClass);
-	if (iter == properties.end()) {
-		throw Exception("Unknown widget type: " + widgetClass, HalleyExceptions::Entity);
+	if (iter != properties.end()) {
+		return iter->second;
 	}
-	return iter->second;
+	if (fallbackFactory) {
+		return fallbackFactory->getPropertiesForWidget(widgetClass);
+	}
+	throw Exception("Unknown widget type: " + widgetClass, HalleyExceptions::Entity);
 }
 
 Vector<String> UIFactory::getWidgetClassList(bool mustAllowChildren) const
@@ -411,6 +422,11 @@ std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 		auto& widgetNode = entryNode["widget"];
 		auto widgetClass = widgetNode["class"].asString();
 		auto iter = factories.find(widgetClass);
+		if (iter == factories.end()) {
+			if (fallbackFactory) {
+				iter = fallbackFactory->factories.find(widgetClass);
+			}
+		}
 		if (iter == factories.end()) {
 			throw Exception("Unknown widget class: " + widgetClass, HalleyExceptions::UI);
 		}

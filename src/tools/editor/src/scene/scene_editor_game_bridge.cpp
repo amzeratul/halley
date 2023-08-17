@@ -384,6 +384,11 @@ String SceneEditorGameBridge::getSceneNameForComments(AssetType assetType, const
 	return assetId;
 }
 
+UIFactory& SceneEditorGameBridge::getFactory() const
+{
+	return factory;
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
@@ -422,6 +427,8 @@ void SceneEditorGameBridge::load()
 
 void SceneEditorGameBridge::unload()
 {
+	gizmos->clear();
+
 	interface.reset();
 	interfaceReady = false;
 
@@ -429,8 +436,6 @@ void SceneEditorGameBridge::unload()
 	gameCoreAPI.reset();
 
 	errorState = false;
-
-	gizmos->clear();
 }
 
 bool SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const

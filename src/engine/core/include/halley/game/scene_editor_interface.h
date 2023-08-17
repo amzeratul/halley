@@ -172,6 +172,8 @@ namespace Halley {
 		virtual void clearAssetCache() = 0;
 
 		virtual void validateAllEntities() = 0;
+
+		virtual UIFactory& getFactory() const = 0;
 	};
 
     class SceneEditorContext {

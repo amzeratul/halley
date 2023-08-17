@@ -8,6 +8,7 @@
 
 #include "ui_colour_scheme.h"
 #include "ui_input.h"
+#include "halley/game/scene_editor_interface.h"
 #include "halley/text/i18n.h"
 
 namespace Halley
@@ -71,6 +72,7 @@ namespace Halley
 		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
 		bool hasFactoryFor(const String& key) const;
 		std::shared_ptr<UIWidget> makeWidgetFromFactory(const String& key, const ConfigNode& config);
+		void setFallbackFactory(UIFactory& factory);
 
 		void pushConditions(Vector<String> conditions);
 		void popConditions();
@@ -146,6 +148,7 @@ namespace Halley
 		Resources& resources;
 		const I18N& i18n;
 		std::shared_ptr<const UIColourScheme> colourScheme;
+		UIFactory* fallbackFactory = nullptr;
 
 		std::shared_ptr<IUIElement> makeWidget(const ConfigNode& node);
 		std::optional<UISizer> makeSizer(const ConfigNode& node);

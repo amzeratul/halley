@@ -59,6 +59,8 @@ namespace Halley {
 		World& getWorld() const;
 		String getSceneNameForComments(AssetType assetType, const String& assetId) const;
 
+		UIFactory& getFactory() const override;
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void openAsset(AssetType assetType, const String& assetId) override;
