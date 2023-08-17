@@ -3,6 +3,7 @@
 
 #include <halley.hpp>
 
+#include "halley/entity/services/scripting_service.h"
 
 #include "components/audio_listener_component.h"
 #include "halley/entity/components/transform_2d_component.h"
@@ -57,13 +58,19 @@ protected:
 	const Halley::HalleyAPI& getAPI() const {
 		return doGetAPI();
 	}
+
+	ScriptingService* tryGetScriptingService() const {
+		return scriptingService;
+	}
 	Halley::FamilyBinding<ListenerFamily> listenerFamily{};
 	Halley::FamilyBinding<SourceFamily> sourceFamily{};
 
 private:
 	friend Halley::System* halleyCreateAudioSystem();
 
+	ScriptingService* scriptingService{ nullptr };
 	void initBase() override final {
+		scriptingService = doGetWorld().template tryGetService<ScriptingService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, ListenerFamily>(listenerFamily, static_cast<T*>(this));
 		initialiseFamilyBinding<T, SourceFamily>(sourceFamily, static_cast<T*>(this));

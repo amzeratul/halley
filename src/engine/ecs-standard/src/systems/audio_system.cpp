@@ -4,6 +4,13 @@ using namespace Halley;
 
 class AudioSystem final : public AudioSystemBase<AudioSystem>, public IAudioSystemInterface {
 public:
+	void init()
+	{
+		if (auto* scripting = tryGetScriptingService()) {
+			scripting->getEnvironment().setInterface(static_cast<IAudioSystemInterface*>(this));
+		}
+	}
+
 	void onEntitiesAdded(Span<SourceFamily> es)
 	{
 		for (auto& e: es) {

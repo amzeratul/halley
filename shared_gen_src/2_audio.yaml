@@ -78,6 +78,8 @@ system:
   strategy: global
   systemMessages:
   - PlayNetworkSound: receive
+  services:
+  - ScriptingService optional
   access:
   - api
 ...
