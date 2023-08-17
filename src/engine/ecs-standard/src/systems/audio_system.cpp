@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-class AudioSystem final : public AudioSystemBase<AudioSystem> {
+class AudioSystem final : public AudioSystemBase<AudioSystem>, public IAudioSystemInterface {
 public:
 	void onEntitiesAdded(Span<SourceFamily> es)
 	{
@@ -35,6 +35,13 @@ public:
 	{
 		if (const auto* source = sourceFamily.tryFind(msg.emitter)) {
 			getAPI().audio->postEvent(msg.event, source->audioSource.emitter);
+		}
+	}
+
+	void playAudio(const String& event, EntityId entityId) override
+	{
+		if (const auto* source = sourceFamily.tryFind(entityId)) {
+			getAPI().audio->postEvent(event, source->audioSource.emitter);
 		}
 	}
 

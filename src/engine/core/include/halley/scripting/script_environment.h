@@ -69,6 +69,13 @@ namespace Halley {
 		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
 	};
 
+	class IAudioSystemInterface : public IScriptEnvironmentInterface {
+	public:
+		virtual ~IAudioSystemInterface() = default;
+
+        virtual void playAudio(const String& event, EntityId entityId) = 0;
+	};
+
     class ScriptEnvironment: private IEntityFactoryContext {
     public:
         struct EntityMessageData {
