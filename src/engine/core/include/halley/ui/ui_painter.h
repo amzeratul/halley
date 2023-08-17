@@ -42,7 +42,7 @@ namespace Halley {
 
 		float getCurrentPriorityAndIncrement() const;
 
-		TextRenderer applyAlpha(TextRenderer text) const;
-		Sprite applyAlpha(Sprite sprite) const;
+		[[nodiscard]] TextRenderer applyAlpha(TextRenderer text) const;
+		[[nodiscard]] Sprite applyAlpha(Sprite sprite) const;
 	};
 }

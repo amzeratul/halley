@@ -82,9 +82,7 @@ float UIPainter::getCurrentPriorityAndIncrement() const
 void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
 	if (alphaMultiplier) {
-		auto s = sprite;
-		applyAlpha(s);
-		painter->add(std::move(s), mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(applyAlpha(sprite), mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else if (forceCopy) {
 		painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
@@ -95,9 +93,7 @@ void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
 	if (alphaMultiplier) {
-		auto t = text;
-		applyAlpha(t);
-		painter->add(std::move(t), mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(applyAlpha(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else if (forceCopy) {
 		painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else {
