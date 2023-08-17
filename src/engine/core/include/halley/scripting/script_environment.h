@@ -66,6 +66,7 @@ namespace Halley {
 		virtual ~IScriptSystemInterface() = default;
 
 		virtual Vector<EntityId> findScriptables(Vector2f pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, Vector2f)>& getDistance) const = 0;
+		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
 	};
 
     class ScriptEnvironment: private IEntityFactoryContext {

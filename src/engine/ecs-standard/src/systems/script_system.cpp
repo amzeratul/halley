@@ -47,6 +47,21 @@ public:
 	{
 		addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
 	}
+	
+	std::shared_ptr<ScriptState> addScript(EntityId entityId, const String& scriptName, Vector<String> tags = {}, Vector<ConfigNode> params = {}) override
+	{
+		auto* scriptable = scriptableFamily.tryFind(entityId);
+		if (scriptable) {
+			if (getResources().exists<ScriptGraph>(scriptName)) {
+				return addScript(entityId, scriptable->scriptable, getResources().get<ScriptGraph>(scriptName), std::move(tags), std::move(params));
+			} else {
+				Logger::logError("Script not found: " + scriptName);
+				return {};
+			}
+		} else {
+			return {};
+		}
+	}
 
 	void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) override
 	{
@@ -329,21 +344,6 @@ private:
 			}
 		}
 		return n;
-	}
-
-	std::shared_ptr<ScriptState> addScript(EntityId entityId, const String& scriptName, Vector<String> tags = {}, Vector<ConfigNode> params = {})
-	{
-		auto* scriptable = scriptableFamily.tryFind(entityId);
-		if (scriptable) {
-			if (getResources().exists<ScriptGraph>(scriptName)) {
-				return addScript(entityId, scriptable->scriptable, getResources().get<ScriptGraph>(scriptName), std::move(tags), std::move(params));
-			} else {
-				Logger::logError("Script not found: " + scriptName);
-				return {};
-			}
-		} else {
-			return {};
-		}
 	}
 
 	std::shared_ptr<ScriptState> addScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<const ScriptGraph> script, Vector<String> tags = {}, Vector<ConfigNode> params = {})
