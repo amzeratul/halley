@@ -227,6 +227,15 @@ Vector<String> UIFactory::getWidgetClassList(bool mustAllowChildren) const
 			result.push_back(p.first);
 		}
 	}
+
+	if (fallbackFactory) {
+		for (const auto& id: fallbackFactory->getWidgetClassList(mustAllowChildren)) {
+			if (std_ex::contains(result, id)) {
+				result.push_back(id);
+			}
+		}
+	}
+
 	return result;
 }
 

@@ -11,6 +11,8 @@ namespace Halley {
 		SelectTargetWidget(const String& id, UIFactory& factory, IProjectWindow& projectWindow);
 		virtual ~SelectTargetWidget() override;
 
+		void update(Time t, bool moved) override;
+
 		void setValue(const String& newValue);
 		String getValue() const;
 
@@ -29,6 +31,7 @@ namespace Halley {
 		virtual String doGetDisplayName(const String& name) const;
 		virtual String doGetToolTip(const String& value) const;
 		virtual void onValueChanged(const String& value);
+		bool canReceiveFocus() const override;
 
 		UIFactory& factory;
 		ProjectWindow& projectWindow;
@@ -48,6 +51,7 @@ namespace Halley {
 		std::shared_ptr<bool> aliveFlag;
 		bool displayErrorForEmpty = true;
 		bool firstValue = true;
+		bool needFocus = false;
 	};
 
 	class SelectAssetWidget : public SelectTargetWidget {

@@ -335,6 +335,7 @@ void UIEditor::loadGameFactory()
 	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
 	auto* game = project.getGameInstance();
 	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
+	gameFactory->setFallbackFactory(factory);
 }
 
 void UIEditor::reassignUUIDs(ConfigNode& node) const

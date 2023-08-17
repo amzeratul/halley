@@ -20,6 +20,14 @@ SelectTargetWidget::~SelectTargetWidget()
 	*aliveFlag = false;
 }
 
+void SelectTargetWidget::update(Time t, bool moved)
+{
+	if (needFocus) {
+		needFocus = false;
+		focus();
+	}
+}
+
 void SelectTargetWidget::setValue(const String& newValue)
 {
 	if (newValue != value || firstValue) {
@@ -94,6 +102,7 @@ void SelectTargetWidget::choose()
 	{
 		if (*flag && result) {
 			setValue(result.value());
+			needFocus = true;
 		}
 	}));
 }
@@ -152,6 +161,11 @@ String SelectTargetWidget::doGetToolTip(const String& value) const
 
 void SelectTargetWidget::onValueChanged(const String& value)
 {
+}
+
+bool SelectTargetWidget::canReceiveFocus() const
+{
+	return true;
 }
 
 
