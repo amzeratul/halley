@@ -6,6 +6,7 @@
 #include "halley/entity/entity_factory.h"
 #include "script_node_type.h"
 #include "halley/input/input_virtual.h"
+#include "halley/navigation/world_position.h"
 
 namespace Halley {
 	class LuaState;
@@ -65,7 +66,7 @@ namespace Halley {
 	public:
 		virtual ~IScriptSystemInterface() = default;
 
-		virtual Vector<EntityId> findScriptables(Vector2f pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, Vector2f)>& getDistance) const = 0;
+		virtual Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
 		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
 	};
 

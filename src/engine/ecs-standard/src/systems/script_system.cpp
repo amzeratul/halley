@@ -84,7 +84,7 @@ public:
 		std_ex::erase_if_value(e.scriptable.activeStates, [](const auto& state) { return state->isDead(); });
 	}
 
-	Vector<EntityId> findScriptables(Vector2f pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, Vector2f)>& getDistance) const override
+	Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const override
 	{
 		// Collect all matching
 		using T = std::pair<float, EntityId>;
@@ -95,7 +95,7 @@ public:
 			if (!std_ex::contains(matchId, entityId)) {
 				if (std::all_of(tags.begin(), tags.end(), [&](const String& tag) { return std_ex::contains(entityTags, tag); })) {
 					const float distance = getDistance(entityId, pos);
-					if (distance <= radius) {
+					if (distance <= radius && isfinite(distance)) {
 						matching.emplace_back(distance, entityId);
 						matchId.push_back(entityId);
 					}
