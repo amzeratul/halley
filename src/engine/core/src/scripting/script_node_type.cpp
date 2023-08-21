@@ -365,6 +365,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLockAvailable>());
 	addScriptNode(std::make_unique<ScriptLockAvailableGate>());
 	addScriptNode(std::make_unique<ScriptSendMessage>());
+	addScriptNode(std::make_unique<ScriptSendGenericMessage>());
 	addScriptNode(std::make_unique<ScriptReceiveMessage>());
 	addScriptNode(std::make_unique<ScriptSendSystemMessage>());
 	addScriptNode(std::make_unique<ScriptSendEntityMessage>());

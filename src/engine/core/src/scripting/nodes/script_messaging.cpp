@@ -15,8 +15,16 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 8>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::array<PinType, 8>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
 
 	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
 
@@ -83,6 +91,102 @@ IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environme
 	
 	return Result(ScriptNodeExecutionState::Done);
 }
+
+
+Vector<IGraphNodeType::SettingType> ScriptSendGenericMessage::getSettingTypes() const
+{
+	return {
+		SettingType{ "message", "Halley::String", Vector<String>{""} },
+		SettingType{ "nParams", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptSendGenericMessage::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 9>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+
+	const auto nParams = node.getSettings()["nParams"].asInt(0);
+
+	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 5 + nParams);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSendGenericMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	const auto msgType = ScriptMessageType(getConnectedNodeName(world, node, graph, 3), node.getSettings()["message"].asString(""), node.getSettings()["nParams"].asInt(0));
+
+	auto str = ColourStringBuilder(true);
+	str.append("Send message ");
+	str.append(msgType.message, settingColour);
+	str.append(" (");
+
+	for (int i = 0; i < msgType.nParams; ++i) {
+		if (i != 0) {
+			str.append(", ");
+		}
+		str.append(getConnectedNodeName(world, node, graph, 5 + i), parameterColour);
+	}
+
+	str.append(") to script ");
+	str.append(msgType.script, parameterColour);
+	str.append(" on entity ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+
+	const auto delayStr = getConnectedNodeName(world, node, graph, 4);
+	if (delayStr != "<empty>") {
+		str.append(" after ");
+		str.append(delayStr + " s", settingColour);
+	}
+
+	return str.moveResults();
+}
+
+String ScriptSendGenericMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 3) {
+		return "Script";
+	} else if (elementIdx == 4) {
+		return "Delay time";
+	} else if (elementIdx >= 5) {
+		return "Parameter #" + toString(elementIdx - 4);
+	} else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
+IScriptNodeType::Result ScriptSendGenericMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto scriptName = environment.readInputDataPin(node, 3).asString("");
+
+	ScriptMessage msg;
+	msg.delay = readDataPin(environment, node, 4).asFloat(0.0f);
+	ScriptMessageType& msgType = msg.type;
+	msgType = ScriptMessageType(scriptName, node.getSettings()["message"].asString(""), node.getSettings()["nParams"].asInt(0));
+
+	if (msgType.nParams > 0) {
+		msg.params = ConfigNode::SequenceType();
+		for (int i = 0; i < msgType.nParams; ++i) {
+			msg.params.asSequence().push_back(readDataPin(environment, node, 5 + i));
+		}
+	}
+
+	const auto entityId = readEntityId(environment, node, 2);
+	environment.sendScriptMessage(entityId, std::move(msg));
+	
+	return Result(ScriptNodeExecutionState::Done);
+}
+
 
 ConfigNode ScriptReceiveMessageData::toConfigNode(const EntitySerializationContext& context)
 {

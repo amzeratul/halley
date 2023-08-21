@@ -11,6 +11,13 @@ ScriptMessageType::ScriptMessageType(const ConfigNode& node)
 	}
 }
 
+ScriptMessageType::ScriptMessageType(String script, String message, int nParams)
+	: script(std::move(script))
+	, message(std::move(message))
+	, nParams(nParams)
+{
+}
+
 ConfigNode ScriptMessageType::toConfig() const
 {
 	ConfigNode::MapType result;

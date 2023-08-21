@@ -17,6 +17,21 @@ namespace Halley {
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
 
+	class ScriptSendGenericMessage final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "sendGenericMessage"; }
+		String getName() const override { return "Send Generic Message"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/send_message.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+		
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+
 	class ScriptReceiveMessageData final : public ScriptStateData<ScriptReceiveMessageData> {
 	public:
 		ConfigNode curArgs;

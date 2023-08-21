@@ -12,6 +12,7 @@ namespace Halley {
 
         ScriptMessageType() = default;
         ScriptMessageType(const ConfigNode& node);
+        ScriptMessageType(String script, String message, int nParams);
         ConfigNode toConfig() const;
 
         void serialize(Serializer& s) const;
