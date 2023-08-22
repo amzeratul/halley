@@ -1005,10 +1005,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfigurat
 
 String ScriptGetValueFromMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Get value with key " +
-		getConnectedNodeName(world, node, graph, 1) +
-		" from map " +
-		getConnectedNodeName(world, node, graph, 0);
+	return getConnectedNodeName(world, node, graph, 0) + "[" + getConnectedNodeName(world, node, graph, 1) + "]";
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -1049,7 +1046,11 @@ ConfigNode ScriptGetValueFromMap::doGetData(ScriptEnvironment& environment, cons
 		return {};
 	}
 
-	return ConfigNode(map[key]);
+	if (map.hasKey(key)) {
+		return ConfigNode(map[key]);
+	} else {
+		return {};
+	}
 }
 
 

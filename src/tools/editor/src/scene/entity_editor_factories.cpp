@@ -1271,6 +1271,8 @@ public:
 			return AssetType::MaterialDefinition;
 		} else if (strippedTypeName == "Prefab") {
 			return AssetType::Prefab;
+		} else if (strippedTypeName == "Scene") {
+			return AssetType::Scene;
 		} else if (strippedTypeName == "ScriptGraph") {
 			return AssetType::ScriptGraph;
 		} else if (strippedTypeName == "UIDefinition") {
