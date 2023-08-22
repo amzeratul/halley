@@ -31,10 +31,12 @@ namespace Halley {
         std::shared_ptr<UIWidget> makeUIWidgetList(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeUIEditorDisplay(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeAudioObjectTreeList(const ConfigNode& entryNode);
-        std::shared_ptr<UIWidget> makeCurveEditor(const ConfigNode& entryNode);
+		std::shared_ptr<UIWidget> makeCurveEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeGradientEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeColourPickerDisplay(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeScriptingVariableInspector(const ConfigNode& entryNode);
+
+		UIFactoryWidgetProperties getCurveEditorProperties() const;
 
     	void loadColourSchemes();
     	void reloadStyleSheet();

@@ -230,7 +230,7 @@ Vector<String> UIFactory::getWidgetClassList(bool mustAllowChildren) const
 
 	if (fallbackFactory) {
 		for (const auto& id: fallbackFactory->getWidgetClassList(mustAllowChildren)) {
-			if (std_ex::contains(result, id)) {
+			if (!std_ex::contains(result, id)) {
 				result.push_back(id);
 			}
 		}
@@ -1573,6 +1573,7 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
 	result.entries.emplace_back("Focusable", "focusable", "bool", "true");
 	result.entries.emplace_back("Requires Selection", "requiresSelection", "bool", "true");
 	result.entries.emplace_back("Show Selection", "showSelection", "bool", "true");
+	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
 
 	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
 

@@ -47,9 +47,9 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
 	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
 	addFactory("gradientEditor", [=](const ConfigNode& node) { return makeGradientEditor(node); });
-	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); });
+	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); }, getCurveEditorProperties());
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
-	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node);  });
+	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -184,6 +184,16 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAudioObjectTreeList(const ConfigN
 	applyListProperties(*widget, node, "treeList");
 
 	return widget;
+}
+
+UIFactoryWidgetProperties EditorUIFactory::getCurveEditorProperties() const
+{
+	UIFactoryWidgetProperties result;
+
+	result.name = "Curve Editor";
+	result.iconName = "widget_icons/widget.png";
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& entryNode)
