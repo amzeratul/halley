@@ -419,7 +419,7 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 		}
 		first = false;
 
-		Vector2f minSize = e.getMinimumSize().ceil();
+		Vector2f minSize = e.getMinimumSize().floor();
 		Vector2f cellSize = minSize;
 		if (p > 0.0001f) {
 			float propSize = std::floor(spare * p / totalProportion);
