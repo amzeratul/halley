@@ -31,6 +31,8 @@ namespace Halley {
         bool isFocusLocked() const override;
         bool canReceiveFocus() const override;
 
+        void readFromDataBind() override;
+
     private:
         UIFactory& factory;
 

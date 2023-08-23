@@ -26,6 +26,10 @@ void UIDataBind::onDataFromWidget(const String&)
 {
 }
 
+void UIDataBind::onDataFromWidget(const ConfigNode& data)
+{
+}
+
 bool UIDataBind::canWriteData() const
 {
 	return acceptingData;
@@ -47,6 +51,11 @@ float UIDataBind::getFloatData()
 }
 
 String UIDataBind::getStringData()
+{
+	throw Exception("Not implemented", HalleyExceptions::UI);
+}
+
+ConfigNode UIDataBind::getConfigData()
 {
 	throw Exception("Not implemented", HalleyExceptions::UI);
 }
@@ -82,6 +91,11 @@ float UIDataBindInt::getFloatData()
 String UIDataBindInt::getStringData()
 {
 	return toString(initialValue);
+}
+
+ConfigNode UIDataBindInt::getConfigData()
+{
+	return ConfigNode(initialValue);
 }
 
 UIDataBind::Format UIDataBindInt::getFormat() const
@@ -134,6 +148,11 @@ String UIDataBindBool::getStringData()
 	return initialValue ? "true" : "false";
 }
 
+ConfigNode UIDataBindBool::getConfigData()
+{
+	return ConfigNode(getBoolData());
+}
+
 UIDataBind::Format UIDataBindBool::getFormat() const
 {
 	return Format::Bool;
@@ -167,6 +186,13 @@ void UIDataBindBool::onDataFromWidget(const String& data)
 	}
 }
 
+void UIDataBindBool::onDataFromWidget(const ConfigNode& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data.asBool(false));
+	}
+}
+
 void UIDataBindInt::onDataFromWidget(int data)
 {
 	if (canWriteData() && writeCallback) {
@@ -194,6 +220,13 @@ void UIDataBindInt::onDataFromWidget(const String& data)
 	}
 }
 
+void UIDataBindInt::onDataFromWidget(const ConfigNode& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data.asInt(0));
+	}
+}
+
 UIDataBindFloat::UIDataBindFloat(float initialValue, WriteCallback writeCallback)
 	: initialValue(initialValue)
 	, writeCallback(writeCallback)
@@ -213,6 +246,11 @@ float UIDataBindFloat::getFloatData()
 String UIDataBindFloat::getStringData()
 {
 	return toString(initialValue);
+}
+
+ConfigNode UIDataBindFloat::getConfigData()
+{
+	return ConfigNode(initialValue);
 }
 
 UIDataBind::Format UIDataBindFloat::getFormat() const
@@ -245,6 +283,13 @@ void UIDataBindFloat::onDataFromWidget(const String& data)
 	}
 }
 
+void UIDataBindFloat::onDataFromWidget(const ConfigNode& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data.asFloat(0));
+	}
+}
+
 UIDataBindString::UIDataBindString(String initialValue, WriteCallback writeCallback)
 	: initialValue(std::move(initialValue))
 	, writeCallback(writeCallback)
@@ -269,6 +314,11 @@ float UIDataBindString::getFloatData()
 String UIDataBindString::getStringData()
 {
 	return initialValue;
+}
+
+ConfigNode UIDataBindString::getConfigData()
+{
+	return ConfigNode(initialValue);
 }
 
 UIDataBind::Format UIDataBindString::getFormat() const
@@ -301,5 +351,83 @@ void UIDataBindString::onDataFromWidget(const String& data)
 {
 	if (canWriteData() && writeCallback) {
 		writeCallback(data);
+	}
+}
+
+void UIDataBindString::onDataFromWidget(const ConfigNode& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(data.asString(""));
+	}
+}
+
+
+UIDataBindConfigNode::UIDataBindConfigNode(ConfigNode initialValue, WriteCallback writeCallback)
+	: initialValue(std::move(initialValue))
+	, writeCallback(writeCallback){
+}
+
+bool UIDataBindConfigNode::getBoolData()
+{
+	return initialValue.asBool(false);
+}
+
+int UIDataBindConfigNode::getIntData()
+{
+	return initialValue.asInt(0);
+}
+
+float UIDataBindConfigNode::getFloatData()
+{
+	return initialValue.asFloat(0.0f);
+}
+
+String UIDataBindConfigNode::getStringData()
+{
+	return initialValue.asString("");
+}
+
+ConfigNode UIDataBindConfigNode::getConfigData()
+{
+	return ConfigNode(initialValue);
+}
+
+UIDataBind::Format UIDataBindConfigNode::getFormat() const
+{
+	return Format::ConfigNode;
+}
+
+void UIDataBindConfigNode::onDataFromWidget(bool data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(ConfigNode(data));
+	}
+}
+
+void UIDataBindConfigNode::onDataFromWidget(int data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(ConfigNode(data));
+	}
+}
+
+void UIDataBindConfigNode::onDataFromWidget(float data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(ConfigNode(data));
+	}
+}
+
+void UIDataBindConfigNode::onDataFromWidget(const String& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(ConfigNode(data));
+	}
+}
+
+void UIDataBindConfigNode::onDataFromWidget(const ConfigNode& data)
+{
+	if (canWriteData() && writeCallback) {
+		writeCallback(ConfigNode(data));
 	}
 }

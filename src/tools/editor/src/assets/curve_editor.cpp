@@ -9,6 +9,8 @@ CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle _style)
 	, factory(factory)
 	, horizontalRange(0, 1)
 {
+	curve.makeDefault();
+
 	styles.push_back(std::move(_style));
 	setInteractWithMouse(true);
 
@@ -182,6 +184,13 @@ bool CurveEditor::canReceiveFocus() const
 	return true;
 }
 
+void CurveEditor::readFromDataBind()
+{
+	if (auto dataBind = getDataBind()) {
+		setCurve(InterpolationCurve(dataBind->getConfigData()));
+	}
+}
+
 void CurveEditor::normalizePoints()
 {
 	auto startPoints = curve;
@@ -211,6 +220,8 @@ void CurveEditor::notifyChange()
 	if (callback) {
 		callback(curve);
 	}
+
+	notifyDataBind(curve.toConfigNode());
 }
 
 Rect4f CurveEditor::getDrawArea() const

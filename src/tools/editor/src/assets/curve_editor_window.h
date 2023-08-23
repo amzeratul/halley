@@ -17,6 +17,7 @@ namespace Halley {
         
     protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+        void readFromDataBind() override;
 
     private:
         UIFactory& factory;

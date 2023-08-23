@@ -1053,7 +1053,7 @@ public:
 		auto data = pars.data;
 		auto container = std::make_shared<UISizer>();
 
-		auto button = std::make_shared<CurveEditorButton>(context.getUIFactory(), InterpolationCurve(data.getFieldData()), [&context, data](InterpolationCurve curve)
+		auto button = std::make_shared<CurveEditorButton>(context.getUIFactory(), InterpolationCurve(data.getFieldData(), false), [&context, data](InterpolationCurve curve)
 		{
 			data.getWriteableFieldData() = curve.toConfigNode();
 			context.onEntityUpdated();

@@ -16,11 +16,11 @@ namespace Halley {
         float scale = 1.0f;
 
         InterpolationCurve();
-        InterpolationCurve(const ConfigNode& node);
+        InterpolationCurve(const ConfigNode& node, bool startFromZero = true);
 
         ConfigNode toConfigNode() const;
 
-		void makeDefault();
+		void makeDefault(bool startFromZero = true);
 
         bool operator==(const InterpolationCurve& other) const;
         bool operator!=(const InterpolationCurve& other) const;

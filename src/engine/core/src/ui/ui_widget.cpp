@@ -542,6 +542,16 @@ void UIWidget::notifyDataBind(const String& data, bool force) const
 	}
 }
 
+void UIWidget::notifyDataBind(const ConfigNode& data, bool force) const
+{
+	if (dataBind) {
+		if (force) {
+			dataBind->setAcceptingDataFromWidget(true);
+		}
+		dataBind->onDataFromWidget(data);
+	}
+}
+
 void UIWidget::shrink()
 {
 	if (size.x > minSize.x + 0.5f || size.y > minSize.y + 0.5f) {
@@ -1110,6 +1120,14 @@ void UIWidget::bindData(const String& childId, const String& initialValue, UIDat
 	auto widget = tryGetWidget(childId);
 	if (widget) {
 		widget->setDataBind(std::make_shared<UIDataBindString>(initialValue, std::move(callback)));
+	}
+}
+
+void UIWidget::bindData(const String& childId, ConfigNode initialValue, UIDataBindConfigNode::WriteCallback callback)
+{
+	auto widget = tryGetWidget(childId);
+	if (widget) {
+		widget->setDataBind(std::make_shared<UIDataBindConfigNode>(std::move(initialValue), std::move(callback)));
 	}
 }
 

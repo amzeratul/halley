@@ -143,6 +143,7 @@ namespace Halley {
 		void bindData(const String& childId, int initialValue, UIDataBindInt::WriteCallback callback = {});
 		void bindData(const String& childId, float initialValue, UIDataBindFloat::WriteCallback callback = {});
 		void bindData(const String& childId, const String& initialValue, UIDataBindString::WriteCallback callback = {});
+		void bindData(const String& childId, ConfigNode initialValue, UIDataBindConfigNode::WriteCallback callback = {});
 
 		bool isDescendentOf(const UIWidget& ancestor) const final override;
 		void setMouseClip(std::optional<Rect4f> mouseClip, bool force);
@@ -217,6 +218,7 @@ namespace Halley {
 		void notifyDataBind(int data, bool force = false) const;
 		void notifyDataBind(float data, bool force = false) const;
 		void notifyDataBind(const String& data, bool force = false) const;
+		void notifyDataBind(const ConfigNode& data, bool force = false) const;
 
 		void shrink();
 		void forceLayout();

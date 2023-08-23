@@ -57,12 +57,12 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 		const auto startScale = node["startScale"].asFloat(1.0f);
 		const auto endScale = node["endScale"].asFloat(1.0f);
 		const float scale = std::max(startScale, endScale);
-		scaleCurve.makeDefault();
+		scaleCurve.makeDefault(false);
 		scaleCurve.points[0].y = startScale / scale;
 		scaleCurve.points[1].y = endScale / scale;
 		scaleCurve.scale = scale;
 	} else {
-		scaleCurve = InterpolationCurve(node["scaleCurve"]);
+		scaleCurve = InterpolationCurve(node["scaleCurve"], false);
 	}
 
 	if (node.hasKey("fadeInTime") || node.hasKey("fadeOutTime")) {

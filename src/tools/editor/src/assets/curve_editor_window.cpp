@@ -46,7 +46,16 @@ void CurveEditorButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMod
 				callback(this->curve);
 			}
 			updateLine();
+
+			notifyDataBind(this->curve.toConfigNode());
 		}));
+	}
+}
+
+void CurveEditorButton::readFromDataBind()
+{
+	if (auto dataBind = getDataBind()) {
+		curve = InterpolationCurve(dataBind->getConfigData());
 	}
 }
 

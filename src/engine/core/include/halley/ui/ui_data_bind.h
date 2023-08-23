@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+
+#include "halley/data_structures/config_node.h"
 #include "halley/text/halleystring.h"
 
 namespace Halley {
@@ -16,7 +18,8 @@ namespace Halley {
 			Bool,
 			Int,
 			Float,
-			String
+			String,
+			ConfigNode
 		};
 
 		virtual ~UIDataBind();
@@ -25,6 +28,7 @@ namespace Halley {
 		virtual int getIntData();
 		virtual float getFloatData();
 		virtual String getStringData();
+		virtual ConfigNode getConfigData();
 
 		void pushData();
 
@@ -35,6 +39,7 @@ namespace Halley {
 		virtual void onDataFromWidget(int data);
 		virtual void onDataFromWidget(float data);
 		virtual void onDataFromWidget(const String& data);
+		virtual void onDataFromWidget(const ConfigNode& data);
 
 		bool canWriteData() const;
 
@@ -56,6 +61,7 @@ namespace Halley {
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
+		ConfigNode getConfigData() override;
 
 		Format getFormat() const override;
 
@@ -64,6 +70,7 @@ namespace Halley {
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
+		void onDataFromWidget(const ConfigNode& data) override;
 
 	private:
 		int initialValue;
@@ -79,6 +86,7 @@ namespace Halley {
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
+		ConfigNode getConfigData() override;
 
 		Format getFormat() const override;
 
@@ -87,6 +95,7 @@ namespace Halley {
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
+		void onDataFromWidget(const ConfigNode& data) override;
 
 	private:
 		int initialValue;
@@ -102,6 +111,7 @@ namespace Halley {
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
+		ConfigNode getConfigData() override;
 
 		Format getFormat() const override;
 
@@ -110,6 +120,7 @@ namespace Halley {
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
+		void onDataFromWidget(const ConfigNode& data) override;
 
 	private:
 		float initialValue;
@@ -126,6 +137,7 @@ namespace Halley {
 		int getIntData() override;
 		float getFloatData() override;
 		String getStringData() override;
+		ConfigNode getConfigData() override;
 
 		Format getFormat() const override;
 
@@ -134,9 +146,36 @@ namespace Halley {
 		void onDataFromWidget(int data) override;
 		void onDataFromWidget(float data) override;
 		void onDataFromWidget(const String& data) override;
+		void onDataFromWidget(const ConfigNode& data) override;
 
 	private:
 		String initialValue;
+		WriteCallback writeCallback;
+	};
+
+	class UIDataBindConfigNode final : public UIDataBind {
+	public:
+		using WriteCallback = std::function<void(ConfigNode)>;
+
+		UIDataBindConfigNode(ConfigNode initialValue, WriteCallback writeCallback);
+
+		bool getBoolData() override;
+		int getIntData() override;
+		float getFloatData() override;
+		String getStringData() override;
+		ConfigNode getConfigData() override;
+
+		Format getFormat() const override;
+
+	protected:
+		void onDataFromWidget(bool data) override;
+		void onDataFromWidget(int data) override;
+		void onDataFromWidget(float data) override;
+		void onDataFromWidget(const String& data) override;
+		void onDataFromWidget(const ConfigNode& data) override;
+
+	private:
+		ConfigNode initialValue;
 		WriteCallback writeCallback;
 	};
 }

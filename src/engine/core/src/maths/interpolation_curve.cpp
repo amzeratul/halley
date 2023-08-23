@@ -9,7 +9,7 @@ InterpolationCurve::InterpolationCurve()
 	makeDefault();
 }
 
-InterpolationCurve::InterpolationCurve(const ConfigNode& node)
+InterpolationCurve::InterpolationCurve(const ConfigNode& node, bool startFromZero)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		points = node["points"].asVector<Vector2f>({});
@@ -19,11 +19,11 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node)
 		points = node.asVector<Vector2f>();
 		tweens.resize(points.size(), TweenCurve::Linear);
 		scale = 1.0f;
-	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int) {
-		makeDefault();
+	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int || node.getType() == ConfigNodeType::String) {
+		makeDefault(false);
 		scale = node.asFloat(1.0f);
 	} else {
-		makeDefault();
+		makeDefault(startFromZero);
 	}
 }
 
@@ -36,10 +36,12 @@ ConfigNode InterpolationCurve::toConfigNode() const
 	return result;
 }
 
-void InterpolationCurve::makeDefault()
+void InterpolationCurve::makeDefault(bool startFromZero)
 {
 	scale = 1.0f;
-	points.push_back(Vector2f(0, 1));
+	points.clear();
+	tweens.clear();
+	points.push_back(Vector2f(0, startFromZero ? 0.0f : 1.0f));
 	points.push_back(Vector2f(1, 1));
 	tweens.push_back(TweenCurve::Linear);
 	tweens.push_back(TweenCurve::Linear);
