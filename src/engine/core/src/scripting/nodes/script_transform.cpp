@@ -26,11 +26,47 @@ std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(
 
 IScriptNodeType::Result ScriptSetPosition::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2));
-	const auto pos = WorldPosition(readDataPin(environment, node, 3), transform->getGlobalPosition(), transform->getSubWorld());
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2))) {
+		const auto pos = WorldPosition(readDataPin(environment, node, 3), transform->getGlobalPosition(), transform->getSubWorld());
 
-	transform->setGlobalPosition(pos.pos);
-	transform->setSubWorld(pos.subWorld);
+		transform->setGlobalPosition(pos.pos);
+		transform->setSubWorld(pos.subWorld);
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Set the height of ");
+	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(" to ");
+	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	return result.moveResults();
+}
+
+IScriptNodeType::Result ScriptSetHeight::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2))) {
+		const auto height = readDataPin(environment, node, 3).asFloat(0);
+		transform->setGlobalHeight(height);
+	}
 
 	return Result(ScriptNodeExecutionState::Done);
 }
@@ -57,9 +93,10 @@ std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(
 
 IScriptNodeType::Result ScriptSetSubworld::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2));
-	const auto subWorld = readDataPin(environment, node, 3).asInt(0);
-	transform->setSubWorld(subWorld);
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2))) {
+		const auto subWorld = readDataPin(environment, node, 3).asInt(0);
+		transform->setSubWorld(subWorld);
+	}
 
 	return Result(ScriptNodeExecutionState::Done);
 }
