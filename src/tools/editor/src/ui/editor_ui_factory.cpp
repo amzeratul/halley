@@ -41,7 +41,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("entityValidator", [=](const ConfigNode& node) { return makeEntityValidator(node); });
 	addFactory("entityValidatorList", [=](const ConfigNode& node) { return makeEntityValidatorList(node); });
 	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
-	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
+	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); }, getSelectAssetProperties());
 	addFactory("uiWidgetList", [=](const ConfigNode& node) { return makeUIWidgetList(node); });
 	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
@@ -133,6 +133,20 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& en
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<EntityEditor>(id, *this);
+}
+
+UIFactoryWidgetProperties EditorUIFactory::getSelectAssetProperties() const
+{
+	UIFactoryWidgetProperties result;
+
+	result.name = "Select Asset";
+	result.iconName = "widget_icons/widget.png";
+
+	result.entries.emplace_back("Asset Type", "assetType", "Halley::AssetType", "");
+	result.entries.emplace_back("Allow Empty", "allowEmpty", "std::optional<String>", "");
+	result.entries.emplace_back("Error on Empty", "displayErrorForEmpty", "bool", "true");
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& entryNode)

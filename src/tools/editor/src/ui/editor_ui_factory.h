@@ -37,6 +37,7 @@ namespace Halley {
         std::shared_ptr<UIWidget> makeScriptingVariableInspector(const ConfigNode& entryNode);
 
 		UIFactoryWidgetProperties getCurveEditorProperties() const;
+		UIFactoryWidgetProperties getSelectAssetProperties() const;
 
     	void loadColourSchemes();
     	void reloadStyleSheet();

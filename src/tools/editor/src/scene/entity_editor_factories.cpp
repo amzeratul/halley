@@ -1953,6 +1953,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<TweenCurve>("Halley::TweenCurve"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<LoggerLevel>("Halley::LoggerLevel"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<ParticleSpawnAreaShape>("Halley::ParticleSpawnAreaShape"));
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<AssetType>("Halley::AssetType"));
 
 	return factories;
 }
