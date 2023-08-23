@@ -1,5 +1,6 @@
 #include "script_loop.h"
 
+#include "halley/maths/interpolation_curve.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
 using namespace Halley;
@@ -138,7 +139,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerpLoop::getSettingTypes() const
 {
 	return {
 		SettingType{ "time", "float", Vector<String>{"1"} },
-		SettingType{ "curve", "Halley::TweenCurve", Vector<String>{"linear"} }
+		SettingType{ "curve", "Halley::InterpolationCurve", Vector<String>{"linear"} }
 	};
 }
 
@@ -175,9 +176,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 		str.append(toString(node.getSettings()["time"].asFloat(1)) + "s", settingColour);
 	}
 
-	str.append(" whilst outputting from 0 to 1 (");
-	str.append(node.getSettings()["curve"].asString("linear"), settingColour);
-	str.append(")");
+	str.append(" whilst outputting from 0 to 1");
 	return str.moveResults();}
 
 String ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
@@ -244,8 +243,8 @@ ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const Scrip
 		length = readDataPin(environment, node, 4).asFloat();
 	}
 
-	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
-	return ConfigNode(Tween<float>::applyCurve(clamp(curData.time / length, 0.0f, 1.0f), curve));
+	const auto curve = InterpolationCurve(node.getSettings()["curve"]);
+	return ConfigNode(curve.evaluate(clamp(curData.time / length, 0.0f, 1.0f)));
 }
 
 bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptLerpLoopData& curData) const

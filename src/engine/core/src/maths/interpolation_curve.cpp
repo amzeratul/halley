@@ -19,9 +19,14 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node, bool startFromZer
 		points = node.asVector<Vector2f>();
 		tweens.resize(points.size(), TweenCurve::Linear);
 		scale = 1.0f;
-	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int || node.getType() == ConfigNodeType::String) {
+	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int) {
 		makeDefault(false);
 		scale = node.asFloat(1.0f);
+	} else if (node.getType() == ConfigNodeType::String) {
+		makeDefault(true);
+		scale = 1;
+		tweens.clear();
+		tweens.resize(points.size(), node.asEnum(TweenCurve::Linear));
 	} else {
 		makeDefault(startFromZero);
 	}
