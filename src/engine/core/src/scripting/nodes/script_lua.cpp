@@ -121,10 +121,12 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 		data.expr = LuaExpression(std::move(exprStr));
 	}
 
+	const int firstInputPin = static_cast<int>(nFlowPins());
+
 	LuaFunctionCaller::startCall(state);
 	data.expr->get(state).pushToLuaStack();
 	for (size_t i = 0; i < argsN; ++i) {
-		stackOps.push(readDataPin(environment, node, i));
+		stackOps.push(readDataPin(environment, node, i + firstInputPin));
 	}
 	LuaFunctionCaller::call(state, static_cast<int>(argsN), static_cast<int>(outputs));
 
