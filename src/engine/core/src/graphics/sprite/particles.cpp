@@ -267,7 +267,7 @@ void Particles::start()
 	if (burst) {
 		spawn(burst.value(), 0);
 	}
-	pendingSpawn = std::max(1.0f, pendingSpawn);
+	pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
 }
 
 void Particles::update(Time t)
