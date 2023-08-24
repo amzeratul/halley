@@ -32,9 +32,7 @@ public:
 	
 	void init()
 	{
-		if (auto* scripting = tryGetScriptingService()) {
-			scripting->getEnvironment().setInterface(static_cast<INetworkLockSystemInterface*>(this));
-		}
+		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
 	}
 
 	void update(Time t)

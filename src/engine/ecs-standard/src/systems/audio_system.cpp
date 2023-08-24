@@ -6,9 +6,7 @@ class AudioSystem final : public AudioSystemBase<AudioSystem>, public IAudioSyst
 public:
 	void init()
 	{
-		if (auto* scripting = tryGetScriptingService()) {
-			scripting->getEnvironment().setInterface(static_cast<IAudioSystemInterface*>(this));
-		}
+		getWorld().setInterface(static_cast<IAudioSystemInterface*>(this));
 	}
 
 	void onEntitiesAdded(Span<SourceFamily> es)

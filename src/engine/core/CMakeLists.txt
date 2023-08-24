@@ -556,6 +556,7 @@ set(HEADERS
         "include/halley/entity/registry.h"
         "include/halley/entity/service.h"
         "include/halley/entity/system.h"
+        "include/halley/entity/system_interface.h"
         "include/halley/entity/system_message.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"

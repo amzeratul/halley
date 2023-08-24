@@ -1,10 +1,9 @@
 #pragma once
-#include <typeinfo>
-#include <typeindex>
 
 #include "script_message.h"
 #include "halley/entity/entity_factory.h"
 #include "script_node_type.h"
+#include "halley/entity/world.h"
 #include "halley/input/input_virtual.h"
 #include "halley/navigation/world_position.h"
 
@@ -29,52 +28,6 @@ namespace Halley {
 				"entity"
 			}};
 		}
-	};
-    	    
-	class IScriptEnvironmentInterface {
-	public:
-		virtual ~IScriptEnvironmentInterface() = default;
-	};
-
-    class INetworkLock {
-    public:
-        virtual ~INetworkLock() = default;
-    };
-
-    using NetworkLockHandle = std::shared_ptr<INetworkLock>;
-
-    class INetworkLockSystemInterface : public IScriptEnvironmentInterface {
-	public:
-        enum class LockStatus {
-	        Unlocked,
-            AcquiredByMe,
-            AcquiredByOther
-        };
-
-    	virtual ~INetworkLockSystemInterface() = default;
-
-        virtual LockStatus getLockStatus(EntityId playerId, EntityId targetId) const = 0;
-        virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId) = 0;
-	};
-
-    class ILuaInterface : public IScriptEnvironmentInterface {
-    public:
-        virtual LuaState& getLuaState() = 0;
-    };
-
-	class IScriptSystemInterface : public IScriptEnvironmentInterface {
-	public:
-		virtual ~IScriptSystemInterface() = default;
-
-		virtual Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
-		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
-	};
-
-	class IAudioSystemInterface : public IScriptEnvironmentInterface {
-	public:
-		virtual ~IAudioSystemInterface() = default;
-
-        virtual void playAudio(const String& event, EntityId entityId) = 0;
 	};
 
     class ScriptEnvironment: private IEntityFactoryContext {
@@ -188,19 +141,7 @@ namespace Halley {
 		template <typename T>
 		T& getInterface()
 		{
-			const auto iter = interfaces.find(std::type_index(typeid(T)));
-			if (iter == interfaces.end()) {
-				throw Exception(String("Script Environment does not have interface \"") + typeid(T).name() + "\"", HalleyExceptions::Scripting);
-			}
-			return dynamic_cast<T&>(*iter->second);
-		}
-
-		template <typename T>
-		void setInterface(T* interface)
-		{
-			static_assert(std::is_abstract_v<T>);
-			static_assert(std::is_base_of_v<IScriptEnvironmentInterface, T>);
-			interfaces[std::type_index(typeid(T))] = interface;
+            return world.getInterface<T>();
 		}
 
     protected:
@@ -223,8 +164,6 @@ namespace Halley {
         Vector<std::pair<EntityId, ScriptMessage>> scriptOutbox;
         Vector<EntityMessageData> entityOutbox;
         Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
-
-    	HashMap<std::type_index, IScriptEnvironmentInterface*> interfaces;
 
         ScriptTargetRetriever scriptTargetRetriever;
 

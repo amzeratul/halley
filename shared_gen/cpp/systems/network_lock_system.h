@@ -3,7 +3,6 @@
 
 #include <halley.hpp>
 
-#include "halley/entity/services/scripting_service.h"
 #include "halley/entity/services/session_service.h"
 
 #include "components/network_component.h"
@@ -56,20 +55,14 @@ protected:
 	SessionService& getSessionService() const {
 		return *sessionService;
 	}
-
-	ScriptingService* tryGetScriptingService() const {
-		return scriptingService;
-	}
 	Halley::FamilyBinding<NetworkFamily> networkFamily{};
 
 private:
 	friend Halley::System* halleyCreateNetworkLockSystem();
 
 	SessionService* sessionService{ nullptr };
-	ScriptingService* scriptingService{ nullptr };
 	void initBase() override final {
 		sessionService = &doGetWorld().template getService<SessionService>(getName());
-		scriptingService = doGetWorld().template tryGetService<ScriptingService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, NetworkFamily>(networkFamily, static_cast<T*>(this));
 	}

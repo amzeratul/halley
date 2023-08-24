@@ -11,6 +11,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "halley/entity/registry.h"
 #include "halley/entity/service.h"
 #include "halley/entity/system.h"
+#include "halley/entity/system_interface.h"
 #include "halley/entity/system_message.h"
 #include "halley/entity/world.h"
 #include "halley/entity/world_scene_data.h"

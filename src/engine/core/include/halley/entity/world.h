@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <typeindex>
 #include <typeinfo>
 #include <type_traits>
 #include "entity_id.h"
@@ -16,9 +17,9 @@
 #include "create_functions.h"
 #include "halley/utils/attributes.h"
 #include <halley/data_structures/memory_pool.h>
-
 #include "system_message.h"
 #include "world_reflection.h"
+#include "system_interface.h"
 
 namespace Halley {
 	class SystemMessage;
@@ -163,6 +164,24 @@ namespace Halley {
 		float getTransform2DAnisotropy() const;
 		void setTransform2DAnisotropy(float anisotropy);
 
+		template <typename T>
+		T& getInterface()
+		{
+			const auto iter = systemInterfaces.find(std::type_index(typeid(T)));
+			if (iter == systemInterfaces.end()) {
+				throw Exception(String("World does not have system interface \"") + typeid(T).name() + "\"", HalleyExceptions::Scripting);
+			}
+			return dynamic_cast<T&>(*iter->second);
+		}
+
+		template <typename T>
+		void setInterface(T* interface)
+		{
+			static_assert(std::is_abstract_v<T>);
+			static_assert(std::is_base_of_v<ISystemInterface, T>);
+			systemInterfaces[std::type_index(typeid(T))] = interface;
+		}
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -193,6 +212,8 @@ namespace Halley {
 		
 		IWorldNetworkInterface* networkInterface = nullptr;
 		float transform2DAnisotropy = 1.0f;
+
+    	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();

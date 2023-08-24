@@ -6,7 +6,7 @@ class ScriptSystem final : public ScriptSystemBase<ScriptSystem>, IScriptSystemI
 public:
 	void init()
 	{
-		getScriptingService().getEnvironment().setInterface<IScriptSystemInterface>(this);
+		getWorld().setInterface<IScriptSystemInterface>(this);
 
 		addConsoleCommands();
 	}

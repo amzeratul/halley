@@ -62,7 +62,6 @@ system:
     - NetworkEntityLock: send receive
   services:
     - SessionService
-    - ScriptingService optional
   access:
     - world
 

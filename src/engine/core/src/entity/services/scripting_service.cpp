@@ -5,7 +5,7 @@ using namespace Halley;
 ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resources& resources, const String& initialModule)
 {
 	scriptEnvironment = std::move(env);
-	scriptEnvironment->setInterface(static_cast<ILuaInterface*>(this));
+	scriptEnvironment->getWorld().setInterface(static_cast<ILuaInterface*>(this));
 
 	luaState = std::make_unique<LuaState>(resources);
 	if (!initialModule.isEmpty()) {

@@ -2,6 +2,7 @@
 #include "halley/lua/lua_state.h"
 #include "halley/scripting/script_environment.h"
 #include "halley/entity/service.h"
+#include "halley/entity/system_interface.h"
 
 namespace Halley {
 

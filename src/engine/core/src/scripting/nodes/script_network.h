@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/entity/system_interface.h"
 #include "halley/scripting/script_environment.h"
 
 namespace Halley {
