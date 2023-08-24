@@ -87,6 +87,7 @@ namespace Halley {
 		};
 
     	Camera camera;
+		Vector2i viewPort;
 		IEditorInterface* editorInterface;
 
 		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
@@ -166,6 +167,7 @@ namespace Halley {
     	void moveCameraTo2D(Vector2f pos);
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
+		Vector2f roundCameraPosition(Vector2f pos, float zoom) const;
     	EntityRef getEntity(const UUID& uuid) const;
 
     	bool doesAreaOverlapSprite(EntityRef& e, Rect4f area) const;

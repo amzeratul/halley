@@ -173,6 +173,7 @@ void SceneEditor::postUpdate(Time t)
 
 void SceneEditor::preRender(RenderContext& rc)
 {
+	viewPort = rc.getCamera().getViewPort().value_or(rc.getDefaultRenderTarget().getViewPort()).getSize();
 }
 
 void SceneEditor::postRender(RenderContext& rc)
@@ -523,7 +524,7 @@ void SceneEditor::updateCameraPos(Time t)
 		saveCameraPos();
 	}
 
-	this->camera.setPosition(roundPosition(transform.getGlobalPosition())).setZoom(camera.zoom);
+	this->camera.setPosition(roundCameraPosition(transform.getGlobalPosition(), camera.zoom)).setZoom(camera.zoom);
 }
 
 void SceneEditor::saveCameraPos()
@@ -682,6 +683,14 @@ Vector2f SceneEditor::roundPosition(Vector2f pos) const
 Vector2f SceneEditor::roundPosition(Vector2f pos, float zoom) const
 {
 	return (pos * zoom).round() / zoom;
+}
+
+Vector2f SceneEditor::roundCameraPosition(Vector2f pos, float z) const
+{
+	const auto zoom = std::max(1.0f, z);
+	const auto offset = Vector2f(viewPort % Vector2i(2, 2)) * 0.5f;
+
+	return ((pos * zoom).round() + offset) / zoom;
 }
 
 void SceneEditor::onInit(std::shared_ptr<const UIColourScheme> colourScheme)

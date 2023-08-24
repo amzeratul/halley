@@ -66,17 +66,22 @@ namespace Halley {
 			return roundPosition(pos, zoom);
 		}
 
-		Vector2f roundPosition(Vector2f pos, Vector2i screenResolution) const
-		{
-			const float zoom = std::max(1.0f, getZoomLevel());
-			const auto offset = Vector2f(screenResolution % Vector2i(2, 2)) * 0.5f;
-			return roundPosition(pos, zoom) + offset / zoom;
-		}
-
 		static Vector2f roundPosition(Vector2f pos, float zoom)
 		{
 			const float effectiveZoom = std::max(1.0f, zoom);
 			return (pos * effectiveZoom).floor() / effectiveZoom;
+		}
+
+		Vector2f roundCameraPosition(Vector2f pos, Vector2i screenResolution) const
+		{
+			return roundCameraPosition(pos, screenResolution, getZoomLevel());
+		}
+
+		static Vector2f roundCameraPosition(Vector2f pos, Vector2i screenResolution, float zoom)
+		{
+			const float z = std::max(1.0f, zoom);
+			const auto offset = Vector2f(screenResolution % Vector2i(2, 2)) * 0.5f;
+			return roundPosition(pos, z) + offset / z;
 		}
 
 		void setScreenGrabInterface(IScreenGrabInterface* interface);
