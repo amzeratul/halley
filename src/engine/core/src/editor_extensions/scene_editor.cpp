@@ -631,10 +631,12 @@ Vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePo
 
 	const auto entities = getRootEntitiesAt(mousePos, true, EntityAtPositionSelectMode::All);
 	for (const auto& e: entities) {
-		const auto name = LocalisedString::fromHardcodedString("Select: " + e.getName());
-		const auto tooltip = LocalisedString::fromHardcodedString("Selects entity o" + e.getName());
-		const auto icon = editorInterface->getEntityIcon(e.getInstanceUUID().toString());
-		result.emplace_back(UIPopupMenuItem{ "entity:" + e.getInstanceUUID(), name, icon, tooltip });
+		if (e.isSerializable()) {
+			const auto name = LocalisedString::fromHardcodedString("Select: " + e.getName());
+			const auto tooltip = LocalisedString::fromHardcodedString("Selects entity o" + e.getName());
+			const auto icon = editorInterface->getEntityIcon(e.getInstanceUUID().toString());
+			result.emplace_back(UIPopupMenuItem{ "entity:" + e.getInstanceUUID(), name, icon, tooltip });
+		}
 	}
 
 	if (const auto clipboard = getAPI().system->getClipboard()) {
