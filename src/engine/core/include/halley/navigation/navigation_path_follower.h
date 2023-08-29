@@ -26,6 +26,7 @@ namespace Halley {
 		int getNavmeshSubWorld() const;
 
 		const ConfigNode& getParams() const;
+		ConfigNode& getParams();
 
 		bool isRunning() const;
 

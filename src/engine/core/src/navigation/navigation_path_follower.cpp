@@ -1,6 +1,7 @@
 #include "halley/navigation/navigation_path_follower.h"
 
 #include "halley/navigation/navmesh_set.h"
+#include "halley/support/debug.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
@@ -193,6 +194,11 @@ int NavigationPathFollower::getNavmeshSubWorld() const
 }
 
 const ConfigNode& NavigationPathFollower::getParams() const
+{
+	return params;
+}
+
+ConfigNode& NavigationPathFollower::getParams()
 {
 	return params;
 }
