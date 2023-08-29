@@ -1,11 +1,17 @@
 #include "halley/ui/widgets/ui_animation.h"
 using namespace Halley;
 
-UIAnimation::UIAnimation(const String& id, Vector2f size, Vector2f animationOffset, AnimationPlayer animation)
-	: UIWidget(id, size)
+UIAnimation::UIAnimation(String id, Vector2f size, Vector2f animationOffset, AnimationPlayer animation)
+	: UIAnimation(std::move(id), size, std::nullopt, animationOffset, std::move(animation))
+{
+}
+
+UIAnimation::UIAnimation(String id, Vector2f size, std::optional<UISizer> sizer, Vector2f animationOffset, AnimationPlayer animation)
+	: UIWidget(std::move(id), size, std::move(sizer))
 	, offset(animationOffset)
-	, animation(animation)
-{}
+	, animation(std::move(animation))
+{
+}
 
 AnimationPlayer& UIAnimation::getPlayer()
 {

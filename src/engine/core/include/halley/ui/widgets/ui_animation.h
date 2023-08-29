@@ -10,7 +10,8 @@ namespace Halley
 	class UIAnimation : public UIWidget
 	{
 	public:
-		UIAnimation(const String& id, Vector2f size, Vector2f animationOffset, AnimationPlayer animation);
+		UIAnimation(String id, Vector2f size, Vector2f animationOffset, AnimationPlayer animation);
+		UIAnimation(String id, Vector2f size, std::optional<UISizer> sizer, Vector2f animationOffset, AnimationPlayer animation);
 
 		AnimationPlayer& getPlayer();
 		const AnimationPlayer& getPlayer() const;

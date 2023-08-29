@@ -1083,6 +1083,20 @@ std::shared_ptr<UIWidget> UIFactory::makeMultiImage(const ConfigNode& entryNode)
 	return std::make_shared<UIMultiImage>(id, size, sprites, offsets);
 }
 
+UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Animation";
+	result.iconName = "widget_icons/animation.png";
+	result.canHaveChildren = true;
+
+	result.entries.emplace_back("Animation", "animation", "Halley::ResourceReference<Halley::Animation>", "");
+	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
+	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
+	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -1095,21 +1109,7 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 
 	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
 
-	return std::make_shared<UIAnimation>(id, size, animationOffset, animation);
-}
-
-UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Animation";
-	result.iconName = "widget_icons/animation.png";
-	result.canHaveChildren = false;
-
-	result.entries.emplace_back("Animation", "animation", "Halley::ResourceReference<Halley::Animation>", "");
-	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
-	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
-	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
-	return result;
+	return std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), animationOffset, animation);
 }
 
 UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
