@@ -21,6 +21,9 @@ namespace Halley
 		Vector2f getOffset() const;
 		void setOffset(Vector2f offset);
 
+		void setColour(Colour4f colour);
+		Colour4f getColour() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -29,5 +32,6 @@ namespace Halley
 		Vector2f offset;
 		AnimationPlayer animation;
 		Sprite sprite;
+		Colour4f colour;
 	};
 }
