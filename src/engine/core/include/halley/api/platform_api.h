@@ -194,6 +194,7 @@ namespace Halley
 		virtual int getStatInt(const String& statId) { return 0; }
 		virtual void incrementStat(const String& statId) { setStat(statId, getStatInt(statId) + 1); }
 		virtual bool isStatsSystemReady() const { return true; }
+		virtual void resetAllStatsAndAchievements() {}
 
 
 		/////////////
