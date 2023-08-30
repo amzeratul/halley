@@ -364,7 +364,7 @@ void UIDropdown::open()
 			if (idx == -1) {
 				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), getSelectedOptionId(), getSelectedOption()));
 			} else {
-				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(idx).id, idx));
+				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(clamp(idx, 0, static_cast<int>(options.size()) - 1)).id, idx));
 			}
 
 			if (notifyOnHover) {
