@@ -311,17 +311,24 @@ void UIEditor::replaceWidget()
 		const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, *gameFactory, mustAllowChildren, [&] (std::optional<String> result)
 		{
 			if (result) {
-				const auto oldWidget = std::move(curData["widget"]);
-				ConfigNode::MapType widget;
-				widget["id"] = oldWidget["id"];
-				widget["size"] = oldWidget["size"];
-				widget["enabled"] = oldWidget["enabled"];
-				widget["active"] = oldWidget["active"];
-				widget["tooltip"] = oldWidget["tooltip"];
-				widget["tooltipKey"] = oldWidget["tooltipKey"];
-				widget["childLayerAdjustment"] = oldWidget["childLayerAdjustment"];
-				widget["class"] = result.value();
-				curData["widget"] = widget;
+				if (result != "sizer" && result != "spacer") {
+					auto oldWidget = std::move(curData["widget"]);
+					oldWidget.ensureType(ConfigNodeType::Map);
+
+					ConfigNode::MapType widget;
+					widget["id"] = oldWidget["id"];
+					widget["size"] = oldWidget["size"];
+					widget["enabled"] = oldWidget["enabled"];
+					widget["active"] = oldWidget["active"];
+					widget["tooltip"] = oldWidget["tooltip"];
+					widget["tooltipKey"] = oldWidget["tooltipKey"];
+					widget["childLayerAdjustment"] = oldWidget["childLayerAdjustment"];
+					widget["class"] = result.value();
+					curData["widget"] = widget;
+				} else {
+					curData.removeKey("widget");
+				}
+
 				onWidgetModified(curSelection);
 				setSelectedWidget(curSelection);
 			}
