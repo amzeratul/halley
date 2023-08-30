@@ -18,7 +18,7 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	gameResources = &project.getGameResources();
 	project.withLoadedDLL([&] (ProjectDLL& dll)
 	{
-		load();
+		//load();
 	});
 }
 
@@ -81,7 +81,7 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded(bool force)
 		if (force || !interfaceInitializationError) {
 			if (interface->isReadyToCreateWorld()) {
 				const bool success = guardedRun([&]() {
-					interface->createWorld(factory.getColourScheme());
+					interface->createWorld(*prefab, factory.getColourScheme());
 					interface->setAssetPreviewGenerator(projectWindow.getAssetPreviewGenerator());
 
 					SceneEditorInputState inputState;
@@ -387,6 +387,11 @@ String SceneEditorGameBridge::getSceneNameForComments(AssetType assetType, const
 UIFactory& SceneEditorGameBridge::getFactory() const
 {
 	return factory;
+}
+
+void SceneEditorGameBridge::setPrefab(std::shared_ptr<Prefab> prefab)
+{
+	this->prefab = std::move(prefab);
 }
 
 void SceneEditorGameBridge::load()

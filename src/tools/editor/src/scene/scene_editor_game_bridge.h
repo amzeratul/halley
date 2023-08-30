@@ -61,6 +61,8 @@ namespace Halley {
 
 		UIFactory& getFactory() const override;
 
+		void setPrefab(std::shared_ptr<Prefab> prefab);
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void openAsset(AssetType assetType, const String& assetId) override;
@@ -88,6 +90,8 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		UIFactory& factory;
 		SceneEditorWindow& sceneEditorWindow;
+
+		std::shared_ptr<Prefab> prefab;
 		
 		std::unique_ptr<ISceneEditor> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;

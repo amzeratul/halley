@@ -205,7 +205,7 @@ namespace Halley {
         virtual void render(RenderContext& rc) = 0;
 
     	virtual bool isReadyToCreateWorld() const = 0;
-    	virtual void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) = 0;
+    	virtual void createWorld(const Prefab& prefab, std::shared_ptr<const UIColourScheme> colourScheme) = 0;
     	
         virtual World& getWorld() const = 0;
     	virtual Resources& getResources() const = 0;

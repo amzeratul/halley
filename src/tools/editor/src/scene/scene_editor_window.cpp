@@ -207,64 +207,66 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 	if (sceneData) {
 		unloadScene();
 	}
-	
+	prefab = origPrefab.clone();
+
+	gameBridge->setPrefab(prefab);
 	gameBridge->initializeInterfaceIfNeeded(true);
-	if (gameBridge->isLoaded()) {
-		auto& interface = gameBridge->getInterface();
-		auto& world = interface.getWorld();
-
-		// Entity validator
-		entityValidator = std::make_unique<EntityValidator>(world, *this);
-		entityValidator->addValidator(std::make_unique<ComponentDependencyValidator>(&project.getECSData()));
-		gameBridge->initializeEntityValidator(*entityValidator);
-
-		// Load prefab
-		prefab = origPrefab.clone();
-
-		// Spawn scene
-		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-		auto sceneCreated = entityFactory->createScene(prefab, true);
-		interface.spawnPending();
-
-		// Setup editors
-		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
-
-		entityEditor->setSceneEditorWindow(*this, api);
-		entityEditor->setECSData(project.getECSData());
-		entityEditor->setEntityEditorFactory(&projectWindow.getEntityEditorFactoryRoot());
-		entityList->setSceneData(sceneData);
-
-		// Select entity
-		const auto& initialEntities = projectWindow.getAssetSetting(getAssetKey(), "currentEntities");
-		if (initialEntities.getType() != ConfigNodeType::Undefined) {
-			selectEntities(initialEntities.asVector<String>());
-		}
-
-		// Setup tools
-		gameBridge->getGizmos().resetTools();
-		const auto initialTool = getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"); // Needs to be stored before setupTools below
-		interface.setupTools(*toolMode, gameBridge->getGizmos());
-		setTool(initialTool);
-
-		// Move camera
-		if (!gameBridge->loadCameraPos()) {
-			if (!sceneCreated.getEntities().empty()) {
-				auto id = sceneCreated.getEntities().at(0);
-				panCameraToEntity(world.getEntity(id).getInstanceUUID().toString());
-			}
-		}
-		
-		currentEntityScene = sceneCreated;
-
-		// Custom UI
-		setCustomUI(gameBridge->makeCustomUI());
-
-		// Console
-		setupConsoleCommands();
-
-		// Done
-		gameBridge->onSceneLoaded(*prefab);
+	if (!gameBridge->isLoaded()) {
+		prefab = {};
+		return;
 	}
+
+	auto& interface = gameBridge->getInterface();
+	auto& world = interface.getWorld();
+
+	// Entity validator
+	entityValidator = std::make_unique<EntityValidator>(world, *this);
+	entityValidator->addValidator(std::make_unique<ComponentDependencyValidator>(&project.getECSData()));
+	gameBridge->initializeEntityValidator(*entityValidator);
+
+	// Spawn scene
+	entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
+	auto sceneCreated = entityFactory->createScene(prefab, true);
+	interface.spawnPending();
+
+	// Setup editors
+	sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
+
+	entityEditor->setSceneEditorWindow(*this, api);
+	entityEditor->setECSData(project.getECSData());
+	entityEditor->setEntityEditorFactory(&projectWindow.getEntityEditorFactoryRoot());
+	entityList->setSceneData(sceneData);
+
+	// Select entity
+	const auto& initialEntities = projectWindow.getAssetSetting(getAssetKey(), "currentEntities");
+	if (initialEntities.getType() != ConfigNodeType::Undefined) {
+		selectEntities(initialEntities.asVector<String>());
+	}
+
+	// Setup tools
+	gameBridge->getGizmos().resetTools();
+	const auto initialTool = getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"); // Needs to be stored before setupTools below
+	interface.setupTools(*toolMode, gameBridge->getGizmos());
+	setTool(initialTool);
+
+	// Move camera
+	if (!gameBridge->loadCameraPos()) {
+		if (!sceneCreated.getEntities().empty()) {
+			auto id = sceneCreated.getEntities().at(0);
+			panCameraToEntity(world.getEntity(id).getInstanceUUID().toString());
+		}
+	}
+	
+	currentEntityScene = sceneCreated;
+
+	// Custom UI
+	setCustomUI(gameBridge->makeCustomUI());
+
+	// Console
+	setupConsoleCommands();
+
+	// Done
+	gameBridge->onSceneLoaded(*prefab);
 }
 
 void SceneEditorWindow::unloadScene()

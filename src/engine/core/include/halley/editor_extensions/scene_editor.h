@@ -30,7 +30,7 @@ namespace Halley {
 		virtual void postRender(RenderContext& rc);
 
     	bool isReadyToCreateWorld() const final override;
-		void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) final override;
+		void createWorld(const Prefab& prefab, std::shared_ptr<const UIColourScheme> colourScheme) final override;
 
 		World& getWorld() const override;
 		Resources& getResources() const override;
@@ -92,8 +92,8 @@ namespace Halley {
 
 		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	
-		virtual void createServices(World& world, std::shared_ptr<const UIColourScheme> colourScheme);
-		virtual void createEntities(World& world);
+		virtual void createServices(World& world, std::shared_ptr<const UIColourScheme> colourScheme, const Prefab& prefab);
+		virtual void createEntities(World& world, const Prefab& prefab);
 
 		virtual String getSceneEditorStageName() const;
     	const HalleyAPI& getAPI() const;
