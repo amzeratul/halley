@@ -531,7 +531,7 @@ bool AudioEventActionStop::run(AudioEngine& engine, AudioEventId id, AudioEmitte
 		voice.stop(fade);
 	});
 
-	return true;
+	return false;
 }
 
 void AudioEventActionPause::load(const ConfigNode& config)
@@ -592,7 +592,7 @@ bool AudioEventActionStopBus::run(AudioEngine& engine, AudioEventId id, AudioEmi
 		voice.stop(fade);
 	});
 
-	return true;
+	return false;
 }
 
 void AudioEventActionPauseBus::load(const ConfigNode& config)
