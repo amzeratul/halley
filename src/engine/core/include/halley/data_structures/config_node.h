@@ -451,7 +451,12 @@ namespace Halley {
 		template <typename T>
 		T asEnum() const
 		{
-			return fromString<T>(asString());
+			if (auto v = tryFromString<T>(asString())) {
+				return *v;
+			} else {
+				Logger::logError("Unknown enum value \"" + asString() + "\" in type " + typeid(T).name());
+				return T();
+			}
 		}
 
 		template <typename T>
@@ -460,7 +465,12 @@ namespace Halley {
 			if (getType() == ConfigNodeType::Undefined) {
 				return defaultValue;
 			}
-			return asEnum<T>();
+			if (auto v = tryFromString<T>(asString())) {
+				return *v;
+			} else {
+				Logger::logError("Unknown enum value \"" + asString() + "\" in type " + typeid(T).name());
+				return defaultValue;
+			}
 		}
 
 		template <typename T>
