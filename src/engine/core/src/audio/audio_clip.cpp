@@ -128,7 +128,9 @@ VorbisData* AudioClip::getVorbisData(size_t targetPos) const
 
 	for (size_t i = 0; i < vorbisData.size(); ++i) {
 		const auto curPos = vorbisData[i]->tell();
-		const auto dist = (targetPos - curPos) % nSamples; // Unsigned subtraction is desirable here, seeking forward is faster than seeking backwards
+
+		const auto dist = (nSamples + targetPos - curPos) % nSamples;
+
 		if (dist < bestDist) {
 			bestDist = dist;
 			bestIdx = i;
