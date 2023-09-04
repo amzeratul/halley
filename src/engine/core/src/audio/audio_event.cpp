@@ -61,6 +61,10 @@ size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& globa
 {
 	size_t nEmitters = 0;
 	for (const auto& a: actions) {
+		if (a->getScope() == AudioEventScope::Object && &globalEmitter == &objectEmitter) {
+			Logger::logWarning("AudioEvent " + getAssetId() + " is trying to play an object scope action, but no audio source was provided (missing AudioSourceComponent?).");
+		}
+
 		if (a->run(engine, id, a->getScope() == AudioEventScope::Object ? objectEmitter : globalEmitter)) {
 			++nEmitters;
 		}
