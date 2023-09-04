@@ -195,7 +195,7 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 				const float dist = (*curPoint - pos.pos).length();
 				if (dist < bestDist) {
 					bestDist = dist;
-					bestPoint = curPoint;
+					bestPoint = WorldPosition(*curPoint, pos.subWorld);
 				}
 			}
 		}
