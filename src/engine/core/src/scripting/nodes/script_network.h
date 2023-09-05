@@ -120,7 +120,17 @@ namespace Halley {
 	};
 
 
-	class ScriptTransferToHost final : public ScriptNodeTypeBase<void> {
+	class ScriptTransferToHostData : public ScriptStateData<ScriptTransferToHostData> {
+	public:
+		ScriptTransferToHostData() = default;
+		ScriptTransferToHostData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+
+		bool waiting = false;
+		bool returned = false;
+	};
+
+	class ScriptTransferToHost final : public ScriptNodeTypeBase<ScriptTransferToHostData> {
 	public:
 		String getId() const override { return "transferToHost"; }
 		String getName() const override { return "Transfer to Host"; }
@@ -130,8 +140,13 @@ namespace Halley {
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+		void doInitData(ScriptTransferToHostData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const override;
+
+		void notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData) const;
 	};
 
 	class ScriptTransferToClient final : public ScriptNodeTypeBase<void> {

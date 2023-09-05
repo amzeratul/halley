@@ -138,6 +138,17 @@ namespace Halley {
 			void releaseData();
 		};
 
+		enum class ControlEventType: uint8_t {
+			StartThread,
+			CancelThread,
+			NotifyReturn
+		};
+
+		struct ControlEvent {
+			ControlEventType type;
+			GraphNodeId nodeId;
+		};
+
     	ScriptState();
 		ScriptState(const ConfigNode& node, const EntitySerializationContext& context);
 		ScriptState(const ScriptGraph* script, bool persistAfterDone);
@@ -191,6 +202,9 @@ namespace Halley {
     	void receiveMessage(ScriptMessage msg);
         void processMessages(Vector<GraphNodeId>& threadsToStart);
 
+    	void receiveControlEvent(ControlEvent event);
+		Vector<ControlEvent> processControlEvents();
+
 		ScriptVariables& getLocalVariables();
 		const ScriptVariables& getLocalVariables() const;
     	ScriptVariables& getSharedVariables();
@@ -218,7 +232,8 @@ namespace Halley {
 		Vector2f displayOffset;
 
 		Vector<String> tags;
-		Vector<ScriptMessage> inbox;
+		Vector<ScriptMessage> messageInbox;
+		Vector<ControlEvent> controlEventInbox;
 		Vector<ConfigNode> startParams;
 
     	void onNodeStartedIntrospection(GraphNodeId nodeId);

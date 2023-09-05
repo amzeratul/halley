@@ -686,7 +686,9 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 	Vector<String> contents = {
 		"#pragma once",
 		"",
+		"#ifndef DONT_INCLUDE_HALLEY_HPP",
 		"#include <halley.hpp>",
+		"#endif"
 		""
 	};
 

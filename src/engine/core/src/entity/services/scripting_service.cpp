@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resources& resources, const String& initialModule)
+Halley::ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resources& resources, const String& initialModule)
 {
 	scriptEnvironment = std::move(env);
 	scriptEnvironment->getWorld().setInterface(static_cast<ILuaInterface*>(this));
@@ -13,19 +13,19 @@ ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resou
 	}
 }
 
-ScriptEnvironment& ScriptingService::getEnvironment()
+ScriptEnvironment& Halley::ScriptingService::getEnvironment()
 {
 	return *scriptEnvironment;
 }
 
-ConfigNode ScriptingService::evaluateExpression(const String& expression) const
+ConfigNode Halley::ScriptingService::evaluateExpression(const String& expression) const
 {
 	auto stack = LuaStackOps(*luaState);
 	stack.eval("return " + expression);
 	return stack.popConfigNode();
 }
 
-ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression) const
+ConfigNode Halley::ScriptingService::evaluateExpression(const LuaExpression& expression) const
 {
 	if (expression.isEmpty()) {
 		return ConfigNode();
@@ -33,7 +33,7 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression)
 	return expression.get(*luaState).call<ConfigNode>();
 }
 
-LuaState& ScriptingService::getLuaState()
+LuaState& Halley::ScriptingService::getLuaState()
 {
 	return *luaState;
 }

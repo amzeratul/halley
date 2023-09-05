@@ -47,11 +47,37 @@ public:
 	{
 		addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
 	}
+
+	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
+	{
+		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId) });
+		} else {
+			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
+		}
+	}
+
+	void onMessageReceived(CancelHostScriptThreadSystemMessage msg) override
+	{
+		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId) });
+		} else {
+			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
+		}
+	}
+
+	void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) override
+	{
+		if (const auto scriptable = getScriptState(e, msg.script)) {
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId) });
+		} else {
+			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
+		}
+	}
 	
 	std::shared_ptr<ScriptState> addScript(EntityId entityId, const String& scriptName, Vector<String> tags = {}, Vector<ConfigNode> params = {}) override
 	{
-		auto* scriptable = scriptableFamily.tryFind(entityId);
-		if (scriptable) {
+		if (auto* scriptable = scriptableFamily.tryFind(entityId)) {
 			if (getResources().exists<ScriptGraph>(scriptName)) {
 				return addScript(entityId, scriptable->scriptable, getResources().get<ScriptGraph>(scriptName), std::move(tags), std::move(params));
 			} else {
@@ -82,6 +108,32 @@ public:
 			}
 		}
 		std_ex::erase_if_value(e.scriptable.activeStates, [](const auto& state) { return state->isDead(); });
+	}
+
+	void onMessageReceived(const SendScriptMsgMessage& msg, ScriptableFamily& e) override
+	{
+		sendLocalMessage(e.entityId, msg.msg);
+	}
+
+	void onMessageReceived(const TerminateScriptsWithTagSystemMessage& msg) override
+	{
+		const auto* scriptable = scriptableFamily.tryFind(msg.scriptableId);
+		if (scriptable == nullptr) {
+			return;
+		}
+
+		auto& env = getScriptingService().getEnvironment();
+		for (auto& state : scriptable->scriptable.activeStates) {
+			if (state.second->hasTag(msg.tag)) {
+				env.terminateState(*state.second, scriptable->entityId, scriptable->scriptable.variables);
+			}
+		}
+		std_ex::erase_if_value(scriptable->scriptable.activeStates, [](const auto& state) { return state->isDead(); });
+	}
+
+	void sendReturnHostThread(EntityId target, const String& scriptId, int node) override
+	{
+		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node));
 	}
 
 	Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const override
@@ -127,27 +179,6 @@ public:
 			result.push_back(e.second);
 		}
 		return result;
-	}
-
-	void onMessageReceived(const SendScriptMsgMessage& msg, ScriptableFamily& e) override
-	{
-		sendLocalMessage(e.entityId, msg.msg);
-	}
-
-	void onMessageReceived(const TerminateScriptsWithTagSystemMessage& msg) override
-	{
-		const auto* scriptable = scriptableFamily.tryFind(msg.scriptableId);
-		if (scriptable == nullptr) {
-			return;
-		}
-
-		auto& env = getScriptingService().getEnvironment();
-		for (auto& state : scriptable->scriptable.activeStates) {
-			if (state.second->hasTag(msg.tag)) {
-				env.terminateState(*state.second, scriptable->entityId, scriptable->scriptable.variables);
-			}
-		}
-		std_ex::erase_if_value(scriptable->scriptable.activeStates, [](const auto& state) { return state->isDead(); });
 	}
 
 private:
@@ -506,6 +537,24 @@ private:
 		} else {
 			return UUID();
 		}
+	}
+
+	std::shared_ptr<ScriptState> getScriptState(EntityId entityId, const String& scriptName)
+	{
+		if (auto* e = scriptableFamily.tryFind(entityId)) {
+			return getScriptState(*e, scriptName);
+		}
+		return {};
+	}
+
+	std::shared_ptr<ScriptState> getScriptState(ScriptableFamily& e, const String& scriptName)
+	{
+		for (const auto& scriptable: e.scriptable.activeStates) {
+			if (scriptable.first == scriptName) {
+				return scriptable.second;					
+			}
+		}
+		return {};
 	}
 };
 

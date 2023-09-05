@@ -1,12 +1,13 @@
-// Halley codegen version 123
+// Halley codegen version 124
 #pragma once
 
+#ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
-
+#endif
 
 class NetworkEntityLockSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 2 };
+	static constexpr int messageIndex{ 4 };
 	static const constexpr char* messageName{ "NetworkEntityLock" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
 	using ReturnType = bool;

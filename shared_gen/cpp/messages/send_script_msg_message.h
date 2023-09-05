@@ -1,8 +1,9 @@
-// Halley codegen version 123
+// Halley codegen version 124
 #pragma once
 
+#ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
-
+#endif
 
 class SendScriptMsgMessage final : public Halley::Message {
 public:

@@ -414,7 +414,7 @@ gsl::span<const ConfigNode> ScriptState::getStartParams() const
 
 bool ScriptState::isDone() const
 {
-	return started && inbox.empty() && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
+	return started && messageInbox.empty() && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
 }
 
 bool ScriptState::isDead() const
@@ -560,13 +560,13 @@ void ScriptState::receiveMessage(ScriptMessage msg)
 {
 	const auto* script = getScriptGraphPtr();
 	if (script && script->getMessageInboxId(msg.type.message, false)) {
-		inbox.push_back(std::move(msg));
+		messageInbox.push_back(std::move(msg));
 	}
 }
 
 void ScriptState::processMessages(Vector<GraphNodeId>& threadsToStart)
 {
-	std_ex::erase_if(inbox, [&] (ScriptMessage& msg)
+	std_ex::erase_if(messageInbox, [&] (ScriptMessage& msg)
 	{
 		return processMessage(msg, threadsToStart);
 	});
@@ -591,6 +591,16 @@ bool ScriptState::processMessage(ScriptMessage& msg, Vector<GraphNodeId>& thread
 
 	// If we get here, then we can never accept this, consume it
 	return true;
+}
+
+void ScriptState::receiveControlEvent(ControlEvent event)
+{
+	controlEventInbox.push_back(event);
+}
+
+Vector<ScriptState::ControlEvent> ScriptState::processControlEvents()
+{
+	return std::move(controlEventInbox);
 }
 
 ScriptVariables& ScriptState::getLocalVariables()

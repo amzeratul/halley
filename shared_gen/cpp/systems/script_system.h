@@ -14,7 +14,10 @@
 #include "messages/terminate_script_message.h"
 #include "messages/terminate_scripts_with_tag_message.h"
 #include "messages/send_script_msg_message.h"
+#include "messages/return_host_script_thread_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
+#include "system_messages/start_host_script_thread_system_message.h"
+#include "system_messages/cancel_host_script_thread_system_message.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -82,10 +85,16 @@ public:
 
 	virtual void onMessageReceived(const SendScriptMsgMessage& msg, ScriptableFamily& e) = 0;
 
+	virtual void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) = 0;
+
 	virtual void onMessageReceived(const TerminateScriptsWithTagSystemMessage& msg) = 0;
 
+	virtual void onMessageReceived(StartHostScriptThreadSystemMessage msg) = 0;
+
+	virtual void onMessageReceived(CancelHostScriptThreadSystemMessage msg) = 0;
+
 	ScriptSystemBase()
-		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily, &tagTargetsFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex})
+		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily, &tagTargetsFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex})
 	{
 		static_assert(std::is_final_v<T>, "System must be final.");
 	}
@@ -105,6 +114,39 @@ protected:
 	void sendMessage(Halley::EntityId entityId, SendScriptMsgMessage msg) {
 		sendMessageGeneric(entityId, std::move(msg));
 	}
+	void sendMessage(Halley::EntityId entityId, ReturnHostScriptThreadMessage msg) {
+		sendMessageGeneric(entityId, std::move(msg));
+	}
+	void sendMessage(StartHostScriptThreadSystemMessage msg, std::function<void()> callback = {}) {
+		Halley::String targetSystem = "";
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast StartHostScriptThreadSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
+	void sendMessage(const Halley::String& targetSystem, StartHostScriptThreadSystemMessage msg, std::function<void()> callback = {}) {
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast StartHostScriptThreadSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
+	void sendMessage(CancelHostScriptThreadSystemMessage msg, std::function<void()> callback = {}) {
+		Halley::String targetSystem = "";
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast CancelHostScriptThreadSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
+	void sendMessage(const Halley::String& targetSystem, CancelHostScriptThreadSystemMessage msg, std::function<void()> callback = {}) {
+		const size_t n = sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
+		if (n != 1) {
+		    throw Halley::Exception("Sending non-multicast CancelHostScriptThreadSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
+		}
+	}
+
 
 	ScriptingService& getScriptingService() const {
 		return *scriptingService;
@@ -138,7 +180,7 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(scriptableFamily, std::array<int, 4>{ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex });
+		doProcessMessages(scriptableFamily, std::array<int, 5>{ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex });
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {
@@ -147,6 +189,7 @@ private:
 		case TerminateScriptMessage::messageIndex: onMessagesReceived(reinterpret_cast<TerminateScriptMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		case TerminateScriptsWithTagMessage::messageIndex: onMessagesReceived(reinterpret_cast<TerminateScriptsWithTagMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		case SendScriptMsgMessage::messageIndex: onMessagesReceived(reinterpret_cast<SendScriptMsgMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
+		case ReturnHostScriptThreadMessage::messageIndex: onMessagesReceived(reinterpret_cast<ReturnHostScriptThreadMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		}
 	}
 
@@ -165,12 +208,30 @@ private:
 		    }
 		    break;
 		}
+		case StartHostScriptThreadSystemMessage::messageIndex: {
+		    auto& realMsg = reinterpret_cast<StartHostScriptThreadSystemMessage&>(*context.msg);
+		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
+		    if (context.callback) {
+		        context.callback(nullptr, {});
+		    }
+		    break;
+		}
+		case CancelHostScriptThreadSystemMessage::messageIndex: {
+		    auto& realMsg = reinterpret_cast<CancelHostScriptThreadSystemMessage&>(*context.msg);
+		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
+		    if (context.callback) {
+		        context.callback(nullptr, {});
+		    }
+		    break;
+		}
 		}
 	}
 	bool canHandleSystemMessage(int msgIndex, const Halley::String& targetSystem) const override final {
 		if (!targetSystem.isEmpty() && targetSystem != getName()) return false;
 		switch (msgIndex) {
 		case TerminateScriptsWithTagSystemMessage::messageIndex: return true;
+		case StartHostScriptThreadSystemMessage::messageIndex: return true;
+		case CancelHostScriptThreadSystemMessage::messageIndex: return true;
 		}
 		return false;
 	}

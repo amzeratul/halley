@@ -286,6 +286,26 @@ IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& env
 
 
 
+ScriptTransferToHostData::ScriptTransferToHostData(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		waiting = node["waiting"].asBool();
+		returned = node["returned"].asBool();
+	} else {
+		waiting = false;
+		returned = false;
+	}
+}
+
+ConfigNode ScriptTransferToHostData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["waiting"] = waiting;
+	result["returned"] = returned;
+	return result;
+}
+
+
 gsl::span<const IGraphNodeType::PinType> ScriptTransferToHost::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
@@ -312,15 +332,42 @@ String ScriptTransferToHost::getPinDescription(const ScriptGraphNode& node, PinT
 	} else if (elementIdx == 2) {
 		return "Flow after Host returns";
 	}
-	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	return ScriptNodeTypeBase<ScriptTransferToHostData>::getPinDescription(node, elementType, elementIdx);
 }
 
-IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+void ScriptTransferToHost::doInitData(ScriptTransferToHostData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	// TODO
-	return Result(ScriptNodeExecutionState::Done);
+	data = ScriptTransferToHostData(nodeData);
 }
 
+IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const
+{
+	if (!curData.waiting) {
+		curData.waiting = true;
+		curData.returned = false;
+		environment.startHostThread(node.getId());
+	} else if (curData.returned) {
+		curData.waiting = false;
+		return Result(ScriptNodeExecutionState::Done, 0, 2);
+	}
+
+	return Result(ScriptNodeExecutionState::Executing, time);
+}
+
+void ScriptTransferToHost::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const
+{
+	if (curData.waiting) {
+		environment.cancelHostThread(node.getId());
+		curData = {};
+	}
+}
+
+void ScriptTransferToHost::notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData) const
+{
+	if (curData.waiting) {
+		curData.returned = true;
+	}
+}
 
 
 gsl::span<const IGraphNodeType::PinType> ScriptTransferToClient::getPinConfiguration(const ScriptGraphNode& node) const
@@ -342,6 +389,6 @@ std::pair<String, Vector<ColourOverride>> ScriptTransferToClient::getNodeDescrip
 
 IScriptNodeType::Result ScriptTransferToClient::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	// TODO
+	environment.returnHostThread();
 	return Result(ScriptNodeExecutionState::Done);
 }

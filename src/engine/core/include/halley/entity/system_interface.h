@@ -47,6 +47,7 @@ namespace Halley {
 
 		virtual Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
 		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
+		virtual void sendReturnHostThread(EntityId target, const String& scriptId, int node) = 0;
 	};
 
 	class IAudioSystemInterface : public ISystemInterface {

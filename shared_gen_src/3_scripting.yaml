@@ -106,6 +106,37 @@ message:
 
 ---
 
+systemMessage:
+  name: StartHostScriptThread
+  members:
+  - script: 'Halley::String'
+  - entity: 'Halley::EntityId'
+  - nodeId: int
+  serializable: true
+  destination: host
+
+---
+
+systemMessage:
+  name: CancelHostScriptThread
+  members:
+  - script: 'Halley::String'
+  - entity: 'Halley::EntityId'
+  - nodeId: int
+  serializable: true
+  destination: host
+
+---
+
+message:
+  name: ReturnHostScriptThread
+  members:
+  - script: 'Halley::String'
+  - nodeId: int
+  serializable: true
+
+---
+
 system:
   name: Script
   families:
@@ -132,7 +163,10 @@ system:
   - TerminateScript: receive scriptable
   - TerminateScriptsWithTag: receive scriptable
   - SendScriptMsg: send receive scriptable
+  - ReturnHostScriptThread: send receive scriptable
   systemMessages:
   - TerminateScriptsWithTag: receive
+  - StartHostScriptThread: send receive
+  - CancelHostScriptThread: send receive
 
 ...

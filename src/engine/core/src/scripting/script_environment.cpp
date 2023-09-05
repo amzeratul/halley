@@ -11,12 +11,17 @@
 #include "halley/audio/audio_event.h"
 
 #include "halley/graphics/sprite/animation_player.h"
-
+#include "halley/bytes/byte_serializer.h"
 #include <components/audio_source_component.h>
 #include <components/scriptable_component.h>
 #include <components/sprite_animation_component.h>
 
+#include <system_messages/cancel_host_script_thread_system_message.h>
+#include <system_messages/start_host_script_thread_system_message.h>
+#include <messages/return_host_script_thread_message.h>
+
 #include "halley/support/profiler.h"
+#include "nodes/script_network.h"
 
 using namespace Halley;
 
@@ -65,6 +70,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 	
 	processMessages(time, threads);
+	processControlEvents(time, threads);
 
 	// Allocate time for each thread
 	for (auto& thread: threads) {
@@ -84,6 +90,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			pendingThreads.clear();
 		}
 	}
+	currentThread = nullptr;
 	removeStoppedThreads();
 
 	// Clean up if done
@@ -102,6 +109,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads)
 {
+	currentThread = &thread;
 	float& timeLeft = thread.getTimeSlice();
 
 	while (timeLeft > 0 && thread.isRunning()) {
@@ -196,7 +204,7 @@ void ScriptEnvironment::stopState(ScriptState& graphState, EntityId curEntity, S
 		doTerminateState();
 	} else {
 		if (const auto startNodeId = currentGraph->getStartNode()) {
-			abortCodePath(*startNodeId, {});
+			abortCodePath(*startNodeId, {}, true);
 		}
 		const auto& threads = currentState->getThreads();
 		if (std::none_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isRunning(); })) {
@@ -402,25 +410,25 @@ void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 {
 	if (cancelMask == 0xFF) {
-		abortCodePath(nodeId, {});
+		abortCodePath(nodeId, {}, false);
 	} else {
 		for (uint8_t i = 0; i < 8; ++i) {
 			if ((cancelMask & (1 << i)) != 0) {
 				auto& node = currentGraph->getNodes()[nodeId];
 				const auto pinIdx = node.getNodeType().getNthOutputPinIdx(node, i);
 				assert(node.getPinType(pinIdx).isCancellable);
-				abortCodePath(nodeId, pinIdx);
+				abortCodePath(nodeId, pinIdx, false);
 			}
 		}
 	}
 }
 
-void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin)
+void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin, bool includeCurNode)
 {
 	Expects(currentState != nullptr);
 
 	for (auto& thread: currentState->getThreads()) {
-		if (thread.stackGoesThrough(node, outputPin)) {
+		if (thread.stackGoesThrough(node, outputPin) || (includeCurNode && thread.getCurNode() == node)) {
 			terminateThread(thread, false);
 		}
 	}
@@ -455,6 +463,35 @@ void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pe
 	currentState->processMessages(toStart);
 	for (const auto nodeId: toStart) {
 		pending.push_back(startThread(ScriptStateThread(nodeId, 0)));
+	}
+}
+
+void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread>& pending)
+{
+	for (const auto& event: currentState->processControlEvents()) {
+		if (event.type == ScriptState::ControlEventType::StartThread) {
+			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& nodeType = node.getNodeType();
+			const auto outputs = nodeType.getOutputNodes(node, 1);
+			const auto dstNode = outputs[0].dstNode;
+			if (dstNode) {
+				const auto dstPin = outputs[0].inputPin;
+				pending.push_back(startThread(ScriptStateThread(*dstNode, dstPin)));
+			}
+		} else if (event.type == ScriptState::ControlEventType::CancelThread) {
+			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& nodeType = node.getNodeType();
+			const auto outputs = nodeType.getOutputNodes(node, 1);
+			const auto dstNode = outputs[0].dstNode;
+			if (dstNode) {
+				abortCodePath(*dstNode, {}, true);
+			}
+		} else if (event.type == ScriptState::ControlEventType::NotifyReturn) {
+			const auto& node = currentGraph->getNodes()[event.nodeId];
+			const auto& nodeType = node.getNodeType();
+			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));
+			dynamic_cast<const ScriptTransferToHost&>(nodeType).notifyReturn(node, *nodeData);
+		}
 	}
 }
 
@@ -665,6 +702,49 @@ Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntit
 Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptExecutionRequests()
 {
 	return std::move(scriptExecutionRequestOutbox);
+}
+
+void ScriptEnvironment::startHostThread(int node)
+{
+	SystemMessageContext context;
+	context.msg = std::make_unique<StartHostScriptThreadSystemMessage>(getCurrentGraph()->getAssetId(), currentEntity, node);
+	context.msgId = context.msg->getId();
+	context.remote = false;
+	world.sendSystemMessage(std::move(context), "Script", SystemMessageDestination::Host);
+}
+
+void ScriptEnvironment::cancelHostThread(int node)
+{
+	SystemMessageContext context;
+	context.msg = std::make_unique<CancelHostScriptThreadSystemMessage>(getCurrentGraph()->getAssetId(), currentEntity, node);
+	context.msgId = context.msg->getId();
+	context.remote = false;
+	world.sendSystemMessage(std::move(context), "Script", SystemMessageDestination::Host);
+}
+
+void ScriptEnvironment::returnHostThread()
+{
+	const auto threadRootId = currentThread->getStack()[0].node;
+
+	OptionalLite<GraphNodeId> rootNodeId;
+
+	const auto& node = currentGraph->getNodes()[threadRootId];
+	const auto& pinConfigs = node.getNodeType().getPinConfiguration(node);
+	const auto& pins = node.getPins();
+	for (size_t i = 0; i < pins.size(); ++i) {
+		if (pinConfigs[i].type == GraphElementType(ScriptNodeElementType::FlowPin) && pinConfigs[i].direction == GraphNodePinDirection::Input) {
+			for (const auto& conn: pins[i].connections) {
+				if (conn.dstNode) {
+					rootNodeId = conn.dstNode;
+					break;
+				}
+			}			
+		}
+	}
+
+	if (rootNodeId) {
+		getInterface<IScriptSystemInterface>().sendReturnHostThread(currentEntity, currentGraph->getAssetId(), *rootNodeId);
+	}
 }
 
 std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId)

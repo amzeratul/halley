@@ -59,6 +59,11 @@ namespace Halley {
             bool allThreads = false;
         };
 
+        enum class NetworkControlMsgType {
+	        StartHostThread,
+            ReturnToOwner
+        };
+
         using ScriptTargetRetriever = std::function<EntityId(const String&)>;
 
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost = true);
@@ -128,6 +133,10 @@ namespace Halley {
         Vector<EntityMessageData> getOutboundEntityMessages();
         Vector<ScriptExecutionRequest> getScriptExecutionRequests();
 
+        void startHostThread(int node);
+        void cancelHostThread(int node);
+        void returnHostThread();
+
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
 
@@ -157,6 +166,7 @@ namespace Halley {
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
         ScriptVariables* currentEntityVariables = nullptr;
+        ScriptStateThread* currentThread = nullptr;
         EntityId currentEntity;
         Time deltaTime = 0;
         EntitySerializationContext serializationContext;
@@ -184,12 +194,13 @@ namespace Halley {
         void setWatcher(ScriptStateThread& thread, bool newState);
 
         void cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask);
-        void abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin);
+        void abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin, bool includeCurNode);
 
         void callFunction(ScriptStateThread& thread);
         void returnFromFunction(ScriptStateThread& thread, uint8_t outputPins, Vector<ScriptStateThread>& pendingThreads);
         
         void processMessages(Time time, Vector<ScriptStateThread>& pending);
+        void processControlEvents(Time time, Vector<ScriptStateThread>& pending);
 
     	EntityId getEntityIdFromUUID(const UUID& uuid) const override;
         UUID getUUIDFromEntityId(EntityId id) const override;
