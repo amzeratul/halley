@@ -101,7 +101,8 @@ String InputKeyboardSDL::getButtonName(int code) const
 		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
 			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
 		} else {
-			return SDL_GetKeyName(SDL_Keycode(code));
+			auto *str = SDL_GetKeyName(SDL_SCANCODE_TO_KEYCODE(code - 128));
+			return str;
 		}
 	}
 }
