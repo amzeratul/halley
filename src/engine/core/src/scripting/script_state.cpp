@@ -296,6 +296,14 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 
 void ScriptState::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
+	if (node.hasKey("script")) {
+		const auto scriptGraphName = node["script"].asString();
+		if (!scriptGraphName.isEmpty()) {
+			scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
+		}
+		needsStateLoading = true;
+	}
+
 	const bool isNetwork = context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
 
 	if (isNetwork) {
@@ -319,14 +327,6 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 
 	if (node.hasKey("tags")) {
 		tags = node["tags"].asVector<String>();
-	}
-
-	if (node.hasKey("script")) {
-		const auto scriptGraphName = node["script"].asString();
-		if (!scriptGraphName.isEmpty()) {
-			scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
-		}
-		needsStateLoading = true;
 	}
 
 	if (node.hasKey("startParams")) {
