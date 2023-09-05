@@ -73,7 +73,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	auto messages = messagesRaw;
 	std::sort(messages.begin(), messages.end());
 	auto systemMessages = systemMessagesRaw;
-	std::sort(messages.begin(), messages.end());
+	std::sort(systemMessages.begin(), systemMessages.end());
 
 	Vector<String> registryCpp {
 		"#include <halley.hpp>",
