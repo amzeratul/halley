@@ -118,4 +118,32 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& curData) const override;
 	};
+
+
+	class ScriptTransferToHost final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "transferToHost"; }
+		String getName() const override { return "Transfer to Host"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/transfer_host.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+
+	class ScriptTransferToClient final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "transferToClient"; }
+		String getName() const override { return "Transfer to Client"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/transfer_client.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
 }

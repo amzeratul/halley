@@ -53,7 +53,17 @@ Vector<IGraphNodeType::SettingType> ScriptLog::getSettingTypes() const
 
 std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return { "Log", {} };
+	auto msg = getConnectedNodeName(world, node, graph, 2);
+	if (msg == "<empty>") {
+		msg = node.getSettings()["message"].asString("");
+	}
+
+	ColourStringBuilder str;
+	str.append("Log ");
+	str.append("\"" + msg + "\"", settingColour);
+	str.append(" with severity ");
+	str.append(toString(node.getSettings()["severity"].asEnum<LoggerLevel>(LoggerLevel::Dev)), settingColour);
+	return str.moveResults();
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptLog::getPinConfiguration(const ScriptGraphNode& node) const

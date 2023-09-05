@@ -283,3 +283,65 @@ IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& env
 		return Result(ScriptNodeExecutionState::Executing, time);
 	}
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptTransferToHost::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output, false, false, true },
+		PinType{ ET::FlowPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptTransferToHost::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Transfer flow control to host");
+	return str.moveResults();
+}
+
+String ScriptTransferToHost::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Flow on Host";
+	} else if (elementIdx == 2) {
+		return "Flow after Host returns";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	// TODO
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptTransferToClient::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{
+		PinType{ ET::FlowPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptTransferToClient::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Transfer flow control back to client");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptTransferToClient::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	// TODO
+	return Result(ScriptNodeExecutionState::Done);
+}
