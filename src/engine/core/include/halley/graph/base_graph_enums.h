@@ -25,25 +25,28 @@ namespace Halley {
 		GraphNodePinDirection direction = GraphNodePinDirection::Input;
 		bool isCancellable : 1;
 		bool forceHorizontal : 1;
+		bool isDetached : 1;
 		
-		GraphNodePinType(GraphElementType type = 0, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
+		GraphNodePinType(GraphElementType type = 0, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false)
 			: type(type)
 			, direction(direction)
 			, isCancellable(cancellable)
 			, forceHorizontal(forceHorizontal)
+			, isDetached(isDetached)
 		{}
 
 		template <typename T>
-		GraphNodePinType(T type = T(0), GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
+		GraphNodePinType(T type = T(0), GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false)
 			: type(static_cast<GraphElementType>(type))
 			, direction(direction)
 			, isCancellable(cancellable)
 			, forceHorizontal(forceHorizontal)
+			, isDetached(isDetached)
 		{}
 
 		[[nodiscard]] bool operator==(const GraphNodePinType& other) const
 		{
-			return type == other.type && direction == other.direction && isCancellable == other.isCancellable && forceHorizontal == other.forceHorizontal;
+			return type == other.type && direction == other.direction && isCancellable == other.isCancellable && forceHorizontal == other.forceHorizontal && isDetached == other.isDetached;
 		}
 
 		[[nodiscard]] bool operator!=(const GraphNodePinType& other) const

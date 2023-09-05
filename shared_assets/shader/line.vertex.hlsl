@@ -2,6 +2,7 @@
 
 struct VIn {
     float4 colour : COLOUR;
+    float4 dashing : DASHING;
     float2 position : POSITION;
     float2 normal : NORMAL;
     float2 width : WIDTH;
@@ -13,6 +14,7 @@ struct VOut {
     float  vertPos : POSITION1;
     float  width : POSITION2;
     float2 worldPos : POSITION3;
+    float4 dashing : POSITION4;
 };
 
 VOut main(VIn input) {
@@ -29,6 +31,7 @@ VOut main(VIn input) {
     result.vertPos = vertPos;
     result.width = width;
     result.worldPos = pos;
+    result.dashing = input.dashing;
 
     return result;
 }

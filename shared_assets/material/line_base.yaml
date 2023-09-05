@@ -6,6 +6,10 @@ attributes:
   - name: colour
     type: vec4
     semantic: COLOUR
+  # x: Cur length from start to this vertex, y: on length, z: off length
+  - name: dashing
+    type: vec4
+    semantic: DASHING
   # position (world space)
   - name: position
     type: vec2

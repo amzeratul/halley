@@ -48,7 +48,12 @@ namespace Halley
 			IndexType firstIndex;
 		};
 
-	public:		
+	public:
+		struct LineDashPattern {
+			float onLength = 10.0f;
+			float offLength = 0.0f;
+		};
+
 		Painter(VideoAPI& video, Resources& resources);
 		virtual ~Painter();
 
@@ -78,10 +83,10 @@ namespace Halley
 		void drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
-		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {});
-		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {});
-		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
-		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
 
 		// Draw arrow
 		void drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy = Vector2f(1, 1), std::shared_ptr<const Material> material = {});

@@ -24,6 +24,7 @@ using namespace Halley;
 
 struct LineVertex {
 	Vector4f colour;
+	Vector4f dashing;
 	Vector2f position;
 	Vector2f normal;
 	Vector2f width;
@@ -269,7 +270,7 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	}
 }
 
-void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material)
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	if (!material) {
 		material = getSolidLineMaterial();
@@ -312,11 +313,17 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	std::optional<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : std::optional<Vector2f>();
 	Vector2f normal = segmentNormal(0).value();
 
+	float curLen = 0;
 	for (size_t i = 0; i < nSegments; ++i) {
 		std::optional<Vector2f> nextNormal = segmentNormal(i + 1);
 
 		const Vector2f v0n = makeNormal(normal, prevNormal);
 		const Vector2f v1n = makeNormal(normal, nextNormal);
+
+		const float segmentLength = (points[(i + 1) % nPoints] - points[i]).length();
+		const float nextCurLen = curLen + segmentLength;
+		std::array<float, 2> curLens = { curLen, nextCurLen };
+		curLen = nextCurLen;
 
 		for (size_t j = 0; j < 4; ++j) {
 			const size_t idx = i * 4 + j;
@@ -326,6 +333,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 			v.normal = j <= 1 ? v0n : v1n;
 			v.width.x = width;
 			v.width.y = normalPos[j];
+			v.dashing = Vector4f(curLens[pointIdxOffset[j]], pattern.onLength, pattern.offLength, 0);
 		}
 
 		prevNormal = normal;
@@ -337,21 +345,21 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	drawQuads(material, vertices.size(), vertices.data());
 }
 
-void Painter::drawLine(const LineSegment& line, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material)
+void Painter::drawLine(const LineSegment& line, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
-	drawLine(gsl::span<const Vector2f>(&line.a, 2), width, colour, loop, std::move(material));
+	drawLine(gsl::span<const Vector2f>(&line.a, 2), width, colour, loop, std::move(material), pattern);
 }
 
-void Painter::drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	auto points = bezier.toLineSegments();
-	drawLine(points, width, colour, false, material);
+	drawLine(points, width, colour, false, material, pattern);
 }
 
-void Painter::drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	auto points = bezier.toLineSegments();
-	drawLine(points, width, colour, false, material);
+	drawLine(points, width, colour, false, material, pattern);
 }
 
 void Painter::drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy, std::shared_ptr<const Material> material)

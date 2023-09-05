@@ -179,8 +179,15 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	const auto bezier = makeBezier(path);
 	const auto baseCol = getPinColour(path.fromType);
 	const auto col = (highlight ? baseCol.inverseMultiplyLuma(0.25f) : baseCol).multiplyAlpha(fade ? 0.5f : 1.0f);
-	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f));
-	painter.drawLine(bezier, 3.0f / curZoom, col);
+
+	Painter::LineDashPattern pattern;
+	if (path.fromType.isDetached) {
+		pattern.onLength = 8.0f;
+		pattern.offLength = 4.0f;
+	}
+
+	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f), {}, pattern);
+	painter.drawLine(bezier, 3.0f / curZoom, col, {}, pattern);
 }
 
 ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId) const
