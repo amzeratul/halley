@@ -34,9 +34,6 @@ namespace Halley {
 
 		String curSelection;
 
-		Sprite boundsSprite;
-		Sprite sizerSprite;
-		Vector<Sprite> sizerSprites;
 		Rect4f curRect;
 		std::map<UISizer*, Vector<std::pair<Rect4f, bool>>> sizerRects;
 		UISizer* curSizer = nullptr;
@@ -46,7 +43,6 @@ namespace Halley {
 		Matrix4f transform;
 		
 		void updateCurWidget();
-		void makeSizerSprites();
 		void doLayout();
 		void onOtherUIReloaded(UIWidget& ui) override;
 

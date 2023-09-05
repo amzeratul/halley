@@ -20,7 +20,9 @@ float4 main(VOut input) : SV_TARGET {
     float period = dashLen + gapLen;
     float lengthAA = 1;
     if (gapLen > 0.0001) {
-        lengthAA = (curLen % period) < dashLen ? 1.0 : 0.0;
+        float t = curLen % period;
+        float halfPixelSize = 0.5; //length(float2(ddx(dashLen), ddy(dashLen))) * 0.5;
+        lengthAA = min(smoothstep(-halfPixelSize, halfPixelSize, t) * (1 - smoothstep(dashLen - halfPixelSize, dashLen + halfPixelSize, t)) + smoothstep(period - halfPixelSize, period + halfPixelSize, t), 1.0);
     }
     
     float aa = widthAA * lengthAA;

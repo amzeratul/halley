@@ -92,14 +92,14 @@ namespace Halley
 		void drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy = Vector2f(1, 1), std::shared_ptr<const Material> material = {});
 
 		// Circle drawing
-		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
-		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
-		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {});
-		void drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {});
-		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
+		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
 
 		// Rect drawing
-		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material = {});
+		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
 
 		// Polygon drawing
 		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<const Material> material = {});

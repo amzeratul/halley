@@ -34,12 +34,7 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 				maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
 			}
 		});
-
-		boundsSprite.setImage(factory.getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
-		sizerSprite.setImage(factory.getResources(), "whitebox_outline.png").setColour(Colour4f(0.7f, 0.7f, 0.7f));
 	} else {
-		boundsSprite = {};
-		sizerSprite = {};
 		curElement = {};
 		clearDisplay();
 	}
@@ -50,11 +45,10 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 	if (curElement) {
 		auto p = painter.withAdjustedLayer(maxAdjustment + 1);
 
-		for (const auto& s: sizerSprites) {
-			//p.draw(s);
-		}
-
-		p.draw(boundsSprite);
+		p.draw([&] (Painter& painter)
+		{
+			painter.drawRect(curRect, 1.0f, Colour4f(0, 1, 0), {}, { 3.0f, 5.0f });
+		});
 	}
 }
 
@@ -83,7 +77,6 @@ void UIEditorDisplay::update(Time time, bool moved)
 
 void UIEditorDisplay::onLayout()
 {
-	makeSizerSprites();
 }
 
 void UIEditorDisplay::setSelectedWidget(const String& id)
@@ -148,25 +141,6 @@ void UIEditorDisplay::updateCurWidget()
 
 		doLayout();
 	}
-}
-
-void UIEditorDisplay::makeSizerSprites()
-{
-	sizerSprites.clear();
-	if (curSizer) {
-		const auto& rects = sizerRects[curSizer];
-		for (const auto& rect: rects) {
-			sizerSprites.push_back(sizerSprite);
-			sizerSprites.back().setPosition(rect.first.getTopLeft()).scaleTo(rect.first.getSize());
-			if (rect.second) {
-				sizerSprites.back().setColour(Colour4f(1, 1, 1, 1));
-			}
-		}
-	}
-
-	boundsSprite
-		.setPosition(curRect.getTopLeft())
-		.scaleTo(curRect.getSize());
 }
 
 void UIEditorDisplay::doLayout()

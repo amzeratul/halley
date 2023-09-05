@@ -183,7 +183,7 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	Painter::LineDashPattern pattern;
 	if (path.fromType.isDetached) {
 		pattern.onLength = 8.0f;
-		pattern.offLength = 4.0f;
+		pattern.offLength = 8.0f;
 	}
 
 	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f), {}, pattern);

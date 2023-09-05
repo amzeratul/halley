@@ -382,22 +382,22 @@ static size_t getSegmentsForArc(float radius, float arcLen)
 	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
 }
 
-void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
 	}
-	drawLine(points, width, colour, true, std::move(material));
+	drawLine(points, width, colour, true, std::move(material), pattern);
 }
 
-void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
-	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material));
+	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material), pattern);
 }
 
-void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
 	const size_t n = getSegmentsForArc(radius, arcLen);
@@ -405,32 +405,32 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
 	}
-	drawLine(points, width, colour, false, std::move(material));
+	drawLine(points, width, colour, false, std::move(material), pattern);
 }
 
-void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
-	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material));
+	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material), pattern);
 }
 
-void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
 	}
-	drawLine(points, width, colour, true, std::move(material));
+	drawLine(points, width, colour, true, std::move(material), pattern);
 }
 
-void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material)
+void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
 {
 	Vector<Vector2f> points;
 	points.push_back(rect.getTopLeft());
 	points.push_back(rect.getTopRight());
 	points.push_back(rect.getBottomRight());
 	points.push_back(rect.getBottomLeft());
-	drawLine(points, width, colour, true, std::move(material));
+	drawLine(points, width, colour, true, std::move(material), pattern);
 }
 
 void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<const Material> material)
