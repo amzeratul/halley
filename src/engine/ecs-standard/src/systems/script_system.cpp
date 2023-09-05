@@ -136,6 +136,16 @@ public:
 		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node));
 	}
 
+	void startHostThread(EntityId entityId, const String& scriptId, int nodeId) override
+	{
+		sendMessage(StartHostScriptThreadSystemMessage(scriptId, entityId, nodeId));
+	}
+
+	void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) override
+	{
+		sendMessage(CancelHostScriptThreadSystemMessage(scriptId, entityId, nodeId));
+	}
+
 	Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const override
 	{
 		// Collect all matching

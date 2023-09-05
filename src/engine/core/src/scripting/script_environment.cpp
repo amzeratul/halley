@@ -16,10 +16,6 @@
 #include <components/scriptable_component.h>
 #include <components/sprite_animation_component.h>
 
-#include <system_messages/cancel_host_script_thread_system_message.h>
-#include <system_messages/start_host_script_thread_system_message.h>
-#include <messages/return_host_script_thread_message.h>
-
 #include "halley/support/profiler.h"
 #include "nodes/script_network.h"
 
@@ -706,20 +702,12 @@ Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptEx
 
 void ScriptEnvironment::startHostThread(int node)
 {
-	SystemMessageContext context;
-	context.msg = std::make_unique<StartHostScriptThreadSystemMessage>(getCurrentGraph()->getAssetId(), currentEntity, node);
-	context.msgId = context.msg->getId();
-	context.remote = false;
-	world.sendSystemMessage(std::move(context), "Script", SystemMessageDestination::Host);
+	getInterface<IScriptSystemInterface>().startHostThread(currentEntity, currentGraph->getAssetId(), node);
 }
 
 void ScriptEnvironment::cancelHostThread(int node)
 {
-	SystemMessageContext context;
-	context.msg = std::make_unique<CancelHostScriptThreadSystemMessage>(getCurrentGraph()->getAssetId(), currentEntity, node);
-	context.msgId = context.msg->getId();
-	context.remote = false;
-	world.sendSystemMessage(std::move(context), "Script", SystemMessageDestination::Host);
+	getInterface<IScriptSystemInterface>().cancelHostThread(currentEntity, currentGraph->getAssetId(), node);
 }
 
 void ScriptEnvironment::returnHostThread()
