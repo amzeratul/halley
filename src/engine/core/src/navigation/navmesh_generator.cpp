@@ -206,6 +206,12 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 {
 	// First, eliminate repeat links to the same neighbour
 	for (auto& poly: polygons) {
+		if (!poly.polygon.isValid()) {
+			Logger::logError("Invalid polygon found during postProcessPolygons at " + toString(poly.polygon));
+			poly.alive = false;
+			continue;
+		}
+
 		auto n = poly.connections.size();
 		for (size_t i = 0; i < n;) {
 			if (poly.connections[i] >= 0 && poly.connections[i] == poly.connections[(i + 1) % n]) {
@@ -220,11 +226,17 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 				// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
 
 				assert(n >= 4); // If it's a triangle, we'll have problems...
-				poly.connections.erase(poly.connections.begin() + i);
 				auto vs = poly.polygon.getVertices();
+				auto origVs = vs;
 				vs.erase(vs.begin() + ((i + 1) % n));
 				poly.polygon.setVertices(vs);
-				--n;
+				if (poly.polygon.isValid()) {
+					poly.connections.erase(poly.connections.begin() + i);
+					--n;
+				} else {
+					// Rollback if something didn't go according to plan
+					poly.polygon.setVertices(origVs);
+				}
 			} else {
 				++i;
 			}
