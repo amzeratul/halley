@@ -999,7 +999,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
 	return data;
 }
 
@@ -1053,6 +1057,143 @@ ConfigNode ScriptGetValueFromMap::doGetData(ScriptEnvironment& environment, cons
 	}
 }
 
+
+
+Vector<IGraphNodeType::SettingType> ScriptPackMap::getSettingTypes() const
+{
+	return {
+		SettingType{ "keys", "Halley::Vector<Halley::String>", Vector<String>{} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptPackMap::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+
+	static Vector<IGraphNodeType::PinType> result;
+	result.clear();
+	result.push_back(PinType{ ET::ReadDataPin, PD::Output });
+	for (const auto& key : keys) {
+		result.push_back(PinType{ ET::ReadDataPin, PD::Input });
+	}
+	return result.span();
+}
+
+String ScriptPackMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	Vector<String> params;
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+	for (size_t i = 0; i < keys.size(); ++i) {
+		params.push_back(keys[i] + " = " + getConnectedNodeName(world, node, graph, i + 1));
+	}
+
+	return "{ " + String::concatList(params, ", ") + " }";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	Vector<String> params;
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+	for (size_t i = 0; i < keys.size(); ++i) {
+		params.push_back(keys[i] + " = " + getConnectedNodeName(world, node, graph, i + 1));
+	}
+
+	auto str = ColourStringBuilder();
+	str.append("Pack map ");
+	str.append("{ " + String::concatList(params, ", ") + " }", parameterColour);
+	return str.moveResults();
+}
+
+String ScriptPackMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Map Output";
+	} else {
+		auto keys = node.getSettings()["keys"].asVector<String>({});
+		return keys.at(elementIdx - 1);
+	}
+}
+
+ConfigNode ScriptPackMap::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+	ConfigNode::MapType result;
+
+	for (size_t i = 0; i < keys.size(); ++i) {
+		result[keys[i]] = readDataPin(environment, node, i + 1);
+	}
+
+	return result;
+}
+
+
+Vector<IGraphNodeType::SettingType> ScriptUnpackMap::getSettingTypes() const
+{
+	return {
+		SettingType{ "keys", "Halley::Vector<Halley::String>", Vector<String>{} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+
+	static Vector<IGraphNodeType::PinType> result;
+	result.clear();
+	result.push_back(PinType{ ET::ReadDataPin, PD::Input });
+	for (const auto& key : keys) {
+		result.push_back(PinType{ ET::ReadDataPin, PD::Output });
+	}
+	return result.span();
+}
+
+String ScriptUnpackMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+	return getConnectedNodeName(world, node, graph, 0) + "[\"" + keys.at(elementIdx - 1) + "\"]";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder();
+	str.append("Unpack map ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptUnpackMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Map Output";
+	} else {
+		auto keys = node.getSettings()["keys"].asVector<String>({});
+		return keys.at(elementIdx - 1);
+	}
+}
+
+ConfigNode ScriptUnpackMap::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto keys = node.getSettings()["keys"].asVector<String>({});
+	
+	auto config = readDataPin(environment, node, 0);
+	if (config.getType() == ConfigNodeType::Map) {
+		auto& map = config.asMap();
+		const auto iter = map.find(keys.at(pinN - 1));
+		if (iter != map.end()) {
+			return ConfigNode(iter->second);
+		} else {
+			return {};
+		}
+	} else {
+		return {};
+	}
+}
 
 
 gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinConfiguration(const ScriptGraphNode& node) const

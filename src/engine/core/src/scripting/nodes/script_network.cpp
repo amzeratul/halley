@@ -350,9 +350,9 @@ String ScriptTransferToHost::getPinDescription(const ScriptGraphNode& node, PinT
 String ScriptTransferToHost::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 4) {
-		return "Parameters passed by client";
+		return "clientParams";
 	} else if (elementIdx == 5) {
-		return "Value returned from host";
+		return "hostResult";
 	}
 	return "";
 }

@@ -395,6 +395,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptFromVector>());
 	addScriptNode(std::make_unique<ScriptInsertValueIntoMap>());
 	addScriptNode(std::make_unique<ScriptGetValueFromMap>());
+	addScriptNode(std::make_unique<ScriptPackMap>());
+	addScriptNode(std::make_unique<ScriptUnpackMap>());
 	addScriptNode(std::make_unique<ScriptInsertValueIntoSequence>());
 	addScriptNode(std::make_unique<ScriptHasSequenceValue>());
 	addScriptNode(std::make_unique<ScriptLuaExpression>());

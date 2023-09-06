@@ -6,7 +6,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "setPosition"; }
 		String getName() const override { return "Set Position"; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/set_position.png"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/position.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
@@ -45,7 +45,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "getPosition"; }
 		String getName() const override { return "Get Position"; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/get_position.png"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/position.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;

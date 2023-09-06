@@ -294,6 +294,38 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
 
+	class ScriptPackMap final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "packMap"; }
+		String getName() const override { return "Pack Map"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/map_pack.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
+	class ScriptUnpackMap final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "unpackMap"; }
+		String getName() const override { return "Unpack Map"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/map_unpack.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
 	class ScriptInsertValueIntoSequence final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "insertValueIntoSequence"; }
