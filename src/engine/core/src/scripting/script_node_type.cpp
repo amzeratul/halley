@@ -357,6 +357,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptBreaker>());
 	addScriptNode(std::make_unique<ScriptSignal>());
 	addScriptNode(std::make_unique<ScriptLineReset>());
+	addScriptNode(std::make_unique<ScriptDetachFlow>());
 	addScriptNode(std::make_unique<ScriptEntityAuthority>());
 	addScriptNode(std::make_unique<ScriptHostAuthority>());
 	addScriptNode(std::make_unique<ScriptIfEntityAuthority>());

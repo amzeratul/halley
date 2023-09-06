@@ -447,3 +447,28 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 		}
 	}
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptDetachFlow::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output, false, false, true, false }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptDetachFlow::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder();
+	str.append("Continues flow in a new thread, detached from this stack");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptDetachFlow::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Detach);
+}

@@ -172,4 +172,19 @@ namespace Halley {
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptLineResetData& curData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLineResetData& curData) const override;
 	};
+
+
+
+	class ScriptDetachFlow final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "detachFlow"; }
+		String getName() const override { return "Detach Flow"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/detach_flow.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
 }

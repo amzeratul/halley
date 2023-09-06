@@ -151,9 +151,13 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 					mergeThread(thread, false);
 				}
 
-				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
 				forkThread(thread, outputNodes, pendingThreads, 1);
 				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
+			} else if (result.state == ScriptNodeExecutionState::Detach) {
+				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+				advanceThread(thread, {}, 0, 0);
+				forkThread(thread, outputNodes, pendingThreads, 0);
 			} else if (result.state == ScriptNodeExecutionState::Terminate) {
 				doTerminateState();
 				return false;
