@@ -321,9 +321,8 @@ int TextInputData::getWordBoundary(int cursorPos, int dir) const
 		}
 	};
 
-	const int firstPos = cursorPos + (dir == -1 ? -1 : 0);
+	const int firstPos = std::max(cursorPos + (dir == -1 ? -1 : 0), 0);
 	const int len = static_cast<int>(text.length());
-	assert(firstPos >= 0);
 	auto category = classifyCharacter(text[firstPos]);
 
 	bool first = true;
