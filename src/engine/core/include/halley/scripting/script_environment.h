@@ -133,9 +133,9 @@ namespace Halley {
         Vector<EntityMessageData> getOutboundEntityMessages();
         Vector<ScriptExecutionRequest> getScriptExecutionRequests();
 
-        void startHostThread(int node);
+        void startHostThread(int node, ConfigNode params);
         void cancelHostThread(int node);
-        void returnHostThread();
+        void returnHostThread(ConfigNode params);
 
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);

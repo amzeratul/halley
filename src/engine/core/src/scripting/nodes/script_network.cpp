@@ -290,10 +290,11 @@ ScriptTransferToHostData::ScriptTransferToHostData(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		waiting = node["waiting"].asBool();
-		returned = node["returned"].asBool();
+		params = node["params"];
+		returnedValue = node["returnedValue"];
 	} else {
 		waiting = false;
-		returned = false;
+		returnedValue = ConfigNode();
 	}
 }
 
@@ -301,7 +302,8 @@ ConfigNode ScriptTransferToHostData::toConfigNode(const EntitySerializationConte
 {
 	ConfigNode::MapType result;
 	result["waiting"] = waiting;
-	result["returned"] = returned;
+	result["params"] = params;
+	result["returnedValue"] = returnedValue;
 	return result;
 }
 
@@ -310,10 +312,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToHost::getPinConfigurati
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{
+	const static auto data = std::array<PinType, 6>{
 		PinType{ ET::FlowPin, PD::Input },
-		PinType{ ET::FlowPin, PD::Output, false, false, true },
-		PinType{ ET::FlowPin, PD::Output }
+		PinType{ ET::FlowPin, PD::Output, false, false, true, true },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output, false, false, true, true },
+		PinType{ ET::ReadDataPin, PD::Output }
 	};
 	return data;
 }
@@ -321,7 +326,8 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToHost::getPinConfigurati
 std::pair<String, Vector<ColourOverride>> ScriptTransferToHost::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Transfer flow control to host");
+	str.append("Transfer flow control to host, passing ");
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	return str.moveResults();
 }
 
@@ -331,8 +337,24 @@ String ScriptTransferToHost::getPinDescription(const ScriptGraphNode& node, PinT
 		return "Flow on Host";
 	} else if (elementIdx == 2) {
 		return "Flow after Host returns";
+	} else if (elementIdx == 3) {
+		return "Parameters";
+	} else if (elementIdx == 4) {
+		return "Host-side parameters";
+	} else if (elementIdx == 5) {
+		return "Returned value";
 	}
 	return ScriptNodeTypeBase<ScriptTransferToHostData>::getPinDescription(node, elementType, elementIdx);
+}
+
+String ScriptTransferToHost::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 4) {
+		return "Parameters passed by client";
+	} else if (elementIdx == 5) {
+		return "Value returned from host";
+	}
+	return "";
 }
 
 void ScriptTransferToHost::doInitData(ScriptTransferToHostData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
@@ -344,9 +366,9 @@ IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& enviro
 {
 	if (!curData.waiting) {
 		curData.waiting = true;
-		curData.returned = false;
-		environment.startHostThread(node.getId());
-	} else if (curData.returned) {
+		curData.returnedValue = ConfigNode();
+		environment.startHostThread(node.getId(), readDataPin(environment, node, 3));
+	} else if (curData.returnedValue.getType() != ConfigNodeType::Undefined) {
 		curData.waiting = false;
 		return Result(ScriptNodeExecutionState::Done, 0, 2);
 	}
@@ -362,11 +384,27 @@ void ScriptTransferToHost::doDestructor(ScriptEnvironment& environment, const Sc
 	}
 }
 
-void ScriptTransferToHost::notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData) const
+ConfigNode ScriptTransferToHost::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptTransferToHostData& curData) const
+{
+	if (pinN == 4) {
+		return ConfigNode(curData.params);
+	} else if (pinN == 5) {
+		return ConfigNode(curData.returnedValue);
+	}
+
+	return {};
+}
+
+void ScriptTransferToHost::notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData, ConfigNode params) const
 {
 	if (curData.waiting) {
-		curData.returned = true;
+		curData.returnedValue = std::move(params);
 	}
+}
+
+void ScriptTransferToHost::setParameters(const ScriptGraphNode& node, ScriptTransferToHostData& curData, ConfigNode params) const
+{
+	curData.params = std::move(params);
 }
 
 
@@ -374,8 +412,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToClient::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{
-		PinType{ ET::FlowPin, PD::Input }
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
 	};
 	return data;
 }
@@ -383,12 +422,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToClient::getPinConfigura
 std::pair<String, Vector<ColourOverride>> ScriptTransferToClient::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Transfer flow control back to client");
+	str.append("Transfer flow control back to client, passing ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptTransferToClient::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	environment.returnHostThread();
+	environment.returnHostThread(readDataPin(environment, node, 1));
 	return Result(ScriptNodeExecutionState::Done);
 }

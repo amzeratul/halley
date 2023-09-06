@@ -24,6 +24,7 @@ namespace Halley {
 		Expression,
 		Terminator, // As in start/end, not as in Arnie
 		Function,
+		NetworkFlow,
 		Comment,
 		DebugDisplay,
 		Unknown

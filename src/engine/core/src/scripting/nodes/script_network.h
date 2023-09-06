@@ -36,7 +36,7 @@ namespace Halley {
 		String getId() const override { return "ifEntityAuthority"; }
 		String getName() const override { return "If Entity Authority"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/entity_authority.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
@@ -48,7 +48,7 @@ namespace Halley {
 		String getId() const override { return "ifHostAuthority"; }
 		String getName() const override { return "If Host Authority"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/host_authority.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
@@ -127,7 +127,8 @@ namespace Halley {
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 
 		bool waiting = false;
-		bool returned = false;
+		ConfigNode params;
+		ConfigNode returnedValue;
 	};
 
 	class ScriptTransferToHost final : public ScriptNodeTypeBase<ScriptTransferToHostData> {
@@ -135,18 +136,21 @@ namespace Halley {
 		String getId() const override { return "transferToHost"; }
 		String getName() const override { return "Transfer to Host"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/transfer_host.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
 		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 
 		void doInitData(ScriptTransferToHostData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const override;
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptTransferToHostData& curData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptTransferToHostData& curData) const override;
 
-		void notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData) const;
+		void notifyReturn(const ScriptGraphNode& node, ScriptTransferToHostData& curData, ConfigNode params) const;
+		void setParameters(const ScriptGraphNode& node, ScriptTransferToHostData& curData, ConfigNode params) const;
 	};
 
 	class ScriptTransferToClient final : public ScriptNodeTypeBase<void> {
@@ -154,7 +158,7 @@ namespace Halley {
 		String getId() const override { return "transferToClient"; }
 		String getName() const override { return "Transfer to Client"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/transfer_client.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;

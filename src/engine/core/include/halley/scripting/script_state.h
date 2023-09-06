@@ -147,6 +147,7 @@ namespace Halley {
 		struct ControlEvent {
 			ControlEventType type;
 			GraphNodeId nodeId;
+			ConfigNode params;
 		};
 
     	ScriptState();

@@ -26,22 +26,25 @@ namespace Halley {
 		bool isCancellable : 1;
 		bool forceHorizontal : 1;
 		bool isDetached : 1;
+		bool isNetwork : 1;
 		
-		GraphNodePinType(GraphElementType type = 0, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false)
+		GraphNodePinType(GraphElementType type = 0, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false, bool isNetwork = false)
 			: type(type)
 			, direction(direction)
 			, isCancellable(cancellable)
 			, forceHorizontal(forceHorizontal)
 			, isDetached(isDetached)
+			, isNetwork(isNetwork)
 		{}
 
 		template <typename T>
-		GraphNodePinType(T type = T(0), GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false)
+		GraphNodePinType(T type = T(0), GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false, bool isDetached = false, bool isNetwork = false)
 			: type(static_cast<GraphElementType>(type))
 			, direction(direction)
 			, isCancellable(cancellable)
 			, forceHorizontal(forceHorizontal)
 			, isDetached(isDetached)
+			, isNetwork(isNetwork)
 		{}
 
 		[[nodiscard]] bool operator==(const GraphNodePinType& other) const

@@ -15,14 +15,16 @@ public:
 	Halley::String script{};
 	Halley::EntityId entity{};
 	int nodeId{};
+	Halley::ConfigNode params{};
 
 	StartHostScriptThreadSystemMessage() {
 	}
 
-	StartHostScriptThreadSystemMessage(Halley::String script, Halley::EntityId entity, int nodeId)
+	StartHostScriptThreadSystemMessage(Halley::String script, Halley::EntityId entity, int nodeId, Halley::ConfigNode params)
 		: script(std::move(script))
 		, entity(std::move(entity))
 		, nodeId(std::move(nodeId))
+		, params(std::move(params))
 	{
 	}
 
@@ -42,12 +44,14 @@ public:
 		s << script;
 		s << entity;
 		s << nodeId;
+		s << params;
 	}
 
 	void deserialize(Halley::Deserializer& s) override final {
 		s >> script;
 		s >> entity;
 		s >> nodeId;
+		s >> params;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) override final {
@@ -55,5 +59,6 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(script)>::deserialize(script, Halley::String{}, context, node, "", "script", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(entity)>::deserialize(entity, Halley::EntityId{}, context, node, "", "entity", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(nodeId)>::deserialize(nodeId, int{}, context, node, "", "nodeId", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(params)>::deserialize(params, Halley::ConfigNode{}, context, node, "", "params", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 	}
 };

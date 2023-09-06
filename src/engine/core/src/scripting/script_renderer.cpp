@@ -466,6 +466,8 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 		return Colour4f(0.75f, 0.35f, 0.97f);
 	case ScriptNodeClassification::Function:
 		return Colour4f(1.00f, 0.49f, 0.68f);
+	case ScriptNodeClassification::NetworkFlow:
+		return Colour4f(0.15f, 0.85f, 0.98f);
 	case ScriptNodeClassification::Comment:
 		return Colour4f(0.25f, 0.25f, 0.3f);
 	case ScriptNodeClassification::DebugDisplay:
@@ -516,7 +518,7 @@ Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
 {
 	switch (ScriptNodeElementType(pinType.type)) {
 	case ScriptNodeElementType::FlowPin:
-		return pinType.isCancellable ? Colour4f(0.75f, 0.0f, 0.99f) : Colour4f(0.75f, 0.75f, 0.99f);
+		return pinType.isCancellable ? Colour4f(0.75f, 0.0f, 0.99f) : (pinType.isNetwork ? Colour4f(0.15f, 0.85f, 0.98f) : Colour4f(0.75f, 0.75f, 0.99f));
 	case ScriptNodeElementType::ReadDataPin:
 		return Colour4f(0.91f, 0.55f, 0.2f);
 	case ScriptNodeElementType::WriteDataPin:

@@ -464,29 +464,31 @@ void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pe
 
 void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread>& pending)
 {
-	for (const auto& event: currentState->processControlEvents()) {
+	for (auto& event: currentState->processControlEvents()) {
 		if (event.type == ScriptState::ControlEventType::StartThread) {
 			const auto& node = currentGraph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
+
 			const auto outputs = nodeType.getOutputNodes(node, 1);
-			const auto dstNode = outputs[0].dstNode;
-			if (dstNode) {
+			if (const auto dstNode = outputs[0].dstNode) {
 				const auto dstPin = outputs[0].inputPin;
 				pending.push_back(startThread(ScriptStateThread(*dstNode, dstPin)));
 			}
+
+			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));
+			dynamic_cast<const ScriptTransferToHost&>(nodeType).setParameters(node, *nodeData, std::move(event.params));
 		} else if (event.type == ScriptState::ControlEventType::CancelThread) {
 			const auto& node = currentGraph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 			const auto outputs = nodeType.getOutputNodes(node, 1);
-			const auto dstNode = outputs[0].dstNode;
-			if (dstNode) {
+			if (const auto dstNode = outputs[0].dstNode) {
 				abortCodePath(*dstNode, {}, true);
 			}
 		} else if (event.type == ScriptState::ControlEventType::NotifyReturn) {
 			const auto& node = currentGraph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));
-			dynamic_cast<const ScriptTransferToHost&>(nodeType).notifyReturn(node, *nodeData);
+			dynamic_cast<const ScriptTransferToHost&>(nodeType).notifyReturn(node, *nodeData, std::move(event.params));
 		}
 	}
 }
@@ -700,9 +702,9 @@ Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptEx
 	return std::move(scriptExecutionRequestOutbox);
 }
 
-void ScriptEnvironment::startHostThread(int node)
+void ScriptEnvironment::startHostThread(int node, ConfigNode params)
 {
-	getInterface<IScriptSystemInterface>().startHostThread(currentEntity, currentGraph->getAssetId(), node);
+	getInterface<IScriptSystemInterface>().startHostThread(currentEntity, currentGraph->getAssetId(), node, std::move(params));
 }
 
 void ScriptEnvironment::cancelHostThread(int node)
@@ -710,7 +712,7 @@ void ScriptEnvironment::cancelHostThread(int node)
 	getInterface<IScriptSystemInterface>().cancelHostThread(currentEntity, currentGraph->getAssetId(), node);
 }
 
-void ScriptEnvironment::returnHostThread()
+void ScriptEnvironment::returnHostThread(ConfigNode params)
 {
 	const auto threadRootId = currentThread->getStack()[0].node;
 
@@ -731,7 +733,7 @@ void ScriptEnvironment::returnHostThread()
 	}
 
 	if (rootNodeId) {
-		getInterface<IScriptSystemInterface>().sendReturnHostThread(currentEntity, currentGraph->getAssetId(), *rootNodeId);
+		getInterface<IScriptSystemInterface>().sendReturnHostThread(currentEntity, currentGraph->getAssetId(), *rootNodeId, std::move(params));
 	}
 }
 

@@ -51,7 +51,7 @@ public:
 	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
 	{
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId) });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params) });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
@@ -60,7 +60,7 @@ public:
 	void onMessageReceived(CancelHostScriptThreadSystemMessage msg) override
 	{
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId) });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode() });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
@@ -69,7 +69,7 @@ public:
 	void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) override
 	{
 		if (const auto scriptable = getScriptState(e, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId) });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params) });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
 		}
@@ -131,14 +131,14 @@ public:
 		std_ex::erase_if_value(scriptable->scriptable.activeStates, [](const auto& state) { return state->isDead(); });
 	}
 
-	void sendReturnHostThread(EntityId target, const String& scriptId, int node) override
+	void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) override
 	{
-		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node));
+		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node, std::move(params)));
 	}
 
-	void startHostThread(EntityId entityId, const String& scriptId, int nodeId) override
+	void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) override
 	{
-		sendMessage(StartHostScriptThreadSystemMessage(scriptId, entityId, nodeId));
+		sendMessage(StartHostScriptThreadSystemMessage(scriptId, entityId, nodeId, std::move(params)));
 	}
 
 	void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) override
