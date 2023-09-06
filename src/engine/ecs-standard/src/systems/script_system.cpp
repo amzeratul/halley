@@ -246,7 +246,20 @@ private:
 
 	void eraseDeadScripts(ScriptableFamily& e)
 	{
-		std_ex::erase_if_value(e.scriptable.activeStates, [] (const auto& state) { return state->isDead(); });
+		// Defer evaluation to when it's needed to avoid querying the world too much
+		std::optional<bool> isLocalCache;
+		auto isLocal = [&]() -> bool
+		{
+			if (!isLocalCache) {
+				isLocalCache = getWorld().getEntity(e.entityId).isLocal();
+			}
+			return *isLocalCache;
+		};
+
+		std_ex::erase_if_value(e.scriptable.activeStates, [&](const auto& state)
+		{
+			return state->isDead() && isLocal();
+		});
 	}
 
 	bool fulfillScriptExecutionRequests()
