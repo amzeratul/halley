@@ -372,10 +372,25 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
 	if (singleton) {
-		const size_t nPlaying = emitter.forVoices(audioObjectId, [&] (AudioVoice&) {});
-		if (nPlaying > 0) {
-			return false;
-		}
+		/*
+		 * NOTE: This change is done to work around a project-specific issue.
+		 *
+		 * !!! We *DO NOT* want to merge this back to the main branch. !!!
+		 *
+		 * Instead of not running the new action in case there are one or more voices
+		 * active already with the same audio object, we stop all those running voices
+		 * and start playing the new one.
+		 *
+		 * original code:
+		 *
+		 * const size_t nPlaying = emitter.forVoices(audioObjectId, [&] (AudioVoice&) {});
+		 * if (nPlaying > 0) {
+		 *     return false;
+		 * }
+		 */
+		emitter.forVoices(audioObjectId, [] (AudioVoice& v) {
+			v.stop(AudioFade());
+		});
 	}
 
 	const auto gainRange = object->getGain() * playGain;
