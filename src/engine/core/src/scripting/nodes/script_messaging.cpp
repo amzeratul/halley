@@ -1,5 +1,6 @@
 #include "script_messaging.h"
 
+#include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
 #include "halley/scripting/script_message.h"
 using namespace Halley;
@@ -322,6 +323,51 @@ std::pair<String, int> ScriptReceiveMessage::getMessageIdAndParams(const ScriptG
 }
 
 
+ScriptSendSystemMessageData::ScriptSendSystemMessageData()
+{
+	aliveFlag = std::make_shared<bool>(true);
+}
+
+ScriptSendSystemMessageData::ScriptSendSystemMessageData(const ConfigNode& node)
+{
+	aliveFlag = std::make_shared<bool>(true);
+	if (node.getType() == ConfigNodeType::Map) {
+		waitingForResult = node["waitingForResult"].asBool(false);
+		gotResult = node["gotResult"].asBool(false);
+		result = node["result"];
+	} else {
+		*this = ScriptSendSystemMessageData();
+	}
+}
+
+ScriptSendSystemMessageData::~ScriptSendSystemMessageData()
+{
+	if (aliveFlag) {
+		*aliveFlag = false;
+	}
+}
+
+ScriptSendSystemMessageData::ScriptSendSystemMessageData(ScriptSendSystemMessageData&& other)
+{
+	*this = std::move(other);
+}
+
+ScriptSendSystemMessageData& ScriptSendSystemMessageData::operator=(ScriptSendSystemMessageData&& other)
+{
+	aliveFlag = std::move(other.aliveFlag);
+	result = std::move(other.result);
+	gotResult = std::move(other.gotResult);
+	waitingForResult = std::move(other.waitingForResult);
+}
+
+ConfigNode ScriptSendSystemMessageData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType v;
+	v["result"] = result;
+	v["gotResult"] = gotResult;
+	v["waitingForResult"] = waitingForResult;
+	return v;
+}
 
 Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() const
 {
@@ -332,7 +378,7 @@ Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() 
 }
 
 namespace {
-	constexpr static size_t maxMsgParams = 5;
+	constexpr static size_t maxMsgParams = 8;
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfiguration(const ScriptGraphNode& node) const
@@ -341,9 +387,18 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfigu
 
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
-		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
-	return gsl::span<const PinType>(data).subspan(0, 2 + std::min(msgType.members.size(), maxMsgParams));
+
+	static Vector<PinType> data;
+	data.clear();
+	data.push_back(PinType{ ET::FlowPin, PD::Input });
+	data.push_back(PinType{ ET::FlowPin, PD::Output });
+	for (size_t i = 0; i < msgType.members.size(); ++i) {
+		data.push_back(PinType{ ET::ReadDataPin, PD::Input });
+	}
+	if (!msgType.returnType.isEmpty()) {
+		data.push_back(PinType{ ET::ReadDataPin, PD::Output });
+	}
+	return data.span();
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -376,16 +431,52 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 
 String ScriptSendSystemMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
-	if (elementIdx >= 2) {
-		const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
-		return msgType.members.at(elementIdx - 2);
-	}
+	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 
-	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	const auto n = static_cast<int>(msgType.members.size());
+	if (elementIdx >= 2 + n) {
+		return "Return";
+	} else if (elementIdx >= 2) {
+		return msgType.members.at(elementIdx - 2);
+	} else {
+		return ScriptNodeTypeBase<ScriptSendSystemMessageData>::getPinDescription(node, elementType, elementIdx);
+	}
 }
 
-IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+void ScriptSendSystemMessage::doInitData(ScriptSendSystemMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
+	data = ScriptSendSystemMessageData(nodeData);
+}
+
+template <typename T>
+std::function<void(std::byte*, Bytes)> ScriptSendSystemMessage::makeCallback(ScriptSendSystemMessageData& curData) const
+{
+	return [&curData, aliveFlag = curData.aliveFlag] (std::byte* data, Bytes serializedData)
+	{
+		if (*aliveFlag) {
+			Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+			if (data) {
+				curData.result = ConfigNode(std::move(*reinterpret_cast<T*>(data)));
+				curData.gotResult = true;
+			} else {
+				auto options = SerializerOptions(SerializerOptions::maxVersion);
+				curData.result = ConfigNode(Deserializer::fromBytes<T>(serializedData, std::move(options)));
+				curData.gotResult = true;
+			}
+		}
+	};
+}
+
+IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSendSystemMessageData& curData) const
+{
+	if (curData.waitingForResult) {
+		if (curData.gotResult) {
+			return Result(ScriptNodeExecutionState::Done);
+		} else {
+			return Result(ScriptNodeExecutionState::Executing, time);
+		}
+	}
+
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 	const auto targetSystem = node.getSettings()["system"].asString("");
 
@@ -399,11 +490,39 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 			break;
 		}
 	}
-	environment.sendSystemMessage(ScriptEnvironment::SystemMessageData{ targetSystem, msgType.message, std::move(args) });
 
-	return Result(ScriptNodeExecutionState::Done);
+	std::function<void(std::byte*, Bytes)> callback;
+	if (!msgType.returnType.isEmpty()) {
+		if (msgType.returnType == "Halley::ConfigNode") {
+			callback = makeCallback<ConfigNode>(curData);
+		} else if (msgType.returnType == "bool") {
+			callback = makeCallback<bool>(curData);
+		} else if (msgType.returnType == "int") {
+			callback = makeCallback<int>(curData);
+		} else if (msgType.returnType == "float") {
+			callback = makeCallback<float>(curData);
+		} else if (msgType.returnType == "Halley::String") {
+			callback = makeCallback<String>(curData);
+		} else if (msgType.returnType == "Halley::Vector2f") {
+			callback = makeCallback<Vector2f>(curData);
+		}
+	}
+	const bool shouldWait = !!callback;
+
+	environment.sendSystemMessage(ScriptEnvironment::SystemMessageData{ targetSystem, msgType.message, std::move(args), callback });
+
+	if (shouldWait) {
+		curData.waitingForResult = true;
+		return Result(ScriptNodeExecutionState::Executing, time);
+	} else {
+		return Result(ScriptNodeExecutionState::Done);
+	}
 }
 
+ConfigNode ScriptSendSystemMessage::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN,	ScriptSendSystemMessageData& curData) const
+{
+	return ConfigNode(curData.result);
+}
 
 
 Vector<IScriptNodeType::SettingType> ScriptSendEntityMessage::getSettingTypes() const

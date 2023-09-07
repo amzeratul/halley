@@ -67,7 +67,27 @@ namespace Halley {
 		std::pair<String, int> getMessageIdAndParams(const ScriptGraphNode& node) const;
 	};
 
-	class ScriptSendSystemMessage final : public ScriptNodeTypeBase<void> {
+
+	class ScriptSendSystemMessageData final : public ScriptStateData<ScriptSendSystemMessageData> {
+	public:
+		ConfigNode result;
+		bool waitingForResult = false;
+		bool gotResult = false;
+		std::shared_ptr<bool> aliveFlag;
+
+		ScriptSendSystemMessageData();
+		ScriptSendSystemMessageData(const ConfigNode& node);
+		~ScriptSendSystemMessageData() override;
+
+		ScriptSendSystemMessageData(ScriptSendSystemMessageData&& other);
+		ScriptSendSystemMessageData(const ScriptSendSystemMessageData& other) = delete;
+		ScriptSendSystemMessageData& operator=(ScriptSendSystemMessageData&& other);
+		ScriptSendSystemMessageData& operator=(const ScriptSendSystemMessageData& other) = delete;
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptSendSystemMessage final : public ScriptNodeTypeBase<ScriptSendSystemMessageData> {
 	public:
 		String getId() const override { return "sendSystemMessage"; }
 		String getName() const override { return "Send System Msg"; }
@@ -79,7 +99,12 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+		void doInitData(ScriptSendSystemMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSendSystemMessageData& curData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptSendSystemMessageData& curData) const override;
+
+	private:
+		template <typename T> std::function<void(std::byte*, Bytes)> makeCallback(ScriptSendSystemMessageData& curData) const;
 	};
 
 	class ScriptSendEntityMessage final : public ScriptNodeTypeBase<void> {

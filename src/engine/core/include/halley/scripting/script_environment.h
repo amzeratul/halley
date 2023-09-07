@@ -42,6 +42,7 @@ namespace Halley {
 	        String targetSystem;
             String messageName;
             ConfigNode messageData;
+            std::function<void(std::byte* data, Bytes serializedData)> callback;
         };
 
         enum class ScriptExecutionRequestType {

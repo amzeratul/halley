@@ -50,6 +50,11 @@ ConfigNode::ConfigNode(const std::string_view& value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(const char* value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(bool value)
 {
 	operator=(value);

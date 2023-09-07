@@ -98,6 +98,7 @@ ScriptEntityMessageType::ScriptEntityMessageType(const ConfigNode& node)
 	if (node.getType() == ConfigNodeType::Map) {
 		message = node["message"].asString("");
 		members = node["members"].asVector<String>({});
+		returnType = node["returnType"].asString("");
 	}
 }
 
@@ -106,6 +107,7 @@ ConfigNode ScriptEntityMessageType::toConfig() const
 	ConfigNode::MapType result;
 	result["message"] = message;
 	result["members"] = members;
+	result["returnType"] = returnType;
 	return result;
 }
 

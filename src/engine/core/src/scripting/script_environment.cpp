@@ -672,6 +672,7 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 	context.msg = std::move(msg);
 	context.msgId = id;
 	context.remote = false;
+	context.callback = std::move(message.callback);
 
 	world.sendSystemMessage(std::move(context), message.targetSystem, dst);
 }

@@ -1746,6 +1746,12 @@ private:
 				members.push_back(ConfigNode(m.name));
 			}
 			result["members"] = std::move(members);
+
+			if (systemMessage) {
+				if (auto* sysMsg = static_cast<const SystemMessageSchema*>(msg)) {
+					result["returnType"] = sysMsg->returnType;
+				}
+			}
 		}
 		
 		return result;

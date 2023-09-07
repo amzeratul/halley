@@ -57,6 +57,18 @@ bool WorldPosition::operator!=(const WorldPosition& other) const
 	return pos != other.pos || subWorld != other.subWorld;
 }
 
+void WorldPosition::serialize(Serializer& s) const
+{
+	s << pos;
+	s << subWorld;
+}
+
+void WorldPosition::deserialize(Deserializer& s)
+{
+	s >> pos;
+	s >> subWorld;
+}
+
 ConfigNode ConfigNodeSerializer<WorldPosition>::serialize(const WorldPosition& target, const EntitySerializationContext& context)
 {
 	return target.toConfigNode();

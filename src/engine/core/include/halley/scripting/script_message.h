@@ -40,6 +40,7 @@ namespace Halley {
 	public:
         String message;
         Vector<String> members;
+        String returnType;
 
         ScriptEntityMessageType() = default;
         ScriptEntityMessageType(const ConfigNode& node);

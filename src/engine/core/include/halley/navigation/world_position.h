@@ -2,6 +2,7 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/vector2.h"
 #include "halley/bytes/config_node_serializer_base.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley {
 	class EntitySerializationContext;
@@ -27,6 +28,9 @@ namespace Halley {
 
 		bool operator==(const WorldPosition& other) const;
 		bool operator!=(const WorldPosition& other) const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 
 	template<>

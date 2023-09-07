@@ -134,6 +134,7 @@ namespace Halley {
 		ConfigNode(SequenceType entryList);
 		explicit ConfigNode(String value);
 		explicit ConfigNode(const std::string_view& value);
+		explicit ConfigNode(const char* value);
 		explicit ConfigNode(bool value);
 		explicit ConfigNode(int value);
 		explicit ConfigNode(uint32_t value);
