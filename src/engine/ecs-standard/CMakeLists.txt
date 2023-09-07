@@ -15,6 +15,7 @@ set(SOURCES
     "src/systems/network_send_system.cpp"
     "src/systems/particle_system.cpp"
     "src/systems/script_system.cpp"
+    "src/systems/scriptable_query_system.cpp"
     "src/systems/sprite_animation_system.cpp"
 )
 

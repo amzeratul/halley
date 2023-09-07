@@ -1,4 +1,4 @@
-// Halley codegen version 123
+// Halley codegen version 124
 #pragma once
 
 #include <halley.hpp>
@@ -9,7 +9,6 @@
 #include "components/scriptable_component.h"
 #include "components/embedded_script_component.h"
 #include "components/script_target_component.h"
-#include "components/script_tag_target_component.h"
 #include "messages/start_script_message.h"
 #include "messages/terminate_script_message.h"
 #include "messages/terminate_scripts_with_tag_message.h"
@@ -64,19 +63,6 @@ public:
 		}
 	};
 
-	class TagTargetsFamily : public Halley::FamilyBaseOf<TagTargetsFamily> {
-	public:
-		const ScriptTagTargetComponent& scriptTagTarget;
-	
-		using Type = Halley::FamilyType<ScriptTagTargetComponent>;
-	
-	protected:
-		TagTargetsFamily(const ScriptTagTargetComponent& scriptTagTarget)
-			: scriptTagTarget(scriptTagTarget)
-		{
-		}
-	};
-
 	virtual void onMessageReceived(const StartScriptMessage& msg, ScriptableFamily& e) = 0;
 
 	virtual void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) = 0;
@@ -94,7 +80,7 @@ public:
 	virtual void onMessageReceived(CancelHostScriptThreadSystemMessage msg) = 0;
 
 	ScriptSystemBase()
-		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily, &tagTargetsFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex})
+		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex})
 	{
 		static_assert(std::is_final_v<T>, "System must be final.");
 	}
@@ -158,7 +144,6 @@ protected:
 	Halley::FamilyBinding<ScriptableFamily> scriptableFamily{};
 	Halley::FamilyBinding<EmbeddedScriptFamily> embeddedScriptFamily{};
 	Halley::FamilyBinding<TargetFamily> targetFamily{};
-	Halley::FamilyBinding<TagTargetsFamily> tagTargetsFamily{};
 
 private:
 	friend Halley::System* halleyCreateScriptSystem();
@@ -172,7 +157,6 @@ private:
 		initialiseFamilyBinding<T, ScriptableFamily>(scriptableFamily, static_cast<T*>(this));
 		initialiseFamilyBinding<T, EmbeddedScriptFamily>(embeddedScriptFamily, static_cast<T*>(this));
 		initialiseFamilyBinding<T, TargetFamily>(targetFamily, static_cast<T*>(this));
-		initialiseFamilyBinding<T, TagTargetsFamily>(tagTargetsFamily, static_cast<T*>(this));
 	}
 
 	void updateBase(Halley::Time time) override final {

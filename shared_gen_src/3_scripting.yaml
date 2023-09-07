@@ -153,8 +153,6 @@ system:
     - EmbeddedScript: write
   - target:
     - ScriptTarget: read
-  - tagTargets:
-    - ScriptTagTarget: read
   strategy: global
   services:
   - ScriptingService
@@ -174,5 +172,18 @@ system:
   - TerminateScriptsWithTag: receive
   - StartHostScriptThread: send receive
   - CancelHostScriptThread: send receive
+
+---
+
+system:
+  name: ScriptableQuery
+  families:
+  - scriptable:
+    - Scriptable: read
+  - tagTargets:
+    - ScriptTagTarget: read
+  strategy: global
+  access:
+  - world
 
 ...

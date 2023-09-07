@@ -39,6 +39,7 @@ System* halleyCreateNetworkReceiveSystem();
 System* halleyCreateNetworkSendSystem();
 System* halleyCreateParticleSystem();
 System* halleyCreateScriptSystem();
+System* halleyCreateScriptableQuerySystem();
 System* halleyCreateSpriteAnimationSystem();
 
 
@@ -46,13 +47,14 @@ class GameCodegenFunctions : public CodegenFunctions {
 public:
 	Vector<SystemReflector> makeSystemReflectors() override {
 		Vector<SystemReflector> result;
-		result.reserve(7);
+		result.reserve(8);
 		result.push_back(SystemReflector("AudioSystem", &halleyCreateAudioSystem));
 		result.push_back(SystemReflector("NetworkLockSystem", &halleyCreateNetworkLockSystem));
 		result.push_back(SystemReflector("NetworkReceiveSystem", &halleyCreateNetworkReceiveSystem));
 		result.push_back(SystemReflector("NetworkSendSystem", &halleyCreateNetworkSendSystem));
 		result.push_back(SystemReflector("ParticleSystem", &halleyCreateParticleSystem));
 		result.push_back(SystemReflector("ScriptSystem", &halleyCreateScriptSystem));
+		result.push_back(SystemReflector("ScriptableQuerySystem", &halleyCreateScriptableQuerySystem));
 		result.push_back(SystemReflector("SpriteAnimationSystem", &halleyCreateSpriteAnimationSystem));
 		return result;
 	}
