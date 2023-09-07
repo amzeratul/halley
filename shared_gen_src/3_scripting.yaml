@@ -16,6 +16,10 @@ component:
       type: 'Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>>'
       canEdit: true
       canSave: false
+  - scriptsStarted:
+      type: 'Halley::Vector<Halley::String>'
+      canEdit: false
+      canSave: false
   - variables:
       type: 'Halley::ScriptVariables'
       canEdit: false

@@ -1,4 +1,4 @@
-// Halley codegen version 123
+// Halley codegen version 124
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -13,6 +13,7 @@ public:
 	Halley::HashMap<Halley::String, std::shared_ptr<Halley::ScriptState>> activeStates{};
 	Halley::Vector<Halley::String> tags{};
 	Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>> scripts{};
+	Halley::Vector<Halley::String> scriptsStarted{};
 	Halley::ScriptVariables variables{};
 
 	ScriptableComponent() {

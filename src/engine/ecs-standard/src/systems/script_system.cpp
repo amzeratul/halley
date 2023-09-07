@@ -216,11 +216,16 @@ private:
 			}
 		}
 
-		for (auto& e : scriptableFamily) {
-			for (const auto& script : e.scriptable.scripts) {
-				const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv) { return kv.second->getScriptGraphPtr() == script.get().get(); });
-				if (!running) {
-					addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
+		for (auto& e: scriptableFamily) {
+			if (getWorld().getEntity(e.entityId).isLocal()) {
+				for (const auto& script : e.scriptable.scripts) {
+					if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
+						e.scriptable.scriptsStarted.push_back(script.getAssetId());
+						const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv) { return kv.second->getScriptGraphPtr() == script.get().get(); });
+						if (!running) {
+							addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
+						}
+					}
 				}
 			}
 			for (auto& state: e.scriptable.activeStates) {
