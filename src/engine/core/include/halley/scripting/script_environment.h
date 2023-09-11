@@ -8,6 +8,7 @@
 #include "halley/navigation/world_position.h"
 
 namespace Halley {
+	class VariableTable;
 	class LuaState;
 	class UIWidget;
 	class InputDevice;
@@ -93,6 +94,9 @@ namespace Halley {
         ScriptVariables& getVariables(ScriptVariableScope scope);
         const ScriptVariables& getVariables(ScriptVariableScope scope) const;
         const ScriptVariables& getEntityVariables(EntityId entityId) const;
+
+        void setVariableTable(const VariableTable& variableTable);
+        const VariableTable* getVariableTable() const;
 
     	virtual void setDirection(EntityId entityId, const String& direction);
 
@@ -180,6 +184,8 @@ namespace Halley {
         Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
 
         ScriptTargetRetriever scriptTargetRetriever;
+
+        const VariableTable* variableTable = nullptr;
 
     private:
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);

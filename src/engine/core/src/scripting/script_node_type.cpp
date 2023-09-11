@@ -334,6 +334,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptVariable>());
 	addScriptNode(std::make_unique<ScriptEntityVariable>());
 	addScriptNode(std::make_unique<ScriptLiteral>());
+	addScriptNode(std::make_unique<ScriptVariableTable>());
 	addScriptNode(std::make_unique<ScriptColourLiteral>());
 	addScriptNode(std::make_unique<ScriptComparison>());
 	addScriptNode(std::make_unique<ScriptArithmetic>());

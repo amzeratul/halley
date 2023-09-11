@@ -3,6 +3,7 @@
 #include "halley/maths/ops.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
+#include "halley/utils/variable.h"
 using namespace Halley;
 
 String ScriptVariable::getLargeLabel(const ScriptGraphNode& node) const
@@ -206,6 +207,54 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 		}
 	}
 	return ConfigNode(value);
+}
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptVariableTable::getSettingTypes() const
+{
+	return {
+		SettingType{ "variable", "Halley::String", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+String ScriptVariableTable::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["variable"].asString("");
+}
+
+String ScriptVariableTable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "variableTable:" + node.getSettings()["variable"].asString("");
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptVariableTable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Variable ");
+	str.append(node.getSettings()["variable"].asString(""), settingColour);
+	str.append(" on variable table");
+	return str.moveResults();
+}
+
+ConfigNode ScriptVariableTable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto* vt = environment.getVariableTable();
+	if (vt) {
+		const auto key = node.getSettings()["variable"].asString("");
+		return ConfigNode(vt->getRawStorage(key));
+	}
+	return {};
 }
 
 

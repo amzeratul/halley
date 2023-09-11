@@ -904,6 +904,16 @@ const ScriptVariables& ScriptEnvironment::getEntityVariables(EntityId entityId) 
 	return dummy;
 }
 
+void ScriptEnvironment::setVariableTable(const VariableTable& variableTable)
+{
+	this->variableTable = &variableTable;
+}
+
+const VariableTable* ScriptEnvironment::getVariableTable() const
+{
+	return variableTable;
+}
+
 ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
 {
 	currentGraph = graphState.getScriptGraphPtr();
