@@ -230,7 +230,8 @@ gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguratio
 
 String ScriptVariableTable::getLargeLabel(const ScriptGraphNode& node) const
 {
-	return node.getSettings()["variable"].asString("");
+	const auto split = node.getSettings()["variable"].asString("").split('.');
+	return split.empty() ? "" : split.back();
 }
 
 String ScriptVariableTable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
