@@ -48,8 +48,16 @@ ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const Scrip
 
 void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
-	auto& vars = environment.getVariables(getScope(node));
-	vars.setVariable(node.getSettings()["variable"].asString(""), std::move(data));
+	const auto scope = getScope(node);
+	const auto variable = node.getSettings()["variable"].asString("");
+
+	if (scope != ScriptVariableScope::Local && !environment.hasNetworkAuthorityOver(environment.getCurrentEntityId())) {
+		Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Script/Entity Variable \"" + variable + "\", not owned by this client");
+		return;
+	}
+
+	auto& vars = environment.getVariables(scope);
+	vars.setVariable(variable, std::move(data));
 }
 
 ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
@@ -322,6 +330,12 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 	auto e = environment.tryGetEntity(readEntityId(environment, node, 0));
 	if (e.isValid()) {
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+
+		if (!environment.hasNetworkAuthorityOver(e)) {
+			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + type.getName() + "\", not owned by this client");
+			return;
+		}
+
 		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
 		EntitySerializationContext context;
 		context.entityContext = &environment;

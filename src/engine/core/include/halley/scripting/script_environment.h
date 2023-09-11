@@ -116,6 +116,7 @@ namespace Halley {
 
         void setHostNetworkAuthority(bool isHost);
         bool hasNetworkAuthorityOver(EntityId id);
+        bool hasNetworkAuthorityOver(EntityRef entity) const;
         bool hasHostNetworkAuthority() const;
 
     	int getCurrentFrameNumber() const;

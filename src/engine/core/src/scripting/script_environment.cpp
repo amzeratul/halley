@@ -592,7 +592,12 @@ void ScriptEnvironment::setHostNetworkAuthority(bool host)
 
 bool ScriptEnvironment::hasNetworkAuthorityOver(EntityId id)
 {
-	return !world.isEntityNetworkRemote(tryGetEntity(id));
+	return hasNetworkAuthorityOver(tryGetEntity(id));
+}
+
+bool ScriptEnvironment::hasNetworkAuthorityOver(EntityRef entity) const
+{
+	return !world.isEntityNetworkRemote(entity);
 }
 
 bool ScriptEnvironment::hasHostNetworkAuthority() const
