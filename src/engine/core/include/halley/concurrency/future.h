@@ -156,7 +156,7 @@ namespace Halley
 			}
 
 			if constexpr (std::is_copy_constructible<T0>::value) {
-				return *data;
+				return T0(*data);
 			} else {
 				auto result = std::move(*data);
 				data.reset();

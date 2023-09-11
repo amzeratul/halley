@@ -632,6 +632,19 @@ void ScriptState::offsetToNodeRange(Range<GraphNodeId> nodeRange)
 	nodeState.resize(nodeRange.getLength());
 }
 
+void ScriptState::setFutureNodeValue(GraphNodeId id, std::optional<Future<ConfigNode>> future)
+{
+	futureNodeValues[id] = std::move(future);
+}
+
+std::optional<Future<ConfigNode>> ScriptState::getFutureNodeValue(GraphNodeId id)
+{
+	if (const auto iter = futureNodeValues.find(id); iter != futureNodeValues.end()) {
+		return iter->second;
+	}
+	return std::nullopt;
+}
+
 ScriptState::NodeState& ScriptState::getNodeState(GraphNodeId nodeId)
 {
 	return nodeState.at(nodeId);

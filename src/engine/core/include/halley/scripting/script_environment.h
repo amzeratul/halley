@@ -154,6 +154,9 @@ namespace Halley {
             return world.getInterface<T>();
 		}
 
+        void setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future);
+        std::optional<Future<ConfigNode>> getFutureNodeValue(const ScriptGraphNode& node);
+
     protected:
 		const HalleyAPI& api;
     	World& world;

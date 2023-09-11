@@ -70,19 +70,11 @@ namespace Halley {
 
 	class ScriptSendSystemMessageData final : public ScriptStateData<ScriptSendSystemMessageData> {
 	public:
-		ConfigNode result;
 		bool waitingForResult = false;
-		bool gotResult = false;
-		std::shared_ptr<bool> aliveFlag;
+		ConfigNode result;
 
-		ScriptSendSystemMessageData();
+		ScriptSendSystemMessageData() = default;
 		ScriptSendSystemMessageData(const ConfigNode& node);
-		~ScriptSendSystemMessageData() override;
-
-		ScriptSendSystemMessageData(ScriptSendSystemMessageData&& other);
-		ScriptSendSystemMessageData(const ScriptSendSystemMessageData& other) = delete;
-		ScriptSendSystemMessageData& operator=(ScriptSendSystemMessageData&& other);
-		ScriptSendSystemMessageData& operator=(const ScriptSendSystemMessageData& other) = delete;
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
@@ -104,7 +96,7 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptSendSystemMessageData& curData) const override;
 
 	private:
-		template <typename T> std::function<void(std::byte*, Bytes)> makeCallback(ScriptSendSystemMessageData& curData) const;
+		template <typename T> std::function<void(std::byte*, Bytes)> makeCallback(ScriptEnvironment& environment, const ScriptGraphNode& node) const;
 	};
 
 	class ScriptSendEntityMessage final : public ScriptNodeTypeBase<void> {

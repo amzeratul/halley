@@ -213,6 +213,9 @@ namespace Halley {
 
 		void offsetToNodeRange(Range<GraphNodeId> nodeRange);
 
+    	void setFutureNodeValue(GraphNodeId id, std::optional<Future<ConfigNode>> future);
+		std::optional<Future<ConfigNode>> getFutureNodeValue(GraphNodeId id);
+
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -236,6 +239,8 @@ namespace Halley {
 		Vector<ScriptMessage> messageInbox;
 		Vector<ControlEvent> controlEventInbox;
 		Vector<ConfigNode> startParams;
+
+		HashMap<GraphNodeId, std::optional<Future<ConfigNode>>> futureNodeValues;
 
     	void onNodeStartedIntrospection(GraphNodeId nodeId);
     	void onNodeEndedIntrospection(GraphNodeId nodeId);

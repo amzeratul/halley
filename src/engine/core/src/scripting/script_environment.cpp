@@ -775,6 +775,21 @@ const ScriptNodeTypeCollection& ScriptEnvironment::getNodeTypeCollection() const
 	return *nodeTypeCollection;
 }
 
+void ScriptEnvironment::setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future)
+{
+	if (currentState) {
+		currentState->setFutureNodeValue(node.getId(), std::move(future));
+	}
+}
+
+std::optional<Future<ConfigNode>> ScriptEnvironment::getFutureNodeValue(const ScriptGraphNode& node)
+{
+	if (currentState) {
+		return currentState->getFutureNodeValue(node.getId());
+	}
+	return {};
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;

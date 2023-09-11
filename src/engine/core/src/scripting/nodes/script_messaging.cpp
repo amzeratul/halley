@@ -323,49 +323,21 @@ std::pair<String, int> ScriptReceiveMessage::getMessageIdAndParams(const ScriptG
 }
 
 
-ScriptSendSystemMessageData::ScriptSendSystemMessageData()
-{
-	aliveFlag = std::make_shared<bool>(true);
-}
-
 ScriptSendSystemMessageData::ScriptSendSystemMessageData(const ConfigNode& node)
 {
-	aliveFlag = std::make_shared<bool>(true);
 	if (node.getType() == ConfigNodeType::Map) {
 		waitingForResult = node["waitingForResult"].asBool(false);
-		gotResult = node["gotResult"].asBool(false);
 		result = node["result"];
 	} else {
 		*this = ScriptSendSystemMessageData();
 	}
 }
 
-ScriptSendSystemMessageData::~ScriptSendSystemMessageData()
-{
-	if (aliveFlag) {
-		*aliveFlag = false;
-	}
-}
-
-ScriptSendSystemMessageData::ScriptSendSystemMessageData(ScriptSendSystemMessageData&& other)
-{
-	*this = std::move(other);
-}
-
-ScriptSendSystemMessageData& ScriptSendSystemMessageData::operator=(ScriptSendSystemMessageData&& other)
-{
-	aliveFlag = std::move(other.aliveFlag);
-	result = std::move(other.result);
-	gotResult = std::move(other.gotResult);
-	waitingForResult = std::move(other.waitingForResult);
-}
-
 ConfigNode ScriptSendSystemMessageData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType v;
-	v["result"] = result;
-	v["gotResult"] = gotResult;
 	v["waitingForResult"] = waitingForResult;
+	v["result"] = result;
 	return v;
 }
 
@@ -449,28 +421,33 @@ void ScriptSendSystemMessage::doInitData(ScriptSendSystemMessageData& data, cons
 }
 
 template <typename T>
-std::function<void(std::byte*, Bytes)> ScriptSendSystemMessage::makeCallback(ScriptSendSystemMessageData& curData) const
+std::function<void(std::byte*, Bytes)> ScriptSendSystemMessage::makeCallback(ScriptEnvironment& environment, const ScriptGraphNode& node) const
 {
-	return [&curData, aliveFlag = curData.aliveFlag] (std::byte* data, Bytes serializedData)
+	Promise<ConfigNode> promise;
+	environment.setFutureNodeValue(node, promise.getFuture());
+
+	return [promise = std::move(promise)](std::byte* data, Bytes serializedData) mutable
 	{
-		if (*aliveFlag) {
-			Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
-			if (data) {
-				curData.result = ConfigNode(std::move(*reinterpret_cast<T*>(data)));
-				curData.gotResult = true;
-			} else {
-				auto options = SerializerOptions(SerializerOptions::maxVersion);
-				curData.result = ConfigNode(Deserializer::fromBytes<T>(serializedData, std::move(options)));
-				curData.gotResult = true;
-			}
+		ConfigNode result;
+
+		Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+		if (data) {
+			result = ConfigNode(std::move(*reinterpret_cast<T*>(data)));
+		} else {
+			auto options = SerializerOptions(SerializerOptions::maxVersion);
+			result = ConfigNode(Deserializer::fromBytes<T>(serializedData, std::move(options)));
 		}
+
+		promise.setValue(std::move(result));
 	};
 }
 
 IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSendSystemMessageData& curData) const
 {
 	if (curData.waitingForResult) {
-		if (curData.gotResult) {
+		if (auto future = environment.getFutureNodeValue(node)) {
+			curData.result = future->get();
+			environment.setFutureNodeValue(node, std::nullopt);
 			return Result(ScriptNodeExecutionState::Done);
 		} else {
 			return Result(ScriptNodeExecutionState::Executing, time);
@@ -494,17 +471,17 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 	std::function<void(std::byte*, Bytes)> callback;
 	if (!msgType.returnType.isEmpty()) {
 		if (msgType.returnType == "Halley::ConfigNode") {
-			callback = makeCallback<ConfigNode>(curData);
+			callback = makeCallback<ConfigNode>(environment, node);
 		} else if (msgType.returnType == "bool") {
-			callback = makeCallback<bool>(curData);
+			callback = makeCallback<bool>(environment, node);
 		} else if (msgType.returnType == "int") {
-			callback = makeCallback<int>(curData);
+			callback = makeCallback<int>(environment, node);
 		} else if (msgType.returnType == "float") {
-			callback = makeCallback<float>(curData);
+			callback = makeCallback<float>(environment, node);
 		} else if (msgType.returnType == "Halley::String") {
-			callback = makeCallback<String>(curData);
+			callback = makeCallback<String>(environment, node);
 		} else if (msgType.returnType == "Halley::Vector2f") {
-			callback = makeCallback<Vector2f>(curData);
+			callback = makeCallback<Vector2f>(environment, node);
 		}
 	}
 	const bool shouldWait = !!callback;
