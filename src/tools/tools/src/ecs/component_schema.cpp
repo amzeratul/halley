@@ -23,6 +23,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				field.serializationTypes.push_back(EntitySerialization::Type::Prefab);
 				field.serializationTypes.push_back(EntitySerialization::Type::SaveData);
 				field.serializationTypes.push_back(EntitySerialization::Type::Network);
+				field.serializationTypes.push_back(EntitySerialization::Type::Dynamic);
 			} else {
 				// e.g.
 				// value:
@@ -51,6 +52,9 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				}
 				if (memberProperties["canNetwork"].as<bool>(canSave)) {
 					serializeTypes.insert(EntitySerialization::Type::Network);
+				}
+				if (memberProperties["canModifyDynamic"].as<bool>(canSave)) {
+					serializeTypes.insert(EntitySerialization::Type::Dynamic);
 				}
 
 				std::optional<Range<float>> range;

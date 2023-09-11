@@ -5,7 +5,7 @@
 
 namespace Halley {
 	template <typename T>
-	class ComponentReflectorImpl : public ComponentReflector {
+	class ComponentReflectorImpl final : public ComponentReflector {
 	public:
 		const char* getName() const override
 		{
@@ -26,10 +26,59 @@ namespace Halley {
 		{
 			return context.createComponent<T>(e, node);
 		}
+
+		ConfigNode serializeField(const EntitySerializationContext& context, const Component& component, std::string_view fieldName) const override
+		{
+			return static_cast<const T&>(component).serializeField(context, fieldName);
+		}
+
+		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName) const override
+		{
+			if (const auto* component = tryGetComponent(entity)) {
+				return serializeField(context, *component, fieldName);
+			} else {
+				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+				return {};
+			}
+		}
+		
+		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName) const override
+		{
+			if (const auto* component = tryGetComponent(entity)) {
+				return serializeField(context, *component, fieldName);
+			} else {
+				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+				return {};
+			}
+		}
+
+		void deserializeField(const EntitySerializationContext& context, Component& component, std::string_view fieldName, const ConfigNode& data) const override
+		{
+			static_cast<T&>(component).deserializeField(context, fieldName, data);
+		}
+
+		void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, const ConfigNode& data) const override
+		{
+			if (auto* component = tryGetComponent(entity)) {
+				deserializeField(context, *component, fieldName, data);
+			} else {
+				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+			}
+		}
+
+		Component* tryGetComponent(EntityRef entity) const override
+		{
+			return entity.tryGetComponent<T>();
+		}
+
+		const Component* tryGetComponent(ConstEntityRef entity) const override
+		{
+			return entity.tryGetComponent<T>();
+		}
 	};
 
 	template <typename T>
-	class MessageReflectorImpl : public MessageReflector {
+	class MessageReflectorImpl final : public MessageReflector {
 	public:
 		const char* getName() const override
 		{
@@ -48,7 +97,7 @@ namespace Halley {
 	};
 
 	template <typename T>
-	class SystemMessageReflectorImpl : public SystemMessageReflector {
+	class SystemMessageReflectorImpl final : public SystemMessageReflector {
 	public:
 		const char* getName() const override
 		{

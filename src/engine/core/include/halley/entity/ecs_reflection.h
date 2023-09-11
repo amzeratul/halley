@@ -2,6 +2,7 @@
 #include "halley/data_structures/config_node.h"
 
 namespace Halley {
+	class ConstEntityRef;
 	class EntityFactoryContext;
 	class SystemMessage;
 	class System;
@@ -22,8 +23,18 @@ namespace Halley {
 
     	virtual const char* getName() const = 0;
 		virtual int getIndex() const = 0;
-    	virtual ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const = 0;
+
+		virtual ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const = 0;
 		virtual CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) const = 0;
+
+		virtual ConfigNode serializeField(const EntitySerializationContext& context, const Component& component, std::string_view fieldName) const = 0;
+		virtual ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName) const = 0;
+		virtual ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName) const = 0;
+    	virtual void deserializeField(const EntitySerializationContext& context, Component& component, std::string_view fieldName, const ConfigNode& data) const = 0;
+    	virtual void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, const ConfigNode& data) const = 0;
+
+		virtual Component* tryGetComponent(EntityRef entity) const = 0;
+		virtual const Component* tryGetComponent(ConstEntityRef entity) const = 0;
     };
 
 	class MessageReflector {

@@ -1,4 +1,4 @@
-// Halley codegen version 124
+// Halley codegen version 125
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -48,7 +48,7 @@ public:
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) override final {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(emitter)>::deserialize(emitter, Halley::EntityId{}, context, node, "", "emitter", makeMask(Type::Prefab, Type::SaveData, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, Halley::String{}, context, node, "", "event", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(emitter)>::deserialize(emitter, Halley::EntityId{}, context, node, "", "emitter", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, Halley::String{}, context, node, "", "event", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 	}
 };

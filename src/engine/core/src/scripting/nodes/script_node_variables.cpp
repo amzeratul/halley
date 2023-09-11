@@ -260,6 +260,78 @@ ConfigNode ScriptVariableTable::doGetData(ScriptEnvironment& environment, const 
 
 
 
+Vector<IGraphNodeType::SettingType> ScriptECSVariable::getSettingTypes() const
+{
+	return {
+		SettingType{ "field", "Halley::ScriptComponentFieldType", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptECSVariable::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::WriteDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+String ScriptECSVariable::getLargeLabel(const ScriptGraphNode& node) const
+{
+	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+	return type.getName();
+}
+
+String ScriptECSVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+	return getConnectedNodeName(world, node, graph, 0) + "." + type.getName();
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+	auto str = ColourStringBuilder(true);
+	str.append("ECS Variable ");
+	str.append(type.getName(), settingColour);
+	str.append(" on entity ");
+	str.append(getConnectedNodeName(world, node, graph, 0), settingColour);
+	return str.moveResults();
+}
+
+ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto e = environment.tryGetEntity(readEntityId(environment, node, 0));
+	if (e.isValid()) {
+		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
+		EntitySerializationContext context;
+		context.entityContext = &environment;
+		context.resources = &environment.getResources();
+		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
+		return reflector.serializeField(context, e, type.field);
+	}
+	return {};
+}
+
+void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
+{
+	auto e = environment.tryGetEntity(readEntityId(environment, node, 0));
+	if (e.isValid()) {
+		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
+		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
+		EntitySerializationContext context;
+		context.entityContext = &environment;
+		context.resources = &environment.getResources();
+		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
+		return reflector.deserializeField(context, e, type.field, data);
+	}
+}
+
+
 String ScriptColourLiteral::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["value"].asString("#FFFFFF");

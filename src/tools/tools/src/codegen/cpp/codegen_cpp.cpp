@@ -196,7 +196,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		"",
 		"#ifndef DONT_INCLUDE_HALLEY_HPP",
 		"#include <halley.hpp>",
-		"#endif"
+		"#endif",
+		"#include \"halley/support/exception.h\"",
 		""
 	};
 
@@ -208,29 +209,61 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
 	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak + "Halley::ConfigNode _node = Halley::ConfigNode::MapType();" + lineBreak;
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
-	bool first = true;
-	for (auto& member: component.members) {
-		if (member.serializationTypes.empty()) {
-			continue;
-		}
-		
-		Vector<String> serializationTypes;
-		for (auto t: member.serializationTypes) {
-			serializationTypes.push_back("Type::" + toString(t));
-		}
-		String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
-		
-		if (first) {
-			first = false;
-		} else {
-			serializeBody += lineBreak;
-			deserializeBody += lineBreak;
-		}
+	{
+		bool first = true;
+		for (auto& member: component.members) {
+			if (member.serializationTypes.empty()) {
+				continue;
+			}
+			
+			Vector<String> serializationTypes;
+			for (auto t: member.serializationTypes) {
+				serializationTypes.push_back("Type::" + toString(t));
+			}
+			String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
+			
+			if (first) {
+				first = false;
+			} else {
+				serializeBody += lineBreak;
+				deserializeBody += lineBreak;
+			}
 
-		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
-		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
+			serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
+			deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", _context, _node, componentName, \"" + member.name + "\", " + mask + ");";
+		}
 	}
 	serializeBody += lineBreak + "return _node;";
+
+	String serializeFieldBody;
+	String deserializeFieldBody;
+	{
+		bool first = true;
+		for (auto& member : component.members) {
+			if (!std_ex::contains(member.serializationTypes, EntitySerialization::Type::Dynamic)) {
+				continue;
+			}
+
+			if (first) {
+				first = false;
+				serializeFieldBody = "using namespace Halley::EntitySerialization;" + lineBreak;
+				deserializeFieldBody = "using namespace Halley::EntitySerialization;" + lineBreak;
+			} else {
+				serializeFieldBody += lineBreak;
+				deserializeFieldBody += lineBreak;
+			}
+
+			serializeFieldBody += "if (_fieldName == \"" + member.name + "\") {"
+				+ lineBreak + "\treturn Halley::ConfigNodeHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", _context);"
+				+ lineBreak + "}";
+			deserializeFieldBody += "if (_fieldName == \"" + member.name + "\") {"
+				+ lineBreak + "\tHalley::ConfigNodeHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", _context, _node);"
+				+ lineBreak + "\treturn;"
+				+ lineBreak + "}";
+		}
+		serializeFieldBody += lineBreak + "throw Halley::Exception(\"Unknown or non-serializable field \\\"\" + Halley::String(_fieldName) + \"\\\"\", Halley::HalleyExceptions::Entity);";
+		deserializeFieldBody += lineBreak + "throw Halley::Exception(\"Unknown or non-serializable field \\\"\" + Halley::String(_fieldName) + \"\\\"\", Halley::HalleyExceptions::Entity);";
+	}
 
 	gen
 		.setAccessLevel(MemberAccess::Public)
@@ -260,6 +293,14 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
 		}, "deserialize"), deserializeBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("Halley::ConfigNode"), {
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("std::string_view"), "_fieldName")
+		}, "serializeField", true), serializeFieldBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("std::string_view"), "_fieldName"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
+		}, "deserializeField"), deserializeFieldBody)
 		.addBlankLine();
 
 	gen.finish()
@@ -750,7 +791,7 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 			configDeserializeBody += lineBreak;
 
 			Vector<String> serializationTypes;
-			for (auto t: { EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData, EntitySerialization::Type::Network }) {
+			for (auto t: { EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData, EntitySerialization::Type::Network, EntitySerialization::Type::Dynamic }) {
 				serializationTypes.push_back("Type::" + toString(t));
 			}
 			String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";

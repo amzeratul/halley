@@ -1822,6 +1822,96 @@ private:
 	const ECSData& ecsData;
 };
 
+class ComponentEditorComponentFieldFactory : public IComponentEditorFieldFactory {
+public:
+	ComponentEditorComponentFieldFactory(const ECSData& ecsData)
+		: ecsData(ecsData)
+	{}
+	
+	String getFieldType() override
+	{
+		return "Halley::ScriptComponentFieldType";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		const auto value = ScriptComponentFieldType(data.getFieldData());
+
+		Vector<String> componentIds;
+		for (auto& [k, v]: ecsData.getComponents()) {
+			componentIds.push_back(k);
+		}
+		std::sort(componentIds.begin(), componentIds.end());
+
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
+
+		auto container = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Vertical));
+
+		auto componentDropdown = std::make_shared<UIDropdown>("componentType", dropStyle);
+		componentDropdown->setOptions(std::move(componentIds));
+		container->add(componentDropdown);
+
+		auto fieldDropdown = std::make_shared<UIDropdown>("fieldName", dropStyle);
+		container->add(fieldDropdown);
+
+		auto& ecs = ecsData;
+		auto populateFields = [fieldDropdown, &ecs, data](const String& componentId) -> String
+		{
+			Vector<String> fieldIds;
+			const auto iter = ecs.getComponents().find(componentId);
+			if (iter != ecs.getComponents().end()) {
+				for (const auto& member: iter->second.members) {
+					if (std_ex::contains(member.serializationTypes, EntitySerialization::Type::Dynamic)) {
+						fieldIds.push_back(member.name);
+					}
+				}
+				std::sort(fieldIds.begin(), fieldIds.end());
+			}
+
+			const auto value = ScriptComponentFieldType(data.getFieldData());
+			int defaultOption = -1;
+			const auto iter2 = std::find(fieldIds.begin(), fieldIds.end(), value.field);
+			if (iter2 != fieldIds.end()) {
+				defaultOption = static_cast<int>(iter2 - fieldIds.begin());
+			}
+
+			fieldDropdown->setOptions(std::move(fieldIds), defaultOption);
+			fieldDropdown->setSelectedOption(value.field);
+			return fieldDropdown->getSelectedOptionId();
+		};
+
+		componentDropdown->bindData("componentType", value.component, [&context, data, this, populateFields](String newVal)
+		{
+			auto type = ScriptComponentFieldType(data.getFieldData());
+			type.component = std::move(newVal);
+			type.field = populateFields(type.component);
+			data.getWriteableFieldData() = type.toConfig();
+			context.onEntityUpdated();
+		});
+
+		populateFields(componentDropdown->getSelectedOptionId());
+		fieldDropdown->bindData("fieldName", value.field, [&context, data, this](String newVal)
+		{
+			auto type = ScriptComponentFieldType(data.getFieldData());
+			type.field = std::move(newVal);
+			data.getWriteableFieldData() = type.toConfig();
+			context.onEntityUpdated();
+		});
+
+		return container;
+	}
+
+private:
+	const ECSData& ecsData;
+};
+
 class ComponentEditorParsedOptionFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1971,6 +2061,6 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::EntityMessageType", false));
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::SystemMessageType", true));
 	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData));
-	
+	factories.emplace_back(std::make_unique<ComponentEditorComponentFieldFactory>(ecsData));
 	return factories;
 }

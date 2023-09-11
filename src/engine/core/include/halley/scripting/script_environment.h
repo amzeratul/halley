@@ -31,7 +31,7 @@ namespace Halley {
 		}
 	};
 
-    class ScriptEnvironment: private IEntityFactoryContext {
+    class ScriptEnvironment: public IEntityFactoryContext {
     public:
         struct EntityMessageData {
 	        EntityId targetEntity;

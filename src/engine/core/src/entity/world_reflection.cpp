@@ -58,3 +58,8 @@ ComponentReflector& WorldReflection::getComponentReflector(int id) const
 {
 	return *componentReflectors.at(id);
 }
+
+ComponentReflector& WorldReflection::getComponentReflector(const String& name) const
+{
+	return *componentReflectors[componentMap.at(name)];
+}

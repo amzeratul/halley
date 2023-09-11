@@ -36,6 +36,13 @@ namespace Halley {
         void deserialize(Deserializer& s);
     };
 
+	template<>
+	class ConfigNodeSerializer<ScriptMessage> {
+	public:
+		ConfigNode serialize(const ScriptMessage& msg, const EntitySerializationContext& context);
+		ScriptMessage deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+	};
+
 	class ScriptEntityMessageType {
 	public:
         String message;
@@ -48,11 +55,18 @@ namespace Halley {
 	};
 
     using ScriptSystemMessageType = ScriptEntityMessageType;
-	
-	template<>
-	class ConfigNodeSerializer<ScriptMessage> {
+
+
+	class ScriptComponentFieldType {
 	public:
-		ConfigNode serialize(const ScriptMessage& msg, const EntitySerializationContext& context);
-		ScriptMessage deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+        String component;
+        String field;
+
+        ScriptComponentFieldType() = default;
+        ScriptComponentFieldType(const ConfigNode& node);
+        ConfigNode toConfig() const;
+
+		String getName() const;
 	};
+	
 }

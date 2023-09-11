@@ -684,6 +684,11 @@ namespace Halley {
 			}
 		}
 
+		static void deserialize(std::optional<T>& dst, const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
+		}
+
 		static void deserialize(std::optional<T>& dst, const std::optional<T>& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
@@ -700,6 +705,11 @@ namespace Halley {
 			} else {
 				return ConfigNode();
 			}
+		}
+		
+		static void deserialize(OptionalLite<T>& dst, const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
 		
 		static void deserialize(OptionalLite<T>& dst, const OptionalLite<T>& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)

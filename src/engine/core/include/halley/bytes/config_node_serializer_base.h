@@ -15,10 +15,11 @@ namespace Halley {
 	namespace EntitySerialization {
         enum class Type : uint8_t {
         	Undefined,
-        	Prefab,
-	        SaveData,
-        	Network,
-			DevCon
+        	Prefab,   // Saved on actual .prefab/.scene files
+	        SaveData, // Saved on game save files
+			Dynamic,  // Modified by code/script via serializeField/deserializeField
+        	Network,  // Transmitted over the network
+			DevCon    // Context is DevCon
         };
 
 		inline int makeMask(Type t)
@@ -38,12 +39,14 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<EntitySerialization::Type> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 6> operator()() const {
 			return{{
 				"Undefined",
 				"Prefab",
 				"SaveData",
-				"Network"
+				"Dynamic",
+				"Network",
+				"DevCon"
 			}};
 		}
 	};

@@ -111,6 +111,27 @@ ConfigNode ScriptEntityMessageType::toConfig() const
 	return result;
 }
 
+ScriptComponentFieldType::ScriptComponentFieldType(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		component = node["component"].asString("");
+		field = node["field"].asString("");
+	}
+}
+
+ConfigNode ScriptComponentFieldType::toConfig() const
+{
+	ConfigNode::MapType result;
+	result["component"] = component;
+	result["field"] = field;
+	return result;
+}
+
+String ScriptComponentFieldType::getName() const
+{
+	return component + ":" + field;
+}
+
 ConfigNode ConfigNodeSerializer<ScriptMessage>::serialize(const ScriptMessage& msg, const EntitySerializationContext& context)
 {
 	return msg.toConfig();
