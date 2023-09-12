@@ -291,7 +291,7 @@ ScriptTransferToHostData::ScriptTransferToHostData(const ConfigNode& node)
 	if (node.getType() == ConfigNodeType::Map) {
 		waiting = node["waiting"].asBool();
 		params = node["params"];
-		returnedValue = node["hasReturnedValue"].asBool(true) ? node["returnedValue"] : std::nullopt;
+		returnedValue = node["hasReturnedValue"].asBool(true) ? std::optional<ConfigNode>(node["returnedValue"]) : std::optional<ConfigNode>();
 	} else {
 		waiting = false;
 		returnedValue = std::nullopt;
