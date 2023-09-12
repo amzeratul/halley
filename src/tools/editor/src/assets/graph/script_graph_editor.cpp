@@ -206,14 +206,18 @@ void ScriptGraphEditor::onModified()
 void ScriptGraphEditor::undo()
 {
 	if (scriptGraph && undoStack.canUndo()) {
+		const auto assetId = scriptGraph->getAssetId();
 		*scriptGraph = ScriptGraph(undoStack.undo());
+		scriptGraph->setAssetId(assetId);
 	}
 }
 
 void ScriptGraphEditor::redo()
 {
 	if (scriptGraph && undoStack.canRedo()) {
+		const auto assetId = scriptGraph->getAssetId();
 		*scriptGraph = ScriptGraph(undoStack.redo());
+		scriptGraph->setAssetId(assetId);
 	}
 }
 
