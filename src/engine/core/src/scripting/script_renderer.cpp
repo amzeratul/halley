@@ -176,9 +176,21 @@ BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 
 void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const
 {
+	const bool dimmed = path.fromType.type == int(ScriptNodeElementType::ReadDataPin) || path.fromType.type == int(ScriptNodeElementType::TargetPin) || path.fromType.type == int(ScriptNodeElementType::WriteDataPin);
+
 	const auto bezier = makeBezier(path);
 	const auto baseCol = getPinColour(path.fromType);
-	const auto col = (highlight ? baseCol.inverseMultiplyLuma(0.25f) : baseCol).multiplyAlpha(fade ? 0.5f : 1.0f);
+	Colour4f normalCol = baseCol;
+	Colour4f highlightCol = baseCol;
+	float shadowAlpha = 0.3f;
+
+	if (dimmed) {
+		normalCol = normalCol.multiplyLuma(0.4f);
+		shadowAlpha = 0.15f;
+	} else {
+		highlightCol = highlightCol.inverseMultiplyLuma(0.25f);
+	}
+	const auto col = (highlight ? highlightCol : normalCol).multiplyAlpha(fade ? 0.5f : 1.0f);
 
 	Painter::LineDashPattern pattern;
 	if (path.fromType.isDetached) {
@@ -186,7 +198,7 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 		pattern.offLength = 8.0f;
 	}
 
-	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f), {}, pattern);
+	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, shadowAlpha), {}, pattern);
 	painter.drawLine(bezier, 3.0f / curZoom, col, {}, pattern);
 }
 
