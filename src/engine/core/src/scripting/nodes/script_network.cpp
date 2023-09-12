@@ -291,10 +291,10 @@ ScriptTransferToHostData::ScriptTransferToHostData(const ConfigNode& node)
 	if (node.getType() == ConfigNodeType::Map) {
 		waiting = node["waiting"].asBool();
 		params = node["params"];
-		returnedValue = node["returnedValue"];
+		returnedValue = node["hasReturnedValue"].asBool(true) ? node["returnedValue"] : std::nullopt;
 	} else {
 		waiting = false;
-		returnedValue = ConfigNode();
+		returnedValue = std::nullopt;
 	}
 }
 
@@ -304,6 +304,7 @@ ConfigNode ScriptTransferToHostData::toConfigNode(const EntitySerializationConte
 	result["waiting"] = waiting;
 	result["params"] = params;
 	result["returnedValue"] = returnedValue;
+	result["hasReturnedValue"] = returnedValue.has_value();
 	return result;
 }
 
@@ -368,7 +369,7 @@ IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& enviro
 		curData.waiting = true;
 		curData.returnedValue = ConfigNode();
 		environment.startHostThread(node.getId(), readDataPin(environment, node, 3));
-	} else if (curData.returnedValue.getType() != ConfigNodeType::Undefined) {
+	} else if (curData.returnedValue) {
 		curData.waiting = false;
 		return Result(ScriptNodeExecutionState::Done, 0, 2);
 	}
@@ -389,7 +390,7 @@ ConfigNode ScriptTransferToHost::doGetData(ScriptEnvironment& environment, const
 	if (pinN == 4) {
 		return ConfigNode(curData.params);
 	} else if (pinN == 5) {
-		return ConfigNode(curData.returnedValue);
+		return curData.returnedValue ? ConfigNode(*curData.returnedValue) : ConfigNode();
 	}
 
 	return {};

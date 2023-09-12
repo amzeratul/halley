@@ -128,7 +128,7 @@ namespace Halley {
 
 		bool waiting = false;
 		ConfigNode params;
-		ConfigNode returnedValue;
+		std::optional<ConfigNode> returnedValue;
 	};
 
 	class ScriptTransferToHost final : public ScriptNodeTypeBase<ScriptTransferToHostData> {
