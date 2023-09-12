@@ -20,7 +20,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::WriteDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::WriteDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Output }
+	};
 	return data;
 }
 
@@ -44,6 +48,17 @@ ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const Scrip
 {
 	const auto& vars = environment.getVariables(getScope(node));
 	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
+}
+
+EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	const auto& vars = environment.getVariables(getScope(node));
+	const auto& data = vars.getVariable(node.getSettings()["variable"].asString(""));
+	if (data.getType() == ConfigNodeType::EntityId || data.getType() == ConfigNodeType::Int || data.getType() == ConfigNodeType::Float) {
+		return EntityId(data.asEntityId().value);
+	} else {
+		return {};
+	}
 }
 
 void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
