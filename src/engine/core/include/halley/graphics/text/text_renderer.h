@@ -37,6 +37,7 @@ namespace Halley
 		TextRenderer& setOutline(float width);
 		TextRenderer& setOutline(float width, Colour colour);
 		TextRenderer& setShadow(float distance, float smoothness, Colour colour);
+		TextRenderer& setShadow(Vector2f distance, float smoothness, Colour colour);
 		TextRenderer& setShadowColour(Colour colour);
 		TextRenderer& setAlignment(float align);
 		TextRenderer& setOffset(Vector2f align);
@@ -91,7 +92,7 @@ namespace Halley
 		float align = 0;
 		float smoothness = 1.0f;
 		float lineSpacing = 0.0f;
-		float shadowDistance = 0.0f;
+		Vector2f shadowDistance;
 		float shadowSmoothness = 1.0f;
 
 		Vector2f position;

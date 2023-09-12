@@ -7,8 +7,8 @@ uniforms:
   - MaterialBlock:
     - u_smoothness: float
     - u_outline: float
-    - u_shadowDistance: float
     - u_shadowSmoothness: float
+    - u_shadowDistance: vec2
     - u_outlineColour: vec4
     - u_shadowColour: vec4
 passes:

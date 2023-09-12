@@ -114,6 +114,11 @@ TextRenderer& TextRenderer::setOutline(float width, Colour colour)
 
 TextRenderer& TextRenderer::setShadow(float distance, float smoothness, Colour colour)
 {
+	return setShadow(Vector2f(distance, distance), smoothness, colour);
+}
+
+TextRenderer& TextRenderer::setShadow(Vector2f distance, float smoothness, Colour colour)
+{
 	if (shadowDistance != distance || shadowSmoothness != smoothness || shadowColour != colour) {
 		shadowDistance = distance;
 		shadowSmoothness = smoothness;
@@ -707,7 +712,7 @@ void ConfigNodeSerializer<TextRenderer>::deserialize(const EntitySerializationCo
 		target.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString()));
 	}
 	if (node.hasKey("shadowColour")) {
-		target.setShadow(node["shadowDistance"].asFloat(0), node["shadowSmoothness"].asFloat(1), Colour4f::fromString(node["shadowColour"].asString()));
+		target.setShadow(node["shadowDistance"].asVector2f({}), node["shadowSmoothness"].asFloat(1), Colour4f::fromString(node["shadowColour"].asString()));
 	}
 	if (node.hasKey("alignment")) {
 		target.setAlignment(node["alignment"].asFloat());

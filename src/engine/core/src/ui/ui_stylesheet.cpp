@@ -57,7 +57,7 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 		.setColour(getColour(node["colour"], styleSheet.getColourScheme()))
 		.setOutline(node["outline"].asFloat(0.0f) * scale)
 		.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString("#000000")))
-		.setShadow(node["shadowDistance"].asFloat(0) * scale, node["shadowSmoothness"].asFloat(1) * scale, Colour4f::fromString(node["shadowColour"].asString("#00000000")))
+		.setShadow(node["shadowDistance"].asVector2f({}) * scale, node["shadowSmoothness"].asFloat(1) * scale, Colour4f::fromString(node["shadowColour"].asString("#00000000")))
 		.setAlignment(node["alignment"].asFloat(0.0f))
 		.setSmoothness(node["smoothness"].asFloat(1.0))
 		.setLineSpacing(node["lineSpacing"].asFloat(0) * scale);

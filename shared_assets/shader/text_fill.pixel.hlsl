@@ -1,17 +1,9 @@
 #include "halley/sprite_attribute.hlsl"
+#include "halley/text.hlsl"
 
 Texture2D tex0 : register(t0);
 SamplerState sampler0 : register(s0) {
 	Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-};
-
-cbuffer MaterialBlock : register(b1) {
-    float u_smoothness;
-    float u_outline;
-    float u_shadowDistance;
-    float u_shadowSmoothness;
-    float4 u_outlineColour;
-    float4 u_shadowColour;
 };
 
 float median(float3 rgb) {
