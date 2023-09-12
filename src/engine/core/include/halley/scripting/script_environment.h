@@ -95,6 +95,7 @@ namespace Halley {
         const ScriptVariables& getVariables(ScriptVariableScope scope) const;
         const ScriptVariables& getEntityVariables(EntityId entityId) const;
 
+        void setEntityVariable(EntityId entityId, const String& name, ConfigNode data) const;
         void setVariableTable(const VariableTable& variableTable);
         const VariableTable* getVariableTable() const;
 

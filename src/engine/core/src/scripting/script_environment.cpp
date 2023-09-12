@@ -909,6 +909,17 @@ const ScriptVariables& ScriptEnvironment::getEntityVariables(EntityId entityId) 
 	return dummy;
 }
 
+void ScriptEnvironment::setEntityVariable(EntityId entityId, const String& name, ConfigNode value) const
+{
+	auto entity = tryGetEntity(entityId);
+	if (entity.isValid()) {
+		auto* scriptable = entity.tryGetComponent<ScriptableComponent>();
+		if (scriptable) {
+			scriptable->variables.setVariable(name, std::move(value));
+		}
+	}
+}
+
 void ScriptEnvironment::setVariableTable(const VariableTable& variableTable)
 {
 	this->variableTable = &variableTable;

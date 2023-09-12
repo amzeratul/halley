@@ -101,7 +101,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptEntityVariable::getPinConfigurati
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::WriteDataPin, PD::Input } };
 	return data;
 }
 
@@ -131,6 +131,19 @@ ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const
 ConfigNode ScriptEntityVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
 {
 	return doGetData(environment, node, 1);
+}
+
+void ScriptEntityVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN,
+	ConfigNode data) const
+{
+	auto e = environment.tryGetEntity(readEntityId(environment, node, 0));
+	if (e.isValid()) {
+		if (!environment.hasNetworkAuthorityOver(e)) {
+			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Entity Variable \"" + node.getSettings()["variable"].asString("") + "\", not owned by this client");
+			return;
+		}
+		environment.setEntityVariable(e.getEntityId(), node.getSettings()["variable"].asString(""), std::move(data));
+	}
 }
 
 
@@ -356,7 +369,7 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		return reflector.deserializeField(context, e, type.field, data);
+		reflector.deserializeField(context, e, type.field, data);
 	}
 }
 
