@@ -367,7 +367,7 @@ IScriptNodeType::Result ScriptTransferToHost::doUpdate(ScriptEnvironment& enviro
 {
 	if (!curData.waiting) {
 		curData.waiting = true;
-		curData.returnedValue = ConfigNode();
+		curData.returnedValue = std::nullopt;
 		environment.startHostThread(node.getId(), readDataPin(environment, node, 3));
 	} else if (curData.returnedValue) {
 		curData.waiting = false;
