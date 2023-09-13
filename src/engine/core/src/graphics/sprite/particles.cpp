@@ -374,11 +374,13 @@ void Particles::initializeParticle(size_t index, float time)
 	particle.alive = true;
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
-	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = rng->getFloat(initialScale);
-	
+
 	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
+	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
+	const auto a = stopped ? Vector3f() : acceleration;
+	particle.pos = getSpawnPosition() + (particle.vel * time + a * (0.5f * time * time)) * velScale;
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
