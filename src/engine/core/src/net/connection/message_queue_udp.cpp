@@ -255,7 +255,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<Outbound> sentMsgs;
-	const size_t maxSize = 2048;
+	const size_t maxSize = 2010;
 	size_t totalSize = 0;
 	bool first = true;
 	bool packetReliable = false;
