@@ -180,9 +180,8 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 
 	auto& world = factory->getWorld();
 
-	const auto entity = world.findEntity(msg.entityUUID);
-	if (entity) {
-		messageBridge.sendMessageToEntity(entity->getEntityId(), msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)));
+	if (const auto entity = world.findEntity(msg.entityUUID)) {
+		messageBridge.sendMessageToEntity(entity->getEntityId(), msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), fromPeerId);
 	} else {
 		Logger::logError("Received message for entity " + toString(msg.entityUUID) + ", but entity was not found.");
 	}
@@ -237,8 +236,8 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 			sendToPeer(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
 		};
 	}
-	
-	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), std::move(callback));
+
+	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), std::move(callback), fromPeerId);
 }
 
 void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)

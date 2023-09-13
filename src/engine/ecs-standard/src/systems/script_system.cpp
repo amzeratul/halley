@@ -51,7 +51,7 @@ public:
 	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
 	{
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params) });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params), msg.fromPeerId });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
@@ -60,7 +60,7 @@ public:
 	void onMessageReceived(CancelHostScriptThreadSystemMessage msg) override
 	{
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode() });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(), msg.fromPeerId });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
@@ -69,7 +69,7 @@ public:
 	void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) override
 	{
 		if (const auto scriptable = getScriptState(e, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params) });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params), msg.fromPeerId });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
 		}

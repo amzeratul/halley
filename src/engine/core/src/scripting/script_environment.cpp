@@ -477,6 +477,7 @@ void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread
 			if (const auto dstNode = outputs[0].dstNode) {
 				const auto dstPin = outputs[0].inputPin;
 				pending.push_back(startThread(ScriptStateThread(*dstNode, dstPin)));
+				pending.back().setNetworkOwnerId(event.networkOwnerId);
 			}
 
 			auto* nodeData = dynamic_cast<ScriptTransferToHostData*>(getNodeData(event.nodeId));

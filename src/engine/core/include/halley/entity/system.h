@@ -32,9 +32,9 @@ namespace Halley {
 		SystemMessageBridge(System& system);
 
 		bool isValid() const;
-		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data);
+		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data, uint8_t fromPeerId);
 		void sendMessageToEntity(EntityId target, const String& messageName, const ConfigNode& messageData);
-		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback);
+		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback, uint8_t fromPeerId);
 
 	private:
 		System* system = nullptr;
@@ -59,8 +59,8 @@ namespace Halley {
 		void processSystemMessages();
 		size_t getSystemMessagesInInbox() const;
 
-		void sendEntityMessage(EntityId target, int msgId, gsl::span<const std::byte> data);
-		void sendSystemMessage(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback);
+		void sendEntityMessage(EntityId target, int msgId, gsl::span<const std::byte> data, uint8_t fromPeerId);
+		void sendSystemMessage(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback, uint8_t fromPeerId);
 		void sendEntityMessageConfig(EntityId target, const String& messageType, const ConfigNode& data);
 		void sendSystemMessageConfig(const String& targetSystem, const String& messageType, const ConfigNode& data);
 

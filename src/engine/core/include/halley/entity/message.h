@@ -15,6 +15,8 @@ namespace Halley
 	class Message
 	{
 	public:
+		uint8_t fromPeerId = 0;
+
 		virtual ~Message() {}
 		virtual size_t getSize() const = 0;
 		virtual int getId() const = 0;

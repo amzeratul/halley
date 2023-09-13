@@ -87,6 +87,9 @@ namespace Halley {
 
 		void offsetToNodeRange(Range<GraphNodeId> range);
 
+		void setNetworkOwnerId(std::optional<uint8_t> ownerId);
+		std::optional<uint8_t> getNetworkOwnerId() const;
+
 	private:
 		uint32_t uniqueId;
 		OptionalLite<GraphNodeId> curNode;
@@ -96,6 +99,7 @@ namespace Halley {
 		float timeSlice = 0;
 		float curNodeTime = 0;
 		Vector<StackFrame> stack;
+		std::optional<uint8_t> networkOwnerId;
 
 		void generateId();
 	};
@@ -148,6 +152,7 @@ namespace Halley {
 			ControlEventType type;
 			GraphNodeId nodeId;
 			ConfigNode params;
+			std::optional<uint8_t> networkOwnerId;
 		};
 
     	ScriptState();

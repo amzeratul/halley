@@ -146,6 +146,16 @@ void ScriptStateThread::offsetToNodeRange(Range<GraphNodeId> range)
 	}
 }
 
+void ScriptStateThread::setNetworkOwnerId(std::optional<uint8_t> ownerId)
+{
+	networkOwnerId = ownerId;
+}
+
+std::optional<uint8_t> ScriptStateThread::getNetworkOwnerId() const
+{
+	return networkOwnerId;
+}
+
 void ScriptStateThread::generateId()
 {
 	static uint32_t nextId = 0;

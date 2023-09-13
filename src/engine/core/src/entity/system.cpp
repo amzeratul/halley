@@ -17,9 +17,9 @@ bool SystemMessageBridge::isValid() const
 	return system != nullptr;
 }
 
-void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
+void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data, uint8_t fromPeerId)
 {
-	system->sendEntityMessage(target, msgId, data);
+	system->sendEntityMessage(target, msgId, data, fromPeerId);
 }
 
 void SystemMessageBridge::sendMessageToEntity(EntityId target, const String& messageName, const ConfigNode& messageData)
@@ -27,9 +27,9 @@ void SystemMessageBridge::sendMessageToEntity(EntityId target, const String& mes
 	system->sendEntityMessageConfig(target, messageName, messageData);
 }
 
-void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback)
+void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback, uint8_t fromPeerId)
 {
-	system->sendSystemMessage(targetSystem, messageType, data, std::move(callback));
+	system->sendSystemMessage(targetSystem, messageType, data, std::move(callback), fromPeerId);
 }
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
@@ -172,19 +172,22 @@ size_t System::getSystemMessagesInInbox() const
 	return systemMessageInbox.size();
 }
 
-void System::sendEntityMessage(EntityId target, int msgId, gsl::span<const std::byte> data)
+void System::sendEntityMessage(EntityId target, int msgId, gsl::span<const std::byte> data, uint8_t fromPeerId)
 {
-	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
+	auto msg = world->deserializeMessage(msgId, data);
+	msg->fromPeerId = fromPeerId;
+	doSendMessage(target, std::move(msg), msgId);
 }
 
-void System::sendSystemMessage(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback)
+void System::sendSystemMessage(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback, uint8_t fromPeerId)
 {
 	SystemMessageContext context;
 
 	context.msgId = msgId;
 	context.remote = true;
 	context.msg = world->deserializeSystemMessage(msgId, data);
-	context.callback = callback;
+	context.msg->fromPeerId = fromPeerId;
+	context.callback = std::move(callback);
 	
 	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
 }
