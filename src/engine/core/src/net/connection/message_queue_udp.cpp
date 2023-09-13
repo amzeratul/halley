@@ -255,8 +255,8 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<Outbound> sentMsgs;
-	const size_t maxSize = 1350;
-	size_t size = 0;
+	const size_t maxSize = 2048;
+	size_t totalSize = 0;
 	bool first = true;
 	bool packetReliable = false;
 	bool allowMaxSizeViolation = true; // Hmm
@@ -273,17 +273,20 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		const bool isOrdered = channel.settings.ordered;
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
-			const size_t msgSize = (*iter).packet.getSize();
+			const size_t msgPayloadSize = (*iter).packet.getSize();
 			const size_t headerSize = 8; // Max header size
-			const size_t totalSize = msgSize + headerSize;
+			const size_t msgSize = msgPayloadSize + headerSize;
 
-			if (size + totalSize <= maxSize || (first && allowMaxSizeViolation)) {
-				if (size > maxSize) {
-					Logger::logWarning("Sending " + toString(size) + " bytes in a message, max is " + toString(maxSize) + " bytes.");
+			if (totalSize + msgSize <= maxSize || first) {
+				if (msgSize > maxSize) {
+					Logger::logWarning("Sending " + toString(msgSize) + " bytes in a message, max is " + toString(maxSize) + " bytes.");
+					if (!allowMaxSizeViolation) {
+						continue;
+					}
 				}
 
 				// It fits, so add it
-				size += totalSize;
+				totalSize += msgSize;
 
 				sentMsgs.push_back(std::move(*iter));
 				outboundQueued.erase(iter);
@@ -298,7 +301,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		throw Exception("Was not able to fit any messages into packet!", HalleyExceptions::Network);
 	}
 
-	return makeTaggedPacket(sentMsgs, size);
+	return makeTaggedPacket(sentMsgs, totalSize);
 }
 
 AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<Outbound>& msgs, size_t size, bool resends, uint16_t resendSeq)
@@ -306,6 +309,9 @@ AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<Outbound>& msgs,
 	const bool reliable = !msgs.empty() && channels[msgs[0].channel].settings.reliable;
 
 	auto data = serializeMessages(msgs, size);
+	if (data.size() > 2048) {
+		Logger::logError("Tagged packet is too big");
+	}
 
 	const int tag = nextPacketId++;
 	auto& pendingData = pendingPackets[tag];

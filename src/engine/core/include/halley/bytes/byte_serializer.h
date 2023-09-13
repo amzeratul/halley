@@ -127,9 +127,31 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const Vector<T>& val)
 		{
-			unsigned int sz = static_cast<unsigned int>(val.size());
+			uint32_t sz = static_cast<uint32_t>(val.size());
 			*this << sz;
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
+				*this << val[i];
+			}
+			return *this;
+		}
+		
+		template <typename T>
+		Serializer& operator<<(gsl::span<T> val)
+		{
+			uint32_t sz = static_cast<uint32_t>(val.size());
+			*this << sz;
+			for (uint32_t i = 0; i < sz; i++) {
+				*this << val[i];
+			}
+			return *this;
+		}
+		
+		template <typename T>
+		Serializer& operator<<(gsl::span<const T> val)
+		{
+			uint32_t sz = static_cast<uint32_t>(val.size());
+			*this << sz;
+			for (uint32_t i = 0; i < sz; i++) {
 				*this << val[i];
 			}
 			return *this;
@@ -138,7 +160,7 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const std::list<T>& val)
 		{
-			unsigned int sz = static_cast<unsigned int>(val.size());
+			uint32_t sz = static_cast<uint32_t>(val.size());
 			*this << sz;
 			for (const auto& v: val) {
 				*this << v;
@@ -153,7 +175,7 @@ namespace Halley {
 			for (auto& kv: val) {
 				keys.insert(kv.first);
 			}
-			*this << static_cast<unsigned int>(keys.size());
+			*this << static_cast<uint32_t>(keys.size());
 			for (const auto& k: keys) {
 				*this << k << val.at(k);
 			}
@@ -163,7 +185,7 @@ namespace Halley {
 		template <typename K, typename V, typename Cmp, typename Allocator>
 		Serializer& operator<<(const std::map<K, V, Cmp, Allocator>& val)
 		{
-			*this << static_cast<unsigned int>(val.size());
+			*this << static_cast<uint32_t>(val.size());
 			for (auto& kv : val) {
 				*this << kv.first << kv.second;
 			}
@@ -173,7 +195,7 @@ namespace Halley {
 		template <typename T>
 		Serializer& operator<<(const std::set<T>& val)
 		{
-			unsigned int sz = static_cast<unsigned int>(val.size());
+			uint32_t sz = static_cast<uint32_t>(val.size());
 			*this << sz;
 			for (auto& v: val) {
 				*this << v;
@@ -349,13 +371,13 @@ namespace Halley {
 		template <typename T>
 		Deserializer& operator>>(Vector<T>& val)
 		{
-			unsigned int sz;
+			uint32_t sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
 
 			val.clear();
 			val.reserve(sz);
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
 				val.push_back(T());
 				*this >> val[i];
 			}
@@ -365,12 +387,12 @@ namespace Halley {
 		template <typename T>
 		Deserializer& operator>>(std::list<T>& val)
 		{
-			unsigned int sz;
+			uint32_t sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
 
 			val.clear();
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
 				T v;
 				*this >> v;
 				val.push_back(std::move(v));
@@ -381,13 +403,13 @@ namespace Halley {
 		template <typename T, typename U>
 		Deserializer& operator>>(HashMap<T, U>& val)
 		{
-			unsigned int sz;
+			uint32_t sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
 
 			val.clear();
 			val.reserve(sz);
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
 				T key;
 				U value;
 				*this >> key >> value;
@@ -399,11 +421,11 @@ namespace Halley {
 		template <typename K, typename V, typename Cmp, typename Allocator>
 		Deserializer& operator >> (std::map<K, V, Cmp, Allocator>& val)
 		{
-			unsigned int sz;
+			uint32_t sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(size_t(sz) * 2); // Expect at least two bytes per map entry
 			
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
 				K key;
 				V value;
 				*this >> key >> value;
@@ -415,12 +437,12 @@ namespace Halley {
 		template <typename T>
 		Deserializer& operator>>(std::set<T>& val)
 		{
-			unsigned int sz;
+			uint32_t sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(sz); // Expect at least one byte per set entry
 
 			val.clear();
-			for (unsigned int i = 0; i < sz; i++) {
+			for (uint32_t i = 0; i < sz; i++) {
 				T v;
 				*this >> v;
 				val.insert(std::move(v));

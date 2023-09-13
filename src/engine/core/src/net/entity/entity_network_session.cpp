@@ -90,15 +90,42 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 
 void EntityNetworkSession::sendMessages()
 {
-	for (const auto& [peerId, msgs]: outbox) {
-		auto data = Serializer::toBytes(msgs, byteSerializationOptions);
-		auto compressed = Compression::compressRaw(gsl::as_bytes(gsl::span<const Byte>(data)), false);
-		auto packet = OutboundNetworkPacket(std::move(compressed));
-
-		if (peerId == -1) {
-			session->sendToPeers(std::move(packet));
+	auto tryCompress = [&](size_t startIdx, size_t count, const Vector<EntityNetworkMessage>& msgs) -> std::optional<Bytes>
+	{
+		auto data = Serializer::toBytes(msgs.span().subspan(startIdx, count), byteSerializationOptions);
+		auto compressed = Compression::lz4Compress(gsl::as_bytes(gsl::span<const Byte>(data)));
+		if (compressed.size() <= 2040) {
+			return std::move(compressed);
 		} else {
-			session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+			return std::nullopt;
+		}
+	};
+
+	for (const auto& [peerId, msgs]: outbox) {
+		size_t startIdx = 0;
+		size_t curCount = msgs.size();
+
+		while (startIdx < msgs.size()) {
+			if (auto data = tryCompress(startIdx, curCount, msgs)) {
+				auto packet = OutboundNetworkPacket(*data);
+				if (peerId == -1) {
+					session->sendToPeers(std::move(packet));
+				} else {
+					session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+				}
+				startIdx += curCount;
+				curCount = msgs.size() - startIdx;
+			} else {
+				if (curCount > 1) {
+					// Has more than one pack, but couldn't fit them - try fitting half.
+					// It might be able to fit more, but halving will approach the solution faster than trying to find the exact number, at a cost of a bit of inefficiency
+					curCount /= 2;
+				} else {
+					Logger::logError("Individual entity network message is too big to send over network, skipping it!");
+					++startIdx;
+					curCount = msgs.size() - startIdx;
+				}
+			}
 		}
 	}
 	outbox.clear();
@@ -112,7 +139,15 @@ void EntityNetworkSession::receiveUpdates()
 		const auto fromPeerId = result->first;
 		auto& packet = result->second;
 
-		auto bytes = Compression::decompressRaw(packet.getBytes(), 256 * 1024);
+		Bytes bytes;
+		bytes.resize(32 * 1024);
+		const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(bytes.span()));
+		if (size) {
+			bytes.resize(*size);
+		} else {
+			Logger::logError("Failed to decompress network packet");
+			continue;
+		}
 		auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(bytes, byteSerializationOptions);
 
 		for (auto& msg: msgs) {

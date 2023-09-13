@@ -100,7 +100,7 @@ Vector<uint16_t> AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliab
 	auto subPacketsLeft = subPackets;
 
 	while (!subPacketsLeft.empty()) {
-		std::array<gsl::byte, 4096> buffer;
+		std::array<gsl::byte, 2048> buffer;
 		const auto dst = gsl::span<gsl::byte>(buffer);
 
 		auto s = Serializer(dst, SerializerOptions(SerializerOptions::maxVersion));

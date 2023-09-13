@@ -2,6 +2,8 @@
 #include <halley/support/exception.h>
 #include <cassert>
 
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 NetworkPacketBase::NetworkPacketBase()
@@ -55,11 +57,18 @@ OutboundNetworkPacket::OutboundNetworkPacket(OutboundNetworkPacket&& other) noex
 
 OutboundNetworkPacket::OutboundNetworkPacket(gsl::span<const gsl::byte> data)
 	: NetworkPacketBase(data, 128)
-{}
+{
+	if (data.size_bytes() > 2048 - 8) {
+		Logger::logError("Network packet is too big");
+	}
+}
 
 OutboundNetworkPacket::OutboundNetworkPacket(const Bytes& data)
 	: NetworkPacketBase(gsl::as_bytes(gsl::span<const Byte>(data)), 128)
 {
+	if (data.size() > 2048 - 8) {
+		Logger::logError("Network packet is too big");
+	}
 }
 
 void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
