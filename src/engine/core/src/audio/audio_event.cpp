@@ -342,6 +342,7 @@ AudioFade& AudioEventActionBus::getFade()
 AudioEventActionPlay::AudioEventActionPlay(bool legacy)
 	: legacy(legacy)
 	, playGain(1, 1)
+	, playPitch(1, 1)
 {
 }
 
