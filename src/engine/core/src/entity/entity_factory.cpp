@@ -395,13 +395,9 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 		// Simple population
 		for (size_t i = 0; i < nComponents; ++i) {
 			const auto& [componentName, componentData] = data.getComponent(i);
-			try {
-				reflection.createComponent(context, componentName, entity, componentData);
-			} catch (const std::exception& e) {
-				Logger::logError("Unable to create component \"" + componentName + "\":");
-				Logger::logException(e);
-			} catch (...) {
-				Logger::logError("Unable to create component \"" + componentName + "\".");
+			const auto result = reflection.createComponent(context, componentName, entity, componentData);
+			if (!result.created) {
+				Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
 			}
 		}
 	} else {
@@ -414,16 +410,12 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 		// Populate
 		for (size_t i = 0; i < nComponents; ++i) {
 			const auto& [componentName, componentData] = data.getComponent(i);
-			try {
-				const auto result = reflection.createComponent(context, componentName, entity, componentData);
-				if (!result.created) {
-					existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
+			const auto result = reflection.createComponent(context, componentName, entity, componentData);
+			if (!result.created) {
+				if (auto iter = std::find(existingComps.begin(), existingComps.end(), result.componentId); iter != existingComps.end()) {
+					existingComps.erase(iter);
 				}
-			} catch (const std::exception& e) {
-				Logger::logError("Unable to create component \"" + componentName + "\":");
-				Logger::logException(e);
-			} catch (...) {
-				Logger::logError("Unable to update component \"" + componentName + "\".");
+				Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
 			}
 		}
 
