@@ -415,7 +415,9 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 				if (auto iter = std::find(existingComps.begin(), existingComps.end(), result.componentId); iter != existingComps.end()) {
 					existingComps.erase(iter);
 				}
-				Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+				if (result.componentId == -1) {
+					Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+				}
 			}
 		}
 
