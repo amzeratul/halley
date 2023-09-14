@@ -21,7 +21,7 @@ std::unique_ptr<Mesh> WavefrontReader::makeMesh()
 	memcpy(vs.data(), vertices.data(), vs.size());
 	result->setVertices(vertices.size(), vs);
 	result->setMaterialName("Halley/StandardMesh"); // TODO
-	result->setTextureNames({"texture/meshTexture0.jpg"}); // TODO
+	result->setTextureNames({"checker.png"}); // TODO
 	return result;
 }
 
@@ -61,7 +61,7 @@ void WavefrontReader::parseVN(Vector<String>& tokens)
 
 void WavefrontReader::parseVT(Vector<String>& tokens)
 {
-	vt.emplace_back(Vector3f(tokens.at(1).toFloat(), 1.0f - tokens.at(2).toFloat(), tokens.at(3).toFloat()));
+	vt.emplace_back(Vector3f(tokens.at(1).toFloat(), 1.0f - tokens.at(2).toFloat(), 0.0f/*tokens.at(3).toFloat()*/));
 }
 
 void WavefrontReader::parseF(Vector<String>& tokens)
