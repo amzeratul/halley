@@ -6212,6 +6212,7 @@ bool TinyGLTF::LoadFromString(Model *model, std::string *err, std::string *warn,
     }
   }
 
+#ifndef TINYGLTF_NO_IMAGE_PARSING // TODO LION disabled this for now, we don't need this
   // 11. Parse Image
   void *load_image_user_data{nullptr};
 
@@ -6225,72 +6226,73 @@ bool TinyGLTF::LoadFromString(Model *model, std::string *err, std::string *warn,
     load_image_user_data = reinterpret_cast<void *>(&load_image_option);
   }
 
-  //{
-  //  int idx = 0;
-  //  bool success = ForEachInArray(v, "images", [&](const detail::json &o) {
-  //    if (!detail::IsObject(o)) {
-  //      if (err) {
-  //        (*err) += "image[" + std::to_string(idx) + "] is not a JSON object.";
-  //      }
-  //      return false;
-  //    }
-  //    Image image;
-  //    if (!ParseImage(&image, idx, err, warn, o,
-  //                    store_original_json_for_extras_and_extensions_, base_dir,
-  //                    max_external_file_size_, &fs, &uri_cb,
-  //                    &this->LoadImageData, load_image_user_data)) {
-  //      return false;
-  //    }
+  {
+    int idx = 0;
+    bool success = ForEachInArray(v, "images", [&](const detail::json &o) {
+      if (!detail::IsObject(o)) {
+        if (err) {
+          (*err) += "image[" + std::to_string(idx) + "] is not a JSON object.";
+        }
+        return false;
+      }
+      Image image;
+      if (!ParseImage(&image, idx, err, warn, o,
+                      store_original_json_for_extras_and_extensions_, base_dir,
+                      max_external_file_size_, &fs, &uri_cb,
+                      &this->LoadImageData, load_image_user_data)) {
+        return false;
+      }
 
-  //    if (image.bufferView != -1) {
-  //      // Load image from the buffer view.
-  //      if (size_t(image.bufferView) >= model->bufferViews.size()) {
-  //        if (err) {
-  //          std::stringstream ss;
-  //          ss << "image[" << idx << "] bufferView \"" << image.bufferView
-  //             << "\" not found in the scene." << std::endl;
-  //          (*err) += ss.str();
-  //        }
-  //        return false;
-  //      }
+      if (image.bufferView != -1) {
+        // Load image from the buffer view.
+        if (size_t(image.bufferView) >= model->bufferViews.size()) {
+          if (err) {
+            std::stringstream ss;
+            ss << "image[" << idx << "] bufferView \"" << image.bufferView
+               << "\" not found in the scene." << std::endl;
+            (*err) += ss.str();
+          }
+          return false;
+        }
 
-  //      const BufferView &bufferView =
-  //          model->bufferViews[size_t(image.bufferView)];
-  //      if (size_t(bufferView.buffer) >= model->buffers.size()) {
-  //        if (err) {
-  //          std::stringstream ss;
-  //          ss << "image[" << idx << "] buffer \"" << bufferView.buffer
-  //             << "\" not found in the scene." << std::endl;
-  //          (*err) += ss.str();
-  //        }
-  //        return false;
-  //      }
-  //      const Buffer &buffer = model->buffers[size_t(bufferView.buffer)];
+        const BufferView &bufferView =
+            model->bufferViews[size_t(image.bufferView)];
+        if (size_t(bufferView.buffer) >= model->buffers.size()) {
+          if (err) {
+            std::stringstream ss;
+            ss << "image[" << idx << "] buffer \"" << bufferView.buffer
+               << "\" not found in the scene." << std::endl;
+            (*err) += ss.str();
+          }
+          return false;
+        }
+        const Buffer &buffer = model->buffers[size_t(bufferView.buffer)];
 
-  //      if (*LoadImageData == nullptr) {
-  //        if (err) {
-  //          (*err) += "No LoadImageData callback specified.\n";
-  //        }
-  //        return false;
-  //      }
-  //      bool ret = LoadImageData(
-  //          &image, idx, err, warn, image.width, image.height,
-  //          &buffer.data[bufferView.byteOffset],
-  //          static_cast<int>(bufferView.byteLength), load_image_user_data);
-  //      if (!ret) {
-  //        return false;
-  //      }
-  //    }
+        if (*LoadImageData == nullptr) {
+          if (err) {
+            (*err) += "No LoadImageData callback specified.\n";
+          }
+          return false;
+        }
+        bool ret = LoadImageData(
+            &image, idx, err, warn, image.width, image.height,
+            &buffer.data[bufferView.byteOffset],
+            static_cast<int>(bufferView.byteLength), load_image_user_data);
+        if (!ret) {
+          return false;
+        }
+      }
 
-  //    model->images.emplace_back(std::move(image));
-  //    ++idx;
-  //    return true;
-  //  });
+      model->images.emplace_back(std::move(image));
+      ++idx;
+      return true;
+    });
 
-  //  if (!success) {
-  //    return false;
-  //  }
-  //}
+    if (!success) {
+      return false;
+    }
+  }
+#endif
 
   // 12. Parse Texture
   {
