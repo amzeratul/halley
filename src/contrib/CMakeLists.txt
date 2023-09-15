@@ -72,6 +72,22 @@ set(SOURCES
         "zlib/trees.c"
         "zlib/uncompr.c"
         "zlib/zutil.c"
+
+        "meshoptimizer/allocator.cpp"
+        "meshoptimizer/clusterizer.cpp"
+        "meshoptimizer/indexcodec.cpp"
+        "meshoptimizer/indexgenerator.cpp"
+        "meshoptimizer/overdrawanalyzer.cpp"
+        "meshoptimizer/overdrawoptimizer.cpp"
+        "meshoptimizer/simplifier.cpp"
+        "meshoptimizer/spatialorder.cpp"
+        "meshoptimizer/stripifier.cpp"
+        "meshoptimizer/vcacheanalyzer.cpp"
+        "meshoptimizer/vcacheoptimizer.cpp"
+        "meshoptimizer/vertexcodec.cpp"
+        "meshoptimizer/vertexfilter.cpp"
+        "meshoptimizer/vfetchanalyzer.cpp"
+        "meshoptimizer/vfetchoptimizer.cpp"
         )
 
 set(HEADERS
@@ -171,6 +187,12 @@ set(HEADERS
         "zlib/zconf.h"
         "zlib/zlib.h"
         "zlib/zutil.h"
+
+        "nlohmann/json.hpp"
+        
+        "tinygltf/tiny_gltf.h"
+
+        "meshoptimizer/meshoptimizer.h"
         )
 
 if(NOT BUILD_HALLEY_TOOLS)
