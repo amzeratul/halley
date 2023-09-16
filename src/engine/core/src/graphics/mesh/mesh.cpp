@@ -9,6 +9,24 @@
 
 using namespace Halley;
 
+void MeshPart::serialize(Serializer& s) const
+{
+	s << numVertices;
+	s << vertexData;
+	s << indices;
+	//s << materialName; // TODO handle materials correctly
+	//s << textureNames;
+}
+
+void MeshPart::deserialize(Deserializer& d)
+{
+	d >> numVertices;
+	d >> vertexData;
+	d >> indices;
+	//d >> materialName;
+	//d >> textureNames;
+}
+
 Mesh::Mesh()
 {
 }
@@ -35,35 +53,9 @@ std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
 	return std::make_unique<Mesh>(loader);
 }
 
-uint32_t Mesh::getNumVertices() const
-{
-	return numVertices;
-}
-
-gsl::span<const Byte> Mesh::getVertexData() const
-{
-	return gsl::span<const Byte>(vertexData.data(), vertexData.size());
-}
-
-gsl::span<const IndexType> Mesh::getIndices() const
-{
-	return indices;
-}
-
 std::shared_ptr<const Material> Mesh::getMaterial() const
 {
 	return material;
-}
-
-void Mesh::setVertices(size_t num, Bytes vertexData)
-{
-	numVertices = uint32_t(num);
-	this->vertexData = std::move(vertexData);
-}
-
-void Mesh::setIndices(Vector<IndexType> indices)
-{
-	this->indices = std::move(indices);
 }
 
 void Mesh::setMaterialName(String name)
@@ -76,20 +68,36 @@ void Mesh::setTextureNames(Vector<String> textureNames)
 	this->textureNames = std::move(textureNames);
 }
 
-void Mesh::serialize(Serializer& s) const
+void Mesh::addPart(MeshPart part)
 {
-	s << numVertices;
-	s << vertexData;
-	s << indices;
-	s << materialName;
-	s << textureNames;
+	meshParts.emplace_back(std::move(part));
 }
 
-void Mesh::deserialize(Deserializer& s)
+const Vector<MeshPart>& Mesh::getParts() const
 {
-	s >> numVertices;
-	s >> vertexData;
-	s >> indices;
-	s >> materialName;
-	s >> textureNames;
+	return meshParts;
+}
+
+void Mesh::serialize(Serializer& s) const
+{
+	s << static_cast<uint32_t>(meshParts.size());
+	s << materialName;
+	s << textureNames;
+
+	for (const auto& part : meshParts) {
+		part.serialize(s);
+	}
+}
+
+void Mesh::deserialize(Deserializer& d)
+{
+    d >> count;
+	d >> materialName;
+	d >> textureNames;
+
+	for (uint32_t i = 0; i < count; ++i) {
+		MeshPart part{};
+		part.deserialize(d);
+		addPart(std::move(part));
+	}
 }

@@ -33,7 +33,7 @@ namespace Halley
 		Matrix4f matrix;
 		Quaternion rot;
 		Vector3f pos;
-		Vector3f scale;
+		Vector3f scale = Vector3f(1.0f, 1.0f, 1.0f);
 
 		std::shared_ptr<const Mesh> mesh;
 		std::shared_ptr<Material> material;

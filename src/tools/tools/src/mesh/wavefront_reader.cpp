@@ -15,12 +15,14 @@ std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data)
 std::unique_ptr<Mesh> WavefrontReader::makeMesh()
 {
 	auto result = std::make_unique<Mesh>();
-	result->setIndices(std::move(indices));
+	MeshPart part{};
+    part.indices = std::move(indices);
 	Bytes vs;
 	vs.resize(vertices.size() * sizeof(decltype(vertices)::value_type));
 	memcpy(vs.data(), vertices.data(), vs.size());
-	result->setVertices(vertices.size(), vs);
-	result->setMaterialName("Halley/StandardMesh"); // TODO
+	part.vertexData = vs;
+	part.numVertices = static_cast<uint32_t>(vertices.size());
+    result->setMaterialName("Halley/StandardMesh"); // TODO
 	result->setTextureNames({"checker.png"}); // TODO
 	return result;
 }

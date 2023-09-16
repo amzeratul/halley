@@ -91,6 +91,7 @@ set(SOURCES
     "src/tool/cli_tool.cpp"
 
     "src/mesh/wavefront_reader.cpp"
+    "src/mesh/gltf_reader.cpp"
 
     "src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
@@ -195,6 +196,7 @@ set(HEADERS
     "src/codegen/cpp/cpp_class_gen.h"
 
     "src/mesh/wavefront_reader.h"
+    "src/mesh/gltf_reader.h"
 
 	"src/sprites/aseprite_file.h"
     "src/sprites/aseprite_reader.h"

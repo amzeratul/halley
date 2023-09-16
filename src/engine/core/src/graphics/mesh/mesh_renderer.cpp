@@ -15,7 +15,9 @@ void MeshRenderer::update(Time t)
 
 void MeshRenderer::render(Painter& painter) const
 {
-	painter.draw(material, mesh->getNumVertices(), mesh->getVertexData().data(), mesh->getIndices());
+	for (const auto& part : mesh->getParts()) {
+		painter.draw(material, part.numVertices, part.vertexData.data(), part.indices);
+	}
 }
 
 std::shared_ptr<const Mesh> MeshRenderer::getMesh() const
