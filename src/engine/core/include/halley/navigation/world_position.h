@@ -11,8 +11,10 @@ namespace Halley {
 	public:
 		Vector2f pos;
 		int subWorld;
+
+		constexpr WorldPosition() = default;
 		
-		constexpr WorldPosition(Vector2f pos = {}, int subWorld = 0)
+		constexpr WorldPosition(Vector2f pos, int subWorld)
 			: pos(pos)
 			, subWorld(subWorld)
 		{
