@@ -340,7 +340,7 @@ std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(
 
 ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	auto e = environment.tryGetEntity(readRawEntityId(environment, node, 0));
+	auto e = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
 	if (e.isValid()) {
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
@@ -355,7 +355,7 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 
 void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
-	auto e = environment.tryGetEntity(readRawEntityId(environment, node, 0));
+	auto e = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
 	if (e.isValid()) {
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 
