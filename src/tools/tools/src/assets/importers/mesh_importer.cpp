@@ -8,13 +8,30 @@ void MeshImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 {
 	for (auto& f: asset.inputFiles) {
 		if (f.name.getExtension() == ".obj") {
-			auto reader = std::make_unique<WavefrontReader>();
+			const auto reader = std::make_unique<WavefrontReader>();
 			std::unique_ptr<Mesh> result = reader->parse(f.data);
 			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
 		}
 		if (f.name.getExtension() == ".glb") {
-			auto reader = std::make_unique<GLTFReader>();
-			std::unique_ptr<Mesh> result = reader->parse(asset, f.data);
+			const auto reader = std::make_unique<GLTFReader>();
+
+			auto name = asset.inputFiles.at(0).name;
+			name = name.replaceExtension("");
+
+			std::unique_ptr<Mesh> result = reader->parseBinary(name, f.data);
+			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
+		}
+		if (f.name.getExtension() == ".gltf") {
+			Path basePath = asset.inputFiles.at(0).name.parentPath();
+			const auto reader = std::make_unique<GLTFReader>();
+
+			auto name = asset.inputFiles.at(0).name;
+			name = name.replaceExtension(".bin");
+
+			auto binData = collector.readAdditionalFile(name);
+			name = name.replaceExtension("");
+
+			std::unique_ptr<Mesh> result = reader->parseASCII(name, binData, f.data);
 			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
 		}
 	}

@@ -16,7 +16,11 @@ void MeshRenderer::update(Time t)
 void MeshRenderer::render(Painter& painter) const
 {
 	for (const auto& part : mesh->getParts()) {
-		painter.draw(material, part.numVertices, part.vertexData.data(), part.indices);
+		if (materialOverride) {
+			painter.draw(materialOverride, part.numVertices, part.vertexData.data(), part.indices);
+		} else {
+			painter.draw(part.material, part.numVertices, part.vertexData.data(), part.indices);
+		}
 	}
 }
 
@@ -42,9 +46,14 @@ Quaternion MeshRenderer::getRotation() const
 
 MeshRenderer& MeshRenderer::setMesh(std::shared_ptr<const Mesh> mesh)
 {
-	material = mesh->getMaterial()->clone();
 	this->mesh = std::move(mesh);
 	dirty = true;
+	return *this;
+}
+
+MeshRenderer& MeshRenderer::setMaterial(const std::shared_ptr<Material>& material)
+{
+	this->materialOverride = material->clone();
 	return *this;
 }
 
@@ -77,6 +86,13 @@ void MeshRenderer::updateMatrix()
 		matrix.rotate(rot);
 		matrix.scale(scale);
 		dirty = false;
-		material->set("u_modelMatrix", matrix);
+
+		if (materialOverride) {
+			materialOverride->set("u_modelMatrix", matrix);
+		} else {
+			for (auto& part : mesh->getParts()) {
+				part.material->set("u_modelMatrix", matrix);
+			}
+		}
 	}
 }

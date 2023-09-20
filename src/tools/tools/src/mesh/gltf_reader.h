@@ -3,12 +3,14 @@
 
 namespace Halley
 {
+    class IAssetCollector;
     class ImportingAsset;
 
     class GLTFReader
 	{
 	public:
-		std::unique_ptr<Mesh> parse(const ImportingAsset& asset, const Bytes& data);
+		std::unique_ptr<Mesh> parseBinary(const Path& path, const Bytes& data);
+		std::unique_ptr<Mesh> parseASCII(const Path& path, const Bytes& binData, const Bytes& gltfData);
 
 	private:
 

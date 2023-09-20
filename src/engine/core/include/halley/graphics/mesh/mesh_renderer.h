@@ -25,6 +25,7 @@ namespace Halley
 		Quaternion getRotation() const;
 
 		MeshRenderer& setMesh(std::shared_ptr<const Mesh> mesh);
+		MeshRenderer& setMaterial(const std::shared_ptr<Material>& material);
 		MeshRenderer& setPosition(Vector3f pos);
 		MeshRenderer& setScale(Vector3f scale);
 		MeshRenderer& setRotation(Quaternion rot);
@@ -36,7 +37,7 @@ namespace Halley
 		Vector3f scale = Vector3f(1.0f, 1.0f, 1.0f);
 
 		std::shared_ptr<const Mesh> mesh;
-		std::shared_ptr<Material> material;
+		std::shared_ptr<Material> materialOverride;
 
 		bool dirty = true;
 		void updateMatrix();

@@ -14,17 +14,27 @@ void MeshPart::serialize(Serializer& s) const
 	s << numVertices;
 	s << vertexData;
 	s << indices;
-	//s << materialName; // TODO handle materials correctly
-	//s << textureNames;
+	s << materialName;
+	s << textureNames;
 }
 
-void MeshPart::deserialize(Deserializer& d)
+void MeshPart::deserialize(Deserializer& d, ResourceLoader& loader)
 {
 	d >> numVertices;
 	d >> vertexData;
 	d >> indices;
-	//d >> materialName;
-	//d >> textureNames;
+	d >> materialName;
+	d >> textureNames;
+
+	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
+    material = std::make_unique<Material>(matDef);
+	
+	int i = 0;
+	for (auto& t: textureNames) {
+		auto texture = loader.getResources().get<Texture>(t);
+		material->set("tex" + toString(i), texture);
+		++i;
+	}
 }
 
 Mesh::Mesh()
@@ -35,37 +45,12 @@ Mesh::Mesh(ResourceLoader& loader)
 {
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
-	deserialize(s);
-
-	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
-	material = std::make_unique<Material>(matDef);
-
-	int i = 0;
-	for (auto& t: textureNames) {
-		auto texture = loader.getResources().get<Texture>(t);
-		material->set("tex" + toString(i), texture);
-		++i;
-	}
+	deserialize(s, loader);
 }
 
 std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
 {
 	return std::make_unique<Mesh>(loader);
-}
-
-std::shared_ptr<const Material> Mesh::getMaterial() const
-{
-	return material;
-}
-
-void Mesh::setMaterialName(String name)
-{
-	this->materialName = std::move(name);
-}
-
-void Mesh::setTextureNames(Vector<String> textureNames)
-{
-	this->textureNames = std::move(textureNames);
 }
 
 void Mesh::addPart(MeshPart part)
@@ -80,24 +65,20 @@ const Vector<MeshPart>& Mesh::getParts() const
 
 void Mesh::serialize(Serializer& s) const
 {
-	s << static_cast<uint32_t>(meshParts.size());
-	s << materialName;
-	s << textureNames;
+	s << static_cast<uint32_t>(meshParts.size()); // TODO can this be done more elegant?
 
 	for (const auto& part : meshParts) {
 		part.serialize(s);
 	}
 }
 
-void Mesh::deserialize(Deserializer& d)
+void Mesh::deserialize(Deserializer& d, ResourceLoader& loader)
 {
-    d >> count;
-	d >> materialName;
-	d >> textureNames;
+    d >> count; // TODO can this be done more elegant?
 
 	for (uint32_t i = 0; i < count; ++i) {
 		MeshPart part{};
-		part.deserialize(d);
+		part.deserialize(d, loader);
 		addPart(std::move(part));
 	}
 }

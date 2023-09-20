@@ -9,8 +9,9 @@ using namespace Halley;
 #define TINYGLTF_NO_STB_IMAGE
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #define TINYGLTF_USE_CPP14
-#define TINYGLTF_NO_EXTERNAL_IMAGE
-#define TINYGLTF_NO_IMAGE_PARSING // THIS IS A CUSTOM FLAG. KEEP THIS IN MIND WHEN UPDATING TINY_GLTF (If ever needed..)
+//#define TINYGLTF_NO_EXTERNAL_IMAGE
+//#define TINYGLTF_NO_FS
+//#define TINYGLTF_NO_IMAGE_PARSING // THIS IS A CUSTOM FLAG. KEEP THIS IN MIND WHEN UPDATING TINY_GLTF (If ever needed..)
 
 #include "nlohmann/json.hpp"
 #include "meshoptimizer/meshoptimizer.h"
@@ -72,7 +73,7 @@ void extractGLTFVertices(tinygltf::Primitive& primitive, tinygltf::Model& model,
 				vertices[i].pos.w = 1.0f;
 			}
 			else {
-				assert(false);
+				assert(false); // TODO use Expects
 			}
 		}
 		else {
@@ -131,25 +132,25 @@ void extractGLTFVertices(tinygltf::Primitive& primitive, tinygltf::Model& model,
 
 void extractGLTFIndices(tinygltf::Primitive& primitive, tinygltf::Model& model, Vector<IndexType>& primindices)
 {
-	const int indexaccessor = primitive.indices;
-	const int componentType = model.accessors[indexaccessor].componentType;
+	const int indexAccessor = primitive.indices;
+	const int componentType = model.accessors[indexAccessor].componentType;
 
     Vector<uint8_t> unpackedIndices;
-	unpackGLTFBuffer(model, model.accessors[indexaccessor], unpackedIndices);
+	unpackGLTFBuffer(model, model.accessors[indexAccessor], unpackedIndices);
 
-	for (int i = 0; i < model.accessors[indexaccessor].count; i++) {
+	for (int i = 0; i < model.accessors[indexAccessor].count; i++) {
 		uint32_t index = 0;
 		switch (componentType) {
 		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
 		{
-			uint16_t* bfr = (uint16_t*)unpackedIndices.data();
-			index = *(bfr + i);
+			const uint16_t* unpackedIndex = reinterpret_cast<uint16_t*>(unpackedIndices.data());
+			index = *(unpackedIndex + i);
 		}
 		break;
 		case TINYGLTF_COMPONENT_TYPE_SHORT:
 		{
-			int16_t* bfr = (int16_t*)unpackedIndices.data();
-			index = *(bfr + i);
+			const int16_t* unpackedIndex = reinterpret_cast<int16_t*>(unpackedIndices.data());
+			index = *(unpackedIndex + i);
 		}
 		break;
 		default:
@@ -165,7 +166,54 @@ void extractGLTFIndices(tinygltf::Primitive& primitive, tinygltf::Model& model, 
 	}
 }
 
-std::unique_ptr<Mesh> GLTFReader::parse(const ImportingAsset& asset, const Bytes& data)
+void extractGLTFImages(const Path& path, tinygltf::Primitive& primitive, tinygltf::Model& model, Vector<String>& textureNames)
+{
+	const auto& material = model.materials[primitive.material];
+	const auto imageIndex = material.pbrMetallicRoughness.baseColorTexture.index;
+	const auto& image = model.images[imageIndex];
+
+	textureNames.push_back((path / image.uri).toString());
+}
+
+std::unique_ptr<Mesh> parse(const Path& path, tinygltf::Model model)
+{
+	auto mesh = std::make_unique<Mesh>();
+
+	for (auto meshindex = 0; meshindex < model.meshes.size(); meshindex++) {
+		auto& glmesh = model.meshes[meshindex];
+
+		for (auto primindex = 0; primindex < glmesh.primitives.size(); primindex++) {
+			String meshname = getMeshName(model, meshindex, primindex);
+			auto& primitive = glmesh.primitives[primindex];
+
+			Vector<VertexData> vertices;
+			Vector<IndexType> indices;
+			Vector<String> textureNames;
+			extractGLTFIndices(primitive, model, indices);
+			extractGLTFVertices(primitive, model, vertices);
+			if (!model.materials.empty() && !model.images.empty()) {
+				extractGLTFImages(path, primitive, model, textureNames);
+			}
+
+			MeshPart part{};
+			part.materialName = "Halley/StandardMesh";
+			part.indices = std::move(indices);
+
+			Bytes vs;
+			vs.resize(vertices.size() * sizeof(decltype(vertices)::value_type));
+			memcpy(vs.data(), vertices.data(), vs.size());
+			part.vertexData = vs;
+			part.numVertices = static_cast<uint32_t>(vertices.size());
+			part.textureNames = std::move(textureNames);
+
+			mesh->addPart(std::move(part));
+		}
+	}
+
+	return mesh;
+}
+
+std::unique_ptr<Mesh> GLTFReader::parseBinary(const Path& path, const Bytes& data)
 {
 	using namespace tinygltf;
 
@@ -173,7 +221,7 @@ std::unique_ptr<Mesh> GLTFReader::parse(const ImportingAsset& asset, const Bytes
 	TinyGLTF loader;
 	std::string err;
 	std::string warn;
-	
+
     bool ret = loader.LoadBinaryFromMemory(&model, &err, &warn, data.data(), static_cast<unsigned>(data.size()));
 	if (!warn.empty()) {
 		Logger::logWarning(warn.c_str());
@@ -183,36 +231,42 @@ std::unique_ptr<Mesh> GLTFReader::parse(const ImportingAsset& asset, const Bytes
 	}
 	if (!ret) {
 		Logger::logError("Failed to parse glTF");
-		return {};
+		return nullptr;
 	}
 
-	auto mesh = std::make_unique<Mesh>();
-	mesh->setMaterialName("Halley/StandardMesh"); // TODO
-	mesh->setTextureNames({ "checker.png" }); // TODO
+	return parse(path, model);
+}
 
-	for (auto meshindex = 0; meshindex < model.meshes.size(); meshindex++) {
-		auto& glmesh = model.meshes[meshindex];
+std::unique_ptr<Mesh> GLTFReader::parseASCII(const Path& path, const Bytes& binData, const Bytes& gltfData)
+{
+	using namespace tinygltf;
 
-		for (auto primindex = 0; primindex < glmesh.primitives.size(); primindex++) {
-			String meshname = getMeshName(model, meshindex, primindex);
-			auto& primitive = glmesh.primitives[primindex];
+	Model model;
+	TinyGLTF loader;
+	std::string err;
+	std::string warn;
+	
+	Buffer buffer{};
+	buffer.data.resize(binData.size());
+	memcpy(buffer.data.data(), binData.data(), binData.size());
+	model.buffers.emplace_back(std::move(buffer));
 
-		    Vector<VertexData> vertices;
-			Vector<IndexType> indices;
-			extractGLTFIndices(primitive, model, indices);
-			extractGLTFVertices(primitive, model, vertices);
+	bool ret = 
+		loader.LoadASCIIFromString(&model,
+			&err,
+			&warn,
+			reinterpret_cast<const char*>(gltfData.data()),
+			static_cast<unsigned>(gltfData.size()), "");
+	if (!warn.empty()) {
+		Logger::logWarning(warn.c_str());
+	}
+	if (!err.empty()) {
+		Logger::logError(err.c_str());
+	}
+	if (!ret) {
+		Logger::logError("Failed to parse glTF");
+		return nullptr;
+	}
 
-			MeshPart part{};
-			part.indices = indices;
-
-			Bytes vs;
-			vs.resize(vertices.size() * sizeof(decltype(vertices)::value_type));
-			memcpy(vs.data(), vertices.data(), vs.size());
-			part.vertexData = vs;
-			part.numVertices = static_cast<uint32_t>(vertices.size());
-			mesh->addPart(std::move(part));
-		}
-    }
-
-	return mesh;
+	return parse(path, model);
 }
