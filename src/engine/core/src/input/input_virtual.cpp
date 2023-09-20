@@ -431,7 +431,9 @@ void InputVirtual::bindPositionRelative(spInputDevice device, int axisX, int axi
 
 void InputVirtual::bindWheel(spInputDevice device)
 {
-	wheels.push_back(std::move(device));
+	if (!std_ex::contains(wheels, device)) {
+		wheels.push_back(std::move(device));
+	}
 }
 
 String InputVirtual::getButtonName(int code) const
