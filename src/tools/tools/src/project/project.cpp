@@ -333,6 +333,11 @@ void Project::setAssetSaveNotification(bool enabled)
 	}
 }
 
+bool Project::isAssetSaveNotificationEnabled() const
+{
+	return assetNotifyImportEnabled;
+}
+
 bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;

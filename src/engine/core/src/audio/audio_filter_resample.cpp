@@ -58,6 +58,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 
 		// Store left overs
 		size_t leftOver = result.nWritten + nLeftOver - numSamples;
+		leftOver = std::min(leftOver, leftoverSamples[channel].samples.size());
 		for (size_t i = 0; i < leftOver; ++i) {
 			leftoverSamples[channel].samples[i] = tmp[i + numSamples];
 		}

@@ -46,6 +46,7 @@ void MoviePlayer::play()
 
 		if (!streamingClip) {
 			streamingClip = std::make_shared<AudioClipStreaming>(2);
+			streamingClip->setLatencyTarget(8192);
 		}
 
 		state = MoviePlayerState::StartingToPlay;
@@ -150,7 +151,7 @@ void MoviePlayer::update(Time t)
 		if (state == MoviePlayerState::StartingToPlay) {
 			if (pendingFrames.size() >= 3) {
 				if (streamingClip) {
-					audioHandle = audio.play(streamingClip, AudioPosition::makeUI(), 0.5f);
+					audioHandle = audio.play(streamingClip, AudioPosition::makeFixed(), 0.5f);
 				}
 				state = MoviePlayerState::Playing;
 			}
