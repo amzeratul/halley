@@ -340,26 +340,39 @@ std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(
 
 ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	auto e = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
-	if (e.isValid()) {
+	EntityRef entityRef{};
+	if (node.getPin(0).hasConnection()) {
+		entityRef = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
+	} else {
+		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
+	}
+
+	if (entityRef.isValid()) {
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
 		EntitySerializationContext context;
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		return reflector.serializeField(context, e, type.field);
+		return reflector.serializeField(context, entityRef, type.field);
 	}
 	return {};
 }
 
 void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
-	auto e = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
-	if (e.isValid()) {
+	EntityRef entityRef{};
+	if (node.getPin(0).hasConnection()) {
+		entityRef = environment.getWorld().tryGetEntity(readRawEntityId(environment, node, 0));
+	}
+	else {
+		entityRef = environment.tryGetEntity(readEntityId(environment, node, 0));
+	}
+
+	if (entityRef.isValid()) {
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 
-		if (!environment.hasNetworkAuthorityOver(e)) {
+		if (!environment.hasNetworkAuthorityOver(entityRef)) {
 			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + type.getName() + "\", not owned by this client");
 			return;
 		}
@@ -369,7 +382,7 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
-		reflector.deserializeField(context, e, type.field, data);
+		reflector.deserializeField(context, entityRef, type.field, data);
 	}
 }
 
