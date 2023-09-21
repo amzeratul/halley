@@ -111,14 +111,14 @@ void AudioFader::startFade(float from, float to, const AudioFade& fade)
 	this->fade = fade;
 	startVal = from;
 	endVal = to;
-	time = -fade.getDelay();
+	fading = true;
 
 	const float delta = std::abs(from - to);
 	if (delta < 0.001f) {
-		fading = false;
+		time = fade.getLength();
 		timeScale = 1;
 	} else {
-		fading = true;
+		time = -fade.getDelay();
 		timeScale = 1.0f / delta;
 	}
 }
