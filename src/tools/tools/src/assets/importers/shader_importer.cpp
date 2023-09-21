@@ -16,7 +16,8 @@
 using namespace Halley;
 
 thread_local String glsl410ShaderName;
-thread_local FlatMap<String, int> glsl410VariantMap;
+thread_local Vector<String> glsl410PSInputVariants;
+thread_local FlatMap<String, int> glsl410PSInputVariantsCount;
 
 void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
@@ -187,12 +188,13 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 
 	if (name != glsl410ShaderName) {
 		if (type == ShaderType::Vertex) {
-			Logger::logWarning("Patching GLSL only works if pixel shader is compiled before vertex shader!");
+			Logger::logWarning("Patching GLSL only works if pixel shader is compiled before vertex shader. Shader '" + name + "' might not behave correctly!");
 			return;
 		}
 
 		glsl410ShaderName = name;
-		glsl410VariantMap.clear();
+		glsl410PSInputVariants.clear();
+		glsl410PSInputVariantsCount.clear();
 
 		// Build a map of all vertex shader inputs, counting how often they are used.
 
@@ -206,11 +208,11 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 				while (isalnum(code[ne])) ne++;
 				// Store in map, counting # of occurrences.
 				String ident = code.substr(n, ne - n);
-				int count = 0;
-				if (glsl410VariantMap.contains(ident)) {
-					count = glsl410VariantMap[ident] + 1;
+				if (!glsl410PSInputVariantsCount.contains(ident)) {
+					glsl410PSInputVariants.emplace_back(ident);
+					glsl410PSInputVariantsCount[ident] = -1;
 				}
-				glsl410VariantMap[ident] = count;
+				glsl410PSInputVariantsCount[ident] = glsl410PSInputVariantsCount[ident] + 1;
 				// forward marker
 				n = ne;
 			}
@@ -220,10 +222,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 		// For unused inputs, remove the source line which declares them.
 		// For used inputs, "remap" the binding locations.
 
-		int slot = 0;
-
-		for (auto& pair : glsl410VariantMap)
-		{
+		for (const auto& pair : glsl410PSInputVariantsCount) {
 			size_t n = code.find(pair.first);
 			Ensures(n != String::npos);
 			size_t ne = n + pair.first.size();
@@ -235,6 +234,15 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 					n++;
 				}
 			} else {
+				int slot = 0;
+				for (const String& ident : glsl410PSInputVariants) {
+					if (ident == pair.first) {
+						break;
+					}
+					if (glsl410PSInputVariantsCount[ident] > 0) {
+						slot++;
+					}
+				}
 				size_t loc = code.find("location = ", n);
 				if (loc < ne) {
 					loc += 11;
@@ -244,7 +252,6 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 					}
 					code[loc++] = static_cast<char>('0' + (slot % 10));
 					while ((code[loc] != ')') && (loc < ne)) code[loc++] = ' ';
-					slot++;
 				}
 			}
 		}
@@ -274,7 +281,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 		}
 	} else {
 		if (type == ShaderType::Pixel) {
-			Logger::logWarning("Patching GLSL only works if vertex shader is compiled after pixel shader!");
+			Logger::logWarning("Patching GLSL only works if vertex shader is compiled after pixel shader. Shader '" + name + "' might not behave correctly!");
 			return;
 		}
 
@@ -285,10 +292,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 		//
 		// For used inputs, remap binding locations just as above.
 
-		int slot = 0;
-
-		for (auto& pair : glsl410VariantMap)
-		{
+		for (const auto& pair : glsl410PSInputVariantsCount) {
 			String ident = pair.first.replaceOne("in_var_", "out_var_");
 			size_t pos = 0;
 			while (pos != String::npos) {
@@ -303,6 +307,15 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 							n++;
 						}
 					} else {
+						int slot = 0;
+						for (const String& origIdent : glsl410PSInputVariants) {
+							if (origIdent == pair.first) {
+								break;
+							}
+							if (glsl410PSInputVariantsCount[origIdent] > 0) {
+								slot++;
+							}
+						}
 						size_t loc = code.find("location = ", n);
 						if (loc < ne) {
 							loc += 11;
@@ -320,10 +333,14 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 				pos = n;
 			}
 		}
-		
+
 		// Rename the remaining/used outputs.
 
 		code = code.replaceAll("out_var_", "xy_var_");
+
+		glsl410ShaderName = "";
+		glsl410PSInputVariants.clear();
+		glsl410PSInputVariantsCount.clear();
 	}
 
 	// Search for uniform blocks.
