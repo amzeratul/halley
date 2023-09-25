@@ -34,7 +34,13 @@ CreateComponentFunctionResult WorldReflection::createComponent(const EntityFacto
 
 std::unique_ptr<System> WorldReflection::createSystem(const String& name) const
 {
-	return std::unique_ptr<System>(systemReflectors[systemMap.at(name)].createSystem());
+	const auto iter = systemMap.find(name);
+	if (iter != systemMap.end()) {
+		return std::unique_ptr<System>(systemReflectors[iter->second].createSystem());
+	} else {
+		Logger::logError("Unknown system: " + name);
+		return {};
+	}
 }
 
 std::unique_ptr<Message> WorldReflection::createMessage(int id) const
