@@ -1008,8 +1008,10 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	auto sprite = Sprite();
 	
 	if (node.hasKey("image")) {
-		auto imageName = node["image"].asString();
-		if (colourScheme) {
+		const auto imageName = node["image"].asString();
+		if (imageName.isEmpty()) {
+			sprite = {};
+		} else if (colourScheme) {
 			sprite = colourScheme->getSprite(resources, imageName, materialName);
 		} else {
 			sprite = Sprite().setImage(resources, imageName, materialName);

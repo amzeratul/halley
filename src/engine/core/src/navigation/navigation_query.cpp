@@ -15,8 +15,8 @@ NavigationQuery::NavigationQuery(WorldPosition from, WorldPosition to, PostProce
 
 NavigationQuery::NavigationQuery(const ConfigNode& node)
 {
-	from = node["from"].asVector2f();
-	to = node["to"].asVector2f();
+	from = WorldPosition(node["from"]);
+	to = WorldPosition(node["to"]);
 	postProcessingType = fromString<PostProcessingType>(node["postProcessingType"].asString());
 }
 

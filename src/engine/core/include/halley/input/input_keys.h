@@ -77,6 +77,7 @@ namespace Halley {
 		Semicolon = ';',
 		Apostrophe = '\'',
 		Grave = '`',
+		Caret = '^',
 		Comma = ',',
 		Period = '.',
 		Slash = '/',

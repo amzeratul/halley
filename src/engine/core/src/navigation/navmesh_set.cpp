@@ -542,7 +542,8 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 
 				if (!startCol) {
 					// Something went wrong, should have hit the edge of the navmesh or another obstacle
-					throw Halley::Exception("Error while post-processing navigation path, ray " + toString(startRay) + " at subworld " + startNavmesh.getSubWorld() + " didn't find hit on Navmesh.", HalleyExceptions::Utils);
+					//throw Halley::Exception("Error while post-processing navigation path, ray " + toString(startRay) + " at subworld " + startNavmesh.getSubWorld() + " didn't find hit on Navmesh.", HalleyExceptions::Utils);
+					break;
 				}
 				
 				// If hit correct portal, then raycast into end

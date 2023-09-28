@@ -37,7 +37,7 @@ namespace Halley {
 			if (const auto* component = tryGetComponent(entity)) {
 				return serializeField(context, *component, fieldName);
 			} else {
-				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
 				return {};
 			}
 		}
@@ -47,7 +47,7 @@ namespace Halley {
 			if (const auto* component = tryGetComponent(entity)) {
 				return serializeField(context, *component, fieldName);
 			} else {
-				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
 				return {};
 			}
 		}
@@ -62,7 +62,7 @@ namespace Halley {
 			if (auto* component = tryGetComponent(entity)) {
 				deserializeField(context, *component, fieldName, data);
 			} else {
-				Logger::logError("Component " + String(T::componentName) + " not found in entity");
+				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
 			}
 		}
 

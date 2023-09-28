@@ -25,13 +25,22 @@ WorldReflection::WorldReflection(CodegenFunctions& codegenFunctions)
 
 CreateComponentFunctionResult WorldReflection::createComponent(const EntityFactoryContext& context, const String& componentName, EntityRef& entity, const ConfigNode& componentData) const
 {
-	const auto id = componentMap.at(componentName);
-	return componentReflectors[id]->createComponent(context, entity, componentData);
+	const auto iter = componentMap.find(componentName);
+	if (iter != componentMap.end()) {
+		return componentReflectors[iter->second]->createComponent(context, entity, componentData);
+	}
+	return {};
 }
 
 std::unique_ptr<System> WorldReflection::createSystem(const String& name) const
 {
-	return std::unique_ptr<System>(systemReflectors[systemMap.at(name)].createSystem());
+	const auto iter = systemMap.find(name);
+	if (iter != systemMap.end()) {
+		return std::unique_ptr<System>(systemReflectors[iter->second].createSystem());
+	} else {
+		Logger::logError("Unknown system: " + name);
+		return {};
+	}
 }
 
 std::unique_ptr<Message> WorldReflection::createMessage(int id) const

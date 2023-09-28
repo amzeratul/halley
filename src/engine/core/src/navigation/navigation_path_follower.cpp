@@ -11,7 +11,7 @@ Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
 		path = NavigationPath(node["path"]);
 		needsToReEvaluatePath = true; // Path doesn't store all its info on ConfigNode, so re-query it
 	}
-	curPos = node["curPos"].asVector2f(Vector2f());
+	curPos = WorldPosition(node["curPos"]);
 	nextPathIdx = node["nextPathIdx"].asInt(0);
 	nextRegionIdx = node["nextRegionIdx"].asInt(0);
 	params = node["params"];

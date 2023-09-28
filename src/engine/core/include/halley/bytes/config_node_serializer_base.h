@@ -33,7 +33,7 @@ namespace Halley {
 		template <typename T, typename ... Ts>
 		[[nodiscard]] int makeMask(T v, Ts ... vs)
 		{
-			return static_cast<int>(v) | makeMask(vs...);
+			return makeMask(v) | makeMask(vs...);
 		}
 	}
 

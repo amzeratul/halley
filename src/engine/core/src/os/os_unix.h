@@ -33,12 +33,15 @@ namespace Halley {
 		OSUnix();
 		~OSUnix();
 
-		virtual ComputerData getComputerData() override;
-		virtual String getUserDataDir() override;
+		ComputerData getComputerData() override;
+		String getUserDataDir() override;
+		String getCurrentWorkingDir() override;
 		void createDirectories(const Path& path) override;
 		Vector<Path> enumerateDirectory(const Path& path) override;
 
 		int runCommand(String command, String cwd, ILoggerSink* sink) override;
+		Future<int> runCommandAsync(const String& string, const String& cwd, ILoggerSink* sink) override;
+		void runCommand(String command, String cwd, Promise<int> promise, ILoggerSink* sink);
 	};
 }
 

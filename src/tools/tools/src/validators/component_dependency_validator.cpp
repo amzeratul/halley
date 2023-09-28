@@ -1,6 +1,7 @@
 #include "halley/tools/validators/component_dependency_validator.h"
 
 #include "halley/editor_extensions/entity_validator.h"
+#include "halley/editor_extensions/standard_entity_validators.h"
 #include "halley/entity/entity.h"
 #include "halley/entity/world.h"
 #include "halley/utils/algorithm.h"
@@ -19,7 +20,13 @@ Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(En
 
 	const auto& componentSchemas = ecsData->getComponents();
 	for (auto& component : entityData.getComponents()) {
-		const auto& componentSchema = componentSchemas.at(component.first);
+		const auto iter = componentSchemas.find(component.first);
+		if (iter == componentSchemas.end()) {
+			result.emplace_back(Severity::Error, "Component " + component.first + " does not exist.", IEntityValidator::Action("Remove Component", RemoveComponentValidatorActionHandler::makeAction(component.first)));
+			continue;
+		}
+
+		const auto& componentSchema = iter->second;
 		for (auto& dependsOn : componentSchema.componentDependencies) {
 			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
 			if (!hasDepedency) {
