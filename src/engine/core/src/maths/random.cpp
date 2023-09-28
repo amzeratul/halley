@@ -67,10 +67,10 @@ int32_t Random::getInt(int32_t min, int32_t max)
 		std::swap(min, max);
 	}
 	const uint32_t base = getRawInt();
-	const uint32_t range = uint32_t(max - min + 1);
-	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+	if (min == std::numeric_limits<int32_t>::min() && max == std::numeric_limits<int32_t>::max()) {
 		return int32_t(base);
 	}
+	const uint32_t range = uint32_t(max - min + 1);
 	return int32_t(base % range) + min;
 }
 
@@ -93,10 +93,10 @@ int64_t Random::getInt(int64_t min, int64_t max)
 		std::swap(min, max);
 	}
 	const int64_t base = int64_t((uint64_t(getRawInt()) << 32ull) | uint64_t(getRawInt()));
-	const uint64_t range = uint64_t(max - min + 1);
-	if (range == 0) { // If min and max correspond to the whole range represented, this blows up
+	if (min == std::numeric_limits<int64_t>::min() && max == std::numeric_limits<int64_t>::max()) {
 		return int64_t(base);
 	}
+	const uint64_t range = uint64_t(max - min + 1);
 	return int64_t(base % range) + min;
 }
 
