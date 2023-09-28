@@ -40,6 +40,11 @@ namespace Halley {
 		{
 			pool = new SizePool(sizeof(T));
 		}
+
+		~PoolAllocator()
+		{
+			delete pool;
+		}
 		
 		void* alloc()
 		{
