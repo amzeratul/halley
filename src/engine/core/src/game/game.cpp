@@ -15,6 +15,11 @@ ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& asse
 	return {};
 }
 
+String Game::getLogFileName() const
+{
+    return "log.txt";
+}
+
 bool Game::shouldCreateSeparateConsole() const
 {
 	return isDevMode();

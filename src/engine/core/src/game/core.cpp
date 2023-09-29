@@ -301,7 +301,7 @@ void Core::initResources()
 void Core::setOutRedirect(bool appendToExisting)
 {
 #if defined(_WIN32) || defined(__APPLE__) || defined(linux)
-	String path = (Path(environment->getDataPath()) / "log.txt").getString();
+	String path = (Path(environment->getDataPath()) / game->getLogFileName()).getString();
 #ifdef _WIN32
 	auto outStream = std::make_shared<std::ofstream>(path.getUTF16().c_str(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 #else

@@ -34,6 +34,7 @@ namespace Halley
 
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;
+        virtual String getLogFileName() const;
 		virtual bool isDevMode() const = 0;
 		virtual bool shouldCreateSeparateConsole() const;
 		virtual ConsoleInfo getConsoleInfo() const;
