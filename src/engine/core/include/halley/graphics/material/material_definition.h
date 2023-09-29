@@ -212,6 +212,7 @@ namespace Halley
 
 	public:
 		constexpr static const char* defaultMaterial = "Halley/Sprite";
+		constexpr static const char* defaultMeshMaterial = "Halley/StandardMesh";
 
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);

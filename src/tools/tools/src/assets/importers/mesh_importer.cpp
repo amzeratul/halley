@@ -18,7 +18,7 @@ void MeshImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 			auto name = asset.inputFiles.at(0).name;
 			name = name.replaceExtension("");
 
-			std::unique_ptr<Mesh> result = reader->parseBinary(name, f.data);
+			std::unique_ptr<Mesh> result = reader->parseBinary(name, f.data, f.metadata);
 			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
 		}
 		if (f.name.getExtension() == ".gltf") {
@@ -31,7 +31,7 @@ void MeshImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 			auto binData = collector.readAdditionalFile(name);
 			name = name.replaceExtension("");
 
-			std::unique_ptr<Mesh> result = reader->parseASCII(name, binData, f.data);
+			std::unique_ptr<Mesh> result = reader->parseASCII(name, binData, f.data, f.metadata);
 			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
 		}
 	}

@@ -1,0 +1,10 @@
+uuid: dc38526b-da52-44c7-ad6e-8a8f97093daa
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 9c2160d9-aa7a-4fdb-a0b6-309cc385d8cd
+    widget: {class: meshEditorDisplay, id: display }
+    proportion: 1
+    fill: [fillHorizontal, fillVertical]

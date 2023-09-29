@@ -11,6 +11,8 @@
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
 #include "ui_editor/ui_editor.h"
+#include "mesh_editor.h"
+
 using namespace Halley;
 
 AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
@@ -214,6 +216,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<AudioObjectEditor>(factory, project.getGameResources(), project, projectWindow);
 	case AssetType::ScriptGraph:
 		return std::make_shared<ScriptGraphAssetEditor>(factory, project.getGameResources(), project, projectWindow);
+	case AssetType::Mesh:
+		return std::make_shared<MeshEditor>(factory, project.getGameResources(), type, project, *metadataEditor);
 	}
 	return {};
 }

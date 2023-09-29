@@ -35,6 +35,7 @@ namespace Halley {
         std::shared_ptr<UIWidget> makeGradientEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeColourPickerDisplay(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeScriptingVariableInspector(const ConfigNode& entryNode);
+        std::shared_ptr<UIWidget> makeMeshEditorDisplay(const ConfigNode& entryNode);
 
 		UIFactoryWidgetProperties getCurveEditorProperties() const;
 		UIFactoryWidgetProperties getSelectAssetProperties() const;

@@ -20,6 +20,8 @@
 #include "src/scene/entity_validator_ui.h"
 #include "src/scene/scene_editor_canvas.h"
 #include "src/assets/graph/script_graph_variable_inspector.h"
+#include "src/assets/mesh_editor.h"
+
 using namespace Halley;
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName)
@@ -50,6 +52,8 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); }, getCurveEditorProperties());
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
 	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node); });
+	addFactory("meshEditorDisplay", [=](const ConfigNode& node) { return makeMeshEditorDisplay(node); });
+
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -248,6 +252,14 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeScriptingVariableInspector(const 
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto widget = std::make_shared<ScriptGraphVariableInspector>(*this);
+	return widget;
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeMeshEditorDisplay(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto widget = std::make_shared<MeshEditorDisplay>(id, resources, api);
 	return widget;
 }
 

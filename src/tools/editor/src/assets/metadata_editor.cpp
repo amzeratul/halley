@@ -23,6 +23,7 @@ bool MetadataEditor::hasEditorForType(AssetType type)
 	case AssetType::Animation:
 	case AssetType::AudioClip:
 	case AssetType::Font:
+	case AssetType::Mesh:
 		return true;
 	default:
 		return false;
@@ -116,6 +117,9 @@ void MetadataEditor::makeUI()
 		addFloatField("Fallback Scale", "replacementScale", 1.0f);
 		addStringField("Extra characters", "extraCharacters", "");
 		addBoolField("Floor Glyph Pos.", "floorGlyphPosition", false);
+		break;
+	case AssetType::Mesh:
+		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, MaterialDefinition::defaultMeshMaterial);
 		break;
 	}
 }

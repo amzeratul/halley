@@ -1,5 +1,6 @@
 #include "gltf_reader.h"
 
+#include "halley/graphics/material/material_definition.h"
 #include "halley/plugin/iasset_importer.h"
 using namespace Halley;
 
@@ -175,7 +176,7 @@ void extractGLTFImages(const Path& path, tinygltf::Primitive& primitive, tinyglt
 	textureNames.push_back((path / image.uri).toString());
 }
 
-std::unique_ptr<Mesh> parse(const Path& path, tinygltf::Model model)
+std::unique_ptr<Mesh> parse(const Path& path, tinygltf::Model& model, const Metadata& metadata)
 {
 	auto mesh = std::make_unique<Mesh>();
 
@@ -196,7 +197,7 @@ std::unique_ptr<Mesh> parse(const Path& path, tinygltf::Model model)
 			}
 
 			MeshPart part{};
-			part.materialName = "Halley/StandardMesh";
+			part.materialName = metadata.getString("material", MaterialDefinition::defaultMeshMaterial);
 			part.indices = std::move(indices);
 
 			Bytes vs;
@@ -213,7 +214,7 @@ std::unique_ptr<Mesh> parse(const Path& path, tinygltf::Model model)
 	return mesh;
 }
 
-std::unique_ptr<Mesh> GLTFReader::parseBinary(const Path& path, const Bytes& data)
+std::unique_ptr<Mesh> GLTFReader::parseBinary(const Path& path, const Bytes& data, const Metadata& metadata)
 {
 	using namespace tinygltf;
 
@@ -234,10 +235,10 @@ std::unique_ptr<Mesh> GLTFReader::parseBinary(const Path& path, const Bytes& dat
 		return nullptr;
 	}
 
-	return parse(path, model);
+	return parse(path, model, metadata);
 }
 
-std::unique_ptr<Mesh> GLTFReader::parseASCII(const Path& path, const Bytes& binData, const Bytes& gltfData)
+std::unique_ptr<Mesh> GLTFReader::parseASCII(const Path& path, const Bytes& binData, const Bytes& gltfData, const Metadata& metadata)
 {
 	using namespace tinygltf;
 
@@ -268,5 +269,5 @@ std::unique_ptr<Mesh> GLTFReader::parseASCII(const Path& path, const Bytes& binD
 		return nullptr;
 	}
 
-	return parse(path, model);
+	return parse(path, model, metadata);
 }
