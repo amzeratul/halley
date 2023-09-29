@@ -30,5 +30,5 @@ float4 main(VOut input) : SV_TARGET {
     float light = min(ambient + diffuse + specular, 1.0);
 
     float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
-    return col * light;
+    return float4(col.xyz * light, col.a);
 }

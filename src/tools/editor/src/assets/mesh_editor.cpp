@@ -53,7 +53,7 @@ MeshEditorDisplay::MeshEditorDisplay(String id, Resources& resources, const Hall
     , resources(resources)
     , api(api)
 {
-	surface = std::make_shared<RenderSurface>(*api.video, resources, "Halley/Sprite");
+	surface = std::make_shared<RenderSurface>(*api.video, resources);
 }
 
 void MeshEditorDisplay::setMetadataEditor(MetadataEditor& metadataEditor)
