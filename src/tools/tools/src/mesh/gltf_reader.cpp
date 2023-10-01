@@ -17,10 +17,14 @@ using namespace Halley;
 #include "nlohmann/json.hpp"
 #include "meshoptimizer/meshoptimizer.h"
 
+#ifdef _MSC_VER
 __pragma(warning(push))
 __pragma(warning(disable : 4018 4267))
+#endif
 #include "tinygltf/tiny_gltf.h"
+#ifdef _MSC_VER
 __pragma(warning(pop))
+#endif
 
 String getMeshName(tinygltf::Model& model, int meshIndex, int primitiveIndex)
 {

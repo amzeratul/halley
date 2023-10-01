@@ -1,6 +1,6 @@
 project (halley-metal)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
         "src/metal_plugin.mm"
