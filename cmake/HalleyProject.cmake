@@ -578,10 +578,10 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		endif()
 	endif ()
 
-	if (BUILD_MACOSX_BUNDLE) # TODO check this out
-	#	add_custom_command(TARGET ${name} POST_BUILD
-	#		COMMAND "cp" "-R" "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "$<TARGET_FILE_DIR:${name}>/../Resources"
-	#	)
+	if (BUILD_MACOSX_BUNDLE AND NOT ${name} MATCHES "halley-editor")
+		add_custom_command(TARGET ${name} POST_BUILD
+			COMMAND "cp" "-R" "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "$<TARGET_FILE_DIR:${name}>/../Resources"
+		)
 	endif ()
 endfunction(halleyProject)
 
