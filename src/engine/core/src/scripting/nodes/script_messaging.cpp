@@ -446,12 +446,13 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 {
 	if (curData.waitingForResult) {
 		if (auto future = environment.getFutureNodeValue(node)) {
-			curData.result = future->get();
-			environment.setFutureNodeValue(node, std::nullopt);
-			return Result(ScriptNodeExecutionState::Done);
-		} else {
-			return Result(ScriptNodeExecutionState::Executing, time);
+			if (future->isReady()) {
+				curData.result = future->get();
+				environment.setFutureNodeValue(node, std::nullopt);
+				return Result(ScriptNodeExecutionState::Done);
+			}
 		}
+		return Result(ScriptNodeExecutionState::Executing, time);
 	}
 
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
