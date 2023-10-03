@@ -100,7 +100,7 @@ namespace Halley {
 	class LuaExpression {
 	public:
 		LuaExpression(String expr = "");
-		const String& getExpression() { return expression; }
+		const String& getExpression() const { return expression; }
 		void setExpression(String expr);
 		bool isEmpty() const;
 
