@@ -656,7 +656,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const 
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 4>{
+	    PinType{ ET::ReadDataPin, PD::Input },
+	    PinType{ ET::ReadDataPin, PD::Output },
+	    PinType{ ET::ReadDataPin, PD::Input },
+	    PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
@@ -664,9 +668,22 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns lerp(");
-	str.append(toString(node.getSettings()["from"].asFloat(0)), settingColour);
+
+	if (node.getPin(2).hasConnection()) {
+		str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	} else {
+		str.append(toString(node.getSettings()["from"].asFloat(0)), settingColour);
+	}
+
 	str.append(", ");
-	str.append(toString(node.getSettings()["to"].asFloat(1)), settingColour);
+
+	if (node.getPin(3).hasConnection()) {
+		str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	}
+	else {
+		str.append(toString(node.getSettings()["to"].asFloat(1)), settingColour);
+	}
+
 	str.append(", ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
 	str.append(", ");
@@ -677,19 +694,66 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 
 String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
+	const auto curve = node.getSettings()["curve"].asString("linear");
+
+	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
+		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+	}
+
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
-	const auto curve = node.getSettings()["curve"].asString("linear");
 	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+}
+
+String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+    switch(elementIdx) {
+    case 0:
+		return "t";
+	case 1:
+		return "output";
+	case 2:
+		return "from";
+	case 3:
+		return "to";
+    }
+
+	return "";
 }
 
 ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
-	const auto from = node.getSettings()["from"].asFloat(0);
-	const auto to = node.getSettings()["to"].asFloat(1);
 	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
 	const auto t = readDataPin(environment, node, 0).asFloat(0);
-	return ConfigNode(lerp(from, to, Tween<float>::applyCurve(t, curve)));
+	const auto factor = Tween<float>::applyCurve(t, curve);
+
+	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
+		const auto from = readDataPin(environment, node, 2);
+		const auto to = readDataPin(environment, node, 3);
+
+		if (from.getType() != to.getType()) {
+			Logger::logError("Trying to lerp between 2 different types! " + toString(from.getType()) + " " + toString(to.getType()));
+		    return {};
+		}
+
+		switch(from.getType()) {
+		case ConfigNodeType::Float:
+			return ConfigNode(lerp(from.asFloat(), to.asFloat(), factor));
+		case ConfigNodeType::Float2:
+			return ConfigNode(lerp(from.asVector2f(), to.asVector2f(), factor));
+		case ConfigNodeType::Int:
+			return ConfigNode(lerp(from.asInt(), to.asInt(), factor));
+		case ConfigNodeType::String:
+			return lerp(Colour4f(from.asString()), Colour4f(to.asString()), factor).toConfigNode();
+		default:
+			Logger::logError("Trying to lerp an unsupported type! " + toString(from.getType()));
+			return {};
+		}
+	}
+
+	const auto from = node.getSettings()["from"].asFloat(0);
+	const auto to = node.getSettings()["to"].asFloat(1);
+	return ConfigNode(lerp(from, to, factor));
 }
 
 
