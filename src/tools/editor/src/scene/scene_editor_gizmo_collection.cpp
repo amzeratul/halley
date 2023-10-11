@@ -5,6 +5,7 @@
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
+#include "gizmos/variant_gizmo.h"
 #include "halley/graphics/camera.h"
 using namespace Halley;
 
@@ -197,6 +198,12 @@ void SceneEditorGizmoCollection::resetTools()
 			[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 			{
 				return std::make_unique<CommentsGizmo>(snapRules, factory, sceneEditorWindow);
+			}
+		);
+		addTool(Tool("variants", LocalisedString::fromHardcodedString("Variants [V]"), Sprite().setImage(resources, "ui/scene_editor_variants.png"), KeyCode::V),
+			[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
+			{
+				return std::make_unique<VariantGizmo>(snapRules, factory, sceneEditorWindow);
 			}
 		);
 	}
