@@ -1,5 +1,6 @@
 #include "halley/graphics/sprite/particles.h"
 
+#include "halley/maths/polygon.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
 
@@ -285,8 +286,10 @@ void Particles::update(Time t)
 	const int toSpawn = static_cast<int>(floor(pendingSpawn));
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 
-	// Spawn new particles
-	spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
+	if (toSpawn > 0) {
+		// Spawn new particles
+		spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
+	}
 
 	// Update particles
 	updateParticles(static_cast<float>(t));
@@ -359,6 +362,30 @@ void Particles::spawnAt(Vector3f pos)
 {
 	spawn(1, 0.0f);
 	particles[nParticlesAlive - 1].pos = pos;
+}
+
+Rect4f Particles::getAABB() const
+{
+	if (nParticlesAlive == 0) {
+		return {};
+	}
+
+	auto aabb = Rect4f(particles[0].pos.xy(), particles[0].pos.xy());
+	for (size_t i = 1; i < nParticlesAlive; ++i) {
+		auto p = Rect4f(particles[i].pos.xy(), particles[i].pos.xy());
+		aabb = aabb.merge(p);
+	}
+	return aabb;
+}
+
+void Particles::destroyOverlapping(const Polygon& polygon)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (polygon.isPointInside(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
 }
 
 void Particles::spawn(size_t n, float time)

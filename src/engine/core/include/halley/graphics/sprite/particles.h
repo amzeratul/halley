@@ -8,6 +8,7 @@
 #include "halley/maths/colour_gradient.h"
 
 namespace Halley {
+	class Polygon;
 	class Random;
 	class Animation;
 
@@ -100,6 +101,9 @@ namespace Halley {
 
 		void setSecondarySpawner(IParticleSpawner* spawner);
 		void spawnAt(Vector3f pos);
+
+		Rect4f getAABB() const;
+		void destroyOverlapping(const Polygon& polygon);
 
 	private:
 		Random* rng;
