@@ -61,7 +61,8 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 		background = Sprite().setMaterial(mat);
 	}
 	if (node.hasKey("backgroundParticles")) {
-		backgroundParticles = Particles(node["backgroundParticles"]["particles"], resources);
+		EntitySerializationContext context;
+		backgroundParticles = Particles(node["backgroundParticles"]["particles"], resources, context);
 		Vector<Sprite> particleSprites;
 		for (const auto& spriteNode: node["backgroundParticles"]["sprites"].asSequence()) {
 			particleSprites.push_back(getSpriteFromConfigNode(spriteNode, resources));

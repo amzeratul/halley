@@ -4,6 +4,7 @@
 #include "halley/time/halleytime.h"
 #include "halley/maths/interpolation_curve.h"
 #include "animation_player.h"
+#include "halley/entity/entity_id.h"
 #include "halley/maths/colour_gradient.h"
 
 namespace Halley {
@@ -24,6 +25,12 @@ namespace Halley {
 			}};
 		}
 	};
+
+	class IParticleSpawner {
+	public:
+		virtual ~IParticleSpawner() = default;
+		virtual void spawn(Vector3f pos, EntityId target) = 0;
+	};
 	
 	class Particles {
 		struct Particle {
@@ -38,10 +45,10 @@ namespace Halley {
 		
 	public:
 		Particles();
-		Particles(const ConfigNode& node, Resources& resources);
-		void load(const ConfigNode& node, Resources& resources);
+		Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
+		void load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		void burstParticles(float n);
 
@@ -91,6 +98,9 @@ namespace Halley {
 		[[nodiscard]] gsl::span<Sprite> getSprites();
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;
 
+		void setSecondarySpawner(IParticleSpawner* spawner);
+		void spawnAt(Vector3f pos);
+
 	private:
 		Random* rng;
 		std::shared_ptr<Material> material;
@@ -133,6 +143,10 @@ namespace Halley {
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector3f position;
+		EntityId onSpawn;
+		EntityId onDeath;
+
+		IParticleSpawner* secondarySpawner = nullptr;
 
 		void start();
 		void initializeParticle(size_t index, float time);
@@ -140,6 +154,8 @@ namespace Halley {
 		void spawn(size_t n, float time);
 
 		Vector3f getSpawnPosition() const;
+
+		void onSecondarySpawn(const Particle& particle, EntityId target);
 	};
 
 	class Resources;

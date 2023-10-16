@@ -10,13 +10,13 @@ Particles::Particles()
 {
 }
 
-Particles::Particles(const ConfigNode& node, Resources& resources)
+Particles::Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
 	: rng(&Random::getGlobal())
 {
-	load(node, resources);
+	load(node, resources, context);
 }
 
-void Particles::load(const ConfigNode& node, Resources& resources)
+void Particles::load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
 {
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
@@ -86,9 +86,11 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	startHeight = node["startHeight"].asFloat(0);
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
+	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
+	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
 }
 
-ConfigNode Particles::toConfigNode() const
+ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType result;
 
@@ -113,6 +115,8 @@ ConfigNode Particles::toConfigNode() const
 	result["startHeight"] = startHeight;
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
+	result["onSpawn"] = ConfigNodeSerializer<EntityId>().serialize(onSpawn, context);
+	result["onDeath"] = ConfigNodeSerializer<EntityId>().serialize(onDeath, context);
 
 	return result;
 }
@@ -290,6 +294,10 @@ void Particles::update(Time t)
 	// Remove dead particles
 	for (size_t i = 0; i < nParticlesAlive; ) {
 		if (!particles[i].alive) {
+			if (onDeath) {
+				onSecondarySpawn(particles[i], onDeath);
+			}
+
 			if (i != nParticlesAlive - 1) {
 				// Swap with last particle that's alive
 				std::swap(particles[i], particles[nParticlesAlive - 1]);
@@ -342,6 +350,17 @@ gsl::span<const Sprite> Particles::getSprites() const
 	return gsl::span<const Sprite>(sprites).subspan(0, nParticlesVisible);
 }
 
+void Particles::setSecondarySpawner(IParticleSpawner* spawner)
+{
+	secondarySpawner = spawner;
+}
+
+void Particles::spawnAt(Vector3f pos)
+{
+	spawn(1, 0.0f);
+	particles[nParticlesAlive - 1].pos = pos;
+}
+
 void Particles::spawn(size_t n, float time)
 {
 	if (maxParticles) {
@@ -388,6 +407,10 @@ void Particles::initializeParticle(size_t index, float time)
 		anim.update(0, sprite);
 	} else if (!baseSprites.empty()) {
 		sprite = rng->getRandomElement(baseSprites);
+	}
+
+	if (onSpawn) {
+		onSecondarySpawn(particle, onSpawn);
 	}
 }
 
@@ -456,18 +479,25 @@ Vector3f Particles::getSpawnPosition() const
 	return position + Vector3f(pos, startHeight);
 }
 
+void Particles::onSecondarySpawn(const Particle& particle, EntityId target)
+{
+	if (secondarySpawner && target) {
+		secondarySpawner->spawn(particle.pos, target);
+	}
+}
+
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const EntitySerializationContext& context)
 {
-	return particles.toConfigNode();
+	return particles.toConfigNode(context);
 }
 
 Particles ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
-	return Particles(node, *context.resources);
+	return Particles(node, *context.resources, context);
 }
 
 void ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Particles& target)
 {
-	target.load(node, *context.resources);
+	target.load(node, *context.resources, context);
 }
 

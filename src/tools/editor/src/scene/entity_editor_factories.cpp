@@ -1124,14 +1124,17 @@ public:
 		auto initialGroup = context.makeNestedField("Initial State");
 		auto dynamicsGroup = context.makeNestedField("Dynamics");
 		auto systemGroup = context.makeNestedField("System");
+		auto multiSystemGroup = context.makeNestedField("Secondary Particles");
 		auto spawnContainer = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2, {{0, 1}}));
 		auto initialContainer = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2, {{0, 1}}));
 		auto dynamicsContainer = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2, {{0, 1}}));
 		auto systemContainer = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2, {{0, 1}}));
+		auto multiSystemContainer = std::make_shared<UIWidget>("", Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2, {{0, 1}}));
 		spawnGroup->getWidget("fields")->add(spawnContainer, 1);
 		initialGroup->getWidget("fields")->add(initialContainer, 1);
 		dynamicsGroup->getWidget("fields")->add(dynamicsContainer, 1);
 		systemGroup->getWidget("fields")->add(systemContainer, 1);
+		multiSystemGroup->getWidget("fields")->add(multiSystemContainer, 1);
 
 		spawnContainer->add(context.makeLabel("Particles/s"));
 		spawnContainer->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
@@ -1175,11 +1178,16 @@ public:
 		dynamicsContainer->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Destroy When Done"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeLabel("On Spawn"));
+		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeLabel("On Death"));
+		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
 
 		container->add(std::move(spawnGroup));
 		container->add(std::move(initialGroup));
 		container->add(std::move(dynamicsGroup));
 		container->add(std::move(systemGroup));
+		container->add(std::move(multiSystemGroup));
 
 		return container;
 	}

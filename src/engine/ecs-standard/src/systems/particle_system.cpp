@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-class ParticleSystem final : public ParticleSystemBase<ParticleSystem> {
+class ParticleSystem final : public ParticleSystemBase<ParticleSystem>, public IParticleSpawner {
 public:
 	void onEntitiesAdded(Span<ParticleFamily> es)
 	{
@@ -23,6 +23,7 @@ public:
 		for (auto& e: particleFamily) {
 			auto& particles = e.particles.particles;
 			particles.setPosition(Vector3f(e.transform2D.getGlobalPosition(), e.transform2D.getGlobalHeight()));
+			particles.setSecondarySpawner(this);
 			particles.update(t);
 
 			if (!particles.isAlive() && !particles.isEnabled() && !getWorld().isEditor()) {
@@ -36,6 +37,14 @@ public:
 	void onMessageReceived(const StopParticlesMessage& msg, ParticleFamily& particles) override
 	{
 		particles.particles.particles.setEnabled(false);
+	}
+
+	void spawn(Vector3f pos, EntityId target) override
+	{
+		// TODO: this could be a perf bottleneck
+		if (auto* particles = particleFamily.tryFind(target)) {
+			particles->particles.particles.spawnAt(pos);
+		}
 	}
 
 private:
