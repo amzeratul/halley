@@ -11,8 +11,8 @@ VariantGizmo::VariantGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditor
 
 std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 {
-	// TODO
-	return {};
+	auto ui = factory.makeUI("halley/variants_gizmo");
+	return ui;
 }
 
 bool VariantGizmo::onKeyPress(KeyboardKeyPress key)

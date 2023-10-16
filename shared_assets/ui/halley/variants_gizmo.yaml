@@ -1,0 +1,77 @@
+uuid: c3a48b45-a0b2-4994-a6b4-40f969663bb6
+sizer:
+  columnProportions: []
+  gap: 3
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: 9c0eabc7-d392-4eae-89db-c9489bfacb09
+    sizer:
+      columnProportions: []
+    widget:
+      class: scrollBarPane
+      style: scrollbarHalley
+    children:
+      - uuid: deb6bcef-e72c-455e-99d6-179f5a6baab4
+        widget:
+          canDrag: true
+          class: list
+          id: variants
+          options: []
+          size: [170, 0]
+          style: dragListSmall
+  - uuid: a0a2a28c-3942-4f3f-a1d6-ded01a5dd642
+    sizer:
+      columnProportions: []
+      gap: 3
+    children:
+      - uuid: 0b7e5f96-6194-48cc-a238-ee8f60aa5928
+        proportion: 1
+        sizer:
+          columnProportions: []
+        widget:
+          class: button
+          id: add
+          style: buttonThin
+          text: +
+      - uuid: 9089ad05-e1b1-48c7-931c-c6c58c72ef97
+        proportion: 1
+        sizer:
+          columnProportions: []
+        widget:
+          class: button
+          id: remove
+          style: buttonThin
+          text: "-"
+  - uuid: 907fd754-b505-448d-8000-516078ecbaf3
+    sizer:
+      columnProportions: [0, 1]
+      columns: 2
+      gap: 1
+      type: grid
+    widget:
+      class: widget
+    children:
+      - uuid: 340dbe68-dee0-4ab7-b260-3dcb7952cf0f
+        border: [0, 0, 5, 0]
+        widget:
+          class: label
+          text: Id
+        fill: [left, centreVertical]
+      - uuid: 4b185b79-e4cf-4c87-ad15-a5b484fd059b
+        border: [0, 0, 0, 0]
+        widget:
+          class: textInput
+          id: id
+      - uuid: c57014c2-4b41-4c28-84ef-9855520f2764
+        border: [0, 0, 5, 0]
+        widget:
+          class: label
+          text: Condition
+        fill: [left, centreVertical]
+      - uuid: c3b38aa2-45f3-40a0-a86d-7d87019af6bf
+        border: [0, 0, 0, 0]
+        widget:
+          class: textInput
+          id: condition
