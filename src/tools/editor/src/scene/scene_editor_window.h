@@ -203,6 +203,7 @@ namespace Halley {
 		bool consoleCommandsAttached = false;
 
 		void makeUI();
+		void refreshSelectedEntities();
 		void onEntitiesSelected(Vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);
 

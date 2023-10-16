@@ -91,7 +91,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
-		onEntitiesSelected(entityList->getCurrentSelections());
+		refreshSelectedEntities();
 	});
 
 	bindData("toolMode", getSetting(EditorSettingType::Temp, "tools.curTool").asString("drag"), [=] (const String& value)
@@ -171,6 +171,11 @@ void SceneEditorWindow::makeUI()
 	{
 		projectWindow.openAssetFinder("@");
 	});
+}
+
+void SceneEditorWindow::refreshSelectedEntities()
+{
+	onEntitiesSelected(entityList->getCurrentSelections());
 }
 
 void SceneEditorWindow::onAddedToRoot(UIRoot& root)
@@ -667,7 +672,7 @@ void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> c
 	}
 
 	entityList->onEntitiesAdded(changes);
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 	undoStack.pushAdded(modified, changes);
 	
 	markModified();
@@ -741,7 +746,7 @@ void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> orig
 		entityList->refreshList();
 	}
 
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 
 	undoStack.pushMoved(modified, forward, back);
 	
@@ -1110,6 +1115,7 @@ void SceneEditorWindow::toggleEntitiesEnabled(gsl::span<const String> ids)
 	
 	onEntitiesModified(modifiedIds, oldDataPtrs, newDataPtrs);
 	entityEditor->reloadEntity();
+	refreshSelectedEntities();
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
@@ -1279,7 +1285,7 @@ void SceneEditorWindow::onEntitiesRemoved(gsl::span<const String> ids, gsl::span
 	for (size_t i = 0; i < ids.size(); ++i) {
 		sceneData->reloadEntity(parents[i].first.isEmpty() ? ids[i] : parents[i].first);
 	}
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 
 	markModified();
 }

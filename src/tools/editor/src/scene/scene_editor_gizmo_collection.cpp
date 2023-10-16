@@ -57,6 +57,15 @@ void SceneEditorGizmoCollection::setSelectedEntities(Vector<EntityRef> entities,
 {
 	selectedEntities = std::move(entities);
 	entityDatas = std::move(datas);
+
+	for (size_t i = 0; i < selectedEntities.size();) {
+		if (!selectedEntities[i].isEnabled()) {
+			selectedEntities.erase(selectedEntities.begin() + i);
+			entityDatas.erase(entityDatas.begin() + i);
+		} else {
+			i++;
+		}
+	}
 	
 	selectedBoundsGizmo->setSelectedEntities(selectedEntities, entityDatas);
 	
