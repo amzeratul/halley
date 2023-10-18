@@ -12,6 +12,7 @@ children:
     widget:
       class: scrollBarPane
       style: scrollbarHalley
+      size: [200, 100]
     children:
       - uuid: deb6bcef-e72c-455e-99d6-179f5a6baab4
         widget:
@@ -19,7 +20,7 @@ children:
           class: list
           id: variants
           options: []
-          size: [170, 0]
+          size: [200, 0]
           style: dragListSmall
   - uuid: a0a2a28c-3942-4f3f-a1d6-ded01a5dd642
     sizer:
@@ -68,10 +69,10 @@ children:
         border: [0, 0, 5, 0]
         widget:
           class: label
-          text: Condition
+          text: Conditions
         fill: [left, centreVertical]
       - uuid: c3b38aa2-45f3-40a0-a86d-7d87019af6bf
         border: [0, 0, 0, 0]
         widget:
           class: textInput
-          id: condition
+          id: conditions

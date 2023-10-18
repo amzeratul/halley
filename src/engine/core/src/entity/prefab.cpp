@@ -426,3 +426,23 @@ Scene::Deltas Scene::generateSceneDeltas(const Scene& newScene) const
 
 	return result;
 }
+
+SceneVariant::SceneVariant(String id, LuaExpression conditions)
+	: id(std::move(id))
+	, conditions(std::move(conditions))
+{
+}
+
+SceneVariant::SceneVariant(const ConfigNode& node)
+{
+	id = node["id"].asString("default");
+	conditions = node["conditions"].asString("");
+}
+
+ConfigNode SceneVariant::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["id"] = id;
+	result["conditions"] = conditions.getExpression();
+	return result;
+}

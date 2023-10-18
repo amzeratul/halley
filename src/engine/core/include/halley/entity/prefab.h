@@ -2,6 +2,7 @@
 
 #include "halley/file_formats/config_file.h"
 #include "entity_data_delta.h"
+#include "halley/lua/lua_reference.h"
 
 namespace Halley {	
 	class Prefab : public AsyncResource {
@@ -95,5 +96,17 @@ namespace Halley {
 	protected:
 		EntityData makeEntityData(const ConfigNode& node) const override;
 		Deltas generateSceneDeltas(const Scene& newScene) const;
+	};
+
+	class SceneVariant {
+	public:
+		String id;
+		LuaExpression conditions;
+
+		SceneVariant() = default;
+		SceneVariant(String id, LuaExpression conditions = {});
+		SceneVariant(const ConfigNode& node);
+
+		ConfigNode toConfigNode() const;
 	};
 }

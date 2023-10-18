@@ -6,10 +6,17 @@ namespace Halley {
 	public:
 		explicit VariantGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
 		std::shared_ptr<UIWidget> makeUI() override;
-		bool onKeyPress(KeyboardKeyPress key) override;
 
 	private:
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
+
+		std::shared_ptr<UIWidget> ui;
+		std::shared_ptr<UIList> variantsList;
+
+		void populateVariants();
+		void populateVariantInfo();
+		void addVariant();
+		void removeVariant();
 	};
 }
