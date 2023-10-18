@@ -35,6 +35,7 @@ namespace Halley {
 		const std::optional<String>& getName() const { return name; }
 		const std::optional<String>& getPrefab() const { return prefab; }
 		const std::optional<String>& getIcon() const { return icon; }
+		const std::optional<String>& getVariant() const { return variant; }
 		const std::optional<uint8_t>& getFlags() const { return flags; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		const std::optional<UUID>& getInstanceUUID() const { return instanceUUID; }

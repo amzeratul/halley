@@ -40,7 +40,7 @@ namespace Halley {
 		
 		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
 		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0);
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0, String variant = "");
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 
@@ -135,6 +135,9 @@ namespace Halley {
 		EntityScene* getScene() const;
 		uint8_t getWorldPartition() const;
 		void setWorldPartition(uint8_t partition);
+
+		const String& getVariant() const;
+		bool canInstantiateVariant(const String& value) const;
 
 		void setCurrentEntity(EntityId entity);
 		EntityId getCurrentEntityId() const override;

@@ -45,6 +45,11 @@ const String& EntityDataInstanced::getPrefab() const
 	return prefabData->getPrefab();
 }
 
+const String& EntityDataInstanced::getVariant() const
+{
+	return prefabData->getVariant();
+}
+
 uint8_t EntityDataInstanced::getFlags() const
 {
 	return prefabData->getFlags() | flags;

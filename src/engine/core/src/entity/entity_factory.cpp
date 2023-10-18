@@ -30,7 +30,7 @@ World& EntityFactory::getWorld()
 	return world;
 }
 
-EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition)
+EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition, String variant)
 {
 	EntityScene curScene(allowReload, worldPartition);
 	try {
@@ -248,6 +248,20 @@ void EntityFactoryContext::setWorldPartition(uint8_t partition)
 	worldPartition = partition;
 }
 
+const String& EntityFactoryContext::getVariant() const
+{
+	if (scene) {
+		return scene->getVariant();
+	} else {
+		return String::emptyString();
+	}
+}
+
+bool EntityFactoryContext::canInstantiateVariant(const String& value) const
+{
+	return value.isEmpty() || value == getVariant();
+}
+
 EntityId EntityFactoryContext::getCurrentEntityId() const
 {
 	return curEntity;
@@ -360,11 +374,20 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		if (delta.getName()) {
 			entity.setName(delta.getName().value());
 		}
+
+		bool enabled = true;
 		if (delta.getFlags()) {
 			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
 			entity.setSerializable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
-			entity.setEnabled((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
+			enabled = enabled && (delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
 		}
+
+		if (delta.getVariant()) {
+			enabled = enabled && context->canInstantiateVariant(delta.getVariant().value());
+		}
+
+		entity.setEnabled(enabled);
+
 		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
 		entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 		updateEntityComponentsDelta(entity, delta, *context);
@@ -374,7 +397,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		entity.setName(data.getName());
 		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
 		entity.setSerializable(!data.getFlag(EntityData::Flag::NotSerializable));
-		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled));
+		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled) && context->canInstantiateVariant(data.getVariant()));
 		if (data.getPrefabUUID().isValid()) {
 			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 		}
