@@ -35,6 +35,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	if (from.icon != to.icon) {
 		icon = to.icon;
 	}
+	if (from.variant != to.variant) {
+		variant = to.variant;
+	}
 	if (from.flags != to.flags) {
 		flags = to.flags;
 	}
@@ -135,7 +138,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 bool EntityDataDelta::hasChange() const
 {
-	return name || prefab || icon || flags || instanceUUID || prefabUUID || parentUUID
+	return name || prefab || icon || variant || flags || instanceUUID || prefabUUID || parentUUID
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
@@ -173,6 +176,7 @@ void EntityDataDelta::serialize(Serializer& s) const
 	encodeField(componentOrder, FieldId::ComponentsOrder);
 	encodeOptField(icon, FieldId::Icon);
 	encodeOptField(flags, FieldId::Flags);
+	encodeOptField(variant, FieldId::Variant);
 }
 
 void EntityDataDelta::deserialize(Deserializer& s)
@@ -210,6 +214,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeField(componentOrder, FieldId::ComponentsOrder);
 	decodeOptField(icon, FieldId::Icon);
 	decodeOptField(flags, FieldId::Flags);
+	decodeOptField(variant, FieldId::Variant);
 }
 
 void EntityDataDelta::setInstanceUUID(const UUID& uuid)
@@ -310,6 +315,9 @@ ConfigNode EntityDataDelta::toConfigNode() const
 	}
 	if (icon) {
 		result["icon"] = icon.value();
+	}
+	if (variant) {
+		result["variant"] = variant.value();
 	}
 	if (instanceUUID) {
 		result["uuid"] = instanceUUID->toString();
@@ -459,6 +467,7 @@ uint16_t EntityDataDelta::getFieldsPresent() const
 	checkFieldVec(componentOrder, FieldId::ComponentsOrder);
 	checkField(icon, FieldId::Icon);
 	checkField(flags, FieldId::Flags);
+	checkField(variant, FieldId::Variant);
 
 	return value;
 }

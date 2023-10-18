@@ -1627,6 +1627,9 @@ Path SceneEditorWindow::getPrimaryInputFile(AssetType type, const String& assetI
 
 String SceneEditorWindow::getCurrentAssetId() const
 {
+	if (!prefab) {
+		return "";
+	}
 	return prefab->getAssetId();
 }
 

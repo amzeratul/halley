@@ -1,5 +1,7 @@
 #include "variant_gizmo.h"
 
+#include "src/assets/new_asset_window.h"
+
 using namespace Halley;
 
 VariantGizmo::VariantGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow)
@@ -7,6 +9,7 @@ VariantGizmo::VariantGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditor
 	, factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
 {
+	loadVariants();
 }
 
 std::shared_ptr<UIWidget> VariantGizmo::makeUI()
@@ -15,7 +18,7 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 
 	variantsList = ui->getWidgetAs<UIList>("variants");
 
-	populateVariants();
+	populateVariants(0);
 	populateVariantInfo();
 
 	ui->setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
@@ -35,47 +38,89 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 
 	ui->setHandle(UIEventType::ListItemsSwapped, "variants", [=](const UIEvent& event)
 	{
-		// TODO
+		const int a = event.getIntData();
+		const int b = event.getIntData2();
+		std::swap(variants[a], variants[b]);
+		populateVariantInfo();
+		saveVariants();
 	});
 
 	return ui;
 }
 
-void VariantGizmo::populateVariants()
+void VariantGizmo::loadVariants()
 {
-	auto& variantsNode = sceneEditorWindow.getGameData("variants");
-	variantsNode.ensureType(ConfigNodeType::Sequence);
-	auto& variants = variantsNode.asSequence();
-
+	variants = sceneEditorWindow.getGameData("variants").asVector<SceneVariant>({});
 	if (variants.empty()) {
-		variants.push_back(SceneVariant("default").toConfigNode());
+		variants.push_back(SceneVariant("default"));
 	}
+}
 
-	for (auto& variantNode: variants) {
-		const auto variant = SceneVariant(variantNode);
+void VariantGizmo::saveVariants()
+{
+	sceneEditorWindow.getGameData("variants") = variants;
+	sceneEditorWindow.markModified();
+}
 
+void VariantGizmo::populateVariants(int startIdx)
+{
+	variantsList->clear();
+	for (auto& variant: variants) {
 		auto widget = factory.makeUI("halley/variant_entry");
+
+		const auto selImage = widget->getWidgetAs<UIImage>("background");
+		const auto normalCol = selImage->getSprite().getColour();
+		const auto selCol = factory.getColourScheme()->getColour("ui_listSelected");
+		const auto hoverCol = factory.getColourScheme()->getColour("ui_listHover");
+		selImage->setHoverableSelectable(normalCol, hoverCol, selCol);
+
 		widget->getWidgetAs<UILabel>("name")->setText(LocalisedString::fromUserString(variant.id));
 		variantsList->addItem(variant.id, widget);
 	}
+	variantsList->setSelectedOption(startIdx);
 }
 
 void VariantGizmo::populateVariantInfo()
 {
-	auto& variantsNode = sceneEditorWindow.getGameData("variants");
-	variantsNode.ensureType(ConfigNodeType::Sequence);
-	auto& variantNode = variantsNode.asSequence()[variantsList->getSelectedOption()];
-	const auto variant = SceneVariant(variantNode);
-	ui->getWidgetAs<UITextInput>("id")->setText(variant.id);
-	ui->getWidgetAs<UITextInput>("conditions")->setText(variant.conditions.getExpression());
+	auto& variant = variants[variantsList->getSelectedOption()];
+
+	ui->bindData("id", variant.id, [this, &variant](String value)
+	{
+		variant.id = value;
+		saveVariants();
+		variantsList->setItemText(variantsList->getSelectedOption(), value);
+	});
+	ui->bindData("conditions", variant.conditions.getExpression(), [this, &variant](String value)
+	{
+		variant.conditions = value;
+		saveVariants();
+	});
+
+	ui->getWidget("remove")->setEnabled(variant.id != "default");
+	ui->getWidget("id")->setEnabled(variant.id != "default");
+	ui->getWidget("conditions")->setEnabled(variant.id != "default");
 }
 
 void VariantGizmo::addVariant()
 {
-	// TODO
+	ui->getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Variant"), "", "", [=](std::optional<String> newName)
+	{
+		if (newName) {
+			variants.push_back(SceneVariant(*newName));
+			populateVariants(static_cast<int>(variants.size()) - 1);
+			saveVariants();
+		}
+	}));
 }
 
 void VariantGizmo::removeVariant()
 {
-	// TODO
+	const int idx = variantsList->getSelectedOption();
+	if (idx >= 0 && idx < static_cast<int>(variants.size())) {
+		if (variants[idx].id != "default") {
+			variants.erase(variants.begin() + idx);
+			populateVariants(idx);
+		}
+	}
+	saveVariants();
 }

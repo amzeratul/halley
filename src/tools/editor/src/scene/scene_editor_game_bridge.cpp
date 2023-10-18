@@ -432,7 +432,9 @@ void SceneEditorGameBridge::load()
 
 void SceneEditorGameBridge::unload()
 {
-	gizmos->clear();
+	if (gizmos) {
+		gizmos->clear();
+	}
 
 	interface.reset();
 	interfaceReady = false;

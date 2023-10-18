@@ -14,7 +14,12 @@ namespace Halley {
 		std::shared_ptr<UIWidget> ui;
 		std::shared_ptr<UIList> variantsList;
 
-		void populateVariants();
+		Vector<SceneVariant> variants;
+
+		void loadVariants();
+		void saveVariants();
+
+		void populateVariants(int startIdx);
 		void populateVariantInfo();
 		void addVariant();
 		void removeVariant();

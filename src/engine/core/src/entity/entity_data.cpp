@@ -69,6 +69,7 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	name = data["name"].asString("");
 	prefab = data["prefab"].asString("");
 	icon = data["icon"].asString("");
+	variant = data["variant"].asString("");
 	flags = static_cast<uint8_t>(data["flags"].asInt(0));
 
 	if (isPrefab) {
@@ -120,6 +121,9 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 	if (!icon.isEmpty()) {
 		result["icon"] = icon;
 	}
+	if (!variant.isEmpty()) {
+		result["variant"] = variant;
+	}
 	if (instanceUUID.isValid()) {
 		result["uuid"] = instanceUUID.toString();
 	}
@@ -157,7 +161,7 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 String EntityData::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "prefab", "icon", "flags", "uuid", "prefabUUID", "parent", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "prefab", "icon", "variant", "flags", "uuid", "prefabUUID", "parent", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(true), options);
 }
 
@@ -310,6 +314,11 @@ void EntityData::setIcon(String icon)
 	this->icon = std::move(icon);
 }
 
+void EntityData::setVariant(String variant)
+{
+	this->variant = std::move(variant);
+}
+
 bool EntityData::setFlag(Flag f, bool value)
 {
 	const auto flag = static_cast<uint8_t>(f);
@@ -375,6 +384,9 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	if (delta.icon) {
 		icon = delta.icon.value();
+	}
+	if (delta.variant) {
+		variant = delta.variant.value();
 	}
 	if (delta.flags) {
 		flags = delta.flags.value();

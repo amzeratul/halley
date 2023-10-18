@@ -66,6 +66,7 @@ namespace Halley {
     	std::optional<String> name;
     	std::optional<String> prefab;
 		std::optional<String> icon;
+		std::optional<String> variant;
 		std::optional<uint8_t> flags;
     	std::optional<UUID> instanceUUID;
     	std::optional<UUID> prefabUUID;
@@ -95,7 +96,8 @@ namespace Halley {
         	ChildrenRemoved,
         	ChildrenOrder,
         	Icon,
-			Flags
+			Flags,
+			Variant
         };
 
     	static uint16_t getFieldBit(FieldId id);
