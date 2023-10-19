@@ -42,6 +42,7 @@ namespace Halley {
 			float time = 0;
 			float ttl = 1;
 			bool alive = true;
+			bool firstFrame = true;
 		};
 		
 	public:

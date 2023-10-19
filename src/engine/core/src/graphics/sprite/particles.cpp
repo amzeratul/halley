@@ -422,6 +422,7 @@ void Particles::initializeParticle(size_t index, float time)
 	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
 	
 	auto& particle = particles[index];
+	particle.firstFrame = true;
 	particle.alive = true;
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
@@ -463,8 +464,12 @@ void Particles::updateParticles(float time)
 		} else {
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 			const auto a = stopped ? Vector3f() : acceleration;
-			particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
-			particle.vel += a * time;
+			if (particle.firstFrame) {
+				particle.firstFrame = false;
+			} else {
+				particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
+				particle.vel += a * time;
+			}
 
 			if (minHeight && particle.pos.z < minHeight) {
 				particle.alive = false;
