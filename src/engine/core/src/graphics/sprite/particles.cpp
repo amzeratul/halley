@@ -267,6 +267,11 @@ float Particles::getSpawnHeight() const
 	return startHeight;
 }
 
+void Particles::setSpawnPositionOffset(Vector2f offset)
+{
+	spawnPositionOffset = offset;
+}
+
 void Particles::start()
 {
 	if (burst) {
@@ -503,7 +508,7 @@ Vector3f Particles::getSpawnPosition() const
 		const float angle = rng->getFloat(0.0f, 2.0f * pif());
 		pos = Vector2f(radius, 0).rotate(Angle1f::fromRadians(angle)) * spawnArea * 0.5f;
 	}
-	return position + Vector3f(pos, startHeight);
+	return position + Vector3f(pos + spawnPositionOffset, startHeight);
 }
 
 void Particles::onSecondarySpawn(const Particle& particle, EntityId target)

@@ -87,7 +87,8 @@ namespace Halley {
 		std::optional<float> getMinHeight() const;
 		void setSpawnHeight(float height);
 		float getSpawnHeight() const;
-		
+		void setSpawnPositionOffset(Vector2f offset);
+
 		void update(Time t);
 
 		void setSprites(Vector<Sprite> sprites);
@@ -125,6 +126,7 @@ namespace Halley {
 		Vector2f spawnArea;
 		ParticleSpawnAreaShape spawnAreaShape = ParticleSpawnAreaShape::Rectangle;
 		float startHeight = 0;
+		Vector2f spawnPositionOffset;
 
 		Range<float> ttl;
 		Range<float> speed;
