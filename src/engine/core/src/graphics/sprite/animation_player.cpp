@@ -406,7 +406,12 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 {
 	updateResourceIfNeeded();
 	if (animation && curSeq && curDir) {
-		return animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);
+		const auto flip = dirFlip && !seqNoFlip;
+		auto point = animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);;
+		if (point && flip) {
+			point->x *= -1;
+		}
+		return point;
 	}
 	return {};
 }
