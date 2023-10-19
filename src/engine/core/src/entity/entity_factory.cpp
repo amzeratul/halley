@@ -32,7 +32,7 @@ World& EntityFactory::getWorld()
 
 EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition, String variant)
 {
-	EntityScene curScene(allowReload, worldPartition);
+	EntityScene curScene(allowReload, worldPartition, variant);
 	try {
 		for (const auto& entityData : prefab->getEntityDatas()) {
 			auto entity = createEntity(entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), EntityRef(), &curScene);
@@ -43,7 +43,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 		Logger::logError("Error loading scene " + prefab->getAssetId());
 		Logger::logException(e);
 		curScene.destroyEntities(world);
-		return EntityScene(allowReload, worldPartition);
+		return EntityScene(allowReload, worldPartition, variant);
 	}
 	return curScene;
 }

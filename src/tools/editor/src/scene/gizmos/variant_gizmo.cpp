@@ -34,6 +34,7 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 	ui->setHandle(UIEventType::ListSelectionChanged, "variants", [=](const UIEvent& event)
 	{
 		populateVariantInfo();
+		setVariant(event.getStringData());
 	});
 
 	ui->setHandle(UIEventType::ListItemsSwapped, "variants", [=](const UIEvent& event)
@@ -43,6 +44,11 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 		std::swap(variants[a], variants[b]);
 		populateVariantInfo();
 		saveVariants();
+	});
+
+	ui->bindData("variants", getVariant(), [=](String value)
+	{
+		setVariant(value);
 	});
 
 	return ui;
@@ -123,4 +129,15 @@ void VariantGizmo::removeVariant()
 		}
 	}
 	saveVariants();
+}
+
+void VariantGizmo::setVariant(const String& variant)
+{
+	sceneEditorWindow.setAssetSetting("variant", ConfigNode(variant == "default" ? "" : variant));
+}
+
+String VariantGizmo::getVariant() const
+{
+	const auto variant = sceneEditorWindow.getAssetSetting("variant").asString("");
+	return variant == "" ? "default" : variant;
 }

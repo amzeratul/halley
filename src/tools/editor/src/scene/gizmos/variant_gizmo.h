@@ -23,5 +23,8 @@ namespace Halley {
 		void populateVariantInfo();
 		void addVariant();
 		void removeVariant();
+
+		void setVariant(const String& variant);
+		String getVariant() const;
 	};
 }
