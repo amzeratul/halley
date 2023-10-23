@@ -560,7 +560,7 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 	} else if (type == ConfigNodeType::Int2) {
 		return ConfigNode(MathOps::apply(op, a.asVector2i({}), b.asVector2i({})));
 	} else {
-		Logger::logError("ScriptComparison node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType()));
+		Logger::logError("ScriptArithmetic node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType()));
 		return ConfigNode();
 	}
 }
