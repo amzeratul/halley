@@ -238,7 +238,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 			}
 			sprite.setPivot(spriteData->pivot + offsetPivot / sz);
 		}
-		sprite.setFlip(dirFlip && !seqNoFlip);
+		sprite.setFlip(isFlipped());
 		if (visibleOverride) {
 			sprite.setVisible(visibleOverride.value());
 		}
@@ -325,6 +325,11 @@ int AnimationPlayer::getCurrentDirectionId() const
 	return dirId;
 }
 
+bool AnimationPlayer::isFlipped() const
+{
+	return dirFlip && !seqNoFlip;
+}
+
 AnimationPlayer& AnimationPlayer::setPlaybackSpeed(float value)
 {
 	playbackSpeed = value;
@@ -406,9 +411,8 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 {
 	updateResourceIfNeeded();
 	if (animation && curSeq && curDir) {
-		const auto flip = dirFlip && !seqNoFlip;
-		auto point = animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);;
-		if (point && flip) {
+		auto point = animation->getActionPoint(actionPointId, curSeq->getId(), curDir->getId(), curFrameN);
+		if (point && isFlipped()) {
 			point->x *= -1;
 		}
 		return point;

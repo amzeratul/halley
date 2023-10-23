@@ -47,6 +47,7 @@ namespace Halley
 
 		String getCurrentDirectionName() const;
 		int getCurrentDirectionId() const;
+		bool isFlipped() const;
 
 		AnimationPlayer& setPlaybackSpeed(float value);
 		float getPlaybackSpeed() const;
