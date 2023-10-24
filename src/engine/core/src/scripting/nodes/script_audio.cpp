@@ -89,9 +89,14 @@ IScriptNodeType::Result ScriptAudioEvent::doUpdate(ScriptEnvironment& environmen
 	if (data.active) {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	} else {
-		data.active = true;
 		environment.postAudioEvent(node.getSettings()["event"].asString(""), entityId);
-		return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher);
+
+		if (variableNames.empty()) {
+			return Result(ScriptNodeExecutionState::Done, time);
+		} else {
+			data.active = true;
+			return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher);
+		}
 	}
 }
 
