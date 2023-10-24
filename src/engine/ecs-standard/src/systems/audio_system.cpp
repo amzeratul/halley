@@ -50,6 +50,13 @@ public:
 		}
 	}
 
+	void setVariable(EntityId entityId, const String& variableName, float value) override
+	{
+		if (const auto* source = sourceFamily.tryFind(entityId)) {
+			source->audioSource.emitter->setVariable(variableName, value);
+		}
+	}
+
 private:
 	String curRegionId;
 	String curRegionPreset;

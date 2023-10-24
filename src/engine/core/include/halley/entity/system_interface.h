@@ -63,5 +63,6 @@ namespace Halley {
 		virtual ~IAudioSystemInterface() = default;
 
         virtual void playAudio(const String& event, EntityId entityId) = 0;
+		virtual void setVariable(EntityId entityId, const String& variableName, float value) = 0;
 	};
 }
