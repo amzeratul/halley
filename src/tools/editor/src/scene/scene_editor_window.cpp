@@ -231,7 +231,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 	// Spawn scene
 	entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-	auto sceneCreated = entityFactory->createScene(prefab, true);
+	auto sceneCreated = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
 	interface.spawnPending();
 
 	// Setup editors
@@ -304,6 +304,23 @@ void SceneEditorWindow::unloadScene()
 	entityList->setSceneData({});
 }
 
+void SceneEditorWindow::reloadScene()
+{
+	/*
+	currentEntityScene->destroyEntities(gameBridge->getWorld());
+	currentEntityScene.reset();
+
+	currentEntityScene = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
+	gameBridge->getInterface().spawnPending();
+
+	gameBridge->reloadScene();
+	*/
+
+	const auto p = prefab;
+	unloadScene();
+	loadScene(*p);
+}
+
 bool SceneEditorWindow::isScene() const
 {
 	return assetType == AssetType::Scene;
@@ -336,6 +353,10 @@ void SceneEditorWindow::update(Time t, bool moved)
 	}
 
 	if (currentEntityScene && entityFactory) {
+		if (currentEntityScene->getVariant() != getAssetSetting("variant").asString("")) {
+			reloadScene();
+		}
+		
 		if (currentEntityScene->needsUpdate()) {
 			currentEntityScene->update(*entityFactory, nullptr);
 			entityList->refreshNames();

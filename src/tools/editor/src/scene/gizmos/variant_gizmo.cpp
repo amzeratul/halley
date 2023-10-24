@@ -34,7 +34,6 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 	ui->setHandle(UIEventType::ListSelectionChanged, "variants", [=](const UIEvent& event)
 	{
 		populateVariantInfo();
-		setVariant(event.getStringData());
 	});
 
 	ui->setHandle(UIEventType::ListItemsSwapped, "variants", [=](const UIEvent& event)
@@ -48,7 +47,11 @@ std::shared_ptr<UIWidget> VariantGizmo::makeUI()
 
 	ui->bindData("variants", getVariant(), [=](String value)
 	{
-		setVariant(value);
+		populateVariantInfo();
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] ()
+		{
+			setVariant(value);
+		});
 	});
 
 	return ui;

@@ -17,15 +17,15 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	// TODO: read this elsewhere
 	snapRules.grid = GridSnapMode::Pixel;
 	snapRules.line = LineSnapMode::IsometricAxisAligned;
-	
-	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
-	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
 
 	resetTools();
+	prepareGizmos();
 }
 
 ISceneEditorGizmoCollection::SelectResult SceneEditorGizmoCollection::update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
+	prepareGizmos();
+
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, sceneEditor, inputState);
 	selectionBoxGizmo->setCamera(camera);
@@ -66,7 +66,8 @@ void SceneEditorGizmoCollection::setSelectedEntities(Vector<EntityRef> entities,
 			i++;
 		}
 	}
-	
+
+	prepareGizmos();
 	selectedBoundsGizmo->setSelectedEntities(selectedEntities, entityDatas);
 	
 	if (activeGizmo) {
@@ -180,6 +181,16 @@ bool SceneEditorGizmoCollection::onKeyPress(KeyboardKeyPress key, UIList& list)
 	return false;
 }
 
+void SceneEditorGizmoCollection::prepareGizmos()
+{
+	if (!selectedBoundsGizmo) {
+		selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
+	}
+	if (!selectionBoxGizmo) {
+		selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
+	}
+}
+
 void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)
 {
 	tools.push_back(tool);
@@ -233,4 +244,6 @@ void SceneEditorGizmoCollection::clear()
 		uiList = nullptr;
 	}
 	activeGizmo.reset();
+	selectedBoundsGizmo.reset();
+	selectionBoxGizmo.reset();
 }

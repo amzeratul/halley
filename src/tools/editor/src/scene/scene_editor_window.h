@@ -29,6 +29,7 @@ namespace Halley {
 		bool loadSceneFromFile(AssetType assetType, const String& name);
 		void loadScene(const Prefab& prefab);
 		void unloadScene();
+		void reloadScene();
 
 		bool isScene() const override;
 		String getSceneNameForComments() const override;
