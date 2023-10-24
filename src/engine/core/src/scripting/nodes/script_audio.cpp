@@ -92,7 +92,7 @@ IScriptNodeType::Result ScriptAudioEvent::doUpdate(ScriptEnvironment& environmen
 		environment.postAudioEvent(node.getSettings()["event"].asString(""), entityId);
 
 		if (variableNames.empty()) {
-			return Result(ScriptNodeExecutionState::Done, time);
+			return Result(ScriptNodeExecutionState::Done);
 		} else {
 			data.active = true;
 			return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher);
