@@ -147,6 +147,7 @@ namespace Halley {
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
 		bool destroyWhenDone = false;
+		bool positionSet = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
@@ -154,13 +155,14 @@ namespace Halley {
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector3f position;
+		Vector3f lastPosition;
 		EntityId onSpawn;
 		EntityId onDeath;
 
 		IParticleSpawner* secondarySpawner = nullptr;
 
 		void start();
-		void initializeParticle(size_t index, float time);
+		void initializeParticle(size_t index, float time, float totalTime);
 		void updateParticles(float t);
 		void spawn(size_t n, float time);
 

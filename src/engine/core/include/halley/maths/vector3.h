@@ -80,8 +80,8 @@ namespace Halley {
 		}
 
 		// Assignment and comparison
-		constexpr inline void operator = (const Vector3D &p) { x = p.x; y = p.y; z = p.z; }
-		constexpr inline void operator = (const T p) { x = p; y = p; z = p; }
+		constexpr inline Vector3D& operator = (const Vector3D& p) { x = p.x; y = p.y; z = p.z; return *this; }
+		constexpr inline Vector3D& operator = (const T p) { x = p; y = p; z = p; return *this; }
 		constexpr inline bool operator == (const Vector3D &p) const { return x == p.x && y == p.y && z == p.z; }
 		constexpr inline bool operator != (const Vector3D &p) const { return x != p.x || y != p.y || z != p.z; }
 

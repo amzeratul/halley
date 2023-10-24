@@ -164,12 +164,18 @@ float Particles::getSpawnRateMultiplier() const
 
 void Particles::setPosition(Vector2f pos)
 {
-	position = Vector3f(pos);
+	setPosition(Vector3f(pos));
 }
 
 void Particles::setPosition(Vector3f pos)
 {
-	position = pos;
+	if (positionSet) {
+		lastPosition = position;
+		position = pos;
+	} else {
+		lastPosition = position = pos;
+		positionSet = true;
+	}
 }
 
 void Particles::setSpawnArea(Vector2f area)
@@ -422,11 +428,11 @@ void Particles::spawn(size_t n, float time)
 
 	const float timeSlice = time / n;
 	for (size_t i = 0; i < n; ++i) {
-		initializeParticle(start + i, i * timeSlice);
+		initializeParticle(start + i, i * timeSlice, time);
 	}
 }
 
-void Particles::initializeParticle(size_t index, float time)
+void Particles::initializeParticle(size_t index, float time, float totalTime)
 {
 	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(azimuth));
 	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
@@ -442,7 +448,8 @@ void Particles::initializeParticle(size_t index, float time)
 	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
-	particle.pos = getSpawnPosition() + (particle.vel * time + a * (0.5f * time * time)) * velScale;
+	const auto spawnPosSmear = lerp(position - lastPosition, Vector3f(), time / totalTime);
+	particle.pos = getSpawnPosition() + spawnPosSmear + (particle.vel * time + a * (0.5f * time * time)) * velScale;
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
