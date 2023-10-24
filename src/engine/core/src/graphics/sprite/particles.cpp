@@ -237,6 +237,16 @@ Range<float> Particles::getSpeed() const
 	return speed;
 }
 
+void Particles::setSpeedMultiplier(float value)
+{
+	speedMultiplier = value;
+}
+
+float Particles::getSpeedMultiplier() const
+{
+	return speedMultiplier;
+}
+
 void Particles::setAcceleration(Vector3f accel)
 {
 	acceleration = accel;
@@ -429,7 +439,7 @@ void Particles::initializeParticle(size_t index, float time)
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = rng->getFloat(initialScale);
 
-	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
+	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
 	particle.pos = getSpawnPosition() + (particle.vel * time + a * (0.5f * time * time)) * velScale;

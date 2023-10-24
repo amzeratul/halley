@@ -81,6 +81,9 @@ namespace Halley {
 		void setSpeed(Range<float> speed);
 		void setSpeed(float speed);
 		Range<float> getSpeed() const;
+		void setSpeedMultiplier(float value);
+		float getSpeedMultiplier() const;
+
 		void setAcceleration(Vector3f acceleration);
 		Vector3f getAcceleration() const;
 
@@ -114,6 +117,7 @@ namespace Halley {
 		bool enabled = true;
 		bool firstUpdate = true;
 		float spawnRateMultiplier = 1.0f;
+		float speedMultiplier = 1.0f;
 
 		Vector<Sprite> sprites;
 		Vector<Particle> particles;
