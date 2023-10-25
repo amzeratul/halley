@@ -380,6 +380,18 @@ ConfigNode Scene::entityToConfigNode() const
 	return ConfigNode(std::move(result));
 }
 
+Vector<SceneVariant> Scene::getVariants() const
+{
+	if (const auto* variantData = tryGetGameData("variants")) {
+		auto result = variantData->asVector<SceneVariant>({});
+		if (!result.empty()) {
+			return result;
+		}
+	}
+
+	return Vector<SceneVariant>({ SceneVariant("default") });
+}
+
 EntityData Scene::makeEntityData(const ConfigNode& node) const
 {
 	waitForLoad(true);

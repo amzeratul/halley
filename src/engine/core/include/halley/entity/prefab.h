@@ -4,7 +4,9 @@
 #include "entity_data_delta.h"
 #include "halley/lua/lua_reference.h"
 
-namespace Halley {	
+namespace Halley {
+	class SceneVariant;
+
 	class Prefab : public AsyncResource {
 	public:		
 		static std::shared_ptr<Prefab> loadResource(ResourceLoader& loader);
@@ -92,7 +94,9 @@ namespace Halley {
 		std::shared_ptr<Prefab> clone() const override;
 
 		ConfigNode entityToConfigNode() const override;
-		
+
+		Vector<SceneVariant> getVariants() const;
+
 	protected:
 		EntityData makeEntityData(const ConfigNode& node) const override;
 		Deltas generateSceneDeltas(const Scene& newScene) const;
