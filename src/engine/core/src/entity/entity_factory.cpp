@@ -656,31 +656,35 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	} else {
 		// Generate full EntityData from prefab first
 		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
-		
-		entityData.setInstanceUUID(uuid);
+		if (entityData) {
+			entityData->setInstanceUUID(uuid);
 
-		if (entity.isValid()) {
-			// Update existing entity
-			updateEntity(entity, entityData, mask);
-		}  else {
-			// Create new entity
-			entity = createEntity(entityData, mask);
+			if (entity.isValid()) {
+				// Update existing entity
+				updateEntity(entity, *entityData, mask);
+			}  else {
+				// Create new entity
+				entity = createEntity(*entityData, mask);
 
-			// Pending parenting
-			if (entityData.getParentUUID().isValid()) {
-				parentUUID = entityData.getParentUUID();
+				// Pending parenting
+				if (entityData->getParentUUID().isValid()) {
+					parentUUID = entityData->getParentUUID();
+				}
 			}
-		}
 
-		if (prefab) {
-			entity.setPrefab(prefab, prefabUUID);
+			if (prefab) {
+				entity.setPrefab(prefab, prefabUUID);
+			}
+		} else {
+			getWorld().destroyEntity(entity);
+			entity = {};
 		}
 	}
 
 	return std::make_pair(entity, parentUUID);
 }
 
-std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
 {
 	if (delta.getPrefab()) {
 		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
@@ -688,7 +692,8 @@ std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefa
 		auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
 		const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
 		if (!prefabData) {
-			throw Exception("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString(), 0);
+			Logger::logError("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString());
+			return {};
 		}
 
 		auto entityData = *prefabData;
