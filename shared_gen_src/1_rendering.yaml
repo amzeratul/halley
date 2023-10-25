@@ -25,6 +25,9 @@ component:
       type: 'Halley::Colour4f'
       defaultValue: '#FFFFFF'
       displayName: "Colour"
+  - intensity:
+      type: float
+      defaultValue: 1
 
 ---
 
