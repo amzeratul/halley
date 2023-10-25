@@ -448,7 +448,7 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
-	const auto spawnPosSmear = lerp(position - lastPosition, Vector3f(), time / totalTime);
+	const auto spawnPosSmear = totalTime > 0.00001f ? lerp(position - lastPosition, Vector3f(), time / totalTime) : Vector3f();
 	particle.pos = getSpawnPosition() + spawnPosSmear + (particle.vel * time + a * (0.5f * time * time)) * velScale;
 
 	auto& sprite = sprites[index];
