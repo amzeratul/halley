@@ -89,6 +89,7 @@ namespace Halley {
 		virtual EntityId getEntityIdFromUUID(const UUID& uuid) const = 0;
 		virtual UUID getUUIDFromEntityId(EntityId id) const = 0;
 		virtual EntityId getCurrentEntityId() const { return EntityId(); }
+		virtual bool isHeadless() const { return false; }
 	};
 
 	class EntityFactoryContext : public IEntityFactoryContext {
@@ -143,6 +144,8 @@ namespace Halley {
 		EntityId getCurrentEntityId() const override;
 
 		UUID getRootUUID() const;
+
+		bool isHeadless() const override;
 
 	private:
 		EntitySerializationContext entitySerializationContext;

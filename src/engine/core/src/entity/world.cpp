@@ -488,6 +488,16 @@ void World::setTransform2DAnisotropy(float anisotropy)
 	transform2DAnisotropy = anisotropy;
 }
 
+bool World::isHeadless() const
+{
+	return headless;
+}
+
+void World::setHeadless(bool headless)
+{
+	this->headless = headless;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);

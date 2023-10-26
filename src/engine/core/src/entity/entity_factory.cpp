@@ -279,6 +279,11 @@ UUID EntityFactoryContext::getRootUUID() const
 	return rootUUID;
 }
 
+bool EntityFactoryContext::isHeadless() const
+{
+	return world->isHeadless();
+}
+
 void EntityFactoryContext::setCurrentEntity(EntityId entity)
 {
 	curEntity = entity;

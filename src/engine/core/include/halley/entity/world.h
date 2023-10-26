@@ -182,6 +182,9 @@ namespace Halley {
 			systemInterfaces[std::type_index(typeid(T))] = interface;
 		}
 
+		bool isHeadless() const;
+		void setHeadless(bool headless);
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -192,6 +195,7 @@ namespace Halley {
 		bool editor = false;
 		bool devMode = false;
 		bool terminating = false;
+		bool headless = false;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
