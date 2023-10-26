@@ -409,6 +409,26 @@ void Particles::destroyOverlapping(const Polygon& polygon)
 	}
 }
 
+void Particles::destroyOverlapping(const Ellipse& ellipse)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (ellipse.contains(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
+}
+
+void Particles::destroyOverlapping(const Circle& circle)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (circle.contains(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
+}
+
 void Particles::spawn(size_t n, float time)
 {
 	if (maxParticles) {

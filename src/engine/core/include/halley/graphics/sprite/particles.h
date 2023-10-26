@@ -5,7 +5,9 @@
 #include "halley/maths/interpolation_curve.h"
 #include "animation_player.h"
 #include "halley/entity/entity_id.h"
+#include "halley/maths/circle.h"
 #include "halley/maths/colour_gradient.h"
+#include "halley/maths/ellipse.h"
 
 namespace Halley {
 	class Polygon;
@@ -109,6 +111,8 @@ namespace Halley {
 
 		Rect4f getAABB() const;
 		void destroyOverlapping(const Polygon& polygon);
+		void destroyOverlapping(const Ellipse& ellipse);
+		void destroyOverlapping(const Circle& circle);
 
 	private:
 		Random* rng;

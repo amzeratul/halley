@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ellipse.h"
 #include "vector2.h"
 #include "halley/data_structures/maybe.h"
 
@@ -32,6 +33,8 @@ namespace Halley {
 
 		std::optional<RayCastResult> castCircle(Vector2f centre, float radius) const;
 		std::optional<RayCastResult> castCircle(const Circle& circle) const;
+		std::optional<RayCastResult> castEllipse(Vector2f centre, Vector2f radii) const;
+		std::optional<RayCastResult> castEllipse(const Ellipse& ellipse) const;
 		std::optional<RayCastResult> castLineSegment(Vector2f a, Vector2f b) const;
 		std::optional<RayCastResult> castLineSegment(const LineSegment& lineSegment) const;
 		std::optional<RayCastResult> castPolygon(const Polygon& polygon) const;

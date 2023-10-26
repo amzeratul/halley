@@ -72,6 +72,28 @@ std::optional<Ray::RayCastResult> Ray::castCircle(const Circle& circle) const
 	return castCircle(circle.getCentre(), circle.getRadius());
 }
 
+std::optional<Ray::RayCastResult> Ray::castEllipse(Vector2f centre, Vector2f radii) const
+{
+	const float radius = std::max(radii.x, radii.y);
+	const Vector2f adjust = radii / radius;
+
+	const auto ray = Ray(p / adjust, (dir / adjust).normalized());
+	auto result = ray.castCircle(centre / adjust, radius);
+
+	if (result) {
+		result->pos = (result->pos - p) * adjust + p;
+		result->distance = (result->pos - p).length();
+		result->normal = (result->pos - p).normalized();
+	}
+
+	return result;
+}
+
+std::optional<Ray::RayCastResult> Ray::castEllipse(const Ellipse& ellipse) const
+{
+	return castEllipse(ellipse.getCentre(), ellipse.getRadii());
+}
+
 std::optional<Ray::RayCastResult> Ray::castLineSegment(Vector2f a, Vector2f b) const
 {
 	// From http://geomalgorithms.com/a05-_intersect-1.html
