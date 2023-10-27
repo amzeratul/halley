@@ -399,6 +399,11 @@ UIDebugConsoleController* ProjectWindow::getDebugConsoleController()
 	return debugConsoleController.get();
 }
 
+Preferences& ProjectWindow::getPreferences() const
+{
+	return editor.getPreferences();
+}
+
 void ProjectWindow::toggleDebugConsole()
 {
 	if (debugConsole && debugConsole->isActive()) {

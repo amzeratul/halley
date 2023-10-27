@@ -10,7 +10,8 @@
 #include "src/scene/choose_window.h"
 
 namespace Halley {
-    class UIFactory;
+	class Preferences;
+	class UIFactory;
     class HalleyEditor;
 	class Toolbar;
 	class Project;
@@ -69,6 +70,8 @@ namespace Halley {
     	void openAssetFinder(std::optional<String> initialQuery);
 
         UIDebugConsoleController* getDebugConsoleController();
+
+        Preferences& getPreferences() const;
 
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;

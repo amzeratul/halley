@@ -1,6 +1,7 @@
 #include "check_source_update_task.h"
 
 #include "halley/tools/project/build_project_task.h"
+#include "src/preferences.h"
 #include "src/ui/project_window.h"
 
 using namespace Halley;
@@ -19,7 +20,12 @@ void CheckSourceUpdateTask::run()
 		if (!projectWindow.getProject().isBuildPending()) {
 			if (needsUpdate()) {
 				projectWindow.getProject().onBuildStarted();
-				addPendingTask(std::make_unique<UpdateSourceTask>(projectWindow));
+
+				if (projectWindow.getPreferences().isAutoBuild()) {
+					addPendingTask(std::make_unique<BuildProjectTask>(projectWindow.getProject()));
+				} else {
+					addPendingTask(std::make_unique<UpdateSourceTask>(projectWindow));
+				}
 			}
 		}
 		using namespace std::chrono_literals;

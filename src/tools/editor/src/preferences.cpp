@@ -19,6 +19,7 @@ void Preferences::loadDefaults()
 	windowState = WindowState::Normal;
 	colourScheme = "Flat Halley (Dark)";
 	lz4hc = false;
+	autoBuild = false;
 }
 
 ConfigNode Preferences::save() const
@@ -40,6 +41,7 @@ ConfigNode Preferences::save() const
 	root["disabledPlatforms"] = ConfigNode(disabledPlatforms);
 	root["colourScheme"] = colourScheme;
 	root["lz4hc"] = lz4hc;
+	root["autoBuild"] = autoBuild;
 
 	return root;
 }
@@ -63,6 +65,7 @@ void Preferences::load(const ConfigNode& root)
 		colourScheme = root["colourScheme"].asString();
 	}
 	lz4hc = root["lz4hc"].asBool(false);
+	autoBuild = root["autoBuild"].asBool(false);
 }
 
 bool Preferences::isDirty() const
@@ -170,12 +173,23 @@ void Preferences::setLZ4HCEnabled(bool enabled)
 	lz4hc = enabled;
 }
 
+bool Preferences::isAutoBuild() const
+{
+	return autoBuild;
+}
+
+void Preferences::setAutoBuild(bool enabled)
+{
+	autoBuild = enabled;
+}
+
 void Preferences::loadEditorPreferences(const Preferences& preferences)
 {
 	dirty = true;
 	disabledPlatforms = preferences.disabledPlatforms;
 	colourScheme = preferences.colourScheme;
 	lz4hc = preferences.lz4hc;
+	autoBuild = preferences.autoBuild;
 }
 
 void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)

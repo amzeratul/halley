@@ -29,6 +29,10 @@ children:
       fill: [ left, verticalCentre ]
     - widget: { id: lz4hc, class: checkbox }
       fill: [ left, verticalCentre ]
+    - widget: { class: label, text: "AutoBuild: " }
+      fill: [ left, verticalCentre ]
+    - widget: { id: autoBuild, class: checkbox }
+      fill: [ left, verticalCentre ]
   - sizer: { type: horizontal }
     children:
     - stretchSpacer: {}
