@@ -143,3 +143,8 @@ size_t Game::getMaxThreads() const
 {
 	return std::thread::hardware_concurrency();
 }
+
+bool Game::shouldProcessEventsOnFixedUpdate() const
+{
+	return false;
+}

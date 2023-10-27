@@ -388,8 +388,6 @@ void Core::onTick(Time delta)
 	const bool record = !profileCallbacks.empty();
 	capture.startFrame(record);
 	
-	processEvents(delta);
-
 	tickFrame(delta);
 
 	capture.endFrame();
@@ -449,6 +447,9 @@ void Core::update(Time time)
 		fixedUpdate(fixedLen);
 	}
 
+	if (!game->shouldProcessEventsOnFixedUpdate()) {
+		processEvents(time);
+	}
 	variableUpdate(time);
 
 	if (nFixed > 1) {
@@ -496,6 +497,10 @@ std::pair<size_t, Time> Core::preFixedUpdate(Time time)
 void Core::fixedUpdate(Time time)
 {
 	fixedUpdateTime = std::max(fixedUpdateTime - time, 0.0);
+	
+	if (game->shouldProcessEventsOnFixedUpdate()) {
+		processEvents(time);
+	}
 
 	ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
 	try {
