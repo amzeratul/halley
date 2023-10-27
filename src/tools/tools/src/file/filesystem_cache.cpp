@@ -276,8 +276,6 @@ void FileSystemCache::DirEntry::removeDir(const String& name)
 void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> events)
 {
 	for (const auto& event: events) {
-		Logger::logDev("Detected change at " + event.name);
-
 		const auto filePath = Path(event.name);
 		if (event.isDir) {
 			const auto& name = filePath.getFilename().getString(false);
