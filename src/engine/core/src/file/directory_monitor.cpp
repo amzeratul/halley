@@ -28,7 +28,7 @@ namespace Halley {
 			if (dirHandle == INVALID_HANDLE_VALUE) {
 				dirHandle = nullptr;
 			} else {
-				buffer.resize(16 * 1024);
+				buffer.resize(1024 * 1024);
 
 				ZeroMemory(&overlapped, sizeof(overlapped));
 				overlapped.hEvent = CreateEvent(nullptr, false, 0, nullptr);
@@ -85,7 +85,7 @@ namespace Halley {
 		void processEvents(Vector<DirectoryMonitor::Event>& output, bool any)
 		{
 			DWORD bytes;
-			GetOverlappedResult(dirHandle, &overlapped, &bytes, false);
+			GetOverlappedResult(dirHandle, &overlapped, &bytes, true);
 			if (bytes == 0 || any) {
 				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::Unknown, {}, {} });
 			} else {

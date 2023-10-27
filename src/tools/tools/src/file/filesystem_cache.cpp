@@ -8,18 +8,32 @@
 
 using namespace Halley;
 
+void FileSystemCache::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+{
+	const auto key = path.getString();
+	if (matchesCache(key, data)) {
+		// No change, nothing to do here
+		return;
+	}
+
+	FileSystem::writeFile(path, data);
+
+	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	if (shouldCache(path, data.size())) {
+		auto& result = fileDataCache[key];
+		result.resize(data.size());
+		memcpy(result.data(), data.data(), data.size());
+	} else {
+		fileDataCache.erase(key);
+	}
+}
+
 void FileSystemCache::writeFile(const Path& path, Bytes data)
 {
 	const auto key = path.getString();
-	{
-		// Check if we're not writing the same thing we wrote last time
-		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
-		if (const auto iter = fileDataCache.find(key); iter != fileDataCache.end()) {
-			if (iter->second == data) {
-				// No change, nothing to do here
-				return;
-			}
-		}
+	if (matchesCache(key, gsl::as_bytes(data.span()))) {
+		// No change, nothing to do here
+		return;
 	}
 
 	FileSystem::writeFile(path, data);
@@ -78,9 +92,20 @@ bool FileSystemCache::hasCached(const Path& path) const
 	return fileDataCache.contains(key);
 }
 
-bool FileSystemCache::shouldCache(const Path& path, size_t size)
+bool FileSystemCache::shouldCache(const Path& path, size_t size) const
 {
 	return size < 2048;
+}
+
+bool FileSystemCache::matchesCache(const String& key, gsl::span<const gsl::byte> data) const
+{
+	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	if (const auto iter = fileDataCache.find(key); iter != fileDataCache.end()) {
+		if (gsl::as_bytes(iter->second.span()) == data) {
+			return true;
+		}
+	}
+	return false;
 }
 
 Vector<Path> FileSystemCache::enumerateDirectory(const Path& path, bool includeDirs, bool recursive)
@@ -251,6 +276,8 @@ void FileSystemCache::DirEntry::removeDir(const String& name)
 void FileSystemCache::notifyChanges(gsl::span<const DirectoryMonitor::Event> events)
 {
 	for (const auto& event: events) {
+		Logger::logDev("Detected change at " + event.name);
+
 		const auto filePath = Path(event.name);
 		if (event.isDir) {
 			const auto& name = filePath.getFilename().getString(false);
