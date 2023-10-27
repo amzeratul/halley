@@ -64,7 +64,7 @@ void Project::loadDLL(const HalleyStatics& statics, bool load)
 	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
 		gameDll = std::make_shared<ProjectDLL>(dllPath, statics);
-		if (load) {
+		if (load && isBuildSourceUpToDate()) {
 			gameDll->load();
 		}
 	}
@@ -620,6 +620,16 @@ uint64_t Project::getSourceHash(const Path& projectRoot)
 uint64_t Project::getSourceHash() const
 {
 	return getSourceHash(rootPath);
+}
+
+String Project::getBuiltSourceStr() const
+{
+	return Path::readFileString(rootPath / "bin" / "code_version.txt");
+}
+
+bool Project::isBuildSourceUpToDate() const
+{
+	return getBuiltSourceStr() == toString(getSourceHash(), 16);
 }
 
 void Project::loadECSData()

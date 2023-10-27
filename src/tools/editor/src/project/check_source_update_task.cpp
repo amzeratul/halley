@@ -34,7 +34,7 @@ bool CheckSourceUpdateTask::needsUpdate()
 	}
 
 	if (firstCheck || monitorCurrent.pollAny()) {
-		lastReadFile = Path::readFileString(projectPath / "bin" / "code_version.txt");
+		lastReadFile = projectWindow.getProject().getBuiltSourceStr();
 	}
 
 	firstCheck = false;

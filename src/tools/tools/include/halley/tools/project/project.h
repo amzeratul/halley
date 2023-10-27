@@ -165,6 +165,8 @@ namespace Halley
 
 		static uint64_t getSourceHash(const Path& projectRoot);
 		uint64_t getSourceHash() const;
+		String getBuiltSourceStr() const;
+		bool isBuildSourceUpToDate() const;
 
 	private:
 		Vector<String> platforms;
