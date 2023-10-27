@@ -92,10 +92,10 @@ namespace Halley
 		void processEvents(Time time);
 		void clearPresses();
 		void runStartFrame(Time time);
-		void update(Time time);
+		void update(Time time, bool multithreaded);
 		void preUpdate(Time time);
-		std::pair<size_t, Time> preFixedUpdate(Time time);
-		void fixedUpdate(Time time);
+		std::pair<size_t, Time> getFixedUpdateCount(Time time);
+		void fixedUpdate(Time time, bool multithreaded);
 		void variableUpdate(Time time);
 		void postUpdate(Time time);
 		void pumpAudio();
