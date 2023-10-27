@@ -33,6 +33,8 @@ BuildProjectTask::BuildProjectTask(Project& project)
 
 void BuildProjectTask::run()
 {
+	project.onBuildStarted();
+
 	using namespace std::literals::chrono_literals;
 	auto future = OS::get().runCommandAsync(command, "", this);
 

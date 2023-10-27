@@ -88,6 +88,21 @@ void Project::update(Time time)
 	comments->update(time);
 }
 
+bool Project::isBuildPending() const
+{
+	return buildPending;
+}
+
+void Project::onBuildNeeded()
+{
+	buildPending = true;
+}
+
+void Project::onBuildStarted()
+{
+	buildPending = true;
+}
+
 void Project::onBuildDone()
 {
 	Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
@@ -95,6 +110,7 @@ void Project::onBuildDone()
 			gameDll->load();
 		}
 	});
+	buildPending = false;
 }
 
 void Project::setPlatforms(Vector<String> platforms)

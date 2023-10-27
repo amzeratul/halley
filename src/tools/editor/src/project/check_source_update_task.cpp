@@ -15,17 +15,16 @@ CheckSourceUpdateTask::CheckSourceUpdateTask(ProjectWindow& projectWindow, Path 
 
 void CheckSourceUpdateTask::run()
 {
-	return;
-
-	while (!needsUpdate()) {
-		if (isCancelled()) {
-			return;
+	while (!isCancelled()) {
+		if (!projectWindow.getProject().isBuildPending()) {
+			if (needsUpdate()) {
+				projectWindow.getProject().onBuildStarted();
+				addPendingTask(std::make_unique<UpdateSourceTask>(projectWindow));
+			}
 		}
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(100ms);
 	}
-
-	addContinuation(std::make_unique<UpdateSourceTask>(projectWindow));
 }
 
 bool CheckSourceUpdateTask::needsUpdate()
@@ -72,5 +71,6 @@ void UpdateSourceTask::doAction(TaskSet& taskSet)
 	{
 		taskSet.addTask(std::make_unique<BuildProjectTask>(project));
 		setError(false);
+		setVisible(false);
 	});
 }

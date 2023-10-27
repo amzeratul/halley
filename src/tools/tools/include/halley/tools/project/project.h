@@ -57,6 +57,10 @@ namespace Halley
 		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
 		
 		void update(Time time);
+
+		bool isBuildPending() const;
+		void onBuildNeeded();
+		void onBuildStarted();
 		void onBuildDone();
 
 		void setPlatforms(Vector<String> platforms);
@@ -194,6 +198,8 @@ namespace Halley
 		bool assetNotifyImportEnabled = true;
 		bool assetsImported = false;
 		Vector<Path> assetsToNotifyImport;
+
+		bool buildPending = false;
 
 		DevConServer* devConServer = nullptr;
 
