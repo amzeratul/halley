@@ -588,6 +588,24 @@ void Project::launchGame(Vector<String> params) const
 	OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
 }
 
+uint64_t Project::getSourceHash(const Path& projectRoot)
+{
+	const auto srcRoot = projectRoot / "src";
+
+	Hash::Hasher hasher;
+	auto files = FileSystem::enumerateDirectory(srcRoot);
+	std::sort(files.begin(), files.end());
+	for (const auto& file: files) {
+		hasher.feed(FileSystem::getLastWriteTime(srcRoot / file));
+	}
+	return hasher.digest();
+}
+
+uint64_t Project::getSourceHash() const
+{
+	return getSourceHash(rootPath);
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {

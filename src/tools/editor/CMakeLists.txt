@@ -48,6 +48,7 @@ set (editor_sources
 	"src/assets/graph/script_target_entity_factory.cpp"
 	"src/assets/graph/ui_graph_node.cpp"
 	
+	"src/project/check_source_update_task.cpp"
 	"src/project/check_update_task.cpp"
 	"src/project/core_api_wrapper.cpp"
 
@@ -140,6 +141,7 @@ set (editor_headers
 	"src/assets/graph/script_target_entity_factory.h"
 	"src/assets/graph/ui_graph_node.h"
 
+	"src/project/check_source_update_task.h"
 	"src/project/check_update_task.h"
 	"src/project/core_api_wrapper.h"
 

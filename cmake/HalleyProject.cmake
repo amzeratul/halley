@@ -484,7 +484,9 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 			add_executable(${name} WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp ${proj_resources})
 		endif()
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
+		add_custom_command(TARGET ${name} POST_BUILD COMMAND ${HALLEY_PATH}/bin/halley-cmd write_code_version ${targetDir}/..)
 
+		add_dependencies(${name}-game halley-cmd)
 		add_dependencies(${name}-dll ${name}-game)
 		add_dependencies(${name} ${name}-game)
 		
@@ -504,6 +506,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		# Setup a gamebins target for external building
 		add_custom_target(${name}-gamebins DEPENDS ${name} ${name}-dll)
 	endif()
+
 
 	if (HALLEY_MONOLITHIC)
 		target_precompile_headers(${name} PRIVATE prec.h)

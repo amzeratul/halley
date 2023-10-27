@@ -27,6 +27,7 @@ namespace Halley {
 
 			if (dirHandle == INVALID_HANDLE_VALUE) {
 				dirHandle = nullptr;
+				Logger::logError("Directory monitor could not be set up for " + path.toString());
 			} else {
 				buffer.resize(1024 * 1024);
 
@@ -86,20 +87,22 @@ namespace Halley {
 		{
 			DWORD bytes;
 			GetOverlappedResult(dirHandle, &overlapped, &bytes, true);
-			if (bytes == 0 || any) {
-				output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::Unknown, {}, {} });
-			} else {
-				size_t pos = 0;
+			if (bytes > 0) {
+				if (any) {
+					output.emplace_back(DirectoryMonitor::Event{ DirectoryMonitor::ChangeType::Unknown, {}, {} });
+				} else {
+					size_t pos = 0;
 
-				while (true) {
-					const auto* event = reinterpret_cast<FILE_NOTIFY_EXTENDED_INFORMATION*>(buffer.data() + pos);
+					while (true) {
+						const auto* event = reinterpret_cast<FILE_NOTIFY_EXTENDED_INFORMATION*>(buffer.data() + pos);
 
-					processEvent(*event, output);
+						processEvent(*event, output);
 
-					if (event->NextEntryOffset) {
-						pos += event->NextEntryOffset;
-					} else {
-						break;
+						if (event->NextEntryOffset) {
+							pos += event->NextEntryOffset;
+						} else {
+							break;
+						}
 					}
 				}
 			}

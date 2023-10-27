@@ -26,6 +26,7 @@ CommandLineTools::CommandLineTools()
 	factories["vs_project"] = []() { return std::make_unique<VSProjectTool>(); };
 	factories["run"] = []() { return std::make_unique<RunnerTool>(); };
 	factories["write_version"] = []() { return std::make_unique<WriteVersionTool>(); };
+	factories["write_code_version"] = []() { return std::make_unique<WriteCodeVersionTool>(); };
 }
 
 Vector<std::string> CommandLineTools::getToolNames()

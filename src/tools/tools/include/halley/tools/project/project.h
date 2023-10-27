@@ -159,6 +159,9 @@ namespace Halley
 
 		void launchGame(Vector<String> params) const override;
 
+		static uint64_t getSourceHash(const Path& projectRoot);
+		uint64_t getSourceHash() const;
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;
