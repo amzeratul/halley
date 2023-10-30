@@ -42,6 +42,15 @@ void TaskBar::update(Time time, bool moved)
 {
 	auto taskData = taskSet.getTasks();
 
+	// Clear tasks
+	for (auto& toClear: taskSet.getToClear()) {
+		for (const auto& t : tasks) {
+			if (t->getTask()->getName() == toClear) {
+				t->getTask()->clear();
+			}
+		}
+	}
+
 	// Ensure that all tasks have a display associated
 	for (auto& t : taskData) {
 		if (t->isVisible() && t->getStatus() == TaskStatus::Started || t->getStatus() == TaskStatus::ReadyToStart) {

@@ -33,6 +33,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 
 void BuildProjectTask::run()
 {
+	clearTask("Update Project");
 	project.onBuildStarted();
 
 	using namespace std::literals::chrono_literals;

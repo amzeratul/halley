@@ -167,6 +167,7 @@ namespace Halley
 		uint64_t getSourceHash() const;
 		String getBuiltSourceStr() const;
 		bool isBuildSourceUpToDate() const;
+		uint32_t getBuildCount() const;
 
 	private:
 		Vector<String> platforms;
@@ -202,6 +203,7 @@ namespace Halley
 		Vector<Path> assetsToNotifyImport;
 
 		bool buildPending = false;
+		uint32_t buildCount = 0;
 
 		DevConServer* devConServer = nullptr;
 

@@ -31,6 +31,12 @@ void Task::addContinuation(std::unique_ptr<Task> task)
 	continuations.emplace_back(std::move(task));
 }
 
+void Task::clearTask(String name)
+{
+	std::lock_guard<std::mutex> lock(mutex);
+	toClear.emplace_back(std::move(name));
+}
+
 void Task::setName(String name)
 {
 	this->name = std::move(name);

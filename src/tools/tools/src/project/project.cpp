@@ -105,6 +105,7 @@ void Project::onBuildStarted()
 
 void Project::onBuildDone()
 {
+	buildCount++;
 	Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 		if (gameDll && !gameDll->isLoaded()) {
 			gameDll->load();
@@ -630,6 +631,11 @@ String Project::getBuiltSourceStr() const
 bool Project::isBuildSourceUpToDate() const
 {
 	return getBuiltSourceStr() == toString(getSourceHash(), 16);
+}
+
+uint32_t Project::getBuildCount() const
+{
+	return buildCount;
 }
 
 void Project::loadECSData()

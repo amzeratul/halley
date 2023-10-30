@@ -30,6 +30,7 @@ namespace Halley
 		virtual void updateOnMain(float time);
 		void addContinuation(std::unique_ptr<Task> task);
 		void addReplacement(std::unique_ptr<Task> task);
+		void clearTask(String name);
 
 		void setName(String name);
 		void setProgress(float progress);
@@ -64,6 +65,7 @@ namespace Halley
 	private:
 		Vector<std::unique_ptr<Task>> continuations;
 		Vector<std::unique_ptr<Task>> pendingTasks;
+		Vector<String> toClear;
 
 		mutable std::mutex mutex;
 		std::atomic<float> progress;
