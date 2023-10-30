@@ -425,7 +425,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 			const auto& [componentName, componentData] = data.getComponent(i);
 			const auto result = reflection.createComponent(context, componentName, entity, componentData);
 			if (!result.created) {
-				Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+				Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
 			}
 		}
 	} else {
@@ -444,7 +444,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 					existingComps.erase(iter);
 				}
 				if (result.componentId == -1) {
-					Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+					Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
 				}
 			}
 		}

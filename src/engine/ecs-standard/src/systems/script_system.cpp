@@ -45,7 +45,11 @@ public:
 
 	void onMessageReceived(const StartScriptMessage& msg, ScriptableFamily& e) override
 	{
-		addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
+		if (getResources().exists<ScriptGraph>(msg.name)) {
+			addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
+		} else {
+			Logger::logError("Script not found: \"" + msg.name + "\"");
+		}
 	}
 
 	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
