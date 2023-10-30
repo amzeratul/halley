@@ -1,6 +1,6 @@
 ---
 name: Halley/Blit
-base: material_base.yaml
+base: material_base.material
 attributes:
   # position [0..1]
   - name: position

@@ -1,6 +1,6 @@
 ---
 name: Halley/StencilView
-base: sprite_base.yaml
+base: sprite_base.material
 textures:
   - image: stencil2D
 passes:

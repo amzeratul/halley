@@ -1,6 +1,6 @@
 ---
 name: Halley/LineBase
-base: material_base.yaml
+base: material_base.material
 attributes:
   # rgba colour of line
   - name: colour

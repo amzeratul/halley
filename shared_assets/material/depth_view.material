@@ -1,6 +1,6 @@
 ---
 name: Halley/DepthView
-base: sprite_base.yaml
+base: sprite_base.material
 textures:
   - tex0: depth2D
 passes:

@@ -1,6 +1,6 @@
 ---
 name: Halley/SpriteBase
-base: material_base.yaml
+base: material_base.material
 attributes:
   # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
   - name: vertPos

@@ -1,6 +1,6 @@
 ---
 name: Halley/FrameDebugView
-base: sprite_base.yaml
+base: sprite_base.material
 passes:
   - blend: Alpha
     shader:

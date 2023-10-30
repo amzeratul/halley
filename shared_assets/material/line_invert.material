@@ -1,6 +1,6 @@
 ---
 name: Halley/InvertLine
-base: line_base.yaml
+base: line_base.material
 passes:
   - blend: Invert
     shader:

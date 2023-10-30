@@ -1,6 +1,6 @@
 ---
 name: Halley/Scanlines
-base: sprite_base.yaml
+base: sprite_base.material
 uniforms:
   - MaterialBlock:
     - u_col0: vec4

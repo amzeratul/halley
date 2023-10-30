@@ -1,10 +1,10 @@
 ---
-name: Halley/SolidColourOpaque
-base: sprite_base.yaml
+name: Halley/ColourDisplayH
+base: sprite_base.material
 passes:
   - blend: Opaque
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl
-      pixel: solid_colour.pixel.hlsl
+      pixel: colour_display_h.pixel.hlsl
 ...

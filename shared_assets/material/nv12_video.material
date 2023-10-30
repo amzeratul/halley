@@ -1,6 +1,6 @@
 ---
 name: Halley/NV12Video
-base: sprite_base.yaml
+base: sprite_base.material
 textures:
   - tex0: sampler2D
 passes:

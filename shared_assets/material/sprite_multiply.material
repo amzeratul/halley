@@ -1,10 +1,10 @@
 ---
-name: Halley/SpriteAlpha
-base: sprite_base.yaml
+name: Halley/SpriteMultiply
+base: sprite_base.material
 textures:
   - image: sampler2D
 passes:
-  - blend: Alpha
+  - blend: Multiply
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl

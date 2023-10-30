@@ -1,6 +1,6 @@
 ---
 name: Halley/SpriteOpaque
-base: sprite_base.yaml
+base: sprite_base.material
 textures:
   - image: sampler2D
 passes:

@@ -486,7 +486,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
 		add_custom_command(TARGET ${name} POST_BUILD COMMAND ${HALLEY_PATH}/bin/halley-cmd write_code_version ${targetDir}/..)
 
-		add_dependencies(${name}-game halley-cmd)
+		#add_dependencies(${name}-game halley-cmd)
 		add_dependencies(${name}-dll ${name}-game)
 		add_dependencies(${name} ${name}-game)
 		

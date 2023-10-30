@@ -1,6 +1,6 @@
 ---
 name: Halley/SolidColour
-base: sprite_base.yaml
+base: sprite_base.material
 passes:
   - blend: Alpha Premultiplied
     shader:

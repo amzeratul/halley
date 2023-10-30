@@ -1,6 +1,6 @@
 ---
 name: Halley/StandardMesh
-base: material_base.yaml
+base: material_base.material
 uniforms:
   - ModelBlock:
     - u_modelMatrix: mat4
