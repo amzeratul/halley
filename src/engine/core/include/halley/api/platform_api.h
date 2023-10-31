@@ -287,5 +287,8 @@ namespace Halley
 		
 		// Returns arbitrary platform-specific data
 		virtual String getStringData(const String& key) { return ""; }
+
+		virtual bool useSystemDisplaySize() { return false; }
+		virtual Vector2i getSystemDisplaySize() { return Vector2i(0, 0); }
 	};
 }
