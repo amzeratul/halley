@@ -47,6 +47,11 @@ Polygon::Polygon(VertexList vertices)
 	realize();
 }
 
+Polygon::Polygon(Rect4f rect)
+	: Polygon(makePolygon(rect.getTopLeft(), rect.getWidth(), rect.getHeight()))
+{
+}
+
 Polygon::Polygon(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
