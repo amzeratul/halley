@@ -64,6 +64,20 @@ namespace Halley {
 			return a + t * b;
 		}
 
+		std::optional<float> intersectionParametric(const Line& other) const
+		{
+			const auto& a = origin;
+			const auto& b = dir;
+			const auto& c = other.origin;
+			const auto& d = other.dir;
+			const float divisor = b.x * d.y - b.y * d.x;
+			if (std::abs(divisor) < 0.000001f) {
+				// Parallel lines
+				return {};
+			}
+			return (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
+		}
+
 		bool contains(const Vector2f& point, float epsilon = 0.01f) const
 		{
 			// TODO: this could probably be much faster
