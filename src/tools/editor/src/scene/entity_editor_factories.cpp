@@ -1285,6 +1285,8 @@ public:
 			return AssetType::ScriptGraph;
 		} else if (strippedTypeName == "UIDefinition") {
 			return AssetType::UIDefinition;
+		} else if (strippedTypeName == "Texture") {
+			return AssetType::Texture;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

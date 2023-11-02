@@ -38,7 +38,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getAssetPreviewData(AssetType as
 {
 	if (assetType == AssetType::Prefab || assetType == AssetType::Scene) {
 		return getPrefabPreviewData(assetType, id, size);
-	} else if (assetType == AssetType::Sprite || assetType == AssetType::Animation) {
+	} else if (assetType == AssetType::Sprite || assetType == AssetType::Animation || assetType == AssetType::Texture) {
 		return getSpritePreviewData(assetType, id, size);
 	}
 
@@ -68,6 +68,10 @@ AssetPreviewData AssetPreviewGenerator::makeSpritePreviewData(AssetType assetTyp
 		auto player = AnimationPlayer(resources.get<Animation>(id));
 		player.update(0);
 		player.updateSprite(sprite);
+	} else if (assetType == AssetType::Texture) {
+		auto tex = resources.get<Texture>(id);
+		auto mat = resources.get<MaterialDefinition>("Halley/Sprite");
+		sprite = Sprite().setImage(tex, mat).setTexRect(Rect4f(0, 0, 1, 1));
 	}
 
 	auto spriteSize = sprite.getAABB().getSize().round();
