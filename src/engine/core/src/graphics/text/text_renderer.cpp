@@ -220,6 +220,24 @@ TextRenderer& TextRenderer::setAlpha(float alpha)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setScale(float scale)
+{
+	if (this->scale != scale) {
+		this->scale = scale;
+		glyphsDirty = true;
+	}
+	return *this;
+}
+
+TextRenderer& TextRenderer::setAngle(Angle1f angle)
+{
+	if (this->angle != angle) {
+		this->angle = angle;
+		glyphsDirty = true;
+	}
+	return *this;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	if (outlineColour != v) {
@@ -271,7 +289,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 		{
 			// Line break, update previous characters!
 			if (align != 0) {
-				Vector2f off = floorAlign(-lineOffset * align);
+				Vector2f off = floorAlign(-lineOffset * align).rotate(angle);
 				for (size_t j = startPos; j < spritesInserted; j++) {
 					auto& sprite = sprites[j];
 					sprite.setPos(sprite.getPosition() + off);
@@ -315,6 +333,9 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
+				const auto glyphPos = p + lineOffset + pixelOffset + fontAdjustment;
+				const auto renderPos = (glyphPos - position).rotate(angle) + position;
+
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
@@ -324,7 +345,8 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 					.setColour(curCol)
 					.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 					.setScale(scale)
-					.setPos(p + lineOffset + pixelOffset + fontAdjustment);
+					.setPos(renderPos)
+					.setRotation(angle);
 
 				lineOffset.x += glyph.advance.x * scale;
 
@@ -601,7 +623,7 @@ bool TextRenderer::empty() const
 float TextRenderer::getScale(const Font& f) const
 {
 	const bool usingReplacement = &f != font.get();
-	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f);
+	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f) * scale;
 }
 
 std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
@@ -623,11 +645,11 @@ void TextRenderer::updateMaterial(Material& material, const Font& font) const
 	const Vector2f smoothPerTexUnit = Vector2f(font.getImageSize()) / (2.0f * smoothRadius);
 	const float lowSmooth = std::min(smoothPerTexUnit.x, smoothPerTexUnit.y);
 
-	const float scale = getScale(font);
+	const float fontScale = getScale(font);
 	
 	const float smooth = smoothness * lowSmooth;
 	const float shadowSmooth = shadowSmoothness * lowSmooth;
-	const float outlineSize = outline / smoothRadius / scale;
+	const float outlineSize = outline * scale / smoothRadius / fontScale;
 
 	material
 		.set("u_smoothness", smooth)
