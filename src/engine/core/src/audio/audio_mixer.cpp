@@ -48,7 +48,7 @@ void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, 
 				dst[i] += src[i] * gain0;
 			}
 		}
-	} else {
+	} else if (nSamples > 0) {
 		// Interpolate the gain
 		const float scale = 1.0f / nSamples;
 		for (size_t i = 0; i < nSamples; ++i) {

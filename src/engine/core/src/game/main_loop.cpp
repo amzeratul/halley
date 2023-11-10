@@ -91,19 +91,21 @@ Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired
 {
 	Time elapsed = measuredElapsed;
 
-	const auto frameTimesTotal = std::chrono::duration<double>(frameTimes.getLatest() - frameTimes.getOldest()).count();
-	const auto avgFrameLen = frameTimesTotal / (frameTimes.size() - 1);
-	if (desired) {
-		if (std::abs(avgFrameLen - *desired) <= 0.001) {
-			// Snap frame time if average has been within 1ms
-			elapsed = *desired;
+	if (frameTimes.size() > 1) {
+		const auto frameTimesTotal = std::chrono::duration<double>(frameTimes.getLatest() - frameTimes.getOldest()).count();
+		const auto avgFrameLen = frameTimesTotal / (frameTimes.size() - 1);
+		if (desired) {
+			if (std::abs(avgFrameLen - *desired) <= 0.001) {
+				// Snap frame time if average has been within 1ms
+				elapsed = *desired;
+			}
+		} else if (std::abs(avgFrameLen - 1.0 / 60.0) <= 0.001) {
+			elapsed = 1.0 / 60.0;
+		} else if (std::abs(avgFrameLen - 1.0 / 120.0) <= 0.001) {
+			elapsed = 1.0 / 120.0;
+		} else if (std::abs(avgFrameLen - 1.0 / 144.0) <= 0.001) {
+			elapsed = 1.0 / 144.0;
 		}
-	} else if (std::abs(avgFrameLen - 1.0 / 60.0) <= 0.001) {
-		elapsed = 1.0 / 60.0;
-	} else if (std::abs(avgFrameLen - 1.0 / 120.0) <= 0.001) {
-		elapsed = 1.0 / 120.0;
-	} else if (std::abs(avgFrameLen - 1.0 / 144.0) <= 0.001) {
-		elapsed = 1.0 / 144.0;
 	}
 
 	//Logger::logDev(toString(elapsed));
