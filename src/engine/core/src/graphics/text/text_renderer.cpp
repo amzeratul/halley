@@ -317,6 +317,9 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 		}
 		sprites.resize(nGlyphs);
 
+		const Font::Glyph* lastGlyph = nullptr;
+		const Font* lastFont = nullptr;
+
 		for (size_t i = 0; i < n; i++) {
 			int c = text[i];
 
@@ -333,7 +336,8 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
-				const auto glyphPos = p + lineOffset + pixelOffset + fontAdjustment;
+				const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+				const auto glyphPos = p + lineOffset + pixelOffset + fontAdjustment + kerning * scale;
 				const auto renderPos = (glyphPos - position).rotate(angle) + position;
 
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
@@ -348,7 +352,10 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 					.setPos(renderPos)
 					.setRotation(angle);
 
-				lineOffset.x += glyph.advance.x * scale;
+				lineOffset.x += (glyph.advance.x + kerning.x) * scale;
+
+				lastGlyph = &glyph;
+				lastFont = font.get();
 
 				if (i == n - 1) {
 					flush();
@@ -401,6 +408,9 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 	float w = 0;
 	const float lineH = getLineHeight();
 
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
+
 	for (auto& c : str) {
 		if (c == '\n') {
 			// Line break!
@@ -410,7 +420,13 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 		} else {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
+
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();
 		}
 	}
 	w = std::max(w, p.x);
@@ -428,6 +444,9 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 	Vector2f p;
 	const float lineH = getLineHeight();
 
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
+
 	for (size_t i = 0; i < character && i < str.size(); ++i) {
 		auto c = str[i];
 		if (c == '\n') {
@@ -437,8 +456,11 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 		} else {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
-		}
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();		}
 	}
 
 	return p;
@@ -459,6 +481,8 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 	bool gotLineMatch = false;
 	size_t bestAnswer = 0;
 	const size_t nChars = str.size();
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
 
 	for (size_t i = 0; i <= nChars; ++i) {
 		auto c = i == nChars ? 0 : str[i]; // Add a sigil at the end
@@ -487,8 +511,11 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 		} else if (c != 0) {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
-		}
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();		}
 	}
 
 	if (!gotLineMatch) {
@@ -513,6 +540,8 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 	StringUTF32 result;
 
 	gsl::span<const char32_t> src = str;
+	const Font::Glyph* lastGlyph = nullptr;
+	const Font* lastFont = nullptr;
 
 	// Keep doing this while src is not exhausted
 	while (!src.empty()) {
@@ -530,8 +559,12 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			const float w = accepted ? glyph.advance.x * scale : 0.0f;
+			const auto kerning = lastFont == font.get() && lastGlyph ? lastGlyph->getKerning(c) : Vector2f();
+			const float w = accepted ? (glyph.advance.x + kerning.x) * scale : 0.0f;
 			curWidth += w;
+
+			lastFont = font.get();
+			lastGlyph = &glyph;
 
 			const bool firstCharInRun = i == 0; // It MUST fit at least the first character, or we'll infinite loop
 			if (c == '\n' || (!firstCharInRun && curWidth > maxWidth) || isLastChar) {
