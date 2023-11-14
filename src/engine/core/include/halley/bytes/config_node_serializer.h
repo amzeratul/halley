@@ -137,6 +137,20 @@ namespace Halley {
     };
 
 	template <>
+    class ConfigNodeSerializer<int64_t> {
+    public:
+        ConfigNode serialize(int64_t value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		int64_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asInt64(0);
+        }
+    };
+
+	template <>
     class ConfigNodeSerializer<uint32_t> {
     public:
         ConfigNode serialize(uint32_t value, const EntitySerializationContext& context)
