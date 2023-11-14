@@ -58,6 +58,11 @@ Vector2f ScreenService::screenToWorld(Vector2f pos) const
 	return (pos - Vector2f(getScreenResolution() / 2)) / getZoomLevel() + cameraPosition;
 }
 
+Vector2f ScreenService::screenToUI(Vector2f pos) const
+{
+	return pos / getZoomLevel();
+}
+
 void ScreenService::setScreenGrabInterface(IScreenGrabInterface* interface)
 {
 	screenGrabInterface = interface;

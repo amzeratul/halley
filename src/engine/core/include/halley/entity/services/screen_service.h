@@ -59,6 +59,7 @@ namespace Halley {
 		Vector2f worldToScreen(Vector2f pos) const;
 		Vector2f worldToUI(Vector2f pos) const;
 		Vector2f screenToWorld(Vector2f pos) const;
+		Vector2f screenToUI(Vector2f pos) const;
 
 		Vector2f roundPosition(Vector2f pos) const
 		{
