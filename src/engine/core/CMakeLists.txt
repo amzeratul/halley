@@ -153,6 +153,7 @@ set(SOURCES
         "src/scripting/script_node_type.cpp"
         "src/scripting/script_renderer.cpp"
         "src/scripting/script_state.cpp"
+        "src/scripting/script_state_set.cpp"
         "src/scripting/script_variables.cpp"
 
         "src/scripting/nodes/script_audio.cpp"
@@ -583,6 +584,7 @@ set(HEADERS
         "include/halley/scripting/script_node_type.h"
         "include/halley/scripting/script_renderer.h"
         "include/halley/scripting/script_state.h"
+        "include/halley/scripting/script_state_set.h"
         "include/halley/scripting/script_variables.h"
 
         "src/scripting/nodes/script_audio.h"

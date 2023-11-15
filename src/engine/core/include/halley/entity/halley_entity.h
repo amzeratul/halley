@@ -38,3 +38,4 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "halley/scripting/script_node_type.h"
 #include "halley/scripting/script_renderer.h"
 #include "halley/scripting/script_state.h"
+#include "halley/scripting/script_state_set.h"

@@ -1323,6 +1323,8 @@ String ConfigNode::getNodeDebugId() const
 		case ConfigNodeType::Undefined:
 			value = "null";
 			break;
+		default:
+			value = toString(type);
 	}
 
 #if defined(STORE_CONFIG_NODE_PARENTING)

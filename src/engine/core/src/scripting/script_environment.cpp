@@ -1,4 +1,5 @@
 #include "halley/scripting/script_environment.h"
+#include "halley/scripting/script_state_set.h"
 
 
 #include "halley/entity/world.h"

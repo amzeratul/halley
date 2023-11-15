@@ -28,27 +28,15 @@ public:
 		}
 	}
 
-	void onEntitiesAdded(Span<ScriptableFamily> es)
-	{
-		for (auto& e: es) {
-			// Make sure that cur id is higher than all scripts attached
-			int64_t curId = e.scriptable.curScriptId;
-			for (auto& [id, state]: e.scriptable.activeStates) {
-				curId = std::max(id + 1, curId);
-			}
-			e.scriptable.curScriptId = curId;
-		}
-	}
-
 	void onEntitiesRemoved(Span<ScriptableFamily> es)
 	{
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e: es) {
 			for (auto& state: e.scriptable.activeStates) {
-				if (state.second->getScriptGraphPtr()->isPersistent()) {
+				if (state->getScriptGraphPtr()->isPersistent()) {
 					// TODO?
 				} else {
-					env.terminateState(*state.second, e.entityId, e.scriptable.variables);
+					env.terminateState(*state, e.entityId, e.scriptable.variables);
 				}
 			}
 			e.scriptable.activeStates.clear();
@@ -108,27 +96,23 @@ public:
 	void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) override
 	{
 		auto& env = getScriptingService().getEnvironment();
-		Vector<int64_t> toRemove;
-		for (auto& [scriptId, script]: e.scriptable.activeStates) {
+		for (auto& script: e.scriptable.activeStates) {
 			if (script->getScriptId() == msg.name) {
 				env.terminateState(*script, e.entityId, e.scriptable.variables);
-				toRemove.push_back(scriptId);
 			}
 		}
-		for (const auto scriptId: toRemove) {
-			e.scriptable.activeStates.erase(scriptId);
-		}
+		e.scriptable.activeStates.removeDeadStates();
 	}
 
 	void onMessageReceived(const TerminateScriptsWithTagMessage& msg, ScriptableFamily& e) override
 	{
 		auto& env = getScriptingService().getEnvironment();
-		for (auto& state : e.scriptable.activeStates) {
-			if (state.second->hasTag(msg.tag)) {
-				env.terminateState(*state.second, e.entityId, e.scriptable.variables);
+		for (auto& state: e.scriptable.activeStates) {
+			if (state->hasTag(msg.tag)) {
+				env.terminateState(*state, e.entityId, e.scriptable.variables);
 			}
 		}
-		std_ex::erase_if_value(e.scriptable.activeStates, [](const auto& state) { return state->isDead(); });
+		e.scriptable.activeStates.removeDeadStates();
 	}
 
 	void onMessageReceived(const SendScriptMsgMessage& msg, ScriptableFamily& e) override
@@ -145,11 +129,11 @@ public:
 
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& state : scriptable->scriptable.activeStates) {
-			if (state.second->hasTag(msg.tag)) {
-				env.terminateState(*state.second, scriptable->entityId, scriptable->scriptable.variables);
+			if (state->hasTag(msg.tag)) {
+				env.terminateState(*state, scriptable->entityId, scriptable->scriptable.variables);
 			}
 		}
-		std_ex::erase_if_value(scriptable->scriptable.activeStates, [](const auto& state) { return state->isDead(); });
+		scriptable->scriptable.activeStates.removeDeadStates();
 	}
 
 	void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) override
@@ -182,7 +166,10 @@ private:
 	void initializeScripts()
 	{
 		for (auto& e: embeddedScriptFamily) {
-			const bool running = std_ex::contains_if(e.scriptable.activeStates, [&] (const auto& kv) { return kv.second->getScriptGraphPtr() == &e.embeddedScript.script; });
+			const bool running = std_ex::contains_if(e.scriptable.activeStates, [&] (const auto& kv)
+			{
+				return kv->getScriptGraphPtr() == &e.embeddedScript.script;
+			});
 			if (!running) {
 				const auto entity = getWorld().getEntity(e.entityId);
 				const auto& id = entity.getPrefabUUID().isValid() ? entity.getPrefabUUID() : entity.getInstanceUUID();
@@ -197,7 +184,10 @@ private:
 				for (const auto& script : e.scriptable.scripts) {
 					if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
 						e.scriptable.scriptsStarted.push_back(script.getAssetId());
-						const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv) { return kv.second->getScriptGraphPtr() == script.get().get(); });
+						const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv)
+						{
+							return kv->getScriptGraphPtr() == script.get().get();
+						});
 						if (!running) {
 							addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
 						}
@@ -205,7 +195,7 @@ private:
 				}
 			}
 			for (auto& state: e.scriptable.activeStates) {
-				state.second->setFrameFlag(false);
+				state->setFrameFlag(false);
 			}
 		}
 	}
@@ -215,9 +205,9 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e : scriptableFamily) {
 			for (auto& state: e.scriptable.activeStates) {
-				if (!state.second->getFrameFlag()) {
-					env.update(t, *state.second, e.entityId, e.scriptable.variables);
-					state.second->setFrameFlag(true);
+				if (!state->getFrameFlag()) {
+					env.update(t, *state, e.entityId, e.scriptable.variables);
+					state->setFrameFlag(true);
 				}
 			}
 
@@ -227,20 +217,7 @@ private:
 
 	void eraseDeadScripts(ScriptableFamily& e)
 	{
-		// Defer evaluation to when it's needed to avoid querying the world too much
-		std::optional<bool> isLocalCache;
-		auto isLocal = [&]() -> bool
-		{
-			if (!isLocalCache) {
-				isLocalCache = getWorld().getEntity(e.entityId).isLocal();
-			}
-			return *isLocalCache;
-		};
-
-		std_ex::erase_if_value(e.scriptable.activeStates, [&](const auto& state)
-		{
-			return state->isDead() && isLocal();
-		});
+		e.scriptable.activeStates.removeDeadLocalStates(getWorld(), e.entityId);
 	}
 
 	bool fulfillScriptExecutionRequests()
@@ -254,9 +231,9 @@ private:
 			if (r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop || r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag) {
 				if (auto* scriptable = scriptableFamily.tryFind(r.target)) {
 					for (auto& state: scriptable->scriptable.activeStates) {
-						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state.second->getScriptId() == r.value)
-							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state.second->hasTag(r.value))) {
-							getScriptingService().getEnvironment().stopState(*state.second, scriptable->entityId, scriptable->scriptable.variables, r.allThreads);
+						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state->getScriptId() == r.value)
+							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state->hasTag(r.value))) {
+							getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, r.allThreads);
 						}
 					}
 					eraseDeadScripts(*scriptable);
@@ -326,7 +303,7 @@ private:
 			return;
 		}
 
-		for (auto& [scriptId, script]: scriptable->scriptable.activeStates) {
+		for (auto& script: scriptable->scriptable.activeStates) {
 			if (script->getScriptId() == msg.type.script) {
 				script->receiveMessage(std::move(msg));
 				return;
@@ -404,10 +381,10 @@ private:
 		return doAddScript(entityId, scriptable, std::make_shared<ScriptState>(&script, true), std::move(tags), std::move(params));
 	}
 
-	std::shared_ptr<ScriptState> doAddScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<ScriptState> statePtr, Vector<String> tags, Vector<ConfigNode> params)
+	std::shared_ptr<ScriptState> doAddScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<ScriptState> state, Vector<String> tags, Vector<ConfigNode> params)
 	{
-		assert(!statePtr->getScriptId().isEmpty());
-		auto& state = scriptable.activeStates[scriptable.curScriptId++] = std::move(statePtr);
+		assert(!state->getScriptId().isEmpty());
+		scriptable.activeStates.addState(state);
 		state->setTags(std::move(tags));
 		state->setStartParams(std::move(params));
 		getScriptingService().getEnvironment().update(0, *state, entityId, scriptable.variables);
@@ -416,7 +393,7 @@ private:
 
 	bool hasScript(ScriptableComponent& scriptable, const String& id)
 	{
-		for (auto& [stateId, state]: scriptable.activeStates) {
+		for (auto& state: scriptable.activeStates) {
 			if (state->getScriptId() == id) {
 				return true;
 			}
@@ -444,7 +421,7 @@ private:
 
 				for (const auto& e : scriptableFamily) {
 					for (const auto& state : e.scriptable.activeStates) {
-						const auto* graph = state.second->getScriptGraphPtr();
+						const auto* graph = state->getScriptGraphPtr();
 						if (!graph || graph->getHash() != scriptHash) {
 							continue;
 						}
@@ -477,7 +454,7 @@ private:
 				const auto* e = scriptableFamily.tryFind(entityId);
 				if (e) {
 					for (const auto& state : e->scriptable.activeStates) {
-						const auto* graph = state.second->getScriptGraphPtr();
+						const auto* graph = state->getScriptGraphPtr();
 						if (!graph || graph->getHash() != scriptHash) {
 							continue;
 						}
@@ -493,23 +470,23 @@ private:
 							context.entityContext = this;
 
 							ConfigNode result = ConfigNode::MapType();
-							result["scriptState"] = state.second->toConfigNode(context);
+							result["scriptState"] = state->toConfigNode(context);
 							result["nodeRange"] = Range<int>(nodeRange);
 
 							ConfigNode::MapType variables{};
 							variables["entity"] = e->scriptable.variables.toConfigNode(context);
-							variables["local"] = state.second->getLocalVariables().toConfigNode(context);
-							variables["shared"] = state.second->getSharedVariables().toConfigNode(context);
+							variables["local"] = state->getLocalVariables().toConfigNode(context);
+							variables["shared"] = state->getSharedVariables().toConfigNode(context);
 							result["variables"] = variables;
 
-							const auto& scriptGraph = subGraphIndex == -1 ? *state.second->getScriptGraphPtr() : *getResources().get<ScriptGraph>(scriptId);
+							const auto& scriptGraph = subGraphIndex == -1 ? *state->getScriptGraphPtr() : *getResources().get<ScriptGraph>(scriptId);
 							result["roots"] = scriptGraph.getRoots().toConfigNode();
 
 							if (config.hasKey("curNode")) {
 								const GraphNodeId nodeId = config["curNode"]["nodeId"].asInt() + nodeRange.start;
 								const GraphPinId elementId = config["curNode"]["elementId"].asInt();
 								result["curNode"] = config["curNode"];
-								result["curNode"]["value"] = getScriptingService().getEnvironment().readNodeElementDevConData(*state.second, entityId, e->scriptable.variables, nodeId, elementId);
+								result["curNode"]["value"] = getScriptingService().getEnvironment().readNodeElementDevConData(*state, entityId, e->scriptable.variables, nodeId, elementId);
 							}
 							
 							ConfigNode::SequenceType debugDisplays;
@@ -517,7 +494,7 @@ private:
 								if (node.getNodeType().getClassification() == ScriptNodeClassification::DebugDisplay) {
 									ConfigNode::MapType entry;
 									entry["nodeId"] = node.getId();
-									entry["value"] = getScriptingService().getEnvironment().readNodeElementDevConData(*state.second, entityId, e->scriptable.variables, node.getId(), 0);
+									entry["value"] = getScriptingService().getEnvironment().readNodeElementDevConData(*state, entityId, e->scriptable.variables, node.getId(), 0);
 									debugDisplays.push_back(std::move(entry));
 								}
 							}
@@ -560,8 +537,8 @@ private:
 	std::shared_ptr<ScriptState> getScriptState(ScriptableFamily& e, const String& scriptName)
 	{
 		for (const auto& scriptable: e.scriptable.activeStates) {
-			if (scriptable.second->getScriptId() == scriptName) {
-				return scriptable.second;
+			if (scriptable->getScriptId() == scriptName) {
+				return scriptable;
 			}
 		}
 		return {};

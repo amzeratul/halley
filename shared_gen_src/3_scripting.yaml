@@ -3,13 +3,8 @@
 component:
   name: Scriptable
   members:
-  - curScriptId:
-      type: int64_t
-      defaultValue: 0
-      canEdit: false
-      canSave: true
   - activeStates:
-      type: 'Halley::HashMap<int64_t, std::shared_ptr<Halley::ScriptState>>'
+      type: 'Halley::ScriptStateSet'
       canEdit: false
       canSave: false # TODO
       canNetwork: true

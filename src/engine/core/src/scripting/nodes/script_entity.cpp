@@ -1,4 +1,5 @@
 #include "script_entity.h"
+#include "halley/scripting/script_state_set.h"
 
 #include <components/scriptable_component.h>
 
