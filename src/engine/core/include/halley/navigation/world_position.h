@@ -10,9 +10,9 @@ namespace Halley {
 	class WorldPosition {
 	public:
 		Vector2f pos;
-		int subWorld;
+		int subWorld = 0;
 
-		WorldPosition() = default;
+		constexpr WorldPosition() = default;
 		
 		constexpr WorldPosition(Vector2f pos, int subWorld)
 			: pos(pos)
