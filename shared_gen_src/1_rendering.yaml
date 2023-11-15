@@ -27,13 +27,11 @@ component:
       displayName: "Colour"
       canSave: false # Saving this is dangerous, hard to keep state consistency
       canEdit: true
-      canNetwork: true
   - intensity:
       type: float
       defaultValue: 1
       canSave: false
       canEdit: true
-      canNetwork: true
 
 ---
 
