@@ -36,6 +36,8 @@ namespace Halley
 
 		bool isLZ4HCEnabled() const;
 		void setLZ4HCEnabled(bool enabled);
+		bool isAutoBuild() const;
+		void setAutoBuild(bool enabled);
 
 		void loadEditorPreferences(const Preferences& preferences);
 
@@ -54,6 +56,7 @@ namespace Halley
 		Vector<String> disabledPlatforms;
 
 		String colourScheme;
-		bool lz4hc;
+		bool lz4hc = false;
+		bool autoBuild = false;
 	};
 }

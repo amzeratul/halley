@@ -1,0 +1,83 @@
+---
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [330, 10] }
+sizer: { type: vertical }
+children:
+- widget: { id: scrollBarPane, class: scrollBarPane }
+  sizer: { type: vertical, gap: 8 }
+  proportion: 1
+  border: [0, 0, 0, 0]
+  children:
+  - widget: { id: header, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { id: "title", class: label, text: "Entity", innerBorder: [1, 4, 1, 1] }
+      fill: centre
+    - widget: { class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children:
+      - widget: { id: commonFields, class: widget }
+        sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+        fill: fill
+        children:
+        - widget: { class: widget, size: [100, 20] }
+          children:
+          - widget: { id: "", class: label, text: "Enabled", style: "labelLight" }
+            fill: centreVertical
+        - widget: { id: enabled, class: checkbox }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Serializable", style: "labelLight" }
+          fill: centreVertical
+        - widget: { id: serializable, class: checkbox }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Selectable", style: "labelLight" }
+          fill: centreVertical
+        - widget: { id: selectable, class: checkbox }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Variant", style: "labelLight" }
+          fill: centreVertical
+        - widget: { id: variant, class: dropdown, size: [200, 22], style: dropdownLight }
+          proportion: 1
+          border: [0, 0, 0, 1]
+      - widget: { id: entityFields, class: widget }
+        sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+        fill: fill
+        children:
+        - widget: { class: widget, size: [100, 20] }
+          children:
+          - widget: { id: "", class: label, text: "Name", style: "labelLight" }
+            fill: centre
+        - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Icon", style: "labelLight" }
+          fill: centreVertical
+        - widget: { id: entityIcon, class: dropdown, size: [200, 22], style: dropdownLight }
+          proportion: 1
+      - widget: { id: prefabFields, class: widget }
+        sizer: { type: vertical }
+        children:
+        - sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+          fill: fill
+          children:
+          - widget: { class: widget, size: [100, 20] }
+            children:
+            - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
+              fill: centreVertical
+          - widget: { id: prefabName, class: selectAsset, assetType: prefab, size: [200, 20] }
+            proportion: 1
+        - widget: { id: editPrefab, class: button, text: Edit, tooltip: "Open this prefab to edit.", style: buttonThin, size: [20, 23] }
+  - widget: { id: fields, class: widget }
+    sizer: { type: vertical, gap: 8 }
+- widget: { id: componentButtons, class: widget }
+  sizer: { type: horizontal, gap: 4 }
+  border: [0, 3, 0, 0]
+  children:
+  - widget: { id: addComponentButton, class: button, style: buttonThin, text: "Add Component", size: [ 30, 22 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }
+    proportion: 1
+  - widget: { id: copyComponentsButton, class: button, style: buttonThin, style: buttonThin, icon: entity_icons/copy.png, tooltip: "Copy all components to the clipboard." }
+  - widget: { id: pasteComponentsButton, class: button, style: buttonThin, style: buttonThin, icon: entity_icons/paste.png, tooltip: "Paste a Component to this Entity." }
+- widget: { id: message, class: label, text: Multiple Entities Selected }
+  proportion: 1
+  fill: centre
+- widget: { id: entityValidatorUI, class: entityValidator }
+...

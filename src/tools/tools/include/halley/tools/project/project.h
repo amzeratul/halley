@@ -57,6 +57,10 @@ namespace Halley
 		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
 		
 		void update(Time time);
+
+		bool isBuildPending() const;
+		void onBuildNeeded();
+		void onBuildStarted();
 		void onBuildDone();
 
 		void setPlatforms(Vector<String> platforms);
@@ -159,6 +163,12 @@ namespace Halley
 
 		void launchGame(Vector<String> params) const override;
 
+		static uint64_t getSourceHash(const Path& projectRoot);
+		uint64_t getSourceHash() const;
+		String getBuiltSourceStr() const;
+		bool isBuildSourceUpToDate() const;
+		uint32_t getBuildCount() const;
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;
@@ -191,6 +201,9 @@ namespace Halley
 		bool assetNotifyImportEnabled = true;
 		bool assetsImported = false;
 		Vector<Path> assetsToNotifyImport;
+
+		bool buildPending = false;
+		uint32_t buildCount = 0;
 
 		DevConServer* devConServer = nullptr;
 

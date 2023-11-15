@@ -28,6 +28,18 @@ public:
 		}
 	}
 
+	void onEntitiesAdded(Span<ScriptableFamily> es)
+	{
+		for (auto& e: es) {
+			// Make sure that cur id is higher than all scripts attached
+			int64_t curId = e.scriptable.curScriptId;
+			for (auto& [id, state]: e.scriptable.activeStates) {
+				curId = std::max(id + 1, curId);
+			}
+			e.scriptable.curScriptId = curId;
+		}
+	}
+
 	void onEntitiesRemoved(Span<ScriptableFamily> es)
 	{
 		auto& env = getScriptingService().getEnvironment();
@@ -45,7 +57,11 @@ public:
 
 	void onMessageReceived(const StartScriptMessage& msg, ScriptableFamily& e) override
 	{
-		addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
+		if (getResources().exists<ScriptGraph>(msg.name)) {
+			addScript(e.entityId, e.scriptable, getResources().get<ScriptGraph>(msg.name), msg.tags, msg.params);
+		} else {
+			Logger::logError("Script not found: \"" + msg.name + "\"");
+		}
 	}
 
 	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
@@ -92,10 +108,15 @@ public:
 	void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) override
 	{
 		auto& env = getScriptingService().getEnvironment();
-		const auto iter = e.scriptable.activeStates.find(msg.name);
-		if (iter != e.scriptable.activeStates.end()) {
-			env.terminateState(*iter->second, e.entityId, e.scriptable.variables);
-			e.scriptable.activeStates.erase(iter);
+		Vector<int64_t> toRemove;
+		for (auto& [scriptId, script]: e.scriptable.activeStates) {
+			if (script->getScriptId() == msg.name) {
+				env.terminateState(*script, e.entityId, e.scriptable.variables);
+				toRemove.push_back(scriptId);
+			}
+		}
+		for (const auto scriptId: toRemove) {
+			e.scriptable.activeStates.erase(scriptId);
 		}
 	}
 
@@ -233,7 +254,7 @@ private:
 			if (r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop || r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag) {
 				if (auto* scriptable = scriptableFamily.tryFind(r.target)) {
 					for (auto& state: scriptable->scriptable.activeStates) {
-						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state.first == r.value)
+						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state.second->getScriptId() == r.value)
 							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state.second->hasTag(r.value))) {
 							getScriptingService().getEnvironment().stopState(*state.second, scriptable->entityId, scriptable->scriptable.variables, r.allThreads);
 						}
@@ -305,10 +326,11 @@ private:
 			return;
 		}
 
-		const auto iter = scriptable->scriptable.activeStates.find(msg.type.script);
-		if (iter != scriptable->scriptable.activeStates.end()) {
-			iter->second->receiveMessage(std::move(msg));
-			return;
+		for (auto& [scriptId, script]: scriptable->scriptable.activeStates) {
+			if (script->getScriptId() == msg.type.script) {
+				script->receiveMessage(std::move(msg));
+				return;
+			}
 		}
 
 		if (getResources().exists<ScriptGraph>(msg.type.script)) {
@@ -385,7 +407,7 @@ private:
 	std::shared_ptr<ScriptState> doAddScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<ScriptState> statePtr, Vector<String> tags, Vector<ConfigNode> params)
 	{
 		assert(!statePtr->getScriptId().isEmpty());
-		auto& state = scriptable.activeStates[statePtr->getScriptId()] = std::move(statePtr);
+		auto& state = scriptable.activeStates[scriptable.curScriptId++] = std::move(statePtr);
 		state->setTags(std::move(tags));
 		state->setStartParams(std::move(params));
 		getScriptingService().getEnvironment().update(0, *state, entityId, scriptable.variables);
@@ -394,7 +416,12 @@ private:
 
 	bool hasScript(ScriptableComponent& scriptable, const String& id)
 	{
-		return scriptable.activeStates.contains(id);
+		for (auto& [stateId, state]: scriptable.activeStates) {
+			if (state->getScriptId() == id) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void updateDevCon()
@@ -533,8 +560,8 @@ private:
 	std::shared_ptr<ScriptState> getScriptState(ScriptableFamily& e, const String& scriptName)
 	{
 		for (const auto& scriptable: e.scriptable.activeStates) {
-			if (scriptable.first == scriptName) {
-				return scriptable.second;					
+			if (scriptable.second->getScriptId() == scriptName) {
+				return scriptable.second;
 			}
 		}
 		return {};

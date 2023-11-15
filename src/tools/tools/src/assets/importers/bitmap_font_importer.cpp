@@ -96,7 +96,7 @@ Font BitmapFontImporter::parseBitmapFontXML(Vector2i imageSize, const Bytes& dat
 				String code = child->GetAttribute("code");
 				charcode = code.getUTF32()[0];
 
-				font.addGlyph(Font::Glyph(charcode, area, size, bearing, bearing, advance));
+				font.addGlyph(Font::Glyph(charcode, area, size, bearing, bearing, advance, {}));
 			}
 
 			return font;

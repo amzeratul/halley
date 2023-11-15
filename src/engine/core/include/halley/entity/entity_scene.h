@@ -21,10 +21,12 @@ namespace Halley {
 			virtual void onEntityRemoved(EntityRef entity, uint8_t worldPartition) = 0;
 		};
 		
-		explicit EntityScene(bool allowReload = false, uint8_t worldPartition = 0);
+		explicit EntityScene(bool allowReload = false, uint8_t worldPartition = 0, String variant = "");
 		
 		Vector<EntityId>& getEntities();
 		const Vector<EntityId>& getEntities() const;
+
+		const String& getVariant() const;
 
 		bool needsUpdate() const;
 		void update(EntityFactory& factory, IEntitySceneUpdateCallbacks* callbacks = nullptr);
@@ -62,6 +64,7 @@ namespace Halley {
 		Vector<EntityId> entities;
 		Vector<PrefabObserver> prefabObservers;
 		Vector<PrefabObserver> sceneObservers;
+		String variant;
 		bool allowReload = false;
 		uint8_t worldPartition = 0;
 

@@ -115,10 +115,11 @@ namespace Halley
 		
 		MaterialParameter getParameter(std::string_view name);
 		bool hasParameter(std::string_view name) const;
-
+		
 		template <typename T>
 		Material& set(std::string_view name, const T& value)
 		{
+			assert(!name.empty());
 			getParameter(name).set(value);
 			return *this;
 		}

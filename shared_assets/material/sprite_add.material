@@ -1,0 +1,12 @@
+---
+name: Halley/SpriteAdd
+base: sprite_base.material
+textures:
+  - image: sampler2D
+passes:
+  - blend: Add
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite.pixel.hlsl
+...

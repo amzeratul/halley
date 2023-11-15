@@ -1,0 +1,18 @@
+---
+name: Halley/SmoothPixel
+base: sprite_base.material
+textures:
+  - image: sampler2D
+uniforms:
+  - TexParams:
+    - name: u_texSize0
+      type: vec2
+      autoVariable: halley.texSize:0
+      canEdit: false
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: smooth_pixel.pixel.hlsl
+...

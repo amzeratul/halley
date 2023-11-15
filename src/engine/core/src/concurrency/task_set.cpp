@@ -44,6 +44,11 @@ void TaskSet::update(Time time)
 			toAdd.push_back(std::move(t));
 		}
 
+		auto newToClear = task->getPendingToClear();
+		for (auto& c: newToClear) {
+			toClear.push_back(std::move(c));
+		}
+
 		if (task->getStatus() == TaskStatus::Done) {
 			auto newTasks = task->getContinuations();
 			const size_t numContinuations = newTasks.size();
@@ -114,6 +119,11 @@ void TaskSet::returnHandle(TaskExclusivityHandle& handle)
 		exclusiveClaims.erase(tag);
 	}
 	handle.tags.clear();
+}
+
+Vector<String> TaskSet::getToClear()
+{
+	return std::move(toClear);
 }
 
 TaskExclusivityHandle::TaskExclusivityHandle(TaskSet& parent, Vector<String> tags)

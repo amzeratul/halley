@@ -207,6 +207,11 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
+	if (!entityData) {
+		Logger::logError("Unable to instantiate network entity");
+		return;
+	}
+
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 	stripNestedNetworkComponents(entity);
 	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") from network:\n\n" + EntityData(delta).toYAML());
@@ -224,7 +229,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	}
 
 	InboundEntity remote;
-	remote.data = std::move(entityData);
+	remote.data = std::move(*entityData);
 	remote.worldId = entity.getEntityId();
 	inboundEntities[msg.entityId] = std::move(remote);
 

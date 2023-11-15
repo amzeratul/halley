@@ -14,6 +14,13 @@ namespace Halley {
 	class ComponentDeleterTable
 	{
 	public:
+		~ComponentDeleterTable()
+		{
+			for (const auto deleter : map) {
+				delete deleter;
+			}
+		}
+
 		void set(int idx, TypeDeleterBase* deleter)
 		{
 			if (int(map.size()) <= idx) {

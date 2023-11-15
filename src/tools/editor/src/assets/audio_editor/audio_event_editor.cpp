@@ -49,7 +49,7 @@ void AudioEventEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("audio_event/" + audioEvent->getAssetId() + ".yaml");
+		const auto assetPath = Path("audio_event/" + audioEvent->getAssetId() + ".audioevent");
 		const auto strData = audioEvent->toYAML();
 
 		project.setAssetSaveNotification(false);

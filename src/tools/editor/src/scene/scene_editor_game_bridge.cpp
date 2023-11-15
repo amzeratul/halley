@@ -432,7 +432,10 @@ void SceneEditorGameBridge::load()
 
 void SceneEditorGameBridge::unload()
 {
-	gizmos->clear();
+	if (gizmos) {
+		gizmos->clear();
+		gizmos = {};
+	}
 
 	interface.reset();
 	interfaceReady = false;
@@ -441,6 +444,14 @@ void SceneEditorGameBridge::unload()
 	gameCoreAPI.reset();
 
 	errorState = false;
+}
+
+void SceneEditorGameBridge::reloadScene()
+{
+	if (gizmos) {
+		gizmos->clear();
+	}
+	getGizmos();
 }
 
 bool SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const

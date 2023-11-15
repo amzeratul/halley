@@ -380,6 +380,18 @@ ConfigNode Scene::entityToConfigNode() const
 	return ConfigNode(std::move(result));
 }
 
+Vector<SceneVariant> Scene::getVariants() const
+{
+	if (const auto* variantData = tryGetGameData("variants")) {
+		auto result = variantData->asVector<SceneVariant>({});
+		if (!result.empty()) {
+			return result;
+		}
+	}
+
+	return Vector<SceneVariant>({ SceneVariant("default") });
+}
+
 EntityData Scene::makeEntityData(const ConfigNode& node) const
 {
 	waitForLoad(true);
@@ -424,5 +436,25 @@ Scene::Deltas Scene::generateSceneDeltas(const Scene& newScene) const
 		result.entitiesRemoved.insert(old.first);
 	}
 
+	return result;
+}
+
+SceneVariant::SceneVariant(String id, LuaExpression conditions)
+	: id(std::move(id))
+	, conditions(std::move(conditions))
+{
+}
+
+SceneVariant::SceneVariant(const ConfigNode& node)
+{
+	id = node["id"].asString("default");
+	conditions = node["conditions"].asString("");
+}
+
+ConfigNode SceneVariant::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["id"] = id;
+	result["conditions"] = conditions.getExpression();
 	return result;
 }

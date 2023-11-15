@@ -167,7 +167,7 @@ void UIEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("ui/" + uiDefinition->getAssetId() + ".yaml");
+		const auto assetPath = Path("ui/" + uiDefinition->getAssetId() + ".ui");
 		const auto strData = uiDefinition->toYAML();
 
 		project.setAssetSaveNotification(false);

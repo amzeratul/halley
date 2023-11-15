@@ -159,20 +159,29 @@ Vector<KerningPair> FontFace::getKerning(const Vector<int>& codes) const
 		return results;
 	}
 	
-	Vector<int> indices;
+	HashMap<int32_t, int> indices;
 	for (int code: codes) {
-		int index = FT_Get_Char_Index(pimpl->face, code);
 		if (code != 0) {
-			indices.push_back(index);
+			indices[code] = FT_Get_Char_Index(pimpl->face, code);
 		}
 	}
-	
-	for (int left: indices) {
-		for (int right: indices) {
+
+	for (int left: codes) {
+		if (left == 0) {
+			continue;
+		}
+		const auto indexLeft = indices.at(left);
+
+		for (int right: codes) {
+			if (right == 0) {
+				continue;
+			}
+
 			FT_Vector result;
-			FT_Get_Kerning(pimpl->face, left, right, FT_KERNING_UNFITTED, &result);
+			FT_Get_Kerning(pimpl->face, indexLeft, indices.at(right), FT_KERNING_UNFITTED, &result);
 			if (result.x != 0 || result.y != 0) {
-				results.emplace_back(KerningPair(left, right, Vector2f(result.x / 64.0f, result.y / 64.0f)));
+				const auto kerning = Vector2f(result.x / 64.0f, result.y / 64.0f);
+				results.emplace_back(KerningPair(left, right, kerning));
 			}
 		}
 	}

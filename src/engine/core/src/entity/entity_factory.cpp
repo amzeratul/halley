@@ -30,9 +30,9 @@ World& EntityFactory::getWorld()
 	return world;
 }
 
-EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition)
+EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition, String variant)
 {
-	EntityScene curScene(allowReload, worldPartition);
+	EntityScene curScene(allowReload, worldPartition, variant);
 	try {
 		for (const auto& entityData : prefab->getEntityDatas()) {
 			auto entity = createEntity(entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), EntityRef(), &curScene);
@@ -43,7 +43,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 		Logger::logError("Error loading scene " + prefab->getAssetId());
 		Logger::logException(e);
 		curScene.destroyEntities(world);
-		return EntityScene(allowReload, worldPartition);
+		return EntityScene(allowReload, worldPartition, variant);
 	}
 	return curScene;
 }
@@ -248,6 +248,20 @@ void EntityFactoryContext::setWorldPartition(uint8_t partition)
 	worldPartition = partition;
 }
 
+const String& EntityFactoryContext::getVariant() const
+{
+	if (scene) {
+		return scene->getVariant();
+	} else {
+		return String::emptyString();
+	}
+}
+
+bool EntityFactoryContext::canInstantiateVariant(const String& value) const
+{
+	return value.isEmpty() || value == getVariant();
+}
+
 EntityId EntityFactoryContext::getCurrentEntityId() const
 {
 	return curEntity;
@@ -263,6 +277,11 @@ UUID EntityFactoryContext::getRootUUID() const
 		}
 	}
 	return rootUUID;
+}
+
+bool EntityFactoryContext::isHeadless() const
+{
+	return world->isHeadless();
 }
 
 void EntityFactoryContext::setCurrentEntity(EntityId entity)
@@ -360,11 +379,20 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		if (delta.getName()) {
 			entity.setName(delta.getName().value());
 		}
+
+		bool enabled = true;
 		if (delta.getFlags()) {
 			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
 			entity.setSerializable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
-			entity.setEnabled((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
+			enabled = enabled && (delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
 		}
+
+		if (delta.getVariant()) {
+			enabled = enabled && context->canInstantiateVariant(delta.getVariant().value());
+		}
+
+		entity.setEnabled(enabled);
+
 		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
 		entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 		updateEntityComponentsDelta(entity, delta, *context);
@@ -374,7 +402,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		entity.setName(data.getName());
 		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
 		entity.setSerializable(!data.getFlag(EntityData::Flag::NotSerializable));
-		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled));
+		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled) && context->canInstantiateVariant(data.getVariant()));
 		if (data.getPrefabUUID().isValid()) {
 			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 		}
@@ -397,7 +425,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 			const auto& [componentName, componentData] = data.getComponent(i);
 			const auto result = reflection.createComponent(context, componentName, entity, componentData);
 			if (!result.created) {
-				Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+				Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
 			}
 		}
 	} else {
@@ -416,7 +444,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 					existingComps.erase(iter);
 				}
 				if (result.componentId == -1) {
-					Logger::logError("Failed to create component " + componentName + " on entity " + entity.getName());
+					Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
 				}
 			}
 		}
@@ -633,31 +661,35 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	} else {
 		// Generate full EntityData from prefab first
 		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
-		
-		entityData.setInstanceUUID(uuid);
+		if (entityData) {
+			entityData->setInstanceUUID(uuid);
 
-		if (entity.isValid()) {
-			// Update existing entity
-			updateEntity(entity, entityData, mask);
-		}  else {
-			// Create new entity
-			entity = createEntity(entityData, mask);
+			if (entity.isValid()) {
+				// Update existing entity
+				updateEntity(entity, *entityData, mask);
+			}  else {
+				// Create new entity
+				entity = createEntity(*entityData, mask);
 
-			// Pending parenting
-			if (entityData.getParentUUID().isValid()) {
-				parentUUID = entityData.getParentUUID();
+				// Pending parenting
+				if (entityData->getParentUUID().isValid()) {
+					parentUUID = entityData->getParentUUID();
+				}
 			}
-		}
 
-		if (prefab) {
-			entity.setPrefab(prefab, prefabUUID);
+			if (prefab) {
+				entity.setPrefab(prefab, prefabUUID);
+			}
+		} else {
+			getWorld().destroyEntity(entity);
+			entity = {};
 		}
 	}
 
 	return std::make_pair(entity, parentUUID);
 }
 
-std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
 {
 	if (delta.getPrefab()) {
 		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
@@ -665,7 +697,8 @@ std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefa
 		auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
 		const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
 		if (!prefabData) {
-			throw Exception("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString(), 0);
+			Logger::logError("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString());
+			return {};
 		}
 
 		auto entityData = *prefabData;

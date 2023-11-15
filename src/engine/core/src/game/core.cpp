@@ -301,7 +301,7 @@ void Core::initResources()
 void Core::setOutRedirect(bool appendToExisting)
 {
 #if defined(_WIN32) || defined(__APPLE__) || defined(linux)
-	String path = (Path(environment->getDataPath()) / "log.txt").getString();
+	String path = (Path(environment->getDataPath()) / game->getLogFileName()).getString();
 #ifdef _WIN32
 	auto outStream = std::make_shared<std::ofstream>(path.getUTF16().c_str(), appendToExisting ? std::ofstream::app : std::ofstream::trunc);
 #else
@@ -388,8 +388,6 @@ void Core::onTick(Time delta)
 	const bool record = !profileCallbacks.empty();
 	capture.startFrame(record);
 	
-	processEvents(delta);
-
 	tickFrame(delta);
 
 	capture.endFrame();
@@ -412,11 +410,15 @@ void Core::tickFrame(Time time)
 
 	updateFrameData(multithreaded, time);
 	runStartFrame(time);
+
+	if (multithreaded || !game->shouldProcessEventsOnFixedUpdate()) {
+		processEvents(time);
+	}
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
 			BaseFrameData::setThreadFrameData(frameDataUpdate.get());
-			update(time);
+			update(time, multithreaded);
 		});
 		if (frameDataRender) {
 			assert(curStageFrames > 0);
@@ -427,7 +429,7 @@ void Core::tickFrame(Time time)
 		updateTask.wait();
 	} else {
 		BaseFrameData::setThreadFrameData(frameDataUpdate.get());
-		update(time);
+		update(time, multithreaded);
 		if (isRunning()) { // Check again, it might have changed
 			render();
 			waitForRenderEnd();
@@ -439,14 +441,14 @@ void Core::tickFrame(Time time)
 	curStageFrames++;
 }
 
-void Core::update(Time time)
+void Core::update(Time time, bool multithreaded)
 {
 	// Run pre update, then ONE fixed update (if needed), then variable, then remaining fixed updates, with input cleared. This makes sure that input is consistent.
 	preUpdate(time);
 
-	auto [nFixed, fixedLen] = preFixedUpdate(time);
+	auto [nFixed, fixedLen] = getFixedUpdateCount(time);
 	if (nFixed > 0) {
-		fixedUpdate(fixedLen);
+		fixedUpdate(fixedLen, multithreaded);
 	}
 
 	variableUpdate(time);
@@ -454,7 +456,7 @@ void Core::update(Time time)
 	if (nFixed > 1) {
 		clearPresses();
 		for (size_t n = 1; n < nFixed; ++n) {
-			fixedUpdate(fixedLen);
+			fixedUpdate(fixedLen, multithreaded);
 			if (n == 4) {
 				// Don't let it run more than 5 fixed frames per variable frame
 				fixedUpdateTime = 0;
@@ -481,7 +483,7 @@ void Core::postUpdate(Time time)
 	updateSystem(time);
 }
 
-std::pair<size_t, Time> Core::preFixedUpdate(Time time)
+std::pair<size_t, Time> Core::getFixedUpdateCount(Time time)
 {
 	if (running && currentStage) {
 		fixedUpdateTime += time;
@@ -493,9 +495,13 @@ std::pair<size_t, Time> Core::preFixedUpdate(Time time)
 	}
 }
 
-void Core::fixedUpdate(Time time)
+void Core::fixedUpdate(Time time, bool multithreaded)
 {
 	fixedUpdateTime = std::max(fixedUpdateTime - time, 0.0);
+	
+	if (!multithreaded && game->shouldProcessEventsOnFixedUpdate()) {
+		processEvents(time);
+	}
 
 	ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
 	try {

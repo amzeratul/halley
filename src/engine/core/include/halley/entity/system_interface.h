@@ -32,7 +32,8 @@ namespace Halley {
 
     	virtual ~INetworkLockSystemInterface() = default;
 
-        virtual LockStatus getLockStatus(EntityId playerId, EntityId targetId) const = 0;
+        virtual LockStatus getLockStatus(EntityId targetId) const = 0;
+        virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const = 0;
         virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId) = 0;
 	};
 
@@ -63,5 +64,6 @@ namespace Halley {
 		virtual ~IAudioSystemInterface() = default;
 
         virtual void playAudio(const String& event, EntityId entityId) = 0;
+		virtual void setVariable(EntityId entityId, const String& variableName, float value) = 0;
 	};
 }

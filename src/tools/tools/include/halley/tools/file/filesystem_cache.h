@@ -7,6 +7,7 @@
 namespace Halley {
     class FileSystemCache {
     public:
+        void writeFile(const Path& path, gsl::span<const gsl::byte> data);
         void writeFile(const Path& path, Bytes data);
 		const Bytes& readFile(const Path& path);
         void remove(const Path& path);
@@ -46,7 +47,8 @@ namespace Halley {
 
         mutable std::pair<Path, DirEntry*> lastDirCache;
 
-        bool shouldCache(const Path& path, size_t size);
+        bool shouldCache(const Path& path, size_t size) const;
+        bool matchesCache(const String& key, gsl::span<const gsl::byte> data) const;
 
         void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst, bool includeDirs, bool recursive);
 

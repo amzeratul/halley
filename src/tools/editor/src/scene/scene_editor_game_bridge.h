@@ -17,6 +17,7 @@ namespace Halley {
 		~SceneEditorGameBridge();
 
 		void unload();
+		void reloadScene();
 
 		bool update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
 		void render(RenderContext& rc) const;

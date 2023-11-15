@@ -5,6 +5,7 @@
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
+#include "gizmos/variant_gizmo.h"
 #include "halley/graphics/camera.h"
 using namespace Halley;
 
@@ -16,15 +17,15 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	// TODO: read this elsewhere
 	snapRules.grid = GridSnapMode::Pixel;
 	snapRules.line = LineSnapMode::IsometricAxisAligned;
-	
-	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
-	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
 
 	resetTools();
+	prepareGizmos();
 }
 
 ISceneEditorGizmoCollection::SelectResult SceneEditorGizmoCollection::update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
+	prepareGizmos();
+
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, sceneEditor, inputState);
 	selectionBoxGizmo->setCamera(camera);
@@ -56,7 +57,17 @@ void SceneEditorGizmoCollection::setSelectedEntities(Vector<EntityRef> entities,
 {
 	selectedEntities = std::move(entities);
 	entityDatas = std::move(datas);
-	
+
+	for (size_t i = 0; i < selectedEntities.size();) {
+		if (!selectedEntities[i].isEnabled()) {
+			selectedEntities.erase(selectedEntities.begin() + i);
+			entityDatas.erase(entityDatas.begin() + i);
+		} else {
+			i++;
+		}
+	}
+
+	prepareGizmos();
 	selectedBoundsGizmo->setSelectedEntities(selectedEntities, entityDatas);
 	
 	if (activeGizmo) {
@@ -170,6 +181,16 @@ bool SceneEditorGizmoCollection::onKeyPress(KeyboardKeyPress key, UIList& list)
 	return false;
 }
 
+void SceneEditorGizmoCollection::prepareGizmos()
+{
+	if (!selectedBoundsGizmo) {
+		selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
+	}
+	if (!selectionBoxGizmo) {
+		selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
+	}
+}
+
 void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)
 {
 	tools.push_back(tool);
@@ -199,6 +220,12 @@ void SceneEditorGizmoCollection::resetTools()
 				return std::make_unique<CommentsGizmo>(snapRules, factory, sceneEditorWindow);
 			}
 		);
+		addTool(Tool("variants", LocalisedString::fromHardcodedString("Variants [V]"), Sprite().setImage(resources, "ui/scene_editor_variants.png"), KeyCode::V),
+			[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
+			{
+				return std::make_unique<VariantGizmo>(snapRules, factory, sceneEditorWindow);
+			}
+		);
 	}
 	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
@@ -217,4 +244,6 @@ void SceneEditorGizmoCollection::clear()
 		uiList = nullptr;
 	}
 	activeGizmo.reset();
+	selectedBoundsGizmo.reset();
+	selectionBoxGizmo.reset();
 }

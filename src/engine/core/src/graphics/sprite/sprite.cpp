@@ -10,6 +10,7 @@
 #include <gsl/gsl_assert>
 
 #include "halley/api/video_api.h"
+#include "halley/entity/entity_factory.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/logger.h"
 
@@ -720,6 +721,9 @@ namespace {
 void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Sprite& sprite)
 {
 	if (node.getType() == ConfigNodeType::Undefined) {
+		return;
+	}
+	if (context.entityContext && context.entityContext->isHeadless()) {
 		return;
 	}
 

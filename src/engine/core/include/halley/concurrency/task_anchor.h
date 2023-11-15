@@ -54,9 +54,11 @@ namespace Halley
 
 		Vector<std::unique_ptr<Task>> getContinuations();
 		Vector<std::unique_ptr<Task>> getPendingTasks();
+		Vector<String> getPendingToClear();
 
 		std::optional<String> getAction();
 		void doAction(TaskSet& taskSet);
+		void clear();
 
 	private:
 		std::unique_ptr<Task> task;

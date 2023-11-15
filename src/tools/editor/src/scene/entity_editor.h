@@ -25,7 +25,7 @@ namespace Halley {
 		void onRemovedFromRoot(UIRoot& root) override;
 		
 		void update(Time t, bool moved) override;
-		
+
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor, const HalleyAPI& api);
 		void setECSData(ECSData& data);
 
@@ -73,6 +73,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;
 		std::shared_ptr<UIDropdown> entityIcon;
+		std::shared_ptr<UIDropdown> variant;
 		std::shared_ptr<SelectAssetWidget> prefabName;
 
 		EntityData* currentEntityData = nullptr;
@@ -95,6 +96,7 @@ namespace Halley {
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
 
+		void loadVariants();
 		void setName(const String& name, bool markModified = true);
 		String getName() const;
 		void setPrefabName(const String& prefab);
@@ -103,6 +105,7 @@ namespace Halley {
 		void setEntityEnabled(bool enabled);
 		void editPrefab();
 		void setIcon(const String& icon);
+		void setVariant(const String& variant);
 
 		void refreshEntityData();
 		void onEntityUpdated(bool temporary = false) override;

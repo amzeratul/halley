@@ -1,0 +1,12 @@
+---
+name: Halley/StencilView
+base: sprite_base.material
+textures:
+  - image: stencil2D
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: stencil_view.pixel.hlsl
+...

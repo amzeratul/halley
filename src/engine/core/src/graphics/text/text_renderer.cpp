@@ -220,6 +220,24 @@ TextRenderer& TextRenderer::setAlpha(float alpha)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setScale(float scale)
+{
+	if (this->scale != scale) {
+		this->scale = scale;
+		glyphsDirty = true;
+	}
+	return *this;
+}
+
+TextRenderer& TextRenderer::setAngle(Angle1f angle)
+{
+	if (this->angle != angle) {
+		this->angle = angle;
+		glyphsDirty = true;
+	}
+	return *this;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	if (outlineColour != v) {
@@ -271,7 +289,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 		{
 			// Line break, update previous characters!
 			if (align != 0) {
-				Vector2f off = floorAlign(-lineOffset * align);
+				Vector2f off = floorAlign(-lineOffset * align).rotate(angle);
 				for (size_t j = startPos; j < spritesInserted; j++) {
 					auto& sprite = sprites[j];
 					sprite.setPos(sprite.getPosition() + off);
@@ -299,6 +317,9 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 		}
 		sprites.resize(nGlyphs);
 
+		const Font::Glyph* lastGlyph = nullptr;
+		const Font* lastFont = nullptr;
+
 		for (size_t i = 0; i < n; i++) {
 			int c = text[i];
 
@@ -315,6 +336,10 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
+				const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+				const auto glyphPos = p + lineOffset + pixelOffset + fontAdjustment + kerning * scale;
+				const auto renderPos = (glyphPos - position).rotate(angle) + position;
+
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
@@ -324,9 +349,13 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 					.setColour(curCol)
 					.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
 					.setScale(scale)
-					.setPos(p + lineOffset + pixelOffset + fontAdjustment);
+					.setPos(renderPos)
+					.setRotation(angle);
 
-				lineOffset.x += glyph.advance.x * scale;
+				lineOffset.x += (glyph.advance.x + kerning.x) * scale;
+
+				lastGlyph = &glyph;
+				lastFont = font.get();
 
 				if (i == n - 1) {
 					flush();
@@ -379,6 +408,9 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 	float w = 0;
 	const float lineH = getLineHeight();
 
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
+
 	for (auto& c : str) {
 		if (c == '\n') {
 			// Line break!
@@ -388,7 +420,13 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 		} else {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
+
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();
 		}
 	}
 	w = std::max(w, p.x);
@@ -406,6 +444,9 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 	Vector2f p;
 	const float lineH = getLineHeight();
 
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
+
 	for (size_t i = 0; i < character && i < str.size(); ++i) {
 		auto c = str[i];
 		if (c == '\n') {
@@ -415,8 +456,11 @@ Vector2f TextRenderer::getCharacterPosition(size_t character, const StringUTF32&
 		} else {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
-		}
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();		}
 	}
 
 	return p;
@@ -437,6 +481,8 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 	bool gotLineMatch = false;
 	size_t bestAnswer = 0;
 	const size_t nChars = str.size();
+	const Font* lastFont = nullptr;
+	const Font::Glyph* lastGlyph = nullptr;
 
 	for (size_t i = 0; i <= nChars; ++i) {
 		auto c = i == nChars ? 0 : str[i]; // Add a sigil at the end
@@ -465,8 +511,11 @@ size_t TextRenderer::getCharacterAt(const Vector2f& position, const StringUTF32&
 		} else if (c != 0) {
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			p += Vector2f(glyph.advance.x, 0) * scale;
-		}
+			const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+			p += Vector2f(glyph.advance.x + kerning.x, 0) * scale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();		}
 	}
 
 	if (!gotLineMatch) {
@@ -491,6 +540,8 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 	StringUTF32 result;
 
 	gsl::span<const char32_t> src = str;
+	const Font::Glyph* lastGlyph = nullptr;
+	const Font* lastFont = nullptr;
 
 	// Keep doing this while src is not exhausted
 	while (!src.empty()) {
@@ -508,8 +559,12 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 
 			const auto& [glyph, f] = font->getGlyph(c);
 			const float scale = getScale(f);
-			const float w = accepted ? glyph.advance.x * scale : 0.0f;
+			const auto kerning = lastFont == font.get() && lastGlyph ? lastGlyph->getKerning(c) : Vector2f();
+			const float w = accepted ? (glyph.advance.x + kerning.x) * scale : 0.0f;
 			curWidth += w;
+
+			lastFont = font.get();
+			lastGlyph = &glyph;
 
 			const bool firstCharInRun = i == 0; // It MUST fit at least the first character, or we'll infinite loop
 			if (c == '\n' || (!firstCharInRun && curWidth > maxWidth) || isLastChar) {
@@ -601,7 +656,7 @@ bool TextRenderer::empty() const
 float TextRenderer::getScale(const Font& f) const
 {
 	const bool usingReplacement = &f != font.get();
-	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f);
+	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f) * scale;
 }
 
 std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
@@ -623,11 +678,11 @@ void TextRenderer::updateMaterial(Material& material, const Font& font) const
 	const Vector2f smoothPerTexUnit = Vector2f(font.getImageSize()) / (2.0f * smoothRadius);
 	const float lowSmooth = std::min(smoothPerTexUnit.x, smoothPerTexUnit.y);
 
-	const float scale = getScale(font);
+	const float fontScale = getScale(font);
 	
 	const float smooth = smoothness * lowSmooth;
 	const float shadowSmooth = shadowSmoothness * lowSmooth;
-	const float outlineSize = outline / smoothRadius / scale;
+	const float outlineSize = outline * scale / smoothRadius / fontScale;
 
 	material
 		.set("u_smoothness", smooth)

@@ -53,6 +53,12 @@ void EditorSettingsWindow::onMakeUI()
 		setSaveEnabled(true);
 	});
 
+	bindData("autoBuild", workingCopy.isAutoBuild(), [=] (bool value)
+	{
+		workingCopy.setAutoBuild(value);
+		setSaveEnabled(true);
+	});
+
 	setHandle(UIEventType::ButtonClicked, "save", [=] (const UIEvent& event)
 	{
 		save();

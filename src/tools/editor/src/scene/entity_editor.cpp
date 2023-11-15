@@ -89,6 +89,7 @@ void EntityEditor::makeUI()
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
+	variant = getWidgetAs<UIDropdown>("variant");
 
 	entityValidatorUI = getWidgetAs<EntityValidatorUI>("entityValidatorUI");
 
@@ -141,6 +142,11 @@ void EntityEditor::makeUI()
 	{
 		setIcon(event.getStringData());
 	});
+
+	setHandle(UIEventType::DropdownSelectionChanged, "variant", [=](const UIEvent& event)
+	{
+		setVariant(event.getStringData());
+	});
 }
 
 bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
@@ -179,6 +185,8 @@ void EntityEditor::unloadEntity(bool becauseHasMultiple)
 
 void EntityEditor::reloadEntity()
 {
+	loadVariants();
+
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromHardcodedString(isPrefab ? "Prefab" : "Entity"));
 	getWidget("scrollBarPane")->setActive(currentEntityData);
 	getWidget("entityFields")->setActive(currentEntityData && !isPrefab);
@@ -204,6 +212,7 @@ void EntityEditor::reloadEntity()
 		} else {
 			entityName->setText(getEntityData().getName());
 			entityIcon->setSelectedOption(getEntityData().getIcon());
+			variant->setSelectedOption(getEntityData().getVariant().isEmpty() ? "default" : getEntityData().getVariant());
 		}
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
 		getWidgetAs<UICheckbox>("serializable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSerializable));
@@ -288,6 +297,27 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	
 	fields->add(componentUI);
 	componentWidgets[componentType] = componentUI;
+}
+
+void EntityEditor::loadVariants()
+{
+	if (!variant) {
+		return;
+	}
+
+	Vector<String> options;
+
+	if (sceneEditor && !sceneEditor->getCurrentAssetId().isEmpty()) {
+		auto variants = sceneEditor->getGameData("variants").asVector<SceneVariant>({});
+		for (const auto& variant: variants) {
+			options.push_back(variant.id);
+		}
+	}
+
+	if (options.empty()) {
+		options.push_back("default");
+	}
+	variant->setOptions(options);
 }
 
 std::set<String> EntityEditor::getComponentsOnEntity() const
@@ -541,6 +571,15 @@ void EntityEditor::setIcon(const String& icon)
 {
 	if (!isPrefab && getEntityData().getIcon() != icon) {
 		getEntityData().setIcon(icon);
+		onEntityUpdated();
+	}
+}
+
+void EntityEditor::setVariant(const String& variant)
+{
+	auto value = variant == "default" ? "" : variant;
+	if (getEntityData().getVariant() != value) {
+		getEntityData().setVariant(value);
 		onEntityUpdated();
 	}
 }

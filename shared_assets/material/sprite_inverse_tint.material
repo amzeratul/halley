@@ -1,0 +1,12 @@
+---
+name: Halley/SpriteInverseTint
+base: sprite_base.material
+textures:
+  - image: sampler2D
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite_inverse_tint.pixel.hlsl
+...

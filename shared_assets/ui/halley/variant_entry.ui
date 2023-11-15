@@ -1,0 +1,15 @@
+widget:
+  childLayerAdjustment: 0
+  class: image
+  colour: $ui_staticBox
+  id: background
+  image: $ui_window
+  innerBorder: [0, 0, 0, 0]
+  size: [200, 26]
+children:
+  - widget:
+      class: label
+      id: name
+      style: label
+    border: [6, 0, 0, 0]
+    fill: [left, centreVertical]

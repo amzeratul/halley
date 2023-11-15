@@ -215,6 +215,12 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 		auto n = poly.connections.size();
 		for (size_t i = 0; i < n;) {
 			if (poly.connections[i] >= 0 && poly.connections[i] == poly.connections[(i + 1) % n]) {
+				if (n <= 3) {
+					Logger::logWarning("Post-processing found a triangle with two faces connecting to the same node.");
+					i++;
+					continue;
+				}
+
 				// If two adjacent connections connect to the same polygon, delete that connection and the middle vertex
 				// e.g.:
 				//
@@ -225,7 +231,6 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 				//
 				// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
 
-				assert(n >= 4); // If it's a triangle, we'll have problems...
 				auto vs = poly.polygon.getVertices();
 				auto origVs = vs;
 				vs.erase(vs.begin() + ((i + 1) % n));

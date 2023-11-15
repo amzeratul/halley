@@ -12,7 +12,7 @@ component:
       canSave: false
       canEdit: false
   - locks:
-      type: 'Halley::HashMap<Halley::EntityId, uint8_t>'
+      type: 'Halley::Vector<std::pair<Halley::EntityId, uint8_t>>'
       canSave: false
       canEdit: false
       canNetwork: true

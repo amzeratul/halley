@@ -7,7 +7,7 @@ using namespace Halley;
 CheckUpdateTask::CheckUpdateTask(ProjectWindow& projectWindow, Path projectPath)
 	: Task("Check Update", true, false)
 	, projectWindow(projectWindow)
-	, projectPath(std::move(projectPath))
+	, projectPath(projectPath) // DON'T MOVE THIS
 	, monitorAssets(projectPath / "halley" / "include")
 {
 }
@@ -60,7 +60,7 @@ std::optional<String> UpdateEditorTask::getAction()
 void UpdateEditorTask::doAction(TaskSet& taskSet)
 {
 	auto& pw = projectWindow;
-	Concurrent::execute([&pw]()
+	Concurrent::execute(Executors::getMainUpdateThread(), [&pw]()
 	{
 		pw.updateEditor();
 	});

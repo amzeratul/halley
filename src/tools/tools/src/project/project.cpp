@@ -26,13 +26,15 @@
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 144;
+constexpr static int currentAssetVersion = 146;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
 Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms)
 	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
 {
+	fileSystemCache = std::make_unique<FileSystemCache>();
+
 	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
 	comments = std::make_unique<ProjectComments>(rootPath / "halley_project" / "comments");
 	gameProperties = std::make_unique<GameProperties>(rootPath / "assets_src" / "game_properties" / "game_properties.yaml");
@@ -46,8 +48,6 @@ Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disab
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms, currentAssetVersion);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion + currentAssetVersion);
-
-	fileSystemCache = std::make_unique<FileSystemCache>();
 }
 
 Project::~Project()
@@ -64,7 +64,7 @@ void Project::loadDLL(const HalleyStatics& statics, bool load)
 	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
 		gameDll = std::make_shared<ProjectDLL>(dllPath, statics);
-		if (load) {
+		if (load && isBuildSourceUpToDate()) {
 			gameDll->load();
 		}
 	}
@@ -88,13 +88,30 @@ void Project::update(Time time)
 	comments->update(time);
 }
 
+bool Project::isBuildPending() const
+{
+	return buildPending;
+}
+
+void Project::onBuildNeeded()
+{
+	buildPending = true;
+}
+
+void Project::onBuildStarted()
+{
+	buildPending = true;
+}
+
 void Project::onBuildDone()
 {
+	buildCount++;
 	Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 		if (gameDll && !gameDll->isLoaded()) {
 			gameDll->load();
 		}
 	});
+	buildPending = false;
 }
 
 void Project::setPlatforms(Vector<String> platforms)
@@ -320,7 +337,7 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 	memcpy(data.data(), str.c_str(), str.size());
 
 	const Path metaPath = filePath.replaceExtension(filePath.getExtension() + ".meta");
-	FileSystem::writeFile(metaPath, data);
+	fileSystemCache->writeFile(metaPath, data);
 	notifyAssetFilesModified(gsl::span<const Path>(&filePath, 1));
 }
 
@@ -341,11 +358,11 @@ bool Project::isAssetSaveNotificationEnabled() const
 bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;
-	auto existing = FileSystem::readFile(filePath);
+	auto existing = fileSystemCache->readFile(filePath);
 	auto oldData = gsl::as_bytes(gsl::span<const Byte>(existing));
 	
 	if (!std::equal(oldData.begin(), oldData.end(), data.begin(), data.end())) {
-		FileSystem::writeFile(filePath, data);
+		fileSystemCache->writeFile(filePath, data);
 		if (assetNotifyImportEnabled) {
 			notifyAssetFilesModified(gsl::span<const Path>(&path, 1));
 		} else {
@@ -588,6 +605,39 @@ void Project::launchGame(Vector<String> params) const
 	OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
 }
 
+uint64_t Project::getSourceHash(const Path& projectRoot)
+{
+	const auto srcRoot = projectRoot / "src";
+
+	Hash::Hasher hasher;
+	auto files = FileSystem::enumerateDirectory(srcRoot);
+	std::sort(files.begin(), files.end());
+	for (const auto& file: files) {
+		hasher.feed(FileSystem::getLastWriteTime(srcRoot / file));
+	}
+	return hasher.digest();
+}
+
+uint64_t Project::getSourceHash() const
+{
+	return getSourceHash(rootPath);
+}
+
+String Project::getBuiltSourceStr() const
+{
+	return Path::readFileString(rootPath / "bin" / "code_version.txt");
+}
+
+bool Project::isBuildSourceUpToDate() const
+{
+	return getBuiltSourceStr() == toString(getSourceHash(), 16);
+}
+
+uint32_t Project::getBuildCount() const
+{
+	return buildCount;
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {
@@ -602,7 +652,7 @@ void Project::loadECSData()
 	Vector<Bytes> inputData(n);
 	
 	for (size_t i = 0; i < n; ++i) {
-		inputData[i] = FileSystem::readFile(getGenSrcPath() / inputFiles[i]);
+		inputData[i] = fileSystemCache->readFile(getGenSrcPath() / inputFiles[i]);
 		auto data = gsl::as_bytes(gsl::span<Byte>(inputData[i].data(), inputData[i].size()));
 		sources[i] = CodegenSourceInfo{inputFiles[i], data, true};
 	}

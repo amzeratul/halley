@@ -230,6 +230,16 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 
 	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback, floorGlyphPosition);
 
+	Vector<int> charcodes;
+	charcodes.reserve(entries.size());
+	for (auto& c: entries) {
+		charcodes.push_back(c.charcode);
+	}
+	HashMap<int, HashMap<int, Vector2f>> kerningMap;
+	for (const auto& kerningPair: font.getKerning(charcodes)) {
+		kerningMap[kerningPair.left][kerningPair.right] = kerningPair.kerning;
+	}
+
 	for (auto& c: entries) {
 		auto metrics = font.getMetrics(c.charcode, scale);
 
@@ -240,7 +250,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		const Vector2f verticalBearing = metrics.bearingVertical + Vector2f(float(-padding), float(padding));
 		const Vector2f advance = metrics.advance;
 
-		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance));
+		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance, std::move(kerningMap[charcode])));
 	}
 	
 	return result;

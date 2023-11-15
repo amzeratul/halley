@@ -91,7 +91,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
-		onEntitiesSelected(entityList->getCurrentSelections());
+		refreshSelectedEntities();
 	});
 
 	bindData("toolMode", getSetting(EditorSettingType::Temp, "tools.curTool").asString("drag"), [=] (const String& value)
@@ -173,6 +173,11 @@ void SceneEditorWindow::makeUI()
 	});
 }
 
+void SceneEditorWindow::refreshSelectedEntities()
+{
+	onEntitiesSelected(entityList->getCurrentSelections());
+}
+
 void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 {
 	root.registerKeyPressListener(shared_from_this());
@@ -226,7 +231,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 	// Spawn scene
 	entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-	auto sceneCreated = entityFactory->createScene(prefab, true);
+	auto sceneCreated = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
 	interface.spawnPending();
 
 	// Setup editors
@@ -299,6 +304,23 @@ void SceneEditorWindow::unloadScene()
 	entityList->setSceneData({});
 }
 
+void SceneEditorWindow::reloadScene()
+{
+	/*
+	currentEntityScene->destroyEntities(gameBridge->getWorld());
+	currentEntityScene.reset();
+
+	currentEntityScene = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
+	gameBridge->getInterface().spawnPending();
+
+	gameBridge->reloadScene();
+	*/
+
+	const auto p = prefab;
+	unloadScene();
+	loadScene(*p);
+}
+
 bool SceneEditorWindow::isScene() const
 {
 	return assetType == AssetType::Scene;
@@ -331,6 +353,10 @@ void SceneEditorWindow::update(Time t, bool moved)
 	}
 
 	if (currentEntityScene && entityFactory) {
+		if (currentEntityScene->getVariant() != getAssetSetting("variant").asString("")) {
+			reloadScene();
+		}
+		
 		if (currentEntityScene->needsUpdate()) {
 			currentEntityScene->update(*entityFactory, nullptr);
 			entityList->refreshNames();
@@ -667,7 +693,7 @@ void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> c
 	}
 
 	entityList->onEntitiesAdded(changes);
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 	undoStack.pushAdded(modified, changes);
 	
 	markModified();
@@ -741,7 +767,7 @@ void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> orig
 		entityList->refreshList();
 	}
 
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 
 	undoStack.pushMoved(modified, forward, back);
 	
@@ -1110,6 +1136,7 @@ void SceneEditorWindow::toggleEntitiesEnabled(gsl::span<const String> ids)
 	
 	onEntitiesModified(modifiedIds, oldDataPtrs, newDataPtrs);
 	entityEditor->reloadEntity();
+	refreshSelectedEntities();
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
@@ -1279,7 +1306,7 @@ void SceneEditorWindow::onEntitiesRemoved(gsl::span<const String> ids, gsl::span
 	for (size_t i = 0; i < ids.size(); ++i) {
 		sceneData->reloadEntity(parents[i].first.isEmpty() ? ids[i] : parents[i].first);
 	}
-	onEntitiesSelected(entityList->getCurrentSelections());
+	refreshSelectedEntities();
 
 	markModified();
 }
@@ -1609,6 +1636,16 @@ void SceneEditorWindow::setSetting(EditorSettingType type, std::string_view id, 
 	projectWindow.setSetting(type, id, std::move(data));
 }
 
+const ConfigNode& SceneEditorWindow::getAssetSetting(std::string_view id) const
+{
+	return projectWindow.getAssetSetting(getAssetKey(), id);
+}
+
+void SceneEditorWindow::setAssetSetting(std::string_view id, ConfigNode data)
+{
+	projectWindow.setAssetSetting(getAssetKey(), id, std::move(data));
+}
+
 Path SceneEditorWindow::getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const
 {
 	auto path = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
@@ -1621,6 +1658,9 @@ Path SceneEditorWindow::getPrimaryInputFile(AssetType type, const String& assetI
 
 String SceneEditorWindow::getCurrentAssetId() const
 {
+	if (!prefab) {
+		return "";
+	}
 	return prefab->getAssetId();
 }
 

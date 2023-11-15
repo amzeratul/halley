@@ -4,9 +4,13 @@
 #include "halley/time/halleytime.h"
 #include "halley/maths/interpolation_curve.h"
 #include "animation_player.h"
+#include "halley/entity/entity_id.h"
+#include "halley/maths/circle.h"
 #include "halley/maths/colour_gradient.h"
+#include "halley/maths/ellipse.h"
 
 namespace Halley {
+	class Polygon;
 	class Random;
 	class Animation;
 
@@ -24,6 +28,12 @@ namespace Halley {
 			}};
 		}
 	};
+
+	class IParticleSpawner {
+	public:
+		virtual ~IParticleSpawner() = default;
+		virtual void spawn(Vector3f pos, EntityId target) = 0;
+	};
 	
 	class Particles {
 		struct Particle {
@@ -34,14 +44,15 @@ namespace Halley {
 			float time = 0;
 			float ttl = 1;
 			bool alive = true;
+			bool firstFrame = true;
 		};
 		
 	public:
 		Particles();
-		Particles(const ConfigNode& node, Resources& resources);
-		void load(const ConfigNode& node, Resources& resources);
+		Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
+		void load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		void burstParticles(float n);
 
@@ -72,6 +83,9 @@ namespace Halley {
 		void setSpeed(Range<float> speed);
 		void setSpeed(float speed);
 		Range<float> getSpeed() const;
+		void setSpeedMultiplier(float value);
+		float getSpeedMultiplier() const;
+
 		void setAcceleration(Vector3f acceleration);
 		Vector3f getAcceleration() const;
 
@@ -79,7 +93,8 @@ namespace Halley {
 		std::optional<float> getMinHeight() const;
 		void setSpawnHeight(float height);
 		float getSpawnHeight() const;
-		
+		void setSpawnPositionOffset(Vector2f offset);
+
 		void update(Time t);
 
 		void setSprites(Vector<Sprite> sprites);
@@ -91,6 +106,14 @@ namespace Halley {
 		[[nodiscard]] gsl::span<Sprite> getSprites();
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;
 
+		void setSecondarySpawner(IParticleSpawner* spawner);
+		void spawnAt(Vector3f pos);
+
+		Rect4f getAABB() const;
+		void destroyOverlapping(const Polygon& polygon);
+		void destroyOverlapping(const Ellipse& ellipse);
+		void destroyOverlapping(const Circle& circle);
+
 	private:
 		Random* rng;
 		std::shared_ptr<Material> material;
@@ -98,6 +121,7 @@ namespace Halley {
 		bool enabled = true;
 		bool firstUpdate = true;
 		float spawnRateMultiplier = 1.0f;
+		float speedMultiplier = 1.0f;
 
 		Vector<Sprite> sprites;
 		Vector<Particle> particles;
@@ -111,6 +135,7 @@ namespace Halley {
 		Vector2f spawnArea;
 		ParticleSpawnAreaShape spawnAreaShape = ParticleSpawnAreaShape::Rectangle;
 		float startHeight = 0;
+		Vector2f spawnPositionOffset;
 
 		Range<float> ttl;
 		Range<float> speed;
@@ -126,6 +151,7 @@ namespace Halley {
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
 		bool destroyWhenDone = false;
+		bool positionSet = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
@@ -133,13 +159,20 @@ namespace Halley {
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector3f position;
+		Vector3f lastPosition;
+		EntityId onSpawn;
+		EntityId onDeath;
+
+		IParticleSpawner* secondarySpawner = nullptr;
 
 		void start();
-		void initializeParticle(size_t index, float time);
+		void initializeParticle(size_t index, float time, float totalTime);
 		void updateParticles(float t);
 		void spawn(size_t n, float time);
 
 		Vector3f getSpawnPosition() const;
+
+		void onSecondarySpawn(const Particle& particle, EntityId target);
 	};
 
 	class Resources;

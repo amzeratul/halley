@@ -34,6 +34,7 @@ namespace Halley
 
 		virtual String getName() const = 0;
 		virtual String getDataPath() const = 0;
+        virtual String getLogFileName() const;
 		virtual bool isDevMode() const = 0;
 		virtual bool shouldCreateSeparateConsole() const;
 		virtual ConsoleInfo getConsoleInfo() const;
@@ -48,6 +49,7 @@ namespace Halley
 		virtual double getTargetBackgroundFPS() const;
 		virtual double getFixedUpdateFPS() const;
 		virtual size_t getMaxThreads() const;
+		virtual bool shouldProcessEventsOnFixedUpdate() const;
 
 		virtual String getDevConAddress() const;
 		virtual int getDevConPort() const;

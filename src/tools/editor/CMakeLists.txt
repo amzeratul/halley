@@ -49,6 +49,7 @@ set (editor_sources
 	"src/assets/graph/script_target_entity_factory.cpp"
 	"src/assets/graph/ui_graph_node.cpp"
 	
+	"src/project/check_source_update_task.cpp"
 	"src/project/check_update_task.cpp"
 	"src/project/core_api_wrapper.cpp"
 
@@ -68,6 +69,7 @@ set (editor_sources
 	"src/scene/gizmos/selected_bounds_gizmo.cpp"
 	"src/scene/gizmos/selection_box_gizmo.cpp"
 	"src/scene/gizmos/translate_gizmo.cpp"
+	"src/scene/gizmos/variant_gizmo.cpp"
 
 	"src/scene/gizmos/scripting/scripting_base_gizmo.cpp"
 	"src/scene/gizmos/scripting/scripting_choose_node.cpp"
@@ -141,6 +143,7 @@ set (editor_headers
 	"src/assets/graph/script_target_entity_factory.h"
 	"src/assets/graph/ui_graph_node.h"
 
+	"src/project/check_source_update_task.h"
 	"src/project/check_update_task.h"
 	"src/project/core_api_wrapper.h"
 
@@ -160,6 +163,7 @@ set (editor_headers
 	"src/scene/gizmos/selected_bounds_gizmo.h"
 	"src/scene/gizmos/selection_box_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
+	"src/scene/gizmos/variant_gizmo.h"
 
 	"src/scene/gizmos/scripting/scripting_base_gizmo.h"
 	"src/scene/gizmos/scripting/scripting_choose_node.h"

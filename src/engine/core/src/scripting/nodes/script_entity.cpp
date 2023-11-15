@@ -121,7 +121,10 @@ EntityId ScriptSpawnEntity::doGetEntityId(ScriptEnvironment& environment, const 
 void ScriptSpawnEntity::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSpawnEntityData& curData) const
 {
 	if (node.getSettings()["autoDestroy"].asBool(false)) {
-		environment.getWorld().destroyEntity(curData.entityId);
+		const auto e = environment.getWorld().tryGetEntity(curData.entityId);
+		if (e.isValid() && e.isAlive()) {
+			environment.getWorld().destroyEntity(curData.entityId);
+		}
 		curData.entityId = {};
 	}
 }

@@ -54,6 +54,7 @@ namespace Halley {
 		
 		Polygon();
 		Polygon(VertexList vertices);
+		Polygon(Rect4f rect);
 		explicit Polygon(const ConfigNode& node);
 
 		Polygon(const Polygon& other) = default;

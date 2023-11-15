@@ -80,3 +80,4 @@ _ReSharper*/
 
 # Apple
 .DS_Store
+/shared_gen/cpp/registry.*

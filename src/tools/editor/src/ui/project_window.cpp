@@ -16,6 +16,7 @@
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
 #include "src/assets/asset_editor_window.h"
+#include "src/project/check_source_update_task.h"
 #include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
@@ -51,6 +52,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
 	tasks->addTask(std::make_unique<CheckUpdateTask>(*this, project.getRootPath()));
+	tasks->addTask(std::make_unique<CheckSourceUpdateTask>(*this, project.getRootPath()));
 }
 
 ProjectWindow::~ProjectWindow()
@@ -395,6 +397,11 @@ void ProjectWindow::openAssetFinder(std::optional<String> initialQuery)
 UIDebugConsoleController* ProjectWindow::getDebugConsoleController()
 {
 	return debugConsoleController.get();
+}
+
+Preferences& ProjectWindow::getPreferences() const
+{
+	return editor.getPreferences();
 }
 
 void ProjectWindow::toggleDebugConsole()

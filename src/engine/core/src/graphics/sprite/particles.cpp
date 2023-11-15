@@ -1,5 +1,6 @@
 #include "halley/graphics/sprite/particles.h"
 
+#include "halley/maths/polygon.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
 
@@ -10,13 +11,13 @@ Particles::Particles()
 {
 }
 
-Particles::Particles(const ConfigNode& node, Resources& resources)
+Particles::Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
 	: rng(&Random::getGlobal())
 {
-	load(node, resources);
+	load(node, resources, context);
 }
 
-void Particles::load(const ConfigNode& node, Resources& resources)
+void Particles::load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context)
 {
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
@@ -86,9 +87,11 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	startHeight = node["startHeight"].asFloat(0);
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
+	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
+	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
 }
 
-ConfigNode Particles::toConfigNode() const
+ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType result;
 
@@ -113,6 +116,8 @@ ConfigNode Particles::toConfigNode() const
 	result["startHeight"] = startHeight;
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
+	result["onSpawn"] = ConfigNodeSerializer<EntityId>().serialize(onSpawn, context);
+	result["onDeath"] = ConfigNodeSerializer<EntityId>().serialize(onDeath, context);
 
 	return result;
 }
@@ -159,12 +164,18 @@ float Particles::getSpawnRateMultiplier() const
 
 void Particles::setPosition(Vector2f pos)
 {
-	position = Vector3f(pos);
+	setPosition(Vector3f(pos));
 }
 
 void Particles::setPosition(Vector3f pos)
 {
-	position = pos;
+	if (positionSet) {
+		lastPosition = position;
+		position = pos;
+	} else {
+		lastPosition = position = pos;
+		positionSet = true;
+	}
 }
 
 void Particles::setSpawnArea(Vector2f area)
@@ -232,6 +243,16 @@ Range<float> Particles::getSpeed() const
 	return speed;
 }
 
+void Particles::setSpeedMultiplier(float value)
+{
+	speedMultiplier = value;
+}
+
+float Particles::getSpeedMultiplier() const
+{
+	return speedMultiplier;
+}
+
 void Particles::setAcceleration(Vector3f accel)
 {
 	acceleration = accel;
@@ -262,6 +283,11 @@ float Particles::getSpawnHeight() const
 	return startHeight;
 }
 
+void Particles::setSpawnPositionOffset(Vector2f offset)
+{
+	spawnPositionOffset = offset;
+}
+
 void Particles::start()
 {
 	if (burst) {
@@ -281,8 +307,10 @@ void Particles::update(Time t)
 	const int toSpawn = static_cast<int>(floor(pendingSpawn));
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 
-	// Spawn new particles
-	spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
+	if (toSpawn > 0) {
+		// Spawn new particles
+		spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
+	}
 
 	// Update particles
 	updateParticles(static_cast<float>(t));
@@ -290,6 +318,10 @@ void Particles::update(Time t)
 	// Remove dead particles
 	for (size_t i = 0; i < nParticlesAlive; ) {
 		if (!particles[i].alive) {
+			if (onDeath) {
+				onSecondarySpawn(particles[i], onDeath);
+			}
+
 			if (i != nParticlesAlive - 1) {
 				// Swap with last particle that's alive
 				std::swap(particles[i], particles[nParticlesAlive - 1]);
@@ -342,6 +374,61 @@ gsl::span<const Sprite> Particles::getSprites() const
 	return gsl::span<const Sprite>(sprites).subspan(0, nParticlesVisible);
 }
 
+void Particles::setSecondarySpawner(IParticleSpawner* spawner)
+{
+	secondarySpawner = spawner;
+}
+
+void Particles::spawnAt(Vector3f pos)
+{
+	spawn(1, 0.0f);
+	particles[nParticlesAlive - 1].pos = pos;
+}
+
+Rect4f Particles::getAABB() const
+{
+	if (nParticlesAlive == 0) {
+		return {};
+	}
+
+	auto aabb = Rect4f(particles[0].pos.xy(), particles[0].pos.xy());
+	for (size_t i = 1; i < nParticlesAlive; ++i) {
+		auto p = Rect4f(particles[i].pos.xy(), particles[i].pos.xy());
+		aabb = aabb.merge(p);
+	}
+	return aabb;
+}
+
+void Particles::destroyOverlapping(const Polygon& polygon)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (polygon.isPointInside(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
+}
+
+void Particles::destroyOverlapping(const Ellipse& ellipse)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (ellipse.contains(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
+}
+
+void Particles::destroyOverlapping(const Circle& circle)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		auto& particle = particles[i];
+		if (circle.contains(particle.pos.xy())) {
+			particle.alive = false;
+		}
+	}
+}
+
 void Particles::spawn(size_t n, float time)
 {
 	if (maxParticles) {
@@ -361,26 +448,28 @@ void Particles::spawn(size_t n, float time)
 
 	const float timeSlice = time / n;
 	for (size_t i = 0; i < n; ++i) {
-		initializeParticle(start + i, i * timeSlice);
+		initializeParticle(start + i, i * timeSlice, time);
 	}
 }
 
-void Particles::initializeParticle(size_t index, float time)
+void Particles::initializeParticle(size_t index, float time, float totalTime)
 {
 	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(azimuth));
 	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
 	
 	auto& particle = particles[index];
+	particle.firstFrame = true;
 	particle.alive = true;
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = rng->getFloat(initialScale);
 
-	particle.vel = Vector3f(rng->getFloat(speed), startAzimuth, startElevation);
+	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
-	particle.pos = getSpawnPosition() + (particle.vel * time + a * (0.5f * time * time)) * velScale;
+	const auto spawnPosSmear = totalTime > 0.00001f ? lerp(position - lastPosition, Vector3f(), time / totalTime) : Vector3f();
+	particle.pos = getSpawnPosition() + spawnPosSmear + (particle.vel * time + a * (0.5f * time * time)) * velScale;
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
@@ -388,6 +477,10 @@ void Particles::initializeParticle(size_t index, float time)
 		anim.update(0, sprite);
 	} else if (!baseSprites.empty()) {
 		sprite = rng->getRandomElement(baseSprites);
+	}
+
+	if (onSpawn) {
+		onSecondarySpawn(particle, onSpawn);
 	}
 }
 
@@ -408,8 +501,12 @@ void Particles::updateParticles(float time)
 		} else {
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 			const auto a = stopped ? Vector3f() : acceleration;
-			particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
-			particle.vel += a * time;
+			if (particle.firstFrame) {
+				particle.firstFrame = false;
+			} else {
+				particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
+				particle.vel += a * time;
+			}
 
 			if (minHeight && particle.pos.z < minHeight) {
 				particle.alive = false;
@@ -453,21 +550,28 @@ Vector3f Particles::getSpawnPosition() const
 		const float angle = rng->getFloat(0.0f, 2.0f * pif());
 		pos = Vector2f(radius, 0).rotate(Angle1f::fromRadians(angle)) * spawnArea * 0.5f;
 	}
-	return position + Vector3f(pos, startHeight);
+	return position + Vector3f(pos + spawnPositionOffset, startHeight);
+}
+
+void Particles::onSecondarySpawn(const Particle& particle, EntityId target)
+{
+	if (secondarySpawner && target) {
+		secondarySpawner->spawn(particle.pos, target);
+	}
 }
 
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const EntitySerializationContext& context)
 {
-	return particles.toConfigNode();
+	return particles.toConfigNode(context);
 }
 
 Particles ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
-	return Particles(node, *context.resources);
+	return Particles(node, *context.resources, context);
 }
 
 void ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Particles& target)
 {
-	target.load(node, *context.resources);
+	target.load(node, *context.resources, context);
 }
 

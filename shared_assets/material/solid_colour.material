@@ -1,0 +1,10 @@
+---
+name: Halley/SolidColour
+base: sprite_base.material
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: solid_colour.pixel.hlsl
+...

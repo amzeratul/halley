@@ -43,6 +43,7 @@ namespace Halley {
 
     	virtual const String& getName() const = 0;
     	virtual const String& getPrefab() const = 0;
+    	virtual const String& getVariant() const = 0;
         virtual uint8_t getFlags() const = 0;
     	virtual bool getFlag(Flag flag) const = 0;
         virtual const UUID& getInstanceUUID() const = 0;
@@ -79,6 +80,7 @@ namespace Halley {
     	const String& getName() const override { return name; }
     	const String& getPrefab() const override { return prefab; }
     	const String& getIcon() const { return icon; }
+    	const String& getVariant() const override { return variant; }
         uint8_t getFlags() const override { return flags; }
         bool getFlag(Flag flag) const override;
     	const UUID& getInstanceUUID() const override { return instanceUUID; }
@@ -106,6 +108,7 @@ namespace Halley {
     	void setName(String name);
     	void setPrefab(String prefab);
     	void setIcon(String icon);
+        void setVariant(String variant);
         bool setFlag(Flag flag, bool value);
         void randomiseInstanceUUIDs();
     	void setInstanceUUID(UUID instanceUUID);
@@ -144,6 +147,7 @@ namespace Halley {
     	String name;
     	String prefab;
     	String icon;
+        String variant;
         uint8_t flags = 0;
     	UUID instanceUUID;
     	UUID prefabUUID;

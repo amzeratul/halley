@@ -8,9 +8,10 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-EntityScene::EntityScene(bool allowReload, uint8_t worldPartition)
+EntityScene::EntityScene(bool allowReload, uint8_t worldPartition, String variant)
 	: allowReload(allowReload)
 	, worldPartition(worldPartition)
+	, variant(std::move(variant))
 {
 }
 
@@ -22,6 +23,11 @@ Vector<EntityId>& EntityScene::getEntities()
 const Vector<EntityId>& EntityScene::getEntities() const
 {
 	return entities;
+}
+
+const String& EntityScene::getVariant() const
+{
+	return variant;
 }
 
 bool EntityScene::needsUpdate() const

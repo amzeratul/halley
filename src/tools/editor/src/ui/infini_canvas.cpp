@@ -23,12 +23,12 @@ Vector2f InfiniCanvas::getScrollPosition() const
 
 Vector2f InfiniCanvas::getBasePosition() const
 {
-	return getPosition() + getSize() / 2;
+	return (getPosition() + getSize() / 2).round();
 }
 
 Vector2f InfiniCanvas::getLayoutOriginPosition() const
 {
-	return getPosition() + getSize() / 2 - scrollPos;
+	return (getPosition() + getSize() / 2 - scrollPos).round();
 }
 
 Vector2f InfiniCanvas::getLayoutMinimumSize(bool force) const

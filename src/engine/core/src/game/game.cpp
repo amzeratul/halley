@@ -15,6 +15,11 @@ ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& asse
 	return {};
 }
 
+String Game::getLogFileName() const
+{
+    return "log.txt";
+}
+
 bool Game::shouldCreateSeparateConsole() const
 {
 	return isDevMode();
@@ -137,4 +142,9 @@ Resources& Game::getResources() const
 size_t Game::getMaxThreads() const
 {
 	return std::thread::hardware_concurrency();
+}
+
+bool Game::shouldProcessEventsOnFixedUpdate() const
+{
+	return false;
 }

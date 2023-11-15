@@ -9,4 +9,10 @@ namespace Halley
 	public:
 		int run(Vector<std::string> args) override;
 	};
+
+	class WriteCodeVersionTool : public CommandLineTool
+	{
+	public:
+		int run(Vector<std::string> args) override;
+	};
 }

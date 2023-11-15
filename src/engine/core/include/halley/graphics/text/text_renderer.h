@@ -48,6 +48,8 @@ namespace Halley
 		TextRenderer& setColourOverride(Vector<ColourOverride> colOverride);
 		TextRenderer& setLineSpacing(float spacing);
 		TextRenderer& setAlpha(float alpha);
+		TextRenderer& setScale(float scale);
+		TextRenderer& setAngle(Angle1f angle);
 
 		TextRenderer clone() const;
 
@@ -94,6 +96,8 @@ namespace Halley
 		float lineSpacing = 0.0f;
 		Vector2f shadowDistance;
 		float shadowSmoothness = 1.0f;
+		float scale = 1.0f;
+		Angle1f angle;
 
 		Vector2f position;
 		Vector2f offset;

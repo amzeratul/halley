@@ -206,18 +206,19 @@ std::optional<VertexList> PolygonGizmo::readPoints()
 
 	auto* data = getComponentData(componentName);
 	if (data) {
-		auto& field = getField(*data, fieldName);		
+		auto& field = getField(*data, fieldName);
 		if (field.getType() != ConfigNodeType::Sequence) {
 			field = ConfigNode::SequenceType();
 		}
-		
+
 		const auto& seq = field.asSequence();
 		result = VertexList();
 		result->reserve(seq.size());
-		for (const auto& p: seq) {
+		for (const auto& p : seq) {
 			result->push_back(p.asVector2f());
 		}
 	}
+
 	lastStored = result;
 	return result;
 }
@@ -261,7 +262,6 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 		
 		markModified(componentName, fieldName);
 	}
-	lastStored = ps;
 }
 
 void PolygonGizmo::loadHandlesFromVertices()
@@ -292,8 +292,9 @@ Rect4f PolygonGizmo::getHandleRect(Vector2f pos, float size) const
 
 void PolygonGizmo::writePointsIfNeeded()
 {
-	if (vertices && lastStored != vertices) {
+	if (vertices && lastStored != vertices && !getEntities().empty()) {
 		writePoints(*vertices);
+		lastStored = *vertices;
 	}
 }
 

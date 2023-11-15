@@ -133,7 +133,7 @@ void CheckAssetsTask::run()
 		
 		if ((importing || first) && !project.getImportAssetsDatabase().hasFailedFiles()) {
 			Concurrent::execute(Executors::getMainUpdateThread(), [project = &project] () {
-				Logger::logDev("Notifying assets imported");
+				//Logger::logDev("Notifying assets imported");
 				project->onAllAssetsImported();
 			});
 		}

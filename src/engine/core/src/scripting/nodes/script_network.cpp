@@ -184,14 +184,23 @@ IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Tim
 
 String ScriptLockAvailable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to " + getConnectedNodeName(world, node, graph, 0);
+	if (elementIdx == 2) {
+		return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to " + getConnectedNodeName(world, node, graph, 0);
+	} else {
+		return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to all";
+	}
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptLockAvailable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
 	return data;
 }
 
@@ -205,10 +214,29 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescriptio
 	return str.moveResults();
 }
 
+String ScriptLockAvailable::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Available to entity";
+	} else if (elementIdx == 3) {
+		return "Available to all";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
 ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto status = environment.getInterface<INetworkLockSystemInterface>().getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
-	return ConfigNode(status == INetworkLockSystemInterface::LockStatus::Unlocked || status == INetworkLockSystemInterface::LockStatus::AcquiredByMe);
+	const auto player = readEntityId(environment, node, 0);
+	const auto toLock = readEntityId(environment, node, 1);
+
+	const auto& lockInterface = environment.getInterface<INetworkLockSystemInterface>();
+	if (pinN == 2) {
+		return ConfigNode(lockInterface.isLockedByOrAvailableTo(player, toLock));
+	} else if (pinN == 3) {
+		return ConfigNode(lockInterface.getLockStatus(toLock) == INetworkLockSystemInterface::LockStatus::Unlocked);
+	}
+
+	return {};
 }
 
 
@@ -269,8 +297,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescri
 
 IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& data) const
 {
-	const auto lockStatus = environment.getInterface<INetworkLockSystemInterface>().getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
-	const bool shouldFlow = lockStatus == INetworkLockSystemInterface::LockStatus::Unlocked || lockStatus == INetworkLockSystemInterface::LockStatus::AcquiredByMe;
+	const auto shouldFlow = environment.getInterface<INetworkLockSystemInterface>().isLockedByOrAvailableTo(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
 
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;

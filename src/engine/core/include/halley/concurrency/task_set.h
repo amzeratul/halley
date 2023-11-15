@@ -47,11 +47,14 @@ namespace Halley
 		std::pair<std::unique_ptr<TaskExclusivityHandle>, String> getExclusiveHandle(const String& taskName, const Vector<String>& tags);
 		void returnHandle(TaskExclusivityHandle& handle);
 
+		Vector<String> getToClear();
+
 	private:
 		std::list<std::shared_ptr<TaskAnchor>> tasks;
 		TaskSetListener* listener = nullptr;
 		int nextId = 0;
 
 		HashMap<String, String> exclusiveClaims;
+		Vector<String> toClear;
 	};
 }

@@ -1,0 +1,25 @@
+---
+name: Halley/LineBase
+base: material_base.material
+attributes:
+  # rgba colour of line
+  - name: colour
+    type: vec4
+    semantic: COLOUR
+  # x: Cur length from start to this vertex, y: on length, z: off length
+  - name: dashing
+    type: vec4
+    semantic: DASHING
+  # position (world space)
+  - name: position
+    type: vec2
+    semantic: POSITION
+  # line normal vector (world space)
+  - name: normal
+    type: vec2
+    semantic: NORMAL
+  # x: width of the line (px), y: relative position of this vertex (-1..1)
+  - name: width
+    type: vec2
+    semantic: WIDTH
+...

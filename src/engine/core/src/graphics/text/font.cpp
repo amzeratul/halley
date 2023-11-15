@@ -12,14 +12,24 @@ using namespace Halley;
 
 Font::Glyph::Glyph() {}
 
-Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance)
+Font::Glyph::Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance, HashMap<int32_t, Vector2f> kerning)
 	: charcode(charcode)
 	, area(area)
 	, size(size)
 	, horizontalBearing(horizontalBearing)
 	, verticalBearing(verticalBearing)
 	, advance(advance)
+	, kerning(std::move(kerning))
 {
+}
+
+Vector2f Font::Glyph::getKerning(int32_t charcode) const
+{
+	const auto iter = kerning.find(charcode);
+	if (iter != kerning.end()) {
+		return iter->second;
+	}
+	return Vector2f();
 }
 
 void Font::Glyph::serialize(Serializer& s) const
@@ -29,6 +39,7 @@ void Font::Glyph::serialize(Serializer& s) const
 	s << horizontalBearing;
 	s << verticalBearing;
 	s << advance;
+	s << kerning;
 }
 
 void Font::Glyph::deserialize(Deserializer& s)
@@ -38,6 +49,7 @@ void Font::Glyph::deserialize(Deserializer& s)
 	s >> horizontalBearing;
 	s >> verticalBearing;
 	s >> advance;
+	s >> kerning;
 }
 
 Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize)

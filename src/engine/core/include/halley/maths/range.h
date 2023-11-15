@@ -139,24 +139,29 @@ namespace Halley {
 			return Range(start / value, end / value);
 		}
 
-		Range getUnion(const Range& other) const
+		constexpr Range getUnion(const Range& other) const
 		{
 			return Range(std::min(start, other.start), std::max(end, other.end));
 		}
 
-		Range operator+(const Range& other) const
+		constexpr Range operator+(const Range& other) const
 		{
 			return Range(start + other.start, end + other.end);
 		}
 
-		Range operator-(const Range& other) const
+		constexpr Range operator-(const Range& other) const
 		{
 			return Range(start - other.start, end - other.end);
 		}
 
-		Range operator*(const Range& other) const
+		constexpr Range operator*(const Range& other) const
 		{
 			return Range(start * other.start, end * other.end);
+		}
+
+		constexpr float getMiddle() const
+		{
+			return (start + end) / 2;
 		}
 	};
 }

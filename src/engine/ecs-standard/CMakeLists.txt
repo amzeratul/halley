@@ -8,6 +8,8 @@ include_directories(
      "../../engine/core/include"
 )
 
+file (GLOB_RECURSE HEADERS_GEN "../../../shared_gen/*.h")
+
 set(SOURCES
     "src/systems/audio_system.cpp"
     "src/systems/network_lock_system.cpp"
@@ -20,10 +22,11 @@ set(SOURCES
 )
 
 set(HEADERS
-    ""
+    ${HEADERS_GEN}
 )
 
 assign_source_group(${SOURCES})
+assign_source_group(${HEADERS})
 
 add_library (halley-ecs-standard ${SOURCES} ${HEADERS})
 target_link_libraries(halley-ecs-standard halley-engine)

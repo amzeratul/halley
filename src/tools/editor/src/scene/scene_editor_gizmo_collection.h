@@ -50,5 +50,7 @@ namespace Halley {
 		
 		Vector<EntityRef> selectedEntities;
 		Vector<EntityData*> entityDatas;
+
+		void prepareGizmos();
 	};
 }

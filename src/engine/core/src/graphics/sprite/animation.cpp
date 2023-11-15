@@ -196,7 +196,11 @@ AnimationActionPoint::AnimationActionPoint(const ConfigNode& config, String name
 			const int dirIdx = static_cast<int>(dirIter - directions.begin());
 
 			for (int i = 0; i < static_cast<int>(v.asSequence().size()); ++i) {
-				points[std::tuple<int, int, int>(seqIdx, dirIdx, i)] = v[i].asVector2i();
+				auto pos = v[i].asVector2i();
+				if (directions[dirIdx].shouldFlip()) {
+					pos.x *= -1;
+				}
+				points[std::tuple<int, int, int>(seqIdx, dirIdx, i)] = pos;
 			}
 		}
 	}

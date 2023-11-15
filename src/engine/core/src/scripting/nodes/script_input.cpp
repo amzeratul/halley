@@ -134,8 +134,6 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 			const auto labelTarget = readRawEntityId(environment, node, 9);
 			data.input = inputDevice->makeExclusiveButton(button, priority, InputLabel(label, labelTarget));
 		}
-	} else if (data.input && !enabled) {
-		data.input = {};
 	}
 
 	if (data.input) {
@@ -155,6 +153,10 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 
 		data.outputMask = curMask;
 		data.lastFrame = curFrame;
+
+		if (!enabled) {
+			data.input = {};
+		}
 
 		if (activate != 0 || cancel != 0) {
 			return Result(ScriptNodeExecutionState::Fork, 0, activate, cancel);

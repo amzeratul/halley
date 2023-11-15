@@ -397,13 +397,13 @@ void AssetsBrowser::addAsset()
 		extension = ".scene";
 		typeName = "Scene";
 	} else if (assetType == "audio_object") {
-		extension = ".yaml";
+		extension = ".audioobject";
 		typeName = "Audio Object";
 	} else if (assetType == "audio_event") {
-		extension = ".yaml";
+		extension = ".audioevent";
 		typeName = "Audio Event";
 	} else if (assetType == "ui") {
-		extension = ".yaml";
+		extension = ".ui";
 		typeName = "UI";
 	} else if (assetType == "comet") {
 		extension = ".comet";

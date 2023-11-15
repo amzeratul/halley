@@ -124,7 +124,7 @@ void AudioObjectEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("audio_object/" + audioObject->getAssetId() + ".yaml");
+		const auto assetPath = Path("audio_object/" + audioObject->getAssetId() + ".audioobject");
 		const auto strData = audioObject->toYAML();
 
 		project.setAssetSaveNotification(false);

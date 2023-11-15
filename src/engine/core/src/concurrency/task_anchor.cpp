@@ -72,6 +72,7 @@ void TaskAnchor::update(TaskSet& taskSet, float time)
 	}
 
 	if (status == TaskStatus::Started) {
+		task->updateOnMain(time);
 		const bool done = taskFuture.hasValue();
 		if (done) {
 			status = TaskStatus::Done;
@@ -80,11 +81,14 @@ void TaskAnchor::update(TaskSet& taskSet, float time)
 			progress = 1;
 			progressLabel = "";
 		} else {
-			task->updateOnMain(time);
 			std::lock_guard<std::mutex> lock(task->mutex);
 			progress = task->progress;
 			progressLabel = task->progressLabel;
 		}
+	}
+
+	if (status == TaskStatus::Done) {
+		task->updateOnMain(time);
 	}
 }
 
@@ -173,6 +177,12 @@ Vector<std::unique_ptr<Task>> TaskAnchor::getPendingTasks()
 	return {};
 }
 
+Vector<String> TaskAnchor::getPendingToClear()
+{
+	std::lock_guard<std::mutex> lock(task->mutex);
+	return std::move(task->toClear);
+}
+
 std::optional<String> TaskAnchor::getAction()
 {
 	std::lock_guard<std::mutex> lock(task->mutex);
@@ -183,4 +193,10 @@ void TaskAnchor::doAction(TaskSet& taskSet)
 {
 	std::lock_guard<std::mutex> lock(task->mutex);
 	task->doAction(taskSet);
+}
+
+void TaskAnchor::clear()
+{
+	std::lock_guard<std::mutex> lock(task->mutex);
+	error = false;
 }

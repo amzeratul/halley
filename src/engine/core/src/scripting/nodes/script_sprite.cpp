@@ -8,6 +8,7 @@
 
 #include "halley/entity/world.h"
 #include "components/sprite_animation_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;
 
@@ -137,3 +138,83 @@ IScriptNodeType::Result ScriptSpriteAlpha::doUpdate(ScriptEnvironment& environme
 	}
 	return Result(ScriptNodeExecutionState::Done);
 }
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptSpriteActionPoint::getSettingTypes() const
+{
+	return {
+		SettingType{ "actionPoint", "Halley::String", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Get action point \"");
+	str.append(node.getSettings()["actionPoint"].asString(""), parameterColour);
+	str.append("\" for entity ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSpriteActionPoint::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "World position";
+	} else if (elementIdx == 2) {
+		return "Offset";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+String ScriptSpriteActionPoint::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	const auto actionPoint = node.getSettings()["actionPoint"].asString("");
+
+	if (elementIdx == 1) {
+		return actionPoint + " of " + getConnectedNodeName(world, node, graph, 0) + " (world)";
+	} else if (elementIdx == 2) {
+		return actionPoint + " of " + getConnectedNodeName(world, node, graph, 0) + " (offset)";
+	}
+
+	return ScriptNodeTypeBase<void>::getShortDescription(world, node, graph, elementIdx);
+}
+
+ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto actionPoint = node.getSettings()["actionPoint"].asString("");
+	const auto entityId = readEntityId(environment, node, 0);
+
+	const auto* spriteAnimation = environment.tryGetComponent<SpriteAnimationComponent>(entityId);
+	if (!spriteAnimation) {
+		return {};
+	}
+
+	const auto point = spriteAnimation->player.getCurrentActionPoint(actionPoint);
+
+	if (pinN == 1) {
+		const auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId);
+		if (!transform) {
+			return {};
+		}
+		return (transform->getWorldPosition() + (point ? Vector2f(*point) : Vector2f())).toConfigNode();
+	} else if (pinN == 2) {
+		return point ? ConfigNode(Vector2f(*point)) : ConfigNode();
+	}
+
+	return {};
+}
+

@@ -23,14 +23,17 @@ namespace Halley
 			Vector2f horizontalBearing;
 			Vector2f verticalBearing;
 			Vector2f advance;
+			HashMap<int32_t, Vector2f> kerning;
 			
 			Glyph();
 			Glyph(const Glyph& other) = default;
 			Glyph(Glyph&& other) noexcept = default;
-			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance);
+			Glyph(int charcode, Rect4f area, Vector2f size, Vector2f horizontalBearing, Vector2f verticalBearing, Vector2f advance, HashMap<int32_t, Vector2f> kerning);
 
 			Glyph& operator=(const Glyph& o) = default;
 			Glyph& operator=(Glyph&& o) noexcept = default;
+
+			Vector2f getKerning(int32_t charcode) const;
 
 			void serialize(Serializer& serializer) const;
 			void deserialize(Deserializer& deserializer);

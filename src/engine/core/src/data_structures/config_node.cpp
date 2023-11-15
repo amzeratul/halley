@@ -1765,10 +1765,17 @@ ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types
 			if (a != b) {
 				if (isScalarType(a, promoteUndefined) && isScalarType(b, promoteUndefined)) {
 					result = (a == ConfigNodeType::Float || b == ConfigNodeType::Float) ? ConfigNodeType::Float : ((a == ConfigNodeType::Int64 || b == ConfigNodeType::Int64) ? ConfigNodeType::Int64 : ConfigNodeType::Int);
-				} else if (isVector2Type(a, promoteUndefined) && isVector2Type(b, promoteUndefined)) {
-					result = (a == ConfigNodeType::Float2 || b == ConfigNodeType::Float2) ? ConfigNodeType::Float2 : ConfigNodeType::Int2;
 				} else {
-					return ConfigNodeType::Undefined;
+					const bool aIsVec2 = isVector2Type(a, promoteUndefined);
+					const bool bIsVec2 = isVector2Type(b, promoteUndefined);
+
+					if (aIsVec2 && bIsVec2) {
+						result = (a == ConfigNodeType::Float2 || b == ConfigNodeType::Float2) ? ConfigNodeType::Float2 : ConfigNodeType::Int2;
+					} else if ((aIsVec2 || bIsVec2) && (a == ConfigNodeType::Sequence || b == ConfigNodeType::Sequence)) {
+						return ConfigNodeType::Float2;
+					} else {
+						return ConfigNodeType::Undefined;
+					}
 				}
 			}
 		}

@@ -1,0 +1,17 @@
+---
+name: Halley/DistanceFieldSprite
+base: sprite_base.material
+textures:
+  - image: sampler2D
+uniforms:
+  - MaterialBlock:
+    - u_smoothness: float
+    - u_outline: float
+    - u_outlineColour: vec4
+passes:
+  - blend: Alpha
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: distance_field_sprite.pixel.hlsl
+...

@@ -230,7 +230,7 @@ void World::destroyEntity(EntityRef entity)
 		return;
 	}
 	if (!entity.entity->isAlive()) {
-		Logger::logWarning("Attempting to destroy entity which is already dead.");
+		Logger::logWarning("Attempting to destroy entity \"" + entity.getName() + "\" which is already dead.");
 		return;
 	}
 	if (entity.world != this) {
@@ -244,6 +244,11 @@ void World::doDestroyEntity(EntityId id)
 {
 	const auto e = tryGetRawEntity(id);
 	if (e) {
+		if (!e->isAlive()) {
+			Logger::logWarning("Attempting to destroy entity \"" + e->name + "\" which is already dead.");
+			return;
+		}
+
 		doDestroyEntity(e);
 	}
 }
@@ -481,6 +486,16 @@ float World::getTransform2DAnisotropy() const
 void World::setTransform2DAnisotropy(float anisotropy)
 {
 	transform2DAnisotropy = anisotropy;
+}
+
+bool World::isHeadless() const
+{
+	return headless;
+}
+
+void World::setHeadless(bool headless)
+{
+	this->headless = headless;
 }
 
 void World::deleteEntity(Entity* entity)
