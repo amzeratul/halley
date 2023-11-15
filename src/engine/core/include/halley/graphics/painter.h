@@ -50,6 +50,16 @@ namespace Halley
 
 	public:
 		struct LineDashPattern {
+			LineDashPattern() 
+				: onLength(10.0f)
+				, offLength(0.0f)
+			{ }
+			
+			LineDashPattern(float onLength, float offLength) 
+				: onLength(onLength)
+				, offLength(offLength)
+			{ }
+
 			float onLength = 10.0f;
 			float offLength = 0.0f;
 		};

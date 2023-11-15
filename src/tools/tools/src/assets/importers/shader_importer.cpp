@@ -6,7 +6,11 @@
 #include "halley/graphics/shader.h"
 #include "halley/support/logger.h"
 
+#ifdef __APPLE__
+#include <ShaderConductor.hpp>
+#else 
 #include <ShaderConductor/ShaderConductor.hpp>
+#endif
 
 #ifdef _MSC_VER
 #include <D3Dcompiler.h>
@@ -88,11 +92,16 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 		target.language = ShadingLanguage::Glsl;
 		target.version = "410";
 	} else if (dstLanguage == "metal") {
-		target.language = ShadingLanguage::Msl_iOS;
+		target.language = ShadingLanguage::Msl_macOS;
 		target.version = "221";
 	} else if (dstLanguage == "spirv") {
 		target.language = ShadingLanguage::SpirV;
+#ifdef __APPLE__
+		target.version = "15";
+#else
 		target.version = "460";
+#endif
+
 	}
 	
 	auto result = Compiler::Compile(source, options, target);

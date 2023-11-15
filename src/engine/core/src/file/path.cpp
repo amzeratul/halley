@@ -341,7 +341,7 @@ bool Path::operator==(gsl::span<const String> other) const
 		auto& a = pathParts[n - i - 1];
 		auto& b = other[n - i - 1];
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
 		if (a.size() != b.size() || !a.asciiCompareNoCase(b.c_str())) {
 #else
 		if (a == b) {
