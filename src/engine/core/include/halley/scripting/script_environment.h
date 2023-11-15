@@ -85,6 +85,7 @@ namespace Halley {
 
     	ConfigNode readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
         ConfigNode readOutputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
+        EntityId readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN, bool disconnectedIsSelf);
         EntityId readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN);
         EntityId readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN);
         EntityId readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN);

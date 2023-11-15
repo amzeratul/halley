@@ -48,55 +48,60 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentGraph->assignTypes(*nodeTypeCollection);
 	currentEntity = curEntity;
 
-	auto& threads = graphState.getThreads();
+	try {
+		auto& threads = graphState.getThreads();
 
-	const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
-	if (!graphState.hasStarted() || hashChanged) {
-		if (graphState.hasStarted()) {
-			// i.e. we're here because the script changed
-			terminateStateWith(currentGraph->getPreviousVersion(graphState.getGraphHash()));
-		}
-
-		graphState.start(currentGraph->getHash());
-		graphState.prepareStates(serializationContext, time);
-		if (currentGraph->getStartNode()) {
-			threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode(), 0)));
-		}
-	} else {
-		graphState.prepareStates(serializationContext, time);
-	}
-	
-	processMessages(time, threads);
-	processControlEvents(time, threads);
-
-	// Allocate time for each thread
-	for (auto& thread: threads) {
-		thread.getTimeSlice() = static_cast<float>(time);
-	}
-	
-	// Update all threads
-	Vector<ScriptStateThread> pendingThreads;
-	for (size_t i = 0; i < threads.size(); ++i) {
-		const bool running = updateThread(graphState, threads[i], pendingThreads);
-		if (running) {
-			processMessages(threads[i].getTimeSlice(), pendingThreads);
-
-			for (auto& t: pendingThreads) {
-				threads.push_back(std::move(t));
+		const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
+		if (!graphState.hasStarted() || hashChanged) {
+			if (graphState.hasStarted()) {
+				// i.e. we're here because the script changed
+				terminateStateWith(currentGraph->getPreviousVersion(graphState.getGraphHash()));
 			}
-			pendingThreads.clear();
+
+			graphState.start(currentGraph->getHash());
+			graphState.prepareStates(serializationContext, time);
+			if (currentGraph->getStartNode()) {
+				threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode(), 0)));
+			}
+		} else {
+			graphState.prepareStates(serializationContext, time);
 		}
-	}
-	currentThread = nullptr;
-	removeStoppedThreads();
+		
+		processMessages(time, threads);
+		processControlEvents(time, threads);
 
-	// Clean up if done
-	if (graphState.isDone()) {
-		doTerminateState();
-	}
+		// Allocate time for each thread
+		for (auto& thread: threads) {
+			thread.getTimeSlice() = static_cast<float>(time);
+		}
+		
+		// Update all threads
+		Vector<ScriptStateThread> pendingThreads;
+		for (size_t i = 0; i < threads.size(); ++i) {
+			const bool running = updateThread(graphState, threads[i], pendingThreads);
+			if (running) {
+				processMessages(threads[i].getTimeSlice(), pendingThreads);
 
-	graphState.updateDisplayOffset(time);
-	graphState.incrementFrameNumber();
+				for (auto& t: pendingThreads) {
+					threads.push_back(std::move(t));
+				}
+				pendingThreads.clear();
+			}
+		}
+		currentThread = nullptr;
+		removeStoppedThreads();
+
+		// Clean up if done
+		if (graphState.isDone()) {
+			doTerminateState();
+		}
+
+		graphState.updateDisplayOffset(time);
+		graphState.incrementFrameNumber();
+	} catch (const std::exception& e) {
+		Logger::logError("Exception while executing script \"" + currentGraph->getAssetId() + "\":");
+		Logger::logException(e);
+	}
 
 	currentGraph = nullptr;
 	currentState = nullptr;
@@ -831,7 +836,7 @@ ConfigNode ScriptEnvironment::readOutputDataPin(const ScriptGraphNode& node, Gra
 	return node.getNodeType().getData(*this, node, pinN, getNodeData(node.getId()));
 }
 
-EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN)
+EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN, bool disconnectedIsSelf)
 {
 	if (pinN < node.getPins().size()) {
 		const auto& pin = node.getPins()[pinN];
@@ -844,13 +849,17 @@ EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, Gr
 			}
 		}
 	}
-	return EntityId();
+	return disconnectedIsSelf ? currentEntity : EntityId();
+}
+
+EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN)
+{
+	return readInputEntityId(node, pinN, false);
 }
 
 EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN)
 {
-	const auto entityId = readInputEntityIdRaw(node, pinN);
-	return entityId.isValid() ? entityId : currentEntity;
+	return readInputEntityId(node, pinN, true);
 }
 
 EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN)
@@ -956,11 +965,7 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 			} else if (pinConfig.type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 				EntityId id;
 				if (pinConfig.direction == GraphNodePinDirection::Input) {
-					if (node.getPins()[pinId].hasConnection()) {
-						id = readInputEntityIdRaw(node, pinId);
-					} else {
-						id = readInputEntityId(node, pinId);
-					}
+					id = readInputEntityId(node, pinId);
 				} else {
 					id = readOutputEntityId(node, pinId);
 				}

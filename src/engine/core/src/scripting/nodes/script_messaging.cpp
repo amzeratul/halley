@@ -552,19 +552,21 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto target = readEntityId(environment, node, 2);
-	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
-	
-	auto args = ConfigNode::MapType();
-	size_t i = 0;
-	for (const auto& m: msgType.members) {
-		args[m] = readDataPin(environment, node, 3 + i);
-		++i;
+	if (target.isValid()) {
+		const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
 		
-		if (i == maxMsgParams) {
-			break;
+		auto args = ConfigNode::MapType();
+		size_t i = 0;
+		for (const auto& m: msgType.members) {
+			args[m] = readDataPin(environment, node, 3 + i);
+			++i;
+			
+			if (i == maxMsgParams) {
+				break;
+			}
 		}
+		environment.sendEntityMessage(ScriptEnvironment::EntityMessageData{ target, msgType.message, std::move(args) });
 	}
-	environment.sendEntityMessage(ScriptEnvironment::EntityMessageData{ target, msgType.message, std::move(args) });
 
 	return Result(ScriptNodeExecutionState::Done);
 }

@@ -98,7 +98,7 @@ EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const Script
 {
 	if (const auto other = getOtherPin(environment, node, pinN)) {
 		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
-		return environment.readInputEntityIdRaw(returnNode, other->second);
+		return environment.readInputEntityId(returnNode, other->second);
 	} else {
 		return EntityId(environment.getStartParams()[pinN - 1].asEntityId().value);
 	}

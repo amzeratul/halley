@@ -39,7 +39,14 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input } };
+	const static auto data = std::array<PinType, 6>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input }
+	};
 	return gsl::span<const PinType>(data).subspan(0, asChild ? 6 : 5);
 }
 
