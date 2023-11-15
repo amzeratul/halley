@@ -131,8 +131,9 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 		thread.getCurNodeTime() += timeLeft;
-		timeLeft -= static_cast<float>(result.timeElapsed);
-		
+		timeLeft -= clamp(static_cast<float>(result.timeElapsed), 0.0f, timeLeft);
+		assert(result.timeElapsed >= 0);
+
 		if (result.outputsCancelled != 0) {
 			cancelOutputs(nodeId, result.outputsCancelled);
 		}

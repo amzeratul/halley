@@ -63,7 +63,7 @@ namespace Halley {
             case MathOp::Multiply:
                 return a * b;
             case MathOp::Divide:
-                return a - b;
+                return a / b;
             case MathOp::Max:
                 return std::max(a, b);
             case MathOp::Min:

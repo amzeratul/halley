@@ -4,9 +4,9 @@ using namespace Halley;
 void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	if (nodeData.getType() == ConfigNodeType::Undefined) {
-		data.timeLeft = node.getSettings()["time"].asFloat(0.0f);
+		data.timeLeft = std::max(node.getSettings()["time"].asFloat(0.0f), 0.0f);
 	} else {
-		data.timeLeft = nodeData["time"].asFloat(0);
+		data.timeLeft = std::max(nodeData["time"].asFloat(0), 0.0f);
 		data.setFromInput = nodeData["setFromInput"].asBool(false);
 	}
 }
@@ -73,7 +73,7 @@ IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Tim
 {
 	if (!curData.setFromInput && (readDataPin(environment, node, 2).getType() == ConfigNodeType::Float || readDataPin(environment, node, 2).getType() == ConfigNodeType::Int)) {
 		curData.setFromInput = true;
-		curData.timeLeft = readDataPin(environment, node, 2).asFloat();
+		curData.timeLeft = std::max(readDataPin(environment, node, 2).asFloat(), 0.0f);
 	}
 
 	const float t = static_cast<float>(time);
