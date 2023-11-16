@@ -212,3 +212,44 @@ ConfigNode ScriptGetRotation::doGetData(ScriptEnvironment& environment, const Sc
 	}
 	return ConfigNode();
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSetScale::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Set the scale of ");
+	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(" to ");
+	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	return result.moveResults();
+}
+
+IScriptNodeType::Result ScriptSetScale::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2))) {
+		const auto scale = readDataPin(environment, node, 3);
+
+		if (scale.getType() == ConfigNodeType::Float || scale.getType() == ConfigNodeType::Int) {
+			const auto s = scale.asFloat();
+			transform->setGlobalScale(Vector2f(s, s));
+		} else {
+			transform->setGlobalScale(scale.asVector2f());
+		}
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
