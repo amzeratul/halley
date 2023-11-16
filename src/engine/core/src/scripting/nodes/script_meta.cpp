@@ -85,7 +85,17 @@ IScriptNodeType::Result ScriptLog::doUpdate(ScriptEnvironment& environment, Time
 	auto message = node.getSettings()["message"].asString("");
 	const auto& data = readDataPin(environment, node, 2);
 	if (data.getType() != ConfigNodeType::Undefined) {
-		message += " " + data.asString();
+		message += " ";
+		if (data.getType() == ConfigNodeType::EntityId) {
+			const auto entityId = EntityId(data.asEntityId().value);
+			if (entityId.isValid()) {
+				message += environment.getWorld().getEntity(entityId).getName() + " (" + toString(entityId) + ")";
+			} else {
+				message += "<invalid entity>";
+			}
+		} else {
+			message += data.asString();
+		}
 	}
 
 	switch(severity) {

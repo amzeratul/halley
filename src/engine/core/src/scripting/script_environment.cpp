@@ -353,9 +353,11 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		auto& nodeState = state.getNodeState(nodeId);
 
 		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].outputPin, nodeState.data)) {
-			threadStack.resize(i);
-			thread.advanceToNode(nodeId, threadStack[i - 1].outputPin, threadStack[i - 1].inputPin);
-			return;
+			if (nodeState.threadCount == 1) {
+				threadStack.resize(i);
+				thread.advanceToNode(nodeId, threadStack[i - 1].outputPin, threadStack[i - 1].inputPin);
+				return;
+			}
 		}
 		
 		assert(nodeState.threadCount > 0);
