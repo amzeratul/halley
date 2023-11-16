@@ -13,16 +13,30 @@ public:
 	{
 	}
 
-	Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const override
+	Vector<EntityId> findEntities(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const Vector<String>& components, const std::function<float(EntityId, WorldPosition)>& getDistance) const override
 	{
+		Vector<ComponentReflector*> reflectors;
+		for (const auto& component: components) {
+			reflectors.push_back(&getWorld().getReflection().getComponentReflector(component));
+		}
+
 		// Collect all matching
 		using T = std::pair<float, EntityId>;
 		Vector<T> matching;
 		Vector<EntityId> matchId;
-		auto checkEntity = [&] (EntityId entityId, const Vector<String>& entityTags)
+		auto checkEntity = [&] (EntityId entityId, gsl::span<const String> entityTags)
 		{
 			if (!std_ex::contains(matchId, entityId)) {
 				if (std::all_of(tags.begin(), tags.end(), [&](const String& tag) { return std_ex::contains(entityTags, tag); })) {
+					if (!reflectors.empty()) {
+						auto e = getWorld().getEntity(entityId);
+						for (const auto& r: reflectors) {
+							if (r->tryGetComponent(e) == nullptr) {
+								return;
+							}
+						}
+					}
+
 					const float distance = getDistance(entityId, pos);
 					if (distance <= radius && isfinite(distance)) {
 						matching.emplace_back(distance, entityId);
@@ -36,6 +50,12 @@ public:
 		}
 		for (const auto& e: tagTargetsFamily) {
 			checkEntity(e.entityId, e.scriptTagTarget.tags);
+		}
+
+		if (callback) {
+			for (const auto& [entityId, entityTags]: callback()) {
+				checkEntity(entityId, entityTags);
+			}
 		}
 
 		// Sort by proximity
@@ -57,6 +77,14 @@ public:
 		}
 		return result;
 	}
+
+	void setFindEntitiesCallback(Callback callback) override
+	{
+		this->callback = callback;
+	}
+
+private:
+	Callback callback;
 };
 
 REGISTER_SYSTEM(ScriptableQuerySystem)

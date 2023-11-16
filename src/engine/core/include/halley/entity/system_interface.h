@@ -54,9 +54,12 @@ namespace Halley {
 
 	class IScriptableQuerySystemInterface : public ISystemInterface {
 	public:
+		using Callback = std::function<Vector<std::pair<EntityId, gsl::span<const String>>>()>;
+
 		virtual ~IScriptableQuerySystemInterface() = default;
 
-		virtual Vector<EntityId> findScriptables(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
+		virtual Vector<EntityId> findEntities(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const Vector<String>& components, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
+		virtual void setFindEntitiesCallback(Callback callback) = 0;
 	};
 
 	class IAudioSystemInterface : public ISystemInterface {

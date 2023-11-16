@@ -1832,9 +1832,9 @@ private:
 	const ECSData& ecsData;
 };
 
-class ComponentEditorComponentFieldFactory : public IComponentEditorFieldFactory {
+class ComponentEditorScriptComponentFieldFactory : public IComponentEditorFieldFactory {
 public:
-	ComponentEditorComponentFieldFactory(const ECSData& ecsData)
+	ComponentEditorScriptComponentFieldFactory(const ECSData& ecsData)
 		: ecsData(ecsData)
 	{}
 	
@@ -1916,6 +1916,52 @@ public:
 		});
 
 		return container;
+	}
+
+private:
+	const ECSData& ecsData;
+};
+
+class ComponentEditorComponentFactory : public IComponentEditorFieldFactory {
+public:
+	ComponentEditorComponentFactory(const ECSData& ecsData)
+		: ecsData(ecsData)
+	{}
+	
+	String getFieldType() override
+	{
+		return "Halley::Component";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode("Transform2D");
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		const auto value = data.getFieldData().asString("Transform2D");
+
+		Vector<String> componentIds;
+		for (auto& [k, v]: ecsData.getComponents()) {
+			componentIds.push_back(k);
+		}
+		std::sort(componentIds.begin(), componentIds.end());
+
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
+
+		auto componentDropdown = std::make_shared<UIDropdown>("componentType", dropStyle);
+		componentDropdown->setOptions(std::move(componentIds));
+
+		componentDropdown->bindData("componentType", value, [&context, data, this](String newVal)
+		{
+			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		return componentDropdown;
 	}
 
 private:
@@ -2071,6 +2117,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::EntityMessageType", false));
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::SystemMessageType", true));
 	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData));
-	factories.emplace_back(std::make_unique<ComponentEditorComponentFieldFactory>(ecsData));
+	factories.emplace_back(std::make_unique<ComponentEditorScriptComponentFieldFactory>(ecsData));
+	factories.emplace_back(std::make_unique<ComponentEditorComponentFactory>(ecsData));
 	return factories;
 }
