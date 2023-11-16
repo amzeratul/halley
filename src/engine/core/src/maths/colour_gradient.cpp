@@ -103,7 +103,7 @@ Colour4f ColourGradient::evaluate(float val) const
 		const float prevX = positions[i - 1];
 		const float nextX = positions[i];
 
-		if (val >= prevX && val < nextX) {
+		if (val >= prevX && val <= nextX) {
 			const float t = (val - prevX) / (nextX - prevX);
 			assert(t >= 0.0f);
 			assert(t <= 1.0f);

@@ -9,6 +9,7 @@
 #include "halley/entity/world.h"
 #include "components/sprite_animation_component.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "halley/maths/colour_gradient.h"
 
 using namespace Halley;
 
@@ -164,7 +165,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescri
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get action point \"");
-	str.append(node.getSettings()["actionPoint"].asString(""), parameterColour);
+	str.append(node.getSettings()["actionPoint"].asString(""), settingColour);
 	str.append("\" for entity ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
 	return str.moveResults();
@@ -216,5 +217,55 @@ ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, co
 	}
 
 	return {};
+}
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptColourGradient::getSettingTypes() const
+{
+	return {
+		SettingType{ "gradient", "Halley::ColourGradient", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptColourGradient::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Sample colour at ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptColourGradient::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Position along gradient (0..1)";
+	} else if (elementIdx == 1) {
+		return "Colour";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+String ScriptColourGradient::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Colour from Gradient";
+}
+
+ConfigNode ScriptColourGradient::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto samplePos = clamp(readDataPin(environment, node, 0).asFloat(), 0.0f, 1.0f);
+	const auto gradient = ColourGradient(node.getSettings()["gradient"]);
+	return gradient.evaluate(samplePos).toConfigNode();
 }
 

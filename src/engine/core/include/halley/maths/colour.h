@@ -130,18 +130,50 @@ namespace Halley {
 		[[nodiscard]] String toString() const
 		{
 			std::stringstream ss;
-			ss << "#" << std::hex;
-			writeByte(ss, r);
-			writeByte(ss, g);
-			writeByte(ss, b);
-			if (byteRep(a) != 255) writeByte(ss, a);
-			ss.flush();
-			return ss.str();
+
+			if (r >= colMinValue<T>() && r <= colMaxValue<T>()
+				&& g >= colMinValue<T>() && g <= colMaxValue<T>()
+				&& b >= colMinValue<T>() && b <= colMaxValue<T>()
+				&& a >= colMinValue<T>() && a <= colMaxValue<T>()) {
+				ss << "#" << std::hex;
+				writeByte(ss, r);
+				writeByte(ss, g);
+				writeByte(ss, b);
+				if (byteRep(a) != 255) writeByte(ss, a);
+				ss.flush();
+				return ss.str();
+			} else {
+				ss << std::setprecision(4);
+				ss << "col(" << r << "," << g << "," << b << "," << a << ")";
+				ss.flush();
+				return ss.str();
+			}
 		}
 
 		[[nodiscard]] ConfigNode toConfigNode() const
 		{
 			return ConfigNode(toString());
+		}
+
+		[[nodiscard]] static bool isColour(std::string_view str)
+		{
+			const size_t len = str.length();
+
+			if (len >= 1 && str[0] == '#') {
+				for (size_t i = 1; i < len; ++i) {
+					auto c = str[i];
+					if (!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F')) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			if (len >= 5 && str.substr(0, 4) == "col(" && str.substr(len - 1, 1) == ")") {
+				return true;
+			}
+
+			return false;
 		}
 
 		[[nodiscard]] static Colour4 fromString(std::string_view str)
@@ -160,6 +192,20 @@ namespace Halley {
 				}
 				if (len >= 9) {
 					col.a = parseHex(str.substr(7, 2));
+				}
+			} else if (len >= 5 && str.substr(0, 4) == "col(" && str.substr(len - 1, 1) == ")") {
+				auto args = String(str.substr(4, len - 5)).split(',');
+				if (args.size() >= 1) {
+					col.r = parseDecimal(args[0]);
+				}
+				if (args.size() >= 2) {
+					col.g = parseDecimal(args[1]);
+				}
+				if (args.size() >= 3) {
+					col.b = parseDecimal(args[2]);
+				}
+				if (args.size() >= 4) {
+					col.a = parseDecimal(args[3]);
 				}
 			}
 			return col;
@@ -385,6 +431,15 @@ namespace Halley {
 
 			const uint8_t out = static_cast<uint8_t>(decode(str[0]) << 4) | decode(str[1]);
 			return convertColour<uint8_t, T>(out);
+		}
+
+		static T parseDecimal(const String& str)
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return str.toInteger();
+			} else {
+				return str.toFloat();
+			}
 		}
 
 		template <typename U>

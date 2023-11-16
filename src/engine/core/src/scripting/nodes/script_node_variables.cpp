@@ -544,6 +544,11 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 	if (type == ConfigNodeType::String) {
 		if (op == MathOp::Add) {
+			if (Colour4f::isColour(a.asString("")) && Colour4f::isColour(b.asString(""))) {
+				// Treat as colours
+				return (Colour4f(a) + Colour4f(b)).toConfigNode();
+			}
+
 			return ConfigNode(a.asString("") + b.asString(""));
 		} else {
 			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types.");
