@@ -95,7 +95,11 @@ Colour4f ColourGradient::evaluate(float val) const
 
 	// Before first point
 	if (val < positions.front()) {
-		return colours.front().multiplyAlpha(std::pow(val / positions.front(), 2.2f));
+		if (positions.front() < 0.001f) {
+			return colours.front();
+		} 	else {
+			return colours.front().multiplyAlpha(std::pow(val / positions.front(), 2.2f));
+		}
 	}
 
 	// Between two positions
@@ -117,7 +121,11 @@ Colour4f ColourGradient::evaluate(float val) const
 	}
 
 	// After last point
-	return colours.back().multiplyAlpha(std::pow((1.0f - val) / (1.0f - positions.back()), 2.2f));
+	if (positions.back() > 0.999f) {
+		return colours.back();
+	} else {
+		return colours.back().multiplyAlpha(std::pow((1.0f - val) / (1.0f - positions.back()), 2.2f));
+	}
 }
 
 void ColourGradient::render(Image& image)
