@@ -6,9 +6,9 @@ namespace Halley {
 	template <size_t size, size_t align, size_t blockLen = 16384>
 	class FixedBytePool {
 		template <typename T>
-		[[nodiscard]] constexpr static T alignUp(T val, T align)
+		[[nodiscard]] constexpr static T alignUp(T val, T alignment)
 		{
-			return val + (align - (val % align)) % align;
+			return val + (alignment - (val % alignment)) % alignment;
 		}
 
 		constexpr static size_t nEntries = blockLen / alignUp(size, align);
