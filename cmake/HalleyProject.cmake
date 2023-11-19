@@ -189,12 +189,15 @@ if (USE_SDL2)
 	endif()
 endif()
 
-# Boost
-find_package(Boost REQUIRED)
-add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
-if (BOOST_INCLUDE_DIR)
-else()
-	set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+# Boost::Asio
+if (USE_ASIO)
+	add_definitions(-DWITH_ASIO)
+	find_package(Boost REQUIRED)
+	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
+	if (BOOST_INCLUDE_DIR)
+	else()
+		set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
+	endif()
 endif()
 
 # OpenGL
@@ -220,11 +223,6 @@ endif ()
 if (USE_OPENGL_ES3)
 	add_definitions(-DWITH_OPENGL_ES3)
 	set(OPENGL_LIBRARIES "GLESv3")
-endif ()
-
-# Asio
-if (USE_ASIO)
-	add_definitions(-DWITH_ASIO)
 endif ()
 
 # DX11
