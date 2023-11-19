@@ -222,7 +222,9 @@ endif ()
 
 if (USE_OPENGL_ES3)
 	add_definitions(-DWITH_OPENGL_ES3)
-	set(OPENGL_LIBRARIES "GLESv3")
+	if (NOT EMSCRIPTEN)
+		set(OPENGL_LIBRARIES "GLESv3")
+	endif()
 endif ()
 
 # DX11
@@ -518,6 +520,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 
 	if (EMSCRIPTEN)
 		#set_target_properties(${name} PROPERTIES SUFFIX ".bc")
+		set(LINK_LIBRARIES ${LINK_LIBRARIES} -sMAX_WEBGL_VERSION=2)
 	endif()
 
 	SET(LINK_LIBRARIES "")
