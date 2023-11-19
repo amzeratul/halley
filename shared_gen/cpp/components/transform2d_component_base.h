@@ -97,6 +97,12 @@ public:
 		return doNew<T>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		static_assert(std::is_base_of_v<Transform2DComponentBase, T>);
+		static_assert(!std::is_same_v<Transform2DComponentBase, T>);
+		return doNew<T>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<T>(ptr);
 	}

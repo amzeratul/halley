@@ -17,6 +17,13 @@ namespace Halley
 		}
 
 		template <typename T>
+		static void* doNew(size_t size)
+		{
+			assert(size <= sizeof(T));
+			return getPool<T>().alloc();
+		}
+
+		template <typename T>
 		static void doDelete(void* ptr)
 		{
 			return getPool<T>().free(static_cast<T*>(ptr));

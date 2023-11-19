@@ -56,6 +56,10 @@ public:
 		return doNew<NetworkComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<NetworkComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<NetworkComponent>(ptr);
 	}

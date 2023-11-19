@@ -71,6 +71,10 @@ public:
 		return doNew<TextLabelComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<TextLabelComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<TextLabelComponent>(ptr);
 	}

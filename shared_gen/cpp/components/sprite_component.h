@@ -78,6 +78,10 @@ public:
 		return doNew<SpriteComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<SpriteComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<SpriteComponent>(ptr);
 	}

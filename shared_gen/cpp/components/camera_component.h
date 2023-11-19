@@ -78,6 +78,10 @@ public:
 		return doNew<CameraComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<CameraComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<CameraComponent>(ptr);
 	}

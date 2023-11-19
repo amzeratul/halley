@@ -56,6 +56,10 @@ public:
 		return doNew<ScriptTargetComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<ScriptTargetComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<ScriptTargetComponent>(ptr);
 	}

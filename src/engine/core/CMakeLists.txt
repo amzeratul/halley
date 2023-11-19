@@ -896,7 +896,9 @@ if (USE_ANDROID)
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (NOT EMSCRIPTEN)
         set_source_files_properties("src/maths/matrix4.cpp" PROPERTIES COMPILE_FLAGS "-msse3")
+    endif()
 endif ()
 
 if (MSVC)

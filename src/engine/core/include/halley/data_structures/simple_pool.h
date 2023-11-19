@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
 
 namespace Halley {
 	template <size_t size, size_t align, size_t blockLen = 16384>

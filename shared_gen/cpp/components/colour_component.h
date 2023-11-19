@@ -53,6 +53,10 @@ public:
 		return doNew<ColourComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<ColourComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<ColourComponent>(ptr);
 	}

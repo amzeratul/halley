@@ -100,6 +100,10 @@ public:
 		return doNew<ParticlesComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<ParticlesComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<ParticlesComponent>(ptr);
 	}

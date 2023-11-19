@@ -71,6 +71,10 @@ public:
 		return doNew<AudioListenerComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<AudioListenerComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<AudioListenerComponent>(ptr);
 	}

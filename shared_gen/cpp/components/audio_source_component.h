@@ -84,6 +84,10 @@ public:
 		return doNew<AudioSourceComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<AudioSourceComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<AudioSourceComponent>(ptr);
 	}

@@ -56,6 +56,10 @@ public:
 		return doNew<VelocityComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<VelocityComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<VelocityComponent>(ptr);
 	}

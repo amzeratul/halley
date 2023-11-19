@@ -43,6 +43,10 @@ public:
 		return doNew<SpriteAnimationReplicatorComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<SpriteAnimationReplicatorComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<SpriteAnimationReplicatorComponent>(ptr);
 	}

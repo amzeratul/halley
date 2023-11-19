@@ -49,6 +49,10 @@ public:
 		return doNew<EmbeddedScriptComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<EmbeddedScriptComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<EmbeddedScriptComponent>(ptr);
 	}

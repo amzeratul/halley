@@ -49,6 +49,10 @@ public:
 		return doNew<ScriptTagTargetComponent>(size, align);
 	}
 
+	void* operator new(std::size_t size) {
+		return doNew<ScriptTagTargetComponent>(size);
+	}
+
 	void operator delete(void* ptr) {
 		return doDelete<ScriptTagTargetComponent>(ptr);
 	}

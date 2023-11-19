@@ -311,16 +311,23 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	// New and delete methods
 	String newBody;
+	String newBody2;
 	if (component.customImplementation) {
 		newBody = "static_assert(std::is_base_of_v<" + className + ", T>);" + lineBreak + "static_assert(!std::is_same_v<" + className + ", T>);" + lineBreak;
+		newBody2 = "static_assert(std::is_base_of_v<" + className + ", T>);" + lineBreak + "static_assert(!std::is_same_v<" + className + ", T>);" + lineBreak;
 	}
 	newBody += "return doNew<" + finalClassReference + ">(size, align);";
+	newBody2 += "return doNew<" + finalClassReference + ">(size);";
 
 	gen.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void*"), {
 			VariableSchema(TypeSchema("std::size_t"), "size"),
 			VariableSchema(TypeSchema("std::align_val_t"), "align"),
 		}, "operator new"), newBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void*"), {
+			VariableSchema(TypeSchema("std::size_t"), "size"),
+		}, "operator new"), newBody2)
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 			VariableSchema(TypeSchema("void*"), "ptr"),
