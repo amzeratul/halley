@@ -470,7 +470,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		add_library(${name} SHARED ${proj_sources} ${proj_headers} ${proj_resources})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
 	elseif (HALLEY_MONOLITHIC)
-		add_executable(${name} WIN32 ${proj_sources} ${proj_headers} ${proj_resources} ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp)
+		add_executable(${name} WIN32 ${proj_sources} ${proj_headers} ${proj_resources})
 		target_compile_definitions(${name} PUBLIC HALLEY_EXECUTABLE)
 	else()
 		add_library(${name}-game STATIC ${proj_sources} ${proj_headers})

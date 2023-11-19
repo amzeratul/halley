@@ -385,8 +385,11 @@ namespace std
         std::size_t operator()(Halley::MaterialDepthStencil const& v) const noexcept
         {
         	const auto result = v.getHash();
-        	static_assert(sizeof(result) == sizeof(std::size_t));
-        	return static_cast<std::size_t>(result);
+			if constexpr (sizeof(result) == sizeof(std::size_t)) {
+				return static_cast<std::size_t>(result);
+			} else {
+				return Halley::combineHash(static_cast<size_t>(result >> 32), static_cast<size_t>(result));
+			}
         }
     };
 }
