@@ -1,5 +1,3 @@
-#define _LIBCPP_DISABLE_DEPRECATION_WARNINGS
-#include <boost/pool/pool.hpp>
 #include "halley/data_structures/memory_pool.h"
 
 using namespace Halley;
@@ -26,27 +24,22 @@ SizePool* PoolPool::getPool(size_t size)
 	return pool;
 }
 
-typedef boost::pool<boost::default_user_allocator_malloc_free> PoolType;
-
 SizePool::SizePool(size_t size)
 	: size(size)
 {
-	pimpl = new PoolType(size);
+	throw Exception("SizePool not implemented", HalleyExceptions::Utils);
 }
 
 SizePool::~SizePool()
 {
-	delete reinterpret_cast<PoolType*>(pimpl);
 }
 
 void* SizePool::alloc()
 {
-	std::unique_lock lock(mutex);
-	return reinterpret_cast<PoolType*>(pimpl)->malloc();
+	throw Exception("SizePool not implemented", HalleyExceptions::Utils);
 }
 
 void SizePool::free(void* p)
 {
-	std::unique_lock lock(mutex);
-	reinterpret_cast<PoolType*>(pimpl)->free(p);
+	throw Exception("SizePool not implemented", HalleyExceptions::Utils);
 }

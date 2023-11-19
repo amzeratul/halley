@@ -9,6 +9,7 @@ namespace Halley {
 		virtual ~TypeDeleterBase() {}
 		virtual size_t getSize() = 0;
 		virtual void callDestructor(void* ptr) = 0;
+		virtual void destroy(void* ptr) = 0;
 	};
 
 	class ComponentDeleterTable
@@ -65,6 +66,11 @@ namespace Halley {
 			ptr = ptr; // Make it shut up about unused
 #endif
 			static_cast<T*>(ptr)->~T();
+		}
+
+		void destroy(void* ptr) override
+		{
+			delete static_cast<T*>(ptr);
 		}
 	};
 }

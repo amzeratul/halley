@@ -1,4 +1,4 @@
-// Halley codegen version 125
+// Halley codegen version 127
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -71,6 +71,15 @@ public:
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+
+	void* operator new(std::size_t size, std::align_val_t align) {
+		return doNew<CameraComponent>(size, align);
+	}
+
+	void operator delete(void* ptr) {
+		return doDelete<CameraComponent>(ptr);
 	}
 
 };

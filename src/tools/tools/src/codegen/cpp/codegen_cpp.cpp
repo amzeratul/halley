@@ -188,7 +188,9 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 
 Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 {
-	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
+	String finalClassName = component.name + "Component";
+	String className = finalClassName + (component.customImplementation ? "Base" : "");
+	String finalClassReference = component.customImplementation ? "T" : className;
 	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation);
 
 	Vector<String> contents = {
@@ -265,6 +267,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		deserializeFieldBody += lineBreak + "throw Halley::Exception(\"Unknown or non-serializable field \\\"\" + Halley::String(_fieldName) + \"\\\"\", Halley::HalleyExceptions::Entity);";
 	}
 
+	if (component.customImplementation) {
+		contents.push_back("template <typename T>");
+	}
+
 	gen
 		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
@@ -301,6 +307,24 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("std::string_view"), "_fieldName"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
 		}, "deserializeField"), deserializeFieldBody)
+		.addBlankLine();
+
+	// New and delete methods
+	String newBody;
+	if (component.customImplementation) {
+		newBody = "static_assert(std::is_base_of_v<" + className + ", T>);" + lineBreak + "static_assert(!std::is_same_v<" + className + ", T>);" + lineBreak;
+	}
+	newBody += "return doNew<" + finalClassReference + ">(size, align);";
+
+	gen.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void*"), {
+			VariableSchema(TypeSchema("std::size_t"), "size"),
+			VariableSchema(TypeSchema("std::align_val_t"), "align"),
+		}, "operator new"), newBody)
+		.addBlankLine()
+		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
+			VariableSchema(TypeSchema("void*"), "ptr"),
+		}, "operator delete"), "return doDelete<" + finalClassReference + ">(ptr);")
 		.addBlankLine();
 
 	gen.finish()

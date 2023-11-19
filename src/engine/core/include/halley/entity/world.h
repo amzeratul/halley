@@ -210,7 +210,7 @@ namespace Halley {
 
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
-		std::shared_ptr<PoolAllocator<Entity>> entityPool;
+		std::shared_ptr<TypedPool<Entity>> entityPool;
 
 		std::list<SystemMessageContext> pendingSystemMessages;
 		

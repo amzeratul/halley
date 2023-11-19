@@ -6,6 +6,7 @@
 
 using namespace Halley;
 
+/*
 void* Component::operator new(size_t size)
 {
 	return PoolPool::getPool(size)->alloc();
@@ -15,3 +16,4 @@ void Component::operator delete(void*)
 {
 	std::cout << ConsoleColour(Console::RED) << "Attempting to delete component!" << ConsoleColour() << std::endl;
 }
+*/

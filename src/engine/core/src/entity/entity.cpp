@@ -90,8 +90,8 @@ void Entity::removeAllComponents(World& world)
 void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable& table)
 {
 	TypeDeleterBase* deleter = table.get(id);
-	deleter->callDestructor(component);
-	PoolPool::getPool(deleter->getSize())->free(component);
+	deleter->destroy(component);
+	//PoolPool::getPool(deleter->getSize())->free(component);
 }
 
 void Entity::keepOnlyComponentsWithIds(const Vector<int>& ids, World& world)

@@ -27,7 +27,7 @@ World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflect
 	, reflection(std::move(reflection))
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
-	, entityPool(std::make_shared<PoolAllocator<Entity>>())
+	, entityPool(std::make_shared<TypedPool<Entity>>())
 {
 	devMode = api.core->isDevMode();
 }

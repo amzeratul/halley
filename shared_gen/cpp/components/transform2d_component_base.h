@@ -1,4 +1,4 @@
-// Halley codegen version 125
+// Halley codegen version 127
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -7,6 +7,7 @@
 #include "halley/support/exception.h"
 
 
+template <typename T>
 class Transform2DComponentBase : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 0 };
@@ -87,6 +88,17 @@ public:
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+
+	void* operator new(std::size_t size, std::align_val_t align) {
+		static_assert(std::is_base_of_v<Transform2DComponentBase, T>);
+		static_assert(!std::is_same_v<Transform2DComponentBase, T>);
+		return doNew<T>(size, align);
+	}
+
+	void operator delete(void* ptr) {
+		return doDelete<T>(ptr);
 	}
 
 protected:

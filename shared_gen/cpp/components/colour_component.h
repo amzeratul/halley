@@ -1,4 +1,4 @@
-// Halley codegen version 125
+// Halley codegen version 127
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -46,6 +46,15 @@ public:
 	void deserializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName, const Halley::ConfigNode& _node) {
 		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+
+	void* operator new(std::size_t size, std::align_val_t align) {
+		return doNew<ColourComponent>(size, align);
+	}
+
+	void operator delete(void* ptr) {
+		return doDelete<ColourComponent>(ptr);
 	}
 
 };

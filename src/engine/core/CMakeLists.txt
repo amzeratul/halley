@@ -733,6 +733,7 @@ set(HEADERS
         "include/halley/data_structures/rect_spatial_checker.h"
         "include/halley/data_structures/ring_buffer.h"
         "include/halley/data_structures/selection_set.h"
+        "include/halley/data_structures/simple_pool.h"
         "include/halley/data_structures/time_cache.h"
         "include/halley/data_structures/tree_map.h"
         "include/halley/data_structures/vector.h"
