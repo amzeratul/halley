@@ -41,8 +41,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++") # Apparently Clang on Mac needs this...
 endif()
 if (EMSCRIPTEN)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
-	add_definitions(-s USE_SDL=2)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++ -pthread")
+	add_definitions(-s USE_SDL=2 -pthread)
 	set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
 
@@ -520,7 +520,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	endif()
 
 	if (EMSCRIPTEN)
-		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun")
+		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency -sNO_DISABLE_EXCEPTION_CATCHING")
 	endif()
 
 	SET(LINK_LIBRARIES "")

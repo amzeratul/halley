@@ -8,6 +8,7 @@
 #include <thread>
 #include "halley/support/logger.h"
 #include "halley/api/system_api.h"
+#include "halley/game/game_platform.h"
 
 using namespace Halley;
 
@@ -73,9 +74,17 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 		}
 	};
 
-	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), maxThreads, makeThread);
-	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), maxThreads, makeThread);
-	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), 1, makeThread);
+	size_t nCPU = maxThreads;
+	size_t nAuxCPU = maxThreads;
+	size_t nDiskIO = 1;
+	if constexpr (getPlatform() == GamePlatform::Emscripten) {
+		nAuxCPU = 0;
+		nCPU = maxThreads - 2;
+	}
+
+	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThread);
+	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), nAuxCPU, makeThread);
+	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), nDiskIO, makeThread);
 #endif
 }
 
