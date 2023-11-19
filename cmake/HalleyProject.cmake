@@ -133,7 +133,7 @@ set(USE_HTTPLIB 1)
 if (EMSCRIPTEN)
 	set(USE_ASIO 0)
 	set(USE_OPENGL 0)
-	set(USE_OPENGL_ES2 1)
+	set(USE_OPENGL_ES3 1)
 	set(HALLEY_MONOLITHIC 1)
 endif()
 
@@ -517,7 +517,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	endif()
 
 	if (EMSCRIPTEN)
-		set_target_properties(${name} PROPERTIES SUFFIX ".bc")
+		#set_target_properties(${name} PROPERTIES SUFFIX ".bc")
 	endif()
 
 	SET(LINK_LIBRARIES "")

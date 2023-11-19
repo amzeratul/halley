@@ -75,7 +75,11 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 		glClearColor(col.r, col.g, col.b, col.a);
 
 		glDepthMask(GL_TRUE);
+#ifdef WITH_OPENGL
 		glClearDepth(depth.value_or(1.0f));
+#else
+		glClearDepthf(depth.value_or(1.0f));
+#endif
 		glClearStencil(stencil.value_or(0));
 
 		GLbitfield mask = 0;

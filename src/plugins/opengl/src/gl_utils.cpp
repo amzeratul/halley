@@ -296,6 +296,11 @@ void GLUtils::resetDefaultGLState()
 	glDepthFunc(GL_ALWAYS);
 
 	glDepthMask(GL_TRUE);
+#ifdef WITH_OPENGL
 	glClearDepth(1.0);
 	glDepthRange(0.0, 1.0);
+#else
+	glClearDepthf(1.0f);
+	glDepthRangef(0.0f, 1.0f);
+#endif
 }
