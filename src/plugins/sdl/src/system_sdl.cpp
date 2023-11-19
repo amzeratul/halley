@@ -98,6 +98,10 @@ void SystemSDL::onSuspend()
 
 Path SystemSDL::getAssetsPath(const Path& gamePath) const
 {
+	if constexpr (getPlatform() == GamePlatform::Emscripten) {
+		return "assets";
+	}
+
 #if defined(HALLEY_MACOSX_BUNDLE)
 	return gamePath / ".." / "Resources";
 #else
