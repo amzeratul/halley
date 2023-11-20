@@ -190,7 +190,7 @@ Deserializer& Deserializer::operator>>(String& str)
 	} else {
 		uint64_t value;
 		*this >> value;
-		
+
 		if (options.dictionary) {
 			if (options.exhaustiveDictionary || (value & 0x1) != 0) {
 				// Indexed string
@@ -269,7 +269,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	uint8_t& header = buffer[0];
 
 	// Figure out which pattern we're dealing with
-	size_t nBytes = 0;
+	uint64_t nBytes = 0;
 	if ((header & 0x80) != 0x80) {
 		nBytes = 1;
 	} else if ((header & 0xC0) != 0xC0) {
@@ -289,7 +289,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	} else {
 		nBytes = 9;
 	}
-	const size_t headerBits = std::min(nBytes, size_t(8));
+	const uint64_t headerBits = std::min(nBytes, uint64_t(8));
 
 	// Read rest of the data
 	if (nBytes > 1) {
@@ -297,10 +297,10 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 	}
 
 	// Convert to uint64_t
-	size_t bitsAvailableOnByte = 8 - headerBits;
-	size_t bitsRead = 0;
+	uint64_t bitsAvailableOnByte = 8 - headerBits;
+	uint64_t bitsRead = 0;
 	uint64_t value = 0;
-	for (size_t i = 0; i < nBytes; ++i) {
+	for (uint64_t i = 0; i < nBytes; ++i) {
 		const uint64_t byteMask = (uint64_t(1) << bitsAvailableOnByte) - 1;
 		value |= (uint64_t(buffer[i]) & byteMask) << bitsRead;
 		bitsRead += bitsAvailableOnByte;
@@ -309,7 +309,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 
 	// Restore sign
 	if (isSigned) {
-		const size_t signPos = nBytes * 7 + (nBytes == 9 ? 0 : -1); // 9-byte version places it on pos 63, not 62
+		const uint64_t signPos = nBytes * 7 + (nBytes == 9 ? 0 : -1); // 9-byte version places it on pos 63, not 62
 		const uint64_t signMask = uint64_t(1) << signPos;
 		sign = (value & signMask) != 0;
 		value &= ~signMask;

@@ -520,7 +520,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	endif()
 
 	if (EMSCRIPTEN)
-		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency -sNO_DISABLE_EXCEPTION_CATCHING --preload-file ../assets@assets")
+		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun -s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency -sNO_DISABLE_EXCEPTION_CATCHING -sALLOW_MEMORY_GROWTH --preload-file ../assets@assets")
 	endif()
 
 	SET(LINK_LIBRARIES "")
