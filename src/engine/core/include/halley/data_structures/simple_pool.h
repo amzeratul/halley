@@ -4,7 +4,7 @@
 #include <list>
 
 namespace Halley {
-	template <size_t size, size_t align, size_t blockLen = 16384>
+	template <size_t size, size_t align, size_t blockLen = 16384, bool threadSafe = true>
 	class FixedBytePool {
 		template <typename T>
 		[[nodiscard]] constexpr static T alignUp(T val, T alignment)
@@ -48,6 +48,8 @@ namespace Halley {
 
 	public:
 		void* alloc() {
+			auto lock = lockMutex();
+
 			// Create a new block if there's no next entry
 			if (!next) {
 				auto& block = blocks.emplace_back();
@@ -69,12 +71,15 @@ namespace Halley {
 			Entry* entry = static_cast<Entry*>(p);
 
 			// Store previous next on this and set it as the new next
+			auto lock = lockMutex();
 			entry->nextFreeEntry = next;
 			next = entry;
 		}
 
 		bool ownsPointer(void* p) const
 		{
+			auto lock = lockMutex();
+
 			for (auto& block: blocks) {
 				if (block.ownsPointer(static_cast<Entry*>(p))) {
 					return true;
@@ -86,17 +91,28 @@ namespace Halley {
 	private:
 		std::list<Block> blocks;
 		Entry* next = nullptr;
+
+		mutable std::mutex mutex;
+
+		std::unique_lock<std::mutex> lockMutex() const
+		{
+			if constexpr (threadSafe) {
+				return std::unique_lock<std::mutex>(mutex);
+			} else {
+				return std::unique_lock<std::mutex>();
+			}
+		}
 	};
 
-	template <typename T, size_t blockLen = 16384>
-	class TypedPool : private FixedBytePool<sizeof(T), alignof(T), blockLen> {
+	template <typename T, size_t blockLen = 16384, bool threadSafe = true>
+	class TypedPool : private FixedBytePool<sizeof(T), alignof(T), blockLen, threadSafe> {
 	public:
 		T* alloc() {
-			return static_cast<T*>(FixedBytePool<sizeof(T), alignof(T), blockLen>::alloc());
+			return static_cast<T*>(FixedBytePool<sizeof(T), alignof(T), blockLen, threadSafe>::alloc());
 		}
 
 		void free(T* p) {
-			FixedBytePool<sizeof(T), alignof(T), blockLen>::free(p);
+			FixedBytePool<sizeof(T), alignof(T), blockLen, threadSafe>::free(p);
 		}
 	};
 }
