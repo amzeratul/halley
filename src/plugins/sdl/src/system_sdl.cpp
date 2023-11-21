@@ -28,6 +28,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 using namespace Halley;
@@ -450,14 +451,14 @@ void SystemSDL::setGameLoopHandler(std::unique_ptr<ISystemMainLoopHandler> handl
 {
 	this->mainLoopHandler = std::move(handler);
 #ifdef __EMSCRIPTEN__
-	static SystemSDL* system = this;
-	emscripten_set_main_loop([]() {
+	emscripten_request_animation_frame_loop([](double t, void* ptr) -> EM_BOOL {
+		auto* system = static_cast<SystemSDL*>(ptr);
 		const bool run = system->mainLoopHandler->run();
 		if (!run) {
-			emscripten_cancel_main_loop();
 			system->mainLoopHandler = {};
 		}
-	}, 60, false);
+		return run ? EM_TRUE : EM_FALSE;
+	}, this);
 #endif
 }
 
