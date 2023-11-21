@@ -45,6 +45,8 @@ namespace Halley
 
 		void setEnvironment(Environment* env) override;
 
+		bool mustOwnMainLoop() const override;
+		void setGameLoopHandler(std::unique_ptr<ISystemMainLoopHandler> handler) override;
 		bool canExit() override;
 
 		void setThreadName(const String& name) override;
@@ -67,5 +69,6 @@ namespace Halley
 		std::shared_ptr<IClipboard> clipboard;
 		std::optional<String> saveCryptKey;
 		Vector<std::function<void()>> globalHotkeyCallbacks;
+		std::unique_ptr<ISystemMainLoopHandler> mainLoopHandler;
 	};
 }

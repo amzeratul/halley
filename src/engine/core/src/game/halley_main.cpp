@@ -11,17 +11,59 @@
 
 using namespace Halley;
 
-int HalleyMain::runMain(GameLoader& loader, const Vector<std::string>& args)
+class SystemMainLoopHandler : public ISystemMainLoopHandler {
+public:
+	SystemMainLoopHandler(std::unique_ptr<Core> _core, std::unique_ptr<GameLoader> _loader)
+		: core(std::move(_core))
+		, loader(std::move(_loader))
+		, loop(*core, *loader)
+	{
+	}
+
+	~SystemMainLoopHandler() override
+	{
+	}
+
+	bool run() override
+	{
+		try {
+			loop.runStep();
+			return true;
+		} catch (std::exception& e) {
+			core->onTerminatedInError(e.what());
+			return false;
+		} catch (...) {
+			core->onTerminatedInError("");
+			return false;
+		}
+	}
+
+private:
+	std::unique_ptr<Core> core;
+	std::unique_ptr<GameLoader> loader;
+	MainLoop loop;
+};
+
+int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
 {
 	std::unique_ptr<Core> core;
 	try {
-		core = loader.createCore(args);
-		loader.setCore(*core);
-		core->getAPI().system->runGame([&]() {
+		core = loader->createCore(args);
+		loader->setCore(*core);
+		auto* system = core->getAPI().system;
+
+		if (system->mustOwnMainLoop()) {
 			core->init();
-			MainLoop loop(*core, loader);
-			loop.run();
-		});
+			system->setGameLoopHandler(std::make_unique<SystemMainLoopHandler>(std::move(core), std::move(loader)));
+			return 0;
+		} else {
+			system->runGame([&]() {
+				core->init();
+				MainLoop loop(*core, *loader);
+				loop.run();
+			});
+		}
+
 		return core->getExitCode();
 	} catch (std::exception& e) {
 		if (core) {

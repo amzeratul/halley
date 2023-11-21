@@ -25,6 +25,12 @@ namespace Halley
 		virtual void* getGLProcAddress(const char* name) = 0;
 	};
 
+	class ISystemMainLoopHandler {
+	public:
+		virtual ~ISystemMainLoopHandler() = default;
+		virtual bool run() = 0;
+	};
+
 	class SystemAPI
 	{
 	public:
@@ -60,7 +66,9 @@ namespace Halley
 		virtual void setThreadName(const String& name) {}
 		virtual void setThreadPriority(ThreadPriority priority) {}
 
+		virtual bool mustOwnMainLoop() const { return false; }
 		virtual void runGame(std::function<void()> runnable) { runnable(); }
+		virtual void setGameLoopHandler(std::unique_ptr<ISystemMainLoopHandler> handler) {}
 		virtual bool canExit() { return false; }
 
 		virtual std::shared_ptr<IClipboard> getClipboard() const { return {}; }

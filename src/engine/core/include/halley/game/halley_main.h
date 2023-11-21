@@ -16,18 +16,16 @@ namespace Halley
 		template <typename T>
 		static int winMain()
 		{
-			StaticGameLoader<T> reloader;
-			return runMain(reloader, getWin32Args());
+			return runMain(std::make_unique<StaticGameLoader<T>>(), getWin32Args());
 		}
 
 		template <typename T>
 		static int main(int argc, char* argv[])
 		{
-			StaticGameLoader<T> reloader;
-			return runMain(reloader, getArgs(argc, argv));
+			return runMain(std::make_unique<StaticGameLoader<T>>(), getArgs(argc, argv));
 		}
 
-		static int runMain(GameLoader& loader, const Vector<std::string>& args);
+		static int runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args);
 
 		static Vector<std::string> getWin32Args();
 		static Vector<std::string> getArgs(int argc, char* argv[]);

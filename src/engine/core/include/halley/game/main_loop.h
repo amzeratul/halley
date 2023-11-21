@@ -38,6 +38,7 @@ namespace Halley
 	public:
 		MainLoop(IMainLoopable& core, GameLoader& reloader);
 		void run();
+		void runStep();
 
 	private:
 		IMainLoopable& target;
@@ -45,7 +46,6 @@ namespace Halley
 
 		using Clock = std::chrono::high_resolution_clock;
 
-		void runLoop();
 		Time snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, RollingDataSet<Clock::time_point>& frameTimes);
 		bool isRunning() const;
 		bool tryReload() const;

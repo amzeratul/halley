@@ -25,11 +25,11 @@ MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 void MainLoop::run()
 {
 	do {
-		runLoop();
+		runStep();
 	} while (tryReload());
 }
 
-void MainLoop::runLoop()
+void MainLoop::runStep()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 

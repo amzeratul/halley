@@ -8,8 +8,7 @@ IHalleyEntryPoint* getHalleyEntryStatic();
 
 int __stdcall WinMain(void*, void*, char*, int)
 {
-    auto loader = EntryPointGameLoader(*getHalleyEntryStatic());
-    return HalleyMain::runMain(loader, HalleyMain::getWin32Args());
+    return HalleyMain::runMain(std::make_unique<EntryPointGameLoader>(*getHalleyEntryStatic()), HalleyMain::getWin32Args());
 }
 
 #else

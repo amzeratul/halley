@@ -20,6 +20,5 @@ int RunnerTool::runRaw(int argc, char* argv[])
 	
 	std::cout << "Running from DLL \"" << args.at(0) << "\"..." << std::endl;
 
-	DynamicGameLoader loader(args.at(0));
-	return HalleyMain::runMain(loader, args);
+	return HalleyMain::runMain(std::make_unique<DynamicGameLoader>(args.at(0)), args);
 }

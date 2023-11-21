@@ -26,6 +26,10 @@
 #undef min
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 using namespace Halley;
 
 SystemSDL::SystemSDL(std::optional<String> saveCryptKey)
@@ -437,9 +441,29 @@ void SystemSDL::setEnvironment(Environment* env)
 	}
 }
 
+bool SystemSDL::mustOwnMainLoop() const
+{
+	return getPlatform() == GamePlatform::Emscripten;
+}
+
+void SystemSDL::setGameLoopHandler(std::unique_ptr<ISystemMainLoopHandler> handler)
+{
+	this->mainLoopHandler = std::move(handler);
+#ifdef __EMSCRIPTEN__
+	static SystemSDL* system = this;
+	emscripten_set_main_loop([]() {
+		const bool run = system->mainLoopHandler->run();
+		if (!run) {
+			emscripten_cancel_main_loop();
+			system->mainLoopHandler = {};
+		}
+	}, 60, false);
+#endif
+}
+
 bool SystemSDL::canExit()
 {
-	return true;
+	return getPlatform() != GamePlatform::Emscripten;
 }
 
 std::shared_ptr<IClipboard> SystemSDL::getClipboard() const
