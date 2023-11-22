@@ -36,7 +36,7 @@ namespace Halley {
 			pushTable(n, 0);
 			for (int i = 0; i < n; ++i) {
 				push(vec[i]);
-				setField(i);
+				setField(i + 1);
 			}
 		}
 
