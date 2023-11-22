@@ -122,6 +122,7 @@ set(USE_OPENGL_ES2 0)
 set(USE_OPENGL_ES3 0)
 set(USE_DX11 0)
 set(USE_METAL 0)
+set(USE_VULKAN 1) # TODO will be true for now
 set(USE_SDL2 1)
 set(USE_ASIO 1)
 set(USE_WINRT 0)
@@ -148,7 +149,7 @@ if (ANDROID_NDK)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set(USE_DX11 1)
+	# set(USE_DX11 1) # TODO
 	set(USE_MEDIA_FOUNDATION 1)
 	if (REQUIRE_WINDOWS_10)
 		set(USE_XAUDIO2 1)
@@ -156,7 +157,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-	set(USE_DX11 1)
+	# set(USE_DX11 1) # TODO
 	set(USE_MEDIA_FOUNDATION 1)
 	set(USE_SDL2 0)
 	set(USE_OPENGL 0)
@@ -241,6 +242,11 @@ if (USE_METAL AND HALLEY_NO_METAL)
 endif ()
 if (USE_METAL)
 	add_definitions(-DWITH_METAL)
+endif()
+
+# Vulkan
+if (USE_VULKAN)
+	add_definitions(-DWITH_VULKAN)
 endif()
 
 # WinRT
@@ -354,6 +360,14 @@ if (USE_DX11)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-dx11
 		debug halley-dx11_d
+		${HALLEY_PROJECT_LIBS}
+		)
+endif ()
+
+if (USE_VULKAN)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-vulkan
+		debug halley-vulkan_d
 		${HALLEY_PROJECT_LIBS}
 		)
 endif ()
@@ -539,6 +553,9 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		endif ()
 		if (USE_DX11)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-dx11)
+		endif ()
+		if (USE_VULKAN)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-vulkan)
 		endif ()
 		if (USE_WINRT)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-winrt)

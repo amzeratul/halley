@@ -31,7 +31,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	initSDLAudioPlugin(registry);
 	initSDLInputPlugin(registry);
 
-#ifdef _WIN32
+#ifdef WITH_DX11
 	initDX11Plugin(registry);
 #elif USE_METAL
 	initMetalPlugin(registry);
