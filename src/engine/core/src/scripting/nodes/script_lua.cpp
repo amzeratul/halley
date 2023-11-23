@@ -117,8 +117,12 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 		if (!code.startsWith("return") && !code.contains('\n')) {
 			code = "return " + code;
 		}
-		String exprStr = "local " + String::concatList(args, ", ") + " = ...\n" + code;
-		data.expr = LuaExpression(std::move(exprStr));
+		if (argsN > 0) {
+			String exprStr = "local " + String::concatList(args, ", ") + " = ...\n" + code;
+			data.expr = LuaExpression(std::move(exprStr));
+		} else {
+			data.expr = LuaExpression(std::move(code));
+		}
 	}
 
 	const int firstInputPin = static_cast<int>(nFlowPins());
@@ -130,9 +134,9 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 	}
 	LuaFunctionCaller::call(state, static_cast<int>(argsN), static_cast<int>(outputs));
 
-	data.results.clear();
+	data.results.resize(outputs);
 	for (size_t i = 0; i < outputs; ++i) {
-		data.results.push_back(stackOps.popConfigNode());
+		data.results[outputs - i - 1] = stackOps.popConfigNode();
 	}
 	LuaFunctionCaller::endCall(state);
 }
