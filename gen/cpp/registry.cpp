@@ -1,4 +1,4 @@
-// Halley codegen version 124
+// Halley codegen version 127
 #include <halley.hpp>
 using namespace Halley;
 
@@ -26,6 +26,7 @@ using namespace Halley;
 #include "messages/terminate_scripts_with_tag_message.h"
 #include "messages/send_script_msg_message.h"
 #include "messages/return_host_script_thread_message.h"
+#include "messages/set_entity_variable_message.h"
 #include "system_messages/play_network_sound_system_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
@@ -81,7 +82,7 @@ public:
 	}
 	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {
 		Vector<std::unique_ptr<MessageReflector>> result;
-		result.reserve(8);
+		result.reserve(9);
 		result.push_back(std::make_unique<MessageReflectorImpl<PlayAnimationMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<PlayAnimationOnceMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<StopParticlesMessage>>());
@@ -90,6 +91,7 @@ public:
 		result.push_back(std::make_unique<MessageReflectorImpl<TerminateScriptsWithTagMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<SendScriptMsgMessage>>());
 		result.push_back(std::make_unique<MessageReflectorImpl<ReturnHostScriptThreadMessage>>());
+		result.push_back(std::make_unique<MessageReflectorImpl<SetEntityVariableMessage>>());
 		return result;
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {

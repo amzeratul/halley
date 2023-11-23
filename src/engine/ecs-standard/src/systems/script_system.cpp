@@ -136,6 +136,11 @@ public:
 		scriptable->scriptable.activeStates.removeDeadStates();
 	}
 
+	void onMessageReceived(const SetEntityVariableMessage& msg, ScriptableFamily& e) override
+	{
+		e.scriptable.variables.setVariable(msg.variable, ConfigNode(msg.value));
+	}
+
 	void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) override
 	{
 		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node, std::move(params)));

@@ -143,6 +143,16 @@ message:
 
 ---
 
+message:
+  name: SetEntityVariable
+  members:
+  - variable: 'Halley::String'
+  - value: 'Halley::ConfigNode'
+  serializable: true
+  destination: host
+
+---
+
 system:
   name: Script
   families:
@@ -168,6 +178,7 @@ system:
   - TerminateScriptsWithTag: receive scriptable
   - SendScriptMsg: send receive scriptable
   - ReturnHostScriptThread: send receive scriptable
+  - SetEntityVariable: receive scriptable
   systemMessages:
   - TerminateScriptsWithTag: receive
   - StartHostScriptThread: send receive

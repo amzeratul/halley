@@ -1,4 +1,4 @@
-// Halley codegen version 124
+// Halley codegen version 127
 #pragma once
 
 #include <halley.hpp>
@@ -14,6 +14,7 @@
 #include "messages/terminate_scripts_with_tag_message.h"
 #include "messages/send_script_msg_message.h"
 #include "messages/return_host_script_thread_message.h"
+#include "messages/set_entity_variable_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
 #include "system_messages/cancel_host_script_thread_system_message.h"
@@ -73,6 +74,8 @@ public:
 
 	virtual void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) = 0;
 
+	virtual void onMessageReceived(const SetEntityVariableMessage& msg, ScriptableFamily& e) = 0;
+
 	virtual void onMessageReceived(const TerminateScriptsWithTagSystemMessage& msg) = 0;
 
 	virtual void onMessageReceived(StartHostScriptThreadSystemMessage msg) = 0;
@@ -80,7 +83,7 @@ public:
 	virtual void onMessageReceived(CancelHostScriptThreadSystemMessage msg) = 0;
 
 	ScriptSystemBase()
-		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex})
+		: System({&scriptableFamily, &embeddedScriptFamily, &targetFamily}, {StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex})
 	{
 		static_assert(std::is_final_v<T>, "System must be final.");
 	}
@@ -164,7 +167,7 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(scriptableFamily, std::array<int, 5>{ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex });
+		doProcessMessages(scriptableFamily, std::array<int, 6>{ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex });
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {
@@ -174,6 +177,7 @@ private:
 		case TerminateScriptsWithTagMessage::messageIndex: onMessagesReceived(reinterpret_cast<TerminateScriptsWithTagMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		case SendScriptMsgMessage::messageIndex: onMessagesReceived(reinterpret_cast<SendScriptMsgMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		case ReturnHostScriptThreadMessage::messageIndex: onMessagesReceived(reinterpret_cast<ReturnHostScriptThreadMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
+		case SetEntityVariableMessage::messageIndex: onMessagesReceived(reinterpret_cast<SetEntityVariableMessage**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<ScriptableFamily>&>(family)); break;
 		}
 	}
 
