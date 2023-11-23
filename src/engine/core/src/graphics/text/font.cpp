@@ -124,6 +124,9 @@ const Font& Font::getFontForGlyph(int code) const
 	const auto iter = glyphs.find(code);
 	if (iter == glyphs.end()) {
 		for (const auto& font: fallbackFont) {
+			if (fallbackIgnore.contains(font->getName())) {
+				continue;
+			}
 			if (font->glyphs.find(code) != font->glyphs.end()) {
 				return *font;
 			}
@@ -257,4 +260,11 @@ void Font::printGlyphs() const
 		}
 	}
 	std::cout << "]\n";
+}
+
+HashSet<String> Font::fallbackIgnore;
+
+void Font::setFallbackFontsIgnore(const HashSet<String>&& ignore)
+{
+	fallbackIgnore = ignore;
 }

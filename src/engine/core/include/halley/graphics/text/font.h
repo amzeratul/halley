@@ -67,6 +67,7 @@ namespace Halley
 		void deserialize(Deserializer& deserializer);
 
 		void printGlyphs() const;
+		static void setFallbackFontsIgnore(const HashSet<String>&& ignore);
 
 	private:
 		String name;
@@ -80,6 +81,7 @@ namespace Halley
 		bool distanceField;
 		Vector<std::shared_ptr<const Font>> fallbackFont;
 		Vector<String> fallback;
+		static HashSet<String> fallbackIgnore;
 		bool floorGlyphPosition;
 
 		std::shared_ptr<Material> material;
