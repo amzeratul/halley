@@ -1,6 +1,6 @@
 project (halley-vulkan)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories( "../../engine/utils/include" "../../engine/core/include" ${Vulkan_INCLUDE_DIRS} )
 
 set(SOURCES
         "src/vulkan_video.cpp"

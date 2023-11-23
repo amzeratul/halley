@@ -246,7 +246,12 @@ endif()
 
 # Vulkan
 if (USE_VULKAN)
+	find_package(Vulkan REQUIRED)
 	add_definitions(-DWITH_VULKAN)
+	add_definitions(-DVK_NO_PROTOTYPES)
+	if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		add_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
+	endif()
 endif()
 
 # WinRT

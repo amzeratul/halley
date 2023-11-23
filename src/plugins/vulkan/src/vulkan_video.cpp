@@ -1,5 +1,7 @@
 #include "vulkan_video.h"
 
+#include "volk/volk.h"
+
 // TODO VULKAN TYPES
 #include "halley/graphics/painter.h"
 #include "halley/graphics/render_target/render_target_screen.h"
@@ -14,6 +16,7 @@ VulkanVideo::VulkanVideo(SystemAPI& system)
 
 void VulkanVideo::init()
 {
+	volkInitialize();
 }
 
 void VulkanVideo::deInit()

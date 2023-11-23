@@ -2,7 +2,6 @@ project (halley-contrib)
 
 include_directories("libogg/include" "libvorbis/include" "libvorbis/lib" "yaml-cpp/include")
 
-
 set(SOURCES
         "json/jsoncpp.cpp"
 
@@ -180,6 +179,12 @@ endif()
 if(MSVC)
         add_definitions("-wd4996 -wd4244 -wd4100 -wd4267 -wd4189 -wd4305 -wd4127 -wd4703 -wd4706")
         add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
+if (USE_VULKAN)
+    include_directories( ${Vulkan_INCLUDE_DIRS} )
+    set(SOURCES ${SOURCES} "volk/volk.c")
+    set(HEADERS ${HEADERS} "volk/volk.h")
 endif()
 
 file (GLOB_RECURSE OGG_FILES "libogg/*.c")
