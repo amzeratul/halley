@@ -11,7 +11,6 @@
 
 using namespace Halley;
 
-
 RenderGraph::RenderGraph()
 {
 }
@@ -75,13 +74,20 @@ RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional<Vector2i> requestedRenderSize)
 {
 	update();
-	
+
+	std::sort(nodes.begin(), nodes.end(), [=](const auto& a, const auto& b) { return a->getPriority() > b->getPriority(); });
+
 	for (auto& node: nodes) {
 		node->startRender();
 	}
 
 	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
 	for (auto& node: nodes) {
+		if (node->method == RenderGraphMethod::RenderToTexture) {
+			node->prepareDependencyGraph(video, {}); // render size is set by methodParameters
+			continue;
+		}
+
 		if (node->method == RenderGraphMethod::Output
 			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {
 			node->prepareDependencyGraph(video, renderSize);

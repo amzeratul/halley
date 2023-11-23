@@ -13,18 +13,20 @@ namespace Halley {
     	Output,
 		ImageOutput,
 	    Paint,
-    	Overlay
+    	Overlay,
+		RenderToTexture
     };
 
 	template <>
 	struct EnumNames<RenderGraphMethod> {
-		constexpr std::array<const char*, 5> operator()() const {
+		constexpr std::array<const char*, 6> operator()() const {
 			return{{
 				"none",
 				"output",
 				"imageOutput",
 				"paint",
-				"overlay"
+				"overlay",
+				"renderToTexture"
 			}};
 		}
 	};
@@ -34,6 +36,7 @@ namespace Halley {
         class Node {
         public:        	
 	        String id;
+			int priority;
         	RenderGraphMethod method = RenderGraphMethod::None;
         	ConfigNode methodParameters;
         	Vector2f position;

@@ -20,7 +20,9 @@ namespace Halley {
 	
 	public:
 		explicit RenderGraphNode(const RenderGraphDefinition::Node& definition);
-		
+
+		int getPriority() const;
+
 	private:
 		struct OtherPin {
 			RenderGraphNode* node = nullptr;
@@ -47,7 +49,7 @@ namespace Halley {
 		void disconnectInput(uint8_t inputPin);
 
 		void startRender();
-		void prepareDependencyGraph(VideoAPI& video, Vector2i targetSize);
+		void prepareDependencyGraph(VideoAPI& video, std::optional<Vector2i> targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void prepareTextures(VideoAPI& video, const RenderContext& rc);
 		
@@ -83,6 +85,7 @@ namespace Halley {
 		bool ownRenderTarget = false;
 		bool passThrough = false;
 		int depsLeft = 0;
+		int priority = 0;
 		Vector2i currentSize;
 
 		Vector<InputPin> inputPins;

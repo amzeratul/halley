@@ -27,6 +27,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 	};
 	
 	const auto& pars = definition.methodParameters;
+	priority = definition.priority;
 
 	if (method == RenderGraphMethod::Paint) {
 		paintId = pars["paintId"].asString();
@@ -71,7 +72,16 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 	} else if (method == RenderGraphMethod::ImageOutput) {
 		setPinTypes(inputPins, {{ RenderGraphPinType::Texture }});
 		setPinTypes(outputPins, {});
+	} else if (method == RenderGraphMethod::RenderToTexture) {
+		currentSize = pars["renderSize"].asVector2i();
+		setPinTypes(inputPins, { { RenderGraphPinType::Texture } });
+		setPinTypes(outputPins, {});
 	}
+}
+
+int RenderGraphNode::getPriority() const
+{
+	return priority;
 }
 
 void RenderGraphNode::startRender()
@@ -83,18 +93,20 @@ void RenderGraphNode::startRender()
 	directOutput = nullptr;
 }
 
-void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, Vector2i targetSize)
+void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vector2i> targetSize)
 {
 	activeInCurrentPass = true;
 	
 	// Reset if render size changed
-	if (currentSize != targetSize) {
-		currentSize = targetSize;
-		resetTextures();
+	if (targetSize) {
+		if (currentSize != *targetSize) {
+			currentSize = *targetSize;
+			resetTextures();
+		}
 	}
 
 	for (auto& input: inputPins) {
-		prepareInputPin(input, video, targetSize);
+		prepareInputPin(input, video, currentSize);
 	}
 }
 

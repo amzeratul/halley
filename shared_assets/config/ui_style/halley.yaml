@@ -398,6 +398,7 @@ uiStyle:
     overlayBackground: { img: $ui_title_capsule, colour: $taskRunning }
     outputBackground: { img: $ui_title_capsule, colour: $taskError }
     imageOutputBackground: { img: $ui_title_capsule, colour: $taskError }
+    renderToTextureBackground: { img: $ui_title_capsule, colour: $taskWarning }
 
   graphConnections:
     colourBuffer: $ui_logErrorText

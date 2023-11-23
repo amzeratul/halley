@@ -18,6 +18,7 @@ RenderGraphDefinition::RenderGraphDefinition(const ConfigNode& config)
 RenderGraphDefinition::Node::Node(const ConfigNode& node)
 {
 	id = node["id"].asString();
+	priority = node["priority"].asInt(0);
 	method = fromString<RenderGraphMethod>(node["method"].asString());
 	methodParameters = ConfigNode(node["methodParameters"]);
 	position = node["position"].asVector2f(Vector2f(100, 100));
@@ -53,6 +54,7 @@ void RenderGraphDefinition::deserialize(Deserializer& s)
 void RenderGraphDefinition::Node::serialize(Serializer& s) const
 {
 	s << id;
+	s << priority;
 	s << method;
 	s << methodParameters;
 	s << position;
@@ -61,6 +63,7 @@ void RenderGraphDefinition::Node::serialize(Serializer& s) const
 void RenderGraphDefinition::Node::deserialize(Deserializer& s)
 {
 	s >> id;
+	s >> priority;
 	s >> method;
 	s >> methodParameters;
 	s >> position;
@@ -111,7 +114,9 @@ void RenderGraphDefinition::Node::generatePins()
 	if (method == RenderGraphMethod::Output) {
 		outputPins.clear();
 	} else if (method == RenderGraphMethod::ImageOutput) {
-		inputPins = {{ RenderGraphPinType::Texture, }};
+		inputPins = {{ RenderGraphPinType::Texture }};
+	} else if (method == RenderGraphMethod::RenderToTexture) {
+		inputPins = {{ RenderGraphPinType::Texture }};
 		outputPins.clear();
 	} else {
 		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
