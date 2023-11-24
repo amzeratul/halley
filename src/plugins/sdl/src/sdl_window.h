@@ -26,6 +26,7 @@ namespace Halley
 
 		void destroy();
 
+		void* getHandle() const override;
 		void* getNativeHandle() const override;
 		String getNativeHandleType() const override;
 

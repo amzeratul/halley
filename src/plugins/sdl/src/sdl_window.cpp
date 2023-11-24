@@ -142,6 +142,11 @@ void SDLWindow::destroy()
 	window = nullptr;
 }
 
+void* SDLWindow::getHandle() const
+{
+	return window;
+}
+
 void* SDLWindow::getNativeHandle() const
 {
 #ifdef _WIN32

@@ -140,6 +140,7 @@ namespace Halley
 		virtual Rect4i getWindowRect() const = 0;
 		virtual const WindowDefinition& getDefinition() const = 0;
 
+		virtual void* getHandle() const { return nullptr; }
 		virtual void* getNativeHandle() const { return nullptr; }
 		virtual String getNativeHandleType() const { return ""; }
 

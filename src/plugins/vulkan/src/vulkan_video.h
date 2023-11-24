@@ -3,6 +3,8 @@
 #include "halley/api/halley_api_internal.h"
 #include "halley/graphics/window.h"
 
+#include "vulkan/vulkan.h"
+
 namespace Halley {
 	class SystemAPI;
 
@@ -43,6 +45,11 @@ namespace Halley {
 	private:
 		SystemAPI& system;
 		std::shared_ptr<Window> window;
+
+		void initVulkan(Window& window);
+		void createInstance(Window& window);
+
+		VkInstance instance = VK_NULL_HANDLE;
 
 		bool useVsync = false;
 	};

@@ -281,9 +281,11 @@ std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& 
 	// Set flags and GL attributes
 	auto windowType = windowDef.getWindowType();
 	int flags = SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
+#if !defined(WITH_VULKAN)
 	if (glVersion) {
 		flags |= SDL_WINDOW_OPENGL;
 	}
+#endif
 	if (windowType == WindowType::BorderlessWindow) {
 		flags |= SDL_WINDOW_BORDERLESS;
 	}
@@ -303,6 +305,9 @@ std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& 
 		flags |= SDL_WINDOW_HIDDEN;
 	}
 
+#ifdef WITH_VULKAN
+	flags |= SDL_WINDOW_VULKAN;
+#else
 	// Context options
 	if (glVersion) {
 #if defined(WITH_OPENGL_ES2)
@@ -337,6 +342,7 @@ std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 	}
+#endif
 
 	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
