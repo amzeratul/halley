@@ -451,14 +451,15 @@ void SystemSDL::setGameLoopHandler(std::unique_ptr<ISystemMainLoopHandler> handl
 {
 	this->mainLoopHandler = std::move(handler);
 #ifdef __EMSCRIPTEN__
-	emscripten_request_animation_frame_loop([](double t, void* ptr) -> EM_BOOL {
+	emscripten_set_main_loop_arg([] (void* ptr) {
 		auto* system = static_cast<SystemSDL*>(ptr);
 		const bool run = system->mainLoopHandler->run();
 		if (!run) {
+			Logger::logInfo("Terminating Emscripten loop");
+			emscripten_cancel_main_loop();
 			system->mainLoopHandler = {};
 		}
-		return run ? EM_TRUE : EM_FALSE;
-	}, this);
+	}, this, -1, 1);
 #endif
 }
 

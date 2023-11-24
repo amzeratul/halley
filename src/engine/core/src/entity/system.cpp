@@ -50,7 +50,9 @@ size_t System::getEntityCount() const
 bool System::tryInit()
 {
 	if (!initialised) {
+		HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 		initBase();
+		HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 		initialised = true;
 		return true;
 	}
