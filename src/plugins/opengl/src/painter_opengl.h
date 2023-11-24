@@ -31,9 +31,7 @@ namespace Halley
 		void onUpdateProjection(Material& material, bool hashChanged) override;
 
 	private:
-#ifdef WITH_OPENGL
 		GLuint vao = 0;
-#endif
 		GLBuffer vertexBuffer;
 		GLBuffer elementBuffer;
 		GLBuffer stdQuadElementBuffer;

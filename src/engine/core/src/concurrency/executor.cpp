@@ -1,6 +1,8 @@
 #include <halley/concurrency/concurrent.h>
 #include <halley/concurrency/executor.h>
 #include <halley/support/exception.h>
+
+#include "halley/game/game_platform.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
 
@@ -57,6 +59,9 @@ void ExecutionQueue::addToQueue(TaskBase task)
 Executors::Executors()
 {
 	immediate.setImmediate(true);
+	if constexpr (getPlatform() == GamePlatform::Emscripten) {
+		videoAux.setImmediate(true);
+	}
 }
 
 Executors& Executors::get()

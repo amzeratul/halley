@@ -27,6 +27,11 @@ public:
 	bool run() override
 	{
 		try {
+			if (!coreInit) {
+				coreInit = true;
+				core->init();
+			}
+
 			loop.runStep();
 			return true;
 		} catch (std::exception& e) {
@@ -42,6 +47,7 @@ private:
 	std::unique_ptr<Core> core;
 	std::unique_ptr<GameLoader> loader;
 	MainLoop loop;
+	bool coreInit = false;
 };
 
 int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
@@ -53,7 +59,6 @@ int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::st
 		auto* system = core->getAPI().system;
 
 		if (system->mustOwnMainLoop()) {
-			core->init();
 			system->setGameLoopHandler(std::make_unique<SystemMainLoopHandler>(std::move(core), std::move(loader)));
 			return 0;
 		} else {

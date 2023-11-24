@@ -15,13 +15,11 @@ PainterOpenGL::PainterOpenGL(VideoAPI& video, Resources& resources)
 
 PainterOpenGL::~PainterOpenGL()
 {
-#ifdef WITH_OPENGL
 	if (vao != 0) {
 		glBindVertexArray(0);
 		glDeleteVertexArrays(1, &vao);
 		vao = 0;
 	}
-#endif
 }
 
 void PainterOpenGL::doStartRender()
@@ -39,7 +37,6 @@ void PainterOpenGL::doStartRender()
 	elementBuffer.init(GL_ELEMENT_ARRAY_BUFFER);
 	stdQuadElementBuffer.init(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 
-#ifdef WITH_OPENGL
 	if (vao == 0) {
 		glGenVertexArrays(1, &vao);
 		glCheckError();
@@ -50,14 +47,11 @@ void PainterOpenGL::doStartRender()
 	}
 
 	glBindVertexArray(vao);
-#endif
 }
 
 void PainterOpenGL::doEndRender()
 {
-#ifdef WITH_OPENGL
 	glBindVertexArray(0);
-#endif
 	glCheckError();
 }
 

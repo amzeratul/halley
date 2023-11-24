@@ -30,7 +30,10 @@ SDLGLContext::~SDLGLContext()
 
 void SDLGLContext::bind()
 {
-	SDL_GL_MakeCurrent(window, context);
+	const int error = SDL_GL_MakeCurrent(window, context);
+	if (error) {
+		Logger::logError("Error binding SDL GL Context: " + toString(SDL_GetError()));
+	}
 }
 
 std::unique_ptr<GLContext> SDLGLContext::createSharedContext()

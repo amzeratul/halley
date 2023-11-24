@@ -39,8 +39,6 @@ namespace Halley
 		unsigned int textureId = 0;
 		Vector2i texSize;
 		VideoOpenGL& parent;
-#if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
 		mutable GLsync fence = nullptr;
-#endif
 	};
 }

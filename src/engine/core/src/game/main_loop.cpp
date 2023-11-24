@@ -25,11 +25,25 @@ MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 void MainLoop::run()
 {
 	do {
-		runStep();
+		runLoop();
 	} while (tryReload());
 }
 
 void MainLoop::runStep()
+{
+	Clock::time_point curFrameStartTime = Clock::now();
+
+	if (target.transitionStage()) {
+		lastFrameStartTime = {};
+	}
+
+	const Time dt = lastFrameStartTime ? std::chrono::duration<double>(*lastFrameStartTime - curFrameStartTime).count() : 0.0;
+	target.onTick(dt);
+
+	lastFrameStartTime = curFrameStartTime;
+}
+
+void MainLoop::runLoop()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 
