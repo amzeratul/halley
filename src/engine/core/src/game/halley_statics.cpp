@@ -79,7 +79,7 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 	size_t nDiskIO = 1;
 	if constexpr (getPlatform() == GamePlatform::Emscripten) {
 		nAuxCPU = 0;
-		nCPU = maxThreads - 2;
+		nCPU = std::max(size_t(4), maxThreads - 4);
 	}
 
 	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), nCPU, makeThread);

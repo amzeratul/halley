@@ -5,6 +5,7 @@
 #include "halley/graphics/texture_descriptor.h"
 #include <gsl/gsl_assert>
 #include "video_opengl.h"
+#include "halley/game/game_platform.h"
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
@@ -79,7 +80,9 @@ unsigned TextureOpenGL::getNativeId() const
 void TextureOpenGL::finishLoading()
 {
 	if (parent.isLoaderThread()) {
-		fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		if constexpr (getPlatform() != GamePlatform::Emscripten) {
+			fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		}
 		glFlush();
 	}
 
@@ -91,15 +94,17 @@ void TextureOpenGL::waitForOpenGLLoad() const
 	waitForLoad();
 
 	if (fence) {
-		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GLuint64(10000000000));
-		if (result == GL_TIMEOUT_EXPIRED) {
-			//throw Exception("Timeout waiting for texture to load.");
-			Logger::logError("Timeout waiting for texture fence to sync. Graphics might be corrupted.");
+		GLuint64 timeout = GLuint64(10000000000);
+		GLenum result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
+
+		while (result == GL_TIMEOUT_EXPIRED) {
+			std::this_thread::yield();
+			result = glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
 		}
-		else if (result == GL_WAIT_FAILED) {
+
+		if (result == GL_WAIT_FAILED) {
 			glCheckError();
-		}
-		else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
+		} else if (result == GL_ALREADY_SIGNALED || result == GL_CONDITION_SATISFIED) {
 			glDeleteSync(fence);
 			fence = nullptr;
 		}
@@ -142,8 +147,9 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	}
 
-	GLuint internalFormat = getGLInternalFormat(format);
-	GLuint pixelFormat = getGLPixelFormat(format);
+	const auto internalFormat = getGLInternalFormat(format);
+	const auto pixelFormat = getGLPixelFormat(format);
+	const auto byteFormat = getGLByteFormat(format);
 
 	if (format != TextureFormat::Depth) {
 		const int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
@@ -153,9 +159,9 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	}
 
 	if (pixelData.empty()) {
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, byteFormat, nullptr);
 	} else {
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, pixelData.getBytes());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, byteFormat, pixelData.getBytes());
 	}
 	glCheckError();
 
@@ -178,18 +184,18 @@ void TextureOpenGL::updateImage(TextureDescriptorImageData& pixelData, TextureFo
 	}
 }
 
-unsigned TextureOpenGL::getGLInternalFormat(TextureFormat format)
+int TextureOpenGL::getGLInternalFormat(TextureFormat format)
 {
 	switch (format) {
 	case TextureFormat::Indexed:
 	case TextureFormat::Red:
 		return GL_R8;
 	case TextureFormat::RGB:
-		return GL_RGB;
+		return GL_RGB8;
 	case TextureFormat::RGBA:
-		return GL_RGBA;
+		return GL_RGBA8;
 	case TextureFormat::Depth:
-		return GL_DEPTH_COMPONENT24;
+		return GL_DEPTH24_STENCIL8;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
 	}
@@ -206,7 +212,22 @@ unsigned TextureOpenGL::getGLPixelFormat(TextureFormat format)
 	case TextureFormat::RGBA:
 		return GL_RGBA;
 	case TextureFormat::Depth:
-		return GL_DEPTH_COMPONENT;
+		return GL_DEPTH_STENCIL;
+	default:
+		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
+	}
+}
+
+unsigned TextureOpenGL::getGLByteFormat(TextureFormat format)
+{
+	switch (format) {
+	case TextureFormat::Indexed:
+	case TextureFormat::Red:
+	case TextureFormat::RGB:
+	case TextureFormat::RGBA:
+		return GL_UNSIGNED_BYTE;
+	case TextureFormat::Depth:
+		return GL_UNSIGNED_INT_24_8;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
 	}

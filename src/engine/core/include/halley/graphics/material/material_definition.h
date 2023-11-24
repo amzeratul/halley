@@ -204,7 +204,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 
-	class MaterialDefinition final : public Resource, public std::enable_shared_from_this<MaterialDefinition>
+	class MaterialDefinition final : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
 	{
 		friend class Material;
 		friend class MaterialParameter;
@@ -246,7 +246,7 @@ namespace Halley
 		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 
-		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
+		static std::shared_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
 
 		void setTags(Vector<String> tags);
@@ -363,7 +363,7 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		void createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes);
+		void createShader(VideoAPI& video, Resources& resources, String name, const Vector<MaterialAttribute>& attributes);
 		void replacePixelShader(const MaterialPass& pixelShaderSource, VideoAPI& video);
 
 	private:

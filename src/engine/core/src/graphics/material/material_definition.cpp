@@ -168,7 +168,27 @@ void MaterialTexture::deserialize(Deserializer& s)
 	s >> samplerType;
 }
 
-MaterialDefinition::MaterialDefinition() {}
+MaterialDefinition::MaterialDefinition() = default;
+
+std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
+{
+	auto result = std::make_shared<MaterialDefinition>(loader);
+	
+	auto* video = loader.getAPI().video;
+	auto& resources = loader.getResources();
+
+	Concurrent::execute(Executors::getVideoAux(), [result, video, &resources]()
+	{
+		int i = 0;
+		for (auto& p: result->passes) {
+			p.createShader(*video, resources, result->name + "/pass" + toString(i++), result->attributes);
+		}
+		result->initialize(*video);
+		result->doneLoading();
+	});
+
+	return result;
+}
 
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 {
@@ -176,19 +196,16 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	Deserializer s(data->getSpan());
 	s >> *this;
 
-	int i = 0;
-	for (auto& p: passes) {
-		p.createShader(loader, name + "/pass" + toString(i++), attributes);
-	}
+	startLoading();
 
-	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
+	auto& resources = loader.getResources();
+
+	fallbackTexture = resources.get<Texture>("whitebox.png");
 	for (auto& tex: textures) {
 		if (!tex.defaultTextureName.isEmpty() && !tex.defaultTextureName.startsWith("$")) {
-			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
+			tex.defaultTexture = resources.get<Texture>(tex.defaultTextureName);
 		}
 	}
-
-	initialize(*loader.getAPI().video);
 }
 
 void MaterialDefinition::initialize(VideoAPI& video)
@@ -204,8 +221,8 @@ void MaterialDefinition::initialize(VideoAPI& video)
 	uint16_t blockNumber = 0;
 	for (auto& uniformBlock: uniformBlocks) {
 		uniformBlock.addresses.resize(getNumPasses() * shaderStageCount);
-		for (int i = 0; i < getNumPasses(); ++i) {
-			auto& shader = getPass(i).getShader();
+		for (int i = 0; i < int(passes.size()); ++i) {
+			auto& shader = passes[i].getShader();
 			for (int j = 0; j < shaderStageCount; ++j) {
 				uniformBlock.addresses[i * shaderStageCount + j] = shader.getBlockLocation(uniformBlock.name, static_cast<ShaderType>(j));
 			}
@@ -348,11 +365,6 @@ void MaterialDefinition::addPass(MaterialPass materialPass)
 	passes.push_back(std::move(materialPass));
 }
 
-std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
-{
-	return std::make_unique<MaterialDefinition>(loader);
-}
-
 void MaterialDefinition::setTags(Vector<String> tags)
 {
 	this->tags = std::move(tags);
@@ -396,6 +408,7 @@ bool MaterialDefinition::isColumnMajor() const
 
 std::shared_ptr<const Material> MaterialDefinition::getMaterial() const
 {
+	waitForLoad();
 	auto m = material.lock();
 	if (!m) {
 		m = makeMaterial();
@@ -733,10 +746,9 @@ void MaterialPass::deserialize(Deserializer& s)
 	s >> enabled;
 }
 
-void MaterialPass::createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes)
+void MaterialPass::createShader(VideoAPI& video, Resources& resources, String name, const Vector<MaterialAttribute>& attributes)
 {
-	auto& video = *(loader.getAPI().video);
-	auto shaderData = loader.getResources().get<ShaderFile>(shaderAssetId + ":" + video.getShaderLanguage());
+	auto shaderData = resources.get<ShaderFile>(shaderAssetId + ":" + video.getShaderLanguage());
 
 	auto definition = std::make_shared<ShaderDefinition>();
 	definition->name = name;
@@ -745,7 +757,7 @@ void MaterialPass::createShader(ResourceLoader& loader, String name, const Vecto
 
 	shader = video.createShader(*definition);
 
-	if (loader.getResources().getOptions().retainShaderData) {
+	if (resources.getOptions().retainShaderData) {
 		shaderDefinition = std::move(definition);
 	}
 }
