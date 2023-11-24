@@ -91,6 +91,9 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 	} else if (dstLanguage == "glsl410") {
 		target.language = ShadingLanguage::Glsl;
 		target.version = "410";
+	} else if (dstLanguage == "glsl300es") {
+		target.language = ShadingLanguage::Essl;
+		target.version = "300";
 	} else if (dstLanguage == "metal") {
 		target.language = ShadingLanguage::Msl_macOS;
 		target.version = "221";

@@ -56,22 +56,10 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
 	glCheckError();
 
 	// Load source
-#ifdef WITH_OPENGL_ES3
-    size_t startPos = 0;
-    if (src.size() >= 13 && memcmp(src.data(), "#version 330", 12) == 0) {
-        startPos = 12;
-    }
-    size_t len = src.size() + 15 - startPos;
-    GLchar* buffer = new GLchar[len + 1];
-    memcpy(buffer, "#version 300 es", 15);
-    memcpy(buffer + 15, src.data() + startPos, len - 15);
-    buffer[len] = 0;
-#else
 	size_t len = src.size();
 	GLchar* buffer = new GLchar[len + 1];
 	memcpy(buffer, src.data(), src.size());
 	buffer[len] = 0;
-#endif
 
 	// Set source
     const char* cbuf = buffer;

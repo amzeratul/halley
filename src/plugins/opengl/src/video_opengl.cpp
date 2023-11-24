@@ -265,6 +265,8 @@ String VideoOpenGL::getShaderLanguage()
 {
 #if defined(HALLEY_OPENGL_USE_GLSL410)
 	return "glsl410";
+#elif defined(WITH_OPENGL_ES3)
+	return "glsl300es";
 #else
 	return getPlatform() != GamePlatform::MacOS ? "glsl" : "glsl410";
 #endif
