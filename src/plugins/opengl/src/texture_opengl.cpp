@@ -242,6 +242,8 @@ unsigned TextureOpenGL::getGLAddressMode(TextureAddressMode addressMode)
 		return GL_MIRRORED_REPEAT;
 	case TextureAddressMode::Repeat:
 		return GL_REPEAT;
+	case TextureAddressMode::Border:
+		return GL_CLAMP_TO_BORDER;
 	default:
 		throw Exception("Unknown texture address mode: " + toString(addressMode), HalleyExceptions::VideoPlugin);
 	}

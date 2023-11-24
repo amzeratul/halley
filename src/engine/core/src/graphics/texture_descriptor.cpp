@@ -155,8 +155,8 @@ int TextureDescriptor::getBytesPerPixel(TextureFormat format)
 	case TextureFormat::RGBA:
 	case TextureFormat::BGRX:
 	case TextureFormat::SRGBA:
-		return 4;
 	case TextureFormat::Depth:
+		return 4;
 	case TextureFormat::RGB:
 		return 3;
 	case TextureFormat::BGR565:
