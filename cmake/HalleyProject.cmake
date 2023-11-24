@@ -522,7 +522,9 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	endif()
 
 	if (EMSCRIPTEN)
-		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun -sPTHREAD_POOL_SIZE=16 -sPTHREAD_POOL_SIZE_STRICT=0 -sNO_DISABLE_EXCEPTION_CATCHING -sALLOW_MEMORY_GROWTH -sDEMANGLE_SUPPORT=1 -sNO_EXIT_RUNTIME=1 --preload-file ../assets@assets")
+		set_target_properties(${name} PROPERTIES LINK_FLAGS "-s USE_WEBGL2=1 -s MAX_WEBGL_VERSION=2 -s USE_SDL=2 -error-limit=0 --emrun\
+			-sPTHREAD_POOL_SIZE=16 -sPTHREAD_POOL_SIZE_STRICT=0 -sNO_DISABLE_EXCEPTION_CATCHING -sALLOW_MEMORY_GROWTH -sDEMANGLE_SUPPORT=1\
+			-sNO_EXIT_RUNTIME=1 -sOFFSCREENCANVAS_SUPPORT --preload-file ../assets@assets")
 	endif()
 
 	SET(LINK_LIBRARIES "")

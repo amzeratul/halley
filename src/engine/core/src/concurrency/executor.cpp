@@ -59,9 +59,6 @@ void ExecutionQueue::addToQueue(TaskBase task)
 Executors::Executors()
 {
 	immediate.setImmediate(true);
-	if constexpr (getPlatform() == GamePlatform::Emscripten) {
-		videoAux.setImmediate(true);
-	}
 }
 
 Executors& Executors::get()
