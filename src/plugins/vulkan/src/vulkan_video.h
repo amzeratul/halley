@@ -48,8 +48,10 @@ namespace Halley {
 
 		void initVulkan(Window& window);
 		void createInstance(Window& window);
+		void createDebugCallback();
 
 		VkInstance instance = VK_NULL_HANDLE;
+		VkDebugUtilsMessengerEXT debugUtils = VK_NULL_HANDLE;
 
 		bool useVsync = false;
 	};
