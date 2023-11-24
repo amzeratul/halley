@@ -21,9 +21,8 @@ void TextureRenderTargetOpenGL::onBind(Painter&)
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glCheckError();
 
-	static GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7, GL_COLOR_ATTACHMENT8 };
+	static GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
 	glDrawBuffers(int(colourBuffer.size()), buffers);
-
 	glCheckError();
 }
 
@@ -47,7 +46,7 @@ void TextureRenderTargetOpenGL::init()
 			glCheckError();
 		}
 		if (depthStencilBuffer) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*depthStencilBuffer).getNativeId(), 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*depthStencilBuffer).getNativeId(), 0);
 			glCheckError();
 		}
 
@@ -87,10 +86,12 @@ bool ScreenRenderTargetOpenGL::getViewportFlipVertical() const
 void ScreenRenderTargetOpenGL::onBind(Painter&)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glCheckError();
+
 #ifdef WITH_OPENGL
+	// This is illegal in OpenGL ES
 	GLuint buffer = GL_BACK_LEFT;
 	glDrawBuffers(1, &buffer);
-#else
-	// TODO?
+	glCheckError();
 #endif
 }

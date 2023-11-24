@@ -102,7 +102,7 @@ void VideoOpenGL::initOpenGL()
 	// Create OpenGL context
 	context = system.createGLContext();
 	context->bind();
-	
+
 	initGLBindings();
 
 	// Print OpenGL data
@@ -177,8 +177,8 @@ void VideoOpenGL::onSuspend()
 		glDebugMessageCallback(nullptr, nullptr);
 		glCheckError();
 	}
-	loaderThread.reset();
 #endif
+	loaderThread.reset();
 }
 
 void VideoOpenGL::onResume()
