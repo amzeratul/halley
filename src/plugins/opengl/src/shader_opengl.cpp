@@ -195,11 +195,11 @@ int ShaderOpenGL::getUniformLocation(const String& name, ShaderType stage)
 		return int(i->second);
 	}
 
-	unsigned int result = glGetUniformLocation(id, name.c_str());
+	const auto result = glGetUniformLocation(id, name.c_str());
 	glCheckError();
 
 	uniformLocations[name] = result;
-	return int(result);
+	return result;
 }
 
 int ShaderOpenGL::getBlockLocation(const String& name, ShaderType stage)

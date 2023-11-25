@@ -16,6 +16,7 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 	, parent(parent)
 {
 	glGenTextures(1, &textureId);
+	assert(textureId != 0);
 	startLoading();
 }
 
@@ -35,6 +36,10 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 	size = other.size;
 	textureId = other.textureId;
 	texSize = other.texSize;
+	descriptor = std::move(other.descriptor);
+
+	other.textureId = 0;
+	other.texSize = {};
 
 	doneLoading();
 
@@ -124,8 +129,8 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 {
 	Expects(size.x > 0);
 	Expects(size.y > 0);
-	Expects(size.x <= 4096);
-	Expects(size.y <= 4096);
+	//Expects(size.x <= 4096);
+	//Expects(size.y <= 4096);
 	glCheckError();
 
 #if defined (WITH_OPENGL)
@@ -242,8 +247,10 @@ unsigned TextureOpenGL::getGLAddressMode(TextureAddressMode addressMode)
 		return GL_MIRRORED_REPEAT;
 	case TextureAddressMode::Repeat:
 		return GL_REPEAT;
+#ifdef WITH_OPENGL
 	case TextureAddressMode::Border:
 		return GL_CLAMP_TO_BORDER;
+#endif
 	default:
 		throw Exception("Unknown texture address mode: " + toString(addressMode), HalleyExceptions::VideoPlugin);
 	}
