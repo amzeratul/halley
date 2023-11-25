@@ -7,7 +7,7 @@ namespace Halley
 	class SDLWindow final : public Window
 	{
 	public:
-		SDLWindow(SDL_Window* window);
+		SDLWindow(SDL_Window* window, bool owning = true);
 
 		void update(const WindowDefinition& definition) override;
 		void updateDefinition(const WindowDefinition& definition);
@@ -33,6 +33,7 @@ namespace Halley
 
 	private:
 		SDL_Window* window;
+		bool owning;
 		std::unique_ptr<WindowDefinition> curDefinition;
 	};
 }

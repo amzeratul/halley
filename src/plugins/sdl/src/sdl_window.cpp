@@ -21,8 +21,9 @@
 using namespace Halley;
 
 
-SDLWindow::SDLWindow(SDL_Window* window)
+SDLWindow::SDLWindow(SDL_Window* window, bool owning)
 	: window(window)
+	, owning(owning)
 {
 #ifdef _WIN32
 	SDL_SysWMinfo wminfo;
@@ -45,7 +46,7 @@ static Vector2i getCenteredWindow(Vector2i size, int screen)
 
 void SDLWindow::update(const WindowDefinition& definition)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
 	return;
 #endif
 
@@ -137,8 +138,10 @@ void SDLWindow::resize(Rect4i windowSize)
 
 void SDLWindow::destroy()
 {
-	SDL_HideWindow(window);
-	SDL_DestroyWindow(window);
+	if (owning && window) {
+		SDL_HideWindow(window);
+		SDL_DestroyWindow(window);
+	}
 	window = nullptr;
 }
 

@@ -16,12 +16,16 @@ SDLGLContext::SDLGLContext(SDL_Window* window)
 	EmscriptenWebGLContextAttributes attr;
 	emscripten_webgl_init_context_attributes(&attr);
 	attr.majorVersion = 3;
-	attr.stencil = 1;
+	attr.minorVersion = 0;
+	attr.stencil = true;
 	attr.proxyContextToMainThread = EMSCRIPTEN_WEBGL_CONTEXT_PROXY_ALWAYS;
+	attr.renderViaOffscreenBackBuffer = true;
+	attr.explicitSwapControl = true;
 	context = emscripten_webgl_create_context("#canvas", &attr);
 	if (context < 0) {
 		Logger::logError("Failed to initialize Emscripten WebGL context with error " + toString(int(context)));
 	}
+	emscripten_webgl_make_context_current(context);
 	sharedContext = context;
 #else
 	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);

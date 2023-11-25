@@ -30,6 +30,11 @@ using namespace Halley;
 	#endif
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
+
 void VideoOpenGL::init()
 {
 	setUpEnumMap();
@@ -307,6 +312,10 @@ void VideoOpenGL::startRender()
 {
 	HALLEY_DEBUG_TRACE();
 
+	context->bind();
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	// TODO
 	/*
 	if (!TextureLoadQueue::hasLoaderThread()) {
@@ -329,6 +338,10 @@ void VideoOpenGL::finishRender()
 void VideoOpenGL::flip()
 {
 	window->swap();
+
+#ifdef __EMSCRIPTEN__
+	emscripten_webgl_commit_frame();
+#endif
 
 	Vector<std::function<void()>> msgs;
 	{

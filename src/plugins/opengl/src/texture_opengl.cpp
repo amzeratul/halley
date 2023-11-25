@@ -158,7 +158,7 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 
 	if (format != TextureFormat::Depth) {
 		const int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format));
+		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBytesPerPixel(format) == 4 ? 4 : 1);
 		glPixelStorei(GL_PACK_ROW_LENGTH, stride);
 		glCheckError();
 	}

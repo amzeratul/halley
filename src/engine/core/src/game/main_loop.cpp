@@ -37,7 +37,7 @@ void MainLoop::runStep()
 		lastFrameStartTime = {};
 	}
 
-	const Time dt = lastFrameStartTime ? std::chrono::duration<double>(*lastFrameStartTime - curFrameStartTime).count() : 0.0;
+	const Time dt = lastFrameStartTime ? std::chrono::duration<double>(curFrameStartTime - *lastFrameStartTime).count() : 0.0;
 	target.onTick(dt);
 
 	lastFrameStartTime = curFrameStartTime;
