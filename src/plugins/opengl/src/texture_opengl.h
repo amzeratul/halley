@@ -32,7 +32,7 @@ namespace Halley
 		static int getGLInternalFormat(TextureFormat format);
 		static unsigned int getGLPixelFormat(TextureFormat format);
 		static unsigned int getGLByteFormat(TextureFormat format);
-		static unsigned int getGLAddressMode(TextureAddressMode addressMode);
+		static int getGLAddressMode(TextureAddressMode addressMode);
 
 		void waitForOpenGLLoad() const;
 		void finishLoading();

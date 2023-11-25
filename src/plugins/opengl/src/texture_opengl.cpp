@@ -139,11 +139,11 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	}
 #endif
 
-	GLuint wrap = getGLAddressMode(addressMode);
+	const auto wrap = getGLAddressMode(addressMode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 
-	int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
+	const int filtering = useFiltering ? GL_LINEAR : GL_NEAREST;
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, useMipMap ? GL_LINEAR_MIPMAP_LINEAR : filtering);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
@@ -238,7 +238,7 @@ unsigned TextureOpenGL::getGLByteFormat(TextureFormat format)
 	}
 }
 
-unsigned TextureOpenGL::getGLAddressMode(TextureAddressMode addressMode)
+int TextureOpenGL::getGLAddressMode(TextureAddressMode addressMode)
 {
 	switch (addressMode) {
 	case TextureAddressMode::Clamp:
