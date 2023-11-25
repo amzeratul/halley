@@ -179,7 +179,7 @@ void ShaderOpenGL::destroy()
 
 void ShaderOpenGL::setUniformBlockBinding(unsigned int blockIndex, unsigned int binding)
 {
-	glUniformBlockBinding(id, blockIndex, binding);
+	//glUniformBlockBinding(id, blockIndex, binding);
 	glCheckError();
 }
 

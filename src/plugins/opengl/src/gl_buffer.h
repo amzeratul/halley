@@ -13,7 +13,7 @@ namespace Halley
 
 		void bind();
 		void bindToTarget(GLuint index);
-		void init(GLenum target, GLenum usage = GL_STREAM_DRAW);
+		void init(GLenum target, GLenum usage = GL_DYNAMIC_DRAW);
 		void setData(gsl::span<const gsl::byte> data);
 		size_t getSize() const;
 
