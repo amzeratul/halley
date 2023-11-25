@@ -188,27 +188,53 @@ void GLUtils::setBlendType(BlendType type)
 	}
 }
 
-static GLenum getDepthComparison(DepthStencilComparisonFunction func)
-{
-	switch (func) {
-	case DepthStencilComparisonFunction::Always:
+
+namespace {
+	GLenum getDepthStencilComparison(DepthStencilComparisonFunction func)
+	{
+		switch (func) {
+		case DepthStencilComparisonFunction::Always:
+			return GL_ALWAYS;
+		case DepthStencilComparisonFunction::Never:
+			return GL_NEVER;
+		case DepthStencilComparisonFunction::Less:
+			return GL_LESS;
+		case DepthStencilComparisonFunction::LessEqual:
+			return GL_LEQUAL;
+		case DepthStencilComparisonFunction::Greater:
+			return GL_GREATER;
+		case DepthStencilComparisonFunction::GreaterEqual:
+			return GL_GEQUAL;
+		case DepthStencilComparisonFunction::Equal:
+			return GL_EQUAL;
+		case DepthStencilComparisonFunction::NotEqual:
+			return GL_NOTEQUAL;
+		}
 		return GL_ALWAYS;
-	case DepthStencilComparisonFunction::Never:
-		return GL_NEVER;
-	case DepthStencilComparisonFunction::Less:
-		return GL_LESS;
-	case DepthStencilComparisonFunction::LessEqual:
-		return GL_LEQUAL;
-	case DepthStencilComparisonFunction::Greater:
-		return GL_GREATER;
-	case DepthStencilComparisonFunction::GreaterEqual:
-		return GL_GEQUAL;
-	case DepthStencilComparisonFunction::Equal:
-		return GL_EQUAL;
-	case DepthStencilComparisonFunction::NotEqual:
-		return GL_NOTEQUAL;
 	}
-	return GL_ALWAYS;
+
+	GLenum getStencilOp(StencilWriteOperation op)
+	{
+		switch (op) {
+		case StencilWriteOperation::Keep:
+			return GL_KEEP;
+		case StencilWriteOperation::Zero:
+			return GL_ZERO;
+		case StencilWriteOperation::Replace:
+			return GL_REPLACE;
+		case StencilWriteOperation::Invert:
+			return GL_INVERT;
+		case StencilWriteOperation::IncrementWrap:
+			return GL_INCR_WRAP;
+		case StencilWriteOperation::DecrementWrap:
+			return GL_DECR_WRAP;
+		case StencilWriteOperation::IncrementClamp:
+			return GL_INCR;
+		case StencilWriteOperation::DecrementClamp:
+			return GL_DECR;
+		}
+		return GL_KEEP;
+	}
 }
 
 void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
@@ -220,10 +246,21 @@ void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
 	}
 	glCheckError();
 
+	if (depthStencil.isStencilTestEnabled()) {
+		glEnable(GL_STENCIL_TEST);
+
+		glStencilMask(depthStencil.getStencilWriteMask());
+		glStencilFunc(getDepthStencilComparison(depthStencil.getStencilComparisonFunction()), depthStencil.getStencilReference(), depthStencil.getStencilReadMask());
+		glStencilOp(getStencilOp(depthStencil.getStencilOpStencilFail()), getStencilOp(depthStencil.getStencilOpDepthFail()), getStencilOp(depthStencil.getStencilOpPass()));
+	} else {
+		glDisable(GL_STENCIL_TEST);
+	}
+	glCheckError();
+
 	glDepthMask(depthStencil.isDepthWriteEnabled() ? GL_TRUE : GL_FALSE);
 	glCheckError();
 
-	glDepthFunc(getDepthComparison(depthStencil.getDepthComparisonFunction()));
+	glDepthFunc(getDepthStencilComparison(depthStencil.getDepthComparisonFunction()));
 	glCheckError();
 }
 

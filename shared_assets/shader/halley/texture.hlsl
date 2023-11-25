@@ -18,14 +18,14 @@ float4 sampleHorizontalAA(Texture2D tex, float2 coord) {
 
     float p0t = (1.0 - frac(p0.x)) * t0.a;
     float p1t = (frac(p1.x)) * t1.a;
-    if (p0t + p1t < 0.01) {
-        return float4(0, 0, 0, 0);
-    }
+    //if (p0t + p1t < 0.01) {
+    //    return float4(0, 0, 0, 0);
+    //}
     
     float4 tl = lerp(t1, t0, t0.a);
     float4 tr = lerp(t0, t1, t1.a);
 
-    float amount = p1t / (p0t + p1t);
+    float amount = p1t / max(p0t + p1t, 0.01);
     float alpha = amount < 0.5 ? t0.a : t1.a;
     float4 result = lerp(tl, tr, amount);
     result.a = alpha;

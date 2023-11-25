@@ -18,6 +18,9 @@ ShaderOpenGL::ShaderOpenGL(const ShaderDefinition& definition)
 {
 	id = glCreateProgram();
 	glCheckError();	
+#ifdef WITH_OPENGL
+	glObjectLabel(GL_PROGRAM, id, -1, name.c_str());
+#endif
 
 	name = definition.name;
 	//setAttributes(definition.vertexAttributes);
@@ -54,6 +57,9 @@ static GLuint loadShader(const Bytes& src, GLenum type, String name)
 	// Create shader
 	GLuint shader = glCreateShader(type);
 	glCheckError();
+#ifdef WITH_OPENGL
+	glObjectLabel(GL_SHADER, shader, -1, name.c_str());
+#endif
 
 	// Load source
 	size_t len = src.size();

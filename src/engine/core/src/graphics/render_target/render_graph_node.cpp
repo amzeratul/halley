@@ -195,6 +195,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 
 	const auto size = Vector2i::max(currentSize, Vector2i(4, 4));
 	auto texture = video.createTexture(size);
+	texture->setAssetId("renderGraph/" + id + "/" + (type == RenderGraphPinType::ColourBuffer ? "colour" : "depthStencil"));
 
 	auto desc = TextureDescriptor(size, type == RenderGraphPinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;

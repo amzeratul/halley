@@ -393,6 +393,7 @@ Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_p
 {
 	if (image && image->getSize().x > 0 && image->getSize().y > 0) {
 		auto tex = std::shared_ptr<Texture>(videoAPI.createTexture(image->getSize()));
+		tex->setAssetId(image->getAssetId());
 		TextureDescriptor desc(image->getSize(), TextureFormat::RGBA);
 		desc.pixelData = std::move(image);
 		tex->startLoading();

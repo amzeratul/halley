@@ -170,6 +170,10 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	}
 	glCheckError();
 
+#ifdef WITH_OPENGL
+	glObjectLabel(GL_TEXTURE, textureId, -1, getAssetId().c_str());
+#endif
+
 	texSize = size;
 }
 

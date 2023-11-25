@@ -161,6 +161,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	}
 
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
+	texture->setAssetId(loader.getName());
 	texture->setMeta(meta);
 	bool retain = loader.getResources().getOptions().retainPixelData;
 
