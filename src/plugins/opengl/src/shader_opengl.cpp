@@ -19,7 +19,7 @@ ShaderOpenGL::ShaderOpenGL(const ShaderDefinition& definition)
 	id = glCreateProgram();
 	glCheckError();	
 #ifdef WITH_OPENGL
-	glObjectLabel(GL_PROGRAM, id, -1, name.c_str());
+	glObjectLabel(GL_PROGRAM, id, -1, definition.name.c_str());
 #endif
 
 	name = definition.name;
@@ -185,7 +185,7 @@ void ShaderOpenGL::destroy()
 
 void ShaderOpenGL::setUniformBlockBinding(unsigned int blockIndex, unsigned int binding)
 {
-	//glUniformBlockBinding(id, blockIndex, binding);
+	glUniformBlockBinding(id, blockIndex, binding);
 	glCheckError();
 }
 
@@ -220,11 +220,17 @@ int ShaderOpenGL::getBlockLocation(const String& name, ShaderType stage)
 		return int(i->second);
 	}
 
-	unsigned int result = glGetUniformBlockIndex(id, name.c_str());
+	auto result = glGetUniformBlockIndex(id, name.c_str());
 	glCheckError();
 
-	blockLocations[name] = result;
-	return int(result);
+	if (result == GL_INVALID_INDEX) {
+		const auto nameAlt = "type_" + name;
+		result = glGetUniformBlockIndex(id, nameAlt.c_str());
+	}
+
+	const int value = result == GL_INVALID_INDEX ? -1 : static_cast<int>(result);
+	blockLocations[name] = value;
+	return value;
 }
 
 int ShaderOpenGL::getAttributeLocation(const String& name)

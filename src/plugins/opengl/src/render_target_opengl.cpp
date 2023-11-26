@@ -91,7 +91,9 @@ void ScreenRenderTargetOpenGL::onBind(Painter&)
 #ifdef WITH_OPENGL
 	// This is illegal in OpenGL ES
 	GLuint buffer = GL_BACK_LEFT;
+#else
+	GLuint buffer = GL_BACK;
+#endif
 	glDrawBuffers(1, &buffer);
 	glCheckError();
-#endif
 }

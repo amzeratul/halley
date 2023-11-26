@@ -16,5 +16,6 @@ namespace Halley
 
 	private:
 		static void patchGLSL410(const String& name, ShaderType type, Bytes& data);
+		static void patchGLSLCombinedTexSamplers(const String& name, ShaderType type, Bytes& data);
 	};
 }

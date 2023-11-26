@@ -21,6 +21,7 @@ SDLGLContext::SDLGLContext(SDL_Window* window)
 	attr.proxyContextToMainThread = EMSCRIPTEN_WEBGL_CONTEXT_PROXY_ALWAYS;
 	attr.renderViaOffscreenBackBuffer = true;
 	attr.explicitSwapControl = true;
+	attr.premultipliedAlpha = false;
 	context = emscripten_webgl_create_context("#canvas", &attr);
 	if (context < 0) {
 		Logger::logError("Failed to initialize Emscripten WebGL context with error " + toString(int(context)));

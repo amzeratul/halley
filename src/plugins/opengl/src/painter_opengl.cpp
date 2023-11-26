@@ -6,6 +6,7 @@
 #include "render_target_opengl.h"
 #include "halley/graphics/material/material_parameter.h"
 #include "texture_opengl.h"
+#include "halley/game/game_platform.h"
 
 using namespace Halley;
 
@@ -108,6 +109,15 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 
 void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 {
+	bool supportsShaderTextureBinding = false;
+	bool supportsShaderBlockBinding = false;
+#ifdef WITH_OPENGL
+	if constexpr (getPlatform() != GamePlatform::MacOS) {
+		supportsShaderTextureBinding = true;
+		supportsShaderBlockBinding = true;
+	}
+#endif
+
 	auto& pass = material.getDefinition().getPass(passNumber);
 
 	glUtils->setScissor(clipping.value_or(Rect4i()), clipping.has_value());
@@ -120,30 +130,33 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	shader.bind();
 
 	// Bind constant buffer
-	// TODO: move this logic to Painter?
-	for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
-		const auto& dataBlock = material.getDataBlocks()[i];
-		const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
-		int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
-		if (address == -1) {
-			address = dataBlock.getBindPoint();
+	if (!supportsShaderBlockBinding) {
+		for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
+			const auto& dataBlock = material.getDataBlocks()[i];
+			const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
+			int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
+			if (address == -1) {
+				address = dataBlock.getBindPoint();
+			}
+			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 		}
-		shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
 	}
 
 	// Bind textures
 	// TODO: move this logic to Painter?
 	int textureUnit = 0;
 	for (auto& tex: material.getDefinition().getTextures()) {
-		int location = tex.getAddress(passNumber, ShaderType::Combined);
-		if (location == -1) {
-			location = textureUnit;
-		}
 		auto texture = std::static_pointer_cast<const TextureOpenGL>(material.getTexture(textureUnit));
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);					
 		} else {
-			//glUniform1i(location, textureUnit);
+			int location = tex.getAddress(passNumber, ShaderType::Combined);
+			if (location == -1) {
+				location = textureUnit;
+			}
+			if (!supportsShaderTextureBinding) {
+				glUniform1i(location, textureUnit);
+			}
 			texture->bind(textureUnit);
 		}
 		++textureUnit;

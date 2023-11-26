@@ -17,6 +17,10 @@
 #pragma comment(lib, "D3DCompiler.lib")
 #endif
 
+#ifdef min
+#undef min
+#endif
+
 using namespace Halley;
 
 thread_local String glsl410ShaderName;
@@ -75,6 +79,7 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 	options.shiftAllTexturesBindings = 0;
 	options.shiftAllUABuffersBindings = 0;
 	options.inheritCombinedSamplerBindings = true;
+	
 
 	Compiler::SourceDesc source = {};
 	source.fileName = name.c_str();
@@ -99,12 +104,7 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 		target.version = "221";
 	} else if (dstLanguage == "spirv") {
 		target.language = ShadingLanguage::SpirV;
-#ifdef __APPLE__
 		target.version = "15";
-#else
-		target.version = "460";
-#endif
-
 	}
 	
 	auto result = Compiler::Compile(source, options, target);
@@ -119,6 +119,10 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 
 	if (dstLanguage == "glsl410") {
 		patchGLSL410(name, type, bytes);
+	}
+	
+	if (dstLanguage == "glsl300es" || dstLanguage == "glsl") {
+		patchGLSLCombinedTexSamplers(name, type, bytes);
 	}
 
 	return bytes;
@@ -379,4 +383,35 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 
 	data.resize(code.size() - 1);
 	memcpy(data.data(), code.c_str(), data.size());
+}
+
+void ShaderImporter::patchGLSLCombinedTexSamplers(const String& name, ShaderType type, Bytes& data)
+{
+	String source(reinterpret_cast<const char*>(data.data()), data.size());
+
+	HashMap<String, String> remaps;
+
+	auto findMatches = [&](const String& matchPattern) {
+		for (size_t pos = 0; (pos = source.find(matchPattern.c_str(), pos)) != std::string::npos; ) {
+			const size_t imageStart = pos + matchPattern.length();
+			const size_t imageEnd = std::min(source.find("sampler", imageStart), source.find("SPIRV_Cross", imageStart));
+			const size_t combinedEnd = source.find(";", imageEnd);
+
+			const String imageName = source.substr(imageStart, imageEnd - imageStart);
+			const String combinedName = "SPIRV_Cross_Combined" + source.substr(imageStart, combinedEnd - imageStart);
+			remaps[combinedName] = imageName;
+
+			pos = combinedEnd;
+		}
+	};
+
+	findMatches("uniform highp sampler2D SPIRV_Cross_Combined");
+	findMatches("uniform sampler2D SPIRV_Cross_Combined");
+
+	for (const auto& [k, v]: remaps) {
+		source = source.replaceAll(k, v);
+	}
+
+	data.resize(source.length());
+	memcpy(data.data(), source.c_str(), data.size());
 }
