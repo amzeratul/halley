@@ -1,6 +1,6 @@
 #include "halley/sprite_attribute.hlsl"
 
-Texture2D tex0 : register(t0);
+Texture2D image : register(t0);
 SamplerState sampler0 : register(s0);
 
 cbuffer TexParams : register(b1) {
@@ -17,6 +17,6 @@ float4 smoothPixel(Texture2D tex, float2 uv, float sharpness)
 }
 
 float4 main(VOut input) : SV_TARGET {
-    float4 col = smoothPixel(tex0, input.texCoord0.xy, 1.0);
+    float4 col = smoothPixel(image, input.texCoord0.xy, 1.0);
     return col * input.colour + input.colourAdd * col.a;
 }

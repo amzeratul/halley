@@ -204,6 +204,10 @@ int ShaderOpenGL::getUniformLocation(const String& name, ShaderType stage)
 	const auto result = glGetUniformLocation(id, name.c_str());
 	glCheckError();
 
+	if (result == -1) {
+		Logger::logError("Failed to get texture address for \"" + name + "\" on " + this->name);
+	}
+
 	uniformLocations[name] = result;
 	return result;
 }

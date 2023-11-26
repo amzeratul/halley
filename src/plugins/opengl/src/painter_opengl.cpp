@@ -113,8 +113,8 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	bool supportsShaderBlockBinding = false;
 #ifdef WITH_OPENGL
 	if constexpr (getPlatform() != GamePlatform::MacOS) {
-		supportsShaderTextureBinding = true;
-		supportsShaderBlockBinding = true;
+		//supportsShaderTextureBinding = true;
+		//supportsShaderBlockBinding = true;
 	}
 #endif
 
@@ -156,6 +156,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 			}
 			if (!supportsShaderTextureBinding) {
 				glUniform1i(location, textureUnit);
+				glCheckError();
 			}
 			texture->bind(textureUnit);
 		}
