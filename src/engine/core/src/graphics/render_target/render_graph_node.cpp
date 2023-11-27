@@ -42,8 +42,16 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
 		
-		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
-		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+		Vector<RenderGraphPinType> inputPinTypes;
+		inputPinTypes.reserve(2 + definition.methodParameters["inputTexCount"].asInt(0));
+		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
+		inputPinTypes.push_back(RenderGraphPinType::DepthStencilBuffer);
+		for (size_t i = 0; i < definition.methodParameters["inputTexCount"].asInt(0); ++i) {
+			inputPinTypes.push_back(RenderGraphPinType::Texture);
+		}
+
+		setPinTypes(inputPins, inputPinTypes);
+		setPinTypes(outputPins, { { RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer } });
 	} else if (method == RenderGraphMethod::Overlay) {
 		overlayMethod = std::make_shared<Material>(definition.material);
 
@@ -74,8 +82,19 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(outputPins, {});
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		currentSize = pars["renderSize"].asVector2i();
-		setPinTypes(inputPins, { { RenderGraphPinType::Texture } });
-		setPinTypes(outputPins, {});
+		paintId = pars["paintId"].asString();
+		cameraId = pars["cameraId"].asString();
+		if (pars.hasKey("colourClear")) {
+			colourClear = Colour4f::fromString(pars["colourClear"].asString());
+		}
+		if (pars.hasKey("depthClear")) {
+			depthClear = pars["depthClear"].asFloat();
+		}
+		if (pars.hasKey("stencilClear")) {
+			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
+		}
+
+		setPinTypes(outputPins, {{ RenderGraphPinType::Texture }});
 	}
 }
 
@@ -98,7 +117,7 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 	activeInCurrentPass = true;
 	
 	// Reset if render size changed
-	if (targetSize) {
+	if (targetSize && method != RenderGraphMethod::RenderToTexture) {
 		if (currentSize != *targetSize) {
 			currentSize = *targetSize;
 			resetTextures();
@@ -116,7 +135,7 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 		// Connected to another node
 		++depsLeft;
 
-		if (input.other.node->activeInCurrentPass) {
+		if (input.other.node->activeInCurrentPass && input.other.node->method != RenderGraphMethod::RenderToTexture) {
 			if (input.other.node->currentSize != targetSize) {
 				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
 			}
@@ -133,7 +152,12 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 		ownRenderTarget = false;
 		return;
 	}
-	
+
+	if (method == RenderGraphMethod::RenderToTexture) {
+		ownRenderTarget = true;
+		return;
+	}
+
 	// Figure out if we can short-circuit this render context
 	bool hasOutputPinsWithMultipleConnections = false;
 	bool hasMultipleRenderNodeOutputs = false;
@@ -218,6 +242,12 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 {
 	getRenderTarget(video);
 
+	if (method == RenderGraphMethod::RenderToTexture) {
+		renderTarget->setTarget(0, makeTexture(video, RenderGraphPinType::ColourBuffer));
+		renderTarget->setDepthTexture(makeTexture(video, RenderGraphPinType::DepthStencilBuffer));
+		return;
+	}
+
 	if (!passThrough) {
 		int colourIdx = 0;
 		for (auto& input: inputPins) {
@@ -247,7 +277,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
-	if (method == RenderGraphMethod::Paint) {
+	if (method == RenderGraphMethod::Paint || method == RenderGraphMethod::RenderToTexture) {
 		renderNodePaintMethod(graph, rc);
 	} else if (method == RenderGraphMethod::Overlay) {
 		renderNodeOverlayMethod(graph, rc);
@@ -358,7 +388,7 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 	
 	for (const auto& output: outputPins) {
 		std::shared_ptr<Texture> texture;
-		if (output.type == RenderGraphPinType::ColourBuffer) {
+		if (output.type == RenderGraphPinType::ColourBuffer || output.type == RenderGraphPinType::Texture) {
 			texture = colour;
 		} else if (output.type == RenderGraphPinType::DepthStencilBuffer) {
 			texture = depthStencil;
@@ -375,6 +405,14 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 			}
 		}
 	}
+}
+
+const RenderGraphNode::InputPin* RenderGraphNode::getInputPin(int index) const
+{
+	if (index >= inputPins.size()) {
+		return nullptr;
+	}
+	return &inputPins[index];
 }
 
 void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin)

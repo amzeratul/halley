@@ -46,6 +46,9 @@ namespace Halley {
 		Image* getImageOutputForNode(const String& nodeId, Vector2i imageSize) const;
 		void notifyImage(const String& nodeId) const;
 
+		RenderGraphNode* getNode(const String& id);
+		RenderGraphNode* tryGetNode(const String& id);
+
 		bool remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin);
 		void resetGraph();
 
@@ -87,8 +90,6 @@ namespace Halley {
 		int lastDefinitionVersion = 0;
 
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
-		RenderGraphNode* getNode(const String& id);
-		RenderGraphNode* tryGetNode(const String& id);
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
 	};
