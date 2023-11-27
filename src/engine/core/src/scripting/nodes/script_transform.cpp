@@ -125,8 +125,10 @@ String ScriptGetPosition::getShortDescription(const World* world, const ScriptGr
 {
 	if (elementIdx == 1 || elementIdx == 3) {
 		return "Position of " + getConnectedNodeName(world, node, graph, 0) + " + " + getConnectedNodeName(world, node, graph, 2);
-	} else {
+	} else if (elementIdx == 4) {
 		return "Subworld of " + getConnectedNodeName(world, node, graph, 0);
+	} else {
+		return "Height of " + getConnectedNodeName(world, node, graph, 0);
 	}
 }
 
