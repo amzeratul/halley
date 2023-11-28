@@ -217,6 +217,19 @@ std::shared_ptr<Texture> RenderGraph::getOutputTexture(const String& id)
 	return pin.texture;
 }
 
+void RenderGraph::setRenderSize(const String& id, const Vector2i& size)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		return;
+	}
+
+	if (targetNode->currentSize != size) {
+		targetNode->currentSize = size;
+		targetNode->resetTextures();
+	}
+}
+
 void RenderGraph::clearImageOutputCallbacks()
 {
 	imageOutputCallbacks.clear();

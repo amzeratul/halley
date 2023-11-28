@@ -47,6 +47,7 @@ namespace Halley {
 		void notifyImage(const String& nodeId) const;
 
 		std::shared_ptr<Texture> getOutputTexture(const String& id);
+		void setRenderSize(const String& id, const Vector2i& size);
 
 		bool remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin);
 		void resetGraph();
