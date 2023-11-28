@@ -82,19 +82,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(outputPins, {});
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		currentSize = pars["renderSize"].asVector2i();
-		paintId = pars["paintId"].asString();
-		cameraId = pars["cameraId"].asString();
-		if (pars.hasKey("colourClear")) {
-			colourClear = Colour4f::fromString(pars["colourClear"].asString());
-		}
-		if (pars.hasKey("depthClear")) {
-			depthClear = pars["depthClear"].asFloat();
-		}
-		if (pars.hasKey("stencilClear")) {
-			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
-		}
-
-		setPinTypes(outputPins, {{ RenderGraphPinType::Texture }});
+		setPinTypes(inputPins, { { RenderGraphPinType::ColourBuffer } });
+		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer }});
 	}
 }
 
@@ -150,11 +139,6 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	directOutput = nullptr;
 	if (!activeInCurrentPass) {
 		ownRenderTarget = false;
-		return;
-	}
-
-	if (method == RenderGraphMethod::RenderToTexture) {
-		ownRenderTarget = true;
 		return;
 	}
 
@@ -242,12 +226,6 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 {
 	getRenderTarget(video);
 
-	if (method == RenderGraphMethod::RenderToTexture) {
-		renderTarget->setTarget(0, makeTexture(video, RenderGraphPinType::ColourBuffer));
-		renderTarget->setDepthTexture(makeTexture(video, RenderGraphPinType::DepthStencilBuffer));
-		return;
-	}
-
 	if (!passThrough) {
 		int colourIdx = 0;
 		for (auto& input: inputPins) {
@@ -277,7 +255,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
-	if (method == RenderGraphMethod::Paint || method == RenderGraphMethod::RenderToTexture) {
+	if (method == RenderGraphMethod::Paint) {
 		renderNodePaintMethod(graph, rc);
 	} else if (method == RenderGraphMethod::Overlay) {
 		renderNodeOverlayMethod(graph, rc);
@@ -405,14 +383,6 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 			}
 		}
 	}
-}
-
-const RenderGraphNode::InputPin* RenderGraphNode::getInputPin(int index) const
-{
-	if (index >= inputPins.size()) {
-		return nullptr;
-	}
-	return &inputPins[index];
 }
 
 void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin)

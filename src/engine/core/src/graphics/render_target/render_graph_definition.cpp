@@ -116,8 +116,8 @@ void RenderGraphDefinition::Node::generatePins()
 	} else if (method == RenderGraphMethod::ImageOutput) {
 		inputPins = {{ RenderGraphPinType::Texture }};
 	} else if (method == RenderGraphMethod::RenderToTexture) {
-		inputPins.clear();
-		outputPins = {{ RenderGraphPinType::Texture }};
+		inputPins = {{ RenderGraphPinType::ColourBuffer }};
+		outputPins = {{ RenderGraphPinType::ColourBuffer }};
 	} else {
 		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
 	}
