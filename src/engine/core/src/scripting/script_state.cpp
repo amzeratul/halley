@@ -458,6 +458,11 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(GraphNodeId nod
 	result.state = NodeIntrospectionState::Unvisited;
 	result.time = 0;
 
+	// If we don't do this, a newly created node will crash here in the frame it was created in, it's fine the next frame
+	if (nodeId >= nodeState.size()) {
+		return result;
+	}
+
 	const auto& state = nodeState.at(nodeId);
 	result.activationTime = state.timeSinceStart;
 	
