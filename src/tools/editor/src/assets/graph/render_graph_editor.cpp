@@ -45,7 +45,11 @@ void RenderGraphEditor::drawConnections(UIPainter& painter)
 			const auto fromPinType = fromNode.getOutputPins()[connection.fromPin];
 			const auto col = getColourForPinType(fromPinType);
 
-			drawConnection(painter, startPos, endPos, col);
+			if (fromNode.method == RenderGraphMethod::RenderToTexture) {
+				drawDottedConnection(painter, startPos, endPos, col);
+			} else {
+				drawConnection(painter, startPos, endPos, col);
+			}
 		}
 	});
 }
@@ -55,4 +59,11 @@ void RenderGraphEditor::drawConnection(Painter& painter, Vector2f startPoint, Ve
 	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
 	const auto bezier = BezierCubic(startPoint, startPoint + Vector2f(dist, 0), endPoint - Vector2f(dist, 0), endPoint);
 	painter.drawLine(bezier, 2, col);
+}
+
+void RenderGraphEditor::drawDottedConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const
+{
+	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
+	const auto bezier = BezierCubic(startPoint, startPoint + Vector2f(dist, 0), endPoint - Vector2f(dist, 0), endPoint);
+	painter.drawLine(bezier, 2, col, {}, Painter::LineDashPattern(5.0f, 5.0f));
 }
