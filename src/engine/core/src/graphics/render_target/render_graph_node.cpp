@@ -226,6 +226,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 {
 	getRenderTarget(video);
 
+	bool updated = false;
 	if (!passThrough) {
 		int colourIdx = 0;
 		for (auto& input: inputPins) {
@@ -233,14 +234,15 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 				// Create Colour/DepthStencil textures for render target, if needed
 				if (!input.other.node && input.type != RenderGraphPinType::Texture) {
 					if (!input.texture) {
+						updated = true;
 						input.texture = makeTexture(video, input.type);
 					}
 				}
 
 				// Assign textures to render target
-				if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
+				if (input.type == RenderGraphPinType::ColourBuffer && (!renderTarget->hasColourBuffer(colourIdx) || updated)) {
 					renderTarget->setTarget(colourIdx++, input.texture);
-				} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
+				} else if (input.type == RenderGraphPinType::DepthStencilBuffer && (!renderTarget->hasDepthBuffer() || updated)) {
 					renderTarget->setDepthTexture(input.texture);
 				}
 			} else {
