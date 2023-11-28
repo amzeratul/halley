@@ -122,6 +122,8 @@ void UIRenderGraphNode::onMakeUI()
 		addField("entity_icons/camera.png", node.methodParameters["cameraId"].asString(""));
 	} else if (node.method == RenderGraphMethod::Overlay) {
 		addField("ui/assetTypes/materialDefinition.png", node.methodParameters["material"].asString(""));
+	} else if (node.method == RenderGraphMethod::RenderToTexture) {
+		addField("entity_icons/zoom_fit.png", node.methodParameters["renderSize"].asString(""));
 	}
 }
 

@@ -23,6 +23,7 @@ namespace Halley {
 
 		int getPriority() const;
 
+	private:
 		struct OtherPin {
 			RenderGraphNode* node = nullptr;
 			uint8_t otherId = 0;
@@ -34,9 +35,6 @@ namespace Halley {
 			std::shared_ptr<Texture> texture;
 		};
 
-		const InputPin* getInputPin(int index) const;
-
-	private:
 		struct OutputPin {
 			RenderGraphPinType type = RenderGraphPinType::Unknown;
 			Vector<OtherPin> others;

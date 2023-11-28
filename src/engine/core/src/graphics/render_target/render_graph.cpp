@@ -83,11 +83,6 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 
 	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
 	for (auto& node: nodes) {
-		if (node->method == RenderGraphMethod::RenderToTexture) {
-			node->prepareDependencyGraph(video, {}); // render size is set by methodParameters
-			continue;
-		}
-
 		if (node->method == RenderGraphMethod::Output
 			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {
 			node->prepareDependencyGraph(video, renderSize);
@@ -208,6 +203,30 @@ void RenderGraph::notifyImage(const String& nodeId) const
 	const auto iter = imageOutputCallbacks.find(nodeId);
 	if (iter != imageOutputCallbacks.end()) {
 		return iter->second.calllback(*iter->second.image);
+	}
+}
+
+std::shared_ptr<Texture> RenderGraph::getOutputTexture(const String& id)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		return nullptr;
+	}
+
+	const auto& pin = targetNode->inputPins[0];
+	return pin.texture;
+}
+
+void RenderGraph::setRenderSize(const String& id, const Vector2i& size)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		return;
+	}
+
+	if (targetNode->currentSize != size) {
+		targetNode->currentSize = size;
+		targetNode->resetTextures();
 	}
 }
 
