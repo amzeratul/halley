@@ -98,6 +98,7 @@ namespace Halley {
 		virtual ~II18N() = default;
 
 		virtual LocalisedString get(const String& key) const = 0;
+		virtual std::optional<LocalisedString> tryGet(const String& key) const = 0;
 	};
 
 	class I18N : public II18N {
@@ -114,6 +115,7 @@ namespace Halley {
 		Vector<I18NLanguage> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const override;
+		std::optional<LocalisedString> tryGet(const String& key) const override;
 		std::optional<LocalisedString> get(const String& key, const I18NLanguage& language) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
 

@@ -74,6 +74,19 @@ Vector<I18NLanguage> I18N::getLanguagesAvailable() const
 
 LocalisedString I18N::get(const String& key) const
 {
+	if (auto str = tryGet(key)) {
+		return *str;
+	}
+
+#ifdef DEV_BUILD
+	return LocalisedString(*this, key, "#MISSING:" + key + "#");
+#else
+	return LocalisedString(*this, key, "#MISSING#");
+#endif
+}
+
+std::optional<LocalisedString> I18N::tryGet(const String& key) const
+{
 	auto curLang = strings.find(currentLanguage);
 	if (curLang != strings.end()) {
 		auto i = curLang->second.find(key);
@@ -92,11 +105,7 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
-#ifdef DEV_BUILD
-	return LocalisedString(*this, key, "#MISSING:" + key + "#");
-#else
-	return LocalisedString(*this, key, "#MISSING#");
-#endif
+	return std::nullopt;
 }
 
 std::optional<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
