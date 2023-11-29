@@ -19,6 +19,10 @@
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "Dxgi.lib")
 
+#ifdef DEV_BUILD
+#pragma comment( lib, "dxguid.lib")
+#endif
+
 using namespace Halley;
 
 DX11Video::DX11Video(SystemAPI& system)

@@ -29,6 +29,10 @@ namespace Halley
 
 		void replaceShaderResourceView(ID3D11ShaderResourceView* view);
 
+#ifdef DEV_BUILD
+		void setAssetId(String name) override;
+#endif
+
 	protected:
 		size_t getVRamUsage() const override;
 		void doCopyToTexture(Painter& painter, Texture& other) const override;
@@ -42,6 +46,10 @@ namespace Halley
 		ID3D11SamplerState* samplerState = nullptr;
 		DXGI_FORMAT format;
 		size_t vramUsage = 0;
+
+#ifdef DEV_BUILD
+		std::optional<String> debugName;
+#endif
 
 		void copyToImageDirectly(Image& image) const;
 		void clear();

@@ -179,7 +179,7 @@ namespace Halley
 		const Metadata& getMeta() const { return meta; }
 		bool isMetaSet() const { return metaSet; }
 		
-		void setAssetId(String name);
+		virtual void setAssetId(String name);
 		const String& getAssetId() const { return assetId; }
 		virtual void onLoaded(Resources& resources);
 		

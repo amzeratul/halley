@@ -212,6 +212,13 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		}
 	}
 
+#ifdef DEV_BUILD
+	if (debugName) {
+		texture->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(debugName->size()), debugName->c_str());
+		debugName.reset();
+	}
+#endif
+
 	doneLoading();
 }
 
@@ -352,6 +359,19 @@ void DX11Texture::replaceShaderResourceView(ID3D11ShaderResourceView* view)
 	}
 	srv = view;
 }
+
+#ifdef DEV_BUILD
+void DX11Texture::setAssetId(String name)
+{
+	Texture::setAssetId(name);
+
+	if (!texture) {
+		debugName = name;
+		return;
+	}
+	texture->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(name.size()), name.c_str());
+}
+#endif
 
 size_t DX11Texture::getVRamUsage() const
 {
