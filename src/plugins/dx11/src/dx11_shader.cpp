@@ -40,14 +40,23 @@ void DX11Shader::loadShader(DX11Video& video, ShaderType type, const Bytes& byte
 	case ShaderType::Vertex:
 		result = video.getDevice().CreateVertexShader(bytes.data(), bytes.size(), nullptr, &vertexShader);
 		vertexBlob = bytes;
+#ifdef DEV_BUILD
+		vertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(name.size()), name.c_str());
+#endif
 		break;
 
 	case ShaderType::Pixel:
 		result = video.getDevice().CreatePixelShader(bytes.data(), bytes.size(), nullptr, &pixelShader);
+#ifdef DEV_BUILD
+		pixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(name.size()), name.c_str());
+#endif
 		break;
 
 	case ShaderType::Geometry:
 		result = video.getDevice().CreateGeometryShader(bytes.data(), bytes.size(), nullptr, &geometryShader);
+#ifdef DEV_BUILD
+		geometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(name.size()), name.c_str());
+#endif
 		break;
 
 	default:
