@@ -28,6 +28,7 @@ namespace Halley {
 		void update();
 		void render(const RenderContext& rc, VideoAPI& video, std::optional<Vector2i> renderSize = {});
 
+		void clearCameras();
 		const Camera* tryGetCamera(std::string_view id) const;
 		void setCamera(std::string_view id, const Camera& camera);
 

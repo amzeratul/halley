@@ -111,6 +111,11 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 	});
 }
 
+void RenderGraph::clearCameras()
+{
+	cameras.clear();
+}
+
 const Camera* RenderGraph::tryGetCamera(std::string_view id) const
 {
 	const auto iter = cameras.find(id);
