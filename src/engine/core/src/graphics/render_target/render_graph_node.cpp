@@ -112,6 +112,26 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 
 void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i targetSize)
 {
+	if (input.type == RenderGraphPinType::Dependency) {
+		for (auto& dependency : input.dependencies) {
+			if (!dependency.node) {
+				continue;
+			}
+
+			++depsLeft;
+			if (dependency.node->activeInCurrentPass && dependency.node->method != RenderGraphMethod::RenderToTexture) {
+				if (dependency.node->currentSize != targetSize) {
+					throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
+				}
+			}
+			else {
+				dependency.node->prepareDependencyGraph(video, targetSize);
+			}
+		}
+
+		return;
+	}
+
 	if (input.other.node) {
 		// Connected to another node
 		++depsLeft;
@@ -373,7 +393,9 @@ void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 		for (const auto& other: output.others) {
 			if (other.node->activeInCurrentPass) {
 				// TODO: copy when needed
-				other.node->inputPins[other.otherId].texture = texture;
+				if (other.node->inputPins[other.otherId].type != RenderGraphPinType::Dependency) {
+					other.node->inputPins[other.otherId].texture = texture;
+				}
 				
 				if (--other.node->depsLeft == 0) {
 					renderQueue.push_back(other.node);
@@ -391,7 +413,11 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	if (input.type != output.type && input.type != RenderGraphPinType::Texture) {
 		throw Exception("Incompatible pin types in RenderGraph.", HalleyExceptions::Graphics);
 	}
-	
+
+	if (input.type == RenderGraphPinType::Dependency) {
+		input.dependencies.push_back({ &node, outputPin });
+	}
+
 	input.other = { &node, outputPin };
 	output.others.push_back({ this, inputPin });
 }
