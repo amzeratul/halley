@@ -70,7 +70,12 @@ bool UIGraphNode::isFocusLocked() const
 
 std::shared_ptr<UIWidget> UIGraphNode::getPinWidget(bool outputPin, uint8_t pinId)
 {
-	return (outputPin ? outputPinWidgets : inputPinWidgets).at(pinId);
+	const auto widgetList = outputPin ? outputPinWidgets : inputPinWidgets;
+	if (pinId >= widgetList.size()) {
+		return nullptr;
+	}
+
+	return widgetList.at(pinId);
 }
 
 UIRenderGraphNode::UIRenderGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory, UIStyle style)

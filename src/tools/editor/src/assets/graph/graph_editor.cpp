@@ -42,6 +42,8 @@ Colour4f GraphEditor::getColourForPinType(RenderGraphPinType pinType) const
 		return connectionsStyle.getColour("depthStencilBuffer");
 	case RenderGraphPinType::Texture:
 		return connectionsStyle.getColour("texture");
+	case RenderGraphPinType::Dependency:
+		return connectionsStyle.getColour("dependency");
 	default:
 		return Colour4f(1, 1, 1);
 	}

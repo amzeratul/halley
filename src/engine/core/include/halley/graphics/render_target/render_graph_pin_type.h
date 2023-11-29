@@ -5,6 +5,7 @@ namespace Halley {
         Unknown,
         ColourBuffer,
         DepthStencilBuffer,
-        Texture
+        Texture,
+        Dependency
     };
 }

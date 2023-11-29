@@ -41,16 +41,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		if (pars.hasKey("stencilClear")) {
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
-		
-		Vector<RenderGraphPinType> inputPinTypes;
-		inputPinTypes.reserve(2 + definition.methodParameters["inputTexCount"].asInt(0));
-		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
-		inputPinTypes.push_back(RenderGraphPinType::DepthStencilBuffer);
-		for (size_t i = 0; i < definition.methodParameters["inputTexCount"].asInt(0); ++i) {
-			inputPinTypes.push_back(RenderGraphPinType::Texture);
-		}
 
-		setPinTypes(inputPins, inputPinTypes);
+		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer, RenderGraphPinType::Dependency }});
 		setPinTypes(outputPins, { { RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer } });
 	} else if (method == RenderGraphMethod::Overlay) {
 		overlayMethod = std::make_shared<Material>(definition.material);
@@ -82,8 +74,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(outputPins, {});
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		currentSize = pars["renderSize"].asVector2i();
-		setPinTypes(inputPins, { { RenderGraphPinType::ColourBuffer } });
-		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer }});
+		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer }});
+		setPinTypes(outputPins, {{ RenderGraphPinType::Dependency }});
 	}
 }
 
@@ -146,6 +138,7 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	bool hasOutputPinsWithMultipleConnections = false;
 	bool hasMultipleRenderNodeOutputs = false;
 	bool allConnectionsAreCompatible = true;
+	bool isDependency = false;
 	RenderGraphNode* curOutputNode = nullptr;
 	for (const auto& outputPin: outputPins) {
 		int nConnections = 0;
@@ -159,6 +152,9 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 					if (curOutputNode->inputPins.at(otherNode.otherId).type != outputPin.type) {
 						allConnectionsAreCompatible = false;
 					}
+					if (curOutputNode->inputPins.at(otherNode.otherId).type == outputPin.type && outputPin.type == RenderGraphPinType::Dependency) {
+						isDependency = true;
+					}
 				}
 				++nConnections;
 			}
@@ -168,7 +164,7 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 		}
 	}
 	
-	ownRenderTarget = hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible;
+	ownRenderTarget = hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible || isDependency;
 
 	if (!ownRenderTarget && curOutputNode && !hasOutputPinsWithMultipleConnections) {
 		assert(!curOutputNode->passThrough);
@@ -232,7 +228,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 		for (auto& input: inputPins) {
 			if (renderTarget) {
 				// Create Colour/DepthStencil textures for render target, if needed
-				if (!input.other.node && input.type != RenderGraphPinType::Texture) {
+				if (!input.other.node && input.type != RenderGraphPinType::Texture && input.type != RenderGraphPinType::Dependency) {
 					if (!input.texture) {
 						updated = true;
 						input.texture = makeTexture(video, input.type);

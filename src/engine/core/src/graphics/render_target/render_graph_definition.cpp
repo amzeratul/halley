@@ -117,17 +117,16 @@ void RenderGraphDefinition::Node::generatePins()
 		inputPins = {{ RenderGraphPinType::Texture }};
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		inputPins = {{ RenderGraphPinType::ColourBuffer }};
-		outputPins = {{ RenderGraphPinType::ColourBuffer }};
+		outputPins = {{ RenderGraphPinType::Dependency }};
+	} else if (method == RenderGraphMethod::Paint) {
+		inputPins.push_back(RenderGraphPinType::Dependency);
+		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
 	} else {
 		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
 	}
 
 	if (material) {
 		for (const auto& t: material->getTextures()) {
-			inputPins.push_back(RenderGraphPinType::Texture);
-		}
-	} else {
-		for (int i = 0; i < methodParameters["inputTexCount"].asInt(0); ++i) {
 			inputPins.push_back(RenderGraphPinType::Texture);
 		}
 	}

@@ -39,6 +39,10 @@ void RenderGraphEditor::drawConnections(UIPainter& painter)
 			const auto outputPinWidget = fromNodeWidget->getPinWidget(true, connection.fromPin);
 			const auto inputPinWidget = toNodeWidget->getPinWidget(false, connection.toPin);
 
+			if (!outputPinWidget || !inputPinWidget) {
+				continue;
+			}
+
 			const auto startPos = outputPinWidget->getPosition() + outputPinWidget->getSize() / 2;
 			const auto endPos = inputPinWidget->getPosition() + inputPinWidget->getSize() / 2;
 

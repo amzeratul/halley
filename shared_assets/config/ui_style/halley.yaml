@@ -404,6 +404,7 @@ uiStyle:
     colourBuffer: $ui_logErrorText
     depthStencilBuffer: $ui_logDevText
     texture: $ui_logInfoText
+    dependency: $taskWarning
 
   popupMenu:
     background: { img: $ui_popup, colour: $ui_popupWindow }
