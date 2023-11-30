@@ -426,9 +426,12 @@ void RenderGraphNode::disconnectInput(uint8_t inputPin)
 {
 	auto& pin = inputPins.at(inputPin);
 	auto* otherNode = pin.other.node;
-	pin.other = OtherPin();
+	if (otherNode == nullptr) {
+		return;
+	}
 
 	auto& outputPin = otherNode->outputPins.at(pin.other.otherId);
 	auto& outs = outputPin.others;
 	outs.erase(std::remove_if(outs.begin(), outs.end(), [=] (const OtherPin& o) { return o.node == this; }), outs.end());
+	pin.other = OtherPin();
 }
