@@ -187,7 +187,7 @@ namespace Halley {
 		}
 
 		// Length
-		constexpr inline T length () const { static_cast<T>(std::sqrt(squaredLength())); }
+		constexpr inline T length () const { return static_cast<T>(std::sqrt(squaredLength())); }
 		constexpr inline T len () const { return length(); }
 
 		// Squared length, often useful and much faster
