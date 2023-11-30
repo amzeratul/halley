@@ -17,7 +17,7 @@ namespace Halley {
 	class Painter;
 	class Material;
 	class RenderGraphNode;
-	
+
 	class RenderGraph {
 	public:
 		using PaintMethod = std::function<void(Painter&)>;
@@ -95,5 +95,31 @@ namespace Halley {
 		RenderGraphNode* tryGetNode(const String& id);
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
+	};
+
+
+	class RenderGraphCommand
+	{
+	public:
+		virtual void apply(RenderGraph& renderGraph) const = 0;
+		virtual ~RenderGraphCommand() = default;
+	};
+
+	class RenderGraphChangeSizeCommand : public RenderGraphCommand
+	{
+	public:
+		RenderGraphChangeSizeCommand(String id, Vector2i newSize)
+			: id(std::move(id))
+			, newSize(newSize)
+		{  }
+
+		void apply(RenderGraph& renderGraph) const override
+		{
+			renderGraph.setRenderSize(id, newSize);
+		}
+
+	private:
+		const String id{};
+		const Vector2i newSize{};
 	};
 }
