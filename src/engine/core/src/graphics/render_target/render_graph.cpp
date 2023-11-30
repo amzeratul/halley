@@ -231,7 +231,7 @@ void RenderGraph::setRenderSize(const String& id, const Vector2i& size)
 
 	if (targetNode->currentSize != size) {
 		targetNode->currentSize = size;
-		targetNode->resetTextures();
+		targetNode->renderTarget.reset();
 	}
 }
 

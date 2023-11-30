@@ -46,6 +46,15 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(outputPins, { { RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer } });
 	} else if (method == RenderGraphMethod::Overlay) {
 		overlayMethod = std::make_shared<Material>(definition.material);
+		if (pars.hasKey("colourClear")) {
+			colourClear = Colour4f::fromString(pars["colourClear"].asString());
+		}
+		if (pars.hasKey("depthClear")) {
+			depthClear = pars["depthClear"].asFloat();
+		}
+		if (pars.hasKey("stencilClear")) {
+			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
+		}
 
 		if (pars.hasKey("variables")) {
 			const auto& seq = pars["variables"].asSequence();
@@ -101,7 +110,7 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 	if (targetSize && method != RenderGraphMethod::RenderToTexture) {
 		if (currentSize != *targetSize) {
 			currentSize = *targetSize;
-			resetTextures();
+			renderTarget.reset();
 		}
 	}
 
@@ -226,9 +235,17 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 	desc.isDepthStencil = type == RenderGraphPinType::DepthStencilBuffer;
 	desc.useFiltering = false; // TODO: allow filtering
 	texture->load(std::move(desc));
-	texture->setAssetId(id);
 
 	return texture;
+}
+
+void RenderGraphNode::updateTexture(std::shared_ptr<Texture> texture, RenderGraphPinType type)
+{
+	auto desc = TextureDescriptor(currentSize, type == RenderGraphPinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
+	desc.isRenderTarget = true;
+	desc.isDepthStencil = type == RenderGraphPinType::DepthStencilBuffer;
+	desc.useFiltering = false;
+	texture->load(std::move(desc));
 }
 
 void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, Vector<RenderGraphNode*>& renderQueue)
@@ -252,6 +269,10 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 					if (!input.texture) {
 						updated = true;
 						input.texture = makeTexture(video, input.type);
+					} else {
+						if (input.texture->getSize() != currentSize) {
+							updateTexture(input.texture, input.type);
+						}
 					}
 				}
 
@@ -318,6 +339,9 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
 	{
 		painter.pushDebugGroup(id);
+		if (colourClear || depthClear || stencilClear) {
+			painter.clear(colourClear, depthClear, stencilClear);
+		}
 		const auto& tex = overlayMethod->getTexture(0);
 		Sprite()
 			.setMaterial(overlayMethod)

@@ -59,6 +59,7 @@ namespace Halley {
 
 		void resetTextures();
 		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphPinType type);
+		void updateTexture(std::shared_ptr<Texture> texture, RenderGraphPinType type);
 
 		void determineIfNeedsRenderTarget();
 		
