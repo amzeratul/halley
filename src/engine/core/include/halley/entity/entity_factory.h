@@ -147,6 +147,17 @@ namespace Halley {
 
 		bool isHeadless() const override;
 
+
+		// TODO HACKFIX: Not sure how to fix the problem with reparenting when the hierachy deletes the child first.
+		// Problem is that when children are moved down the hierachy into a new parent, they will be removed first.
+		// After that the engine tries to apply the new parent to that removed child and crashes.
+		// To fix that I buffer the deletion in the context and delete the children at the end of the delta operation.
+		// Is probably not the real solution but fixes it for now..
+		void addToDelete(EntityRef entityRef);
+		void removeDelete(UUID uuid);
+		const Vector<EntityRef>& getToDeleteEntities() const;
+
+
 	private:
 		EntitySerializationContext entitySerializationContext;
 		std::shared_ptr<const Prefab> prefab;
@@ -160,6 +171,8 @@ namespace Halley {
 
 		const IEntityData* entityData = nullptr;
 		EntityDataInstanced instancedEntityData;
+
+		Vector<EntityRef> toDelete;
 
 		void setEntityData(const IEntityData& iData);
 	};

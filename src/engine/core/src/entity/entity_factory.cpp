@@ -284,6 +284,21 @@ bool EntityFactoryContext::isHeadless() const
 	return world->isHeadless();
 }
 
+void EntityFactoryContext::addToDelete(EntityRef entityRef)
+{
+	toDelete.push_back(entityRef);
+}
+
+void EntityFactoryContext::removeDelete(UUID uuid)
+{
+	std_ex::erase_if(toDelete, [&](EntityRef entityRef) { return entityRef.getInstanceUUID() == uuid; });
+}
+
+const Vector<EntityRef>& EntityFactoryContext::getToDeleteEntities() const
+{
+	return toDelete;
+}
+
 void EntityFactoryContext::setCurrentEntity(EntityId entity)
 {
 	curEntity = entity;
@@ -335,6 +350,9 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 	Expects(entity.isValid());
 	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
+	for (auto& c : context->getToDeleteEntities()) {
+		destroyEntity(c);
+	}
 }
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
@@ -535,10 +553,9 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 
 void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	Vector<EntityRef> toDelete;
 	for (auto child: entity.getChildren()) {
 		if (std_ex::contains(delta.getChildrenRemoved(), child.getInstanceUUID())) {
-			toDelete.emplace_back(child);
+			context->addToDelete(child);
 		} else {
 			const auto iter = std::find_if(delta.getChildrenChanged().begin(), delta.getChildrenChanged().end(), [&] (const auto& e) { return e.first == child.getInstanceUUID() || e.first == child.getPrefabUUID(); });
 			if (iter != delta.getChildrenChanged().end()) {
@@ -549,15 +566,14 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 	for (const auto& childData: delta.getChildrenAdded()) {
 		assert(childData.getInstanceUUID() != entity.getInstanceUUID());
 
+		context->removeDelete(childData.getInstanceUUID());
+
 		if (context->needsNewContextFor(childData)) {
 			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
 			updateEntityNode(newContext->getRootEntityData(), getEntity(childData.getInstanceUUID(), *newContext, false), entity, newContext);
 		} else {
 			updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
 		}
-	}
-	for (auto& c: toDelete) {
-		destroyEntity(c);
 	}
 }
 
