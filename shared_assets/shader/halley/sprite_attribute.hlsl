@@ -11,6 +11,7 @@ struct VIn {
     float4 custom0 : CUSTOM0;
     float4 custom1 : CUSTOM1;
     float4 custom2 : CUSTOM2;
+    float4 custom3 : CUSTOM3;
     float rotation : ROTATION;
     float textureRotation : TEXTUREROTATION;
 };
@@ -22,9 +23,10 @@ struct VOut {
     float2 pixelTexCoord0 : PIXELTEXCOORD0;
     float2 texCoord1 : TEXCOORD1;
     float2 pixelTexCoord1 : PIXELTEXCOORD1;
-    float4 custom0: CUSTOM0;
+    float4 custom0 : CUSTOM0;
     float4 custom1 : CUSTOM1;
     float4 custom2 : CUSTOM2;
+    float4 custom3 : CUSTOM3;
     float4 colour : COLOR0;
     float4 colourAdd : COLOR1;
     float4 colourNoPremultiply : COLOR2;

@@ -58,6 +58,11 @@ attributes:
     type: vec4
     semantic: CUSTOM2
 
+  # custom3
+  - name: custom3
+    type: vec4
+    semantic: CUSTOM3
+
   # rotation (radians)
   - name: rotation
     type: float

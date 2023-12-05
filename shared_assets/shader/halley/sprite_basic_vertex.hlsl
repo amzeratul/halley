@@ -29,6 +29,7 @@ void basicVertex(VIn input, out VOut output, bool premultiply) {
     output.custom0 = input.custom0;
     output.custom1 = input.custom1;
     output.custom2 = input.custom2;
+    output.custom3 = input.custom3;
     output.vertPos = input.vertPos.xy;
     output.pixelPos = input.size * input.scale * input.vertPos.xy;
     output.pivot = input.pivot;
