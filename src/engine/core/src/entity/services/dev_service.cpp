@@ -191,6 +191,11 @@ const Vector<DebugEllipse>& DevService::getDebugEllipses()
 	return BaseFrameData::getCurrent().debugEllipses;
 }
 
+const Vector<DebugWorldText>& DevService::getDebugWorldTexts()
+{
+	return BaseFrameData::getCurrent().debugWorldTexts;
+}
+
 void DevService::addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness)
 {
 	BaseFrameData::getCurrent().debugEllipses.emplace_back(point, radius, thickness, colour);
@@ -206,6 +211,11 @@ void DevService::addDebugText(std::string_view key, String value)
 	auto& dt = BaseFrameData::getCurrent().debugTexts[key];
 	dt.text = std::move(value);
 	dt.time = 0.0;
+}
+
+void DevService::addDebugText(String value, Vector2f position)
+{
+	BaseFrameData::getCurrent().debugWorldTexts.emplace_back(value, position);
 }
 
 void DevService::addScriptRenderer(Vector2f pos, std::shared_ptr<ScriptState> state)

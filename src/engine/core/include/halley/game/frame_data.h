@@ -72,6 +72,17 @@ namespace Halley {
 		Time time = 0;
 	};
 
+	struct DebugWorldText {
+		DebugWorldText(String text, Vector2f position)
+			: text(std::move(text))
+			, position(position)
+		{}
+
+		String text;
+		Time time = 0;
+		Vector2f position;
+	};
+
 
 	class BaseFrameData {
 	public:
@@ -100,6 +111,7 @@ namespace Halley {
 		Vector<DebugPoint> debugPoints;
 		Vector<DebugPolygon> debugPolygons;
 		Vector<DebugEllipse> debugEllipses;
+		Vector<DebugWorldText> debugWorldTexts;
 		TreeMap<String, DebugText> debugTexts;
 		Vector<std::pair<Vector2f, std::shared_ptr<ScriptState>>> scriptStates;
 

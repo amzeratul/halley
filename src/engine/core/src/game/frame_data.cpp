@@ -26,4 +26,5 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 	debugPolygons.clear();
 	debugEllipses.clear();
 	scriptStates.clear();
+	debugWorldTexts.clear();
 }
