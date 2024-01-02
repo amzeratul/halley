@@ -176,12 +176,12 @@ EntityRef World::createEntity(String name, std::optional<EntityRef> parent)
 
 EntityRef World::createEntity(String name, EntityId parentId)
 {
-	return createEntity(UUID(), name, getEntity(parentId));
+	return createEntity(UUID(), name, tryGetEntity(parentId));
 }
 
 EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
 {
-	return createEntity(uuid, name, getEntity(parentId));
+	return createEntity(uuid, name, tryGetEntity(parentId));
 }
 
 EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, uint8_t worldPartition)
@@ -209,7 +209,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	auto e = EntityRef(*entity, *this);
 	e.setName(std::move(name));
 
-	if (parent) {
+	if (parent && parent->isValid()) {
 		e.setParent(parent.value());
 	}
 
