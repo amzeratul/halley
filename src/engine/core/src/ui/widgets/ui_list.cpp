@@ -637,6 +637,13 @@ bool UIList::canDragListItem(const UIListItem& listItem)
 void UIList::setUniformSizedItems(bool value)
 {
 	uniformSizedItems = value;
+	if (getSizer().getType() == UISizerType::Grid) {
+		if (value) {
+			getSizer().setEvenColumns();
+		} else {
+			getSizer().setColumnProportions({});
+		}
+	}
 }
 
 void UIList::setScrollToSelection(bool value)
