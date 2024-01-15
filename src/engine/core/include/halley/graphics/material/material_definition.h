@@ -242,6 +242,7 @@ namespace Halley
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		void setTextures(Vector<MaterialTexture> textures);
 		const Vector<MaterialTexture>& getTextures() const { return textures; }
+		Vector<String> getTextureNames() const;
 
 		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;

@@ -345,6 +345,16 @@ void MaterialDefinition::setTextures(Vector<MaterialTexture> textures)
 	this->textures = std::move(textures);
 }
 
+Vector<String> MaterialDefinition::getTextureNames() const
+{
+	Vector<String> result;
+	result.reserve(textures.size());
+	for (auto& t: textures) {
+		result.push_back(t.name);
+	}
+	return result;
+}
+
 bool MaterialDefinition::hasTexture(const String& name) const
 {
 	return std_ex::contains_if(textures, [&] (const auto& t) { return t.name == name; });
