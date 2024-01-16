@@ -87,6 +87,12 @@ Vector<Rect4f> SessionMultiplayer::getRemoteViewPorts() const
 	return {};
 }
 
+size_t SessionMultiplayer::getNumberOfPlayers() const
+{
+	// Only meaningful if this is the host!
+	return entitySession->getNumberOfPeers() + 1;
+}
+
 bool SessionMultiplayer::isWaitingForInitialViewPort() const
 {
 	return waitingForViewPort;

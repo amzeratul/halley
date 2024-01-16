@@ -88,6 +88,11 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 	outbox[peerId].push_back(std::move(msg));
 }
 
+size_t EntityNetworkSession::getNumberOfPeers() const
+{
+	return peers.size();
+}
+
 void EntityNetworkSession::sendMessages()
 {
 	auto tryCompress = [&](size_t startIdx, size_t count, const Vector<EntityNetworkMessage>& msgs) -> std::optional<Bytes>

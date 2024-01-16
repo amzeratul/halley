@@ -16,6 +16,7 @@ namespace Halley {
 		virtual bool isReadyToStart() const { return true; }
 		virtual bool hasHostAuthority() const { return true; }
 		virtual size_t getNumberOfLocalPlayers() const { return 1; }
+		virtual size_t getNumberOfPlayers() const { return 1; }
 		virtual Vector<Rect4f> getRemoteViewPorts() const { return {}; }
 
 		virtual bool isWaitingForInitialViewPort() const { return false; }

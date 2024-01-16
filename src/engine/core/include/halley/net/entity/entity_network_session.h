@@ -77,6 +77,8 @@ namespace Halley {
 		void sendToAll(EntityNetworkMessage msg);
 		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
+		size_t getNumberOfPeers() const;
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;

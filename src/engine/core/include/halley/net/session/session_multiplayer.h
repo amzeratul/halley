@@ -38,6 +38,7 @@ namespace Halley {
 		bool isReadyToStart() const override;
 		bool hasHostAuthority() const override;
 		Vector<Rect4f> getRemoteViewPorts() const override;
+		size_t getNumberOfPlayers() const override;
 
 		bool isWaitingForInitialViewPort() const override;
 		void reportInitialViewPort(Rect4f viewPort) override;
