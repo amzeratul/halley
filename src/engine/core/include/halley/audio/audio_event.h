@@ -157,6 +157,7 @@ namespace Halley
 		void setBusName(String name);
 
 		AudioFade& getFade();
+		AudioEventScope getScope() const override;
 
 	protected:
 		String busName;

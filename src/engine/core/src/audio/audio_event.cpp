@@ -338,6 +338,11 @@ AudioFade& AudioEventActionBus::getFade()
 	return fade;
 }
 
+AudioEventScope AudioEventActionBus::getScope() const
+{
+	return AudioEventScope::Global;
+}
+
 
 AudioEventActionPlay::AudioEventActionPlay(bool legacy)
 	: legacy(legacy)
