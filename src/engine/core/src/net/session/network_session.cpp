@@ -96,8 +96,7 @@ std::optional<NetworkSession::PeerId> NetworkSession::getMyPeerId() const
 uint16_t NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
-		throw Exception("Client shouldn't be trying to query client count!", HalleyExceptions::Network);
-		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
+		return static_cast<uint16_t>(sharedData.size()); // Is this correct?
 	} else if (type == NetworkSessionType::Host) {
 		uint16_t i = 1;
 		for (const auto& peer: peers) {

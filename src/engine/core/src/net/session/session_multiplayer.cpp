@@ -89,8 +89,12 @@ Vector<Rect4f> SessionMultiplayer::getRemoteViewPorts() const
 
 size_t SessionMultiplayer::getNumberOfPlayers() const
 {
-	// Only meaningful if this is the host!
-	return entitySession->getNumberOfPeers() + 1;
+	return session->getClientCount();
+}
+
+uint8_t SessionMultiplayer::getMyClientId() const
+{
+	return *session->getMyPeerId();
 }
 
 bool SessionMultiplayer::isWaitingForInitialViewPort() const
