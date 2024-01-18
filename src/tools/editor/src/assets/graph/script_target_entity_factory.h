@@ -12,4 +12,5 @@ namespace Halley {
 	private:
         ScriptGraphEditor& editor;
     };
+
 }

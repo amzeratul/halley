@@ -689,7 +689,9 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 			}
 		}
 
-		auto scriptEditor = std::make_shared<ScriptGraphEditor>(factory, *gameResources, sceneEditor->getProjectWindow(), graph, nullptr,
+		auto scene = std::dynamic_pointer_cast<const Scene>(sceneEditor->getCurPrefab());
+
+		auto scriptEditor = std::make_shared<ScriptGraphEditor>(factory, *gameResources, sceneEditor->getProjectWindow(), graph, nullptr, scene,
 			[=, componentName=componentName, fieldName=fieldName] (bool accept, std::shared_ptr<ScriptGraph> graph)
 		{
 			if (accept) {

@@ -22,10 +22,10 @@ std::shared_ptr<IUIElement> ScriptTargetEntityFactory::createField(const Compone
     Vector<String> ids = editor.getScriptTargetIds();
 
     const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
-    auto dropdown = std::make_shared<UIDropdown>("systemType", dropStyle);
+    auto dropdown = std::make_shared<UIDropdown>("scriptTarget", dropStyle);
     dropdown->setOptions(std::move(ids));
 
-    dropdown->bindData("systemType", value, [&context, data, this](String newVal)
+    dropdown->bindData("scriptTarget", value, [&context, data, this](String newVal)
     {
         data.getWriteableFieldData() = ConfigNode(std::move(newVal));
         context.onEntityUpdated();

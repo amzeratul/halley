@@ -1732,6 +1732,11 @@ Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedStri
 	return future;
 }
 
+std::shared_ptr<const Prefab> SceneEditorWindow::getCurPrefab() const
+{
+	return prefab;
+}
+
 void SceneEditorWindow::openGoToDialogue()
 {
 	const auto worldOffset = gameBridge->getWorldOffset().value_or(Vector2f());

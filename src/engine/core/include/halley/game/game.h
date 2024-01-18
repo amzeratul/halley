@@ -6,6 +6,7 @@
 
 namespace Halley
 {
+	class Scene;
 	class UIDebugConsoleCommands;
 	class SceneEditorContext;
 	class IPluginRegistry;
@@ -65,6 +66,7 @@ namespace Halley
 		virtual std::unique_ptr<UIFactory> createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
 		virtual std::unique_ptr<ScriptNodeTypeCollection> createScriptNodeTypeCollection();
 		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomEditorFieldFactories(Resources& resources);
+		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources);
 
 		virtual String getDefaultColourScheme();
 

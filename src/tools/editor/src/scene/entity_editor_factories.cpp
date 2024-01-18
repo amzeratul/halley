@@ -2051,6 +2051,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::String"));
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::ScriptTargetId"));
+	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::CutsceneId"));
 	factories.emplace_back(std::make_unique<ComponentEditorCodeEditorFactory>("Halley::LuaExpression"));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int8_t", static_cast<float>(std::numeric_limits<int8_t>::min()), static_cast<float>(std::numeric_limits<int8_t>::max())));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int16_t", static_cast<float>(std::numeric_limits<int16_t>::min()), static_cast<float>(std::numeric_limits<int16_t>::max())));

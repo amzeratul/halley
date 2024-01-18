@@ -114,6 +114,11 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFi
 	return {};
 }
 
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources)
+{
+	return {};
+}
+
 String Game::getDefaultColourScheme()
 {
 	return "";

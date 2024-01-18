@@ -8,17 +8,19 @@
 
 using namespace Halley;
 
-ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, Callback callback, Vector<String> entityTargets)
+ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow,
+	std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene, Callback callback, Vector<String> entityTargets)
 	: DrillDownAssetWindow("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
 	, project(projectWindow.getProject())
 	, assetEditor(assetEditor)
+	, scene(std::move(scene))
 	, callback(std::move(callback))
+	, undoStack(32)
 	, scriptGraph(std::move(scriptGraph))
 	, entityTargets(std::move(entityTargets))
-	, undoStack(32)
 {
 	factory.loadUI(*this, "halley/script_graph_editor");
 	setListeningToClient(true);
@@ -82,6 +84,12 @@ void ScriptGraphEditor::onMakeUI()
 	if (callback) {
 		// Only add this overriding default factory if we're running inside scene editor
 		entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
+
+		if (scene) {
+			for (auto& f: project.getGameInstance()->createCustomScriptEditorFieldFactories(*scene, gameResources)) {
+				entityEditorFactory->addFieldFactory(std::move(f));
+			}
+		}
 	}
 
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
@@ -193,6 +201,11 @@ void ScriptGraphEditor::onMakeUI()
 const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
 {
 	return entityTargets;
+}
+
+std::shared_ptr<const Scene> ScriptGraphEditor::getScene() const
+{
+	return scene;
 }
 
 void ScriptGraphEditor::onModified()

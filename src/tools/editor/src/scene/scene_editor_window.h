@@ -149,6 +149,8 @@ namespace Halley {
 
 		Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue, String extension) override;
 
+		std::shared_ptr<const Prefab> getCurPrefab() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 

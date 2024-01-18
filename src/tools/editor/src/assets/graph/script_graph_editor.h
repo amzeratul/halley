@@ -15,7 +15,8 @@ namespace Halley {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
-		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, Callback callback = {}, Vector<String> entityTargets = {});
+		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph,
+			AssetEditor* assetEditor, std::shared_ptr<const Scene> scene = {}, Callback callback = {}, Vector<String> entityTargets = {});
 		~ScriptGraphEditor() override;
 
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
@@ -29,6 +30,7 @@ namespace Halley {
 		void onMakeUI() override;
 
 		const Vector<String>& getScriptTargetIds() const;
+		std::shared_ptr<const Scene> getScene() const;
 
 		void onModified();
 		void undo();
@@ -51,6 +53,7 @@ namespace Halley {
 		Resources& gameResources;
 		Project& project;
 		AssetEditor* assetEditor = nullptr;
+		std::shared_ptr<const Scene> scene;
 		Callback callback;
 
 		ConfigUndoStack undoStack;
@@ -74,6 +77,7 @@ namespace Halley {
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		Vector<String> entityTargets;
+		Vector<String> cutsceneIds;
 
 		void setListeningToClient(bool listening);
 		void refreshScriptEnumHandle();
