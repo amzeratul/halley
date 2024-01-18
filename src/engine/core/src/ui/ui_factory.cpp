@@ -29,6 +29,7 @@
 #include "halley/ui/widgets/ui_option_list_morpher.h"
 #include "halley/ui/widgets/ui_tree_list.h"
 #include "halley/ui/behaviours/ui_reload_ui_behaviour.h"
+#include "halley/ui/widgets/ui_custom_paint.h"
 #include "halley/ui/widgets/ui_debug_console.h"
 #include "halley/ui/widgets/ui_render_surface.h"
 #include "halley/ui/widgets/ui_spin_control2.h"
@@ -89,6 +90,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); }, getTreeListProperties());
 	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
 	addFactory("renderSurface", [=](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
+	addFactory("customPaint", [=](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
 }
 
 UIFactory::~UIFactory()
@@ -1627,6 +1629,22 @@ std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNo
 	widget->setColour(colour);
 	widget->setScale(scale);
 
+	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getCustomPaintProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Custom Paint";
+	result.iconName = "widget_icons/customPaint.png";
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeCustomPaint(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto widget = std::make_shared<UICustomPaint>(std::move(id), makeSizer(entryNode));
 	return widget;
 }
 

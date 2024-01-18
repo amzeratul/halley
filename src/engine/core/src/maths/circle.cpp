@@ -87,6 +87,11 @@ Circle Circle::getSpanningCircle2(Vector<Vector2f> points)
 	return msw(span.subspan(3, span.size() - 3), gsl::span<Vector2f, 3>(points.data(), 3));
 }
 
+Circle Circle::getInscribedCircle(Rect4f rect)
+{
+	return Circle(rect.getCenter(), std::min(rect.getWidth(), rect.getHeight()) / 2.0f);
+}
+
 Circle Circle::msw(gsl::span<Vector2f> ps, gsl::span<Vector2f, 3> rs)
 {
 	if (ps.empty()) {
