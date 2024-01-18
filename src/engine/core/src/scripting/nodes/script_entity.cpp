@@ -351,3 +351,68 @@ ConfigNode ScriptHasTags::doGetData(ScriptEnvironment& environment, const Script
 	return ConfigNode(true);
 }
 
+
+ConfigNode ScriptToggleEntityEnabledData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["entityId"] = ConfigNodeSerializer<EntityId>().serialize(entityId, context);
+	result["previousState"] = previousState;
+	return result;
+}
+
+String ScriptToggleEntityEnabled::getIconName(const ScriptGraphNode& node) const
+{
+	if (node.getSettings().getType() == ConfigNodeType::Map && node.getSettings()["enabled"].asBool(true)) {
+		return "script_icons/toggle_enabled_on.png";
+	}
+	return "script_icons/toggle_enabled_off.png";
+}
+
+Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes() const
+{
+	return {
+		SettingType{ "enabled", "bool", Vector<String>{"true"} }
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Toggle entity enabled to ");
+	str.append(node.getSettings()["enabled"].asString("true"), parameterColour);
+	str.append(" and return to previous after");
+	return str.moveResults();
+}
+
+void ScriptToggleEntityEnabled::doInitData(ScriptToggleEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	if (nodeData.getType() != ConfigNodeType::Map) {
+		return;
+	}
+
+	data.entityId = ConfigNodeSerializer<EntityId>().deserialize(context, nodeData["entityId"]);
+	data.previousState = nodeData["previousState"].asBool(false);
+}
+
+IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
+{
+	auto entityRef = environment.getWorld().getEntity(readEntityId(environment, node, 2));
+	data.entityId = entityRef.getEntityId();
+	data.previousState = entityRef.isEnabled();
+	entityRef.setEnabled(node.getSettings()["enabled"].asBool(true));
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+void ScriptToggleEntityEnabled::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
+{
+	auto entityRef = environment.getWorld().getEntity(data.entityId);
+	entityRef.setEnabled(data.previousState);
+}
