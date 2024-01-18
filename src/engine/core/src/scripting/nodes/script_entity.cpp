@@ -388,6 +388,7 @@ std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDesc
 	auto str = ColourStringBuilder(true);
 	str.append("Toggle entity enabled to ");
 	str.append(node.getSettings()["enabled"].asString("true"), parameterColour);
+	str.append(" and return to previous after");
 	return str.moveResults();
 }
 
