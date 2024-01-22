@@ -404,7 +404,12 @@ void ScriptToggleEntityEnabled::doInitData(ScriptToggleEntityEnabledData& data, 
 
 IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
 {
-	auto entityRef = environment.getWorld().getEntity(readEntityId(environment, node, 2));
+	const auto entityId = readEntityId(environment, node, 2);
+	if (!entityId.isValid()) {
+		Logger::logError("Entity with id " + toString(entityId) + " does not exist and can't be toggled!");
+		return Result(ScriptNodeExecutionState::Done);
+	}
+	auto entityRef = environment.getWorld().getEntity(entityId);
 	data.entityId = entityRef.getEntityId();
 	data.previousState = entityRef.isEnabled();
 	entityRef.setEnabled(node.getSettings()["enabled"].asBool(true));
