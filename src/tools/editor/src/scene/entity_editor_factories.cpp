@@ -912,6 +912,112 @@ public:
 	}
 };
 
+class ComponentEditorStdHashMapFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::HashMap<>";
+	}
+
+	bool isNested() const override
+	{
+		return false;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+
+		{
+			auto& fieldData = data.getWriteableFieldData(); // HACK
+			if (fieldData.getType() != ConfigNodeType::Map) {
+				if (fieldData.getType() == ConfigNodeType::Undefined) {
+					fieldData = ConfigNode::MapType();
+				}
+				else {
+					fieldData = ConfigNode::MapType({ std::move(fieldData.asMap()) });
+				}
+			}
+		}
+
+		const auto containerPtr = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+		const auto containerWeak = std::weak_ptr<UIWidget>(containerPtr);
+
+		auto buildList = [=, &context]()
+		{
+			const auto container = containerWeak.lock();
+			container->clear();
+			
+			for (const auto& pair : data.getFieldData().asMap()) {
+				auto rowSizer = std::make_shared<UISizer>();
+
+				const auto key = pair.first;
+				auto keyWidget = std::make_shared<UITextInput>(key, context.getUIFactory().getStyle("inputThin"), key);
+				keyWidget->setHandle(UIEventType::TextSubmit, [=](const UIEvent& event)
+				{
+					auto& fieldData = data.getWriteableFieldData();
+					if (event.getStringData().isEmpty() || fieldData.asMap().find(event.getStringData()) != fieldData.asMap().end()) {
+						keyWidget->setText(event.getSourceId());
+						return;
+					}
+					fieldData[event.getStringData()] = fieldData[key];
+					fieldData.asMap().erase(key);
+					context.onEntityUpdated();
+					containerPtr->sendEvent(event);
+				});
+				rowSizer->add(keyWidget, 1);
+				rowSizer->add(context.makeField(String(pars.typeParameters.at(1)).trimBoth(), pars.withSubKey(key, ""), ComponentEditorLabelCreation::OnlyIfNested), 1);
+
+				auto deleteButton = std::make_shared<UIButton>("delete" + pair.first, context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
+				deleteButton->setMinSize(Vector2f(22, 22));
+				deleteButton->setToolTip(LocalisedString::fromHardcodedString("Remove entry"));
+				rowSizer->add(deleteButton);
+				container->add(rowSizer);
+			}
+
+			auto addButton = std::make_shared<UIButton>("add", context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("+"));
+			addButton->setMinSize(Vector2f(22, 22));
+			addButton->setToolTip(LocalisedString::fromHardcodedString("Add new entry on " + pars.data.getName()));
+			container->add(addButton);
+		};
+		buildList();
+
+		containerPtr->setHandle(UIEventType::TextSubmit, [=, buildList = std::move(buildList)](const UIEvent& event)
+		{
+			if (event.getSourceId() == event.getStringData()) {
+				return;
+			}
+
+			buildList();
+		});
+
+		containerPtr->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)](const UIEvent& event)
+		{
+			auto& map = data.getWriteableFieldData().asMap();
+			if (event.getSourceId() == "add") {
+				if (map.find("") != map.end()) {
+					return;
+				}
+				map[""] = ConfigNode();
+				context.onEntityUpdated();
+			}
+			else if (event.getSourceId().startsWith("delete")) {
+				const auto key = event.getSourceId().mid(6);
+				map.erase(key);
+				context.onEntityUpdated();
+			}
+			buildList();
+		});
+
+		return containerPtr;
+	}
+};
+
 class ComponentEditorStdSetFieldFactory : public ComponentEditorStdVectorFieldFactory {
 public:
 	String getFieldType() override
@@ -2095,6 +2201,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorScriptMessageTypeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParsedOptionFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorEntityIdFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdHashMapFieldFactory>());
 
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<InputPriority>("Halley::InputPriority"));

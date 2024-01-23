@@ -25,6 +25,10 @@ component:
       canEdit: false
       canSave: true
       canNetwork: true
+  - entityReferences:
+      type: 'Halley::HashMap<Halley::String, Halley::EntityId>'
+      canEdit: true
+      canSave: false
 
 ---
 

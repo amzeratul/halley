@@ -17,13 +17,15 @@ public:
 	Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>> scripts{};
 	Halley::Vector<Halley::String> scriptsStarted{};
 	Halley::ScriptVariables variables{};
+	Halley::HashMap<Halley::String, Halley::EntityId> entityReferences{};
 
 	ScriptableComponent() {
 	}
 
-	ScriptableComponent(Halley::Vector<Halley::String> tags, Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>> scripts)
+	ScriptableComponent(Halley::Vector<Halley::String> tags, Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>> scripts, Halley::HashMap<Halley::String, Halley::EntityId> entityReferences)
 		: tags(std::move(tags))
 		, scripts(std::move(scripts))
+		, entityReferences(std::move(entityReferences))
 	{
 	}
 
@@ -34,6 +36,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(tags)>::serialize(tags, Halley::Vector<Halley::String>{}, _context, _node, componentName, "tags", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(scripts)>::serialize(scripts, Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>>{}, _context, _node, componentName, "scripts", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(variables)>::serialize(variables, Halley::ScriptVariables{}, _context, _node, componentName, "variables", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(entityReferences)>::serialize(entityReferences, Halley::HashMap<Halley::String, Halley::EntityId>{}, _context, _node, componentName, "entityReferences", makeMask(Type::Prefab));
 		return _node;
 	}
 
@@ -43,6 +46,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(tags)>::deserialize(tags, Halley::Vector<Halley::String>{}, _context, _node, componentName, "tags", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(scripts)>::deserialize(scripts, Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>>{}, _context, _node, componentName, "scripts", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(variables)>::deserialize(variables, Halley::ScriptVariables{}, _context, _node, componentName, "variables", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(entityReferences)>::deserialize(entityReferences, Halley::HashMap<Halley::String, Halley::EntityId>{}, _context, _node, componentName, "entityReferences", makeMask(Type::Prefab));
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
