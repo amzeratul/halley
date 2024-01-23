@@ -571,7 +571,7 @@ void UIFactory::applyInputButtons(UIWidget& widget, const String& key)
 
 LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defaultOption, const String& key) {
 	LocalisedString label;
-	if (node.hasKey(key + "Key")) {
+	if (node.hasKey(key + "Key") && node[key + "Key"].asString("") != "") {
 		label = i18n.get(node[key + "Key"].asString());
 	} else if (node.hasKey(key)) {
 		label = LocalisedString::fromUserString(node[key].asString(defaultOption));
