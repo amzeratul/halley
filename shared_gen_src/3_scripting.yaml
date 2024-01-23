@@ -29,6 +29,7 @@ component:
       type: 'Halley::HashMap<Halley::String, Halley::EntityId>'
       canEdit: true
       canSave: false
+      canModifyDynamic: true
 
 ---
 

@@ -247,11 +247,10 @@ EntityId ScriptGetParent::doGetEntityId(ScriptEnvironment& environment, const Sc
 }
 
 
-
 Vector<IGraphNodeType::SettingType> ScriptEntityReference::getSettingTypes() const
 {
 	return {
-		SettingType{ "scriptTargetId", "Halley::ScriptTargetId", Vector<String>{""} }
+		SettingType{ "key", "Halley::String", Vector<String>{""} }
 	};
 }
 
@@ -266,12 +265,81 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
+	str.append("Entity reference set in ScriptableComponent with key ");
+	str.append(node.getSettings()["key"].asString(""), settingColour);
+	return str.moveResults();
+}
+
+String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return node.getSettings()["key"].asString("");
+	} else {
+		return "pos(" + node.getSettings()["key"].asString("") + ")";
+	}
+}
+
+String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["key"].asString("");
+}
+
+EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	const auto key = node.getSettings()["key"].asString("");
+	if (key.isEmpty()) {
+		return {};
+	}
+
+	const auto entityRef = environment.tryGetEntity({});
+	const auto& references = entityRef.getComponent<ScriptableComponent>().entityReferences;
+	const auto find = references.find(key);
+	if (find == references.end()) {
+		return {};
+	}
+
+	return find->second;
+}
+
+ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto entityId = doGetEntityId(environment, node, 0);
+	if (!entityId.isValid()) {
+		return {};
+	}
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId)) {
+		return transform->getWorldPosition().toConfigNode();
+	} else {
+		return {};
+	}
+}
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptEntityTargetReference::getSettingTypes() const
+{
+	return {
+		SettingType{ "scriptTargetId", "Halley::ScriptTargetId", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
 	str.append(node.getSettings()["scriptTargetId"].asString(""), settingColour);
 	return str.moveResults();
 }
 
-String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityTargetReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return node.getSettings()["scriptTargetId"].asString("");
@@ -280,17 +348,17 @@ String ScriptEntityReference::getShortDescription(const World* world, const Scri
 	}
 }
 
-String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptEntityTargetReference::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["scriptTargetId"].asString("");
 }
 
-EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+EntityId ScriptEntityTargetReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	return environment.getScriptTarget(node.getSettings()["scriptTargetId"].asString(""));
 }
 
-ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto entityId = doGetEntityId(environment, node, 0);
 	if (!entityId.isValid()) {
