@@ -671,6 +671,7 @@ void UIWidget::setParent(UIParent* p)
 void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 {
 	if (this->root != &root) {
+		this->lastInputType = root.getLastInputType();
 		this->root = &root;
 		onAddedToRoot(root);
 

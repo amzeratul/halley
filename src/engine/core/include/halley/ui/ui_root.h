@@ -74,6 +74,8 @@ namespace Halley {
 
 		void releaseWeakPtrs();
 
+		UIInputType getLastInputType() const;
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
@@ -95,6 +97,7 @@ namespace Halley {
 		std::function<bool(KeyboardKeyPress)> unhandledKeyPressListener;
 
 		std::shared_ptr<UIToolTip> toolTip;
+		UIInputType lastInputType = UIInputType::Keyboard;
 
 		void updateMouse(const std::shared_ptr<InputDevice>& mouse, KeyMods keyMods);
 		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, Vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);

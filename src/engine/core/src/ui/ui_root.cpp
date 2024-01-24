@@ -71,6 +71,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 {
 	auto joystickType = manual ? manual->getJoystickType() : JoystickType::Generic;
 	bool first = true;
+	lastInputType = activeInputType;
 
 	updateKeyboardInput();
 
@@ -313,6 +314,11 @@ void UIRoot::releaseWeakPtrs()
 	currentFocus = {};
 	currentMouseOver = {};
 	mouseExclusive = {};
+}
+
+UIInputType UIRoot::getLastInputType() const
+{
+	return lastInputType;
 }
 
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
