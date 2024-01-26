@@ -6,6 +6,8 @@
 #include <array>
 #include <optional>
 
+#include "halley/data_structures/hash_map.h"
+
 namespace Halley {
 	class ConfigNode;
 	class Deserializer;
@@ -55,7 +57,7 @@ struct std::hash<Halley::UUID>
     std::size_t operator() (const Halley::UUID& uuid) const noexcept
     {
         const auto& bytes = uuid.getUint64Bytes();
-        return bytes[0] ^ bytes[1];
+        return std::hash<uint64_t>()(Halley::combineHash64(bytes[0], bytes[1]));
     }
 };
 
