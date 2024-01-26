@@ -34,8 +34,15 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 {
 	EntityScene curScene(allowReload, worldPartition, variant);
 	try {
+		Vector<EntityRef> entities;
 		for (const auto& entityData : prefab->getEntityDatas()) {
-			auto entity = createEntity(entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), EntityRef(), &curScene);
+			preInstantiate(entityData, worldPartition, entities);
+		}
+		auto ctx = makeStandaloneContext();
+		ctx->setEntities(std::move(entities));
+
+		for (const auto& entityData : prefab->getEntityDatas()) {
+			auto entity = createEntity(entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), EntityRef(), &curScene, ctx.get());
 			curScene.addPrefabReference(prefab, entity);
 			curScene.addRootEntity(entity);
 		}
@@ -196,6 +203,11 @@ void EntityFactoryContext::addEntity(EntityRef entity)
 	entities.push_back(entity);
 }
 
+void EntityFactoryContext::setEntities(Vector<EntityRef> entities)
+{
+	this->entities = std::move(entities);
+}
+
 EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID, bool allowWorldLookup) const
 {
 	if (!uuid.isValid()) {
@@ -270,9 +282,8 @@ EntityId EntityFactoryContext::getCurrentEntityId() const
 UUID EntityFactoryContext::getRootUUID() const
 {
 	UUID rootUUID;
-	if (entityData->getType() == IEntityData::Type::Data) {
-		const auto* rootEntity = dynamic_cast<const EntityData*>(entityData);
-		if (rootEntity) {
+	if (entityData && entityData->getType() == IEntityData::Type::Data) {
+		if (const auto* rootEntity = dynamic_cast<const EntityData*>(entityData)) {
 			rootUUID = rootEntity->getInstanceUUID();
 		}
 	}
@@ -337,9 +348,9 @@ EntityRef EntityFactory::createEntity(const String& prefabName, EntityRef parent
 	return createEntity(data, mask, parent, scene);
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene)
+EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene, EntityFactoryContext* parentContext)
 {
-	const auto context = makeContext(data, {}, scene, false, mask);
+	const auto context = makeContext(data, {}, scene, false, mask, parentContext);
 	const auto entity = tryGetEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
 	return entity;
@@ -574,6 +585,17 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		} else {
 			updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
 		}
+	}
+}
+
+void EntityFactory::preInstantiate(const IEntityConcreteData& data, uint8_t worldPartition, Vector<EntityRef>& entities)
+{
+	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), worldPartition);
+	entities.push_back(entity);
+
+	const auto nChildren = data.getNumChildren();
+	for (size_t i = 0; i < nChildren; ++i) {
+		preInstantiate(data.getChild(i), worldPartition, entities);
 	}
 }
 

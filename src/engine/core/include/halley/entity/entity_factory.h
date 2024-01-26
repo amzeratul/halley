@@ -39,7 +39,7 @@ namespace Halley {
 		World& getWorld();
 		
 		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
+		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr);
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0, String variant = "");
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
@@ -75,6 +75,7 @@ namespace Halley {
 
 		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);
+		void preInstantiate(const IEntityConcreteData& data, uint8_t worldPartition, Vector<EntityRef>& entities);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
 		void collectExistingEntities(EntityRef entity, EntityFactoryContext& context);
 
@@ -126,6 +127,7 @@ namespace Halley {
 		UUID getUUIDFromEntityId(EntityId id) const override;
 
 		void addEntity(EntityRef entity);
+		void setEntities(Vector<EntityRef> entities);
 		void notifyEntity(const EntityRef& entity) const;
 		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID, bool allowWorldLookup) const;
 
@@ -156,7 +158,6 @@ namespace Halley {
 		void addToDelete(EntityRef entityRef);
 		void removeDelete(UUID uuid);
 		const Vector<EntityRef>& getToDeleteEntities() const;
-
 
 	private:
 		EntitySerializationContext entitySerializationContext;
