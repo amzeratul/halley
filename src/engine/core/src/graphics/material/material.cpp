@@ -122,6 +122,13 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 	initUniforms(forceLocalBlocks);
 }
 
+Material::~Material()
+{
+	textures.clear();
+	dataBlocks.clear();
+	materialDefinition = {};
+}
+
 void Material::initUniforms(bool forceLocalBlocks)
 {
 	int nextBindPoint = 1;

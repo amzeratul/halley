@@ -75,6 +75,7 @@ namespace Halley
 		Material(const Material& other);
 		Material(Material&& other) noexcept;
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
+		~Material();
 
 		void bind(int pass, Painter& painter) const;
 		static void resetBindCache();
