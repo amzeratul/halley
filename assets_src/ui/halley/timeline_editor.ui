@@ -1,0 +1,9 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { class: widget }
+  sizer: { type: horizontal }
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { id: close, class: button, text: x, style: buttonThin, size: [16, 16] }

@@ -6,6 +6,7 @@
 #include "infini_canvas.h"
 #include "scroll_background.h"
 #include "select_asset_widget.h"
+#include "timeline_editor.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/curve_editor.h"
@@ -50,6 +51,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); }, getCurveEditorProperties());
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
 	addFactory("scriptingVariableInspector", [=](const ConfigNode& node) { return makeScriptingVariableInspector(node); });
+	addFactory("timelineEditor", [=](const ConfigNode& node) { return makeTimelineEditor(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -248,6 +250,14 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeScriptingVariableInspector(const 
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto widget = std::make_shared<ScriptGraphVariableInspector>(*this);
+	return widget;
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeTimelineEditor(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto widget = std::make_shared<TimelineEditor>(id, *this);
 	return widget;
 }
 

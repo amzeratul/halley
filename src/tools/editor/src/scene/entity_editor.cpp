@@ -700,6 +700,8 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 			}
 		}, std::move(entityTargets));
 		sceneEditor->drillDownEditor(std::move(scriptEditor));
+	} else if (tool == "!timeline") {
+		sceneEditor->editTimeline(currentId);
 	} else {
 		sceneEditor->setTool(tool, componentName, fieldName);
 	}

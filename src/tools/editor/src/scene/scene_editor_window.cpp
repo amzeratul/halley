@@ -20,6 +20,7 @@
 #include "src/assets/new_asset_window.h"
 #include "src/assets/prefab_editor.h"
 #include "src/ui/project_window.h"
+#include "src/ui/timeline_editor.h"
 using namespace Halley;
 
 SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor, AssetType assetType)
@@ -1735,6 +1736,12 @@ Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedStri
 std::shared_ptr<const Prefab> SceneEditorWindow::getCurPrefab() const
 {
 	return prefab;
+}
+
+void SceneEditorWindow::editTimeline(const String& uuid)
+{
+	auto timelineEditor = getWidgetAs<TimelineEditor>("timelineEditor");
+	timelineEditor->setActive(true);
 }
 
 void SceneEditorWindow::openGoToDialogue()

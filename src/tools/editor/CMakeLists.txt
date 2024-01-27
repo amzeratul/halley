@@ -93,6 +93,7 @@ set (editor_sources
 	"src/ui/task_details.cpp"
 	"src/ui/task_display.cpp"
 	"src/ui/taskbar.cpp"
+	"src/ui/timeline_editor.cpp"
 	"src/ui/toolbar.cpp"
 
 	"../../../gen/cpp/registry.cpp"
@@ -186,6 +187,7 @@ set (editor_headers
 	"src/ui/task_details.h"
 	"src/ui/task_display.h"
 	"src/ui/taskbar.h"
+	"src/ui/timeline_editor.h"
 	"src/ui/toolbar.h"
 	)
 

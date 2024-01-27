@@ -151,6 +151,8 @@ namespace Halley {
 
 		std::shared_ptr<const Prefab> getCurPrefab() const;
 
+		void editTimeline(const String& uuid);
+
 	protected:
 		void update(Time t, bool moved) override;
 

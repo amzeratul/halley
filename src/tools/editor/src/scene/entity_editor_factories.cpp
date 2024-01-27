@@ -1493,6 +1493,32 @@ public:
 	}
 };
 
+class ComponentEditorTimelineFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Timeline";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+
+		auto style = context.getUIFactory().getStyle("buttonThin");
+
+		auto field = std::make_shared<UIButton>("editTimeline", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setMinSize(Vector2f(30, 22));
+
+		field->setHandle(UIEventType::ButtonClicked, "editTimeline", [=, &context] (const UIEvent& event)
+		{
+			context.setTool("!timeline", componentName, data.getName());
+		});
+
+		return field;
+	}
+};
+
 class ComponentEditorRangeFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -2196,6 +2222,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIStyleFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorTimelineFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptMessageTypeFieldFactory>());
