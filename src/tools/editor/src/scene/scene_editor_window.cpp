@@ -1738,10 +1738,21 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getCurPrefab() const
 	return prefab;
 }
 
-void SceneEditorWindow::editTimeline(const String& uuid)
+void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timeline> timeline)
 {
-	auto timelineEditor = getWidgetAs<TimelineEditor>("timelineEditor");
-	timelineEditor->setActive(true);
+	const auto timelineEditor = getWidgetAs<TimelineEditor>("timelineEditor");
+	timelineEditor->open(uuid, std::move(timeline), [=] (const String& entityId, const Timeline& timeline)
+	{
+		auto& entityData = sceneData->getWriteableEntityNodeData(entityId).getData();
+		const auto prevEntityData = entityData;
+		
+		for (auto& comp : entityData.getComponents()) {
+			if (comp.first == "Timeline") {
+				comp.second["timeline"] = timeline.toConfigNode();
+			}
+		}
+		onEntityModified(entityId, prevEntityData, entityData);
+	});
 }
 
 void SceneEditorWindow::openGoToDialogue()
