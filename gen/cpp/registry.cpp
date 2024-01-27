@@ -18,6 +18,7 @@ using namespace Halley;
 #include "components/script_target_component.h"
 #include "components/script_tag_target_component.h"
 #include "components/network_component.h"
+#include "components/timeline_component.h"
 #include "messages/play_animation_message.h"
 #include "messages/play_animation_once_message.h"
 #include "messages/stop_particles_message.h"
@@ -61,7 +62,7 @@ public:
 	}
 	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {
 		Vector<std::unique_ptr<ComponentReflector>> result;
-		result.reserve(16);
+		result.reserve(17);
 		result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<VelocityComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
@@ -78,6 +79,7 @@ public:
 		result.push_back(std::make_unique<ComponentReflectorImpl<ScriptTargetComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<ScriptTagTargetComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<NetworkComponent>>());
+		result.push_back(std::make_unique<ComponentReflectorImpl<TimelineComponent>>());
 		return result;
 	}
 	Vector<std::unique_ptr<MessageReflector>> makeMessageReflectors() override {

@@ -1,0 +1,22 @@
+---
+
+component:
+  name: Timeline
+  members:
+  - timeline:
+      type: 'Halley::Timeline'
+      canEdit: true
+      canSave: false
+      canNetwork: false
+  - player:
+      type: 'Halley::TimelinePlayer'
+      canEdit: false
+      canSave: true
+      canNetwork: true
+  - playOnStart:
+      type: bool
+      canEdit: true
+      canSave: false
+      defaultValue: false
+
+...

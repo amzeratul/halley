@@ -351,6 +351,10 @@ set(SOURCES
         "src/text/string_serializer.cpp"
         
         "src/time/stopwatch.cpp"
+
+        "src/timeline/timeline.cpp"
+        "src/timeline/timeline_player.cpp"
+        "src/timeline/timeline_sequence.cpp"
         
         "src/utils/cryptography.cpp"
         "src/utils/encrypt.cpp"
@@ -834,6 +838,10 @@ set(HEADERS
 
         "include/halley/time/halleytime.h"
         "include/halley/time/stopwatch.h"
+
+        "include/halley/timeline/timeline.h"
+        "include/halley/timeline/timeline_player.h"
+        "include/halley/timeline/timeline_sequence.h"
 
         "include/halley/utils/algorithm.h"
         "include/halley/utils/attributes.h"

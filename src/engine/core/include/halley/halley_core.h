@@ -87,4 +87,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "audio/halley_audio.h"
 #include "ui/halley_ui.h"
 
+#include "halley/timeline/timeline.h"
+#include "halley/timeline/timeline_player.h"
+
 #include "storage/options.h"
