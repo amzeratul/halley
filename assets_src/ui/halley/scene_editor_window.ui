@@ -58,8 +58,8 @@ children:
             proportion: 1
   - widget: { class: widget }
     proportion: 1
-    border: [4, 0, 0, 0]
-    sizer: { type: vertical }
+    border: [4, 0, 4, 0]
+    sizer: { type: vertical, gap: 4 }
     children:
     - widget: { id: canvas, class: sceneEditorCanvas }
       proportion: 1
