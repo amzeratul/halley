@@ -2156,6 +2156,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
 
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::String"));
+	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::ConfigNode"));
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::ScriptTargetId"));
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::CutsceneId"));
 	factories.emplace_back(std::make_unique<ComponentEditorCodeEditorFactory>("Halley::LuaExpression"));

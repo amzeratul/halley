@@ -30,6 +30,11 @@ component:
       canEdit: true
       canSave: false
       canModifyDynamic: true
+  - entityParams:
+      type: 'Halley::HashMap<Halley::String, Halley::ConfigNode>'
+      canEdit: true
+      canSave: false
+      canModifyDynamic: true
 
 ---
 
