@@ -17,12 +17,15 @@ namespace Halley {
 		CubicOut,
 		Sqrt,
 		SqrtIn,
-		SqrtOut
+		SqrtOut,
+		EaseBack,
+		EaseBackIn,
+		EaseBackOut
 	};
 
 	template <>
 	struct EnumNames<TweenCurve> {
-		constexpr std::array<const char*, 13> operator()() const {
+		constexpr std::array<const char*, 16> operator()() const {
 			return{{
 				"linear",
 				"sine",
@@ -37,6 +40,9 @@ namespace Halley {
 				"sqrt",
 				"sqrtIn",
 				"sqrtOut",
+				"easeBack",
+				"easeBackIn",
+				"easeBackOut",
 			}};
 		}
 	};
@@ -86,6 +92,16 @@ namespace Halley {
 				return static_cast<T>(std::sqrt(t));
 			} else if constexpr (curve == TweenCurve::SqrtOut) {
 				return applyInverseCurve<TweenCurve::SqrtIn>(t);
+			} else if constexpr (curve == TweenCurve::Ease) {
+				return t < 0.5f ?
+					applyCurve<TweenCurve::EaseBackIn>(t) / sqrt(2.0f) :
+					1.0f - applyCurve<TweenCurve::EaseBackOut>(-2.0f * t + 2.0f) * 0.5f;
+			} else if constexpr (curve == TweenCurve::EaseBackIn) {
+				const static double c1 = 1.70158;
+				const static double c3 = c1 + 1.0;
+				return static_cast<T>(c3 * t * t * t - c1 * t * t);
+			} else if constexpr (curve == TweenCurve::EaseBackOut) {
+				return applyInverseCurve<TweenCurve::EaseBackIn>(t);
 			}
 			return t;
 		}
