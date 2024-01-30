@@ -960,6 +960,9 @@ public:
 				auto keyWidget = std::make_shared<UITextInput>(key, context.getUIFactory().getStyle("inputThin"), key);
 				keyWidget->setHandle(UIEventType::FocusLost, [=](const UIEvent& event)
 				{
+					if (keyWidget->getText() == key) {
+						return;
+					}
 					auto& fieldData = data.getWriteableFieldData();
 					fieldData[keyWidget->getText()] = ConfigNode(fieldData[key]);
 					fieldData.asMap().erase(key);
