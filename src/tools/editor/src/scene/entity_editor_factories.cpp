@@ -958,14 +958,10 @@ public:
 
 				const auto key = pair.first;
 				auto keyWidget = std::make_shared<UITextInput>(key, context.getUIFactory().getStyle("inputThin"), key);
-				keyWidget->setHandle(UIEventType::TextSubmit, [=](const UIEvent& event)
+				keyWidget->setHandle(UIEventType::FocusLost, [=](const UIEvent& event)
 				{
 					auto& fieldData = data.getWriteableFieldData();
-					if (event.getStringData().isEmpty() || fieldData.asMap().find(event.getStringData()) != fieldData.asMap().end()) {
-						keyWidget->setText(event.getSourceId());
-						return;
-					}
-					fieldData[event.getStringData()] = fieldData[key];
+					fieldData[keyWidget->getText()] = ConfigNode(fieldData[key]);
 					fieldData.asMap().erase(key);
 					context.onEntityUpdated();
 					containerPtr->sendEvent(event);
@@ -987,12 +983,8 @@ public:
 		};
 		buildList();
 
-		containerPtr->setHandle(UIEventType::TextSubmit, [=, buildList = std::move(buildList)](const UIEvent& event)
+		containerPtr->setHandle(UIEventType::FocusLost, [=, buildList = std::move(buildList)](const UIEvent& event)
 		{
-			if (event.getSourceId() == event.getStringData()) {
-				return;
-			}
-
 			buildList();
 		});
 
