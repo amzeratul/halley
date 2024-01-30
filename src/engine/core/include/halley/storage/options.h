@@ -26,17 +26,17 @@ namespace Halley {
 		void setDevFlag(std::string_view name, bool value);
 		bool getDevFlag(std::string_view name, bool defaultValue) const;
 
+		Vector2i getResolution() const;
+		void setResolution(Vector2i resolution);
+
 	protected:
 		
 		std::shared_ptr<ISaveData> saveData;
 
-		std::map<String, float> volume;
-		std::map<String, bool> devFlags;
-		std::map<String, float> devValues;
-		String keyboardLayout;
+		ConfigNode options;
 		
 		virtual void onReset();
-		void load(const ConfigNode& node);
+		void load(ConfigNode node);
 		ConfigNode toConfigNode() const;
 	};
 }

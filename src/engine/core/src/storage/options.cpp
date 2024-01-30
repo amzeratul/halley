@@ -12,12 +12,12 @@ Options::Options(std::shared_ptr<ISaveData> saveData)
 
 void Options::load()
 {
+	reset();
+
 	const auto data = saveData->getData("options");
 	if (!data.empty()) {
 		auto configFile = Deserializer::fromBytes<ConfigFile>(data, SerializerOptions(SerializerOptions::maxVersion));
-		load(configFile.getRoot());
-	} else {
-		reset();
+		load(std::move(configFile.getRoot()));
 	}
 }
 
@@ -31,90 +31,83 @@ void Options::save()
 
 void Options::reset()
 {
-	volume.clear();
-	devValues.clear();
-	devFlags.clear();
-	keyboardLayout = "qwerty";
+	options = ConfigNode::MapType();
+	options["volume"] = ConfigNode::MapType();
+	options["devValues"] = ConfigNode::MapType();
+	options["devFlags"] = ConfigNode::MapType();
+	options["keyboardLayout"] = "qwerty";
+	options["resolution"] = Vector2i(1280, 720);
+
 	onReset();
 }
 
-void Options::load(const ConfigNode& node)
+void Options::load(ConfigNode node)
 {
-	volume = node["volume"].asMap<String, float>();
-	devValues = node["devValues"].asMap<String, float>();
-	devFlags = node["devFlags"].asMap<String, bool>();
-	keyboardLayout = node["keyboardLayout"].asString("qwerty");
+	for (auto& [k, v]: node.asMap()) {
+		options[k] = std::move(v);
+	}
 }
 
 ConfigNode Options::toConfigNode() const
 {
-	auto result = ConfigNode::MapType();
-	
-	result["volume"] = volume;
-	result["devValues"] = devValues;
-	result["devFlags"] = devFlags;
-	result["keyboardLayout"] = keyboardLayout;
-	
-	return result;
+	return ConfigNode(options);
 }
 
 float Options::getVolume(std::string_view bus) const
 {
-	const auto iter = volume.find(bus);
-	if (iter != volume.end()) {
-		return iter->second;
-	}
-	return 1.0f;
+	return options["volume"][bus].asFloat(1.0f);
 }
 
 void Options::setVolume(std::string_view bus, float value)
 {
-	volume[bus] = value;
+	options["volume"][bus] = value;
 }
 
 void Options::applyVolumes(AudioAPI& audio)
 {
-	for (const auto& [k, v]: volume) {
-		audio.setBusVolume(k, v);
+	for (const auto& [k, v]: options["volume"].asMap()) {
+		audio.setBusVolume(k, v.asFloat(1.0f));
 	}
 }
 
 String Options::getKeyboardLayout() const
 {
-	return keyboardLayout;
+	return options["keyboardLayout"].asString();
 }
 
 void Options::setKeyboardLayout(String layout)
 {
-	keyboardLayout = std::move(layout);
+	options["keyboardLayout"] = ConfigNode(std::move(layout));
 }
 
 void Options::setDevValue(std::string_view name, float value)
 {
-	devValues[name] = value;
+	options["devValues"][name] = value;
 }
 
 float Options::getDevValue(std::string_view name, float defaultValue) const
 {
-	const auto iter = devValues.find(name);
-	if (iter == devValues.end()) {
-		return defaultValue;
-	}
-	return iter->second;
+	return options["devValues"][name].asFloat(defaultValue);
 }
 
 void Options::setDevFlag(std::string_view name, bool value)
 {
-	devFlags[name] = value;
+	options["devFlags"][name] = value;
 }
 
 bool Options::getDevFlag(std::string_view name, bool defaultValue) const
 {
-	const auto iter = devFlags.find(name);
-	if (iter == devFlags.end()) {
-		return defaultValue;
-	}
-	return iter->second;
+	return options["devFlags"][name].asBool(defaultValue);
+}
+
+Vector2i Options::getResolution() const
+{
+	return options["resolution"].asVector2i();
+}
+
+void Options::setResolution(Vector2i resolution)
+{
+	options["resolution"] = resolution;
 }
 
 void Options::onReset()
