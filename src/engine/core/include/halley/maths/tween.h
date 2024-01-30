@@ -92,7 +92,7 @@ namespace Halley {
 				return static_cast<T>(std::sqrt(t));
 			} else if constexpr (curve == TweenCurve::SqrtOut) {
 				return applyInverseCurve<TweenCurve::SqrtIn>(t);
-			} else if constexpr (curve == TweenCurve::Ease) {
+			} else if constexpr (curve == TweenCurve::EaseBack) {
 				return t < 0.5f ?
 					applyCurve<TweenCurve::EaseBackIn>(t) / sqrt(2.0f) :
 					1.0f - applyCurve<TweenCurve::EaseBackOut>(-2.0f * t + 2.0f) * 0.5f;
@@ -135,6 +135,12 @@ namespace Halley {
 				return Tween<T>::applyCurve<TweenCurve::SqrtIn>(t);
 			case TweenCurve::SqrtOut:
 				return Tween<T>::applyCurve<TweenCurve::SqrtOut>(t);
+			case TweenCurve::EaseBack:
+				return Tween<T>::applyCurve<TweenCurve::EaseBack>(t);
+			case TweenCurve::EaseBackIn:
+				return Tween<T>::applyCurve<TweenCurve::EaseBackIn>(t);
+			case TweenCurve::EaseBackOut:
+				return Tween<T>::applyCurve<TweenCurve::EaseBackOut>(t);
 			}
 			return t;
 		}
