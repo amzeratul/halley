@@ -429,6 +429,9 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 
 Vector2f UISizer::computeMinimumSizeBoxFree() const
 {
+	return Vector2f(); // Free sizer doesn't have a minimum size
+
+	/*
 	Rect4f rect = Rect4f(0, 0, 1, 1); // Always include origin
 
 	for (const auto& e : entries) {
@@ -443,6 +446,7 @@ Vector2f UISizer::computeMinimumSizeBoxFree() const
 	}
 
 	return rect.getSize();
+	*/
 }
 
 void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
