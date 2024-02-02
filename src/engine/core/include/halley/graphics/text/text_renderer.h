@@ -82,6 +82,7 @@ namespace Halley
 		float getAlignment() const;
 
 		bool empty() const;
+		Rect4f getAABB() const;
 
 	private:
 		std::shared_ptr<const Font> font;

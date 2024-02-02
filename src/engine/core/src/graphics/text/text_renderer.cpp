@@ -653,6 +653,13 @@ bool TextRenderer::empty() const
 	return text.empty();
 }
 
+Rect4f TextRenderer::getAABB() const
+{
+	const auto pos = getPosition();
+	const auto size = getExtents();
+	return Rect4f(pos, pos + size);
+}
+
 float TextRenderer::getScale(const Font& f) const
 {
 	const bool usingReplacement = &f != font.get();
