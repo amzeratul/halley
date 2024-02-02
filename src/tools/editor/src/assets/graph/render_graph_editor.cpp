@@ -69,5 +69,5 @@ void RenderGraphEditor::drawDottedConnection(Painter& painter, Vector2f startPoi
 {
 	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
 	const auto bezier = BezierCubic(startPoint, startPoint + Vector2f(dist, 0), endPoint - Vector2f(dist, 0), endPoint);
-	painter.drawLine(bezier, 2, col, {}, Painter::LineDashPattern(5.0f, 5.0f));
+	painter.drawLine(bezier, 2, col, {}, Painter::LineParameters(true, 5.0f, 5.0f));
 }

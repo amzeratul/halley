@@ -76,7 +76,8 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	updateCameraPos(t);
 
 	// Update input state
-	inputState.mousePos = inputState.rawMousePos ? camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect) : std::optional<Vector2f>();
+	const float zoom = getZoom();
+	inputState.mousePos = inputState.rawMousePos ? roundPosition(camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect), zoom) : std::optional<Vector2f>();
 	mousePos = inputState.mousePos;
 	if (!inputState.leftClickHeld) {
 		holdMouseStart.reset();

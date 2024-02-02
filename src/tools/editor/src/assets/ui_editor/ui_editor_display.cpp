@@ -47,7 +47,7 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 
 		p.draw([&] (Painter& painter)
 		{
-			painter.drawRect(curRect, 1.0f, Colour4f(0, 1, 0), {}, { 3.0f, 5.0f });
+			painter.drawRect(curRect, 1.0f, Colour4f(0, 1, 0), {}, { true, 3.0f, 5.0f });
 		});
 	}
 }

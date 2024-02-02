@@ -77,10 +77,9 @@ void ScriptGizmoUI::draw(UIPainter& painter) const
 		gizmo.draw(p);
 
 		if (inputState.selectionBox) {
-			const float zoom = 1.0f;
-			const auto rect = inputState.selectionBox.value() + Vector2f(0.5f, 0.5f) / zoom;
-			p.drawRect(rect, 3.0f / zoom, Colour4f(0, 0, 0, 0.5f));
-			p.drawRect(rect, 1.0f / zoom, Colour4f(1, 1, 1));
+			const auto rect = inputState.selectionBox.value();
+			p.drawRect(rect, 3.0f, Colour4f(0, 0, 0, 0.5f));
+			p.drawRect(rect, 1.0f, Colour4f(1, 1, 1));
 		}
 	});
 }
