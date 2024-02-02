@@ -20,6 +20,7 @@ namespace Halley {
 
 		void update(Time t, bool moved) override;
 
+		void refreshAssets() override;
 		void reload() override;
 		void onMakeUI() override;
 		void markModified(bool temporary = false);

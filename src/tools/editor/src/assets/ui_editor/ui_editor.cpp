@@ -219,6 +219,11 @@ void UIEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 	}
 }
 
+void UIEditor::refreshAssets()
+{
+	doLoadUI(true);
+}
+
 void UIEditor::reload()
 {
 	doLoadUI(false);
