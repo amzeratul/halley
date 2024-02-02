@@ -7,10 +7,9 @@ UISizerEntry::UISizerEntry()
 {
 }
 
-UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position)
+UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
 	: element(widget)
 	, border(border)
-	, position(position)
 	, proportion(proportion)
 	, fillFlags(fillFlags)
 {
@@ -96,11 +95,6 @@ void UISizerEntry::setProportion(float prop)
 	proportion = prop;
 }
 
-void UISizerEntry::setPosition(Vector2f pos)
-{
-	position = pos;
-}
-
 Vector4f UISizerEntry::getBorder() const
 {
 	return border;
@@ -109,11 +103,6 @@ Vector4f UISizerEntry::getBorder() const
 int UISizerEntry::getFillFlags() const
 {
 	return fillFlags;
-}
-
-Vector2f UISizerEntry::getPosition() const
-{
-	return position;
 }
 
 UISizer::UISizer(UISizerType type, float gap)
@@ -188,9 +177,9 @@ void UISizer::setRect(Rect4f rect, IUIElementListener* listener)
 	}
 }
 
-void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position, size_t insertPos)
+void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, size_t insertPos)
 {
-	entries.emplace(entries.begin() + std::min(entries.size(), insertPos), UISizerEntry(element, proportion, border, fillFlags, position));
+	entries.emplace(entries.begin() + std::min(entries.size(), insertPos), UISizerEntry(element, proportion, border, fillFlags));
 	reparentEntry(entries.back());
 }
 
@@ -447,8 +436,8 @@ Vector2f UISizer::computeMinimumSizeBoxFree() const
 			continue;
 		}
 
-		const auto size = e.getMinimumSize();
-		const auto position = e.getPosition();
+		const auto size = e.getMinimumSize() + e.getBorder().zw();
+		const auto position = e.getBorder().xy();
 		auto entryRect = Rect4f(position.x, position.y, size.x, size.y);
 		rect = rect.merge(entryRect);
 	}
@@ -456,20 +445,16 @@ Vector2f UISizer::computeMinimumSizeBoxFree() const
 	return rect.getSize();
 }
 
-void UISizer::setRectFree(Rect4f rect, IUIElementListener* listener)
+void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
 {
-	const auto startPos = rect.getTopLeft();
-
 	for (auto& e : entries) {
 		if (!e.isEnabled()) {
 			continue;
 		}
 		
 		const auto minSize = e.getMinimumSize();
-		const auto cellSize = rect.getSize() - e.getPosition();
-		const auto curPos = startPos + e.getPosition();
-		const auto rect = Rect4f(curPos, curPos + cellSize);
-		e.placeInside(rect, rect, minSize, listener, *this);
+		const auto dstRect = origRect.grow(-e.getBorder());
+		e.placeInside(dstRect, origRect, minSize, listener, *this);
 	}
 }
 

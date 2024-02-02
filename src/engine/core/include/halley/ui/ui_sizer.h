@@ -50,13 +50,12 @@ namespace Halley {
 	class UISizerEntry {
 	public:
 		UISizerEntry();
-		UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position);
+		UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
 	
 		float getProportion() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getBorder() const;
 		int getFillFlags() const;
-		Vector2f getPosition() const;
 
 		void placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer);
 
@@ -68,12 +67,10 @@ namespace Halley {
 		void setBorder(const Vector4f& border);
 
 		void setProportion(float prop);
-		void setPosition(Vector2f pos);
 
 	private:
 		UIElementPtr element;
 		Vector4f border;
-		Vector2f position;
 		float proportion;
 		uint16_t fillFlags;
 		mutable bool enabled = true;
@@ -87,7 +84,7 @@ namespace Halley {
 	public:
 		virtual ~IUISizer() {}
 
-		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) = 0;
+		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, size_t insertPos = std::numeric_limits<size_t>::max()) = 0;
 		virtual void addSpacer(float size) = 0;
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 		virtual void remove(IUIElement& element) = 0;
@@ -119,7 +116,7 @@ namespace Halley {
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect, IUIElementListener* listener) override;
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;
@@ -173,7 +170,7 @@ namespace Halley {
 		void setRectBox(Rect4f rect, IUIElementListener* listener);
 
 		Vector2f computeMinimumSizeBoxFree() const;
-		void setRectFree(Rect4f rect, IUIElementListener* listener);
+		void setRectFree(Rect4f origRect, IUIElementListener* listener);
 
 		void computeGridSizes(Vector<float>& cols, Vector<float>& rows) const;
 		Vector2f computeMinimumSizeGrid() const;

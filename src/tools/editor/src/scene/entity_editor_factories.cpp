@@ -433,8 +433,8 @@ public:
 				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources(), context.getProjectWindow());
 				widget->setDefaultAssetId(tex.defaultTextureName);
 				
-				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
-				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, insertPos++);
+				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, insertPos++);
 				prevMaterialParameters->push_back(label);
 				prevMaterialParameters->push_back(widget);
 
@@ -503,8 +503,8 @@ public:
 					const auto label = context.makeLabel("- " + uniform.name);
 					const auto widget = context.makeField(type, pars.withSubKey(key, defaultValue).withOptions(std::move(options)), ComponentEditorLabelCreation::Never);
 					
-					container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
-					container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+					container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, insertPos++);
+					container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, insertPos++);
 					prevMaterialParameters->push_back(label);
 					prevMaterialParameters->push_back(widget);
 
