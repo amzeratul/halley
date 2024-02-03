@@ -32,10 +32,11 @@ namespace Halley
 	        String name;
             String type;
             Vector<String> defaultValue;
+			ConfigNode options;
 
 			Entry() = default;
-			Entry(String label, String name, String type, Vector<String> defaultValue = {});
-			Entry(String label, String name, String type, String defaultValue);
+			Entry(String label, String name, String type, Vector<String> defaultValue = {}, ConfigNode options = {});
+			Entry(String label, String name, String type, String defaultValue, ConfigNode options = {});
         };
 
 		Vector<Entry> entries;

@@ -168,7 +168,13 @@ public:
 		const float value = data.getFieldData().asFloat(defaultValue);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
+		float granularity = 1;
+		if (pars.options.getType() == ConfigNodeType::Map) {
+			granularity = pars.options["granularity"].asFloat(1.0f);
+		}
+
 		auto field = std::make_shared<UISpinControl2>("floatValue", context.getUIFactory().getStyle("spinControl"), value, true);
+		field->setIncrement(granularity);
 		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
 			data.getWriteableFieldData() = ConfigNode(newVal);
@@ -1388,6 +1394,8 @@ public:
 			return AssetType::UIDefinition;
 		} else if (strippedTypeName == "Texture") {
 			return AssetType::Texture;
+		} else if (strippedTypeName == "Font") {
+			return AssetType::Font;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}
