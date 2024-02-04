@@ -323,6 +323,16 @@ void UIWidget::focus()
 	}
 }
 
+bool UIWidget::canPropagateMouseToChildren() const
+{
+	return propagateMouseToChildren;
+}
+
+void UIWidget::setPropagateMouseToChildren(bool enabled)
+{
+	propagateMouseToChildren = enabled;
+}
+
 void UIWidget::setId(const String& i)
 {
 	id = i;

@@ -326,7 +326,8 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	// Go through all root-level widgets and find the actual widget under the mouse
 	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
 	const auto exclusive = mouseExclusive.lock();
-	const auto actuallyUnderMouse = getWidgetUnderMouse(mousePos);
+	const auto underMouseResult = getWidgetUnderMouse(mousePos);
+	const auto actuallyUnderMouse = underMouseResult.overrideWidget ? underMouseResult.overrideWidget : underMouseResult.widget;
 	lastMousePos = mousePos;
 
 	// Check buttons
@@ -454,14 +455,14 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 	}
 }
 
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
+UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled) const
 {
 	const auto& cs = getChildren();
 	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
 		const auto& curRootWidget = cs[i];
 		const auto result = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
-		if (result.first) {
-			return result.first;
+		if (result.widget) {
+			return result;
 		} else {
 			if (curRootWidget->isMouseBlocker() && curRootWidget->isActiveInHierarchy()) {
 				return {};
@@ -471,7 +472,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool in
 	return {};
 }
 
-std::pair<std::shared_ptr<UIWidget>, int> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, int childLayerAdjustment) const
+UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, int childLayerAdjustment) const
 {
 	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
@@ -481,21 +482,24 @@ std::pair<std::shared_ptr<UIWidget>, int> UIRoot::getWidgetUnderMouse(const std:
 	const auto childMousePos = curWidget->transformToChildSpace(mousePos);
 	if (childMousePos) {
 		const int adjustmentForChildren = childLayerAdjustment + curWidget->getChildLayerAdjustment();
-		std::pair<std::shared_ptr<UIWidget>, int> bestResult;
+		WidgetUnderMouseResult bestResult;
 		for (auto& c : curWidget->getChildren()) {
 			const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, adjustmentForChildren);
-			if (result.first && (!bestResult.first || result.second > bestResult.second)) {
+			if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
 				bestResult = result;
 			}
 		}
-		if (bestResult.first) {
+		if (bestResult.widget) {
+			if (!curWidget->canPropagateMouseToChildren()) {
+				bestResult.overrideWidget = curWidget;
+			}
 			return bestResult;
 		}
 	}
 
 	auto rect = curWidget->getMouseRect();
 	if (curWidget->canInteractWithMouse() && rect.contains(mousePos)) {
-		return { curWidget, childLayerAdjustment };
+		return { curWidget, {}, childLayerAdjustment };
 	} else {
 		return {};
 	}
@@ -519,7 +523,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse() const
 
 std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
 {
-	return getWidgetUnderMouse(lastMousePos, true);
+	return getWidgetUnderMouse(lastMousePos, true).widget;
 }
 
 void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus, bool byClicking)

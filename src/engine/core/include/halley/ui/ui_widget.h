@@ -74,6 +74,8 @@ namespace Halley {
 		virtual bool isMouseOver() const;
 		bool isFocused() const;
 		void focus();
+		bool canPropagateMouseToChildren() const;
+		void setPropagateMouseToChildren(bool enabled);
 
 		void setId(const String& id);
 		const String& getId() const final override;
@@ -293,6 +295,7 @@ namespace Halley {
 		bool destroying = false;
 		bool canSendEvents = true;
 		bool dontClipChildren = false;
+		bool propagateMouseToChildren = true;
 	};
 
 	template <typename F>
