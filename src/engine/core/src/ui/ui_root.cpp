@@ -489,11 +489,12 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 				bestResult = result;
 			}
 		}
-		if (bestResult.widget) {
-			if (!curWidget->canPropagateMouseToChildren()) {
-				bestResult.overrideWidget = curWidget;
+		if (curWidget->canPropagateMouseToChildren()) {
+			if (bestResult.widget) {
+				return bestResult;
 			}
-			return bestResult;
+		} else {
+			curWidget->notifyWidgetUnderMouse(bestResult.widget);
 		}
 	}
 

@@ -41,10 +41,15 @@ namespace Halley {
 		std::shared_ptr<UIRenderSurface> displayRoot;
 
 		Matrix4f transform;
-		
+		std::shared_ptr<InputKeyboard> keyboard;
+		std::shared_ptr<UIWidget> lastWidgetUnderMouse;
+
 		void updateCurWidget();
 		void doLayout();
 		void onOtherUIReloaded(UIWidget& ui) override;
+		void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget) override;
+
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
 	private:
 		Rect4f transformRect(Rect4f r) const;

@@ -71,6 +71,8 @@ void UIEditor::onMakeUI()
 		display->setZoom(zoom);
 	});
 
+	infiniCanvas->setMouseMirror(display);
+
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{
 		setSelectedWidget(event.getStringData());

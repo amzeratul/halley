@@ -68,14 +68,16 @@ namespace Halley {
 		void clear() override;
 		void clearChildren();
 
-		void setInteractWithMouse(bool enabled);
-		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
 		virtual bool isMouseOver() const;
 		bool isFocused() const;
 		void focus();
+
+		void setInteractWithMouse(bool enabled);
+		virtual bool canInteractWithMouse() const;
 		bool canPropagateMouseToChildren() const;
 		void setPropagateMouseToChildren(bool enabled);
+		virtual void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget);
 
 		void setId(const String& id);
 		const String& getId() const final override;

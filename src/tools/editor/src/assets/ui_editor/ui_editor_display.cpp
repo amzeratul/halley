@@ -8,6 +8,7 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 	: UIWidget(std::move(id), minSize, std::move(sizer))
 {
 	setCanSendEvents(false);
+	setPropagateMouseToChildren(false);
 
 	RenderSurfaceOptions options;
 	options.createDepthStencil = false;
@@ -16,6 +17,8 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 	displayRoot = std::make_shared<UIRenderSurface>("displayRoot", Vector2f(), UISizer(), api, resources, "Halley/Sprite", options);
 	displayRoot->setScale(Vector2f(1, 1));
 	UIWidget::add(displayRoot, 0, Vector4f(), UISizerAlignFlags::Top | UISizerAlignFlags::Left);
+
+	keyboard = api.input->getKeyboard();
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
@@ -73,6 +76,8 @@ void UIEditorDisplay::update(Time time, bool moved)
 	if (moved) {
 		doLayout();
 	}
+
+	setPropagateMouseToChildren(keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl));
 }
 
 void UIEditorDisplay::onLayout()
@@ -152,6 +157,15 @@ void UIEditorDisplay::doLayout()
 void UIEditorDisplay::onOtherUIReloaded(UIWidget& ui)
 {
 	updateCurWidget();
+}
+
+void UIEditorDisplay::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
+{
+	lastWidgetUnderMouse = widget;
+}
+
+void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
 }
 
 Rect4f UIEditorDisplay::transformRect(Rect4f r) const

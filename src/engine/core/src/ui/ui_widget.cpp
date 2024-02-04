@@ -333,6 +333,10 @@ void UIWidget::setPropagateMouseToChildren(bool enabled)
 	propagateMouseToChildren = enabled;
 }
 
+void UIWidget::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
+{
+}
+
 void UIWidget::setId(const String& i)
 {
 	id = i;
