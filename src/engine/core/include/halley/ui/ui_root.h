@@ -116,7 +116,7 @@ namespace Halley {
 		};
 
 		WidgetUnderMouseResult getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
-		WidgetUnderMouseResult getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false, int childLayerAdjustment = 0) const;
+		WidgetUnderMouseResult getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false, bool ignoreMouseInteraction = false, int childLayerAdjustment = 0) const;
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::shared_ptr<UIWidget>>& output);
 

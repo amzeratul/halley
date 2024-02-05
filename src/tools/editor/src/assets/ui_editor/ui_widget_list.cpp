@@ -70,6 +70,11 @@ bool UIWidgetList::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
+void UIWidgetList::selectWidget(const String& id)
+{
+	list->setSelectedOptionId(id);
+}
+
 void UIWidgetList::populateList()
 {
 	if (list && definition) {

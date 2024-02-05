@@ -40,6 +40,8 @@ namespace Halley {
         void addWidgetsAt(const String& referenceId, bool asChild, Vector<ConfigNode> datas);
         void deleteWidgets(const Vector<String>& ids);
 
+		void selectWidget(const String& id);
+
 	protected:
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 		
@@ -67,13 +69,13 @@ namespace Halley {
 
 		void open();
 		void doLoadUI(bool force);
-		void setSelectedWidget(const String& id);
 		void goToWidget(const String& id);
 
 		void addWidget();
 		void addWidget(const String& widgetClass);
 		void removeWidget();
 		void replaceWidget();
+		void setSelectedWidget(const String& id);
 
 		void loadGameFactory();
 

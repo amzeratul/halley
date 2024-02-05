@@ -166,6 +166,31 @@ void UIEditorDisplay::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& wi
 
 void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
+	if (!canPropagateMouseToChildren()) {
+		const auto uuid = lastWidgetUnderMouse ? getUUIDOfWidgetClicked(*lastWidgetUnderMouse) : UUID();
+		editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+	}
+}
+
+UUID UIEditorDisplay::getUUIDOfWidgetClicked(const UIWidget& widget) const
+{
+	if (&widget == this) {
+		return {};
+	}
+
+	// NB: this algorithm is garbage
+	for (const auto& [k, v]: elements) {
+		if (v.get() == &widget) {
+			return k;
+		}
+	}
+
+	const auto* parent = dynamic_cast<const UIWidget*>(widget.getParent());
+	if (!parent) {
+		return {};
+	}
+
+	return getUUIDOfWidgetClicked(*parent);
 }
 
 Rect4f UIEditorDisplay::transformRect(Rect4f r) const

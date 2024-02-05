@@ -472,19 +472,22 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bo
 	return {};
 }
 
-UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, int childLayerAdjustment) const
+UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, bool ignoreMouseInteraction, int childLayerAdjustment) const
 {
 	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
 	}
 
 	// Depth first
+	if (!curWidget->canPropagateMouseToChildren()) {
+		ignoreMouseInteraction = true;
+	}
 	const auto childMousePos = curWidget->transformToChildSpace(mousePos);
 	if (childMousePos) {
 		const int adjustmentForChildren = childLayerAdjustment + curWidget->getChildLayerAdjustment();
 		WidgetUnderMouseResult bestResult;
 		for (auto& c : curWidget->getChildren()) {
-			const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, adjustmentForChildren);
+			const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren);
 			if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
 				bestResult = result;
 			}
@@ -499,7 +502,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 	}
 
 	auto rect = curWidget->getMouseRect();
-	if (curWidget->canInteractWithMouse() && rect.contains(mousePos)) {
+	if ((ignoreMouseInteraction || curWidget->canInteractWithMouse()) && rect.contains(mousePos)) {
 		return { curWidget, {}, childLayerAdjustment };
 	} else {
 		return {};

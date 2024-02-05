@@ -50,6 +50,7 @@ namespace Halley {
 		void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget) override;
 
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		UUID getUUIDOfWidgetClicked(const UIWidget& widget) const;
 
 	private:
 		Rect4f transformRect(Rect4f r) const;

@@ -20,6 +20,7 @@ namespace Halley {
         UITreeList& getList();
 
         bool onKeyPress(KeyboardKeyPress key) override;
+        void selectWidget(const String& id);
 
     private:
         struct MoveOperation {

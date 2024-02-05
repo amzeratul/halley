@@ -71,7 +71,7 @@ void UIEditor::onMakeUI()
 		display->setZoom(zoom);
 	});
 
-	infiniCanvas->setMouseMirror(display);
+	infiniCanvas->setMouseMirror(display, true);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{
@@ -470,6 +470,11 @@ void UIEditor::deleteWidgets(const Vector<String>& uuids)
 	if (modified) {
 		markModified();
 	}
+}
+
+void UIEditor::selectWidget(const String& id)
+{
+	widgetList->selectWidget(id);
 }
 
 
