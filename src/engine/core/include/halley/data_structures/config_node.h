@@ -311,6 +311,7 @@ namespace Halley {
 		Vector4f asVector4f() const;
 		Rect4i asRect4i() const;
 		Rect4f asRect4f() const;
+		Range<int> asIntRange() const;
 		Range<float> asFloatRange() const;
 		String asString() const;
 		std::string_view asStringView() const;
@@ -332,6 +333,7 @@ namespace Halley {
 		Rect4i asRect4i(Rect4i defaultValue) const;
 		Rect4f asRect4f(Rect4f defaultValue) const;
 		Range<float> asFloatRange(Range<float> defaultValue) const;
+		Range<int> asIntRange(Range<int> defaultValue) const;
 
 		template <typename T>
 		Vector<T> asVector() const

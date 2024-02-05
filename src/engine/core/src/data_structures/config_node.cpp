@@ -809,6 +809,23 @@ Rect4f ConfigNode::asRect4f() const
 	}
 }
 
+Range<int> ConfigNode::asIntRange() const
+{
+	if (type == ConfigNodeType::Int2) {
+		return Range<int>(vec2iData.x, vec2iData.y);
+	} else if (type == ConfigNodeType::Float2) {
+		return Range<int>(int(vec2fData.x), int(vec2fData.y));
+	} else if (type == ConfigNodeType::Sequence) {
+		const auto& seq = asSequence();
+		return Range<int>(seq.at(0).asInt(), seq.at(1).asInt());
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		const auto v = asInt();
+		return Range<int>(v, v);
+	} else {
+		throw Exception(getNodeDebugId() + " is not a range type", HalleyExceptions::Resources);
+	}
+}
+
 Range<float> ConfigNode::asFloatRange() const
 {
 	if (type == ConfigNodeType::Int2) {
@@ -913,6 +930,15 @@ Range<float> ConfigNode::asFloatRange(Range<float> defaultValue) const
 		return defaultValue;
 	} else {
 		return asFloatRange();
+	}
+}
+
+Range<int> ConfigNode::asIntRange(Range<int> defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asIntRange();
 	}
 }
 
