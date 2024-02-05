@@ -37,9 +37,11 @@ void UIEditor::update(Time time, bool moved)
 		pendingLoad = false;
 	}
 
-	getWidget("saveButton")->setEnabled(isModified());
-	getWidget("undoButton")->setEnabled(undoStack.canUndo());
-	getWidget("redoButton")->setEnabled(undoStack.canRedo());
+	if (!pendingLoad) {
+		getWidget("saveButton")->setEnabled(isModified());
+		getWidget("undoButton")->setEnabled(undoStack.canUndo());
+		getWidget("redoButton")->setEnabled(undoStack.canRedo());
+	}
 }
 
 void UIEditor::open()
