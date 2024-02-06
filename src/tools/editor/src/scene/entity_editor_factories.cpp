@@ -169,6 +169,9 @@ public:
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
 		float granularity = 1;
+		if (pars.typeParameters.size() == 1) {
+			granularity = pars.typeParameters[0].toFloat();
+		}
 		if (pars.options.getType() == ConfigNodeType::Map) {
 			granularity = pars.options["granularity"].asFloat(1.0f);
 		}
@@ -193,6 +196,14 @@ public:
 		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
 
 		return container;
+	}
+};
+
+class ComponentEditorFloatGranularityFieldFactory : public ComponentEditorFloatFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "float<>";
 	}
 };
 
@@ -992,12 +1003,12 @@ public:
 		};
 		buildList();
 
-		containerPtr->setHandle(UIEventType::FocusLost, [=, buildList = std::move(buildList)](const UIEvent& event)
+		containerPtr->setHandle(UIEventType::FocusLost, [=](const UIEvent& event)
 		{
 			buildList();
 		});
 
-		containerPtr->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)](const UIEvent& event)
+		containerPtr->setHandle(UIEventType::ButtonClicked, [=](const UIEvent& event)
 		{
 			auto& map = data.getWriteableFieldData().asMap();
 			if (event.getSourceId() == "add") {
@@ -2173,6 +2184,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint32_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint64_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorFloatGranularityFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2i, 2>>("Halley::Vector2i"));
