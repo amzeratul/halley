@@ -1116,8 +1116,9 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
+	if (!dragged && held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
 		dragged = true;
+		myStartPos = dragWidget->getPosition();
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
 	if (dragged) {
