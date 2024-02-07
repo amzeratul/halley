@@ -92,8 +92,8 @@ namespace Halley {
 		bool isClockwise() const { return clockwise; }
 		bool isValid() const { return valid; }
 
-		Vector<Polygon> splitIntoConvex() const;
-		bool splitIntoConvex(Vector<Polygon>& output) const;
+		Vector<Polygon> splitIntoConvex(bool allowSimplify = true) const;
+		bool splitIntoConvex(Vector<Polygon>& output, bool allowSimplify = true) const;
 		std::optional<Vector<Polygon>> subtract(const Polygon& other) const;
 		void simplify(float epsilon = 0.0001f);
 		Vector<Polygon> splitConvexIntoMaxSides(size_t maxSides) const;
@@ -151,7 +151,7 @@ namespace Halley {
 		void checkConvex();
 
 		// Split by inserting a new edge between v0 and v1
-		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const;
+		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices, bool allowSimplify) const;
 
 		void doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output) const;
 
