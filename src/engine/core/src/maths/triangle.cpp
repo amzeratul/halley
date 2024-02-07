@@ -1,5 +1,6 @@
 #include "halley/maths/triangle.h"
 #include "halley/maths/polygon.h"
+#include "halley/maths/random.h"
 
 using namespace Halley;
 
@@ -69,6 +70,19 @@ Circle Triangle::getCircumscribedCircle() const
 	const auto radius = (a - *centre).length();
 
 	return Circle(*centre, radius);
+}
+
+Vector2f Triangle::getRandomPoint(Random& rng) const
+{
+	const auto ab = b - a;
+	const auto ac = c - a;
+	auto u = rng.getFloat(0.0f, 1.0f);
+	auto v = rng.getFloat(0.0f, 1.0f);
+	if (u + v > 1.0f) {
+		u = 1 - u;
+		v = 1 - v;
+	}
+	return (ab * u + ac * v) + a;
 }
 
 Triangle Triangle::operator+(Vector2f v) const

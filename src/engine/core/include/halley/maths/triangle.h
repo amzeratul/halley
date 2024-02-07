@@ -6,7 +6,8 @@
 #include "vector3.h"
 
 namespace Halley {
-    class Polygon;
+	class Random;
+	class Polygon;
 
     class Triangle {
     public:
@@ -28,6 +29,8 @@ namespace Halley {
         Polygon toPolygon() const;
 
         Circle getCircumscribedCircle() const;
+
+    	Vector2f getRandomPoint(Random& rng) const;
 
         Triangle operator+(Vector2f v) const;
         Triangle operator-(Vector2f v) const;

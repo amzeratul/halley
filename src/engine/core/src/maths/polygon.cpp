@@ -32,6 +32,8 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/maths/random.h"
+#include "halley/maths/triangle.h"
 using namespace Halley;
 
 
@@ -1389,6 +1391,55 @@ std::optional<size_t> Polygon::getExitEdge(const Ray& ray, size_t startFromEdge)
 		}
 	}
 	return {};
+}
+
+size_t Polygon::pickRandomPolygonIdxByArea(gsl::span<const Polygon> polygons, Random& rng)
+{
+	assert(!polygons.empty());
+
+	float totalArea = 0;
+	for (const auto& poly: polygons) {
+		totalArea += poly.getArea();
+	}
+	if (totalArea <= 0) {
+		return 0;
+	}
+
+	float curArea = 0;
+	const float pick = rng.getFloat(0.0f, totalArea);
+	for (size_t i = 0; i < polygons.size(); ++i) {
+		curArea += polygons[i].getArea();
+		if (curArea >= pick) {
+			return i;
+		}
+	}
+
+	return polygons.size() - 1;
+}
+
+const Polygon& Polygon::pickRandomPolygonByArea(gsl::span<const Polygon> polygons, Random& rng)
+{
+	return polygons[pickRandomPolygonIdxByArea(polygons, rng)];
+}
+
+Vector2f Polygon::getRandomPoint(Random& rng) const
+{
+	Expects(isConvex());
+
+	const float areaPick = rng.getFloat(0, getArea());
+
+	float areaSoFar = 0;
+	const auto nTris = vertices.size() - 2;
+	for (size_t i = 0; i < nTris; ++i) {
+		const auto tri = Triangle(vertices[0], vertices[i + 1], vertices[i + 2]);
+		areaSoFar += tri.getArea();
+		if (areaSoFar >= areaPick || i == nTris - 1) {
+			return tri.getRandomPoint(rng);
+		}
+	}
+
+	// Should not happen
+	return getCentre();
 }
 
 String Polygon::toString() const

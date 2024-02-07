@@ -30,6 +30,7 @@
 #include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
+	class Random;
 	class Ray;
 	class LineSegment;
 
@@ -125,6 +126,10 @@ namespace Halley {
 		float getArea() const { return area; }
 
 		String toString() const;
+
+		static size_t pickRandomPolygonIdxByArea(gsl::span<const Polygon> polygons, Random& rng);
+		static const Polygon& pickRandomPolygonByArea(gsl::span<const Polygon> polygons, Random& rng);
+		Vector2f getRandomPoint(Random& rng) const;
 
 	private:
 		Circle circle;
