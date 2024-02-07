@@ -153,6 +153,8 @@ namespace Halley {
 		explicit ConfigNode(NoopType value);
 		explicit ConfigNode(DelType value);
 		explicit ConfigNode(IdxType value);
+		explicit ConfigNode(Range<float> value);
+		explicit ConfigNode(Range<int> value);
 
 		template <typename T>
 		explicit ConfigNode(const Vector<T>& sequence)

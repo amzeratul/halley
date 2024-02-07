@@ -145,6 +145,16 @@ ConfigNode::ConfigNode(IdxType value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(Range<float> value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Range<int> value)
+{
+	operator=(value);
+}
+
 bool ConfigNode::removeKey(std::string_view key)
 {
 	auto& map = asMap();

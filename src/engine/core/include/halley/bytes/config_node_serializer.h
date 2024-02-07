@@ -207,6 +207,34 @@ namespace Halley {
     };
 
 	template <>
+    class ConfigNodeSerializer<Range<float>> {
+    public:
+        ConfigNode serialize(Range<float> value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Range<float> deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asFloatRange(Range<float>());
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<Range<int>> {
+    public:
+        ConfigNode serialize(Range<int> value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(value);
+		}
+		
+		Range<int> deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asIntRange(Range<int>());
+        }
+    };
+
+	template <>
     class ConfigNodeSerializer<Vector3i> {
     public:
         ConfigNode serialize(Vector3i value, const EntitySerializationContext& context)
