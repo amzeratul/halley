@@ -65,7 +65,7 @@ namespace Halley {
 		Selection getSelection() const;
 		void setSelection(int selection);
 		void setSelection(Selection selection);
-		void moveCursor(int position, KeyMods mods);
+		bool moveCursor(int position, KeyMods mods);
 
 		void setLengthLimits(int min, std::optional<int> max);
 		int getMinLength() const;

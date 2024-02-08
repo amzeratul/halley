@@ -463,14 +463,12 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 	} else if (multiLine) {
 		if (key.key == KeyCode::Up) {
 			const auto from = label.getCharacterPosition(text.getSelection().getCaret());
-			text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, -label.getLineHeight()))), key.mod);
-			return true;
+			return text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, -label.getLineHeight()))), key.mod);
 		}
 
 		if (key.key == KeyCode::Down) {
 			const auto from = label.getCharacterPosition(text.getSelection().getCaret());
-			text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, label.getLineHeight()))), key.mod);
-			return true;
+			return text.moveCursor(static_cast<int>(label.getCharacterAt(from + Vector2f(0, label.getLineHeight()))), key.mod);
 		}
 	}
 

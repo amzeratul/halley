@@ -396,12 +396,15 @@ void TextInputData::changeSelection(int dir, bool shiftHeld, ChangeSelectionMode
 	}
 }
 
-void TextInputData::moveCursor(int position, KeyMods mods)
+bool TextInputData::moveCursor(int position, KeyMods mods)
 {
-	if ((mods & KeyMods::Shift) != KeyMods::None) {
+	if (mods == KeyMods::Shift) {
 		const auto sel = getSelection();
 		setSelection(Selection::fromAnchorAndCaret(sel.getAnchor(), position));
-	} else {
+		return true;
+	} else if (mods == KeyMods::None) {
 		setSelection(position);
+		return true;
 	}
+	return false;
 }
