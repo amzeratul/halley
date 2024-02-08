@@ -425,3 +425,51 @@ IScriptNodeType::Result ScriptStopTag::doUpdate(ScriptEnvironment& environment, 
 
 	return Result(ScriptNodeExecutionState::Done);
 }
+
+
+ConfigNode ScriptWaitUntilEndOfFrameData::toConfigNode(const EntitySerializationContext& context)
+{
+	if (lastFrame) {
+		return ConfigNode(*lastFrame);
+	}
+	return {};
+}
+
+
+Vector<IScriptNodeType::SettingType> ScriptWaitUntilEndOfFrame::getSettingTypes() const
+{
+	return { };
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptWaitUntilEndOfFrame::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptWaitUntilEndOfFrame::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Wait until one frame has passed and then continue");
+	return str.moveResults();
+}
+
+void ScriptWaitUntilEndOfFrame::doInitData(ScriptWaitUntilEndOfFrameData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data.lastFrame = nodeData.asOptional<int>();
+}
+
+IScriptNodeType::Result ScriptWaitUntilEndOfFrame::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitUntilEndOfFrameData& data) const
+{
+	if (!data.lastFrame) {
+		data.lastFrame = environment.getCurrentFrameNumber();
+	} else {
+		if (data.lastFrame != environment.getCurrentFrameNumber()) {
+			return Result(ScriptNodeExecutionState::Done);
+		}
+	}
+
+	return Result(ScriptNodeExecutionState::Executing, time);
+}

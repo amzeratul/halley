@@ -410,5 +410,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLuaExpression>());
 	addScriptNode(std::make_unique<ScriptLuaStatement>());
 	addScriptNode(std::make_unique<ScriptToggleEntityEnabled>());
+	addScriptNode(std::make_unique<ScriptWaitUntilEndOfFrame>());
 
 }
