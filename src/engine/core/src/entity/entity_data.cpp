@@ -491,6 +491,7 @@ void EntityData::instantiateWith(const EntityData& instance)
 	instantiateData(instance);
 
 	flags |= instance.flags;
+	variant = instance.getVariant();
 }
 
 void EntityData::generateChildUUID(const UUID& root)
@@ -574,6 +575,7 @@ size_t EntityData::getSizeBytes() const
 	result += name.getSizeBytes();
 	result += prefab.getSizeBytes();
 	result += icon.getSizeBytes();
+	result += variant.getSizeBytes();
 
 	for (const auto& c: children) {
 		result += c.getSizeBytes();

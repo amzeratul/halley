@@ -136,11 +136,10 @@ void VariantGizmo::removeVariant()
 
 void VariantGizmo::setVariant(const String& variant)
 {
-	sceneEditorWindow.setAssetSetting("variant", ConfigNode(variant == "default" ? "" : variant));
+	sceneEditorWindow.setAssetSetting("variant", ConfigNode(variant));
 }
 
 String VariantGizmo::getVariant() const
 {
-	const auto variant = sceneEditorWindow.getAssetSetting("variant").asString("");
-	return variant == "" ? "default" : variant;
+	return sceneEditorWindow.getAssetSetting("variant").asString("default");
 }

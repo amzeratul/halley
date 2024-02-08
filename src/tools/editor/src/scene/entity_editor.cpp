@@ -212,8 +212,8 @@ void EntityEditor::reloadEntity()
 		} else {
 			entityName->setText(getEntityData().getName());
 			entityIcon->setSelectedOption(getEntityData().getIcon());
-			variant->setSelectedOption(getEntityData().getVariant().isEmpty() ? "default" : getEntityData().getVariant());
 		}
+		variant->setSelectedOption(getEntityData().getVariant());
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
 		getWidgetAs<UICheckbox>("serializable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSerializable));
 		getWidgetAs<UICheckbox>("enabled")->setChecked(!getEntityData().getFlag(EntityData::Flag::Disabled));
@@ -305,18 +305,21 @@ void EntityEditor::loadVariants()
 		return;
 	}
 
-	Vector<String> options;
+	Vector<UIDropdown::Entry> options;
 
+	options.push_back(UIDropdown::Entry("", "<any>"));
 	if (sceneEditor && !sceneEditor->getCurrentAssetId().isEmpty()) {
 		auto variants = sceneEditor->getGameData("variants").asVector<SceneVariant>({});
+
+		if (variants.empty()) {
+			options.push_back(UIDropdown::Entry("default", "default"));
+		}
+
 		for (const auto& variant: variants) {
-			options.push_back(variant.id);
+			options.push_back(UIDropdown::Entry(variant.id, variant.id));
 		}
 	}
 
-	if (options.empty()) {
-		options.push_back("default");
-	}
 	variant->setOptions(options);
 }
 
@@ -577,9 +580,8 @@ void EntityEditor::setIcon(const String& icon)
 
 void EntityEditor::setVariant(const String& variant)
 {
-	auto value = variant == "default" ? "" : variant;
-	if (getEntityData().getVariant() != value) {
-		getEntityData().setVariant(value);
+	if (getEntityData().getVariant() != variant) {
+		getEntityData().setVariant(variant);
 		onEntityUpdated();
 	}
 }
