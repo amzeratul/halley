@@ -597,10 +597,14 @@ bool AudioEventActionStopBus::run(AudioEngine& engine, AudioEventId id, AudioEmi
 		return false;
 	}
 
-	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
-	{
-		voice.stop(fade);
-	});
+	Vector<int> ids;
+	engine.getBusIds(busName, ids);
+	for (const auto id: ids) {
+		engine.forVoicesOnBus(id, [&] (AudioVoice& voice)
+		{
+			voice.stop(fade);
+		});
+	}
 
 	return false;
 }
@@ -616,10 +620,14 @@ bool AudioEventActionPauseBus::run(AudioEngine& engine, AudioEventId id, AudioEm
 		return false;
 	}
 
-	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
-	{
-		voice.pause(fade);
-	});
+	Vector<int> ids;
+	engine.getBusIds(busName, ids);
+	for (const auto id: ids) {
+		engine.forVoicesOnBus(id, [&] (AudioVoice& voice)
+		{
+			voice.pause(fade);
+		});
+	}
 
 	return true;
 }
@@ -635,10 +643,14 @@ bool AudioEventActionResumeBus::run(AudioEngine& engine, AudioEventId id, AudioE
 		return false;
 	}
 
-	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
-	{
-		voice.resume(fade);
-	});
+	Vector<int> ids;
+	engine.getBusIds(busName, ids);
+	for (const auto id: ids) {
+		engine.forVoicesOnBus(id, [&] (AudioVoice& voice)
+		{
+			voice.resume(fade);
+		});
+	}
 
 	return true;
 }
