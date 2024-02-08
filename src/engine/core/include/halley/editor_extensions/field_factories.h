@@ -86,6 +86,16 @@ namespace Halley {
 			return std::make_unique<EnumFieldFactory>(std::move(name), config.getKeys<T>());
 		}
 
+		template <typename T, typename U>
+		static std::unique_ptr<EnumFieldFactory> makeConfigFactory(String name, const ConfigDatabase& config, const String& altPrefix = "!")
+		{
+			Vector<String> result = config.getKeys<T>();
+			for (const auto& k: config.getKeys<U>()) {
+				result.push_back(altPrefix + k);
+			}
+			return std::make_unique<EnumFieldFactory>(std::move(name), result);
+		}
+
 	protected:
 		Vector<String> getValues(const ComponentDataRetriever& data) const override;
 
