@@ -136,7 +136,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "waitUntilEndOfFrame"; }
 		String getName() const override { return "Wait Until EOF"; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/wait.png"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/wait_until_eof.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
 		Vector<SettingType> getSettingTypes() const override;
