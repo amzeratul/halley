@@ -19,6 +19,16 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 	UIWidget::add(displayRoot, 0, Vector4f(), UISizerAlignFlags::Top | UISizerAlignFlags::Left);
 
 	keyboard = api.input->getKeyboard();
+
+	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
+	{
+		// Bypass setCanSendEvents(false) for this particular event
+		if (event.getDirection() == UIEventDirection::Up) {
+			if (auto parent = getParent()) {
+				parent->sendEvent(event);
+			}
+		}
+	});
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)

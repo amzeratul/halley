@@ -192,9 +192,19 @@ UIWidget& UIEvent::getCurWidget() const
 	return *curWidget;
 }
 
+UIEventDirection UIEvent::getDirection() const
+{
+	return direction;
+}
+
 void UIEvent::setCurWidget(UIWidget* widget)
 {
 	curWidget = widget;
+}
+
+void UIEvent::setDirection(UIEventDirection direction)
+{
+	this->direction = direction;
 }
 
 UIEventType UIEvent::getType() const

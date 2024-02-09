@@ -9,7 +9,7 @@ namespace Halley {
 	enum class KeyMods : uint8_t;
 	class UIWidget;
 
-	enum class UIEventType {
+	enum class UIEventType : uint16_t {
 		Undefined,
 
 		// Please keep these in alphabetical order
@@ -79,6 +79,12 @@ namespace Halley {
 		WidgetHighlighted,
 	};
 
+	enum class UIEventDirection: uint8_t {
+		Undefined,
+		Up,  // i.e. towards the root
+		Down // i.e. towards the leafs
+	};
+
     class UIEvent {
     public:
 		UIEvent();
@@ -114,11 +120,14 @@ namespace Halley {
 		Rect4f getRectData() const;
 		const ConfigNode& getConfigData() const;
 		UIWidget& getCurWidget() const;
-	    
+		UIEventDirection getDirection() const;
+
 	    void setCurWidget(UIWidget* widget);
+		void setDirection(UIEventDirection direction);
 
     private:
-		UIEventType type;
+		UIEventType type = UIEventType::Undefined;
+		UIEventDirection direction = UIEventDirection::Undefined;
 		String sourceId;
 		ConfigNode configData;
 		UIWidget* curWidget = nullptr;

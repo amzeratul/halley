@@ -942,19 +942,17 @@ bool UIWidget::onDestroyRequested()
 
 void UIWidget::sendEvent(UIEvent event, bool includeSelf) const
 {
-	if (canSendEvents) {
-		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
-			eventHandler->queue(event);
-		} else if (parent) {
-			parent->sendEvent(std::move(event), true);
-		}
+	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
+		eventHandler->queue(event, UIEventDirection::Up);
+	} else if (parent && canSendEvents) {
+		parent->sendEvent(std::move(event), true);
 	}
 }
 
 void UIWidget::sendEventDown(const UIEvent& event, bool includeSelf) const
 {
 	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
-		eventHandler->queue(event);
+		eventHandler->queue(event, UIEventDirection::Down);
 	} else {
 		for (const auto& c: getChildren()) {
 			c->sendEventDown(event, true);
@@ -968,8 +966,7 @@ void UIWidget::sendEventDown(const UIEvent& event, bool includeSelf) const
 std::optional<AudioHandle> UIWidget::playSound(const String& eventName)
 {
 	if (!eventName.isEmpty()) {
-		auto root = getRoot();
-		if (root) {
+		if (auto root = getRoot()) {
 			return root->playSound(eventName);
 		}
 	}
