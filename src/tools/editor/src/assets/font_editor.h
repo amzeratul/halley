@@ -24,8 +24,6 @@ namespace Halley {
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
 	private:
-        std::shared_ptr<const Font> font;
-
         void updatePreviews();
 	};
 }
