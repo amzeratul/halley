@@ -299,7 +299,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 		refreshScriptEnum();
 		ConfigNode::MapType params;
 		params["scriptId"] = scriptGraph->getAssetId();
-		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getHash());
+		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		scriptEnumHandle = devConServer->registerInterest("scriptEnum", std::move(params), [=] (size_t connId, ConfigNode result)
 		{
 			onScriptEnum(connId, std::move(result));
@@ -332,7 +332,7 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 		params["connId"] = static_cast<int>(entityId.first);
 		params["entityId"] = EntityIdHolder{ entityId.second };
 		params["scriptId"] = scriptGraph->getAssetId();
-		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getHash());
+		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		params["curNode"] = getCurrentNodeConfig();
 		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (size_t connId, ConfigNode result)
 		{
