@@ -106,7 +106,12 @@ void AnimationEditor::setupWindow()
 	info = getWidgetAs<UILabel>("info");
 	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
 
-	updateActionPointList();
+	if (assetType == AssetType::Animation || assetType == AssetType::Sprite) {
+		updateActionPointList();
+		getWidget("topBar")->setActive(true);
+	} else {
+		getWidget("topBar")->setActive(false);
+	}
 
 	scrollBg->setZoomListener([=] (float zoom)
 	{
@@ -120,7 +125,9 @@ void AnimationEditor::setupWindow()
 
 	setHandle(UIEventType::CanvasDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
 	{
-		animationDisplay->onDoubleClick();
+		if (assetType == AssetType::Animation || assetType == AssetType::Sprite) {
+			animationDisplay->onDoubleClick();
+		}
 	});
 
 	setHandle(UIEventType::ButtonClicked, "play", [=] (const UIEvent& event)
