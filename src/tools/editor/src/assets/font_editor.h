@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asset_editor.h"
+#include "halley/tools/assets/import_assets_database.h"
 
 namespace Halley {
 	class Project;
@@ -14,16 +15,22 @@ namespace Halley {
         void refresh();
         void reload() override;
         void refreshAssets() override;
-
-		void onAddedToRoot(UIRoot& root) override;
-		void onRemovedFromRoot(UIRoot& root) override;
-		bool onKeyPress(KeyboardKeyPress key) override;
-	
+        
     protected:
-        void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
 	private:
+        Metadata metadata;
+        Path metaPath;
+        std::shared_ptr<const Font> font;
+        LocalisedString previewText;
+
+        void updateFont();
         void updatePreviews();
+        void updatePreviewText();
+        void updatePreviewText(LocalisedString text);
+
+		void loadMetadata();
+        void saveMetadata();
 	};
 }
