@@ -647,9 +647,7 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("maxHeight")) {
 		label->setMaxHeight(node["maxHeight"].asFloat());
 	}
-	if (node.hasKey("wordWrapped")) {
-		label->setWordWrapped(node["wordWrapped"].asBool());
-	}
+	label->setWordWrapped(node["wordWrapped"].asBool(false));
 	if (node.hasKey("alignment")) {
 		label->setAlignment(node["alignment"].asFloat());
 	}
@@ -696,7 +694,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.5f) } });
 	result.entries.emplace_back("Marquee", "marquee", "std::optional<float>", "");
-	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "false");
 	result.entries.emplace_back("Font", "font", "std::optional<Halley::ResourceReference<Halley::Font>>", "");
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
 	result.entries.emplace_back("Outline", "outline", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.1f) } });

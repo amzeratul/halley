@@ -7,7 +7,7 @@ children:
   - widget: { id: title, class: label, text: "New Asset" }
     fill: centre
     proportion: 1
-- widget: { id: name, class: textInput, size: [400, 22], ghostText: Name }
+- widget: { id: name, class: textInput, size: [400, 22], ghost: Name }
   border: [10, 13, 10, 10]
 - sizer: { type: horizontal, gap: 4 }
   children:

@@ -50,6 +50,7 @@ namespace Halley {
 
 	protected:
 		void onParentChanged() override;
+		Vector2f getLayoutMinimumSize(bool force) const override;
 
 	private:
 		TextRenderer renderer;
@@ -57,10 +58,12 @@ namespace Halley {
 		const std::shared_ptr<bool> aliveFlag;
 
 		Vector2f textExtents;
+		Vector2f textMinSize;
 		float maxWidth = std::numeric_limits<float>::infinity();
 		float maxHeight = std::numeric_limits<float>::infinity();
 		bool wordWrapped = true;
-		bool needsClip = false;
+		bool needsClipX = false;
+		bool needsClipY = false;
 		bool flowLayout = false;
 
 		Time marqueeIdle;
