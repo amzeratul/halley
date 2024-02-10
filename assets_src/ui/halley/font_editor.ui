@@ -1,0 +1,20 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { class: image, id: previewDisplay, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [15, 15, 15, 15], size: [1100, 200] }
+  sizer: { type: vertical, gap: 12 }
+  fill: centre
+  border: [0, 10, 0, 0]
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { class: label, id: preview0, maxWidth: 1060, wordWrap: true }
+    fill: left
+  - widget: { class: label, id: preview1, maxWidth: 1060, wordWrap: true }
+    fill: left
+  - widget: { class: label, id: preview2, maxWidth: 1060, wordWrap: true }
+    fill: left
+    border: [0, 4, 0, 0]
+  - stretchSpacer: {}
+    proportion: 1
