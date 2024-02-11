@@ -96,6 +96,8 @@ namespace {
 			dstPixels[i] = static_cast<uint8_t>(clamp(srcPixels[i] * 255.0f, 0.0f, 255.0f));
 		}
 
+		result->flipVertically();
+
 		return result;
 	}
 }
@@ -118,9 +120,10 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, const Fon
 		const double range = 2.0f * radius / scale;
 		const auto pos = Vector2d(Vector2f(radius, radius) / scale);
 
-		shape.inverseYAxis = true;
+		shape.inverseYAxis = false;
 		shape.normalize();
 		const auto bounds = shape.getBounds();
+		//Logger::logInfo(String(char32_t(charcode)) + ": size: " + toString(size) + ", pos: " + toString(pos) + ", scale: " + toString(scale) + ", bounds: " + toString(bounds.l) + ", " + toString(bounds.b) + ", " + toString(bounds.r) + ", " + toString(bounds.t));
 
 		edgeColoringSimple(shape, 3.0);
 		msdfgen::Projection projection({ scale, scale }, { pos.x - bounds.l, pos.y - bounds.b });

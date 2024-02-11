@@ -23,10 +23,9 @@
 #pragma once
 
 #include "vector2.h"
+#include "vector4.h"
 #include "range.h"
 #include <optional>
-
-#include "vector4.h"
 
 namespace Halley {
 	template <typename T>
@@ -97,6 +96,11 @@ namespace Halley {
 		constexpr Rect2D(T x, T y, T width, T height)
 		{
 			set(x, y, width, height);
+		}
+
+		constexpr Rect2D(Vector4D<T> points)
+		{
+			set(points.xy(), points.zw());
 		}
 
 		constexpr void set(T x, T y, T width, T height)

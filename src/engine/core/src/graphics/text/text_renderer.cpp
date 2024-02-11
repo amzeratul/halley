@@ -238,6 +238,13 @@ TextRenderer& TextRenderer::setAngle(Angle1f angle)
 	return *this;
 }
 
+void TextRenderer::refresh()
+{
+	glyphsDirty = true;
+	materialDirty = true;
+	positionDirty = true;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	if (outlineColour != v) {

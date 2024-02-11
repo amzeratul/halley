@@ -13,10 +13,11 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 {
 	const auto& meta = asset.inputFiles.at(0).metadata;
 	const float radius = meta.getFloat("radius", 8);
-	const int supersample = meta.getInt("supersample", 1);
 	Vector2i imgSize;
-	imgSize.x = meta.getInt("width", 512);
-	imgSize.y = meta.getInt("height", 512);
+	if (meta.hasKey("width") && meta.hasKey("height")) {
+		imgSize.x = meta.getInt("width");
+		imgSize.y = meta.getInt("height");
+	}
 	const float fontSize = meta.getFloat("fontSize", 0);
 	const float replacementScale = meta.getFloat("replacementScale", 1.0f);
 
@@ -30,7 +31,8 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	FontGenerator::FontSizeInfo sizeInfo;
 	if (fontSize != 0) {
 		sizeInfo.fontSize = fontSize;
-	} else {
+	}
+	if (imgSize != Vector2i()) {
 		sizeInfo.imageSize = imgSize;
 	}
 	sizeInfo.replacementScale = replacementScale;

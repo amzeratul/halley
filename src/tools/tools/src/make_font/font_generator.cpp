@@ -95,20 +95,25 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		fontSize = int(sizeInfo.fontSize.value());
 
 		constexpr int minSize = 16;
-		constexpr int maxSize = 4096;
+		const auto maxSize = sizeInfo.imageSize.value_or(Vector2i(4096, 4096));
+		Vector2i lastTried;
 		for (int i = 0; ; ++i) {
-			auto curSize = Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2));
-			if (curSize.x > maxSize || curSize.y > maxSize) {
+			auto curSize = Vector2i::min(Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2)), maxSize);
+			if (curSize == maxSize) {
 				break;
+			}
+			if (curSize == lastTried) {
+				continue;
 			}
 			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, characters);
 			if (result) {
 				imageSize = curSize;
 				break;
 			}
+			lastTried = curSize;
 		}
-	} else if (sizeInfo.imageSize) {
-		imageSize = sizeInfo.imageSize.value();
+	} else {
+		imageSize = sizeInfo.imageSize.value_or(Vector2i(512, 512));
 		
 		constexpr int minFont = 0;
 		constexpr int maxFont = 1000;
@@ -116,8 +121,6 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		{
 			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, characters);
 		}, minFont, maxFont, fontSize);
-	} else {
-		throw Exception("Neither font size nor image size were specified", HalleyExceptions::Tools);
 	}
 	
 	if (!result) {

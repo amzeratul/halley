@@ -272,8 +272,8 @@ Colour4f UILabel::getColour() const
 
 void UILabel::setTextRenderer(TextRenderer r)
 {
-	r.setText(renderer.getText()).setPosition(renderer.getPosition());
-	renderer = r;
+	r.setText(text).setPosition(renderer.getPosition());
+	renderer = std::move(r);
 	updateMinSize();
 }
 

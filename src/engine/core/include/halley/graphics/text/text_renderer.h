@@ -51,6 +51,8 @@ namespace Halley
 		TextRenderer& setScale(float scale);
 		TextRenderer& setAngle(Angle1f angle);
 
+		void refresh();
+
 		TextRenderer clone() const;
 
 		void generateSprites(Vector<Sprite>& sprites) const;

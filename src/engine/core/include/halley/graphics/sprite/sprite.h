@@ -31,8 +31,8 @@ namespace Halley
 		Vector2f size;
 		Vector2f scale;
 		Colour4f colour;
-		Rect4f texRect0;
-		Rect4f texRect1;
+		Vector4f texRect0;
+		Vector4f texRect1;
 		Vector4f custom0;
 		Vector4f custom1;
 		Vector4f custom2;
@@ -120,11 +120,14 @@ namespace Halley
 		float getAlpha() const { return vertexAttrib.colour.a; }
 
 		Sprite& setTexRect(Rect4f texRect);
-		Rect4f getTexRect() const { return vertexAttrib.texRect0; }
+		Sprite& setTexRect(Vector4f texRect);
+		Rect4f getTexRect() const { return Rect4f(vertexAttrib.texRect0); }
 		Sprite& setTexRect0(Rect4f texRect);
-		Rect4f getTexRect0() const { return vertexAttrib.texRect0; }
-		Sprite& setTexRect1(Rect4f texRect) { vertexAttrib.texRect1 = texRect; return *this; }
-		Rect4f getTexRect1() const { return vertexAttrib.texRect1; }
+		Sprite& setTexRect0(Vector4f texRect);
+		Rect4f getTexRect0() const { return Rect4f(vertexAttrib.texRect0); }
+		Sprite& setTexRect1(Rect4f texRect) { vertexAttrib.texRect1 = texRect.toVector4(); return *this; }
+		Sprite& setTexRect1(Vector4f texRect) { vertexAttrib.texRect1 = texRect; return *this; }
+		Rect4f getTexRect1() const { return Rect4f(vertexAttrib.texRect1); }
 
 		Sprite& setCustom0(Vector4f custom0) { vertexAttrib.custom0 = custom0; return *this; }
 		Vector4f getCustom0() const { return vertexAttrib.custom0; }
