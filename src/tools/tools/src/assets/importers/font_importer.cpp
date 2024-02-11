@@ -13,7 +13,6 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 {
 	const auto& meta = asset.inputFiles.at(0).metadata;
 	const float radius = meta.getFloat("radius", 8);
-	const int supersample = meta.getInt("supersample", 1);
 	Vector2i imgSize;
 	if (meta.hasKey("width") && meta.hasKey("height")) {
 		imgSize.x = meta.getInt("width");
@@ -53,7 +52,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 		characters.push_back(c);
 	}
 
-	auto result = gen.generateFont(meta, data, sizeInfo, radius, supersample, characters);
+	auto result = gen.generateFont(meta, data, sizeInfo, radius, characters);
 	if (!result.success) {
 		return;
 	}
