@@ -224,6 +224,17 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Resume; }
+
+		bool getForce() const;
+		void setForce(bool force);
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
+
+	private:
+		bool force = false;
 	};
 
 	class AudioEventActionStopBus final : public AudioEventActionBus
@@ -251,6 +262,17 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::ResumeBus; }
+
+		bool getForce() const;
+		void setForce(bool force);
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
+
+	private:
+		bool force = false;
 	};
 
 	class AudioEventActionSetVolume final : public AudioEventActionObject

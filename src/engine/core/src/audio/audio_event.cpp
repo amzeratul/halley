@@ -568,6 +568,7 @@ bool AudioEventActionPause::run(AudioEngine& engine, AudioEventId id, AudioEmitt
 void AudioEventActionResume::load(const ConfigNode& config)
 {
 	loadObject(config);
+	force = config["force"].asBool(false);
 }
 
 bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
@@ -580,10 +581,39 @@ bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmit
 
 	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
-		voice.resume(fade);
+		voice.resume(fade, force);
 	});
 
 	return true;
+}
+
+bool AudioEventActionResume::getForce() const
+{
+	return force;
+}
+
+void AudioEventActionResume::setForce(bool force)
+{
+	this->force = force;
+}
+
+void AudioEventActionResume::serialize(Serializer& s) const
+{
+	AudioEventActionObject::serialize(s);
+	s << force;
+}
+
+void AudioEventActionResume::deserialize(Deserializer& s)
+{
+	AudioEventActionObject::deserialize(s);
+	s >> force;
+}
+
+ConfigNode AudioEventActionResume::toConfigNode() const
+{
+	auto result = AudioEventActionObject::toConfigNode();
+	result["force"] = force;
+	return result;
 }
 
 void AudioEventActionStopBus::load(const ConfigNode& config)
@@ -635,6 +665,7 @@ bool AudioEventActionPauseBus::run(AudioEngine& engine, AudioEventId id, AudioEm
 void AudioEventActionResumeBus::load(const ConfigNode& config)
 {
 	AudioEventActionBus::load(config);
+	force = config["force"].asBool(false);
 }
 
 bool AudioEventActionResumeBus::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
@@ -648,11 +679,40 @@ bool AudioEventActionResumeBus::run(AudioEngine& engine, AudioEventId id, AudioE
 	for (const auto id: ids) {
 		engine.forVoicesOnBus(id, [&] (AudioVoice& voice)
 		{
-			voice.resume(fade);
+			voice.resume(fade, force);
 		});
 	}
 
 	return true;
+}
+
+bool AudioEventActionResumeBus::getForce() const
+{
+	return force;
+}
+
+void AudioEventActionResumeBus::setForce(bool force)
+{
+	this->force = force;
+}
+
+void AudioEventActionResumeBus::serialize(Serializer& s) const
+{
+	AudioEventActionBus::serialize(s);
+	s << force;
+}
+
+void AudioEventActionResumeBus::deserialize(Deserializer& s)
+{
+	AudioEventActionBus::deserialize(s);
+	s >> force;
+}
+
+ConfigNode AudioEventActionResumeBus::toConfigNode() const
+{
+	auto result = AudioEventActionBus::toConfigNode();
+	result["force"] = force;
+	return result;
 }
 
 void AudioEventActionSetVolume::load(const ConfigNode& config)

@@ -15,3 +15,9 @@ children:
     - widget: { class: label, text: "Bus: " }
       fill: centre
     - widget: { id: busName, class: dropdown, size: [200, 20] }
+- widget: { class: widget, id: resumeOptions, active: false }
+  sizer: { horizontal }
+  children:
+  - widget: { class: label, text: "Force: " }
+    fill: centre
+  - widget: { id: force, class: checkbox }
