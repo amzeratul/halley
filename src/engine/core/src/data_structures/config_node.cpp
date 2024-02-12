@@ -3,6 +3,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/support/exception.h"
 #include "../file_formats/config_file_serialization_state.h"
+#include "halley/maths/ops.h"
 #include "halley/utils/hash.h"
 using namespace Halley;
 
@@ -367,46 +368,127 @@ ConfigNode& ConfigNode::operator=(const std::string_view& value)
 	return *this;
 }
 
+namespace {
+	template<MathRelOp op>
+	struct Cmp {
+		template<typename T>
+		bool compare(const T& a, const T& b) const
+		{
+			return MathOps::compare<op, T>(a, b);
+		}
+
+		template<typename T>
+		bool compareEq(const T& a, const T& b) const
+		{
+			if constexpr (op == MathRelOp::Equal || op == MathRelOp::Different) {
+				return MathOps::compareEq<op, T>(a, b);
+			} else {
+				return false;
+			}
+		}
+	};
+
+	template<MathRelOp op>
+	bool compareStrictOrder(const ConfigNode& a, const ConfigNode& b)
+	{
+		Cmp<op> cmp;
+
+		const auto aType = a.getType();
+		const auto bType = b.getType();
+		Expects(aType < bType);
+
+		if (aType == ConfigNodeType::Int && bType == ConfigNodeType::Float) {
+			return cmp.compare(a.asFloat(), b.asFloat());
+		}
+		if (aType == ConfigNodeType::Int && bType == ConfigNodeType::Int64) {
+			return cmp.compare(a.asInt64(), b.asInt64());
+		}
+		if (aType == ConfigNodeType::Float && bType == ConfigNodeType::Int64) {
+			return cmp.compare(a.asFloat(), b.asFloat());
+		}
+		if (aType == ConfigNodeType::Int && bType == ConfigNodeType::Bool) {
+			return cmp.compare(a.asInt(), b.asInt());
+		}
+		if (aType == ConfigNodeType::Sequence && bType == ConfigNodeType::Int2 && a.asSequence().size() >= 2) {
+			return cmp.compareEq(a.asVector2i(), b.asVector2i());
+		}
+		if (aType == ConfigNodeType::Sequence && bType == ConfigNodeType::Float2 && a.asSequence().size() >= 2) {
+			return cmp.compareEq(a.asVector2f(), b.asVector2f());
+		}
+		
+		return false;
+	}
+
+	template<MathRelOp op>
+	bool compare(const ConfigNode& a, const ConfigNode& b)
+	{
+		if (a.getType() == b.getType()) {
+			Cmp<op> cmp;
+			switch (a.getType()) {
+				case ConfigNodeType::String:
+					return cmp.compare(a.asString(), b.asString());
+				case ConfigNodeType::Sequence:
+				case ConfigNodeType::DeltaSequence:
+					return cmp.compare(a.asSequence(), b.asSequence());
+				case ConfigNodeType::Map:
+				case ConfigNodeType::DeltaMap:
+					return cmp.compareEq(a.asMap(), b.asMap());
+				case ConfigNodeType::Int:
+					return cmp.compare(a.asInt(), b.asInt());
+				case ConfigNodeType::Bool:
+					return cmp.compare(a.asBool(), b.asBool());
+				case ConfigNodeType::Int64:
+					return cmp.compare(a.asInt64(), b.asInt64());
+				case ConfigNodeType::EntityId:
+					return cmp.compare(a.asEntityId().value, b.asEntityId().value);
+				case ConfigNodeType::Float:
+					return cmp.compare(a.asFloat(), b.asFloat());
+				case ConfigNodeType::Int2:
+				case ConfigNodeType::Idx:
+					return cmp.compareEq(a.asVector2i(), b.asVector2i());
+				case ConfigNodeType::Float2:
+					return cmp.compareEq(a.asVector2f(), b.asVector2f());
+				case ConfigNodeType::Bytes:
+					return cmp.compare(a.asBytes(), b.asBytes());
+				default:
+					return cmp.compare(0, 0);
+			}
+		} else if (a.getType() < b.getType()) {
+			return compareStrictOrder<op>(a, b);
+		} else {
+			return compareStrictOrder<op>(b, a);
+		}
+	}
+}
+
 bool ConfigNode::operator==(const ConfigNode& other) const
 {
-	if (type != other.type) {
-		return isEquivalent(other);
-	}
-	
-	switch (type) {
-		case ConfigNodeType::String:
-			return asString() == other.asString();
-		case ConfigNodeType::Sequence:
-		case ConfigNodeType::DeltaSequence:
-			return asSequence() == other.asSequence();
-		case ConfigNodeType::Map:
-		case ConfigNodeType::DeltaMap:
-			return asMap() == other.asMap();
-		case ConfigNodeType::Int:
-			return asInt() == other.asInt();
-		case ConfigNodeType::Bool:
-			return asBool() == other.asBool();
-		case ConfigNodeType::Int64:
-			return asInt64() == other.asInt64();
-		case ConfigNodeType::EntityId:
-			return asEntityId().value == other.asEntityId().value;
-		case ConfigNodeType::Float:
-			return std::abs(asFloat() - other.asFloat()) < 0.00001f;
-		case ConfigNodeType::Int2:
-		case ConfigNodeType::Idx:
-			return asVector2i() == other.asVector2i();
-		case ConfigNodeType::Float2:
-			return asVector2f() == other.asVector2f();
-		case ConfigNodeType::Bytes:
-			return asBytes() == other.asBytes();
-		default:
-			return true;
-	}
+	return compare<MathRelOp::Equal>(*this, other);
 }
 
 bool ConfigNode::operator!=(const ConfigNode& other) const
 {
-	return !(*this == other);
+	return compare<MathRelOp::Different>(*this, other);
+}
+
+bool ConfigNode::operator>(const ConfigNode& other) const
+{
+	return compare<MathRelOp::Greater>(*this, other);
+}
+
+bool ConfigNode::operator<(const ConfigNode& other) const
+{
+	return compare<MathRelOp::Less>(*this, other);
+}
+
+bool ConfigNode::operator>=(const ConfigNode& other) const
+{
+	return compare<MathRelOp::GreaterOrEqual>(*this, other);
+}
+
+bool ConfigNode::operator<=(const ConfigNode& other) const
+{
+	return compare<MathRelOp::LessOrEqual>(*this, other);
 }
 
 ConfigNode& ConfigNode::operator=(Bytes value)
@@ -1926,35 +2008,6 @@ void ConfigNode::applySequenceDelta(const ConfigNode& delta)
 	}
 
 	*this = std::move(result);
-}
-
-bool ConfigNode::isEquivalent(const ConfigNode& other) const
-{
-	if (type < other.type) {
-		return isEquivalentStrictOrder(other);
-	} else {
-		return other.isEquivalentStrictOrder(*this);
-	}
-}
-
-bool ConfigNode::isEquivalentStrictOrder(const ConfigNode& other) const
-{
-	Expects(type < other.type);
-
-	if (type == ConfigNodeType::Int && other.type == ConfigNodeType::Float) {
-		return std::abs(asFloat() - other.asFloat()) < 0.00001f;
-	}
-	if (type == ConfigNodeType::Int && other.type == ConfigNodeType::Bool) {
-		return asInt() == other.asInt();
-	}
-	if (type == ConfigNodeType::Sequence && other.type == ConfigNodeType::Int2 && asSequence().size() >= 2) {
-		return asVector2i() == other.asVector2i();
-	}
-	if (type == ConfigNodeType::Sequence && other.type == ConfigNodeType::Float2 && asSequence().size() >= 2) {
-		return asVector2f() == other.asVector2f();
-	}
-	
-	return false;
 }
 
 size_t ConfigNode::getSizeBytes() const

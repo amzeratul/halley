@@ -91,5 +91,39 @@ namespace Halley {
             }
             return false;
         }
+
+        template <MathRelOp op, typename T>
+        static bool compare(const T& a, const T& b)
+        {
+            switch (op) {
+            case MathRelOp::Equal:
+                return a == b;
+            case MathRelOp::Different:
+                return a != b;
+            case MathRelOp::Less:
+                return a < b;
+            case MathRelOp::LessOrEqual:
+                return a <= b;
+            case MathRelOp::Greater:
+                return a > b;
+            case MathRelOp::GreaterOrEqual:
+                return a >= b;
+            }
+            return false;
+        }
+
+        template <MathRelOp op, typename T>
+        static bool compareEq(const T& a, const T& b)
+        {
+            switch (op) {
+            case MathRelOp::Equal:
+                return a == b;
+            case MathRelOp::Different:
+                return a != b;
+            default:
+                return false;
+            }
+            return false;
+        }
     };
 }

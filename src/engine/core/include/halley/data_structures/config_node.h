@@ -294,6 +294,10 @@ namespace Halley {
 
 		bool operator==(const ConfigNode& other) const;
 		bool operator!=(const ConfigNode& other) const;
+		bool operator>(const ConfigNode& other) const;
+		bool operator<(const ConfigNode& other) const;
+		bool operator>=(const ConfigNode& other) const;
+		bool operator<=(const ConfigNode& other) const;
 
 		ConfigNodeType getType() const;
 
@@ -642,8 +646,5 @@ namespace Halley {
 		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		void applyMapDelta(const ConfigNode& delta);
 		void applySequenceDelta(const ConfigNode& delta);
-
-		bool isEquivalent(const ConfigNode& other) const;
-		bool isEquivalentStrictOrder(const ConfigNode& other) const;
 	};
 }
