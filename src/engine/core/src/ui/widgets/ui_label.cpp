@@ -103,10 +103,14 @@ void UILabel::updateMinSize()
 		needsClipY = true;
 	}
 
+	const auto oldTextMinSize = textMinSize;
 	if (flowLayout) {
-		textMinSize = Vector2f(0.0f, textExtents.y);
+		textMinSize = Vector2f(0.0f, textExtents.y).ceil();
 	} else {
-		textMinSize = textExtents;
+		textMinSize = textExtents.ceil();
+	}
+	if (textMinSize != oldTextMinSize) {
+		markAsNeedingLayout();
 	}
 }
 

@@ -388,10 +388,10 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 		}
 	}
 
-	int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
-	int otherAxis = 1 - mainAxis;
+	const int mainAxis = type == UISizerType::Horizontal ? 0 : 1;
+	const int otherAxis = 1 - mainAxis;
 
-	Vector2f sizerMinSize = computeMinimumSizeBox(false);
+	const Vector2f sizerMinSize = computeMinimumSizeBox(false);
 	float spare = std::max(0.0f, (rect.getSize() - sizerMinSize)[mainAxis]);
 	
 	bool first = true;
