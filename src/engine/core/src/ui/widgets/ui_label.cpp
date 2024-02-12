@@ -31,7 +31,7 @@ UILabel::~UILabel()
 void UILabel::draw(UIPainter& painter) const
 {
 	if (needsClipX || needsClipY) {
-		auto rect = Rect4f(getPosition(), getPosition() + getMinimumSize());
+		auto rect = getRect();
 		if (!needsClipX) {
 			rect = rect.grow(50, 0, 50, 0);
 		}
@@ -375,7 +375,7 @@ void UILabel::onParentChanged()
 	}
 }
 
-Vector2f UILabel::getLayoutMinimumSize(bool force) const
+Vector2f UILabel::getMinimumSize() const
 {
-	return Vector2f::max(textMinSize, UIWidget::getLayoutMinimumSize(force));
+	return Vector2f::max(textMinSize, UIWidget::getMinimumSize());
 }

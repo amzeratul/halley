@@ -47,10 +47,10 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setFontSize(float size);
+		Vector2f getMinimumSize() const override;
 
 	protected:
 		void onParentChanged() override;
-		Vector2f getLayoutMinimumSize(bool force) const override;
 
 	private:
 		TextRenderer renderer;

@@ -86,7 +86,7 @@ namespace Halley {
 		virtual Vector2f getLayoutOriginPosition() const;
 		virtual Vector2f getLayoutSize(Vector2f size) const;
 		Vector2f getSize() const;
-		Vector2f getMinimumSize() const;
+		virtual Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
 		Rect4f getRect() const final override;
 		virtual bool ignoreClip() const;
