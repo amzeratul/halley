@@ -260,6 +260,24 @@ UISizerEntry& UISizer::operator[](size_t n)
 	return entries[n];
 }
 
+UISizerEntry* UISizer::tryGetEntry(IUIElement* element)
+{
+	if (const auto idx = getEntryIdx(element)) {
+		return &entries[*idx];
+	}
+	return nullptr;
+}
+
+std::optional<size_t> UISizer::getEntryIdx(IUIElement* element) const
+{
+	for (size_t i = 0; i < entries.size(); ++i) {
+		if (entries[i].getPointer().get() == element) {
+			return i;
+		}
+	}
+	return std::nullopt;
+}
+
 void UISizer::updateEnabled() const
 {
 	for (auto& e: entries) {

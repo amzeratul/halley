@@ -395,6 +395,18 @@ void UIWidget::setPosition(Vector2f pos)
 	positionUpdated = true;
 }
 
+void UIWidget::setBorder(Vector4f border)
+{
+	if (auto* parentWidget = dynamic_cast<UIWidget*>(parent)) {
+		if (auto& parentSizer = parentWidget->tryGetSizer()) {
+			if (auto* entry = parentSizer->tryGetEntry(this)) {
+				entry->setBorder(border);
+				parentWidget->markAsNeedingLayout();
+			}
+		}
+	}
+}
+
 void UIWidget::setMinSize(Vector2f size)
 {
 	Expects(size.isValid());

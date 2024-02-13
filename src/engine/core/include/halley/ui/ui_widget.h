@@ -92,6 +92,7 @@ namespace Halley {
 		virtual bool ignoreClip() const;
 
 		void setPosition(Vector2f pos);
+		void setBorder(Vector4f border);
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 

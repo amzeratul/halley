@@ -134,6 +134,8 @@ namespace Halley {
 		size_t size() const;
 		const UISizerEntry& operator[](size_t n) const;
 		UISizerEntry& operator[](size_t n);
+		UISizerEntry* tryGetEntry(IUIElement* element);
+		std::optional<size_t> getEntryIdx(IUIElement* element) const;
 
 		void updateEnabled() const;
 		
