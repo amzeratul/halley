@@ -336,14 +336,19 @@ gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input }
+	};
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Entity parameter set in ScriptableComponent with key ");
+	str.append("Entity parameter set in ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append("'s ScriptableComponent with key ");
 	str.append(node.getSettings()["key"].asString(""), settingColour);
 	return str.moveResults();
 }
@@ -365,7 +370,7 @@ ConfigNode ScriptEntityParameter::doGetData(ScriptEnvironment& environment, cons
 		return {};
 	}
 
-	const auto entityRef = environment.tryGetEntity({});
+	const auto entityRef = environment.tryGetEntity(readEntityId(environment, node, 1));
 	const auto& params = entityRef.getComponent<ScriptableComponent>().entityParams;
 	const auto find = params.find(key);
 	if (find == params.end()) {
