@@ -1447,6 +1447,28 @@ Vector2f Polygon::getRandomPoint(Random& rng) const
 	return getCentre();
 }
 
+Vector<Triangle> Polygon::triangulate() const
+{
+	Vector<Triangle> result;
+	triangulate(result);
+	return result;
+}
+
+void Polygon::triangulate(Vector<Triangle>& dst) const
+{
+	if (convex) {
+		const auto nTris = vertices.size() - 2;
+		for (size_t i = 0; i < nTris; ++i) {
+			dst.push_back(Triangle(vertices[0], vertices[i + 1], vertices[i + 2]));
+		}
+	} else {
+		auto polys = splitIntoConvex(false);
+		for (const auto& poly: polys) {
+			poly.triangulate(dst);
+		}
+	}
+}
+
 String Polygon::toString() const
 {
 	return "[" + String::concatList(std_ex::transform(vertices, [&](Vector2f p) -> String { return p.toString(); }), ", ") + "]";
