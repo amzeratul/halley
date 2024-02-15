@@ -47,6 +47,26 @@ WorldPosition WorldPosition::operator-(const Vector2f& other) const
 	return WorldPosition(pos - other, subWorld);
 }
 
+WorldPosition WorldPosition::operator+(const WorldPosition& other) const
+{
+	return WorldPosition(pos + other.pos, subWorld);
+}
+
+WorldPosition WorldPosition::operator-(const WorldPosition& other) const
+{
+	return WorldPosition(pos - other.pos, subWorld);
+}
+
+WorldPosition WorldPosition::operator*(float value) const
+{
+	return WorldPosition(pos * value, subWorld);
+}
+
+WorldPosition WorldPosition::operator/(float value) const
+{
+	return WorldPosition(pos / value, subWorld);
+}
+
 bool WorldPosition::operator==(const WorldPosition& other) const
 {
 	return pos == other.pos && subWorld == other.subWorld;
