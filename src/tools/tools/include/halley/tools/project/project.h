@@ -200,6 +200,7 @@ namespace Halley
 
 		bool assetNotifyImportEnabled = true;
 		bool assetsImported = false;
+		bool allowPackedAssets = false;
 		Vector<Path> assetsToNotifyImport;
 
 		bool buildPending = false;
