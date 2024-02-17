@@ -48,7 +48,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getAssetPreviewData(AssetType as
 void AssetPreviewGenerator::render(RenderContext& rc)
 {
 	curRC = &rc;
-	renderExecutor.runPending();
+	renderExecutor.runUpTo(1);
 	curRC = nullptr;
 }
 

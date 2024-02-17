@@ -34,6 +34,21 @@ TaskBase ExecutionQueue::getNext()
 	return value;
 }
 
+Vector<TaskBase> ExecutionQueue::getUpTo(size_t n)
+{
+	std::unique_lock<std::mutex> lock(mutex);
+	if (queue.size() <= n) {
+		hasTasks.store(false);
+		Vector<TaskBase> tasks(queue.begin(), queue.end());
+		queue.clear();
+		return tasks;
+	} else {
+		Vector<TaskBase> tasks(queue.begin(), queue.begin() + n);
+		queue.erase(queue.begin(), queue.begin() + n);
+		return tasks;
+	}
+}
+
 Vector<TaskBase> ExecutionQueue::getAll()
 {
 	std::unique_lock<std::mutex> lock(mutex);
@@ -127,7 +142,17 @@ Executor::~Executor()
 #endif
 }
 
-bool Executor::runPending()
+void Executor::runUpTo(size_t n)
+{
+#if HAS_THREADS
+	auto tasks = queue.getUpTo(n);
+	for (auto& t : tasks) {
+		t();
+	}
+#endif
+}
+
+void Executor::runPending()
 {
 #if HAS_THREADS
 	auto tasks = queue.getAll();
@@ -135,7 +160,6 @@ bool Executor::runPending()
 		t();
 	}
 #endif
-	return false;
 }
 
 void Executor::runForever()

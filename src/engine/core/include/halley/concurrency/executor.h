@@ -19,6 +19,7 @@ namespace Halley
 		void addToQueue(TaskBase task);
 
 		TaskBase getNext();
+		Vector<TaskBase> getUpTo(size_t n);
 		Vector<TaskBase> getAll();
 
 		size_t threadCount() const;
@@ -78,7 +79,8 @@ namespace Halley
 		Executor(ExecutionQueue& queue);
 		~Executor();
 
-		bool runPending();
+		void runUpTo(size_t n);
+		void runPending();
 		void runForever();
 		void stop();
 		
