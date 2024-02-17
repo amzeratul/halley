@@ -180,20 +180,19 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 {
 	Expects(vertexData != nullptr);
 
-	const size_t verticesPerSprite = 4;
-	const size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
+	constexpr size_t verticesPerSprite = 4;
+	constexpr size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
 	size_t numSpritesLeft = totalNumSprites;
 	size_t offset = 0;
 
 	while (numSpritesLeft > 0) {
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
-		
 		const size_t numVertices = verticesPerSprite * numSprites;
 		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
 		const auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
-		const char* const src = reinterpret_cast<const char*>(vertexData) + offset;
+		const char* const src = static_cast<const char*>(vertexData) + offset;
 
 		for (size_t i = 0; i < numSprites; i++) {
 			for (size_t j = 0; j < verticesPerSprite; j++) {
@@ -201,14 +200,9 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 				const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
 				memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
-				// j -> vertPos
-				// 0 -> 0, 0
-				// 1 -> 1, 0
-				// 2 -> 1, 1
-				// 3 -> 0, 1
-				const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
-				const float y = ((j & 2) >> 1) * 1.0f;
-				getVertPos(result.dstVertex + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
+				constexpr static Vector2f vertPosList[] = { Vector2f(0, 0), Vector2f(1, 0), Vector2f(1, 1), Vector2f(0, 1)};
+				const auto vertPos = Vector4f(vertPosList[j], vertPosList[j]);
+				memcpy(result.dstVertex + dstOffset + vertPosOffset, &vertPos, sizeof(vertPos));
 			}
 		}
 
