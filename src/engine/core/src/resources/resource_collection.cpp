@@ -236,40 +236,62 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std
 		
 		throw Exception("Resource not found: \"" + toString(type) + ":" + assetId + "\"", HalleyExceptions::Resources);
 	}
-	
+
+	newRes->setAssetId(assetId);
 	return std::make_pair(newRes, true);
 }
 
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {
-	// Look in cache and return if it's there
-	{
-		std::shared_lock lock(mutex);
-		const auto res = resources.find(assetId);
-		if (res != resources.end()) {
-			return res->second.res;
+	using namespace std::chrono_literals;
+
+	for (int i = 0; true; ++i) {
+		{
+			// Look in cache and return if it's there
+			std::shared_lock lock(mutex);
+			const auto res = resources.find(assetId);
+			if (res != resources.end()) {
+				// Found resource, all good
+				return res->second.res;
+			}
+
+			if (i > 0) {
+				// We only get here if we've already determined that someone else is loading this resource
+				// So we'll keep doing this until we manage to read the resource
+				resourceLoaded.wait_for(lock, 20us);
+				continue;
+			}
 		}
-	}
 
-	// Lock mutex, and make sure it's still not there (someone else might have gone through this by now)
-	std::unique_lock lockWrite(mutex);
-	const auto res = resources.find(assetId);
-	if (res != resources.end()) {
-		return res->second.res;
-	}
-	
-	// Load resource from disk
-	const auto [newRes, loaded] = loadAsset(assetId, priority, allowFallback);
+		{
+			// Resource not found; claim loading it
+			std::unique_lock lock(mutex);
+			if (resourcesLoading.contains(assetId)) {
+				// Someone else already loading it, wait until signaled then do the whole thing again
+				resourceLoaded.wait_for(lock, 20us);
+				continue;
+			}
+			resourcesLoading.insert(assetId);
+		}
 
-	// Store in cache
-	if (loaded) {
-		newRes->setAssetId(assetId);
-		resources.emplace(assetId, Wrapper(newRes, 0));
-		lockWrite.unlock();
-		newRes->onLoaded(parent);
-	}
+		// Load resource from disk
+		const auto [newRes, loaded] = loadAsset(assetId, priority, allowFallback);
 
-	return newRes;
+		// Store in cache
+		{
+			std::unique_lock lock(mutex);
+			resourcesLoading.erase(assetId);
+			if (loaded) {
+				resources.emplace(assetId, Wrapper(newRes, 0));
+				resourceLoaded.notify_all();
+			}
+		}
+
+		if (loaded) {
+			newRes->onLoaded(parent);
+		}
+		return newRes;
+	}
 }
 
 bool ResourceCollectionBase::exists(std::string_view assetId) const
