@@ -344,7 +344,7 @@ ConfigNode ScriptSendSystemMessageData::toConfigNode(const EntitySerializationCo
 Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() const
 {
 	return {
-		SettingType{ "system", "Halley::System", Vector<String>{""} },
+		SettingType{ "system", "Halley::SystemWithSystemMessages", Vector<String>{""} },
 		SettingType{ "message", "Halley::SystemMessageType", Vector<String>{""} },
 	};
 }

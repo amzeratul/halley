@@ -1803,7 +1803,6 @@ public:
 };
 
 
-
 class ComponentEditorEntityMessageTypeFieldFactory : public IComponentEditorFieldFactory {
 public:
 	ComponentEditorEntityMessageTypeFieldFactory(const ECSData& ecsData, String fieldType, bool systemMessage)
@@ -1829,32 +1828,20 @@ public:
 		auto& fieldData = data.getWriteableFieldData(); // HACK
 		fieldData.ensureType(ConfigNodeType::Map);
 
-		Vector<String> messageIds;
-		if (systemMessage) {
-			for (auto& [k, v]: ecsData.getSystemMessages()) {
-				if (v.serializable) {
-					messageIds.push_back(k);
-				}
-			}
-		} else {
-			for (auto& [k, v]: ecsData.getMessages()) {
-				if (v.serializable) {
-					messageIds.push_back(k);
-				}
-			}
-		}
-		std::sort(messageIds.begin(), messageIds.end());
-
 		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
 		auto dropdown = std::make_shared<UIDropdown>("messageType", dropStyle);
-		dropdown->setOptions(std::move(messageIds));
+		dropdown->setOptions(getMessageIds(ecsData, systemMessage, data));
 		dropdown->setSelectedOption(data.getFieldData()["message"].asString(""));
 
 		dropdown->bindData("messageType", fieldData["message"].asString(""), [&context, data, this](String newVal)
 		{
-			data.getWriteableFieldData() = getMessageConfig(newVal);
+			data.getWriteableFieldData() = getMessageConfig(ecsData, systemMessage, newVal);
 			context.onEntityUpdated();
 		});
+
+		if (systemMessage) {
+			dropdown->addBehaviour(std::make_shared<ReloadMessageTypeBehaviour>(data, ecsData));
+		}
 
 		return dropdown;
 	}
@@ -1864,12 +1851,12 @@ private:
 	String fieldType;
 	bool systemMessage;
 
-	ConfigNode getMessageConfig(const String& messageId) const
+	static ConfigNode getMessageConfig(const ECSData& ecsData, bool systemMessage, const String& messageId)
 	{
 		ConfigNode::MapType result;
 		result["message"] = messageId;
 
-		if (const auto* msg = getMessage(messageId)) {
+		if (const auto* msg = getMessage(ecsData, systemMessage, messageId)) {
 			ConfigNode::SequenceType members;
 			members.reserve(msg->members.size());
 			for (const auto& m: msg->members) {
@@ -1887,7 +1874,7 @@ private:
 		return result;
 	}
 
-	const MessageSchema* getMessage(const String& messageId) const
+	static const MessageSchema* getMessage(const ECSData& ecsData, bool systemMessage, const String& messageId)
 	{
 		if (systemMessage) {
 			const auto& msgs = ecsData.getSystemMessages();
@@ -1904,18 +1891,99 @@ private:
 		}
 		return nullptr;
 	}
+
+	static Vector<String> getMessageIds(const ECSData& ecsData, bool systemMessage, ComponentDataRetriever& data)
+	{
+		Vector<String> messageIds;
+		if (systemMessage) {
+			String systemId;
+			const auto& parentData = data.getParentFieldData();
+			if (parentData.getType() == ConfigNodeType::Map) {
+				systemId = parentData["system"].asString("");
+			}
+			const auto systemIter = ecsData.getSystems().find(systemId);
+
+			if (systemIter == ecsData.getSystems().end()) {
+				for (auto& [k, v]: ecsData.getSystemMessages()) {
+					if (v.serializable) {
+						messageIds.push_back(k);
+					}
+				}
+			} else {
+				const auto& systemData = *systemIter;
+				for (const auto& msg: systemData.second.systemMessages) {
+					if (msg.receive) {
+						const auto& messageData = ecsData.getSystemMessages().at(msg.name);
+						if (messageData.serializable) {
+							messageIds.push_back(messageData.name);
+						}
+					}
+				}
+			}
+		} else {
+			for (auto& [k, v]: ecsData.getMessages()) {
+				if (v.serializable) {
+					messageIds.push_back(k);
+				}
+			}
+		}
+		std::sort(messageIds.begin(), messageIds.end());
+		return messageIds;
+	}
+
+	class ReloadMessageTypeBehaviour : public UIBehaviour {
+	public:
+		ReloadMessageTypeBehaviour(ComponentDataRetriever data, const ECSData& ecsData)
+			: data(std::move(data))
+			, ecsData(ecsData)
+		{}
+
+		void init() override
+		{
+			systemId = getSystemId();
+		}
+
+		void update(Time time) override
+		{
+			const auto curSystem = getSystemId();
+			if (curSystem != systemId) {
+				systemId = curSystem;
+				auto* dropdown = dynamic_cast<UIDropdown*>(getWidget());
+				dropdown->setOptions(getMessageIds(ecsData, true, data));
+
+				data.getWriteableFieldData() = getMessageConfig(ecsData, true, dropdown->getSelectedOptionId());
+			}
+		}
+
+	private:
+		ComponentDataRetriever data;
+		const ECSData& ecsData;
+		String systemId;
+
+		String getSystemId() const
+		{
+			const auto& parentData = data.getParentFieldData();
+			if (parentData.getType() == ConfigNodeType::Map) {
+				return parentData["system"].asString("");
+			} else {
+				return "";
+			}			
+		}
+	};
 };
 
 
 class ComponentEditorSystemFieldFactory : public IComponentEditorFieldFactory {
 public:
-	ComponentEditorSystemFieldFactory(const ECSData& ecsData)
+	ComponentEditorSystemFieldFactory(const ECSData& ecsData, String name, bool mustHaveSystemMessages)
 		: ecsData(ecsData)
+		, name(std::move(name))
+		, mustHaveSystemMessages(mustHaveSystemMessages)
 	{}
 	
 	String getFieldType() override
 	{
-		return "Halley::System";
+		return name;
 	}
 
 	ConfigNode getDefaultNode() const override
@@ -1931,7 +1999,23 @@ public:
 
 		Vector<String> systemIds;
 		for (auto& [k, v]: ecsData.getSystems()) {
-			systemIds.push_back(k);
+			bool canAdd = false;
+			if (mustHaveSystemMessages) {
+				for (const auto& msg: v.systemMessages) {
+					if (msg.receive) {
+						const auto& sysMsgData = ecsData.getSystemMessages().at(msg.name);
+						if (sysMsgData.serializable) {
+							canAdd = true;
+							break;
+						}
+					}
+				}
+			} else {
+				canAdd = true;
+			}
+			if (canAdd) {
+				systemIds.push_back(k);
+			}
 		}
 		std::sort(systemIds.begin(), systemIds.end());
 
@@ -1950,6 +2034,8 @@ public:
 
 private:
 	const ECSData& ecsData;
+	String name;
+	bool mustHaveSystemMessages;
 };
 
 class ComponentEditorScriptComponentFieldFactory : public IComponentEditorFieldFactory {
@@ -2240,7 +2326,8 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::EntityMessageType", false));
 	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::SystemMessageType", true));
-	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData));
+	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData, "Halley::System", false));
+	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData, "Halley::SystemWithSystemMessages", true));
 	factories.emplace_back(std::make_unique<ComponentEditorScriptComponentFieldFactory>(ecsData));
 	factories.emplace_back(std::make_unique<ComponentEditorComponentFactory>(ecsData));
 	return factories;
