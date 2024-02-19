@@ -132,7 +132,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(
 
 IScriptNodeType::Result ScriptSpriteAlpha::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto* sprite = environment.tryGetComponent<SpriteComponent>(readEntityId(environment, node, 2));
+	auto* sprite = environment.tryGetComponent<SpriteComponent>(readRawEntityId(environment, node, 2));
 	if (sprite) {
 		const float value = readDataPin(environment, node, 3).asFloat(1.0f);
 		sprite->sprite.getColour().a = value;
