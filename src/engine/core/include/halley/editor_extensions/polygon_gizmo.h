@@ -42,6 +42,9 @@ namespace Halley {
 		void onEntityChanged() override;
 		void refreshEntity() override;
 
+		virtual void onRemoveGizmoHandle(const int index);
+		virtual void onInsertGizmoHandle(const int index, const SceneEditorGizmoHandle& handle);
+
 		UIFactory& factory;
 		String componentName;
 		String fieldName;
@@ -52,11 +55,14 @@ namespace Halley {
 		std::optional<VertexList> lastStored;
 		std::optional<VertexList> vertices;
 		mutable VertexList worldSpaceVertices;
+		
+		Vector<SceneEditorGizmoHandle> handles;
 
+		ConfigNode& getField(ConfigNode& node, const String& fieldName);
+		
 	private:
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
-		Vector<SceneEditorGizmoHandle> handles;
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
 		std::optional<PolygonGizmoMode> pendingMode;
@@ -71,7 +77,6 @@ namespace Halley {
 		std::optional<VertexList> readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();
-		ConfigNode& getField(ConfigNode& node, const String& fieldName);
 
 		void loadHandlesFromVertices();
 		void setHandleIndices();

@@ -47,14 +47,11 @@ void PolygonGizmo::update(Time time, const ISceneEditor& sceneEditor, const Scen
 	// Insert/delete
 	if (inputState.leftClickPressed) {
 		if (mode == PolygonGizmoMode::Append && curFocus == -1 && inputState.mousePos) {
-			handles.emplace_back(makeHandle(inputState.mousePos.value()));
-			setHandleIndices();
+			onInsertGizmoHandle(static_cast<int>(handles.size()), makeHandle(inputState.mousePos.value()));
 		} else if (mode == PolygonGizmoMode::Delete && curFocus != -1) {
-			handles.erase(handles.begin() + curFocus);
-			setHandleIndices();
+			onRemoveGizmoHandle(curFocus);
 		} else if (mode == PolygonGizmoMode::Insert && preview) {
-			handles.insert(handles.begin() + previewIndex, makeHandle(preview.value()));
-			setHandleIndices();
+			onInsertGizmoHandle(static_cast<int>(previewIndex), makeHandle(preview.value()));
 		}
 	}
 
@@ -106,6 +103,18 @@ int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 	}
 
 	return curFocus;
+}
+
+void PolygonGizmo::onRemoveGizmoHandle(const int index)
+{
+	handles.erase(handles.begin() + index);
+	setHandleIndices();
+}
+
+void PolygonGizmo::onInsertGizmoHandle(const int index, const SceneEditorGizmoHandle& handle)
+{
+	handles.insert(handles.begin() + index, handle);
+	setHandleIndices();
 }
 
 void PolygonGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
