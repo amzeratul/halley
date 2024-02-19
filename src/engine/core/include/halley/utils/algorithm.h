@@ -249,15 +249,21 @@ namespace std_ex {
 	}
 
 	template <typename C, typename V>
-	void erase(C& container, const V& value)
+	bool erase(C& container, const V& value)
 	{
-		container.erase(std::remove(container.begin(), container.end(), value), container.end());
+		const auto iter = std::remove(container.begin(), container.end(), value);
+		const bool erased = iter != container.end();
+		container.erase(iter, container.end());
+		return erased;
 	}
 
 	template <typename C, typename F>
-	void erase_if(C& container, F predicate)
+	bool erase_if(C& container, F predicate)
 	{
-		container.erase(std::remove_if(container.begin(), container.end(), predicate), container.end());
+		const auto iter = std::remove_if(container.begin(), container.end(), predicate);
+		const bool erased = iter != container.end();
+		container.erase(iter, container.end());
+		return erased;
 	}
 
 	template <typename C, typename V>
