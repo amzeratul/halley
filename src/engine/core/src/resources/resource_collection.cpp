@@ -6,6 +6,7 @@
 
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
+#include "halley/utils/scoped_guard.h"
 
 using namespace Halley;
 
@@ -275,7 +276,16 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		}
 
 		// Load resource from disk
-		const auto [newRes, loaded] = loadAsset(assetId, priority, allowFallback);
+		std::shared_ptr<Resource> newRes;
+		bool loaded = false;
+		try {
+			std::tie(newRes, loaded) = loadAsset(assetId, priority, allowFallback);
+		} catch (...) {
+			std::unique_lock lock(mutex);
+			resourcesLoading.erase(assetId);
+			resourceLoaded.notify_all();
+			throw;
+		}
 
 		// Store in cache
 		{
