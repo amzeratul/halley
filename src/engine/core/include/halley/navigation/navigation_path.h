@@ -31,6 +31,8 @@ namespace Halley {
 
 		bool operator==(const NavigationPath& other) const;
 		bool operator!=(const NavigationPath& other) const;
+
+		static NavigationPath merge(gsl::span<const NavigationPath> paths);
 	};
 
 	template<>

@@ -34,6 +34,29 @@ bool NavigationPath::operator!=(const NavigationPath& other) const
 	return !(*this == other);
 }
 
+NavigationPath NavigationPath::merge(gsl::span<const NavigationPath> paths)
+{
+	if (paths.empty()) {
+		return {};
+	}
+
+	NavigationPath result;
+	result.query = paths.front().query;
+	result.query.to = paths.back().query.to;
+
+	for (const auto& path: paths) {
+		for (const auto p: path.path) {
+			if (result.path.empty() || p != result.path.back()) {
+				result.path.push_back(p);
+			}
+		}
+	}
+
+	result.regions = paths.back().regions;
+
+	return result;
+}
+
 ConfigNode ConfigNodeSerializer<NavigationPath>::serialize(const NavigationPath& path, const EntitySerializationContext& context)
 {
 	return path.toConfigNode();
