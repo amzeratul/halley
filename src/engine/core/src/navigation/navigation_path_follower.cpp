@@ -40,8 +40,14 @@ ConfigNode NavigationPathFollower::toConfigNode() const
 	return result;
 }
 
+void NavigationPathFollower::setComputingPath()
+{
+	computingPath = true;
+}
+
 void NavigationPathFollower::setPath(std::optional<NavigationPath> p, ConfigNode params)
 {
+	computingPath = false;
 	doSetPath(std::move(p));
 	this->params = std::move(params);
 	this->params.ensureType(ConfigNodeType::Map);

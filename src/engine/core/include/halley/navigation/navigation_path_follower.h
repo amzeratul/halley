@@ -12,7 +12,8 @@ namespace Halley {
 		explicit NavigationPathFollower(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
-		
+
+		void setComputingPath();
 		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
 		const std::optional<NavigationPath>& getPath() const;
 		gsl::span<const Vector2f> getNextPathPoints() const;
@@ -36,6 +37,7 @@ namespace Halley {
 		size_t nextRegionIdx = 0;
 		std::optional<NavigationPath> path;
 		bool needsToReEvaluatePath = false;
+		bool computingPath = false;
 		int navmeshSubWorld = 0;
 		ConfigNode params;
 
