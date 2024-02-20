@@ -16,11 +16,12 @@ public:
 	Transform2DComponentBase() {
 	}
 
-	Transform2DComponentBase(Halley::Vector2f position, Halley::Vector2f scale, Halley::Angle1f rotation, float height, Halley::OptionalLite<int16_t> subWorld)
+	Transform2DComponentBase(Halley::Vector2f position, Halley::Vector2f scale, Halley::Angle1f rotation, float height, bool fixedHeight, Halley::OptionalLite<int16_t> subWorld)
 		: position(std::move(position))
 		, scale(std::move(scale))
 		, rotation(std::move(rotation))
 		, height(std::move(height))
+		, fixedHeight(std::move(fixedHeight))
 		, subWorld(std::move(subWorld))
 	{
 	}
@@ -32,6 +33,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(scale)>::serialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, _context, _node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rotation)>::serialize(rotation, Halley::Angle1f{}, _context, _node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(height)>::serialize(height, float{}, _context, _node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::serialize(fixedHeight, bool{ false }, _context, _node, componentName, "fixedHeight", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::serialize(subWorld, Halley::OptionalLite<int16_t>{}, _context, _node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		return _node;
 	}
@@ -42,6 +44,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(scale)>::deserialize(scale, Halley::Vector2f{ 1.0f, 1.0f }, _context, _node, componentName, "scale", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rotation)>::deserialize(rotation, Halley::Angle1f{}, _context, _node, componentName, "rotation", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(height)>::deserialize(height, float{}, _context, _node, componentName, "height", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(fixedHeight)>::deserialize(fixedHeight, bool{ false }, _context, _node, componentName, "fixedHeight", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::deserialize(subWorld, Halley::OptionalLite<int16_t>{}, _context, _node, componentName, "subWorld", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 	}
 
@@ -58,6 +61,9 @@ public:
 		}
 		if (_fieldName == "height") {
 			return Halley::ConfigNodeHelper<decltype(height)>::serialize(height, _context);
+		}
+		if (_fieldName == "fixedHeight") {
+			return Halley::ConfigNodeHelper<decltype(fixedHeight)>::serialize(fixedHeight, _context);
 		}
 		if (_fieldName == "subWorld") {
 			return Halley::ConfigNodeHelper<decltype(subWorld)>::serialize(subWorld, _context);
@@ -81,6 +87,10 @@ public:
 		}
 		if (_fieldName == "height") {
 			Halley::ConfigNodeHelper<decltype(height)>::deserialize(height, _context, _node);
+			return;
+		}
+		if (_fieldName == "fixedHeight") {
+			Halley::ConfigNodeHelper<decltype(fixedHeight)>::deserialize(fixedHeight, _context, _node);
 			return;
 		}
 		if (_fieldName == "subWorld") {
@@ -112,6 +122,7 @@ protected:
 	Halley::Vector2f scale{ 1.0f, 1.0f };
 	Halley::Angle1f rotation{};
 	float height{};
+	bool fixedHeight{ false };
 	Halley::OptionalLite<int16_t> subWorld{};
 	mutable uint16_t revision{ 0 };
 

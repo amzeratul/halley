@@ -23,6 +23,11 @@ component:
       type: 'float'
       access: protected
       displayName: Height
+  - fixedHeight:
+      type: bool
+      access: protected
+      displayName: Fixed Height
+      defaultValue: false
   - subWorld:
       type: 'Halley::OptionalLite<int16_t>'
       access: protected

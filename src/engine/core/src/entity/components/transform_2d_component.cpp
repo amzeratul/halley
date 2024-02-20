@@ -12,12 +12,12 @@ Transform2DComponent::Transform2DComponent() = default;
 
 
 Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld, float height)
-	: Transform2DComponentBase(localPosition, localScale, localRotation, height, subWorld)
+	: Transform2DComponentBase(localPosition, localScale, localRotation, height, false, subWorld)
 {
 }
 
 Transform2DComponent::Transform2DComponent(WorldPosition localPosition, Angle1f localRotation, Vector2f localScale, float height)
-	: Transform2DComponentBase(localPosition.pos, localScale, localRotation, height, localPosition.subWorld)
+	: Transform2DComponentBase(localPosition.pos, localScale, localRotation, height, false, localPosition.subWorld)
 {
 }
 
@@ -75,6 +75,15 @@ void Transform2DComponent::setLocalHeight(float v)
 {
 	if (height != v) {
 		height = v;
+		markDirty();
+	}
+}
+
+void Transform2DComponent::setFixedHeight(bool v)
+{
+	if (fixedHeight != v) {
+		fixedHeight = v;
+		setCached(CachedIndices::Height); // This is needed otherwise the system might incorrectly assume that because the flag is unset, nobody has read it
 		markDirty();
 	}
 }
@@ -151,7 +160,7 @@ void Transform2DComponent::setGlobalRotation(Angle1f v)
 
 float Transform2DComponent::getGlobalHeight() const
 {
-	if (parentTransform) {
+	if (!fixedHeight && parentTransform) {
 		if (!isCached(CachedIndices::Height)) {
 			setCached(CachedIndices::Height);
 			cachedGlobalHeight = parentTransform->getGlobalHeight() + height;
