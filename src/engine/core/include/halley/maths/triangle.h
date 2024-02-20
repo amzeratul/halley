@@ -34,7 +34,7 @@ namespace Halley {
         Vector3f getBarycentricCoordinates(Vector2f p) const;
 
     	template<typename T>
-        T interpolate(T valueAtA, T valueAtB, T valueAtC, Vector2f pointToSample)
+        T interpolate(T valueAtA, T valueAtB, T valueAtC, Vector2f pointToSample) const
         {
             const auto coords = getBarycentricCoordinates(pointToSample);
             return coords.x * valueAtA + coords.y * valueAtB + coords.z * valueAtC;
