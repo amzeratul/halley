@@ -13,6 +13,7 @@ NavigationPath::NavigationPath(const NavigationQuery& query, Vector<Vector2f> pa
 NavigationPath::NavigationPath(const ConfigNode& node)
 {
 	query = NavigationQuery(node["query"]);
+	followUpPaths = node["followUpPaths"].asVector<NavigationPath>({});
 }
 
 ConfigNode NavigationPath::toConfigNode() const
@@ -20,13 +21,16 @@ ConfigNode NavigationPath::toConfigNode() const
 	ConfigNode::MapType result;
 
 	result["query"] = query.toConfigNode();
+	if (!followUpPaths.empty()) {
+		result["followUpPaths"] = followUpPaths;
+	}
 	
 	return result;
 }
 
 bool NavigationPath::operator==(const NavigationPath& other) const
 {
-	return query == other.query;
+	return query == other.query && followUpPaths == other.followUpPaths;
 }
 
 bool NavigationPath::operator!=(const NavigationPath& other) const
@@ -40,6 +44,7 @@ NavigationPath NavigationPath::merge(gsl::span<const NavigationPath> paths)
 		return {};
 	}
 
+	/*
 	NavigationPath result;
 	result.query = paths.front().query;
 	result.query.to = paths.back().query.to;
@@ -53,6 +58,12 @@ NavigationPath NavigationPath::merge(gsl::span<const NavigationPath> paths)
 	}
 
 	result.regions = paths.back().regions;
+	*/
+
+	NavigationPath result = paths.front();
+	for (size_t i = 1; i < paths.size(); ++i) {
+		result.followUpPaths.push_back(paths[i]);
+	}
 
 	return result;
 }

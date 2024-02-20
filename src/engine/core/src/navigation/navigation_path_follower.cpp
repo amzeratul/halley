@@ -149,11 +149,26 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 			nextRegionIdx++;
 			navmeshSubWorld = subWorld;
 		} else {
-			doSetPath({});
+			nextSubPath();
 		}
 	} else {
 		// No more regions
+		nextSubPath();
+	}
+}
+
+void NavigationPathFollower::nextSubPath()
+{
+	assert(path.has_value());
+
+	if (path->followUpPaths.empty()) {
 		doSetPath({});
+	} else {
+		auto followUpPaths = std::move(path->followUpPaths);
+		auto newPath = std::move(followUpPaths.front());
+		followUpPaths.erase(followUpPaths.begin());
+		newPath.followUpPaths = std::move(followUpPaths);
+		doSetPath(std::move(newPath));
 	}
 }
 

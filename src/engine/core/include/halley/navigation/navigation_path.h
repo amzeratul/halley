@@ -17,9 +17,10 @@ namespace Halley {
 			RegionNode(uint16_t regionNodeId = 0, uint16_t exitEdgeId = std::numeric_limits<uint16_t>::max()) : regionNodeId(regionNodeId), exitEdgeId(exitEdgeId) {}
 		};
 		
-		// The path is defined by a sequence of points, followed by a sequence of regions that need further processing
+		// The path is defined by a sequence of points, followed by a sequence of regions that need further processing, followed by additional paths
 		Vector<Vector2f> path;
 		Vector<RegionNode> regions;
+		Vector<NavigationPath> followUpPaths;
 
 		NavigationQuery query;
 

@@ -42,6 +42,7 @@ namespace Halley {
 		ConfigNode params;
 
 		void doSetPath(std::optional<NavigationPath> p);
+		void nextSubPath();
 		void goToNextRegion(const NavmeshSet& navmeshSet);
 		void reEvaluatePath(const NavmeshSet& navmeshSet);
 	};
