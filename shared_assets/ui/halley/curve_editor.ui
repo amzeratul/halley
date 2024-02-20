@@ -27,12 +27,27 @@ children:
     widget:
       class: curveEditor
       id: curveEditor
-      size: [600, 202]
+      size: [600, 402]
   - uuid: e6c3f59c-b496-47a8-a12f-ff024827adca
     sizer:
       columnProportions: []
       type: horizontal
     children:
+      - uuid: 6f86d35d-2ca2-4712-9a40-20688a16ac50
+        border: [0, 0, 5, 0]
+        widget:
+          class: label
+          text: "Baseline: "
+        fill: [fillHorizontal, centreVertical]
+      - uuid: f7ac8924-7548-41b1-8df9-791fcef58881
+        sizer:
+          columnProportions: []
+        widget:
+          id: baseline
+          class: spinControl2
+          size: [60, 0]
+          increment: 0.1
+          allowFloat: true
       - uuid: 6f86d35d-2ca2-4712-9a40-20688a16ac50
         border: [0, 0, 5, 0]
         widget:
