@@ -298,6 +298,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 	if (listening) {
 		refreshScriptEnum();
 		ConfigNode::MapType params;
+		scriptGraph->updateHash();
 		params["scriptId"] = scriptGraph->getAssetId();
 		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		scriptEnumHandle = devConServer->registerInterest("scriptEnum", std::move(params), [=] (size_t connId, ConfigNode result)

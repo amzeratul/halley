@@ -416,7 +416,7 @@ namespace {
 			return cmp.compareEq(a.asVector2f(), b.asVector2f());
 		}
 		
-		return false;
+		return cmp.compare(0, 1);
 	}
 
 	template<MathRelOp op>
