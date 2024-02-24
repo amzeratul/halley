@@ -155,7 +155,9 @@ void World::loadSystems(const ConfigNode& root)
 
 		for (auto& sysName: tlSystems) {
 			String name = sysName.asString();
-			addSystem(reflection.createSystem(name + "System"), timeline).setName(name);
+			if (auto system = reflection.createSystem(name + "System")) {
+				addSystem(std::move(system), timeline).setName(name);
+			}
 		}
 	}
 }
