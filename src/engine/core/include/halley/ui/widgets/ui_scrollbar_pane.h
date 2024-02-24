@@ -16,6 +16,9 @@ namespace Halley {
 
 		void setAlwaysShow(bool alwaysShow);
 
+	protected:
+		void updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick) override;
+
 	private:
 		std::shared_ptr<UIScrollPane> pane;
 		std::shared_ptr<UIScrollBar> hBar;

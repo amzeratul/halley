@@ -64,3 +64,18 @@ void UIScrollBarPane::setAlwaysShow(bool alwaysShow)
 		vBar->setAlwaysShow(alwaysShow);
 	}
 }
+
+void UIScrollBarPane::updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick)
+{
+	// We need to update scrollbars first, then contents, otherwise scrolling information will lag a frame
+
+	if (hBar) {
+		hBar->doUpdate(updateType, time, uiInput, joystick);
+	}
+	if (vBar) {
+		vBar->doUpdate(updateType, time, uiInput, joystick);
+	}
+	if (pane) {
+		pane->doUpdate(updateType, time, uiInput, joystick);
+	}
+}
