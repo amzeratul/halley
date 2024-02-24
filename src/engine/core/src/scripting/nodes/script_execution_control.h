@@ -123,4 +123,27 @@ namespace Halley {
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
+
+
+	class ScriptWaitUntilEndOfFrameData final : public ScriptStateData<ScriptStartScriptData> {
+	public:
+		std::optional<int> lastFrame = 0;
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptWaitUntilEndOfFrame final : public ScriptNodeTypeBase<ScriptWaitUntilEndOfFrameData> {
+	public:
+		String getId() const override { return "waitUntilEndOfFrame"; }
+		String getName() const override { return "Wait Until EOF"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/wait_until_eof.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+
+		void doInitData(ScriptWaitUntilEndOfFrameData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitUntilEndOfFrameData& data) const override;
+	};
 }

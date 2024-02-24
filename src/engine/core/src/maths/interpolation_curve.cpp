@@ -15,16 +15,20 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node, bool startFromZer
 		points = node["points"].asVector<Vector2f>({});
 		tweens = node["tweens"].asVector<TweenCurve>({});
 		scale = node["scale"].asFloat(1.0f);
+		baseline = node["baseline"].asFloat(0);
 	} else if (node.getType() == ConfigNodeType::Sequence) {
 		points = node.asVector<Vector2f>();
 		tweens.resize(points.size(), TweenCurve::Linear);
 		scale = 1.0f;
+		baseline = 0;
 	} else if (node.getType() == ConfigNodeType::Float || node.getType() == ConfigNodeType::Int) {
 		makeDefault(false);
 		scale = node.asFloat(1.0f);
+		baseline = 0;
 	} else if (node.getType() == ConfigNodeType::String) {
 		makeDefault(true);
 		scale = 1;
+		baseline = 0;
 		tweens.clear();
 		tweens.resize(points.size(), node.asEnum(TweenCurve::Linear));
 	} else {
@@ -38,12 +42,14 @@ ConfigNode InterpolationCurve::toConfigNode() const
 	result["points"] = points;
 	result["tweens"] = tweens;
 	result["scale"] = scale;
+	result["baseline"] = baseline;
 	return result;
 }
 
 void InterpolationCurve::makeDefault(bool startFromZero)
 {
 	scale = 1.0f;
+	baseline = 0;
 	points.clear();
 	tweens.clear();
 	points.push_back(Vector2f(0, startFromZero ? 0.0f : 1.0f));
@@ -54,7 +60,7 @@ void InterpolationCurve::makeDefault(bool startFromZero)
 
 bool InterpolationCurve::operator==(const InterpolationCurve& other) const
 {
-	return points == other.points && tweens == other.tweens && scale == other.scale;
+	return points == other.points && tweens == other.tweens && scale == other.scale && baseline == other.baseline;
 }
 
 bool InterpolationCurve::operator!=(const InterpolationCurve& other) const
@@ -67,18 +73,20 @@ void InterpolationCurve::serialize(Serializer& s) const
 	s << points;
 	s << tweens;
 	s << scale;
+	s << baseline;
 }
 
 void InterpolationCurve::deserialize(Deserializer& s)
 {
 	s >> points;
 	s >> tweens;
-	s >> scale;	
+	s >> scale;
+	s >> baseline;
 }
 
 float InterpolationCurve::evaluate(float val) const
 {
-	return evaluateRaw(val) * scale;
+	return evaluateRaw(val) * scale + baseline;
 }
 
 float InterpolationCurve::evaluateRaw(float val) const

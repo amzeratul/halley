@@ -229,11 +229,41 @@ void SpritePainter::draw(int mask, Painter& painter)
 std::optional<Rect4f> SpritePainter::getBounds() const
 {
 	std::optional<Rect4f> result;
-
-	// NB: this only includes cached sprites
-	for (const auto& sprite: cachedSprites) {
-		const auto aabb = sprite.getAABB();
+	
+	auto merge = [&](Rect4f aabb, std::optional<Rect4f> clip)
+	{
+		if (clip) {
+			if (!aabb.overlaps(*clip)) {
+				return;
+			}
+			aabb = aabb.intersection(*clip);
+		}
 		result = result ? result->merge(aabb) : aabb;
+	};
+
+	for (auto& s: sprites) {
+		const auto type = s.getType();
+		const auto clip = s.getClip();
+
+		if (type == SpritePainterEntryType::SpriteRef) {
+			for (const auto& sprite: s.getSprites()) {
+				merge(sprite.getAABB(), clip);
+			}
+		} else if (type == SpritePainterEntryType::SpriteCached) {
+			for (const auto& sprite: gsl::span<const Sprite>(cachedSprites.data() + s.getIndex(), s.getCount())) {
+				merge(sprite.getAABB(), clip);
+			}
+		} else if (type == SpritePainterEntryType::TextRef) {
+			for (const auto& text: s.getTexts()) {
+				merge(text.getAABB(), clip);
+			}
+		} else if (type == SpritePainterEntryType::TextCached) {
+			for (const auto& text: gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount())) {
+				merge(text.getAABB(), clip);
+			}
+		} else if (type == SpritePainterEntryType::Callback) {
+			// Not included
+		}
 	}
 
 	return result;

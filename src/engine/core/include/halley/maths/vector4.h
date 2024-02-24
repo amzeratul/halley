@@ -84,6 +84,13 @@ namespace Halley {
 			, w(w)
 		{}
 
+		constexpr inline explicit Vector4D(const Vector2D<T>& xy, const Vector2D<T>& zw)
+			: x(xy.x)
+			, y(xy.y)
+			, z(zw.x)
+			, w(zw.y)
+		{}
+
 		constexpr inline explicit Vector4D(const Vector3D<T>& v, T w = 0)
 			: x(v.x)
 			, y(v.y)

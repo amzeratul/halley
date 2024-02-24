@@ -78,7 +78,10 @@ namespace Halley
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
 		ResourceEnumeratorFunc resourceEnumerator;
+
 		mutable SharedRecursiveMutex mutex;
+		mutable std::condition_variable_any resourceLoaded;
+		HashSet<String> resourcesLoading;
 	};
 
 	template <typename T>

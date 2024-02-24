@@ -244,11 +244,26 @@ Sprite& Sprite::setTexRect(Rect4f texRect)
 	setHotReload(nullptr, 0);
 #endif
 	
+	vertexAttrib.texRect0 = texRect.toVector4();
+	return *this;
+}
+
+Sprite& Sprite::setTexRect(Vector4f texRect)
+{
+#ifdef ENABLE_HOT_RELOAD
+	setHotReload(nullptr, 0);
+#endif
+	
 	vertexAttrib.texRect0 = texRect;
 	return *this;
 }
 
 Sprite& Sprite::setTexRect0(Rect4f texRect)
+{
+	return setTexRect(texRect);
+}
+
+Sprite& Sprite::setTexRect0(Vector4f texRect)
 {
 	return setTexRect(texRect);
 }
@@ -460,7 +475,7 @@ void Sprite::doSetSprite(const SpriteSheetEntry& entry, bool applyPivot)
 		Expects(entry.pivot.isValid());
 		vertexAttrib.pivot = entry.pivot;
 	}
-	vertexAttrib.texRect0 = entry.coords;
+	vertexAttrib.texRect0 = entry.coords.toVector4();
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 
 #ifdef ENABLE_HOT_RELOAD
@@ -582,11 +597,11 @@ Sprite& Sprite::crop(Vector4f sides)
 	setAbsolutePivot(origPivot - sides.xy());
 
 	const auto texRect0 = vertexAttrib.texRect0;
-	const auto texScale0 = texRect0.getSize() / origSize;
-	vertexAttrib.texRect0 = Rect4f(texRect0.getTopLeft() + sides.xy() * texScale0, texRect0.getBottomRight() - sides.zw() * texScale0);
+	const auto texScale0 = Rect4f(texRect0).getSize() / origSize;
+	vertexAttrib.texRect0 = texRect0 + Vector4f(texScale0 * sides.xy(), -texScale0 * sides.zw());
 	const auto texRect1 = vertexAttrib.texRect1;
-	const auto texScale1 = texRect1.getSize() / origSize;
-	vertexAttrib.texRect1 = Rect4f(texRect1.getTopLeft() + sides.xy() * texScale1, texRect1.getBottomRight() - sides.zw() * texScale1);
+	const auto texScale1 = Rect4f(texRect1).getSize() / origSize;
+	vertexAttrib.texRect1 = texRect1 + Vector4f(texScale1 * sides.xy(), -texScale1 * sides.zw());
 
 	return *this;
 }
@@ -600,8 +615,8 @@ void Sprite::setRectInfo(const RectInfo& info)
 {
 	vertexAttrib.pivot = info.pivot;
 	size = info.size;
-	vertexAttrib.texRect0 = info.texRect0;
-	vertexAttrib.texRect1 = info.texRect1;
+	vertexAttrib.texRect0 = info.texRect0.toVector4();
+	vertexAttrib.texRect1 = info.texRect1.toVector4();
 	computeSize();
 }
 

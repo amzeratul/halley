@@ -284,6 +284,15 @@ String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["key"].asString("");
 }
 
+String ScriptEntityReference::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (static_cast<ScriptNodeElementType>(elementType.type) == ScriptNodeElementType::ReadDataPin) {
+		return "Position";
+	} else {
+		return "Entity";
+	}
+}
+
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto key = node.getSettings()["key"].asString("");
@@ -312,6 +321,63 @@ ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, cons
 	} else {
 		return {};
 	}
+}
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptEntityParameter::getSettingTypes() const
+{
+	return {
+		SettingType{ "key", "Halley::String", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Entity parameter set in ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append("'s ScriptableComponent with key ");
+	str.append(node.getSettings()["key"].asString(""), settingColour);
+	return str.moveResults();
+}
+
+String ScriptEntityParameter::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Param \"" + node.getSettings()["key"].asString("") + "\"";
+}
+
+String ScriptEntityParameter::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["key"].asString("");
+}
+
+ConfigNode ScriptEntityParameter::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto key = node.getSettings()["key"].asString("");
+	if (key.isEmpty()) {
+		return {};
+	}
+
+	const auto entityRef = environment.tryGetEntity(readEntityId(environment, node, 1));
+	const auto& params = entityRef.getComponent<ScriptableComponent>().entityParams;
+	const auto find = params.find(key);
+	if (find == params.end()) {
+		return {};
+	}
+
+	return ConfigNode(find->second);
 }
 
 

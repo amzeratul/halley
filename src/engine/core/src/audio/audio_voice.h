@@ -22,7 +22,7 @@ namespace Halley {
 		void play(AudioFade fade);
 		void stop(AudioFade fade);
 		void pause(AudioFade fade);
-		void resume(AudioFade fade);
+		void resume(AudioFade fade, bool force = false);
 
 		bool isPlaying() const;
 		bool isReady() const;
@@ -60,7 +60,6 @@ namespace Halley {
 		uint8_t bus = 0;
 		uint8_t nChannels = 0;
 		bool playing : 1;
-		bool paused : 1;
 		bool done : 1;
 		bool isFirstUpdate : 1;
     	float baseGain = 1.0f;
@@ -69,6 +68,8 @@ namespace Halley {
 		float dopplerScale = 0.0f;
 		float elapsedTime = 0.0f;
 		uint32_t delaySamples = 0;
+		uint32_t paused = 0;
+		uint32_t pendingPauses = 0;
 
 		AudioFader fader;
 		FadeEndBehaviour fadeEnd = FadeEndBehaviour::None;

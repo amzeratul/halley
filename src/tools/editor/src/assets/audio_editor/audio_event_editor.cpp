@@ -182,9 +182,11 @@ void AudioEventEditorAction::onMakeUI()
 		makeSetVariableAction(dynamic_cast<AudioEventActionSetVariable&>(action));
 		break;
 	case AudioEventActionType::PauseBus:
-	case AudioEventActionType::ResumeBus:
 	case AudioEventActionType::StopBus:
 		makeBusAction(dynamic_cast<AudioEventActionBus&>(action));
+		break;
+	case AudioEventActionType::ResumeBus:
+		makeResumeBusAction(dynamic_cast<AudioEventActionResumeBus&>(action));
 		break;
 	}
 
@@ -272,7 +274,15 @@ void AudioEventEditorAction::makePauseAction(AudioEventActionPause& action)
 
 void AudioEventEditorAction::makeResumeAction(AudioEventActionResume& action)
 {
-	makeObjectAction(action);	
+	makeObjectAction(action);
+
+	getWidget("resumeOptions")->setActive(true);
+
+	bindData("force", action.getForce(), [=, &action] (bool value)
+	{
+		action.setForce(value);
+		editor.markModified();
+	});	
 }
 
 void AudioEventEditorAction::makeSetVolumeAction(AudioEventActionSetVolume& action)
@@ -371,6 +381,19 @@ void AudioEventEditorAction::makeBusAction(AudioEventActionBus& action)
 		action.setBusName(std::move(value));
 		editor.markModified();
 	});
+}
+
+void AudioEventEditorAction::makeResumeBusAction(AudioEventActionResumeBus& action)
+{
+	makeBusAction(action);
+
+	getWidget("resumeOptions")->setActive(true);
+
+	bindData("force", action.getForce(), [=, &action] (bool value)
+	{
+		action.setForce(value);
+		editor.markModified();
+	});	
 }
 
 ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)

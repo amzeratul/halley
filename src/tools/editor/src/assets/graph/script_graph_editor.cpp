@@ -104,7 +104,7 @@ void ScriptGraphEditor::onMakeUI()
 
 	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();
-	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Top | UISizerAlignFlags::Left, Vector2f());
+	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Top | UISizerAlignFlags::Left);
 	infiniCanvas->setMouseMirror(gizmoEditor);
 	infiniCanvas->setZoomEnabled(false);
 	infiniCanvas->setLeftClickScrollKey(KeyCode::Space);
@@ -298,8 +298,9 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 	if (listening) {
 		refreshScriptEnum();
 		ConfigNode::MapType params;
+		scriptGraph->updateHash();
 		params["scriptId"] = scriptGraph->getAssetId();
-		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getHash());
+		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		scriptEnumHandle = devConServer->registerInterest("scriptEnum", std::move(params), [=] (size_t connId, ConfigNode result)
 		{
 			onScriptEnum(connId, std::move(result));
@@ -332,7 +333,7 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 		params["connId"] = static_cast<int>(entityId.first);
 		params["entityId"] = EntityIdHolder{ entityId.second };
 		params["scriptId"] = scriptGraph->getAssetId();
-		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getHash());
+		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		params["curNode"] = getCurrentNodeConfig();
 		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (size_t connId, ConfigNode result)
 		{

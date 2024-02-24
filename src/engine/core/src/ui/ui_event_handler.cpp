@@ -33,8 +33,9 @@ bool UIEventHandler::canHandle(const UIEvent& event) const
 	}
 }
 
-void UIEventHandler::queue(UIEvent event)
+void UIEventHandler::queue(UIEvent event, UIEventDirection direction)
 {
+	event.setDirection(direction);
 	eventQueue.emplace_back(std::move(event));
 }
 

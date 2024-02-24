@@ -212,7 +212,7 @@ namespace Halley {
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
 		std::shared_ptr<TypedPool<Entity>> entityPool;
 
-		std::list<SystemMessageContext> pendingSystemMessages;
+		std::array<std::list<SystemMessageContext>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> pendingSystemMessages;
 		
 		IWorldNetworkInterface* networkInterface = nullptr;
 		float transform2DAnisotropy = 1.0f;

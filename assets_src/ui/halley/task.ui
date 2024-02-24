@@ -12,10 +12,10 @@ children:
     proportion: 1
     sizer: { type: vertical }
     children:
-    - widget: { id: name, class: label, text: taskName }
+    - widget: { id: name, class: label, text: taskName, maxHeight: 30 }
       fill: left
       proportion: 1
-    - widget: { id: desc, class: label, text: desc, style: labelLight }
+    - widget: { id: desc, class: label, text: desc, style: labelLight, maxHeight: 20 }
       fill: left
       proportion: 1
   - widget: { id: statusIconBackground, class: image, image: ui/task_anim_bg.png, colour: $taskStatusBackground }

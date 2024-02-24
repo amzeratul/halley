@@ -235,7 +235,7 @@ void UIWidget::setSizer(std::optional<UISizer> sizer)
 	}
 }
 
-void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position, size_t insertPos)
+void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, size_t insertPos)
 {
 	auto widget = std::dynamic_pointer_cast<UIWidget>(element);
 	if (widget) {
@@ -247,7 +247,7 @@ void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector
 		}
 	}
 	if (sizer) {
-		sizer->add(element, proportion, border, fillFlags, position, insertPos);
+		sizer->add(element, proportion, border, fillFlags, insertPos);
 	}
 }
 
@@ -323,6 +323,20 @@ void UIWidget::focus()
 	}
 }
 
+bool UIWidget::canPropagateMouseToChildren() const
+{
+	return propagateMouseToChildren;
+}
+
+void UIWidget::setPropagateMouseToChildren(bool enabled)
+{
+	propagateMouseToChildren = enabled;
+}
+
+void UIWidget::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
+{
+}
+
 void UIWidget::setId(const String& i)
 {
 	id = i;
@@ -379,6 +393,18 @@ void UIWidget::setPosition(Vector2f pos)
 	
 	position = pos;
 	positionUpdated = true;
+}
+
+void UIWidget::setBorder(Vector4f border)
+{
+	if (auto* parentWidget = dynamic_cast<UIWidget*>(parent)) {
+		if (auto& parentSizer = parentWidget->tryGetSizer()) {
+			if (auto* entry = parentSizer->tryGetEntry(this)) {
+				entry->setBorder(border);
+				parentWidget->markAsNeedingLayout();
+			}
+		}
+	}
 }
 
 void UIWidget::setMinSize(Vector2f size)
@@ -928,19 +954,17 @@ bool UIWidget::onDestroyRequested()
 
 void UIWidget::sendEvent(UIEvent event, bool includeSelf) const
 {
-	if (canSendEvents) {
-		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
-			eventHandler->queue(event);
-		} else if (parent) {
-			parent->sendEvent(std::move(event), true);
-		}
+	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
+		eventHandler->queue(event, UIEventDirection::Up);
+	} else if (parent && canSendEvents) {
+		parent->sendEvent(std::move(event), true);
 	}
 }
 
 void UIWidget::sendEventDown(const UIEvent& event, bool includeSelf) const
 {
 	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
-		eventHandler->queue(event);
+		eventHandler->queue(event, UIEventDirection::Down);
 	} else {
 		for (const auto& c: getChildren()) {
 			c->sendEventDown(event, true);
@@ -954,8 +978,7 @@ void UIWidget::sendEventDown(const UIEvent& event, bool includeSelf) const
 std::optional<AudioHandle> UIWidget::playSound(const String& eventName)
 {
 	if (!eventName.isEmpty()) {
-		auto root = getRoot();
-		if (root) {
+		if (auto root = getRoot()) {
 			return root->playSound(eventName);
 		}
 	}

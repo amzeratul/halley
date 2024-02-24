@@ -27,7 +27,7 @@ void UIGraphNode::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 			const size_t n = sizer.size();
 			for (size_t i = 0; i < n; ++i) {
 				if (sizer[i].getPointer().get() == this) {
-					parentPos = sizer[i].getPosition();
+					parentPos = sizer[i].getBorder().xy();
 				}
 			}
 		}
@@ -54,10 +54,10 @@ void UIGraphNode::onMouseOver(Vector2f mousePos)
 			const size_t n = sizer.size();
 			for (size_t i = 0; i < n; ++i) {
 				if (sizer[i].getPointer().get() == this) {
-					sizer[i].setPosition(newPos);
+					sizer[i].setBorder(Vector4f(newPos));
 				}
 			}
-			sizer.sortItems([] (const UISizerEntry& a, const UISizerEntry& b) -> bool { return a.getPosition().y < b.getPosition().y; });
+			sizer.sortItems([] (const UISizerEntry& a, const UISizerEntry& b) -> bool { return a.getBorder().y < b.getBorder().y; });
 			parent->layout();
 		}
 	}

@@ -511,7 +511,7 @@ void SetThreadName( DWORD dwThreadID, const char* name)
 
 void SystemSDL::setThreadName(const String& name)
 {
-#if defined(_WIN32) && !defined(WINDOWS_STORE) && defined(_DEBUG)
+#if defined(_WIN32) && !defined(WINDOWS_STORE)
 	if (name != "main") {
 		SetThreadName(static_cast<DWORD>(-1), name.c_str());
 	}

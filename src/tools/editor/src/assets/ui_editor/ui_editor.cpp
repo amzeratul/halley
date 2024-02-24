@@ -37,9 +37,11 @@ void UIEditor::update(Time time, bool moved)
 		pendingLoad = false;
 	}
 
-	getWidget("saveButton")->setEnabled(isModified());
-	getWidget("undoButton")->setEnabled(undoStack.canUndo());
-	getWidget("redoButton")->setEnabled(undoStack.canRedo());
+	if (!pendingLoad) {
+		getWidget("saveButton")->setEnabled(isModified());
+		getWidget("undoButton")->setEnabled(undoStack.canUndo());
+		getWidget("redoButton")->setEnabled(undoStack.canRedo());
+	}
 }
 
 void UIEditor::open()
@@ -70,6 +72,8 @@ void UIEditor::onMakeUI()
 	{
 		display->setZoom(zoom);
 	});
+
+	infiniCanvas->setMouseMirror(display, true);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{
@@ -217,6 +221,11 @@ void UIEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 		}
 		doLoadUI(false);
 	}
+}
+
+void UIEditor::refreshAssets()
+{
+	doLoadUI(true);
 }
 
 void UIEditor::reload()
@@ -463,6 +472,11 @@ void UIEditor::deleteWidgets(const Vector<String>& uuids)
 	if (modified) {
 		markModified();
 	}
+}
+
+void UIEditor::selectWidget(const String& id)
+{
+	widgetList->selectWidget(id);
 }
 
 

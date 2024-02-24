@@ -238,6 +238,13 @@ TextRenderer& TextRenderer::setAngle(Angle1f angle)
 	return *this;
 }
 
+void TextRenderer::refresh()
+{
+	glyphsDirty = true;
+	materialDirty = true;
+	positionDirty = true;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	if (outlineColour != v) {
@@ -651,6 +658,13 @@ float TextRenderer::getAlignment() const
 bool TextRenderer::empty() const
 {
 	return text.empty();
+}
+
+Rect4f TextRenderer::getAABB() const
+{
+	const auto pos = getPosition();
+	const auto size = getExtents();
+	return Rect4f(pos, pos + size);
 }
 
 float TextRenderer::getScale(const Font& f) const

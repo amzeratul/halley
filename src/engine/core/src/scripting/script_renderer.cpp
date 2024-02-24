@@ -192,7 +192,7 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	}
 	const auto col = (highlight ? highlightCol : normalCol).multiplyAlpha(fade ? 0.5f : 1.0f);
 
-	Painter::LineDashPattern pattern;
+	Painter::LineParameters pattern;
 	if (path.fromType.isDetached) {
 		pattern.onLength = 8.0f;
 		pattern.offLength = 8.0f;

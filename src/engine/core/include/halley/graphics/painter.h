@@ -49,17 +49,14 @@ namespace Halley
 		};
 
 	public:
-		struct LineDashPattern {
-			LineDashPattern() 
-				: onLength(10.0f)
-				, offLength(0.0f)
-			{ }
-			
-			LineDashPattern(float onLength, float offLength) 
-				: onLength(onLength)
+		struct LineParameters {
+			LineParameters(bool pixelAlign = true, float onLength = 10.0f, float offLength = 0.0f) 
+				: pixelAlign(pixelAlign)
+				, onLength(onLength)
 				, offLength(offLength)
 			{ }
 
+			bool pixelAlign = true;
 			float onLength = 10.0f;
 			float offLength = 0.0f;
 		};
@@ -93,23 +90,23 @@ namespace Halley
 		void drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
-		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 
 		// Draw arrow
 		void drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy = Vector2f(1, 1), std::shared_ptr<const Material> material = {});
 
 		// Circle drawing
-		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
-		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 
 		// Rect drawing
-		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineDashPattern pattern = {});
+		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 
 		// Polygon drawing
 		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<const Material> material = {});

@@ -36,6 +36,9 @@ public:
 	float& getLocalHeight() { return height; }
 	void setLocalHeight(float v);
 
+	bool isFixedHeight() const { return fixedHeight; }
+	void setFixedHeight(bool fixed);
+
 	Halley::Vector2f getGlobalPosition() const;
 	Halley::Vector2f getGlobalPositionWithHeight() const;
 	Halley::WorldPosition getWorldPosition() const;

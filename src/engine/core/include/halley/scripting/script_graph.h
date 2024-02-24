@@ -21,7 +21,7 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void feedToHash(Hash::Hasher& hasher) const override;
+		void feedToHash(Hash::Hasher& hasher, bool assetOnly) const;
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void clearType() const;
@@ -113,7 +113,6 @@ namespace Halley {
 		OptionalLite<GraphNodeId> getCaller(GraphNodeId node) const;
 		OptionalLite<GraphNodeId> getReturnTo(GraphNodeId node) const;
 		OptionalLite<GraphNodeId> getReturnFrom(GraphNodeId node) const;
-		uint64_t getHash() const;
 
 		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
@@ -121,6 +120,8 @@ namespace Halley {
 		void clearTypes();
 		void finishGraph();
 		void updateHash();
+		uint64_t getHash() const;
+		uint64_t getAssetHash() const;
 
 		GraphNodeId getNodeRoot(GraphNodeId nodeId) const;
 		const ScriptGraphNodeRoots& getRoots() const;
@@ -140,6 +141,7 @@ namespace Halley {
 		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;
 
 		uint64_t hash = 0;
+		uint64_t assetHash = 0;
 		mutable uint64_t lastAssignTypeHash = 1;
 
 		ScriptGraphNodeRoots roots;

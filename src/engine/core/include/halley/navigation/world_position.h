@@ -27,6 +27,11 @@ namespace Halley {
 
 		WorldPosition operator+(const Vector2f& other) const;
 		WorldPosition operator-(const Vector2f& other) const;
+		WorldPosition operator+(const WorldPosition& other) const;
+		WorldPosition operator-(const WorldPosition& other) const;
+
+		WorldPosition operator*(float value) const;
+		WorldPosition operator/(float value) const;
 
 		bool operator==(const WorldPosition& other) const;
 		bool operator!=(const WorldPosition& other) const;

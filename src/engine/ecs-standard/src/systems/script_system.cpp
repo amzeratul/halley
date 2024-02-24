@@ -423,11 +423,11 @@ private:
 				ConfigNode::SequenceType result;
 				const String& scriptId = config["scriptId"].asString();
 				const uint64_t scriptHash = static_cast<uint64_t>(config["scriptHash"].asInt64());
-
+				
 				for (const auto& e : scriptableFamily) {
 					for (const auto& state : e.scriptable.activeStates) {
 						const auto* graph = state->getScriptGraphPtr();
-						if (!graph || graph->getHash() != scriptHash) {
+						if (!graph || graph->getAssetHash() != scriptHash) {
 							continue;
 						}
 						auto indices = graph->getSubGraphIndicesForAssetId(scriptId);
@@ -460,7 +460,7 @@ private:
 				if (e) {
 					for (const auto& state : e->scriptable.activeStates) {
 						const auto* graph = state->getScriptGraphPtr();
-						if (!graph || graph->getHash() != scriptHash) {
+						if (!graph || graph->getAssetHash() != scriptHash) {
 							continue;
 						}
 						auto indices = graph->getSubGraphIndicesForAssetId(scriptId);

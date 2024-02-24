@@ -391,6 +391,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptFindChildByName>());
 	addScriptNode(std::make_unique<ScriptGetParent>());
 	addScriptNode(std::make_unique<ScriptEntityReference>());
+	addScriptNode(std::make_unique<ScriptEntityParameter>());
 	addScriptNode(std::make_unique<ScriptEntityTargetReference>());
 	addScriptNode(std::make_unique<ScriptFunctionCallExternal>());
 	addScriptNode(std::make_unique<ScriptFunctionReturn>());
@@ -409,5 +410,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLuaExpression>());
 	addScriptNode(std::make_unique<ScriptLuaStatement>());
 	addScriptNode(std::make_unique<ScriptToggleEntityEnabled>());
+	addScriptNode(std::make_unique<ScriptWaitUntilEndOfFrame>());
 
 }

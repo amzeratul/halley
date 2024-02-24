@@ -36,18 +36,20 @@
 
 using namespace Halley;
 
-UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, Vector<String> defaultValue)
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, Vector<String> defaultValue, ConfigNode options)
 	: label(std::move(label))
 	, name(std::move(name))
 	, type(std::move(type))
 	, defaultValue(std::move(defaultValue))
+	, options(std::move(options))
 {
 }
 
-UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, String defaultValue)
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, String defaultValue, ConfigNode options)
 	: label(std::move(label))
 	, name(std::move(name))
 	, type(std::move(type))
+	, options(std::move(options))
 {
 	this->defaultValue.emplace_back(std::move(defaultValue));
 }
@@ -645,9 +647,7 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("maxHeight")) {
 		label->setMaxHeight(node["maxHeight"].asFloat());
 	}
-	if (node.hasKey("wordWrapped")) {
-		label->setWordWrapped(node["wordWrapped"].asBool());
-	}
+	label->setWordWrapped(node["wordWrapped"].asBool(false));
 	if (node.hasKey("alignment")) {
 		label->setAlignment(node["alignment"].asFloat());
 	}
@@ -664,6 +664,22 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("fontSize")) {
 		label->setFontSize(node["fontSize"].asFloat());
 	}
+	if (node.hasKey("font")) {
+		label->getTextRenderer().setFont(resources.get<Font>(node["font"].asString()));
+	}
+	if (node.hasKey("outline")) {
+		label->getTextRenderer().setOutline(node["outline"].asFloat());
+	}
+	if (node.hasKey("shadow")) {
+		const auto shadow = node["shadow"].asVector3f();
+		label->getTextRenderer().setShadow(shadow.xy(), shadow.z, Colour4f(0, 0, 0, 1));
+	}
+	if (node.hasKey("outlineColour")) {
+		label->getTextRenderer().setOutlineColour(getColour(node["outlineColour"].asString()));
+	}
+	if (node.hasKey("shadowColour")) {
+		label->getTextRenderer().setShadowColour(getColour(node["shadowColour"].asString()));
+	}
 	return label;
 }
 
@@ -676,11 +692,16 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<label>", "label");
 	result.entries.emplace_back("Max Width", "maxWidth", "std::optional<float>", "");
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
-	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");
-	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
+	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.5f) } });
 	result.entries.emplace_back("Marquee", "marquee", "std::optional<float>", "");
-	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "false");
+	result.entries.emplace_back("Font", "font", "std::optional<Halley::ResourceReference<Halley::Font>>", "");
+	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
+	result.entries.emplace_back("Outline", "outline", "std::optional<float>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.1f) } });
+	result.entries.emplace_back("Shadow", "shadow", "std::optional<Halley::Vector3f>", "", ConfigNode::MapType{ { "granularity", ConfigNode(0.1f) } });
 	result.entries.emplace_back("Colour", "colour", "std::optional<Halley::Colour4f>", "");
+	result.entries.emplace_back("Outline Colour", "outlineColour", "std::optional<Halley::Colour4f>", "");
+	result.entries.emplace_back("Shadow Colour", "shadowColour", "std::optional<Halley::Colour4f>", "");
 
 	result.name = "Label";
 	result.iconName = "widget_icons/label.png";

@@ -51,7 +51,7 @@ Colour4f GraphEditor::getColourForPinType(RenderGraphPinType pinType) const
 
 void GraphEditor::addNode(std::shared_ptr<UIGraphNode> node)
 {
-	infiniCanvas->add(node, 0, {}, {}, node->getPosition());
+	infiniCanvas->add(node, 0, Vector4f(node->getPosition()), UISizerAlignFlags::Top | UISizerAlignFlags::Left);
 }
 
 GraphConnections::GraphConnections(GraphEditor& editor)

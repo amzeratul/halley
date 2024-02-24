@@ -30,8 +30,15 @@ UILabel::~UILabel()
 
 void UILabel::draw(UIPainter& painter) const
 {
-	if (needsClip) {
-		painter.withClip(Rect4f(getPosition(), getPosition() + getMinimumSize())).draw(renderer);
+	if (needsClipX || needsClipY) {
+		auto rect = getRect();
+		if (!needsClipX) {
+			rect = rect.grow(50, 0, 50, 0);
+		}
+		if (!needsClipY) {
+			rect = rect.grow(0, 50, 0, 50);
+		}
+		painter.withClip(rect).draw(renderer);
 	} else {
 		painter.draw(renderer);
 	}
@@ -76,7 +83,7 @@ void UILabel::updateMinSize()
 	lastCellWidth = getCellWidth();
 	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth);
 
-	needsClip = false;
+	needsClipX = needsClipY = false;
 	textExtents = renderer.getExtents();
 	unclippedWidth = textExtents.x;
 	if (textExtents.x > effectiveMaxWidth) {
@@ -87,19 +94,23 @@ void UILabel::updateMinSize()
 		} else {
 			unclippedWidth = textExtents.x;
 			textExtents.x = effectiveMaxWidth;
-			needsClip = true;
+			needsClipX = true;
 		}
 	}
 	if (textExtents.y > maxHeight) {
 		float maxLines = std::floor(maxHeight / renderer.getLineHeight());
 		textExtents.y = maxLines * renderer.getLineHeight();
-		needsClip = true;
+		needsClipY = true;
 	}
 
+	const auto oldTextMinSize = textMinSize;
 	if (flowLayout) {
-		setMinSize(Vector2f(0.0f, textExtents.y));
+		textMinSize = Vector2f(0.0f, textExtents.y).ceil();
 	} else {
-		setMinSize(textExtents);
+		textMinSize = textExtents.ceil();
+	}
+	if (textMinSize != oldTextMinSize) {
+		markAsNeedingLayout();
 	}
 }
 
@@ -110,7 +121,7 @@ void UILabel::updateText() {
 
 void UILabel::updateMarquee(Time t)
 {
-	if (needsClip) {
+	if (needsClipX) {
 		if (marqueeIdle > 0) {
 			marqueeIdle -= t;
 			return;
@@ -234,7 +245,7 @@ bool UILabel::isWordWrapped() const
 
 bool UILabel::isClipped() const
 {
-	return needsClip;
+	return needsClipX || needsClipY;
 }
 
 void UILabel::setFlowLayout(bool flow)
@@ -265,8 +276,8 @@ Colour4f UILabel::getColour() const
 
 void UILabel::setTextRenderer(TextRenderer r)
 {
-	r.setText(renderer.getText()).setPosition(renderer.getPosition());
-	renderer = r;
+	r.setText(text).setPosition(renderer.getPosition());
+	renderer = std::move(r);
 	updateMinSize();
 }
 
@@ -366,4 +377,9 @@ void UILabel::onParentChanged()
 	if (flowLayout) {
 		updateText();
 	}
+}
+
+Vector2f UILabel::getMinimumSize() const
+{
+	return Vector2f::max(textMinSize, UIWidget::getMinimumSize());
 }

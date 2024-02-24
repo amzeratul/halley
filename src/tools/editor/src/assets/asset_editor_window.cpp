@@ -1,6 +1,7 @@
 #include "asset_editor_window.h"
 #include "animation_editor.h"
 #include "asset_editor.h"
+#include "font_editor.h"
 #include "audio_editor/audio_event_editor.h"
 #include "audio_editor/audio_object_editor.h"
 #include "metadata_editor.h"
@@ -214,6 +215,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<AudioObjectEditor>(factory, project.getGameResources(), project, projectWindow);
 	case AssetType::ScriptGraph:
 		return std::make_shared<ScriptGraphAssetEditor>(factory, project.getGameResources(), project, projectWindow);
+	case AssetType::Font:
+		return std::make_shared<FontEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}
 	return {};
 }

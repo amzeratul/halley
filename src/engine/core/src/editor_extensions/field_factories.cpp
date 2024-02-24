@@ -15,7 +15,7 @@ std::shared_ptr<IUIElement> BaseEnumFieldFactory::createField(const ComponentEdi
 	auto& fieldData = data.getFieldData();
 	const auto& defaultValue = pars.getStringDefaultParameter();
 	const auto& origValue = fieldData.asString("");
-	const auto& value = fieldData.asString(defaultValue.isEmpty() ? values.front() : defaultValue);
+	const auto& value = fieldData.asString(defaultValue.isEmpty() ? (values.empty() ? "" : values.front()) : defaultValue);
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 
@@ -119,4 +119,20 @@ std::shared_ptr<IUIElement> EnumIntFieldFactory::createField(const ComponentEdit
 String EnumIntFieldFactory::getFieldType()
 {
 	return fieldName;
+}
+
+ConfigDBFieldFactory::ConfigDBFieldFactory(String name, Vector<String> values)
+	: fieldName(std::move(name))
+	, values(std::move(values))
+{
+}
+
+String ConfigDBFieldFactory::getFieldType()
+{
+	return fieldName;
+}
+
+Vector<String> ConfigDBFieldFactory::getValues(const ComponentDataRetriever& data) const
+{
+	return values;
 }

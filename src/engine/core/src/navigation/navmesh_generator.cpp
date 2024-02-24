@@ -50,7 +50,7 @@ Vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<const P
 	// Start with the given input polygons
 	Vector<Polygon> output;
 	for (const auto& b: inputPolygons) {
-		b.splitIntoConvex(output);
+		b.splitIntoConvex(output, false);
 	}
 
 	for (const auto& p: output) {

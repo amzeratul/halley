@@ -421,17 +421,34 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 		sendRemote = true;
 		break;
 	}
-	
-	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
 
+	// Choose target timeline
+	std::optional<int> targetTimeline;
 	size_t systemCount = 0;
-	for (auto& timeline : systems) {
-		for (auto& system : timeline) {
-			if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
-				if (sendLocal) {
-					system->receiveSystemMessage(context);
+	for (int i = 0; i < static_cast<int>(TimeLine::NUMBER_OF_TIMELINES); ++i) {
+		auto& timeline = systems[i];
+		for (const auto& system : timeline) {
+			if (system->canHandleSystemMessage(origContext.msgId, targetSystem)) {
+				if (!targetTimeline) {
+					targetTimeline = i;
+				} else if (i != targetTimeline) {
+					throw Exception("System Message being received by systems across multiple timelines.", HalleyExceptions::Entity);
 				}
 				++systemCount;
+			}
+		}
+	}
+
+	if (!targetTimeline) {
+		Logger::logWarning("Message id " + toString(origContext.msgId) + " sent to system \"" + targetSystem + "\" was not received by any systems.");
+		return 0;
+	}
+
+	auto& context = pendingSystemMessages[*targetTimeline].emplace_back(std::move(origContext));
+	if (sendLocal) {
+		for (auto& system : systems[*targetTimeline]) {
+			if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
+				system->receiveSystemMessage(context);
 			}
 		}
 	}
@@ -446,10 +463,6 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 		totalCount += (destination == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
 	}
 
-	if (totalCount == 0) {
-		Logger::logWarning("Message id " + toString(context.msgId) + " sent to system \"" + targetSystem + "\" was not received by any systems.");
-	}
-		
 	return totalCount;
 }
 
@@ -762,7 +775,7 @@ void World::processSystemMessages(TimeLine timeline)
 			}
 		}
 	}
-	pendingSystemMessages.clear();
+	pendingSystemMessages[static_cast<int>(timeline)].clear();
 }
 
 bool World::isEntityNetworkRemote(EntityId entityId) const

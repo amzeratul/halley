@@ -16,7 +16,7 @@
 
 using namespace Halley;
 
-static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const Vector<int>& characters)
+static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, int border, const Vector<int>& characters)
 {
 	font.setSize(fontSize);
 
@@ -24,9 +24,9 @@ static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fon
 	for (int code : font.getCharCodes()) {
 		if (std::binary_search(characters.begin(), characters.end(), code)) {
 			Vector2i glyphSize = font.getGlyphSize(code);
-			int padding = int(2 * borderSuperSampled) + 1;
+			const int padding = 2 * border + 1;
 			Vector2i superSampleSize = glyphSize + Vector2i(padding, padding);
-			Vector2i finalSize(Vector2f(superSampleSize) * scale + Vector2f(1, 1));
+			Vector2i finalSize(Vector2f(superSampleSize) + Vector2f(1, 1));
 
 			size_t payload = size_t(code);
 			entries.push_back(BinPackEntry(finalSize, reinterpret_cast<void*>(payload)));
@@ -74,12 +74,10 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int superSample, Vector<int> characters) {
+FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<int> characters) {
 	std::sort(characters.begin(), characters.end());
 
-	const float scale = 1.0f / superSample;
-	const float borderFinal = ceil(radius);
-	const float borderSuperSample = borderFinal * superSample;
+	const int borderFinal = static_cast<int>(ceil(radius));
 
 	if (!progressReporter(0, "Packing")) {
 		return FontGeneratorResult();
@@ -95,29 +93,32 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 		fontSize = int(sizeInfo.fontSize.value());
 
 		constexpr int minSize = 16;
-		constexpr int maxSize = 4096;
+		const auto maxSize = sizeInfo.imageSize.value_or(Vector2i(4096, 4096));
+		Vector2i lastTried;
 		for (int i = 0; ; ++i) {
-			auto curSize = Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2));
-			if (curSize.x > maxSize || curSize.y > maxSize) {
+			auto curSize = Vector2i::min(Vector2i(minSize << ((i + 1) / 2), minSize << (i / 2)), maxSize);
+			if (curSize == maxSize) {
 				break;
 			}
-			result = tryPacking(font, float(fontSize), curSize, scale, borderSuperSample, characters);
+			if (curSize == lastTried) {
+				continue;
+			}
+			result = tryPacking(font, float(fontSize), curSize, borderFinal, characters);
 			if (result) {
 				imageSize = curSize;
 				break;
 			}
+			lastTried = curSize;
 		}
-	} else if (sizeInfo.imageSize) {
-		imageSize = sizeInfo.imageSize.value();
+	} else {
+		imageSize = sizeInfo.imageSize.value_or(Vector2i(512, 512));
 		
 		constexpr int minFont = 0;
 		constexpr int maxFont = 1000;
 		result = binarySearch([&](int curFontSize) -> std::optional<Vector<BinPackResult>>
 		{
-			return tryPacking(font, float(curFontSize), imageSize, scale, borderSuperSample, characters);
+			return tryPacking(font, float(curFontSize), imageSize, borderFinal, characters);
 		}, minFont, maxFont, fontSize);
-	} else {
-		throw Exception("Neither font size nor image size were specified", HalleyExceptions::Tools);
 	}
 	
 	if (!result) {
@@ -144,12 +145,12 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	for (auto& r : pack) {
 		int charcode = int(reinterpret_cast<size_t>(r.data));
 		Rect4i dstRect = Rect4i(r.rect.getTopLeft(), r.rect.getBottomRight() - Vector2i(1, 1));
-		Rect4i srcRect = dstRect * superSample;
+		Rect4i srcRect = dstRect;
 		codes.push_back(CharcodeEntry(charcode, dstRect));
 
 		const bool useMsdfgen = meta.getBool("msdfgen", true);
 		if (useMsdfgen) {
-			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize() / superSample, charcode, dstRect.getSize(), radius);
+			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize(), charcode, dstRect.getSize(), radius);
 			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
 
 			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
@@ -166,7 +167,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 				tmpImg->clear(0);
 				{
 					std::lock_guard<std::mutex> g(m);
-					font.drawGlyph(*tmpImg, charcode, Vector2i(lround(borderSuperSample), lround(borderSuperSample)));
+					font.drawGlyph(*tmpImg, charcode, Vector2i(borderFinal, borderFinal));
 				}
 
 				if (!keepGoing) {
@@ -200,7 +201,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	FontGeneratorResult genResult;
 	genResult.success = true;
-	genResult.font = generateFontMapBinary(meta, font, codes, scale, sizeInfo.replacementScale, radius, imageSize);
+	genResult.font = generateFontMapBinary(meta, font, codes, sizeInfo.replacementScale, radius, imageSize);
 	genResult.image = std::move(dstImg);
 	genResult.imageMeta = generateTextureMeta();
 	progressReporter(1.0f, "Done");
@@ -208,16 +209,16 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	return genResult;
 }
 
-std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float scale, float replacementScale, float radius, Vector2i imageSize) const
+std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float replacementScale, float radius, Vector2i imageSize) const
 {
 	String fontName = meta.getString("fontName", font.getName());
 	String imageName = "fontTex/" + fontName;
 
-	const float ascender = float(lround(font.getAscender() * scale) + meta.getInt("ascenderAdjustment", 0));
-	const float height = float(lround(font.getHeight() * scale) + meta.getInt("lineSpacing", 0));
-	const float sizePt = float(lround(font.getSize() * scale));
+	const float ascender = font.getAscender() + meta.getFloat("ascenderAdjustment", 0);
+	const float height = font.getHeight() + meta.getFloat("lineSpacing", 0);
+	const float sizePt = font.getSize();
 	const float smoothRadius = radius;
-	const int padding = lround(radius);
+	const float padding = floor(radius);
 	const bool floorGlyphPosition = meta.getBool("floorGlyphPosition", false);
 
 	Vector<String> fallback;
@@ -241,13 +242,13 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	}
 
 	for (auto& c: entries) {
-		auto metrics = font.getMetrics(c.charcode, scale);
+		auto metrics = font.getMetrics(c.charcode);
 
 		const int32_t charcode = c.charcode;
 		const Rect4f area = Rect4f(c.rect) / Vector2f(imageSize);
 		const Vector2f size = Vector2f(c.rect.getSize());
-		const Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(float(-padding), float(padding));
-		const Vector2f verticalBearing = metrics.bearingVertical + Vector2f(float(-padding), float(padding));
+		const Vector2f horizontalBearing = metrics.bearingHorizontal + Vector2f(-padding, padding);
+		const Vector2f verticalBearing = metrics.bearingVertical + Vector2f(-padding, padding);
 		const Vector2f advance = metrics.advance;
 
 		result->addGlyph(Font::Glyph(charcode, area, size, horizontalBearing, verticalBearing, advance, std::move(kerningMap[charcode])));

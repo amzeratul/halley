@@ -26,13 +26,14 @@
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 147;
+constexpr static int currentAssetVersion = 149;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
 Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms)
 	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
 {
+	allowPackedAssets = false;
 	fileSystemCache = std::make_unique<FileSystemCache>();
 
 	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
@@ -423,7 +424,7 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 	if (packed && gameResources) {
 		if (gameResources->getLocator().getLocatorCount() == 0) {
 			try {
-				if (false && getGameInstance()) {
+				if (allowPackedAssets && getGameInstance()) {
 					getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), gameResources->getLocator());
 				} else {
 					gameResources->getLocator().addFileSystem(getUnpackedAssetsPath());
@@ -523,7 +524,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
 
 	try {
-		if (false && getGameInstance()) {
+		if (allowPackedAssets && getGameInstance()) {
 			getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
 		} else {
 			locator->addFileSystem(getUnpackedAssetsPath());

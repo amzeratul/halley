@@ -104,11 +104,17 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 	s >> parentNode;
 }
 
-void ScriptGraphNode::feedToHash(Hash::Hasher& hasher) const
+void ScriptGraphNode::feedToHash(Hash::Hasher& hasher, bool assetOnly) const
 {
-	BaseGraphNode::feedToHash(hasher);
-	if (parentNode) {
-		hasher.feed(*parentNode);
+	if (assetOnly) {
+		if (!parentNode) {
+			BaseGraphNode::feedToHash(hasher);
+		}
+	} else {
+		BaseGraphNode::feedToHash(hasher);
+		if (parentNode) {
+			hasher.feed(*parentNode);
+		}
 	}
 }
 
@@ -386,6 +392,11 @@ uint64_t ScriptGraph::getHash() const
 	return hash;
 }
 
+uint64_t ScriptGraph::getAssetHash() const
+{
+	return assetHash;
+}
+
 std::optional<GraphNodeId> ScriptGraph::getMessageInboxId(const String& messageId, bool requiresSpawningScript) const
 {
 	for (size_t i = 0; i < nodes.size(); ++i) {
@@ -551,13 +562,17 @@ void ScriptGraph::finishGraph()
 void ScriptGraph::updateHash()
 {
 	Hash::Hasher hasher;
+	Hash::Hasher assetHasher;
 	GraphNodeId i = 0;
+
 	hasher.feed(nodes.size());
 	for (auto& node: nodes) {
 		node.setId(i++);
-		node.feedToHash(hasher);
+		node.feedToHash(hasher, false);
+		node.feedToHash(assetHasher, true);
 	}
 	hash = hasher.digest();
+	assetHash = assetHasher.digest();
 }
 
 void ScriptGraph::appendGraph(GraphNodeId parent, const ScriptGraph& other)

@@ -14,6 +14,7 @@ namespace Halley {
         Vector<Vector2f> points;
         Vector<TweenCurve> tweens;
         float scale = 1.0f;
+        float baseline = 0.0f;
 
         InterpolationCurve();
         InterpolationCurve(const ConfigNode& node, bool startFromZero = true);

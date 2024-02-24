@@ -3,6 +3,7 @@
 #include "component_field_parameters.h"
 #include "halley/game/scene_editor_interface.h"
 #include "halley/ui/ui_widget.h"
+#include "halley/data_structures/config_database.h"
 
 namespace Halley {
 	class ComponentDataRetriever;
@@ -71,4 +72,36 @@ namespace Halley {
 		const String fieldName;
 		Vector<String> names;
 	};
+	
+	class ConfigDBFieldFactory : public BaseEnumFieldFactory
+	{
+	public:
+		ConfigDBFieldFactory(String name, Vector<String> values);
+		
+		String getFieldType() override;
+
+		template <typename T>
+		static std::unique_ptr<EnumFieldFactory> makeConfigFactory(String name, const ConfigDatabase& config)
+		{
+			return std::make_unique<EnumFieldFactory>(std::move(name), config.getKeys<T>());
+		}
+
+		template <typename T, typename U>
+		static std::unique_ptr<EnumFieldFactory> makeConfigFactory(String name, const ConfigDatabase& config, const String& altPrefix = "!")
+		{
+			Vector<String> result = config.getKeys<T>();
+			for (const auto& k: config.getKeys<U>()) {
+				result.push_back(altPrefix + k);
+			}
+			return std::make_unique<EnumFieldFactory>(std::move(name), result);
+		}
+
+	protected:
+		Vector<String> getValues(const ComponentDataRetriever& data) const override;
+
+	private:
+		const String fieldName;
+		Vector<String> values;
+	};
+
 }

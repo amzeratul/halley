@@ -19,7 +19,7 @@ namespace Halley {
 		void setScrollEnabled(bool enabled);
 		void setLeftClickScrollEnabled(bool enabled);
 		void setLeftClickScrollKey(std::optional<KeyCode> key);
-		void setMouseMirror(std::shared_ptr<UIWidget> mouseMirror);
+		void setMouseMirror(std::shared_ptr<UIWidget> mouseMirror, bool evenWhenDragging = false);
 		
         virtual void setScrollPosition(Vector2f pos) = 0;
 		virtual Vector2f getScrollPosition() const = 0;
@@ -68,6 +68,7 @@ namespace Halley {
     	MousePosListener mousePosListener;
 		ScrollListener scrollListener;
 		std::shared_ptr<UIWidget> mouseMirror;
+		bool mirrorWhenDragging = false;
 
 		void onMouseWheel(const UIEvent& event);
     };

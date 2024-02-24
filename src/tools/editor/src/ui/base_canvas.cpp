@@ -58,9 +58,10 @@ void BaseCanvas::setLeftClickScrollKey(std::optional<KeyCode> key)
 	leftClickScrollKey = key;
 }
 
-void BaseCanvas::setMouseMirror(std::shared_ptr<UIWidget> widget)
+void BaseCanvas::setMouseMirror(std::shared_ptr<UIWidget> widget, bool evenWhenDragging)
 {
-	mouseMirror = widget;
+	mouseMirror = std::move(widget);
+	mirrorWhenDragging = evenWhenDragging;
 }
 
 std::optional<Vector2f> BaseCanvas::transformToChildSpace(Vector2f pos) const
@@ -124,7 +125,7 @@ void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 
 	UIClickable::pressMouse(mousePos, button, keyMods);
 
-	if (mouseMirror && !dragging) {
+	if (mouseMirror && (!dragging || mirrorWhenDragging)) {
 		mouseMirror->pressMouse(mousePos, button, keyMods);
 	}
 }

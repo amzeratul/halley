@@ -118,13 +118,21 @@ void CurveEditorWindow::onMakeUI()
 		cancel();
 	});
 
+	auto curveEditor = getWidgetAs<CurveEditor>("curveEditor");
+	bindData("baseline", curve.baseline, [=](float value)
+	{
+		curve.baseline = value;
+		curveEditor->setCurve(curve);
+	});
+
 	bindData("scale", curve.scale, [=](float value)
 	{
 		curve.scale = value;
+		curveEditor->setCurve(curve);
 	});
 
-	getWidgetAs<CurveEditor>("curveEditor")->setCurve(curve);
-	getWidgetAs<CurveEditor>("curveEditor")->setChangeCallback([=] (InterpolationCurve curve)
+	curveEditor->setCurve(curve);
+	curveEditor->setChangeCallback([=] (InterpolationCurve curve)
 	{
 		this->curve = std::move(curve);
 	});

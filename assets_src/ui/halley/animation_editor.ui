@@ -2,7 +2,8 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- sizer: { type: horizontal }
+- widget: { class: widget, id: topBar }
+  sizer: { type: horizontal }
   children:
   - widget: { id: animControls, class: widget }
     sizer: { type: horizontal }

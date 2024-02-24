@@ -41,7 +41,14 @@ namespace Halley {
 	template <typename T=float, class U=Angle<float>>
 	class alignas(sizeof(T)*2) Vector2D {
 	private:
-		constexpr static T mod(T a, T b) noexcept { return a % b; }
+		constexpr static T mod(T a, T b) noexcept
+		{
+			if constexpr (std::is_integral_v<T>) {
+				return a % b;
+			} else {
+				return std::fmod(a, b);
+			}
+		}
 
 	public:
 		using ScalarType = T;

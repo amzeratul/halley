@@ -58,6 +58,7 @@ namespace Halley {
 		void setBusGain(const String& name, float gain);
     	float getCompositeBusGain(uint8_t bus) const;
 		int getBusId(const String& busName);
+		void getBusIds(const String& busName, Vector<int>& busIds);
 
 		int64_t getLastTimeElapsed();
 
@@ -69,6 +70,7 @@ namespace Halley {
 			float gain = 1;
 			float compositeGain = 1;
 			OptionalLite<uint8_t> parent;
+			Vector<uint8_t> children;
 		};
 
 		AudioSpec spec;
@@ -108,7 +110,8 @@ namespace Halley {
 		size_t output(gsl::span<std::byte> dst, bool fill) override;
 
     	void loadBuses();
-		void loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
+		uint8_t loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
 		void updateBusGains();
+		void collectBusChildren(Vector<int>& dst, const BusData& bus) const;
     };
 }

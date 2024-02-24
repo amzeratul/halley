@@ -60,7 +60,7 @@ namespace Halley {
 		virtual UISizer& getSizer();
 		void setSizer(std::optional<UISizer> sizer);
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;
@@ -68,12 +68,16 @@ namespace Halley {
 		void clear() override;
 		void clearChildren();
 
-		void setInteractWithMouse(bool enabled);
-		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
 		virtual bool isMouseOver() const;
 		bool isFocused() const;
 		void focus();
+
+		void setInteractWithMouse(bool enabled);
+		virtual bool canInteractWithMouse() const;
+		bool canPropagateMouseToChildren() const;
+		void setPropagateMouseToChildren(bool enabled);
+		virtual void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget);
 
 		void setId(const String& id);
 		const String& getId() const final override;
@@ -82,12 +86,13 @@ namespace Halley {
 		virtual Vector2f getLayoutOriginPosition() const;
 		virtual Vector2f getLayoutSize(Vector2f size) const;
 		Vector2f getSize() const;
-		Vector2f getMinimumSize() const;
+		virtual Vector2f getMinimumSize() const;
 		Vector4f getInnerBorder() const;
 		Rect4f getRect() const final override;
 		virtual bool ignoreClip() const;
 
 		void setPosition(Vector2f pos);
+		void setBorder(Vector4f border);
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 
@@ -293,6 +298,7 @@ namespace Halley {
 		bool destroying = false;
 		bool canSendEvents = true;
 		bool dontClipChildren = false;
+		bool propagateMouseToChildren = true;
 	};
 
 	template <typename F>

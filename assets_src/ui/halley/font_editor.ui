@@ -1,0 +1,48 @@
+---
+widget: { class: widget }
+children:
+- widget: { class: widget, size: [1100, 200] }
+  sizer: { type: vertical, gap: 4 }
+  fill: [centreHorizontal, top]
+  proportion: 1
+  border: [0, 10, 0, 0]
+  children:
+  - widget: { class: image, id: previewDisplay, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [15, 15, 15, 15] }
+    sizer: { type: vertical, gap: 12 }
+    children:
+    - stretchSpacer: {}
+      proportion: 1
+    - widget: { class: label, id: preview0, maxWidth: 1050, wordWrapped: true }
+      fill: left
+    - widget: { class: label, id: preview1, maxWidth: 1050, wordWrapped: true }
+      fill: left
+    - widget: { class: label, id: preview2, maxWidth: 1050, wordWrapped: true }
+      fill: left
+      border: [0, 4, 0, 0]
+    - sizer: { type: horizontal, gap: 15 }
+      fill: centre
+      children:
+      - widget: { class: label, id: previewRegular, text: Regular, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+      - widget: { class: label, id: previewOutline, text: Outline, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+      - widget: { class: label, id: previewShadow, text: Shadow, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+    - sizer: { type: horizontal, gap: 15 }
+      fill: centre
+      children:
+      - widget: { class: label, id: previewRegularSmall, text: Regular, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+      - widget: { class: label, id: previewOutlineSmall, text: Outline, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+      - widget: { class: label, id: previewShadowSmall, text: Shadow, maxWidth: 300 }
+        fill: centre
+        proportion: 1
+    - stretchSpacer: {}
+      proportion: 1
+  - widget: { class: textInput, id: customPreviewText, ghost: Type custom preview text here..., showGhostWhenFocused: true }

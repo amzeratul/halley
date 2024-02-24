@@ -8,6 +8,7 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 	: UIWidget(std::move(id), minSize, std::move(sizer))
 {
 	setCanSendEvents(false);
+	setPropagateMouseToChildren(false);
 
 	RenderSurfaceOptions options;
 	options.createDepthStencil = false;
@@ -16,6 +17,18 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 	displayRoot = std::make_shared<UIRenderSurface>("displayRoot", Vector2f(), UISizer(), api, resources, "Halley/Sprite", options);
 	displayRoot->setScale(Vector2f(1, 1));
 	UIWidget::add(displayRoot, 0, Vector4f(), UISizerAlignFlags::Top | UISizerAlignFlags::Left);
+
+	keyboard = api.input->getKeyboard();
+
+	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
+	{
+		// Bypass setCanSendEvents(false) for this particular event
+		if (event.getDirection() == UIEventDirection::Up) {
+			if (auto parent = getParent()) {
+				parent->sendEvent(event);
+			}
+		}
+	});
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
@@ -47,7 +60,7 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 
 		p.draw([&] (Painter& painter)
 		{
-			painter.drawRect(curRect, 1.0f, Colour4f(0, 1, 0), {}, { 3.0f, 5.0f });
+			painter.drawRect(curRect, 1.0f, Colour4f(0, 1, 0), {}, { true, 3.0f, 5.0f });
 		});
 	}
 }
@@ -73,6 +86,8 @@ void UIEditorDisplay::update(Time time, bool moved)
 	if (moved) {
 		doLayout();
 	}
+
+	setPropagateMouseToChildren(keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl));
 }
 
 void UIEditorDisplay::onLayout()
@@ -152,6 +167,40 @@ void UIEditorDisplay::doLayout()
 void UIEditorDisplay::onOtherUIReloaded(UIWidget& ui)
 {
 	updateCurWidget();
+}
+
+void UIEditorDisplay::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
+{
+	lastWidgetUnderMouse = widget;
+}
+
+void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	if (!canPropagateMouseToChildren()) {
+		const auto uuid = lastWidgetUnderMouse ? getUUIDOfWidgetClicked(*lastWidgetUnderMouse) : UUID();
+		editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+	}
+}
+
+UUID UIEditorDisplay::getUUIDOfWidgetClicked(const UIWidget& widget) const
+{
+	if (&widget == this) {
+		return {};
+	}
+
+	// NB: this algorithm is garbage
+	for (const auto& [k, v]: elements) {
+		if (v.get() == &widget) {
+			return k;
+		}
+	}
+
+	const auto* parent = dynamic_cast<const UIWidget*>(widget.getParent());
+	if (!parent) {
+		return {};
+	}
+
+	return getUUIDOfWidgetClicked(*parent);
 }
 
 Rect4f UIEditorDisplay::transformRect(Rect4f r) const

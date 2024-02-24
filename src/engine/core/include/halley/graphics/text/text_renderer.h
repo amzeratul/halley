@@ -51,6 +51,8 @@ namespace Halley
 		TextRenderer& setScale(float scale);
 		TextRenderer& setAngle(Angle1f angle);
 
+		void refresh();
+
 		TextRenderer clone() const;
 
 		void generateSprites(Vector<Sprite>& sprites) const;
@@ -82,6 +84,7 @@ namespace Halley
 		float getAlignment() const;
 
 		bool empty() const;
+		Rect4f getAABB() const;
 
 	private:
 		std::shared_ptr<const Font> font;

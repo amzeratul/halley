@@ -13,7 +13,7 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	: engine(engine)
 	, bus(bus)
 	, playing(false)
-	, paused(false)
+	, paused(0)
 	, done(false)
 	, isFirstUpdate(true)
 	, baseGain(gain)
@@ -81,25 +81,30 @@ void AudioVoice::stop(AudioFade fade)
 
 void AudioVoice::pause(AudioFade fade)
 {
-	if (fade.hasFade()) {
+	if (!paused && fade.hasFade()) {
+		++pendingPauses;
 		if (fadeEnd == FadeEndBehaviour::None) {
 			// If we're fading to stop or pause, don't do anything
 			fader.startFade(fader.getCurrentValue(), 0, fade);
 			fadeEnd = FadeEndBehaviour::Pause;
 		}
 	} else {
-		paused = true;
+		++paused;
 	}
 }
 
-void AudioVoice::resume(AudioFade fade)
+void AudioVoice::resume(AudioFade fade, bool force)
 {
-	paused = false;
-	if (fade.hasFade()) {
-		if (!fader.isFading() || fadeEnd == FadeEndBehaviour::Pause) {
-			// If we're already fading, only override a pause
-			fader.startFade(fader.getCurrentValue(), 1, fade);
-			fadeEnd = FadeEndBehaviour::None;
+	if (paused) {
+		paused = force ? 0 : paused - 1;
+		if (paused == 0) {
+			if (fade.hasFade()) {
+				if (!fader.isFading() || fadeEnd == FadeEndBehaviour::Pause) {
+					// If we're already fading, only override a pause
+					fader.startFade(fader.getCurrentValue(), 1, fade);
+					fadeEnd = FadeEndBehaviour::None;
+				}
+			}
 		}
 	}
 }

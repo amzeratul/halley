@@ -350,6 +350,31 @@ int AudioEngine::getBusId(const String& busName)
 	}
 }
 
+void AudioEngine::getBusIds(const String& busName, Vector<int>& busIds)
+{
+	busIds.clear();
+
+	const auto iter = std::find_if(buses.begin(), buses.end(), [&] (const BusData& b) { return b.name == busName; });
+	if (iter != buses.end()) {
+		busIds.push_back(static_cast<int>(iter - buses.begin()));
+		collectBusChildren(busIds, *iter);
+	} else {
+		if (busName.isEmpty()) {
+			busIds.push_back(0);
+		} else {
+			Logger::logError("Unknown audio bus: " + busName);
+		}
+	}
+}
+
+void AudioEngine::collectBusChildren(Vector<int>& dst, const BusData& bus) const
+{
+	for (const auto child: bus.children) {
+		dst.push_back(child);
+		collectBusChildren(dst, buses[child]);
+	}
+}
+
 void AudioEngine::loadBuses()
 {
 	buses.clear();
@@ -358,13 +383,17 @@ void AudioEngine::loadBuses()
 	}
 }
 
-void AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
+uint8_t AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
 {
 	const auto id = static_cast<uint8_t>(buses.size());
 	buses.emplace_back(BusData{ bus.getId(), 1.0f, 1.0f, parent });
+	buses.back().children.reserve(bus.getChildren().size());
+
 	for (const auto& b: bus.getChildren()) {
-		loadBus(b, id);
+		// DO NOT store buses.back(), pointer invalidation will happen
+		buses.back().children.push_back(loadBus(b, id));
 	}
+	return id;
 }
 
 void AudioEngine::updateBusGains()

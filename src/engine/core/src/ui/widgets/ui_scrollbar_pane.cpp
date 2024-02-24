@@ -40,9 +40,9 @@ std::shared_ptr<UIScrollPane> UIScrollBarPane::getPane() const
 	return pane;
 }
 
-void UIScrollBarPane::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position, size_t insertPos)
+void UIScrollBarPane::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, size_t insertPos)
 {
-	pane->add(element, proportion, border, fillFlags, position, insertPos);
+	pane->add(element, proportion, border, fillFlags, insertPos);
 }
 
 void UIScrollBarPane::addSpacer(float size)

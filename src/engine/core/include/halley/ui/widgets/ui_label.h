@@ -47,6 +47,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setFontSize(float size);
+		Vector2f getMinimumSize() const override;
 
 	protected:
 		void onParentChanged() override;
@@ -57,10 +58,12 @@ namespace Halley {
 		const std::shared_ptr<bool> aliveFlag;
 
 		Vector2f textExtents;
+		Vector2f textMinSize;
 		float maxWidth = std::numeric_limits<float>::infinity();
 		float maxHeight = std::numeric_limits<float>::infinity();
 		bool wordWrapped = true;
-		bool needsClip = false;
+		bool needsClipX = false;
+		bool needsClipY = false;
 		bool flowLayout = false;
 
 		Time marqueeIdle;

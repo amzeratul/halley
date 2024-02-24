@@ -3,6 +3,5 @@ sizer: { type: vertical, gap: 5 }
 children:
 - widget: { id: messages, class: label, text: desc, style: labelSmall }
   fill: left
-  proportion: 1
 - widget: { id: copyToClipboard, class: button, text: Copy to Clipboard, active: false }
 - widget: { id: action, class: button, text: Action, active: false }

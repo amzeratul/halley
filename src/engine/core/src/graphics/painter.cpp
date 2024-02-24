@@ -180,20 +180,19 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 {
 	Expects(vertexData != nullptr);
 
-	const size_t verticesPerSprite = 4;
-	const size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
+	constexpr size_t verticesPerSprite = 4;
+	constexpr size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
 	size_t numSpritesLeft = totalNumSprites;
 	size_t offset = 0;
 
 	while (numSpritesLeft > 0) {
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
-		
 		const size_t numVertices = verticesPerSprite * numSprites;
 		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
 		const auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
-		const char* const src = reinterpret_cast<const char*>(vertexData) + offset;
+		const char* const src = static_cast<const char*>(vertexData) + offset;
 
 		for (size_t i = 0; i < numSprites; i++) {
 			for (size_t j = 0; j < verticesPerSprite; j++) {
@@ -201,14 +200,9 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 				const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
 				memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
-				// j -> vertPos
-				// 0 -> 0, 0
-				// 1 -> 1, 0
-				// 2 -> 1, 1
-				// 3 -> 0, 1
-				const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
-				const float y = ((j & 2) >> 1) * 1.0f;
-				getVertPos(result.dstVertex + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
+				constexpr static Vector2f vertPosList[] = { Vector2f(0, 0), Vector2f(1, 0), Vector2f(1, 1), Vector2f(0, 1)};
+				const auto vertPos = Vector4f(vertPosList[j], vertPosList[j]);
+				memcpy(result.dstVertex + dstOffset + vertPosOffset, &vertPos, sizeof(vertPos));
 			}
 		}
 
@@ -270,7 +264,7 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	}
 }
 
-void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineParameters params)
 {
 	if (!material) {
 		material = getSolidLineMaterial();
@@ -313,6 +307,9 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	std::optional<Vector2f> prevNormal = loop ? segmentNormal(nSegments - 1) : std::optional<Vector2f>();
 	Vector2f normal = segmentNormal(0).value();
 
+	const float zoom = getCurrentCamera().getZoom();
+	const float pixelAlignOffset = params.pixelAlign ? std::fmod(width * zoom, 2.0f) / (2.0f * zoom) : 0.0f;
+
 	float curLen = 0;
 	for (size_t i = 0; i < nSegments; ++i) {
 		std::optional<Vector2f> nextNormal = segmentNormal(i + 1);
@@ -329,11 +326,11 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 			const size_t idx = i * 4 + j;
 			auto& v = vertices[idx];
 			v.colour = colour.toVector4();
-			v.position = points[(i + pointIdxOffset[j]) % nPoints];
+			v.position = points[(i + pointIdxOffset[j]) % nPoints] + Vector2f(pixelAlignOffset, pixelAlignOffset);
 			v.normal = j <= 1 ? v0n : v1n;
 			v.width.x = width;
 			v.width.y = normalPos[j];
-			v.dashing = Vector4f(curLens[pointIdxOffset[j]], pattern.onLength, pattern.offLength, 0);
+			v.dashing = Vector4f(curLens[pointIdxOffset[j]], params.onLength, params.offLength, 0);
 		}
 
 		prevNormal = normal;
@@ -345,21 +342,21 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	drawQuads(material, vertices.size(), vertices.data());
 }
 
-void Painter::drawLine(const LineSegment& line, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawLine(const LineSegment& line, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineParameters params)
 {
-	drawLine(gsl::span<const Vector2f>(&line.a, 2), width, colour, loop, std::move(material), pattern);
+	drawLine(gsl::span<const Vector2f>(&line.a, 2), width, colour, loop, std::move(material), params);
 }
 
-void Painter::drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	auto points = bezier.toLineSegments();
-	drawLine(points, width, colour, false, material, pattern);
+	drawLine(points, width, colour, false, material, params);
 }
 
-void Painter::drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	auto points = bezier.toLineSegments();
-	drawLine(points, width, colour, false, material, pattern);
+	drawLine(points, width, colour, false, material, params);
 }
 
 void Painter::drawArrow(Vector2f from, Vector2f to, float headSize, float width, Colour4f colour, Vector2f anisotropy, std::shared_ptr<const Material> material)
@@ -382,22 +379,22 @@ static size_t getSegmentsForArc(float radius, float arcLen)
 	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
 }
 
-void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
 	}
-	drawLine(points, width, colour, true, std::move(material), pattern);
+	drawLine(points, width, colour, true, std::move(material), params);
 }
 
-void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
-	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material), pattern);
+	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material), params);
 }
 
-void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
 	const size_t n = getSegmentsForArc(radius, arcLen);
@@ -405,32 +402,32 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
 	}
-	drawLine(points, width, colour, false, std::move(material), pattern);
+	drawLine(points, width, colour, false, std::move(material), params);
 }
 
-void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
-	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material), pattern);
+	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material), params);
 }
 
-void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
 	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
 	}
-	drawLine(points, width, colour, true, std::move(material), pattern);
+	drawLine(points, width, colour, true, std::move(material), params);
 }
 
-void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material, LineDashPattern pattern)
+void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<const Material> material, LineParameters params)
 {
 	Vector<Vector2f> points;
 	points.push_back(rect.getTopLeft());
 	points.push_back(rect.getTopRight());
 	points.push_back(rect.getBottomRight());
 	points.push_back(rect.getBottomLeft());
-	drawLine(points, width, colour, true, std::move(material), pattern);
+	drawLine(points, width, colour, true, std::move(material), params);
 }
 
 void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<const Material> material)

@@ -77,11 +77,14 @@ void TranslateGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) con
 		const auto radius = circle.getRadius();
 		const float lineWidth = 2.0f / zoom;
 		const float fineLineWidth = 1.0f / zoom;
+
+		Painter::LineParameters params;
+		params.pixelAlign = false;
 		
-		painter.drawCircle(centre, radius, lineWidth + 2 / zoom, Colour4f(0, 0, 0, 0.5f));
-		painter.drawCircle(centre, radius, lineWidth, col);
-		painter.drawLine({{ centre - Vector2f(radius * 0.6f, 0), centre + Vector2f(radius * 0.6f, 0) }}, fineLineWidth, col);
-		painter.drawLine({{ centre - Vector2f(0, radius * 0.6f), centre + Vector2f(0, radius * 0.6f) }}, fineLineWidth, col);
+		painter.drawCircle(centre, radius, lineWidth + 2 / zoom, Colour4f(0, 0, 0, 0.5f), {}, params);
+		painter.drawCircle(centre, radius, lineWidth, col, {}, params);
+		painter.drawLine({{ centre - Vector2f(radius * 0.6f, 0), centre + Vector2f(radius * 0.6f, 0) }}, fineLineWidth, col, false, {}, params);
+		painter.drawLine({{ centre - Vector2f(0, radius * 0.6f), centre + Vector2f(0, radius * 0.6f) }}, fineLineWidth, col, false, {}, params);
 	}
 }
 

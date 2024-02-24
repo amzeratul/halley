@@ -6,7 +6,8 @@
 #include "vector3.h"
 
 namespace Halley {
-    class Polygon;
+	class Random;
+	class Polygon;
 
     class Triangle {
     public:
@@ -17,7 +18,6 @@ namespace Halley {
 	        : a(a), b(b), c(c)
         {}
 
-        Vector3f getBarycentricCoordinates(Vector2f p) const;
         Rect4f getBounds() const;
         bool contains(Vector2f p) const;
         float getDistance(Vector2f p) const;
@@ -28,6 +28,17 @@ namespace Halley {
         Polygon toPolygon() const;
 
         Circle getCircumscribedCircle() const;
+
+    	Vector2f getRandomPoint(Random& rng) const;
+
+        Vector3f getBarycentricCoordinates(Vector2f p) const;
+
+    	template<typename T>
+        T interpolate(T valueAtA, T valueAtB, T valueAtC, Vector2f pointToSample) const
+        {
+            const auto coords = getBarycentricCoordinates(pointToSample);
+            return coords.x * valueAtA + coords.y * valueAtB + coords.z * valueAtC;
+        }
 
         Triangle operator+(Vector2f v) const;
         Triangle operator-(Vector2f v) const;

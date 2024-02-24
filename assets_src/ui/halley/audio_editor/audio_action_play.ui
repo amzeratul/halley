@@ -51,3 +51,9 @@ children:
   - widget: { class: label, text: "Scope: " }
     fill: centre
   - widget: { id: scope, class: dropdown, size: [150, 20], options: [{ id: object, text: Target Object }, { id: global, text: Global Singleton }] }
+- widget: { class: widget, id: resumeOptions, active: false }
+  sizer: { horizontal }
+  children:
+  - widget: { class: label, text: "Force: " }
+    fill: centre
+  - widget: { id: force, class: checkbox }
