@@ -6,6 +6,7 @@
 #include "ui_input.h"
 
 namespace Halley {
+	class InputAPI;
 	class UIStyle;
 	class RenderContext;
 	class HalleyAPI;
@@ -79,7 +80,8 @@ namespace Halley {
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
-		AudioAPI* audio = nullptr;
+		InputAPI* inputAPI = nullptr;
+		AudioAPI* audioAPI = nullptr;
 		Rect4f uiRect;
 
 		std::weak_ptr<UIWidget> currentMouseOver;

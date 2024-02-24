@@ -45,6 +45,7 @@ namespace Halley {
 		void onMouseOver(Vector2f mousePos) override;
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
+		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
 	private:
 		bool dragging = false;

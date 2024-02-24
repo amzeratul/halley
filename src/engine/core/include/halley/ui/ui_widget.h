@@ -12,6 +12,7 @@
 #include "halley/text/i18n.h"
 
 namespace Halley {
+	enum class MouseCursorMode;
 	enum class JoystickType;
 	class UIEvent;
 	class UIValidator;
@@ -198,6 +199,7 @@ namespace Halley {
 		void fitToRoot();
 
 		virtual std::optional<Vector2f> transformToChildSpace(Vector2f pos) const;
+		virtual std::optional<MouseCursorMode> getMouseCursorMode() const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;

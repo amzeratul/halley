@@ -56,6 +56,7 @@ namespace Halley {
 
 		void setMouseTrap(bool shouldBeTrapped) override;
 		void setMouseCursorPos(Vector2i pos) override;
+		void setMouseCursorMode(std::optional<MouseCursorMode> mode) override;
 
 		void processEvent(SDL_Event& event);
 
@@ -83,6 +84,8 @@ namespace Halley {
 		HashMap<int, std::shared_ptr<InputJoystickSDL>> sdlJoys;
 		HashMap<int, std::shared_ptr<InputGameControllerSDL>> sdlGameControllers;
 		HashMap<int, std::shared_ptr<InputTouch>> touchEvents;
+		HashMap<SDL_SystemCursor, SDL_Cursor*> cursors;
+		std::optional<MouseCursorMode> curCursor;
 
 		std::function<Vector2f(Vector2i)> mouseRemap;
 

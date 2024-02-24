@@ -36,6 +36,7 @@ namespace Halley {
 
 		Rect4f getMouseRect() const override;
 		void setMouseExtraBorder(std::optional<Vector4f> override);
+		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
 	protected:
 

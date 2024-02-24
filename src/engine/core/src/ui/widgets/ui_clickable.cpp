@@ -1,5 +1,6 @@
 #include "halley/ui/widgets/ui_clickable.h"
 
+#include "halley/api/input_api.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -187,6 +188,11 @@ void UIClickable::onMouseDoubleClicked(Vector2f mousePos, int button, KeyMods ke
 void UIClickable::setMouseExtraBorder(std::optional<Vector4f> override)
 {
 	mouseExtraBorder = override;
+}
+
+std::optional<MouseCursorMode> UIClickable::getMouseCursorMode() const
+{
+	return MouseCursorMode::Hand;
 }
 
 void UIClickable::update(Time t, bool)

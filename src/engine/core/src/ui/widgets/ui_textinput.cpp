@@ -1,5 +1,7 @@
 #include <utility>
 #include "halley/ui/widgets/ui_textinput.h"
+
+#include "halley/api/input_api.h"
 #include "halley/ui/ui_style.h"
 #include "halley/ui/ui_validator.h"
 #include "halley/text/i18n.h"
@@ -409,6 +411,11 @@ Vector4f UITextInput::getTextInnerBorder() const
 		border.x += icon.getSize().x + iconBorder.x + iconBorder.z;
 	}
 	return border;
+}
+
+std::optional<MouseCursorMode> UITextInput::getMouseCursorMode() const
+{
+	return MouseCursorMode::IBeam;
 }
 
 Rect4f UITextInput::getTextBounds() const

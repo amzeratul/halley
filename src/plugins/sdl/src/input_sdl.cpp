@@ -52,7 +52,13 @@ InputSDL::InputSDL(SystemAPI& system)
 {
 }
 
-InputSDL::~InputSDL() = default;
+InputSDL::~InputSDL()
+{
+	for (auto& c: cursors) {
+		SDL_FreeCursor(c.second);
+	}
+	cursors.clear();
+}
 
 void InputSDL::setResources(Resources& resources)
 {
@@ -370,6 +376,56 @@ Vector<spInputTouch> Halley::InputSDL::getTouchEvents()
 void InputSDL::setMouseCursorPos(Vector2i pos)
 {
 	SDL_WarpMouseInWindow(system.getWindow(0)->getSDLWindow(), pos.x, pos.y);
+}
+
+namespace {
+	SDL_SystemCursor getSDLSystemCursor(MouseCursorMode mode)
+	{
+		switch (mode) {
+			case MouseCursorMode::Arrow:
+				return SDL_SYSTEM_CURSOR_ARROW;
+			case MouseCursorMode::IBeam:
+				return SDL_SYSTEM_CURSOR_IBEAM;
+			case MouseCursorMode::Wait:
+				return SDL_SYSTEM_CURSOR_WAIT;
+			case MouseCursorMode::Crosshair:
+				return SDL_SYSTEM_CURSOR_CROSSHAIR;
+			case MouseCursorMode::WaitArrow:
+				return SDL_SYSTEM_CURSOR_WAITARROW;
+			case MouseCursorMode::SizeNWSE:
+				return SDL_SYSTEM_CURSOR_SIZENWSE;
+			case MouseCursorMode::SizeNESW:
+				return SDL_SYSTEM_CURSOR_SIZENESW;
+			case MouseCursorMode::SizeWE:
+				return SDL_SYSTEM_CURSOR_SIZEWE;
+			case MouseCursorMode::SizeNS:
+				return SDL_SYSTEM_CURSOR_SIZENS;
+			case MouseCursorMode::SizeAll:
+				return SDL_SYSTEM_CURSOR_SIZEALL;
+			case MouseCursorMode::No:
+				return SDL_SYSTEM_CURSOR_NO;
+			case MouseCursorMode::Hand:
+				return SDL_SYSTEM_CURSOR_HAND;
+		}
+		return SDL_SYSTEM_CURSOR_ARROW;
+	}
+}
+
+void InputSDL::setMouseCursorMode(std::optional<MouseCursorMode> mode)
+{
+	if (mode == curCursor) {
+		return;
+	}
+	curCursor = mode;
+
+	const auto cursorId = getSDLSystemCursor(mode.value_or(MouseCursorMode::Arrow));
+	const auto iter = cursors.find(cursorId);
+	if (iter != cursors.end()) {
+		SDL_SetCursor(iter->second);
+	}
+	auto* cursor = SDL_CreateSystemCursor(cursorId);
+	SDL_SetCursor(cursor);
+	cursors[cursorId] = cursor;
 }
 
 void InputSDL::setMouseTrap(bool shouldBeTrapped)

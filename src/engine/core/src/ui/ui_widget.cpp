@@ -887,6 +887,11 @@ std::optional<Vector2f> UIWidget::transformToChildSpace(Vector2f pos) const
 	return pos;
 }
 
+std::optional<MouseCursorMode> UIWidget::getMouseCursorMode() const
+{
+	return std::nullopt;
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }

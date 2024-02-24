@@ -15,7 +15,8 @@ using namespace Halley;
 
 UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 	: id("root")
-	, audio(api.audio)
+	, audioAPI(api.audio)
+	, inputAPI(api.input)
 	, uiRect(rect)
 	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, mouseRemap([](Vector2f p) { return p; })
@@ -404,6 +405,9 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
 	if (mousePosTarget) {
 		mousePosTarget->onMouseOver(mousePos, keyMods);
+		inputAPI->setMouseCursorMode(mousePosTarget->getMouseCursorMode());
+	} else {
+		inputAPI->setMouseCursorMode(std::nullopt);
 	}
 
 	// Show tooltip
@@ -666,8 +670,8 @@ void UIRoot::render(RenderContext& rc)
 
 std::optional<AudioHandle> UIRoot::playSound(const String& eventName)
 {
-	if (audio && !eventName.isEmpty()) {
-		return audio->postEvent(eventName, AudioPosition::makeUI(0.0f));
+	if (audioAPI && !eventName.isEmpty()) {
+		return audioAPI->postEvent(eventName, AudioPosition::makeUI(0.0f));
 	}
 
 	return {};

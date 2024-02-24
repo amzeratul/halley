@@ -80,6 +80,11 @@ void StatusBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	}
 }
 
+std::optional<MouseCursorMode> StatusBar::getMouseCursorMode() const
+{
+	return MouseCursorMode::Hand;
+}
+
 void StatusBar::updateLED(Time t)
 {
 	LoggerLevel curLevel = idleLEDLevel;

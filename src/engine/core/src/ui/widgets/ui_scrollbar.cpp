@@ -169,6 +169,11 @@ void UIScrollThumb::releaseMouse(Vector2f mousePos, int button)
 	}
 }
 
+std::optional<MouseCursorMode> UIScrollThumb::getMouseCursorMode() const
+{
+	return std::nullopt;
+}
+
 void UIScrollThumb::setDragPos(Vector2f pos)
 {
 	sendEvent(UIEvent(UIEventType::Dragged, getId(), pos));

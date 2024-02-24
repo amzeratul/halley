@@ -17,6 +17,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
 	private:
 		struct LEDState {

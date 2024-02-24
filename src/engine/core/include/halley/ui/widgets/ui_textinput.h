@@ -88,6 +88,8 @@ namespace Halley {
 
 		virtual Vector4f getTextInnerBorder() const;
 
+		std::optional<MouseCursorMode> getMouseCursorMode() const override;
+
 	private:
 		void updateCaret();
 		Rect4f getTextBounds() const;
