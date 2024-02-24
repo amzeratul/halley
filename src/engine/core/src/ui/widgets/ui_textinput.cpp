@@ -183,6 +183,8 @@ bool UITextInput::isSelectAllOnClick() const
 
 void UITextInput::draw(UIPainter& painter) const
 {
+	auto clippedPainter = painter.withClip(textClip);
+
 	if (sprite.hasMaterial()) {
 		painter.draw(sprite);
 	}
@@ -190,20 +192,20 @@ void UITextInput::draw(UIPainter& painter) const
 	if (isFocused()) {
 		const auto sel = getSelection();
 		if (sel.start != sel.end) {
-			drawSelection(sel, painter);
+			drawSelection(sel, clippedPainter);
 		}
 	}
 	
 	if (icon.hasMaterial()) {
-		painter.draw(icon);
+		clippedPainter.draw(icon);
 	}
 
 	if (!ghostLabel.empty()) {
-		painter.draw(ghostLabel);
+		clippedPainter.draw(ghostLabel);
 	}
 	
 	if (!label.empty()) {
-		painter.draw(label);
+		clippedPainter.draw(label);
 	}
 
 	if (caretShowing && caret.hasMaterial()) {
@@ -363,20 +365,15 @@ void UITextInput::update(Time t, bool moved)
 	// Position the text
 	if (!multiLine && textSize.x > textBounds.getWidth()) {
 		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos.x - textBounds.getWidth()), std::min(textSize.x - textBounds.getWidth(), caretPhysicalPos.x));
-		const auto clip = Rect4f(textScrollPos, textScrollPos + textBounds.getSize());
-		label.setClip(clip);
-		ghostLabel.setClip(clip);
+		textClip = textBounds;
 	} else if (textSize.y > textBounds.getHeight()) {
 		const float caretTop = caretPhysicalPos.y;
 		const float caretBottom = caretPhysicalPos.y + label.getLineHeight();
 		textScrollPos.y = clamp(textScrollPos.y, std::max(0.0f, caretBottom - textBounds.getHeight()), std::min(textSize.y - textBounds.getHeight(), caretTop));
-		const auto clip = Rect4f(textScrollPos, textScrollPos + textBounds.getSize());
-		label.setClip(clip);
-		ghostLabel.setClip(clip);
+		textClip = textBounds;
 	} else {
 		textScrollPos.x = 0;
-		label.setClip();
-		ghostLabel.setClip();
+		textClip = std::nullopt;
 	}
 	const auto textPos = textBounds.getTopLeft() - textScrollPos;
 	label.setPosition(textPos);

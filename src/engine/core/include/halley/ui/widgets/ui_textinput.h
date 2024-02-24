@@ -123,6 +123,7 @@ namespace Halley {
 		LocalisedString ghostText;
 		LocalisedString appendText;
 		StringUTF32 lastText;
+		std::optional<Rect4f> textClip;
 		
 		AutoCompleteHandle autoCompleteHandle;
 		StringUTF32 userInputForAutoComplete;
