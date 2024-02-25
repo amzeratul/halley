@@ -957,7 +957,7 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 	auto constNewDatas = gsl::span<const EntityData*>(const_cast<const EntityData**>(newDatas.data()), newDatas.size());
 
 	if (timelineEditor->isRecording()) {
-		// TODO: notify timeline editor
+		notifyTimelineChanges(ids, prevDatas, newDatas);
 	} else if (undoStack.pushModified(modified, ids, prevDatas, constNewDatas)) {
 		sceneData->reloadEntities(ids, constNewDatas);
 		for (size_t i = 0; i < ids.size(); ++i) {
@@ -1767,6 +1767,16 @@ void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timelin
 	timelineEditor->open(uuid, std::move(timeline), *this);
 }
 
+void SceneEditorWindow::onStartTimelineRecording()
+{
+	// TODO
+}
+
+void SceneEditorWindow::onStopTimelineRecording()
+{
+	// TODO
+}
+
 void SceneEditorWindow::saveTimeline(const String& entityId, const Timeline& timeline)
 {
 	auto& entityData = sceneData->getWriteableEntityNodeData(entityId).getData();
@@ -1778,4 +1788,26 @@ void SceneEditorWindow::saveTimeline(const String& entityId, const Timeline& tim
 		}
 	}
 	onEntityModified(entityId, prevEntityData, entityData);
+}
+
+void SceneEditorWindow::notifyTimelineChanges(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newData)
+{
+	for (size_t i = 0; i < ids.size(); ++i) {
+		EntityDataDelta::Options options;
+		options.shallow = true;
+		auto delta = std::make_unique<EntityDataDelta>(*prevDatas[i], *newData[i], options);
+		if (delta->hasChange()) {
+			for (const auto& [componentId, componentData]: delta->getComponentsChanged()) {
+				for (const auto& [fieldId, changeData]: componentData.asMap()) {
+					if (changeData.getType() == ConfigNodeType::DeltaMap) {
+						for (const auto& [subKeyId, data]: changeData.asMap()) {
+							timelineEditor->addChange(ids[i], componentId, fieldId, subKeyId, data);
+						}
+					} else {
+						timelineEditor->addChange(ids[i], componentId, fieldId, "", changeData);
+					}
+				}
+			}
+		}		
+	}
 }

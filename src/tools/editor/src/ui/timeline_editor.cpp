@@ -38,6 +38,12 @@ bool TimelineEditor::isRecording() const
 	return recording;
 }
 
+void TimelineEditor::addChange(const String& targetId, const String& fieldGroupId, const String& fieldId, const String& fieldSubKeyId, const ConfigNode& data)
+{
+	// TODO
+	Logger::logInfo(targetId + " " + fieldGroupId + "::" + fieldId + (fieldSubKeyId.isEmpty() ? "" : "." + fieldSubKeyId) + " = " + data.asString());
+}
+
 void TimelineEditor::loadTimeline()
 {
 	// TODO
@@ -55,7 +61,9 @@ void TimelineEditor::toggleRecording()
 	recording = !recording;
 	if (recording) {
 		getWidgetAs<UIButton>("record")->setLabel(LocalisedString::fromHardcodedString("Stop"));
+		callbacks->onStartTimelineRecording();
 	} else {
+		callbacks->onStopTimelineRecording();
 		getWidgetAs<UIButton>("record")->setLabel(LocalisedString::fromHardcodedString("Record"));
 	}
 }

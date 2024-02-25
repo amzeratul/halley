@@ -1048,7 +1048,7 @@ String ConfigNode::asString() const
 		return toString(asEntityId().value);
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
-	} else if (type == ConfigNodeType::Sequence) {
+	} else if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		String result = "[";
 		bool first = true;
 		for (auto& e: asSequence()) {
@@ -1066,7 +1066,7 @@ String ConfigNode::asString() const
 	} else if (type == ConfigNodeType::Int2) {
 		auto v = asVector2i();
 		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
-	} else if (type == ConfigNodeType::Map) {
+	} else if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		String result = "{";
 		bool first = true;
 		for (auto& [k, v] : asMap()) {
@@ -1080,6 +1080,10 @@ String ConfigNode::asString() const
 		return result;
 	} else if (type == ConfigNodeType::Undefined) {
 		return "null";
+	} else if (type == ConfigNodeType::Del) {
+		return "<del>";
+	} else if (type == ConfigNodeType::Noop) {
+		return "<noop>";
 	} else {
 		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to String.", HalleyExceptions::Resources);
 	}

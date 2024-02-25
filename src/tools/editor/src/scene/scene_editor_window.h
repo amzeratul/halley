@@ -247,7 +247,10 @@ namespace Halley {
 		void redo();
 
 		void openGoToDialogue();
-		
+
+		void onStartTimelineRecording() override;
+		void onStopTimelineRecording() override;
 		void saveTimeline(const String& entityId, const Timeline& timeline) override;
+		void notifyTimelineChanges(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newData);
 	};
 }

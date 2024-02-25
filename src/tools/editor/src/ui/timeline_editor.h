@@ -8,6 +8,8 @@ namespace Halley
     public:
         virtual ~ITimelineEditorCallbacks() = default;
 
+        virtual void onStartTimelineRecording() = 0;
+        virtual void onStopTimelineRecording() = 0;
         virtual void saveTimeline(const String& id, const Timeline& timeline) = 0;
     };
 
@@ -19,6 +21,8 @@ namespace Halley
 
     	void open(const String& id, std::shared_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks);
         bool isRecording() const;
+
+    	void addChange(const String& targetId, const String& fieldGroupId, const String& fieldId, const String& fieldSubKeyId, const ConfigNode& data);
 
     private:
         String targetId;
