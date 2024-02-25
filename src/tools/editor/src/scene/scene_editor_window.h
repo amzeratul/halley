@@ -20,7 +20,7 @@ namespace Halley {
 	class UIFactory;
 	class EntityFactory;
 
-	class SceneEditorWindow final : public UIWidget, public IProjectDLLListener, public ISceneEditorWindow {
+	class SceneEditorWindow final : public UIWidget, public IProjectDLLListener, public ISceneEditorWindow, public ITimelineEditorCallbacks {
 	public:
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor, AssetType assetType);
 		~SceneEditorWindow();
@@ -247,5 +247,7 @@ namespace Halley {
 		void redo();
 
 		void openGoToDialogue();
+		
+		void saveTimeline(const String& entityId, const Timeline& timeline) override;
 	};
 }

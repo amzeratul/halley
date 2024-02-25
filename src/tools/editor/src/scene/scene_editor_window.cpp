@@ -954,7 +954,9 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 	Expects(ids.size() == prevDatas.size());
 	Expects(ids.size() == newDatas.size());
 
-	if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
+	if (timelineEditor->isRecording()) {
+		// TODO: notify timeline editor
+	} else if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
 		sceneData->reloadEntities(ids, newDatas);
 		for (size_t i = 0; i < ids.size(); ++i) {
 			const auto* prevData = prevDatas[i];
@@ -1746,22 +1748,6 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getCurPrefab() const
 	return prefab;
 }
 
-void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timeline> timeline)
-{
-	timelineEditor->open(uuid, std::move(timeline), [=] (const String& entityId, const Timeline& timeline)
-	{
-		auto& entityData = sceneData->getWriteableEntityNodeData(entityId).getData();
-		const auto prevEntityData = entityData;
-		
-		for (auto& comp : entityData.getComponents()) {
-			if (comp.first == "Timeline") {
-				comp.second["timeline"] = timeline.toConfigNode();
-			}
-		}
-		onEntityModified(entityId, prevEntityData, entityData);
-	});
-}
-
 void SceneEditorWindow::openGoToDialogue()
 {
 	const auto worldOffset = gameBridge->getWorldOffset().value_or(Vector2f());
@@ -1772,4 +1758,22 @@ void SceneEditorWindow::openGoToDialogue()
 			gameBridge->moveCamera(*result - worldOffset);
 		}
 	}));
+}
+
+void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timeline> timeline)
+{
+	timelineEditor->open(uuid, std::move(timeline), *this);
+}
+
+void SceneEditorWindow::saveTimeline(const String& entityId, const Timeline& timeline)
+{
+	auto& entityData = sceneData->getWriteableEntityNodeData(entityId).getData();
+	const auto prevEntityData = entityData;
+	
+	for (auto& comp : entityData.getComponents()) {
+		if (comp.first == "Timeline") {
+			comp.second["timeline"] = timeline.toConfigNode();
+		}
+	}
+	onEntityModified(entityId, prevEntityData, entityData);
 }

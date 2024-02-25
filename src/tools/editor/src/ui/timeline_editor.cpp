@@ -22,10 +22,10 @@ void TimelineEditor::onMakeUI()
 	});
 }
 
-void TimelineEditor::open(const String& id, std::shared_ptr<Timeline> timeline, SaveCallback callback)
+void TimelineEditor::open(const String& id, std::shared_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks)
 {
 	targetId = id;
-	this->callback = std::move(callback);
+	this->callbacks = &callbacks;
 	this->timeline = std::move(timeline);
 
 	loadTimeline();
@@ -45,8 +45,8 @@ void TimelineEditor::loadTimeline()
 
 void TimelineEditor::saveTimeline()
 {
-	if (callback) {
-		callback(targetId, *timeline);
+	if (callbacks) {
+		callbacks->saveTimeline(targetId, *timeline);
 	}
 }
 
