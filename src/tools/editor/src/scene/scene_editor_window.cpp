@@ -1762,7 +1762,7 @@ void SceneEditorWindow::openGoToDialogue()
 	}));
 }
 
-void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timeline> timeline)
+void SceneEditorWindow::editTimeline(const String& uuid, std::unique_ptr<Timeline> timeline)
 {
 	timelineEditor->open(uuid, std::move(timeline), *this);
 }
@@ -1787,7 +1787,8 @@ void SceneEditorWindow::saveTimeline(const String& entityId, const Timeline& tim
 			comp.second["timeline"] = timeline.toConfigNode();
 		}
 	}
-	onEntityModified(entityId, prevEntityData, entityData);
+	//onEntityModified(entityId, prevEntityData, entityData);
+	markModified();
 }
 
 void SceneEditorWindow::notifyTimelineChanges(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newData)

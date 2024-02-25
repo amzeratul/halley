@@ -16,22 +16,24 @@ namespace Halley
     class TimelineEditor : public UIWidget {
     public:
     	TimelineEditor(String id, UIFactory& factory);
+        ~TimelineEditor() override;
 
         void onMakeUI() override;
 
-    	void open(const String& id, std::shared_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks);
+    	void open(const String& id, std::unique_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks);
         bool isRecording() const;
 
     	void addChange(const String& targetId, const String& fieldGroupId, const String& fieldId, const String& fieldSubKeyId, const ConfigNode& data);
 
     private:
-        String targetId;
-        std::shared_ptr<Timeline> timeline;
+        String timelineOwnerId;
+        std::unique_ptr<Timeline> timeline;
 		ITimelineEditorCallbacks* callbacks = nullptr;
 
         bool recording = false;
+        int curFrame = 0;
 
-        void loadTimeline();
+        void populateTimeline();
         void saveTimeline();
 
         void toggleRecording();

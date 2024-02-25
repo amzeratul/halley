@@ -8,6 +8,10 @@ TimelineEditor::TimelineEditor(String id, UIFactory& factory)
 	factory.loadUI(*this, "halley/timeline_editor");
 }
 
+TimelineEditor::~TimelineEditor()
+{
+}
+
 void TimelineEditor::onMakeUI()
 {
 	setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
@@ -22,13 +26,13 @@ void TimelineEditor::onMakeUI()
 	});
 }
 
-void TimelineEditor::open(const String& id, std::shared_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks)
+void TimelineEditor::open(const String& id, std::unique_ptr<Timeline> timeline, ITimelineEditorCallbacks& callbacks)
 {
-	targetId = id;
+	timelineOwnerId = id;
 	this->callbacks = &callbacks;
 	this->timeline = std::move(timeline);
 
-	loadTimeline();
+	populateTimeline();
 
 	setActive(true);
 }
@@ -40,11 +44,15 @@ bool TimelineEditor::isRecording() const
 
 void TimelineEditor::addChange(const String& targetId, const String& fieldGroupId, const String& fieldId, const String& fieldSubKeyId, const ConfigNode& data)
 {
-	// TODO
-	Logger::logInfo(targetId + " " + fieldGroupId + "::" + fieldId + (fieldSubKeyId.isEmpty() ? "" : "." + fieldSubKeyId) + " = " + data.asString());
+	const auto key = TimelineSequence::Key(fieldGroupId, fieldId, fieldSubKeyId);
+	auto& seq = timeline->getSequence(targetId, key);
+	seq.addKeyFrame(curFrame, ConfigNode(data));
+
+	saveTimeline();
+	populateTimeline();
 }
 
-void TimelineEditor::loadTimeline()
+void TimelineEditor::populateTimeline()
 {
 	// TODO
 }
@@ -52,7 +60,7 @@ void TimelineEditor::loadTimeline()
 void TimelineEditor::saveTimeline()
 {
 	if (callbacks) {
-		callbacks->saveTimeline(targetId, *timeline);
+		callbacks->saveTimeline(timelineOwnerId, *timeline);
 	}
 }
 

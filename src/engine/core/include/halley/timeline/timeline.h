@@ -12,8 +12,14 @@ namespace Halley {
 		void load(const ConfigNode& node);
         ConfigNode toConfigNode() const;
 
+		bool hasEntity(std::string_view entityId) const;
+		Vector<TimelineSequence>& getSequences(std::string_view entityId);
+		const Vector<TimelineSequence>& getSequences(std::string_view entityId) const;
+
+		TimelineSequence& getSequence(std::string_view entityId, const TimelineSequence::Key& key);
+
     private:
-        Vector<TimelineSequence> sequences;
+        Vector<TimelineSequenceEntity> entities;
     };
 
 	class Resources;
