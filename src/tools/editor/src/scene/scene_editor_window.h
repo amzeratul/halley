@@ -8,6 +8,7 @@
 #include "undo_stack.h"
 #include "halley/tools/dll/project_dll.h"
 #include "src/assets/graph/script_graph_editor.h"
+#include "src/ui/timeline_editor.h"
 
 namespace Halley {
 	class DrillDownAssetWindow;
@@ -186,6 +187,7 @@ namespace Halley {
 		std::shared_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
 		std::optional<EntityScene> currentEntityScene;
+		std::shared_ptr<TimelineEditor> timelineEditor;
 
 		std::unique_ptr<EntityValidator> entityValidator;
 

@@ -15,6 +15,11 @@ void TimelineEditor::onMakeUI()
 		saveTimeline();
 		setActive(false);
 	});
+
+	setHandle(UIEventType::ButtonClicked, "record", [=] (const UIEvent& event)
+	{
+		toggleRecording();
+	});
 }
 
 void TimelineEditor::open(const String& id, std::shared_ptr<Timeline> timeline, SaveCallback callback)
@@ -28,6 +33,11 @@ void TimelineEditor::open(const String& id, std::shared_ptr<Timeline> timeline, 
 	setActive(true);
 }
 
+bool TimelineEditor::isRecording() const
+{
+	return recording;
+}
+
 void TimelineEditor::loadTimeline()
 {
 	// TODO
@@ -37,5 +47,15 @@ void TimelineEditor::saveTimeline()
 {
 	if (callback) {
 		callback(targetId, *timeline);
+	}
+}
+
+void TimelineEditor::toggleRecording()
+{
+	recording = !recording;
+	if (recording) {
+		getWidgetAs<UIButton>("record")->setLabel(LocalisedString::fromHardcodedString("Stop"));
+	} else {
+		getWidgetAs<UIButton>("record")->setLabel(LocalisedString::fromHardcodedString("Record"));
 	}
 }

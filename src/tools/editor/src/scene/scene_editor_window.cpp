@@ -86,6 +86,8 @@ void SceneEditorWindow::makeUI()
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
 	entityEditor->setSceneEditorWindow(*this, api);
 
+	timelineEditor = getWidgetAs<TimelineEditor>("timelineEditor");
+
 	toolMode = getWidgetAs<UIList>("toolMode");
 	
 	setModified(false);
@@ -374,6 +376,12 @@ void SceneEditorWindow::update(Time t, bool moved)
 
 	if (entityList && gameBridge) {
 		gameBridge->setEntityHighlightedOnList(entityList->getEntityUnderCursor(), false);
+	}
+
+	if (timelineEditor->isRecording()) {
+		canvas->setBorder(2, Colour4f(1, 0, 0));
+	} else {
+		canvas->setBorder(1, Colour4f(0, 0, 0));
 	}
 }
 
@@ -1740,7 +1748,6 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getCurPrefab() const
 
 void SceneEditorWindow::editTimeline(const String& uuid, std::shared_ptr<Timeline> timeline)
 {
-	const auto timelineEditor = getWidgetAs<TimelineEditor>("timelineEditor");
 	timelineEditor->open(uuid, std::move(timeline), [=] (const String& entityId, const Timeline& timeline)
 	{
 		auto& entityData = sceneData->getWriteableEntityNodeData(entityId).getData();

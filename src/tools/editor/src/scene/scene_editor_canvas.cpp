@@ -97,10 +97,13 @@ void SceneEditorCanvas::draw(UIPainter& p) const
 
 		canvas.draw(painter);
 
-		border.clone().setPos(pos).setSize(Vector2f(size.x, 1)).draw(painter);
-		border.clone().setPos(pos + Vector2f(0, size.y - 1)).setSize(Vector2f(size.x, 1)).draw(painter);
-		border.clone().setPos(pos).setSize(Vector2f(1, size.y)).draw(painter);
-		border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)).draw(painter);
+		// Draw border
+		auto b = border.clone().setColour(borderColour);
+		const float w = static_cast<float>(borderWidth);
+		b.setPos(pos).setSize(Vector2f(size.x, w)).draw(painter);
+		b.setPos(pos + Vector2f(0, size.y - w)).setSize(Vector2f(size.x, w)).draw(painter);
+		b.setPos(pos).setSize(Vector2f(w, size.y)).draw(painter);
+		b.setPos(pos + Vector2f(size.x - w, 0)).setSize(Vector2f(w, size.y)).draw(painter);
 	});
 }
 
@@ -206,6 +209,12 @@ std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(const String& tool, const S
 {
 	this->tool = tool;
 	return gameBridge->getGizmos().setTool(tool, componentName, fieldName);
+}
+
+void SceneEditorCanvas::setBorder(int width, Colour4f colour)
+{
+	borderWidth = width;
+	borderColour = colour;
 }
 
 void SceneEditorCanvas::updateInputState()

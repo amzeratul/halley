@@ -1,9 +1,19 @@
 widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox }
-sizer: { type: vertical }
+sizer: { type: vertical, gap: 4 }
 children:
 - widget: { class: widget }
   sizer: { type: horizontal }
   children:
+  - widget: { id: record, class: button, text: Record, style: buttonThin, size: [60, 20] }
   - stretchSpacer: {}
     proportion: 1
   - widget: { id: close, class: button, text: x, style: buttonThin, size: [16, 16] }
+    fill: [top]
+- widget: { class: scrollBarPane, scrollVertical: true, scrollHorizontal: true, style: scrollbarHalley }
+  proportion: 1
+  sizer: { type: vertical }
+  children:
+  - widget: { id: timelineBox, class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_popupWindow }
+    proportion: 1
+    sizer: { type: vertical }
+    children: []

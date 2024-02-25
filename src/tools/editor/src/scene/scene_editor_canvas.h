@@ -20,6 +20,8 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName);
 
+		void setBorder(int width, Colour4f colour);
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -46,6 +48,8 @@ namespace Halley {
 		SceneEditorGameBridge* gameBridge = nullptr;
 
 		Sprite border;
+		Colour4f borderColour;
+		int borderWidth = 1;
 
 		std::shared_ptr<RenderSurface> surface;
 		bool ready = false;
