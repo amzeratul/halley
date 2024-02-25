@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "family_type.h"
 #include "family_mask.h"
 #include "entity_id.h"

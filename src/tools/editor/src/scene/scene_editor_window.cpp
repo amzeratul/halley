@@ -723,7 +723,7 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 	Vector<String> ids;
 	Vector<EntityData> oldDatas;
 	Vector<const EntityData*> oldDataPtrs;
-	Vector<const EntityData*> newDataPtrs;
+	Vector<EntityData*> newDataPtrs;
 	ids.reserve(ids.size());
 	oldDatas.reserve(patches.size());
 	oldDataPtrs.reserve(patches.size());
@@ -942,22 +942,24 @@ void SceneEditorWindow::clearModifiedFlag()
 	setModified(false);
 }
 
-void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
+void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, EntityData& newData)
 {
 	const auto* oldPtr = &prevData;
-	const auto* newPtr = &newData;
-	onEntitiesModified(gsl::span<const String>(&id, 1), gsl::span<const EntityData*>(&oldPtr, 1), gsl::span<const EntityData*>(&newPtr, 1));
+	auto* newPtr = &newData;
+	onEntitiesModified(gsl::span<const String>(&id, 1), gsl::span<const EntityData*>(&oldPtr, 1), gsl::span<EntityData*>(&newPtr, 1));
 }
 
-void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newDatas)
+void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newDatas)
 {
 	Expects(ids.size() == prevDatas.size());
 	Expects(ids.size() == newDatas.size());
 
+	auto constNewDatas = gsl::span<const EntityData*>(const_cast<const EntityData**>(newDatas.data()), newDatas.size());
+
 	if (timelineEditor->isRecording()) {
 		// TODO: notify timeline editor
-	} else if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
-		sceneData->reloadEntities(ids, newDatas);
+	} else if (undoStack.pushModified(modified, ids, prevDatas, constNewDatas)) {
+		sceneData->reloadEntities(ids, constNewDatas);
 		for (size_t i = 0; i < ids.size(); ++i) {
 			const auto* prevData = prevDatas[i];
 			const auto* newData = newDatas[i];
@@ -1110,7 +1112,7 @@ void SceneEditorWindow::toggleEntitiesEnabled(gsl::span<const String> ids)
 
 	Vector<String> modifiedIds;
 	Vector<EntityData> oldDatas;
-	Vector<const EntityData*> newDataPtrs;
+	Vector<EntityData*> newDataPtrs;
 
 	if (anyDisabled) {
 		// Enable everything

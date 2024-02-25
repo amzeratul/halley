@@ -3,7 +3,7 @@
 #include "render_target_opengl.h"
 #include <halley/graphics/texture.h>
 #include <halley/data_structures/flat_map.h>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "texture_opengl.h"
 
 using namespace Halley;

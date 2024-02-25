@@ -1,7 +1,7 @@
 #include "halley/graphics/sprite/animation.h"
 #include "halley/graphics/sprite/animation_player.h"
 #include "halley/graphics/sprite/sprite.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 #include "halley/graphics/material/material.h"
 #include "halley/resources/resources.h"

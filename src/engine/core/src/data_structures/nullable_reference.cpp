@@ -1,5 +1,5 @@
 #include "halley/data_structures/nullable_reference.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 using namespace Halley;
 

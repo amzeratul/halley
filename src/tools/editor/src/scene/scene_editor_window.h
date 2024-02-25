@@ -54,8 +54,8 @@ namespace Halley {
 		void selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void moveEntities(gsl::span<const EntityChangeOperation> changes, bool refreshEntityList = true);
 
-		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
-		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
+		void onEntityModified(const String& id, const EntityData& prevData, EntityData& newData) override;
+		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newData) override;
 
 		void addEntities(gsl::span<const EntityChangeOperation> patches);
 		void removeEntities(gsl::span<const EntityChangeOperation> patches);

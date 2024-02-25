@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "vector.h"
 #include "halley/utils/algorithm.h"
 

@@ -29,7 +29,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "halley/text/string_converter.h"
 
 using namespace Halley;

@@ -1,7 +1,7 @@
 #include "halley/concurrency/task.h"
 #include "halley/text/halleystring.h"
 #include <mutex>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "halley/concurrency/concurrent.h"
 #include <iostream>
 #include "halley/support/logger.h"

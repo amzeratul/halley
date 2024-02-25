@@ -1,6 +1,6 @@
 #pragma once
 #include <typeinfo>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <gsl/span>
 #include <sstream>
 #include <algorithm>

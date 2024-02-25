@@ -17,29 +17,39 @@
 #ifndef GSL_UTIL_H
 #define GSL_UTIL_H
 
-#include <gsl/gsl_assert> // for Expects
+#include "assert" // for Expects
 
 #include <array>
 #include <cstddef>          // for ptrdiff_t, size_t
+#include <limits>           // for numeric_limits
 #include <initializer_list> // for initializer_list
 #include <type_traits>      // for is_signed, integral_constant
 #include <utility>          // for exchange, forward
+
+#if defined(__has_include) && __has_include(<version>)
+#include <version>
+#if defined(__cpp_lib_span) && __cpp_lib_span >= 202002L
+#include <span>
+#endif // __cpp_lib_span >= 202002L
+#endif //__has_include(<version>)
 
 #if defined(_MSC_VER) && !defined(__clang__)
 
 #pragma warning(push)
 #pragma warning(disable : 4127) // conditional expression is constant
 
-#if _MSC_VER < 1910
-#pragma push_macro("constexpr")
-#define constexpr /*constexpr*/
-#endif            // _MSC_VER < 1910
-#endif            // _MSC_VER
+#endif // _MSC_VER
 
-#if (defined(_MSC_VER) && _MSC_VER < 1910) || (!defined(__clang__) && defined(__GNUC__) && __GNUC__ < 6)
-#define GSL_CONSTEXPR_NARROW 0
+#if defined(__cplusplus) && (__cplusplus >= 201703L)
+#define GSL_NODISCARD [[nodiscard]]
 #else
-#define GSL_CONSTEXPR_NARROW 1
+#define GSL_NODISCARD
+#endif // defined(__cplusplus) && (__cplusplus >= 201703L)
+
+#if defined(__cpp_inline_variables)
+#define GSL_INLINE inline
+#else
+#define GSL_INLINE
 #endif
 
 namespace gsl
@@ -56,87 +66,62 @@ template <class F>
 class final_action
 {
 public:
-    explicit final_action(F f) noexcept : f_(std::move(f)) {}
+    explicit final_action(const F& ff) noexcept : f{ff} { }
+    explicit final_action(F&& ff) noexcept : f{std::move(ff)} { }
 
-    final_action(final_action&& other) noexcept : f_(std::move(other.f_)), invoke_(std::exchange(other.invoke_, false)) {}
+    ~final_action() noexcept { if (invoke) f(); }
 
-    final_action(const final_action&) = delete;
-    final_action& operator=(const final_action&) = delete;
-    final_action& operator=(final_action&&) = delete;
+    final_action(final_action&& other) noexcept
+        : f(std::move(other.f)), invoke(std::exchange(other.invoke, false))
+    { }
 
-    GSL_SUPPRESS(f.6) // NO-FORMAT: attribute // terminate if throws
-    ~final_action() noexcept
-    {
-        if (invoke_) f_();
-    }
+    final_action(const final_action&)   = delete;
+    void operator=(const final_action&) = delete;
+    void operator=(final_action&&)      = delete;
 
 private:
-    F f_;
-    bool invoke_{true};
+    F f;
+    bool invoke = true;
 };
 
 // finally() - convenience function to generate a final_action
 template <class F>
-final_action<F> finally(const F& f) noexcept
+GSL_NODISCARD auto finally(F&& f) noexcept
 {
-    return final_action<F>(f);
-}
-
-template <class F>
-final_action<F> finally(F&& f) noexcept
-{
-    return final_action<F>(std::forward<F>(f));
+    return final_action<std::decay_t<F>>{std::forward<F>(f)};
 }
 
 // narrow_cast(): a searchable way to do narrowing casts of values
 template <class T, class U>
+// clang-format off
 GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
-constexpr T narrow_cast(U&& u) noexcept
+    // clang-format on
+    constexpr T narrow_cast(U&& u) noexcept
 {
     return static_cast<T>(std::forward<U>(u));
-}
-
-namespace details
-{
-    template <class T, class U>
-    struct is_same_signedness
-        : public std::integral_constant<bool, std::is_signed<T>::value == std::is_signed<U>::value>
-    {
-    };
-} // namespace details
-
-// narrow() : a checked version of narrow_cast() that throws if the cast changed the value
-template <class T, class U>
-GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
-GSL_SUPPRESS(f.6) // NO-FORMAT: attribute // TODO: MSVC /analyze does not recognise noexcept(false)
-#if GSL_CONSTEXPR_NARROW
-constexpr
-#endif
-T narrow(U u) noexcept(false)
-{
-    T t = narrow_cast<T>(u);
-    if (static_cast<U>(t) != u) gsl::details::terminate();
-    if (!details::is_same_signedness<T, U>::value && ((t < T{}) != (u < U{})))
-        gsl::details::terminate();
-    return t;
 }
 
 //
 // at() - Bounds-checked way of accessing builtin arrays, std::array, std::vector
 //
 template <class T, std::size_t N>
+// clang-format off
 GSL_SUPPRESS(bounds.4) // NO-FORMAT: attribute
 GSL_SUPPRESS(bounds.2) // NO-FORMAT: attribute
-constexpr T& at(T (&arr)[N], const index i)
+    // clang-format on
+    constexpr T& at(T (&arr)[N], const index i)
 {
+    static_assert(N <= static_cast<std::size_t>((std::numeric_limits<std::ptrdiff_t>::max)()), "We only support arrays up to PTRDIFF_MAX bytes.");
     Expects(i >= 0 && i < narrow_cast<index>(N));
     return arr[narrow_cast<std::size_t>(i)];
 }
 
 template <class Cont>
+// clang-format off
 GSL_SUPPRESS(bounds.4) // NO-FORMAT: attribute
 GSL_SUPPRESS(bounds.2) // NO-FORMAT: attribute
-constexpr auto at(Cont& cont, const index i) -> decltype(cont[cont.size()])
+    // clang-format on
+    constexpr auto at(Cont& cont, const index i) -> decltype(cont[cont.size()])
 {
     Expects(i >= 0 && i < narrow_cast<index>(cont.size()));
     using size_type = decltype(cont.size());
@@ -144,21 +129,26 @@ constexpr auto at(Cont& cont, const index i) -> decltype(cont[cont.size()])
 }
 
 template <class T>
+// clang-format off
 GSL_SUPPRESS(bounds.1) // NO-FORMAT: attribute
-constexpr T at(const std::initializer_list<T> cont, const index i)
+    // clang-format on
+    constexpr T at(const std::initializer_list<T> cont, const index i)
 {
     Expects(i >= 0 && i < narrow_cast<index>(cont.size()));
     return *(cont.begin() + i);
 }
 
+#if defined(__cpp_lib_span) && __cpp_lib_span >= 202002L
+template <class T, std::size_t extent = std::dynamic_extent>
+constexpr auto at(std::span<T, extent> sp, const index i) -> decltype(sp[sp.size()])
+{
+    Expects(i >= 0 && i < narrow_cast<index>(sp.size()));
+    return sp[gsl::narrow_cast<std::size_t>(i)];
+}
+#endif // __cpp_lib_span >= 202002L
 } // namespace gsl
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#if _MSC_VER < 1910
-#undef constexpr
-#pragma pop_macro("constexpr")
-
-#endif // _MSC_VER < 1910
 
 #pragma warning(pop)
 

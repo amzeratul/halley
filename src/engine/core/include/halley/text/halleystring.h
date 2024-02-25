@@ -24,7 +24,7 @@
 
 #include <string>
 #include <halley/data_structures/vector.h>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <gsl/span>
 #include <cstdint>
 #include <limits>

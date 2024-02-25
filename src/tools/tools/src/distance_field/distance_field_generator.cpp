@@ -1,7 +1,7 @@
 #include "halley/tools/distance_field/distance_field_generator.h"
 #include <cassert>
 #include <halley/file_formats/image.h>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

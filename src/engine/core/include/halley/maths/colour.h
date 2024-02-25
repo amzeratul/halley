@@ -25,7 +25,7 @@
 #include <sstream>
 #include <cmath>
 #include "halley/text/halleystring.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <cstdint>
 
 #include "halley/data_structures/config_node.h"

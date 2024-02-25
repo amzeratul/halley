@@ -8,7 +8,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"
 #include <cstring> // memmove
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 
 #include "halley/api/video_api.h"

@@ -23,7 +23,7 @@
 #include <set>
 #include "halley/support/exception.h"
 #include "halley/concurrency/concurrent.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "halley/text/string_converter.h"
 #include "halley_gl.h"
 

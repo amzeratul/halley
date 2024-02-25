@@ -1,6 +1,6 @@
 #include "painter_opengl.h"
 #include "halley/graphics/material/material_definition.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
 #include "render_target_opengl.h"

@@ -3,7 +3,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "halley/api/halley_api.h"
 #include "halley/graphics/shader.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 using namespace Halley;
 

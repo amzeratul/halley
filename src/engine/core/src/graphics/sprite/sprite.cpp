@@ -7,7 +7,7 @@
 #include "halley/graphics/material/material_parameter.h"
 #include "halley/graphics/texture.h"
 #include "halley/resources/resources.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 #include "halley/api/video_api.h"
 #include "halley/entity/entity_factory.h"

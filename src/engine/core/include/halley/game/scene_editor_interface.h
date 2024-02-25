@@ -387,8 +387,8 @@ namespace Halley {
 		virtual void markModified() = 0;
 		virtual bool isModified() const = 0;
 		
-		virtual void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) = 0;
-		virtual void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) = 0;
+		virtual void onEntityModified(const String& id, const EntityData& prevData, EntityData& newData) = 0;
+		virtual void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newData) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;
 
 		virtual void removeEntities(gsl::span<const String> entityIds) = 0;

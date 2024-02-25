@@ -1,6 +1,6 @@
 #include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <iostream>
 #include "halley/support/console.h"
 #include "halley/utils/hash.h"

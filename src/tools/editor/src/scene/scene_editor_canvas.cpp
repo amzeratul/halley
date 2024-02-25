@@ -238,7 +238,7 @@ void SceneEditorCanvas::notifyOutputState()
 		const auto n = fields.size();
 		Vector<String> ids;
 		Vector<const EntityData*> oldDatas;
-		Vector<const EntityData*> newDatas;
+		Vector<EntityData*> newDatas;
 		ids.reserve(n);
 		oldDatas.reserve(n);
 		newDatas.reserve(n);

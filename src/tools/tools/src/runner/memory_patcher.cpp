@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 #include "halley/data_structures/hash_map.h"
 #include "halley/support/console.h"

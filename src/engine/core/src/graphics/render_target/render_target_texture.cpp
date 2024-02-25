@@ -1,5 +1,5 @@
 #include "halley/graphics/render_target/render_target_texture.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include "halley/graphics/texture.h"
 
 using namespace Halley;

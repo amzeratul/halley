@@ -27,7 +27,7 @@
 #include "vector2.h"
 #include "vector3.h"
 #include <halley/utils/utils.h>
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 
 namespace Halley {
 	template <typename T=float, int Alignment=4>

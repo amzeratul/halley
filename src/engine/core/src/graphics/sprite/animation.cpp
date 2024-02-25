@@ -6,7 +6,7 @@
 #include "halley/api/halley_api.h"
 #include "halley/resources/resources.h"
 #include "halley/bytes/byte_serializer.h"
-#include <gsl/gsl_assert>
+#include <gsl/assert>
 #include <utility>
 
 #include "halley/support/logger.h"
