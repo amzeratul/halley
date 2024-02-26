@@ -47,6 +47,7 @@ namespace Halley {
 		void editComment(const UUID& uuid, std::function<void(bool)> callback = {});
 		void deleteComment(const UUID& uuid);
 		void deleteComments();
+		void exportComments();
 
 		SceneEditorGizmoHandle makeHandle(const UUID& uuid, Vector2f pos);
 		void updateHandles();

@@ -188,6 +188,11 @@ std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 		});
 	});
 
+	ui->setHandle(UIEventType::ButtonClicked, "export", [=] (const UIEvent& event)
+	{
+		exportComments();
+	});
+
 	ui->bindData("categoryFilter", "", [=](String categoryFilter)
 	{
 		if (categoryFilter == "all") {
@@ -245,6 +250,19 @@ void CommentsGizmo::deleteComments()
 		}
 	}
 	std_ex::erase_if(handles, [&](const auto& handle) { return handle.isSelected(); });
+}
+
+void CommentsGizmo::exportComments()
+{
+	FileChooserParameters params;
+	params.save = true;
+	params.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, true });
+	OS::get().openFileChooser(params).then([this] (std::optional<Path> path)
+	{
+		if (path) {
+			comments.exportAll(categoryFilter, *path);
+		}
+	});
 }
 
 SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)

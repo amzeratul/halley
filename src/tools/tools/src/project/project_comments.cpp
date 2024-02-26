@@ -104,6 +104,29 @@ void ProjectComments::updateComment(const UUID& id, std::function<void(ProjectCo
 	}
 }
 
+void ProjectComments::exportAll(std::optional<ProjectCommentCategory> category, const Path& path)
+{
+	ConfigNode::MapType result;
+
+	for (const auto& [k, v]: comments) {
+		if (!category || v.category == category) {
+			auto& dst = result[toString(v.category)];
+			dst.ensureType(ConfigNodeType::Map);
+			auto data = v.toConfigNode();
+			data.removeKey("priority");
+			data.removeKey("scene");
+			data.removeKey("category");
+			dst[toString(k)] = std::move(data);
+		}
+	}
+
+	YAMLConvert::EmitOptions options;
+	options.compactMaps = false;
+	options.mapKeyOrder = { "text", "pos" };
+	const auto yaml = YAMLConvert::generateYAML(result, options);
+	Path::writeFile(path, yaml);
+}
+
 uint64_t ProjectComments::getVersion() const
 {
 	return version;

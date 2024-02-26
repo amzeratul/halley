@@ -37,3 +37,4 @@ children:
         - id: writing
           image: comments/comment_small_icon_writing.png
           text: Writing
+- widget: { class: button, id: export, text: Export..., style: buttonThin }

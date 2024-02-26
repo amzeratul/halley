@@ -76,6 +76,7 @@ namespace Halley {
         void deleteComment(const UUID& id);
         void setComment(const UUID& id, ProjectComment comment);
         void updateComment(const UUID& id, std::function<void(ProjectComment&)> f, bool immediate = false);
+        void exportAll(std::optional<ProjectCommentCategory> category, const Path& path);
 
         uint64_t getVersion() const;
         void update(Time t);
