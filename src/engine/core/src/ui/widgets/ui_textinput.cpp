@@ -197,7 +197,7 @@ void UITextInput::draw(UIPainter& painter) const
 	}
 	
 	if (icon.hasMaterial()) {
-		clippedPainter.draw(icon);
+		painter.draw(icon);
 	}
 
 	if (!ghostLabel.empty()) {
