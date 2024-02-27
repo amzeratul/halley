@@ -61,7 +61,7 @@ namespace Halley {
 		Vector2f textMinSize;
 		std::optional<float> maxWidth;
 		std::optional<float> maxHeight;
-		bool wordWrapped = true;
+		bool wordWrapped = false;
 		bool needsClipX = false;
 		bool needsClipY = false;
 		bool flowLayout = false;
