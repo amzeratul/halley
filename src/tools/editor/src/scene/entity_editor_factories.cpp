@@ -1296,6 +1296,8 @@ public:
 		dynamicsContainer->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Destroy When Done"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
+		systemContainer->add(context.makeLabel("Relative Position"));
+		systemContainer->add(context.makeField("bool", pars.withSubKey("relativePosition", "false"), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Spawn"));
 		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Death"));

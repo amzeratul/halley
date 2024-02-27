@@ -82,6 +82,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
 	destroyWhenDone = node["destroyWhenDone"].asBool(false);
+	relativePosition = node["relativePosition"].asBool(false);
 	velScale = node["velScale"].asVector3f(Vector3f(1, 1, 1));
 	minHeight = node["minHeight"].asOptional<float>();
 	startHeight = node["startHeight"].asFloat(0);
@@ -111,6 +112,7 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["directionScatter"] = directionScatter;
 	result["rotateTowardsMovement"] = rotateTowardsMovement;
 	result["destroyWhenDone"] = destroyWhenDone;
+	result["relativePosition"] = relativePosition;
 	result["velScale"] = velScale;
 	result["minHeight"] = minHeight;
 	result["startHeight"] = startHeight;
@@ -171,7 +173,17 @@ void Particles::setPosition(Vector3f pos)
 {
 	if (positionSet) {
 		lastPosition = position;
-		position = pos;
+
+		const auto delta = pos - position;
+		if (delta.squaredLength() > 0.000001f) {
+			if (relativePosition) {
+				for (auto& particle: particles) {
+					particle.pos += delta;
+				}
+			}
+
+			position = pos;
+		}
 	} else {
 		lastPosition = position = pos;
 		positionSet = true;

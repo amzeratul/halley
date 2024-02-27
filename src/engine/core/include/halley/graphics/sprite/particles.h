@@ -152,6 +152,7 @@ namespace Halley {
 		bool rotateTowardsMovement = false;
 		bool destroyWhenDone = false;
 		bool positionSet = false;
+		bool relativePosition = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
