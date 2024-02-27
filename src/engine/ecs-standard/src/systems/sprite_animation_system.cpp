@@ -47,7 +47,7 @@ private:
 			player.update(time);
 
 			if (player.hasAnimation()) {
-				auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPosition();
+				auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPositionWithHeight();
 				if (spriteBounds.overlaps(viewPort)) {
 					player.updateSprite(sprite);
 				}
