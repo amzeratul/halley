@@ -186,7 +186,7 @@ std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared
 	if (hasSearch) {
 		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
 	} else {
-		label->setMaxWidth(128);
+		label->setMaxWidth(128.0f);
 		return makeItemSizerBigIcon(std::move(icon), std::move(label));
 	}
 }

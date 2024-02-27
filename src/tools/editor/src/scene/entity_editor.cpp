@@ -849,7 +849,7 @@ EntityEditorFactory::EntityEditorFactory(EntityEditorFactoryRoot& root, IEntityE
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
 {
 	auto label = std::make_shared<UILabel>("", root.factory.getStyle("labelLight"), LocalisedString::fromUserString(text));
-	label->setMaxWidth(100);
+	label->setMaxWidth(100.0f);
 	label->setMarquee(true);
 	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
 	labelBox->add(label, 0, {}, UISizerAlignFlags::Centre);

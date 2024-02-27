@@ -81,7 +81,7 @@ void UILabel::setMarquee(std::optional<float> speed)
 void UILabel::updateMinSize()
 {
 	lastCellWidth = getCellWidth();
-	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth);
+	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth.value_or(std::numeric_limits<float>::infinity()));
 
 	needsClipX = needsClipY = false;
 	textExtents = renderer.getExtents();
@@ -91,14 +91,15 @@ void UILabel::updateMinSize()
 			renderer.setText(renderer.split(effectiveMaxWidth));
 			textExtents = renderer.getExtents();
 			unclippedWidth = textExtents.x;
+			needsClipX = textExtents.x > effectiveMaxWidth;
 		} else {
 			unclippedWidth = textExtents.x;
 			textExtents.x = effectiveMaxWidth;
 			needsClipX = true;
 		}
 	}
-	if (textExtents.y > maxHeight) {
-		float maxLines = std::floor(maxHeight / renderer.getLineHeight());
+	if (textExtents.y > maxHeight.value_or(std::numeric_limits<float>::infinity())) {
+		float maxLines = std::floor(maxHeight.value_or(std::numeric_limits<float>::infinity()) / renderer.getLineHeight());
 		textExtents.y = maxLines * renderer.getLineHeight();
 		needsClipY = true;
 	}
@@ -127,7 +128,7 @@ void UILabel::updateMarquee(Time t)
 			return;
 		}
 		const float speed = *marqueeSpeed;
-		const float maxMarquee = unclippedWidth - maxWidth;
+		const float maxMarquee = unclippedWidth - maxWidth.value_or(std::numeric_limits<float>::infinity());
 		marqueePos += float(marqueeDirection) * float(t) * speed;
 		if (marqueePos < 0 || marqueePos > maxMarquee) {
 			marqueePos = clamp(marqueePos, 0.0f, maxMarquee);
@@ -205,37 +206,41 @@ void UILabel::setColourOverride(Vector<ColourOverride> overrides)
 	renderer.setColourOverride(std::move(overrides));
 }
 
-void UILabel::setMaxWidth(float m)
+void UILabel::setMaxWidth(std::optional<float> m)
 {
-	if (std::abs(maxWidth - m) > 0.001f) {
+	if (maxWidth != m) {
 		maxWidth = m;
 		updateMinSize();
 		updateText();
 	}
 }
 
-void UILabel::setMaxHeight(float m)
+void UILabel::setMaxHeight(std::optional<float> m)
 {
-	if (std::abs(maxHeight - m) > 0.001f) {
+	if (maxHeight != m) {
 		maxHeight = m;
 		updateMinSize();
 		updateText();
 	}
 }
 
-float UILabel::getMaxWidth() const
+std::optional<float> UILabel::getMaxWidth() const
 {
 	return maxWidth;
 }
 
-float UILabel::getMaxHeight() const
+std::optional<float> UILabel::getMaxHeight() const
 {
 	return maxHeight;
 }
 
 void UILabel::setWordWrapped(bool wrapped)
 {
-	wordWrapped = wrapped;
+	if (wordWrapped != wrapped) {
+		wordWrapped = wrapped;
+		updateMinSize();
+		updateText();
+	}
 }
 
 bool UILabel::isWordWrapped() const

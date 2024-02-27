@@ -20,10 +20,10 @@ namespace Halley {
 		const LocalisedString& getText() const;
 		void setColourOverride(Vector<ColourOverride> overrides);
 
-		void setMaxWidth(float maxWidth);
-		void setMaxHeight(float maxHeight);
-		float getMaxWidth() const;
-		float getMaxHeight() const;
+		void setMaxWidth(std::optional<float> maxWidth);
+		void setMaxHeight(std::optional<float> maxHeight);
+		std::optional<float> getMaxWidth() const;
+		std::optional<float> getMaxHeight() const;
 		void setWordWrapped(bool wrapped);
 		bool isWordWrapped() const;
 		bool isClipped() const;
@@ -59,14 +59,14 @@ namespace Halley {
 
 		Vector2f textExtents;
 		Vector2f textMinSize;
-		float maxWidth = std::numeric_limits<float>::infinity();
-		float maxHeight = std::numeric_limits<float>::infinity();
+		std::optional<float> maxWidth;
+		std::optional<float> maxHeight;
 		bool wordWrapped = true;
 		bool needsClipX = false;
 		bool needsClipY = false;
 		bool flowLayout = false;
 
-		Time marqueeIdle;
+		Time marqueeIdle = 0;
 		std::optional<float> marqueeSpeed;
 		int marqueeDirection = -1;
 		float marqueePos = 0;
