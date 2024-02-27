@@ -73,6 +73,11 @@ std::optional<Vector2f> BaseCanvas::transformToChildSpace(Vector2f pos) const
 	}
 }
 
+std::optional<MouseCursorMode> BaseCanvas::getMouseCursorMode() const
+{
+	return std::nullopt;
+}
+
 void BaseCanvas::doSetState(State state)
 {
 }

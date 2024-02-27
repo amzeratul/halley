@@ -28,6 +28,7 @@ namespace Halley {
 		void changeZoom(int amount, std::optional<Vector2f> anchor = std::nullopt);
 
 		std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
+		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
     protected:
 		void doSetState(State state) override;
