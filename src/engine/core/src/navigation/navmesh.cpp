@@ -479,6 +479,9 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 	if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
 		postProcessPath(points, query.postProcessingType);
 	}
+	if (query.quantizationType != NavigationQuery::QuantizationType::None) {
+		quantizePath(points, query.quantizationType);
+	}
 
 	// Check for NaN/inf
 	for (auto& p: points) {
@@ -570,10 +573,71 @@ void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostPro
 	}
 }
 
+void Navmesh::quantizePath(Vector<Vector2f>& points, NavigationQuery::QuantizationType type) const
+{
+	if (type == NavigationQuery::QuantizationType::Quantize8Way) {
+		quantizePath8Way(points, Vector2f(1, 1));
+	} else if (type == NavigationQuery::QuantizationType::Quantize8WayIsometric) {
+		quantizePath8Way(points, Vector2f(1, 2));
+	}
+}
+
+void Navmesh::quantizePath8Way(Vector<Vector2f>& points, Vector2f scale) const
+{
+	if (points.size() < 2) {
+		return;
+	}
+
+	Vector<Vector2f> result;
+	result.reserve(points.size());
+	result.push_back(points[0]);
+
+	for (size_t i = 1; i < points.size(); i++) {
+		const auto a = points[i - 1];
+		const auto b = points[i];
+
+		// Construct a parallelogram around the path
+		// One of these will be a diagonal, the other will be horizontal or vertical
+		// d0 is the diagonal, d1 is the remaining (horizontal or vertical)
+		const auto delta = (b - a) * scale;
+		const auto d0 = std::abs(delta.x) > std::abs(delta.y) ? Vector2f(signOf(delta.x) * std::abs(delta.y), delta.y) : Vector2f(delta.x, signOf(delta.y) * std::abs(delta.x));
+		const auto d1 = delta - d0;
+
+		// If either vector is too small, then it's not worth doing it
+		if (d0.length() >= 4 && d1.length() >= 4) {
+			// Two potential target points, c and d, are constructed
+			const auto c = a + d0 / scale;
+			const auto d = a + d1 / scale;
+
+			// See if either path is acceptable
+			if (isPathClear(a, c, b)) {
+				result.push_back(c);
+			} else if (isPathClear(a, d, b)) {
+				result.push_back(d);
+			}
+		}
+
+		result.push_back(b);
+	}
+
+	points = std::move(result);
+}
+
+bool Navmesh::isPathClear(Vector2f a, Vector2f b, Vector2f c) const
+{
+	return !findRayCollision(b, c) && !findRayCollision(a, b);
+}
+
+std::optional<Vector2f> Navmesh::findRayCollision(Vector2f from, Vector2f to) const
+{
+	const auto delta = to - from;
+	const auto len = delta.length();
+	return findRayCollision(Ray(from, delta / len), len);
+}
+
 std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) const
 {
-	auto startNode = getNodeAt(ray.p);
-	if (startNode) {
+	if (const auto startNode = getNodeAt(ray.p)) {
 		return findRayCollision(ray, maxDistance, startNode.value()).first;
 	} else {
 		return Vector2f(ray.p);

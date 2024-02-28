@@ -13,12 +13,19 @@ namespace Halley {
 			Aggressive
 		};
 
+		enum class QuantizationType {
+			None,
+			Quantize8Way,
+			Quantize8WayIsometric,
+		};
+
 		WorldPosition from;
 		WorldPosition to;
 		PostProcessingType postProcessingType;
+		QuantizationType quantizationType;
 
 		NavigationQuery();
-		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing);
+		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType);
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
@@ -35,6 +42,17 @@ namespace Halley {
 				"none",
 				"simple",
 				"aggressive"
+			}};
+		}
+	};
+
+	template <>
+	struct EnumNames<NavigationQuery::QuantizationType> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"none",
+				"quantize8Way",
+				"quantize8WayIsometric"
 			}};
 		}
 	};
