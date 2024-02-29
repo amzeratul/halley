@@ -45,9 +45,19 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 10>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
-		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true },
-		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input } };
+	const static auto data = std::array<PinType, 11>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+	};
 	return data;
 }
 
@@ -66,6 +76,10 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	} else if (node.getSettings()["label"].asString("") != "") {
 		str.append(" and label ");
 		str.append(node.getSettings()["label"].asString(""), settingColour);
+	}
+	if (node.getPin(10).hasConnection()) {
+		str.append(" and params ");
+		str.append(getConnectedNodeName(world, node, graph, 10), parameterColour);
 	}
 	if (node.getPin(8).hasConnection()) {
 		str.append(" if ");
@@ -100,6 +114,8 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Enable Check";
 	case 9:
 		return "Label Target";
+	case 10:
+		return "Params";
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
@@ -132,7 +148,8 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 				label = node.getSettings()["label"].asString("");
 			}
 			const auto labelTarget = readRawEntityId(environment, node, 9);
-			data.input = inputDevice->makeExclusiveButton(button, priority, InputLabel(label, labelTarget));
+			auto params = readDataPin(environment, node, 10);
+			data.input = inputDevice->makeExclusiveButton(button, priority, InputLabel(label, labelTarget, std::move(params)));
 		}
 	}
 

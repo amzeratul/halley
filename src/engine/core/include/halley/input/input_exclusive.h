@@ -10,10 +10,12 @@ namespace Halley {
 	struct InputLabel {
 		String label;
 		EntityId target;
+        ConfigNode params;
 
-        InputLabel(String label = "", EntityId target = {})
+        InputLabel(String label = "", EntityId target = {}, ConfigNode params = {})
 	        : label(std::move(label))
 			, target(std::move(target))
+			, params(std::move(params))
         {}
 	};
 
