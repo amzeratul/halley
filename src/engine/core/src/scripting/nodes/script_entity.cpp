@@ -258,7 +258,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
@@ -266,16 +266,28 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescript
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity reference set in ScriptableComponent with key ");
-	str.append(node.getSettings()["key"].asString(""), settingColour);
+	if (node.getPin(2).hasConnection()) {
+		str.append(getConnectedNodeName(world, node, graph, 2), settingColour);
+	} else {
+		str.append(node.getSettings()["key"].asString(""), settingColour);
+	}
 	return str.moveResults();
 }
 
 String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
-		return node.getSettings()["key"].asString("");
+		if (node.getPin(2).hasConnection()) {
+			return getConnectedNodeName(world, node, graph, 2);
+		} else {
+			return node.getSettings()["key"].asString("");
+		}
 	} else {
-		return "pos(" + node.getSettings()["key"].asString("") + ")";
+		if (node.getPin(2).hasConnection()) {
+			return "pos(" + getConnectedNodeName(world, node, graph, 2) + ")";
+		} else {
+			return "pos(" + node.getSettings()["key"].asString("") + ")";
+		}
 	}
 }
 
@@ -286,16 +298,21 @@ String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
 
 String ScriptEntityReference::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
-	if (static_cast<ScriptNodeElementType>(elementType.type) == ScriptNodeElementType::ReadDataPin) {
+	if (elementIdx == 1) {
 		return "Position";
-	} else {
-		return "Entity";
 	}
+	if (elementIdx == 2) {
+		return "Key";
+	}
+	return "Entity";
 }
 
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	const auto key = node.getSettings()["key"].asString("");
+	auto key = node.getSettings()["key"].asString("");
+	if (node.getPin(2).hasConnection()) {
+		key = readDataPin(environment, node, 2).asString();
+	}
 	if (key.isEmpty()) {
 		return {};
 	}
