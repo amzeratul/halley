@@ -1005,6 +1005,9 @@ public:
 
 		containerPtr->setHandle(UIEventType::FocusLost, [=](const UIEvent& event)
 		{
+			if (event.getSourceId() == "entity") {
+				return;
+			}
 			buildList();
 		});
 
