@@ -95,6 +95,8 @@ namespace Halley {
 			bool canJoinWith(const Portal& other, float epsilon) const;
 			void updateLocal();
 			void translate(Vector2f offset);
+
+			Vector2f getClosestPoint(Vector2f pos) const;
 		};
 		
 		Navmesh();
@@ -107,7 +109,10 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
+		[[nodiscard]] std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath, bool postProcess) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
+		void postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
+		void quantizePath(Vector<Vector2f>& points, NavigationQuery::QuantizationType type) const;
 
 		[[nodiscard]] const Vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const Vector<Polygon>& getPolygons() const { return polygons; }
@@ -182,9 +187,6 @@ namespace Halley {
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;
-		std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const;
-		void postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
-		void quantizePath(Vector<Vector2f>& points, NavigationQuery::QuantizationType type) const;
 		void quantizePath8Way(Vector<Vector2f>& points, Vector2f scale) const;
 
 		void processPolygons();

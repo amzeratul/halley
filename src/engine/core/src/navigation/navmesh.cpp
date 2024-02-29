@@ -370,7 +370,7 @@ std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) co
 		return {};
 	}
 
-	return makePath(query, nodePath.value());
+	return makePath(query, nodePath.value(), true);
 }
 
 Vector<Navmesh::NodeAndConn> Navmesh::makeResult(const Vector<State>& state, int startId, int endId) const
@@ -460,7 +460,7 @@ std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, int to
 	return {};
 }
 
-std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const
+std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath, bool postProcess) const
 {
 	Vector<Vector2f> points;
 	points.reserve(nodePath.size() + 1);
@@ -475,12 +475,14 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 		points.push_back(0.5f * (edge.a + edge.b));
 	}
 	points.push_back(query.to.pos);
-	
-	if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
-		postProcessPath(points, query.postProcessingType);
-	}
-	if (query.quantizationType != NavigationQuery::QuantizationType::None) {
-		quantizePath(points, query.quantizationType);
+
+	if (postProcess) {
+		if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
+			postProcessPath(points, query.postProcessingType);
+		}
+		if (query.quantizationType != NavigationQuery::QuantizationType::None) {
+			quantizePath(points, query.quantizationType);
+		}
 	}
 
 	// Check for NaN/inf
@@ -604,7 +606,8 @@ void Navmesh::quantizePath8Way(Vector<Vector2f>& points, Vector2f scale) const
 		const auto d1 = delta - d0;
 
 		// If either vector is too small, then it's not worth doing it
-		if (d0.length() >= 4 && d1.length() >= 4) {
+		const float threshold = 1.0f;
+		if (d0.length() >= threshold && d1.length() >= threshold) {
 			// Two potential target points, c and d, are constructed
 			const auto c = a + d0 / scale;
 			const auto d = a + d1 / scale;
@@ -722,7 +725,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 	}
 
 	// No collisions
-	return { {}, weightedDistance };
+	return { std::nullopt, weightedDistance };
 }
 
 void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
@@ -1072,4 +1075,11 @@ void Navmesh::Portal::translate(Vector2f offset)
 	for (auto& v: vertices) {
 		v += offset;
 	}
+}
+
+Vector2f Navmesh::Portal::getClosestPoint(Vector2f pos) const
+{
+	// NB: this assumes a linear portal
+	const auto segment = LineSegment(vertices.front(), vertices.back());
+	return segment.getClosestPoint(pos);
 }
