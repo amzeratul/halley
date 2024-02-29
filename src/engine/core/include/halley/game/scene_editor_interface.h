@@ -442,6 +442,7 @@ namespace Halley {
 		virtual void setAssetSaveNotification(bool enabled) = 0;
 		virtual Game* getGameInstance() const = 0;
 		virtual void launchGame(Vector<String> params) const = 0;
+		virtual Resources& getGameResources() = 0;
 	};
 
 	class IProjectWindow {

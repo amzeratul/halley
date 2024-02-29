@@ -3,6 +3,7 @@
 #include "halley/maths/uuid.h"
 #include <set>
 #include "entity_data.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
 	class IDataInterpolatorSetRetriever;
@@ -118,7 +119,18 @@ namespace Halley {
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
+		ConfigNode toConfigNode() const;
+
 	private:
 		Vector<std::pair<UUID, EntityDataDelta>> entities;
+	};
+
+	class Resources;
+	template<>
+	class ConfigNodeSerializer<EntityDataDelta> {
+	public:
+		ConfigNode serialize(const EntityDataDelta& entityData, const EntitySerializationContext& context);
+		EntityDataDelta deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, EntityDataDelta& target);
 	};
 }

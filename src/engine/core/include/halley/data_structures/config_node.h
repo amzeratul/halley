@@ -168,6 +168,12 @@ namespace Halley {
 			*this = values;
 		}
 
+		template <typename T, typename U>
+		explicit ConfigNode(const std::pair<T, U>& values)
+		{
+			*this = values;
+		}
+
 		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
 		explicit ConfigNode(T enumValue)
 		{
@@ -267,6 +273,15 @@ namespace Halley {
 				}
 			}
 			return *this = std::move(seq);
+		}
+
+		template <typename T, typename U>
+		ConfigNode& operator=(const std::pair<T, U>& value)
+		{
+			MapType map;
+			map["first"] = value.first;
+			map["second"] = value.second;
+			return *this = std::move(map);
 		}
 
 		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>

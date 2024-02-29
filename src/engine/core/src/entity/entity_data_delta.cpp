@@ -491,3 +491,25 @@ void SceneDataDelta::deserialize(Deserializer& s)
 {
 	s >> entities;
 }
+
+ConfigNode SceneDataDelta::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["entities"] = entities;
+	return result;
+}
+
+ConfigNode ConfigNodeSerializer<EntityDataDelta>::serialize(const EntityDataDelta& entityData, const EntitySerializationContext& context)
+{
+	return entityData.toConfigNode();
+}
+
+EntityDataDelta ConfigNodeSerializer<EntityDataDelta>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	throw Exception("EntityDataDelta deserialization is not implemented", HalleyExceptions::Entity);
+}
+
+void ConfigNodeSerializer<EntityDataDelta>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, EntityDataDelta& target)
+{
+	throw Exception("EntityDataDelta deserialization is not implemented", HalleyExceptions::Entity);
+}

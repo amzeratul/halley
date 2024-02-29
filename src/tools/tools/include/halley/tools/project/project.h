@@ -129,7 +129,7 @@ namespace Halley
 		Path getExecutablePath() const;
 
 		void loadGameResources(const HalleyAPI& api);
-		Resources& getGameResources();
+		Resources& getGameResources() override;
 
 		bool isDLLLoaded() const;
 		bool areAssetsLoaded() const;
