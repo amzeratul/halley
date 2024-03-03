@@ -84,7 +84,7 @@ namespace Halley {
 
         void setClip(Rect4i rect, bool enable);
     	void clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil);
-	    void draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads);
+	    void draw(const Material& material, size_t numObjects, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads);
 
         void finish();
 
@@ -115,8 +115,10 @@ namespace Halley {
         struct DrawData {
             const Material* materialTemp;
             std::shared_ptr<Material> material;
+            size_t numObjects;
             size_t numVertices;
             Vector<char> vertexData;
+            Vector<char> objectData;
             Vector<IndexType> indices;
             PrimitiveType primitive;
             bool allIndicesAreQuads;

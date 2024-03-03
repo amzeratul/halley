@@ -168,9 +168,11 @@ namespace Halley
 		Vector<MaterialUniform> uniforms;
 		Vector<int> addresses;
 		size_t offset = 0;
+		uint8_t bindingMask = 0;
+		bool shared = false;
 
 		MaterialUniformBlock() = default;
-		MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms);
+		MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -187,7 +189,6 @@ namespace Halley
 		int semanticIndex = 0;
 		int location = 0;
 		int offset = 0;
-		bool isVertexPos = false;
 
 		MaterialAttribute();
 		MaterialAttribute(String name, ShaderParameterType type, int location, int offset = 0);
@@ -254,10 +255,14 @@ namespace Halley
 
 		size_t getVertexSize() const;
 		size_t getVertexStride() const;
-		size_t getVertexPosOffset() const;
+		size_t getObjectSize() const;
+		size_t getObjectStride() const;
 
-		void setAttributes(Vector<MaterialAttribute> attributes);
-		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
+		void setVertexAttributes(Vector<MaterialAttribute> attributes);
+		const Vector<MaterialAttribute>& getVertexAttributes() const { return vertexAttributes; }
+		void setObjectAttributes(Vector<MaterialAttribute> attributes);
+		const Vector<MaterialAttribute>& getObjectAttributes() const { return objectAttributes; }
+
 		void setUniformBlocks(Vector<MaterialUniformBlock> uniformBlocks);
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		void setTextures(Vector<MaterialTexture> textures);
@@ -285,9 +290,10 @@ namespace Halley
 		Vector<MaterialPass> passes;
 		Vector<MaterialTexture> textures;
 		Vector<MaterialUniformBlock> uniformBlocks;
-		Vector<MaterialAttribute> attributes;
+		Vector<MaterialAttribute> vertexAttributes;
+		Vector<MaterialAttribute> objectAttributes;
 		int vertexSize = 0;
-		int vertexPosOffset = 0;
+		int objectSize = 0;
 		int defaultMask = 1;
 		bool columnMajor = false;
 		bool autoVariables = false;
@@ -298,8 +304,9 @@ namespace Halley
 		void updateUniformBlocks();
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
-		void loadAttributes(const ConfigNode& node);
+		void loadAttributes(Vector<MaterialAttribute>& attributes, const ConfigNode& node);
 		void assignAttributeOffsets();
+		int assignAttributeOffsets(Vector<MaterialAttribute>& attributes) const;
 		ShaderParameterType parseParameterType(const String& rawType) const;
 		TextureSamplerType parseSamplerType(const String& rawType) const;
 	};

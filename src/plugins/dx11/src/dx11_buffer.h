@@ -11,7 +11,8 @@ namespace Halley {
 		{
 			Vertex,
 			Index,
-			Constant
+			Constant,
+			StructuredBuffer
 		};
 
         DX11Buffer(DX11Video& video, Type type, size_t initialSize = 0);
@@ -23,7 +24,7 @@ namespace Halley {
 		DX11Buffer& operator=(const DX11Buffer& other) = delete;
 		DX11Buffer& operator=(DX11Buffer&& other) = delete;
 
-		void setData(gsl::span<const gsl::byte> data);
+		void setData(gsl::span<const gsl::byte> data, std::optional<size_t> stride = std::nullopt);
 		ID3D11Buffer*& getBuffer();
 		UINT getOffset() const;
 		UINT getLastSize() const;
@@ -42,6 +43,6 @@ namespace Halley {
 		size_t lastPos = 0;
 		bool waitingReset = false;
 
-		void resize(size_t size);
+		void resize(size_t size, std::optional<size_t> stride);
 	};
 }

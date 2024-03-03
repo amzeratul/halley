@@ -60,6 +60,11 @@ std::unique_ptr<MaterialConstantBuffer> DummyVideoAPI::createConstantBuffer()
 	return std::make_unique<DummyMaterialConstantBuffer>();
 }
 
+std::unique_ptr<MaterialShaderStorageBuffer> DummyVideoAPI::createShaderStorageBuffer()
+{
+	return std::make_unique<DummyMaterialShaderStorageBuffer>();
+}
+
 void DummyVideoAPI::init()
 {
 }
@@ -99,6 +104,10 @@ int DummyShader::getBlockLocation(const String&, ShaderType)
 }
 
 void DummyMaterialConstantBuffer::update(gsl::span<const gsl::byte> data) {}
+
+void DummyMaterialShaderStorageBuffer::update(size_t numElements, size_t pitch, gsl::span<const gsl::byte> data) {}
+
+void DummyMaterialShaderStorageBuffer::bind(ShaderType type, int position) {}
 
 DummyPainter::DummyPainter(VideoAPI& video, Resources& resources)
 	: Painter(video, resources)

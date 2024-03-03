@@ -262,6 +262,12 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 	return std::make_unique<ConstantBufferOpenGL>();
 }
 
+std::unique_ptr<MaterialShaderStorageBuffer> VideoOpenGL::createShaderStorageBuffer()
+{
+	// TODO
+	throw Exception("Unimplemented: VideoOpenGL::createShaderStorageBuffer", HalleyExceptions::VideoPlugin);
+}
+
 String VideoOpenGL::getShaderLanguage()
 {
 #if defined(HALLEY_OPENGL_USE_GLSL410)

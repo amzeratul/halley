@@ -1,13 +1,21 @@
 ---
 name: Halley/SpriteBase
 base: material_base.material
+uniforms:
+  - SpriteData:
+      shared: true
+      bindings: [vertex]
 attributes:
   # xy = relative position of vertex [0..1], zw = relative position of texture [0..1]
   - name: vertPos
     type: vec4
     semantic: VERTPOS
-    special: vertPos
 
+  # Index of which object it belongs to
+  - name: idx
+    type: int
+    semantic: OBJECTIDX
+objectAttributes:
   # position (world space)
   - name: position
     type: vec2

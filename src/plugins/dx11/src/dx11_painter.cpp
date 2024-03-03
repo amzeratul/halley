@@ -82,7 +82,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
-	shader.setMaterialLayout(dx11Video, material.getDefinition().getAttributes());
+	shader.setMaterialLayout(dx11Video, material.getDefinition().getVertexAttributes());
 	shader.bind(dx11Video);
 
 	// Blend
@@ -114,8 +114,16 @@ void DX11Painter::setMaterialData(const Material& material)
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
 			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(getConstantBuffer(block)).getBuffer();
 			auto dxBuffer = buffer.getBuffer();
-            devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
-            devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+
+			const auto vsBindPoint = block.getBindPoint(ShaderType::Vertex);
+			const auto psBindPoint = block.getBindPoint(ShaderType::Pixel);
+
+			if (vsBindPoint >= 0) {
+				devCon.VSSetConstantBuffers(vsBindPoint, 1, &dxBuffer);
+			}
+			if (psBindPoint >= 0) {
+				devCon.PSSetConstantBuffers(psBindPoint, 1, &dxBuffer);
+			}
 		}
 	}
 }
