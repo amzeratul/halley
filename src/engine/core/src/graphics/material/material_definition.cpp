@@ -340,6 +340,18 @@ size_t MaterialDefinition::getVertexPosOffset() const
 	return size_t(vertexPosOffset);
 }
 
+size_t MaterialDefinition::getObjectSize() const
+{
+	// TODO
+	return 0;
+}
+
+size_t MaterialDefinition::getObjectStride() const
+{
+	// TODO
+	return 0;
+}
+
 void MaterialDefinition::setAttributes(Vector<MaterialAttribute> attributes)
 {
 	this->attributes = std::move(attributes);

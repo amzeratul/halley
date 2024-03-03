@@ -237,6 +237,8 @@ namespace Halley
 		size_t getVertexSize() const;
 		size_t getVertexStride() const;
 		size_t getVertexPosOffset() const;
+		size_t getObjectSize() const;
+		size_t getObjectStride() const;
 
 		void setAttributes(Vector<MaterialAttribute> attributes);
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }

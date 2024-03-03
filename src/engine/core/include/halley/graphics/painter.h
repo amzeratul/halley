@@ -41,10 +41,14 @@ namespace Halley
 		struct PainterVertexData
 		{
 			char* dstVertex;
+			char* dstObject;
 			IndexType* dstIndex;
 			size_t vertexSize;
 			size_t vertexStride;
-			size_t dataSize;
+			size_t vertexDataSize;
+			size_t objectSize;
+			size_t objectStride;
+			size_t objectDataSize;
 			IndexType firstIndex;
 		};
 
@@ -182,10 +186,13 @@ namespace Halley
 		Camera camera;
 
 		size_t verticesPending = 0;
-		size_t bytesPending = 0;
 		size_t indicesPending = 0;
+		size_t objectsPending = 0;
+		size_t vertexBytesPending = 0;
+		size_t objectBytesPending = 0;
 		bool allIndicesAreQuads = true;
 		Vector<char> vertexBuffer;
+		Vector<char> objectBuffer;
 		Vector<IndexType> indexBuffer;
 		std::shared_ptr<const Material> materialPending;
 		std::shared_ptr<const Material> solidLineMaterial;
@@ -229,8 +236,9 @@ namespace Halley
 		void executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
+		void makeSpaceForPendingObjects(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		PainterVertexData addDrawData(const std::shared_ptr<const Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
+		PainterVertexData addDrawData(const std::shared_ptr<const Material>& material, size_t numObjects, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
 		IndexType* getStandardQuadIndices(size_t numQuads);
 		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);

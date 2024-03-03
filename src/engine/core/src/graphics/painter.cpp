@@ -111,39 +111,54 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
+Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Material>& material, size_t numObjects, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
-	updateClip();
-
-	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max()) + 1;
-	if (numVertices > maxVertices) {
-		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
-	}
-	if (verticesPending + numVertices > maxVertices) {
-		flushPending();
-	}
-
 	Expects(material != nullptr);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
 
-	startDrawCall(material);
+	updateClip();
 
+	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max()) + 1;
+	constexpr auto maxObjectSize = 16 * 1024; // TODO, max UBO size
+	if (numVertices > maxVertices) {
+		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
+	}
+
+	// Calculate space needed
 	PainterVertexData result;
-
 	result.vertexSize = material->getDefinition().getVertexSize();
 	result.vertexStride = material->getDefinition().getVertexStride();
-	result.dataSize = numVertices * result.vertexStride;
-	makeSpaceForPendingVertices(result.dataSize);
-	makeSpaceForPendingIndices(numIndices);
+	result.vertexDataSize = numVertices * result.vertexStride;
+	result.objectSize = material->getDefinition().getObjectSize();
+	result.objectStride = material->getDefinition().getObjectStride();
+	result.objectDataSize = numObjects * result.objectStride;
 
-	result.dstVertex = vertexBuffer.data() + bytesPending;
+	// Flush existing if it won't fit
+	if (verticesPending + numVertices > maxVertices || objectBytesPending + result.objectDataSize > maxObjectSize) {
+		flushPending();
+	}
+	if (verticesPending + numVertices > maxVertices || objectBytesPending + result.objectDataSize > maxObjectSize) {
+		throw Exception("Too much data for a single Sprite draw call.", HalleyExceptions::Graphics);
+	}
+
+	// Start new draw call if needed
+	startDrawCall(material);
+
+	// Allocate space
+	makeSpaceForPendingVertices(result.vertexDataSize);
+	makeSpaceForPendingObjects(result.objectDataSize);
+	makeSpaceForPendingIndices(numIndices);
+	result.dstVertex = vertexBuffer.data() + vertexBytesPending;
+	result.dstObject = objectBuffer.data() + objectBytesPending;
 	result.dstIndex = indexBuffer.data() + indicesPending;
 	result.firstIndex = static_cast<IndexType>(verticesPending);
 
 	indicesPending += numIndices;
 	verticesPending += numVertices;
-	bytesPending += result.dataSize;
+	objectsPending += numObjects;
+	vertexBytesPending += result.vertexDataSize;
+	objectBytesPending += result.objectDataSize;
 	allIndicesAreQuads &= standardQuadsOnly;
 
 	pendingDebugGroupStack = curDebugGroupStack;
@@ -156,9 +171,9 @@ void Painter::draw(const std::shared_ptr<const Material>& material, size_t numVe
 	Expects(primitiveType == PrimitiveType::Triangle);
 	Expects(indices.size() % 3 == 0);
 
-	const auto result = addDrawData(material, numVertices, indices.size(), false);
+	const auto result = addDrawData(material, 1, numVertices, indices.size(), false);
 
-	memcpy(result.dstVertex, vertexData, result.dataSize);
+	memcpy(result.dstVertex, vertexData, result.vertexDataSize);
 
 	for (size_t i = 0; i < size_t(indices.size()); ++i) {
 		result.dstIndex[i] = indices[i] + result.firstIndex;
@@ -170,9 +185,9 @@ void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t 
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
 
-	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
+	const auto result = addDrawData(material, 1, numVertices, numVertices * 3 / 2, true);
 
-	memcpy(result.dstVertex, vertexData, result.dataSize);
+	memcpy(result.dstVertex, vertexData, result.vertexDataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
@@ -190,7 +205,7 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 		const size_t numVertices = verticesPerSprite * numSprites;
 		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-		const auto result = addDrawData(material, numVertices, numSprites * 6, true);
+		const auto result = addDrawData(material, 1, numVertices, numSprites * 6, true);
 
 		const char* const src = static_cast<const char*>(vertexData) + offset;
 
@@ -237,7 +252,7 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	const auto result = addDrawData(material, numVertices, numIndices, false);
+	const auto result = addDrawData(material, 1, numVertices, numIndices, false);
 	const char* const src = static_cast<const char*>(vertexData);
 
 	// Vertices
@@ -581,9 +596,17 @@ void Painter::onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
-	size_t requiredSize = bytesPending + numBytes;
+	size_t requiredSize = vertexBytesPending + numBytes;
 	if (vertexBuffer.size() < requiredSize) {
 		vertexBuffer.resize(requiredSize * 2);
+	}
+}
+
+void Painter::makeSpaceForPendingObjects(size_t numBytes)
+{
+	size_t requiredSize = objectBytesPending + numBytes;
+	if (objectBuffer.size() < requiredSize) {
+		objectBuffer.resize(requiredSize * 2);
 	}
 }
 
@@ -737,8 +760,10 @@ void Painter::flushPending()
 
 void Painter::resetPending()
 {
-	bytesPending = 0;
+	vertexBytesPending = 0;
 	verticesPending = 0;
+	objectBytesPending = 0;
+	objectsPending = 0;
 	indicesPending = 0;
 	allIndicesAreQuads = true;
 	if (materialPending) {
