@@ -20,18 +20,21 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def)
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints, std::string_view name, const MaterialDefinition& def)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, dataBlockType(type)
-	, bindPoint(static_cast<int16_t>(bindPoint))
+	, blockIndex(blockIndex)
+	, bindPoints(bindPoints)
 {
+	assert(std::any_of(bindPoints.begin(), bindPoints.end(), [](const auto e) { return e != -1; }));
 }
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	: data(std::move(other.data))
 	, dataBlockType(other.dataBlockType)
 	, needToUpdateHash(other.needToUpdateHash)
-	, bindPoint(other.bindPoint)
+	, blockIndex(other.blockIndex)
+	, bindPoints(other.bindPoints)
 	, hash(other.hash)
 {
 	other.hash = 0;
@@ -131,13 +134,23 @@ Material::~Material()
 
 void Material::initUniforms(bool forceLocalBlocks)
 {
-	int nextBindPoint = 1;
+	std::array<int16_t, 4> curBindPoints;
+	curBindPoints.fill(-1);
+
+	int nextIndex = 1;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
-		const auto type = uniformBlock.name == "HalleyBlock"
-			? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal)
-			: MaterialDataBlockType::Local;
-		const int bind = type == MaterialDataBlockType::Local ? nextBindPoint++ : 0;
-		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, bind, uniformBlock.name, *materialDefinition));
+		const auto type = uniformBlock.shared ? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal) : MaterialDataBlockType::Local;
+		const int index = type == MaterialDataBlockType::Local ? nextIndex++ : 0;
+
+		std::array<int16_t, 4> bindPoints;
+		bindPoints.fill(-1);
+		for (int i = 0; i < bindPoints.size(); ++i) {
+			if (uniformBlock.bindingMask & (1 << i)) {
+				bindPoints[i] = ++curBindPoints[i];
+			}
+		}
+
+		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, index, bindPoints, uniformBlock.name, *materialDefinition));
 	}
 
 	// Load textures

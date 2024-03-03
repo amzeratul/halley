@@ -54,21 +54,32 @@ void MaterialUniform::deserialize(Deserializer& s)
 	s >> defaultValue;
 }
 
-MaterialUniformBlock::MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms)
+MaterialUniformBlock::MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms)
 	: name(std::move(name))
 	, uniforms(std::move(uniforms))
-{}
+	, shared(isShared)
+{
+	bindingMask = 0;
+	for (const auto& binding: bindings) {
+		bindingMask = bindingMask | (1 << static_cast<int>(binding));
+	}
+	assert(bindingMask != 0);
+}
 
 void MaterialUniformBlock::serialize(Serializer& s) const
 {
 	s << name;
 	s << uniforms;
+	s << bindingMask;
+	s << shared;
 }
 
 void MaterialUniformBlock::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> uniforms;
+	s >> bindingMask;
+	s >> shared;
 }
 
 int MaterialUniformBlock::getAddress(int pass, ShaderType stage) const
@@ -437,31 +448,44 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 	for (auto& blockEntry : node.asSequence()) {
 		for (auto& it: blockEntry.asMap()) {
 			const String& blockName = it.first;
-			auto& uniformNodes = it.second;
+
+			const auto& blockData = it.second;
+			const auto& uniformNodes = blockData.getType() == ConfigNodeType::Sequence ? blockData : blockData["uniforms"];
 
 			Vector<MaterialUniform> uniforms;
-			for (auto& uniformEntry: uniformNodes.asSequence()) {
-				if (uniformEntry.hasKey("name")) {
-					const auto name = uniformEntry["name"].asString();
-					const auto type = parseParameterType(uniformEntry["type"].asString());
-					std::optional<Range<float>> range;
-					if (uniformEntry.hasKey("range")) {
-						range = uniformEntry["range"].asFloatRange();
-					}
-					const auto granularity = uniformEntry["granularity"].asFloat(1);
-					const bool editable = uniformEntry["canEdit"].asBool(true);
-					const auto autoVariable = uniformEntry["autoVariable"].asString("");
-					uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
-				} else {
-					for (auto& uit: uniformEntry.asMap()) {
-						String uniformName = uit.first;
-						ShaderParameterType type = parseParameterType(uit.second.asString());
-						uniforms.push_back(MaterialUniform(uniformName, type));
+			if (uniformNodes.getType() != ConfigNodeType::Undefined) {
+				for (const auto& uniformEntry: uniformNodes.asSequence()) {
+					if (uniformEntry.hasKey("name")) {
+						const auto name = uniformEntry["name"].asString();
+						const auto type = parseParameterType(uniformEntry["type"].asString());
+						std::optional<Range<float>> range;
+						if (uniformEntry.hasKey("range")) {
+							range = uniformEntry["range"].asFloatRange();
+						}
+						const auto granularity = uniformEntry["granularity"].asFloat(1);
+						const bool editable = uniformEntry["canEdit"].asBool(true);
+						const auto autoVariable = uniformEntry["autoVariable"].asString("");
+						uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
+					} else {
+						for (auto& uit: uniformEntry.asMap()) {
+							String uniformName = uit.first;
+							ShaderParameterType type = parseParameterType(uit.second.asString());
+							uniforms.push_back(MaterialUniform(uniformName, type));
+						}
 					}
 				}
 			}
+
+			Vector<ShaderType> bindings;
+			bool shared = false;
+			if (blockData.getType() == ConfigNodeType::Map) {
+				bindings = blockData["bindings"].asVector<ShaderType>({ ShaderType::Vertex, ShaderType::Pixel });
+				shared = blockData["shared"].asBool(false);
+			} else {
+				bindings = { { ShaderType::Vertex, ShaderType::Pixel } };
+			}
 			
-			uniformBlocks.push_back(MaterialUniformBlock(blockName, uniforms));
+			uniformBlocks.push_back(MaterialUniformBlock(blockName, bindings, shared, uniforms));
 		}
 	}
 }

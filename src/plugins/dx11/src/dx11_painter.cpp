@@ -122,11 +122,11 @@ void DX11Painter::setMaterialData(const Material& material)
 			if (Halley::getPlatform() == GamePlatform::UWP || Halley::getPlatform() == GamePlatform::XboxOne) {
 				UINT firstConstant[] = { buffer.getOffset() / 16 };
 				UINT numConstants[] = { buffer.getLastSize() / 16 };
-				devCon.VSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
-				devCon.PSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
+				devCon.VSSetConstantBuffers1(block.getBindPoint(ShaderType::Vertex), 1, &dxBuffer, firstConstant, numConstants);
+				devCon.PSSetConstantBuffers1(block.getBindPoint(ShaderType::Pixel), 1, &dxBuffer, firstConstant, numConstants);
 			} else {
-				devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
-				devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+				devCon.VSSetConstantBuffers(block.getBindPoint(ShaderType::Vertex), 1, &dxBuffer);
+				devCon.PSSetConstantBuffers(block.getBindPoint(ShaderType::Pixel), 1, &dxBuffer);
 			}
 		}
 	}
