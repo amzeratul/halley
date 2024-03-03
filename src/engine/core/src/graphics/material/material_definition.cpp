@@ -54,21 +54,32 @@ void MaterialUniform::deserialize(Deserializer& s)
 	s >> defaultValue;
 }
 
-MaterialUniformBlock::MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms)
+MaterialUniformBlock::MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms)
 	: name(std::move(name))
 	, uniforms(std::move(uniforms))
-{}
+	, shared(isShared)
+{
+	bindingMask = 0;
+	for (const auto& binding: bindings) {
+		bindingMask = bindingMask | (1 << static_cast<int>(binding));
+	}
+	assert(bindingMask != 0);
+}
 
 void MaterialUniformBlock::serialize(Serializer& s) const
 {
 	s << name;
 	s << uniforms;
+	s << bindingMask;
+	s << shared;
 }
 
 void MaterialUniformBlock::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> uniforms;
+	s >> bindingMask;
+	s >> shared;
 }
 
 int MaterialUniformBlock::getAddress(int pass, ShaderType stage) const
@@ -200,7 +211,7 @@ std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoa
 	{
 		int i = 0;
 		for (auto& p: result->passes) {
-			p.createShader(*video, resources, result->name + "/pass" + toString(i++), result->attributes);
+			p.createShader(*video, resources, result->name + "/pass" + toString(i++), result->vertexAttributes);
 		}
 		result->initialize(*video);
 		result->doneLoading();
@@ -284,8 +295,12 @@ void MaterialDefinition::load(const ConfigNode& root)
 
 	// Load attributes & uniforms
 	if (root.hasKey("attributes")) {
-		loadAttributes(root["attributes"]);
+		loadAttributes(vertexAttributes, root["attributes"]);
 	}
+	if (root.hasKey("objectAttributes")) {
+		loadAttributes(objectAttributes, root["objectAttributes"]);
+	}
+	assignAttributeOffsets();
 	if (root.hasKey("uniforms")) {
 		loadUniforms(root["uniforms"]);
 	}
@@ -341,21 +356,28 @@ size_t MaterialDefinition::getVertexSize() const
 
 size_t MaterialDefinition::getVertexStride() const
 {
-	if (vertexSize % 16 != 0) {
-		return size_t(vertexSize + 16 - vertexSize % 16);
-	} else {
-		return size_t(vertexSize);
-	}
+	return alignUp(vertexSize, 16);
 }
 
-size_t MaterialDefinition::getVertexPosOffset() const
+size_t MaterialDefinition::getObjectSize() const
 {
-	return size_t(vertexPosOffset);
+	return size_t(objectSize);
 }
 
-void MaterialDefinition::setAttributes(Vector<MaterialAttribute> attributes)
+size_t MaterialDefinition::getObjectStride() const
 {
-	this->attributes = std::move(attributes);
+	return alignUp(objectSize, 16);
+}
+
+void MaterialDefinition::setVertexAttributes(Vector<MaterialAttribute> attributes)
+{
+	this->vertexAttributes = std::move(attributes);
+	assignAttributeOffsets();
+}
+
+void MaterialDefinition::setObjectAttributes(Vector<MaterialAttribute> attributes)
+{
+	this->objectAttributes = std::move(attributes);
 	assignAttributeOffsets();
 }
 
@@ -416,9 +438,9 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << passes;
 	s << textures;
 	s << uniformBlocks;
-	s << attributes;
+	s << vertexAttributes;
 	s << vertexSize;
-	s << vertexPosOffset;
+	s << objectSize;
 	s << defaultMask;
 	s << tags;
 }
@@ -429,9 +451,9 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> passes;
 	s >> textures;
 	s >> uniformBlocks;
-	s >> attributes;
+	s >> vertexAttributes;
 	s >> vertexSize;
-	s >> vertexPosOffset;
+	s >> objectSize;
 	s >> defaultMask;
 	s >> tags;
 }
@@ -479,31 +501,44 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 	for (auto& blockEntry : node.asSequence()) {
 		for (auto& it: blockEntry.asMap()) {
 			const String& blockName = it.first;
-			auto& uniformNodes = it.second;
+
+			const auto& blockData = it.second;
+			const auto& uniformNodes = blockData.getType() == ConfigNodeType::Sequence ? blockData : blockData["uniforms"];
 
 			Vector<MaterialUniform> uniforms;
-			for (auto& uniformEntry: uniformNodes.asSequence()) {
-				if (uniformEntry.hasKey("name")) {
-					const auto name = uniformEntry["name"].asString();
-					const auto type = parseParameterType(uniformEntry["type"].asString());
-					std::optional<Range<float>> range;
-					if (uniformEntry.hasKey("range")) {
-						range = uniformEntry["range"].asFloatRange();
-					}
-					const auto granularity = uniformEntry["granularity"].asFloat(1);
-					const bool editable = uniformEntry["canEdit"].asBool(true);
-					const auto autoVariable = uniformEntry["autoVariable"].asString("");
-					uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
-				} else {
-					for (auto& uit: uniformEntry.asMap()) {
-						String uniformName = uit.first;
-						ShaderParameterType type = parseParameterType(uit.second.asString());
-						uniforms.push_back(MaterialUniform(uniformName, type));
+			if (uniformNodes.getType() != ConfigNodeType::Undefined) {
+				for (const auto& uniformEntry: uniformNodes.asSequence()) {
+					if (uniformEntry.hasKey("name")) {
+						const auto name = uniformEntry["name"].asString();
+						const auto type = parseParameterType(uniformEntry["type"].asString());
+						std::optional<Range<float>> range;
+						if (uniformEntry.hasKey("range")) {
+							range = uniformEntry["range"].asFloatRange();
+						}
+						const auto granularity = uniformEntry["granularity"].asFloat(1);
+						const bool editable = uniformEntry["canEdit"].asBool(true);
+						const auto autoVariable = uniformEntry["autoVariable"].asString("");
+						uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
+					} else {
+						for (auto& uit: uniformEntry.asMap()) {
+							String uniformName = uit.first;
+							ShaderParameterType type = parseParameterType(uit.second.asString());
+							uniforms.push_back(MaterialUniform(uniformName, type));
+						}
 					}
 				}
 			}
+
+			Vector<ShaderType> bindings;
+			bool shared = false;
+			if (blockData.getType() == ConfigNodeType::Map) {
+				bindings = blockData["bindings"].asVector<ShaderType>({ ShaderType::Vertex, ShaderType::Pixel });
+				shared = blockData["shared"].asBool(false);
+			} else {
+				bindings = { { ShaderType::Vertex, ShaderType::Pixel } };
+			}
 			
-			uniformBlocks.push_back(MaterialUniformBlock(blockName, uniforms));
+			uniformBlocks.push_back(MaterialUniformBlock(blockName, bindings, shared, uniforms));
 		}
 	}
 
@@ -532,7 +567,7 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 	}
 }
 
-void MaterialDefinition::loadAttributes(const ConfigNode& node)
+void MaterialDefinition::loadAttributes(Vector<MaterialAttribute>& attributes, const ConfigNode& node)
 {
 	for (const auto& attribEntry: node.asSequence()) {
 		const ShaderParameterType type = parseParameterType(attribEntry["type"].asString());
@@ -549,28 +584,27 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 		a.type = type;
 		a.semantic = semantic;
 		a.semanticIndex = semanticIndex;
-		a.isVertexPos = attribEntry["special"].asString("") == "vertPos";
 	}
-
-	assignAttributeOffsets();
 }
 
 void MaterialDefinition::assignAttributeOffsets()
 {
+	vertexSize = assignAttributeOffsets(vertexAttributes);
+	objectSize = assignAttributeOffsets(objectAttributes);
+}
+
+int MaterialDefinition::assignAttributeOffsets(Vector<MaterialAttribute>& attributes) const
+{
 	int location = 0;
-	vertexSize = 0;
+	int totalSize = 0;
 
 	for (auto& a: attributes) {
 		a.location = location++;
-		a.offset = vertexSize;
-
-		const int size = int(MaterialAttribute::getAttributeSize(a.type));
-		vertexSize += size;
-
-		if (a.isVertexPos) {
-			vertexPosOffset = a.offset;
-		}
+		a.offset = totalSize;
+		totalSize += static_cast<int>(MaterialAttribute::getAttributeSize(a.type));
 	}
+
+	return totalSize;
 }
 
 ShaderParameterType MaterialDefinition::parseParameterType(const String& rawType) const

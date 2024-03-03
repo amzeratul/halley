@@ -1,19 +1,7 @@
 // Vertex input
 struct VIn {
     float4 vertPos : VERTPOS;
-    float2 position : POSITION;
-    float2 pivot : PIVOT;
-    float2 size : SIZE;
-    float2 scale : SCALE;
-    float4 colour : COLOUR;
-    float4 texCoord0 : TEXCOORD0;
-    float4 texCoord1 : TEXCOORD1;
-    float4 custom0 : CUSTOM0;
-    float4 custom1 : CUSTOM1;
-    float4 custom2 : CUSTOM2;
-    float4 custom3 : CUSTOM3;
-    float rotation : ROTATION;
-    float textureRotation : TEXTUREROTATION;
+    int idx : OBJECTIDX;
 };
 
 // Vertex output / Pixel input

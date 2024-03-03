@@ -68,11 +68,11 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+		Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 
 		paintWithClip(painter, extClip, [&] ()
 		{
-			painter.drawSprites(material, 1, getVertexAttrib());
+			painter.drawSprites(material, 1, getObjectAttrib());
 		});
 	}
 }
@@ -80,7 +80,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+		Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 		
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -91,7 +91,7 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 			slices.w /= size.y;
 			slices *= sliceScale;
 
-			painter.drawSlicedSprite(material, vertexAttrib.scale, slices, getVertexAttrib());
+			painter.drawSlicedSprite(material, objectAttrib.scale, slices, getObjectAttrib());
 		});
 	}
 }
@@ -103,27 +103,27 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+	Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 
-	size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
+	size_t spriteSize = sizeof(SpriteObjectAttrib);
 	char buffer[4096];
-	char* vertexData;
+	char* objectData;
 	Vector<char> vertices;
-	const size_t vertexDataSize = sprites.size() * spriteSize;
-	if (vertexDataSize <= 4096) {
-		vertexData = buffer;
+	const size_t objectDataSize = sprites.size() * spriteSize;
+	if (objectDataSize <= 4096) {
+		objectData = buffer;
 	} else {
-		vertices.resize(vertexDataSize);
-		vertexData = vertices.data();
+		vertices.resize(objectDataSize);
+		objectData = vertices.data();
 	}
 
 	for (size_t i = 0; i < sprites.size(); i++) {
 		auto& sprite = sprites[i];
 		Expects(sprite.material == material);
-		memcpy(&vertexData[i * spriteSize], sprite.getVertexAttrib(), spriteSize);
+		memcpy(&objectData[i * spriteSize], sprite.getObjectAttrib(), spriteSize);
 	}
 
-	painter.drawSprites(material, sprites.size(), vertexData);
+	painter.drawSprites(material, sprites.size(), objectData);
 }
 
 void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter)
@@ -202,14 +202,14 @@ bool Sprite::isInView(Rect4f rect) const
 
 Sprite& Sprite::setRotation(Angle1f v)
 {
-	vertexAttrib.rotation = v.getRadians();
+	objectAttrib.rotation = v.getRadians();
 	rotated = std::abs(v.getRadians()) > 0.000001f;
 	return *this;
 }
 
 Sprite& Sprite::setScale(Vector2f v)
 {
-	vertexAttrib.scale = v;
+	objectAttrib.scale = v;
 	return *this;
 }
 
@@ -244,7 +244,7 @@ Sprite& Sprite::setTexRect(Rect4f texRect)
 	setHotReload(nullptr, 0);
 #endif
 	
-	vertexAttrib.texRect0 = texRect.toVector4();
+	objectAttrib.texRect0 = texRect.toVector4();
 	return *this;
 }
 
@@ -254,7 +254,7 @@ Sprite& Sprite::setTexRect(Vector4f texRect)
 	setHotReload(nullptr, 0);
 #endif
 	
-	vertexAttrib.texRect0 = texRect;
+	objectAttrib.texRect0 = texRect;
 	return *this;
 }
 
@@ -272,23 +272,23 @@ Sprite& Sprite::setPivot(Vector2f v)
 {
 	Expects(v.isValid());
 	
-	vertexAttrib.pivot = v;
+	objectAttrib.pivot = v;
 
 	return *this;
 }
 
 Sprite& Sprite::setAbsolutePivot(Vector2f v)
 {
-	vertexAttrib.pivot = v / size;
+	objectAttrib.pivot = v / size;
 
 	if (std::abs(size.x) < 0.000001f) {
-		vertexAttrib.pivot.x = 0;
+		objectAttrib.pivot.x = 0;
 	}
 	if (std::abs(size.y) < 0.000001f) {
-		vertexAttrib.pivot.y = 0;
+		objectAttrib.pivot.y = 0;
 	}
 	
-	Ensures(vertexAttrib.pivot.isValid());
+	Ensures(objectAttrib.pivot.isValid());
 
 	return *this;
 }
@@ -475,10 +475,10 @@ void Sprite::doSetSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	setSize(entry.size);
 	if (applyPivot) {
 		Expects(entry.pivot.isValid());
-		vertexAttrib.pivot = entry.pivot;
+		objectAttrib.pivot = entry.pivot;
 	}
-	vertexAttrib.texRect0 = entry.coords.toVector4();
-	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
+	objectAttrib.texRect0 = entry.coords.toVector4();
+	objectAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 
 #ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = applyPivot;
@@ -581,7 +581,7 @@ std::optional<Rect4f> Sprite::getClip() const
 
 std::optional<Rect4f> Sprite::getAbsoluteClip() const
 {
-	return hasClip ? clip + (absoluteClip ? Vector2f() : vertexAttrib.pos) : std::optional<Rect4f>();
+	return hasClip ? clip + (absoluteClip ? Vector2f() : objectAttrib.pos) : std::optional<Rect4f>();
 }
 
 Sprite& Sprite::crop(Vector4f sides)
@@ -598,27 +598,27 @@ Sprite& Sprite::crop(Vector4f sides)
 	setSize(origSize - (sides.xy() + sides.zw()));
 	setAbsolutePivot(origPivot - sides.xy());
 
-	const auto texRect0 = vertexAttrib.texRect0;
+	const auto texRect0 = objectAttrib.texRect0;
 	const auto texScale0 = Rect4f(texRect0).getSize() / origSize;
-	vertexAttrib.texRect0 = texRect0 + Vector4f(texScale0 * sides.xy(), -texScale0 * sides.zw());
-	const auto texRect1 = vertexAttrib.texRect1;
+	objectAttrib.texRect0 = texRect0 + Vector4f(texScale0 * sides.xy(), -texScale0 * sides.zw());
+	const auto texRect1 = objectAttrib.texRect1;
 	const auto texScale1 = Rect4f(texRect1).getSize() / origSize;
-	vertexAttrib.texRect1 = texRect1 + Vector4f(texScale1 * sides.xy(), -texScale1 * sides.zw());
+	objectAttrib.texRect1 = texRect1 + Vector4f(texScale1 * sides.xy(), -texScale1 * sides.zw());
 
 	return *this;
 }
 
 Sprite::RectInfo Sprite::getRectInfo() const
 {
-	return RectInfo{ vertexAttrib.pivot, size, vertexAttrib.texRect0, vertexAttrib.texRect1 };
+	return RectInfo{ objectAttrib.pivot, size, objectAttrib.texRect0, objectAttrib.texRect1 };
 }
 
 void Sprite::setRectInfo(const RectInfo& info)
 {
-	vertexAttrib.pivot = info.pivot;
+	objectAttrib.pivot = info.pivot;
 	size = info.size;
-	vertexAttrib.texRect0 = info.texRect0.toVector4();
-	vertexAttrib.texRect1 = info.texRect1.toVector4();
+	objectAttrib.texRect0 = info.texRect0.toVector4();
+	objectAttrib.texRect1 = info.texRect1.toVector4();
 	computeSize();
 }
 
@@ -658,15 +658,15 @@ bool Sprite::operator!=(const Sprite& other) const
 
 void Sprite::computeSize()
 {
-	vertexAttrib.size = size;
+	objectAttrib.size = size;
 	if (flip) {
-		vertexAttrib.size.x *= -1;
+		objectAttrib.size.x *= -1;
 	}
 }
 
-const void* Sprite::getVertexAttrib() const
+const void* Sprite::getObjectAttrib() const
 {
-	return reinterpret_cast<const char*>(&vertexAttrib) - sizeof(Vector4f);
+	return &objectAttrib;
 }
 
 Vector2f Sprite::getUncroppedSize() const
@@ -902,7 +902,7 @@ void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
 	sliced = other.sliced;
 	rotated = other.rotated;
 	sliceScale = other.sliceScale;
-	vertexAttrib = other.vertexAttrib;
+	objectAttrib = other.objectAttrib;
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;
@@ -933,7 +933,7 @@ void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
 	sliced = other.sliced;
 	rotated = other.rotated;
 	sliceScale = other.sliceScale;
-	vertexAttrib = other.vertexAttrib;
+	objectAttrib = other.objectAttrib;
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;

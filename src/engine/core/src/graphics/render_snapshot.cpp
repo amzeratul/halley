@@ -58,10 +58,10 @@ void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> 
 	finishDrawCall();
 }
 
-void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
+void RenderSnapshot::draw(const Material& material, size_t numObjects, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
 {
 	getCurDrawCall().emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
-	drawDatas.push_back(DrawData{ &material, {}, numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
+	drawDatas.push_back(DrawData{ &material, {}, numObjects, numVertices, Vector<char>(objectData.begin(), objectData.end()), Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
 	finishDrawCall();
 }
 
@@ -326,5 +326,5 @@ void RenderSnapshot::playDraw(Painter& painter, const DrawData& data, std::share
 		}
 		material->setDefinition(std::move(definition));
 	}
-	painter.executeDrawPrimitives(*material, data.numVertices, data.vertexData, data.indices, data.primitive, data.allIndicesAreQuads);
+	painter.executeDrawPrimitives(*material, data.numObjects, data.numVertices, data.objectData, data.vertexData, data.indices, data.primitive, data.allIndicesAreQuads);
 }

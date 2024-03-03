@@ -30,6 +30,15 @@ namespace Halley
 		virtual void update(gsl::span<const gsl::byte> data) = 0;
 	};
 
+	class MaterialShaderStorageBuffer
+	{
+	public:
+		virtual ~MaterialShaderStorageBuffer() {}
+
+		virtual void update(size_t numElements, size_t pitch, gsl::span<const gsl::byte> data) = 0;
+		virtual void bind(ShaderType type, int position) = 0;
+	};
+
 	enum class MaterialDataBlockType : uint8_t
 	{
 		// Shared blocks are not stored locally in the material (e.g. the HalleyBlock, stored by the engine)
@@ -44,12 +53,14 @@ namespace Halley
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def);
+		MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints, std::string_view name, const MaterialDefinition& def);
 		MaterialDataBlock(const MaterialDataBlock& other) = default;
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
-		int getBindPoint() const { return bindPoint; }
+		int getIndex() const { return blockIndex; }
+		int getBindPoint(ShaderType type) const { return bindPoints[static_cast<int>(type)]; }
 		gsl::span<const gsl::byte> getData() const;
+		void setData(gsl::span<const gsl::byte> data);
 		MaterialDataBlockType getType() const { return dataBlockType; }
 		uint64_t getHash() const;
 
@@ -63,7 +74,8 @@ namespace Halley
 		Bytes data;
 		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
 		mutable bool needToUpdateHash = true;
-		int16_t bindPoint = 0;
+		int16_t blockIndex;
+		std::array<int16_t, 4> bindPoints;
 		mutable uint64_t hash = 0;
 
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
@@ -74,11 +86,13 @@ namespace Halley
 	{
 		friend class MaterialParameter;
 		friend class ConstMaterialParameter;
+		friend class Painter;
+		Material(std::shared_ptr<const MaterialDefinition> materialDefinition, std::optional<size_t> forceLocalBlock); // forceLocalBlocks is for engine use only
 
 	public:
 		Material(const Material& other);
 		Material(Material&& other) noexcept;
-		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
+		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition); // forceLocalBlocks is for engine use only
 		~Material();
 
 		void bind(int pass, Painter& painter) const;
@@ -143,8 +157,8 @@ namespace Halley
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
 		mutable bool needToUpdateHash = true;
-		bool forceLocalBlocks = false;
 		bool depthStencilEnabled = true;
+		std::optional<size_t> forceLocalBlock;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
 		mutable uint64_t fullHashValue = 0;
@@ -157,7 +171,7 @@ namespace Halley
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
 
 		void loadMaterialDefinition();
-		void initUniforms(bool forceLocalBlocks);
+		void initUniforms(std::optional<size_t> forceLocalBlock);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		bool isUniformEqualTo(int blockNumber, size_t offset, ShaderParameterType type, const void* data) const;

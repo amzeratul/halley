@@ -32,13 +32,14 @@ struct LineVertex {
 };
 
 Painter::Painter(VideoAPI& video, Resources& resources)
-	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	: halleyGlobalMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/MaterialBase"), 0)))
 	, resources(resources)
 	, video(video)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
 	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
 	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
 	, blitDepthMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/BlitDepth")))
+	, objectDataBuffer(video.createShaderStorageBuffer())
 {
 }
 
@@ -106,44 +107,57 @@ void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, st
 	}
 }
 
-static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
+Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Material>& material, size_t numObjects, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
-	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
-}
-
-Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
-{
-	updateClip();
-
-	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max()) + 1;
-	if (numVertices > maxVertices) {
-		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
-	}
-	if (verticesPending + numVertices > maxVertices) {
-		flushPending();
-	}
-
 	Expects(material != nullptr);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
+	const auto& matDef = material->getDefinition();
 
+	updateClip();
+
+	// Check absolute max values
+	constexpr auto maxVertices = static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1;
+	const auto maxObjects = getMaxObjects(matDef);
+	if (numVertices > maxVertices) {
+		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
+	}
+	if (numObjects > maxObjects) {
+		throw Exception("Too many objects in draw call: " + toString(numObjects) + ", maximum is " + toString(maxObjects), HalleyExceptions::Graphics);
+	}
+
+	// Flush existing if it won't fit
+	if (verticesPending + numVertices > maxVertices || objectsPending + numObjects > maxObjects) {
+		flushPending();
+	}
+
+	// Calculate space needed
+	PainterVertexData result;
+	result.vertexSize = matDef.getVertexSize();
+	result.vertexStride = matDef.getVertexStride();
+	result.vertexDataSize = numVertices * result.vertexStride;
+	result.objectSize = matDef.getObjectSize();
+	result.objectStride = matDef.getObjectStride();
+	result.objectDataSize = numObjects * result.objectStride;
+
+	// Start new draw call if needed
 	startDrawCall(material);
 
-	PainterVertexData result;
-
-	result.vertexSize = material->getDefinition().getVertexSize();
-	result.vertexStride = material->getDefinition().getVertexStride();
-	result.dataSize = numVertices * result.vertexStride;
-	makeSpaceForPendingVertices(result.dataSize);
+	// Allocate space
+	makeSpaceForPendingVertices(result.vertexDataSize);
+	makeSpaceForPendingObjects(result.objectDataSize);
 	makeSpaceForPendingIndices(numIndices);
-
-	result.dstVertex = vertexBuffer.data() + bytesPending;
+	result.dstVertex = vertexBuffer.data() + vertexBytesPending;
+	result.dstObject = objectBuffer.data() + objectBytesPending;
 	result.dstIndex = indexBuffer.data() + indicesPending;
 	result.firstIndex = static_cast<IndexType>(verticesPending);
+	result.firstObjectIndex = static_cast<int>(objectsPending);
 
 	indicesPending += numIndices;
 	verticesPending += numVertices;
-	bytesPending += result.dataSize;
+	objectsPending += numObjects;
+	vertexBytesPending += result.vertexDataSize;
+	objectBytesPending += result.objectDataSize;
 	allIndicesAreQuads &= standardQuadsOnly;
 
 	pendingDebugGroupStack = curDebugGroupStack;
@@ -156,9 +170,9 @@ void Painter::draw(const std::shared_ptr<const Material>& material, size_t numVe
 	Expects(primitiveType == PrimitiveType::Triangle);
 	Expects(indices.size() % 3 == 0);
 
-	const auto result = addDrawData(material, numVertices, indices.size(), false);
+	const auto result = addDrawData(material, 1, numVertices, indices.size(), false);
 
-	memcpy(result.dstVertex, vertexData, result.dataSize);
+	memcpy(result.dstVertex, vertexData, result.vertexDataSize);
 
 	for (size_t i = 0; i < size_t(indices.size()); ++i) {
 		result.dstIndex[i] = indices[i] + result.firstIndex;
@@ -170,52 +184,56 @@ void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t 
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
 
-	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
+	const auto result = addDrawData(material, 1, numVertices, numVertices * 3 / 2, true);
 
-	memcpy(result.dstVertex, vertexData, result.dataSize);
+	memcpy(result.dstVertex, vertexData, result.vertexDataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData)
+void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* objectData)
 {
-	Expects(vertexData != nullptr);
+	Expects(objectData != nullptr);
 
 	constexpr size_t verticesPerSprite = 4;
-	constexpr size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
+	const size_t maxSpritesPerCall = std::min((static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite, getMaxObjects(material->getDefinition()));
 	size_t numSpritesLeft = totalNumSprites;
-	size_t offset = 0;
+	size_t objectOffset = 0;
 
 	while (numSpritesLeft > 0) {
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
 		const size_t numVertices = verticesPerSprite * numSprites;
-		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-		const auto result = addDrawData(material, numVertices, numSprites * 6, true);
+		const auto result = addDrawData(material, numSprites, numVertices, numSprites * 6, true);
+		const char* const src = static_cast<const char*>(objectData) + objectOffset;
 
-		const char* const src = static_cast<const char*>(vertexData) + offset;
+		if (result.objectDataSize > 0) {
+			memcpy(result.dstObject, src, result.objectDataSize);
+		}
 
 		for (size_t i = 0; i < numSprites; i++) {
+			const auto objectIdx = static_cast<int>(i) + result.firstObjectIndex;
+
 			for (size_t j = 0; j < verticesPerSprite; j++) {
-				const size_t srcOffset = i * result.vertexStride;
 				const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
-				memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 				constexpr static Vector2f vertPosList[] = { Vector2f(0, 0), Vector2f(1, 0), Vector2f(1, 1), Vector2f(0, 1)};
-				const auto vertPos = Vector4f(vertPosList[j], vertPosList[j]);
-				memcpy(result.dstVertex + dstOffset + vertPosOffset, &vertPos, sizeof(vertPos));
+				VertexData vertData;
+				vertData.pos = Vector4f(vertPosList[j], vertPosList[j]);
+				vertData.idx = objectIdx;
+				memcpy(result.dstVertex + dstOffset, &vertData, sizeof(vertData));
 			}
 		}
 
 		generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 
 		numSpritesLeft -= numSprites;
-		offset += numSprites * material->getDefinition().getVertexStride();
+		objectOffset += numSprites * material->getDefinition().getObjectStride();
 	}
 }
 
-void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
+void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* objectData)
 {
-	Expects(vertexData != nullptr);
+	Expects(objectData != nullptr);
 	if (scale.x < 0.00001f || scale.y < 0.00001f) {
 		//throw Exception("Scale is zero for material with texture " + material->getTexture(0)->getAssetId());
 		return;
@@ -233,12 +251,14 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	//   |     |        |     |
 	//   12 -- 13 ----- 14 -- 15
 
-	const size_t numVertices = 16;
-	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
-	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	constexpr size_t numVertices = 16;
+	constexpr size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 
-	const auto result = addDrawData(material, numVertices, numIndices, false);
-	const char* const src = static_cast<const char*>(vertexData);
+	const auto result = addDrawData(material, 1, numVertices, numIndices, false);
+
+	if (result.objectDataSize > 0) {
+		memcpy(result.dstObject, objectData, result.objectDataSize);
+	}
 
 	// Vertices
 	std::array<Vector2f, 4> pos = {{ Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) }};
@@ -248,10 +268,10 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 		const size_t iy = i >> 2;
 		const size_t dstOffset = i * result.vertexStride;
 
-		memcpy(result.dstVertex + dstOffset, src, result.vertexSize);
-
-		Vector4f& vertPos = getVertPos(result.dstVertex + dstOffset, vertPosOffset);
-		vertPos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);
+		VertexData vert;
+		vert.pos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);
+		vert.idx = result.firstObjectIndex;
+		memcpy(result.dstVertex + dstOffset, &vert, result.vertexSize);
 	}
 
 	// Indices
@@ -581,9 +601,17 @@ void Painter::onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
-	size_t requiredSize = bytesPending + numBytes;
+	size_t requiredSize = vertexBytesPending + numBytes;
 	if (vertexBuffer.size() < requiredSize) {
 		vertexBuffer.resize(requiredSize * 2);
+	}
+}
+
+void Painter::makeSpaceForPendingObjects(size_t numBytes)
+{
+	size_t requiredSize = objectBytesPending + numBytes;
+	if (objectBuffer.size() < requiredSize) {
+		objectBuffer.resize(requiredSize * 2);
 	}
 }
 
@@ -712,6 +740,16 @@ void Painter::refreshConstantBufferCache()
 	std_ex::erase_if_value(constantBuffers, [] (const ConstantBufferEntry& e) { return e.age >= 10; });
 }
 
+size_t Painter::getMaxObjects(const MaterialDefinition& material) const
+{
+	const size_t perObject = material.getObjectStride();
+	if (perObject == 0) {
+		return std::numeric_limits<size_t>::max();
+	}
+	const size_t maxSize = 16 * 1024; // TODO
+	return (maxSize + (perObject - 1)) / perObject;
+}
+
 void Painter::startDrawCall(const std::shared_ptr<const Material>& material)
 {
 	constexpr bool enableDynamicBatching = true;
@@ -727,9 +765,10 @@ void Painter::startDrawCall(const std::shared_ptr<const Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		auto vertexSpan = gsl::span<char>(vertexBuffer.data(), verticesPending * materialPending->getDefinition().getVertexStride());
-		auto indexSpan = gsl::span<const IndexType>(indexBuffer.data(), indicesPending);
-		executeDrawPrimitives(*materialPending, verticesPending, vertexSpan, indexSpan, PrimitiveType::Triangle, allIndicesAreQuads);
+		const auto vertexSpan = gsl::span<char>(vertexBuffer.data(), verticesPending * materialPending->getDefinition().getVertexStride());
+		const auto objectSpan = gsl::span<char>(objectBuffer.data(), objectsPending * materialPending->getDefinition().getObjectStride());
+		const auto indexSpan = gsl::span<const IndexType>(indexBuffer.data(), indicesPending);
+		executeDrawPrimitives(*materialPending, objectsPending, verticesPending, objectSpan, vertexSpan, indexSpan, PrimitiveType::Triangle, allIndicesAreQuads);
 	}
 
 	resetPending();
@@ -737,8 +776,10 @@ void Painter::flushPending()
 
 void Painter::resetPending()
 {
-	bytesPending = 0;
+	vertexBytesPending = 0;
 	verticesPending = 0;
+	objectBytesPending = 0;
+	objectsPending = 0;
 	indicesPending = 0;
 	allIndicesAreQuads = true;
 	if (materialPending) {
@@ -748,7 +789,7 @@ void Painter::resetPending()
 	pendingDebugGroupStack = curDebugGroupStack;
 }
 
-void Painter::executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
+void Painter::executeDrawPrimitives(const Material& material, size_t numObjects, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
@@ -757,7 +798,7 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	size_t commandIdx = 0;
 	if (recordingSnapshot) {
 		commandIdx = recordingSnapshot->getNumCommands();
-		recordingSnapshot->draw(material, numVertices, vertexData, indices, primitiveType, allIndicesAreQuads);
+		recordingSnapshot->draw(material, numObjects, numVertices, objectData, vertexData, indices, primitiveType, allIndicesAreQuads);
 		recordTimestamp(TimestampType::CommandStart, commandIdx);
 	}
 
@@ -766,6 +807,12 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), indices.data(), allIndicesAreQuads);
 	
+	// Load object data
+	if (!objectData.empty()) {
+		objectDataBuffer->update(numObjects, objectData.size_bytes() / numObjects, gsl::as_bytes(objectData));
+		objectDataBuffer->bind(ShaderType::Vertex, 0);
+	}
+
 	// Load material uniforms
 	setMaterialData(material);
 

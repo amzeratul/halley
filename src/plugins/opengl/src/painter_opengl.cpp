@@ -109,15 +109,6 @@ void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> d
 
 void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 {
-	bool supportsShaderTextureBinding = false;
-	bool supportsShaderBlockBinding = false;
-#ifdef WITH_OPENGL
-	if constexpr (getPlatform() != GamePlatform::MacOS) {
-		//supportsShaderTextureBinding = true;
-		//supportsShaderBlockBinding = true;
-	}
-#endif
-
 	auto& pass = material.getDefinition().getPass(passNumber);
 
 	glUtils->setScissor(clipping.value_or(Rect4i()), clipping.has_value());
@@ -130,16 +121,14 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	shader.bind();
 
 	// Bind constant buffer
-	if (!supportsShaderBlockBinding) {
-		for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
-			const auto& dataBlock = material.getDataBlocks()[i];
-			const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
-			int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
-			if (address == -1) {
-				address = dataBlock.getBindPoint();
-			}
-			shader.setUniformBlockBinding(address, dataBlock.getBindPoint());
+	for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
+		const auto& dataBlock = material.getDataBlocks()[i];
+		const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
+		int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
+		if (address == -1) {
+			address = dataBlock.getIndex();
 		}
+		shader.setUniformBlockBinding(address, dataBlock.getIndex());
 	}
 
 	// Bind textures
@@ -154,10 +143,8 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 			if (location == -1) {
 				location = textureUnit;
 			}
-			if (!supportsShaderTextureBinding) {
-				glUniform1i(location, textureUnit);
-				glCheckError();
-			}
+			glUniform1i(location, textureUnit);
+			glCheckError();
 			texture->bind(textureUnit);
 		}
 		++textureUnit;
@@ -168,7 +155,7 @@ void PainterOpenGL::setMaterialData(const Material& material)
 {
 	for (auto& dataBlock: material.getDataBlocks()) {
 		if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
-			static_cast<ConstantBufferOpenGL&>(getConstantBuffer(dataBlock)).bind(dataBlock.getBindPoint());
+			static_cast<ConstantBufferOpenGL&>(getConstantBuffer(dataBlock)).bind(dataBlock.getIndex());
 		}
 	}
 }
@@ -225,7 +212,7 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 
 	// Set vertex attribute pointers in VBO
 	size_t vertexStride = material.getVertexStride();
-	for (auto& attribute : material.getAttributes()) {
+	for (auto& attribute : material.getVertexAttributes()) {
 		int count = 0;
 		int type = 0;
 		switch (attribute.type) {

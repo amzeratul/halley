@@ -23,11 +23,12 @@ namespace Halley
 
 	using SpriteMaskBase = int;
 
-	struct SpriteVertexAttrib
+	struct SpriteObjectAttrib
 	{
 		// This structure must match the layout of the shader
-		// See shared_assets/material/sprite_base.material for reference
-		//Vector4f vertPos; // A hack in getVertexAttrib() allows this field to be omitted as long as something else is here
+		// For reference, see:
+		// - shared_assets/material/sprite_base.material
+		// - shared_assets/shader/halley/sprite_data_block.hlsl
 		Vector2f pos;
 		Vector2f pivot;
 		Vector2f size;
@@ -41,7 +42,7 @@ namespace Halley
 		Vector4f custom3;
 		float rotation = 0;
 		float textureRotation = 0;
-		char _padding[4];
+		char _padding[8];
 	};
 
 	class Sprite
@@ -86,20 +87,20 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true, bool enableHotReload = true);
 
-		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
-		Sprite& setPosition(Vector2f pos) & { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
-		Sprite&& setPosition(Vector2f pos) && { Expects(pos.isValid()); vertexAttrib.pos = pos; return std::move(*this); }
-		Vector2f getPosition() const { return vertexAttrib.pos; }
-		Vector2f& getPosition() { return vertexAttrib.pos; }
+		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); objectAttrib.pos = pos; return *this; }
+		Sprite& setPosition(Vector2f pos) & { Expects(pos.isValid()); objectAttrib.pos = pos; return *this; }
+		Sprite&& setPosition(Vector2f pos) && { Expects(pos.isValid()); objectAttrib.pos = pos; return std::move(*this); }
+		Vector2f getPosition() const { return objectAttrib.pos; }
+		Vector2f& getPosition() { return objectAttrib.pos; }
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);
-		Vector2f getPivot() const { return vertexAttrib.pivot; }
+		Vector2f getPivot() const { return objectAttrib.pivot; }
 		Vector2f getAbsolutePivot() const;
 		Vector2f getUncroppedAbsolutePivot() const;
 
 		Sprite& setRotation(Angle1f angle);
-		Angle1f getRotation() const { return Angle1f::fromRadians(vertexAttrib.rotation, false); }
+		Angle1f getRotation() const { return Angle1f::fromRadians(objectAttrib.rotation, false); }
 
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
@@ -107,42 +108,42 @@ namespace Halley
 		Sprite& setSliceScale(float scale);
 		Sprite& scaleTo(Vector2f size);
 		Vector2f getSize() const { return size; }
-		Vector2f getScale() const { return vertexAttrib.scale; }
-		Vector2f getScaledSize() const { return size * vertexAttrib.scale; }
+		Vector2f getScale() const { return objectAttrib.scale; }
+		Vector2f getScaledSize() const { return size * objectAttrib.scale; }
 		Vector2f getUncroppedSize() const;
 		Vector2f getUncroppedScaledSize() const;
 
 		Sprite& setFlip(bool flip);
 		bool isFlipped() const { return flip; }
 
-		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = colour; return *this; }
-		Colour4f getColour() const { return vertexAttrib.colour; }
-		Colour4f& getColour() { return vertexAttrib.colour; }
-		Sprite& setAlpha(float alpha) { vertexAttrib.colour.a = alpha; return *this; }
-		float getAlpha() const { return vertexAttrib.colour.a; }
+		Sprite& setColour(Colour4f colour) { objectAttrib.colour = colour; return *this; }
+		Colour4f getColour() const { return objectAttrib.colour; }
+		Colour4f& getColour() { return objectAttrib.colour; }
+		Sprite& setAlpha(float alpha) { objectAttrib.colour.a = alpha; return *this; }
+		float getAlpha() const { return objectAttrib.colour.a; }
 
 		Sprite& setTexRect(Rect4f texRect);
 		Sprite& setTexRect(Vector4f texRect);
-		Rect4f getTexRect() const { return Rect4f(vertexAttrib.texRect0); }
+		Rect4f getTexRect() const { return Rect4f(objectAttrib.texRect0); }
 		Sprite& setTexRect0(Rect4f texRect);
 		Sprite& setTexRect0(Vector4f texRect);
-		Rect4f getTexRect0() const { return Rect4f(vertexAttrib.texRect0); }
-		Sprite& setTexRect1(Rect4f texRect) { vertexAttrib.texRect1 = texRect.toVector4(); return *this; }
-		Sprite& setTexRect1(Vector4f texRect) { vertexAttrib.texRect1 = texRect; return *this; }
-		Rect4f getTexRect1() const { return Rect4f(vertexAttrib.texRect1); }
+		Rect4f getTexRect0() const { return Rect4f(objectAttrib.texRect0); }
+		Sprite& setTexRect1(Rect4f texRect) { objectAttrib.texRect1 = texRect.toVector4(); return *this; }
+		Sprite& setTexRect1(Vector4f texRect) { objectAttrib.texRect1 = texRect; return *this; }
+		Rect4f getTexRect1() const { return Rect4f(objectAttrib.texRect1); }
 
-		Sprite& setCustom0(Vector4f custom0) { vertexAttrib.custom0 = custom0; return *this; }
-		Vector4f getCustom0() const { return vertexAttrib.custom0; }
-		Vector4f& getCustom0() { return vertexAttrib.custom0; }
-		Sprite& setCustom1(Vector4f custom1) { vertexAttrib.custom1 = custom1; return *this; }
-		Vector4f getCustom1() const { return vertexAttrib.custom1; }
-		Vector4f& getCustom1() { return vertexAttrib.custom1; }
-		Sprite& setCustom2(Vector4f custom2) { vertexAttrib.custom2 = custom2; return *this; }
-		Vector4f getCustom2() const { return vertexAttrib.custom2; }
-		Vector4f& getCustom2() { return vertexAttrib.custom2; }
-		Sprite& setCustom3(Vector4f custom3) { vertexAttrib.custom3 = custom3; return *this; }
-		Vector4f getCustom3() const { return vertexAttrib.custom3; }
-		Vector4f& getCustom3() { return vertexAttrib.custom3; }
+		Sprite& setCustom0(Vector4f custom0) { objectAttrib.custom0 = custom0; return *this; }
+		Vector4f getCustom0() const { return objectAttrib.custom0; }
+		Vector4f& getCustom0() { return objectAttrib.custom0; }
+		Sprite& setCustom1(Vector4f custom1) { objectAttrib.custom1 = custom1; return *this; }
+		Vector4f getCustom1() const { return objectAttrib.custom1; }
+		Vector4f& getCustom1() { return objectAttrib.custom1; }
+		Sprite& setCustom2(Vector4f custom2) { objectAttrib.custom2 = custom2; return *this; }
+		Vector4f getCustom2() const { return objectAttrib.custom2; }
+		Vector4f& getCustom2() { return objectAttrib.custom2; }
+		Sprite& setCustom3(Vector4f custom3) { objectAttrib.custom3 = custom3; return *this; }
+		Vector4f getCustom3() const { return objectAttrib.custom3; }
+		Vector4f& getCustom3() { return objectAttrib.custom3; }
 
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
@@ -194,7 +195,7 @@ namespace Halley
 		bool rotated : 1;
 		float sliceScale = 1;
 
-		SpriteVertexAttrib vertexAttrib;
+		SpriteObjectAttrib objectAttrib;
 
 		Vector4s slices;
 		Vector4s outerBorder;
@@ -203,7 +204,7 @@ namespace Halley
 		void doSetSprite(const SpriteSheetEntry& entry, bool applyPivot);
 		void computeSize();
 
-		const void* getVertexAttrib() const;
+		const void* getObjectAttrib() const;
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 
