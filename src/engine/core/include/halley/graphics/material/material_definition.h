@@ -149,9 +149,11 @@ namespace Halley
 		Vector<MaterialUniform> uniforms;
 		Vector<int> addresses;
 		size_t offset = 0;
+		uint8_t bindingMask = 0;
+		bool shared = false;
 
 		MaterialUniformBlock() = default;
-		MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms);
+		MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
