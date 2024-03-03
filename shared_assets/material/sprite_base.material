@@ -10,8 +10,12 @@ attributes:
   - name: vertPos
     type: vec4
     semantic: VERTPOS
-    special: vertPos
 
+  # Index of which object it belongs to
+  - name: idx
+    type: int
+    semantic: OBJECTIDX
+objectAttributes:
   # position (world space)
   - name: position
     type: vec2

@@ -87,7 +87,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
-	shader.setMaterialLayout(dx11Video, material.getDefinition().getAttributes());
+	shader.setMaterialLayout(dx11Video, material.getDefinition().getVertexAttributes());
 	shader.bind(dx11Video);
 
 	// Blend

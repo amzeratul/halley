@@ -192,7 +192,7 @@ std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoa
 	{
 		int i = 0;
 		for (auto& p: result->passes) {
-			p.createShader(*video, resources, result->name + "/pass" + toString(i++), result->attributes);
+			p.createShader(*video, resources, result->name + "/pass" + toString(i++), result->vertexAttributes);
 		}
 		result->initialize(*video);
 		result->doneLoading();
@@ -328,33 +328,28 @@ size_t MaterialDefinition::getVertexSize() const
 
 size_t MaterialDefinition::getVertexStride() const
 {
-	if (vertexSize % 16 != 0) {
-		return size_t(vertexSize + 16 - vertexSize % 16);
-	} else {
-		return size_t(vertexSize);
-	}
-}
-
-size_t MaterialDefinition::getVertexPosOffset() const
-{
-	return size_t(vertexPosOffset);
+	return alignUp(vertexSize, 16);
 }
 
 size_t MaterialDefinition::getObjectSize() const
 {
-	// TODO
-	return 0;
+	return size_t(objectSize);
 }
 
 size_t MaterialDefinition::getObjectStride() const
 {
-	// TODO
-	return 0;
+	return alignUp(objectSize, 16);
 }
 
-void MaterialDefinition::setAttributes(Vector<MaterialAttribute> attributes)
+void MaterialDefinition::setVertexAttributes(Vector<MaterialAttribute> attributes)
 {
-	this->attributes = std::move(attributes);
+	this->vertexAttributes = std::move(attributes);
+	assignAttributeOffsets();
+}
+
+void MaterialDefinition::setObjectAttributes(Vector<MaterialAttribute> attributes)
+{
+	this->objectAttributes = std::move(attributes);
 	assignAttributeOffsets();
 }
 
@@ -414,9 +409,9 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << passes;
 	s << textures;
 	s << uniformBlocks;
-	s << attributes;
+	s << vertexAttributes;
 	s << vertexSize;
-	s << vertexPosOffset;
+	s << objectSize;
 	s << defaultMask;
 	s << tags;
 }
@@ -427,9 +422,9 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> passes;
 	s >> textures;
 	s >> uniformBlocks;
-	s >> attributes;
+	s >> vertexAttributes;
 	s >> vertexSize;
-	s >> vertexPosOffset;
+	s >> objectSize;
 	s >> defaultMask;
 	s >> tags;
 }
@@ -535,13 +530,12 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 			semantic = semantic.left(semantic.size() - 1);
 		}
 
-		attributes.push_back(MaterialAttribute());
-		auto& a = attributes.back();
+		vertexAttributes.push_back(MaterialAttribute());
+		auto& a = vertexAttributes.back();
 		a.name = attribEntry["name"].asString("");
 		a.type = type;
 		a.semantic = semantic;
 		a.semanticIndex = semanticIndex;
-		a.isVertexPos = attribEntry["special"].asString("") == "vertPos";
 	}
 
 	assignAttributeOffsets();
@@ -549,20 +543,22 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 
 void MaterialDefinition::assignAttributeOffsets()
 {
+	vertexSize = assignAttributeOffsets(vertexAttributes);
+	objectSize = assignAttributeOffsets(objectAttributes);
+}
+
+int MaterialDefinition::assignAttributeOffsets(Vector<MaterialAttribute>& attributes) const
+{
 	int location = 0;
-	vertexSize = 0;
+	int totalSize = 0;
 
 	for (auto& a: attributes) {
 		a.location = location++;
-		a.offset = vertexSize;
-
-		const int size = int(MaterialAttribute::getAttributeSize(a.type));
-		vertexSize += size;
-
-		if (a.isVertexPos) {
-			vertexPosOffset = a.offset;
-		}
+		a.offset = totalSize;
+		totalSize += static_cast<int>(MaterialAttribute::getAttributeSize(a.type));
 	}
+
+	return totalSize;
 }
 
 ShaderParameterType MaterialDefinition::parseParameterType(const String& rawType) const

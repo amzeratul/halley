@@ -212,7 +212,7 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 
 	// Set vertex attribute pointers in VBO
 	size_t vertexStride = material.getVertexStride();
-	for (auto& attribute : material.getAttributes()) {
+	for (auto& attribute : material.getVertexAttributes()) {
 		int count = 0;
 		int type = 0;
 		switch (attribute.type) {

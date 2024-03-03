@@ -116,31 +116,33 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Mate
 	Expects(material != nullptr);
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
+	const auto& matDef = material->getDefinition();
 
 	updateClip();
 
-	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max()) + 1;
-	constexpr auto maxObjectSize = 16 * 1024; // TODO, max UBO size
+	// Check absolute max values
+	constexpr auto maxVertices = static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1;
+	const auto maxObjects = getMaxObjects(matDef);
 	if (numVertices > maxVertices) {
 		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
+	}
+	if (numObjects > maxObjects) {
+		throw Exception("Too many objects in draw call: " + toString(numObjects) + ", maximum is " + toString(maxObjects), HalleyExceptions::Graphics);
+	}
+
+	// Flush existing if it won't fit
+	if (verticesPending + numVertices > maxVertices || objectsPending + numObjects > maxObjects) {
+		flushPending();
 	}
 
 	// Calculate space needed
 	PainterVertexData result;
-	result.vertexSize = material->getDefinition().getVertexSize();
-	result.vertexStride = material->getDefinition().getVertexStride();
+	result.vertexSize = matDef.getVertexSize();
+	result.vertexStride = matDef.getVertexStride();
 	result.vertexDataSize = numVertices * result.vertexStride;
-	result.objectSize = material->getDefinition().getObjectSize();
-	result.objectStride = material->getDefinition().getObjectStride();
+	result.objectSize = matDef.getObjectSize();
+	result.objectStride = matDef.getObjectStride();
 	result.objectDataSize = numObjects * result.objectStride;
-
-	// Flush existing if it won't fit
-	if (verticesPending + numVertices > maxVertices || objectBytesPending + result.objectDataSize > maxObjectSize) {
-		flushPending();
-	}
-	if (verticesPending + numVertices > maxVertices || objectBytesPending + result.objectDataSize > maxObjectSize) {
-		throw Exception("Too much data for a single Sprite draw call.", HalleyExceptions::Graphics);
-	}
 
 	// Start new draw call if needed
 	startDrawCall(material);
@@ -191,33 +193,35 @@ void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t 
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData)
+void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* objectData)
 {
-	Expects(vertexData != nullptr);
+	Expects(objectData != nullptr);
 
 	constexpr size_t verticesPerSprite = 4;
-	constexpr size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
+	const size_t maxSpritesPerCall = std::min((static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite, getMaxObjects(material->getDefinition()));
 	size_t numSpritesLeft = totalNumSprites;
 	size_t offset = 0;
 
 	while (numSpritesLeft > 0) {
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
 		const size_t numVertices = verticesPerSprite * numSprites;
-		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
 		const auto result = addDrawData(material, 1, numVertices, numSprites * 6, true);
+		const char* const src = static_cast<const char*>(objectData) + offset;
 
-		const char* const src = static_cast<const char*>(vertexData) + offset;
+		memcpy(result.dstObject, src, result.objectDataSize);
 
 		for (size_t i = 0; i < numSprites; i++) {
+			const auto objectIdx = static_cast<int>(i) + result.firstObjectIndex;
+
 			for (size_t j = 0; j < verticesPerSprite; j++) {
-				const size_t srcOffset = i * result.vertexStride;
 				const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
-				memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 				constexpr static Vector2f vertPosList[] = { Vector2f(0, 0), Vector2f(1, 0), Vector2f(1, 1), Vector2f(0, 1)};
-				const auto vertPos = Vector4f(vertPosList[j], vertPosList[j]);
-				memcpy(result.dstVertex + dstOffset + vertPosOffset, &vertPos, sizeof(vertPos));
+				VertexData vertData;
+				vertData.pos = Vector4f(vertPosList[j], vertPosList[j]);
+				vertData.idx = objectIdx;
+				memcpy(result.dstVertex + dstOffset, &vertData, sizeof(vertData));
 			}
 		}
 
@@ -228,9 +232,9 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 	}
 }
 
-void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
+void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* objectData)
 {
-	Expects(vertexData != nullptr);
+	Expects(objectData != nullptr);
 	if (scale.x < 0.00001f || scale.y < 0.00001f) {
 		//throw Exception("Scale is zero for material with texture " + material->getTexture(0)->getAssetId());
 		return;
@@ -248,12 +252,11 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	//   |     |        |     |
 	//   12 -- 13 ----- 14 -- 15
 
-	const size_t numVertices = 16;
-	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
-	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	constexpr size_t numVertices = 16;
+	constexpr size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 
 	const auto result = addDrawData(material, 1, numVertices, numIndices, false);
-	const char* const src = static_cast<const char*>(vertexData);
+	memcpy(result.dstObject, objectData, result.objectDataSize);
 
 	// Vertices
 	std::array<Vector2f, 4> pos = {{ Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) }};
@@ -263,10 +266,10 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 		const size_t iy = i >> 2;
 		const size_t dstOffset = i * result.vertexStride;
 
-		memcpy(result.dstVertex + dstOffset, src, result.vertexSize);
-
-		Vector4f& vertPos = getVertPos(result.dstVertex + dstOffset, vertPosOffset);
-		vertPos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);
+		VertexData vert;
+		vert.pos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);
+		vert.idx = result.firstObjectIndex;
+		memcpy(result.dstVertex + dstOffset, &vert, result.vertexSize);
 	}
 
 	// Indices
@@ -733,6 +736,13 @@ void Painter::refreshConstantBufferCache()
 		++v.age;
 	}
 	std_ex::erase_if_value(constantBuffers, [] (const ConstantBufferEntry& e) { return e.age >= 10; });
+}
+
+size_t Painter::getMaxObjects(const MaterialDefinition& material) const
+{
+	const size_t maxSize = 16 * 1024; // TODO
+	const size_t perObject = material.getObjectStride();
+	return (maxSize + (perObject - 1)) / perObject;
 }
 
 void Painter::startDrawCall(const std::shared_ptr<const Material>& material)

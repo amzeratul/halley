@@ -50,6 +50,7 @@ namespace Halley
 			size_t objectStride;
 			size_t objectDataSize;
 			IndexType firstIndex;
+			int firstObjectIndex;
 		};
 
 	public:
@@ -63,6 +64,11 @@ namespace Halley
 			bool pixelAlign = true;
 			float onLength = 10.0f;
 			float offLength = 0.0f;
+		};
+
+		struct VertexData {
+			Vector4f pos;
+			int idx;
 		};
 
 		Painter(VideoAPI& video, Resources& resources);
@@ -88,10 +94,10 @@ namespace Halley
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
 		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
-		void drawSprites(const std::shared_ptr<const Material>& material, size_t numSprites, const void* vertexData);
+		void drawSprites(const std::shared_ptr<const Material>& material, size_t numSprites, const void* objectData);
 
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
-		void drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
+		void drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* objectData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
 		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
@@ -252,5 +258,7 @@ namespace Halley
 		std::shared_ptr<const Material> getSolidPolygonMaterial();
 
 		void refreshConstantBufferCache();
+
+		size_t getMaxObjects(const MaterialDefinition& material) const;
 	};
 }
