@@ -22,7 +22,7 @@ float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vert
     return mul(u_mvp, float4(pos, 0.0, 1.0));
 }
 
-void basicVertex(VIn inputVertex, out VOut output, bool premultiply) {
+void basicVertexOffset(VIn inputVertex, out VOut output, bool premultiply, float2 offset) {
     OIn input = objectData[inputVertex.idx];
 
     output.texCoord0 = getTexCoord(input.texCoord0, inputVertex.vertPos.zw, input.textureRotation);
@@ -39,7 +39,11 @@ void basicVertex(VIn inputVertex, out VOut output, bool premultiply) {
     output.scale = input.scale;
     getColours(input.colour, output.colour, output.colourAdd, premultiply);
     output.colourNoPremultiply = input.colour;
-    output.position = getVertexPosition(input.position, input.pivot, input.size * input.scale, inputVertex.vertPos.xy, input.rotation);
+    output.position = getVertexPosition(input.position + offset, input.pivot, input.size * input.scale, inputVertex.vertPos.xy, input.rotation);
     output.size = input.size.xy;
     output.texCoord0Bounds = input.texCoord0;
+}
+
+void basicVertex(VIn inputVertex, out VOut output, bool premultiply) {
+    basicVertexOffset(inputVertex, output, premultiply, float2(0, 0));
 }
