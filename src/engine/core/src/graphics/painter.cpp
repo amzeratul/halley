@@ -107,11 +107,6 @@ void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, st
 	}
 }
 
-static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
-{
-	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
-}
-
 Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Material>& material, size_t numObjects, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
 	Expects(material != nullptr);
@@ -156,6 +151,7 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Mate
 	result.dstObject = objectBuffer.data() + objectBytesPending;
 	result.dstIndex = indexBuffer.data() + indicesPending;
 	result.firstIndex = static_cast<IndexType>(verticesPending);
+	result.firstObjectIndex = static_cast<int>(objectsPending);
 
 	indicesPending += numIndices;
 	verticesPending += numVertices;
