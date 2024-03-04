@@ -1680,16 +1680,6 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 {
 	const auto& fromMap = from.asMap();
 	const auto& toMap = to.asMap();
-
-	// Shortcut if from is empty
-	if (fromMap.empty()) {
-		if (toMap.empty()) {
-			return ConfigNode(NoopType());
-		}
-		auto result = ConfigNode(toMap);
-		result.type = ConfigNodeType::DeltaMap;
-		return result;
-	}
 	
 	auto result = ConfigNode(MapType());
 	result.type = ConfigNodeType::DeltaMap;

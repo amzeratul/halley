@@ -22,16 +22,15 @@ namespace Halley {
         void addEntry(size_t idx, String str);
         void addEntries(gsl::span<const String> strings);
 
-        void setLogMissingStrings(bool enabled, int minMissing, int freq);
+        void setLogMissingStrings(bool enabled);
         void notifyMissingString(const String& string) override;
+        void printMissingStrings();
     
     private:
         Vector<String> strings;
         HashMap<String, int> indices;
     	
         HashMap<String, int> missing;
-        int missingMin = 1;
-        int missingFreq = 10;
         bool logMissingStrings = false;
     };
 }
