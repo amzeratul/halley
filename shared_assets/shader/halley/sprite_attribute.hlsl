@@ -1,6 +1,11 @@
 // Vertex input
 struct VIn {
     float4 vertPos : VERTPOS;
+    int idx : OBJECTIDX;
+};
+
+// Object input
+struct OIn {
     float2 position : POSITION;
     float2 pivot : PIVOT;
     float2 size : SIZE;

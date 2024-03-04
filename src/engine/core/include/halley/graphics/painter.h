@@ -222,6 +222,7 @@ namespace Halley
 		Vector<String> pendingDebugGroupStack;
 
 		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
+		std::unique_ptr<Material> objectDataMaterial;
 
 		RenderSnapshot* recordingSnapshot = nullptr;
 		bool recordingPerformance = false;
@@ -239,7 +240,7 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(const std::shared_ptr<const Material>& material);
 		void flushPending();
-		void executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
+		void executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingObjects(size_t numBytes);

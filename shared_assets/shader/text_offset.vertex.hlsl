@@ -3,7 +3,7 @@
 #include "halley/text.hlsl"
 
 VOut main(VIn input) {
-    input.position += u_shadowDistance.xy;
+    //input.position += u_shadowDistance.xy; // TODO: FIXME
     VOut result;
     basicVertex(input, result, true);
     return result;

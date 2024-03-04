@@ -49,6 +49,7 @@ namespace Halley
 		int getIndex() const { return blockIndex; }
 		int getBindPoint(ShaderType type) const { return bindPoints[static_cast<int>(type)]; }
 		gsl::span<const gsl::byte> getData() const;
+		void setData(gsl::span<const gsl::byte> data);
 		MaterialDataBlockType getType() const { return dataBlockType; }
 		uint64_t getHash() const;
 
@@ -72,11 +73,13 @@ namespace Halley
 	class Material
 	{
 		friend class MaterialParameter;
+		friend class Painter;
+		Material(std::shared_ptr<const MaterialDefinition> materialDefinition, std::optional<size_t> forceLocalBlock); // forceLocalBlocks is for engine use only
 
 	public:
 		Material(const Material& other);
 		Material(Material&& other) noexcept;
-		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
+		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition); // forceLocalBlocks is for engine use only
 		~Material();
 
 		void bind(int pass, Painter& painter) const;
@@ -149,7 +152,7 @@ namespace Halley
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
 		void setTexUnitAssetId(size_t texUnit, const String& id);
 
-		void initUniforms(bool forceLocalBlocks);
+		void initUniforms(std::optional<size_t> forceLocalBlock);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		void computeHashes() const;

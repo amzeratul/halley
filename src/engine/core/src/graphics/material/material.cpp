@@ -45,6 +45,13 @@ gsl::span<const gsl::byte> MaterialDataBlock::getData() const
 	return gsl::as_bytes(gsl::span<const Byte>(data));
 }
 
+void MaterialDataBlock::setData(gsl::span<const gsl::byte> data)
+{
+	this->data.resize(data.size_bytes());
+	memcpy(this->data.data(), data.data(), data.size_bytes());
+	needToUpdateHash = true;
+}
+
 uint64_t MaterialDataBlock::getHash() const
 {
 	if (needToUpdateHash) {
@@ -105,7 +112,12 @@ Material::Material(Material&& other) noexcept
 	other.partialHashValue = 0;
 }
 
-Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
+Material::Material(std::shared_ptr<const MaterialDefinition> materialDefinition)
+	: Material(materialDefinition, std::nullopt)
+{
+}
+
+Material::Material(std::shared_ptr<const MaterialDefinition> definition, std::optional<size_t> forceLocalBlock)
 	: materialDefinition(std::move(definition))
 {
 	materialDefinition->waitForLoad();
@@ -122,7 +134,7 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 		}
 	}
 	
-	initUniforms(forceLocalBlocks);
+	initUniforms(forceLocalBlock);
 }
 
 Material::~Material()
@@ -132,14 +144,15 @@ Material::~Material()
 	materialDefinition = {};
 }
 
-void Material::initUniforms(bool forceLocalBlocks)
+void Material::initUniforms(std::optional<size_t> forceLocalBlock)
 {
 	std::array<int16_t, 4> curBindPoints;
 	curBindPoints.fill(-1);
 
 	int nextIndex = 1;
+	size_t idx = 0;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
-		const auto type = uniformBlock.shared ? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal) : MaterialDataBlockType::Local;
+		const auto type = uniformBlock.shared ? (forceLocalBlock == idx ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal) : MaterialDataBlockType::Local;
 		const int index = type == MaterialDataBlockType::Local ? nextIndex++ : 0;
 
 		std::array<int16_t, 4> bindPoints;
@@ -151,6 +164,7 @@ void Material::initUniforms(bool forceLocalBlocks)
 		}
 
 		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, index, bindPoints, uniformBlock.name, *materialDefinition));
+		++idx;
 	}
 
 	// Load textures
