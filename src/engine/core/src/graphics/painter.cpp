@@ -206,7 +206,9 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 		const auto result = addDrawData(material, numSprites, numVertices, numSprites * 6, true);
 		const char* const src = static_cast<const char*>(objectData) + objectOffset;
 
-		memcpy(result.dstObject, src, result.objectDataSize);
+		if (result.objectDataSize > 0) {
+			memcpy(result.dstObject, src, result.objectDataSize);
+		}
 
 		for (size_t i = 0; i < numSprites; i++) {
 			const auto objectIdx = static_cast<int>(i) + result.firstObjectIndex;
@@ -253,7 +255,10 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 	constexpr size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
 
 	const auto result = addDrawData(material, 1, numVertices, numIndices, false);
-	memcpy(result.dstObject, objectData, result.objectDataSize);
+
+	if (result.objectDataSize > 0) {
+		memcpy(result.dstObject, objectData, result.objectDataSize);
+	}
 
 	// Vertices
 	std::array<Vector2f, 4> pos = {{ Vector2f(0, 0), Vector2f(slices.x / scale.x, slices.y / scale.y), Vector2f(1 - slices.z / scale.x, 1 - slices.w / scale.y), Vector2f(1, 1) }};
@@ -737,8 +742,11 @@ void Painter::refreshConstantBufferCache()
 
 size_t Painter::getMaxObjects(const MaterialDefinition& material) const
 {
-	const size_t maxSize = 16 * 1024; // TODO
 	const size_t perObject = material.getObjectStride();
+	if (perObject == 0) {
+		return std::numeric_limits<size_t>::max();
+	}
+	const size_t maxSize = 16 * 1024; // TODO
 	return (maxSize + (perObject - 1)) / perObject;
 }
 
