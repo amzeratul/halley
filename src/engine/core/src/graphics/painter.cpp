@@ -201,14 +201,14 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 	constexpr size_t verticesPerSprite = 4;
 	const size_t maxSpritesPerCall = std::min((static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite, getMaxObjects(material->getDefinition()));
 	size_t numSpritesLeft = totalNumSprites;
-	size_t offset = 0;
+	size_t objectOffset = 0;
 
 	while (numSpritesLeft > 0) {
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
 		const size_t numVertices = verticesPerSprite * numSprites;
 
 		const auto result = addDrawData(material, 1, numVertices, numSprites * 6, true);
-		const char* const src = static_cast<const char*>(objectData) + offset;
+		const char* const src = static_cast<const char*>(objectData) + objectOffset;
 
 		memcpy(result.dstObject, src, result.objectDataSize);
 
@@ -229,7 +229,7 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 		generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 
 		numSpritesLeft -= numSprites;
-		offset += numSprites * material->getDefinition().getVertexStride();
+		objectOffset += numSprites * material->getDefinition().getObjectStride();
 	}
 }
 

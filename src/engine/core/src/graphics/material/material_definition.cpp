@@ -271,8 +271,12 @@ void MaterialDefinition::load(const ConfigNode& root)
 
 	// Load attributes & uniforms
 	if (root.hasKey("attributes")) {
-		loadAttributes(root["attributes"]);
+		loadAttributes(vertexAttributes, root["attributes"]);
 	}
+	if (root.hasKey("objectAttributes")) {
+		loadAttributes(objectAttributes, root["objectAttributes"]);
+	}
+	assignAttributeOffsets();
 	if (root.hasKey("uniforms")) {
 		loadUniforms(root["uniforms"]);
 	}
@@ -519,7 +523,7 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 	}
 }
 
-void MaterialDefinition::loadAttributes(const ConfigNode& node)
+void MaterialDefinition::loadAttributes(Vector<MaterialAttribute>& attributes, const ConfigNode& node)
 {
 	for (const auto& attribEntry: node.asSequence()) {
 		const ShaderParameterType type = parseParameterType(attribEntry["type"].asString());
@@ -530,15 +534,13 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 			semantic = semantic.left(semantic.size() - 1);
 		}
 
-		vertexAttributes.push_back(MaterialAttribute());
-		auto& a = vertexAttributes.back();
+		attributes.push_back(MaterialAttribute());
+		auto& a = attributes.back();
 		a.name = attribEntry["name"].asString("");
 		a.type = type;
 		a.semantic = semantic;
 		a.semanticIndex = semanticIndex;
 	}
-
-	assignAttributeOffsets();
 }
 
 void MaterialDefinition::assignAttributeOffsets()

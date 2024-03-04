@@ -285,7 +285,7 @@ namespace Halley
 
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
-		void loadAttributes(const ConfigNode& node);
+		void loadAttributes(Vector<MaterialAttribute>& attributes, const ConfigNode& node);
 		void assignAttributeOffsets();
 		int assignAttributeOffsets(Vector<MaterialAttribute>& attributes) const;
 		ShaderParameterType parseParameterType(const String& rawType) const;

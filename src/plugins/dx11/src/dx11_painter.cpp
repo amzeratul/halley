@@ -119,14 +119,26 @@ void DX11Painter::setMaterialData(const Material& material)
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
 			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(getConstantBuffer(block)).getBuffer();
 			auto dxBuffer = buffer.getBuffer();
+
+			const auto vsBindPoint = block.getBindPoint(ShaderType::Vertex);
+			const auto psBindPoint = block.getBindPoint(ShaderType::Pixel);
+
 			if (Halley::getPlatform() == GamePlatform::UWP || Halley::getPlatform() == GamePlatform::XboxOne) {
 				UINT firstConstant[] = { buffer.getOffset() / 16 };
 				UINT numConstants[] = { buffer.getLastSize() / 16 };
-				devCon.VSSetConstantBuffers1(block.getBindPoint(ShaderType::Vertex), 1, &dxBuffer, firstConstant, numConstants);
-				devCon.PSSetConstantBuffers1(block.getBindPoint(ShaderType::Pixel), 1, &dxBuffer, firstConstant, numConstants);
+				if (vsBindPoint >= 0) {
+					devCon.VSSetConstantBuffers1(vsBindPoint, 1, &dxBuffer, firstConstant, numConstants);
+				}
+				if (psBindPoint >= 0) {
+					devCon.PSSetConstantBuffers1(psBindPoint, 1, &dxBuffer, firstConstant, numConstants);
+				}
 			} else {
-				devCon.VSSetConstantBuffers(block.getBindPoint(ShaderType::Vertex), 1, &dxBuffer);
-				devCon.PSSetConstantBuffers(block.getBindPoint(ShaderType::Pixel), 1, &dxBuffer);
+				if (vsBindPoint >= 0) {
+					devCon.VSSetConstantBuffers(vsBindPoint, 1, &dxBuffer);
+				}
+				if (psBindPoint >= 0) {
+					devCon.PSSetConstantBuffers(psBindPoint, 1, &dxBuffer);
+				}
 			}
 		}
 	}

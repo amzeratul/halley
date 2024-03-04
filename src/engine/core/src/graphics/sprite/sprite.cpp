@@ -68,7 +68,7 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteObjectAttrib) + 16);
+		Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -80,7 +80,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteObjectAttrib) + 16);
+		Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 		
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -103,9 +103,9 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteObjectAttrib) + 16);
+	Expects(material->getDefinition().getObjectStride() == sizeof(SpriteObjectAttrib));
 
-	size_t spriteSize = sizeof(SpriteObjectAttrib) + 16;
+	size_t spriteSize = sizeof(SpriteObjectAttrib);
 	char buffer[4096];
 	char* objectData;
 	Vector<char> vertices;
