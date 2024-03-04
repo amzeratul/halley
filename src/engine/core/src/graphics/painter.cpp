@@ -203,7 +203,7 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
 		const size_t numVertices = verticesPerSprite * numSprites;
 
-		const auto result = addDrawData(material, 1, numVertices, numSprites * 6, true);
+		const auto result = addDrawData(material, numSprites, numVertices, numSprites * 6, true);
 		const char* const src = static_cast<const char*>(objectData) + objectOffset;
 
 		memcpy(result.dstObject, src, result.objectDataSize);
