@@ -161,6 +161,12 @@ namespace Halley {
 		{
 			*this = sequence;
 		}
+		
+		template <typename T>
+		explicit ConfigNode(const std::optional<T>& opt)
+		{
+			*this = opt;
+		}
 
 		template <typename K, typename V>
 		explicit ConfigNode(const std::map<K, V>& values)
