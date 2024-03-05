@@ -462,7 +462,9 @@ namespace Halley {
 		template <typename T>
 		T asType() const
 		{
-			if constexpr (HasConfigNodeConstructor<T>::value) {
+			if constexpr (std::is_enum_v<T>) {
+				return asEnum<T>();
+			} else if constexpr (HasConfigNodeConstructor<T>::value) {
 				return T(*this);
 			} else {
 				return convertTo(Tag<T>());
