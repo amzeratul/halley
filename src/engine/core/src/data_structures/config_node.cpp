@@ -1892,12 +1892,14 @@ ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types
 	if (!types.empty()) {
 		result = types[0];
 		for (size_t i = 1; i < types.size(); ++i) {
-			const auto a = types[i - 1];
+			const auto a = result;
 			const auto b = types[i];
 
 			if (a != b) {
 				if (isScalarType(a, promoteUndefined) && isScalarType(b, promoteUndefined)) {
 					result = (a == ConfigNodeType::Float || b == ConfigNodeType::Float) ? ConfigNodeType::Float : ((a == ConfigNodeType::Int64 || b == ConfigNodeType::Int64) ? ConfigNodeType::Int64 : ConfigNodeType::Int);
+				} else if (a == ConfigNodeType::String || b == ConfigNodeType::String) {
+					result = a;
 				} else {
 					const bool aIsVec2 = isVector2Type(a, promoteUndefined);
 					const bool bIsVec2 = isVector2Type(b, promoteUndefined);

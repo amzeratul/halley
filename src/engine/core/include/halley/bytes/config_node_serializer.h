@@ -179,6 +179,20 @@ namespace Halley {
     };
 
 	template <>
+    class ConfigNodeSerializer<double> {
+    public:
+        ConfigNode serialize(double value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(static_cast<float>(value));
+		}
+		
+		double deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return node.asFloat(0);
+        }
+    };
+
+	template <>
     class ConfigNodeSerializer<Vector2i> {
     public:
         ConfigNode serialize(Vector2i value, const EntitySerializationContext& context)

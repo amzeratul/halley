@@ -20,11 +20,21 @@ String ScriptForLoop::getLabel(const ScriptGraphNode& node) const
 	return toString(node.getSettings()["loopCount"].asInt(0));
 }
 
+String ScriptForLoop::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Loop Index";
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptForLoop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
 	return data;
 }
 
@@ -49,6 +59,8 @@ String ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType ele
 		return "Flow output after loop";
 	} else if (elementIdx == 2) {
 		return "Flow output for each loop iteration";
+	} else if (elementIdx == 3) {
+		return "Loop index [0-base]";
 	} else {
 		return ScriptNodeTypeBase<ScriptForLoopData>::getPinDescription(node, element, elementIdx);
 	}
@@ -62,6 +74,11 @@ IScriptNodeType::Result ScriptForLoop::doUpdate(ScriptEnvironment& environment, 
 		++curData.iterations;
 	}
 	return Result(ScriptNodeExecutionState::Done, 0, done ? 1 : 2);
+}
+
+ConfigNode ScriptForLoop::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptForLoopData& curData) const
+{
+	return ConfigNode(curData.iterations - 1);
 }
 
 void ScriptForLoop::doInitData(ScriptForLoopData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
@@ -139,7 +156,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerpLoop::getSettingTypes() const
 {
 	return {
 		SettingType{ "time", "float", Vector<String>{"1"} },
-		SettingType{ "curve", "Halley::InterpolationCurve", Vector<String>{"linear"} }
+		SettingType{ "curve", "Halley::InterpolationCurveLerp", Vector<String>{"linear"} }
 	};
 }
 
@@ -243,7 +260,7 @@ ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const Scrip
 		length = readDataPin(environment, node, 4).asFloat();
 	}
 
-	const auto curve = InterpolationCurve(node.getSettings()["curve"]);
+	const auto curve = InterpolationCurve(node.getSettings()["curve"], true);
 	return ConfigNode(curve.evaluate(clamp(curData.time / length, 0.0f, 1.0f)));
 }
 

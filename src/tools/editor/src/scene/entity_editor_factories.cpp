@@ -215,6 +215,14 @@ public:
 	}
 };
 
+class ComponentEditorTimeFieldFactory : public ComponentEditorFloatFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Time";
+	}
+};
+
 class ComponentEditorBoolFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -428,7 +436,7 @@ public:
 				uniformBlocks = material->getUniformBlocks();
 			} else {
 				dummy.name = "image";
-				textures = gsl::span(&dummy, 1);
+				textures = gsl::span<const MaterialTexture>(&dummy, 1);
 			}
 			
 			for (auto& widget: *prevMaterialParameters) {
@@ -1174,7 +1182,7 @@ public:
 		auto data = pars.data;
 		auto container = std::make_shared<UISizer>();
 
-		auto button = std::make_shared<CurveEditorButton>(context.getUIFactory(), InterpolationCurve(data.getFieldData(), false), [&context, data](InterpolationCurve curve)
+		auto button = std::make_shared<CurveEditorButton>(context.getUIFactory(), InterpolationCurve(data.getFieldData(), startsFromZero()), [&context, data](InterpolationCurve curve)
 		{
 			data.getWriteableFieldData() = curve.toConfigNode();
 			context.onEntityUpdated();
@@ -1182,6 +1190,24 @@ public:
 		container->add(button, 1);
 
 		return container;
+	}
+
+	virtual bool startsFromZero()
+	{
+		return false;
+	}
+};
+
+class ComponentEditorInterpolationCurveLerpFieldFactory : public ComponentEditorInterpolationCurveFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::InterpolationCurveLerp";
+	}
+
+	bool startsFromZero() override
+	{
+		return true;
 	}
 };
 
@@ -2303,6 +2329,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorFloatGranularityFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorTimeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2i, 2>>("Halley::Vector2i"));
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2f, 2>>("Halley::Vector2f"));
@@ -2325,6 +2352,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorUIColourFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourGradientFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorInterpolationCurveFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorInterpolationCurveLerpFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIStyleFieldFactory>());

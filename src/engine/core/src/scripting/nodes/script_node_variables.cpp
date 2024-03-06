@@ -1,5 +1,6 @@
 #include "script_node_variables.h"
 
+#include "halley/maths/interpolation_curve.h"
 #include "halley/maths/ops.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
@@ -646,7 +647,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 	return {
 		SettingType{ "from", "float", Vector<String>{"0"} },
 		SettingType{ "to", "float", Vector<String>{"1"} },
-		SettingType{ "curve", "Halley::TweenCurve", Vector<String>{"linear"} }
+		SettingType{ "curve", "Halley::InterpolationCurveLerp", Vector<String>{"linear"} }
 	};
 }
 
@@ -684,23 +685,19 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 
 	str.append(", ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
-	str.append(", ");
-	str.append(node.getSettings()["curve"].asString("linear"), settingColour);
 	str.append(")");
 	return str.moveResults();
 }
 
 String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
-	const auto curve = node.getSettings()["curve"].asString("linear");
-
 	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
-		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
 	}
 
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
-	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
 }
 
 String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -721,9 +718,9 @@ String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elemen
 
 ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
-	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
+	const auto curve = InterpolationCurve(node.getSettings()["curve"], true);
 	const auto t = readDataPin(environment, node, 0).asFloat(0);
-	const auto factor = Tween<float>::applyCurve(t, curve);
+	const auto factor = curve.evaluate(clamp(t, 0.0f, 1.0f));
 
 	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
 		const auto from = readDataPin(environment, node, 2);
