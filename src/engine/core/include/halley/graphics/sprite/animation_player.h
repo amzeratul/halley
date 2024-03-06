@@ -35,6 +35,7 @@ namespace Halley
 		std::shared_ptr<const Material> getMaterial() const;
 		void setApplyMaterial(bool apply);
 		void setReversePlaying(bool reverse);
+		bool isPlayingReverse();
 		bool isApplyingMaterial() const;
 
 		bool isPlaying() const;

@@ -19,6 +19,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 		SettingType{ "sequence", "Halley::String", Vector<String>{"default"} },
 		SettingType{ "loop", "bool", Vector<String>{"true"} },
 		SettingType{ "wait", "bool", Vector<String>{"true"} },
+		SettingType{ "reverse", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -43,6 +44,9 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 	if (node.getSettings()["wait"].asBool(true)) {
 		str.append(" and wait for it to finish ");
 	}
+	if (node.getSettings()["reverse"].asBool(false)) {
+		str.append(". Also animation will play in reverse");
+	}
 	return str.moveResults();
 }
 
@@ -51,13 +55,15 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 	auto entity = environment.tryGetEntity(readEntityId(environment, node, 2));
 	if (entity.isValid()) {
 		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
+		const auto reverse = node.getSettings()["reverse"].asBool(false);
+
 		if (spriteAnimation) {
-			if (spriteAnimation->player.getCurrentSequenceName() != node.getSettings()["sequence"].asString("")) {
+			if (spriteAnimation->player.getCurrentSequenceName() != node.getSettings()["sequence"].asString("") || reverse != spriteAnimation->player.isPlayingReverse()) {
 				if (node.getSettings()["loop"].asBool(true)) {
 					spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
 				}
 				else {
-					spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""));
+					spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""), {}, reverse);
 				}
 			}
 

@@ -273,6 +273,11 @@ void AnimationPlayer::setReversePlaying(bool reverse)
 	this->reverse = reverse;
 }
 
+bool AnimationPlayer::isPlayingReverse()
+{
+	return this->reverse;	
+}
+
 bool AnimationPlayer::isApplyingMaterial() const
 {
 	return applyMaterial;
