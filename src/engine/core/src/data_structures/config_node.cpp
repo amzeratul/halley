@@ -456,7 +456,7 @@ namespace {
 		} else if (a.getType() < b.getType()) {
 			return compareStrictOrder<op>(a, b);
 		} else {
-			return compareStrictOrder<op>(b, a);
+			return compareStrictOrder<MathOps::getFlipArguments<op>()>(b, a);
 		}
 	}
 }
@@ -489,6 +489,25 @@ bool ConfigNode::operator>=(const ConfigNode& other) const
 bool ConfigNode::operator<=(const ConfigNode& other) const
 {
 	return compare<MathRelOp::LessOrEqual>(*this, other);
+}
+
+bool ConfigNode::compareTo(MathRelOp op, const ConfigNode& other) const
+{
+	switch (op) {
+	case MathRelOp::Equal:
+		return compare<MathRelOp::Equal>(*this, other);
+	case MathRelOp::Different:
+		return compare<MathRelOp::Different>(*this, other);
+	case MathRelOp::Less:
+		return compare<MathRelOp::Less>(*this, other);
+	case MathRelOp::LessOrEqual:
+		return compare<MathRelOp::LessOrEqual>(*this, other);
+	case MathRelOp::Greater:
+		return compare<MathRelOp::Greater>(*this, other);
+	case MathRelOp::GreaterOrEqual:
+		return compare<MathRelOp::GreaterOrEqual>(*this, other);
+	}
+	return false;
 }
 
 ConfigNode& ConfigNode::operator=(Bytes value)

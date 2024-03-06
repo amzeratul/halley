@@ -477,26 +477,8 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	const auto typeA = a.getType();
-	const auto typeB = b.getType();
 	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asString("=="));
-
-	bool result = false;
-	if (typeA == ConfigNodeType::EntityId || typeB == ConfigNodeType::EntityId) {
-		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
-	} else if (typeA == ConfigNodeType::String || typeB == ConfigNodeType::String) {
-		result = MathOps::compare(op, a.asString(""), b.asString(""));
-	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
-		result = MathOps::compare(op, a.asFloat(0), b.asFloat(0));
-	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
-		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
-	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
-		result = MathOps::compare(op, a.asInt(0), b.asInt(0));
-	} else {
-		Logger::logError("ScriptComparison node can't compare types " + toString(typeA) + " and " + toString(typeB));
-	}
-
-	return ConfigNode(result);
+	return ConfigNode(a.compareTo(op, b));
 }
 
 

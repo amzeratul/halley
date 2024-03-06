@@ -10,6 +10,7 @@
 #include "halley/data_structures/vector.h"
 
 #include "hash_map.h"
+#include "halley/maths/ops.h"
 #include "halley/maths/rect.h"
 #include "halley/utils/type_traits.h"
 
@@ -319,6 +320,7 @@ namespace Halley {
 		bool operator<(const ConfigNode& other) const;
 		bool operator>=(const ConfigNode& other) const;
 		bool operator<=(const ConfigNode& other) const;
+		bool compareTo(MathRelOp op, const ConfigNode& other) const;
 
 		ConfigNodeType getType() const;
 
