@@ -3,7 +3,7 @@
 widget: { class: image, image: halley_ui/ui_window.png, innerBorder: [5, 5, 5, 5], colour: $ui_debugConsole }
 sizer: { type: vertical }
 children:
-- widget: { class: scrollBarPane, size: [40, 40], id: log }
+- widget: { class: scrollBarPane, size: [40, 40], id: log, style: scrollbarHalley }
   proportion: 1
   sizer: { type: vertical }
   children: []
