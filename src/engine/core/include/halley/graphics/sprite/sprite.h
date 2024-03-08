@@ -24,7 +24,9 @@ namespace Halley
 	struct SpriteObjectAttrib
 	{
 		// This structure must match the layout of the shader
-		// See shared_assets/material/sprite_base.material for reference
+		// For reference, see:
+		// - shared_assets/material/sprite_base.material
+		// - shared_assets/shader/halley/sprite_data_block.hlsl
 		Vector2f pos;
 		Vector2f pivot;
 		Vector2f size;
