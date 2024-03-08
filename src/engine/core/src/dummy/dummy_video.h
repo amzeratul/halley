@@ -21,6 +21,7 @@ namespace Halley {
 		std::unique_ptr<TextureRenderTarget> createTextureRenderTarget() override;
 		std::unique_ptr<ScreenRenderTarget> createScreenRenderTarget() override;
 		std::unique_ptr<MaterialConstantBuffer> createConstantBuffer() override;
+		std::unique_ptr<MaterialShaderStorageBuffer> createShaderStorageBuffer() override;
 		void init() override;
 		void deInit() override;
 		std::unique_ptr<Painter> makePainter(Resources& resources) override;
@@ -48,6 +49,13 @@ namespace Halley {
 	{
 	public:
 		void update(gsl::span<const gsl::byte> data) override;
+	};
+
+	class DummyMaterialShaderStorageBuffer : public MaterialShaderStorageBuffer
+	{
+	public:
+		void update(size_t numElements, size_t pitch, gsl::span<const gsl::byte> data) override;
+		void bind(ShaderType type, int position) override;
 	};
 
 	class DummyPainter : public Painter

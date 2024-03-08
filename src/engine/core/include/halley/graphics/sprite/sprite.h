@@ -38,7 +38,7 @@ namespace Halley
 		Vector4f custom3;
 		float rotation = 0;
 		float textureRotation = 0;
-		char _padding[4];
+		char _padding[8];
 	};
 
 	class Sprite

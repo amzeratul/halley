@@ -9,7 +9,7 @@ DX11Buffer::DX11Buffer(DX11Video& video, Type type, size_t initialSize)
 	, type(type)
 {
 	if (initialSize > 0) {
-		resize(initialSize);
+		resize(initialSize, std::nullopt);
 	}
 }
 
@@ -31,7 +31,7 @@ DX11Buffer::~DX11Buffer()
 	clear();
 }
 
-void DX11Buffer::setData(gsl::span<const gsl::byte> data)
+void DX11Buffer::setData(gsl::span<const gsl::byte> data, std::optional<size_t> stride)
 {
 	Expects(data.size_bytes() > 0);
 
@@ -69,7 +69,7 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 		video.getDevice().CreateBuffer(&bd, &resData, &buffer);
 	} else {
 		if (size_t(data.size_bytes()) > curSize) {
-			resize(size_t(data.size_bytes()));
+			resize(size_t(data.size_bytes()), stride);
 		}
 
 		lastPos = curPos;
@@ -128,9 +128,14 @@ void DX11Buffer::clear()
 	curSize = 0;
 }
 
-void DX11Buffer::resize(size_t requestedSize)
+void DX11Buffer::resize(size_t requestedSize, std::optional<size_t> stride)
 {
-	size_t targetSize = std::max(size_t(256), nextPowerOf2(requestedSize));
+	size_t targetSize;
+	if (type == Type::StructuredBuffer) {
+		targetSize = requestedSize;
+	} else {
+		targetSize = std::max(256ull, nextPowerOf2(requestedSize));
+	}
 
 	if (buffer) {
 		buffer->Release();
@@ -141,7 +146,7 @@ void DX11Buffer::resize(size_t requestedSize)
 	ZeroMemory(&bd, sizeof(bd));
 
 	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.ByteWidth = UINT(targetSize);
+	bd.ByteWidth = static_cast<UINT>(targetSize);
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	switch (type) {
@@ -153,6 +158,11 @@ void DX11Buffer::resize(size_t requestedSize)
 		break;
 	case Type::Vertex:
 		bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		break;
+	case Type::StructuredBuffer:
+		bd.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		bd.StructureByteStride = static_cast<UINT>(stride.value_or(0ull));
 		break;
 	}
 

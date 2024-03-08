@@ -28,6 +28,15 @@ namespace Halley
 		virtual void update(gsl::span<const gsl::byte> data) = 0;
 	};
 
+	class MaterialShaderStorageBuffer
+	{
+	public:
+		virtual ~MaterialShaderStorageBuffer() {}
+
+		virtual void update(size_t numElements, size_t pitch, gsl::span<const gsl::byte> data) = 0;
+		virtual void bind(ShaderType type, int position) = 0;
+	};
+
 	enum class MaterialDataBlockType : uint8_t
 	{
 		// Shared blocks are not stored locally in the material (e.g. the HalleyBlock, stored by the engine)

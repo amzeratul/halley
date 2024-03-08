@@ -4,23 +4,6 @@ struct VIn {
     int idx : OBJECTIDX;
 };
 
-// Object input
-struct OIn {
-    float2 position : POSITION;
-    float2 pivot : PIVOT;
-    float2 size : SIZE;
-    float2 scale : SCALE;
-    float4 colour : COLOUR;
-    float4 texCoord0 : TEXCOORD0;
-    float4 texCoord1 : TEXCOORD1;
-    float4 custom0 : CUSTOM0;
-    float4 custom1 : CUSTOM1;
-    float4 custom2 : CUSTOM2;
-    float4 custom3 : CUSTOM3;
-    float rotation : ROTATION;
-    float textureRotation : TEXTUREROTATION;
-};
-
 // Vertex output / Pixel input
 struct VOut {
     float4 position : SV_POSITION;

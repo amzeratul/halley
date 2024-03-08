@@ -21,6 +21,7 @@
 
 #ifdef DEV_BUILD
 #pragma comment( lib, "dxguid.lib")
+#include <d3d11sdklayers.h>
 #endif
 
 using namespace Halley;
@@ -73,7 +74,7 @@ void DX11Video::initD3D(Window& window)
 	ID3D11DeviceContext* dc;
 	std::array<D3D_FEATURE_LEVEL, 3> featureLevels = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
 	uint32_t flags = 0;
-	if (Debug::isDebug()) {
+	if constexpr (Debug::isDebug()) {
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
 	const auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, &device, &featureLevel, &dc);
@@ -84,6 +85,17 @@ void DX11Video::initD3D(Window& window)
 	if (!dc) {
 		throw Exception("Unable to initialise DX11.1", HalleyExceptions::VideoPlugin);
 	}
+
+#ifdef DEV_BUILD
+	if constexpr (Debug::isDebug()) {
+        ID3D11InfoQueue* infoQueue;
+        const auto result = device->QueryInterface(__uuidof(ID3D11InfoQueue), reinterpret_cast<void**>(&infoQueue));
+		if (SUCCEEDED(result)) {
+			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, TRUE);
+		}
+    }
+#endif
 
 	ID3D10Multithread* mt;
 	device->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&mt));
@@ -181,6 +193,11 @@ std::unique_ptr<ScreenRenderTarget> DX11Video::createScreenRenderTarget()
 std::unique_ptr<MaterialConstantBuffer> DX11Video::createConstantBuffer()
 {
 	return std::make_unique<DX11MaterialConstantBuffer>(*this);
+}
+
+std::unique_ptr<MaterialShaderStorageBuffer> DX11Video::createShaderStorageBuffer()
+{
+	return std::make_unique<DX11ShaderStorageBuffer>(*this);
 }
 
 std::unique_ptr<Painter> DX11Video::makePainter(Resources& resources)

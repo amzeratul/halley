@@ -39,7 +39,7 @@ Painter::Painter(VideoAPI& video, Resources& resources)
 	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
 	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
 	, blitDepthMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/BlitDepth")))
-	, objectDataMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/SpriteBase"), 1)))
+	, objectDataBuffer(video.createShaderStorageBuffer())
 {
 }
 
@@ -768,7 +768,7 @@ void Painter::flushPending()
 		const auto vertexSpan = gsl::span<char>(vertexBuffer.data(), verticesPending * materialPending->getDefinition().getVertexStride());
 		const auto objectSpan = gsl::span<char>(objectBuffer.data(), objectsPending * materialPending->getDefinition().getObjectStride());
 		const auto indexSpan = gsl::span<const IndexType>(indexBuffer.data(), indicesPending);
-		executeDrawPrimitives(*materialPending, verticesPending, objectSpan, vertexSpan, indexSpan, PrimitiveType::Triangle, allIndicesAreQuads);
+		executeDrawPrimitives(*materialPending, objectsPending, verticesPending, objectSpan, vertexSpan, indexSpan, PrimitiveType::Triangle, allIndicesAreQuads);
 	}
 
 	resetPending();
@@ -789,7 +789,7 @@ void Painter::resetPending()
 	pendingDebugGroupStack = curDebugGroupStack;
 }
 
-void Painter::executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
+void Painter::executeDrawPrimitives(const Material& material, size_t numObjects, size_t numVertices, gsl::span<const char> objectData, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
@@ -798,7 +798,7 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	size_t commandIdx = 0;
 	if (recordingSnapshot) {
 		commandIdx = recordingSnapshot->getNumCommands();
-		recordingSnapshot->draw(material, numVertices, objectData, vertexData, indices, primitiveType, allIndicesAreQuads);
+		recordingSnapshot->draw(material, numObjects, numVertices, objectData, vertexData, indices, primitiveType, allIndicesAreQuads);
 		recordTimestamp(TimestampType::CommandStart, commandIdx);
 	}
 
@@ -809,8 +809,8 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 	
 	// Load object data
 	if (!objectData.empty()) {
-		objectDataMaterial->getDataBlocks()[1].setData(gsl::as_bytes(objectData));
-		setMaterialData(*objectDataMaterial);
+		objectDataBuffer->update(numObjects, objectData.size_bytes() / numObjects, gsl::as_bytes(objectData));
+		objectDataBuffer->bind(ShaderType::Vertex, 0);
 	}
 
 	// Load material uniforms
