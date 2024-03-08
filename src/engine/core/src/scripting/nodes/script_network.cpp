@@ -167,7 +167,11 @@ std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const S
 IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockData& data) const
 {
 	if (!data.requestPending.isValid()) {
-		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+		auto target = readEntityId(environment, node, 2);
+		if (!target.isValid()) {
+			return Result(ScriptNodeExecutionState::Done, 0, 1);
+		}
+		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), target);
 	}
 
 	if (data.requestPending.hasValue()) {

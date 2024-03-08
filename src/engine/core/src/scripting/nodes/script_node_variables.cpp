@@ -1,5 +1,6 @@
 #include "script_node_variables.h"
 
+#include "halley/maths/interpolation_curve.h"
 #include "halley/maths/ops.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
@@ -477,26 +478,8 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	const auto typeA = a.getType();
-	const auto typeB = b.getType();
 	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asString("=="));
-
-	bool result = false;
-	if (typeA == ConfigNodeType::EntityId || typeB == ConfigNodeType::EntityId) {
-		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
-	} else if (typeA == ConfigNodeType::String || typeB == ConfigNodeType::String) {
-		result = MathOps::compare(op, a.asString(""), b.asString(""));
-	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
-		result = MathOps::compare(op, a.asFloat(0), b.asFloat(0));
-	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
-		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
-	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
-		result = MathOps::compare(op, a.asInt(0), b.asInt(0));
-	} else {
-		Logger::logError("ScriptComparison node can't compare types " + toString(typeA) + " and " + toString(typeB));
-	}
-
-	return ConfigNode(result);
+	return ConfigNode(a.compareTo(op, b));
 }
 
 
@@ -664,7 +647,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 	return {
 		SettingType{ "from", "float", Vector<String>{"0"} },
 		SettingType{ "to", "float", Vector<String>{"1"} },
-		SettingType{ "curve", "Halley::TweenCurve", Vector<String>{"linear"} }
+		SettingType{ "curve", "Halley::InterpolationCurveLerp", Vector<String>{"linear"} }
 	};
 }
 
@@ -702,23 +685,19 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 
 	str.append(", ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
-	str.append(", ");
-	str.append(node.getSettings()["curve"].asString("linear"), settingColour);
 	str.append(")");
 	return str.moveResults();
 }
 
 String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
-	const auto curve = node.getSettings()["curve"].asString("linear");
-
 	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
-		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
 	}
 
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
-	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ", " + curve + ")";
+	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
 }
 
 String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -739,9 +718,9 @@ String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elemen
 
 ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
-	const auto curve = node.getSettings()["curve"].asEnum(TweenCurve::Linear);
+	const auto curve = InterpolationCurve(node.getSettings()["curve"], true);
 	const auto t = readDataPin(environment, node, 0).asFloat(0);
-	const auto factor = Tween<float>::applyCurve(t, curve);
+	const auto factor = curve.evaluate(clamp(t, 0.0f, 1.0f));
 
 	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
 		const auto from = readDataPin(environment, node, 2);

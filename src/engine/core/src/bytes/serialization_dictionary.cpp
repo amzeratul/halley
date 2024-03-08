@@ -66,21 +66,32 @@ void SerializationDictionary::addEntries(gsl::span<const String> strings)
 	}
 }
 
-void SerializationDictionary::setLogMissingStrings(bool enabled, int min, int freq)
+void SerializationDictionary::setLogMissingStrings(bool enabled)
 {
 	logMissingStrings = enabled;
-	missingMin = min;
-	missingFreq = freq;
+	if (!enabled) {
+		missing.clear();
+	}
 }
 
 void SerializationDictionary::notifyMissingString(const String& string)
 {
-	if (!logMissingStrings) {
-		return;
+	if (logMissingStrings) {
+		++missing[string];
 	}
+}
 
-	const int cur = ++missing[string];
-	if (cur >= missingMin && (cur == missingMin || cur % missingFreq == 0)) {
-		Logger::logWarning("Serialization dictionary missing string: " + string + " (" + toString(cur) + "x)");
+void SerializationDictionary::printMissingStrings()
+{
+	if (logMissingStrings) {
+		Vector<std::pair<int, String>> result;
+		for (auto& [k, v] : missing) {
+			result.emplace_back(v, k);
+		}
+		std::sort(result.begin(), result.end(), [&](const auto& a, const auto& b) { return a.first > b.first; });
+		for (auto& [count, string] : result) {
+			Logger::logDev("  - " + string + " (" + toString(count) + ")");
+		}
+		missing.clear();
 	}
 }

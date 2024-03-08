@@ -10,6 +10,7 @@
 #include "halley/data_structures/vector.h"
 
 #include "hash_map.h"
+#include "halley/maths/ops.h"
 #include "halley/maths/rect.h"
 #include "halley/utils/type_traits.h"
 
@@ -160,6 +161,12 @@ namespace Halley {
 		explicit ConfigNode(const Vector<T>& sequence)
 		{
 			*this = sequence;
+		}
+		
+		template <typename T>
+		explicit ConfigNode(const std::optional<T>& opt)
+		{
+			*this = opt;
 		}
 
 		template <typename K, typename V>
@@ -313,6 +320,7 @@ namespace Halley {
 		bool operator<(const ConfigNode& other) const;
 		bool operator>=(const ConfigNode& other) const;
 		bool operator<=(const ConfigNode& other) const;
+		bool compareTo(MathRelOp op, const ConfigNode& other) const;
 
 		ConfigNodeType getType() const;
 
@@ -456,7 +464,9 @@ namespace Halley {
 		template <typename T>
 		T asType() const
 		{
-			if constexpr (HasConfigNodeConstructor<T>::value) {
+			if constexpr (std::is_enum_v<T>) {
+				return asEnum<T>();
+			} else if constexpr (HasConfigNodeConstructor<T>::value) {
 				return T(*this);
 			} else {
 				return convertTo(Tag<T>());

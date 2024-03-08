@@ -16,7 +16,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 8>{
+	const static auto data = std::array<PinType, 12>{
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
@@ -24,7 +24,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
 	};
 
 	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
@@ -98,7 +102,7 @@ Vector<IGraphNodeType::SettingType> ScriptSendGenericMessage::getSettingTypes() 
 {
 	return {
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
-		SettingType{ "nParams", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+		SettingType{ "nParams", "Halley::Range<int, 0, 8>", Vector<String>{""} },
 	};
 }
 
@@ -106,7 +110,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSendGenericMessage::getPinConfigu
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 9>{
+	const static auto data = std::array<PinType, 13>{
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
@@ -115,7 +119,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptSendGenericMessage::getPinConfigu
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
 	};
 
 	const auto nParams = node.getSettings()["nParams"].asInt(0);
@@ -202,7 +210,7 @@ Vector<IScriptNodeType::SettingType> ScriptReceiveMessage::getSettingTypes() con
 {
 	return {
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
-		SettingType{ "nParams", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
+		SettingType{ "nParams", "Halley::Range<int, 0, 8>", Vector<String>{"0"} },
 		SettingType{ "allowSpawning", "bool", Vector<String>{"false"} },
 	};
 }
@@ -211,7 +219,17 @@ gsl::span<const IScriptNodeType::PinType> ScriptReceiveMessage::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 9>{
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
 	const int nParams = node.getSettings()["nParams"].asInt(0);
 
 	return gsl::span<const PinType>(data).subspan(0, 1 + nParams);

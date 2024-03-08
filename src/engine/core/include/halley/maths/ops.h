@@ -53,7 +53,7 @@ namespace Halley {
     class MathOps {
     public:
         template <typename T>
-        static T apply(MathOp op, const T& a, const T& b)
+        constexpr static T apply(MathOp op, const T& a, const T& b)
         {
             switch (op) {
             case MathOp::Add:
@@ -73,7 +73,7 @@ namespace Halley {
         }
 
         template <typename T>
-        static bool compare(MathRelOp op, const T& a, const T& b)
+        constexpr static bool compare(MathRelOp op, const T& a, const T& b)
         {
             switch (op) {
             case MathRelOp::Equal:
@@ -93,7 +93,7 @@ namespace Halley {
         }
 
         template <MathRelOp op, typename T>
-        static bool compare(const T& a, const T& b)
+        constexpr static bool compare(const T& a, const T& b)
         {
             switch (op) {
             case MathRelOp::Equal:
@@ -113,7 +113,7 @@ namespace Halley {
         }
 
         template <MathRelOp op, typename T>
-        static bool compareEq(const T& a, const T& b)
+        constexpr static bool compareEq(const T& a, const T& b)
         {
             switch (op) {
             case MathRelOp::Equal:
@@ -124,6 +124,25 @@ namespace Halley {
                 return false;
             }
             return false;
+        }
+
+        template <MathRelOp op>
+        constexpr static MathRelOp getFlipArguments()
+        {
+	        switch (op) {
+	        case MathRelOp::Equal:
+	        case MathRelOp::Different:
+                return op;
+	        case MathRelOp::Greater:
+                return MathRelOp::Less;
+	        case MathRelOp::Less:
+                return MathRelOp::Greater;
+	        case MathRelOp::GreaterOrEqual:
+                return MathRelOp::LessOrEqual;
+	        case MathRelOp::LessOrEqual:
+                return MathRelOp::GreaterOrEqual;
+	        }
+            return MathRelOp::Equal;
         }
     };
 }

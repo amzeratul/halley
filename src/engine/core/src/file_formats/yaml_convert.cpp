@@ -143,6 +143,14 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 		emitter << YAML::Binary(node.asBytes().data(), node.asBytes().size());
 		return;
 
+	case ConfigNodeType::Noop:
+		emitter << "<noop>";
+		return;
+
+	case ConfigNodeType::Del:
+		emitter << "<del>";
+		return;
+
 	default:
 		emitter << YAML::Null;
 	}

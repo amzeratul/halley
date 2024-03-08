@@ -456,7 +456,7 @@ namespace {
 		} else if (a.getType() < b.getType()) {
 			return compareStrictOrder<op>(a, b);
 		} else {
-			return compareStrictOrder<op>(b, a);
+			return compareStrictOrder<MathOps::getFlipArguments<op>()>(b, a);
 		}
 	}
 }
@@ -489,6 +489,25 @@ bool ConfigNode::operator>=(const ConfigNode& other) const
 bool ConfigNode::operator<=(const ConfigNode& other) const
 {
 	return compare<MathRelOp::LessOrEqual>(*this, other);
+}
+
+bool ConfigNode::compareTo(MathRelOp op, const ConfigNode& other) const
+{
+	switch (op) {
+	case MathRelOp::Equal:
+		return compare<MathRelOp::Equal>(*this, other);
+	case MathRelOp::Different:
+		return compare<MathRelOp::Different>(*this, other);
+	case MathRelOp::Less:
+		return compare<MathRelOp::Less>(*this, other);
+	case MathRelOp::LessOrEqual:
+		return compare<MathRelOp::LessOrEqual>(*this, other);
+	case MathRelOp::Greater:
+		return compare<MathRelOp::Greater>(*this, other);
+	case MathRelOp::GreaterOrEqual:
+		return compare<MathRelOp::GreaterOrEqual>(*this, other);
+	}
+	return false;
 }
 
 ConfigNode& ConfigNode::operator=(Bytes value)
@@ -1680,16 +1699,6 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 {
 	const auto& fromMap = from.asMap();
 	const auto& toMap = to.asMap();
-
-	// Shortcut if from is empty
-	if (fromMap.empty()) {
-		if (toMap.empty()) {
-			return ConfigNode(NoopType());
-		}
-		auto result = ConfigNode(toMap);
-		result.type = ConfigNodeType::DeltaMap;
-		return result;
-	}
 	
 	auto result = ConfigNode(MapType());
 	result.type = ConfigNodeType::DeltaMap;
@@ -1883,12 +1892,14 @@ ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types
 	if (!types.empty()) {
 		result = types[0];
 		for (size_t i = 1; i < types.size(); ++i) {
-			const auto a = types[i - 1];
+			const auto a = result;
 			const auto b = types[i];
 
 			if (a != b) {
 				if (isScalarType(a, promoteUndefined) && isScalarType(b, promoteUndefined)) {
 					result = (a == ConfigNodeType::Float || b == ConfigNodeType::Float) ? ConfigNodeType::Float : ((a == ConfigNodeType::Int64 || b == ConfigNodeType::Int64) ? ConfigNodeType::Int64 : ConfigNodeType::Int);
+				} else if (a == ConfigNodeType::String || b == ConfigNodeType::String) {
+					result = a;
 				} else {
 					const bool aIsVec2 = isVector2Type(a, promoteUndefined);
 					const bool bIsVec2 = isVector2Type(b, promoteUndefined);
