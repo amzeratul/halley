@@ -126,7 +126,7 @@ systemMessage:
   - script: 'Halley::String'
   - entity: 'Halley::EntityId'
   - nodeId: int
-  - params: 'Halley::ConfigNode'
+  - params: 'Halley::Bytes'
   serializable: true
   destination: host
 
@@ -148,7 +148,7 @@ message:
   members:
   - script: 'Halley::String'
   - nodeId: int
-  - params: 'Halley::ConfigNode'
+  - params: 'Halley::Bytes'
   serializable: true
 
 ---

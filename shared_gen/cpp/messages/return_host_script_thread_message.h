@@ -1,4 +1,4 @@
-// Halley codegen version 125
+// Halley codegen version 127
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -12,12 +12,12 @@ public:
 
 	Halley::String script{};
 	int nodeId{};
-	Halley::ConfigNode params{};
+	Halley::Bytes params{};
 
 	ReturnHostScriptThreadMessage() {
 	}
 
-	ReturnHostScriptThreadMessage(Halley::String script, int nodeId, Halley::ConfigNode params)
+	ReturnHostScriptThreadMessage(Halley::String script, int nodeId, Halley::Bytes params)
 		: script(std::move(script))
 		, nodeId(std::move(nodeId))
 		, params(std::move(params))
@@ -48,6 +48,6 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(script)>::deserialize(script, Halley::String{}, context, node, "", "script", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(nodeId)>::deserialize(nodeId, int{}, context, node, "", "nodeId", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
-		Halley::EntityConfigNodeSerializer<decltype(params)>::deserialize(params, Halley::ConfigNode{}, context, node, "", "params", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(params)>::deserialize(params, Halley::Bytes{}, context, node, "", "params", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 	}
 };

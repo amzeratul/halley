@@ -3,6 +3,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/support/exception.h"
 #include "../file_formats/config_file_serialization_state.h"
+#include "halley/entity/world.h"
 #include "halley/maths/ops.h"
 #include "halley/utils/hash.h"
 using namespace Halley;
@@ -611,7 +612,11 @@ void ConfigNode::serialize(Serializer& s) const
 			s << asInt64();
 			break;
 		case ConfigNodeType::EntityId:
-			s << asEntityId().value;
+			if (s.getOptions().world) {
+				s << s.getOptions().world->getEntity(EntityId(asEntityId().value)).getInstanceUUID();
+			} else {
+				s << asEntityId().value;
+			}
 			break;
 		case ConfigNodeType::Float:
 			s << asFloat();
@@ -684,7 +689,14 @@ void ConfigNode::deserialize(Deserializer& s)
 			deserializeContents<int64_t>(s);
 			break;
 		case ConfigNodeType::EntityId:
-			deserializeContents<EntityIdHolder>(s);
+			if (s.getOptions().world != nullptr) {
+				UUID uuid;
+				s >> uuid;
+				auto entity = s.getOptions().world->findEntity(uuid);
+				*this = EntityIdHolder{ entity->getEntityId().value };
+			} else {
+				deserializeContents<EntityIdHolder>(s);
+			}
 			break;
 		case ConfigNodeType::Float:
 			deserializeContents<float>(s);

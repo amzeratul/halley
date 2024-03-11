@@ -55,7 +55,7 @@ public:
 	void onMessageReceived(StartHostScriptThreadSystemMessage msg) override
 	{
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params), msg.fromPeerId });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), Deserializer::fromBytes<ConfigNode>(msg.params, getSerializerOptions()), msg.fromPeerId});
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
@@ -73,7 +73,7 @@ public:
 	void onMessageReceived(const ReturnHostScriptThreadMessage& msg, ScriptableFamily& e) override
 	{
 		if (const auto scriptable = getScriptState(e, msg.script)) {
-			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(msg.params), msg.fromPeerId });
+			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), Deserializer::fromBytes<ConfigNode>(msg.params, getSerializerOptions()), msg.fromPeerId });
 		} else {
 			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
 		}
@@ -143,12 +143,12 @@ public:
 
 	void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) override
 	{
-		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node, std::move(params)));
+		sendMessage(target, ReturnHostScriptThreadMessage(scriptId, node, Serializer::toBytes(params, getSerializerOptions())));
 	}
 
 	void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) override
 	{
-		sendMessage(StartHostScriptThreadSystemMessage(scriptId, entityId, nodeId, std::move(params)));
+		sendMessage(StartHostScriptThreadSystemMessage(scriptId, entityId, nodeId, Serializer::toBytes(params, getSerializerOptions())));
 	}
 
 	void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) override
@@ -547,6 +547,14 @@ private:
 			}
 		}
 		return {};
+	}
+
+	SerializerOptions getSerializerOptions()
+	{
+		SerializerOptions options;
+		options.version = SerializerOptions::maxVersion;
+		options.world = &getWorld();
+		return options;
 	}
 };
 
