@@ -9,6 +9,8 @@ using namespace Halley;
 
 void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
+	assert(isValid());
+
 	if (node.getType() == ConfigNodeType::Noop) {
 		return;
 	}
@@ -24,11 +26,11 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 
 		for (const auto& [stateId, stateNode]: node["states"].asMap()) {
 			const auto id = stateId.toInteger64();
-			auto& stateData = getStateData(id);
 			if (stateNode.getType() == ConfigNodeType::Del) {
 				continue;
 			}
 
+			auto& stateData = getStateData(id);
 			stateData.present = true;
 
 			if (stateData.state) {
@@ -46,6 +48,8 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 			}
 		}
 	}
+
+	assert(isValid());
 }
 
 ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& context) const
@@ -69,6 +73,7 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 
 void ScriptStateSet::addState(std::shared_ptr<ScriptState> state)
 {
+	assert(!!state);
 	states.push_back(State{ curId++, std::move(state) });
 }
 
@@ -84,14 +89,17 @@ bool ScriptStateSet::empty() const
 
 void ScriptStateSet::removeDeadStates()
 {
+	assert(isValid());
 	std_ex::erase_if(states, [](const auto& state)
 	{
 		return state.state->isDead();
 	});
+	assert(isValid());
 }
 
 void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 {
+	assert(isValid());
 	// Defer evaluation to when it's needed to avoid querying the world too much
 	std::optional<bool> isLocalCache;
 	auto isLocal = [&]() -> bool
@@ -106,10 +114,12 @@ void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 	{
 		return state.state->isDead() && isLocal();
 	});
+	assert(isValid());
 }
 
 void ScriptStateSet::terminateMarkedDead(ScriptEnvironment& environment, EntityId entityId, ScriptVariables& entityVariables)
 {
+	assert(isValid());
 	for (auto& state: states) {
 		if (state.dead) {
 			environment.terminateState(*state.state, entityId, entityVariables);
@@ -142,6 +152,11 @@ ScriptStateSet::State& ScriptStateSet::getStateData(int64_t id)
 		}
 	}
 	return states.emplace_back(State{ id, {}, true });
+}
+
+bool ScriptStateSet::isValid() const
+{
+	return std::all_of(states.begin(), states.end(), [&](const State& state) { return !!state.state; });
 }
 
 ConfigNode ConfigNodeSerializer<ScriptStateSet>::serialize(const ScriptStateSet& stateSet, const EntitySerializationContext& context)

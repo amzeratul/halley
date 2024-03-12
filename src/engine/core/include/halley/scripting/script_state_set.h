@@ -87,6 +87,7 @@ namespace Halley {
         int64_t curId = 0;
 
         State& getStateData(int64_t id);
+        bool isValid() const;
     };
 
     template<>

@@ -209,6 +209,8 @@ private:
 	{
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e : scriptableFamily) {
+			e.scriptable.activeStates.terminateMarkedDead(env, e.entityId, e.scriptable.variables);
+
 			for (auto& state: e.scriptable.activeStates) {
 				if (!state->getFrameFlag()) {
 					env.update(t, *state, e.entityId, e.scriptable.variables);

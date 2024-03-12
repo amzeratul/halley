@@ -35,6 +35,7 @@ namespace Halley {
 		void onModified();
 		void undo();
 		void redo();
+		void centreView();
 		void openProperties();
 
 	protected:

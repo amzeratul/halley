@@ -184,6 +184,11 @@ void ScriptGraphEditor::onMakeUI()
 		redo();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "centreViewButton", [=](const UIEvent& event)
+	{
+		centreView();
+	});
+
 	setHandle(UIEventType::ButtonClicked, "propertiesButton", [=](const UIEvent& event)
 	{
 		openProperties();
@@ -232,6 +237,11 @@ void ScriptGraphEditor::redo()
 		*scriptGraph = ScriptGraph(undoStack.redo());
 		scriptGraph->setAssetId(assetId);
 	}
+}
+
+void ScriptGraphEditor::centreView()
+{
+	infiniCanvas->setScrollPosition({});
 }
 
 void ScriptGraphEditor::openProperties()
