@@ -101,7 +101,7 @@ public:
 				env.terminateState(*script, e.entityId, e.scriptable.variables);
 			}
 		}
-		e.scriptable.activeStates.removeDeadStates();
+		e.scriptable.activeStates.removeDeadLocalStates(getWorld(), e.entityId);
 	}
 
 	void onMessageReceived(const TerminateScriptsWithTagMessage& msg, ScriptableFamily& e) override
@@ -112,7 +112,7 @@ public:
 				env.terminateState(*state, e.entityId, e.scriptable.variables);
 			}
 		}
-		e.scriptable.activeStates.removeDeadStates();
+		e.scriptable.activeStates.removeDeadLocalStates(getWorld(), e.entityId);
 	}
 
 	void onMessageReceived(const SendScriptMsgMessage& msg, ScriptableFamily& e) override
@@ -133,7 +133,7 @@ public:
 				env.terminateState(*state, scriptable->entityId, scriptable->scriptable.variables);
 			}
 		}
-		scriptable->scriptable.activeStates.removeDeadStates();
+		scriptable->scriptable.activeStates.removeDeadLocalStates(getWorld(), scriptable->entityId);
 	}
 
 	void onMessageReceived(const SetEntityVariableMessage& msg, ScriptableFamily& e) override

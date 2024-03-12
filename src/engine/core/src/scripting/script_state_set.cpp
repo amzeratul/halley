@@ -87,16 +87,6 @@ bool ScriptStateSet::empty() const
 	return states.empty();
 }
 
-void ScriptStateSet::removeDeadStates()
-{
-	assert(isValid());
-	std_ex::erase_if(states, [](const auto& state)
-	{
-		return state.state->isDead();
-	});
-	assert(isValid());
-}
-
 void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 {
 	assert(isValid());
@@ -125,7 +115,7 @@ void ScriptStateSet::terminateMarkedDead(ScriptEnvironment& environment, EntityI
 			environment.terminateState(*state.state, entityId, entityVariables);
 		}
 	}
-	removeDeadStates();
+	removeDeadLocalStates(environment.getWorld(), entityId);
 }
 
 ScriptStateSet::Iterator ScriptStateSet::begin() const

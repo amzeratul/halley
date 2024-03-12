@@ -11,11 +11,14 @@ namespace Halley {
 		SessionService(std::shared_ptr<Session> session);
 
 		std::shared_ptr<Session> getSession() const;
-		SessionMultiplayer& getMultiplayerSession();
+		SessionMultiplayer& getMultiplayerSession() const;
 
 		bool isMultiplayer() const;
 		bool canSave() const;
 		bool hasHostAuthority() const;
+
+		String getSessionClientName() const;
+		uint8_t getMyClientId() const;
 
 	private:
 		std::shared_ptr<Session> session;

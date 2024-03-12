@@ -67,7 +67,6 @@ namespace Halley {
         void clear();
         bool empty() const;
 
-    	void removeDeadStates();
         void removeDeadLocalStates(World& world, EntityId entityId);
         void terminateMarkedDead(ScriptEnvironment& environment, EntityId entityId, ScriptVariables& entityVariables);
 

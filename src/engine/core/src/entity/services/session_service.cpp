@@ -27,7 +27,26 @@ bool SessionService::hasHostAuthority() const
 	return session ? session->hasHostAuthority() : true;
 }
 
-SessionMultiplayer& SessionService::getMultiplayerSession()
+String SessionService::getSessionClientName() const
+{
+	if (isMultiplayer()) {
+		auto& mp = getMultiplayerSession();
+		if (mp.hasHostAuthority()) {
+			return "host";
+		} else {
+			return "client" + toString(mp.getMyClientId());
+		}
+	} else {
+		return "local";
+	}
+}
+
+uint8_t SessionService::getMyClientId() const
+{
+	return isMultiplayer() ? getMultiplayerSession().getMyClientId() : 0;
+}
+
+SessionMultiplayer& SessionService::getMultiplayerSession() const
 {
 	return dynamic_cast<SessionMultiplayer&>(*session);
 }
