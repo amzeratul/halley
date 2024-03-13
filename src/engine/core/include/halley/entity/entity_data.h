@@ -69,7 +69,7 @@ namespace Halley {
     	EntityData(EntityData&& other) noexcept = default;
     	EntityData& operator=(const EntityData& other) = delete;
     	EntityData& operator=(EntityData&& other) noexcept = default;
-        explicit EntityData(const EntityDataDelta& delta);
+	    explicit EntityData(const EntityDataDelta& delta);
 
     	ConfigNode toConfigNode(bool allowPrefabUUID) const;
         String toYAML() const;
@@ -141,6 +141,9 @@ namespace Halley {
 
         void generateUUIDs(HashMap<UUID, UUID>& changes);
         void updateComponentUUIDs(const HashMap<UUID, UUID>& changes);
+
+	    void postProcessAddedChild(const std::set<String>& ignoreComponents);
+        void makeComponentChangesIntoDeltas();
 
     private:
 

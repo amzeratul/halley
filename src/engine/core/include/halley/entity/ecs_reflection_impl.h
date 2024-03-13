@@ -19,7 +19,9 @@ namespace Halley {
 		
 		ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const override
 		{
-			return static_cast<const T&>(component).serialize(context);
+			ConfigNode result = static_cast<const T&>(component).serialize(context);
+			result.ensureType(ConfigNodeType::DeltaMap);
+			return result;
 		}
 
 		CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) const override

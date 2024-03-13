@@ -820,14 +820,12 @@ namespace Halley {
 						node[name] = std::move(result);
 					}
 				}
-			} else {
-				node[name] = ConfigNode(ConfigNode::NoopType());
 			}
 		}
 
 		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, std::string_view componentName, std::string_view fieldName, int serializationMask)
 		{
-			if (context.matchType(serializationMask) && node.getType() != ConfigNodeType::Noop) {
+			if ((context.matchType(serializationMask) || node.getType() != ConfigNodeType::Undefined) && node.getType() != ConfigNodeType::Noop) {
 				const bool delta = node.getType() == ConfigNodeType::DeltaMap;
 				const auto& fieldNode = node[fieldName];
 				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {

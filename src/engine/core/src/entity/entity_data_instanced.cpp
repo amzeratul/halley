@@ -92,8 +92,23 @@ const std::pair<String, ConfigNode>& EntityDataInstanced::getComponent(size_t id
 {
 	const auto& original = prefabData->getComponent(idx);
 	const auto iter = componentOverrides.find(original.first);
+
 	if (iter != componentOverrides.end()) {
-		return iter->second;
+		const auto& fromData = original.second;
+		const auto& toData = iter->second.second;
+		if (toData.asMap().empty()) {
+			return original;
+		}
+
+		if (toData.getType() == ConfigNodeType::DeltaMap && !fromData.asMap().empty()) {
+			thread_local std::pair<String, ConfigNode> temp;
+
+			temp = original;
+			temp.second.applyDelta(toData);
+			return temp;
+		} else {
+			return iter->second;
+		}
 	}
 	return original;
 }

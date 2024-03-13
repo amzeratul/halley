@@ -429,11 +429,11 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		std_ex::erase_if(components, [&] (const auto& component) { return component.first == componentId; });
 	}
 	for (const auto& component: delta.componentsChanged) {
-		auto iter = std_ex::find_if(components, [&] (const auto& cur) { return cur.first == component.first; });
-		if (iter == components.end()) {
-			components.emplace_back(component.first, ConfigNode::applyDelta(ConfigNode(ConfigNode::MapType()), component.second));
-		} else {
+		if (auto iter = std_ex::find_if(components, [&] (const auto& cur) { return cur.first == component.first; }); iter != components.end()) {
 			iter->second.applyDelta(component.second);
+		} else {
+			components.emplace_back(component.first, ConfigNode::applyDelta(ConfigNode(ConfigNode::MapType()), component.second));
+			//components.emplace_back(component.first, component.second);
 		}
 	}
 	if (!delta.componentOrder.empty()) {
@@ -634,5 +634,28 @@ void EntityData::updateComponentUUIDs(const HashMap<UUID, UUID>& changes)
 
 	for (auto& c: children) {
 		c.updateComponentUUIDs(changes);
+	}
+}
+
+void EntityData::postProcessAddedChild(const std::set<String>& ignoredComponents)
+{
+	std_ex::erase_if(components, [&] (const std::pair<String, ConfigNode>& entry)
+	{
+		return ignoredComponents.find(entry.first) != ignoredComponents.end() || entry.second.asMap().empty();
+	});
+
+	for (auto& c: children) {
+		c.postProcessAddedChild(ignoredComponents);
+	}
+}
+
+void EntityData::makeComponentChangesIntoDeltas()
+{
+	for (auto& [k, v]: components) {
+		v.ensureType(ConfigNodeType::DeltaMap);
+	}
+
+	for (auto& c: children) {
+		c.makeComponentChangesIntoDeltas();
 	}
 }

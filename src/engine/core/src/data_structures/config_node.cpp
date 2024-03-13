@@ -1266,7 +1266,16 @@ void ConfigNode::ensureType(ConfigNodeType t)
 			*this = SequenceType();
 			break;
 		case ConfigNodeType::Map:
-			*this = MapType();
+			if (type != ConfigNodeType::DeltaMap) {
+				*this = MapType();
+			}
+			type = ConfigNodeType::Map;
+			break;
+		case ConfigNodeType::DeltaMap:
+			if (type != ConfigNodeType::Map) {
+				*this = MapType();
+			}
+			type = ConfigNodeType::DeltaMap;
 			break;
 		case ConfigNodeType::Bytes:
 			*this = Bytes();
@@ -1677,7 +1686,7 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 			return ConfigNode(NoopType());
 		}
 
-		if (from.getType() == ConfigNodeType::Map) {
+		if (from.getType() == ConfigNodeType::Map || from.getType() == ConfigNodeType::DeltaMap) {
 			auto delta = createMapDelta(from, to, breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;

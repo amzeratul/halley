@@ -72,6 +72,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			} else {
 				// Inserted
 				childrenAdded.emplace_back(toChild);
+				childrenAdded.back().postProcessAddedChild(options.ignoreComponents);
 			}
 		}
 		for (const auto& fromChild: from.children) {
@@ -97,6 +98,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	// Components
 	for (const auto& toComponent: to.components) {
 		const String& compId = toComponent.first;
+
 		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
 			const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
 			if (fromIter != from.components.end()) {
@@ -215,6 +217,10 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(icon, FieldId::Icon);
 	decodeOptField(flags, FieldId::Flags);
 	decodeOptField(variant, FieldId::Variant);
+
+	for (auto& c: childrenAdded) {
+		c.makeComponentChangesIntoDeltas();
+	}
 }
 
 void EntityDataDelta::setInstanceUUID(const UUID& uuid)

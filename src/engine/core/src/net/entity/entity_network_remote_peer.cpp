@@ -142,7 +142,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + EntityData(deltaData).toYAML() + "\n");
+	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
 	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
