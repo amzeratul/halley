@@ -45,6 +45,11 @@ const String& EntityDataInstanced::getPrefab() const
 	return prefabData->getPrefab();
 }
 
+const String& EntityDataInstanced::getPrefabInstanced() const
+{
+	return prefabData->getPrefabInstanced();
+}
+
 const String& EntityDataInstanced::getVariant() const
 {
 	return prefabData->getVariant();

@@ -31,6 +31,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	deltaOptions.deltaComponents = true;
 	deltaOptions.allowNonSerializable = false;
 	deltaOptions.ignoreComponents = std::move(ignoreComponents);
+	deltaOptions.resources = &resources;
 
 	setupDictionary();
 	byteSerializationOptions.version = SerializerOptions::maxVersion;
@@ -421,6 +422,11 @@ NetworkSession& EntityNetworkSession::getSession() const
 bool EntityNetworkSession::hasWorld() const
 {
 	return !!factory;
+}
+
+Resources& EntityNetworkSession::getResources() const
+{
+	return resources;
 }
 
 void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)

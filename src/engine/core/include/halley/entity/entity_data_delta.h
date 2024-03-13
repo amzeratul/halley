@@ -12,21 +12,13 @@ namespace Halley {
 		friend class EntityData;
 		
 	public:
-        class Options {
-        public:
-            Options();
-        	
-	        bool preserveOrder = false;
-			bool shallow = false;
-            bool deltaComponents = true;
-			bool allowNonSerializable = true;
-        	std::set<String> ignoreComponents;
-			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
-        };
+		using Options = EntityDataDeltaOptions;
 		
         EntityDataDelta();
 		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
+
+		void encode(const EntityData& from, const EntityData& to, const Options& options = Options());
 
 		bool hasChange() const;
 
@@ -35,6 +27,7 @@ namespace Halley {
 
 		const std::optional<String>& getName() const { return name; }
 		const std::optional<String>& getPrefab() const { return prefab; }
+		const std::optional<String>& getPrefabInstanced() const { return prefabInstanced; }
 		const std::optional<String>& getIcon() const { return icon; }
 		const std::optional<String>& getVariant() const { return variant; }
 		const std::optional<uint8_t>& getFlags() const { return flags; }
@@ -48,7 +41,7 @@ namespace Halley {
 		const Vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
 		const Vector<String>& getComponentsRemoved() const { return componentsRemoved; }
 		
-		const Vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
+		const Vector<EntityDataDelta>& getChildrenAdded() const { return childrenAdded; }
 		const Vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
 		const Vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
 
@@ -67,6 +60,7 @@ namespace Halley {
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
+    	std::optional<String> prefabInstanced;
 		std::optional<String> icon;
 		std::optional<String> variant;
 		std::optional<uint8_t> flags;
@@ -78,7 +72,7 @@ namespace Halley {
 		Vector<String> componentsRemoved;
 		Vector<String> componentOrder;
 
-		Vector<EntityData> childrenAdded;
+		Vector<EntityDataDelta> childrenAdded;
 		Vector<std::pair<UUID, EntityDataDelta>> childrenChanged;
 		Vector<UUID> childrenRemoved;
 		Vector<UUID> childrenOrder;
@@ -99,14 +93,15 @@ namespace Halley {
         	ChildrenOrder,
         	Icon,
 			Flags,
-			Variant
+			Variant,
+			PrefabInstanced
         };
 
-    	static uint16_t getFieldBit(FieldId id);
-    	static void setFieldPresent(uint16_t& value, FieldId id, bool present);
-    	static bool isFieldPresent(uint16_t value, FieldId id);
+    	static uint32_t getFieldBit(FieldId id);
+    	static void setFieldPresent(uint32_t& value, FieldId id, bool present);
+    	static bool isFieldPresent(uint32_t value, FieldId id);
 
-		uint16_t getFieldsPresent() const;
+		uint32_t getFieldsPresent() const;
 
 		Vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
 	};

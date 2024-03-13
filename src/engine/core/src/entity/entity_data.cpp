@@ -2,9 +2,16 @@
 #include "halley/entity/entity_data_delta.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/prefab.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/resources/resources.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+
+namespace Halley {
+	class Prefab;
+}
+
 using namespace Halley;
 
 EntityChangeOperation EntityChangeOperation::clone() const
@@ -103,9 +110,22 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	}
 }
 
-EntityData::EntityData(const EntityDataDelta& delta)
+std::optional<EntityData> EntityData::fromDelta(const EntityDataDelta& delta, Resources* resources)
 {
-	applyDelta(delta);
+	EntityData result;
+	if (result.applyDelta(delta, resources)) {
+		return result;
+	}
+	return std::nullopt;
+}
+
+std::optional<EntityData> EntityData::fromDelta(const EntityDataDelta& delta, UUID instanceUUID, Resources* resources)
+{
+	EntityData result;
+	if (result.applyDelta(delta, resources, instanceUUID)) {
+		return result;
+	}
+	return std::nullopt;
 }
 
 ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
@@ -174,7 +194,7 @@ void EntityData::deserialize(Deserializer& s)
 {
 	EntityDataDelta delta;
 	s >> delta;
-	applyDelta(delta);
+	applyDelta(delta, nullptr);
 }
 
 bool EntityData::getFlag(Flag flag) const
@@ -309,6 +329,11 @@ void EntityData::setPrefab(String prefab)
 	this->prefab = std::move(prefab);
 }
 
+void EntityData::setPrefabInstanced(String prefab)
+{
+	this->prefabInstanced = std::move(prefab);
+}
+
 void EntityData::setIcon(String icon)
 {
 	this->icon = std::move(icon);
@@ -374,13 +399,30 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 	}
 }
 
-void EntityData::applyDelta(const EntityDataDelta& delta)
+bool EntityData::applyDelta(const EntityDataDelta& delta, Resources* resources, std::optional<UUID> instanceUUIDOverride)
 {
-	if (delta.name) {
-		name = delta.name.value();
+	if (instanceUUIDOverride) {
+		instanceUUID = *instanceUUIDOverride;
+	} else if (delta.instanceUUID) {
+		instanceUUID = delta.instanceUUID.value();
+	}
+
+	if (delta.prefabUUID) {
+		prefabUUID = delta.prefabUUID.value();
 	}
 	if (delta.prefab) {
 		prefab = delta.prefab.value();
+		if (resources) {
+			if (!loadFromPrefab(prefab, prefabUUID, *resources)) {
+				return false;
+			}
+		}
+	} else if (delta.prefabInstanced) {
+		prefabInstanced = delta.prefabInstanced.value();
+	}
+
+	if (delta.name) {
+		name = delta.name.value();
 	}
 	if (delta.icon) {
 		icon = delta.icon.value();
@@ -390,12 +432,6 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	if (delta.flags) {
 		flags = delta.flags.value();
-	}
-	if (delta.instanceUUID) {
-		instanceUUID = delta.instanceUUID.value();
-	}
-	if (delta.prefabUUID) {
-		prefabUUID = delta.prefabUUID.value();
 	}
 	if (delta.parentUUID) {
 		parentUUID = delta.parentUUID.value();
@@ -407,17 +443,21 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	for (const auto& child: delta.childrenChanged) {
 		auto iter = std_ex::find_if(children, [&] (const auto& cur) { return cur.matchesUUID(child.first); });
 		if (iter != children.end()) {
-			iter->applyDelta(child.second);
+			iter->applyDelta(child.second, resources);
 		} else {
-			children.push_back(EntityData(child.second));
+			if (auto data = fromDelta(child.second, resources)) {
+				children.push_back(std::move(*data));
+			}
 		}
 	}
 	for (const auto& child: delta.childrenAdded) {
 		auto iter = std_ex::find_if(children, [&] (const auto& cur) { return cur.matchesUUID(child); });
 		if (iter == children.end()) {
-			children.emplace_back(child);
+			if (auto data = fromDelta(child, resources)) {
+				children.push_back(std::move(*data));
+			}
 		} else {
-			Logger::logWarning("Child already present: " + child.getPrefabUUID().toString());
+			Logger::logWarning("Child already present: " + child.getPrefabUUID()->toString());
 		}
 	}
 
@@ -439,11 +479,13 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	if (!delta.componentOrder.empty()) {
 		// TODO
 	}
+
+	return true;
 }
 
-EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
+EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta, Resources* resources)
 {
-	src.applyDelta(delta);
+	src.applyDelta(delta, resources);
 	return src;
 }
 
@@ -454,6 +496,22 @@ bool EntityData::matchesUUID(const UUID& uuid) const
 }
 
 bool EntityData::matchesUUID(const EntityData& other) const
+{
+	if (instanceUUID.isValid()) {
+		if (instanceUUID == other.getInstanceUUID()) {
+			return true;
+		}
+
+		// Got an instance UUID and no match on instance UUID... but we'll still accept a hybrid match
+		return (instanceUUID == other.getPrefabUUID() || (prefabUUID.isValid() && prefabUUID == other.instanceUUID));
+	} else if (prefabUUID.isValid()) {
+		return prefabUUID == other.getPrefabUUID();
+	} else {
+		return false; // ?
+	}
+}
+
+bool EntityData::matchesUUID(const EntityDataDelta& other) const
 {
 	if (instanceUUID.isValid()) {
 		if (instanceUUID == other.getInstanceUUID()) {
@@ -510,6 +568,30 @@ void EntityData::instantiateData(const EntityData& instance)
 	}
 	for (const auto& c: instance.children) {
 		updateChild(c);
+	}
+}
+
+bool EntityData::loadFromPrefab(String prefabName, UUID prefabUUID, Resources& resources)
+{
+	const auto prefab = resources.get<Prefab>(prefabName);
+	if (auto *data = prefab->getEntityData().tryGetPrefabUUID(prefabUUID)) {
+		// prefab, prefabInstance, instanceUUID, and prefabUUID will be overriden by operator=, restore it after
+		const auto origInstanceUUID = instanceUUID;
+
+		*this = EntityData(*data);
+		instantiate(origInstanceUUID);
+
+		// Restore values
+		this->instanceUUID = origInstanceUUID;
+		this->prefabUUID = prefabUUID;
+		this->prefab = "";
+		this->prefabInstanced = prefabName;
+
+		return true;
+	} else {
+		Logger::logError("Unable to find prefab data in " + prefabName + " with UUID " + prefabUUID.toString());
+
+		return false;
 	}
 }
 

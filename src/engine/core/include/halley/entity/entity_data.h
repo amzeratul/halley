@@ -4,6 +4,8 @@
 #include <set>
 
 namespace Halley {
+	class Resources;
+	class IDataInterpolatorSetRetriever;
 	class EntityData;
     class EntityDataDelta;
     class EntityDataInstanced;
@@ -20,6 +22,19 @@ namespace Halley {
 
 		virtual Type getType() const = 0;
 	};
+
+    class EntityDataDeltaOptions {
+    public:
+        EntityDataDeltaOptions() = default;
+        
+        bool preserveOrder = false;
+		bool shallow = false;
+        bool deltaComponents = true;
+		bool allowNonSerializable = true;
+        std::set<String> ignoreComponents;
+		IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
+        Resources* resources = nullptr;
+    };
 
 	struct EntityChangeOperation {
 		std::unique_ptr<IEntityData> data;
@@ -43,6 +58,7 @@ namespace Halley {
 
     	virtual const String& getName() const = 0;
     	virtual const String& getPrefab() const = 0;
+    	virtual const String& getPrefabInstanced() const = 0;
     	virtual const String& getVariant() const = 0;
         virtual uint8_t getFlags() const = 0;
     	virtual bool getFlag(Flag flag) const = 0;
@@ -61,6 +77,8 @@ namespace Halley {
     	friend class EntityDataDelta;
     	
     public:
+        using Options = EntityDataDeltaOptions;
+
     	EntityData();
     	
         explicit EntityData(UUID instanceUUID);
@@ -69,7 +87,9 @@ namespace Halley {
     	EntityData(EntityData&& other) noexcept = default;
     	EntityData& operator=(const EntityData& other) = delete;
     	EntityData& operator=(EntityData&& other) noexcept = default;
-        explicit EntityData(const EntityDataDelta& delta);
+
+        static std::optional<EntityData> fromDelta(const EntityDataDelta& delta, Resources* resources);
+        static std::optional<EntityData> fromDelta(const EntityDataDelta& delta, UUID instanceUUID, Resources* resources);
 
     	ConfigNode toConfigNode(bool allowPrefabUUID) const;
         String toYAML() const;
@@ -79,6 +99,7 @@ namespace Halley {
 
     	const String& getName() const override { return name; }
     	const String& getPrefab() const override { return prefab; }
+    	const String& getPrefabInstanced() const override { return prefabInstanced; }
     	const String& getIcon() const { return icon; }
     	const String& getVariant() const override { return variant; }
         uint8_t getFlags() const override { return flags; }
@@ -107,6 +128,7 @@ namespace Halley {
         
     	void setName(String name);
     	void setPrefab(String prefab);
+    	void setPrefabInstanced(String prefab);
     	void setIcon(String icon);
         void setVariant(String variant);
         bool setFlag(Flag flag, bool value);
@@ -117,11 +139,12 @@ namespace Halley {
 	   	void setChildren(Vector<EntityData> children);
     	void setComponents(Vector<std::pair<String, ConfigNode>> components);
 
-    	void applyDelta(const EntityDataDelta& delta);
-        static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
+        bool applyDelta(const EntityDataDelta& delta, Resources* resources, std::optional<UUID> instanceUUIDOverride = std::nullopt);
+        static EntityData applyDelta(EntityData src, const EntityDataDelta& delta, Resources* resources);
 
     	bool matchesUUID(const UUID& uuid) const;
     	bool matchesUUID(const EntityData& other) const;
+    	bool matchesUUID(const EntityDataDelta& other) const;
 
         void updateComponent(const String& id, const ConfigNode& data);
         void updateChild(const EntityData& instanceChildData);
@@ -146,6 +169,7 @@ namespace Halley {
 
     	String name;
     	String prefab;
+    	String prefabInstanced;
     	String icon;
         String variant;
         uint8_t flags = 0;
@@ -160,5 +184,6 @@ namespace Halley {
     	void parseUUID(UUID& dst, const ConfigNode& node);
     	void generateChildUUID(const UUID& root);
     	void instantiateData(const EntityData& instance);
+	    bool loadFromPrefab(String prefabName, UUID prefabUUID, Resources& resources); // don't pass prefabName as reference
 	};
 }

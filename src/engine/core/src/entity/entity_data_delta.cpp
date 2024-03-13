@@ -12,25 +12,50 @@
 using namespace Halley;
 
 
-EntityDataDelta::Options::Options()
-{
-}
-
 EntityDataDelta::EntityDataDelta()
 {}
 
+namespace {
+	std::optional<EntityData> getPrefabShallow(const EntityData& entityData, const EntityDataDelta::Options& options)
+	{
+		if (!entityData.getPrefab().isEmpty() && options.resources) {
+			const auto prefab = options.resources->get<Prefab>(entityData.getPrefab());
+			const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID());
+			if (!prefabData) {
+				Logger::logError("Prefab data not found: " + entityData.getPrefab() + " with UUID " + entityData.getPrefabUUID().toString());
+				return {};
+			}
+			return *prefabData;
+		}
+		return std::nullopt;
+	}
+}
+
 EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
-	: EntityDataDelta(EntityData(), to, options)
 {
+	if (auto prefabFrom = getPrefabShallow(to, options)) {
+		encode(*prefabFrom, to, options);
+		setPrefabUUID(to.getPrefabUUID());
+	} else {
+		encode(EntityData(), to, options);
+	}
 }
 
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
+{
+	encode(from, to, options);
+}
+
+void EntityDataDelta::encode(const EntityData& from, const EntityData& to, const Options& options)
 {
 	if (from.name != to.name) {
 		name = to.name;
 	}
 	if (from.prefab != to.prefab) {
 		prefab = to.prefab;
+	}
+	if (from.prefabInstanced != to.prefabInstanced) {
+		prefabInstanced = to.prefabInstanced;
 	}
 	if (from.icon != to.icon) {
 		icon = to.icon;
@@ -71,7 +96,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				}
 			} else {
 				// Inserted
-				childrenAdded.emplace_back(toChild);
+				childrenAdded.emplace_back(EntityDataDelta(toChild, options));
 			}
 		}
 		for (const auto& fromChild: from.children) {
@@ -138,14 +163,14 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 bool EntityDataDelta::hasChange() const
 {
-	return name || prefab || icon || variant || flags || instanceUUID || prefabUUID || parentUUID
+	return name || prefab || prefabInstanced || icon || variant || flags || instanceUUID || prefabUUID || parentUUID
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
 
 void EntityDataDelta::serialize(Serializer& s) const
 {
-	uint16_t fieldsPresent = getFieldsPresent();
+	uint32_t fieldsPresent = getFieldsPresent();
 	s << fieldsPresent;
 
 	auto encodeField = [&] (auto& v, FieldId id)
@@ -177,11 +202,12 @@ void EntityDataDelta::serialize(Serializer& s) const
 	encodeOptField(icon, FieldId::Icon);
 	encodeOptField(flags, FieldId::Flags);
 	encodeOptField(variant, FieldId::Variant);
+	encodeOptField(prefabInstanced, FieldId::PrefabInstanced);
 }
 
 void EntityDataDelta::deserialize(Deserializer& s)
 {
-	uint16_t fieldsPresent;
+	uint32_t fieldsPresent;
 	s >> fieldsPresent;
 
 	auto decodeField = [&] (auto& v, FieldId id)
@@ -215,6 +241,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(icon, FieldId::Icon);
 	decodeOptField(flags, FieldId::Flags);
 	decodeOptField(variant, FieldId::Variant);
+	decodeOptField(prefabInstanced, FieldId::PrefabInstanced);
 }
 
 void EntityDataDelta::setInstanceUUID(const UUID& uuid)
@@ -313,6 +340,9 @@ ConfigNode EntityDataDelta::toConfigNode() const
 	if (prefab) {
 		result["prefab"] = prefab.value();
 	}
+	if (prefabInstanced) {
+		result["prefabInstanced"] = prefabInstanced.value();
+	}
 	if (icon) {
 		result["icon"] = icon.value();
 	}
@@ -353,7 +383,7 @@ ConfigNode EntityDataDelta::toConfigNode() const
 	if (!childrenAdded.empty()) {
 		ConfigNode::SequenceType childNodes;
 		for (const auto& child: childrenAdded) {
-			childNodes.emplace_back(child.toConfigNode(true));
+			childNodes.emplace_back(child.toConfigNode());
 		}
 		result["childrenAdded"] = std::move(childNodes);
 	}
@@ -416,12 +446,12 @@ Vector<std::pair<String, ConfigNode>> EntityDataDelta::getComponentEmptyStructur
 	return result;
 }
 
-uint16_t EntityDataDelta::getFieldBit(FieldId id)
+uint32_t EntityDataDelta::getFieldBit(FieldId id)
 {
-	return static_cast<uint16_t>(1 << static_cast<int>(id));
+	return static_cast<uint32_t>(1 << static_cast<int>(id));
 }
 
-void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
+void EntityDataDelta::setFieldPresent(uint32_t& value, FieldId id, bool present)
 {
 	if (present) {
 		value |= getFieldBit(id);
@@ -430,14 +460,14 @@ void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
 	}
 }
 
-bool EntityDataDelta::isFieldPresent(uint16_t value, FieldId id)
+bool EntityDataDelta::isFieldPresent(uint32_t value, FieldId id)
 {
 	return (value & getFieldBit(id)) != 0;
 }
 
-uint16_t EntityDataDelta::getFieldsPresent() const
+uint32_t EntityDataDelta::getFieldsPresent() const
 {
-	uint16_t value = 0;
+	uint32_t value = 0;
 	
 	auto checkField = [&] (const auto& v, FieldId id)
 	{
@@ -468,6 +498,7 @@ uint16_t EntityDataDelta::getFieldsPresent() const
 	checkField(icon, FieldId::Icon);
 	checkField(flags, FieldId::Flags);
 	checkField(variant, FieldId::Variant);
+	checkField(prefabInstanced, FieldId::PrefabInstanced);
 
 	return value;
 }

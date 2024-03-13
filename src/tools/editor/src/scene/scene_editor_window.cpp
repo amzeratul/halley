@@ -735,7 +735,7 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 		oldDatas.emplace_back(EntityData(data));
 		oldDataPtrs.emplace_back(&oldDatas.back()); // This is only OK because of the reserve above, otherwise the pointer might be invalidated
 		newDataPtrs.emplace_back(&data);
-		data.applyDelta(dynamic_cast<const EntityDataDelta&>(*patch.data));
+		data.applyDelta(dynamic_cast<const EntityDataDelta&>(*patch.data), &getGameResources());
 	}
 	
 	onEntitiesModified(ids, oldDataPtrs, newDataPtrs);

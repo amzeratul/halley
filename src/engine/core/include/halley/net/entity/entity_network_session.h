@@ -52,6 +52,7 @@ namespace Halley {
 		EntityFactory& getFactory() const;
 		NetworkSession& getSession() const;
 		bool hasWorld() const;
+		Resources& getResources() const;
 
 		const EntityFactory::SerializationOptions& getEntitySerializationOptions() const;
 		const EntityDataDelta::Options& getEntityDeltaOptions() const;

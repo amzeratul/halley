@@ -57,7 +57,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 
 EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent)
 {
-	return doSerializeEntity(entity, options, canStoreParent, entity.getPrefabAssetId().value_or(""));
+	return doSerializeEntity(entity, options, canStoreParent, "");
 }
 
 EntityData EntityFactory::doSerializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent, const String& lastPrefab)
@@ -108,23 +108,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 
 EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent)
 {
-	auto entityData = serializeEntity(entity, options, canStoreParent);
-	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions);
-}
-
-EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions)
-{
-	if (prefab) {
-		entityData.setPrefab(prefab->getAssetId());
-		const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID());
-		assert(prefabData);
-		auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
-		delta.setPrefabUUID(entityData.getPrefabUUID());
-		return delta;
-	} else {
-		//Logger::logInfo("Entity " + entity.getName() + " has no prefab associated with it.");
-		return EntityDataDelta(entityData, deltaOptions);
-	}
+	return EntityDataDelta(serializeEntity(entity, options, canStoreParent), deltaOptions);
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
@@ -574,16 +558,19 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 			}
 		}
 	}
-	for (const auto& childData: delta.getChildrenAdded()) {
-		assert(childData.getInstanceUUID() != entity.getInstanceUUID());
+	for (const auto& childDataDelta: delta.getChildrenAdded()) {
+		assert(childDataDelta.getInstanceUUID() != entity.getInstanceUUID());
 
-		context->removeDelete(childData.getInstanceUUID());
+		if (const auto maybeChildData = EntityData::fromDelta(childDataDelta, &resources)) {
+			const auto& childData = *maybeChildData;
+			context->removeDelete(childData.getInstanceUUID());
 
-		if (context->needsNewContextFor(childData)) {
-			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
-			updateEntityNode(newContext->getRootEntityData(), getEntity(childData.getInstanceUUID(), *newContext, false), entity, newContext);
-		} else {
-			updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
+			if (context->needsNewContextFor(childData)) {
+				const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
+				updateEntityNode(newContext->getRootEntityData(), getEntity(childData.getInstanceUUID(), *newContext, false), entity, newContext);
+			} else {
+				updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
+			}
 		}
 	}
 }
@@ -698,10 +685,8 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
-		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
-		if (entityData) {
-			entityData->setInstanceUUID(uuid);
-
+		//auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
+		if (const auto entityData = EntityData::fromDelta(delta, uuid, &resources)) {
 			if (entity.isValid()) {
 				// Update existing entity
 				updateEntity(entity, *entityData, mask);
@@ -714,10 +699,6 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 					parentUUID = entityData->getParentUUID();
 				}
 			}
-
-			if (prefab) {
-				entity.setPrefab(prefab, prefabUUID);
-			}
 		} else {
 			getWorld().destroyEntity(entity);
 			entity = {};
@@ -725,27 +706,4 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	}
 
 	return std::make_pair(entity, parentUUID);
-}
-
-std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
-{
-	if (delta.getPrefab()) {
-		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
-		const auto& prefabDataRoot = prefab->getEntityData();
-		auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
-		const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
-		if (!prefabData) {
-			Logger::logError("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString());
-			return {};
-		}
-
-		auto entityData = *prefabData;
-		entityData.instantiate(entityUUID);
-		entityData.applyDelta(delta);
-		entityData.setPrefab("");
-
-		return { std::move(entityData), std::move(prefab), prefabUUID };
-	} else {
-		return { EntityData(delta), {}, {} };
-	}
 }

@@ -140,10 +140,10 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	result.networkId = assignId();
 	result.data = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
 
-	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
+	auto deltaData = EntityDataDelta(result.data, parent->getEntityDeltaOptions());
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + EntityData(deltaData).toYAML() + "\n");
-	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
+	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
 	
@@ -169,7 +169,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		remote.timeSinceSend = 0;
 
 		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
+		Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
 		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 		
 		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
@@ -206,7 +206,8 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
-	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
+	//auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
+	auto entityData = EntityData::fromDelta(delta, *delta.getInstanceUUID(), &parent->getResources());
 	if (!entityData) {
 		Logger::logError("Unable to instantiate network entity");
 		return;
@@ -268,7 +269,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 		Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
 		Logger::logException(e);
 	}
-	remote.data.applyDelta(delta);
+	remote.data.applyDelta(delta, &parent->getResources());
 }
 
 void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDestroy& msg)
