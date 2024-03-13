@@ -15,6 +15,10 @@
 
 namespace Halley
 {
+	inline String toString(bool value)
+	{
+		return value ? "true" : "false";
+	}
 
 	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
 	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.', bool fixed = true)

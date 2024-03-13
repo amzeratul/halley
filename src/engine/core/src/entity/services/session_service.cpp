@@ -34,7 +34,7 @@ String SessionService::getSessionClientName() const
 		if (mp.hasHostAuthority()) {
 			return "host";
 		} else {
-			return "client" + toString(mp.getMyClientId());
+			return "client" + toString(int(mp.getMyClientId()));
 		}
 	} else {
 		return "local";
