@@ -1870,7 +1870,7 @@ void ConfigNode::applyDelta(const ConfigNode& delta)
 		return;
 	}
 	
-	if (getType() == ConfigNodeType::Map && delta.getType() == ConfigNodeType::DeltaMap) {
+	if ((getType() == ConfigNodeType::Map || getType() == ConfigNodeType::DeltaMap) && delta.getType() == ConfigNodeType::DeltaMap) {
 		applyMapDelta(delta);
 	} else if (getType() == ConfigNodeType::Sequence && delta.getType() == ConfigNodeType::DeltaSequence) {
 		applySequenceDelta(delta);
