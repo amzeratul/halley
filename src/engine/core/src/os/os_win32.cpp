@@ -912,7 +912,7 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 		}
 
 		IShellItem* defaultFolder = nullptr;
-		hr = SHCreateItemFromParsingName(parameters.defaultPath.getNativeString().getUTF16().c_str(), nullptr, IID_IShellItem, reinterpret_cast<void**>(&defaultFolder));
+		hr = SHCreateItemFromParsingName(parameters.defaultPath.getNativeString(false).getUTF16().c_str(), nullptr, IID_IShellItem, reinterpret_cast<void**>(&defaultFolder));
 		if (SUCCEEDED(hr)) {
 			fileDialog->SetFolder(defaultFolder);
 		}
