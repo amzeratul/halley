@@ -430,7 +430,9 @@ const String& Material::getTexUnitAssetId(int texUnit) const
 		}
 	}
 	if (texUnit < static_cast<int>(textures.size())) {
-		return textures[texUnit]->getAssetId();
+		if (textures[texUnit]) {
+			return textures[texUnit]->getAssetId();
+		}
 	}
 	return String::emptyString();
 }
