@@ -72,7 +72,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			} else {
 				// Inserted
 				childrenAdded.emplace_back(toChild);
-				childrenAdded.back().postProcessAddedChild(options.ignoreComponents);
+				childrenAdded.back().postProcessAddedChild(options.ignoreComponents, options.omitEmptyComponents);
 			}
 		}
 		for (const auto& fromChild: from.children) {
