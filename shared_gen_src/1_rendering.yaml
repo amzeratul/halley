@@ -7,7 +7,7 @@ component:
   - sprite:
       type: 'Halley::Sprite'
       collapse: true
-      canSave: true
+      canSave: false
   - layer:
       type: int
       defaultValue: 0
@@ -15,6 +15,7 @@ component:
   - mask:
       type: 'Halley::OptionalLite<int>'
       displayName: Mask
+      canSave: false
 
 ---
 
@@ -87,13 +88,16 @@ component:
   - particles:
       type: 'Halley::Particles'
       collapse: true
+      canSave: false
   - sprites:
       type: 'Halley::Vector<Halley::Sprite>'
       collapse: true
       displayName: Sprites
+      canSave: false
   - animation:
       type: 'Halley::ResourceReference<Halley::Animation>'
       displayName: Animation
+      canSave: false
   - layer:
       type: int
       defaultValue: 0
@@ -101,6 +105,7 @@ component:
   - mask:
       type: 'Halley::OptionalLite<int>'
       displayName: Mask
+      canSave: false
 
 ---
 
