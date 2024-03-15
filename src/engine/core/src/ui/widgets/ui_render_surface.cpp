@@ -129,6 +129,7 @@ void UIRenderSurface::setColour(Colour4f col)
 void UIRenderSurface::setScale(Vector2f scale)
 {
 	this->scale = scale;
+	markAsNeedingLayout();
 }
 
 Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const

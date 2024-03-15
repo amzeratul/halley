@@ -9,6 +9,7 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer, con
 {
 	setCanSendEvents(false);
 	setPropagateMouseToChildren(false);
+	setShrinkOnLayout(true);
 
 	RenderSurfaceOptions options;
 	options.createDepthStencil = false;
