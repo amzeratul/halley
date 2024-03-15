@@ -48,6 +48,7 @@ namespace Halley
 
 		virtual Vector2i getScreenSize(int n) const = 0;
 		virtual Rect4i getDisplayRect(int screen) const = 0;
+		virtual void setEnableScreensaver(bool enabled) const {}
 
 		virtual void showCursor(bool show) = 0;
 		virtual bool hasBeenDisconnectedFromTheInternet() { return false; }

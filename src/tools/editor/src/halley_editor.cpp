@@ -148,6 +148,7 @@ void HalleyEditor::parseArguments(const Vector<String>& args)
 std::unique_ptr<Stage> HalleyEditor::startGame()
 {
 	auto& api = getAPI();
+
 	preferences = std::make_unique<Preferences>();
 	preferences->setEditorVersion(getHalleyVersion().toString());
 	preferences->loadFromFile(*api.system);
@@ -162,6 +163,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 
 	api.video->setWindow(preferences->getWindowDefinition());
 	api.video->setVsync(true);
+	api.system->setEnableScreensaver(true);
 	return std::make_unique<EditorRootStage>(*this, std::move(project), launcherPath);
 }
 

@@ -37,6 +37,8 @@ namespace Halley
 		Vector2i getScreenSize(int n) const override;
 		Rect4i getDisplayRect(int screen) const override;
 		Vector2i getCenteredWindow(Vector2i size, int screen) const;
+		void setEnableScreensaver(bool enabled) const override;
+
 		std::unique_ptr<GLContext> createGLContext() override;
 
 		void showCursor(bool show) override;

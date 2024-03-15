@@ -406,6 +406,15 @@ Vector2i SystemSDL::getCenteredWindow(Vector2i size, int screen) const
 	return rect.getTopLeft() + (rect.getSize() - size) / 2;
 }
 
+void SystemSDL::setEnableScreensaver(bool enabled) const
+{
+	if (enabled) {
+		SDL_EnableScreenSaver();
+	} else {
+		SDL_DisableScreenSaver();
+	}
+}
+
 std::unique_ptr<GLContext> SystemSDL::createGLContext()
 {
 	return std::make_unique<SDLGLContext>(windows[0]->getSDLWindow());
