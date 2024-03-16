@@ -27,7 +27,6 @@ void AssetEditor::update(Time t, bool moved)
 
 void AssetEditor::setResource(Path filePath, String assetId)
 {
-	Logger::logInfo("Loading resource " + filePath.toString());
 	this->assetPath = std::move(filePath);
 	this->assetId = std::move(assetId);
 	needsLoading = true;
