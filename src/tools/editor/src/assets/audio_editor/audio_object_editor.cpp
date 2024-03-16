@@ -124,7 +124,6 @@ void AudioObjectEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("audio_object/" + audioObject->getAssetId() + ".audioobject");
 		const auto strData = audioObject->toYAML();
 
 		project.setAssetSaveNotification(false);
@@ -133,18 +132,9 @@ void AudioObjectEditor::save()
 	}
 }
 
-std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
-	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
-
-	if (!assetData.empty()) {
-		auto config = YAMLConvert::parseConfig(assetData);
-		audioObject = std::make_shared<AudioObject>(config.getRoot());
-	} else {
-		audioObject = std::make_shared<AudioObject>();
-		markModified(false);
-	}
+	audioObject = std::make_shared<AudioObject>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
 	audioObject->setAssetId(assetId);
 
 	setCurrentObject(audioObject.get());

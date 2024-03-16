@@ -186,14 +186,10 @@ void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 	root.registerKeyPressListener(shared_from_this());
 }
 
-bool SceneEditorWindow::loadSceneFromFile(AssetType assetType, const String& name)
+bool SceneEditorWindow::loadSceneFromFile(Path assetPath, AssetType assetType, const String& name)
 {
 	unloadScene();
-	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, name);
-
-	if (name.isEmpty()) {
-		return false;
-	}
+	this->assetPath = assetPath;
 
 	auto prefab = assetType == AssetType::Prefab ? std::make_unique<Prefab>() : std::make_unique<Scene>();
 	

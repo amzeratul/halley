@@ -20,7 +20,8 @@ void AudioEventEditor::reload()
 void AudioEventEditor::refreshAssets()
 {
 	if (audioEvent) {
-		audioEvent = std::make_shared<AudioEvent>(*gameResources.get<AudioEvent>(audioEvent->getAssetId()));
+		audioEvent = std::make_shared<AudioEvent>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
+		audioEvent->setAssetId(assetId);
 		doLoadUI();
 	}
 }
@@ -49,7 +50,6 @@ void AudioEventEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("audio_event/" + audioEvent->getAssetId() + ".audioevent");
 		const auto strData = audioEvent->toYAML();
 
 		project.setAssetSaveNotification(false);
@@ -110,9 +110,8 @@ void AudioEventEditor::update(Time t, bool moved)
 {
 }
 
-std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
+std::shared_ptr<const Resource> AudioEventEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
 	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
 
 	if (!assetData.empty()) {

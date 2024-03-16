@@ -81,7 +81,7 @@ void PrefabEditor::update(Time t, bool moved)
 	elapsedTime += t;
 }
 
-std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> PrefabEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	if (project.isDLLLoaded() && project.areAssetsLoaded() && elapsedTime >= minLoadTime) {
 		open();
@@ -108,7 +108,7 @@ void PrefabEditor::open()
 		add(window, 1);
 	}
 	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {
-		const bool ok = window->loadSceneFromFile(assetType, assetId);
+		const bool ok = window->loadSceneFromFile(assetPath, assetType, assetId);
 		if (!ok) {
 			window->destroy();
 			window = {};

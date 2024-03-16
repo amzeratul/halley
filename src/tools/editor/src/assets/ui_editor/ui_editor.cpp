@@ -234,7 +234,7 @@ void UIEditor::reload()
 	doLoadUI(false);
 }
 
-std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
+std::shared_ptr<const Resource> UIEditor::loadResource(const Path& assetPath, const String& id, AssetType assetType)
 {
 	if (project.isDLLLoaded()) {
 		open();

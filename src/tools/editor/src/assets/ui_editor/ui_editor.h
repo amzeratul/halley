@@ -46,7 +46,7 @@ namespace Halley {
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 		
 	private:
-		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
+		std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 		
 		std::unique_ptr<UIFactory> gameFactory;
 		std::unique_ptr<I18N> gameI18N;

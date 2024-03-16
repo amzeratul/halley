@@ -27,7 +27,7 @@ namespace Halley {
 
 		void onAddedToRoot(UIRoot& root) override;
 		
-		bool loadSceneFromFile(AssetType assetType, const String& name);
+		bool loadSceneFromFile(Path assetPath, AssetType assetType, const String& name);
 		void loadScene(const Prefab& prefab);
 		void unloadScene();
 		void reloadScene();

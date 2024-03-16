@@ -33,7 +33,7 @@ void FontEditor::refreshAssets()
 	updateFont();
 }
 
-std::shared_ptr<const Resource> FontEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> FontEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	loadMetadata();
 	font = gameResources.get<Font>(assetId);
@@ -123,7 +123,7 @@ void FontEditor::updatePreviewText(LocalisedString text)
 
 void FontEditor::loadMetadata()
 {
-	metaPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId, true);
+	metaPath = project.getAssetsSrcPath() / assetPath;
 	metadata = project.getImportAssetsDatabase().getMetadata(assetType, assetId).value_or(Metadata());
 	//metadata = project.readMetadataFromDisk(metaPath);
 }

@@ -45,7 +45,6 @@ void ScriptGraphAssetEditor::save()
 			throw Exception("Trying to save Comet script with no name", HalleyExceptions::Tools);
 		}
 
-		const auto assetPath = Path("comet/" + scriptGraph->getAssetId() + ".comet");
 		const auto strData = scriptGraph->toYAML();
 
 		project.setAssetSaveNotification(false);
@@ -73,7 +72,7 @@ void ScriptGraphAssetEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 	}
 }
 
-std::shared_ptr<const Resource> ScriptGraphAssetEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> ScriptGraphAssetEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	if (project.isDLLLoaded()) {
 		open();
@@ -88,7 +87,6 @@ void ScriptGraphAssetEditor::open()
 {
 	Expects (project.isDLLLoaded());
 
-	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
 	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
 	std::shared_ptr<ScriptGraph> scriptGraph;
 	bool modified = false;

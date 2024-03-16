@@ -28,7 +28,7 @@ namespace Halley {
         virtual void onOpenAssetFinder(PaletteWindow& assetFinder);
 
     protected:
-		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;
+		virtual std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) = 0;
 
 		virtual void onTabbedIn();
 		void setTabbedIn(bool value);

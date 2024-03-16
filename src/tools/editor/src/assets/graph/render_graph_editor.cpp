@@ -1,6 +1,7 @@
 #include "render_graph_editor.h"
 
 #include "ui_graph_node.h"
+#include "halley/tools/project/project.h"
 using namespace Halley;
 
 RenderGraphEditor::RenderGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
@@ -22,9 +23,9 @@ void RenderGraphEditor::reload()
 	}
 }
 
-std::shared_ptr<const Resource> RenderGraphEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> RenderGraphEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	return gameResources.get<RenderGraphDefinition>(assetId);
+	return std::make_shared<RenderGraphDefinition>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
 }
 
 void RenderGraphEditor::drawConnections(UIPainter& painter)

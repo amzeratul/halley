@@ -11,7 +11,7 @@ namespace Halley {
 		void drawConnections(UIPainter& painter) override;
 	
 	protected:
-		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
+		std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 		
 		std::shared_ptr<const RenderGraphDefinition> renderGraph;
 

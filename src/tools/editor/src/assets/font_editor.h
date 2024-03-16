@@ -17,7 +17,7 @@ namespace Halley {
         void refreshAssets() override;
         
     protected:
-        std::shared_ptr<const Resource> loadResource(const String& assetId) override;
+        std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 		
 	private:
         Metadata metadata;

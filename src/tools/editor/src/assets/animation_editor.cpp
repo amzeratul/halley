@@ -81,7 +81,7 @@ void AnimationEditor::update(Time t, bool moved)
 	info->setText(LocalisedString::fromUserString(str));
 }
 
-std::shared_ptr<const Resource> AnimationEditor::loadResource(const String& assetId)
+std::shared_ptr<const Resource> AnimationEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	std::shared_ptr<const Resource> resource;
 	if (assetType == AssetType::Animation) {

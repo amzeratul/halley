@@ -96,7 +96,7 @@ void AssetEditor::load()
 {
 	try {
 		needsLoading = false;
-		resource = loadResource(assetId);
+		resource = loadResource(assetPath, assetId, assetType);
 		reload();
 	} catch (const std::exception& e) {
 		Logger::logException(e);

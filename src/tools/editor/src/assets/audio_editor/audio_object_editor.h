@@ -26,7 +26,7 @@ namespace Halley {
 
     protected:
         void update(Time t, bool moved) override;
-        std::shared_ptr<const Resource> loadResource(const String& assetId) override;
+        std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 
 	private:
         struct TreeData {
