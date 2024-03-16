@@ -2,9 +2,9 @@
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "asset_editor_window.h"
+#include "asset_file_handler.h"
 #include "new_asset_window.h"
 #include "prefab_editor.h"
-#include "halley/audio/audio_object.h"
 #include "halley/tools/file/filesystem.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
@@ -16,6 +16,7 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, factory(factory)
 	, project(project)
 	, projectWindow(projectWindow)
+	, assetFileHandler(std::make_unique<AssetFileHandler>())
 	, curSrcPath(".")
 {
 	makeUI();
@@ -23,6 +24,9 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 
 	project.addAssetSrcChangeListener(*this);
 }
+
+AssetsBrowser::~AssetsBrowser()
+{}
 
 void AssetsBrowser::update(Time t, bool moved)
 {
@@ -292,7 +296,8 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 	};
 
 	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
+	const bool canAdd = assetFileHandler->canAdd(stem);
+	const bool canDuplicate = assetFileHandler->canDuplicate(stem);
 
 	if (assetId.isEmpty()) {
 		makeEntry("add", "New asset...", "Create new asset.", "new_file.png", canAdd);
@@ -305,7 +310,7 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 			makeEntry("deleteFolder", "Delete", "Delete folder.", "delete.png", true);
 		} else {
 			makeEntry("rename", "Rename", "Rename Asset.", "rename.png", true);
-			makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", canAdd);
+			makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", canDuplicate);
 			makeEntry("delete", "Delete", "Delete Asset.", "delete.png", true);
 		}
 	}
@@ -375,76 +380,49 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 
 void AssetsBrowser::updateAddRemoveButtons()
 {
-	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
-	
 	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
+	const bool canAdd = assetFileHandler->canAdd(stem);
 
 	getWidget("addAsset")->setEnabled(canAdd);
 }
 
 void AssetsBrowser::addAsset()
 {
-	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
-	
 	const auto assetType = curSrcPath.getFront(1).string();
-	String extension;
-	String typeName;
-	if (assetType == "prefab") {
-		extension = ".prefab";
-		typeName = "Prefab";
-	} else if (assetType == "scene") {
-		extension = ".scene";
-		typeName = "Scene";
-	} else if (assetType == "audio_object") {
-		extension = ".audioobject";
-		typeName = "Audio Object";
-	} else if (assetType == "audio_event") {
-		extension = ".audioevent";
-		typeName = "Audio Event";
-	} else if (assetType == "ui") {
-		extension = ".ui";
-		typeName = "UI";
-	} else if (assetType == "comet") {
-		extension = ".comet";
-		typeName = "Comet Script";
+	auto* handler = assetFileHandler->tryGetHandlerFor(assetType);
+	if (!handler) {
+		Logger::logError("Not handler found for assetType " + assetType);
+		return;
 	}
+	const String extension = handler->getFileExtension();
+	const String typeName = handler->getName();
 
 	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New " + typeName), "", extension, [=](std::optional<String> newName)
 	{
 		if (newName) {
-			if (assetType == "prefab") {
-				Prefab prefab;
-				prefab.makeDefault();
-				addAsset(newName.value() + extension, prefab.toYAML());
-			}
-			else if (assetType == "scene") {
-				Scene scene;
-				scene.makeDefault();
-				addAsset(newName.value() + extension, scene.toYAML());
-			}
-			else if (assetType == "audio_object") {
-				AudioObject object;
-				object.makeDefault();
-				addAsset(newName.value() + extension, object.toYAML());
-			}
-			else if (assetType == "audio_event") {
-				AudioEvent audioEvent;
-				audioEvent.makeDefault();
-				addAsset(newName.value() + extension, audioEvent.toYAML());
-			}
-			else if (assetType == "ui") {
-				UIDefinition ui;
-				ui.makeDefault();
-				addAsset(newName.value() + extension, ui.toYAML());
-			}
-			else if (assetType == "comet") {
-				ScriptGraph graph;
-				graph.makeDefault();
-				addAsset(newName.value() + extension, graph.toYAML());
-			}
+			addAsset(newName.value() + extension, handler->makeDefaultFile());
 		}
 	}));
+}
+
+void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
+{
+	const auto assetType = curSrcPath.getFront(1).string();
+	const auto* handler = assetFileHandler->tryGetHandlerFor(assetType);
+	if (!handler) {
+		Logger::logError("Not handler found for assetType " + assetType);
+		return;
+	}
+
+	const auto srcFile = Path::readFile(project.getAssetsSrcPath() / srcId);
+	if (srcFile.empty()) {
+		return;
+	}
+
+	const auto configRoot = YAMLConvert::parseConfig(srcFile);
+	const auto& configNode = configRoot.getRoot();
+
+	addAsset(dstId, handler->duplicateAsset(configNode), true);
 }
 
 void AssetsBrowser::addAsset(Path path, std::string_view data, bool isFullPath)
@@ -485,47 +463,6 @@ void AssetsBrowser::renameFolder(const String& oldName, const String& newName)
 {
 	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
 	refreshList();
-}
-
-void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
-{
-	const auto assetType = curSrcPath.getFront(1).string();
-	auto srcFile = Path::readFile(project.getAssetsSrcPath() / srcId);
-	if (srcFile.empty()) {
-		return;
-	}
-
-	const auto configRoot = YAMLConvert::parseConfig(srcFile);
-	const auto& configNode = configRoot.getRoot();
-
-	if (assetType == "prefab") {
-		Prefab prefab;
-		prefab.parseConfigNode(configNode);
-		prefab.generateUUIDs();
-		addAsset(dstId, prefab.toYAML(), true);
-	}
-	else if (assetType == "scene") {
-		Scene scene;
-		scene.parseConfigNode(configNode);
-		scene.generateUUIDs();
-		addAsset(dstId, scene.toYAML(), true);
-	}
-	else if (assetType == "audio_object") {
-		auto object = AudioObject(configNode);
-		addAsset(dstId, object.toYAML(), true);
-	}
-	else if (assetType == "audio_event") {
-		auto audioEvent = AudioEvent(configNode);
-		addAsset(dstId, audioEvent.toYAML(), true);
-	}
-	else if (assetType == "ui") {
-		auto ui = UIDefinition(ConfigNode(configNode));
-		addAsset(dstId, ui.toYAML(), true);
-	}
-	else if (assetType == "comet") {
-		auto graph = ScriptGraph(configNode);
-		addAsset(dstId, graph.toYAML(), true);
-	}
 }
 
 void AssetsBrowser::addFolder()

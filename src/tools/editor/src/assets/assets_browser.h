@@ -1,14 +1,11 @@
 #pragma once
 
 #include "asset_browser_tabs.h"
-#include "halley/api/halley_api.h"
 #include "halley/tools/project/project.h"
-#include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
-#include "halley/ui/widgets/ui_list.h"
-#include "halley/ui/widgets/ui_paged_pane.h"
 
 namespace Halley {
+	class AssetFileHandler;
 	class EditorUIFactory;
 	class ProjectWindow;
 	class Project;
@@ -19,6 +16,7 @@ namespace Halley {
 	class AssetsBrowser : public UIWidget, public Project::IAssetSrcChangeListener {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
+		~AssetsBrowser() override;
 
 		void update(Time t, bool moved) override;
 
@@ -42,6 +40,8 @@ namespace Halley {
 		Project& project;
 		ProjectWindow& projectWindow;
 
+		std::unique_ptr<AssetFileHandler> assetFileHandler;
+
 		std::map<AssetType, Path> curPaths;
 		Path curSrcPath;
 		AssetType curType = AssetType::Sprite;
@@ -60,13 +60,10 @@ namespace Halley {
 		bool collapsed = false;
         int waitingToShowSel = 0;
 
-        void loadResources();
         void makeUI();
-		void setAssetSrcMode(bool enabled);
 		void updateAddRemoveButtons();
 
 		void listAssetSources();
-		void listAssets(AssetType type);
 		void setListContents();
 		void refreshList();
 
@@ -76,7 +73,6 @@ namespace Halley {
 
 		void setSelectedAsset(const String& name);
 		void loadAsset(const String& name);
-		void refreshAssets(gsl::span<const String> assets);
 
 		void openContextMenu(const String& assetId);
 		void onContextMenuAction(const String& assetId, const String& action);
