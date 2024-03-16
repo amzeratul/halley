@@ -14,11 +14,6 @@ const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetT
 	if (assetType.isEmpty()) {
 		return nullptr;
 	}
-	return tryGetHandlerFor(fromString<AssetType>(assetType));
-}
-
-const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(AssetType assetType) const
-{
 	const auto iter = handlers.find(assetType);
 	if (iter != handlers.end()) {
 		return iter->second.get();
@@ -62,7 +57,7 @@ void AssetFileHandler::addHandler(std::unique_ptr<IAssetFileHandler> handler)
 	if (handler->canDuplicate()) {
 		duplicateFolders.insert(handler->getRootAssetDirectory());
 	}
-	handlers[handler->getAssetType()] = std::move(handler);
+	handlers[handler->getRootAssetDirectory()] = std::move(handler);
 }
 
 AssetFileHandlerBase::AssetFileHandlerBase(AssetType type, String rootAssetDir, String name, String fileExtension)

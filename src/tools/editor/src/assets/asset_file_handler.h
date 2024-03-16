@@ -24,7 +24,6 @@ namespace Halley {
 		AssetFileHandler();
 
 		const IAssetFileHandler* tryGetHandlerFor(const String& assetType) const;
-		const IAssetFileHandler* tryGetHandlerFor(AssetType assetType) const;
 		bool canAdd(std::string_view rootAssetDir) const;
 		bool canDuplicate(std::string_view rootAssetDir) const;
 
@@ -33,7 +32,7 @@ namespace Halley {
 		void clear();
 		void addHandler(std::unique_ptr<IAssetFileHandler> handler);
 
-		HashMap<AssetType, std::unique_ptr<IAssetFileHandler>> handlers;
+		HashMap<String, std::unique_ptr<IAssetFileHandler>> handlers;
 		HashSet<String> addFolders;
 		HashSet<String> duplicateFolders;
 	};
