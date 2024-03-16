@@ -73,6 +73,7 @@ namespace Halley
 		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const override;
 		Path getSharedAssetsSrcPath() const;
+		Path getEditorAssetsSrcPath() const;
 
 		Path getGenPath() const;
 		Path getGenSrcPath() const;

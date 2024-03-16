@@ -50,6 +50,7 @@ void CheckAssetsTask::run()
 			fileSystemCache.trackDirectory(project.getUnpackedAssetsPath());
 			fileSystemCache.trackDirectory(project.getSharedGenPath());
 			fileSystemCache.trackDirectory(project.getGenPath());
+			fileSystemCache.trackDirectory(project.getEditorAssetsSrcPath());
 		}
 
 		projectAssetImporter = project.getAssetImporter();

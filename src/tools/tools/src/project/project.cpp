@@ -157,6 +157,11 @@ Path Project::getSharedAssetsSrcPath() const
 	return halleyRootPath / "shared_assets";
 }
 
+Path Project::getEditorAssetsSrcPath() const
+{
+	return halleyRootPath / "assets_src";
+}
+
 Path Project::getGenPath() const
 {
 	return rootPath / "gen";
