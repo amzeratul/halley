@@ -21,16 +21,6 @@ const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetT
 	return nullptr;
 }
 
-bool AssetFileHandler::canAdd(std::string_view rootAssetDir) const
-{
-	return addFolders.contains(rootAssetDir);
-}
-
-bool AssetFileHandler::canDuplicate(std::string_view rootAssetDir) const
-{
-	return duplicateFolders.contains(rootAssetDir);
-}
-
 void AssetFileHandler::populate()
 {
 	clear();
@@ -45,18 +35,10 @@ void AssetFileHandler::populate()
 void AssetFileHandler::clear()
 {
 	handlers.clear();
-	addFolders.clear();
-	duplicateFolders.clear();
 }
 
 void AssetFileHandler::addHandler(std::unique_ptr<IAssetFileHandler> handler)
 {
-	if (handler->canCreateNew()) {
-		addFolders.insert(handler->getRootAssetDirectory());
-	}
-	if (handler->canDuplicate()) {
-		duplicateFolders.insert(handler->getRootAssetDirectory());
-	}
 	handlers[handler->getRootAssetDirectory()] = std::move(handler);
 }
 

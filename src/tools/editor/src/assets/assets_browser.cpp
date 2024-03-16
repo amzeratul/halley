@@ -295,9 +295,9 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 		menuOptions.back().enabled = enabled;
 	};
 
-	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = assetFileHandler->canAdd(stem);
-	const bool canDuplicate = assetFileHandler->canDuplicate(stem);
+	auto* handler = getHandlerForCurType();
+	const bool canAdd = handler && handler->canCreateNew();
+	const bool canDuplicate = handler && handler->canDuplicate();
 
 	if (assetId.isEmpty()) {
 		makeEntry("add", "New asset...", "Create new asset.", "new_file.png", canAdd);
@@ -380,18 +380,16 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 
 void AssetsBrowser::updateAddRemoveButtons()
 {
-	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = assetFileHandler->canAdd(stem);
+	auto* handler = getHandlerForCurType();
+	const bool canAdd = handler && handler->canCreateNew();
 
 	getWidget("addAsset")->setEnabled(canAdd);
 }
 
 void AssetsBrowser::addAsset()
 {
-	const auto assetType = curSrcPath.getFront(1).string();
-	auto* handler = assetFileHandler->tryGetHandlerFor(assetType);
+	auto* handler = getHandlerForCurType();
 	if (!handler) {
-		Logger::logError("Not handler found for assetType " + assetType);
 		return;
 	}
 	const String extension = handler->getFileExtension();
@@ -407,10 +405,8 @@ void AssetsBrowser::addAsset()
 
 void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 {
-	const auto assetType = curSrcPath.getFront(1).string();
-	const auto* handler = assetFileHandler->tryGetHandlerFor(assetType);
+	auto* handler = getHandlerForCurType();
 	if (!handler) {
-		Logger::logError("Not handler found for assetType " + assetType);
 		return;
 	}
 
@@ -499,4 +495,10 @@ void AssetsBrowser::doSetCollapsed(bool c)
 		
 		getWidget("assetBrowsePanel")->setActive(!collapsed);
 	}
+}
+
+const IAssetFileHandler* AssetsBrowser::getHandlerForCurType() const
+{
+	const auto assetType = curSrcPath.getFront(1).string();
+	return assetFileHandler->tryGetHandlerFor(assetType);
 }

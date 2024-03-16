@@ -5,6 +5,7 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class IAssetFileHandler;
 	class AssetFileHandler;
 	class EditorUIFactory;
 	class ProjectWindow;
@@ -90,5 +91,7 @@ namespace Halley {
 
 		void setCollapsed(bool collapsed);
 		void doSetCollapsed(bool collapsed);
+
+		const IAssetFileHandler* getHandlerForCurType() const;
 	};
 }
