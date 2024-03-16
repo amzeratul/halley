@@ -13,7 +13,7 @@ namespace Halley {
         void onMakeUI() override;
 
         void refresh();
-        void reload() override;
+        void onResourceLoaded() override;
         void refreshAssets() override;
         
     protected:

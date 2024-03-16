@@ -8,7 +8,7 @@ namespace Halley {
     public:
         AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
 
-        void reload() override;
+        void onResourceLoaded() override;
         void refreshAssets() override;
 		void onMakeUI() override;
 		
@@ -25,7 +25,6 @@ namespace Halley {
 		const AudioProperties& getAudioProperties() const;
 
     protected:
-        void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 
 	private:

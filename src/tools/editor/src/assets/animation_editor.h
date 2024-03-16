@@ -18,7 +18,7 @@ namespace Halley {
         AnimationEditor(UIFactory& factory, Resources& gameResources, AssetType type, Project& project, MetadataEditor& metadataEditor);
 
         void refresh();
-        void reload() override;
+        void onResourceLoaded() override;
         void refreshAssets() override;
 
 		void onAddedToRoot(UIRoot& root) override;

@@ -62,12 +62,15 @@ void PrefabEditor::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
 	layout();
 }
 
+bool PrefabEditor::isReadyToLoad() const
+{
+	return project.areAssetsLoaded() && elapsedTime >= minLoadTime;
+}
+
 void PrefabEditor::update(Time t, bool moved)
 {
-	if (pendingLoad && project.isDLLLoaded() && project.areAssetsLoaded() && elapsedTime >= minLoadTime) {
-		pendingLoad = false;
-		open();
-	}
+	AssetEditor::update(t, moved);
+
 	if (!drillDown.empty() && !drillDown.back()->isAlive()) {
 		drillDown.pop_back();
 	}
@@ -81,17 +84,6 @@ void PrefabEditor::update(Time t, bool moved)
 	elapsedTime += t;
 }
 
-std::shared_ptr<const Resource> PrefabEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
-{
-	if (project.isDLLLoaded() && project.areAssetsLoaded() && elapsedTime >= minLoadTime) {
-		open();
-	} else {
-		pendingLoad = true;
-	}
-	
-	return {};
-}
-
 void PrefabEditor::onTabbedIn()
 {
 	if (window) {
@@ -99,19 +91,20 @@ void PrefabEditor::onTabbedIn()
 	}
 }
 
-void PrefabEditor::open()
+std::shared_ptr<const Resource> PrefabEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	Expects (project.isDLLLoaded());
-	
+	std::shared_ptr<Prefab> prefab;
 	if (!window) {
 		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow, *this, assetType);
 		add(window, 1);
 	}
 	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {
-		const bool ok = window->loadSceneFromFile(assetPath, assetType, assetId);
-		if (!ok) {
+		prefab = window->loadSceneFromFile(assetPath, assetType, assetId);
+		if (!prefab) {
 			window->destroy();
 			window = {};
 		}
 	}
+
+	return prefab;
 }

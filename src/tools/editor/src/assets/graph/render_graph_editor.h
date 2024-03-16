@@ -7,7 +7,7 @@ namespace Halley {
 	public:
 		RenderGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type);
 
-		void reload() override;
+		void onResourceLoaded() override;
 		void drawConnections(UIPainter& painter) override;
 	
 	protected:

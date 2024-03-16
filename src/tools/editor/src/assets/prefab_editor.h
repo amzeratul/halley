@@ -15,6 +15,7 @@ namespace Halley {
 		void onOpenAssetFinder(PaletteWindow& assetFinder) override;
 
 		void drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor);
+		bool isReadyToLoad() const override;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -29,9 +30,6 @@ namespace Halley {
 		std::shared_ptr<SceneEditorWindow> window;
 		Vector<std::shared_ptr<DrillDownAssetWindow>> drillDown;
 
-		bool pendingLoad = false;
 		Time elapsedTime = 0;
-
-		void open();
 	};
 }

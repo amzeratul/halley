@@ -32,23 +32,19 @@ UIEditor::~UIEditor()
 
 void UIEditor::update(Time time, bool moved)
 {
-	if (pendingLoad && project.isDLLLoaded()) {
-		open();
-		pendingLoad = false;
-	}
+	AssetEditor::update(time, moved);
 
-	if (!pendingLoad) {
+	if (resource) {
 		getWidget("saveButton")->setEnabled(isModified());
 		getWidget("undoButton")->setEnabled(undoStack.canUndo());
 		getWidget("redoButton")->setEnabled(undoStack.canRedo());
 	}
 }
 
-void UIEditor::open()
+std::shared_ptr<const Resource> UIEditor::loadResource(const Path& assetPath, const String& id, AssetType assetType)
 {
 	loadGameFactory();
 
-	//uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
 	uiDefinition = std::make_shared<UIDefinition>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath));
 
 	if (widgetList) {
@@ -56,6 +52,8 @@ void UIEditor::open()
 	}
 
 	factory.loadUI(*this, "halley/ui_editor");
+
+	return uiDefinition;
 }
 
 void UIEditor::onMakeUI()
@@ -229,20 +227,9 @@ void UIEditor::refreshAssets()
 	doLoadUI(true);
 }
 
-void UIEditor::reload()
+void UIEditor::onResourceLoaded()
 {
 	doLoadUI(false);
-}
-
-std::shared_ptr<const Resource> UIEditor::loadResource(const Path& assetPath, const String& id, AssetType assetType)
-{
-	if (project.isDLLLoaded()) {
-		open();
-		return uiDefinition;
-	} else {
-		pendingLoad = true;
-		return {};
-	}
 }
 
 void UIEditor::doLoadUI(bool force)

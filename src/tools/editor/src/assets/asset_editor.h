@@ -16,16 +16,17 @@ namespace Halley {
 		virtual ~AssetEditor() = default;
 
         void update(Time t, bool moved) override;
-
 		void setResource(Path filePath, String assetId);
-		void clearResource();
-		virtual void reload();
+
+		virtual void onResourceLoaded();
 		virtual void refreshAssets();
         virtual void onDoubleClick();
         virtual bool isModified();
         virtual void save();
 		virtual bool canSave(bool forceInstantCheck) const;
         virtual void onOpenAssetFinder(PaletteWindow& assetFinder);
+		virtual bool isReadyToLoad() const;
+		virtual bool needsDLLToLoad() const;
 
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) = 0;

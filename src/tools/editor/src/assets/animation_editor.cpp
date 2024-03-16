@@ -20,7 +20,7 @@ void AnimationEditor::refresh()
 	animationDisplay->refresh();
 }
 
-void AnimationEditor::reload()
+void AnimationEditor::onResourceLoaded()
 {
 	loadAssetData();
 }
@@ -63,6 +63,8 @@ bool AnimationEditor::onKeyPress(KeyboardKeyPress key)
 
 void AnimationEditor::update(Time t, bool moved)
 {
+	AssetEditor::update(t, moved);
+
 	const auto mousePos = Vector2i(animationDisplay->getMousePos());
 	const auto size = animationDisplay->getBounds().getSize();
 	String str = "Frame: " + toString(animationDisplay->getFrameNumber()) +  ", x: " + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";

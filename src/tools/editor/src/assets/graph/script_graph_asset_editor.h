@@ -11,7 +11,7 @@ namespace Halley {
 		ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
 		~ScriptGraphAssetEditor() override;
 
-        void reload() override;
+        void onResourceLoaded() override;
 		void refreshAssets() override;
 		
 		void save() override;
@@ -20,17 +20,13 @@ namespace Halley {
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
     protected:
-    	void update(Time t, bool moved) override;
 		std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 
     private:
     	ProjectWindow& projectWindow;
 		Resources& gameResources;
 		bool dllListenerAdded = false;
-		bool pendingLoad = false;
 
 		std::shared_ptr<ScriptGraphEditor> graphEditor;
-
-		void open();
-    };
+	};
 }

@@ -29,7 +29,7 @@ ScriptGraphAssetEditor::~ScriptGraphAssetEditor()
 	});
 }
 
-void ScriptGraphAssetEditor::reload()
+void ScriptGraphAssetEditor::onResourceLoaded()
 {
 }
 
@@ -74,19 +74,6 @@ void ScriptGraphAssetEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 
 std::shared_ptr<const Resource> ScriptGraphAssetEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	if (project.isDLLLoaded()) {
-		open();
-	} else {
-		pendingLoad = true;
-	}
-	
-	return {};
-}
-
-void ScriptGraphAssetEditor::open()
-{
-	Expects (project.isDLLLoaded());
-
 	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
 	std::shared_ptr<ScriptGraph> scriptGraph;
 	bool modified = false;
@@ -110,14 +97,6 @@ void ScriptGraphAssetEditor::open()
 	if (modified) {
 		graphEditor->setModified(true);
 	}
-}
 
-void ScriptGraphAssetEditor::update(Time time, bool moved)
-{
-	if (pendingLoad && project.isDLLLoaded()) {
-		pendingLoad = false;
-		open();
-	}
-
-	AssetEditor::update(time, moved);
+	return scriptGraph;
 }

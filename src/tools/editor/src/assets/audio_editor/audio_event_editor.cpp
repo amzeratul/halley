@@ -12,7 +12,7 @@ AudioEventEditor::AudioEventEditor(UIFactory& factory, Resources& gameResources,
 	factory.loadUI(*this, "halley/audio_editor/audio_event_editor");
 }
 
-void AudioEventEditor::reload()
+void AudioEventEditor::onResourceLoaded()
 {
 	doLoadUI();
 }
@@ -104,10 +104,6 @@ const AudioProperties& AudioEventEditor::getAudioProperties() const
 Resources& AudioEventEditor::getGameResources() const
 {
 	return gameResources;
-}
-
-void AudioEventEditor::update(Time t, bool moved)
-{
 }
 
 std::shared_ptr<const Resource> AudioEventEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)

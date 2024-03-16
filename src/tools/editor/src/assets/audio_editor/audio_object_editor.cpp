@@ -101,7 +101,7 @@ const AudioProperties& AudioObjectEditor::getAudioProperties() const
 	return project.getGameProperties().getAudioProperties();
 }
 
-void AudioObjectEditor::reload()
+void AudioObjectEditor::onResourceLoaded()
 {
 	doLoadUI();
 }
@@ -152,6 +152,8 @@ void AudioObjectEditor::markModified(bool refreshList)
 
 void AudioObjectEditor::update(Time t, bool moved)
 {
+	AssetEditor::update(t, moved);
+
 	if (needFullRefresh) {
 		doLoadUI();
 		needFullRefresh = false;

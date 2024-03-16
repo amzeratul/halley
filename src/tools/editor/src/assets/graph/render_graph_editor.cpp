@@ -9,11 +9,11 @@ RenderGraphEditor::RenderGraphEditor(UIFactory& factory, Resources& gameResource
 {
 }
 
-void RenderGraphEditor::reload()
+void RenderGraphEditor::onResourceLoaded()
 {
 	renderGraph = std::dynamic_pointer_cast<const RenderGraphDefinition>(resource);
 
-	GraphEditor::reload();
+	GraphEditor::onResourceLoaded();
 
 	int i = 0;
 	for (const auto& node: renderGraph->getNodes()) {

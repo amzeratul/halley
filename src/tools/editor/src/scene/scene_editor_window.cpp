@@ -186,7 +186,7 @@ void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 	root.registerKeyPressListener(shared_from_this());
 }
 
-bool SceneEditorWindow::loadSceneFromFile(Path assetPath, AssetType assetType, const String& name)
+std::shared_ptr<Prefab> SceneEditorWindow::loadSceneFromFile(Path assetPath, AssetType assetType, const String& name)
 {
 	unloadScene();
 	this->assetPath = assetPath;
@@ -202,8 +202,9 @@ bool SceneEditorWindow::loadSceneFromFile(Path assetPath, AssetType assetType, c
 	}
 	prefab->setAssetId(name);
 	loadScene(*prefab);
+	prefab = {};
 
-	return true;
+	return this->prefab;
 }
 
 void SceneEditorWindow::loadScene(const Prefab& origPrefab)

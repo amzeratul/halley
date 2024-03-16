@@ -22,7 +22,7 @@ void FontEditor::refresh()
 {
 }
 
-void FontEditor::reload()
+void FontEditor::onResourceLoaded()
 {
 	updateFont();
 }

@@ -1,5 +1,7 @@
 #include "asset_editor.h"
 
+#include "halley/tools/project/project.h"
+
 using namespace Halley;
 
 AssetEditor::AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
@@ -32,14 +34,7 @@ void AssetEditor::setResource(Path filePath, String assetId)
 	needsLoading = true;
 }
 
-void AssetEditor::clearResource()
-{
-	assetId = "";
-	resource.reset();
-	reload();
-}
-
-void AssetEditor::reload()
+void AssetEditor::onResourceLoaded()
 {
 }
 
@@ -72,6 +67,16 @@ void AssetEditor::onOpenAssetFinder(PaletteWindow& assetFinder)
 {
 }
 
+bool AssetEditor::isReadyToLoad() const
+{
+	return true;
+}
+
+bool AssetEditor::needsDLLToLoad() const
+{
+	return true;
+}
+
 void AssetEditor::onTabbedIn()
 {
 }
@@ -87,7 +92,7 @@ void AssetEditor::setTabbedIn(bool value)
 
 void AssetEditor::tryLoading()
 {
-	if (tabbedIn && needsLoading) {
+	if (tabbedIn && needsLoading && (!needsDLLToLoad() || project.isDLLLoaded()) && isReadyToLoad()) {
 		load();
 	}
 }
@@ -97,7 +102,7 @@ void AssetEditor::load()
 	try {
 		needsLoading = false;
 		resource = loadResource(assetPath, assetId, assetType);
-		reload();
+		onResourceLoaded();
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	}

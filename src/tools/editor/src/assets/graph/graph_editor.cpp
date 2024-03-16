@@ -12,7 +12,7 @@ GraphEditor::GraphEditor(UIFactory& factory, Resources& gameResources, Project& 
 	factory.loadUI(*this, "halley/graph_editor");
 }
 
-void GraphEditor::reload()
+void GraphEditor::onResourceLoaded()
 {
 	infiniCanvas->clear();
 	infiniCanvas->add(std::make_shared<GraphConnections>(*this));

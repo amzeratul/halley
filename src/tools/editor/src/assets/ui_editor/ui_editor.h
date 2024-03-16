@@ -21,7 +21,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void refreshAssets() override;
-		void reload() override;
+		void onResourceLoaded() override;
 		void onMakeUI() override;
 		void markModified(bool temporary = false);
 		void onWidgetModified(const String& id, bool temporary = false);
@@ -60,14 +60,12 @@ namespace Halley {
 		std::shared_ptr<UIEditorDisplay> display;
 		bool loaded = false;
 		bool modified = false;
-		bool pendingLoad = false;
 		bool firstLoad = true;
 
 		String curSelection;
 
 		ConfigUndoStack undoStack;
 
-		void open();
 		void doLoadUI(bool force);
 		void goToWidget(const String& id);
 

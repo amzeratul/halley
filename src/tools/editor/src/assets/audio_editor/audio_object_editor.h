@@ -10,7 +10,7 @@ namespace Halley {
     public:
         AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
 
-        void reload() override;
+        void onResourceLoaded() override;
         void refreshAssets() override;
 
 		bool isModified() override;
