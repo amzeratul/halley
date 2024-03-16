@@ -439,11 +439,13 @@ void EntityList::forceValidationIfWaiting()
 
 void EntityList::doValidateAllEntities()
 {
-	if (auto sceneData = sceneEditorWindow->getSceneData()) {
-		validationTimeout = 0.1;
-		needsToValidateAllEntities = false;
-		Vector<const EntityData*> entityDataStack{};
-		validateEntityTree(sceneData->getEntityTree(), entityDataStack);
+	if (sceneEditorWindow) {
+		if (auto sceneData = sceneEditorWindow->getSceneData()) {
+			validationTimeout = 0.1;
+			needsToValidateAllEntities = false;
+			Vector<const EntityData*> entityDataStack{};
+			validateEntityTree(sceneData->getEntityTree(), entityDataStack);
+		}
 	}
 }
 

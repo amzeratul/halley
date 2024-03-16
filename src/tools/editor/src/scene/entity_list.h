@@ -53,7 +53,7 @@ namespace Halley {
 
 	private:
 		UIFactory& factory;
-		SceneEditorWindow* sceneEditorWindow;
+		SceneEditorWindow* sceneEditorWindow = nullptr;
 		const EntityIcons* icons = nullptr;
 
 		std::shared_ptr<UITreeList> list;

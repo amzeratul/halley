@@ -546,6 +546,9 @@ std::optional<Vector4f> AnimationEditorDisplay::getCurrentSlices() const
 
 int AnimationEditorDisplay::getMetaIntOr(const String& key, int defaultValue) const
 {
+	if (!metadataEditor) {
+		return 0;
+	}
 	const auto result = metadataEditor->getString(key);
 	if (result.isEmpty() || !result.isInteger()) {
 		return defaultValue;
