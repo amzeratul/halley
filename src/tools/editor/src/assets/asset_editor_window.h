@@ -47,7 +47,8 @@ namespace Halley {
 		bool modified = false;
 		Vector<std::pair<AssetType, String>> lastAssets;
 
-		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
+		std::shared_ptr<AssetEditor> makeEditor(AssetType type);
 		void createEditorTab(Path filePath, AssetType type, const String& name);
+		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 	};
 }

@@ -6,7 +6,6 @@
 
 namespace Halley {
 	class IAssetFileHandler;
-	class AssetFileHandler;
 	class EditorUIFactory;
 	class ProjectWindow;
 	class Project;
@@ -17,7 +16,6 @@ namespace Halley {
 	class AssetsBrowser : public UIWidget, public Project::IAssetSrcChangeListener {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
-		~AssetsBrowser() override;
 
 		void update(Time t, bool moved) override;
 
@@ -40,8 +38,6 @@ namespace Halley {
 		EditorUIFactory& factory;
 		Project& project;
 		ProjectWindow& projectWindow;
-
-		std::unique_ptr<AssetFileHandler> assetFileHandler;
 
 		std::map<AssetType, Path> curPaths;
 		Path curSrcPath;

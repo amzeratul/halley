@@ -1,42 +1,115 @@
----
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: cd446220-38a3-4311-97cf-536da9aa3266
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
 children:
-- widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [400, 300] }
-  sizer: { type: vertical }
-  fill: centre
-  proportion: 1
-  children:
-  - sizer: { type: horizontal }
-    children:
-    - widget: { class: label, text: "Halley Editor Settings" }
-      fill: centre
-      proportion: 1
-  - widget: { id: fields, class: widget }
+  - uuid: c69df118-2f10-4756-bb19-a009ec02e694
     proportion: 1
-    border: [4, 10, 4, 4]
-    sizer: { type: grid, columns: 2, columnProportions: [1, 1], gap: 4 }
+    sizer:
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      image: $ui_title_capsule
+      innerBorder: [6, 3, 6, 6]
+      size: [400, 300]
     children:
-    - widget: { class: label, text: "Colour Scheme: " }
-      fill: [ left, verticalCentre ]
-    - widget: { id: colourScheme, class: dropdown }
-    - widget: { class: label, text: "Platforms:" }
-      fill: [ left, verticalCentre ]
-    - widget: { id: platforms, class: widget }
-      sizer: { type: grid, columns: 2, gap: 4 }
-      children: []
-    - widget: { class: label, text: "LZ4 HC (Slower/Smaller): " }
-      fill: [ left, verticalCentre ]
-    - widget: { id: lz4hc, class: checkbox }
-      fill: [ left, verticalCentre ]
-    - widget: { class: label, text: "AutoBuild: " }
-      fill: [ left, verticalCentre ]
-    - widget: { id: autoBuild, class: checkbox }
-      fill: [ left, verticalCentre ]
-  - sizer: { type: horizontal }
-    children:
-    - stretchSpacer: {}
-      proportion: 1
-    - widget: { id: save, class: button, text: Save, size: [100, 22] }
-    - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
-...
+      - uuid: 3f653d18-dbd3-4133-824a-33c20f14f536
+        sizer:
+          type: horizontal
+        children:
+          - uuid: 2dd0224d-7806-4c0d-bc21-580503eedff2
+            proportion: 1
+            widget:
+              class: label
+              text: Halley Editor Settings
+            fill: centre
+      - uuid: 7ef919eb-f035-41de-85c6-7838e0008f39
+        proportion: 1
+        border: [4, 10, 4, 4]
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 4
+          type: grid
+        widget:
+          class: widget
+          id: fields
+        children:
+          - uuid: fb183fc2-5463-4fb6-aee3-be6d408fbf6f
+            widget:
+              class: label
+              text: "Colour Scheme: "
+            fill: [left, verticalCentre]
+          - uuid: 74e90202-1862-4e4c-bd2f-6a8217d6b603
+            widget:
+              class: dropdown
+              id: colourScheme
+              options: []
+          - uuid: a4e33d48-4b2c-4478-bfcb-da804e450519
+            widget:
+              class: label
+              text: "Platforms:"
+            fill: [left, verticalCentre]
+          - uuid: eb853666-3cff-413d-95ac-af7e70e52a34
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 4
+              type: grid
+            widget:
+              class: widget
+              id: platforms
+            children: []
+          - uuid: 5599a793-fcfb-47e0-8822-99d25b4910ed
+            widget:
+              class: label
+              text: "LZ4 HC (Slower/Smaller): "
+            fill: [left, verticalCentre]
+          - uuid: 4d80abb4-6644-4250-9cb4-558afa41fa26
+            widget:
+              class: checkbox
+              id: lz4hc
+            fill: [left, verticalCentre]
+          - uuid: c4a7d4d3-4602-48d1-8bc0-315f468899fd
+            widget:
+              class: label
+              text: "AutoBuild: "
+            fill: [left, verticalCentre]
+          - uuid: 935a3bd9-7fd7-476f-af74-1c0bfc06ce79
+            widget:
+              class: checkbox
+              id: autoBuild
+            fill: [left, verticalCentre]
+          - uuid: b2527cf1-0e85-47a5-b209-fb88d8b8cb23
+            widget:
+              class: label
+              text: "Show Halley Assets:"
+            fill: [left, verticalCentre]
+          - uuid: 6b33ad50-9582-47ed-b966-89d2b318522f
+            widget:
+              class: checkbox
+              id: showHalleyAssets
+            fill: [left, verticalCentre]
+      - uuid: c804d283-4981-4590-9843-d0c86db859dc
+        sizer:
+          type: horizontal
+        children:
+          - uuid: 6d6e62a0-34e4-4259-9cc5-f5deff0a66c8
+            proportion: 1
+            stretchSpacer: {}
+          - uuid: 6b4e0233-8f2c-4d9c-b0c1-7a4b5e5b92ad
+            widget:
+              class: button
+              id: save
+              size: [100, 22]
+              text: Save
+          - uuid: 20ff926c-a0d0-47aa-ad81-78352afb022e
+            widget:
+              class: button
+              id: cancel
+              size: [100, 22]
+              text: Cancel
+    fill: centre

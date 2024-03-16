@@ -76,6 +76,12 @@ ConfigNode YAMLConvert::parseConfig(const String& str)
 	return parseYAMLNode(root);
 }
 
+ConfigFile YAMLConvert::parseConfig(const Path& path)
+{
+	const auto data = Path::readFile(path);
+	return parseConfig(data);
+}
+
 String YAMLConvert::generateYAML(const ConfigFile& config, const EmitOptions& options)
 {
 	return generateYAML(config.getRoot(), options);

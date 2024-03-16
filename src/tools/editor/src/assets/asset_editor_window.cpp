@@ -1,6 +1,7 @@
 #include "asset_editor_window.h"
 #include "animation_editor.h"
 #include "asset_editor.h"
+#include "asset_file_handler.h"
 #include "font_editor.h"
 #include "audio_editor/audio_event_editor.h"
 #include "audio_editor/audio_object_editor.h"
@@ -53,47 +54,52 @@ void AssetEditorWindow::reload()
 
 void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> type, bool force)
 {
-	bool showMetadataEditor = true;
+	if (loadedAsset == name && !force) {
+		return;
+	}
 
-	if (loadedAsset != name || force) {
-		loadedAsset = name;
-		loadedType = type;
+	loadedAsset = name;
+	loadedType = type;
 		
-		content->clear();
-		contentList->clear();
-		curEditors.clear();
+	content->clear();
+	contentList->clear();
+	curEditors.clear();
 
-		auto assets = project.getAssetsFromFile(Path(name));
-		lastAssets = assets;
+	auto assets = getAssetsFromFile(Path(name));
+	lastAssets = assets;
 
-		std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
-		{
-			return b.first < a.first;
-		});
+	std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
+	{
+		return b.first < a.first;
+	});
 
-		showMetadataEditor = false;
-		for (const auto& asset: assets) {
-			if (MetadataEditor::hasEditorForType(asset.first)) {
-				showMetadataEditor = true;
-			}
+	bool showMetadataEditor = false;
+	for (const auto& asset: assets) {
+		if (MetadataEditor::hasEditorForType(asset.first)) {
+			showMetadataEditor = true;
 		}
+	}
 
-		if (assets.empty()) {
+	if (!showMetadataEditor || assets.empty()) {
+		metadataEditor->clear();
+	} else {
+		// TODO: this is all a bit dodgy tbh, metafile should be derived here probably?
+		const auto type = assets.at(0).first;
+		const auto primaryFilePath = project.getImportAssetsDatabase().getPrimaryInputFile(type, assets.at(0).second, true);
+		if (primaryFilePath.isEmpty()) {
 			metadataEditor->clear();
 		} else {
-			const auto type = assets.at(0).first;
-			const auto primaryFilePath = project.getImportAssetsDatabase().getPrimaryInputFile(type, assets.at(0).second, true);
 			auto effectiveMeta = project.getImportAssetsDatabase().getMetadata(type, assets.at(0).second).value_or(Metadata());
 			metadataEditor->setResource(project, type, primaryFilePath, std::move(effectiveMeta));
 		}
+	}
 
-		const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });
-		for (auto& asset: assets) {
-			if (asset.first == AssetType::Texture && hasSpriteSheet) {
-				continue;
-			}
-			createEditorTab(Path(name), asset.first, asset.second);
+	const bool hasSpriteSheet = std_ex::contains_if(assets, [&] (const auto& a) { return a.first == AssetType::SpriteSheet; });
+	for (auto& asset: assets) {
+		if (asset.first == AssetType::Texture && hasSpriteSheet) {
+			continue;
 		}
+		createEditorTab(Path(name), asset.first, asset.second);
 	}
 
 	getWidget("metadataPanel")->setActive(showMetadataEditor);
@@ -161,7 +167,7 @@ void AssetEditorWindow::onDoubleClickAsset()
 
 void AssetEditorWindow::refreshAssets()
 {
-	auto assets = project.getAssetsFromFile(Path(loadedAsset));
+	auto assets = getAssetsFromFile(Path(loadedAsset));
 	if (assets != lastAssets) {
 		loadAsset(loadedAsset, loadedType, true);
 	} else {
@@ -173,9 +179,8 @@ void AssetEditorWindow::refreshAssets()
 
 void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const String& name)
 {
-	auto editor = makeEditor(std::move(filePath), type, name);
-	if (editor) {
-		editor->setResource(name);
+	if (const auto editor = makeEditor(type)) {
+		editor->setResource(std::move(filePath), name);
 		auto n = content->getNumberOfPages();
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
@@ -195,7 +200,24 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 	}
 }
 
-std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetType type, const String& name)
+Vector<std::pair<AssetType, String>> AssetEditorWindow::getAssetsFromFile(const Path& path) const
+{
+	auto assets = project.getAssetsFromFile(path);
+
+	if (assets.empty()) {
+		if (auto* handler = projectWindow.getAssetFileHandler().tryGetHandlerFor(path)) {
+			auto assetId = path.replaceExtension(handler->getFileExtension());
+			if (assetId.getNumberPaths() >= 3 && assetId.getParts()[0] == ".." && assetId.getParts()[1] == "halley") {
+				assetId = assetId.dropFront(3);
+			}
+			return { std::pair<AssetType, String>(handler->getAssetType(), assetId.toString() )};
+		}
+	}
+
+	return assets;
+}
+
+std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 {
 	switch (type) {
 	case AssetType::Animation:

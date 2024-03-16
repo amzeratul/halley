@@ -48,7 +48,9 @@ void UIEditor::open()
 {
 	loadGameFactory();
 
-	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
+	//uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
+	uiDefinition = std::make_shared<UIDefinition>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath));
+
 	if (widgetList) {
 		widgetList->setDefinition(uiDefinition);
 	}
@@ -171,7 +173,6 @@ void UIEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("ui/" + uiDefinition->getAssetId() + ".ui");
 		const auto strData = uiDefinition->toYAML();
 
 		project.setAssetSaveNotification(false);

@@ -59,6 +59,12 @@ void EditorSettingsWindow::onMakeUI()
 		setSaveEnabled(true);
 	});
 
+	bindData("showHalleyAssets", workingCopy.getCanEditHalleyAssets(), [=] (bool value)
+	{
+		workingCopy.setCanEditHalleyAssets(value);
+		setSaveEnabled(true);
+	});
+
 	setHandle(UIEventType::ButtonClicked, "save", [=] (const UIEvent& event)
 	{
 		save();

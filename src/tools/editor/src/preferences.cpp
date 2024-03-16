@@ -20,6 +20,7 @@ void Preferences::loadDefaults()
 	colourScheme = "Flat Halley (Dark)";
 	lz4hc = false;
 	autoBuild = false;
+	canEditHalleyAssets = false;
 }
 
 ConfigNode Preferences::save() const
@@ -42,6 +43,7 @@ ConfigNode Preferences::save() const
 	root["colourScheme"] = colourScheme;
 	root["lz4hc"] = lz4hc;
 	root["autoBuild"] = autoBuild;
+	root["canEditHalleyAssets"] = canEditHalleyAssets;
 
 	return root;
 }
@@ -66,6 +68,7 @@ void Preferences::load(const ConfigNode& root)
 	}
 	lz4hc = root["lz4hc"].asBool(false);
 	autoBuild = root["autoBuild"].asBool(false);
+	canEditHalleyAssets = root["canEditHalleyAssets"].asBool(false);
 }
 
 bool Preferences::isDirty() const
@@ -190,6 +193,7 @@ void Preferences::loadEditorPreferences(const Preferences& preferences)
 	colourScheme = preferences.colourScheme;
 	lz4hc = preferences.lz4hc;
 	autoBuild = preferences.autoBuild;
+	canEditHalleyAssets = preferences.canEditHalleyAssets;
 }
 
 void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)
@@ -199,6 +203,10 @@ void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)
 
 bool Preferences::getCanEditHalleyAssets() const
 {
-	// TODO
-	return false;
+	return canEditHalleyAssets;
+}
+
+void Preferences::setCanEditHalleyAssets(bool enabled)
+{
+	canEditHalleyAssets = enabled;
 }

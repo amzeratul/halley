@@ -17,7 +17,6 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, factory(factory)
 	, project(project)
 	, projectWindow(projectWindow)
-	, assetFileHandler(std::make_unique<AssetFileHandler>())
 	, curSrcPath(".")
 {
 	resetRootPath();
@@ -26,9 +25,6 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 
 	project.addAssetSrcChangeListener(*this);
 }
-
-AssetsBrowser::~AssetsBrowser()
-{}
 
 void AssetsBrowser::update(Time t, bool moved)
 {
@@ -525,8 +521,7 @@ void AssetsBrowser::doSetCollapsed(bool c)
 
 const IAssetFileHandler* AssetsBrowser::getHandlerForCurType() const
 {
-	const auto assetType = curSrcPath.getFront(1).string();
-	return assetFileHandler->tryGetHandlerFor(assetType);
+	return projectWindow.getAssetFileHandler().tryGetHandlerFor(curSrcPath);
 }
 
 void AssetsBrowser::resetRootPath()

@@ -21,6 +21,16 @@ const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const String& assetT
 	return nullptr;
 }
 
+const IAssetFileHandler* AssetFileHandler::tryGetHandlerFor(const Path& path) const
+{
+	const auto& pathParts = path.getParts();
+	if (pathParts.size() >= 2 && pathParts[0] == ".." && pathParts[1] == "halley") {
+		return pathParts.size() >= 4 ? tryGetHandlerFor(pathParts[3]) : nullptr;
+	} else {
+		return !pathParts.empty() ? tryGetHandlerFor(pathParts[0]) : nullptr;
+	}
+}
+
 void AssetFileHandler::populate()
 {
 	clear();

@@ -38,12 +38,12 @@ namespace Halley
 		void setLZ4HCEnabled(bool enabled);
 		bool isAutoBuild() const;
 		void setAutoBuild(bool enabled);
+		bool getCanEditHalleyAssets() const;
+		void setCanEditHalleyAssets(bool enabled);
 
 		void loadEditorPreferences(const Preferences& preferences);
 
 		void applyProjectLoaderPreferences(ProjectLoader& projectLoader);
-
-		bool getCanEditHalleyAssets() const;
 
 	private:
 		mutable bool dirty = false;
@@ -60,5 +60,6 @@ namespace Halley
 		String colourScheme;
 		bool lz4hc = false;
 		bool autoBuild = false;
+		bool canEditHalleyAssets = false;
 	};
 }

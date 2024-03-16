@@ -156,6 +156,9 @@ Path Path::getStem() const
 
 String Path::getExtension() const
 {
+	if (pathParts.empty()) {
+		return "";
+	}
 	String filename = pathParts.back();
 	if (filename == "." || filename == "..") {
 		return filename;

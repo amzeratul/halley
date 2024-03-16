@@ -25,9 +25,11 @@ void AssetEditor::update(Time t, bool moved)
 	tryLoading();
 }
 
-void AssetEditor::setResource(const String& id)
+void AssetEditor::setResource(Path filePath, String assetId)
 {
-	assetId = id;
+	Logger::logInfo("Loading resource " + filePath.toString());
+	this->assetPath = std::move(filePath);
+	this->assetId = std::move(assetId);
 	needsLoading = true;
 }
 

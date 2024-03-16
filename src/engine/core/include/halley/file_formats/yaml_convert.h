@@ -26,6 +26,7 @@ namespace Halley {
 		static ConfigFile parseConfig(gsl::span<const gsl::byte> data);
 		static ConfigFile parseConfig(const Bytes& data);
 		static ConfigNode parseConfig(const String& str);
+		static ConfigFile parseConfig(const Path& path);
 		
 		static String generateYAML(const ConfigFile& config, const EmitOptions& options = {});
 		static String generateYAML(const ConfigNode& node, const EmitOptions& options = {});

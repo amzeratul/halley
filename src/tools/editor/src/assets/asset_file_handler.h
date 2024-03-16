@@ -24,6 +24,7 @@ namespace Halley {
 		AssetFileHandler();
 
 		const IAssetFileHandler* tryGetHandlerFor(const String& assetType) const;
+		const IAssetFileHandler* tryGetHandlerFor(const Path& path) const;
 
 	private:
 		void populate();

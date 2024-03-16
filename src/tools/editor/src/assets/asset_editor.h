@@ -17,7 +17,7 @@ namespace Halley {
 
         void update(Time t, bool moved) override;
 
-		void setResource(const String& assetId);
+		void setResource(Path filePath, String assetId);
 		void clearResource();
 		virtual void reload();
 		virtual void refreshAssets();
@@ -39,6 +39,7 @@ namespace Halley {
 		Project& project;
 		Resources& gameResources;
 		AssetType assetType;
+		Path assetPath;
 		String assetId;
 		std::shared_ptr<const Resource> resource;
 		bool needsLoading = false;

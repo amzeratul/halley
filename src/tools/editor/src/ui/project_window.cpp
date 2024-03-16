@@ -16,6 +16,7 @@
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
 #include "src/assets/asset_editor_window.h"
+#include "src/assets/asset_file_handler.h"
 #include "src/project/check_source_update_task.h"
 #include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
@@ -31,6 +32,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, project(project)
 	, resources(resources)
 	, api(api)
+	, assetFileHandler(std::make_unique<AssetFileHandler>())
 {
 	settings[EditorSettingType::Temp] = std::make_unique<SettingsStorage>(std::shared_ptr<ISaveData>(), "");
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
@@ -402,6 +404,11 @@ UIDebugConsoleController* ProjectWindow::getDebugConsoleController()
 Preferences& ProjectWindow::getPreferences() const
 {
 	return editor.getPreferences();
+}
+
+const AssetFileHandler& ProjectWindow::getAssetFileHandler() const
+{
+	return *assetFileHandler;
 }
 
 void ProjectWindow::toggleDebugConsole()

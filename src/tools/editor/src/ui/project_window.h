@@ -15,6 +15,7 @@ namespace Halley {
     class HalleyEditor;
 	class Toolbar;
 	class Project;
+	class AssetFileHandler;
         
     class ProjectWindow final : public UIWidget, public IProjectDLLListener, public Project::IAssetLoadListener, public IProjectWindow
     {
@@ -72,6 +73,7 @@ namespace Halley {
         UIDebugConsoleController* getDebugConsoleController();
 
         Preferences& getPreferences() const;
+        const AssetFileHandler& getAssetFileHandler() const;
 
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
@@ -108,6 +110,7 @@ namespace Halley {
     	Project& project;
     	Resources& resources;
     	const HalleyAPI& api;
+		std::unique_ptr<AssetFileHandler> assetFileHandler;
 
 		std::shared_ptr<UIWidget> uiTop;
 		std::shared_ptr<UIWidget> uiMid;
