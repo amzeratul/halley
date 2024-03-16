@@ -379,7 +379,7 @@ TaskSet& ProjectWindow::getTasks() const
 void ProjectWindow::openAssetFinder(std::optional<String> initialQuery)
 {
 	if (!assetFinder) {
-		assetFinder = std::make_shared<PaletteWindow>(factory, project, initialQuery, [=] (std::optional<String> result)
+		assetFinder = std::make_shared<PaletteWindow>(factory, project, initialQuery, getPreferences().getCanEditHalleyAssets(), [=] (std::optional<String> result)
 		{
 			if (result) {
 				openFile(result.value());

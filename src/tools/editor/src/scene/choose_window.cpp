@@ -29,11 +29,22 @@ ChooseUIStyleWindow::ChooseUIStyleWindow(Vector2f minSize, UIFactory& factory, S
 	setTitle(LocalisedString::fromHardcodedString("Choose UI Style"));
 }
 
-PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, std::optional<String> initialQuery, Callback callback)
+PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, std::optional<String> initialQuery, bool listHalleyAssets, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, project(project)
 {
 	auto assetNames = project.getAssetSrcList(false, Path("."), true);
+	if (listHalleyAssets) {
+		auto assetNames1 = project.getAssetSrcList(false, Path("../halley/assets_src"), true);
+		auto assetNames2 = project.getAssetSrcList(false, Path("../halley/shared_assets"), true);
+		assetNames.reserve(assetNames.size() + assetNames1.size() + assetNames2.size());
+		for (auto& p: assetNames1) {
+			assetNames.push_back(std::move(p));
+		}
+		for (auto& p: assetNames2) {
+			assetNames.push_back(std::move(p));
+		}
+	}
 	std::sort(assetNames.begin(), assetNames.end());
 	
 	setAssetIds(std::move(assetNames), "");
