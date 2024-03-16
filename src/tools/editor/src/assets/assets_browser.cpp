@@ -6,6 +6,7 @@
 #include "new_asset_window.h"
 #include "prefab_editor.h"
 #include "halley/tools/file/filesystem.h"
+#include "src/preferences.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
 
@@ -19,6 +20,7 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, assetFileHandler(std::make_unique<AssetFileHandler>())
 	, curSrcPath(".")
 {
+	resetRootPath();
 	makeUI();
 	listAssetSources();
 
@@ -160,10 +162,22 @@ void AssetsBrowser::makeUI()
 
 void AssetsBrowser::listAssetSources()
 {
-	assetNames = project.getAssetSrcList(true, curSrcPath, false);
-	if (curSrcPath != Path(".")) {
-		assetNames.push_back((project.getAssetsSrcPath() / curSrcPath / "..").toString());
+	if (curSrcPath == Path("..")) {
+		assetNames.clear();
+		assetNames.push_back("assets_src");
+		assetNames.push_back("halley/shared_assets");
+		assetNames.push_back("halley/assets_src");
+	} else {
+		assetNames = project.getAssetSrcList(true, curSrcPath, false);
+		if (curSrcPath == Path(".")) {
+			if (projectWindow.getPreferences().getCanEditHalleyAssets()) {
+				assetNames.push_back("..");
+			}
+		} else {
+			assetNames.push_back((rootPath / curSrcPath / "..").toString());
+		}
 	}
+
 	std::sort(assetNames.begin(), assetNames.end());
 	
 	setListContents();
@@ -203,13 +217,23 @@ void AssetsBrowser::setListContents()
 	std::set<String> dirs;
 	Vector<String> files;
 
-	for (auto& a: assetNames) {
-		auto relPath = Path("./" + a).makeRelativeTo(curSrcPath);
-		if (relPath.getNumberPaths() == 1) {
-			files.emplace_back(a);
-		} else {
-			auto start = relPath.getFront(1);
-			dirs.insert(start.toString());
+	if (curSrcPath == "..") {
+		for (auto& a: assetNames) {
+			dirs.insert(a);
+		}
+	} else {
+		for (auto& a: assetNames) {
+			if (a == "..") {
+				dirs.insert(a);
+				continue;
+			}
+			auto relPath = Path("./" + a).makeRelativeTo(curSrcPath);
+			if (relPath.getNumberPaths() == 1) {
+				files.emplace_back(a);
+			} else {
+				auto start = relPath.getFront(1);
+				dirs.insert(start.toString());
+			}
 		}
 	}
 
@@ -278,7 +302,10 @@ void AssetsBrowser::setSelectedAsset(const String& name)
 void AssetsBrowser::loadAsset(const String& name)
 {
 	if (name.endsWith("/.")) {
-		curSrcPath = name;
+		curSrcPath = (rootPath / name).makeRelativeTo(rootPath);
+		if (curSrcPath == "../halley/.") {
+			curSrcPath = Path("..");
+		}
 		refreshList();
 	} else {
 		assetTabs->load(name);
@@ -398,7 +425,7 @@ void AssetsBrowser::addAsset()
 	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New " + typeName), "", extension, [=](std::optional<String> newName)
 	{
 		if (newName) {
-			addAsset(newName.value() + extension, handler->makeDefaultFile());
+			addAsset(curSrcPath / (newName.value() + extension), handler->makeDefaultFile());
 		}
 	}));
 }
@@ -410,7 +437,7 @@ void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 		return;
 	}
 
-	const auto srcFile = Path::readFile(project.getAssetsSrcPath() / srcId);
+	const auto srcFile = Path::readFile(rootPath / srcId);
 	if (srcFile.empty()) {
 		return;
 	}
@@ -418,14 +445,13 @@ void AssetsBrowser::duplicateAsset(const String& srcId, const String& dstId)
 	const auto configRoot = YAMLConvert::parseConfig(srcFile);
 	const auto& configNode = configRoot.getRoot();
 
-	addAsset(dstId, handler->duplicateAsset(configNode), true);
+	addAsset(dstId, handler->duplicateAsset(configNode));
 }
 
-void AssetsBrowser::addAsset(Path path, std::string_view data, bool isFullPath)
+void AssetsBrowser::addAsset(Path path, std::string_view data)
 {
-	const auto fullPath = isFullPath ? path : curSrcPath / path;
-	pendingOpen = fullPath;
-	project.writeAssetToDisk(fullPath, data);
+	pendingOpen = path;
+	project.writeAssetToDisk(path, data);
 
 	refreshList();
 }
@@ -438,26 +464,26 @@ void AssetsBrowser::removeAsset()
 void AssetsBrowser::removeAsset(const String& assetId)
 {
 	assetTabs->closeTab(assetId);
-	FileSystem::remove(project.getAssetsSrcPath() / assetId);
+	FileSystem::remove(rootPath / assetId);
 	refreshList();
 }
 
 void AssetsBrowser::renameAsset(const String& oldName, const String& newName)
 {
 	assetTabs->closeTab(oldName);
-	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
+	FileSystem::rename(rootPath / oldName, rootPath / newName);
 	refreshList();
 }
 
 void AssetsBrowser::removeFolder(const String& assetId)
 {
-	FileSystem::remove(project.getAssetsSrcPath() / assetId);
+	FileSystem::remove(rootPath / assetId);
 	refreshList();
 }
 
 void AssetsBrowser::renameFolder(const String& oldName, const String& newName)
 {
-	FileSystem::rename(project.getAssetsSrcPath() / oldName, project.getAssetsSrcPath() / newName);
+	FileSystem::rename(rootPath / oldName, rootPath / newName);
 	refreshList();
 }
 
@@ -465,7 +491,7 @@ void AssetsBrowser::addFolder()
 {
 	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Folder"), "", "", [=](std::optional<String> newName)
 	{
-		addFolder(project.getAssetsSrcPath() / curSrcPath / *newName / ".");
+		addFolder(rootPath / curSrcPath / *newName / ".");
 	}));
 }
 
@@ -501,4 +527,9 @@ const IAssetFileHandler* AssetsBrowser::getHandlerForCurType() const
 {
 	const auto assetType = curSrcPath.getFront(1).string();
 	return assetFileHandler->tryGetHandlerFor(assetType);
+}
+
+void AssetsBrowser::resetRootPath()
+{
+	rootPath = project.getAssetsSrcPath();
 }

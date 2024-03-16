@@ -43,6 +43,8 @@ namespace Halley
 
 		void applyProjectLoaderPreferences(ProjectLoader& projectLoader);
 
+		bool getCanEditHalleyAssets() const;
+
 	private:
 		mutable bool dirty = false;
 

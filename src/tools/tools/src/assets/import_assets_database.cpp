@@ -535,6 +535,11 @@ Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 
 Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(const Path& inputFile)
 {
+	const auto& pathParts = inputFile.getParts();
+	if (pathParts.size() >= 3 && pathParts[0] == ".." && pathParts[1] == "halley") {
+		return getAssetsFromFile(inputFile.dropFront(3)); // e.g. ../halley/assets_src
+	}
+
 	std::lock_guard<std::mutex> lock(mutex);
 	Vector<std::pair<AssetType, String>> result;
 

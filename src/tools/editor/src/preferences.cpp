@@ -196,3 +196,9 @@ void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)
 {
 	projectLoader.setImporterOption("lz4hc", ConfigNode(lz4hc));
 }
+
+bool Preferences::getCanEditHalleyAssets() const
+{
+	// TODO
+	return false;
+}
