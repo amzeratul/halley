@@ -157,3 +157,8 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f 
 {
 	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, scriptNodeTypes, std::move(callback));
 }
+
+std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& node)
+{
+	return std::make_unique<ScriptGraphNode>(node);
+}

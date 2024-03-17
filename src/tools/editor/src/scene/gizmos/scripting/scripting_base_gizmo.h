@@ -34,6 +34,7 @@ namespace Halley {
 
 		void onNodeAdded(GraphNodeId id) override;
 		std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback) override;
+		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;

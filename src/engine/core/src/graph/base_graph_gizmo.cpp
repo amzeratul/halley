@@ -551,8 +551,11 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 	if (!isValidPaste(node)) {
 		return;
 	}
-	/*
-	Vector<ScriptGraphNode> nodes = node.asVector<ScriptGraphNode>();
+
+	Vector<std::unique_ptr<BaseGraphNode>> nodes;
+	for (const auto& n: node.asSequence()) {
+		nodes.push_back(makeNode(n));
+	}
 	if (nodes.empty()) {
 		return;
 	}
@@ -560,7 +563,7 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 	// Find centre position
 	Vector2f avgPos;
 	for (auto& n: nodes) {
-		avgPos += n.getPosition();
+		avgPos += n->getPosition();
 	}
 	avgPos /= static_cast<float>(nodes.size());
 	Vector2f offset;
@@ -571,7 +574,7 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 	// Reassign ids and paste
 	Vector<GraphNodeId> sel;
 	Vector<Vector2f> startPos;
-	const auto startNewIdx = static_cast<GraphNodeId>(scriptGraph->getNodes().size());
+	const auto startNewIdx = static_cast<GraphNodeId>(baseGraph->getNumNodes());
 	auto newIdx = startNewIdx;
 	HashMap<GraphNodeId, GraphNodeId> remap;
 	for (size_t i = 0; i < nodes.size(); ++i) {
@@ -579,7 +582,7 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 		remap[static_cast<GraphNodeId>(i)] = newIdx++;
 	}
 	for (size_t i = 0; i < nodes.size(); ++i) {
-		auto& node = scriptGraph->getNodes().emplace_back(nodes[i]);
+		auto& node = baseGraph->addNode(*nodes[i]);
 		node.remapNodes(remap);
 
 		const auto pos = node.getPosition() + offset;
@@ -592,8 +595,7 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 	dragging = Dragging{ std::move(sel), std::move(startPos), lastMousePos, true };
 
 	onModified();
-	scriptGraph->finishGraph();
-	*/
+	baseGraph->finishGraph();
 }
 
 void BaseGraphGizmo::pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard)

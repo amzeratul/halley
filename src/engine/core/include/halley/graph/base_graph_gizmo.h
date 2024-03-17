@@ -143,5 +143,6 @@ namespace Halley {
 		void drawWheelGuides(Painter& painter) const;
 
 		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
+		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
 	};
 }

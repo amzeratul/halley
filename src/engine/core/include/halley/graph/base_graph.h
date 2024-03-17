@@ -103,6 +103,7 @@ namespace Halley {
 	public:
 		virtual ~BaseGraph() = default;
 
+		virtual BaseGraphNode& addNode(const BaseGraphNode& node) = 0;
 		virtual GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) = 0;
 
 		bool connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN);
@@ -149,6 +150,11 @@ namespace Halley {
 		const BaseGraphNode& getNode(size_t i) const final override
 		{
 			return nodes.at(i);
+		}
+
+		BaseGraphNode& addNode(const BaseGraphNode& node) override
+		{
+			return nodes.emplace_back(dynamic_cast<const NodeType&>(node));
 		}
 
 		void eraseNode(size_t i) final override
