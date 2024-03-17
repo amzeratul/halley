@@ -147,3 +147,16 @@ std::optional<BaseGraphGizmo::Connection> BaseGraphGizmo::findAutoConnectionForP
 
 	return bestPath;
 }
+
+void BaseGraphGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
+{
+	if (modifier == SelectionSetModifier::None) {
+		Vector<GraphNodeId> nodeIds = selectedNodes.getSelected();
+		Vector<Vector2f> startPos;
+		startPos.reserve(nodeIds.size());
+		for (const auto& node: nodeIds) {
+			startPos.push_back(baseGraph->getNode(node).getPosition());
+		}
+		dragging = Dragging { nodeIds, startPos, mousePos, false };
+	}
+}

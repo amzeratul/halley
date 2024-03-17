@@ -1,6 +1,5 @@
 #pragma once
-#include "halley/data_structures/selection_set.h"
-#include "halley/editor_extensions/scene_editor_gizmo.h"
+#include "halley/graph/base_graph_gizmo.h"
 
 namespace Halley {
 	class ScriptingBaseGizmo : public BaseGraphGizmo {
@@ -57,15 +56,12 @@ namespace Halley {
 		ScriptState* scriptState = nullptr;
 
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeUnderMouse;
-		SelectionSet<GraphNodeId> selectedNodes;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
 		bool lastCtrlHeld = false;
 		bool lastShiftHeld = false;
 		bool autoConnectPin = false;
-
-		std::optional<Dragging> dragging;
 
 		Vector<String> entityTargets;
 
@@ -78,7 +74,6 @@ namespace Halley {
 
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
-		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool leftClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);

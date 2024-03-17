@@ -87,20 +87,6 @@ void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 	entityTargets = std::move(targets);
 }
 
-void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
-{
-	if (modifier == SelectionSetModifier::None) {
-		const auto& nodes = scriptGraph->getNodes();
-		Vector<GraphNodeId> nodeIds = selectedNodes.getSelected();
-		Vector<Vector2f> startPos;
-		startPos.reserve(nodeIds.size());
-		for (auto& node: nodeIds) {
-			startPos.push_back(nodes[node].getPosition());
-		}
-		dragging = Dragging { nodeIds, startPos, mousePos, false };
-	}
-}
-
 void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 {
 	Expects(dragging->nodeIds.size() == dragging->startPos.size());

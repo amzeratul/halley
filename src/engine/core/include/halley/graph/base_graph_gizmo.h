@@ -2,6 +2,7 @@
 #include "base_graph_enums.h"
 #include "halley/graphics/text/text_renderer.h"
 #include "halley/maths/vector2.h"
+#include "halley/data_structures/selection_set.h"
 
 namespace Halley {
 	class BaseGraphRenderer;
@@ -72,9 +73,14 @@ namespace Halley {
 
 		Vector<Connection> pendingAutoConnections;
 
+		std::optional<Dragging> dragging;
+		SelectionSet<GraphNodeId> selectedNodes;
+
 		void updateNodeAutoConnection(gsl::span<const GraphNodeId> nodes);
 		void pruneConflictingAutoConnections();
 		bool finishAutoConnection();
 		std::optional<Connection> findAutoConnectionForPin(GraphNodeId srcNodeId, GraphPinId srcPinIdx, Vector2f nodePos, GraphNodePinType srcPinType, gsl::span<const GraphNodeId> excludeIds) const;
+
+		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 	};
 }
