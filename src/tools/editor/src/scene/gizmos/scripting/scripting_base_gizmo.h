@@ -9,7 +9,6 @@ namespace Halley {
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 
-		void addNode() override;
 		ScriptGraphNode& getNode(GraphNodeId id);
 		const ScriptGraphNode& getNode(GraphNodeId id) const;
 
@@ -26,9 +25,6 @@ namespace Halley {
 		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);
 		void setState(ScriptState* state);
-		void setAutoConnectPins(bool autoConnect);
-
-		ExecutionQueue& getExecutionQueue();
 
 		std::shared_ptr<UIWidget> makeUI();
 
@@ -46,6 +42,7 @@ namespace Halley {
 		void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType) override;
 
 		void onNodeAdded(GraphNodeId id) override;
+		std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback) override;
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -55,15 +52,10 @@ namespace Halley {
 		ScriptState* scriptState = nullptr;
 
 		Vector<String> entityTargets;
-		ExecutionQueue pendingUITasks;
 
 		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
 
-		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
-		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
-
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const override;
 		void assignNodeTypes(bool force = false) const;
-
-		void drawWheelGuides(Painter& painter) const;
 	};
 }

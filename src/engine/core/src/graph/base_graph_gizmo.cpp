@@ -1,8 +1,11 @@
 #include "halley/graph/base_graph_gizmo.h"
 
+#include "halley/concurrency/concurrent.h"
 #include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/graph/base_graph.h"
 #include "halley/graph/base_graph_renderer.h"
+#include "halley/graphics/painter.h"
+#include "halley/maths/polygon.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
 
@@ -14,11 +17,6 @@ bool BaseGraphGizmo::Connection::operator<(const Connection& other) const
 bool BaseGraphGizmo::Connection::conflictsWith(const Connection& other) const
 {
 	return (srcNode == other.srcNode && srcPin == other.srcPin) || (dstNode == other.dstNode && dstPin == other.dstPin);
-}
-
-void BaseGraphGizmo::setBasePosition(Vector2f pos)
-{
-	basePos = pos;
 }
 
 BaseGraphGizmo::BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, float baseZoom)
@@ -35,8 +33,14 @@ BaseGraphGizmo::BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& e
 		.setOutline(1);
 }
 
+BaseGraphGizmo::~BaseGraphGizmo()
+{
+}
+
 void BaseGraphGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
+	Executor(pendingUITasks).runPending();
+
 	// This must be set before onNodeDragging/onEditingConnection below
 	const bool startedIdle = !dragging && !nodeEditingConnection;
 
@@ -96,7 +100,43 @@ void BaseGraphGizmo::update(Time time, const SceneEditorInputState& inputState)
 
 void BaseGraphGizmo::draw(Painter& painter) const
 {
-	
+	if (!renderer) {
+		return;
+	}
+
+	drawWheelGuides(painter);
+	Vector<BaseGraphRenderer::ConnectionPath> paths;
+	if (nodeEditingConnection && nodeConnectionDst) {
+		const auto srcType = nodeEditingConnection->element;
+		GraphNodePinType dstType = srcType.getReverseDirection();
+		const auto pos = renderer->getPinPosition(basePos, baseGraph->getNode(nodeEditingConnection->nodeId), nodeEditingConnection->elementId, getZoom());
+		paths.push_back(BaseGraphRenderer::ConnectionPath{ pos, nodeConnectionDst.value(), srcType, dstType, false });
+	}
+
+	for (auto& conn: pendingAutoConnections) {
+		paths.push_back(BaseGraphRenderer::ConnectionPath{ conn.srcPos, conn.dstPos, conn.srcType, conn.dstType, true });
+	}
+
+	renderer->setHighlight(nodeUnderMouse);
+	renderer->setSelection(selectedNodes.getSelected());
+	renderer->setCurrentPaths(paths);
+	renderer->draw(painter, basePos, getZoom());
+
+	if (!dragging) {
+		if (nodeUnderMouse) {
+			drawToolTip(painter, baseGraph->getNode(nodeUnderMouse->nodeId), nodeUnderMouse.value());
+		}
+	}
+}
+
+void BaseGraphGizmo::setBasePosition(Vector2f pos)
+{
+	basePos = pos;
+}
+
+void BaseGraphGizmo::setAutoConnectPins(bool autoConnect)
+{
+	autoConnectPin = autoConnect;
 }
 
 void BaseGraphGizmo::setUIRoot(UIRoot& root)
@@ -386,9 +426,30 @@ SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInput
 	}
 }
 
+std::shared_ptr<UIWidget> BaseGraphGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
+{
+	return {};
+}
+
 void BaseGraphGizmo::addNode()
 {
-	
+	if (uiRoot->hasModalUI()) {
+		return;
+	}
+
+	const auto windowSize = uiRoot->getRect().getSize() - Vector2f(900, 350);
+	auto chooseAssetWindow = makeChooseNodeTypeWindow(windowSize, factory, *resources, [=] (std::optional<String> result)
+	{
+		if (result) {
+			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()
+			{
+				openNodeUI({}, {}, type);
+			});
+		}
+	});
+	if (chooseAssetWindow) {
+		uiRoot->addChild(std::move(chooseAssetWindow));
+	}
 }
 
 GraphNodeId BaseGraphGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
@@ -460,4 +521,61 @@ void BaseGraphGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional
 
 void BaseGraphGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType)
 {
+}
+
+void BaseGraphGizmo::drawWheelGuides(Painter& painter) const
+{
+	const auto viewPort = Rect4f(painter.getViewPort());
+
+	if (lastMousePos) {
+		if (lastCtrlHeld) {
+			painter.drawLine(Vector<Vector2f>{ Vector2f(lastMousePos->x, viewPort.getTop()), Vector2f(lastMousePos->x, viewPort.getBottom()) }, 1, Colour4f(1, 1, 1, 1));
+		} else if (lastShiftHeld) {
+			painter.drawLine(Vector<Vector2f>{ Vector2f(viewPort.getLeft(), lastMousePos->y), Vector2f(viewPort.getRight(), lastMousePos->y) }, 1, Colour4f(1, 1, 1, 1));
+		}
+	}
+}
+
+std::pair<String, Vector<ColourOverride>> BaseGraphGizmo::getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
+{
+	return {};
+}
+
+void BaseGraphGizmo::drawToolTip(Painter& painter, const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
+{
+	auto [text, colours] = getNodeDescription(node, nodeInfo);
+	if (!text.isEmpty()) {
+		const auto elemPos = nodeInfo.element.type == GraphElementType(BaseGraphNodeElementType::Node) ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
+		drawToolTip(painter, text, colours, elemPos);
+	}
+}
+
+void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f elemPos) const
+{
+	const float align = 0.5f;
+	const float curZoom = getZoom();
+	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
+	
+	tooltipLabel
+		.setColourOverride(colours)
+		.setPosition(pos)
+		.setAlignment(align)
+		.setSize(16 / curZoom)
+		.setOutline(4.0f / curZoom);
+
+	tooltipLabel
+		.setText(tooltipLabel.split(text, 250.0f / curZoom));
+
+	const auto extents = tooltipLabel.getExtents();
+	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-align, 0), pos + extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
+	const auto poly = Polygon({ tooltipArea.getTopLeft(), tooltipArea.getTopRight(), tooltipArea.getBottomRight(), tooltipArea.getBottomLeft() });
+	painter.drawPolygon(poly, Colour4f(0, 0, 0, 0.6f));
+
+	tooltipLabel
+		.draw(painter);
+}
+
+ExecutionQueue& BaseGraphGizmo::getExecutionQueue()
+{
+	return pendingUITasks;
 }

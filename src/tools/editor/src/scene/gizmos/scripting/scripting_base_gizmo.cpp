@@ -16,10 +16,9 @@ ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFa
 
 void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
-	Executor(pendingUITasks).runPending();
-	
 	if (!renderer) {
 		renderer = std::make_shared<ScriptRenderer>(*resources, world, *scriptNodeTypes, baseZoom);
+		dynamic_cast<ScriptRenderer&>(*renderer).setState(scriptState);
 	}
 	renderer->setGraph(scriptGraph);
 
@@ -28,45 +27,34 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 	BaseGraphGizmo::update(time, inputState);
 }
 
+void ScriptingBaseGizmo::draw(Painter& painter) const
+{
+	assignNodeTypes();
+
+	BaseGraphGizmo::draw(painter);
+}
+
 void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 {
 	entityTargets = std::move(targets);
 }
 
-
-void ScriptingBaseGizmo::draw(Painter& painter) const
+std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
-	drawWheelGuides(painter);
-
-	if (!renderer) {
-		return;
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return {};
+	}
+	
+	auto [text, colours] = nodeType->getDescription(dynamic_cast<const ScriptGraphNode&>(node), world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	if (devConData && devConData->first == nodeUnderMouse && !devConData->second.isEmpty()) {
+		colours.emplace_back(text.size(), std::nullopt);
+		text += "\n\nValue: ";
+		colours.emplace_back(text.size(), Colour4f(0.44f, 1.0f, 0.94f));
+		text += devConData->second;
 	}
 
-	assignNodeTypes();
-
-	Vector<BaseGraphRenderer::ConnectionPath> paths;
-	if (nodeEditingConnection && nodeConnectionDst) {
-		const auto srcType = nodeEditingConnection->element;
-		GraphNodePinType dstType = srcType.getReverseDirection();
-		const auto pos = renderer->getPinPosition(basePos, getNode(nodeEditingConnection->nodeId), nodeEditingConnection->elementId, getZoom());
-		paths.push_back(BaseGraphRenderer::ConnectionPath{ pos, nodeConnectionDst.value(), srcType, dstType, false });
-	}
-
-	for (auto& conn: pendingAutoConnections) {
-		paths.push_back(BaseGraphRenderer::ConnectionPath{ conn.srcPos, conn.dstPos, conn.srcType, conn.dstType, true });
-	}
-
-	renderer->setHighlight(nodeUnderMouse);
-	renderer->setSelection(selectedNodes.getSelected());
-	renderer->setCurrentPaths(paths);
-	static_cast<ScriptRenderer&>(*renderer).setState(scriptState);
-	renderer->draw(painter, basePos, getZoom());
-
-	if (!dragging) {
-		if (nodeUnderMouse) {
-			drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse.value());
-		}
-	}
+	return std::pair<String, Vector<ColourOverride>>{ std::move(text), std::move(colours) };
 }
 
 void ScriptingBaseGizmo::assignNodeTypes(bool force) const
@@ -97,11 +85,9 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 void ScriptingBaseGizmo::setState(ScriptState* state)
 {
 	scriptState = state;
-}
-
-void ScriptingBaseGizmo::setAutoConnectPins(bool autoConnect)
-{
-	autoConnectPin = autoConnect;
+	if (renderer) {
+		dynamic_cast<ScriptRenderer&>(*renderer).setState(scriptState);
+	}
 }
 
 ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id)
@@ -239,77 +225,9 @@ bool ScriptingBaseGizmo::deleteSelection()
 	return changed;
 }
 
-ExecutionQueue& ScriptingBaseGizmo::getExecutionQueue()
-{
-	return pendingUITasks;
-}
-
-void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
-{
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
-	if (!nodeType) {
-		return;
-	}
-	
-	auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
-	if (devConData && devConData->first == nodeUnderMouse && !devConData->second.isEmpty()) {
-		colours.emplace_back(text.size(), std::nullopt);
-		text += "\n\nValue: ";
-		colours.emplace_back(text.size(), Colour4f(0.44f, 1.0f, 0.94f));
-		text += devConData->second;
-	}
-	const auto elemPos = nodeInfo.element.type == GraphElementType(ScriptNodeElementType::Node) ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
-	drawToolTip(painter, text, colours, elemPos);
-}
-
-void ScriptingBaseGizmo::drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f elemPos) const
-{
-	const float align = 0.5f;
-	const float curZoom = getZoom();
-	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
-	
-	tooltipLabel
-		.setColourOverride(colours)
-		.setPosition(pos)
-		.setAlignment(align)
-		.setSize(16 / curZoom)
-		.setOutline(4.0f / curZoom);
-
-	tooltipLabel
-		.setText(tooltipLabel.split(text, 250.0f / curZoom));
-
-	const auto extents = tooltipLabel.getExtents();
-	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-align, 0), pos + extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
-	const auto poly = Polygon({ tooltipArea.getTopLeft(), tooltipArea.getTopRight(), tooltipArea.getBottomRight(), tooltipArea.getBottomLeft() });
-	painter.drawPolygon(poly, Colour4f(0, 0, 0, 0.6f));
-
-	tooltipLabel
-		.draw(painter);
-}
-
 std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 {
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
-}
-
-void ScriptingBaseGizmo::addNode()
-{
-	if (uiRoot->hasModalUI()) {
-		return;
-	}
-
-	const auto windowSize = uiRoot->getRect().getSize() - Vector2f(900, 350);
-
-	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(windowSize, factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
-	{
-		if (result) {
-			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()
-			{
-				openNodeUI({}, {}, type);
-			});
-		}
-	});
-	uiRoot->addChild(std::move(chooseAssetWindow));
 }
 
 void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
@@ -360,15 +278,7 @@ void ScriptingBaseGizmo::onNodeAdded(GraphNodeId id)
 	assignNodeTypes();
 }
 
-void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const
+std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
 {
-	const auto viewPort = Rect4f(painter.getViewPort());
-
-	if (lastMousePos) {
-		if (lastCtrlHeld) {
-			painter.drawLine(Vector<Vector2f>{ Vector2f(lastMousePos->x, viewPort.getTop()), Vector2f(lastMousePos->x, viewPort.getBottom()) }, 1, Colour4f(1, 1, 1, 1));
-		} else if (lastShiftHeld) {
-			painter.drawLine(Vector<Vector2f>{ Vector2f(viewPort.getLeft(), lastMousePos->y), Vector2f(viewPort.getRight(), lastMousePos->y) }, 1, Colour4f(1, 1, 1, 1));
-		}
-	}
+	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, scriptNodeTypes, std::move(callback));
 }

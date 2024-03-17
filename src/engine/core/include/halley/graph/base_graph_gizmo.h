@@ -4,6 +4,7 @@
 #include "halley/graphics/text/text_renderer.h"
 #include "halley/maths/vector2.h"
 #include "halley/data_structures/selection_set.h"
+#include "halley/editor_extensions/choose_asset_window.h"
 #include "halley/input/input_keys.h"
 
 namespace Halley {
@@ -21,6 +22,7 @@ namespace Halley {
 		using ModifiedCallback = std::function<void()>;
 
 		BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, float baseZoom = 1.0f);
+		virtual ~BaseGraphGizmo();
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
@@ -31,6 +33,7 @@ namespace Halley {
 		void setZoom(float zoom);
 		float getZoom() const;
 		void setBasePosition(Vector2f pos);
+		void setAutoConnectPins(bool autoConnect);
 
 		void onModified();
 		void setModifiedCallback(ModifiedCallback callback);
@@ -40,10 +43,12 @@ namespace Halley {
 		bool isHighlighted() const;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 
-		virtual void addNode();
+		void addNode();
 		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
 		bool destroyNode(GraphNodeId id);
 		bool destroyNodes(Vector<GraphNodeId> ids);
+
+		ExecutionQueue& getExecutionQueue();
 
 	protected:
 		struct Dragging {
@@ -101,6 +106,8 @@ namespace Halley {
 		bool lastShiftHeld = false;
 		bool autoConnectPin = false;
 
+		ExecutionQueue pendingUITasks;
+
 		void updateNodeAutoConnection(gsl::span<const GraphNodeId> nodes);
 		void pruneConflictingAutoConnections();
 		bool finishAutoConnection();
@@ -119,5 +126,12 @@ namespace Halley {
 
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
+
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
+		void drawToolTip(Painter& painter, const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
+		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
+		void drawWheelGuides(Painter& painter) const;
+
+		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
 	};
 }
