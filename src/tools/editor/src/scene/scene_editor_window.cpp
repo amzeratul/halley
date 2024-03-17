@@ -186,33 +186,19 @@ void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 	root.registerKeyPressListener(shared_from_this());
 }
 
-std::shared_ptr<Prefab> SceneEditorWindow::loadSceneFromFile(Path assetPath, AssetType assetType, const String& name)
+void SceneEditorWindow::setScene(std::shared_ptr<Prefab> prefab, Path assetPath)
 {
 	unloadScene();
-	this->assetPath = assetPath;
-
-	auto prefab = assetType == AssetType::Prefab ? std::make_unique<Prefab>() : std::make_unique<Scene>();
-	
-	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
-	if (!assetData.empty()) {
-		prefab->parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
-	} else {
-		prefab->makeDefault();
-		markModified();
-	}
-	prefab->setAssetId(name);
-	loadScene(*prefab);
-	prefab = {};
-
-	return this->prefab;
+	this->prefab = std::move(prefab);
+	this->assetPath = std::move(assetPath);
+	loadScene();
 }
 
-void SceneEditorWindow::loadScene(const Prefab& origPrefab)
+void SceneEditorWindow::loadScene()
 {
 	if (sceneData) {
 		unloadScene();
 	}
-	prefab = origPrefab.clone();
 
 	gameBridge->setPrefab(prefab);
 	gameBridge->initializeInterfaceIfNeeded(true);
@@ -306,19 +292,8 @@ void SceneEditorWindow::unloadScene()
 
 void SceneEditorWindow::reloadScene()
 {
-	/*
-	currentEntityScene->destroyEntities(gameBridge->getWorld());
-	currentEntityScene.reset();
-
-	currentEntityScene = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
-	gameBridge->getInterface().spawnPending();
-
-	gameBridge->reloadScene();
-	*/
-
-	const auto p = prefab;
 	unloadScene();
-	loadScene(*p);
+	loadScene();
 }
 
 bool SceneEditorWindow::isScene() const
@@ -614,7 +589,7 @@ void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {
 		if (prefab) {
-			loadScene(*prefab);
+			reloadScene();
 		}
 	} else {
 		unloadScene();

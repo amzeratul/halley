@@ -93,18 +93,22 @@ void PrefabEditor::onTabbedIn()
 
 std::shared_ptr<const Resource> PrefabEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
-	std::shared_ptr<Prefab> prefab;
 	if (!window) {
 		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow, *this, assetType);
 		add(window, 1);
 	}
-	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {
-		prefab = window->loadSceneFromFile(assetPath, assetType, assetId);
-		if (!prefab) {
-			window->destroy();
-			window = {};
-		}
+
+	const auto prefab = assetType == AssetType::Prefab ? std::make_shared<Prefab>() : std::make_shared<Scene>();
+	
+	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+	if (!assetData.empty()) {
+		prefab->parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
+	} else {
+		prefab->makeDefault();
 	}
+	prefab->setAssetId(assetId);
+
+	window->setScene(prefab, assetPath);
 
 	return prefab;
 }

@@ -40,8 +40,10 @@ void AssetEditor::onResourceLoaded()
 
 void AssetEditor::refreshAssets()
 {
-	// If this is set to true, it causes scenes to re-load when anything is modified
-	//needsLoading = true;
+	// If this is set to true every time, it causes scenes to re-load when anything is modified
+	if (!resource) {
+		needsLoading = true;
+	}
 	tryLoading();
 }
 

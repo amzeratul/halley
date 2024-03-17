@@ -27,8 +27,8 @@ namespace Halley {
 
 		void onAddedToRoot(UIRoot& root) override;
 		
-		std::shared_ptr<Prefab> loadSceneFromFile(Path assetPath, AssetType assetType, const String& name);
-		void loadScene(const Prefab& prefab);
+		void setScene(std::shared_ptr<Prefab> prefab, Path assetPath);
+		void loadScene();
 		void unloadScene();
 		void reloadScene();
 
