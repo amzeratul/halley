@@ -267,3 +267,95 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 		nodeEditingConnection.reset();
 	}
 }
+
+bool BaseGraphGizmo::isHighlighted() const
+{
+	return !!nodeUnderMouse || nodeEditingConnection;
+}
+
+void BaseGraphGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods)
+{
+	int axis;
+	if (keyMods == KeyMods::Ctrl) {
+		axis = 0;
+	} else if (keyMods == KeyMods::Shift) {
+		axis = 1;
+	} else {
+		return;
+	}
+
+	const float delta = static_cast<float>(amount) * -16.0f;
+	const float midPos = (mousePos - basePos)[axis];
+	const float mid0 = midPos - 32;
+	const float mid1 = midPos + 32;
+
+	const auto n = baseGraph->getNumNodes();
+	for (size_t i = 0; i < n; ++i) {
+		auto& node = baseGraph->getNode(i);
+		auto pos = node.getPosition();
+		if (std::abs(pos[axis] - midPos) > 32) {
+			pos[axis] = advance(pos[axis], pos[axis] < midPos ? mid0 : mid1, delta);
+			node.setPosition(pos);
+		}
+	}
+}
+
+std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphGizmo::getNodeUnderMouse() const
+{
+	return nodeUnderMouse;
+}
+
+SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInputState& inputState) const
+{
+	if (inputState.ctrlHeld) {
+		return SelectionSetModifier::Toggle;
+	} else if (inputState.shiftHeld) {
+		return SelectionSetModifier::Add;
+	} else if (inputState.altHeld) {
+		return SelectionSetModifier::Remove;
+	} else {
+		return SelectionSetModifier::None;
+	}
+}
+
+bool BaseGraphGizmo::destroyNode(GraphNodeId id)
+{
+	return destroyNodes({ id });
+}
+
+bool BaseGraphGizmo::destroyNodes(Vector<GraphNodeId> ids)
+{
+	std::sort(ids.begin(), ids.end(), std::greater<GraphNodeId>());
+
+	bool modified = false;
+
+	for (auto& id: ids) {
+		if (nodeUnderMouse && nodeUnderMouse->nodeId == id) {
+			nodeUnderMouse.reset();
+		}
+
+		if (!canDeleteNode(baseGraph->getNode(id))) {
+			continue;
+		}
+		
+		const size_t numNodes = baseGraph->getNumNodes();
+		for (size_t i = 0; i < numNodes; ++i) {
+			baseGraph->getNode(i).onNodeRemoved(id);
+		}
+
+		baseGraph->eraseNode(id);
+		modified = true;
+	}
+
+	if (modified) {
+		onModified();
+		baseGraph->finishGraph();
+	}
+
+	return modified;
+}
+
+bool BaseGraphGizmo::canDeleteNode(const BaseGraphNode& node) const
+{
+	return true;
+}

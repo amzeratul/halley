@@ -130,62 +130,6 @@ void ScriptingBaseGizmo::assignNodeTypes(bool force) const
 	}
 }
 
-SelectionSetModifier ScriptingBaseGizmo::getSelectionModifier(const SceneEditorInputState& inputState) const
-{
-	if (inputState.ctrlHeld) {
-		return SelectionSetModifier::Toggle;
-	} else if (inputState.shiftHeld) {
-		return SelectionSetModifier::Add;
-	} else if (inputState.altHeld) {
-		return SelectionSetModifier::Remove;
-	} else {
-		return SelectionSetModifier::None;
-	}
-}
-
-bool ScriptingBaseGizmo::isHighlighted() const
-{
-	return !!nodeUnderMouse || nodeEditingConnection;
-}
-
-bool ScriptingBaseGizmo::destroyNode(GraphNodeId id)
-{
-	return destroyNodes({ id });
-}
-
-bool ScriptingBaseGizmo::destroyNodes(Vector<GraphNodeId> ids)
-{
-	std::sort(ids.begin(), ids.end(), std::greater<GraphNodeId>());
-
-	bool modified = false;
-
-	auto& nodes = scriptGraph->getNodes();
-	for (auto& id: ids) {
-		if (nodeUnderMouse && nodeUnderMouse->nodeId == id) {
-			nodeUnderMouse.reset();
-		}
-
-		const auto* nodeType = scriptNodeTypes->tryGetNodeType(nodes[id].getType());
-		if (nodeType && !nodeType->canDelete()) {
-			continue;
-		}
-		
-		for (auto& n: nodes) {
-			n.onNodeRemoved(id);
-		}
-		
-		nodes.erase(nodes.begin() + id);
-		modified = true;
-	}
-
-	if (modified) {
-		onModified();
-		scriptGraph->finishGraph();
-	}
-
-	return modified;
-}
-
 ScriptGraph& ScriptingBaseGizmo::getGraph()
 {
 	return *scriptGraph;
@@ -444,36 +388,6 @@ GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, Config
 	return id;
 }
 
-void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods)
-{
-	int axis;
-	if (keyMods == KeyMods::Ctrl) {
-		axis = 0;
-	} else if (keyMods == KeyMods::Shift) {
-		axis = 1;
-	} else {
-		return;
-	}
-
-	const float delta = static_cast<float>(amount) * -16.0f;
-	const float midPos = (mousePos - basePos)[axis];
-	const float mid0 = midPos - 32;
-	const float mid1 = midPos + 32;
-
-	for (auto& node: scriptGraph->getNodes()) {
-		auto pos = node.getPosition();
-		if (std::abs(pos[axis] - midPos) > 32) {
-			pos[axis] = advance(pos[axis], pos[axis] < midPos ? mid0 : mid1, delta);
-			node.setPosition(pos);
-		}
-	}
-}
-
-std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptingBaseGizmo::getNodeUnderMouse() const
-{
-	return nodeUnderMouse;
-}
-
 void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 {
 	if (nodeUnderMouse) {
@@ -496,6 +410,12 @@ void ScriptingBaseGizmo::updateNodes(bool force)
 			node.getNodeType().updateSettings(node, *scriptGraph, *resources);
 		}
 	}
+}
+
+bool ScriptingBaseGizmo::canDeleteNode(const BaseGraphNode& node) const
+{
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	return !nodeType || nodeType->canDelete();
 }
 
 void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const

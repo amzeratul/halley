@@ -4,6 +4,7 @@
 #include "halley/graphics/text/text_renderer.h"
 #include "halley/maths/vector2.h"
 #include "halley/data_structures/selection_set.h"
+#include "halley/input/input_keys.h"
 
 namespace Halley {
 	struct SceneEditorInputState;
@@ -30,6 +31,14 @@ namespace Halley {
 
 		void onModified();
 		void setModifiedCallback(ModifiedCallback callback);
+
+		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
+
+		bool isHighlighted() const;
+		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+
+		bool destroyNode(GraphNodeId id);
+		bool destroyNodes(Vector<GraphNodeId> ids);
 
 	protected:
 		struct Dragging {
@@ -96,5 +105,9 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool leftClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
+
+		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
+
+		virtual bool canDeleteNode(const BaseGraphNode& node) const;
 	};
 }

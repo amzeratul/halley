@@ -8,8 +8,6 @@ namespace Halley {
 
 		void addNode();
 		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
-		bool destroyNode(GraphNodeId id);
-		bool destroyNodes(Vector<GraphNodeId> ids);
 		ScriptGraphNode& getNode(GraphNodeId id);
 		const ScriptGraphNode& getNode(GraphNodeId id) const;
 
@@ -33,19 +31,17 @@ namespace Halley {
 		void update(Time time, const SceneEditorInputState& inputState);
 		void draw(Painter& painter) const;
 
-		bool isHighlighted() const;
-
 		std::shared_ptr<UIWidget> makeUI();
 
 		void setEntityTargets(Vector<String> entityTargets);
 
-		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
-
-		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 		void setDebugDisplayData(HashMap<int, String> values);
 
 		void updateNodes(bool force = false);
+
+	protected:
+		bool canDeleteNode(const BaseGraphNode& node) const override;
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -65,7 +61,6 @@ namespace Halley {
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
 		void assignNodeTypes(bool force = false) const;
-		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
 
 		void drawWheelGuides(Painter& painter) const;
 	};

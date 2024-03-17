@@ -113,6 +113,9 @@ namespace Halley {
 		virtual BaseGraphNode& getNode(size_t i) = 0;
 		virtual const BaseGraphNode& getNode(size_t i) const = 0;
 		virtual size_t getNumNodes() const = 0;
+		virtual void eraseNode(size_t i) = 0;
+
+		virtual void finishGraph() {}
 
 	protected:
 		virtual bool isMultiConnection(GraphNodePinType pinType) const
@@ -145,6 +148,11 @@ namespace Halley {
 		const BaseGraphNode& getNode(size_t i) const final override
 		{
 			return nodes.at(i);
+		}
+
+		void eraseNode(size_t i) final override
+		{
+			nodes.erase(nodes.begin() + i);
 		}
 
 		size_t getNumNodes() const override

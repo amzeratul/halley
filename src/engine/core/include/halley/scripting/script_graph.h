@@ -118,7 +118,7 @@ namespace Halley {
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force = false) const;
 		void clearTypes();
-		void finishGraph();
+		void finishGraph() override;
 		void updateHash();
 		uint64_t getHash() const;
 		uint64_t getAssetHash() const;
