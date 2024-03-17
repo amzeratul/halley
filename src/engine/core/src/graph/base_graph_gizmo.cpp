@@ -35,6 +35,70 @@ BaseGraphGizmo::BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& e
 		.setOutline(1);
 }
 
+void BaseGraphGizmo::update(Time time, const SceneEditorInputState& inputState)
+{
+	// This must be set before onNodeDragging/onEditingConnection below
+	const bool startedIdle = !dragging && !nodeEditingConnection;
+
+	if (dragging) {
+		onNodeDragging(inputState);
+	} else if (nodeEditingConnection) {
+		onEditingConnection(inputState);
+	}
+
+	if (!dragging) {
+		if (inputState.mousePos) {
+			nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), *inputState.mousePos, !!nodeEditingConnection);
+		} else {
+			nodeUnderMouse.reset();
+		}
+		if (inputState.selectionBox) {
+			selectedNodes.updateOrStartDrag(renderer->getNodesInRect(basePos, getZoom(), *inputState.selectionBox), getSelectionModifier(inputState));
+		} else {
+			selectedNodes.endDrag();
+		}
+	}
+
+	if (startedIdle && inputState.leftClickPressed && inputState.mousePos) {
+		const auto modifier = getSelectionModifier(inputState);
+		if (nodeUnderMouse && nodeUnderMouse->element.type == GraphElementType(BaseGraphNodeElementType::Node)) {
+			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
+		} else {
+			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
+		}
+	}
+	if (inputState.leftClickReleased && inputState.mousePos) {
+		selectedNodes.mouseButtonReleased(*inputState.mousePos);
+	}
+
+	if (startedIdle && inputState.mousePos) {
+		if (nodeUnderMouse) {
+			if (nodeUnderMouse->element.type == GraphElementType(BaseGraphNodeElementType::Node)) {
+				if (inputState.leftClickPressed) {
+					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
+				} else if (inputState.rightClickReleased) {
+					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), baseGraph->getNode(nodeUnderMouse->nodeId).getType());
+				}
+			} else {
+				if (inputState.leftClickPressed) {
+					onPinClicked(true, inputState.shiftHeld);
+				} else if (inputState.rightClickPressed) {
+					onPinClicked(false, inputState.shiftHeld);
+				}
+			}
+		}
+	}
+	
+	lastMousePos = inputState.mousePos;
+	lastCtrlHeld = inputState.ctrlHeld;
+	lastShiftHeld = inputState.shiftHeld;
+}
+
+void BaseGraphGizmo::draw(Painter& painter) const
+{
+	
+}
+
 void BaseGraphGizmo::setUIRoot(UIRoot& root)
 {
 	uiRoot = &root;
@@ -268,6 +332,10 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	}
 }
 
+void BaseGraphGizmo::onNodeAdded(GraphNodeId id)
+{
+}
+
 bool BaseGraphGizmo::isHighlighted() const
 {
 	return !!nodeUnderMouse || nodeEditingConnection;
@@ -318,6 +386,22 @@ SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInput
 	}
 }
 
+void BaseGraphGizmo::addNode()
+{
+	
+}
+
+GraphNodeId BaseGraphGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
+{
+	const auto id = baseGraph->addNode(type, pos, std::move(settings));
+	onNodeAdded(id);
+
+	selectedNodes.directSelect(id, SelectionSetModifier::None);
+	dragging = Dragging{ { id }, { baseGraph->getNode(id).getPosition() }, {}, true };
+
+	return id;
+}
+
 bool BaseGraphGizmo::destroyNode(GraphNodeId id)
 {
 	return destroyNodes({ id });
@@ -358,4 +442,22 @@ bool BaseGraphGizmo::destroyNodes(Vector<GraphNodeId> ids)
 bool BaseGraphGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
 	return true;
+}
+
+bool BaseGraphGizmo::nodeTypeNeedsSettings(const String& nodeType) const
+{
+	return false;
+}
+
+void BaseGraphGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType)
+{
+	if (nodeId || nodeTypeNeedsSettings(nodeType)) {
+		openNodeSettings(nodeId, pos, nodeType);
+	} else {
+		addNode(nodeType, pos.value_or(Vector2f()), ConfigNode::MapType());
+	}
+}
+
+void BaseGraphGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType)
+{
 }

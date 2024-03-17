@@ -25,61 +25,7 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 
 	assignNodeTypes();
 
-	// This must be set before onNodeDragging/onEditingConnection below
-	const bool startedIdle = !dragging && !nodeEditingConnection;
-
-	if (dragging) {
-		onNodeDragging(inputState);
-	} else if (nodeEditingConnection) {
-		onEditingConnection(inputState);
-	}
-
-	if (!dragging) {
-		if (inputState.mousePos) {
-			nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), *inputState.mousePos, !!nodeEditingConnection);
-		} else {
-			nodeUnderMouse.reset();
-		}
-		if (inputState.selectionBox) {
-			selectedNodes.updateOrStartDrag(renderer->getNodesInRect(basePos, getZoom(), *inputState.selectionBox), getSelectionModifier(inputState));
-		} else {
-			selectedNodes.endDrag();
-		}
-	}
-
-	if (startedIdle && inputState.leftClickPressed && inputState.mousePos) {
-		const auto modifier = getSelectionModifier(inputState);
-		if (nodeUnderMouse && nodeUnderMouse->element.type == GraphElementType(ScriptNodeElementType::Node)) {
-			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
-		} else {
-			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
-		}
-	}
-	if (inputState.leftClickReleased && inputState.mousePos) {
-		selectedNodes.mouseButtonReleased(*inputState.mousePos);
-	}
-
-	if (startedIdle && inputState.mousePos) {
-		if (nodeUnderMouse) {
-			if (nodeUnderMouse->element.type == GraphElementType(ScriptNodeElementType::Node)) {
-				if (inputState.leftClickPressed) {
-					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
-				} else if (inputState.rightClickReleased) {
-					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), getNode(nodeUnderMouse->nodeId).getType());
-				}
-			} else {
-				if (inputState.leftClickPressed) {
-					onPinClicked(true, inputState.shiftHeld);
-				} else if (inputState.rightClickPressed) {
-					onPinClicked(false, inputState.shiftHeld);
-				}
-			}
-		}
-	}
-	
-	lastMousePos = inputState.mousePos;
-	lastCtrlHeld = inputState.ctrlHeld;
-	lastShiftHeld = inputState.shiftHeld;
+	BaseGraphGizmo::update(time, inputState);
 }
 
 void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
@@ -346,16 +292,6 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingBaseGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
-{
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
-	if (nodeType && (nodeId || !nodeType->getSettingTypes().empty())) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
-	} else if (!nodeId) {
-		addNode(type, pos.value_or(Vector2f()), ConfigNode::MapType());
-	}
-}
-
 void ScriptingBaseGizmo::addNode()
 {
 	if (uiRoot->hasModalUI()) {
@@ -374,18 +310,6 @@ void ScriptingBaseGizmo::addNode()
 		}
 	});
 	uiRoot->addChild(std::move(chooseAssetWindow));
-}
-
-GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
-{
-	const auto id = scriptGraph->addNode(type, pos, std::move(settings));
-	assignNodeTypes();
-	//onModified(); // Placing after dragging will modify
-
-	selectedNodes.directSelect(id, SelectionSetModifier::None);
-	dragging = Dragging{ { id }, { scriptGraph->getNodes()[id].getPosition() }, {}, true };
-
-	return id;
 }
 
 void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
@@ -416,6 +340,24 @@ bool ScriptingBaseGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	return !nodeType || nodeType->canDelete();
+}
+
+bool ScriptingBaseGizmo::nodeTypeNeedsSettings(const String& type) const
+{
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
+	return nodeType && !nodeType->getSettingTypes().empty();
+}
+
+void ScriptingBaseGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
+{
+	if (const auto* nodeType = scriptNodeTypes->tryGetNodeType(type)) {
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
+	}
+}
+
+void ScriptingBaseGizmo::onNodeAdded(GraphNodeId id)
+{
+	assignNodeTypes();
 }
 
 void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const

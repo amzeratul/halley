@@ -6,8 +6,10 @@ namespace Halley {
 	public:
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
 
-		void addNode();
-		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
+		void update(Time time, const SceneEditorInputState& inputState) override;
+		void draw(Painter& painter) const override;
+
+		void addNode() override;
 		ScriptGraphNode& getNode(GraphNodeId id);
 		const ScriptGraphNode& getNode(GraphNodeId id) const;
 
@@ -28,9 +30,6 @@ namespace Halley {
 
 		ExecutionQueue& getExecutionQueue();
 
-		void update(Time time, const SceneEditorInputState& inputState);
-		void draw(Painter& painter) const;
-
 		std::shared_ptr<UIWidget> makeUI();
 
 		void setEntityTargets(Vector<String> entityTargets);
@@ -42,6 +41,11 @@ namespace Halley {
 
 	protected:
 		bool canDeleteNode(const BaseGraphNode& node) const override;
+		bool nodeTypeNeedsSettings(const String& nodeType) const override;
+
+		void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType) override;
+
+		void onNodeAdded(GraphNodeId id) override;
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -57,8 +61,6 @@ namespace Halley {
 
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
-
-		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
 		void assignNodeTypes(bool force = false) const;
 

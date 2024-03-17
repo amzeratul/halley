@@ -103,7 +103,7 @@ void ScriptingNodeEditor::applyChanges()
 	
 	Concurrent::execute(gizmo->getExecutionQueue(), [type, gizmo, nodeId = this->nodeId, curSettings = ConfigNode(curSettings)] () mutable {
 		if (!nodeId) {
-			nodeId = gizmo->addNode(type, Vector2f(), std::move(curSettings));
+			nodeId = static_cast<BaseGraphGizmo*>(gizmo)->addNode(type, Vector2f(), std::move(curSettings));
 		} else {
 			gizmo->getNode(*nodeId).getSettings() = std::move(curSettings);
 		}

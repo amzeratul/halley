@@ -7,6 +7,11 @@ namespace Halley {
 	using GraphPinId = uint8_t;
 	using GraphElementType = uint8_t;
 
+	enum class BaseGraphNodeElementType : uint8_t {
+		Undefined,
+		Node
+	};
+
 	enum class GraphNodePinDirection : uint8_t {
 		Input,
 		Output

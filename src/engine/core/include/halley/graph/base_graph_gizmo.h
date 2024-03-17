@@ -22,6 +22,9 @@ namespace Halley {
 
 		BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, float baseZoom = 1.0f);
 
+		virtual void update(Time time, const SceneEditorInputState& inputState);
+		virtual void draw(Painter& painter) const;
+
 		void setUIRoot(UIRoot& root);
 		void setEventSink(UIWidget& eventSink);
 
@@ -37,6 +40,8 @@ namespace Halley {
 		bool isHighlighted() const;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 
+		virtual void addNode();
+		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
 		bool destroyNode(GraphNodeId id);
 		bool destroyNodes(Vector<GraphNodeId> ids);
 
@@ -105,9 +110,14 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool leftClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
+		virtual void onNodeAdded(GraphNodeId id);
 
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
 
 		virtual bool canDeleteNode(const BaseGraphNode& node) const;
+		virtual bool nodeTypeNeedsSettings(const String& nodeType) const;
+
+		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
+		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 	};
 }
