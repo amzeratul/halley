@@ -4,6 +4,7 @@
 #include <halley/maths/rect.h>
 
 #include "halley/ui/widgets/ui_list.h"
+#include "halley/entity/entity_data.h"
 
 namespace Halley {
    	struct SceneEditorInputState {

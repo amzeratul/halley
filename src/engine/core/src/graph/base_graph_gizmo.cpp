@@ -1,5 +1,6 @@
 #include "halley/graph/base_graph_gizmo.h"
 
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/graph/base_graph.h"
 #include "halley/graph/base_graph_renderer.h"
 #include "halley/ui/ui_factory.h"
@@ -158,5 +159,111 @@ void BaseGraphGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modif
 			startPos.push_back(baseGraph->getNode(node).getPosition());
 		}
 		dragging = Dragging { nodeIds, startPos, mousePos, false };
+	}
+}
+
+void BaseGraphGizmo::onNodeDragging(const SceneEditorInputState& inputState)
+{
+	Expects(dragging->nodeIds.size() == dragging->startPos.size());
+	if (inputState.mousePos) {
+		if (dragging->startMousePos) {
+			const Vector2f delta = inputState.mousePos.value() - *dragging->startMousePos;
+			if (delta.length() > 1.0f) {
+				for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+					auto& node = baseGraph->getNode(dragging->nodeIds[i]);
+					const auto newPos = dragging->startPos[i] + delta;
+					node.setPosition(Vector2f(std::floor(newPos.x / gridSize) * gridSize, std::floor(newPos.y / gridSize) * gridSize));
+					dragging->hadChange = true;
+				}
+			}
+		} else {
+			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+				auto& node = baseGraph->getNode(dragging->nodeIds[i]);
+				const auto newPos = *inputState.mousePos - basePos;
+				node.setPosition(Vector2f(std::floor(newPos.x / gridSize) * gridSize, std::floor(newPos.y / gridSize) * gridSize));
+				dragging->hadChange = true;
+			}
+		}
+	}
+
+	if (autoConnectPin) {
+		updateNodeAutoConnection(dragging->nodeIds);
+	}
+
+	if ((dragging->sticky && inputState.leftClickPressed) || (!dragging->sticky && !inputState.leftClickHeld)) {
+		const bool hadChange = dragging->hadChange;
+		dragging.reset();
+		const bool newConnection = finishAutoConnection();
+		if (hadChange || newConnection) {
+			onModified();
+		}
+	}
+}
+
+void BaseGraphGizmo::onPinClicked(bool leftClick, bool shiftHeld)
+{
+	Expects(nodeUnderMouse);
+
+	const auto nodeId = nodeUnderMouse->nodeId;
+	const auto pinId = nodeUnderMouse->elementId;
+	const auto connections = baseGraph->getPinConnections(nodeId, pinId);
+	bool changed = false;
+	nodeConnectionDst = {};
+	
+	if (leftClick) {
+		if (shiftHeld) {
+			changed = baseGraph->disconnectPinIfSingleConnection(nodeId, pinId);
+		} else {
+			changed = baseGraph->disconnectPin(nodeId, pinId);
+		}
+
+		// If this causes a disconnection and there was exactly one connection before, set anchor THERE, rather than here
+		// (so it's like I'm picking up this end of the wire)
+		if (changed && connections.size() == 1) {
+			const auto other = connections[0];
+			nodeEditingConnection = renderer->getPinInfo(basePos, getZoom(), other.first, other.second);
+		} else {
+			nodeEditingConnection = nodeUnderMouse;
+		}
+	} else {
+		changed = baseGraph->disconnectPin(nodeId, pinId);
+	}
+
+	if (changed) {
+		onModified();
+	}
+}
+
+void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState)
+{
+	nodeConnectionDst = inputState.mousePos;
+
+	const auto srcType = nodeEditingConnection->element;
+	const auto srcNodeId = nodeEditingConnection->nodeId;
+	const auto srcPinId = nodeEditingConnection->elementId;
+
+	if (nodeUnderMouse) {
+		const auto dstNodeId = nodeUnderMouse->nodeId;
+		const auto dstType = nodeUnderMouse->element;
+
+		if (!srcType.canConnectTo(dstType) || srcNodeId == dstNodeId) {
+			nodeUnderMouse.reset();
+		}
+	}
+
+	if (inputState.leftClickPressed) {
+		if (nodeUnderMouse) {
+			const auto dstNodeId = nodeUnderMouse->nodeId;
+			const auto dstPinId = nodeUnderMouse->elementId;
+			
+			if (baseGraph->connectPins(srcNodeId, srcPinId, dstNodeId, dstPinId)) {
+				onModified();
+			}
+		}
+		
+		nodeEditingConnection.reset();
+	}
+	if (inputState.rightClickPressed) {
+		nodeEditingConnection.reset();
 	}
 }

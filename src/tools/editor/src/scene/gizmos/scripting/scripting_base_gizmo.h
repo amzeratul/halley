@@ -50,21 +50,11 @@ namespace Halley {
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		const World* world = nullptr;
-		static constexpr float gridSize = 16.0f;
 
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;
 
-		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeUnderMouse;
-		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeEditingConnection;
-		std::optional<Vector2f> nodeConnectionDst;
-		std::optional<Vector2f> lastMousePos;
-		bool lastCtrlHeld = false;
-		bool lastShiftHeld = false;
-		bool autoConnectPin = false;
-
 		Vector<String> entityTargets;
-
 		ExecutionQueue pendingUITasks;
 
 		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
@@ -73,10 +63,6 @@ namespace Halley {
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
-
-		void onNodeDragging(const SceneEditorInputState& inputState);
-		void onPinClicked(bool leftClick, bool shiftHeld);
-		void onEditingConnection(const SceneEditorInputState& inputState);
 
 		void assignNodeTypes(bool force = false) const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
