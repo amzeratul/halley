@@ -12,23 +12,25 @@ AnimationEditor::AnimationEditor(UIFactory& factory, Resources& gameResources, A
 	: AssetEditor(factory, gameResources, project, type)
 	, metadataEditor(metadataEditor)
 {
-	setupWindow();
-}
-
-void AnimationEditor::refresh()
-{
-	animationDisplay->refresh();
 }
 
 void AnimationEditor::onResourceLoaded()
 {
+	setupWindow();
 	loadAssetData();
 }
 
 void AnimationEditor::refreshAssets()
 {
 	AssetEditor::refreshAssets();
-	loadAssetData();
+	if (resource) {
+		loadAssetData();
+	}
+}
+
+bool AnimationEditor::isReadyToLoad() const
+{
+	return project.areAssetsLoaded();
 }
 
 void AnimationEditor::onAddedToRoot(UIRoot& root)
@@ -43,6 +45,10 @@ void AnimationEditor::onRemovedFromRoot(UIRoot& root)
 
 bool AnimationEditor::onKeyPress(KeyboardKeyPress key)
 {
+	if (!animationDisplay) {
+		return false;
+	}
+
 	if (key.is(KeyCode::Space)) {
 		togglePlay();
 		return true;
@@ -64,6 +70,10 @@ bool AnimationEditor::onKeyPress(KeyboardKeyPress key)
 void AnimationEditor::update(Time t, bool moved)
 {
 	AssetEditor::update(t, moved);
+
+	if (!animationDisplay) {
+		return;
+	}
 
 	const auto mousePos = Vector2i(animationDisplay->getMousePos());
 	const auto size = animationDisplay->getBounds().getSize();

@@ -12,9 +12,9 @@ namespace Halley {
 
         void onMakeUI() override;
 
-        void refresh();
         void onResourceLoaded() override;
         void refreshAssets() override;
+        bool isReadyToLoad() const override;
         
     protected:
         std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;

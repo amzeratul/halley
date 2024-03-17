@@ -7,7 +7,6 @@ using namespace Halley;
 FontEditor::FontEditor(UIFactory& factory, Resources& gameResources, AssetType type, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, type)
 {
-	factory.loadUI(*this, "halley/font_editor");
 }
 
 void FontEditor::onMakeUI()
@@ -18,12 +17,9 @@ void FontEditor::onMakeUI()
 	});
 }
 
-void FontEditor::refresh()
-{
-}
-
 void FontEditor::onResourceLoaded()
 {
+	factory.loadUI(*this, "halley/font_editor");
 	updateFont();
 }
 
@@ -31,6 +27,11 @@ void FontEditor::refreshAssets()
 {
 	AssetEditor::refreshAssets();
 	updateFont();
+}
+
+bool FontEditor::isReadyToLoad() const
+{
+	return project.areAssetsLoaded();
 }
 
 std::shared_ptr<const Resource> FontEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
