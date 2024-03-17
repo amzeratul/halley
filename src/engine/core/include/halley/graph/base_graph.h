@@ -86,6 +86,7 @@ namespace Halley {
 
 		virtual GraphNodePinType getPinType(GraphPinId idx) const = 0;
 		virtual gsl::span<const GraphNodePinType> getPinConfiguration() const = 0;
+		virtual std::unique_ptr<BaseGraphNode> clone() const = 0;
 
 		virtual void feedToHash(Hash::Hasher& hasher) const;
 

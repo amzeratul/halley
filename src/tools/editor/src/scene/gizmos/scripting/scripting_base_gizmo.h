@@ -12,15 +12,6 @@ namespace Halley {
 		ScriptGraphNode& getNode(GraphNodeId id);
 		const ScriptGraphNode& getNode(GraphNodeId id) const;
 
-		[[nodiscard]] ConfigNode copySelection() const;
-		[[nodiscard]] ConfigNode cutSelection();
-		void paste(const ConfigNode& node);
-		bool isValidPaste(const ConfigNode& node) const;
-		bool deleteSelection();
-		void copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const;
-		void cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard);
-		void pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard);
-
 		ScriptGraph& getGraph();
 		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);

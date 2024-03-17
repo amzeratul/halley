@@ -48,6 +48,16 @@ namespace Halley {
 		bool destroyNode(GraphNodeId id);
 		bool destroyNodes(Vector<GraphNodeId> ids);
 
+		bool isValidPaste(const ConfigNode& node) const;
+		bool deleteSelection();
+
+		[[nodiscard]] ConfigNode copySelection() const;
+		[[nodiscard]] ConfigNode cutSelection();
+		void paste(const ConfigNode& node);
+		void copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const;
+		void cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard);
+		void pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard);
+
 		ExecutionQueue& getExecutionQueue();
 
 	protected:

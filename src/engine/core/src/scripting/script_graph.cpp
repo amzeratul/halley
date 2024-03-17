@@ -126,6 +126,11 @@ void ScriptGraphNode::offsetNodes(GraphNodeId offset)
 	}
 }
 
+std::unique_ptr<BaseGraphNode> ScriptGraphNode::clone() const
+{
+	return std::make_unique<ScriptGraphNode>(*this);
+}
+
 void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
 {
 	nodeType = nodeTypeCollection.tryGetNodeType(type);

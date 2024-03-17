@@ -1,7 +1,9 @@
 #include "halley/graph/base_graph_gizmo.h"
 
+#include "halley/api/clipboard.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/editor_extensions/scene_editor_input_state.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/graph/base_graph.h"
 #include "halley/graph/base_graph_renderer.h"
 #include "halley/graphics/painter.h"
@@ -498,6 +500,132 @@ bool BaseGraphGizmo::destroyNodes(Vector<GraphNodeId> ids)
 	}
 
 	return modified;
+}
+
+bool BaseGraphGizmo::isValidPaste(const ConfigNode& node) const
+{
+	if (node.getType() != ConfigNodeType::Sequence) {
+		return false;
+	}
+	for (const auto& n: node.asSequence()) {
+		if (n.getType() != ConfigNodeType::Map) {
+			return false;
+		}
+		if (!n.hasKey("position") || !n.hasKey("pins") || !n.hasKey("type")) {
+			return false;
+		}
+	}
+	return true;
+}
+
+ConfigNode BaseGraphGizmo::copySelection() const
+{
+	HashMap<GraphNodeId, GraphNodeId> remap;
+	GraphNodeId newIdx = 0;
+	for (const auto id: selectedNodes.getSelected()) {
+		remap[id] = newIdx++;
+	}
+
+	ConfigNode::SequenceType result;
+	for (const auto id: selectedNodes.getSelected()) {
+		const auto node = baseGraph->getNode(id).clone();
+		node->remapNodes(remap);
+		result.emplace_back(node->toConfigNode());
+	}
+
+	return result;
+}
+
+void BaseGraphGizmo::copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const
+{
+	const auto sel = copySelection();
+
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = { "type", "settings", "position", "pins" };
+	options.compactMaps = true;
+	clipboard->setData(YAMLConvert::generateYAML(sel, options));
+}
+
+void BaseGraphGizmo::paste(const ConfigNode& node)
+{
+	if (!isValidPaste(node)) {
+		return;
+	}
+	/*
+	Vector<ScriptGraphNode> nodes = node.asVector<ScriptGraphNode>();
+	if (nodes.empty()) {
+		return;
+	}
+
+	// Find centre position
+	Vector2f avgPos;
+	for (auto& n: nodes) {
+		avgPos += n.getPosition();
+	}
+	avgPos /= static_cast<float>(nodes.size());
+	Vector2f offset;
+	if (lastMousePos) {
+		offset = lastMousePos.value() - basePos - avgPos;
+	}
+
+	// Reassign ids and paste
+	Vector<GraphNodeId> sel;
+	Vector<Vector2f> startPos;
+	const auto startNewIdx = static_cast<GraphNodeId>(scriptGraph->getNodes().size());
+	auto newIdx = startNewIdx;
+	HashMap<GraphNodeId, GraphNodeId> remap;
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		sel.push_back(newIdx);
+		remap[static_cast<GraphNodeId>(i)] = newIdx++;
+	}
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		auto& node = scriptGraph->getNodes().emplace_back(nodes[i]);
+		node.remapNodes(remap);
+
+		const auto pos = node.getPosition() + offset;
+		node.setPosition(pos);
+		startPos.push_back(pos);
+	}
+
+	// Update selection
+	selectedNodes.setSelection(sel);
+	dragging = Dragging{ std::move(sel), std::move(startPos), lastMousePos, true };
+
+	onModified();
+	scriptGraph->finishGraph();
+	*/
+}
+
+void BaseGraphGizmo::pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard)
+{
+	auto strData = clipboard->getStringData();
+	if (strData) {
+		try {
+			const ConfigNode node = YAMLConvert::parseConfig(strData.value());
+			paste(node);
+		} catch (...) {}
+	}
+}
+
+void BaseGraphGizmo::cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard)
+{
+	copySelectionToClipboard(clipboard);
+	deleteSelection();
+}
+
+ConfigNode BaseGraphGizmo::cutSelection()
+{
+	auto result = copySelection();
+	deleteSelection();
+	return result;
+}
+
+bool BaseGraphGizmo::deleteSelection()
+{
+	const bool changed = destroyNodes(selectedNodes.getSelected());
+	selectedNodes.clear();
+	dragging.reset();
+	return changed;
 }
 
 bool BaseGraphGizmo::canDeleteNode(const BaseGraphNode& node) const

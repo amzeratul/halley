@@ -35,6 +35,8 @@ namespace Halley {
 
 		void offsetNodes(GraphNodeId offset) override;
 
+		std::unique_ptr<BaseGraphNode> clone() const override;
+
 	private:
 		mutable const IScriptNodeType* nodeType = nullptr;
 		OptionalLite<GraphNodeId> parentNode;
