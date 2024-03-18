@@ -47,7 +47,7 @@ std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription
 	}
 	
 	auto [text, colours] = nodeType->getDescription(dynamic_cast<const ScriptGraphNode&>(node), world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
-	if (devConData && devConData->first == nodeUnderMouse && !devConData->second.isEmpty()) {
+	if (devConData && devConData->first == getNodeUnderMouse() && !devConData->second.isEmpty()) {
 		colours.emplace_back(text.size(), std::nullopt);
 		text += "\n\nValue: ";
 		colours.emplace_back(text.size(), Colour4f(0.44f, 1.0f, 0.94f));
@@ -78,7 +78,7 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
 	baseGraph = graph;
 	scriptGraph = graph;
-	dragging.reset();
+	resetDrag();
 	updateNodes(true);
 }
 
@@ -107,8 +107,8 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 
 void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 {
-	if (nodeUnderMouse) {
-		devConData = { *nodeUnderMouse, str };
+	if (getNodeUnderMouse()) {
+		devConData = { *getNodeUnderMouse(), str };
 	} else {
 		devConData.reset();
 	}

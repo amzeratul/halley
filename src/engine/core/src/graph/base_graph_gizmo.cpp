@@ -415,6 +415,11 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphGizmo::getNodeUnde
 	return nodeUnderMouse;
 }
 
+void BaseGraphGizmo::resetDrag()
+{
+	dragging.reset();
+}
+
 SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInputState& inputState) const
 {
 	if (inputState.ctrlHeld) {

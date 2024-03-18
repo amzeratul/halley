@@ -42,12 +42,12 @@ namespace Halley {
 
 		bool isHighlighted() const;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+		void resetDrag();
 
 		void addNode();
 		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
 		bool destroyNode(GraphNodeId id);
 		bool destroyNodes(Vector<GraphNodeId> ids);
-
 		bool isValidPaste(const ConfigNode& node) const;
 		bool deleteSelection();
 
@@ -61,6 +61,27 @@ namespace Halley {
 		ExecutionQueue& getExecutionQueue();
 
 	protected:
+		UIFactory& factory;
+		const IEntityEditorFactory& entityEditorFactory;
+		Resources* resources = nullptr;
+
+		std::shared_ptr<BaseGraphRenderer> renderer;
+		BaseGraph* baseGraph = nullptr;
+
+		UIRoot* uiRoot = nullptr;
+		UIWidget* eventSink = nullptr;
+
+		float baseZoom = 1.0f;
+
+		virtual void onNodeAdded(GraphNodeId id);
+		virtual bool canDeleteNode(const BaseGraphNode& node) const;
+		virtual bool nodeTypeNeedsSettings(const String& nodeType) const;
+		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
+		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
+		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
+
+	private:
 		struct Dragging {
 			Vector<GraphNodeId> nodeIds;
 			Vector<Vector2f> startPos;
@@ -84,38 +105,24 @@ namespace Halley {
 			bool conflictsWith(const Connection& connection) const;
 		};
 
-		UIFactory& factory;
-		const IEntityEditorFactory& entityEditorFactory;
-		Resources* resources = nullptr;
-
-		std::shared_ptr<BaseGraphRenderer> renderer;
-		BaseGraph* baseGraph = nullptr;
-
-		UIRoot* uiRoot = nullptr;
-		UIWidget* eventSink = nullptr;
-
-		Vector2f basePos;
-		float zoom = 1.0f;
-		float baseZoom = 1.0f;
-
-		mutable TextRenderer tooltipLabel;
-
-		ModifiedCallback modifiedCallback;
-
 		Vector<Connection> pendingAutoConnections;
-
 		std::optional<Dragging> dragging;
-		SelectionSet<GraphNodeId> selectedNodes;
 
 		static constexpr float gridSize = 16.0f;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
+		SelectionSet<GraphNodeId> selectedNodes;
 		bool lastCtrlHeld = false;
 		bool lastShiftHeld = false;
 		bool autoConnectPin = false;
 
+		Vector2f basePos;
+		float zoom = 1.0f;
+		mutable TextRenderer tooltipLabel;
+
+		ModifiedCallback modifiedCallback;
 		ExecutionQueue pendingUITasks;
 
 		void updateNodeAutoConnection(gsl::span<const GraphNodeId> nodes);
@@ -127,22 +134,12 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool leftClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
-		virtual void onNodeAdded(GraphNodeId id);
-
-		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
-
-		virtual bool canDeleteNode(const BaseGraphNode& node) const;
-		virtual bool nodeTypeNeedsSettings(const String& nodeType) const;
-
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
-		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawToolTip(Painter& painter, const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawWheelGuides(Painter& painter) const;
 
-		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
-		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
+		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
 	};
 }
