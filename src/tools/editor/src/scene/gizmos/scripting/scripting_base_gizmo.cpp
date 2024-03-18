@@ -14,26 +14,6 @@ ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFa
 {
 }
 
-void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputState)
-{
-	if (!renderer) {
-		renderer = std::make_shared<ScriptRenderer>(*resources, world, *scriptNodeTypes, baseZoom);
-		dynamic_cast<ScriptRenderer&>(*renderer).setState(scriptState);
-	}
-	renderer->setGraph(scriptGraph);
-
-	assignNodeTypes();
-
-	BaseGraphGizmo::update(time, inputState);
-}
-
-void ScriptingBaseGizmo::draw(Painter& painter) const
-{
-	assignNodeTypes();
-
-	BaseGraphGizmo::draw(painter);
-}
-
 void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 {
 	entityTargets = std::move(targets);
@@ -69,16 +49,10 @@ ScriptGraph& ScriptingBaseGizmo::getGraph()
 	return *scriptGraph;
 }
 
-ScriptGraph* ScriptingBaseGizmo::getGraphPtr()
-{
-	return scriptGraph;
-}
-
 void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
-	baseGraph = graph;
+	setBaseGraph(graph);
 	scriptGraph = graph;
-	resetDrag();
 	updateNodes(true);
 }
 
@@ -91,11 +65,6 @@ void ScriptingBaseGizmo::setState(ScriptState* state)
 }
 
 ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id)
-{
-	return scriptGraph->getNodes().at(id);
-}
-
-const ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id) const
 {
 	return scriptGraph->getNodes().at(id);
 }
@@ -121,7 +90,7 @@ void ScriptingBaseGizmo::setDebugDisplayData(HashMap<int, String> values)
 
 void ScriptingBaseGizmo::updateNodes(bool force)
 {
-	if (scriptGraph && resources) {
+	if (scriptGraph) {
 		assignNodeTypes(force);
 		for (auto& node: scriptGraph->getNodes()) {
 			node.getNodeType().updateSettings(node, *scriptGraph, *resources);
@@ -148,7 +117,7 @@ void ScriptingBaseGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std
 	}
 }
 
-void ScriptingBaseGizmo::onNodeAdded(GraphNodeId id)
+void ScriptingBaseGizmo::refreshNodes() const
 {
 	assignNodeTypes();
 }
@@ -161,4 +130,11 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f 
 std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& node)
 {
 	return std::make_unique<ScriptGraphNode>(node);
+}
+
+std::shared_ptr<BaseGraphRenderer> ScriptingBaseGizmo::makeRenderer(Resources& resources, float baseZoom)
+{
+	auto renderer = std::make_shared<ScriptRenderer>(resources, world, *scriptNodeTypes, baseZoom);
+	renderer->setState(scriptState);
+	return renderer;
 }

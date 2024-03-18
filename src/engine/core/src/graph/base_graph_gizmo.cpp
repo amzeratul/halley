@@ -41,7 +41,15 @@ BaseGraphGizmo::~BaseGraphGizmo()
 
 void BaseGraphGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
+	if (!renderer) {
+		renderer = makeRenderer(*resources, baseZoom);
+		if (baseGraph) {
+			renderer->setGraph(baseGraph);
+		}
+	}
+
 	Executor(pendingUITasks).runPending();
+	refreshNodes();
 
 	// This must be set before onNodeDragging/onEditingConnection below
 	const bool startedIdle = !dragging && !nodeEditingConnection;
@@ -106,6 +114,8 @@ void BaseGraphGizmo::draw(Painter& painter) const
 		return;
 	}
 
+	refreshNodes();
+
 	drawWheelGuides(painter);
 	Vector<BaseGraphRenderer::ConnectionPath> paths;
 	if (nodeEditingConnection && nodeConnectionDst) {
@@ -129,6 +139,15 @@ void BaseGraphGizmo::draw(Painter& painter) const
 			drawToolTip(painter, baseGraph->getNode(nodeUnderMouse->nodeId), nodeUnderMouse.value());
 		}
 	}
+}
+
+void BaseGraphGizmo::setBaseGraph(BaseGraph* graph)
+{
+	baseGraph = graph;
+	if (renderer) {
+		renderer->setGraph(graph);
+	}
+	dragging = {};
 }
 
 void BaseGraphGizmo::setBasePosition(Vector2f pos)
@@ -374,7 +393,7 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	}
 }
 
-void BaseGraphGizmo::onNodeAdded(GraphNodeId id)
+void BaseGraphGizmo::refreshNodes() const
 {
 }
 
@@ -413,11 +432,6 @@ void BaseGraphGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods
 std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphGizmo::getNodeUnderMouse() const
 {
 	return nodeUnderMouse;
-}
-
-void BaseGraphGizmo::resetDrag()
-{
-	dragging.reset();
 }
 
 SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInputState& inputState) const
@@ -462,7 +476,7 @@ void BaseGraphGizmo::addNode()
 GraphNodeId BaseGraphGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
 {
 	const auto id = baseGraph->addNode(type, pos, std::move(settings));
-	onNodeAdded(id);
+	refreshNodes();
 
 	selectedNodes.directSelect(id, SelectionSetModifier::None);
 	dragging = Dragging{ { id }, { baseGraph->getNode(id).getPosition() }, {}, true };

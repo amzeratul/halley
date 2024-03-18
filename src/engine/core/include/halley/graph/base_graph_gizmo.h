@@ -27,6 +27,8 @@ namespace Halley {
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
 
+		void setBaseGraph(BaseGraph* graph);
+
 		void setUIRoot(UIRoot& root);
 		void setEventSink(UIWidget& eventSink);
 
@@ -42,7 +44,6 @@ namespace Halley {
 
 		bool isHighlighted() const;
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
-		void resetDrag();
 
 		void addNode();
 		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
@@ -64,22 +65,19 @@ namespace Halley {
 		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
 		Resources* resources = nullptr;
-
 		std::shared_ptr<BaseGraphRenderer> renderer;
-		BaseGraph* baseGraph = nullptr;
 
 		UIRoot* uiRoot = nullptr;
 		UIWidget* eventSink = nullptr;
 
-		float baseZoom = 1.0f;
-
-		virtual void onNodeAdded(GraphNodeId id);
+		virtual void refreshNodes() const;
 		virtual bool canDeleteNode(const BaseGraphNode& node) const;
 		virtual bool nodeTypeNeedsSettings(const String& nodeType) const;
 		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
 		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
+		virtual std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) = 0;
 
 	private:
 		struct Dragging {
@@ -105,6 +103,8 @@ namespace Halley {
 			bool conflictsWith(const Connection& connection) const;
 		};
 
+		BaseGraph* baseGraph = nullptr;
+
 		Vector<Connection> pendingAutoConnections;
 		std::optional<Dragging> dragging;
 
@@ -120,6 +120,7 @@ namespace Halley {
 
 		Vector2f basePos;
 		float zoom = 1.0f;
+		float baseZoom = 1.0f;
 		mutable TextRenderer tooltipLabel;
 
 		ModifiedCallback modifiedCallback;

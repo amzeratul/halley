@@ -5,15 +5,10 @@ namespace Halley {
 	class ScriptingBaseGizmo : public BaseGraphGizmo {
 	public:
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
-
-		void update(Time time, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
-
+		
 		ScriptGraphNode& getNode(GraphNodeId id);
-		const ScriptGraphNode& getNode(GraphNodeId id) const;
 
 		ScriptGraph& getGraph();
-		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);
 		void setState(ScriptState* state);
 
@@ -29,12 +24,11 @@ namespace Halley {
 	protected:
 		bool canDeleteNode(const BaseGraphNode& node) const override;
 		bool nodeTypeNeedsSettings(const String& nodeType) const override;
-
 		void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType) override;
-
-		void onNodeAdded(GraphNodeId id) override;
+		void refreshNodes() const override;
 		std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback) override;
 		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
+		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
