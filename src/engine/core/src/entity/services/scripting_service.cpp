@@ -13,7 +13,7 @@ Halley::ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> en
 	}
 }
 
-ScriptEnvironment& Halley::ScriptingService::getEnvironment()
+ScriptEnvironment& Halley::ScriptingService::getEnvironment() const
 {
 	return *scriptEnvironment;
 }

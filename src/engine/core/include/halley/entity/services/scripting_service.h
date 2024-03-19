@@ -10,7 +10,7 @@ namespace Halley {
 	public:
 		ScriptingService(std::unique_ptr<ScriptEnvironment> environment, Resources& resources, const String& initialLuaModule = "");
 
-		ScriptEnvironment& getEnvironment();
+		ScriptEnvironment& getEnvironment() const;
 
 		ConfigNode evaluateExpression(const String& expression) const;
 		ConfigNode evaluateExpression(const LuaExpression& expression) const;
