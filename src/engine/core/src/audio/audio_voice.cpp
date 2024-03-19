@@ -67,7 +67,7 @@ void AudioVoice::stop(AudioFade fade)
 	// Check if the fade would be complete before a delayed voice would even start playing
 	const float samplesToFade = (fade.getDelay() + fade.getLength()) * static_cast<float>(AudioConfig::sampleRate);
 
-	if (fade.hasFade() && (samplesToFade > static_cast<float>(delaySamples))) {
+	if (!paused && fade.hasFade() && (samplesToFade > static_cast<float>(delaySamples))) {
 		if (fadeEnd == FadeEndBehaviour::None) {
 			// If we're fading to stop or pause, don't change the fade, just replace its behaviour
 			fader.startFade(fader.getCurrentValue(), 0, fade);
@@ -76,6 +76,7 @@ void AudioVoice::stop(AudioFade fade)
 	} else {
 		playing = false;
 		done = true;
+		paused = 0;
 	}
 }
 
@@ -203,7 +204,8 @@ void AudioVoice::onFadeEnd()
 {
 	switch (fadeEnd) {
 	case FadeEndBehaviour::Pause:
-		pause(AudioFade());
+		paused += pendingPauses;
+		pendingPauses = 0;
 		break;
 	case FadeEndBehaviour::Stop:
 		stop(AudioFade());
