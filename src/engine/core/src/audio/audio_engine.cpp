@@ -375,9 +375,22 @@ void AudioEngine::collectBusChildren(Vector<int>& dst, const BusData& bus) const
 	}
 }
 
+namespace {
+	size_t countBuses(gsl::span<const AudioBusProperties> buses)
+	{
+		size_t n = buses.size();
+		for (const auto& bus: buses) {
+			n += countBuses(bus.getChildren());
+		}
+		return n;
+	}
+}
+
 void AudioEngine::loadBuses()
 {
 	buses.clear();
+	buses.reserve(countBuses(audioProperties->getBuses()));
+
 	for (const auto& bus: audioProperties->getBuses()) {
 		loadBus(bus, OptionalLite<uint8_t>{});
 	}
@@ -386,13 +399,11 @@ void AudioEngine::loadBuses()
 uint8_t AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
 {
 	const auto id = static_cast<uint8_t>(buses.size());
-	buses.emplace_back(BusData{ bus.getId(), 1.0f, 1.0f, parent });
-	buses.back().children.reserve(bus.getChildren().size());
-
-	for (const auto& b: bus.getChildren()) {
-		// DO NOT store buses.back(), pointer invalidation will happen
-		buses.back().children.push_back(loadBus(b, id));
+	buses.push_back(BusData{ bus.getId(), 1.0f, 1.0f, parent });
+	for (const auto& child: bus.getChildren()) {
+		buses[id].children.push_back(loadBus(child, id));
 	}
+
 	return id;
 }
 
