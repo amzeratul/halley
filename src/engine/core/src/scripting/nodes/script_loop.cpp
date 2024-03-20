@@ -133,6 +133,102 @@ bool ScriptWhileLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, con
 
 
 
+ScriptForEachLoopData::ScriptForEachLoopData(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		iterations = node["iterations"].asInt(0);
+		seq = node["seq"].asSequence();
+	}
+}
+
+ConfigNode ScriptForEachLoopData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["iterations"] = iterations;
+	result["seq"] = seq;
+	return result;
+}
+
+String ScriptForEachLoop::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "curLoopElement";
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptForEachLoop::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 5>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptForEachLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Loop for each element in ");
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptForEachLoop::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Flow after loop";
+	} else if (elementIdx == 2) {
+		return "Flow for each element";
+	} else if (elementIdx == 3) {
+		return "List";
+	} else if (elementIdx == 4) {
+		return "Current Element";
+	}
+	return ScriptNodeTypeBase<ScriptForEachLoopData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptForEachLoop::doInitData(ScriptForEachLoopData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
+{
+	data = ScriptForEachLoopData(nodeData);
+}
+
+bool ScriptForEachLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptForEachLoopData& curData) const
+{
+	return outPin == 2;
+}
+
+bool ScriptForEachLoop::canKeepData() const
+{
+	return true;
+}
+
+IScriptNodeType::Result ScriptForEachLoop::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptForEachLoopData& curData) const
+{
+	if (curData.iterations == 0) {
+		auto data = readDataPin(environment, node, 3);
+		if (data.getType() == ConfigNodeType::Sequence) {
+			curData.seq = data.asSequence();
+		} else {
+			curData.seq = {};
+		}
+	}
+
+	const int count = static_cast<int>(curData.seq.size());
+	const bool done = curData.iterations >= count;
+	if (!done) {
+		++curData.iterations;
+	}
+	return Result(ScriptNodeExecutionState::Done, 0, done ? 1 : 2);
+}
+
+ConfigNode ScriptForEachLoop::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptForEachLoopData& curData) const
+{
+	return ConfigNode(curData.seq[curData.iterations - 1]);
+}
+
 
 ScriptLerpLoopData::ScriptLerpLoopData(const ConfigNode& node)
 {

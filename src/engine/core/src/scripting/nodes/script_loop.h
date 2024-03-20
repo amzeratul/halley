@@ -46,6 +46,36 @@ namespace Halley {
 		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin) const override;
 	};
 
+	class ScriptForEachLoopData : public ScriptStateData<ScriptForEachLoopData> {
+	public:
+		int iterations = 0;
+		ConfigNode::SequenceType seq;
+
+		ScriptForEachLoopData() = default;
+		ScriptForEachLoopData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+	
+	class ScriptForEachLoop final : public ScriptNodeTypeBase<ScriptForEachLoopData> {
+	public:
+		String getId() const override { return "forEach"; }
+		String getName() const override { return "For Each Loop"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/loop.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptForEachLoopData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptForEachLoopData& curData) const override;
+		bool canKeepData() const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptForEachLoopData& curData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptForEachLoopData& curData) const override;
+	};
+
 	class ScriptLerpLoopData : public ScriptStateData<ScriptLerpLoopData> {
 	public:
 		enum class State : uint8_t {
