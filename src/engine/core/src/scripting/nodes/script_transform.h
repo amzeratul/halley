@@ -71,6 +71,20 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
 
+	class ScriptSetRotation final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "setRotation"; }
+		String getName() const override { return "Set Rotation"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/rotation.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+
 	class ScriptSetScale final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "setScale"; }

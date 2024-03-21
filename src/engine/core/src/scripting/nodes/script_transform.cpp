@@ -216,6 +216,49 @@ ConfigNode ScriptGetRotation::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Set the rotation of ");
+	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(" to ");
+	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	return result.moveResults();
+}
+
+String ScriptSetRotation::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Target";
+	} else if (elementIdx == 3) {
+		return "Rotation (Degrees)";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+IScriptNodeType::Result ScriptSetRotation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	auto* transform2D = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2));
+	if (transform2D) {
+		transform2D->setGlobalRotation(Angle1f::fromDegrees(readDataPin(environment, node, 3).asFloat(0)));
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
+
 
 gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(const ScriptGraphNode& node) const
 {
