@@ -577,6 +577,8 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 
 void ScriptToggleEntityEnabled::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
 {
-	auto entityRef = environment.getWorld().getEntity(data.entityId);
-	entityRef.setEnabled(data.previousState);
+	auto entityRef = environment.getWorld().tryGetEntity(data.entityId);
+	if (entityRef.isValid()) {
+		entityRef.setEnabled(data.previousState);
+	}
 }

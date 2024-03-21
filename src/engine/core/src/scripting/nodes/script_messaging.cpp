@@ -433,6 +433,12 @@ String ScriptSendSystemMessage::getPinDescription(const ScriptGraphNode& node, P
 	}
 }
 
+String ScriptSendSystemMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
+	return msgType.message + ".result";
+}
+
 void ScriptSendSystemMessage::doInitData(ScriptSendSystemMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
 	data = ScriptSendSystemMessageData(nodeData);
