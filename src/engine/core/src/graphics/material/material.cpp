@@ -574,6 +574,26 @@ MaterialUpdater& MaterialUpdater::setStencilReferenceOverride(std::optional<uint
 	return *this;
 }
 
+const std::shared_ptr<const Texture>& MaterialUpdater::getTexture(int textureUnit) const
+{
+	return material->getTexture(textureUnit);
+}
+
+std::shared_ptr<const Texture> MaterialUpdater::getRawTexture(int textureUnit) const
+{
+	return material->getRawTexture(textureUnit);
+}
+
+const Vector<std::shared_ptr<const Texture>>& MaterialUpdater::getTextures() const
+{
+	return material->getTextures();
+}
+
+size_t MaterialUpdater::getNumTextureUnits() const
+{
+	return material->getNumTextureUnits();
+}
+
 MaterialParameter MaterialUpdater::getParameter(std::string_view name)
 {
 	return material->getParameter(name);

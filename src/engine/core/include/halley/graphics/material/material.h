@@ -157,7 +157,7 @@ namespace Halley
 
 	class MaterialUpdater {
 	public:
-		MaterialUpdater();
+		MaterialUpdater() = default;
 		MaterialUpdater(std::shared_ptr<const Material>& orig);
 		MaterialUpdater(const MaterialUpdater& other) = delete;
 		MaterialUpdater(MaterialUpdater&& other) noexcept;
@@ -184,6 +184,11 @@ namespace Halley
 
 		MaterialUpdater& setPassEnabled(int pass, bool enabled);
 		MaterialUpdater& setStencilReferenceOverride(std::optional<uint8_t> reference);
+
+		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
+		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
+		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
+		size_t getNumTextureUnits() const;
 
 	private:
 		std::shared_ptr<const Material>* orig = nullptr;

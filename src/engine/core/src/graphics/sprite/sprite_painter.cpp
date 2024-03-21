@@ -4,6 +4,7 @@
 #include <gsl/gsl>
 
 #include "halley/graphics/material/material.h"
+#include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/text/text_renderer.h"
 #include "halley/utils/algorithm.h"
 
@@ -92,6 +93,77 @@ int SpritePainterEntry::getMask() const
 const std::optional<Rect4f>& SpritePainterEntry::getClip() const
 {
 	return clip;
+}
+
+SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
+{
+	setHandle("halley.texSize", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	{
+		const int idx = autoVarArgs.toInteger();
+		const auto tex = material.getTexture(idx);
+		material.set(uniformName, tex ? Vector2f(tex->getSize()) : Vector2f());
+	});
+
+	setHandle("halley.texBPP", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	{
+		const int idx = autoVarArgs.toInteger();
+		const auto tex = material.getTexture(idx);
+		material.set(uniformName, tex ? TextureDescriptor::getBytesPerPixel(tex->getDescriptor().format) : 1);
+	});
+
+	setHandle("halley.timeLoop", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	{
+		const Time cycleLen = autoVarArgs.toDouble();
+		const auto value = std::fmod(curTime / cycleLen, 1.0);
+		material.set(uniformName, static_cast<float>(value));
+	});
+}
+
+void SpritePainterMaterialParamUpdater::update(Time t)
+{
+	curTime += t;
+}
+
+void SpritePainterMaterialParamUpdater::copyPrevious(const SpritePainterMaterialParamUpdater& previous)
+{
+	curTime = previous.curTime;
+}
+
+void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite)
+{
+	std::optional<MaterialUpdater> mat;
+
+	const auto& blocks = sprite.getMaterial().getDefinition().getUniformBlocks();
+	for (const auto& block: blocks) {
+		for (const auto& uniform: block.uniforms) {
+			const auto& var = uniform.autoVariable;
+			if (!var.isEmpty()) {
+				const auto split = var.split(":");
+				const auto iter = handles.find(split[0]);
+				if (iter != handles.end()) {
+					if (!mat) {
+						mat = sprite.getMutableMaterial();
+					}
+					iter->second(*mat, uniform.name, split.size() >= 2 ? split[1] : "");
+				}
+			}
+		}
+	}
+}
+
+void SpritePainterMaterialParamUpdater::setHandle(String id, Callback callback)
+{
+	handles[id] = std::move(callback);
+}
+
+void SpritePainter::update(Time t)
+{
+	paramUpdater.update(t);
+}
+
+void SpritePainter::copyPrevious(const SpritePainter& prev)
+{
+	paramUpdater.copyPrevious(prev.paramUpdater);
 }
 
 void SpritePainter::start(bool forceCopy)

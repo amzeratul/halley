@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley
 {
@@ -55,9 +56,31 @@ namespace Halley
 		std::optional<Rect4f> clip;
 	};
 
+	class MaterialUpdater;
+
+	class SpritePainterMaterialParamUpdater {
+	public:
+		using Callback = std::function<void(MaterialUpdater&, const String&, const String&)>;
+
+		SpritePainterMaterialParamUpdater();
+
+		void update(Time t);
+		void copyPrevious(const SpritePainterMaterialParamUpdater& previous);
+
+		void preProcessMaterial(Sprite& sprite);
+		void setHandle(String id, Callback callback);
+
+	private:
+		Time curTime = 0;
+		HashMap<String, Callback> handles;
+	};
+
 	class SpritePainter
 	{
 	public:
+		void update(Time t);
+		void copyPrevious(const SpritePainter& prev);
+
 		void start(bool forceCopy = false);
 		
 		void add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
@@ -80,6 +103,7 @@ namespace Halley
 		Vector<SpritePainterEntry::Callback> callbacks;
 		bool dirty = false;
 		bool forceCopy = false;
+		SpritePainterMaterialParamUpdater paramUpdater;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
