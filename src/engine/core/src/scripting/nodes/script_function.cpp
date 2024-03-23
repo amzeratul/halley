@@ -19,7 +19,7 @@ Vector<IScriptNodeType::SettingType> ScriptFunctionCallExternal::getSettingTypes
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Call ");
@@ -90,7 +90,7 @@ String ScriptFunctionCallExternal::getPinDescription(const BaseGraphNode& node, 
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptFunctionCallExternal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptFunctionCallExternal::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx);
 }
@@ -199,7 +199,7 @@ Vector<IScriptNodeType::SettingType> ScriptFunctionReturn::getSettingTypes() con
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Return to caller");

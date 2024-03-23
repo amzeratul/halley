@@ -33,7 +33,7 @@ namespace Halley {
 		virtual gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const = 0;
         PinType getPin(const BaseGraphNode& node, size_t n) const;
 
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const;
 		virtual String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const;
 		virtual String getPinTypeName(PinType type) const;
 

@@ -25,11 +25,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Flow while ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
@@ -92,9 +92,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowOnce::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto desc = getConnectedNodeName(world, node, graph, 1);
+	const auto desc = getConnectedNodeName(node, graph, 1);
 	auto str = ColourStringBuilder(true);
 	str.append("Flow once");
 	return str.moveResults();
@@ -151,9 +151,9 @@ ConfigNode ScriptLatchData::toConfigNode(const EntitySerializationContext& conte
 	return result;
 }
 
-String ScriptLatch::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLatch::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "latch(" + getConnectedNodeName(world, node, graph, 0) + ")";
+	return "latch(" + getConnectedNodeName(node, graph, 0) + ")";
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const BaseGraphNode& node) const
@@ -164,11 +164,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(", or last latched value");
 	return str.moveResults();
 }
@@ -227,7 +227,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptFence::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFence::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFence::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Waits until signaled.", {} };
 }
@@ -284,7 +284,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptBreaker::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptBreaker::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptBreaker::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Flows until signaled",  {} };
 }
@@ -345,11 +345,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptSignal::getPinConfiguration(const
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Signals ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -391,13 +391,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Resets output if signaled by ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" or if variable ");
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	str.append(" changes.");
 	return str.moveResults();
 }
@@ -461,7 +461,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptDetachFlow::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDetachFlow::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDetachFlow::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder();
 	str.append("Continues flow in a new thread, detached from this stack");

@@ -36,7 +36,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 4 + msgType.nParams);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
 
@@ -49,15 +49,15 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 		if (i != 0) {
 			str.append(", ");
 		}
-		str.append(getConnectedNodeName(world, node, graph, 4 + i), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 4 + i), parameterColour);
 	}
 
 	str.append(") to script ");
 	str.append(msgType.script, settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 
-	const auto delayStr = getConnectedNodeName(world, node, graph, 3);
+	const auto delayStr = getConnectedNodeName(node, graph, 3);
 	if (delayStr != "<empty>") {
 		str.append(" after ");
 		str.append(delayStr + " s", settingColour);
@@ -131,9 +131,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptSendGenericMessage::getPinConfigu
 	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 5 + nParams);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendGenericMessage::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSendGenericMessage::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto msgType = ScriptMessageType(getConnectedNodeName(world, node, graph, 3), node.getSettings()["message"].asString(""), node.getSettings()["nParams"].asInt(0));
+	const auto msgType = ScriptMessageType(getConnectedNodeName(node, graph, 3), node.getSettings()["message"].asString(""), node.getSettings()["nParams"].asInt(0));
 
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
@@ -144,15 +144,15 @@ std::pair<String, Vector<ColourOverride>> ScriptSendGenericMessage::getNodeDescr
 		if (i != 0) {
 			str.append(", ");
 		}
-		str.append(getConnectedNodeName(world, node, graph, 5 + i), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 5 + i), parameterColour);
 	}
 
 	str.append(") to script ");
 	str.append(msgType.script, parameterColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 
-	const auto delayStr = getConnectedNodeName(world, node, graph, 4);
+	const auto delayStr = getConnectedNodeName(node, graph, 4);
 	if (delayStr != "<empty>") {
 		str.append(" after ");
 		str.append(delayStr + " s", settingColour);
@@ -235,7 +235,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptReceiveMessage::getPinConfigurat
 	return gsl::span<const PinType>(data).subspan(0, 1 + nParams);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("On receive message ");
@@ -252,12 +252,12 @@ String ScriptReceiveMessage::getPinDescription(const BaseGraphNode& node, PinTyp
 	}
 }
 
-String ScriptReceiveMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptReceiveMessage::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
 		return "msg.param" + toString(static_cast<int>(elementIdx));
 	} else {
-		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getShortDescription(world, node, graph, elementIdx);
+		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getShortDescription(node, graph, elementIdx);
 	}
 }
 
@@ -391,7 +391,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfigu
 	return data.span();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 
@@ -406,7 +406,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 			str.append(", ");
 		}
 		str.append(m + " = ");
-		str.append(getConnectedNodeName(world, node, graph, 2 + i), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 2 + i), parameterColour);
 		++i;
 
 		if (i == maxMsgParams) {
@@ -433,7 +433,7 @@ String ScriptSendSystemMessage::getPinDescription(const BaseGraphNode& node, Pin
 	}
 }
 
-String ScriptSendSystemMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptSendSystemMessage::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 	return msgType.message + ".result";
@@ -545,7 +545,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfigu
 	return gsl::span<const PinType>(data).subspan(0, 3 + std::min(msgType.members.size(), maxMsgParams));
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
 	
@@ -560,7 +560,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 			str.append(", ");
 		}
 		str.append(m + " = ");
-		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 3 + i), parameterColour);
 		++i;
 
 		if (i == maxMsgParams) {
@@ -569,7 +569,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 	}
 
 	str.append(") to entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 

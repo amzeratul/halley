@@ -14,13 +14,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the position of ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	result.append(" to ");
-	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return result.moveResults();
 }
 
@@ -51,13 +51,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the height of ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	result.append(" to ");
-	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return result.moveResults();
 }
 
@@ -81,13 +81,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the subworld of ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	result.append(" to ");
-	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return result.moveResults();
 }
 
@@ -111,24 +111,24 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Get the position of ");
-	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	result.append(" with offset ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return result.moveResults();
 }
 
-String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptGetPosition::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1 || elementIdx == 3) {
-		return "Position of " + getConnectedNodeName(world, node, graph, 0) + " + " + getConnectedNodeName(world, node, graph, 2);
+		return "Position of " + getConnectedNodeName(node, graph, 0) + " + " + getConnectedNodeName(node, graph, 2);
 	} else if (elementIdx == 4) {
-		return "Subworld of " + getConnectedNodeName(world, node, graph, 0);
+		return "Subworld of " + getConnectedNodeName(node, graph, 0);
 	} else {
-		return "Height of " + getConnectedNodeName(world, node, graph, 0);
+		return "Height of " + getConnectedNodeName(node, graph, 0);
 	}
 }
 
@@ -177,17 +177,17 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetRotation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetRotation::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Get the rotation of ");
-	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return result.moveResults();
 }
 
-String ScriptGetRotation::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptGetRotation::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-    return "Rotation of " + getConnectedNodeName(world, node, graph, 0);
+    return "Rotation of " + getConnectedNodeName(node, graph, 0);
 }
 
 String ScriptGetRotation::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -229,13 +229,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the rotation of ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	result.append(" to ");
-	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return result.moveResults();
 }
 
@@ -273,13 +273,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetScale::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetScale::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the scale of ");
-	result.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	result.append(" to ");
-	result.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return result.moveResults();
 }
 

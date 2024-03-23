@@ -31,13 +31,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
 	str.append(node.getSettings()["sequence"].asString("default"), settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	if (node.getSettings()["loop"].asBool(true)) {
 		str.append(" which loops ");
 	}
@@ -93,9 +93,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto dir = getConnectedNodeName(world, node, graph, 3);
+	const auto dir = getConnectedNodeName(node, graph, 3);
 	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");
 	if (dir != "" && dir != "<empty>") {
@@ -104,7 +104,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescript
 		str.append(node.getSettings()["direction"].asString("right"), settingColour);
 	}
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -126,13 +126,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Set alpha of sprite ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" to ");
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return str.moveResults();
 }
 
@@ -167,13 +167,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfigur
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get action point \"");
 	str.append(node.getSettings()["actionPoint"].asString(""), settingColour);
 	str.append("\" for entity ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -187,17 +187,17 @@ String ScriptSpriteActionPoint::getPinDescription(const BaseGraphNode& node, Pin
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptSpriteActionPoint::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptSpriteActionPoint::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	const auto actionPoint = node.getSettings()["actionPoint"].asString("");
 
 	if (elementIdx == 1) {
-		return actionPoint + " of " + getConnectedNodeName(world, node, graph, 0) + " (world)";
+		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (world)";
 	} else if (elementIdx == 2) {
-		return actionPoint + " of " + getConnectedNodeName(world, node, graph, 0) + " (offset)";
+		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (offset)";
 	}
 
-	return ScriptNodeTypeBase<void>::getShortDescription(world, node, graph, elementIdx);
+	return ScriptNodeTypeBase<void>::getShortDescription(node, graph, elementIdx);
 }
 
 ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -245,11 +245,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptColourGradient::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Sample colour at ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -263,7 +263,7 @@ String ScriptColourGradient::getPinDescription(const BaseGraphNode& node, PinTyp
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptColourGradient::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptColourGradient::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "Colour from Gradient";
 }

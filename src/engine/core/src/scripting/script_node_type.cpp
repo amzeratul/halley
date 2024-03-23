@@ -25,7 +25,7 @@
 #include "nodes/script_lua.h"
 using namespace Halley;
 
-String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String IScriptNodeType::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getName();
 }
@@ -44,7 +44,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	case ScriptNodeElementType::TargetPin:
 		return getPinAndConnectionDescription(node, world, elementType, elementIdx, graph);
 	case ScriptNodeElementType::Node:
-		return getNodeDescription(node, world, graph);
+		return getNodeDescription(node, graph);
 	default:
 		return { "?", {} };
 	}
@@ -58,14 +58,14 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDe
 
 	const auto type = ScriptNodeElementType(elementType.type);
 	if ((type == ScriptNodeElementType::ReadDataPin || type == ScriptNodeElementType::TargetPin) && elementType.direction == GraphNodePinDirection::Input) {
-		const auto connected = getConnectedNodeName(world, node, graph, elementIdx);
+		const auto connected = getConnectedNodeName(node, graph, elementIdx);
 		builder.append(pinDesc);
 		if (connected != "<empty>") {
 			builder.append(" := ");
 			builder.append(connected, settingColour);
 		}
 	} else if (type == ScriptNodeElementType::WriteDataPin && elementType.direction == GraphNodePinDirection::Output) {
-		const auto connected = getConnectedNodeName(world, node, graph, elementIdx);
+		const auto connected = getConnectedNodeName(node, graph, elementIdx);
 		if (connected != "<empty>") {
 			builder.append(connected, settingColour);
 			builder.append(" := ");
@@ -102,7 +102,7 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data), environment.getNodeData(dst.dstNode.value()));
 }
 
-String IScriptNodeType::getConnectedNodeName(const World* world, const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
+String IScriptNodeType::getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
@@ -116,7 +116,7 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const BaseGraph
 
 	if (pin.connections[0].dstNode) {
 		const auto& otherNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pin.connections[0].dstNode.value()));
-		return otherNode.getNodeType().getShortDescription(world, otherNode, dynamic_cast<const ScriptGraph&>(graph), pin.connections[0].dstPin);
+		return otherNode.getNodeType().getShortDescription(otherNode, dynamic_cast<const ScriptGraph&>(graph), pin.connections[0].dstPin);
 	}
 	
 	return "<unknown>";

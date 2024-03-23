@@ -39,7 +39,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 	return gsl::span<const PinType>(data).subspan(0, nPins);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto& event = node.getSettings()["event"].asString("");
 	const auto& destroyEvent = node.getSettings()["destroyEvent"].asString("");
@@ -48,7 +48,7 @@ std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(c
 	str.append("Post audio event ");
 	str.append(event, settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	if (!destroyEvent.isEmpty()) {
 		str.append(", then post audio event ");
 		str.append(destroyEvent, settingColour);

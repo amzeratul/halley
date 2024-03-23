@@ -10,7 +10,7 @@ Vector<IScriptNodeType::SettingType> ScriptStart::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Start script", {} };
 }
@@ -74,7 +74,7 @@ String ScriptStart::getPinDescription(const BaseGraphNode& node, PinType element
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptStart::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptStart::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx);
 }
@@ -117,7 +117,7 @@ std::optional<std::pair<GraphNodeId, GraphPinId>> ScriptStart::getOtherPin(Scrip
 }
 
 
-std::pair<String, Vector<ColourOverride>> ScriptDestructor::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDestructor::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "On destruction", {} };
 }
@@ -145,7 +145,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptRestart::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptRestart::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Restart script", {} };
 }
@@ -165,7 +165,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStop::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStop::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Terminate script", {} };
 }
@@ -185,7 +185,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpinwait::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpinwait::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpinwait::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Spinwait thread", {} };
 }
@@ -260,9 +260,9 @@ void ScriptStartScript::updateSettings(BaseGraphNode& node, const BaseGraph& gra
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto scriptName = getConnectedNodeName(world, node, graph, 3);
+	const auto scriptName = getConnectedNodeName(node, graph, 3);
 
 	auto str = ColourStringBuilder(true);
 	str.append("Start Script ");
@@ -272,7 +272,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 		str.append(scriptName, parameterColour);
 	}
 	str.append(" on ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with tags ");
 	str.append(node.getSettings()["tags"].asString("{}"), settingColour);
 	if (hasDestructor(dynamic_cast<const ScriptGraphNode&>(node))) {
@@ -357,13 +357,13 @@ Vector<IScriptNodeType::SettingType> ScriptStopScript::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStopScript::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStopScript::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop Script ");
 	str.append(node.getSettings()["script"].asString(""), settingColour);
 	str.append(" on ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -396,13 +396,13 @@ Vector<IScriptNodeType::SettingType> ScriptStopTag::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop all Scripts matching tag ");
 	str.append(node.getSettings()["tag"].asString(""), settingColour);
 	str.append(" on ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -449,7 +449,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWaitUntilEndOfFrame::getPinConfi
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptWaitUntilEndOfFrame::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWaitUntilEndOfFrame::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Wait until one frame has passed and then continue");

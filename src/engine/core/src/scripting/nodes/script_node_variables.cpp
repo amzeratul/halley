@@ -12,7 +12,7 @@ String ScriptVariable::getLargeLabel(const BaseGraphNode& node) const
 	return node.getSettings()["variable"].asString("");
 }
 
-String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptVariable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return node.getSettings()["scope"].asString("local") + ":" + node.getSettings()["variable"].asString("");
 }
@@ -37,7 +37,7 @@ Vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -93,7 +93,7 @@ String ScriptEntityVariable::getLargeLabel(const BaseGraphNode& node) const
 	return node.getSettings()["variable"].asString("");
 }
 
-String ScriptEntityVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityVariable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "entity:" + node.getSettings()["variable"].asString("");
 }
@@ -118,13 +118,13 @@ Vector<IGraphNodeType::SettingType> ScriptEntityVariable::getSettingTypes() cons
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
 	str.append("entity:" + node.getSettings()["variable"].asString(""), settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -171,7 +171,7 @@ String ScriptLiteral::getLargeLabel(const BaseGraphNode& node) const
 	return str;
 }
 
-String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLiteral::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getLargeLabel(node);
 }
@@ -189,7 +189,7 @@ Vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 	return { SettingType{ "value", "Halley::String", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto data = getConfigNode(node);
 
@@ -282,12 +282,12 @@ String ScriptVariableTable::getLargeLabel(const BaseGraphNode& node) const
 	return split.empty() ? "" : split.back();
 }
 
-String ScriptVariableTable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptVariableTable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "variableTable:" + node.getSettings()["variable"].asString("");
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptVariableTable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptVariableTable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -333,20 +333,20 @@ String ScriptECSVariable::getLargeLabel(const BaseGraphNode& node) const
 	return type.getName();
 }
 
-String ScriptECSVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptECSVariable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
-	return getConnectedNodeName(world, node, graph, 0) + "." + type.getName();
+	return getConnectedNodeName(node, graph, 0) + "." + type.getName();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 	auto str = ColourStringBuilder(true);
 	str.append("ECS Variable ");
 	str.append(type.getName(), settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 0), settingColour);
+	str.append(getConnectedNodeName(node, graph, 0), settingColour);
 	return str.moveResults();
 }
 
@@ -404,7 +404,7 @@ String ScriptColourLiteral::getLargeLabel(const BaseGraphNode& node) const
 	return node.getSettings()["value"].asString("#FFFFFF");
 }
 
-String ScriptColourLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptColourLiteral::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getLargeLabel(node);
 }
@@ -422,7 +422,7 @@ Vector<IScriptNodeType::SettingType> ScriptColourLiteral::getSettingTypes() cons
 	return { SettingType{ "value", "Halley::Colour4f", Vector<String>{"#FFFFFF"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptColourLiteral::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptColourLiteral::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(false);
 	str.append("Colour");
@@ -441,10 +441,10 @@ String ScriptComparison::getLargeLabel(const BaseGraphNode& node) const
 	return node.getSettings()["operator"].asString("==");
 }
 
-String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptComparison::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	auto op = getLargeLabel(node);
 	return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
 }
@@ -462,15 +462,15 @@ Vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() const
 	return { SettingType{ "operator", "Halley::MathRelOp", Vector<String>{"=="} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("True if ");
-	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), parameterColour);
+	str.append(addParentheses(getConnectedNodeName(node, graph, 0)), parameterColour);
 	str.append(" ");
 	str.append(node.getSettings()["operator"].asString("=="), settingColour);
 	str.append(" ");
-	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), parameterColour);
+	str.append(addParentheses(getConnectedNodeName(node, graph, 1)), parameterColour);
 	return str.moveResults();
 }
 
@@ -489,10 +489,10 @@ String ScriptArithmetic::getLargeLabel(const BaseGraphNode& node) const
 	return node.getSettings()["operator"].asString("+");
 }
 
-String ScriptArithmetic::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptArithmetic::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	auto op = getLargeLabel(node);
 
 	if (op[0] >= 'a' && op[0] <= 'z') {
@@ -520,11 +520,11 @@ Vector<IScriptNodeType::SettingType> ScriptArithmetic::getSettingTypes() const
 	return { SettingType{ "operator", "Halley::MathOp", Vector<String>{"+"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
-	str.append(getShortDescription(world, dynamic_cast<const ScriptGraphNode&>(node), dynamic_cast<const ScriptGraph&>(graph), 0), parameterColour);
+	str.append(getShortDescription(dynamic_cast<const ScriptGraphNode&>(node), dynamic_cast<const ScriptGraph&>(graph), 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -566,10 +566,10 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptValueOr::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	return addParentheses(std::move(a)) + " ?? " + addParentheses(std::move(b));
 }
 
@@ -581,13 +581,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptValueOr::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptValueOr::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(" if defined, otherwise ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
@@ -603,11 +603,11 @@ ConfigNode ScriptValueOr::doGetData(ScriptEnvironment& environment, const Script
 
 
 
-String ScriptConditionalOperator::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptConditionalOperator::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
-	auto c = getConnectedNodeName(world, node, graph, 2);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
+	auto c = getConnectedNodeName(node, graph, 2);
 	return addParentheses(std::move(a)) + " ? " + addParentheses(std::move(b)) + " : " + addParentheses(std::move(c));
 }
 
@@ -619,15 +619,15 @@ gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfig
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptConditionalOperator::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptConditionalOperator::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("If ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(", ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(", otherwise ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -663,13 +663,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns lerp(");
 
 	if (node.getPin(2).hasConnection()) {
-		str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	} else {
 		str.append(toString(node.getSettings()["from"].asFloat(0)), settingColour);
 	}
@@ -677,27 +677,27 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const B
 	str.append(", ");
 
 	if (node.getPin(3).hasConnection()) {
-		str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	}
 	else {
 		str.append(toString(node.getSettings()["to"].asFloat(1)), settingColour);
 	}
 
 	str.append(", ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(")");
 	return str.moveResults();
 }
 
-String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
+String ScriptLerp::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
 	if (node.getPin(2).hasConnection() && node.getPin(3).hasConnection()) {
-		return "lerp(" + getConnectedNodeName(world, node, graph, 2) + ", " + getConnectedNodeName(world, node, graph, 3) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
+		return "lerp(" + getConnectedNodeName(node, graph, 2) + ", " + getConnectedNodeName(node, graph, 3) + ", " + getConnectedNodeName(node, graph, 0) + ")";
 	}
 
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
-	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
+	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(node, graph, 0) + ")";
 }
 
 String ScriptLerp::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -793,15 +793,15 @@ String ScriptAdvanceTo::getPinDescription(const BaseGraphNode& node, PinType ele
 	return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Advance ");
-	str.append(getConnectedNodeName(world, node, graph, 8), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 8), parameterColour);
 	str.append(" towards ");
-	str.append(getConnectedNodeName(world, node, graph, 6), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 6), parameterColour);
 	str.append(" by ");
-	str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 7), parameterColour);
 	return str.moveResults();
 }
 
@@ -874,19 +874,19 @@ Vector<IScriptNodeType::SettingType> ScriptSetVariable::getSettingTypes() const
 	return { SettingType{ "defaultValue", "float", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	str.append(" := ");
-	str.append(node.getPin(2).hasConnection() ? getConnectedNodeName(world, node, graph, 2) : getLabel(node), node.getPin(2).hasConnection() ? parameterColour : settingColour);
+	str.append(node.getPin(2).hasConnection() ? getConnectedNodeName(node, graph, 2) : getLabel(node), node.getPin(2).hasConnection() ? parameterColour : settingColour);
 	return str.moveResults();
 }
 
-String ScriptSetVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptSetVariable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 3) {
-		return node.getPin(2).hasConnection() ? getConnectedNodeName(world, node, graph, 2) : getLabel(node);
+		return node.getPin(2).hasConnection() ? getConnectedNodeName(node, graph, 2) : getLabel(node);
 	}
 	return "Set Variable";
 }
@@ -949,19 +949,19 @@ Vector<IScriptNodeType::SettingType> ScriptHoldVariable::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto label1 = !node.getPin(2).hasConnection() ? toString(node.getSettings()["defaultValue"].asInt(0)) : "";
 	const auto label2 = !node.getPin(3).hasConnection() ? toString(node.getSettings()["defaultPrevValue"].asInt(0)) : "";
 
 	auto str = ColourStringBuilder(true);
-	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 4), parameterColour);
 	str.append(" := ");
-	str.append(label1.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label1, label1.isEmpty() ? parameterColour : settingColour);
+	str.append(label1.isEmpty() ? getConnectedNodeName(node, graph, 2) : label1, label1.isEmpty() ? parameterColour : settingColour);
 	str.append(", then ");
-	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 4), parameterColour);
 	str.append(" := ");
-	str.append(label2.isEmpty() ? getConnectedNodeName(world, node, graph, 3) : label2, label2.isEmpty() ? parameterColour : settingColour);
+	str.append(label2.isEmpty() ? getConnectedNodeName(node, graph, 3) : label2, label2.isEmpty() ? parameterColour : settingColour);
 	if (node.getSettings()["continuous"].asBool(false)) {
 		str.append(" (continuously)", settingColour);
 	}
@@ -1017,12 +1017,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfigurat
 	return data;
 }
 
-String ScriptEntityIdToData::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityIdToData::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0);
+	return getConnectedNodeName(node, graph, 0);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	if (node.getSettings()["readRaw"].asBool(true)) {
 		return { "Convert EntityId to data. Using readRaw function.", {} };
@@ -1048,12 +1048,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfigurat
 	return data;
 }
 
-String ScriptDataToEntityId::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptDataToEntityId::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0);
+	return getConnectedNodeName(node, graph, 0);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Convert data to EntityId.", {} };
 }
@@ -1075,18 +1075,18 @@ gsl::span<const IGraphNodeType::PinType> ScriptToVector::getPinConfiguration(con
 	return data;
 }
 
-String ScriptToVector::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptToVector::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "(" + getConnectedNodeName(world, node, graph, 0) + ", " + getConnectedNodeName(world, node, graph, 1) + ")";
+	return "(" + getConnectedNodeName(node, graph, 0) + ", " + getConnectedNodeName(node, graph, 1) + ")";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Return (");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(", ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(")");
 	return str.moveResults();
 }
@@ -1119,21 +1119,21 @@ gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(c
 	return data;
 }
 
-String ScriptFromVector::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptFromVector::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return getConnectedNodeName(world, node, graph, 0) + ".x";
+		return getConnectedNodeName(node, graph, 0) + ".x";
 	} else if (elementIdx == 2) {
-		return getConnectedNodeName(world, node, graph, 0) + ".y";
+		return getConnectedNodeName(node, graph, 0) + ".y";
 	}
 	return "";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Split vector ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -1169,27 +1169,27 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfigu
 	return data;
 }
 
-String ScriptInsertValueIntoMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptInsertValueIntoMap::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto startMap = getConnectedNodeName(world, node, graph, 0);
+	auto startMap = getConnectedNodeName(node, graph, 0);
 	if (startMap.startsWith("{") && startMap.endsWith("}")) {
 		startMap = startMap.mid(1, startMap.size() - 2).trimBoth();
 	}
 	if (startMap == "<empty>") {
 		startMap = {};
 	}
-	return "{ " + (startMap.isEmpty() ? "" : startMap + ", ") + getConnectedNodeName(world, node, graph, 2) + " := " + getConnectedNodeName(world, node, graph, 1) + " }";
+	return "{ " + (startMap.isEmpty() ? "" : startMap + ", ") + getConnectedNodeName(node, graph, 2) + " := " + getConnectedNodeName(node, graph, 1) + " }";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Insert into map ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(" key ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with value ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
@@ -1243,18 +1243,18 @@ gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfigurat
 	return data;
 }
 
-String ScriptGetValueFromMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptGetValueFromMap::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0) + "[" + getConnectedNodeName(world, node, graph, 1) + "]";
+	return getConnectedNodeName(node, graph, 0) + "[" + getConnectedNodeName(node, graph, 1) + "]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get value with key ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" from map ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -1318,23 +1318,23 @@ gsl::span<const IGraphNodeType::PinType> ScriptPackMap::getPinConfiguration(cons
 	return result.span();
 }
 
-String ScriptPackMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptPackMap::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	Vector<String> params;
 	auto keys = node.getSettings()["keys"].asVector<String>({});
 	for (size_t i = 0; i < keys.size(); ++i) {
-		params.push_back(keys[i] + " = " + getConnectedNodeName(world, node, graph, i + 1));
+		params.push_back(keys[i] + " = " + getConnectedNodeName(node, graph, i + 1));
 	}
 
 	return "{ " + String::concatList(params, ", ") + " }";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	Vector<String> params;
 	auto keys = node.getSettings()["keys"].asVector<String>({});
 	for (size_t i = 0; i < keys.size(); ++i) {
-		params.push_back(keys[i] + " = " + getConnectedNodeName(world, node, graph, i + 1));
+		params.push_back(keys[i] + " = " + getConnectedNodeName(node, graph, i + 1));
 	}
 
 	auto str = ColourStringBuilder();
@@ -1389,17 +1389,17 @@ gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(co
 	return result.span();
 }
 
-String ScriptUnpackMap::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptUnpackMap::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto keys = node.getSettings()["keys"].asVector<String>({});
-	return getConnectedNodeName(world, node, graph, 0) + "[\"" + keys.at(elementIdx - 1) + "\"]";
+	return getConnectedNodeName(node, graph, 0) + "[\"" + keys.at(elementIdx - 1) + "\"]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder();
 	str.append("Unpack map ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -1440,25 +1440,25 @@ gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinCo
 	return data;
 }
 
-String ScriptInsertValueIntoSequence::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptInsertValueIntoSequence::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto startSeq = getConnectedNodeName(world, node, graph, 0);
+	auto startSeq = getConnectedNodeName(node, graph, 0);
 	if (startSeq.startsWith("[") && startSeq.endsWith("]")) {
 		startSeq = startSeq.mid(1, startSeq.size() - 2).trimBoth();
 	}
 	if (startSeq == "<empty>") {
 		startSeq = {};
 	}
-	return "[ " + (startSeq.isEmpty() ? "" : startSeq + ", ") + getConnectedNodeName(world, node, graph, 1) + " ]";
+	return "[ " + (startSeq.isEmpty() ? "" : startSeq + ", ") + getConnectedNodeName(node, graph, 1) + " ]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Insert value ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" into sequence ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -1506,21 +1506,21 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasSequenceValue::getPinConfigura
 	return data;
 }
 
-String ScriptHasSequenceValue::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptHasSequenceValue::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "Has sequence " +
-		getConnectedNodeName(world, node, graph, 0) +
+		getConnectedNodeName(node, graph, 0) +
 		" value " +
-		getConnectedNodeName(world, node, graph, 1);
+		getConnectedNodeName(node, graph, 1);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Has sequence ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(" value ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 

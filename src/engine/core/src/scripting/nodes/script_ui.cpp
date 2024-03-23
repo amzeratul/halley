@@ -23,18 +23,18 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open modal UI ");
 	str.append(node.getSettings()["ui"].asString(""), settingColour);
 	str.append(" with data ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(", wait for it, then output result value");
 	return str.moveResults();
 }
 
-String ScriptUIModal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
+String ScriptUIModal::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
 	return "ui.value";
 }
@@ -98,13 +98,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open UI ");
 	str.append(node.getSettings()["ui"].asString(""), settingColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with alignment ");
 	str.append(toString(node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f))), settingColour);
 	str.append(" and offset ");

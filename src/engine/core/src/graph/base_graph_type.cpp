@@ -17,7 +17,7 @@ void IGraphNodeType::updateSettings(BaseGraphNode& node, const BaseGraph& graph,
 {
 }
 
-std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { getName(), {} };
 }

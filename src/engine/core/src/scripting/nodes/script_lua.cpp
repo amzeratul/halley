@@ -53,7 +53,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLuaExpression::getPinConfiguratio
 	return pins;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLuaExpression::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLuaExpression::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Return ");
@@ -61,7 +61,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLuaExpression::getNodeDescriptio
 	return str.moveResults();
 }
 
-String ScriptLuaExpression::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLuaExpression::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return node.getSettings()["code"].asString("") + " (" + toString(elementIdx) + ")";
 }
@@ -142,7 +142,7 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 }
 
 
-std::pair<String, Vector<ColourOverride>> ScriptLuaStatement::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLuaStatement::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Execute ");

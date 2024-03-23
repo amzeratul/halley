@@ -61,29 +61,29 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Input ");
 	str.append(node.getSettings()["button"].asString(""), settingColour);
 	str.append(" on ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" with priority ");
 	str.append(node.getSettings()["priority"].asString("normal"), parameterColour);
 	if (node.getPin(7).hasConnection()) {
 		str.append(" and label ");
-		str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 7), parameterColour);
 	} else if (node.getSettings()["label"].asString("") != "") {
 		str.append(" and label ");
 		str.append(node.getSettings()["label"].asString(""), settingColour);
 	}
 	if (node.getPin(10).hasConnection()) {
 		str.append(" and params ");
-		str.append(getConnectedNodeName(world, node, graph, 10), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 10), parameterColour);
 	}
 	if (node.getPin(8).hasConnection()) {
 		str.append(" if ");
-		str.append(getConnectedNodeName(world, node, graph, 8), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 8), parameterColour);
 	}
 
 	if (node.getSettings()["bypassEnableCheck"].asBool(false)) {
@@ -198,17 +198,17 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Has input label associated with ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
-String ScriptHasInputLabel::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptHasInputLabel::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0) + " has input label";
+	return getConnectedNodeName(node, graph, 0) + " has input label";
 }
 
 ConfigNode ScriptHasInputLabel::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const

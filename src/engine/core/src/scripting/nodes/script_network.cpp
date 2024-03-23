@@ -3,9 +3,9 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
-String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityAuthority::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "has authority over " + getConnectedNodeName(world, node, graph, 0);
+	return "has authority over " + getConnectedNodeName(node, graph, 0);
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptEntityAuthority::getPinConfiguration(const BaseGraphNode& node) const
@@ -16,11 +16,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityAuthority::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityAuthority::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityAuthority::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Has authority over ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -32,7 +32,7 @@ ConfigNode ScriptEntityAuthority::doGetData(ScriptEnvironment& environment, cons
 
 
 
-String ScriptHostAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptHostAuthority::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "has host authority";
 }
@@ -45,7 +45,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptHostAuthority::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHostAuthority::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHostAuthority::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Has host authority", {} };
 }
@@ -66,11 +66,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptIfEntityAuthority::getPinConfigu
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("If has authority over ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
@@ -92,7 +92,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptIfHostAuthority::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptIfHostAuthority::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptIfHostAuthority::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "If has host authority", {} };
 }
@@ -153,13 +153,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptLock::getPinConfiguration(const B
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Tries to acquire lock for player ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" and target ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" and branches based on success");
 	return str.moveResults();
 }
@@ -186,12 +186,12 @@ IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Tim
 
 
 
-String ScriptLockAvailable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLockAvailable::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
-		return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to " + getConnectedNodeName(world, node, graph, 0);
+		return "Lock for " + getConnectedNodeName(node, graph, 1) + " available to " + getConnectedNodeName(node, graph, 0);
 	} else {
-		return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to all";
+		return "Lock for " + getConnectedNodeName(node, graph, 1) + " available to all";
 	}
 }
 
@@ -208,13 +208,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptLockAvailable::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Is lock for ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append(" available or acquired by ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -289,13 +289,13 @@ gsl::span<const IGraphNodeType::PinType> ScriptLockAvailableGate::getPinConfigur
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Flow based on lock for ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" being available or acquired by ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 
@@ -355,11 +355,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToHost::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptTransferToHost::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptTransferToHost::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Transfer flow control to host, passing ");
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
 	return str.moveResults();
 }
 
@@ -379,7 +379,7 @@ String ScriptTransferToHost::getPinDescription(const BaseGraphNode& node, PinTyp
 	return ScriptNodeTypeBase<ScriptTransferToHostData>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptTransferToHost::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptTransferToHost::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 4) {
 		return "clientParams";
@@ -451,11 +451,11 @@ gsl::span<const IGraphNodeType::PinType> ScriptTransferToClient::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptTransferToClient::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptTransferToClient::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Transfer flow control back to client, passing ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 

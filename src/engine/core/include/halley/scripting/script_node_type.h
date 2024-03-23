@@ -15,7 +15,7 @@ namespace Halley {
 	class BaseGraphNode;
 	
 	class IScriptNodeType : public IGraphNodeType {
-	public:		
+	public:
         struct Result {
         	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
         	uint8_t outputsActive = 1;
@@ -35,7 +35,7 @@ namespace Halley {
 
 		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
 		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
-		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
+		virtual String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
 		virtual String getLargeLabel(const BaseGraphNode& node) const;
 
         virtual bool canKeepData() const { return false; }
@@ -58,7 +58,7 @@ namespace Halley {
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		EntityId readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
-		String getConnectedNodeName(const World* world, const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
+		String getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
 
 		String getPinTypeName(PinType type) const override;
 

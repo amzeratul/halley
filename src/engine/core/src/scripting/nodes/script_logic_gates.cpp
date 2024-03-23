@@ -2,10 +2,10 @@
 
 using namespace Halley;
 
-String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLogicGateAnd::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	return addParentheses(std::move(a)) + " AND " + addParentheses(std::move(b));
 }
 
@@ -17,10 +17,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
 	result.append(addParentheses(std::move(a)), parameterColour);
@@ -36,10 +36,10 @@ ConfigNode ScriptLogicGateAnd::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLogicGateOr::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	return addParentheses(std::move(a)) + " OR " + addParentheses(std::move(b));
 }
 
@@ -51,10 +51,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
 	result.append(addParentheses(std::move(a)), parameterColour);
@@ -70,10 +70,10 @@ ConfigNode ScriptLogicGateOr::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
-String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLogicGateXor::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	return addParentheses(std::move(a)) + " XOR " + addParentheses(std::move(b));
 }
 
@@ -85,10 +85,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
-	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto a = getConnectedNodeName(node, graph, 0);
+	auto b = getConnectedNodeName(node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
 	result.append(addParentheses(std::move(a)), parameterColour);
@@ -104,9 +104,9 @@ ConfigNode ScriptLogicGateXor::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptLogicGateNot::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto a = getConnectedNodeName(node, graph, 0);
 	return "NOT " + addParentheses(std::move(a));
 }
 
@@ -118,9 +118,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto a = getConnectedNodeName(node, graph, 0);
 	ColourStringBuilder result;
 	result.append("True if NOT ");
 	result.append(addParentheses(std::move(a)), parameterColour);

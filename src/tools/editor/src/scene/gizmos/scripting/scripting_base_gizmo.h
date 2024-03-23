@@ -30,13 +30,12 @@ namespace Halley {
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
-		const World* world = nullptr;
 
+		const World* world = nullptr;
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;
 
 		Vector<String> entityTargets;
-
 		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
 
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const override;

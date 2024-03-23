@@ -46,13 +46,13 @@ Vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
 	return { SettingType{ "time", "float", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const float time = node.getSettings()["time"].asFloat(0.0f);
 	auto str = ColourStringBuilder(true);
 	str.append("Wait ");
 	if (node.getPin(2).hasConnection()) {
-		str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 
 	} else {
 		str.append(toString(time), settingColour);

@@ -50,7 +50,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 	return gsl::span<const PinType>(data).subspan(0, asChild ? 6 : 5);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
@@ -59,12 +59,12 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 	str.append("Spawn entity ");
 	str.append(node.getSettings()["prefab"].asString(""), settingColour);
 	str.append(" at position ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with rotation ");
-	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 4), parameterColour);
 	if (asChild) {
 		str.append(" relative to parent ");
-		str.append(getConnectedNodeName(world, node, graph, 5), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 5), parameterColour);
 	}
 	if (serializable) {
 		str.append(" and serialize it ");
@@ -146,11 +146,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDestroyEntity::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDestroyEntity::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Destroy entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
@@ -176,20 +176,20 @@ gsl::span<const IScriptNodeType::PinType> ScriptFindChildByName::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Try to find first level child with name ");
 
 	if (node.getPin(0).hasConnection()) {
-		str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+		str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	}
 	else {
 		str.append(toString(node.getSettings()["childName"].asString("")), settingColour);
 	}
 
 	str.append(" on ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 
 	return str.moveResults();
 }
@@ -229,11 +229,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetParent::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetParent::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetParent::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get parent of entity ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -262,29 +262,29 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity reference set in ScriptableComponent with key ");
 	if (node.getPin(2).hasConnection()) {
-		str.append(getConnectedNodeName(world, node, graph, 2), settingColour);
+		str.append(getConnectedNodeName(node, graph, 2), settingColour);
 	} else {
 		str.append(node.getSettings()["key"].asString(""), settingColour);
 	}
 	return str.moveResults();
 }
 
-String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityReference::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		if (node.getPin(2).hasConnection()) {
-			return getConnectedNodeName(world, node, graph, 2);
+			return getConnectedNodeName(node, graph, 2);
 		} else {
 			return node.getSettings()["key"].asString("");
 		}
 	} else {
 		if (node.getPin(2).hasConnection()) {
-			return "pos(" + getConnectedNodeName(world, node, graph, 2) + ")";
+			return "pos(" + getConnectedNodeName(node, graph, 2) + ")";
 		} else {
 			return "pos(" + node.getSettings()["key"].asString("") + ")";
 		}
@@ -360,17 +360,17 @@ gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfigurat
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity parameter set in ");
-	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
 	str.append("'s ScriptableComponent with key ");
 	str.append(node.getSettings()["key"].asString(""), settingColour);
 	return str.moveResults();
 }
 
-String ScriptEntityParameter::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityParameter::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "Param \"" + node.getSettings()["key"].asString("") + "\"";
 }
@@ -422,7 +422,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinCon
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
@@ -430,7 +430,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDe
 	return str.moveResults();
 }
 
-String ScriptEntityTargetReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptEntityTargetReference::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return node.getSettings()["scriptTargetId"].asString("");
@@ -479,19 +479,19 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasTags::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasTags::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasTags::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Checks if ");
-	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	str.append(" has tags ");
 	str.append("[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]", settingColour);
 	return str.moveResults();
 }
 
-String ScriptHasTags::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+String ScriptHasTags::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(world, node, graph, 0) + " has tags " + "[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]";
+	return getConnectedNodeName(node, graph, 0) + " has tags " + "[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]";
 }
 
 ConfigNode ScriptHasTags::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -542,7 +542,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfi
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Toggle entity enabled to ");

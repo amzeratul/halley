@@ -9,7 +9,7 @@ Vector<IGraphNodeType::SettingType> ScriptComment::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptComment::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptComment::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	return { "Comment", {} };
 }
@@ -26,11 +26,11 @@ String ScriptComment::getLargeLabel(const BaseGraphNode& node) const
 
 
 
-std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Display the value of ");
-	result.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	result.append(getConnectedNodeName(node, graph, 0), parameterColour);
 	return result.moveResults();
 }
 
@@ -51,9 +51,9 @@ Vector<IGraphNodeType::SettingType> ScriptLog::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	auto msg = getConnectedNodeName(world, node, graph, 2);
+	auto msg = getConnectedNodeName(node, graph, 2);
 	if (msg == "<empty>") {
 		msg = node.getSettings()["message"].asString("");
 	}
