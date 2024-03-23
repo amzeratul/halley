@@ -3,6 +3,7 @@
 #include "base_graph_enums.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/resources/resource.h"
 #include "halley/utils/hash.h"
 
 namespace Halley {
@@ -99,7 +100,7 @@ namespace Halley {
 	};
 
 
-	class BaseGraph {
+	class BaseGraph: public Resource {
 	public:
 		virtual ~BaseGraph() = default;
 
@@ -119,6 +120,7 @@ namespace Halley {
 
 		virtual void finishGraph() {}
 		
+		virtual void load(const ConfigNode& node) = 0;
 		virtual ConfigNode toConfigNode() const = 0;
 		virtual String toYAML() const;
 

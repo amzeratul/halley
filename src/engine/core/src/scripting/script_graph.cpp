@@ -224,22 +224,15 @@ ScriptGraph::ScriptGraph()
 
 ScriptGraph::ScriptGraph(const ConfigNode& node)
 {
+	load(node);
+}
+
+void ScriptGraph::load(const ConfigNode& node)
+{
 	if (node.getType() == ConfigNodeType::Map) {
 		nodes = node["nodes"].asVector<ScriptGraphNode>({});
 		properties = node["properties"];
 	}
-	finishGraph();
-}
-
-ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context)
-{
-	load(node, context);
-}
-
-void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext& context)
-{
-	nodes = node["nodes"].asVector<ScriptGraphNode>({});
-	properties = node["properties"];
 	lastAssignTypeHash = 0;
 	finishGraph();
 }
@@ -622,17 +615,17 @@ Range<GraphNodeId> ScriptGraph::getSubGraphRange(int subGraphIdx) const
 	}
 }
 
-ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(ScriptGraph script, const EntitySerializationContext& context)
+ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(const ScriptGraph& script, const EntitySerializationContext& context)
 {
 	return script.toConfigNode();
 }
 
 ScriptGraph ConfigNodeSerializer<ScriptGraph>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
-	return ScriptGraph(node, context);
+	return ScriptGraph(node);
 }
 
 void ConfigNodeSerializer<ScriptGraph>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptGraph& target)
 {
-	target.load(node, context);
+	target.load(node);
 }

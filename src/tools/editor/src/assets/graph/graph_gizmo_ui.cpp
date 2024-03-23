@@ -89,6 +89,10 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> GraphGizmoUI::getNodeUnderM
 	return gizmo->getNodeUnderMouse();
 }
 
+void GraphGizmoUI::load(BaseGraph& graph)
+{
+}
+
 void GraphGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	focus();

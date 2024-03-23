@@ -10,7 +10,7 @@ namespace Halley {
 	public:
 		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ScriptGraphEditor& graphEditor);
 		
-		void load(ScriptGraph& graph);
+		void load(BaseGraph& graph) override;
 		void setState(ScriptState* state);
 		
 		void setCurNodeDevConData(const String& str);

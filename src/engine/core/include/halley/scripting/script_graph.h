@@ -63,7 +63,7 @@ namespace Halley {
 		void clear();
 	};
 	
-	class ScriptGraph final : public Resource, public BaseGraphImpl<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
+	class ScriptGraph final : public BaseGraphImpl<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
 	public:
 		struct FunctionParameters {
 			uint8_t nOutput = 1;
@@ -78,9 +78,8 @@ namespace Halley {
 
 		ScriptGraph();
 		ScriptGraph(const ConfigNode& node);
-		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
 
-		void load(const ConfigNode& node, const EntitySerializationContext& context);
+		void load(const ConfigNode& node) override;
 
 		bool isPersistent() const;
 		bool isMultiCopy() const;
@@ -157,7 +156,7 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<ScriptGraph> {
     public:
-		ConfigNode serialize(ScriptGraph script, const EntitySerializationContext& context);
+		ConfigNode serialize(const ScriptGraph& script, const EntitySerializationContext& context);
 		ScriptGraph deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptGraph& target);
     };

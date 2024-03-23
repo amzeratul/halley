@@ -3,6 +3,9 @@
 #include "src/assets/config_undo_stack.h"
 
 namespace Halley {
+	class EntityEditorFactory;
+	class InfiniCanvas;
+	class GraphGizmoUI;
 	class ScriptGraphVariableInspector;
 
 	class IGraphEditor {
@@ -19,10 +22,23 @@ namespace Halley {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<BaseGraph>)>;
 
-		GraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<BaseGraph> graph, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene = {}, Callback callback = {});
+		GraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<BaseGraph> graph, AssetType assetType, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene = {}, Callback callback = {});
 		virtual void init();
 
 		void setGraph(std::shared_ptr<BaseGraph> graph);
+
+		void onMakeUI() override;
+		
+		void setModified(bool modified) override;
+		bool isModified() override;
+		void drillDownSave() override;
+
+		void onModified() override;
+		void undo() override;
+		void redo() override;
+		void centreView();
+
+		String getAssetKey() const;
 
 	protected:
 		UIFactory& factory;
@@ -32,8 +48,17 @@ namespace Halley {
 		AssetEditor* assetEditor = nullptr;
 		std::shared_ptr<const Scene> scene;
 		Callback callback;
+		AssetType assetType;
 
 		ConfigUndoStack undoStack;
+
+		std::shared_ptr<GraphGizmoUI> gizmoEditor;
+		std::shared_ptr<InfiniCanvas> infiniCanvas;
+		bool modified = false;
+		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
+
+		virtual std::shared_ptr<GraphGizmoUI> createGizmoEditor() = 0;
+		virtual void onWasModified();
 
 	private:
 		std::shared_ptr<BaseGraph> graph;

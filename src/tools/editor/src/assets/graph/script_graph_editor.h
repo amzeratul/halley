@@ -21,27 +21,23 @@ namespace Halley {
 		void init() override;
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
 
-		void onActiveChanged(bool active) override;
-		void setModified(bool modified) override;
-		bool isModified() override;
-		void drillDownSave() override;
 		std::shared_ptr<ScriptGraph> getScriptGraph();
 
 		void onMakeUI() override;
 
 		const Vector<String>& getScriptTargetIds() const;
 		std::shared_ptr<const Scene> getScene() const;
-
-		void onModified() override;
-		void undo() override;
-		void redo() override;
-		void centreView();
+		
 		void openProperties();
 
 		std::shared_ptr<UIWidget> asWidget() override;
 
 	protected:
     	void update(Time t, bool moved) override;
+		void onActiveChanged(bool active) override;
+		void onWasModified() override;
+
+		std::shared_ptr<GraphGizmoUI> createGizmoEditor() override;
 
     private:
 		struct EntityEnumData {
@@ -53,11 +49,9 @@ namespace Halley {
 
     	std::shared_ptr<ScriptGraph> scriptGraph;
 		std::unique_ptr<ScriptState> scriptState;
+		std::shared_ptr<ScriptGizmoUI> scriptGizmoEditor;
 
-		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
-		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		std::shared_ptr<ScriptGraphVariableInspector> variableInspector;
-		bool modified = false;
 		bool autoAcquire = false;
 		bool variableInspectorEnabled = false;
 
@@ -68,7 +62,6 @@ namespace Halley {
     	Vector<EntityEnumData> curEntities;
 
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
-		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		Vector<String> entityTargets;
 		Vector<String> cutsceneIds;
 

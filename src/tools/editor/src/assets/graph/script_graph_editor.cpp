@@ -10,8 +10,9 @@ using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow,
 	std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene, Callback callback, Vector<String> entityTargets)
-	: GraphEditor(factory, gameResources, projectWindow, scriptGraph, assetEditor, scene, callback)
+	: GraphEditor(factory, gameResources, projectWindow, scriptGraph, AssetType::ScriptGraph, assetEditor, scene, callback)
 	, scriptGraph(std::move(scriptGraph))
+	, scriptNodeTypes(projectWindow.getScriptNodeTypes())
 	, entityTargets(std::move(entityTargets))
 {
 }
@@ -31,8 +32,8 @@ void ScriptGraphEditor::init()
 
 void ScriptGraphEditor::onMakeUI()
 {
-	scriptNodeTypes = projectWindow.getScriptNodeTypes();
-	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
+	GraphEditor::onMakeUI();
+
 	if (callback) {
 		// Only add this overriding default factory if we're running inside scene editor
 		entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
@@ -43,40 +44,6 @@ void ScriptGraphEditor::onMakeUI()
 			}
 		}
 	}
-
-	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
-		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), *this
-	);
-	gizmoEditor->setEntityTargets(entityTargets);
-	
-	if (scriptGraph) {
-		gizmoEditor->load(*scriptGraph);
-	}
-	const auto assetKey = scriptGraph ? (toString(AssetType::ScriptGraph) + ":" + scriptGraph->getAssetId()) : "";
-
-	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
-	infiniCanvas->clear();
-	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Top | UISizerAlignFlags::Left);
-	infiniCanvas->setMouseMirror(gizmoEditor);
-	infiniCanvas->setZoomEnabled(false);
-	infiniCanvas->setLeftClickScrollKey(KeyCode::Space);
-
-	infiniCanvas->setZoomListener([=] (float zoom)
-	{
-		gizmoEditor->setZoom(zoom);
-	});
-	infiniCanvas->setScrollPosition(projectWindow.getAssetSetting(assetKey, "position").asVector2f({}));
-	infiniCanvas->setScrollListener([=] (Vector2f pos)
-	{
-		projectWindow.setAssetSetting(assetKey, "position", ConfigNode(pos));
-	});
-
-	variableInspector = getWidgetAs<ScriptGraphVariableInspector>("ScriptGraphVariableInspector");
-
-	getWidget("toolbarGizmo")->clear();
-	getWidget("toolbarGizmo")->add(gizmoEditor->makeUI());
-
-	getWidget("drillUpBar")->setActive(!!callback);
 
 	bindData("instances", "-1:-1", [=](String id)
 	{
@@ -90,6 +57,9 @@ void ScriptGraphEditor::onMakeUI()
 		}
 	});
 
+	variableInspector = getWidgetAs<ScriptGraphVariableInspector>("ScriptGraphVariableInspector");
+
+	const auto assetKey = getAssetKey();
 	autoAcquire = projectWindow.getAssetSetting(assetKey, "autoAcquire").asBool(true);
 	bindData("autoAcquire", autoAcquire, [=](bool value)
 	{
@@ -98,15 +68,7 @@ void ScriptGraphEditor::onMakeUI()
 		tryAutoAcquire();
 	});
 	tryAutoAcquire();
-
-	const auto autoConnect = projectWindow.getSetting(EditorSettingType::Project, "autoConnectPins").asBool(true);
-	gizmoEditor->setAutoConnectPins(autoConnect);
-	bindData("autoConnectPins", autoConnect, [=](bool value)
-	{
-		projectWindow.setSetting(EditorSettingType::Project, "autoConnectPins", ConfigNode(value));
-		gizmoEditor->setAutoConnectPins(value);
-	});
-
+	
 	variableInspectorEnabled = projectWindow.getSetting(EditorSettingType::Project, "variableInspectorEnabled").asBool(true);
 	bindData("variableInspectorEnabled", variableInspectorEnabled, [=](bool value)
 	{
@@ -114,83 +76,16 @@ void ScriptGraphEditor::onMakeUI()
 		variableInspectorEnabled = value;
 	});
 
-	setHandle(UIEventType::ButtonClicked, "ok", [=](const UIEvent& event)
-	{
-		callback(true, scriptGraph);
-		destroy();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
-	{
-		callback(false, scriptGraph);
-		destroy();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "undoButton", [=](const UIEvent& event)
-	{
-		undo();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "redoButton", [=](const UIEvent& event)
-	{
-		redo();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "centreViewButton", [=](const UIEvent& event)
-	{
-		centreView();
-	});
-
 	setHandle(UIEventType::ButtonClicked, "propertiesButton", [=](const UIEvent& event)
 	{
 		openProperties();
 	});
-
-	getWidget("saveButton")->setActive(assetEditor);
-	if (assetEditor) {
-		setHandle(UIEventType::ButtonClicked, "saveButton", [=](const UIEvent& event)
-		{
-			assetEditor->save();
-		});
-	}
 }
 
 void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
 {
 	scriptGraph = std::move(graph);
 	setGraph(scriptGraph);
-}
-
-void ScriptGraphEditor::onActiveChanged(bool active)
-{
-	setListeningToClient(active);
-	if (active && gizmoEditor) {
-		gizmoEditor->updateNodes();
-	}
-}
-
-void ScriptGraphEditor::setModified(bool value)
-{
-	modified = value;
-
-	if (value) {
-		scriptGraph->updateHash();
-		if (scriptEnumHandle) {
-			setListeningToClient(false);
-			setListeningToClient(true);
-		}
-	}
-}
-
-bool ScriptGraphEditor::isModified()
-{
-	return modified;
-}
-
-void ScriptGraphEditor::drillDownSave()
-{
-	callback(true, scriptGraph);
-	setModified(false);
 }
 
 std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()
@@ -206,37 +101,6 @@ const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
 std::shared_ptr<const Scene> ScriptGraphEditor::getScene() const
 {
 	return scene;
-}
-
-void ScriptGraphEditor::onModified()
-{
-	setModified(true);
-	if (scriptGraph) {
-		undoStack.update(scriptGraph->toConfigNode());
-	}
-}
-
-void ScriptGraphEditor::undo()
-{
-	if (scriptGraph && undoStack.canUndo()) {
-		const auto assetId = scriptGraph->getAssetId();
-		*scriptGraph = ScriptGraph(undoStack.undo());
-		scriptGraph->setAssetId(assetId);
-	}
-}
-
-void ScriptGraphEditor::redo()
-{
-	if (scriptGraph && undoStack.canRedo()) {
-		const auto assetId = scriptGraph->getAssetId();
-		*scriptGraph = ScriptGraph(undoStack.redo());
-		scriptGraph->setAssetId(assetId);
-	}
-}
-
-void ScriptGraphEditor::centreView()
-{
-	infiniCanvas->setScrollPosition({});
 }
 
 void ScriptGraphEditor::openProperties()
@@ -256,9 +120,9 @@ std::shared_ptr<UIWidget> ScriptGraphEditor::asWidget()
 
 void ScriptGraphEditor::update(Time t, bool moved)
 {
-	if (gizmoEditor) {
-		gizmoEditor->setState(scriptState.get());
-		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
+	if (scriptGizmoEditor) {
+		scriptGizmoEditor->setState(scriptState.get());
+		infiniCanvas->setScrollEnabled(!scriptGizmoEditor->isHighlighted());
 
 		updateNodeUnderCursor();
 	}
@@ -270,14 +134,23 @@ void ScriptGraphEditor::update(Time t, bool moved)
 	getWidget("redoButton")->setEnabled(undoStack.canRedo());
 }
 
+std::shared_ptr<GraphGizmoUI> ScriptGraphEditor::createGizmoEditor()
+{
+	scriptGizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
+		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), *this
+	);
+	scriptGizmoEditor->setEntityTargets(entityTargets);
+	return scriptGizmoEditor;
+}
+
 void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)
 {
 	if (curEntityId != entityId) {
 		if (entityId.second == -1) {
 			curEntityId.reset();
 			scriptState.reset();
-			if (gizmoEditor) {
-				gizmoEditor->setState(nullptr);
+			if (scriptGizmoEditor) {
+				scriptGizmoEditor->setState(nullptr);
 			}
 		} else {
 			curEntityId = entityId;
@@ -286,6 +159,23 @@ void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)
 		if (scriptEnumHandle) {
 			setListeningToState(entityId);
 		}
+	}
+}
+
+void ScriptGraphEditor::onActiveChanged(bool active)
+{
+	setListeningToClient(active);
+	if (active && scriptGizmoEditor) {
+		scriptGizmoEditor->updateNodes();
+	}
+}
+
+void ScriptGraphEditor::onWasModified()
+{
+	scriptGraph->updateHash();
+	if (scriptEnumHandle) {
+		setListeningToClient(false);
+		setListeningToClient(true);
 	}
 }
 
@@ -357,8 +247,8 @@ void ScriptGraphEditor::updateNodeUnderCursor()
 
 ConfigNode ScriptGraphEditor::getCurrentNodeConfig()
 {
-	if (gizmoEditor) {
-		if (const auto node = gizmoEditor->getNodeUnderMouse()) {
+	if (scriptGizmoEditor) {
+		if (const auto node = scriptGizmoEditor->getNodeUnderMouse()) {
 			ConfigNode::MapType result;
 			result["nodeId"] = node->nodeId;
 			result["elementId"] = static_cast<int>(static_cast<int8_t>(node->elementId));
@@ -378,8 +268,8 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 	if (data.getType() == ConfigNodeType::Undefined) {
 		scriptState.reset();
 		scriptGraph->setRoots({});
-		if (gizmoEditor) {
-			gizmoEditor->setState(nullptr);
+		if (scriptGizmoEditor) {
+			scriptGizmoEditor->setState(nullptr);
 		}
 		onDebugDisplayData({});
 		variableInspector->updateVariables(ConfigNode());
@@ -421,8 +311,8 @@ void ScriptGraphEditor::onCurNodeData(const ConfigNode& curNodeData)
 
 void ScriptGraphEditor::setCurNodeData(const String& str)
 {
-	if (gizmoEditor) {
-		gizmoEditor->setCurNodeDevConData(str);
+	if (scriptGizmoEditor) {
+		scriptGizmoEditor->setCurNodeDevConData(str);
 	}
 }
 
@@ -438,8 +328,8 @@ void ScriptGraphEditor::onDebugDisplayData(const ConfigNode& node)
 			values[n["nodeId"].asInt()] = std::move(val);
 		}
 	}
-	if (gizmoEditor) {
-		gizmoEditor->setDebugDisplayData(std::move(values));
+	if (scriptGizmoEditor) {
+		scriptGizmoEditor->setDebugDisplayData(std::move(values));
 	}
 }
 

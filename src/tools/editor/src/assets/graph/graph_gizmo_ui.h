@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graph_editor.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
@@ -23,6 +24,8 @@ namespace Halley {
 		std::shared_ptr<UIWidget> makeUI();
 
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+
+		virtual void load(BaseGraph& graph) = 0;
 
 	protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;

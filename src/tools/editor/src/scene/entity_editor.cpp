@@ -701,6 +701,7 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 				onEntityUpdated();
 			}
 		}, std::move(entityTargets));
+		scriptEditor->init();
 		sceneEditor->drillDownEditor(std::move(scriptEditor));
 	} else if (tool == "!timeline") {
 		auto timeline = std::make_unique<Timeline>(getComponentData(componentName, fieldName));
