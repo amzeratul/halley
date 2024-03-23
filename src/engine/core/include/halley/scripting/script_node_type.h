@@ -33,8 +33,8 @@ namespace Halley {
 
 		virtual ScriptNodeClassification getClassification() const = 0;
 
-		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
-		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
+		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
 		virtual String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
 		virtual String getLargeLabel(const BaseGraphNode& node) const;
 

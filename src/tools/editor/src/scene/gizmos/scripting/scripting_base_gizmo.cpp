@@ -7,10 +7,9 @@
 
 using namespace Halley;
 
-ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
+ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: BaseGraphGizmo(factory, entityEditorFactory, resources, baseZoom)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
-	, world(world)
 {
 }
 
@@ -26,7 +25,7 @@ std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription
 		return {};
 	}
 	
-	auto [text, colours] = nodeType->getDescription(dynamic_cast<const ScriptGraphNode&>(node), world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	auto [text, colours] = nodeType->getDescription(dynamic_cast<const ScriptGraphNode&>(node), nodeInfo.element, nodeInfo.elementId, *scriptGraph);
 	if (devConData && devConData->first == getNodeUnderMouse() && !devConData->second.isEmpty()) {
 		colours.emplace_back(text.size(), std::nullopt);
 		text += "\n\nValue: ";

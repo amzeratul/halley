@@ -9,7 +9,7 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 	, resources(resources)
 	, keyboard(std::move(keyboard))
 	, clipboard(std::move(clipboard))
-	, gizmo(factory, entityEditorFactory, nullptr, resources, scriptNodeTypes)
+	, gizmo(factory, entityEditorFactory, resources, scriptNodeTypes)
 	, graphEditor(graphEditor)
 {
 	gizmo.setModifiedCallback([=] ()

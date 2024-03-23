@@ -35,14 +35,14 @@ String IScriptNodeType::getLargeLabel(const BaseGraphNode& node) const
 	return "";
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (ScriptNodeElementType(elementType.type)) {
 	case ScriptNodeElementType::ReadDataPin:
 	case ScriptNodeElementType::WriteDataPin:
 	case ScriptNodeElementType::FlowPin:
 	case ScriptNodeElementType::TargetPin:
-		return getPinAndConnectionDescription(node, world, elementType, elementIdx, graph);
+		return getPinAndConnectionDescription(node, elementType, elementIdx, graph);
 	case ScriptNodeElementType::Node:
 		return getNodeDescription(node, graph);
 	default:
@@ -50,7 +50,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
 {
 	auto pinDesc = getPinDescription(node, elementType, elementIdx);
 
