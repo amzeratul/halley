@@ -6,12 +6,6 @@
 #include "halley/scripting/script_node_type.h"
 using namespace Halley;
 
-#ifndef DONT_INCLUDE_HALLEY_HPP
-#define DONT_INCLUDE_HALLEY_HPP
-#endif
-#include "halley/entity/components/transform_2d_component.h"
-
-
 ScriptRenderer::ScriptRenderer(Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: BaseGraphRenderer(resources, nativeZoom)
 	, nodeTypeCollection(nodeTypeCollection)

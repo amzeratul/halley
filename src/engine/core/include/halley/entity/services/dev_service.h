@@ -4,6 +4,7 @@
 #include "halley/storage/options.h"
 #include "halley/entity/service.h"
 #include "halley/data_structures/tree_map.h"
+#include "halley/entity/entity.h"
 #include "halley/maths/polygon.h"
 #include "halley/graphics/camera.h"
 

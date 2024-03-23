@@ -3,6 +3,8 @@
 #include "halley/game/frame_data.h"
 #include "halley/graphics/painter.h"
 #include "halley/maths/polygon.h"
+#include "halley/scripting/script_graph.h"
+#include "halley/scripting/script_state.h"
 #include "halley/ui/widgets/ui_debug_console.h"
 
 using namespace Halley;

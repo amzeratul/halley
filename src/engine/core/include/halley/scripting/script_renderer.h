@@ -1,9 +1,7 @@
 #pragma once
-#include "script_node_type.h"
-#include "script_node_enums.h"
+#include "halley/graph/base_graph_type.h"
 #include "halley/graph/base_graph_renderer.h"
 #include "halley/graphics/sprite/sprite.h"
-#include "halley/maths/circle.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
