@@ -147,15 +147,6 @@ const IScriptNodeType& ScriptGraphNode::getNodeType() const
 	return *nodeType;
 }
 
-GraphNodePinType ScriptGraphNode::getPinType(GraphPinId idx) const
-{
-	const auto& config = getNodeType().getPinConfiguration(*this);
-	if (idx >= config.size()) {
-		return GraphNodePinType();
-	}
-	return config[idx];
-}
-
 gsl::span<const GraphNodePinType> ScriptGraphNode::getPinConfiguration() const
 {
 	return getNodeType().getPinConfiguration(*this);

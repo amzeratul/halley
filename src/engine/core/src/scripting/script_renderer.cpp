@@ -37,7 +37,7 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId)
 
 GraphPinSide ScriptRenderer::getSide(GraphNodePinType pinType) const
 {
-	switch (ScriptNodeElementType(pinType.type)) {
+	switch (static_cast<ScriptNodeElementType>(pinType.type)) {
 	case ScriptNodeElementType::TargetPin:
 		if (!pinType.forceHorizontal) {
 			return pinType.direction == GraphNodePinDirection::Input ? GraphPinSide::Top : GraphPinSide::Bottom;

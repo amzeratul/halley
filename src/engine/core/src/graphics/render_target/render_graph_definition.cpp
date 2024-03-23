@@ -17,10 +17,10 @@ RenderGraphDefinition::RenderGraphDefinition(const ConfigNode& config)
 
 RenderGraphDefinition::Node::Node(const ConfigNode& node)
 {
-	id = node["id"].asString();
+	id = node["name"].asString();
 	priority = node["priority"].asInt(0);
-	method = fromString<RenderGraphMethod>(node["method"].asString());
-	methodParameters = ConfigNode(node["methodParameters"]);
+	method = fromString<RenderGraphMethod>(node["type"].asString());
+	methodParameters = ConfigNode(node["settings"]);
 	position = node["position"].asVector2f(Vector2f(100, 100));
 }
 
@@ -141,12 +141,14 @@ RenderGraphNode2::RenderGraphNode2(const String& type, const Vector2f& position)
 RenderGraphNode2::RenderGraphNode2(const ConfigNode& node)
 	: BaseGraphNode(node)
 {
+	name = node["name"].asString("");
 }
 
-GraphNodePinType RenderGraphNode2::getPinType(GraphPinId idx) const
+ConfigNode RenderGraphNode2::toConfigNode() const
 {
-	// TODO
-	return {};
+	auto result = BaseGraphNode::toConfigNode();
+	result["name"] = name;
+	return result;
 }
 
 gsl::span<const GraphNodePinType> RenderGraphNode2::getPinConfiguration() const
@@ -158,6 +160,28 @@ gsl::span<const GraphNodePinType> RenderGraphNode2::getPinConfiguration() const
 std::unique_ptr<BaseGraphNode> RenderGraphNode2::clone() const
 {
 	return std::make_unique<RenderGraphNode2>(*this);
+}
+
+void RenderGraphNode2::serialize(Serializer& s) const
+{
+	BaseGraphNode::serialize(s);
+	s << name;
+}
+
+void RenderGraphNode2::deserialize(Deserializer& s)
+{
+	BaseGraphNode::deserialize(s);
+	s >> name;
+}
+
+const String& RenderGraphNode2::getName() const
+{
+	return name;
+}
+
+void RenderGraphNode2::setName(String name)
+{
+	this->name = std::move(name);
 }
 
 

@@ -215,3 +215,12 @@ void BaseGraphNode::offsetNodes(GraphNodeId offset)
 	}
 	id += offset;
 }
+
+GraphNodePinType BaseGraphNode::getPinType(GraphPinId idx) const
+{
+	const auto& config = getPinConfiguration();
+	if (idx >= config.size()) {
+		return GraphNodePinType();
+	}
+	return config[idx];
+}

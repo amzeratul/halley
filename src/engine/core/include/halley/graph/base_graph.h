@@ -85,7 +85,7 @@ namespace Halley {
 		void remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap);
 		virtual void offsetNodes(GraphNodeId offset);
 
-		virtual GraphNodePinType getPinType(GraphPinId idx) const = 0;
+		GraphNodePinType getPinType(GraphPinId idx) const;
 		virtual gsl::span<const GraphNodePinType> getPinConfiguration() const = 0;
 		virtual std::unique_ptr<BaseGraphNode> clone() const = 0;
 

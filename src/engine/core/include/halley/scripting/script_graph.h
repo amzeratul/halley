@@ -26,7 +26,6 @@ namespace Halley {
 		void clearType() const;
 		const IScriptNodeType& getNodeType() const;
 
-		GraphNodePinType getPinType(GraphPinId idx) const override;
 		gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }

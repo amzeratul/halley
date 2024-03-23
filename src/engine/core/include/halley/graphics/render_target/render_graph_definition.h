@@ -102,9 +102,19 @@ namespace Halley {
         RenderGraphNode2(const String& type, const Vector2f& position);
         RenderGraphNode2(const ConfigNode& node);
 
-	    GraphNodePinType getPinType(GraphPinId idx) const override;
+        ConfigNode toConfigNode() const override;
+
 	    gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 	    std::unique_ptr<BaseGraphNode> clone() const override;
+
+        void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+
+        const String& getName() const;
+        void setName(String name);
+
+    private:
+        String name;
     };
 
     class RenderGraphDefinition2 : public BaseGraphImpl<RenderGraphNode2> {
