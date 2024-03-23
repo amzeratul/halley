@@ -22,17 +22,6 @@ namespace Halley {
 
 	private:
 		RenderGraphGizmo* renderGraphGizmo = nullptr;
-
-		static std::shared_ptr<GraphNodeTypeCollection> makeRenderGraphTypes();
 	};
 	
-
-	class RenderGraphNodeType : public IGraphNodeType {
-	public:
-		String getId() const override;
-		String getName() const override;
-		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
-	};
-
-
 }
