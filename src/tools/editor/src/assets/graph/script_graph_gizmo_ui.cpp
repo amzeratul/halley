@@ -23,7 +23,6 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 void ScriptGizmoUI::load(BaseGraph& graph)
 {
 	scriptGizmo->setGraph(dynamic_cast<ScriptGraph*>(&graph));
-	updateNodes();
 }
 
 void ScriptGizmoUI::setState(ScriptState* state)

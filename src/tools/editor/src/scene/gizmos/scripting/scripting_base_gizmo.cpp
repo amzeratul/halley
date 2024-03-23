@@ -35,13 +35,6 @@ std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription
 	return std::pair<String, Vector<ColourOverride>>{ std::move(text), std::move(colours) };
 }
 
-void ScriptingBaseGizmo::assignNodeTypes(bool force) const
-{
-	if (scriptGraph && nodeTypes) {
-		scriptGraph->assignTypes(*nodeTypes, force);
-	}
-}
-
 ScriptGraph& ScriptingBaseGizmo::getGraph()
 {
 	return *scriptGraph;
@@ -51,7 +44,6 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
 	setBaseGraph(graph);
 	scriptGraph = graph;
-	updateNodes(true);
 }
 
 void ScriptingBaseGizmo::setState(ScriptState* state)
@@ -81,16 +73,6 @@ void ScriptingBaseGizmo::setDebugDisplayData(HashMap<int, String> values)
 	renderer->setDebugDisplayData(std::move(values));
 }
 
-void ScriptingBaseGizmo::updateNodes(bool force)
-{
-	if (scriptGraph) {
-		assignNodeTypes(force);
-		for (auto& node: scriptGraph->getNodes()) {
-			node.getNodeType().updateSettings(node, *scriptGraph, *resources);
-		}
-	}
-}
-
 bool ScriptingBaseGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
 	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
@@ -108,11 +90,6 @@ void ScriptingBaseGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std
 	if (const auto* nodeType = nodeTypes->tryGetGraphNodeType(type)) {
 		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
 	}
-}
-
-void ScriptingBaseGizmo::refreshNodes() const
-{
-	assignNodeTypes();
 }
 
 std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)

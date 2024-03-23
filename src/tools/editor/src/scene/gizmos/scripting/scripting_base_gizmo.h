@@ -17,13 +17,10 @@ namespace Halley {
 		void setCurNodeDevConData(const String& str);
 		void setDebugDisplayData(HashMap<int, String> values);
 
-		void updateNodes(bool force = false);
-
 	protected:
 		bool canDeleteNode(const BaseGraphNode& node) const override;
 		bool nodeTypeNeedsSettings(const String& nodeType) const override;
 		void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType) override;
-		void refreshNodes() const override;
 		std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback) override;
 		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
 		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
@@ -36,6 +33,5 @@ namespace Halley {
 		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
 
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const override;
-		void assignNodeTypes(bool force = false) const;
 	};
 }

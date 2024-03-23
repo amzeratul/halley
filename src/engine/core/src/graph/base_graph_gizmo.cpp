@@ -6,6 +6,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/graph/base_graph.h"
 #include "halley/graph/base_graph_renderer.h"
+#include "halley/graph/base_graph_type.h"
 #include "halley/graphics/painter.h"
 #include "halley/maths/polygon.h"
 #include "halley/ui/ui_factory.h"
@@ -154,6 +155,12 @@ void BaseGraphGizmo::setBaseGraph(BaseGraph* graph)
 		renderer->setGraph(graph);
 	}
 	dragging = {};
+	updateNodes(true);
+}
+
+BaseGraph& BaseGraphGizmo::getBaseGraph() const
+{
+	return *baseGraph;
 }
 
 void BaseGraphGizmo::setBasePosition(Vector2f pos)
@@ -401,6 +408,7 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 
 void BaseGraphGizmo::refreshNodes() const
 {
+	assignNodeTypes();
 }
 
 bool BaseGraphGizmo::isHighlighted() const
@@ -630,12 +638,23 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 
 void BaseGraphGizmo::pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard)
 {
-	auto strData = clipboard->getStringData();
-	if (strData) {
+	if (const auto strData = clipboard->getStringData()) {
 		try {
 			const ConfigNode node = YAMLConvert::parseConfig(strData.value());
 			paste(node);
 		} catch (...) {}
+	}
+}
+
+void BaseGraphGizmo::updateNodes(bool force)
+{
+	if (baseGraph) {
+		assignNodeTypes(force);
+		const auto n = baseGraph->getNumNodes();
+		for (size_t i = 0; i < n; ++i) {
+			auto& node = baseGraph->getNode(i);
+			node.getGraphNodeType().updateSettings(node, *baseGraph, *resources);
+		}
 	}
 }
 
@@ -738,6 +757,13 @@ void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vec
 
 	tooltipLabel
 		.draw(painter);
+}
+
+void BaseGraphGizmo::assignNodeTypes(bool force) const
+{
+	if (baseGraph && nodeTypes) {
+		baseGraph->assignTypes(*nodeTypes, force);
+	}
 }
 
 ExecutionQueue& BaseGraphGizmo::getExecutionQueue()

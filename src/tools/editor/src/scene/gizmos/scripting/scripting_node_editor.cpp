@@ -1,10 +1,9 @@
 #include "scripting_node_editor.h"
-
 #include "scripting_base_gizmo.h"
-#include "scripting_gizmo.h"
+
 using namespace Halley;
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IGraphNodeType& nodeType, std::optional<Vector2f> pos)
+ScriptingNodeEditor::ScriptingNodeEditor(BaseGraphGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IGraphNodeType& nodeType, std::optional<Vector2f> pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
@@ -103,12 +102,12 @@ void ScriptingNodeEditor::applyChanges()
 	
 	Concurrent::execute(gizmo->getExecutionQueue(), [type, gizmo, nodeId = this->nodeId, curSettings = ConfigNode(curSettings)] () mutable {
 		if (!nodeId) {
-			nodeId = static_cast<BaseGraphGizmo*>(gizmo)->addNode(type, Vector2f(), std::move(curSettings));
+			nodeId = gizmo->addNode(type, Vector2f(), std::move(curSettings));
 		} else {
 			gizmo->getNode(*nodeId).getSettings() = std::move(curSettings);
 		}
 		gizmo->updateNodes();
-		gizmo->getGraph().validateNodePins(*nodeId);
+		gizmo->getBaseGraph().validateNodePins(*nodeId);
 		gizmo->onModified();
 	});
 }

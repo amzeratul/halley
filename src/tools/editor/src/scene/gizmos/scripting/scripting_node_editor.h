@@ -5,11 +5,11 @@ namespace Halley {
 	class UIFactory;
 	class IScriptNodeType;
 	class IEntityEditorFactory;
-	class ScriptingBaseGizmo;
+	class BaseGraphGizmo;
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IGraphNodeType& nodeType, std::optional<Vector2f> pos);
+		ScriptingNodeEditor(BaseGraphGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IGraphNodeType& nodeType, std::optional<Vector2f> pos);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
@@ -19,7 +19,7 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
-		ScriptingBaseGizmo& gizmo;
+		BaseGraphGizmo& gizmo;
 		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
 		UIWidget* eventSink = nullptr;

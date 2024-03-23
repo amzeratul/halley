@@ -30,6 +30,7 @@ namespace Halley {
 		virtual std::shared_ptr<UIWidget> makeUI();
 
 		void setBaseGraph(BaseGraph* graph);
+		BaseGraph& getBaseGraph() const;
 
 		void setUIRoot(UIRoot& root);
 		void setEventSink(UIWidget& eventSink);
@@ -63,6 +64,8 @@ namespace Halley {
 		void cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard);
 		void pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard);
 
+		void updateNodes(bool force = false);
+
 		ExecutionQueue& getExecutionQueue();
 
 	protected:
@@ -75,7 +78,7 @@ namespace Halley {
 		UIRoot* uiRoot = nullptr;
 		UIWidget* eventSink = nullptr;
 
-		virtual void refreshNodes() const;
+		void refreshNodes() const;
 		virtual bool canDeleteNode(const BaseGraphNode& node) const;
 		virtual bool nodeTypeNeedsSettings(const String& nodeType) const;
 		virtual void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
@@ -147,5 +150,7 @@ namespace Halley {
 		void drawWheelGuides(Painter& painter) const;
 
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
+
+		void assignNodeTypes(bool force = false) const;
 	};
 }
