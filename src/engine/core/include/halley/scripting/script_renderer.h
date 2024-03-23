@@ -30,25 +30,22 @@ namespace Halley {
 		Colour4f getBaseNodeColour(const IGraphNodeType& type) const override;
 		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
 
-	private:		
+	private:
 		const World* world = nullptr;
 		const ScriptNodeTypeCollection& nodeTypeCollection;
 		
 		const ScriptState* state = nullptr;
 
-		Sprite nodeBg;
-		Sprite nodeBgOutline;
-		Sprite pinSprite;
 		Sprite destructorBg;
 		Sprite destructorIcon;
-		TextRenderer labelText;
 		HashMap<int, String> debugDisplayValues;
 
 		void drawNodeBackground(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode) override;
-		void drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId) override;
+		std::pair<String, LabelType> getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const;
 
 		NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const override;
 		Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const override;
+		float getIconAlpha(const IGraphNodeType& nodeType, bool dim) const override;
 		Vector2f getCommentNodeSize(const BaseGraphNode& node, float curZoom) const;
 
 		String getDebugDisplayValue(uint16_t id) const;

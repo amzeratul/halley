@@ -20,6 +20,15 @@ BaseGraphRenderer::BaseGraphRenderer(Resources& resources, float nativeZoom)
 	: resources(resources)
 	, nativeZoom(nativeZoom)
 {
+	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
+	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
+	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
+	labelText
+		.setFont(resources.get<Font>("Ubuntu Bold"))
+		.setSize(14)
+		.setColour(Colour(1, 1, 1))
+		.setOutlineColour(Colour(0, 0, 0))
+		.setOutline(1);
 }
 
 void BaseGraphRenderer::setGraph(const BaseGraph* graph)
@@ -175,6 +184,100 @@ void BaseGraphRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, c
 
 void BaseGraphRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
 {
+	const auto* nodeType = tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
+
+	const Vector2f border = Vector2f(18, 18);
+	const Vector2f nodeSize = getNodeSize(*nodeType, node, curZoom);
+	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
+	const auto [c, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
+	auto col = c; // Clang doesn't seem to like lambda capturing (drawLabel, below) from a structured binding
+
+	// Node body
+	nodeBg.clone()
+		.setColour(col)
+		.setPosition(pos)
+		.scaleTo(nodeSize + border)
+		.setSize(nodeBg.getSize() / curZoom)
+		.setSliceScale(1.0f / curZoom)
+		.draw(painter);
+
+	if (borderAlpha > 0.0001f) {
+		nodeBgOutline.clone()
+			.setPosition(pos)
+			.scaleTo(nodeSize + border)
+			.setSize(nodeBg.getSize() / curZoom)
+			.setSliceScale(1.0f / curZoom)
+			.setColour(Colour4f(1, 1, 1, borderAlpha))
+			.draw(painter);
+	}
+
+	auto [label, labelType] = getLabel(*tryGetNodeType(node.getType()), node);
+	const Vector2f iconOffset = labelType == LabelType::Normal ? Vector2f(0, -8.0f / curZoom).round() : Vector2f();
+
+	// Icon
+	const auto& icon = getIconByName(nodeType->getIconName(node));
+	const float iconAlpha = getIconAlpha(*nodeType, labelType == LabelType::Large);
+	if (icon.hasMaterial() && iconAlpha > 0.0f) {
+		icon.clone()
+			.setPosition(pos + iconOffset)
+			.setScale(1.0f / curZoom)
+			.setColour(iconCol.multiplyAlpha(iconAlpha))
+			.draw(painter);
+	}
+
+	auto drawLabel = [&, col](const String& text, Vector2f pos, float size, float maxWidth, bool split)
+	{
+		auto labelCopy = labelText.clone()
+			.setPosition(pos)
+			.setSize(size)
+			.setOutline(8.0f / curZoom)
+			.setOutlineColour(col.multiplyLuma(0.75f))
+			.setOffset(Vector2f(0.5f, 0.5f))
+			.setAlignment(0.0f);
+
+		if (split) {
+			labelCopy.setText(labelCopy.split(text, maxWidth));
+		} else {
+			labelCopy.setText(text);
+			const auto extents = labelCopy.getExtents();
+			if (extents.x > maxWidth) {
+				labelCopy.setSize(size * maxWidth / extents.x);
+			}
+		}
+
+		labelCopy
+			.draw(painter);
+	};
+
+	// Large label
+	switch (labelType) {
+	case LabelType::Normal:
+		drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14.0f / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
+		break;
+	case LabelType::Large:
+		drawLabel(label, pos + iconOffset, 18.0f / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
+		break;
+	case LabelType::Comment:
+		drawLabel(label, pos + iconOffset, 14.0f / curZoom, (nodeSize.x - 20.0f) / curZoom, true);
+		break;
+	}
+
+	// Draw pins
+	const auto& pins = nodeType->getPinConfiguration(node);
+	for (size_t i = 0; i < pins.size(); ++i) {
+		const auto& pinType = pins[i];
+		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale);
+		const auto baseCol = getPinColour(pinType);
+		const auto col = highlightElement == pinType && highlightElementId == i ? baseCol.inverseMultiplyLuma(0.3f) : baseCol;
+		pinSprite.clone()
+			.setPosition(circle.getCentre())
+			.setColour(col)
+			.setScale(1.0f / curZoom)
+			.draw(painter);
+	}
 }
 
 std::tuple<Colour4f, Colour4f, float> BaseGraphRenderer::getNodeColour(const IGraphNodeType& nodeType, NodeDrawMode drawMode)
@@ -441,4 +544,19 @@ Vector<GraphNodeId> BaseGraphRenderer::getNodesInRect(Vector2f basePos, float cu
 	}
 
 	return result;
+}
+
+float BaseGraphRenderer::getIconAlpha(const IGraphNodeType& graphNode, bool dim) const
+{
+	return dim ? 0.25f : 1.0f;
+}
+
+std::pair<String, BaseGraphRenderer::LabelType> BaseGraphRenderer::getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const
+{
+	const auto label = nodeType.getLabel(node);
+	if (!label.isEmpty()) {
+		return { label, LabelType::Normal };
+	}
+
+	return { "", LabelType::None };
 }

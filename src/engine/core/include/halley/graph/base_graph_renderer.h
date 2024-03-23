@@ -1,6 +1,7 @@
 #pragma once
 #include "base_graph_enums.h"
 #include "halley/graphics/sprite/sprite.h"
+#include "halley/graphics/text/text_renderer.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/circle.h"
 #include "halley/maths/colour.h"
@@ -66,6 +67,13 @@ namespace Halley {
 			float activationTime = std::numeric_limits<float>::infinity();
 		};
 
+		enum class LabelType {
+			None,
+			Large,
+			Normal,
+			Comment
+		};
+
 		Resources& resources;
 		std::optional<NodeUnderMouseInfo> highlightNode;
 		Vector<GraphNodeId> selectedNodes;
@@ -73,6 +81,11 @@ namespace Halley {
 		float nativeZoom = 1.0f;
 
 		const BaseGraph* graph = nullptr;
+
+		Sprite nodeBg;
+		Sprite nodeBgOutline;
+		Sprite pinSprite;
+		TextRenderer labelText;
 
 		virtual const IGraphNodeType* tryGetNodeType(const String& typeId) const = 0;
 
@@ -91,6 +104,8 @@ namespace Halley {
 		virtual Colour4f getPinColour(GraphNodePinType pinType) const;
 		virtual Colour4f getBaseNodeColour(const IGraphNodeType& type) const;
 		virtual Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;
+		virtual float getIconAlpha(const IGraphNodeType& graphNode, bool dim) const;
+		virtual std::pair<String, LabelType> getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const;
 
 		Circle getNodeElementArea(const IGraphNodeType& nodeType, Vector2f basePos, const BaseGraphNode& node, size_t pinN, float curZoom, float posScale) const;
 

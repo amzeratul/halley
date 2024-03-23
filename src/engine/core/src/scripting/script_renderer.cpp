@@ -17,17 +17,8 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 	, world(world)
 	, nodeTypeCollection(nodeTypeCollection)
 {
-	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
-	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	destructorBg = Sprite().setImage(resources, "halley_ui/script_destructor_bg.png").setPivot(Vector2f(0.5f, 0.0f));
 	destructorIcon = Sprite().setImage(resources, "halley_ui/script_destructor_icon.png").setPivot(Vector2f(0.5f, 0.5f));
-	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
-	labelText
-		.setFont(resources.get<Font>("Ubuntu Bold"))
-		.setSize(14)
-		.setColour(Colour(1, 1, 1))
-		.setOutlineColour(Colour(0, 0, 0))
-		.setOutline(1);
 }
 
 void ScriptRenderer::setState(const ScriptState* scriptState)
@@ -111,103 +102,20 @@ void ScriptRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, cons
 	}
 }
 
-void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
+std::pair<String, ScriptRenderer::LabelType> ScriptRenderer::getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const
 {
-	const auto* nodeType = dynamic_cast<const IScriptNodeType*>(tryGetNodeType(node.getType())); // TODO: remove cast
-	if (!nodeType) {
-		return;
+	const auto& graphNodeType = dynamic_cast<const IScriptNodeType&>(nodeType);
+	const auto classification = graphNodeType.getClassification();
+	if (classification == ScriptNodeClassification::DebugDisplay) {
+		return { getDebugDisplayValue(node.getId()), LabelType::Large };
 	}
 
-	const Vector2f border = Vector2f(18, 18);
-	const Vector2f nodeSize = getNodeSize(*nodeType, node, curZoom);
-	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
-	const auto [c, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
-	auto col = c; // Clang doesn't seem to like lambda capturing (drawLabel, below) from a structured binding
-
-	// Node body
-	nodeBg.clone()
-		.setColour(col)
-		.setPosition(pos)
-		.scaleTo(nodeSize + border)
-		.setSize(nodeBg.getSize() / curZoom)
-		.setSliceScale(1.0f / curZoom)
-		.draw(painter);
-
-	if (borderAlpha > 0.0001f) {
-		nodeBgOutline.clone()
-			.setPosition(pos)
-			.scaleTo(nodeSize + border)
-			.setSize(nodeBg.getSize() / curZoom)
-			.setSliceScale(1.0f / curZoom)
-			.setColour(Colour4f(1, 1, 1, borderAlpha))
-			.draw(painter);
-	}
-
-	const auto label = nodeType->getLabel(node);
-	const auto classification = nodeType->getClassification();
-	const auto largeLabel = classification == ScriptNodeClassification::DebugDisplay ? getDebugDisplayValue(node.getId()) : nodeType->getLargeLabel(node);
-	const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, -8.0f / curZoom).round();
-
-	auto drawLabel = [&, col](const String& text, Vector2f pos, float size, float maxWidth, bool split)
-	{
-		auto labelCopy = labelText.clone()
-			.setPosition(pos)
-			.setSize(size)
-			.setOutline(8.0f / curZoom)
-			.setOutlineColour(col.multiplyLuma(0.75f))
-			.setOffset(Vector2f(0.5f, 0.5f))
-			.setAlignment(0.0f);
-
-		if (split) {
-			labelCopy.setText(labelCopy.split(text, maxWidth));
-		} else {
-			labelCopy.setText(text);
-			const auto extents = labelCopy.getExtents();
-			if (extents.x > maxWidth) {
-				labelCopy.setSize(size * maxWidth / extents.x);
-			}
-		}
-
-		labelCopy
-			.draw(painter);
-	};
-	
-	// Icon
-	const auto& icon = getIconByName(nodeType->getIconName(node));
-	if (icon.hasMaterial() && classification != ScriptNodeClassification::Comment) {
-		icon.clone()
-			.setPosition(pos + iconOffset)
-			.setScale(1.0f / curZoom)
-			.setColour(iconCol.multiplyAlpha(classification == ScriptNodeClassification::DebugDisplay ? 0.05f : (largeLabel.isEmpty() ? 1.0f : 0.25f)))
-			.draw(painter);
-	}
-
-	// Large label
+	const auto largeLabel = graphNodeType.getLargeLabel(node);
 	if (!largeLabel.isEmpty()) {
-		const bool isComment = classification == ScriptNodeClassification::Comment;
-		const auto fontSize = isComment ? 14.0f : 18.0f;
-		const auto margin = isComment ? 20.0f : 10.0f;
-		drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - margin) / curZoom, isComment);
+		return { largeLabel, classification == ScriptNodeClassification::Comment ? LabelType::Comment : LabelType::Large };
 	}
 
-	// Label
-	if (!label.isEmpty()) {
-		drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
-	}
-
-	// Draw pins
-	const auto& pins = nodeType->getPinConfiguration(node);
-	for (size_t i = 0; i < pins.size(); ++i) {
-		const auto& pinType = pins[i];
-		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale);
-		const auto baseCol = getPinColour(pinType);
-		const auto col = highlightElement == pinType && highlightElementId == i ? baseCol.inverseMultiplyLuma(0.3f) : baseCol;
-		pinSprite.clone()
-			.setPosition(circle.getCentre())
-			.setColour(col)
-			.setScale(1.0f / curZoom)
-			.draw(painter);
-	}
+	return BaseGraphRenderer::getLabel(nodeType, node);
 }
 
 Vector2f ScriptRenderer::getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
@@ -225,6 +133,18 @@ Vector2f ScriptRenderer::getNodeSize(const IGraphNodeType& nodeType, const BaseG
 		return Vector2f(150, 60);
 	default:
 		return Vector2f(60, 60);
+	}
+}
+
+float ScriptRenderer::getIconAlpha(const IGraphNodeType& nodeType, bool dim) const
+{
+	switch (dynamic_cast<const IScriptNodeType&>(nodeType).getClassification()) {
+	case ScriptNodeClassification::Comment:
+		return 0.0f;
+	case ScriptNodeClassification::DebugDisplay:
+		return 0.05f;
+	default:
+		return BaseGraphRenderer::getIconAlpha(nodeType, dim);
 	}
 }
 
