@@ -12,7 +12,7 @@
 namespace Halley {
 	class ScriptGraphVariableInspector;
 
-	class ScriptGraphEditor : public DrillDownAssetWindow, public IGraphEditor {
+	class ScriptGraphEditor : public UIWidget, public IDrillDownAssetWindow, public IGraphEditor {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
@@ -38,6 +38,8 @@ namespace Halley {
 		void redo() override;
 		void centreView();
 		void openProperties();
+
+		std::shared_ptr<UIWidget> asWidget() override;
 
 	protected:
     	void update(Time t, bool moved) override;

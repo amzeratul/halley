@@ -4,6 +4,7 @@
 #include "halley/maths/ops.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 #include "halley/utils/variable.h"
 using namespace Halley;
 

@@ -11,7 +11,7 @@
 #include "src/ui/timeline_editor.h"
 
 namespace Halley {
-	class DrillDownAssetWindow;
+	class IDrillDownAssetWindow;
 	class PrefabEditor;
 	class ProjectWindow;
 	class AssetBrowserTabs;
@@ -140,7 +140,7 @@ namespace Halley {
 		Resources& getGameResources() const override;
 		Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const override;
 
-		void drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor);
+		void drillDownEditor(std::shared_ptr<IDrillDownAssetWindow> editor);
 
 		Vector<const EntityData*> queryEntityDatas(const String& containComponent) const;
 		ConfigNode& getGameData(const String& key) override;

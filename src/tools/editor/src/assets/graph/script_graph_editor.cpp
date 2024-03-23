@@ -10,7 +10,7 @@ using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow,
 	std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene, Callback callback, Vector<String> entityTargets)
-	: DrillDownAssetWindow("ScriptGraphEditor", {}, UISizer())
+	: UIWidget("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
@@ -32,49 +32,6 @@ ScriptGraphEditor::~ScriptGraphEditor()
 	setListeningToClient(false);
 	assert(!scriptEnumHandle);
 	assert(!scriptStateHandle);
-}
-
-void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
-{
-	scriptGraph = std::move(graph);
-	initUndoStack();
-}
-
-void ScriptGraphEditor::onActiveChanged(bool active)
-{
-	setListeningToClient(active);
-	if (active && gizmoEditor) {
-		gizmoEditor->updateNodes();
-	}
-}
-
-void ScriptGraphEditor::setModified(bool value)
-{
-	modified = value;
-
-	if (value) {
-		scriptGraph->updateHash();
-		if (scriptEnumHandle) {
-			setListeningToClient(false);
-			setListeningToClient(true);
-		}
-	}
-}
-
-bool ScriptGraphEditor::isModified()
-{
-	return modified;
-}
-
-void ScriptGraphEditor::drillDownSave()
-{
-	callback(true, scriptGraph);
-	setModified(false);
-}
-
-std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()
-{
-	return scriptGraph;
 }
 
 void ScriptGraphEditor::onMakeUI()
@@ -203,6 +160,49 @@ void ScriptGraphEditor::onMakeUI()
 	}
 }
 
+void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
+{
+	scriptGraph = std::move(graph);
+	initUndoStack();
+}
+
+void ScriptGraphEditor::onActiveChanged(bool active)
+{
+	setListeningToClient(active);
+	if (active && gizmoEditor) {
+		gizmoEditor->updateNodes();
+	}
+}
+
+void ScriptGraphEditor::setModified(bool value)
+{
+	modified = value;
+
+	if (value) {
+		scriptGraph->updateHash();
+		if (scriptEnumHandle) {
+			setListeningToClient(false);
+			setListeningToClient(true);
+		}
+	}
+}
+
+bool ScriptGraphEditor::isModified()
+{
+	return modified;
+}
+
+void ScriptGraphEditor::drillDownSave()
+{
+	callback(true, scriptGraph);
+	setModified(false);
+}
+
+std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()
+{
+	return scriptGraph;
+}
+
 const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
 {
 	return entityTargets;
@@ -252,6 +252,11 @@ void ScriptGraphEditor::openProperties()
 			onModified();
 		}));
 	}
+}
+
+std::shared_ptr<UIWidget> ScriptGraphEditor::asWidget()
+{
+	return shared_from_this();
 }
 
 void ScriptGraphEditor::initUndoStack()

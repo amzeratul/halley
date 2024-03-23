@@ -273,22 +273,6 @@ ConfigNode ScriptGraph::toConfigNode() const
 	return result;
 }
 
-ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) const
-{
-	ConfigNode::MapType result;
-	result["nodes"] = nodes;
-	result["properties"] = properties;
-	return result;
-}
-
-String ScriptGraph::toYAML() const
-{
-	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = { "type", "settings", "position", "pins", "properties", "nodes" };
-	options.compactMaps = true;
-	return YAMLConvert::generateYAML(toConfigNode(), options);
-}
-
 std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
 {
 	auto script = std::make_shared<ScriptGraph>();
@@ -641,7 +625,7 @@ Range<GraphNodeId> ScriptGraph::getSubGraphRange(int subGraphIdx) const
 
 ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(ScriptGraph script, const EntitySerializationContext& context)
 {
-	return script.toConfigNode(context);
+	return script.toConfigNode();
 }
 
 ScriptGraph ConfigNodeSerializer<ScriptGraph>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)

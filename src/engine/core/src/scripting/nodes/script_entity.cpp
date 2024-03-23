@@ -6,6 +6,7 @@
 #include "halley/entity/world.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/navigation/world_position.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 ConfigNode ScriptSpawnEntityData::toConfigNode(const EntitySerializationContext& context)

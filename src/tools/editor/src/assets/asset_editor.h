@@ -47,10 +47,12 @@ namespace Halley {
 		bool tabbedIn = false;
 	};
 
-	class DrillDownAssetWindow : public UIWidget {
+	class IDrillDownAssetWindow {
 	public:
-		DrillDownAssetWindow(String id, Vector2f minSize, UISizer sizer) : UIWidget(std::move(id), minSize, std::move(sizer)) {}
+		virtual ~IDrillDownAssetWindow() = default;
+
 		virtual bool isModified() { return false; }
 		virtual void drillDownSave() {}
+		virtual std::shared_ptr<UIWidget> asWidget() = 0;
 	};
 }

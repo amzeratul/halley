@@ -1,10 +1,8 @@
 #pragma once
-#include "script_node_enums.h"
 #include "script_state.h"
 #include "halley/entity/entity_id.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/graph/base_graph.h"
-#include "halley/utils/hash.h"
 
 namespace Halley {
 	class IScriptNodeType;
@@ -93,8 +91,6 @@ namespace Halley {
 		const ConfigNode& getProperties() const;
 
 		ConfigNode toConfigNode() const;
-		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
-		String toYAML() const;
 
 		Vector<String> getMessageNames() const;
 		int getMessageNumParams(const String& messageId) const;

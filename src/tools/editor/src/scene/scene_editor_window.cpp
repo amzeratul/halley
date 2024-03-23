@@ -580,7 +580,7 @@ Vector<const EntityData*> SceneEditorWindow::getEntityDataStack(const UUID& inst
 	return sceneData->getEntityDataStack(instanceUUID.toString());
 }
 
-void SceneEditorWindow::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
+void SceneEditorWindow::drillDownEditor(std::shared_ptr<IDrillDownAssetWindow> editor)
 {
 	parentEditor.drillDownEditor(std::move(editor));
 }

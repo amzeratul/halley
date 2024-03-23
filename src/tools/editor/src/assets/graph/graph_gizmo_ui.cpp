@@ -1,5 +1,4 @@
 #include "graph_gizmo_ui.h"
-
 #include "graph_editor.h"
 
 using namespace Halley;

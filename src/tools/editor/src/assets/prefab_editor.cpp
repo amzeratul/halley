@@ -1,6 +1,4 @@
 #include "prefab_editor.h"
-
-
 #include "src/scene/scene_editor_window.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
@@ -51,12 +49,12 @@ void PrefabEditor::onOpenAssetFinder(PaletteWindow& assetFinder)
 	}
 }
 
-void PrefabEditor::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
+void PrefabEditor::drillDownEditor(std::shared_ptr<IDrillDownAssetWindow> editor)
 {
 	for (auto& otherDrill: drillDown) {
-		otherDrill->setActive(false);
+		otherDrill->asWidget()->setActive(false);
 	}
-	add(editor, 1);
+	add(editor->asWidget(), 1);
 	drillDown.push_back(std::move(editor));
 	window->setActive(false);
 	layout();
@@ -71,7 +69,7 @@ void PrefabEditor::update(Time t, bool moved)
 {
 	AssetEditor::update(t, moved);
 
-	if (!drillDown.empty() && !drillDown.back()->isAlive()) {
+	if (!drillDown.empty() && !drillDown.back()->asWidget()->isAlive()) {
 		drillDown.pop_back();
 	}
 	if (drillDown.empty()) {
@@ -79,7 +77,7 @@ void PrefabEditor::update(Time t, bool moved)
 			window->setActive(true);
 		}
 	} else {
-		drillDown.back()->setActive(true);
+		drillDown.back()->asWidget()->setActive(true);
 	}
 	elapsedTime += t;
 }

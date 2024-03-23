@@ -1,6 +1,8 @@
 #include "halley/graph/base_graph.h"
 #include "halley/utils/hash.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -157,6 +159,14 @@ void BaseGraph::validateNodePins(GraphNodeId nodeIdx) {
 		}
 		node.getPins().resize(nPinsTarget);
 	}
+}
+
+String BaseGraph::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = { "type", "settings", "position", "pins", "properties", "nodes" };
+	options.compactMaps = true;
+	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
 void BaseGraphNode::onNodeRemoved(GraphNodeId nodeId)

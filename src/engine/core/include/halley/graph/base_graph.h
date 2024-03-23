@@ -3,7 +3,6 @@
 #include "base_graph_enums.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/data_structures/maybe.h"
-#include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 
 namespace Halley {
@@ -119,6 +118,9 @@ namespace Halley {
 		virtual void eraseNode(size_t i) = 0;
 
 		virtual void finishGraph() {}
+		
+		virtual ConfigNode toConfigNode() const = 0;
+		virtual String toYAML() const;
 
 	protected:
 		virtual bool isMultiConnection(GraphNodePinType pinType) const
