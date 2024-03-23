@@ -32,13 +32,4 @@ namespace Halley {
 
 		std::shared_ptr<GraphEditor> graphEditor;
 	};
-
-	class ScriptGraphAssetEditor : public GraphAssetEditor {
-	public:
-		ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResoures, ProjectWindow& projectWindow);
-
-	protected:
-		std::shared_ptr<BaseGraph> makeGraph() override;
-		std::shared_ptr<GraphEditor> makeGraphEditor(std::shared_ptr<BaseGraph> graph) override;
-	};
 }

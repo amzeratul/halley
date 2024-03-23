@@ -1,6 +1,5 @@
 #include "graph_asset_editor.h"
-#include "halley/scripting/script_graph.h"
-#include "script_graph_editor.h"
+#include "graph_editor.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
@@ -98,19 +97,4 @@ std::shared_ptr<const Resource> GraphAssetEditor::loadResource(const Path& asset
 	}
 
 	return graph;
-}
-
-ScriptGraphAssetEditor::ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResoures, ProjectWindow& projectWindow)
-	: GraphAssetEditor(factory, gameResoures, projectWindow, AssetType::ScriptGraph)
-{
-}
-
-std::shared_ptr<BaseGraph> ScriptGraphAssetEditor::makeGraph()
-{
-	return std::make_shared<ScriptGraph>();
-}
-
-std::shared_ptr<GraphEditor> ScriptGraphAssetEditor::makeGraphEditor(std::shared_ptr<BaseGraph> graph)
-{
-	return std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::dynamic_pointer_cast<ScriptGraph>(graph), this);
 }

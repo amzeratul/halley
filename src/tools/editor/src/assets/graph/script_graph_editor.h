@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graph_asset_editor.h"
 #include "graph_editor.h"
 #include "script_gizmo_ui.h"
 #include "../asset_editor.h"
@@ -91,5 +92,14 @@ namespace Halley {
 		Callback callback;
 
 		ConfigNode properties;
+	};
+
+	class ScriptGraphAssetEditor : public GraphAssetEditor {
+	public:
+		ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResoures, ProjectWindow& projectWindow);
+
+	protected:
+		std::shared_ptr<BaseGraph> makeGraph() override;
+		std::shared_ptr<GraphEditor> makeGraphEditor(std::shared_ptr<BaseGraph> graph) override;
 	};
 }

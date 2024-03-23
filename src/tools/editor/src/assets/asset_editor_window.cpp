@@ -8,7 +8,6 @@
 #include "metadata_editor.h"
 #include "prefab_editor.h"
 #include "graph/render_graph_editor.h"
-#include "graph/graph_asset_editor.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
@@ -227,8 +226,6 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 	case AssetType::Prefab:
 	case AssetType::Scene:
 		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, projectWindow);
-	case AssetType::RenderGraphDefinition:
-		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
 	case AssetType::UIDefinition:
 		return std::make_shared<UIEditor>(factory, project.getGameResources(), project, projectWindow, projectWindow.getAPI());
 	case AssetType::AudioEvent:
@@ -237,6 +234,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 		return std::make_shared<AudioObjectEditor>(factory, project.getGameResources(), project, projectWindow);
 	case AssetType::ScriptGraph:
 		return std::make_shared<ScriptGraphAssetEditor>(factory, project.getGameResources(), projectWindow);
+	case AssetType::RenderGraphDefinition:
+		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
 	case AssetType::Font:
 		return std::make_shared<FontEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}

@@ -437,3 +437,18 @@ void ScriptGraphProperties::onMakeUI()
 		properties["network"] = value;
 	});
 }
+
+ScriptGraphAssetEditor::ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResoures, ProjectWindow& projectWindow)
+	: GraphAssetEditor(factory, gameResoures, projectWindow, AssetType::ScriptGraph)
+{
+}
+
+std::shared_ptr<BaseGraph> ScriptGraphAssetEditor::makeGraph()
+{
+	return std::make_shared<ScriptGraph>();
+}
+
+std::shared_ptr<GraphEditor> ScriptGraphAssetEditor::makeGraphEditor(std::shared_ptr<BaseGraph> graph)
+{
+	return std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::dynamic_pointer_cast<ScriptGraph>(graph), this);
+}
