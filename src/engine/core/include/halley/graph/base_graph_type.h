@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base_graph_enums.h"
+#include "halley/graphics/render_target/render_graph_definition.h"
 #include "halley/graphics/text/text_renderer.h"
 
 namespace Halley {

@@ -136,7 +136,7 @@ void GraphEditor::undo()
 {
 	if (graph && undoStack.canUndo()) {
 		const auto assetId = graph->getAssetId();
-		graph->load(undoStack.undo());
+		graph->load(undoStack.undo(), gameResources);
 		graph->setAssetId(assetId);
 	}
 }
@@ -145,7 +145,7 @@ void GraphEditor::redo()
 {
 	if (graph && undoStack.canRedo()) {
 		const auto assetId = graph->getAssetId();
-		graph->load(undoStack.redo());
+		graph->load(undoStack.redo(), gameResources);
 		graph->setAssetId(assetId);
 	}
 }

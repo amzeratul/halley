@@ -19,12 +19,8 @@ void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 
 std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
-	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
-	if (!nodeType) {
-		return {};
-	}
-	
-	auto [text, colours] = nodeType->getDescription(node, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	auto [text, colours] = BaseGraphGizmo::getNodeDescription(node, nodeInfo);
+
 	if (devConData && devConData->first == getNodeUnderMouse() && !devConData->second.isEmpty()) {
 		colours.emplace_back(text.size(), std::nullopt);
 		text += "\n\nValue: ";

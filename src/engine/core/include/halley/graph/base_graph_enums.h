@@ -67,11 +67,6 @@ namespace Halley {
 			return direction == GraphNodePinDirection::Input ? GraphPinSide::Left : GraphPinSide::Right;
 		}
 
-		[[nodiscard]] bool canConnectTo(const GraphNodePinType& other) const
-		{
-			return type == other.type && direction != other.direction;
-		}
-
 		[[nodiscard]] GraphNodePinType getReverseDirection() const
 		{
 			return GraphNodePinType(type, direction == GraphNodePinDirection::Input ? GraphNodePinDirection::Output : GraphNodePinDirection::Input);

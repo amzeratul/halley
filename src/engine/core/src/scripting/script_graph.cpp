@@ -229,6 +229,11 @@ void ScriptGraph::load(const ConfigNode& node)
 	finishGraph();
 }
 
+void ScriptGraph::load(const ConfigNode& node, Resources& resources)
+{
+	load(node);
+}
+
 bool ScriptGraph::isPersistent() const
 {
 	return properties["persistent"].asBool(false);

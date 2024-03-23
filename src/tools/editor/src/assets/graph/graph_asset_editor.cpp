@@ -78,7 +78,7 @@ std::shared_ptr<const Resource> GraphAssetEditor::loadResource(const Path& asset
 	std::shared_ptr<BaseGraph> graph = makeGraph();
 	if (!assetData.empty()) {
 		auto config = YAMLConvert::parseConfig(assetData);
-		graph->load(config.getRoot());
+		graph->load(config.getRoot(), gameResources);
 	} else {
 		graph->makeDefault();
 		modified = true;

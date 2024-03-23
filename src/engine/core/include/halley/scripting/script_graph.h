@@ -78,7 +78,8 @@ namespace Halley {
 		ScriptGraph();
 		ScriptGraph(const ConfigNode& node);
 
-		void load(const ConfigNode& node) override;
+		void load(const ConfigNode& node);
+		void load(const ConfigNode& node, Resources& resources) override;
 
 		bool isPersistent() const;
 		bool isMultiCopy() const;

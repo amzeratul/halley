@@ -3,6 +3,7 @@
 #include "halley/graph/base_graph_type.h"
 #include "halley/resources/resources.h"
 #include "halley/graphics/material/material_definition.h"
+#include "halley/graphics/render_target/render_graph_node_types.h"
 
 using namespace Halley;
 
@@ -11,8 +12,10 @@ RenderGraphDefinition::RenderGraphDefinition(const ConfigNode& config)
 	for (const auto& node: config["nodes"].asSequence()) {
 		nodes.emplace_back(node);
 	}
-	for (const auto& connection: config["connections"].asSequence()) {
-		connections.emplace_back(connection);
+	if (config.hasKey("connections")) {
+		for (const auto& connection : config["connections"].asSequence()) {
+			connections.emplace_back(connection);
+		}
 	}
 }
 
@@ -111,24 +114,24 @@ void RenderGraphDefinition::Node::loadMaterials(Resources& resources)
 
 void RenderGraphDefinition::Node::generatePins()
 {
-	inputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
+	inputPins = {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer }};
 	if (method == RenderGraphMethod::Output) {
 		outputPins.clear();
 	} else if (method == RenderGraphMethod::ImageOutput) {
-		inputPins = {{ RenderGraphPinType::Texture }};
+		inputPins = {{ RenderGraphElementType::Texture }};
 	} else if (method == RenderGraphMethod::RenderToTexture) {
-		inputPins = {{ RenderGraphPinType::ColourBuffer }};
-		outputPins = {{ RenderGraphPinType::Dependency }};
+		inputPins = {{ RenderGraphElementType::ColourBuffer }};
+		outputPins = {{ RenderGraphElementType::Dependency }};
 	} else if (method == RenderGraphMethod::Paint) {
-		inputPins.push_back(RenderGraphPinType::Dependency);
-		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
+		inputPins.push_back(RenderGraphElementType::Dependency);
+		outputPins = {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer }};
 	} else {
-		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
+		outputPins = {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer }};
 	}
 
 	if (material) {
 		for (const auto& t: material->getTextures()) {
-			inputPins.push_back(RenderGraphPinType::Texture);
+			inputPins.push_back(RenderGraphElementType::Texture);
 		}
 	}
 }
@@ -184,6 +187,11 @@ void RenderGraphNode2::deserialize(Deserializer& s)
 	s >> name;
 }
 
+void RenderGraphNode2::loadMaterials(Resources& resources)
+{
+	dynamic_cast<const RenderGraphNodeType*>(nodeType)->loadMaterials(*this, resources);
+}
+
 const String& RenderGraphNode2::getName() const
 {
 	return name;
@@ -192,6 +200,16 @@ const String& RenderGraphNode2::getName() const
 void RenderGraphNode2::setName(String name)
 {
 	this->name = std::move(name);
+}
+
+void RenderGraphNode2::setMaterial(std::shared_ptr<const MaterialDefinition> material)
+{
+	this->material = std::move(material);
+}
+
+const std::shared_ptr<const MaterialDefinition>& RenderGraphNode2::getMaterial() const
+{
+	return material;
 }
 
 
@@ -203,9 +221,10 @@ GraphNodeId RenderGraphDefinition2::addNode(const String& type, Vector2f pos, Co
 	return id;
 }
 
-void RenderGraphDefinition2::load(const ConfigNode& node)
+void RenderGraphDefinition2::load(const ConfigNode& node, Resources& resources)
 {
 	nodes = node["nodes"].asVector<RenderGraphNode2>({});
+	loadMaterials(resources);
 }
 
 ConfigNode RenderGraphDefinition2::toConfigNode() const
@@ -219,6 +238,7 @@ std::shared_ptr<RenderGraphDefinition2> RenderGraphDefinition2::loadResource(Res
 {
 	auto graph = std::make_shared<RenderGraphDefinition2>();
 	Deserializer::fromBytes(*graph, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
+	graph->loadMaterials(loader.getResources());
 	return graph;
 }
 
@@ -235,5 +255,21 @@ void RenderGraphDefinition2::serialize(Serializer& s) const
 void RenderGraphDefinition2::deserialize(Deserializer& s)
 {
 	s >> nodes;
+}
+
+void RenderGraphDefinition2::loadMaterials(Resources& resources)
+{
+	assignTypes(*RenderGraphNodeTypes::makeRenderGraphTypes());
+	for (auto& node: nodes) {
+		node.loadMaterials(resources);
+	}
+}
+
+bool RenderGraphDefinition2::isMultiConnection(GraphNodePinType pinType) const
+{
+	return (pinType.type == static_cast<int>(RenderGraphElementType::ColourBuffer) && pinType.direction == GraphNodePinDirection::Output)
+		|| (pinType.type == static_cast<int>(RenderGraphElementType::DepthStencilBuffer) && pinType.direction == GraphNodePinDirection::Output)
+		|| (pinType.type == static_cast<int>(RenderGraphElementType::Dependency))
+		|| (pinType.type == static_cast<int>(RenderGraphElementType::Texture) && pinType.direction == GraphNodePinDirection::Output);
 }
 

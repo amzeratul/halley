@@ -12,6 +12,8 @@ namespace Halley {
 
 	protected:
 		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
+		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
+		bool canConnectPins(GraphNodePinType src, GraphNodePinType dst) const override;
 	};
 
 	class RenderGraphGizmoUI : public GraphGizmoUI {
@@ -22,6 +24,15 @@ namespace Halley {
 
 	private:
 		RenderGraphGizmo* renderGraphGizmo = nullptr;
+	};
+
+	class RenderGraphRenderer : public BaseGraphRenderer {
+	public:
+		RenderGraphRenderer(Resources& resources, const GraphNodeTypeCollection& nodeTypeCollection, float nativeZoom);
+
+	protected:
+		Colour4f getPinColour(GraphNodePinType pinType) const override;
+		Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const override;
 	};
 	
 }

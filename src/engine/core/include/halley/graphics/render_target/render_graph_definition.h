@@ -52,14 +52,14 @@ namespace Halley {
 
         	void loadMaterials(Resources& resources);
 
-        	gsl::span<const RenderGraphPinType> getInputPins() const { return inputPins; }
-        	gsl::span<const RenderGraphPinType> getOutputPins() const { return outputPins; }
+        	gsl::span<const RenderGraphElementType> getInputPins() const { return inputPins; }
+        	gsl::span<const RenderGraphElementType> getOutputPins() const { return outputPins; }
 
         private:
             void generatePins();
         	
-        	Vector<RenderGraphPinType> inputPins;
-        	Vector<RenderGraphPinType> outputPins;
+        	Vector<RenderGraphElementType> inputPins;
+        	Vector<RenderGraphElementType> outputPins;
         };
 
     	class Connection {
@@ -112,19 +112,25 @@ namespace Halley {
 
         void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
+        
+    	void loadMaterials(Resources& resources);
 
         const String& getName() const;
         void setName(String name);
 
+        void setMaterial(std::shared_ptr<const MaterialDefinition> material);
+        const std::shared_ptr<const MaterialDefinition>& getMaterial() const;
+
     private:
         String name;
         mutable const IGraphNodeType* nodeType = nullptr;
+        std::shared_ptr<const MaterialDefinition> material;
     };
 
     class RenderGraphDefinition2 : public BaseGraphImpl<RenderGraphNode2> {
     public:
 	    GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) override;
-	    void load(const ConfigNode& node) override;
+	    void load(const ConfigNode& node, Resources& resources) override;
 	    ConfigNode toConfigNode() const override;
 
         static std::shared_ptr<RenderGraphDefinition2> loadResource(ResourceLoader& loader);
@@ -133,5 +139,10 @@ namespace Halley {
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+    	void loadMaterials(Resources& resources);
+
+    protected:
+        bool isMultiConnection(GraphNodePinType pinType) const override;
     };
 }

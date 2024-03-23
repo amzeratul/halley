@@ -30,14 +30,14 @@ namespace Halley {
 		};
 
 		struct InputPin {
-			RenderGraphPinType type = RenderGraphPinType::Unknown;
+			RenderGraphElementType type = RenderGraphElementType::Unknown;
 			OtherPin other;
 			Vector<OtherPin> dependencies;
 			std::shared_ptr<Texture> texture;
 		};
 
 		struct OutputPin {
-			RenderGraphPinType type = RenderGraphPinType::Unknown;
+			RenderGraphElementType type = RenderGraphElementType::Unknown;
 			Vector<OtherPin> others;
 		};
 
@@ -58,8 +58,8 @@ namespace Halley {
 		void notifyOutputs(Vector<RenderGraphNode*>& renderQueue);
 
 		void resetTextures();
-		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphPinType type);
-		void updateTexture(std::shared_ptr<Texture> texture, RenderGraphPinType type);
+		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphElementType type);
+		void updateTexture(std::shared_ptr<Texture> texture, RenderGraphElementType type);
 
 		void determineIfNeedsRenderTarget();
 		

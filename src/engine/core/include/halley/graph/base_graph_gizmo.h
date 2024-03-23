@@ -86,6 +86,7 @@ namespace Halley {
 		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
 		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
 		virtual std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom);
+		virtual bool canConnectPins(GraphNodePinType src, GraphNodePinType dst) const;
 
 	private:
 		struct Dragging {

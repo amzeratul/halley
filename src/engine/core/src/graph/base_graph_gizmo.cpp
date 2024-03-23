@@ -272,7 +272,7 @@ std::optional<BaseGraphGizmo::Connection> BaseGraphGizmo::findAutoConnectionForP
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
 			const bool empty = !node.getPin(pinIdx).hasConnection();
 			const auto dstPinType = node.getPinType(static_cast<GraphPinId>(pinIdx));
-			if (empty && srcPinType.canConnectTo(dstPinType)) {
+			if (empty && canConnectPins(srcPinType, dstPinType)) {
 				const auto srcPos = renderer->getPinPosition(basePos, baseGraph->getNode(srcNodeId), srcPinIdx, getZoom());
 				const auto dstPos = renderer->getPinPosition(basePos, baseGraph->getNode(node.getId()), static_cast<GraphPinId>(pinIdx), getZoom());
 				const float distance = (srcPos - dstPos).length();
@@ -302,7 +302,11 @@ void BaseGraphGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modif
 
 void BaseGraphGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 {
+	if (!dragging) {
+		return;
+	}
 	Expects(dragging->nodeIds.size() == dragging->startPos.size());
+
 	if (inputState.mousePos) {
 		if (dragging->startMousePos) {
 			const Vector2f delta = inputState.mousePos.value() - *dragging->startMousePos;
@@ -384,7 +388,7 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 		const auto dstNodeId = nodeUnderMouse->nodeId;
 		const auto dstType = nodeUnderMouse->element;
 
-		if (!srcType.canConnectTo(dstType) || srcNodeId == dstNodeId) {
+		if (!canConnectPins(srcType, dstType) || srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
 	}
@@ -404,6 +408,11 @@ void BaseGraphGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	if (inputState.rightClickPressed) {
 		nodeEditingConnection.reset();
 	}
+}
+
+bool BaseGraphGizmo::canConnectPins(GraphNodePinType src, GraphNodePinType dst) const
+{
+	return src.type == dst.type && src.direction != dst.direction;
 }
 
 void BaseGraphGizmo::refreshNodes() const
@@ -722,7 +731,13 @@ void BaseGraphGizmo::drawWheelGuides(Painter& painter) const
 
 std::pair<String, Vector<ColourOverride>> BaseGraphGizmo::getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
-	return {};
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
+	if (!nodeType) {
+		return {};
+	}
+	auto [text, colours] = nodeType->getDescription(node, nodeInfo.element, nodeInfo.elementId, *baseGraph);
+	
+	return std::pair<String, Vector<ColourOverride>>{ std::move(text), std::move(colours) };
 }
 
 void BaseGraphGizmo::drawToolTip(Painter& painter, const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
