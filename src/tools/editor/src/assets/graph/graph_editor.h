@@ -25,7 +25,8 @@ namespace Halley {
 		GraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<BaseGraph> graph, AssetType assetType, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene = {}, Callback callback = {});
 		virtual void init();
 
-		void setGraph(std::shared_ptr<BaseGraph> graph);
+		virtual void setGraph(std::shared_ptr<BaseGraph> graph);
+		std::shared_ptr<BaseGraph> getGraph() const;
 
 		void onMakeUI() override;
 		

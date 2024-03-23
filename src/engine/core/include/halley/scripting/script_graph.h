@@ -98,7 +98,7 @@ namespace Halley {
 		constexpr static AssetType getAssetType() { return AssetType::ScriptGraph; }
 
 		void reload(Resource&& resource) override;
-		void makeDefault();
+		void makeDefault() override;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

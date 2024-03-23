@@ -82,15 +82,10 @@ void ScriptGraphEditor::onMakeUI()
 	});
 }
 
-void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
+void ScriptGraphEditor::setGraph(std::shared_ptr<BaseGraph> graph)
 {
-	scriptGraph = std::move(graph);
-	setGraph(scriptGraph);
-}
-
-std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()
-{
-	return scriptGraph;
+	scriptGraph = std::dynamic_pointer_cast<ScriptGraph>(graph);
+	GraphEditor::setGraph(graph);
 }
 
 const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const

@@ -118,6 +118,7 @@ namespace Halley {
 		virtual size_t getNumNodes() const = 0;
 		virtual void eraseNode(size_t i) = 0;
 
+		virtual void makeDefault() {}
 		virtual void finishGraph() {}
 		
 		virtual void load(const ConfigNode& node) = 0;

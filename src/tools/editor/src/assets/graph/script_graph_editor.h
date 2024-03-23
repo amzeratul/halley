@@ -5,7 +5,6 @@
 #include "../asset_editor.h"
 #include "halley/tools/dll/project_dll.h"
 #include "src/scene/entity_editor.h"
-#include "src/ui/infini_canvas.h"
 #include "src/assets/config_undo_stack.h"
 #include "src/ui/popup_window.h"
 
@@ -19,9 +18,7 @@ namespace Halley {
 		~ScriptGraphEditor() override;
 
 		void init() override;
-		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
-
-		std::shared_ptr<ScriptGraph> getScriptGraph();
+		void setGraph(std::shared_ptr<BaseGraph> graph) override;
 
 		void onMakeUI() override;
 

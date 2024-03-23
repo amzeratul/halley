@@ -33,6 +33,11 @@ void GraphEditor::setGraph(std::shared_ptr<BaseGraph> graph)
 	initUndoStack();
 }
 
+std::shared_ptr<BaseGraph> GraphEditor::getGraph() const
+{
+	return graph;
+}
+
 void GraphEditor::initUndoStack()
 {
 	if (graph) {
