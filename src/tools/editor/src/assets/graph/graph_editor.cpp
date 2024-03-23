@@ -160,6 +160,11 @@ String GraphEditor::getAssetKey() const
 	return graph ? (toString(assetType) + ":" + graph->getAssetId()) : "";
 }
 
+std::shared_ptr<UIWidget> GraphEditor::asWidget()
+{
+	return shared_from_this();
+}
+
 void GraphEditor::setModified(bool value)
 {
 	modified = value;

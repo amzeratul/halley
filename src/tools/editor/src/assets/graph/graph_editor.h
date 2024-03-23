@@ -41,6 +41,8 @@ namespace Halley {
 
 		String getAssetKey() const;
 
+		std::shared_ptr<UIWidget> asWidget() override;
+
 	protected:
 		UIFactory& factory;
 		ProjectWindow& projectWindow;

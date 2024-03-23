@@ -235,7 +235,7 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 	case AssetType::ScriptGraph:
 		return std::make_shared<ScriptGraphAssetEditor>(factory, project.getGameResources(), projectWindow);
 	case AssetType::RenderGraphDefinition:
-		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
+		return std::make_shared<RenderGraphAssetEditor>(factory, project.getGameResources(), projectWindow);
 	case AssetType::Font:
 		return std::make_shared<FontEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}

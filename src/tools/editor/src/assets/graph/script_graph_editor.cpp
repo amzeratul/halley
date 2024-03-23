@@ -1,5 +1,5 @@
 #include "script_graph_editor.h"
-#include "script_gizmo_ui.h"
+#include "script_graph_gizmo_ui.h"
 #include "script_target_entity_factory.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/infini_canvas.h"
@@ -106,11 +106,6 @@ void ScriptGraphEditor::openProperties()
 			onModified();
 		}));
 	}
-}
-
-std::shared_ptr<UIWidget> ScriptGraphEditor::asWidget()
-{
-	return shared_from_this();
 }
 
 void ScriptGraphEditor::update(Time t, bool moved)

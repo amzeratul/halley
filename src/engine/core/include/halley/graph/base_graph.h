@@ -45,6 +45,7 @@ namespace Halley {
 		BaseGraphNode();
 		BaseGraphNode(String type, Vector2f position);
 		BaseGraphNode(const ConfigNode& node);
+		virtual ~BaseGraphNode() = default;
 
 		virtual ConfigNode toConfigNode() const;
 

@@ -131,3 +131,71 @@ void RenderGraphDefinition::Node::generatePins()
 		}
 	}
 }
+
+
+
+
+
+
+
+
+GraphNodePinType RenderGraphNode2::getPinType(GraphPinId idx) const
+{
+	// TODO
+	return {};
+}
+
+gsl::span<const GraphNodePinType> RenderGraphNode2::getPinConfiguration() const
+{
+	// TODO
+	return {};
+}
+
+std::unique_ptr<BaseGraphNode> RenderGraphNode2::clone() const
+{
+	return std::make_unique<RenderGraphNode2>(*this);
+}
+
+
+GraphNodeId RenderGraphDefinition2::addNode(const String& type, Vector2f pos, ConfigNode settings)
+{
+	// TODO
+	const auto id = static_cast<GraphNodeId>(nodes.size());
+	nodes.push_back(RenderGraphNode2());
+	return id;
+}
+
+void RenderGraphDefinition2::load(const ConfigNode& node)
+{
+	// TODO
+}
+
+ConfigNode RenderGraphDefinition2::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	// TODO
+	return result;
+}
+
+std::shared_ptr<RenderGraphDefinition2> RenderGraphDefinition2::loadResource(ResourceLoader& loader)
+{
+	auto graph = std::make_shared<RenderGraphDefinition2>();
+	Deserializer::fromBytes(*graph, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
+	return graph;
+}
+
+void RenderGraphDefinition2::reload(Resource&& resource)
+{
+	*this = dynamic_cast<RenderGraphDefinition2&&>(resource);
+}
+
+void RenderGraphDefinition2::serialize(Serializer& s) const
+{
+	s << nodes;
+}
+
+void RenderGraphDefinition2::deserialize(Deserializer& s)
+{
+	s >> nodes;
+}
+

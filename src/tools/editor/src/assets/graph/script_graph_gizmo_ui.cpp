@@ -1,8 +1,9 @@
-#include "script_gizmo_ui.h"
+#include "script_graph_gizmo_ui.h"
 
 #include <utility>
 
 #include "script_graph_editor.h"
+#include "halley/scripting/script_graph.h"
 #include "src/scene/gizmos/scripting/scripting_base_gizmo.h"
 using namespace Halley;
 

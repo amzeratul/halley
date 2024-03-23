@@ -4,6 +4,7 @@
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
 #include "render_graph_pin_type.h"
+#include "halley/graph/base_graph.h"
 
 namespace Halley {
 	class MaterialDefinition;
@@ -93,5 +94,26 @@ namespace Halley {
     	Vector<Connection> connections;
 
     	void loadMaterials(Resources& resources);
+    };
+
+    class RenderGraphNode2 : public BaseGraphNode {
+    public:
+	    GraphNodePinType getPinType(GraphPinId idx) const override;
+	    gsl::span<const GraphNodePinType> getPinConfiguration() const override;
+	    std::unique_ptr<BaseGraphNode> clone() const override;
+    };
+
+    class RenderGraphDefinition2 : public BaseGraphImpl<RenderGraphNode2> {
+    public:
+	    GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) override;
+	    void load(const ConfigNode& node) override;
+	    ConfigNode toConfigNode() const override;
+
+        static std::shared_ptr<RenderGraphDefinition2> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::RenderGraphDefinition; }
+    	void reload(Resource&& resource) override;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
     };
 }

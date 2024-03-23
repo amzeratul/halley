@@ -2,7 +2,7 @@
 
 #include "graph_asset_editor.h"
 #include "graph_editor.h"
-#include "script_gizmo_ui.h"
+#include "script_graph_gizmo_ui.h"
 #include "../asset_editor.h"
 #include "halley/tools/dll/project_dll.h"
 #include "src/scene/entity_editor.h"
@@ -27,8 +27,6 @@ namespace Halley {
 		std::shared_ptr<const Scene> getScene() const;
 		
 		void openProperties();
-
-		std::shared_ptr<UIWidget> asWidget() override;
 
 	protected:
     	void update(Time t, bool moved) override;
