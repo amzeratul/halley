@@ -29,15 +29,17 @@ namespace Halley {
 
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
+		virtual String getIconName(const BaseGraphNode& node) const;
+		virtual String getLabel(const BaseGraphNode& node) const;
 
 		virtual Vector<SettingType> getSettingTypes() const;
-		virtual void updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const;
+		virtual void updateSettings(BaseGraphNode& node, const BaseGraph& graph, Resources& resources) const;
 
-		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;
-        PinType getPin(const ScriptGraphNode& node, size_t n) const;
+		virtual gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const = 0;
+        PinType getPin(const BaseGraphNode& node, size_t n) const;
 
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
-		virtual String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const;
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const;
+		virtual String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const;
 		
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
@@ -67,9 +69,7 @@ namespace Halley {
 		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
 		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
 		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
-		virtual String getLargeLabel(const ScriptGraphNode& node) const;
-		virtual String getLabel(const ScriptGraphNode& node) const;
-		virtual String getIconName(const ScriptGraphNode& node) const;
+		virtual String getLargeLabel(const BaseGraphNode& node) const;
 
         virtual bool canKeepData() const { return false; }
 		virtual bool hasDestructor(const ScriptGraphNode& node) const { return false; }
@@ -91,7 +91,7 @@ namespace Halley {
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		EntityId readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
-		String getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
+		String getConnectedNodeName(const World* world, const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
 
 		struct OutputNode {
 			OptionalLite<GraphNodeId> dstNode;

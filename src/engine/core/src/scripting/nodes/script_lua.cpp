@@ -25,7 +25,7 @@ Vector<IGraphNodeType::SettingType> ScriptLuaExpression::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptLuaExpression::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptLuaExpression::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -53,7 +53,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLuaExpression::getPinConfiguratio
 	return pins;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLuaExpression::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLuaExpression::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Return ");
@@ -66,7 +66,7 @@ String ScriptLuaExpression::getShortDescription(const World* world, const Script
 	return node.getSettings()["code"].asString("") + " (" + toString(elementIdx) + ")";
 }
 
-String ScriptLuaExpression::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptLuaExpression::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	const size_t flowN = nFlowPins();
 	if (elementIdx < flowN) {
@@ -142,7 +142,7 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 }
 
 
-std::pair<String, Vector<ColourOverride>> ScriptLuaStatement::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLuaStatement::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Execute ");

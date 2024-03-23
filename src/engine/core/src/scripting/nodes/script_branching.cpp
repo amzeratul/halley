@@ -1,7 +1,7 @@
 #include "script_branching.h"
 using namespace Halley;
 
-gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -9,7 +9,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptBranch::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("If ");
@@ -23,7 +23,7 @@ IScriptNodeType::Result ScriptBranch::doUpdate(ScriptEnvironment& environment, T
 	return Result(ScriptNodeExecutionState::Done, 0, value ? 1 : 2);
 }
 
-String ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+String ScriptBranch::getPinDescription(const BaseGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	if (elementIdx >= 1) {
 		if (elementIdx == 1) {
@@ -38,7 +38,7 @@ String ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elem
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -46,7 +46,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFork::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Fork execution.");
@@ -60,7 +60,7 @@ IScriptNodeType::Result ScriptFork::doUpdate(ScriptEnvironment& environment, Tim
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -68,7 +68,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Allows ");
@@ -84,7 +84,7 @@ IScriptNodeType::Result ScriptMergeAny::doUpdate(ScriptEnvironment& environment,
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -92,7 +92,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Proceeds with execution only when ");

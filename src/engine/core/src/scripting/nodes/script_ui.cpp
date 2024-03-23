@@ -15,7 +15,7 @@ Vector<IScriptNodeType::SettingType> ScriptUIModal::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -23,7 +23,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open modal UI ");
@@ -90,7 +90,7 @@ Vector<IScriptNodeType::SettingType> ScriptUIInWorld::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -98,7 +98,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open UI ");

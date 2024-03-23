@@ -7,7 +7,7 @@
 #include "halley/utils/variable.h"
 using namespace Halley;
 
-String ScriptVariable::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptVariable::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["variable"].asString("");
 }
@@ -17,7 +17,7 @@ String ScriptVariable::getShortDescription(const World* world, const ScriptGraph
 	return node.getSettings()["scope"].asString("local") + ":" + node.getSettings()["variable"].asString("");
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -37,7 +37,7 @@ Vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -88,7 +88,7 @@ ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 
 
 
-String ScriptEntityVariable::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptEntityVariable::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["variable"].asString("");
 }
@@ -98,7 +98,7 @@ String ScriptEntityVariable::getShortDescription(const World* world, const Scrip
 	return "entity:" + node.getSettings()["variable"].asString("");
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptEntityVariable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptEntityVariable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -118,7 +118,7 @@ Vector<IGraphNodeType::SettingType> ScriptEntityVariable::getSettingTypes() cons
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -159,7 +159,7 @@ void ScriptEntityVariable::doSetData(ScriptEnvironment& environment, const Scrip
 }
 
 
-String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptLiteral::getLargeLabel(const BaseGraphNode& node) const
 {
 	const auto& val = getConfigNode(node);
 	const auto& str = val.asString("");
@@ -176,7 +176,7 @@ String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphN
 	return getLargeLabel(node);
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -189,7 +189,7 @@ Vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 	return { SettingType{ "value", "Halley::String", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto data = getConfigNode(node);
 
@@ -223,7 +223,7 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 	return getConfigNode(node);
 }
 
-ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
+ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 {
 	const auto& value = node.getSettings()["value"].asString("");
 	if (value == "null") {
@@ -266,7 +266,7 @@ Vector<IGraphNodeType::SettingType> ScriptVariableTable::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -276,7 +276,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptVariableTable::getPinConfiguratio
 	return data;
 }
 
-String ScriptVariableTable::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptVariableTable::getLargeLabel(const BaseGraphNode& node) const
 {
 	const auto split = node.getSettings()["variable"].asString("").split('.');
 	return split.empty() ? "" : split.back();
@@ -287,7 +287,7 @@ String ScriptVariableTable::getShortDescription(const World* world, const Script
 	return "variableTable:" + node.getSettings()["variable"].asString("");
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptVariableTable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptVariableTable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -315,7 +315,7 @@ Vector<IGraphNodeType::SettingType> ScriptECSVariable::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptECSVariable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptECSVariable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -327,7 +327,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptECSVariable::getPinConfiguration(
 	return data;
 }
 
-String ScriptECSVariable::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptECSVariable::getLargeLabel(const BaseGraphNode& node) const
 {
 	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 	return type.getName();
@@ -339,7 +339,7 @@ String ScriptECSVariable::getShortDescription(const World* world, const ScriptGr
 	return getConnectedNodeName(world, node, graph, 0) + "." + type.getName();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptECSVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 	auto str = ColourStringBuilder(true);
@@ -399,7 +399,7 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 }
 
 
-String ScriptColourLiteral::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptColourLiteral::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["value"].asString("#FFFFFF");
 }
@@ -409,7 +409,7 @@ String ScriptColourLiteral::getShortDescription(const World* world, const Script
 	return getLargeLabel(node);
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptColourLiteral::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptColourLiteral::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -422,7 +422,7 @@ Vector<IScriptNodeType::SettingType> ScriptColourLiteral::getSettingTypes() cons
 	return { SettingType{ "value", "Halley::Colour4f", Vector<String>{"#FFFFFF"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptColourLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptColourLiteral::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(false);
 	str.append("Colour");
@@ -436,7 +436,7 @@ ConfigNode ScriptColourLiteral::doGetData(ScriptEnvironment& environment, const 
 
 
 
-String ScriptComparison::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptComparison::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["operator"].asString("==");
 }
@@ -449,7 +449,7 @@ String ScriptComparison::getShortDescription(const World* world, const ScriptGra
 	return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -462,7 +462,7 @@ Vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() const
 	return { SettingType{ "operator", "Halley::MathRelOp", Vector<String>{"=="} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("True if ");
@@ -484,7 +484,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-String ScriptArithmetic::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptArithmetic::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["operator"].asString("+");
 }
@@ -507,7 +507,7 @@ String ScriptArithmetic::getShortDescription(const World* world, const ScriptGra
 	}
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptArithmetic::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptArithmetic::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -520,11 +520,11 @@ Vector<IScriptNodeType::SettingType> ScriptArithmetic::getSettingTypes() const
 	return { SettingType{ "operator", "Halley::MathOp", Vector<String>{"+"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
-	str.append(getShortDescription(world, node, graph, 0), parameterColour);
+	str.append(getShortDescription(world, dynamic_cast<const ScriptGraphNode&>(node), dynamic_cast<const ScriptGraph&>(graph), 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -573,7 +573,7 @@ String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphN
 	return addParentheses(std::move(a)) + " ?? " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -581,7 +581,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptValueOr::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptValueOr::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
@@ -611,7 +611,7 @@ String ScriptConditionalOperator::getShortDescription(const World* world, const 
 	return addParentheses(std::move(a)) + " ? " + addParentheses(std::move(b)) + " : " + addParentheses(std::move(c));
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -619,7 +619,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfig
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptConditionalOperator::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptConditionalOperator::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("If ");
@@ -651,7 +651,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -663,7 +663,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns lerp(");
@@ -700,7 +700,7 @@ String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode
 	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
 }
 
-String ScriptLerp::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptLerp::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
     switch(elementIdx) {
     case 0:
@@ -753,7 +753,7 @@ ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGra
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -771,7 +771,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 	return data;
 }
 
-String ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptAdvanceTo::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Flow output.";
@@ -793,7 +793,7 @@ String ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType e
 	return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Advance ");
@@ -853,7 +853,7 @@ IScriptNodeType::Result ScriptAdvanceTo::doUpdate(ScriptEnvironment& environment
 
 
 
-String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
+String ScriptSetVariable::getLabel(const BaseGraphNode& node) const
 {
 	if (!node.getPin(2).hasConnection()) {
 		return toString(node.getSettings()["defaultValue"].asFloat(0));
@@ -861,7 +861,7 @@ String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
 	return "";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -874,7 +874,7 @@ Vector<IScriptNodeType::SettingType> ScriptSetVariable::getSettingTypes() const
 	return { SettingType{ "defaultValue", "float", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
@@ -920,7 +920,7 @@ ConfigNode ScriptHoldVariableData::toConfigNode(const EntitySerializationContext
 	return result;
 }
 
-String ScriptHoldVariable::getLabel(const ScriptGraphNode& node) const
+String ScriptHoldVariable::getLabel(const BaseGraphNode& node) const
 {
 	if (!node.getPin(2).hasConnection()) {
 		if (!node.getPin(3).hasConnection()) {
@@ -932,7 +932,7 @@ String ScriptHoldVariable::getLabel(const ScriptGraphNode& node) const
 	return "";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptHoldVariable::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptHoldVariable::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -949,7 +949,7 @@ Vector<IScriptNodeType::SettingType> ScriptHoldVariable::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const auto label1 = !node.getPin(2).hasConnection() ? toString(node.getSettings()["defaultValue"].asInt(0)) : "";
 	const auto label2 = !node.getPin(3).hasConnection() ? toString(node.getSettings()["defaultPrevValue"].asInt(0)) : "";
@@ -1009,7 +1009,7 @@ Vector<IGraphNodeType::SettingType> ScriptEntityIdToData::getSettingTypes() cons
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1022,7 +1022,7 @@ String ScriptEntityIdToData::getShortDescription(const World* world, const Scrip
 	return getConnectedNodeName(world, node, graph, 0);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	if (node.getSettings()["readRaw"].asBool(true)) {
 		return { "Convert EntityId to data. Using readRaw function.", {} };
@@ -1040,7 +1040,7 @@ ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1053,7 +1053,7 @@ String ScriptDataToEntityId::getShortDescription(const World* world, const Scrip
 	return getConnectedNodeName(world, node, graph, 0);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	return { "Convert data to EntityId.", {} };
 }
@@ -1067,7 +1067,7 @@ EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, con
 }
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptToVector::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptToVector::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1080,7 +1080,7 @@ String ScriptToVector::getShortDescription(const World* world, const ScriptGraph
 	return "(" + getConnectedNodeName(world, node, graph, 0) + ", " + getConnectedNodeName(world, node, graph, 1) + ")";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Return (");
@@ -1091,7 +1091,7 @@ std::pair<String, Vector<ColourOverride>> ScriptToVector::getNodeDescription(con
 	return str.moveResults();
 }
 
-String ScriptToVector::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptToVector::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "x";
@@ -1111,7 +1111,7 @@ ConfigNode ScriptToVector::doGetData(ScriptEnvironment& environment, const Scrip
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptFromVector::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1129,7 +1129,7 @@ String ScriptFromVector::getShortDescription(const World* world, const ScriptGra
 	return "";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Split vector ");
@@ -1137,7 +1137,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFromVector::getNodeDescription(c
 	return str.moveResults();
 }
 
-String ScriptFromVector::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptFromVector::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "x";
@@ -1161,7 +1161,7 @@ ConfigNode ScriptFromVector::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoMap::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1181,7 +1181,7 @@ String ScriptInsertValueIntoMap::getShortDescription(const World* world, const S
 	return "{ " + (startMap.isEmpty() ? "" : startMap + ", ") + getConnectedNodeName(world, node, graph, 2) + " := " + getConnectedNodeName(world, node, graph, 1) + " }";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Insert into map ");
@@ -1193,7 +1193,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoMap::getNodeDescr
 	return str.moveResults();
 }
 
-String ScriptInsertValueIntoMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptInsertValueIntoMap::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Map (can be empty)";
@@ -1231,7 +1231,7 @@ ConfigNode ScriptInsertValueIntoMap::doGetData(ScriptEnvironment& environment, c
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptGetValueFromMap::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1248,7 +1248,7 @@ String ScriptGetValueFromMap::getShortDescription(const World* world, const Scri
 	return getConnectedNodeName(world, node, graph, 0) + "[" + getConnectedNodeName(world, node, graph, 1) + "]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get value with key ");
@@ -1258,7 +1258,7 @@ std::pair<String, Vector<ColourOverride>> ScriptGetValueFromMap::getNodeDescript
 	return str.moveResults();
 }
 
-String ScriptGetValueFromMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptGetValueFromMap::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Map";
@@ -1302,7 +1302,7 @@ Vector<IGraphNodeType::SettingType> ScriptPackMap::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptPackMap::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptPackMap::getPinConfiguration(const BaseGraphNode& node) const
 {
 	auto keys = node.getSettings()["keys"].asVector<String>({});
 
@@ -1329,7 +1329,7 @@ String ScriptPackMap::getShortDescription(const World* world, const ScriptGraphN
 	return "{ " + String::concatList(params, ", ") + " }";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	Vector<String> params;
 	auto keys = node.getSettings()["keys"].asVector<String>({});
@@ -1343,7 +1343,7 @@ std::pair<String, Vector<ColourOverride>> ScriptPackMap::getNodeDescription(cons
 	return str.moveResults();
 }
 
-String ScriptPackMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptPackMap::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Map Output";
@@ -1373,7 +1373,7 @@ Vector<IGraphNodeType::SettingType> ScriptUnpackMap::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(const BaseGraphNode& node) const
 {
 	auto keys = node.getSettings()["keys"].asVector<String>({});
 
@@ -1395,7 +1395,7 @@ String ScriptUnpackMap::getShortDescription(const World* world, const ScriptGrap
 	return getConnectedNodeName(world, node, graph, 0) + "[\"" + keys.at(elementIdx - 1) + "\"]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder();
 	str.append("Unpack map ");
@@ -1403,7 +1403,7 @@ std::pair<String, Vector<ColourOverride>> ScriptUnpackMap::getNodeDescription(co
 	return str.moveResults();
 }
 
-String ScriptUnpackMap::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptUnpackMap::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Map Output";
@@ -1432,7 +1432,7 @@ ConfigNode ScriptUnpackMap::doGetData(ScriptEnvironment& environment, const Scri
 }
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptInsertValueIntoSequence::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1452,7 +1452,7 @@ String ScriptInsertValueIntoSequence::getShortDescription(const World* world, co
 	return "[ " + (startSeq.isEmpty() ? "" : startSeq + ", ") + getConnectedNodeName(world, node, graph, 1) + " ]";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Insert value ");
@@ -1462,7 +1462,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInsertValueIntoSequence::getNode
 	return str.moveResults();
 }
 
-String ScriptInsertValueIntoSequence::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptInsertValueIntoSequence::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Sequence (Can be empty)";
@@ -1498,7 +1498,7 @@ ConfigNode ScriptInsertValueIntoSequence::doGetData(ScriptEnvironment& environme
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptHasSequenceValue::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptHasSequenceValue::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -1514,7 +1514,7 @@ String ScriptHasSequenceValue::getShortDescription(const World* world, const Scr
 		getConnectedNodeName(world, node, graph, 1);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Has sequence ");
@@ -1524,7 +1524,7 @@ std::pair<String, Vector<ColourOverride>> ScriptHasSequenceValue::getNodeDescrip
 	return str.moveResults();
 }
 
-String ScriptHasSequenceValue::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptHasSequenceValue::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Sequence";

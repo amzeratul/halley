@@ -17,7 +17,7 @@ ConfigNode ScriptFlowGateData::toConfigNode(const EntitySerializationContext& co
 	return result;
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -25,7 +25,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Flow while ");
@@ -33,7 +33,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(con
 	return str.moveResults();
 }
 
-String ScriptFlowGate::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptFlowGate::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Condition";
@@ -84,7 +84,7 @@ ConfigNode ScriptFlowOnceData::toConfigNode(const EntitySerializationContext& co
 	return result;
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptFlowOnce::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptFlowOnce::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -92,7 +92,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowOnce::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const auto desc = getConnectedNodeName(world, node, graph, 1);
 	auto str = ColourStringBuilder(true);
@@ -100,7 +100,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(con
 	return str.moveResults();
 }
 
-String ScriptFlowOnce::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptFlowOnce::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Flow once";
@@ -156,7 +156,7 @@ String ScriptLatch::getShortDescription(const World* world, const ScriptGraphNod
 	return "latch(" + getConnectedNodeName(world, node, graph, 0) + ")";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -164,7 +164,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Returns ");
@@ -173,7 +173,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const 
 	return str.moveResults();
 }
 
-String ScriptLatch::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptLatch::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Set Latched";
@@ -215,7 +215,7 @@ ConfigNode ScriptFenceData::toConfigNode(const EntitySerializationContext& conte
 	return ConfigNode(signaled);
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptFence::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptFence::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -227,12 +227,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptFence::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFence::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFence::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	return { "Waits until signaled.", {} };
 }
 
-String ScriptFence::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptFence::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Signal";
@@ -272,7 +272,7 @@ ConfigNode ScriptBreakerData::toConfigNode(const EntitySerializationContext& con
 	return result;
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptBreaker::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptBreaker::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -284,12 +284,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptBreaker::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptBreaker::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptBreaker::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	return { "Flows until signaled",  {} };
 }
 
-String ScriptBreaker::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptBreaker::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Signal";
@@ -333,7 +333,7 @@ IScriptNodeType::Result ScriptBreaker::doUpdate(ScriptEnvironment& environment, 
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptSignal::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSignal::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -345,7 +345,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSignal::getPinConfiguration(const
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Signals ");
@@ -353,7 +353,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const
 	return str.moveResults();
 }
 
-String ScriptSignal::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptSignal::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Signal";
@@ -378,7 +378,7 @@ ConfigNode ScriptLineResetData::toConfigNode(const EntitySerializationContext& c
 	return result;
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -391,7 +391,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Resets output if signaled by ");
@@ -402,7 +402,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(co
 	return str.moveResults();
 }
 
-String ScriptLineReset::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptLineReset::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Signal";
@@ -450,7 +450,7 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptDetachFlow::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptDetachFlow::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -461,7 +461,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptDetachFlow::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDetachFlow::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDetachFlow::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder();
 	str.append("Continues flow in a new thread, detached from this stack");

@@ -9,7 +9,7 @@ String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptG
 	return addParentheses(std::move(a)) + " AND " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -17,7 +17,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -43,7 +43,7 @@ String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGr
 	return addParentheses(std::move(a)) + " OR " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -51,7 +51,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -77,7 +77,7 @@ String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptG
 	return addParentheses(std::move(a)) + " XOR " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -85,7 +85,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -110,7 +110,7 @@ String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptG
 	return "NOT " + addParentheses(std::move(a));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -118,7 +118,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	ColourStringBuilder result;

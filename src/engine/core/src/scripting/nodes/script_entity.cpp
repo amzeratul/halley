@@ -33,7 +33,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpawnEntity::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration(const BaseGraphNode& node) const
 {
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 
@@ -50,7 +50,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 	return gsl::span<const PinType>(data).subspan(0, asChild ? 6 : 5);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 	const bool serializable = node.getSettings()["serializable"].asBool(true);
@@ -74,7 +74,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 	return str.moveResults();
 }
 
-String ScriptSpawnEntity::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptSpawnEntity::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Position";
@@ -138,7 +138,7 @@ void ScriptSpawnEntity::doDestructor(ScriptEnvironment& environment, const Scrip
 }
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -146,7 +146,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptDestroyEntity::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDestroyEntity::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Destroy entity ");
@@ -168,7 +168,7 @@ Vector<IGraphNodeType::SettingType> ScriptFindChildByName::getSettingTypes() con
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptFindChildByName::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptFindChildByName::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -176,7 +176,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFindChildByName::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Try to find first level child with name ");
@@ -221,7 +221,7 @@ Vector<IGraphNodeType::SettingType> ScriptGetParent::getSettingTypes() const
 	return { };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptGetParent::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptGetParent::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -229,7 +229,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetParent::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetParent::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetParent::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get parent of entity ");
@@ -254,7 +254,7 @@ Vector<IGraphNodeType::SettingType> ScriptEntityReference::getSettingTypes() con
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -262,7 +262,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity reference set in ScriptableComponent with key ");
@@ -291,12 +291,12 @@ String ScriptEntityReference::getShortDescription(const World* world, const Scri
 	}
 }
 
-String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptEntityReference::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["key"].asString("");
 }
 
-String ScriptEntityReference::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptEntityReference::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Position";
@@ -349,7 +349,7 @@ Vector<IGraphNodeType::SettingType> ScriptEntityParameter::getSettingTypes() con
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -360,7 +360,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptEntityParameter::getPinConfigurat
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityParameter::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity parameter set in ");
@@ -375,7 +375,7 @@ String ScriptEntityParameter::getShortDescription(const World* world, const Scri
 	return "Param \"" + node.getSettings()["key"].asString("") + "\"";
 }
 
-String ScriptEntityParameter::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptEntityParameter::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["key"].asString("");
 }
@@ -414,7 +414,7 @@ Vector<IGraphNodeType::SettingType> ScriptEntityTargetReference::getSettingTypes
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -422,7 +422,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinCon
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
@@ -439,7 +439,7 @@ String ScriptEntityTargetReference::getShortDescription(const World* world, cons
 	}
 }
 
-String ScriptEntityTargetReference::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptEntityTargetReference::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["scriptTargetId"].asString("");
 }
@@ -471,7 +471,7 @@ Vector<IGraphNodeType::SettingType> ScriptHasTags::getSettingTypes() const
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptHasTags::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptHasTags::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -479,7 +479,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasTags::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasTags::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasTags::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Checks if ");
@@ -519,7 +519,7 @@ ConfigNode ScriptToggleEntityEnabledData::toConfigNode(const EntitySerialization
 	return result;
 }
 
-String ScriptToggleEntityEnabled::getIconName(const ScriptGraphNode& node) const
+String ScriptToggleEntityEnabled::getIconName(const BaseGraphNode& node) const
 {
 	if (node.getSettings().getType() == ConfigNodeType::Map && node.getSettings()["enabled"].asBool(true)) {
 		return "script_icons/toggle_enabled_on.png";
@@ -534,7 +534,7 @@ Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes()
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -542,7 +542,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfi
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Toggle entity enabled to ");

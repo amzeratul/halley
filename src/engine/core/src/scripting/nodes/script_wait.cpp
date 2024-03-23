@@ -25,7 +25,7 @@ ConfigNode ScriptWaitData::toConfigNode(const EntitySerializationContext& contex
 	return node;
 }
 
-String ScriptWait::getLabel(const ScriptGraphNode& node) const
+String ScriptWait::getLabel(const BaseGraphNode& node) const
 {
 	if (!node.getPin(2).hasConnection()) {
 		return toString(node.getSettings()["time"].asFloat(0.0f)) + "s";
@@ -33,7 +33,7 @@ String ScriptWait::getLabel(const ScriptGraphNode& node) const
 	return "";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -46,7 +46,7 @@ Vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
 	return { SettingType{ "time", "float", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const float time = node.getSettings()["time"].asFloat(0.0f);
 	auto str = ColourStringBuilder(true);
@@ -61,7 +61,7 @@ std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const S
 	return str.moveResults();
 }
 
-String ScriptWait::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptWait::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Time Override";

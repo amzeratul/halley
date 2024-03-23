@@ -25,7 +25,7 @@ std::shared_ptr<UIImage> ScriptingChooseNode::makeIcon(const String& id, bool ha
 	const auto* type = scriptNodeTypes->tryGetNodeType(id);
 	if (type) {
 		const ScriptGraphNode dummy;
-		auto sprite = Sprite().setImage(resources, type->getIconName(dummy)).setColour(ScriptRenderer::getNodeColour(*type));
+		auto sprite = Sprite().setImage(resources, type->getIconName(dummy)).setColour(ScriptRenderer::getScriptNodeColour(*type));
 		if (hasSearch) {
 			sprite.setScale(0.5f);
 		}

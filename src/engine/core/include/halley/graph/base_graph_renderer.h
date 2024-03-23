@@ -7,6 +7,7 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
+	class IGraphNodeType;
 	class BaseGraphNode;
 	class Painter;
 	class BaseGraph;
@@ -71,6 +72,8 @@ namespace Halley {
 
 		const BaseGraph* graph = nullptr;
 
+		virtual const IGraphNodeType* tryGetNodeType(const String& typeId) const = 0;
+
 		BezierCubic makeBezier(const ConnectionPath& path) const;
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;
 
@@ -78,11 +81,14 @@ namespace Halley {
 		virtual void drawNodeBackground(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode);
 		virtual void drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);
 
-		virtual NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const;
+		std::tuple<Colour4f, Colour4f, float> getNodeColour(const IGraphNodeType& nodeType, NodeDrawMode drawMode);
 
+		virtual NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const;
 		virtual bool isDimmed(GraphNodePinType type) const;
 		virtual GraphPinSide getSide(GraphNodePinType pinType) const;
 		virtual Colour4f getPinColour(GraphNodePinType pinType) const;
+		virtual Colour4f getBaseNodeColour(const IGraphNodeType& type) const;
+		virtual Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;
 
 		const Sprite& getIconByName(const String& iconName);
 

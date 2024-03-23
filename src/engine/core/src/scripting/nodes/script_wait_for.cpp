@@ -1,7 +1,7 @@
 #include "script_wait_for.h"
 using namespace Halley;
 
-gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -9,7 +9,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptWaitFor::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWaitFor::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Wait until ");

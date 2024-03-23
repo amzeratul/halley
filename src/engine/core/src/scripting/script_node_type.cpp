@@ -30,12 +30,12 @@ String IScriptNodeType::getShortDescription(const World* world, const ScriptGrap
 	return getName();
 }
 
-String IScriptNodeType::getLargeLabel(const ScriptGraphNode& node) const
+String IScriptNodeType::getLargeLabel(const BaseGraphNode& node) const
 {
 	return "";
 }
 
-String IScriptNodeType::getLabel(const ScriptGraphNode& node) const
+String IGraphNodeType::getLabel(const BaseGraphNode& node) const
 {
 	return "";
 }
@@ -45,7 +45,7 @@ Vector<IScriptNodeType::SettingType> IGraphNodeType::getSettingTypes() const
 	return {};
 }
 
-void IGraphNodeType::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
+void IGraphNodeType::updateSettings(BaseGraphNode& node, const BaseGraph& graph, Resources& resources) const
 {
 }
 
@@ -92,12 +92,12 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDe
 	return builder.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	return { getName(), {} };
 }
 
-String IGraphNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+String IGraphNodeType::getPinDescription(const BaseGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	auto getName = [](ScriptNodeElementType type) -> const char*
 	{
@@ -146,18 +146,18 @@ String IGraphNodeType::getPinDescription(const ScriptGraphNode& node, PinType el
 	return builder.moveResults().first;
 }
 
-String IScriptNodeType::getIconName(const ScriptGraphNode& node) const
-{
-	return "";
-}
-
-IScriptNodeType::PinType IGraphNodeType::getPin(const ScriptGraphNode& node, size_t n) const
+IScriptNodeType::PinType IGraphNodeType::getPin(const BaseGraphNode& node, size_t n) const
 {
 	const auto& pins = getPinConfiguration(node);
 	if (n < pins.size()) {
 		return pins[n];
 	}
 	return PinType{ {}, GraphNodePinDirection::Input };
+}
+
+String IGraphNodeType::getIconName(const BaseGraphNode& node) const
+{
+	return "";
 }
 
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -184,11 +184,11 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data), environment.getNodeData(dst.dstNode.value()));
 }
 
-String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
+String IScriptNodeType::getConnectedNodeName(const World* world, const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
-		if (node.getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
+		if (dynamic_cast<const ScriptGraphNode&>(node).getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 			return "<current entity>";
 		} else {
 			return "<empty>";
@@ -197,8 +197,8 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 	assert(pin.connections.size() == 1);
 
 	if (pin.connections[0].dstNode) {
-		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
-		return otherNode.getNodeType().getShortDescription(world, otherNode, graph, pin.connections[0].dstPin);
+		const auto& otherNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pin.connections[0].dstNode.value()));
+		return otherNode.getNodeType().getShortDescription(world, otherNode, dynamic_cast<const ScriptGraph&>(graph), pin.connections[0].dstPin);
 	}
 	
 	return "<unknown>";

@@ -15,7 +15,7 @@ ConfigNode ScriptForLoopData::toConfigNode(const EntitySerializationContext& con
 	return ConfigNode(iterations);
 }
 
-String ScriptForLoop::getLabel(const ScriptGraphNode& node) const
+String ScriptForLoop::getLabel(const BaseGraphNode& node) const
 {
 	return toString(node.getSettings()["loopCount"].asInt(0));
 }
@@ -25,7 +25,7 @@ String ScriptForLoop::getShortDescription(const World* world, const ScriptGraphN
 	return "Loop Index";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptForLoop::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptForLoop::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -43,7 +43,7 @@ Vector<IScriptNodeType::SettingType> ScriptForLoop::getSettingTypes() const
 	return { SettingType{ "loopCount", "int", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const int count = node.getSettings()["loopCount"].asInt(0);
 	auto str = ColourStringBuilder(true);
@@ -53,7 +53,7 @@ std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(cons
 	return str.moveResults();
 }
 
-String ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptForLoop::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Flow output after loop";
@@ -97,7 +97,7 @@ bool ScriptForLoop::canKeepData() const
 }
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptWhileLoop::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptWhileLoop::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -105,7 +105,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWhileLoop::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	if (node.getPin(1).hasConnection()) {
@@ -154,7 +154,7 @@ String ScriptForEachLoop::getShortDescription(const World* world, const ScriptGr
 	return "curLoopElement";
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptForEachLoop::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptForEachLoop::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -168,7 +168,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptForEachLoop::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptForEachLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptForEachLoop::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Loop for each element in ");
@@ -176,7 +176,7 @@ std::pair<String, Vector<ColourOverride>> ScriptForEachLoop::getNodeDescription(
 	return str.moveResults();
 }
 
-String ScriptForEachLoop::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptForEachLoop::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Flow after loop";
@@ -256,7 +256,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerpLoop::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLerpLoop::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptLerpLoop::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -269,7 +269,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLerpLoop::getPinConfiguration(co
 	return data;
 }
 
-String ScriptLerpLoop::getLabel(const ScriptGraphNode& node) const
+String ScriptLerpLoop::getLabel(const BaseGraphNode& node) const
 {
 	if (node.getPin(4).hasConnection()) {
 		return "";
@@ -277,7 +277,7 @@ String ScriptLerpLoop::getLabel(const ScriptGraphNode& node) const
 	return toString(node.getSettings()["time"].asFloat(1)) + "s";
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Loop over ");
@@ -292,7 +292,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 	str.append(" whilst outputting from 0 to 1");
 	return str.moveResults();}
 
-String ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptLerpLoop::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Flow output after loop";
@@ -367,7 +367,7 @@ bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, cons
 
 
 
-String ScriptWhileLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptWhileLoop::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Condition";
@@ -395,7 +395,7 @@ ConfigNode ScriptEveryFrameData::toConfigNode(const EntitySerializationContext& 
 	return result;
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -403,7 +403,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Pulse every ");
@@ -411,7 +411,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(c
 	return str.moveResults();
 }
 
-String ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptEveryFrame::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Frame delta time";
@@ -465,7 +465,7 @@ ConfigNode ScriptEveryTimeData::toConfigNode(const EntitySerializationContext& c
 	return result;
 }
 
-String ScriptEveryTime::getLabel(const ScriptGraphNode& node) const
+String ScriptEveryTime::getLabel(const BaseGraphNode& node) const
 {
 	return toString(node.getSettings()["time"].asFloat(1.0f)) + " s";
 }
@@ -475,7 +475,7 @@ Vector<IScriptNodeType::SettingType> ScriptEveryTime::getSettingTypes() const
 	return { SettingType{ "time", "float", Vector<String>{"1"} } };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -483,7 +483,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEveryTime::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptEveryTime::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Pulse every ");

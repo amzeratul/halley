@@ -3,6 +3,7 @@
 #include "halley/graph/base_graph.h"
 #include "halley/graphics/painter.h"
 #include "halley/maths/colour.h"
+#include "halley/scripting/script_node_type.h"
 using namespace Halley;
 
 BaseGraphRenderer::BaseGraphRenderer(Resources& resources, float nativeZoom)
@@ -119,6 +120,44 @@ void BaseGraphRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseG
 {
 }
 
+std::tuple<Colour4f, Colour4f, float> BaseGraphRenderer::getNodeColour(const IGraphNodeType& nodeType, NodeDrawMode drawMode)
+{
+	const auto baseCol = getBaseNodeColour(nodeType);
+	Colour4f col = baseCol;
+	Colour4f iconCol = Colour4f(1, 1, 1);
+	float borderAlpha = drawMode.selected ? 1.0f : 0.0f;
+	
+	switch (drawMode.type) {
+	case NodeDrawModeType::Highlight:
+		col = col.inverseMultiplyLuma(0.5f);
+		break;
+	case NodeDrawModeType::Active:
+		{
+			const float phase = drawMode.time * 2.0f * pif();
+			col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
+			borderAlpha = 1;
+			break;
+		}
+	case NodeDrawModeType::Unvisited:
+		col = col.multiplyLuma(0.3f);
+		iconCol = Colour4f(0.5f, 0.5f, 0.5f);
+		break;
+	case NodeDrawModeType::Normal:
+		break;
+	}
+
+	if (drawMode.activationTime < 1.0f) {
+		const float t = drawMode.activationTime;
+		const float t2 = std::pow(t, 0.5f);
+		const float t3 = std::pow(t, 0.3f);
+		const auto baseCol2 = lerp(baseCol, col, t2);
+		iconCol = lerp(Colour4f(1, 1, 1), iconCol, t2);
+		col = lerp(Colour4f(1, 1, 1), baseCol2, t3 * 0.5f + 0.5f);
+	}
+
+	return { col, iconCol, borderAlpha };
+}
+
 BaseGraphRenderer::NodeDrawMode BaseGraphRenderer::getNodeDrawMode(GraphNodeId nodeId) const
 {
 	return {};
@@ -137,6 +176,20 @@ GraphPinSide BaseGraphRenderer::getSide(GraphNodePinType pinType) const
 Colour4f BaseGraphRenderer::getPinColour(GraphNodePinType pinType) const
 {
 	return Colour4f(1, 1, 1, 1);
+}
+
+Colour4f BaseGraphRenderer::getBaseNodeColour(const IGraphNodeType& type) const
+{
+	return Colour4f(0.7f, 0.7f, 0.7f);
+}
+
+Vector2f BaseGraphRenderer::getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
+{
+	if (auto size = nodeType.getNodeSize(node, curZoom)) {
+		return size.value();
+	} else {
+		return Vector2f(64, 64);
+	}
 }
 
 const Sprite& BaseGraphRenderer::getIconByName(const String& iconName)

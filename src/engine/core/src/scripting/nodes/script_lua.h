@@ -19,13 +19,13 @@ namespace Halley {
 		String getId() const override { return "luaExpression"; }
 		String getName() const override { return "Lua Expression"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/lua.png"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/lua.png"; }
 
 		Vector<SettingType> getSettingTypes() const override;
-		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const override;
 		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
-		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 
 		void doInitData(ScriptLuaExpressionData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLuaExpressionData& data) const override;
@@ -40,9 +40,9 @@ namespace Halley {
 		String getId() const override { return "luaStatement"; }
 		String getName() const override { return "Lua Statement"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/lua.png"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/lua.png"; }
 
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const override;
 
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLuaExpressionData& curData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLuaExpressionData& data) const override;

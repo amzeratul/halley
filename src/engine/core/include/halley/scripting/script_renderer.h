@@ -26,12 +26,14 @@ namespace Halley {
 		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const override;
 		void setDebugDisplayData(HashMap<int, String> values) override;
 
-		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
+		static Colour4f getScriptNodeColour(const IScriptNodeType& nodeType);
 
 	protected:
 		bool isDimmed(GraphNodePinType type) const override;
 		GraphPinSide getSide(GraphNodePinType pinType) const override;
 		Colour4f getPinColour(GraphNodePinType pinType) const override;
+		Colour4f getBaseNodeColour(const IGraphNodeType& type) const override;
+		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
 
 	private:		
 		const World* world = nullptr;
@@ -47,17 +49,14 @@ namespace Halley {
 		TextRenderer labelText;
 		HashMap<int, String> debugDisplayValues;
 
-		static std::tuple<Colour4f, Colour4f, float> getNodeColour(const IScriptNodeType& nodeType, NodeDrawMode drawMode);
-
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const BaseGraph& graph, float curZoom, float posScale) override;
 		void drawNodeBackground(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode) override;
 		void drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId) override;
 
 		NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const override;
-		Vector2f getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;
+		Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const override;
 		Vector2f getCommentNodeSize(const BaseGraphNode& node, float curZoom) const;
-		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const;
-		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
+		Circle getNodeElementArea(const IGraphNodeType& nodeType, Vector2f basePos, const BaseGraphNode& node, size_t pinN, float curZoom, float posScale) const;
 
 		String getDebugDisplayValue(uint16_t id) const;
 	};

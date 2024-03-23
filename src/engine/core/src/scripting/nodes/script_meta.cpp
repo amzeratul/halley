@@ -9,24 +9,24 @@ Vector<IGraphNodeType::SettingType> ScriptComment::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptComment::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptComment::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	return { "Comment", {} };
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptComment::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptComment::getPinConfiguration(const BaseGraphNode& node) const
 {
 	return {};
 }
 
-String ScriptComment::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptComment::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["comment"].asString("");
 }
 
 
 
-std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Display the value of ");
@@ -34,7 +34,7 @@ std::pair<String, Vector<ColourOverride>> ScriptDebugDisplay::getNodeDescription
 	return result.moveResults();
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptDebugDisplay::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptDebugDisplay::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -51,7 +51,7 @@ Vector<IGraphNodeType::SettingType> ScriptLog::getSettingTypes() const
 	};
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto msg = getConnectedNodeName(world, node, graph, 2);
 	if (msg == "<empty>") {
@@ -66,7 +66,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLog::getNodeDescription(const Sc
 	return str.moveResults();
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptLog::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptLog::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -74,7 +74,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLog::getPinConfiguration(const Sc
 	return data;
 }
 
-String ScriptLog::getLargeLabel(const ScriptGraphNode& node) const
+String ScriptLog::getLargeLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["severity"].asString("");
 }

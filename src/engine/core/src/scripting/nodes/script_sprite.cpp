@@ -23,7 +23,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -31,7 +31,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
@@ -85,7 +85,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes() co
 	return { SettingType{ "direction", "Halley::String", Vector<String>{"right"} } };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -93,7 +93,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const auto dir = getConnectedNodeName(world, node, graph, 3);
 	auto str = ColourStringBuilder(true);
@@ -118,7 +118,7 @@ IScriptNodeType::Result ScriptSpriteDirection::doUpdate(ScriptEnvironment& envir
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -126,7 +126,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Set alpha of sprite ");
@@ -155,7 +155,7 @@ Vector<IGraphNodeType::SettingType> ScriptSpriteActionPoint::getSettingTypes() c
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -167,7 +167,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfigur
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Get action point \"");
@@ -177,7 +177,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteActionPoint::getNodeDescri
 	return str.moveResults();
 }
 
-String ScriptSpriteActionPoint::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptSpriteActionPoint::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "World position";
@@ -234,7 +234,7 @@ Vector<IGraphNodeType::SettingType> ScriptColourGradient::getSettingTypes() cons
 	};
 }
 
-gsl::span<const IGraphNodeType::PinType> ScriptColourGradient::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptColourGradient::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -245,7 +245,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptColourGradient::getPinConfigurati
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Sample colour at ");
@@ -253,7 +253,7 @@ std::pair<String, Vector<ColourOverride>> ScriptColourGradient::getNodeDescripti
 	return str.moveResults();
 }
 
-String ScriptColourGradient::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptColourGradient::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
 		return "Position along gradient (0..1)";

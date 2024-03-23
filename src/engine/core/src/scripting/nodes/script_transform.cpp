@@ -6,7 +6,7 @@
 using namespace Halley;
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -14,7 +14,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the position of ");
@@ -38,7 +38,7 @@ IScriptNodeType::Result ScriptSetPosition::doUpdate(ScriptEnvironment& environme
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -51,7 +51,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetHeight::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetHeight::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the height of ");
@@ -73,7 +73,7 @@ IScriptNodeType::Result ScriptSetHeight::doUpdate(ScriptEnvironment& environment
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -81,7 +81,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetSubworld::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the subworld of ");
@@ -103,7 +103,7 @@ IScriptNodeType::Result ScriptSetSubworld::doUpdate(ScriptEnvironment& environme
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -111,7 +111,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Get the position of ");
@@ -132,7 +132,7 @@ String ScriptGetPosition::getShortDescription(const World* world, const ScriptGr
 	}
 }
 
-String ScriptGetPosition::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptGetPosition::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "World Position";
@@ -169,7 +169,7 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -177,7 +177,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetRotation::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptGetRotation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptGetRotation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Get the rotation of ");
@@ -190,7 +190,7 @@ String ScriptGetRotation::getShortDescription(const World* world, const ScriptGr
     return "Rotation of " + getConnectedNodeName(world, node, graph, 0);
 }
 
-String ScriptGetRotation::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptGetRotation::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return "Rotation (Degrees)";
@@ -216,7 +216,7 @@ ConfigNode ScriptGetRotation::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -229,7 +229,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetRotation::getPinConfiguration(
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the rotation of ");
@@ -239,7 +239,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSetRotation::getNodeDescription(
 	return result.moveResults();
 }
 
-String ScriptSetRotation::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptSetRotation::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return "Target";
@@ -260,7 +260,7 @@ IScriptNodeType::Result ScriptSetRotation::doUpdate(ScriptEnvironment& environme
 }
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -273,7 +273,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSetScale::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetScale::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetScale::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	ColourStringBuilder result;
 	result.append("Set the scale of ");

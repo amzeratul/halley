@@ -20,7 +20,7 @@ Vector<IScriptNodeType::SettingType> ScriptAudioEvent::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -39,7 +39,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 	return gsl::span<const PinType>(data).subspan(0, nPins);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	const auto& event = node.getSettings()["event"].asString("");
 	const auto& destroyEvent = node.getSettings()["destroyEvent"].asString("");
@@ -57,7 +57,7 @@ std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(c
 	return str.moveResults();
 }
 
-String ScriptAudioEvent::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptAudioEvent::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 3) {
 		auto variableNames = node.getSettings()["variables"].asVector<String>({});

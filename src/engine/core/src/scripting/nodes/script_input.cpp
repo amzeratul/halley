@@ -26,7 +26,7 @@ void ScriptInputButtonData::finishData()
 	outputMask = 0;
 }
 
-String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
+String ScriptInputButton::getLabel(const BaseGraphNode& node) const
 {
 	return node.getSettings()["button"].asString("");
 }
@@ -41,7 +41,7 @@ Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -61,7 +61,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Input ");
@@ -93,7 +93,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	return str.moveResults();
 }
 
-String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptInputButton::getPinDescription(const BaseGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	switch (elementIdx) {
 	case 1:
@@ -190,7 +190,7 @@ void ScriptInputButton::doDestructor(ScriptEnvironment& environment, const Scrip
 
 
 
-gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguration(const ScriptGraphNode& node) const
+gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -198,7 +198,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguratio
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptHasInputLabel::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Has input label associated with ");
