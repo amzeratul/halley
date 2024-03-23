@@ -41,6 +41,7 @@ set (editor_sources
 	"src/assets/ui_editor/ui_widget_editor.cpp"
 	"src/assets/ui_editor/ui_widget_list.cpp"
 
+	"src/assets/graph/graph_gizmo_ui.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
 	"src/assets/graph/script_gizmo_ui.cpp"
 	"src/assets/graph/script_graph_asset_editor.cpp"
@@ -135,6 +136,8 @@ set (editor_headers
 	"src/assets/ui_editor/ui_widget_editor.h"
 	"src/assets/ui_editor/ui_widget_list.h"
 
+	"src/assets/graph/graph_editor.h"
+	"src/assets/graph/graph_gizmo_ui.h"
 	"src/assets/graph/render_graph_editor.h"
 	"src/assets/graph/script_gizmo_ui.h"
 	"src/assets/graph/script_graph_asset_editor.h"

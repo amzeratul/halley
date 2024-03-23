@@ -27,6 +27,8 @@ namespace Halley {
 		virtual void update(Time time, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
 
+		virtual std::shared_ptr<UIWidget> makeUI();
+
 		void setBaseGraph(BaseGraph* graph);
 
 		void setUIRoot(UIRoot& root);

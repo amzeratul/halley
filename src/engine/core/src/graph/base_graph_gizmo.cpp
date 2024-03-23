@@ -141,6 +141,11 @@ void BaseGraphGizmo::draw(Painter& painter) const
 	}
 }
 
+std::shared_ptr<UIWidget> BaseGraphGizmo::makeUI()
+{
+	return {};
+}
+
 void BaseGraphGizmo::setBaseGraph(BaseGraph* graph)
 {
 	baseGraph = graph;

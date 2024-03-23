@@ -10,7 +10,7 @@ namespace Halley {
 		void setGraph(ScriptGraph* graph);
 		void setState(ScriptState* state);
 
-		std::shared_ptr<UIWidget> makeUI();
+		std::shared_ptr<UIWidget> makeUI() override;
 
 		void setEntityTargets(Vector<String> entityTargets);
 

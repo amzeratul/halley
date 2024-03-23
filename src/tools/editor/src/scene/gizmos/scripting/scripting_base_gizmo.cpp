@@ -11,6 +11,7 @@ ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFa
 	: BaseGraphGizmo(factory, entityEditorFactory, resources, baseZoom)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
 {
+
 }
 
 void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)

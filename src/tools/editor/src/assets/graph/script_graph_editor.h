@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graph_editor.h"
 #include "script_gizmo_ui.h"
 #include "../asset_editor.h"
 #include "halley/tools/dll/project_dll.h"
@@ -11,7 +12,7 @@
 namespace Halley {
 	class ScriptGraphVariableInspector;
 
-	class ScriptGraphEditor : public DrillDownAssetWindow {
+	class ScriptGraphEditor : public DrillDownAssetWindow, public IGraphEditor {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
@@ -22,7 +23,7 @@ namespace Halley {
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
 
 		void onActiveChanged(bool active) override;
-		void setModified(bool modified);
+		void setModified(bool modified) override;
 		bool isModified() override;
 		void drillDownSave() override;
 		std::shared_ptr<ScriptGraph> getScriptGraph();
@@ -32,9 +33,9 @@ namespace Halley {
 		const Vector<String>& getScriptTargetIds() const;
 		std::shared_ptr<const Scene> getScene() const;
 
-		void onModified();
-		void undo();
-		void redo();
+		void onModified() override;
+		void undo() override;
+		void redo() override;
 		void centreView();
 		void openProperties();
 
