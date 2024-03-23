@@ -5,6 +5,7 @@
 #include "halley/maths/colour.h"
 #include "halley/graph/base_graph_type.h"
 #include "halley/resources/resources.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 bool BaseGraphRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
@@ -321,7 +322,13 @@ std::tuple<Colour4f, Colour4f, float> BaseGraphRenderer::getNodeColour(const IGr
 
 BaseGraphRenderer::NodeDrawMode BaseGraphRenderer::getNodeDrawMode(GraphNodeId nodeId) const
 {
-	return {};
+	NodeDrawMode drawMode;
+	const bool highlightThis = highlightNode && highlightNode->nodeId == nodeId;
+	if (highlightThis && highlightNode->element.type == static_cast<GraphElementType>(BaseGraphNodeElementType::Node)) {
+		drawMode.type = NodeDrawModeType::Highlight;
+	}
+	drawMode.selected = std_ex::contains(selectedNodes, nodeId);
+	return drawMode;
 }
 
 bool BaseGraphRenderer::isDimmed(GraphNodePinType type) const

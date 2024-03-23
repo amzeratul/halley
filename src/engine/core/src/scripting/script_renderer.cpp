@@ -21,9 +21,8 @@ void ScriptRenderer::setState(const ScriptState* scriptState)
 
 ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId) const
 {
-	NodeDrawMode drawMode;
+	NodeDrawMode drawMode = BaseGraphRenderer::getNodeDrawMode(nodeId);
 	if (state) {
-		// Rendering in-game, with execution state
 		const auto nodeIntrospection = state->getNodeIntrospection(nodeId);
 		drawMode.activationTime = nodeIntrospection.activationTime < 0.5f ? nodeIntrospection.activationTime * 2 : std::numeric_limits<float>::infinity();
 		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
@@ -32,14 +31,7 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId)
 		} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Unvisited) {
 			drawMode.type = NodeDrawModeType::Unvisited;
 		}
-	} else {
-		// Rendering in editor
-		const bool highlightThis = highlightNode && highlightNode->nodeId == nodeId;
-		if (highlightThis && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node)) {
-			drawMode.type = NodeDrawModeType::Highlight;
-		}
 	}
-	drawMode.selected = std_ex::contains(selectedNodes, nodeId);
 	return drawMode;
 }
 
