@@ -41,6 +41,7 @@ set (editor_sources
 	"src/assets/ui_editor/ui_widget_editor.cpp"
 	"src/assets/ui_editor/ui_widget_list.cpp"
 
+	"src/assets/graph/graph_editor.cpp"
 	"src/assets/graph/graph_gizmo_ui.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
 	"src/assets/graph/script_gizmo_ui.cpp"
