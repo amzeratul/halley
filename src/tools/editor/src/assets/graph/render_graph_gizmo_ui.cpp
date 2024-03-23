@@ -26,7 +26,7 @@ RenderGraphGizmoUI::RenderGraphGizmoUI(UIFactory& factory, Resources& resources,
 
 void RenderGraphGizmoUI::load(BaseGraph& graph)
 {
-	// TODO
+	renderGraphGizmo->setBaseGraph(&graph);
 }
 
 RenderGraphRenderer::RenderGraphRenderer(Resources& resources, float nativeZoom)
