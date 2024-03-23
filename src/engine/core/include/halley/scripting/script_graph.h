@@ -22,6 +22,7 @@ namespace Halley {
 		void deserialize(Deserializer& s) override;
 
 		void feedToHash(Hash::Hasher& hasher, bool assetOnly) const;
+		bool canDraw() const override { return !parentNode; }
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void clearType() const;

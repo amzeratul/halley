@@ -89,6 +89,7 @@ namespace Halley {
 		virtual std::unique_ptr<BaseGraphNode> clone() const = 0;
 
 		virtual void feedToHash(Hash::Hasher& hasher) const;
+		virtual bool canDraw() const { return true; }
 
 	protected:
 		ConfigNode settings;

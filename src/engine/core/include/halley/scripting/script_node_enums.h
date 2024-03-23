@@ -32,8 +32,8 @@ namespace Halley {
 	};
 
 	enum class ScriptNodeElementType : uint8_t {
-		Undefined = BaseGraphNodeElementType::Undefined,
-		Node = BaseGraphNodeElementType::Node,
+		Undefined = uint8_t(BaseGraphNodeElementType::Undefined),
+		Node = uint8_t(BaseGraphNodeElementType::Node),
 		FlowPin,
 		ReadDataPin,
 		WriteDataPin,
