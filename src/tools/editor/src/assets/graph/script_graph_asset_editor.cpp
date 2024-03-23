@@ -92,6 +92,7 @@ std::shared_ptr<const Resource> ScriptGraphAssetEditor::loadResource(const Path&
 		graphEditor->setScriptGraph(std::move(scriptGraph));
 	} else {
 		graphEditor = std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::move(scriptGraph), this);
+		graphEditor->init();
 		add(graphEditor, 1);
 	}
 	if (modified) {

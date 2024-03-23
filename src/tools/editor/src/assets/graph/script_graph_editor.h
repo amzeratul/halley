@@ -12,14 +12,13 @@
 namespace Halley {
 	class ScriptGraphVariableInspector;
 
-	class ScriptGraphEditor : public UIWidget, public IDrillDownAssetWindow, public IGraphEditor {
+	class ScriptGraphEditor : public GraphEditor {
 	public:
-		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
-
 		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph,
 			AssetEditor* assetEditor, std::shared_ptr<const Scene> scene = {}, Callback callback = {}, Vector<String> entityTargets = {});
 		~ScriptGraphEditor() override;
 
+		void init() override;
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
 
 		void onActiveChanged(bool active) override;
@@ -51,16 +50,6 @@ namespace Halley {
 			String name;
 			int scriptIdx;
 		};
-
-		UIFactory& factory;
-		ProjectWindow& projectWindow;
-		Resources& gameResources;
-		Project& project;
-		AssetEditor* assetEditor = nullptr;
-		std::shared_ptr<const Scene> scene;
-		Callback callback;
-
-		ConfigUndoStack undoStack;
 
     	std::shared_ptr<ScriptGraph> scriptGraph;
 		std::unique_ptr<ScriptState> scriptState;
@@ -97,8 +86,6 @@ namespace Halley {
 		ConfigNode getCurrentNodeConfig();
 
 		bool tryAutoAcquire();
-
-		void initUndoStack();
 	};
 
 	class ScriptGraphProperties : public PopupWindow {

@@ -2,8 +2,61 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: infiniCanvas, id: infiniCanvas }
+- sizer: { type: horizontal, gap: 8 }
+  border: [0, -6, 0, 4]
+  children:
+  - widget: { id: saveToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [30, 35] }
+    sizer: { type: horizontal, gap: 4 }
+    children:
+      - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
+        border: [0, 0, 10, 0]
+      - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
+      - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
+        border: [0, 0, 10, 0]
+      - widget: { id: centreViewButton, class: button, style: buttonThin, icon: "entity_icons/centre_view.png", size: [22, 22], tooltip: "Centre View" }
+  - widget: { id: editToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+    sizer: { type: horizontal, gap: 8 }
+    children:
+    - widget: { class: widget, id: toolbarGizmo }
+      children: []
+    - widget: { class: checkbox, id: autoConnectPins, label: Auto Connect Pins }
+      fill: centre
+    - widget: { class: button, id: propertiesButton, text: Properties }
+  - widget: { id: debugToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+    sizer: { type: horizontal, gap: 8 }
+    proportion: 1
+    children:
+    - widget: { class: checkbox, id: autoAcquire, label: Auto Acquire }
+      fill: centre
+      border: [4, 0, 0, 0]
+    - widget: { class: dropdown, id: instances, size: [200, 16] }
+      fill: centre
+    - widget: { class: checkbox, id: variableInspectorEnabled, label: Variable Inspector }
+      fill: centre
+      border: [0, 0, 2, 0]
+- widget: { class: widget }
   proportion: 1
-  sizer: { type: free }
-  children: []
+  children:
+  - widget: { class: infiniCanvas, id: infiniCanvas }
+    proportion: 1
+    sizer: { type: free }
+    children: []
+  - widget: { class: widget, size: [510, 0]}
+    border: [-510, 0, 0, 0]
+    sizer: { type: vertical }
+    children:
+    - widget: { class: scriptingVariableInspector }
+      proportion: 1
+      fill: [bottom, right]
+      children: []
+- widget: { class: widget, id: drillUpBar }
+  sizer: { type: horizontal }
+  border: [0, 6, 0, 0]
+  children:
+  - spacer: {}
+    proportion: 1
+  - widget: { class: button, id: ok, text: OK, size: [100, 16] }
+    border: [0, 0, 3, 0]
+  - widget: { class: button, id: cancel, text: Cancel, size: [100, 16] }
+
 ...

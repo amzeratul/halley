@@ -90,7 +90,7 @@ namespace Halley {
 		ConfigNode& getProperties();
 		const ConfigNode& getProperties() const;
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode() const override;
 
 		Vector<String> getMessageNames() const;
 		int getMessageNumParams(const String& messageId) const;

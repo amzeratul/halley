@@ -1,7 +1,6 @@
 #include "halley/scripting/script_graph.h"
 
 #include "halley/bytes/byte_serializer.h"
-#include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"

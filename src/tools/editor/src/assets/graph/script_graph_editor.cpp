@@ -10,21 +10,10 @@ using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow,
 	std::shared_ptr<ScriptGraph> scriptGraph, AssetEditor* assetEditor, std::shared_ptr<const Scene> scene, Callback callback, Vector<String> entityTargets)
-	: UIWidget("ScriptGraphEditor", {}, UISizer())
-	, factory(factory)
-	, projectWindow(projectWindow)
-	, gameResources(gameResources)
-	, project(projectWindow.getProject())
-	, assetEditor(assetEditor)
-	, scene(std::move(scene))
-	, callback(std::move(callback))
-	, undoStack(32)
+	: GraphEditor(factory, gameResources, projectWindow, scriptGraph, assetEditor, scene, callback)
 	, scriptGraph(std::move(scriptGraph))
 	, entityTargets(std::move(entityTargets))
 {
-	factory.loadUI(*this, "halley/script_graph_editor");
-	setListeningToClient(true);
-	initUndoStack();
 }
 
 ScriptGraphEditor::~ScriptGraphEditor()
@@ -32,6 +21,12 @@ ScriptGraphEditor::~ScriptGraphEditor()
 	setListeningToClient(false);
 	assert(!scriptEnumHandle);
 	assert(!scriptStateHandle);
+}
+
+void ScriptGraphEditor::init()
+{
+	GraphEditor::init();
+	setListeningToClient(true);
 }
 
 void ScriptGraphEditor::onMakeUI()
@@ -163,7 +158,7 @@ void ScriptGraphEditor::onMakeUI()
 void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
 {
 	scriptGraph = std::move(graph);
-	initUndoStack();
+	setGraph(scriptGraph);
 }
 
 void ScriptGraphEditor::onActiveChanged(bool active)
@@ -257,15 +252,6 @@ void ScriptGraphEditor::openProperties()
 std::shared_ptr<UIWidget> ScriptGraphEditor::asWidget()
 {
 	return shared_from_this();
-}
-
-void ScriptGraphEditor::initUndoStack()
-{
-	if (scriptGraph) {
-		undoStack.loadInitialValue(scriptGraph->toConfigNode());
-	} else {
-		undoStack.clear();
-	}
 }
 
 void ScriptGraphEditor::update(Time t, bool moved)
