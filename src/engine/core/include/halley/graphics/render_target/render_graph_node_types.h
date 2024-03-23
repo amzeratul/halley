@@ -29,25 +29,30 @@ namespace Halley {
 		public:
 			String getId() const override { return "paint"; }
 			String getName() const override { return "Paint"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/paint.png"; }
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::DrawPass; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		};
 
 		class OverlayNodeType : public RenderGraphNodeType {
 		public:
 			String getId() const override { return "overlay"; }
 			String getName() const override { return "Overlay"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/overlay.png"; }
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Filter; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 			void loadMaterials(RenderGraphNode2& node, Resources& resources) const override;
+			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		};
 
 		class RenderToTextureNodeType : public RenderGraphNodeType {
 		public:
 			String getId() const override { return "renderToTexture"; }
 			String getName() const override { return "Render to Texture"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/render_to_texture.png"; }
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Texture; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
@@ -57,6 +62,7 @@ namespace Halley {
 		public:
 			String getId() const override { return "output"; }
 			String getName() const override { return "Output"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/output.png"; }
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Sink; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
@@ -66,6 +72,7 @@ namespace Halley {
 		public:
 			String getId() const override { return "imageOutput"; }
 			String getName() const override { return "Image Output"; }
+			String getIconName(const BaseGraphNode& node) const override { return "render_graph_icons/image_output.png"; }
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Sink; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;

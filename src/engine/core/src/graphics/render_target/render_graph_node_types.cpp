@@ -70,6 +70,16 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::PaintNodeType::ge
 	return data;
 }
 
+std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::PaintNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Paint with paintId ");
+	str.append(node.getSettings()["paintId"].asString("undefined"), settingColour);
+	str.append(" and cameraId ");
+	str.append(node.getSettings()["cameraId"].asString("undefined"), settingColour);
+	return str.moveResults();
+}
+
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = RenderGraphElementType;
@@ -106,6 +116,16 @@ void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNode2& node
 	} else {
 		node.setMaterial({});
 	}
+}
+
+std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::OverlayNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	const auto& renderGraphNode = dynamic_cast<const RenderGraphNode2&>(node);
+
+	ColourStringBuilder str;
+	str.append("Overlay with material ");
+	str.append(renderGraphNode.getMaterial() ? renderGraphNode.getMaterial()->getName() : "<missing>", settingColour);
+	return str.moveResults();
 }
 
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNodeType::getPinConfiguration(const BaseGraphNode& node) const
