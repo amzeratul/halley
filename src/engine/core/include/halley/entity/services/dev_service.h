@@ -71,7 +71,7 @@ namespace Halley {
 		void addDebugText(std::string_view key, String value);
 		void addDebugText(String value, Vector2f position);
 
-		void initScriptGraphRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom);
+		void initScriptGraphRenderer(Resources& resources, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom);
 		void addScriptRenderer(Vector2f pos, std::shared_ptr<ScriptState> state);
 		void drawScripts(Painter& painter);
 

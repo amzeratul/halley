@@ -5,8 +5,6 @@ namespace Halley {
 	class ScriptingBaseGizmo : public BaseGraphGizmo {
 	public:
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
-		
-		ScriptGraphNode& getNode(GraphNodeId id);
 
 		ScriptGraph& getGraph();
 		void setGraph(ScriptGraph* graph);

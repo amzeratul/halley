@@ -52,6 +52,8 @@ namespace Halley {
 		bool isValidPaste(const ConfigNode& node) const;
 		bool deleteSelection();
 
+		BaseGraphNode& getNode(GraphNodeId id);
+
 		[[nodiscard]] ConfigNode copySelection() const;
 		[[nodiscard]] ConfigNode cutSelection();
 		void paste(const ConfigNode& node);

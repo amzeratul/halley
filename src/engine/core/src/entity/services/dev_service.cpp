@@ -235,9 +235,9 @@ void DevService::drawScripts(Painter& painter)
 	}
 }
 
-void DevService::initScriptGraphRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom)
+void DevService::initScriptGraphRenderer(Resources& resources, const ScriptNodeTypeCollection& scriptNodeTypeCollection, float nativeZoom)
 {
-	scriptGraphRenderer = std::make_unique<ScriptRenderer>(resources, &world, scriptNodeTypeCollection, nativeZoom);
+	scriptGraphRenderer = std::make_unique<ScriptRenderer>(resources, scriptNodeTypeCollection, nativeZoom);
 }
 
 void DevService::setDevValue(std::string_view name, float value)

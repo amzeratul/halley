@@ -649,6 +649,11 @@ bool BaseGraphGizmo::deleteSelection()
 	return changed;
 }
 
+BaseGraphNode& BaseGraphGizmo::getNode(GraphNodeId id)
+{
+	return baseGraph->getNode(id);
+}
+
 bool BaseGraphGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
 	return true;

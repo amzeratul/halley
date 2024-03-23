@@ -16,7 +16,7 @@ namespace Halley {
 
 	class ScriptRenderer : public BaseGraphRenderer {
 	public:
-		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
+		ScriptRenderer(Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setState(const ScriptState* scriptState);
 		void setDebugDisplayData(HashMap<int, String> values) override;
@@ -31,7 +31,6 @@ namespace Halley {
 		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
 
 	private:
-		const World* world = nullptr;
 		const ScriptNodeTypeCollection& nodeTypeCollection;
 		
 		const ScriptState* state = nullptr;

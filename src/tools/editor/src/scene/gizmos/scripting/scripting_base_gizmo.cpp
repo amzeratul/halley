@@ -64,11 +64,6 @@ void ScriptingBaseGizmo::setState(ScriptState* state)
 	}
 }
 
-ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id)
-{
-	return scriptGraph->getNodes().at(id);
-}
-
 std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 {
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
@@ -134,7 +129,7 @@ std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& no
 
 std::shared_ptr<BaseGraphRenderer> ScriptingBaseGizmo::makeRenderer(Resources& resources, float baseZoom)
 {
-	auto renderer = std::make_shared<ScriptRenderer>(resources, world, *scriptNodeTypes, baseZoom);
+	auto renderer = std::make_shared<ScriptRenderer>(resources, *scriptNodeTypes, baseZoom);
 	renderer->setState(scriptState);
 	return renderer;
 }

@@ -12,9 +12,8 @@ using namespace Halley;
 #include "halley/entity/components/transform_2d_component.h"
 
 
-ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
+ScriptRenderer::ScriptRenderer(Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: BaseGraphRenderer(resources, nativeZoom)
-	, world(world)
 	, nodeTypeCollection(nodeTypeCollection)
 {
 	destructorBg = Sprite().setImage(resources, "halley_ui/script_destructor_bg.png").setPivot(Vector2f(0.5f, 0.0f));
