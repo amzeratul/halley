@@ -3,7 +3,8 @@
 #include "halley/graph/base_graph.h"
 #include "halley/graphics/painter.h"
 #include "halley/maths/colour.h"
-#include "halley/scripting/script_node_type.h"
+#include "halley/graph/base_graph_type.h"
+#include "halley/resources/resources.h"
 using namespace Halley;
 
 bool BaseGraphRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
@@ -127,17 +128,17 @@ void BaseGraphRenderer::drawConnection(Painter& painter, const ConnectionPath& p
 	painter.drawLine(bezier, 3.0f / curZoom, col, {}, pattern);
 }
 
-void BaseGraphRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const BaseGraph& graph, float curZoom, float posScale)
+void BaseGraphRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const BaseGraph& graph, float curZoom, float posScale) const
 {
-	auto drawMode = getNodeDrawMode(nodeIdx);
+	const auto drawMode = getNodeDrawMode(nodeIdx);
 	NodeDrawMode dstDrawMode;
 
-	const ScriptGraphNode& node = dynamic_cast<const ScriptGraphNode&>(graph.getNode(nodeIdx));
+	const BaseGraphNode& node = graph.getNode(nodeIdx);
 	const auto* nodeType = tryGetNodeType(node.getType());
 	if (!nodeType) {
 		return;
 	}
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node);
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == static_cast<GraphElementType>(BaseGraphNodeElementType::Node);
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
@@ -153,7 +154,7 @@ void BaseGraphRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, Grap
 
 			if (pinConnection.dstNode && srcPinType.direction == GraphNodePinDirection::Output) {
 				const size_t dstIdx = pinConnection.dstPin;
-				const auto& dstNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pinConnection.dstNode.value()));
+				const auto& dstNode = graph.getNode(pinConnection.dstNode.value());
 				const auto* dstNodeType = tryGetNodeType(dstNode.getType());
 				if (!dstNodeType) {
 					continue;
@@ -161,7 +162,7 @@ void BaseGraphRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, Grap
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
 				dstPinType = dstNodeType->getPin(dstNode, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
-					if (highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node) || highlightNode->elementId == pinConnection.dstPin) {
+					if (highlightNode->element.type == static_cast<GraphElementType>(BaseGraphNodeElementType::Node) || highlightNode->elementId == pinConnection.dstPin) {
 						highlighted = true;
 					}
 				}
@@ -486,7 +487,7 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphRenderer::getNodeU
 			const float distance = (mousePos - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), GraphNodePinType{ScriptNodeElementType::Node}, static_cast<GraphPinId>(-1), curRect, Vector2f() };
+				bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), GraphNodePinType{BaseGraphNodeElementType::Node}, static_cast<GraphPinId>(-1), curRect, Vector2f() };
 			}
 		}
 	}
@@ -514,7 +515,7 @@ BaseGraphRenderer::NodeUnderMouseInfo BaseGraphRenderer::getPinInfo(Vector2f bas
 
 Vector2f BaseGraphRenderer::getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const
 {
-	return getNodeElementArea(dynamic_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, node, idx, zoom, 1.0f).getCentre();
+	return getNodeElementArea(*tryGetNodeType(node.getType()), basePos, node, idx, zoom, 1.0f).getCentre();
 }
 
 Vector<GraphNodeId> BaseGraphRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const

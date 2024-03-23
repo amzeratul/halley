@@ -35,20 +35,6 @@ String IScriptNodeType::getLargeLabel(const BaseGraphNode& node) const
 	return "";
 }
 
-String IGraphNodeType::getLabel(const BaseGraphNode& node) const
-{
-	return "";
-}
-
-Vector<IScriptNodeType::SettingType> IGraphNodeType::getSettingTypes() const
-{
-	return {};
-}
-
-void IGraphNodeType::updateSettings(BaseGraphNode& node, const BaseGraph& graph, Resources& resources) const
-{
-}
-
 std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (ScriptNodeElementType(elementType.type)) {
@@ -90,74 +76,6 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDe
 	}
 
 	return builder.moveResults();
-}
-
-std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const BaseGraphNode& node, const World* world, const BaseGraph& graph) const
-{
-	return { getName(), {} };
-}
-
-String IGraphNodeType::getPinDescription(const BaseGraphNode& node, PinType elementType, uint8_t elementIdx) const
-{
-	auto getName = [](ScriptNodeElementType type) -> const char*
-	{
-		switch (type) {
-		case ScriptNodeElementType::FlowPin:
-			return "Flow";
-		case ScriptNodeElementType::ReadDataPin:
-			return "Read Data";
-		case ScriptNodeElementType::WriteDataPin:
-			return "Write Data";
-		case ScriptNodeElementType::TargetPin:
-			return "Target";
-		}
-		return "?";
-	};
-
-	auto getIO = [](GraphNodePinDirection direction) -> const char*
-	{
-		switch (direction) {
-		case GraphNodePinDirection::Input:
-			return " Input";
-		case GraphNodePinDirection::Output:
-			return " Output";
-		}
-		return nullptr;
-	};
-
-	const auto& config = getPinConfiguration(node);
-	size_t typeIdx = 0;
-	size_t typeTotal = 0;
-	for (size_t i = 0; i < config.size(); ++i) {
-		if (i == elementIdx) {
-			typeIdx = typeTotal;
-		}
-		if (config[i] == elementType) {
-			++typeTotal;
-		}
-	}
-
-	ColourStringBuilder builder;
-	builder.append(getName(ScriptNodeElementType(elementType.type)));
-	builder.append(getIO(elementType.direction));
-	if (typeTotal > 1) {
-		builder.append(" " + toString(static_cast<int>(typeIdx)));
-	}
-	return builder.moveResults().first;
-}
-
-IScriptNodeType::PinType IGraphNodeType::getPin(const BaseGraphNode& node, size_t n) const
-{
-	const auto& pins = getPinConfiguration(node);
-	if (n < pins.size()) {
-		return pins[n];
-	}
-	return PinType{ {}, GraphNodePinDirection::Input };
-}
-
-String IGraphNodeType::getIconName(const BaseGraphNode& node) const
-{
-	return "";
 }
 
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -202,6 +120,21 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const BaseGraph
 	}
 	
 	return "<unknown>";
+}
+
+String IScriptNodeType::getPinTypeName(PinType type) const
+{
+	switch (static_cast<ScriptNodeElementType>(type.type)) {
+	case ScriptNodeElementType::FlowPin:
+		return "Flow";
+	case ScriptNodeElementType::ReadDataPin:
+		return "Read Data";
+	case ScriptNodeElementType::WriteDataPin:
+		return "Write Data";
+	case ScriptNodeElementType::TargetPin:
+		return "Target";
+	}
+	return "?";
 }
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
@@ -413,5 +346,4 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLuaStatement>());
 	addScriptNode(std::make_unique<ScriptToggleEntityEnabled>());
 	addScriptNode(std::make_unique<ScriptWaitUntilEndOfFrame>());
-
 }

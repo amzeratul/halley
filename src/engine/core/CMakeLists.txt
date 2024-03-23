@@ -28,6 +28,7 @@ set(SOURCES
         "src/graph/base_graph_gizmo.cpp"
         "src/graph/base_graph_node.cpp"
         "src/graph/base_graph_renderer.cpp"
+        "src/graph/base_graph_type.cpp"
         "src/graph/base_graph.cpp"
 
         "src/graphics/blend.cpp"
@@ -428,6 +429,7 @@ set(HEADERS
         "include/halley/graph/base_graph_gizmo.h"
         "include/halley/graph/base_graph_node.h"
         "include/halley/graph/base_graph_renderer.h"
+        "include/halley/graph/base_graph_type.h"
         "include/halley/graph/base_graph.h"
 
         "include/halley/graphics/blend.h"
