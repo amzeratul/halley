@@ -1,74 +1,18 @@
 #include "render_graph_editor.h"
-
-#include "ui_graph_node.h"
 #include "halley/tools/project/project.h"
 using namespace Halley;
 
 RenderGraphEditor::RenderGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
-	: GraphEditor(factory, gameResources, project, type)
+	: AssetEditor(factory, gameResources, project, type)
 {
 }
 
 void RenderGraphEditor::onResourceLoaded()
 {
 	renderGraph = std::dynamic_pointer_cast<const RenderGraphDefinition>(resource);
-
-	GraphEditor::onResourceLoaded();
-
-	int i = 0;
-	for (const auto& node: renderGraph->getNodes()) {
-		auto nodeWidget = std::make_shared<UIRenderGraphNode>(*this, node, factory, factory.getStyle("graphNode"));
-		addNode(nodeWidget);
-		++i;
-	}
 }
 
 std::shared_ptr<const Resource> RenderGraphEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	return std::make_shared<RenderGraphDefinition>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
-}
-
-void RenderGraphEditor::drawConnections(UIPainter& painter)
-{
-	painter.draw([this] (Painter& painter)
-	{
-		for (const auto& connection: renderGraph->getConnections()) {
-			const auto& fromNodeWidget = getNode(connection.fromId);
-			const auto& toNodeWidget = getNode(connection.toId);
-			const auto& fromNode = std::dynamic_pointer_cast<UIRenderGraphNode>(fromNodeWidget)->getNode();
-
-			const auto outputPinWidget = fromNodeWidget->getPinWidget(true, connection.fromPin);
-			const auto inputPinWidget = toNodeWidget->getPinWidget(false, connection.toPin);
-
-			if (!outputPinWidget || !inputPinWidget) {
-				continue;
-			}
-
-			const auto startPos = outputPinWidget->getPosition() + outputPinWidget->getSize() / 2;
-			const auto endPos = inputPinWidget->getPosition() + inputPinWidget->getSize() / 2;
-
-			const auto fromPinType = fromNode.getOutputPins()[connection.fromPin];
-			const auto col = getColourForPinType(fromPinType);
-
-			if (fromNode.method == RenderGraphMethod::RenderToTexture) {
-				drawDottedConnection(painter, startPos, endPos, col);
-			} else {
-				drawConnection(painter, startPos, endPos, col);
-			}
-		}
-	});
-}
-
-void RenderGraphEditor::drawConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const
-{
-	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
-	const auto bezier = BezierCubic(startPoint, startPoint + Vector2f(dist, 0), endPoint - Vector2f(dist, 0), endPoint);
-	painter.drawLine(bezier, 2, col);
-}
-
-void RenderGraphEditor::drawDottedConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const
-{
-	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
-	const auto bezier = BezierCubic(startPoint, startPoint + Vector2f(dist, 0), endPoint - Vector2f(dist, 0), endPoint);
-	painter.drawLine(bezier, 2, col, {}, Painter::LineParameters(true, 5.0f, 5.0f));
 }

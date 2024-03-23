@@ -1,21 +1,18 @@
 #pragma once
 
-#include "graph_editor.h"
+#include "halley/tools/dll/project_dll.h"
+#include "src/assets/asset_editor.h"
 
 namespace Halley {
-	class RenderGraphEditor : public GraphEditor {
+	class RenderGraphEditor : public AssetEditor {
 	public:
 		RenderGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type);
 
-		void onResourceLoaded() override;
-		void drawConnections(UIPainter& painter) override;
-	
 	protected:
+		void onResourceLoaded() override;
 		std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
-		
-		std::shared_ptr<const RenderGraphDefinition> renderGraph;
 
-		void drawConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const;
-		void drawDottedConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const;
+	private:
+		std::shared_ptr<const RenderGraphDefinition> renderGraph;
 	};
 }
