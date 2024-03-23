@@ -2,6 +2,7 @@
 #include "base_graph_enums.h"
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/maths/bezier.h"
+#include "halley/maths/circle.h"
 #include "halley/maths/colour.h"
 #include "halley/maths/rect.h"
 #include "halley/maths/vector2.h"
@@ -38,16 +39,17 @@ namespace Halley {
 
 		void setGraph(const BaseGraph* graph);
 		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
-
-		virtual std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const = 0;
-		virtual NodeUnderMouseInfo getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const = 0;
-		virtual Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const = 0;
-		virtual Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const = 0;
+		
 		virtual void setDebugDisplayData(HashMap<int, String> values);
 
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
 		void setSelection(Vector<GraphNodeId> selectedNodes);
 		void setCurrentPaths(Vector<ConnectionPath> path);
+
+		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
+		NodeUnderMouseInfo getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const;
+		Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const;
+		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 
 	protected:
 		enum class NodeDrawModeType : uint8_t {
@@ -89,6 +91,8 @@ namespace Halley {
 		virtual Colour4f getPinColour(GraphNodePinType pinType) const;
 		virtual Colour4f getBaseNodeColour(const IGraphNodeType& type) const;
 		virtual Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;
+
+		Circle getNodeElementArea(const IGraphNodeType& nodeType, Vector2f basePos, const BaseGraphNode& node, size_t pinN, float curZoom, float posScale) const;
 
 		const Sprite& getIconByName(const String& iconName);
 

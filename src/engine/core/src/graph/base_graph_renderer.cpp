@@ -6,6 +6,16 @@
 #include "halley/scripting/script_node_type.h"
 using namespace Halley;
 
+bool BaseGraphRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
+{
+	return nodeId == other.nodeId && element == other.element && elementId == other.elementId;
+}
+
+bool BaseGraphRenderer::NodeUnderMouseInfo::operator!=(const NodeUnderMouseInfo& other) const
+{
+	return !(*this == other);
+}
+
 BaseGraphRenderer::BaseGraphRenderer(Resources& resources, float nativeZoom)
 	: resources(resources)
 	, nativeZoom(nativeZoom)
@@ -226,4 +236,162 @@ BezierCubic BaseGraphRenderer::makeBezier(const ConnectionPath& path) const
 	const float dist = std::max(std::max(std::abs(delta.x), std::abs(delta.y)), 20.0f) / 2;
 
 	return BezierCubic(path.from, path.from + dist * fromDir, path.to + dist * toDir, path.to);
+}
+
+Circle BaseGraphRenderer::getNodeElementArea(const IGraphNodeType& nodeType, Vector2f basePos, const BaseGraphNode& node, size_t pinN, float curZoom, float posScale) const
+{
+	const Vector2f nodeSize = getNodeSize(nodeType, node, curZoom);
+	const auto getOffset = [&] (size_t idx, size_t n, size_t axis)
+	{
+		const float spacing = nodeSize[axis] / (n + 1);
+		return (static_cast<float>(idx) - (n - 1) * 0.5f) * spacing;
+	};
+
+	const auto& pin = nodeType.getPin(node, pinN);
+	const auto pinSide = getSide(pin);
+	
+	size_t pinsOnSide = 0;
+	size_t idxOnSide = 0;
+	const auto& pins = nodeType.getPinConfiguration(node);
+	for (size_t i = 0; i < pins.size(); ++i) {
+		const auto& pinType = pins[i];
+		if (i == pinN) {
+			idxOnSide = pinsOnSide;
+		}
+		if (getSide(pinType) == pinSide) {
+			++pinsOnSide;
+		}
+	}
+	
+	Vector2f offset;
+	switch (pinSide) {
+	case GraphPinSide::Left:
+		offset = Vector2f(-nodeSize.x * 0.5f, getOffset(idxOnSide, pinsOnSide, 1));
+		break;
+	case GraphPinSide::Right:
+		offset = Vector2f(nodeSize.x * 0.5f, getOffset(idxOnSide, pinsOnSide, 1));
+		break;
+	case GraphPinSide::Top:
+		offset = Vector2f(getOffset(idxOnSide, pinsOnSide, 0), -nodeSize.y * 0.5f);
+		break;
+	case GraphPinSide::Bottom:
+		offset = Vector2f(getOffset(idxOnSide, pinsOnSide, 0 ), nodeSize.y * 0.5f);
+		break;
+	default:
+		break;
+	}
+
+	const Vector2f pos = basePos + node.getPosition() * posScale;
+	const Vector2f centre = pos + offset / curZoom;
+	const float radius = 4.0f / curZoom;
+	
+	return Circle(centre, radius);
+}
+
+std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const
+{
+	if (!graph) {
+		return {};
+	}
+
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+
+	float bestDistance = std::numeric_limits<float>::max();
+	std::optional<NodeUnderMouseInfo> bestResult;
+	
+	for (size_t i = 0; i < graph->getNumNodes(); ++i) {
+		const auto& node = graph->getNode(i);
+		const auto pos = basePos + node.getPosition();
+
+		const auto* nodeType = tryGetNodeType(node.getType());
+		if (!nodeType) {
+			continue;
+		}
+		const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
+		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+		const auto curRect = area + pos;
+
+		if (!curRect.grow(10).contains(mousePos)) {
+			continue;
+		}
+		
+		// Check each pin handle
+		bool foundPin = false;
+		const auto& pins = node.getPinConfiguration();
+		for	(size_t j = 0; j < pins.size(); ++j) {
+			const auto& pinType = pins[j];
+			const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			if (circle.contains(mousePos)) {
+				foundPin = true;
+				const float distance = (mousePos - circle.getCentre()).length();
+				if (distance < bestDistance) {
+					bestDistance = distance;
+					bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), pinType, static_cast<GraphPinId>(j), curRect, circle.getCentre() };
+				}
+			}
+		}
+		
+		// Check main body
+		if (!foundPin && curRect.contains(mousePos)) {
+			const float distance = (mousePos - curRect.getCenter()).length();
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), GraphNodePinType{ScriptNodeElementType::Node}, static_cast<GraphPinId>(-1), curRect, Vector2f() };
+			}
+		}
+	}
+
+	return bestResult;
+}
+
+BaseGraphRenderer::NodeUnderMouseInfo BaseGraphRenderer::getPinInfo(Vector2f basePos, float curZoom, GraphNodeId nodeId, GraphPinId pinId) const
+{
+	const auto& node = graph->getNode(nodeId);
+	const auto& pins = node.getPinConfiguration();
+	const auto& pinType = pins[pinId];
+	const auto* nodeType = tryGetNodeType(node.getType());
+
+	const auto pos = basePos + node.getPosition();
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+	const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
+	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+	const auto curRect = area + pos;
+
+	const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), pinId, curZoom, 1.0f).expand(4.0f / curZoom);
+
+	return NodeUnderMouseInfo{ nodeId, pinType, pinId, curRect, circle.getCentre() };
+}
+
+Vector2f BaseGraphRenderer::getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const
+{
+	return getNodeElementArea(static_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, static_cast<const ScriptGraphNode&>(node), idx, zoom, 1.0f).getCentre();
+}
+
+Vector<GraphNodeId> BaseGraphRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
+{
+	if (!graph) {
+		return {};
+	}
+
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+	Vector<GraphNodeId> result;
+
+	for (size_t i = 0; i < graph->getNumNodes(); ++i) {
+		const auto& node = graph->getNode(i);
+		const auto pos = basePos + node.getPosition();
+
+		const auto* nodeType = tryGetNodeType(node.getType());
+		if (!nodeType) {
+			continue;
+		}
+		const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
+		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+		const auto curRect = area + pos;
+
+		if (curRect.overlaps(selBox)) {
+			result.push_back(static_cast<GraphNodeId>(i));
+		}
+	}
+
+	return result;
 }
