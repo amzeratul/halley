@@ -24,4 +24,21 @@ namespace Halley {
 	private:
 		RenderGraphGizmo* renderGraphGizmo = nullptr;
 	};
+
+	class RenderGraphRenderer : public BaseGraphRenderer {
+	public:
+		RenderGraphRenderer(Resources& resources, float nativeZoom);
+
+		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
+	};
+
+
+	class RenderGraphNodeType : public IGraphNodeType {
+	public:
+		String getId() const override;
+		String getName() const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+	};
+
+
 }

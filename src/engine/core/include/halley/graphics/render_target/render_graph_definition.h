@@ -98,6 +98,10 @@ namespace Halley {
 
     class RenderGraphNode2 : public BaseGraphNode {
     public:
+        RenderGraphNode2() = default;
+        RenderGraphNode2(const String& type, const Vector2f& position);
+        RenderGraphNode2(const ConfigNode& node);
+
 	    GraphNodePinType getPinType(GraphPinId idx) const override;
 	    gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 	    std::unique_ptr<BaseGraphNode> clone() const override;

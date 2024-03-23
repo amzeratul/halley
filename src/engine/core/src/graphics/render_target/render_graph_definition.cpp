@@ -133,11 +133,15 @@ void RenderGraphDefinition::Node::generatePins()
 }
 
 
+RenderGraphNode2::RenderGraphNode2(const String& type, const Vector2f& position)
+	: BaseGraphNode(type, position)
+{
+}
 
-
-
-
-
+RenderGraphNode2::RenderGraphNode2(const ConfigNode& node)
+	: BaseGraphNode(node)
+{
+}
 
 GraphNodePinType RenderGraphNode2::getPinType(GraphPinId idx) const
 {
@@ -159,21 +163,21 @@ std::unique_ptr<BaseGraphNode> RenderGraphNode2::clone() const
 
 GraphNodeId RenderGraphDefinition2::addNode(const String& type, Vector2f pos, ConfigNode settings)
 {
-	// TODO
 	const auto id = static_cast<GraphNodeId>(nodes.size());
-	nodes.push_back(RenderGraphNode2());
+	nodes.push_back(RenderGraphNode2(type, pos));
+	nodes.back().getSettings() = settings;
 	return id;
 }
 
 void RenderGraphDefinition2::load(const ConfigNode& node)
 {
-	// TODO
+	nodes = node["nodes"].asVector<RenderGraphNode2>({});
 }
 
 ConfigNode RenderGraphDefinition2::toConfigNode() const
 {
 	ConfigNode::MapType result;
-	// TODO
+	result["nodes"] = nodes;
 	return result;
 }
 
