@@ -2,6 +2,7 @@
 #include "halley/utils/hash.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/graph/base_graph_type.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -169,6 +170,29 @@ String BaseGraph::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
+void BaseGraph::assignTypes(const GraphNodeTypeCollection& nodeTypeCollection, bool force) const
+{
+	if (lastAssignTypeHash != hash || force) {
+		lastAssignTypeHash = hash;
+		const auto n = getNumNodes();
+		for (size_t i = 0; i < n; ++i) {
+			getNode(i).assignType(nodeTypeCollection);
+		}
+	}
+}
+
+void BaseGraph::clearTypes()
+{
+	lastAssignTypeHash = 0;
+	const auto n = getNumNodes();
+	for (size_t i = 0; i < n; ++i) {
+		getNode(i).clearType();
+	}
+}
+
+
+
+
 void BaseGraphNode::onNodeRemoved(GraphNodeId nodeId)
 {
 	for (auto& pin: pins) {
@@ -223,4 +247,9 @@ GraphNodePinType BaseGraphNode::getPinType(GraphPinId idx) const
 		return GraphNodePinType();
 	}
 	return config[idx];
+}
+
+gsl::span<const GraphNodePinType> BaseGraphNode::getPinConfiguration() const
+{
+	return getGraphNodeType().getPinConfiguration(*this);
 }

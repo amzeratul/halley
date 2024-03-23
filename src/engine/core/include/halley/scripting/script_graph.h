@@ -5,6 +5,7 @@
 #include "halley/graph/base_graph.h"
 
 namespace Halley {
+	class GraphNodeTypeCollection;
 	class IScriptNodeType;
 	class ScriptNodeTypeCollection;
 	class ScriptGraph;
@@ -22,11 +23,10 @@ namespace Halley {
 		void feedToHash(Hash::Hasher& hasher, bool assetOnly) const;
 		bool canDraw() const override { return !parentNode; }
 
-		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
-		void clearType() const;
+		void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const override;
+		void clearType() const override;
+		const IGraphNodeType& getGraphNodeType() const;
 		const IScriptNodeType& getNodeType() const;
-
-		gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
 		void setParentNode(OptionalLite<GraphNodeId> id) { parentNode = id; }
@@ -113,8 +113,6 @@ namespace Halley {
 
 		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
-		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force = false) const;
-		void clearTypes();
 		void finishGraph() override;
 		void updateHash();
 		uint64_t getHash() const;
@@ -136,10 +134,6 @@ namespace Halley {
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
 		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;
-
-		uint64_t hash = 0;
-		uint64_t assetHash = 0;
-		mutable uint64_t lastAssignTypeHash = 1;
 
 		ScriptGraphNodeRoots roots;
 

@@ -6,9 +6,8 @@
 #include "halley/scripting/script_node_type.h"
 using namespace Halley;
 
-ScriptRenderer::ScriptRenderer(Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
-	: BaseGraphRenderer(resources, nativeZoom)
-	, nodeTypeCollection(nodeTypeCollection)
+ScriptRenderer::ScriptRenderer(Resources& resources, const GraphNodeTypeCollection& nodeTypeCollection, float nativeZoom)
+	: BaseGraphRenderer(resources, nodeTypeCollection, nativeZoom)
 {
 	destructorBg = Sprite().setImage(resources, "halley_ui/script_destructor_bg.png").setPivot(Vector2f(0.5f, 0.0f));
 	destructorIcon = Sprite().setImage(resources, "halley_ui/script_destructor_icon.png").setPivot(Vector2f(0.5f, 0.5f));
@@ -150,40 +149,6 @@ void ScriptRenderer::setDebugDisplayData(HashMap<int, String> values)
 	debugDisplayValues = std::move(values);
 }
 
-Colour4f ScriptRenderer::getScriptNodeColour(const IScriptNodeType& nodeType)
-{
-	switch (nodeType.getClassification()) {
-	case ScriptNodeClassification::Terminator:
-		return Colour4f(0.97f, 0.35f, 0.35f);
-	case ScriptNodeClassification::Action:
-		return Colour4f(0.07f, 0.84f, 0.09f);
-	case ScriptNodeClassification::Variable:
-		return Colour4f(0.91f, 0.71f, 0.0f);
-	case ScriptNodeClassification::Expression:
-		return Colour4f(1.0f, 0.64f, 0.14f);
-	case ScriptNodeClassification::FlowControl:
-		return Colour4f(0.35f, 0.55f, 0.97f);
-	case ScriptNodeClassification::State:
-		return Colour4f(0.75f, 0.35f, 0.97f);
-	case ScriptNodeClassification::Function:
-		return Colour4f(1.00f, 0.49f, 0.68f);
-	case ScriptNodeClassification::NetworkFlow:
-		return Colour4f(0.15f, 0.85f, 0.98f);
-	case ScriptNodeClassification::Comment:
-		return Colour4f(0.25f, 0.25f, 0.3f);
-	case ScriptNodeClassification::DebugDisplay:
-		return Colour4f(0.1f, 0.1f, 0.15f);
-	case ScriptNodeClassification::Unknown:
-		return Colour4f(0.2f, 0.2f, 0.2f);
-	}
-	return Colour4f(0.2f, 0.2f, 0.2f);
-}
-
-Colour4f ScriptRenderer::getBaseNodeColour(const IGraphNodeType& nodeType) const
-{
-	return getScriptNodeColour(dynamic_cast<const IScriptNodeType&>(nodeType));
-}
-
 bool ScriptRenderer::isDimmed(GraphNodePinType type) const
 {
 	return type.type == int(ScriptNodeElementType::ReadDataPin) || type.type == int(ScriptNodeElementType::TargetPin) || type.type == int(ScriptNodeElementType::WriteDataPin);
@@ -203,9 +168,4 @@ Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
 	}
 
 	return Colour4f();
-}
-
-const IGraphNodeType* ScriptRenderer::tryGetNodeType(const String& typeId) const
-{
-	return nodeTypeCollection.tryGetNodeType(typeId);
 }

@@ -9,7 +9,7 @@ namespace Halley {
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos);
+		ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IGraphNodeType& nodeType, std::optional<Vector2f> pos);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
@@ -24,7 +24,7 @@ namespace Halley {
 		const IEntityEditorFactory& entityEditorFactory;
 		UIWidget* eventSink = nullptr;
 		std::optional<uint32_t> nodeId;
-		const IScriptNodeType& nodeType;
+		const IGraphNodeType& nodeType;
 		ConfigNode curSettings;
 
 		void applyChanges();

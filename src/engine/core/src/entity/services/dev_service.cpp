@@ -6,6 +6,8 @@
 #include "halley/scripting/script_graph.h"
 #include "halley/scripting/script_state.h"
 #include "halley/ui/widgets/ui_debug_console.h"
+#include "halley/graph/base_graph_type.h"
+#include "halley/scripting/script_node_type.h"
 
 using namespace Halley;
 

@@ -2,13 +2,13 @@
 
 using namespace Halley;
 
-ScriptingChooseNode::ScriptingChooseNode(Vector2f minSize, UIFactory& factory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, const Callback& callback)
+ScriptingChooseNode::ScriptingChooseNode(Vector2f minSize, UIFactory& factory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes, const Callback& callback)
 	: ChooseAssetWindow(minSize, factory, callback, {})
 	, resources(resources)
-	, scriptNodeTypes(scriptNodeTypes)
+	, nodeTypes(nodeTypes)
 {
-	setAssetIds(scriptNodeTypes->getTypes(false), scriptNodeTypes->getNames(false), "");
-	setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));
+	setAssetIds(nodeTypes->getTypes(false), nodeTypes->getNames(false), "");
+	setTitle(LocalisedString::fromHardcodedString("Add Node"));
 }
 
 std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
@@ -22,10 +22,10 @@ std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(std::shared_ptr<UIIm
 
 std::shared_ptr<UIImage> ScriptingChooseNode::makeIcon(const String& id, bool hasSearch)
 {
-	const auto* type = scriptNodeTypes->tryGetNodeType(id);
+	const auto* type = nodeTypes->tryGetGraphNodeType(id);
 	if (type) {
 		const ScriptGraphNode dummy;
-		auto sprite = Sprite().setImage(resources, type->getIconName(dummy)).setColour(ScriptRenderer::getScriptNodeColour(*type));
+		auto sprite = Sprite().setImage(resources, type->getIconName(dummy)).setColour(type->getColour());
 		if (hasSearch) {
 			sprite.setScale(0.5f);
 		}
@@ -39,10 +39,10 @@ void ScriptingChooseNode::sortItems(Vector<std::pair<String, String>>& items)
 {
 	std::sort(items.begin(), items.end(), [&] (const auto& a, const auto& b)
 	{
-		const auto* typeA = scriptNodeTypes->tryGetNodeType(a.first);
-		const auto* typeB = scriptNodeTypes->tryGetNodeType(b.first);
-		const auto classA = typeA ? typeA->getClassification() : ScriptNodeClassification::Unknown;
-		const auto classB = typeB ? typeB->getClassification() : ScriptNodeClassification::Unknown;
+		const auto* typeA = nodeTypes->tryGetGraphNodeType(a.first);
+		const auto* typeB = nodeTypes->tryGetGraphNodeType(b.first);
+		const auto classA = typeA ? typeA->getSortOrder() : 0;
+		const auto classB = typeB ? typeB->getSortOrder() : 0;
 		if (classA != classB) {
 			return classA < classB;
 		}

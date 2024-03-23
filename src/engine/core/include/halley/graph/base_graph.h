@@ -7,6 +7,9 @@
 #include "halley/utils/hash.h"
 
 namespace Halley {
+	class IGraphNodeType;
+	class GraphNodeTypeCollection;
+
 	class BaseGraphNode {
 	public:
 		struct PinConnection {
@@ -56,7 +59,7 @@ namespace Halley {
 		void setPosition(Vector2f p) { position = p; }
 
 		const String& getType() const { return type; }
-
+		
 		Vector<Pin>& getPins() { return pins; }
 		const Vector<Pin>& getPins() const { return pins; }
 		Pin& getPin(size_t idx)
@@ -86,8 +89,12 @@ namespace Halley {
 		virtual void offsetNodes(GraphNodeId offset);
 
 		GraphNodePinType getPinType(GraphPinId idx) const;
-		virtual gsl::span<const GraphNodePinType> getPinConfiguration() const = 0;
+		gsl::span<const GraphNodePinType> getPinConfiguration() const;
 		virtual std::unique_ptr<BaseGraphNode> clone() const = 0;
+
+		virtual void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const = 0;
+		virtual void clearType() const = 0;
+		virtual const IGraphNodeType& getGraphNodeType() const = 0;
 
 		virtual void feedToHash(Hash::Hasher& hasher) const;
 		virtual bool canDraw() const { return true; }
@@ -126,11 +133,18 @@ namespace Halley {
 		virtual ConfigNode toConfigNode() const = 0;
 		virtual String toYAML() const;
 
+		void assignTypes(const GraphNodeTypeCollection& nodeTypeCollection, bool force = false) const;
+		void clearTypes();
+
 	protected:
 		virtual bool isMultiConnection(GraphNodePinType pinType) const
 		{
 			return false;
 		}
+
+		uint64_t hash = 0;
+		uint64_t assetHash = 0;
+		mutable uint64_t lastAssignTypeHash = 1;
 	};
 
 

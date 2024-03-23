@@ -3,8 +3,8 @@
 
 using namespace Halley;
 
-RenderGraphGizmo::RenderGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources)
-	: BaseGraphGizmo(factory, entityEditorFactory, resources)
+RenderGraphGizmo::RenderGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes)
+	: BaseGraphGizmo(factory, entityEditorFactory, resources, std::move(nodeTypes))
 {
 }
 
@@ -13,13 +13,8 @@ std::unique_ptr<BaseGraphNode> RenderGraphGizmo::makeNode(const ConfigNode& node
 	return std::make_unique<RenderGraphNode2>(node);
 }
 
-std::shared_ptr<BaseGraphRenderer> RenderGraphGizmo::makeRenderer(Resources& resources, float baseZoom)
-{
-	return std::make_shared<RenderGraphRenderer>(resources, baseZoom);
-}
-
 RenderGraphGizmoUI::RenderGraphGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, RenderGraphEditor& graphEditor)
-	: GraphGizmoUI(std::move(keyboard), std::move(clipboard), graphEditor, std::make_unique<RenderGraphGizmo>(factory, entityEditorFactory, resources))
+	: GraphGizmoUI(std::move(keyboard), std::move(clipboard), graphEditor, std::make_unique<RenderGraphGizmo>(factory, entityEditorFactory, resources, makeRenderGraphTypes()))
 {
 	renderGraphGizmo = dynamic_cast<RenderGraphGizmo*>(gizmo.get());
 }
@@ -29,15 +24,13 @@ void RenderGraphGizmoUI::load(BaseGraph& graph)
 	renderGraphGizmo->setBaseGraph(&graph);
 }
 
-RenderGraphRenderer::RenderGraphRenderer(Resources& resources, float nativeZoom)
-	: BaseGraphRenderer(resources, nativeZoom)
-{}
-
-const IGraphNodeType* RenderGraphRenderer::tryGetNodeType(const String& typeId) const
+std::shared_ptr<GraphNodeTypeCollection> RenderGraphGizmoUI::makeRenderGraphTypes()
 {
-	// TODO
-	static RenderGraphNodeType type;
-	return &type;
+	auto result = std::make_shared<GraphNodeTypeCollection>();
+
+	result->addNodeType(std::make_unique<RenderGraphNodeType>());
+
+	return result;
 }
 
 String RenderGraphNodeType::getId() const

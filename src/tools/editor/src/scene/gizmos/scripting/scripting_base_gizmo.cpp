@@ -8,10 +8,8 @@
 using namespace Halley;
 
 ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
-	: BaseGraphGizmo(factory, entityEditorFactory, resources, baseZoom)
-	, scriptNodeTypes(std::move(scriptNodeTypes))
+	: BaseGraphGizmo(factory, entityEditorFactory, resources, std::move(scriptNodeTypes), baseZoom)
 {
-
 }
 
 void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
@@ -21,12 +19,12 @@ void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 
 std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
 	if (!nodeType) {
 		return {};
 	}
 	
-	auto [text, colours] = nodeType->getDescription(dynamic_cast<const ScriptGraphNode&>(node), nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	auto [text, colours] = nodeType->getDescription(node, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
 	if (devConData && devConData->first == getNodeUnderMouse() && !devConData->second.isEmpty()) {
 		colours.emplace_back(text.size(), std::nullopt);
 		text += "\n\nValue: ";
@@ -39,8 +37,8 @@ std::pair<String, Vector<ColourOverride>> ScriptingBaseGizmo::getNodeDescription
 
 void ScriptingBaseGizmo::assignNodeTypes(bool force) const
 {
-	if (scriptGraph && scriptNodeTypes) {
-		scriptGraph->assignTypes(*scriptNodeTypes, force);
+	if (scriptGraph && nodeTypes) {
+		scriptGraph->assignTypes(*nodeTypes, force);
 	}
 }
 
@@ -95,19 +93,19 @@ void ScriptingBaseGizmo::updateNodes(bool force)
 
 bool ScriptingBaseGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
 	return !nodeType || nodeType->canDelete();
 }
 
 bool ScriptingBaseGizmo::nodeTypeNeedsSettings(const String& type) const
 {
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(type);
 	return nodeType && !nodeType->getSettingTypes().empty();
 }
 
 void ScriptingBaseGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
 {
-	if (const auto* nodeType = scriptNodeTypes->tryGetNodeType(type)) {
+	if (const auto* nodeType = nodeTypes->tryGetGraphNodeType(type)) {
 		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
 	}
 }
@@ -119,7 +117,7 @@ void ScriptingBaseGizmo::refreshNodes() const
 
 std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
 {
-	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, scriptNodeTypes, std::move(callback));
+	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, nodeTypes, std::move(callback));
 }
 
 std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& node)
@@ -129,7 +127,7 @@ std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& no
 
 std::shared_ptr<BaseGraphRenderer> ScriptingBaseGizmo::makeRenderer(Resources& resources, float baseZoom)
 {
-	auto renderer = std::make_shared<ScriptRenderer>(resources, *scriptNodeTypes, baseZoom);
+	auto renderer = std::make_shared<ScriptRenderer>(resources, *nodeTypes, baseZoom);
 	renderer->setState(scriptState);
 	return renderer;
 }

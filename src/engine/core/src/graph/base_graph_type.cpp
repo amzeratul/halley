@@ -8,6 +8,11 @@ String IGraphNodeType::getLabel(const BaseGraphNode& node) const
 	return "";
 }
 
+Colour4f IGraphNodeType::getColour() const
+{
+	return Colour4f(0.5f, 0.5f, 0.5f);
+}
+
 Vector<IGraphNodeType::SettingType> IGraphNodeType::getSettingTypes() const
 {
 	return {};
@@ -61,6 +66,15 @@ String IGraphNodeType::getPinTypeName(PinType type) const
 	return "Pin";
 }
 
+std::pair<String, Vector<ColourOverride>> IGraphNodeType::getDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx, const BaseGraph& graph) const
+{
+	if (elementType.type == static_cast<int>(BaseGraphNodeElementType::Node)) {
+		return getNodeDescription(node, graph);
+	} else {
+		return { getPinDescription(node, elementType, elementIdx), {} };
+	}
+}
+
 IGraphNodeType::PinType IGraphNodeType::getPin(const BaseGraphNode& node, size_t n) const
 {
 	const auto& pins = getPinConfiguration(node);
@@ -73,4 +87,43 @@ IGraphNodeType::PinType IGraphNodeType::getPin(const BaseGraphNode& node, size_t
 String IGraphNodeType::getIconName(const BaseGraphNode& node) const
 {
 	return "";
+}
+
+void GraphNodeTypeCollection::addNodeType(std::unique_ptr<IGraphNodeType> nodeType)
+{
+	auto name = nodeType->getId();
+	nodeTypes[std::move(name)] = std::move(nodeType);
+}
+
+const IGraphNodeType* GraphNodeTypeCollection::tryGetGraphNodeType(const String& typeId) const
+{
+	const auto iter = nodeTypes.find(typeId);
+	if (iter != nodeTypes.end()) {
+		return iter->second.get();
+	}
+	return nullptr;
+}
+
+Vector<String> GraphNodeTypeCollection::getTypes(bool includeNonAddable) const
+{
+	Vector<String> result;
+	result.reserve(nodeTypes.size());
+	for (const auto& [id, v]: nodeTypes) {
+		if (v->canAdd() || includeNonAddable) {
+			result.push_back(id);
+		}
+	}
+	return result;
+}
+
+Vector<String> GraphNodeTypeCollection::getNames(bool includeNonAddable) const
+{
+	Vector<String> result;
+	result.reserve(nodeTypes.size());
+	for (const auto& [id, v]: nodeTypes) {
+		if (v->canAdd() || includeNonAddable) {
+			result.push_back(v->getName());
+		}
+	}
+	return result;
 }

@@ -18,8 +18,9 @@ bool BaseGraphRenderer::NodeUnderMouseInfo::operator!=(const NodeUnderMouseInfo&
 	return !(*this == other);
 }
 
-BaseGraphRenderer::BaseGraphRenderer(Resources& resources, float nativeZoom)
+BaseGraphRenderer::BaseGraphRenderer(Resources& resources, const GraphNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: resources(resources)
+	, nodeTypeCollection(nodeTypeCollection)
 	, nativeZoom(nativeZoom)
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
@@ -348,7 +349,7 @@ Colour4f BaseGraphRenderer::getPinColour(GraphNodePinType pinType) const
 
 Colour4f BaseGraphRenderer::getBaseNodeColour(const IGraphNodeType& type) const
 {
-	return Colour4f(0.7f, 0.7f, 0.7f);
+	return type.getColour();
 }
 
 Vector2f BaseGraphRenderer::getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
@@ -368,6 +369,11 @@ const Sprite& BaseGraphRenderer::getIconByName(const String& iconName)
 	}
 	icons[iconName] = iconName.isEmpty() ? Sprite() : Sprite().setImage(resources, iconName).setPivot(Vector2f(0.5f, 0.5f));
 	return icons[iconName];
+}
+
+const IGraphNodeType* BaseGraphRenderer::tryGetNodeType(const String& typeId) const
+{
+	return nodeTypeCollection.tryGetGraphNodeType(typeId);
 }
 
 BezierCubic BaseGraphRenderer::makeBezier(const ConnectionPath& path) const

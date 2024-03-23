@@ -1,5 +1,6 @@
 #include "halley/graphics/render_target/render_graph_definition.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/graph/base_graph_type.h"
 #include "halley/resources/resources.h"
 #include "halley/graphics/material/material_definition.h"
 
@@ -151,15 +152,24 @@ ConfigNode RenderGraphNode2::toConfigNode() const
 	return result;
 }
 
-gsl::span<const GraphNodePinType> RenderGraphNode2::getPinConfiguration() const
-{
-	// TODO
-	return {};
-}
-
 std::unique_ptr<BaseGraphNode> RenderGraphNode2::clone() const
 {
 	return std::make_unique<RenderGraphNode2>(*this);
+}
+
+void RenderGraphNode2::assignType(const GraphNodeTypeCollection& nodeTypeCollection) const
+{
+	nodeType = nodeTypeCollection.tryGetGraphNodeType(type);
+}
+
+void RenderGraphNode2::clearType() const
+{
+	nodeType = nullptr;
+}
+
+const IGraphNodeType& RenderGraphNode2::getGraphNodeType() const
+{
+	return *nodeType;
 }
 
 void RenderGraphNode2::serialize(Serializer& s) const

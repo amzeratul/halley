@@ -104,8 +104,11 @@ namespace Halley {
 
         ConfigNode toConfigNode() const override;
 
-	    gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 	    std::unique_ptr<BaseGraphNode> clone() const override;
+
+        void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const override;
+        void clearType() const override;
+        const IGraphNodeType& getGraphNodeType() const override;
 
         void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
@@ -115,6 +118,7 @@ namespace Halley {
 
     private:
         String name;
+        mutable const IGraphNodeType* nodeType = nullptr;
     };
 
     class RenderGraphDefinition2 : public BaseGraphImpl<RenderGraphNode2> {

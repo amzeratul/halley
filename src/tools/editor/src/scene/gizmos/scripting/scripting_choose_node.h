@@ -5,7 +5,7 @@
 namespace Halley {
 	class ScriptingChooseNode final : public ChooseAssetWindow {
 	public:
-		ScriptingChooseNode(Vector2f minSize, UIFactory& factory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, const Callback& callback);
+		ScriptingChooseNode(Vector2f minSize, UIFactory& factory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes, const Callback& callback);
 
 	protected:
 		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
@@ -16,6 +16,6 @@ namespace Halley {
 	
 	private:
 		Resources& resources;
-		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
+		std::shared_ptr<GraphNodeTypeCollection> nodeTypes;
 	};
 }

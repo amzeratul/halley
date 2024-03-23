@@ -33,8 +33,8 @@ namespace Halley {
 
 		virtual ScriptNodeClassification getClassification() const = 0;
 
-		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
-		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
+		std::pair<String, Vector<ColourOverride>> getDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx, const BaseGraph& graph) const override;
+		std::pair<String, Vector<ColourOverride>> getPinAndConnectionDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx, const BaseGraph& graph) const;
 		virtual String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
 		virtual String getLargeLabel(const BaseGraphNode& node) const;
 
@@ -71,6 +71,9 @@ namespace Halley {
 		GraphPinId getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const;
 
         static String addParentheses(String str);
+
+		Colour4f getColour() const override;
+		int getSortOrder() const override;
 	};
 
 	template <typename DataType>
@@ -119,18 +122,14 @@ namespace Halley {
 		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const override { return doGetDevConData(environment, node); }
 	};
 
-	class ScriptNodeTypeCollection {
+	class ScriptNodeTypeCollection : public GraphNodeTypeCollection {
 	public:
 		ScriptNodeTypeCollection();
-    	void addScriptNode(std::unique_ptr<IScriptNodeType> nodeType);
 
+    	void addScriptNode(std::unique_ptr<IGraphNodeType> nodeType);
 		const IScriptNodeType* tryGetNodeType(const String& typeId) const;
-		Vector<String> getTypes(bool includeNonAddable) const;
-		Vector<String> getNames(bool includeNonAddable) const;
 
 	private:
-    	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
-
 		void addBasicScriptNodes();
 	};
 }

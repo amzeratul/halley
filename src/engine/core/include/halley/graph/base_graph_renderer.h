@@ -9,6 +9,7 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
+	class GraphNodeTypeCollection;
 	class IGraphNodeType;
 	class BaseGraphNode;
 	class Painter;
@@ -35,7 +36,7 @@ namespace Halley {
 			bool fade = false;
 		};
 
-		BaseGraphRenderer(Resources& resources, float nativeZoom);
+		BaseGraphRenderer(Resources& resources, const GraphNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		virtual ~BaseGraphRenderer() = default;
 
 		void setGraph(const BaseGraph* graph);
@@ -75,10 +76,12 @@ namespace Halley {
 		};
 
 		Resources& resources;
+		const GraphNodeTypeCollection& nodeTypeCollection;
+		float nativeZoom = 1.0f;
+
 		std::optional<NodeUnderMouseInfo> highlightNode;
 		Vector<GraphNodeId> selectedNodes;
 		Vector<ConnectionPath> currentPaths;
-		float nativeZoom = 1.0f;
 
 		const BaseGraph* graph = nullptr;
 
@@ -87,7 +90,7 @@ namespace Halley {
 		Sprite pinSprite;
 		TextRenderer labelText;
 
-		virtual const IGraphNodeType* tryGetNodeType(const String& typeId) const = 0;
+		const IGraphNodeType* tryGetNodeType(const String& typeId) const;
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;

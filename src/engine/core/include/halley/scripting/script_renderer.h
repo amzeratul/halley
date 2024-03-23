@@ -14,23 +14,17 @@ namespace Halley {
 
 	class ScriptRenderer : public BaseGraphRenderer {
 	public:
-		ScriptRenderer(Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
+		ScriptRenderer(Resources& resources, const GraphNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setState(const ScriptState* scriptState);
 		void setDebugDisplayData(HashMap<int, String> values) override;
-
-		static Colour4f getScriptNodeColour(const IScriptNodeType& nodeType);
 
 	protected:
 		bool isDimmed(GraphNodePinType type) const override;
 		GraphPinSide getSide(GraphNodePinType pinType) const override;
 		Colour4f getPinColour(GraphNodePinType pinType) const override;
-		Colour4f getBaseNodeColour(const IGraphNodeType& type) const override;
-		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
 
 	private:
-		const ScriptNodeTypeCollection& nodeTypeCollection;
-		
 		const ScriptState* state = nullptr;
 
 		Sprite destructorBg;

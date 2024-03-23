@@ -130,9 +130,9 @@ std::unique_ptr<BaseGraphNode> ScriptGraphNode::clone() const
 	return std::make_unique<ScriptGraphNode>(*this);
 }
 
-void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
+void ScriptGraphNode::assignType(const GraphNodeTypeCollection& nodeTypeCollection) const
 {
-	nodeType = nodeTypeCollection.tryGetNodeType(type);
+	nodeType = dynamic_cast<const IScriptNodeType*>(nodeTypeCollection.tryGetGraphNodeType(type));
 	Ensures(nodeType != nullptr);
 }
 
@@ -141,15 +141,16 @@ void ScriptGraphNode::clearType() const
 	nodeType = nullptr;
 }
 
-const IScriptNodeType& ScriptGraphNode::getNodeType() const
+const IGraphNodeType& ScriptGraphNode::getGraphNodeType() const
 {
 	Expects(nodeType != nullptr);
 	return *nodeType;
 }
 
-gsl::span<const GraphNodePinType> ScriptGraphNode::getPinConfiguration() const
+const IScriptNodeType& ScriptGraphNode::getNodeType() const
 {
-	return getNodeType().getPinConfiguration(*this);
+	Expects(nodeType != nullptr);
+	return *nodeType;
 }
 
 ScriptGraphNodeRoots::Entry::Entry(Range<GraphNodeId> range, GraphNodeId root)
@@ -411,24 +412,6 @@ int ScriptGraph::getMessageNumParams(const String& messageId) const
 		}
 	}
 	return 0;
-}
-
-void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force) const
-{
-	if (lastAssignTypeHash != hash || force) {
-		lastAssignTypeHash = hash;
-		for (const auto& node: nodes) {
-			node.assignType(nodeTypeCollection);
-		}
-	}
-}
-
-void ScriptGraph::clearTypes()
-{
-	lastAssignTypeHash = 0;
-	for (const auto& node: nodes) {
-		node.clearType();
-	}
 }
 
 GraphNodeId ScriptGraph::getNodeRoot(GraphNodeId nodeId) const

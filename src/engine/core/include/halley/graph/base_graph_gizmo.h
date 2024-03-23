@@ -21,7 +21,7 @@ namespace Halley {
 	public:
 		using ModifiedCallback = std::function<void()>;
 
-		BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, float baseZoom = 1.0f);
+		BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes, float baseZoom = 1.0f);
 		virtual ~BaseGraphGizmo();
 
 		virtual void update(Time time, const SceneEditorInputState& inputState);
@@ -70,6 +70,7 @@ namespace Halley {
 		const IEntityEditorFactory& entityEditorFactory;
 		Resources* resources = nullptr;
 		std::shared_ptr<BaseGraphRenderer> renderer;
+		std::shared_ptr<GraphNodeTypeCollection> nodeTypes;
 
 		UIRoot* uiRoot = nullptr;
 		UIWidget* eventSink = nullptr;
@@ -81,7 +82,7 @@ namespace Halley {
 		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		virtual std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback);
 		virtual std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) = 0;
-		virtual std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) = 0;
+		virtual std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom);
 
 	private:
 		struct Dragging {

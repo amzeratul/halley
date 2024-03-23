@@ -35,7 +35,7 @@ String IScriptNodeType::getLargeLabel(const BaseGraphNode& node) const
 	return "";
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const BaseGraphNode& node, PinType elementType, uint8_t elementIdx, const BaseGraph& graph) const
 {
 	switch (ScriptNodeElementType(elementType.type)) {
 	case ScriptNodeElementType::ReadDataPin:
@@ -50,7 +50,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx, const BaseGraph& graph) const
 {
 	auto pinDesc = getPinDescription(node, elementType, elementIdx);
 
@@ -198,48 +198,53 @@ String IScriptNodeType::addParentheses(String str)
 	return str;
 }
 
+Colour4f IScriptNodeType::getColour() const
+{
+	switch (getClassification()) {
+	case ScriptNodeClassification::Terminator:
+		return Colour4f(0.97f, 0.35f, 0.35f);
+	case ScriptNodeClassification::Action:
+		return Colour4f(0.07f, 0.84f, 0.09f);
+	case ScriptNodeClassification::Variable:
+		return Colour4f(0.91f, 0.71f, 0.0f);
+	case ScriptNodeClassification::Expression:
+		return Colour4f(1.0f, 0.64f, 0.14f);
+	case ScriptNodeClassification::FlowControl:
+		return Colour4f(0.35f, 0.55f, 0.97f);
+	case ScriptNodeClassification::State:
+		return Colour4f(0.75f, 0.35f, 0.97f);
+	case ScriptNodeClassification::Function:
+		return Colour4f(1.00f, 0.49f, 0.68f);
+	case ScriptNodeClassification::NetworkFlow:
+		return Colour4f(0.15f, 0.85f, 0.98f);
+	case ScriptNodeClassification::Comment:
+		return Colour4f(0.25f, 0.25f, 0.3f);
+	case ScriptNodeClassification::DebugDisplay:
+		return Colour4f(0.1f, 0.1f, 0.15f);
+	case ScriptNodeClassification::Unknown:
+		return Colour4f(0.2f, 0.2f, 0.2f);
+	}
+	return Colour4f(0.2f, 0.2f, 0.2f);
+}
+
+int IScriptNodeType::getSortOrder() const
+{
+	return static_cast<int>(getClassification());
+}
+
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 {
 	addBasicScriptNodes();
 }
 
-void ScriptNodeTypeCollection::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
+void ScriptNodeTypeCollection::addScriptNode(std::unique_ptr<IGraphNodeType> nodeType)
 {
-	auto name = nodeType->getId();
-	nodeTypes[std::move(name)] = std::move(nodeType);
+	addNodeType(std::move(nodeType));
 }
 
 const IScriptNodeType* ScriptNodeTypeCollection::tryGetNodeType(const String& typeId) const
 {
-	const auto iter = nodeTypes.find(typeId);
-	if (iter != nodeTypes.end()) {
-		return iter->second.get();
-	}
-	return nullptr;
-}
-
-Vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) const
-{
-	Vector<String> result;
-	result.reserve(nodeTypes.size());
-	for (const auto& [id, v]: nodeTypes) {
-		if (v->canAdd() || includeNonAddable) {
-			result.push_back(id);
-		}
-	}
-	return result;
-}
-
-Vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) const
-{
-	Vector<String> result;
-	result.reserve(nodeTypes.size());
-	for (const auto& [id, v]: nodeTypes) {
-		if (v->canAdd() || includeNonAddable) {
-			result.push_back(v->getName());
-		}
-	}
-	return result;
+	return dynamic_cast<const IScriptNodeType*>(tryGetGraphNodeType(typeId));
 }
 
 void ScriptNodeTypeCollection::addBasicScriptNodes()

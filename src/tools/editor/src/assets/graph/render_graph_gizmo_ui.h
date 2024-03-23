@@ -8,11 +8,10 @@ namespace Halley {
 
 	class RenderGraphGizmo : public BaseGraphGizmo {
 	public:
-		RenderGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources);
+		RenderGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes);
 
 	protected:
 		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
-		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
 	};
 
 	class RenderGraphGizmoUI : public GraphGizmoUI {
@@ -23,15 +22,10 @@ namespace Halley {
 
 	private:
 		RenderGraphGizmo* renderGraphGizmo = nullptr;
+
+		static std::shared_ptr<GraphNodeTypeCollection> makeRenderGraphTypes();
 	};
-
-	class RenderGraphRenderer : public BaseGraphRenderer {
-	public:
-		RenderGraphRenderer(Resources& resources, float nativeZoom);
-
-		const IGraphNodeType* tryGetNodeType(const String& typeId) const override;
-	};
-
+	
 
 	class RenderGraphNodeType : public IGraphNodeType {
 	public:

@@ -29,8 +29,6 @@ namespace Halley {
 		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
 
 	private:
-		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
-
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;
 

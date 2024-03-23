@@ -21,10 +21,11 @@ bool BaseGraphGizmo::Connection::conflictsWith(const Connection& other) const
 	return (srcNode == other.srcNode && srcPin == other.srcPin) || (dstNode == other.dstNode && dstPin == other.dstPin);
 }
 
-BaseGraphGizmo::BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, float baseZoom)
+BaseGraphGizmo::BaseGraphGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, Resources& resources, std::shared_ptr<GraphNodeTypeCollection> nodeTypes, float baseZoom)
 	: factory(factory)
 	, entityEditorFactory(entityEditorFactory)
 	, resources(&resources)
+	, nodeTypes(std::move(nodeTypes))
 	, baseZoom(baseZoom)
 {
 	tooltipLabel
@@ -455,6 +456,11 @@ SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInput
 std::shared_ptr<UIWidget> BaseGraphGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
 {
 	return {};
+}
+
+std::shared_ptr<BaseGraphRenderer> BaseGraphGizmo::makeRenderer(Resources& resources, float baseZoom)
+{
+	return std::make_shared<BaseGraphRenderer>(resources, *nodeTypes, baseZoom);
 }
 
 void BaseGraphGizmo::addNode()
