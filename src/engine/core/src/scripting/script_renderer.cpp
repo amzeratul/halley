@@ -35,57 +35,6 @@ void ScriptRenderer::setState(const ScriptState* scriptState)
 	state = scriptState;
 }
 
-void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const BaseGraph& graph, float curZoom, float posScale)
-{
-	auto drawMode = getNodeDrawMode(nodeIdx);
-	NodeDrawMode dstDrawMode;
-
-	const ScriptGraphNode& node = dynamic_cast<const ScriptGraphNode&>(graph.getNode(nodeIdx));
-	const auto* nodeType = tryGetNodeType(node.getType());
-	if (!nodeType) {
-		return;
-	}
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node);
-
-	for (size_t i = 0; i < node.getPins().size(); ++i) {
-		const auto& srcPinType = nodeType->getPin(node, i);
-		const auto& pin = node.getPins()[i];
-
-		const bool pinHighlighted = nodeHighlighted || (highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->elementId == i);
-		
-		for (const auto& pinConnection: pin.connections) {
-			std::optional<Vector2f> dstPos;
-			GraphNodePinType dstPinType;
-
-			bool highlighted = pinHighlighted;
-
-			if (pinConnection.dstNode && srcPinType.direction == GraphNodePinDirection::Output) {
-				const size_t dstIdx = pinConnection.dstPin;
-				const auto& dstNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pinConnection.dstNode.value()));
-				const auto* dstNodeType = tryGetNodeType(dstNode.getType());
-				if (!dstNodeType) {
-					continue;
-				}
-				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
-				dstPinType = dstNodeType->getPin(dstNode, dstIdx);
-				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
-					if (highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node) || highlightNode->elementId == pinConnection.dstPin) {
-						highlighted = true;
-					}
-				}
-
-				dstDrawMode = getNodeDrawMode(*pinConnection.dstNode);
-			}
-			
-			if (dstPos) {
-				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale).getCentre();
-				const bool connActive = drawMode.type != NodeDrawModeType::Unvisited && dstDrawMode.type != NodeDrawModeType::Unvisited;
-				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, !connActive);
-			}
-		}
-	}
-}
-
 ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId) const
 {
 	NodeDrawMode drawMode;

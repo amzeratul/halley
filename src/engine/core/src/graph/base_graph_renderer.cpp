@@ -120,6 +120,53 @@ void BaseGraphRenderer::drawConnection(Painter& painter, const ConnectionPath& p
 
 void BaseGraphRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const BaseGraph& graph, float curZoom, float posScale)
 {
+	auto drawMode = getNodeDrawMode(nodeIdx);
+	NodeDrawMode dstDrawMode;
+
+	const ScriptGraphNode& node = dynamic_cast<const ScriptGraphNode&>(graph.getNode(nodeIdx));
+	const auto* nodeType = tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node);
+
+	for (size_t i = 0; i < node.getPins().size(); ++i) {
+		const auto& srcPinType = nodeType->getPin(node, i);
+		const auto& pin = node.getPins()[i];
+
+		const bool pinHighlighted = nodeHighlighted || (highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->elementId == i);
+		
+		for (const auto& pinConnection: pin.connections) {
+			std::optional<Vector2f> dstPos;
+			GraphNodePinType dstPinType;
+
+			bool highlighted = pinHighlighted;
+
+			if (pinConnection.dstNode && srcPinType.direction == GraphNodePinDirection::Output) {
+				const size_t dstIdx = pinConnection.dstPin;
+				const auto& dstNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pinConnection.dstNode.value()));
+				const auto* dstNodeType = tryGetNodeType(dstNode.getType());
+				if (!dstNodeType) {
+					continue;
+				}
+				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
+				dstPinType = dstNodeType->getPin(dstNode, dstIdx);
+				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
+					if (highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node) || highlightNode->elementId == pinConnection.dstPin) {
+						highlighted = true;
+					}
+				}
+
+				dstDrawMode = getNodeDrawMode(*pinConnection.dstNode);
+			}
+			
+			if (dstPos) {
+				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale).getCentre();
+				const bool connActive = drawMode.type != NodeDrawModeType::Unvisited && dstDrawMode.type != NodeDrawModeType::Unvisited;
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, !connActive);
+			}
+		}
+	}
 }
 
 void BaseGraphRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode)
@@ -320,7 +367,7 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> BaseGraphRenderer::getNodeU
 		const auto& pins = node.getPinConfiguration();
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
-			const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
 			if (circle.contains(mousePos)) {
 				foundPin = true;
 				const float distance = (mousePos - circle.getCentre()).length();
@@ -357,14 +404,14 @@ BaseGraphRenderer::NodeUnderMouseInfo BaseGraphRenderer::getPinInfo(Vector2f bas
 	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 	const auto curRect = area + pos;
 
-	const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), pinId, curZoom, 1.0f).expand(4.0f / curZoom);
+	const auto circle = getNodeElementArea(*nodeType, basePos, node, pinId, curZoom, 1.0f).expand(4.0f / curZoom);
 
 	return NodeUnderMouseInfo{ nodeId, pinType, pinId, curRect, circle.getCentre() };
 }
 
 Vector2f BaseGraphRenderer::getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const
 {
-	return getNodeElementArea(static_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, static_cast<const ScriptGraphNode&>(node), idx, zoom, 1.0f).getCentre();
+	return getNodeElementArea(dynamic_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, node, idx, zoom, 1.0f).getCentre();
 }
 
 Vector<GraphNodeId> BaseGraphRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
