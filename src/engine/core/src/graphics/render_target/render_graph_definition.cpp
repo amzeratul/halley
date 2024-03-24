@@ -82,6 +82,18 @@ const std::shared_ptr<const MaterialDefinition>& RenderGraphNodeDefinition::getM
 	return material;
 }
 
+uint8_t RenderGraphNodeDefinition::getPinIndex(GraphPinId pinId, GraphNodePinDirection direction) const
+{
+	uint8_t result = 0;
+	const auto& pins = getPinConfiguration();
+	for (size_t i = 0; i < pinId; ++i) {
+		if (pins[i].direction == direction) {
+			++result;
+		}
+	}
+	return result;
+}
+
 
 RenderGraphDefinition::RenderGraphDefinition(const ConfigNode& node)
 {

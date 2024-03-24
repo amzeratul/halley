@@ -32,15 +32,27 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 		addNode(nodeDefinition.getName(), std::make_unique<RenderGraphNode>(nodeDefinition));
 	}
 
-	// TODO: make connections
-	/*
-	for (const auto& connectionDefinition: graphDefinition->getConnections()) {
-		auto* from = getNode(connectionDefinition.fromId);
-		auto* to = getNode(connectionDefinition.toId);
+	for (const auto& nodeDefinition : graphDefinition->getNodes()) {
+		const auto& pins = nodeDefinition.getPins();
+		const auto& pinTypes = nodeDefinition.getPinConfiguration();
 
-		to->connectInput(connectionDefinition.toPin, *from, connectionDefinition.fromPin);
+		for (size_t i = 0; i < pins.size(); ++i) {
+			const auto& pin = pins[i];
+
+			if (pinTypes[i].direction == GraphNodePinDirection::Output) {
+				for (const auto& connection : pin.connections) {
+					if (connection.dstNode) {
+						const auto& dstNodeDefinition = graphDefinition->getNodes()[*connection.dstNode];
+
+						auto* from = getNode(nodeDefinition.getName());
+						auto* to = getNode(dstNodeDefinition.getName());
+						
+						to->connectInput(dstNodeDefinition.getPinIndex(connection.dstPin, GraphNodePinDirection::Input), *from, nodeDefinition.getPinIndex(static_cast<GraphPinId>(i), GraphNodePinDirection::Output));
+					}
+				}
+			}
+		}
 	}
-	*/
 }
 
 void RenderGraph::update()

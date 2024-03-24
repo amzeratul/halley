@@ -57,6 +57,8 @@ namespace Halley {
         void setMaterial(std::shared_ptr<const MaterialDefinition> material);
         const std::shared_ptr<const MaterialDefinition>& getMaterial() const;
 
+    	uint8_t getPinIndex(GraphPinId pinId, GraphNodePinDirection direction) const;
+
     private:
         String name;
         mutable const IGraphNodeType* nodeType = nullptr;
