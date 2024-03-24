@@ -85,6 +85,14 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::PaintNodeType::ge
 	return data;
 }
 
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSettingTypes() const
+{
+	return {
+		SettingType{ "cameraId", "Halley::String", Vector<String>{""} },
+		SettingType{ "paintId", "Halley::String", Vector<String>{""} },
+	};
+}
+
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::PaintNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
@@ -121,6 +129,14 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 	}
 
 	return gsl::span<const IGraphNodeType::PinType>(data).subspan(0, 4 + numTexs);
+}
+
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::OverlayNodeType::getSettingTypes() const
+{
+	return {
+		SettingType{ "material", "Halley::ResourceReference<Halley::MaterialDefinition>", Vector<String>{""} },
+		SettingType{ "variables", "Halley::HashMap<Halley::String, Halley::String>", Vector<String>{""} },
+	};
 }
 
 void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const
@@ -167,6 +183,13 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNo
 	return data;
 }
 
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::RenderToTextureNodeType::getSettingTypes() const
+{
+	return {
+		SettingType{ "renderSize", "Halley::Vector2i", Vector<String>{""} },
+	};
+}
+
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OutputNodeType::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = RenderGraphElementType;
@@ -178,6 +201,11 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OutputNodeType::g
 	return data;
 }
 
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::OutputNodeType::getSettingTypes() const
+{
+	return {};
+}
+
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::ImageOutputNodeType::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = RenderGraphElementType;
@@ -186,4 +214,9 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::ImageOutputNodeTy
 		PinType{ ET::ColourBuffer, PD::Input }
 	};
 	return data;
+}
+
+Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::ImageOutputNodeType::getSettingTypes() const
+{
+	return {};
 }

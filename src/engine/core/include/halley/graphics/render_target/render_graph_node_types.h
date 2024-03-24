@@ -35,6 +35,7 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::DrawPass; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			Vector<SettingType> getSettingTypes() const override;
 			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		};
 
@@ -46,9 +47,11 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Filter; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
-			void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const override;
+			Vector<SettingType> getSettingTypes() const override;
 			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 			String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+			void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const override;
 		};
 
 		class RenderToTextureNodeType : public RenderGraphNodeType {
@@ -59,6 +62,7 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Texture; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			Vector<SettingType> getSettingTypes() const override;
 		};
 
 		class OutputNodeType : public RenderGraphNodeType {
@@ -69,6 +73,7 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Sink; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			Vector<SettingType> getSettingTypes() const override;
 		};
 
 		class ImageOutputNodeType : public RenderGraphNodeType {
@@ -79,6 +84,7 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Sink; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+			Vector<SettingType> getSettingTypes() const override;
 		};
 	}
 }

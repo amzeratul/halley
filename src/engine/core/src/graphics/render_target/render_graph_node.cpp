@@ -57,10 +57,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		}
 
 		if (pars.hasKey("variables")) {
-			const auto& seq = pars["variables"].asSequence();
-			variables.reserve(seq.size());
-			for (const auto& node: seq) {
-				variables.emplace_back(Variable{ node["name"].asString(), ConfigNode(node["value"]) });
+			for (const auto& [key, value] : pars["variables"].asMap()) {
+				variables.emplace_back(Variable{ key, ConfigNode(value) });
 			}
 		}
 
