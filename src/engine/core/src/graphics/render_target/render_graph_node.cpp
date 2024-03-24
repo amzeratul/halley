@@ -18,13 +18,13 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 	: id(definition.getName())
 	, method(fromString<RenderGraphMethod>(definition.getType()))
 {
-	auto setPinTypes = [] (auto& pins, gsl::span<const RenderGraphElementType> pinTypes)
-	{
-		pins.resize(pinTypes.size());
-		for (size_t i = 0; i < pinTypes.size(); ++i) {
-			pins[i].type = pinTypes[i];
+	for (const auto& pin: definition.getPinConfiguration()) {
+		if (pin.direction == GraphNodePinDirection::Input) {
+			inputPins.emplace_back().type = static_cast<RenderGraphElementType>(pin.type);
+		} else {
+			outputPins.emplace_back().type = static_cast<RenderGraphElementType>(pin.type);
 		}
-	};
+	}
 	
 	const auto& pars = definition.getSettings();
 	//priority = definition.priority;
@@ -41,9 +41,6 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 		if (pars.hasKey("stencilClear")) {
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
-
-		setPinTypes(inputPins, {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer, RenderGraphElementType::Dependency }});
-		setPinTypes(outputPins, { { RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer } });
 	} else if (method == RenderGraphMethod::Overlay) {
 		overlayMethod = std::make_shared<Material>(definition.getMaterial());
 		if (pars.hasKey("colourClear")) {
@@ -61,28 +58,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 				variables.emplace_back(Variable{ key, ConfigNode(value) });
 			}
 		}
-
-		const auto& texs = overlayMethod->getDefinition().getTextures();
-		Vector<RenderGraphElementType> inputPinTypes;
-		inputPinTypes.reserve(2 + texs.size());
-		inputPinTypes.push_back(RenderGraphElementType::ColourBuffer);
-		inputPinTypes.push_back(RenderGraphElementType::DepthStencilBuffer);
-		for (size_t i = 0; i < texs.size(); ++i) {
-			inputPinTypes.push_back(RenderGraphElementType::Texture);
-		}
-		
-		setPinTypes(inputPins, inputPinTypes);
-		setPinTypes(outputPins, {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer }});
-	} else if (method == RenderGraphMethod::Output) {
-		setPinTypes(inputPins, {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer }});
-		setPinTypes(outputPins, {});
-	} else if (method == RenderGraphMethod::ImageOutput) {
-		setPinTypes(inputPins, {{ RenderGraphElementType::Texture }});
-		setPinTypes(outputPins, {});
 	} else if (method == RenderGraphMethod::RenderToTexture) {
 		currentSize = pars["renderSize"].asVector2i();
-		setPinTypes(inputPins, {{ RenderGraphElementType::ColourBuffer }});
-		setPinTypes(outputPins, {{ RenderGraphElementType::Dependency }});
 	}
 }
 
