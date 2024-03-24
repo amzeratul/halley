@@ -19,7 +19,7 @@ namespace Halley {
 		friend class RenderGraph;
 	
 	public:
-		explicit RenderGraphNode(const RenderGraphDefinition::Node& definition);
+		explicit RenderGraphNode(const RenderGraphNodeDefinition& definition);
 
 		int getPriority() const;
 

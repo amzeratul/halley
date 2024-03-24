@@ -14,9 +14,9 @@
 
 using namespace Halley;
 
-RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
-	: id(definition.id)
-	, method(definition.method)
+RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
+	: id(definition.getName())
+	, method(fromString<RenderGraphMethod>(definition.getType()))
 {
 	auto setPinTypes = [] (auto& pins, gsl::span<const RenderGraphElementType> pinTypes)
 	{
@@ -26,8 +26,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		}
 	};
 	
-	const auto& pars = definition.methodParameters;
-	priority = definition.priority;
+	const auto& pars = definition.getSettings();
+	//priority = definition.priority;
 
 	if (method == RenderGraphMethod::Paint) {
 		paintId = pars["paintId"].asString();
@@ -45,7 +45,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(inputPins, {{ RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer, RenderGraphElementType::Dependency }});
 		setPinTypes(outputPins, { { RenderGraphElementType::ColourBuffer, RenderGraphElementType::DepthStencilBuffer } });
 	} else if (method == RenderGraphMethod::Overlay) {
-		overlayMethod = std::make_shared<Material>(definition.material);
+		overlayMethod = std::make_shared<Material>(definition.getMaterial());
 		if (pars.hasKey("colourClear")) {
 			colourClear = Colour4f::fromString(pars["colourClear"].asString());
 		}

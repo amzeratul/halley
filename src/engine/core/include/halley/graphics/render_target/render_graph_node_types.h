@@ -16,10 +16,12 @@ namespace Halley {
 		virtual RenderGraphNodeClassification getClassification() const = 0;
 
 		Colour4f getColour() const override;
+		String getPinTypeName(PinType type) const override;
+
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		String getLabel(const BaseGraphNode& node) const override;
 
-		virtual void loadMaterials(RenderGraphNode2& node, Resources& resources) const;
+		virtual void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const;
 	};
 
 	namespace RenderGraphNodeTypes {
@@ -44,8 +46,9 @@ namespace Halley {
 			RenderGraphNodeClassification getClassification() const override { return RenderGraphNodeClassification::Filter; }
 
 			gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
-			void loadMaterials(RenderGraphNode2& node, Resources& resources) const override;
+			void loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const override;
 			std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+			String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 		};
 
 		class RenderToTextureNodeType : public RenderGraphNodeType {

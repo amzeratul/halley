@@ -29,14 +29,18 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 	lastDefinitionVersion = graphDefinition->getAssetVersion();
 	
 	for (const auto& nodeDefinition: graphDefinition->getNodes()) {
-		addNode(nodeDefinition.id, std::make_unique<RenderGraphNode>(nodeDefinition));
+		addNode(nodeDefinition.getName(), std::make_unique<RenderGraphNode>(nodeDefinition));
 	}
+
+	// TODO: make connections
+	/*
 	for (const auto& connectionDefinition: graphDefinition->getConnections()) {
 		auto* from = getNode(connectionDefinition.fromId);
 		auto* to = getNode(connectionDefinition.toId);
 
 		to->connectInput(connectionDefinition.toPin, *from, connectionDefinition.fromPin);
 	}
+	*/
 }
 
 void RenderGraph::update()

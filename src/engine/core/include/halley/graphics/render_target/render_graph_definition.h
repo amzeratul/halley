@@ -32,75 +32,11 @@ namespace Halley {
 		}
 	};
 	
-    class RenderGraphDefinition : public Resource {
+    class RenderGraphNodeDefinition : public BaseGraphNode {
     public:
-        class Node {
-        public:        	
-	        String id;
-			int priority;
-        	RenderGraphMethod method = RenderGraphMethod::None;
-        	ConfigNode methodParameters;
-        	Vector2f position;
-        	
-        	std::shared_ptr<const MaterialDefinition> material;
-
-        	Node() = default;
-        	Node(const ConfigNode& node);
-
-        	void serialize(Serializer& s) const;
-			void deserialize(Deserializer& s);
-
-        	void loadMaterials(Resources& resources);
-
-        	gsl::span<const RenderGraphElementType> getInputPins() const { return inputPins; }
-        	gsl::span<const RenderGraphElementType> getOutputPins() const { return outputPins; }
-
-        private:
-            void generatePins();
-        	
-        	Vector<RenderGraphElementType> inputPins;
-        	Vector<RenderGraphElementType> outputPins;
-        };
-
-    	class Connection {
-    	public:
-    		String fromId;
-    		String toId;
-    		uint8_t fromPin = 0;
-    		uint8_t toPin = 0;
-
-    		Connection() = default;
-        	Connection(const ConfigNode& node);
-
-    		void serialize(Serializer& s) const;
-			void deserialize(Deserializer& s);
-    	};
-    	
-    	RenderGraphDefinition() = default;
-        explicit RenderGraphDefinition(const ConfigNode& config);
-
-        gsl::span<const Node> getNodes() const { return nodes; }
-    	gsl::span<const Connection> getConnections() const { return connections; }
-    	
-        static std::unique_ptr<RenderGraphDefinition> loadResource(ResourceLoader& loader);
-		constexpr static AssetType getAssetType() { return AssetType::RenderGraphDefinition; }
-    	void reload(Resource&& resource) override;
-
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
-
-    private:
-    	Vector<Node> nodes;
-    	Vector<Connection> connections;
-
-    	void loadMaterials(Resources& resources);
-    };
-
-    class RenderGraphNode2 : public BaseGraphNode {
-    public:
-        RenderGraphNode2() = default;
-        RenderGraphNode2(const String& type, const Vector2f& position);
-        RenderGraphNode2(const ConfigNode& node);
+        RenderGraphNodeDefinition() = default;
+        RenderGraphNodeDefinition(const String& type, const Vector2f& position);
+        RenderGraphNodeDefinition(const ConfigNode& node);
 
         ConfigNode toConfigNode() const override;
 
@@ -127,13 +63,19 @@ namespace Halley {
         std::shared_ptr<const MaterialDefinition> material;
     };
 
-    class RenderGraphDefinition2 : public BaseGraphImpl<RenderGraphNode2> {
+    class RenderGraphDefinition : public BaseGraphImpl<RenderGraphNodeDefinition> {
     public:
-	    GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) override;
+        RenderGraphDefinition() = default;
+        RenderGraphDefinition(const ConfigNode& node);
+        RenderGraphDefinition(const ConfigNode& node, Resources& resources);
+
+	    void load(const ConfigNode& node);
 	    void load(const ConfigNode& node, Resources& resources) override;
 	    ConfigNode toConfigNode() const override;
 
-        static std::shared_ptr<RenderGraphDefinition2> loadResource(ResourceLoader& loader);
+    	GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) override;
+
+        static std::shared_ptr<RenderGraphDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::RenderGraphDefinition; }
     	void reload(Resource&& resource) override;
 

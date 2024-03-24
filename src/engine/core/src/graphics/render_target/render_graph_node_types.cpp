@@ -21,21 +21,36 @@ Colour4f RenderGraphNodeType::getColour() const
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }
 
+String RenderGraphNodeType::getPinTypeName(PinType type) const
+{
+	switch (static_cast<RenderGraphElementType>(type.type)) {
+	case RenderGraphElementType::ColourBuffer:
+		return "Colour Buffer";
+	case RenderGraphElementType::DepthStencilBuffer:
+		return "DepthStencil Buffer";
+	case RenderGraphElementType::Texture:
+		return "Texture";
+	case RenderGraphElementType::Dependency:
+		return "Dependency";
+	}
+	return "?";
+}
+
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append(getName());
 	str.append(" ");
-	str.append(dynamic_cast<const RenderGraphNode2&>(node).getName(), settingColour);
+	str.append(dynamic_cast<const RenderGraphNodeDefinition&>(node).getName(), settingColour);
 	return str.moveResults();
 }
 
 String RenderGraphNodeType::getLabel(const BaseGraphNode& node) const
 {
-	return dynamic_cast<const RenderGraphNode2&>(node).getName();
+	return dynamic_cast<const RenderGraphNodeDefinition&>(node).getName();
 }
 
-void RenderGraphNodeType::loadMaterials(RenderGraphNode2& node, Resources& resources) const
+void RenderGraphNodeType::loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const
 {
 }
 
@@ -100,7 +115,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 	};
 
 	size_t numTexs = 0;
-	const auto& renderNode = dynamic_cast<const RenderGraphNode2&>(node);
+	const auto& renderNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
 	if (renderNode.getMaterial()) {
 		numTexs = renderNode.getMaterial()->getTextureNames().size();
 	}
@@ -108,7 +123,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 	return gsl::span<const IGraphNodeType::PinType>(data).subspan(0, 4 + numTexs);
 }
 
-void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNode2& node, Resources& resources) const
+void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const
 {
 	const auto matId = node.getSettings()["material"].asString("");
 	if (!matId.isEmpty()) {
@@ -120,12 +135,25 @@ void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNode2& node
 
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::OverlayNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto& renderGraphNode = dynamic_cast<const RenderGraphNode2&>(node);
+	const auto& renderGraphNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
 
 	ColourStringBuilder str;
 	str.append("Overlay with material ");
 	str.append(renderGraphNode.getMaterial() ? renderGraphNode.getMaterial()->getName() : "<missing>", settingColour);
 	return str.moveResults();
+}
+
+String RenderGraphNodeTypes::OverlayNodeType::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx < 4) {
+		return RenderGraphNodeType::getPinDescription(node, elementType, elementIdx);
+	}
+
+	const auto& renderGraphNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
+	if (!renderGraphNode.getMaterial()) {
+		return "<invalid>";
+	}
+	return renderGraphNode.getMaterial()->getTextureNames()[elementIdx - 4];
 }
 
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNodeType::getPinConfiguration(const BaseGraphNode& node) const
@@ -134,7 +162,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNo
 	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{
 		PinType{ ET::ColourBuffer, PD::Input },
-		PinType{ ET::Dependency, PD::Output }
+		PinType{ ET::Dependency, PD::Output, false, false, true }
 	};
 	return data;
 }

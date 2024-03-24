@@ -6,13 +6,13 @@
 namespace Halley {
 	class RenderGraphEditor : public GraphEditor {
 	public:
-		RenderGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<RenderGraphDefinition2> graph, AssetEditor* assetEditor);
+		RenderGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<RenderGraphDefinition> graph, AssetEditor* assetEditor);
 		
 	protected:
 		std::shared_ptr<GraphGizmoUI> createGizmoEditor() override;
 
 	private:
-		std::shared_ptr<RenderGraphDefinition2> renderGraph;
+		std::shared_ptr<RenderGraphDefinition> renderGraph;
 	};
 
 	class RenderGraphAssetEditor : public GraphAssetEditor {

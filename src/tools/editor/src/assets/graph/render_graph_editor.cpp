@@ -6,7 +6,7 @@
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-RenderGraphEditor::RenderGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<RenderGraphDefinition2> graph, AssetEditor* assetEditor)
+RenderGraphEditor::RenderGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<RenderGraphDefinition> graph, AssetEditor* assetEditor)
 	: GraphEditor(factory, gameResources, projectWindow, graph, AssetType::RenderGraphDefinition, assetEditor, {}, {})
 	, renderGraph(graph)
 {
@@ -24,10 +24,10 @@ RenderGraphAssetEditor::RenderGraphAssetEditor(UIFactory& factory, Resources& ga
 
 std::shared_ptr<BaseGraph> RenderGraphAssetEditor::makeGraph()
 {
-	return std::make_shared<RenderGraphDefinition2>();
+	return std::make_shared<RenderGraphDefinition>();
 }
 
 std::shared_ptr<GraphEditor> RenderGraphAssetEditor::makeGraphEditor(std::shared_ptr<BaseGraph> graph)
 {
-	return std::make_shared<RenderGraphEditor>(factory, gameResources, projectWindow, std::dynamic_pointer_cast<RenderGraphDefinition2>(graph), this);
+	return std::make_shared<RenderGraphEditor>(factory, gameResources, projectWindow, std::dynamic_pointer_cast<RenderGraphDefinition>(graph), this);
 }

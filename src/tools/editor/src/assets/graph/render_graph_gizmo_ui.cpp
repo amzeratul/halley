@@ -11,7 +11,7 @@ RenderGraphGizmo::RenderGraphGizmo(UIFactory& factory, const IEntityEditorFactor
 
 std::unique_ptr<BaseGraphNode> RenderGraphGizmo::makeNode(const ConfigNode& node)
 {
-	return std::make_unique<RenderGraphNode2>(node);
+	return std::make_unique<RenderGraphNodeDefinition>(node);
 }
 
 std::shared_ptr<BaseGraphRenderer> RenderGraphGizmo::makeRenderer(Resources& resources, float baseZoom)
