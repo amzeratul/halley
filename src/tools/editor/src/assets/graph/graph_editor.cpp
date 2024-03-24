@@ -170,6 +170,7 @@ void GraphEditor::setModified(bool value)
 	modified = value;
 
 	if (value) {
+		graph->updateHash();
 		onWasModified();
 	}
 }

@@ -135,6 +135,7 @@ namespace Halley {
 
 		void assignTypes(const GraphNodeTypeCollection& nodeTypeCollection, bool force = false) const;
 		void clearTypes();
+		virtual void updateHash();
 
 	protected:
 		virtual bool isMultiConnection(GraphNodePinType pinType) const

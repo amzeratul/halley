@@ -162,7 +162,6 @@ void ScriptGraphEditor::onActiveChanged(bool active)
 
 void ScriptGraphEditor::onWasModified()
 {
-	scriptGraph->updateHash();
 	if (scriptEnumHandle) {
 		setListeningToClient(false);
 		setListeningToClient(true);

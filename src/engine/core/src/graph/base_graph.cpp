@@ -190,7 +190,19 @@ void BaseGraph::clearTypes()
 	}
 }
 
+void BaseGraph::updateHash()
+{
+	Hash::Hasher hasher;
 
+	const auto n = getNumNodes();
+	hasher.feed(n);
+	for (size_t i = 0; i < n; ++i) {
+		auto& node = getNode(i);
+		node.setId(static_cast<GraphNodeId>(i));
+		node.feedToHash(hasher);
+	}
+	assetHash = hash = hasher.digest();
+}
 
 
 void BaseGraphNode::onNodeRemoved(GraphNodeId nodeId)
