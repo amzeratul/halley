@@ -1,4 +1,4 @@
-#include "halley/graph/base_graph_gizmo.h"
+#include "base_graph_gizmo.h"
 
 #include "halley/api/clipboard.h"
 #include "halley/concurrency/concurrent.h"
@@ -10,6 +10,8 @@
 #include "halley/graphics/painter.h"
 #include "halley/maths/polygon.h"
 #include "halley/ui/ui_factory.h"
+#include "src/scene/gizmos/scripting/scripting_choose_node.h"
+#include "src/scene/gizmos/scripting/scripting_node_editor.h"
 using namespace Halley;
 
 bool BaseGraphGizmo::Connection::operator<(const Connection& other) const
@@ -472,7 +474,7 @@ SelectionSetModifier BaseGraphGizmo::getSelectionModifier(const SceneEditorInput
 
 std::shared_ptr<UIWidget> BaseGraphGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
 {
-	return {};
+	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, nodeTypes, std::move(callback));
 }
 
 std::shared_ptr<BaseGraphRenderer> BaseGraphGizmo::makeRenderer(Resources& resources, float baseZoom)
@@ -695,12 +697,14 @@ BaseGraphNode& BaseGraphGizmo::getNode(GraphNodeId id)
 
 bool BaseGraphGizmo::canDeleteNode(const BaseGraphNode& node) const
 {
-	return true;
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
+	return !nodeType || nodeType->canDelete();
 }
 
-bool BaseGraphGizmo::nodeTypeNeedsSettings(const String& nodeType) const
+bool BaseGraphGizmo::nodeTypeNeedsSettings(const String& nodeTypeId) const
 {
-	return false;
+	const auto* nodeType = nodeTypes->tryGetGraphNodeType(nodeTypeId);
+	return nodeType && !nodeType->getSettingTypes().empty();
 }
 
 void BaseGraphGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType)
@@ -712,8 +716,11 @@ void BaseGraphGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional
 	}
 }
 
-void BaseGraphGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType)
+void BaseGraphGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeTypeId)
 {
+	if (const auto* nodeType = nodeTypes->tryGetGraphNodeType(nodeTypeId)) {
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
+	}
 }
 
 void BaseGraphGizmo::drawWheelGuides(Painter& painter) const

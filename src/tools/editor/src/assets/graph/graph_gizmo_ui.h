@@ -2,6 +2,7 @@
 
 #include "graph_editor.h"
 #include "halley/ui/ui_widget.h"
+#include "src/scene/gizmos/graph/base_graph_gizmo.h"
 
 namespace Halley {
 	class IGraphEditor;

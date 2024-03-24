@@ -1,5 +1,6 @@
 #include "scripting_node_editor.h"
-#include "scripting_base_gizmo.h"
+
+#include "src/scene/gizmos/graph/base_graph_gizmo.h"
 
 using namespace Halley;
 

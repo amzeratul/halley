@@ -1,6 +1,4 @@
 #pragma once
-#include "base_graph_enums.h"
-#include "base_graph_renderer.h"
 #include "halley/graphics/text/text_renderer.h"
 #include "halley/maths/vector2.h"
 #include "halley/data_structures/selection_set.h"

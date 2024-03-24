@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graph_gizmo_ui.h"
-#include "halley/graph/base_graph_gizmo.h"
 
 namespace Halley {
 	class RenderGraphEditor;

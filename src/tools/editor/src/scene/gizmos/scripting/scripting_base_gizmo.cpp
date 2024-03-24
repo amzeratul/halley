@@ -69,30 +69,6 @@ void ScriptingBaseGizmo::setDebugDisplayData(HashMap<int, String> values)
 	renderer->setDebugDisplayData(std::move(values));
 }
 
-bool ScriptingBaseGizmo::canDeleteNode(const BaseGraphNode& node) const
-{
-	const auto* nodeType = nodeTypes->tryGetGraphNodeType(node.getType());
-	return !nodeType || nodeType->canDelete();
-}
-
-bool ScriptingBaseGizmo::nodeTypeNeedsSettings(const String& type) const
-{
-	const auto* nodeType = nodeTypes->tryGetGraphNodeType(type);
-	return nodeType && !nodeType->getSettingTypes().empty();
-}
-
-void ScriptingBaseGizmo::openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
-{
-	if (const auto* nodeType = nodeTypes->tryGetGraphNodeType(type)) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
-	}
-}
-
-std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback)
-{
-	return std::make_shared<ScriptingChooseNode>(windowSize, factory, resources, nodeTypes, std::move(callback));
-}
-
 std::unique_ptr<BaseGraphNode> ScriptingBaseGizmo::makeNode(const ConfigNode& node)
 {
 	return std::make_unique<ScriptGraphNode>(node);

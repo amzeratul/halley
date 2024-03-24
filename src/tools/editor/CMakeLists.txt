@@ -73,6 +73,8 @@ set (editor_sources
 	"src/scene/gizmos/translate_gizmo.cpp"
 	"src/scene/gizmos/variant_gizmo.cpp"
 
+	"src/scene/gizmos/graph/base_graph_gizmo.cpp"
+
 	"src/scene/gizmos/scripting/scripting_base_gizmo.cpp"
 	"src/scene/gizmos/scripting/scripting_choose_node.cpp"
 	"src/scene/gizmos/scripting/scripting_gizmo_toolbar.cpp"
@@ -169,6 +171,8 @@ set (editor_headers
 	"src/scene/gizmos/selection_box_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
 	"src/scene/gizmos/variant_gizmo.h"
+
+	"src/scene/gizmos/graph/base_graph_gizmo.h"
 
 	"src/scene/gizmos/scripting/scripting_base_gizmo.h"
 	"src/scene/gizmos/scripting/scripting_choose_node.h"

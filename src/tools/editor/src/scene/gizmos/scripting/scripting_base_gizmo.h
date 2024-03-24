@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/graph/base_graph_gizmo.h"
+#include "src/scene/gizmos/graph/base_graph_gizmo.h"
 
 namespace Halley {
 	class ScriptingBaseGizmo : public BaseGraphGizmo {
@@ -18,10 +18,6 @@ namespace Halley {
 		void setDebugDisplayData(HashMap<int, String> values);
 
 	protected:
-		bool canDeleteNode(const BaseGraphNode& node) const override;
-		bool nodeTypeNeedsSettings(const String& nodeType) const override;
-		void openNodeSettings(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType) override;
-		std::shared_ptr<UIWidget> makeChooseNodeTypeWindow(Vector2f windowSize, UIFactory& factory, Resources& resources, ChooseAssetWindow::Callback callback) override;
 		std::unique_ptr<BaseGraphNode> makeNode(const ConfigNode& node) override;
 		std::shared_ptr<BaseGraphRenderer> makeRenderer(Resources& resources, float baseZoom) override;
 
