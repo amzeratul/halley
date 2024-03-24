@@ -15,5 +15,5 @@ void RenderGraphImporter::import(const ImportingAsset& asset, IAssetCollector& c
 
 	auto renderGraph = RenderGraphDefinition(config.getRoot());
 
-	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::RenderGraphDefinition, Serializer::toBytes(renderGraph), meta);
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::RenderGraphDefinition, Serializer::toBytes(renderGraph, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
