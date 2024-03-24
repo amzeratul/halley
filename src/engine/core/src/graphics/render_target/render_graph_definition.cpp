@@ -57,6 +57,12 @@ void RenderGraphNodeDefinition::deserialize(Deserializer& s)
 	s >> name;
 }
 
+void RenderGraphNodeDefinition::feedToHash(Hash::Hasher& hasher) const
+{
+	BaseGraphNode::feedToHash(hasher);
+	hasher.feed(name);
+}
+
 void RenderGraphNodeDefinition::loadMaterials(Resources& resources)
 {
 	dynamic_cast<const RenderGraphNodeType*>(nodeType)->loadMaterials(*this, resources);
@@ -121,6 +127,7 @@ GraphNodeId RenderGraphDefinition::addNode(const String& type, Vector2f pos, Con
 	const auto id = static_cast<GraphNodeId>(nodes.size());
 	nodes.push_back(RenderGraphNodeDefinition(type, pos));
 	nodes.back().getSettings() = settings;
+	finishGraph();
 	return id;
 }
 
@@ -152,6 +159,7 @@ void RenderGraphDefinition::serialize(Serializer& s) const
 void RenderGraphDefinition::deserialize(Deserializer& s)
 {
 	s >> nodes;
+	finishGraph();
 }
 
 void RenderGraphDefinition::loadMaterials(Resources& resources)

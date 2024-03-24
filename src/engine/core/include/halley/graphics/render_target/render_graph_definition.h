@@ -48,6 +48,7 @@ namespace Halley {
 
         void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
+        void feedToHash(Hash::Hasher& hasher) const override;
         
     	void loadMaterials(Resources& resources);
 

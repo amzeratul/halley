@@ -162,6 +162,11 @@ void BaseGraph::validateNodePins(GraphNodeId nodeIdx) {
 	}
 }
 
+void BaseGraph::finishGraph()
+{
+	updateHash();
+}
+
 String BaseGraph::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
