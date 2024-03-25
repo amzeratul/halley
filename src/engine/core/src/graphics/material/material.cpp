@@ -6,6 +6,7 @@
 #include "halley/graphics/shader.h"
 #include "halley/api/video_api.h"
 #include "halley/graphics/sprite/sprite_sheet.h"
+#include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 
 using namespace Halley;
@@ -104,7 +105,24 @@ Material::Material(Material&& other) noexcept
 
 Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
 	: materialDefinition(std::move(definition))
+	, forceLocalBlocks(forceLocalBlocks)
 {
+	loadMaterialDefinition();
+}
+
+Material::~Material()
+{
+	textures.clear();
+	dataBlocks.clear();
+	materialDefinition = {};
+}
+
+void Material::loadMaterialDefinition()
+{
+	if (!materialDefinition) {
+		return;
+	}
+
 	materialDefinition->waitForLoad();
 	const size_t numPasses = materialDefinition->getNumPasses();
 	if (numPasses > passEnabled.size()) {
@@ -120,18 +138,14 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 	}
 	
 	initUniforms(forceLocalBlocks);
-}
 
-Material::~Material()
-{
-	textures.clear();
-	dataBlocks.clear();
-	materialDefinition = {};
+	needToUpdateHash = true;
 }
 
 void Material::initUniforms(bool forceLocalBlocks)
 {
 	int nextBindPoint = 1;
+	dataBlocks.clear();
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
 		const auto type = uniformBlock.name == "HalleyBlock"
 			? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal)
@@ -143,10 +157,9 @@ void Material::initUniforms(bool forceLocalBlocks)
 	// Load textures
 	const auto& textureDefs = materialDefinition->getTextures();
 	const size_t nTextures = textureDefs.size();
-	textures.reserve(nTextures);
+	textures.resize(nTextures);
 	for (size_t i = 0; i < nTextures; ++i) {
-		const auto& tex = textureDefs[i];
-		textures.push_back(tex.defaultTexture);
+		textures[i] = textureDefs[i].defaultTexture;
 	}
 }
 
@@ -483,6 +496,41 @@ MaterialParameter Material::getParameter(std::string_view name)
 void Material::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
 {
 	materialDefinition = std::move(definition);
+	loadMaterialDefinition();
+}
+
+void Material::replaceMaterialDefinition(std::shared_ptr<const MaterialDefinition> definition)
+{
+	const auto oldMaterial = materialDefinition;
+	const auto oldTextures = textures;
+	const auto oldDataBlocks = dataBlocks;
+
+	materialDefinition = std::move(definition);
+	loadMaterialDefinition();
+
+	const auto srcTexs = oldMaterial->getTextureNames();
+	const auto dstTexs = materialDefinition->getTextureNames();
+
+	// Remap textures
+	for (size_t i = 0; i < oldTextures.size(); ++i) {
+		if (oldTextures[i]) {
+			const auto iter = std_ex::find(dstTexs, srcTexs[i]);
+			if (iter != dstTexs.end()) {
+				const int idx = static_cast<int>(iter - dstTexs.begin());
+				set(idx, oldTextures[i]);
+			}
+		}
+	}
+
+	// Remap data blocks
+	for (auto& dataBlock: dataBlocks) {
+		for (auto& oldDataBlock: oldDataBlocks) {
+			if (oldDataBlock.bindPoint == dataBlock.bindPoint && oldDataBlock.getType() == dataBlock.getType() && oldDataBlock.data.size() == dataBlock.data.size()) {
+				dataBlock = oldDataBlock;
+				break;
+			}
+		}
+	}
 }
 
 std::shared_ptr<Material> Material::clone() const
@@ -592,6 +640,28 @@ const Vector<std::shared_ptr<const Texture>>& MaterialUpdater::getTextures() con
 size_t MaterialUpdater::getNumTextureUnits() const
 {
 	return material->getNumTextureUnits();
+}
+
+const MaterialDefinition& MaterialUpdater::getDefinition() const
+{
+	return material->getDefinition();
+}
+
+const std::shared_ptr<const MaterialDefinition>& MaterialUpdater::getDefinitionPtr() const
+{
+	return material->getDefinitionPtr();
+}
+
+MaterialUpdater& MaterialUpdater::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
+{
+	material->setDefinition(std::move(definition));
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::replaceMaterialDefinition(std::shared_ptr<const MaterialDefinition> definition)
+{
+	material->replaceMaterialDefinition(std::move(definition));
+	return *this;
 }
 
 MaterialParameter MaterialUpdater::getParameter(std::string_view name)

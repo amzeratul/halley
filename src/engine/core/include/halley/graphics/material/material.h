@@ -88,6 +88,7 @@ namespace Halley
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 		const std::shared_ptr<const MaterialDefinition>& getDefinitionPtr() const { return materialDefinition; }
 		void setDefinition(std::shared_ptr<const MaterialDefinition> definition);
+		void replaceMaterialDefinition(std::shared_ptr<const MaterialDefinition> definition);
 
 		std::shared_ptr<Material> clone() const;
 		
@@ -138,6 +139,7 @@ namespace Halley
 		Vector<String> texUnitAssetId;
 
 		mutable bool needToUpdateHash = true;
+		bool forceLocalBlocks = false;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
 		mutable uint64_t fullHashValue = 0;
@@ -147,6 +149,7 @@ namespace Halley
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
 		void setTexUnitAssetId(size_t texUnit, const String& id);
 
+		void loadMaterialDefinition();
 		void initUniforms(bool forceLocalBlocks);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
@@ -189,6 +192,11 @@ namespace Halley
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
 		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
 		size_t getNumTextureUnits() const;
+
+		const MaterialDefinition& getDefinition() const;
+		const std::shared_ptr<const MaterialDefinition>& getDefinitionPtr() const;
+		MaterialUpdater& setDefinition(std::shared_ptr<const MaterialDefinition> definition);
+		MaterialUpdater& replaceMaterialDefinition(std::shared_ptr<const MaterialDefinition> definition);
 
 	private:
 		std::shared_ptr<const Material>* orig = nullptr;
