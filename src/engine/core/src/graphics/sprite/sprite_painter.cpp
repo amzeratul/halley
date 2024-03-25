@@ -129,7 +129,12 @@ void SpritePainterMaterialParamUpdater::copyPrevious(const SpritePainterMaterial
 	curTime = previous.curTime;
 }
 
-void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite)
+void SpritePainterMaterialParamUpdater::setHandle(String id, Callback callback)
+{
+	handles[id] = std::move(callback);
+}
+
+void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite) const
 {
 	std::optional<MaterialUpdater> mat;
 
@@ -151,9 +156,9 @@ void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite)
 	}
 }
 
-void SpritePainterMaterialParamUpdater::setHandle(String id, Callback callback)
+bool SpritePainterMaterialParamUpdater::needsToPreProcessessMaterial(const Sprite& sprite) const
 {
-	handles[id] = std::move(callback);
+	return sprite.hasMaterial() && sprite.getMaterial().getDefinition().hasAutoVariables();
 }
 
 void SpritePainter::update(Time t)
@@ -341,11 +346,22 @@ std::optional<Rect4f> SpritePainter::getBounds() const
 	return result;
 }
 
+SpritePainterMaterialParamUpdater& SpritePainter::getParamUpdater()
+{
+	return paramUpdater;
+}
+
 void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& sprite: sprites) {
 		if (sprite.isInView(view)) {
-			sprite.draw(painter, clip);
+			if (paramUpdater.needsToPreProcessessMaterial(sprite)) {
+				auto s2 = sprite;
+				paramUpdater.preProcessMaterial(s2);
+				s2.draw(painter, clip);
+			} else {
+				sprite.draw(painter, clip);
+			}
 		}
 	}
 }

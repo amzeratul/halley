@@ -66,9 +66,10 @@ namespace Halley
 
 		void update(Time t);
 		void copyPrevious(const SpritePainterMaterialParamUpdater& previous);
-
-		void preProcessMaterial(Sprite& sprite);
 		void setHandle(String id, Callback callback);
+
+		bool needsToPreProcessessMaterial(const Sprite& sprite) const;
+		void preProcessMaterial(Sprite& sprite) const;
 
 	private:
 		Time curTime = 0;
@@ -95,6 +96,8 @@ namespace Halley
 		
 		void draw(int mask, Painter& painter);
 		std::optional<Rect4f> getBounds() const;
+
+		SpritePainterMaterialParamUpdater& getParamUpdater();
 
 	private:
 		Vector<SpritePainterEntry> sprites;
