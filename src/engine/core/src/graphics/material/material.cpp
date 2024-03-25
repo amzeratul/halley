@@ -86,6 +86,7 @@ Material::Material(const Material& other)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
 	, texUnitAssetId(other.texUnitAssetId)
+	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
 {
@@ -96,6 +97,7 @@ Material::Material(Material&& other) noexcept
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
 	, texUnitAssetId(std::move(other.texUnitAssetId))
+	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
 {
@@ -273,6 +275,7 @@ void Material::computeHashes() const
 
 	hasher.feed(stencilReferenceOverride.has_value());
 	hasher.feed(stencilReferenceOverride.value_or(0));
+	hasher.feed(depthStencilEnabled);
 	hasher.feed(passEnabled.to_ulong());
 
 	partialHashValue = hasher.digest();
@@ -332,13 +335,15 @@ bool Material::isPassEnabled(int pass) const
 
 MaterialDepthStencil Material::getDepthStencil(int pass) const
 {
-	if (stencilReferenceOverride) {
-		auto depthStencil = getDefinition().getPass(pass).getDepthStencil();
-		depthStencil.setStencilReference(stencilReferenceOverride.value());
-		return depthStencil;
-	} else {
-		return getDefinition().getPass(pass).getDepthStencil();
+	if (!depthStencilEnabled) {
+		return {};
 	}
+
+	auto depthStencil = getDefinition().getPass(pass).getDepthStencil();
+	if (stencilReferenceOverride) {
+		depthStencil.setStencilReference(stencilReferenceOverride.value());
+	}
+	return depthStencil;
 }
 
 void Material::setStencilReferenceOverride(std::optional<uint8_t> reference)
@@ -352,6 +357,19 @@ void Material::setStencilReferenceOverride(std::optional<uint8_t> reference)
 std::optional<uint8_t> Material::getStencilReferenceOverride() const
 {
 	return stencilReferenceOverride;
+}
+
+void Material::setDepthStencilEnabled(bool enabled)
+{
+	if (depthStencilEnabled != enabled) {
+		depthStencilEnabled = enabled;
+		needToUpdateHash = true;
+	}
+}
+
+bool Material::isDepthStencilEnabled() const
+{
+	return depthStencilEnabled;
 }
 
 void Material::doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
@@ -619,6 +637,12 @@ MaterialUpdater& MaterialUpdater::setPassEnabled(int pass, bool enabled)
 MaterialUpdater& MaterialUpdater::setStencilReferenceOverride(std::optional<uint8_t> reference)
 {
 	material->setStencilReferenceOverride(reference);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setDepthStencilEnabled(bool enabled)
+{
+	material->setDepthStencilEnabled(enabled);
 	return *this;
 }
 

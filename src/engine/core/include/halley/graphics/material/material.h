@@ -107,6 +107,8 @@ namespace Halley
 		MaterialDepthStencil getDepthStencil(int pass) const;
 		void setStencilReferenceOverride(std::optional<uint8_t> reference);
 		std::optional<uint8_t> getStencilReferenceOverride() const;
+		void setDepthStencilEnabled(bool enabled);
+		bool isDepthStencilEnabled() const;
 
 		Material& set(std::string_view name, const std::shared_ptr<const Texture>& texture);
 		Material& set(std::string_view name, const std::shared_ptr<Texture>& texture);
@@ -140,6 +142,7 @@ namespace Halley
 
 		mutable bool needToUpdateHash = true;
 		bool forceLocalBlocks = false;
+		bool depthStencilEnabled = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
 		mutable uint64_t fullHashValue = 0;
@@ -187,6 +190,7 @@ namespace Halley
 
 		MaterialUpdater& setPassEnabled(int pass, bool enabled);
 		MaterialUpdater& setStencilReferenceOverride(std::optional<uint8_t> reference);
+		MaterialUpdater& setDepthStencilEnabled(bool enabled);
 
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;

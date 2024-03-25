@@ -243,6 +243,8 @@ void MaterialDefinition::initialize(VideoAPI& video)
 		uniformBlock.offset = curOffset;
 		++blockNumber;
 	}
+
+	updateUniformBlocks();
 }
 
 void MaterialDefinition::reload(Resource&& resource)
@@ -338,6 +340,7 @@ void MaterialDefinition::setAttributes(Vector<MaterialAttribute> attributes)
 void MaterialDefinition::setUniformBlocks(Vector<MaterialUniformBlock> uniformBlocks)
 {
 	this->uniformBlocks = std::move(uniformBlocks);
+	updateUniformBlocks();
 }
 
 void MaterialDefinition::setTextures(Vector<MaterialTexture> textures)
@@ -416,6 +419,11 @@ bool MaterialDefinition::isColumnMajor() const
 	return columnMajor;
 }
 
+bool MaterialDefinition::hasAutoVariables() const
+{
+	return autoVariables;
+}
+
 std::shared_ptr<const Material> MaterialDefinition::getMaterial() const
 {
 	waitForLoad();
@@ -430,6 +438,18 @@ std::shared_ptr<const Material> MaterialDefinition::getMaterial() const
 std::shared_ptr<const Material> MaterialDefinition::makeMaterial() const
 {
 	return std::make_shared<Material>(shared_from_this());
+}
+
+void MaterialDefinition::updateUniformBlocks()
+{
+	autoVariables = false;
+	for (const auto& block: uniformBlocks) {
+		for (const auto& uniform : block.uniforms) {
+			if (!uniform.autoVariable.isEmpty()) {
+				autoVariables = true;
+			}
+		}
+	}
 }
 
 void MaterialDefinition::loadUniforms(const ConfigNode& node)
@@ -464,6 +484,8 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 			uniformBlocks.push_back(MaterialUniformBlock(blockName, uniforms));
 		}
 	}
+
+	updateUniformBlocks();
 }
 
 void MaterialDefinition::loadTextures(const ConfigNode& node)

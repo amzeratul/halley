@@ -258,6 +258,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 		bool isColumnMajor() const;
+		bool hasAutoVariables() const;
 
 		std::shared_ptr<const Material> getMaterial() const;
 		NOINLINE virtual std::shared_ptr<const Material> makeMaterial() const;
@@ -272,11 +273,13 @@ namespace Halley
 		int vertexPosOffset = 0;
 		int defaultMask = 1;
 		bool columnMajor = false;
+		bool autoVariables = false;
 
 		std::shared_ptr<const Texture> fallbackTexture;
 		Vector<String> tags;
 		mutable std::weak_ptr<const Material> material;
 
+		void updateUniformBlocks();
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
 		void loadAttributes(const ConfigNode& node);
