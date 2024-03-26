@@ -312,7 +312,12 @@ void UIFactory::update()
 
 Sprite UIFactory::makeAssetTypeIcon(AssetType type) const
 {
-	return Sprite();
+	return {};
+}
+
+Sprite UIFactory::makeImportAssetTypeIcon(ImportAssetType type) const
+{
+	return {};
 }
 
 void UIFactory::setConstructionCallback(ConstructionCallback callback)

@@ -8,7 +8,7 @@ namespace Halley {
 		EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName);
 
     	Sprite makeAssetTypeIcon(AssetType type) const override;
-    	Sprite makeImportAssetTypeIcon(ImportAssetType type) const;
+    	Sprite makeImportAssetTypeIcon(ImportAssetType type) const override;
     	Sprite makeDirectoryIcon(bool up = false) const;
 
     	Vector<String> getColourSchemeNames() const;

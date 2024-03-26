@@ -210,6 +210,11 @@ ECSData& Project::getECSData()
 	return *ecsData;
 }
 
+ImportAssetType Project::getImportAssetType(const Path& filePath)
+{
+	return assetImporter->getImportAssetType(filePath, false);
+}
+
 const std::shared_ptr<AssetImporter>& Project::getAssetImporter() const
 {
 	return assetImporter;

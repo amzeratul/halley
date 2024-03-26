@@ -443,6 +443,7 @@ namespace Halley {
 		virtual Game* getGameInstance() const = 0;
 		virtual void launchGame(Vector<String> params) const = 0;
 		virtual Resources& getGameResources() = 0;
+		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;
 	};
 
 	class IProjectWindow {

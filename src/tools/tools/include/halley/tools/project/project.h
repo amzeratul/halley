@@ -87,6 +87,7 @@ namespace Halley
 		ImportAssetsDatabase& getCodegenDatabase() const;
 		ImportAssetsDatabase& getSharedCodegenDatabase() const;
 		ECSData& getECSData();
+		ImportAssetType getImportAssetType(const Path& filePath) override;
 
 		const std::shared_ptr<AssetImporter>& getAssetImporter() const;
 		Vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;

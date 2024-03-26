@@ -112,6 +112,7 @@ namespace Halley
 		void update();
 
 		virtual Sprite makeAssetTypeIcon(AssetType type) const;
+		virtual Sprite makeImportAssetTypeIcon(ImportAssetType type) const;
 
 		void setConstructionCallback(ConstructionCallback callback);
 
