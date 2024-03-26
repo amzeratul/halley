@@ -1400,6 +1400,15 @@ void ConfigNode::reset()
 	type = ConfigNodeType::Undefined;
 }
 
+std::pair<int, int> ConfigNode::getOriginalPosition() const
+{
+#if defined(STORE_CONFIG_NODE_PARENTING)
+	return { parent->line, parent->column };
+#else
+	return { 0, 0 };
+#endif
+}
+
 void ConfigNode::setOriginalPosition(int l, int c)
 {
 #if defined(STORE_CONFIG_NODE_PARENTING)

@@ -544,6 +544,7 @@ namespace Halley {
 		SequenceType::const_iterator end() const;
 
 		void reset();
+		std::pair<int, int> getOriginalPosition() const;
 		void setOriginalPosition(int line, int column);
 		void setParent(const ConfigNode* parent, int idx);
 		void propagateParentingInformation(const ConfigFile* parentFile);
