@@ -361,15 +361,16 @@ void UIDropdown::open()
 		dropdownList->setHandle(UIEventType::ListHoveredChanged, [=] (const UIEvent& event)
 		{
 			const int idx = event.getIntData();
+			const auto clampedIdx = clamp(idx, 0, static_cast<int>(options.size()) - 1);
 			if (idx == -1) {
 				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), getSelectedOptionId(), getSelectedOption()));
 			} else {
-				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(clamp(idx, 0, static_cast<int>(options.size()) - 1)).id, idx));
+				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(clampedIdx).id, idx));
 			}
 
 			if (notifyOnHover) {
 				if (getDataBindFormat() == UIDataBind::Format::String) {
-					notifyDataBind(idx == -1 ? getSelectedOptionId() : options.at(idx).id);
+					notifyDataBind(idx == -1 ? getSelectedOptionId() : options.at(clampedIdx).id);
 				} else {
 					notifyDataBind(idx == -1 ? getSelectedOption() : idx);
 				}
