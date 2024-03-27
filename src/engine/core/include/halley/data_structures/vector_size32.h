@@ -18,7 +18,7 @@
 
 namespace Halley {
 	namespace HalleyExceptions {
-		void throwException(std::string_view msg, int code);
+		[[noreturn]] void throwException(std::string_view msg, int code);
 	}
 
 	template <typename T, typename Pointer>

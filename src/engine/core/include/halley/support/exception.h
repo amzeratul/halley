@@ -60,7 +60,7 @@ namespace Halley {
 			LastHalleyReserved = 999
 		};
 
-		void throwException(std::string_view msg, int code);
+		[[noreturn]] void throwException(std::string_view msg, int code);
 	}
 
 	class Exception final : public std::exception {
