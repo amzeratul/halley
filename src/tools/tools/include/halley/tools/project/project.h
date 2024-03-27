@@ -118,6 +118,7 @@ namespace Halley
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) override;
 		bool writeAssetToDisk(const Path& filePath, const Bytes& data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
+		Bytes readAssetFromDisk(const Path& filePath) override;
 
 		Vector<String> getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;

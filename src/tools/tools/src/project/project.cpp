@@ -394,6 +394,11 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const char>(str)));
 }
 
+Bytes Project::readAssetFromDisk(const Path& filePath)
+{
+	return fileSystemCache->readFile(getAssetsSrcPath() / filePath);
+}
+
 Vector<String> Project::getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const
 {
 	Vector<String> result;
