@@ -25,6 +25,11 @@
 
 using namespace Halley;
 
+void HalleyExceptions::throwException(std::string_view msg, int code)
+{
+	throw Exception(msg, code);
+}
+
 Exception::Exception(String msg, int errorCode) noexcept
 	: msg(std::move(msg))
 	, errorCode(errorCode)

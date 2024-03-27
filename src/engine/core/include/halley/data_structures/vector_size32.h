@@ -17,6 +17,10 @@
 #endif
 
 namespace Halley {
+	namespace HalleyExceptions {
+		void throwException(std::string_view msg, int code);
+	}
+
 	template <typename T, typename Pointer>
 	class VectorIterator {
 	public:
@@ -307,7 +311,7 @@ namespace Halley {
 		[[nodiscard]] reference at(size_t index)
 		{
 			if (index >= size()) {
-				throw std::out_of_range("Index out of vector range");
+				HalleyExceptions::throwException("Index out of vector range", 217);
 			}
 			return data()[index];
 		}
@@ -315,7 +319,7 @@ namespace Halley {
 		[[nodiscard]] const_reference at(size_t index) const
 		{
 			if (index >= size()) {
-				throw std::out_of_range("Index out of vector range");
+				HalleyExceptions::throwException("Index out of vector range", 217);
 			}
 			return data()[index];			
 		}

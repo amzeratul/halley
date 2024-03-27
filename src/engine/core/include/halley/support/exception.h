@@ -55,9 +55,12 @@ namespace Halley {
 			Compression = 214,
 			Scripting = 215,
 			Web = 216,
+			DataStructures = 217,
 
 			LastHalleyReserved = 999
 		};
+
+		void throwException(std::string_view msg, int code);
 	}
 
 	class Exception final : public std::exception {
