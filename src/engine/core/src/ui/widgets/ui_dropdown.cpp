@@ -25,8 +25,7 @@ void UIDropdown::setSelectedOption(int option)
 	const int nextOption = clamp(option, 0, static_cast<int>(options.size()) - 1);
 	if (curOption != nextOption) {
 		curOption = nextOption;
-		label.setText(options.at(curOption).label);
-		icon = options.at(curOption).icon;
+		updateTopLabel();
 		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), options[curOption].id, curOption));
 
 		if (getDataBindFormat() == UIDataBind::Format::String) {
@@ -86,24 +85,29 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 	}
 }
 
-void UIDropdown::updateOptionLabels() {
+void UIDropdown::updateTopLabel()
+{
 	const auto& style = styles.at(0);
-	auto tempLabel = style.getTextRenderer("label");
-
+	label = style.getTextRenderer("label");
 	if (options.empty()) {
-		label = tempLabel.clone();
 		icon = Sprite();
 	} else {
-		label = tempLabel.clone().setText(options[curOption].label);
+		label.setText(options[curOption].label);
 		icon = options[curOption].icon;
 	}
+}
 
+void UIDropdown::updateOptionLabels()
+{
+	updateTopLabel();
+
+	const auto& style = styles.at(0);
 	const float iconGap = style.getFloat("iconGap");
 	
-	float maxExtents = 0;
+	float maxExtents = label.getExtents().x;
 	for (auto& o: options) {
 		const float iconSize = o.icon.hasMaterial() ? o.icon.getScaledSize().x + iconGap : 0;
-		const float strSize = tempLabel.setText(o.label).getExtents().x;
+		const float strSize = label.getExtents(o.label.getString().getUTF32()).x;
 		maxExtents = std::max(maxExtents, iconSize + strSize);
 	}
 
@@ -316,16 +320,11 @@ void UIDropdown::open()
 		openState = distanceFromBottom >= standardHeight ? OpenState::OpenDown : OpenState::OpenUp;
 		const auto height = openState == OpenState::OpenDown ? standardHeight : std::min(standardHeight, distanceFromTop);
 
-		const float iconGap = style.getFloat("iconGap");
-	
 		dropdownList = std::make_shared<UIList>(getId() + "_list", style.getSubStyle("listStyle"));
 		int i = 0;
 		for (const auto& o: options) {
 			if (o.icon.hasMaterial()) {
-				auto item = std::make_shared<UISizer>(UISizerType::Horizontal, iconGap);
-				item->add(std::make_shared<UIImage>(o.icon));
-				item->add(dropdownList->makeLabel(toString(i++) + "_label", o.label));
-				dropdownList->addItem(toString(i++), std::move(item));
+				dropdownList->addTextIconItem(toString(i++), o.label, o.icon);
 			} else {
 				dropdownList->addTextItem(toString(i++), o.label);
 			}

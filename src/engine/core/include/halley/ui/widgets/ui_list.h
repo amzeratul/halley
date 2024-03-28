@@ -69,7 +69,9 @@ namespace Halley {
 		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
 		std::shared_ptr<UIListItem> getItemUnderCursor() const;
 		void changeItemId(int idx, const String& newId);
+
 		void setItemText(int idx, const String& text);
+		void setItemIcon(int idx, Sprite icon);
 
 		bool isDragEnabled() const;
 		void setDragEnabled(bool drag);

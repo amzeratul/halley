@@ -145,6 +145,7 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 
 std::shared_ptr<UIImage> UIList::makeIcon(String id, Sprite image) const
 {
+	Logger::logDev("Making icon " + id);
 	auto icon = std::make_shared<UIImage>(std::move(id), std::move(image));
 	applyImageColour(*icon);	
 	return icon;
@@ -165,8 +166,19 @@ void UIList::setItemText(int optionId, const String& text)
 	if (optionId < 0 || optionId >= static_cast<int>(getNumberOfItems())) {
 		return;
 	}
-	const auto label = getItem(optionId)->getWidgetAs<UILabel>(getSelectedOptionId() + "_label");
+	const auto item = getItem(optionId);
+	const auto label = item->getWidgetAs<UILabel>(item->getId() + "_label");
 	label->setText(LocalisedString::fromUserString(text));
+}
+
+void UIList::setItemIcon(int optionId, Sprite icon)
+{
+	if (optionId < 0 || optionId >= static_cast<int>(getNumberOfItems())) {
+		return;
+	}
+	const auto item = getItem(optionId);
+	const auto iconImage = item->getWidgetAs<UIImage>(item->getId() + "_icon");
+	iconImage->setSprite(std::move(icon));
 }
 
 std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
@@ -193,12 +205,13 @@ std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedS
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
+	const float gap = style.getFloat("iconGap", 4);
 
 	const bool hasIcon = icon.hasMaterial();
 	const bool hasLabel = !label.getString().isEmpty();
 	
 	if (hasIcon) {
-		item->add(makeIcon(id + "_icon", icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
+		item->add(makeIcon(id + "_icon", icon), 0, hasLabel ? Vector4f(0, 0, gap, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
 	}
 	if (hasLabel) {
 		item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);

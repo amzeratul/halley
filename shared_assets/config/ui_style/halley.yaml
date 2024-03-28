@@ -135,6 +135,8 @@ uiStyle:
     minSizeMargins: [ 40, 20, 0, 0 ]
     listStyle: list
     scrollbarStyle: scrollbarHalley
+    notSelectedIcon: { img: $ui_dropdown_item_not_selected, colour: $ui_inputNormal }
+    selectedIcon: { img: $ui_dropdown_item_selected, colour: $ui_inputNormal }
 
   dropdownLight:
     classes: [dropdown]
@@ -157,6 +159,8 @@ uiStyle:
     minSizeMargins: [ 40, 20, 0, 0 ]
     listStyle: listLight
     scrollbarStyle: scrollbarHalley
+    notSelectedIcon: { img: $ui_dropdown_item_not_selected, colour: $ui_inputNormal }
+    selectedIcon: { img: $ui_dropdown_item_selected, colour: $ui_inputNormal }
 
   list:
     classes: [list]

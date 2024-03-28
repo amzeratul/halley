@@ -82,6 +82,7 @@ namespace Halley {
 
 		void readFromDataBind() override;
 
+		virtual void updateTopLabel();
 		virtual void updateOptionLabels();
 
 	private:
