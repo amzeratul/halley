@@ -21,8 +21,6 @@ namespace Halley {
 	public:
 		explicit RenderGraphNode(const RenderGraphNodeDefinition& definition);
 
-		int getPriority() const;
-
 	private:
 		struct OtherPin {
 			RenderGraphNode* node = nullptr;
@@ -61,6 +59,7 @@ namespace Halley {
 		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphElementType type);
 		void updateTexture(std::shared_ptr<Texture> texture, RenderGraphElementType type);
 
+		void determineIfCanForwardRenderTarget();
 		void determineIfNeedsRenderTarget();
 		
 		void renderNode(const RenderGraph& graph, const RenderContext& rc);
@@ -84,16 +83,15 @@ namespace Halley {
 		Vector<Variable> variables;
 		
 		bool activeInCurrentPass = false;
-		bool ownRenderTarget = false;
-		bool passThrough = false;
 		int depsLeft = 0;
-		int priority = 0;
 		Vector2i currentSize;
 
 		Vector<InputPin> inputPins;
 		Vector<OutputPin> outputPins;
 
+		bool ownRenderTarget = false;
+		bool canForwardRenderTarget = false;
 		std::shared_ptr<TextureRenderTarget> renderTarget;
-		RenderGraphNode* directOutput = nullptr;
+		RenderGraphNode* reuseRenderTarget = nullptr;
 	};
 }

@@ -63,18 +63,13 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 	}
 }
 
-int RenderGraphNode::getPriority() const
-{
-	return priority;
-}
-
 void RenderGraphNode::startRender()
 {
 	activeInCurrentPass = false;
-	passThrough = false;
 	ownRenderTarget = false;
+	canForwardRenderTarget = false;
 	depsLeft = 0;
-	directOutput = nullptr;
+	reuseRenderTarget = nullptr;
 }
 
 void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vector2i> targetSize)
@@ -130,51 +125,54 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 	}
 }
 
+void RenderGraphNode::determineIfCanForwardRenderTarget()
+{
+	size_t numColourBufferOutputs = 0;
+	size_t numDepthStencilBufferOutputs = 0;
+
+	for (const auto& outputPin: outputPins) {
+		for (const auto& otherNode: outputPin.others) {
+			if (otherNode.node && otherNode.node->activeInCurrentPass) {
+				if (outputPin.type == RenderGraphElementType::ColourBuffer) {
+					++numColourBufferOutputs;
+				} else if (outputPin.type == RenderGraphElementType::DepthStencilBuffer) {
+					++numDepthStencilBufferOutputs;
+				}
+			}
+		}
+	}
+
+	canForwardRenderTarget = numColourBufferOutputs == 1 && numDepthStencilBufferOutputs == 1;
+}
+
 void RenderGraphNode::determineIfNeedsRenderTarget()
 {
-	directOutput = nullptr;
+	reuseRenderTarget = nullptr;
 	if (!activeInCurrentPass) {
 		ownRenderTarget = false;
 		return;
 	}
 
-	// Figure out if we can short-circuit this render context
-	bool hasOutputPinsWithMultipleConnections = false;
-	bool hasMultipleRenderNodeOutputs = false;
-	bool allConnectionsAreCompatible = true;
-	bool isDependency = false;
-	RenderGraphNode* curOutputNode = nullptr;
-	for (const auto& outputPin: outputPins) {
-		int nConnections = 0;
-		for (const auto& otherNode: outputPin.others) {
-			if (otherNode.node && otherNode.node->activeInCurrentPass) {
-				if (otherNode.node != curOutputNode) {
-					if (curOutputNode) {
-						hasMultipleRenderNodeOutputs = true;
-					}
-					curOutputNode = otherNode.node;
-					if (curOutputNode->inputPins.at(otherNode.otherId).type != outputPin.type) {
-						allConnectionsAreCompatible = false;
-					}
-					if (curOutputNode->inputPins.at(otherNode.otherId).type == outputPin.type && outputPin.type == RenderGraphElementType::Dependency) {
-						isDependency = true;
-					}
-				}
-				++nConnections;
+	// Check if it can reuse render target
+	RenderGraphNode* colourInput = nullptr;
+	RenderGraphNode* depthStencilInput = nullptr;
+
+	for (const auto& inputPin: inputPins) {
+		if (auto* inputNode = inputPin.other.node) {
+			if (inputPin.type == RenderGraphElementType::ColourBuffer) {
+				colourInput = inputNode;
+			} else if (inputPin.type == RenderGraphElementType::DepthStencilBuffer) {
+				depthStencilInput = inputNode;
 			}
 		}
-		if (nConnections > 1) {
-			hasOutputPinsWithMultipleConnections = true;
-		}
 	}
-	
-	ownRenderTarget = hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible || isDependency;
 
-	if (!ownRenderTarget && curOutputNode && !hasOutputPinsWithMultipleConnections) {
-		assert(!curOutputNode->passThrough);
-		directOutput = curOutputNode;
-		directOutput->passThrough = true;
+	const bool isOutput = method == RenderGraphMethod::Output;
+	if (colourInput == depthStencilInput && colourInput != nullptr && colourInput->canForwardRenderTarget && !isOutput) {
+		reuseRenderTarget = colourInput;
 	}
+
+	ownRenderTarget = !reuseRenderTarget && !isOutput;
 }
 
 std::shared_ptr<TextureRenderTarget> RenderGraphNode::getRenderTarget(VideoAPI& video)
@@ -183,8 +181,8 @@ std::shared_ptr<TextureRenderTarget> RenderGraphNode::getRenderTarget(VideoAPI& 
 		if (!renderTarget) {
 			renderTarget = video.createTextureRenderTarget();
 		}
-	} else if (directOutput) {
-		renderTarget = directOutput->getRenderTarget(video);
+	} else if (reuseRenderTarget) {
+		renderTarget = reuseRenderTarget->getRenderTarget(video);
 	}
 	return renderTarget;
 }
@@ -235,7 +233,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 	getRenderTarget(video);
 
 	bool updated = false;
-	if (!passThrough) {
+	if (!reuseRenderTarget) {
 		int colourIdx = 0;
 		for (auto& input: inputPins) {
 			if (renderTarget) {

@@ -91,8 +91,6 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 {
 	update();
 
-	std::sort(nodes.begin(), nodes.end(), [=](const auto& a, const auto& b) { return a->getPriority() > b->getPriority(); });
-
 	for (auto& node: nodes) {
 		node->startRender();
 	}
@@ -105,6 +103,9 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 		}
 	}
 
+	for (auto& node: nodes) {
+		node->determineIfCanForwardRenderTarget();
+	}
 	for (auto& node: nodes) {
 		node->determineIfNeedsRenderTarget();
 	}
