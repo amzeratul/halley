@@ -4,6 +4,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_sizer.h"
 #include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -86,9 +87,10 @@ Vector<String> EnumFieldFactory::getValues(const ComponentDataRetriever& data) c
 }
 
 
-EnumIntFieldFactory::EnumIntFieldFactory(String name, Vector<String> names)
+EnumIntFieldFactory::EnumIntFieldFactory(String name, Vector<String> names, Vector<int> values)
 	: fieldName(std::move(name))
 	, names(std::move(names))
+	, values(std::move(values))
 {
 }
 
@@ -107,9 +109,21 @@ std::shared_ptr<IUIElement> EnumIntFieldFactory::createField(const ComponentEdit
 	dropdown->setOptions(names);
 	container->add(dropdown);
 
-	container->bindData("enum", value, [&context, data](int newVal) {
+	const auto valueIter = std_ex::find(values, value);
+	size_t idx;
+	if (valueIter != values.end()) {
+		idx = valueIter - values.begin();
+	} else {
+		idx = 0;
 		auto& node = data.getWriteableFieldData();
-		node = ConfigNode(newVal);
+		node = ConfigNode(values[idx]);
+		context.onEntityUpdated();
+	}
+
+	container->bindData("enum", names[idx], [&context, data, names = names, values = values](String newVal) {
+		auto& node = data.getWriteableFieldData();
+		auto idx = std_ex::find(names, newVal) - names.begin();
+		node = ConfigNode(values[idx]);
 		context.onEntityUpdated();
 	});
 	

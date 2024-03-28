@@ -13,7 +13,7 @@ component:
       defaultValue: 0
       displayName: Layer
   - mask:
-      type: 'Halley::OptionalLite<int>'
+      type: 'Halley::OptionalLite<Halley::SpriteMaskBase>'
       displayName: Mask
       canSave: false
 
@@ -103,7 +103,7 @@ component:
       defaultValue: 0
       displayName: Layer
   - mask:
-      type: 'Halley::OptionalLite<int>'
+      type: 'Halley::OptionalLite<Halley::SpriteMaskBase>'
       displayName: Mask
       canSave: false
 

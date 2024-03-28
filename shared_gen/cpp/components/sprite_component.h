@@ -14,12 +14,12 @@ public:
 
 	Halley::Sprite sprite{};
 	int layer{ 0 };
-	Halley::OptionalLite<int> mask{};
+	Halley::OptionalLite<Halley::SpriteMaskBase> mask{};
 
 	SpriteComponent() {
 	}
 
-	SpriteComponent(Halley::Sprite sprite, int layer, Halley::OptionalLite<int> mask)
+	SpriteComponent(Halley::Sprite sprite, int layer, Halley::OptionalLite<Halley::SpriteMaskBase> mask)
 		: sprite(std::move(sprite))
 		, layer(std::move(layer))
 		, mask(std::move(mask))
@@ -31,7 +31,7 @@ public:
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(sprite)>::serialize(sprite, Halley::Sprite{}, _context, _node, componentName, "sprite", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, Halley::OptionalLite<int>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, Halley::OptionalLite<Halley::SpriteMaskBase>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
 		return _node;
 	}
 
@@ -39,7 +39,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(sprite)>::deserialize(sprite, Halley::Sprite{}, _context, _node, componentName, "sprite", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
-		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<int>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<Halley::SpriteMaskBase>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

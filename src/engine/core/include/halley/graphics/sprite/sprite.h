@@ -21,6 +21,8 @@ namespace Halley
 	class MaterialUpdater;
 	class Painter;
 
+	using SpriteMaskBase = int;
+
 	struct SpriteVertexAttrib
 	{
 		// This structure must match the layout of the shader

@@ -56,7 +56,7 @@ namespace Halley {
 	class EnumIntFieldFactory : public IComponentEditorFieldFactory
 	{
 	public:
-		EnumIntFieldFactory(String name, Vector<String> names);
+		EnumIntFieldFactory(String name, Vector<String> names, Vector<int> values);
 		
 		std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override;
 		String getFieldType() override;
@@ -64,13 +64,21 @@ namespace Halley {
 		template <typename T>
 		static std::unique_ptr<EnumIntFieldFactory> makeEnumFactory(String name)
 		{
-			const auto& vals = EnumNames<T>()();
-			return std::make_unique<EnumIntFieldFactory>(std::move(name), Vector<String>(vals.begin(), vals.end()));
+			const auto names = EnumNames<T>();
+			const auto& vals = names();
+			auto stringValues = Vector<String>(vals.begin(), vals.end());
+			Vector<int> intValues;
+			intValues.resize(stringValues.size());
+			for (size_t i = 0; i < intValues.size(); ++i) {
+				intValues[i] = names.getValue(i);
+			}
+			return std::make_unique<EnumIntFieldFactory>(std::move(name), std::move(stringValues), std::move(intValues));
 		}
 
 	private:
 		const String fieldName;
 		Vector<String> names;
+		Vector<int> values;
 	};
 	
 	class ConfigDBFieldFactory : public BaseEnumFieldFactory
