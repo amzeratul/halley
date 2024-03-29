@@ -83,13 +83,11 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	constexpr bool includeVsync = false;
-	
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
 	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate).count() + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate).count());
-	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count() + (includeVsync ? vsyncTime.getLatest() : 0));
+	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count());
 	gpuTime.pushValue(data->getElapsedTime(ProfilerEventType::GPU).count());
-	totalFrameTime.pushValue(std::max(updateTime.getLatest(), renderTime.getLatest()));
+	totalFrameTime.pushValue((data->getEndTime() - data->getStartTime()).count());
 	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
 	auto getTime = [&](TimeLine timeline) -> int
@@ -102,7 +100,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	auto& curFrameData = frameData[lastFrameData];
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
-	curFrameData.renderTime = getTime(TimeLine::Render) - (includeVsync ? 0 : static_cast<int>((vsyncTime.getLatest() + 500) / 1000));
+	curFrameData.renderTime = getTime(TimeLine::Render);
 
 	for (auto& [k, e]: systemHistory) {
 		e.startUpdate();
@@ -250,15 +248,18 @@ void PerformanceStatsView::EventHistoryData::sortIfNeeded() const
 
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
+	const bool hasVSync = api.video->hasVsync();
+
 	const auto frameAvgTime = totalFrameTime.getAverage();
 	const auto updateAvgTime = updateTime.getAverage();
 	const auto renderAvgTime = renderTime.getAverage();
-	const auto vsyncAvgTime = vsyncTime.getAverage();
 	const auto audioAvgTime = audioTime.getAverage();
 	const auto gpuAvgTime = gpuTime.getAverage();
-	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
-	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(std::max(updateAvgTime, renderAvgTime), gpuAvgTime)));
-
+	const auto renderAndGPUAvgTime = renderTime.getAverage() + gpuTime.getAverage();
+	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
+	//const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(std::max(updateAvgTime, renderAvgTime), gpuAvgTime)));
+	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(frameAvgTime - vsyncTime.getAverage(), renderAndGPUAvgTime)));
+	
 	const auto updateCol = Colour4f(0.69f, 0.75f, 0.98f);
 	const auto renderCol = Colour4f(0.98f, 0.69f, 0.69f);
 	const auto gpuCol = Colour4f(0.98f, 0.85f, 0.55f);
@@ -266,8 +267,10 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
 	strBuilder.append(" FPS | ");
-	strBuilder.append(toString(maxFPS, 10, 4, ' '), (updateAvgTime > renderAvgTime && updateAvgTime > gpuAvgTime) ? updateCol : (renderAvgTime > gpuAvgTime ? renderCol : gpuCol));
-	strBuilder.append(" FPS | ");
+	if (hasVSync) {
+		strBuilder.append(toString(maxFPS, 10, 4, ' '), (updateAvgTime > renderAvgTime && updateAvgTime > gpuAvgTime) ? updateCol : (renderAvgTime > gpuAvgTime ? renderCol : gpuCol));
+		strBuilder.append(" FPS | ");
+	}
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
 	strBuilder.append(" calls | ");
 	strBuilder.append(toString(painter.getPrevTriangles()));
