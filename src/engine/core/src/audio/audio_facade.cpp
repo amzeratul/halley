@@ -11,14 +11,26 @@
 
 using namespace Halley;
 
+namespace {
+	// The command queue is filled every update, and only drained when the audio thread runs.
+	// Therefore its size must be > (logicFPS / audioFPS).
+	// Because audio can run as low as 10 fps (for a >4096 sample buffer), and logic could conceivably be over 1000 fps,
+	// this should be at least 100. Here I choose 256 as a safe number.
+	constexpr size_t commandQueueSize = 256;
+
+	// These, on the other hand, flow the other direction, so they can be much more relaxed
+	constexpr size_t exceptionQueueSize = 16;
+	constexpr size_t finishedSoundsQueueSize = 16;
+}
+
 AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	: output(o)
 	, system(system)
 	, running(false)
 	, started(false)
-	, commandQueue(4)
-	, exceptions(16)
-	, finishedSoundsQueue(4)
+	, commandQueue(commandQueueSize)
+	, exceptions(exceptionQueueSize)
+	, finishedSoundsQueue(finishedSoundsQueueSize)
 	, ownAudioThread(o.needsAudioThread())
 	, curEmitterId(1)
 {
