@@ -32,7 +32,7 @@ namespace Halley {
 		HashMap<int, String> debugDisplayValues;
 
 		void drawNodeBackground(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode) override;
-		std::pair<String, LabelType> getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const;
+		std::pair<String, LabelType> getLabel(const IGraphNodeType& nodeType, const BaseGraphNode& node) const override;
 
 		NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const override;
 		Vector2f getNodeSize(const IGraphNodeType& nodeType, const BaseGraphNode& node, float curZoom) const override;

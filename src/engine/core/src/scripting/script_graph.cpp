@@ -103,7 +103,7 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 	s >> parentNode;
 }
 
-void ScriptGraphNode::feedToHash(Hash::Hasher& hasher, bool assetOnly) const
+void ScriptGraphNode::feedToHashEx(Hash::Hasher& hasher, bool assetOnly) const
 {
 	if (assetOnly) {
 		if (!parentNode) {
@@ -528,8 +528,8 @@ void ScriptGraph::updateHash()
 	hasher.feed(nodes.size());
 	for (auto& node: nodes) {
 		node.setId(i++);
-		node.feedToHash(hasher, false);
-		node.feedToHash(assetHasher, true);
+		node.feedToHashEx(hasher, false);
+		node.feedToHashEx(assetHasher, true);
 	}
 	hash = hasher.digest();
 	assetHash = assetHasher.digest();

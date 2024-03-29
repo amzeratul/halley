@@ -20,12 +20,12 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void feedToHash(Hash::Hasher& hasher, bool assetOnly) const;
+		void feedToHashEx(Hash::Hasher& hasher, bool assetOnly) const;
 		bool canDraw() const override { return !parentNode; }
 
 		void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const override;
 		void clearType() const override;
-		const IGraphNodeType& getGraphNodeType() const;
+		const IGraphNodeType& getGraphNodeType() const override;
 		const IScriptNodeType& getNodeType() const;
 
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
@@ -115,7 +115,7 @@ namespace Halley {
 		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
 		void finishGraph() override;
-		void updateHash();
+		void updateHash() override;
 		uint64_t getHash() const;
 		uint64_t getAssetHash() const;
 

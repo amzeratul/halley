@@ -631,7 +631,7 @@ void BaseGraphGizmo::paste(const ConfigNode& node)
 		remap[static_cast<GraphNodeId>(i)] = newIdx++;
 	}
 	for (size_t i = 0; i < nodes.size(); ++i) {
-		auto& node = baseGraph->addNode(*nodes[i]);
+		auto& node = baseGraph->addBaseNode(*nodes[i]);
 		node.remapNodes(remap);
 
 		const auto pos = node.getPosition() + offset;

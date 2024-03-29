@@ -97,8 +97,8 @@ namespace Halley {
 					applyCurve<TweenCurve::EaseBackIn>(t) / sqrt(2.0f) :
 					1.0f - applyCurve<TweenCurve::EaseBackOut>(-2.0f * t + 2.0f) * 0.5f;
 			} else if constexpr (curve == TweenCurve::EaseBackIn) {
-				const static double c1 = 1.70158;
-				const static double c3 = c1 + 1.0;
+				constexpr double c1 = 1.70158;
+				constexpr double c3 = c1 + 1.0;
 				return static_cast<T>(c3 * t * t * t - c1 * t * t);
 			} else if constexpr (curve == TweenCurve::EaseBackOut) {
 				return applyInverseCurve<TweenCurve::EaseBackIn>(t);
