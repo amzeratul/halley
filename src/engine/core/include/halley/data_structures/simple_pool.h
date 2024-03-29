@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <list>
+#include <mutex>
+#include "halley/data_structures/vector.h"
 
 namespace Halley {
 	template <size_t size, size_t align, size_t blockLen = 16384, bool threadSafe = true>

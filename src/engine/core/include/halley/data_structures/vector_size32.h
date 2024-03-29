@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <gsl/span>
+#include <string_view>
 
 #ifdef max
 #undef max
