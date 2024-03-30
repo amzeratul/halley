@@ -65,11 +65,13 @@ namespace Halley
 		mutable uint64_t hash = 0;
 
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
+		bool isEqualTo(size_t offset, ShaderParameterType type, const void* data) const;
 	};
 	
 	class Material
 	{
 		friend class MaterialParameter;
+		friend class ConstMaterialParameter;
 
 	public:
 		Material(const Material& other);
@@ -93,6 +95,7 @@ namespace Halley
 		std::shared_ptr<Material> clone() const;
 		
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
+		const std::shared_ptr<const Texture>& getTexture(std::string_view name) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
 		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
 		size_t getNumTextureUnits() const;
@@ -118,6 +121,7 @@ namespace Halley
 		Material& set(size_t textureUnit, const SpriteResource& spriteResource);
 		
 		MaterialParameter getParameter(std::string_view name);
+		ConstMaterialParameter getParameter(std::string_view name) const;
 		bool hasParameter(std::string_view name) const;
 		
 		template <typename T>
@@ -154,6 +158,7 @@ namespace Halley
 		void initUniforms(bool forceLocalBlocks);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
+		bool isUniformEqualTo(int blockNumber, size_t offset, ShaderParameterType type, const void* data) const;
 		void computeHashes() const;
 
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
@@ -182,7 +187,9 @@ namespace Halley
 		template <typename T>
 		MaterialUpdater& set(std::string_view name, const T& value)
 		{
-			getParameter(name).set(value);
+			if (material || !getOriginalMaterial().getParameter(name).isEqual(value)) {
+				getWriteMaterial().getParameter(name).set(value);
+			}
 			return *this;
 		}
 
@@ -204,6 +211,8 @@ namespace Halley
 		std::shared_ptr<const Material>* orig = nullptr;
 		std::shared_ptr<Material> material;
 
-		MaterialParameter getParameter(std::string_view name);
+		const Material& getCurrentMaterial() const;
+		const Material& getOriginalMaterial() const;
+		Material& getWriteMaterial();
 	};
 }

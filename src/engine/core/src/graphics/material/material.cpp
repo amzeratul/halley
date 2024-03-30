@@ -81,6 +81,17 @@ bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, cons
 	}
 }
 
+bool MaterialDataBlock::isEqualTo(size_t offset, ShaderParameterType type, const void* srcData) const
+{
+	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
+
+	const size_t size = MaterialAttribute::getAttributeSize(type);
+	Expects(size + offset <= data.size());
+	Expects(offset % 4 == 0); // Alignment
+
+	return memcmp(data.data() + offset, srcData, size) == 0;
+}
+
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, dataBlocks(other.dataBlocks)
@@ -261,6 +272,11 @@ bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType ty
 	return false;
 }
 
+bool Material::isUniformEqualTo(int blockNumber, size_t offset, ShaderParameterType type, const void* data) const
+{
+	return dataBlocks[blockNumber].isEqualTo(offset, type, data);
+}
+
 void Material::computeHashes() const
 {
 	Hash::Hasher hasher;
@@ -299,9 +315,20 @@ const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) cons
 	return tex;
 }
 
+const std::shared_ptr<const Texture>& Material::getTexture(std::string_view name) const
+{
+	const auto& texs = materialDefinition->getTextures();
+	for (size_t i = 0; i < texs.size(); ++i) {
+		if (texs[i].name == name) {
+			return getTexture(static_cast<int>(i));
+		}
+	}
+	return getFallbackTexture();
+}
+
 std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
 {
-	return textureUnit >= 0 && textureUnit < int(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
+	return textureUnit >= 0 && textureUnit < static_cast<int>(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
 }
 
 const Vector<MaterialDataBlock>& Material::getDataBlocks() const
@@ -490,6 +517,20 @@ MaterialParameter Material::getParameter(std::string_view name)
 	throw Exception("Uniform \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
+ConstMaterialParameter Material::getParameter(std::string_view name) const
+{
+	for (const auto& block: materialDefinition->getUniformBlocks()) {
+		for (const auto& u: block.uniforms) {
+			if (u.name == name) {
+				return ConstMaterialParameter(*this, u.type, u.blockNumber, u.offset);
+			}
+		}
+	}
+
+	throw Exception("Uniform \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+	
+}
+
 void Material::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
 {
 	materialDefinition = std::move(definition);
@@ -538,7 +579,6 @@ std::shared_ptr<Material> Material::clone() const
 
 MaterialUpdater::MaterialUpdater(std::shared_ptr<const Material>& orig)
 	: orig(&orig)
-	, material(orig->clone())
 {
 }
 
@@ -551,7 +591,7 @@ MaterialUpdater::MaterialUpdater(MaterialUpdater&& other) noexcept
 
 MaterialUpdater::~MaterialUpdater()
 {
-	if (orig) {
+	if (orig && material) {
 		*orig = material;
 	}
 }
@@ -573,101 +613,136 @@ bool MaterialUpdater::isValid() const
 
 MaterialUpdater& MaterialUpdater::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
 {
-	material->set(name, texture);
+	if (material || getOriginalMaterial().getTexture(name) != texture) {
+		getWriteMaterial().set(name, texture);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::set(std::string_view name, const std::shared_ptr<Texture>& texture)
 {
-	material->set(name, texture);
+	if (material || getOriginalMaterial().getTexture(name) != texture) {
+		getWriteMaterial().set(name, texture);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::set(std::string_view name, const SpriteResource& sprite)
 {
-	material->set(name, sprite);
+	if (material || getOriginalMaterial().getTexture(name) != sprite.getSpriteSheet()->getTexture()) {
+		getWriteMaterial().set(name, sprite);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
 {
-	material->set(textureUnit, texture);
+	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != texture) {
+		getWriteMaterial().set(textureUnit, texture);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
 {
-	material->set(textureUnit, texture);
+	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != texture) {
+		getWriteMaterial().set(textureUnit, texture);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const SpriteResource& sprite)
 {
-	material->set(textureUnit, sprite);
+	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != sprite.getSpriteSheet()->getTexture()) {
+		getWriteMaterial().set(textureUnit, sprite);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::setPassEnabled(int pass, bool enabled)
 {
-	material->setPassEnabled(pass, enabled);
+	if (material || getOriginalMaterial().isPassEnabled(pass) != enabled) {
+		getWriteMaterial().setPassEnabled(pass, enabled);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::setStencilReferenceOverride(std::optional<uint8_t> reference)
 {
-	material->setStencilReferenceOverride(reference);
+	if (material || getOriginalMaterial().getStencilReferenceOverride() != reference) {
+		getWriteMaterial().setStencilReferenceOverride(reference);
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::setDepthStencilEnabled(bool enabled)
 {
-	material->setDepthStencilEnabled(enabled);
+	if (material || getOriginalMaterial().isDepthStencilEnabled() != enabled) {
+		getWriteMaterial().setDepthStencilEnabled(enabled);
+	}
 	return *this;
 }
 
 const std::shared_ptr<const Texture>& MaterialUpdater::getTexture(int textureUnit) const
 {
-	return material->getTexture(textureUnit);
+	return getCurrentMaterial().getTexture(textureUnit);
 }
 
 std::shared_ptr<const Texture> MaterialUpdater::getRawTexture(int textureUnit) const
 {
-	return material->getRawTexture(textureUnit);
+	return getCurrentMaterial().getRawTexture(textureUnit);
 }
 
 const Vector<std::shared_ptr<const Texture>>& MaterialUpdater::getTextures() const
 {
-	return material->getTextures();
+	return getCurrentMaterial().getTextures();
 }
 
 size_t MaterialUpdater::getNumTextureUnits() const
 {
-	return material->getNumTextureUnits();
+	return getCurrentMaterial().getNumTextureUnits();
 }
 
 const MaterialDefinition& MaterialUpdater::getDefinition() const
 {
-	return material->getDefinition();
+	return getCurrentMaterial().getDefinition();
 }
 
 const std::shared_ptr<const MaterialDefinition>& MaterialUpdater::getDefinitionPtr() const
 {
-	return material->getDefinitionPtr();
+	return getCurrentMaterial().getDefinitionPtr();
 }
 
 MaterialUpdater& MaterialUpdater::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
 {
-	material->setDefinition(std::move(definition));
+	if (material || getOriginalMaterial().getDefinitionPtr() != definition) {
+		getWriteMaterial().setDefinition(std::move(definition));
+	}
 	return *this;
 }
 
 MaterialUpdater& MaterialUpdater::replaceMaterialDefinition(std::shared_ptr<const MaterialDefinition> definition)
 {
-	material->replaceMaterialDefinition(std::move(definition));
+	if (material || getOriginalMaterial().getDefinitionPtr() != definition) {
+		getWriteMaterial().replaceMaterialDefinition(std::move(definition));
+	}
 	return *this;
 }
 
-MaterialParameter MaterialUpdater::getParameter(std::string_view name)
+const Material& MaterialUpdater::getCurrentMaterial() const
 {
-	return material->getParameter(name);
+	return material ? *material : getOriginalMaterial();
+}
+
+const Material& MaterialUpdater::getOriginalMaterial() const
+{
+	return *(*orig);
+}
+
+Material& MaterialUpdater::getWriteMaterial()
+{
+	if (!material) {
+		material = (*orig)->clone();
+	}
+	return *material;
 }

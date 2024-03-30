@@ -44,4 +44,31 @@ namespace Halley
 		ShaderParameterType type;
 	};
 
+	class ConstMaterialParameter
+	{
+		friend class Material;
+		friend class MaterialPass;
+
+	public:
+		bool isEqual(Colour colour);
+		bool isEqual(float p);
+		bool isEqual(Vector2f p);
+		bool isEqual(Vector3f p);
+		bool isEqual(Vector4f p);
+		bool isEqual(int p);
+		bool isEqual(Vector2i p);
+		bool isEqual(Vector3i p);
+		bool isEqual(Vector4i p);
+		bool isEqual(uint32_t p);
+		bool isEqual(const Matrix4f& m);
+
+	private:
+		ConstMaterialParameter(const Material& material, ShaderParameterType type, uint16_t blockNumber, uint32_t offset);
+
+		const Material* material;
+		uint32_t offset;
+		uint16_t blockNumber;
+		ShaderParameterType type;
+	};
+
 }
