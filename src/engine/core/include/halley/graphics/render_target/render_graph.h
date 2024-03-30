@@ -50,7 +50,7 @@ namespace Halley {
 		std::shared_ptr<Texture> getOutputTexture(const String& id);
 		void setRenderSize(const String& id, const Vector2i& size);
 
-		bool remapNode(std::string_view outputName, uint8_t outputNodePin, std::string_view inputName, uint8_t inputNodePin);
+		bool remapNode(std::string_view toNodeName, uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin);
 		void resetGraph();
 
 	private:
