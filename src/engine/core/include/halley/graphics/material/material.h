@@ -7,6 +7,8 @@
 #include <gsl/gsl>
 #include <bitset>
 
+#include "material.h"
+
 namespace Halley
 {
 	class SpriteResource;
@@ -97,11 +99,11 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		const std::shared_ptr<const Texture>& getTexture(std::string_view name) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
-		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
+		gsl::span<const std::shared_ptr<const Texture>> getTextures() const;
 		size_t getNumTextureUnits() const;
 
-		const Vector<MaterialDataBlock>& getDataBlocks() const;
-		Vector<MaterialDataBlock>& getDataBlocks();
+		gsl::span<const MaterialDataBlock> getDataBlocks() const;
+		gsl::span<MaterialDataBlock> getDataBlocks();
 
 		void setPassEnabled(int pass, bool enabled);
 		bool isPassEnabled(int pass) const;
@@ -140,9 +142,6 @@ namespace Halley
 	private:
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
-		Vector<MaterialDataBlock> dataBlocks;
-		Vector<std::shared_ptr<const Texture>> textures;
-
 		mutable bool needToUpdateHash = true;
 		bool forceLocalBlocks = false;
 		bool depthStencilEnabled = true;
@@ -150,6 +149,9 @@ namespace Halley
 		std::bitset<8> passEnabled;
 		mutable uint64_t fullHashValue = 0;
 		mutable uint64_t partialHashValue = 0;
+		
+		Vector<MaterialDataBlock, std::allocator<MaterialDataBlock>, 2 * sizeof(MaterialDataBlock)> dataBlocks;
+		Vector<std::shared_ptr<const Texture>, std::allocator<std::shared_ptr<const Texture>>, 4 * sizeof(std::shared_ptr<const Texture>)> textures;
 
 		void doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
@@ -199,7 +201,7 @@ namespace Halley
 
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
-		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
+		gsl::span<const std::shared_ptr<const Texture>> getTextures() const;
 		size_t getNumTextureUnits() const;
 
 		const MaterialDefinition& getDefinition() const;

@@ -253,9 +253,9 @@ bool Material::isCompatibleWith(const Material& other) const
 	return true;
 }
 
-const Vector<std::shared_ptr<const Texture>>& Material::getTextures() const
+gsl::span<const std::shared_ptr<const Texture>> Material::getTextures() const
 {
-	return textures;
+	return textures.span();
 }
 
 size_t Material::getNumTextureUnits() const
@@ -331,14 +331,14 @@ std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
 	return textureUnit >= 0 && textureUnit < static_cast<int>(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
 }
 
-const Vector<MaterialDataBlock>& Material::getDataBlocks() const
+gsl::span<const MaterialDataBlock> Material::getDataBlocks() const
 {
-	return dataBlocks;
+	return dataBlocks.span();
 }
 
-Vector<MaterialDataBlock>& Material::getDataBlocks()
+gsl::span<MaterialDataBlock> Material::getDataBlocks()
 {
-	return dataBlocks;
+	return dataBlocks.span();
 }
 
 void Material::setPassEnabled(int pass, bool enabled)
@@ -693,7 +693,7 @@ std::shared_ptr<const Texture> MaterialUpdater::getRawTexture(int textureUnit) c
 	return getCurrentMaterial().getRawTexture(textureUnit);
 }
 
-const Vector<std::shared_ptr<const Texture>>& MaterialUpdater::getTextures() const
+gsl::span<const std::shared_ptr<const Texture>> MaterialUpdater::getTextures() const
 {
 	return getCurrentMaterial().getTextures();
 }
