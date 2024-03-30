@@ -97,25 +97,28 @@ const std::optional<Rect4f>& SpritePainterEntry::getClip() const
 
 SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 {
-	setHandle("halley.texSize", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	setHandle("halley.texSize", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		const int idx = autoVarArgs.toInteger();
-		const auto tex = material.getTexture(idx);
-		material.set(uniformName, tex ? Vector2f(tex->getSize()) : Vector2f());
+		if (const auto idx = stringViewToInt(autoVarArgs)) {
+			const auto tex = material.getTexture(*idx);
+			material.set(uniformName, tex ? Vector2f(tex->getSize()) : Vector2f());
+		}
 	});
 
-	setHandle("halley.texBPP", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	setHandle("halley.texBPP", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		const int idx = autoVarArgs.toInteger();
-		const auto tex = material.getTexture(idx);
-		material.set(uniformName, tex ? TextureDescriptor::getBytesPerPixel(tex->getDescriptor().format) : 1);
+		if (const auto idx = stringViewToInt(autoVarArgs)) {
+			const auto tex = material.getTexture(*idx);
+			material.set(uniformName, tex ? TextureDescriptor::getBytesPerPixel(tex->getDescriptor().format) : 1);
+		}
 	});
 
-	setHandle("halley.timeLoop", [this] (MaterialUpdater& material, const String& uniformName, const String& autoVarArgs)
+	setHandle("halley.timeLoop", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
-		const Time cycleLen = autoVarArgs.toDouble();
-		const auto value = std::fmod(curTime / cycleLen, 1.0);
-		material.set(uniformName, static_cast<float>(value));
+		if (const auto cycleLen = stringViewToDouble(autoVarArgs)) {
+			const auto value = std::fmod(curTime / *cycleLen, 1.0);
+			material.set(uniformName, static_cast<float>(value));
+		}
 	});
 }
 

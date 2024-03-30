@@ -12,6 +12,7 @@
 #include "halley/data_structures/maybe.h"
 #include "enum_names.h"
 #include "halley/support/logger.h"
+#include <charconv>
 
 namespace Halley
 {
@@ -374,4 +375,33 @@ namespace Halley
 		}
 	};
 
+	inline std::optional<int> stringViewToInt(const std::string_view& input)
+	{
+	    int out;
+	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
+	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
+	        return std::nullopt;
+	    }
+	    return out;
+	}
+
+	inline std::optional<float> stringViewToFloat(const std::string_view& input)
+	{
+	    float out;
+	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
+	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
+	        return std::nullopt;
+	    }
+	    return out;
+	}
+
+	inline std::optional<double> stringViewToDouble(const std::string_view& input)
+	{
+	    double out;
+	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
+	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
+	        return std::nullopt;
+	    }
+	    return out;
+	}
 }

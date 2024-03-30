@@ -955,21 +955,23 @@ void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
 		return;
 	}
 
-	vertexAttrib = other.vertexAttrib;
 	material = other.material;
+
 	size = other.size;
+	visible = other.visible;
+	flip = other.flip;
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	sliced = other.sliced;
+	rotated = other.rotated;
+	sliceScale = other.sliceScale;
+	vertexAttrib = other.vertexAttrib;
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;
-	hasClip = other.hasClip;
-	absoluteClip = other.absoluteClip;
-	visible = other.visible;
-	flip = other.flip;
-	sliced = other.sliced;
-	rotated = other.rotated;
-	lastAppliedPivot = other.lastAppliedPivot;
 
 #ifdef ENABLE_HOT_RELOAD
+	lastAppliedPivot = other.lastAppliedPivot;
 	if (enableHotReload) {
 		setHotReload(other.hotReloadRef, other.hotReloadIdx);
 	} else {
@@ -984,21 +986,23 @@ void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
 		return;
 	}
 
-	vertexAttrib = other.vertexAttrib;
 	material = std::move(other.material);
+
 	size = other.size;
+	visible = other.visible;
+	flip = other.flip;
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	sliced = other.sliced;
+	rotated = other.rotated;
+	sliceScale = other.sliceScale;
+	vertexAttrib = other.vertexAttrib;
 	slices = other.slices;
 	outerBorder = other.outerBorder;
 	clip = other.clip;
-	hasClip = other.hasClip;
-	absoluteClip = other.absoluteClip;
-	visible = other.visible;
-	flip = other.flip;
-	sliced = other.sliced;
-	rotated = other.rotated;
-	lastAppliedPivot = other.lastAppliedPivot;
 
 #ifdef ENABLE_HOT_RELOAD
+	lastAppliedPivot = other.lastAppliedPivot;
 	if (enableHotReload) {
 		setHotReload(other.hotReloadRef, other.hotReloadIdx);
 	} else {

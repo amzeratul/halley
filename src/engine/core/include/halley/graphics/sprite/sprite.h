@@ -183,6 +183,8 @@ namespace Halley
 		void moveFrom(Sprite&& other, bool enableHotReload = true);
 
 	private:
+		std::shared_ptr<const Material> material;
+
 		Vector2f size;
 		bool visible : 1;
 		bool flip : 1;
@@ -192,7 +194,6 @@ namespace Halley
 		bool rotated : 1;
 		float sliceScale = 1;
 
-		std::shared_ptr<const Material> material;
 		SpriteVertexAttrib vertexAttrib;
 
 		Vector4s slices;

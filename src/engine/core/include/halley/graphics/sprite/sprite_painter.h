@@ -60,7 +60,7 @@ namespace Halley
 
 	class SpritePainterMaterialParamUpdater {
 	public:
-		using Callback = std::function<void(MaterialUpdater&, const String&, const String&)>;
+		using Callback = std::function<void(MaterialUpdater&, std::string_view, std::string_view)>;
 
 		SpritePainterMaterialParamUpdater();
 
