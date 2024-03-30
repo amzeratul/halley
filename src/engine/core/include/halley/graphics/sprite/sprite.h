@@ -173,10 +173,14 @@ namespace Halley
 		Vector4s getOuterBorder() const { return outerBorder; }
 		Sprite& setOuterBorder(Vector4s border);
 
-		Sprite clone() const;
+		Sprite clone(bool enableHotReload = true) const;
+		Sprite&& move(bool enableHotReload = true);
 
 		bool operator==(const Sprite& other) const;
 		bool operator!=(const Sprite& other) const;
+
+		void copyFrom(const Sprite& other, bool enableHotReload = true);
+		void moveFrom(Sprite&& other, bool enableHotReload = true);
 
 	private:
 		Vector2f size;

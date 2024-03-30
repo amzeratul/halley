@@ -620,9 +620,29 @@ void Sprite::setRectInfo(const RectInfo& info)
 	computeSize();
 }
 
-Sprite Sprite::clone() const
+Sprite Sprite::clone(bool enableHotReload) const
 {
+#ifdef ENABLE_HOT_RELOAD
+	if (enableHotReload) {
+		return *this;
+	} else {
+		Sprite result;
+		result.copyFrom(*this, false);
+		return result;
+	}
+#else
 	return *this;
+#endif
+}
+
+Sprite&& Sprite::move(bool enableHotReload)
+{
+#ifdef ENABLE_HOT_RELOAD
+	if (!enableHotReload) {
+		setHotReload(nullptr, 0);
+	}
+#endif
+	return std::move(*this);
 }
 
 bool Sprite::operator==(const Sprite& other) const
@@ -921,10 +941,10 @@ Sprite::Sprite(Sprite&& other) noexcept
 	*this = std::move(other);
 }
 
-Sprite& Sprite::operator=(const Sprite& other)
+void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
 {
 	if (this == &other) {
-		return *this;
+		return;
 	}
 
 	vertexAttrib = other.vertexAttrib;
@@ -940,24 +960,28 @@ Sprite& Sprite::operator=(const Sprite& other)
 	sliced = other.sliced;
 	rotated = other.rotated;
 	lastAppliedPivot = other.lastAppliedPivot;
-	
-	setHotReload(other.hotReloadRef, other.hotReloadIdx);
-	
-	return *this;
+
+#ifdef ENABLE_HOT_RELOAD
+	if (enableHotReload) {
+		setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	} else {
+		setHotReload(nullptr, 0);
+	}
+#endif
 }
 
-Sprite& Sprite::operator=(Sprite&& other) noexcept
+void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
 {
 	if (this == &other) {
-		return *this;
+		return;
 	}
 
-	vertexAttrib = std::move(other.vertexAttrib);
+	vertexAttrib = other.vertexAttrib;
 	material = std::move(other.material);
-	size = std::move(other.size);
+	size = other.size;
 	slices = other.slices;
 	outerBorder = other.outerBorder;
-	clip = std::move(other.clip);
+	clip = other.clip;
 	hasClip = other.hasClip;
 	absoluteClip = other.absoluteClip;
 	visible = other.visible;
@@ -966,9 +990,25 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	rotated = other.rotated;
 	lastAppliedPivot = other.lastAppliedPivot;
 
-	setHotReload(other.hotReloadRef, other.hotReloadIdx);
+#ifdef ENABLE_HOT_RELOAD
+	if (enableHotReload) {
+		setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	} else {
+		setHotReload(nullptr, 0);
+	}
 	other.setHotReload(nullptr, 0);
+#endif
+}
 
+Sprite& Sprite::operator=(const Sprite& other)
+{
+	copyFrom(other);
+	return *this;
+}
+
+Sprite& Sprite::operator=(Sprite&& other) noexcept
+{
+	moveFrom(std::move(other));
 	return *this;
 }
 
