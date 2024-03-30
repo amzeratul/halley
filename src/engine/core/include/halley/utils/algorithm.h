@@ -290,6 +290,50 @@ namespace std_ex {
 		return std::find_if(container.begin(), container.end(), predicate);
 	}
 
+	template <typename C, typename V>
+	std::optional<size_t> find_index(C& container, const V& value)
+	{
+		const auto iter = std::find(container.begin(), container.end(), value);
+		if (iter == container.end()) {
+			return {};
+		} else {
+			return iter - container.begin();
+		}
+	}
+
+	template <typename C, typename V>
+	std::optional<size_t> find_index(const C& container, const V& value)
+	{
+		const auto iter = std::find(container.begin(), container.end(), value);
+		if (iter == container.end()) {
+			return {};
+		} else {
+			return iter - container.begin();
+		}
+	}
+
+	template <typename C, typename F>
+	std::optional<size_t> find_index_if(C& container, F predicate)
+	{
+		const auto iter = std::find_if(container.begin(), container.end(), predicate);
+		if (iter == container.end()) {
+			return {};
+		} else {
+			return iter - container.begin();
+		}
+	}
+
+	template <typename C, typename F>
+	std::optional<size_t> find_index_if(const C& container, F predicate)
+	{
+		const auto iter = std::find_if(container.begin(), container.end(), predicate);
+		if (iter == container.end()) {
+			return {};
+		} else {
+			return iter - container.begin();
+		}
+	}
+
 	template <typename C, typename S>
 	auto move_push_back(C& destination, S& source)
 	{

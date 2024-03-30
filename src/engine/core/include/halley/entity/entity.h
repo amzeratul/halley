@@ -12,6 +12,7 @@
 #include "prefab.h"
 #include "halley/utils/type_traits.h"
 #include "halley/maths/uuid.h"
+#include <gsl/span>
 
 namespace Halley {
 	class DataInterpolatorSet;
@@ -105,6 +106,19 @@ namespace Halley {
 				return tryGetComponent<T>() != nullptr;
 			} else {
 				return hasBit(world, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
+			}
+		}
+
+		template <typename ... Ts>
+		bool hasAnyComponent(const World& world) const
+		{
+			if (dirty) {
+				return dirtyHasAnyComponents<Ts...>(world);
+			} else {
+				std::array<int, sizeof...(Ts)> result;
+				auto span = gsl::span<int>(result.data(), result.size());
+				getComponentIndices<Ts...>(result);
+				return hasAnyBit(world, span);
 			}
 		}
 
@@ -234,6 +248,29 @@ namespace Halley {
 		void doDestroy(World& world, bool updateParenting);
 
 		bool hasBit(const World& world, int index) const;
+		bool hasAnyBit(const World& world, gsl::span<const int> indices) const;
+		
+		template <typename T, typename ... Ts>
+		constexpr static void getComponentIndices(gsl::span<int> dst)
+		{
+			dst[0] = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+			if constexpr (sizeof...(Ts) > 0) {
+				getComponentIndices<Ts...>(dst.subspan(1));
+			}
+		}
+
+		template <typename T, typename ... Ts>
+		bool dirtyHasAnyComponents(const World& world) const
+		{
+			if (tryGetComponent<T>() != nullptr) {
+				return true;
+			}
+			if constexpr (sizeof...(Ts) > 0) {
+				return dirtyHasAnyComponents<Ts...>(world);
+			} else {
+				return false;
+			}
+		}
 	};
 
 	class EntityRef;
@@ -497,6 +534,13 @@ namespace Halley {
 			validateComponentType<T>();
 			validate();
 			return entity->hasComponent<T>(*world);
+		}
+
+		template <typename ... Ts>
+		bool hasAnyComponent() const
+		{
+			validate();
+			return entity->hasAnyComponent<Ts...>(*world);
 		}
 
 		template <typename T>

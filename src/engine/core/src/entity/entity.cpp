@@ -394,6 +394,11 @@ bool Entity::hasBit(const World& world, int index) const
 	return FamilyMask::hasBit(mask, index, world.getMaskStorage());
 }
 
+bool Entity::hasAnyBit(const World& world, gsl::span<const int> indices) const
+{
+	return FamilyMask::hasAnyBit(mask, indices, world.getMaskStorage());
+}
+
 void EntityRef::setReloaded()
 {
 	Expects(entity);

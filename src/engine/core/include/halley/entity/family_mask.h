@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include "halley/data_structures/maybe_ref.h"
+#include <gsl/span>
 
 class MaskStorage;
 
@@ -45,6 +46,16 @@ namespace Halley {
 
 		inline bool hasBit(HandleType handle, int bit, MaskStorage& storage) {
 			return handle.getRealValue(storage)[bit];
+		}
+
+		inline bool hasAnyBit(HandleType handle, gsl::span<const int> bits, MaskStorage& storage) {
+			const auto& val = handle.getRealValue(storage);
+			for (auto bit: bits) {
+				if (val[bit]) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 

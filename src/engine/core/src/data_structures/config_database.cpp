@@ -22,7 +22,9 @@ void ConfigDatabase::load(Resources& resources, const String& prefix)
 
 void ConfigDatabase::loadFile(const ConfigFile& configFile)
 {
+#ifdef DEV_BUILD
 	observers[configFile.getAssetId()] = ConfigObserver(configFile);
+#endif
 	loadConfig(configFile.getRoot());
 }
 

@@ -48,7 +48,9 @@ void I18N::setFallbackLanguage(const I18NLanguage& code)
 void I18N::loadLocalisationFile(const ConfigFile& config)
 {
 	loadLocalisation(config.getRoot());
+#ifdef DEV_BUILD
 	observers[config.getAssetId()] = ConfigObserver(config);
+#endif
 }
 
 void I18N::loadLocalisation(const ConfigNode& root)
@@ -388,6 +390,7 @@ LocalisedString LocalisedString::operator+(const LocalisedString& other) const
 
 bool LocalisedString::checkForUpdates()
 {
+#ifdef DEV_BUILD
 	if (i18n) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
@@ -399,5 +402,6 @@ bool LocalisedString::checkForUpdates()
 			}
 		}
 	}
+#endif
 	return false;
 }
