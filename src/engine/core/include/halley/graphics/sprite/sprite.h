@@ -209,7 +209,9 @@ namespace Halley
 #ifdef ENABLE_HOT_RELOAD
 	public:
 		Sprite(const Sprite& other);
+		Sprite(const Sprite& other, bool enableHotReload);
 		Sprite(Sprite&& other) noexcept;
+		Sprite(Sprite&& other, bool enableHotReload) noexcept;
 		Sprite& operator=(const Sprite& other);
 		Sprite& operator=(Sprite&& other) noexcept;
 		~Sprite();

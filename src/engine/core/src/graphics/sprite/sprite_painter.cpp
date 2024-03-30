@@ -141,15 +141,21 @@ void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite) const
 	const auto& blocks = sprite.getMaterial().getDefinition().getUniformBlocks();
 	for (const auto& block: blocks) {
 		for (const auto& uniform: block.uniforms) {
-			const auto& var = uniform.autoVariable;
-			if (!var.isEmpty()) {
-				const auto split = var.split(":");
-				const auto iter = handles.find(split[0]);
+			const auto& var = std::string_view(uniform.autoVariable);
+			if (!var.empty()) {
+				const auto colonPos = var.find(':');
+				std::string_view split0 = var.substr(0, colonPos);
+				std::string_view split1;
+				if (colonPos != std::string_view::npos) {
+					split1 = var.substr(colonPos + 1);
+				}
+
+				const auto iter = handles.find(split0);
 				if (iter != handles.end()) {
 					if (!mat) {
 						mat = sprite.getMutableMaterial();
 					}
-					iter->second(*mat, uniform.name, split.size() >= 2 ? split[1] : "");
+					iter->second(*mat, uniform.name, split1);
 				}
 			}
 		}

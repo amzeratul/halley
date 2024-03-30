@@ -252,7 +252,7 @@ namespace Halley
 
 		void setTags(Vector<String> tags);
 		const Vector<String>& getTags() const { return tags; }
-		bool hasTag(const String& tag) const;
+		bool hasTag(std::string_view tag) const;
 		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

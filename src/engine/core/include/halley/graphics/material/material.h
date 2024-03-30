@@ -138,7 +138,6 @@ namespace Halley
 		
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
-		Vector<String> texUnitAssetId;
 
 		mutable bool needToUpdateHash = true;
 		bool forceLocalBlocks = false;
@@ -150,7 +149,6 @@ namespace Halley
 
 		void doSet(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		size_t doSet(std::string_view name, const std::shared_ptr<const Texture>& texture);
-		void setTexUnitAssetId(size_t texUnit, const String& id);
 
 		void loadMaterialDefinition();
 		void initUniforms(bool forceLocalBlocks);

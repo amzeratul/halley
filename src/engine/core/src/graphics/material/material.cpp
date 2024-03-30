@@ -85,7 +85,6 @@ Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
-	, texUnitAssetId(other.texUnitAssetId)
 	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
@@ -96,7 +95,6 @@ Material::Material(Material&& other) noexcept
 	: materialDefinition(std::move(other.materialDefinition))
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
-	, texUnitAssetId(std::move(other.texUnitAssetId))
 	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
@@ -405,61 +403,42 @@ size_t Material::doSet(std::string_view name, const std::shared_ptr<const Textur
 
 Material& Material::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
 {
-	const auto textureUnit = doSet(name, texture);
-	setTexUnitAssetId(textureUnit, "");
+	doSet(name, texture);
 	return *this;
 }
 
 Material& Material::set(std::string_view name, const std::shared_ptr<Texture>& texture)
 {
-	const auto textureUnit = doSet(name, std::shared_ptr<const Texture>(texture));
-	setTexUnitAssetId(textureUnit, "");
+	doSet(name, std::shared_ptr<const Texture>(texture));
 	return *this;
 }
 
 Material& Material::set(std::string_view name, const SpriteResource& spriteResource)
 {
-	const auto textureUnit = doSet(name, std::shared_ptr<const Texture>(spriteResource.getSpriteSheet()->getTexture()));
-	setTexUnitAssetId(textureUnit, spriteResource.getAssetId());
+	doSet(name, std::shared_ptr<const Texture>(spriteResource.getSpriteSheet()->getTexture()));
 	return *this;
 }
 
 Material& Material::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
 {
 	doSet(textureUnit, texture);
-	setTexUnitAssetId(textureUnit, "");
 	return *this;
 }
 
 Material& Material::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
 {
 	doSet(textureUnit, std::shared_ptr<const Texture>(texture));
-	setTexUnitAssetId(textureUnit, "");
 	return *this;
 }
 
 Material& Material::set(size_t textureUnit, const SpriteResource& spriteResource)
 {
 	doSet(textureUnit, spriteResource.getSpriteSheet()->getTexture());
-	setTexUnitAssetId(textureUnit, spriteResource.getAssetId());
 	return *this;
-}
-
-void Material::setTexUnitAssetId(size_t texUnit, const String& id)
-{
-	if (texUnitAssetId.size() != textures.size()) {
-		texUnitAssetId.resize(textures.size());
-	}
-	texUnitAssetId[texUnit] = id;
 }
 
 const String& Material::getTexUnitAssetId(int texUnit) const
 {
-	if (false && texUnit < static_cast<int>(texUnitAssetId.size())) {
-		if (!texUnitAssetId[texUnit].isEmpty()) {
-			return texUnitAssetId[texUnit];
-		}
-	}
 	if (texUnit < static_cast<int>(textures.size())) {
 		if (textures[texUnit]) {
 			return textures[texUnit]->getAssetId();

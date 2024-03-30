@@ -383,7 +383,7 @@ void MaterialDefinition::setTags(Vector<String> tags)
 	this->tags = std::move(tags);
 }
 
-bool MaterialDefinition::hasTag(const String& tag) const
+bool MaterialDefinition::hasTag(std::string_view tag) const
 {
 	return std_ex::contains(tags, tag);
 }

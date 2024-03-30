@@ -626,9 +626,7 @@ Sprite Sprite::clone(bool enableHotReload) const
 	if (enableHotReload) {
 		return *this;
 	} else {
-		Sprite result;
-		result.copyFrom(*this, false);
-		return result;
+		return Sprite(*this, false);
 	}
 #else
 	return *this;
@@ -933,12 +931,22 @@ std::shared_ptr<Material> Sprite::copyMaterialParameters(const std::shared_ptr<c
 
 Sprite::Sprite(const Sprite& other)
 {
-	*this = other;
+	copyFrom(other);
+}
+
+Sprite::Sprite(const Sprite& other, bool enableHotReload)
+{
+	copyFrom(other, enableHotReload);
 }
 
 Sprite::Sprite(Sprite&& other) noexcept
 {
-	*this = std::move(other);
+	moveFrom(std::move(other));
+}
+
+Sprite::Sprite(Sprite&& other, bool enableHotReload) noexcept
+{
+	moveFrom(std::move(other), enableHotReload);
 }
 
 void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
