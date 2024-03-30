@@ -397,7 +397,7 @@ void Particles::spawnAt(Vector3f pos)
 	particles[nParticlesAlive - 1].pos = pos;
 }
 
-Rect4f Particles::getAABB() const
+std::optional<Rect4f> Particles::getAABB() const
 {
 	if (nParticlesAlive == 0) {
 		return {};
@@ -407,6 +407,19 @@ Rect4f Particles::getAABB() const
 	for (size_t i = 1; i < nParticlesAlive; ++i) {
 		auto p = Rect4f(particles[i].pos.xy(), particles[i].pos.xy());
 		aabb = aabb.merge(p);
+	}
+	return aabb;
+}
+
+std::optional<Rect4f> Particles::getVisualAABB() const
+{
+	if (nParticlesAlive == 0) {
+		return {};
+	}
+
+	auto aabb = Rect4f(sprites[0].getAABB());
+	for (size_t i = 1; i < nParticlesAlive; ++i) {
+		aabb = aabb.merge(sprites[i].getAABB());
 	}
 	return aabb;
 }

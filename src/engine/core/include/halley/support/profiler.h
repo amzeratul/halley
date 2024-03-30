@@ -94,6 +94,7 @@ namespace Halley {
     	const Vector<Event>& getEvents() const;
     	Duration getTotalElapsedTime() const;
 		Duration getElapsedTime(ProfilerEventType eventType) const;
+		Duration getElapsedTime(gsl::span<const ProfilerEventType> eventTypes) const;
 
     	gsl::span<const ThreadInfo> getThreads() const;
 

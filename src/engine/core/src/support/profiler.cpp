@@ -43,12 +43,17 @@ ProfilerData::Duration ProfilerData::getTotalElapsedTime() const
 
 ProfilerData::Duration ProfilerData::getElapsedTime(ProfilerEventType eventType) const
 {
+	return getElapsedTime(gsl::span<const ProfilerEventType>(&eventType, 1));
+}
+
+ProfilerData::Duration ProfilerData::getElapsedTime(gsl::span<const ProfilerEventType> eventTypes) const
+{
 	TimePoint start = {};
 	TimePoint end = {};
 	bool first = true;
 	
 	for (const auto& e: events) {
-		if (e.type == eventType) {
+		if (std_ex::contains(eventTypes, e.type)) {
 			if (first) {
 				start = e.startTime;
 				first = false;

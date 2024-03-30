@@ -109,7 +109,8 @@ namespace Halley {
 		void setSecondarySpawner(IParticleSpawner* spawner);
 		void spawnAt(Vector3f pos);
 
-		Rect4f getAABB() const;
+		std::optional<Rect4f> getAABB() const;
+		std::optional<Rect4f> getVisualAABB() const;
 		void destroyOverlapping(const Polygon& polygon);
 		void destroyOverlapping(const Ellipse& ellipse);
 		void destroyOverlapping(const Circle& circle);
