@@ -257,19 +257,16 @@ void RenderGraph::clearImageOutputCallbacks()
 	imageOutputCallbacks.clear();
 }
 
-bool RenderGraph::remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin)
+bool RenderGraph::remapNode(std::string_view toNodeName, uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin)
 {
-	auto* targetNode = tryGetNode(inputName);
-	auto* output = tryGetNode(outputName);
-	if (!output || !targetNode) {
+	auto* fromNode = tryGetNode(fromNodeName);
+	auto* toNode = tryGetNode(toNodeName);
+	if (!toNode || !fromNode) {
 		return false;
 	}
 	
-	for (uint8_t i = 0; i < static_cast<uint8_t>(output->inputPins.size()); ++i) {
-		output->disconnectInput(i++);
-	}
-
-	output->connectInput(outputPin, *targetNode, inputPin);
+	toNode->disconnectInput(toNodeInputPin);
+	toNode->connectInput(toNodeInputPin, *fromNode, toNodeOutputPin);
 	return true;
 }
 
