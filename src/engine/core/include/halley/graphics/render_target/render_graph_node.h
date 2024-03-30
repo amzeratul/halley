@@ -29,8 +29,7 @@ namespace Halley {
 
 		struct InputPin {
 			RenderGraphElementType type = RenderGraphElementType::Unknown;
-			OtherPin other;
-			Vector<OtherPin> dependencies;
+			Vector<OtherPin> others;
 			std::shared_ptr<Texture> texture;
 		};
 

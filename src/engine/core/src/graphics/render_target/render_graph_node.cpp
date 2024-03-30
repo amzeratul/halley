@@ -11,6 +11,7 @@
 #include "halley/graphics/render_target/render_target.h"
 #include "halley/graphics/render_target/render_target_texture.h"
 #include "halley/graphics/sprite/sprite.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -91,36 +92,16 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 
 void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i targetSize)
 {
-	if (input.type == RenderGraphElementType::Dependency) {
-		for (auto& dependency : input.dependencies) {
-			if (!dependency.node) {
-				continue;
-			}
-
-			++depsLeft;
-			if (dependency.node->activeInCurrentPass && dependency.node->method != RenderGraphMethod::RenderToTexture) {
-				if (dependency.node->currentSize != targetSize) {
-					throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
-				}
-			}
-			else {
-				dependency.node->prepareDependencyGraph(video, targetSize);
-			}
-		}
-
-		return;
-	}
-
-	if (input.other.node) {
+	for (const auto& other: input.others) {
 		// Connected to another node
 		++depsLeft;
 
-		if (input.other.node->activeInCurrentPass && input.other.node->method != RenderGraphMethod::RenderToTexture) {
-			if (input.other.node->currentSize != targetSize) {
+		if (input.type != RenderGraphElementType::Dependency && other.node->activeInCurrentPass) {
+			if (other.node->currentSize != targetSize) {
 				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
 			}
 		} else {
-			input.other.node->prepareDependencyGraph(video, targetSize);
+			other.node->prepareDependencyGraph(video, targetSize);
 		}
 	}
 }
@@ -158,11 +139,13 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	RenderGraphNode* depthStencilInput = nullptr;
 
 	for (const auto& inputPin: inputPins) {
-		if (auto* inputNode = inputPin.other.node) {
-			if (inputPin.type == RenderGraphElementType::ColourBuffer) {
-				colourInput = inputNode;
-			} else if (inputPin.type == RenderGraphElementType::DepthStencilBuffer) {
-				depthStencilInput = inputNode;
+		for (const auto& other: inputPin.others) {
+			if (auto* inputNode = other.node) {
+				if (inputPin.type == RenderGraphElementType::ColourBuffer) {
+					colourInput = inputNode;
+				} else if (inputPin.type == RenderGraphElementType::DepthStencilBuffer) {
+					depthStencilInput = inputNode;
+				}
 			}
 		}
 	}
@@ -238,7 +221,7 @@ void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
 		for (auto& input: inputPins) {
 			if (renderTarget) {
 				// Create Colour/DepthStencil textures for render target, if needed
-				if (!input.other.node && input.type != RenderGraphElementType::Texture && input.type != RenderGraphElementType::Dependency) {
+				if (input.others.empty() && (input.type == RenderGraphElementType::ColourBuffer || input.type == RenderGraphElementType::DepthStencilBuffer)) {
 					if (!input.texture) {
 						updated = true;
 						input.texture = makeTexture(video, input.type);
@@ -411,24 +394,17 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 		throw Exception("Incompatible pin types in RenderGraph.", HalleyExceptions::Graphics);
 	}
 
-	if (input.type == RenderGraphElementType::Dependency) {
-		input.dependencies.push_back({ &node, outputPin });
-	}
-
-	input.other = { &node, outputPin };
+	input.others.push_back({ &node, outputPin });
 	output.others.push_back({ this, inputPin });
 }
 
 void RenderGraphNode::disconnectInput(uint8_t inputPin)
 {
 	auto& pin = inputPins.at(inputPin);
-	auto* otherNode = pin.other.node;
-	if (otherNode == nullptr) {
-		return;
+	for (auto& other : pin.others) {
+		auto* otherNode = other.node;
+		auto& outputPin = otherNode->outputPins.at(other.otherId);
+		std_ex::erase_if(outputPin.others, [=](const OtherPin& o) { return o.node == this; });
 	}
-
-	auto& outputPin = otherNode->outputPins.at(pin.other.otherId);
-	auto& outs = outputPin.others;
-	outs.erase(std::remove_if(outs.begin(), outs.end(), [=] (const OtherPin& o) { return o.node == this; }), outs.end());
-	pin.other = OtherPin();
+	pin.others = {};
 }
