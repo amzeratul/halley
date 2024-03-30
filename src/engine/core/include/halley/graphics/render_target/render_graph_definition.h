@@ -38,22 +38,13 @@ namespace Halley {
         RenderGraphNodeDefinition(const String& type, const Vector2f& position);
         RenderGraphNodeDefinition(const ConfigNode& node);
 
-        ConfigNode toConfigNode() const override;
-
 	    std::unique_ptr<BaseGraphNode> clone() const override;
 
         void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const override;
         void clearType() const override;
         const IGraphNodeType& getGraphNodeType() const override;
 
-        void serialize(Serializer& s) const override;
-        void deserialize(Deserializer& s) override;
-        void feedToHash(Hash::Hasher& hasher) const override;
-        
     	void loadMaterials(Resources& resources);
-
-        const String& getName() const;
-        void setName(String name);
 
         void setMaterial(std::shared_ptr<const MaterialDefinition> material);
         const std::shared_ptr<const MaterialDefinition>& getMaterial() const;
@@ -61,7 +52,6 @@ namespace Halley {
     	uint8_t getPinIndex(GraphPinId pinId, GraphNodePinDirection direction) const;
 
     private:
-        String name;
         mutable const IGraphNodeType* nodeType = nullptr;
         std::shared_ptr<const MaterialDefinition> material;
     };

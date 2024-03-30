@@ -16,7 +16,7 @@
 using namespace Halley;
 
 RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
-	: id(definition.getName())
+	: id(definition.getSettings().getType() == ConfigNodeType::Map ? definition.getSettings()["name"].asString("") : "")
 	, method(fromString<RenderGraphMethod>(definition.getType()))
 {
 	for (const auto& pin: definition.getPinConfiguration()) {
@@ -28,7 +28,6 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 	}
 	
 	const auto& pars = definition.getSettings();
-	//priority = definition.priority;
 
 	if (method == RenderGraphMethod::Paint) {
 		paintId = pars["paintId"].asString();

@@ -80,7 +80,7 @@ namespace Halley {
 		};
 		
 		Vector<std::unique_ptr<RenderGraphNode>> nodes;
-		std::map<String, RenderGraphNode*> nodeMap;
+		std::map<GraphNodeId, RenderGraphNode*> nodeMap;
 		
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
@@ -90,8 +90,8 @@ namespace Halley {
 		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
 		int lastDefinitionVersion = 0;
 
-		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
-		RenderGraphNode* getNode(const String& id);
+		void addNode(GraphNodeId id, std::unique_ptr<RenderGraphNode> node);
+		RenderGraphNode* getNode(GraphNodeId id);
 		RenderGraphNode* tryGetNode(const String& id);
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);

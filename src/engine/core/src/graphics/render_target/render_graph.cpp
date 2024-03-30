@@ -29,7 +29,7 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 	lastDefinitionVersion = graphDefinition->getAssetVersion();
 	
 	for (const auto& nodeDefinition: graphDefinition->getNodes()) {
-		addNode(nodeDefinition.getName(), std::make_unique<RenderGraphNode>(nodeDefinition));
+		addNode(nodeDefinition.getId(), std::make_unique<RenderGraphNode>(nodeDefinition));
 	}
 
 	for (const auto& nodeDefinition : graphDefinition->getNodes()) {
@@ -44,8 +44,8 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 					if (connection.dstNode) {
 						const auto& dstNodeDefinition = graphDefinition->getNodes()[*connection.dstNode];
 
-						auto* from = getNode(nodeDefinition.getName());
-						auto* to = getNode(dstNodeDefinition.getName());
+						auto* from = getNode(nodeDefinition.getId());
+						auto* to = getNode(*connection.dstNode);
 						
 						to->connectInput(dstNodeDefinition.getPinIndex(connection.dstPin, GraphNodePinDirection::Input), *from, nodeDefinition.getPinIndex(static_cast<GraphPinId>(i), GraphNodePinDirection::Output));
 					}
@@ -63,26 +63,27 @@ void RenderGraph::update()
 	}
 }
 
-void RenderGraph::addNode(String id, std::unique_ptr<RenderGraphNode> node)
+void RenderGraph::addNode(GraphNodeId id, std::unique_ptr<RenderGraphNode> node)
 {
 	if (nodeMap.find(id) != nodeMap.end()) {
-		throw Exception("Duplicate id \"" + id + "\" in RenderGraph.", HalleyExceptions::Graphics);
+		throw Exception("Duplicate id \"" + toString(int(id)) + "\" in RenderGraph.", HalleyExceptions::Graphics);
 	}
 	
 	nodes.emplace_back(std::move(node));
-	nodeMap[std::move(id)] = nodes.back().get();
+	nodeMap[id] = nodes.back().get();
 }
 
-RenderGraphNode* RenderGraph::getNode(const String& id)
+RenderGraphNode* RenderGraph::getNode(GraphNodeId id)
 {
 	return nodeMap.at(id);
 }
 
 RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 {
-	const auto iter = nodeMap.find(id);
-	if (iter != nodeMap.end()) {
-		return iter->second;
+	for (auto& node: nodes) {
+		if (node->id == id) {
+			return node.get();
+		}
 	}
 	return nullptr;
 }

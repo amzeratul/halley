@@ -15,14 +15,6 @@ RenderGraphNodeDefinition::RenderGraphNodeDefinition(const String& type, const V
 RenderGraphNodeDefinition::RenderGraphNodeDefinition(const ConfigNode& node)
 	: BaseGraphNode(node)
 {
-	name = node["name"].asString("");
-}
-
-ConfigNode RenderGraphNodeDefinition::toConfigNode() const
-{
-	auto result = BaseGraphNode::toConfigNode();
-	result["name"] = name;
-	return result;
 }
 
 std::unique_ptr<BaseGraphNode> RenderGraphNodeDefinition::clone() const
@@ -45,37 +37,9 @@ const IGraphNodeType& RenderGraphNodeDefinition::getGraphNodeType() const
 	return *nodeType;
 }
 
-void RenderGraphNodeDefinition::serialize(Serializer& s) const
-{
-	BaseGraphNode::serialize(s);
-	s << name;
-}
-
-void RenderGraphNodeDefinition::deserialize(Deserializer& s)
-{
-	BaseGraphNode::deserialize(s);
-	s >> name;
-}
-
-void RenderGraphNodeDefinition::feedToHash(Hash::Hasher& hasher) const
-{
-	BaseGraphNode::feedToHash(hasher);
-	hasher.feed(name);
-}
-
 void RenderGraphNodeDefinition::loadMaterials(Resources& resources)
 {
 	dynamic_cast<const RenderGraphNodeType*>(nodeType)->loadMaterials(*this, resources);
-}
-
-const String& RenderGraphNodeDefinition::getName() const
-{
-	return name;
-}
-
-void RenderGraphNodeDefinition::setName(String name)
-{
-	this->name = std::move(name);
 }
 
 void RenderGraphNodeDefinition::setMaterial(std::shared_ptr<const MaterialDefinition> material)

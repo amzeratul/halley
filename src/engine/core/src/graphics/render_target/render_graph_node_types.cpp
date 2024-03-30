@@ -41,13 +41,13 @@ std::pair<String, Vector<ColourOverride>> RenderGraphNodeType::getNodeDescriptio
 	ColourStringBuilder str;
 	str.append(getName());
 	str.append(" ");
-	str.append(dynamic_cast<const RenderGraphNodeDefinition&>(node).getName(), settingColour);
+	str.append(node.getSettings()["name"].asString(""), settingColour);
 	return str.moveResults();
 }
 
 String RenderGraphNodeType::getLabel(const BaseGraphNode& node) const
 {
-	return dynamic_cast<const RenderGraphNodeDefinition&>(node).getName();
+	return node.getSettings()["name"].asString("");
 }
 
 void RenderGraphNodeType::loadMaterials(RenderGraphNodeDefinition& node, Resources& resources) const
@@ -88,18 +88,41 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::PaintNodeType::ge
 Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSettingTypes() const
 {
 	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
 		SettingType{ "cameraId", "Halley::String", Vector<String>{""} },
 		SettingType{ "paintId", "Halley::String", Vector<String>{""} },
+		SettingType{ "colourClear", "std::optional<Halley::Colour4f>", Vector<String>{""} },
+		SettingType{ "depthClear", "std::optional<float>", Vector<String>{""} },
+		SettingType{ "stencilClear", "std::optional<uint8_t>", Vector<String>{""} }
 	};
 }
 
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::PaintNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	const auto& settings = node.getSettings();
+
 	ColourStringBuilder str;
 	str.append("Paint with paintId ");
-	str.append(node.getSettings()["paintId"].asString("undefined"), settingColour);
+	str.append(settings["paintId"].asString("undefined"), settingColour);
 	str.append(" and cameraId ");
-	str.append(node.getSettings()["cameraId"].asString("undefined"), settingColour);
+	str.append(settings["cameraId"].asString("undefined"), settingColour);
+
+	if (settings.hasKey("colourClear") || settings.hasKey("depthClear") || settings.hasKey("stencilClear")) {
+		str.append("\n");
+		if (settings.hasKey("colourClear")) {
+			str.append("\nColour Clear: ");
+			str.append(settings["colourClear"].asString(), settingColour);
+		}
+		if (settings.hasKey("depthClear")) {
+			str.append("\nDepth Clear: ");
+			str.append(settings["depthClear"].asString(), settingColour);
+		}
+		if (settings.hasKey("stencilClear")) {
+			str.append("\nStencil Clear: ");
+			str.append(settings["stencilClear"].asString(), settingColour);
+		}
+	}
+
 	return str.moveResults();
 }
 
@@ -134,8 +157,12 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OverlayNodeType::
 Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::OverlayNodeType::getSettingTypes() const
 {
 	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
 		SettingType{ "material", "Halley::ResourceReference<Halley::MaterialDefinition>", Vector<String>{""} },
 		SettingType{ "variables", "Halley::HashMap<Halley::String, Halley::String>", Vector<String>{""} },
+		SettingType{ "colourClear", "std::optional<Halley::Colour4f>", Vector<String>{""} },
+		SettingType{ "depthClear", "std::optional<float>", Vector<String>{""} },
+		SettingType{ "stencilClear", "std::optional<uint8_t>", Vector<String>{""} }
 	};
 }
 
@@ -152,10 +179,27 @@ void RenderGraphNodeTypes::OverlayNodeType::loadMaterials(RenderGraphNodeDefinit
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::OverlayNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	const auto& renderGraphNode = dynamic_cast<const RenderGraphNodeDefinition&>(node);
+	const auto& settings = node.getSettings();
 
 	ColourStringBuilder str;
 	str.append("Overlay with material ");
 	str.append(renderGraphNode.getMaterial() ? renderGraphNode.getMaterial()->getName() : "<missing>", settingColour);
+
+	if (settings.hasKey("colourClear") || settings.hasKey("depthClear") || settings.hasKey("stencilClear")) {
+		str.append("\n");
+		if (settings.hasKey("colourClear")) {
+			str.append("\nColour Clear: ");
+			str.append(settings["colourClear"].asString(), settingColour);
+		}
+		if (settings.hasKey("depthClear")) {
+			str.append("\nDepth Clear: ");
+			str.append(settings["depthClear"].asString(), settingColour);
+		}
+		if (settings.hasKey("stencilClear")) {
+			str.append("\nStencil Clear: ");
+			str.append(settings["stencilClear"].asString(), settingColour);
+		}
+	}
 	return str.moveResults();
 }
 
@@ -186,6 +230,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::RenderToTextureNo
 Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::RenderToTextureNodeType::getSettingTypes() const
 {
 	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
 		SettingType{ "renderSize", "Halley::Vector2i", Vector<String>{""} },
 	};
 }
@@ -203,7 +248,9 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::OutputNodeType::g
 
 Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::OutputNodeType::getSettingTypes() const
 {
-	return {};
+	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
+	};
 }
 
 gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::ImageOutputNodeType::getPinConfiguration(const BaseGraphNode& node) const
@@ -218,5 +265,7 @@ gsl::span<const IGraphNodeType::PinType> RenderGraphNodeTypes::ImageOutputNodeTy
 
 Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::ImageOutputNodeType::getSettingTypes() const
 {
-	return {};
+	return {
+		SettingType{ "name", "Halley::String", Vector<String>{""} },
+	};
 }
