@@ -896,11 +896,11 @@ size_t String::getUTF32Len(std::string_view str)
 	return result;
 }
 
-Halley::String Halley::String::prettySize(long long bytes)
+String String::prettySize(uint64_t bytes)
 {
-	long long value = bytes;
-	long long steps = 0;
-	long long div = 1;
+	uint64_t value = bytes;
+	uint64_t steps = 0;
+	uint64_t div = 1;
 	while (steps < 5 && value > 1024) {
 		value >>= 10;
 		div <<= 10;
@@ -911,7 +911,7 @@ Halley::String Halley::String::prettySize(long long bytes)
 	return Halley::toString(double(bytes) / double(div), prec) + suffixes[steps];
 }
 
-Vector<String> Halley::String::split(char delimiter, size_t limit) const
+Vector<String> String::split(char delimiter, size_t limit) const
 {
 	Vector<String> result;
 	

@@ -168,4 +168,9 @@ Future<std::optional<Path>> OS::openFileChooser(FileChooserParameters)
 	return Future<std::optional<Path>>::makeImmediate({});
 }
 
+uint64_t OS::getMemoryUsage()
+{
+	return 0;
+}
+
 OS* OS::osInstance = nullptr;

@@ -203,6 +203,7 @@ namespace Halley {
         Vector<std::unique_ptr<IConfigDatabaseType>> dbs;
         HashMap<String, ConfigObserver> observers;
         int version = 0;
+        bool allowHotReload = true;
         static size_t nextIdx;
 
         std::optional<Vector<String>> onlyLoad;

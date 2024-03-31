@@ -42,6 +42,7 @@
 #include <fstream>
 #include <Windows.h>
 #include <shellapi.h>
+#include <psapi.h>
 
 #pragma comment(lib, "wbemuuid.lib")
 //#pragma comment(lib, "comsupp.lib")
@@ -947,6 +948,13 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 	});
 
 	return future;
+}
+
+uint64_t OSWin32::getMemoryUsage()
+{
+	PROCESS_MEMORY_COUNTERS counters;
+	GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters));
+	return counters.WorkingSetSize;
 }
 
 #endif

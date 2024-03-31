@@ -61,6 +61,8 @@ namespace Halley {
 		void openFile(const Path& path) override;
 		void showFile(const Path& path) override;
 		Future<std::optional<Path>>	openFileChooser(FileChooserParameters parameters) override;
+
+		uint64_t getMemoryUsage() override;
 		
 	private:
 		String runWMIQuery(String query, String parameter) const;

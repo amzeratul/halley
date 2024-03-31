@@ -247,7 +247,6 @@ void PerformanceStatsView::EventHistoryData::sortIfNeeded() const
 	}
 }
 
-
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
 	const bool hasVSync = api.video->hasVsync();
@@ -283,6 +282,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(" ms / ");
 	strBuilder.append(formatTime(gpuAvgTime), gpuCol);
 	strBuilder.append(" ms");
+	strBuilder.append(" | ");
+	strBuilder.append(String::prettySize(api.system->getMemoryUsage()));
 
 	if (networkStats) {
 		strBuilder.append(" | up: ");

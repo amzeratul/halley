@@ -144,7 +144,7 @@ namespace Halley {
 
 		// Number tidy up functions
 		static String prettyFloat(String src);
-		static String prettySize(long long bytes);
+		static String prettySize(uint64_t bytes);
 
 		// Unicode routines
 		StringUTF16 getUTF16() const;

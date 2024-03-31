@@ -88,6 +88,8 @@ namespace Halley {
 		virtual void showFile(const Path& path);
 		virtual Future<std::optional<Path>> openFileChooser(FileChooserParameters parameters);
 
+		virtual uint64_t getMemoryUsage();
+
 	private:
 		static OS* osInstance;
 	};

@@ -267,6 +267,11 @@ void SystemSDL::registerGlobalHotkey(KeyCode key, KeyMods mods, std::function<vo
 	globalHotkeyCallbacks.push_back(std::move(callback));
 }
 
+uint64_t SystemSDL::getMemoryUsage()
+{
+	return OS::get().getMemoryUsage();
+}
+
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
 {
 	return SDLRWOps::fromPath(path, start, end);

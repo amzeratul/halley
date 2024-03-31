@@ -55,6 +55,8 @@ namespace Halley
 		void setThreadPriority(ThreadPriority priority) override;
 
 		void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) override;
+
+		uint64_t getMemoryUsage() override;
 	
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);

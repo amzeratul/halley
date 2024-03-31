@@ -2,12 +2,22 @@
 
 #include "halley/resources/resources.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/game/game_platform.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
+namespace {
+#ifdef DEV_BUILD
+	constexpr bool doAllowHotReload = getPlatform() != GamePlatform::Switch;
+#else
+	constexpr bool doAllowHotReload = false;
+#endif
+}
+
 ConfigDatabase::ConfigDatabase(std::optional<Vector<String>> onlyLoad)
-	: onlyLoad(std::move(onlyLoad))
+	: allowHotReload(doAllowHotReload)
+	, onlyLoad(std::move(onlyLoad))
 {
 }
 
@@ -16,15 +26,18 @@ void ConfigDatabase::load(Resources& resources, const String& prefix)
 	for (const auto& configName: resources.enumerate<ConfigFile>()) {
 		if (configName.startsWith(prefix)) {
 			loadFile(*resources.get<ConfigFile>(configName));
+			if (!allowHotReload) {
+				resources.unload<ConfigFile>(configName);
+			}
 		}
 	}
 }
 
 void ConfigDatabase::loadFile(const ConfigFile& configFile)
 {
-#ifdef DEV_BUILD
-	observers[configFile.getAssetId()] = ConfigObserver(configFile);
-#endif
+	if (allowHotReload) {
+		observers[configFile.getAssetId()] = ConfigObserver(configFile);
+	}
 	loadConfig(configFile.getRoot());
 }
 
