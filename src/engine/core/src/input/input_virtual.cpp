@@ -493,7 +493,7 @@ void InputVirtual::updateLastDevice()
 	if (!lastDeviceFrozen) {
 		for (auto& buttonBinds: buttons) {
 			for (auto& bind: buttonBinds) {
-				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
+				if (bind.device && !bind.device->isManual()) {
 					if (!bind.isAxisEmulation && bind.device->isButtonPressed(bind.a)) {
 						setLastDevice(bind.device);
 						return;
@@ -503,7 +503,7 @@ void InputVirtual::updateLastDevice()
 		}
 		for (auto& axisBind: axes) {
 			for (auto& bind: axisBind.binds) {
-				if (bind.device && !std::dynamic_pointer_cast<InputManual>(bind.device)) {
+				if (bind.device && !bind.device->isManual()) {
 					if ((!bind.isAxisEmulation && fabs(bind.device->getAxis(bind.a)) > 0.1f)
 						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.a))
 						|| (bind.isAxisEmulation && bind.device->isButtonDown(bind.b))) {

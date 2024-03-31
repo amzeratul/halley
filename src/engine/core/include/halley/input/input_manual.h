@@ -44,6 +44,8 @@ namespace Halley {
 		size_t getNumberAxes() override;
 		float getAxis(int n) override;
 
+		bool isManual() const override;
+
 	private:
 		Vector<Command> commands;
 		Vector<float> axes;

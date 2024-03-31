@@ -64,6 +64,9 @@ namespace Halley {
 		Vector<char> buttonPressedRepeat;
 		Vector<char> buttonReleased;
 		Vector<char> buttonDown;
+		bool anyButtonPressed = false;
+		bool anyButtonPressedRepeat = false;
+		bool anyButtonReleased = false;
 		std::weak_ptr<InputDevice> parent;
 
 		void init(int nButtons);

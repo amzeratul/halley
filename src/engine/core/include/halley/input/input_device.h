@@ -184,6 +184,8 @@ namespace Halley {
 		virtual void setParent(const std::shared_ptr<InputDevice>& parent);
 		virtual std::shared_ptr<InputDevice> getParent() const;
 
+		virtual bool isManual() const;
+
 	private:
 		uint16_t deviceId = 0;
 	};

@@ -80,3 +80,8 @@ float Halley::InputManual::getAxis(int n)
 {
 	return axes.at(n);
 }
+
+bool Halley::InputManual::isManual() const
+{
+	return true;
+}

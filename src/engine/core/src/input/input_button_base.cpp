@@ -40,8 +40,10 @@ void InputButtonBase::init(int nButtons)
 void InputButtonBase::onButtonPressed(int code)
 {
 	buttonPressedRepeat[code] = true;
+	anyButtonPressedRepeat = true;
 	if (!buttonDown[code]) {
 		buttonPressed[code] = true;
+		anyButtonPressed = true;
 		// Note that this doesn't set released as false. It's possible to get a press and a release on the same step.
 		buttonDown[code] = true;
 	}
@@ -52,6 +54,7 @@ void InputButtonBase::onButtonReleased(int code)
 	if (buttonDown[code]) {
 		// See comment on method above
 		buttonReleased[code] = true;
+		anyButtonReleased = true;
 		buttonDown[code] = false;
 	}
 }
@@ -63,12 +66,17 @@ void InputButtonBase::onButtonStatus(int code, bool down)
 {
 	// This method should probably not be used with the two above
 	// This is designed for polled input, such as XInput controllers
-	bool wasDown = buttonDown[code] != 0;
+	const bool wasDown = buttonDown[code] != 0;
 	buttonDown[code] = down;
-	if (wasDown && !down) buttonReleased[code] = true;
+	if (wasDown && !down) {
+		buttonReleased[code] = true;
+		anyButtonReleased = true;
+	}
 	if (!wasDown && down) {
 		buttonPressed[code] = true;
 		buttonPressedRepeat[code] = true;
+		anyButtonPressed = true;
+		anyButtonPressedRepeat = true;
 	}
 }
 
@@ -90,22 +98,25 @@ void InputButtonBase::clearPresses()
 		buttonPressedRepeat[i] = 0;
 		buttonReleased[i] = 0;
 	}
+	anyButtonPressed = false;
+	anyButtonPressedRepeat = false;
+	anyButtonReleased = false;
 	onButtonsCleared();
 }
 
 bool InputButtonBase::isAnyButtonPressed()
 {
-	return std::any_of(buttonPressed.begin(), buttonPressed.end(), [] (const auto& v) { return v != 0; });
+	return anyButtonPressed;
 }
 
 bool InputButtonBase::isAnyButtonPressedRepeat()
 {
-	return std::any_of(buttonPressedRepeat.begin(), buttonPressedRepeat.end(), [] (const auto& v) { return v != 0; });
+	return anyButtonPressedRepeat;
 }
 
 bool InputButtonBase::isAnyButtonReleased()
 {
-	return std::any_of(buttonReleased.begin(), buttonReleased.end(), [] (const auto& v) { return v != 0; });
+	return anyButtonReleased;
 }
 
 bool InputButtonBase::isAnyButtonDown()

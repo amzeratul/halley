@@ -184,6 +184,11 @@ std::shared_ptr<InputDevice> InputDevice::getParent() const
 	return {};
 }
 
+bool InputDevice::isManual() const
+{
+	return false;
+}
+
 InputAxisRepeater::InputAxisRepeater(Time firstDelay, Time repeatInterval0, Time secondDelay, Time repeatInterval1)
 	: firstDelay(firstDelay)
 	, secondDelay(secondDelay)
