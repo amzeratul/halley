@@ -295,8 +295,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 		strBuilder.append("\nRAM ");
 		strBuilder.append(String::prettySize(memoryUsage.ramUsage), ramCol);
 		if (memoryUsage.ramMax) {
-			strBuilder.append(" / ");
-			strBuilder.append(String::prettySize(*memoryUsage.ramMax), ramCol);
+			//strBuilder.append(" / ");
+			//strBuilder.append(String::prettySize(*memoryUsage.ramMax), ramCol);
 			strBuilder.append(" (");
 			strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.ramUsage) / double(*memoryUsage.ramMax))), ramCol);
 			strBuilder.append("%)");
@@ -305,8 +305,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 			strBuilder.append(" | VRAM ");
 			strBuilder.append(String::prettySize(memoryUsage.vramUsage), vramCol);
 			if (memoryUsage.vramMax) {
-				strBuilder.append(" / ");
-				strBuilder.append(String::prettySize(*memoryUsage.vramMax), vramCol);
+				//strBuilder.append(" / ");
+				//strBuilder.append(String::prettySize(*memoryUsage.vramMax), vramCol);
 				strBuilder.append(" (");
 				strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.vramUsage) / double(*memoryUsage.vramMax))), vramCol);
 				strBuilder.append("%)");
