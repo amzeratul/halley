@@ -13,6 +13,7 @@
 #include <halley/data_structures/tree_map.h>
 #include "halley/support/logger.h"
 #include "halley/support/profiler.h"
+#include "halley/os/os.h"
 
 namespace Halley
 {
@@ -74,7 +75,6 @@ namespace Halley
 		int getExitCode() const { return exitCode; }
 
 		DevConClient* getDevConClient() const override;
-		
 
 	private:
 		void deInit();
@@ -142,5 +142,7 @@ namespace Halley
 		
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;
+
+		ComputerData computerData;
 	};
 }

@@ -72,6 +72,8 @@ void SystemSDL::init()
 
 	// Init clipboard
 	clipboard = OS::get().getClipboard();
+
+	computerData = OS::get().getComputerData();
 }
 
 void SystemSDL::deInit()
@@ -267,9 +269,12 @@ void SystemSDL::registerGlobalHotkey(KeyCode key, KeyMods mods, std::function<vo
 	globalHotkeyCallbacks.push_back(std::move(callback));
 }
 
-uint64_t SystemSDL::getMemoryUsage()
+SystemAPI::MemoryUsage SystemSDL::getMemoryUsage()
 {
-	return OS::get().getMemoryUsage();
+	MemoryUsage result;
+	result.ramUsage = OS::get().getMemoryUsage();
+	result.ramMax = computerData.RAM;
+	return result;
 }
 
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)

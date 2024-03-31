@@ -83,7 +83,13 @@ namespace Halley
 
 		virtual void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) {}
 
-		virtual uint64_t getMemoryUsage() { return 0; }
+		struct MemoryUsage {
+			uint64_t ramUsage = 0;
+			std::optional<uint64_t> ramMax;
+			uint64_t vramUsage = 0;
+			std::optional<uint64_t> vramMax;
+		};
+		virtual MemoryUsage getMemoryUsage() { return {}; }
 
 	private:
 		friend class HalleyAPI;

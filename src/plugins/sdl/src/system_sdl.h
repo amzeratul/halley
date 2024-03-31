@@ -56,7 +56,7 @@ namespace Halley
 
 		void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) override;
 
-		uint64_t getMemoryUsage() override;
+		MemoryUsage getMemoryUsage() override;
 	
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
@@ -74,5 +74,6 @@ namespace Halley
 		std::optional<String> saveCryptKey;
 		Vector<std::function<void()>> globalHotkeyCallbacks;
 		std::unique_ptr<ISystemMainLoopHandler> mainLoopHandler;
+		ComputerData computerData;
 	};
 }

@@ -83,7 +83,8 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	std::cout << "Data dir: " << ConsoleColour(Console::DARK_GREY) << environment->getDataPath() << ConsoleColour() << std::endl;
 
 	// Computer info
-#ifndef _DEBUG
+#ifdef DEV_BUILD
+	computerData = OS::get().getComputerData();
 	showComputerInfo();
 #endif
 
@@ -606,7 +607,6 @@ void Core::showComputerInfo() const
 	String curTime = asctime(localtime(&rawtime));
 	curTime.trim(true);
 
-	auto computerData = OS::get().getComputerData();
 	std::cout << "Computer data:" << "\n";
 	//std::cout << "\tName: " << computerData.computerName << "\n";
 	//std::cout << "\tUser: " << computerData.userName << "\n";

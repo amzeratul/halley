@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "halley/concurrency/future.h"
+#include "halley/os/os.h"
 
 namespace Halley
 {

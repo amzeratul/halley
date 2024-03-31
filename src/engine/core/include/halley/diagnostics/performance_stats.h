@@ -4,6 +4,7 @@
 
 #include "stats_view.h"
 #include "halley/api/core_api.h"
+#include "halley/api/system_api.h"
 #include "halley/net/connection/ack_unreliable_connection_stats.h"
 #include "halley/support/profiler.h"
 
@@ -104,6 +105,8 @@ namespace Halley
 		const Sprite boxBg;
 		const Sprite whitebox;
 
+		SystemAPI::MemoryUsage memoryUsage;
+		Time memoryUsageRefreshTime = 1;
 
 		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);

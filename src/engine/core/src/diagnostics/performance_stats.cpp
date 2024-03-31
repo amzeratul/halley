@@ -57,6 +57,7 @@ void PerformanceStatsView::paint(Painter& painter)
 	const auto now = std::chrono::steady_clock::now();
 	const Time t = std::min(0.2, std::chrono::duration<Time>(now - lastUpdateTime).count());
 	lastUpdateTime = now;
+	memoryUsageRefreshTime += t;
 
 	if (active) {
 		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
@@ -264,6 +265,13 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	const auto updateCol = Colour4f(0.69f, 0.75f, 0.98f);
 	const auto renderCol = Colour4f(0.98f, 0.69f, 0.69f);
 	const auto gpuCol = Colour4f(0.98f, 0.85f, 0.55f);
+	const auto ramCol = Colour4f(0.6f, 0.6f, 0.7f);
+	const auto vramCol = Colour4f(0.6f, 0.7f, 0.6f);
+
+	if (memoryUsageRefreshTime >= 1.0) {
+		memoryUsage = api.system->getMemoryUsage();
+		memoryUsageRefreshTime = 0;
+	}
 
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
@@ -282,11 +290,32 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(" ms / ");
 	strBuilder.append(formatTime(gpuAvgTime), gpuCol);
 	strBuilder.append(" ms");
-	strBuilder.append(" | ");
-	strBuilder.append(String::prettySize(api.system->getMemoryUsage()));
+
+	if (memoryUsage.ramUsage > 0) {
+		strBuilder.append("\nRAM ");
+		strBuilder.append(String::prettySize(memoryUsage.ramUsage), ramCol);
+		if (memoryUsage.ramMax) {
+			strBuilder.append(" / ");
+			strBuilder.append(String::prettySize(*memoryUsage.ramMax), ramCol);
+			strBuilder.append(" (");
+			strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.ramUsage) / double(*memoryUsage.ramMax))), ramCol);
+			strBuilder.append("%)");
+		}
+		if (memoryUsage.vramUsage > 0) {
+			strBuilder.append(" | VRAM ");
+			strBuilder.append(String::prettySize(memoryUsage.vramUsage), vramCol);
+			if (memoryUsage.vramMax) {
+				strBuilder.append(" / ");
+				strBuilder.append(String::prettySize(*memoryUsage.vramMax), vramCol);
+				strBuilder.append(" (");
+				strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.vramUsage) / double(*memoryUsage.vramMax))), vramCol);
+				strBuilder.append("%)");
+			}
+		}
+	}
 
 	if (networkStats) {
-		strBuilder.append(" | up: ");
+		strBuilder.append("\nNetwork | up: ");
 		strBuilder.append(toString(networkStats->getSentDataPerSecond() / 1000.0, 3) + " kBps");
 		strBuilder.append(" (");
 		strBuilder.append(toString(networkStats->getSentPacketsPerSecond()));

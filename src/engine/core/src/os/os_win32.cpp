@@ -231,8 +231,12 @@ void OSWin32::initializeConsole()
 
 Halley::ComputerData Halley::OSWin32::getComputerData()
 {
-	ComputerData data;
-	return data;
+	static ComputerData data;
+	static bool retrieved = false;
+
+	if (retrieved) {
+		return data;
+	}
 
 	TCHAR chrComputerName[MAX_COMPUTERNAME_LENGTH + 1];
 	DWORD dwBufferSize = MAX_COMPUTERNAME_LENGTH + 1;
@@ -245,13 +249,21 @@ Halley::ComputerData Halley::OSWin32::getComputerData()
 	String os = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "Caption");
 	String servPack = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "CSDVersion");
 	String osArch = "Unknown";
-	if (!os.contains("Windows XP") && !os.contains("2003") && !os.contains("2000")) osArch = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "OSArchitecture");
+	if (!os.contains("Windows XP") && !os.contains("2003") && !os.contains("2000")) {
+		osArch = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "OSArchitecture");
+	}
 	data.osName = os.trimBoth();
-	if (osArch != "Unknown") data.osName += " " + osArch.trimBoth();
-	if (servPack != "Unknown") data.osName += " " + servPack.trimBoth();
+	if (osArch != "Unknown") {
+		data.osName += " " + osArch.trimBoth();
+	}
+	if (servPack != "Unknown") {
+		data.osName += " " + servPack.trimBoth();
+	}
 	data.cpuName = runWMIQuery("SELECT * FROM Win32_Processor", "Name");
 	data.gpuName = runWMIQuery("SELECT * FROM Win32_DisplayConfiguration", "DeviceName");
 	data.RAM = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "TotalVisibleMemorySize").toInteger64() * 1024;
+
+	retrieved = true;
 
 	return data;
 }
