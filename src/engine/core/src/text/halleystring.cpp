@@ -52,6 +52,13 @@ String::String(const char* utf8, size_t bytes)
 	}
 }
 
+#if __cplusplus >= 202002L
+String::String(const char8_t* utf8)
+	: str(reinterpret_cast<const char*>(utf8))
+{
+}
+#endif
+
 String::String(std::string_view strView)
 	: str(strView)
 {

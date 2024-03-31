@@ -49,6 +49,9 @@ namespace Halley {
 		String();
 		String(const char* utf8);
 		String(const char* utf8, size_t bytes);
+#if __cplusplus >= 202002L
+		String(const char8_t* utf8);
+#endif
 		String(std::string_view strView);
 		String(const std::basic_string<Character>& str);
 		String(std::basic_string<Character>&& str);

@@ -13,6 +13,7 @@
 #include "enum_names.h"
 #include "halley/support/logger.h"
 #include <charconv>
+#include <cstring>
 
 namespace Halley
 {
@@ -206,6 +207,35 @@ namespace Halley
 		}
 	};
 
+#if __cplusplus >= 202002L
+	template<size_t N>
+	struct ToStringConverter<char8_t[N]>
+	{
+		String operator()(const char8_t s[N]) const
+		{
+			return String(s);
+		}
+	};
+
+	template<>
+	struct ToStringConverter<const char8_t*>
+	{
+		String operator()(const char8_t* s) const
+		{
+			return String(s);
+		}
+	};
+
+	template<>
+	struct ToStringConverter<char8_t*>
+	{
+		String operator()(char8_t* s) const
+		{
+			return String(s);
+		}
+	};
+#endif
+
 	template<size_t N>
 	struct ToStringConverter<wchar_t[N]>
 	{
@@ -387,21 +417,35 @@ namespace Halley
 
 	inline std::optional<float> stringViewToFloat(const std::string_view& input)
 	{
+		// Not available in all platforms
+		/*
 	    float out;
 	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
 	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
 	        return std::nullopt;
 	    }
 	    return out;
+	    */
+
+		std::array<char, 16> buffer;
+		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
+		return static_cast<float>(std::atof(buffer.data()));
 	}
 
 	inline std::optional<double> stringViewToDouble(const std::string_view& input)
 	{
+		// Not available in all platforms
+		/*
 	    double out;
 	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
 	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
 	        return std::nullopt;
 	    }
 	    return out;
+	    */
+
+		std::array<char, 16> buffer;
+		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
+		return std::atof(buffer.data());
 	}
 }
