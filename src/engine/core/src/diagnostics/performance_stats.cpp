@@ -654,7 +654,7 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 			.draw(painter);
 	};
 
-	const std::array<float, 3> xPos = { 0, 310, 360 };
+	const std::array<float, 3> xPos = { 0, 410, 460 };
 	const float barDrawX = xPos[2];
 	const int64_t granularity = 500'000;
 	int64_t maxTime = granularity;
