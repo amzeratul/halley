@@ -160,7 +160,7 @@ void Texture::setAlphaMask(std::unique_ptr<ImageMask> mask)
 
 bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
 {
-	if (mask) {
+	if (descriptor.retainPixelData) {
 		const auto* img = descriptor.pixelData.getImage();
 
 		if (img) {
