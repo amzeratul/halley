@@ -2,6 +2,7 @@
 
 #include "halley/resources/resource.h"
 #include "halley/maths/vector2.h"
+#include "halley/file_formats/image_mask.h"
 #include "texture_descriptor.h"
 #include <memory>
 
@@ -18,10 +19,6 @@ namespace Halley
 
 		void load(TextureDescriptor descriptor);
 
-		std::optional<uint32_t> getPixel(Vector2f texPos) const;
-		std::optional<uint32_t> getPixel(Vector2i pixelPos) const;
-		bool hasOpaquePixels(Rect4i pixelBounds) const;
-
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Texture; }
 
@@ -36,9 +33,13 @@ namespace Halley
 
 		ResourceMemoryUsage getMemoryUsage() const final override;
 
+		void setAlphaMask(std::unique_ptr<ImageMask> mask);
+		bool hasOpaquePixels(Rect4i pixelBounds) const;
+
 	protected:
 		Vector2i size;
 		TextureDescriptor descriptor;
+		std::unique_ptr<ImageMask> mask;
 
 		virtual void doLoad(TextureDescriptor& descriptor);
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;

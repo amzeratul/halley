@@ -24,69 +24,6 @@ void Texture::load(TextureDescriptor desc)
 	}
 }
 
-std::optional<uint32_t> Texture::getPixel(Vector2f texPos) const
-{
-	const auto pixelPos = Vector2i((texPos * Vector2f(size)).floor());
-	return getPixel(pixelPos);
-}
-
-std::optional<uint32_t> Texture::getPixel(Vector2i pos) const
-{
-	if (descriptor.retainPixelData) {
-		const auto* img = descriptor.pixelData.getImage();
-		pos = Vector2i::max(Vector2i(), Vector2i::min(size - Vector2i(1, 1), pos)); // Clamp mode
-		
-		if (img) {
-			if (img->getFormat() == Image::Format::RGBA || img->getFormat() == Image::Format::RGBAPremultiplied) {
-				return img->getPixel4BPP(pos);
-			}
-		}
-	}
-
-	return {};
-}
-
-bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
-{
-	if (descriptor.retainPixelData) {
-		const auto* img = descriptor.pixelData.getImage();
-
-		if (img) {
-			const auto w = img->getWidth();
-			const auto h = img->getHeight();
-			const auto rect = pixelBounds.intersection(Rect4i(Vector2i(), Vector2i(w - 1, h - 1)));
-
-			if (img->getFormat() == Image::Format::RGBA || img->getFormat() == Image::Format::RGBAPremultiplied) {
-				auto pxs = img->getPixels4BPP();
-
-				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
-					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
-						const auto px = pxs[x + y * w];
-						const auto alpha = (px >> 24) & 0xFF;
-						if (alpha > 0) {
-							return true;
-						}
-					}
-				}
-			} else if (img->getFormat() == Image::Format::SingleChannel || img->getFormat() == Image::Format::Indexed) {
-				auto pxs = img->getPixels1BPP();
-
-				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
-					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
-						const auto px = pxs[x + y * w];
-						// Assume px 0 = transparent
-						if (px > 0) {
-							return true;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return false;
-}
-
 void Texture::copyToTexture(Painter& painter, Texture& other) const
 {
 	if (getSize() != other.getSize()) {
@@ -205,4 +142,50 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	});
 
 	return texture;
+}
+
+void Texture::setAlphaMask(std::unique_ptr<ImageMask> mask)
+{
+	this->mask = std::move(mask);
+}
+
+bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
+{
+	if (mask) {
+		const auto* img = descriptor.pixelData.getImage();
+
+		if (img) {
+			const auto w = img->getWidth();
+			const auto h = img->getHeight();
+			const auto rect = pixelBounds.intersection(Rect4i(Vector2i(), Vector2i(w - 1, h - 1)));
+
+			if (img->getFormat() == Image::Format::RGBA || img->getFormat() == Image::Format::RGBAPremultiplied) {
+				auto pxs = img->getPixels4BPP();
+
+				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
+					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
+						const auto px = pxs[x + y * w];
+						const auto alpha = (px >> 24) & 0xFF;
+						if (alpha > 0) {
+							return true;
+						}
+					}
+				}
+			} else if (img->getFormat() == Image::Format::SingleChannel || img->getFormat() == Image::Format::Indexed) {
+				auto pxs = img->getPixels1BPP();
+
+				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
+					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
+						const auto px = pxs[x + y * w];
+						// Assume px 0 = transparent
+						if (px > 0) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return false;
 }
