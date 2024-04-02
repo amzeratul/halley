@@ -32,8 +32,6 @@ namespace Halley
 		void copyToImage(Painter& painter, Image& image) const;
 		std::unique_ptr<Image> makeImage(Painter& painter) const;
 
-		const Image* tryGetOriginalImage() const;
-
 		virtual void generateMipMaps();
 
 		ResourceMemoryUsage getMemoryUsage() const final override;
