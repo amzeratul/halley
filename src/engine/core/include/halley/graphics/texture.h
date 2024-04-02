@@ -35,13 +35,13 @@ namespace Halley
 
 		ResourceMemoryUsage getMemoryUsage() const final override;
 
-		void setAlphaMask(std::unique_ptr<ImageMask> mask);
+		void setAlphaMask(ImageMask mask);
 		bool hasOpaquePixels(Rect4i pixelBounds) const;
 
 	protected:
 		Vector2i size;
 		TextureDescriptor descriptor;
-		std::unique_ptr<ImageMask> mask;
+		ImageMask mask;
 
 		virtual void doLoad(TextureDescriptor& descriptor);
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;

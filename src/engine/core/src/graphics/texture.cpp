@@ -103,17 +103,23 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	bool retain = loader.getResources().getOptions().retainPixelData;
 
 	loader.getAsync(true)
-	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
+	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
 	{
 		auto& meta = texture->getMeta();
 		if (const auto& compression = meta.getString("compression"); compression == "png" || compression == "qoi" || compression == "hlif") {
-			return TextureDescriptorImageData(std::make_unique<Image>(*data, meta));
+			auto image = std::make_unique<Image>(*data, meta);
+			auto alphaMask = ImageMask::fromAlpha(*image);
+			return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
 		} else {
-			return TextureDescriptorImageData(data->getSpan());
+			ImageMask alphaMask; // TODO
+			return { TextureDescriptorImageData(data->getSpan()), std::move(alphaMask) };
+
 		}
 	})
-	.then(Executors::getVideoAux(), [texture, retain](TextureDescriptorImageData img)
+	.then(Executors::getVideoAux(), [texture, retain](std::pair<TextureDescriptorImageData, ImageMask> imgPair)
 	{
+		auto& img = imgPair.first;
+		auto& alphaMask = imgPair.second;
 		auto& meta = texture->getMeta();
 
 		const auto imgFormat = fromString<Image::Format>(meta.getString("format", "rgba"));
@@ -148,50 +154,25 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.pixelFormat = compression == "png" || compression == "qoi" || compression == "hlif" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
 		descriptor.retainPixelData = retain;
 		texture->load(std::move(descriptor));
+		texture->setAlphaMask(std::move(alphaMask));
 	});
 
 	return texture;
 }
 
-void Texture::setAlphaMask(std::unique_ptr<ImageMask> mask)
+void Texture::setAlphaMask(ImageMask mask)
 {
 	this->mask = std::move(mask);
 }
 
 bool Texture::hasOpaquePixels(Rect4i pixelBounds) const
 {
-	if (descriptor.retainPixelData) {
-		const auto* img = descriptor.pixelData.getImage();
+	if (mask.getSize() != Vector2i()) {
+		const auto rect = pixelBounds.grow(0, 0, 1, 1).intersection(mask.getRect());
 
-		if (img) {
-			const auto w = img->getWidth();
-			const auto h = img->getHeight();
-			const auto rect = pixelBounds.intersection(Rect4i(Vector2i(), Vector2i(w - 1, h - 1)));
-
-			if (img->getFormat() == Image::Format::RGBA || img->getFormat() == Image::Format::RGBAPremultiplied) {
-				auto pxs = img->getPixels4BPP();
-
-				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
-					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
-						const auto px = pxs[x + y * w];
-						const auto alpha = (px >> 24) & 0xFF;
-						if (alpha > 0) {
-							return true;
-						}
-					}
-				}
-			} else if (img->getFormat() == Image::Format::SingleChannel || img->getFormat() == Image::Format::Indexed) {
-				auto pxs = img->getPixels1BPP();
-
-				for (int y = rect.getTop(); y <= rect.getBottom(); ++y) {
-					for (int x = rect.getLeft(); x <= rect.getRight(); ++x) {
-						const auto px = pxs[x + y * w];
-						// Assume px 0 = transparent
-						if (px > 0) {
-							return true;
-						}
-					}
-				}
+		for (const auto pos: rect) {
+			if (mask.isSet(pos)) {
+				return true;
 			}
 		}
 	}
