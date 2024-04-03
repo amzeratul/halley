@@ -392,7 +392,7 @@ bool Path::writeFile(const Path& path, const String& data)
 
 bool Path::exists(const Path& path)
 {
-#ifndef	_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY
+#if !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY) && !defined(__NX_TOOLCHAIN_MAJOR__)
 	std::error_code ec;
 	return std::filesystem::exists(path.string(), ec);
 #else
