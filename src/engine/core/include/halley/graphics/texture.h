@@ -12,6 +12,15 @@ namespace Halley
 	class TextureDescriptor;
 	class ResourceLoader;
 
+	class ImageDataAndMask {
+	public:
+		Bytes imageData;
+		ImageMask mask;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
 	class Texture : public AsyncResource
 	{
 	public:

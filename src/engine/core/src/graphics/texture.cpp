@@ -6,8 +6,21 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/game/game_platform.h"
 #include "halley/support/logger.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
+
+void ImageDataAndMask::serialize(Serializer& s) const
+{
+	s << imageData;
+	s << mask;
+}
+
+void ImageDataAndMask::deserialize(Deserializer& s)
+{
+	s >> imageData;
+	s >> mask;
+}
 
 Texture::Texture(Vector2i size)
 	: size(size)
@@ -106,14 +119,26 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
 	{
 		auto& meta = texture->getMeta();
-		if (const auto& compression = meta.getString("compression"); compression == "png" || compression == "qoi" || compression == "hlif") {
-			auto image = std::make_unique<Image>(*data, meta);
-			auto alphaMask = ImageMask::fromAlpha(*image);
+		const auto& compression = meta.getString("compression");
+
+		Bytes imageBytes;
+		ImageMask alphaMask;
+		if (meta.getBool("withMask", false)) {
+			const auto options = SerializerOptions(SerializerOptions::maxVersion);
+			auto imageDataAndMask = Deserializer::fromBytes<ImageDataAndMask>(data->getSpan(), options);
+			imageBytes = std::move(imageDataAndMask.imageData);
+			alphaMask = std::move(imageDataAndMask.mask);
+		}
+
+		gsl::span<const gsl::byte> imageData = imageBytes.empty() ? data->getSpan() : imageBytes.byte_span();
+
+		if (compression == "png" || compression == "qoi" || compression == "hlif") {
+			const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
+			auto image = std::make_unique<Image>(imageData, format);
+			alphaMask = ImageMask::fromAlpha(*image);
 			return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
 		} else {
-			ImageMask alphaMask; // TODO
-			return { TextureDescriptorImageData(data->getSpan()), std::move(alphaMask) };
-
+			return { TextureDescriptorImageData(imageData), std::move(alphaMask) };
 		}
 	})
 	.then(Executors::getVideoAux(), [texture, retain](std::pair<TextureDescriptorImageData, ImageMask> imgPair)

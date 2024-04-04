@@ -4,6 +4,8 @@
 
 namespace Halley {
 	class Image;
+    class Serializer;
+    class Deserializer;
 
 	class ImageMask {
     public:
@@ -17,6 +19,9 @@ namespace Halley {
 
         Vector2i getSize() const;
         Rect4i getRect() const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 	private:
         Vector2i size;

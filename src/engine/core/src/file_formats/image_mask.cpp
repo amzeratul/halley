@@ -1,5 +1,7 @@
 #include "halley/file_formats/image_mask.h"
 #include "halley/file_formats/image.h"
+#include "halley/bytes/byte_serializer.h"
+#include "halley/bytes/compression.h"
 
 using namespace Halley;
 
@@ -73,4 +75,24 @@ Vector2i ImageMask::getSize() const
 Rect4i ImageMask::getRect() const
 {
 	return Rect4i({}, size);
+}
+
+void ImageMask::serialize(Serializer& s) const
+{
+	s << size;
+	s << values;
+	//Compression::LZ4Options options;
+	//const auto result = Compression::lz4Compress(values.byte_span(), options);
+	//s << result;
+}
+
+void ImageMask::deserialize(Deserializer& s)
+{
+	s >> size;
+	s >> values;
+
+	//values.resize(alignUp(size.x * size.y, 8) / 8);
+	//Bytes compressed;
+	//s >> compressed;
+	//Compression::lz4Decompress(compressed, values.span());
 }
