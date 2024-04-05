@@ -65,7 +65,8 @@ namespace Halley {
 		uint64_t getMemoryUsage() override;
 		
 	private:
-		String runWMIQuery(String query, String parameter) const;
+		String runWMIQuery(std::string_view query, const String& parameter) const;
+		Vector<String> runWMIQuery(std::string_view query, gsl::span<const String> parameters) const;
 		void loadWindowIcon(HWND hwnd);
 
 	private:

@@ -55,7 +55,7 @@
 
 using namespace Halley;
 
-Halley::OSWin32::OSWin32()
+OSWin32::OSWin32()
 	: pLoc(nullptr)
 	, pSvc(nullptr)
 {
@@ -95,7 +95,7 @@ Halley::OSWin32::OSWin32()
 	icon = ::LoadIcon(handle, "IDI_MAIN_ICON");
 }
 
-Halley::OSWin32::~OSWin32()
+OSWin32::~OSWin32()
 {
 	if (pSvc) {
 		pSvc->Release();
@@ -115,8 +115,16 @@ static String getCOMError(int hr)
 	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ toString(hr, 16);
 }
 
-Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) const
+String OSWin32::runWMIQuery(std::string_view query, const String& parameter) const
 {
+	return runWMIQuery(query, gsl::span<const String>(&parameter, 1)).at(0);
+}
+
+Vector<String> OSWin32::runWMIQuery(std::string_view query, gsl::span<const String> parameters) const
+{
+	Vector<String> results;
+	results.resize(parameters.size());
+
 	// See:
 	// http://www.codeproject.com/KB/system/UsingWMI.aspx
 	// http://www.codeproject.com/KB/system/Using_WMI_in_Visual_C__.aspx
@@ -126,24 +134,33 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 			HRESULT hr;
 			CComPtr<IEnumWbemClassObject> enumerator;
 			BSTR lang = CComBSTR(L"WQL");
-			BSTR q = CComBSTR(query.c_str());
+			BSTR q = CComBSTR(query.data());
 			hr = pSvc->ExecQuery(lang, q, WBEM_FLAG_FORWARD_ONLY, nullptr, &enumerator);
-			if (FAILED(hr)) throw Exception("Error running WMI query: "+getCOMError(hr), HalleyExceptions::OS);
+			if (FAILED(hr)) {
+				throw Exception("Error running WMI query: " + getCOMError(hr), HalleyExceptions::OS);
+			}
 
 			ULONG retcnt;
 			CComPtr<IWbemClassObject> result;
 			hr = enumerator->Next(WBEM_INFINITE, 1L, &result, &retcnt);
-			if (retcnt == 0) return "Unknown";
-			if (FAILED(hr)) throw Exception("Error obtaining WMI enumeration", HalleyExceptions::OS);
+			if (retcnt == 0) {
+				return results;
+			}
+			if (FAILED(hr)) {
+				throw Exception("Error obtaining WMI enumeration", HalleyExceptions::OS);
+			}
 
-			_variant_t var_val;
-			hr = result->Get(parameter.getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
-			if (FAILED(hr)) throw Exception("Error retrieving name from WMI query result", HalleyExceptions::OS);
+			for (size_t i = 0; i < parameters.size(); ++i) {
+				_variant_t var_val;
+				hr = result->Get(parameters[i].getUTF16().c_str(), 0, &var_val, nullptr, nullptr);
 
-			if (var_val.vt == VT_NULL) {
-				return "";
-			} else {
-				return String(static_cast<const char*>(_bstr_t(var_val)));
+				if (FAILED(hr)) {
+					throw Exception("Error retrieving name from WMI query result", HalleyExceptions::OS);
+				}
+				if (var_val.vt != VT_NULL) {
+					results[i] = String(static_cast<const char*>(_bstr_t(var_val)));
+					results[i].trimBoth();
+				}
 			}
 		} catch (std::exception& e) {
 			std::cout << "Exception running WMI query: " << e.what() << std::endl;
@@ -151,7 +168,7 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 			std::cout << "Unknown exception running WMI query." << std::endl;
 		}
 	}
-	return "Unknown";
+	return results;
 }
 
 
@@ -229,7 +246,7 @@ void OSWin32::initializeConsole()
 	std::cin.clear();
 }
 
-Halley::ComputerData Halley::OSWin32::getComputerData()
+ComputerData OSWin32::getComputerData()
 {
 	static ComputerData data;
 	static bool retrieved = false;
@@ -246,29 +263,29 @@ Halley::ComputerData Halley::OSWin32::getComputerData()
 	DWORD dwBufferSize2 = UNLEN + 1;
 	if (GetUserName(name, &dwBufferSize2)) data.userName = String(name);
 
-	String os = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "Caption");
-	String servPack = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "CSDVersion");
-	String osArch = "Unknown";
-	if (!os.contains("Windows XP") && !os.contains("2003") && !os.contains("2000")) {
-		osArch = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "OSArchitecture");
+	auto osInfo = runWMIQuery("SELECT * FROM Win32_OperatingSystem", std::array<String, 4>({ "Caption", "CSDVersion", "OSArchitecture", "TotalVisibleMemorySize" }));
+
+	String servPack = osInfo[1];
+	data.osName = osInfo[0];
+	if (data.osName.contains("Windows XP") || data.osName.contains("2003") || data.osName.contains("2000")) {
+		throw Exception("Windows 7 or later is required to run this game.", HalleyExceptions::OS);
 	}
-	data.osName = os.trimBoth();
-	if (osArch != "Unknown") {
-		data.osName += " " + osArch.trimBoth();
+	if (!osInfo[2].isEmpty()) {
+		data.osName += " " + osInfo[2];
 	}
-	if (servPack != "Unknown") {
-		data.osName += " " + servPack.trimBoth();
+	if (!osInfo[1].isEmpty()) {
+		data.osName += " " + osInfo[1];
 	}
 	data.cpuName = runWMIQuery("SELECT * FROM Win32_Processor", "Name");
 	data.gpuName = runWMIQuery("SELECT * FROM Win32_DisplayConfiguration", "DeviceName");
-	data.RAM = runWMIQuery("SELECT * FROM Win32_OperatingSystem", "TotalVisibleMemorySize").toInteger64() * 1024;
+	data.RAM = osInfo[3].toInteger64() * 1024;
 
 	retrieved = true;
 
 	return data;
 }
 
-Halley::String Halley::OSWin32::getUserDataDir()
+String OSWin32::getUserDataDir()
 {
 	PWSTR path;
 	auto hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
@@ -315,7 +332,7 @@ Path OSWin32::parseProgramPath(const String& path)
 	}
 }
 
-void Halley::OSWin32::setConsoleColor(int foreground, int background)
+void OSWin32::setConsoleColor(int foreground, int background)
 {
 	if (foreground == -1) {
 		foreground = 7;
