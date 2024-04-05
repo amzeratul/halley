@@ -128,6 +128,25 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 	}
 }
 
+size_t MaterialAttribute::getAttributeAlignment(ShaderParameterType type)
+{
+	switch (type) {
+		case ShaderParameterType::Float: return 4;
+		case ShaderParameterType::Float2: return 8;
+		case ShaderParameterType::Float3: return 16;
+		case ShaderParameterType::Float4: return 16;
+		case ShaderParameterType::Int: return 4;
+		case ShaderParameterType::Int2: return 8;
+		case ShaderParameterType::Int3: return 16;
+		case ShaderParameterType::Int4: return 16;
+		case ShaderParameterType::Matrix2: return 16;
+		case ShaderParameterType::Matrix3: return 16;
+		case ShaderParameterType::Matrix4: return 16;
+		case ShaderParameterType::UInt: return 4;
+		default: throw Exception("Unknown type: " + toString(int(type)), HalleyExceptions::Resources);
+	}
+}
+
 MaterialTexture::MaterialTexture()
 {}
 
@@ -230,8 +249,11 @@ void MaterialDefinition::initialize(VideoAPI& video)
 
 		size_t curOffset = 0;
 		for (auto& uniform: uniformBlock.uniforms) {
-			auto size = MaterialAttribute::getAttributeSize(uniform.type);
-			curOffset = alignUp(curOffset, std::min(static_cast<size_t>(16), size));
+			const auto size = MaterialAttribute::getAttributeSize(uniform.type);
+			const auto alignment = MaterialAttribute::getAttributeAlignment(uniform.type);
+
+			curOffset = alignUp(curOffset, alignment);
+
 			uniform.blockNumber = blockNumber;
 			if (uniform.predefinedOffset) {
 				curOffset = uniform.offset;

@@ -177,6 +177,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 		static size_t getAttributeSize(ShaderParameterType type);
+		static size_t getAttributeAlignment(ShaderParameterType type);
 	};
 
 	class MaterialDefinition;
