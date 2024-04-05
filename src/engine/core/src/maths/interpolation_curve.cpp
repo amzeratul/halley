@@ -117,6 +117,16 @@ float InterpolationCurve::evaluateRaw(float val) const
 	return points.back().y;
 }
 
+bool InterpolationCurve::isTrivial() const
+{
+	for (const auto& p: points) {
+		if (p.y != 1.0f) {
+			return false;
+		}
+	}
+	return true;
+}
+
 PrecomputedInterpolationCurve::PrecomputedInterpolationCurve(const InterpolationCurve& src)
 	: scale(src.scale)
 {

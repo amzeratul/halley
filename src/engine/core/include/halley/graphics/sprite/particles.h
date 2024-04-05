@@ -170,6 +170,7 @@ namespace Halley {
 		void start();
 		void initializeParticle(size_t index, float time, float totalTime);
 		void updateParticles(float t);
+		void removeDeadParticles();
 		void spawn(size_t n, float time);
 
 		Vector3f getSpawnPosition() const;

@@ -31,7 +31,9 @@ namespace Halley {
 
         float evaluate(float t) const;
         float evaluateRaw(float t) const;
-    };
+
+		bool isTrivial() const;
+	};
 
     class PrecomputedInterpolationCurve {
     public:

@@ -187,3 +187,13 @@ void ColourGradient::add(Colour4f col, float position)
 	positions.push_back(position);
 	dirty = true;
 }
+
+bool ColourGradient::isTrivial() const
+{
+	for (const auto& c: colours) {
+		if (c != Colour4f(1, 1, 1, 1)) {
+			return false;
+		}
+	}
+	return true;
+}

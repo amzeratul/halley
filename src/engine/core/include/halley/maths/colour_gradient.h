@@ -37,6 +37,8 @@ namespace Halley {
 		void clear();
 		void add(Colour4f col, float position);
 
+		bool isTrivial() const;
+
     private:
 		constexpr static int precomputedSize = 128;
 

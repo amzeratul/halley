@@ -327,28 +327,6 @@ void Particles::update(Time t)
 	// Update particles
 	updateParticles(static_cast<float>(t));
 
-	// Remove dead particles
-	for (size_t i = 0; i < nParticlesAlive; ) {
-		if (!particles[i].alive) {
-			if (onDeath) {
-				onSecondarySpawn(particles[i], onDeath);
-			}
-
-			if (i != nParticlesAlive - 1) {
-				// Swap with last particle that's alive
-				std::swap(particles[i], particles[nParticlesAlive - 1]);
-				std::swap(sprites[i], sprites[nParticlesAlive - 1]);
-				if (isAnimated()) {
-					std::swap(animationPlayers[i], animationPlayers[nParticlesAlive - 1]);
-				}
-			}
-			--nParticlesAlive;
-			// Don't increment i here, since i is now a new particle that's still alive
-		} else {
-			++i;
-		}
-	}
-
 	// Update visibility
 	nParticlesVisible = nParticlesAlive;
 	if (nParticlesVisible > 0 && !sprites[0].hasMaterial()) {
@@ -514,19 +492,83 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 
 void Particles::updateParticles(float time)
 {
-	const bool hasAnim = isAnimated();
-	
-	for (size_t i = 0; i < nParticlesAlive; ++i) {
-		if (hasAnim) {
-			animationPlayers[i].update(time, sprites[i]);
-		}
-		
-		auto& particle = particles[i];
+	if (true) {
+		const bool hasAnim = isAnimated();
+		for (size_t i = 0; i < nParticlesAlive; ++i) {
+			if (hasAnim) {
+				animationPlayers[i].update(time, sprites[i]);
+			}
 
-		particle.time += time;
-		if (particle.time >= particle.ttl) {
-			particle.alive = false;
-		} else {
+			auto& particle = particles[i];
+
+			particle.time += time;
+			if (particle.time >= particle.ttl) {
+				particle.alive = false;
+			}
+			else {
+				const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
+				const auto a = stopped ? Vector3f() : acceleration;
+				if (particle.firstFrame) {
+					particle.firstFrame = false;
+				}
+				else {
+					particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
+					particle.vel += a * time;
+				}
+
+				if (minHeight && particle.pos.z < minHeight) {
+					particle.alive = false;
+				}
+
+				if (stopped) {
+					particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
+				}
+
+				if (speedDamp > 0.0001f) {
+					particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
+				}
+
+				if (directionScatter > 0.00001f) {
+					particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
+				}
+
+				if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
+					particle.angle = particle.vel.xy().angle();
+				}
+
+				const float t = particle.time / particle.ttl;
+
+				sprites[i]
+					.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
+					.setRotation(particle.angle)
+					.setScale(scaleCurve.evaluate(t) * particle.scale)
+					.setColour(colourGradient.evaluatePrecomputed(t))
+					.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
+			}
+		}
+
+		removeDeadParticles();
+	} else {
+		// TLL and life
+		for (size_t i = 0; i < nParticlesAlive; ++i) {
+			auto& particle = particles[i];
+
+			particle.time += time;
+			if (particle.time >= particle.ttl) {
+				particle.alive = false;
+			}
+		}
+		removeDeadParticles();
+
+		// Animation
+		if (isAnimated()) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				animationPlayers[i].update(time, sprites[i]);
+			}
+		}
+
+		for (size_t i = 0; i < nParticlesAlive; ++i) {
+			auto& particle = particles[i];
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 			const auto a = stopped ? Vector3f() : acceleration;
 			if (particle.firstFrame) {
@@ -536,34 +578,94 @@ void Particles::updateParticles(float time)
 				particle.vel += a * time;
 			}
 
-			if (minHeight && particle.pos.z < minHeight) {
-				particle.alive = false;
-			}
-			
 			if (stopped) {
 				particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
 			}
-			
-			if (speedDamp > 0.0001f) {
+		}
+
+		if (minHeight) {
+			bool anyRemoved = false;
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
+				if (particle.pos.z < minHeight) {
+					particle.alive = false;
+					anyRemoved = true;
+				}
+			}
+			if (anyRemoved) {
+				removeDeadParticles();
+			}
+		}
+
+		if (speedDamp > 0.0001f) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
 				particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
 			}
+		}
 
-			if (directionScatter > 0.00001f) {
+		if (directionScatter > 0.00001f) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
 				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
 			}
+		}
 
-			if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
-				particle.angle = particle.vel.xy().angle();
-			}
-
-			const float t = particle.time / particle.ttl;
-
+		for (size_t i = 0; i < nParticlesAlive; ++i) {
+			auto& particle = particles[i];
 			sprites[i]
 				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
-				.setRotation(particle.angle)
-				.setScale(scaleCurve.evaluate(t) * particle.scale)
-				.setColour(colourGradient.evaluatePrecomputed(t))
 				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
+		}
+
+		if (rotateTowardsMovement) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
+				if (particle.vel.squaredLength() > 0.001f) {
+					particle.angle = particle.vel.xy().angle();
+				}
+				sprites[i].setRotation(particle.angle);
+			}
+		}
+
+		if (!scaleCurve.isTrivial()) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
+				const float t = particle.time / particle.ttl;
+				sprites[i].setScale(scaleCurve.evaluate(t) * particle.scale);
+			}
+		}
+
+		if (!colourGradient.isTrivial()) {
+			for (size_t i = 0; i < nParticlesAlive; ++i) {
+				auto& particle = particles[i];
+				const float t = particle.time / particle.ttl;
+				sprites[i].setColour(colourGradient.evaluatePrecomputed(t));
+			}
+		}
+	}
+}
+
+void Particles::removeDeadParticles()
+{
+	for (size_t i = 0; i < nParticlesAlive; ) {
+		if (!particles[i].alive) {
+			if (onDeath) {
+				onSecondarySpawn(particles[i], onDeath);
+			}
+
+			if (i != nParticlesAlive - 1) {
+				// Swap with last particle that's alive
+				std::swap(particles[i], particles[nParticlesAlive - 1]);
+				std::swap(sprites[i], sprites[nParticlesAlive - 1]);
+				if (isAnimated()) {
+					std::swap(animationPlayers[i], animationPlayers[nParticlesAlive - 1]);
+				}
+			}
+			--nParticlesAlive;
+			// Don't increment i here, since i is now a new particle that's still alive
+		} else {
+			++i;
 		}
 	}
 }
