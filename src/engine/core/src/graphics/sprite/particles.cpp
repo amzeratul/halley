@@ -519,7 +519,7 @@ void Particles::updateSprites(Time t)
 
 		Angle1f angle;
 		if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
-			angle = particle.vel.xy().angle();
+			angle = (particle.vel.xy() + Vector2f(0, particle.vel.z)).angle();
 		}
 
 		const float t = particle.time / particle.ttl;
@@ -586,7 +586,6 @@ std::optional<Rect4f> Particles::getAABB() const
 	Vector2f minPos = particles[0].pos.xy() + Vector2f(0, -particles[0].pos.z);
 	Vector2f maxPos = minPos;
 
-	auto aabb = Rect4f(particles[0].pos.xy(), particles[0].pos.xy());
 	for (size_t i = 1; i < nParticlesAlive; ++i) {
 		const auto p = particles[i].pos.xy() + Vector2f(0, -particles[i].pos.z);
 		minPos = Vector2f::min(minPos, p);
@@ -597,7 +596,7 @@ std::optional<Rect4f> Particles::getAABB() const
 		computeMaxBorder();
 	}
 
-	return aabb.grow(*maxBorder);
+	return Rect4f(minPos, maxPos).grow(*maxBorder);
 }
 
 float Particles::getSpriteBorder(const Sprite& sprite) const

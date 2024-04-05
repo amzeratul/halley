@@ -886,6 +886,69 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 	}
 }
 
+void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
+{
+	if (this == &other) {
+		return;
+	}
+
+	material = other.material;
+
+	size = other.size;
+	visible = other.visible;
+	flip = other.flip;
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	sliced = other.sliced;
+	rotated = other.rotated;
+	sliceScale = other.sliceScale;
+	vertexAttrib = other.vertexAttrib;
+	slices = other.slices;
+	outerBorder = other.outerBorder;
+	clip = other.clip;
+
+#ifdef ENABLE_HOT_RELOAD
+	lastAppliedPivot = other.lastAppliedPivot;
+	if (enableHotReload) {
+		setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	} else {
+		setHotReload(nullptr, 0);
+	}
+#endif
+}
+
+void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
+{
+	if (this == &other) {
+		return;
+	}
+
+	material = std::move(other.material);
+
+	size = other.size;
+	visible = other.visible;
+	flip = other.flip;
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	sliced = other.sliced;
+	rotated = other.rotated;
+	sliceScale = other.sliceScale;
+	vertexAttrib = other.vertexAttrib;
+	slices = other.slices;
+	outerBorder = other.outerBorder;
+	clip = other.clip;
+
+#ifdef ENABLE_HOT_RELOAD
+	lastAppliedPivot = other.lastAppliedPivot;
+	if (enableHotReload) {
+		setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	} else {
+		setHotReload(nullptr, 0);
+	}
+	other.setHotReload(nullptr, 0);
+#endif
+}
+
 
 #ifdef ENABLE_HOT_RELOAD
 Sprite::~Sprite()
@@ -949,69 +1012,6 @@ Sprite::Sprite(Sprite&& other) noexcept
 Sprite::Sprite(Sprite&& other, bool enableHotReload) noexcept
 {
 	moveFrom(std::move(other), enableHotReload);
-}
-
-void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
-{
-	if (this == &other) {
-		return;
-	}
-
-	material = other.material;
-
-	size = other.size;
-	visible = other.visible;
-	flip = other.flip;
-	hasClip = other.hasClip;
-	absoluteClip = other.absoluteClip;
-	sliced = other.sliced;
-	rotated = other.rotated;
-	sliceScale = other.sliceScale;
-	vertexAttrib = other.vertexAttrib;
-	slices = other.slices;
-	outerBorder = other.outerBorder;
-	clip = other.clip;
-
-#ifdef ENABLE_HOT_RELOAD
-	lastAppliedPivot = other.lastAppliedPivot;
-	if (enableHotReload) {
-		setHotReload(other.hotReloadRef, other.hotReloadIdx);
-	} else {
-		setHotReload(nullptr, 0);
-	}
-#endif
-}
-
-void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
-{
-	if (this == &other) {
-		return;
-	}
-
-	material = std::move(other.material);
-
-	size = other.size;
-	visible = other.visible;
-	flip = other.flip;
-	hasClip = other.hasClip;
-	absoluteClip = other.absoluteClip;
-	sliced = other.sliced;
-	rotated = other.rotated;
-	sliceScale = other.sliceScale;
-	vertexAttrib = other.vertexAttrib;
-	slices = other.slices;
-	outerBorder = other.outerBorder;
-	clip = other.clip;
-
-#ifdef ENABLE_HOT_RELOAD
-	lastAppliedPivot = other.lastAppliedPivot;
-	if (enableHotReload) {
-		setHotReload(other.hotReloadRef, other.hotReloadIdx);
-	} else {
-		setHotReload(nullptr, 0);
-	}
-	other.setHotReload(nullptr, 0);
-#endif
 }
 
 Sprite& Sprite::operator=(const Sprite& other)
