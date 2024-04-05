@@ -272,6 +272,6 @@ ConfigNode ScriptColourGradient::doGetData(ScriptEnvironment& environment, const
 {
 	const auto samplePos = clamp(readDataPin(environment, node, 0).asFloat(), 0.0f, 1.0f);
 	const auto gradient = ColourGradient(node.getSettings()["gradient"]);
-	return gradient.evaluate(samplePos).toConfigNode();
+	return gradient.evaluatePrecomputed(samplePos).toConfigNode();
 }
 

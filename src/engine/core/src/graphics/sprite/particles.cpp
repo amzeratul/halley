@@ -501,7 +501,10 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 		auto& anim = animationPlayers[index];
 		anim.update(0, sprite);
 	} else if (!baseSprites.empty()) {
-		sprite = rng->getRandomElement(baseSprites);
+		// Optimization: if there's only one baseSprite, and this sprite has a material, then we don't need to update it at all here
+		if (!sprite.hasMaterial() || baseSprites.size() >= 2) {
+			sprite.copyFrom(rng->getRandomElement(baseSprites), false);
+		}
 	}
 
 	if (onSpawn) {
@@ -559,7 +562,7 @@ void Particles::updateParticles(float time)
 				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
 				.setRotation(particle.angle)
 				.setScale(scaleCurve.evaluate(t) * particle.scale)
-				.setColour(colourGradient.evaluate(t))
+				.setColour(colourGradient.evaluatePrecomputed(t))
 				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
 		}
 	}

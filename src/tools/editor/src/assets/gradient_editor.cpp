@@ -269,7 +269,7 @@ void GradientEditor::createAnchor(Vector2f mousePos)
 
 void GradientEditor::insertAnchorAt(float pos, size_t idx)
 {
-	const auto colour = gradient.evaluate(pos);
+	const auto colour = gradient.evaluatePrecomputed(pos);
 
 	gradient.positions.insert(gradient.positions.begin() + idx, pos);
 	gradient.colours.insert(gradient.colours.begin() + idx, colour);
@@ -333,6 +333,7 @@ void GradientEditor::updateGradient()
 	if (!image || image->getSize() != size) {
 		image = std::make_shared<Image>(Image::Format::RGBA, size);
 	}
+	gradientTmp.markDirty();
 	gradientTmp.render(*image);
 
 	gradientImage.setImage(factory.getResources(), video, image);

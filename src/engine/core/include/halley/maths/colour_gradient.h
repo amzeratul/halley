@@ -28,12 +28,22 @@ namespace Halley {
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
 
-        Colour4f evaluate(float t) const;
+		Colour4f evaluateSource(float t) const;
+		Colour4f evaluatePrecomputed(float t) const;
 
+        void markDirty();
 		void render(Image& image);
 
 		void clear();
 		void add(Colour4f col, float position);
+
+    private:
+		constexpr static int precomputedSize = 128;
+
+		mutable Vector<Colour4f> precomputed;
+		mutable bool dirty = true;
+
+		void precompute() const;
 	};
 
 	template<>

@@ -65,6 +65,7 @@ void ColourGradient::makeDefault()
 	colours.clear();
 	colours.push_back(Colour4f(1, 1, 1, 1));
 	colours.push_back(Colour4f(1, 1, 1, 1));
+	dirty = true;
 }
 
 bool ColourGradient::operator==(const ColourGradient& other) const
@@ -87,7 +88,7 @@ void ColourGradient::deserialize(Deserializer& s)
 	s >> colours;
 }
 
-Colour4f ColourGradient::evaluate(float val) const
+Colour4f ColourGradient::evaluateSource(float val) const
 {
 	if (positions.empty()) {
 		return Colour4f(0, 0, 0, 0);
@@ -128,6 +129,35 @@ Colour4f ColourGradient::evaluate(float val) const
 	}
 }
 
+Colour4f ColourGradient::evaluatePrecomputed(float val) const
+{
+	if (dirty) {
+		precompute();
+		dirty = false;
+	}
+
+	const auto maxIdx = precomputedSize - 1;
+	const auto fractIdx = std::max(val, 0.0f) * static_cast<float>(maxIdx);
+	const auto idx = clamp(static_cast<int>(fractIdx), 0, maxIdx);
+	const auto next = std::min(idx + 1, maxIdx);
+
+	return lerp(precomputed[idx], precomputed[next], fractIdx - idx);
+}
+
+void ColourGradient::markDirty()
+{
+	dirty = true;
+}
+
+void ColourGradient::precompute() const
+{
+	precomputed.resize(precomputedSize);
+	const float scale = 1.0f / (precomputedSize - 1);
+	for (int i = 0; i < precomputedSize; ++i) {
+		precomputed[i] = evaluateSource(i * scale);
+	}
+}
+
 void ColourGradient::render(Image& image)
 {
 	const auto size = image.getSize();
@@ -136,7 +166,7 @@ void ColourGradient::render(Image& image)
 
 	for (int x = 0; x < size.x; ++x) {
 		const float pos = static_cast<float>(x) / static_cast<float>(size.x - 1);
-		const auto col = Image::convertColourToInt(evaluate(pos));
+		const auto col = Image::convertColourToInt(evaluatePrecomputed(pos));
 		for (int y = 0; y < size.y; ++y) {
 			dst[x + y * size.x] = col;
 		}
@@ -148,10 +178,12 @@ void ColourGradient::clear()
 {
 	colours.clear();
 	positions.clear();
+	dirty = true;
 }
 
 void ColourGradient::add(Colour4f col, float position)
 {
 	colours.push_back(col);
 	positions.push_back(position);
+	dirty = true;
 }

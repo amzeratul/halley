@@ -65,7 +65,10 @@ namespace Halley {
 		size_t getRandomIndex(const T& vec)
 		{
 			size_t size = std::end(vec) - std::begin(vec);
-			if (size == 0) {
+			if (size == 1) {
+				// Perf: common case with particles; avoids calling the RNG
+				return 0;
+			} else if (size == 0) {
 				throw Exception("Can't get random index of empty sequence.", HalleyExceptions::Utils);
 			}
 			return getSizeT(size_t(0), size_t(size - 1));
