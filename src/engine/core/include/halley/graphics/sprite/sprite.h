@@ -84,7 +84,7 @@ namespace Halley
 		Sprite& setSprite(Resources& resources, std::string_view spriteSheetName, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setSprite(const SpriteResource& sprite, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot = true);
-		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
+		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true, bool enableHotReload = true);
 
 		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
 		Sprite& setPosition(Vector2f pos) & { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }

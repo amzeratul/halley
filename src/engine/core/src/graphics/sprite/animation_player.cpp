@@ -529,7 +529,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 	if (changed) {
 		sprite
 			.setMaterial(animation->getMaterial())
-			.setSprite(seq.getFrame(curFrame).getSprite(curDir));
+			.setSprite(seq.getFrame(curFrame).getSprite(curDir), true, false);
 	}
 }
 

@@ -39,7 +39,6 @@ namespace Halley {
 		struct Particle {
 			Vector3f pos;
 			Vector3f vel;
-			Angle1f angle;
 			float scale = 1;
 			float time = 0;
 			float ttl = 1;
@@ -96,6 +95,7 @@ namespace Halley {
 		void setSpawnPositionOffset(Vector2f offset);
 
 		void update(Time t);
+		void updateSprites(Time t);
 
 		void setSprites(Vector<Sprite> sprites);
 		void setAnimation(std::shared_ptr<const Animation> animation);
@@ -110,7 +110,6 @@ namespace Halley {
 		void spawnAt(Vector3f pos);
 
 		std::optional<Rect4f> getAABB() const;
-		std::optional<Rect4f> getVisualAABB() const;
 		void destroyOverlapping(const Polygon& polygon);
 		void destroyOverlapping(const Ellipse& ellipse);
 		void destroyOverlapping(const Circle& circle);
@@ -167,6 +166,8 @@ namespace Halley {
 
 		IParticleSpawner* secondarySpawner = nullptr;
 
+		mutable std::optional<float> maxBorder;
+
 		void start();
 		void initializeParticle(size_t index, float time, float totalTime);
 		void updateParticles(float t);
@@ -176,6 +177,9 @@ namespace Halley {
 		Vector3f getSpawnPosition() const;
 
 		void onSecondarySpawn(const Particle& particle, EntityId target);
+
+		float getSpriteBorder(const Sprite& sprite) const;
+		void computeMaxBorder() const;
 	};
 
 	class Resources;

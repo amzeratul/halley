@@ -55,6 +55,7 @@ namespace Halley {
 
 		Rect4f getCameraViewPort() const;
 		void setCameraPosition(Vector2f camPos);
+		bool isVisible(const Rect4f& aabb) const;
 
 		Vector2f worldToScreen(Vector2f pos) const;
 		Vector2f worldToUI(Vector2f pos) const;

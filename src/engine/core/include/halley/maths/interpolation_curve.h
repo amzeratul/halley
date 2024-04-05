@@ -33,6 +33,7 @@ namespace Halley {
         float evaluateRaw(float t) const;
 
 		bool isTrivial() const;
+        float getMaxAbsValue() const;
 	};
 
     class PrecomputedInterpolationCurve {

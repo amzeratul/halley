@@ -204,6 +204,7 @@ void EditorRootStage::updateUI(Time time)
 	backgroundParticles.setPosition(Vector2f(size) * Vector2f(0.6f, 0.4f));
 	backgroundParticles.setSpawnArea(Vector2f(size) * 1.2f);
 	backgroundParticles.update(time);
+	backgroundParticles.updateSprites(time);
 }
 
 void EditorRootStage::loadProject()

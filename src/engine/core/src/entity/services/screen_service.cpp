@@ -43,6 +43,11 @@ void ScreenService::setCameraPosition(Vector2f camPos)
 	cameraPosition = camPos;
 }
 
+bool ScreenService::isVisible(const Rect4f& aabb) const
+{
+	return getCameraViewPort().overlaps(aabb);
+}
+
 Vector2f ScreenService::worldToScreen(Vector2f pos) const
 {
 	return (pos - cameraPosition) * getZoomLevel() + Vector2f(getScreenResolution() / 2);

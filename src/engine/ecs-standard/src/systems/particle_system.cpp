@@ -26,6 +26,10 @@ public:
 			particles.setSecondarySpawner(this);
 			particles.update(t);
 
+			if (const auto aabb = particles.getAABB(); aabb && getScreenService().isVisible(*aabb)) {
+				particles.updateSprites(t);
+			}
+
 			if (!particles.isAlive() && !particles.isEnabled() && !getWorld().isEditor()) {
 				getWorld().destroyEntity(e.entityId);
 			}

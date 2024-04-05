@@ -454,12 +454,14 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, std::string_view name, bool 
 	return *this;
 }
 
-Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
+Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot, bool enableHotReload)
 {
 	doSetSprite(entry, applyPivot);
 
 #ifdef ENABLE_HOT_RELOAD
-	setHotReload(entry.parent, entry.idx);
+	if (enableHotReload) {
+		setHotReload(entry.parent, entry.idx);
+	}
 #endif
 
 	return *this;

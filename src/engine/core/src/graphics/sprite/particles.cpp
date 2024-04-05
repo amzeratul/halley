@@ -90,6 +90,8 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	burst = node["burst"].asOptional<int>();
 	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
 	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
+
+	maxBorder = {};
 }
 
 ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) const
@@ -375,33 +377,6 @@ void Particles::spawnAt(Vector3f pos)
 	particles[nParticlesAlive - 1].pos = pos;
 }
 
-std::optional<Rect4f> Particles::getAABB() const
-{
-	if (nParticlesAlive == 0) {
-		return {};
-	}
-
-	auto aabb = Rect4f(particles[0].pos.xy(), particles[0].pos.xy());
-	for (size_t i = 1; i < nParticlesAlive; ++i) {
-		auto p = Rect4f(particles[i].pos.xy(), particles[i].pos.xy());
-		aabb = aabb.merge(p);
-	}
-	return aabb;
-}
-
-std::optional<Rect4f> Particles::getVisualAABB() const
-{
-	if (nParticlesAlive == 0) {
-		return {};
-	}
-
-	auto aabb = Rect4f(sprites[0].getAABB());
-	for (size_t i = 1; i < nParticlesAlive; ++i) {
-		aabb = aabb.merge(sprites[i].getAABB());
-	}
-	return aabb;
-}
-
 void Particles::destroyOverlapping(const Polygon& polygon)
 {
 	for (size_t i = 0; i < nParticlesAlive; ++i) {
@@ -465,7 +440,7 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 	particle.alive = true;
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
-	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
+	//particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = rng->getFloat(initialScale);
 
 	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
@@ -492,157 +467,69 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 
 void Particles::updateParticles(float time)
 {
-	if (true) {
-		const bool hasAnim = isAnimated();
-		for (size_t i = 0; i < nParticlesAlive; ++i) {
-			if (hasAnim) {
-				animationPlayers[i].update(time, sprites[i]);
-			}
+	const bool hasAnim = isAnimated();
 
-			auto& particle = particles[i];
-
-			particle.time += time;
-			if (particle.time >= particle.ttl) {
-				particle.alive = false;
-			}
-			else {
-				const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
-				const auto a = stopped ? Vector3f() : acceleration;
-				if (particle.firstFrame) {
-					particle.firstFrame = false;
-				}
-				else {
-					particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
-					particle.vel += a * time;
-				}
-
-				if (minHeight && particle.pos.z < minHeight) {
-					particle.alive = false;
-				}
-
-				if (stopped) {
-					particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
-				}
-
-				if (speedDamp > 0.0001f) {
-					particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
-				}
-
-				if (directionScatter > 0.00001f) {
-					particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
-				}
-
-				if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
-					particle.angle = particle.vel.xy().angle();
-				}
-
-				const float t = particle.time / particle.ttl;
-
-				sprites[i]
-					.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
-					.setRotation(particle.angle)
-					.setScale(scaleCurve.evaluate(t) * particle.scale)
-					.setColour(colourGradient.evaluatePrecomputed(t))
-					.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
-			}
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		if (hasAnim) {
+			animationPlayers[i].update(time, sprites[i]);
 		}
 
-		removeDeadParticles();
-	} else {
-		// TLL and life
-		for (size_t i = 0; i < nParticlesAlive; ++i) {
-			auto& particle = particles[i];
+		auto& particle = particles[i];
 
-			particle.time += time;
-			if (particle.time >= particle.ttl) {
-				particle.alive = false;
-			}
+		particle.time += time;
+		if (particle.time >= particle.ttl) {
+			particle.alive = false;
 		}
-		removeDeadParticles();
-
-		// Animation
-		if (isAnimated()) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				animationPlayers[i].update(time, sprites[i]);
-			}
-		}
-
-		for (size_t i = 0; i < nParticlesAlive; ++i) {
-			auto& particle = particles[i];
+		else {
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 			const auto a = stopped ? Vector3f() : acceleration;
 			if (particle.firstFrame) {
 				particle.firstFrame = false;
-			} else {
+			}
+			else {
 				particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
 				particle.vel += a * time;
+			}
+
+			if (minHeight && particle.pos.z < minHeight) {
+				particle.alive = false;
 			}
 
 			if (stopped) {
 				particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
 			}
-		}
 
-		if (minHeight) {
-			bool anyRemoved = false;
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
-				if (particle.pos.z < minHeight) {
-					particle.alive = false;
-					anyRemoved = true;
-				}
-			}
-			if (anyRemoved) {
-				removeDeadParticles();
-			}
-		}
-
-		if (speedDamp > 0.0001f) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
+			if (speedDamp > 0.0001f) {
 				particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
 			}
-		}
 
-		if (directionScatter > 0.00001f) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
+			if (directionScatter > 0.00001f) {
 				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
 			}
 		}
+	}
 
-		for (size_t i = 0; i < nParticlesAlive; ++i) {
-			auto& particle = particles[i];
-			sprites[i]
-				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
-				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
+	removeDeadParticles();
+}
+
+void Particles::updateSprites(Time t)
+{
+	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		const auto& particle = particles[i];
+
+		Angle1f angle;
+		if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
+			angle = particle.vel.xy().angle();
 		}
 
-		if (rotateTowardsMovement) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
-				if (particle.vel.squaredLength() > 0.001f) {
-					particle.angle = particle.vel.xy().angle();
-				}
-				sprites[i].setRotation(particle.angle);
-			}
-		}
+		const float t = particle.time / particle.ttl;
 
-		if (!scaleCurve.isTrivial()) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
-				const float t = particle.time / particle.ttl;
-				sprites[i].setScale(scaleCurve.evaluate(t) * particle.scale);
-			}
-		}
-
-		if (!colourGradient.isTrivial()) {
-			for (size_t i = 0; i < nParticlesAlive; ++i) {
-				auto& particle = particles[i];
-				const float t = particle.time / particle.ttl;
-				sprites[i].setColour(colourGradient.evaluatePrecomputed(t));
-			}
-		}
+		sprites[i]
+			.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
+			.setRotation(angle)
+			.setScale(scaleCurve.evaluate(t) * particle.scale)
+			.setColour(colourGradient.evaluatePrecomputed(t))
+			.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
 	}
 }
 
@@ -688,6 +575,52 @@ void Particles::onSecondarySpawn(const Particle& particle, EntityId target)
 	if (secondarySpawner && target) {
 		secondarySpawner->spawn(particle.pos, target);
 	}
+}
+
+std::optional<Rect4f> Particles::getAABB() const
+{
+	if (nParticlesAlive == 0) {
+		return {};
+	}
+
+	Vector2f minPos = particles[0].pos.xy() + Vector2f(0, -particles[0].pos.z);
+	Vector2f maxPos = minPos;
+
+	auto aabb = Rect4f(particles[0].pos.xy(), particles[0].pos.xy());
+	for (size_t i = 1; i < nParticlesAlive; ++i) {
+		const auto p = particles[i].pos.xy() + Vector2f(0, -particles[i].pos.z);
+		minPos = Vector2f::min(minPos, p);
+		maxPos = Vector2f::max(maxPos, p);
+	}
+
+	if (!maxBorder) {
+		computeMaxBorder();
+	}
+
+	return aabb.grow(*maxBorder);
+}
+
+float Particles::getSpriteBorder(const Sprite& sprite) const
+{
+	const auto topRight = (sprite.getSize() - sprite.getAbsolutePivot()).abs();
+	const auto bottomLeft = sprite.getAbsolutePivot().abs();
+	return Vector2f::max(topRight, bottomLeft).length();
+}
+
+void Particles::computeMaxBorder() const
+{
+	float biggestBorder = 0;
+	if (baseAnimation) {
+		const auto bounds = baseAnimation->getBounds();
+		const auto delta = Vector2i::max(bounds.getBottomLeft().abs(), bounds.getTopRight().abs());
+		biggestBorder = Vector2f(delta).length();
+	} else {
+		for (const auto& sprite: baseSprites) {
+			biggestBorder = std::max(biggestBorder, getSpriteBorder(sprite));
+		}
+	}
+
+	maxBorder = biggestBorder * scaleCurve.getMaxAbsValue();
 }
 
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const EntitySerializationContext& context)

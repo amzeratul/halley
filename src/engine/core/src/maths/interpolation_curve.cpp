@@ -120,11 +120,20 @@ float InterpolationCurve::evaluateRaw(float val) const
 bool InterpolationCurve::isTrivial() const
 {
 	for (const auto& p: points) {
-		if (p.y != 1.0f) {
+		if (std::abs(p.y * scale + baseline - 1.0f) > 0.000001f) {
 			return false;
 		}
 	}
 	return true;
+}
+
+float InterpolationCurve::getMaxAbsValue() const
+{
+	float maxScale = 1.0f;
+	for (const auto& p : points) {
+		maxScale = std::max(p.y, maxScale);
+	}
+	return std::abs(maxScale * scale + baseline);
 }
 
 PrecomputedInterpolationCurve::PrecomputedInterpolationCurve(const InterpolationCurve& src)
