@@ -19,11 +19,12 @@ namespace Halley {
 
         Vector2i getSize() const;
         Rect4i getRect() const;
+        size_t getSizeBytes() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-	private:
+    private:
         Vector2i size;
         Vector<uint8_t> values;
     };

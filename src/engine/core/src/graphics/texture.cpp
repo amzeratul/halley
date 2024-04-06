@@ -76,7 +76,7 @@ void Texture::generateMipMaps()
 ResourceMemoryUsage Texture::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
-	result.ramUsage = descriptor.getMemoryUsage() + sizeof(*this);
+	result.ramUsage = descriptor.getMemoryUsage() + sizeof(*this) + mask.getSizeBytes();
 	result.vramUsage = getVRamUsage();
 	return result;
 }

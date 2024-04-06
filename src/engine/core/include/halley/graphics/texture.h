@@ -42,7 +42,7 @@ namespace Halley
 
 		virtual void generateMipMaps();
 
-		ResourceMemoryUsage getMemoryUsage() const final override;
+		ResourceMemoryUsage getMemoryUsage() const override;
 
 		void setAlphaMask(ImageMask mask);
 		bool hasOpaquePixels(Rect4i pixelBounds) const;
