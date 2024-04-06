@@ -61,3 +61,13 @@ int PackResourceLocator::getPriority() const
 {
 	return priority ? priority.value() : IResourceLocatorProvider::getPriority();
 }
+
+size_t PackResourceLocator::getMemoryUsage() const
+{
+	return sizeof(*this) + (assetPack ? assetPack->getMemoryUsage() : 0);
+}
+
+String PackResourceLocator::getName() const
+{
+	return path.getFilenameStr();
+}

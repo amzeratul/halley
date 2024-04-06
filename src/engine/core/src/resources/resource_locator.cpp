@@ -204,4 +204,20 @@ size_t ResourceLocator::getLocatorCount() const
 	return assetToLocator.size();
 }
 
+void ResourceLocator::generateMemoryReport() const
+{
+	size_t totalSize = 0;
+	std::map<String, size_t> sizes;
+	for (const auto& locator: locators) {
+		const auto size = locator->getMemoryUsage();
+		totalSize += size;
+		sizes[locator->getName()] = size;
+	}
+
+	Logger::logInfo("Resource locator memory usage: " + String::prettySize(totalSize));
+	for (const auto& [k, v]: sizes) {
+		Logger::logInfo("\t" + k + ": " + String::prettySize(v));
+	}
+}
+
 const Metadata ResourceLocator::dummyMetadata;

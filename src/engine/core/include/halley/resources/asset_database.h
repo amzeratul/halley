@@ -23,6 +23,8 @@ namespace Halley
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			size_t getMemoryUsage() const;
 		};
 
 		class TypedDB
@@ -41,6 +43,8 @@ namespace Halley
 			const HashMap<String, Entry>& getAssets() const;
 			AssetType getType() const;
 
+			size_t getMemoryUsage() const;
+
 		private:
 			AssetType type;
 			HashMap<String, Entry> assets;
@@ -54,6 +58,8 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 		Vector<String> enumerate(AssetType type) const;
+
+		size_t getMemoryUsage() const;
 
 	private:
 		mutable TreeMap<int, TypedDB> dbs;

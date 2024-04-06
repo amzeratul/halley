@@ -77,13 +77,15 @@ void Resources::generateMemoryReport()
 
 	std::sort(usage.begin(), usage.end(), [](const auto& a, const auto& b) { return a.second.getTotal() > b.second.getTotal(); });
 
-	Logger::logInfo("Memory usage: " + total.toString());
+	Logger::logInfo("Resource memory usage: " + total.toString());
 
 	for (const auto& [assetType, memoryUsage] : usage) {
 		if (memoryUsage.ramUsage > 0 || memoryUsage.vramUsage > 0) {
 			Logger::logInfo(String("\t") + toString(assetType) + ": " + memoryUsage.toString());
 		}
 	}
+
+	locator->generateMemoryReport();
 }
 
 Resources::~Resources() = default;

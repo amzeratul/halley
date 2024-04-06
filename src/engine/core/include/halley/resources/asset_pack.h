@@ -52,6 +52,8 @@ namespace Halley {
 
 		std::shared_ptr<bool> getAliveToken() const;
 
+		size_t getMemoryUsage() const;
+
     private:
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;

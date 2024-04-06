@@ -42,6 +42,8 @@ namespace Halley {
 		virtual int getPriority() const { return 0; }
 		virtual void purgeAll(SystemAPI& system) = 0;
 		virtual bool purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds) = 0;
+		virtual size_t getMemoryUsage() const = 0;
+		virtual String getName() const = 0;
 	};
 
 	class ResourceLocator final : public IResourceLocator
@@ -66,6 +68,7 @@ namespace Halley {
 		bool exists(const String& asset, AssetType type);
 
 		size_t getLocatorCount() const;
+		void generateMemoryReport() const;
 
 	private:
 		SystemAPI& system;

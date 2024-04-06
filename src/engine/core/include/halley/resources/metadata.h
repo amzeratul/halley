@@ -80,6 +80,8 @@ namespace Halley
 		String toString() const;
 		ConfigNode toConfig() const;
 
+		size_t getMemoryUsage() const;
+
 	private:
 		ConfigNode entries;
 	};

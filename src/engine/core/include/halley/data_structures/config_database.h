@@ -26,6 +26,7 @@ namespace Halley {
         }
 
         virtual void loadConfigs(const ConfigNode& nodes) = 0;
+        virtual size_t getMemoryUsage() const = 0;
 
     private:
         String key;
@@ -129,6 +130,11 @@ namespace Halley {
         	return idx;
         }
 
+        size_t getMemoryUsage() const override
+        {
+            return sizeof(keys) + sizeof(entries) + keys.size() * sizeof(String) + entries.size_bytes();
+        }
+
     private:
         HashMap<String, T> entries;
         mutable Vector<String> keys;
@@ -198,6 +204,7 @@ namespace Halley {
         }
 
         int getVersion() const;
+    	void generateMemoryReport();
 
     private:
         Vector<std::unique_ptr<IConfigDatabaseType>> dbs;

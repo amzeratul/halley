@@ -57,6 +57,16 @@ bool FileSystemResourceLocator::purgeIfAffected(SystemAPI& system, gsl::span<con
 	return true;
 }
 
+String FileSystemResourceLocator::getName() const
+{
+	return "filesystem";
+}
+
+size_t FileSystemResourceLocator::getMemoryUsage() const
+{
+	return sizeof(*this) + assetDb->getMemoryUsage();
+}
+
 void FileSystemResourceLocator::loadAssetDb()
 {
 	assetDb = std::make_unique<AssetDatabase>();

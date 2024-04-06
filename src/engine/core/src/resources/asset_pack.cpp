@@ -226,6 +226,11 @@ std::shared_ptr<bool> AssetPack::getAliveToken() const
 	return aliveToken;
 }
 
+size_t AssetPack::getMemoryUsage() const
+{
+	return sizeof(*this) + data.size() + assetDb->getMemoryUsage();
+}
+
 PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize)
 	: pack(pack)
 	, startPos(startPos)

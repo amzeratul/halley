@@ -25,6 +25,11 @@ void AssetDatabase::Entry::deserialize(Deserializer& s)
 	s >> meta;
 }
 
+size_t AssetDatabase::Entry::getMemoryUsage() const
+{
+	return sizeof(*this) + path.size() + meta.getMemoryUsage();
+}
+
 AssetDatabase::TypedDB::TypedDB()
 {
 }
@@ -77,6 +82,16 @@ const HashMap<String, AssetDatabase::Entry>& AssetDatabase::TypedDB::getAssets()
 AssetType AssetDatabase::TypedDB::getType() const
 {
 	return type;
+}
+
+size_t AssetDatabase::TypedDB::getMemoryUsage() const
+{
+	size_t size = assets.size_bytes();
+	for (const auto& [k, v]: assets) {
+		size += k.size();
+		size += v.getMemoryUsage();
+	}
+	return size;
 }
 
 void AssetDatabase::addAsset(const String& name, AssetType type, Entry&& entry)
@@ -147,6 +162,15 @@ Vector<String> AssetDatabase::enumerate(AssetType type) const
 		for (auto& asset: getDatabase(type).getAssets()) {
 			result.push_back(asset.first);
 		}
+	}
+	return result;
+}
+
+size_t AssetDatabase::getMemoryUsage() const
+{
+	size_t result = 0;
+	for (const auto& [k, v]: dbs) {
+		result += v.getMemoryUsage();
 	}
 	return result;
 }

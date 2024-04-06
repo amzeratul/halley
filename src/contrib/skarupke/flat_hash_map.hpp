@@ -742,6 +742,10 @@ public:
     {
         return (AllocatorTraits::max_size(*this)) / sizeof(Entry);
     }
+    size_t size_bytes() const
+    {
+        return sizeof(this) + sizeof(Entry) * (num_slots_minus_one + max_lookups);
+    }
     size_t bucket_count() const
     {
         return num_slots_minus_one ? num_slots_minus_one + 1 : 0;

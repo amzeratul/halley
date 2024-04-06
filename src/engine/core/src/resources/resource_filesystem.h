@@ -16,6 +16,8 @@ namespace Halley {
 		int getPriority() const override;
 		void purgeAll(SystemAPI& system) override;
 		bool purgeIfAffected(SystemAPI& system, gsl::span<const String> assetIds, gsl::span<const String> packIds) override;
+		String getName() const override;
+		size_t getMemoryUsage() const override;
 
 		SystemAPI& system;
 		Path basePath;

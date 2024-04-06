@@ -46,6 +46,22 @@ int ConfigDatabase::getVersion() const
 	return version;
 }
 
+void ConfigDatabase::generateMemoryReport()
+{
+	size_t totalSize = 0;
+	std::map<String, size_t> results;
+	for (const auto& db: dbs) {
+		const auto size = db->getMemoryUsage();
+		totalSize += size;
+		results[db->getKey()] = size;
+	}
+
+	Logger::logInfo("ConfigDatabase memory usage: " + String::prettySize(totalSize));
+	for (const auto& [k, v]: results) {
+		Logger::logInfo("\t" + k + ": " + String::prettySize(v));
+	}
+}
+
 void ConfigDatabase::loadConfig(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {

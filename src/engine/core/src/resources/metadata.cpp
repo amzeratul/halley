@@ -159,3 +159,8 @@ ConfigNode Metadata::toConfig() const
 {
 	return ConfigNode(entries);
 }
+
+size_t Metadata::getMemoryUsage() const
+{
+	return entries.getSizeBytes();
+}
