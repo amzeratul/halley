@@ -46,10 +46,11 @@ namespace Halley {
 	class World
 	{
 	public:
-		World(const HalleyAPI& api, Resources& resources, WorldReflection reflection);
+		World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldReflection> reflection);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
+		std::unique_ptr<World> makeStagingWorld();
 
 		void step(TimeLine timeline, Time elapsed);
 		void render(RenderContext& rc);
@@ -96,6 +97,8 @@ namespace Halley {
 		EntityRef createEntity(String name, EntityId parentId);
 		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
 		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, uint8_t worldPartition = 0);
+
+		void moveEntitiesFrom(World& other, std::optional<uint8_t> worldPartition);
 
 		void destroyEntity(EntityId id);
 		void destroyEntity(EntityRef entity);
@@ -189,7 +192,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		Resources& resources;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
-		WorldReflection reflection;
+		std::shared_ptr<WorldReflection> reflection;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;
@@ -199,7 +202,7 @@ namespace Halley {
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
-		MappedPool<Entity*> entityMap;
+		std::shared_ptr<MappedPool<Entity*>> entityMap;
 		HashMap<UUID, Entity*> uuidMap;
 
 		//TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
@@ -218,6 +221,9 @@ namespace Halley {
 		float transform2DAnisotropy = 1.0f;
 
     	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
+
+		struct StagingWorldTag{};
+		World(World& world, StagingWorldTag tag);
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();

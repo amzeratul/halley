@@ -18,18 +18,32 @@
 #include "halley/graphics/render_context.h"
 #include "halley/support/logger.h"
 #include "halley/support/profiler.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflection)
+World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldReflection> reflection)
 	: api(api)
 	, resources(resources)
 	, reflection(std::move(reflection))
+	, devMode(api.core->isDevMode())
+	, entityMap(std::make_shared<MappedPool<Entity*>>())
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<TypedPool<Entity>>())
 {
-	devMode = api.core->isDevMode();
+}
+
+World::World(World& world, StagingWorldTag tag)
+	: api(world.api)
+	, resources(world.resources)
+	, reflection(world.reflection)
+	, devMode(world.devMode)
+	, entityMap(world.entityMap)
+	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
+	, componentDeleterTable(world.componentDeleterTable)
+	, entityPool(world.entityPool)
+{
 }
 
 World::~World()
@@ -61,10 +75,15 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, WorldReflection(*CreateEntityFunctions::getCodegenFunctions()));
+	auto world = std::make_unique<World>(api, resources, std::make_shared<WorldReflection>(*CreateEntityFunctions::getCodegenFunctions()));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig);
 	return world;
+}
+
+std::unique_ptr<World> World::makeStagingWorld()
+{
+	return std::unique_ptr<World>(new World(*this, StagingWorldTag()));
 }
 
 System& World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
@@ -155,7 +174,7 @@ void World::loadSystems(const ConfigNode& root)
 
 		for (auto& sysName: tlSystems) {
 			String name = sysName.asString();
-			if (auto system = reflection.createSystem(name + "System")) {
+			if (auto system = reflection->createSystem(name + "System")) {
 				addSystem(std::move(system), timeline).setName(name);
 			}
 		}
@@ -218,6 +237,30 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	uuidMap[uuid] = entity;
 	
 	return e;
+}
+
+void World::moveEntitiesFrom(World& other, std::optional<uint8_t> worldPartition)
+{
+	for (auto& e: other.entities) {
+		if (!worldPartition || e->worldPartition == worldPartition) {
+			entitiesPendingCreation.push_back(e);
+			uuidMap[e->getInstanceUUID()] = e;
+			if (worldPartition) {
+				other.uuidMap.erase(e->getInstanceUUID());
+			}
+		}
+	}
+
+	if (worldPartition) {
+		std_ex::erase_if(other.entities, [&](Entity* e) { return e->worldPartition == worldPartition; });
+	} else {
+		other.entities.clear();
+		other.uuidMap.clear();
+	}
+	other.entityDirty = true;
+	other.entityReloaded = true;
+	other.spawnPending();
+	spawnPending();
 }
 
 void World::destroyEntity(EntityId id)
@@ -299,7 +342,7 @@ ConstEntityRef World::tryGetEntity(EntityId id) const
 
 Entity* World::tryGetRawEntity(EntityId id)
 {
-	auto* v = entityMap.get(id.value);
+	auto* v = entityMap->get(id.value);
 	if (v == nullptr) {
 		return nullptr;
 	}
@@ -308,7 +351,7 @@ Entity* World::tryGetRawEntity(EntityId id)
 
 const Entity* World::tryGetRawEntity(EntityId id) const
 {
-	const auto* v = entityMap.get(id.value);
+	const auto* v = entityMap->get(id.value);
 	if (v == nullptr) {
 		return nullptr;
 	}
@@ -387,7 +430,7 @@ void World::setEntityReloaded()
 
 const WorldReflection& World::getReflection() const
 {
-	return reflection;
+	return *reflection;
 }
 
 MaskStorage& World::getMaskStorage() const noexcept
@@ -547,7 +590,7 @@ void World::render(RenderContext& rc)
 }
 
 void World::allocateEntity(Entity* entity) {
-	auto res = entityMap.alloc();
+	auto res = entityMap->alloc();
 	*res.first = entity;
 	entity->entityId.value = res.second;
 }
@@ -678,7 +721,7 @@ void World::updateEntities()
 			auto& entity = *entities[idx];
 
 			// Remove
-			entityMap.freeId(entity.getEntityId().value);
+			entityMap->freeId(entity.getEntityId().value);
 			deleteEntity(&entity);
 
 			// Put it at the back of the array, so it's removed when the array gets resized
@@ -821,7 +864,7 @@ void World::sendNetworkSystemMessage(const String& targetSystem, const SystemMes
 
 std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data)
 {
-	auto msg = reflection.createMessage(msgId);
+	auto msg = reflection->createMessage(msgId);
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
@@ -832,7 +875,7 @@ std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const st
 
 std::unique_ptr<Message> World::deserializeMessage(const String& messageName, const ConfigNode& data)
 {
-	auto msg = reflection.createMessage(messageName);
+	auto msg = reflection->createMessage(messageName);
 
 	EntitySerializationContext context;
 	context.resources = &resources;
@@ -843,7 +886,7 @@ std::unique_ptr<Message> World::deserializeMessage(const String& messageName, co
 
 std::unique_ptr<SystemMessage> World::deserializeSystemMessage(int msgId, gsl::span<const std::byte> data)
 {
-	auto msg = reflection.createSystemMessage(msgId);
+	auto msg = reflection->createSystemMessage(msgId);
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
@@ -854,7 +897,7 @@ std::unique_ptr<SystemMessage> World::deserializeSystemMessage(int msgId, gsl::s
 
 std::unique_ptr<SystemMessage> World::deserializeSystemMessage(const String& messageName, const ConfigNode& data)
 {
-	auto msg = reflection.createSystemMessage(messageName);
+	auto msg = reflection->createSystemMessage(messageName);
 
 	EntitySerializationContext context;
 	context.resources = &resources;

@@ -21,7 +21,7 @@ namespace Halley {
 			virtual void onEntityRemoved(EntityRef entity, uint8_t worldPartition) = 0;
 		};
 		
-		explicit EntityScene(bool allowReload = false, uint8_t worldPartition = 0, String variant = "");
+		EntityScene(bool allowReload = false, uint8_t worldPartition = 0, String variant = "");
 		
 		Vector<EntityId>& getEntities();
 		const Vector<EntityId>& getEntities() const;
