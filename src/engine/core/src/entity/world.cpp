@@ -40,9 +40,10 @@ World::World(World& world, StagingWorldTag tag)
 	, reflection(world.reflection)
 	, devMode(world.devMode)
 	, entityMap(world.entityMap)
-	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
+	, maskStorage({})
 	, componentDeleterTable(world.componentDeleterTable)
 	, entityPool(world.entityPool)
+	, transform2DAnisotropy(world.transform2DAnisotropy)
 {
 }
 
@@ -241,25 +242,44 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 
 void World::moveEntitiesFrom(World& other, std::optional<uint8_t> worldPartition)
 {
+	// First, make sure other doesn't have any pending entities that actually need deletion
+	other.spawnPending();
+
+	// Find entities to move
+	Vector<Entity*> entitiesToMove;
 	for (auto& e: other.entities) {
 		if (!worldPartition || e->worldPartition == worldPartition) {
-			entitiesPendingCreation.push_back(e);
-			uuidMap[e->getInstanceUUID()] = e;
-			if (worldPartition) {
-				other.uuidMap.erase(e->getInstanceUUID());
-			}
+			entitiesToMove.push_back(e);
+			e->alive = false;
+			e->dirty = true;
 		}
 	}
 
-	if (worldPartition) {
-		std_ex::erase_if(other.entities, [&](Entity* e) { return e->worldPartition == worldPartition; });
-	} else {
-		other.entities.clear();
-		other.uuidMap.clear();
-	}
+	// Update other world
+	// We tell it not to delete entities - we want them to "leak" since we're stealing them
+	// It'll still remove it from families and whatnot
 	other.entityDirty = true;
-	other.entityReloaded = true;
+	other.canDeleteEntities = false;
 	other.spawnPending();
+	other.canDeleteEntities = true;
+
+	// Add entities to my pending list
+	entitiesPendingCreation.reserve(entitiesPendingCreation.size() + entitiesToMove.size());
+	for (auto& e: entitiesToMove) {
+		e->dirty = true;
+		e->alive = true;
+		e->mask = FamilyMask::Handle();
+
+		auto entityRef = EntityRef(*e, *this);
+		for (auto& [id, comp]: e->components) {
+			reflection->getComponentReflector(id).rebindComponent(*comp, entityRef);
+		}
+
+		entitiesPendingCreation.push_back(e);
+		uuidMap[e->getInstanceUUID()] = e;
+	}
+
+	// Update me
 	spawnPending();
 }
 
@@ -649,7 +669,7 @@ void World::updateEntities()
 			} else {
 				// It's alive, so check old and new system inclusions
 				FamilyMaskType oldMask = entity.getMask();
-				entity.refresh(*maskStorage, *componentDeleterTable);
+				entity.refresh(maskStorage.get(), *componentDeleterTable);
 				FamilyMaskType newMask = entity.getMask();
 
 				// Did it change?
@@ -675,33 +695,35 @@ void World::updateEntities()
 
 	HALLEY_DEBUG_TRACE();
 	// Go through every family adding/removing entities as needed
-	for (auto& todo: pending) {
-		for (auto* fam: getFamiliesFor(todo.first)) {
-			const auto& famMask = fam->inclusionMask;
-			const auto& optFamMask = fam->optionalMask;
-			auto& ms = *maskStorage;
-			
-			for (auto& e: todo.second.toRemove) {
-				// Only remove if the entity is not about to be re-added
-				const auto& newMask = e.first;
-				if (!newMask.contains(famMask, ms)) {
-					fam->removeEntity(*e.second);
+	if (maskStorage) {
+		for (auto& todo: pending) {
+			for (auto* fam: getFamiliesFor(todo.first)) {
+				const auto& famMask = fam->inclusionMask;
+				const auto& optFamMask = fam->optionalMask;
+				auto& ms = *maskStorage;
+				
+				for (auto& e: todo.second.toRemove) {
+					// Only remove if the entity is not about to be re-added
+					const auto& newMask = e.first;
+					if (!newMask.contains(famMask, ms)) {
+						fam->removeEntity(*e.second);
+					}
 				}
-			}
-			for (auto& e: todo.second.toAdd) {
-				// Only add if the entity was not already in this
-				const auto& oldMask = e.first;
-				const auto& newMask = todo.first;
-				if (!oldMask.contains(famMask, ms)) {
-					fam->addEntity(*e.second);
-				} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
-					// Needs refreshing of optional references
-					fam->refreshEntity(*e.second);
+				for (auto& e: todo.second.toAdd) {
+					// Only add if the entity was not already in this
+					const auto& oldMask = e.first;
+					const auto& newMask = todo.first;
+					if (!oldMask.contains(famMask, ms)) {
+						fam->addEntity(*e.second);
+					} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
+						// Needs refreshing of optional references
+						fam->refreshEntity(*e.second);
+					}
 				}
-			}
 
-			for (auto& e : todo.second.toReload) {
-				fam->reloadEntity(*e.second);
+				for (auto& e : todo.second.toReload) {
+					fam->reloadEntity(*e.second);
+				}
 			}
 		}
 	}
@@ -721,8 +743,10 @@ void World::updateEntities()
 			auto& entity = *entities[idx];
 
 			// Remove
-			entityMap->freeId(entity.getEntityId().value);
-			deleteEntity(&entity);
+			if (canDeleteEntities) {
+				entityMap->freeId(entity.getEntityId().value);
+				deleteEntity(&entity);
+			}
 
 			// Put it at the back of the array, so it's removed when the array gets resized
 			std::swap(entities[idx], entities[--livingEntityCount]);
@@ -769,13 +793,15 @@ Family& World::addFamily(std::unique_ptr<Family> family) noexcept
 void World::onAddFamily(Family& family) noexcept
 {
 	// Add any existing entities to this new family
-	size_t nEntities = entities.size();
-	for (size_t i = 0; i < nEntities; i++) {
-		auto& entity = *entities[i];
-		auto eMask = entity.getMask();
-		auto fMask = family.inclusionMask;
-		if ((eMask.intersection(fMask, *maskStorage)) == fMask) {
-			family.addEntity(entity);
+	if (maskStorage) {
+		size_t nEntities = entities.size();
+		for (size_t i = 0; i < nEntities; i++) {
+			auto& entity = *entities[i];
+			auto eMask = entity.getMask();
+			auto fMask = family.inclusionMask;
+			if ((eMask.intersection(fMask, *maskStorage)) == fMask) {
+				family.addEntity(entity);
+			}
 		}
 	}
 	familyCache.clear();
@@ -788,11 +814,13 @@ const Vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 		return i->second;
 	} else {
 		Vector<Family*> result;
-		for (auto& iter : families) {
-			auto& family = *iter;
-			FamilyMaskType famMask = family.inclusionMask;
-			if (mask.contains(famMask, *maskStorage)) {
-				result.push_back(&family);
+		if (maskStorage) {
+			for (auto& iter : families) {
+				auto& family = *iter;
+				FamilyMaskType famMask = family.inclusionMask;
+				if (mask.contains(famMask, *maskStorage)) {
+					result.push_back(&family);
+				}
 			}
 		}
 		familyCache[mask] = std::move(result);

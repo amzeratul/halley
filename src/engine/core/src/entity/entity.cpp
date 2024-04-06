@@ -237,7 +237,7 @@ FamilyMaskType Entity::getMask() const
 	return mask;
 }
 
-void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
+void Entity::refresh(MaskStorage* storage, ComponentDeleterTable& table)
 {
 	if (dirty) {
 		dirty = false;
@@ -249,13 +249,17 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 		components.resize(liveComponents);
 
 		// Re-generate mask
-		auto m = FamilyMask::RealType();
-		if (enabled && parentEnabled) {
-			for (auto i : components) {
-				FamilyMask::setBit(m, i.first);
+		if (!storage) {
+			mask = {};
+		} else {
+			auto m = FamilyMask::RealType();
+			if (enabled && parentEnabled) {
+				for (auto i : components) {
+					FamilyMask::setBit(m, i.first);
+				}
 			}
+			mask = FamilyMaskType(m, *storage);
 		}
-		mask = FamilyMaskType(m, storage);
 
 		// Notify parent
 		if (parent) {

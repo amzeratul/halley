@@ -15,6 +15,11 @@ namespace Halley {
 	class ComponentDeleterTable
 	{
 	public:
+		ComponentDeleterTable()
+		{
+			map.resize(256, nullptr);
+		}
+
 		~ComponentDeleterTable()
 		{
 			for (const auto deleter : map) {
@@ -24,9 +29,7 @@ namespace Halley {
 
 		void set(int idx, TypeDeleterBase* deleter)
 		{
-			if (int(map.size()) <= idx) {
-				map.resize(static_cast<size_t>(idx) * 3 / 2 + 1, nullptr);
-			}
+			assert(idx < static_cast<int>(map.size()));
 			map[idx] = deleter;
 		}
 
@@ -37,7 +40,7 @@ namespace Halley {
 
 		bool hasComponent(int uid) const
 		{
-			return map.size() > size_t(uid) && map[uid] != nullptr;
+			return map[uid] != nullptr;
 		}
 
 	private:

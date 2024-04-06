@@ -152,7 +152,7 @@ namespace Halley {
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
-		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
+		void refresh(MaskStorage* storage, ComponentDeleterTable& table);
 		
 		void sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids);
 

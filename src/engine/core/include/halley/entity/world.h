@@ -199,6 +199,7 @@ namespace Halley {
 		bool devMode = false;
 		bool terminating = false;
 		bool headless = false;
+		bool canDeleteEntities = true;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;

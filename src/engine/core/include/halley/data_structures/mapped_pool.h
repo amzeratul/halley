@@ -24,7 +24,7 @@
 #include <cstdint>
 
 namespace Halley {
-	template <typename T, size_t blockLen = 16384>
+	template <typename T, size_t blockLen = 16384, bool threadSafe = true>
 	class MappedPool {
 		struct Entry {
 			alignas(T) std::array<char, sizeof(T)> data;
@@ -54,6 +54,8 @@ namespace Halley {
 
 	public:
 		std::pair<T*, int64_t> alloc() {
+			auto lock = lockMutex();
+
 			// Next entry will be at position "entryIdx", which is just what was stored on next
 			const uint32_t entryIdx = next;
 
@@ -79,6 +81,8 @@ namespace Halley {
 		}
 
 		void free(T* p) {
+			auto lock = lockMutex();
+
 			// Swaps the data with the next, so this will actually be the next one to be allocated
 			Entry* entry = reinterpret_cast<Entry*>(p);
 			std::swap(entry->nextFreeEntryIndex, next);
@@ -92,6 +96,8 @@ namespace Halley {
 		}
 
 		T* get(int64_t externalIdx) {
+			auto lock = lockMutex();
+
 			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
 			auto rev = static_cast<uint32_t>(externalIdx >> 32);
 
@@ -112,6 +118,8 @@ namespace Halley {
 		}
 
 		const T* get(int64_t externalIdx) const {
+			auto lock = lockMutex();
+
 			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
 			auto rev = static_cast<uint32_t>(externalIdx >> 32);
 
@@ -134,5 +142,16 @@ namespace Halley {
 	private:
 		Vector<Block> blocks;
 		uint32_t next = 0;
+
+		mutable std::mutex mutex;
+
+		std::unique_lock<std::mutex> lockMutex() const
+		{
+			if constexpr (threadSafe) {
+				return std::unique_lock<std::mutex>(mutex);
+			} else {
+				return std::unique_lock<std::mutex>();
+			}
+		}
 	};
 }
