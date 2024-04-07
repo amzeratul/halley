@@ -171,5 +171,9 @@ void TaskDetails::copyToClipboard(bool verbose)
 
 void TaskDetails::doAction()
 {
-	taskDisplay->getTask()->doAction(taskDisplay->getTaskSet());
+	if (taskDisplay) {
+		if (auto task = taskDisplay->getTask()) {
+			task->doAction(taskDisplay->getTaskSet());
+		}
+	}
 }
