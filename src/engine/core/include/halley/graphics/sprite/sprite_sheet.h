@@ -180,6 +180,7 @@ namespace Halley
 
 		String defaultMaterialName;
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
+		mutable std::mutex materialMutex;
 
 		void loadTexture(Resources& resources) const;
 		void loadPaletteTexture(Resources& resources) const;

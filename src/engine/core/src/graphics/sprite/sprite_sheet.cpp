@@ -275,6 +275,8 @@ void SpriteSheet::setTextureName(String name)
 
 std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 {
+	auto lock = std::unique_lock(materialMutex);
+
 	const auto iter = materials.find(name);
 	std::shared_ptr<Material> result;
 	if (iter != materials.end()) {
@@ -297,6 +299,12 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 	return result;
 }
 
+void SpriteSheet::clearMaterialCache() const
+{
+	auto lock = std::unique_lock(materialMutex);
+	materials.clear();
+}
+
 void SpriteSheet::setDefaultMaterialName(String materialName)
 {
 	defaultMaterialName = std::move(materialName);
@@ -315,11 +323,6 @@ void SpriteSheet::setPaletteName(String paletteName)
 const String& SpriteSheet::getPaletteName() const
 {
 	return paletteName;
-}
-
-void SpriteSheet::clearMaterialCache() const
-{
-	materials.clear();
 }
 
 void SpriteSheet::reload(Resource&& resource)
