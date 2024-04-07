@@ -700,6 +700,7 @@ void SpriteResource::reload(Resource&& resource)
 	idx = reloaded.idx;
 
 #ifdef ENABLE_HOT_RELOAD
+	auto lock = std::unique_lock(spriteMutex);
 	for (auto& sprite: spriteRefs) {
 		sprite.first->reloadSprite(*this);
 	}
@@ -738,23 +739,27 @@ ResourceMemoryUsage SpriteResource::getMemoryUsage() const
 void SpriteHotReloader::addSprite(Sprite* sprite, uint32_t idx) const
 {
 	Expects(sprite != nullptr);
+	auto lock = std::unique_lock(spriteMutex);
 	spriteRefs[sprite] = idx;
 }
 
 void SpriteHotReloader::removeSprite(Sprite* sprite) const
 {
 	Expects(sprite != nullptr);
+	auto lock = std::unique_lock(spriteMutex);
 	spriteRefs.erase(sprite);
 }
 
 void SpriteHotReloader::updateSpriteIndex(Sprite* sprite, uint32_t idx) const
 {
 	Expects(sprite != nullptr);
+	auto lock = std::unique_lock(spriteMutex);
 	spriteRefs.at(sprite) = idx;
 }
 
 void SpriteHotReloader::clearSpriteRefs()
 {
+	auto lock = std::unique_lock(spriteMutex);
 	for (auto sprite: spriteRefs) {
 		sprite.first->clearSpriteSheetRef();
 	}
