@@ -9,8 +9,13 @@ namespace Halley {
 
 	class Session {
 	public:
+		Session()
+		{
+			options.ensureType(ConfigNodeType::Map);
+		}
 		virtual ~Session() = default;
 
+		virtual bool isInteractive() const { return true; }
 		virtual bool isMultiplayer() const { return false; }
 		virtual bool hasLocalSave() const { return true; }
 		virtual bool isReadyToStart() const { return true; }
