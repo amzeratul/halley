@@ -145,7 +145,6 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 
 std::shared_ptr<UIImage> UIList::makeIcon(String id, Sprite image) const
 {
-	Logger::logDev("Making icon " + id);
 	auto icon = std::make_shared<UIImage>(std::move(id), std::move(image));
 	applyImageColour(*icon);	
 	return icon;
