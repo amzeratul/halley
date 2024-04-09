@@ -76,10 +76,40 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
+	return make(api, resources, sceneName, std::nullopt, devMode);
+}
+
+std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, const std::optional<String>& systemTag, bool devMode)
+{
 	auto world = std::make_unique<World>(api, resources, std::make_shared<WorldReflection>(*CreateEntityFunctions::getCodegenFunctions()));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
-	world->loadSystems(sceneConfig);
+	world->loadSystems(sceneConfig, systemTag);
 	return world;
+}
+
+void World::loadSystems(const ConfigNode& root, const std::optional<String>& systemTag)
+{
+	for (const auto& [timelineName, tlSystems]: root["timelines"].asMap()) {
+		const TimeLine timeline = fromString<TimeLine>(timelineName);
+
+		for (auto& systemEntry: tlSystems) {
+			String systemName;
+			Vector<String> systemTags;
+
+			if (systemEntry.getType() == ConfigNodeType::String) {
+				systemName = systemEntry.asString();
+			} else if (systemEntry.getType() == ConfigNodeType::Map) {
+				systemName = systemEntry["name"].asString();
+				systemTags = systemEntry["tags"].asVector<String>({});
+			}
+
+			if (systemTags.empty() || !systemTag || std_ex::contains(systemTags, *systemTag)) {
+				if (auto system = reflection->createSystem(systemName + "System")) {
+					addSystem(std::move(system), timeline).setName(systemName);
+				}
+			}
+		}
+	}
 }
 
 std::unique_ptr<World> World::makeStagingWorld()
@@ -157,29 +187,6 @@ Service& World::addService(std::shared_ptr<Service> service)
 	}
 	services[service->getName()] = std::move(service);
 	return ref;
-}
-
-void World::loadSystems(const ConfigNode& root)
-{
-	for (const auto& [timelineName, tlSystems]: root["timelines"].asMap()) {
-		TimeLine timeline;
-		if (timelineName == "fixedUpdate") {
-			timeline = TimeLine::FixedUpdate;
-		} else if (timelineName == "variableUpdate") {
-			timeline = TimeLine::VariableUpdate;
-		} else if (timelineName == "render") {
-			timeline = TimeLine::Render;
-		} else {
-			throw Exception("Unknown timeline: " + timelineName, HalleyExceptions::Entity);
-		}
-
-		for (auto& sysName: tlSystems) {
-			String name = sysName.asString();
-			if (auto system = reflection->createSystem(name + "System")) {
-				addSystem(std::move(system), timeline).setName(name);
-			}
-		}
-	}
 }
 
 Service* World::doTryGetService(const String& name) const

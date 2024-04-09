@@ -50,6 +50,7 @@ namespace Halley {
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
+		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, const std::optional<String>& systemTag, bool devMode);
 		std::unique_ptr<World> makeStagingWorld();
 
 		void step(TimeLine timeline, Time elapsed);
@@ -64,7 +65,7 @@ namespace Halley {
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		Service& addService(std::shared_ptr<Service> service);
-		void loadSystems(const ConfigNode& config);
+		void loadSystems(const ConfigNode& config, const std::optional<String>& systemTag = {});
 		
 		template <typename T>
 		T* tryGetService(std::string_view systemName = "")

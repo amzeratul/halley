@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "halley/text/string_converter.h"
+
 namespace Halley {
 
 	using Time = double;
@@ -31,6 +33,17 @@ namespace Halley {
 		VariableUpdate,
 		Render,
 		NUMBER_OF_TIMELINES
+	};
+
+	template <>
+	struct EnumNames<TimeLine> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"fixedUpdate",
+				"variableUpdate",
+				"render"
+			}};
+		}
 	};
 	
 }
