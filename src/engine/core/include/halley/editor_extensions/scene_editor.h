@@ -96,6 +96,7 @@ namespace Halley {
 		virtual void createEntities(World& world, const Prefab& prefab);
 
 		virtual String getSceneEditorStageName() const;
+		virtual std::optional<String> getSceneEditorSystemTag() const;
     	const HalleyAPI& getAPI() const;
     	Resources& getGameResources() const;
     	Resources& getEditorResources() const;
@@ -108,7 +109,7 @@ namespace Halley {
     	virtual void setEntityFocus(Vector<EntityId> entityIds);
 		void cycleHighlight(int delta) override;
 
-		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
+		std::unique_ptr<World> doCreateWorld(const String& stageName, const std::optional<String>& systemTag) const;
 
     	virtual Vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
     	EntityRef getRootEntityAt(Vector2f point, bool allowUnselectable, EntityAtPositionSelectMode mode) const;

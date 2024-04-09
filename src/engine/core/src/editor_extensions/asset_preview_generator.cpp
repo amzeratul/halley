@@ -118,7 +118,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		});
 		
 		// Create world
-		auto world = std::shared_ptr<World>(World::make(api, resources, "stages/prefab_preview", true));
+		auto world = std::shared_ptr<World>(World::make(api, resources, "stages/game_world", "prefab_preview", true));
 		setupPrefabPreviewWorld(*world, size);
 
 		// Add prefab

@@ -188,7 +188,7 @@ bool SceneEditor::isReadyToCreateWorld() const
 
 void SceneEditor::createWorld(const Prefab& prefab, std::shared_ptr<const UIColourScheme> colourScheme)
 {
-	world = doCreateWorld(getSceneEditorStageName());
+	world = doCreateWorld(getSceneEditorStageName(), getSceneEditorSystemTag());
 	createServices(*world, colourScheme, prefab);
 	createEntities(*world, prefab);
 	cameraEntityIds = createCamera();
@@ -228,9 +228,9 @@ void SceneEditor::onSceneSaved()
 {
 }
 
-std::unique_ptr<World> SceneEditor::doCreateWorld(const String& stageName) const
+std::unique_ptr<World> SceneEditor::doCreateWorld(const String& stageName, const std::optional<String>& systemTag) const
 {
-	return World::make(getAPI(), getGameResources(), stageName, true);
+	return World::make(getAPI(), getGameResources(), stageName, systemTag, true);
 }
 
 void SceneEditor::createServices(World& world, std::shared_ptr<const UIColourScheme> colourScheme, const Prefab& prefab)
@@ -244,6 +244,11 @@ void SceneEditor::createEntities(World& world, const Prefab& prefab)
 String SceneEditor::getSceneEditorStageName() const
 {
 	return "stages/scene_editor";
+}
+
+std::optional<String> SceneEditor::getSceneEditorSystemTag() const
+{
+	return std::nullopt;
 }
 
 const HalleyAPI& SceneEditor::getAPI() const

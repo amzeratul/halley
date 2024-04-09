@@ -4,7 +4,7 @@
 #include "halley/entity/entity_stage.h"
 using namespace Halley;
 
-std::unique_ptr<World> EntityStage::createWorld(const String& configName)
+std::unique_ptr<World> EntityStage::createWorld(const String& configName, const std::optional<String>& systemTag)
 {
-	return World::make(getAPI(), getResources(), configName, getGame().isDevMode());
+	return World::make(getAPI(), getResources(), configName, systemTag, getGame().isDevMode());
 }
