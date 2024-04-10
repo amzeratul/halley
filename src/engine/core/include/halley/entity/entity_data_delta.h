@@ -75,6 +75,8 @@ namespace Halley {
     	std::optional<UUID> prefabUUID;
 		std::optional<UUID> parentUUID;
 
+		bool deserializeChildrenComponentsAsDeltas = true;
+
 		Vector<std::pair<String, ConfigNode>> componentsChanged;// Also includes components added
 		Vector<String> componentsRemoved;
 		Vector<String> componentOrder;

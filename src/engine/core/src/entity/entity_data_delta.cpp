@@ -218,8 +218,10 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(flags, FieldId::Flags);
 	decodeOptField(variant, FieldId::Variant);
 
-	for (auto& c: childrenAdded) {
-		c.makeComponentChangesIntoDeltas();
+	if (deserializeChildrenComponentsAsDeltas) {
+		for (auto& c : childrenAdded) {
+			c.makeComponentChangesIntoDeltas();
+		}
 	}
 }
 

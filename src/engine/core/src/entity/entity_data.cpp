@@ -173,6 +173,7 @@ void EntityData::serialize(Serializer& s) const
 void EntityData::deserialize(Deserializer& s)
 {
 	EntityDataDelta delta;
+	delta.deserializeChildrenComponentsAsDeltas = false;
 	s >> delta;
 	applyDelta(delta);
 }
