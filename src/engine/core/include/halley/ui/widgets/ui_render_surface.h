@@ -23,6 +23,9 @@ namespace Halley {
         void onPreNotifySetRect(IUIElementListener& listener) override;
 
         std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
+
+        void setBypass(bool bypass);
+        bool isRendering() const;
         
     private:
         std::unique_ptr<RenderSurface> renderSurface;
@@ -30,6 +33,7 @@ namespace Halley {
         Colour4f colour;
         Vector2f scale;
         mutable Vector2f innerSize;
+        bool bypass = false;
 
         struct RenderParams {
             int mask;

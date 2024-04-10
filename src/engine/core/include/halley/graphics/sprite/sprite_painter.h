@@ -83,6 +83,7 @@ namespace Halley
 		void copyPrevious(const SpritePainter& prev);
 
 		void start(bool forceCopy = false);
+		void clear();
 		
 		void add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(Sprite&& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});

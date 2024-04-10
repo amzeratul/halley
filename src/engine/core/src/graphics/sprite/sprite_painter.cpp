@@ -183,6 +183,11 @@ void SpritePainter::copyPrevious(const SpritePainter& prev)
 void SpritePainter::start(bool forceCopy)
 {
 	this->forceCopy = forceCopy;
+	clear();
+}
+
+void SpritePainter::clear()
+{
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();

@@ -17,7 +17,7 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 // Update thread
 void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 {
-	if (isEnabled()) {
+	if (isRendering()) {
 		RenderParams params;
 		params.spritePainter = std::make_unique<SpritePainter>();
 		params.pos = getPosition();
@@ -53,7 +53,7 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 // Update thread
 void UIRenderSurface::draw(UIPainter& painter) const
 {
-	if (!isEnabled()) {
+	if (!isRendering()) {
 		return;
 	}
 
@@ -135,18 +135,18 @@ void UIRenderSurface::setScale(Vector2f scale)
 Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const
 {
 	const auto sz = UIWidget::getLayoutMinimumSize(force);
-	return isEnabled() ? sz * scale : sz;
+	return isRendering() ? sz * scale : sz;
 }
 
 Vector2f UIRenderSurface::getLayoutSize(Vector2f size) const
 {
-	innerSize = isEnabled() ? (size / scale).round() : size;
+	innerSize = isRendering() ? (size / scale).round() : size;
 	return innerSize;
 }
 
 void UIRenderSurface::onPreNotifySetRect(IUIElementListener& listener)
 {
-	if (isEnabled()) {
+	if (isRendering()) {
 		auto m = Matrix4f::makeIdentity();
 		m.translate(getPosition());
 		m.scale(scale);
@@ -157,10 +157,20 @@ void UIRenderSurface::onPreNotifySetRect(IUIElementListener& listener)
 
 std::optional<Vector2f> UIRenderSurface::transformToChildSpace(Vector2f pos) const
 {
-	if (isEnabled()) {
+	if (isRendering()) {
 		const auto p0 = getPosition();
 		return (pos - p0) / scale + p0;
 	} else {
 		return pos;
 	}
+}
+
+void UIRenderSurface::setBypass(bool bypass)
+{
+	this->bypass = bypass;
+}
+
+bool UIRenderSurface::isRendering() const
+{
+	return isEnabled() && !bypass;
 }
