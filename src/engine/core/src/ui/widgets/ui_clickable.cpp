@@ -195,6 +195,11 @@ std::optional<MouseCursorMode> UIClickable::getMouseCursorMode() const
 	return MouseCursorMode::Hand;
 }
 
+bool UIClickable::isHovered() const
+{
+	return curState == State::Hover;
+}
+
 void UIClickable::update(Time t, bool)
 {
 	for (auto& i : clickTime) {

@@ -110,6 +110,16 @@ Vector<String> UIList::getSelectedOptionIds() const
 	return result;
 }
 
+std::optional<int> UIList::getHoveredOption() const
+{
+	for (const auto& item : items) {
+		if (item->isHovered()) {
+			return item->getIndex();
+		}
+	}
+	return {};
+}
+
 size_t UIList::getCount() const
 {
 	return getNumberOfItems();

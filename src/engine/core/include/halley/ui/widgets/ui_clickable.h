@@ -38,6 +38,8 @@ namespace Halley {
 		void setMouseExtraBorder(std::optional<Vector4f> override);
 		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
+		bool isHovered() const;
+
 	protected:
 
 		void update(Time t, bool moved) override;
