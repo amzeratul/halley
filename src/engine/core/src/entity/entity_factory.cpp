@@ -727,7 +727,12 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	return std::make_pair(entity, parentUUID);
 }
 
-std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID)
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID) const
+{
+	return prefabDeltaToEntityData(delta, entityUUID, resources);
+}
+
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources)
 {
 	if (delta.getPrefab()) {
 		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
