@@ -203,7 +203,7 @@ void Entity::propagateChildrenChange()
 	}
 }
 
-void Entity::propagateChildWorldPartition(uint8_t newWorldPartition)
+void Entity::propagateChildWorldPartition(WorldPartitionId newWorldPartition)
 {
 	worldPartition = newWorldPartition;
 	for (auto& child : children) {

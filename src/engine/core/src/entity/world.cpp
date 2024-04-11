@@ -213,7 +213,7 @@ EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
 	return createEntity(uuid, name, tryGetEntity(parentId));
 }
 
-EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, uint8_t worldPartition)
+EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, WorldPartitionId worldPartition)
 {
 	if (!uuid.isValid()) {
 		uuid = UUID::generate();
@@ -247,7 +247,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	return e;
 }
 
-void World::moveEntitiesFrom(World& other, std::optional<uint8_t> worldPartition)
+void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition)
 {
 	// First, make sure other doesn't have any pending entities that actually need deletion
 	other.spawnPending();

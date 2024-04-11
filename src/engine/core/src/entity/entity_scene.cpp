@@ -8,10 +8,10 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-EntityScene::EntityScene(bool allowReload, uint8_t worldPartition, String variant)
-	: allowReload(allowReload)
+EntityScene::EntityScene(bool allowReload, WorldPartitionId worldPartition, String variant)
+	: variant(std::move(variant))
+	, allowReload(allowReload)
 	, worldPartition(worldPartition)
-	, variant(std::move(variant))
 {
 }
 
@@ -76,12 +76,12 @@ void EntityScene::addRootEntity(EntityRef entity)
 	entities.emplace_back(entity.getEntityId());
 }
 
-uint8_t EntityScene::getWorldPartition() const
+WorldPartitionId EntityScene::getWorldPartition() const
 {
 	return worldPartition;
 }
 
-void EntityScene::validate(uint8_t worldPartition, World& world)
+void EntityScene::validate(WorldPartitionId worldPartition, World& world)
 {
 	for (const auto& id: entities) {
 		auto e = world.tryGetEntity(id);
@@ -121,7 +121,7 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != prefab->getAssetVersion();
 }
 
-void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition)
+void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, WorldPartitionId worldPartition)
 {
 	const auto& modified = prefab->getEntitiesModified();
 	const auto& removed = prefab->getEntitiesRemoved();

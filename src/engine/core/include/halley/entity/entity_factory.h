@@ -40,7 +40,7 @@ namespace Halley {
 		
 		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
 		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr);
-		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0, String variant = "");
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, WorldPartitionId worldPartition = 0, String variant = "");
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 
@@ -75,7 +75,7 @@ namespace Halley {
 
 		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);
-		void preInstantiate(const IEntityConcreteData& data, uint8_t worldPartition, Vector<EntityRef>& entities);
+		void preInstantiate(const IEntityConcreteData& data, WorldPartitionId worldPartition, Vector<EntityRef>& entities);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
 		void collectExistingEntities(EntityRef entity, EntityFactoryContext& context);
 
@@ -136,8 +136,8 @@ namespace Halley {
 
 		const IEntityData& getRootEntityData() const;
 		EntityScene* getScene() const;
-		uint8_t getWorldPartition() const;
-		void setWorldPartition(uint8_t partition);
+		WorldPartitionId getWorldPartition() const;
+		void setWorldPartition(WorldPartitionId partition);
 
 		const String& getVariant() const;
 		bool canInstantiateVariant(const String& value) const;
@@ -167,7 +167,7 @@ namespace Halley {
 		EntityFactoryContext* parent;
 		Vector<EntityRef> entities;
 		bool update = false;
-		uint8_t worldPartition = 0;
+		WorldPartitionId worldPartition = 0;
 		EntityId curEntity;
 
 		const IEntityData* entityData = nullptr;

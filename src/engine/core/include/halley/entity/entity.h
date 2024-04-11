@@ -39,6 +39,8 @@ namespace Halley {
 	class EntityRef;
 	class ConstEntityRef;
 
+	using WorldPartitionId = uint16_t;
+
 	class Entity
 	{
 		friend class World;
@@ -180,7 +182,6 @@ namespace Halley {
 		bool fromNetwork : 1;
 		
 		uint8_t childrenRevision = 0;
-		uint8_t worldPartition = 0;
 
 		FamilyMaskType mask;
 		Entity* parent = nullptr;
@@ -196,6 +197,7 @@ namespace Halley {
 		UUID prefabUUID;
 		std::shared_ptr<const Prefab> prefab;
 
+		WorldPartitionId worldPartition = 0;
 		uint8_t hierarchyRevision = 0;
 
 		Entity();
@@ -237,7 +239,7 @@ namespace Halley {
 		void detachChildren();
 		void markHierarchyDirty();
 		void propagateChildrenChange();
-		void propagateChildWorldPartition(uint8_t newWorldPartition);
+		void propagateChildWorldPartition(WorldPartitionId newWorldPartition);
 		void propagateEnabled(bool enabled, bool parentEnabled);
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
@@ -700,7 +702,7 @@ namespace Halley {
 			return entity->childrenRevision;
 		}
 
-		uint8_t getWorldPartition() const
+		WorldPartitionId getWorldPartition() const
 		{
 			validate();
 			return entity->worldPartition;

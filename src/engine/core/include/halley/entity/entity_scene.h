@@ -16,12 +16,12 @@ namespace Halley {
 		public:
 			virtual ~IEntitySceneUpdateCallbacks() = default;
 
-			virtual void onEntityAdded(EntityRef entity, const EntityData& data, uint8_t worldPartition) = 0;
-			virtual void onEntityUpdated(EntityRef entity, const EntityDataDelta& data, uint8_t worldPartition) = 0;
-			virtual void onEntityRemoved(EntityRef entity, uint8_t worldPartition) = 0;
+			virtual void onEntityAdded(EntityRef entity, const EntityData& data, WorldPartitionId worldPartition) = 0;
+			virtual void onEntityUpdated(EntityRef entity, const EntityDataDelta& data, WorldPartitionId worldPartition) = 0;
+			virtual void onEntityRemoved(EntityRef entity, WorldPartitionId worldPartition) = 0;
 		};
 		
-		EntityScene(bool allowReload = false, uint8_t worldPartition = 0, String variant = "");
+		EntityScene(bool allowReload = false, WorldPartitionId worldPartition = 0, String variant = "");
 		
 		Vector<EntityId>& getEntities();
 		const Vector<EntityId>& getEntities() const;
@@ -34,8 +34,8 @@ namespace Halley {
 		void addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity);
 		void addRootEntity(EntityRef entity);
 
-		uint8_t getWorldPartition() const;
-		void validate(uint8_t worldPartition, World& world);
+		WorldPartitionId getWorldPartition() const;
+		void validate(WorldPartitionId worldPartition, World& world);
 
 		void destroyEntities(World& world);
 
@@ -46,7 +46,7 @@ namespace Halley {
 			
 			bool needsUpdate() const;
 			
-			void updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition);
+			void updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, WorldPartitionId worldPartition);
 			void markUpdated();
 
 			void addEntity(EntityRef entity);
@@ -66,7 +66,7 @@ namespace Halley {
 		Vector<PrefabObserver> sceneObservers;
 		String variant;
 		bool allowReload = false;
-		uint8_t worldPartition = 0;
+		WorldPartitionId worldPartition = 0;
 
 		PrefabObserver& getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab);
 	};

@@ -97,9 +97,9 @@ namespace Halley {
 		EntityRef createEntity(String name = "", std::optional<EntityRef> parent = {});
 		EntityRef createEntity(String name, EntityId parentId);
 		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
-		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, uint8_t worldPartition = 0);
+		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, WorldPartitionId worldPartition = 0);
 
-		void moveEntitiesFrom(World& other, std::optional<uint8_t> worldPartition);
+		void moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition);
 
 		void destroyEntity(EntityId id);
 		void destroyEntity(EntityRef entity);

@@ -67,7 +67,7 @@ public:
 	void onHierarchyChanged();
 
 	uint16_t getRevision() const { return revision; }
-	uint8_t getWorldPartition() const { return worldPartition; }
+	Halley::WorldPartitionId getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
 
@@ -77,7 +77,7 @@ private:
 	friend class Halley::EntityRef;
 
 	mutable Transform2DComponent* parentTransform = nullptr;
-	mutable uint8_t worldPartition = 0;
+	mutable Halley::WorldPartitionId worldPartition = 0;
 
 	mutable uint8_t cachedValues = 0;
 	mutable int16_t cachedSubWorld = 0;

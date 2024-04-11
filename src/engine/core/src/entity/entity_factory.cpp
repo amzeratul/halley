@@ -30,7 +30,7 @@ World& EntityFactory::getWorld()
 	return world;
 }
 
-EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition, String variant)
+EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, WorldPartitionId worldPartition, String variant)
 {
 	EntityScene curScene(allowReload, worldPartition, variant);
 	try {
@@ -250,12 +250,12 @@ EntityScene* EntityFactoryContext::getScene() const
 	return scene;
 }
 
-uint8_t EntityFactoryContext::getWorldPartition() const
+WorldPartitionId EntityFactoryContext::getWorldPartition() const
 {
 	return worldPartition;
 }
 
-void EntityFactoryContext::setWorldPartition(uint8_t partition)
+void EntityFactoryContext::setWorldPartition(WorldPartitionId partition)
 {
 	worldPartition = partition;
 }
@@ -588,7 +588,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 	}
 }
 
-void EntityFactory::preInstantiate(const IEntityConcreteData& data, uint8_t worldPartition, Vector<EntityRef>& entities)
+void EntityFactory::preInstantiate(const IEntityConcreteData& data, WorldPartitionId worldPartition, Vector<EntityRef>& entities)
 {
 	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), worldPartition);
 	entities.push_back(entity);
