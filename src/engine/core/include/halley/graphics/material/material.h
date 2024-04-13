@@ -135,6 +135,7 @@ namespace Halley
 		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
 		Material& set(size_t textureUnit, const SpriteResource& spriteResource);
+		Material& setDataBlock(size_t idx, gsl::span<const gsl::byte> data);
 		
 		MaterialParameter getParameter(std::string_view name);
 		ConstMaterialParameter getParameter(std::string_view name) const;
@@ -199,6 +200,7 @@ namespace Halley
 		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
 		MaterialUpdater& set(size_t textureUnit, const SpriteResource& sprite);
+		MaterialUpdater& setDataBlock(size_t idx, gsl::span<const gsl::byte> data);
 
 		template <typename T>
 		MaterialUpdater& set(std::string_view name, const T& value)

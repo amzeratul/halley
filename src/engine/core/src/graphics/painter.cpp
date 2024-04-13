@@ -33,6 +33,7 @@ struct LineVertex {
 
 Painter::Painter(VideoAPI& video, Resources& resources)
 	: halleyGlobalMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/MaterialBase"), 0)))
+	, objectAttributeMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/MaterialBase"), 1)))
 	, resources(resources)
 	, video(video)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
@@ -611,7 +612,7 @@ void Painter::makeSpaceForPendingObjects(size_t numBytes)
 {
 	size_t requiredSize = objectBytesPending + numBytes;
 	if (objectBuffer.size() < requiredSize) {
-		objectBuffer.resize(requiredSize * 2);
+		objectBuffer.resize(std::min(requiredSize * 2, static_cast<size_t>(16 * 1024)));
 	}
 }
 
@@ -747,7 +748,7 @@ size_t Painter::getMaxObjects(const MaterialDefinition& material) const
 		return std::numeric_limits<size_t>::max();
 	}
 	const size_t maxSize = 16 * 1024; // TODO
-	return (maxSize + (perObject - 1)) / perObject;
+	return maxSize / perObject;
 }
 
 void Painter::startDrawCall(const std::shared_ptr<const Material>& material)
@@ -809,8 +810,10 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numObjects,
 	
 	// Load object data
 	if (!objectData.empty()) {
-		objectDataBuffer->update(numObjects, objectData.size_bytes() / numObjects, gsl::as_bytes(objectData));
-		objectDataBuffer->bind(ShaderType::Vertex, 0);
+		objectAttributeMaterial->setDataBlock(1, gsl::as_bytes(objectData));
+		setMaterialData(*objectAttributeMaterial);
+		//objectDataBuffer->update(numObjects, objectData.size_bytes() / numObjects, gsl::as_bytes(objectData));
+		//objectDataBuffer->bind(ShaderType::Vertex, 0);
 	}
 
 	// Load material uniforms

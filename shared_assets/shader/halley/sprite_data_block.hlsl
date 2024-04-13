@@ -16,4 +16,8 @@ struct OIn {
     float2 __padding;
 };
 
-StructuredBuffer<OIn> objectData : register(t0);
+//StructuredBuffer<OIn> objectData : register(t0);
+
+cbuffer HalleyObjectAttrib : register(b1) {
+    OIn objectData[100];
+};

@@ -491,6 +491,13 @@ Material& Material::set(size_t textureUnit, const SpriteResource& spriteResource
 	return *this;
 }
 
+Material& Material::setDataBlock(size_t idx, gsl::span<const gsl::byte> data)
+{
+	dataBlocks.at(idx).setData(data);
+	needToUpdateHash = true;
+	return *this;
+}
+
 const String& Material::getTexUnitAssetId(int texUnit) const
 {
 	if (texUnit < static_cast<int>(textures.size())) {
@@ -682,6 +689,14 @@ MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const SpriteResource& 
 {
 	if (material || getOriginalMaterial().getTexture(static_cast<int>(textureUnit)) != sprite.getSpriteSheet()->getTexture()) {
 		getWriteMaterial().set(textureUnit, sprite);
+	}
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setDataBlock(size_t idx, gsl::span<const gsl::byte> data)
+{
+	if (material || getOriginalMaterial().getDataBlocks()[idx].getData() != data) {
+		getWriteMaterial().setDataBlock(idx, data);
 	}
 	return *this;
 }

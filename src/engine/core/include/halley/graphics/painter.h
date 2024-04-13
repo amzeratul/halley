@@ -175,6 +175,7 @@ namespace Halley
 		MaterialConstantBuffer& getConstantBuffer(const MaterialDataBlock& dataBlock);
 
 		std::unique_ptr<Material> halleyGlobalMaterial;
+		std::unique_ptr<Material> objectAttributeMaterial;
 
 	private:
 		class ConstantBufferEntry {
