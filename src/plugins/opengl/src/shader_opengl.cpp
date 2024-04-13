@@ -150,7 +150,7 @@ void ShaderOpenGL::compile()
 		glGetProgramiv(id, GL_LINK_STATUS, &result);
 		glCheckError();
 		if (result == GL_FALSE) {
-			throw Exception("Error loading shader: " + log, HalleyExceptions::VideoPlugin);
+			throw Exception("Error loading shader " + name + ": " + log, HalleyExceptions::VideoPlugin);
 		} else if (infolen > 0) {
 			std::cout << ConsoleColour(Console::YELLOW) << "\nIn shader \"" << name << "\":\n==========\n" << log << "\n==========" << ConsoleColour() << std::endl;
 		}

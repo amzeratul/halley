@@ -40,7 +40,6 @@ Painter::Painter(VideoAPI& video, Resources& resources)
 	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
 	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
 	, blitDepthMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/BlitDepth")))
-	, objectDataBuffer(video.createShaderStorageBuffer())
 {
 }
 
@@ -722,14 +721,13 @@ std::shared_ptr<const Material> Painter::getSolidPolygonMaterial()
 MaterialConstantBuffer& Painter::getConstantBuffer(const MaterialDataBlock& dataBlock)
 {
 	const uint64_t hash = dataBlock.getHash();
-	const auto iter = constantBuffers.find(hash);
-	if (iter == constantBuffers.end()) {
+	if (const auto iter = constantBuffers.find(hash); iter != constantBuffers.end()) {
+		return *iter->second.buffer;
+	} else {
 		auto buffer = std::shared_ptr<MaterialConstantBuffer>(video.createConstantBuffer());
 		buffer->update(dataBlock.getData());
 		constantBuffers[hash] = ConstantBufferEntry{ buffer, 0 };
 		return *buffer;
-	} else {
-		return *iter->second.buffer;
 	}
 }
 

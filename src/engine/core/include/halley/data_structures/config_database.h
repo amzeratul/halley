@@ -108,7 +108,7 @@ namespace Halley {
             return entries;
         }
 
-        void loadConfigs(const ConfigNode& nodes)
+        void loadConfigs(const ConfigNode& nodes) override
         {
             if (nodes.getType() == ConfigNodeType::Sequence) {
                 for (const auto& n : nodes.asSequence()) {

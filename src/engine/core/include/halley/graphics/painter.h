@@ -223,7 +223,6 @@ namespace Halley
 		Vector<String> pendingDebugGroupStack;
 
 		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
-		std::shared_ptr<MaterialShaderStorageBuffer> objectDataBuffer;
 
 		RenderSnapshot* recordingSnapshot = nullptr;
 		bool recordingPerformance = false;

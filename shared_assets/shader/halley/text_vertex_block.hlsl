@@ -1,4 +1,4 @@
-cbuffer MaterialBlock : register(b2) {
+cbuffer MaterialBlock : register(b1) {
     float u_smoothness;
     float u_outline;
     float u_shadowSmoothness;

@@ -176,14 +176,14 @@ void Material::loadMaterialDefinition()
 void Material::initUniforms(std::optional<size_t> forceLocalBlock)
 {
 	dataBlocks.clear();
-	std::array<int16_t, 4> curBindPoints;
-	curBindPoints.fill(-1);
+	std::array<Vector<int16_t>, 4> takenBindPoints;
 
-	int nextIndex = 1;
+	int nextIndex = 0;
 	size_t idx = 0;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
 		const auto type = uniformBlock.shared ? (forceLocalBlock == idx ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal) : MaterialDataBlockType::Local;
-		const int index = type == MaterialDataBlockType::Local ? nextIndex++ : 0;
+		//const int index = type == MaterialDataBlockType::Local ? nextIndex++ : 0;
+		const int index = nextIndex++;
 
 		std::array<int16_t, 4> bindPoints;
 		bindPoints.fill(-1);
@@ -192,7 +192,15 @@ void Material::initUniforms(std::optional<size_t> forceLocalBlock)
 				if (uniformBlock.bindingPoint) {
 					bindPoints[i] = static_cast<int16_t>(*uniformBlock.bindingPoint);
 				} else {
-					bindPoints[i] = ++curBindPoints[i];
+					for (int j = 0; j < 8; ++j) {
+						if (!std_ex::contains(takenBindPoints[i], j)) {
+							bindPoints[i] = j;
+							break;
+						}
+					}
+				}
+				if (bindPoints[i] != -1) {
+					takenBindPoints[i].push_back(bindPoints[i]);
 				}
 			}
 		}
