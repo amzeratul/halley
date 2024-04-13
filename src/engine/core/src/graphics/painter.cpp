@@ -33,7 +33,7 @@ struct LineVertex {
 
 Painter::Painter(VideoAPI& video, Resources& resources)
 	: halleyGlobalMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/MaterialBase"), 0)))
-	, objectAttributeMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/MaterialBase"), 1)))
+	, objectAttributeMaterial(std::unique_ptr<Material>(new Material(resources.get<MaterialDefinition>("Halley/SpriteBase"), 1)))
 	, resources(resources)
 	, video(video)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))

@@ -21,7 +21,7 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints, std::string_view name, const MaterialDefinition& def)
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, dataBlockType(type)
 	, blockIndex(blockIndex)
@@ -39,6 +39,11 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	, hash(other.hash)
 {
 	other.hash = 0;
+}
+
+int MaterialDataBlock::getBindPoint(ShaderType type) const
+{
+	return bindPoints[static_cast<int>(type)];
 }
 
 gsl::span<const gsl::byte> MaterialDataBlock::getData() const
@@ -184,11 +189,15 @@ void Material::initUniforms(std::optional<size_t> forceLocalBlock)
 		bindPoints.fill(-1);
 		for (int i = 0; i < bindPoints.size(); ++i) {
 			if (uniformBlock.bindingMask & (1 << i)) {
-				bindPoints[i] = ++curBindPoints[i];
+				if (uniformBlock.bindingPoint) {
+					bindPoints[i] = static_cast<int16_t>(*uniformBlock.bindingPoint);
+				} else {
+					bindPoints[i] = ++curBindPoints[i];
+				}
 			}
 		}
 
-		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, index, bindPoints, uniformBlock.name, *materialDefinition));
+		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, index, bindPoints));
 		++idx;
 	}
 

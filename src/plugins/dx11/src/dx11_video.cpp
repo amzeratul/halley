@@ -91,7 +91,7 @@ void DX11Video::initD3D(Window& window)
         ID3D11InfoQueue* infoQueue;
         const auto result = device->QueryInterface(__uuidof(ID3D11InfoQueue), reinterpret_cast<void**>(&infoQueue));
 		if (SUCCEEDED(result)) {
-			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, FALSE);
 			infoQueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, TRUE);
 		}
     }

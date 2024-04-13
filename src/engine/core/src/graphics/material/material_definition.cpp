@@ -54,9 +54,10 @@ void MaterialUniform::deserialize(Deserializer& s)
 	s >> defaultValue;
 }
 
-MaterialUniformBlock::MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms)
+MaterialUniformBlock::MaterialUniformBlock(String name, gsl::span<const ShaderType> bindings, bool isShared, Vector<MaterialUniform> uniforms, std::optional<int> bindingPoint)
 	: name(std::move(name))
 	, uniforms(std::move(uniforms))
+	, bindingPoint(bindingPoint)
 	, shared(isShared)
 {
 	bindingMask = 0;
@@ -72,6 +73,7 @@ void MaterialUniformBlock::serialize(Serializer& s) const
 	s << uniforms;
 	s << bindingMask;
 	s << shared;
+	s << bindingPoint;
 }
 
 void MaterialUniformBlock::deserialize(Deserializer& s)
@@ -80,6 +82,7 @@ void MaterialUniformBlock::deserialize(Deserializer& s)
 	s >> uniforms;
 	s >> bindingMask;
 	s >> shared;
+	s >> bindingPoint;
 }
 
 int MaterialUniformBlock::getAddress(int pass, ShaderType stage) const
@@ -530,15 +533,17 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 			}
 
 			Vector<ShaderType> bindings;
+			std::optional<int> bindingPoint;
 			bool shared = false;
 			if (blockData.getType() == ConfigNodeType::Map) {
 				bindings = blockData["bindings"].asVector<ShaderType>({ ShaderType::Vertex, ShaderType::Pixel });
 				shared = blockData["shared"].asBool(false);
+				bindingPoint = blockData["bindingPoint"].asOptional<int>();
 			} else {
 				bindings = { { ShaderType::Vertex, ShaderType::Pixel } };
 			}
 			
-			uniformBlocks.push_back(MaterialUniformBlock(blockName, bindings, shared, uniforms));
+			uniformBlocks.push_back(MaterialUniformBlock(blockName, bindings, shared, uniforms, bindingPoint));
 		}
 	}
 

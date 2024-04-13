@@ -53,12 +53,12 @@ namespace Halley
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints, std::string_view name, const MaterialDefinition& def);
+		MaterialDataBlock(MaterialDataBlockType type, size_t size, int16_t blockIndex, std::array<int16_t, 4> bindPoints);
 		MaterialDataBlock(const MaterialDataBlock& other) = default;
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
 		int getIndex() const { return blockIndex; }
-		int getBindPoint(ShaderType type) const { return bindPoints[static_cast<int>(type)]; }
+		int getBindPoint(ShaderType type) const;
 		gsl::span<const gsl::byte> getData() const;
 		void setData(gsl::span<const gsl::byte> data);
 		MaterialDataBlockType getType() const { return dataBlockType; }

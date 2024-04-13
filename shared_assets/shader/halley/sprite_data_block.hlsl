@@ -18,6 +18,6 @@ struct OIn {
 
 //StructuredBuffer<OIn> objectData : register(t0);
 
-cbuffer HalleyObjectAttrib : register(b1) {
+cbuffer HalleyObjectAttrib : register(b7) {
     OIn objectData[100];
 };

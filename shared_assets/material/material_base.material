@@ -10,7 +10,4 @@ uniforms:
       - name: u_viewPortSize
         type: vec2
         canEdit: false
-  - HalleyObjectAttrib:
-      shared: true
-      uniforms: []
 ...
