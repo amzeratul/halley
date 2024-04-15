@@ -290,7 +290,7 @@ LocalisedString LocalisedString::fromUserString(const String& str)
 
 LocalisedString LocalisedString::fromNumber(int number, int base, int width, char fill)
 {
-	return LocalisedString(toString(number, base, width, fill));
+	return LocalisedString(Halley::toString(number, base, width, fill));
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const
@@ -317,7 +317,7 @@ LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> 
 {
 	auto str = string;
 	for (int i = 0; i < int(toks.size()); ++i) {
-		str = str.replaceAll("{" + toString(i) + "}", toks[i].getString());
+		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i].getString());
 	}
 	return LocalisedString(str);
 }
@@ -329,7 +329,7 @@ std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceToken
 	Vector<std::pair<int, size_t>> indices;
 
 	for (int i = 0; i < int(toks.size()); ++i) {
-		const auto pos = string.find("{" + toString(i) + "}");
+		const auto pos = string.find("{" + Halley::toString(i) + "}");
 		if (pos != String::npos) {
 			indices.emplace_back(i, pos);
 		}
@@ -364,6 +364,11 @@ LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedS
 }
 
 const String& LocalisedString::getString() const
+{
+	return string;
+}
+
+const String& LocalisedString::toString() const
 {
 	return string;
 }

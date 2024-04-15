@@ -43,6 +43,7 @@ namespace Halley {
 		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
 
 		const String& getString() const;
+		const String& toString() const;
 
 		bool operator==(const LocalisedString& other) const;
 		bool operator!=(const LocalisedString& other) const;

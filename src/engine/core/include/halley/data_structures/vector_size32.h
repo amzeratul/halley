@@ -589,6 +589,11 @@ namespace Halley {
 			return gsl::span<T>(data(), size());
 		}
 
+		[[nodiscard]] gsl::span<const T> const_span() const
+		{
+			return gsl::span<const T>(data(), size());
+		}
+
 		[[nodiscard]] gsl::span<const gsl::byte> byte_span() const
 		{
 			return gsl::as_bytes(span());
@@ -597,6 +602,11 @@ namespace Halley {
 		[[nodiscard]] gsl::span<gsl::byte> byte_span()
 		{
 			return gsl::as_writable_bytes(span());
+		}
+
+		[[nodiscard]] gsl::span<const gsl::byte> const_byte_span() const
+		{
+			return gsl::as_bytes(span());
 		}
 
 	private:
