@@ -1313,7 +1313,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	auto id = widgetNode["id"].asString();
 	auto style = widgetNode["style"].asString("tabs");
 	auto tabs = std::make_shared<UIList>(id, getStyle(style), UISizerType::Horizontal, 1);
-	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
+	applyListProperties(*tabs, widgetNode, "tabs");
 
 	Vector<const ConfigNode*> tabNodes;
 	auto loadChildren = [&] (const ConfigNode& root)
@@ -1357,10 +1357,11 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 
 UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 {
-	UIFactoryWidgetProperties result;
+	UIFactoryWidgetProperties result = getBaseListProperties();
 	result.name = "Tabbed Pane";
 	result.iconName = "widget_icons/tabbedPane.png";
 	result.childName = "Tab";
+	result.canHaveChildren = true;
 
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<list>", "tabs");
 
