@@ -16,6 +16,8 @@ namespace Halley {
 
 		void setAlwaysShow(bool alwaysShow);
 
+		void setClipSize(Vector2f clipSize);
+
 	protected:
 		void updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick) override;
 

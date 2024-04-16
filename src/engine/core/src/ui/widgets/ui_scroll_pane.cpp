@@ -56,6 +56,11 @@ Vector2f UIScrollPane::getRelativeScrollEndPosition() const
 	return (scrollPos + clipSize) / std::max(contentsSize, Vector2f(1.0f, 1.0f));
 }
 
+void UIScrollPane::setClipSize(Vector2f clipSize)
+{
+	this->clipSize = clipSize;
+}
+
 void UIScrollPane::scrollTo(Vector2f position)
 {
 	const auto target = clampScrollPos(position);

@@ -27,6 +27,8 @@ namespace Halley {
 		Vector2f getRelativeScrollPosition() const;
 		Vector2f getRelativeScrollEndPosition() const;
 
+		void setClipSize(Vector2f clipSize);
+
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
 		void scrollToShow(Rect4f rect, bool center, bool continuous);

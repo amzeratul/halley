@@ -65,6 +65,11 @@ void UIScrollBarPane::setAlwaysShow(bool alwaysShow)
 	}
 }
 
+void UIScrollBarPane::setClipSize(Vector2f clipSize)
+{
+	pane->setClipSize(clipSize);
+}
+
 void UIScrollBarPane::updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick)
 {
 	// We need to update scrollbars first, then contents, otherwise scrolling information will lag a frame
