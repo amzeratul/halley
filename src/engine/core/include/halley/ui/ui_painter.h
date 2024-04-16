@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	class TextRenderer;
@@ -27,6 +28,7 @@ namespace Halley {
 		UIPainter withMask(int mask) const;
 		UIPainter withNoClip() const;
 		UIPainter withAlpha(float alpha) const;
+		UIPainter withColour(Colour4f colour) const;
 
 		std::optional<Rect4f> getClip() const;
 		int getMask() const;
@@ -36,13 +38,13 @@ namespace Halley {
 		std::optional<Rect4f> clip;
 		int mask;
 		int layer;
-		std::optional<float> alphaMultiplier;
+		std::optional<Colour4f> colourMultiplier;
 		mutable int currentPriority = 0;
 		const UIPainter* rootPainter = nullptr;
 
 		float getCurrentPriorityAndIncrement() const;
 
-		[[nodiscard]] TextRenderer applyAlpha(TextRenderer text) const;
-		[[nodiscard]] Sprite applyAlpha(Sprite sprite) const;
+		[[nodiscard]] TextRenderer applyColour(TextRenderer text) const;
+		[[nodiscard]] Sprite applyColour(Sprite sprite) const;
 	};
 }
