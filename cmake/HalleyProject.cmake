@@ -579,6 +579,7 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	endif()
 
 	set_property(TARGET ${name} PROPERTY VS_DPI_AWARE "PerMonitor")
+	set_property(TARGET ${name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
