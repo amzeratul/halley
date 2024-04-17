@@ -57,6 +57,7 @@ namespace Halley {
 		void onWidgetRemoved(const UIWidget& widget);
 
 		UIWidget* getCurrentFocus() const;
+		UIWidget* getCurrentMouseOver() const;
 
 		void setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction);
 		void unsetUIMouseRemapping();

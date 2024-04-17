@@ -721,3 +721,8 @@ UIWidget* UIRoot::getCurrentFocus() const
 {
 	return currentFocus.lock().get();
 }
+
+UIWidget* UIRoot::getCurrentMouseOver() const
+{
+	return currentMouseOver.lock().get();
+}

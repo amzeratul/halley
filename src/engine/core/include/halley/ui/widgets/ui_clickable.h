@@ -40,6 +40,9 @@ namespace Halley {
 
 		bool isHovered() const;
 
+		void setHoverOnChildren(bool enabled);
+		bool isMouseOver() const override;
+
 	protected:
 
 		void update(Time t, bool moved) override;
@@ -57,6 +60,7 @@ namespace Halley {
 		std::optional<Vector4f> mouseExtraBorder;
 		std::pair<bool, KeyMods> held[3] = {{false, KeyMods::None}, {false, KeyMods::None}, {false, KeyMods::None}};
 		bool forceUpdate = false;
+		bool hoverOnChildren = false;
 
 		Vector2f clickPos[3] = {Vector2f(), Vector2f(), Vector2f()};
 		Time clickTime[3] = { 100.0, 100.0, 100.0 };

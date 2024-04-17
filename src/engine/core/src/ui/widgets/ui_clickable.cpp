@@ -206,3 +206,22 @@ void UIClickable::update(Time t, bool)
 		i += t;
 	}
 }
+
+void UIClickable::setHoverOnChildren(bool enabled)
+{
+	hoverOnChildren = enabled;
+}
+
+bool UIClickable::isMouseOver() const
+{
+	if (UIWidget::isMouseOver()) {
+		return true;
+	}
+
+	if (hoverOnChildren) {
+		auto* curMouseOver = getRoot() ? getRoot()->getCurrentMouseOver() : nullptr;
+		return curMouseOver && curMouseOver->isDescendentOf(*this);
+	}
+
+	return false;
+}
