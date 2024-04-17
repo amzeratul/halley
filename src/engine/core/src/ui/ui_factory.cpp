@@ -731,15 +731,6 @@ UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getSliderProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Slider";
-	result.canHaveChildren = false;
-	result.iconName = "widget_icons/slider.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getFramedImageProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -1239,6 +1230,24 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 
 	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow, Vector2f(), scrollSpeed, smoothGoTo);
 	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSliderProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Slider";
+	result.canHaveChildren = false;
+	result.iconName = "widget_icons/slider.png";
+
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<slider>", "slider");
+	result.entries.emplace_back("Value", "value", "float", "0.5");
+	result.entries.emplace_back("Min Value", "minValue", "float", "0");
+	result.entries.emplace_back("Max Value", "maxValue", "float", "1");
+	result.entries.emplace_back("Granularity", "granularity", "std::optional<float>", "");
+	result.entries.emplace_back("Has Spin Control", "hasSpinControl", "bool", "false");
+	result.entries.emplace_back("Show Label", "showLabel", "bool", "true");
+
 	return result;
 }
 
