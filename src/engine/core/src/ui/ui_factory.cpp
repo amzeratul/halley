@@ -753,6 +753,11 @@ UIFactoryWidgetProperties UIFactory::getSpinListProperties() const
 	UIFactoryWidgetProperties result;
 	result.name = "Spin List";
 	result.canHaveChildren = false;
+	result.entries.emplace_back("Options", "options", "std::optional<Halley::Vector<Halley::UIFactory::ParsedOption>>", "");
+	result.entries.emplace_back("Min Value", "minValue", "std::optional<float>", "");
+	result.entries.emplace_back("Max Value", "maxValue", "std::optional<float>", "");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<spinlist>", "label");
+
 	//result.iconName = "widget_icons/spinList.png";
 	return result;
 }
@@ -1520,6 +1525,13 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
 	auto widget = std::make_shared<UISpinList>(id, style);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(optionIds, optionLabels);
+
+	const auto min = node["minValue"].asOptional<int>();
+	const auto max = node["maxValue"].asOptional<int>();
+	if (min || max) {
+		widget->setMinMax(min.value_or(0), max.value_or(0));
+	}
+
 	return widget;
 }
 

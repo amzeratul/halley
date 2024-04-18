@@ -1,30 +1,51 @@
 #include "halley/ui/widgets/ui_spin_list.h"
+
+#include "halley/input/input_keyboard.h"
 #include "halley/ui/ui_style.h"
 #include "halley/ui/widgets/ui_image.h"
 #include "halley/text/i18n.h"
 #include "halley/ui/ui_data_bind.h"
 #include "halley/ui/widgets/ui_label.h"
-#include "halley/support/logger.h"
 
 using namespace Halley;
 
 UISpinList::UISpinList(String id, const UIStyle& style, Vector<LocalisedString> os, int defaultOption)
-	: UIWidget(std::move(id), {})
+	: UIWidget(std::move(id), {}, UISizer())
 	, curOption(defaultOption)
 {
-	sprite = style.getSprite("normal");
 	styles.emplace_back(style);
+
+	leftArrow = std::make_shared<UISpinListArrow>(*this, "spinlist_arrow_left_" + getId(), styles[0], true);
+	add(leftArrow, 0, {}, UISizerFillFlags::Left);
+
+	label = std::make_shared<UILabel>("spinlist_label_" + getId(), style, LocalisedString::fromUserString(""));
+	add(label, 1, {}, UISizerFillFlags::Centre);
+
+	rightArrow = std::make_shared<UISpinListArrow>(*this, "spinlist_arrow_right_" + getId(), styles[0], false);
+	add(rightArrow, 0, {}, UISizerFillFlags::Right);
 
 	setOptions(std::move(os));
 }
 
 void UISpinList::setSelectedOption(int option)
 {
-	int nextOption = clamp(option, 0, int(options.size()) - 1);
+	int nextOption = option;
+	if (option >= static_cast<int>(options.size())) {
+		nextOption = 0;
+	}
+	if (option < 0) {
+		nextOption = static_cast<int>(options.size()) - 1;
+	}
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), optionIds[curOption], curOption));
 
+		const auto spinSound = styles[0].getString("spinSound");
+		if (!spinSound.isEmpty()) {
+			playSound(spinSound);
+		}
+
+		label->setText(options[curOption]);
 		if (getDataBindFormat() == UIDataBind::Format::String) {
 			notifyDataBind(optionIds[curOption]);
 		}
@@ -32,8 +53,7 @@ void UISpinList::setSelectedOption(int option)
 			notifyDataBind(curOption);
 		}	
 	}
-
-	updateLabelPositions();
+	focus();
 }
 
 void UISpinList::setSelectedOption(const String& id)
@@ -69,55 +89,6 @@ void UISpinList::setOptions(const Vector<LocalisedString> os, int defaultOption)
 	setOptions({}, os, defaultOption);
 }
 
-void UISpinList::updateLabelPositions() {
-	if (!spinner || int(spinner->getChildren().size()) == 0) {
-		return;
-	}
-
-	for (auto& child : spinner->getChildren()) {
-		child->setMinSize(getSize());
-	}
-
-	auto currentLabel = spinner->getChildren().at(curOption);
-	auto firstLabel = spinner->getChildren().at(0);
-	auto offset = Vector2f(currentLabel->getSize().x * 0.5f - std::dynamic_pointer_cast<UILabel>(currentLabel)->getTextRenderer().getExtents().x * 0.5f, 0);
-	spinner->setPosition(getPosition() - (currentLabel->getPosition() - firstLabel->getPosition()) + offset);
-
-	for (auto& c : spinner->getChildren()) {
-		auto label = std::dynamic_pointer_cast<UILabel>(c);
-		const auto offsetFromStart = currentLabel->getPosition() - c->getPosition();
-		std::dynamic_pointer_cast<UILabel>(c)->getTextRenderer().setClip(Rect4f(offsetFromStart, c->getSize().x, c->getSize().y));
-	}
-
-	spinner->layout();
-}
-
-void UISpinList::updateOptionLabels() {
-	const auto& style = styles.at(0);
-	auto label = style.getTextRenderer("label").clone();
-	float maxExtents = 0;
-	for (auto& o : options) {
-		maxExtents = std::max(maxExtents, label.clone().setText(o).getExtents().x);
-	}
-
-	auto minSize = Vector2f(maxExtents + 19, 14); // HACK
-	setMinSize(std::max(getMinimumSize(), minSize));
-
-	if (spinner) {
-		spinner->destroy();
-	}
-	spinner = std::make_shared<UIWidget>("spinner_" + getId(), Vector2f(), UISizer(UISizerType::Horizontal, 0));
-
-	auto i = 0;
-	for (auto& o : options) {
-		auto optionLabel = std::make_shared<UILabel>("spinner_option_" + optionIds[i], style, o);
-		spinner->add(optionLabel);
-		++i;
-	}
-
-	addChild(spinner);
-}
-
 void UISpinList::setOptions(Vector<String> oIds, const Vector<LocalisedString>& os, int defaultOption)
 {
 	if (oIds.empty()) {
@@ -139,7 +110,7 @@ void UISpinList::setOptions(Vector<String> oIds, const Vector<LocalisedString>& 
 		optionIds.emplace_back();
 	}
 	curOption = clamp(curOption, 0, int(options.size() - 1));
-	updateOptionLabels();
+	label->setText(options[curOption]);
 
 	if (defaultOption != -1) {
 		setSelectedOption(defaultOption);
@@ -149,6 +120,17 @@ void UISpinList::setOptions(Vector<String> oIds, const Vector<LocalisedString>& 
 void UISpinList::setOptions(const I18N& i18n, const String& i18nPrefix, const Vector<String>& optionIds, int defaultOption)
 {
 	setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
+}
+
+void UISpinList::setMinMax(int min, int max)
+{
+	Vector<LocalisedString> os;
+	os.reserve(max - min);
+	for (int i = min; i <= max; ++i) {
+		os.push_back(LocalisedString::fromUserString(String(toString(i))));
+	}
+
+	setOptions(std::move(os));
 }
 
 void UISpinList::onManualControlCycleValue(int delta)
@@ -166,11 +148,6 @@ bool UISpinList::canReceiveFocus() const
 	return true;
 }
 
-void UISpinList::draw(UIPainter& painter) const
-{
-	painter.draw(sprite);
-}
-
 void UISpinList::update(Time t, bool moved)
 {
 	bool optionsUpdated = false;
@@ -179,16 +156,9 @@ void UISpinList::update(Time t, bool moved)
 			optionsUpdated = true;
 		}
 	}
+
 	if (optionsUpdated) {
-		updateOptionLabels();
-	}
-
-	const auto& style = styles.at(0);
-	sprite = isEnabled() ? (isMouseOver() ? style.getSprite("hover") : style.getSprite("normal")) : style.getSprite("disabled");
-	sprite.setPos(getPosition()).scaleTo(getSize());
-
-	if (spinner && int(spinner->getChildren().size()) > 0) {
-		updateLabelPositions();
+		label->setText(options[curOption]);
 	}
 }
 
@@ -203,8 +173,40 @@ void UISpinList::readFromDataBind()
 	}
 }
 
-void UISpinList::drawChildren(UIPainter& painter) const
+void UISpinList::arrowPressed(bool left)
 {
-	auto p = painter.withAdjustedLayer(1);
-	UIWidget::drawChildren(p);
+	setSelectedOption(left ? curOption - 1 : curOption + 1);
+}
+
+
+UISpinListArrow::UISpinListArrow(UISpinList& parent, String id, const UIStyle& style, bool left)
+    : UIImage(id, left ? style.getSprite("normalLeft") : style.getSprite("normalRight"), UISizer())
+    , parent(parent)
+    , left(left)
+{
+	setInteractWithMouse(true);
+	styles.emplace_back(style);
+}
+
+void UISpinListArrow::update(Time t, bool moved)
+{
+	const auto& style = styles.at(0);
+	const auto animationLength = style.getFloat("animationLength", 0.0f);
+	if (animationLength != 0.0f) {
+		time += static_cast<float>(t);
+	    const auto step = clamp(time / animationLength, 0.0f, 1.0f);
+		const auto offset = 1.0f - pow((step * 2.0f - 1.0f), 2.0f);
+		setPosition(getRect().getTopLeft() + Vector2f((left ? -offset : offset) * style.getFloat("animationDistance", 1.0f), 0.0f));
+	}
+
+	const String dir = left ? "Left" : "Right";
+	setSprite(isEnabled() ? (isMouseOver() ? style.getSprite("hover" + dir) : style.getSprite("normal" + dir)) : style.getSprite("disabled" + dir));
+
+    UIImage::update(t, moved);
+}
+
+void UISpinListArrow::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	parent.arrowPressed(left);
+	time = 0.0f;
 }
