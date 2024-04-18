@@ -30,11 +30,13 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 		});
 	} else {
 		box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
-		label = std::make_shared<UILabel>(id + "_label", style, makeLabel());
-		box->add(label, 0, {}, UISizerAlignFlags::Centre);
+		label = std::make_shared<UILabel>(id + "_label", style, makeLabel(true));
+		box->add(label, 1, {}, UISizerAlignFlags::Centre);
+		box->setMinSize(Vector2f(1, 1));
 		box->layout();
 		box->setMinSize(box->getSize());
 		UIWidget::add(box, 0, {}, UISizerAlignFlags::Centre);
+		updateLabel();
 	}
 
 	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
@@ -171,19 +173,20 @@ void UISlider::update(Time t, bool moved)
 	}
 }
 
-LocalisedString UISlider::makeLabel() const
+LocalisedString UISlider::makeLabel(bool forceMax) const
 {
+	float value = forceMax ? getMaxValue() : getValue();
 	if (labelConversion) {
-		return labelConversion(getValue());
+		return labelConversion(value);
 	} else {
-		return LocalisedString::fromNumber(int(lround(getValue())));
+		return LocalisedString::fromNumber(int(lround(value)));
 	}
 }
 
 void UISlider::updateLabel()
 {
 	if (box && label) {
-		label->setText(makeLabel());
+		label->setText(makeLabel(false));
 		box->layout();
 		box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
 	}

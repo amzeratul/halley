@@ -52,7 +52,7 @@ namespace Halley {
 		std::function<LocalisedString(float)> labelConversion;
 		std::function<float(float)> transformation;
 
-		LocalisedString makeLabel() const;
+		LocalisedString makeLabel(bool forceMax) const;
 		void updateLabel();
 		float getValueWithGranularity() const;
 	};
