@@ -72,4 +72,19 @@ namespace Halley {
         return GamePlatform::Unknown;
     #endif
     }
+
+    constexpr inline bool isPCPlatform()
+    {
+        return getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::Linux || getPlatform() == GamePlatform::MacOS || getPlatform() == GamePlatform::FreeBSD || getPlatform() == GamePlatform::Emscripten;
+    }
+
+    constexpr inline bool isMobilePlatform()
+    {
+        return getPlatform() == GamePlatform::Android || getPlatform() == GamePlatform::iOS;
+    }
+
+    constexpr inline bool isConsolePlatform()
+    {
+        return getPlatform() == GamePlatform::Switch || getPlatform() == GamePlatform::PS4 || getPlatform() == GamePlatform::XboxOne || getPlatform() == GamePlatform::UWP;
+    }
 }

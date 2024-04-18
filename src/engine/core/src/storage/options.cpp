@@ -27,6 +27,7 @@ void Options::save()
 	result.getRoot() = toConfigNode();
 	auto bytes = Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion));
 	saveData->setData("options", bytes);
+	modified = false;
 }
 
 void Options::reset()
@@ -37,8 +38,14 @@ void Options::reset()
 	options["devFlags"] = ConfigNode::MapType();
 	options["keyboardLayout"] = "qwerty";
 	options["resolution"] = Vector2i(1280, 720);
+	modified = true;
 
 	onReset();
+}
+
+bool Options::isModified() const
+{
+	return modified;
 }
 
 void Options::load(ConfigNode node)
@@ -46,6 +53,7 @@ void Options::load(ConfigNode node)
 	for (auto& [k, v]: node.asMap()) {
 		options[k] = std::move(v);
 	}
+	modified = false;
 }
 
 ConfigNode Options::toConfigNode() const
@@ -53,36 +61,21 @@ ConfigNode Options::toConfigNode() const
 	return ConfigNode(options);
 }
 
-float Options::getVolume(std::string_view bus) const
+void Options::setOption(std::string_view name, ConfigNode value)
 {
-	return options["volume"][bus].asFloat(1.0f);
+	options[name] = std::move(value);
+	modified = true;
 }
 
-void Options::setVolume(std::string_view bus, float value)
+ConfigNode Options::getOption(std::string_view name) const
 {
-	options["volume"][bus] = value;
-}
-
-void Options::applyVolumes(AudioAPI& audio)
-{
-	for (const auto& [k, v]: options["volume"].asMap()) {
-		audio.setBusVolume(k, v.asFloat(1.0f));
-	}
-}
-
-String Options::getKeyboardLayout() const
-{
-	return options["keyboardLayout"].asString();
-}
-
-void Options::setKeyboardLayout(String layout)
-{
-	options["keyboardLayout"] = ConfigNode(std::move(layout));
+	return ConfigNode(options[name]);
 }
 
 void Options::setDevValue(std::string_view name, float value)
 {
 	options["devValues"][name] = value;
+	modified = true;
 }
 
 float Options::getDevValue(std::string_view name, float defaultValue) const
@@ -93,6 +86,7 @@ float Options::getDevValue(std::string_view name, float defaultValue) const
 void Options::setDevFlag(std::string_view name, bool value)
 {
 	options["devFlags"][name] = value;
+	modified = true;
 }
 
 bool Options::getDevFlag(std::string_view name, bool defaultValue) const
@@ -100,17 +94,77 @@ bool Options::getDevFlag(std::string_view name, bool defaultValue) const
 	return options["devFlags"][name].asBool(defaultValue);
 }
 
+void Options::onReset()
+{
+
+}
+
+
 Vector2i Options::getResolution() const
 {
-	return options["resolution"].asVector2i();
+	return getOption("resolution").asVector2i();
 }
 
 void Options::setResolution(Vector2i resolution)
 {
-	options["resolution"] = resolution;
+	setOption("resolution", ConfigNode(resolution));
 }
 
-void Options::onReset()
+bool Options::getFullscreen() const
 {
-	
+	return getOption("fullscreen").asBool(true);
+}
+
+void Options::setFullscreen(bool fullscreen)
+{
+	setOption("fullscreen", ConfigNode(fullscreen));
+}
+
+float Options::getVolume(std::string_view bus) const
+{
+	return options["volume"][bus].asFloat(1.0f);
+}
+
+void Options::setVolume(std::string_view bus, float value)
+{
+	options["volume"][bus] = value;
+	modified = true;
+}
+
+void Options::applyVolumes(AudioAPI& audio)
+{
+	for (const auto& [k, v] : options["volume"].asMap()) {
+		audio.setBusVolume(k, v.asFloat(1.0f));
+	}
+}
+
+void Options::setAudioOutputType(AudioOutputType type)
+{
+	setOption("audioOutputType", ConfigNode(toString(type)));
+}
+
+AudioOutputType Options::getAudioOutputType() const
+{
+	const auto defaultValue = isPCPlatform() ? AudioOutputType::Headphones : AudioOutputType::SurroundSpeakers;
+	return getOption("audioOutputType").asEnum<AudioOutputType>(defaultValue);
+}
+
+String Options::getKeyboardLayout() const
+{
+	return getOption("keyboardLayout").asString();
+}
+
+void Options::setKeyboardLayout(String layout)
+{
+	setOption("keyboardLayout", ConfigNode(std::move(layout)));
+}
+
+String Options::getLanguage() const
+{
+	return getOption("language").asString("en-GB");
+}
+
+void Options::setLanguage(String languageCode)
+{
+	setOption("language", ConfigNode(std::move(languageCode)));
 }
