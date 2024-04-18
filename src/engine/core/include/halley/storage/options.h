@@ -53,10 +53,17 @@ namespace Halley {
 		String getLanguage() const;
 		void setLanguage(String languageCode);
 
-		Vector2i getResolution() const;
-		void setResolution(Vector2i resolution);
+		Vector2i getResolution(bool fullscreen) const;
+		void setResolution(bool fullscreen, Vector2i resolution);
 		bool getFullscreen() const;
 		void setFullscreen(bool fullscreen);
+
+		bool getVibration() const;
+		void setVibration(bool enabled);
+		bool getFlashingEffects() const;
+		void setFlashingEffects(bool enabled);
+		bool getScreenShake() const;
+		void setScreenShake(bool enabled);
 
 	protected:
 		

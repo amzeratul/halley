@@ -100,24 +100,56 @@ void Options::onReset()
 }
 
 
-Vector2i Options::getResolution() const
+Vector2i Options::getResolution(bool fullscreen) const
 {
-	return getOption("resolution").asVector2i();
+	return getOption("resolution" + String(fullscreen ? "_fullscreen" : "_window")).asVector2i(Vector2i(1280, 720));
 }
 
-void Options::setResolution(Vector2i resolution)
+void Options::setResolution(bool fullscreen, Vector2i resolution)
 {
-	setOption("resolution", ConfigNode(resolution));
+	setOption("resolution" + String(fullscreen ? "_fullscreen" : "_window"), ConfigNode(resolution));
 }
 
 bool Options::getFullscreen() const
 {
+	return false;
+	// TODO
 	return getOption("fullscreen").asBool(true);
 }
 
 void Options::setFullscreen(bool fullscreen)
 {
 	setOption("fullscreen", ConfigNode(fullscreen));
+}
+
+bool Options::getVibration() const
+{
+	return getOption("vibration").asBool(true);
+}
+
+void Options::setVibration(bool enabled)
+{
+	setOption("vibration", ConfigNode(enabled));
+}
+
+bool Options::getFlashingEffects() const
+{
+	return getOption("flashingEffects").asBool(true);
+}
+
+void Options::setFlashingEffects(bool enabled)
+{
+	setOption("flashingEffects", ConfigNode(enabled));
+}
+
+bool Options::getScreenShake() const
+{
+	return getOption("screenShake").asBool(true);
+}
+
+void Options::setScreenShake(bool enabled)
+{
+	setOption("screenShake", ConfigNode(enabled));
 }
 
 float Options::getVolume(std::string_view bus) const

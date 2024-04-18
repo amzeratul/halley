@@ -114,6 +114,13 @@ namespace Halley
 			return w;
 		}
 
+		WindowDefinition withType(WindowType type) const
+		{
+			auto w = *this;
+			w.windowType = type;
+			return w;
+		}
+
 	private:
 		WindowType windowType = WindowType::Fullscreen;
 		WindowState windowState = WindowState::Normal;
