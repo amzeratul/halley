@@ -156,6 +156,8 @@ namespace Halley {
 		virtual bool isButtonDown(InputButton code);
 		virtual KeyMods getKeyMods();
 
+		virtual bool hasAnyInput();
+
 		virtual void clearButton(InputButton code);
 		virtual void clearButtonPress(InputButton code);
 		virtual void clearButtonRelease(InputButton code);

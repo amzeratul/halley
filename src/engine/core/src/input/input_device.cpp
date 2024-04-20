@@ -87,6 +87,21 @@ KeyMods InputDevice::getKeyMods()
 	return KeyMods::None;
 }
 
+bool InputDevice::hasAnyInput()
+{
+	if (isAnyButtonPressed() || isAnyButtonReleased()) {
+		return true;
+	}
+
+	for (int i = 0; i < getNumberAxes(); ++i) {
+		if (std::fabs(getAxis(i)) > 0.1f) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void InputDevice::clearButton(InputButton code)
 {
 }

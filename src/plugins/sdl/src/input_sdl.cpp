@@ -35,20 +35,18 @@
 #include "halley/text/string_converter.h"
 #include "halley/utils/algorithm.h"
 
-#ifdef _MSC_VER
-#include "halley/input/input_joystick_xinput.h"
-#endif
-
 using namespace Halley;
 
 #ifdef XINPUT_AVAILABLE
+#include "halley/input/input_joystick_xinput.h"
 constexpr static bool hasXInput = true;
 #else
 constexpr static bool hasXInput = false;
 #endif
 
-InputSDL::InputSDL(SystemAPI& system)
+InputSDL::InputSDL(SystemAPI& system, bool useXInput)
 	: system(dynamic_cast<SystemSDL&>(system))
+	, useXInput(useXInput && hasXInput)
 {
 }
 
@@ -78,10 +76,12 @@ void InputSDL::setResources(Resources& resources)
 
 	// XInput controllers
 #ifdef XINPUT_AVAILABLE
-	for (int i = 0; i < 4; i++) {
-		auto joy = std::make_shared<InputJoystickXInput>(i);
-		joy->update(0);
-		joysticks.push_back(std::move(joy));
+	if (useXInput) {
+		for (int i = 0; i < 4; i++) {
+			auto joy = std::make_shared<InputJoystickXInput>(i);
+			joy->update(0);
+			joysticks.push_back(std::move(joy));
+		}
 	}
 #endif
 
@@ -298,30 +298,23 @@ void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent&
 void InputSDL::addJoystick(int idx)
 {
 	try {
-		const auto nameLower = String(SDL_JoystickNameForIndex(idx)).asciiLower();
-		const auto guid = SDL_JoystickGetDeviceGUID(idx);
-		char buffer[64] = {};
-#if SDL_VERSION_ATLEAST(2, 24, 0)
-		SDL_GUIDToString(guid, buffer, 64);
-#endif
-		const bool isXinputController = String(buffer) == "xinput" || nameLower.contains("xbox") || nameLower.contains("xinput");
-
-		if (!hasXInput || !isXinputController) {
-			if (SDL_IsGameController(idx)) {
+		if (SDL_IsGameController(idx)) {
+			const auto type = SDL_GameControllerTypeForIndex(idx);
+			if (!useXInput || (type != SDL_CONTROLLER_TYPE_XBOXONE && type != SDL_CONTROLLER_TYPE_XBOX360)) {
 				const auto joy = std::make_shared<InputGameControllerSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
 				assert(!sdlGameControllers.contains(id));
 				assert(!sdlJoys.contains(id));
 				sdlGameControllers[id] = joy;
 				joysticks.push_back(joy);
-			} else {
-				const auto joy = std::make_shared<InputJoystickSDL>(idx);
-				const auto id = joy->getSDLJoystickId();
-				assert(!sdlGameControllers.contains(id));
-				assert(!sdlJoys.contains(id));
-				sdlJoys[id] = joy;
-				joysticks.push_back(joy);
 			}
+		} else {
+			const auto joy = std::make_shared<InputJoystickSDL>(idx);
+			const auto id = joy->getSDLJoystickId();
+			assert(!sdlGameControllers.contains(id));
+			assert(!sdlJoys.contains(id));
+			sdlJoys[id] = joy;
+			joysticks.push_back(joy);
 		}
 	} catch (const std::exception& e) {
 		Logger::logException(e);

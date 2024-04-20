@@ -40,5 +40,6 @@ namespace Halley
 		virtual ~IPluginRegistry() {}
 		virtual void registerPlugin(std::unique_ptr<Plugin> plugin) = 0;
 		virtual Vector<Plugin*> getPlugins(PluginType type) = 0;
+		virtual bool isDevMode() = 0;
 	};
 }

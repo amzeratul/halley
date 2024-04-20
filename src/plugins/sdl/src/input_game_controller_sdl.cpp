@@ -16,6 +16,31 @@ InputGameControllerSDL::InputGameControllerSDL(int number)
 	id = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controller));
 	idx = number;
 	name = String(SDL_GameControllerName(controller));
+	const auto type = SDL_GameControllerGetType(controller);
+
+	// Category
+	if (type == SDL_CONTROLLER_TYPE_XBOX360 || type == SDL_CONTROLLER_TYPE_XBOXONE) {
+		joystickType = JoystickType::Xbox;
+	} else if (type == SDL_CONTROLLER_TYPE_PS3 || type == SDL_CONTROLLER_TYPE_PS4 || type == SDL_CONTROLLER_TYPE_PS5) {
+		joystickType = JoystickType::Playstation;
+	} else if (type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO || type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_PAIR) {
+		joystickType = JoystickType::SwitchFull;
+	} else if (type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_LEFT) {
+		joystickType = JoystickType::SwitchLeftJoycon;
+	} else if (type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_JOYCON_RIGHT) {
+		joystickType = JoystickType::SwitchRightJoycon;
+	} else {
+		auto nameLower = name.asciiLower();
+		if (nameLower.contains("xinput") || nameLower.contains("xbox")) {
+			joystickType = JoystickType::Xbox;
+		} else if (nameLower.contains("playstation") || nameLower.contains("dualshock") || nameLower.contains("dualsense")) {
+			joystickType = JoystickType::Playstation;
+		} else if (nameLower.contains("nintendo") || nameLower.contains("switch")) {
+			joystickType = JoystickType::SwitchFull;
+		} else {
+			joystickType = JoystickType::Generic;
+		}
+	}
 
 	// Axes
 	axes.resize(SDL_CONTROLLER_AXIS_MAX);
@@ -61,6 +86,11 @@ std::string_view InputGameControllerSDL::getName() const
 String InputGameControllerSDL::getMapping() const
 {
 	return controller ? SDL_GameControllerMapping(controller) : nullptr;
+}
+
+JoystickType InputGameControllerSDL::getJoystickType() const
+{
+	return joystickType;
 }
 
 int InputGameControllerSDL::getSDLJoystickId() const

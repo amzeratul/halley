@@ -18,7 +18,7 @@ namespace Halley {
 
 		std::string_view getName() const final override;
 		String getMapping() const;
-		JoystickType getJoystickType() const override { return JoystickType::Generic; }
+		JoystickType getJoystickType() const override;
 		int getSDLJoystickId() const;
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
@@ -28,6 +28,7 @@ namespace Halley {
 		int id;
 		int idx;
 		String name;
+		JoystickType joystickType = JoystickType::Generic;
 
 		void processEvent(const SDL_Event& event);
 		void doSetVibration(float low, float high) override;
