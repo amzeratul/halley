@@ -23,6 +23,12 @@ namespace Halley {
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
 
+		bool hasLED() const override;
+		void setLED(Colour4c colour) const override;
+		std::optional<int> getPlayerIndex() const override;
+
+		int getControllerIndex() const;
+
 	private:
 		SDL_GameController* controller = nullptr;
 		int id;

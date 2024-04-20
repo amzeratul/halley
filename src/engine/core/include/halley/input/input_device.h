@@ -26,6 +26,7 @@
 #include <halley/text/string_converter.h>
 
 #include "input_keys.h"
+#include "halley/maths/colour.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
@@ -187,6 +188,10 @@ namespace Halley {
 		virtual std::shared_ptr<InputDevice> getParent() const;
 
 		virtual bool isManual() const;
+
+		virtual std::optional<int> getPlayerIndex() const;
+		virtual bool hasLED() const;
+		virtual void setLED(Colour4c colour) const;
 
 	private:
 		uint16_t deviceId = 0;

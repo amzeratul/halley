@@ -137,6 +137,20 @@ size_t InputDevice::getNumberHats()
 	return 0;
 }
 
+std::optional<int> InputDevice::getPlayerIndex() const
+{
+	return {};
+}
+
+bool InputDevice::hasLED() const
+{
+	return false;
+}
+
+void InputDevice::setLED(Colour4c colour) const
+{
+}
+
 std::shared_ptr<InputDevice> InputDevice::getHat(int)
 {
 	return {};

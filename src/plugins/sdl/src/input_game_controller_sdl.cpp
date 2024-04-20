@@ -124,6 +124,30 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 	}
 }
 
+bool InputGameControllerSDL::hasLED() const
+{
+	return SDL_GameControllerHasLED(controller);
+}
+
+void InputGameControllerSDL::setLED(Colour4c c) const
+{
+	SDL_GameControllerSetLED(controller, c.r, c.g, c.b);
+}
+
+std::optional<int> InputGameControllerSDL::getPlayerIndex() const
+{
+	if (auto idx = SDL_GameControllerGetPlayerIndex(controller); idx != -1) {
+		return idx;
+	} else {
+		return {};
+	}
+}
+
+int InputGameControllerSDL::getControllerIndex() const
+{
+	return idx;
+}
+
 void InputGameControllerSDL::processEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_CONTROLLERBUTTONDOWN || event.type == SDL_CONTROLLERBUTTONUP) {

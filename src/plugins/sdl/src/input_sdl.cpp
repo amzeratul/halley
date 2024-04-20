@@ -297,6 +297,13 @@ void InputSDL::processGameControllerDeviceEvent(const SDL_ControllerDeviceEvent&
 
 void InputSDL::addJoystick(int idx)
 {
+	for (const auto& controller: sdlGameControllers) {
+		if (controller.second->getControllerIndex() == idx) {
+			Logger::logWarning("Controller already loaded");
+			return;
+		}
+	}
+
 	try {
 		if (SDL_IsGameController(idx)) {
 			const auto type = SDL_GameControllerTypeForIndex(idx);
