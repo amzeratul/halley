@@ -52,7 +52,11 @@ void AudioFacade::init()
 	std::cout << "Audio devices available:" << std::endl;
 	int i = 0;
 	for (auto& device: getAudioDevices()) {
-		std::cout << "\t" << i++ << ": " << device->getName() << std::endl;
+		std::cout << "\t" << ConsoleColour() << i++ << ": " << ConsoleColour(Console::DARK_GREY) << device->getName();
+		if (auto spec = device->getPreferredSpec()) {
+			std::cout << ", " << spec->numChannels << "ch, " << spec->sampleRate << " Hz";
+		}
+		std::cout << std::endl;
 	}
 }
 

@@ -37,13 +37,6 @@ namespace Halley
 	using AudioMultiChannelSamples = std::array<AudioSamples, AudioConfig::maxChannels>;
 	using AudioMultiChannelSamplesConst = std::array<AudioSamplesConst, AudioConfig::maxChannels>;
 	
-	class AudioDevice
-	{
-	public:
-		virtual ~AudioDevice() {}
-		virtual String getName() const = 0;
-	};
-
 	enum class AudioSampleFormat
 	{
 		Undefined,
@@ -79,6 +72,14 @@ namespace Halley
 			, bufferSize(bufferSize)
 			, format(format)
 		{}
+	};
+	
+	class AudioDevice
+	{
+	public:
+		virtual ~AudioDevice() {}
+		virtual String getName() const = 0;
+		virtual std::optional<AudioSpec> getPreferredSpec() const { return {}; }
 	};
 
 	class AudioListenerData

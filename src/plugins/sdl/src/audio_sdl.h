@@ -11,11 +11,13 @@ namespace Halley
 	class AudioDeviceSDL final : public AudioDevice
 	{
 	public:
-		AudioDeviceSDL(String name);
+		AudioDeviceSDL(String name, std::optional<AudioSpec> spec);
 		String getName() const override;
+		std::optional<AudioSpec> getPreferredSpec() const override;
 
 	private:
 		String name;
+		std::optional<AudioSpec> spec;
 	};
 
 	class AudioSDL final : public AudioOutputAPIInternal

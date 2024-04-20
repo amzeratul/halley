@@ -7,14 +7,20 @@
 
 using namespace Halley;
 
-AudioDeviceSDL::AudioDeviceSDL(String name)
+AudioDeviceSDL::AudioDeviceSDL(String name, std::optional<AudioSpec> spec)
 	: name(std::move(name))
+	, spec(spec)
 {
 }
 
 String AudioDeviceSDL::getName() const
 {
 	return name != "" ? name : "Default";
+}
+
+std::optional<AudioSpec> AudioDeviceSDL::getPreferredSpec() const
+{
+	return spec;
 }
 
 AudioSDL::AudioSDL()
@@ -37,10 +43,18 @@ void AudioSDL::deInit()
 Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 {
 	Vector<std::unique_ptr<const AudioDevice>> result;
-	result.emplace_back(std::make_unique<AudioDeviceSDL>("[Default]"));
+	result.emplace_back(std::make_unique<AudioDeviceSDL>("[Default]", std::nullopt));
 	int nDevices = SDL_GetNumAudioDevices(0);
 	for (int i = 0; i < nDevices; i++) {
-		result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0)));
+		SDL_AudioSpec sdlSpec;
+		std::optional<AudioSpec> spec;
+		if (SDL_GetAudioDeviceSpec(i, 0, &sdlSpec) == 0) {
+			AudioSpec s;
+			s.numChannels = sdlSpec.channels;
+			s.sampleRate = sdlSpec.freq;
+			spec = s;
+		}
+		result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0), spec));
 	}
 	return result;
 }

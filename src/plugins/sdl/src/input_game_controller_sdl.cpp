@@ -100,11 +100,13 @@ int InputGameControllerSDL::getSDLJoystickId() const
 
 int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position) const
 {
+	bool nintendo = joystickType == JoystickType::SwitchFull || joystickType == JoystickType::SwitchLeftJoycon || joystickType == JoystickType::SwitchRightJoycon;
+
 	switch (position) {
-		case JoystickButtonPosition::FaceTop: return SDL_CONTROLLER_BUTTON_Y;
-		case JoystickButtonPosition::FaceRight: return SDL_CONTROLLER_BUTTON_B;
-		case JoystickButtonPosition::FaceBottom: return SDL_CONTROLLER_BUTTON_A;
-		case JoystickButtonPosition::FaceLeft: return SDL_CONTROLLER_BUTTON_X;
+		case JoystickButtonPosition::FaceTop: return nintendo ? SDL_CONTROLLER_BUTTON_X : SDL_CONTROLLER_BUTTON_Y;
+		case JoystickButtonPosition::FaceRight: return nintendo ? SDL_CONTROLLER_BUTTON_A : SDL_CONTROLLER_BUTTON_B;
+		case JoystickButtonPosition::FaceBottom: return nintendo ? SDL_CONTROLLER_BUTTON_B : SDL_CONTROLLER_BUTTON_A;
+		case JoystickButtonPosition::FaceLeft: return nintendo ? SDL_CONTROLLER_BUTTON_Y : SDL_CONTROLLER_BUTTON_X;
 		case JoystickButtonPosition::Select: return SDL_CONTROLLER_BUTTON_BACK;
 		case JoystickButtonPosition::Start: return SDL_CONTROLLER_BUTTON_START;
 		case JoystickButtonPosition::BumperLeft: return SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
