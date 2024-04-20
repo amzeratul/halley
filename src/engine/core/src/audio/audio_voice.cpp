@@ -185,12 +185,13 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		const auto dopplerShift = sourcePos.getDopplerShift(listener) * dopplerScale;
 		setPitch(clamp((dopplerShift + 1.0f) * basePitch, 0.1f, 4.0f));
 	}
-	
+
+	// Find the target gain
+	const float gain = paused ? 0.0f : (baseGain * userGain * fader.getCurrentValue() * busGain);
+
 	// Mix
-	const float dynamicGain = fader.getCurrentValue();
-	const float pauseGain = paused ? 0.0f : 1.0f;
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * busGain * pauseGain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, gain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
