@@ -79,6 +79,9 @@ namespace Halley {
 
     	String getSceneNameForComments(AssetType assetType, const String& assetId) const override;
 
+		void setGameInstance(Game* game) override;
+		Game* getGameInstance() const;
+
     protected:
 		enum class EntityAtPositionSelectMode {
 			All,
@@ -89,6 +92,7 @@ namespace Halley {
     	Camera camera;
 		Vector2i viewPort;
 		IEditorInterface* editorInterface;
+		Game* game = nullptr;
 
 		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	

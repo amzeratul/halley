@@ -68,7 +68,7 @@ namespace Halley {
 
         using ScriptTargetRetriever = std::function<EntityId(const String&)>;
 
-    	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost = true);
+    	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost = true);
     	virtual ~ScriptEnvironment() = default;
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
@@ -169,7 +169,7 @@ namespace Halley {
     	World& world;
     	Resources& resources;
         HashMap<EntityId, std::shared_ptr<InputVirtual>> inputDevices;
-    	std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection;
+    	std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection;
         bool isHost = false;
         bool inputEnabled = true;
 

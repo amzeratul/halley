@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class Game;
 	class UIDebugConsoleCommands;
 	class UIRoot;
 	struct AssetPreviewData;
@@ -250,6 +251,7 @@ namespace Halley {
     	virtual void initializeEntityValidator(EntityValidator& validator) = 0;
         virtual bool shouldDrawOutline(const Sprite& sprite) const = 0;
         virtual String getSceneNameForComments(AssetType assetType, const String& assetId) const = 0;
+        virtual void setGameInstance(Game* game) = 0;
     };
 
 	class EntityTree {

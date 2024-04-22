@@ -907,3 +907,13 @@ String SceneEditor::getSceneNameForComments(AssetType assetType, const String& a
 {
 	return assetId;
 }
+
+void SceneEditor::setGameInstance(Game* game)
+{
+	this->game = game;
+}
+
+Game* SceneEditor::getGameInstance() const
+{
+	return game;
+}

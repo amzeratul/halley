@@ -22,7 +22,7 @@
 
 using namespace Halley;
 
-ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::unique_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost)
+ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> nodeTypeCollection, bool isHost)
 	: api(api)
 	, world(world)
 	, resources(resources)
