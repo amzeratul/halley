@@ -248,7 +248,6 @@ void DevService::setDevValue(std::string_view name, float value)
 {
 	if (devMode) {
 		options->setDevValue(name, value);
-		options->save();
 	}
 }
 
@@ -265,7 +264,6 @@ void DevService::setDevFlag(std::string_view name, bool value)
 {
 	if (devMode) {
 		options->setDevFlag(name, value);
-		options->save();
 	}
 }
 
