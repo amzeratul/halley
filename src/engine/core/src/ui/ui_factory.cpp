@@ -842,6 +842,7 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 	result.iconName = "widget_icons/textInput.png";
 	result.canHaveChildren = false;
 
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<textInput>", "button");
 	result.entries.emplace_back("Max Length", "maxLength", "std::optional<int>", "");
 	result.entries.emplace_back("History", "history", "bool", "false");
 	result.entries.emplace_back("Read Only", "readOnly", "bool", "false");
