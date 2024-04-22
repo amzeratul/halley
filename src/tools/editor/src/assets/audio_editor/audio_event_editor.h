@@ -54,6 +54,7 @@ namespace Halley {
         void makeResumeAction(AudioEventActionResume& action);
         void makeSetVolumeAction(AudioEventActionSetVolume& action);
         void makeSetSwitchAction(AudioEventActionSetSwitch& action);
+        void makeCopySwitchAction(AudioEventActionCopySwitch& action);
         void makeSetVariableAction(AudioEventActionSetVariable& action);
         void makeBusAction(AudioEventActionBus& action);
         void makeResumeBusAction(AudioEventActionResumeBus& action);

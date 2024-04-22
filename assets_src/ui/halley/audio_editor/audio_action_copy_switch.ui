@@ -1,0 +1,16 @@
+widget: { class: widget }
+sizer: { type: vertical, gap: 4 }
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Set " }
+    fill: centre
+  - widget: { id: dstId, class: dropdown, size: [100, 20] }
+  - widget: { class: label, text: " to value of " }
+    fill: centre
+  - widget: { id: srcId, class: dropdown, size: [100, 20] }
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Scope: " }
+    fill: centre
+  - widget: { id: scope, class: dropdown, size: [150, 20], options: [{ id: object, text: Target Object }, { id: global, text: Global Singleton }] }

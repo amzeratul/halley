@@ -28,12 +28,13 @@ namespace Halley
 		ResumeBus,
 		SetVolume,
 		SetSwitch,
+		CopySwitch,
 		SetVariable
 	};
 	
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 12> operator()() const {
 			return{{
 				"playLegacy",
 				"play",
@@ -45,6 +46,7 @@ namespace Halley
 				"resumeBus",
 				"setVolume",
 				"setSwitch",
+				"copySwitch",
 				"setVariable"
 			}};
 		}
@@ -316,6 +318,29 @@ namespace Halley
 	private:
 		String switchId;
 		String value;
+	};
+
+	class AudioEventActionCopySwitch final : public AudioEventAction
+	{
+	public:
+		void load(const ConfigNode& config) override;
+
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::CopySwitch; }
+
+		const String& getDstSwitchId() const;
+		const String& getSrcSwitchId() const;
+		void setDstSwitchId(String id);
+		void setSrcSwitchId(String id);
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
+
+	private:
+		String dstSwitchId;
+		String srcSwitchId;
 	};
 
 	class AudioEventActionSetVariable final : public AudioEventAction

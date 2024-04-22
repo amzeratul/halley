@@ -173,6 +173,9 @@ void AudioEventEditorAction::onMakeUI()
 	case AudioEventActionType::SetSwitch:
 		makeSetSwitchAction(dynamic_cast<AudioEventActionSetSwitch&>(action));
 		break;
+	case AudioEventActionType::CopySwitch:
+		makeCopySwitchAction(dynamic_cast<AudioEventActionCopySwitch&>(action));
+		break;
 	case AudioEventActionType::SetVariable:
 		makeSetVariableAction(dynamic_cast<AudioEventActionSetVariable&>(action));
 		break;
@@ -323,6 +326,32 @@ void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& acti
 	bindData("switchValue", action.getValue(), [=, &action](String value)
 	{
 		action.setValue(std::move(value));
+		editor.markModified();
+	});
+
+	bindData("scope", toString(action.getScope()), [=, &action](String value)
+	{
+		action.setScope(fromString<AudioEventScope>(value));
+		editor.markModified();
+	});
+}
+
+void AudioEventEditorAction::makeCopySwitchAction(AudioEventActionCopySwitch& action)
+{
+	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_copy_switch");
+
+	getWidgetAs<UIDropdown>("dstId")->setOptions(editor.getAudioProperties().getSwitchIds());
+	getWidgetAs<UIDropdown>("srcId")->setOptions(editor.getAudioProperties().getSwitchIds());
+
+	bindData("dstId", action.getDstSwitchId(), [=, &action](String value)
+	{
+		action.setDstSwitchId(std::move(value));
+		editor.markModified();
+	});
+
+	bindData("srcId", action.getSrcSwitchId(), [=, &action](String value)
+	{
+		action.setSrcSwitchId(std::move(value));
 		editor.markModified();
 	});
 

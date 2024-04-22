@@ -162,6 +162,8 @@ std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType ty
 		return std::make_unique<AudioEventActionSetVolume>();
 	case AudioEventActionType::SetSwitch:
 		return std::make_unique<AudioEventActionSetSwitch>();
+	case AudioEventActionType::CopySwitch:
+		return std::make_unique<AudioEventActionCopySwitch>();
 	case AudioEventActionType::SetVariable:
 		return std::make_unique<AudioEventActionSetVariable>();
 	}
@@ -189,6 +191,8 @@ String AudioEvent::getActionName(AudioEventActionType type)
 		return "Resume Bus";
 	case AudioEventActionType::SetSwitch:
 		return "Set Switch";
+	case AudioEventActionType::CopySwitch:
+		return "Copy Switch";
 	case AudioEventActionType::SetVariable:
 		return "Set Variable";
 	case AudioEventActionType::SetVolume:
@@ -821,6 +825,63 @@ void AudioEventActionSetSwitch::deserialize(Deserializer& s)
 	AudioEventAction::deserialize(s);
 	s >> switchId;
 	s >> value;
+}
+
+void AudioEventActionCopySwitch::load(const ConfigNode& config)
+{
+	AudioEventAction::load(config);
+	dstSwitchId = config["dstSwitchId"].asString();
+	srcSwitchId = config["srcSwitchId"].asString();
+	scope = fromString<AudioEventScope>(config["scope"].asString("object"));
+}
+
+ConfigNode AudioEventActionCopySwitch::toConfigNode() const
+{
+	auto result = AudioEventAction::toConfigNode();
+	result["dstSwitchId"] = dstSwitchId;
+	result["srcSwitchId"] = srcSwitchId;
+	return result;
+}
+
+bool AudioEventActionCopySwitch::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+{
+	emitter.setSwitchValue(dstSwitchId, emitter.getSwitchValue(srcSwitchId));
+
+	return true;
+}
+
+const String& AudioEventActionCopySwitch::getDstSwitchId() const
+{
+	return dstSwitchId;
+}
+
+const String& AudioEventActionCopySwitch::getSrcSwitchId() const
+{
+	return srcSwitchId;
+}
+
+void AudioEventActionCopySwitch::setDstSwitchId(String id)
+{
+	dstSwitchId = id;
+}
+
+void AudioEventActionCopySwitch::setSrcSwitchId(String id)
+{
+	srcSwitchId = id;
+}
+
+void AudioEventActionCopySwitch::serialize(Serializer& s) const
+{
+	AudioEventAction::serialize(s);
+	s << dstSwitchId;
+	s << srcSwitchId;
+}
+
+void AudioEventActionCopySwitch::deserialize(Deserializer& s)
+{
+	AudioEventAction::deserialize(s);
+	s >> dstSwitchId;
+	s >> srcSwitchId;
 }
 
 void AudioEventActionSetVariable::load(const ConfigNode& config)
