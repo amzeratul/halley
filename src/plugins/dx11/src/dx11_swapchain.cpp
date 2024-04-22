@@ -119,6 +119,8 @@ void DX11SwapChain::init(Window& window)
 		if (result != S_OK) {
 			throw Exception("Unable to create swap chain for HWND", HalleyExceptions::VideoPlugin);
 		}
+
+		pIDXGIFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_WINDOW_CHANGES);
 	}
 
 	initRenderTarget();
