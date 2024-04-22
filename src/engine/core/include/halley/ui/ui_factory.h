@@ -109,7 +109,7 @@ namespace Halley
 		void setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet);
 		std::shared_ptr<const UIColourScheme> getColourScheme() const;
 
-		void update();
+		virtual void update();
 
 		virtual Sprite makeAssetTypeIcon(AssetType type) const;
 		virtual Sprite makeImportAssetTypeIcon(ImportAssetType type) const;
