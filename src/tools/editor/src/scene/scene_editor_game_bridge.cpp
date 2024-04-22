@@ -81,6 +81,7 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded(bool force)
 		if (force || !interfaceInitializationError) {
 			if (interface->isReadyToCreateWorld()) {
 				const bool success = guardedRun([&]() {
+					interface->setGameInstance(project.getGameInstance());
 					interface->createWorld(*prefab, factory.getColourScheme());
 					interface->setAssetPreviewGenerator(projectWindow.getAssetPreviewGenerator());
 					interface->setGameInstance(project.getGameInstance());
