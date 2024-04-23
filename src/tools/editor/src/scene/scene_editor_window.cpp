@@ -1704,6 +1704,11 @@ IProject& SceneEditorWindow::getProject() const
 	return project;
 }
 
+IProjectWindow& SceneEditorWindow::getIProjectWindow() const
+{
+	return projectWindow;
+}
+
 Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedString label, String defaultValue, String extension)
 {
 	Promise<std::optional<String>> promise;

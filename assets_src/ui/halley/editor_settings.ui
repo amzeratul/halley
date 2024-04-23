@@ -8,13 +8,14 @@ children:
   - uuid: c69df118-2f10-4756-bb19-a009ec02e694
     proportion: 1
     sizer:
+      columnProportions: []
       type: vertical
     widget:
       class: image
       colour: $ui_popupWindow
       image: $ui_title_capsule
       innerBorder: [6, 3, 6, 6]
-      size: [400, 300]
+      size: [500, 300]
     children:
       - uuid: 3f653d18-dbd3-4133-824a-33c20f14f536
         sizer:
@@ -95,6 +96,8 @@ children:
             fill: [left, verticalCentre]
       - uuid: c804d283-4981-4590-9843-d0c86db859dc
         sizer:
+          columnProportions: []
+          gap: 4
           type: horizontal
         children:
           - uuid: 6d6e62a0-34e4-4259-9cc5-f5deff0a66c8

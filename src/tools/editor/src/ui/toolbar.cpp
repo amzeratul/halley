@@ -83,7 +83,7 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "runProject", [=] (const UIEvent& event)
 	{
-		project.launchGame({"--devcon=127.0.0.1"});
+		project.launchGame(projectWindow.getLaunchArguments());
 	});
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)

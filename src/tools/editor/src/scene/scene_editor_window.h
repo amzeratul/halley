@@ -147,6 +147,7 @@ namespace Halley {
 
 		World& getWorld() const;
 		IProject& getProject() const override;
+		IProjectWindow& getIProjectWindow() const override;
 
 		Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue, String extension) override;
 

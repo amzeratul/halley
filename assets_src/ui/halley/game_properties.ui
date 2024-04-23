@@ -1,25 +1,51 @@
----
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: 2805e54b-a942-4bee-b6ee-8363d8c9ecf1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
 children:
-- widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [400, 300] }
-  sizer: { type: vertical }
-  fill: centre
-  proportion: 1
-  children:
-  - sizer: { type: horizontal }
-    children:
-    - widget: { class: label, text: "Game Properties" }
-      fill: centre
-      proportion: 1
-  - widget: { id: fields, class: widget }
+  - uuid: cf5655e7-d141-45d5-aba6-c67ce9ec6436
     proportion: 1
-    border: [1, 4, 1, 1]
-    sizer: { type: vertical, gap: 2 }
-  - sizer: { type: horizontal }
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      image: $ui_title_capsule
+      innerBorder: [6, 3, 6, 6]
+      size: [500, 300]
     children:
-    - stretchSpacer: {}
-      proportion: 1
-    - widget: { id: save, class: button, text: Save, size: [100, 22] }
-    - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
-...
+      - uuid: 7c120941-27a7-461f-9347-27d12c787542
+        sizer:
+          type: horizontal
+        children:
+          - uuid: f2dbb5dc-dd1a-46ce-88d5-6140b484d845
+            proportion: 1
+            widget:
+              class: label
+              text: Project Properties
+            fill: centre
+      - uuid: 036666d3-3da0-4215-97b3-71bf0d55923b
+        proportion: 1
+        border: [4, 10, 4, 4]
+        sizer:
+          columnProportions: [1, 2]
+          columns: 2
+          gap: 2
+          type: grid
+        widget:
+          class: widget
+          id: fields
+        children:
+          - uuid: 05489abb-b706-4160-9290-f0ad4a3e680c
+            widget:
+              class: label
+              text: "Command Line Args: "
+            fill: [left, verticalCentre]
+          - uuid: 64bae373-acf7-40ef-aa51-8c00e9ac5fe9
+            widget:
+              class: textInput
+              id: commandLine
+    fill: centre

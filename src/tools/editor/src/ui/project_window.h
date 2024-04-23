@@ -75,6 +75,8 @@ namespace Halley {
         Preferences& getPreferences() const;
         const AssetFileHandler& getAssetFileHandler() const;
 
+    	Vector<String> getLaunchArguments() const override;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

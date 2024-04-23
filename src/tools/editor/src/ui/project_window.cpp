@@ -142,7 +142,7 @@ void ProjectWindow::makePagedPane()
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto remotes = std::make_shared<UIWidget>();
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
-	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
+	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
 
 	const auto margin = Vector4f(8, 8, 8, 4);
@@ -409,6 +409,14 @@ Preferences& ProjectWindow::getPreferences() const
 const AssetFileHandler& ProjectWindow::getAssetFileHandler() const
 {
 	return *assetFileHandler;
+}
+
+Vector<String> ProjectWindow::getLaunchArguments() const
+{
+	auto args = String(getSetting(EditorSettingType::Project, "commandLineArguments").asString("")).split(' ');
+	args.push_back("--devcon=127.0.0.1");
+
+	return args;
 }
 
 void ProjectWindow::toggleDebugConsole()

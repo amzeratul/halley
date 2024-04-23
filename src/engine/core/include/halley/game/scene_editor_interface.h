@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class IProjectWindow;
 	class Game;
 	class UIDebugConsoleCommands;
 	class UIRoot;
@@ -427,6 +428,7 @@ namespace Halley {
 		virtual Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const = 0;
 
 		virtual IProject& getProject() const = 0;
+		virtual IProjectWindow& getIProjectWindow() const = 0;
 		virtual ConfigNode& getGameData(const String& key) = 0;
 
 		virtual Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue, String extension) = 0;
@@ -456,6 +458,7 @@ namespace Halley {
         virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual void buildGame() = 0;
 		virtual void updateEditor() = 0;
+		virtual Vector<String> getLaunchArguments() const = 0;
 	};
 
     class IEditorCustomTools { 
