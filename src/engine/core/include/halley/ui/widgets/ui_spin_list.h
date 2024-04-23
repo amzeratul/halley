@@ -31,8 +31,6 @@ namespace Halley {
 		void setMinMax(int min, int max);
 
 		void onManualControlCycleValue(int delta) override;
-		void onManualControlActivate() override;
-
 		bool canReceiveFocus() const override;
 
 	protected:

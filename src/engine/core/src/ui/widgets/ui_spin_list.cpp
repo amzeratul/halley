@@ -53,7 +53,6 @@ void UISpinList::setSelectedOption(int option)
 			notifyDataBind(curOption);
 		}	
 	}
-	focus();
 }
 
 void UISpinList::setSelectedOption(const String& id)
@@ -138,14 +137,9 @@ void UISpinList::onManualControlCycleValue(int delta)
 	setSelectedOption(modulo(curOption + delta, int(options.size())));
 }
 
-void UISpinList::onManualControlActivate()
-{
-	focus();
-}
-
 bool UISpinList::canReceiveFocus() const
 {
-	return true;
+	return false;
 }
 
 void UISpinList::update(Time t, bool moved)
