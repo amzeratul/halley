@@ -31,16 +31,18 @@ namespace Halley {
 	{
 		FixedUpdate,
 		VariableUpdate,
+		VariableUpdateUI,
 		Render,
 		NUMBER_OF_TIMELINES
 	};
 
 	template <>
 	struct EnumNames<TimeLine> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"fixedUpdate",
 				"variableUpdate",
+				"variableUpdateUI",
 				"render"
 			}};
 		}

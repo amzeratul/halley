@@ -602,7 +602,7 @@ void World::step(TimeLine timeline, Time elapsed)
 
 	spawnPending();
 
-	initSystems(std::array<TimeLine, 3>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render });
+	initSystems(std::array<TimeLine, 4>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render });
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
 }
@@ -611,7 +611,7 @@ void World::render(RenderContext& rc)
 {
 	//ProfilerEvent event(ProfilerEventType::WorldSystemRender);
 
-	initSystems(std::array<TimeLine, 3>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render });
+	initSystems(std::array<TimeLine, 4>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::VariableUpdateUI, TimeLine::Render });
 	renderSystems(rc);
 	rc.flush();
 }

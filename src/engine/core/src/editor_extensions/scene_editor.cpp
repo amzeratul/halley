@@ -132,6 +132,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	// Update world
 	world->step(TimeLine::FixedUpdate, t);
 	world->step(TimeLine::VariableUpdate, t);
+	world->step(TimeLine::VariableUpdateUI, t);
 
 	lastStepTime = t;
 
