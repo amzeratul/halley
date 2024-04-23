@@ -47,6 +47,23 @@ namespace Halley {
 		TextInputData* textInput;
 	};
 
+	class HotkeyTextInputCapture : public ITextInputCapture {
+	public:
+		size_t addHotkey(KeyboardKeyPress c);
+		bool isHotkeyPressed(size_t idx);
+
+		void open(TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
+		void close() override;
+		bool isOpen() const override;
+		void update() override;
+
+		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard) override;
+
+	private:
+		Vector<KeyboardKeyPress> hotkeys;
+		Vector<bool> pressed;
+	};
+
 	class TextInputCapture {
 	public:
 		TextInputCapture(TextInputData& inputData, SoftwareKeyboardData data, std::unique_ptr<ITextInputCapture> capture);

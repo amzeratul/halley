@@ -43,9 +43,8 @@ void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
 	
 	if (!sendKeyPress(key)) {
 		keyPresses.push_back(key);
+		onButtonPressed(static_cast<int>(code));
 	}
-	
-	onButtonPressed(static_cast<int>(code));
 }
 
 void InputKeyboard::onKeyReleased(KeyCode code, KeyMods mods)
@@ -117,8 +116,13 @@ void InputKeyboard::onButtonsCleared()
 std::unique_ptr<ITextInputCapture> InputKeyboard::makeTextInputCapture()
 {
 	auto ptr = std::make_unique<StandardTextInputCapture>(*this);
-	captures.insert(ptr.get());
+	addCapture(ptr.get());
 	return ptr;
+}
+
+void InputKeyboard::addCapture(ITextInputCapture* capture)
+{
+	captures.insert(capture);
 }
 
 void InputKeyboard::removeCapture(ITextInputCapture* capture)

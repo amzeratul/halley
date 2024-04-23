@@ -58,6 +58,51 @@ bool StandardTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipbo
 	return textInput->onKeyPress(c, clipboard);
 }
 
+size_t HotkeyTextInputCapture::addHotkey(KeyboardKeyPress c)
+{
+	const auto idx = hotkeys.size();
+	hotkeys.push_back(c);
+	pressed.push_back(false);
+	return idx;
+}
+
+bool HotkeyTextInputCapture::isHotkeyPressed(size_t idx)
+{
+	return pressed.at(idx);
+}
+
+void HotkeyTextInputCapture::open(TextInputData& input, SoftwareKeyboardData softKeyboardData)
+{
+}
+
+void HotkeyTextInputCapture::close()
+{
+}
+
+bool HotkeyTextInputCapture::isOpen() const
+{
+	return false;
+}
+
+void HotkeyTextInputCapture::update()
+{
+	for (auto& p: pressed) {
+		p = false;
+	}
+}
+
+bool HotkeyTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
+{
+	for (size_t i = 0; i < hotkeys.size(); ++i) {
+		if (c == hotkeys[i]) {
+			pressed[i] = true;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 TextInputCapture::TextInputCapture(TextInputData& inputData, SoftwareKeyboardData softKeyboardData, std::unique_ptr<ITextInputCapture> _capture)
 	: capture(std::move(_capture))
 {
