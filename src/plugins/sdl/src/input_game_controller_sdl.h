@@ -22,6 +22,7 @@ namespace Halley {
 		int getSDLJoystickId() const;
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
+		String getButtonName(int code) const override;
 
 		bool hasLED() const override;
 		void setLED(Colour4c colour) const override;

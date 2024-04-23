@@ -126,6 +126,118 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 	}
 }
 
+String InputGameControllerSDL::getButtonName(int code) const
+{
+	if (joystickType == JoystickType::Xbox || joystickType == JoystickType::Generic) {
+		auto buttons = std::array<const char*, 17>{
+			"xbox_a",
+			"xbox_b",
+			"xbox_x",
+			"xbox_y",
+			"xbox_lb",
+			"xbox_rb",
+			"xbox_lsb",
+			"xbox_rsb",
+			"xbox_back",
+			"xbox_start",
+			"xbox_lt",
+			"xbox_rt",
+			"xbox_dpad_up",
+			"xbox_dpad_right",
+			"xbox_dpad_down",
+			"xbox_dpad_left",
+			"xbox_guide"
+		};
+		return buttons[code];
+	} else if (joystickType == JoystickType::Playstation) {
+		auto buttons = std::array<const char*, 17>{
+			"playstation_cross",
+			"playstation_circle",
+			"playstation_square",
+			"playstation_triangle",
+			"playstation_l1",
+			"playstation_r1",
+			"playstation_l3",
+			"playstation_r3",
+			"playstation_share",
+			"playstation_option",
+			"playstation_l2",
+			"playstation_r2",
+			"playstation_dpad_up",
+			"playstation_dpad_right",
+			"playstation_dpad_down",
+			"playstation_dpad_left",
+			"playstation_guide"
+		};
+		return buttons[code];
+	} else if (joystickType == JoystickType::SwitchFull) {
+		auto buttons = std::array<const char*, 17>{
+			"switch_b",
+			"switch_a",
+			"switch_y",
+			"switch_x",
+			"switch_l",
+			"switch_r",
+			"switch_lsb",
+			"switch_rsb",
+			"switch_minus",
+			"switch_plus",
+			"switch_zl",
+			"switch_zr",
+			"switch_dpad_up",
+			"switch_dpad_right",
+			"switch_dpad_down",
+			"switch_dpad_left",
+			"switch_guide"
+		};
+		return buttons[code];
+	} else if (joystickType == JoystickType::SwitchLeftJoycon) {
+		auto buttons = std::array<const char*, 17>{
+			"switch_alt_b",
+			"switch_alt_a",
+			"switch_alt_y",
+			"switch_alt_x",
+			"switch_alt_sl",
+			"switch_alt_sr",
+			"switch_lsb",
+			"switch_rsb",
+			"switch_plus",
+			"switch_minus",
+			"switch_zl",
+			"switch_zr",
+			"switch_dpad_up",
+			"switch_dpad_right",
+			"switch_dpad_down",
+			"switch_dpad_left",
+			"switch_guide"
+		};
+		return buttons[code];
+	} else if (joystickType == JoystickType::SwitchRightJoycon) {
+		auto buttons = std::array<const char*, 17>{
+			"switch_alt_b",
+			"switch_alt_a",
+			"switch_alt_y",
+			"switch_alt_x",
+			"switch_alt_sl",
+			"switch_alt_sr",
+			"switch_lsb",
+			"switch_rsb",
+			"switch_minus",
+			"switch_plus",
+			"switch_zl",
+			"switch_zr",
+			"switch_dpad_up",
+			"switch_dpad_right",
+			"switch_dpad_down",
+			"switch_dpad_left",
+			"switch_guide"
+		};
+		return buttons[code];
+	} else {
+		return InputJoystick::getButtonName(code);
+	}
+}
+
 bool InputGameControllerSDL::hasLED() const
 {
 	return SDL_GameControllerHasLED(controller);
