@@ -57,10 +57,14 @@ namespace Halley {
 	protected:
 		void update(Time t, bool moved) override;
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
-
+		
 	private:
 		UISpinList& parent;
 		bool left = false;
 		float time = 999.0;
+
+		Vector2f target;
+		bool wasHovering = false;
+	    float hoverTime = 0.0f;
 	};
 }
