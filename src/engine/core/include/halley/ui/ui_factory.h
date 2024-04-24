@@ -135,6 +135,7 @@ namespace Halley
 			String imageColour;
 			Vector4f border;
 			bool active;
+			bool centre = false;
 
 			LocalisedString displayText;
 			LocalisedString displayTooltip;

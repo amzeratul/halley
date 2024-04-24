@@ -605,6 +605,7 @@ UIFactory::ParsedOption::ParsedOption(const ConfigNode& n)
 	sprite = n["sprite"].asString("");
 	border = n["border"].asVector4f(Vector4f());
 	active = n["active"].asBool(true);
+	centre = n["centre"].asBool(false);
 }
 
 void UIFactory::ParsedOption::generateDisplay(const I18N& i18n)
@@ -1348,7 +1349,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 				}
 			}
 			auto label = parseLabel(tabNode);
-			tabs->addTextItem(tabNode["id"].asString(id + "_tab_" + toString(tabNodes.size())), label);
+			tabs->addTextItem(tabNode["id"].asString(id + "_tab_" + toString(tabNodes.size())), label, -1, tabNode["centre"].asBool(false));
 			tabNodes.push_back(&tabNode);
 		}
 	};
@@ -1392,6 +1393,7 @@ UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
 	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
 	result.childEntries.emplace_back("If", "if", "Vector<Halley::String>", Vector<String>());
+	result.childEntries.emplace_back("Centre", "centre", "bool", "");
 
 	return result;
 }
@@ -1599,7 +1601,7 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 
 			list.addImage(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
 		} else {
-			list.addTextItem(o.id, o.displayText);
+			list.addTextItem(o.id, o.displayText, -1, o.centre);
 		}
 
 		if (!o.displayTooltip.getString().isEmpty()) {

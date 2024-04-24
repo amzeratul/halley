@@ -2277,7 +2277,9 @@ public:
 		container->add(context.makeField("Halley::Vector4f", pars.withSubKey("border", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Active"));
 		container->add(context.makeField("bool", pars.withSubKey("active", ""), ComponentEditorLabelCreation::Never));
-		
+		container->add(context.makeLabel("Centre"));
+		container->add(context.makeField("bool", pars.withSubKey("centre", ""), ComponentEditorLabelCreation::Never));
+
 		return container;
 	}
 };

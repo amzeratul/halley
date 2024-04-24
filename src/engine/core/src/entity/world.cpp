@@ -272,7 +272,7 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 
 	// Add entities to my pending list
 	entitiesPendingCreation.reserve(entitiesPendingCreation.size() + entitiesToMove.size());
-	for (auto& e: entitiesToMove) {
+	for (auto* e: entitiesToMove) {
 		e->dirty = true;
 		e->alive = true;
 		e->mask = FamilyMask::Handle();
