@@ -18,6 +18,7 @@ namespace Halley {
 	public:
 		explicit UISpinList(String id, const UIStyle& style, Vector<LocalisedString> options = {}, int defaultOption = 0);
 
+		void setSelectedOptionSilent(int option);
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& id);
 		int getSelectedOption() const;

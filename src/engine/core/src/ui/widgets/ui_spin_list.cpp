@@ -27,6 +27,33 @@ UISpinList::UISpinList(String id, const UIStyle& style, Vector<LocalisedString> 
 	setOptions(std::move(os));
 }
 
+void UISpinList::setSelectedOptionSilent(int option)
+{
+	int nextOption = option;
+	if (option >= static_cast<int>(options.size())) {
+		nextOption = 0;
+	}
+	if (option < 0) {
+		nextOption = static_cast<int>(options.size()) - 1;
+	}
+
+	if (curOption != nextOption) {
+		curOption = nextOption;
+		const auto spinSound = styles[0].getString("spinSound");
+		if (!spinSound.isEmpty()) {
+			playSound(spinSound);
+		}
+
+		label->setText(options[curOption]);
+		if (getDataBindFormat() == UIDataBind::Format::String) {
+			notifyDataBind(optionIds[curOption]);
+		}
+		else {
+			notifyDataBind(curOption);
+		}
+	}
+}
+
 void UISpinList::setSelectedOption(int option)
 {
 	int nextOption = option;
