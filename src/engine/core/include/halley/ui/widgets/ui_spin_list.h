@@ -63,7 +63,6 @@ namespace Halley {
 		bool left = false;
 		float time = 999.0;
 
-		Vector2f target;
 		bool wasHovering = false;
 	    float hoverTime = 0.0f;
 	};

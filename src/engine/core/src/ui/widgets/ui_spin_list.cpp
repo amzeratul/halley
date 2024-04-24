@@ -185,7 +185,7 @@ UISpinListArrow::UISpinListArrow(UISpinList& parent, String id, const UIStyle& s
 void UISpinListArrow::update(Time t, bool moved)
 {
 	const auto& style = styles.at(0);
-	auto newTarget = getRect().getTopLeft();
+	auto target = getRect().getTopLeft();
 	const auto hoverAnimationLength = style.getFloat("hoverAnimationLength", 0.0f);
 	if (isMouseOver() && hoverAnimationLength != 0.0f) {
 		if (!wasHovering) {
@@ -195,7 +195,7 @@ void UISpinListArrow::update(Time t, bool moved)
 		hoverTime += static_cast<float>(t);
 
 		const auto offset = abs(sin(hoverTime / hoverAnimationLength)) * style.getFloat("hoverAnimationDistance", 1.0f);
-		newTarget = getRect().getTopLeft() + Vector2f((left ? -offset : offset) , 0.0f);
+		target = getRect().getTopLeft() + Vector2f((left ? -offset : offset) , 0.0f);
 	}
 
 	if (!isMouseOver()) {
@@ -208,10 +208,9 @@ void UISpinListArrow::update(Time t, bool moved)
 		hoverTime = 0.0f;
 		const auto step = clamp(time / animationLength, 0.0f, 1.0f);
 		const auto offset = 1.0f - pow((step * 2.0f - 1.0f), 2.0f);
-		newTarget = getRect().getTopLeft() + Vector2f((left ? -offset : offset) * style.getFloat("animationDistance", 1.0f), 0.0f);
+		target = getRect().getTopLeft() + Vector2f((left ? -offset : offset) * style.getFloat("animationDistance", 1.0f), 0.0f);
 	}
 
-	target = damp(newTarget, target, 10.0f, static_cast<float>(t));
 
 	const String dir = left ? "Left" : "Right";
 	auto sprite = isEnabled() ? (isMouseOver() ? style.getSprite("hover" + dir) : style.getSprite("normal" + dir)) : style.getSprite("disabled" + dir);
