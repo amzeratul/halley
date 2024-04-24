@@ -47,6 +47,7 @@ namespace Halley
 		virtual void destroyWindow(std::shared_ptr<Window> window) = 0;
 
 		virtual Vector2i getScreenSize(int n) const = 0;
+		virtual int getNumDisplays() const { return 1; }
 		virtual Rect4i getDisplayRect(int screen) const = 0;
 		virtual void setEnableScreensaver(bool enabled) const {}
 

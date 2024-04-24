@@ -35,6 +35,7 @@ namespace Halley
 		void destroyWindow(std::shared_ptr<Window> window) override;
 
 		Vector2i getScreenSize(int n) const override;
+		int getNumDisplays() const override;
 		Rect4i getDisplayRect(int screen) const override;
 		Vector2i getCenteredWindow(Vector2i size, int screen) const;
 		void setEnableScreensaver(bool enabled) const override;

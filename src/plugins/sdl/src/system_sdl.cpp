@@ -189,7 +189,9 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 {
 	for (auto& w : windows) {
 		if (w->getId() == int(event.window.windowID)) {
-			if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+			if (event.window.event == SDL_WINDOWEVENT_MOVED) {
+				w->updateDefinition(w->getDefinition().withPosition(Vector2i(event.window.data1, event.window.data2)));
+			} else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
 				int x, y;
 				SDL_GetWindowPosition(SDL_GetWindowFromID(event.window.windowID), &x, &y);
 				w->updateDefinition(w->getDefinition().withPosition(Vector2i(x, y)).withSize(Vector2i(event.window.data1, event.window.data2)));
@@ -399,6 +401,11 @@ Vector2i SystemSDL::getScreenSize(int n) const
 	} else {
 		return Vector2i();
 	}
+}
+
+int SystemSDL::getNumDisplays() const
+{
+	return SDL_GetNumVideoDisplays();
 }
 
 Rect4i SystemSDL::getDisplayRect(int screen) const
