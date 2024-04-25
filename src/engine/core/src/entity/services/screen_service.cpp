@@ -102,6 +102,11 @@ std::shared_ptr<IScreenServiceInterface> ScreenService::getInterfacePointer()
 
 Rect4f ScreenService::getCameraViewPort() const
 {
-	const auto screenSize = Vector2f(getGameResolution()) * 0.5f;
-	return Rect4f(-screenSize, screenSize) + cameraPosition;
+	return getCameraViewPort(cameraPosition, getGameResolution());
+}
+
+Rect4f ScreenService::getCameraViewPort(Vector2f cameraPos, Vector2i gameRes)
+{
+	const auto screenSize = Vector2f(gameRes) * 0.5f;
+	return Rect4f(-screenSize, screenSize) + cameraPos;
 }

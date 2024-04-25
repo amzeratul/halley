@@ -73,6 +73,8 @@ namespace Halley
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
 
+		std::optional<int> getCurrentDisplay() const;
+
 	private:
 		friend class Core;
 		

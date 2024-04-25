@@ -322,13 +322,13 @@ String OSWin32::getEnvironmentVariable(const String& name)
 Path OSWin32::parseProgramPath(const String& path)
 {
 	if (path.endsWith(".dll")) {
-		return Path(path).parentPath();
+		return Path(path);
 	} else {
 		HMODULE hModule = GetModuleHandleW(nullptr);
 		WCHAR path[MAX_PATH];
 		GetModuleFileNameW(hModule, path, MAX_PATH);
 		String programPath(path);
-		return Path(programPath).parentPath() / ".";
+		return Path(programPath);
 	}
 }
 

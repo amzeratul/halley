@@ -104,7 +104,7 @@ Halley::String Halley::OS::makeDataPath(String appDataPath, String userProvidedP
 
 Path OS::parseProgramPath(const String& commandLine)
 {
-	return Path(commandLine).parentPath() / ".";
+	return Path(commandLine);
 }
 
 void OS::createDirectories(const Path& path)

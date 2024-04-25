@@ -3,34 +3,42 @@
 #include "halley/file/path.h"
 #include "halley/utils/algorithm.h"
 
-Halley::Path Halley::Environment::getProgramPath() const
+using namespace Halley;
+
+Path Environment::getProgramPath() const
 {
 	return programPath;
 }
 
-Halley::Path Halley::Environment::getDataPath() const
+Path Environment::getProgramExecutablePath() const
+{
+	return programExecutablePath;
+}
+
+Path Environment::getDataPath() const
 {
 	return dataPath;
 }
 
-Halley::Path Halley::Environment::getGameDataPath() const
+Path Environment::getGameDataPath() const
 {
 	return gameDataPath;
 }
 
-const Halley::Vector<std::string>& Halley::Environment::getArguments() const
+const Vector<std::string>& Environment::getArguments() const
 {
 	return args;
 }
 
-bool Halley::Environment::hasArgument(const std::string& arg) const
+bool Environment::hasArgument(const std::string& arg) const
 {
 	return std_ex::contains(args, arg);
 }
 
-void Halley::Environment::parseProgramPath(const String& commandLine)
+void Environment::parseProgramPath(const String& commandLine)
 {
-	programPath = OS::get().parseProgramPath(commandLine);
+	programExecutablePath = OS::get().parseProgramPath(commandLine);
+	programPath = programExecutablePath.parentPath() / ".";
 
 #ifdef __ANDROID__
 	gameDataPath = Path(); // Inside "assets"
@@ -39,13 +47,13 @@ void Halley::Environment::parseProgramPath(const String& commandLine)
 #endif
 }
 
-void Halley::Environment::setDataPath(Path pathName)
+void Environment::setDataPath(Path pathName)
 {
 	dataPath = Path(OS::get().getUserDataDir()) / pathName / ".";
 	OS::get().createDirectories(dataPath);
 }
 
-void Halley::Environment::setArguments(const Vector<std::string>& args)
+void Environment::setArguments(const Vector<std::string>& args)
 {
 	this->args = args;
 }

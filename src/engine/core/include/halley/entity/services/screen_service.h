@@ -54,6 +54,7 @@ namespace Halley {
 		float getZoomLevel() const;
 
 		Rect4f getCameraViewPort() const;
+		static Rect4f getCameraViewPort(Vector2f cameraPos, Vector2i gameRes);
 		void setCameraPosition(Vector2f camPos);
 		bool isVisible(const Rect4f& aabb) const;
 

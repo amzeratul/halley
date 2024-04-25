@@ -9,6 +9,7 @@ namespace Halley
 	{
 	public:
 		Path getProgramPath() const;
+		Path getProgramExecutablePath() const;
 		Path getDataPath() const;
 		Path getGameDataPath() const;
 		const Vector<std::string>& getArguments() const;
@@ -20,6 +21,7 @@ namespace Halley
 
 	private:
 		Path programPath;
+		Path programExecutablePath;
 		Path dataPath;
 		Path gameDataPath;
 		Vector<std::string> args;

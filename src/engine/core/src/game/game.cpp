@@ -144,6 +144,25 @@ Resources& Game::getResources() const
 	return *resources;
 }
 
+std::optional<int> Game::getCurrentDisplay() const
+{
+	auto& video = *getAPI().video;
+	if (video.hasWindow()) {
+		const auto windowRect = video.getWindow().getWindowRect();
+		const auto windowCentre = windowRect.getCenter();
+
+		auto& system = *getAPI().system;
+		int nDisplays = system.getNumDisplays();
+		for (int i = 0; i < nDisplays; ++i) {
+			if (system.getDisplayRect(i).contains(windowCentre)) {
+				return i;
+			}
+		}
+		return video.getWindow().getDefinition().getScreen();
+	}
+	return {};
+}
+
 size_t Game::getMaxThreads() const
 {
 	return std::thread::hardware_concurrency();
