@@ -1392,7 +1392,7 @@ UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
 	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
 	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
-	result.childEntries.emplace_back("If", "if", "Vector<Halley::String>", Vector<String>());
+	result.childEntries.emplace_back("If", "if", "Halley::Vector<Halley::String>", Vector<String>());
 	result.childEntries.emplace_back("Centre", "centre", "bool", "");
 
 	return result;

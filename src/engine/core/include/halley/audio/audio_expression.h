@@ -97,6 +97,6 @@ namespace Halley {
 
 	private:
         Vector<AudioExpressionTerm> terms;
-        AudioExpressionOperation operation;
+        AudioExpressionOperation operation = AudioExpressionOperation::Multiply;
     };
 }

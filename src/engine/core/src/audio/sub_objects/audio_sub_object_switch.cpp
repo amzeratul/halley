@@ -110,9 +110,11 @@ void AudioSubObjectSwitch::addObject(AudioSubObjectHandle audioSubObject, const 
 
 AudioSubObjectHandle AudioSubObjectSwitch::removeObject(const IAudioObject* object)
 {
-	for (auto& c: cases) {
-		if (&c.second.getObject() == object) {
-			return std::move(c.second);
+	for (auto iter = cases.begin(); iter != cases.end(); ++iter) {
+		if (&iter->second.getObject() == object) {
+			auto result = std::move(iter->second);
+			cases.erase(iter);
+			return result;
 		}
 	}
 	return AudioSubObjectHandle();

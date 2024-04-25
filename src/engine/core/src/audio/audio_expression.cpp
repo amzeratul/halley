@@ -107,7 +107,9 @@ ConfigNode AudioExpression::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["terms"] = terms;
-	result["operation"] = toString(operation);
+	if (!terms.empty()) {
+		result["operation"] = toString(operation);
+	}
 	return result;
 }
 
