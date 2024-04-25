@@ -27,33 +27,6 @@ UISpinList::UISpinList(String id, const UIStyle& style, Vector<LocalisedString> 
 	setOptions(std::move(os));
 }
 
-void UISpinList::setSelectedOptionSilent(int option)
-{
-	int nextOption = option;
-	if (option >= static_cast<int>(options.size())) {
-		nextOption = 0;
-	}
-	if (option < 0) {
-		nextOption = static_cast<int>(options.size()) - 1;
-	}
-
-	if (curOption != nextOption) {
-		curOption = nextOption;
-		const auto spinSound = styles[0].getString("spinSound");
-		if (!spinSound.isEmpty()) {
-			playSound(spinSound);
-		}
-
-		label->setText(options[curOption]);
-		if (getDataBindFormat() == UIDataBind::Format::String) {
-			notifyDataBind(optionIds[curOption]);
-		}
-		else {
-			notifyDataBind(curOption);
-		}
-	}
-}
-
 void UISpinList::setSelectedOption(int option)
 {
 	int nextOption = option;
@@ -65,7 +38,6 @@ void UISpinList::setSelectedOption(int option)
 	}
 	if (curOption != nextOption) {
 		curOption = nextOption;
-		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), optionIds[curOption], curOption));
 
 		const auto spinSound = styles[0].getString("spinSound");
 		if (!spinSound.isEmpty()) {
@@ -78,7 +50,7 @@ void UISpinList::setSelectedOption(int option)
 		}
 		else {
 			notifyDataBind(curOption);
-		}	
+		}
 	}
 }
 
@@ -103,6 +75,17 @@ String UISpinList::getSelectedOptionId() const
 LocalisedString UISpinList::getSelectedOptionText() const
 {
 	return options[curOption];
+}
+
+void UISpinList::changeOption(int direction)
+{
+	setSelectedOption(curOption + direction);
+	if (direction > 0) {
+		rightArrow->animate();
+	} else {
+		leftArrow->animate();
+	}
+	sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), optionIds[curOption], curOption));
 }
 
 void UISpinList::setInputButtons(const UIInputButtons& buttons)
@@ -196,9 +179,8 @@ void UISpinList::readFromDataBind()
 
 void UISpinList::arrowPressed(bool left)
 {
-	setSelectedOption(left ? curOption - 1 : curOption + 1);
+	changeOption(left ? -1 : 1);
 }
-
 
 UISpinListArrow::UISpinListArrow(UISpinList& parent, String id, const UIStyle& style, bool left)
     : UIImage(id, left ? style.getSprite("normalLeft") : style.getSprite("normalRight"), UISizer())
@@ -207,6 +189,11 @@ UISpinListArrow::UISpinListArrow(UISpinList& parent, String id, const UIStyle& s
 {
 	setInteractWithMouse(true);
 	styles.emplace_back(style);
+}
+
+void UISpinListArrow::animate()
+{
+	time = 0.0f;
 }
 
 void UISpinListArrow::update(Time t, bool moved)
@@ -248,5 +235,5 @@ void UISpinListArrow::update(Time t, bool moved)
 void UISpinListArrow::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	parent.arrowPressed(left);
-	time = 0.0f;
+	animate();
 }

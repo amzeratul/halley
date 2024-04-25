@@ -18,12 +18,12 @@ namespace Halley {
 	public:
 		explicit UISpinList(String id, const UIStyle& style, Vector<LocalisedString> options = {}, int defaultOption = 0);
 
-		void setSelectedOptionSilent(int option);
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& id);
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		LocalisedString getSelectedOptionText() const;
+		void changeOption(int direction);
 
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setOptions(Vector<LocalisedString> options, int defaultOption = -1);
@@ -40,6 +40,7 @@ namespace Halley {
 
 	private:
 		void arrowPressed(bool left);
+
 	    UIInputButtons inputButtons;
 
 		std::shared_ptr<UILabel> label;
@@ -55,6 +56,7 @@ namespace Halley {
 	public:
 		explicit UISpinListArrow(UISpinList& parent, String id, const UIStyle& style, bool left);
 
+		void animate();
 	protected:
 		void update(Time t, bool moved) override;
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
