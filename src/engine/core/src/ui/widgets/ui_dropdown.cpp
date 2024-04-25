@@ -167,13 +167,17 @@ void UIDropdown::setOptions(Vector<Entry> os, int defaultOption)
 
 void UIDropdown::onManualControlCycleValue(int delta)
 {
-	setSelectedOption(modulo(curOption + delta, int(options.size())));
+	if (isEnabled()) {
+		setSelectedOption(modulo(curOption + delta, int(options.size())));
+	}
 }
 
 void UIDropdown::onManualControlActivate()
 {
-	focus();
-	open();
+	if (isEnabled()) {
+		focus();
+		open();
+	}
 }
 
 bool UIDropdown::canReceiveFocus() const

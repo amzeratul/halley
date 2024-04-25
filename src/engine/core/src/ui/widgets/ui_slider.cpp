@@ -134,6 +134,10 @@ void UISlider::setTransformation(std::function<float(float)> f)
 
 void UISlider::onManualControlAnalogueAdjustValue(float input, Time t)
 {
+	if (!isEnabled()) {
+		return;
+	}
+
 	timeSinceMove = 0;
 
 	constexpr float targetSpeed = 3.0f;

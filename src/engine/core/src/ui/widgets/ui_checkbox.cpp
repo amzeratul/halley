@@ -61,16 +61,20 @@ void UICheckbox::doSetState(State state)
 
 void UICheckbox::onManualControlCycleValue(int delta)
 {
-	if (delta > 0) {
-		setChecked(true);
-	} else if (delta < 0) {
-		setChecked(false);
+	if (isEnabled()) {
+		if (delta > 0) {
+			setChecked(true);
+		} else if (delta < 0) {
+			setChecked(false);
+		}
 	}
 }
 
 void UICheckbox::onManualControlActivate()
 {
-	setChecked(!checked);
+	if (isEnabled()) {
+		setChecked(!checked);
+	}
 }
 
 void UICheckbox::readFromDataBind()
