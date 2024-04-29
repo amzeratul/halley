@@ -96,7 +96,7 @@ Future<ConfigNode> EntityNetworkSession::requestAccountData(ConfigNode accountPa
 	pendingAccountData = Promise<ConfigNode>();
 
 	if (isHost()) {
-		pendingAccountData.setValue(getAccountData(std::move(accountParams)));
+		pendingAccountData.setValue(getAccountData(accountParams));
 	} else {
 		peers.back().requestAccountData(std::move(accountParams));
 	}
@@ -349,8 +349,7 @@ void EntityNetworkSession::setupDictionary()
 
 ConfigNode EntityNetworkSession::getAccountData(const ConfigNode& params)
 {
-	// TODO
-	return {};
+	return listener ? listener->getAccountData(params) : ConfigNode();
 }
 
 World& EntityNetworkSession::getWorld() const

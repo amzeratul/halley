@@ -51,9 +51,10 @@ namespace Halley {
 		size_t getNumberOfPlayers() const override;
 		uint8_t getMyClientId() const override;
 		SessionState getState() const;
+		bool hasGameStarted() const;
 
 		void reportInitialViewPort(Rect4f viewPort);
-		void requestJoinGame();
+		void startOrJoinGame();
 
 		EntityNetworkSession* getEntityNetworkSession() override;
 		NetworkSession* getNetworkSession() override;
@@ -68,6 +69,7 @@ namespace Halley {
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
+		ConfigNode getAccountData(const ConfigNode& params) override;
 
 	private:
 		bool host = false;

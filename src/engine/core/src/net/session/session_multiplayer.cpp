@@ -105,6 +105,11 @@ SessionMultiplayer::SessionState SessionMultiplayer::getState() const
 	return curState;
 }
 
+bool SessionMultiplayer::hasGameStarted() const
+{
+	return entitySession->isGameStarted();
+}
+
 void SessionMultiplayer::reportInitialViewPort(Rect4f viewPort)
 {
 	if (curState == SessionState::WaitingForInitialViewport) {
@@ -115,9 +120,9 @@ void SessionMultiplayer::reportInitialViewPort(Rect4f viewPort)
 	}
 }
 
-void SessionMultiplayer::requestJoinGame()
+void SessionMultiplayer::startOrJoinGame()
 {
-	if (curState == SessionState::GameLobbyReady) {
+	if (curState == SessionState::GameLobbyReady && !hasGameStarted()) {
 		if (host) {
 			curState = SessionState::PlayingGame;
 			entitySession->startGame();
@@ -191,6 +196,12 @@ bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientShar
 	// Send if it's in an expanded rect
 	return clientData.viewRect->grow(256).contains(Vector2i(transform->getGlobalPosition()));
 }
+
+ConfigNode SessionMultiplayer::getAccountData(const ConfigNode& params)
+{
+	return {};
+}
+
 void SessionMultiplayer::setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> serializationDict)
 {
 	dict = SerializationDictionary(serializationDict->getRoot());

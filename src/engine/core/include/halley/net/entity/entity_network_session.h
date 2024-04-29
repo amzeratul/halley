@@ -42,6 +42,7 @@ namespace Halley {
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
+			virtual ConfigNode getAccountData(const ConfigNode& params) = 0;
 		};
 		
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
