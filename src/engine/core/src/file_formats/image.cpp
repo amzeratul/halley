@@ -464,7 +464,7 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat, const Pa
 
 		uint8_t *pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, targetChannels);
 		if (!pixels) {
-			throw Exception("STBI was unable to load image data: " + String(stbi_failure_reason()) + " from " + path.getNativeString(false), HalleyExceptions::Utils);
+			throw Exception("STBI was unable to load image data: " + String(stbi_failure_reason()) + " from \"" + path.getNativeString(false) + "\"", HalleyExceptions::Utils);
 		}
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(pixels, [](unsigned char* data) { stbi_image_free(data); });
 		w = x;
