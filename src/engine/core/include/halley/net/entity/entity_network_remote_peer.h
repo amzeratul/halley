@@ -25,8 +25,15 @@ namespace Halley {
         EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId);
 
         NetworkSession::PeerId getPeerId() const;
-        bool isAlive() const;
+
+    	bool isAlive() const;
     	void destroy();
+
+    	bool hasJoinedWorld() const;
+        void onJoinedWorld();
+        void requestJoinWorld();
+        void requestAccountData(ConfigNode params);
+        void sendAccountData(ConfigNode data);
 
     	void sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
@@ -50,6 +57,7 @@ namespace Halley {
         NetworkSession::PeerId peerId;
     	bool alive = true;
         bool hasSentData = false;
+        bool joinedWorld = false;
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;

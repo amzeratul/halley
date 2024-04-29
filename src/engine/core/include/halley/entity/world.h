@@ -40,7 +40,7 @@ namespace Halley {
 		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
 		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) = 0;
-		virtual bool isHost() = 0;
+		virtual bool isHost() const = 0;
 	};
 
 	class World

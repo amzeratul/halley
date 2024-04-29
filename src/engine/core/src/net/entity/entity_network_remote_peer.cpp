@@ -115,6 +115,31 @@ void EntityNetworkRemotePeer::destroy()
 	}
 }
 
+bool EntityNetworkRemotePeer::hasJoinedWorld() const
+{
+	return joinedWorld;
+}
+
+void EntityNetworkRemotePeer::onJoinedWorld()
+{
+	joinedWorld = true;
+}
+
+void EntityNetworkRemotePeer::requestJoinWorld()
+{
+	send(EntityNetworkMessageJoinWorld());
+}
+
+void EntityNetworkRemotePeer::requestAccountData(ConfigNode params)
+{
+	send(EntityNetworkMessageGetAccountData(std::move(params)));
+}
+
+void EntityNetworkRemotePeer::sendAccountData(ConfigNode data)
+{
+	send(EntityNetworkMessageSetAccountData(std::move(data)));
+}
+
 bool EntityNetworkRemotePeer::isAlive() const
 {
 	return alive;

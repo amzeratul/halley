@@ -24,18 +24,26 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	
 	if (options.mode == Mode::Host) {
 		Logger::logDev("Starting multiplayer session as the host.");
+		curState = SessionState::GameLobbyReady;
 		session->host(options.maxPlayers);
 		lobby = api.platform->makeMultiplayerLobby(session->getHostAddress());
 		lobby->setPrivacy(MultiplayerPrivacy::FriendsOnly);
 	} else if (options.mode == Mode::Join && options.clientConnectTo) {
 		Logger::logDev("Starting multiplayer session as a client, connecting to " + options.clientConnectTo.value());
+		curState = SessionState::JoiningSession;
 		session->join(options.clientConnectTo.value());
 	} else if (options.mode == Mode::WaitForLobby) {
 		Logger::logDev("Waiting for lobby callback...");
+		curState = SessionState::WaitingForPlatformLobbyCallback;
 		api.platform->setJoinCallback([=] (PlatformJoinCallbackParameters params)
 		{
-			Logger::logDev("Starting multiplayer session as a client, connecting to " + params.param);
-			session->join(params.param);
+			if (curState == SessionState::WaitingForPlatformLobbyCallback) {
+				Logger::logDev("Starting multiplayer session as a client, connecting to " + params.param);
+				curState = SessionState::JoiningSession;
+				session->join(params.param);
+			} else {
+				Logger::logError("Received platform join lobby callback at unexpected time.");
+			}
 		});
 		api.platform->setPreparingToJoinCallback([=]()
 		{
@@ -61,11 +69,6 @@ bool SessionMultiplayer::isHost() const
 bool SessionMultiplayer::hasLocalSave() const
 {
 	return host;
-}
-
-bool SessionMultiplayer::isReadyToStart() const
-{
-	return entitySession->isReadyToStart();
 }
 
 bool SessionMultiplayer::hasHostAuthority() const
@@ -97,18 +100,30 @@ uint8_t SessionMultiplayer::getMyClientId() const
 	return *session->getMyPeerId();
 }
 
-bool SessionMultiplayer::isWaitingForInitialViewPort() const
+SessionMultiplayer::SessionState SessionMultiplayer::getState() const
 {
-	return waitingForViewPort;
+	return curState;
 }
 
 void SessionMultiplayer::reportInitialViewPort(Rect4f viewPort)
 {
-	if (waitingForViewPort) {
+	if (curState == SessionState::WaitingForInitialViewport) {
 		auto& sharedData = session->getMySharedData<EntityClientSharedData>();
 		sharedData.viewRect = Rect4i(viewPort);
 		sharedData.markModified();
-		waitingForViewPort = false;
+		curState = SessionState::WaitingToStart;
+	}
+}
+
+void SessionMultiplayer::requestJoinGame()
+{
+	if (curState == SessionState::GameLobbyReady) {
+		if (host) {
+			curState = SessionState::PlayingGame;
+			entitySession->startGame();
+		} else {
+			entitySession->joinGame();
+		}
 	}
 }
 
@@ -134,14 +149,20 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 
 void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 {
+}
+
+void SessionMultiplayer::onStartGame()
+{
 	if (!host) {
-		waitingForViewPort = true;
+		curState = SessionState::WaitingForInitialViewport;
 	}
 }
 
 bool SessionMultiplayer::update()
 {
 	entitySession->receiveUpdates();
+
+
 
 	return session->getStatus() != ConnectionStatus::Closed;
 }

@@ -18,7 +18,10 @@ namespace Halley {
 
 	class EntitySessionSharedData : public SharedData {
 	public:
-		
+		bool gameStarted = false;
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
 	};
 
 	class EntityClientSharedData : public SharedData {
@@ -35,6 +38,7 @@ namespace Halley {
 		public:
 			virtual ~IEntityNetworkSessionListener() = default;
 			virtual void onStartSession(NetworkSession::PeerId myPeerId) = 0;
+			virtual void onStartGame() = 0;
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
@@ -64,18 +68,24 @@ namespace Halley {
 		void requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
 		void setupOutboundInterpolators(EntityRef entity);
 
-		bool isReadyToStart() const;
-		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
+		void startGame();
+		void joinGame();
+		bool isGameStarted() const;
+		bool isReadyToStartGame() const;
+		bool isLobbyReady() const;
 
+		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
 		Vector<Rect4i> getRemoteViewPorts() const;
 
-		bool isHost() override;
+		bool isHost() const override;
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
 		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;
 
 		void sendToAll(EntityNetworkMessage msg);
 		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
+
+		Future<ConfigNode> requestAccountData(ConfigNode accountParams);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
@@ -113,7 +123,11 @@ namespace Halley {
 
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 
-		bool readyToStart = false;
+		Promise<ConfigNode> pendingAccountData;
+
+		bool readyToStartGame = false;
+		bool gameStarted = false;
+		bool lobbyReady = false;
 
 		bool canProcessMessage(const EntityNetworkMessage& msg) const;
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
@@ -122,9 +136,14 @@ namespace Halley {
 		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg);
 		void onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg);
 		void onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg);
+		void onReceiveJoinWorld(NetworkSession::PeerId fromPeerId);
+		void onReceiveGetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetAccountData& msg);
+		void onReceiveSetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetAccountData& msg);
 
 		void sendMessages();
 		
 		void setupDictionary();
+
+		ConfigNode getAccountData(const ConfigNode& params);
 	};
 }

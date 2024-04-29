@@ -16,6 +16,17 @@ namespace Halley {
 			WaitForLobby
 		};
 
+		enum class SessionState {
+			WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
+			JoiningSession, // Connecting, waiting for host to assign peer id
+			GameLobbyReady, // Peer id assigned, ready to join in-game lobby
+			JoiningGame, // Starting game
+			WaitingForInitialViewport, // Host is waiting for initial viewport
+			WaitingToStart, // Client is waiting for the host to confirm they're ready to go
+			PlayingGame, // Playing
+			Disconnected
+		};
+
 		struct ConnectionOptions {
 			Mode mode = Mode::Host;
 			int16_t maxPlayers = 8;
@@ -35,14 +46,14 @@ namespace Halley {
 		bool isMultiplayer() const override;
 		bool isHost() const;
 		bool hasLocalSave() const override;
-		bool isReadyToStart() const override;
 		bool hasHostAuthority() const override;
 		Vector<Rect4f> getRemoteViewPorts() const override;
 		size_t getNumberOfPlayers() const override;
 		uint8_t getMyClientId() const override;
+		SessionState getState() const;
 
-		bool isWaitingForInitialViewPort() const override;
-		void reportInitialViewPort(Rect4f viewPort) override;
+		void reportInitialViewPort(Rect4f viewPort);
+		void requestJoinGame();
 
 		EntityNetworkSession* getEntityNetworkSession() override;
 		NetworkSession* getNetworkSession() override;
@@ -53,14 +64,15 @@ namespace Halley {
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
+		void onStartGame() override;
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
 
 	private:
 		bool host = false;
-		bool waitingForViewPort = false;
 		String playerName;
+		SessionState curState = SessionState::Disconnected;
 
 		std::unique_ptr<EntityNetworkSession> entitySession;
 		std::shared_ptr<NetworkSession> session;

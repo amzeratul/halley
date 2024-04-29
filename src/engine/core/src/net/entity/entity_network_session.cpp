@@ -72,7 +72,9 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 
 	// Update entities
 	for (auto& peer: peers) {
-		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
+		if (peer.hasJoinedWorld()) {
+			peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
+		}
 	}
 
 	sendMessages();
@@ -87,6 +89,19 @@ void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
 void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
 {
 	outbox[peerId].push_back(std::move(msg));
+}
+
+Future<ConfigNode> EntityNetworkSession::requestAccountData(ConfigNode accountParams)
+{
+	pendingAccountData = Promise<ConfigNode>();
+
+	if (isHost()) {
+		pendingAccountData.setValue(getAccountData(std::move(accountParams)));
+	} else {
+		peers.back().requestAccountData(std::move(accountParams));
+	}
+
+	return pendingAccountData.getFuture();
 }
 
 void EntityNetworkSession::sendMessages()
@@ -188,6 +203,15 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 		break;
 	case EntityNetworkHeaderType::KeepAlive:
 		break;
+	case EntityNetworkHeaderType::JoinWorld:
+		onReceiveJoinWorld(fromPeerId);
+		break;
+	case EntityNetworkHeaderType::GetAccountData:
+		onReceiveGetAccountData(fromPeerId, msg.getMessage<EntityNetworkMessageGetAccountData>());
+		break;
+	case EntityNetworkHeaderType::SetAccountData:
+		onReceiveSetAccountData(fromPeerId, msg.getMessage<EntityNetworkMessageSetAccountData>());
+		break;
 	}
 }
 
@@ -205,7 +229,7 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId, con
 {
 	Logger::logDev("onReceiveReady from " + toString(int(fromPeerId)));
 	if (fromPeerId == 0) {
-		readyToStart = true;
+		lobbyReady = true;
 	}
 }
 
@@ -288,6 +312,32 @@ void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId
 	pendingSysMsgResponses.erase(iter);
 }
 
+void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
+{
+	for (auto& peer: peers) {
+		if (peer.getPeerId() == fromPeerId) {
+			peer.onJoinedWorld();
+			break;
+		}
+	}
+}
+
+void EntityNetworkSession::onReceiveGetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetAccountData& msg)
+{
+	for (auto& peer : peers) {
+		if (peer.getPeerId() == fromPeerId) {
+			peer.sendAccountData(getAccountData(msg.accountInfo));
+			break;
+		}
+	}
+}
+
+void EntityNetworkSession::onReceiveSetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetAccountData& msg)
+{
+	if (fromPeerId == 0) {
+		pendingAccountData.setValue(ConfigNode(msg.accountData));
+	}
+}
 
 void EntityNetworkSession::setupDictionary()
 {
@@ -295,6 +345,12 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("children");
 	serializationDictionary.addEntry("Transform2D");
 	serializationDictionary.addEntry("position");
+}
+
+ConfigNode EntityNetworkSession::getAccountData(const ConfigNode& params)
+{
+	// TODO
+	return {};
 }
 
 World& EntityNetworkSession::getWorld() const
@@ -375,9 +431,38 @@ void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 	}
 }
 
-bool EntityNetworkSession::isReadyToStart() const
+void EntityNetworkSession::startGame()
 {
-	return readyToStart;
+	if (isHost()) {
+		gameStarted = true;
+		session->getMutableSessionSharedData<EntitySessionSharedData>().gameStarted = true;
+	}
+}
+
+void EntityNetworkSession::joinGame()
+{
+	if (!isHost()) {
+		peers.back().requestJoinWorld();
+	}
+}
+
+bool EntityNetworkSession::isGameStarted() const
+{
+	if (isHost()) {
+		return gameStarted;
+	} else {
+		return session->getSessionSharedData<EntitySessionSharedData>().gameStarted;
+	}
+}
+
+bool EntityNetworkSession::isReadyToStartGame() const
+{
+	return readyToStartGame;
+}
+
+bool EntityNetworkSession::isLobbyReady() const
+{
+	return lobbyReady;
 }
 
 bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const
@@ -398,7 +483,7 @@ Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 	return result;
 }
 
-bool EntityNetworkSession::isHost()
+bool EntityNetworkSession::isHost() const
 {
 	return session->getType() == NetworkSessionType::Host;
 }
@@ -428,16 +513,15 @@ void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 {
 	Logger::logDev("Starting session, I'm peer id " + toString(static_cast<int>(myPeerId)));
 	if (myPeerId == 0) {
-		readyToStart = true;
+		lobbyReady = true;
 	}
 	listener->onStartSession(myPeerId);
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
 {
-	peers.emplace_back(*this, peerId);
-
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " connected to EntityNetworkSession.");
+	peers.emplace_back(*this, peerId);
 }
 
 void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
@@ -460,6 +544,16 @@ std::unique_ptr<SharedData> EntityNetworkSession::makeSessionSharedData()
 std::unique_ptr<SharedData> EntityNetworkSession::makePeerSharedData()
 {
 	return std::make_unique<EntityClientSharedData>();
+}
+
+void EntitySessionSharedData::serialize(Serializer& s) const
+{
+	s << gameStarted;
+}
+
+void EntitySessionSharedData::deserialize(Deserializer& s)
+{
+	s >> gameStarted;
 }
 
 void EntityClientSharedData::serialize(Serializer& s) const

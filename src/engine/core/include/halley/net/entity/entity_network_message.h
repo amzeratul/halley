@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "halley/data_structures/config_node.h"
 #include "halley/entity/system_message.h"
 #include "halley/maths/uuid.h"
 
@@ -16,7 +17,10 @@ namespace Halley {
     	EntityMsg,
     	SystemMsg,
     	SystemMsgResponse,
-    	KeepAlive
+    	KeepAlive,
+        JoinWorld,
+        GetAccountData,
+        SetAccountData
     };
 
     class IEntityNetworkMessage {
@@ -134,6 +138,39 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
+
+    class EntityNetworkMessageJoinWorld final : public IEntityNetworkMessage {
+    public:
+        EntityNetworkMessageJoinWorld() = default;
+
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::JoinWorld; }
+        void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+    };
+
+    class EntityNetworkMessageGetAccountData final : public IEntityNetworkMessage {
+    public:
+        ConfigNode accountInfo;
+
+        EntityNetworkMessageGetAccountData() = default;
+        EntityNetworkMessageGetAccountData(ConfigNode info);
+
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::GetAccountData; }
+        void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+    };
+
+    class EntityNetworkMessageSetAccountData final : public IEntityNetworkMessage {
+    public:
+        ConfigNode accountData;
+
+        EntityNetworkMessageSetAccountData() = default;
+        EntityNetworkMessageSetAccountData(ConfigNode data);
+
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetAccountData; }
+        void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+    };
     
     class EntityNetworkMessage {
     public:

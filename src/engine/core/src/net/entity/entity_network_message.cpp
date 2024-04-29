@@ -102,6 +102,42 @@ void EntityNetworkMessageKeepAlive::serialize(Serializer& s) const
 void EntityNetworkMessageKeepAlive::deserialize(Deserializer& s)
 {}
 
+void EntityNetworkMessageJoinWorld::serialize(Serializer& s) const
+{}
+
+void EntityNetworkMessageJoinWorld::deserialize(Deserializer& s)
+{}
+
+EntityNetworkMessageGetAccountData::EntityNetworkMessageGetAccountData(ConfigNode info)
+	: accountInfo(std::move(info))
+{
+}
+
+void EntityNetworkMessageGetAccountData::serialize(Serializer& s) const
+{
+	s << accountInfo;
+}
+
+void EntityNetworkMessageGetAccountData::deserialize(Deserializer& s)
+{
+	s >> accountInfo;
+}
+
+EntityNetworkMessageSetAccountData::EntityNetworkMessageSetAccountData(ConfigNode data)
+	: accountData(std::move(data))
+{
+}
+
+void EntityNetworkMessageSetAccountData::serialize(Serializer& s) const
+{
+	s << accountData;
+}
+
+void EntityNetworkMessageSetAccountData::deserialize(Deserializer& s)
+{
+	s >> accountData;
+}
+
 EntityNetworkMessage::EntityNetworkMessage(std::unique_ptr<IEntityNetworkMessage> msg)
 	: message(std::move(msg))
 {
