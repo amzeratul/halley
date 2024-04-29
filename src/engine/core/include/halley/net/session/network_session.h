@@ -96,6 +96,8 @@ namespace Halley {
 			return dynamic_cast<const T*>(doTryGetClientSharedData(clientId));
 		}
 
+		bool hasSessionSharedData() const;
+
 	protected:
 		SharedData& doGetMySharedData();
 		SharedData& doGetMutableSessionSharedData();

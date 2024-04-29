@@ -450,7 +450,7 @@ bool EntityNetworkSession::isGameStarted() const
 	if (isHost()) {
 		return gameStarted;
 	} else {
-		return session->getSessionSharedData<EntitySessionSharedData>().gameStarted;
+		return session->hasSessionSharedData() && session->getSessionSharedData<EntitySessionSharedData>().gameStarted;
 	}
 }
 

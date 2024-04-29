@@ -171,6 +171,11 @@ NetworkSessionType NetworkSession::getType() const
 	return type;
 }
 
+bool NetworkSession::hasSessionSharedData() const
+{
+	return !!sessionSharedData;
+}
+
 SharedData& NetworkSession::doGetMySharedData()
 {
 	if (type == NetworkSessionType::Undefined || !myPeerId) {
