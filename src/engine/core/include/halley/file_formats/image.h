@@ -55,7 +55,7 @@ namespace Halley {
 
 		void setSize(Vector2i size, bool clear = true);
 
-		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
+		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined, const Path& originalPath = {});
 
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;

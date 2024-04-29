@@ -59,14 +59,14 @@ Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
 Image::Image(const ResourceDataStatic& data)
 	: px(nullptr, [](unsigned char*) {})
 {
-	load(data.getSpan(), Format::Undefined);
+	load(data.getSpan(), Format::Undefined, data.getPath());
 }
 
 Image::Image(const ResourceDataStatic& data, const Metadata& meta)
 	: px(nullptr, [](unsigned char*) {})
 {
 	auto format = fromString<Format>(meta.getString("format", "undefined"));
-	load(data.getSpan(), format);
+	load(data.getSpan(), format, data.getPath());
 }
 
 Image::Image(Image&& other) = default;
@@ -427,7 +427,7 @@ void Image::deserialize(Deserializer& s)
 	s >> span;
 }
 
-void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
+void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat, const Path& path)
 {
 	int targetChannels;
 	switch (targetFormat) {
@@ -464,7 +464,7 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 
 		uint8_t *pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, targetChannels);
 		if (!pixels) {
-			throw Exception("Unable to load image data: " + String(stbi_failure_reason()), HalleyExceptions::Utils);
+			throw Exception("STBI was unable to load image data: " + String(stbi_failure_reason()) + " from " + path.getNativeString(false), HalleyExceptions::Utils);
 		}
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(pixels, [](unsigned char* data) { stbi_image_free(data); });
 		w = x;
