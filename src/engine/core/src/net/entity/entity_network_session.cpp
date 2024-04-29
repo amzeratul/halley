@@ -229,7 +229,7 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId, con
 {
 	Logger::logDev("onReceiveReady from " + toString(int(fromPeerId)));
 	if (fromPeerId == 0) {
-		lobbyReady = true;
+		readyToStartGame = true;
 	}
 }
 
@@ -314,6 +314,7 @@ void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId
 
 void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
 {
+	Logger::logDev("Peer " + toString(int(fromPeerId)) + " joining world...");
 	for (auto& peer: peers) {
 		if (peer.getPeerId() == fromPeerId) {
 			peer.onJoinedWorld();
@@ -441,6 +442,7 @@ void EntityNetworkSession::startGame()
 void EntityNetworkSession::joinGame()
 {
 	if (!isHost()) {
+		Logger::logDev("Requesting join...");
 		peers.back().requestJoinWorld();
 	}
 }

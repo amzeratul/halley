@@ -8,23 +8,41 @@
 namespace Halley {
 	class HalleyAPI;
 
+	enum class SessionState {
+		Idle,
+		WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
+		JoiningSession, // Connecting, waiting for host to assign peer id
+		GameLobbyReady, // Peer id assigned, ready to join in-game lobby
+		JoiningGame, // Starting game
+		WaitingForInitialViewport, // Host is waiting for initial viewport
+		WaitingToStart, // Client is waiting for the host to confirm they're ready to go
+		PlayingGame, // Playing
+		Disconnected
+	};
+
+	template <>
+	struct EnumNames<SessionState> {
+		constexpr std::array<const char*, 9> operator()() const {
+			return{ {
+				"Idle",
+				"WaitingForPlatformLobbyCallback",
+				"JoiningSession",
+				"GameLobbyReady",
+				"JoiningGame",
+				"WaitingForInitialViewport",
+				"WaitingToStart",
+				"PlayingGame",
+				"Disconnected"
+			} };
+		}
+	};
+
 	class SessionMultiplayer : public Session, public EntityNetworkSession::IEntityNetworkSessionListener {
 	public:
 		enum class Mode {
 			Host,
 			Join,
 			WaitForLobby
-		};
-
-		enum class SessionState {
-			WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
-			JoiningSession, // Connecting, waiting for host to assign peer id
-			GameLobbyReady, // Peer id assigned, ready to join in-game lobby
-			JoiningGame, // Starting game
-			WaitingForInitialViewport, // Host is waiting for initial viewport
-			WaitingToStart, // Client is waiting for the host to confirm they're ready to go
-			PlayingGame, // Playing
-			Disconnected
 		};
 
 		struct ConnectionOptions {
@@ -70,6 +88,7 @@ namespace Halley {
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
 		ConfigNode getAccountData(const ConfigNode& params) override;
+		void setState(SessionState state);
 
 	private:
 		bool host = false;

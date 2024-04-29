@@ -24,22 +24,22 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	
 	if (options.mode == Mode::Host) {
 		Logger::logDev("Starting multiplayer session as the host.");
-		curState = SessionState::GameLobbyReady;
+		setState(SessionState::GameLobbyReady);
 		session->host(options.maxPlayers);
 		lobby = api.platform->makeMultiplayerLobby(session->getHostAddress());
 		lobby->setPrivacy(MultiplayerPrivacy::FriendsOnly);
 	} else if (options.mode == Mode::Join && options.clientConnectTo) {
 		Logger::logDev("Starting multiplayer session as a client, connecting to " + options.clientConnectTo.value());
-		curState = SessionState::JoiningSession;
+		setState(SessionState::JoiningSession);
 		session->join(options.clientConnectTo.value());
 	} else if (options.mode == Mode::WaitForLobby) {
 		Logger::logDev("Waiting for lobby callback...");
-		curState = SessionState::WaitingForPlatformLobbyCallback;
+		setState(SessionState::WaitingForPlatformLobbyCallback);
 		api.platform->setJoinCallback([=] (PlatformJoinCallbackParameters params)
 		{
 			if (curState == SessionState::WaitingForPlatformLobbyCallback) {
 				Logger::logDev("Starting multiplayer session as a client, connecting to " + params.param);
-				curState = SessionState::JoiningSession;
+				setState(SessionState::JoiningSession);
 				session->join(params.param);
 			} else {
 				Logger::logError("Received platform join lobby callback at unexpected time.");
@@ -100,7 +100,7 @@ uint8_t SessionMultiplayer::getMyClientId() const
 	return *session->getMyPeerId();
 }
 
-SessionMultiplayer::SessionState SessionMultiplayer::getState() const
+SessionState SessionMultiplayer::getState() const
 {
 	return curState;
 }
@@ -116,7 +116,7 @@ void SessionMultiplayer::reportInitialViewPort(Rect4f viewPort)
 		auto& sharedData = session->getMySharedData<EntityClientSharedData>();
 		sharedData.viewRect = Rect4i(viewPort);
 		sharedData.markModified();
-		curState = SessionState::WaitingToStart;
+		setState(SessionState::WaitingToStart);
 	}
 }
 
@@ -124,9 +124,10 @@ void SessionMultiplayer::startOrJoinGame()
 {
 	if (curState == SessionState::GameLobbyReady && !hasGameStarted()) {
 		if (host) {
-			curState = SessionState::PlayingGame;
+			setState(SessionState::PlayingGame);
 			entitySession->startGame();
 		} else {
+			setState(SessionState::JoiningGame);
 			entitySession->joinGame();
 		}
 	}
@@ -159,7 +160,7 @@ void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 void SessionMultiplayer::onStartGame()
 {
 	if (!host) {
-		curState = SessionState::WaitingForInitialViewport;
+		setState(SessionState::WaitingForInitialViewport);
 	}
 }
 
@@ -200,6 +201,13 @@ bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientShar
 ConfigNode SessionMultiplayer::getAccountData(const ConfigNode& params)
 {
 	return {};
+}
+
+void SessionMultiplayer::setState(SessionState state)
+{
+	auto oldState = curState;
+	curState = state;
+	Logger::logDev("Connection state: " + toString(oldState) + " -> " + toString(state));
 }
 
 void SessionMultiplayer::setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> serializationDict)
