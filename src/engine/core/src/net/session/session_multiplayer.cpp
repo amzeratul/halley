@@ -130,7 +130,7 @@ void SessionMultiplayer::startOrJoinGame()
 			}
 		} else {
 			if (hasGameStarted()) {
-				setState(SessionState::JoiningGame);
+				setState(SessionState::WaitingForInitialViewport);
 				entitySession->joinGame();
 			}
 		}
@@ -169,11 +169,12 @@ void SessionMultiplayer::onStartGame()
 	}
 }
 
-bool SessionMultiplayer::update()
+bool SessionMultiplayer::update(Time t)
 {
+	entitySession->update(0);
 	entitySession->receiveUpdates();
-
-
+	entitySession->sendUpdates();
+	entitySession->update(t);
 
 	return session->getStatus() != ConnectionStatus::Closed;
 }

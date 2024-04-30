@@ -59,7 +59,7 @@ namespace Halley {
 
 		SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings);
 
-		bool update() override;
+		bool update(Time t) override;
 
 		bool isMultiplayer() const override;
 		bool isHost() const;

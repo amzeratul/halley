@@ -58,7 +58,17 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	}
 }
 
-void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds)
+void EntityNetworkSession::update(Time t)
+{
+	session->update(t);
+}
+
+void EntityNetworkSession::sendUpdates()
+{
+	sendMessages();
+}
+
+void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds)
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();
@@ -74,9 +84,6 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 	for (auto& peer: peers) {
 		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
 	}
-
-	sendMessages();
-	session->update(t);
 }
 
 void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
@@ -433,14 +440,15 @@ void EntityNetworkSession::startGame()
 {
 	if (isHost()) {
 		gameStarted = true;
-		session->getMutableSessionSharedData<EntitySessionSharedData>().gameStarted = true;
+		auto& sharedData = session->getMutableSessionSharedData<EntitySessionSharedData>();
+		sharedData.gameStarted = true;
+		sharedData.markModified();
 	}
 }
 
 void EntityNetworkSession::joinGame()
 {
 	if (!isHost()) {
-		Logger::logDev("Requesting join...");
 		peers.back().requestJoinWorld();
 	}
 }

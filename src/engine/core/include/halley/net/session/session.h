@@ -2,6 +2,7 @@
 #include "halley/maths/rect.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley {
 	class EntityNetworkSession;
@@ -29,7 +30,7 @@ namespace Halley {
 
 		virtual const String& getPlayerName() const { return String::emptyString(); }
 
-		[[nodiscard]] virtual bool update() { return true; }
+		[[nodiscard]] virtual bool update(Time t) { return true; }
 
 		ConfigNode& getOptions() { return options; }
 		const ConfigNode& getOptions() const { return options; }

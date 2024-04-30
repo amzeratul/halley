@@ -46,7 +46,9 @@ public:
 
 			const auto viewPort = Rect4i(getScreenService().getCameraViewPort());
 			
-			entityNetworkSession.sendUpdates(t, viewPort, entities);
+			entityNetworkSession.sendEntityUpdates(t, viewPort, entities);
+			entityNetworkSession.sendUpdates();
+			entityNetworkSession.update(0.0);
 		}
 	}
 

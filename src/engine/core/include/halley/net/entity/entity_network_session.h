@@ -49,8 +49,10 @@ namespace Halley {
 		~EntityNetworkSession() override;
 
 		void setWorld(World& world, SystemMessageBridge bridge);
-		
-		void sendUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds); // Takes pairs of entity id and owner peer id
+
+		void update(Time t);
+		void sendUpdates();
+		void sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds); // Takes pairs of entity id and owner peer id
 		void receiveUpdates();
 
 		World& getWorld() const;

@@ -17,7 +17,7 @@ public:
 	void update(Time t)
 	{
 		auto& world = getWorld();
-		const bool sessionAlive = getSessionService().getSession()->update();
+		const bool sessionAlive = getSessionService().getSession()->update(t);
 
 		if (!sessionAlive && !requestedExit) {
 			requestedExit = true;
