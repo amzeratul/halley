@@ -143,6 +143,11 @@ void EntityNetworkRemotePeer::sendLobbyInfo(ConfigNode data)
 	send(EntityNetworkMessageUpdateLobbyInfo(std::move(data)));
 }
 
+void EntityNetworkRemotePeer::setLobbyInfo(ConfigNode params, ConfigNode info)
+{
+	send(EntityNetworkMessageSetLobbyInfo(std::move(params), std::move(info)));
+}
+
 bool EntityNetworkRemotePeer::isAlive() const
 {
 	return alive;

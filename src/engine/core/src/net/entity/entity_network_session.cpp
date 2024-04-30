@@ -96,17 +96,28 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 	outbox[peerId].push_back(std::move(msg));
 }
 
-Future<ConfigNode> EntityNetworkSession::requestLobbyInfo(ConfigNode params)
+void EntityNetworkSession::requestLobbyInfo(ConfigNode params)
 {
-	pendingLobbyInfo = Promise<ConfigNode>();
-
 	if (isHost()) {
-		pendingLobbyInfo.setValue(getLobbyInfo(0, params));
+		if (listener) {
+			listener->setLobbyParams(0, params);
+			listener->onReceiveLobbyInfo(getLobbyInfo());
+		}
 	} else {
 		peers.back().requestLobbyInfo(std::move(params));
 	}
+}
 
-	return pendingLobbyInfo.getFuture();
+void EntityNetworkSession::setLobbyInfo(ConfigNode accountParams, ConfigNode info)
+{
+	if (isHost()) {
+		if (listener) {
+			listener->setLobbyInfo(0, accountParams, info);
+			sendUpdatedLobbyInfos();
+		}
+	} else {
+		peers.back().setLobbyInfo(std::move(accountParams), std::move(info));
+	}
 }
 
 void EntityNetworkSession::sendMessages()
@@ -335,7 +346,10 @@ void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeer
 {
 	for (auto& peer : peers) {
 		if (peer.getPeerId() == fromPeerId) {
-			peer.sendLobbyInfo(getLobbyInfo(fromPeerId, msg.accountInfo));
+			if (listener) {
+				listener->setLobbyParams(fromPeerId, msg.accountInfo);
+			}
+			peer.sendLobbyInfo(getLobbyInfo());
 			break;
 		}
 	}
@@ -344,7 +358,9 @@ void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeer
 void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageUpdateLobbyInfo& msg)
 {
 	if (fromPeerId == 0) {
-		pendingLobbyInfo.setValue(ConfigNode(msg.lobbyInfo));
+		if (listener) {
+			listener->onReceiveLobbyInfo(ConfigNode(msg.lobbyInfo));
+		}
 	}
 }
 
@@ -352,6 +368,7 @@ void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeer
 {
 	if (listener) {
 		listener->setLobbyInfo(fromPeerId, msg.accountInfo, msg.lobbyInfo);
+		sendUpdatedLobbyInfos();
 	}
 }
 
@@ -363,9 +380,20 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("position");
 }
 
-ConfigNode EntityNetworkSession::getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params)
+ConfigNode EntityNetworkSession::getLobbyInfo()
 {
-	return listener ? listener->getLobbyInfo(fromPeerId, params) : ConfigNode();
+	return listener ? listener->getLobbyInfo() : ConfigNode();
+}
+
+void EntityNetworkSession::sendUpdatedLobbyInfos()
+{
+	auto lobbyInfo = getLobbyInfo();
+	for (auto& peer: peers) {
+		if (!peer.hasJoinedWorld()) {
+			peer.sendLobbyInfo(ConfigNode(lobbyInfo));
+		}
+	}
+	listener->onReceiveLobbyInfo(lobbyInfo);
 }
 
 World& EntityNetworkSession::getWorld() const

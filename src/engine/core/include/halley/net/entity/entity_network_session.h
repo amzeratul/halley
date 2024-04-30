@@ -42,8 +42,10 @@ namespace Halley {
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
-			virtual ConfigNode getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params) = 0;
+			virtual void setLobbyParams(NetworkSession::PeerId fromPeerId, const ConfigNode& params) = 0;
+			virtual ConfigNode getLobbyInfo() = 0;
 			virtual void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& accountInfo, const ConfigNode& lobbyInfo) = 0;
+			virtual void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) = 0;
 		};
 		
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
@@ -89,7 +91,8 @@ namespace Halley {
 		void sendToAll(EntityNetworkMessage msg);
 		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
-		Future<ConfigNode> requestLobbyInfo(ConfigNode params);
+		void requestLobbyInfo(ConfigNode params);
+		void setLobbyInfo(ConfigNode accountParams, ConfigNode info);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
@@ -127,8 +130,6 @@ namespace Halley {
 
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 
-		Promise<ConfigNode> pendingLobbyInfo;
-
 		bool readyToStartGame = false;
 		bool gameStarted = false;
 		bool lobbyReady = false;
@@ -149,6 +150,7 @@ namespace Halley {
 		
 		void setupDictionary();
 
-		ConfigNode getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params);
+		ConfigNode getLobbyInfo();
+		void sendUpdatedLobbyInfos();
 	};
 }
