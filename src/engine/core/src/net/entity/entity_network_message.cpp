@@ -123,19 +123,37 @@ void EntityNetworkMessageGetLobbyInfo::deserialize(Deserializer& s)
 	s >> accountInfo;
 }
 
-EntityNetworkMessageSetLobbyInfo::EntityNetworkMessageSetLobbyInfo(ConfigNode data)
-	: accountData(std::move(data))
+EntityNetworkMessageUpdateLobbyInfo::EntityNetworkMessageUpdateLobbyInfo(ConfigNode info)
+	: lobbyInfo(std::move(info))
+{
+}
+
+void EntityNetworkMessageUpdateLobbyInfo::serialize(Serializer& s) const
+{
+	s << lobbyInfo;
+}
+
+void EntityNetworkMessageUpdateLobbyInfo::deserialize(Deserializer& s)
+{
+	s >> lobbyInfo;
+}
+
+EntityNetworkMessageSetLobbyInfo::EntityNetworkMessageSetLobbyInfo(ConfigNode accountInfo, ConfigNode lobbyInfo)
+	: accountInfo(std::move(accountInfo))
+	, lobbyInfo(std::move(lobbyInfo))
 {
 }
 
 void EntityNetworkMessageSetLobbyInfo::serialize(Serializer& s) const
 {
-	s << accountData;
+	s << accountInfo;
+	s << lobbyInfo;
 }
 
 void EntityNetworkMessageSetLobbyInfo::deserialize(Deserializer& s)
 {
-	s >> accountData;
+	s >> accountInfo;
+	s >> lobbyInfo;
 }
 
 EntityNetworkMessage::EntityNetworkMessage(std::unique_ptr<IEntityNetworkMessage> msg)
@@ -195,6 +213,9 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		break;
 	case EntityNetworkHeaderType::GetLobbyInfo:
 		message = std::make_unique<EntityNetworkMessageGetLobbyInfo>();
+		break;
+	case EntityNetworkHeaderType::UpdateLobbyInfo:
+		message = std::make_unique<EntityNetworkMessageUpdateLobbyInfo>();
 		break;
 	case EntityNetworkHeaderType::SetLobbyInfo:
 		message = std::make_unique<EntityNetworkMessageSetLobbyInfo>();

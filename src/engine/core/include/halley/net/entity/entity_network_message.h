@@ -20,6 +20,7 @@ namespace Halley {
     	KeepAlive,
         JoinWorld,
         GetLobbyInfo,
+        UpdateLobbyInfo,
         SetLobbyInfo
     };
 
@@ -179,12 +180,27 @@ namespace Halley {
         void deserialize(Deserializer& s) override;
     };
 
+    class EntityNetworkMessageUpdateLobbyInfo final : public IEntityNetworkMessage {
+    public:
+        ConfigNode lobbyInfo;
+
+        EntityNetworkMessageUpdateLobbyInfo() = default;
+        EntityNetworkMessageUpdateLobbyInfo(ConfigNode info);
+
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::UpdateLobbyInfo; }
+        bool needsWorld() const override { return false; }
+
+        void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+    };
+
     class EntityNetworkMessageSetLobbyInfo final : public IEntityNetworkMessage {
     public:
-        ConfigNode accountData;
+        ConfigNode accountInfo;
+        ConfigNode lobbyInfo;
 
         EntityNetworkMessageSetLobbyInfo() = default;
-        EntityNetworkMessageSetLobbyInfo(ConfigNode data);
+        EntityNetworkMessageSetLobbyInfo(ConfigNode accountInfo, ConfigNode lobbyInfo);
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetLobbyInfo; }
         bool needsWorld() const override { return false; }

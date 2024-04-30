@@ -140,7 +140,7 @@ void EntityNetworkRemotePeer::requestLobbyInfo(ConfigNode params)
 
 void EntityNetworkRemotePeer::sendLobbyInfo(ConfigNode data)
 {
-	send(EntityNetworkMessageSetLobbyInfo(std::move(data)));
+	send(EntityNetworkMessageUpdateLobbyInfo(std::move(data)));
 }
 
 bool EntityNetworkRemotePeer::isAlive() const

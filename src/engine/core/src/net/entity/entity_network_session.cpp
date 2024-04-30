@@ -101,7 +101,7 @@ Future<ConfigNode> EntityNetworkSession::requestLobbyInfo(ConfigNode params)
 	pendingLobbyInfo = Promise<ConfigNode>();
 
 	if (isHost()) {
-		pendingLobbyInfo.setValue(getLobbyInfo(params));
+		pendingLobbyInfo.setValue(getLobbyInfo(0, params));
 	} else {
 		peers.back().requestLobbyInfo(std::move(params));
 	}
@@ -213,6 +213,9 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 		break;
 	case EntityNetworkHeaderType::GetLobbyInfo:
 		onReceiveGetLobbyInfo(fromPeerId, msg.getMessage<EntityNetworkMessageGetLobbyInfo>());
+		break;
+	case EntityNetworkHeaderType::UpdateLobbyInfo:
+		onReceiveUpdateLobbyInfo(fromPeerId, msg.getMessage<EntityNetworkMessageUpdateLobbyInfo>());
 		break;
 	case EntityNetworkHeaderType::SetLobbyInfo:
 		onReceiveSetLobbyInfo(fromPeerId, msg.getMessage<EntityNetworkMessageSetLobbyInfo>());
@@ -332,16 +335,23 @@ void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeer
 {
 	for (auto& peer : peers) {
 		if (peer.getPeerId() == fromPeerId) {
-			peer.sendLobbyInfo(getLobbyInfo(msg.accountInfo));
+			peer.sendLobbyInfo(getLobbyInfo(fromPeerId, msg.accountInfo));
 			break;
 		}
 	}
 }
 
-void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg)
+void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageUpdateLobbyInfo& msg)
 {
 	if (fromPeerId == 0) {
-		pendingLobbyInfo.setValue(ConfigNode(msg.accountData));
+		pendingLobbyInfo.setValue(ConfigNode(msg.lobbyInfo));
+	}
+}
+
+void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg)
+{
+	if (listener) {
+		listener->setLobbyInfo(fromPeerId, msg.accountInfo, msg.lobbyInfo);
 	}
 }
 
@@ -353,9 +363,9 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("position");
 }
 
-ConfigNode EntityNetworkSession::getLobbyInfo(const ConfigNode& params)
+ConfigNode EntityNetworkSession::getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params)
 {
-	return listener ? listener->getLobbyInfo(params) : ConfigNode();
+	return listener ? listener->getLobbyInfo(fromPeerId, params) : ConfigNode();
 }
 
 World& EntityNetworkSession::getWorld() const

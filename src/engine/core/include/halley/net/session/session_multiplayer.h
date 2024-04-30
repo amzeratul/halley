@@ -91,7 +91,8 @@ namespace Halley {
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
-		ConfigNode getLobbyInfo(const ConfigNode& params) override;
+		ConfigNode getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params) override;
+		void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& accountInfo, const ConfigNode& lobbyInfo) override;
 		void setState(SessionState state);
 
 	private:

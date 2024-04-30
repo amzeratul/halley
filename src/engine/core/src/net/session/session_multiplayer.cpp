@@ -204,9 +204,13 @@ bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientShar
 	return clientData.viewRect->grow(256).contains(Vector2i(transform->getGlobalPosition()));
 }
 
-ConfigNode SessionMultiplayer::getLobbyInfo(const ConfigNode& params)
+ConfigNode SessionMultiplayer::getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params)
 {
 	return {};
+}
+
+void SessionMultiplayer::setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& accountInfo, const ConfigNode& lobbyInfo)
+{
 }
 
 void SessionMultiplayer::setState(SessionState state)

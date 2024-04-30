@@ -42,7 +42,8 @@ namespace Halley {
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
-			virtual ConfigNode getLobbyInfo(const ConfigNode& params) = 0;
+			virtual ConfigNode getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params) = 0;
+			virtual void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& accountInfo, const ConfigNode& lobbyInfo) = 0;
 		};
 		
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
@@ -141,12 +142,13 @@ namespace Halley {
 		void onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg);
 		void onReceiveJoinWorld(NetworkSession::PeerId fromPeerId);
 		void onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetLobbyInfo& msg);
+		void onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageUpdateLobbyInfo& msg);
 		void onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg);
 
 		void sendMessages();
 		
 		void setupDictionary();
 
-		ConfigNode getLobbyInfo(const ConfigNode& params);
+		ConfigNode getLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& params);
 	};
 }
