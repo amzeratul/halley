@@ -169,13 +169,20 @@ namespace Halley {
 		void setTransform2DAnisotropy(float anisotropy);
 
 		template <typename T>
-		T& getInterface()
+		T* tryGetInterface()
 		{
 			const auto iter = systemInterfaces.find(std::type_index(typeid(T)));
-			if (iter == systemInterfaces.end()) {
+			return iter == systemInterfaces.end() ? nullptr : dynamic_cast<T*>(iter->second);
+		}
+
+		template <typename T>
+		T& getInterface()
+		{
+			if (auto* ptr = tryGetInterface<T>()) {
+				return *ptr;
+			} else {
 				throw Exception(String("World does not have system interface \"") + typeid(T).name() + "\"", HalleyExceptions::Scripting);
 			}
-			return dynamic_cast<T&>(*iter->second);
 		}
 
 		template <typename T>

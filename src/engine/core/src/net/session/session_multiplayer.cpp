@@ -122,13 +122,17 @@ void SessionMultiplayer::reportInitialViewPort(Rect4f viewPort)
 
 void SessionMultiplayer::startOrJoinGame()
 {
-	if (curState == SessionState::GameLobbyReady && !hasGameStarted()) {
+	if (curState == SessionState::GameLobbyReady) {
 		if (host) {
-			setState(SessionState::PlayingGame);
-			entitySession->startGame();
+			if (!hasGameStarted()) {
+				setState(SessionState::PlayingGame);
+				entitySession->startGame();
+			}
 		} else {
-			setState(SessionState::JoiningGame);
-			entitySession->joinGame();
+			if (hasGameStarted()) {
+				setState(SessionState::JoiningGame);
+				entitySession->joinGame();
+			}
 		}
 	}
 }
@@ -155,6 +159,7 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 
 void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 {
+	setState(SessionState::GameLobbyReady);
 }
 
 void SessionMultiplayer::onStartGame()

@@ -148,9 +148,9 @@ void EntityNetworkMessage::setMessage(std::unique_ptr<IEntityNetworkMessage> msg
 	message = std::move(msg);
 }
 
-bool EntityNetworkMessage::needsInitialization() const
+bool EntityNetworkMessage::needsWorld() const
 {
-	return message->needsInitialization();
+	return message->needsWorld();
 }
 
 void EntityNetworkMessage::serialize(Serializer& s) const
@@ -189,6 +189,15 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		break;
 	case EntityNetworkHeaderType::KeepAlive:
 		message = std::make_unique<EntityNetworkMessageKeepAlive>();
+		break;
+	case EntityNetworkHeaderType::JoinWorld:
+		message = std::make_unique<EntityNetworkMessageJoinWorld>();
+		break;
+	case EntityNetworkHeaderType::GetAccountData:
+		message = std::make_unique<EntityNetworkMessageGetAccountData>();
+		break;
+	case EntityNetworkHeaderType::SetAccountData:
+		message = std::make_unique<EntityNetworkMessageSetAccountData>();
 		break;
 	}
 

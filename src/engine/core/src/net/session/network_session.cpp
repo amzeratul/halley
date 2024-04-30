@@ -477,6 +477,7 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 
 void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg)
 {
+	Logger::logDev("Received SetPeerId");
 	if (peerId != 0) {
 		closeConnection(peerId, "Unauthorised control message: SetPeerId");
 		return;
@@ -508,6 +509,7 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetSessionS
 		return;
 	}
 
+	Logger::logDev("Updating session state");
 	if (!sessionSharedData) {
 		sessionSharedData = makeSessionSharedData();
 	}

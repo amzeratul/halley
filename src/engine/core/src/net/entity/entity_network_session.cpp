@@ -72,9 +72,7 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 
 	// Update entities
 	for (auto& peer: peers) {
-		if (peer.hasJoinedWorld()) {
-			peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
-		}
+		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
 	}
 
 	sendMessages();
@@ -178,7 +176,7 @@ void EntityNetworkSession::receiveUpdates()
 
 bool EntityNetworkSession::canProcessMessage(const EntityNetworkMessage& msg) const
 {
-	return factory || !msg.needsInitialization();
+	return factory || !msg.needsWorld();
 }
 
 void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)

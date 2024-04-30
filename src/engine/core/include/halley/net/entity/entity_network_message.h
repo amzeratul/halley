@@ -29,7 +29,7 @@ namespace Halley {
         virtual EntityNetworkHeaderType getType() const = 0;
         virtual void serialize(Serializer& s) const = 0;
     	virtual void deserialize(Deserializer& s) = 0;
-        virtual bool needsInitialization() const { return true; }
+        virtual bool needsWorld() const = 0;
     };
 
 	class EntityNetworkMessageCreate final : public IEntityNetworkMessage {
@@ -41,6 +41,8 @@ namespace Halley {
 		EntityNetworkMessageCreate(EntityNetworkId id, Bytes bytes) : entityId(id), bytes(std::move(bytes)) {}
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Create; }
+        bool needsWorld() const override { return true; }
+
         void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -54,6 +56,8 @@ namespace Halley {
 		EntityNetworkMessageUpdate(EntityNetworkId id, Bytes bytes) : entityId(id), bytes(std::move(bytes)) {}
 
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Update; }
+        bool needsWorld() const override { return true; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -66,6 +70,8 @@ namespace Halley {
 		EntityNetworkMessageDestroy(EntityNetworkId id) : entityId(id) {}
 
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Destroy; }
+        bool needsWorld() const override { return true; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -73,9 +79,10 @@ namespace Halley {
 	class EntityNetworkMessageReadyToStart final : public IEntityNetworkMessage {
 	public:
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::ReadyToStart; }
+        bool needsWorld() const override { return false; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
-        bool needsInitialization() const override { return false; }
 	};
 
 	class EntityNetworkMessageEntityMsg final : public IEntityNetworkMessage {
@@ -88,6 +95,8 @@ namespace Halley {
 		EntityNetworkMessageEntityMsg(UUID entityUUID, int messageType, Bytes messageData) : entityUUID(entityUUID), messageType(messageType), messageData(std::move(messageData)) {}
 		
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::EntityMsg; }
+        bool needsWorld() const override { return true; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -112,6 +121,8 @@ namespace Halley {
 		{}
 		
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsg; }
+        bool needsWorld() const override { return true; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -126,6 +137,8 @@ namespace Halley {
 		EntityNetworkMessageSystemMsgResponse(int messageType, uint32_t msgId, Bytes responseData) : messageType(messageType), msgId(msgId), responseData(std::move(responseData)) {}
 		
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsgResponse; }
+        bool needsWorld() const override { return true; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -135,16 +148,20 @@ namespace Halley {
         EntityNetworkMessageKeepAlive() = default;
 
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::KeepAlive; }
+        bool needsWorld() const override { return false; }
+
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
-	};
+    };
 
     class EntityNetworkMessageJoinWorld final : public IEntityNetworkMessage {
     public:
         EntityNetworkMessageJoinWorld() = default;
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::JoinWorld; }
-        void serialize(Serializer& s) const override;
+        bool needsWorld() const override { return false; }
+
+    	void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
     };
 
@@ -156,7 +173,9 @@ namespace Halley {
         EntityNetworkMessageGetAccountData(ConfigNode info);
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::GetAccountData; }
-        void serialize(Serializer& s) const override;
+        bool needsWorld() const override { return false; }
+
+    	void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
     };
 
@@ -168,7 +187,9 @@ namespace Halley {
         EntityNetworkMessageSetAccountData(ConfigNode data);
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetAccountData; }
-        void serialize(Serializer& s) const override;
+        bool needsWorld() const override { return false; }
+
+    	void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
     };
     
@@ -193,7 +214,7 @@ namespace Halley {
             return dynamic_cast<T&>(*message);
         }
 
-        bool needsInitialization() const;
+        bool needsWorld() const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);

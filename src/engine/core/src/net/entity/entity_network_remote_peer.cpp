@@ -24,6 +24,9 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	Expects(isAlive());
 
 	if (!isRemoteReady()) {
+		if (timeSinceSend > maxSendInterval) {
+			sendKeepAlive();
+		}
 		return;
 	}
 

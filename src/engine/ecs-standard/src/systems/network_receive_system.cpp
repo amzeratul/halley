@@ -16,17 +16,26 @@ public:
 
 	void update(Time t)
 	{
-		if (!getSessionService().getSession()->update()) {
-			getAPI().core->quit();
+		auto& world = getWorld();
+		const bool sessionAlive = getSessionService().getSession()->update();
+
+		if (!sessionAlive && !requestedExit) {
+			requestedExit = true;
+			if (auto* exitGameInterface = world.tryGetInterface<IExitGameInterface>()) {
+				exitGameInterface->exitGame();
+			} else {
+				getAPI().core->quit();
+			}
 		}
 
-		auto& world = getWorld();
 		for (auto& e: networkFamily) {
 			e.network.dataInterpolatorSet.update(t, world);
 		}
 	}
 
 private:
+
+	bool requestedExit = false;
 
 	void setupCheats()
 	{

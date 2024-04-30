@@ -19,7 +19,7 @@ bool SessionService::isMultiplayer() const
 
 bool SessionService::canSave() const
 {
-	return session ? session->hasLocalSave() : false;
+	return session ? session->hasLocalSave() && session->isInteractive() : false;
 }
 
 bool SessionService::hasHostAuthority() const

@@ -69,4 +69,11 @@ namespace Halley {
         virtual void playAudio(const String& event, EntityId entityId) = 0;
 		virtual void setVariable(EntityId entityId, const String& variableName, float value) = 0;
 	};
+
+	class IExitGameInterface : public ISystemInterface {
+	public:
+		virtual ~IExitGameInterface() = default;
+
+		virtual void exitGame() = 0;
+	};
 }
