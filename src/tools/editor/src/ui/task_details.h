@@ -15,6 +15,7 @@ namespace Halley {
 
 		void onMouseOver(Vector2f mousePos) override;
 		bool canInteractWithMouse() const override;
+		bool canChildrenInteractWithMouse() const override;
 	
 	protected:
 		void update(Time t, bool moved) override;

@@ -53,6 +53,11 @@ bool TaskDetails::canInteractWithMouse() const
 	return visible;
 }
 
+bool TaskDetails::canChildrenInteractWithMouse() const
+{
+	return visible;
+}
+
 void TaskDetails::update(Time t, bool moved)
 {
 	const auto underMouse = getRoot()->getWidgetUnderMouse();

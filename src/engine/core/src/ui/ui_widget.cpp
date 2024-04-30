@@ -307,6 +307,11 @@ bool UIWidget::canInteractWithMouse() const
 	return mouseInteraction;
 }
 
+bool UIWidget::canChildrenInteractWithMouse() const
+{
+	return true;
+}
+
 bool UIWidget::isFocused() const
 {
 	return focused;
