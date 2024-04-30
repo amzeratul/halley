@@ -133,14 +133,14 @@ void EntityNetworkRemotePeer::requestJoinWorld()
 	send(EntityNetworkMessageJoinWorld());
 }
 
-void EntityNetworkRemotePeer::requestAccountData(ConfigNode params)
+void EntityNetworkRemotePeer::requestLobbyInfo(ConfigNode params)
 {
-	send(EntityNetworkMessageGetAccountData(std::move(params)));
+	send(EntityNetworkMessageGetLobbyInfo(std::move(params)));
 }
 
-void EntityNetworkRemotePeer::sendAccountData(ConfigNode data)
+void EntityNetworkRemotePeer::sendLobbyInfo(ConfigNode data)
 {
-	send(EntityNetworkMessageSetAccountData(std::move(data)));
+	send(EntityNetworkMessageSetLobbyInfo(std::move(data)));
 }
 
 bool EntityNetworkRemotePeer::isAlive() const

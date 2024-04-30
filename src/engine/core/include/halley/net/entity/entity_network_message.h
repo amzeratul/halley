@@ -19,8 +19,8 @@ namespace Halley {
     	SystemMsgResponse,
     	KeepAlive,
         JoinWorld,
-        GetAccountData,
-        SetAccountData
+        GetLobbyInfo,
+        SetLobbyInfo
     };
 
     class IEntityNetworkMessage {
@@ -165,28 +165,28 @@ namespace Halley {
         void deserialize(Deserializer& s) override;
     };
 
-    class EntityNetworkMessageGetAccountData final : public IEntityNetworkMessage {
+    class EntityNetworkMessageGetLobbyInfo final : public IEntityNetworkMessage {
     public:
         ConfigNode accountInfo;
 
-        EntityNetworkMessageGetAccountData() = default;
-        EntityNetworkMessageGetAccountData(ConfigNode info);
+        EntityNetworkMessageGetLobbyInfo() = default;
+        EntityNetworkMessageGetLobbyInfo(ConfigNode info);
 
-        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::GetAccountData; }
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::GetLobbyInfo; }
         bool needsWorld() const override { return false; }
 
     	void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
     };
 
-    class EntityNetworkMessageSetAccountData final : public IEntityNetworkMessage {
+    class EntityNetworkMessageSetLobbyInfo final : public IEntityNetworkMessage {
     public:
         ConfigNode accountData;
 
-        EntityNetworkMessageSetAccountData() = default;
-        EntityNetworkMessageSetAccountData(ConfigNode data);
+        EntityNetworkMessageSetLobbyInfo() = default;
+        EntityNetworkMessageSetLobbyInfo(ConfigNode data);
 
-        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetAccountData; }
+        EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetLobbyInfo; }
         bool needsWorld() const override { return false; }
 
     	void serialize(Serializer& s) const override;

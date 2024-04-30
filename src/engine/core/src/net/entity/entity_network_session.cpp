@@ -96,17 +96,17 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 	outbox[peerId].push_back(std::move(msg));
 }
 
-Future<ConfigNode> EntityNetworkSession::requestAccountData(ConfigNode accountParams)
+Future<ConfigNode> EntityNetworkSession::requestLobbyInfo(ConfigNode params)
 {
-	pendingAccountData = Promise<ConfigNode>();
+	pendingLobbyInfo = Promise<ConfigNode>();
 
 	if (isHost()) {
-		pendingAccountData.setValue(getAccountData(accountParams));
+		pendingLobbyInfo.setValue(getLobbyInfo(params));
 	} else {
-		peers.back().requestAccountData(std::move(accountParams));
+		peers.back().requestLobbyInfo(std::move(params));
 	}
 
-	return pendingAccountData.getFuture();
+	return pendingLobbyInfo.getFuture();
 }
 
 void EntityNetworkSession::sendMessages()
@@ -211,11 +211,11 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 	case EntityNetworkHeaderType::JoinWorld:
 		onReceiveJoinWorld(fromPeerId);
 		break;
-	case EntityNetworkHeaderType::GetAccountData:
-		onReceiveGetAccountData(fromPeerId, msg.getMessage<EntityNetworkMessageGetAccountData>());
+	case EntityNetworkHeaderType::GetLobbyInfo:
+		onReceiveGetLobbyInfo(fromPeerId, msg.getMessage<EntityNetworkMessageGetLobbyInfo>());
 		break;
-	case EntityNetworkHeaderType::SetAccountData:
-		onReceiveSetAccountData(fromPeerId, msg.getMessage<EntityNetworkMessageSetAccountData>());
+	case EntityNetworkHeaderType::SetLobbyInfo:
+		onReceiveSetLobbyInfo(fromPeerId, msg.getMessage<EntityNetworkMessageSetLobbyInfo>());
 		break;
 	}
 }
@@ -328,20 +328,20 @@ void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
 	}
 }
 
-void EntityNetworkSession::onReceiveGetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetAccountData& msg)
+void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetLobbyInfo& msg)
 {
 	for (auto& peer : peers) {
 		if (peer.getPeerId() == fromPeerId) {
-			peer.sendAccountData(getAccountData(msg.accountInfo));
+			peer.sendLobbyInfo(getLobbyInfo(msg.accountInfo));
 			break;
 		}
 	}
 }
 
-void EntityNetworkSession::onReceiveSetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetAccountData& msg)
+void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg)
 {
 	if (fromPeerId == 0) {
-		pendingAccountData.setValue(ConfigNode(msg.accountData));
+		pendingLobbyInfo.setValue(ConfigNode(msg.accountData));
 	}
 }
 
@@ -353,9 +353,9 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("position");
 }
 
-ConfigNode EntityNetworkSession::getAccountData(const ConfigNode& params)
+ConfigNode EntityNetworkSession::getLobbyInfo(const ConfigNode& params)
 {
-	return listener ? listener->getAccountData(params) : ConfigNode();
+	return listener ? listener->getLobbyInfo(params) : ConfigNode();
 }
 
 World& EntityNetworkSession::getWorld() const

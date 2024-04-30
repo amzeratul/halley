@@ -12,6 +12,8 @@ namespace Halley {
 		Idle,
 		WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
 		JoiningSession, // Connecting, waiting for host to assign peer id
+		JoinedSession, // Joined
+		WaitingForLobbyInfo, // Waiting for player info
 		GameLobbyReady, // Peer id assigned, ready to join in-game lobby
 		JoiningGame, // Starting game
 		WaitingForInitialViewport, // Host is waiting for initial viewport
@@ -22,11 +24,13 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<SessionState> {
-		constexpr std::array<const char*, 9> operator()() const {
+		constexpr std::array<const char*, 11> operator()() const {
 			return{ {
 				"Idle",
 				"WaitingForPlatformLobbyCallback",
 				"JoiningSession",
+				"JoinedSession",
+				"WaitingForLobbyInfo",
 				"GameLobbyReady",
 				"JoiningGame",
 				"WaitingForInitialViewport",
@@ -87,7 +91,7 @@ namespace Halley {
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
-		ConfigNode getAccountData(const ConfigNode& params) override;
+		ConfigNode getLobbyInfo(const ConfigNode& params) override;
 		void setState(SessionState state);
 
 	private:

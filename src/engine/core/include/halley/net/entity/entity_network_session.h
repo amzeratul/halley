@@ -42,7 +42,7 @@ namespace Halley {
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
-			virtual ConfigNode getAccountData(const ConfigNode& params) = 0;
+			virtual ConfigNode getLobbyInfo(const ConfigNode& params) = 0;
 		};
 		
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
@@ -88,7 +88,7 @@ namespace Halley {
 		void sendToAll(EntityNetworkMessage msg);
 		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
-		Future<ConfigNode> requestAccountData(ConfigNode accountParams);
+		Future<ConfigNode> requestLobbyInfo(ConfigNode params);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
@@ -126,7 +126,7 @@ namespace Halley {
 
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 
-		Promise<ConfigNode> pendingAccountData;
+		Promise<ConfigNode> pendingLobbyInfo;
 
 		bool readyToStartGame = false;
 		bool gameStarted = false;
@@ -140,13 +140,13 @@ namespace Halley {
 		void onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg);
 		void onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg);
 		void onReceiveJoinWorld(NetworkSession::PeerId fromPeerId);
-		void onReceiveGetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetAccountData& msg);
-		void onReceiveSetAccountData(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetAccountData& msg);
+		void onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetLobbyInfo& msg);
+		void onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg);
 
 		void sendMessages();
 		
 		void setupDictionary();
 
-		ConfigNode getAccountData(const ConfigNode& params);
+		ConfigNode getLobbyInfo(const ConfigNode& params);
 	};
 }

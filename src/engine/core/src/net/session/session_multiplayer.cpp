@@ -159,7 +159,7 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 
 void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 {
-	setState(SessionState::GameLobbyReady);
+	setState(SessionState::JoinedSession);
 }
 
 void SessionMultiplayer::onStartGame()
@@ -204,7 +204,7 @@ bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientShar
 	return clientData.viewRect->grow(256).contains(Vector2i(transform->getGlobalPosition()));
 }
 
-ConfigNode SessionMultiplayer::getAccountData(const ConfigNode& params)
+ConfigNode SessionMultiplayer::getLobbyInfo(const ConfigNode& params)
 {
 	return {};
 }

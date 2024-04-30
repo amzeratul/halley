@@ -108,32 +108,32 @@ void EntityNetworkMessageJoinWorld::serialize(Serializer& s) const
 void EntityNetworkMessageJoinWorld::deserialize(Deserializer& s)
 {}
 
-EntityNetworkMessageGetAccountData::EntityNetworkMessageGetAccountData(ConfigNode info)
+EntityNetworkMessageGetLobbyInfo::EntityNetworkMessageGetLobbyInfo(ConfigNode info)
 	: accountInfo(std::move(info))
 {
 }
 
-void EntityNetworkMessageGetAccountData::serialize(Serializer& s) const
+void EntityNetworkMessageGetLobbyInfo::serialize(Serializer& s) const
 {
 	s << accountInfo;
 }
 
-void EntityNetworkMessageGetAccountData::deserialize(Deserializer& s)
+void EntityNetworkMessageGetLobbyInfo::deserialize(Deserializer& s)
 {
 	s >> accountInfo;
 }
 
-EntityNetworkMessageSetAccountData::EntityNetworkMessageSetAccountData(ConfigNode data)
+EntityNetworkMessageSetLobbyInfo::EntityNetworkMessageSetLobbyInfo(ConfigNode data)
 	: accountData(std::move(data))
 {
 }
 
-void EntityNetworkMessageSetAccountData::serialize(Serializer& s) const
+void EntityNetworkMessageSetLobbyInfo::serialize(Serializer& s) const
 {
 	s << accountData;
 }
 
-void EntityNetworkMessageSetAccountData::deserialize(Deserializer& s)
+void EntityNetworkMessageSetLobbyInfo::deserialize(Deserializer& s)
 {
 	s >> accountData;
 }
@@ -193,11 +193,11 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 	case EntityNetworkHeaderType::JoinWorld:
 		message = std::make_unique<EntityNetworkMessageJoinWorld>();
 		break;
-	case EntityNetworkHeaderType::GetAccountData:
-		message = std::make_unique<EntityNetworkMessageGetAccountData>();
+	case EntityNetworkHeaderType::GetLobbyInfo:
+		message = std::make_unique<EntityNetworkMessageGetLobbyInfo>();
 		break;
-	case EntityNetworkHeaderType::SetAccountData:
-		message = std::make_unique<EntityNetworkMessageSetAccountData>();
+	case EntityNetworkHeaderType::SetLobbyInfo:
+		message = std::make_unique<EntityNetworkMessageSetLobbyInfo>();
 		break;
 	}
 
