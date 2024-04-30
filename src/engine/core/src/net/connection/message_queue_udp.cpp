@@ -255,7 +255,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<Outbound> sentMsgs;
-	const size_t maxSize = 2010;
+	const size_t maxSize = 16 * 1024;
 	size_t totalSize = 0;
 	bool first = true;
 	bool packetReliable = false;
@@ -309,7 +309,7 @@ AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<Outbound>& msgs,
 	const bool reliable = !msgs.empty() && channels[msgs[0].channel].settings.reliable;
 
 	auto data = serializeMessages(msgs, size);
-	if (data.size() > 2048) {
+	if (data.size() > 16 * 1024) {
 		Logger::logError("Tagged packet is too big");
 	}
 

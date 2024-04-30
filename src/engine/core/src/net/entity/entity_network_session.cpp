@@ -126,7 +126,7 @@ void EntityNetworkSession::sendMessages()
 	{
 		auto data = Serializer::toBytes(msgs.span().subspan(startIdx, count), byteSerializationOptions);
 		auto compressed = Compression::lz4Compress(gsl::as_bytes(gsl::span<const Byte>(data)));
-		if (compressed.size() <= 2000) {
+		if (compressed.size() <= 16000) {
 			return std::move(compressed);
 		} else {
 			return std::nullopt;
