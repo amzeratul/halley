@@ -344,15 +344,11 @@ void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
 
 void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetLobbyInfo& msg)
 {
-	for (auto& peer : peers) {
-		if (peer.getPeerId() == fromPeerId) {
-			if (listener) {
-				listener->setLobbyParams(fromPeerId, msg.accountInfo);
-			}
-			peer.sendLobbyInfo(getLobbyInfo());
-			break;
-		}
+	if (listener) {
+		listener->setLobbyParams(fromPeerId, msg.accountInfo);
 	}
+
+	sendUpdatedLobbyInfos();
 }
 
 void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageUpdateLobbyInfo& msg)
