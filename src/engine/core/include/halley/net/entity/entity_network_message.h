@@ -168,10 +168,7 @@ namespace Halley {
 
     class EntityNetworkMessageGetLobbyInfo final : public IEntityNetworkMessage {
     public:
-        ConfigNode accountInfo;
-
         EntityNetworkMessageGetLobbyInfo() = default;
-        EntityNetworkMessageGetLobbyInfo(ConfigNode info);
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::GetLobbyInfo; }
         bool needsWorld() const override { return false; }
@@ -196,11 +193,10 @@ namespace Halley {
 
     class EntityNetworkMessageSetLobbyInfo final : public IEntityNetworkMessage {
     public:
-        ConfigNode accountInfo;
         ConfigNode lobbyInfo;
 
         EntityNetworkMessageSetLobbyInfo() = default;
-        EntityNetworkMessageSetLobbyInfo(ConfigNode accountInfo, ConfigNode lobbyInfo);
+        EntityNetworkMessageSetLobbyInfo(ConfigNode lobbyInfo);
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SetLobbyInfo; }
         bool needsWorld() const override { return false; }

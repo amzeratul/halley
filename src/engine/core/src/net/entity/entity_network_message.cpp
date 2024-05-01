@@ -108,20 +108,11 @@ void EntityNetworkMessageJoinWorld::serialize(Serializer& s) const
 void EntityNetworkMessageJoinWorld::deserialize(Deserializer& s)
 {}
 
-EntityNetworkMessageGetLobbyInfo::EntityNetworkMessageGetLobbyInfo(ConfigNode info)
-	: accountInfo(std::move(info))
-{
-}
-
 void EntityNetworkMessageGetLobbyInfo::serialize(Serializer& s) const
-{
-	s << accountInfo;
-}
+{}
 
 void EntityNetworkMessageGetLobbyInfo::deserialize(Deserializer& s)
-{
-	s >> accountInfo;
-}
+{}
 
 EntityNetworkMessageUpdateLobbyInfo::EntityNetworkMessageUpdateLobbyInfo(ConfigNode info)
 	: lobbyInfo(std::move(info))
@@ -138,21 +129,18 @@ void EntityNetworkMessageUpdateLobbyInfo::deserialize(Deserializer& s)
 	s >> lobbyInfo;
 }
 
-EntityNetworkMessageSetLobbyInfo::EntityNetworkMessageSetLobbyInfo(ConfigNode accountInfo, ConfigNode lobbyInfo)
-	: accountInfo(std::move(accountInfo))
-	, lobbyInfo(std::move(lobbyInfo))
+EntityNetworkMessageSetLobbyInfo::EntityNetworkMessageSetLobbyInfo(ConfigNode lobbyInfo)
+	: lobbyInfo(std::move(lobbyInfo))
 {
 }
 
 void EntityNetworkMessageSetLobbyInfo::serialize(Serializer& s) const
 {
-	s << accountInfo;
 	s << lobbyInfo;
 }
 
 void EntityNetworkMessageSetLobbyInfo::deserialize(Deserializer& s)
 {
-	s >> accountInfo;
 	s >> lobbyInfo;
 }
 

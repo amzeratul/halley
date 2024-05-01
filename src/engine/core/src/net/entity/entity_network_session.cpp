@@ -96,27 +96,26 @@ void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::
 	outbox[peerId].push_back(std::move(msg));
 }
 
-void EntityNetworkSession::requestLobbyInfo(ConfigNode params)
+void EntityNetworkSession::requestLobbyInfo()
 {
 	if (isHost()) {
 		if (listener) {
-			listener->setLobbyParams(0, params);
 			listener->onReceiveLobbyInfo(getLobbyInfo());
 		}
 	} else {
-		peers.back().requestLobbyInfo(std::move(params));
+		peers.back().requestLobbyInfo();
 	}
 }
 
-void EntityNetworkSession::setLobbyInfo(ConfigNode accountParams, ConfigNode info)
+void EntityNetworkSession::setLobbyInfo(ConfigNode info)
 {
 	if (isHost()) {
 		if (listener) {
-			listener->setLobbyInfo(0, accountParams, info);
-			sendUpdatedLobbyInfos();
+			listener->setLobbyInfo(0, info);
+			sendUpdatedLobbyInfos({});
 		}
 	} else {
-		peers.back().setLobbyInfo(std::move(accountParams), std::move(info));
+		peers.back().setLobbyInfo(std::move(info));
 	}
 }
 
@@ -344,11 +343,7 @@ void EntityNetworkSession::onReceiveJoinWorld(NetworkSession::PeerId fromPeerId)
 
 void EntityNetworkSession::onReceiveGetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageGetLobbyInfo& msg)
 {
-	if (listener) {
-		listener->setLobbyParams(fromPeerId, msg.accountInfo);
-	}
-
-	sendUpdatedLobbyInfos();
+	sendUpdatedLobbyInfos(fromPeerId);
 }
 
 void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageUpdateLobbyInfo& msg)
@@ -363,8 +358,8 @@ void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromP
 void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg)
 {
 	if (listener) {
-		listener->setLobbyInfo(fromPeerId, msg.accountInfo, msg.lobbyInfo);
-		sendUpdatedLobbyInfos();
+		listener->setLobbyInfo(fromPeerId, msg.lobbyInfo);
+		sendUpdatedLobbyInfos({});
 	}
 }
 
@@ -381,15 +376,17 @@ ConfigNode EntityNetworkSession::getLobbyInfo()
 	return listener ? listener->getLobbyInfo() : ConfigNode();
 }
 
-void EntityNetworkSession::sendUpdatedLobbyInfos()
+void EntityNetworkSession::sendUpdatedLobbyInfos(std::optional<NetworkSession::PeerId> toPeerId)
 {
 	auto lobbyInfo = getLobbyInfo();
 	for (auto& peer: peers) {
-		if (!peer.hasJoinedWorld()) {
+		if (!toPeerId || toPeerId == peer.getPeerId()) {
 			peer.sendLobbyInfo(ConfigNode(lobbyInfo));
 		}
 	}
-	listener->onReceiveLobbyInfo(lobbyInfo);
+	if (!toPeerId || toPeerId == 0) {
+		listener->onReceiveLobbyInfo(lobbyInfo);
+	}
 }
 
 World& EntityNetworkSession::getWorld() const

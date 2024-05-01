@@ -32,9 +32,9 @@ namespace Halley {
     	bool hasJoinedWorld() const;
         void onJoinedWorld();
         void requestJoinWorld();
-        void requestLobbyInfo(ConfigNode params);
+        void requestLobbyInfo();
         void sendLobbyInfo(ConfigNode data);
-        void setLobbyInfo(ConfigNode params, ConfigNode info);
+        void setLobbyInfo(ConfigNode info);
 
     	void sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
