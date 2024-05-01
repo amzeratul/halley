@@ -202,7 +202,7 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 			}
 
 			// Extract data
-			std::array<char, 4096> buffer;
+			std::array<char, 16 * 1024> buffer;
 			if (size > buffer.size() || size > s.getBytesLeft()) {
 				throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, " + toString(s.getBytesLeft()) + " bytes remaining.", HalleyExceptions::Network);
 			}

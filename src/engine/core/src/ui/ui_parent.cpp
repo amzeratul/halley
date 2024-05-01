@@ -43,14 +43,18 @@ void UIParent::removeChild(UIWidget& widget)
 
 void UIParent::clear()
 {
-	if (children.empty()) {
+	if (children.empty() && childrenWaiting.empty()) {
 		return;
 	}
 
 	for (auto& c: children) {
 		c->setParent(nullptr);
 	}
+	for (auto& c: childrenWaiting) {
+		c->setParent(nullptr);
+	}
 	children.clear();
+	childrenWaiting.clear();
 	markAsNeedingLayout();
 }
 
