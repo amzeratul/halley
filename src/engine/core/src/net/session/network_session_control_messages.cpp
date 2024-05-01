@@ -44,3 +44,53 @@ void ControlMsgSetPeerState::deserialize(Deserializer& s)
 	s >> peerId;
 	s >> state;
 }
+
+void ControlMsgSetServerSideData::serialize(Serializer& s) const
+{
+	s << key;
+	s << data;
+	s << requestId;
+}
+
+void ControlMsgSetServerSideData::deserialize(Deserializer& s)
+{
+	s >> key;
+	s >> data;
+	s >> requestId;
+}
+
+void ControlMsgSetServerSideDataReply::serialize(Serializer& s) const
+{
+	s << ok;
+	s << requestId;
+}
+
+void ControlMsgSetServerSideDataReply::deserialize(Deserializer& s)
+{
+	s >> ok;
+	s >> requestId;
+}
+
+void ControlMsgGetServerSideData::serialize(Serializer& s) const
+{
+	s << key;
+	s << requestId;
+}
+
+void ControlMsgGetServerSideData::deserialize(Deserializer& s)
+{
+	s >> key;
+	s >> requestId;
+}
+
+void ControlMsgGetServerSideDataReply::serialize(Serializer& s) const
+{
+	s << data;
+	s << requestId;
+}
+
+void ControlMsgGetServerSideDataReply::deserialize(Deserializer& s)
+{
+	s >> data;
+	s >> requestId;
+}

@@ -7,7 +7,11 @@ namespace Halley {
 		Join,
 		SetPeerId,
 		SetSessionState,
-		SetPeerState
+		SetPeerState,
+		SetServerSideData,
+		SetServerSideDataReply,
+		GetServerSideData,
+		GetServerSideDataReply
 	};
 
 	struct ControlMsgHeader
@@ -40,6 +44,39 @@ namespace Halley {
 	struct ControlMsgSetPeerState {
 		int8_t peerId = 0;
 		Bytes state;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgSetServerSideData {
+		String key;
+		ConfigNode data;
+		uint32_t requestId;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgSetServerSideDataReply {
+		bool ok;
+		uint32_t requestId;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgGetServerSideData {
+		String key;
+		uint32_t requestId;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgGetServerSideDataReply {
+		ConfigNode data;
+		uint32_t requestId;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

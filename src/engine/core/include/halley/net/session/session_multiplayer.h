@@ -41,7 +41,7 @@ namespace Halley {
 		}
 	};
 
-	class SessionMultiplayer : public Session, public EntityNetworkSession::IEntityNetworkSessionListener {
+	class SessionMultiplayer : public Session, public EntityNetworkSession::IEntityNetworkSessionListener, public NetworkSession::IServerSideDataHandler {
 	public:
 		enum class Mode {
 			Host,
@@ -96,6 +96,8 @@ namespace Halley {
 		void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& accountInfo, const ConfigNode& lobbyInfo) override;
 		void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) override;
 		void setState(SessionState state);
+		bool setServerSideData(String uniqueKey, ConfigNode data) override;
+		ConfigNode getServerSideData(String uniqueKey) override;
 
 	private:
 		bool host = false;

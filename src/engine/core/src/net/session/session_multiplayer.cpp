@@ -21,6 +21,7 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	session = std::make_shared<NetworkSession>(*service, settings.networkVersion, playerName);
 	entitySession = std::make_unique<EntityNetworkSession>(session, resources, std::move(settings.ignoreComponents), this);
 	setupDictionary(entitySession->getSerializationDictionary(), std::move(settings.serializationDict));
+	session->setServerSideDataHandler(this);
 	
 	if (options.mode == Mode::Host) {
 		Logger::logDev("Starting multiplayer session as the host.");
@@ -226,6 +227,16 @@ void SessionMultiplayer::setState(SessionState state)
 	auto oldState = curState;
 	curState = state;
 	Logger::logDev("Connection state: " + toString(oldState) + " -> " + toString(state));
+}
+
+bool SessionMultiplayer::setServerSideData(String uniqueKey, ConfigNode data)
+{
+	return false;
+}
+
+ConfigNode SessionMultiplayer::getServerSideData(String uniqueKey)
+{
+	return {};
 }
 
 void SessionMultiplayer::setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> serializationDict)

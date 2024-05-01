@@ -440,6 +440,30 @@ void NetworkSession::receiveControlMessage(PeerId peerId, InboundNetworkPacket& 
 			retransmitControlMessage(peerId, origData);
 		}
 		break;
+	case NetworkSessionControlMessageType::SetServerSideData:
+		{
+			ControlMsgSetServerSideData msg = Deserializer::fromBytes<ControlMsgSetServerSideData>(packet.getBytes());
+			onControlMessage(peerId, msg);
+		}
+		break;
+	case NetworkSessionControlMessageType::SetServerSideDataReply:
+		{
+			ControlMsgSetServerSideDataReply msg = Deserializer::fromBytes<ControlMsgSetServerSideDataReply>(packet.getBytes());
+			onControlMessage(peerId, msg);
+		}
+		break;
+	case NetworkSessionControlMessageType::GetServerSideData:
+		{
+			ControlMsgGetServerSideData msg = Deserializer::fromBytes<ControlMsgGetServerSideData>(packet.getBytes());
+			onControlMessage(peerId, msg);
+		}
+		break;
+	case NetworkSessionControlMessageType::GetServerSideDataReply:
+		{
+			ControlMsgGetServerSideDataReply msg = Deserializer::fromBytes<ControlMsgGetServerSideDataReply>(packet.getBytes());
+			onControlMessage(peerId, msg);
+		}
+		break;
 	default:
 		closeConnection(peerId, "Invalid control packet.");
 	}
@@ -517,6 +541,63 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetSessionS
 	sessionSharedData->deserialize(s);
 }
 
+void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetServerSideData& msg)
+{
+	auto ok = doSetServerSideData(msg.key, ConfigNode(msg.data));
+
+	ControlMsgSetServerSideDataReply reply;
+	reply.requestId = msg.requestId;
+	reply.ok = ok;
+	Bytes bytes = Serializer::toBytes(reply);
+
+	doSendToPeer(getPeer(peerId), doMakeControlPacket(NetworkSessionControlMessageType::SetServerSideDataReply, OutboundNetworkPacket(bytes)));
+}
+
+void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgSetServerSideDataReply& msg)
+{
+	if (peerId != 0) {
+		closeConnection(peerId, "Unauthorised control message: ControlMsgSetServerSideDataReply");
+		return;
+	}
+
+	if (const auto iter = setServerSideDataPending.find(msg.requestId); iter != setServerSideDataPending.end()) {
+		auto promise = std::move(iter->second);
+		setServerSideDataPending.erase(iter);
+		promise.setValue(msg.ok);
+	} else {
+		Logger::logWarning("Unexpected SetServerSideDataReply");
+	}
+}
+
+void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgGetServerSideData& msg)
+{
+	auto result = doGetServerSideData(msg.key);
+
+	ControlMsgGetServerSideDataReply reply;
+	reply.requestId = msg.requestId;
+	reply.data = std::move(result);
+	Bytes bytes = Serializer::toBytes(reply);
+
+	doSendToPeer(getPeer(peerId), doMakeControlPacket(NetworkSessionControlMessageType::GetServerSideDataReply, OutboundNetworkPacket(bytes)));
+}
+
+void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgGetServerSideDataReply& msg)
+{
+	if (peerId != 0) {
+		closeConnection(peerId, "Unauthorised control message: ControlMsgGetServerSideDataReply");
+		return;
+	}
+
+	if (const auto iter = getServerSideDataPending.find(msg.requestId); iter != getServerSideDataPending.end()) {
+		auto promise = std::move(iter->second);
+		getServerSideDataPending.erase(iter);
+		promise.setValue(ConfigNode(msg.data));
+	}
+	else {
+		Logger::logWarning("Unexpected GetServerSideDataReply");
+	}
+}
+
 void NetworkSession::setMyPeerId(PeerId id)
 {
 	Expects (!myPeerId);
@@ -543,6 +624,11 @@ void NetworkSession::removeListener(IListener* listener)
 void NetworkSession::setSharedDataHandler(ISharedDataHandler* handler)
 {
 	sharedDataHandler = handler;
+}
+
+void NetworkSession::setServerSideDataHandler(IServerSideDataHandler* handler)
+{
+	serverSideDataHandler = handler;
 }
 
 const String& NetworkSession::getHostAddress() const
@@ -673,4 +759,65 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	messageQueue->setChannel(0, ChannelSettings(true, true));
 
 	return Peer{ peerId, true, std::move(messageQueue), std::move(stats) };
+}
+
+Future<bool> NetworkSession::setServerSideData(String uniqueKey, ConfigNode data)
+{
+	Promise<bool> result;
+	if (type == NetworkSessionType::Host) {
+		result.setValue(doSetServerSideData(std::move(uniqueKey), std::move(data)));
+		return result.getFuture();
+	} else {
+		const auto id = requestId++;
+
+		ControlMsgSetServerSideData msg;
+		msg.key = std::move(uniqueKey);
+		msg.data = std::move(data);
+		msg.requestId = id;
+		Bytes bytes = Serializer::toBytes(msg);
+
+		doSendToPeer(peers.back(), doMakeControlPacket(NetworkSessionControlMessageType::SetServerSideData, OutboundNetworkPacket(bytes)));
+
+		auto future = result.getFuture();
+		setServerSideDataPending[id] = std::move(result);
+		return future;
+	}
+}
+
+Future<ConfigNode> NetworkSession::retrieveServerSideData(String uniqueKey)
+{
+	Promise<ConfigNode> result;
+	if (type == NetworkSessionType::Host) {
+		result.setValue(doGetServerSideData(std::move(uniqueKey)));
+		return result.getFuture();
+	} else {
+		const auto id = requestId++;
+
+		ControlMsgGetServerSideData msg;
+		msg.key = std::move(uniqueKey);
+		msg.requestId = id;
+		Bytes bytes = Serializer::toBytes(msg);
+
+		doSendToPeer(peers.back(), doMakeControlPacket(NetworkSessionControlMessageType::GetServerSideData, OutboundNetworkPacket(bytes)));
+
+		auto future = result.getFuture();
+		getServerSideDataPending[id] = std::move(result);
+		return future;
+	}
+}
+
+bool NetworkSession::doSetServerSideData(String uniqueKey, ConfigNode data)
+{
+	if (serverSideDataHandler) {
+		return serverSideDataHandler->setServerSideData(std::move(uniqueKey), std::move(data));
+	}
+	return false;
+}
+
+ConfigNode NetworkSession::doGetServerSideData(String uniqueKey)
+{
+	if (serverSideDataHandler) {
+		return serverSideDataHandler->getServerSideData(std::move(uniqueKey));
+	}
+	return {};
 }

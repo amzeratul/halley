@@ -32,6 +32,13 @@ namespace Halley {
 			virtual std::unique_ptr<SharedData> makePeerSharedData() { return {}; }
 		};
 
+		class IServerSideDataHandler {
+		public:
+			virtual ~IServerSideDataHandler() = default;
+			virtual bool setServerSideData(String uniqueKey, ConfigNode data) = 0;
+			virtual ConfigNode getServerSideData(String uniqueKey) = 0;
+		};
+
 		NetworkSession(NetworkService& service, uint32_t networkVersion, String userName, ISharedDataHandler* sharedDataHandler = nullptr);
 		virtual ~NetworkSession();
 
@@ -58,6 +65,7 @@ namespace Halley {
 		void addListener(IListener* listener);
 		void removeListener(IListener* listener);
 		void setSharedDataHandler(ISharedDataHandler* sharedDataHandler);
+		void setServerSideDataHandler(IServerSideDataHandler* serverSideDataHandler);
 
 		const String& getHostAddress() const;
 		NetworkService& getService() const;
@@ -98,6 +106,9 @@ namespace Halley {
 
 		bool hasSessionSharedData() const;
 
+		Future<bool> setServerSideData(String uniqueKey, ConfigNode data);
+		Future<ConfigNode> retrieveServerSideData(String uniqueKey);
+
 	protected:
 		SharedData& doGetMySharedData();
 		SharedData& doGetMutableSessionSharedData();
@@ -122,6 +133,7 @@ namespace Halley {
 		NetworkSessionType type = NetworkSessionType::Undefined;
 		String hostAddress;
 		ISharedDataHandler* sharedDataHandler = nullptr;
+		IServerSideDataHandler* serverSideDataHandler = nullptr;
 
 		uint32_t networkVersion;
 		String userName;
@@ -137,6 +149,10 @@ namespace Halley {
 
 		Vector<IListener*> listeners;
 
+		uint32_t requestId = 0;
+		HashMap<uint32_t, Promise<bool>> setServerSideDataPending;
+		HashMap<uint32_t, Promise<ConfigNode>> getServerSideDataPending;
+
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
@@ -150,6 +166,10 @@ namespace Halley {
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerState& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetSessionState& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgSetServerSideData& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgSetServerSideDataReply& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgGetServerSideData& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgGetServerSideDataReply& msg);
 
 		void setMyPeerId(PeerId id);
 		Peer& getPeer(PeerId id);
@@ -166,5 +186,8 @@ namespace Halley {
 		void disconnectPeer(Peer& peer);
 
 		Peer makePeer(PeerId peerId, std::shared_ptr<IConnection> connection);
+
+		bool doSetServerSideData(String uniqueKey, ConfigNode data);
+		ConfigNode doGetServerSideData(String uniqueKey);
 	};
 }
