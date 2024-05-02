@@ -372,6 +372,10 @@ void EntityEditor::addComponent()
 
 void EntityEditor::addComponent(const String& name, ConfigNode data)
 {
+	if (!currentEntityData) {
+		return;
+	}
+
 	// Dependencies
 	const auto iter = ecsData->getComponents().find(name);
 	if (iter == ecsData->getComponents().end()) {

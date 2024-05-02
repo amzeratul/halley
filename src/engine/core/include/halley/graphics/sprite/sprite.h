@@ -78,7 +78,7 @@ namespace Halley
 		Sprite& setImage(Resources& resources, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
-		Sprite& setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, std::string_view materialName = "");
+		Sprite& setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, std::string_view materialName = "", bool filtering = false);
 		Sprite& setImageData(const Texture& image);
 
 		Sprite& setSprite(Resources& resources, std::string_view spriteSheetName, std::string_view imageName, std::string_view materialName = "");

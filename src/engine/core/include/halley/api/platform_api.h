@@ -173,7 +173,9 @@ namespace Halley
 		virtual Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) = 0;
 
 		virtual String getPlayerName() { return "Player"; }
-		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
+		virtual String getAccountId() { return ""; }
+		virtual String getStaticAccountId() { return getAccountId(); }
+		[[deprecated]] virtual String getUniquePlayerIdString() { return getStaticAccountId(); } // This has to be a valid filename
 
 
 		//////////////
@@ -239,6 +241,8 @@ namespace Halley
 		
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
+		virtual bool canGetPlayerAvatars() const { return false; }
+		virtual Future<std::unique_ptr<Image>> getPlayerAvatar(const String& playerId, Vector2i sizeHint) { return Future<std::unique_ptr<Image>>::makeImmediate({}); }
 
 
 		////////////////////////////
