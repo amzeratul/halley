@@ -1014,7 +1014,7 @@ UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
 	result.entries.emplace_back("Checked", "checked", "bool", "false");
 	result.entries.emplace_back("Label", "label", "Halley::String", "");
 	result.entries.emplace_back("Label (Loc Key)", "labelKey", "Halley::String", "");
-	result.entries.emplace_back("Extra Mouse Border", "extraMouseBorder", "Halley::Vector4f", "");
+	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", "");
 
 	return result;
 }
@@ -1028,8 +1028,8 @@ std::shared_ptr<UIWidget> UIFactory::makeCheckbox(const ConfigNode& entryNode)
 	auto label = parseLabel(node, "", "label");
 
 	auto checkbox = std::make_shared<UICheckbox>(std::move(id), std::move(style), checked, std::move(label));
-	if (node.hasKey("extraMouseBorder")) {
-		checkbox->setMouseExtraBorder(node["extraMouseBorder"].asVector4f());
+	if (node.hasKey("mouseBorder")) {
+		checkbox->setMouseExtraBorder(node["mouseBorder"].asVector4f());
 	}
 	return checkbox;
 }
