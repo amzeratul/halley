@@ -6,6 +6,10 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "halley/entity/entity_data.h"
+
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
 #include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;

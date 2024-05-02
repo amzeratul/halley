@@ -2,6 +2,11 @@
 #include "halley/entity/entity.h"
 #include "halley/entity/world.h"
 #include "halley/editor_extensions/component_editor_context.h"
+
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
+
 #include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;

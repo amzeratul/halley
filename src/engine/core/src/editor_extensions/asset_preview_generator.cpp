@@ -1,5 +1,8 @@
 #include "halley/editor_extensions/asset_preview_generator.h"
 
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
 #include <components/sprite_component.h>
 
 #include "halley/api/halley_api.h"

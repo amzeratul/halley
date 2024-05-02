@@ -1,3 +1,6 @@
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
 #include "halley/editor_extensions/scene_editor.h"
 
 #include "halley/editor_extensions/entity_validator.h"
