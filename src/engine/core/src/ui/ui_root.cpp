@@ -467,7 +467,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bo
 		const auto result = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
 		if (result.widget) {
 			return result;
-		} else if (curRootWidget->isMouseBlocker()) {
+		} else if (curRootWidget->isMouseBlocker() && curRootWidget->isActiveInHierarchy()) {
 			return {};
 		}
 	}
@@ -490,7 +490,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 		WidgetUnderMouseResult bestResult;
 
 		if (curWidget->canChildrenInteractWithMouse()) {
-			for (auto& c : curWidget->getChildren()) {
+			for (auto& c: curWidget->getChildren()) {
 				const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren);
 				if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
 					bestResult = result;
