@@ -10,6 +10,7 @@ UICheckbox::UICheckbox(String id, UIStyle style, bool checked, LocalisedString l
 	, checked(checked)
 {
 	label = std::make_shared<UILabel>(id + "_label", style, std::move(labelText));
+	label->setActive(!label->getText().getString().isEmpty());
 	image = std::make_shared<UIImage>(id + "_image", checked ? style.getSprite("checked") : style.getSprite("normal"));
 
 	UIWidget::add(image, 0);
@@ -84,5 +85,6 @@ void UICheckbox::readFromDataBind()
 
 void UICheckbox::setLabel(LocalisedString str)
 {
+	label->setActive(!str.getString().isEmpty());
 	label->setText(std::move(str));
 }
