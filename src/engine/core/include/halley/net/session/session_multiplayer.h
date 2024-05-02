@@ -85,6 +85,8 @@ namespace Halley {
 
 		void setNetworkQuality(NetworkService::Quality level);
 
+		MultiplayerLobby& getLobby();
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onStartGame() override;

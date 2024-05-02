@@ -28,7 +28,6 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 		setState(SessionState::GameLobbyReady);
 		session->host(options.maxPlayers);
 		lobby = api.platform->makeMultiplayerLobby(session->getHostAddress());
-		lobby->setPrivacy(MultiplayerPrivacy::FriendsOnly);
 	} else if (options.mode == Mode::Join && options.clientConnectTo) {
 		Logger::logDev("Starting multiplayer session as a client, connecting to " + options.clientConnectTo.value());
 		setState(SessionState::JoiningSession);
@@ -149,6 +148,11 @@ const String& SessionMultiplayer::getPlayerName() const
 void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 {
 	service->setSimulateQualityLevel(level);
+}
+
+MultiplayerLobby& SessionMultiplayer::getLobby()
+{
+	return *lobby;
 }
 
 void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
