@@ -571,6 +571,12 @@ void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 	}
 	std_ex::erase_if(peers, [](const EntityNetworkRemotePeer& p) { return !p.isAlive(); });
 
+	if (listener) {
+		listener->setLobbyInfo(peerId, {});
+	}
+
+	sendUpdatedLobbyInfos({});
+
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 }
 
