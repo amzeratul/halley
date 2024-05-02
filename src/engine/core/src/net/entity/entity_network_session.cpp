@@ -112,7 +112,7 @@ void EntityNetworkSession::receiveUpdates()
 		const auto fromPeerId = result->first;
 		auto& packet = result->second;
 
-		auto bytes = Compression::decompressRaw(packet.getBytes(), 256 * 1024);
+		auto bytes = Compression::decompressRaw(packet.getBytes(), false, 256 * 1024);
 		auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(bytes, byteSerializationOptions);
 
 		for (auto& msg: msgs) {

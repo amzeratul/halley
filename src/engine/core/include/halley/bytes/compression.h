@@ -14,7 +14,7 @@ namespace Halley {
 		static std::shared_ptr<const char> decompressToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& outSize, size_t maxSize = std::numeric_limits<size_t>::max());
 		static Bytes compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength, int level = -1);
 		static gsl::span<gsl::byte> compressRaw(gsl::span<const gsl::byte> inBytes, gsl::span<gsl::byte> outBytes, bool insertLength, int level = -1);
-		static Bytes decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize = 0);
+		static Bytes decompressRaw(gsl::span<const gsl::byte> bytes, bool headerLess, size_t maxSize, size_t expectedSize = 0);
 
 		enum class LZ4Mode {
 			Normal,

@@ -2,6 +2,7 @@
 #include <memory>
 #include "halley/bytes/compression.h"
 #include "../../../../contrib/zlib/zlib.h"
+#include "../../../../contrib/zlib/zutil.h"
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
 #include "lz4/lz4.h"
@@ -112,7 +113,7 @@ gsl::span<gsl::byte> Compression::compressRaw(gsl::span<const gsl::byte> inBytes
 	return outBytes.subspan(0, headerSize + outSize);
 }
 
-Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize)
+Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, bool headerLess, size_t maxSize, size_t expectedSize)
 {
 	if (expectedSize > uint64_t(maxSize)) {
 		throw Exception("File is too big to inflate: " + String::prettySize(expectedSize), HalleyExceptions::Compression);
@@ -124,7 +125,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 	stream.opaque = nullptr;
 	stream.avail_in = 0;
 	stream.next_in = nullptr;
-	int ret = inflateInit(&stream);
+	int ret = inflateInit2(&stream, headerLess ? -15 : DEF_WBITS);
 	if (ret != Z_OK) {
 		throw Exception("Unable to initialise zlib", HalleyExceptions::Compression);
 	}

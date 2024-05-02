@@ -351,7 +351,7 @@ void AsepriteFile::addCelChunk(gsl::span<const gsl::byte> span)
 			memcpy(cel.rawData.data(), span.data(), cel.rawData.size());
 		} else if (type == 2) {
 			// ZLIB compressed
-			cel.rawData = Compression::decompressRaw(span, std::numeric_limits<size_t>::max());
+			cel.rawData = Compression::decompressRaw(span, false, std::numeric_limits<size_t>::max());
 		}
 	} else if (type == 1) {
 		// Linked
