@@ -42,17 +42,10 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 				Logger::logDev("Starting multiplayer session as a client, connecting to " + params.param);
 				setState(SessionState::JoiningSession);
 				session->join(params.param);
+				api.platform->setJoinCallback({});
 			} else {
 				Logger::logError("Received platform join lobby callback at unexpected time.");
 			}
-		});
-		api.platform->setPreparingToJoinCallback([=]()
-		{
-			Logger::logDev("Preparing to join lobby...");
-		});
-		api.platform->setJoinErrorCallback([=]()
-		{
-			Logger::logError("Error joining lobby.");
 		});
 	}
 }
