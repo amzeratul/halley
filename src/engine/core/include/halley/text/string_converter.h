@@ -419,35 +419,17 @@ namespace Halley
 
 	inline std::optional<float> stringViewToFloat(const std::string_view& input)
 	{
-#if defined(__NX_TOOLCHAIN_MAJOR__)
 		std::array<char, 16> buffer;
 		buffer.fill(0);
 		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
 		return static_cast<float>(std::atof(buffer.data()));
-#else
-		float out;
-	    const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
-	    if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
-	        return std::nullopt;
-	    }
-	    return out;
-#endif
 	}
 
 	inline std::optional<double> stringViewToDouble(const std::string_view& input)
 	{
-#if defined(__NX_TOOLCHAIN_MAJOR__)
 		std::array<char, 16> buffer;
 		buffer.fill(0);
 		std::memcpy(buffer.data(), input.data(), std::min(input.size(), buffer.size() - 1));
 		return std::atof(buffer.data());
-#else
-		double out;
-		const auto result = std::from_chars(input.data(), input.data() + input.size(), out);
-		if (result.ec == std::errc::invalid_argument || result.ec == std::errc::result_out_of_range) {
-			return std::nullopt;
-		}
-		return out;
-#endif
 	}
 }
