@@ -18,6 +18,13 @@ namespace Halley {
     public:
         class Iterator {
         public:
+            typedef std::forward_iterator_tag iterator_category;
+            typedef std::shared_ptr<ScriptState> value_type;
+            typedef std::shared_ptr<ScriptState>* pointer;
+            typedef std::shared_ptr<ScriptState>& reference;
+            typedef size_t size_type;
+            typedef std::ptrdiff_t difference_type;
+
             Iterator();
             Iterator(const ScriptStateSet& parent, size_t idx)
 	            : parent(&parent)
