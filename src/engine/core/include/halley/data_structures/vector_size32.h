@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <gsl/span>
 #include <string_view>
+#include <cstring>
 
 #ifdef max
 #undef max
