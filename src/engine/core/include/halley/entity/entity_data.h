@@ -145,6 +145,9 @@ namespace Halley {
 	    void postProcessAddedChild(const std::set<String>& ignoreComponents, bool removeEmptyComponents);
         void makeComponentChangesIntoDeltas();
 
+        bool operator==(const EntityData& other) const;
+        bool operator!=(const EntityData& other) const;
+
     private:
 
     	String name;

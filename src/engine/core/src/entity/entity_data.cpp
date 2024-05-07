@@ -660,3 +660,22 @@ void EntityData::makeComponentChangesIntoDeltas()
 		c.makeComponentChangesIntoDeltas();
 	}
 }
+
+bool EntityData::operator==(const EntityData& other) const
+{
+	return name == other.name &&
+		prefab == other.prefab &&
+		icon == other.icon &&
+		variant == other.variant &&
+		flags == other.flags &&
+		instanceUUID == other.instanceUUID &&
+		prefabUUID == other.prefabUUID &&
+		parentUUID == other.parentUUID &&
+		children == other.children &&
+		components == other.components;
+}
+
+bool EntityData::operator!=(const EntityData& other) const
+{
+	return !(*this == other);
+}

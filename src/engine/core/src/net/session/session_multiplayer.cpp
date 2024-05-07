@@ -135,6 +135,11 @@ EntityNetworkSession* SessionMultiplayer::getEntityNetworkSession()
 	return entitySession.get();
 }
 
+const EntityNetworkSession* SessionMultiplayer::getEntityNetworkSession() const
+{
+	return entitySession.get();
+}
+
 NetworkSession* SessionMultiplayer::getNetworkSession()
 {
 	return session.get();
@@ -207,8 +212,9 @@ ConfigNode SessionMultiplayer::getLobbyInfo()
 	return {};
 }
 
-void SessionMultiplayer::setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo)
+bool SessionMultiplayer::setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo)
 {
+	return false;
 }
 
 void SessionMultiplayer::onReceiveLobbyInfo(const ConfigNode& lobbyInfo)

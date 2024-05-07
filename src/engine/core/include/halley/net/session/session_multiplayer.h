@@ -79,6 +79,7 @@ namespace Halley {
 		void startOrJoinGame();
 
 		EntityNetworkSession* getEntityNetworkSession() override;
+		const EntityNetworkSession* getEntityNetworkSession() const;
 		NetworkSession* getNetworkSession() override;
 
 		const String& getPlayerName() const override;
@@ -94,7 +95,7 @@ namespace Halley {
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) override;
 		ConfigNode getLobbyInfo() override;
-		void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) override;
+		bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) override;
 		void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) override;
 		void setState(SessionState state);
 		bool setServerSideData(String uniqueKey, ConfigNode data) override;

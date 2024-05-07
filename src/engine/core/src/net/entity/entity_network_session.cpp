@@ -111,8 +111,9 @@ void EntityNetworkSession::setLobbyInfo(ConfigNode info)
 {
 	if (isHost()) {
 		if (listener) {
-			listener->setLobbyInfo(0, info);
-			sendUpdatedLobbyInfos({});
+			if (listener->setLobbyInfo(0, info)) {
+				sendUpdatedLobbyInfos({});
+			}
 		}
 	} else {
 		peers.back().setLobbyInfo(std::move(info));
@@ -358,8 +359,9 @@ void EntityNetworkSession::onReceiveUpdateLobbyInfo(NetworkSession::PeerId fromP
 void EntityNetworkSession::onReceiveSetLobbyInfo(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSetLobbyInfo& msg)
 {
 	if (listener) {
-		listener->setLobbyInfo(fromPeerId, msg.lobbyInfo);
-		sendUpdatedLobbyInfos({});
+		if (listener->setLobbyInfo(fromPeerId, msg.lobbyInfo)) {
+			sendUpdatedLobbyInfos({});
+		}
 	}
 }
 

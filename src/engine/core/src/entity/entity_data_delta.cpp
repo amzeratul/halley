@@ -394,6 +394,30 @@ String EntityDataDelta::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
+bool EntityDataDelta::operator==(const EntityDataDelta& other) const
+{
+	return name == other.name &&
+		prefab == other.prefab &&
+		icon == other.icon &&
+		variant == other.variant &&
+		flags == other.flags &&
+		instanceUUID == other.instanceUUID &&
+		prefabUUID == other.prefabUUID &&
+		parentUUID == other.parentUUID &&
+		componentsChanged == other.componentsChanged &&
+		componentsRemoved == other.componentsRemoved &&
+		componentOrder == other.componentOrder &&
+		childrenAdded == other.childrenAdded &&
+		childrenChanged == other.childrenChanged &&
+		childrenRemoved == other.childrenRemoved &&
+		childrenOrder == other.childrenOrder;
+}
+
+bool EntityDataDelta::operator!=(const EntityDataDelta& other) const
+{
+	return !(*this == other);
+}
+
 static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {

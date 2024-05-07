@@ -65,6 +65,9 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 		String toYAML() const;
 
+		bool operator==(const EntityDataDelta& other) const;
+		bool operator!=(const EntityDataDelta& other) const;
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;

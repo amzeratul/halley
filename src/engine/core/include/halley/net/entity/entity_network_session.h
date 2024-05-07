@@ -43,7 +43,7 @@ namespace Halley {
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
-			virtual void setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
+			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
 			virtual void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) = 0;
 		};
 		
