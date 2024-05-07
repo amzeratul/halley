@@ -1,6 +1,9 @@
 #include "script_entity.h"
 #include "halley/scripting/script_state_set.h"
 
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
 #include <components/scriptable_component.h>
 
 #include "halley/entity/world.h"

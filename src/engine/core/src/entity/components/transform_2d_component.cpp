@@ -1,4 +1,9 @@
 #include "halley/support/logger.h"
+
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
+
 #include "halley/entity/components/transform_2d_component.h"
 
 #include "halley/entity/world.h"

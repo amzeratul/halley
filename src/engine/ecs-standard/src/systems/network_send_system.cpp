@@ -35,6 +35,7 @@ public:
 				// Automatically assign the current peerId to any NetworkComponent that hasn't been bound yet
 				// This means that all entities created locally belong to this peer; remote entities will be pre-populated
 				if (!e.network.ownerId) {
+					Logger::logDev("Claiming network ownership for " + getWorld().getEntity(e.entityId).getName());
 					e.network.ownerId = peerId;
 				}
 

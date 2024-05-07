@@ -2,6 +2,9 @@
 
 #include "halley/entity/world.h"
 #include "halley/navigation/world_position.h"
+#ifndef DONT_INCLUDE_HALLEY_HPP
+#define DONT_INCLUDE_HALLEY_HPP
+#endif
 #include "halley/entity/components/transform_2d_component.h"
 using namespace Halley;
 

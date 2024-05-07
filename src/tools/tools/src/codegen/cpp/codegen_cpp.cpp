@@ -198,6 +198,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		"",
 		"#ifndef DONT_INCLUDE_HALLEY_HPP",
 		"#include <halley.hpp>",
+		"#else",
+		"#include \"halley/entity/component.h\"",
 		"#endif",
 		"#include \"halley/support/exception.h\"",
 		""

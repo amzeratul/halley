@@ -1,8 +1,10 @@
-// Halley codegen version 127
+// Halley codegen version 128
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
+#else
+#include "halley/entity/component.h"
 #endif
 #include "halley/support/exception.h"
 
