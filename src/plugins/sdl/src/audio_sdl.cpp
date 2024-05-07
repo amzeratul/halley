@@ -46,14 +46,18 @@ Vector<std::unique_ptr<const AudioDevice>> AudioSDL::getAudioDevices()
 	result.emplace_back(std::make_unique<AudioDeviceSDL>("[Default]", std::nullopt));
 	int nDevices = SDL_GetNumAudioDevices(0);
 	for (int i = 0; i < nDevices; i++) {
-		SDL_AudioSpec sdlSpec;
 		std::optional<AudioSpec> spec;
+
+#if SDL_MAJOR_VERSION >= 2 && SDL_MINOR_VERSION >= 16
+		SDL_AudioSpec sdlSpec;
 		if (SDL_GetAudioDeviceSpec(i, 0, &sdlSpec) == 0) {
 			AudioSpec s;
 			s.numChannels = sdlSpec.channels;
 			s.sampleRate = sdlSpec.freq;
 			spec = s;
 		}
+#endif
+
 		result.emplace_back(std::make_unique<AudioDeviceSDL>(SDL_GetAudioDeviceName(i, 0), spec));
 	}
 	return result;

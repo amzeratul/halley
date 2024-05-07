@@ -38,7 +38,7 @@ public:
 					}
 
 					const float distance = getDistance(entityId, pos);
-					if (distance <= radius && isfinite(distance)) {
+					if (distance <= radius && std::isfinite(distance)) {
 						matching.emplace_back(distance, entityId);
 						matchId.push_back(entityId);
 					}
