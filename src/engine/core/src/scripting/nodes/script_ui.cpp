@@ -51,10 +51,10 @@ IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, 
 		const String ui = node.getSettings()["ui"].asString("");
 		data.ui = environment.createModalUI(ui, readDataPin(environment, node, 2));
 	}
+	data.result = data.ui->getResultValue();
 	if (data.ui->isAlive()) {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	} else {
-		data.result = data.ui->getResultValue();
 		data.ui.reset();
 		return Result(ScriptNodeExecutionState::Done);
 	}
