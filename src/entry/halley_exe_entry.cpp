@@ -15,8 +15,7 @@ int __stdcall WinMain(void*, void*, char*, int)
 
 int main(int argc, char* argv[])
 {
-    auto loader = EntryPointGameLoader(*getHalleyEntryStatic());
-    return HalleyMain::runMain(loader, HalleyMain::getArgs(argc, argv));
+    return HalleyMain::runMain(std::make_unique<EntryPointGameLoader>(*getHalleyEntryStatic()), HalleyMain::getArgs(argc, argv));
 }
 
 #endif
