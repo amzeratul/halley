@@ -178,8 +178,10 @@ void UIEditorDisplay::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& wi
 void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (!canPropagateMouseToChildren()) {
-		const auto uuid = lastWidgetUnderMouse ? getUUIDOfWidgetClicked(*lastWidgetUnderMouse) : UUID();
-		editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+		if (button == 0) {
+			const auto uuid = lastWidgetUnderMouse ? getUUIDOfWidgetClicked(*lastWidgetUnderMouse) : UUID();
+			editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+		}
 	}
 }
 
