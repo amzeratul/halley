@@ -39,4 +39,5 @@ void basicVertex(VIn input, out VOut output, bool premultiply) {
     output.position = getVertexPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
     output.size = input.size.xy;
     output.texCoord0Bounds = input.texCoord0;
+    output.texCoord1Bounds = input.texCoord1;
 }

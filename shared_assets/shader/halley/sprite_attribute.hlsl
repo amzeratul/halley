@@ -36,4 +36,5 @@ struct VOut {
     float2 size : SIZE0;
     float2 scale : SCALE;
     float4 texCoord0Bounds : TEXCOORD0BOUNDS;
+    float4 texCoord1Bounds : TEXCOORD1BOUNDS;
 };

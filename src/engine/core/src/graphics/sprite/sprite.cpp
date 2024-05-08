@@ -792,7 +792,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		
 		if (texUnit == 0) {
 			sprite.setImage(*context.resources, imageNode.asStringView(), node["material"].asStringView(sprite.hasMaterial() ? std::string_view(sprite.getMaterial().getDefinition().getName()) : ""));
-		} else {
+		} else if (texUnit == 1) {
 			const auto image = context.resources->get<SpriteResource>(imageNode.asStringView());
 			sprite.setTexRect1(image->getSprite().coords);
 			sprite.getMutableMaterial().set(texUnit, *image);
