@@ -25,6 +25,7 @@ namespace Halley {
         std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
 
         void setBypass(bool bypass);
+        void setAutoBypass(bool autoBypass);
         bool isRendering() const;
 
     	void fade(Colour4f from, Colour4f to, Time time);
@@ -37,6 +38,7 @@ namespace Halley {
         Vector2f scale;
         mutable Vector2f innerSize;
         bool bypass = false;
+        bool autoBypass = false;
 
         struct RenderParams {
             int mask;

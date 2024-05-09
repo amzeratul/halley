@@ -170,6 +170,11 @@ void UIRenderSurface::setBypass(bool bypass)
 	this->bypass = bypass;
 }
 
+void UIRenderSurface::setAutoBypass(bool autoBypass)
+{
+	this->autoBypass = autoBypass;
+}
+
 bool UIRenderSurface::isRendering() const
 {
 	return isEnabled() && !bypass;
@@ -187,7 +192,12 @@ void UIRenderSurface::update(Time t, bool moved)
 		const auto v = static_cast<float>(clamp(fading->curTime / fading->length, 0.0, 1.0));
 		setColour(lerp(fading->from, fading->to, v));
 		if (fading->curTime >= fading->length) {
+			setColour(fading->to);
 			fading = {};
 		}
+	}
+
+	if (autoBypass) {
+		bypass = Colour4c(colour) == Colour4c(255, 255, 255, 255) && std::abs(scale.x - 1.0f) < 0.00001f && std::abs(scale.y - 1.0f) < 0.00001f;
 	}
 }
