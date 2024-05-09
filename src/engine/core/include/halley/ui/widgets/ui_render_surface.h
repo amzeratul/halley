@@ -26,7 +26,10 @@ namespace Halley {
 
         void setBypass(bool bypass);
         bool isRendering() const;
-        
+
+    	void fade(Colour4f from, Colour4f to, Time time);
+        void update(Time t, bool moved) override;
+
     private:
         std::unique_ptr<RenderSurface> renderSurface;
 
@@ -44,6 +47,14 @@ namespace Halley {
 		    Colour4f colour;
 			std::unique_ptr<SpritePainter> spritePainter;
         };
+
+        struct Fade {
+            Colour4f from;
+            Colour4f to;
+            Time length;
+            Time curTime = 0;
+        };
+        std::optional<Fade> fading;
 
         mutable FrameDataSync<RenderParams> paramsSync;
         mutable std::optional<RenderParams> renderParams;

@@ -174,3 +174,20 @@ bool UIRenderSurface::isRendering() const
 {
 	return isEnabled() && !bypass;
 }
+
+void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time)
+{
+	fading = Fade{ from, to, time, 0 };
+}
+
+void UIRenderSurface::update(Time t, bool moved)
+{
+	if (fading) {
+		fading->curTime += t;
+		const auto v = static_cast<float>(clamp(fading->curTime / fading->length, 0.0, 1.0));
+		setColour(lerp(fading->from, fading->to, v));
+		if (fading->curTime >= fading->length) {
+			fading = {};
+		}
+	}
+}
