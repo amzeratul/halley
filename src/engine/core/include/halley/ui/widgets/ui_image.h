@@ -20,6 +20,7 @@ namespace Halley {
 
 		void setLayerAdjustment(int adjustment);
 		void setWorldClip(std::optional<Rect4f> worldClip);
+		void setLocalClip(std::optional<Rect4f> localClip);
 		void setHoverable(Colour4f normalColour, Colour4f hoverColour);
 		void setHoverable(Sprite normalSprite, Sprite hoverSprite);
 		void setSelectable(Colour4f normalColour, Colour4f selColour);
@@ -36,8 +37,9 @@ namespace Halley {
 		int layerAdjustment = 0;
 		bool dirty = true;
 		bool useClipForPos = true;
+		bool isLocalClip = false;
 		mutable uint8_t drawing = 0;
-		std::optional<Rect4f> worldClip;
+		std::optional<Rect4f> clip;
 	};
 
 	class UIImageVisibleBehaviour : public UIBehaviour {

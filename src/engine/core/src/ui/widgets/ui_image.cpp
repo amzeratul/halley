@@ -21,10 +21,10 @@ void UIImage::draw(UIPainter& painter) const
 	}
 	
 	if (sprite.hasMaterial()) {
-		if (layerAdjustment != 0 || worldClip) {
+		if (layerAdjustment != 0 || clip) {
 			auto p2 = painter.withAdjustedLayer(layerAdjustment);
-			if (worldClip) {
-				p2 = p2.withClip(worldClip);
+			if (clip) {
+				p2 = p2.withClip(*clip + (isLocalClip ? getPosition() : Vector2f()));
 			}
 			p2.draw(sprite);
 		} else {
@@ -96,7 +96,14 @@ void UIImage::setLayerAdjustment(int adjustment)
 
 void UIImage::setWorldClip(std::optional<Rect4f> wc)
 {
-	worldClip = wc;
+	clip = wc;
+	isLocalClip = false;
+}
+
+void UIImage::setLocalClip(std::optional<Rect4f> c)
+{
+	clip = c;
+	isLocalClip = true;
 }
 
 void UIImage::setSelectable(Colour4f normalColour, Colour4f selColour)
