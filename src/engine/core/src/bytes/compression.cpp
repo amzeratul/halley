@@ -41,7 +41,7 @@ Bytes Compression::decompress(gsl::span<const gsl::byte> bytes, size_t maxSize)
 	Expects (bytes.size_bytes() >= 8);
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
-	auto out = decompressRaw(bytes.subspan(8), maxSize, size_t(expectedOutSize));
+	auto out = decompressRaw(bytes.subspan(8), false, maxSize, size_t(expectedOutSize));
 	return out;
 }
 
