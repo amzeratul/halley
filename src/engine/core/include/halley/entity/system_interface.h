@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/api/audio_api.h"
 #include "halley/text/halleystring.h"
 #include "halley/concurrency/future.h"
 
@@ -68,6 +69,7 @@ namespace Halley {
 
         virtual void playAudio(const String& event, EntityId entityId) = 0;
 		virtual void setVariable(EntityId entityId, const String& variableName, float value) = 0;
+		virtual String getSourceName(AudioEmitterId id) const = 0;
 	};
 
 	class IExitGameInterface : public ISystemInterface {

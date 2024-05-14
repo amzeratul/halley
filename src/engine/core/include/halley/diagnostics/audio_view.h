@@ -23,6 +23,13 @@ namespace Halley
 		TextRenderer headerText;
 
 		bool listenerRegistered = false;
+		bool populatedObjectNames = false;
 		AudioDebugData lastData;
+
+		mutable HashMap<AudioEmitterId, String> emitterNames;
+		mutable HashMap<AudioObjectId, String> objectNames;
+
+		String getName(AudioEmitterId emitterId) const;
+		String getObjectName(AudioObjectId objectId) const;
 	};
 }

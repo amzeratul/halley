@@ -29,6 +29,8 @@ namespace Halley {
     	const String& getSwitchValue(const String& id) const;
         float getVariableValue(const String& id) const;
 
+    	AudioDebugData::EmitterData getDebugData() const;
+
     private:
         AudioEmitterId id = 0;
         bool temporary = false;

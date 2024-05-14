@@ -188,6 +188,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	// Find the target gain
 	const float gain = paused ? 0.0f : (baseGain * userGain * fader.getCurrentValue() * busGain);
+	lastGain = gain;
 
 	// Mix
 	prevChannelMix = channelMix;
@@ -288,4 +289,15 @@ void AudioVoice::advancePlayback(size_t samples)
 	if (!paused) {
 		elapsedTime += float(samples) / AudioConfig::sampleRate;
 	}
+}
+
+AudioDebugData::VoiceData AudioVoice::getDebugData() const
+{
+	AudioDebugData::VoiceData result;
+
+	result.gain = lastGain;
+	result.paused = paused;
+	result.objectId = audioObjectId;
+
+	return result;
 }

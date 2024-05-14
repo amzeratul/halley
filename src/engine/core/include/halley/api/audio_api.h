@@ -205,18 +205,17 @@ namespace Halley
 	public:
 		struct VoiceData {
 			AudioObjectId objectId;
-			AudioEmitterId emitterId;
 			float gain = 1;
-			bool paused = false;
+			uint32_t paused = 0;
 		};
 
 		struct EmitterData {
 			AudioEmitterId emitterId;
 			HashMap<String, String> switches;
 			HashMap<String, float> variables;
+			Vector<VoiceData> voices;
 		};
 
-		Vector<VoiceData> voices;
 		Vector<EmitterData> emitters;
 	};
 

@@ -97,3 +97,19 @@ float AudioEmitter::getVariableValue(const String& id) const
 	}
 	return iter->second;
 }
+
+AudioDebugData::EmitterData AudioEmitter::getDebugData() const
+{
+	AudioDebugData::EmitterData result;
+
+	result.emitterId = id;
+	result.switches = switchValues;
+	result.variables = variableValues;
+
+	result.voices.reserve(voices.size());
+	for (const auto& voice: voices) {
+		result.voices.emplace_back(voice->getDebugData());
+	}
+
+	return result;
+}

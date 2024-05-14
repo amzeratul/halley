@@ -46,6 +46,8 @@ namespace Halley {
 		
 		uint8_t getBus() const;
 
+		AudioDebugData::VoiceData getDebugData() const;
+
 	private:
 		enum class FadeEndBehaviour : uint8_t {
 			None,
@@ -79,6 +81,8 @@ namespace Halley {
 
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
+
+		float lastGain = 0;
 
 		void advancePlayback(size_t samples);
 		void onFadeEnd();

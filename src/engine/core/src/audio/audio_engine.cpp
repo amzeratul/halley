@@ -456,7 +456,10 @@ AudioDebugData AudioEngine::generateDebugData() const
 {
 	AudioDebugData result;
 
-	// TODO
+	result.emitters.reserve(emitters.size());
+	for (const auto& [emitterId, emitter]: emitters) {
+		result.emitters.emplace_back(emitter->getDebugData());
+	}
 
 	return result;
 }

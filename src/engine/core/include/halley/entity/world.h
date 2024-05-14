@@ -186,6 +186,23 @@ namespace Halley {
 		}
 
 		template <typename T>
+		const T* tryGetInterface() const
+		{
+			const auto iter = systemInterfaces.find(std::type_index(typeid(T)));
+			return iter == systemInterfaces.end() ? nullptr : dynamic_cast<T*>(iter->second);
+		}
+
+		template <typename T>
+		const T& getInterface() const
+		{
+			if (auto* ptr = tryGetInterface<T>()) {
+				return *ptr;
+			} else {
+				throw Exception(String("World does not have system interface \"") + typeid(T).name() + "\"", HalleyExceptions::Scripting);
+			}
+		}
+
+		template <typename T>
 		void setInterface(T* interface)
 		{
 			static_assert(std::is_abstract_v<T>);

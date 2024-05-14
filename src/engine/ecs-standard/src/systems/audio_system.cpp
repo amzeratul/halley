@@ -57,6 +57,16 @@ public:
 		}
 	}
 
+	String getSourceName(AudioEmitterId id) const override
+	{
+		for (const auto& source: sourceFamily) {
+			if (source.audioSource.emitter && source.audioSource.emitter->getId() == id) {
+				return getWorld().getEntity(source.entityId).getName();
+			}
+		}
+		return "<unknown>";
+	}
+
 private:
 	String curRegionId;
 	String curRegionPreset;
