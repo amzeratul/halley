@@ -60,9 +60,8 @@ void PerformanceStatsView::paint(Painter& painter)
 	memoryUsageRefreshTime += t;
 
 	if (active) {
-		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
-
 		const auto rect = Rect4f(painter.getViewPort());
+		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
 
 		drawHeader(painter, false);
 		drawTimeline(painter, Rect4f(20, 80,	rect.getWidth() - 40, 100));

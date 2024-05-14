@@ -64,6 +64,9 @@ namespace Halley {
 
     	void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller);
 
+    	void setGenerateDebugData(bool enabled);
+		std::optional<AudioDebugData> getDebugData() const;
+
 	private:
 		struct BusData {
 			String name;
@@ -100,6 +103,8 @@ namespace Halley {
 
 		std::shared_ptr<IAudioBufferSizeController> bufferSizeController;
 
+		bool debugDataEnabled = false;
+
 		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedVoices();
 		void queueAudioFloat(gsl::span<const float> data);
@@ -113,5 +118,7 @@ namespace Halley {
 		uint8_t loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
 		void updateBusGains();
 		void collectBusChildren(Vector<int>& dst, const BusData& bus) const;
+
+		AudioDebugData generateDebugData() const;
     };
 }

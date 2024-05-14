@@ -21,6 +21,7 @@ namespace {
 	// These, on the other hand, flow the other direction, so they can be much more relaxed
 	constexpr size_t exceptionQueueSize = 16;
 	constexpr size_t finishedSoundsQueueSize = 16;
+	constexpr size_t debugInfoQueueSize = 16;
 }
 
 AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
@@ -33,6 +34,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, finishedSoundsQueue(finishedSoundsQueueSize)
 	, ownAudioThread(o.needsAudioThread())
 	, curEmitterId(1)
+	, audioDebugData(debugInfoQueueSize)
 {
 }
 
@@ -180,6 +182,15 @@ void AudioFacade::setBufferSizeController(std::shared_ptr<IAudioBufferSizeContro
 {
 	enqueue([=]() {
 		engine->setBufferSizeController(controller);
+	});
+}
+
+void AudioFacade::setDebugListener(IAudioDebugDataListener* listener)
+{
+	debugListener = listener;
+	const bool enabled = listener != nullptr;
+	enqueue([=]() {
+		engine->setGenerateDebugData(enabled);
 	});
 }
 
@@ -413,6 +424,12 @@ void AudioFacade::stepAudio()
 					finishedSoundsQueue.writeOne(std::move(finishedSounds));
 				}
 			}
+
+			if (auto debugData = engine->getDebugData()) {
+				if (audioDebugData.canWrite(1)) {
+					audioDebugData.writeOne(std::move(*debugData));
+				}
+			}
 		}
 
 		while (commandQueue.canRead(1)) {
@@ -468,6 +485,13 @@ void AudioFacade::pump()
 			{
 				return std::find(finishedSounds.begin(), finishedSounds.end(), id) != finishedSounds.end();
 			}), playingSounds.end());
+		}
+
+		while (audioDebugData.canRead(1)) {
+			auto data = audioDebugData.readOne();
+			if (debugListener) {
+				debugListener->onAudioDebugData(std::move(data));
+			}
 		}
 	}
 }

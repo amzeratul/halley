@@ -201,6 +201,31 @@ namespace Halley
 	};
 	using AudioEmitterHandle = std::shared_ptr<IAudioEmitterHandle>;
 
+	class AudioDebugData {
+	public:
+		struct VoiceData {
+			AudioObjectId objectId;
+			AudioEmitterId emitterId;
+			float gain = 1;
+			bool paused = false;
+		};
+
+		struct EmitterData {
+			AudioEmitterId emitterId;
+			HashMap<String, String> switches;
+			HashMap<String, float> variables;
+		};
+
+		Vector<VoiceData> voices;
+		Vector<EmitterData> emitters;
+	};
+
+	class IAudioDebugDataListener {
+	public:
+		virtual ~IAudioDebugDataListener() = default;
+		virtual void onAudioDebugData(AudioDebugData data) = 0;
+	};
+
 	class AudioAPI
 	{
 	public:
@@ -241,5 +266,7 @@ namespace Halley
 		virtual std::optional<AudioSpec> getAudioSpec() const = 0;
 
 		virtual void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller) = 0;
+
+		virtual void setDebugListener(IAudioDebugDataListener* listener) {}
 	};
 }

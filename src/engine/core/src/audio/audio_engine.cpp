@@ -437,3 +437,26 @@ float AudioEngine::getCompositeBusGain(uint8_t id) const
 	}
 	return buses.at(id).compositeGain;
 }
+
+void AudioEngine::setGenerateDebugData(bool enabled)
+{
+	debugDataEnabled = enabled;
+}
+
+std::optional<AudioDebugData> AudioEngine::getDebugData() const
+{
+	if (debugDataEnabled) {
+		return generateDebugData();
+	} else {
+		return std::nullopt;
+	}
+}
+
+AudioDebugData AudioEngine::generateDebugData() const
+{
+	AudioDebugData result;
+
+	// TODO
+
+	return result;
+}

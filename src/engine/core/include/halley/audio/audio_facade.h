@@ -69,6 +69,8 @@ namespace Halley {
 
 		void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller) override;
 
+		void setDebugListener(IAudioDebugDataListener* listener) override;
+
 	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;
@@ -95,6 +97,9 @@ namespace Halley {
 		bool ownAudioThread;
 
 		AudioEmitterId curEmitterId;
+
+		RingBuffer<AudioDebugData> audioDebugData;
+		IAudioDebugDataListener* debugListener = nullptr;
 
 		AudioHandle doPostEvent(const AudioEvent& event, AudioEmitterId emitterId);
 		AudioHandle doPostEvent(const String& name, AudioEmitterId emitterId);
