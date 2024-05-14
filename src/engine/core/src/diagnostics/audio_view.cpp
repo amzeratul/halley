@@ -51,7 +51,7 @@ void AudioView::paint(Painter& painter)
 
 	{
 		std::unique_lock<std::mutex> lock(mutex);
-		curData = std::move(lastData);
+		curData = lastData;
 	}
 
 	const auto rect = Rect4f(painter.getViewPort());
