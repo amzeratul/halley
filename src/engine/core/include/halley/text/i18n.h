@@ -41,6 +41,7 @@ namespace Halley {
 		LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
 		std::pair<LocalisedString, Vector<ColourOverride>> replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const;
 		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
+		LocalisedString replaceToken(const String& pattern, const LocalisedString& token);
 
 		const String& getString() const;
 		const String& toString() const;

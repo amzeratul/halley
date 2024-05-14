@@ -363,6 +363,11 @@ LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedS
 	return LocalisedString(curString);
 }
 
+LocalisedString LocalisedString::replaceToken(const String& pattern, const LocalisedString& token)
+{
+	return fromUserString(string.replaceAll(pattern, token.getString()));
+}
+
 const String& LocalisedString::getString() const
 {
 	return string;
