@@ -99,7 +99,7 @@ void AudioView::paint(Painter& painter)
 			}
 			str.append(k, keyCol);
 			str.append(": ", keyCol);
-			str.append(toString(v), valueCol);
+			str.append(toString(v, 2), valueCol);
 		}
 
 		for (auto& voiceData: emitterData.voices) {
