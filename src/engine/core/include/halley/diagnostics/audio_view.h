@@ -25,6 +25,9 @@ namespace Halley
 		bool listenerRegistered = false;
 		bool populatedObjectNames = false;
 		AudioDebugData lastData;
+		AudioDebugData curData;
+
+		std::mutex mutex;
 
 		mutable HashMap<AudioEmitterId, String> emitterNames;
 		mutable HashMap<AudioObjectId, String> objectNames;

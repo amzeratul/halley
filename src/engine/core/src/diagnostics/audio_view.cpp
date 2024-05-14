@@ -49,6 +49,11 @@ void AudioView::paint(Painter& painter)
 		return;
 	}
 
+	{
+		std::unique_lock<std::mutex> lock(mutex);
+		curData = std::move(lastData);
+	}
+
 	const auto rect = Rect4f(painter.getViewPort());
 	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
 
@@ -57,12 +62,12 @@ void AudioView::paint(Painter& painter)
 	Colour4f keyCol(0.75f, 0.75f, 0.75f);
 	Colour4f valueCol(0.5f, 0.5f, 0.5f);
 
-	std::sort(lastData.emitters.begin(), lastData.emitters.end(), [=] (const auto& a, const auto& b)
+	std::sort(curData.emitters.begin(), curData.emitters.end(), [=] (const auto& a, const auto& b)
 	{
 		return a.emitterId < b.emitterId;
 	});
 
-	for (auto& emitterData: lastData.emitters) {
+	for (auto& emitterData: curData.emitters) {
 		if (emitterData.voices.empty()) {
 			continue;
 		}
@@ -119,7 +124,8 @@ void AudioView::paint(Painter& painter)
 
 void AudioView::onAudioDebugData(AudioDebugData data)
 {
-	lastData = data;
+	std::unique_lock<std::mutex> lock(mutex);
+	lastData = std::move(data);
 }
 
 String AudioView::getName(AudioEmitterId emitterId) const
