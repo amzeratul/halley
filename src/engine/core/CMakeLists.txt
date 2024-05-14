@@ -143,6 +143,7 @@ set(SOURCES
         "src/entity/services/scripting_service.cpp"
         "src/entity/services/session_service.cpp"
 
+        "src/diagnostics/audio_view.cpp"
         "src/diagnostics/frame_debugger.cpp"
         "src/diagnostics/performance_stats.cpp"
         "src/diagnostics/stats_view.cpp"
@@ -580,6 +581,7 @@ set(HEADERS
         "include/halley/entity/services/scripting_service.h"
         "include/halley/entity/services/session_service.h"
 
+        "include/halley/diagnostics/audio_view.h"
         "include/halley/diagnostics/frame_debugger.h"
         "include/halley/diagnostics/performance_stats.h"
         "include/halley/diagnostics/stats_view.h"
