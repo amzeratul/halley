@@ -40,6 +40,7 @@ public:
 				}
 			}
 			e.scriptable.activeStates.clear();
+			e.scriptable.scriptsStarted.clear();
 		}
 	}
 
