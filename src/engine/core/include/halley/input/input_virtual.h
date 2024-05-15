@@ -127,7 +127,7 @@ namespace Halley {
 		};
 		Vector<ExclusiveButtonInfo> getExclusiveButtonLabels(InputDevice* preferredDevice);
 
-		std::pair<InputDevice*, int> getPhysicalButton(ConvertibleTo<int> button) const;
+		std::pair<InputDevice*, int> getPhysicalButton(ConvertibleTo<int> button, InputDevice* preferredDevice) const;
 
 		void clearPresses() override;
 

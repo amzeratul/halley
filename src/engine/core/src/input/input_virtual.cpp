@@ -760,9 +760,11 @@ Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels
 	return result;
 }
 
-std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(ConvertibleTo<int> button) const
+std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(ConvertibleTo<int> button, InputDevice* device) const
 {
-	auto device = lastDevice.lock().get();
+	if (!device) {
+		device = lastDevice.lock().get();
+	}
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
 	{
