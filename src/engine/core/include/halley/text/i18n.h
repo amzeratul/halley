@@ -29,19 +29,19 @@ namespace Halley {
 		
 		LocalisedString& operator+=(const LocalisedString& str);
 
-		static LocalisedString fromHardcodedString(const char* str);
-		static LocalisedString fromHardcodedString(const String& str);
-		static LocalisedString fromUserString(const String& str);
-		static LocalisedString fromNumber(int number, int base = 10, int width = 1, char fill = '0');
+		[[nodiscard]] static LocalisedString fromHardcodedString(const char* str);
+		[[nodiscard]] static LocalisedString fromHardcodedString(const String& str);
+		[[nodiscard]] static LocalisedString fromUserString(const String& str);
+		[[nodiscard]] static LocalisedString fromNumber(int number, int base = 10, int width = 1, char fill = '0');
 
-		LocalisedString replaceTokens(const LocalisedString& tok0) const;
-		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
-		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
-		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const;
-		LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
-		std::pair<LocalisedString, Vector<ColourOverride>> replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const;
-		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
-		LocalisedString replaceToken(const String& pattern, const LocalisedString& token);
+		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0) const;
+		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
+		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
+		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const;
+		[[nodiscard]] LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
+		[[nodiscard]] std::pair<LocalisedString, Vector<ColourOverride>> replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const;
+		[[nodiscard]] LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
+		[[nodiscard]] LocalisedString replaceToken(const String& pattern, const LocalisedString& token);
 
 		const String& getString() const;
 		const String& toString() const;
