@@ -4,7 +4,6 @@
 #include "halley/maths/random.h"
 #include "halley/bytes/byte_serializer.h"
 #include <cstring> // needed for memset and memcmp
-
 #include "halley/data_structures/config_node.h"
 
 using namespace Halley;
@@ -170,4 +169,18 @@ void UUID::serialize(Serializer& s) const
 void UUID::deserialize(Deserializer& s)
 {
 	s >> getWriteableBytes();
+}
+
+ConfigNode ConfigNodeSerializer<UUID>::serialize(UUID id, const EntitySerializationContext& context)
+{
+	auto bytes = id.getBytes();
+	Bytes result;
+	result.resize(bytes.size());
+	memcpy(result.data(), bytes.data(), bytes.size());
+	return ConfigNode(result);
+}
+
+UUID ConfigNodeSerializer<UUID>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return UUID(node.asBytes());
 }

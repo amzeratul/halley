@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
 	class ConfigNode;
@@ -49,6 +50,13 @@ namespace Halley {
             std::array<uint8_t, 16> bytes;
         };
 	};
+
+    template <>
+    class ConfigNodeSerializer<UUID> {
+    public:
+        ConfigNode serialize(UUID id, const EntitySerializationContext& context);
+        UUID deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+    };
 }
 
 template<>
