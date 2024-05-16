@@ -259,6 +259,7 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 			entitiesToMove.push_back(e);
 			e->alive = false;
 			e->dirty = true;
+			other.uuidMap.erase(e->getInstanceUUID());
 		}
 	}
 
