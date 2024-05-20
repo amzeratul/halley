@@ -25,7 +25,7 @@ namespace Halley {
             return key;
         }
 
-        virtual void loadConfigs(const ConfigNode& nodes) = 0;
+        virtual void loadConfigs(const ConfigNode& nodes, bool enforceUnique) = 0;
         virtual size_t getMemoryUsage() const = 0;
 
     private:
@@ -108,19 +108,25 @@ namespace Halley {
             return entries;
         }
 
-        void loadConfigs(const ConfigNode& nodes)
+        void loadConfigs(const ConfigNode& nodes, bool enforceUnique) override
         {
             if (nodes.getType() == ConfigNodeType::Sequence) {
                 for (const auto& n : nodes.asSequence()) {
-                    loadConfig(n);
+                    loadConfig(n, enforceUnique);
                 }
             }
             keys.clear();
         }
 
-        void loadConfig(const ConfigNode& node)
+        void loadConfig(const ConfigNode& node, bool enforceUnique)
         {
-            entries[node["id"].asString()] = T(node);
+            auto id = node["id"].asString();
+            if (enforceUnique && entries.contains(id)) {
+	            Logger::logError("Duplicate config id \"" + id + "\" for type " + typeid(T).name());
+                return;
+            }
+
+            entries[std::move(id)] = T(node);
             keys.clear();
         }
 
@@ -146,7 +152,7 @@ namespace Halley {
 
         void load(Resources& resources, const String& prefix);
         void loadFile(const ConfigFile& configFile);
-        void loadConfig(const ConfigNode& node);
+        void loadConfig(const ConfigNode& node, bool enforceUnique);
         void update();
 
         template <typename T>

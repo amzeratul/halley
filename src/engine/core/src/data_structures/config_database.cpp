@@ -38,7 +38,7 @@ void ConfigDatabase::loadFile(const ConfigFile& configFile)
 	if (allowHotReload) {
 		observers[configFile.getAssetId()] = ConfigObserver(configFile);
 	}
-	loadConfig(configFile.getRoot());
+	loadConfig(configFile.getRoot(), true);
 }
 
 int ConfigDatabase::getVersion() const
@@ -62,7 +62,7 @@ void ConfigDatabase::generateMemoryReport()
 	}
 }
 
-void ConfigDatabase::loadConfig(const ConfigNode& node)
+void ConfigDatabase::loadConfig(const ConfigNode& node, bool enforceUnique)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		for (const auto& [k, v]: node.asMap()) {
@@ -72,7 +72,7 @@ void ConfigDatabase::loadConfig(const ConfigNode& node)
 
 			for (auto& db: dbs) {
 				if (db && db->getKey() == k) {
-					db->loadConfigs(v);
+					db->loadConfigs(v, enforceUnique);
 					break;
 				}
 			}
@@ -87,7 +87,7 @@ void ConfigDatabase::update()
 		if (o.needsUpdate()) {
 			changed = true;
 			o.update();
-			loadConfig(o.getRoot());
+			loadConfig(o.getRoot(), false);
 		}
 	}
 
