@@ -77,9 +77,9 @@ private:
 		const auto area = ps.getSpawnArea();
 		const auto pos = e.transform2D.getGlobalPosition();
 		if (ps.getSpawnAreaShape() == ParticleSpawnAreaShape::Rectangle) {
-			getDevService().addDebugLine(Polygon::makePolygon(pos - area / 2, area.x, area.y).getVertices(), Colour4f(0.8f, 1.0f, 1.0f), 1.0f, true);
+			getDebugDrawService().addDebugLine(Polygon::makePolygon(pos - area / 2, area.x, area.y).getVertices(), Colour4f(0.8f, 1.0f, 1.0f), 1.0f, true);
 		} else {
-			getDevService().addDebugEllipse(pos, area * 0.5f, Colour4f(0.8f, 1.0f, 1.0f), 1.0f);
+			getDebugDrawService().addDebugEllipse(pos, area * 0.5f, Colour4f(0.8f, 1.0f, 1.0f), 1.0f);
 		}
 	}
 

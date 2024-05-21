@@ -1,10 +1,11 @@
-// Halley codegen version 127
+// Halley codegen version 128
 #pragma once
 
 #include <halley.hpp>
 
 #include "halley/entity/services/screen_service.h"
 #include "halley/entity/services/dev_service.h"
+#include "halley/entity/services/debug_draw_service.h"
 
 #include "components/particles_component.h"
 #include "halley/entity/components/transform_2d_component.h"
@@ -45,6 +46,10 @@ protected:
 		return *devService;
 	}
 
+	DebugDrawService& getDebugDrawService() const {
+		return *debugDrawService;
+	}
+
 	ScreenService& getScreenService() const {
 		return *screenService;
 	}
@@ -54,9 +59,11 @@ private:
 	friend Halley::System* halleyCreateParticleSystem();
 
 	DevService* devService{ nullptr };
+	DebugDrawService* debugDrawService{ nullptr };
 	ScreenService* screenService{ nullptr };
 	void initBase() override final {
 		devService = &doGetWorld().template getService<DevService>(getName());
+		debugDrawService = &doGetWorld().template getService<DebugDrawService>(getName());
 		screenService = &doGetWorld().template getService<ScreenService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, ParticleFamily>(particleFamily, static_cast<T*>(this));

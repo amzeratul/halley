@@ -168,6 +168,7 @@ system:
   - world
   services:
   - DevService
+  - DebugDrawService
   - ScreenService
   messages:
   - StopParticles: receive particle

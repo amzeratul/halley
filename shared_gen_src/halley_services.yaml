@@ -22,4 +22,10 @@ type:
   name: DevService
   include: "halley/entity/services/dev_service.h"
 
+---
+
+type:
+  name: DebugDrawService
+  include: "halley/entity/services/debug_draw_service.h"
+
 ...

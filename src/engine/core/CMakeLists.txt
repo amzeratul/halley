@@ -138,6 +138,7 @@ set(SOURCES
 
         "src/entity/components/transform_2d_component.cpp"
 
+        "src/entity/services/debug_draw_service.cpp"
         "src/entity/services/dev_service.cpp"
         "src/entity/services/screen_service.cpp"
         "src/entity/services/scripting_service.cpp"
@@ -576,6 +577,7 @@ set(HEADERS
 
         "include/halley/entity/components/transform_2d_component.h"
 
+        "include/halley/entity/services/debug_draw_service.h"
         "include/halley/entity/services/dev_service.h"
         "include/halley/entity/services/screen_service.h"
         "include/halley/entity/services/scripting_service.h"
