@@ -9,6 +9,7 @@
 #include "halley/graphics/camera.h"
 
 namespace Halley {
+	class UIDebugConsoleController;
 	class UIDebugConsoleCommands;
 	class Polygon;
 	struct DebugLine;
@@ -21,6 +22,7 @@ namespace Halley {
 	class DevService : public Service {
 	public:
 		DevService(bool editorMode = true, bool devMode = true, std::shared_ptr<Options> options = {});
+		~DevService();
 
 		bool isDevMode() const;
 		bool isEditorMode() const;
@@ -28,7 +30,7 @@ namespace Halley {
 		void setTime(Time time);
 		Time getTime() const;
 
-		void setCommands(std::shared_ptr<UIDebugConsoleCommands> commands);
+		void setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> controller);
 		UIDebugConsoleCommands& getConsoleCommands();
 
 		void setEditorTool(String tool);
@@ -79,6 +81,7 @@ namespace Halley {
 		bool devMode = false;
 		Time time = 0;
 
+		std::shared_ptr<UIDebugConsoleController> consoleController;
 		std::shared_ptr<UIDebugConsoleCommands> commands;
 
 		String editorTool;

@@ -19,6 +19,13 @@ DevService::DevService(bool editorMode, bool devMode, std::shared_ptr<Options> o
 	commands = std::make_shared<UIDebugConsoleCommands>();
 }
 
+DevService::~DevService()
+{
+	if (consoleController) {
+		consoleController->removeCommands(*commands);
+	}
+}
+
 bool DevService::isDevMode() const
 {
 	return devMode;
@@ -27,11 +34,6 @@ bool DevService::isDevMode() const
 bool DevService::isEditorMode() const
 {
 	return editorMode;
-}
-
-void DevService::setCommands(std::shared_ptr<UIDebugConsoleCommands> commands)
-{
-	this->commands = std::move(commands);
 }
 
 UIDebugConsoleCommands& DevService::getConsoleCommands()
@@ -47,6 +49,15 @@ void DevService::setTime(Time t)
 Time DevService::getTime() const
 {
 	return time;
+}
+
+void DevService::setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> controller)
+{
+	if (consoleController) {
+		consoleController->removeCommands(*commands);
+	}
+	consoleController = controller;
+	consoleController->addCommands(*commands);
 }
 
 void DevService::setEditorTool(String tool)
