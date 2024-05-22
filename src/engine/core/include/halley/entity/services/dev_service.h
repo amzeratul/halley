@@ -22,7 +22,7 @@ namespace Halley {
 	class DevService : public Service {
 	public:
 		DevService(bool editorMode = true, bool devMode = true, std::shared_ptr<Options> options = {});
-		~DevService();
+		~DevService() override;
 
 		bool isDevMode() const;
 		bool isEditorMode() const;
@@ -74,6 +74,8 @@ namespace Halley {
 		void setIsScene(bool isScene);
 		bool isScene() const;
 
+		void setActive(bool active);
+
 	private:
 		std::shared_ptr<Options> options;
 		bool editorMode = false;
@@ -83,6 +85,7 @@ namespace Halley {
 
 		std::shared_ptr<UIDebugConsoleController> consoleController;
 		std::shared_ptr<UIDebugConsoleCommands> commands;
+		bool commandsBound = false;
 
 		String editorTool;
 		const Vector<EntityRef>* entitiesUnderCursor = nullptr;
@@ -105,6 +108,8 @@ namespace Halley {
 
 		Camera devCamera;
 		Camera devUICamera;
+
+		void setCommandsBound(bool bound);
 	};
 }
 

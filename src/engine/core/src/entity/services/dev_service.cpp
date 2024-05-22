@@ -21,9 +21,7 @@ DevService::DevService(bool editorMode, bool devMode, std::shared_ptr<Options> o
 
 DevService::~DevService()
 {
-	if (consoleController) {
-		consoleController->removeCommands(*commands);
-	}
+	setCommandsBound(false);
 }
 
 bool DevService::isDevMode() const
@@ -53,11 +51,9 @@ Time DevService::getTime() const
 
 void DevService::setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> controller)
 {
-	if (consoleController) {
-		consoleController->removeCommands(*commands);
-	}
-	consoleController = controller;
-	consoleController->addCommands(*commands);
+	setCommandsBound(false);
+	consoleController = std::move(controller);
+	setCommandsBound(true);
 }
 
 void DevService::setEditorTool(String tool)
@@ -215,6 +211,28 @@ void DevService::setIsScene(bool isScene)
 bool DevService::isScene() const
 {
 	return sceneMode;
+}
+
+void DevService::setActive(bool active)
+{
+	setCommandsBound(active);
+}
+
+void DevService::setCommandsBound(bool bound)
+{
+	if (consoleController && commands) {
+		if (bound != commandsBound) {
+			commandsBound = bound;
+
+			if (bound) {
+				consoleController->addCommands(*commands);
+			} else {
+				consoleController->removeCommands(*commands);
+			}
+		}
+	} else {
+		commandsBound = false;
+	}
 }
 
 void DevService::setEntitiesUnderCursor(const Vector<EntityRef>& entities)

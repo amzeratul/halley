@@ -291,6 +291,16 @@ void World::moveEntitiesFrom(World& other, std::optional<WorldPartitionId> world
 	spawnPending();
 }
 
+bool World::tryDestroyEntity(EntityId id)
+{
+	auto e = tryGetEntity(id);
+	if (e.isValid() && e.isAlive()) {
+		destroyEntity(e);
+		return true;
+	}
+	return false;
+}
+
 void World::destroyEntity(EntityId id)
 {
 	doDestroyEntity(id);

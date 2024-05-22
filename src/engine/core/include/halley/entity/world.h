@@ -101,6 +101,7 @@ namespace Halley {
 
 		void moveEntitiesFrom(World& other, std::optional<WorldPartitionId> worldPartition);
 
+		bool tryDestroyEntity(EntityId id);
 		void destroyEntity(EntityId id);
 		void destroyEntity(EntityRef entity);
 
