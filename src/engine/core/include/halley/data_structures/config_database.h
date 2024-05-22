@@ -122,7 +122,11 @@ namespace Halley {
         {
             auto id = node["id"].asString();
             if (enforceUnique && entries.contains(id)) {
-	            Logger::logError("Duplicate " + String(typeid(T).name()) + " id \"" + id + "\"");
+                auto typeName = String(typeid(T).name());
+                if (typeName.startsWith("class ")) {
+	                typeName = typeName.mid(6);
+                }
+	            Logger::logError("Duplicate " + typeName + " id \"" + id + "\"");
                 return;
             }
 
