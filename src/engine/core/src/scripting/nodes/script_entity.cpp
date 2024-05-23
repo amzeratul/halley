@@ -262,7 +262,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
 
@@ -321,7 +321,7 @@ EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, co
 		return {};
 	}
 
-	const auto entityRef = environment.tryGetEntity({});
+	const auto entityRef = environment.tryGetEntity(readEntityId(environment, node, 3));
 	const auto& references = entityRef.getComponent<ScriptableComponent>().entityReferences;
 	const auto find = references.find(key);
 	if (find == references.end()) {
