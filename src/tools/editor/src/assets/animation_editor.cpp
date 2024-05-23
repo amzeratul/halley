@@ -211,10 +211,14 @@ void AnimationEditor::loadAssetData()
 
 	if (animation) {
 		auto sequenceList = getWidgetAs<UIDropdown>("sequence");
+		auto prevSeq = sequenceList->getSelectedOptionId();
 		sequenceList->setOptions(animation->getSequenceNames());
+		sequenceList->setSelectedOption(prevSeq);
 
 		auto directionList = getWidgetAs<UIDropdown>("direction");
+		auto prevDir = directionList->getSelectedOptionId();
 		directionList->setOptions(animation->getDirectionNames());
+		directionList->setSelectedOption(prevDir);
 	} else {
 		getWidget("animControls")->setActive(false);
 	}
@@ -268,7 +272,10 @@ void AnimationEditorDisplay::setZoom(float z)
 void AnimationEditorDisplay::setAnimation(std::shared_ptr<const Animation> a)
 {
 	animation = std::move(a);
-	animationPlayer.setAnimation(animation);
+	auto curFrame = animationPlayer.getCurrentSequenceFrame();
+	auto curFrameTime = animationPlayer.getCurrentSequenceFrameTime();
+	animationPlayer.setAnimation(animation, animationPlayer.getCurrentSequenceName(), animationPlayer.getCurrentDirectionName());
+	animationPlayer.setTiming(curFrame, curFrameTime);
 	origBounds = animation->getBounds();
 	origPivot = animation->getPivot();
 	updateBounds();
