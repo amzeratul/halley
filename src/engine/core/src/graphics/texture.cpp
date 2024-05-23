@@ -101,6 +101,13 @@ size_t Texture::getVRamUsage() const
 	return 0;
 }
 
+void Texture::moveFrom(Texture& other)
+{
+	size = other.size;
+	descriptor = std::move(other.descriptor);
+	mask = std::move(other.mask);
+}
+
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	const auto& meta = loader.getMeta();

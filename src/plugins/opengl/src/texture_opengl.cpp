@@ -33,10 +33,10 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 {
 	other.waitForOpenGLLoad();
 
-	size = other.size;
+	moveFrom(other);
+
 	textureId = other.textureId;
 	texSize = other.texSize;
-	descriptor = std::move(other.descriptor);
 
 	other.textureId = 0;
 	other.texSize = {};

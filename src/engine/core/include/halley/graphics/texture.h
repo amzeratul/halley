@@ -56,5 +56,7 @@ namespace Halley
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
 		virtual void doCopyToImage(Painter& painter, Image& image) const;
 		virtual size_t getVRamUsage() const;
+
+		void moveFrom(Texture& other);
 	};
 }

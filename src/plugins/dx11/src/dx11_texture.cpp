@@ -40,13 +40,13 @@ DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 {
 	other.waitForLoad(true);
 
+	moveFrom(other);
+
 	texture = other.texture;
 	srv = other.srv;
 	srvAlt = other.srvAlt;
 	samplerState = other.samplerState;
 	format = other.format;
-	size = other.size;
-	descriptor = std::move(other.descriptor);
 
 	other.texture = nullptr;
 	other.srv = nullptr;
