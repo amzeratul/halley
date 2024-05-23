@@ -115,6 +115,8 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 			systemHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
 		} else if (e.type == ProfilerEventType::ScriptUpdate) {
 			scriptHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
+		} else if (e.type == ProfilerEventType::WorldSystemMessages) {
+			systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime).count());
 		}
 	}
 	std_ex::erase_if_value(systemHistory, [&](const auto& e) { return !e.isVisited(); });

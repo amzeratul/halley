@@ -31,6 +31,7 @@ namespace Halley {
 		WorldRender,
 		WorldSystemUpdate,
 		WorldSystemRender,
+		WorldSystemMessages,
 
         ScriptUpdate,
 

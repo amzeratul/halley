@@ -163,6 +163,8 @@ void System::prepareSystemMessages()
 
 void System::processSystemMessages()
 {
+	ProfilerEvent event(ProfilerEventType::WorldSystemMessages, name);
+
 	for (auto& message: systemMessages) {
 		onSystemMessageReceived(*message);
 	}
