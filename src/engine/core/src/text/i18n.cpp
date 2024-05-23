@@ -352,7 +352,7 @@ std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceToken
 	return { LocalisedString(std::move(result.first)), std::move(result.second) };
 }
 
-LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens)
+LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens) const
 {
 	auto curString = string;
 	int idx = 0;
@@ -363,7 +363,7 @@ LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedS
 	return LocalisedString(curString);
 }
 
-LocalisedString LocalisedString::replaceToken(const String& pattern, const LocalisedString& token)
+LocalisedString LocalisedString::replaceToken(const String& pattern, const LocalisedString& token) const
 {
 	return fromUserString(string.replaceAll(pattern, token.getString()));
 }
