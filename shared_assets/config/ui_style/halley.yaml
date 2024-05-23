@@ -351,7 +351,11 @@ uiStyle:
     fullBar: { img: halley_ui/slider_bar_full.png, colour: $ui_controlNormal }
     left: { img: halley_ui/slider_bar_left.png, colour: $ui_controlNormal }
     right: { img: halley_ui/slider_bar_right.png, colour: $ui_controlDisabled }
-    thumb: { img: halley_ui/slider_thumb.png, colour: $ui_controlHover }
+    thumb: 
+      normal: { img: halley_ui/slider_thumb.png, colour: $ui_controlHover }
+      down: { img: halley_ui/slider_thumb.png, colour: $ui_controlHover }
+      hover: { img: halley_ui/slider_thumb.png, colour: $ui_controlHover }
+      disabled: { img: halley_ui/slider_thumb.png, colour: $ui_controlHover }
     labelBorder: { img: whitebox.png, colour: "#00000000" }
     innerBorder: [3, 0, 2, 0]
     barBorder: [0, 1, 6, 1]

@@ -66,6 +66,7 @@ namespace Halley {
 	    void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
+		void onMouseLeft(Vector2f mousePos) override;
 		Rect4f getMouseRect() const override;
 		LocalisedString getToolTip() const override;
 
@@ -76,7 +77,11 @@ namespace Halley {
 	private:
 		UISlider& parent;
 		bool held = false;
+		bool over = false;
 		Vector4f extra;
+
+		bool dirtyThumb = true;
+		UIStyle thumbStyle;
 
 		Sprite bar;
 		Sprite barFull;
@@ -84,6 +89,7 @@ namespace Halley {
 		Sprite left;
 		Sprite right;
 
+		void updateThumbState();
 		void fill(UIPainter& painter, Rect4f rect, Sprite sprite) const;
 	};
 }

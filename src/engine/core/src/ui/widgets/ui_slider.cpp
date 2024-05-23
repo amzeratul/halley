@@ -212,9 +212,11 @@ UISliderBar::UISliderBar(UISlider& parent, UIStyle style)
 	: UIWidget("")
 	, parent(parent)
 {
+	thumbStyle = style.getSubStyle("thumb");
+
 	bar = style.getSprite("emptyBar");
 	barFull = style.getSprite("fullBar");
-	thumb = style.getSprite("thumb");
+	thumb = thumbStyle.getSprite("normal");
 	left = style.getSprite("left");
 	right = style.getSprite("right");
 	extra = style.getBorder("extraMouseBorder");
@@ -237,6 +239,8 @@ void UISliderBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		held = true;
 		auto relative = (mousePos - getPosition()) / getSize();
 		parent.setRelativeValue(relative.x);
+
+		dirtyThumb = true;
 	}
 }
 
@@ -244,6 +248,8 @@ void UISliderBar::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0 && isEnabled()) {
 		held = false;
+
+		dirtyThumb = true;
 	}
 }
 
@@ -253,6 +259,15 @@ void UISliderBar::onMouseOver(Vector2f mousePos)
 		auto relative = (mousePos - getPosition()) / getSize();
 		parent.setRelativeValue(relative.x);
 	}
+
+	over = true;
+	dirtyThumb = true;
+}
+
+void UISliderBar::onMouseLeft(Vector2f mousePos)
+{
+	over = false;
+	dirtyThumb = true;
 }
 
 Rect4f UISliderBar::getMouseRect() const
@@ -270,7 +285,7 @@ void UISliderBar::draw(UIPainter& painter) const
 	painter.draw(left);
 	painter.draw(right);
 	fill(painter, Rect4f(getPosition(), getPosition() + getSize()), bar);
-	fill(painter, Rect4f(getPosition(), getPosition() + getSize() * Vector2f(parent.getRelativeValue(!held), 1.0f)), barFull);
+	fill(painter, Rect4f(getPosition(), getPosition() + getSize() * Vector2f(parent.getRelativeValue(true), 1.0f)), barFull);
 	painter.draw(thumb);
 }
 
@@ -282,6 +297,10 @@ void UISliderBar::update(Time t, bool moved)
 	left.setPos(getPosition() + Vector2f(-left.getUncroppedSize().x, 0));
 	thumb.setPos(Vector2f(thumbX, 0) + getPosition());
 	right.setPos(getPosition() + Vector2f(getSize().x, 0));
+
+	if (dirtyThumb) {
+		updateThumbState();
+	}
 }
 
 void UISliderBar::fill(UIPainter& painter, Rect4f rect, Sprite sprite) const
@@ -293,4 +312,19 @@ void UISliderBar::fill(UIPainter& painter, Rect4f rect, Sprite sprite) const
 		sprite.setPos(getPosition() + Vector2f(i * spriteSize.x, 0));
 		p2.draw(sprite, true);
 	}
+}
+
+void UISliderBar::updateThumbState()
+{
+	if (!isEnabled()) {
+		thumb = thumbStyle.getSprite("disabled");
+	} else if (held) {
+		thumb = thumbStyle.getSprite("down");
+	} else if(over) {
+		thumb = thumbStyle.getSprite("hover");
+	} else {
+		thumb = thumbStyle.getSprite("normal");
+	}
+
+	dirtyThumb = false;
 }
