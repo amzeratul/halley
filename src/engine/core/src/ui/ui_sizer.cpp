@@ -320,6 +320,7 @@ void UISizer::setColumnProportions(const Vector<float>& values)
 {
 	if (gridProportions) {
 		gridProportions->columnProportions = values;
+		gridProportions->columnProportions.resize(gridProportions->nColumns, 0);
 	}
 }
 

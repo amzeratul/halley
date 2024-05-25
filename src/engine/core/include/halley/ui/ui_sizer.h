@@ -9,7 +9,6 @@ namespace Halley {
 	class UISizer;
 
 	enum class UISizerType {
-		Undefined,
 		Horizontal,
 		Vertical,
 		Grid,
@@ -18,9 +17,8 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<UISizerType> {
-		constexpr std::array<const char*, 5> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return {{
-				"undefined",
 				"horizontal",
 				"vertical",
 				"grid",
@@ -158,7 +156,7 @@ namespace Halley {
 		Vector<UISizerEntry> entries;
 		std::unique_ptr<GridProportions> gridProportions;
 
-		UISizerType type = UISizerType::Undefined;
+		UISizerType type = UISizerType::Horizontal;
 		float gap = 1.0f;
 
 		UIParent* curParent = nullptr;

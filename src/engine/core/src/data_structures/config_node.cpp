@@ -1545,87 +1545,87 @@ String ConfigNode::backTrackFullNodeName() const
 
 int ConfigNode::convertTo(Tag<int> tag) const
 {
-	return asInt();
+	return asInt(0);
 }
 
 int64_t ConfigNode::convertTo(Tag<int64_t> tag) const
 {
-	return asInt64();
+	return asInt64(0);
 }
 
 EntityIdHolder ConfigNode::convertTo(Tag<EntityIdHolder> tag) const
 {
-	return asEntityId();
+	return asEntityId({});
 }
 
 float ConfigNode::convertTo(Tag<float> tag) const
 {
-	return asFloat();
+	return asFloat(0);
 }
 
 bool ConfigNode::convertTo(Tag<bool> tag) const
 {
-	return asBool();
+	return asBool(false);
 }
 
 uint8_t ConfigNode::convertTo(Tag<uint8_t> tag) const
 {
-	return asInt();
+	return asInt(0);
 }
 
 uint16_t ConfigNode::convertTo(Tag<uint16_t> tag) const
 {
-	return asInt();
+	return asInt(0);
 }
 
 uint32_t ConfigNode::convertTo(Tag<uint32_t> tag) const
 {
-	return asInt();
+	return asInt(0);
 }
 
 uint64_t ConfigNode::convertTo(Tag<uint64_t> tag) const
 {
-	return asInt64();
+	return asInt64(0);
 }
 
 Vector2i ConfigNode::convertTo(Tag<Vector2i> tag) const
 {
-	return asVector2i();
+	return asVector2i({});
 }
 
 Vector2f ConfigNode::convertTo(Tag<Vector2f> tag) const
 {
-	return asVector2f();
+	return asVector2f({});
 }
 
 Vector3i ConfigNode::convertTo(Tag<Vector3i> tag) const
 {
-	return asVector3i();
+	return asVector3i({});
 }
 
 Vector3f ConfigNode::convertTo(Tag<Vector3f> tag) const
 {
-	return asVector3f();
+	return asVector3f({});
 }
 
 Vector4i ConfigNode::convertTo(Tag<Vector4i> tag) const
 {
-	return asVector4i();
+	return asVector4i({});
 }
 
 Vector4f ConfigNode::convertTo(Tag<Vector4f> tag) const
 {
-	return asVector4f();
+	return asVector4f({});
 }
 
 Range<float> ConfigNode::convertTo(Tag<Range<float>> tag) const
 {
-	return asFloatRange();
+	return asFloatRange({});
 }
 
 String ConfigNode::convertTo(Tag<String> tag) const
 {
-	return asString();
+	return asString({});
 }
 
 const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
