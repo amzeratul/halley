@@ -28,7 +28,7 @@ void I18N::loadStrings(Resources& resources)
 {
 	for (auto& assetName : resources.enumerate<ConfigFile>()) {
 		if (assetName.startsWith("strings/")) {
-			resources.of<ConfigFile>().unload(assetName);
+			//resources.of<ConfigFile>().unload(assetName);
 			loadLocalisationFile(*resources.get<ConfigFile>(assetName));
 		}
 	}

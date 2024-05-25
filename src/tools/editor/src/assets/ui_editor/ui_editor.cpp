@@ -34,6 +34,10 @@ void UIEditor::update(Time time, bool moved)
 {
 	AssetEditor::update(time, moved);
 
+	if (gameI18N) {
+		gameI18N->update();
+	}
+
 	if (resource) {
 		getWidget("saveButton")->setEnabled(isModified());
 		getWidget("undoButton")->setEnabled(undoStack.canUndo());

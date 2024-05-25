@@ -12,10 +12,6 @@ public:
 	bool storeFilePosition = false;
 };
 
-ConfigFile::ConfigFile()
-{
-}
-
 ConfigFile::ConfigFile(const ConfigFile& other)
 {
 	root = ConfigNode(other.root);
@@ -141,6 +137,7 @@ ConfigObserver::ConfigObserver(const ConfigFile& file)
 	: file(&file)
 	, node(&file.getRoot())
 {
+	assert(node->getType() != ConfigNodeType::Undefined);
 }
 
 const ConfigNode& ConfigObserver::getRoot() const
@@ -159,6 +156,7 @@ void ConfigObserver::update()
 	if (file) {
 		assetVersion = file->getAssetVersion();
 		node = &file->getRoot();
+		assert(node->getType() == ConfigNodeType::Map);
 	}
 }
 

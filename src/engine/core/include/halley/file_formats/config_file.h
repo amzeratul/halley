@@ -11,12 +11,11 @@ namespace Halley
 	class ConfigFile : public Resource
 	{
 	public:
-		ConfigFile();
+		ConfigFile() = default;
 		explicit ConfigFile(const ConfigFile& other);
 		explicit ConfigFile(ConfigNode root);
 		ConfigFile(ConfigFile&& other) noexcept;
 
-		ConfigFile& operator=(const ConfigFile& other);
 		ConfigFile& operator=(ConfigFile&& other) noexcept;
 
 		ConfigNode& getRoot();
