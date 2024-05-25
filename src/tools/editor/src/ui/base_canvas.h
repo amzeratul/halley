@@ -55,7 +55,6 @@ namespace Halley {
 
     	Vector2f mouseStartPos;
 		Vector2f startScrollPos;
-		Vector2f lastMousePos;
 		int zoomExp = 0;
     	bool zoomEnabled = true;
 		bool scrollEnabled = true;

@@ -156,7 +156,6 @@ void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
 
 void BaseCanvas::onMouseOver(Vector2f mousePos, KeyMods keyMods)
 {
-	lastMousePos = mousePos;
 	if (dragging) {
 		setScrollPosition(mouseStartPos - mousePos + startScrollPos);
 	}
@@ -212,7 +211,7 @@ void BaseCanvas::onMouseWheel(const UIEvent& event)
 		mouseMirror->sendEventDown(event);
 	}
 
-	changeZoom(signOf(event.getIntData()), lastMousePos);
+	changeZoom(signOf(event.getIntData()), getRoot()->getLastMousePos());
 }
 
 void BaseCanvas::changeZoom(int amount, std::optional<Vector2f> anchor)
