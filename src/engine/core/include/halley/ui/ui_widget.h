@@ -99,6 +99,7 @@ namespace Halley {
 		void setInnerBorder(Vector4f border);
 
 		void setMouseOver(bool mouseOver);
+		virtual std::optional<std::shared_ptr<UIWidget>> prePressMouse(Vector2f mousePos, int button, KeyMods keyMods);
 		virtual void pressMouse(Vector2f mousePos, int button, KeyMods keyMods);
 		virtual void releaseMouse(Vector2f mousePos, int button);
 		virtual void onMouseOver(Vector2f mousePos);

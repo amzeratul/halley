@@ -435,6 +435,11 @@ void UIWidget::setMouseOver(bool mo)
 	mouseOver = mo;
 }
 
+std::optional<std::shared_ptr<UIWidget>> UIWidget::prePressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	return {};
+}
+
 void UIWidget::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 }

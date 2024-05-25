@@ -2,6 +2,8 @@
 
 #include <halley.hpp>
 
+#include "src/ui/base_canvas.h"
+
 namespace Halley {
 	class UIEditor;
 
@@ -25,7 +27,9 @@ namespace Halley {
 		void setZoom(float zoom);
 		bool ignoreClip() const override;
 		Rect4f getCurWidgetRect() const;
-		
+
+		void setCanvas(std::shared_ptr<BaseCanvas> canvas);
+
 	private:
 		UIEditor* editor = nullptr;
 		std::map<UUID, std::shared_ptr<IUIElement>> elements;
@@ -44,11 +48,15 @@ namespace Halley {
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<UIWidget> lastWidgetUnderMouse;
 
+		std::shared_ptr<BaseCanvas> canvas;
+		bool processingMouse = false;
+
 		void updateCurWidget();
 		void doLayout();
 		void onOtherUIReloaded(UIWidget& ui) override;
 		void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget) override;
 
+		std::optional<std::shared_ptr<UIWidget>> prePressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		UUID getUUIDOfWidgetClicked(const UIWidget& widget) const;
 

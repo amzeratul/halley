@@ -82,6 +82,11 @@ Rect4f UIEditorDisplay::getCurWidgetRect() const
 	return curRect - getPosition();
 }
 
+void UIEditorDisplay::setCanvas(std::shared_ptr<BaseCanvas> canvas)
+{
+	this->canvas = std::move(canvas);
+}
+
 void UIEditorDisplay::update(Time time, bool moved)
 {
 	if (moved) {
@@ -173,6 +178,14 @@ void UIEditorDisplay::onOtherUIReloaded(UIWidget& ui)
 void UIEditorDisplay::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
 {
 	lastWidgetUnderMouse = widget;
+}
+
+std::optional<std::shared_ptr<UIWidget>> UIEditorDisplay::prePressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	if (button == 1 || (button == 0 && canvas->canLeftClickScroll())) {
+		return canvas;
+	}
+	return {};
 }
 
 void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)

@@ -70,14 +70,15 @@ void UIEditor::onMakeUI()
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setUIEditor(*this, projectWindow);
 	widgetEditor->setGameResources(gameResources);
-	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 
+	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
+	infiniCanvas->setLeftClickScrollKey(KeyCode::Space);
 	infiniCanvas->setZoomListener([=](float zoom)
 	{
 		display->setZoom(zoom);
 	});
-
-	infiniCanvas->setMouseMirror(display, true);
+	//infiniCanvas->setMouseMirror(display, true);
+	display->setCanvas(infiniCanvas);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{

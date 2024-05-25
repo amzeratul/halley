@@ -328,15 +328,18 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
 	const auto exclusive = mouseExclusive.lock();
 	const auto underMouseResult = getWidgetUnderMouse(mousePos);
-	const auto actuallyUnderMouse = underMouseResult.overrideWidget ? underMouseResult.overrideWidget : underMouseResult.widget;
+	auto actuallyUnderMouse = underMouseResult.overrideWidget ? underMouseResult.overrideWidget : underMouseResult.widget;
 	lastMousePos = mousePos;
 
 	// Check buttons
 	for (int i = 0; i < 3; ++i) {
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
-			
 			anyMouseButtonHeld = i;
+
+			if (actuallyUnderMouse) {
+				actuallyUnderMouse = actuallyUnderMouse->prePressMouse(mousePos, i, keyMods).value_or(actuallyUnderMouse);
+			}
 			mouseExclusive = actuallyUnderMouse;
 
 			if (actuallyUnderMouse) {

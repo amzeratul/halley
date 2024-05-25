@@ -30,16 +30,18 @@ namespace Halley {
 		std::optional<Vector2f> transformToChildSpace(Vector2f pos) const override;
 		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
+		bool canLeftClickScroll() const;
+
+    	void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+        void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
+		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
+
     protected:
 		void doSetState(State state) override;
 		void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
 		void drawAfterChildren(UIPainter& painter) const override;
-
-        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
-		void releaseMouse(Vector2f mousePos, int button) override;
-        void onMouseOver(Vector2f mousePos, KeyMods keyMods) override;
-		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
 
     	void onNewScrollPosition(Vector2f pos) const;
 		virtual float getBackgroundScrollSpeed() const;

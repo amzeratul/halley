@@ -111,10 +111,14 @@ void BaseCanvas::drawAfterChildren(UIPainter& painter) const
 	painter.draw(border);
 }
 
+bool BaseCanvas::canLeftClickScroll() const
+{
+	return leftClickScrollEnabled && (!leftClickScrollKey || keyboard && keyboard->isButtonDown(*leftClickScrollKey));
+}
+
 void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	const bool canLeftClickScroll = leftClickScrollEnabled && (!leftClickScrollKey || keyboard && keyboard->isButtonDown(*leftClickScrollKey));
-	if (button == 0 && canLeftClickScroll) {
+	if (button == 0 && canLeftClickScroll()) {
 		draggingButton[0] = true;
 	}
 	if (button == 1) {
@@ -126,6 +130,7 @@ void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		dragging = true;
 		mouseStartPos = mousePos;
 		startScrollPos = getScrollPosition();
+		focus();
 	}
 
 	UIClickable::pressMouse(mousePos, button, keyMods);
