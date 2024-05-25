@@ -1,68 +1,184 @@
-widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [400, 10] }
-sizer: { type: vertical }
+uuid: 6ebdb8df-4233-475c-b266-0e6bf8843fad
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_backgroundBox
+  image: halley_ui/ui_window.png
+  innerBorder: [4, 4, 4, 4]
+  size: [400, 10]
 children:
-- widget: { id: scrollBarPane, class: scrollBarPane }
-  sizer: { type: vertical, gap: 8 }
-  proportion: 1
-  border: [0, 0, 0, 0]
-  children:
-  - widget: { id: parentWidgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
+  - uuid: 7e2fbf49-a70a-422f-9cb8-3b615c7e8bd4
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 8
+      type: vertical
+    widget:
+      class: scrollBarPane
+      id: scrollBarPane
+      size: [0, 300]
+      style: scrollbarHalley
     children:
-    - widget: { class: label, id: parentClassLabel, text: Parent }
-      fill: centre
-    - widget: { id: parentWidgetContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: widgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    children:
-    - sizer: { type: horizontal }
-      fill: centre
-      children:
-      - widget: { id: classIcon, class: image }
-        border: [0, 0, 4, 0]
-        fill: centre
-      - widget: { id: classLabel, class: label, text: Widget }
-        fill: centre
-    - widget: { id: widgetContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: genericWidgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    children:
-    - widget: { class: label, text: Base Widget }
-      fill: centre
-    - widget: { id: genericWidgetContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: fillBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    children:
-    - widget: { class: label, text: Fill }
-      fill: centre
-    - widget: { id: fillContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: spacerBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    children:
-    - widget: { class: label, text: Spacer }
-      fill: centre
-    - widget: { id: spacerContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: sizerBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    children:
-    - widget: { class: label, text: Sizer }
-      fill: centre
-    - widget: { id: sizerContents, class: widget }
-      border: [ 4, 4, 4, 4 ]
-      sizer: { type: vertical }
-      children: []
+      - uuid: ea0f0402-63fa-4986-98b4-d5f1d8d8a24a
+        sizer:
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: parentWidgetBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 34578d0c-e0a5-490f-a554-7c422b9253b4
+            widget:
+              class: label
+              id: parentClassLabel
+              text: Parent
+            fill: centre
+          - uuid: 6472bbef-089b-4461-bf22-838aaa2d391b
+            border: [4, 4, 4, 4]
+            sizer:
+              type: vertical
+            widget:
+              class: widget
+              id: parentWidgetContents
+            children: []
+      - uuid: 2c749d0a-d0b2-45e2-9441-3bc9a163a295
+        sizer:
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: widgetBox
+          image: $ui_title_capsule
+        children:
+          - uuid: c33916bc-341b-450d-9641-10b6e20d327c
+            sizer:
+              type: horizontal
+            children:
+              - uuid: d63894eb-ffa6-43ca-98c4-6e4d499bce8e
+                border: [0, 0, 4, 0]
+                widget:
+                  class: image
+                  id: classIcon
+                fill: centre
+              - uuid: 768353a5-14b7-455c-8ff5-0bf9e9a2996a
+                widget:
+                  class: label
+                  id: classLabel
+                  text: Widget
+                fill: centre
+            fill: centre
+          - uuid: c20e2c21-8171-4146-b950-15ff3dde2e67
+            border: [4, 4, 4, 4]
+            sizer:
+              type: vertical
+            widget:
+              class: widget
+              id: widgetContents
+            children: []
+      - uuid: 63e3d0b7-20a0-4085-aa5f-08ae8176ec2e
+        sizer:
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: genericWidgetBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 880c9d41-1ffd-483b-9ac3-1c8486b635b2
+            widget:
+              class: label
+              text: Base Widget
+            fill: centre
+          - uuid: 0675b1b1-1b26-40a4-8f91-c22e9b6fefb5
+            border: [4, 4, 4, 4]
+            sizer:
+              type: vertical
+            widget:
+              class: widget
+              id: genericWidgetContents
+            children: []
+      - uuid: ab319286-7a39-4f98-8751-af9db9a101cf
+        sizer:
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: fillBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 822591cd-91c3-4b27-ae9f-25f2c253d6b8
+            widget:
+              class: label
+              text: Fill
+            fill: centre
+          - uuid: 65446367-4ccb-4818-bdd7-558c27ef3802
+            border: [4, 4, 4, 4]
+            sizer:
+              type: vertical
+            widget:
+              class: widget
+              id: fillContents
+            children: []
+      - uuid: 74276cde-c80e-4a59-bbdb-5616d94115b6
+        sizer:
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: spacerBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 72e706a8-9dc0-4c79-8024-66d3281e0af7
+            widget:
+              class: label
+              text: Spacer
+            fill: centre
+          - uuid: b2d81e87-b0c7-420f-9578-d10ca9375ab8
+            border: [4, 4, 4, 4]
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: widget
+              id: spacerContents
+            children: []
+      - uuid: 9770afca-ff86-4830-bf41-0967680266f0
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: sizerBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 6bc0ff3e-d195-495a-99f3-fc1f9d9db92c
+            widget:
+              class: label
+              text: Sizer
+            fill: centre
+          - uuid: 4a3416b9-e2b7-4259-af9b-57e447085a67
+            border: [4, 4, 4, 4]
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: widget
+              id: sizerContents
+            children: []
+          - uuid: fe46e222-43af-4a4b-b88d-8203ebfbe7d5
+            border: [5, 4, 5, 5]
+            widget:
+              class: button
+              id: removeSizer
+              text: Remove Sizer
+      - uuid: c266adb6-03b5-4805-b05d-80d46a4e2e44
+        border: [0, 0, 0, 0]
+        widget:
+          class: button
+          id: addSizer
+          text: Add Sizer

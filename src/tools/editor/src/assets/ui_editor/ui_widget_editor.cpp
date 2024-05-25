@@ -13,6 +13,36 @@ UIWidgetEditor::UIWidgetEditor(String id, UIFactory& factory)
 	factory.loadUI(*this, "halley/ui_widget_editor");
 }
 
+void UIWidgetEditor::onMakeUI()
+{
+	setHandle(UIEventType::ButtonClicked, "addSizer", [=] (const UIEvent& event)
+	{
+		auto sizerBox = getWidget("sizerBox");
+		auto addSizerButton = getWidget("addSizer");
+		auto removeSizerButton = getWidget("removeSizer");
+		sizerBox->setActive(true);
+		addSizerButton->setActive(false);
+		removeSizerButton->setEnabled(true);
+		populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
+
+		(*curNode)["sizer"] = ConfigNode::MapType();
+		onEntityUpdated(false);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removeSizer", [=] (const UIEvent& event)
+	{
+		auto sizerBox = getWidget("sizerBox");
+		auto addSizerButton = getWidget("addSizer");
+		auto removeSizerButton = getWidget("removeSizer");
+		sizerBox->setActive(false);
+		addSizerButton->setActive(true);
+		addSizerButton->setEnabled(true);
+
+		curNode->removeKey("sizer");
+		onEntityUpdated(false);
+	});
+}
+
 void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node, const ConfigNode* parent)
 {
 	curId = id;
@@ -58,6 +88,8 @@ void UIWidgetEditor::refresh()
 	auto fillBox = getWidget("fillBox");
 	auto sizerBox = getWidget("sizerBox");
 	auto spacerBox = getWidget("spacerBox");
+	auto addSizerButton = getWidget("addSizer");
+	auto removeSizerButton = getWidget("removeSizer");
 
 	parentWidgetBox->setActive(false);
 	widgetBox->setActive(false);
@@ -65,9 +97,12 @@ void UIWidgetEditor::refresh()
 	fillBox->setActive(false);
 	sizerBox->setActive(false);
 	spacerBox->setActive(false);
+	addSizerButton->setActive(false);
 	
 	if (curNode && entityFieldFactory) {
 		bool hasSizer = curNode->hasKey("sizer") || curNode->hasKey("children");
+		bool hasChildren = curNode->hasKey("children") && (*curNode)["children"].getType() == ConfigNodeType::Sequence && !(*curNode)["children"].asSequence().empty();
+		bool canHaveSizer = false;
 		const bool isSpacer = curNode->hasKey("spacer") || curNode->hasKey("stretchSpacer");
 
 		curNode->asMap().reserve(15); // Important: this prevents references being invalidated during a re-hash
@@ -77,13 +112,12 @@ void UIWidgetEditor::refresh()
 			widgetNode.ensureType(ConfigNodeType::Map);
 			const auto widgetClass = widgetNode["class"].asString();
 
-			if (widgetClass != "widget") {
-				const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
-				if (!properties.entries.empty()) {
-					widgetBox->setActive(true);
-					populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode, properties);
-				}
-				hasSizer = properties.canHaveChildren;
+			const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
+			canHaveSizer = properties.canHaveChildren;
+
+			if (widgetClass != "widget" && !properties.entries.empty()) {
+				widgetBox->setActive(true);
+				populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode, properties);
 			}
 
 			genericWidgetBox->setActive(true);
@@ -91,8 +125,12 @@ void UIWidgetEditor::refresh()
 		}
 
 		sizerBox->setActive(hasSizer);
+		addSizerButton->setActive(!hasSizer);
 		if (hasSizer) {
 			populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
+			removeSizerButton->setEnabled(!hasChildren);
+		} else {
+			addSizerButton->setEnabled(canHaveSizer);
 		}
 
 		if (isSpacer) {
