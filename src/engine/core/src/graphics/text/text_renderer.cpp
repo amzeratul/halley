@@ -411,6 +411,10 @@ Vector2f TextRenderer::getExtents() const
 
 Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
+	if (!font) {
+		return {};
+	}
+
 	Vector2f p;
 	float w = 0;
 	const float lineH = getLineHeight();
@@ -647,7 +651,7 @@ std::optional<Rect4f> TextRenderer::getClip() const
 
 float TextRenderer::getLineHeight() const
 {
-	return roundf(font->getHeight() * getScale(*font) + lineSpacing);
+	return font ? roundf(font->getHeight() * getScale(*font) + lineSpacing) : 1.0f;
 }
 
 float TextRenderer::getAlignment() const

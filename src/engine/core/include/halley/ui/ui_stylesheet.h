@@ -89,6 +89,8 @@ namespace Halley {
 		float getUIScale() const;
 		void setUIScale(float scale);
 
+		const TextRenderer& getDefaultTextRenderer() const;
+
 	private:
 		Resources& resources;
 		HashMap<String, std::shared_ptr<UIStyleDefinition>> styles;
@@ -97,9 +99,14 @@ namespace Halley {
 		std::shared_ptr<const UIColourScheme> lastColourScheme = nullptr;
 		float uiScale = 1;
 
+		ConfigNode defaultData;
+		std::shared_ptr<UIStyleDefinition> defaultStyle;
+		TextRenderer defaultTextRenderer;
+
 		void load(const ConfigNode& node, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme);
 
 		bool needsUpdate() const;
 		void update();
+		void setupDefaultStyle();
 	};
 }

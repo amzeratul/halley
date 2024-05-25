@@ -178,7 +178,9 @@ UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, U
 	, styleSheet(styleSheet)
 	, pimpl(std::make_unique<Pimpl>())
 {
-	classes = node["classes"].asVector<String>({});
+	if (node.getType() == ConfigNodeType::Map) {
+		classes = node["classes"].asVector<String>({});
+	}
 	loadDefaults();
 }
 
@@ -321,7 +323,7 @@ void UIStyleDefinition::loadDefaults()
 	pimpl->sprites.clear();
 	pimpl->sprites[":default"] = Sprite();
 	pimpl->textRenderers.clear();
-	pimpl->textRenderers[":default"] = TextRenderer();
+	pimpl->textRenderers[":default"] = styleSheet.getDefaultTextRenderer();
 	pimpl->floats.clear();
 	pimpl->floats[":default"] = 0.0f;
 	pimpl->vector2fs.clear();
@@ -340,11 +342,13 @@ void UIStyleDefinition::loadDefaults()
 UIStyleSheet::UIStyleSheet(Resources& resources)
 	: resources(resources)
 {
+	setupDefaultStyle();
 }
 
 UIStyleSheet::UIStyleSheet(Resources& resources, std::shared_ptr<const UIColourScheme> colourScheme)
 	: resources(resources)
 {
+	setupDefaultStyle();
 	for (auto& style: resources.enumerate<ConfigFile>()) {
 		if (style.startsWith("ui_style/")) {
 			load(*resources.get<ConfigFile>(style), colourScheme);
@@ -355,7 +359,8 @@ UIStyleSheet::UIStyleSheet(Resources& resources, std::shared_ptr<const UIColourS
 UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
 	: resources(resources)
 {
-	load(file, colourScheme);
+	setupDefaultStyle();
+	load(file, std::move(colourScheme));
 }
 
 void UIStyleSheet::load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
@@ -399,6 +404,18 @@ void UIStyleSheet::update()
 	}
 }
 
+void UIStyleSheet::setupDefaultStyle()
+{
+	ConfigNode::MapType labelData;
+	labelData["font"] = "Ubuntu Bold";
+	labelData["size"] = 12;
+	labelData["colour"] = "#000000";
+	loadStyleData(*this, ":default", labelData, defaultTextRenderer);
+
+	defaultData = ConfigNode::MapType();
+	defaultStyle = std::make_unique<UIStyleDefinition>(":default", defaultData, *this);
+}
+
 void UIStyleSheet::load(const ConfigNode& root, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	lastColourScheme = colourScheme;
@@ -419,7 +436,7 @@ std::shared_ptr<const UIStyleDefinition> UIStyleSheet::getStyle(const String& st
 {
 	auto iter = styles.find(styleName);
 	if (iter == styles.end()) {
-		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
+		return defaultStyle;
 	}
 	return iter->second;
 }
@@ -428,7 +445,7 @@ std::shared_ptr<UIStyleDefinition> UIStyleSheet::getStyle(const String& styleNam
 {
 	auto iter = styles.find(styleName);
 	if (iter == styles.end()) {
-		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
+		return defaultStyle;
 	}
 	return iter->second;
 }
@@ -474,4 +491,9 @@ float UIStyleSheet::getUIScale() const
 void UIStyleSheet::setUIScale(float scale)
 {
 	uiScale = scale;
+}
+
+const TextRenderer& UIStyleSheet::getDefaultTextRenderer() const
+{
+	return defaultTextRenderer;
 }
