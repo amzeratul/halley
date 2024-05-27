@@ -55,7 +55,8 @@ namespace Halley {
 		Vector4f getBorder() const;
 		int getFillFlags() const;
 
-		void placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer);
+		void placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer) const;
+		void placeInside(Vector2f tl, Vector2f br, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer) const;
 
 		UIElementPtr getPointer() const;
 

@@ -26,9 +26,17 @@ Vector2f UISizerEntry::getMinimumSize() const
 	return element ? element->getLayoutMinimumSize(false) : Vector2f();
 }
 
-void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer)
+void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer) const
 {
-	Vector2f cellSize = rect.getSize();
+	placeInside(rect.getTopLeft(), rect.getBottomRight(), origRect, minSize, listener, sizer);
+}
+
+void UISizerEntry::placeInside(Vector2f tl, Vector2f br, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer) const
+{
+	// TL and BR might not be in strict rectangular order (i.e. TL could be to the bottom right of BR) when dealing with free sizers and borders
+	// Hence us not using Rect4f here
+
+	Vector2f cellSize = br - tl;
 	Vector2f anchoring;
 	Vector2f size = minSize;
 
@@ -58,7 +66,7 @@ void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, I
 	}
 
 	const Vector2f spareSize = cellSize - size;
-	const Vector2f pos = rect.getTopLeft() + (spareSize * anchoring).round();
+	const Vector2f pos = tl + (spareSize * anchoring).round();
 	const auto finalRect = Rect4f(pos, pos + size);
 
 	if (listener) {
@@ -476,8 +484,7 @@ void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
 		}
 		
 		const auto minSize = e.getMinimumSize();
-		const auto dstRect = origRect.grow(-e.getBorder());
-		e.placeInside(dstRect, origRect, minSize, listener, *this);
+		e.placeInside(origRect.getTopLeft() + e.getBorder().xy(), origRect.getBottomRight() - e.getBorder().zw(), origRect, minSize, listener, *this);
 	}
 }
 

@@ -94,7 +94,8 @@ namespace Halley
 		void add(TextRenderer&& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
-		
+		void add(Rect4f bounds);
+
 		void draw(int mask, Painter& painter);
 		std::optional<Rect4f> getBounds() const;
 
@@ -105,6 +106,7 @@ namespace Halley
 		Vector<Sprite> cachedSprites;
 		Vector<TextRenderer> cachedText;
 		Vector<SpritePainterEntry::Callback> callbacks;
+		Vector<Rect4f> extraBounds;
 		bool dirty = false;
 		bool forceCopy = false;
 		SpritePainterMaterialParamUpdater paramUpdater;

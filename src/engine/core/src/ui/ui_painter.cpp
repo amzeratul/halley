@@ -125,6 +125,15 @@ void UIPainter::draw(std::function<void(Painter&)> f)
 	painter->add(std::move(f), mask, layer, getCurrentPriorityAndIncrement(), clip);
 }
 
+void UIPainter::addBounds(Rect4f bounds)
+{
+	if (clip && clip->overlaps(bounds)) {
+		painter->add(clip->intersection(bounds));
+	} else {
+		painter->add(bounds);
+	}
+}
+
 TextRenderer UIPainter::applyColour(TextRenderer text) const
 {
 	if (colourMultiplier) {

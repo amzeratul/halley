@@ -21,6 +21,7 @@ namespace Halley {
 		void draw(Sprite&& sprite);
 		void draw(TextRenderer&& text);
 		void draw(std::function<void(Painter&)> f);
+		void addBounds(Rect4f bounds);
 
 		UIPainter clone() const;
 		UIPainter withAdjustedLayer(int delta) const;

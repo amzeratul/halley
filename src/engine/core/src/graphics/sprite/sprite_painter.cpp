@@ -281,6 +281,11 @@ void SpritePainter::add(SpritePainterEntry::Callback callback, int mask, int lay
 	dirty = true;
 }
 
+void SpritePainter::add(Rect4f bounds)
+{
+	extraBounds.push_back(bounds);
+}
+
 void SpritePainter::draw(int mask, Painter& painter)
 {
 	if (dirty) {
@@ -355,6 +360,10 @@ std::optional<Rect4f> SpritePainter::getBounds() const
 		} else if (type == SpritePainterEntryType::Callback) {
 			// Not included
 		}
+	}
+
+	for (auto& b: extraBounds) {
+		merge(b, {});
 	}
 
 	return result;

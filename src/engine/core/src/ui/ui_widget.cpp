@@ -389,7 +389,7 @@ Rect4f UIWidget::getRect() const
 
 bool UIWidget::ignoreClip() const
 {
-	return false;
+	return sizer && sizer->getType() == UISizerType::Free && !getChildren().empty();
 }
 
 void UIWidget::setPosition(Vector2f pos)

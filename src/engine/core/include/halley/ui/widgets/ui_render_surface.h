@@ -31,6 +31,8 @@ namespace Halley {
     	void fade(Colour4f from, Colour4f to, Time time);
         void update(Time t, bool moved) override;
 
+        bool ignoreClip() const override;
+
     private:
         std::unique_ptr<RenderSurface> renderSurface;
 

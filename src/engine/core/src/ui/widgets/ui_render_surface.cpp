@@ -7,47 +7,11 @@
 using namespace Halley;
 
 UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISizer> sizer, const HalleyAPI& api, Resources& resources, const String& materialName, RenderSurfaceOptions options)
-	: UIWidget(std::move(id), minSize, std::move(sizer))
+	: UIWidget(std::move(id), Vector2f::max(Vector2f(1, 1), minSize), std::move(sizer))
 	, renderSurface(std::make_unique<RenderSurface>(*api.video, resources, materialName, options))
 	, colour(1, 1, 1, 1)
 	, scale(1, 1)
 {
-}
-
-// Update thread
-void UIRenderSurface::drawChildren(UIPainter& origPainter) const
-{
-	if (isRendering()) {
-		RenderParams params;
-		params.spritePainter = std::make_unique<SpritePainter>();
-		params.pos = getPosition();
-		params.size = innerSize + innerSize % Vector2f(2, 2);
-		params.colour = colour;
-		params.scale = scale;
-		params.mask = origPainter.getMask();
-
-		if (params.size.x > 0.1f && params.size.y > 0.1f) {
-			params.spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
-			auto painter = UIPainter(*params.spritePainter, origPainter.getMask(), 0);
-			UIWidget::drawChildren(painter);
-
-			// Check sprite bounds and enlarge border if needed
-			const auto tryBounds = params.spritePainter->getBounds();
-			if (tryBounds) {
-				const auto bounds = *tryBounds;
-				auto myRect = Rect4f(params.pos, params.pos + params.size);
-				myRect.setSize(myRect.getSize() + myRect.getSize() % Vector2f(2, 2));
-				params.border.x = std::abs(myRect.getLeft() - bounds.getLeft());
-				params.border.y = std::abs(myRect.getTop() - bounds.getTop());
-				params.border.z = std::abs(bounds.getRight() - myRect.getRight());
-				params.border.w = std::abs(bounds.getBottom() - myRect.getBottom());
-			}
-
-			paramsSync.write(std::move(params));
-		}
-	} else {
-		UIWidget::drawChildren(origPainter);
-	}
 }
 
 // Update thread
@@ -64,6 +28,54 @@ void UIRenderSurface::draw(UIPainter& painter) const
 	});
 }
 
+// Update thread
+void UIRenderSurface::drawChildren(UIPainter& origPainter) const
+{
+	if (!isRendering()) {
+		UIWidget::drawChildren(origPainter);
+		return;
+	}
+
+	RenderParams params;
+	params.spritePainter = std::make_unique<SpritePainter>();
+	params.pos = getPosition();
+	params.size = innerSize + innerSize % Vector2f(2, 2);
+	params.colour = colour;
+	params.scale = scale;
+	params.mask = origPainter.getMask();
+
+	auto clip = origPainter.getClip();
+	if (clip) {
+		clip = (*clip - params.pos) / scale + params.pos;
+	}
+
+	if (params.size.x > 0.1f && params.size.y > 0.1f) {
+		params.spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
+		auto painter = UIPainter(*params.spritePainter, origPainter.getMask(), 0).withClip(clip);
+		UIWidget::drawChildren(painter);
+
+		// Check sprite bounds and enlarge border if needed
+		if (const auto tryBounds = params.spritePainter->getBounds()) {
+			auto spriteBounds = *tryBounds;
+			origPainter.addBounds(spriteBounds);
+
+			auto myRect = Rect4f(params.pos, params.pos + params.size);
+			myRect.setSize(myRect.getSize() + myRect.getSize() % Vector2f(2, 2));
+
+			if (clip) {
+				spriteBounds = spriteBounds.intersection(*clip);
+			}
+
+			params.border.x = spriteBounds.getLeft() - myRect.getLeft();
+			params.border.y = spriteBounds.getTop() - myRect.getTop();
+			params.border.z = myRect.getRight() - spriteBounds.getRight();
+			params.border.w = myRect.getBottom() - spriteBounds.getBottom();
+		}
+
+		paramsSync.write(std::move(params));
+	}
+}
+
 // Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
@@ -74,11 +86,11 @@ void UIRenderSurface::render(RenderContext& rc) const
 	Camera cam = rc.getCamera();
 	origScale = cam.getScale().xy();
 	const auto scale = renderParams->scale * origScale;
-	cam.setPosition(renderParams->pos - renderParams->border.xy() / 2 + renderParams->border.zw() / 2 + renderParams->size / 2);
+	cam.setPosition(renderParams->pos + (renderParams->border.xy() - renderParams->border.zw()) / 2 + renderParams->size / 2);
 	cam.setScale(scale);
 
 	const auto borderSize = renderParams->border.xy() + renderParams->border.zw();
-	renderSurface->setSize(Vector2i((renderParams->size + borderSize) * scale));
+	renderSurface->setSize(Vector2i((renderParams->size - borderSize) * scale));
 
 	rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
 	{
@@ -109,13 +121,12 @@ void UIRenderSurface::drawOnPainter(Painter& painter) const
 	if (renderParams) {
 		assert(renderSurface->isReady());
 
-		const auto scale = renderParams->scale * origScale;
-		
-		renderSurface->getSurfaceSprite().clone()
-			.setPosition(renderParams->pos - renderParams->border.xy() * scale)
+		auto sprite = renderSurface->getSurfaceSprite().clone()
+			.setPosition(renderParams->pos + renderParams->border.xy() * renderParams->scale)
 			.setColour(renderParams->colour)
-			.setScale(Vector2f(1.0f, 1.0f) / origScale)
-			.draw(painter);
+			.setScale(Vector2f(1.0f, 1.0f) / origScale);
+
+		sprite.draw(painter);
 
 		renderParams = {};
 	}
@@ -200,4 +211,9 @@ void UIRenderSurface::update(Time t, bool moved)
 	if (autoBypass) {
 		bypass = Colour4c(colour) == Colour4c(255, 255, 255, 255) && std::abs(scale.x - 1.0f) < 0.00001f && std::abs(scale.y - 1.0f) < 0.00001f;
 	}
+}
+
+bool UIRenderSurface::ignoreClip() const
+{
+	return true;
 }
