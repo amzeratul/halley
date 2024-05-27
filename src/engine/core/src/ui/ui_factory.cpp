@@ -1666,6 +1666,8 @@ UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
 
 	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
 	result.entries.emplace_back("Use Filtering", "useFilter", "bool", "false");
+	result.entries.emplace_back("Bypass", "bypass", "bool", "false");
+	result.entries.emplace_back("Auto-Bypass", "autoBypass", "bool", "false");
 	result.entries.emplace_back("Colour", "colour", "Halley::UIColour", "#FFFFFF");
 	result.entries.emplace_back("Scale", "scale", "Halley::Vector2f", Vector<String>{ "1", "1" });
 
@@ -1692,6 +1694,8 @@ std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNo
 	auto widget = std::make_shared<UIRenderSurface>(std::move(id), Vector2f(), makeSizer(entryNode), api, resources, material, options);
 	widget->setColour(colour);
 	widget->setScale(scale);
+	widget->setBypass(node["bypass"].asBool(false));
+	widget->setAutoBypass(node["autoBypass"].asBool(false));
 
 	return widget;
 }
