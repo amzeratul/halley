@@ -146,12 +146,12 @@ void UIRenderSurface::setScale(Vector2f scale)
 Vector2f UIRenderSurface::getLayoutMinimumSize(bool force) const
 {
 	const auto sz = UIWidget::getLayoutMinimumSize(force);
-	return isRendering() ? sz * scale : sz;
+	return isRendering() ? (sz * scale).ceil() : sz;
 }
 
 Vector2f UIRenderSurface::getLayoutSize(Vector2f size) const
 {
-	innerSize = isRendering() ? (size / scale).round() : size;
+	innerSize = isRendering() ? (size / scale).ceil() : size;
 	return innerSize;
 }
 
