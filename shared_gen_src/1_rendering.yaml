@@ -62,6 +62,10 @@ component:
       type: 'Halley::AnimationPlayer'
       displayName: Player
       collapse: true
+  - updateSprite:
+      type: bool
+      defaultValue: true
+      canSave: false
 
 ---
 

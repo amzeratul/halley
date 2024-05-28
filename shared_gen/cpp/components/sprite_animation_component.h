@@ -15,12 +15,14 @@ public:
 	static const constexpr char* componentName{ "SpriteAnimation" };
 
 	Halley::AnimationPlayer player{};
+	bool updateSprite{ true };
 
 	SpriteAnimationComponent() {
 	}
 
-	SpriteAnimationComponent(Halley::AnimationPlayer player)
+	SpriteAnimationComponent(Halley::AnimationPlayer player, bool updateSprite)
 		: player(std::move(player))
+		, updateSprite(std::move(updateSprite))
 	{
 	}
 
@@ -28,12 +30,14 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(player)>::serialize(player, Halley::AnimationPlayer{}, _context, _node, componentName, "player", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(updateSprite)>::serialize(updateSprite, bool{ true }, _context, _node, componentName, "updateSprite", makeMask(Type::Prefab));
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, Halley::AnimationPlayer{}, _context, _node, componentName, "player", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(updateSprite)>::deserialize(updateSprite, bool{ true }, _context, _node, componentName, "updateSprite", makeMask(Type::Prefab));
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

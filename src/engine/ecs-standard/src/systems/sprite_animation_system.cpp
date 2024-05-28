@@ -23,7 +23,9 @@ public:
 	{
 		for (auto& e: es) {
 			e.spriteAnimation.player.update(0.0f);
-			e.spriteAnimation.player.updateSprite(e.sprite.sprite);
+			if (e.spriteAnimation.updateSprite) {
+				e.spriteAnimation.player.updateSprite(e.sprite.sprite);
+			}
 		}
 	}
 
@@ -31,7 +33,9 @@ public:
 	{
 		for (auto& e : es) {
 			e->spriteAnimation.player.update(0.0f);
-			e->spriteAnimation.player.updateSprite(e->sprite.sprite);
+			if (e->spriteAnimation.updateSprite) {
+				e->spriteAnimation.player.updateSprite(e->sprite.sprite);
+			}
 		}
 	}
 
@@ -46,7 +50,7 @@ private:
 			auto& player = e.spriteAnimation.player;
 			player.update(time);
 
-			if (player.hasAnimation()) {
+			if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
 				auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPositionWithHeight();
 				if (spriteBounds.overlaps(viewPort)) {
 					player.updateSprite(sprite);
@@ -80,7 +84,9 @@ private:
 					auto& sprite = entity.getComponent<SpriteComponent>();
 
 					spriteAnimation.player.syncWith(parentAnimation->player, false);
-					spriteAnimation.player.updateSprite(sprite.sprite);
+					if (spriteAnimation.updateSprite) {
+						spriteAnimation.player.updateSprite(sprite.sprite);
+					}
 					replicatorsUpdated.emplace(id);
 				}
 			}
