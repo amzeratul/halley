@@ -27,34 +27,53 @@
 #include "mt199937ar.h"
 using namespace Halley;
 
-Random::Random()
+Random::Random(bool threadSafe)
 	: generator(std::make_unique<MT199937AR>())
+	, threadSafe(threadSafe)
 {
 }
 
-Random::Random(uint32_t seed)
+Random::Random(uint32_t seed, bool threadSafe)
 	: generator(std::make_unique<MT199937AR>())
-{
-	setSeed(seed);
-}
-
-Random::Random(uint64_t seed)
-	: generator(std::make_unique<MT199937AR>())
+	, threadSafe(threadSafe)
 {
 	setSeed(seed);
 }
 
-Random::Random(gsl::span<const gsl::byte> data)
+Random::Random(uint64_t seed, bool threadSafe)
 	: generator(std::make_unique<MT199937AR>())
+	, threadSafe(threadSafe)
+{
+	setSeed(seed);
+}
+
+Random::Random(gsl::span<const gsl::byte> data, bool threadSafe)
+	: generator(std::make_unique<MT199937AR>())
+	, threadSafe(threadSafe)
 {
 	setSeed(data);
 }
 
 Random::~Random() = default;
 
-Random::Random(Random&& other) noexcept = default;
+Random::Random(Random&& other) noexcept
+{
+	*this = std::move(other);
+}
 
-Random& Random::operator=(Random&& other) noexcept = default;
+Random& Random::operator=(Random&& other) noexcept
+{
+	auto lock = std::unique_lock<std::mutex>(other.mutex, std::defer_lock_t());
+	if (other.threadSafe) {
+		lock.lock();
+	}
+
+	generator = std::move(other.generator);
+	canSeed = other.canSeed;
+	threadSafe = other.threadSafe;
+
+	return *this;
+}
 
 int32_t Random::getInt(Range<int32_t> range)
 {
@@ -160,26 +179,31 @@ Random& Random::getGlobal()
 		const time_t curTime = time(nullptr);
 		const unsigned int curClock = static_cast<unsigned int>(clock());
 		const unsigned int salt = 0x3F29AB51;
-		unsigned int seed[] = { rd(), rd(), rd(), rd(), rd(), curClock, salt, static_cast<unsigned int>(curTime & 0xFFFFFFFF) };
-		global = new Random(gsl::as_bytes(gsl::span<unsigned int>(seed)));
+		unsigned int seed[] = { rd(), rd(), rd(), rd(), rd(), curClock, salt, static_cast<unsigned int>(curTime & 0xFFFFFFFF), rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd() };
+		global = new Random(gsl::as_bytes(gsl::span<unsigned int>(seed)), true);
+		global->canSeed = false;
 	}
 	return *global;
 }
 
 void Random::getBytes(gsl::span<gsl::byte> dst)
 {
-	int step = 0;
-	uint32_t number = getRawInt();
+	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	if (threadSafe) {
+		lock.lock();
+	}
+
+	int step = 3;
+	uint32_t number = 0;
 
 	for (int pos = 0; pos < dst.size_bytes(); ++pos) {
-		dst[pos] = gsl::byte(uint8_t(number & 0xFF));
-
-		number >>= 8;
-		++step;
-		if (step == 4) {
-			number = getRawInt();
+		if (++step == 4) {
+			number = getRawIntUnsafe();
 			step = 0;
 		}
+
+		dst[pos] = static_cast<gsl::byte>(static_cast<uint8_t>(number & 0xFF));
+		number >>= 8;
 	}
 }
 
@@ -200,9 +224,13 @@ void Random::setSeed(uint64_t seed)
 
 void Random::setSeed(gsl::span<const gsl::byte> data)
 {
-	Vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
-	memcpy(initData.data(), data.data(), data.size_bytes());
-	generator->init_by_array(initData.data(), initData.size());
+	if (canSeed) {
+		Vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
+		memcpy(initData.data(), data.data(), data.size_bytes());
+		generator->init_by_array(initData.data(), initData.size());
+	} else {
+		throw Exception("Attempting to re-seed global RNG, which is forbidden. Please instantiate your own RNG instance.", HalleyExceptions::Utils);
+	}
 }
 
 void Random::setSeed(gsl::span<Byte> data)
@@ -212,16 +240,36 @@ void Random::setSeed(gsl::span<Byte> data)
 
 uint32_t Random::getRawInt()
 {
+	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	if (threadSafe) {
+		lock.lock();
+	}
+
 	return generator->genrand_int32();
 }
 
 float Random::getRawFloat()
 {
+	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	if (threadSafe) {
+		lock.lock();
+	}
+
 	return float(generator->genrand_real2());
 }
 
 double Random::getRawDouble()
 {
+	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	if (threadSafe) {
+		lock.lock();
+	}
+
 	return generator->genrand_res53();
+}
+
+uint32_t Random::getRawIntUnsafe()
+{
+	return generator->genrand_int32();
 }
 

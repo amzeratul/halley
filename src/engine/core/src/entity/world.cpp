@@ -222,7 +222,11 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	// Don't do this check in release mode as it's somewhat expensive
 	if (devMode && uuidMap.contains(uuid)) {
 		const auto oldEntity = uuidMap.at(uuid);
-		throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists: " + oldEntity->name, HalleyExceptions::Entity);
+		if (oldEntity->getInstanceUUID() != uuid) {
+			throw Exception("Error creating entity \"" + name + "\" - World::uuidMap is seemingly corrupted", HalleyExceptions::Entity);
+		} else {
+			throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists as " + oldEntity->name, HalleyExceptions::Entity);
+		}
 	}
 	
 	Entity* entity = new(entityPool->alloc()) Entity();

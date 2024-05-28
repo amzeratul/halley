@@ -35,10 +35,10 @@ namespace Halley {
 	public:
 		static Random& getGlobal();
 
-		Random();
-		Random(uint32_t seed);
-		Random(uint64_t seed);
-		Random(gsl::span<const gsl::byte> data);
+		Random(bool threadSafe = false);
+		Random(uint32_t seed, bool threadSafe = false);
+		Random(uint64_t seed, bool threadSafe = false);
+		Random(gsl::span<const gsl::byte> data, bool threadSafe = false);
 		~Random();
 
 		Random(const Random& other) = delete;
@@ -99,6 +99,11 @@ namespace Halley {
 
 	private:
 		std::unique_ptr<MT199937AR> generator;
+		bool canSeed = true;
+		bool threadSafe = false;
+		std::mutex mutex;
+
+		uint32_t getRawIntUnsafe();
 	};
 
 }
