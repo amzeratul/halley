@@ -161,16 +161,17 @@ std::optional<Circle> Circle::getCircleTangentToAngle(Vector2f A, Vector2f B, Ve
 	// alpha is the angle at B
 	// d is the distance from B, along the ABC bisector
 	// d = r / sin(alpha/2)
-	// Using sin(alpha/2) = sqrt((1 - cos(alpha)) / 2)
-
-	const float cosAlpha = (B - A).normalized().dot((C - B).normalized());
-	if (cosAlpha > 0.9999f) {
+	
+	const auto ba = (A - B).normalized();
+	const auto bc = (C - B).normalized();
+	const auto cosAlpha = ba.dot(bc);
+	if (std::abs(cosAlpha) > 0.9999f) {
 		return std::nullopt;
 	}
-	const float halfSinAlpha = std::sqrt((1.0f - cosAlpha) / 2.0f);
-	const float d = radius / halfSinAlpha;
 
-	const auto bisectorN = (((A - B).normalized() + (C - B).normalized()) * 0.5f).normalized();
+	const auto bisectorN = ((ba + bc) * 0.5f).normalized();
+	const auto sinAlphaOver2 = std::abs(ba.cross(bisectorN));
+	const float d = radius / sinAlphaOver2;
 	const auto P = B + d * bisectorN;
 	return Circle(P, radius);
 }
