@@ -1135,6 +1135,8 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
 	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
 	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
+	result.entries.emplace_back("Playback Speed", "playbackSpeed", "float", "1");
+	result.entries.emplace_back("Occupy Space", "occupySpace", "bool", "false");
 	return result;
 }
 
@@ -1142,15 +1144,20 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	auto size = node["size"].asVector2f(Vector2f());
-	auto animationOffset = node["offset"].asVector2f(Vector2f());
 	auto animationName = node["animation"].asString("");
 	auto sequence = node["sequence"].asString("default");
 	auto direction = node["direction"].asString("default");
+	auto playbackSpeed = node["playbackSpeed"].asFloat(1.0f);
+	bool occupySpace = node["occupySpace"].asBool(false);
 
 	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
+	animation.setPlaybackSpeed(playbackSpeed);
 
-	return std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), animationOffset, animation);
+	const auto bounds = Rect4f(animation.getAnimation().getBounds());
+	auto size = Vector2f::max(node["size"].asVector2f(Vector2f()), occupySpace ? bounds.getSize() : Vector2f());
+	auto offset = node["offset"].asVector2f(Vector2f()) + (occupySpace ? -bounds.getTopLeft() : Vector2f());
+
+	return std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), offset, animation);
 }
 
 UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
