@@ -90,6 +90,7 @@ public:
 				return {};
 			}
 		} else {
+			Logger::logError("Unable to add script " + scriptName + " to entity " + toString(entityId) + ": entity not found.");
 			return {};
 		}
 	}

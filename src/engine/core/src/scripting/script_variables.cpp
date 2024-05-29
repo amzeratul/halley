@@ -1,5 +1,5 @@
 #include "halley/scripting/script_variables.h"
-
+#include "halley/bytes/config_node_serializer.h"
 #include "halley/entity/entity_id.h"
 
 using namespace Halley;
