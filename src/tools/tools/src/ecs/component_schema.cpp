@@ -24,6 +24,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				field.serializationTypes.push_back(EntitySerialization::Type::SaveData);
 				field.serializationTypes.push_back(EntitySerialization::Type::Network);
 				field.serializationTypes.push_back(EntitySerialization::Type::Dynamic);
+				field.access = MemberAccess::Public;
 			} else {
 				// e.g.
 				// value:

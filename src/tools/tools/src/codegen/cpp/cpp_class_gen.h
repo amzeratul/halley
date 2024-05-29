@@ -28,6 +28,7 @@ namespace Halley
 		
 		CPPClassGenerator& addDefaultConstructor();
 		CPPClassGenerator& addConstructor(const Vector<VariableSchema>& variables, bool move);
+		CPPClassGenerator& addConstructor(const Vector<VariableSchema>& variables, const Vector<VariableSchema>& variableInits, bool move);
 		CPPClassGenerator& addCustomConstructor(const Vector<VariableSchema>& parameters, const Vector<VariableSchema>& initialization, const Vector<String>& body = {});
 		
 		static String getTypeString(const TypeSchema& type);

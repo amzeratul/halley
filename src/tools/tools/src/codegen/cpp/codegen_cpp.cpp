@@ -285,10 +285,32 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	// Additional constructors
 	if (!component.members.empty()) {
-		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const ComponentFieldSchema& m) { return std_ex::contains(m.serializationTypes, EntitySerialization::Type::Prefab); });
-		if (!serializableMembers.empty()) {
+		Vector<ComponentFieldSchema> origSerializableMembers;
+		Vector<std::pair<ComponentFieldSchema, size_t>> serializableMembersIdx;
+		size_t idx = 0;
+		for (const auto& m: component.members) {
+			if (std_ex::contains(m.serializationTypes, EntitySerialization::Type::Prefab)) {
+				serializableMembersIdx.emplace_back(m, idx++);
+				origSerializableMembers.emplace_back(m);
+			}
+		}
+
+		if (!serializableMembersIdx.empty()) {
+			std::sort(serializableMembersIdx.begin(), serializableMembersIdx.end(), [] (const auto& a, const auto& b)
+			{
+				if (a.first.access != b.first.access) {
+					return a.first.access < b.first.access;
+				}
+				return a.second < b.second;
+			});
+
+			Vector<ComponentFieldSchema> serializableMembers;
+			for (const auto& m: serializableMembersIdx) {
+				serializableMembers.push_back(m.first);
+			}
+
 			gen.addBlankLine()
-				.addConstructor(ComponentFieldSchema::toVariableSchema(serializableMembers), true);
+				.addConstructor(ComponentFieldSchema::toVariableSchema(origSerializableMembers), ComponentFieldSchema::toVariableSchema(serializableMembers), true);
 		}
 	}
 	
