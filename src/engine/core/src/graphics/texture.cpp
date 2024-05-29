@@ -48,7 +48,7 @@ void Texture::copyToTexture(Painter& painter, Texture& other) const
 void Texture::copyToImage(Painter& painter, Image& image) const
 {
 	if (image.getSize() != getSize()) {
-		throw Exception("Incompatible image and texture sizes.", HalleyExceptions::Graphics);
+		throw Exception("Incompatible image (" + toString(image.getSize().x) + "x" + image.getSize().y + ") and texture (" + getSize().x + "x" + getSize().y + ") sizes.", HalleyExceptions::Graphics);
 	}
 	doCopyToImage(painter, image);
 }
