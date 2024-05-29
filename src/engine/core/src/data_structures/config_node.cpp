@@ -685,7 +685,9 @@ void ConfigNode::deserialize(Deserializer& s)
 				auto entity = s.getOptions().world->findEntity(uuid);
 				*this = entity->getEntityId();
 			} else {
-				deserializeContents<EntityId>(s);
+				EntityId result;
+				s >> result.value;
+				*this = result;
 			}
 			break;
 		case ConfigNodeType::Float:

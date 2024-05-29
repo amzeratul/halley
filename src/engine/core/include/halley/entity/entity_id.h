@@ -5,12 +5,10 @@
 namespace Halley {
 	class ConfigNode;
 	class EntitySerializationContext;
-}
-
-namespace Halley {
 	class World;
 	class Serializer;
 	class Deserializer;
+	class String;
 
 	struct alignas(8) EntityId {
 		int64_t value;
