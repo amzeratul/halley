@@ -100,7 +100,7 @@ EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const Script
 		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
 		return environment.readInputEntityId(returnNode, other->second);
 	} else {
-		return EntityId(environment.getStartParams()[pinN - 1].asEntityIdHolder().value);
+		return environment.getStartParams()[pinN - 1].asEntityId();
 	}
 }
 
@@ -199,7 +199,7 @@ ConfigNode ScriptStartScriptData::toConfigNode(const EntitySerializationContext&
 {
 	auto result = ConfigNode::MapType();
 	result["scriptName"] = scriptName;
-	result["target"] = EntityIdHolder{ target.value };
+	result["target"] = target;
 	return result;
 }
 
@@ -311,7 +311,7 @@ void ScriptStartScript::doInitData(ScriptStartScriptData& data, const ScriptGrap
 {
 	if (nodeData.getType() == ConfigNodeType::Map) {
 		data.scriptName = nodeData["scriptName"].asString("");
-		data.target = EntityId(nodeData["target"].asEntityIdHolder({}).value);
+		data.target = nodeData["target"].asEntityId({});
 	} else {
 		data.scriptName = {};
 		data.target = {};
@@ -332,7 +332,7 @@ IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environme
 			params.push_back(readDataPin(environment, node, 4 + i));
 		}
 		for (size_t i = 0; i < nTargetInput; ++i) {
-			params.push_back(ConfigNode(EntityIdHolder{ readEntityId(environment, node, 4 + nDataInput + i).value } ));
+			params.push_back(ConfigNode(readEntityId(environment, node, 4 + nDataInput + i)));
 		}
 
 		environment.startScript(target, script, tags, params);

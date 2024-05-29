@@ -8,16 +8,6 @@
 #include "halley/utils/hash.h"
 using namespace Halley;
 
-void EntityIdHolder::serialize(Serializer& s) const
-{
-	s << value;
-}
-
-void EntityIdHolder::deserialize(Deserializer& s)
-{
-	s >> value;
-}
-
 ConfigNode::ConfigNode()
 {
 }
@@ -73,11 +63,6 @@ ConfigNode::ConfigNode(uint32_t value)
 }
 
 ConfigNode::ConfigNode(int64_t value)
-{
-	operator=(value);
-}
-
-ConfigNode::ConfigNode(EntityIdHolder value)
 {
 	operator=(value);
 }
@@ -202,7 +187,7 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 			*this = other.asBool();
 			break;
 		case ConfigNodeType::EntityId:
-			*this = other.asEntityIdHolder();
+			*this = other.asEntityId();
 			break;
 		case ConfigNodeType::Float:
 			*this = other.asFloat();
@@ -281,14 +266,6 @@ ConfigNode& ConfigNode::operator=(int64_t value)
 	reset();
 	type = ConfigNodeType::Int64;
 	int64Data = value;
-	return *this;
-}
-
-ConfigNode& ConfigNode::operator=(EntityIdHolder value)
-{
-	reset();
-	type = ConfigNodeType::EntityId;
-	int64Data = value.value;
 	return *this;
 }
 
@@ -454,7 +431,7 @@ namespace {
 				case ConfigNodeType::Int64:
 					return cmp.compare(a.asInt64(), b.asInt64());
 				case ConfigNodeType::EntityId:
-					return cmp.compare(a.asEntityIdHolder().value, b.asEntityIdHolder().value);
+					return cmp.compare(a.asEntityId(), b.asEntityId());
 				case ConfigNodeType::Float:
 					return cmp.compare(a.asFloat(), b.asFloat());
 				case ConfigNodeType::Int2:
@@ -626,9 +603,9 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		case ConfigNodeType::EntityId:
 			if (s.getOptions().world) {
-				s << s.getOptions().world->getEntity(EntityId(asEntityIdHolder().value)).getInstanceUUID();
+				s << s.getOptions().world->getEntity(asEntityId()).getInstanceUUID();
 			} else {
-				s << asEntityIdHolder().value;
+				s << asEntityId().value;
 			}
 			break;
 		case ConfigNodeType::Float:
@@ -706,9 +683,9 @@ void ConfigNode::deserialize(Deserializer& s)
 				UUID uuid;
 				s >> uuid;
 				auto entity = s.getOptions().world->findEntity(uuid);
-				*this = EntityIdHolder{ entity->getEntityId().value };
+				*this = entity->getEntityId();
 			} else {
-				deserializeContents<EntityIdHolder>(s);
+				deserializeContents<EntityId>(s);
 			}
 			break;
 		case ConfigNodeType::Float:
@@ -792,19 +769,6 @@ int64_t ConfigNode::asInt64() const
 		return asString().toInteger();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
-	}
-}
-
-EntityIdHolder ConfigNode::asEntityIdHolder() const
-{
-	if (type == ConfigNodeType::EntityId || type == ConfigNodeType::Int64) {
-		return EntityIdHolder{ int64Data };
-	} else if (type == ConfigNodeType::Int && intData == -1) {
-		return EntityIdHolder{};
-	} else if (type == ConfigNodeType::Float && std::abs(floatData + 1.0f) < 0.0001f) {
-		return EntityIdHolder{};
-	} else {
-		throw Exception(getNodeDebugId() + " cannot be converted to EntityId.", HalleyExceptions::Resources);
 	}
 }
 
@@ -1102,7 +1066,7 @@ String ConfigNode::asString() const
 	} else if (type == ConfigNodeType::Bool) {
 		return asBool() ? "true" : "false";
 	} else if (type == ConfigNodeType::EntityId) {
-		return toString(asEntityIdHolder().value);
+		return toString(asEntityId());
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
 	} else if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
@@ -1170,15 +1134,6 @@ int64_t ConfigNode::asInt64(int64_t defaultValue) const
 		return defaultValue;
 	} else {
 		return asInt64();
-	}
-}
-
-EntityIdHolder ConfigNode::asEntityIdHolder(EntityIdHolder defaultValue) const
-{
-	if (type == ConfigNodeType::Undefined) {
-		return defaultValue;
-	} else {
-		return asEntityIdHolder();
 	}
 }
 
@@ -1289,7 +1244,7 @@ void ConfigNode::ensureType(ConfigNodeType t)
 			*this = false;
 			break;
 		case ConfigNodeType::EntityId:
-			*this = EntityIdHolder{};
+			*this = EntityId();
 			break;
 		case ConfigNodeType::Float:
 			*this = 0.0f;
@@ -1588,9 +1543,9 @@ int64_t ConfigNode::convertTo(Tag<int64_t> tag) const
 	return asInt64(0);
 }
 
-EntityIdHolder ConfigNode::convertTo(Tag<EntityIdHolder> tag) const
+EntityId ConfigNode::convertTo(Tag<EntityId> tag) const
 {
-	return asEntityIdHolder({});
+	return asEntityId({});
 }
 
 float ConfigNode::convertTo(Tag<float> tag) const

@@ -18,9 +18,7 @@ namespace {
 	EntityId fromConfigNode(const ConfigNode& node, const EntitySerializationContext& context)
 	{
 		if (node.getType() == ConfigNodeType::EntityId) {
-			EntityId result;
-			result.value = node.asEntityIdHolder().value;
-			return result;
+			return node.asEntityId();
 		}
 
 		if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined) {

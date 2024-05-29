@@ -101,13 +101,6 @@ namespace Halley {
 	};
 
 	class ConfigFile;
-
-	struct EntityIdHolder {
-		int64_t value = -1;
-
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
-	};
 	
 	class ConfigNode
 	{
@@ -141,7 +134,6 @@ namespace Halley {
 		explicit ConfigNode(int value);
 		explicit ConfigNode(uint32_t value);
 		explicit ConfigNode(int64_t value);
-		explicit ConfigNode(EntityIdHolder value);
 		explicit ConfigNode(EntityId value);
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
@@ -197,7 +189,6 @@ namespace Halley {
 		ConfigNode& operator=(int value);
 		ConfigNode& operator=(uint32_t value);
 		ConfigNode& operator=(int64_t value);
-		ConfigNode& operator=(EntityIdHolder value);
 		ConfigNode& operator=(EntityId value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
@@ -332,7 +323,6 @@ namespace Halley {
 
 		int asInt() const;
 		int64_t asInt64() const;
-		EntityIdHolder asEntityIdHolder() const;
 		EntityId asEntityId() const;
 		float asFloat() const;
 		bool asBool() const;
@@ -352,7 +342,6 @@ namespace Halley {
 
 		int asInt(int defaultValue) const;
 		int64_t asInt64(int64_t defaultValue) const;
-		EntityIdHolder asEntityIdHolder(EntityIdHolder defaultValue) const;
 		EntityId asEntityId(EntityId defaultValue) const;
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
@@ -641,7 +630,7 @@ namespace Halley {
 
 		int convertTo(Tag<int> tag) const;
 		int64_t convertTo(Tag<int64_t> tag) const;
-		EntityIdHolder convertTo(Tag<EntityIdHolder> tag) const;
+		EntityId convertTo(Tag<EntityId> tag) const;
 		float convertTo(Tag<float> tag) const;
 		bool convertTo(Tag<bool> tag) const;
 		uint8_t convertTo(Tag<uint8_t> tag) const;

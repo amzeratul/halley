@@ -437,7 +437,7 @@ private:
 
 						for (auto scriptIdx: indices) {
 							ConfigNode::MapType entry;
-							entry["entityId"] = EntityIdHolder{ e.entityId.value };
+							entry["entityId"] = e.entityId;
 							entry["name"] = getWorld().getEntity(e.entityId).getName();
 							entry["scriptIdx"] = scriptIdx;
 							result.push_back(entry);
@@ -456,7 +456,7 @@ private:
 			for (const auto& config : interest.getInterestConfigs("scriptState")) {
 				const String& scriptId = config["scriptId"].asString();
 				const uint64_t scriptHash = static_cast<uint64_t>(config["scriptHash"].asInt64());
-				const EntityId entityId = EntityId(config["entityId"].asEntityIdHolder().value);
+				const EntityId entityId = config["entityId"].asEntityId();
 				const int scriptIdx = config["scriptIdx"].asInt(0);
 
 				const auto* e = scriptableFamily.tryFind(entityId);

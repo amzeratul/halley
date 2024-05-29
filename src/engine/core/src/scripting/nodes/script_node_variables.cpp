@@ -57,7 +57,7 @@ EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const Scr
 	const auto& vars = environment.getVariables(getScope(node));
 	const auto& data = vars.getVariable(node.getSettings()["variable"].asString(""));
 	if (data.getType() == ConfigNodeType::EntityId || data.getType() == ConfigNodeType::Int || data.getType() == ConfigNodeType::Float) {
-		return EntityId(data.asEntityIdHolder().value);
+		return data.asEntityId();
 	} else {
 		return {};
 	}
@@ -138,7 +138,7 @@ ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const
 EntityId ScriptEntityVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto& vars = environment.getEntityVariables(readEntityId(environment, node, 0));
-	return EntityId(vars.getVariable(node.getSettings()["variable"].asString("")).asEntityIdHolder({}).value);
+	return vars.getVariable(node.getSettings()["variable"].asString("")).asEntityId({});
 }
 
 ConfigNode ScriptEntityVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
@@ -1034,9 +1034,9 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescripti
 ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	if (node.getSettings()["readRaw"].asBool(true)) {
-		return ConfigNode(EntityIdHolder{ readRawEntityId(environment, node, 0).value });
+		return ConfigNode(readRawEntityId(environment, node, 0));
 	}
-	return ConfigNode(EntityIdHolder{ readEntityId(environment, node, 0).value });
+	return ConfigNode(readEntityId(environment, node, 0));
 }
 
 
@@ -1061,10 +1061,7 @@ std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescripti
 
 EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	const auto data = readDataPin(environment, node, 0);
-	EntityId result;
-	result.value = data.asEntityIdHolder({}).value;
-	return result;
+	return readDataPin(environment, node, 0).asEntityId({});
 }
 
 

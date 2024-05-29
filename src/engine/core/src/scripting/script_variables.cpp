@@ -16,7 +16,7 @@ void ScriptVariables::load(const ConfigNode& node, const EntitySerializationCont
 		for (const auto& [k, v]: node.asMap()) {
 			if (k.startsWith("entity!")) {
 				const auto entityId = ConfigNodeSerializer<EntityId>().deserialize(context, v);
-				variables[k.mid(7)] = EntityIdHolder{ entityId.value };
+				variables[k.mid(7)] = entityId;
 			} else {
 				variables[k] = v;
 			}
@@ -28,7 +28,7 @@ void ScriptVariables::load(const ConfigNode& node, const EntitySerializationCont
 					variables.erase(k.mid(7));
 				} else {
 					const auto entityId = ConfigNodeSerializer<EntityId>().deserialize(context, v);
-					variables[k.mid(7)] = EntityIdHolder{ entityId.value };
+					variables[k.mid(7)] = entityId;
 				}
 			} else {
 				if (v.getType() == ConfigNodeType::Del) {
@@ -46,7 +46,7 @@ ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& conte
 	ConfigNode::MapType result;
 	for (const auto& [k, v]: variables) {
 		if (v.getType() == ConfigNodeType::EntityId) {
-			result["entity!" + k] = ConfigNodeSerializer<EntityId>().serialize(EntityId(v.asEntityIdHolder().value), context);
+			result["entity!" + k] = ConfigNodeSerializer<EntityId>().serialize(v.asEntityId(), context);
 		} else {
 			result[k] = v;
 		}

@@ -211,7 +211,7 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 	if (entityId.second != -1) {
 		ConfigNode::MapType params;
 		params["connId"] = static_cast<int>(entityId.first);
-		params["entityId"] = EntityIdHolder{ entityId.second };
+		params["entityId"] = EntityId(entityId.second);
 		params["scriptId"] = scriptGraph->getAssetId();
 		params["scriptHash"] = static_cast<int64_t>(scriptGraph->getAssetHash());
 		params["curNode"] = getCurrentNodeConfig();
@@ -328,7 +328,7 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 
 	if (data.getType() == ConfigNodeType::Sequence) {
 		for (const auto& entry: data.asSequence()) {
-			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asEntityIdHolder().value, entry["name"].asString(), entry["scriptIdx"].asInt() });
+			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asEntityId().value, entry["name"].asString(), entry["scriptIdx"].asInt() });
 		}
 	}
 
