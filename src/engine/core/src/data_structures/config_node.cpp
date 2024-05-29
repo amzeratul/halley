@@ -82,6 +82,11 @@ ConfigNode::ConfigNode(EntityIdHolder value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(EntityId value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(float value)
 {
 	operator=(value);
@@ -197,7 +202,7 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 			*this = other.asBool();
 			break;
 		case ConfigNodeType::EntityId:
-			*this = other.asEntityId();
+			*this = other.asEntityIdHolder();
 			break;
 		case ConfigNodeType::Float:
 			*this = other.asFloat();
@@ -280,6 +285,14 @@ ConfigNode& ConfigNode::operator=(int64_t value)
 }
 
 ConfigNode& ConfigNode::operator=(EntityIdHolder value)
+{
+	reset();
+	type = ConfigNodeType::EntityId;
+	int64Data = value.value;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(EntityId value)
 {
 	reset();
 	type = ConfigNodeType::EntityId;
@@ -441,7 +454,7 @@ namespace {
 				case ConfigNodeType::Int64:
 					return cmp.compare(a.asInt64(), b.asInt64());
 				case ConfigNodeType::EntityId:
-					return cmp.compare(a.asEntityId().value, b.asEntityId().value);
+					return cmp.compare(a.asEntityIdHolder().value, b.asEntityIdHolder().value);
 				case ConfigNodeType::Float:
 					return cmp.compare(a.asFloat(), b.asFloat());
 				case ConfigNodeType::Int2:
@@ -613,9 +626,9 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		case ConfigNodeType::EntityId:
 			if (s.getOptions().world) {
-				s << s.getOptions().world->getEntity(EntityId(asEntityId().value)).getInstanceUUID();
+				s << s.getOptions().world->getEntity(EntityId(asEntityIdHolder().value)).getInstanceUUID();
 			} else {
-				s << asEntityId().value;
+				s << asEntityIdHolder().value;
 			}
 			break;
 		case ConfigNodeType::Float:
@@ -782,7 +795,7 @@ int64_t ConfigNode::asInt64() const
 	}
 }
 
-EntityIdHolder ConfigNode::asEntityId() const
+EntityIdHolder ConfigNode::asEntityIdHolder() const
 {
 	if (type == ConfigNodeType::EntityId || type == ConfigNodeType::Int64) {
 		return EntityIdHolder{ int64Data };
@@ -790,6 +803,19 @@ EntityIdHolder ConfigNode::asEntityId() const
 		return EntityIdHolder{};
 	} else if (type == ConfigNodeType::Float && std::abs(floatData + 1.0f) < 0.0001f) {
 		return EntityIdHolder{};
+	} else {
+		throw Exception(getNodeDebugId() + " cannot be converted to EntityId.", HalleyExceptions::Resources);
+	}
+}
+
+EntityId ConfigNode::asEntityId() const
+{
+	if (type == ConfigNodeType::EntityId || type == ConfigNodeType::Int64) {
+		return EntityId{ int64Data };
+	} else if (type == ConfigNodeType::Int && intData == -1) {
+		return EntityId{};
+	} else if (type == ConfigNodeType::Float && std::abs(floatData + 1.0f) < 0.0001f) {
+		return EntityId{};
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to EntityId.", HalleyExceptions::Resources);
 	}
@@ -1076,7 +1102,7 @@ String ConfigNode::asString() const
 	} else if (type == ConfigNodeType::Bool) {
 		return asBool() ? "true" : "false";
 	} else if (type == ConfigNodeType::EntityId) {
-		return toString(asEntityId().value);
+		return toString(asEntityIdHolder().value);
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
 	} else if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
@@ -1147,7 +1173,16 @@ int64_t ConfigNode::asInt64(int64_t defaultValue) const
 	}
 }
 
-EntityIdHolder ConfigNode::asEntityId(EntityIdHolder defaultValue) const
+EntityIdHolder ConfigNode::asEntityIdHolder(EntityIdHolder defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asEntityIdHolder();
+	}
+}
+
+EntityId ConfigNode::asEntityId(EntityId defaultValue) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
@@ -1555,7 +1590,7 @@ int64_t ConfigNode::convertTo(Tag<int64_t> tag) const
 
 EntityIdHolder ConfigNode::convertTo(Tag<EntityIdHolder> tag) const
 {
-	return asEntityId({});
+	return asEntityIdHolder({});
 }
 
 float ConfigNode::convertTo(Tag<float> tag) const

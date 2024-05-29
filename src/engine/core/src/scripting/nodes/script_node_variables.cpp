@@ -57,7 +57,7 @@ EntityId ScriptVariable::doGetEntityId(ScriptEnvironment& environment, const Scr
 	const auto& vars = environment.getVariables(getScope(node));
 	const auto& data = vars.getVariable(node.getSettings()["variable"].asString(""));
 	if (data.getType() == ConfigNodeType::EntityId || data.getType() == ConfigNodeType::Int || data.getType() == ConfigNodeType::Float) {
-		return EntityId(data.asEntityId().value);
+		return EntityId(data.asEntityIdHolder().value);
 	} else {
 		return {};
 	}
@@ -138,7 +138,7 @@ ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const
 EntityId ScriptEntityVariable::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto& vars = environment.getEntityVariables(readEntityId(environment, node, 0));
-	return EntityId(vars.getVariable(node.getSettings()["variable"].asString("")).asEntityId({}).value);
+	return EntityId(vars.getVariable(node.getSettings()["variable"].asString("")).asEntityIdHolder({}).value);
 }
 
 ConfigNode ScriptEntityVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
@@ -1063,7 +1063,7 @@ EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, con
 {
 	const auto data = readDataPin(environment, node, 0);
 	EntityId result;
-	result.value = data.asEntityId({}).value;
+	result.value = data.asEntityIdHolder({}).value;
 	return result;
 }
 

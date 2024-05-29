@@ -10,6 +10,7 @@
 #include "halley/data_structures/vector.h"
 
 #include "hash_map.h"
+#include "halley/entity/entity_id.h"
 #include "halley/maths/ops.h"
 #include "halley/maths/rect.h"
 #include "halley/utils/type_traits.h"
@@ -141,6 +142,7 @@ namespace Halley {
 		explicit ConfigNode(uint32_t value);
 		explicit ConfigNode(int64_t value);
 		explicit ConfigNode(EntityIdHolder value);
+		explicit ConfigNode(EntityId value);
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
 		explicit ConfigNode(Vector2f value);
@@ -196,6 +198,7 @@ namespace Halley {
 		ConfigNode& operator=(uint32_t value);
 		ConfigNode& operator=(int64_t value);
 		ConfigNode& operator=(EntityIdHolder value);
+		ConfigNode& operator=(EntityId value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
 		ConfigNode& operator=(Vector2f value);
@@ -329,7 +332,8 @@ namespace Halley {
 
 		int asInt() const;
 		int64_t asInt64() const;
-		EntityIdHolder asEntityId() const;
+		EntityIdHolder asEntityIdHolder() const;
+		EntityId asEntityId() const;
 		float asFloat() const;
 		bool asBool() const;
 		Vector2i asVector2i() const;
@@ -348,7 +352,8 @@ namespace Halley {
 
 		int asInt(int defaultValue) const;
 		int64_t asInt64(int64_t defaultValue) const;
-		EntityIdHolder asEntityId(EntityIdHolder defaultValue) const;
+		EntityIdHolder asEntityIdHolder(EntityIdHolder defaultValue) const;
+		EntityId asEntityId(EntityId defaultValue) const;
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;

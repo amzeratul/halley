@@ -5,12 +5,53 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"
 #include "halley/text/halleystring.h"
+#include "halley/bytes/config_node_serializer.h"
 
 using namespace Halley;
 
 EntityId::EntityId(const String& str)
 {
 	value = str.toInteger64();
+}
+
+namespace {
+	EntityId fromConfigNode(const ConfigNode& node, const EntitySerializationContext& context)
+	{
+		if (node.getType() == ConfigNodeType::EntityId) {
+			EntityId result;
+			result.value = node.asEntityIdHolder().value;
+			return result;
+		}
+
+		if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined) {
+			return {};
+		}
+
+		const auto& value = node.asString("");
+		const auto uuid = value.isEmpty() ? UUID() : UUID(value);
+		if (!context.entityContext || !uuid.isValid()) {
+			return EntityId();
+		}
+		return context.entityContext->getEntityIdFromUUID(uuid);
+	}
+}
+
+EntityId::EntityId(const ConfigNode& node, const EntitySerializationContext& context)
+{
+	*this = fromConfigNode(node, context);
+}
+
+ConfigNode EntityId::toConfigNode(const EntitySerializationContext& context) const
+{
+	if (!context.entityContext) {
+		return ConfigNode(*this);
+	}
+
+	if (!isValid()) {
+		return ConfigNode(String());
+	}
+
+	return ConfigNode(context.entityContext->getUUIDFromEntityId(*this).toString());
 }
 
 String EntityId::toString() const
@@ -47,37 +88,4 @@ void EntityId::deserialize(Deserializer& s)
 	} else {
 		throw Exception("Deserializing EntityID requires World to be set in SerializationOptions.", HalleyExceptions::Entity);
 	}
-}
-
-ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySerializationContext& context)
-{
-	if (!context.entityContext) {
-		return ConfigNode(EntityIdHolder{ id.value });
-	}
-
-	if (!id.isValid()) {
-		return ConfigNode(String());
-	}
-
-	return ConfigNode(context.entityContext->getUUIDFromEntityId(id).toString());
-}
-
-EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
-{
-	if (node.getType() == ConfigNodeType::EntityId) {
-		EntityId result;
-		result.value = node.asEntityId().value;
-		return result;
-	}
-
-	if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined) {
-		return {};
-	}
-
-	const auto& value = node.asString("");
-	const auto uuid = value.isEmpty() ? UUID() : UUID(value);
-	if (!context.entityContext || !uuid.isValid()) {
-		return EntityId();
-	}
-	return context.entityContext->getEntityIdFromUUID(uuid);
 }

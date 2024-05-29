@@ -1,6 +1,6 @@
 #pragma once
 #include "entity.h"
-#include "halley/bytes/config_node_serializer_base.h"
+#include "halley/bytes/config_node_serializer.h"
 #include "halley/time/halleytime.h"
 #include "halley/support/logger.h"
 

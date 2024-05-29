@@ -46,7 +46,7 @@ ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& conte
 	ConfigNode::MapType result;
 	for (const auto& [k, v]: variables) {
 		if (v.getType() == ConfigNodeType::EntityId) {
-			result["entity!" + k] = ConfigNodeSerializer<EntityId>().serialize(EntityId(v.asEntityId().value), context);
+			result["entity!" + k] = ConfigNodeSerializer<EntityId>().serialize(EntityId(v.asEntityIdHolder().value), context);
 		} else {
 			result[k] = v;
 		}

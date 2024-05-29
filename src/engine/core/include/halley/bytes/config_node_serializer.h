@@ -9,6 +9,7 @@
 #include <set>
 
 
+#include "halley/entity/entity_id.h"
 #include "halley/resources/resource_reference.h"
 #include "halley/support/logger.h"
 
@@ -591,6 +592,20 @@ namespace Halley {
 			return node.asString("");
 		}
 	};
+
+	template <>
+    class ConfigNodeSerializer<EntityId> {
+    public:
+		ConfigNode serialize(EntityId id, const EntitySerializationContext& context)
+		{
+			return id.toConfigNode(context);
+		}
+
+		EntityId deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			return EntityId(node, context);
+		}
+    };
 
 	template <typename T>
 	class ConfigNodeSerializer<std::map<String, T>>

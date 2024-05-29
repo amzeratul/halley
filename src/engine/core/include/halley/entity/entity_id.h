@@ -1,10 +1,16 @@
 #pragma once
 
 #include <cstdint>
-#include "halley/bytes/config_node_serializer.h"
+
+namespace Halley {
+	class ConfigNode;
+	class EntitySerializationContext;
+}
 
 namespace Halley {
 	class World;
+	class Serializer;
+	class Deserializer;
 
 	struct alignas(8) EntityId {
 		int64_t value;
@@ -12,6 +18,9 @@ namespace Halley {
 		EntityId() : value(-1) {}
 		explicit EntityId(int64_t value) : value(value) {}
 		explicit EntityId(const String& str);
+		EntityId(const ConfigNode& node, const EntitySerializationContext& context);
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		bool isValid() const { return value != -1; }
 		bool operator==(const EntityId& other) const { return value == other.value; }
@@ -28,13 +37,6 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 	};
-
-	template <>
-    class ConfigNodeSerializer<EntityId> {
-    public:
-		ConfigNode serialize(EntityId id, const EntitySerializationContext& context);
-		EntityId deserialize(const EntitySerializationContext& context, const ConfigNode& node);
-    };
 }
 
 

@@ -328,7 +328,7 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 
 	if (data.getType() == ConfigNodeType::Sequence) {
 		for (const auto& entry: data.asSequence()) {
-			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asEntityId().value, entry["name"].asString(), entry["scriptIdx"].asInt() });
+			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asEntityIdHolder().value, entry["name"].asString(), entry["scriptIdx"].asInt() });
 		}
 	}
 

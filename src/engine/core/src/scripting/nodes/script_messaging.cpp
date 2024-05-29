@@ -507,6 +507,8 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 			callback = makeCallback<String>(environment, node);
 		} else if (msgType.returnType == "Halley::Vector2f") {
 			callback = makeCallback<Vector2f>(environment, node);
+		} else if (msgType.returnType == "Halley::EntityId") {
+			callback = makeCallback<EntityId>(environment, node);
 		}
 	}
 	const bool shouldWait = !!callback;

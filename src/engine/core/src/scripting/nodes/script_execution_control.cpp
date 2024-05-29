@@ -100,7 +100,7 @@ EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const Script
 		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
 		return environment.readInputEntityId(returnNode, other->second);
 	} else {
-		return EntityId(environment.getStartParams()[pinN - 1].asEntityId().value);
+		return EntityId(environment.getStartParams()[pinN - 1].asEntityIdHolder().value);
 	}
 }
 
@@ -311,7 +311,7 @@ void ScriptStartScript::doInitData(ScriptStartScriptData& data, const ScriptGrap
 {
 	if (nodeData.getType() == ConfigNodeType::Map) {
 		data.scriptName = nodeData["scriptName"].asString("");
-		data.target = EntityId(nodeData["target"].asEntityId({}).value);
+		data.target = EntityId(nodeData["target"].asEntityIdHolder({}).value);
 	} else {
 		data.scriptName = {};
 		data.target = {};
