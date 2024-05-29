@@ -575,6 +575,16 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 	return str.moveResults();
 }
 
+String ScriptSendEntityMessage::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
+
+	if (elementIdx >= 3 && elementIdx < msgType.members.size() + 3) {
+		return msgType.members.at(elementIdx - 3);
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
 IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto target = readEntityId(environment, node, 2);
