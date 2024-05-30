@@ -40,44 +40,6 @@ Vector<Vector2i> Line::generateLine(Vector2i p0, Vector2i p1)
 	return result;
 }
 
-void Halley::Line::doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback)
-{
-	// Using Bresenham's line algorithm
-	// http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-
-	const int x0 = p0.x;
-	const int y0 = p0.y;
-	const int x1 = p1.x;
-	const int y1 = p1.y;
-
-	int x = x0;
-	int y = y0;
-	//callback(Vector2i(x, y));
-
-	const int dx = abs(x1-x0);
-	const int dy = abs(y1-y0);
-	const int sx = (x0 < x1) ? 1 : -1;
-	const int sy = (y0 < y1) ? 1 : -1;
-	int err = dx-dy;
-
-	while (true) {
-		callback(Vector2i(x, y));
-
-		// End of line
-		if (x == x1 && y == y1)	return;
-
-		int e2 = 2*err;
-		if (e2 > -dy) {
-			err -= dy;
-			x += sx;
-		}
-		if (e2 < dx) {
-			err += dx;
-			y += sy;
-		}
-	}
-}
-
 std::optional<LineSegment> LineSegment::clip(const Circle& circle) const {
 	const bool aInside = circle.contains(a);
 	const bool bInside = circle.contains(b);
