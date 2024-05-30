@@ -82,7 +82,6 @@ std::optional<LineSegment> LineSegment::clip(const Rect4f& rect) const
 	}
 
 	const bool orderHorizontal = a.x < b.x;
-	const bool orderVertical = a.y < b.y;
 	auto result = *this;
 
 	if (!hRange.contains(result.a.x)) {
@@ -96,19 +95,21 @@ std::optional<LineSegment> LineSegment::clip(const Rect4f& rect) const
 		assert(orig.getDistance(result.b) < 0.1f);
 	}
 
-	if (!vRange.overlaps(getVertical())) {
+	if (!vRange.overlaps(result.getVertical())) {
 		// No overlap
 		return {};
 	}
 
+	const bool orderVertical = result.a.y < result.b.y;
+
 	if (!vRange.contains(result.a.y)) {
 		// Clip vertical A
-		result.a = *intersection(Line(orderVertical ? rect.getTopLeft() : rect.getBottomLeft(), Vector2f(1, 0)));
+		result.a = *result.intersection(Line(orderVertical ? rect.getTopLeft() : rect.getBottomLeft(), Vector2f(1, 0)));
 		assert(orig.getDistance(result.a) < 0.1f);
 	}
 	if (!vRange.contains(result.b.y)) {
 		// Clip vertical B
-		result.b = *intersection(Line(orderVertical ? rect.getBottomLeft() : rect.getTopLeft(), Vector2f(1, 0)));
+		result.b = *result.intersection(Line(orderVertical ? rect.getBottomLeft() : rect.getTopLeft(), Vector2f(1, 0)));
 		assert(orig.getDistance(result.b) < 0.1f);
 	}
 
