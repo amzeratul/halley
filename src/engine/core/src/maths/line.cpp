@@ -22,6 +22,7 @@
 #include "halley/maths/line.h"
 
 #include "halley/maths/circle.h"
+#include "halley/maths/rect.h"
 #include "halley/maths/ray.h"
 
 using namespace Halley;
@@ -66,4 +67,50 @@ std::optional<LineSegment> LineSegment::clip(const Circle& circle) const {
 		// No overlap
 		return std::nullopt;
 	}
+}
+
+std::optional<LineSegment> LineSegment::clip(const Rect4f& rect) const
+{
+	const auto hRange = rect.getHorizontal();
+	const auto vRange = rect.getVertical();
+
+	const auto orig = *this;
+
+	if (!hRange.overlaps(getHorizontal()) || !vRange.overlaps(getVertical())) {
+		// No overlap
+		return {};
+	}
+
+	const bool orderHorizontal = a.x < b.x;
+	const bool orderVertical = a.y < b.y;
+	auto result = *this;
+
+	if (!hRange.contains(result.a.x)) {
+		// Clip horizontal A
+		result.a = *intersection(Line(orderHorizontal ? rect.getTopLeft() : rect.getTopRight(), Vector2f(0, 1)));
+		assert(orig.getDistance(result.a) < 0.1f);
+	}
+	if (!hRange.contains(result.b.x)) {
+		// Clip horizontal B
+		result.b = *intersection(Line(orderHorizontal ? rect.getTopRight() : rect.getTopLeft(), Vector2f(0, 1)));
+		assert(orig.getDistance(result.b) < 0.1f);
+	}
+
+	if (!vRange.overlaps(getVertical())) {
+		// No overlap
+		return {};
+	}
+
+	if (!vRange.contains(result.a.y)) {
+		// Clip vertical A
+		result.a = *intersection(Line(orderVertical ? rect.getTopLeft() : rect.getBottomLeft(), Vector2f(1, 0)));
+		assert(orig.getDistance(result.a) < 0.1f);
+	}
+	if (!vRange.contains(result.b.y)) {
+		// Clip vertical B
+		result.b = *intersection(Line(orderVertical ? rect.getBottomLeft() : rect.getTopLeft(), Vector2f(1, 0)));
+		assert(orig.getDistance(result.b) < 0.1f);
+	}
+
+	return result;
 }

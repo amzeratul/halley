@@ -24,6 +24,7 @@
 #include "vector2.h"
 #include <optional>
 #include "range.h"
+#include "rect.h"
 
 namespace Halley {
 	class Circle;
@@ -267,12 +268,22 @@ namespace Halley {
 				|| (a.epsilonEquals(other.b, epsilon) && b.epsilonEquals(other.a, epsilon));
 		}
 
-		Range<float> project(const Vector2f& axis) const
+		[[nodiscard]] Range<float> project(const Vector2f& axis) const
 		{
 			const float dotA = axis.dot(a);
 			const float dotB = axis.dot(b);
 
 			return Range<float>(dotA, dotB);
+		}
+
+		[[nodiscard]] Range<float> getHorizontal() const
+		{
+			return Range<float>(a.x, b.x);
+		}
+
+		[[nodiscard]] Range<float> getVertical() const
+		{
+			return Range<float>(a.y, b.y);
 		}
 
 		bool operator==(const LineSegment& other) const
@@ -296,6 +307,7 @@ namespace Halley {
 		}
 
 		[[nodiscard]] std::optional<LineSegment> clip(const Circle& circle) const;
+		[[nodiscard]] std::optional<LineSegment> clip(const Rect4f& rect) const;
 
 		[[nodiscard]] LineSegment operator+(Vector2f p) const
 		{
