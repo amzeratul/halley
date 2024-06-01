@@ -172,6 +172,8 @@ namespace Halley
 		bool isBuildSourceUpToDate() const;
 		uint32_t getBuildCount() const;
 
+		Vector<Path> enumerateDirectory(const Path& path) override;
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;

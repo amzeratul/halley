@@ -449,6 +449,7 @@ namespace Halley {
 		virtual void launchGame(Vector<String> params) const = 0;
 		virtual Resources& getGameResources() = 0;
 		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;
+        virtual Vector<Path> enumerateDirectory(const Path& path) = 0;
 	};
 
 	class IProjectWindow {

@@ -654,6 +654,11 @@ uint32_t Project::getBuildCount() const
 	return buildCount;
 }
 
+Vector<Path> Project::enumerateDirectory(const Path& path)
+{
+	return FileSystem::enumerateDirectory(path);
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {
