@@ -164,6 +164,11 @@ std::shared_ptr<UIWidget> UISlider::getLabelBox() const
 	return box;
 }
 
+Vector2f UISlider::getThumbPosition() const
+{
+	return sliderBar->getThumbPosition();
+}
+
 bool UISlider::canInteractWithMouse() const
 {
 	return true;
@@ -280,6 +285,14 @@ LocalisedString UISliderBar::getToolTip() const
 	return parent.getToolTip();
 }
 
+Vector2f UISliderBar::getThumbPosition() const
+{
+	const auto size = getSize();
+	const float thumbX = size.x * parent.getRelativeValue();
+
+	return Vector2f(thumbX, 0) + getPosition();
+}
+
 void UISliderBar::draw(UIPainter& painter) const
 {
 	painter.draw(left);
@@ -291,11 +304,8 @@ void UISliderBar::draw(UIPainter& painter) const
 
 void UISliderBar::update(Time t, bool moved)
 {
-	const auto size = getSize();
-	const float thumbX = size.x * parent.getRelativeValue();
-
 	left.setPos(getPosition() + Vector2f(-left.getUncroppedSize().x, 0));
-	thumb.setPos(Vector2f(thumbX, 0) + getPosition());
+	thumb.setPos(getThumbPosition());
 	right.setPos(getPosition() + Vector2f(getSize().x, 0));
 
 	if (dirtyThumb) {

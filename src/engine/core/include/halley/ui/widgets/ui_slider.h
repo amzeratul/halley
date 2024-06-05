@@ -29,6 +29,7 @@ namespace Halley {
 		void onManualControlAnalogueAdjustValue(float delta, Time t) override;
 
 		std::shared_ptr<UIWidget> getLabelBox() const;
+		Vector2f getThumbPosition() const;
 
 	protected:
 		bool canInteractWithMouse() const override;
@@ -69,6 +70,7 @@ namespace Halley {
 		void onMouseLeft(Vector2f mousePos) override;
 		Rect4f getMouseRect() const override;
 		LocalisedString getToolTip() const override;
+		Vector2f getThumbPosition() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
