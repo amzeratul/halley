@@ -61,6 +61,7 @@ namespace Halley {
 		SetSelected,
 		SetEnabled,
 		SetHovered,
+		SpinControlValueChanged,
 		TextChanged,
 		TextSubmit,
 		TabChanged,

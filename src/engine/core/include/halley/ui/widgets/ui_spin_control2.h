@@ -28,6 +28,7 @@ namespace Halley {
 	protected:
 		Vector4f getTextInnerBorder() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
+		void onTextModified() override;
 
 	private:
 		float increment = 1;

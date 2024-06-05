@@ -36,7 +36,7 @@ void UISpinControl2::setValue(float value)
 
 float UISpinControl2::getValue() const
 {
-	return getText().toFloat();
+	return getText().isNumber() ? getText().toFloat() : minValue.value_or(0.0f);
 }
 
 void UISpinControl2::setIncrement(float inc)
@@ -87,4 +87,11 @@ bool UISpinControl2::onKeyPress(KeyboardKeyPress key)
 	}
 
 	return UITextInput::onKeyPress(key);
+}
+
+void UISpinControl2::onTextModified()
+{
+	UITextInput::onTextModified();
+
+	sendEvent(UIEvent(UIEventType::SpinControlValueChanged, getId(), getValue()));
 }

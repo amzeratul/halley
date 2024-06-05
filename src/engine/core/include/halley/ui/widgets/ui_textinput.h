@@ -89,13 +89,13 @@ namespace Halley {
 		virtual Vector4f getTextInnerBorder() const;
 
 		std::optional<MouseCursorMode> getMouseCursorMode() const override;
+		virtual void onTextModified();
 
 	private:
 		void updateCaret();
 		Rect4f getTextBounds() const;
 
 		void onMaybeTextModified();
-		void onTextModified();
 		void validateText();
 		void onValidatorSet() override;
 
