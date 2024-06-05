@@ -64,8 +64,12 @@ void CurveEditor::draw(UIPainter& painter) const
 
 	// Vertical baselines
 	const auto baseline = hLine.clone().setColour(lineColour.withAlpha(0.7f));
-	p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y0))), true);
-	p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y1))), true);
+	if (std::abs(y0) > 0.00001f) {
+		p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y0))), true);
+	}
+	if (std::abs(y1 - 1.0f) > 0.00001f) {
+		p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y1))), true);
+	}
 
 	painter.draw([this] (Painter& painter)
 	{
@@ -209,6 +213,7 @@ void CurveEditor::normalizePoints()
 	if (points.empty()) {
 		points.push_back(Vector2f(horizontalRange.start, 0));
 		points.push_back(Vector2f(horizontalRange.end, 1));
+		curve.ensureValid();
 	}
 	if (points.size() == 1) {
 		points.push_back(points.back());

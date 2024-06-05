@@ -21,6 +21,7 @@ namespace Halley {
 
         ConfigNode toConfigNode() const;
 
+        void ensureValid();
 		void makeDefault(bool startFromZero = true);
 
         bool operator==(const InterpolationCurve& other) const;

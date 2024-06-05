@@ -34,6 +34,8 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node, bool startFromZer
 	} else {
 		makeDefault(startFromZero);
 	}
+
+	assert(tweens.size() == points.size());
 }
 
 ConfigNode InterpolationCurve::toConfigNode() const
@@ -46,6 +48,13 @@ ConfigNode InterpolationCurve::toConfigNode() const
 	return result;
 }
 
+void InterpolationCurve::ensureValid()
+{
+	if (tweens.size() != points.size()) {
+		tweens.resize(points.size(), TweenCurve::Linear);
+	}
+}
+
 void InterpolationCurve::makeDefault(bool startFromZero)
 {
 	scale = 1.0f;
@@ -56,6 +65,8 @@ void InterpolationCurve::makeDefault(bool startFromZero)
 	points.push_back(Vector2f(1, 1));
 	tweens.push_back(TweenCurve::Linear);
 	tweens.push_back(TweenCurve::Linear);
+
+	assert(tweens.size() == points.size());
 }
 
 bool InterpolationCurve::operator==(const InterpolationCurve& other) const
@@ -82,6 +93,8 @@ void InterpolationCurve::deserialize(Deserializer& s)
 	s >> tweens;
 	s >> scale;
 	s >> baseline;
+
+	assert(tweens.size() == points.size());
 }
 
 float InterpolationCurve::evaluate(float val) const
