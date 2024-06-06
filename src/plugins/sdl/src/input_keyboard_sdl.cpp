@@ -97,6 +97,19 @@ String InputKeyboardSDL::getButtonName(int code) const
 		return "Esc";
 	case static_cast<int>(KeyCode::Delete):
 		return "Del";
+	case static_cast<int>(KeyCode::Tab):
+		return "Tab";
+	case static_cast<int>(KeyCode::LCtrl):
+	case static_cast<int>(KeyCode::RCtrl):
+		return "Ctrl";
+	case static_cast<int>(KeyCode::LShift):
+	case static_cast<int>(KeyCode::RShift):
+		return "Shift";
+	case static_cast<int>(KeyCode::LAlt):
+	case static_cast<int>(KeyCode::RAlt):
+		return "Alt";
+	case static_cast<int>(KeyCode::Enter):
+		return "Enter";
 	default:
 		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
 			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
