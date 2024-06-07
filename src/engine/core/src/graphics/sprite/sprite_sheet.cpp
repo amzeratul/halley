@@ -545,7 +545,8 @@ std::unique_ptr<Image> SpriteSheet::makeAtlas(const Vector<BinPackResult>& resul
 			entry.rotated = packedImg.rotated;
 			entry.pivot = imgData.clip.isEmpty() ? Vector2f() : Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
 			entry.origPivot = imgData.pivot;
-			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()), Vector2f(packedImg.rect.getBottomRight()))) / Vector2f(size);
+			const auto bias = Vector2f(1, 1) / 256;
+			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + bias, Vector2f(packedImg.rect.getBottomRight()) - bias)) / Vector2f(size);
 			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));
 			entry.slices = imgData.slices;
 
