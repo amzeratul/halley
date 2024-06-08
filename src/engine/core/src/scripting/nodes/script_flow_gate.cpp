@@ -1,4 +1,6 @@
 #include "script_flow_gate.h"
+
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 ScriptFlowGateData::ScriptFlowGateData(const ConfigNode& node)
@@ -62,6 +64,102 @@ IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment,
 		} else {
 			return Result(ScriptNodeExecutionState::Fork, 0, 2, 1);
 		}
+	} else {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	}
+}
+
+
+
+ScriptSwitchGateData::ScriptSwitchGateData(const ConfigNode& node)
+{
+	if (node.hasKey("flowing")) {
+		flowing = node["flowing"].asOptional<int>();
+	}
+}
+
+ConfigNode ScriptSwitchGateData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	if (flowing) {
+		result["flowing"] = *flowing;
+	}
+	return result;	
+}
+
+Vector<IGraphNodeType::SettingType> ScriptSwitchGate::getSettingTypes() const
+{
+	return {
+		SettingType{ "cases", "Halley::Vector<Halley::String>", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptSwitchGate::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 10>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true },
+	};
+
+	const auto cases = node.getSettings()["cases"].asVector<String>({});
+	const auto numCases = std::min(cases.size(), static_cast<size_t>(7));
+	return gsl::span<const PinType>(data).subspan(0, 3 + numCases);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSwitchGate::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Switches flow based on ");
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSwitchGate::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx >= 2) {
+		const auto cases = node.getSettings()["cases"].asVector<String>({});
+		if (elementIdx - 2 >= cases.size()) {
+			return "default";
+		}
+		return cases.at(elementIdx - 2);
+	}
+	return ScriptNodeTypeBase<ScriptSwitchGateData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptSwitchGate::doInitData(ScriptSwitchGateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data = ScriptSwitchGateData(nodeData);
+}
+
+IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSwitchGateData& data) const
+{
+	const auto curValue = readDataPin(environment, node, 1).asString("");
+	auto cases = node.getSettings()["cases"].asVector<String>({});
+	if (cases.size() > 7) {
+		cases.resize(7);
+	}
+
+	int idx = 0;
+	if (const auto iter = std_ex::find(cases, curValue); iter != cases.end()) {
+		idx = static_cast<int>(iter - cases.begin());
+	} else {
+		idx = static_cast<int>(cases.size());
+	}
+
+	if (idx != data.flowing) {
+		data.flowing = idx;
+		const uint8_t active = 1 << idx;
+		return Result(ScriptNodeExecutionState::Fork, 0, active, 0xFF & (~active));
 	} else {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	}

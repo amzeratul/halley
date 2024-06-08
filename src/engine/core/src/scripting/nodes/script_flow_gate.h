@@ -28,6 +28,32 @@ namespace Halley {
 	};
 
 
+	class ScriptSwitchGateData : public ScriptStateData<ScriptSwitchGateData> {
+	public:
+		ScriptSwitchGateData() = default;
+		ScriptSwitchGateData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+
+		std::optional<int> flowing;
+	};
+
+	class ScriptSwitchGate : public ScriptNodeTypeBase<ScriptSwitchGateData> {
+	public:
+		String getId() const override { return "switchGate"; }
+		String getName() const override { return "Switch Gate"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/switch.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::State; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptSwitchGateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSwitchGateData& data) const override;
+	};
+
+
 	class ScriptFlowOnceData : public ScriptStateData<ScriptFlowOnceData> {
 	public:
 		ScriptFlowOnceData() = default;
