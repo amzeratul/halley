@@ -209,6 +209,96 @@ void ScriptLatch::doSetData(ScriptEnvironment& environment, const ScriptGraphNod
 }
 
 
+ScriptCacheData::ScriptCacheData(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		value = node["value"];
+		timeElapsed = node["timeElapsed"].asFloat(0);
+		lastFrame = node["lastFrame"].asInt(0);
+		hasValue = node["hasValue"].asBool(false);
+	}
+}
+
+ConfigNode ScriptCacheData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["value"] = value;
+	result["timeElapsed"] = static_cast<float>(timeElapsed);
+	result["lastFrame"] = lastFrame;
+	result["hasValue"] = hasValue;
+	return result;
+}
+
+
+Vector<IGraphNodeType::SettingType> ScriptCache::getSettingTypes() const
+{
+	return {
+		SettingType{ "expiration", "Halley::Time", Vector<String>{"0"} },
+	};
+}
+
+String ScriptCache::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "cache(" + getConnectedNodeName(node, graph, 0) + ")";
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptCache::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptCache::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Returns ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	str.append(", or cached value");
+	return str.moveResults();
+}
+
+String ScriptCache::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	return ScriptNodeTypeBase<ScriptCacheData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptCache::doInitData(ScriptCacheData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data = ScriptCacheData(nodeData);
+}
+
+ConfigNode ScriptCache::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptCacheData& data) const
+{
+	const auto curFrame = environment.getCurrentFrameNumber();
+
+	if (data.hasValue) {
+		if (data.lastFrame != curFrame) {
+			data.timeElapsed += environment.getDeltaTime();
+			data.lastFrame = curFrame;
+
+			if (data.timeElapsed > node.getSettings()["expiration"].asFloat(0)) {
+				data.hasValue = false;
+				data.value = ConfigNode();
+			}
+		}
+	}
+
+	if (!data.hasValue) {
+		data.value = readDataPin(environment, node, 0);
+		data.hasValue = true;
+		data.lastFrame = curFrame;
+		data.timeElapsed = 0;
+	}
+
+	return ConfigNode(data.value);
+}
+
+
 
 ConfigNode ScriptFenceData::toConfigNode(const EntitySerializationContext& context)
 {
