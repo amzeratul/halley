@@ -29,10 +29,10 @@ void PlotterCanvas::draw(UIPainter& p) const
 		aabb = aabb.merge(Rect4f::getSpanningRect(polygons[1]));
 	}
 	const auto rect = getRect().grow(-10.0f);
-	const auto c0 = Vector2f(-563.889f, 58.8439f);//aabb.getCenter();
+	const auto c0 = aabb.getCenter();
 	const auto c1 = rect.getCenter();
 
-	const auto zoom = std::min(rect.getHeight() / aabb.getHeight(), rect.getWidth() / aabb.getWidth()) * 25;
+	const auto zoom = std::min(rect.getHeight() / aabb.getHeight(), rect.getWidth() / aabb.getWidth());
 	auto polys = polygons;
 	for (auto& poly: polys) {
 		for (auto& v: poly) {
