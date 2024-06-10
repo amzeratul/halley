@@ -17,9 +17,6 @@ namespace Halley {
         Sprite bg;
         Sprite circle;
 
-        Vector<Vertex> vertices;
-
-        size_t curVertex = 0;
-        Time displayTime = 0;
+        Vector<Vector<Vertex>> polygons;
     };
 }

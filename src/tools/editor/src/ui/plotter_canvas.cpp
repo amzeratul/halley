@@ -13,41 +13,44 @@ PlotterCanvas::PlotterCanvas(UIFactory& factory)
 void PlotterCanvas::update(Time t, bool moved)
 {
 	bg.setPosition(getPosition()).scaleTo(getRect().getSize());
-
-	if (!vertices.empty()) {
-		displayTime -= t;
-		if (displayTime <= 0) {
-			curVertex = (curVertex + 1) % vertices.size();
-			displayTime += 0.5;
-		}
-	}
 }
 
 void PlotterCanvas::draw(UIPainter& p) const
 {
-	p.draw(bg);
+	auto p2 = p.withClip(getRect());
+	p2.draw(bg);
 
-	if (vertices.empty()) {
+	if (polygons.empty()) {
 		return;
 	}
-	const auto aabb = Rect4f::getSpanningRect(vertices).grow(1.0f);
+
+	Rect4f aabb = Rect4f::getSpanningRect(polygons[0]);
+	for (size_t i = 1; i < polygons.size(); ++i) {
+		aabb = aabb.merge(Rect4f::getSpanningRect(polygons[1]));
+	}
 	const auto rect = getRect().grow(-10.0f);
-	const auto c0 = aabb.getCenter();
+	const auto c0 = Vector2f(-563.889f, 58.8439f);//aabb.getCenter();
 	const auto c1 = rect.getCenter();
 
-	const auto zoom = std::min(rect.getHeight() / aabb.getHeight(), rect.getWidth() / aabb.getWidth());
-	auto vs = vertices;
-	for (auto& v: vs) {
-		v = (v - c0) * zoom + c1;
+	const auto zoom = std::min(rect.getHeight() / aabb.getHeight(), rect.getWidth() / aabb.getWidth()) * 25;
+	auto polys = polygons;
+	for (auto& poly: polys) {
+		for (auto& v: poly) {
+			v = (v - c0) * zoom + c1;
+		}
 	}
 
-	p.draw([circle = circle, vs = vs, curVertex = curVertex] (Painter& painter)
+	p2.draw([circle = circle, polys = std::move(polys)] (Painter& painter)
 	{
-		painter.drawLine(vs, 1.0f, Colour4f(1, 1, 1), true);
+		int i = 0;
+		for (auto& poly: polys) {
+			auto col = Colour4f::fromHSV(static_cast<float>(i++) / 0.41f, 0.5f, 1.0f, 1.0f);
+			painter.drawLine(poly, 1.0f, col, true);
 
-		auto c = circle;
-		for (size_t i = 0; i < vs.size(); ++i) {
-			c.setPosition(vs[i]).setColour(i == curVertex ? Colour4f(1, 0, 0) : Colour4f(1, 1, 1)).scaleTo(Vector2f(1, 1) * (i == curVertex ? 7 : 5)).draw(painter);
+			auto c = circle.clone().setColour(col);
+			for (size_t i = 0; i < poly.size(); ++i) {
+				c.setPosition(poly[i]).draw(painter);
+			}
 		}
 	});
 }
@@ -55,7 +58,7 @@ void PlotterCanvas::draw(UIPainter& p) const
 void PlotterCanvas::setPlot(std::string_view str)
 {
 	// Hacky parser :)
-	vertices.clear();
+	Vector<Vertex> curVertices;
 
 	bool parsingList = false;
 	bool parsingVertex = false;
@@ -79,7 +82,7 @@ void PlotterCanvas::setPlot(std::string_view str)
 
 						if (c == ')') {
 							parsingVertex = false;
-							vertices.push_back(Vertex(number.size() >= 1 ? number[0] : 0, number.size() >= 2 ? number[1] : 0));
+							curVertices.push_back(Vertex(number.size() >= 1 ? number[0] : 0, number.size() >= 2 ? number[1] : 0));
 							number.clear();
 						}
 					}
@@ -89,7 +92,10 @@ void PlotterCanvas::setPlot(std::string_view str)
 					}
 					if (c == ']') {
 						parsingList = false;
-						return;
+						if (!curVertices.empty()) {
+							polygons.push_back(std::move(curVertices));
+							curVertices = {};
+						}
 					}
 				}
 			} else {

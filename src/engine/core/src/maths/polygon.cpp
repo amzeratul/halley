@@ -478,7 +478,7 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 	return bestPoint * Vector2f(1.0f, anisotropy);
 }
 
-Polygon::SATClassification Polygon::classify(const Polygon& other) const
+Polygon::SATClassification Polygon::classify(const Polygon& other, float epsilon) const
 {
 	Expects(convex);
 	Expects(other.convex);
@@ -506,6 +506,10 @@ Polygon::SATClassification Polygon::classify(const Polygon& other) const
 			const auto otherRange = other.project(axis);
 
 			if (myRange.overlaps(otherRange)) {
+				if (myRange.getOverlap(otherRange).getLength() < epsilon) {
+					return SATClassification::Separate;
+				}
+
 				if (!myRange.contains(otherRange)) {
 					contains = false;
 				}

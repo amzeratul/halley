@@ -72,7 +72,7 @@ namespace Halley {
 		bool collide(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
 
-		SATClassification classify(const Polygon& other) const;
+		SATClassification classify(const Polygon& other, float epsilon = 0.0001f) const;
 		SATClassification classify(const LineSegment& line) const;
 
 		void setVertices(VertexList vertices);
