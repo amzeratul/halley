@@ -5,6 +5,7 @@
 #include "ecs_window.h"
 #include "editor_settings_window.h"
 #include "game_properties_window.h"
+#include "plotter.h"
 #include "status_bar.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
@@ -144,6 +145,7 @@ void ProjectWindow::makePagedPane()
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
+	auto plot = std::make_shared<Plotter>(factory);
 
 	const auto margin = Vector4f(8, 8, 8, 4);
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
@@ -154,6 +156,7 @@ void ProjectWindow::makePagedPane()
 	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Terminal))->add(consoleWindow, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Plot))->add(plot, 1, margin);
 
 	uiMid->add(pagedPane, 1);
 }

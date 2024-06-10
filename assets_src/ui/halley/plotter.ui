@@ -1,0 +1,20 @@
+uuid: 5f37c5c4-4c7b-4744-9f3f-b17500901479
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: 85ea6612-4a66-42f1-abe7-1a59f8070767
+    proportion: 1
+    border: [8, 8, 8, 8]
+    sizer:
+      columnProportions: []
+    widget:
+      class: widget
+      id: canvasContainer
+  - uuid: 981b2d8e-d4a0-451e-ab2c-5aaff2430a4c
+    border: [8, 8, 8, 8]
+    widget:
+      class: textInput
+      id: input

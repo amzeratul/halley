@@ -71,6 +71,9 @@ void Toolbar::makeUI()
 		case EditorTabs::Terminal:
 			toolName = "Terminal";
 			break;
+		case EditorTabs::Plot:
+			toolName = "Plotter";
+			break;
 		}
 		toolNameWidget->setText(LocalisedString::fromHardcodedString(toolName));
 		projectWindow.setPage(tab);

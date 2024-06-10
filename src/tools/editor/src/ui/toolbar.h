@@ -15,18 +15,20 @@ namespace Halley {
 		Properties,
 		Settings,
 		Terminal,
+		Plot,
 	};
 
 	template <>
 	struct EnumNames<EditorTabs> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr std::array<const char*, 7> operator()() const {
 			return{{
 				"assets",
 				"ecs",
 				"remotes",
 				"properties",
 				"settings",
-				"terminal"
+				"terminal",
+				"plot"
 			}};
 		}
 	};

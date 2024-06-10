@@ -105,7 +105,7 @@ namespace Halley {
 			mutable bool dirty = false;
 		};
     	
-		constexpr static int numOfStandardTools = 6;
+		constexpr static int numOfStandardTools = 7;
 
     	EditorUIFactory& factory;
         HalleyEditor& editor;
