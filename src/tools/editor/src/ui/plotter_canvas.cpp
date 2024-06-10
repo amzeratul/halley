@@ -13,6 +13,14 @@ PlotterCanvas::PlotterCanvas(UIFactory& factory)
 void PlotterCanvas::update(Time t, bool moved)
 {
 	bg.setPosition(getPosition()).scaleTo(getRect().getSize());
+
+	if (!vertices.empty()) {
+		displayTime -= t;
+		if (displayTime <= 0) {
+			curVertex = (curVertex + 1) % vertices.size();
+			displayTime += 0.5;
+		}
+	}
 }
 
 void PlotterCanvas::draw(UIPainter& p) const
@@ -33,13 +41,13 @@ void PlotterCanvas::draw(UIPainter& p) const
 		v = (v - c0) * zoom + c1;
 	}
 
-	p.draw([circle = circle, vs = vs] (Painter& painter)
+	p.draw([circle = circle, vs = vs, curVertex = curVertex] (Painter& painter)
 	{
 		painter.drawLine(vs, 1.0f, Colour4f(1, 1, 1), true);
 
 		auto c = circle;
-		for (const auto& v: vs) {
-			c.setPosition(v).draw(painter);
+		for (size_t i = 0; i < vs.size(); ++i) {
+			c.setPosition(vs[i]).setColour(i == curVertex ? Colour4f(1, 0, 0) : Colour4f(1, 1, 1)).scaleTo(Vector2f(1, 1) * (i == curVertex ? 7 : 5)).draw(painter);
 		}
 	});
 }

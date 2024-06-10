@@ -18,5 +18,8 @@ namespace Halley {
         Sprite circle;
 
         Vector<Vertex> vertices;
+
+        size_t curVertex = 0;
+        Time displayTime = 0;
     };
 }
