@@ -488,6 +488,18 @@ InputDevice* InputVirtual::getLastDevice() const
 	return lastDevice.lock().get();
 }
 
+void InputVirtual::setLastDeviceToType(InputType type)
+{
+	for (auto& binds: buttons) {
+		for (auto& bind: binds) {
+			if (bind.device->getInputType() == type) {
+				lastDevice = bind.device;
+				return;
+			}
+		}
+	}
+}
+
 void InputVirtual::updateLastDevice()
 {
 	if (!lastDeviceFrozen) {

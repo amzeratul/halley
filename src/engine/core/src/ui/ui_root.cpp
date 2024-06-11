@@ -15,8 +15,8 @@ using namespace Halley;
 
 UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 	: id("root")
-	, audioAPI(api.audio)
 	, inputAPI(api.input)
+	, audioAPI(api.audio)
 	, uiRect(rect)
 	, dummyInput(std::make_shared<InputButtonBase>(4))
 	, mouseRemap([](Vector2f p) { return p; })
@@ -320,6 +320,11 @@ void UIRoot::releaseWeakPtrs()
 UIInputType UIRoot::getLastInputType() const
 {
 	return lastInputType;
+}
+
+void UIRoot::setLastInputType(UIInputType inputType)
+{
+	lastInputType = inputType;
 }
 
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)

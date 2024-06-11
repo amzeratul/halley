@@ -111,6 +111,7 @@ namespace Halley {
 		void setRepeat(float first, float hold);
 
 		InputDevice* getLastDevice() const;
+		void setLastDeviceToType(InputType type);
 		void setLastDeviceFreeze(bool frozen);
 
 		JoystickType getJoystickType() const override;

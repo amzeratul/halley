@@ -77,6 +77,7 @@ namespace Halley {
 		void releaseWeakPtrs();
 
 		UIInputType getLastInputType() const;
+		void setLastInputType(UIInputType inputType);
 
 	private:
 		String id;
