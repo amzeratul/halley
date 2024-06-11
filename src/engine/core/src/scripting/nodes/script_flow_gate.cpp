@@ -159,7 +159,8 @@ IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environmen
 	if (idx != data.flowing) {
 		data.flowing = idx;
 		const uint8_t active = 1 << idx;
-		return Result(ScriptNodeExecutionState::Fork, 0, active, 0xFF & (~active));
+		const auto allMask = static_cast<uint8_t>((1 << (cases.size() + 1)) - 1);
+		return Result(ScriptNodeExecutionState::Fork, 0, active, allMask & (~active));
 	} else {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	}
