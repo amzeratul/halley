@@ -79,6 +79,8 @@ namespace Halley {
 		UIInputType getLastInputType() const;
 		void setLastInputType(UIInputType inputType);
 
+		bool hasMouseExclusive(const UIWidget& widget) const;
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
@@ -88,6 +90,7 @@ namespace Halley {
 
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> mouseExclusive; // A widget that's taking exclusive control of mouse
+		std::array<bool, 3> exclusiveButtonsHeld;
 		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;

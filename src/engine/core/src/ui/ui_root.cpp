@@ -327,6 +327,12 @@ void UIRoot::setLastInputType(UIInputType inputType)
 	lastInputType = inputType;
 }
 
+bool UIRoot::hasMouseExclusive(const UIWidget& widget) const
+{
+	auto exclusive = mouseExclusive.lock();
+	return exclusive && exclusive.get() == &widget;
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse
@@ -337,7 +343,9 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	lastMousePos = mousePos;
 
 	// Check buttons
-	for (int i = 0; i < 3; ++i) {
+	constexpr int nButtons = 3;
+	assert(exclusiveButtonsHeld.size() == static_cast<size_t>(nButtons));
+	for (int i = 0; i < nButtons; ++i) {
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
 			anyMouseButtonHeld = i;
@@ -346,6 +354,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				actuallyUnderMouse = actuallyUnderMouse->prePressMouse(mousePos, i, keyMods).value_or(actuallyUnderMouse);
 			}
 			mouseExclusive = actuallyUnderMouse;
+			exclusiveButtonsHeld[i] = true;
 
 			if (actuallyUnderMouse) {
 				setFocus(actuallyUnderMouse->getFocusableOrAncestor(), true);
@@ -397,7 +406,10 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				}
 			}
 
-			mouseExclusive.reset();
+			exclusiveButtonsHeld[i] = false;
+			if (std::none_of(exclusiveButtonsHeld.begin(), exclusiveButtonsHeld.end(), [] (bool b) { return b; })) {
+				mouseExclusive.reset();
+			}
 		}
 	}
 

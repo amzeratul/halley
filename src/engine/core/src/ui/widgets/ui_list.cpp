@@ -1071,13 +1071,13 @@ void UIListItem::onEnabledChanged()
 
 bool UIListItem::ignoreClip() const
 {
-	return dragged;
+	return dragging.has_value();
 }
 
 void UIListItem::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
-		if (dragged) {
+		if (dragging) {
 			auto p2 = painter.withAdjustedLayer(1);
 			p2.draw(sprite);
 		} else {
@@ -1092,13 +1092,16 @@ void UIListItem::update(Time t, bool moved)
 
 	origPos = getPosition();
 
-	if (dragged) {
-		setChildLayerAdjustment(1);
+	if (dragging && !getRoot()->hasMouseExclusive(*this)) {
+		stopDragging();
+	}
 
-		auto pos = curDragPos;
+	if (dragging) {
+		setChildLayerAdjustment(1);
+		auto pos = dragging->curDragPos;
 		if (!parent.dragOutsideEnabled) {
 			const auto parentRect = parent.getRect();
-			const auto myTargetRect = Rect4f(curDragPos, curDragPos + dragWidget->getSize());
+			const auto myTargetRect = Rect4f(dragging->curDragPos, dragging->curDragPos + dragWidget->getSize());
 			pos = myTargetRect.fitWithin(parentRect).getTopLeft();
 		}
 		dragWidget->setPosition(pos);
@@ -1120,7 +1123,7 @@ void UIListItem::update(Time t, bool moved)
 	}
 
 	const bool manualDragging = isManualDragging();
-	if (dragged || manualDragging || manualDragTime > 0) {
+	if (dragging || manualDragging || manualDragTime > 0) {
 		if (manualDragging) {
 			manualDragTime = 1;
 		} else {
@@ -1138,13 +1141,12 @@ void UIListItem::update(Time t, bool moved)
 
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
-	if (!dragged && held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
-		dragged = true;
-		myStartPos = dragWidget->getPosition();
+	if (!dragging && held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
+		dragging = DragInfo { {}, dragWidget->getPosition() };
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
-	if (dragged) {
-		setDragPos(parent.getDragPositionAdjustment(mousePos - mouseStartPos + myStartPos, myStartPos));
+	if (dragging) {
+		setDragPos(parent.getDragPositionAdjustment(mousePos - mouseStartPos + dragging->myStartPos, dragging->myStartPos));
 	}
 }
 
@@ -1153,19 +1155,18 @@ void UIListItem::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	UIClickable::pressMouse(mousePos, button, keyMods);
 	if (button == 0) {
 		held = true;
-		dragged = false;
+		stopDragging();
 		mouseStartPos = mousePos;
 
 		if (!dragWidget) {
 			dragWidget = this;
 		}
-		myStartPos = dragWidget->getPosition();
-		dragWidgetOffset = myStartPos - getPosition();
+		dragWidgetOffset = dragWidget->getPosition() - getPosition();
 	}
 
 	if (button == 2) {
 		held = false;
-		dragged = false;
+		stopDragging();
 	}
 
 	lastMods = keyMods;
@@ -1179,12 +1180,7 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 		if (held) {
 			onMouseOver(mousePos);
 			held = false;
-
-			if (dragged) {
-				dragged = false;
-				setNoClipChildren(false);
-				parent.onItemDoneDragging(*this, index, curDragPos);
-			}
+			stopDragging();
 		}
 	}
 	parent.onItemClickReleased(*this, button, lastMods);
@@ -1197,13 +1193,25 @@ void UIListItem::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 
 void UIListItem::setDragPos(Vector2f pos)
 {
-	curDragPos = pos.round();
-	parent.onItemDragging(*this, index, curDragPos);
+	if (dragging) {
+		dragging->curDragPos = pos.round();
+		parent.onItemDragging(*this, index, dragging->curDragPos);
+	}
+}
+
+void UIListItem::stopDragging()
+{
+	if (dragging) {
+		const auto pos = dragging->curDragPos;
+		dragging = {};
+		setNoClipChildren(false);
+		parent.onItemDoneDragging(*this, index, pos);
+	}
 }
 
 void UIListItem::doSetState(State state)
 {
-	if (dragged || isManualDragging()) {
+	if (dragging || isManualDragging()) {
 		sprite = style.getSprite("drag");
 	} else if (selected && parent.canShowSelection() && style.hasSprite("selected")) {
 		sprite = style.getSprite("selected");
@@ -1236,7 +1244,7 @@ void UIListItem::updateSpritePosition()
 	if (sprite.hasMaterial()) {
 		Vector2f pos = getPosition();
 
-		if (dragged) {
+		if (dragging) {
 			pos = dragWidget->getPosition() - dragWidgetOffset;
 		}
 		sprite.scaleTo(getSize() - innerBorder.xy() - innerBorder.zw()).setPos(pos + innerBorder.xy());
@@ -1294,7 +1302,7 @@ Vector4f UIListItem::getClickableInnerBorder() const
 
 void UIListItem::notifySwap(Vector2f to)
 {
-	if (!dragged) {
+	if (!dragging) {
 		swapping = true;
 		swapTime = 0;
 		swapFrom = getPosition();

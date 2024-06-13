@@ -213,6 +213,7 @@ namespace Halley {
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void setDragPos(Vector2f pos);
+		void stopDragging();
 		void onEnabledChanged() override;
 		bool ignoreClip() const override;
 
@@ -226,14 +227,17 @@ namespace Halley {
 		Vector4f innerBorder;
 		bool selected = false;
 
+		struct DragInfo {
+			Vector2f curDragPos;
+			Vector2f myStartPos;
+		};
+
 		bool held = false;
-		bool dragged = false;
-		Vector2f mouseStartPos;
-		Vector2f myStartPos;
-		Vector2f origPos;
-		Vector2f curDragPos;
-		Vector2f dragWidgetOffset;
 		UIWidget* dragWidget = nullptr;
+		Vector2f mouseStartPos;
+		Vector2f dragWidgetOffset;
+		Vector2f origPos;
+		std::optional<DragInfo> dragging;
 
 		bool swapping = false;
 		Vector2f swapFrom;
