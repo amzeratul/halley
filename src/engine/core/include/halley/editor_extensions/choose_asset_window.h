@@ -49,6 +49,7 @@ namespace Halley {
         virtual void sortItems(Vector<std::pair<String, String>>& items);
 		void sortItemsByName(Vector<std::pair<String, String>>& items);
 		void sortItemsById(Vector<std::pair<String, String>>& items);
+		size_t getNumItems() const;
 
         virtual int getNumColumns(Vector2f scrollPaneSize) const;
 

@@ -70,6 +70,8 @@ namespace Halley {
 
 		void setAutoSize(std::optional<Range<float>> range, bool horizontal = true);
 
+		void setCapturePageUpDown(bool enable);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;

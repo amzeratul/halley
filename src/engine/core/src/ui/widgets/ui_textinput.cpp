@@ -311,6 +311,11 @@ void UITextInput::setAutoSize(std::optional<Range<float>> range, bool horizontal
 	autoSizeHorizontal = horizontal;
 }
 
+void UITextInput::setCapturePageUpDown(bool enable)
+{
+	text.setCapturePageUpDown(enable);
+}
+
 void UITextInput::update(Time t, bool moved)
 {
 	// Update auto text

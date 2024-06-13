@@ -139,14 +139,16 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 		return true;
 	}
 
-	if (c.key == KeyCode::PageUp) {
-		changeSelection(-1, shiftHeld, ChangeSelectionMode::Page);
-		return true;
-	}
-	
-	if (c.key == KeyCode::PageDown) {
-		changeSelection(1, shiftHeld, ChangeSelectionMode::Page);
-		return true;
+	if (capturePageUpDown) {
+		if (c.key == KeyCode::PageUp) {
+			changeSelection(-1, shiftHeld, ChangeSelectionMode::Page);
+			return true;
+		}
+		
+		if (c.key == KeyCode::PageDown) {
+			changeSelection(1, shiftHeld, ChangeSelectionMode::Page);
+			return true;
+		}
 	}
 
 	if (!text.empty()) {
@@ -253,6 +255,11 @@ bool TextInputData::isPendingSubmit()
 void TextInputData::setCaptureSubmit(bool enable)
 {
 	captureSubmit = enable;
+}
+
+void TextInputData::setCapturePageUpDown(bool enable)
+{
+	capturePageUpDown = enable;
 }
 
 bool TextInputData::isMultiline() const

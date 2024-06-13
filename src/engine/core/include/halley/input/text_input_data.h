@@ -85,6 +85,8 @@ namespace Halley {
 		bool isPendingSubmit();
 		void setCaptureSubmit(bool enable);
 
+		void setCapturePageUpDown(bool enable);
+
 		bool isMultiline() const;
 		void setMultiline(bool enable);
 
@@ -103,6 +105,7 @@ namespace Halley {
 		bool readOnly = false;
 		bool pendingSubmit = false;
 		bool captureSubmit = false;
+		bool capturePageUpDown = true;
 		bool multiline = false;
 
 		enum class ChangeSelectionMode {

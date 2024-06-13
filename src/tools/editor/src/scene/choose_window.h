@@ -34,6 +34,9 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		AssetType type;
 
+	protected:
+		bool canShowAll() const override;
+
 	private:
 		Sprite icon;
 		Sprite emptyPreviewIcon;
@@ -74,6 +77,7 @@ namespace Halley {
 		void onCategorySet(const String& id) override;
 		void onOptionSelected(const String& id) override;
 		bool onDestroyRequested() override;
+		bool canShowAll() const override;
 	
 	private:
 		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";

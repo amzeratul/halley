@@ -1,32 +1,89 @@
----
-widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow }
-sizer: { type: vertical }
+uuid: 35e2cca4-8975-4876-b179-f8d674809214
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_popupWindow
+  image: $ui_float_window
+  innerBorder: [14, 11, 14, 14]
 children:
-- sizer: { type: horizontal }
-  children:
-  - widget: { id: title, class: label, text: "Choose Asset" }
-    fill: centre
+  - uuid: 2dbfaceb-dfdc-471e-a607-ce2c612be1d3
+    sizer:
+      type: horizontal
+    children:
+      - uuid: aff31456-ffc3-4951-a4cc-a96f61cd58fa
+        proportion: 1
+        widget:
+          class: label
+          id: title
+          text: Choose Asset
+        fill: centre
+  - uuid: d0f11b11-10fc-4805-9aaf-05d223b42cd4
+    proportion: 0
+    border: [0, 4, 0, 0]
+    sizer:
+      type: vertical
+    widget:
+      active: false
+      autoHide: true
+      class: scrollBarPane
+      id: tabsContainer
+      scrollHorizontal: true
+      scrollVertical: false
+      size: [50, 10]
+    children:
+      - uuid: 664bb197-a411-457c-8c9d-76e6c15e8fc7
+        proportion: 1
+        widget:
+          class: list
+          id: tabs
+          style: tabs
+          type: horizontal
+  - uuid: f19c4d1c-d2ba-496e-af6d-6339b32ee384
+    border: [1, 4, 1, 1]
+    widget:
+      class: textInput
+      ghost: Search
+      id: search
+      showGhostWhenFocused: true
+      size: [50, 22]
+      tooltip: Type the name (or part of the name) of the asset you want to search for.
+  - uuid: 084cd53a-95f1-473c-96dc-48c31de911dc
     proportion: 1
-- widget: { id: tabsContainer, class: scrollBarPane, scrollHorizontal: true, scrollVertical: false, autoHide: true, size: [50, 10], active: false }
-  proportion: 0
-  sizer: { type: vertical }
-  border: [0, 4, 0, 0]
-  children:
-  - widget: { id: tabs, class: list, type: horizontal, style: tabs }
-    proportion: 1
-- widget: { id: search, class: textInput, size: [50, 22], ghost: Search, tooltip: "Type the name (or part of the name) of the asset you want to search for.", showGhostWhenFocused: true }
-  border: [1, 4, 1, 1]
-- widget: { id: optionsScroll, class: scrollBarPane, size: [625, 200], scrollHorizontal: true, scrollVertical: true, autoHide: true }
-  border: [1, 4, 1, 1]
-  proportion: 1
-  children:
-  - widget: { id: options, class: list, size: [400, 200], singleClickAccept: false }
-    proportion: 1
-- sizer: { type: horizontal }
-  children:
-  - widget: { id: ok, class: button, text: "OK" }
-    proportion: 1
-  - widget: { id: cancel, class: button, text: "Cancel" }
-    proportion: 1
-
-...
+    border: [1, 4, 1, 1]
+    sizer:
+      columnProportions: []
+    widget:
+      autoHide: true
+      class: scrollBarPane
+      id: optionsScroll
+      scrollHorizontal: true
+      scrollVertical: true
+      size: [625, 200]
+      style: scrollbarHalley
+    children:
+      - uuid: 456c1df0-95e1-4db7-8f1b-df6394e719dd
+        proportion: 1
+        widget:
+          class: list
+          id: options
+          options: []
+          singleClickAccept: false
+          size: [400, 200]
+  - uuid: 05b0edba-5f48-418f-9c34-ad6ad6ad7a3d
+    sizer:
+      type: horizontal
+    children:
+      - uuid: 3cbfa766-c615-44cd-86dd-599ca9fc23c2
+        proportion: 1
+        widget:
+          class: button
+          id: ok
+          text: OK
+      - uuid: 53675dfb-efde-40cd-aa81-703a030ffdcf
+        proportion: 1
+        widget:
+          class: button
+          id: cancel
+          text: Cancel

@@ -46,6 +46,8 @@ void ChooseAssetWindow::onMakeUI()
 {
 	options = getWidgetAs<UIList>("options");
 
+	getWidgetAs<UITextInput>("search")->setCapturePageUpDown(false);
+
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
 		accept();
@@ -172,19 +174,29 @@ void ChooseAssetWindow::populateList()
 	if (hasFilter) {
 		for (const auto& r: fuzzyMatcher.match(filter)) {
 			addItem(r.getId(), r.getString(), r.getMatchPositions());
-		}			
-	} else if (canShowAll()) {
+		}
+	} else {
 		if (canShowBlank) {
 			options->addTextItem("", LocalisedString::fromUserString(canShowBlank.value()));
 		}
 
-		Vector<std::pair<String, String>> items;
-		for (size_t i = 0; i < ids.size(); ++i) {
-			items.emplace_back(ids[i], names[i]);
-		}
-		sortItems(items);
-		for (auto& item: items) {
-			addItem(item.first, item.second);
+		if (canShowAll()) {
+			Vector<std::pair<String, String>> items;
+			for (size_t i = 0; i < ids.size(); ++i) {
+				items.emplace_back(ids[i], names[i]);
+			}
+			sortItems(items);
+			for (auto& item: items) {
+				addItem(item.first, item.second);
+			}
+		} else if (!entries[curEntry].defaultOption.isEmpty()) {
+			// Even on empty, show the last option selected
+			const auto& defaultOption = entries[curEntry].defaultOption;
+			for (size_t i = 0; i < ids.size(); ++i) {
+				if (ids[i] == defaultOption) {
+					addItem(defaultOption, names[i]);
+				}
+			}
 		}
 	}
 
@@ -297,6 +309,11 @@ void ChooseAssetWindow::sortItemsById(Vector<std::pair<String, String>>& items)
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.first < b.first; });
 }
 
+size_t ChooseAssetWindow::getNumItems() const
+{
+	return ids.size();
+}
+
 int ChooseAssetWindow::getNumColumns(Vector2f scrollPaneSize) const
 {
 	return 1;
@@ -380,6 +397,16 @@ bool ChooseAssetWindow::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::Esc)) {
 		cancel();
+		return true;
+	}
+
+	if (key.is(KeyCode::PageDown)) {
+		// TODO
+		return true;
+	}
+
+	if (key.is(KeyCode::PageUp)) {
+		// TODO
 		return true;
 	}
 

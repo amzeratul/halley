@@ -207,6 +207,11 @@ int ChooseAssetTypeWindow::getNumColumns(Vector2f scrollPaneSize) const
 	return hasPreview ? static_cast<int>(std::floor(scrollPaneSize.x / 150.0f)) : 1;
 }
 
+bool ChooseAssetTypeWindow::canShowAll() const
+{
+	return type != AssetType::Sprite && type != AssetType::Prefab;
+}
+
 
 ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, std::optional<String> defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback)
 	: ChooseAssetTypeWindow(projectWindow.getChoosePrefabWindowSize(), factory, AssetType::Prefab, defaultOption.value_or(projectWindow.getSetting(EditorSettingType::Project, lastOptionKey).asString("")), gameResources, projectWindow, true, {}, std::move(callback))
@@ -231,6 +236,10 @@ bool ChoosePrefabWindow::onDestroyRequested()
 	return true;
 }
 
+bool ChoosePrefabWindow::canShowAll() const
+{
+	return false;
+}
 
 
 ChooseEntityWindow::ChooseEntityWindow(UIFactory& factory, const Vector<IEntityEditorCallbacks::EntityInfo>& entities, Callback callback)
