@@ -318,7 +318,7 @@ void AudioObjectEditor::addClip(const String& assetId)
 {
 	auto clip = gameResources.get<AudioClip>(assetId);
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
-	parent.object->addClip(std::move(clip), {}, std::numeric_limits<size_t>::max());
+	parent.object->addClip(std::move(clip), parent.subCase, std::numeric_limits<size_t>::max());
 	markModified(true);
 }
 
