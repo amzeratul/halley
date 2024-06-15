@@ -1624,6 +1624,8 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 	}
 
 	list.setDragEnabled(node["canDrag"].asBool(false));
+	list.setDragOutsideEnabled(node["canDragOutside"].asBool(false));
+	list.setReorderWhenDragging(node["reorderWhenDragging"].asBool(true));
 	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
 	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
 	list.setMultiSelect(node["multiSelect"].asBool(false));
@@ -1641,6 +1643,8 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
 	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Can Drag", "canDrag", "bool", "false");
+	result.entries.emplace_back("Reorder When Dragging", "reorderWhenDragging", "bool", "true");
+	result.entries.emplace_back("Can Drag Outside", "canDragOutside", "bool", "false");
 	result.entries.emplace_back("Multi-select", "multiSelect", "bool", "false");
 	result.entries.emplace_back("Single Click Accept", "singleClickAccept", "bool", "true");
 	result.entries.emplace_back("Uniform Sized Items", "uniformSizedItems", "bool", "false");

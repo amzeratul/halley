@@ -162,10 +162,12 @@ std::shared_ptr<UIImage> UIList::makeIcon(String id, Sprite image) const
 
 Vector2f UIList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const
 {
-	if (orientation == UISizerType::Horizontal) {
-		pos.y = startPos.y;
-	} else if (orientation == UISizerType::Vertical) {
-		pos.x = startPos.x;
+	if (!dragOutsideEnabled) {
+		if (orientation == UISizerType::Horizontal) {
+			pos.y = startPos.y;
+		} else if (orientation == UISizerType::Vertical) {
+			pos.x = startPos.x;
+		}
 	}
 	return pos;
 }
@@ -641,6 +643,11 @@ void UIList::setDragEnabled(bool drag)
 	dragEnabled = drag;
 }
 
+void UIList::setReorderWhenDragging(bool reorder)
+{
+	reorderWhenDragging = reorder;
+}
+
 bool UIList::isDragOutsideEnabled() const
 {
 	return dragOutsideEnabled;
@@ -996,17 +1003,19 @@ void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 {
 	const int axis = orientation == UISizerType::Horizontal ? 0 : 1;
 
-	if (index > 0) {
-		auto& prev = items[index - 1];
-		if (prev->canSwap() && pos[axis] < prev->getPosition()[axis] + 2.0f) {
-			swapItems(index - 1, index);
+	if (reorderWhenDragging) {
+		if (index > 0) {
+			auto& prev = items[index - 1];
+			if (prev->canSwap() && pos[axis] < prev->getPosition()[axis] + 2.0f) {
+				swapItems(index - 1, index);
+			}
 		}
-	}
 
-	if (index < int(items.size()) - 1) {
-		auto& next = items[index + 1];
-		if (next->canSwap() && pos[axis] + item.getSize()[axis] > next->getPosition()[axis] + next->getSize()[axis] - 2.0f) {
-			swapItems(index, index + 1);
+		if (index < int(items.size()) - 1) {
+			auto& next = items[index + 1];
+			if (next->canSwap() && pos[axis] + item.getSize()[axis] > next->getPosition()[axis] + next->getSize()[axis] - 2.0f) {
+				swapItems(index, index + 1);
+			}
 		}
 	}
 

@@ -76,6 +76,7 @@ namespace Halley {
 
 		bool isDragEnabled() const;
 		void setDragEnabled(bool drag);
+		void setReorderWhenDragging(bool reorder);
 		bool isDragOutsideEnabled() const;
 		void setDragOutsideEnabled(bool dragOutside);
 		virtual bool canDragListItem(const UIListItem& listItem);
@@ -141,6 +142,7 @@ namespace Halley {
 		int nColumns = 1;
 		bool firstUpdate = true;
 		bool dragEnabled = false;
+		bool reorderWhenDragging = true;
 		bool dragOutsideEnabled = false;
 		bool manualDragging = false;
 		bool uniformSizedItems = false;
