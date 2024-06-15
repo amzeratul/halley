@@ -49,6 +49,8 @@ namespace Halley
 		AudioMultiChannelSamples getSpans() const;
 		AudioMultiChannelSamples getSampleSpans() const;
 
+		AudioBuffer& operator[](size_t n) const;
+
 		bool matches(size_t n, size_t len) const;
 		void clear();
 

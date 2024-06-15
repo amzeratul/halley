@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/audio/audio_buffer.h"
+#include "halley/audio/audio_env.h"
 #include <atomic>
 #include <condition_variable>
 #include <map>
@@ -21,7 +22,7 @@ namespace Halley {
 	class Resources;
 	class AudioVariableTable;
 
-    class AudioEngine final: private IAudioOutput
+	class AudioEngine final: private IAudioOutput, public AudioEnv
     {
     public:
 		using VoiceCallback = std::function<void(AudioVoice&)>;
@@ -51,8 +52,8 @@ namespace Halley {
 
 		void generateBuffer();
 	    
-    	Random& getRNG();
-		AudioBufferPool& getPool() const;
+    	Random& getRNG() override;
+		AudioBufferPool& getPool() const override;
 
 		void setMasterGain(float gain);
 		void setBusGain(const String& name, float gain);

@@ -108,6 +108,11 @@ AudioMultiChannelSamples AudioBuffersRef::getSampleSpans() const
 	return sampleSpans;
 }
 
+AudioBuffer& AudioBuffersRef::operator[](size_t n) const
+{
+	return *buffers[n];
+}
+
 bool AudioBuffersRef::matches(size_t n, size_t len) const
 {
 	return nBuffers == n && (nBuffers == 0 || buffers[0]->samples.size() == len);

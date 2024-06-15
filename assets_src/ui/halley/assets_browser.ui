@@ -1,51 +1,114 @@
----
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: 6d36d86d-843d-4fd3-99c9-bd2c3dbd7b88
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
 children:
-- widget: { class: widget }
-  proportion: 1
-  sizer: { type: horizontal }
-  children:
-  - sizer: { type: vertical }
-    border: [0, 0, 6, 0]
-    children:
-    - widget: { id: collapseButton, class: button, text: "<< Collapse" }
-      border: [0, 0, 0, 6]
-    - widget: { id: assetBrowsePanel, class: widget }
-      sizer: { type: vertical, gap: 4 }
-      proportion: 1
-      children:
-      - widget: { class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [30, 35] }
-        sizer: { type: horizontal, gap: 4 }
-        children:
-          - widget: { id: curDir, class: label, style: labelLight, text: assets_src, maxWidth: 305, maxHeight: 25 }
-            fill: [left, centreVertical]
-            proportion: 1
-          - widget: { id: goToAssetButton, class: button, style: buttonThin, icon: "entity_icons/sync.png", size: [22, 22], tooltip: "Go to asset" }
-      - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, autoHide: true, size: [255, 50] }
-        border: [0, 2, 0, 0]
-        proportion: 1
-        children:
-        - proportion: 1
-          widget: 
-            class: list
-            id: assetList
-            options:
-            - id: test0
-              text: test
-            - id: test1
-              text: test
-            - id: test2
-              text: test
-      - sizer: { type: horizontal }
-        children:
-          - widget: { id: addAsset, class: button, text: Add }
-            proportion: 1
-          - widget: { id: addFolder, class: button, text: Add Folder }
-            proportion: 1
-  - widget: { class: widget, id: assetEditorContainer }
+  - uuid: 43bb93f6-a889-41bb-86fa-8fd0c9c5c672
     proportion: 1
-    border: [10, 0, 0, 0]
-    sizer: { type: vertical }
-    children: []
-...
+    sizer:
+      type: horizontal
+    widget:
+      class: widget
+    children:
+      - uuid: 5c233090-c0e3-40ba-8884-3d46fceb07a2
+        border: [0, 0, 6, 0]
+        sizer:
+          type: vertical
+        children:
+          - uuid: 8f29ce39-e85d-44c2-b42a-e1c645d78293
+            border: [0, 0, 0, 6]
+            widget:
+              class: button
+              id: collapseButton
+              text: << Collapse
+          - uuid: 29cf6930-f5fb-4eb3-b47a-40961a9cfb15
+            proportion: 1
+            sizer:
+              columnProportions: []
+              gap: 4
+              type: vertical
+            widget:
+              class: widget
+              id: assetBrowsePanel
+            children:
+              - uuid: dd3ef1d4-42c9-4f64-8d74-333e321ecdcc
+                sizer:
+                  gap: 4
+                  type: horizontal
+                widget:
+                  class: image
+                  colour: $ui_backgroundBox
+                  image: halley_ui/ui_list_item.png
+                  innerBorder: [5, 5, 5, 5]
+                  size: [30, 35]
+                children:
+                  - uuid: f32d6948-3d40-411b-bc40-9db59d98c315
+                    proportion: 1
+                    widget:
+                      class: label
+                      id: curDir
+                      maxHeight: 25
+                      maxWidth: 305
+                      style: labelLight
+                      text: assets_src
+                    fill: [left, centreVertical]
+                  - uuid: d67a8711-ce2a-47e1-802f-3ecd881f5ee0
+                    widget:
+                      class: button
+                      icon: entity_icons/sync.png
+                      id: goToAssetButton
+                      size: [22, 22]
+                      style: buttonThin
+                      tooltip: Go to asset
+              - uuid: 4c87eea4-a314-4a25-9f7e-4764557b2d29
+                proportion: 1
+                border: [0, 2, 0, 0]
+                sizer:
+                  columnProportions: []
+                widget:
+                  autoHide: true
+                  class: scrollBarPane
+                  scrollHorizontal: true
+                  scrollVertical: true
+                  size: [255, 50]
+                children:
+                  - uuid: 35fce438-0705-4053-8a90-f08477baf776
+                    proportion: 1
+                    widget:
+                      canDrag: true
+                      canDragOutside: true
+                      class: list
+                      id: assetList
+                      multiSelect: true
+                      options: []
+                      reorderWhenDragging: false
+                      requiresSelection: false
+                      singleClickAccept: false
+              - uuid: 79bc481a-f7a3-4d27-a64a-463c5f6050ae
+                sizer:
+                  columnProportions: []
+                  type: horizontal
+                children:
+                  - uuid: ac9b739c-322e-427e-ae11-4bd464672a2b
+                    proportion: 1
+                    widget:
+                      class: button
+                      id: addAsset
+                      text: Add
+                  - uuid: 818ef854-3cc0-4c7d-be80-82a627bf4d74
+                    proportion: 1
+                    widget:
+                      class: button
+                      id: addFolder
+                      text: Add Folder
+      - uuid: 69d3dabf-7e78-4b51-ad1d-63c3dd710be4
+        proportion: 1
+        border: [10, 0, 0, 0]
+        sizer:
+          type: vertical
+        widget:
+          class: widget
+          id: assetEditorContainer
+        children: []
