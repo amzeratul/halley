@@ -3,13 +3,14 @@
 #include "halley/file/path.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/file/directory_monitor.h"
+#include "halley/game/scene_editor_interface.h"
 
 namespace Halley {
-    class FileSystemCache {
+    class FileSystemCache: public IFileSystemCache {
     public:
         void writeFile(const Path& path, gsl::span<const gsl::byte> data);
         void writeFile(const Path& path, Bytes data);
-		const Bytes& readFile(const Path& path);
+		const Bytes& readFile(const Path& path) override;
         void remove(const Path& path);
         bool hasCached(const Path& path) const;
 

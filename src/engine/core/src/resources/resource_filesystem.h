@@ -8,7 +8,7 @@ namespace Halley {
 
 	class FileSystemResourceLocator final : public IResourceLocatorProvider {
 	public:
-		FileSystemResourceLocator(SystemAPI& system, const Path& basePath);
+		FileSystemResourceLocator(SystemAPI& system, const Path& basePath, IFileSystemCache* cache = nullptr);
 
 	protected:
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream) override;
@@ -22,6 +22,7 @@ namespace Halley {
 		SystemAPI& system;
 		Path basePath;
 		std::unique_ptr<AssetDatabase> assetDb;
+		IFileSystemCache* cache = nullptr;
 
 	private:
 		void loadAssetDb();

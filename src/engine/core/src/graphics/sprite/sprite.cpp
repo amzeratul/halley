@@ -350,6 +350,14 @@ bool Sprite::hasCompatibleMaterial(const Material& other) const
 	return material->isCompatibleWith(other);
 }
 
+bool Sprite::isLoaded() const
+{
+	if (!material) {
+		return true;
+	}
+	return material->areAllTexturesLoaded();
+}
+
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));

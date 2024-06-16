@@ -192,11 +192,10 @@ MaterialDefinition::MaterialDefinition() = default;
 std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_shared<MaterialDefinition>(loader);
-	
 	auto* video = loader.getAPI().video;
 	auto& resources = loader.getResources();
 
-	Concurrent::execute(Executors::getVideoAux(), [result, video, &resources]()
+	Concurrent::execute(video->needsVideoAux() ? Executors::getVideoAux() : Executors::getImmediate(), [result, video, &resources]()
 	{
 		int i = 0;
 		for (auto& p: result->passes) {

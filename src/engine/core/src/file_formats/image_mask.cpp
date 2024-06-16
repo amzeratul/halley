@@ -19,27 +19,42 @@ ImageMask::ImageMask(Vector2i size, bool clear)
 ImageMask ImageMask::fromAlpha(const Image& image)
 {
 	const auto size = image.getSize();
+	const size_t nPixels = static_cast<size_t>(size.x * size.y);
 	auto result = ImageMask(size, false);
+	auto* dst = result.values.data();
 
-	// This could be faster
+	uint8_t curByteValue = 0;
+	size_t curBit = 0;
+	size_t curDstIdx = 0;
+
 	if (image.getFormat() == Image::Format::RGBA || image.getFormat() == Image::Format::RGBAPremultiplied) {
-		auto pxs = image.getPixels4BPP();
+		auto src = image.getPixels4BPP().data();
 
-		for (int y = 0; y < size.y; ++y) {
-			for (int x = 0; x < size.x; ++x) {
-				const auto px = pxs[x + y * size.x];
-				const auto alpha = (px >> 24) & 0xFF;
-				result.set(Vector2i(x, y), alpha > 0);
+		for (size_t i = 0; i < nPixels; ++i) {
+			const auto px = src[i];
+			const auto alpha = (px >> 24) & 0xFF;
+			if (alpha != 0) {
+				curByteValue |= 1 << curBit;
+			}
+			if (++curBit == 8) {
+				dst[curDstIdx++] = curByteValue;
+				curByteValue = 0;
+				curBit = 0;
 			}
 		}
 	} else if (image.getFormat() == Image::Format::SingleChannel || image.getFormat() == Image::Format::Indexed) {
-		auto pxs = image.getPixels1BPP();
+		auto src = image.getPixels1BPP().data();
 
-		for (int y = 0; y < size.y; ++y) {
-			for (int x = 0; x < size.x; ++x) {
-				const auto px = pxs[x + y * size.x];
-				// Assume px 0 = transparent
-				result.set(Vector2i(x, y), px > 0);
+		for (size_t i = 0; i < nPixels; ++i) {
+			const auto px = src[i];
+			// Assume px 0 = transparent
+			if (px != 0) {
+				curByteValue |= 1 << curBit;
+			}
+			if (++curBit == 8) {
+				dst[curDstIdx++] = curByteValue;
+				curByteValue = 0;
+				curBit = 0;
 			}
 		}
 	}
@@ -59,7 +74,7 @@ void ImageMask::set(Vector2i pos, bool value)
 {
 	const size_t pxIdx = pos.x + pos.y * size.x;
 	const size_t byteIdx = pxIdx / 8;
-	const int mask = 1 << static_cast<uint8_t>(pxIdx % 8);
+	const uint8_t mask = static_cast<uint8_t>(1 << static_cast<uint8_t>(pxIdx % 8));
 	if (value) {
 		values[byteIdx] |= mask;
 	} else {

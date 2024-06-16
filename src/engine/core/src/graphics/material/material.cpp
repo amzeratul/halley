@@ -263,6 +263,16 @@ size_t Material::getNumTextureUnits() const
 	return textures.size();
 }
 
+bool Material::areAllTexturesLoaded() const
+{
+	for (auto& tex: textures) {
+		if (tex && !tex->isLoaded()) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {

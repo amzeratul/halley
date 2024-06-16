@@ -454,12 +454,19 @@ namespace Halley {
 
 	class IProjectWindow {
 	public:
+		virtual ~IProjectWindow() = default;
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
 		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
         virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual void buildGame() = 0;
 		virtual void updateEditor() = 0;
 		virtual Vector<String> getLaunchArguments() const = 0;
+	};
+
+	class IFileSystemCache {
+	public:
+		virtual ~IFileSystemCache() = default;
+		virtual const Bytes& readFile(const Path& path) = 0;
 	};
 
     class IEditorCustomTools { 

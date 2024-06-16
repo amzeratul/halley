@@ -23,12 +23,14 @@
 #include "resource_filesystem.h"
 #include "halley/api/system_api.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/game/scene_editor_interface.h"
 
 using namespace Halley;
 
-FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Path& _basePath)
+FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Path& _basePath, IFileSystemCache* cache)
 	: system(system)
     , basePath(_basePath)
+	, cache(cache)
 {
 	loadAssetDb();
 }
@@ -90,6 +92,12 @@ std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& a
 		return std::make_unique<ResourceDataStream>(path, [=] () -> std::unique_ptr<ResourceDataReader> {
 			return system.getDataReader(path);
 		});
+	} else if (cache) {
+		auto data = cache->readFile(path);
+		auto size = data.size();
+		char* buf = new char[size];
+		memcpy(buf, data.data(), data.size());
+		return std::make_unique<ResourceDataStatic>(buf, size, path);
 	} else {
 		auto fp = system.getDataReader(path);
 		if (!fp) {

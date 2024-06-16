@@ -29,6 +29,7 @@
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
+	class IFileSystemCache;
 	enum class AssetType;
 	class ResourceData;
 	class SystemAPI;
@@ -50,7 +51,7 @@ namespace Halley {
 	{
 	public:
 		explicit ResourceLocator(SystemAPI& system);
-		void addFileSystem(const Path& path);
+		void addFileSystem(const Path& path, IFileSystemCache* cache = nullptr);
 		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, std::optional<int> priority = {});
 		Vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);

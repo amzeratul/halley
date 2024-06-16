@@ -126,9 +126,9 @@ Vector<String> ResourceLocator::enumerate(const AssetType type)
 	return result;
 }
 
-void ResourceLocator::addFileSystem(const Path& path)
+void ResourceLocator::addFileSystem(const Path& path, IFileSystemCache* cache)
 {
-	add(std::make_unique<FileSystemResourceLocator>(system, path), path);
+	add(std::make_unique<FileSystemResourceLocator>(system, path, cache), path);
 }
 
 void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure, std::optional<int> priority)

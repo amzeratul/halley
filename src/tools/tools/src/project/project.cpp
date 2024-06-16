@@ -542,7 +542,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 		if (allowPackedAssets && getGameInstance()) {
 			getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
 		} else {
-			locator->addFileSystem(getUnpackedAssetsPath());
+			locator->addFileSystem(getUnpackedAssetsPath(), fileSystemCache.get());
 		}
 	} catch (...) {}
 

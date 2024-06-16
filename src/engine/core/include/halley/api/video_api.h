@@ -44,5 +44,7 @@ namespace Halley
 		virtual bool isColumnMajor() const { return false; }
 
 		virtual void* getImplementationPointer(const String& id) { return nullptr; }
+
+		virtual bool needsVideoAux() const { return true; }
 	};
 }

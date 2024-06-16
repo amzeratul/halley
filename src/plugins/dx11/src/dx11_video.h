@@ -52,6 +52,8 @@ namespace Halley {
 
 		void* getImplementationPointer(const String& id) override;
 
+		bool needsVideoAux() const override;
+
 	private:
 		SystemAPI& system;
 		std::shared_ptr<Window> window;

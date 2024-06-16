@@ -228,3 +228,8 @@ void* DX11Video::getImplementationPointer(const String& id)
 	}
 	return nullptr;
 }
+
+bool DX11Video::needsVideoAux() const
+{
+	return true;
+}
