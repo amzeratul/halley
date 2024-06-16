@@ -86,7 +86,9 @@ void Project::update(Time time)
 		dll.reloadIfChanged();
 	});
 
-	comments->update(time);
+	if (comments->isLoaded()) {
+		comments->update(time);
+	}
 }
 
 bool Project::isBuildPending() const
@@ -324,6 +326,7 @@ ProjectProperties& Project::getProperties() const
 
 ProjectComments& Project::getComments() const
 {
+	comments->waitForLoad();
 	return *comments;
 }
 

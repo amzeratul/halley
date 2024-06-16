@@ -69,6 +69,9 @@ namespace Halley {
     public:
         ProjectComments(Path commentsRoot);
 
+    	void waitForLoad();
+        bool isLoaded() const;
+
         Vector<std::pair<UUID, const ProjectComment*>> getComments(const String& scene) const;
         const ProjectComment& getComment(const UUID& id) const;
 
@@ -91,6 +94,10 @@ namespace Halley {
         uint64_t version = 0;
         HashSet<UUID> toSave;
         HashMap<UUID, uint64_t> lastSeenHash;
+
+        std::mutex mutex;
+        std::condition_variable loadWait;
+        std::atomic<bool> loaded;
 
         void loadAll();
         void savePending();

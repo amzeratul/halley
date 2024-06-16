@@ -1,5 +1,6 @@
 #include "halley/tools/project/project_comments.h"
 
+#include "halley/concurrency/concurrent.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
@@ -49,8 +50,30 @@ bool ProjectComment::operator!=(const ProjectComment& other) const
 ProjectComments::ProjectComments(Path commentsRoot)
 	: commentsRoot(commentsRoot)
 	, monitor(commentsRoot)
+	, loaded(false)
 {
-	loadAll();
+	Concurrent::execute([this] ()
+	{
+		loadAll();
+		auto lock = std::unique_lock(mutex);
+		loaded = true;
+		loadWait.notify_all();
+	});
+}
+
+void ProjectComments::waitForLoad()
+{
+	if (!loaded) {
+		auto lock = std::unique_lock(mutex);
+		if (!loaded) {
+			loadWait.wait(lock);
+		}
+	}
+}
+
+bool ProjectComments::isLoaded() const
+{
+	return loaded;
 }
 
 Vector<std::pair<UUID, const ProjectComment*>> ProjectComments::getComments(const String& scene) const
