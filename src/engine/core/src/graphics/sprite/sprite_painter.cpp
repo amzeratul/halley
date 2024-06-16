@@ -374,10 +374,17 @@ SpritePainterMaterialParamUpdater& SpritePainter::getParamUpdater()
 	return paramUpdater;
 }
 
+void SpritePainter::setWaitForSpriteLoad(bool wait)
+{
+	waitForSpriteLoad = wait;
+}
+
 void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& sprite: sprites) {
-		if (sprite.isInView(view)) {
+		// The logic is a bit confusing here - if we're waiting, just go ahead, as the code will eventually wait
+		// If we're not waiting, skip this sprite if it's not loaded
+		if (sprite.isInView(view) && (waitForSpriteLoad || sprite.isLoaded())) {
 			if (paramUpdater.needsToPreProcessessMaterial(sprite)) {
 				auto s2 = sprite;
 				paramUpdater.preProcessMaterial(s2);

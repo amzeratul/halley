@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/entity/services/dev_service.h"
 #include "halley/time/halleytime.h"
 
 namespace Halley
@@ -101,6 +102,8 @@ namespace Halley
 
 		SpritePainterMaterialParamUpdater& getParamUpdater();
 
+		void setWaitForSpriteLoad(bool wait);
+
 	private:
 		Vector<SpritePainterEntry> sprites;
 		Vector<Sprite> cachedSprites;
@@ -109,6 +112,7 @@ namespace Halley
 		Vector<Rect4f> extraBounds;
 		bool dirty = false;
 		bool forceCopy = false;
+		bool waitForSpriteLoad = true;
 		SpritePainterMaterialParamUpdater paramUpdater;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
