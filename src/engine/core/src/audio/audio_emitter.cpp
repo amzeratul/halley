@@ -4,10 +4,11 @@
 
 using namespace Halley;
 
-AudioEmitter::AudioEmitter(AudioEmitterId id, AudioPosition position, bool temporary)
+AudioEmitter::AudioEmitter(AudioEmitterId id, AudioPosition position, bool temporary, AudioEmitter* fallback)
 	: id(id)
 	, temporary(temporary)
 	, position(std::move(position))
+	, fallback(fallback)
 {
 }
 
@@ -84,7 +85,7 @@ const String& AudioEmitter::getSwitchValue(const String& id) const
 {
 	const auto iter = switchValues.find(id);
 	if (iter == switchValues.end()) {
-		return String::emptyString();
+		return fallback ? fallback->getSwitchValue(id) : String::emptyString();
 	}
 	return iter->second;
 }
@@ -93,7 +94,7 @@ float AudioEmitter::getVariableValue(const String& id) const
 {
 	const auto iter = variableValues.find(id);
 	if (iter == variableValues.end()) {
-		return 0;
+		return fallback ? fallback->getVariableValue(id) : 0;
 	}
 	return iter->second;
 }

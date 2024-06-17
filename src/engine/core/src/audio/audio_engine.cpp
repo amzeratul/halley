@@ -33,7 +33,7 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::createEmitter(AudioEmitterId id, AudioPosition position, bool temporary)
 {
-	emitters[id] = std::make_unique<AudioEmitter>(id, std::move(position), temporary);
+	emitters[id] = std::make_unique<AudioEmitter>(id, std::move(position), temporary, id == 0 ? nullptr : emitters.at(0).get());
 }
 
 void AudioEngine::destroyEmitter(AudioEmitterId id)
