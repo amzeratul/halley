@@ -35,7 +35,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptLuaExpression::getPinConfiguratio
 	const size_t outputs = settings["outputs"].asInt(1);
 	const size_t flowN = nFlowPins();
 
-	static thread_local std::vector<PinType> pins;
+	static thread_local Vector<PinType> pins;
 	pins.clear();
 	pins.reserve(argsN + outputs + flowN);
 

@@ -40,7 +40,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	const size_t nDataOutput = settings["nDataOutput"].asInt(0);
 	const size_t nTargetOutput = settings["nTargetOutput"].asInt(0);
 
-	static thread_local std::vector<PinType> pins;
+	static thread_local Vector<PinType> pins;
 	pins.clear();
 	pins.reserve(16);
 
@@ -222,7 +222,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 		const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input } };
 		return gsl::span<const PinType>(data).subspan(0, nInput);
 	} else {
-		static thread_local std::vector<PinType> pins;
+		static thread_local Vector<PinType> pins;
 		pins.clear();
 		pins.reserve(16);
 

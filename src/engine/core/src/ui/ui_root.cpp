@@ -344,7 +344,6 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 
 	// Check buttons
 	constexpr int nButtons = 3;
-	assert(exclusiveButtonsHeld.size() == static_cast<size_t>(nButtons));
 	for (int i = 0; i < nButtons; ++i) {
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
@@ -354,7 +353,6 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				actuallyUnderMouse = actuallyUnderMouse->prePressMouse(mousePos, i, keyMods).value_or(actuallyUnderMouse);
 			}
 			mouseExclusive = actuallyUnderMouse;
-			exclusiveButtonsHeld[i] = true;
 
 			if (actuallyUnderMouse) {
 				setFocus(actuallyUnderMouse->getFocusableOrAncestor(), true);
@@ -381,7 +379,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 		}
 
 		// Release click
-		if (anyMouseButtonHeld == i && mouse->isButtonReleased(i)) {
+		if (anyMouseButtonHeld == i && !mouse->isButtonDown(i)) {
 			anyMouseButtonHeld = {};
 			
 			if (exclusive) {
@@ -394,8 +392,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				else releaseEvent = UIEventType::MouseReleaseRight;
 
 				exclusive->sendEvent(UIEvent(releaseEvent, "mouse", mousePos));
-			}
-			else {
+			} else {
 				const auto& cs = getChildren();
 				if (!cs.empty()) {
 					UIEventType unhandledReleaseEvent;
@@ -406,10 +403,11 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				}
 			}
 
-			exclusiveButtonsHeld[i] = false;
-			if (std::none_of(exclusiveButtonsHeld.begin(), exclusiveButtonsHeld.end(), [] (bool b) { return b; })) {
-				mouseExclusive.reset();
-			}
+			mouseExclusive.reset();
+		}
+
+		if (mouse->isButtonDown(i)) {
+			
 		}
 	}
 

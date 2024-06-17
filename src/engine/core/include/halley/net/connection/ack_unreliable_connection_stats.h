@@ -38,7 +38,7 @@ namespace Halley {
         size_t lineSize = 0;
         size_t lineStart = 0;
 
-        std::vector<PacketStats> packetStats;
+        Vector<PacketStats> packetStats;
         size_t pos = 0;
 
         void addPacket(PacketStats stats);

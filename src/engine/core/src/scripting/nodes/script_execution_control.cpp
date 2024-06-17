@@ -24,7 +24,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 	const size_t nTargetOutput = node.getSettings()["targetPins"].getSequenceSize();
 
 	if (nDataOutput > 4 || nTargetOutput > 0) {
-		static thread_local std::vector<PinType> pins;
+		static thread_local Vector<PinType> pins;
 		pins.clear();
 		pins.reserve(16);
 
@@ -224,7 +224,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStartScript::getPinConfiguration
 	const size_t nDataInput = settings["nDataInput"].asInt(0);
 	const size_t nTargetInput = settings["nTargetInput"].asInt(0);
 
-	static thread_local std::vector<PinType> pins;
+	static thread_local Vector<PinType> pins;
 	pins.clear();
 	pins.reserve(16);
 

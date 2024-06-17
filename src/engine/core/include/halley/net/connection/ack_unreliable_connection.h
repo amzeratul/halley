@@ -64,7 +64,7 @@ namespace Halley
 
 		struct SentPacketData
 		{
-			std::vector<int> tags;
+			Vector<int> tags;
 			Clock::time_point timestamp = {};
 			bool waiting = false;
 		};
