@@ -524,8 +524,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 		}
 	}
 
-	auto rect = curWidget->getMouseRect();
-	if ((ignoreMouseInteraction || curWidget->canInteractWithMouse()) && rect.contains(mousePos)) {
+	if ((ignoreMouseInteraction || curWidget->canInteractWithMouse()) && curWidget->isMouseInside(mousePos)) {
 		return { curWidget, {}, childLayerAdjustment };
 	} else {
 		return {};

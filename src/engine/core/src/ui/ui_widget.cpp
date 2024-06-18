@@ -430,6 +430,11 @@ void UIWidget::setInnerBorder(Vector4f border)
 	}
 }
 
+bool UIWidget::isMouseInside(Vector2f mousePos) const
+{
+	return getMouseRect().contains(mousePos);
+}
+
 void UIWidget::setMouseOver(bool mo)
 {
 	mouseOver = mo;

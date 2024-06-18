@@ -98,6 +98,7 @@ namespace Halley {
 		void setMinSize(Vector2f size);
 		void setInnerBorder(Vector4f border);
 
+		virtual bool isMouseInside(Vector2f mousePos) const;
 		void setMouseOver(bool mouseOver);
 		virtual std::optional<std::shared_ptr<UIWidget>> prePressMouse(Vector2f mousePos, int button, KeyMods keyMods);
 		virtual void pressMouse(Vector2f mousePos, int button, KeyMods keyMods);
