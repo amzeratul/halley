@@ -392,7 +392,7 @@ namespace Halley {
 		static Rect2D getSpanningRect(gsl::span<const Vector2D<T>> points)
 		{
 			if (points.empty()) {
-				return Rect2D(Vector2f(), Vector2f());
+				return Rect2D(Vector2D<T>(), Vector2D<T>());
 			}
 			
 			T x1 = std::numeric_limits<T>::max();
@@ -407,7 +407,7 @@ namespace Halley {
 				y2 = std::max(y2, v.y);
 			}
 			
-			return Rect2D(Vector2f(x1, y1), Vector2f(x2, y2));
+			return Rect2D(Vector2D<T>(x1, y1), Vector2D<T>(x2, y2));
 		}
 
 		Rect2DIterator<T> begin() const
