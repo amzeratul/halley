@@ -1153,7 +1153,7 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
 	animation.setPlaybackSpeed(playbackSpeed);
 
-	const auto bounds = Rect4f(animation.getAnimation().getBounds());
+	const auto bounds = animation.hasAnimation() ? Rect4f(animation.getAnimation().getBounds()) : Rect4f();
 	auto size = Vector2f::max(node["size"].asVector2f(Vector2f()), occupySpace ? bounds.getSize() : Vector2f());
 	auto offset = node["offset"].asVector2f(Vector2f()) + (occupySpace ? -bounds.getTopLeft() : Vector2f());
 
