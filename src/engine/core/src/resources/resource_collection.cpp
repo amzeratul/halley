@@ -255,13 +255,6 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 				// Found resource, all good
 				return res->second.res;
 			}
-
-			if (i > 0) {
-				// We only get here if we've already determined that someone else is loading this resource
-				// So we'll keep doing this until we manage to read the resource
-				resourceLoaded.wait_for(lock, 20us);
-				continue;
-			}
 		}
 
 		{
