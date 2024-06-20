@@ -48,6 +48,7 @@ namespace Halley {
 		virtual ~IScriptSystemInterface() = default;
 
 		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
+		virtual bool isRunningScript(EntityId target, const String& scriptId) = 0;
 		virtual void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) = 0;
 		virtual void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) = 0;
 		virtual void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) = 0;

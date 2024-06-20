@@ -95,6 +95,18 @@ public:
 		}
 	}
 
+	bool isRunningScript(EntityId entityId, const String& scriptId) override
+	{
+		if (const auto* scriptable = scriptableFamily.tryFind(entityId)) {
+			for (const auto& script: scriptable->scriptable.activeStates) {
+				if (script->getScriptId() == scriptId) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) override
 	{
 		auto& env = getScriptingService().getEnvironment();

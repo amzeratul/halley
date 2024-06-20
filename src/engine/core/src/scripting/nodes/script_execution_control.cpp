@@ -211,6 +211,7 @@ Vector<IScriptNodeType::SettingType> ScriptStartScript::getSettingTypes() const
 		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} },
 		SettingType{ "terminateOnDestruction", "bool", Vector<String>{"false"} },
 		SettingType{ "terminateAllThreadsOnDestruction", "bool", Vector<String>{"false"} },
+		SettingType{ "wait", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -284,6 +285,9 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 		}
 		str.append(" on destruction");
 	}
+	if (node.getSettings()["wait"].asBool(false)) {
+		str.append(" and wait");
+	}
 	return str.moveResults();
 }
 
@@ -320,6 +324,17 @@ void ScriptStartScript::doInitData(ScriptStartScriptData& data, const ScriptGrap
 
 IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node,	ScriptStartScriptData& data) const
 {
+	const bool wait = node.getSettings()["wait"].asBool(false);
+	if (wait && !data.scriptName.isEmpty() && data.target) {
+		if (environment.getInterface<IScriptSystemInterface>().isRunningScript(data.target, data.scriptName)) {
+			return Result(ScriptNodeExecutionState::Executing, time);
+		} else {
+			data.scriptName = "";
+			data.target = {};
+			return Result(ScriptNodeExecutionState::Done);
+		}
+	}
+
 	const auto script = environment.readInputDataPin(node, 3).asString(node.getSettings()["script"].asString(""));
 	const auto& tags = node.getSettings()["tags"].asVector<String>({});
 	const auto target = readEntityId(environment, node, 2);
@@ -340,7 +355,11 @@ IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environme
 		data.target = target;
 	}
 
-	return Result(ScriptNodeExecutionState::Done);
+	if (wait) {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	} else {
+		return Result(ScriptNodeExecutionState::Done);
+	}
 }
 
 void ScriptStartScript::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptStartScriptData& data) const
