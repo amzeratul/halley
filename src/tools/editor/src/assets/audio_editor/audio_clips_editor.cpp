@@ -46,4 +46,10 @@ void AudioClipsEditor::onMakeUI()
 		clips.setLoopEnd(value);
 		editor.markModified(false);
 	});
+
+	bindData("randomiseStart", clips.getRandomiseStart(), [=] (bool value)
+	{
+		clips.setRandomiseStart(value);
+		editor.markModified(false);
+	});
 }

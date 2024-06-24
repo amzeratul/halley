@@ -209,3 +209,13 @@ void AudioSubObjectClips::setLoopEnd(int samples)
 {
 	loopEnd = samples;
 }
+
+bool AudioSubObjectClips::getRandomiseStart() const
+{
+	return randomiseStart;
+}
+
+void AudioSubObjectClips::setRandomiseStart(bool enabled)
+{
+	randomiseStart = enabled;
+}

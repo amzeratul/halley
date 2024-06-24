@@ -36,6 +36,8 @@ namespace Halley {
 		int getLoopEnd() const;
 		void setLoopStart(int samples);
 		void setLoopEnd(int samples);
+		bool getRandomiseStart() const;
+		void setRandomiseStart(bool enabled);
 
 	private:
 		Vector<String> clips;
