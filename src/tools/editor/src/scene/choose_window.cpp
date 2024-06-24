@@ -209,7 +209,7 @@ int ChooseAssetTypeWindow::getNumColumns(Vector2f scrollPaneSize) const
 
 bool ChooseAssetTypeWindow::canShowAll() const
 {
-	return type != AssetType::Sprite && type != AssetType::Prefab;
+	return type != AssetType::Sprite && type != AssetType::Animation && type != AssetType::Prefab;
 }
 
 
