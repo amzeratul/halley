@@ -29,6 +29,9 @@ namespace Halley {
     	const String& getSwitchValue(const String& id) const;
         float getVariableValue(const String& id) const;
 
+        void setRegion(AudioRegionId regionId);
+        AudioRegionId getRegion() const;
+
     	AudioDebugData::EmitterData getDebugData() const;
 
     private:
@@ -36,6 +39,7 @@ namespace Halley {
         bool temporary = false;
         AudioPosition position;
         AudioEmitter* fallback = nullptr;
+        AudioRegionId regionId;
 
         Vector<std::unique_ptr<AudioVoice>> voices;
         HashMap<String, String> switchValues;

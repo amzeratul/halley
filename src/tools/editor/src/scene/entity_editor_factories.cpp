@@ -1418,6 +1418,8 @@ public:
 		const String strippedTypeName = typeName.startsWith("Halley::") ? typeName.mid(8) : typeName;
 		if (strippedTypeName == "AudioClip") {
 			return AssetType::AudioClip;
+		} else if (strippedTypeName == "AudioObject") {
+			return AssetType::AudioObject;
 		} else if (strippedTypeName == "AudioEvent") {
 			return AssetType::AudioEvent;
 		} else if (strippedTypeName == "SpriteResource") {

@@ -288,6 +288,19 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitt
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 }
 
+AudioHandle AudioFacade::play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume)
+{
+	uint32_t id = curEventId++;
+	const auto emitterId = emitter ? emitter->getId() : 0;
+
+	enqueue([=] () {
+		engine->play(id, audioObject, emitterId, volume);
+	});
+	playingSounds.push_back(id);
+
+	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+}
+
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
 	const auto id = curEventId++;

@@ -21,3 +21,23 @@ void AudioRegion::removeNeighbour(AudioRegionId id)
 {
 	// TODO
 }
+
+void AudioRegion::markAsReadyToDestroy()
+{
+	readyToDestroy = true;
+}
+
+void AudioRegion::clearRefCount()
+{
+	refCount = 0;
+}
+
+void AudioRegion::incRefCount()
+{
+	++refCount;
+}
+
+bool AudioRegion::shouldDestroy() const
+{
+	return readyToDestroy && refCount == 0;
+}

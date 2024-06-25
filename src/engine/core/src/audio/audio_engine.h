@@ -40,6 +40,7 @@ namespace Halley {
 
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
 	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop);
+	    void play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float volume);
 		
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);
@@ -114,6 +115,8 @@ namespace Halley {
 		bool debugDataEnabled = false;
 
 		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
+		void mixRegion(const AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain);
+
 	    void removeFinishedVoices();
 		void queueAudioFloat(gsl::span<const float> data);
 		void queueAudioBytes(gsl::span<const gsl::byte> data);
@@ -126,6 +129,8 @@ namespace Halley {
 		uint8_t loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
 		void updateBusGains();
 		void collectBusChildren(Vector<int>& dst, const BusData& bus) const;
+
+		void updateRegions();
 
 		AudioDebugData generateDebugData() const;
     };

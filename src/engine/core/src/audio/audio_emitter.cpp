@@ -99,6 +99,16 @@ float AudioEmitter::getVariableValue(const String& id) const
 	return iter->second;
 }
 
+void AudioEmitter::setRegion(AudioRegionId regionId)
+{
+	this->regionId = regionId;
+}
+
+AudioRegionId AudioEmitter::getRegion() const
+{
+	return regionId;
+}
+
 AudioDebugData::EmitterData AudioEmitter::getDebugData() const
 {
 	AudioDebugData::EmitterData result;

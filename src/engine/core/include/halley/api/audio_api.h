@@ -13,6 +13,7 @@
 
 namespace Halley
 {
+	class AudioObject;
 	class AudioFade;
 	class AudioPosition;
 	class AudioClip;
@@ -268,10 +269,11 @@ namespace Halley
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
 		virtual AudioHandle postEvent(const AudioEvent& event) = 0;
 		virtual AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) = 0;
-		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float gain = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float gain = 1.0f) = 0;
 
 		// Start old API, avoid in new code
-		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float gain = 1.0f, bool loop = false) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
 		virtual AudioHandle playMusic(const String& eventName, int track = 0, float fadeInTime = 0.0f) = 0;
 		virtual AudioHandle getMusic(int track = 0) = 0;

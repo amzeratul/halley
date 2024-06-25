@@ -9,6 +9,7 @@
 #include "halley/audio/audio_event.h"
 #include "halley/support/logger.h"
 #include "halley/api/audio_api.h"
+#include "halley/audio/audio_object.h"
 #include "halley/properties/audio_properties.h"
 #include "halley/support/profiler.h"
 #include "halley/time/stopwatch.h"
@@ -25,6 +26,7 @@ AudioEngine::AudioEngine()
 	rng.setSeed(Random::getGlobal().getRawInt());
 
 	createEmitter(0, AudioPosition::makeFixed(), false);
+	createRegion(0);
 }
 
 AudioEngine::~AudioEngine()
@@ -48,7 +50,7 @@ void AudioEngine::createRegion(AudioRegionId id)
 
 void AudioEngine::destroyRegion(AudioRegionId id)
 {
-	regions.erase(id);
+	regions.at(id)->markAsReadyToDestroy();
 }
 
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
@@ -78,9 +80,24 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 	iter->second->addVoice(std::move(voice));
 }
 
+void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float volume)
+{
+	const auto iter = emitters.find(emitterId);
+	if (iter == emitters.end()) {
+		finishedSounds.push_back(id);
+		return;
+	}
+
+	auto pitch = rng.getFloat(object->getPitch());
+	auto voice = std::make_unique<AudioVoice>(*this, object->makeSource(*this, *iter->second), volume, pitch, 0.0f, 0, getBusId(object->getBus()));
+	voice->setIds(id);
+	iter->second->addVoice(std::move(voice));
+}
+
 void AudioEngine::setListener(AudioListenerData l)
 {
 	listener = std::move(l);
+	listener.regions.emplace_back(); // Ensure the default region is added
 }
 
 void AudioEngine::setOutputChannels(Vector<AudioChannelData> channelData)
@@ -191,6 +208,9 @@ void AudioEngine::generateBuffer()
 	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer);
 	Stopwatch timer;
 	timer.start();
+
+	updateRegions();
+	updateBusGains();
 
 	const size_t targetSamples = bufferSizeController ? bufferSizeController->getTargetSamples() : spec.bufferSize;
 	const size_t samplesToRead = alignDown(targetSamples * 48000 / spec.sampleRate, static_cast<size_t>(16));
@@ -323,26 +343,41 @@ void AudioEngine::setMasterGain(float gain)
 
 void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
 {
-	// Ensure propagation of bus gains
-	updateBusGains();
-
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
 		AudioMixer::zero(buffers[i]->samples);
 	}
 
-	// Mix every emitter
+	// Update every emitter
 	for (auto& e: emitters) {
 		for (auto& v: e.second->getVoices()) {
 			// Start playing if necessary
 			if (!v->isPlaying() && !v->isDone() && v->isReady()) {
 				v->start();
 			}
-
-			// Mix it in!
+			// Update
 			if (v->isPlaying()) {
 				v->update(channels, e.second->getPosition(), listener, masterGain * getCompositeBusGain(v->getBus()));
-				v->mixTo(numSamples, buffers, *pool);
+			}
+		}
+	}
+
+	// Mix every region
+	for (auto& listenerRegion: listener.regions) {
+		auto& region = regions.at(listenerRegion.regionId);
+		mixRegion(*region, numSamples, nChannels, buffers, listenerRegion.presence);
+	}
+}
+
+void AudioEngine::mixRegion(const AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain)
+{
+	for (auto& e: emitters) {
+		const auto regionId = e.second->getRegion();
+		if (regionId == region.getId()) {
+			for (auto& v: e.second->getVoices()) {
+				if (v->isPlaying()) {
+					v->mixTo(numSamples, buffers, *pool, gain);
+				}
 			}
 		}
 	}
@@ -392,6 +427,24 @@ void AudioEngine::collectBusChildren(Vector<int>& dst, const BusData& bus) const
 		dst.push_back(child);
 		collectBusChildren(dst, buses[child]);
 	}
+}
+
+void AudioEngine::updateRegions()
+{
+	for (auto& region: regions) {
+		region.second->clearRefCount();
+	}
+	for (auto& emitter: emitters) {
+		const auto regionId = emitter.second->getRegion();
+		if (regionId != 0) {
+			regions.at(regionId)->incRefCount();
+		}
+	}
+
+	std_ex::erase_if_value(regions, [&] (std::unique_ptr<AudioRegion>& region)
+	{
+		return region->shouldDestroy();
+	});
 }
 
 namespace {

@@ -107,7 +107,16 @@ void AudioEmitterHandleImpl::setGain(float gain)
 
 void AudioEmitterHandleImpl::setRegion(AudioRegionId regionId)
 {
-	// TODO
+	AudioEngine* engine = facade.engine.get();
+	const auto emId = id;
+
+	facade.enqueue([=] ()
+	{
+		auto* em = engine->getEmitter(emId);
+		if (em) {
+			em->setRegion(regionId);
+		}
+	});
 }
 
 AudioPosition AudioEmitterHandleImpl::getPosition() const

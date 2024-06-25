@@ -8,6 +8,7 @@
 #include "halley/data_structures/ring_buffer.h"
 
 namespace Halley {
+	class AudioObject;
 	class AudioProperties;
 	class AudioPosition;
 	class AudioEngine;
@@ -48,6 +49,7 @@ namespace Halley {
 		AudioHandle postEvent(const AudioEvent& event) override;
 		AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) override;
 		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop) override;
+		AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume) override;
 
     	AudioHandle postEvent(const String& name, AudioPosition position) override;
     	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop) override;

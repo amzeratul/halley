@@ -12,7 +12,15 @@ namespace Halley {
         void addNeighbour(AudioRegionId id, float attenuation, float lowPassHz);
         void removeNeighbour(AudioRegionId id);
 
+    	void markAsReadyToDestroy();
+    	void clearRefCount();
+        void incRefCount();
+        bool shouldDestroy() const;
+
     private:
         AudioRegionId id;
+
+        bool readyToDestroy = false;
+        int refCount = 0;
     };
 }
