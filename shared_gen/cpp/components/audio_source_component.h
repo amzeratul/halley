@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 129
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -20,6 +20,7 @@ public:
 	float rangeMax{ 100 };
 	Halley::Vector3f lastPos{};
 	bool canAutoVel{ false };
+	bool moved{ false };
 
 	AudioSourceComponent() {
 	}

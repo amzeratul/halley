@@ -21,6 +21,10 @@ component:
       defaultValue: 343
       displayName: Speed of Sound
       canSave: false
+  - regions:
+      type: 'Halley::Vector<Halley::AudioListenerRegionData>'
+      canEdit: false
+      canSave: false
 
 ---
 
@@ -50,6 +54,11 @@ component:
   - canAutoVel:
       type: bool
       canSave: false
+      defaultValue: false
+  - moved:
+      type: bool
+      canSave: false
+      canEdit: false
       defaultValue: false
 
 ---

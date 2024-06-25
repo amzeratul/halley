@@ -5,9 +5,10 @@
 
 using namespace Halley;
 
-AudioEmitterHandleImpl::AudioEmitterHandleImpl(AudioFacade& facade, AudioEmitterId id, bool owning)
+AudioEmitterHandleImpl::AudioEmitterHandleImpl(AudioFacade& facade, AudioEmitterId id, AudioPosition position, bool owning)
 	: facade(facade)
 	, id(id)
+	, position(std::move(position))
 	, owning(owning)
 {
 }
@@ -76,6 +77,8 @@ void AudioEmitterHandleImpl::setPosition(AudioPosition position)
 	AudioEngine* engine = facade.engine.get();
 	const auto emId = id;
 
+	this->position = position;
+
 	facade.enqueue([=] ()
 	{
 		auto* em = engine->getEmitter(emId);
@@ -100,4 +103,14 @@ void AudioEmitterHandleImpl::setGain(float gain)
 			});
 		}
 	});
+}
+
+void AudioEmitterHandleImpl::setRegion(AudioRegionId regionId)
+{
+	// TODO
+}
+
+AudioPosition AudioEmitterHandleImpl::getPosition() const
+{
+	return position;
 }

@@ -2,7 +2,6 @@
 #include "halley/audio/audio_facade.h"
 #include "audio_engine.h"
 #include <algorithm>
-#include "halley/support/logger.h"
 
 using namespace Halley;
 

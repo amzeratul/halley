@@ -3,6 +3,7 @@
 #include "audio_emitter_handle_impl.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
+#include "audio_region_handle_impl.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
 #include "halley/resources/resources.h"
@@ -203,12 +204,23 @@ AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 		engine->createEmitter(emitterId, position, false);
 	});
 
-	return std::make_shared<AudioEmitterHandleImpl>(*this, emitterId, true);
+	return std::make_shared<AudioEmitterHandleImpl>(*this, emitterId, position, true);
 }
 
 AudioEmitterHandle AudioFacade::getGlobalEmitter()
 {
-	return std::make_shared<AudioEmitterHandleImpl>(*this, 0, false);
+	return std::make_shared<AudioEmitterHandleImpl>(*this, 0, AudioPosition::makeFixed(), false);
+}
+
+AudioRegionHandle AudioFacade::createRegion()
+{
+	const auto regionId = curRegionId++;
+
+	enqueue([=]() {
+		engine->createRegion(regionId);
+	});
+
+	return std::make_shared<AudioRegionHandleImpl>(*this, regionId);
 }
 
 AudioHandle AudioFacade::postEvent(const String& name)

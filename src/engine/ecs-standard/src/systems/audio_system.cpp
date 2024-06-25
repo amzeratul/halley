@@ -86,7 +86,7 @@ private:
 			const auto vel = deltaPos.length() < 15.0f ? deltaPos / static_cast<float>(t) : Vector3f();
 			listener.audioListener.velAverage.add(vel);
 			listener.audioListener.lastPos = pos;
-			audio.setListener(AudioListenerData(lastPos, listener.audioListener.velAverage.getMean(), listener.audioListener.referenceDistance, listener.audioListener.speedOfSound));
+			audio.setListener(AudioListenerData(lastPos, listener.audioListener.velAverage.getMean(), listener.audioListener.referenceDistance, listener.audioListener.speedOfSound, listener.audioListener.regions));
 		}
 	}
 
@@ -117,13 +117,15 @@ private:
 
 		for (auto& source: sourceFamily) {
 			Vector3f vel;
+			const auto pos = Vector3f(source.transform2D.getGlobalPosition());
+			const auto lastPos = source.audioSource.lastPos;
+			source.audioSource.lastPos = pos;
+			source.audioSource.moved = pos != lastPos;
+
 			if (source.velocity) {
 				vel = Vector3f(source.velocity->velocity, 0);
 			} else if (source.audioSource.canAutoVel) {
-				const auto pos = Vector3f(source.transform2D.getGlobalPosition());
-				const auto lastPos = source.audioSource.lastPos;
 				vel = (pos - lastPos) / static_cast<float>(t);
-				source.audioSource.lastPos = pos;
 			}
 
 			source.audioSource.emitter->setPosition(getAudioPosition(source, vel));

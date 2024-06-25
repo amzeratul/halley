@@ -23,6 +23,7 @@ namespace Halley
 	using AudioEventId = uint32_t;
     using AudioEmitterId = uint32_t;
     using AudioObjectId = uint32_t;
+	using AudioRegionId = uint32_t;
 
     namespace AudioConfig {
         constexpr int sampleRate = 48000;
@@ -82,6 +83,12 @@ namespace Halley
 		virtual std::optional<AudioSpec> getPreferredSpec() const { return {}; }
 	};
 
+	class AudioListenerRegionData {
+	public:
+		AudioRegionId regionId = 0;
+		float presence = 1; // 0: not in region, 1: fully in region
+	};
+
 	class AudioListenerData
 	{
 	public:
@@ -89,13 +96,15 @@ namespace Halley
 		Vector3f velocity;
 		float referenceDistance = 100.0f;
 		float speedOfSound = 343.0f;
+		Vector<AudioListenerRegionData> regions;
 
 		AudioListenerData() {}
-		AudioListenerData(Vector3f position, Vector3f velocity = {}, float referenceDistance = 100.0f, float speedOfSound = 343.0f)
+		AudioListenerData(Vector3f position, Vector3f velocity = {}, float referenceDistance = 100.0f, float speedOfSound = 343.0f, Vector<AudioListenerRegionData> regions = {})
 			: position(position)
 			, velocity(velocity)
 			, referenceDistance(referenceDistance)
 			, speedOfSound(speedOfSound)
+			, regions(std::move(regions))
 		{}
 	};
 
@@ -195,11 +204,25 @@ namespace Halley
 		virtual void setVariable(String variableId, float value) = 0;
 		virtual void setPosition(AudioPosition position) = 0;
 		virtual void setGain(float gain) = 0;
+		virtual void setRegion(AudioRegionId regionId) = 0;
+
+		virtual AudioPosition getPosition() const = 0;
 
 		/// Allows emitter to remain alive after handle is destroyed, as long as it has sound playing
 		virtual void detach() = 0;
 	};
 	using AudioEmitterHandle = std::shared_ptr<IAudioEmitterHandle>;
+
+	class IAudioRegionHandle {
+	public:
+		virtual ~IAudioRegionHandle() = default;
+
+		virtual AudioRegionId getId() const = 0;
+
+		virtual void addNeighbour(AudioRegionId id, float attenuation, float lowPassHz) = 0;
+		virtual void removeNeighbour(AudioRegionId id) = 0;
+	};
+	using AudioRegionHandle = std::shared_ptr<IAudioRegionHandle>;
 
 	class AudioDebugData {
 	public:
@@ -238,6 +261,8 @@ namespace Halley
 
 		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
 		virtual AudioEmitterHandle getGlobalEmitter() = 0;
+
+		virtual AudioRegionHandle createRegion() = 0;
 
 		virtual AudioHandle postEvent(const String& name) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;

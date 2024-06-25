@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 129
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -18,6 +18,7 @@ public:
 	Halley::Vector3f lastPos{};
 	Halley::RollingDataSet<Halley::Vector3f> velAverage{ 5 };
 	float speedOfSound{ 343 };
+	Halley::Vector<Halley::AudioListenerRegionData> regions{};
 
 	AudioListenerComponent() {
 	}

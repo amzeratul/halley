@@ -250,6 +250,8 @@ set(SOURCES
         "src/audio/audio_mixer.cpp"
         "src/audio/audio_object.cpp"
         "src/audio/audio_position.cpp"
+        "src/audio/audio_region.cpp"
+        "src/audio/audio_region_handle_impl.cpp"
         "src/audio/audio_sub_object.cpp"
         "src/audio/audio_voice.cpp"
         "src/audio/audio_sources/audio_source_clip.cpp"
@@ -705,7 +707,9 @@ set(HEADERS
         "src/audio/audio_engine.h"
         "src/audio/audio_filter_resample.h"
         "src/audio/audio_handle_impl.h"
+        "src/audio/audio_region_handle_impl.h"
         "src/audio/audio_mixer.h"
+        "src/audio/audio_region.h"
         "src/audio/audio_voice.h"
 
 

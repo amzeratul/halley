@@ -41,6 +41,16 @@ void AudioEngine::destroyEmitter(AudioEmitterId id)
 	emitters.erase(id);
 }
 
+void AudioEngine::createRegion(AudioRegionId id)
+{
+	regions[id] = std::make_unique<AudioRegion>(id);
+}
+
+void AudioEngine::destroyRegion(AudioRegionId id)
+{
+	regions.erase(id);
+}
+
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
 {
 	const auto iter = emitters.find(emitterId);
@@ -125,6 +135,15 @@ AudioEmitter* AudioEngine::getEmitter(AudioEmitterId id)
 {
 	const auto iter = emitters.find(id);
 	if (iter == emitters.end()) {
+		return nullptr;
+	}
+	return iter->second.get();
+}
+
+AudioRegion* AudioEngine::getRegion(AudioRegionId id)
+{
+	const auto iter = regions.find(id);
+	if (iter == regions.end()) {
 		return nullptr;
 	}
 	return iter->second.get();

@@ -6,6 +6,7 @@
 #include <map>
 
 #include "audio_emitter.h"
+#include "audio_region.h"
 #include "halley/data_structures/vector.h"
 
 #include "audio_voice.h"
@@ -15,6 +16,7 @@
 #include "halley/maths/random.h"
 
 namespace Halley {
+	class AudioRegion;
 	class AudioBusProperties;
 	class AudioProperties;
 	class AudioMixer;
@@ -33,6 +35,9 @@ namespace Halley {
 		void createEmitter(AudioEmitterId id, AudioPosition position, bool temporary);
 		void destroyEmitter(AudioEmitterId id);
 
+		void createRegion(AudioRegionId id);
+		void destroyRegion(AudioRegionId id);
+
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
 	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop);
 		
@@ -43,6 +48,7 @@ namespace Halley {
 		void forVoicesOnBus(int busId, VoiceCallback callback);
 
 		AudioEmitter* getEmitter(AudioEmitterId id);
+		AudioRegion* getRegion(AudioRegionId id);
 		Vector<AudioEventId> getFinishedSounds();
 
 		void run();
@@ -90,6 +96,7 @@ namespace Halley {
 		std::atomic<bool> needsBuffer;
 
 		HashMap<AudioEmitterId, std::unique_ptr<AudioEmitter>> emitters;
+		HashMap<AudioRegionId, std::unique_ptr<AudioRegion>> regions;
 		Vector<AudioChannelData> channels;
 		
 		float masterGain = 1.0f;

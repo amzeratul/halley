@@ -19,10 +19,11 @@ namespace Halley {
     {
 		friend class AudioHandleImpl;
 		friend class AudioEmitterHandleImpl;
+		friend class AudioRegionHandleImpl;
 
     public:
 		explicit AudioFacade(AudioOutputAPI& output, SystemAPI& system);
-		~AudioFacade();
+		~AudioFacade() override;
 
 		void setResources(Resources& resources) override;
 
@@ -39,6 +40,8 @@ namespace Halley {
 
 		AudioEmitterHandle createEmitter(AudioPosition position) override;
 		AudioEmitterHandle getGlobalEmitter() override;
+
+		AudioRegionHandle createRegion() override;
 
 		AudioHandle postEvent(const String& name) override;
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
@@ -96,7 +99,8 @@ namespace Halley {
 		AudioEventId curEventId = 0;
 		bool ownAudioThread;
 
-		AudioEmitterId curEmitterId;
+		AudioEmitterId curEmitterId = 1;
+		AudioRegionId curRegionId = 1;
 
 		RingBuffer<AudioDebugData> audioDebugData;
 		IAudioDebugDataListener* debugListener = nullptr;
