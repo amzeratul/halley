@@ -260,6 +260,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptWaitFor>());
 	addScriptNode(std::make_unique<ScriptSpriteAnimation>());
+	addScriptNode(std::make_unique<ScriptSpriteAnimationState>());
 	addScriptNode(std::make_unique<ScriptSpriteDirection>());
 	addScriptNode(std::make_unique<ScriptSpriteAlpha>());
 	addScriptNode(std::make_unique<ScriptSpriteActionPoint>());

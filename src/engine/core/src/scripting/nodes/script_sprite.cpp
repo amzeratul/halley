@@ -80,6 +80,72 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptSpriteAnimationState::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimationState::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Get animation info for ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSpriteAnimationState::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Target";
+	} else if (elementIdx == 1) {
+		return "Sequence";
+	} else if (elementIdx == 2) {
+		return "Direction";
+	} else if (elementIdx == 3) {
+		return "Frame";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+String ScriptSpriteAnimationState::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	auto target = getConnectedNodeName(node, graph, 0);
+	if (elementIdx == 1) {
+		return target + ".sequence";
+	} else if (elementIdx == 2) {
+		return target + ".direction";
+	} else if (elementIdx == 3) {
+		return target + ".frame";
+	}
+	return ScriptNodeTypeBase<void>::getShortDescription(node, graph, elementIdx);
+}
+
+ConfigNode ScriptSpriteAnimationState::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	if (const auto* spriteAnimation = environment.tryGetComponent<SpriteAnimationComponent>(readEntityId(environment, node, 0))) {
+		const auto& player = spriteAnimation->player;
+
+		if (pinN == 1) {
+			return ConfigNode(player.getCurrentSequenceName());
+		} else if (pinN == 2) {
+			return ConfigNode(player.getCurrentDirectionName());
+		} else if (pinN == 3) {
+			return ConfigNode(player.getCurrentSequenceFrame());
+		}
+	}
+
+	return {};
+}
+
+
 Vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes() const
 {
 	return { SettingType{ "direction", "Halley::String", Vector<String>{"right"} } };
