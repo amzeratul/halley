@@ -166,6 +166,9 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 	if (buffers.available.empty()) {
 		// No free buffers, create new one
+		if (buffers.entries.size() > 256) {
+			Logger::logWarning("Very large number of audio buffers are being created (" + toString(nextPowerOf2(buffers.entries.size())) + "), something might be going wrong.", true);
+		}
 		auto& result = *buffers.entries.emplace_back(std::make_unique<AudioBuffer>(static_cast<size_t>(1LL << idx)));
 		result.samples.resize(numSamples);
 		return result;

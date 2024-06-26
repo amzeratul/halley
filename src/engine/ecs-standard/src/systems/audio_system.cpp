@@ -50,6 +50,15 @@ public:
 		}
 	}
 
+	void playAudio(const String& event, WorldPosition position, std::optional<AudioRegionId> regionId) override
+	{
+		auto emitter = getAPI().audio->createEmitter(AudioPosition::makePositional(position.pos));
+		if (regionId) {
+			emitter->setRegion(*regionId);
+		}
+		getAPI().audio->postEvent(event, emitter);
+	}
+
 	void setVariable(EntityId entityId, const String& variableName, float value) override
 	{
 		if (const auto* source = sourceFamily.tryFind(entityId)) {

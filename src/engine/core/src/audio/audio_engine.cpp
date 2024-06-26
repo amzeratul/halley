@@ -480,8 +480,16 @@ void AudioEngine::updateRegions()
 			if (auto iter = regions.find(regionId); iter != regions.end()) {
 				iter->second->incRefCount();
 			} else {
-				Logger::logWarning("Unknown region referenced by audio emitter: " + toString(int(regionId)));
+				Logger::logWarning("Unknown region referenced by audio emitter: " + toString(static_cast<int>(regionId)));
 			}
+		}
+	}
+	for (auto& listenerRegion: listener.regions) {
+		const auto regionId = listenerRegion.regionId;
+		if (auto iter = regions.find(regionId); iter != regions.end()) {
+			iter->second->incRefCount();
+		} else {
+			Logger::logWarning("Unknown region referenced by audio emitter: " + toString(static_cast<int>(regionId)));
 		}
 	}
 
