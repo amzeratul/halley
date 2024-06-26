@@ -14,6 +14,8 @@ namespace Halley {
 		void processSamples(AudioBuffersRef& buffers);
 		void processSamples(AudioBuffer& buffer, size_t channelNumber);
 
+		void clearHistory();
+
 	private:
 		float a1 = 0;
 		float a2 = 0;

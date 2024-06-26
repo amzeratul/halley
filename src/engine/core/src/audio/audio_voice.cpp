@@ -125,7 +125,6 @@ bool AudioVoice::isDone() const
 	return done;
 }
 
-
 uint8_t AudioVoice::getBus() const
 {
 	return bus;

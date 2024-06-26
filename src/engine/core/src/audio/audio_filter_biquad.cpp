@@ -60,3 +60,10 @@ void AudioFilterBiquad::processSamples(AudioBuffer& buffer, size_t channelNumber
 		sample = processSample(sample, channelNumber);
 	}
 }
+
+void AudioFilterBiquad::clearHistory()
+{
+	for (auto& cn: channels) {
+		cn.x1 = cn.x2 = cn.y1 = cn.y2 = 0;
+	}
+}
