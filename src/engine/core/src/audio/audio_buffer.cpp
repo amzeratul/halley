@@ -166,7 +166,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 	if (buffers.available.empty()) {
 		// No free buffers, create new one
-		if (buffers.entries.size() > 256) {
+		if (buffers.entries.size() > 128) {
 			Logger::logWarning("Very large number of audio buffers are being created (" + toString(nextPowerOf2(buffers.entries.size())) + "), something might be going wrong.", true);
 		}
 		auto& result = *buffers.entries.emplace_back(std::make_unique<AudioBuffer>(static_cast<size_t>(1LL << idx)));
@@ -183,7 +183,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
 {
-	const size_t idx = fastLog2Ceil(uint32_t(buffer.samples.size()));
+	const size_t idx = fastLog2Ceil(std::max(static_cast<uint32_t>(16), static_cast<uint32_t>(buffer.samples.size())));
 	auto& buffers = buffersTable[idx];
 
 	buffers.available.push_back(&buffer);
