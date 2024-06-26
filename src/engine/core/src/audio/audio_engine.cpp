@@ -97,7 +97,9 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> objec
 void AudioEngine::setListener(AudioListenerData l)
 {
 	listener = std::move(l);
-	listener.regions.emplace_back(); // Ensure the default region is added
+	if (!std_ex::contains_if(listener.regions, [] (const AudioListenerRegionData& rd) { return rd.regionId == 0; })) {
+		listener.regions.emplace_back(); // Ensure the default region is added
+	}
 }
 
 void AudioEngine::setOutputChannels(Vector<AudioChannelData> channelData)
@@ -440,7 +442,11 @@ void AudioEngine::updateRegions()
 	for (auto& emitter: emitters) {
 		const auto regionId = emitter.second->getRegion();
 		if (regionId != 0) {
-			regions.at(regionId)->incRefCount();
+			if (auto iter = regions.find(regionId); iter != regions.end()) {
+				iter->second->incRefCount();
+			} else {
+				Logger::logWarning("Unknown region referenced by audio emitter: " + toString(int(regionId)));
+			}
 		}
 	}
 
