@@ -13,7 +13,6 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	: engine(engine)
 	, bus(bus)
 	, playing(false)
-	, paused(0)
 	, done(false)
 	, isFirstUpdate(true)
 	, baseGain(gain)
@@ -21,6 +20,7 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	, basePitch(pitch)
 	, dopplerScale(dopplerScale)
 	, delaySamples(delaySamples)
+	, paused(0)
 	, source(std::move(src))
 {
 	fader.stopAndSetValue(1);

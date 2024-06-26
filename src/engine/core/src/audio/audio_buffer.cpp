@@ -24,6 +24,7 @@ AudioBufferRef::AudioBufferRef(AudioBufferRef&& other) noexcept
 
 AudioBufferRef& AudioBufferRef::operator=(AudioBufferRef&& other) noexcept
 {
+	clear();
 	buffer = other.buffer;
 	pool = other.pool;
 	other.buffer = nullptr;
@@ -33,10 +34,7 @@ AudioBufferRef& AudioBufferRef::operator=(AudioBufferRef&& other) noexcept
 
 AudioBufferRef::~AudioBufferRef()
 {
-	if (buffer && pool) {
-		pool->returnBuffer(*buffer);
-		buffer = nullptr;
-	}
+	clear();
 }
 
 AudioBuffer& AudioBufferRef::getBuffer() const
@@ -47,6 +45,14 @@ AudioBuffer& AudioBufferRef::getBuffer() const
 AudioSamples AudioBufferRef::getSpan() const
 {
 	return AudioSamples(buffer->samples);
+}
+
+void AudioBufferRef::clear()
+{
+	if (buffer && pool) {
+		pool->returnBuffer(*buffer);
+		buffer = nullptr;
+	}
 }
 
 AudioBuffersRef::AudioBuffersRef()
@@ -73,6 +79,8 @@ AudioBuffersRef::AudioBuffersRef(AudioBuffersRef&& other) noexcept
 
 AudioBuffersRef& AudioBuffersRef::operator=(AudioBuffersRef&& other) noexcept
 {
+	clear();
+
 	buffers = other.buffers;
 	nBuffers = other.nBuffers;
 	pool = other.pool;

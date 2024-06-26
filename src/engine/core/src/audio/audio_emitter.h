@@ -39,7 +39,7 @@ namespace Halley {
         bool temporary = false;
         AudioPosition position;
         AudioEmitter* fallback = nullptr;
-        AudioRegionId regionId;
+        AudioRegionId regionId = 0;
 
         Vector<std::unique_ptr<AudioVoice>> voices;
         HashMap<String, String> switchValues;

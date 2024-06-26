@@ -30,6 +30,8 @@ namespace Halley
 	private:
 		AudioBuffer* buffer;
 		AudioBufferPool* pool;
+
+		void clear();
 	};
 
 	class AudioBuffersRef
