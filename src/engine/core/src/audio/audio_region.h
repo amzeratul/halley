@@ -9,8 +9,9 @@ namespace Halley {
 
         AudioRegionId getId() const;
 
-        void addNeighbour(AudioRegionId id, float attenuation, float lowPassHz);
+        void addNeighbour(AudioRegionNeighbour neighbour);
         void removeNeighbour(AudioRegionId id);
+        const Vector<AudioRegionNeighbour>& getNeighbours() const;
 
     	void markAsReadyToDestroy();
     	void clearRefCount();
@@ -26,5 +27,7 @@ namespace Halley {
         bool readyToDestroy = false;
         int refCount = 0;
         float prevGain = 0;
+
+        Vector<AudioRegionNeighbour> neighbours;
     };
 }

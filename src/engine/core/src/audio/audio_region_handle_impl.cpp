@@ -37,11 +37,11 @@ void AudioRegionHandleImpl::enqueue(std::function<void(AudioRegion& region)> f)
 	});
 }
 
-void AudioRegionHandleImpl::addNeighbour(AudioRegionId otherId, float attenuation, float lowPassHz)
+void AudioRegionHandleImpl::addNeighbour(AudioRegionNeighbour neighbour)
 {
-	enqueue([=] (AudioRegion& region)
+	enqueue([neighbour = std::move(neighbour)](AudioRegion& region)
 	{
-		region.addNeighbour(otherId, attenuation, lowPassHz);
+		region.addNeighbour(neighbour);
 	});
 }
 

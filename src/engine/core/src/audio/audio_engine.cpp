@@ -368,7 +368,12 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 	// Mix every region
 	for (auto& listenerRegion: listener.regions) {
 		auto& region = *regions.at(listenerRegion.regionId);
-		mixRegion(region, buffers, listenerRegion.presence);
+
+		float gain = listenerRegion.presence;
+		const float prevGain = region.getPrevGain();
+		region.setPrevGain(gain);
+
+		mixMainRegion(region, buffers, prevGain, gain);
 	}
 
 	// Clear voice buffers
@@ -379,11 +384,30 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 	}
 }
 
-void AudioEngine::mixRegion(AudioRegion& region, gsl::span<AudioBuffer*> buffers, float gain)
+void AudioEngine::mixMainRegion(const AudioRegion& region, gsl::span<AudioBuffer*> buffers, float prevGain, float gain)
 {
-	const float prevGain = region.getPrevGain();
-	region.setPrevGain(gain);
+	mixRegion(region, buffers, prevGain, gain);
 
+	for (const auto& neighbour: region.getNeighbours()) {
+		if (auto iter = regions.find(neighbour.id); iter != regions.end()) {
+			const auto& otherRegion = *iter->second;
+			const float gain0 = prevGain * neighbour.attenuation;
+			const float gain1 = gain * neighbour.attenuation;
+
+			if (neighbour.lowPassHz) {
+				// TODO: lowpass
+				mixRegion(otherRegion, buffers, gain0, gain1);
+			} else {
+				mixRegion(otherRegion, buffers, gain0, gain1);
+			}
+		} else {
+			Logger::logError("Audio Region " + toString(int(region.getId())) + " has unknown neighbour " + toString(int(neighbour.id)), true);
+		}
+	}
+}
+
+void AudioEngine::mixRegion(const AudioRegion& region, gsl::span<AudioBuffer*> buffers, float prevGain, float gain)
+{
 	for (auto& e: emitters) {
 		const auto regionId = e.second->getRegion();
 		if (regionId == region.getId()) {

@@ -116,6 +116,12 @@ namespace Halley
 		float gain = 1.0f;
 	};
 
+	struct AudioRegionNeighbour {
+        AudioRegionId id;
+        float attenuation;
+        std::optional<float> lowPassHz;
+    };
+
 	using AudioCallback = std::function<void()>;
 
 	class IAudioOutput
@@ -220,7 +226,7 @@ namespace Halley
 
 		virtual AudioRegionId getId() const = 0;
 
-		virtual void addNeighbour(AudioRegionId id, float attenuation, float lowPassHz) = 0;
+		virtual void addNeighbour(AudioRegionNeighbour neighbour) = 0;
 		virtual void removeNeighbour(AudioRegionId id) = 0;
 	};
 	using AudioRegionHandle = std::shared_ptr<IAudioRegionHandle>;

@@ -1,5 +1,7 @@
 #include "audio_region.h"
 
+#include "halley/utils/algorithm.h"
+
 using namespace Halley;
 
 AudioRegion::AudioRegion(AudioRegionId id)
@@ -12,14 +14,19 @@ AudioRegionId AudioRegion::getId() const
 	return id;
 }
 
-void AudioRegion::addNeighbour(AudioRegionId id, float attenuation, float lowPassHz)
+void AudioRegion::addNeighbour(AudioRegionNeighbour neighbour)
 {
-	// TODO
+	neighbours.push_back(neighbour);
 }
 
 void AudioRegion::removeNeighbour(AudioRegionId id)
 {
-	// TODO
+	std_ex::erase_if(neighbours, [=] (const AudioRegionNeighbour& n) { return n.id == id; });
+}
+
+const Vector<AudioRegionNeighbour>& AudioRegion::getNeighbours() const
+{
+	return neighbours;
 }
 
 void AudioRegion::markAsReadyToDestroy()

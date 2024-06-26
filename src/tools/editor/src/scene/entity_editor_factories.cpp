@@ -169,14 +169,25 @@ public:
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
 		float granularity = 1;
+		std::optional<float> minValue;
+		std::optional<float> maxValue;
+
 		if (pars.typeParameters.size() == 1) {
 			granularity = pars.typeParameters[0].toFloat();
+		} else if (pars.typeParameters.size() == 2 || pars.typeParameters.size() == 3) {
+			minValue = pars.typeParameters[0].toFloat();
+			maxValue = pars.typeParameters[1].toFloat();
+			if (pars.typeParameters.size() == 3) {	
+				granularity = pars.typeParameters[2].toFloat();
+			}
 		}
 		if (pars.options.getType() == ConfigNodeType::Map) {
 			granularity = pars.options["granularity"].asFloat(1.0f);
 		}
 
 		auto field = std::make_shared<UISpinControl2>("floatValue", context.getUIFactory().getStyle("spinControl"), value, true);
+		field->setMinimumValue(minValue);
+		field->setMaximumValue(maxValue);
 		field->setIncrement(granularity);
 		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
