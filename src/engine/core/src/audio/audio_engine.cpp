@@ -219,8 +219,7 @@ void AudioEngine::generateBuffer()
 	const size_t numChannels = spec.numChannels;
 	
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
-	auto channelBuffers = channelBuffersRef.getBuffers();
-	mixVoices(samplesToRead, numChannels, channelBuffers);
+	mixVoices(samplesToRead, numChannels, channelBuffersRef);
 	removeFinishedVoices();
 
 	// Interleave
@@ -228,9 +227,9 @@ void AudioEngine::generateBuffer()
 	auto buffer = bufferRef.getSpan().subspan(0, samplesToRead * numChannels);
 	const bool interleave = out->needsInterleavedSamples();
 	if (interleave) {
-		AudioMixer::interleaveChannels(buffer, channelBuffers);
+		AudioMixer::interleaveChannels(buffer, channelBuffersRef.getBuffers());
 	} else {
-		AudioMixer::concatenateChannels(buffer, channelBuffers);
+		AudioMixer::concatenateChannels(buffer, channelBuffersRef.getBuffers());
 	}
 
 	// Compress
@@ -343,11 +342,11 @@ void AudioEngine::setMasterGain(float gain)
 	masterGain = gain;
 }
 
-void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
+void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef& buffers)
 {
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
-		AudioMixer::zero(buffers[i]->samples);
+		AudioMixer::zero(buffers[i].samples);
 	}
 
 	// Update every emitter
@@ -373,7 +372,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 		const float prevGain = region.getPrevGain();
 		region.setPrevGain(gain);
 
-		mixMainRegion(region, buffers, prevGain, gain);
+		mixMainRegion(numSamples, nChannels, region, buffers, prevGain, gain);
 	}
 
 	// Clear voice buffers
@@ -384,36 +383,40 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 	}
 }
 
-void AudioEngine::mixMainRegion(const AudioRegion& region, gsl::span<AudioBuffer*> buffers, float prevGain, float gain)
+void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion& region, AudioBuffersRef& outputBuffers, float prevGain, float gain)
 {
-	mixRegion(region, buffers, prevGain, gain);
+	mixRegion(region, outputBuffers, prevGain, gain);
 
-	for (const auto& neighbour: region.getNeighbours()) {
-		if (auto iter = regions.find(neighbour.id); iter != regions.end()) {
+	for (auto& neighbour: region.getNeighbours()) {
+		if (auto iter = regions.find(neighbour.props.id); iter != regions.end()) {
 			const auto& otherRegion = *iter->second;
-			const float gain0 = prevGain * neighbour.attenuation;
-			const float gain1 = gain * neighbour.attenuation;
+			const float gain0 = prevGain * neighbour.props.attenuation;
+			const float gain1 = gain * neighbour.props.attenuation;
 
-			if (neighbour.lowPassHz) {
-				// TODO: lowpass
-				mixRegion(otherRegion, buffers, gain0, gain1);
+			if (neighbour.props.lowPassHz) {
+				auto regionBuffer = pool->getBuffers(nChannels, numSamples);
+				mixRegion(otherRegion, regionBuffer, 1, 1);
+
+				neighbour.filter.processSamples(regionBuffer);
+
+				AudioMixer::mixAudio(regionBuffer.getSampleSpans(), outputBuffers.getSampleSpans(), gain0, gain1);
 			} else {
-				mixRegion(otherRegion, buffers, gain0, gain1);
+				mixRegion(otherRegion, outputBuffers, gain0, gain1);
 			}
 		} else {
-			Logger::logError("Audio Region " + toString(int(region.getId())) + " has unknown neighbour " + toString(int(neighbour.id)), true);
+			Logger::logError("Audio Region " + toString(static_cast<int>(region.getId())) + " has unknown neighbour " + toString(static_cast<int>(neighbour.props.id)), true);
 		}
 	}
 }
 
-void AudioEngine::mixRegion(const AudioRegion& region, gsl::span<AudioBuffer*> buffers, float prevGain, float gain)
+void AudioEngine::mixRegion(const AudioRegion& region, AudioBuffersRef& buffers, float prevGain, float gain)
 {
 	for (auto& e: emitters) {
 		const auto regionId = e.second->getRegion();
 		if (regionId == region.getId()) {
 			for (auto& v: e.second->getVoices()) {
 				if (v->isPlaying()) {
-					v->mixTo(buffers, prevGain, gain);
+					v->mixTo(buffers.getBuffers(), prevGain, gain);
 				}
 			}
 		}

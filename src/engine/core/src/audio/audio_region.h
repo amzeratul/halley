@@ -1,17 +1,24 @@
 #pragma once
 
 #include "audio_voice.h"
+#include "halley/audio/audio_filter_biquad.h"
 
 namespace Halley {
     class AudioRegion {
     public:
+        struct Neighbour {
+	        AudioRegionNeighbour props;
+            AudioFilterBiquad filter;
+        };
+
         AudioRegion(AudioRegionId id);
 
         AudioRegionId getId() const;
 
         void addNeighbour(AudioRegionNeighbour neighbour);
         void removeNeighbour(AudioRegionId id);
-        const Vector<AudioRegionNeighbour>& getNeighbours() const;
+        const Vector<Neighbour>& getNeighbours() const;
+        Vector<Neighbour>& getNeighbours();
 
     	void markAsReadyToDestroy();
     	void clearRefCount();
@@ -28,6 +35,6 @@ namespace Halley {
         int refCount = 0;
         float prevGain = 0;
 
-        Vector<AudioRegionNeighbour> neighbours;
+        Vector<Neighbour> neighbours;
     };
 }

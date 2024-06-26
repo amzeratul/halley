@@ -85,8 +85,7 @@ namespace Halley {
 		std::array<float, 16> prevChannelMix;
 		float lastGain = 0;
 
-		AudioMultiChannelSamples audioData;
-		std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
+		AudioBuffersRef audioData;
 		size_t startDstSample = 0;
 		size_t numSamplesRendered = 0;
 

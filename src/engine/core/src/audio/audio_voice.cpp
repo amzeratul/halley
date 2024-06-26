@@ -221,15 +221,9 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 	}
 	numSamplesRendered = numSamples;
 
-	// Allocate buffers
-	const size_t nSrcChannels = getNumberOfChannels();
-	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
-		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
-	}
-
 	// Get sample data
-	const bool isPlaying = source->getAudioData(numSamples, audioData);
+	audioData = pool.getBuffers(getNumberOfChannels(), numSamples);
+	const bool isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
 
 	// Advance playback state
 	advancePlayback(numSamples);
@@ -270,7 +264,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 				// Mix to destination
 				if (gain0 + gain1 > 0.0001f) {
 					const auto dstBuffer = AudioSamples(dst[dstChannel]->samples).subspan(startDstSample);
-					AudioMixer::mixAudio(audioData[srcChannel], dstBuffer, gain0, gain1);
+					AudioMixer::mixAudio(audioData[srcChannel].samples, dstBuffer, gain0, gain1);
 				}
 			}
 		}
@@ -279,12 +273,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 
 void AudioVoice::clearBuffers()
 {
-	const size_t nSrcChannels = getNumberOfChannels();
-
-	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-		bufferRefs[srcChannel] = {};
-		audioData[srcChannel] = {};
-	}
+	audioData = {};
 }
 
 void AudioVoice::advancePlayback(size_t samples)

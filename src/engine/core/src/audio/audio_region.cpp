@@ -16,15 +16,25 @@ AudioRegionId AudioRegion::getId() const
 
 void AudioRegion::addNeighbour(AudioRegionNeighbour neighbour)
 {
-	neighbours.push_back(neighbour);
+	AudioFilterBiquad filter;
+	if (neighbour.lowPassHz) {
+		filter.setLowPass(*neighbour.lowPassHz);
+	}
+
+	neighbours.push_back(Neighbour{ neighbour, filter });
 }
 
 void AudioRegion::removeNeighbour(AudioRegionId id)
 {
-	std_ex::erase_if(neighbours, [=] (const AudioRegionNeighbour& n) { return n.id == id; });
+	std_ex::erase_if(neighbours, [=] (const Neighbour& n) { return n.props.id == id; });
 }
 
-const Vector<AudioRegionNeighbour>& AudioRegion::getNeighbours() const
+const Vector<AudioRegion::Neighbour>& AudioRegion::getNeighbours() const
+{
+	return neighbours;
+}
+
+Vector<AudioRegion::Neighbour>& AudioRegion::getNeighbours()
 {
 	return neighbours;
 }

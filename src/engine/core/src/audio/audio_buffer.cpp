@@ -166,11 +166,14 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 	if (buffers.available.empty()) {
 		// No free buffers, create new one
-		return *buffers.entries.emplace_back(std::make_unique<AudioBuffer>(static_cast<size_t>(1LL << idx)));
+		auto& result = *buffers.entries.emplace_back(std::make_unique<AudioBuffer>(static_cast<size_t>(1LL << idx)));
+		result.samples.resize(numSamples);
+		return result;
 	} else {
 		// Return latest free buffer
 		auto* ptr = buffers.available.back();
 		buffers.available.pop_back();
+		ptr->samples.resize(numSamples);
 		return *ptr;
 	}
 }
