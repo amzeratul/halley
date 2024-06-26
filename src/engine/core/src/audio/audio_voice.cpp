@@ -204,8 +204,14 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 {
-	// Check delay
 	startDstSample = 0;
+	numSamplesRendered = 0;
+
+	if (paused) {
+		return;
+	}
+
+	// Check delay
 	size_t numSamples = numSamplesRequested;
 	if (delaySamples > 0) {
 		const size_t delayNow = std::min(static_cast<size_t>(delaySamples), numSamples);
@@ -242,7 +248,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 
 	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
 	const size_t nSrcChannels = getNumberOfChannels();
-	const auto nDstChannels = size_t(dst.size());
+	const auto nDstChannels = dst.size();
 	float totalMix = 0.0f;
 	const size_t nMixes = nSrcChannels * nDstChannels;
 	Expects (nMixes < 16);
