@@ -7,6 +7,8 @@ namespace Halley
 	struct AudioBuffer
 	{
 		Vector<AudioSample> samples;
+
+		AudioBuffer(size_t size);
 	};
 
 	class AudioBufferPool;
@@ -72,16 +74,12 @@ namespace Halley
 		void returnBuffer(AudioBuffer& buffer);
 
 	private:
-		struct Entry
-		{
-			size_t size = 0;
-			bool available = false;
-			std::unique_ptr<AudioBuffer> buffer;
-
-			explicit Entry(std::unique_ptr<AudioBuffer>&& buffer);
+		struct Table {
+			Vector<std::unique_ptr<AudioBuffer>> entries;
+			Vector<AudioBuffer*> available;
 		};
 
-		std::array<Vector<Entry>, 16> buffersTable;
+		std::array<Table, 16> buffersTable;
 
 		AudioBuffer& allocBuffer(size_t numSamples);
 	};

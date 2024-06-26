@@ -2,6 +2,11 @@
 
 using namespace Halley;
 
+AudioBuffer::AudioBuffer(size_t size)
+	: samples(size)
+{
+}
+
 AudioBufferRef::AudioBufferRef()
 	: buffer(nullptr)
 	, pool(nullptr)
@@ -159,17 +164,15 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 	const size_t idx = fastLog2Ceil(std::max(static_cast<uint32_t>(16), static_cast<uint32_t>(numSamples)));
 	auto& buffers = buffersTable[idx];
 
-	for (auto& b: buffers) {
-		if (b.available) {
-			b.available = false;
-			return *b.buffer;
-		}
+	if (buffers.available.empty()) {
+		// No free buffers, create new one
+		return *buffers.entries.emplace_back(std::make_unique<AudioBuffer>(static_cast<size_t>(1LL << idx)));
+	} else {
+		// Return latest free buffer
+		auto* ptr = buffers.available.back();
+		buffers.available.pop_back();
+		return *ptr;
 	}
-
-	// Couldn't find a free one, create new
-	buffers.emplace_back(std::make_unique<AudioBuffer>());
-	buffers.back().buffer->samples.resize(1LL << idx);
-	return *buffers.back().buffer;
 }
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
@@ -177,16 +180,5 @@ void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
 	const size_t idx = fastLog2Ceil(uint32_t(buffer.samples.size()));
 	auto& buffers = buffersTable[idx];
 
-	for (auto& b: buffers) {
-		if (b.buffer.get() == &buffer) {
-			Expects(!b.available);
-			b.available = true;
-		}
-	}
-}
-
-AudioBufferPool::Entry::Entry(std::unique_ptr<AudioBuffer>&& buffer)
-	: available(false)
-	, buffer(std::move(buffer))
-{
+	buffers.available.push_back(&buffer);
 }
