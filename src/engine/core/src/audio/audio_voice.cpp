@@ -216,7 +216,7 @@ void AudioVoice::onFadeEnd()
 }
 
 
-void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool, float gain)
+void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool, float prevGain, float gain)
 {
 	Expects(!dst.empty());
 
@@ -231,7 +231,7 @@ void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, 
 	const size_t nMixes = nSrcChannels * nDstChannels;
 	Expects (nMixes < 16);
 	for (size_t i = 0; i < nMixes; ++i) {
-		totalMix += prevChannelMix[i] * gain + channelMix[i] * gain;
+		totalMix += prevChannelMix[i] * prevGain + channelMix[i] * gain;
 	}
 
 	// Check delay
@@ -264,7 +264,7 @@ void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, 
 				for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
 					// Compute mix
 					const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
-					const float gain0 = prevChannelMix[mixIndex] * gain;
+					const float gain0 = prevChannelMix[mixIndex] * prevGain;
 					const float gain1 = channelMix[mixIndex] * gain;
 
 					// Render to destination

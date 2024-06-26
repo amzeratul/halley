@@ -364,19 +364,22 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 
 	// Mix every region
 	for (auto& listenerRegion: listener.regions) {
-		auto& region = regions.at(listenerRegion.regionId);
-		mixRegion(*region, numSamples, nChannels, buffers, listenerRegion.presence);
+		auto& region = *regions.at(listenerRegion.regionId);
+		mixRegion(region, numSamples, nChannels, buffers, listenerRegion.presence);
 	}
 }
 
-void AudioEngine::mixRegion(const AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain)
+void AudioEngine::mixRegion(AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain)
 {
+	const float prevGain = region.getPrevGain();
+	region.setPrevGain(gain);
+
 	for (auto& e: emitters) {
 		const auto regionId = e.second->getRegion();
 		if (regionId == region.getId()) {
 			for (auto& v: e.second->getVoices()) {
 				if (v->isPlaying()) {
-					v->mixTo(numSamples, buffers, *pool, gain);
+					v->mixTo(numSamples, buffers, *pool, prevGain, gain);
 				}
 			}
 		}

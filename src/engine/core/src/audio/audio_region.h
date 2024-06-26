@@ -17,10 +17,14 @@ namespace Halley {
         void incRefCount();
         bool shouldDestroy() const;
 
+    	void setPrevGain(float gain);
+        float getPrevGain() const;
+
     private:
         AudioRegionId id;
 
         bool readyToDestroy = false;
         int refCount = 0;
+        float prevGain = 0;
     };
 }

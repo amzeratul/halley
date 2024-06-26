@@ -115,7 +115,7 @@ namespace Halley {
 		bool debugDataEnabled = false;
 
 		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
-		void mixRegion(const AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain);
+		void mixRegion(AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain);
 
 	    void removeFinishedVoices();
 		void queueAudioFloat(gsl::span<const float> data);

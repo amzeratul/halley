@@ -41,3 +41,13 @@ bool AudioRegion::shouldDestroy() const
 {
 	return readyToDestroy && refCount == 0;
 }
+
+void AudioRegion::setPrevGain(float gain)
+{
+	prevGain = gain;
+}
+
+float AudioRegion::getPrevGain() const
+{
+	return prevGain;
+}
