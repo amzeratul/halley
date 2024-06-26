@@ -383,25 +383,15 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 		return false;
 	}
 
-	const uint32_t audioObjectId = object->getAudioObjectId();
-
 	if (singleton) {
-		const size_t nPlaying = emitter.forVoices(audioObjectId, [&] (AudioVoice&) {});
+		const size_t nPlaying = emitter.forVoices(object->getAudioObjectId(), [&] (AudioVoice&) {});
 		if (nPlaying > 0) {
 			return false;
 		}
 	}
 
-	const auto gainRange = object->getGain() * playGain;
-	const float gain = engine.getRNG().getFloat(gainRange);
-	const auto pitchRange = object->getPitch() * playPitch;
-	const float pitch = clamp(engine.getRNG().getFloat(pitchRange), 0.1f, 4.0f);
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
-	const float dopplerScale = object->getDopplerScale();
-
-	auto source = object->makeSource(engine, emitter);
-	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, dopplerScale, delaySamples, engine.getBusId(object->getBus()));
-	voice->setIds(uniqueId, audioObjectId);
+	auto voice = engine.makeObjectVoice(*object, uniqueId, emitter, playGain, playPitch, delaySamples);
 	voice->play(fade);
 	emitter.addVoice(std::move(voice));
 

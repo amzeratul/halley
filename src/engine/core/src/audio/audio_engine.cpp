@@ -67,7 +67,7 @@ void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitt
 	}
 }
 
-void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop)
+void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop)
 {
 	const auto iter = emitters.find(emitterId);
 	if (iter == emitters.end()) {
@@ -75,12 +75,12 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 		return;
 	}
 
-	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), volume, 1.0f, 0.0f, 0, getBusId(""));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), gain, 1.0f, 0.0f, 0, getBusId(""));
 	voice->setIds(id);
 	iter->second->addVoice(std::move(voice));
 }
 
-void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float volume)
+void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain)
 {
 	const auto iter = emitters.find(emitterId);
 	if (iter == emitters.end()) {
@@ -88,9 +88,7 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> objec
 		return;
 	}
 
-	auto pitch = rng.getFloat(object->getPitch());
-	auto voice = std::make_unique<AudioVoice>(*this, object->makeSource(*this, *iter->second), volume, pitch, 0.0f, 0, getBusId(object->getBus()));
-	voice->setIds(id);
+	auto voice = makeObjectVoice(*object, id, *iter->second, Range<float>(gain, gain));
 	iter->second->addVoice(std::move(voice));
 }
 
@@ -574,6 +572,20 @@ std::optional<AudioDebugData> AudioEngine::getDebugData() const
 	} else {
 		return std::nullopt;
 	}
+}
+
+std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> playGain, Range<float> playPitch, uint32_t delaySamples)
+{
+	const auto gainRange = object.getGain() * playGain;
+	const auto pitchRange = object.getPitch() * playPitch;
+	const float gain = getRNG().getFloat(gainRange);
+	const float pitch = clamp(getRNG().getFloat(pitchRange), 0.1f, 4.0f);
+	const float dopplerScale = object.getDopplerScale();
+
+	auto source = object.makeSource(*this, emitter);
+	auto voice = std::make_unique<AudioVoice>(*this, std::move(source), gain, pitch, dopplerScale, delaySamples, getBusId(object.getBus()));
+	voice->setIds(uniqueId, object.getAudioObjectId());
+	return voice;
 }
 
 AudioDebugData AudioEngine::generateDebugData() const

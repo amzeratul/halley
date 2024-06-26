@@ -10,6 +10,7 @@
 #include "halley/data_structures/vector.h"
 
 #include "audio_voice.h"
+#include "halley/audio/audio_event.h"
 #include "halley/audio/resampler.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/ring_buffer.h"
@@ -39,8 +40,8 @@ namespace Halley {
 		void destroyRegion(AudioRegionId id);
 
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
-	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop);
-	    void play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float volume);
+	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop);
+	    void play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain);
 		
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);
@@ -74,6 +75,8 @@ namespace Halley {
 
     	void setGenerateDebugData(bool enabled);
 		std::optional<AudioDebugData> getDebugData() const;
+
+		std::unique_ptr<AudioVoice> makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> gain = { 1, 1 }, Range<float> pitch = { 1, 1 }, uint32_t delaySamples = 0);
 
 	private:
 		struct BusData {

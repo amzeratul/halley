@@ -56,6 +56,7 @@ public:
 		if (regionId) {
 			emitter->setRegion(*regionId);
 		}
+		emitter->detach();
 		getAPI().audio->postEvent(event, emitter);
 	}
 
