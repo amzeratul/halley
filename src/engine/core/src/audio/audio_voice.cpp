@@ -202,21 +202,37 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	elapsedTime = 0;
 }
 
-void AudioVoice::onFadeEnd()
+void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 {
-	switch (fadeEnd) {
-	case FadeEndBehaviour::Pause:
-		paused += pendingPauses;
-		pendingPauses = 0;
-		break;
-	case FadeEndBehaviour::Stop:
+	// Check delay
+	startDstSample = 0;
+	size_t numSamples = numSamplesRequested;
+	if (delaySamples > 0) {
+		const size_t delayNow = std::min(static_cast<size_t>(delaySamples), numSamples);
+		delaySamples -= static_cast<uint32_t>(delayNow);
+		startDstSample += delayNow;
+		numSamples -= delayNow;
+	}
+	numSamplesRendered = numSamples;
+
+	// Allocate buffers
+	const size_t nSrcChannels = getNumberOfChannels();
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
+		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
+	}
+
+	// Get sample data
+	const bool isPlaying = source->getAudioData(numSamples, audioData);
+
+	// Advance playback state
+	advancePlayback(numSamples);
+	if (!isPlaying) {
 		stop(AudioFade());
-		break;
 	}
 }
 
-
-void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool, float prevGain, float gain)
+void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 {
 	Expects(!dst.empty());
 
@@ -234,60 +250,54 @@ void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, 
 		totalMix += prevChannelMix[i] * prevGain + channelMix[i] * gain;
 	}
 
-	// Check delay
-	size_t startDstSample = 0;
-	size_t numSamples = numSamplesRequested;
-	if (delaySamples > 0) {
-		const size_t delayNow = std::min(static_cast<size_t>(delaySamples), numSamples);
-		delaySamples -= static_cast<uint32_t>(delayNow);
-		startDstSample += delayNow;
-		numSamples -= delayNow;
-	}
-
-	if (numSamples > 0) {
-		// Read data from source
-		AudioMultiChannelSamples audioData;
-		AudioMultiChannelSamples audioSampleData;
-		std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
+	// If we're audible, mix
+	if (numSamplesRendered > 0 && totalMix >= 0.0001f) {
+		// Mix each emitter channel
 		for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-			bufferRefs[srcChannel] = pool.getBuffer(numSamples);
-			audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
-			audioSampleData[srcChannel] = audioData[srcChannel];
-		}
-		const bool isPlaying = source->getAudioData(numSamples, audioSampleData);
+			// Read to buffer
+			for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+				// Compute mix
+				const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
+				const float gain0 = prevChannelMix[mixIndex] * prevGain;
+				const float gain1 = channelMix[mixIndex] * gain;
 
-		// If we're audible, render
-		if (totalMix >= 0.0001f) {
-			// Render each emitter channel
-			for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-				// Read to buffer
-				for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
-					// Compute mix
-					const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
-					const float gain0 = prevChannelMix[mixIndex] * prevGain;
-					const float gain1 = channelMix[mixIndex] * gain;
-
-					// Render to destination
-					if (gain0 + gain1 > 0.0001f) {
-						const auto dstBuffer = AudioSamples(dst[dstChannel]->samples).subspan(startDstSample);
-						AudioMixer::mixAudio(audioData[srcChannel], dstBuffer, gain0, gain1);
-					}
+				// Mix to destination
+				if (gain0 + gain1 > 0.0001f) {
+					const auto dstBuffer = AudioSamples(dst[dstChannel]->samples).subspan(startDstSample);
+					AudioMixer::mixAudio(audioData[srcChannel], dstBuffer, gain0, gain1);
 				}
 			}
 		}
+	}
+}
 
-		advancePlayback(numSamples);
+void AudioVoice::clearBuffers()
+{
+	const size_t nSrcChannels = getNumberOfChannels();
 
-		if (!isPlaying) {
-			stop(AudioFade());
-		}
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		bufferRefs[srcChannel] = {};
+		audioData[srcChannel] = {};
 	}
 }
 
 void AudioVoice::advancePlayback(size_t samples)
 {
 	if (!paused) {
-		elapsedTime += float(samples) / AudioConfig::sampleRate;
+		elapsedTime += static_cast<float>(samples) / AudioConfig::sampleRate;
+	}
+}
+
+void AudioVoice::onFadeEnd()
+{
+	switch (fadeEnd) {
+	case FadeEndBehaviour::Pause:
+		paused += pendingPauses;
+		pendingPauses = 0;
+		break;
+	case FadeEndBehaviour::Stop:
+		stop(AudioFade());
+		break;
 	}
 }
 

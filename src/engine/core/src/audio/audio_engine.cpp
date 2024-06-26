@@ -357,9 +357,10 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 			if (!v->isPlaying() && !v->isDone() && v->isReady()) {
 				v->start();
 			}
-			// Update
+			// Render
 			if (v->isPlaying()) {
 				v->update(channels, e.second->getPosition(), listener, masterGain * getCompositeBusGain(v->getBus()));
+				v->render(numSamples, *pool);
 			}
 		}
 	}
@@ -367,11 +368,18 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 	// Mix every region
 	for (auto& listenerRegion: listener.regions) {
 		auto& region = *regions.at(listenerRegion.regionId);
-		mixRegion(region, numSamples, nChannels, buffers, listenerRegion.presence);
+		mixRegion(region, buffers, listenerRegion.presence);
+	}
+
+	// Clear voice buffers
+	for (auto& e: emitters) {
+		for (auto& v: e.second->getVoices()) {
+			v->clearBuffers();
+		}
 	}
 }
 
-void AudioEngine::mixRegion(AudioRegion& region, size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers, float gain)
+void AudioEngine::mixRegion(AudioRegion& region, gsl::span<AudioBuffer*> buffers, float gain)
 {
 	const float prevGain = region.getPrevGain();
 	region.setPrevGain(gain);
@@ -381,7 +389,7 @@ void AudioEngine::mixRegion(AudioRegion& region, size_t numSamples, size_t nChan
 		if (regionId == region.getId()) {
 			for (auto& v: e.second->getVoices()) {
 				if (v->isPlaying()) {
-					v->mixTo(numSamples, buffers, *pool, prevGain, gain);
+					v->mixTo(buffers, prevGain, gain);
 				}
 			}
 		}

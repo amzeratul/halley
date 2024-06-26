@@ -38,7 +38,9 @@ namespace Halley {
 		size_t getNumberOfChannels() const;
 
 		void update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float busGain);
-		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool, float prevGain, float gain);
+		void render(size_t numSamples, AudioBufferPool& pool);
+		void mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain);
+		void clearBuffers();
 		
 		void setIds(AudioEventId eventId, AudioObjectId audioObjectId = 0);
 		AudioEventId getEventId() const;
@@ -81,8 +83,12 @@ namespace Halley {
 
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;
-
 		float lastGain = 0;
+
+		AudioMultiChannelSamples audioData;
+		std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
+		size_t startDstSample = 0;
+		size_t numSamplesRendered = 0;
 
 		void advancePlayback(size_t samples);
 		void onFadeEnd();
