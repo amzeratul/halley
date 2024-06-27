@@ -14,9 +14,9 @@ std::shared_ptr<IUIElement> BaseEnumFieldFactory::createField(const ComponentEdi
 	const auto& values = getValues(data);
 
 	auto& fieldData = data.getFieldData();
-	const auto& defaultValue = pars.getStringDefaultParameter();
+	const auto defaultValue = pars.getStringDefaultParameter().split("::").back();
 	const auto& origValue = fieldData.asString("");
-	const auto& value = fieldData.asString(defaultValue.isEmpty() ? (values.empty() ? "" : values.front()) : defaultValue);
+	const auto& value = fieldData.asString(getDefaultValue(values, defaultValue));
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 
@@ -47,6 +47,18 @@ std::shared_ptr<IUIElement> BaseEnumFieldFactory::createField(const ComponentEdi
 	return sizer;
 }
 
+String BaseEnumFieldFactory::getDefaultValue(const Vector<String>& values, const String& requestedValue) const
+{
+	auto lc = requestedValue.asciiLower();
+
+	for (auto& value: values) {
+		if (value.asciiLower() == lc) {
+			return value;
+		}
+	}
+	return values.empty() ? "" : values.front();
+}
+
 std::optional<String> BaseEnumFieldFactory::getDependentField() const
 {
 	return std::nullopt;
@@ -70,8 +82,9 @@ void DependencyObserver::update(Time t, bool moved)
 	}
 }
 
-EnumFieldFactory::EnumFieldFactory(String name, Vector<String> values)
+EnumFieldFactory::EnumFieldFactory(String name, Vector<String> values, String defaultValue)
 	: fieldName(std::move(name))
+	, defaultValue(std::move(defaultValue))
 	, values(std::move(values))
 {
 }
@@ -84,6 +97,18 @@ String EnumFieldFactory::getFieldType()
 Vector<String> EnumFieldFactory::getValues(const ComponentDataRetriever& data) const
 {
 	return values;
+}
+
+String EnumFieldFactory::getDefaultValue(const Vector<String>& values, const String& requestedValue) const
+{
+	auto lc = requestedValue.asciiLower();
+
+	for (auto& value: values) {
+		if (value.asciiLower() == lc) {
+			return value;
+		}
+	}
+	return defaultValue;
 }
 
 

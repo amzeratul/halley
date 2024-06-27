@@ -15,6 +15,7 @@ namespace Halley {
 
 	protected:
 		virtual Vector<String> getValues(const ComponentDataRetriever& data) const = 0;
+		virtual String getDefaultValue(const Vector<String>& values, const String& requestedValue) const;
 		virtual std::optional<String> getDependentField() const;
 	};
 
@@ -34,7 +35,7 @@ namespace Halley {
 	class EnumFieldFactory : public BaseEnumFieldFactory
 	{
 	public:
-		EnumFieldFactory(String name, Vector<String> values);
+		EnumFieldFactory(String name, Vector<String> values, String defaultValue);
 		
 		String getFieldType() override;
 
@@ -42,14 +43,25 @@ namespace Halley {
 		static std::unique_ptr<EnumFieldFactory> makeEnumFactory(String name)
 		{
 			const auto& vals = EnumNames<T>()();
-			return std::make_unique<EnumFieldFactory>(std::move(name), Vector<String>(vals.begin(), vals.end()));
+			auto values = Vector<String>(vals.begin(), vals.end());
+			auto defaultValue = values.empty() ? "" : values.front();
+			return std::make_unique<EnumFieldFactory>(std::move(name), std::move(values), defaultValue);
+		}
+
+		template <typename T>
+		static std::unique_ptr<EnumFieldFactory> makeEnumFactory(String name, T defaultValue)
+		{
+			const auto& vals = EnumNames<T>()();
+			return std::make_unique<EnumFieldFactory>(std::move(name), Vector<String>(vals.begin(), vals.end()), toString(defaultValue));
 		}
 
 	protected:
 		Vector<String> getValues(const ComponentDataRetriever& data) const override;
+		String getDefaultValue(const Vector<String>& values, const String& requestedValue) const override;
 
 	private:
 		const String fieldName;
+		String defaultValue;
 		Vector<String> values;
 	};
 
@@ -101,7 +113,7 @@ namespace Halley {
 			for (const auto& k: config.getKeys<U>()) {
 				result.push_back(altPrefix + k);
 			}
-			return std::make_unique<EnumFieldFactory>(std::move(name), result);
+			return std::make_unique<EnumFieldFactory>(std::move(name), result, result.empty() ? result.front() : "");
 		}
 
 	protected:
