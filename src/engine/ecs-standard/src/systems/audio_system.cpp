@@ -43,11 +43,25 @@ public:
 		}
 	}
 
-	void playAudio(const String& event, EntityId entityId) override
+	void playAudio(const String& eventId, EntityId entityId) override
 	{
 		if (const auto* source = sourceFamily.tryFind(entityId)) {
-			getAPI().audio->postEvent(event, source->audioSource.emitter);
+			getAPI().audio->postEvent(eventId, source->audioSource.emitter);
+			return;
 		}
+
+		// Not a source
+		auto e = getWorld().tryGetEntity(entityId);
+		if (e.isValid()) {
+			if (const auto* transform2d = e.tryGetComponent<Transform2DComponent>(entityId)) {
+				auto pos = transform2d->getWorldPosition();
+				playAudio(eventId, pos, findRegion(pos));
+				return;
+			}
+		}
+
+		// Fallback
+		getAPI().audio->postEvent(eventId);
 	}
 
 	void playAudio(const String& event, WorldPosition position, std::optional<AudioRegionId> regionId) override
@@ -55,6 +69,8 @@ public:
 		auto emitter = getAPI().audio->createEmitter(AudioPosition::makePositional(position.pos));
 		if (regionId) {
 			emitter->setRegion(*regionId);
+		} else {
+			emitter->setRegion(findRegion(position).value_or(0));
 		}
 		emitter->detach();
 		getAPI().audio->postEvent(event, emitter);
@@ -82,10 +98,24 @@ public:
 		return getAPI().audio->getRegionName(id);
 	}
 
+	std::optional<AudioRegionId> findRegion(WorldPosition pos)
+	{
+		if (regionLookup) {
+			return regionLookup(pos);
+		}
+		return std::nullopt;
+	}
+
+	void setRegionLookup(std::function<AudioRegionId(WorldPosition pos)> f) override
+	{
+		regionLookup = f;
+	}
+
 private:
 	String curRegionId;
 	String curRegionPreset;
 	String curFloorType;
+	std::function<AudioRegionId(WorldPosition pos)> regionLookup;
 	
 	void updateListeners(Time t)
 	{

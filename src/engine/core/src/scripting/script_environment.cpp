@@ -875,13 +875,7 @@ EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, Grap
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (!id.isEmpty()) {
-		if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {
-			api.audio->postEvent(id, audioSource->emitter);
-		} else if (const auto* transform2d = tryGetComponent<Transform2DComponent>(entityId)) {
-			api.audio->postEvent(id, AudioPosition::makePositional(transform2d->getGlobalPosition()));
-		} else {
-			api.audio->postEvent(id);
-		}
+		getInterface<IAudioSystemInterface>().playAudio(id, entityId);
 	}
 }
 

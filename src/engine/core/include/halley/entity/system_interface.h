@@ -73,6 +73,7 @@ namespace Halley {
 		virtual void setVariable(EntityId entityId, const String& variableName, float value) = 0;
 		virtual String getSourceName(AudioEmitterId id) const = 0;
 		virtual String getRegionName(AudioRegionId id) const = 0;
+		virtual void setRegionLookup(std::function<AudioRegionId(WorldPosition pos)> f) = 0;
 	};
 
 	class IExitGameInterface : public ISystemInterface {
