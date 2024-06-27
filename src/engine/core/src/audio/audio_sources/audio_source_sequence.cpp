@@ -175,6 +175,10 @@ void AudioSourceSequence::initialize()
 		playList.push_back(i);
 	}
 
+	if (playList.empty()) {
+		return;
+	}
+
 	const auto type = sequenceConfig.getSequenceType();
 	if (type == AudioSequenceType::Shuffle || type == AudioSequenceType::ShuffleOnce) {
 		shuffle(playList.begin(), playList.end(), engine.getRNG());
@@ -191,6 +195,10 @@ void AudioSourceSequence::initialize()
 
 void AudioSourceSequence::nextTrack()
 {
+	if (playList.empty()) {
+		return;
+	}
+
 	if (sequenceConfig.getSequenceType() == AudioSequenceType::Random) {
 		curTrack = engine.getRNG().getSizeT(0, playList.size() - 1);
 	} else {
@@ -215,6 +223,10 @@ void AudioSourceSequence::nextTrack()
 
 void AudioSourceSequence::loadCurrentTrack()
 {
+	if (playList.empty()) {
+		return;
+	}
+
 	const auto& segment = sequenceConfig.getSegments()[playList[curTrack]];
 	playingTracks.push_back({ segment.object->makeSource(engine, emitter) });
 	auto& track = playingTracks.back();

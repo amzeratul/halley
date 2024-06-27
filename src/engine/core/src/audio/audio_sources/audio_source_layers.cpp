@@ -21,14 +21,18 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		layers.emplace_back(std::move(layerSources[i]), i);
 		layers.back().init(layerConfig);
-
-		assert(layers[0].source->getNumberOfChannels() == layers[i].source->getNumberOfChannels());
 	}
 }
 
 uint8_t AudioSourceLayers::getNumberOfChannels() const
 {
-	return layers.empty() ? 0 : layers[0].source->getNumberOfChannels();
+	for (auto& layer: layers) {
+		auto n = layer.source->getNumberOfChannels();
+		if (n > 0) {
+			return n;
+		}
+	}
+	return 0;
 }
 
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples dst)
