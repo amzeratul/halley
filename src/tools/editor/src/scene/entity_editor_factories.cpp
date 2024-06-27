@@ -881,6 +881,7 @@ public:
 
 		containerPtr->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
 		{
+			data.getWriteableFieldData().ensureType(ConfigNodeType::Sequence);
 			auto& seq = data.getWriteableFieldData().asSequence();
 			if (event.getSourceId() == "add") {
 				seq.emplace_back(ConfigNode());

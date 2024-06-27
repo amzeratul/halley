@@ -53,4 +53,43 @@ void AudioRootEditor::onMakeUI()
 		object.setDopplerScale(value);
 		editor.markModified(false);
 	});
+
+	auto bindAttenuationParams = [this] (const AudioAttenuation& attenuation)
+	{
+		bindData("refDistance", attenuation.referenceDistance, [this] (float value)
+		{
+			object.getMutableAttenuationOverride().referenceDistance = value;
+			editor.markModified(false);
+		});
+
+		bindData("maxDistance", attenuation.maximumDistance, [this] (float value)
+		{
+			object.getMutableAttenuationOverride().maximumDistance = value;
+			editor.markModified(false);
+		});
+
+		bindData("attenuationCurve", toString(attenuation.curve), [this] (String value)
+		{
+			object.getMutableAttenuationOverride().curve = fromString<AudioAttenuationCurve>(value);
+			editor.markModified(false);
+		});
+	};
+
+	if (object.getAttenuationOverride().has_value()) {
+		getWidget("attenuationContents")->setActive(true);
+		bindAttenuationParams(*object.getAttenuationOverride());
+	}
+
+	bindData("overrideAttenuation", object.getAttenuationOverride().has_value(), [this, bindAttenuationParams] (bool value)
+	{
+		getWidget("attenuationContents")->setActive(value);
+
+		if (value) {
+			object.setAttenuationOverride(AudioAttenuation());
+			bindAttenuationParams(*object.getAttenuationOverride());
+		} else {
+			object.setAttenuationOverride(std::nullopt);
+		}
+		editor.markModified(false);
+	});
 }

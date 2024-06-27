@@ -1,4 +1,6 @@
 #include "halley/audio/audio_object.h"
+
+#include "halley/audio/audio_attenuation.h"
 #include "halley/audio/audio_clip.h"
 
 #include "halley/bytes/byte_serializer.h"
@@ -28,6 +30,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	dopplerScale = node["dopplerScale"].asFloat(0.0f);
 	objects = node["objects"].asVector<AudioSubObjectHandle>({});
+	attenuationOverride = node["attenuationOverride"].asOptional<AudioAttenuation>();
 }
 
 ConfigNode AudioObject::toConfigNode() const
@@ -45,6 +48,9 @@ ConfigNode AudioObject::toConfigNode() const
 	}
 	if (std::abs(dopplerScale) > 0.0001f) {
 		result["dopplerScale"] = dopplerScale;
+	}
+	if (attenuationOverride) {
+		result["attenuationOverride"] = *attenuationOverride;
 	}
 	result["objects"] = objects;
 	
@@ -123,6 +129,24 @@ void AudioObject::setDopplerScale(float scale)
 	dopplerScale = scale;
 }
 
+std::optional<AudioAttenuation> AudioObject::getAttenuationOverride() const
+{
+	return attenuationOverride;
+}
+
+AudioAttenuation& AudioObject::getMutableAttenuationOverride()
+{
+	if (!attenuationOverride) {
+		attenuationOverride = AudioAttenuation();
+	}
+	return *attenuationOverride;
+}
+
+void AudioObject::setAttenuationOverride(std::optional<AudioAttenuation> value)
+{
+	this->attenuationOverride = value;
+}
+
 void AudioObject::setBus(String bus)
 {
 	this->bus = std::move(bus);
@@ -149,6 +173,7 @@ void AudioObject::serialize(Serializer& s) const
 	s << gain;
 	s << dopplerScale;
 	s << objects;
+	s << attenuationOverride;
 }
 
 void AudioObject::deserialize(Deserializer& s)
@@ -158,6 +183,7 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> gain;
 	s >> dopplerScale;
 	s >> objects;
+	s >> attenuationOverride;
 }
 
 void AudioObject::reload(Resource&& resource)

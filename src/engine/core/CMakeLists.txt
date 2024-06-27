@@ -234,6 +234,7 @@ set(SOURCES
         "src/ui/widgets/ui_tooltip.cpp"
         "src/ui/widgets/ui_tree_list.cpp"
 
+        "src/audio/audio_attenuation.cpp"
         "src/audio/audio_buffer.cpp"
         "src/audio/audio_clip.cpp"
         "src/audio/audio_clip_streaming.cpp"
@@ -679,6 +680,7 @@ set(HEADERS
         "include/halley/ui/widgets/ui_tooltip.h"
         "include/halley/ui/widgets/ui_tree_list.h"
 
+        "include/halley/audio/audio_attenuation.h"
         "include/halley/audio/audio_buffer.h"
         "include/halley/audio/audio_clip.h"
         "include/halley/audio/audio_clip_streaming.h"

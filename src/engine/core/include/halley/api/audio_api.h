@@ -13,6 +13,9 @@
 
 namespace Halley
 {
+	class Deserializer;
+	class Serializer;
+	class ConfigNode;
 	class AudioObject;
 	class AudioFade;
 	class AudioPosition;

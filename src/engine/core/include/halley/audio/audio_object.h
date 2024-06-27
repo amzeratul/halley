@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio_attenuation.h"
 #include "audio_sub_object.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
@@ -32,6 +33,10 @@ namespace Halley {
 		float getDopplerScale() const;
 		void setDopplerScale(float scale);
 
+		std::optional<AudioAttenuation> getAttenuationOverride() const;
+		AudioAttenuation& getMutableAttenuationOverride();
+		void setAttenuationOverride(std::optional<AudioAttenuation> value);
+
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
@@ -63,6 +68,7 @@ namespace Halley {
 		Range<float> pitch;
 		Range<float> gain;
 		float dopplerScale = 0.0f;
+		std::optional<AudioAttenuation> attenuationOverride;
 
 		void generateId();
     };
