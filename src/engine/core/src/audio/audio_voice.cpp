@@ -250,14 +250,16 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
 	const size_t nSrcChannels = getNumberOfChannels();
 	const auto nDstChannels = dst.size();
+	lastDstChannels = static_cast<uint8_t>(nDstChannels);
 	float totalMix = 0.0f;
 	const size_t nMixes = nSrcChannels * nDstChannels;
-	Expects (nMixes < 16);
+	Expects (nMixes <= 16);
 	for (size_t i = 0; i < nMixes; ++i) {
 		totalMix += prevChannelMix[i] * prevGain + channelMix[i] * gain;
 	}
 
 	// If we're audible, mix
+	lastPostGain = gain;
 	if (numSamplesRendered > 0 && totalMix >= 0.0001f) {
 		// Mix each emitter channel
 		for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
@@ -310,6 +312,17 @@ AudioDebugData::VoiceData AudioVoice::getDebugData() const
 	result.gain = lastGain;
 	result.paused = paused;
 	result.objectId = audioObjectId;
+	result.dstChannels = lastDstChannels;
+	result.channelMix.fill(0);
+
+	const int nSrc = static_cast<int>(getNumberOfChannels());
+	for (int dst = 0; dst < lastDstChannels; ++dst) {
+		float total = 0;
+		for (int src = 0; src < nSrc; ++src) {
+			total += channelMix[dst + src * nSrc] * lastPostGain;
+		}
+		result.channelMix[dst] = total;
+	}
 
 	return result;
 }

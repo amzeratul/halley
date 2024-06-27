@@ -240,6 +240,8 @@ namespace Halley
 			AudioObjectId objectId;
 			float gain = 1;
 			uint32_t paused = 0;
+			uint8_t dstChannels = 0;
+			std::array<float, 8> channelMix;
 		};
 
 		struct RegionData {

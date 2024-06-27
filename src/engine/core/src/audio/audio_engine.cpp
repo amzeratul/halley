@@ -392,7 +392,7 @@ void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion
 			const float gain1 = gain * neighbour.props.attenuation;
 
 			if (neighbour.props.lowPassHz) {
-				auto regionBuffer = pool->getBuffers(nChannels, numSamples);
+				auto regionBuffer = pool->getBuffers(nChannels, numSamples, true);
 				mixRegion(otherRegion, regionBuffer, 1, 1);
 
 				neighbour.filter.processSamples(regionBuffer);

@@ -69,8 +69,8 @@ namespace Halley
 	class AudioBufferPool
 	{
 	public:
-		AudioBufferRef getBuffer(size_t numSamples);
-		AudioBuffersRef getBuffers(size_t n, size_t numSamples);
+		AudioBufferRef getBuffer(size_t numSamples, bool zero = false);
+		AudioBuffersRef getBuffers(size_t n, size_t numSamples, bool zero = false);
 		void returnBuffer(AudioBuffer& buffer);
 
 	private:

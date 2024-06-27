@@ -132,6 +132,8 @@ void AudioView::paint(Painter& painter)
 			str.append(toString(voiceData.gain), valueCol);
 			str.append(", pause = ");
 			str.append(toString(voiceData.paused), valueCol);
+			str.append(", mix = ");
+			str.append("[" + String::concat(gsl::span<const float>(voiceData.channelMix).subspan(0, voiceData.dstChannels), ", ", [](float v) { return toString(v, 2); }) + "]", valueCol);
 		}
 
 		auto results = str.moveResults();

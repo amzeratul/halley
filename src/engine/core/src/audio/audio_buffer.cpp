@@ -1,5 +1,7 @@
 #include "halley/audio/audio_buffer.h"
 
+#include "audio_mixer.h"
+
 using namespace Halley;
 
 AudioBuffer::AudioBuffer(size_t size)
@@ -142,19 +144,27 @@ void AudioBuffersRef::clear()
 	nBuffers = 0;
 }
 
-AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples)
+AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples, bool zero)
 {
-	return AudioBufferRef(allocBuffer(numSamples), *this);
+	auto result = AudioBufferRef(allocBuffer(numSamples), *this);
+	if (zero) {
+		AudioMixer::zero(result.getSpan());
+	}
+	return result;
 }
 
-AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples)
+AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples, bool zero)
 {
 	Expects(n <= AudioConfig::maxChannels);
 	std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
 	for (size_t i = 0; i < n; ++i) {
 		buffers[i] = &allocBuffer(numSamples);
 	}
-	return AudioBuffersRef(n, buffers, *this);
+	auto result = AudioBuffersRef(n, buffers, *this);
+	if (zero) {
+		AudioMixer::zero(result.getSampleSpans(), n);
+	}
+	return result;
 }
 
 AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
