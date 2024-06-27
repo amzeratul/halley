@@ -226,8 +226,11 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 	numSamplesRendered = numSamples;
 
 	// Get sample data
-	audioData = pool.getBuffers(getNumberOfChannels(), numSamples);
-	const bool isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
+	bool isPlaying = true;
+	if (numSamples > 0) {
+		audioData = pool.getBuffers(getNumberOfChannels(), numSamples);
+		isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
+	}
 
 	// Advance playback state
 	advancePlayback(numSamples);
