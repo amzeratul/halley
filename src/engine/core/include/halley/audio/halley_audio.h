@@ -2,6 +2,7 @@
 
 namespace Halley {}
 
+#include "audio_attenuation.h"
 #include "audio_clip.h"
 #include "audio_clip_streaming.h"
 #include "audio_event.h"

@@ -102,7 +102,7 @@ private:
 
 	AudioPosition getAudioPosition(SourceFamily& e, Vector3f vel)
 	{
-		return AudioPosition::makePositional(Vector3f(e.transform2D.getGlobalPosition()), e.audioSource.rangeMin, e.audioSource.rangeMax, vel);
+		return AudioPosition::makePositional(Vector3f(e.transform2D.getGlobalPosition()), AudioAttenuation(e.audioSource.rangeMin, e.audioSource.rangeMax, e.audioSource.rollOff, e.audioSource.curve), vel);
 	}
 
 	void initSource(SourceFamily& e)

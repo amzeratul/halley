@@ -584,7 +584,10 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 
 	auto source = object.makeSource(*this, emitter);
 	auto voice = std::make_unique<AudioVoice>(*this, std::move(source), gain, pitch, dopplerScale, delaySamples, getBusId(object.getBus()));
+
 	voice->setIds(uniqueId, object.getAudioObjectId());
+	voice->setAttenuationOverride(object.getAttenuationOverride());
+
 	return voice;
 }
 

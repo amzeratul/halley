@@ -47,6 +47,14 @@ component:
       type: float
       defaultValue: 100
       displayName: Max Range
+  - rollOff:
+      type: float
+      defaultValue: 1
+      displayName: Rolloff Factor
+  - curve:
+      type: Halley::AudioAttenuationCurve
+      defaultValue: Halley::AudioAttenuationCurve::Linear
+      displayName: Curve
   - lastPos:
       type: Halley::Vector3f
       canEdit: false

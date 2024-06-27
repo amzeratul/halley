@@ -4,25 +4,31 @@
 using namespace Halley;
 
 
-AudioPosition::SpatialSource::SpatialSource()
-	: referenceDistance(200)
-	, maxDistance(400)
-{
-}
-
 AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, float referenceDistance, float maxDistance)
 	: pos(pos)
 	, velocity(vel)
-	, referenceDistance(referenceDistance)
-	, maxDistance(maxDistance)
+	, attenuation(AudioAttenuation(referenceDistance, maxDistance))
 {
 }
 
 AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, float referenceDistance, float maxDistance)
 	: pos(pos)
 	, velocity(vel)
-	, referenceDistance(referenceDistance)
-	, maxDistance(maxDistance)
+	, attenuation(AudioAttenuation(referenceDistance, maxDistance))
+{
+}
+
+AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, AudioAttenuation attenuation)
+	: pos(pos)
+	, velocity(vel)
+	, attenuation(attenuation)
+{
+}
+
+AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, AudioAttenuation attenuation)
+	: pos(pos)
+	, velocity(vel)
+	, attenuation(attenuation)
 {
 }
 
@@ -43,13 +49,27 @@ AudioPosition AudioPosition::makeUI(float pan)
 
 AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistance, float maxDistance, Vector2f velocity)
 {
-	return makePositional(Vector3f(pos), referenceDistance, maxDistance, Vector3f(velocity));
+	return makePositional(Vector3f(pos), AudioAttenuation(referenceDistance, maxDistance), Vector3f(velocity));
 }
 
 AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance, Vector3f velocity)
 {
 	Vector<SpatialSource> sources;
-	sources.emplace_back(pos, velocity, referenceDistance, maxDistance);
+	sources.emplace_back(pos, velocity, AudioAttenuation(referenceDistance, maxDistance));
+	return makePositional(std::move(sources));
+}
+
+AudioPosition AudioPosition::makePositional(Vector2f pos, AudioAttenuation attenuation, Vector2f velocity)
+{
+	Vector<SpatialSource> sources;
+	sources.emplace_back(pos, velocity, attenuation);
+	return makePositional(std::move(sources));
+}
+
+AudioPosition AudioPosition::makePositional(Vector3f pos, AudioAttenuation attenuation, Vector3f velocity)
+{
+	Vector<SpatialSource> sources;
+	sources.emplace_back(pos, velocity, attenuation);
 	return makePositional(std::move(sources));
 }
 
@@ -62,8 +82,8 @@ AudioPosition AudioPosition::makePositional(Vector<SpatialSource> sources)
 	result.sources = std::move(sources);
 
 	for (auto& s: result.sources) {
-		s.referenceDistance = std::max(0.1f, s.referenceDistance);
-		s.maxDistance = std::max(s.referenceDistance + 0.1f, s.maxDistance);
+		s.attenuation.referenceDistance = std::max(0.1f, s.attenuation.referenceDistance);
+		s.attenuation.maximumDistance = std::max(s.attenuation.referenceDistance + 0.1f, s.attenuation.maximumDistance);
 	}
 
 	return result;
@@ -116,13 +136,13 @@ static void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, f
 	distance = delta.length();
 }
 
-void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
+void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	if (isPannable) {
 		if (isUI) {
 			setMixUI(dstChannels, dst, gain, listener);
 		} else {
-			setMixPositional(nSrcChannels, dstChannels, dst, gain, listener);
+			setMixPositional(nSrcChannels, dstChannels, dst, gain, listener, attenuationOverride);
 		}
 	} else {
 		setMixFixed(nSrcChannels, dstChannels, dst, gain, listener);
@@ -149,7 +169,7 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 	}
 }
 
-void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
+void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	if (sources.empty()) {
@@ -168,7 +188,7 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 		// One source, do the simple algorithm
 		float len;
 		getPanAndDistance(sources[0].pos, listener, resultPan, len);
-		proximity = 1.0f - clamp((len - sources[0].referenceDistance) / (sources[0].maxDistance - sources[0].referenceDistance), 0.0f, 1.0f);
+		proximity = attenuationOverride.value_or(sources[0].attenuation).getProximity(len);
 	} else {
 		// Multiple sources, average them
 		float panAccum = 0;
@@ -178,7 +198,7 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 			float localPan;
 			float len;
 			getPanAndDistance(s.pos, listener, localPan, len);
-			const float localProximity = 1.0f - clamp((len - s.referenceDistance) / (s.maxDistance - s.referenceDistance), 0.0f, 1.0f);
+			const float localProximity = attenuationOverride.value_or(s.attenuation).getProximity(len);
 
 			panAccum += localProximity * localPan;
 			proximityAccum += localProximity;

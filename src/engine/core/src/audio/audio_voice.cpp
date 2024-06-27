@@ -45,6 +45,11 @@ AudioObjectId AudioVoice::getAudioObjectId() const
 	return audioObjectId;
 }
 
+void AudioVoice::setAttenuationOverride(std::optional<AudioAttenuation> attenuation)
+{
+	this->attenuation = attenuation;
+}
+
 void AudioVoice::start()
 {
 	Expects(isReady());
@@ -191,7 +196,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	// Mix
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, gain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, gain, listener, attenuation);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;

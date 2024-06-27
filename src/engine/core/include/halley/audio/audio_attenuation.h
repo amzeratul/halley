@@ -6,15 +6,19 @@
 namespace Halley {
 
 	enum class AudioAttenuationCurve {
+		None,
 		Linear,
+		InvDistance,
 		Exponential
 	};
 
 	template <>
 	struct EnumNames<AudioAttenuationCurve> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
+				"none",
 				"linear",
+				"invDistance",
 				"exponential"
 			}};
 		}
@@ -22,17 +26,21 @@ namespace Halley {
 	
 	class AudioAttenuation {
 	public:
-		float referenceDistance = 100.0f;
-		float maximumDistance = 200.0f;
+		float referenceDistance = 200.0f;
+		float maximumDistance = 400.0f;
+		float rollOffFactor = 1;
 		AudioAttenuationCurve curve = AudioAttenuationCurve::Linear;
 
 		AudioAttenuation() = default;
 		AudioAttenuation(const ConfigNode& node);
+		AudioAttenuation(float refDistance, float maxDistance, float rollOffFactor = 1.0f, AudioAttenuationCurve curve = AudioAttenuationCurve::Linear);
 
 		ConfigNode toConfigNode() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		float getProximity(float distance) const;
 	};
 
 }

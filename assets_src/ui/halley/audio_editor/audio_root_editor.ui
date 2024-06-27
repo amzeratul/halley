@@ -129,6 +129,7 @@ children:
             widget:
               class: checkbox
               id: overrideAttenuation
+            fill: [left, fillVertical]
       - uuid: ddca003b-ad51-434c-b6ab-d125838f8e6e
         border: [20, 2, 0, 0]
         sizer:
@@ -175,6 +176,20 @@ children:
               minValue: 0
               size: [100, 0]
             fill: [left, centreVertical]
+          - uuid: b84cabdd-95fa-4b6d-a5d0-427366213f6c
+            widget:
+              class: label
+              text: "Rolloff Factor:"
+            fill: [fillHorizontal, centreVertical]
+          - uuid: 4522cc01-69f8-4de4-9bca-82ce171198ac
+            widget:
+              allowFloat: true
+              class: spinControl2
+              id: rollOffFactor
+              increment: 0.100000001
+              minValue: 0.100000001
+              size: [100, 0]
+            fill: [left, centreVertical]
           - uuid: a8a1bd9c-40bf-4054-a3ab-58e789616464
             widget:
               class: label
@@ -187,7 +202,11 @@ children:
               options:
                 - id: linear
                   text: Linear
+                - id: invDistance
+                  text: Inverse Distance
                 - id: exponential
                   text: Exponential
+                - id: none
+                  text: None
               size: [200, 20]
             fill: [left, centreVertical]

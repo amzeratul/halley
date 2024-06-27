@@ -11,13 +11,13 @@
 #include "halley/api/audio_api.h"
 #include "halley/audio/audio_event.h"
 
+#include "halley/audio/audio_position.h"
 #include "halley/graphics/sprite/animation_player.h"
 #include "halley/bytes/byte_serializer.h"
 #include <components/audio_source_component.h>
 #include <components/scriptable_component.h>
 #include <components/sprite_animation_component.h>
 
-#include "halley/audio/audio_position.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/support/profiler.h"
 #include "nodes/script_network.h"

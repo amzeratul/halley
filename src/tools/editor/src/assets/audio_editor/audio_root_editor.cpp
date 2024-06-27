@@ -68,6 +68,12 @@ void AudioRootEditor::onMakeUI()
 			editor.markModified(false);
 		});
 
+		bindData("rollOffFactor", attenuation.rollOffFactor, [this] (float value)
+		{
+			object.getMutableAttenuationOverride().rollOffFactor = value;
+			editor.markModified(false);
+		});
+
 		bindData("attenuationCurve", toString(attenuation.curve), [this] (String value)
 		{
 			object.getMutableAttenuationOverride().curve = fromString<AudioAttenuationCurve>(value);
