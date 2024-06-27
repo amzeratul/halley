@@ -159,6 +159,7 @@ void AudioVoice::setPitch(float pitch)
 {
 	if (resample || std::abs(pitch - 1.0f) > 0.001f) {
 		const auto freq = AudioConfig::sampleRate * pitch;
+		lastPitch = pitch;
 		
 		if (resample) {
 			resample->setFromHz(freq);
@@ -313,6 +314,7 @@ AudioDebugData::VoiceData AudioVoice::getDebugData() const
 	result.paused = paused;
 	result.objectId = audioObjectId;
 	result.dstChannels = lastDstChannels;
+	result.pitch = lastPitch;
 	result.channelMix.fill(0);
 
 	const int nSrc = static_cast<int>(getNumberOfChannels());

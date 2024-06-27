@@ -130,6 +130,8 @@ void AudioView::paint(Painter& painter)
 			str.append(getObjectName(voiceData.objectId), keyCol);
 			str.append(": gain = ");
 			str.append(toString(voiceData.gain), valueCol);
+			str.append(": pitch = ");
+			str.append(toString(voiceData.pitch), valueCol);
 			str.append(", pause = ");
 			str.append(toString(voiceData.paused), valueCol);
 			str.append(", mix = ");

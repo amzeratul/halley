@@ -239,6 +239,7 @@ namespace Halley
 		struct VoiceData {
 			AudioObjectId objectId;
 			float gain = 1;
+			float pitch = 1;
 			uint32_t paused = 0;
 			uint8_t dstChannels = 0;
 			std::array<float, 8> channelMix;

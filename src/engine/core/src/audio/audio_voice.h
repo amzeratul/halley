@@ -87,6 +87,7 @@ namespace Halley {
 		std::array<float, 16> prevChannelMix;
 		float lastGain = 0;
 		float lastPostGain = 0;
+		float lastPitch = 1;
 		uint8_t lastDstChannels = 0;
 
 		AudioBuffersRef audioData;
