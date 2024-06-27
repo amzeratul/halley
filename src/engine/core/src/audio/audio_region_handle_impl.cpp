@@ -13,6 +13,7 @@ AudioRegionHandleImpl::AudioRegionHandleImpl(AudioFacade& facade, AudioRegionId 
 
 AudioRegionHandleImpl::~AudioRegionHandleImpl()
 {
+	facade.regionNames.erase(id);
 	AudioEngine* engine = facade.engine.get();
 
 	facade.enqueue([regId = id, engine] ()

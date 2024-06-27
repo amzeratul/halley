@@ -242,14 +242,21 @@ namespace Halley
 			uint32_t paused = 0;
 		};
 
+		struct RegionData {
+			AudioRegionId regionId;
+			float amount;
+		};
+
 		struct EmitterData {
 			AudioEmitterId emitterId;
+			AudioRegionId regionId;
 			HashMap<String, String> switches;
 			HashMap<String, float> variables;
 			Vector<VoiceData> voices;
 		};
 
 		Vector<EmitterData> emitters;
+		AudioListenerData listener;
 	};
 
 	class IAudioDebugDataListener {
@@ -272,7 +279,8 @@ namespace Halley
 		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
 		virtual AudioEmitterHandle getGlobalEmitter() = 0;
 
-		virtual AudioRegionHandle createRegion() = 0;
+		virtual AudioRegionHandle createRegion(const String& name) = 0;
+		virtual String getRegionName(AudioRegionId id) = 0;
 
 		virtual AudioHandle postEvent(const String& name) = 0;
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;

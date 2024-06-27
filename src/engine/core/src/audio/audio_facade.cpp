@@ -212,7 +212,7 @@ AudioEmitterHandle AudioFacade::getGlobalEmitter()
 	return std::make_shared<AudioEmitterHandleImpl>(*this, 0, AudioPosition::makeFixed(), false);
 }
 
-AudioRegionHandle AudioFacade::createRegion()
+AudioRegionHandle AudioFacade::createRegion(const String& name)
 {
 	const auto regionId = curRegionId++;
 
@@ -220,7 +220,17 @@ AudioRegionHandle AudioFacade::createRegion()
 		engine->createRegion(regionId);
 	});
 
+	regionNames[regionId] = name;
+
 	return std::make_shared<AudioRegionHandleImpl>(*this, regionId);
+}
+
+String AudioFacade::getRegionName(AudioRegionId id)
+{
+	if (auto iter = regionNames.find(id); iter != regionNames.end()) {
+		return iter->second;
+	}
+	return "<Unknown>";
 }
 
 AudioHandle AudioFacade::postEvent(const String& name)

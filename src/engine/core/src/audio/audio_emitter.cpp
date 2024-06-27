@@ -116,6 +116,7 @@ AudioDebugData::EmitterData AudioEmitter::getDebugData() const
 	result.emitterId = id;
 	result.switches = switchValues;
 	result.variables = variableValues;
+	result.regionId = regionId;
 
 	result.voices.reserve(voices.size());
 	for (const auto& voice: voices) {

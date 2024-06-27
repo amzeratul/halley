@@ -42,7 +42,8 @@ namespace Halley {
 		AudioEmitterHandle createEmitter(AudioPosition position) override;
 		AudioEmitterHandle getGlobalEmitter() override;
 
-		AudioRegionHandle createRegion() override;
+		AudioRegionHandle createRegion(const String& name) override;
+		String getRegionName(AudioRegionId id) override;
 
 		AudioHandle postEvent(const String& name) override;
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
@@ -106,6 +107,8 @@ namespace Halley {
 
 		RingBuffer<AudioDebugData> audioDebugData;
 		IAudioDebugDataListener* debugListener = nullptr;
+
+		HashMap<AudioRegionId, String> regionNames;
 
 		AudioHandle doPostEvent(const AudioEvent& event, AudioEmitterId emitterId);
 		AudioHandle doPostEvent(const String& name, AudioEmitterId emitterId);

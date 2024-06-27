@@ -57,10 +57,31 @@ void AudioView::paint(Painter& painter)
 	const auto rect = Rect4f(painter.getViewPort());
 	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
 
-	Vector2f emitterPos = Vector2f(10, 90);
+	Vector2f textPos = Vector2f(10, 90);
 
 	Colour4f keyCol(0.75f, 0.75f, 0.75f);
 	Colour4f valueCol(0.5f, 0.5f, 0.5f);
+
+	{
+		ColourStringBuilder str;
+
+		str.append("Listener at regions:");
+		for (const auto& region: curData.listener.regions) {
+			str.append("\n- ");
+			str.append(getRegionName(region.regionId), keyCol);
+			str.append(" with presence ");
+			str.append(toString(region.presence, 2), valueCol);
+		}
+
+		auto results = str.moveResults();
+		headerText
+			.setPosition(textPos)
+			.setText(results.first)
+			.setColourOverride(results.second)
+			.draw(painter);
+		auto extents = headerText.getExtents();
+		textPos.y += extents.y + 16;
+	}
 
 	std::sort(curData.emitters.begin(), curData.emitters.end(), [=] (const auto& a, const auto& b)
 	{
@@ -74,7 +95,9 @@ void AudioView::paint(Painter& painter)
 
 		ColourStringBuilder str;
 
-		str.append(getName(emitterData.emitterId));
+		str.append(getEmitterName(emitterData.emitterId));
+		str.append(" at region ");
+		str.append(getRegionName(emitterData.regionId), valueCol);
 
 		bool first = true;
 		for (const auto& [k, v]: emitterData.switches) {
@@ -113,12 +136,12 @@ void AudioView::paint(Painter& painter)
 
 		auto results = str.moveResults();
 		headerText
-			.setPosition(emitterPos)
+			.setPosition(textPos)
 			.setText(results.first)
 			.setColourOverride(results.second)
 			.draw(painter);
 		auto extents = headerText.getExtents();
-		emitterPos.y += extents.y + 16;
+		textPos.y += extents.y + 16;
 	}
 }
 
@@ -128,7 +151,7 @@ void AudioView::onAudioDebugData(AudioDebugData data)
 	lastData = std::move(data);
 }
 
-String AudioView::getName(AudioEmitterId emitterId) const
+String AudioView::getEmitterName(AudioEmitterId emitterId) const
 {
 	if (emitterId == 0) {
 		return "Global Singleton";
@@ -140,6 +163,21 @@ String AudioView::getName(AudioEmitterId emitterId) const
 	}
 	auto name = world->getInterface<IAudioSystemInterface>().getSourceName(emitterId);
 	emitterNames[emitterId] = name;
+	return name;
+}
+
+String AudioView::getRegionName(AudioRegionId regionId) const
+{
+	if (regionId == 0) {
+		return "Global Region (0)";
+	}
+
+	const auto iter = regionNames.find(regionId);
+	if (iter != regionNames.end()) {
+		return iter->second;
+	}
+	auto name = world->getInterface<IAudioSystemInterface>().getRegionName(regionId) + " (" + toString(int(regionId)) + ")";
+	regionNames[regionId] = name;
 	return name;
 }
 

@@ -77,6 +77,11 @@ public:
 		return "<unknown>";
 	}
 
+	String getRegionName(AudioRegionId id) const override
+	{
+		return getAPI().audio->getRegionName(id);
+	}
+
 private:
 	String curRegionId;
 	String curRegionPreset;

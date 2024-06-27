@@ -600,5 +600,7 @@ AudioDebugData AudioEngine::generateDebugData() const
 		result.emitters.emplace_back(emitter->getDebugData());
 	}
 
+	result.listener = listener;
+
 	return result;
 }
