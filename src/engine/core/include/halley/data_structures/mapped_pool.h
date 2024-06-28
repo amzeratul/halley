@@ -53,6 +53,11 @@ namespace Halley {
 		};
 
 	public:
+		MappedPool(size_t maxBlocks = 64)
+		{
+			blocks.reserve(maxBlocks);
+		}
+
 		std::pair<T*, int64_t> alloc() {
 			auto lock = lockMutex();
 
@@ -62,6 +67,11 @@ namespace Halley {
 			// Figure which block it goes into, and make sure that exists
 			const size_t blockIdx = entryIdx / blockLen;
 			if (blockIdx >= blocks.size()) {
+				// We never grow beyond pre-reserved size as that could cause a block pointer invalidation, which would make MappedPool::get() thread-unsafe.
+				// Locking that method in a mutex would perform too slowly
+				if (blocks.size() + 1 > blocks.capacity()) {
+					throw Exception("Run out of maximum space on MappedPool", HalleyExceptions::Utils);
+				}
 				blocks.push_back(Block(blocks.size()));
 			}
 			auto& block = blocks[blockIdx];
@@ -96,17 +106,13 @@ namespace Halley {
 		}
 
 		T* get(int64_t externalIdx) {
-			auto lock = lockMutex();
-
 			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
 			auto rev = static_cast<uint32_t>(externalIdx >> 32);
 
 			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= int(blocks.size())) {
+			if (blockN < 0 || blockN >= int(blocks.capacity())) {
 				return nullptr;
 			}
-
-			// TODO: check if can shrink?
 
 			auto& block = blocks[blockN];
 			int localIdx = idx % blockLen;
@@ -118,17 +124,13 @@ namespace Halley {
 		}
 
 		const T* get(int64_t externalIdx) const {
-			auto lock = lockMutex();
-
 			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
 			auto rev = static_cast<uint32_t>(externalIdx >> 32);
 
 			int blockN = idx / blockLen;
-			if (blockN < 0 || blockN >= int(blocks.size())) {
+			if (blockN < 0 || blockN >= int(blocks.capacity())) {
 				return nullptr;
 			}
-
-			// TODO: check if can shrink?
 
 			auto& block = blocks[blockN];
 			int localIdx = idx % blockLen;
@@ -140,7 +142,7 @@ namespace Halley {
 		}
 
 	private:
-		Vector<Block> blocks;
+		VectorStd<Block, uint32_t, false> blocks; // Ensure no SBO
 		uint32_t next = 0;
 
 		mutable std::mutex mutex;

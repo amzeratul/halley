@@ -95,7 +95,8 @@ namespace Halley {
 	}
 
 	template <typename T, typename SizeType = uint32_t, bool EnableSBO = false, size_t SBOPadding = 0, class Allocator = std::allocator<T>>
-	class VectorStd : Allocator {
+	class alignas(typename std::allocator_traits<Allocator>::pointer) VectorStd : Allocator
+	{
 	public:
 		using value_type = T;
 		using size_type = SizeType;
@@ -140,13 +141,22 @@ namespace Halley {
 		
 		VectorStd(const VectorStd& other)
 		{
-			change_capacity(other.st_capacity());
-			auto* dst = data();
-			const auto iterEnd = other.end();
-			for (auto iter = other.begin(); iter != iterEnd; ++iter) {
-				std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				if (sbo_active() && other.sbo_active()) {
+					memcpy(this, &other, sizeof(*this));
+				} else {
+					resize_no_init(other.size());
+					memcpy(data(), other.data(), other.size() * sizeof(T));
+				}
+			} else {
+				change_capacity(other.st_capacity());
+				auto* dst = data();
+				const auto iterEnd = other.end();
+				for (auto iter = other.begin(); iter != iterEnd; ++iter) {
+					std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
+				}
+				set_size(other.st_size());
 			}
-			set_size(other.st_size());
 		}
 		
 		VectorStd(const VectorStd& other, const Allocator& alloc)
@@ -193,8 +203,17 @@ namespace Halley {
 				return *this;
 			}
 
-			assign(other.begin(), other.end());
-			
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				if (sbo_active() && other.sbo_active()) {
+					memcpy(this, &other, sizeof(*this));
+				} else {
+					resize_no_init(other.size());
+					memcpy(data(), other.data(), other.size() * sizeof(T));
+				}
+			} else {
+				assign(other.begin(), other.end());
+			}
+
 			return *this;
 		}
 
@@ -207,7 +226,12 @@ namespace Halley {
 				}
 			}
 
-			assign(other.begin(), other.end());
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				resize_no_init(other.size());
+				memcpy(data(), other.data(), other.size() * sizeof(T));
+			} else {
+				assign(other.begin(), other.end());
+			}
 			
 			return *this;
 		}
@@ -472,29 +496,46 @@ namespace Halley {
 		reference emplace_back(Args&&... args)
 		{
 			const auto idx = size();
-			construct_with_ensure_capacity(st_size() + 1, [&] (pointer data)
-			{
-				std::allocator_traits<Allocator>::construct(as_allocator(), data + idx, std::forward<Args>(args)...);
-			});
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				ensure_capacity(st_size() + 1);
+				data()[idx] = T(std::forward<Args>(args)...);
+			} else {
+				construct_with_ensure_capacity(st_size() + 1, [&] (pointer data)
+				{
+					std::allocator_traits<Allocator>::construct(as_allocator(), data + idx, std::forward<Args>(args)...);
+				});
+			}
 			set_size(st_size() + 1);
 			return elem(idx);
 		}
 
 		void push_back(const T& value)
 		{
-			construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
-			{
-				std::allocator_traits<Allocator>::construct(as_allocator(), data + size(), value);
-			});
+			const auto idx = size();
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				ensure_capacity(st_size() + 1);
+				data()[idx] = value;
+			} else {
+				construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
+				{
+					std::allocator_traits<Allocator>::construct(as_allocator(), data + size(), value);
+				});
+			}
 			set_size(st_size() + 1);
 		}
 
 		void push_back(T&& value)
 		{
-			construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
-			{
-				std::allocator_traits<Allocator>::construct(as_allocator(), data + size(), std::move(value));
-			});
+			const auto idx = size();
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				ensure_capacity(st_size() + 1);
+				data()[idx] = std::move(value);
+			} else {
+				construct_with_ensure_capacity(st_size() + 1, [&](pointer data)
+				{
+					std::allocator_traits<Allocator>::construct(as_allocator(), data + size(), std::move(value));
+				});
+			}
 			set_size(st_size() + 1);
 		}
 
@@ -572,7 +613,7 @@ namespace Halley {
 				constexpr auto size_bytes = sizeof(VectorStd);
 				constexpr auto sbo_align_enabled = alignof(VectorStd) >= alignof(T);
 				constexpr auto first_sbo_offset = sbo_start_offset_bytes();
-				const auto result = sbo_align_enabled && first_sbo_offset < size_bytes ? (size_bytes - first_sbo_offset) / sizeof(T) : 0ull;
+				constexpr auto result = sbo_align_enabled && first_sbo_offset < size_bytes ? (size_bytes - first_sbo_offset) / sizeof(T) : 0ull;
 				static_assert(result <= 127); // More than 127 wouldn't fit in the 7-bit size field
 				return static_cast<size_type>(result);
 			} else {
@@ -725,6 +766,13 @@ namespace Halley {
 			}
 		}
 
+		void ensure_capacity(size_type minCapacity)
+		{
+			if (capacity() < minCapacity) {
+				change_capacity(std::max(minCapacity, static_cast<size_type>(capacity() * growth_factor)));
+			}
+		}
+
 		template <typename F>
 		void construct_with_ensure_capacity(size_type minCapacity, const F& construct)
 		{
@@ -757,14 +805,18 @@ namespace Halley {
 				// Using SBO, move elements
 				m_size = other.m_size;
 
-				auto* dst = data();
-				auto iter = other.begin();
-				const auto iterEnd = other.end();
-				for (; iter != iterEnd; ++iter) {
-					std::allocator_traits<Allocator>::construct(*this, dst++, std::move(*iter));
+				if constexpr (std::is_trivially_copyable_v<T>) {
+					memcpy(data(), other.data(), size() * sizeof(T));
+					other.set_size(0);
+				} else {
+					auto* dst = data();
+					auto iter = other.begin();
+					const auto iterEnd = other.end();
+					for (; iter != iterEnd; ++iter) {
+						std::allocator_traits<Allocator>::construct(*this, dst++, std::move(*iter));
+					}
+					other.clear();
 				}
-				
-				other.clear();
 			} else {
 				// No SBO, steal data
 				m_size = other.m_size;
