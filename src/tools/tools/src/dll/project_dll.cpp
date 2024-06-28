@@ -30,7 +30,7 @@ void ProjectDLL::load()
 	
 	dll.clearTempDirectory();
 	if (!dll.isLoaded()) {
-		const bool success = dll.load(true);
+		const bool success = dll.load(false);
 		if (!success) {
 			// Could not load DLL
 			setStatus(Status::DLLNotFound);

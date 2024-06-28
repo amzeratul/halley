@@ -93,6 +93,7 @@ namespace Halley {
 		Vector2i viewPort;
 		IEditorInterface* editorInterface;
 		Game* game = nullptr;
+		IGameEditorData* gameEditorData = nullptr;
 
 		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	

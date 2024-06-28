@@ -54,6 +54,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disab
 Project::~Project()
 {
 	clearCachedAssetPreviews();
+	editorData.reset();
 	gameResources.reset();
 	gameDll.reset();
 	assetImporter.reset();
@@ -540,10 +541,11 @@ Path Project::getExecutablePath() const
 void Project::loadGameResources(const HalleyAPI& api)
 {
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
+	auto* game = getGameInstance();
 
 	try {
-		if (allowPackedAssets && getGameInstance()) {
-			getGameInstance()->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
+		if (allowPackedAssets && game) {
+			game->initResourceLocator(rootPath, getPackedAssetsPath("pc"), getUnpackedAssetsPath(), *locator);
 		} else {
 			locator->addFileSystem(getUnpackedAssetsPath(), fileSystemCache.get());
 		}
@@ -551,6 +553,10 @@ void Project::loadGameResources(const HalleyAPI& api)
 
 	gameResources = std::make_unique<Resources>(std::move(locator), api, ResourceOptions(true));
 	StandardResources::initialize(*gameResources);
+
+	if (game) {
+		editorData = game->createGameEditorData(api, *gameResources);
+	}
 }
 
 Resources& Project::getGameResources()
@@ -581,6 +587,11 @@ Game* Project::getGameInstance() const
 		result = &dll.getGame();
 	});
 	return result;
+}
+
+IGameEditorData* Project::getGameEditorData() const
+{
+	return editorData.get();
 }
 
 std::optional<AssetPreviewData> Project::getCachedAssetPreview(AssetType type, const String& id)

@@ -47,6 +47,7 @@ void SceneEditor::init(SceneEditorContext& context)
 	editorResources = context.editorResources;
 	gizmoCollection = context.gizmos;
 	editorInterface = context.editorInterface;
+	gameEditorData = context.gameEditorData;
 
 	api->core->getStatics().setupGlobals();
 

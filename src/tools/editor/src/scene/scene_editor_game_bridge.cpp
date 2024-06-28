@@ -420,6 +420,7 @@ void SceneEditorGameBridge::load()
 		context.api = gameAPI.get();
 		context.gizmos = &getGizmos();
 		context.editorInterface = this;
+		context.gameEditorData = project.getGameEditorData();
 
 		guardedRun([&]() {
 			interface->init(context);

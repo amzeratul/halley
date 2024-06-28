@@ -39,7 +39,7 @@ void ScriptGraphEditor::onMakeUI()
 		entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
 
 		if (scene) {
-			for (auto& f: project.getGameInstance()->createCustomScriptEditorFieldFactories(*scene, gameResources)) {
+			for (auto& f: project.getGameInstance()->createCustomScriptEditorFieldFactories(*scene, gameResources, project.getGameEditorData())) {
 				entityEditorFactory->addFieldFactory(std::move(f));
 			}
 		}

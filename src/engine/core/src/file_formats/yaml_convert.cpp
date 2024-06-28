@@ -12,7 +12,7 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 		ConfigNode::MapType map;
 		for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
 			String key = it->first.as<std::string>();
-			map[key] = parseYAMLNode(it->second);
+			map[std::move(key)] = parseYAMLNode(it->second);
 		}
 		result = std::move(map);
 	} else if (node.IsSequence()) {

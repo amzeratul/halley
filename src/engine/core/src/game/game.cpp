@@ -88,7 +88,7 @@ std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 	return {};
 }
 
-std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources)
+std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources, IGameEditorData* gameEditorData)
 {
 	return std::make_unique<AssetPreviewGenerator>(*this, api, resources);
 }
@@ -109,12 +109,17 @@ std::unique_ptr<ScriptNodeTypeCollection> Game::createScriptNodeTypeCollection()
 	return std::make_unique<ScriptNodeTypeCollection>();
 }
 
-Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories(Resources& gameResources)
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories(Resources& gameResources, IGameEditorData* gameEditorData)
 {
 	return {};
 }
 
-Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources)
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources, IGameEditorData* gameEditorData)
+{
+	return {};
+}
+
+std::unique_ptr<IGameEditorData> Game::createGameEditorData(const HalleyAPI& api, Resources& resources)
 {
 	return {};
 }

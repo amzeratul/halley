@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class IGameEditorData;
 	class IProjectWindow;
 	class Game;
 	class UIDebugConsoleCommands;
@@ -185,6 +186,7 @@ namespace Halley {
         Resources* editorResources;
         ISceneEditorGizmoCollection* gizmos;
     	IEditorInterface* editorInterface;
+        IGameEditorData* gameEditorData;
     };
 
     class IComponentEditorFieldFactory {
@@ -446,10 +448,17 @@ namespace Halley {
 		virtual Bytes readAssetFromDisk(const Path& filePath) = 0;
 		virtual void setAssetSaveNotification(bool enabled) = 0;
 		virtual Game* getGameInstance() const = 0;
+		virtual IGameEditorData* getGameEditorData() const = 0;
 		virtual void launchGame(Vector<String> params) const = 0;
 		virtual Resources& getGameResources() = 0;
 		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;
         virtual Vector<Path> enumerateDirectory(const Path& path) = 0;
+
+		template <typename T>
+		T* getGameEditorDataAs() const
+		{
+			return dynamic_cast<T*>(getGameEditorData());
+		}
 	};
 
 	class IProjectWindow {
@@ -509,4 +518,9 @@ namespace Halley {
 
         virtual Vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
     };
+
+	class IGameEditorData {
+	public:
+		virtual ~IGameEditorData() = default;
+	};
 }

@@ -155,6 +155,7 @@ namespace Halley
 		}
 
 		Game* getGameInstance() const override;
+		IGameEditorData* getGameEditorData() const override;
 
 		std::optional<AssetPreviewData> getCachedAssetPreview(AssetType type, const String& id);
 		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
@@ -200,6 +201,7 @@ namespace Halley
 		Vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
+		std::unique_ptr<IGameEditorData> editorData;
 
 		std::unique_ptr<FileSystemCache> fileSystemCache;
 

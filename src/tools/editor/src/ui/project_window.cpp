@@ -203,7 +203,7 @@ bool ProjectWindow::loadCustomUI()
 
 	entityEditorFactoryRoot->clear();
 	entityEditorFactoryRoot->addStandardFieldFactories();
-	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories(project.getGameResources()));
+	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories(project.getGameResources(), project.getGameEditorData()));
 	
 	return true;
 }
@@ -251,7 +251,7 @@ void ProjectWindow::onAssetsLoaded()
 		c.widget->sendEvent(UIEvent(UIEventType::AssetsReloaded, getId()));
 	}
 	project.withLoadedDLL([&](ProjectDLL& dll) {
-		entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories(project.getGameResources()));
+		entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories(project.getGameResources(), project.getGameEditorData()));
 	});
 }
 
@@ -564,7 +564,7 @@ AssetPreviewGenerator& ProjectWindow::getAssetPreviewGenerator()
 		if (hasDLL) {
 			project.withLoadedDLL([&] (ProjectDLL& dll)
 			{
-				assetPreviewGenerator = dll.getGame().createAssetPreviewGenerator(getAPI(), project.getGameResources());
+				assetPreviewGenerator = dll.getGame().createAssetPreviewGenerator(getAPI(), project.getGameResources(), project.getGameEditorData());
 				assetPreviewGenerator->setColourScheme(factory.getColourScheme());
 			});
 		} else {
