@@ -65,7 +65,8 @@ void AudioView::paint(Painter& painter)
 	{
 		ColourStringBuilder str;
 
-		str.append("Listener at regions:");
+		str.append("Listener", valueCol);
+		str.append(" at regions:");
 		for (const auto& region: curData.listener.regions) {
 			str.append("\n- ");
 			str.append(getRegionName(region.regionId), keyCol);
@@ -95,14 +96,14 @@ void AudioView::paint(Painter& painter)
 
 		ColourStringBuilder str;
 
-		str.append(getEmitterName(emitterData.emitterId));
+		str.append(getEmitterName(emitterData.emitterId), valueCol);
 		str.append(" at region ");
 		str.append(getRegionName(emitterData.regionId), valueCol);
 
 		bool first = true;
 		for (const auto& [k, v]: emitterData.switches) {
 			if (first) {
-				str.append("\n    ");
+				str.append(" | ");
 				first = false;
 			} else {
 				str.append(", ", keyCol);
@@ -115,7 +116,7 @@ void AudioView::paint(Painter& painter)
 		first = true;
 		for (const auto& [k, v]: emitterData.variables) {
 			if (first) {
-				str.append("\n    ");
+				str.append(" | ");
 				first = false;
 			} else {
 				str.append(", ", keyCol);
@@ -128,14 +129,20 @@ void AudioView::paint(Painter& painter)
 		for (auto& voiceData: emitterData.voices) {
 			str.append("\n- ");
 			str.append(getObjectName(voiceData.objectId), keyCol);
-			str.append(": gain = ");
-			str.append(toString(voiceData.gain), valueCol);
-			str.append(": pitch = ");
-			str.append(toString(voiceData.pitch), valueCol);
-			str.append(", pause = ");
-			str.append(toString(voiceData.paused), valueCol);
-			str.append(", mix = ");
-			str.append("[" + String::concat(gsl::span<const float>(voiceData.channelMix).subspan(0, voiceData.dstChannels), ", ", [](float v) { return toString(v, 2); }) + "]", valueCol);
+			if (voiceData.playing) {
+				str.append(": gain = ");
+				str.append(toString(voiceData.gain), valueCol);
+				str.append(", pitch = ");
+				str.append(toString(voiceData.pitch), valueCol);
+				str.append(", mix amount = ");
+				str.append(toString(voiceData.mixAmount), valueCol);
+				str.append(", pause = ");
+				str.append(toString(voiceData.paused), valueCol);
+				str.append(", mix = ");
+				str.append("[" + String::concat(gsl::span<const float>(voiceData.channelMix).subspan(0, voiceData.dstChannels), ", ", [](float v) { return toString(v, 2); }) + "]", valueCol);
+			} else {
+				str.append(": not playing");
+			}
 		}
 
 		auto results = str.moveResults();
@@ -158,14 +165,14 @@ void AudioView::onAudioDebugData(AudioDebugData data)
 String AudioView::getEmitterName(AudioEmitterId emitterId) const
 {
 	if (emitterId == 0) {
-		return "Global Singleton";
+		return "global_singleton (0)";
 	}
 
 	const auto iter = emitterNames.find(emitterId);
 	if (iter != emitterNames.end()) {
 		return iter->second;
 	}
-	auto name = world->getInterface<IAudioSystemInterface>().getSourceName(emitterId);
+	auto name = world->getInterface<IAudioSystemInterface>().getSourceName(emitterId) + " (" + toString(int(emitterId)) + ")";
 	emitterNames[emitterId] = name;
 	return name;
 }
@@ -173,7 +180,7 @@ String AudioView::getEmitterName(AudioEmitterId emitterId) const
 String AudioView::getRegionName(AudioRegionId regionId) const
 {
 	if (regionId == 0) {
-		return "Global Region (0)";
+		return "global_region (0)";
 	}
 
 	const auto iter = regionNames.find(regionId);

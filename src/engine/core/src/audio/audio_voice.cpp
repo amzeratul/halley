@@ -211,6 +211,7 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 {
 	startDstSample = 0;
 	numSamplesRendered = 0;
+	mixAmount = 0;
 
 	if (paused) {
 		return;
@@ -275,6 +276,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 				if (gain0 + gain1 > 0.0001f) {
 					const auto dstBuffer = AudioSamples(dst[dstChannel]->samples).subspan(startDstSample);
 					AudioMixer::mixAudio(audioData[srcChannel].samples, dstBuffer, gain0, gain1);
+					mixAmount += (gain0 + gain1) / 2;
 				}
 			}
 		}
@@ -311,10 +313,12 @@ AudioDebugData::VoiceData AudioVoice::getDebugData() const
 	AudioDebugData::VoiceData result;
 
 	result.gain = lastGain;
+	result.playing = playing;
 	result.paused = paused;
 	result.objectId = audioObjectId;
 	result.dstChannels = lastDstChannels;
 	result.pitch = lastPitch;
+	result.mixAmount = mixAmount;
 	result.channelMix.fill(0);
 
 	const int nSrc = static_cast<int>(getNumberOfChannels());

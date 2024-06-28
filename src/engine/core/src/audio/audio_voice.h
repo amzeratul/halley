@@ -93,6 +93,7 @@ namespace Halley {
 		AudioBuffersRef audioData;
 		size_t startDstSample = 0;
 		size_t numSamplesRendered = 0;
+		float mixAmount = 0;
 
 		std::optional<AudioAttenuation> attenuation;
 
