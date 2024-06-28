@@ -158,20 +158,36 @@ void AssetsBrowser::makeUI()
 
 void AssetsBrowser::listAssetSources()
 {
+	if (pendingAssetNames.isValid()) {
+		pendingAssetNames.cancel();
+	}
+
 	if (curSrcPath == Path("..")) {
-		assetNames.clear();
-		assetNames.push_back("assets_src");
-		assetNames.push_back("halley/shared_assets");
-		assetNames.push_back("halley/assets_src");
+		Vector<String> names;
+		names.push_back("assets_src");
+		names.push_back("halley/shared_assets");
+		names.push_back("halley/assets_src");
+		completeListingAssetSources(names);
 	} else {
-		assetNames = project.getAssetSrcList(true, curSrcPath, false);
-		if (curSrcPath == Path(".")) {
-			if (projectWindow.getPreferences().getCanEditHalleyAssets()) {
-				assetNames.push_back("..");
-			}
-		} else {
-			assetNames.push_back((rootPath / curSrcPath / "..").toString());
+		pendingAssetNames = Concurrent::execute([=] () -> Vector<String>
+		{
+			return project.getAssetSrcList(true, curSrcPath, false);
+		}).then(Executors::getMainUpdateThread(), [=] (Vector<String> names)
+		{
+			completeListingAssetSources(std::move(names));
+		});
+	}
+}
+
+void AssetsBrowser::completeListingAssetSources(Vector<String> names)
+{
+	assetNames = std::move(names);
+	if (curSrcPath == Path(".")) {
+		if (projectWindow.getPreferences().getCanEditHalleyAssets()) {
+			assetNames.push_back("..");
 		}
+	} else {
+		assetNames.push_back((rootPath / curSrcPath / "..").toString());
 	}
 
 	std::sort(assetNames.begin(), assetNames.end());

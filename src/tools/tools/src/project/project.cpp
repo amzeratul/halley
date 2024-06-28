@@ -555,7 +555,10 @@ void Project::loadGameResources(const HalleyAPI& api)
 	StandardResources::initialize(*gameResources);
 
 	if (game) {
-		editorData = game->createGameEditorData(api, *gameResources);
+		editorDataLoading = Concurrent::execute([this, game, &api] ()
+		{
+			editorData = game->createGameEditorData(api, *gameResources);
+		});
 	}
 }
 
@@ -591,6 +594,9 @@ Game* Project::getGameInstance() const
 
 IGameEditorData* Project::getGameEditorData() const
 {
+	if (editorDataLoading.isValid()) {
+		editorDataLoading.wait();
+	}
 	return editorData.get();
 }
 

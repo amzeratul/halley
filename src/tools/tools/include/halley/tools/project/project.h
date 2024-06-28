@@ -201,7 +201,9 @@ namespace Halley
 		Vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
+
 		std::unique_ptr<IGameEditorData> editorData;
+		Future<void> editorDataLoading;
 
 		std::unique_ptr<FileSystemCache> fileSystemCache;
 

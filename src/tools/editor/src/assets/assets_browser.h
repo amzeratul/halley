@@ -44,6 +44,7 @@ namespace Halley {
 		Path rootPath;
 		AssetType curType = AssetType::Sprite;
 
+		Future<void> pendingAssetNames;
 		Vector<String> assetNames;
 		std::optional<Path> pendingOpen;
         
@@ -62,6 +63,7 @@ namespace Halley {
 		void updateAddRemoveButtons();
 
 		void listAssetSources();
+		void completeListingAssetSources(Vector<String> names);
 		void setListContents();
 		void refreshList();
 
