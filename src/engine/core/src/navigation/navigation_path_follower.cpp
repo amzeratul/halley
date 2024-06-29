@@ -101,7 +101,7 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 	}
 	
 	const auto nextPos = path->path[nextPathIdx];
-	const bool arrivedAtNextNode = (nextPos - curPos.pos).length() < threshold;
+	const bool arrivedAtNextNode = (nextPos - curPos.pos).squaredLength() < threshold * threshold;
 	
 	if (arrivedAtNextNode) {
 		nextPathIdx++;

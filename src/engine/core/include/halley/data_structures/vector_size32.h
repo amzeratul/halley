@@ -10,6 +10,7 @@
 #include <gsl/span>
 #include <string_view>
 #include <cstring>
+#include <halley/utils/macros.h>
 
 #ifdef max
 #undef max
@@ -384,7 +385,7 @@ namespace Halley {
 
 		void resize_no_init(size_t size)
 		{
-			do_resize(size, [] (pointer bytes) {});
+			do_resize(size);
 		}
 
 		void resize(size_t size, T defaultValue)
@@ -686,7 +687,7 @@ namespace Halley {
 		}
 
 		template <typename F>
-		void change_capacity(size_type newCapacity, const F& construct)
+		FORCEINLINE void change_capacity(size_type newCapacity, const F& construct)
 		{
 			const auto size = st_size();
 			const auto capacity = st_capacity();
@@ -729,8 +730,21 @@ namespace Halley {
 			}
 		}
 
+		void do_resize(size_t nSize)
+		{
+			const auto newSize = static_cast<size_type>(nSize);
+			if (newSize > st_size()) {
+				if (newSize > capacity()) {
+					change_capacity(newSize);
+				}
+				set_size(newSize);
+			} else if (newSize < st_size()) {
+				resize_down(newSize);
+			}
+		}
+
 		template<typename F>
-		void do_resize(size_t nSize, const F& construct)
+		FORCEINLINE void do_resize(size_t nSize, const F& construct)
 		{
 			const auto newSize = static_cast<size_type>(nSize);
 			if (newSize > st_size()) {
@@ -774,7 +788,7 @@ namespace Halley {
 		}
 
 		template <typename F>
-		void construct_with_ensure_capacity(size_type minCapacity, const F& construct)
+		FORCEINLINE void construct_with_ensure_capacity(size_type minCapacity, const F& construct)
 		{
 			if (capacity() >= minCapacity) {
 				construct(data());
@@ -784,7 +798,7 @@ namespace Halley {
 		}
 
 		template <typename F>
-		iterator do_insert(const_iterator pos, F f)
+		FORCEINLINE iterator do_insert(const_iterator pos, F f)
 		{
 			const auto prevSize = size();
 			const auto idx = pos - begin();

@@ -21,12 +21,7 @@
 
 #pragma once
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
+#include "macros.h"
 
 #include <algorithm>
 #include <limits>
@@ -40,25 +35,6 @@
 #include <gsl/assert>
 
 #include "type_traits.h"
-
-#ifdef _MSC_VER
-	#include <xmmintrin.h>
-
-	#if defined(DEV_BUILD)
-		#define PRAGMA_DEOPTIMIZE __pragma(optimize( "", off ))
-		#define PRAGMA_REOPTIMIZE __pragma(optimize( "", on ))
-	#else
-		#define PRAGMA_DEOPTIMIZE
-		#define PRAGMA_REOPTIMIZE
-	#endif
-
-	#define NOINLINE __declspec(noinline)
-#else
-	#define PRAGMA_DEOPTIMIZE
-	#define PRAGMA_REOPTIMIZE
-
-	#define NOINLINE __attribute__((noinline))
-#endif
 
 namespace Halley {
 	

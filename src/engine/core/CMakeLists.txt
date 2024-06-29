@@ -866,6 +866,7 @@ set(HEADERS
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
         "include/halley/utils/halley_iostream.h"
+        "include/halley/utils/macros.h"
         "include/halley/utils/scoped_guard.h"
         "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
