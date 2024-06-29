@@ -199,6 +199,7 @@ namespace Halley {
 
 		WorldPartitionId worldPartition = 0;
 		uint8_t hierarchyRevision = 0;
+		uint8_t componentRevision = 0;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -696,6 +697,12 @@ namespace Halley {
 			return entity->hierarchyRevision;
 		}
 
+		uint8_t getComponentRevision() const
+		{
+			validate();
+			return entity->componentRevision;
+		}
+
 		uint8_t getChildrenRevision() const
 		{
 			validate();
@@ -991,6 +998,11 @@ namespace Halley {
 		uint8_t getHierarchyRevision() const
 		{
 			return entity->hierarchyRevision;
+		}
+
+		uint8_t getComponentRevision() const
+		{
+			return entity->componentRevision;
 		}
 
 		uint8_t getChildrenRevision() const

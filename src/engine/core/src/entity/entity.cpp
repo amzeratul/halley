@@ -120,6 +120,7 @@ void Entity::markDirty(World& world)
 		dirty = true;
 		world.onEntityDirty();
 	}
+	++componentRevision;
 }
 
 ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
