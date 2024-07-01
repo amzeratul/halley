@@ -191,9 +191,14 @@ bool UIRenderSurface::isRendering() const
 	return isEnabled() && !bypass;
 }
 
-void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time)
+void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time, Time delay)
 {
-	fading = Fade{ from, to, time, 0 };
+	fading = Fade{ from, to, time, -delay };
+}
+
+void UIRenderSurface::fade(float from, float to, Time time, Time delay)
+{
+	fade(Colour4f(1, 1, 1, from), Colour4f(1, 1, 1, to), time, delay);
 }
 
 void UIRenderSurface::update(Time t, bool moved)

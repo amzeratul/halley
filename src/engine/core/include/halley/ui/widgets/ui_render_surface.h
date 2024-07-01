@@ -28,7 +28,8 @@ namespace Halley {
         void setAutoBypass(bool autoBypass);
         bool isRendering() const;
 
-    	void fade(Colour4f from, Colour4f to, Time time);
+    	void fade(Colour4f from, Colour4f to, Time time, Time delay = 0);
+    	void fade(float from, float to, Time time, Time delay = 0);
         void update(Time t, bool moved) override;
 
         bool ignoreClip() const override;
