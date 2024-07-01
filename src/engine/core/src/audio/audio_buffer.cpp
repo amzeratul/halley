@@ -62,12 +62,6 @@ void AudioBufferRef::clear()
 	}
 }
 
-AudioBuffersRef::AudioBuffersRef()
-	: nBuffers(0)
-	, pool(nullptr)
-{
-}
-
 AudioBuffersRef::AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig::maxChannels> buffers, AudioBufferPool& pool)
 	: buffers(buffers)
 	, nBuffers(n)

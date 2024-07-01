@@ -39,7 +39,7 @@ namespace Halley
 	class AudioBuffersRef
 	{
 	public:
-		AudioBuffersRef();
+		AudioBuffersRef() = default;
 		AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig::maxChannels> buffers, AudioBufferPool& pool);
 		AudioBuffersRef(const AudioBuffersRef& other) = delete;
 		AudioBuffersRef(AudioBuffersRef&& other) noexcept;
@@ -62,8 +62,8 @@ namespace Halley
 		std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
 		AudioMultiChannelSamples spans;
 		AudioMultiChannelSamples sampleSpans;
-		size_t nBuffers;
-		AudioBufferPool* pool;
+		size_t nBuffers = 0;
+		AudioBufferPool* pool = nullptr;
 	};
 
 	class AudioBufferPool
