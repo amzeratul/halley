@@ -586,7 +586,7 @@ std::optional<AudioDebugData> AudioEngine::getDebugData() const
 
 std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> playGain, Range<float> playPitch, uint32_t delaySamples)
 {
-	if (object.getPruneDistant()) {
+	if (false && object.getPruneDistant()) {
 		// Prune
 		const auto [attenuation, pan] = emitter.getPosition().getAttenuationAndPan(listener, object.getAttenuationOverride());
 		if (attenuation < 0.000001f) {
@@ -594,7 +594,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 		}
 	}
 
-	if (object.getMaxInstances() || object.getCooldown()) {
+	if (false && (object.getMaxInstances() || object.getCooldown())) {
 		auto& data = getMutablePlayingObjectData(object.getAudioObjectId());
 		if (data.count >= object.getMaxInstances() || data.cooldown > 0) {
 			return {};
