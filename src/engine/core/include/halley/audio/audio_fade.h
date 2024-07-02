@@ -31,8 +31,8 @@ namespace Halley {
 	class AudioFade {
 	public:
 		AudioFade() = default;
-		AudioFade(float length, AudioFadeCurve curve);
-		AudioFade(float length, float delay, AudioFadeCurve curve);
+		AudioFade(float length, AudioFadeCurve curve = AudioFadeCurve::Linear);
+		AudioFade(float length, float delay, AudioFadeCurve curve = AudioFadeCurve::Linear);
 		AudioFade(const ConfigNode& node);
 
 		float evaluate(float time) const;

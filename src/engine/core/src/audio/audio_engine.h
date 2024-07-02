@@ -40,8 +40,8 @@ namespace Halley {
 		void destroyRegion(AudioRegionId id);
 
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
-	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop);
-	    void play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain);
+	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop, AudioFade fade);
+	    void play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain, AudioFade fade);
 		
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);

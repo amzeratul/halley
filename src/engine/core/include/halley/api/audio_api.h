@@ -10,6 +10,7 @@
 #include "halley/maths/vector3.h"
 
 #include "halley/data_structures/ring_buffer.h"
+#include "halley/audio/audio_fade.h"
 
 namespace Halley
 {
@@ -291,8 +292,8 @@ namespace Halley
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
 		virtual AudioHandle postEvent(const AudioEvent& event) = 0;
 		virtual AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) = 0;
-		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float gain = 1.0f, bool loop = false) = 0;
-		virtual AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float gain = 1.0f) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float gain = 1.0f, bool loop = false, AudioFade fade = {}) = 0;
+		virtual AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float gain = 1.0f, AudioFade fade = {}) = 0;
 
 		// Start old API, avoid in new code
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float gain = 1.0f, bool loop = false) = 0;

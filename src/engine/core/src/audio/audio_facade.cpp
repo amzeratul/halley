@@ -285,26 +285,26 @@ AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterI
 	}
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop)
+AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop, AudioFade fade)
 {
 	uint32_t id = curEventId++;
 	const auto emitterId = emitter ? emitter->getId() : 0;
 
 	enqueue([=] () {
-		engine->play(id, clip, emitterId, volume, loop);
+		engine->play(id, clip, emitterId, volume, loop, fade);
 	});
 	playingSounds.push_back(id);
 
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 }
 
-AudioHandle AudioFacade::play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume)
+AudioHandle AudioFacade::play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume, AudioFade fade)
 {
 	uint32_t id = curEventId++;
 	const auto emitterId = emitter ? emitter->getId() : 0;
 
 	enqueue([=] () {
-		engine->play(id, audioObject, emitterId, volume);
+		engine->play(id, audioObject, emitterId, volume, fade);
 	});
 	playingSounds.push_back(id);
 
@@ -337,7 +337,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosit
 
 	enqueue([=] () {
 		engine->createEmitter(emitterId, position, true);
-		engine->play(id, clip, emitterId, volume, loop);
+		engine->play(id, clip, emitterId, volume, loop, {});
 	});
 	playingSounds.push_back(id);
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);

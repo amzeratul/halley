@@ -67,7 +67,7 @@ void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitt
 	}
 }
 
-void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop)
+void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float gain, bool loop, AudioFade fade)
 {
 	const auto iter = emitters.find(emitterId);
 	if (iter == emitters.end()) {
@@ -77,10 +77,11 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 
 	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), gain, 1.0f, 0.0f, 0, getBusId(""));
 	voice->setIds(id);
+	voice->play(fade);
 	iter->second->addVoice(std::move(voice));
 }
 
-void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain)
+void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> object, AudioEmitterId emitterId, float gain, AudioFade fade)
 {
 	const auto iter = emitters.find(emitterId);
 	if (iter == emitters.end()) {
@@ -89,6 +90,7 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> objec
 	}
 
 	auto voice = makeObjectVoice(*object, id, *iter->second, Range<float>(gain, gain));
+	voice->play(fade);
 	iter->second->addVoice(std::move(voice));
 }
 

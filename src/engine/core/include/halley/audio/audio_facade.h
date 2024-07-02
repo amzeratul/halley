@@ -49,8 +49,8 @@ namespace Halley {
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
 		AudioHandle postEvent(const AudioEvent& event) override;
 		AudioHandle postEvent(const AudioEvent& event, AudioEmitterHandle emitter) override;
-		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop) override;
-		AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume) override;
+		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop, AudioFade fade) override;
+		AudioHandle play(std::shared_ptr<const AudioObject> audioObject, AudioEmitterHandle emitter, float volume, AudioFade fade) override;
 
     	AudioHandle postEvent(const String& name, AudioPosition position) override;
     	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop) override;
