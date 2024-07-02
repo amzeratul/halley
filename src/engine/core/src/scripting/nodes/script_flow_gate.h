@@ -220,6 +220,7 @@ namespace Halley {
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/line_reset.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::State; }
 
+		Vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;

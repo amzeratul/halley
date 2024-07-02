@@ -567,6 +567,13 @@ ConfigNode ScriptLineResetData::toConfigNode(const EntitySerializationContext& c
 	return result;
 }
 
+Vector<IGraphNodeType::SettingType> ScriptLineReset::getSettingTypes() const
+{
+	return {
+		SettingType{ "flowAtStart", "bool", Vector<String>{"true"} },
+	};
+}
+
 gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
@@ -583,11 +590,17 @@ gsl::span<const IGraphNodeType::PinType> ScriptLineReset::getPinConfiguration(co
 std::pair<String, Vector<ColourOverride>> ScriptLineReset::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Resets output if signaled by ");
+	str.append("Pulses output if signaled by ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" or if variable ");
 	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
-	str.append(" changes.");
+	str.append(" changes");
+	if (node.getSettings()["flowAtStart"].asBool(true)) {
+		str.append(" (pulses at start)", settingColour);
+	} else {
+		str.append(" (wait for first change)", settingColour);
+	}
+	str.append(".");
 	return str.moveResults();
 }
 
@@ -618,7 +631,12 @@ IScriptNodeType::Result ScriptLineReset::doUpdate(ScriptEnvironment& environment
 		curData.active = true;
 		curData.signaled = false;
 		curData.monitorVariable = environment.readInputDataPin(node, 3);
-		return Result(ScriptNodeExecutionState::Fork, 0, 1);
+
+		if (node.getSettings()["flowAtStart"].asBool(true)) {
+			return Result(ScriptNodeExecutionState::Fork, 0, 1);
+		} else {
+			return Result(ScriptNodeExecutionState::Executing, time);
+		}
 	} else {
 		bool reset = curData.signaled;
 		curData.signaled = false;
