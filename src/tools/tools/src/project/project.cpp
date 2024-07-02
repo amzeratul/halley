@@ -542,6 +542,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 {
 	auto locator = std::make_unique<ResourceLocator>(*api.system);
 	auto* game = getGameInstance();
+	this->api = &api;
 
 	try {
 		if (allowPackedAssets && game) {
@@ -553,13 +554,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 
 	gameResources = std::make_unique<Resources>(std::move(locator), api, ResourceOptions(true));
 	StandardResources::initialize(*gameResources);
-
-	if (game) {
-		editorDataLoading = Concurrent::execute([this, game, &api] ()
-		{
-			editorData = game->createGameEditorData(api, *gameResources);
-		});
-	}
+	loadGameEditorData();
 }
 
 Resources& Project::getGameResources()
@@ -590,14 +585,6 @@ Game* Project::getGameInstance() const
 		result = &dll.getGame();
 	});
 	return result;
-}
-
-IGameEditorData* Project::getGameEditorData() const
-{
-	if (editorDataLoading.isValid()) {
-		editorDataLoading.wait();
-	}
-	return editorData.get();
 }
 
 std::optional<AssetPreviewData> Project::getCachedAssetPreview(AssetType type, const String& id)
@@ -679,6 +666,21 @@ Vector<Path> Project::enumerateDirectory(const Path& path)
 	return FileSystem::enumerateDirectory(path);
 }
 
+void Project::onDLLLoaded()
+{
+	loadGameEditorData();
+}
+
+void Project::onDLLUnload()
+{
+	for (const auto& ss: getGameResources().enumerate<SpriteSheet>()) {
+		getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
+	}
+	clearCachedAssetPreviews();
+	editorData = {};
+	editorDataLoading = {};
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {
@@ -699,4 +701,28 @@ void Project::loadECSData()
 	}
 	
 	ecsData->loadSources(sources, false);
+}
+
+void Project::loadGameEditorData() const
+{
+	if (editorData || editorDataLoading.isValid()) {
+		return;
+	}
+
+	if (auto game = getGameInstance()) {
+		editorDataLoading = Concurrent::execute([this, game] ()
+		{
+			editorData = game->createGameEditorData(*api, *gameResources);
+		});
+	}
+}
+
+IGameEditorData* Project::getGameEditorData() const
+{
+	loadGameEditorData();
+
+	if (editorDataLoading.isValid()) {
+		editorDataLoading.wait();
+	}
+	return editorData.get();
 }

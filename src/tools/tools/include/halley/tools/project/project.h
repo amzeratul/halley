@@ -175,6 +175,9 @@ namespace Halley
 
 		Vector<Path> enumerateDirectory(const Path& path) override;
 
+		void onDLLLoaded();
+		void onDLLUnload();
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;
@@ -202,8 +205,8 @@ namespace Halley
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
-		std::unique_ptr<IGameEditorData> editorData;
-		Future<void> editorDataLoading;
+		mutable std::unique_ptr<IGameEditorData> editorData;
+		mutable Future<void> editorDataLoading;
 
 		std::unique_ptr<FileSystemCache> fileSystemCache;
 
@@ -216,6 +219,7 @@ namespace Halley
 		uint32_t buildCount = 0;
 
 		DevConServer* devConServer = nullptr;
+		const HalleyAPI* api = nullptr;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;
@@ -225,5 +229,6 @@ namespace Halley
 
 		Path getDLLPath() const;
 		void loadECSData();
+		void loadGameEditorData() const;
 	};
 }

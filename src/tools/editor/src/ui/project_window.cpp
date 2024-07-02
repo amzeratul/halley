@@ -226,16 +226,14 @@ void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 	if (status == ProjectDLL::Status::Loaded) {
 		hasDLL = true;
 		waitingToLoadCustomUI = true;
+		project.onDLLLoaded();
 		tryLoadCustomUI();
 	} else {
 		destroyCustomUI();
 		for (const auto& ss: resources.enumerate<SpriteSheet>()) {
 			resources.get<SpriteSheet>(ss)->clearMaterialCache();
 		}
-		for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
-			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
-		}
-		project.clearCachedAssetPreviews();
+		project.onDLLUnload();
 		assetPreviewGenerator = {};
 		getRoot()->releaseWeakPtrs();
 	}
