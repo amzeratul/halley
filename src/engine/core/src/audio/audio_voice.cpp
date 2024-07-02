@@ -56,7 +56,7 @@ void AudioVoice::start()
 	Expects(!playing);
 
 	playing = true;
-	nChannels = source->getNumberOfChannels();
+	nChannels = source ? source->getNumberOfChannels() : 0;
 }
 
 void AudioVoice::play(AudioFade fade)
@@ -164,8 +164,10 @@ void AudioVoice::setPitch(float pitch)
 		if (resample) {
 			resample->setFromHz(freq);
 		} else {
-			resample = std::make_shared<AudioFilterResample>(source, freq, static_cast<float>(AudioConfig::sampleRate), engine.getPool());
-			source = resample;
+			if (source) {
+				resample = std::make_shared<AudioFilterResample>(source, freq, static_cast<float>(AudioConfig::sampleRate), engine.getPool());
+				source = resample;
+			}
 		}
 	}
 }
@@ -178,6 +180,11 @@ size_t AudioVoice::getNumberOfChannels() const
 void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float busGain)
 {
 	Expects(playing);
+
+	if (!source) {
+		stop({});
+		return;
+	}
 
 	if (fader.isFading()) {
 		if (fader.update(elapsedTime)) {
@@ -213,7 +220,7 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 	numSamplesRendered = 0;
 	mixAmount = 0;
 
-	if (paused) {
+	if (paused || !source) {
 		return;
 	}
 
@@ -245,7 +252,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 {
 	Expects(!dst.empty());
 
-	if (paused) {
+	if (paused || !source) {
 		return;
 	}
 
