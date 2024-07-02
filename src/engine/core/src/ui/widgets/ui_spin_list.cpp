@@ -27,7 +27,7 @@ UISpinList::UISpinList(String id, const UIStyle& style, Vector<LocalisedString> 
 	setOptions(std::move(os));
 }
 
-void UISpinList::setSelectedOption(int option)
+void UISpinList::setSelectedOption(int option, bool shouldPlaySound)
 {
 	int nextOption = option;
 	if (option >= static_cast<int>(options.size())) {
@@ -39,9 +39,11 @@ void UISpinList::setSelectedOption(int option)
 	if (curOption != nextOption) {
 		curOption = nextOption;
 
-		const auto spinSound = styles[0].getString("spinSound");
-		if (!spinSound.isEmpty()) {
-			playSound(spinSound);
+		if (shouldPlaySound) {
+			const auto spinSound = styles[0].getString("spinSound");
+			if (!spinSound.isEmpty()) {
+				playSound(spinSound);
+			}
 		}
 
 		label->setText(options[curOption]);
@@ -54,11 +56,10 @@ void UISpinList::setSelectedOption(int option)
 	}
 }
 
-void UISpinList::setSelectedOption(const String& id)
+void UISpinList::setSelectedOption(const String& id, bool playSound)
 {
-	auto iter = std::find(optionIds.begin(), optionIds.end(), id);
-	if (iter != optionIds.end()) {
-		setSelectedOption(int(iter - optionIds.begin()));
+	if (auto iter = std::find(optionIds.begin(), optionIds.end(), id); iter != optionIds.end()) {
+		setSelectedOption(static_cast<int>(iter - optionIds.begin()), playSound);
 	}
 }
 
