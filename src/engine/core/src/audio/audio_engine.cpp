@@ -89,9 +89,10 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const AudioObject> objec
 		return;
 	}
 
-	auto voice = makeObjectVoice(*object, id, *iter->second, Range<float>(gain, gain));
-	voice->play(fade);
-	iter->second->addVoice(std::move(voice));
+	if (auto voice = makeObjectVoice(*object, id, *iter->second, Range<float>(gain, gain))) {
+		voice->play(fade);
+		iter->second->addVoice(std::move(voice));
+	}
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -221,6 +222,7 @@ void AudioEngine::generateBuffer()
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
 	mixVoices(samplesToRead, numChannels, channelBuffersRef);
 	removeFinishedVoices();
+	updatePlayingObjectData(static_cast<float>(samplesToRead) / static_cast<float>(spec.sampleRate));
 
 	// Interleave
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
@@ -425,10 +427,16 @@ void AudioEngine::mixRegion(const AudioRegion& region, AudioBuffersRef& buffers,
 
 void AudioEngine::removeFinishedVoices()
 {
+	Vector<AudioObjectId> removedObjects;
+
 	for (auto& e: emitters) {
-		e.second->removeFinishedVoices(finishedSounds);
+		e.second->removeFinishedVoices(finishedSounds, removedObjects);
 	}
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
+
+	for (auto obj: removedObjects) {
+		--getMutablePlayingObjectData(obj).count;
+	}
 }
 
 int AudioEngine::getBusId(const String& busName)
@@ -578,6 +586,26 @@ std::optional<AudioDebugData> AudioEngine::getDebugData() const
 
 std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> playGain, Range<float> playPitch, uint32_t delaySamples)
 {
+	if (object.getPruneDistant()) {
+		// Prune
+		const auto [attenuation, pan] = emitter.getPosition().getAttenuationAndPan(listener, object.getAttenuationOverride());
+		if (attenuation < 0.000001f) {
+			return {};
+		}
+	}
+
+	if (object.getMaxInstances() || object.getCooldown()) {
+		auto& data = getMutablePlayingObjectData(object.getAudioObjectId());
+		if (data.count >= object.getMaxInstances() || data.cooldown > 0) {
+			return {};
+		} else {
+			++data.count;
+			if (object.getCooldown()) {
+				data.cooldown = *object.getCooldown();
+			}
+		}
+	}
+
 	const auto gainRange = object.getGain() * playGain;
 	const auto pitchRange = object.getPitch() * playPitch;
 	const float gain = getRNG().getFloat(gainRange);
@@ -605,4 +633,26 @@ AudioDebugData AudioEngine::generateDebugData() const
 	result.listener = listener;
 
 	return result;
+}
+
+AudioEngine::PlayingObjectData& AudioEngine::getMutablePlayingObjectData(AudioObjectId id)
+{
+	for (auto& data: playingObjectData) {
+		if (data.id == id) {
+			return data;
+		}
+	}
+	return playingObjectData.emplace_back(PlayingObjectData{ id, 0, 0 });
+}
+
+void AudioEngine::updatePlayingObjectData(float deltaTime)
+{
+	for (auto& data: playingObjectData) {
+		data.cooldown -= deltaTime;
+	}
+
+	std_ex::erase_if(playingObjectData, [] (const PlayingObjectData& entry)
+	{
+		return entry.count == 0 && entry.cooldown <= 0;
+	});
 }

@@ -391,11 +391,12 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	}
 
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
-	auto voice = engine.makeObjectVoice(*object, uniqueId, emitter, playGain, playPitch, delaySamples);
-	voice->play(fade);
-	emitter.addVoice(std::move(voice));
-
-	return true;
+	if (auto voice = engine.makeObjectVoice(*object, uniqueId, emitter, playGain, playPitch, delaySamples)) {
+		voice->play(fade);
+		emitter.addVoice(std::move(voice));
+		return true;
+	}
+	return false;
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const

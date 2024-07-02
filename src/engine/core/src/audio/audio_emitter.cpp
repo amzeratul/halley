@@ -32,13 +32,14 @@ void AudioEmitter::addVoice(std::unique_ptr<AudioVoice> voice)
 	voices.push_back(std::move(voice));
 }
 
-void AudioEmitter::removeFinishedVoices(Vector<AudioEventId>& removedIds)
+void AudioEmitter::removeFinishedVoices(Vector<AudioEventId>& removedIds, Vector<AudioObjectId>& removedObjects)
 {
 	std_ex::erase_if(voices, [&] (const auto& v)
 	{
 		const bool done = v->isDone();
 		if (done) {
 			removedIds.push_back(v->getEventId());
+			removedObjects.push_back(v->getAudioObjectId());
 		}
 		return done;
 	});

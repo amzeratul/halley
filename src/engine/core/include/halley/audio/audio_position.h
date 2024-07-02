@@ -35,6 +35,7 @@ namespace Halley
 		static AudioPosition makeFixed();
 
 		void setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		std::pair<float, float> getAttenuationAndPan(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
 		void setPosition(Vector3f position);
 
 		float getDopplerShift(const AudioListenerData& listener) const;

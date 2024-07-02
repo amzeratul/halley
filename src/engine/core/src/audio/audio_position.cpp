@@ -122,18 +122,20 @@ float AudioPosition::getDopplerShift(const AudioListenerData& listener) const
 	return (c + listenerSpeed) / (c + srcSpeed) - 1.0f;
 }
 
-static float gain2DPan(float srcPan, float dstPan)
-{
-	constexpr float piOverTwo = 3.1415926535897932384626433832795f / 2.0f;
-	const float panDistance = std::abs(srcPan - dstPan);
-	return std::sin(std::max(0.0f, 1.0f - 0.5f * panDistance) * piOverTwo);
-}
+namespace {
+	float gain2DPan(float srcPan, float dstPan)
+	{
+		constexpr float piOverTwo = 3.1415926535897932384626433832795f / 2.0f;
+		const float panDistance = std::abs(srcPan - dstPan);
+		return std::sin(std::max(0.0f, 1.0f - 0.5f * panDistance) * piOverTwo);
+	}
 
-static void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, float& pan, float& distance)
-{
-	auto delta = pos - listener.position;
-	pan = clamp(delta.x / listener.referenceDistance, -1.0f, 1.0f);
-	distance = delta.length();
+	void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, float& pan, float& distance)
+	{
+		auto delta = pos - listener.position;
+		pan = clamp(delta.x / listener.referenceDistance, -1.0f, 1.0f);
+		distance = delta.length();
+	}
 }
 
 void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
@@ -169,26 +171,15 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 	}
 }
 
-void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+std::pair<float, float> AudioPosition::getAttenuationAndPan(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
-	const size_t nDstChannels = size_t(dstChannels.size());
-	if (sources.empty()) {
-		// No sources, don't emit anything
-		for (size_t i = 0; i < nDstChannels; ++i) {
-			dst[i] = 0;
-		}
-		return;
-	}
-
-	// Proximity means 1 within the reference distance, 0 outside the maximum distance, and between 0 and 1 between them
-	float proximity = 0;
-	float resultPan = 0;
-
+	float attenuation;
+	float resultPan;
 	if (sources.size() == 1) {
 		// One source, do the simple algorithm
 		float len;
 		getPanAndDistance(sources[0].pos, listener, resultPan, len);
-		proximity = attenuationOverride.value_or(sources[0].attenuation).getProximity(len);
+		attenuation = attenuationOverride.value_or(sources[0].attenuation).getProximity(len);
 	} else {
 		// Multiple sources, average them
 		float panAccum = 0;
@@ -206,16 +197,32 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 
 		if (proximityAccum > 0.01f) {
 			resultPan = panAccum / proximityAccum;
-			proximity = clamp(proximityAccum, 0.0f, 1.0f);
+			attenuation = clamp(proximityAccum, 0.0f, 1.0f);
 		}
 	}
+
+	return { attenuation, resultPan };
+}
+
+void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+{
+	const size_t nDstChannels = size_t(dstChannels.size());
+	if (sources.empty()) {
+		// No sources, don't emit anything
+		for (size_t i = 0; i < nDstChannels; ++i) {
+			dst[i] = 0;
+		}
+		return;
+	}
+
+	auto [attenuation, pan] = getAttenuationAndPan(listener, attenuationOverride);
 
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
 		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
 			// Compute mix
 			const size_t mixIndex = (srcChannel * nSrcChannels) + dstChannel;
-			dst[mixIndex] = gain2DPan(resultPan, dstChannels[dstChannel].pan) * gain * proximity * dstChannels[dstChannel].gain;
+			dst[mixIndex] = gain2DPan(pan, dstChannels[dstChannel].pan) * gain * attenuation * dstChannels[dstChannel].gain;
 		}
 	}
 }

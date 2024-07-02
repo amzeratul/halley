@@ -87,6 +87,12 @@ namespace Halley {
 			Vector<uint8_t> children;
 		};
 
+		struct PlayingObjectData {
+			AudioObjectId id = 0;
+			int count = 0;
+			float cooldown = 0;
+		};
+
 		AudioSpec spec;
 		AudioOutputAPI* out = nullptr;
 		const AudioProperties* audioProperties = nullptr;
@@ -112,6 +118,7 @@ namespace Halley {
 		std::atomic<int64_t> lastTimeElapsed;
 
     	Vector<uint32_t> finishedSounds;
+		Vector<PlayingObjectData> playingObjectData;
 
 		std::shared_ptr<IAudioBufferSizeController> bufferSizeController;
 
@@ -135,6 +142,9 @@ namespace Halley {
 		void collectBusChildren(Vector<int>& dst, const BusData& bus) const;
 
 		void updateRegions();
+
+		PlayingObjectData& getMutablePlayingObjectData(AudioObjectId id);
+		void updatePlayingObjectData(float deltaTime);
 
 		AudioDebugData generateDebugData() const;
     };
