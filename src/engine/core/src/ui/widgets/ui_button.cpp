@@ -171,20 +171,17 @@ void UIButton::doSetState(State state)
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), false));
 		} else if (state == State::Up) {
 			sprite = style.getSprite("normal");
-			playSound(style.getString("upSound"));
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetSelected, getId(), false));
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false, false));
 		} else if (state == State::Down) {
 			sprite = style.getSprite("down");
-			playSound(style.getString("downSound"));
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetSelected, getId(), true));
 		} else if (state == State::Hover) {
 			sprite = style.getSprite("hover");
 			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true, false));
-			playSound(style.getString("hoverSound"));
 		}
 	}
 }
@@ -198,7 +195,9 @@ void UIButton::onStateChanged(State prev, State next)
 		} else if (next == State::Down) {
 			playSound(style.getString("downSound"));
 		} else if (next == State::Hover) {
-			playSound(style.getString("hoverSound"));
+			if (prev == State::Up) {
+				playSound(style.getString("hoverSound"));
+			}
 		}
 	}
 }
