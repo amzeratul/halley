@@ -26,7 +26,7 @@
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 155;
+constexpr static int currentAssetVersion = 157;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
 Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disabledPlatforms)

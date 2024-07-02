@@ -37,6 +37,15 @@ namespace Halley {
 		AudioAttenuation& getMutableAttenuationOverride();
 		void setAttenuationOverride(std::optional<AudioAttenuation> value);
 
+		bool getPruneDistant() const;
+		void setPruneDistant(bool value);
+		std::optional<float> getCooldown() const;
+		void setCooldown(std::optional<float> value);
+		std::optional<int> getMaxInstances() const;
+		void setMaxInstances(std::optional<int> value);
+		int getPriority() const;
+		void setPriority(int value);
+
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
@@ -69,6 +78,10 @@ namespace Halley {
 		Range<float> gain;
 		float dopplerScale = 0.0f;
 		std::optional<AudioAttenuation> attenuationOverride;
+		bool pruneDistant = true;
+		std::optional<float> cooldown;
+		std::optional<int> maxInstances;
+		int priority = 0;
 
 		void generateId();
     };

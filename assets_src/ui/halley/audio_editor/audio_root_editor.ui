@@ -1,212 +1,373 @@
 uuid: f02d7b3e-cca2-4c44-9526-d83d1e6467f6
 sizer:
   columnProportions: []
+  columns: 1
+  gap: 0
   type: vertical
 widget:
   class: widget
 children:
-  - uuid: bf662fc3-cd14-4eab-a528-9f3f2a466597
+  - uuid: 876fce9d-0ee3-421e-8bc1-a88674ea9177
     sizer:
       columnProportions: []
+      gap: 8
       type: vertical
     widget:
-      class: image
-      colour: $ui_popupWindow
-      id: background
-      image: $ui_title_capsule
-      innerBorder: [4, 1, 4, 4]
-      size: [20, 20]
+      class: widget
     children:
-      - uuid: 8ac950a6-8304-43ea-968b-3ff871f54038
-        widget:
-          class: label
-          id: title
-          text: Audio Object
-        fill: centre
-      - uuid: be771c02-e482-4fdf-921e-b8cbd227db09
-        proportion: 1
-        border: [1, 4, 1, 1]
+      - uuid: bf662fc3-cd14-4eab-a528-9f3f2a466597
         sizer:
-          columnProportions: [0, 1]
-          columns: 2
-          gap: 4
-          type: grid
+          columnProportions: []
+          type: vertical
         widget:
-          class: widget
-          id: content
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: $ui_title_capsule
+          innerBorder: [4, 1, 4, 4]
+          size: [20, 20]
         children:
-          - uuid: b3b96a42-4131-4eb1-b1f6-f3e1fc978f3c
+          - uuid: 8ac950a6-8304-43ea-968b-3ff871f54038
+            widget:
+              class: label
+              id: title
+              text: Properties
+            fill: centre
+          - uuid: be771c02-e482-4fdf-921e-b8cbd227db09
+            proportion: 1
+            border: [1, 4, 1, 1]
             sizer:
-              columnProportions: []
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
             widget:
               class: widget
-              size: [170, 20]
+              id: content
             children:
-              - uuid: f3c57d42-3b7f-4d25-b717-51e12db0c0f7
+              - uuid: b3b96a42-4131-4eb1-b1f6-f3e1fc978f3c
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: f3c57d42-3b7f-4d25-b717-51e12db0c0f7
+                    widget:
+                      class: label
+                      text: "Bus:"
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: dea8fd62-ec7e-46b6-94d3-c6be144fa0cd
+                widget:
+                  class: dropdown
+                  id: bus
+                  options: []
+                  size: [200, 20]
+                fill: left
+              - uuid: 1180eeed-c5a5-4958-89b3-75c45da6f788
                 widget:
                   class: label
-                  text: "Bus:"
+                  text: "Gain:"
                 fill: [fillHorizontal, centreVertical]
-          - uuid: dea8fd62-ec7e-46b6-94d3-c6be144fa0cd
-            widget:
-              class: dropdown
-              id: bus
-              options: []
-              size: [200, 20]
-            fill: left
-          - uuid: 1180eeed-c5a5-4958-89b3-75c45da6f788
-            widget:
-              class: label
-              text: "Gain:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: b8de2d3f-4d87-42a4-9624-37bde4a33abb
-            sizer:
-              type: horizontal
-            children:
-              - uuid: 32b36b9f-e002-4fa5-bcb5-79141824a935
-                widget:
-                  class: textInput
-                  id: gainMin
-                  size: [50, 20]
-                  validator: numericPositive
-              - uuid: 1ada4887-adb1-42ce-9d33-7c675a4bb028
+              - uuid: b8de2d3f-4d87-42a4-9624-37bde4a33abb
+                sizer:
+                  type: horizontal
+                children:
+                  - uuid: 32b36b9f-e002-4fa5-bcb5-79141824a935
+                    widget:
+                      class: textInput
+                      id: gainMin
+                      size: [50, 20]
+                      validator: numericPositive
+                  - uuid: 1ada4887-adb1-42ce-9d33-7c675a4bb028
+                    widget:
+                      class: label
+                      text: " ~ "
+                  - uuid: ff114387-36e4-4560-a036-feb8d6805485
+                    widget:
+                      class: textInput
+                      id: gainMax
+                      size: [50, 20]
+                      validator: numericPositive
+              - uuid: c03ba7e6-c21b-42cf-8f0c-d84dcbe372e8
                 widget:
                   class: label
-                  text: " ~ "
-              - uuid: ff114387-36e4-4560-a036-feb8d6805485
-                widget:
-                  class: textInput
-                  id: gainMax
-                  size: [50, 20]
-                  validator: numericPositive
-          - uuid: c03ba7e6-c21b-42cf-8f0c-d84dcbe372e8
-            widget:
-              class: label
-              text: "Pitch:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: f0c2703c-70cc-4c57-a37a-29f6d5af0128
-            sizer:
-              type: horizontal
-            children:
-              - uuid: 0daeaac4-9ab4-42b3-89ac-a137fe52de8f
-                widget:
-                  class: textInput
-                  id: pitchMin
-                  size: [50, 20]
-                  validator: numericPositive
-              - uuid: ceccca31-57cd-43fa-96b1-516663d6bda4
+                  text: "Pitch:"
+                fill: [fillHorizontal, centreVertical]
+              - uuid: f0c2703c-70cc-4c57-a37a-29f6d5af0128
+                sizer:
+                  type: horizontal
+                children:
+                  - uuid: 0daeaac4-9ab4-42b3-89ac-a137fe52de8f
+                    widget:
+                      class: textInput
+                      id: pitchMin
+                      size: [50, 20]
+                      validator: numericPositive
+                  - uuid: ceccca31-57cd-43fa-96b1-516663d6bda4
+                    widget:
+                      class: label
+                      text: " ~ "
+                  - uuid: 850a3ecb-1020-475f-98c3-368c9975476b
+                    widget:
+                      class: textInput
+                      id: pitchMax
+                      size: [50, 20]
+                      validator: numericPositive
+              - uuid: c25d02a0-924e-4071-abe0-5473770d2487
                 widget:
                   class: label
-                  text: " ~ "
-              - uuid: 850a3ecb-1020-475f-98c3-368c9975476b
-                widget:
-                  class: textInput
-                  id: pitchMax
-                  size: [50, 20]
-                  validator: numericPositive
-          - uuid: c25d02a0-924e-4071-abe0-5473770d2487
-            widget:
-              class: label
-              text: "Doppler Effect Scale:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: fd2920c3-76e9-4a80-bf04-e83fb893bb2c
-            sizer:
-              columnProportions: []
-              type: horizontal
-            children:
-              - uuid: 07e58747-438c-441e-8f2a-8eecbe20d07c
-                widget:
-                  class: textInput
-                  id: dopplerScale
-                  size: [50, 20]
-                  validator: numericPositive
-          - uuid: b409c196-6bae-40c1-85ae-e3a3204d6edc
-            widget:
-              class: label
-              text: "Override Attenuation:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: 4b373a23-d8cd-4791-86ca-ee50a6785164
-            widget:
-              class: checkbox
-              id: overrideAttenuation
-            fill: [left, fillVertical]
-      - uuid: ddca003b-ad51-434c-b6ab-d125838f8e6e
-        border: [20, 2, 0, 0]
+                  text: "Doppler Effect Scale:"
+                fill: [fillHorizontal, centreVertical]
+              - uuid: fd2920c3-76e9-4a80-bf04-e83fb893bb2c
+                sizer:
+                  columnProportions: []
+                  type: horizontal
+                children:
+                  - uuid: 07e58747-438c-441e-8f2a-8eecbe20d07c
+                    widget:
+                      class: textInput
+                      id: dopplerScale
+                      size: [50, 20]
+                      validator: numericPositive
+      - uuid: 54529834-8dec-4348-825d-f5113784f90d
         sizer:
-          columnProportions: [0, 1]
-          columns: 2
-          gap: 4
-          type: grid
+          columnProportions: []
+          type: vertical
         widget:
-          active: false
-          class: widget
-          enabled: true
-          id: attenuationContents
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: $ui_title_capsule
+          innerBorder: [4, 1, 4, 4]
+          size: [20, 20]
         children:
-          - uuid: a0816886-0082-41f9-9510-66a52c2b8277
+          - uuid: a9bbd495-eb89-4e4c-a4c8-c2a284715d26
+            widget:
+              class: label
+              id: title
+              text: Attenuation
+            fill: centre
+          - uuid: fa298439-ecf4-4822-b3b2-c2ef0a9c8881
+            proportion: 1
+            border: [1, 4, 1, 1]
             sizer:
-              columnProportions: []
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
             widget:
               class: widget
-              size: [150, 20]
+              id: ""
             children:
-              - uuid: 5b91400e-ab15-495d-823d-ae6b50d3b701
+              - uuid: e58fb69b-b77b-4902-8dc5-fc7eef848020
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: fd62fba7-9092-4030-99e3-738624f048e7
+                    widget:
+                      class: label
+                      text: "Override:"
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: 320a3fa2-c80e-4b5e-8317-d5c9504d8b5e
+                widget:
+                  class: checkbox
+                  id: overrideAttenuation
+                fill: [left, fillVertical]
+          - uuid: 09ada842-2f11-47ef-9690-6138b5b4f485
+            border: [20, 2, 0, 0]
+            sizer:
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
+            widget:
+              active: false
+              class: widget
+              enabled: true
+              id: attenuationContents
+            children:
+              - uuid: bd3842e6-7930-4f09-8053-50b7fae94a5c
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [150, 20]
+                children:
+                  - uuid: a5d13f69-4bb3-42ff-ab26-0f4e185b7d1e
+                    widget:
+                      class: label
+                      text: "Reference Distance:"
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: 1c34afb0-d3bf-468e-ac14-7fd9f7a87b9e
+                widget:
+                  allowFloat: true
+                  class: spinControl2
+                  id: refDistance
+                  minValue: 0
+                  size: [100, 0]
+                fill: [left, centreVertical]
+              - uuid: 27a1ac09-0f79-4ca1-b05b-6e7c446228d8
                 widget:
                   class: label
-                  text: "Reference Distance:"
+                  text: "Maximum Distance:"
                 fill: [fillHorizontal, centreVertical]
-          - uuid: 034224c5-04da-43da-aa16-9d1001885697
-            widget:
-              allowFloat: true
-              class: spinControl2
-              id: refDistance
-              minValue: 0
-              size: [100, 0]
-            fill: [left, centreVertical]
-          - uuid: 7f82e4a1-38f1-46bf-bed0-c90e93a48994
+              - uuid: 4f43c6ca-27d8-41a6-a026-a39f0b692adc
+                widget:
+                  allowFloat: true
+                  class: spinControl2
+                  id: maxDistance
+                  minValue: 0
+                  size: [100, 0]
+                fill: [left, centreVertical]
+              - uuid: 9616e5ef-d0f4-471f-8f89-75bc4160ef40
+                widget:
+                  class: label
+                  text: "Rolloff Factor:"
+                fill: [fillHorizontal, centreVertical]
+              - uuid: 010c8799-d34c-41ac-82dd-45aa5b069369
+                widget:
+                  allowFloat: true
+                  class: spinControl2
+                  id: rollOffFactor
+                  increment: 0.100000001
+                  minValue: 0.100000001
+                  size: [100, 0]
+                fill: [left, centreVertical]
+              - uuid: a2d6faa5-67e4-4949-9afb-2f1c30fc76b4
+                widget:
+                  class: label
+                  text: "Curve:"
+                fill: [fillHorizontal, centreVertical]
+              - uuid: aef773ba-d79a-464e-840b-762d321420e3
+                widget:
+                  class: dropdown
+                  id: attenuationCurve
+                  options:
+                    - id: linear
+                      text: Linear
+                    - id: invDistance
+                      text: Inverse Distance
+                    - id: exponential
+                      text: Exponential
+                    - id: none
+                      text: None
+                  size: [200, 20]
+                fill: [left, centreVertical]
+      - uuid: 2c952b0a-084e-4d03-a8ef-8187b0e18ce2
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: $ui_title_capsule
+          innerBorder: [4, 1, 4, 4]
+          size: [20, 20]
+        children:
+          - uuid: dc533b72-5005-4db9-a547-0160b81a3233
             widget:
               class: label
-              text: "Maximum Distance:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: 9056b336-56b1-4ab4-9286-40119a2d3628
+              id: title
+              text: Limits
+            fill: centre
+          - uuid: 8e2800af-4655-42b3-aab9-1e8d3eab308a
+            proportion: 1
+            border: [1, 4, 1, 3]
+            sizer:
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
             widget:
-              allowFloat: true
-              class: spinControl2
-              id: maxDistance
-              minValue: 0
-              size: [100, 0]
-            fill: [left, centreVertical]
-          - uuid: b84cabdd-95fa-4b6d-a5d0-427366213f6c
-            widget:
-              class: label
-              text: "Rolloff Factor:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: 4522cc01-69f8-4de4-9bca-82ce171198ac
-            widget:
-              allowFloat: true
-              class: spinControl2
-              id: rollOffFactor
-              increment: 0.100000001
-              minValue: 0.100000001
-              size: [100, 0]
-            fill: [left, centreVertical]
-          - uuid: a8a1bd9c-40bf-4054-a3ab-58e789616464
-            widget:
-              class: label
-              text: "Curve:"
-            fill: [fillHorizontal, centreVertical]
-          - uuid: 4e79678c-6070-4d62-ad23-9fb18739e86b
-            widget:
-              class: dropdown
-              id: attenuationCurve
-              options:
-                - id: linear
-                  text: Linear
-                - id: invDistance
-                  text: Inverse Distance
-                - id: exponential
-                  text: Exponential
-                - id: none
-                  text: None
-              size: [200, 20]
-            fill: [left, centreVertical]
+              class: widget
+              id: content
+            children:
+              - uuid: 1fe3df50-9e0e-45d6-9c70-010533de852f
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: b194ef8e-35d9-462a-8a2d-f30982ff0da8
+                    widget:
+                      class: label
+                      text: "Prune if distant:"
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: 6685449a-9eff-446b-bf26-9d87ca6c2ad6
+                widget:
+                  class: checkbox
+                  id: pruneDistant
+                  tooltip: Don't play this sound if it would start with attenuation zero due to its distance from listener.
+                fill: [left, centreVertical]
+              - uuid: 0d14828d-1782-4a30-b7f7-67fa74b59775
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: 125da3ab-50ae-4501-8917-2429289771d4
+                    widget:
+                      class: label
+                      text: "Cooldown:"
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: c65a79c4-5b1d-4313-85cf-01f548f5a215
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                children:
+                  - uuid: 0e19530b-0146-47c9-afb6-0f57c39b9160
+                    widget:
+                      class: checkbox
+                      id: enableCooldown
+                  - uuid: 65feecb7-3d13-4df2-a502-3f81073f14db
+                    sizer:
+                      columnProportions: []
+                    widget:
+                      class: widget
+                      id: cooldownContent
+                    children:
+                      - uuid: 3a1772c0-4535-4d3a-8019-46484584af1e
+                        proportion: 0
+                        border: [2, 0, 0, 0]
+                        widget:
+                          allowFloat: true
+                          class: spinControl2
+                          id: cooldown
+                          increment: 0.00999999978
+                          minValue: 0
+                          size: [100, 0]
+                      - uuid: e0849f4e-1bbe-480f-9f65-6790726057f8
+                        widget:
+                          class: label
+                          text: " s"
+              - uuid: c8dde413-411b-4d17-9470-4e6f5493e54b
+                widget:
+                  class: label
+                  text: "Maximum Instances:"
+                fill: [fillHorizontal, centreVertical]
+              - uuid: f8cd770f-d251-42c6-9de9-b0f7a674a6e5
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                children:
+                  - uuid: 7ae7be2c-aa53-4156-8e63-4adb475d17e0
+                    widget:
+                      class: checkbox
+                      id: enableMaxInstances
+                  - uuid: a4b06595-e902-4a76-a8a9-96f446492955
+                    proportion: 0
+                    border: [2, 0, 0, 0]
+                    widget:
+                      class: spinControl2
+                      id: maxInstances
+                      size: [100, 0]
+    fill: [left, fillVertical]

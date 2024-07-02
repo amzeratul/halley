@@ -98,4 +98,54 @@ void AudioRootEditor::onMakeUI()
 		}
 		editor.markModified(false);
 	});
+
+	bindData("pruneDistant", object.getPruneDistant(), [this] (bool value)
+	{
+		object.setPruneDistant(value);
+		editor.markModified(false);
+	});
+
+	auto bindCooldown = [this] ()
+	{
+		const bool hasValue = object.getCooldown().has_value();
+		getWidget("cooldownContent")->setActive(hasValue);
+
+		if (hasValue) {
+			bindData("cooldown", *object.getCooldown(), [this] (float value)
+			{
+				object.setCooldown(value);
+				editor.markModified(false);
+			});
+		}
+	};
+	bindCooldown();
+
+	auto bindMaxInstances = [this] ()
+	{
+		const bool hasValue = object.getMaxInstances().has_value();
+		getWidget("maxInstances")->setActive(hasValue);
+
+		if (hasValue) {
+			bindData("maxInstances", *object.getMaxInstances(), [this] (int value)
+			{
+				object.setMaxInstances(value);
+				editor.markModified(false);
+			});
+		}
+	};
+	bindMaxInstances();
+
+	bindData("enableCooldown", object.getCooldown().has_value(), [this, bindCooldown] (bool value)
+	{
+		object.setCooldown(value ? std::optional<float>(0.0f) : std::nullopt);
+		bindCooldown();
+		editor.markModified(false);
+	});
+
+	bindData("enableMaxInstances", object.getMaxInstances().has_value(), [this, bindMaxInstances] (bool value)
+	{
+		object.setMaxInstances(value ? std::optional<int>(0) : std::nullopt);
+		bindMaxInstances();
+		editor.markModified(false);
+	});
 }

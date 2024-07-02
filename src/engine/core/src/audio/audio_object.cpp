@@ -31,6 +31,10 @@ AudioObject::AudioObject(const ConfigNode& node)
 	dopplerScale = node["dopplerScale"].asFloat(0.0f);
 	objects = node["objects"].asVector<AudioSubObjectHandle>({});
 	attenuationOverride = node["attenuationOverride"].asOptional<AudioAttenuation>();
+	pruneDistant = node["pruneDistant"].asBool(true);
+	cooldown = node["cooldown"].asOptional<float>();
+	maxInstances = node["maxInstances"].asOptional<int>();
+	priority = node["priority"].asInt(0);
 }
 
 ConfigNode AudioObject::toConfigNode() const
@@ -51,6 +55,16 @@ ConfigNode AudioObject::toConfigNode() const
 	}
 	if (attenuationOverride) {
 		result["attenuationOverride"] = *attenuationOverride;
+	}
+	result["pruneDistant"] = pruneDistant;
+	if (cooldown) {
+		result["cooldown"] = cooldown;
+	}
+	if (maxInstances) {
+		result["maxInstances"] = maxInstances;
+	}
+	if (priority) {
+		result["priority"] = priority;
 	}
 	result["objects"] = objects;
 	
@@ -147,6 +161,46 @@ void AudioObject::setAttenuationOverride(std::optional<AudioAttenuation> value)
 	this->attenuationOverride = value;
 }
 
+bool AudioObject::getPruneDistant() const
+{
+	return pruneDistant;
+}
+
+void AudioObject::setPruneDistant(bool value)
+{
+	pruneDistant = value;
+}
+
+std::optional<float> AudioObject::getCooldown() const
+{
+	return cooldown;
+}
+
+void AudioObject::setCooldown(std::optional<float> value)
+{
+	cooldown = value;
+}
+
+std::optional<int> AudioObject::getMaxInstances() const
+{
+	return maxInstances;
+}
+
+void AudioObject::setMaxInstances(std::optional<int> maxInstances)
+{
+	this->maxInstances = maxInstances;
+}
+
+int AudioObject::getPriority() const
+{
+	return priority;
+}
+
+void AudioObject::setPriority(int value)
+{
+	priority = value;
+}
+
 void AudioObject::setBus(String bus)
 {
 	this->bus = std::move(bus);
@@ -174,6 +228,10 @@ void AudioObject::serialize(Serializer& s) const
 	s << dopplerScale;
 	s << objects;
 	s << attenuationOverride;
+	s << pruneDistant;
+	s << cooldown;
+	s << maxInstances;
+	s << priority;
 }
 
 void AudioObject::deserialize(Deserializer& s)
@@ -184,6 +242,10 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> dopplerScale;
 	s >> objects;
 	s >> attenuationOverride;
+	s >> pruneDistant;
+	s >> cooldown;
+	s >> maxInstances;
+	s >> priority;
 }
 
 void AudioObject::reload(Resource&& resource)
