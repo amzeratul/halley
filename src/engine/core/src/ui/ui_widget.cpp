@@ -1071,6 +1071,18 @@ void UIWidget::checkActive()
 {
 }
 
+void UIWidget::playStyleSound(const String& keyId)
+{
+	if (!styles.empty()) {
+		if (styles.at(0).hasString(keyId)) {
+			const auto& eventId = styles.at(0).getString(keyId);
+			if (!eventId.isEmpty()) {
+				playSound(eventId);
+			}
+		}
+	}
+}
+
 void UIWidget::setWidgetRect(Rect4f rect)
 {
 	if (position != rect.getTopLeft()) {

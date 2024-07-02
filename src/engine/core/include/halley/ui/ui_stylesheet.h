@@ -40,6 +40,7 @@ namespace Halley {
 		bool hasSprite(const String& name) const;
 		bool hasVector2f(const String& name) const;
 		bool hasFloat(const String& name) const;
+		bool hasString(const String& name) const;
 
 		void reload(const ConfigNode& node);
 

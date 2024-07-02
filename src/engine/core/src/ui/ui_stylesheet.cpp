@@ -236,6 +236,11 @@ bool UIStyleDefinition::hasFloat(const String& name) const
 	return hasValue(node, name, pimpl->floats, { ConfigNodeType::Float, ConfigNodeType::Int });
 }
 
+bool UIStyleDefinition::hasString(const String& name) const
+{
+	return hasValue(node, name, pimpl->strings, { ConfigNodeType::String, ConfigNodeType::Int, ConfigNodeType::Float });
+}
+
 Vector4f UIStyleDefinition::getBorder(const String& name) const
 {
 	return getValue(node, styleSheet, styleName, name, pimpl->borders);

@@ -26,6 +26,7 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 		if (event.getBoolData()) {
 			curHover = childIdx;
 			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), curHover));
+			playStyleSound("hoverSound");
 		} else if (curHover == childIdx) {
 			curHover = -1;
 			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), String(), -1));
@@ -348,7 +349,7 @@ void UIList::notifyNewItemSelected()
 {
 	if (notifyItemSelectionEnabled) {
 		const auto& itemId = getSelectedOptionId();
-		playSound(styles.at(0).getString("selectionChangedSound"));
+		playStyleSound("selectionChangedSound");
 
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, curOption));
 		if (scrollToSelection) {
@@ -528,11 +529,13 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::onAccept()
 {
+	playStyleSound("acceptSound");
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), getSelectedOptionId(), curOption));
 }
 
 void UIList::onCancel()
 {
+	playStyleSound("cancelSound");
 	sendEvent(UIEvent(UIEventType::ListCancel, getId(), getSelectedOptionId(), curOption));
 }
 

@@ -29,6 +29,7 @@ namespace Halley {
 		Colour4f getColour(const String& name) const;
 		bool hasColour(const String& name) const;
 		bool hasFloat(const String& name) const;
+		bool hasString(const String& name) const;
 		bool hasVector2f(const String& name) const;
 
 	private:

@@ -242,6 +242,8 @@ namespace Halley {
 
 		virtual void checkActive();
 
+		void playStyleSound(const String& keyId);
+
 		Vector<UIStyle> styles = {};
 
 	private:

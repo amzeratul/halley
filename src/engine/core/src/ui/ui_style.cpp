@@ -111,6 +111,11 @@ bool UIStyle::hasFloat(const String& name) const
 	return style->hasFloat(name);
 }
 
+bool UIStyle::hasString(const String& name) const
+{
+	return style->hasString(name);
+}
+
 bool UIStyle::hasVector2f(const String& name) const
 {
 	return style->hasVector2f(name);
