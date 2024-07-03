@@ -498,6 +498,12 @@ bool MoveFilesTool::updateUIWidget(const MovedFilesByType& movedFiles, ConfigNod
 		}
 	}
 
+	if (classId == "animation") {
+		if (widgetNode.hasKey("animation")) {
+			modified = updateConfigNode(movedFiles, widgetNode["animation"], ImportAssetType::Sprite) || modified;
+		}
+	}
+
 	return modified;
 }
 
