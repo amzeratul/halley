@@ -130,6 +130,14 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 
 void AudioEvent::makeDefault()
 {
+	*this = AudioEvent();
+}
+
+void AudioEvent::parseYAML(gsl::span<const gsl::byte> yaml)
+{
+	ConfigFile config;
+	YAMLConvert::parseConfig(config, yaml);
+	*this = AudioEvent(config.getRoot());
 }
 
 void AudioEvent::loadDependencies(Resources& resources)
@@ -280,6 +288,11 @@ void AudioEventActionObject::setObjectName(const String& name, Resources& resour
 {
 	objectName = name;
 	loadDependencies(resources);
+}
+
+void AudioEventActionObject::setObjectName(const String& name)
+{
+	objectName = name;
 }
 
 const AudioFade& AudioEventActionObject::getFade() const

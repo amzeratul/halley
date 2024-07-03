@@ -22,6 +22,7 @@
 #include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
+#include "src/tools/move_files_tool.h"
 #include "src/ui/editor_ui_factory.h"
 
 using namespace Halley;
@@ -418,6 +419,11 @@ Vector<String> ProjectWindow::getLaunchArguments() const
 	args.push_back("--devcon=127.0.0.1");
 
 	return args;
+}
+
+std::shared_ptr<UIWidget> ProjectWindow::makeMoveFilesTool(UIFactory& factory, UIFactory& origFactory, Vector<ConfigBreadCrumb> configBreadCrumb)
+{
+	return std::make_shared<MoveFilesTool>(factory, origFactory, project, std::move(configBreadCrumb));
 }
 
 void ProjectWindow::toggleDebugConsole()

@@ -81,6 +81,8 @@ set (editor_sources
 	"src/scene/gizmos/scripting/scripting_gizmo.cpp"
 	"src/scene/gizmos/scripting/scripting_node_editor.cpp"
 
+	"src/tools/move_files_tool.cpp"
+
 	"src/ui/base_canvas.cpp"
 	"src/ui/colour_picker.cpp"
 	"src/ui/console_window.cpp"
@@ -182,6 +184,8 @@ set (editor_headers
 	"src/scene/gizmos/scripting/scripting_gizmo.h"
 	"src/scene/gizmos/scripting/scripting_node_editor.h"
 	
+	"src/tools/move_files_tool.h"
+
 	"src/ui/base_canvas.h"
 	"src/ui/colour_picker.h"
 	"src/ui/console_window.h"

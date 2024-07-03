@@ -461,6 +461,17 @@ namespace Halley {
 		}
 	};
 
+	struct ConfigBreadCrumb {
+		Vector<String> breadCrumb;
+		ImportAssetType assetType;
+
+		ConfigBreadCrumb() = default;
+		ConfigBreadCrumb(const String& str, ImportAssetType type)
+			: breadCrumb(str.split('.'))
+			, assetType(type)
+		{}
+	};
+
 	class IProjectWindow {
 	public:
 		virtual ~IProjectWindow() = default;
@@ -470,6 +481,8 @@ namespace Halley {
 		virtual void buildGame() = 0;
 		virtual void updateEditor() = 0;
 		virtual Vector<String> getLaunchArguments() const = 0;
+
+		virtual std::shared_ptr<UIWidget> makeMoveFilesTool(UIFactory& factory, UIFactory& origFactory, Vector<ConfigBreadCrumb> configBreadCrumb) = 0;
 	};
 
 	class IFileSystemCache {

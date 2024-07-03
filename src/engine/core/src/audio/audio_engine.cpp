@@ -586,13 +586,14 @@ std::optional<AudioDebugData> AudioEngine::getDebugData() const
 
 std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> playGain, Range<float> playPitch, uint32_t delaySamples)
 {
+	// Prune if out of range
 	if (object.getPruneDistant()) {
-		// Prune
 		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
 			return {};
 		}
 	}
 
+	// Limit by number of instances or cooldown
 	if (object.getMaxInstances() || object.getCooldown()) {
 		auto& data = getMutablePlayingObjectData(object.getAudioObjectId());
 		if ((object.getMaxInstances() && data.count >= object.getMaxInstances()) || data.cooldown > 0) {

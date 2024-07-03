@@ -78,6 +78,11 @@ gsl::span<const String> AudioSubObjectClips::getClips() const
 	return clips;
 }
 
+gsl::span<String> AudioSubObjectClips::getClips()
+{
+	return clips;
+}
+
 bool AudioSubObjectClips::canCollapseToClip() const
 {
 	return true;

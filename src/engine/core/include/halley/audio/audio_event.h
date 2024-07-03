@@ -91,6 +91,7 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
 
 		void makeDefault();
+		void parseYAML(gsl::span<const gsl::byte> yaml);
         String toYAML() const;
 
 		static std::unique_ptr<AudioEventAction> makeAction(AudioEventActionType type);
@@ -137,6 +138,7 @@ namespace Halley
 
 		const String& getObjectName() const;
 		void setObjectName(const String& name, Resources& resources);
+		void setObjectName(const String& name);
 
 		const AudioFade& getFade() const;
 		AudioFade& getFade();

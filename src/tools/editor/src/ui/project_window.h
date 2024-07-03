@@ -77,6 +77,8 @@ namespace Halley {
 
     	Vector<String> getLaunchArguments() const override;
 
+        std::shared_ptr<UIWidget> makeMoveFilesTool(UIFactory& factory, UIFactory& origFactory, Vector<ConfigBreadCrumb> configBreadCrumb) override;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
