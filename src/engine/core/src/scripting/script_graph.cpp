@@ -1,6 +1,7 @@
 #include "halley/scripting/script_graph.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
@@ -232,6 +233,13 @@ void ScriptGraph::load(const ConfigNode& node)
 void ScriptGraph::load(const ConfigNode& node, Resources& resources)
 {
 	load(node);
+}
+
+void ScriptGraph::parseYAML(gsl::span<const gsl::byte> yaml)
+{
+	ConfigFile config;
+	YAMLConvert::parseConfig(config, yaml);
+	load(config.getRoot());
 }
 
 bool ScriptGraph::isPersistent() const

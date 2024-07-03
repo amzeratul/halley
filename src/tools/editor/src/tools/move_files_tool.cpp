@@ -19,6 +19,7 @@ MoveFilesTool::MoveFilesTool(UIFactory& factory, UIFactory& editorFactory, Proje
 	project.setAssetSaveNotification(false);
 
 	setupComponentReplacementTable();
+	setupCometNodeReplacementTable();
 }
 
 MoveFilesTool::~MoveFilesTool()
@@ -225,8 +226,15 @@ void MoveFilesTool::computeChanges()
 		file1.to = dstPath.toString();
 		movedFilesByType[type].push_back(file1);
 
-		const auto ext = dstPath.getExtension();
-		if (type == ImportAssetType::Sprite && (ext == ".ase" || ext == ".aseprite")) {
+		bool removeExtension = false;
+		if (type == ImportAssetType::Sprite) {
+			const auto ext = dstPath.getExtension();
+			removeExtension = (ext == ".ase" || ext == ".aseprite");
+		} else if (type != ImportAssetType::AudioClip) {
+			removeExtension = true;
+		}
+
+		if (removeExtension) {
 			auto file2 = file;
 			file2.from = srcPath.replaceExtension("").toString();
 			file2.to = dstPath.replaceExtension("").toString();
@@ -240,6 +248,7 @@ void MoveFilesTool::computeChanges()
 	updateUI(movedFilesByType, "ui");
 	updateAudioEvents(movedFilesByType, "audio_event");
 	updateAudioObjects(movedFilesByType, "audio_object");
+	updateCometScripts(movedFilesByType, "comet");
 }
 
 void MoveFilesTool::updateGameplayConfig(const MovedFilesByType& movedFiles, const Path& rootPath)
@@ -304,6 +313,18 @@ void MoveFilesTool::updateAudioObjects(const MovedFilesByType& movedFiles, const
 	}
 }
 
+void MoveFilesTool::updateCometScripts(const MovedFilesByType& movedFiles, const Path& rootPath)
+{
+	for (const auto& path: OS::get().enumerateDirectory(project.getAssetsSrcPath() / rootPath)) {
+		ScriptGraph script;
+		script.parseYAML(project.readAssetFromDisk(rootPath / path).byte_span());
+
+		if (updateCometScript(movedFiles, script)) {
+			addChangedFile(rootPath / path, script.toYAML());
+		}
+	}
+}
+
 void MoveFilesTool::updateUI(const MovedFilesByType& movedFiles, const Path& rootPath)
 {
 	for (const auto& path: OS::get().enumerateDirectory(project.getAssetsSrcPath() / rootPath)) {
@@ -331,6 +352,13 @@ bool MoveFilesTool::updateEntityData(const MovedFilesByType& movedFiles, EntityD
 
 	for (auto& [compName, compData]: data.getComponents()) {
 		changed = updateComponentData(movedFiles, compName, compData) || changed;
+	}
+
+	if (const auto prefabIter = movedFiles.find(ImportAssetType::Prefab); prefabIter != movedFiles.end()) {
+		if (auto updated = updateString(prefabIter->second, data.getPrefab())) {
+			data.setPrefab(*updated);
+			changed = true;
+		}
 	}
 
 	for (auto& c: data.getChildren()) {
@@ -373,16 +401,9 @@ bool MoveFilesTool::updateComponentData(const MovedFilesByType& movedFiles, cons
 	}
 
 	if (auto compIter = componentReplacementTable.find(componentName); compIter != componentReplacementTable.end()) {
-		for (const auto& [fieldName, importAssetType, isVector]: compIter->second) {
+		for (const auto& [fieldName, importAssetType]: compIter->second) {
 			if (componentData.hasKey(fieldName)) {
-				if (isVector) {
-					auto& s = componentData[fieldName].asSequence();
-					for (auto& e: s) {
-						changed = updateConfigNode(movedFiles, e, importAssetType) || changed;
-					}
-				} else {
-					changed = updateConfigNode(movedFiles, componentData[fieldName], importAssetType) || changed;
-				}
+				changed = updateConfigNode(movedFiles, componentData[fieldName], importAssetType) || changed;
 			}
 		}
 	}
@@ -392,7 +413,13 @@ bool MoveFilesTool::updateComponentData(const MovedFilesByType& movedFiles, cons
 
 bool MoveFilesTool::updateConfigNode(const MovedFilesByType& movedFiles, ConfigNode& node, ImportAssetType type)
 {
-	if (node.getType() != ConfigNodeType::String) {
+	if (node.getType() == ConfigNodeType::Sequence) {
+		bool changed = false;
+		for (auto& n: node.asSequence()) {
+			changed = updateConfigNode(movedFiles, n, type) || changed;
+		}
+		return changed;
+	} else if (node.getType() != ConfigNodeType::String) {
 		return false;
 	}
 
@@ -411,6 +438,10 @@ bool MoveFilesTool::updateConfigNode(const MovedFilesByType& movedFiles, ConfigN
 
 std::optional<String> MoveFilesTool::updateString(const Vector<MovedFile>& movedFiles, const String& str)
 {
+	if (str.isEmpty()) {
+		return std::nullopt;
+	}
+
 	bool modified = false;
 	auto split = str.split(":");
 
@@ -523,30 +554,65 @@ void MoveFilesTool::updateAudioObject(const Vector<MovedFile>& movedFiles, IAudi
 	}
 }
 
-void MoveFilesTool::setupComponentReplacementTable()
+bool MoveFilesTool::updateCometScript(const MovedFilesByType& movedFiles, ScriptGraph& script)
 {
-	auto parseType = [] (String str) -> std::optional<ImportAssetType>
+	bool changed = false;
+	for (auto& node: script.getNodes()) {
+		if (auto nodeIter = cometReplacementTable.find(node.getType()); nodeIter != cometReplacementTable.end()) {
+			for (const auto& [fieldName, importAssetType]: nodeIter->second) {
+				if (node.getSettings().hasKey(fieldName)) {
+					if (importAssetType == ImportAssetType::AudioEvent) {
+						int a = 0;
+					}
+					changed = updateConfigNode(movedFiles, node.getSettings()[fieldName], importAssetType) || changed;
+				}
+			}
+		}
+	}
+	return changed;
+}
+
+namespace {
+	std::optional<ImportAssetType> parseType(String str)
 	{
+		if (str.startsWith("Halley::ResourceReference<")) {
+			str = str.mid(26, str.size() - 27);
+		} else if (str.startsWith("Halley::Vector<Halley::ResourceReference<")) {
+			str = str.mid(41, str.size() - 43);
+		} else {
+			return {};
+		}
+
 		if (str.startsWith("Halley::")) {
 			str = str.mid(8);
 		}
 		str = str.left(1).asciiLower() + str.mid(1);
 		return tryFromString<ImportAssetType>(str);
 	};
+}
 
+void MoveFilesTool::setupComponentReplacementTable()
+{
+	componentReplacementTable.clear();
 	for (const auto& component: project.getECSData().getComponents()) {
 		for (const auto& member: component.second.members) {
-			std::optional<ImportAssetType> type;
-			bool vector = false;
-			if (member.type.name.startsWith("Halley::ResourceReference<")) {
-				type = parseType(member.type.name.mid(26, member.type.name.size() - 27));
-			} else if (member.type.name.startsWith("Halley::Vector<Halley::ResourceReference<")) {
-				type = parseType(member.type.name.mid(41, member.type.name.size() - 43));
-				vector = true;
+			if (auto type = parseType(member.type.name)) {
+				componentReplacementTable[component.first].emplace_back(member.name, *type);
 			}
+		}
+	}
+}
 
-			if (type) {
-				componentReplacementTable[component.first].emplace_back(member.name, *type, vector);
+void MoveFilesTool::setupCometNodeReplacementTable()
+{
+	cometReplacementTable.clear();
+	auto nodeTypes = project.getGameInstance()->createScriptNodeTypeCollection();
+	for (const auto& typeId: nodeTypes->getTypes(true)) {
+		if (auto* type = nodeTypes->tryGetNodeType(typeId)) {
+			for (const auto& setting: type->getSettingTypes()) {
+				if (auto importType = parseType(setting.type)) {
+					cometReplacementTable[typeId].emplace_back(setting.name, *importType);
+				}
 			}
 		}
 	}

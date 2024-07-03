@@ -48,7 +48,8 @@ private:
 	std::mutex toChangeMutex;
 
 	Vector<ConfigBreadCrumb> configBreadCrumbs;
-	HashMap<String, Vector<std::tuple<String, ImportAssetType, bool>>> componentReplacementTable;
+	HashMap<String, Vector<std::pair<String, ImportAssetType>>> componentReplacementTable;
+	HashMap<String, Vector<std::pair<String, ImportAssetType>>> cometReplacementTable;
 
 	void onNext();
 	void setStage(Stage stage);
@@ -72,6 +73,7 @@ private:
 	void updateScenes(const MovedFilesByType& movedFiles, const Path& path);
 	void updateAudioEvents(const MovedFilesByType& movedFiles, const Path& path);
 	void updateAudioObjects(const MovedFilesByType& movedFiles, const Path& path);
+	void updateCometScripts(const MovedFilesByType& movedFiles, const Path& path);
 	void updateUI(const MovedFilesByType& movedFiles, const Path& path);
 
 	bool updatePrefab(const MovedFilesByType& movedFiles, Prefab& prefab);
@@ -88,7 +90,10 @@ private:
 	bool updateAudioObject(const MovedFilesByType& movedFiles, AudioObject& object);
 	void updateAudioObject(const Vector<MovedFile>& movedFiles, IAudioObject& object, bool& modified);
 
+	bool updateCometScript(const MovedFilesByType& movedFiles, ScriptGraph& script);
+
 	void setupComponentReplacementTable();
+	void setupCometNodeReplacementTable();
 
 	struct ConfigChange {
 		int line;
