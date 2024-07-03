@@ -124,6 +124,11 @@ std::unique_ptr<IGameEditorData> Game::createGameEditorData(const HalleyAPI& api
 	return {};
 }
 
+Vector<ConfigBreadCrumb> Game::createConfigBreadCrumbs()
+{
+	return {};
+}
+
 String Game::getDefaultColourScheme()
 {
 	return "";

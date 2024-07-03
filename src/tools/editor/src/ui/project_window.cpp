@@ -421,9 +421,9 @@ Vector<String> ProjectWindow::getLaunchArguments() const
 	return args;
 }
 
-std::shared_ptr<UIWidget> ProjectWindow::makeMoveFilesTool(UIFactory& factory, UIFactory& origFactory, Vector<ConfigBreadCrumb> configBreadCrumb)
+std::shared_ptr<UIWidget> ProjectWindow::makeMoveFilesTool(UIFactory& factory)
 {
-	return std::make_shared<MoveFilesTool>(factory, origFactory, project, std::move(configBreadCrumb));
+	return std::make_shared<MoveFilesTool>(factory, project, project.getGameInstance()->createConfigBreadCrumbs());
 }
 
 void ProjectWindow::toggleDebugConsole()

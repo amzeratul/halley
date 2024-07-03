@@ -1,0 +1,76 @@
+uuid: 7bb6879a-8ffc-4892-9003-12cc08db2060
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: e1fda77d-7c3a-4d84-a838-2624f4a2c48e
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_title_capsule.png
+      innerBorder: [5, 2, 4, 4]
+      size: [600, 0]
+    children:
+      - uuid: 2b84fbee-611c-414f-a706-771b4ced55e9
+        border: [0, 0, 0, 3]
+        widget:
+          class: label
+          text: Move Files
+        fill: [centreHorizontal, fillVertical]
+      - uuid: f0c0520d-1f38-41ec-b9bd-ab427440190f
+        border: [3, 0, 0, 3]
+        widget:
+          class: label
+          id: status
+          text: Status
+        fill: [left, fillVertical]
+      - uuid: 0007fa14-d197-4866-88bc-70cf370cb7a0
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: scrollBarPane
+          scrollHorizontal: true
+          size: [0, 300]
+          style: scrollbarHalley
+        children:
+          - uuid: f434c574-4ce1-48df-90b4-698d411712f4
+            widget:
+              class: list
+              id: log
+              options: []
+              style: listClear
+      - uuid: ad7adb63-79ce-4610-946f-82d65ea5eaaf
+        sizer:
+          columnProportions: []
+          gap: 8
+          type: horizontal
+        widget:
+          class: widget
+          id: ""
+        children:
+          - uuid: 3a9b5a75-2733-4298-a4a1-2e8435eed6dd
+            proportion: 2
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: next
+              text: Next
+          - uuid: 344bb269-0f20-4a4d-9274-371e2a20042b
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: cancel
+              text: Cancel
+    fill: [centreHorizontal, centreVertical]

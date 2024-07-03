@@ -4,15 +4,14 @@
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project.h"
 
-MoveFilesTool::MoveFilesTool(UIFactory& factory, UIFactory& editorFactory, Project& project, Vector<ConfigBreadCrumb> configBreadCrumbs)
+MoveFilesTool::MoveFilesTool(UIFactory& factory, Project& project, Vector<ConfigBreadCrumb> configBreadCrumbs)
 	: UIWidget("move_files_tool", {}, UISizer())
 	, factory(factory)
-	, editorFactory(editorFactory)
 	, project(project)
 	, monitor(project.getAssetsSrcPath())
 	, configBreadCrumbs(std::move(configBreadCrumbs))
 {
-	factory.loadUI(*this, "editor/utils/move_files_util");
+	factory.loadUI(*this, "halley/move_files_util");
 	setStage(Stage::Monitoring);
 	setAnchor({});
 
@@ -146,7 +145,7 @@ void MoveFilesTool::populateLog()
 
 	log->clear();
 	for (const auto& change: filesMoved) {
-		auto icon = editorFactory.makeImportAssetTypeIcon(project.getImportAssetType(change.to));
+		auto icon = factory.makeImportAssetTypeIcon(project.getImportAssetType(change.to));
 		log->addTextIconItem("", LocalisedString::fromUserString(change.from + " -> " + change.to), std::move(icon));
 	}
 }
@@ -169,7 +168,7 @@ void MoveFilesTool::receiveChangedFiles()
 void MoveFilesTool::addChangesToLog(const ChangeList& entries)
 {
 	for (const auto& entry: entries) {
-		auto icon = editorFactory.makeImportAssetTypeIcon(project.getImportAssetType(entry.first));
+		auto icon = factory.makeImportAssetTypeIcon(project.getImportAssetType(entry.first));
 		log->addTextIconItem("", LocalisedString::fromUserString(entry.first.toString()), std::move(icon));
 	}
 }

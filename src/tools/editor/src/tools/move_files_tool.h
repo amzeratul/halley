@@ -5,7 +5,7 @@ using namespace Halley;
 
 class MoveFilesTool : public UIWidget {
 public:
-	MoveFilesTool(UIFactory& factory, UIFactory& editorFactory, Project& project, Vector<ConfigBreadCrumb> configBreadCrumbs);
+	MoveFilesTool(UIFactory& factory, Project& project, Vector<ConfigBreadCrumb> configBreadCrumbs);
 	~MoveFilesTool() override;
 
 	void onMakeUI() override;
@@ -30,7 +30,6 @@ private:
 	using MovedFilesByType = HashMap<ImportAssetType, Vector<MovedFile>>;
 
 	UIFactory& factory;
-	UIFactory& editorFactory;
 	Project& project;
 
 	DirectoryMonitor monitor;

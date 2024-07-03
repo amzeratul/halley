@@ -482,7 +482,7 @@ namespace Halley {
 		virtual void updateEditor() = 0;
 		virtual Vector<String> getLaunchArguments() const = 0;
 
-		virtual std::shared_ptr<UIWidget> makeMoveFilesTool(UIFactory& factory, UIFactory& origFactory, Vector<ConfigBreadCrumb> configBreadCrumb) = 0;
+		virtual std::shared_ptr<UIWidget> makeMoveFilesTool(UIFactory& factory) = 0;
 	};
 
 	class IFileSystemCache {
