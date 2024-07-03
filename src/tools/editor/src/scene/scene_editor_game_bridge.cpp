@@ -15,7 +15,6 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	, factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
 {
-	gameResources = &project.getGameResources();
 	project.withLoadedDLL([&] (ProjectDLL& dll)
 	{
 		//load();
@@ -306,8 +305,9 @@ Sprite SceneEditorGameBridge::getEntityIcon(const String& uuid)
 	if (!entityData.getIcon().isEmpty()) {
 		icon = entityData.getIcon();
 	} else if (!entityData.getPrefab().isEmpty()) {
-		if (gameResources->exists<Prefab>(entityData.getPrefab())) {
-			const auto prefab = gameResources->get<Prefab>(entityData.getPrefab());
+		auto& gameResources = project.getGameResources();
+		if (gameResources.exists<Prefab>(entityData.getPrefab())) {
+			const auto prefab = gameResources.get<Prefab>(entityData.getPrefab());
 			icon = prefab->getPrefabIcon();
 		}
 	}
@@ -415,8 +415,8 @@ void SceneEditorGameBridge::load()
 		gameAPI->replaceCoreAPI(gameCoreAPI.get());
 
 		SceneEditorContext context;
-		context.resources = gameResources;
 		context.editorResources = &resources;
+		context.resources = &project.getGameResources();
 		context.api = gameAPI.get();
 		context.gizmos = &getGizmos();
 		context.editorInterface = this;

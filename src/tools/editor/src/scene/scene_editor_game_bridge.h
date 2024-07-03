@@ -100,8 +100,6 @@ namespace Halley {
 
 		std::unique_ptr<SceneEditorGizmoCollection> gizmos;
 
-		Resources* gameResources = nullptr;
-
 		std::map<Path, Bytes> pendingAssets;
 
 		mutable bool errorState = false;
