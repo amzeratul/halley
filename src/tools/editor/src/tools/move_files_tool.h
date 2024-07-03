@@ -48,7 +48,7 @@ private:
 	std::mutex toChangeMutex;
 
 	Vector<ConfigBreadCrumb> configBreadCrumbs;
-	HashMap<String, Vector<std::pair<String, ImportAssetType>>> componentReplacementTable;
+	HashMap<String, Vector<std::tuple<String, ImportAssetType, bool>>> componentReplacementTable;
 
 	void onNext();
 	void setStage(Stage stage);

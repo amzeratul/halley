@@ -1,6 +1,7 @@
 #include "move_files_tool.h"
 
 #include "halley/audio/sub_objects/audio_sub_object_clips.h"
+#include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project.h"
 
 MoveFilesTool::MoveFilesTool(UIFactory& factory, UIFactory& editorFactory, Project& project, Vector<ConfigBreadCrumb> configBreadCrumbs)
@@ -369,15 +370,19 @@ bool MoveFilesTool::updateComponentData(const MovedFilesByType& movedFiles, cons
 				}
 			}
 		}
-		if (componentData.hasKey("animation")) {
-			changed = updateConfigNode(movedFiles, componentData["animation"], ImportAssetType::Sprite) || changed;
-		}
 	}
 
 	if (auto compIter = componentReplacementTable.find(componentName); compIter != componentReplacementTable.end()) {
-		for (const auto& [fieldName, importAssetType]: compIter->second) {
+		for (const auto& [fieldName, importAssetType, isVector]: compIter->second) {
 			if (componentData.hasKey(fieldName)) {
-				changed = updateConfigNode(movedFiles, componentData[fieldName], importAssetType) || changed;
+				if (isVector) {
+					auto& s = componentData[fieldName].asSequence();
+					for (auto& e: s) {
+						changed = updateConfigNode(movedFiles, e, importAssetType) || changed;
+					}
+				} else {
+					changed = updateConfigNode(movedFiles, componentData[fieldName], importAssetType) || changed;
+				}
 			}
 		}
 	}
@@ -520,15 +525,31 @@ void MoveFilesTool::updateAudioObject(const Vector<MovedFile>& movedFiles, IAudi
 
 void MoveFilesTool::setupComponentReplacementTable()
 {
-	componentReplacementTable["AmbienceRegion"].emplace_back("ambience", ImportAssetType::AudioObject);
-	componentReplacementTable["AudioEventRegion"].emplace_back("onPlayerEnter", ImportAssetType::AudioEvent);
-	componentReplacementTable["AudioEventRegion"].emplace_back("onPlayerLeave", ImportAssetType::AudioEvent);
-	componentReplacementTable["AudioEventRegion"].emplace_back("onEnter", ImportAssetType::AudioEvent);
-	componentReplacementTable["AudioEventRegion"].emplace_back("onLeave", ImportAssetType::AudioEvent);
-	componentReplacementTable["FootstepEmitter"].emplace_back("walkFootstep", ImportAssetType::AudioEvent);
-	componentReplacementTable["FootstepEmitter"].emplace_back("runFootstep", ImportAssetType::AudioEvent);
-	componentReplacementTable["FootstepEmitter"].emplace_back("runFootstep", ImportAssetType::AudioEvent);
-	componentReplacementTable["FootstepEmitter"].emplace_back("runFootstep", ImportAssetType::AudioEvent);
+	auto parseType = [] (String str) -> std::optional<ImportAssetType>
+	{
+		if (str.startsWith("Halley::")) {
+			str = str.mid(8);
+		}
+		str = str.left(1).asciiLower() + str.mid(1);
+		return tryFromString<ImportAssetType>(str);
+	};
+
+	for (const auto& component: project.getECSData().getComponents()) {
+		for (const auto& member: component.second.members) {
+			std::optional<ImportAssetType> type;
+			bool vector = false;
+			if (member.type.name.startsWith("Halley::ResourceReference<")) {
+				type = parseType(member.type.name.mid(26, member.type.name.size() - 27));
+			} else if (member.type.name.startsWith("Halley::Vector<Halley::ResourceReference<")) {
+				type = parseType(member.type.name.mid(41, member.type.name.size() - 43));
+				vector = true;
+			}
+
+			if (type) {
+				componentReplacementTable[component.first].emplace_back(member.name, *type, vector);
+			}
+		}
+	}
 }
 
 MoveFilesTool::ConfigBreadCrumbRef::ConfigBreadCrumbRef(const ConfigBreadCrumb& crumb)
