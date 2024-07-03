@@ -228,6 +228,7 @@ namespace Halley {
 		Vector4f extraMouseArea;
 		Vector4f innerBorder;
 		bool selected = false;
+		bool hovered = false;
 
 		struct DragInfo {
 			Vector2f curDragPos;

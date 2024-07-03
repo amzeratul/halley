@@ -1223,6 +1223,8 @@ void UIListItem::stopDragging()
 
 void UIListItem::doSetState(State state)
 {
+	const bool wasHovered = hovered;
+
 	if (dragging || isManualDragging()) {
 		sprite = style.getSprite("drag");
 	} else if (selected && parent.canShowSelection() && style.hasSprite("selected")) {
@@ -1233,19 +1235,24 @@ void UIListItem::doSetState(State state)
 		switch (state) {
 		case State::Up:
 			sprite = style.getSprite("normal");
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false, selected));
-			sendEvent(UIEvent(UIEventType::SetHovered, getId(), false, selected));
+			hovered = false;
 			break;
 		case State::Hover:
 			sprite = style.getSprite("hover");
-			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true, selected));
-			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true, selected));
+			hovered = true;
 			break;
 		case State::Down:
 			sprite = style.hasSprite("selected") ? style.getSprite("selected") : style.getSprite("hover");
+			hovered = true;
 			break;
 		}
 	}
+
+	if (wasHovered != hovered) {
+		sendEventDown(UIEvent(UIEventType::SetHovered, getId(), hovered, selected));
+		sendEvent(UIEvent(UIEventType::SetHovered, getId(), hovered, selected));
+	}
+
 	updateSpritePosition();
 
 	parent.setItemUnderCursor(index, isMouseOver());
