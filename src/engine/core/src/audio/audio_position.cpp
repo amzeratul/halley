@@ -171,7 +171,16 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 	}
 }
 
-std::pair<float, float> AudioPosition::getAttenuationAndPan(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+float AudioPosition::getAttenuation(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+{
+	if (isPannable && !isUI) {
+		return getAttenuationAndPanPositional(listener, attenuationOverride).first;
+	} else {
+		return 1.0f;
+	}
+}
+
+std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	float attenuation;
 	float resultPan;
@@ -215,7 +224,7 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 		return;
 	}
 
-	auto [attenuation, pan] = getAttenuationAndPan(listener, attenuationOverride);
+	auto [attenuation, pan] = getAttenuationAndPanPositional(listener, attenuationOverride);
 
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
