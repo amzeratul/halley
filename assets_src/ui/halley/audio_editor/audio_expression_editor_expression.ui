@@ -1,28 +1,103 @@
-widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20], interactWithMouse: true }
-sizer: { type: horizontal }
+uuid: 647f33c2-c42d-4a20-bbc0-233f5a9d69a1
+sizer:
+  columnProportions: []
+  type: horizontal
+widget:
+  class: image
+  colour: $ui_staticBox
+  id: background
+  image: $ui_window
+  innerBorder: [8, 8, 8, 8]
+  interactWithMouse: true
+  size: [20, 20]
 children:
-- widget: { id: switchExpression, class: widget, active: false }
-  proportion: 1
-  sizer: { type: horizontal }
-  children:
-  - widget: { class: label, text: "If switch " }
-    fill: [left, centreVertical]
-  - widget: { id: switchId, class: dropdown, size: [150, 20] }
-  - widget: { id: switchOp, class: dropdown, size: [50, 20], options: [{ id: "equals", text: "==" }, { id: "notEquals", text: "!=" }] }
-  - widget: { id: switchValue, class: dropdown, size: [150, 20] }
-  - widget: { class: label, text: ", gain = " }
-    fill: centre
-  - widget: { id: gain, class: textInput, size: [50, 20], validator: numericPositive }
-- widget: { id: variableExpression, class: widget, active: false }
-  sizer: { type: vertical, gap: 4 }
-  proportion: 1
-  children:
-  - sizer: { type: horizontal }
+  - uuid: 7868707e-0e2b-49f0-af4c-7b40244ecf61
+    proportion: 1
+    sizer:
+      columnProportions: []
+      type: horizontal
+    widget:
+      active: false
+      class: widget
+      id: switchExpression
     children:
-    - widget: { class: label, text: "Variable " }
-      fill: [left, centreVertical]
-    - widget: { id: variableId, class: dropdown, size: [150, 20] }
-  - widget: { id: variableCurve, class: curveEditor, size: [400, 60] }
-- widget: { id: delete, class: button, style: buttonThin, text: "x", size: [20, 16] }
-  fill: [top, centreHorizontal]
-  border: [4, 0, 0, 0]
+      - uuid: cd213343-643c-4237-a9bc-eafe1c7820d8
+        widget:
+          class: label
+          text: "If switch "
+        fill: [left, centreVertical]
+      - uuid: f9f8d490-bf9f-408e-8d9f-df0027812731
+        widget:
+          class: dropdown
+          id: switchId
+          options: []
+          size: [150, 20]
+      - uuid: 02409724-f860-43df-94f5-d9a0f56a8eeb
+        widget:
+          class: dropdown
+          id: switchOp
+          options:
+            - id: equals
+              text: ==
+            - id: notEquals
+              text: "!="
+          size: [50, 20]
+      - uuid: ab8fd986-dd6b-457a-a377-d2570ea008f1
+        widget:
+          class: dropdown
+          id: switchValue
+          size: [150, 20]
+      - uuid: 91be0a72-d80e-486e-8621-a6404365ba1c
+        widget:
+          class: label
+          text: ", gain = "
+        fill: centre
+      - uuid: f88ad1aa-4582-4533-a5f6-35a0d1fc2bb9
+        widget:
+          class: textInput
+          id: gain
+          size: [50, 20]
+          validator: numericPositive
+      - uuid: 13caf8a1-662d-49a3-a224-99425bcf1b17
+        widget:
+          class: label
+          text: ", otherwise gain = 0"
+        fill: centre
+  - uuid: 43ce291f-1fd0-41b6-b0e1-38373ed94738
+    proportion: 1
+    sizer:
+      gap: 4
+      type: vertical
+    widget:
+      active: false
+      class: widget
+      id: variableExpression
+    children:
+      - uuid: e806ede0-b1e2-4e88-a74c-619e110b097a
+        sizer:
+          type: horizontal
+        children:
+          - uuid: d7971118-2439-4d66-a030-ed679b18309d
+            widget:
+              class: label
+              text: "Variable "
+            fill: [left, centreVertical]
+          - uuid: ce0939ec-cef5-41af-ac2b-113f5add0dcd
+            widget:
+              class: dropdown
+              id: variableId
+              size: [150, 20]
+      - uuid: 52d3721e-0685-450f-8011-2354e161eeb1
+        widget:
+          class: curveEditor
+          id: variableCurve
+          size: [400, 60]
+  - uuid: 939c447c-1617-45e5-a6af-acf089db8c92
+    border: [4, 0, 0, 0]
+    widget:
+      class: button
+      id: delete
+      size: [20, 16]
+      style: buttonThin
+      text: x
+    fill: [top, centreHorizontal]
