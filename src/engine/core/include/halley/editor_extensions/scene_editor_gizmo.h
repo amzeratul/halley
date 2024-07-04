@@ -111,6 +111,7 @@ namespace Halley {
 		bool hasEntityData() const;
 		ConfigNode* getComponentData(const String& name, size_t entityIdx = 0);
 		const ConfigNode* getComponentData(const String& name, size_t entityIdx = 0) const;
+		bool hasComponentData(const String& name, size_t entityIdx = 0) const;
 
 		void markModified(const String& component, const String& field, size_t entityIdx = 0);
 		

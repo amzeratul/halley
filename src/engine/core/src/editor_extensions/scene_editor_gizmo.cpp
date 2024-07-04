@@ -289,6 +289,17 @@ const ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t 
 	return nullptr;
 }
 
+bool SceneEditorGizmo::hasComponentData(const String& name, size_t entityIdx) const
+{
+	auto& components = (*entityDatas.at(entityIdx)).getComponents();
+	for (auto& [curName, value]: components) {
+		if (curName == name) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void SceneEditorGizmo::markModified(const String& component, const String& field, size_t entityIdx)
 {
 	Expects(outputState);
