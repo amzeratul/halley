@@ -216,6 +216,8 @@ void AnimationPlayer::update(Time time)
 
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
+	updateResourceIfNeeded();
+
 	if (animation && spriteData && (hasUpdate || !sprite.hasMaterial())) {
 		if (applyMaterial || !sprite.hasMaterial()) {
 			const auto& newMaterial = materialOverride ? materialOverride : animation->getMaterial();
@@ -428,7 +430,11 @@ std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& act
 void AnimationPlayer::resolveSprite()
 {
 	updateResourceIfNeeded();
+	doResolveSprite();
+}
 
+void AnimationPlayer::doResolveSprite()
+{
 	if (curSeq && curSeq->numFrames() > 0) {
 		curFrame = &curSeq->getFrame(curFrameN);
 		spriteData = &(curFrame->getSprite(dirId));
@@ -467,6 +473,7 @@ void AnimationPlayer::doUpdateResource()
 	curSeq = nullptr;
 	setSequence(curSeqName);
 	setDirection(curDirName);
+	doResolveSprite();
 }
 
 AnimationPlayerLite::AnimationPlayerLite(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)

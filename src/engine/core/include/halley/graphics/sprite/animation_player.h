@@ -68,6 +68,7 @@ namespace Halley
 
 	private:
 		void resolveSprite();
+		void doResolveSprite();
 		void updateResourceIfNeeded() const;
 		void doUpdateResource();
 
