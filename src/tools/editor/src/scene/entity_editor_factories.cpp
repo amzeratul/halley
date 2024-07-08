@@ -119,6 +119,11 @@ public:
 		const int value = data.getFieldData().asInt(defaultValue);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
+		if (pars.typeParameters.size() == 2) {
+			minValue = pars.typeParameters[0].toFloat();
+			maxValue = pars.typeParameters[1].toFloat();
+		}
+
 		auto field = std::make_shared<UISpinControl2>("intValue", context.getUIFactory().getStyle("spinControl"), float(value), false);
 		field->bindData("intValue", value, [&context, data](int newVal)
 		{
@@ -127,6 +132,7 @@ public:
 		});
 		field->setMinimumValue(minValue);
 		field->setMaximumValue(maxValue);
+		field->setMinSize(Vector2f(50, 22));
 		container->add(field, 1);
 
 		auto reset = std::make_shared<UIButton>("resetValue", context.getUIFactory().getStyle("buttonThin"), UISizer());
@@ -146,6 +152,14 @@ private:
 	String fieldType;
 	std::optional<float> minValue;
 	std::optional<float> maxValue;
+};
+
+class ComponentEditorIntRangeFieldFactory : public ComponentEditorIntFieldFactory {
+public:
+	ComponentEditorIntRangeFieldFactory()
+		: ComponentEditorIntFieldFactory("int<>", {}, {})
+	{		
+	}
 };
 
 class ComponentEditorFloatFieldFactory : public IComponentEditorFieldFactory {
@@ -2343,6 +2357,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint32_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint64_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("Halley::SpriteMaskBase", std::nullopt, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorFloatGranularityFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
