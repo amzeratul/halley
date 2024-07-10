@@ -68,3 +68,9 @@ void UIInputResults::setAxisRepeat(UIGamepadInput::Axis axis, int value)
 {
 	axesRepeat[int(axis)] = clamp(value, -1, 1);
 }
+
+void UIInputResults::clearPress(UIGamepadInput::Button button)
+{
+	bool isHeld = isButtonHeld(button);
+	setButton(button, false, false, isHeld);
+}
