@@ -712,7 +712,13 @@ void Project::loadGameEditorData() const
 	if (auto game = getGameInstance()) {
 		editorDataLoading = Concurrent::execute([this, game] ()
 		{
-			editorData = game->createGameEditorData(*api, *gameResources);
+			try {
+				editorData = game->createGameEditorData(*api, *gameResources);
+			} catch (const std::exception& e) {
+				Logger::logException(e);
+			} catch (...) {
+				Logger::logError("Unknown error loading editor game data");
+			}
 		});
 	}
 }
