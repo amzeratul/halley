@@ -29,10 +29,6 @@
 #include <cstdint>
 #include <limits>
 
-#ifdef max
-#undef max
-#endif
-
 namespace Halley {
 
 	typedef char Character;

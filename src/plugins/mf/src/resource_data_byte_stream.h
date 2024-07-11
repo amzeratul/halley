@@ -6,8 +6,6 @@
 #include <Mfapi.h>
 #include <Mfidl.h>
 #include <Mfreadwrite.h>
-#undef min
-#undef max
 
 namespace Halley {
 	class ResourceDataByteStream final : public IMFByteStream, public IMFAsyncCallback 

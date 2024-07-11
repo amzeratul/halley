@@ -2,13 +2,6 @@
 #include "Xaudio2.h"
 using namespace Halley;
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 XAudio2MasteringVoice::XAudio2MasteringVoice(XAudio2AudioOutput& audio, const AudioSpec& spec, String deviceId)
 {
 	auto result = audio.getXAudio2().CreateMasteringVoice(&masteringVoice, spec.numChannels, spec.sampleRate, 0, deviceId.isEmpty() ? nullptr : deviceId.getUTF16().c_str());

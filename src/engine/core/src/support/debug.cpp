@@ -184,10 +184,6 @@ String Debug::getCallStack(int skip)
 	return ss.str();
 }
 
-#ifdef min
-#undef min
-#endif
-
 void Debug::trace(const char* filename, int line, const char* arg)
 {
 	auto& trace = lastTraces[tracePos];

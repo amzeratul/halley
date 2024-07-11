@@ -19,12 +19,6 @@
 #define WIN32_WIN_AND_MEAN
 #endif
 #include <SDL_syswm.h>
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

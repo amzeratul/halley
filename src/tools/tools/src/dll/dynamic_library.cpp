@@ -16,10 +16,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Psapi.h>
-#ifdef min
-#undef min
-#undef max
-#endif
 #endif
 
 using namespace Halley;

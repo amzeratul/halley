@@ -2,13 +2,6 @@
 
 namespace Halley {}
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 #ifdef _MSC_VER
 	#include <xmmintrin.h>
 

@@ -3,8 +3,6 @@
 #include <d3d11.h>
 #include <D3D11_1.h>
 #include <DXGI1_2.h>
-#undef min
-#undef max
 #include "halley/api/halley_api_internal.h"
 #include "halley/graphics/window.h"
 

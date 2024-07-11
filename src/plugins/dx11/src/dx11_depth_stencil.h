@@ -1,7 +1,5 @@
 #pragma once
 #include <D3D11_1.h>
-#undef min
-#undef max
 #include "halley/graphics/material/material_definition.h"
 
 namespace Halley

@@ -1,8 +1,6 @@
 #pragma once
 #include <gsl/gsl>
 #include <d3d11.h>
-#undef min
-#undef max
 
 namespace Halley {
 	class DX11Video;

@@ -3,8 +3,6 @@
 #include <d3d11.h>
 
 #include "halley/graphics/material/material_definition.h"
-#undef min
-#undef max
 
 namespace Halley
 {

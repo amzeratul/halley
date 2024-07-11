@@ -5,10 +5,6 @@
 #include <halley/text/enum_names.h>
 #include <limits>
 
-#ifdef max
-#undef max
-#endif
-
 namespace Halley {
 	class String;
 	

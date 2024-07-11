@@ -48,10 +48,6 @@
 //#pragma comment(lib, "comsupp.lib")
 #pragma comment(lib, "comsuppw.lib")
 
-#ifdef min
-#undef min
-#endif
-
 
 using namespace Halley;
 

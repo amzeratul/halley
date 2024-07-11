@@ -5,8 +5,6 @@
 #include <d3d11.h>
 #include <D3D11_1.h>
 #include <DXGI1_2.h>
-#undef min
-#undef max
 
 namespace Halley {
 	class SystemAPI;

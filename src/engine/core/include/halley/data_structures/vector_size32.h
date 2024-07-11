@@ -12,13 +12,6 @@
 #include <cstring>
 #include <halley/utils/macros.h>
 
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-
 namespace Halley {
 	namespace HalleyExceptions {
 		[[noreturn]] void throwException(std::string_view msg, int code);

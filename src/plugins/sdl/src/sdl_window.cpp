@@ -7,15 +7,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
-
-// win32 crap
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-
 #endif
 
 using namespace Halley;

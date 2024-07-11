@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
 #include "../../../../../contrib/skarupke/flat_hash_map.hpp"
 #include <string_view>
 

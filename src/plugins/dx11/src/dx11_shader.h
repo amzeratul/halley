@@ -2,8 +2,6 @@
 #include "halley/graphics/shader.h"
 
 #include <d3d11.h>
-#undef min
-#undef max
 
 namespace Halley
 {

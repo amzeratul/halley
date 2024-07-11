@@ -12,8 +12,6 @@
 #include <Mfidl.h>
 #include <Mfreadwrite.h>
 #include <Mferror.h>
-#undef min
-#undef max
 
 namespace Halley
 {

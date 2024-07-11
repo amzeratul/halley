@@ -28,13 +28,6 @@
 #include "halley/text/string_converter.h"
 #include <gsl/gsl>
 
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-
 namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
