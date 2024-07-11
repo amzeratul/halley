@@ -272,7 +272,7 @@ void XAudio2AudioOutput::consumeAudio()
 		sendBuffer();
 	} else {
 		// Insert silence
-		buffer.resize(128, 0.0f);
+		buffer.assign(128, 0.0f);
 		sendBuffer();
 	}
 }
