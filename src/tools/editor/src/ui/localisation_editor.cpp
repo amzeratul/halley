@@ -29,12 +29,23 @@ void LocalisationEditor::onMakeUI()
 
 void LocalisationEditor::onActiveChanged(bool active)
 {
+	if (active && project.isDLLLoaded()) {
+		populateData();
+	}
+}
+
+void LocalisationEditor::onAssetsLoaded()
+{
+	if (isActiveInHierarchy() && project.isDLLLoaded()) {
+		populateData();
+	}
 }
 
 void LocalisationEditor::load()
 {
-	factory.loadUI(*this, "halley/localisation_editor");
 	loaded = true;
+	factory.loadUI(*this, "halley/localisation_editor");
+	project.addAssetLoadedListener(this);
 }
 
 void LocalisationEditor::wordCount()
@@ -146,6 +157,13 @@ String LocalisationEditor::getNumberWithCommas(int number) const
 
 void LocalisationEditor::populateData()
 {
+	if (!loaded) {
+		if (project.isDLLLoaded()) {
+			load();
+		} else {
+			return;
+		}
+	}
 	wordCount();
 
 	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(getFlag(originalLanguage));

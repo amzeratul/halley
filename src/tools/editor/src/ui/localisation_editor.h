@@ -1,15 +1,18 @@
 #pragma once
 
+#include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-    class LocalisationEditor : public UIWidget {
+    class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
         LocalisationEditor(Project& project, UIFactory& factory);
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
         void onActiveChanged(bool active) override;
+
+        void onAssetsLoaded() override;
 
     private:
         Project& project;
