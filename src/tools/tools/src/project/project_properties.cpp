@@ -83,6 +83,16 @@ float ProjectProperties::getDefaultZoom() const
 	return defaultZoom;
 }
 
+const I18NLanguage& ProjectProperties::getOriginalLanguage() const
+{
+	return originalLanguage;
+}
+
+const Vector<I18NLanguage>& ProjectProperties::getLanguages() const
+{
+	return languages;
+}
+
 void ProjectProperties::loadDefaults()
 {
 	uuid = UUID::generate();
@@ -92,6 +102,9 @@ void ProjectProperties::loadDefaults()
 	importByExtension = false;
 	defaultZoom = 1.0f;
 	platforms = {"pc"};
+	originalLanguage = I18NLanguage("en");
+	languages.clear();
+	languages.push_back(originalLanguage);
 }
 
 void ProjectProperties::load()
@@ -124,6 +137,12 @@ void ProjectProperties::load()
 		if (node.hasKey("platforms")) {
 			platforms = node["platforms"].asVector<String>();
 		}
+		if (node.hasKey("originalLanguage")) {
+			originalLanguage = node["originalLanguage"];
+		}
+		if (node.hasKey("languages")) {
+			languages = node["languages"].asVector<I18NLanguage>();
+		}
 	}
 
 	save();
@@ -140,6 +159,8 @@ void ProjectProperties::save()
 	node["importByExtension"] = importByExtension;
 	node["defaultZoom"] = defaultZoom;
 	node["platforms"] = platforms;
+	node["originalLanguage"] = originalLanguage;
+	node["languages"] = languages;
 
 	const auto curFile = Path::readFile(propertiesFile);
 	const auto yaml = YAMLConvert::generateYAML(node, YAMLConvert::EmitOptions());

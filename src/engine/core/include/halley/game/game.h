@@ -69,6 +69,7 @@ namespace Halley
 		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomScriptEditorFieldFactories(const Scene& scene, Resources& resources, IGameEditorData* gameEditorData);
 		virtual std::unique_ptr<IGameEditorData> createGameEditorData(const HalleyAPI& api, Resources& resources);
 		virtual Vector<ConfigBreadCrumb> createConfigBreadCrumbs();
+		virtual String getLocalisationFileCategory(const String& assetName);
 
 		virtual String getDefaultColourScheme();
 

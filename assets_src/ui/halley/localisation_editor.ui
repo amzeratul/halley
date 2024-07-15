@@ -1,0 +1,158 @@
+uuid: 5144dc4d-cbf2-4713-87bf-f80d6538c214
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+    widget:
+      class: button
+      enabled: false
+      icon: ui/sync.png
+      id: sync
+      size: [200, 0]
+      text: Sync with Server
+    fill: [centreHorizontal, centreVertical]
+  - uuid: a44bd871-594e-497a-92f0-fab31b060e49
+    border: [0, 10, 0, 0]
+    sizer:
+      columnProportions: []
+      columns: 2
+      gap: 10
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_backgroundBox
+      id: ""
+      image: halley_ui/ui_list_item.png
+      innerBorder: [15, 15, 15, 15]
+    children:
+      - uuid: 4bf13c51-5a5f-495f-a66b-8173b2121565
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 4
+          type: grid
+        widget:
+          class: widget
+          size: [500, 0]
+        children:
+          - uuid: feb5d743-b4ca-4c01-821d-0113d143950c
+            sizer:
+              columnProportions: []
+            widget:
+              childLayerAdjustment: 0
+              class: widget
+              size: [150, 0]
+            children:
+              - uuid: 5b1cd85d-a3fe-4534-a9b2-936f1022a9fc
+                widget:
+                  class: label
+                  id: ""
+                  text: "Main language:"
+                  wordWrapped: false
+                fill: left
+          - uuid: 6818e524-9b58-4695-aa39-cf63e1a00306
+            sizer:
+              columnProportions: []
+              gap: 4
+            widget:
+              class: widget
+            children:
+              - uuid: 928dfda7-5afb-4ce3-96ea-97f084dc4255
+                widget:
+                  class: image
+                  id: mainLanguageFlag
+                  image: flags/h20/gb.png
+              - uuid: 5b4f0f75-8649-4a86-a163-eff8ffe5d56f
+                widget:
+                  class: label
+                  id: mainLanguage
+                  text: English
+                  wordWrapped: false
+                fill: left
+          - uuid: c04b8568-2193-4283-abe1-5b9514486099
+            widget:
+              class: label
+              id: ""
+              text: "Word Count:"
+              wordWrapped: false
+            fill: left
+          - uuid: 6a57d2a7-68ca-474b-bdfa-7a2f32668675
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 10
+              type: vertical
+            widget:
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [0, 2, 0, 2]
+              size: [100, 0]
+            children:
+              - uuid: 952b9097-b0bc-4ef8-9271-2e909dc11afb
+                widget:
+                  class: label
+                  id: wordCount
+                  text: 0
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+            fill: [left, fillVertical]
+        fill: [left, fillVertical]
+      - uuid: 704fed0e-cc96-44c0-aa87-3b861a186f3f
+        border: [0, 15, 0, 0]
+        widget:
+          class: label
+          id: ""
+          text: "Breakdown by category:"
+          wordWrapped: false
+        fill: left
+      - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
+        border: [20, 0, 20, 0]
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 1
+          type: grid
+        widget:
+          class: widget
+          id: byCategory
+          size: [460, 0]
+        children: []
+        fill: [left, fillVertical]
+  - uuid: 2e6c9059-28bd-4a02-b1aa-c3ac6468b51a
+    border: [0, 10, 0, 0]
+    sizer:
+      columnProportions: []
+      columns: 2
+      gap: 10
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_backgroundBox
+      id: ""
+      image: halley_ui/ui_list_item.png
+      innerBorder: [15, 15, 15, 15]
+    children:
+      - uuid: 8f5f1b0d-1572-457f-bdce-104afd8cad6d
+        border: [0, 0, 0, 0]
+        widget:
+          class: label
+          id: ""
+          text: "Translations:"
+          wordWrapped: false
+        fill: left
+      - uuid: 10f26ce6-756b-4157-af52-61bbde8927eb
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 4
+          type: vertical
+        widget:
+          class: widget
+          id: languages
+        children: []

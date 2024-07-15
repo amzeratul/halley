@@ -1,0 +1,53 @@
+uuid: f88e9af7-33d1-4332-83d5-80e97b9060af
+widget:
+  class: widget
+children:
+  - uuid: 37a82753-05e4-44d2-9895-96c4510ce27e
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+    widget:
+      class: widget
+      size: [40, 0]
+    children:
+      - uuid: c1fd9caa-8d00-4858-84b0-4fbc0e6bca7f
+        widget:
+          class: image
+          id: flag
+          image: flags/h20/gb.png
+        fill: [centreHorizontal, centreVertical]
+  - uuid: de206c30-bb22-4623-a3c6-81c65adfb813
+    sizer:
+      columnProportions: []
+    widget:
+      class: widget
+      size: [200, 0]
+    children:
+      - uuid: 532ce8ff-6aa6-4819-88f1-45ea9f720257
+        border: [4, 0, 0, 0]
+        widget:
+          class: label
+          id: languageName
+          text: English
+        fill: [fillHorizontal, centreVertical]
+  - uuid: 2ef87383-98d4-4007-8b32-cb92ead95973
+    sizer:
+      columnProportions: []
+    widget:
+      class: widget
+      size: [200, 0]
+    children:
+      - uuid: 40d9d1e3-9866-4278-9de7-481b608dcacd
+        widget:
+          class: label
+          id: completion
+          text: 0% complete
+        fill: [fillHorizontal, centreVertical]
+  - uuid: 1d5be313-a529-4140-b753-82386003d69a
+    border: [10, 0, 0, 0]
+    widget:
+      class: button
+      enabled: false
+      id: edit
+      size: [100, 0]
+      text: Edit...

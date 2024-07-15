@@ -2,6 +2,7 @@
 
 #include <halley/text/halleystring.h>
 #include "halley/maths/uuid.h"
+#include "halley/text/i18n.h"
 
 namespace Halley {
 	class Path;
@@ -30,12 +31,17 @@ namespace Halley {
     	void setDefaultZoom(float zoom);
 		float getDefaultZoom() const;
 
+		const I18NLanguage& getOriginalLanguage() const;
+		const Vector<I18NLanguage>& getLanguages() const;
+
 	private:
 		const Path& propertiesFile;
     	UUID uuid;
 		String name;
     	String assetPackManifest;
         String binName;
+        I18NLanguage originalLanguage;
+        Vector<I18NLanguage> languages;
     	bool importByExtension = false;
     	float defaultZoom = 1.0f;
     	Vector<String> platforms;

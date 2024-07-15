@@ -129,6 +129,11 @@ Vector<ConfigBreadCrumb> Game::createConfigBreadCrumbs()
 	return {};
 }
 
+String Game::getLocalisationFileCategory(const String& assetName)
+{
+	return "unknown";
+}
+
 String Game::getDefaultColourScheme()
 {
 	return "";
