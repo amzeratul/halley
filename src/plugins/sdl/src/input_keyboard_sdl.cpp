@@ -110,6 +110,8 @@ String InputKeyboardSDL::getButtonName(int code) const
 		return "Alt";
 	case static_cast<int>(KeyCode::Enter):
 		return "Enter";
+	case static_cast<int>(KeyCode::Space):
+		return "Space";
 	default:
 		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
 			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
