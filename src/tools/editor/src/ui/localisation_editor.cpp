@@ -53,22 +53,53 @@ void LocalisationEditor::wordCount()
 	totalCount = 0;
 	wordCounts.clear();
 
+	HashSet<String> locKeys;
+	const auto langs = project.getProperties().getLanguages();
+
 	auto& gameResources = project.getGameResources();
 
+	// Scan for original language
 	for (auto& assetName: gameResources.enumerate<ConfigFile>()) {
 		if (assetName.startsWith("strings/")) {
 			auto& config = *gameResources.get<ConfigFile>(assetName);
 			const String category = getCategory(assetName);
 
-			for (auto& language: config.getRoot().asMap()) {
-				auto langCode = I18NLanguage(language.first);
-				if (langCode == originalLanguage) {
-					for (auto& e: language.second.asMap()) {
+			for (auto& languageNode: config.getRoot().asMap()) {
+				const auto language = I18NLanguage(languageNode.first);
+				if (language == originalLanguage) {
+					for (auto& e: languageNode.second.asMap()) {
 						const auto& str = e.second.asString();
 
-						const auto curCount = getWordCount(str);
-						wordCounts[category] += curCount;
-						totalCount += curCount;
+						if (!locKeys.contains(e.first)) {
+							locKeys.insert(e.first);
+							++totalKeys;
+
+							const auto curCount = getWordCount(str);
+							wordCounts[category] += curCount;
+							totalCount += curCount;
+						} else {
+							Logger::logWarning("Duplicated localisation key \"" + e.first + "\" found in file " + assetName);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Scan for localisation
+	for (auto& assetName: gameResources.enumerate<ConfigFile>()) {
+		if (assetName.startsWith("strings/")) {
+			auto& config = *gameResources.get<ConfigFile>(assetName);
+
+			for (auto& languageNode: config.getRoot().asMap()) {
+				const auto language = I18NLanguage(languageNode.first);
+
+				if (language != originalLanguage && std_ex::contains(langs, language)) {
+					const auto langCode = language.getISOCode();
+					for (auto& e: languageNode.second.asMap()) {
+						if (locKeys.contains(e.first)) {
+							++localisedCount[langCode];
+						}
 					}
 				}
 			}
@@ -193,7 +224,12 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 {
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 
-	int completion = 0; // TODO
+	const auto iter = localisedCount.find(language.getISOCode());
+	const int localised = iter == localisedCount.end() ? 0 : iter->second;
+	int completion = (localised * 100) / totalKeys;
+	if (localised > 0 && completion == 0) {
+		completion = 1;
+	}
 
 	widget->getWidgetAs<UIImage>("flag")->setSprite(getFlag(language));
 	widget->getWidgetAs<UILabel>("languageName")->setText(LocalisedString::fromUserString(getLanguageName(language)));

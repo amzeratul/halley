@@ -21,11 +21,13 @@ namespace Halley {
 
         bool loaded = false;
         int totalCount = 0;
+        int totalKeys = 0;
         HashMap<String, int> wordCounts;
 
         HashMap<String, String> countryNames;
         HashMap<String, String> languageNames;
         HashSet<String> languageNeedsQualifier;
+        HashMap<String, int> localisedCount;
 
         void load();
 

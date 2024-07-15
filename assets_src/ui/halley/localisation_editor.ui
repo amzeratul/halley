@@ -1,21 +1,39 @@
 uuid: 5144dc4d-cbf2-4713-87bf-f80d6538c214
 sizer:
   columnProportions: []
+  gap: 10
   type: vertical
 widget:
   class: widget
 children:
-  - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+  - uuid: ebe9ec8d-b8a9-46a0-abbc-140a13eebfff
+    sizer:
+      columnProportions: []
+      gap: 10
     widget:
-      class: button
-      enabled: false
-      icon: ui/sync.png
-      id: sync
-      size: [200, 0]
-      text: Sync with Server
-    fill: [centreHorizontal, centreVertical]
+      class: widget
+    children:
+      - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+        widget:
+          class: button
+          enabled: false
+          icon: ui/upload.png
+          id: upload
+          size: [250, 0]
+          text: Upload Original
+        fill: [centreHorizontal, centreVertical]
+      - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
+        widget:
+          class: button
+          enabled: false
+          icon: ui/download.png
+          id: download
+          size: [250, 0]
+          text: Download Translations
+        fill: [centreHorizontal, centreVertical]
+    fill: [centreHorizontal, fillVertical]
   - uuid: a44bd871-594e-497a-92f0-fab31b060e49
-    border: [0, 10, 0, 0]
+    border: [0, 0, 0, 0]
     sizer:
       columnProportions: []
       columns: 2
@@ -111,21 +129,31 @@ children:
           text: "Breakdown by category:"
           wordWrapped: false
         fill: left
-      - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
-        border: [20, 0, 20, 0]
+      - uuid: c559b6ca-4d9d-4149-aef6-86c282c913e6
         sizer:
-          columnProportions: [1, 1]
-          columns: 2
-          gap: 1
-          type: grid
+          columnProportions: []
         widget:
-          class: widget
-          id: byCategory
-          size: [460, 0]
-        children: []
-        fill: [left, fillVertical]
+          class: scrollBarPane
+          clipSize: [0, 0]
+          size: [0, 150]
+        children:
+          - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
+            border: [20, 0, 20, 0]
+            sizer:
+              columnProportions: [1, 1]
+              columns: 2
+              gap: 1
+              type: grid
+            widget:
+              class: widget
+              id: byCategory
+              size: [460, 0]
+            children: []
+            fill: [left, fillVertical]
+        fill: [fillHorizontal, centreVertical]
   - uuid: 2e6c9059-28bd-4a02-b1aa-c3ac6468b51a
-    border: [0, 10, 0, 0]
+    proportion: 1
+    border: [0, 0, 0, 0]
     sizer:
       columnProportions: []
       columns: 2
@@ -146,13 +174,20 @@ children:
           text: "Translations:"
           wordWrapped: false
         fill: left
-      - uuid: 10f26ce6-756b-4157-af52-61bbde8927eb
+      - uuid: c92807ed-e99b-47bb-a196-e06aa625c2a6
+        proportion: 1
         sizer:
-          columnProportions: [1, 1]
-          columns: 2
-          gap: 4
-          type: vertical
+          columnProportions: []
         widget:
-          class: widget
-          id: languages
-        children: []
+          class: scrollBarPane
+        children:
+          - uuid: 10f26ce6-756b-4157-af52-61bbde8927eb
+            sizer:
+              columnProportions: [1, 1]
+              columns: 2
+              gap: 4
+              type: vertical
+            widget:
+              class: widget
+              id: languages
+            children: []
