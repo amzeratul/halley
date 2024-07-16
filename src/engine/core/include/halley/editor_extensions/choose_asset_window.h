@@ -16,7 +16,7 @@ namespace Halley {
         using Callback = std::function<void(std::optional<String>)>;
 		using HighlightCallback = std::function<void(const String&)>;
 		
-        ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank = "[None]");
+        ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank = "[None]", int resultLimit = 200);
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot(UIRoot& root) override;

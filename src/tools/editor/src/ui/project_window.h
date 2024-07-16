@@ -80,6 +80,8 @@ namespace Halley {
 
         std::shared_ptr<UIWidget> makeMoveFilesTool(UIFactory& factory) override;
 
+    	int getPaletteWindowResultsLimit() const;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

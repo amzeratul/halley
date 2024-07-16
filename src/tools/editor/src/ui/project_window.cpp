@@ -439,6 +439,11 @@ std::shared_ptr<UIWidget> ProjectWindow::makeMoveFilesTool(UIFactory& factory)
 	return std::make_shared<MoveFilesTool>(factory, project, project.getGameInstance()->createConfigBreadCrumbs());
 }
 
+int ProjectWindow::getPaletteWindowResultsLimit() const
+{
+	return editor.getPreferences().getPaletteWindowResultsLimit();
+}
+
 void ProjectWindow::toggleDebugConsole()
 {
 	if (debugConsole && debugConsole->isActive()) {

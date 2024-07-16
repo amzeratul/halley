@@ -12,10 +12,10 @@
 using namespace Halley;
 
 
-ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank)
+ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank, int resultsLimit)
 	: UIWidget("choose_asset_window", minSize, UISizer())
 	, factory(factory)
-	, fuzzyMatcher(false, 100)
+	, fuzzyMatcher(false, resultsLimit)
 	, canShowBlank(std::move(canShowBlank))
 {
 	entries.emplace_back(DataSet{});

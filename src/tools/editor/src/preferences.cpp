@@ -21,6 +21,7 @@ void Preferences::loadDefaults()
 	lz4hc = false;
 	autoBuild = false;
 	canEditHalleyAssets = false;
+	paletteWindowResultsLimit = 100;
 }
 
 ConfigNode Preferences::save() const
@@ -44,6 +45,7 @@ ConfigNode Preferences::save() const
 	root["lz4hc"] = lz4hc;
 	root["autoBuild"] = autoBuild;
 	root["canEditHalleyAssets"] = canEditHalleyAssets;
+	root["paletteWindowResultsLimit"] = paletteWindowResultsLimit;
 
 	return root;
 }
@@ -69,6 +71,7 @@ void Preferences::load(const ConfigNode& root)
 	lz4hc = root["lz4hc"].asBool(false);
 	autoBuild = root["autoBuild"].asBool(false);
 	canEditHalleyAssets = root["canEditHalleyAssets"].asBool(false);
+	paletteWindowResultsLimit = root["paletteWindowResultsLimit"].asInt(100);
 }
 
 bool Preferences::isDirty() const
@@ -194,6 +197,7 @@ void Preferences::loadEditorPreferences(const Preferences& preferences)
 	lz4hc = preferences.lz4hc;
 	autoBuild = preferences.autoBuild;
 	canEditHalleyAssets = preferences.canEditHalleyAssets;
+	paletteWindowResultsLimit = preferences.paletteWindowResultsLimit;
 }
 
 void Preferences::applyProjectLoaderPreferences(ProjectLoader& projectLoader)
@@ -209,4 +213,14 @@ bool Preferences::getCanEditHalleyAssets() const
 void Preferences::setCanEditHalleyAssets(bool enabled)
 {
 	canEditHalleyAssets = enabled;
+}
+
+int Preferences::getPaletteWindowResultsLimit()
+{
+	return paletteWindowResultsLimit;
+}
+
+void Preferences::setPaletteWindowResultsLimit(int value)
+{
+	paletteWindowResultsLimit = value;
 }

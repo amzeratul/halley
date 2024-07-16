@@ -40,6 +40,8 @@ namespace Halley
 		void setAutoBuild(bool enabled);
 		bool getCanEditHalleyAssets() const;
 		void setCanEditHalleyAssets(bool enabled);
+		int getPaletteWindowResultsLimit();
+		void setPaletteWindowResultsLimit(int value);
 
 		void loadEditorPreferences(const Preferences& preferences);
 
@@ -61,5 +63,6 @@ namespace Halley
 		bool lz4hc = false;
 		bool autoBuild = false;
 		bool canEditHalleyAssets = false;
+		int paletteWindowResultsLimit = 100;
 	};
 }

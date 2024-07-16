@@ -91,7 +91,7 @@ bool PaletteWindow::canShowAll() const
 
 
 ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, std::optional<String> allowEmpty, Callback callback)
-	: ChooseAssetWindow(minSize, factory, std::move(callback), allowEmpty)
+	: ChooseAssetWindow(minSize, factory, std::move(callback), allowEmpty, projectWindow.getPaletteWindowResultsLimit())
 	, projectWindow(projectWindow)
 	, type(type)
 	, hasPreview(hasPreview)

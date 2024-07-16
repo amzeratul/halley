@@ -65,6 +65,12 @@ void EditorSettingsWindow::onMakeUI()
 		setSaveEnabled(true);
 	});
 
+	bindData("paletteWindowResultsLimit", workingCopy.getPaletteWindowResultsLimit(), [=] (int value)
+	{
+		workingCopy.setPaletteWindowResultsLimit(value);
+		setSaveEnabled(true);
+	});
+
 	setHandle(UIEventType::ButtonClicked, "save", [=] (const UIEvent& event)
 	{
 		save();

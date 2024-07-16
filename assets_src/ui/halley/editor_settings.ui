@@ -94,6 +94,16 @@ children:
               class: checkbox
               id: showHalleyAssets
             fill: [left, verticalCentre]
+          - uuid: 9b3bc93b-8a28-4b53-9289-6356045e4ebf
+            widget:
+              class: label
+              text: "Palette Window Results Limit: "
+            fill: [left, verticalCentre]
+          - uuid: 801f214f-155b-4d21-a5ec-5127941e93cc
+            widget:
+              class: spinControl2
+              id: paletteWindowResultsLimit
+              minValue: 10
       - uuid: c804d283-4981-4590-9843-d0c86db859dc
         sizer:
           columnProportions: []
