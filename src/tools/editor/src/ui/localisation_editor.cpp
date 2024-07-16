@@ -51,7 +51,9 @@ void LocalisationEditor::load()
 void LocalisationEditor::wordCount()
 {
 	totalCount = 0;
+	totalKeys = 0;
 	wordCounts.clear();
+	localisedCount.clear();
 
 	HashSet<String> locKeys;
 	const auto langs = project.getProperties().getLanguages();
