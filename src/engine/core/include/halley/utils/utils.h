@@ -297,6 +297,55 @@ namespace Halley {
 		}
 	}
 
+    template <typename T>
+    [[nodiscard]] constexpr size_t countBits(T val)
+    {
+        size_t c = 0;
+        for (; val != 0; c++) {
+            val &= val - 1;
+        }
+        return c;
+    }
+
+    template <typename T>
+    [[nodiscard]] constexpr size_t leastSignificantBit(T val)
+    {
+        size_t c = 0;
+        if (val != 0) {
+            val = (val ^ (val - 1)) >> 1;
+            while (val != 0) {
+                val >>= 1;
+                c++;
+            }
+        } else {
+            c = 8 * sizeof(T);
+        }
+        return c;
+    }
+
+    template <typename T>
+    [[nodiscard]] constexpr size_t mostSignificantBit(T val)
+    {
+        size_t c = 0;
+        while (val != 0) {
+            val >>= 1;
+            c++;
+        }
+        return c;
+    }
+
+    template <typename T>
+    [[nodiscard]] constexpr T rotateLeft(const T val, size_t n)
+    {
+        return (T) (T(val << n) | T(val >> ((8 * sizeof(T)) - n)));
+    }
+
+    template <typename T>
+    [[nodiscard]] constexpr T rotateRight(const T val, size_t n)
+    {
+        return (T) (T(val >> n) | T(val << ((8 * sizeof(T)) - n)));
+    }
+
 	// Prefetch data from memory
 	static inline void prefetchL1(void* p) {
 #ifdef _MSC_VER
