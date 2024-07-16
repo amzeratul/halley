@@ -5,6 +5,7 @@
 #include "ecs_window.h"
 #include "editor_settings_window.h"
 #include "game_properties_window.h"
+#include "localisation_editor.h"
 #include "plotter.h"
 #include "status_bar.h"
 #include "taskbar.h"
@@ -45,6 +46,10 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	entityEditorFactoryRoot = std::make_shared<EntityEditorFactoryRoot>(*this, factory);
 	entityEditorFactoryRoot->addStandardFieldFactories();
 	entityEditorFactoryRoot->setGameResources(project.getGameResources(), api);
+
+	halleyEntityEditorFactoryRoot = std::make_shared<EntityEditorFactoryRoot>(*this, factory);
+	halleyEntityEditorFactoryRoot->addStandardFieldFactories();
+	halleyEntityEditorFactoryRoot->setGameResources(factory.getResources(), api);
 
 	project.withDLL([&] (ProjectDLL& dll)
 	{
@@ -143,6 +148,7 @@ void ProjectWindow::makePagedPane()
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto remotes = std::make_shared<UIWidget>();
+	auto localisation = std::make_shared<LocalisationEditor>(project, factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
@@ -154,6 +160,7 @@ void ProjectWindow::makePagedPane()
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(remotes, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Localisation))->add(localisation, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, margin);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Terminal))->add(consoleWindow, 1, margin);
@@ -205,13 +212,19 @@ bool ProjectWindow::loadCustomUI()
 	entityEditorFactoryRoot->clear();
 	entityEditorFactoryRoot->addStandardFieldFactories();
 	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories(project.getGameResources(), project.getGameEditorData()));
+	entityEditorFactoryRoot->setGameResources(project.getGameResources(), api);
 	
+	halleyEntityEditorFactoryRoot->clear();
+	halleyEntityEditorFactoryRoot->addStandardFieldFactories();
+	halleyEntityEditorFactoryRoot->setGameResources(factory.getResources(), api);
+
 	return true;
 }
 
 void ProjectWindow::destroyCustomUI()
 {
 	entityEditorFactoryRoot->clear();
+	halleyEntityEditorFactoryRoot->clear();
 
 	if (!customTools.empty()) {
 		makeToolbar();
@@ -614,6 +627,11 @@ Vector2f ProjectWindow::getChoosePrefabWindowSize() const
 EntityEditorFactoryRoot& ProjectWindow::getEntityEditorFactoryRoot()
 {
 	return *entityEditorFactoryRoot;
+}
+
+EntityEditorFactoryRoot& ProjectWindow::getHalleyEntityEditorFactoryRoot()
+{
+	return *halleyEntityEditorFactoryRoot;
 }
 
 std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()

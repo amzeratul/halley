@@ -75,6 +75,9 @@ namespace Halley {
 		I18NLanguage();
 		explicit I18NLanguage(const String& code);
 		I18NLanguage(String languageCode, std::optional<String> countryCode);
+		I18NLanguage(const ConfigNode& node);
+
+		ConfigNode toConfigNode() const;
 
 		void set(String languageCode, std::optional<String> countryCode);
 

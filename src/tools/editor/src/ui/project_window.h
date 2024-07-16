@@ -63,6 +63,7 @@ namespace Halley {
     	Vector2f getChoosePrefabWindowSize() const;
 
     	EntityEditorFactoryRoot& getEntityEditorFactoryRoot();
+    	EntityEditorFactoryRoot& getHalleyEntityEditorFactoryRoot();
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
         void buildGame() override;
@@ -107,7 +108,7 @@ namespace Halley {
 			mutable bool dirty = false;
 		};
     	
-		constexpr static int numOfStandardTools = 7;
+		constexpr static int numOfStandardTools = 8;
 
     	EditorUIFactory& factory;
         HalleyEditor& editor;
@@ -135,6 +136,7 @@ namespace Halley {
         std::shared_ptr<PaletteWindow> assetFinder;
 
         std::shared_ptr<EntityEditorFactoryRoot> entityEditorFactoryRoot;
+        std::shared_ptr<EntityEditorFactoryRoot> halleyEntityEditorFactoryRoot;
         
         std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
 

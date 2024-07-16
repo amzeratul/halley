@@ -478,7 +478,13 @@ void Path::removeFile(const Path& path)
 
 bool Path::isPrefixOf(const Path& other) const
 {
-	return *this == other.getParts().subspan(0, std::min(other.getNumberPaths(), getNumberPaths()));
+	size_t n = std::min(pathParts.size(), other.pathParts.size());
+	for (size_t i = 0; i < n; ++i) {
+		if (pathParts[i] != other.pathParts[i] && pathParts[i] != ".") {
+			return false;
+		}
+	}
+	return true;
 }
 
 Path Path::makeRelativeTo(const Path& path) const

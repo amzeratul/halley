@@ -196,6 +196,16 @@ I18NLanguage::I18NLanguage(String languageCode, std::optional<String> countryCod
 	set(std::move(languageCode), std::move(countryCode));
 }
 
+I18NLanguage::I18NLanguage(const ConfigNode& node)
+{
+	*this = I18NLanguage(node.asString(""));
+}
+
+ConfigNode I18NLanguage::toConfigNode() const
+{
+	return ConfigNode(getISOCode());
+}
+
 void I18NLanguage::set(String languageCode, std::optional<String> countryCode)
 {
 	this->languageCode = std::move(languageCode);

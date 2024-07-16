@@ -60,7 +60,7 @@ void UIWidgetEditor::setUIEditor(UIEditor& editor, ProjectWindow& project)
 {
 	uiEditor = &editor;
 	projectWindow = &project;
-	entityFieldFactory = std::make_shared<EntityEditorFactory>(projectWindow->getEntityEditorFactoryRoot(), static_cast<IEntityEditorCallbacks*>(this));
+	entityFieldFactory = std::make_shared<EntityEditorFactory>(editor.isEditingHalleyUI() ? projectWindow->getHalleyEntityEditorFactoryRoot() : projectWindow->getEntityEditorFactoryRoot(), static_cast<IEntityEditorCallbacks*>(this));
 }
 
 void UIWidgetEditor::onEntityUpdated(bool temporary)

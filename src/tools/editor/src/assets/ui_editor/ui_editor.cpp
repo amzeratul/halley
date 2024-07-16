@@ -47,9 +47,9 @@ void UIEditor::update(Time time, bool moved)
 
 std::shared_ptr<const Resource> UIEditor::loadResource(const Path& assetPath, const String& id, AssetType assetType)
 {
-	loadGameFactory();
-
 	uiDefinition = std::make_shared<UIDefinition>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath));
+
+	loadGameFactory();
 
 	if (widgetList) {
 		widgetList->setDefinition(uiDefinition);
@@ -69,7 +69,7 @@ void UIEditor::onMakeUI()
 	widgetList->setDefinition(uiDefinition);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setUIEditor(*this, projectWindow);
-	widgetEditor->setGameResources(gameResources);
+	widgetEditor->setGameResources(getResources());
 
 	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->setLeftClickScrollKey(KeyCode::Space);
@@ -341,10 +341,18 @@ void UIEditor::replaceWidget()
 
 void UIEditor::loadGameFactory()
 {
-	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
-	auto* game = project.getGameInstance();
-	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
-	gameFactory->setFallbackFactory(factory);
+	auto fullAssetPath = project.getAssetsSrcPath() / assetPath;
+	if (project.getHalleyRootPath().isPrefixOf(fullAssetPath)) {
+		isHalleyUI = true;
+		gameI18N = std::make_unique<I18N>(factory.getResources(), I18NLanguage("en-GB"));
+		gameFactory = factory.clone();
+	} else {
+		isHalleyUI = false;
+		gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
+		auto* game = project.getGameInstance();
+		gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
+		gameFactory->setFallbackFactory(factory);
+	}
 }
 
 void UIEditor::reassignUUIDs(ConfigNode& node) const
@@ -382,6 +390,16 @@ void UIEditor::reloadUI()
 	display->loadDisplay(*uiDefinition);
 	widgetList->setDefinition(uiDefinition);
 	layout();
+}
+
+const Resources& UIEditor::getResources() const
+{
+	return isHalleyUI ? factory.getResources() : gameResources;
+}
+
+Resources& UIEditor::getResources()
+{
+	return isHalleyUI ? factory.getResources() : gameResources;
 }
 
 void UIEditor::copyWidgets(const Vector<String>& uuids)
@@ -470,6 +488,11 @@ void UIEditor::deleteWidgets(const Vector<String>& uuids)
 void UIEditor::selectWidget(const String& id)
 {
 	widgetList->selectWidget(id);
+}
+
+bool UIEditor::isEditingHalleyUI() const
+{
+	return isHalleyUI;
 }
 
 

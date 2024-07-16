@@ -41,6 +41,7 @@ namespace Halley {
         void deleteWidgets(const Vector<String>& ids);
 
 		void selectWidget(const String& id);
+		bool isEditingHalleyUI() const;
 
 	protected:
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
@@ -61,6 +62,7 @@ namespace Halley {
 		bool loaded = false;
 		bool modified = false;
 		bool firstLoad = true;
+		bool isHalleyUI = false;
 
 		String curSelection;
 
@@ -82,6 +84,9 @@ namespace Halley {
 		void undo();
 		void redo();
 		void reloadUI();
+
+		const Resources& getResources() const;
+		Resources& getResources();
 	};
 
 	class ChooseUIWidgetWindow : public ChooseAssetWindow {

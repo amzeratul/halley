@@ -62,6 +62,9 @@ void Toolbar::makeUI()
 		case EditorTabs::Remotes:
 			toolName = "Remotes";
 			break;
+		case EditorTabs::Localisation:
+			toolName = "Localisation";
+			break;
 		case EditorTabs::Properties:
 			toolName = "Properties";
 			break;
