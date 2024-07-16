@@ -43,8 +43,7 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 			if (!uuid.isEmpty()) {
 				elements[UUID(uuid)] = element;
 			}
-			const auto widget = std::dynamic_pointer_cast<UIWidget>(element);
-			if (widget) {
+			if (const auto widget = std::dynamic_pointer_cast<UIWidget>(element)) {
 				maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
 			}
 		});

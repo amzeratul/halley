@@ -508,7 +508,11 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 		WidgetUnderMouseResult bestResult;
 
 		if (curWidget->canChildrenInteractWithMouse()) {
-			for (auto& c: curWidget->getChildren()) {
+			const auto& cs = curWidget->getChildren().span();
+
+			for (int i = int(cs.size()); --i >= 0;) {
+				auto& c = cs[i];
+
 				const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren);
 				if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
 					bestResult = result;
