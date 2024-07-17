@@ -1997,6 +1997,11 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 	}
 }
 
+const ConfigNode& ConfigNode::getUndefined()
+{
+	return undefinedConfigNode;
+}
+
 void ConfigNode::applyMapDelta(const ConfigNode& delta)
 {
 	auto& myMap = asMap();

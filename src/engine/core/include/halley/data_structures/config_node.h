@@ -588,6 +588,8 @@ namespace Halley {
 
 		void feedToHash(Hash::Hasher& hasher) const;
 
+		static const ConfigNode& getUndefined();
+
 	private:
 		union {
 			String* strData;

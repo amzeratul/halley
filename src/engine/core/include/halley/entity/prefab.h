@@ -41,6 +41,7 @@ namespace Halley {
 		void setGameData(const String& key, ConfigNode data);
 		void removeGameData(const String& key);
 		ConfigNode& getGameData(const String& key);
+		const ConfigNode& getGameData(const String& key) const;
 		const ConfigNode* tryGetGameData(const String& key) const;
 
 		virtual String getPrefabName() const;

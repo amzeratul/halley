@@ -199,6 +199,16 @@ ConfigNode& Prefab::getGameData(const String& key)
 	return gameData.getRoot()[key];
 }
 
+const ConfigNode& Prefab::getGameData(const String& key) const
+{
+	waitForLoad(true);
+	if (gameData.getRoot().getType() == ConfigNodeType::Map) {
+		return gameData.getRoot()[key];
+	} else {
+		return ConfigNode::getUndefined();
+	}
+}
+
 const ConfigNode* Prefab::tryGetGameData(const String& key) const
 {
 	waitForLoad(true);
