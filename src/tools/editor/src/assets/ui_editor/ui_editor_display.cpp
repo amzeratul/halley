@@ -48,6 +48,7 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 			}
 		});
 	} else {
+		lastWidgetUnderMouse = {};
 		curElement = {};
 		clearDisplay();
 	}
