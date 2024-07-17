@@ -196,14 +196,7 @@ ConfigNode& Prefab::getGameData(const String& key)
 	waitForLoad(true);
 
 	gameData.getRoot().ensureType(ConfigNodeType::Map);
-	auto& map = gameData.getRoot().asMap();
-	const auto iter = map.find(key);
-	if (iter == map.end()) {
-		auto [newIter, inserted] = map.insert(std::make_pair<String, ConfigNode>(String(key), ConfigNode::MapType()));
-		return newIter->second;
-	} else {
-		return iter->second;
-	}
+	return gameData.getRoot()[key];
 }
 
 const ConfigNode* Prefab::tryGetGameData(const String& key) const
