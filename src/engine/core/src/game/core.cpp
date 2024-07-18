@@ -677,7 +677,11 @@ bool Core::transitionStage()
 
 	// Check if there's a stage waiting to be switched to
 	if (pendingStageTransition) {
-		// Get rid of current stage
+        if (api && api->video) {
+            api->video->flush();
+        }
+
+        // Get rid of current stage
 		if (currentStage) {
 			HALLEY_DEBUG_TRACE();
 			currentStage.reset();
