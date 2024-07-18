@@ -6,10 +6,9 @@ float2 getTexCoord(float4 texCoords, float2 vertPos, float texCoordRotation) {
 }
 
 void getColours(float4 inColour, out float4 baseColour, out float4 addColour, bool premultiply) {
-    float4 inputCol = premultiply ? float4(inColour.rgb * inColour.a, inColour.a) : inColour;
-    float4 baseCol = clamp(inputCol, float4(0, 0, 0, 0), float4(1, 1, 1, 1));
-    baseColour = baseCol;
-    addColour = clamp(inputCol - baseCol, float4(0, 0, 0, 0), float4(1, 1, 1, 0));
+    float4 inputCol = premultiply ? float4(saturate(inColour.rgb) * inColour.a, inColour.a) : saturate(inColour);
+    baseColour = inputCol;
+    addColour = saturate(inColour - float4(1, 1, 1, 1));
 }
 
 float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vertPos, float angle) {
