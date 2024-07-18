@@ -47,7 +47,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 	const String shaderName = passName;
 
 	const auto shaderTypes = { ShaderType::Pixel, ShaderType::Vertex, ShaderType::Geometry, ShaderType::Combined };
-	const String languages[] = { "hlsl", "glsl", "glsl410", "glsl300es", "metal", "spirv" };
+	const String languages[] = { "hlsl", "glsl", "glsl410", "glsl300es", "metal", "spirv", "dxil" };
 
 	// Map languages to nodes
 	std::map<String, const ConfigNode*> langToNode;
@@ -78,7 +78,11 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 			if (shaderEntry.hasKey(curTypeName)) {
 				auto data = loadShader(shaderEntry[curTypeName].asString(), collector);
 				if (!hasEntry) {
-					data = ShaderImporter::convertHLSL(shaderName, curType, data, language);
+                    if (language == "dxil") {
+                        data = ShaderImporter::compileDXIL(shaderName, curType, data, material);
+                    } else {
+                        data = ShaderImporter::convertHLSL(shaderName, curType, data, language);
+                    }
 				}
 				
 				Metadata meta;

@@ -22,6 +22,8 @@ target_link_libraries (halley-cmd
         ${ShaderConductor_LIBRARY}
         )
 
+add_dxc_runtime_dependencies(halley-cmd)
+
 get_property(deps GLOBAL PROPERTY halley_external_plugin_dependencies)
 if (NOT ("${deps}" STREQUAL ""))
     separate_arguments(deps)

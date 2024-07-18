@@ -218,3 +218,7 @@ target_link_libraries (halley-tools
     ${FREETYPE_LIBRARIES}
     ${CMAKE_DL_LIBS}
     )
+
+if (WIN32)
+    target_link_libraries(halley-tools d3d12 dxc)
+endif()
