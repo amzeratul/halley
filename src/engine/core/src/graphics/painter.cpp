@@ -700,6 +700,7 @@ MaterialConstantBuffer& Painter::getConstantBuffer(const MaterialDataBlock& data
 		constantBuffers[hash] = ConstantBufferEntry{ buffer, 0 };
 		return *buffer;
 	} else {
+        iter->second.age = 0;
 		return *iter->second.buffer;
 	}
 }
