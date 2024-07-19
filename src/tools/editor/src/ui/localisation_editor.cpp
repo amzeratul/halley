@@ -53,7 +53,7 @@ void LocalisationEditor::wordCount()
 	totalCount = 0;
 	totalKeys = 0;
 	wordCounts.clear();
-	localisedCount.clear();
+	localisedInfo.clear();
 
 	HashSet<String> locKeys;
 	const auto langs = project.getProperties().getLanguages();
@@ -100,7 +100,7 @@ void LocalisationEditor::wordCount()
 					const auto langCode = language.getISOCode();
 					for (auto& e: languageNode.second.asMap()) {
 						if (locKeys.contains(e.first)) {
-							++localisedCount[langCode];
+							++localisedInfo[langCode].keysTranslated;
 						}
 					}
 				}
@@ -225,17 +225,25 @@ void LocalisationEditor::populateData()
 void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language)
 {
 	auto widget = factory.makeUI("halley/localisation_language_summary");
-
-	const auto iter = localisedCount.find(language.getISOCode());
-	const int localised = iter == localisedCount.end() ? 0 : iter->second;
-	int completion = (localised * 100) / totalKeys;
-	if (localised > 0 && completion == 0) {
-		completion = 1;
-	}
+	widget->layout();
 
 	widget->getWidgetAs<UIImage>("flag")->setSprite(getFlag(language));
 	widget->getWidgetAs<UILabel>("languageName")->setText(LocalisedString::fromUserString(getLanguageName(language)));
-	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(completion) + "% complete"));
+
+	const auto iter = localisedInfo.find(language.getISOCode());
+	const auto info = iter == localisedInfo.end() ? LocalisationInfo{} : iter->second;
+
+	const int translatedPercent = std::max((info.keysTranslated * 100) / totalKeys, info.keysTranslated > 0 ? 1 : 0);
+
+	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
+	const int totalW = rect.getWidth() - 2;
+	const int totalH = rect.getHeight();
+	const int greenW = std::max((info.keysTranslated * totalW) / totalKeys, info.keysTranslated > 0 ? 1 : 0);
+	const int yellowW = std::max((info.keysOutdated * totalW) / totalKeys, info.keysOutdated > 0 ? 1 : 0);
+
+	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent) + "% complete"));
+	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
+	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
 	container.add(widget);
 }

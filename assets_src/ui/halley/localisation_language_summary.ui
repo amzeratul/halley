@@ -1,4 +1,6 @@
 uuid: f88e9af7-33d1-4332-83d5-80e97b9060af
+sizer:
+  columnProportions: []
 widget:
   class: widget
 children:
@@ -37,11 +39,41 @@ children:
       class: widget
       size: [200, 0]
     children:
-      - uuid: 40d9d1e3-9866-4278-9de7-481b608dcacd
+      - uuid: d209f486-9383-4d17-83d8-cb5e89c8018a
+        proportion: 1
+        sizer:
+          columnProportions: []
+          type: free
         widget:
-          class: label
-          id: completion
-          text: 0% complete
+          class: image
+          colour: $ui_popupWindow
+          id: bar_full
+          image: $ui_list_item
+          size: [0, 19]
+        children:
+          - uuid: fbb9c6fe-8017-4ed8-8d42-db9c40d54d4b
+            border: [1, 1, 1, 1]
+            widget:
+              active: true
+              class: image
+              colour: "#e0a800"
+              id: bar_yellow
+              image: $ui_list_item
+          - uuid: 47bdac8d-3882-4ea0-a60e-20321b6501cc
+            border: [1, 1, 1, 1]
+            widget:
+              active: true
+              class: image
+              colour: "#00972d"
+              id: bar_green
+              image: $ui_list_item
+          - uuid: 40d9d1e3-9866-4278-9de7-481b608dcacd
+            proportion: 1
+            widget:
+              class: label
+              id: completion
+              text: 0%
+            fill: [centreHorizontal, centreVertical]
         fill: [fillHorizontal, centreVertical]
   - uuid: 1d5be313-a529-4140-b753-82386003d69a
     border: [10, 0, 0, 0]

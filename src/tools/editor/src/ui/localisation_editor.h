@@ -15,6 +15,11 @@ namespace Halley {
         void onAssetsLoaded() override;
 
     private:
+        struct LocalisationInfo {
+	        int keysTranslated;
+            int keysOutdated;
+        };
+
         Project& project;
         UIFactory& factory;
         I18NLanguage originalLanguage;
@@ -27,7 +32,7 @@ namespace Halley {
         HashMap<String, String> countryNames;
         HashMap<String, String> languageNames;
         HashSet<String> languageNeedsQualifier;
-        HashMap<String, int> localisedCount;
+        HashMap<String, LocalisationInfo> localisedInfo;
 
         void load();
 
