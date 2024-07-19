@@ -213,6 +213,8 @@ void LocalisationEditor::setupCountryNames()
 	countryNames["AG"] = "Argentina";
 	countryNames["MX"] = "Mexico";
 	countryNames["CL"] = "Chile";
+	countryNames["NL"] = "Netherlands";
+	countryNames["CZ"] = "Czechia";
 }
 
 void LocalisationEditor::setupLanguageNames()
@@ -231,6 +233,9 @@ void LocalisationEditor::setupLanguageNames()
 	languageNames["pl"] = "Polish";
 	languageNames["tr"] = "Turkish";
 	languageNames["uk"] = "Ukrainian";
+	languageNames["ar"] = "Arabic";
+	languageNames["nl"] = "Dutch";
+	languageNames["cs"] = "Czech";
 
 	languageNeedsQualifier.insert("en");
 	languageNeedsQualifier.insert("pt");
