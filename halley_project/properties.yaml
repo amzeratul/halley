@@ -1,0 +1,9 @@
+assetPackManifest: halley_project/asset_manifest.yaml
+binName: halley-editor
+defaultZoom: 1
+importByExtension: false
+languages: [en]
+name: halley-editor
+originalLanguage: en-GB
+platforms: [pc]
+uuid: e874a467-afa5-4793-8b28-876d0794ac75

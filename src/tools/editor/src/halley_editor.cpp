@@ -44,7 +44,14 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 
 ResourceOptions HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
-	locator.addFileSystem(unpackedAssetsPath);
+	const auto path = Path(assetsPath) / "editor.dat";
+	if (Path::exists(path)) {
+		locator.addPack(path, "", true);
+	} else {
+		Logger::logWarning("editor.dat not found, falling back to loading unpacked assets");
+		locator.addFileSystem(unpackedAssetsPath);
+	}
+
 	return ResourceOptions(true);
 }
 
@@ -152,18 +159,30 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 	preferences = std::make_unique<Preferences>();
 	preferences->setEditorVersion(getHalleyVersion().toString());
 	preferences->loadFromFile(*api.system);
+	auto windowDef = preferences->getWindowDefinition();
 
 	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath, preferences->getDisabledPlatforms());
 	std::unique_ptr<Project> project;
+	Future<std::unique_ptr<Project>> projectFuture;
 
 	if (projectPath) {
-		Logger::logInfo("Loading " + *projectPath);
-		project = loadProject(Path(*projectPath));
+		// NB: this is only safe to execute in another thread because ALL we're doing in this thread in the meanwhile is set up video
+		// Both are relatively slow operations, so it makes sense to load project in another thread
+		projectFuture = Concurrent::execute([=]
+		{
+			Logger::logInfo("Loading " + *projectPath);
+			return loadProject(Path(*projectPath));
+		});
 	}
 
-	api.video->setWindow(preferences->getWindowDefinition());
+	api.video->setWindow(std::move(windowDef));
 	api.video->setVsync(true);
 	api.system->setEnableScreensaver(true);
+
+	if (projectPath) {
+		project = projectFuture.get();
+	}
+
 	return std::make_unique<EditorRootStage>(*this, std::move(project), launcherPath);
 }
 

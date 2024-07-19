@@ -1,0 +1,26 @@
+---
+packs:
+  - name: editor
+    matches:
+      - ~:audioClip
+      - ~:binaryFile
+      - ~:configFile
+      - ~:scriptGraph
+      - ~:textFile
+      - ~:audioEvent
+      - ~:audioObject
+      - ~:variableTable
+      - ~:gameProperties
+      - ~:prefab
+      - ~:scene
+      - ~:navmeshSet
+      - ~:font
+      - ~:texture
+      - ~:uiDefinition
+      - ~:sprite
+      - ~:animation
+      - ~:spriteSheet
+      - ~:materialDefinition
+      - ~:shader
+      - ~:renderGraphDefinition
+...

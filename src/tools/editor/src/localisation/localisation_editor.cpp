@@ -9,7 +9,6 @@ LocalisationEditor::LocalisationEditor(Project& project, UIFactory& factory)
 	: UIWidget("localisation_editor", {}, UISizer())
     , project(project)
 	, factory(factory)
-	, originalLanguage(project.getProperties().getOriginalLanguage())
 {
 	setupCountryNames();
 	setupLanguageNames();
@@ -48,85 +47,16 @@ void LocalisationEditor::load()
 	project.addAssetLoadedListener(this);
 }
 
-void LocalisationEditor::wordCount()
+void LocalisationEditor::loadFromResources()
 {
-	totalCount = 0;
-	totalKeys = 0;
-	wordCounts.clear();
-	localisedInfo.clear();
-
-	HashSet<String> locKeys;
-	const auto langs = project.getProperties().getLanguages();
-
-	auto& gameResources = project.getGameResources();
-
 	// Scan for original language
-	for (auto& assetName: gameResources.enumerate<ConfigFile>()) {
-		if (assetName.startsWith("strings/")) {
-			auto& config = *gameResources.get<ConfigFile>(assetName);
-			const String category = getCategory(assetName);
+	originalLanguage = LocalisationData::generateFromResources(project.getProperties().getOriginalLanguage(), project.getGameResources(), *this);
 
-			for (auto& languageNode: config.getRoot().asMap()) {
-				const auto language = I18NLanguage(languageNode.first);
-				if (language == originalLanguage) {
-					for (auto& e: languageNode.second.asMap()) {
-						const auto& str = e.second.asString();
-
-						if (!locKeys.contains(e.first)) {
-							locKeys.insert(e.first);
-							++totalKeys;
-
-							const auto curCount = getWordCount(str);
-							wordCounts[category] += curCount;
-							totalCount += curCount;
-						} else {
-							Logger::logWarning("Duplicated localisation key \"" + e.first + "\" found in file " + assetName);
-						}
-					}
-				}
-			}
-		}
+	// Scan for localisation from HDD
+	localised.clear();
+	for (const auto& lang: project.getProperties().getLanguages()) {
+		localised[lang.getISOCode()] = LocalisationData::generateFromResources(lang, project.getGameResources(), *this);
 	}
-
-	// Scan for localisation
-	for (auto& assetName: gameResources.enumerate<ConfigFile>()) {
-		if (assetName.startsWith("strings/")) {
-			auto& config = *gameResources.get<ConfigFile>(assetName);
-
-			for (auto& languageNode: config.getRoot().asMap()) {
-				const auto language = I18NLanguage(languageNode.first);
-
-				if (language != originalLanguage && std_ex::contains(langs, language)) {
-					const auto langCode = language.getISOCode();
-					for (auto& e: languageNode.second.asMap()) {
-						if (locKeys.contains(e.first)) {
-							++localisedInfo[langCode].keysTranslated;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-int LocalisationEditor::getWordCount(const String& line)
-{
-	const char* delims = " ,;.?![]{}()";
-	auto start = delims;
-	auto end = delims + strlen(delims);
-
-	bool isInWord = false;
-	int count = 0;
-
-	for (auto c: line.cppStr()) {
-		const bool isWordCharacter = std::find(start, end, c) == end;
-		if (isWordCharacter && !isInWord) {
-			++count;
-		}
-		isInWord = isWordCharacter;
-	}
-
-	return count;
 }
 
 String LocalisationEditor::getCategory(const String& assetId) const
@@ -197,32 +127,43 @@ void LocalisationEditor::populateData()
 			return;
 		}
 	}
-	wordCount();
+	loadFromResources();
 
-	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(getFlag(originalLanguage));
-	getWidgetAs<UILabel>("mainLanguage")->setText(LocalisedString::fromUserString(getLanguageName(originalLanguage)));
-	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(totalCount)));
-
-	auto byCategory = getWidget("byCategory");
-	byCategory->clear();
+	const auto origStats = originalLanguage.getStats();
+	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(getFlag(originalLanguage.language));
+	getWidgetAs<UILabel>("mainLanguage")->setText(LocalisedString::fromUserString(getLanguageName(originalLanguage.language)));
+	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
+	getWidgetAs<UILabel>("keyCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalKeys)));
 
 	auto labelStyle = factory.getStyle("label");
-	for (const auto& [k, v]: wordCounts) {
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromUserString(k + ":")));
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
+	auto labelLightStyle = factory.getStyle("labelLight");
+	auto byCategory = getWidget("byCategory");
+	byCategory->clear();
+	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Category")));
+	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")));
+	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
+	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
+
+	for (const auto& [k, v]: origStats.wordsPerCategory) {
+		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(k)));
+		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
+
+		auto keys = origStats.keysPerCategory.at(k);
+		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(keys))));
+		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
 	}
 
 	auto languagesContainer = getWidget("languages");
 	languagesContainer->clear();
 
 	for (const auto& lang: project.getProperties().getLanguages()) {
-		if (lang != originalLanguage) {
-			addTranslationData(*languagesContainer, lang);
+		if (lang != originalLanguage.language) {
+			addTranslationData(*languagesContainer, lang, origStats.totalKeys);
 		}
 	}
 }
 
-void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language)
+void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys)
 {
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 	widget->layout();
@@ -230,18 +171,19 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	widget->getWidgetAs<UIImage>("flag")->setSprite(getFlag(language));
 	widget->getWidgetAs<UILabel>("languageName")->setText(LocalisedString::fromUserString(getLanguageName(language)));
 
-	const auto iter = localisedInfo.find(language.getISOCode());
-	const auto info = iter == localisedInfo.end() ? LocalisationInfo{} : iter->second;
+	const auto iter = localised.find(language.getISOCode());
+	const auto locData = iter == localised.end() ? LocalisationData{} : iter->second;
+	const auto locStats = locData.getTranslationStats(originalLanguage);
 
-	const int translatedPercent = std::max((info.keysTranslated * 100) / totalKeys, info.keysTranslated > 0 ? 1 : 0);
+	const int translatedPercent = std::max((locStats.translatedKeys * 100) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
 	const int totalH = rect.getHeight();
-	const int greenW = std::max((info.keysTranslated * totalW) / totalKeys, info.keysTranslated > 0 ? 1 : 0);
-	const int yellowW = std::max((info.keysOutdated * totalW) / totalKeys, info.keysOutdated > 0 ? 1 : 0);
+	const int greenW = std::max((locStats.translatedKeys * totalW) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
+	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalKeys, locStats.outdatedKeys > 0 ? 1 : 0);
 
-	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent) + "% complete"));
+	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent) + "%"));
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 

@@ -51,6 +51,10 @@ set (editor_sources
 	"src/assets/graph/script_graph_variable_inspector.cpp"
 	"src/assets/graph/script_target_entity_factory.cpp"
 	
+	"src/localisation/localisation_client.cpp"
+	"src/localisation/localisation_data.cpp"
+	"src/localisation/localisation_editor.cpp"
+
 	"src/project/check_source_update_task.cpp"
 	"src/project/check_update_task.cpp"
 	"src/project/core_api_wrapper.cpp"
@@ -92,7 +96,6 @@ set (editor_sources
 	"src/ui/game_properties_window.cpp"
 	"src/ui/infini_canvas.cpp"
 	"src/ui/load_project_window.cpp"
-	"src/ui/localisation_editor.cpp"
 	"src/ui/plotter_canvas.cpp"
 	"src/ui/plotter.cpp"
 	"src/ui/popup_window.cpp"
@@ -155,6 +158,10 @@ set (editor_headers
 	"src/assets/graph/script_graph_variable_inspector.h"
 	"src/assets/graph/script_target_entity_factory.h"
 
+	"src/localisation/localisation_client.h"
+	"src/localisation/localisation_data.h"
+	"src/localisation/localisation_editor.h"
+
 	"src/project/check_source_update_task.h"
 	"src/project/check_update_task.h"
 	"src/project/core_api_wrapper.h"
@@ -196,7 +203,6 @@ set (editor_headers
 	"src/ui/game_properties_window.h"
 	"src/ui/infini_canvas.h"
 	"src/ui/load_project_window.h"
-	"src/ui/localisation_editor.h"
 	"src/ui/plotter_canvas.h"
 	"src/ui/plotter.h"
 	"src/ui/popup_window.h"

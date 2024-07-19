@@ -5,7 +5,7 @@
 #include "ecs_window.h"
 #include "editor_settings_window.h"
 #include "game_properties_window.h"
-#include "localisation_editor.h"
+#include "src/localisation/localisation_editor.h"
 #include "plotter.h"
 #include "status_bar.h"
 #include "taskbar.h"

@@ -1,10 +1,11 @@
 #pragma once
 
+#include "localisation_data.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-    class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
+    class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener, public ILocalisationInfoRetriever {
     public:
         LocalisationEditor(Project& project, UIFactory& factory);
 
@@ -15,36 +16,28 @@ namespace Halley {
         void onAssetsLoaded() override;
 
     private:
-        struct LocalisationInfo {
-	        int keysTranslated;
-            int keysOutdated;
-        };
-
         Project& project;
         UIFactory& factory;
-        I18NLanguage originalLanguage;
+
+        LocalisationData originalLanguage;
+        HashMap<String, LocalisationData> localised;
 
         bool loaded = false;
-        int totalCount = 0;
-        int totalKeys = 0;
-        HashMap<String, int> wordCounts;
 
         HashMap<String, String> countryNames;
         HashMap<String, String> languageNames;
         HashSet<String> languageNeedsQualifier;
-        HashMap<String, LocalisationInfo> localisedInfo;
 
         void load();
 
-        void wordCount();
-        static int getWordCount(const String& line);
-        String getCategory(const String& assetId) const;
+        void loadFromResources();
+        String getCategory(const String& assetId) const override;
         String getLanguageName(const I18NLanguage& language) const;
         Sprite getFlag(const I18NLanguage& language) const;
         String getNumberWithCommas(int number) const;
 
         void populateData();
-        void addTranslationData(UIWidget& container, const I18NLanguage& language);
+        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys);
 
         void setupCountryNames();
         void setupLanguageNames();

@@ -120,6 +120,36 @@ children:
                   wordWrapped: false
                 fill: [centreHorizontal, centreVertical]
             fill: [left, fillVertical]
+          - uuid: 48f8aa27-b6c5-42d6-aea2-02483649f9f4
+            widget:
+              class: label
+              id: ""
+              text: "Key Count:"
+              wordWrapped: false
+            fill: left
+          - uuid: a3dae772-fd15-48bb-af42-e49a99992bb9
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 10
+              type: vertical
+            widget:
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [0, 2, 0, 2]
+              size: [100, 0]
+            children:
+              - uuid: 612e7b00-39dc-4e82-9674-ef072a6a0c98
+                widget:
+                  class: label
+                  id: keyCount
+                  text: 0
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+            fill: [left, fillVertical]
         fill: [left, fillVertical]
       - uuid: 704fed0e-cc96-44c0-aa87-3b861a186f3f
         border: [0, 15, 0, 0]
@@ -129,28 +159,45 @@ children:
           text: "Breakdown by category:"
           wordWrapped: false
         fill: left
-      - uuid: c559b6ca-4d9d-4149-aef6-86c282c913e6
+      - uuid: 75945935-94b4-415d-9212-2361002b34ea
+        border: [0, 0, 0, 0]
         sizer:
           columnProportions: []
+          columns: 2
+          gap: 10
+          type: vertical
         widget:
-          class: scrollBarPane
-          clipSize: [0, 0]
-          size: [0, 150]
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: halley_ui/ui_list_item.png
+          innerBorder: [6, 6, 6, 6]
+          size: [100, 0]
         children:
-          - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
-            border: [20, 0, 20, 0]
+          - uuid: c559b6ca-4d9d-4149-aef6-86c282c913e6
             sizer:
-              columnProportions: [1, 1]
-              columns: 2
-              gap: 1
-              type: grid
+              columnProportions: []
             widget:
-              class: widget
-              id: byCategory
-              size: [460, 0]
-            children: []
-            fill: [left, fillVertical]
-        fill: [fillHorizontal, centreVertical]
+              class: scrollBarPane
+              clipSize: [0, 0]
+              size: [0, 150]
+            children:
+              - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
+                proportion: 1
+                border: [0, 0, 4, 0]
+                sizer:
+                  columnProportions: [2, 1, 1, 1]
+                  columns: 4
+                  gap: 3
+                  type: grid
+                widget:
+                  class: widget
+                  id: byCategory
+                  size: [470, 0]
+                children: []
+                fill: [fillHorizontal, top]
+            fill: [left, centreVertical]
+        fill: [left, fillVertical]
   - uuid: 2e6c9059-28bd-4a02-b1aa-c3ac6468b51a
     proportion: 1
     border: [0, 0, 0, 0]
