@@ -4,21 +4,32 @@
 #include "halley/text/encode.h"
 using namespace Halley;
 
-ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
+ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions& options)
 {
 	ConfigNode result;
 
 	if (node.IsMap()) {
-		ConfigNode::MapType map;
-		for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
-			String key = it->first.as<std::string>();
-			map[std::move(key)] = parseYAMLNode(it->second);
+		if (options.parseMapsAsSequencesOfPairs) {
+			ConfigNode::SequenceType seq;
+			for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+				ConfigNode::MapType entry;
+				entry["key"] = String(it->first.as<std::string>());
+				entry["value"] = parseYAMLNode(it->second, options);
+				seq.push_back(std::move(entry));
+			}
+			result = std::move(seq);
+		} else {
+			ConfigNode::MapType map;
+			for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+				String key = it->first.as<std::string>();
+				map[std::move(key)] = parseYAMLNode(it->second, options);
+			}
+			result = std::move(map);
 		}
-		result = std::move(map);
 	} else if (node.IsSequence()) {
 		Vector<ConfigNode> list;
 		for (auto& n : node) {
-			list.emplace_back(parseYAMLNode(n));
+			list.emplace_back(parseYAMLNode(n, options));
 		}
 		result = std::move(list);
 	} else if (node.IsScalar()) {
@@ -52,34 +63,34 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 	return result;
 }
 
-void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data)
+void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options)
 {
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
-	config.getRoot() = parseConfig(strData);
+	config.getRoot() = parseConfig(strData, options);
 }
 
-ConfigFile YAMLConvert::parseConfig(gsl::span<const gsl::byte> data)
+ConfigFile YAMLConvert::parseConfig(gsl::span<const gsl::byte> data, const ParseOptions& options)
 {
 	ConfigFile config;
-	parseConfig(config, data);
+	parseConfig(config, data, options);
 	return config;
 }
 
-ConfigFile YAMLConvert::parseConfig(const Bytes& data)
+ConfigFile YAMLConvert::parseConfig(const Bytes& data, const ParseOptions& options)
 {
-	return parseConfig(gsl::as_bytes(gsl::span<const Byte>(data.data(), data.size())));
+	return parseConfig(gsl::as_bytes(gsl::span<const Byte>(data.data(), data.size())), options);
 }
 
-ConfigNode YAMLConvert::parseConfig(const String& str)
+ConfigNode YAMLConvert::parseConfig(const String& str, const ParseOptions& options)
 {
 	YAML::Node root = YAML::Load(str.cppStr());
-	return parseYAMLNode(root);
+	return parseYAMLNode(root, options);
 }
 
-ConfigFile YAMLConvert::parseConfig(const Path& path)
+ConfigFile YAMLConvert::parseConfig(const Path& path, const ParseOptions& options)
 {
 	const auto data = Path::readFile(path);
-	return parseConfig(data);
+	return parseConfig(data, options);
 }
 
 String YAMLConvert::generateYAML(const ConfigFile& config, const EmitOptions& options)

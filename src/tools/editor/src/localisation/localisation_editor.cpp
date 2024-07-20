@@ -50,12 +50,12 @@ void LocalisationEditor::load()
 void LocalisationEditor::loadFromResources()
 {
 	// Scan for original language
-	originalLanguage = LocalisationData::generateFromResources(project.getProperties().getOriginalLanguage(), project.getGameResources(), *this);
+	originalLanguage = LocalisationData::generateFromProject(project.getProperties().getOriginalLanguage(), project, *this);
 
 	// Scan for localisation from HDD
 	localised.clear();
 	for (const auto& lang: project.getProperties().getLanguages()) {
-		localised[lang.getISOCode()] = LocalisationData::generateFromResources(lang, project.getGameResources(), *this);
+		localised[lang.getISOCode()] = LocalisationData::generateFromProject(lang, project, *this);
 	}
 }
 

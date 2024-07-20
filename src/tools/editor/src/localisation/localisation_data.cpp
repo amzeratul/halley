@@ -1,4 +1,6 @@
 #include "localisation_data.h"
+#include "halley/tools/file/filesystem_cache.h"
+#include "halley/tools/project/project.h"
 
 using namespace Halley;
 
@@ -121,42 +123,48 @@ TranslationStats LocalisationData::getTranslationStats(const LocalisationData& o
 	return result;
 }
 
-LocalisationData LocalisationData::generateFromResources(const I18NLanguage& language, Resources& resources, const ILocalisationInfoRetriever& infoRetriever)
+namespace {
+	LocalisationDataChunk generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
+	{
+		LocalisationDataChunk result;
+		result.category = infoRetriever.getCategory(name);
+		result.name = std::move(name);
+
+		for (const auto& entry: data.asSequence()) {
+			String context; // TODO
+			String comment; // TODO
+			result.entries.emplace_back(entry["key"].asString(), entry["value"].asString(""), std::move(context), std::move(comment));
+		}
+
+		result.computeHash();
+
+		return result;
+	}
+}
+
+LocalisationData LocalisationData::generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever)
 {
 	LocalisationData result;
 	result.language = language;
 
-	// Scan for language
-	for (auto& assetName: resources.enumerate<ConfigFile>()) {
-		if (assetName.startsWith("strings/")) {
-			auto& config = *resources.get<ConfigFile>(assetName);
+	const auto& rootPath = project.getAssetsSrcPath() / "config" / "strings";
+	for (const auto& assetName: project.getFileSystemCache().enumerateDirectory(rootPath)) {
+		if (!assetName.getString().contains(language.getISOCode())) {
+			continue;
+		}
 
-			for (auto& languageNode: config.getRoot().asMap()) {
-				const auto curLang = I18NLanguage(languageNode.first);
+		const auto data = Path::readFile(rootPath / assetName);
+		if (!data.empty()) {
+			const auto config = YAMLConvert::parseConfig(data, YAMLConvert::ParseOptions{ true });
+
+			for (auto& languageNode: config.getRoot().asSequence()) {
+				const auto curLang = I18NLanguage(languageNode["key"].asString());
 				if (curLang == language) {
-					result.chunks.push_back(generateChunk(assetName.mid(8), languageNode.second, infoRetriever));
+					result.chunks.push_back(generateChunk(assetName.replaceExtension("").getString(false), languageNode["value"], infoRetriever));
 				}
 			}
 		}
 	}
-
-	return result;
-}
-
-LocalisationDataChunk LocalisationData::generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
-{
-	LocalisationDataChunk result;
-	result.category = infoRetriever.getCategory(name);
-	result.name = std::move(name);
-
-	// TODO: ConfigNode map is not ordered, should probably parse raw YAML here
-	for (const auto& [key, value]: data.asMap()) {
-		String context; // TODO
-		String comment; // TODO
-		result.entries.emplace_back(key, value.asString(""), std::move(context), std::move(comment));
-	}
-
-	result.computeHash();
 
 	return result;
 }
