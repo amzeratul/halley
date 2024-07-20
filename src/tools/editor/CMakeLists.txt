@@ -54,6 +54,8 @@ set (editor_sources
 	"src/localisation/localisation_client.cpp"
 	"src/localisation/localisation_data.cpp"
 	"src/localisation/localisation_editor.cpp"
+	"src/localisation/localisation_editor_root.cpp"
+	"src/localisation/localisation_language_editor.cpp"
 
 	"src/project/check_source_update_task.cpp"
 	"src/project/check_update_task.cpp"
@@ -161,6 +163,8 @@ set (editor_headers
 	"src/localisation/localisation_client.h"
 	"src/localisation/localisation_data.h"
 	"src/localisation/localisation_editor.h"
+	"src/localisation/localisation_editor_root.h"
+	"src/localisation/localisation_language_editor.h"
 
 	"src/project/check_source_update_task.h"
 	"src/project/check_update_task.h"

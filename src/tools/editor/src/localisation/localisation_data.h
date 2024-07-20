@@ -70,9 +70,12 @@ namespace Halley {
 	public:
 		I18NLanguage language;
 		Vector<LocalisationDataChunk> chunks;
+		HashMap<String, LocalisationHashType> keyHashes;
 
 		LocalisationStats getStats() const;
 		TranslationStats getTranslationStats(const LocalisationData& original) const;
+
+		void realignWith(const LocalisationData& original);
 
 		static LocalisationData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
 	};

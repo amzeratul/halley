@@ -19,6 +19,7 @@
 #include "src/assets/assets_browser.h"
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/asset_file_handler.h"
+#include "src/localisation/localisation_editor_root.h"
 #include "src/project/check_source_update_task.h"
 #include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
@@ -148,7 +149,7 @@ void ProjectWindow::makePagedPane()
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto remotes = std::make_shared<UIWidget>();
-	auto localisation = std::make_shared<LocalisationEditor>(project, factory);
+	auto localisation = std::make_shared<LocalisationEditorRoot>(project, factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);

@@ -1,17 +1,18 @@
 #include "localisation_editor.h"
 
+#include "localisation_editor_root.h"
+#include "localisation_language_editor.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
 
 using namespace Halley;
 
-LocalisationEditor::LocalisationEditor(Project& project, UIFactory& factory)
+LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory)
 	: UIWidget("localisation_editor", {}, UISizer())
+	, root(root)
     , project(project)
 	, factory(factory)
 {
-	setupCountryNames();
-	setupLanguageNames();
 }
 
 void LocalisationEditor::update(Time t, bool moved)
@@ -29,7 +30,7 @@ void LocalisationEditor::onMakeUI()
 void LocalisationEditor::onActiveChanged(bool active)
 {
 	if (active && project.isDLLLoaded()) {
-		populateData();
+		//populateData();
 	}
 }
 
@@ -68,45 +69,6 @@ String LocalisationEditor::getCategory(const String& assetId) const
 	}
 }
 
-String LocalisationEditor::getLanguageName(const I18NLanguage& ln) const
-{
-	auto cc = ln.getCountryCode();
-	auto lc = ln.getLanguageCode();
-	String country, language;
-
-	if (const auto iter = languageNames.find(lc); iter != languageNames.end()) {
-		language = iter->second;
-	} else {
-		language = lc;
-	}
-	
-	if (cc && languageNeedsQualifier.contains(lc)) {
-		if (const auto iter = countryNames.find(*cc); iter != countryNames.end()) {
-			country = iter->second;
-		} else {
-			country = *cc;
-		}
-	}
-
-	return country.isEmpty() ? language : language + " (" + country + ")";
-}
-
-Sprite LocalisationEditor::getFlag(const I18NLanguage& language) const
-{
-	if (language.getCountryCode()) {
-		auto countryCode = language.getCountryCode()->asciiLower();
-		if (countryCode == "hans") {
-			countryCode = "cn";
-		} else if (countryCode == "hant") {
-			countryCode = "hk";
-		}
-
-		return Sprite().setImage(factory.getResources(), "flags/h20/" + countryCode + ".png");
-	} else {
-		return {};
-	}
-}
-
 String LocalisationEditor::getNumberWithCommas(int number) const
 {
 	if (number >= 1'000'000) {
@@ -120,18 +82,19 @@ String LocalisationEditor::getNumberWithCommas(int number) const
 
 void LocalisationEditor::populateData()
 {
-	if (!loaded) {
+	if (loaded) {
+		loadFromResources();
+	} else {
 		if (project.isDLLLoaded()) {
-			load();
+			load(); // Calls loadFromResources();
 		} else {
 			return;
 		}
 	}
-	loadFromResources();
 
 	const auto origStats = originalLanguage.getStats();
-	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(getFlag(originalLanguage.language));
-	getWidgetAs<UILabel>("mainLanguage")->setText(LocalisedString::fromUserString(getLanguageName(originalLanguage.language)));
+	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.language));
+	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.language));
 	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
 	getWidgetAs<UILabel>("keyCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalKeys)));
 
@@ -153,23 +116,32 @@ void LocalisationEditor::populateData()
 		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
 	}
 
+	bool canEditOriginal = true; // TODO
+	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
+	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
+	{
+		openLanguage(originalLanguage, true);
+	});
+
 	auto languagesContainer = getWidget("languages");
 	languagesContainer->clear();
 
 	for (const auto& lang: project.getProperties().getLanguages()) {
 		if (lang != originalLanguage.language) {
-			addTranslationData(*languagesContainer, lang, origStats.totalKeys);
+			bool canEdit = false; // TODO
+			addTranslationData(*languagesContainer, lang, origStats.totalKeys, canEdit);
 		}
 	}
 }
 
-void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys)
+void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit)
 {
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 	widget->layout();
 
-	widget->getWidgetAs<UIImage>("flag")->setSprite(getFlag(language));
-	widget->getWidgetAs<UILabel>("languageName")->setText(LocalisedString::fromUserString(getLanguageName(language)));
+	widget->getWidgetAs<UIImage>("flag")->setSprite(root.getFlag(language));
+	widget->getWidgetAs<UILabel>("languageName")->setText(root.getLanguageName(language));
+	widget->getWidgetAs<UIButton>("edit")->setLabel(LocalisedString::fromHardcodedString(canEdit ? "Edit..." : "View..."));
 
 	const auto iter = localised.find(language.getISOCode());
 	const auto locData = iter == localised.end() ? LocalisationData{} : iter->second;
@@ -187,59 +159,15 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
+	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = language, canEdit] (const UIEvent& event)
+	{
+		openLanguage(localised.at(language.getISOCode()), canEdit);
+	});
+
 	container.add(widget);
 }
 
-void LocalisationEditor::setupCountryNames()
+void LocalisationEditor::openLanguage(LocalisationData& localisationData, bool canEdit)
 {
-	countryNames["GB"] = "United Kingdom";
-	countryNames["US"] = "United States";
-	countryNames["CA"] = "Canada";
-	countryNames["FR"] = "France";
-	countryNames["ES"] = "Spain";
-	countryNames["IT"] = "Italy";
-	countryNames["PT"] = "Portugal";
-	countryNames["BR"] = "Brazil";
-	countryNames["DE"] = "Germany";
-	countryNames["RU"] = "Russia";
-	countryNames["JP"] = "Japan";
-	countryNames["Hans"] = "Simplified";
-	countryNames["Hant"] = "Traditional";
-	countryNames["KR"] = "South Korea";
-	countryNames["TH"] = "Thailand";
-	countryNames["PL"] = "Poland";
-	countryNames["TR"] = u8"Türkiye";
-	countryNames["UA"] = "Ukraine";
-	countryNames["AG"] = "Argentina";
-	countryNames["MX"] = "Mexico";
-	countryNames["CL"] = "Chile";
-	countryNames["NL"] = "Netherlands";
-	countryNames["CZ"] = "Czechia";
-}
-
-void LocalisationEditor::setupLanguageNames()
-{
-	languageNames["en"] = "English";
-	languageNames["fr"] = "French";
-	languageNames["es"] = "Spanish";
-	languageNames["it"] = "Italian";
-	languageNames["pt"] = "Portuguese";
-	languageNames["de"] = "German";
-	languageNames["ru"] = "Russian";
-	languageNames["ja"] = "Japanese";
-	languageNames["zh"] = "Chinese";
-	languageNames["ko"] = "Korean";
-	languageNames["th"] = "Thai";
-	languageNames["pl"] = "Polish";
-	languageNames["tr"] = "Turkish";
-	languageNames["uk"] = "Ukrainian";
-	languageNames["ar"] = "Arabic";
-	languageNames["nl"] = "Dutch";
-	languageNames["cs"] = "Czech";
-
-	languageNeedsQualifier.insert("en");
-	languageNeedsQualifier.insert("pt");
-	languageNeedsQualifier.insert("zh");
-	languageNeedsQualifier.insert("fr");
-	languageNeedsQualifier.insert("es");
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, originalLanguage, &localisationData == &originalLanguage ? nullptr : &localisationData, canEdit));
 }

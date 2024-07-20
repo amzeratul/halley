@@ -50,7 +50,7 @@ children:
         sizer:
           columnProportions: [1, 1]
           columns: 2
-          gap: 4
+          gap: 6
           type: grid
         widget:
           class: widget
@@ -71,12 +71,20 @@ children:
                   text: "Main language:"
                   wordWrapped: false
                 fill: left
-          - uuid: 6818e524-9b58-4695-aa39-cf63e1a00306
+          - uuid: 741c3f8f-322c-4990-9ce5-08b9ff962d40
+            border: [0, 0, 0, 0]
             sizer:
               columnProportions: []
-              gap: 4
+              columns: 2
+              gap: 10
+              type: horizontal
             widget:
-              class: widget
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [4, 4, 4, 4]
+              size: [200, 0]
             children:
               - uuid: 928dfda7-5afb-4ce3-96ea-97f084dc4255
                 widget:
@@ -84,12 +92,14 @@ children:
                   id: mainLanguageFlag
                   image: flags/h20/gb.png
               - uuid: 5b4f0f75-8649-4a86-a163-eff8ffe5d56f
+                border: [0, 1, 0, 0]
                 widget:
                   class: label
                   id: mainLanguage
                   text: English
                   wordWrapped: false
                 fill: left
+            fill: [left, fillVertical]
           - uuid: c04b8568-2193-4283-abe1-5b9514486099
             widget:
               class: label
@@ -197,6 +207,15 @@ children:
                 children: []
                 fill: [fillHorizontal, top]
             fill: [left, centreVertical]
+        fill: [left, fillVertical]
+      - uuid: 05e11bcb-8c98-4bc3-b224-4e77b5c450dc
+        border: [0, 0, 0, 0]
+        widget:
+          class: button
+          enabled: true
+          id: editOriginal
+          size: [200, 0]
+          text: Edit Original...
         fill: [left, fillVertical]
   - uuid: 2e6c9059-28bd-4a02-b1aa-c3ac6468b51a
     proportion: 1

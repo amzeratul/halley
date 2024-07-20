@@ -96,31 +96,26 @@ LocalisationStats LocalisationData::getStats() const
 TranslationStats LocalisationData::getTranslationStats(const LocalisationData& original) const
 {
 	TranslationStats result;
-	
-	HashMap<String, LocalisationHashType> origKeys;
-	for (const auto& chunk: original.chunks) {
-		for (const auto& entry: chunk.entries) {
-			const auto& value = entry.values.back();
-			origKeys[value.value] = value.hash;
-		}
-	}
+	const auto& origKeys = original.keyHashes;
 
-	for (const auto& chunk: chunks) {
-		for (const auto& entry: chunk.entries) {
-			const auto& value = entry.values.back();
-			const auto iter = origKeys.find(value.value);
+	for (const auto& keyHash: keyHashes) {
+		const auto iter = origKeys.find(keyHash.first);
 
-			if (iter != origKeys.end()) {
-				if (iter->second == value.hash) {
-					result.translatedKeys++;
-				} else {
-					result.outdatedKeys++;
-				}
+		if (iter != origKeys.end()) {
+			if (iter->second == keyHash.second) {
+				result.translatedKeys++;
+			} else {
+				result.outdatedKeys++;
 			}
 		}
 	}
 
 	return result;
+}
+
+void LocalisationData::realignWith(const LocalisationData& original)
+{
+	// TODO
 }
 
 namespace {
@@ -163,6 +158,13 @@ LocalisationData LocalisationData::generateFromProject(const I18NLanguage& langu
 					result.chunks.push_back(generateChunk(assetName.replaceExtension("").getString(false), languageNode["value"], infoRetriever));
 				}
 			}
+		}
+	}
+
+	for (const auto& chunk: result.chunks) {
+		for (const auto& entry: chunk.entries) {
+			const auto& value = entry.values.back();
+			result.keyHashes[value.value] = value.hash;
 		}
 	}
 

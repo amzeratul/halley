@@ -79,7 +79,7 @@ children:
     border: [10, 0, 0, 0]
     widget:
       class: button
-      enabled: false
+      enabled: true
       id: edit
       size: [100, 0]
       text: Edit...

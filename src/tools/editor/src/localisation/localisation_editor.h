@@ -5,9 +5,11 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-    class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener, public ILocalisationInfoRetriever {
+	class LocalisationEditorRoot;
+
+	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener, public ILocalisationInfoRetriever {
     public:
-        LocalisationEditor(Project& project, UIFactory& factory);
+        LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory);
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
@@ -16,6 +18,7 @@ namespace Halley {
         void onAssetsLoaded() override;
 
     private:
+        LocalisationEditorRoot& root;
         Project& project;
         UIFactory& factory;
 
@@ -24,22 +27,15 @@ namespace Halley {
 
         bool loaded = false;
 
-        HashMap<String, String> countryNames;
-        HashMap<String, String> languageNames;
-        HashSet<String> languageNeedsQualifier;
-
         void load();
 
         void loadFromResources();
         String getCategory(const String& assetId) const override;
-        String getLanguageName(const I18NLanguage& language) const;
-        Sprite getFlag(const I18NLanguage& language) const;
         String getNumberWithCommas(int number) const;
 
         void populateData();
-        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys);
+        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
 
-        void setupCountryNames();
-        void setupLanguageNames();
+        void openLanguage(LocalisationData& localisationData, bool canEdit);
     };
 }
