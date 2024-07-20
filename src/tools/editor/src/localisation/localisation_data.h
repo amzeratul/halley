@@ -75,7 +75,9 @@ namespace Halley {
 		LocalisationStats getStats() const;
 		TranslationStats getTranslationStats(const LocalisationData& original) const;
 
-		void realignWith(const LocalisationData& original);
+		LocalisationDataChunk& getChunk(const String& name);
+
+		void alignWith(const LocalisationData& original);
 
 		static LocalisationData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
 	};

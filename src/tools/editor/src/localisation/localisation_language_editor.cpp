@@ -29,8 +29,35 @@ void LocalisationLanguageEditor::onMakeUI()
 		getWidgetAs<UILabel>("dstLanguage")->setText(root.getLanguageName(dstLanguage->language));
 	}
 
-	setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
+	Vector<UIDropdown::Entry> chunks;
+	chunks.push_back(UIDropdown::Entry("", "[All]"));
+	for (auto& chunk: srcLanguage.chunks) {
+		String name = chunk.name;
+
+		if (dstLanguage) {
+			const auto& dstChunk = dstLanguage->getChunk(chunk.name);
+			const auto srcStats = chunk.getStats();
+			const auto dstStats = dstChunk.getStats();
+			const int complete = srcStats.totalKeys > 0 ? std::max(dstStats.totalKeys * 100 / srcStats.totalKeys, dstStats.totalKeys > 0 ? 1 : 0) : 0;
+			name = "[" + toString(complete, 10, 3, ' ') + "%] " + name;
+		}
+
+		chunks.push_back(UIDropdown::Entry(chunk.name, name));
+	}
+	getWidgetAs<UIDropdown>("chunk")->setOptions(chunks);
+
+	bindData("chunk", "", [=] (String chunkId)
+	{
+		setChunk(chunkId);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "close", [this] (const UIEvent& event)
 	{
 		root.returnToRoot();
 	});
+}
+
+void LocalisationLanguageEditor::setChunk(const String& chunkId)
+{
+	// TODO
 }

@@ -113,9 +113,43 @@ TranslationStats LocalisationData::getTranslationStats(const LocalisationData& o
 	return result;
 }
 
-void LocalisationData::realignWith(const LocalisationData& original)
+LocalisationDataChunk& LocalisationData::getChunk(const String& name)
 {
-	// TODO
+	for (auto& chunk: chunks) {
+		if (chunk.name == name) {
+			return chunk;
+		}
+	}
+	throw Exception("Chunk not found: " + name, HalleyExceptions::Tools);
+}
+
+void LocalisationData::alignWith(const LocalisationData& original)
+{
+	// Store original entries
+	HashMap<String, LocalisationDataEntry> entries;
+	for (auto& chunk: chunks) {
+		for (auto& entry: chunk.entries) {
+			const auto key = entry.key;
+			entries[key] = std::move(entry);
+		}
+	}
+
+	// Copy chunks from original
+	chunks = original.chunks;
+
+	// Replace entry data
+	for (auto& chunk: chunks) {
+		auto origEntries = std::move(chunk.entries);
+		chunk.entries.clear();
+
+		for (auto& entry: origEntries) {
+			const auto iter = entries.find(entry.key);
+			if (iter != entries.end()) {
+				chunk.entries.push_back(std::move(iter->second));
+			}
+		}
+		chunk.computeHash();
+	}
 }
 
 namespace {
@@ -142,9 +176,11 @@ LocalisationData LocalisationData::generateFromProject(const I18NLanguage& langu
 	LocalisationData result;
 	result.language = language;
 
+	auto suffix = language.getISOCode();
+
 	const auto& rootPath = project.getAssetsSrcPath() / "config" / "strings";
 	for (const auto& assetName: project.getFileSystemCache().enumerateDirectory(rootPath)) {
-		if (!assetName.getString().contains(language.getISOCode())) {
+		if (!assetName.getString().contains(suffix)) {
 			continue;
 		}
 
@@ -155,7 +191,8 @@ LocalisationData LocalisationData::generateFromProject(const I18NLanguage& langu
 			for (auto& languageNode: config.getRoot().asSequence()) {
 				const auto curLang = I18NLanguage(languageNode["key"].asString());
 				if (curLang == language) {
-					result.chunks.push_back(generateChunk(assetName.replaceExtension("").getString(false), languageNode["value"], infoRetriever));
+					auto chunkName = assetName.replaceExtension("").getString(false).replaceAll("-" + suffix, "").replaceAll("_" + suffix, "");
+					result.chunks.push_back(generateChunk(std::move(chunkName), languageNode["value"], infoRetriever));
 				}
 			}
 		}

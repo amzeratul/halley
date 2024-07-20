@@ -56,7 +56,9 @@ void LocalisationEditor::loadFromResources()
 	// Scan for localisation from HDD
 	localised.clear();
 	for (const auto& lang: project.getProperties().getLanguages()) {
-		localised[lang.getISOCode()] = LocalisationData::generateFromProject(lang, project, *this);
+		auto data = LocalisationData::generateFromProject(lang, project, *this);
+		data.alignWith(originalLanguage);
+		localised[lang.getISOCode()] = std::move(data);
 	}
 }
 
@@ -136,6 +138,8 @@ void LocalisationEditor::populateData()
 
 void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit)
 {
+	totalKeys = std::max(totalKeys, 1); // Avoid divisions by zero
+
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 	widget->layout();
 

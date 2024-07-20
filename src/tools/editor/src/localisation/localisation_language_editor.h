@@ -17,5 +17,7 @@ namespace Halley {
 		LocalisationData& srcLanguage;
 		LocalisationData* dstLanguage;
 		bool canEdit = false;
+
+		void setChunk(const String& chunkId);
     };
 }

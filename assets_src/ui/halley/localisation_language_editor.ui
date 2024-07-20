@@ -86,7 +86,7 @@ children:
               childLayerAdjustment: 0
               class: image
               colour: $ui_popupWindow
-              id: ""
+              id: dstLanguageContainer
               image: halley_ui/ui_list_item.png
               innerBorder: [4, 4, 4, 4]
               size: [300, 0]
@@ -98,7 +98,7 @@ children:
                   gap: 10
                 widget:
                   class: widget
-                  id: dstLanguageContainer
+                  id: ""
                 children:
                   - uuid: 1e682d80-2bc6-4bdc-a1dd-af23c6e5330d
                     widget:
@@ -116,6 +116,13 @@ children:
                 fill: [centreHorizontal, centreVertical]
             fill: [fillHorizontal, fillVertical]
         fill: [centreHorizontal, fillVertical]
+      - uuid: e91d5c87-e9c5-42c4-b5ff-95835543ce2b
+        widget:
+          class: dropdown
+          id: chunk
+          options: []
+          size: [400, 22]
+        fill: [left, fillVertical]
       - uuid: f0c18d5d-5061-475d-b536-e9d41b4ba6a0
         proportion: 1
         border: [0, 0, 0, 0]
