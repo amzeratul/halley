@@ -671,6 +671,15 @@ Rect4f TextRenderer::getAABB() const
 	return Rect4f(pos, pos + size);
 }
 
+bool TextRenderer::isCompatibleWith(const TextRenderer& other) const
+{
+	if (!font || !other.font) {
+		// At least one won't draw, so no incompatibility
+		return true;
+	}
+	return getMaterial(*font)->isCompatibleWith(*other.getMaterial(*other.font));
+}
+
 float TextRenderer::getScale(const Font& f) const
 {
 	const bool usingReplacement = &f != font.get();

@@ -122,7 +122,7 @@ namespace Halley
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const;
 
-		Vector<uint32_t> getSpriteDrawOrder(int mask, Rect4f view) const;
+		Vector<uint32_t> getSpriteDrawOrder(int mask, Rect4f view, bool reorder) const;
 		Vector<uint32_t> getSpriteDrawOrderReordered(int mask, Rect4f view) const;
 	};
 }

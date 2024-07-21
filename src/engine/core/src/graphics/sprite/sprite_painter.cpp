@@ -140,17 +140,22 @@ Rect4f SpritePainterEntry::getBounds(const Rect4f& view, const Vector<Sprite>& c
 
 bool SpritePainterEntry::isCompatibleWith(const SpritePainterEntry& other, const Vector<Sprite>& cachedSprites, const Vector<TextRenderer>& cachedText) const
 {
-	if (type != other.type) {
+	if (type != other.type || clip != other.clip) {
 		return false;
 	}
 
 	if (type == SpritePainterEntryType::SpriteCached || type == SpritePainterEntryType::SpriteRef) {
 		const auto& s0 = getSprites(cachedSprites)[0];
 		const auto& s1 = other.getSprites(cachedSprites)[0];
+
 		// Treat no material as compatible, since it'll be ignored by the renderer a little after this anyway
-		return !s0.hasMaterial() || !s1.hasMaterial() || s0.getMaterial().isCompatibleWith(s1.getMaterial());
+		if (!s0.hasMaterial() || !s1.hasMaterial()) {
+			return true;
+		}
+
+		return s0.getMaterial().isCompatibleWith(s1.getMaterial());
 	} else if (type == SpritePainterEntryType::TextCached || type == SpritePainterEntryType::TextRef) {
-		return false; // TODO
+		return getTexts(cachedText)[0].isCompatibleWith(other.getTexts(cachedText)[0]);
 	} else {
 		return false;
 	}
@@ -358,7 +363,7 @@ void SpritePainter::draw(int mask, Painter& painter)
 	const Rect4f view = painter.getCurrentCamera().getClippingRectangle();
 
 	// Draw!
-	for (auto spriteIdx: getSpriteDrawOrderReordered(mask, view)) {
+	for (auto spriteIdx: getSpriteDrawOrder(mask, view, true)) {
 		auto& s = sprites[spriteIdx];
 		const auto type = s.getType();
 		
@@ -373,8 +378,12 @@ void SpritePainter::draw(int mask, Painter& painter)
 	painter.flush();
 }
 
-Vector<uint32_t> SpritePainter::getSpriteDrawOrder(int mask, Rect4f view) const
+Vector<uint32_t> SpritePainter::getSpriteDrawOrder(int mask, Rect4f view, bool reorder) const
 {
+	if (reorder) {
+		return getSpriteDrawOrderReordered(mask, view);
+	}
+
 	Vector<uint32_t> result;
 	const auto nTotal = static_cast<uint32_t>(sprites.size());
 	for (uint32_t i = 0; i < nTotal; ++i) {
@@ -403,7 +412,7 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 	Vector<Entry> entries;
 	Vector<Rect4f> skippedRects;
 	skippedRects.reserve(64);
-	constexpr int maxSkipsInARow = 8;
+	constexpr int maxSkipsInARow = 16;
 
 	// Generate filtered sprite draw order, and sprite bounds
 	const auto nTotal = static_cast<uint32_t>(sprites.size());
@@ -442,8 +451,12 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 		}
 
 		// Add to result
-		result.push_back(i);
+		result.push_back(entry.idx);
 		entry.assigned = true;
+
+		if (sprites[entry.idx].getType() == SpritePainterEntryType::Callback) {
+			continue;
+		}
 
 		// Look ahead and see if anyone else can join
 		skipped.clear();
@@ -451,19 +464,25 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 		int skipsInARow = 0;
 		for (uint32_t j = i + 1; j < n; ++j) {
 			auto& other = entries[j];
-			if (!other.assigned) {
-				if (sprites[entry.idx].isCompatibleWith(sprites[other.idx], cachedSprites, cachedText) && !overlapsAny(other.bounds, combinedSkipped, skipped)) {
-					result.push_back(j);
-					other.assigned = true;
-					skipsInARow = 0;
-				} else {
-					combinedSkipped = skipped.empty() ? other.bounds : combinedSkipped.merge(other.bounds);
-					skipped.push_back(other.bounds);
-					++skipsInARow;
+			if (other.assigned) {
+				continue;
+			}
 
-					if (skipsInARow >= maxSkipsInARow) {
-						break;
-					}
+			if (sprites[other.idx].getType() == SpritePainterEntryType::Callback) {
+				break;
+			}
+
+			if (sprites[entry.idx].isCompatibleWith(sprites[other.idx], cachedSprites, cachedText) && !overlapsAny(other.bounds, combinedSkipped, skipped)) {
+				result.push_back(other.idx);
+				other.assigned = true;
+				skipsInARow = 0;
+			} else {
+				combinedSkipped = skipped.empty() ? other.bounds : combinedSkipped.merge(other.bounds);
+				skipped.push_back(other.bounds);
+				++skipsInARow;
+
+				if (skipsInARow >= maxSkipsInARow) {
+					break;
 				}
 			}
 		}

@@ -86,6 +86,8 @@ namespace Halley
 		bool empty() const;
 		Rect4f getAABB() const;
 
+		bool isCompatibleWith(const TextRenderer& other) const; // Can be drawn as part of the same draw call
+
 	private:
 		std::shared_ptr<const Font> font;
 		mutable std::map<const Font*, std::shared_ptr<Material>> materials;
