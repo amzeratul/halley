@@ -60,23 +60,33 @@ SpritePainterEntryType SpritePainterEntry::getType() const
 	return type;
 }
 
-gsl::span<const Sprite> SpritePainterEntry::getSprites() const
+gsl::span<const Sprite> SpritePainterEntry::getSprites(const Vector<Sprite>& cached) const
 {
-	Expects(ptr != nullptr);
-	Expects(type == SpritePainterEntryType::SpriteRef);
-	return gsl::span<const Sprite>(static_cast<const Sprite*>(ptr), count);
+	assert(type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached);
+
+	if (type == SpritePainterEntryType::SpriteRef) {
+		assert(ptr != nullptr);
+		return { static_cast<const Sprite*>(ptr), count };
+	} else {
+		return { cached.data() + index, count };
+	}
 }
 
-gsl::span<const TextRenderer> SpritePainterEntry::getTexts() const
+gsl::span<const TextRenderer> SpritePainterEntry::getTexts(const Vector<TextRenderer>& cached) const
 {
-	Expects(ptr != nullptr);
-	Expects(type == SpritePainterEntryType::TextRef);
-	return gsl::span<const TextRenderer>(static_cast<const TextRenderer*>(ptr), count);
+	assert(type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached);
+
+	if (type == SpritePainterEntryType::TextRef) {
+		assert(ptr != nullptr);
+		return { static_cast<const TextRenderer*>(ptr), count };
+	} else {
+		return { cached.data() + index, count };
+	}
 }
 
 uint32_t SpritePainterEntry::getIndex() const
 {
-	Expects(ptr == nullptr);
+	assert(ptr == nullptr);
 	return index;
 }
 
@@ -93,6 +103,57 @@ int SpritePainterEntry::getMask() const
 const std::optional<Rect4f>& SpritePainterEntry::getClip() const
 {
 	return clip;
+}
+
+Rect4f SpritePainterEntry::getBounds(const Rect4f& view, const Vector<Sprite>& cachedSprites, const Vector<TextRenderer>& cachedText) const
+{
+	if (type == SpritePainterEntryType::SpriteCached || type == SpritePainterEntryType::SpriteRef) {
+		bool first = true;
+		Rect4f result;
+		for (const auto& s: getSprites(cachedSprites)) {
+			auto r = s.getAABB();
+			if (first) {
+				result = r;
+				first = false;
+			} else {
+				result = result.merge(r);
+			}
+		}
+		return result;
+	} else if (type == SpritePainterEntryType::TextCached || type == SpritePainterEntryType::TextRef) {
+		bool first = true;
+		Rect4f result;
+		for (const auto& s: getTexts(cachedText)) {
+			auto r = s.getAABB();
+			if (first) {
+				result = r;
+				first = false;
+			} else {
+				result = result.merge(r);
+			}
+		}
+		return result;
+	} else {
+		return view;
+	}
+}
+
+bool SpritePainterEntry::isCompatibleWith(const SpritePainterEntry& other, const Vector<Sprite>& cachedSprites, const Vector<TextRenderer>& cachedText) const
+{
+	if (type != other.type) {
+		return false;
+	}
+
+	if (type == SpritePainterEntryType::SpriteCached || type == SpritePainterEntryType::SpriteRef) {
+		const auto& s0 = getSprites(cachedSprites)[0];
+		const auto& s1 = other.getSprites(cachedSprites)[0];
+		// Treat no material as compatible, since it'll be ignored by the renderer a little after this anyway
+		return !s0.hasMaterial() || !s1.hasMaterial() || s0.getMaterial().isCompatibleWith(s1.getMaterial());
+	} else if (type == SpritePainterEntryType::TextCached || type == SpritePainterEntryType::TextRef) {
+		return false; // TODO
+	} else {
+		return false;
+	}
 }
 
 SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
@@ -289,37 +350,126 @@ void SpritePainter::add(Rect4f bounds)
 void SpritePainter::draw(int mask, Painter& painter)
 {
 	if (dirty) {
-		// TODO: implement hierarchical bucketing.
-		// - one bucket per layer
-		// - for each layer, one bucket per vertical band of the screen (32px or so)
-		// - sort each leaf bucket
-		std::sort(sprites.begin(), sprites.end()); // lol
+		std::sort(sprites.begin(), sprites.end());
 		dirty = false;
 	}
 
 	// View
-	const auto& cam = painter.getCurrentCamera();
-	Rect4f view = cam.getClippingRectangle();
+	const Rect4f view = painter.getCurrentCamera().getClippingRectangle();
 
 	// Draw!
-	for (auto& s : sprites) {
-		if ((s.getMask() & mask) != 0) {
-			const auto type = s.getType();
-			
-			if (type == SpritePainterEntryType::SpriteRef) {
-				draw(s.getSprites(), painter, view, s.getClip());
-			} else if (type == SpritePainterEntryType::SpriteCached) {
-				draw(gsl::span<const Sprite>(cachedSprites.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
-			} else if (type == SpritePainterEntryType::TextRef) {
-				draw(s.getTexts(), painter, view, s.getClip());
-			} else if (type == SpritePainterEntryType::TextCached) {
-				draw(gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
-			} else if (type == SpritePainterEntryType::Callback) {
-				draw(callbacks.at(s.getIndex()), painter, s.getClip());
-			}
+	for (auto spriteIdx: getSpriteDrawOrderReordered(mask, view)) {
+		auto& s = sprites[spriteIdx];
+		const auto type = s.getType();
+		
+		if (type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached) {
+			draw(s.getSprites(cachedSprites), painter, view, s.getClip());
+		} else if (type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached) {
+			draw(s.getTexts(cachedText), painter, view, s.getClip());
+		} else if (type == SpritePainterEntryType::Callback) {
+			draw(callbacks.at(s.getIndex()), painter, s.getClip());
 		}
 	}
 	painter.flush();
+}
+
+Vector<uint32_t> SpritePainter::getSpriteDrawOrder(int mask, Rect4f view) const
+{
+	Vector<uint32_t> result;
+	const auto nTotal = static_cast<uint32_t>(sprites.size());
+	for (uint32_t i = 0; i < nTotal; ++i) {
+		auto& s = sprites[i];
+
+		if ((s.getMask() & mask) != 0) {
+			result.emplace_back(i);
+		}
+	}
+	return result;
+}
+
+Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f view) const
+{
+	struct Entry {
+		uint32_t idx = 0;
+		bool assigned = false;
+		Rect4f bounds;
+
+		Entry(uint32_t idx = 0, Rect4f bounds = {})
+			: idx(idx)
+			, bounds(bounds)
+		{}
+	};
+
+	Vector<Entry> entries;
+	Vector<Rect4f> skippedRects;
+	skippedRects.reserve(64);
+	constexpr int maxSkipsInARow = 8;
+
+	// Generate filtered sprite draw order, and sprite bounds
+	const auto nTotal = static_cast<uint32_t>(sprites.size());
+	for (uint32_t i = 0; i < nTotal; ++i) {
+		auto& s = sprites[i];
+
+		if ((s.getMask() & mask) != 0) {
+			entries.emplace_back(i, s.getBounds(view, cachedSprites, cachedText));
+		}
+	}
+	const auto n = static_cast<uint32_t>(entries.size());
+
+	Vector<uint32_t> result;
+	result.reserve(entries.size());
+	Vector<Rect4f> skipped;
+
+	auto overlapsAny = [](const Rect4f& a, const Rect4f bCombined, const Vector<Rect4f>& bs)
+	{
+		if (bs.empty() || !a.overlaps(bCombined)) {
+			return false;
+		}
+
+		for (const auto& b: bs) {
+			if (a.overlaps(b)) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	// Go through everyone, adding to final list, including any re-ordering
+	for (uint32_t i = 0; i < n; ++i) {
+		auto& entry = entries[i];
+		if (entry.assigned) {
+			continue;
+		}
+
+		// Add to result
+		result.push_back(i);
+		entry.assigned = true;
+
+		// Look ahead and see if anyone else can join
+		skipped.clear();
+		Rect4f combinedSkipped;
+		int skipsInARow = 0;
+		for (uint32_t j = i + 1; j < n; ++j) {
+			auto& other = entries[j];
+			if (!other.assigned) {
+				if (sprites[entry.idx].isCompatibleWith(sprites[other.idx], cachedSprites, cachedText) && !overlapsAny(other.bounds, combinedSkipped, skipped)) {
+					result.push_back(j);
+					other.assigned = true;
+					skipsInARow = 0;
+				} else {
+					combinedSkipped = skipped.empty() ? other.bounds : combinedSkipped.merge(other.bounds);
+					skipped.push_back(other.bounds);
+					++skipsInARow;
+
+					if (skipsInARow >= maxSkipsInARow) {
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 std::optional<Rect4f> SpritePainter::getBounds() const
@@ -341,20 +491,12 @@ std::optional<Rect4f> SpritePainter::getBounds() const
 		const auto type = s.getType();
 		const auto clip = s.getClip();
 
-		if (type == SpritePainterEntryType::SpriteRef) {
-			for (const auto& sprite: s.getSprites()) {
+		if (type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached) {
+			for (const auto& sprite: s.getSprites(cachedSprites)) {
 				merge(sprite.getAABB(), clip);
 			}
-		} else if (type == SpritePainterEntryType::SpriteCached) {
-			for (const auto& sprite: gsl::span<const Sprite>(cachedSprites.data() + s.getIndex(), s.getCount())) {
-				merge(sprite.getAABB(), clip);
-			}
-		} else if (type == SpritePainterEntryType::TextRef) {
-			for (const auto& text: s.getTexts()) {
-				merge(text.getAABB(), clip);
-			}
-		} else if (type == SpritePainterEntryType::TextCached) {
-			for (const auto& text: gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount())) {
+		} else if (type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached) {
+			for (const auto& text: s.getTexts(cachedText)) {
 				merge(text.getAABB(), clip);
 			}
 		} else if (type == SpritePainterEntryType::Callback) {
@@ -382,15 +524,17 @@ void SpritePainter::setWaitForSpriteLoad(bool wait)
 void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
 	for (const auto& sprite: sprites) {
-		// The logic is a bit confusing here - if we're waiting, just go ahead, as the code will eventually wait
-		// If we're not waiting, skip this sprite if it's not loaded
-		if (sprite.isInView(view) && (waitForSpriteLoad || sprite.isLoaded())) {
-			if (paramUpdater.needsToPreProcessessMaterial(sprite)) {
-				auto s2 = sprite;
-				paramUpdater.preProcessMaterial(s2);
-				s2.draw(painter, clip);
-			} else {
-				sprite.draw(painter, clip);
+		if (sprite.isInView(view)) {
+			// The logic is a bit confusing here - if we're waiting, just go ahead, as the code will eventually wait
+			// If we're not waiting, skip this sprite if it's not loaded
+			if (waitForSpriteLoad || sprite.isLoaded()) {
+				if (paramUpdater.needsToPreProcessessMaterial(sprite)) {
+					auto s2 = sprite;
+					paramUpdater.preProcessMaterial(s2);
+					s2.draw(painter, clip);
+				} else {
+					sprite.draw(painter, clip);
+				}
 			}
 		}
 	}

@@ -38,12 +38,15 @@ namespace Halley
 
 		bool operator<(const SpritePainterEntry& o) const;
 		SpritePainterEntryType getType() const;
-		gsl::span<const Sprite> getSprites() const;
-		gsl::span<const TextRenderer> getTexts() const;
+		gsl::span<const Sprite> getSprites(const Vector<Sprite>& cached) const;
+		gsl::span<const TextRenderer> getTexts(const Vector<TextRenderer>& cached) const;
 		uint32_t getIndex() const;
 		uint32_t getCount() const;
 		int getMask() const;
 		const std::optional<Rect4f>& getClip() const;
+
+		Rect4f getBounds(const Rect4f& view, const Vector<Sprite>& cachedSprites, const Vector<TextRenderer>& cachedText) const;
+		bool isCompatibleWith(const SpritePainterEntry& other, const Vector<Sprite>& cachedSprites, const Vector<TextRenderer>& cachedText) const;
 
 	private:
 		const void* ptr = nullptr;
@@ -118,5 +121,8 @@ namespace Halley
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const;
+
+		Vector<uint32_t> getSpriteDrawOrder(int mask, Rect4f view) const;
+		Vector<uint32_t> getSpriteDrawOrderReordered(int mask, Rect4f view) const;
 	};
 }
