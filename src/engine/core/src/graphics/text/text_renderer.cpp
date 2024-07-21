@@ -259,6 +259,11 @@ TextRenderer TextRenderer::clone() const
 	return *this;
 }
 
+void TextRenderer::generateSprites() const
+{
+	generateSprites(spritesCache);
+}
+
 void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 {
 	if (!font) {
@@ -699,15 +704,15 @@ void TextRenderer::markGlyphsDirty() const
 	hasExtents = false;
 }
 
-std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
+const std::shared_ptr<Material>& TextRenderer::getMaterial(const Font& font) const
 {
 	if (const auto iter = materials.find(&font); iter != materials.end()) {
 		return iter->second;
 	} else {
 		auto material = font.getMaterial()->clone();
-		materials[&font] = material;
 		updateMaterial(*material, font);
-		return material;
+		materials[&font] = std::move(material);
+		return materials.at(&font);
 	}
 }
 

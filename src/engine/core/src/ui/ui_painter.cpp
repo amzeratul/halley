@@ -101,6 +101,7 @@ void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 
 void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
+	text.generateSprites();
 	if (colourMultiplier) {
 		painter->add(applyColour(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
 	} else if (forceCopy) {

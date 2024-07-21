@@ -55,6 +55,7 @@ namespace Halley
 
 		TextRenderer clone() const;
 
+		void generateSprites() const;
 		void generateSprites(Vector<Sprite>& sprites) const;
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 
@@ -90,7 +91,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<const Font> font;
-		mutable std::map<const Font*, std::shared_ptr<Material>> materials;
+		mutable HashMap<const Font*, std::shared_ptr<Material>> materials;
 		StringUTF32 text;
 		SpriteFilter spriteFilter;
 		
@@ -122,7 +123,7 @@ namespace Halley
 
 		mutable Vector2f extents;
 
-		std::shared_ptr<Material> getMaterial(const Font& font) const;
+		const std::shared_ptr<Material>& getMaterial(const Font& font) const;
 		void updateMaterial(Material& material, const Font& font) const;
 		void updateMaterialForFont(const Font& font) const;
 		void updateMaterials() const;

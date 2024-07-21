@@ -321,6 +321,7 @@ void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer
 void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	if (forceCopy) {
+		text.generateSprites();
 		addCopy(text, mask, layer, tieBreaker, clip);
 	} else {
 		Expects(mask >= 0);
