@@ -20,6 +20,7 @@
 #include "system_message.h"
 #include "world_reflection.h"
 #include "system_interface.h"
+#include "halley/data_structures/temp_allocator.h"
 
 namespace Halley {
 	class SystemMessage;
@@ -214,6 +215,8 @@ namespace Halley {
 		bool isHeadless() const;
 		void setHeadless(bool headless);
 
+		TempMemoryPool& getTempMemoryPool() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -248,6 +251,8 @@ namespace Halley {
 		float transform2DAnisotropy = 1.0f;
 
     	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
+
+		std::unique_ptr<TempMemoryPool> tempMemoryPool;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

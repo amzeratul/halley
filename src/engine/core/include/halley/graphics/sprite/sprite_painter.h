@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/data_structures/temp_allocator.h"
 #include "halley/entity/services/dev_service.h"
 #include "halley/time/halleytime.h"
 
@@ -83,6 +84,8 @@ namespace Halley
 	class SpritePainter
 	{
 	public:
+		SpritePainter();
+
 		void update(Time t);
 		void copyPrevious(const SpritePainter& prev);
 
@@ -117,6 +120,8 @@ namespace Halley
 		bool forceCopy = false;
 		bool waitForSpriteLoad = true;
 		SpritePainterMaterialParamUpdater paramUpdater;
+
+		mutable TempMemoryPool memoryPool;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;

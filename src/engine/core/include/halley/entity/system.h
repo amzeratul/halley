@@ -11,6 +11,7 @@
 #include "halley/utils/type_traits.h"
 #include "system_message.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/data_structures/temp_allocator.h"
 
 namespace Halley {
 	class Message;

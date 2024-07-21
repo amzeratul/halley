@@ -31,6 +31,7 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<TypedPool<Entity>>())
+	, tempMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 {
 }
 
@@ -44,6 +45,7 @@ World::World(World& world, StagingWorldTag tag)
 	, componentDeleterTable(world.componentDeleterTable)
 	, entityPool(world.entityPool)
 	, transform2DAnisotropy(world.transform2DAnisotropy)
+	, tempMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 {
 }
 
@@ -72,6 +74,8 @@ World::~World()
 	}
 	families.clear();
 	services.clear();
+
+	tempMemoryPool.reset();
 }
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
@@ -598,6 +602,11 @@ void World::setHeadless(bool headless)
 	this->headless = headless;
 }
 
+TempMemoryPool& World::getTempMemoryPool() const
+{
+	return *tempMemoryPool;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
@@ -782,6 +791,7 @@ void World::updateEntities()
 void World::initSystems(gsl::span<const TimeLine> timelines)
 {
 	for (auto& tl: timelines) {
+		tempMemoryPool->reset();
 		for (auto& system : systems[int(tl)]) {
 			// If the system is initialised, also check for any entities that need spawning
 			if (system->tryInit()) {
@@ -794,6 +804,7 @@ void World::initSystems(gsl::span<const TimeLine> timelines)
 void World::updateSystems(TimeLine timeline, Time elapsed)
 {
 	for (auto& system : getSystems(timeline)) {
+		tempMemoryPool->reset();
 		system->doUpdate(elapsed);
 		spawnPending();
 	}
@@ -802,6 +813,7 @@ void World::updateSystems(TimeLine timeline, Time elapsed)
 void World::renderSystems(RenderContext& rc) const
 {
 	for (auto& system : getSystems(TimeLine::Render)) {
+		tempMemoryPool->reset();
 		system->doRender(rc);
 	}
 }
@@ -855,6 +867,7 @@ void World::processSystemMessages(TimeLine timeline)
 	bool keepRunning = true;
 	auto& timelineSystems = systems[static_cast<int>(timeline)];
 	while (keepRunning) {
+		tempMemoryPool->reset();
 		spawnPending();
 		
 		keepRunning = false;
@@ -862,6 +875,7 @@ void World::processSystemMessages(TimeLine timeline)
 			system->prepareSystemMessages();
 		}
 		for (auto& system: timelineSystems) {
+			tempMemoryPool->reset();
 			system->processSystemMessages();
 		}
 		for (auto& system : timelineSystems) {

@@ -216,7 +216,6 @@ void System::sendSystemMessageConfig(const String& targetSystem, const String& m
 	//context.callback = [] () {};
 	
 	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
-
 }
 
 void System::doUpdate(Time time) {

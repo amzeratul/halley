@@ -33,15 +33,15 @@ namespace Halley {
 	};
 
 	template <typename T>
-	struct PoolAllocator
+	struct OldPoolAllocator
 	{
 	public:
-		PoolAllocator()
+		OldPoolAllocator()
 		{
 			pool = new SizePool(sizeof(T));
 		}
 
-		~PoolAllocator()
+		~OldPoolAllocator()
 		{
 			delete pool;
 		}

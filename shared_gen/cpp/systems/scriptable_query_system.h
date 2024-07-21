@@ -1,4 +1,4 @@
-// Halley codegen version 125
+// Halley codegen version 131
 #pragma once
 
 #include <halley.hpp>
@@ -45,6 +45,9 @@ public:
 protected:
 	Halley::World& getWorld() const {
 		return doGetWorld();
+	}
+	Halley::TempMemoryPool& getTempMemoryPool() const {
+		return doGetWorld().getTempMemoryPool();
 	}
 	Halley::FamilyBinding<ScriptableFamily> scriptableFamily{};
 	Halley::FamilyBinding<TagTargetsFamily> tagTargetsFamily{};

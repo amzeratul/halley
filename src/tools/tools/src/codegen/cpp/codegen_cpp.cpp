@@ -507,6 +507,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	if ((int(system.access) & int(SystemAccess::MessageBridge)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::SystemMessageBridge"), {}, "getMessageBridge"), "return doGetMessageBridge();");
 	}
+	sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::TempMemoryPool&"), {}, "getTempMemoryPool", true), "return doGetWorld().getTempMemoryPool();");
 
 	// Entity messages
 	bool hasReceiveEntityMessage = false;

@@ -1,4 +1,4 @@
-// Halley codegen version 123
+// Halley codegen version 131
 #pragma once
 
 #include <halley.hpp>
@@ -59,6 +59,9 @@ protected:
 	}
 	Halley::World& getWorld() const {
 		return doGetWorld();
+	}
+	Halley::TempMemoryPool& getTempMemoryPool() const {
+		return doGetWorld().getTempMemoryPool();
 	}
 	Halley::FamilyBinding<ListenerFamily> listenerFamily{};
 	Halley::FamilyBinding<SourceFamily> sourceFamily{};

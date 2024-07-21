@@ -286,6 +286,7 @@ set(SOURCES
         "src/data_structures/memory_pool.cpp"
         "src/data_structures/nullable_reference.cpp"
         "src/data_structures/rect_spatial_checker.cpp"
+        "src/data_structures/temp_allocator.cpp"
         
         "src/file/directory_monitor.cpp"
         "src/file/path.cpp"
@@ -754,6 +755,7 @@ set(HEADERS
         "include/halley/data_structures/ring_buffer.h"
         "include/halley/data_structures/selection_set.h"
         "include/halley/data_structures/simple_pool.h"
+        "include/halley/data_structures/temp_allocator.h"
         "include/halley/data_structures/time_cache.h"
         "include/halley/data_structures/tree_map.h"
         "include/halley/data_structures/vector.h"

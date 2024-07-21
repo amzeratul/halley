@@ -236,6 +236,11 @@ bool SpritePainterMaterialParamUpdater::needsToPreProcessessMaterial(const Sprit
 	return sprite.hasMaterial() && sprite.getMaterial().getDefinition().hasAutoVariables();
 }
 
+SpritePainter::SpritePainter()
+	: memoryPool(256 * 1024)
+{
+}
+
 void SpritePainter::update(Time t)
 {
 	paramUpdater.update(t);
@@ -257,6 +262,7 @@ void SpritePainter::clear()
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();
+	memoryPool.reset();
 }
 
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
@@ -409,9 +415,9 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 		{}
 	};
 
-	Vector<Entry> entries;
-	Vector<Rect4f> skippedRects;
-	skippedRects.reserve(64);
+	auto entries = Vector<Entry, TempPoolAllocator<Entry>>(TempPoolAllocator<Entry>(memoryPool));
+	auto skipped = Vector<Rect4f, TempPoolAllocator<Rect4f>>(TempPoolAllocator<Entry>(memoryPool));
+	skipped.reserve(64);
 	constexpr int maxSkipsInARow = 16;
 
 	// Generate filtered sprite draw order, and sprite bounds
@@ -427,9 +433,8 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 
 	Vector<uint32_t> result;
 	result.reserve(entries.size());
-	Vector<Rect4f> skipped;
 
-	auto overlapsAny = [](const Rect4f& a, const Rect4f bCombined, const Vector<Rect4f>& bs)
+	auto overlapsAny = [](const Rect4f& a, const Rect4f bCombined, const Vector<Rect4f, TempPoolAllocator<Rect4f>>& bs)
 	{
 		if (bs.empty() || !a.overlaps(bCombined)) {
 			return false;

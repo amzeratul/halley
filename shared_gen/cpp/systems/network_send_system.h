@@ -1,4 +1,4 @@
-// Halley codegen version 123
+// Halley codegen version 131
 #pragma once
 
 #include <halley.hpp>
@@ -36,6 +36,9 @@ protected:
 	}
 	Halley::Resources& getResources() const {
 		return doGetResources();
+	}
+	Halley::TempMemoryPool& getTempMemoryPool() const {
+		return doGetWorld().getTempMemoryPool();
 	}
 
 	SessionService& getSessionService() const {

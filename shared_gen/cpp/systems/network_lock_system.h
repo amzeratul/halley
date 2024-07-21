@@ -1,4 +1,4 @@
-// Halley codegen version 123
+// Halley codegen version 131
 #pragma once
 
 #include <halley.hpp>
@@ -35,6 +35,9 @@ public:
 protected:
 	Halley::World& getWorld() const {
 		return doGetWorld();
+	}
+	Halley::TempMemoryPool& getTempMemoryPool() const {
+		return doGetWorld().getTempMemoryPool();
 	}
 	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(bool)> callback = {}) {
 		Halley::String targetSystem = "";

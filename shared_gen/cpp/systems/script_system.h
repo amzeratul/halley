@@ -1,4 +1,4 @@
-// Halley codegen version 127
+// Halley codegen version 131
 #pragma once
 
 #include <halley.hpp>
@@ -99,6 +99,9 @@ protected:
 	}
 	Halley::SystemMessageBridge getMessageBridge() {
 		return doGetMessageBridge();
+	}
+	Halley::TempMemoryPool& getTempMemoryPool() const {
+		return doGetWorld().getTempMemoryPool();
 	}
 	void sendMessage(Halley::EntityId entityId, SendScriptMsgMessage msg) {
 		sendMessageGeneric(entityId, std::move(msg));
