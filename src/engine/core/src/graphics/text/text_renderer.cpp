@@ -51,7 +51,7 @@ TextRenderer& TextRenderer::setText(const String& v)
 	const auto newText = v.getUTF32();
 	if (newText != text) {
 		text = newText;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -60,7 +60,7 @@ TextRenderer& TextRenderer::setText(const StringUTF32& v)
 {
 	if (v != text) {
 		text = v;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -70,7 +70,7 @@ TextRenderer& TextRenderer::setText(const LocalisedString& v)
 	const auto newText = v.getString().getUTF32();
 	if (newText != text) {
 		text = newText;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -79,7 +79,7 @@ TextRenderer& TextRenderer::setSize(float v)
 {
 	if (size != v) {
 		size = v;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -88,7 +88,7 @@ TextRenderer& TextRenderer::setColour(Colour v)
 {
 	if (colour != v) {
 		colour = v;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -141,7 +141,7 @@ TextRenderer& TextRenderer::setAlignment(float v)
 {
 	if (align != v) {
 		align = v;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -150,7 +150,7 @@ TextRenderer& TextRenderer::setOffset(Vector2f v)
 {
 	if (offset != v) {
 		offset = v;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -180,7 +180,7 @@ TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
 {
 	if (pixelOffset != offset) {
 		pixelOffset = offset;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -189,7 +189,7 @@ TextRenderer& TextRenderer::setColourOverride(Vector<ColourOverride> colOverride
 {
 	if (colourOverrides != colOverride) {
 		colourOverrides = std::move(colOverride);
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -198,7 +198,7 @@ TextRenderer& TextRenderer::setLineSpacing(float spacing)
 {
 	if (lineSpacing != spacing) {
 		lineSpacing = spacing;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -208,7 +208,7 @@ TextRenderer& TextRenderer::setAlpha(float alpha)
 	const auto c = colour.withAlpha(alpha);
 	if (colour != c) {
 		colour = c;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 
 	const auto oc = outlineColour.withAlpha(alpha);
@@ -224,7 +224,7 @@ TextRenderer& TextRenderer::setScale(float scale)
 {
 	if (this->scale != scale) {
 		this->scale = scale;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
@@ -233,14 +233,14 @@ TextRenderer& TextRenderer::setAngle(Angle1f angle)
 {
 	if (this->angle != angle) {
 		this->angle = angle;
-		glyphsDirty = true;
+		markGlyphsDirty();
 	}
 	return *this;
 }
 
 void TextRenderer::refresh()
 {
-	glyphsDirty = true;
+	markGlyphsDirty();
 	materialDirty = true;
 	positionDirty = true;
 }
@@ -382,7 +382,7 @@ void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) 
 	if (spriteFilter) {
 		// We don't know what the user will do with glyphs, so mark them as dirty
 		spriteFilter(gsl::span<Sprite>(spritesCache.data(), spritesCache.size()));
-		glyphsDirty = true;
+		markGlyphsDirty();
 		positionDirty = true;
 	}
 
@@ -406,12 +406,17 @@ void TextRenderer::setSpriteFilter(SpriteFilter f)
 
 Vector2f TextRenderer::getExtents() const
 {
+	if (hasExtents) {
+		return extents;
+	}
 	return getExtents(text);
 }
 
 Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
 	if (!font) {
+		hasExtents = true;
+		extents = {};
 		return {};
 	}
 
@@ -442,7 +447,9 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 	}
 	w = std::max(w, p.x);
 
-	return Vector2f(w, p.y + lineH);
+	extents = Vector2f(w, p.y + lineH);
+	hasExtents = true;
+	return extents;
 }
 
 Vector2f TextRenderer::getCharacterPosition(size_t character) const
@@ -686,16 +693,21 @@ float TextRenderer::getScale(const Font& f) const
 	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f) * scale;
 }
 
+void TextRenderer::markGlyphsDirty() const
+{
+	glyphsDirty = true;
+	hasExtents = false;
+}
+
 std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
 {
-	const auto iter = materials.find(&font);
-	if (iter == materials.end()) {
+	if (const auto iter = materials.find(&font); iter != materials.end()) {
+		return iter->second;
+	} else {
 		auto material = font.getMaterial()->clone();
 		materials[&font] = material;
 		updateMaterial(*material, font);
 		return material;
-	} else {
-		return iter->second;
 	}
 }
 

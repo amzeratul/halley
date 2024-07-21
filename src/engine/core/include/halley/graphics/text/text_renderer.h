@@ -118,12 +118,17 @@ namespace Halley
 		mutable bool materialDirty = true;
 		mutable bool glyphsDirty = true;
 		mutable bool positionDirty = true;
+		mutable bool hasExtents = false;
+
+		mutable Vector2f extents;
 
 		std::shared_ptr<Material> getMaterial(const Font& font) const;
 		void updateMaterial(Material& material, const Font& font) const;
 		void updateMaterialForFont(const Font& font) const;
 		void updateMaterials() const;
 		float getScale(const Font& font) const;
+
+		void markGlyphsDirty() const;
 	};
 
 	class ColourStringBuilder {
