@@ -3,6 +3,8 @@
 #include "../../../../../contrib/skarupke/flat_hash_map.hpp"
 #include <string_view>
 
+#include "temp_allocator.h"
+
 namespace Halley {
 
 	class String;
@@ -17,11 +19,17 @@ namespace Halley {
 		using type = std::equal_to<std::string_view>;
 	};
 
+	template<typename Key, typename Value, typename Hash = std::hash<Key>, typename Allocator = std::allocator<std::pair<Key, Value>>>
+	using HashMap = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type, Allocator>;
+
+	template<typename Key, typename Hash = std::hash<Key>, typename Allocator = std::allocator<Key>>
+	using HashSet = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type, Allocator>;
+	
 	template<typename Key, typename Value, typename Hash = std::hash<Key>>
-	using HashMap = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type>;
+	using HashMapTemp = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type, TempPoolAllocator<std::pair<Key, Value>>>;
 
 	template<typename Key, typename Hash = std::hash<Key>>
-	using HashSet = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type>;
+	using HashSetTemp = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type, TempPoolAllocator<Key>>;
 
 	static inline uint32_t combineHash32(uint32_t a, uint32_t b)
 	{

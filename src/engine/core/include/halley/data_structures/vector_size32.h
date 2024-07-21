@@ -933,6 +933,6 @@ namespace Halley {
 
 
 	// Default versions
-	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0>
-	using VectorSize32 = VectorStd<T, uint32_t, true, Padding, Allocator>;
+	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0, bool EnableSBO = true>
+	using VectorSize32 = VectorStd<T, uint32_t, EnableSBO, Padding, Allocator>;
 }

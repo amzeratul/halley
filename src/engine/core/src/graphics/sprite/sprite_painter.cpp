@@ -415,8 +415,8 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 		{}
 	};
 
-	auto entries = Vector<Entry, TempPoolAllocator<Entry>>(TempPoolAllocator<Entry>(memoryPool));
-	auto skipped = Vector<Rect4f, TempPoolAllocator<Rect4f>>(TempPoolAllocator<Entry>(memoryPool));
+	auto entries = VectorTemp<Entry>(memoryPool);
+	auto skipped = VectorTemp<Rect4f>(memoryPool);
 	skipped.reserve(64);
 	constexpr int maxSkipsInARow = 16;
 
@@ -434,7 +434,7 @@ Vector<uint32_t> SpritePainter::getSpriteDrawOrderReordered(int mask, Rect4f vie
 	Vector<uint32_t> result;
 	result.reserve(entries.size());
 
-	auto overlapsAny = [](const Rect4f& a, const Rect4f bCombined, const Vector<Rect4f, TempPoolAllocator<Rect4f>>& bs)
+	auto overlapsAny = [](const Rect4f& a, const Rect4f bCombined, const VectorTemp<Rect4f>& bs)
 	{
 		if (bs.empty() || !a.overlaps(bCombined)) {
 			return false;
