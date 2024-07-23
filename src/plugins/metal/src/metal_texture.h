@@ -23,5 +23,6 @@ namespace Halley {
 		id<MTLSamplerState> sampler;
 
 		static MTLSamplerAddressMode getMetalAddressMode(TextureDescriptor& descriptor);
+		static MTLTextureUsage getMetalTextureUsage(TextureDescriptor& descriptor);
 	};
 }

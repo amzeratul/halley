@@ -40,6 +40,7 @@ void MetalTexture::doLoad(TextureDescriptor& descriptor)
 		height:descriptor.size.y
 		mipmapped:descriptor.useMipMap
 	];
+	textureDescriptor.usage = getMetalTextureUsage(descriptor);
 	metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
 
 	NSUInteger bytesPerRow = bytesPerPixel * descriptor.size.x;
@@ -99,4 +100,13 @@ MTLSamplerAddressMode MetalTexture::getMetalAddressMode(TextureDescriptor& descr
 	case TextureAddressMode::Repeat:
 		return MTLSamplerAddressModeRepeat;
 	}
+}
+
+MTLTextureUsage MetalTexture::getMetalTextureUsage(TextureDescriptor& descriptor)
+{
+	MTLTextureUsage usage = MTLTextureUsageShaderRead;
+	if (descriptor.isRenderTarget) {
+		return usage | MTLTextureUsageRenderTarget;
+	}
+	return usage;
 }
