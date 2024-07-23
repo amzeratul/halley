@@ -1215,7 +1215,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return *sequenceData;
 	} else if (type == ConfigNodeType::Undefined) {
-		*this = ConfigNode::SequenceType();
+		*this = SequenceType();
 		return *sequenceData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
@@ -1227,7 +1227,7 @@ ConfigNode::MapType& ConfigNode::asMap()
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		return *mapData;
 	} else if (type == ConfigNodeType::Undefined) {
-		*this = ConfigNode::MapType();
+		*this = MapType();
 		return *mapData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
@@ -1310,9 +1310,6 @@ bool ConfigNode::hasKey(std::string_view key) const
 
 ConfigNode& ConfigNode::operator[](std::string_view key)
 {
-	if (getType() == ConfigNodeType::Undefined) {
-		ensureType(ConfigNodeType::Map);
-	}
 	return asMap()[key];
 }
 
