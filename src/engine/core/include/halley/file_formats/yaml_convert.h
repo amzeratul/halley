@@ -16,13 +16,22 @@ namespace Halley {
 	public:
 		class EmitOptions {
 		public:
+			EmitOptions(Vector<String> mapKeyOrder = {}, bool compactMaps = false)
+				: mapKeyOrder(std::move(mapKeyOrder))
+				, compactMaps(compactMaps)
+			{}
+
 			Vector<String> mapKeyOrder;
-			bool compactMaps = false;
+			bool compactMaps;
 		};
 
 		class ParseOptions {
 		public:
-			bool parseMapsAsSequencesOfPairs = false;
+			ParseOptions(bool parseMapsAsSequencesOfPairs = false)
+				: parseMapsAsSequencesOfPairs(parseMapsAsSequencesOfPairs)
+			{}
+
+			bool parseMapsAsSequencesOfPairs;
 		};
 		
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options = {});

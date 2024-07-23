@@ -23,7 +23,7 @@
 #include "src/assets/graph/script_graph_variable_inspector.h"
 using namespace Halley;
 
-EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName)
+EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, const String& colourSchemeName)
 	: UIFactory(api, resources, i18n)
 {
 	loadColourSchemes();
@@ -309,6 +309,14 @@ void EditorUIFactory::setProject(ProjectWindow* projectWindow, Resources* gameRe
 {
 	this->projectWindow = projectWindow;
 	this->gameResources = gameResources;
+}
+
+std::unique_ptr<UIFactory> EditorUIFactory::make(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet, std::shared_ptr<const UIColourScheme> colourScheme) const
+{
+	auto factory = std::make_unique<EditorUIFactory>(api, resources, i18n, colourScheme->getName());
+	factory->projectWindow = projectWindow;
+	factory->gameResources = gameResources;
+	return factory;
 }
 
 void EditorUIFactory::setColourSchemeByAssetId(const String& assetId)

@@ -72,6 +72,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 		entries.emplace_back(icon.id, LocalisedString::fromUserString(icon.name), icon.icon);
 	}
 	entityIcon->setOptions(std::move(entries));
+	getWidget("sceneFields")->setActive(sceneEditor->isScene());
 }
 
 void EntityEditor::setECSData(ECSData& ecs)
@@ -191,6 +192,7 @@ void EntityEditor::reloadEntity()
 	getWidget("scrollBarPane")->setActive(currentEntityData);
 	getWidget("entityFields")->setActive(currentEntityData && !isPrefab);
 	getWidget("prefabFields")->setActive(currentEntityData && isPrefab);
+	getWidget("sceneFields")->setActive(sceneEditor && sceneEditor->isScene());
 	getWidget("componentButtons")->setActive(currentEntityData);
 
 	auto msg = getWidgetAs<UILabel>("message");

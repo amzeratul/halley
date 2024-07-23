@@ -5,7 +5,7 @@
 namespace Halley {
     class EditorUIFactory : public UIFactory {
     public:
-		EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName);
+		EditorUIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, const String& colourSchemeName);
 
     	Sprite makeAssetTypeIcon(AssetType type) const override;
     	Sprite makeImportAssetTypeIcon(ImportAssetType type) const override;
@@ -15,6 +15,8 @@ namespace Halley {
     	void setColourScheme(const String& name);
 
         void setProject(ProjectWindow* projectWindow, Resources* gameResources);
+
+        std::unique_ptr<UIFactory> make(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet, std::shared_ptr<const UIColourScheme> colourScheme) const override;
 
 	private:
 		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
