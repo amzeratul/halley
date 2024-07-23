@@ -147,13 +147,21 @@ ConfigNode::ConfigNode(Range<int> value)
 	operator=(value);
 }
 
-bool ConfigNode::removeKey(std::string_view key)
+bool ConfigNode::removeKey(std::string_view key, bool unsetMapIfEmpty)
 {
-	auto& map = asMap();
-	const auto iter = map.find(key);
-	if (iter != map.end()) {
-		map.erase(iter);
-		return true;
+	if (getType() == ConfigNodeType::Map) {
+		auto& map = asMap();
+		const auto iter = map.find(key);
+		const bool hadKey = iter != map.end();
+		if (hadKey) {
+			map.erase(iter);
+		}
+
+		if (unsetMapIfEmpty && map.empty()) {
+			*this = ConfigNode();
+		}
+
+		return hadKey;
 	}
 	return false;
 }
@@ -1206,6 +1214,9 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 {
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return *sequenceData;
+	} else if (type == ConfigNodeType::Undefined) {
+		*this = ConfigNode::SequenceType();
+		return *sequenceData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
@@ -1214,6 +1225,9 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 ConfigNode::MapType& ConfigNode::asMap()
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+		return *mapData;
+	} else if (type == ConfigNodeType::Undefined) {
+		*this = ConfigNode::MapType();
 		return *mapData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
@@ -1296,6 +1310,9 @@ bool ConfigNode::hasKey(std::string_view key) const
 
 ConfigNode& ConfigNode::operator[](std::string_view key)
 {
+	if (getType() == ConfigNodeType::Undefined) {
+		ensureType(ConfigNodeType::Map);
+	}
 	return asMap()[key];
 }
 

@@ -520,7 +520,7 @@ namespace Halley {
 		void ensureType(ConfigNodeType type);
 
 		bool hasKey(std::string_view key) const;
-		bool removeKey(std::string_view key);
+		bool removeKey(std::string_view key, bool unsetMapIfEmpty = false);
 
 		ConfigNode& operator[](std::string_view key);
 		ConfigNode& operator[](size_t idx);
