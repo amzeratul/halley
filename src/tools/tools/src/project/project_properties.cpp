@@ -144,8 +144,6 @@ void ProjectProperties::load()
 			languages = node["languages"].asVector<I18NLanguage>();
 		}
 	}
-
-	save();
 }
 
 void ProjectProperties::save()
