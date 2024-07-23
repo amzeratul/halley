@@ -199,14 +199,17 @@ public:
 			granularity = pars.options["granularity"].asFloat(1.0f);
 		}
 
+		auto dataOutput = std::make_shared<bool>(true);
 		auto field = std::make_shared<UISpinControl2>("floatValue", context.getUIFactory().getStyle("spinControl"), value, true);
 		field->setMinimumValue(minValue);
 		field->setMaximumValue(maxValue);
 		field->setIncrement(granularity);
-		field->bindData("floatValue", value, [&context, data](float newVal)
+		field->bindData("floatValue", value, [&context, data, dataOutput] (float newVal)
 		{
-			data.getWriteableFieldData() = ConfigNode(newVal);
-			context.onEntityUpdated();
+			if (*dataOutput) {
+				data.getWriteableFieldData() = ConfigNode(newVal);
+				context.onEntityUpdated();
+			}
 		});
 		container->add(field, 1);
 
@@ -219,6 +222,17 @@ public:
 			field->setValue(defaultValue);
 		});
 		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
+		
+		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=] (const UIEvent& event)
+		{
+			float newVal = 0;
+			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+				newVal = data.getFieldData().asType<float>();
+			}
+			*dataOutput = false;
+			event.getCurWidget().getWidgetAs<UITextInput>("floatValue")->setText(toString(newVal));
+			*dataOutput = true;
+		});
 
 		return container;
 	}
