@@ -1134,6 +1134,7 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 	result.entries.emplace_back("Animation", "animation", "Halley::ResourceReference<Halley::Animation>", "");
 	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
 	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
+	result.entries.emplace_back("Colour", "colour", "Halley::UIColour", "#FFFFFF");
 	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
 	result.entries.emplace_back("Playback Speed", "playbackSpeed", "float", "1");
 	result.entries.emplace_back("Occupy Space", "occupySpace", "bool", "false");
@@ -1157,7 +1158,9 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto size = Vector2f::max(node["size"].asVector2f(Vector2f()), occupySpace ? bounds.getSize() : Vector2f());
 	auto offset = node["offset"].asVector2f(Vector2f()) + (occupySpace ? -bounds.getTopLeft() : Vector2f());
 
-	return std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), offset, animation);
+	auto anim = std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), offset, animation);
+	anim->setColour(Colour4f::fromString(node["colour"].asString("#FFFFFF")));
+	return anim;
 }
 
 UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
