@@ -1320,6 +1320,15 @@ ConfigNode& ConfigNode::operator[](size_t idx)
 
 const ConfigNode& ConfigNode::operator[](std::string_view key) const
 {
+	if (getType() == ConfigNodeType::Undefined) {
+#if defined(STORE_CONFIG_NODE_PARENTING)
+		undefinedConfigNode.setParent(this, -1);
+		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
+#endif
+		//undefinedConfigNodeName = key;
+		return undefinedConfigNode;		
+	}
+
 	const auto& map = asMap();
 	const auto iter = map.find(key);
 	if (iter != map.end()) {
