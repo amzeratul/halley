@@ -36,11 +36,6 @@ namespace Halley {
 		UIWidget(String id = "", Vector2f minSize = {}, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
 		virtual ~UIWidget();
 
-		void doDraw(UIPainter& painter) const;
-		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst);
-		void doPostUpdate();
-		void doRender(RenderContext& rc);
-
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect, IUIElementListener* listener) final override;
 		virtual void onPreNotifySetRect(IUIElementListener& listener);
@@ -206,13 +201,15 @@ namespace Halley {
 		virtual std::optional<MouseCursorMode> getMouseCursorMode() const;
 
 		virtual void collectWidgetsForUpdating(Vector<UIWidget*>& dst);
+		virtual void collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
+
 		virtual void render(RenderContext& rc) const;
-		virtual void renderChildren(RenderContext& rc) const;
+
 		virtual void update(Time t, bool moved);
 
 		void updateBehaviours(Time t);
@@ -249,6 +246,10 @@ namespace Halley {
 		Vector<UIStyle> styles = {};
 
 	private:
+		void doDraw(UIPainter& painter) const;
+		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst);
+		void doPostUpdate();
+
 		void setParent(UIParent* parent);
 		void notifyTreeAddedToRoot(UIRoot& root);
 		void notifyTreeRemovedFromRoot(UIRoot& root);

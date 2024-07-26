@@ -108,6 +108,8 @@ namespace Halley {
 		UIInputType lastInputType = UIInputType::Keyboard;
 
 		Vector<UIWidget*> widgetsCache;
+		Vector<std::pair<UIWidget*, size_t>> renderWidgetsCache;
+		Vector<RenderContext> rcCache;
 
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 

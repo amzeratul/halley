@@ -77,6 +77,27 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 }
 
 // Render thread
+void UIRenderSurface::collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs)
+{
+	renderParams = paramsSync.read();
+
+	if (renderParams) {
+		auto& rc = dstRCs[curRCIdx];
+		auto& cam = renderParams->camera;
+		cam = rc.getCamera();
+		cam.setScale(cam.getScale().xy() * renderParams->scale);
+		dstRCs.push_back(rc.with(cam));
+
+		for (auto& c: getChildren()) {
+			c->collectWidgetsForRendering(curRCIdx + 1, dst, dstRCs);
+		}
+		dst.emplace_back(this, curRCIdx);
+	} else {
+		UIWidget::collectWidgetsForRendering(curRCIdx, dst, dstRCs);
+	}
+}
+
+// Render thread
 void UIRenderSurface::render(RenderContext& rc) const
 {
 	if (!renderParams) {
@@ -97,22 +118,6 @@ void UIRenderSurface::render(RenderContext& rc) const
 		painter.clear(Colour4f(0, 0, 0, 0));
 		renderParams->spritePainter->draw(renderParams->mask, painter);
 	});
-}
-
-// Render thread
-void UIRenderSurface::renderChildren(RenderContext& rc) const
-{
-	// renderChildren runs before render, so we acquire renderParams here
-	renderParams = paramsSync.read();
-
-	if (renderParams) {
-		auto cam = rc.getCamera();
-		cam.setScale(cam.getScale().xy() * renderParams->scale);
-		auto rc2 = rc.with(cam);
-		UIWidget::renderChildren(rc2);
-	} else {
-		UIWidget::renderChildren(rc);
-	}
 }
 
 // Render thread

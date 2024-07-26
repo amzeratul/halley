@@ -12,8 +12,9 @@ namespace Halley {
 
         void draw(UIPainter& painter) const override;
         void drawChildren(UIPainter& painter) const override;
+
+        void collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs) override;
         void render(RenderContext& rc) const override;
-        void renderChildren(RenderContext& rc) const override;
 
         void setColour(Colour4f col);
         void setScale(Vector2f scale);
@@ -51,6 +52,7 @@ namespace Halley {
             Vector4f border;
 		    Colour4f colour;
 			std::unique_ptr<SpritePainter> spritePainter;
+            Camera camera;
         };
 
         struct Fade {

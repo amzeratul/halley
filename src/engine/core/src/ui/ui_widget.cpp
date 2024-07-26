@@ -57,7 +57,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	drawAfterChildren(painter);
 }
 
-void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
+void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst)
 {
 	if (updateType == UIWidgetUpdateType::Full || updateType == UIWidgetUpdateType::First) {
 		setInputType(inputType);
@@ -84,6 +84,7 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		addNewChildren(inputType);
+		collectWidgetsForUpdating(dst);
 	}
 }
 
@@ -106,23 +107,21 @@ void UIWidget::removeSizerDeadChildren()
 	}
 }
 
-void UIWidget::collectWidgets(Vector<UIWidget*>& dst)
+void UIWidget::collectWidgetsForUpdating(Vector<UIWidget*>& dst)
 {
-	dst.push_back(this);
 	for (auto& c: getChildren()) {
-		c->collectWidgets(dst);
+		dst.push_back(c.get());
 	}
 }
 
-void UIWidget::doRender(RenderContext& rc)
+void UIWidget::collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs)
 {
-	if (!isActive()) {
-		return;
+	if (isActive()) {
+		for (auto& c : getChildren()) {
+			c->collectWidgetsForRendering(curRCIdx, dst, dstRCs);
+		}
+		dst.emplace_back(this, curRCIdx);
 	}
-
-	// Render children first
-	renderChildren(rc);
-	render(rc);
 }
 
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const
@@ -930,13 +929,6 @@ void UIWidget::drawChildren(UIPainter& painter) const
 
 void UIWidget::render(RenderContext& render) const
 {
-}
-
-void UIWidget::renderChildren(RenderContext& rc) const
-{
-	for (auto& c: getChildren()) {
-		c->doRender(rc);
-	}
 }
 
 void UIWidget::update(Time t, bool moved)

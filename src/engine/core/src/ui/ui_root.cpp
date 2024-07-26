@@ -10,6 +10,7 @@
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
 #include "halley/ui/widgets/ui_tooltip.h"
+#include "halley/graphics/render_context.h"
 
 using namespace Halley;
 
@@ -713,10 +714,17 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	}
 }
 
-void UIRoot::render(RenderContext& rc)
+void UIRoot::render(RenderContext& origRC)
 {
+	renderWidgetsCache.clear();
+	rcCache.clear();
+	rcCache.push_back(origRC);
+
 	for (auto& c: getChildren()) {
-		c->doRender(rc);
+		c->collectWidgetsForRendering(0, renderWidgetsCache, rcCache);
+	}
+	for (auto& [w, rc]: renderWidgetsCache) {
+		w->render(rcCache[rc]);
 	}
 }
 
