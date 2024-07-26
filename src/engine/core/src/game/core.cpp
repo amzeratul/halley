@@ -541,7 +541,7 @@ void Core::render()
 			if (!pendingSnapshots.empty()) {
 				snapshot = std::make_unique<RenderSnapshot>();
 				painter->startRecording(snapshot.get());
-			} else if (true || isDevMode()) {
+			} else if (game->canCollectVideoPerformance() && isDevMode()) {
 				painter->startRecording(nullptr);
 			}
 

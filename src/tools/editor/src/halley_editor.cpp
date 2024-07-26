@@ -79,6 +79,11 @@ bool HalleyEditor::shouldCreateSeparateConsole() const
 #endif
 }
 
+bool HalleyEditor::canCollectVideoPerformance()
+{
+	return false;
+}
+
 Preferences& HalleyEditor::getPreferences()
 {
 	return *preferences;

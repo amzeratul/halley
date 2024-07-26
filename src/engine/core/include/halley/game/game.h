@@ -70,6 +70,7 @@ namespace Halley
 		virtual std::unique_ptr<IGameEditorData> createGameEditorData(const HalleyAPI& api, Resources& resources);
 		virtual Vector<ConfigBreadCrumb> createConfigBreadCrumbs();
 		virtual String getLocalisationFileCategory(const String& assetName);
+		virtual bool canCollectVideoPerformance();
 
 		virtual String getDefaultColourScheme();
 

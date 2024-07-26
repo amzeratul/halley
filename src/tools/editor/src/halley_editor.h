@@ -34,6 +34,7 @@ namespace Halley
 		String getDataPath() const override;
 		bool isDevMode() const override;
 		bool shouldCreateSeparateConsole() const override;
+		bool canCollectVideoPerformance() override;
 
 	private:
 		std::unique_ptr<ProjectLoader> projectLoader;

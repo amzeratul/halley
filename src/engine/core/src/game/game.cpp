@@ -134,6 +134,11 @@ String Game::getLocalisationFileCategory(const String& assetName)
 	return "unknown";
 }
 
+bool Game::canCollectVideoPerformance()
+{
+	return true;
+}
+
 String Game::getDefaultColourScheme()
 {
 	return "";

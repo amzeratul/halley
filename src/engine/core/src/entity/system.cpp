@@ -91,19 +91,26 @@ void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> t
 	// This whole method is probably very inefficient.
 	struct MessageBox
 	{
-		Vector<Message*> msg;
-		Vector<size_t> elemIdx;
+		VectorTemp<Message*> msg;
+		VectorTemp<size_t> elemIdx;
+
+		MessageBox(TempMemoryPool& pool)
+			: msg(pool)
+			, elemIdx(pool)
+		{}
 	};
-	HashMap<int, MessageBox> inboxes;
+	auto inboxes = HashMapTemp<int, MessageBox>(world->getTempMemoryPool());
 
 	const size_t sz = family.count();
 	for (size_t i = 0; i < sz; i++) {
 		const FamilyBase* elem = static_cast<FamilyBase*>(family.getElement(i));
-		const Entity* entity = world->tryGetRawEntity(elem->entityId);
-		if (entity) {
+		if (const Entity* entity = world->tryGetRawEntity(elem->entityId)) {
 			for (const auto& msg: entity->inbox) {
 				if (std::find(typesAccepted.begin(), typesAccepted.end(), msg.type) != typesAccepted.end()) {
-					auto& inbox = inboxes[msg.type];
+					if (!inboxes.contains(msg.type)) {
+						inboxes.insert_or_assign(msg.type, MessageBox(world->getTempMemoryPool()));
+					}
+					auto& inbox = inboxes.at(msg.type);
 					inbox.msg.emplace_back(msg.msg.get());
 					inbox.elemIdx.emplace_back(i);
 				}
