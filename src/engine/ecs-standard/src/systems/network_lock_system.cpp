@@ -84,14 +84,14 @@ public:
 		return true;
 	}
 
-	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId) override
+	Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) override
 	{
 		const auto iter = myLocks.find(targetId);
 		if (iter != myLocks.end()) {
 			// Locked by some local entity
-			if (iter->second.first == playerId) {
+			if (iter->second.playerId == playerId) {
 				// Already locked by this player, just increment count!
-				iter->second.second++;
+				iter->second.refCount++;
 				return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
 			} else {
 				// Locked by someone else
@@ -100,12 +100,12 @@ public:
 		}
 
 		// Not locked locally, try to lock
-		return doLockAcquireForMe(targetId).then([=] (bool success) -> NetworkLockHandle
+		return doLockAcquireForMe(targetId, acquireAuthority).then([=] (bool success) -> NetworkLockHandle
 		{
 			if (success) {
 				auto& l = myLocks[targetId];
-				l.first = playerId;
-				l.second++;
+				l.playerId = playerId;
+				l.refCount++;
 				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId);
 			}
 			return {};
@@ -117,9 +117,9 @@ public:
 		const auto iter = myLocks.find(targetId);
 		if (iter != myLocks.end()) {
 			auto& l = iter->second;
-			if (l.first == playerId) {
-				l.second--;
-				if (l.second == 0) {
+			if (l.playerId == playerId) {
+				l.refCount--;
+				if (l.refCount == 0) {
 					doLockReleaseForMe(targetId);
 					myLocks.erase(iter);
 				}
@@ -133,23 +133,26 @@ public:
 
 	bool onMessageReceived(NetworkEntityLockSystemMessage msg) override
 	{
-		return doEntityLock(msg.target, msg.peerId, msg.lock);
+		return doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority);
 	}
 
 private:
-
-	HashMap<EntityId, std::pair<EntityId, int>> myLocks;
+	struct LocalLock {
+		EntityId playerId;
+		int refCount;
+	};
+	HashMap<EntityId, LocalLock> myLocks;
 
 	SessionMultiplayer* mpSession = nullptr;
 
-	Future<bool> doLockAcquireForMe(EntityId targetId)
+	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
 	{
 		if (isHost()) {
-			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true));
+			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true, withAuthority));
 		} else {
 			Promise<bool> promise;
 			auto future = promise.getFuture();
-			sendMessage(NetworkEntityLockSystemMessage(targetId, true, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
 			{
 				promise.setValue(value);
 			});
@@ -160,13 +163,13 @@ private:
 	void doLockReleaseForMe(EntityId targetId)
 	{
 		if (isHost()) {
-			doEntityLock(targetId, getMyPeerId(), false);
+			doEntityLock(targetId, getMyPeerId(), false, false);
 		} else {
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, getMyPeerId()));
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, false, getMyPeerId()));
 		}
 	}
 
-	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock)
+	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority)
 	{
 		if (!targetId.isValid()) {
 			Logger::logError("Peer attempted to lock invalid entity.");
@@ -179,6 +182,8 @@ private:
 				Logger::logError("Peer attempted to lock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
 				return false;
 			}
+
+			// TODO: assign authority
 
 			auto& locks = e->network.locks;
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });

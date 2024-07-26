@@ -71,8 +71,9 @@ namespace Halley {
 		String getId() const override { return "lock"; }
 		String getName() const override { return "Lock"; }
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/lock.png"; }
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
+		Vector<SettingType> getSettingTypes() const override;
 		bool hasDestructor(const ScriptGraphNode& node) const override;
 		void doInitData(ScriptLockData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptLockData& data) const override;

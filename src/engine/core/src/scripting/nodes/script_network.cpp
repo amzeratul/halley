@@ -114,6 +114,13 @@ ConfigNode ScriptLockData::toConfigNode(const EntitySerializationContext& contex
 	return {};
 }
 
+Vector<IGraphNodeType::SettingType> ScriptLock::getSettingTypes() const
+{
+	return {
+		SettingType{ "acquireAuthority", "bool", Vector<String>{"false"} }
+	};
+}
+
 bool ScriptLock::hasDestructor(const ScriptGraphNode& node) const
 {
 	return true;
@@ -149,18 +156,26 @@ gsl::span<const IGraphNodeType::PinType> ScriptLock::getPinConfiguration(const B
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 5>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output }
+	};
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Tries to acquire lock for player ");
 	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
-	str.append(" and target ");
+	str.append(" tries to acquire network lock");
+	if (node.getSettings()["acquireAuthority"].asBool(false)) {
+		str.append(" and authority", settingColour);
+	}
+	str.append(" over entity ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
-	str.append(" and branches based on success");
 	return str.moveResults();
 }
 
@@ -171,7 +186,8 @@ IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Tim
 		if (!target.isValid()) {
 			return Result(ScriptNodeExecutionState::Done, 0, 1);
 		}
-		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), target);
+		bool acquireAuthority = node.getSettings()["acquireAuthority"].asBool(false);
+		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), target, acquireAuthority);
 	}
 
 	if (data.requestPending.hasValue()) {
