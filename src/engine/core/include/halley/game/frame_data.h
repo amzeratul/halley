@@ -83,6 +83,14 @@ namespace Halley {
 		Vector2f position;
 	};
 
+	class UIWidget;
+	class UIRoot;
+
+	class UIRootFrameData {
+	public:
+		Vector<std::pair<std::shared_ptr<UIWidget>, size_t>> renderWidgets;
+		Vector<std::shared_ptr<UIWidget>> renderRoots;
+	};
 
 	class BaseFrameData {
 	public:
@@ -114,6 +122,13 @@ namespace Halley {
 		Vector<DebugWorldText> debugWorldTexts;
 		TreeMap<String, DebugText> debugTexts;
 		Vector<std::pair<Vector2f, std::shared_ptr<ScriptState>>> scriptStates;
+		HashMap<const UIRoot*, UIRootFrameData> uiRootData;
+
+		static BaseFrameData& getCurrentBase()
+		{
+			assert(hasCurrent());
+			return *threadInstance;
+		}
 
 	protected:
 		static thread_local BaseFrameData* threadInstance;

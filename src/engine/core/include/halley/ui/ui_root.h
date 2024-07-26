@@ -41,6 +41,7 @@ namespace Halley {
 
 		void update(Time t, UIInputType activeInputType, std::shared_ptr<InputDevice> mouse, std::shared_ptr<InputDevice> manual);
 		void draw(SpritePainter& painter, int mask, int layer);
+		void prepareRender();
 		void render(RenderContext& rc);
 
 		void mouseOverNext(bool forward = true);
@@ -108,8 +109,6 @@ namespace Halley {
 		UIInputType lastInputType = UIInputType::Keyboard;
 
 		Vector<UIWidget*> widgetsCache;
-		Vector<std::pair<UIWidget*, size_t>> renderWidgetsCache;
-		Vector<RenderContext> rcCache;
 
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 

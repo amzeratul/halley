@@ -618,6 +618,11 @@ Future<AssetPreviewData> ProjectWindow::getAssetPreviewData(AssetType assetType,
 	});
 }
 
+bool ProjectWindow::hasRender() const
+{
+	return true;
+}
+
 void ProjectWindow::render(RenderContext& rc) const
 {
 	if (assetPreviewGenerator) {

@@ -76,25 +76,42 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 	}
 }
 
-// Render thread
-void UIRenderSurface::collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs)
+// Update thread
+void UIRenderSurface::collectWidgetsForRendering(size_t curRootIdx, Vector<std::pair<std::shared_ptr<UIWidget>, size_t>>& dst, Vector<std::shared_ptr<UIWidget>>& dstRoots)
 {
-	renderParams = paramsSync.read();
-
-	if (renderParams) {
-		auto& rc = dstRCs[curRCIdx];
-		auto& cam = renderParams->camera;
-		cam = rc.getCamera();
-		cam.setScale(cam.getScale().xy() * renderParams->scale);
-		dstRCs.push_back(rc.with(cam));
+	if (isRendering()) {
+		auto me = shared_from_this();
+		dstRoots.push_back(me);
 
 		for (auto& c: getChildren()) {
-			c->collectWidgetsForRendering(curRCIdx + 1, dst, dstRCs);
+			c->collectWidgetsForRendering(curRootIdx + 1, dst, dstRoots);
 		}
-		dst.emplace_back(this, curRCIdx);
+		dst.emplace_back(me, curRootIdx);
 	} else {
-		UIWidget::collectWidgetsForRendering(curRCIdx, dst, dstRCs);
+		UIWidget::collectWidgetsForRendering(curRootIdx, dst, dstRoots);
 	}
+}
+
+// Update thread
+bool UIRenderSurface::hasRender() const
+{
+	return true;
+}
+
+// Render thread
+void UIRenderSurface::onPreRender()
+{
+	renderParams = paramsSync.read();
+}
+
+// Render thread
+RenderContext UIRenderSurface::getRenderContextForChildren(RenderContext& rc)
+{
+	auto& cam = renderParams->camera; // Camera cannot be a local variable, returned RC will take a reference to it
+
+	cam = rc.getCamera();
+	cam.setScale(cam.getScale().xy() * renderParams->scale);
+	return rc.with(cam);
 }
 
 // Render thread

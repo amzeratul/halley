@@ -5,6 +5,7 @@
 #include "halley/audio/audio_position.h"
 #include "halley/audio/audio_clip.h"
 #include "halley/api/halley_api.h"
+#include "halley/game/frame_data.h"
 #include "halley/input/input_keyboard.h"
 #include "halley/input/input_virtual.h"
 #include "halley/maths/random.h"
@@ -135,6 +136,8 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		// For subsequent iterations, make sure t = 0
 		t = 0;
 	} while (isWaitingToSpawnChildren());
+
+	prepareRender();
 }
 
 void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, Vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
@@ -714,17 +717,37 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 	}
 }
 
-void UIRoot::render(RenderContext& origRC)
+void UIRoot::prepareRender()
 {
-	renderWidgetsCache.clear();
-	rcCache.clear();
-	rcCache.push_back(origRC);
+	auto& data = BaseFrameData::getCurrentBase().uiRootData[this];
+	data.renderRoots.clear();
+	data.renderRoots.push_back({});
+	data.renderWidgets.clear();
 
 	for (auto& c: getChildren()) {
-		c->collectWidgetsForRendering(0, renderWidgetsCache, rcCache);
+		c->collectWidgetsForRendering(0, data.renderWidgets, data.renderRoots);
 	}
-	for (auto& [w, rc]: renderWidgetsCache) {
-		w->render(rcCache[rc]);
+}
+
+void UIRoot::render(RenderContext& origRC)
+{
+	const auto& data = BaseFrameData::getCurrentBase().uiRootData.at(this);
+
+	for (auto& [w, rcIdx] : data.renderWidgets) {
+		w->onPreRender();
+	}
+
+	Vector<RenderContext> rcs;
+	for (auto& root: data.renderRoots) {
+		if (!root) {
+			rcs.push_back(origRC);
+		} else {
+			rcs.push_back(root->getRenderContextForChildren(origRC));
+		}
+	}
+	
+	for (auto& [w, rcIdx]: data.renderWidgets) {
+		w->render(rcs[rcIdx]);
 	}
 }
 

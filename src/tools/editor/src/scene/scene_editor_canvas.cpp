@@ -107,6 +107,11 @@ void SceneEditorCanvas::draw(UIPainter& p) const
 	});
 }
 
+bool SceneEditorCanvas::hasRender() const
+{
+	return true;
+}
+
 void SceneEditorCanvas::render(RenderContext& rc) const
 {
 	if (gameBridge && surface->isReady() && ready) {

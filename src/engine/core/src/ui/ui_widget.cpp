@@ -1,4 +1,6 @@
 #include "halley/ui/ui_widget.h"
+
+#include "halley/graphics/render_context.h"
 #include "halley/ui/ui_root.h"
 #include "halley/ui/ui_validator.h"
 #include "halley/ui/ui_data_bind.h"
@@ -114,13 +116,15 @@ void UIWidget::collectWidgetsForUpdating(Vector<UIWidget*>& dst)
 	}
 }
 
-void UIWidget::collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs)
+void UIWidget::collectWidgetsForRendering(size_t curRootIdx, Vector<std::pair<std::shared_ptr<UIWidget>, size_t>>& dst, Vector<std::shared_ptr<UIWidget>>& dstRoots)
 {
 	if (isActive()) {
-		for (auto& c : getChildren()) {
-			c->collectWidgetsForRendering(curRCIdx, dst, dstRCs);
+		for (auto& c: getChildren()) {
+			c->collectWidgetsForRendering(curRootIdx, dst, dstRoots);
 		}
-		dst.emplace_back(this, curRCIdx);
+		if (hasRender()) {
+			dst.emplace_back(shared_from_this(), curRootIdx);
+		}
 	}
 }
 
@@ -927,8 +931,22 @@ void UIWidget::drawChildren(UIPainter& painter) const
 	}
 }
 
+bool UIWidget::hasRender() const
+{
+	return false;
+}
+
+void UIWidget::onPreRender()
+{
+}
+
 void UIWidget::render(RenderContext& render) const
 {
+}
+
+RenderContext UIWidget::getRenderContextForChildren(RenderContext& rc)
+{
+	return rc;
 }
 
 void UIWidget::update(Time t, bool moved)

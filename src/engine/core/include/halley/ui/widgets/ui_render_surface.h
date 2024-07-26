@@ -13,8 +13,12 @@ namespace Halley {
         void draw(UIPainter& painter) const override;
         void drawChildren(UIPainter& painter) const override;
 
-        void collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs) override;
-        void render(RenderContext& rc) const override;
+        void collectWidgetsForRendering(size_t curRootIdx, Vector<std::pair<std::shared_ptr<UIWidget>, size_t>>& dst, Vector<std::shared_ptr<UIWidget>>& dstRoots) override;
+
+        void onPreRender() override;
+        bool hasRender() const override;
+    	void render(RenderContext& rc) const override;
+        RenderContext getRenderContextForChildren(RenderContext& rc) override;
 
         void setColour(Colour4f col);
         void setScale(Vector2f scale);

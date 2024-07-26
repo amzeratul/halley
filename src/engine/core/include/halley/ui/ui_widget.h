@@ -201,14 +201,17 @@ namespace Halley {
 		virtual std::optional<MouseCursorMode> getMouseCursorMode() const;
 
 		virtual void collectWidgetsForUpdating(Vector<UIWidget*>& dst);
-		virtual void collectWidgetsForRendering(size_t curRCIdx, Vector<std::pair<UIWidget*, size_t>>& dst, Vector<RenderContext>& dstRCs);
+		virtual void collectWidgetsForRendering(size_t curRootIdx, Vector<std::pair<std::shared_ptr<UIWidget>, size_t>>& dst, Vector<std::shared_ptr<UIWidget>>& dstRoots);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
 		virtual void drawChildren(UIPainter& painter) const;
 
+		virtual bool hasRender() const;
+		virtual void onPreRender();
 		virtual void render(RenderContext& rc) const;
+		virtual RenderContext getRenderContextForChildren(RenderContext& rc);
 
 		virtual void update(Time t, bool moved);
 

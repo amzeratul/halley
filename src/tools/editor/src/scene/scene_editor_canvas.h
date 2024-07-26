@@ -25,6 +25,7 @@ namespace Halley {
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
+		bool hasRender() const override;
 		void render(RenderContext& rc) const override;
 
 		bool canInteractWithMouse() const override;

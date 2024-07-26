@@ -58,6 +58,7 @@ namespace Halley {
         AssetPreviewGenerator& getAssetPreviewGenerator();
         Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
+        bool hasRender() const override;
         void render(RenderContext& rc) const override;
 
     	Vector2f getChoosePrefabWindowSize() const;
