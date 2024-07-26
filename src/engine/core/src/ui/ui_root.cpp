@@ -72,13 +72,15 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 {
 	widgetsCache.clear();
 	for (auto& c: getChildren()) {
-		c->collectWidgets(widgetsCache);
+		widgetsCache.push_back(c.get());
 	}
-	for (auto& w: widgetsCache) {
+
+	for (size_t i = 0; i < widgetsCache.size(); ++i) {
+		auto& w = widgetsCache[i];
 		if (w->getParent() && w->getParent()->isGuardedUpdate()) {
 			bool crashed = false;
 			try {
-				w->doUpdate(type, t, activeInputType, joystickType);
+				w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
 			} catch (const std::exception& e) {
 				Logger::logException(e);
 				crashed = true;
@@ -90,12 +92,12 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 				w->clear();
 			}
 		} else {
-			w->doUpdate(type, t, activeInputType, joystickType);
+			w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
 		}
 	}
 
-	std::reverse(widgetsCache.begin(), widgetsCache.end());
-	for (auto& w: widgetsCache) {
+	for (int i = static_cast<int>(widgetsCache.size()); --i >= 0; ) {
+		auto& w = widgetsCache[i];
 		w->doPostUpdate();
 	}
 }

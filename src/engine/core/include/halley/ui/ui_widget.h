@@ -37,7 +37,7 @@ namespace Halley {
 		virtual ~UIWidget();
 
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType);
+		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst);
 		void doPostUpdate();
 		void doRender(RenderContext& rc);
 
@@ -205,7 +205,7 @@ namespace Halley {
 		virtual std::optional<Vector2f> transformToChildSpace(Vector2f pos) const;
 		virtual std::optional<MouseCursorMode> getMouseCursorMode() const;
 
-		virtual void collectWidgets(Vector<UIWidget*>& dst);
+		virtual void collectWidgetsForUpdating(Vector<UIWidget*>& dst);
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
