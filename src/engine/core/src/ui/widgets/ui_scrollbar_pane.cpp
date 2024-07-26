@@ -70,17 +70,16 @@ void UIScrollBarPane::setClipSize(Vector2f clipSize)
 	pane->setClipSize(clipSize);
 }
 
-void UIScrollBarPane::updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick)
+void UIScrollBarPane::collectWidgets(Vector<UIWidget*>& dst)
 {
-	// We need to update scrollbars first, then contents, otherwise scrolling information will lag a frame
-
+	dst.push_back(this);
 	if (hBar) {
-		hBar->doUpdate(updateType, time, uiInput, joystick);
+		hBar->collectWidgets(dst);
 	}
 	if (vBar) {
-		vBar->doUpdate(updateType, time, uiInput, joystick);
+		vBar->collectWidgets(dst);
 	}
 	if (pane) {
-		pane->doUpdate(updateType, time, uiInput, joystick);
+		pane->collectWidgets(dst);
 	}
 }

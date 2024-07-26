@@ -6,6 +6,8 @@
 #include "ui_input.h"
 
 namespace Halley {
+	enum class JoystickType;
+	enum class UIWidgetUpdateType;
 	class InputAPI;
 	class UIStyle;
 	class RenderContext;
@@ -104,6 +106,10 @@ namespace Halley {
 
 		std::shared_ptr<UIToolTip> toolTip;
 		UIInputType lastInputType = UIInputType::Keyboard;
+
+		Vector<UIWidget*> widgetsCache;
+
+		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 
 		void updateMouse(const std::shared_ptr<InputDevice>& mouse, KeyMods keyMods);
 		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, Vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);

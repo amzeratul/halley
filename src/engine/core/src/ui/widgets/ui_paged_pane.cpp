@@ -110,26 +110,3 @@ bool UIPagedPane::isGuardedUpdate() const
 {
 	return guardedUpdate;
 }
-
-void UIPagedPane::updateChildren(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
-{
-	for (auto& c: getChildren()) {
-		if (guardedUpdate) {
-			bool crashed = false;
-			try {
-				c->doUpdate(updateType, t, inputType, joystickType);
-			} catch (const std::exception& e) {
-				Logger::logException(e);
-				crashed = true;
-			} catch (...) {
-				crashed = true;
-			}
-
-			if (crashed) {
-				c->clear();
-			}
-		} else {
-			c->doUpdate(updateType, t, inputType, joystickType);
-		}
-	}
-}

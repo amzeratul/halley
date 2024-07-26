@@ -68,6 +68,38 @@ void UIRoot::runLayout()
 	}
 }
 
+void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType)
+{
+	widgetsCache.clear();
+	for (auto& c: getChildren()) {
+		c->collectWidgets(widgetsCache);
+	}
+	for (auto& w: widgetsCache) {
+		if (w->getParent() && w->getParent()->isGuardedUpdate()) {
+			bool crashed = false;
+			try {
+				w->doUpdate(type, t, activeInputType, joystickType);
+			} catch (const std::exception& e) {
+				Logger::logException(e);
+				crashed = true;
+			} catch (...) {
+				crashed = true;
+			}
+
+			if (crashed) {
+				w->clear();
+			}
+		} else {
+			w->doUpdate(type, t, activeInputType, joystickType);
+		}
+	}
+
+	std::reverse(widgetsCache.begin(), widgetsCache.end());
+	for (auto& w: widgetsCache) {
+		w->doPostUpdate();
+	}
+}
+
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
 	auto joystickType = manual ? manual->getJoystickType() : JoystickType::Generic;
@@ -87,9 +119,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		updateGamepadInput(manual);
 
 		// Update children
-		for (auto& c: getChildren()) {
-			c->doUpdate(first ? UIWidgetUpdateType::First : UIWidgetUpdateType::Full, t, activeInputType, joystickType);
-		}
+		updateWidgets(first ? UIWidgetUpdateType::First : UIWidgetUpdateType::Full, t, activeInputType, joystickType);
 		first = false;
 		removeDeadChildren();
 
@@ -97,9 +127,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 		runLayout();
 
 		// Update again, to reflect what happened >_>
-		for (auto& c: getChildren()) {
-			c->doUpdate(UIWidgetUpdateType::Partial, 0, activeInputType, joystickType);
-		}
+		updateWidgets(UIWidgetUpdateType::Partial, 0, activeInputType, joystickType);
 
 		// For subsequent iterations, make sure t = 0
 		t = 0;

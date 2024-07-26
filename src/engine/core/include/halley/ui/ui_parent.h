@@ -75,6 +75,8 @@ namespace Halley {
 		template <typename F>
 		void descend(F f, bool includeInactive = false, bool includePending = false);
 
+		virtual bool isGuardedUpdate() const { return false; }
+
 	private:
 		Vector<std::shared_ptr<UIWidget>> children;
 		Vector<std::shared_ptr<UIWidget>> childrenWaiting;

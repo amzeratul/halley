@@ -21,10 +21,7 @@ namespace Halley {
         void clear() override;
 
     	void setGuardedUpdate(bool enabled);
-    	bool isGuardedUpdate() const;
-
-    protected:
-        void updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick) override;
+    	bool isGuardedUpdate() const override;
 
     private:
         int currentPage = 0;

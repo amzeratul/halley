@@ -84,7 +84,12 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		addNewChildren(inputType);
-		updateChildren(updateType, t, inputType, joystickType);
+	}
+}
+
+void UIWidget::doPostUpdate()
+{
+	if (isActive()) {
 		removeSizerDeadChildren();
 		removeDeadChildren();
 	}
@@ -101,10 +106,11 @@ void UIWidget::removeSizerDeadChildren()
 	}
 }
 
-void UIWidget::updateChildren(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
+void UIWidget::collectWidgets(Vector<UIWidget*>& dst)
 {
+	dst.push_back(this);
 	for (auto& c: getChildren()) {
-		c->doUpdate(updateType, t, inputType, joystickType);
+		c->collectWidgets(dst);
 	}
 }
 
