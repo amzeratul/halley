@@ -84,6 +84,7 @@ namespace Halley {
 
 			// Next block is what was stored on the nextFreeEntryIndex
 			std::swap(next, block.data[localIdx].nextFreeEntryIndex);
+			++nAllocs;
 
 			// External index composes the revision with the index, so it's unique, but easily mappable
 			const int64_t externalIdx = static_cast<int64_t>(entryIdx) | (static_cast<int64_t>(rev & 0x7FFFFFFF) << 32); // TODO: compute properly
@@ -96,6 +97,7 @@ namespace Halley {
 			// Swaps the data with the next, so this will actually be the next one to be allocated
 			Entry* entry = reinterpret_cast<Entry*>(p);
 			std::swap(entry->nextFreeEntryIndex, next);
+			--nAllocs;
 
 			// Increase revision so the next one to allocate this gets a unique number
 			++entry->revision;
@@ -141,9 +143,15 @@ namespace Halley {
 			return reinterpret_cast<const T*>(&(data.data));
 		}
 
+		uint32_t getNumAllocs() const
+		{
+			return nAllocs;
+		}
+
 	private:
 		VectorStd<Block, uint32_t, false> blocks; // Ensure no SBO
 		uint32_t next = 0;
+		uint32_t nAllocs = 0;
 
 		mutable std::mutex mutex;
 

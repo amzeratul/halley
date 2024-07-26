@@ -610,6 +610,7 @@ TempMemoryPool& World::getTempMemoryPool() const
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);
+	entityMap->freeId(entity->getEntityId().value);
 	entity->destroyComponents(*componentDeleterTable);
 	entity->~Entity();
 	entityPool->free(entity);
@@ -775,7 +776,6 @@ void World::updateEntities()
 
 			// Remove
 			if (canDeleteEntities) {
-				entityMap->freeId(entity.getEntityId().value);
 				deleteEntity(&entity);
 			}
 
