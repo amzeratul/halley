@@ -123,7 +123,7 @@ namespace Halley {
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;
 		[[nodiscard]] bool containsPoint(Vector2f position) const;
-		[[nodiscard]] std::optional<Vector2f> getClosestPointTo(Vector2f pos, float anisotropy = 1.0f) const;
+		[[nodiscard]] std::optional<Vector2f> getClosestPointTo(Vector2f pos, float anisotropy = 1.0f, float maxDist = std::numeric_limits<float>::infinity()) const;
 		
 		// Returns empty if no collision is found (i.e. fully contained within navmesh)
 		// Otherwise returns collision point
@@ -184,6 +184,7 @@ namespace Halley {
 		Vector2i worldGridPos;
 
 		float totalArea = 0;
+		Circle boundingCircle;
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;
@@ -192,13 +193,16 @@ namespace Halley {
 		void processPolygons();
 		void addPolygonsToGrid();
 		void addPolygonToGrid(const Polygon& poly, NodeId idx);
+		std::optional<Vector2i> getGridAt(Vector2f pos, bool allowOutside) const;
 		gsl::span<const NodeId> getPolygonsAt(Vector2f pos, bool allowOutside) const;
+		gsl::span<const NodeId> getPolygonsAt(Vector2i gridPos) const;
 
 		void addToPortals(NodeAndConn nodeAndConn, int id);
 		Portal& getPortals(int id);
 		void postProcessPortals();
 
 		void computeArea();
+		void computeBoundingCircle();
 
 		void generateOpenEdges();
 

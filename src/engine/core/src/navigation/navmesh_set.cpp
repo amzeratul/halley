@@ -157,21 +157,21 @@ std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldP
 	}
 
 	// Find closest and try again
-	if (auto p = getClosestPointTo(pos, anisotropy, nudge)) {
+	if (auto p = getClosestPointTo(pos, std::numeric_limits<float>::infinity(), anisotropy, nudge)) {
 		return { getNavMeshIdxAt(*p), *p };
 	}
 
 	return { std::numeric_limits<size_t>::max(), pos };
 }
 
-std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float anisotropy, float nudge) const
+std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float maxDist, float anisotropy, float nudge) const
 {
 	std::optional<WorldPosition> bestPoint;
-	float bestDist = std::numeric_limits<float>::infinity();
+	float bestDist = maxDist;
 
 	for (const auto& navmesh: navmeshes) {
 		if (navmesh.getSubWorld() == pos.subWorld) {
-			const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy);
+			const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist);
 			if (curPoint) {
 				const float dist = (*curPoint - pos.pos).length();
 				if (dist < bestDist) {

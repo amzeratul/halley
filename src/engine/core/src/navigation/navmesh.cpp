@@ -188,13 +188,17 @@ bool Navmesh::containsPoint(Vector2f position) const
 	return false;
 }
 
-std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotropy) const
+std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotropy, float maxDist) const
 {
+	if (boundingCircle.getDistanceTo(pos) > maxDist) {
+		return {};
+	}
+
 	if (containsPoint(pos)) {
 		return pos;
 	}
 
-	float bestDist = std::numeric_limits<float>::infinity();
+	float bestDist = maxDist;
 	std::optional<Vector2f> bestPoint;
 
 	for (const auto& poly: polygons) {
@@ -766,6 +770,7 @@ void Navmesh::processPolygons()
 {
 	addPolygonsToGrid();
 	computeArea();
+	computeBoundingCircle();
 }
 
 void Navmesh::addPolygonsToGrid()
@@ -801,7 +806,7 @@ void Navmesh::addPolygonToGrid(const Polygon& poly, NodeId idx)
 	}
 }
 
-gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2f pos, bool allowOutside) const
+std::optional<Vector2i> Navmesh::getGridAt(Vector2f pos, bool allowOutside) const
 {
 	const auto p = Vector2i((normalisedCoordinatesBase.inverseTransform(pos - origin) * Vector2f(gridSize)).floor());
 	const int x = clamp(p.x, 0, gridSize.x - 1);
@@ -810,8 +815,22 @@ gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2f pos, bool allow
 	if (!allowOutside && (x != p.x || y != p.y)) {
 		return {};
 	}
-	
-	return polyGrid[x + y * gridSize.x];
+
+	return Vector2i(x, y);
+}
+
+gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2f pos, bool allowOutside) const
+{
+	if (const auto p = getGridAt(pos, allowOutside)) {
+		return getPolygonsAt(*p);
+	} else {
+		return {};
+	}
+}
+
+gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2i gridPos) const
+{
+	return polyGrid[gridPos.x + gridPos.y * gridSize.x];
 }
 
 float Navmesh::getArea() const
@@ -842,6 +861,13 @@ void Navmesh::computeArea()
 	for (const auto& p: polygons) {
 		totalArea += p.getArea();
 	}
+}
+
+void Navmesh::computeBoundingCircle()
+{
+	auto centre = normalisedCoordinatesBase.transform(Vector2f(0.5f, 0.5f)) + origin;
+	auto radius = (origin - centre).length();
+	boundingCircle = Circle(centre, radius);
 }
 
 void Navmesh::generateOpenEdges()
