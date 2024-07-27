@@ -31,7 +31,8 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<TypedPool<Entity>>())
-	, tempMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
+	, updateMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
+	, renderMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 {
 }
 
@@ -45,7 +46,8 @@ World::World(World& world, StagingWorldTag tag)
 	, componentDeleterTable(world.componentDeleterTable)
 	, entityPool(world.entityPool)
 	, transform2DAnisotropy(world.transform2DAnisotropy)
-	, tempMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
+	, updateMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
+	, renderMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
 {
 }
 
@@ -75,7 +77,8 @@ World::~World()
 	families.clear();
 	services.clear();
 
-	tempMemoryPool.reset();
+	updateMemoryPool.reset();
+	renderMemoryPool.reset();
 }
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
@@ -602,9 +605,14 @@ void World::setHeadless(bool headless)
 	this->headless = headless;
 }
 
-TempMemoryPool& World::getTempMemoryPool() const
+TempMemoryPool& World::getUpdateMemoryPool() const
 {
-	return *tempMemoryPool;
+	return *updateMemoryPool;
+}
+
+TempMemoryPool& World::getRenderMemoryPool() const
+{
+	return *renderMemoryPool;
 }
 
 void World::deleteEntity(Entity* entity)
@@ -791,11 +799,11 @@ void World::updateEntities()
 void World::initSystems(gsl::span<const TimeLine> timelines)
 {
 	for (auto& tl: timelines) {
-		tempMemoryPool->reset();
 		for (auto& system : systems[int(tl)]) {
 			// If the system is initialised, also check for any entities that need spawning
 			if (system->tryInit()) {
 				spawnPending();
+				updateMemoryPool->reset();
 			}
 		}
 	}
@@ -804,17 +812,19 @@ void World::initSystems(gsl::span<const TimeLine> timelines)
 void World::updateSystems(TimeLine timeline, Time elapsed)
 {
 	for (auto& system : getSystems(timeline)) {
-		tempMemoryPool->reset();
+		updateMemoryPool->reset();
 		system->doUpdate(elapsed);
 		spawnPending();
+		updateMemoryPool->reset();
 	}
 }
 
 void World::renderSystems(RenderContext& rc) const
 {
 	for (auto& system : getSystems(TimeLine::Render)) {
-		tempMemoryPool->reset();
+		renderMemoryPool->reset();
 		system->doRender(rc);
+		renderMemoryPool->reset();
 	}
 }
 
@@ -864,10 +874,12 @@ const Vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 
 void World::processSystemMessages(TimeLine timeline)
 {
+	auto& pool = timeline == TimeLine::Render ? renderMemoryPool : updateMemoryPool;
+
 	bool keepRunning = true;
 	auto& timelineSystems = systems[static_cast<int>(timeline)];
 	while (keepRunning) {
-		tempMemoryPool->reset();
+		pool->reset();
 		spawnPending();
 		
 		keepRunning = false;
@@ -875,14 +887,16 @@ void World::processSystemMessages(TimeLine timeline)
 			system->prepareSystemMessages();
 		}
 		for (auto& system: timelineSystems) {
-			tempMemoryPool->reset();
+			pool->reset();
 			system->processSystemMessages();
+			pool->reset();
 		}
 		for (auto& system : timelineSystems) {
 			if (system->getSystemMessagesInInbox() > 0) {
 				keepRunning = true;
 			}
 		}
+		pool->reset();
 	}
 	pendingSystemMessages[static_cast<int>(timeline)].clear();
 }

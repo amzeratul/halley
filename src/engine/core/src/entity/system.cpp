@@ -99,7 +99,7 @@ void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> t
 			, elemIdx(pool)
 		{}
 	};
-	auto inboxes = HashMapTemp<int, MessageBox>(world->getTempMemoryPool());
+	auto inboxes = HashMapTemp<int, MessageBox>(world->getUpdateMemoryPool());
 
 	const size_t sz = family.count();
 	for (size_t i = 0; i < sz; i++) {
@@ -108,7 +108,7 @@ void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> t
 			for (const auto& msg: entity->inbox) {
 				if (std::find(typesAccepted.begin(), typesAccepted.end(), msg.type) != typesAccepted.end()) {
 					if (!inboxes.contains(msg.type)) {
-						inboxes.insert_or_assign(msg.type, MessageBox(world->getTempMemoryPool()));
+						inboxes.insert_or_assign(msg.type, MessageBox(world->getUpdateMemoryPool()));
 					}
 					auto& inbox = inboxes.at(msg.type);
 					inbox.msg.emplace_back(msg.msg.get());

@@ -101,7 +101,7 @@ protected:
 		return doGetMessageBridge();
 	}
 	Halley::TempMemoryPool& getTempMemoryPool() const {
-		return doGetWorld().getTempMemoryPool();
+		return doGetWorld().getUpdateMemoryPool();
 	}
 	void sendMessage(Halley::EntityId entityId, SendScriptMsgMessage msg) {
 		sendMessageGeneric(entityId, std::move(msg));

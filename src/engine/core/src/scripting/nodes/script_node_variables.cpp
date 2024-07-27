@@ -226,7 +226,12 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 
 ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 {
-	const auto& value = node.getSettings()["value"].asString("");
+	const auto& origValue = node.getSettings()["value"];
+	if (origValue.getType() == ConfigNodeType::Int || origValue.getType() == ConfigNodeType::Float || origValue.getType() == ConfigNodeType::Bool || origValue.getType() == ConfigNodeType::Undefined) {
+		return ConfigNode(origValue);
+	}
+
+	const auto& value = origValue.asString("");
 	if (value == "null") {
 		return ConfigNode();
 	}
@@ -249,11 +254,7 @@ ConfigNode ScriptLiteral::getConfigNode(const BaseGraphNode& node) const
 	}
 
 	if (value.isNumber()) {
-		if (value.isInteger()) {
-			return ConfigNode(value.toInteger());
-		} else {
-			return ConfigNode(value.toFloat());
-		}
+		return value.isInteger() ? ConfigNode(value.toInteger()) : ConfigNode(value.toFloat());
 	}
 	return ConfigNode(value);
 }

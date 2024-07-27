@@ -37,7 +37,7 @@ protected:
 		return doGetWorld();
 	}
 	Halley::TempMemoryPool& getTempMemoryPool() const {
-		return doGetWorld().getTempMemoryPool();
+		return doGetWorld().getUpdateMemoryPool();
 	}
 	void sendMessage(NetworkEntityLockSystemMessage msg, std::function<void(bool)> callback = {}) {
 		Halley::String targetSystem = "";

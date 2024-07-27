@@ -38,7 +38,7 @@ protected:
 		return doGetResources();
 	}
 	Halley::TempMemoryPool& getTempMemoryPool() const {
-		return doGetWorld().getTempMemoryPool();
+		return doGetWorld().getUpdateMemoryPool();
 	}
 
 	SessionService& getSessionService() const {

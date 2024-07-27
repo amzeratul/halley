@@ -215,7 +215,8 @@ namespace Halley {
 		bool isHeadless() const;
 		void setHeadless(bool headless);
 
-		TempMemoryPool& getTempMemoryPool() const;
+		TempMemoryPool& getUpdateMemoryPool() const;
+		TempMemoryPool& getRenderMemoryPool() const;
 
 	private:
 		const HalleyAPI& api;
@@ -252,7 +253,8 @@ namespace Halley {
 
     	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
 
-		std::unique_ptr<TempMemoryPool> tempMemoryPool;
+		std::unique_ptr<TempMemoryPool> updateMemoryPool;
+		std::unique_ptr<TempMemoryPool> renderMemoryPool;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

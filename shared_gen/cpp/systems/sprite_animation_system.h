@@ -64,7 +64,7 @@ protected:
 		return doGetWorld();
 	}
 	Halley::TempMemoryPool& getTempMemoryPool() const {
-		return doGetWorld().getTempMemoryPool();
+		return doGetWorld().getUpdateMemoryPool();
 	}
 
 	ScreenService& getScreenService() const {
