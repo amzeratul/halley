@@ -80,6 +80,8 @@ namespace Halley
 		Path getSharedGenPath() const;
 		Path getSharedGenSrcPath() const;
 
+		Path getSrcPath() const;
+
 		void setAssetPackManifest(const Path& path);
 		Path getAssetPackManifestPath() const;
 

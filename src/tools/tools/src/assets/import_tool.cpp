@@ -9,6 +9,7 @@
 #include "halley/os/os.h"
 #include "halley/game/halley_statics.h"
 #include "halley/support/logger.h"
+#include "halley/tools/assets/check_source_update_task.h"
 #include "halley/tools/project/project_loader.h"
 
 using namespace Halley;
@@ -34,6 +35,7 @@ int ImportTool::run(Vector<std::string> args)
 		auto tasks = std::make_unique<TaskSet>();
 		tasks->setListener(*this);
 		tasks->addTask(std::make_unique<CheckAssetsTask>(*proj, true));
+		tasks->addTask(std::make_unique<CheckSourceUpdateTask>(*proj, false, true));
 		auto last = std::chrono::steady_clock::now();
 		Logger::logInfo("Waiting on tasks...");
 

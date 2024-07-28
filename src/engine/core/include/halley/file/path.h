@@ -61,6 +61,7 @@ namespace Halley
 		static bool writeFile(const Path& path, gsl::span<const gsl::byte> data);
 		static bool writeFile(const Path& path, const Bytes& data);
 		static bool writeFile(const Path& path, const String& data);
+		static void touchFile(const Path& path);
 
 		static bool exists(const Path& path);
 		static Bytes readFile(const Path& path);

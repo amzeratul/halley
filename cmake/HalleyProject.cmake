@@ -444,8 +444,7 @@ set(HALLEY_PROJECT_LIB_DIRS
 	)
 
 
-
-function(halleyProject name sources headers proj_resources genDefinitions targetDir)
+function(halleyProjectV2 name sources proj_resources targetDir)
 	set(EMBED ${HALLEY_PROJECT_EMBED})
 	set(HALLEY_PROJECT_EMBED 0)
 
@@ -457,29 +456,23 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${targetDir})
-
-	file (GLOB_RECURSE ${name}_sources_gen "gen/*.cpp")
-	file (GLOB_RECURSE ${name}_sources_systems "src/systems/*.cpp")
-	file (GLOB_RECURSE ${name}_headers_gen "gen/*.h")
 	
-	set(proj_sources ${sources} ${${name}_sources_gen} ${${name}_sources_systems})
-	set(proj_headers ${headers} ${${name}_headers_gen} ${genDefinitions})
+	set(proj_sources ${sources} ${${name}_sources_gen} ${${name}_sources_systems} ${${name}_headers_gen})
 
 	assign_source_group(${proj_sources})
-	assign_source_group(${proj_headers})
 	assign_source_group(${proj_resources})
 
 	include_directories("." "gen/cpp" ${HALLEY_PROJECT_INCLUDE_DIRS})
 	link_directories(${HALLEY_PROJECT_LIB_DIRS})
 
 	if (ANDROID_NDK)
-		add_library(${name} SHARED ${proj_sources} ${proj_headers} ${proj_resources})
+		add_library(${name} SHARED ${proj_sources} ${proj_resources})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
 	elseif (HALLEY_MONOLITHIC)
-		add_executable(${name} WIN32 ${proj_sources} ${proj_headers} ${proj_resources})
+		add_executable(${name} WIN32 ${proj_sources} ${proj_resources})
 		target_compile_definitions(${name} PUBLIC HALLEY_EXECUTABLE)
 	else()
-		add_library(${name}-game STATIC ${proj_sources} ${proj_headers})
+		add_library(${name}-game STATIC ${proj_sources})
 		add_library(${name}-dll SHARED ${HALLEY_PATH}/src/entry/halley_dll_entry.cpp)
 
 		if (BUILD_MACOSX_BUNDLE)
@@ -597,17 +590,22 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 			COMMAND "cp" "-R" "${CMAKE_CURRENT_SOURCE_DIR}/assets/" "$<TARGET_FILE_DIR:${name}>/../Resources"
 		)
 	endif ()
+endfunction(halleyProjectV2)
+
+function(halleyProject name sources headers project_resources targetDir)
+	set(proj_sources ${sources} ${headers})
+	halleyProjectV2(${name} "${proj_sources}" "${project_resources}" "${targetDir}")
 endfunction(halleyProject)
 
-function(halleyProjectCodegen name sources headers project_resources genDefinitions targetDir)
-	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
-	halleyProject(${name} "${sources}" "${headers}" "${project_resources}" "${genDefinitions}" "${targetDir}")
+function(halleyProjectCodegenV2 name sources project_resources targetDir)
+	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	halleyProjectV2(${name} "${sources}" "${project_resources}" "${targetDir}")
 	add_dependencies(${name} ${PROJECT_NAME}-codegen)
 
 	if (TARGET halley-cmd)
 		add_dependencies(${PROJECT_NAME}-codegen halley-cmd)
 	endif ()
-endfunction(halleyProjectCodegen)
+endfunction(halleyProjectCodegenV2)
 
 function(halleyProjectBundleProperties name icon app_title copyright)
 	if (BUILD_MACOSX_BUNDLE)

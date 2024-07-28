@@ -1,20 +1,24 @@
 #pragma once
 
-#include <halley.hpp>
+#include "import_assets_database.h"
+#include "halley/concurrency/task.h"
+#include "halley/file/directory_monitor.h"
 
 namespace Halley {
-	class ProjectWindow;
+	class Project;
 
 	class CheckSourceUpdateTask : public Task {
     public:
-        CheckSourceUpdateTask(ProjectWindow& projectWindow, Path projectPath);
+        CheckSourceUpdateTask(Project& project, bool autoBuild, bool oneShot);
 
 	protected:
         void run() override;
 
     private:
-        ProjectWindow& projectWindow;
-        Path projectPath;
+        Project& project;
+        const bool autoBuild;
+        const bool oneShot;
+
         DirectoryMonitor monitorSource;
         DirectoryMonitor monitorCurrent;
         bool firstCheck = true;
@@ -23,12 +27,13 @@ namespace Halley {
         String lastReadFile;
 
         bool needsUpdate();
+		void generateSourceListing();
     };
 
     
     class UpdateSourceTask : public Task {
     public:
-        UpdateSourceTask(ProjectWindow& projectWindow);
+        UpdateSourceTask(Project& project, bool reportError);
 
 	protected:
         void run() override;
@@ -37,7 +42,8 @@ namespace Halley {
         void doAction(TaskSet& taskSet) override;
 
     private:
-        ProjectWindow& projectWindow;
+        Project& project;
+        const bool reportError;
     };
     
 }

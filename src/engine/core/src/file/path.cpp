@@ -6,6 +6,8 @@
 
 #include <sstream>
 #include <fstream>
+#include <sys/utime.h>
+
 #include "halley/os/os.h"
 #include "halley/utils/hash.h"
 
@@ -388,6 +390,11 @@ bool Path::writeFile(const Path& path, const Bytes& data)
 bool Path::writeFile(const Path& path, const String& data)
 {
 	return writeFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+}
+
+void Path::touchFile(const Path& path)
+{
+	utime(path.string().c_str(), nullptr);
 }
 
 bool Path::exists(const Path& path)

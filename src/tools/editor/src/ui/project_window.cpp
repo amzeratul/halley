@@ -11,6 +11,7 @@
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/assets/check_source_update_task.h"
 #include "halley/tools/dll/load_dll_task.h"
 #include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project_properties.h"
@@ -20,7 +21,6 @@
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/asset_file_handler.h"
 #include "src/localisation/localisation_editor_root.h"
-#include "src/project/check_source_update_task.h"
 #include "src/project/check_update_task.h"
 #include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
@@ -62,7 +62,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
 	tasks->addTask(std::make_unique<CheckUpdateTask>(*this, project.getRootPath()));
-	tasks->addTask(std::make_unique<CheckSourceUpdateTask>(*this, project.getRootPath()));
+	tasks->addTask(std::make_unique<CheckSourceUpdateTask>(project, getPreferences().isAutoBuild(), false));
 }
 
 ProjectWindow::~ProjectWindow()

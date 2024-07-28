@@ -17,15 +17,10 @@ set (SOURCES
 	"prec.cpp"
 	"src/game.cpp"
 	"src/game_stage.cpp"
-	)
 
-set (HEADERS
 	"prec.h"
 	"src/game.h"
 	"src/game_stage.h"
 	)
 
-set (GEN_DEFINITIONS
-	)
-
-halleyProject(halleyGame "${SOURCES}" "${HEADERS}" "${GEN_DEFINITIONS}" ${CMAKE_CURRENT_SOURCE_DIR}/${HALLEY_GAME_BIN_DIR})
+halleyProjectV2(halleyGame "${SOURCES}" ${CMAKE_CURRENT_SOURCE_DIR}/${HALLEY_GAME_BIN_DIR})

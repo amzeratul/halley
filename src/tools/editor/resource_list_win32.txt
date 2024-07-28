@@ -1,0 +1,3 @@
+res/halley-editor.rc
+res/resource.h
+res/halley.ico

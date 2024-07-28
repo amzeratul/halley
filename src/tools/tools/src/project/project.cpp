@@ -185,6 +185,11 @@ Path Project::getSharedGenSrcPath() const
 	return halleyRootPath / "shared_gen_src";
 }
 
+Path Project::getSrcPath() const
+{
+	return rootPath / "src";
+}
+
 Path Project::getAssetPackManifestPath() const
 {
 	return assetPackManifest;
