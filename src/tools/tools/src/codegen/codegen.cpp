@@ -161,6 +161,20 @@ Vector<Path> Codegen::generateCode(const ECSData& data, Path directory, IAssetCo
 		writeFiles(directory, prefix, gen->generateRegistry(comps, syss, msgs, sysMsgs), stats, collector);
 	}
 
+	// Erase old files
+	HashSet<Path> validPaths;
+	for (const auto& file: stats.files) {
+		validPaths.insert(file);
+	}
+	for (const auto& file: FileSystem::enumerateDirectory(directory)) {
+		if (file.getExtension() != ".db") {
+			if (!validPaths.contains(directory / file)) {
+				Logger::logInfo("Codegen deleting obsolete file: " + file.toString());
+				Path::removeFile(directory / file);
+			}
+		}
+	}
+
 	// Has changes
 	if (stats.written > 0) {
 		auto cmakeLists = directory.parentPath() / Path("CMakeLists.txt");
