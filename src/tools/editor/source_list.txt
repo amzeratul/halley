@@ -180,4 +180,3 @@ src/ui/timeline_editor.h
 src/ui/toolbar.cpp
 src/ui/toolbar.h
 ../../../gen/cpp/registry.cpp
-../../../gen/cpp/registry.h

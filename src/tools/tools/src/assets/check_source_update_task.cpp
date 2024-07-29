@@ -76,21 +76,21 @@ void CheckSourceUpdateTask::generateSourceListing()
 
 	std::stringstream result;
 
-	Vector<std::pair<Path, Path>> roots;
-	roots.emplace_back(projectPath / "src", projectPath);
+	Vector<std::tuple<Path, Path, bool>> roots;
+	roots.emplace_back(projectPath / "src", projectPath, true);
 	if (isEditor) {
-		roots.emplace_back(rootPath / "gen", projectPath);
+		roots.emplace_back(rootPath / "gen", projectPath, false);
 	}
 	//roots.emplace_back(halleyPath / "shared_gen", rootPath);
 
-	for (const auto& [root, makeRelTo]: roots) {
+	for (const auto& [root, makeRelTo, acceptHeaders]: roots) {
 		auto files = FileSystem::enumerateDirectory(root);
 		//Logger::logInfo("Found " + toString(files.size()) + " files at " + root.getString());
 		std::sort(files.begin(), files.end());
 
 		for (auto& file: files) {
 			const auto ext = file.getExtension();
-			if (ext == ".h" || ext == ".cpp" || ext == ".hpp") {
+			if (ext == ".cpp" || (acceptHeaders && (ext == ".h" || ext == ".hpp"))) {
 				if (file.getFilenameStr() != "build_version.h") {
 					auto path = (root / file).makeRelativeTo(makeRelTo);
 					result << path.getString(false).cppStr() << "\n";
