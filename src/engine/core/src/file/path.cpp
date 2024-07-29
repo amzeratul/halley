@@ -6,7 +6,13 @@
 
 #include <sstream>
 #include <fstream>
-#include <sys/utime.h>
+
+#ifdef _MSC_VER
+	#include <sys/utime.h>
+#else
+	#include <sys/types.h>
+	#include <utime.h>
+#endif
 
 #include "halley/os/os.h"
 #include "halley/utils/hash.h"

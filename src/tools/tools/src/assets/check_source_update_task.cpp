@@ -99,6 +99,10 @@ void CheckSourceUpdateTask::generateSourceListing()
 		}
 	}
 
+	if (!isEditor) {
+		result << "prec.h\nprec.cpp\n";
+	}
+
 	auto newContents = String(result.str());
 	auto curContents = Path::readFileString(srcListFile);
 
