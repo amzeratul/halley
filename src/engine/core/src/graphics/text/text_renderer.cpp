@@ -414,14 +414,21 @@ Vector2f TextRenderer::getExtents() const
 	if (hasExtents) {
 		return extents;
 	}
-	return getExtents(text);
+
+	if (!font) {
+		hasExtents = true;
+		extents = {};
+		return {};
+	}
+	
+	extents = getExtents(text);
+	hasExtents = true;
+	return extents;
 }
 
 Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 {
 	if (!font) {
-		hasExtents = true;
-		extents = {};
 		return {};
 	}
 
@@ -452,9 +459,7 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 	}
 	w = std::max(w, p.x);
 
-	extents = Vector2f(w, p.y + lineH);
-	hasExtents = true;
-	return extents;
+	return Vector2f(w, p.y + lineH);
 }
 
 Vector2f TextRenderer::getCharacterPosition(size_t character) const
