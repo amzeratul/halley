@@ -70,15 +70,15 @@ void UIScrollBarPane::setClipSize(Vector2f clipSize)
 	pane->setClipSize(clipSize);
 }
 
-void UIScrollBarPane::collectWidgetsForUpdating(Vector<UIWidget*>& dst)
+void UIScrollBarPane::collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	if (hBar) {
-		dst.push_back(hBar.get());
+		dst.push_back(hBar);
 	}
 	if (vBar) {
-		dst.push_back(vBar.get());
+		dst.push_back(vBar);
 	}
 	if (pane) {
-		dst.push_back(pane.get());
+		dst.push_back(pane);
 	}
 }

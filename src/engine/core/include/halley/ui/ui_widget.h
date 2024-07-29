@@ -200,7 +200,7 @@ namespace Halley {
 		virtual std::optional<Vector2f> transformToChildSpace(Vector2f pos) const;
 		virtual std::optional<MouseCursorMode> getMouseCursorMode() const;
 
-		virtual void collectWidgetsForUpdating(Vector<UIWidget*>& dst);
+		virtual void collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst);
 		virtual void collectWidgetsForRendering(size_t curRootIdx, Vector<std::pair<std::shared_ptr<UIWidget>, size_t>>& dst, Vector<std::shared_ptr<UIWidget>>& dstRoots);
 
 	protected:
@@ -250,7 +250,7 @@ namespace Halley {
 
 	private:
 		void doDraw(UIPainter& painter) const;
-		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst);
+		void doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst);
 		void doPostUpdate();
 
 		void setParent(UIParent* parent);

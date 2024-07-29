@@ -19,7 +19,7 @@ namespace Halley {
 		void setClipSize(Vector2f clipSize);
 
 	protected:
-		void collectWidgetsForUpdating(Vector<UIWidget*>& dst) override;
+		void collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst) override;
 
 	private:
 		std::shared_ptr<UIScrollPane> pane;

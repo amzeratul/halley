@@ -59,7 +59,7 @@ void UIWidget::doDraw(UIPainter& painter) const
 	drawAfterChildren(painter);
 }
 
-void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<UIWidget*>& dst)
+void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType, Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	if (updateType == UIWidgetUpdateType::Full || updateType == UIWidgetUpdateType::First) {
 		setInputType(inputType);
@@ -109,10 +109,10 @@ void UIWidget::removeSizerDeadChildren()
 	}
 }
 
-void UIWidget::collectWidgetsForUpdating(Vector<UIWidget*>& dst)
+void UIWidget::collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	for (auto& c: getChildren()) {
-		dst.push_back(c.get());
+		dst.push_back(c);
 	}
 }
 

@@ -74,7 +74,7 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 {
 	widgetsCache.clear();
 	for (auto& c: getChildren()) {
-		widgetsCache.push_back(c.get());
+		widgetsCache.push_back(c);
 	}
 
 	for (size_t i = 0; i < widgetsCache.size(); ++i) {

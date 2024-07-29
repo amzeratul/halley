@@ -25,8 +25,8 @@ EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> 
 EditorRootStage::~EditorRootStage()
 {
 	topLevelUI.reset();
-	projectWindow.reset();
 	ui.reset();
+	projectWindow.reset();
 	uiFactory.reset();
 	devConServer.reset();
 

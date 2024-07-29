@@ -108,7 +108,7 @@ namespace Halley {
 		std::shared_ptr<UIToolTip> toolTip;
 		UIInputType lastInputType = UIInputType::Keyboard;
 
-		Vector<UIWidget*> widgetsCache;
+		Vector<std::shared_ptr<UIWidget>> widgetsCache;
 
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 
