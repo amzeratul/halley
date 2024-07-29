@@ -22,12 +22,14 @@ void CheckSourceUpdateTask::run()
 	while (!isCancelled()) {
 		using namespace std::chrono_literals;
 
-		if (needsUpdate()) {
-			if (lastSrcHash != lastSourceListsHash) {
-				lastSourceListsHash = lastSrcHash;
-				generateSourceListing();
-			}
+		updateHashes();
 
+		if (lastSrcHash != lastSourceListsHash) {
+			lastSourceListsHash = lastSrcHash;
+			generateSourceListing();
+		}
+
+		if (lastSrcHash != lastReadFile) {
 			if (!project.isBuildPending()) {
 				project.onBuildStarted();
 				if (autoBuild) {
@@ -49,7 +51,7 @@ void CheckSourceUpdateTask::run()
 	}
 }
 
-bool CheckSourceUpdateTask::needsUpdate()
+void CheckSourceUpdateTask::updateHashes()
 {
 	if (firstCheck || monitorSource.pollAny()) {
 		lastSrcHash = toString(project.getSourceHash(), 16);
@@ -60,12 +62,6 @@ bool CheckSourceUpdateTask::needsUpdate()
 	}
 
 	firstCheck = false;
-
-	if (lastSrcHash != lastReadFile) {
-		//Logger::logInfo("Src hashes to " + lastSrcHash + ", file reads " + lastReadFile);
-	}
-
-	return lastSrcHash != lastReadFile;
 }
 
 void CheckSourceUpdateTask::generateSourceListing()
@@ -93,8 +89,10 @@ void CheckSourceUpdateTask::generateSourceListing()
 		for (auto& file: files) {
 			const auto ext = file.getExtension();
 			if (ext == ".h" || ext == ".cpp" || ext == ".hpp") {
-				auto path = (root / file).makeRelativeTo(makeRelTo);
-				result << path.getString(false).cppStr() << "\n";
+				if (file.getFilenameStr() != "build_version.h") {
+					auto path = (root / file).makeRelativeTo(makeRelTo);
+					result << path.getString(false).cppStr() << "\n";
+				}
 			}
 		}
 	}
