@@ -25,6 +25,7 @@ namespace Halley {
 
         String lastSrcHash;
         String lastReadFile;
+        String lastSourceListsHash;
 
         bool needsUpdate();
 		void generateSourceListing();

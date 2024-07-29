@@ -23,7 +23,10 @@ void CheckSourceUpdateTask::run()
 		using namespace std::chrono_literals;
 
 		if (needsUpdate()) {
-			generateSourceListing();
+			if (lastSrcHash != lastSourceListsHash) {
+				lastSourceListsHash = lastSrcHash;
+				generateSourceListing();
+			}
 
 			if (!project.isBuildPending()) {
 				project.onBuildStarted();
