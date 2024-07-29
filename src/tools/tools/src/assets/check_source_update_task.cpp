@@ -78,7 +78,9 @@ void CheckSourceUpdateTask::generateSourceListing()
 
 	Vector<std::pair<Path, Path>> roots;
 	roots.emplace_back(projectPath / "src", projectPath);
-	roots.emplace_back(rootPath / "gen", projectPath);
+	if (isEditor) {
+		roots.emplace_back(rootPath / "gen", projectPath);
+	}
 	//roots.emplace_back(halleyPath / "shared_gen", rootPath);
 
 	for (const auto& [root, makeRelTo]: roots) {

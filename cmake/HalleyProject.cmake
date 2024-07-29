@@ -456,6 +456,10 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${targetDir})
+
+	file (GLOB_RECURSE ${name}_sources_gen "gen/*.cpp")
+	file (GLOB_RECURSE ${name}_sources_systems "src/systems/*.cpp")
+	file (GLOB_RECURSE ${name}_headers_gen "gen/*.h")
 	
 	set(proj_sources ${sources} ${${name}_sources_gen} ${${name}_sources_systems} ${${name}_headers_gen})
 
