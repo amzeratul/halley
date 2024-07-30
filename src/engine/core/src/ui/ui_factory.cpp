@@ -1062,6 +1062,10 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	}
 
 	sprite.setColour(getColour(col)).setFlip(flip).setRotation(rotation);
+
+	if (node.hasKey("scale")) {
+		sprite.setScale(node["scale"].asVector2f());
+	}
 	
 	if (pivot) {
 		sprite.setPivot(pivot.value());
@@ -1092,6 +1096,7 @@ UIFactoryWidgetProperties UIFactory::getImageProperties() const
 	result.entries.emplace_back("Layer Adjustment", "layerAdjustment", "std::optional<int>", "");
 	result.entries.emplace_back("Interact with Mouse", "interactWithMouse", "bool", "false");
 	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", "");
+	result.entries.emplace_back("Scale", "scale", "std::optional<Halley::Vector2f>", "");
 
 	result.name = "Image";
 	result.iconName = "widget_icons/image.png";

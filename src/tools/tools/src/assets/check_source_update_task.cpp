@@ -104,7 +104,7 @@ void CheckSourceUpdateTask::generateSourceListing()
 	}
 
 	auto newContents = String(result.str());
-	auto curContents = Path::readFileString(srcListFile);
+	auto curContents = Path::readFileString(srcListFile).replaceAll("\r\n", "\n");
 
 	if (newContents != curContents) {
 		Logger::logInfo("Updating " + srcListFile.getString());
