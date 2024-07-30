@@ -125,6 +125,11 @@ void EntityNetworkSession::sendMessages()
 	auto tryCompress = [&](size_t startIdx, size_t count, const Vector<EntityNetworkMessage>& msgs) -> std::optional<Bytes>
 	{
 		auto data = Serializer::toBytes(msgs.span().subspan(startIdx, count), byteSerializationOptions);
+        if (data.size() > 32 * 1024) {
+            // EntityNetworkSession::receiveUpdates() uses a fixed sized buffer to decompress into.
+            // Let's just check the size right here, and split if needed.
+            return std::nullopt;
+        }
 		auto compressed = Compression::lz4Compress(gsl::as_bytes(gsl::span<const Byte>(data)));
 		if (compressed.size() <= 16000) {
 			return std::move(compressed);
