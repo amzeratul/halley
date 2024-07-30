@@ -19,7 +19,6 @@ cd build
 echo Copying DLLs...
 mkdir "%~dp0..\bin\" 2>NUL
 xcopy "%~dp0..\deps\bin\SDL2.dll" "%~dp0..\bin\" /C /Q /Y
-xcopy "%~dp0..\deps\bin\dxcompiler.dll" "%~dp0..\bin\" /C /Q /Y
 xcopy "%~dp0..\deps\bin\ShaderConductor.dll" "%~dp0..\bin\" /C /Q /Y
 
 set ignoreconsoles=1
