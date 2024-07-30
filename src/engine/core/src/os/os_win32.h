@@ -21,18 +21,17 @@
 
 #pragma once
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
-#include <halley/os/os.h>
+#if defined(_WIN32) && !defined(WITH_GDK)
+
 #define _WIN32_DCOM
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "os_winbase.h"
 #include <wbemidl.h>
 
 namespace Halley {
-	class OSWin32 final : public OS {
+	class OSWin32 final : public OSWinBase {
 	public:
 		OSWin32();
-		~OSWin32();
+		~OSWin32() override;
 
 		void createLogConsole(String name, std::optional<size_t> monitor, Vector2f align) override;
 		void initializeConsole() override;
@@ -43,9 +42,7 @@ namespace Halley {
 		String getEnvironmentVariable(const String& name) override;
 		Path parseProgramPath(const String&) override;
 		void setConsoleColor(int foreground, int background) override;
-		void createDirectories(const Path& path) override;
 		bool atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath) override;
-		Vector<Path> enumerateDirectory(const Path& path) override;
 
 		void displayError(const std::string& cs) override;
 		void onWindowCreated(void* window) override;

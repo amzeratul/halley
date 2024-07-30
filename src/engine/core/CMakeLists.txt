@@ -332,8 +332,10 @@ set(SOURCES
         "src/os/os_linux.cpp"
         "src/os/os_freebsd.cpp"
         "src/os/os_mac.cpp"
+		"src/os/os_gdk.cpp"
         "src/os/os_unix.cpp"
         "src/os/os_win32.cpp"
+		"src/os/os_winbase.cpp"
 
         "src/navigation/navigation_query.cpp"
         "src/navigation/navigation_path.cpp"
@@ -885,8 +887,10 @@ set(HEADERS
         "src/os/os_ios.h"
         "src/os/os_linux.h"
         "src/os/os_mac.h"
+		"src/os/os_gdk.h"
         "src/os/os_unix.h"
         "src/os/os_win32.h"
+		"src/os/os_winbase.h"
 
         "src/support/StackWalker/StackWalker.h"
         

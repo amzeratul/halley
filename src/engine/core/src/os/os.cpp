@@ -26,6 +26,7 @@
 #include "os_ios.h"
 #include "os_linux.h"
 #include "os_freebsd.h"
+#include "os_gdk.h"
 #include "halley/support/exception.h"
 #include <fstream>
 
@@ -44,7 +45,7 @@ void OS::setInstance(OS* os)
 
 OS* OS::createOS()
 {
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 	return new OSWin32();
 #elif defined(__APPLE__)
 	return new OSMac();
@@ -56,6 +57,8 @@ OS* OS::createOS()
 	return new OSLinux();
 #elif defined(__FreeBSD__) && !defined(__ORBIS__)
 	return new OSFreeBSD();
+#elif defined(WITH_GDK)
+    return new OSGDK();
 #else
 	return new OS();
 #endif

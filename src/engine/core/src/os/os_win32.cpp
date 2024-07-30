@@ -22,7 +22,7 @@
 #include "halley/file_formats/image.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 #include "halley/support/exception.h"
 
 #pragma warning(disable: 6387)
@@ -342,24 +342,6 @@ void OSWin32::setConsoleColor(int foreground, int background)
 	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
 }
 
-static bool hasDirectory(const Path& directory) {
-    DWORD res = GetFileAttributesW(directory.getString().getUTF16().c_str());
-    return res != INVALID_FILE_ATTRIBUTES && (res & FILE_ATTRIBUTE_DIRECTORY) != 0;
-}
-
-void OSWin32::createDirectories(const Path& path)
-{
-	size_t n = path.getNumberPaths();
-	for (size_t i = 1; i < n; ++i) {
-		Path curPath = path.getFront(i);
-		if (!hasDirectory(curPath)) {
-			if (!CreateDirectoryW(curPath.getString().getUTF16().c_str(), 0)) {
-				throw Exception("Unable to create directory: " + curPath + " (trying to make " + path + ")", HalleyExceptions::OS);
-			}
-		}
-	}
-}
-
 static bool writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 {
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
@@ -436,41 +418,6 @@ bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data,
 	} else {
 		return writeFile(dstPath.c_str(), data);
 	}
-}
-
-Vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
-{
-	std::list<String> dirsToList;
-	dirsToList.push_back(".");
-
-	Vector<Path> result;
-
-	WIN32_FIND_DATAW ffd;
-	while (!dirsToList.empty()) {
-		const auto curDir = dirsToList.front();
-		const auto curPath = (rootPath / curDir).getString();
-		const auto pathStr = (curPath + "/*").replaceAll("/", "\\");
-		dirsToList.pop_front();
-
-		const auto handle = FindFirstFileW(pathStr.getUTF16().c_str(), &ffd);
-		if (handle != INVALID_HANDLE_VALUE) {
-			do {
-				String curFile = String(ffd.cFileName);
-
-				const DWORD attrib = GetFileAttributesW((rootPath / curDir / curFile).getString().getUTF16().c_str());
-				if ((attrib & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-					if (curFile != "." && curFile != "..") {
-						dirsToList.emplace_back(curDir + "/" + curFile);
-					}
-				} else {
-					auto res = (Path(curDir) / curFile);
-					result.emplace_back(res);
-				}
-			} while (FindNextFileW(handle, &ffd) != 0);
-		}
-	}
-
-	return result;
 }
 
 void OSWin32::displayError(const std::string& cs)
