@@ -102,6 +102,8 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 		auto& w = widgetsCache[i];
 		w->doPostUpdate();
 	}
+
+	widgetsCache.clear();
 }
 
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
