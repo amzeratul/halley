@@ -5,6 +5,7 @@
 #include "halley/tools/file/filesystem_cache.h"
 #include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -74,14 +75,14 @@ void CheckSourceUpdateTask::generateSourceListing()
 	const auto srcListFile = projectPath / "source_list.txt";
 	const auto cmakeLists = projectPath / "CMakeLists.txt";
 
-	std::stringstream result;
-
 	Vector<std::tuple<Path, Path, bool>> roots;
 	roots.emplace_back(projectPath / "src", projectPath, true);
 	if (isEditor) {
 		roots.emplace_back(rootPath / "gen", projectPath, false);
 	}
 	//roots.emplace_back(halleyPath / "shared_gen", rootPath);
+
+	Vector<String> result;
 
 	for (const auto& [root, makeRelTo, acceptHeaders]: roots) {
 		auto files = FileSystem::enumerateDirectory(root);
@@ -93,25 +94,38 @@ void CheckSourceUpdateTask::generateSourceListing()
 			if (ext == ".cpp" || (acceptHeaders && (ext == ".h" || ext == ".hpp"))) {
 				if (file.getFilenameStr() != "build_version.h") {
 					auto path = (root / file).makeRelativeTo(makeRelTo);
-					result << path.getString(false).cppStr() << "\n";
+					result.push_back(path.getString(false));
 				}
 			}
 		}
 	}
 
 	if (!isEditor) {
-		result << "prec.h\nprec.cpp\n";
+		result.push_back("prec.h");
+		result.push_back("prec.cpp");
 	}
 
-	auto newContents = String(result.str());
-	auto curContents = Path::readFileString(srcListFile).replaceAll("\r\n", "\n");
+	auto prevContents = Path::readFileLines(srcListFile);
+	std_ex::erase(prevContents, String());
 
-	if (newContents != curContents) {
+	if (result != prevContents) {
 		Logger::logInfo("Updating " + srcListFile.getString());
 		setProgress(0.5f, "Updating source_list.txt");
 
+		std::stringstream resultStr;
+		constexpr const char* lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n" : "\n";
+		for (const auto& line: result) {
+			resultStr << line.cppStr() << lineBreak;
+		}
+		auto newContents = String(resultStr.str());
+
 		Path::writeFile(srcListFile, newContents);
 		Path::touchFile(cmakeLists);
+	} else {
+		if (FileSystem::getLastWriteTime(srcListFile) > FileSystem::getLastWriteTime(cmakeLists)) {
+			Logger::logInfo("Touching " + cmakeLists.getString());
+			Path::touchFile(cmakeLists);
+		}
 	}
 }
 
