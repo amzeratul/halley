@@ -90,6 +90,10 @@ void Project::update(Time time)
 	if (comments->isLoaded()) {
 		comments->update(time);
 	}
+
+	if (editorData) {
+		editorData->update();
+	}
 }
 
 bool Project::isBuildPending() const

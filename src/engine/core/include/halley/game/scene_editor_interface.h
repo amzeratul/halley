@@ -535,5 +535,7 @@ namespace Halley {
 	class IGameEditorData {
 	public:
 		virtual ~IGameEditorData() = default;
+
+		virtual void update() {}
 	};
 }
