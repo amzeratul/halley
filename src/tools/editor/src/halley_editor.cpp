@@ -60,7 +60,7 @@ String HalleyEditor::getName() const
 	return "Halley Editor";
 }
 
-String HalleyEditor::getDataPath() const
+String HalleyEditor::getDataPath(const Vector<String>& args) const
 {
 	return "halley/editor";
 }

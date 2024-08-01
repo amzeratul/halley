@@ -47,7 +47,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 		args.resize(_args.size() - 1);
 		std::copy(_args.begin() + 1, _args.end(), args.begin());
 	}
-	environment->setDataPath(game->getDataPath());
+	environment->setDataPath(game->getDataPath(args));
 	environment->setArguments(_args);
 
 	// Basic initialization

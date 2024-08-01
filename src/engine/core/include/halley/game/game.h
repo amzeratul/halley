@@ -34,7 +34,7 @@ namespace Halley
 		virtual ResourceOptions initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator);
 
 		virtual String getName() const = 0;
-		virtual String getDataPath() const = 0;
+		virtual String getDataPath(const Vector<String>& args) const = 0;
         virtual String getLogFileName() const;
 		virtual bool isDevMode() const = 0;
 		virtual bool shouldCreateSeparateConsole() const;
