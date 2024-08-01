@@ -176,4 +176,9 @@ uint64_t OS::getMemoryUsage()
 	return 0;
 }
 
+bool OS::isDebuggerAttached() const
+{
+    return false;
+}
+
 OS* OS::osInstance = nullptr;

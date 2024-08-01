@@ -59,4 +59,13 @@ Vector<Path> OSWinBase::enumerateDirectory(const Path& rootPath)
     return result;
 }
 
+bool OSWinBase::isDebuggerAttached() const
+{
+#ifdef DEV_BUILD
+    return IsDebuggerPresent() == TRUE;
+#else
+    return false;
+#endif
+}
+
 #endif

@@ -17,6 +17,8 @@ namespace Halley {
     public:
         void createDirectories(const Halley::Path &path) override;
         Vector<Path> enumerateDirectory(const Halley::Path &path) override;
+
+        bool isDebuggerAttached() const override;
     };
 
 }

@@ -90,6 +90,8 @@ namespace Halley {
 
 		virtual uint64_t getMemoryUsage();
 
+        virtual bool isDebuggerAttached() const;
+
 	private:
 		static OS* osInstance;
 	};
