@@ -11,7 +11,7 @@ float4 smoothPixel(Texture2D tex, float2 uv, float sharpness)
 {
     float2 size = u_texSize0;
     float2 pxCoord = size * uv;
-    float pxSize = fwidth(pxCoord);
+    float pxSize = fwidth(pxCoord.x);
     float2 sampleCoord = (floor(pxCoord) + smoothstep(0, 1, frac(pxCoord) / pxSize) - 0.5) / size;
     return tex.Sample(sampler0, lerp(uv, sampleCoord, smoothstep(1, 2, 1.0 / pxSize)));
 }

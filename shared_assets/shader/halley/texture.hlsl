@@ -8,7 +8,7 @@ float2 getTextureSize(Texture2D tex) {
 float4 sampleHorizontalAA(Texture2D tex, float2 coord) {
     float2 texSize = getTextureSize(tex);
     float2 pixelCoord = coord * texSize;
-    float pixelSize = abs(ddx(pixelCoord));
+    float pixelSize = abs(ddx(pixelCoord.x));
     
     float2 p0 = pixelCoord - float2(0.5, 0) * pixelSize;
     float2 p1 = p0 + float2(pixelSize, 0);
