@@ -5,8 +5,10 @@ project (halley-editor)
 SET(HALLEY_MONOLITHIC 1)
 
 file(STRINGS "source_list.txt" editor_sources)
+set_directory_properties(PROPERTIES CMAKE_CONFIGURE_DEPENDS "source_list.txt")
 if (MSVC)
 	file(STRINGS "resource_list_win32.txt" editor_resources)
+	set_directory_properties(PROPERTIES CMAKE_CONFIGURE_DEPENDS "resource_list_win32.txt")
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL)
