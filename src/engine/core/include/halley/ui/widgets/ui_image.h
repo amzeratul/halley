@@ -29,6 +29,7 @@ namespace Halley {
 		void setHoverableSelectable(Colour4f normalColour, Colour4f hoverColour, Colour4f selColour);
 
 		bool isDrawing() const;
+		bool isMouseInside(Vector2f mousePos) const override;
 
 	private:
 		Sprite sprite;

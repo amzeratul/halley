@@ -153,6 +153,7 @@ namespace Halley
 		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
 		bool isVisible() const { return visible; }
 
+		bool hasPointVisible(Vector2f point) const;
 		bool hasPointVisible(Rect4f area) const;
 
 		Sprite& setClip(Rect4f clip);
@@ -221,6 +222,8 @@ namespace Halley
 		void reloadSprite(const SpriteResource& sprite);
 		bool hasLastAppliedPivot() const;
 		void clearSpriteSheetRef();
+
+		Vector2f getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const;
 
 	private:
 		bool lastAppliedPivot = false;
