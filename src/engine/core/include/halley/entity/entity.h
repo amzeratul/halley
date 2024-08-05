@@ -380,6 +380,24 @@ namespace Halley {
 			return *this;
 		}
 
+		template <typename T>
+		EntityRef& tryAddComponent(T&& component)
+		{
+			if (!hasComponent<T>()) {
+				addComponent<T>(std::move(component));
+			}
+			return *this;
+		}
+
+		template <typename T>
+		EntityRef& tryRemoveComponent()
+		{
+			if (hasComponent<T>()) {
+				removeComponent<T>();
+			}
+			return *this;
+		}
+
 		EntityRef& removeComponentById(int id)
 		{
 			validate();
