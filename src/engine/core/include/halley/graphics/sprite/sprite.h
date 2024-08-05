@@ -209,6 +209,8 @@ namespace Halley
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 
+		Vector2f getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const;
+
 #ifdef ENABLE_HOT_RELOAD
 	public:
 		Sprite(const Sprite& other);
@@ -222,8 +224,6 @@ namespace Halley
 		void reloadSprite(const SpriteResource& sprite);
 		bool hasLastAppliedPivot() const;
 		void clearSpriteSheetRef();
-
-		Vector2f getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const;
 
 	private:
 		bool lastAppliedPivot = false;
