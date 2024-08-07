@@ -789,6 +789,14 @@ namespace {
 		}
 		return v;
 	}
+
+	Colour4f clampToRange(std::optional<Range<float>> range, Colour4f v)
+	{
+		if (range) {
+			return Colour4f(clamp(v.r, range->start, range->end), clamp(v.g, range->start, range->end), clamp(v.b, range->start, range->end), clamp(v.a, range->start, range->end));
+		}
+		return v;
+	}
 }
 
 void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Sprite& sprite)
@@ -874,7 +882,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
 					} else if (uniform.type == ShaderParameterType::Float4) {
 						if (uniform.semantic == ShaderParameterSemanticType::Colour) {
-							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000")).toVector4()));
+							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000"))));
 						} else {
 							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
 						}
