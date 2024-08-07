@@ -873,7 +873,11 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 					} else if (uniform.type == ShaderParameterType::Float3) {
 						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
 					} else if (uniform.type == ShaderParameterType::Float4) {
-						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+						if (uniform.semantic == ShaderParameterSemanticType::Colour) {
+							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000")).toVector4()));
+						} else {
+							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+						}
 					}
 				};
 
