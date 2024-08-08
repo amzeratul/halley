@@ -2,11 +2,12 @@
 
 #include <cassert>
 #include <cstddef>
+#include <memory>
 
 namespace Halley {
 	class TempMemoryPool {
 	public:
-		TempMemoryPool(size_t capacity);
+		TempMemoryPool(size_t capacity, bool allowPaging = true);
 		~TempMemoryPool();
 
 		char* allocate(size_t n, size_t alignment);
@@ -20,6 +21,9 @@ namespace Halley {
 		size_t pos = 0;
 		size_t allocated = 0;
 		char* data = nullptr;
+
+		bool allowPaging = false;
+		std::unique_ptr<TempMemoryPool> nextPage;
 
 		void allocBuffer();
 		void freeBuffer();

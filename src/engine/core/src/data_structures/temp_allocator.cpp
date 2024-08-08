@@ -5,8 +5,9 @@
 
 using namespace Halley;
 
-TempMemoryPool::TempMemoryPool(size_t capacity)
+TempMemoryPool::TempMemoryPool(size_t capacity, bool allowPaging)
 	: capacity(capacity)
+	, allowPaging(allowPaging)
 {
 	allocBuffer();
 }
@@ -27,15 +28,32 @@ char* TempMemoryPool::allocate(size_t n, size_t alignment)
 		allocated += n;
 		return result;
 	}
+
+	// Pool is full!
+	if (allowPaging && n < capacity) {
+		if (!nextPage) {
+			nextPage = std::make_unique<TempMemoryPool>(capacity, allowPaging);
+		}
+		return nextPage->allocate(n, alignment);
+	}
+
 	throw std::bad_alloc();
 }
 
 void TempMemoryPool::deallocate(void* ptr, size_t n)
 {
-	if (allocated >= n && ptr >= data && ptr < data + capacity) {
-		allocated -= n;
+	if (ptr >= data && ptr < data + capacity) {
+		if (allocated >= n) {
+			allocated -= n;
+		} else {
+			Logger::logError("TempMemoryPool received invalid deallocate request.");
+		}
 	} else {
-		Logger::logError("TempMemoryPool received deallocate request for data that doesn't belong to it.");
+		if (nextPage) {
+			nextPage->deallocate(ptr, n);
+		} else {
+			Logger::logError("TempMemoryPool received deallocate request for data that doesn't belong to it.");
+		}
 	}
 }
 
@@ -47,12 +65,17 @@ void TempMemoryPool::reset()
 
 	pos = 0;
 	allocated = 0;
+
+	if (nextPage) {
+		nextPage->reset();
+	}
 }
 
 void TempMemoryPool::resize(size_t size)
 {
 	reset();
 	freeBuffer();
+	nextPage = {};
 	capacity = size;
 	allocBuffer();
 }
