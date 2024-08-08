@@ -82,8 +82,9 @@ void NavmeshSet::clearSubWorld(int subWorld)
 
 std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut, float anisotropy, float nudge) const
 {
-	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(query.from, anisotropy, nudge);
-	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(query.to, anisotropy, nudge);
+	const float maxDist = 10; // TODO: this should be roughly equivalent to the agent radius
+	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(query.from, maxDist, anisotropy, nudge);
+	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(query.to, maxDist, anisotropy, nudge);
 	constexpr size_t notFound = std::numeric_limits<size_t>::max();
 
 	if (fromRegion == notFound || toRegion == notFound) {
@@ -149,7 +150,7 @@ size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 	return std::numeric_limits<size_t>::max();
 }
 
-std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldPosition pos, float anisotropy, float nudge) const
+std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist, float anisotropy, float nudge) const
 {
 	auto navMeshIdx = getNavMeshIdxAt(pos);
 	if (navMeshIdx != std::numeric_limits<size_t>::max()) {
@@ -157,7 +158,7 @@ std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldP
 	}
 
 	// Find closest and try again
-	if (auto p = getClosestPointTo(pos, std::numeric_limits<float>::infinity(), anisotropy, nudge)) {
+	if (auto p = getClosestPointTo(pos, maxDist, anisotropy, nudge)) {
 		return { getNavMeshIdxAt(*p), *p };
 	}
 

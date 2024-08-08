@@ -38,9 +38,11 @@ std::shared_ptr<IUIElement> BaseEnumFieldFactory::createField(const ComponentEdi
 	}
 
 	if (const auto dependentField = getDependentField()) {
-		sizer->add(std::make_shared<DependencyObserver>(data, *dependentField, data.getParentFieldData()[*dependentField].asString(""), [this, dropdown] (const ComponentDataRetriever& data)
+		sizer->add(std::make_shared<DependencyObserver>(data, *dependentField, data.getParentFieldData()[*dependentField].asString(""), [this, dropdown, &context] (const ComponentDataRetriever& data)
 		{
 			dropdown->setOptions(getValues(data));
+			data.getWriteableFieldData() = ConfigNode(dropdown->getSelectedOptionId());
+			context.onEntityUpdated();
 		}));
 	}
 

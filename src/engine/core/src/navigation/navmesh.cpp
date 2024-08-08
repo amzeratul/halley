@@ -752,6 +752,7 @@ void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 		edge.second.b += delta;
 	}
 	origin += delta;
+	computeBoundingCircle();
 }
 
 void Navmesh::markPortalConnected(size_t idx)
@@ -865,9 +866,20 @@ void Navmesh::computeArea()
 
 void Navmesh::computeBoundingCircle()
 {
-	auto centre = normalisedCoordinatesBase.transform(Vector2f(0.5f, 0.5f)) + origin;
-	auto radius = (origin - centre).length();
+	auto centre = origin + normalisedCoordinatesBase.transform(Vector2f(0.5f, 0.5f));
+	auto left = origin + normalisedCoordinatesBase.transform(Vector2f(1.0f, 0.0f));
+	auto radius = std::max((origin - left).length(), (origin - centre).length());
 	boundingCircle = Circle(centre, radius);
+
+	/*
+	for (const auto& poly: polygons) {
+		for (const auto& p: poly.getVertices()) {
+			if (!boundingCircle.contains(p)) {
+				assert(false);
+			}
+		}
+	}
+	*/
 }
 
 void Navmesh::generateOpenEdges()

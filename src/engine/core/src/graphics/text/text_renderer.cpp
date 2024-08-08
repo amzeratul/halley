@@ -402,6 +402,8 @@ void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) 
 	if (finalClip) {
 		painter.setClip();
 	}
+
+	//painter.drawRect(getAABB(), 0.5f, Colour4f(0, 1, 0));
 }
 
 void TextRenderer::setSpriteFilter(SpriteFilter f)
@@ -685,7 +687,7 @@ Rect4f TextRenderer::getAABB() const
 {
 	const auto pos = getPosition();
 	const auto size = getExtents();
-	return Rect4f(pos, pos + size);
+	return pos + Rect4f(Vector2f(), size) - size * offset;
 }
 
 bool TextRenderer::isCompatibleWith(const TextRenderer& other) const

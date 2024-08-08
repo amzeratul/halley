@@ -1354,6 +1354,14 @@ public:
         return found->second;
     }
 
+    const V & value_or(const K& key, const V& defaultValue) const
+    {
+        auto found = this->find(key);
+        if (found == this->end())
+            return defaultValue;
+        return found->second;
+    }
+
     using Table::emplace;
     std::pair<typename Table::iterator, bool> emplace()
     {

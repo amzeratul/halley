@@ -20,15 +20,17 @@ namespace {
 MaterialUniform::MaterialUniform()
 	: granularity(1.0f)
 	, type(ShaderParameterType::Invalid)
+	, semantic(ShaderParameterSemanticType::Number)
 {}
 
-MaterialUniform::MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range, float granularity, bool editable, String autoVariable, ConfigNode defaultValue)
+MaterialUniform::MaterialUniform(String name, ShaderParameterType type, ShaderParameterSemanticType semantic, std::optional<Range<float>> range, float granularity, bool editable, String autoVariable, ConfigNode defaultValue)
 	: name(std::move(name))
 	, autoVariable(std::move(autoVariable))
 	, range(range)
 	, granularity(granularity)
 	, editable(editable)
 	, type(type)
+	, semantic(semantic)
 	, defaultValue(std::move(defaultValue))
 {}
 
@@ -36,6 +38,7 @@ void MaterialUniform::serialize(Serializer& s) const
 {
 	s << name;
 	s << type;
+	s << semantic;
 	s << range;
 	s << granularity;
 	s << editable;
@@ -47,6 +50,7 @@ void MaterialUniform::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> type;
+	s >> semantic;
 	s >> range;
 	s >> granularity;
 	s >> editable;
@@ -492,12 +496,13 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 					const auto granularity = uniformEntry["granularity"].asFloat(1);
 					const bool editable = uniformEntry["canEdit"].asBool(true);
 					const auto autoVariable = uniformEntry["autoVariable"].asString("");
-					uniforms.push_back(MaterialUniform(name, type, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
+					const auto semantic = uniformEntry["semantic"].asEnum(ShaderParameterSemanticType::Number);
+					uniforms.push_back(MaterialUniform(name, type, semantic, range, granularity, editable, autoVariable, ConfigNode(uniformEntry["defaultValue"])));
 				} else {
 					for (auto& uit: uniformEntry.asMap()) {
 						String uniformName = uit.first;
 						ShaderParameterType type = parseParameterType(uit.second.asString());
-						uniforms.push_back(MaterialUniform(uniformName, type));
+						uniforms.push_back(MaterialUniform(uniformName, type, ShaderParameterSemanticType::Number));
 					}
 				}
 			}

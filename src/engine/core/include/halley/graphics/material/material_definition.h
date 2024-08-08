@@ -37,6 +37,22 @@ namespace Halley
 		UInt
 	};
 
+	enum class ShaderParameterSemanticType : uint8_t
+	{
+		Number,
+		Colour
+	};
+
+	template <>
+	struct EnumNames<ShaderParameterSemanticType> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"number",
+				"colour"
+			}};
+		}
+	};
+
 	enum class DepthStencilComparisonFunction : uint8_t
 	{
 		Never,
@@ -133,10 +149,11 @@ namespace Halley
 		bool editable = true;
 		bool predefinedOffset = false;
 		ShaderParameterType type;
+		ShaderParameterSemanticType semantic;
 		ConfigNode defaultValue;
 
 		MaterialUniform();
-		MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range = {}, float granularity = 0, bool editable = true, String autoVariable = "", ConfigNode defaultValue = {});
+		MaterialUniform(String name, ShaderParameterType type, ShaderParameterSemanticType semantic, std::optional<Range<float>> range = {}, float granularity = 0, bool editable = true, String autoVariable = "", ConfigNode defaultValue = {});
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

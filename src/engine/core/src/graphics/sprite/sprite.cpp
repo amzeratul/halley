@@ -512,6 +512,11 @@ Vector4s Sprite::getSlices() const
 	return slices;
 }
 
+bool Sprite::hasPointVisible(Vector2f point) const
+{
+	return hasPointVisible(Rect4f(0, 0, 1, 1) + point);
+}
+
 bool Sprite::hasPointVisible(Rect4f area) const
 {
 	// Is the sprite visible?
@@ -535,20 +540,13 @@ bool Sprite::hasPointVisible(Rect4f area) const
 
 	// Check against texture
 	if (material) {
-		const auto tex = material->getTexture(0);
-		if (tex) {
+		if (const auto tex = material->getTexture(0)) {
 			auto overlapArea = localArea.intersection(aabb);
 
-			Rect4f relPos = (overlapArea - aabb.getTopLeft()) / aabb.getSize();
-			if (flip ^ (getScale().x < 0)) {
-				relPos.getP1().x = 1.0f - relPos.getP1().x;
-				relPos.getP2().x = 1.0f - relPos.getP2().x;
-			}
-			if (getScale().y < 0) {
-				relPos.getP1().y = 1.0f - relPos.getP1().y;
-				relPos.getP2().y = 1.0f - relPos.getP2().y;
-			}
-			
+			const auto pixelArea = overlapArea - aabb.getTopLeft();
+			const auto origSize = getUncroppedSize();
+			const auto relPos = Rect4f(getRelativePosition(pixelArea.getTopLeft(), aabb.getSize(), origSize), getRelativePosition(pixelArea.getBottomRight(), aabb.getSize(), origSize));
+
 			const auto texRect = getTexRect0();
 			const auto texelRect = relPos.mult(texRect.getSize()) + texRect.getTopLeft(); // lol hack
 			const auto pixelRect = texelRect.mult(Vector2f(tex->getSize()));
@@ -558,6 +556,36 @@ bool Sprite::hasPointVisible(Rect4f area) const
 	}
 
 	return true;
+}
+
+Vector2f Sprite::getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const
+{
+	if (flip ^ (getScale().x < 0)) {
+		pos.x = size.x - pos.x - 1.0f;
+	}
+	if (getScale().y < 0) {
+		pos.y = size.y - pos.y - 1.0f;
+	}
+
+	if (!sliced) {
+		return pos / size;
+	}
+
+	auto getInRange = [](float v, float s0, float s1, float size, float origSize, float scale) -> float
+	{
+		if (v < s0 * scale) {
+			return (v / scale) / origSize;
+		} else if (v > size - s1 * scale) {
+			return (origSize - ((size - v) / scale)) / origSize;
+		} else {
+			return (v - s0 * (1 - scale)) / origSize;
+		}
+	};
+
+	return Vector2f(
+		getInRange(pos.x, slices[0], slices[2], size.x, origSize.x, sliceScale),
+		getInRange(pos.y, slices[1], slices[3], size.y, origSize.y, sliceScale)
+	);
 }
 
 Sprite& Sprite::setClip(Rect4f c)
@@ -761,6 +789,14 @@ namespace {
 		}
 		return v;
 	}
+
+	Colour4f clampToRange(std::optional<Range<float>> range, Colour4f v)
+	{
+		if (range) {
+			return Colour4f(clamp(v.r, range->start, range->end), clamp(v.g, range->start, range->end), clamp(v.b, range->start, range->end), clamp(v.a, range->start, range->end));
+		}
+		return v;
+	}
 }
 
 void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Sprite& sprite)
@@ -845,7 +881,11 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 					} else if (uniform.type == ShaderParameterType::Float3) {
 						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
 					} else if (uniform.type == ShaderParameterType::Float4) {
-						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+						if (uniform.semantic == ShaderParameterSemanticType::Colour) {
+							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, Colour4f::fromString(node.asString("#000000"))));
+						} else {
+							sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+						}
 					}
 				};
 

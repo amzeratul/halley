@@ -153,6 +153,7 @@ namespace Halley
 		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
 		bool isVisible() const { return visible; }
 
+		bool hasPointVisible(Vector2f point) const;
 		bool hasPointVisible(Rect4f area) const;
 
 		Sprite& setClip(Rect4f clip);
@@ -207,6 +208,8 @@ namespace Halley
 		const void* getVertexAttrib() const;
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
+
+		Vector2f getRelativePosition(Vector2f pos, Vector2f size, Vector2f origSize) const;
 
 #ifdef ENABLE_HOT_RELOAD
 	public:

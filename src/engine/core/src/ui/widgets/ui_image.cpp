@@ -183,6 +183,11 @@ bool UIImage::isDrawing() const
 	return drawing > 0;
 }
 
+bool UIImage::isMouseInside(Vector2f mousePos) const
+{
+	return UIWidget::isMouseInside(mousePos) && sprite.hasPointVisible(mousePos);
+}
+
 UIImageVisibleBehaviour::UIImageVisibleBehaviour(Callback onVisible, Callback onInvisible)
 	: onVisible(std::move(onVisible))
 	, onInvisible(std::move(onInvisible))

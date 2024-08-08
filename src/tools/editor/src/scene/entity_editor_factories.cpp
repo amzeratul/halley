@@ -546,8 +546,20 @@ public:
 						}
 					} else if (uniform.type == ShaderParameterType::Float2) {
 						type = "Halley::Vector2f";
+					} else if (uniform.type == ShaderParameterType::Float3) {
+						type = "Halley::Vector3f";
+					} else if (uniform.type == ShaderParameterType::Float4) {
+						if (uniform.semantic == ShaderParameterSemanticType::Colour) {
+							type = "Halley::Colour4f";
+						} else {
+							type = "Halley::Vector4f";
+						}
 					} else if (uniform.type == ShaderParameterType::Int2) {
 						type = "Halley::Vector2i";
+					} else if (uniform.type == ShaderParameterType::Int3) {
+						type = "Halley::Vector3i";
+					} else if (uniform.type == ShaderParameterType::Int4) {
+						type = "Halley::Vector4i";
 					}
 					options["granularity"] = uniform.granularity;
 
