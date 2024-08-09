@@ -27,82 +27,97 @@ children:
             proportion: 1
             sizer:
               columnProportions: []
-              gap: 4
-              type: vertical
+              gap: 2
+              type: horizontal
             widget:
               class: widget
               id: assetBrowsePanel
             children:
-              - uuid: dd3ef1d4-42c9-4f64-8d74-333e321ecdcc
-                sizer:
-                  gap: 4
-                  type: horizontal
-                widget:
-                  class: image
-                  colour: $ui_backgroundBox
-                  image: halley_ui/ui_list_item.png
-                  innerBorder: [5, 5, 5, 5]
-                  size: [30, 35]
-                children:
-                  - uuid: f32d6948-3d40-411b-bc40-9db59d98c315
-                    proportion: 1
-                    widget:
-                      class: label
-                      id: curDir
-                      maxHeight: 25
-                      maxWidth: 305
-                      style: labelLight
-                      text: assets_src
-                    fill: [left, centreVertical]
-                  - uuid: d67a8711-ce2a-47e1-802f-3ecd881f5ee0
-                    widget:
-                      class: button
-                      icon: entity_icons/sync.png
-                      id: goToAssetButton
-                      size: [22, 22]
-                      style: buttonThin
-                      tooltip: Go to asset
-              - uuid: 4c87eea4-a314-4a25-9f7e-4764557b2d29
+              - uuid: 875594ca-4216-4e77-84a4-d2c16fec1c8b
                 proportion: 1
-                border: [0, 2, 0, 0]
                 sizer:
                   columnProportions: []
+                  gap: 4
+                  type: vertical
                 widget:
-                  autoHide: true
-                  class: scrollBarPane
-                  scrollHorizontal: true
-                  scrollVertical: true
-                  size: [255, 50]
+                  class: widget
                 children:
-                  - uuid: 35fce438-0705-4053-8a90-f08477baf776
-                    proportion: 1
+                  - uuid: dd3ef1d4-42c9-4f64-8d74-333e321ecdcc
+                    sizer:
+                      columnProportions: []
+                      gap: 4
+                      type: horizontal
                     widget:
-                      canDrag: true
-                      canDragOutside: true
-                      class: list
-                      id: assetList
-                      multiSelect: true
-                      options: []
-                      reorderWhenDragging: false
-                      requiresSelection: false
-                      singleClickAccept: false
-              - uuid: 79bc481a-f7a3-4d27-a64a-463c5f6050ae
-                sizer:
-                  columnProportions: []
-                  type: horizontal
-                children:
-                  - uuid: ac9b739c-322e-427e-ae11-4bd464672a2b
+                      class: image
+                      colour: $ui_backgroundBox
+                      image: halley_ui/ui_list_item.png
+                      innerBorder: [5, 5, 5, 5]
+                      size: [30, 35]
+                    children:
+                      - uuid: f32d6948-3d40-411b-bc40-9db59d98c315
+                        proportion: 1
+                        widget:
+                          class: label
+                          id: curDir
+                          maxHeight: 25
+                          maxWidth: 305
+                          style: labelLight
+                          text: assets_src
+                        fill: [left, centreVertical]
+                      - uuid: d67a8711-ce2a-47e1-802f-3ecd881f5ee0
+                        widget:
+                          class: button
+                          icon: entity_icons/sync.png
+                          id: goToAssetButton
+                          size: [22, 22]
+                          style: buttonThin
+                          tooltip: Go to asset
+                  - uuid: 4c87eea4-a314-4a25-9f7e-4764557b2d29
                     proportion: 1
+                    border: [0, 2, 0, 0]
+                    sizer:
+                      columnProportions: []
                     widget:
-                      class: button
-                      id: addAsset
-                      text: Add
-                  - uuid: 818ef854-3cc0-4c7d-be80-82a627bf4d74
-                    proportion: 1
-                    widget:
-                      class: button
-                      id: addFolder
-                      text: Add Folder
+                      autoHide: true
+                      childLayerAdjustment: 0
+                      class: scrollBarPane
+                      scrollHorizontal: true
+                      scrollVertical: true
+                      size: [0, 50]
+                    children:
+                      - uuid: 35fce438-0705-4053-8a90-f08477baf776
+                        proportion: 1
+                        widget:
+                          canDrag: true
+                          canDragOutside: true
+                          class: list
+                          id: assetList
+                          multiSelect: true
+                          options: []
+                          reorderWhenDragging: false
+                          requiresSelection: false
+                          singleClickAccept: false
+                  - uuid: 79bc481a-f7a3-4d27-a64a-463c5f6050ae
+                    sizer:
+                      columnProportions: []
+                      type: horizontal
+                    children:
+                      - uuid: ac9b739c-322e-427e-ae11-4bd464672a2b
+                        proportion: 1
+                        widget:
+                          class: button
+                          id: addAsset
+                          text: Add
+                      - uuid: 818ef854-3cc0-4c7d-be80-82a627bf4d74
+                        proportion: 1
+                        widget:
+                          class: button
+                          id: addFolder
+                          text: Add Folder
+              - uuid: fd4068c2-edd7-4bb3-adc1-00e47b599272
+                widget:
+                  class: resizeDivider
+                  id: assetBrowserListDivider
       - uuid: 69d3dabf-7e78-4b51-ad1d-63c3dd710be4
         proportion: 1
         border: [10, 0, 0, 0]

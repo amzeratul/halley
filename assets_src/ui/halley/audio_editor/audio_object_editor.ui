@@ -1,26 +1,74 @@
-widget: { class: widget }
-sizer: { type: horizontal }
+uuid: 3a049021-ee0a-4645-98ec-547e454f8817
+sizer:
+  columnProportions: []
+  gap: 3
+  type: horizontal
+widget:
+  class: widget
 children:
-- sizer: { type: vertical }
-  children:
-  - widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true, autoHide: true }
-    proportion: 1
+  - uuid: 9dd9e429-e2b7-4e7f-b47f-009d20b51ee8
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: widget
     children:
-    - widget: { id: hierarchy, class: audioObjectTreeList, canDrag: true }
-      proportion: 1
-  - sizer: { type: horizontal }
-    children:
-    - widget: { class: button, id: add, text: Add }
-      proportion: 1
-    - widget: { class: button, id: addClip, text: Add Clip }
-      proportion: 1
-    - widget: { class: button, id: remove, text: Remove }
-      proportion: 1
-- widget: { class: scrollBarPane, size: [300, 200], scrollVertical: true, autoHide: true }
-  proportion: 1
-  sizer: { type: vertical }
-  children:
-  - widget: { id: contents, class: widget }
+      - uuid: 4dd95c7d-3ed3-4a9d-a845-0937124eb060
+        proportion: 1
+        widget:
+          autoHide: true
+          class: scrollBarPane
+          scrollHorizontal: true
+          scrollVertical: true
+          size: [350, 250]
+        children:
+          - uuid: ca006c96-c8e1-4a79-b9d9-bcfa1bd868ec
+            proportion: 1
+            widget:
+              canDrag: true
+              class: audioObjectTreeList
+              id: hierarchy
+      - uuid: 379d2b1d-688a-4987-b99b-a266fcf396b0
+        sizer:
+          type: horizontal
+        children:
+          - uuid: e3cdd527-b8b7-4cae-b2f0-f86056961cc8
+            proportion: 1
+            widget:
+              class: button
+              id: add
+              text: Add
+          - uuid: 034c7716-f3e5-44ab-902e-5ab244e89f2d
+            proportion: 1
+            widget:
+              class: button
+              id: addClip
+              text: Add Clip
+          - uuid: cdb16086-5779-4b08-9e1b-21620cf1efcd
+            proportion: 1
+            widget:
+              class: button
+              id: remove
+              text: Remove
+  - uuid: ed1f38f9-4263-4546-88ff-4e83b16b0384
+    widget:
+      class: resizeDivider
+      id: audioObjectLeft
+  - uuid: a711ab27-0cf4-4b48-8937-a47cdb04f40a
     proportion: 1
-    sizer: { type: vertical }
-    children: []
+    sizer:
+      type: vertical
+    widget:
+      autoHide: true
+      class: scrollBarPane
+      scrollVertical: true
+      size: [300, 200]
+    children:
+      - uuid: 13d98257-0858-4a44-99d8-6e772fc7be1a
+        proportion: 1
+        sizer:
+          type: vertical
+        widget:
+          class: widget
+          id: contents
+        children: []

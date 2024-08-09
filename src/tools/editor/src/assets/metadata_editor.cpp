@@ -10,7 +10,7 @@
 using namespace Halley;
 
 MetadataEditor::MetadataEditor(UIFactory& factory, ProjectWindow& projectWindow)
-	: UIWidget("metadataEditor", {}, UISizer(UISizerType::Grid, 1, 2))
+	: UIWidget("metadataEditor", {}, UISizer(UISizerType::Vertical))
 	, factory(factory)
 	, projectWindow(projectWindow)
 {
@@ -65,7 +65,7 @@ bool MetadataEditor::isModified() const
 void MetadataEditor::makeUI()
 {
 	clear();
-	add(factory.makeUI("halley/metadata_editor"));
+	add(factory.makeUI("halley/metadata_editor"), 1);
 	fields = getWidget("fields");
 	getWidget("applyChanges")->setEnabled(false);
 

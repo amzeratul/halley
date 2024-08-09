@@ -1,22 +1,75 @@
-widget: { class: widget }
-sizer: { type: horizontal }
+uuid: 93341867-aa54-4fb4-a345-9f13fe8aeb53
+sizer:
+  columnProportions: []
+  type: horizontal
+widget:
+  class: widget
 children:
-- sizer: { type: vertical }
-  proportion: 1
-  children:
-  - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: false, autoHide: true, size: [50, 10] }
-    proportion: 0
-    sizer: { type: vertical }
-    children:
-    - widget: { id: contentList, class: list, style: tabs, type: horizontal }
-  - widget: { id: content, class: pagedPane }
-    fill: fill
-    sizer: { type: horizontal }
+  - uuid: b24cee29-4222-441b-91bb-e050b99bab56
     proportion: 1
-- widget: { id: metadataPanel, class: widget, active: false }
-  sizer: { type: vertical }
-  border: [10, 0, 0, 0]
-  children:
-  - widget: { class: metadataEditor }
-  - widget: { id: openFile, class: button, text: Open File }
-  - widget: { id: showFile, class: button, text: Show File }
+    sizer:
+      columnProportions: []
+      type: vertical
+    children:
+      - uuid: 5c065598-3406-4fc0-a841-eca781dc3816
+        proportion: 0
+        sizer:
+          type: vertical
+        widget:
+          autoHide: true
+          class: scrollBarPane
+          scrollHorizontal: true
+          scrollVertical: false
+          size: [50, 10]
+        children:
+          - uuid: 59fcecee-a2fc-4452-a7a4-91e0c2d27766
+            widget:
+              class: list
+              id: contentList
+              options: []
+              style: tabs
+              type: horizontal
+      - uuid: d0f6f28b-d73f-485d-a1d3-5d06ec8c9779
+        proportion: 1
+        sizer:
+          columnProportions: []
+          type: horizontal
+        widget:
+          class: pagedPane
+          id: content
+        fill: fill
+  - uuid: 96d6d463-71e2-4d7a-8b1a-07107fb9f4cc
+    border: [10, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      type: horizontal
+    widget:
+      active: false
+      class: widget
+      id: metadataPanel
+    children:
+      - uuid: 243a6366-de9c-4b9a-a6a6-72e98a51482f
+        widget:
+          class: resizeDivider
+          id: assetEditorMetadataDivider
+          type: horizontalRight
+      - uuid: 1924c1e0-ffb7-4b61-a83a-c763f2d48633
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: widget
+        children:
+          - uuid: 942cb078-4a59-4ab2-8aa9-cfeacf6f4ae4
+            widget:
+              class: metadataEditor
+          - uuid: 35d60be9-9e1c-4df8-a861-8773d045e10b
+            widget:
+              class: button
+              id: openFile
+              text: Open File
+          - uuid: 77378b99-40f0-41f8-975a-76fb9f9d1b6e
+            widget:
+              class: button
+              id: showFile
+              text: Show File
