@@ -47,7 +47,8 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
 		std::shared_ptr<UIWidget> tryGetWidget(const String& id);
-		
+		virtual std::shared_ptr<UIWidget> tryGetAncestorWidget(const String& id);
+
 		template <typename T>
 		std::shared_ptr<T> tryGetWidgetAs(const String& id)
 		{

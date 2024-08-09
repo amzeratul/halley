@@ -74,8 +74,15 @@ ProjectWindow::~ProjectWindow()
 	project.removeAssetLoadedListener(this);
 }
 
+void ProjectWindow::onAddedToRoot(UIRoot& root)
+{
+	root.setSettingProvider(this);
+}
+
 void ProjectWindow::onRemovedFromRoot(UIRoot& root)
 {
+	root.setSettingProvider(nullptr);
+
 	destroyConsole();
 	consoleWindow.reset();
 
@@ -326,6 +333,16 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 	}
 	
 	return false;
+}
+
+void ProjectWindow::setUISetting(std::string_view key, ConfigNode value)
+{
+	return setSetting(EditorSettingType::Editor, String("ui:") + key, std::move(value));
+}
+
+ConfigNode ProjectWindow::getUISetting(std::string_view key)
+{
+	return ConfigNode(getSetting(EditorSettingType::Editor, String("ui:") + key));
 }
 
 void ProjectWindow::setPage(EditorTabs tab)

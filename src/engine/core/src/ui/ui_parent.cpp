@@ -162,6 +162,11 @@ std::shared_ptr<UIWidget> UIParent::tryGetWidget(const String& id)
 	return doGetWidget(id);
 }
 
+std::shared_ptr<UIWidget> UIParent::tryGetAncestorWidget(const String& id)
+{
+	return {};
+}
+
 std::shared_ptr<UIWidget> UIParent::doGetWidget(const String& id) const
 {
 	auto lists = { children, childrenWaiting };

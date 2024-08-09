@@ -369,6 +369,27 @@ bool UIRoot::hasMouseExclusive(const UIWidget& widget) const
 	return exclusive && exclusive.get() == &widget;
 }
 
+void UIRoot::setUISetting(std::string_view key, ConfigNode value)
+{
+	if (provider) {
+		provider->setUISetting(key, std::move(value));
+	}
+}
+
+ConfigNode UIRoot::getUISetting(std::string_view key)
+{
+	if (provider) {
+		return provider->getUISetting(key);
+	} else {
+		return {};
+	}
+}
+
+void UIRoot::setSettingProvider(IUIRootSettingsProvider* provider)
+{
+	this->provider = provider;
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse

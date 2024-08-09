@@ -787,6 +787,17 @@ bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
 	return parent->isDescendentOf(ancestor);
 }
 
+std::shared_ptr<UIWidget> UIWidget::tryGetAncestorWidget(const String& id)
+{
+	if (getId() == id) {
+		return shared_from_this();
+	} else if (auto* parent = getParent()) {
+		return parent->tryGetAncestorWidget(id);
+	} else {
+		return {};
+	}
+}
+
 void UIWidget::setEventHandler(std::shared_ptr<UIEventHandler> handler)
 {
 	eventHandler = handler;

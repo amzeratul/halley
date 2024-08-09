@@ -17,7 +17,7 @@ namespace Halley {
 	class Project;
 	class AssetFileHandler;
         
-    class ProjectWindow final : public UIWidget, public IProjectDLLListener, public Project::IAssetLoadListener, public IProjectWindow
+    class ProjectWindow final : public UIWidget, public IProjectDLLListener, public Project::IAssetLoadListener, public IProjectWindow, public IUIRootSettingsProvider
     {
     public:
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
@@ -25,6 +25,7 @@ namespace Halley {
 
         void makeUI();
 
+        void onAddedToRoot(UIRoot& root) override;
     	void onRemovedFromRoot(UIRoot& root) override;
     	
         void setPage(EditorTabs tab);
@@ -90,7 +91,10 @@ namespace Halley {
 
         void update(Time t, bool moved) override;
         bool onKeyPress(KeyboardKeyPress key) override;
-    	
+
+        void setUISetting(std::string_view key, ConfigNode value) override;
+        ConfigNode getUISetting(std::string_view key) override;
+
     private:
 		class SettingsStorage {
 		public:

@@ -26,6 +26,14 @@ namespace Halley {
 		Keyboard,
 		Gamepad
 	};
+
+	class IUIRootSettingsProvider {
+	public:
+		virtual ~IUIRootSettingsProvider() = default;
+
+		virtual void setUISetting(std::string_view key, ConfigNode value) = 0;
+		virtual ConfigNode getUISetting(std::string_view key) = 0;
+	};
 	
 	class UIRoot final : public UIParent {
 	public:
@@ -84,12 +92,18 @@ namespace Halley {
 
 		bool hasMouseExclusive(const UIWidget& widget) const;
 
+		void setUISetting(std::string_view key, ConfigNode value);
+		ConfigNode getUISetting(std::string_view key);
+		void setSettingProvider(IUIRootSettingsProvider* provider);
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;
 		InputAPI* inputAPI = nullptr;
 		AudioAPI* audioAPI = nullptr;
 		Rect4f uiRect;
+
+		IUIRootSettingsProvider* provider = nullptr;
 
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> mouseExclusive; // A widget that's taking exclusive control of mouse

@@ -27,6 +27,7 @@ namespace Halley {
 		UIResizeDivider(String id, UIResizeDividerType type);
 
 		void update(Time t, bool moved) override;
+		void onActiveChanged(bool active) override;
 
 	protected:
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
@@ -50,5 +51,8 @@ namespace Halley {
 		void acquireTarget();
 		bool isHorizontal() const;
 		bool isTargetBeforeMe() const;
+
+		void setTargetSize(float size, bool store);
+		void loadTargetSize();
     };
 }

@@ -14,7 +14,15 @@ void UIResizeDivider::update(Time t, bool moved)
 {
 	if (!gotTarget) {
 		acquireTarget();
+		loadTargetSize();
 		gotTarget = true;
+	}
+}
+
+void UIResizeDivider::onActiveChanged(bool active)
+{
+	if (active) {
+		loadTargetSize();
 	}
 }
 
@@ -126,8 +134,27 @@ void UIResizeDivider::releaseMouse(Vector2f mousePos, int button)
 void UIResizeDivider::onMouseOver(Vector2f mousePos)
 {
 	if (held && target) {
-		auto size = target->getMinimumSize();
-		size[isHorizontal() ? 0 : 1] = startSize + (mousePos - startPos)[isHorizontal() ? 0 : 1] * (isTargetBeforeMe() ? 1.0f : -1.0f);
-		target->setMinSize(size);
+		setTargetSize(startSize + (mousePos - startPos)[isHorizontal() ? 0 : 1] * (isTargetBeforeMe() ? 1.0f : -1.0f), true);
+	}
+}
+
+void UIResizeDivider::setTargetSize(float size, bool store)
+{
+	auto minSize = target->getMinimumSize();
+	minSize[isHorizontal() ? 0 : 1] = size;
+	target->setMinSize(minSize);
+
+	if (store) {
+		getRoot()->setUISetting("resize_divider:" + getId(), ConfigNode(size));
+	}
+}
+
+void UIResizeDivider::loadTargetSize()
+{
+	if (target) {
+		auto value = getRoot()->getUISetting("resize_divider:" + getId());
+		if (value.getType() != ConfigNodeType::Undefined) {
+			setTargetSize(value.asFloat(), false);
+		}
 	}
 }

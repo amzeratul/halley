@@ -151,6 +151,14 @@ namespace Halley {
 		void bindData(const String& childId, ConfigNode initialValue, UIDataBindConfigNode::WriteCallback callback = {});
 
 		bool isDescendentOf(const UIWidget& ancestor) const final override;
+
+		std::shared_ptr<UIWidget> tryGetAncestorWidget(const String& id) override;
+		template <typename T>
+		std::shared_ptr<T> tryGetAncestorWidgetAs(const String& id)
+		{
+			return std::dynamic_pointer_cast<T>(tryGetAncestorWidget(id));
+		}
+
 		void setMouseClip(std::optional<Rect4f> mouseClip, bool force);
 
 		virtual void onManualControlCycleValue(int delta);
