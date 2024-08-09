@@ -208,6 +208,7 @@ children:
       - uuid: b4c0cc18-9c1c-42e2-b6da-2040c3839886
         widget:
           class: resizeDivider
+          id: sceneEditorLeftDivider
       - uuid: 54c42355-97ae-41a6-8f9e-4fcbe3e0a782
         proportion: 1
         border: [0, 0, 0, 0]
@@ -257,6 +258,7 @@ children:
       - uuid: 9eaa22fe-6c99-4718-ad6b-490c9559fc21
         widget:
           class: resizeDivider
+          id: sceneEditorRightPanel
           type: horizontalRight
       - uuid: 2d20cb60-f67e-4d6d-a379-73a477545f40
         sizer:

@@ -286,6 +286,25 @@ std::optional<size_t> UISizer::getEntryIdx(IUIElement* element) const
 	return std::nullopt;
 }
 
+UISizer* UISizer::findSizerFor(IUIElement* element)
+{
+	for (const auto& entry: entries) {
+		if (entry.getPointer().get() == element) {
+			return this;
+		}
+	}
+	for (const auto& entry : entries) {
+		if (auto* sizer = dynamic_cast<UISizer*>(entry.getPointer().get())) {
+			auto result = sizer->findSizerFor(element);
+			if (result != nullptr) {
+				return result;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void UISizer::updateEnabled() const
 {
 	for (auto& e: entries) {

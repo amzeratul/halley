@@ -1,32 +1,123 @@
----
-widget: { class: widget }
-sizer: { type: vertical, gap: 6 }
+uuid: ce6d2f40-77af-4fce-a2d8-2522e9e3e802
+sizer:
+  columnProportions: []
+  gap: 6
+  type: vertical
+widget:
+  class: widget
 children:
-- widget: { id: toolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [50, 35] }
-  sizer: { type: horizontal, gap: 4 }
-  border: [0, -6, 0, 0]
-  children:
-  - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
-    border: [0, 0, 10, 0]
-  - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
-  - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
-    border: [0, 0, 10, 0]
-  - widget: { id: zoomOutButton, class: button, style: buttonThin, icon: "entity_icons/zoom_out.png", size: [22, 22], tooltip: "Zoom Out [Ctrl+-]" }
-  - widget: { id: zoomInButton, class: button, style: buttonThin, icon: "entity_icons/zoom_in.png", size: [22, 22], tooltip: "Zoom In [Ctrl+=]" }
-  - widget: { id: zoomFitButton, class: button, style: buttonThin, icon: "entity_icons/zoom_fit.png", size: [22, 22], tooltip: "Zoom To Fit", active: false }
-  - widget: { id: centreViewButton, class: button, style: buttonThin, icon: "entity_icons/centre_view.png", size: [22, 22], tooltip: "Centre View" }
-- sizer: { type: horizontal, gap: 6 }
-  proportion: 1
-  children:
-  - widget: { id: widgetList, class: uiWidgetList }
-  - widget: { class: infiniCanvas, id: infiniCanvas }
-    proportion: 1
-    sizer: { type: free }
+  - uuid: 75961144-9985-4e62-ba4b-a7e632118a74
+    border: [0, -6, 0, 0]
+    sizer:
+      gap: 4
+      type: horizontal
+    widget:
+      class: image
+      colour: $ui_backgroundBox
+      id: toolbar
+      image: halley_ui/ui_list_item.png
+      innerBorder: [5, 5, 5, 5]
+      size: [50, 35]
     children:
-    - widget: { class: uiEditorDisplay, id: display }
-      proportion: 0
-      fill: [top, left]
-      sizer: { type: vertical }
-      children: []
-  - widget: { id: widgetEditor, class: uiWidgetEditor }
-...
+      - uuid: 6d6cfd43-2387-4755-8e08-98d41dad1904
+        border: [0, 0, 10, 0]
+        widget:
+          class: button
+          icon: entity_icons/save.png
+          id: saveButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Save [Ctrl+S]
+      - uuid: 60fceb0b-ea3e-4288-b06d-cb9c2230fa96
+        widget:
+          class: button
+          icon: entity_icons/undo.png
+          id: undoButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Undo [Ctrl+Z]
+      - uuid: 83b1a468-6468-4df9-8cce-35971b48bd0f
+        border: [0, 0, 10, 0]
+        widget:
+          class: button
+          icon: entity_icons/redo.png
+          id: redoButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Redo [Ctrl+Y / Ctrl+Shift+Z]
+      - uuid: 0d23a621-1301-4d3a-b065-d1e2d16bfb8c
+        widget:
+          class: button
+          icon: entity_icons/zoom_out.png
+          id: zoomOutButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Zoom Out [Ctrl+-]
+      - uuid: 8a36cd18-65c9-484b-bc4c-69b743947299
+        widget:
+          class: button
+          icon: entity_icons/zoom_in.png
+          id: zoomInButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Zoom In [Ctrl+=]
+      - uuid: 299ff7c9-4d6b-43f9-97e9-3dfd82b300b4
+        widget:
+          active: false
+          class: button
+          icon: entity_icons/zoom_fit.png
+          id: zoomFitButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Zoom To Fit
+      - uuid: fde9d718-d9c3-4d48-870b-957f57e58193
+        widget:
+          class: button
+          icon: entity_icons/centre_view.png
+          id: centreViewButton
+          size: [22, 22]
+          style: buttonThin
+          tooltip: Centre View
+  - uuid: 8bfb0281-86ba-4b90-9882-c25908ad43a6
+    proportion: 1
+    sizer:
+      columnProportions: []
+      gap: 3
+      type: horizontal
+    children:
+      - uuid: be78b3fe-a809-4a93-8682-d77509c0166a
+        widget:
+          class: uiWidgetList
+          id: widgetList
+      - uuid: 8f030acb-6ee6-4be6-be2d-cf078c3490f1
+        widget:
+          class: resizeDivider
+          id: uiEditorLeftPanel
+      - uuid: fbd1bcf3-8b9e-4e2d-b2ce-16a52f6686a3
+        proportion: 1
+        sizer:
+          columnProportions: []
+          type: free
+        widget:
+          class: infiniCanvas
+          id: infiniCanvas
+        children:
+          - uuid: 15f69ec7-4d48-4475-8d8c-89be89dc1646
+            proportion: 0
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: uiEditorDisplay
+              id: display
+            children: []
+            fill: [top, left]
+      - uuid: e72e2af1-a365-4159-b43b-e69dda9204b4
+        widget:
+          class: resizeDivider
+          id: uiEditorRightPanel
+          type: horizontalRight
+      - uuid: 775e07e9-c59b-4193-ba23-8839e1f1ac8a
+        widget:
+          class: uiWidgetEditor
+          id: widgetEditor

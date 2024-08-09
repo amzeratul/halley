@@ -45,30 +45,22 @@ void UIResizeDivider::acquireTarget()
 		Logger::logError("Parent of UIResizeDivider has no sizer");
 		return;
 	}
+	auto activeSizer = parentSizer->findSizerFor(this);
 
 	if (isHorizontal()) {
-		if (parentSizer->getType() != UISizerType::Horizontal) {
+		if (activeSizer->getType() != UISizerType::Horizontal) {
 			Logger::logError("UIResizeDivider expected parent with horizontal sizer (got " + toString(parentSizer->getType()) + ")");
 			return;
 		}
 	} else {
-		if (parentSizer->getType() != UISizerType::Vertical) {
+		if (activeSizer->getType() != UISizerType::Vertical) {
 			Logger::logError("UIResizeDivider expected parent with vertical sizer (got " + toString(parentSizer->getType()) + ")");
 			return;
 		}
 	}
 
-	const auto& siblings = getParent()->getChildren();
-
-	std::optional<size_t> myIdx;
-
-	const auto n = siblings.size();
-	for (size_t i = 0; i < n; ++i) {
-		if (siblings[i].get() == this) {
-			myIdx = i;
-			break;
-		}
-	}
+	std::optional<size_t> myIdx = activeSizer->getEntryIdx(this);
+	const auto n = activeSizer->size();
 
 	if (myIdx) {
 		std::optional<size_t> targetIdx;
@@ -83,7 +75,10 @@ void UIResizeDivider::acquireTarget()
 		}
 
 		if (targetIdx) {
-			target = siblings[*targetIdx];
+			auto e = (*activeSizer)[*targetIdx].getPointer();
+			if (auto widget = std::dynamic_pointer_cast<UIWidget>(e)) {
+				target = widget;
+			}
 		}
 	}
 
@@ -144,14 +139,14 @@ void UIResizeDivider::setTargetSize(float size, bool store)
 	minSize[isHorizontal() ? 0 : 1] = size;
 	target->setMinSize(minSize);
 
-	if (store) {
+	if (store && !getId().isEmpty()) {
 		getRoot()->setUISetting("resize_divider:" + getId(), ConfigNode(size));
 	}
 }
 
 void UIResizeDivider::loadTargetSize()
 {
-	if (target) {
+	if (target && !getId().isEmpty()) {
 		auto value = getRoot()->getUISetting("resize_divider:" + getId());
 		if (value.getType() != ConfigNodeType::Undefined) {
 			setTargetSize(value.asFloat(), false);

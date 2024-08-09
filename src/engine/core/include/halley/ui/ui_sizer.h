@@ -136,6 +136,8 @@ namespace Halley {
 		UISizerEntry* tryGetEntry(IUIElement* element);
 		std::optional<size_t> getEntryIdx(IUIElement* element) const;
 
+		UISizer* findSizerFor(IUIElement* element);
+
 		void updateEnabled() const;
 		
 		void swapItems(int idxA, int idxB);
