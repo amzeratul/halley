@@ -84,8 +84,8 @@ void EntityEditor::setECSData(ECSData& ecs)
 void EntityEditor::makeUI()
 {
 	add(factory.makeUI("halley/entity_editor"), 1);
-	fields = getWidget("fields");
-	fields->setMinSize(Vector2f(300, 20));
+	componentsList = getWidgetAs<UIList>("components");
+	componentsList->setMinSize(Vector2f(200, 20));
 
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
@@ -148,6 +148,11 @@ void EntityEditor::makeUI()
 	{
 		setVariant(event.getStringData());
 	});
+
+	setHandle(UIEventType::ListItemsSwapped, "components", [=](const UIEvent& event)
+	{
+		swapComponents(event.getIntData(), event.getIntData2());
+	});
 }
 
 bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
@@ -199,7 +204,7 @@ void EntityEditor::reloadEntity()
 	msg->setActive(!currentEntityData);
 	msg->setText(LocalisedString::fromHardcodedString(unloadedBecauseHasMultiple ? "Multiple Entities Selected" : "No Entities Selected"));
 
-	fields->clear();
+	componentsList->clear();
 	componentWidgets.clear();
 
 	if (currentEntityData) {
@@ -297,7 +302,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 
 	setComponentColour(componentType, *componentUI);
 	
-	fields->add(componentUI);
+	componentsList->addItem(componentType, componentUI, 1);
 	componentWidgets[componentType] = componentUI;
 }
 
@@ -590,6 +595,13 @@ void EntityEditor::setVariant(const String& variant)
 		getEntityData().setVariant(variant);
 		onEntityUpdated();
 	}
+}
+
+void EntityEditor::swapComponents(int idxA, int idxB)
+{
+	auto& cs = getEntityData().getComponents();
+	std::swap(cs[idxA], cs[idxB]);
+	onEntityUpdated();
 }
 
 void EntityEditor::setDefaultName(const String& name, const String& prevName)

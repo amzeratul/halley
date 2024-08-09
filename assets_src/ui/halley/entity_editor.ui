@@ -13,14 +13,17 @@ children:
     proportion: 1
     border: [0, 0, 0, 0]
     sizer:
+      columnProportions: []
       gap: 8
       type: vertical
     widget:
       class: scrollBarPane
       id: scrollBarPane
+      size: [0, 220]
     children:
       - uuid: 5d3fe2cd-643e-45e1-8954-8e0ff60390b8
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: image
@@ -38,6 +41,7 @@ children:
           - uuid: 8c68626e-8612-4525-985e-6301a1bd25ea
             border: [4, 4, 4, 4]
             sizer:
+              columnProportions: []
               type: vertical
             widget:
               class: widget
@@ -54,6 +58,8 @@ children:
                   id: commonFields
                 children:
                   - uuid: 7200c6ae-e9f4-4f34-835a-b27e16e31108
+                    sizer:
+                      columnProportions: []
                     widget:
                       class: widget
                       size: [100, 20]
@@ -107,6 +113,8 @@ children:
                   id: sceneFields
                 children:
                   - uuid: 8f03c406-669b-4012-ba24-4f9df33d7d92
+                    sizer:
+                      columnProportions: []
                     widget:
                       class: widget
                       size: [100, 20]
@@ -131,6 +139,7 @@ children:
               - uuid: 41bef486-a1c3-4997-8208-fe1210c445cc
                 sizer:
                   columnProportion: [0, 1]
+                  columnProportions: []
                   columns: 2
                   gap: 2
                   type: grid
@@ -139,6 +148,8 @@ children:
                   id: entityFields
                 children:
                   - uuid: 0d9fbbae-a6a7-445d-a883-0afe4624dc84
+                    sizer:
+                      columnProportions: []
                     widget:
                       class: widget
                       size: [100, 20]
@@ -169,11 +180,13 @@ children:
                     widget:
                       class: dropdown
                       id: entityIcon
+                      options: []
                       size: [200, 22]
                       style: dropdownLight
                 fill: fill
               - uuid: a821da0d-329f-4896-bbdb-fcb16b6ced78
                 sizer:
+                  columnProportions: []
                   type: vertical
                 widget:
                   class: widget
@@ -182,11 +195,14 @@ children:
                   - uuid: 72943133-3f55-4526-938f-a5c4afa9830c
                     sizer:
                       columnProportion: [0, 1]
+                      columnProportions: []
                       columns: 2
                       gap: 2
                       type: grid
                     children:
                       - uuid: e18a790b-607c-4198-aa8a-7b2fbdbdf5bd
+                        sizer:
+                          columnProportions: []
                         widget:
                           class: widget
                           size: [100, 20]
@@ -216,11 +232,20 @@ children:
                       tooltip: Open this prefab to edit.
       - uuid: 4360d2c3-fccd-420b-ab26-478bffc84250
         sizer:
+          columnProportions: []
           gap: 8
           type: vertical
         widget:
-          class: widget
-          id: fields
+          acceptKeyboardInput: false
+          canDrag: true
+          class: list
+          focusable: false
+          id: components
+          options: []
+          requiresSelection: false
+          showSelection: false
+          singleClickAccept: false
+          style: componentList
   - uuid: de3083a2-eaa2-48d4-b798-0c5fb1e96d4b
     border: [0, 3, 0, 0]
     sizer:

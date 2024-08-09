@@ -91,7 +91,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		}
 	}
-	if (options.preserveOrder) {
+	if (options.preserveChildOrder) {
 		// TODO
 	}
 
@@ -133,8 +133,18 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		}
 	}
-	if (options.preserveOrder) {
-		// TODO
+	if (options.preserveComponentOrder) {
+		Vector<String> fromOrder;
+		Vector<String> toOrder;
+		for (const auto& c: from.components) {
+			fromOrder.push_back(c.first);
+		}
+		for (const auto& c: to.components) {
+			toOrder.push_back(c.first);
+		}
+		if (fromOrder != toOrder) {
+			componentOrder = std::move(toOrder);
+		}
 	}
 }
 

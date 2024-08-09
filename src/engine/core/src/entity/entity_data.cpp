@@ -438,7 +438,23 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		}
 	}
 	if (!delta.componentOrder.empty()) {
-		// TODO
+		HashMap<String, ConfigNode> compData;
+		decltype(components) otherComps;
+		for (auto& c: components) {
+			if (std_ex::contains(delta.componentOrder, c.first)) {
+				compData[c.first] = std::move(c.second);
+			} else {
+				otherComps.push_back(std::move(c));
+			}
+		}
+		components.clear();
+
+		for (const auto& compName: delta.componentOrder) {
+			components.emplace_back(compName, compData.value_or(compName, {}));
+		}
+		for (auto& c: otherComps) {
+			components.push_back(std::move(c));
+		}
 	}
 }
 

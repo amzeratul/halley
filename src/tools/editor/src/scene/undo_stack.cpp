@@ -89,6 +89,7 @@ bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds
 	for (size_t i = 0; i < entityIds.size(); ++i) {
 		EntityDataDelta::Options options;
 		options.shallow = true;
+		options.preserveComponentOrder = true;
 		auto forward = std::make_unique<EntityDataDelta>(*before[i], *after[i], options);
 		auto back = std::make_unique<EntityDataDelta>(*after[i], *before[i], options);
 		hasAnyChange = hasAnyChange || forward->hasChange();

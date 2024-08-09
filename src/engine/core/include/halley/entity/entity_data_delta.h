@@ -16,7 +16,8 @@ namespace Halley {
         public:
             Options();
         	
-	        bool preserveOrder = false;
+	        bool preserveChildOrder = false;
+	        bool preserveComponentOrder = false;
 			bool shallow = false;
             bool deltaComponents = true;
 			bool allowNonSerializable = true;

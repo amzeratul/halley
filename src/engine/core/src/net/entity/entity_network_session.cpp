@@ -26,7 +26,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 
 	entitySerializationOptions.type = EntitySerialization::Type::Network;
 
-	deltaOptions.preserveOrder = false;
+	deltaOptions.preserveComponentOrder = false;
 	deltaOptions.shallow = false;
 	deltaOptions.deltaComponents = true;
 	deltaOptions.allowNonSerializable = false;

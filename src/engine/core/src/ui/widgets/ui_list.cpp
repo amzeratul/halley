@@ -1116,21 +1116,25 @@ void UIListItem::update(Time t, bool moved)
 			const auto myTargetRect = Rect4f(dragging->curDragPos, dragging->curDragPos + dragWidget->getSize());
 			pos = myTargetRect.fitWithin(parentRect).getTopLeft();
 		}
+		dragWidget->setMinSize(dragging->startMinSize);
 		dragWidget->setPosition(pos);
+		dragWidget->setShrinkOnLayout(false);
 		dragWidget->layout();
 		dirty = true;
 	} else  {
 		setChildLayerAdjustment(0);
 		if (swapping) {
+			setShrinkOnLayout(false);
 			swapTime += t;
 			constexpr Time totalTime = 0.15;
-			if (swapTime > totalTime) {
-				swapping = false;
-			}
-			float p = clamp(float(swapTime / totalTime), 0.0f, 1.0f);
+			float p = clamp(static_cast<float>(swapTime / totalTime), 0.0f, 1.0f);
 			setPosition(lerp(swapFrom, swapTo, p));
 			layout();
 			dirty = true;
+			if (swapTime > totalTime) {
+				setShrinkOnLayout(true);
+				swapping = false;
+			}
 		}
 	}
 
@@ -1154,7 +1158,7 @@ void UIListItem::update(Time t, bool moved)
 void UIListItem::onMouseOver(Vector2f mousePos)
 {
 	if (!dragging && held && parent.canDragListItem(*this) && (mousePos - mouseStartPos).length() > 3.0f) {
-		dragging = DragInfo { {}, dragWidget->getPosition() };
+		dragging = DragInfo { {}, dragWidget->getPosition(), getMinimumSize(), getSize() };
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
 	if (dragging) {
@@ -1215,6 +1219,8 @@ void UIListItem::stopDragging()
 {
 	if (dragging) {
 		const auto pos = dragging->curDragPos;
+		setShrinkOnLayout(true);
+		setMinSize(dragging->startMinSize);
 		dragging = {};
 		setNoClipChildren(false);
 		parent.onItemDoneDragging(*this, index, pos);

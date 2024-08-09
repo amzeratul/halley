@@ -1,19 +1,12 @@
 UI Editor:
-- Copy/Paste
 - Undo/Redo
-- Zoom
 - Multiple selection
-- Replace element
-- Named colours
 
 Script Editor:
-- Undo/Redo
 - Figure out why sometimes it doesn't connect to the game
 
 Widgets:
-- Fix handling of delete/backspace/home/end in input fields when certain modifiers are held
 - Improve UI design of slider
-- Allow checkbox labels
 - Add toggle boxes
 
 UI:
@@ -35,6 +28,3 @@ Editor Misc:
 
 Launcher:
 - Create project
-
-Engine:
-- Engine-side systems

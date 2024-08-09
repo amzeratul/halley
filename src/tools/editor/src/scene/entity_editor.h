@@ -70,7 +70,7 @@ namespace Halley {
 		const EntityIcons* entityIcons = nullptr;
 		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		
-		std::shared_ptr<UIWidget> fields;
+		std::shared_ptr<UIList> componentsList;
 		std::shared_ptr<UITextInput> entityName;
 		std::shared_ptr<UIDropdown> entityIcon;
 		std::shared_ptr<UIDropdown> variant;
@@ -106,6 +106,7 @@ namespace Halley {
 		void editPrefab();
 		void setIcon(const String& icon);
 		void setVariant(const String& variant);
+		void swapComponents(int idxA, int idxB);
 
 		void refreshEntityData();
 		void onEntityUpdated(bool temporary = false) override;

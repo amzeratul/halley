@@ -227,6 +227,38 @@ uiStyle:
     selectedLabel: { font: Ubuntu Light, size: 14, colour: $ui_selectedText }
     gap: 1
 
+  listInvisible:
+    classes: [list]
+    background: ""
+    item:
+      normal: ""
+      hover: ""
+      selected: ""
+      drag: ""
+      innerBorder: [ 0, 0, 0, 0 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Light, size: 14, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Light, size: 14, colour: $ui_selectedText }
+    gap: 1
+
+  listComponent:
+    classes: [list]
+    background: ""
+    item:
+      normal: ""
+      hover: ""
+      selected: ""
+      drag: ""
+      innerBorder: [ 0, 0, 0, 0 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Light, size: 14, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Light, size: 14, colour: $ui_selectedText }
+    gap: 4
+
   treeList:
     classes: [treeList]
     background: { img: $ui_list_background, colour: $ui_listBackground }
@@ -479,6 +511,22 @@ uiStyle:
     selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
     disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
     gap: 1
+
+  componentList:
+    classes: [list]
+    background: ""
+    item:
+      normal: { img: "halley_ui/drag_item_small.png", colour: $ui_listBackground }
+      hover: { img: "halley_ui/drag_item_small.png", colour: $ui_listDrag }
+      drag: { img: "halley_ui/drag_item_small.png", colour: $ui_listDrag }
+      innerBorder: [ 20, 0, 0, 0 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 0, 0, 0 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
+    disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
+    gap: 8
 
   curveEditor:
     background: { img: $ui_window, colour: $ui_popupWindow }

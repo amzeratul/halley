@@ -233,6 +233,8 @@ namespace Halley {
 		struct DragInfo {
 			Vector2f curDragPos;
 			Vector2f myStartPos;
+			Vector2f startMinSize;
+			Vector2f startSize;
 		};
 
 		bool held = false;
