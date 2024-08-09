@@ -1,84 +1,293 @@
----
-widget: { class: widget }
-sizer: { type: vertical, gap: 6 }
+uuid: 9febc246-9987-4cf5-9e59-e155d567c999
 proportion: 1
+sizer:
+  columnProportions: []
+  gap: 6
+  type: vertical
+widget:
+  class: widget
 children:
-- sizer: { type: horizontal, gap: 6 }
-  border: [0, -6, 0, 0]
-  children:
-  - widget: { id: sceneEditorToolbarButtons, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [350, 20] }
-    sizer: { type: horizontal, gap: 4 }
+  - uuid: fc43fa5d-24ef-416c-8923-6d8f33557b10
+    border: [0, -6, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 6
+      type: horizontal
     children:
-      - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
-        border: [0, 0, 10, 0]
-      - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
-      - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
-        border: [0, 0, 10, 0]
-      - widget: { id: zoomOutButton, class: button, style: buttonThin, icon: "entity_icons/zoom_out.png", size: [22, 22], tooltip: "Zoom Out [Ctrl+-]" }
-      - widget: { id: zoomInButton, class: button, style: buttonThin, icon: "entity_icons/zoom_in.png", size: [22, 22], tooltip: "Zoom In [Ctrl+=]" }
-      - widget: { id: zoomFitButton, class: button, style: buttonThin, icon: "entity_icons/zoom_fit.png", size: [22, 22], tooltip: "Zoom To Fit", active: false }
-      - widget: { id: centreViewButton, class: button, style: buttonThin, icon: "entity_icons/centre_view.png", size: [22, 22], tooltip: "Centre View" }
-  - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
-    sizer: { type: horizontal }
-    proportion: 1
-    children:
-      - widget:
-          id: toolMode
-          class: list
+      - uuid: 4eb2e45e-1a59-475e-bf5c-937095d96e07
+        sizer:
+          columnProportions: []
+          gap: 4
           type: horizontal
-          options: []
-- sizer: { type: horizontal }
-  proportion: 1
-  children:
-  - widget: { class: widget, id: sceneEditorLeftPanel }
-    sizer: { type: vertical, gap: 4 }
-    children:
-      - sizer: { type: horizontal, gap: 4 }
+        widget:
+          class: image
+          colour: $ui_backgroundBox
+          id: sceneEditorToolbarButtons
+          image: halley_ui/ui_list_item.png
+          innerBorder: [5, 5, 5, 5]
+          size: [350, 20]
         children:
-        - widget: { id: expandAll, class: button, style: buttonThin, text: Expand All, size: [60, 20] }
-          proportion: 1
-        - widget: { id: collapseAll, class: button, style: buttonThin, text: Collapse All, size: [60, 20] }
-          proportion: 1
-        - widget: { id: searchEntities, class: button, style: buttonThin, text: Search, tooltip: "Searches entities [Ctrl+P, @]", size: [60, 20] }
-          proportion: 1
-      - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 22] }
-        sizer: { type: vertical }
+          - uuid: c532d4a8-21d9-4829-9e60-f5ebe6483b12
+            border: [0, 0, 10, 0]
+            widget:
+              class: button
+              icon: entity_icons/save.png
+              id: saveButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Save [Ctrl+S]
+          - uuid: cd190c62-6f11-45f4-8e32-723c00ebd308
+            widget:
+              class: button
+              icon: entity_icons/undo.png
+              id: undoButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Undo [Ctrl+Z]
+          - uuid: 3724d741-b090-46b3-ae7b-589c1edce7aa
+            border: [0, 0, 10, 0]
+            widget:
+              class: button
+              icon: entity_icons/redo.png
+              id: redoButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Redo [Ctrl+Y / Ctrl+Shift+Z]
+          - uuid: c2eaf2bc-07a5-4545-9d06-1b52ceefe00c
+            widget:
+              class: button
+              icon: entity_icons/zoom_out.png
+              id: zoomOutButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Zoom Out [Ctrl+-]
+          - uuid: 5a7c2e00-1695-41f4-a794-f03cf7d57f7b
+            widget:
+              class: button
+              icon: entity_icons/zoom_in.png
+              id: zoomInButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Zoom In [Ctrl+=]
+          - uuid: 79dfab67-f895-4c64-b2c0-4c5e15bbea64
+            widget:
+              active: false
+              class: button
+              icon: entity_icons/zoom_fit.png
+              id: zoomFitButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Zoom To Fit
+          - uuid: 0493ddc7-8ce3-433f-9a4b-8f4ea7e50564
+            widget:
+              class: button
+              icon: entity_icons/centre_view.png
+              id: centreViewButton
+              size: [22, 22]
+              style: buttonThin
+              tooltip: Centre View
+      - uuid: 3efe4e6e-e46c-4006-a089-7e3d18b0d8f9
         proportion: 1
+        sizer:
+          columnProportions: []
+          type: horizontal
+        widget:
+          class: image
+          colour: $ui_backgroundBox
+          id: sceneEditorToolbar
+          image: halley_ui/ui_list_item.png
+          innerBorder: [5, 5, 5, 5]
         children:
-          - widget: { id: entityList, class: entityList }
-            proportion: 1
-      - widget: { id: entityValidatorListUI, class: entityValidatorList }
-      - sizer: { type: horizontal, gap: 4 }
-        children:
-          - widget: { id: addEntity, class: button, style: buttonThin, text: Add Entity, tooltip: "Adds a blank new entity as a child of the current selection. [Ctrl+N]" }
-            proportion: 1
-          - widget: { id: addPrefab, class: button, style: buttonThin, text: Add Prefab, tooltip: "Adds a Prefab as a child of the current selection. [Ctrl+Shift+N]" }
-            proportion: 1
-          - widget: { id: removeEntity, class: button, style: buttonThin, text: Remove, tooltip: "Removes the currently selected entity. [Delete]" }
-            proportion: 1
-  - widget: { class: widget }
+          - uuid: 858588e5-02f5-4586-9e0d-cb2555e1701b
+            widget:
+              class: list
+              id: toolMode
+              options: []
+              type: horizontal
+  - uuid: ccee129e-bf5e-43ab-a7fc-85bb792e523e
     proportion: 1
-    border: [4, 0, 4, 0]
-    sizer: { type: vertical, gap: 4 }
+    sizer:
+      columnProportions: []
+      gap: 3
+      type: horizontal
+    widget:
+      class: widget
     children:
-    - widget: { id: canvas, class: sceneEditorCanvas }
-      proportion: 1
-      children:
-        - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [100, 32] }
-          sizer: { type: horizontal }
-          border: [10, 10, 10, 10]
-          fill: right
-          children: []
-        - widget: { id: debugConsole, class: debugConsole, size: [640, 320], active: false }
-          proportion: 1
-          border: [10, 10, 10, 10]
-          fill: [ bottom, left ]
-    - widget: { id: timelineEditor, class: timelineEditor, active: false }
-  - widget: { id: majorCustomTool, active: false, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+      - uuid: cb8d772b-c83d-46c3-8b2e-a5faaa1a274e
+        sizer:
+          columnProportions: []
+          gap: 4
+          type: vertical
+        widget:
+          class: widget
+          id: sceneEditorLeftPanel
+          size: [360, 0]
+        children:
+          - uuid: 6c827f3e-4646-46e8-abbc-7c34864b5aed
+            sizer:
+              columnProportions: []
+              gap: 4
+              type: horizontal
+            children:
+              - uuid: 9a9a9d37-816f-4cbe-babd-f05c1ddb34e5
+                proportion: 1
+                widget:
+                  class: button
+                  id: expandAll
+                  size: [60, 20]
+                  style: buttonThin
+                  text: Expand All
+              - uuid: 5e731026-d67b-4dbe-959a-f0fbaad51cc4
+                proportion: 1
+                widget:
+                  class: button
+                  id: collapseAll
+                  size: [60, 20]
+                  style: buttonThin
+                  text: Collapse All
+              - uuid: 4957d244-7f3a-4955-b905-3768390b3f82
+                proportion: 1
+                widget:
+                  class: button
+                  id: searchEntities
+                  size: [60, 20]
+                  style: buttonThin
+                  text: Search
+                  tooltip: Searches entities [Ctrl+P, @]
+          - uuid: a6ac7a93-5494-453f-9612-5de848690267
+            proportion: 1
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: scrollBarPane
+              id: scrollBarPane
+              scrollHorizontal: true
+              scrollVertical: true
+              size: [0, 22]
+            children:
+              - uuid: 06939df9-b5bc-49ba-b275-d1cf6acd3b5d
+                proportion: 1
+                widget:
+                  class: entityList
+                  id: entityList
+          - uuid: 7167b125-617c-415c-9ae6-3244564059b8
+            widget:
+              class: entityValidatorList
+              id: entityValidatorListUI
+          - uuid: efb02964-692e-476b-a86e-e77a2a902bd1
+            sizer:
+              columnProportions: []
+              gap: 4
+              type: horizontal
+            children:
+              - uuid: f38a6a67-d4f4-4c24-8588-7afb8ed53e4b
+                proportion: 1
+                widget:
+                  class: button
+                  id: addEntity
+                  style: buttonThin
+                  text: Add Entity
+                  tooltip: Adds a blank new entity as a child of the current selection. [Ctrl+N]
+              - uuid: 68820513-2c6b-424c-9161-cb9a8e56029f
+                proportion: 1
+                widget:
+                  class: button
+                  id: addPrefab
+                  style: buttonThin
+                  text: Add Prefab
+                  tooltip: Adds a Prefab as a child of the current selection. [Ctrl+Shift+N]
+              - uuid: 99d74dd8-c950-451f-9c43-d10c42261659
+                proportion: 1
+                widget:
+                  class: button
+                  id: removeEntity
+                  style: buttonThin
+                  text: Remove
+                  tooltip: Removes the currently selected entity. [Delete]
+      - uuid: b4c0cc18-9c1c-42e2-b6da-2040c3839886
+        widget:
+          class: resizeDivider
+      - uuid: 54c42355-97ae-41a6-8f9e-4fcbe3e0a782
+        proportion: 1
+        border: [0, 0, 0, 0]
+        sizer:
+          columnProportions: []
+          gap: 4
+          type: vertical
+        widget:
+          class: widget
+        children:
+          - uuid: ee16e29a-4f6e-42a8-aca4-70e574cdcf0f
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              class: sceneEditorCanvas
+              id: canvas
+            children:
+              - uuid: 8a427726-ecaf-4826-818f-b13237c3460d
+                border: [10, 10, 10, 10]
+                sizer:
+                  columnProportions: []
+                  type: horizontal
+                widget:
+                  class: image
+                  colour: $ui_backgroundBox
+                  id: currentToolUI
+                  image: halley_ui/ui_list_item.png
+                  innerBorder: [5, 5, 5, 5]
+                  size: [100, 32]
+                children: []
+                fill: right
+              - uuid: 989d20a1-c34c-482c-a630-2dca8fac4fba
+                proportion: 1
+                border: [10, 10, 10, 10]
+                widget:
+                  active: false
+                  class: debugConsole
+                  id: debugConsole
+                  size: [640, 320]
+                fill: [bottom, left]
+          - uuid: 5c20fe13-3fc4-41a6-91ba-a9f19f6e844b
+            widget:
+              active: false
+              class: timelineEditor
+              id: timelineEditor
+      - uuid: 9eaa22fe-6c99-4718-ad6b-490c9559fc21
+        widget:
+          class: resizeDivider
+          type: horizontalRight
+      - uuid: 2d20cb60-f67e-4d6d-a379-73a477545f40
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+          id: sceneEditorRightPanel
+        children:
+          - uuid: aeb86648-ed02-491e-b791-c7aa1157ee0a
+            proportion: 1
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              active: false
+              class: image
+              colour: $ui_backgroundBox
+              id: majorCustomTool
+              image: halley_ui/ui_list_item.png
+              innerBorder: [5, 5, 5, 5]
+            children: []
+          - uuid: 368208ff-bab3-4412-a478-8eb0718a2da6
+            proportion: 1
+            widget:
+              class: entityEditor
+              id: entityEditor
+  - uuid: ed411ca6-c72b-4765-8823-d68febb737f0
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: widget
+      id: customUI
     children: []
-    sizer: { type: vertical }
-  - widget: { id: entityEditor, class: entityEditor }
-- widget: { id: customUI, class: widget }
-  sizer: { type: vertical }
-  children: []
-...

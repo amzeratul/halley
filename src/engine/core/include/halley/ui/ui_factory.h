@@ -190,6 +190,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeRenderSurface(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeCustomPaint(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeResizeDivider(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
@@ -221,6 +222,7 @@ namespace Halley
 		UIFactoryWidgetProperties getTreeListProperties() const;
 		UIFactoryWidgetProperties getRenderSurfaceProperties() const;
 		UIFactoryWidgetProperties getCustomPaintProperties() const;
+		UIFactoryWidgetProperties getResizeDividerProperties() const;
 		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

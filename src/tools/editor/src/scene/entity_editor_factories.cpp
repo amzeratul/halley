@@ -2426,6 +2426,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<InputPriority>("Halley::InputPriority"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UIResizeDividerType>("Halley::UIResizeDividerType"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UIScrollDirection>("Halley::UIScrollDirection"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<ScriptVariableScope>("Halley::ScriptVariableScope"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<MathOp>("Halley::MathOp"));

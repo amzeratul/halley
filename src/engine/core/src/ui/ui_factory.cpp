@@ -32,6 +32,7 @@
 #include "halley/ui/widgets/ui_custom_paint.h"
 #include "halley/ui/widgets/ui_debug_console.h"
 #include "halley/ui/widgets/ui_render_surface.h"
+#include "halley/ui/widgets/ui_resize_divider.h"
 #include "halley/ui/widgets/ui_spin_control2.h"
 
 using namespace Halley;
@@ -93,6 +94,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
 	addFactory("renderSurface", [=](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
 	addFactory("customPaint", [=](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
+	addFactory("resizeDivider", [=](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
 }
 
 UIFactory::~UIFactory()
@@ -1723,7 +1725,7 @@ UIFactoryWidgetProperties UIFactory::getCustomPaintProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Custom Paint";
-	result.iconName = "widget_icons/customPaint.png";
+	result.iconName = "widget_icons/custom_paint.png";
 	return result;
 }
 
@@ -1732,6 +1734,26 @@ std::shared_ptr<UIWidget> UIFactory::makeCustomPaint(const ConfigNode& entryNode
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto widget = std::make_shared<UICustomPaint>(std::move(id), makeSizer(entryNode));
+	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getResizeDividerProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Resize Divider";
+	result.iconName = "widget_icons/resize_divider.png";
+
+	result.entries.emplace_back("Type", "type", "Halley::UIResizeDividerType", "horizontalLeft");
+
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeResizeDivider(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto type = node["type"].asEnum(UIResizeDividerType::HorizontalLeft);
+	auto widget = std::make_shared<UIResizeDivider>(std::move(id), type);
 	return widget;
 }
 
