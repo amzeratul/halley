@@ -2,6 +2,7 @@
 
 component:
   name: Scriptable
+  category: general
   members:
   - activeStates:
       type: 'Halley::ScriptStateSet'
@@ -40,6 +41,7 @@ component:
 
 component:
   name: EmbeddedScript
+  category: general
   componentDependencies: [Scriptable, Transform2D]
   members:
   - script:
@@ -52,6 +54,7 @@ component:
 
 component:
   name: ScriptTarget
+  category: general
   componentDependencies: [Transform2D]
   members:
   - id:
@@ -61,6 +64,7 @@ component:
 
 component:
   name: ScriptTagTarget
+  category: general
   members:
   - tags:
       type: 'Halley::Vector<Halley::String>'

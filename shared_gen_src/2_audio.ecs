@@ -2,6 +2,7 @@
 
 component:
   name: AudioListener
+  category: audio
   componentDependencies: [Transform2D]
   members:
   - referenceDistance:
@@ -30,6 +31,7 @@ component:
 
 component:
   name: AudioSource
+  category: audio
   componentDependencies: [Transform2D]
   members:
   - emitter:

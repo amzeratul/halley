@@ -17,6 +17,7 @@ namespace Halley {
 		bool isEnabled() const;
 
 		Colour4f getColour(const String& key) const;
+		bool hasColour(const String& key) const;
 		Vector<String> getColourNames() const;
 
 		Sprite getSprite(Resources& resources, const String& name, const String& material) const;

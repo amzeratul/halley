@@ -118,7 +118,7 @@ namespace Halley {
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;
 
-		void setComponentColour(const String& name, UIWidget& component);
+		void setComponentHighlight(const String& name, UIWidget& component);
 		ConfigNode serializeComponent(const String& name, const ConfigNode& data);
 		ConfigNode getComponentsFromClipboard();
 	};

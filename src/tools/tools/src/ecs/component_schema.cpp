@@ -13,6 +13,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 	: generate(generate)
 {
 	name = node["name"].as<std::string>();
+	category = node["category"].as<std::string>("general");
 
 	for (auto memberEntry : node["members"]) {
 		for (auto m = memberEntry.begin(); m != memberEntry.end(); ++m) {

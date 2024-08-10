@@ -86,6 +86,13 @@ colours:
   ui_staticListBackgroundAlternate: "#30463ddd"
   ui_staticListBackgroundInvalid: "#644853dd"
 
+  component_category_general: "#5068F4"
+  component_category_graphics: "#ED6061"
+  component_category_physics: "#8EF29B"
+  component_category_serialization: "#7CF3EA"
+  component_category_audio: "#E555D8"
+  component_category_ai: "#EAB555"
+
 sprites:
   ui_button: { img: halley_ui/ui_button.png }
   ui_window: { img: halley_ui/ui_window.png, material: Halley/Sprite }

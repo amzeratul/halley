@@ -299,9 +299,14 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 				}
 			}
 		}
+
+		auto colKey = "component_category_" + componentData.category;
+		auto& colourScheme = *factory.getColourScheme();
+		auto colour = colourScheme.hasColour(colKey) ? colourScheme.getColour(colKey) : colourScheme.getColour("component_category_general");
+		componentUI->getWidgetAs<UIImage>("nameBackground")->getSprite().setColour(colour);
 	}
 
-	setComponentColour(componentType, *componentUI);
+	setComponentHighlight(componentType, *componentUI);
 	
 	componentsList->addItem(componentType, componentUI, 1);
 	componentWidgets[componentType] = componentUI;
@@ -758,7 +763,7 @@ void EntityEditor::setHighlightedComponents(Vector<String> componentNames)
 		highlightedComponents = std::move(componentNames);
 
 		for (auto& [compName, widget]: componentWidgets) {
-			setComponentColour(compName, *widget);
+			setComponentHighlight(compName, *widget);
 		}
 	}
 }
@@ -812,7 +817,7 @@ void EntityEditor::goToEntity(const UUID& uuid)
 	sceneEditor->selectEntity(uuid.toString());
 }
 
-void EntityEditor::setComponentColour(const String& name, UIWidget& component)
+void EntityEditor::setComponentHighlight(const String& name, UIWidget& component)
 {
 	return;
 

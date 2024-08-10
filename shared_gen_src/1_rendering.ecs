@@ -2,6 +2,7 @@
 
 component:
   name: Sprite
+  category: graphics
   componentDependencies: [Transform2D]
   members:
   - sprite:
@@ -21,6 +22,7 @@ component:
 
 component:
   name: Colour
+  category: graphics
   members:
   - colour:
       type: 'Halley::Colour4f'
@@ -39,6 +41,7 @@ component:
 
 component:
   name: TextLabel
+  category: graphics
   componentDependencies: [Transform2D]
   members:
   - text:
@@ -57,6 +60,7 @@ component:
 
 component:
   name: SpriteAnimation
+  category: graphics
   members:
   - player:
       type: 'Halley::AnimationPlayer'
@@ -71,6 +75,7 @@ component:
 
 component:
   name: Camera
+  category: graphics
   componentDependencies: [Transform2D]
   members:
   - zoom:
@@ -88,6 +93,7 @@ component:
 
 component:
   name: Particles
+  category: graphics
   componentDependencies: [Transform2D]
   members:
   - particles:
@@ -130,6 +136,7 @@ message:
 
 component:
   name: SpriteAnimationReplicator
+  category: graphics
 
 ---
 

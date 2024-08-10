@@ -19,6 +19,7 @@ namespace Halley
 
 		int id = -1;
 		String name;
+		String category;
 		Vector<ComponentFieldSchema> members;
 		HashSet<String> includeFiles;
 		std::optional<String> customImplementation;

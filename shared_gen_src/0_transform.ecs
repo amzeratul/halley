@@ -4,6 +4,7 @@
 
 component:
   name: Transform2D
+  category: physics
   customImplementation: "halley/entity/components/transform_2d_component.h"
   members:
   - position:
@@ -43,6 +44,7 @@ component:
 
 component:
   name: Velocity
+  category: physics
   members:
   - velocity:
       type: 'Halley::Vector2f'

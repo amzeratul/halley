@@ -93,6 +93,11 @@ Colour4f UIColourScheme::getColour(const String& rawKey) const
 	return defaultColour;
 }
 
+bool UIColourScheme::hasColour(const String& key) const
+{
+	return colours.contains(key);
+}
+
 Sprite UIColourScheme::getSprite(Resources& resources, const String& name, const String& material) const
 {
 	if (name.startsWith("$")) {

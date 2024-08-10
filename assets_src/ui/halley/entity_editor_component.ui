@@ -45,6 +45,7 @@ children:
                 widget:
                   class: image
                   colour: "#00000040"
+                  id: nameBackground
                   image: $ui_window
                   innerBorder: [4, 0, 4, 0]
                 children:

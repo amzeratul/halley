@@ -2,6 +2,7 @@
 
 component:
   name: Timeline
+  category: general
   members:
   - timeline:
       type: 'Halley::Timeline'

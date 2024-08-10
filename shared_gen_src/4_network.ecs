@@ -2,6 +2,7 @@
 
 component:
   name: Network
+  category: serialization
   members:
   - ownerId: 
       type: 'std::optional<uint8_t>'
