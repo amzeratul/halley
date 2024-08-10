@@ -149,6 +149,7 @@ Vector<String> UIColourScheme::getColourNames() const
 	for (const auto& [k, v]: colours) {
 		result.push_back(k);
 	}
+	std::sort(result.begin(), result.end());
 	return result;
 }
 
