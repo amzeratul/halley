@@ -86,6 +86,7 @@ void EntityEditor::makeUI()
 	add(factory.makeUI("halley/entity_editor"), 1);
 	componentsList = getWidgetAs<UIList>("components");
 	componentsList->setMinSize(Vector2f(200, 20));
+	componentsList->setScrollToSelection(false);
 
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
@@ -193,6 +194,9 @@ void EntityEditor::reloadEntity()
 {
 	loadVariants();
 
+	const auto pane = getWidgetAs<UIScrollPane>("scrollBarPane_pane");
+	const auto startPos = pane->getScrollPosition();
+
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromHardcodedString(isPrefab ? "Prefab" : "Entity"));
 	getWidget("scrollBarPane")->setActive(currentEntityData);
 	getWidget("entityFields")->setActive(currentEntityData && !isPrefab);
@@ -230,6 +234,9 @@ void EntityEditor::reloadEntity()
 	} else {
 		entityValidatorUI->unloadEntity();
 	}
+
+	layout();
+	pane->scrollTo(startPos);
 }
 
 void EntityEditor::unloadIcons()
