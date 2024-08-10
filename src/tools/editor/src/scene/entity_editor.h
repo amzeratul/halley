@@ -121,6 +121,9 @@ namespace Halley {
 		void setComponentHighlight(const String& name, UIWidget& component);
 		ConfigNode serializeComponent(const String& name, const ConfigNode& data);
 		ConfigNode getComponentsFromClipboard();
+
+		void setComponentCollapsed(const String& name, bool collapsed);
+		bool isComponentCollapsed(const String& name) const;
 	};
 
 	class EntityEditorFactoryRoot {

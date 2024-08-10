@@ -275,14 +275,24 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const bool ctrlHeld = (static_cast<int>(event.getKeyMods()) & static_cast<int>(KeyMods::Ctrl)) != 0;
 		copyComponentToClipboard(componentType, ctrlHeld);
 	});
-	componentUI->setHandle(UIEventType::ButtonClicked, "collapseComponentButton", [=] (const UIEvent& event)
+
+	auto setCollapsed = [=](bool collapsed, bool store)
 	{
 		auto target = componentUI->getWidget("contentsDrawer");
-		bool active = target->isActive();
-		target->setActive(!active);
-		auto icon = Sprite().setImage(factory.getResources(), active ? "halley_ui/button_expand.png" : "halley_ui/button_collapse.png");
+		target->setActive(!collapsed);
+		auto icon = Sprite().setImage(factory.getResources(), collapsed ? "halley_ui/button_expand.png" : "halley_ui/button_collapse.png");
 		componentUI->getWidgetAs<UIButton>("collapseComponentButton")->setIcon(icon);
+
+		if (store) {
+			setComponentCollapsed(componentType, collapsed);
+		}
+	};
+
+	componentUI->setHandle(UIEventType::ButtonClicked, "collapseComponentButton", [=] (const UIEvent& event)
+	{
+		setCollapsed(componentUI->getWidget("contentsDrawer")->isActive(), true);
 	});
+	setCollapsed(isComponentCollapsed(componentType), false);
 
 	auto componentFields = componentUI->getWidget("componentFields");
 	
@@ -532,6 +542,31 @@ ConfigNode EntityEditor::getComponentsFromClipboard()
 	} catch (...) {}
 
 	return {};
+}
+
+void EntityEditor::setComponentCollapsed(const String& name, bool collapsed)
+{
+	for (auto& [comp, compData]: getEntityData().getComponents()) {
+		if (comp == name) {
+			if (collapsed) {
+				compData["__collapsed"] = ConfigNode(true);
+			} else {
+				compData.removeKey("__collapsed");
+			}
+			onEntityUpdated();
+			return;
+		}
+	}
+}
+
+bool EntityEditor::isComponentCollapsed(const String& name) const
+{
+	for (const auto& [comp, compData] : getEntityData().getComponents()) {
+		if (comp == name) {
+			return compData["__collapsed"].asBool(false);
+		}
+	}
+	return false;
 }
 
 void EntityEditor::pasteComponentsFromClipboard()
