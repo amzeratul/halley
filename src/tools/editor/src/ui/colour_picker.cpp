@@ -54,6 +54,11 @@ void ColourPickerButton::setColour(String colour, bool final)
 	}
 }
 
+bool ColourPickerButton::isMouseInside(Vector2f mousePos) const
+{
+	return UIWidget::isMouseInside(mousePos);
+}
+
 void ColourPickerButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0 && keyMods == KeyMods::None) {

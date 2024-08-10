@@ -264,6 +264,7 @@ void EntityEditor::onFieldChangedProcedurally(const String& componentName, const
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("halley/entity_editor_component");
+	componentUI->getWidget("mouseBlocker")->setInteractWithMouse(true);
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
 	componentUI->setHandle(UIEventType::ButtonClicked, "deleteComponentButton", [=] (const UIEvent& event)
 	{
@@ -813,11 +814,13 @@ void EntityEditor::goToEntity(const UUID& uuid)
 
 void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 {
+	return;
+
 	const bool highlighted = std_ex::contains(highlightedComponents, name);
 	
-	const auto colour = factory.getColourScheme()->getColour(highlighted ? "ui_listSelected" : "ui_staticBox");
-	auto capsule = component.getWidgetAs<UIImage>("capsule");
-	capsule->getSprite().setColour(colour);
+	const auto colour = highlighted ? factory.getColourScheme()->getColour("ui_listSelected") : Colour4f(0, 0, 0, 0);
+	auto border = component.getWidgetAs<UIImage>("border");
+	border->getSprite().setColour(colour);
 }
 
 

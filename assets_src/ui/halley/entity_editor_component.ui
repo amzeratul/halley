@@ -1,16 +1,97 @@
----
-widget: { id: capsule, class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBox }
-sizer: { type: vertical }
+uuid: a73cad96-73c3-4ad3-805f-59f84e462219
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: "#00000000"
+  id: border
+  image: $ui_title_capsule
+  innerBorder: [0, 0, 0, 0]
 children:
-- sizer: { type: horizontal }
-  children:
-  - widget: { id: componentType, class: label, text: "Name" }
-    fill: centre
-    proportion: 1
-  - widget: { id: copyComponentButton, class: button, icon: "entity_icons/copy_small.png", size: [20, 18], style: buttonThin, tooltip: "Copy Component to Clipboard. Hold Ctrl to append to existing Clipboard copy." }
-  - widget: { id: deleteComponentButton, class: button, text: "x", size: [20, 18], style: buttonThin, tooltip: "Delete Component" }
-    border: [0, 0, -2, 0]
-- widget: { id: componentFields, class: widget }
-  border: [1, 4, 1, 1]
-  sizer: { type: vertical, gap: 2 }
-...
+  - uuid: fc1ebe4d-faef-4120-83ee-0a1ef8983a40
+    sizer:
+      columnProportions: []
+      gap: 0
+      type: vertical
+    widget:
+      class: widget
+      id: mouseBlocker
+    children:
+      - uuid: 38a399e6-5db8-41e3-bae4-ab9b93165dd1
+        proportion: 1
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          childLayerAdjustment: 1
+          class: image
+          colour: $ui_staticBox
+          id: capsule
+          image: halley_ui/ui_title_capsule_top_flat.png
+          innerBorder: [2, 2, 2, 2]
+        children:
+          - uuid: 52f8000a-20b7-47b5-b55a-606949bf0e6f
+            sizer:
+              columnProportions: []
+              gap: 2
+              type: horizontal
+            children:
+              - uuid: a68ed925-42d1-42ac-bc74-da79430cdaf1
+                proportion: 1
+                border: [0, 0, 0, 0]
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: image
+                  colour: "#00000040"
+                  image: $ui_window
+                  innerBorder: [4, 0, 4, 0]
+                children:
+                  - uuid: 7042fbff-0fe7-47a6-9542-e1707f048497
+                    proportion: 1
+                    widget:
+                      class: label
+                      id: componentType
+                      text: Name
+                    fill: centre
+                fill: [fillHorizontal, fillVertical]
+              - uuid: a006b90f-cc6d-416f-a597-daa49be32917
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  icon: entity_icons/copy_small.png
+                  id: copyComponentButton
+                  mouseBorder: [0, 0, 0, 0]
+                  size: [20, 18]
+                  style: buttonThin
+                  tooltip: Copy Component to Clipboard. Hold Ctrl to append to existing Clipboard copy.
+              - uuid: 3eaf05a7-36a5-43ed-a572-8d0ad2636ca1
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  id: deleteComponentButton
+                  size: [20, 18]
+                  style: buttonThin
+                  text: x
+                  tooltip: Delete Component
+      - uuid: 72bcae87-7529-4ff3-b78f-7d21c7136857
+        border: [0, -4, 0, 0]
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBox
+          image: halley_ui/ui_title_capsule_bottom_flat.png
+          innerBorder: [8, 8, 8, 5]
+        children:
+          - uuid: bfbf9a6e-05d2-4349-ae4d-ba9f114f8b6a
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              gap: 2
+              type: vertical
+            widget:
+              class: widget
+              id: componentFields

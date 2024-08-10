@@ -18,6 +18,8 @@ namespace Halley {
         
     	void setColour(String colour, bool final);
 
+        bool isMouseInside(Vector2f mousePos) const override;
+
     protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
