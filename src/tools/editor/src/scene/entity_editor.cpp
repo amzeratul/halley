@@ -275,6 +275,14 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const bool ctrlHeld = (static_cast<int>(event.getKeyMods()) & static_cast<int>(KeyMods::Ctrl)) != 0;
 		copyComponentToClipboard(componentType, ctrlHeld);
 	});
+	componentUI->setHandle(UIEventType::ButtonClicked, "collapseComponentButton", [=] (const UIEvent& event)
+	{
+		auto target = componentUI->getWidget("contentsDrawer");
+		bool active = target->isActive();
+		target->setActive(!active);
+		auto icon = Sprite().setImage(factory.getResources(), active ? "halley_ui/button_expand.png" : "halley_ui/button_collapse.png");
+		componentUI->getWidgetAs<UIButton>("collapseComponentButton")->setIcon(icon);
+	});
 
 	auto componentFields = componentUI->getWidget("componentFields");
 	

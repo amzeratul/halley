@@ -3,11 +3,8 @@ sizer:
   columnProportions: []
   type: vertical
 widget:
-  class: image
-  colour: "#00000000"
+  class: widget
   id: border
-  image: $ui_title_capsule
-  innerBorder: [0, 0, 0, 0]
 children:
   - uuid: fc1ebe4d-faef-4120-83ee-0a1ef8983a40
     sizer:
@@ -37,6 +34,16 @@ children:
               gap: 2
               type: horizontal
             children:
+              - uuid: a006b90f-cc6d-416f-a597-daa49be32917
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  icon: halley_ui/button_collapse.png
+                  id: collapseComponentButton
+                  mouseBorder: [0, 0, 0, 0]
+                  size: [20, 18]
+                  style: buttonThin
+                  tooltip: Collapse/Expand component.
               - uuid: a68ed925-42d1-42ac-bc74-da79430cdaf1
                 proportion: 1
                 border: [0, 0, 0, 0]
@@ -57,7 +64,7 @@ children:
                       text: Name
                     fill: centre
                 fill: [fillHorizontal, fillVertical]
-              - uuid: a006b90f-cc6d-416f-a597-daa49be32917
+              - uuid: b7262e68-fe0c-40f1-bc69-149eb0e51e17
                 border: [0, 0, 0, 0]
                 widget:
                   class: button
@@ -82,8 +89,10 @@ children:
           columnProportions: []
           type: vertical
         widget:
+          active: true
           class: image
           colour: $ui_staticBox
+          id: contentsDrawer
           image: halley_ui/ui_title_capsule_bottom_flat.png
           innerBorder: [8, 8, 8, 5]
         children:
