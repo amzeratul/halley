@@ -54,6 +54,11 @@ Colour4f UIAnimation::getColour() const
 	return colour;
 }
 
+bool UIAnimation::isMouseInside(Vector2f mousePos) const
+{
+	return UIWidget::isMouseInside(mousePos) && sprite.hasPointVisible(mousePos);
+}
+
 void UIAnimation::update(Time t, bool moved)
 {
 	if (animation.hasAnimation()) {

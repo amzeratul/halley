@@ -24,6 +24,8 @@ namespace Halley
 		void setColour(Colour4f colour);
 		Colour4f getColour() const;
 
+		bool isMouseInside(Vector2f mousePos) const override;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
