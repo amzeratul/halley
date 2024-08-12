@@ -791,6 +791,22 @@ UIFactoryWidgetProperties UIFactory::getTreeListProperties() const
 	return result;
 }
 
+UIFactoryWidgetProperties UIFactory::getButtonProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Button";
+	result.iconName = "widget_icons/button.png";
+	result.canHaveChildren = true;
+	result.entries.emplace_back("Text", "text", "Halley::String", "");
+	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<button>", "button");
+	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
+	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", Vector<String>{"0", "0", "0", "0"});
+	result.entries.emplace_back("Mouse Only", "mouseOnly", "bool", Vector<String>{"false"});
+	result.entries.emplace_back("Precise Click", "preciseClick", "bool", Vector<String>{"false"});
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -820,21 +836,8 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 		result->setOnlyEnabledWithInputs(inputs);
 	}
 
-	return result;
-}
+	result->setPreciseClick(node["preciseClick"].asBool(false));
 
-UIFactoryWidgetProperties UIFactory::getButtonProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Button";
-	result.iconName = "widget_icons/button.png";
-	result.canHaveChildren = true;
-	result.entries.emplace_back("Text", "text", "Halley::String", "");
-	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
-	result.entries.emplace_back("Style", "style", "Halley::UIStyle<button>", "button");
-	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
-	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", Vector<String>{"0", "0", "0", "0"});
-	result.entries.emplace_back("Mouse Only", "mouseOnly", "bool", Vector<String>{"false"});
 	return result;
 }
 

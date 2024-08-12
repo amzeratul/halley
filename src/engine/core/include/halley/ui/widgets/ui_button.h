@@ -23,10 +23,14 @@ namespace Halley {
 		void onManualControlActivate() override;
 
 		void setCanDoBorderOnly(bool canDo);
+		void setPreciseClick(bool enabled);
+		bool isPreciseClick() const;
 
 		void setLabel(LocalisedString string);
 		const LocalisedString& getLabel() const;
 		void setIcon(Sprite icon);
+
+		bool isMouseInside(Vector2f mousePos) const override;
 
 	protected:
 		void doSetState(State state) override;
@@ -39,5 +43,6 @@ namespace Halley {
 		std::shared_ptr<UIImage> iconImage;
 		bool borderOnly = false;
 		bool canDoBorderOnly = true;
+		bool preciseClick = false;
 	};
 }

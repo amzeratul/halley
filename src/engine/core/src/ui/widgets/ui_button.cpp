@@ -99,6 +99,16 @@ void UIButton::setCanDoBorderOnly(bool canDo)
 	canDoBorderOnly = canDo;
 }
 
+void UIButton::setPreciseClick(bool enabled)
+{
+	preciseClick = enabled;
+}
+
+bool UIButton::isPreciseClick() const
+{
+	return preciseClick;
+}
+
 void UIButton::setLabel(LocalisedString text)
 {
 	if (!label) {
@@ -157,6 +167,15 @@ void UIButton::setIcon(Sprite icon)
 		add(iconImage, label ? 0.0f : 1.0f, style.getBorder("iconBorder"), UISizerAlignFlags::Centre);
 	} else {
 		iconImage->setSprite(icon);
+	}
+}
+
+bool UIButton::isMouseInside(Vector2f mousePos) const
+{
+	if (preciseClick) {
+		return UIWidget::isMouseInside(mousePos) && sprite.hasPointVisible(mousePos);
+	} else {
+		return UIClickable::isMouseInside(mousePos);
 	}
 }
 

@@ -17,7 +17,7 @@ Colour4f getColour(const ConfigNode& node, const std::shared_ptr<const UIColourS
 	}
 	
 	const auto& str = node.asString();
-	if (str.startsWith("#")) {
+	if (Colour4f::isColour(str)) {
 		return Colour4f::fromString(str);
 	} else if (str.startsWith("$") && colourScheme) {
 		return colourScheme->getColour(str.mid(1));
