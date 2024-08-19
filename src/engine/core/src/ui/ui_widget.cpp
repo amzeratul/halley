@@ -112,6 +112,7 @@ void UIWidget::removeSizerDeadChildren()
 void UIWidget::collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	for (auto& c: getChildren()) {
+		assert(c->getRoot() == getRoot());
 		dst.push_back(c);
 	}
 }
@@ -727,6 +728,11 @@ void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 
 		for (auto& c : getChildren()) {
 			c->notifyTreeAddedToRoot(root);
+		}
+		for (auto& c : getChildrenWaiting()) {
+			if (c) {
+				c->notifyTreeAddedToRoot(root);
+			}
 		}
 	}
 }

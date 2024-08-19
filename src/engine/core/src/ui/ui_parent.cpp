@@ -65,6 +65,7 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 
 	for (auto& c: childrenWaiting) {
+		assert(c->getRoot() == getRoot());
 		c->setInputType(inputType);
 		onChildAdded(*children.emplace_back(std::move(c)));
 	}

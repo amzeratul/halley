@@ -73,12 +73,15 @@ void UIScrollBarPane::setClipSize(Vector2f clipSize)
 void UIScrollBarPane::collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	if (hBar) {
+		assert(hBar->getRoot() == getRoot());
 		dst.push_back(hBar);
 	}
 	if (vBar) {
+		assert(vBar->getRoot() == getRoot());
 		dst.push_back(vBar);
 	}
 	if (pane) {
+		assert(pane->getRoot() == getRoot());
 		dst.push_back(pane);
 	}
 }
