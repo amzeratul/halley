@@ -95,6 +95,42 @@ public:
 		}
 	}
 
+	bool stopScript(EntityId target, const String& scriptId) override
+	{
+		if (auto* scriptable = scriptableFamily.tryFind(target)) {
+			bool foundAny = false;
+			for (auto& state: scriptable->scriptable.activeStates) {
+				if (state->getScriptId() == scriptId) {
+					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, true);
+					foundAny = true;
+				}
+			}
+			eraseDeadScripts(*scriptable);
+			return foundAny;
+		} else {
+			Logger::logError("Unable to stop script " + scriptId + " on entity " + toString(target) + ": entity not found.");
+			return false;
+		}
+	}
+
+	bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId) override
+	{
+		if (auto* scriptable = scriptableFamily.tryFind(target)) {
+			bool foundAny = false;
+			for (auto& state: scriptable->scriptable.activeStates) {
+				if (state->hasTag(tagId) && state->getScriptId() != exceptScriptId) {
+					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, true);
+					foundAny = true;
+				}
+			}
+			eraseDeadScripts(*scriptable);
+			return foundAny;
+		} else {
+			Logger::logError("Unable to stop tag " + tagId + " on entity " + toString(target) + ": entity not found.");
+			return false;
+		}
+	}
+
 	bool isRunningScript(EntityId entityId, const String& scriptId) override
 	{
 		if (const auto* scriptable = scriptableFamily.tryFind(entityId)) {
