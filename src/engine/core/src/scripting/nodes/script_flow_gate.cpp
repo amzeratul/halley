@@ -167,6 +167,76 @@ IScriptNodeType::Result ScriptSwitchGate::doUpdate(ScriptEnvironment& environmen
 }
 
 
+
+Vector<IGraphNodeType::SettingType> ScriptSwitch::getSettingTypes() const
+{
+	return {
+		SettingType{ "cases", "Halley::Vector<Halley::String>", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptSwitch::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 10>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+	};
+
+	const auto cases = node.getSettings()["cases"].asVector<String>({});
+	const auto numCases = std::min(cases.size(), static_cast<size_t>(7));
+	return gsl::span<const PinType>(data).subspan(0, 3 + numCases);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSwitch::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Switches flow based on ");
+	str.append(getConnectedNodeName(node, graph, 1), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSwitch::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx >= 2) {
+		const auto cases = node.getSettings()["cases"].asVector<String>({});
+		if (elementIdx - 2 >= cases.size()) {
+			return "default";
+		}
+		return cases.at(elementIdx - 2);
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+IScriptNodeType::Result ScriptSwitch::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto curValue = readDataPin(environment, node, 1).asString("");
+	auto cases = node.getSettings()["cases"].asVector<String>({});
+	if (cases.size() > 7) {
+		cases.resize(7);
+	}
+
+	int idx = 0;
+	if (const auto iter = std_ex::find(cases, curValue); iter != cases.end()) {
+		idx = static_cast<int>(iter - cases.begin());
+	} else {
+		idx = static_cast<int>(cases.size());
+	}
+
+	const uint8_t active = 1 << idx;
+	return Result(ScriptNodeExecutionState::Done, 0, active);
+}
+
+
 ScriptFlowOnceData::ScriptFlowOnceData(const ConfigNode& node)
 {
 	if (node.hasKey("active")) {

@@ -296,6 +296,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptEveryTime>());
 	addScriptNode(std::make_unique<ScriptFlowGate>());
 	addScriptNode(std::make_unique<ScriptSwitchGate>());
+	addScriptNode(std::make_unique<ScriptSwitch>());
 	addScriptNode(std::make_unique<ScriptFlowOnce>());
 	addScriptNode(std::make_unique<ScriptLatch>());
 	addScriptNode(std::make_unique<ScriptCache>());
