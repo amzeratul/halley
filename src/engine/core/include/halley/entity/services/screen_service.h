@@ -91,6 +91,7 @@ namespace Halley {
 		Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect = {}, ScreenGrabMode mode = ScreenGrabMode::ComposedWithUI) override;
 		Future<std::unique_ptr<Image>> requestGlobalScreenGrab(Rect4i worldRect, ScreenGrabMode mode = ScreenGrabMode::ComposedNoUI, float zoom = 1.0f) override;
 		bool isScreenGrabMode() const;
+		Rect4i getScreenGrabRect() const;
 
 		std::shared_ptr<IScreenServiceInterface> getInterfacePointer();
 
@@ -100,6 +101,7 @@ namespace Halley {
 		IScreenGrabInterface* screenGrabInterface = nullptr;
 		Vector2f cameraPosition;
 		bool screenGrabMode = false;
+		Rect4i screenGrabRect;
 	};
 }
 

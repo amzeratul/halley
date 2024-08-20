@@ -83,6 +83,7 @@ Future<std::unique_ptr<Image>> ScreenService::requestGlobalScreenGrab(Rect4i wor
 {
 	Expects(screenGrabInterface != nullptr);
 	screenGrabMode = true;
+	screenGrabRect = worldRect;
 	return screenGrabInterface->requestGlobalScreenGrab(worldRect, mode, zoom).then([this] (std::unique_ptr<Image> img) -> std::unique_ptr<Image>
 	{
 		screenGrabMode = false;
@@ -93,6 +94,11 @@ Future<std::unique_ptr<Image>> ScreenService::requestGlobalScreenGrab(Rect4i wor
 bool ScreenService::isScreenGrabMode() const
 {
 	return screenGrabMode;
+}
+
+Rect4i ScreenService::getScreenGrabRect() const
+{
+	return screenGrabRect;
 }
 
 std::shared_ptr<IScreenServiceInterface> ScreenService::getInterfacePointer()
