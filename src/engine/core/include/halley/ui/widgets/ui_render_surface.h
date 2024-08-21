@@ -21,6 +21,7 @@ namespace Halley {
         RenderContext getRenderContextForChildren(RenderContext& rc) override;
 
         void setColour(Colour4f col);
+        Colour4f getColour() const;
         void setScale(Vector2f scale);
 
         Vector2f getLayoutMinimumSize(bool force) const override;

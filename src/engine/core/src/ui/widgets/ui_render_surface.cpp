@@ -159,6 +159,11 @@ void UIRenderSurface::setColour(Colour4f col)
 	colour = col;
 }
 
+Colour4f UIRenderSurface::getColour() const
+{
+	return colour;
+}
+
 void UIRenderSurface::setScale(Vector2f scale)
 {
 	this->scale = scale;
