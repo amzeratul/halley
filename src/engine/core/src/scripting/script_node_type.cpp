@@ -352,6 +352,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptUnpackMap>());
 	addScriptNode(std::make_unique<ScriptInsertValueIntoSequence>());
 	addScriptNode(std::make_unique<ScriptHasSequenceValue>());
+	addScriptNode(std::make_unique<ScriptSizeOf>());
 	addScriptNode(std::make_unique<ScriptLuaExpression>());
 	addScriptNode(std::make_unique<ScriptLuaStatement>());
 	addScriptNode(std::make_unique<ScriptToggleEntityEnabled>());

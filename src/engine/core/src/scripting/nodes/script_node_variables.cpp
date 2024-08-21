@@ -1557,3 +1557,70 @@ ConfigNode ScriptHasSequenceValue::doGetData(ScriptEnvironment& environment, con
 	const auto hasValueIter = std_ex::find(sequence.asSequence(), value);
 	return ConfigNode(hasValueIter != sequence.asSequence().end());
 }
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptSizeOf::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+String ScriptSizeOf::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Size of " + getConnectedNodeName(node, graph, 0);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSizeOf::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Returns size of ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSizeOf::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Value";
+	} else if (elementIdx == 1) {
+		return "Size";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+ConfigNode ScriptSizeOf::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto data = readDataPin(environment, node, 0);
+	size_t size;
+	switch (data.getType()) {
+	case ConfigNodeType::DeltaMap:
+	case ConfigNodeType::Map:
+		size = data.asMap().size();
+		break;
+
+	case ConfigNodeType::Sequence:
+	case ConfigNodeType::DeltaSequence:
+		size = data.asSequence().size();
+		break;
+
+	case ConfigNodeType::Bytes:
+		size = data.asBytes().size();
+		break;
+
+	case ConfigNodeType::Undefined:
+		size = 0;
+		break;
+
+	default:
+		size = 1;
+		break;
+	}
+
+	return ConfigNode(static_cast<int>(size));
+}
