@@ -362,6 +362,15 @@ private:
 			return;
 		}
 
+		// Broadcast
+		if (msg.type.script.isEmpty()) {
+			for (auto& script: scriptable->scriptable.activeStates) {
+				script->receiveMessage(msg);
+			}
+			return;
+		}
+
+		// Targeting existing script
 		for (auto& script: scriptable->scriptable.activeStates) {
 			if (script->getScriptId() == msg.type.script) {
 				script->receiveMessage(std::move(msg));
@@ -369,6 +378,7 @@ private:
 			}
 		}
 
+		// Spin new script
 		if (getResources().exists<ScriptGraph>(msg.type.script)) {
 			auto script = getResources().get<ScriptGraph>(msg.type.script);
 			getScriptingService().getEnvironment().assignTypes(*script);

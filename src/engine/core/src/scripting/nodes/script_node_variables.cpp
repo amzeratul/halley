@@ -1391,6 +1391,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(co
 String ScriptUnpackMap::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto keys = node.getSettings()["keys"].asVector<String>({});
+	if (elementIdx <= 1 && elementIdx - 1 >= keys.size()) {
+		return "";
+	}
 	return getConnectedNodeName(node, graph, 0) + "[\"" + keys.at(elementIdx - 1) + "\"]";
 }
 

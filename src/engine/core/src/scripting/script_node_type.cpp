@@ -316,6 +316,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptTransferToClient>());
 	addScriptNode(std::make_unique<ScriptSendMessage>());
 	addScriptNode(std::make_unique<ScriptSendGenericMessage>());
+	addScriptNode(std::make_unique<ScriptBroadcastMessage>());
 	addScriptNode(std::make_unique<ScriptReceiveMessage>());
 	addScriptNode(std::make_unique<ScriptSendSystemMessage>());
 	addScriptNode(std::make_unique<ScriptSendEntityMessage>());
