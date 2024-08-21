@@ -540,4 +540,10 @@ uiStyle:
     anchor: { img: ui/gradient_anchor.png, colour: $ui_listBackground }
     anchorColour: { img: ui/gradient_anchor_colour.png, colour: "#FFFFFF" }
 
+  resizeDivider:
+    hoverHorizontal: { img: whitebox.png, colour: $ui_listHover }
+    hoverVertical: { img: whitebox.png, colour: $ui_listHover }
+    dragHorizontal: { img: whitebox.png, colour: $ui_listSelected }
+    dragVertical: { img: whitebox.png, colour: $ui_listSelected }
+
 ...

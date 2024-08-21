@@ -1747,6 +1747,7 @@ UIFactoryWidgetProperties UIFactory::getResizeDividerProperties() const
 	result.iconName = "widget_icons/resize_divider.png";
 
 	result.entries.emplace_back("Type", "type", "Halley::UIResizeDividerType", "horizontalLeft");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<resizeDivider>", "resizeDivider");
 
 	return result;
 }
@@ -1756,7 +1757,8 @@ std::shared_ptr<UIWidget> UIFactory::makeResizeDivider(const ConfigNode& entryNo
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto type = node["type"].asEnum(UIResizeDividerType::HorizontalLeft);
-	auto widget = std::make_shared<UIResizeDivider>(std::move(id), type);
+	auto styleName = node["style"].asString("resizeDivider");
+	auto widget = std::make_shared<UIResizeDivider>(std::move(id), type, getStyle(styleName));
 	return widget;
 }
 

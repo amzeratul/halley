@@ -24,15 +24,17 @@ namespace Halley {
 
 	class UIResizeDivider : public UIWidget {
 	public:
-		UIResizeDivider(String id, UIResizeDividerType type);
+		UIResizeDivider(String id, UIResizeDividerType type, UIStyle style);
 
 		void update(Time t, bool moved) override;
+		void draw(UIPainter& painter) const override;
 		void onActiveChanged(bool active) override;
 
 	protected:
 		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
+		void onMouseLeft(Vector2f mousePos) override;
 		void onAddedToRoot(UIRoot& root) override;
 		std::optional<MouseCursorMode> getMouseCursorMode() const override;
 
@@ -43,10 +45,13 @@ namespace Halley {
 
 		bool gotTarget = false;
 		bool held = false;
+		bool hover = false;
 		float startSize = 0;
 		Vector2f startPos;
 
 		std::shared_ptr<UIWidget> target;
+		Sprite hoverSprite;
+		Sprite dragSprite;
 
 		void acquireTarget();
 		bool isHorizontal() const;

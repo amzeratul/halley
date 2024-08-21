@@ -3,10 +3,14 @@
 #include "halley/api/input_api.h"
 using namespace Halley;
 
-UIResizeDivider::UIResizeDivider(String id, UIResizeDividerType type)
+UIResizeDivider::UIResizeDivider(String id, UIResizeDividerType type, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(1, 1))
 	, type(type)
 {
+	hoverSprite = style.getSprite(isHorizontal() ? "hoverHorizontal" : "hoverVertical");
+	dragSprite = style.getSprite(isHorizontal() ? "dragHorizontal" : "dragVertical");
+	styles.push_back(std::move(style));
+
 	setInteractWithMouse(true);
 }
 
@@ -16,6 +20,23 @@ void UIResizeDivider::update(Time t, bool moved)
 		acquireTarget();
 		loadTargetSize();
 		gotTarget = true;
+	}
+
+	if (moved) {
+		const auto rect = getMouseRect();
+		hoverSprite.setPosition(rect.getTopLeft());
+		hoverSprite.scaleTo(rect.getSize());
+		dragSprite.setPosition(rect.getTopLeft());
+		dragSprite.scaleTo(rect.getSize());
+	}
+}
+
+void UIResizeDivider::draw(UIPainter& painter) const
+{
+	if (held) {
+		painter.draw(dragSprite);
+	} else if (hover) {
+		painter.draw(hoverSprite);
 	}
 }
 
@@ -131,6 +152,12 @@ void UIResizeDivider::onMouseOver(Vector2f mousePos)
 	if (held && target) {
 		setTargetSize(startSize + (mousePos - startPos)[isHorizontal() ? 0 : 1] * (isTargetBeforeMe() ? 1.0f : -1.0f), true);
 	}
+	hover = true;
+}
+
+void UIResizeDivider::onMouseLeft(Vector2f mousePos)
+{
+	hover = false;
 }
 
 void UIResizeDivider::setTargetSize(float size, bool store)
