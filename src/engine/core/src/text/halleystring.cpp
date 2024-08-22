@@ -396,7 +396,7 @@ bool String::isNumber() const
 				return false;
 			}
 			foundSeparator = true;
-		} else if (cur == '-') {
+		} else if (cur == '-' || cur == '+') {
 			if (i != 0) {
 				return false;
 			}
@@ -418,7 +418,7 @@ bool String::isInteger() const
 	int i = 0;
 	for (const char *chr = c_str(); *chr; chr++) {
 		char cur = *chr;
-		if (cur == '-') {
+		if (cur == '-' || cur == '+') {
 			if (i != 0) {
 				return false;
 			}
