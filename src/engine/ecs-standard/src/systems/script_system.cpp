@@ -95,13 +95,13 @@ public:
 		}
 	}
 
-	bool stopScript(EntityId target, const String& scriptId) override
+	bool stopScript(EntityId target, const String& scriptId, bool allThreads) override
 	{
 		if (auto* scriptable = scriptableFamily.tryFind(target)) {
 			bool foundAny = false;
 			for (auto& state: scriptable->scriptable.activeStates) {
 				if (state->getScriptId() == scriptId) {
-					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, true);
+					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, allThreads);
 					foundAny = true;
 				}
 			}
@@ -113,13 +113,13 @@ public:
 		}
 	}
 
-	bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId) override
+	bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId, bool allThreads) override
 	{
 		if (auto* scriptable = scriptableFamily.tryFind(target)) {
 			bool foundAny = false;
 			for (auto& state: scriptable->scriptable.activeStates) {
 				if (state->hasTag(tagId) && state->getScriptId() != exceptScriptId) {
-					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, true);
+					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, allThreads);
 					foundAny = true;
 				}
 			}
