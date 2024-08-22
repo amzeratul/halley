@@ -49,7 +49,9 @@ children:
               - uuid: c15de552-1f2e-4e1a-b536-a2e50937429a
                 sizer:
                   columnProportion: [0, 1]
-                  columnProportions: []
+                  columnProportions:
+                    - ~
+                    - 1
                   columns: 2
                   gap: 2
                   type: grid
@@ -104,7 +106,9 @@ children:
               - uuid: d8140fc0-8e9b-47d8-b5e5-0ce866df5c8e
                 sizer:
                   columnProportion: [0, 1]
-                  columnProportions: []
+                  columnProportions:
+                    - ~
+                    - 1
                   columns: 2
                   gap: 2
                   type: grid
@@ -139,7 +143,9 @@ children:
               - uuid: 41bef486-a1c3-4997-8208-fe1210c445cc
                 sizer:
                   columnProportion: [0, 1]
-                  columnProportions: []
+                  columnProportions:
+                    - ~
+                    - 1
                   columns: 2
                   gap: 2
                   type: grid
@@ -195,7 +201,9 @@ children:
                   - uuid: 72943133-3f55-4526-938f-a5c4afa9830c
                     sizer:
                       columnProportion: [0, 1]
-                      columnProportions: []
+                      columnProportions:
+                        - ~
+                        - 1
                       columns: 2
                       gap: 2
                       type: grid
