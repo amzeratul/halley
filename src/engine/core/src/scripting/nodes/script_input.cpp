@@ -137,19 +137,21 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 
 	const bool enabled = readDataPin(environment, node, 8).asBool(true);
 
+	auto labelStr = readDataPin(environment, node, 7).asString("");
+	if (labelStr.isEmpty()) {
+		labelStr = node.getSettings()["label"].asString("");
+	}
+	const auto labelTarget = readRawEntityId(environment, node, 9);
+	auto params = readDataPin(environment, node, 10);
+	auto label = InputLabel(labelStr, labelTarget, std::move(params));
+
 	if (!data.input && enabled) {
 		const auto entity = readEntityId(environment, node, 1);
 		const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 		const auto inputDevice = environment.getInputDevice(entity, node.getSettings()["bypassEnableCheck"].asBool(false));
 		if (inputDevice) {
 			const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
-			auto label = readDataPin(environment, node, 7).asString("");
-			if (label.isEmpty()) {
-				label = node.getSettings()["label"].asString("");
-			}
-			const auto labelTarget = readRawEntityId(environment, node, 9);
-			auto params = readDataPin(environment, node, 10);
-			data.input = inputDevice->makeExclusiveButton(button, priority, InputLabel(label, labelTarget, std::move(params)));
+			data.input = inputDevice->makeExclusiveButton(button, priority, label);
 		}
 	}
 
@@ -171,7 +173,9 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		data.outputMask = curMask;
 		data.lastFrame = curFrame;
 
-		if (!enabled) {
+		if (enabled) {
+			data.input->setLabel(label);
+		} else {
 			data.input = {};
 		}
 

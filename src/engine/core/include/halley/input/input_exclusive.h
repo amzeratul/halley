@@ -44,6 +44,8 @@ namespace Halley {
 
         const InputLabel& getLabel() const;
 
+		void setLabel(InputLabel label);
+
 	private:
         InputVirtual* parent = nullptr;
         InputButton button = 0;

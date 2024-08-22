@@ -52,6 +52,11 @@ const InputLabel& InputExclusiveButton::getLabel() const
 	return label;
 }
 
+void InputExclusiveButton::setLabel(InputLabel label)
+{
+	this->label = std::move(label);
+}
+
 InputPriority InputExclusiveButton::getPriority() const
 {
 	return priority;
