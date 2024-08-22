@@ -60,23 +60,25 @@ void PerformanceStatsView::paint(Painter& painter)
 	memoryUsageRefreshTime += t;
 
 	if (active) {
-		const auto rect = Rect4f(painter.getViewPort());
-		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
-
-		drawHeader(painter, false);
-		drawTimeline(painter, Rect4f(20, 80,	rect.getWidth() - 40, 100));
-
 		if (page == 0) {
-			drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
-		} else if (page == 1) {
-			drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, systemHistory);
-		} else if (page == 2) {
-			drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, scriptHistory);
-		} else if (page == 3) {
-			drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+			drawHeader(painter, true);
+		} else {
+			const auto rect = Rect4f(painter.getViewPort());
+			whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+
+			drawHeader(painter, false);
+			drawTimeline(painter, Rect4f(20, 80, rect.getWidth() - 40, 100));
+
+			if (page == 1) {
+				drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+			} else if (page == 2) {
+				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, systemHistory);
+			} else if (page == 3) {
+				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, scriptHistory);
+			} else if (page == 4) {
+				drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+			}
 		}
-	} else {
-		drawHeader(painter, true);
 	}
 	
 	painter.setLogging(true);
@@ -135,7 +137,7 @@ void PerformanceStatsView::setNetworkStats(NetworkSession& session)
 
 int PerformanceStatsView::getNumPages() const
 {
-	return networkStats ? 4 : 3;
+	return networkStats ? 5 : 4;
 }
 
 int PerformanceStatsView::getPage() const
