@@ -184,4 +184,19 @@ system:
   messages:
   - StopParticles: receive particle
 
+---
+
+system:
+  name: CameraRender
+  families: []
+  method: render
+  strategy: global
+  services:
+  - PainterService
+  - DevService
+  - ScreenService
+  access:
+  - resources
+  - api
+
 ...
