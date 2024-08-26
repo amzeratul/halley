@@ -788,17 +788,40 @@ namespace Halley {
 			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
 	};
+	
+	namespace Detail
+	{
+	    template<typename T>
+	    struct IsBitfieldEnum
+	    {
+			template <typename U = T>
+	        static auto test(U&& t) -> typename EnumNames<decltype(t)>::isBitfield;
+	        static auto test(...) -> std::false_type;
+	        using type = decltype(test(std::declval<T>()));
+	    };
+	}
+
+	template<typename T>
+	struct IsBitfieldEnum : Detail::IsBitfieldEnum<T>::type {};
 
 	template <typename T>
 	T ConfigNodeSerializerEnumUtils<T>::parseEnum(const ConfigNode& node)
 	{
-		return fromString<T>(node.asString());
+		if (node.getType() == ConfigNodeType::Int) {
+			return T(node.asInt());
+		} else {
+			return fromString<T>(node.asString());
+		}
 	}
 
 	template <typename T>
 	ConfigNode ConfigNodeSerializerEnumUtils<T>::fromEnum(T value)
 	{
-		return ConfigNode(toString(value));
+		if constexpr (IsBitfieldEnum<T>::value) {
+			return ConfigNode(static_cast<int>(value));
+		} else {
+			return ConfigNode(toString(value));
+		}
 	}
 
 	namespace Detail

@@ -28,8 +28,12 @@ namespace Halley {
 		void draw(SpriteMaskBase mask, Painter& painter);
 		void clear();
 
-		void setBackgroundClearColour(std::optional<Colour4f> colour);
+		void setClearColour(std::optional<Colour4f> colour);
+		void setStencilClear(std::optional<uint8_t> value);
+		void setDepthClear(std::optional<float> value);
 		const std::optional<Colour4f>& getClearColour() const { return clearColour; }
+		const std::optional<uint8_t>& getStencilClear() const { return stencilClear; }
+		const std::optional<float>& getDepthClear() const { return depthClear; }
 
 		void setDepthQueriesEnabled(bool enabled, std::optional<uint16_t> worldPartition);
 
@@ -51,6 +55,8 @@ namespace Halley {
 		bool depthQueriesEnabled = false;
 		std::optional<uint16_t> worldPartition;
 		std::optional<Colour4f> clearColour;
+		std::optional<uint8_t> stencilClear;
+		std::optional<float> depthClear;
 		std::unique_ptr<RenderGraph> renderGraph;
 	};
 }

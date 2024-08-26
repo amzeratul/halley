@@ -7,6 +7,8 @@ using namespace Halley;
 PainterService::PainterService()
 {
 	clearColour = Colour4f::fromString("#B0B0B0");
+	stencilClear = static_cast<uint8_t>(0);
+	depthClear = 1.0f;
 }
 
 PainterService::~PainterService()
@@ -58,9 +60,19 @@ void PainterService::clear()
 	}
 }
 
-void PainterService::setBackgroundClearColour(std::optional<Colour4f> colour)
+void PainterService::setClearColour(std::optional<Colour4f> colour)
 {
 	clearColour = colour;
+}
+
+void PainterService::setStencilClear(std::optional<uint8_t> value)
+{
+	stencilClear = value;
+}
+
+void PainterService::setDepthClear(std::optional<float> value)
+{
+	depthClear = value;
 }
 
 void PainterService::setDepthQueriesEnabled(bool enabled, std::optional<uint16_t> worldPartition)

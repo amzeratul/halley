@@ -11,6 +11,7 @@ public:
 		if (!getPainterService().hasRenderGraph()) {
 			getPainterService().setRenderGraph(std::make_unique<RenderGraph>(getResources().get<RenderGraphDefinition>("default_render_graph")));
 		}
+		setupRenderGraphMethods(getPainterService().getRenderGraph());
 	}
 
 	void render(RenderContext& rc)
@@ -64,6 +65,15 @@ private:
 	Vector<PendingCapture> queuedCaptures;
 	std::optional<PendingCapture> pendingGlobalCapture;
 	std::mutex captureMutex;
+
+	void setupRenderGraphMethods(RenderGraph& renderGraph)
+	{
+		renderGraph.setPaintMethod("dynamicClear", [this] (Painter& painter)
+		{
+			auto& painterService = getPainterService();
+			painter.clear(painterService.getClearColour(), painterService.getDepthClear(), painterService.getStencilClear());
+		});
+	}
 
 	void setupRenderGraphCameras(Rect4i viewPort, RenderGraph& renderGraph)
 	{
