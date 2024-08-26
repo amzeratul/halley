@@ -4,9 +4,12 @@
 
 #include "halley/maths/polygon.h"
 #include "halley/data_structures/tree_map.h"
+#include "halley/graphics/camera.h"
+#include "halley/graphics/sprite/ipainter.h"
 #include "halley/maths/colour.h"
 
 namespace Halley {
+	class RenderGraphCommand;
 	class ScriptState;
 
 	struct DebugLine
@@ -94,6 +97,8 @@ namespace Halley {
 
 	class BaseFrameData {
 	public:
+		BaseFrameData();
+
 		virtual ~BaseFrameData() = default;
 
 		static void setThreadFrameData(BaseFrameData* value)
@@ -114,6 +119,23 @@ namespace Halley {
 
 		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) {}
 
+		static BaseFrameData& getCurrentBase()
+		{
+			assert(hasCurrent());
+			return *threadInstance;
+		}
+
+		template <typename T>
+		T* tryGetPainter() const
+		{
+			for (auto& p: painters) {
+				if (auto p2 = dynamic_cast<T*>(p.get())) {
+					return p2;
+				}
+			}
+			return nullptr;
+		}
+		
 		int frameIdx = 0;
 		Vector<DebugLine> debugLines;
 		Vector<DebugPoint> debugPoints;
@@ -124,11 +146,14 @@ namespace Halley {
 		Vector<std::pair<Vector2f, std::shared_ptr<ScriptState>>> scriptStates;
 		HashMap<const UIRoot*, UIRootFrameData> uiRootData;
 
-		static BaseFrameData& getCurrentBase()
-		{
-			assert(hasCurrent());
-			return *threadInstance;
-		}
+		Vector<std::unique_ptr<IPainter>> painters;
+		Vector<std::pair<String, Camera>> cameras;
+		float zoomLevel = 1;
+
+		Camera devCamera;
+		Camera devUICamera;
+
+		Vector<std::shared_ptr<RenderGraphCommand>> renderGraphCommands;
 
 	protected:
 		static thread_local BaseFrameData* threadInstance;
@@ -155,7 +180,7 @@ namespace Halley {
 		}
 	};
 
-	class EmptyFrameData : public FrameData<EmptyFrameData> {
+	class DefaultFrameData : public FrameData<DefaultFrameData> {
 	public:
 	};
 }

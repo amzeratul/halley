@@ -26,6 +26,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "halley/entity/services/debug_draw_service.h"
 #include "halley/entity/services/dev_service.h"
+#include "halley/entity/services/painter_service.h"
 #include "halley/entity/services/screen_service.h"
 #include "halley/entity/services/scripting_service.h"
 #include "halley/entity/services/session_service.h"

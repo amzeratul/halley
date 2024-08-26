@@ -241,20 +241,25 @@ SpritePainter::SpritePainter()
 {
 }
 
-void SpritePainter::update(Time t)
+void SpritePainter::update(Time t, Resources& resources)
 {
 	paramUpdater.update(t);
 }
 
-void SpritePainter::copyPrevious(const SpritePainter& prev)
+void SpritePainter::copyPrevious(const IPainter& prev)
 {
-	paramUpdater.copyPrevious(prev.paramUpdater);
+	paramUpdater.copyPrevious(dynamic_cast<const SpritePainter&>(prev).paramUpdater);
 }
 
-void SpritePainter::start(bool forceCopy)
+void SpritePainter::startFrame(bool multithreaded)
 {
-	this->forceCopy = forceCopy;
+	this->forceCopy = multithreaded;
 	clear();
+}
+
+void SpritePainter::startRender(bool waitForSpriteLoad, bool depthQueriesEnabled, std::optional<uint16_t> worldPartition)
+{
+	this->waitForSpriteLoad = waitForSpriteLoad;
 }
 
 void SpritePainter::clear()
@@ -539,11 +544,6 @@ std::optional<Rect4f> SpritePainter::getBounds() const
 SpritePainterMaterialParamUpdater& SpritePainter::getParamUpdater()
 {
 	return paramUpdater;
-}
-
-void SpritePainter::setWaitForSpriteLoad(bool wait)
-{
-	waitForSpriteLoad = wait;
 }
 
 void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const

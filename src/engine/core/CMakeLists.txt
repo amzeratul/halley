@@ -140,6 +140,7 @@ set(SOURCES
 
         "src/entity/services/debug_draw_service.cpp"
         "src/entity/services/dev_service.cpp"
+        "src/entity/services/painter_service.cpp"
         "src/entity/services/screen_service.cpp"
         "src/entity/services/scripting_service.cpp"
         "src/entity/services/session_service.cpp"
@@ -468,6 +469,7 @@ set(HEADERS
         "include/halley/graphics/sprite/animation.h"
         "include/halley/graphics/sprite/animation_player.h"
         "include/halley/graphics/sprite/particles.h"
+        "include/halley/graphics/sprite/ipainter.h"
         "include/halley/graphics/sprite/sprite.h"
         "include/halley/graphics/sprite/sprite.natvis"
         "include/halley/graphics/sprite/sprite_painter.h"
@@ -584,6 +586,7 @@ set(HEADERS
 
         "include/halley/entity/services/debug_draw_service.h"
         "include/halley/entity/services/dev_service.h"
+        "include/halley/entity/services/painter_service.h"
         "include/halley/entity/services/screen_service.h"
         "include/halley/entity/services/scripting_service.h"
         "include/halley/entity/services/session_service.h"

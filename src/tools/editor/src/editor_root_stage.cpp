@@ -76,7 +76,7 @@ void EditorRootStage::onVariableUpdate(Time time)
 void EditorRootStage::onRender(RenderContext& context) const
 {
 	SpritePainter spritePainter;
-	spritePainter.start();
+	spritePainter.startFrame();
 	ui->draw(spritePainter, 1, 0);
 	ui->render(context);
 	

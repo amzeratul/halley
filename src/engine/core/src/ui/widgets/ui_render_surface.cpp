@@ -50,7 +50,7 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 	}
 
 	if (params.size.x > 0.1f && params.size.y > 0.1f) {
-		params.spritePainter->start(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
+		params.spritePainter->startFrame(true); // force copy is only needed in multi-threaded rendering, but no way of knowing that from here
 		auto painter = UIPainter(*params.spritePainter, origPainter.getMask(), 0).withClip(clip);
 		UIWidget::drawChildren(painter);
 

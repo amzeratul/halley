@@ -28,4 +28,10 @@ type:
   name: DebugDrawService
   include: "halley/entity/services/debug_draw_service.h"
 
+---
+
+type:
+  name: PainterService
+  include: "halley/entity/services/painter_service.h"
+
 ...

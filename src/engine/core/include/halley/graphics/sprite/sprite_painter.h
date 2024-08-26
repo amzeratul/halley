@@ -6,6 +6,7 @@
 #include <limits>
 #include <optional>
 
+#include "ipainter.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/temp_allocator.h"
 #include "halley/entity/services/dev_service.h"
@@ -81,16 +82,17 @@ namespace Halley
 		HashMap<String, Callback> handles;
 	};
 
-	class SpritePainter
+	class SpritePainter: public IPainter
 	{
 	public:
 		SpritePainter();
 
-		void update(Time t);
-		void copyPrevious(const SpritePainter& prev);
+		void update(Time t, Resources& resources) override;
+		void copyPrevious(const IPainter& prev) override;
 
-		void start(bool forceCopy = false);
-		void clear();
+		void startFrame(bool multithreaded = false) override;
+		void startRender(bool waitForSpriteLoad, bool depthQueriesEnabled, std::optional<uint16_t> worldPartition) override;
+		void clear() override;
 		
 		void add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(Sprite&& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
@@ -103,12 +105,10 @@ namespace Halley
 		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(Rect4f bounds);
 
-		void draw(int mask, Painter& painter);
+		void draw(int mask, Painter& painter) override;
 		std::optional<Rect4f> getBounds() const;
 
 		SpritePainterMaterialParamUpdater& getParamUpdater();
-
-		void setWaitForSpriteLoad(bool wait);
 
 	private:
 		Vector<SpritePainterEntry> sprites;

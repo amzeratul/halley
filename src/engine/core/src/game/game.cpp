@@ -40,7 +40,7 @@ std::unique_ptr<Stage> Game::makeStage(StageID)
 
 std::unique_ptr<BaseFrameData> Game::makeFrameData()
 {
-	return std::make_unique<EmptyFrameData>();
+	return std::make_unique<DefaultFrameData>();
 }
 
 double Game::getTargetFPS() const
