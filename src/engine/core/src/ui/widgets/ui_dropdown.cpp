@@ -28,10 +28,12 @@ void UIDropdown::setSelectedOption(int option)
 		updateTopLabel();
 		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), options[curOption].id, curOption));
 
-		if (getDataBindFormat() == UIDataBind::Format::String) {
-			notifyDataBind(options[curOption].id);
-		} else {
-			notifyDataBind(curOption);
+		if (canNotifyAsDropdown()) {
+			if (getDataBindFormat() == UIDataBind::Format::String) {
+				notifyDataBind(options[curOption].id);
+			} else {
+				notifyDataBind(curOption);
+			}
 		}
 
 		if (dropdownList) {
@@ -114,6 +116,11 @@ void UIDropdown::updateOptionLabels()
 	const auto minSizeMargins = style.getBorder("minSizeMargins");
 	const auto minSize = Vector2f(maxExtents, 0) + minSizeMargins.xy();
 	setMinSize(Vector2f::max(getMinimumSize(), minSize));
+}
+
+bool UIDropdown::canNotifyAsDropdown() const
+{
+	return true;
 }
 
 void UIDropdown::setOptions(Vector<LocalisedString> os, int defaultOption)
@@ -305,7 +312,9 @@ void UIDropdown::readFromDataBind()
 		const auto target = data->getStringData();
 		setSelectedOption(target);
 		if (getSelectedOptionId() != target) {
-			notifyDataBind(getSelectedOptionId(), true);
+			if (canNotifyAsDropdown()) {
+				notifyDataBind(getSelectedOptionId(), true);
+			}
 		}
 	} else {
 		setSelectedOption(data->getIntData());
@@ -371,7 +380,7 @@ void UIDropdown::open()
 				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(clampedIdx).id, idx));
 			}
 
-			if (notifyOnHover) {
+			if (notifyOnHover && canNotifyAsDropdown()) {
 				if (getDataBindFormat() == UIDataBind::Format::String) {
 					notifyDataBind(idx == -1 ? getSelectedOptionId() : options.at(clampedIdx).id);
 				} else {

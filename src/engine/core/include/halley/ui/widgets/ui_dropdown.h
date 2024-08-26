@@ -19,17 +19,20 @@ namespace Halley {
 			String id;
 			LocalisedString label;
 			Sprite icon;
+			int value = 0;
 
 			Entry() = default;
-			Entry(String id, LocalisedString label, Sprite icon = Sprite())
+			Entry(String id, LocalisedString label, Sprite icon = Sprite(), int value = 0)
 				: id(std::move(id))
 				, label(std::move(label))
 				, icon(std::move(icon))
+				, value(value)
 			{}
-			Entry(String id, const String& label, Sprite icon = Sprite())
+			Entry(String id, const String& label, Sprite icon = Sprite(), int value = 0)
 				: id(std::move(id))
 				, label(LocalisedString::fromUserString(label))
 				, icon(std::move(icon))
+				, value(value)
 			{}
 		};
 		
@@ -84,6 +87,8 @@ namespace Halley {
 
 		virtual void updateTopLabel();
 		virtual void updateOptionLabels();
+
+		virtual bool canNotifyAsDropdown() const;
 
 	private:
 		enum class OpenState : uint8_t {
