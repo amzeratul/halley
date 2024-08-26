@@ -12,10 +12,16 @@ public:
 			getPainterService().setRenderGraph(std::make_unique<RenderGraph>(getResources().get<RenderGraphDefinition>("default_render_graph")));
 		}
 		setupRenderGraphMethods(getPainterService().getRenderGraph());
+
+		setupCheats();
 	}
 
 	void render(RenderContext& rc)
 	{
+		if (const auto& nodeOverride = getDevService().getRenderNodeOverride()) {
+			setRenderNode(nodeOverride.value());
+		}
+
 		auto& painterService = getPainterService();
 		painterService.startRender(!getDevService().isEditorMode());
 
@@ -65,6 +71,7 @@ private:
 	Vector<PendingCapture> queuedCaptures;
 	std::optional<PendingCapture> pendingGlobalCapture;
 	std::mutex captureMutex;
+	String curRenderNode;
 
 	void setupRenderGraphMethods(RenderGraph& renderGraph)
 	{
@@ -190,6 +197,43 @@ private:
 		renderGraph.clearImageOutputCallbacks();
 		pendingGlobalCapture->promise.setValue(std::move(finalImage));
 		pendingGlobalCapture.reset();
+	}
+
+	bool setRenderNode(const String& nodeId)
+	{
+		auto& renderGraph = getPainterService().getRenderGraph();
+		if (nodeId != curRenderNode) {
+			curRenderNode = nodeId;
+
+			if (nodeId.isEmpty()) {
+				renderGraph.resetRemapNode();
+				return true;
+			} else {
+				return renderGraph.remapNode(0, nodeId, 0)
+					&& renderGraph.remapNode(1, nodeId, 1);
+			}
+		}
+		return true;
+	}
+
+	void setupCheats()
+	{
+		getDevService().getConsoleCommands().addCommand("renderOutput", [=] (const Vector<String>& args) -> String
+		{
+			if (args.size() == 1) {
+				const bool success = setRenderNode(args.at(0));
+				if (success) {
+					return "Outputting render graph from \"" + args.at(0) + "\".";
+				} else {
+					return "Unknown node \"" + args.at(0) + "\".";
+				}
+			} else if (args.empty()) {
+				setRenderNode("");
+				return "Resetting render graph.";
+			} else {
+				return "Usage: renderOutput [outputNode]";
+			}
+		});
 	}
 };
 

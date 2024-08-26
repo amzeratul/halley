@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+
 #include "halley/data_structures/vector.h"
 
 #include "render_graph_pin_type.h"
@@ -55,7 +56,10 @@ namespace Halley {
 		std::shared_ptr<Texture> getOutputTexture(const String& id);
 		void setRenderSize(const String& id, const Vector2i& size);
 
-		bool remapNode(std::string_view toNodeName, uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin);
+		void setRemapOutputNode(std::string_view toNodeName);
+		bool remapNode(uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin);
+		void resetRemapNode();
+
 		void resetGraph();
 
 	private:
@@ -92,6 +96,9 @@ namespace Halley {
 		std::map<String, Variable> variables;
 		std::map<String, ImageOutputCallback> imageOutputCallbacks;
 		DrawCallback drawCallback;
+
+		String remapOutputNode;
+		Vector<std::pair<uint8_t, Vector<std::pair<String, uint8_t>>>> defaultOutputMapping;
 
 		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
 		int lastDefinitionVersion = 0;

@@ -53,6 +53,17 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 			}
 		}
 	}
+
+	std::optional<String> defaultOutput;
+	for (const auto& node: nodes) {
+		if (!defaultOutput && node->method == RenderGraphMethod::Output) {
+			defaultOutput = node->id;
+			break;
+		}
+	}
+	if (defaultOutput) {
+		setRemapOutputNode(*defaultOutput);
+	}
 }
 
 void RenderGraph::update()
@@ -273,10 +284,10 @@ void RenderGraph::clearImageOutputCallbacks()
 	imageOutputCallbacks.clear();
 }
 
-bool RenderGraph::remapNode(std::string_view toNodeName, uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin)
+bool RenderGraph::remapNode(uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin)
 {
 	auto* fromNode = tryGetNode(fromNodeName);
-	auto* toNode = tryGetNode(toNodeName);
+	auto* toNode = tryGetNode(remapOutputNode);
 	if (!toNode || !fromNode) {
 		return false;
 	}
@@ -284,6 +295,44 @@ bool RenderGraph::remapNode(std::string_view toNodeName, uint8_t toNodeInputPin,
 	toNode->disconnectInput(toNodeInputPin);
 	toNode->connectInput(toNodeInputPin, *fromNode, toNodeOutputPin);
 	return true;
+}
+
+void RenderGraph::resetRemapNode()
+{
+	auto* toNode = tryGetNode(remapOutputNode);
+	if (!toNode) {
+		return;
+	}
+
+	for (auto& mapping: defaultOutputMapping) {
+		toNode->disconnectInput(mapping.first);
+
+		for (const auto& [otherId, otherPin]: mapping.second) {
+			if (auto* other = tryGetNode(otherId)) {
+				toNode->connectInput(mapping.first, *other, otherPin);
+			}
+		}
+	}
+}
+
+void RenderGraph::setRemapOutputNode(std::string_view toNodeName)
+{
+	auto* toNode = tryGetNode(toNodeName);
+	if (!toNode) {
+		remapOutputNode = "";
+		return;
+	}
+
+	defaultOutputMapping.clear();
+	for (size_t i = 0; i < toNode->inputPins.size(); ++i) {
+		auto& pin = toNode->inputPins[i];
+		Vector<std::pair<String, uint8_t>> connections;
+		for (auto& p: pin.others) {
+			connections.emplace_back(p.node->id, p.otherId);
+		}
+		defaultOutputMapping.emplace_back(static_cast<uint8_t>(i), std::move(connections));
+	}
+	remapOutputNode = toNodeName;
 }
 
 void RenderGraph::resetGraph()
