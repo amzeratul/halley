@@ -4,6 +4,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_sizer.h"
 #include "halley/ui/widgets/ui_dropdown.h"
+#include "halley/ui/widgets/ui_dropdown_multi_select.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -131,10 +132,8 @@ std::shared_ptr<IUIElement> EnumIntFieldFactory::createField(const ComponentEdit
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 
-	auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 	auto dropdown = std::make_shared<UIDropdown>("enum", dropStyle);
 	dropdown->setOptions(names);
-	container->add(dropdown);
 
 	const auto valueIter = std_ex::find(values, value);
 	size_t idx;
@@ -147,20 +146,69 @@ std::shared_ptr<IUIElement> EnumIntFieldFactory::createField(const ComponentEdit
 		context.onEntityUpdated();
 	}
 
-	container->bindData("enum", names[idx], [&context, data, names = names, values = values](String newVal) {
+	dropdown->bindData("enum", names[idx], [&context, data, names = names, values = values](String newVal) {
 		auto& node = data.getWriteableFieldData();
 		auto idx = std_ex::find(names, newVal) - names.begin();
 		node = ConfigNode(values[idx]);
 		context.onEntityUpdated();
 	});
 	
-	return container;
+	return dropdown;
 }
 
 String EnumIntFieldFactory::getFieldType()
 {
 	return fieldName;
 }
+
+
+
+EnumIntMaskFieldFactory::EnumIntMaskFieldFactory(String name, Vector<String> names, Vector<int> values)
+	: fieldName(std::move(name))
+	, names(std::move(names))
+	, values(std::move(values))
+{}
+
+std::shared_ptr<IUIElement> EnumIntMaskFieldFactory::createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars)
+{
+	const auto data = pars.data;
+
+	auto& fieldData = data.getFieldData();
+	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
+		
+	auto dropdown = std::make_shared<UIDropdownMultiSelect>("dropdown", dropStyle);
+
+	const auto initialValue = fieldData.asInt(pars.getIntDefaultParameter());
+
+	Vector<UIDropdown::Entry> options;
+	Vector<int> curOptions;
+	for (auto i = 0; i < static_cast<int>(names.size()); i++) {
+		const auto& id = names.at(i);
+		const int value = values.at(i);
+
+		options.emplace_back(UIDropdown::Entry{ id, id, {}, value });
+		if ((value & initialValue) != 0) {
+			curOptions.push_back(i);
+		}
+	}
+	
+	dropdown->setOptions(options, curOptions);
+
+	dropdown->bindData("dropdown", initialValue, [&context, data](int newVal) {
+		auto& node = data.getWriteableFieldData();
+		node = ConfigNode(newVal);
+		context.onEntityUpdated();
+	});
+
+	return dropdown;
+}
+
+String EnumIntMaskFieldFactory::getFieldType()
+{
+	return fieldName;
+}
+
+
 
 ConfigDBFieldFactory::ConfigDBFieldFactory(String name, Vector<String> values)
 	: fieldName(std::move(name))

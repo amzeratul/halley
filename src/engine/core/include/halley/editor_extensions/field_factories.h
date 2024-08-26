@@ -93,6 +93,34 @@ namespace Halley {
 		Vector<int> values;
 	};
 	
+	class EnumIntMaskFieldFactory : public IComponentEditorFieldFactory
+	{
+	public:
+		EnumIntMaskFieldFactory(String name, Vector<String> names, Vector<int> values);
+		
+		std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override;
+		String getFieldType() override;
+
+		template <typename T>
+		static std::unique_ptr<EnumIntMaskFieldFactory> makeEnumFactory(String name)
+		{
+			const auto names = EnumNames<T>();
+			const auto& vals = names();
+			auto stringValues = Vector<String>(vals.begin(), vals.end());
+			Vector<int> intValues;
+			intValues.resize(stringValues.size());
+			for (size_t i = 0; i < intValues.size(); ++i) {
+				intValues[i] = names.getValue(i);
+			}
+			return std::make_unique<EnumIntMaskFieldFactory>(std::move(name), std::move(stringValues), std::move(intValues));
+		}
+
+	private:
+		const String fieldName;
+		Vector<String> names;
+		Vector<int> values;
+	};
+
 	class ConfigDBFieldFactory : public BaseEnumFieldFactory
 	{
 	public:

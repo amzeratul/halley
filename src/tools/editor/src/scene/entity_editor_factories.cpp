@@ -2383,6 +2383,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint32_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint64_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("Halley::SpriteMaskBase", std::nullopt, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("Halley::SpriteMasksBase", std::nullopt, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorIntRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorFloatGranularityFieldFactory>());

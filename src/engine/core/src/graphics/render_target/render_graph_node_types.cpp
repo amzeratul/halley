@@ -94,7 +94,7 @@ Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSett
 		SettingType{ "depthClear", "std::optional<float>", Vector<String>{""} },
 		SettingType{ "stencilClear", "std::optional<uint8_t>", Vector<String>{""} },
 		SettingType{ "prePaintMethodId", "Halley::String", Vector<String>{""} },
-		SettingType{ "paintMasks", "Halley::Vector<Halley::SpriteMaskBase>", Vector<String>{""} },
+		SettingType{ "paintMasks", "Halley::Vector<Halley::SpriteMasksBase>", Vector<String>{""} },
 		SettingType{ "postPaintMethodId", "Halley::String", Vector<String>{""} },
 	};
 }
