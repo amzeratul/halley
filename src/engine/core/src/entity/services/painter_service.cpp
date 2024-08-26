@@ -44,7 +44,7 @@ bool PainterService::hasFrameData() const
 	return BaseFrameData::hasCurrent();
 }
 
-void PainterService::draw(int mask, Painter& painter)
+void PainterService::draw(SpriteMaskBase mask, Painter& painter)
 {
 	for (auto& p: getFrameData().painters) {
 		p->draw(mask, painter);

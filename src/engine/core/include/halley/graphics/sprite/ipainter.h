@@ -1,4 +1,5 @@
 #pragma once
+#include "sprite.h"
 #include "halley/time/halleytime.h"
 
 namespace Halley {
@@ -16,7 +17,7 @@ namespace Halley {
         virtual void startRender(bool waitForSpriteLoad, bool depthQueriesEnabled, std::optional<uint16_t> worldPartition) {}
         virtual void endRender() {}
 
-        virtual void draw(int mask, Painter& painter) {}
+        virtual void draw(SpriteMaskBase mask, Painter& painter) {}
         virtual void clear() {}
     };
 

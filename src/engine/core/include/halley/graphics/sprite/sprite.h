@@ -21,7 +21,7 @@ namespace Halley
 	class MaterialUpdater;
 	class Painter;
 
-	using SpriteMaskBase = int;
+	using SpriteMaskBase = uint32_t;
 
 	struct SpriteVertexAttrib
 	{

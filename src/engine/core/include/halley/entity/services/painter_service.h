@@ -3,6 +3,7 @@
 #include "halley/maths/colour.h"
 #include "halley/time/halleytime.h"
 #include "halley/game/frame_data.h"
+#include "halley/graphics/sprite/sprite.h"
 
 namespace Halley {
 	class Texture;
@@ -24,7 +25,7 @@ namespace Halley {
 		BaseFrameData& getFrameData();
 		bool hasFrameData() const;
 
-		void draw(int mask, Painter& painter);
+		void draw(SpriteMaskBase mask, Painter& painter);
 		void clear();
 
 		void setBackgroundClearColour(std::optional<Colour4f> colour);

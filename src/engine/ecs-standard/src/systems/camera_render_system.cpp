@@ -15,10 +15,15 @@ public:
 
 	void render(RenderContext& rc)
 	{
-		getPainterService().startRender(!getDevService().isEditorMode());
+		auto& painterService = getPainterService();
+		painterService.startRender(!getDevService().isEditorMode());
 
-		if (getPainterService().hasRenderGraph()) {
-			auto& renderGraph = getPainterService().getRenderGraph();
+		if (painterService.hasRenderGraph()) {
+			auto& renderGraph = painterService.getRenderGraph();
+			renderGraph.setDrawCallback([&painterService] (SpriteMaskBase mask, Painter& painter)
+			{
+				painterService.draw(mask, painter);
+			});
 
 			setupRenderGraphCameras(rc.getDefaultRenderTarget().getViewPort(), renderGraph);
 			initializeRequestedScreenGrabs(renderGraph);
@@ -28,7 +33,7 @@ public:
 			renderGlobalScreenGrab(rc, renderGraph);
 		}
 
-		getPainterService().endRender();
+		painterService.endRender();
 	}
 
 	Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode) override

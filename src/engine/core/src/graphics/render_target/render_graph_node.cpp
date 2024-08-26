@@ -30,8 +30,12 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 	const auto& pars = definition.getSettings();
 
 	if (method == RenderGraphMethod::Paint) {
-		paintId = pars["paintId"].asString();
+		prePaintMethodId = pars["prePaintMethodId"].asString("");
+		postPaintMethodId = pars["postPaintMethodId"].asString("");
+		paintMasks = pars["paintMasks"].asVector<SpriteMaskBase>({});
+
 		cameraId = pars["cameraId"].asString();
+
 		if (pars.hasKey("colourClear")) {
 			colourClear = Colour4f::fromString(pars["colourClear"].asString());
 		}
@@ -260,17 +264,27 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 
 void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto* camera = graph.tryGetCamera(cameraId);
-	const auto* paintMethod = graph.tryGetPaintMethod(paintId);
-
-	if (camera && paintMethod) {
-		getTargetRenderContext(rc).with(*camera).bind([this, paintMethod] (Painter& painter)
+	if (const auto* camera = graph.tryGetCamera(cameraId)) {
+		getTargetRenderContext(rc).with(*camera).bind([this, &graph] (Painter& painter)
 		{
 			painter.pushDebugGroup(id);
+
 			if (colourClear || depthClear || stencilClear) {
 				painter.clear(colourClear, depthClear, stencilClear);
 			}
-			(*paintMethod)(painter);
+
+			if (const auto* prePaintMethod = graph.tryGetPaintMethod(prePaintMethodId)) {
+				(*prePaintMethod)(painter);
+			}
+
+			for (auto mask: paintMasks) {
+				graph.draw(mask, painter);
+			}
+
+			if (const auto* postPaintMethod = graph.tryGetPaintMethod(postPaintMethodId)) {
+				(*postPaintMethod)(painter);
+			}
+
 			painter.popDebugGroup();
 		});
 	}

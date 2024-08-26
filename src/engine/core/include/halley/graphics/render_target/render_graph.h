@@ -4,6 +4,7 @@
 
 #include "render_graph_pin_type.h"
 #include "halley/graphics/texture_descriptor.h"
+#include "halley/graphics/sprite/sprite.h"
 
 namespace Halley {
 	class RenderGraphDefinition;
@@ -21,6 +22,7 @@ namespace Halley {
 	class RenderGraph {
 	public:
 		using PaintMethod = std::function<void(Painter&)>;
+		using DrawCallback = std::function<void(SpriteMaskBase, Painter&)>;
 
 		RenderGraph();
 		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
@@ -31,6 +33,9 @@ namespace Halley {
 		void clearCameras();
 		const Camera* tryGetCamera(std::string_view id) const;
 		void setCamera(std::string_view id, const Camera& camera);
+
+		void setDrawCallback(DrawCallback callback);
+		void draw(SpriteMaskBase mask, Painter& painter) const;
 
 		const PaintMethod* tryGetPaintMethod(std::string_view id) const;
 		void setPaintMethod(std::string_view id, PaintMethod method);
@@ -86,6 +91,7 @@ namespace Halley {
 		std::map<String, PaintMethod> paintMethods;
 		std::map<String, Variable> variables;
 		std::map<String, ImageOutputCallback> imageOutputCallbacks;
+		DrawCallback drawCallback;
 
 		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
 		int lastDefinitionVersion = 0;

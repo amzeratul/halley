@@ -364,7 +364,7 @@ void SpritePainter::add(Rect4f bounds)
 	extraBounds.push_back(bounds);
 }
 
-void SpritePainter::draw(int mask, Painter& painter)
+void SpritePainter::draw(SpriteMaskBase mask, Painter& painter)
 {
 	if (dirty) {
 		std::sort(sprites.begin(), sprites.end());

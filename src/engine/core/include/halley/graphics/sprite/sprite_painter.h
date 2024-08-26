@@ -105,7 +105,7 @@ namespace Halley
 		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(Rect4f bounds);
 
-		void draw(int mask, Painter& painter) override;
+		void draw(SpriteMaskBase mask, Painter& painter) override;
 		std::optional<Rect4f> getBounds() const;
 
 		SpritePainterMaterialParamUpdater& getParamUpdater();

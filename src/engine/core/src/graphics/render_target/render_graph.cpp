@@ -149,8 +149,23 @@ void RenderGraph::setCamera(std::string_view id, const Camera& camera)
 	cameras[id] = camera;
 }
 
+void RenderGraph::setDrawCallback(DrawCallback callback)
+{
+	drawCallback = std::move(callback);
+}
+
+void RenderGraph::draw(SpriteMaskBase mask, Painter& painter) const
+{
+	if (drawCallback) {
+		drawCallback(mask, painter);
+	}
+}
+
 const RenderGraph::PaintMethod* RenderGraph::tryGetPaintMethod(std::string_view id) const
 {
+	if (id.empty()) {
+		return nullptr;
+	}
 	const auto iter = paintMethods.find(id);
 	if (iter != paintMethods.end()) {
 		return &iter->second;

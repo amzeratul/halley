@@ -6,6 +6,7 @@
 #include "render_graph_definition.h"
 #include "render_graph_pin_type.h"
 #include "halley/graphics/texture_descriptor.h"
+#include "halley/graphics/sprite/sprite.h"
 
 namespace Halley {
 	class Material;
@@ -72,11 +73,13 @@ namespace Halley {
 		String id;
 		RenderGraphMethod method;
 
-		String paintId;
+		String prePaintMethodId;
+		String postPaintMethodId;
 		String cameraId;
 		std::optional<Colour4f> colourClear;
 		std::optional<float> depthClear;
 		std::optional<uint8_t> stencilClear;
+		Vector<SpriteMaskBase> paintMasks;
 
 		std::shared_ptr<Material> overlayMethod;
 		Vector<Variable> variables;

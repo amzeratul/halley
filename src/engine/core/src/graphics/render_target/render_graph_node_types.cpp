@@ -90,10 +90,12 @@ Vector<IGraphNodeType::SettingType> RenderGraphNodeTypes::PaintNodeType::getSett
 	return {
 		SettingType{ "name", "Halley::String", Vector<String>{""} },
 		SettingType{ "cameraId", "Halley::String", Vector<String>{""} },
-		SettingType{ "paintId", "Halley::String", Vector<String>{""} },
 		SettingType{ "colourClear", "std::optional<Halley::Colour4f>", Vector<String>{""} },
 		SettingType{ "depthClear", "std::optional<float>", Vector<String>{""} },
-		SettingType{ "stencilClear", "std::optional<uint8_t>", Vector<String>{""} }
+		SettingType{ "stencilClear", "std::optional<uint8_t>", Vector<String>{""} },
+		SettingType{ "prePaintMethodId", "Halley::String", Vector<String>{""} },
+		SettingType{ "paintMasks", "Halley::Vector<Halley::SpriteMaskBase>", Vector<String>{""} },
+		SettingType{ "postPaintMethodId", "Halley::String", Vector<String>{""} },
 	};
 }
 
@@ -102,24 +104,47 @@ std::pair<String, Vector<ColourOverride>> RenderGraphNodeTypes::PaintNodeType::g
 	const auto& settings = node.getSettings();
 
 	ColourStringBuilder str;
-	str.append("Paint with paintId ");
-	str.append(settings["paintId"].asString("undefined"), settingColour);
-	str.append(" and cameraId ");
+	str.append("Paint with cameraId ");
 	str.append(settings["cameraId"].asString("undefined"), settingColour);
 
 	if (settings.hasKey("colourClear") || settings.hasKey("depthClear") || settings.hasKey("stencilClear")) {
 		str.append("\n");
+
 		if (settings.hasKey("colourClear")) {
-			str.append("\nColour Clear: ");
+			str.append("\nColour: ");
 			str.append(settings["colourClear"].asString(), settingColour);
 		}
 		if (settings.hasKey("depthClear")) {
-			str.append("\nDepth Clear: ");
+			str.append("\nDepth: ");
 			str.append(settings["depthClear"].asString(), settingColour);
 		}
 		if (settings.hasKey("stencilClear")) {
-			str.append("\nStencil Clear: ");
+			str.append("\nStencil: ");
 			str.append(settings["stencilClear"].asString(), settingColour);
+		}
+	}
+
+	auto prePaint = settings["prePaintMethodId"].asString("");
+	auto masks = settings["paintMasks"].asVector<SpriteMaskBase>({});
+	auto postPaint = settings["postPaintMethodId"].asString("");
+
+	if (!prePaint.isEmpty() || !masks.empty() || !postPaint.isEmpty()) {
+		str.append("\n");
+
+		if (!prePaint.isEmpty()) {
+			str.append("\nPre-Paint: ");
+			str.append(prePaint, settingColour);
+		}
+
+		if (!masks.empty()) {
+			str.append("\nDraw Masks: ");
+			auto list = String::concat(masks.const_span(), ", ", [](SpriteMaskBase mask) { return toString(mask); });
+			str.append("[ " + list + " ]", settingColour);
+		}
+
+		if (!postPaint.isEmpty()) {
+			str.append("\nPost-Paint: ");
+			str.append(postPaint, settingColour);
 		}
 	}
 
