@@ -15,6 +15,7 @@ namespace Halley {
 	{
 	public:
 		PainterService();
+		~PainterService() override;
 		
 		void startUpdate(Resources& resources, Time t);
 		void startRender(bool waitForSpriteLoad = true);
@@ -34,10 +35,9 @@ namespace Halley {
 		void setUpdateEnabled(bool enabled);
 		bool isUpdateEnabled() const;
 
-		void setRenderGraph(RenderGraph* renderGraph);
-
-		std::shared_ptr<Texture> getRenderGraphTexture(const String& id) const;
-		void setRenderTargetSize(const String& id, const Vector2i& size);
+		void setRenderGraph(std::unique_ptr<RenderGraph> renderGraph);
+		RenderGraph& getRenderGraph();
+		bool hasRenderGraph() const;
 
 		template <typename T>
 		T& getPainter()
@@ -50,7 +50,7 @@ namespace Halley {
 		bool depthQueriesEnabled = false;
 		std::optional<uint16_t> worldPartition;
 		std::optional<Colour4f> clearColour;
-		RenderGraph* renderGraph = nullptr;
+		std::unique_ptr<RenderGraph> renderGraph;
 	};
 }
 

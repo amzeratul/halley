@@ -1,11 +1,16 @@
 #include "halley/entity/services/painter_service.h"
 #include "halley/graphics/render_target/render_graph.h"
+#include "halley/graphics/render_target/render_graph_node.h"
 
 using namespace Halley;
 
 PainterService::PainterService()
 {
 	clearColour = Colour4f::fromString("#B0B0B0");
+}
+
+PainterService::~PainterService()
+{
 }
 
 void PainterService::startUpdate(Resources& resources, Time t)
@@ -74,17 +79,17 @@ bool PainterService::isUpdateEnabled() const
 	return updateEnabled;
 }
 
-void PainterService::setRenderGraph(RenderGraph* renderGraph)
+void PainterService::setRenderGraph(std::unique_ptr<RenderGraph> renderGraph)
 {
-	this->renderGraph = renderGraph;
+	this->renderGraph = std::move(renderGraph);
 }
 
-std::shared_ptr<Texture> PainterService::getRenderGraphTexture(const String& id) const
+RenderGraph& PainterService::getRenderGraph()
 {
-	return renderGraph->getOutputTexture(id);
+	return *renderGraph;
 }
 
-void PainterService::setRenderTargetSize(const String& id, const Vector2i& size)
+bool PainterService::hasRenderGraph() const
 {
-	renderGraph->setRenderSize(id, size);
+	return !!renderGraph;
 }
