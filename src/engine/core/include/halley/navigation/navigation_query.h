@@ -25,10 +25,8 @@ namespace Halley {
 
 			DebugData() = default;
 			DebugData(String agentId);
-			DebugData(const ConfigNode& data);
 
 			String toString() const;
-			ConfigNode toConfigNode() const;
 		};
 
 		WorldPosition from;

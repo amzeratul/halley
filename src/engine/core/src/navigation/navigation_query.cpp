@@ -9,21 +9,9 @@ NavigationQuery::DebugData::DebugData(String agentId)
 {
 }
 
-NavigationQuery::DebugData::DebugData(const ConfigNode& data)
-{
-	agentId = data["agentId"].asString("");
-}
-
 String NavigationQuery::DebugData::toString() const
 {
 	return "(" + agentId + ")";
-}
-
-ConfigNode NavigationQuery::DebugData::toConfigNode() const
-{
-	ConfigNode::MapType result;
-	result["agentId"] = agentId;
-	return result;
 }
 
 NavigationQuery::NavigationQuery() = default;
@@ -43,7 +31,6 @@ NavigationQuery::NavigationQuery(const ConfigNode& node)
 	to = WorldPosition(node["to"]);
 	postProcessingType = fromString<PostProcessingType>(node["postProcessingType"].asString());
 	quantizationType = fromString<QuantizationType>(node["quantizationType"].asString());
-	debugData = DebugData(node["debugData"]);
 }
 
 ConfigNode NavigationQuery::toConfigNode() const
@@ -54,7 +41,6 @@ ConfigNode NavigationQuery::toConfigNode() const
 	result["to"] = to;
 	result["postProcessingType"] = Halley::toString(postProcessingType);
 	result["quantizationType"] = Halley::toString(quantizationType);
-	result["debugData"] = debugData.toConfigNode();
 	
 	return result;
 }

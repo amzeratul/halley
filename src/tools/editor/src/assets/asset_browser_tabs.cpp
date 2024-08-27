@@ -154,7 +154,7 @@ bool AssetBrowserTabs::requestQuit(std::function<void()> callback)
 		return true;
 	}
 	if (quittingCallback) {
-		Logger::logDev("Ignoring quit request due to another quest being in flight");
+		Logger::logDev("Ignoring quit request due to another request being in flight");
 		return false;
 	}
 	if (getRoot()->hasModalUI()) {
