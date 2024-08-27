@@ -185,7 +185,7 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 
 	if (bestPoint) {
 		const auto scale = Vector2f(1.0f, anisotropy);
-		const auto du = ((bestPoint->pos - pos.pos) * scale).unit();
+		const auto du = bestDist > 0.00001f ? ((bestPoint->pos - pos.pos) * scale).unit() : Vector2f(0, 1);
 
 		const auto p1 = *bestPoint + (du / scale) * nudge;
 		if (getNavMeshAt(p1)) {
@@ -202,9 +202,12 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 			return p3;
 		}
 
-		if (getNavMeshAt(*bestPoint)) {
-			return bestPoint;
+		const auto p4 = *bestPoint - (du / scale) * nudge;
+		if (getNavMeshAt(p4)) {
+			return p4;
 		}
+
+		return bestPoint;
 	}
 
 	return {};
