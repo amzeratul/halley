@@ -46,7 +46,7 @@ namespace Halley {
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;
 		
 		String currentTool;
-		UIList* uiList = nullptr;
+		std::weak_ptr<UIList> uiList;
 		
 		Vector<EntityRef> selectedEntities;
 		Vector<EntityData*> entityDatas;

@@ -155,7 +155,7 @@ void SceneEditorGizmoCollection::generateList(UIList& list)
 			list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
 		}
 	}
-	uiList = &list;
+	uiList = std::dynamic_pointer_cast<UIList>(list.shared_from_this());
 }
 
 ISceneEditorWindow& SceneEditorGizmoCollection::getSceneEditorWindow()
@@ -239,9 +239,9 @@ void SceneEditorGizmoCollection::clear()
 {
 	tools.clear();
 	gizmoFactories.clear();
-	if (uiList) {
-		uiList->clear();
-		uiList = nullptr;
+	if (auto list = uiList.lock()) {
+		list->clear();
+		uiList = {};
 	}
 	activeGizmo.reset();
 	selectedBoundsGizmo.reset();
