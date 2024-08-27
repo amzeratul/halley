@@ -172,6 +172,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 {
 	auto* devConServer = project.getDevConServer();
 	if (!devConServer) {
+		assert(!scriptEnumHandle);
 		return;
 	}
 
