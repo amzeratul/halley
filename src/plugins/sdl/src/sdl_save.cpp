@@ -149,7 +149,7 @@ Vector<String> SDLSaveData::enumerate(const String& root)
 	return result;
 }
 
-void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
+void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit, bool log)
 {
 	Expects (!path.isEmpty());
 
@@ -191,7 +191,9 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 	// Write
 	OS::get().createDirectories(dir);
 	OS::get().atomicWriteFile(dstPath, gsl::as_bytes(gsl::span<const Byte>(finalData)), backupPath);
-	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(finalData.size()));
+	if (log) {
+		Logger::logDev("Saving \"" + path + "\", " + String::prettySize(finalData.size()));
+	}
 }
 
 void SDLSaveData::commit()

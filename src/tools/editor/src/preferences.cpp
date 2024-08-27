@@ -83,7 +83,7 @@ void Preferences::saveToFile(SystemAPI& system) const
 {
 	ConfigFile file;
 	file.getRoot() = save();
-	system.getStorageContainer(SaveDataType::SaveLocal)->setData("preferences", Serializer::toBytes(file));
+	system.getStorageContainer(SaveDataType::SaveLocal)->setData("preferences", Serializer::toBytes(file), true, false);
 	dirty = false;
 }
 

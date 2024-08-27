@@ -91,11 +91,11 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		// Failed
 		if (errorOut) {
 			if (fromRegion == notFound && toRegion == notFound) {
-				*errorOut = "neither the start position " + query.from + " nor the end position " + query.to + " are on the navmesh";
+				*errorOut = "neither the start position " + query.from + " nor the end position " + query.to + " are on the navmesh " + query.debugData.toString();
 			} else if (fromRegion == notFound) {
-				*errorOut = "start position " + query.from + " is not on the navmesh";
+				*errorOut = "start position " + query.from + " is not on the navmesh " + query.debugData.toString();
 			} else {
-				*errorOut = "end position " + query.to + " is not on the navmesh";
+				*errorOut = "end position " + query.to + " is not on the navmesh " + query.debugData.toString();
 			}
 		}
 		return {};
@@ -108,7 +108,7 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		if (regionPath.size() <= 1) {
 			// Failed
 			if (errorOut) {
-				*errorOut = "no path from " + fromPos + " to " + toPos;
+				*errorOut = "no path from " + fromPos + " to " + toPos + " " + query.debugData.toString();
 			}
 			return {};
 		} else {

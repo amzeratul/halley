@@ -19,13 +19,26 @@ namespace Halley {
 			Quantize8WayIsometric,
 		};
 
+		class DebugData {
+		public:
+			String agentId;
+
+			DebugData() = default;
+			DebugData(String agentId);
+			DebugData(const ConfigNode& data);
+
+			String toString() const;
+			ConfigNode toConfigNode() const;
+		};
+
 		WorldPosition from;
 		WorldPosition to;
 		PostProcessingType postProcessingType;
 		QuantizationType quantizationType;
+		DebugData debugData;
 
 		NavigationQuery();
-		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType);
+		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing, QuantizationType quantizationType, DebugData debugData = {});
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;

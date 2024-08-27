@@ -60,7 +60,7 @@ Vector<String> DummySaveData::enumerate(const String& root)
 	return {};
 }
 
-void DummySaveData::setData(const String& path, const Bytes& data, bool commit)
+void DummySaveData::setData(const String& path, const Bytes& data, bool commit, bool log)
 {
 }
 

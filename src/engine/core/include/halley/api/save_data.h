@@ -37,7 +37,7 @@ namespace Halley {
 		virtual void removeData(const String& path) {};
 		virtual Vector<String> enumerate(const String& root) = 0;
 
-		virtual void setData(const String& path, const Bytes& data, bool commit = true) = 0;
+		virtual void setData(const String& path, const Bytes& data, bool commit = true, bool log = true) = 0;
 		virtual void commit() = 0;
 		virtual size_t getFreeSpace() { return std::numeric_limits<size_t>::max(); }
 	};

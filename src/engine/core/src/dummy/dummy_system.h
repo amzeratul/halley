@@ -26,7 +26,7 @@ namespace Halley {
 		bool isReady() const override;
 		Bytes getData(const String& path) override;
 		Vector<String> enumerate(const String& root) override;
-		void setData(const String& path, const Bytes& data, bool commit) override;
+		void setData(const String& path, const Bytes& data, bool commit, bool log) override;
 		void commit() override;
 	};
 

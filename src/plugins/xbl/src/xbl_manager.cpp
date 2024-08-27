@@ -686,7 +686,7 @@ Vector<String> XBLSaveData::enumerate(const String& root)
 	}).get();
 }
 
-void XBLSaveData::setData(const String& path, const Bytes& data, bool commit)
+void XBLSaveData::setData(const String& path, const Bytes& data, bool commit, bool log)
 {
 	if (!isReady()) {
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);

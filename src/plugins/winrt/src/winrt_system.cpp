@@ -506,7 +506,7 @@ Vector<String> WinRTLocalSave::enumerate(const String& root)
 	}).get();
 }
 
-void WinRTLocalSave::setData(const String& path, const Bytes& data, bool commit)
+void WinRTLocalSave::setData(const String& path, const Bytes& data, bool commit, bool log)
 {
 	Concurrent::execute([&] () {
 		auto file = folder.CreateFileAsync(path.getUTF16().c_str(), CreationCollisionOption::ReplaceExisting).get();

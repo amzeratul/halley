@@ -701,7 +701,7 @@ bool ProjectWindow::SettingsStorage::save() const
 {
 	if (dirty) {
 		if (saveData) {
-			saveData->setData(path, Serializer::toBytes(data));
+			saveData->setData(path, Serializer::toBytes(data), true, false);
 		}
 		dirty = false;
 		return true;
