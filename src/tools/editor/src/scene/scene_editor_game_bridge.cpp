@@ -238,6 +238,11 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
+bool SceneEditorGameBridge::deleteAsset(const Path& path)
+{
+	return project.deleteAssetFromDisk(path);
+}
+
 void SceneEditorGameBridge::openAsset(AssetType assetType, const String& assetId)
 {
 	sceneEditorWindow.openAsset(assetType, assetId);

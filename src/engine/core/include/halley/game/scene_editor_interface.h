@@ -156,6 +156,7 @@ namespace Halley {
 		virtual ~IEditorInterface() = default;
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual bool deleteAsset(const Path& path) = 0;
 		virtual void openAsset(AssetType assetType, const String& assetId) = 0;
 		virtual void openAssetHere(AssetType assetType, const String& assetId) = 0;
 		virtual void setAssetSaveNotification(bool enabled) = 0;

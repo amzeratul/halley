@@ -11,7 +11,7 @@ namespace Halley {
         void writeFile(const Path& path, gsl::span<const gsl::byte> data);
         void writeFile(const Path& path, Bytes data);
 		const Bytes& readFile(const Path& path) override;
-        void remove(const Path& path);
+        bool remove(const Path& path);
         bool hasCached(const Path& path) const;
 
     	Vector<Path> enumerateDirectory(const Path& path, bool includeDirs = false, bool recursive = true);

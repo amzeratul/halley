@@ -121,6 +121,7 @@ namespace Halley
 		bool writeAssetToDisk(const Path& filePath, const Bytes& data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
 		Bytes readAssetFromDisk(const Path& filePath) override;
+		bool deleteAssetFromDisk(const Path& path);
 
 		Vector<String> getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const;
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;

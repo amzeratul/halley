@@ -71,18 +71,21 @@ const Bytes& FileSystemCache::readFile(const Path& path)
 	}
 }
 
-void FileSystemCache::remove(const Path& path)
+bool FileSystemCache::remove(const Path& path)
 {
+	bool modified = false;
+
 	const auto key = path.getString();
 	{
 		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			fileDataCache.erase(iter);
+			modified = true;
 		}
 	}
 
-	FileSystem::remove(path);
+	return FileSystem::remove(path) || modified;
 }
 
 bool FileSystemCache::hasCached(const Path& path) const

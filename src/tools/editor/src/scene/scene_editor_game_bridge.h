@@ -66,6 +66,7 @@ namespace Halley {
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
+		bool deleteAsset(const Path& path) override;
 		void openAsset(AssetType assetType, const String& assetId) override;
 		void openAssetHere(AssetType assetType, const String& assetId) override;
 		void addTask(std::unique_ptr<Task> task) override;

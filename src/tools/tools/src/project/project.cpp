@@ -412,6 +412,11 @@ Bytes Project::readAssetFromDisk(const Path& filePath)
 	return fileSystemCache->readFile(getAssetsSrcPath() / filePath);
 }
 
+bool Project::deleteAssetFromDisk(const Path& filePath)
+{
+	return fileSystemCache->remove(getAssetsSrcPath() / filePath);
+}
+
 Vector<String> Project::getAssetSrcList(bool includeDirs, const Path& relPath, bool recursive) const
 {
 	Vector<String> result;
