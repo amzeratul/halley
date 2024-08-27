@@ -260,7 +260,7 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 				if (portal.regionLink) {
 					// Local portals (always check)
 					const auto gridPos = navmesh.getWorldGridPos();
-					Logger::logWarning("\nUnlinked local Portal in \"" + getChunkName(gridPos) + "\" at " + portal.pos + ":" + toString(navmesh.getSubWorld()), true);
+					Logger::logError("\nUnlinked local Portal in \"" + getChunkName(gridPos) + "\" at " + portal.pos + ":" + toString(navmesh.getSubWorld()), true);
 				} else if (navmesh.getSubWorld() == 0) {
 					// Portals between chunks (only check subworld zero)
 					const auto& base = navmesh.getNormalisedCoordinatesBase();
@@ -270,7 +270,7 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 					const auto gridPos = navmesh.getWorldGridPos();
 					const Vector2i gridPosOffset = Vector2i(Vector2f(std::abs(normalPos.x) >= 0.99f ? signOf(normalPos.x) : 0, std::abs(normalPos.y) >= 0.99f ? signOf(normalPos.y) : 0));
 					if (occupiedGrids.find(gridPos + gridPosOffset) != occupiedGrids.end()) {
-						Logger::logWarning("\nUnlinked portal " + toString(portal.id) + " from \"" + getChunkName(gridPos) + "\" to \"" + getChunkName(gridPos + gridPosOffset)
+						Logger::logError("\nUnlinked portal " + toString(portal.id) + " from \"" + getChunkName(gridPos) + "\" to \"" + getChunkName(gridPos + gridPosOffset)
 							+ "\" at " + portal.pos + ":" + toString(navmesh.getSubWorld()) +
 							+ "\n\t(portal vertices: " + String::concat(portal.vertices.span(), ", ") + ")", true);
 					}
