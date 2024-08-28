@@ -24,6 +24,7 @@ namespace Halley {
 		size_t getNextPathIdx() const;
 		uint16_t getCurrentRegionId() const;
 		bool isDone() const;
+		void setNavmeshSubWorld(int value);
 		int getNavmeshSubWorld() const;
 
 		const ConfigNode& getParams() const;
