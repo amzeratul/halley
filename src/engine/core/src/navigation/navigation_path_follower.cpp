@@ -211,6 +211,11 @@ bool NavigationPathFollower::isDone() const
 	return !path;
 }
 
+void NavigationPathFollower::setNavmeshSubWorld(int value)
+{
+	navmeshSubWorld = value;
+}
+
 int NavigationPathFollower::getNavmeshSubWorld() const
 {
 	return navmeshSubWorld;
