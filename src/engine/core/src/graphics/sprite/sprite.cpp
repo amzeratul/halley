@@ -317,7 +317,7 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	if (materialName == "") {
 		materialName = MaterialDefinition::defaultMaterial;
 	}
-	setMaterial(resources.get<MaterialDefinition>(materialName)->getMaterial());
+	setMaterial(resources.get<MaterialDefinition>(materialName));
 	return *this;
 }
 
@@ -334,6 +334,12 @@ Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 		}
 	}
 
+	return *this;
+}
+
+Sprite& Sprite::setMaterial(std::shared_ptr<const MaterialDefinition> definition)
+{
+	setMaterial(std::make_shared<Material>(definition));
 	return *this;
 }
 
@@ -847,7 +853,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 	if (materialDefinition) {
 		if (materialDefinition->getTextures().empty()) {
 			if (hasNewMaterial) {
-				sprite.setMaterial(materialDefinition->getMaterial());
+				sprite.setMaterial(materialDefinition);
 			}
 		} else {
 			// Load each texture
@@ -858,7 +864,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 					if (i == 0) {
 						if (!loadTexture("image", i)) {
 							if (hasNewMaterial) {
-								sprite.setMaterial(materialDefinition->getMaterial());
+								sprite.setMaterial(materialDefinition);
 							}
 						}
 					} else if (i == 1) {

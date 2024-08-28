@@ -5,6 +5,8 @@
 #include "halley/maths/range.h"
 #include "halley/graphics/shader_type.h"
 
+#include <shared_mutex>
+
 namespace Halley
 {
 	class ConfigNode;
@@ -278,9 +280,6 @@ namespace Halley
 		bool isColumnMajor() const;
 		bool hasAutoVariables() const;
 
-		std::shared_ptr<const Material> getMaterial() const;
-		NOINLINE virtual std::shared_ptr<const Material> makeMaterial() const;
-
 	private:
 		String name;
 		Vector<MaterialPass> passes;
@@ -295,7 +294,6 @@ namespace Halley
 
 		std::shared_ptr<const Texture> fallbackTexture;
 		Vector<String> tags;
-		mutable std::weak_ptr<const Material> material;
 
 		void updateUniformBlocks();
 		void loadUniforms(const ConfigNode& node);
