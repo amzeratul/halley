@@ -220,9 +220,11 @@ Bytes ShaderImporter::compileDXIL(const String& name, ShaderType type, const Byt
         throw Exception("Wrong shader type for DXC compiler " + toString(type), HalleyExceptions::Tools);
     }
 
+    String sourceName = material.getName() + " (" + toString(type) + " shader)";
+
     ComPtr<IDxcCompilerArgs> compilerArguments;
     if (FAILED(utils->BuildArguments(
-            name.getUTF16().c_str(),
+            sourceName.getUTF16().c_str(),
             nullptr,
             targetProfile.c_str(),
             arguments,
@@ -257,9 +259,9 @@ Bytes ShaderImporter::compileDXIL(const String& name, ShaderType type, const Byt
         size_t len = errors->GetStringLength();
         if (len > 0) {
             if (FAILED(resultCode)) {
-                throw Exception("DXC compile error: " + String(errors->GetStringPointer()), HalleyExceptions::Tools);
+                throw Exception(String(errors->GetStringPointer()), HalleyExceptions::Tools);
             } else {
-                Logger::logWarning("DXC compile warning: " + String(errors->GetStringPointer()));
+                Logger::logWarning(String(errors->GetStringPointer()));
             }
         }
     }
