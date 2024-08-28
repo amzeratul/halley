@@ -30,8 +30,6 @@ namespace Halley {
 		const ConfigNode& getParams() const;
 		ConfigNode& getParams();
 
-		bool isRunning() const;
-
 	private:
 		WorldPosition curPos;
 		size_t nextPathIdx = 0;
