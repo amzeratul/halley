@@ -6,7 +6,7 @@ using namespace Halley;
 
 static bool hasDirectory(const String& directory)
 {
-    const DWORD res = GetFileAttributes(directory.c_str());
+    const DWORD res = GetFileAttributesW(directory.getUTF16().c_str());
     return res != INVALID_FILE_ATTRIBUTES && (res & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
@@ -17,7 +17,7 @@ void OSWinBase::createDirectories(const Path& path)
         Path curPath = path.getFront(i);
         String nativePath = curPath.getNativeString(false);
         if (!hasDirectory(nativePath)) {
-            if (!CreateDirectory(nativePath.c_str(), nullptr)) {
+            if (!CreateDirectoryW(nativePath.getUTF16().c_str(), nullptr)) {
                 throw Exception("Unable to create directory: " + curPath + " (trying to make " + path + ")", HalleyExceptions::OS);
             }
         }
