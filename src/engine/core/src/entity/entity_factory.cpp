@@ -718,7 +718,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 			if (prefab) {
 				entity.setPrefab(prefab, prefabUUID);
 			}
-		} else {
+		} else if (entity.isValid()) {
 			getWorld().destroyEntity(entity);
 			entity = {};
 		}
