@@ -33,6 +33,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	generateConnectivity(polygons);
 	tagEdgeConnections(polygons, params.bounds.edges);
 	removeNodesBeyondPortals(polygons);
+	removePoisonedNodes(polygons, params.poison);
 	//postProcessPolygons(polygons, maxSize, true, params.bounds);
 	simplifyPolygons(polygons, params.bounds);
 	applyRegions(polygons, params.regions);
@@ -576,6 +577,38 @@ void NavmeshGenerator::removeNodesBeyondPortals(Vector<NavmeshNode>& nodes)
 		}
 	}
 	
+	removeDeadPolygons(nodes);
+}
+
+void NavmeshGenerator::removePoisonedNodes(Vector<NavmeshNode>& nodes, gsl::span<const Vector2f> poisons)
+{
+	std::list<NavmeshNode*> toProcess;
+	for (auto& node: nodes) {
+		if (std::any_of(poisons.begin(), poisons.end(), [&] (Vector2f p) { return node.polygon.isPointInside(p); })) {
+			toProcess.push_back(&node);
+			node.tagged = true;
+		} else {
+			node.tagged = false;
+		}
+	}
+	
+	while (!toProcess.empty()) {
+		auto& node = *toProcess.front();
+		toProcess.pop_front();
+		
+		node.alive = false;
+
+		for (const auto c: node.connections) {
+			if (c >= 0) {
+				auto& otherNode = nodes[c];
+				if (!otherNode.tagged) {
+					toProcess.push_back(&otherNode);
+					otherNode.tagged = true;
+				}
+			}
+		}
+	}
+
 	removeDeadPolygons(nodes);
 }
 

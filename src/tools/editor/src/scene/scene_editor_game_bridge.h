@@ -57,6 +57,8 @@ namespace Halley {
 		void initializeEntityValidator(EntityValidator& validator);
 		void validateAllEntities() override;
 
+		void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData);
+
 		World& getWorld() const;
 		String getSceneNameForComments(AssetType assetType, const String& assetId) const;
 

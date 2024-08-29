@@ -813,10 +813,11 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 		instanceData.setPrefab(prefabName);
 		instanceData.setComponents(components);
 		replaceEntity(id, std::move(instanceData));
+		entityEditor->reloadEntity();
 
 		return true;
 	});
-	
+		
 	// Write prefab
 	const auto serializedData = serializeEntities(gsl::span<const EntityData>(&entityData, 1));
 	project.writeAssetToDisk(Path("prefab") / (prefabName + ".prefab"), serializedData);
@@ -936,6 +937,7 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 			const auto* prevData = prevDatas[i];
 			const auto* newData = newDatas[i];
 			entityList->onEntityModified(ids[i], prevData, *newData);
+			gameBridge->onEntityModified(ids[i], prevData, *newData);
 		}
 		markModified();
 	}

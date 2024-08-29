@@ -264,8 +264,8 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 					// Local portals (always check)
 					const auto gridPos = navmesh.getWorldGridPos();
 					Logger::logError("\nUnlinked local Portal in \"" + getChunkName(gridPos) + "\" at " + portal.pos + ":" + toString(navmesh.getSubWorld()), true);
-				} else if (navmesh.getSubWorld() == 0) {
-					// Portals between chunks (only check subworld zero)
+				} else {
+					// Portals between chunks
 					const auto& base = navmesh.getNormalisedCoordinatesBase();
 					const auto relPos = portal.pos - navmesh.getOffset();
 					auto normalPos = Vector2f(base.inverseTransform(relPos)) * 2;

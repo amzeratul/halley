@@ -256,6 +256,8 @@ namespace Halley {
         virtual bool shouldDrawOutline(const Sprite& sprite) const = 0;
         virtual String getSceneNameForComments(AssetType assetType, const String& assetId) const = 0;
         virtual void setGameInstance(Game* game) = 0;
+
+    	virtual void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData) = 0;
     };
 
 	class EntityTree {
