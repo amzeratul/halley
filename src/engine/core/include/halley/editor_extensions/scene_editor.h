@@ -82,6 +82,8 @@ namespace Halley {
 		void setGameInstance(Game* game) override;
 		Game* getGameInstance() const;
 
+		void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData) override;
+
     protected:
 		enum class EntityAtPositionSelectMode {
 			All,

@@ -378,6 +378,13 @@ void SceneEditorGameBridge::validateAllEntities()
 	sceneEditorWindow.validateAllEntities();
 }
 
+void SceneEditorGameBridge::onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData)
+{
+	if (interface) {
+		interface->onEntityModified(id, prevData, newData);
+	}
+}
+
 World& SceneEditorGameBridge::getWorld() const
 {
 	return interface->getWorld();

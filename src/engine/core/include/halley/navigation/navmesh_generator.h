@@ -11,6 +11,7 @@ namespace Halley {
 			gsl::span<const Polygon> obstacles;
 			gsl::span<const Polygon> regions;
 			gsl::span<const NavmeshSubworldPortal> subworldPortals;
+			gsl::span<const Vector2f> poison; // These points destroy whatever navmesh they touch
 			int subWorld = 0;
 			float agentSize = 1.0f;
 			std::function<float(int, const Polygon&)> getPolygonWeightCallback;
@@ -73,7 +74,9 @@ namespace Halley {
 		static void splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
 		static void splitByRegions(Vector<NavmeshNode>& nodes, gsl::span<const Polygon> regions);
 		static size_t split(Vector<NavmeshNode>& nodes, size_t idx, LineSegment splitBy, std::function<void(NavmeshNode&)> postProcess);
+
 		static void removeNodesBeyondPortals(Vector<NavmeshNode>& nodes);
+		static void removePoisonedNodes(Vector<NavmeshNode>& nodes, gsl::span<const Vector2f> poisons);
 
 		static void applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions);
 		static int assignRegions(gsl::span<NavmeshNode> nodes);

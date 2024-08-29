@@ -922,3 +922,7 @@ Game* SceneEditor::getGameInstance() const
 {
 	return game;
 }
+
+void SceneEditor::onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData)
+{
+}
