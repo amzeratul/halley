@@ -177,17 +177,24 @@ void MessageQueueUDP::sendAll()
 	}
 
 	// Send and update sequences
-	if (!toSend.empty()) {
-		const auto seqs = connection->sendTagged(toSend);
-		for (size_t i = 0; i < toSend.size(); ++i) {
-			auto& packet = toSend[i];
-			if (packet.tag != -1) {
-				pendingPackets[packet.tag].seq = seqs[i];
-			}
-		}
-	}
+    try {
+        if (!toSend.empty()) {
+            const auto seqs = connection->sendTagged(toSend);
+            for (size_t i = 0; i < toSend.size(); ++i) {
+                auto &packet = toSend[i];
+                if (packet.tag != -1) {
+                    pendingPackets[packet.tag].seq = seqs[i];
+                }
+            }
+        }
 
-	connection->sendAckPacketsIfNeeded();
+        connection->sendAckPacketsIfNeeded();
+    } catch (std::exception& e) {
+        std::cout << "Error sending messages: " << e.what() << std::endl;
+        connection->close();
+    } catch (...) {
+        connection->close();
+    }
 }
 
 bool MessageQueueUDP::isConnected() const
