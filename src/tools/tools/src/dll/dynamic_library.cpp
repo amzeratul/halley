@@ -39,7 +39,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 
 	// Does the path exist?
 	if (std::error_code ec; !exists(libOrigPath, ec) || ec) {
-		Logger::logError("Library doesn't exist: " + libOrigPath);
+		Logger::logError("Library doesn't exist: " + libOrigPath, true);
 		return false;
 	}
 
