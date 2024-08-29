@@ -107,6 +107,10 @@ void UIRenderSurface::onPreRender()
 // Render thread
 RenderContext UIRenderSurface::getRenderContextForChildren(RenderContext& rc)
 {
+    if (!renderParams) {
+        return rc;
+    }
+
 	auto& cam = renderParams->camera; // Camera cannot be a local variable, returned RC will take a reference to it
 
 	cam = rc.getCamera();
