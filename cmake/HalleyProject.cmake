@@ -194,6 +194,7 @@ endif()
 # Boost::Asio
 if (USE_ASIO)
 	add_definitions(-DWITH_ASIO)
+	find_package(Boost REQUIRED)
 	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
 	if (BOOST_INCLUDE_DIR)
 	else()
