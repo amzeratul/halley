@@ -35,16 +35,18 @@ namespace Halley {
 
 	public:
 		using ScalarType = T;
-		T x, y, z;
+		T x = 0;
+		T y = 0;
+		T z = 0;
 
 	private:
 		T pad = 0;
 
 	public:
 		// Constructors
-		constexpr Vector3D () { x = y = z = 0; }
+		constexpr Vector3D() noexcept = default;
 		constexpr Vector3D (T x, T y, T z) { this->x = x; this->y = y; this->z = z; }
-		constexpr Vector3D (const Vector3D<T> &vec) { x = vec.x; y = vec.y; z = vec.z; }
+		constexpr Vector3D(const Vector3D<T>& vec) noexcept = default;
 		template <typename V>
 		constexpr explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
 
@@ -80,7 +82,7 @@ namespace Halley {
 		}
 
 		// Assignment and comparison
-		constexpr inline Vector3D& operator = (const Vector3D& p) { x = p.x; y = p.y; z = p.z; return *this; }
+		constexpr inline Vector3D& operator = (const Vector3D& p) = default;
 		constexpr inline Vector3D& operator = (const T p) { x = p; y = p; z = p; return *this; }
 		constexpr inline bool operator == (const Vector3D &p) const { return x == p.x && y == p.y && z == p.z; }
 		constexpr inline bool operator != (const Vector3D &p) const { return x != p.x || y != p.y || z != p.z; }
@@ -179,4 +181,6 @@ namespace Halley {
 	typedef Vector3D<int> Vector3i;
 	typedef Vector3D<short> Vector3s;
 	typedef Vector3D<char> Vector3c;
+
+	static_assert(std::is_trivially_copyable_v<Vector3f>);
 }

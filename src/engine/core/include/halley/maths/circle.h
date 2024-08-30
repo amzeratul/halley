@@ -43,4 +43,5 @@ namespace Halley {
         static Vector2f& mswNonBase(Vector2f p, gsl::span<Vector2f, 3> rs);
     };
 
+	static_assert(std::is_trivially_copyable_v<Circle>);
 }

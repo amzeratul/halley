@@ -33,11 +33,11 @@ namespace Halley {
 	class Matrix4f {
 	public:
 		Matrix4f();
-		Matrix4f(const Matrix4f& m);
-		Matrix4f(Matrix4f&& m) noexcept;
+		Matrix4f(const Matrix4f& m) noexcept = default;
+		Matrix4f(Matrix4f&& m) noexcept = default;
 		Matrix4f(const float elements[]);
 
-		Matrix4f& operator=(const Matrix4f& param);
+		Matrix4f& operator=(const Matrix4f& param) = default;
 		Matrix4f& operator*=(const Matrix4f& param);
 		Matrix4f operator*(const Matrix4f& param) const;
 		Vector2f operator*(const Vector2f& param) const;
@@ -95,4 +95,6 @@ namespace Halley {
 	private:
 		std::array<Vector4f, 4> columns;
 	};
+
+	static_assert(std::is_trivially_copyable_v<Matrix4f>);
 }

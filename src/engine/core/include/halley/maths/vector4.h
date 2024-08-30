@@ -242,4 +242,7 @@ namespace Halley {
 	using Vector4i = Vector4D<int, 4>;
 	using Vector4s = Vector4D<short, 4>;
 	using Vector4c = Vector4D<char, 4>;
+
+	static_assert(std::is_trivially_copyable_v<Vector4f>);
+
 }

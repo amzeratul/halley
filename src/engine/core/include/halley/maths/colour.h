@@ -454,4 +454,7 @@ namespace Halley {
 	typedef Colour4<uint8_t> Colour4c;
 	typedef Colour4<float> Colour4f;
 	typedef Colour4f Colour;
+
+	static_assert(std::is_trivially_copyable_v<Colour4f>);
+	static_assert(std::is_trivially_copyable_v<Colour4c>);
 }

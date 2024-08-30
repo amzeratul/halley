@@ -157,4 +157,6 @@ namespace Halley {
 			return (start + end) / 2;
 		}
 	};
+
+	static_assert(std::is_trivially_copyable_v<Range<float>>);
 }

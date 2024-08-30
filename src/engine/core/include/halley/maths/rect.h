@@ -479,4 +479,6 @@ namespace Halley {
 	typedef Rect2D<float> Rect4f;
 	typedef Rect2D<double> Rect4d;
 	typedef Rect2D<int> Rect4i;
+
+	static_assert(std::is_trivially_copyable_v<Rect4f>);
 }

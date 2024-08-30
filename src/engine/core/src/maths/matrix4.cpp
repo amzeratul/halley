@@ -31,22 +31,10 @@ Matrix4f::Matrix4f()
 {
 }
 
-Matrix4f::Matrix4f(const Matrix4f& m)
-	: columns(m.columns)
-{
-}
-
-Matrix4f::Matrix4f(Matrix4f&& m) noexcept
-	: columns(std::move(m.columns))
-{
-}
-
 Matrix4f::Matrix4f(const float elems[])
 {
 	memcpy(getElements(), elems, sizeof(float) * 16);
 }
-
-Matrix4f& Matrix4f::operator=(const Matrix4f& param) = default;
 
 Matrix4f& Matrix4f::operator*=(const Matrix4f& param)
 {
