@@ -218,6 +218,10 @@ namespace Halley {
 		TempMemoryPool& getUpdateMemoryPool() const;
 		TempMemoryPool& getRenderMemoryPool() const;
 
+		void purgeMessages(int systemId, gsl::span<const int> messageTypes);
+		void sendEntityMessage(EntityId target, MessageEntry msg);
+		Vector<std::pair<MessageEntry, EntityId>>* getEntityMessageInbox(int messageType);
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -255,6 +259,8 @@ namespace Halley {
 
 		std::unique_ptr<TempMemoryPool> updateMemoryPool;
 		std::unique_ptr<TempMemoryPool> renderMemoryPool;
+
+		HashMap<int, Vector<std::pair<MessageEntry, EntityId>>> entityMessageInbox;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

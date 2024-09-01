@@ -232,7 +232,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		if (oldEntity->getInstanceUUID() != uuid) {
 			throw Exception("Error creating entity \"" + name + "\" - World::uuidMap is seemingly corrupted", HalleyExceptions::Entity);
 		} else {
-			throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists as " + oldEntity->name, HalleyExceptions::Entity);
+			throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists as " + (oldEntity->name ? *oldEntity->name : String()), HalleyExceptions::Entity);
 		}
 	}
 	
@@ -339,7 +339,7 @@ void World::doDestroyEntity(EntityId id)
 	const auto e = tryGetRawEntity(id);
 	if (e) {
 		if (!e->isAlive()) {
-			Logger::logWarning("Attempting to destroy entity \"" + e->name + "\" which is already dead.");
+			Logger::logWarning("Attempting to destroy entity \"" + (e->name ? *e->name : String::emptyString()) + "\" which is already dead.");
 			return;
 		}
 
@@ -988,3 +988,27 @@ void World::setNetworkInterface(IWorldNetworkInterface* interface)
 {
 	networkInterface = interface;
 }
+
+void World::purgeMessages(int systemId, gsl::span<const int> messageTypes)
+{
+	for (const auto type: messageTypes) {
+		if (const auto iter = entityMessageInbox.find(type); iter != entityMessageInbox.end()) {
+			std_ex::erase_if(iter->second, [&] (const std::pair<MessageEntry, EntityId>& e) { return e.first.age == systemId; });
+		}
+	}
+}
+
+void World::sendEntityMessage(EntityId target, MessageEntry msg)
+{
+	auto id = msg.type;
+	entityMessageInbox[id].emplace_back(std::move(msg), target);
+}
+
+Vector<std::pair<MessageEntry, EntityId>>* World::getEntityMessageInbox(int messageType)
+{
+	if (const auto iter = entityMessageInbox.find(messageType); iter != entityMessageInbox.end()) {
+		return &iter->second;
+	}
+	return nullptr;
+}
+

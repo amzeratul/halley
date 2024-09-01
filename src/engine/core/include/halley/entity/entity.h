@@ -182,6 +182,9 @@ namespace Halley {
 		bool fromNetwork : 1;
 		
 		uint8_t childrenRevision = 0;
+		WorldPartitionId worldPartition = 0;
+		uint8_t hierarchyRevision = 0;
+		uint8_t componentRevision = 0;
 
 		FamilyMaskType mask;
 		Entity* parent = nullptr;
@@ -189,17 +192,10 @@ namespace Halley {
 		Vector<Entity*> children; // Cacheline 1 starts 16 bytes into this
 
 		// Cacheline 1
-		Vector<MessageEntry> inbox;
-		String name;
-
-		// Cacheline 2
 		UUID instanceUUID;
 		UUID prefabUUID;
 		std::shared_ptr<const Prefab> prefab;
-
-		WorldPartitionId worldPartition = 0;
-		uint8_t hierarchyRevision = 0;
-		uint8_t componentRevision = 0;
+		std::unique_ptr<String> name;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -607,13 +603,17 @@ namespace Halley {
 		const String& getName() const
 		{
 			validate();
-			return entity->name;
+			return entity->name ? *entity->name : String::emptyString();
 		}
 
 		void setName(String name)
 		{
 			validate();
-			entity->name = std::move(name);
+			if (entity->name) {
+				*entity->name = std::move(name);
+			} else {
+				entity->name = std::make_unique<String>(std::move(name));
+			}
 		}
 
 		const UUID& getInstanceUUID() const
@@ -978,7 +978,7 @@ namespace Halley {
 
 		const String& getName() const
 		{
-			return entity->name;
+			return entity->name ? *entity->name : String::emptyString();
 		}
 
 		const UUID& getInstanceUUID() const

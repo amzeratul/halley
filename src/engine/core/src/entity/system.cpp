@@ -67,60 +67,45 @@ void System::onAddedToWorld(World& w, int id) {
 	}
 }
 
-void System::purgeMessages()
-{
-	if (!messagesSentTo.empty()) {
-		for (auto& target: messagesSentTo) {
-			// Purge all messages of this age
-			Entity* entity = world->tryGetRawEntity(target);
-
-			if (entity) {
-				std_ex::erase_if(entity->inbox, [&] (const MessageEntry& e) { return e.age == systemId; });
-			}
-		}
-		messagesSentTo.clear();
-	}
-}
-
 void System::processMessages()
 {
 }
 
 void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted)
 {
-	// This whole method is probably very inefficient.
-	struct MessageBox
-	{
-		VectorTemp<Message*> msg;
-		VectorTemp<size_t> elemIdx;
+	for (const int type: typesAccepted) {
+		if (auto* inbox = world->getEntityMessageInbox(type); inbox && !inbox->empty()) {
+			doProcessMessages(family, type, *inbox);
+		}
+	}
+}
 
-		MessageBox(TempMemoryPool& pool)
-			: msg(pool)
-			, elemIdx(pool)
-		{}
-	};
-	auto inboxes = HashMapTemp<int, MessageBox>(world->getUpdateMemoryPool());
+void System::doProcessMessages(FamilyBindingBase& family, int messageType, Vector<std::pair<MessageEntry, EntityId>>& messages)
+{
+	auto targetIds = VectorTemp<EntityId>(world->getUpdateMemoryPool());
+	targetIds.reserve(messages.size());
+	for (auto& msg: messages) {
+		targetIds.push_back(msg.second);
+	}
+
+	auto msgPtrs = VectorTemp<Message*>(world->getUpdateMemoryPool());
+	auto elemIdx = VectorTemp<size_t>(world->getUpdateMemoryPool());
 
 	const size_t sz = family.count();
 	for (size_t i = 0; i < sz; i++) {
 		const FamilyBase* elem = static_cast<FamilyBase*>(family.getElement(i));
-		if (const Entity* entity = world->tryGetRawEntity(elem->entityId)) {
-			for (const auto& msg: entity->inbox) {
-				if (std::find(typesAccepted.begin(), typesAccepted.end(), msg.type) != typesAccepted.end()) {
-					if (!inboxes.contains(msg.type)) {
-						inboxes.insert_or_assign(msg.type, MessageBox(world->getUpdateMemoryPool()));
-					}
-					auto& inbox = inboxes.at(msg.type);
-					inbox.msg.emplace_back(msg.msg.get());
-					inbox.elemIdx.emplace_back(i);
+		if (std_ex::contains(targetIds, elem->entityId)) {
+			for (auto& msg: messages) {
+				if (msg.second == elem->entityId) {
+					msgPtrs.emplace_back(msg.first.msg.get());
+					elemIdx.emplace_back(i);
 				}
 			}
 		}
 	}
-	for (auto& iter: inboxes) {
-		const int msgId = iter.first;
-		auto& inbox = iter.second;
-		onMessagesReceived(msgId, inbox.msg.data(), inbox.elemIdx.data(), inbox.msg.size(), family);
+
+	if (!msgPtrs.empty()) {
+		onMessagesReceived(messageType, msgPtrs.data(), elemIdx.data(), msgPtrs.size(), family);
 	}
 }
 
@@ -134,7 +119,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int 
 	if (world->isEntityNetworkRemote(e)) {
 		world->sendNetworkMessage(entityId, id, std::move(msg));
 	} else {
-		outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+		outbox.emplace_back(std::make_pair(MessageEntry(std::move(msg), id, systemId), entityId));
 	}
 }
 
@@ -142,10 +127,10 @@ void System::dispatchMessages()
 {
 	if (!outbox.empty()) {
 		for (auto& o: outbox) {
-			Entity* entity = world->tryGetRawEntity(o.first);
-			if (entity) {
-				entity->inbox.emplace_back(std::move(o.second));
-				messagesSentTo.push_back(o.first);
+			const int type = o.first.type;
+			world->sendEntityMessage(o.second, std::move(o.first));
+			if (!std_ex::contains(messageTypesSentThisUpdate, type)) {
+				messageTypesSentThisUpdate.push_back(type);
 			}
 		}
 		outbox.clear();
@@ -232,7 +217,10 @@ void System::doUpdate(Time time) {
 	if (!messageTypesReceived.empty()) {
 		processMessages();
 	}
-	purgeMessages();
+	if (!messageTypesSentThisUpdate.empty()) {
+		world->purgeMessages(systemId, messageTypesSentThisUpdate);
+		messageTypesSentThisUpdate.clear();
+	}
 	
 	updateBase(time);
 	dispatchMessages();

@@ -191,8 +191,8 @@ namespace Halley {
 
 		Vector<FamilyBindingBase*> families;
 		Vector<int> messageTypesReceived;
-		Vector<EntityId> messagesSentTo;
-		Vector<std::pair<EntityId, MessageEntry>> outbox;
+		Vector<int> messageTypesSentThisUpdate;
+		Vector<std::pair<MessageEntry, EntityId>> outbox;
 		Vector<const SystemMessageContext*> systemMessageInbox;
 		Vector<const SystemMessageContext*> systemMessages;
 
@@ -207,10 +207,10 @@ namespace Halley {
 		void doRender(RenderContext& rc);
 		void onAddedToWorld(World& world, int id);
 
-		void purgeMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
 		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination);
 		void dispatchMessages();
+		void doProcessMessages(FamilyBindingBase& family, int messageType, Vector<std::pair<MessageEntry, EntityId>>& messages);
 	};
 
 }
