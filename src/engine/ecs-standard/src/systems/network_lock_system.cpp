@@ -212,7 +212,7 @@ private:
 			// Entity not found
 			const auto entity = getWorld().tryGetEntity(targetId);
 			if (entity.isValid()) {
-				Logger::logError("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity or descendent of one.");
+				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity or descendent of one.");
 			}
 			return false;
 		}
