@@ -10,6 +10,7 @@
 #include "halley/entity/world.h"
 #include "halley/entity/registry.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resources.h"
 #include "halley/utils/algorithm.h"
 
@@ -454,7 +455,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 			const auto& [componentName, componentData] = data.getComponent(i);
 			const auto result = reflection.createComponent(context, componentName, entity, componentData);
 			if (!result.created) {
-				Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
+				Logger::logError("Failed to create component \"" + componentName + "\" on empty entity " + entity.getName() + ". Data was: \n" + YAMLConvert::generateYAML(componentData));
 			}
 		}
 	} else {
@@ -473,7 +474,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 					existingComps.erase(iter);
 				}
 				if (result.componentId == -1) {
-					Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName());
+					Logger::logError("Failed to create component \"" + componentName + "\" on entity " + entity.getName() + ", and couldn't find it on entity either. Data was:\n" + YAMLConvert::generateYAML(componentData));
 				}
 			}
 		}

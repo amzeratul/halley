@@ -500,6 +500,7 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 	return NavigationPath(query, points);
 }
 
+/*
 void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const
 {
 	if (type == NavigationQuery::PostProcessingType::None) {
@@ -576,6 +577,53 @@ void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostPro
 		} else {
 			dst = lastSafeFrom;
 		}
+	}
+}
+*/
+
+void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const
+{
+	if (type == NavigationQuery::PostProcessingType::None || points.size() <= 2) {
+		return;
+	}
+
+	Vector<NodeId> nodeIds;
+	nodeIds.resize(points.size());
+	for (size_t i = 0; i < points.size(); ++i) {
+		nodeIds[i] = getNodeAt(points[i]).value_or(static_cast<NodeId>(-1));
+		assert(nodeIds[i] != static_cast<NodeId>(-1));
+	}
+
+	for (size_t i = 1; i < points.size() - 1; ) {
+		// This point can be removed if the previous point has direct line of sight to the next
+
+		const auto p0 = points.at(i - 1);
+		const auto p1 = points.at(i);
+		const auto p2 = points.at(i + 1);
+		const auto delta = p2 - p0;
+		const auto origDist = delta.length();
+		const auto dir = delta / origDist;
+
+		const auto ray = Ray(p0, dir);
+		const auto col = findRayCollision(ray, origDist, nodeIds[i - 1]);
+
+		if (!col.first) {
+			// No collision, so this is a candidate for removal
+			// But first, make sure that the new path is not much more expensive than the previous
+
+			const auto col0 = findRayCollision(Ray(p0, (p1 - p0).normalized()), (p1 - p0).length(), nodeIds[i - 1]);
+			const auto col1 = findRayCollision(Ray(p1, (p2 - p1).normalized()), (p2 - p1).length(), nodeIds[i]);
+			if (col.second < (col0.second + col1.second) * 1.2f) {
+				points.erase(points.begin() + i);
+				nodeIds.erase(nodeIds.begin() + i);
+
+				// i is now the next item, so no need to increment
+				continue;
+			}
+		}
+
+		// Didn't remove a point, so increment i
+		++i;
 	}
 }
 
