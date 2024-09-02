@@ -34,7 +34,10 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 	for (auto& painter: painters) {
 		painter->startFrame(multithreaded);
 	}
+}
 
+void BaseFrameData::baseEndFrame()
+{
 	debugLines.clear();
 	debugPoints.clear();
 	debugPolygons.clear();

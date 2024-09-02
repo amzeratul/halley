@@ -118,6 +118,7 @@ namespace Halley {
 		}
 
 		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) {}
+		virtual void doEndFrame() {}
 
 		static BaseFrameData& getCurrentBase()
 		{
@@ -159,12 +160,14 @@ namespace Halley {
 		static thread_local BaseFrameData* threadInstance;
 
 		void baseStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime);
+		void baseEndFrame();
 	};
 
 	template <typename T>
 	class FrameData : public BaseFrameData {
 	public:
 		virtual void startFrame(bool multithreaded, T* previous, Time deltaTime) {}
+		virtual void endFrame() {}
 
 		static T& getCurrent()
 		{
@@ -177,6 +180,12 @@ namespace Halley {
 		{
 			baseStartFrame(multithreaded, previous, deltaTime);
 			startFrame(multithreaded, static_cast<T*>(previous), deltaTime);
+		}
+
+		void doEndFrame() override
+		{
+			baseEndFrame();
+			endFrame();
 		}
 	};
 

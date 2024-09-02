@@ -167,6 +167,10 @@ void SceneEditor::render(RenderContext& rc)
 	});
 
 	postRender(rc);
+
+	if (curFrameData) {
+		curFrameData->doEndFrame();
+	}
 }
 
 void SceneEditor::preUpdate(Time t)

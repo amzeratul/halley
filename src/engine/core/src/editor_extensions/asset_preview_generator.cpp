@@ -159,6 +159,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		createPrefabPreviewCamera(*entityFactory, *world, spriteBounds, zoom);
 
 		// Simulate again
+		frameData->doEndFrame();
 		frameData->doStartFrame(false, nullptr, 0.1);
 		world->step(TimeLine::VariableUpdate, 0.1);
 
@@ -171,7 +172,10 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		});
 		BaseFrameData::setThreadFrameData(info.frameData.get());
 		auto rc2 = curRC->with(*worldRenderTarget);
-		return renderAssetPreview(info, rc2);
+		auto result = renderAssetPreview(info, rc2);
+		info.frameData->doEndFrame();
+
+		return result;
 	});
 }
 
