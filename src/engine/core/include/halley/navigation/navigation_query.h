@@ -9,8 +9,7 @@ namespace Halley {
 	public:
 		enum class PostProcessingType {
 			None,
-			Simple,
-			Aggressive
+			Normal
 		};
 
 		enum class QuantizationType {
