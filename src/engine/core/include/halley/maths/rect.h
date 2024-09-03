@@ -265,6 +265,11 @@ namespace Halley {
 			return Rect2D<T>(Vector2D<T>::min(p1, other.p1), Vector2D<T>::max(p2, other.p2));
 		}
 
+		[[nodiscard]] constexpr Rect2D<T> merge(const Vector2D<T>& point) const
+		{
+			return Rect2D<T>(Vector2D<T>::min(p1, point), Vector2D<T>::max(p2, point));
+		}
+
 		Range<T> getHorizontal() const
 		{
 			return Range<T>(p1.x, p2.x);
