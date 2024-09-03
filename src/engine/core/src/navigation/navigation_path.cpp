@@ -3,10 +3,9 @@ using namespace Halley;
 
 NavigationPath::NavigationPath() = default;
 
-NavigationPath::NavigationPath(const NavigationQuery& query, Vector<Vector2f> path, Vector<RegionNode> regions)
+NavigationPath::NavigationPath(NavigationQuery query, Vector<WorldPosition> path)
 	: path(std::move(path))
-	, regions(std::move(regions))
-	, query(query)
+	, query(std::move(query))
 {
 }
 

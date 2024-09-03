@@ -73,8 +73,14 @@ namespace Halley {
 			Vector<uint16_t> portals;
 		};
 
+		struct NodeAndConn {
+			uint16_t regionNodeId;
+			uint16_t exitEdgeId;
+
+			NodeAndConn(uint16_t regionNodeId = 0, uint16_t exitEdgeId = std::numeric_limits<uint16_t>::max()) : regionNodeId(regionNodeId), exitEdgeId(exitEdgeId) {}
+		};
+
 		using NodeId = uint16_t;
-		using NodeAndConn = NavigationPath::RegionNode;
 
 		struct State {
 			float gScore = std::numeric_limits<float>::infinity();
@@ -103,6 +109,7 @@ namespace Halley {
 
 		void tryLinkNavMeshes(uint16_t idxA, uint16_t idxB);
 
-		Vector<NavigationPath::RegionNode> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
+		NavigationPath extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& path) const;
+		Vector<NodeAndConn> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
 	};
 }

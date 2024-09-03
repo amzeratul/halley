@@ -16,16 +16,17 @@ namespace Halley {
 		void setComputingPath();
 		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
 		const std::optional<NavigationPath>& getPath() const;
-		gsl::span<const Vector2f> getNextPathPoints() const;
+		gsl::span<const WorldPosition> getNextPathPoints() const;
 
 		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold);
 		
-		Vector2f getNextPosition() const;
+		WorldPosition getNextPosition() const;
+		WorldPosition getCurPosition() const;
+
 		size_t getNextPathIdx() const;
-		uint16_t getCurrentRegionId() const;
 		bool isFollowingPath() const;
 		bool isDone() const;
-		void setNavmeshSubWorld(int value);
+		void setAllPathSubWorld(int value);
 		int getNavmeshSubWorld() const;
 
 		const ConfigNode& getParams() const;
@@ -34,16 +35,13 @@ namespace Halley {
 	private:
 		WorldPosition curPos;
 		size_t nextPathIdx = 0;
-		size_t nextRegionIdx = 0;
 		std::optional<NavigationPath> path;
 		bool needsToReEvaluatePath = false;
 		bool computingPath = false;
-		int navmeshSubWorld = 0;
 		ConfigNode params;
 
-		void doSetPath(std::optional<NavigationPath> p);
 		void nextSubPath();
-		void goToNextRegion(const NavmeshSet& navmeshSet);
+		void doSetPath(std::optional<NavigationPath> p);
 		void reEvaluatePath(const NavmeshSet& navmeshSet);
 	};
 

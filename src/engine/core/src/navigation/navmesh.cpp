@@ -466,32 +466,32 @@ std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, int to
 
 std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath, bool postProcess) const
 {
-	Vector<Vector2f> points;
+	Vector<WorldPosition> points;
 	points.reserve(nodePath.size() + 1);
-	
-	points.push_back(query.from.pos);
+
+	points.push_back(WorldPosition(query.from.pos, subWorld));
 	for (size_t i = 1; i < nodePath.size(); ++i) {
 		const auto cur = nodePath[i - 1];
 
 		const auto& prevPoly = polygons[cur.node];
 		const auto edge = prevPoly.getEdge(cur.connectionIdx);
 		
-		points.push_back(0.5f * (edge.a + edge.b));
+		points.push_back(WorldPosition(0.5f * (edge.a + edge.b), subWorld));
 	}
-	points.push_back(query.to.pos);
+	points.push_back(WorldPosition(query.to.pos, subWorld));
 
 	if (postProcess) {
 		if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
-			postProcessPath(points, query.postProcessingType);
+			//postProcessPath(points, query.postProcessingType);
 		}
 		if (query.quantizationType != NavigationQuery::QuantizationType::None) {
-			quantizePath(points, query.quantizationType);
+			//quantizePath(points, query.quantizationType);
 		}
 	}
 
 	// Check for NaN/inf
 	for (auto& p: points) {
-		if (!p.isValid()) {
+		if (!p.pos.isValid()) {
 			Logger::logError("Navmesh query " + toString(query) + " generated NaNs and/or infs. Aborting.");
 			return NavigationPath(query, {});
 		}
@@ -532,7 +532,8 @@ void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostPro
 
 			const auto col0 = findRayCollision(Ray(p0, (p1 - p0).normalized()), (p1 - p0).length(), nodeIds[i - 1]);
 			const auto col1 = findRayCollision(Ray(p1, (p2 - p1).normalized()), (p2 - p1).length(), nodeIds[i]);
-			if (col.second < (col0.second + col1.second) * 1.2f) {
+			const float oldCost = col0.second + col1.second;
+			if (col.second < oldCost * 1.2f) {
 				points.erase(points.begin() + i);
 				nodeIds.erase(nodeIds.begin() + i);
 

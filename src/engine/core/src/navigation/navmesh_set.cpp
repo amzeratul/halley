@@ -112,18 +112,47 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 			}
 			return {};
 		} else {
-			return NavigationPath(query, {}, std::move(regionPath));
+			return extendToFullPath(query, regionPath);
 		}
 	}
 }
 
 std::optional<NavigationPath> NavmeshSet::pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const
 {
-	auto result = navmeshes[regionId].pathfind(query);
-	if (result) {
-		result->regions.emplace_back(regionId);
+	return navmeshes[regionId].pathfind(query);
+}
+
+NavigationPath NavmeshSet::extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& regions) const
+{
+	auto result = Vector<WorldPosition>();
+
+	auto lastPosition = query.from.pos;
+
+	for (auto i = 0; i < int(regions.size()); i++) {
+		const auto& region = regions.at(i);
+
+		const auto isLastRegion = i == int(regions.size()) - 1;
+		const auto& regionNavMesh = navmeshes[region.regionNodeId];
+
+		const auto endPos = isLastRegion ? query.to.pos : regionNavMesh.getPortals()[region.exitEdgeId].pos;
+		const auto subWorld = regionNavMesh.getSubWorld();
+
+		const auto p0 = WorldPosition(lastPosition, subWorld);
+		const auto p1 = WorldPosition(endPos, subWorld);
+		const auto subQuery = NavigationQuery(p0, p1, query.postProcessingType, query.quantizationType);
+
+		auto newPath = pathfindInRegion(subQuery, region.regionNodeId);
+		if (!newPath) {
+			Logger::logError("Unable to find path within region from " + toString(p0) + " to " + p1, true);
+			return {};
+		}
+		for (const auto& point: newPath->path) {
+			result.emplace_back(point);
+		}
+		lastPosition = endPos;
 	}
-	return result;
+
+	return NavigationPath(query, std::move(result));
 }
 
 const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos) const
