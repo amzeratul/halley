@@ -23,6 +23,7 @@ namespace Halley {
 		Vector2f getNextPosition() const;
 		size_t getNextPathIdx() const;
 		uint16_t getCurrentRegionId() const;
+		bool isFollowingPath() const;
 		bool isDone() const;
 		void setNavmeshSubWorld(int value);
 		int getNavmeshSubWorld() const;

@@ -206,6 +206,11 @@ uint16_t NavigationPathFollower::getCurrentRegionId() const
 	return path->regions[nextRegionIdx - 1].regionNodeId;
 }
 
+bool NavigationPathFollower::isFollowingPath() const
+{
+	return !!path;
+}
+
 bool NavigationPathFollower::isDone() const
 {
 	return !path;
