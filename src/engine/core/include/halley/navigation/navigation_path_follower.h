@@ -16,18 +16,16 @@ namespace Halley {
 		void setComputingPath();
 		void setPath(std::optional<NavigationPath> p, ConfigNode params = {});
 		const std::optional<NavigationPath>& getPath() const;
-		gsl::span<const WorldPosition> getNextPathPoints() const;
+		gsl::span<const NavigationPath::Point> getNextPathPoints() const;
 
 		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold);
 		
 		WorldPosition getNextPosition() const;
-		WorldPosition getCurPosition() const;
 
 		size_t getNextPathIdx() const;
 		bool isFollowingPath() const;
 		bool isDone() const;
-		void setAllPathSubWorld(int value);
-		int getNavmeshSubWorld() const;
+		void detachFromNavmesh();
 
 		const ConfigNode& getParams() const;
 		ConfigNode& getParams();

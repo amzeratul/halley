@@ -3,7 +3,7 @@ using namespace Halley;
 
 NavigationPath::NavigationPath() = default;
 
-NavigationPath::NavigationPath(NavigationQuery query, Vector<WorldPosition> path)
+NavigationPath::NavigationPath(NavigationQuery query, Vector<Point> path)
 	: path(std::move(path))
 	, query(std::move(query))
 {
@@ -12,7 +12,6 @@ NavigationPath::NavigationPath(NavigationQuery query, Vector<WorldPosition> path
 NavigationPath::NavigationPath(const ConfigNode& node)
 {
 	query = NavigationQuery(node["query"]);
-	followUpPaths = node["followUpPaths"].asVector<NavigationPath>({});
 }
 
 ConfigNode NavigationPath::toConfigNode() const
@@ -20,16 +19,13 @@ ConfigNode NavigationPath::toConfigNode() const
 	ConfigNode::MapType result;
 
 	result["query"] = query.toConfigNode();
-	if (!followUpPaths.empty()) {
-		result["followUpPaths"] = followUpPaths;
-	}
 	
 	return result;
 }
 
 bool NavigationPath::operator==(const NavigationPath& other) const
 {
-	return query == other.query && followUpPaths == other.followUpPaths;
+	return query == other.query;
 }
 
 bool NavigationPath::operator!=(const NavigationPath& other) const
@@ -43,26 +39,14 @@ NavigationPath NavigationPath::merge(gsl::span<const NavigationPath> paths)
 		return {};
 	}
 
-	/*
-	NavigationPath result;
-	result.query = paths.front().query;
-	result.query.to = paths.back().query.to;
-
-	for (const auto& path: paths) {
-		for (const auto p: path.path) {
-			if (result.path.empty() || p != result.path.back()) {
-				result.path.push_back(p);
-			}
-		}
-	}
-
-	result.regions = paths.back().regions;
-	*/
-
 	NavigationPath result = paths.front();
+
 	for (size_t i = 1; i < paths.size(); ++i) {
-		result.followUpPaths.push_back(paths[i]);
+		auto& other = paths[i];
+		result.path.insert(result.path.end(), other.path.begin(), other.path.end());
 	}
+
+	result.query.to = paths.back().query.to;
 
 	return result;
 }

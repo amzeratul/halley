@@ -111,5 +111,8 @@ namespace Halley {
 
 		NavigationPath extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& path) const;
 		Vector<NodeAndConn> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
+		void postProcessPath(NavigationPath& path) const;
+
+		void assignNavmeshIds();
 	};
 }

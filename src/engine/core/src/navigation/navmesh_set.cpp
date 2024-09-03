@@ -15,6 +15,7 @@ NavmeshSet::NavmeshSet(const ConfigNode& nodeData)
 	if (nodeData.getType() == ConfigNodeType::Map) {
 		navmeshes = nodeData["navmeshes"].asVector<Navmesh>();
 	}
+	assignNavmeshIds();
 }
 
 ConfigNode NavmeshSet::toConfigNode() const
@@ -48,11 +49,14 @@ void NavmeshSet::serialize(Serializer& s) const
 void NavmeshSet::deserialize(Deserializer& s)
 {
 	s >> navmeshes;
+	assignNavmeshIds();
 }
 
 void NavmeshSet::add(Navmesh navmesh)
 {
+	auto id = navmeshes.size();
 	navmeshes.push_back(std::move(navmesh));
+	navmeshes.back().setId(static_cast<uint16_t>(id));
 }
 
 void NavmeshSet::addChunk(NavmeshSet navmeshSet, Vector2f origin, Vector2i gridPosition)
@@ -78,6 +82,7 @@ void NavmeshSet::clear()
 void NavmeshSet::clearSubWorld(int subWorld)
 {
 	navmeshes.erase(std::remove_if(navmeshes.begin(), navmeshes.end(), [&] (const Navmesh& nav) { return nav.getSubWorld() == subWorld; }), navmeshes.end());
+	assignNavmeshIds();
 }
 
 std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut, float anisotropy, float nudge) const
@@ -101,7 +106,11 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		return {};
 	} else if (fromRegion == toRegion) {
 		// Just path in that mesh
-		return pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
+		auto path = pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
+		if (path) {
+			postProcessPath(*path);
+		}
+		return path;
 	} else {
 		// Gotta path between regions first
 		auto regionPath = findRegionPath(fromPos.pos, toPos.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
@@ -112,7 +121,9 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 			}
 			return {};
 		} else {
-			return extendToFullPath(query, regionPath);
+			auto path = extendToFullPath(query, regionPath);
+			postProcessPath(path);
+			return path;
 		}
 	}
 }
@@ -124,7 +135,7 @@ std::optional<NavigationPath> NavmeshSet::pathfindInRegion(const NavigationQuery
 
 NavigationPath NavmeshSet::extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& regions) const
 {
-	auto result = Vector<WorldPosition>();
+	auto result = Vector<NavigationPath::Point>();
 
 	auto lastPosition = query.from.pos;
 
@@ -147,7 +158,7 @@ NavigationPath NavmeshSet::extendToFullPath(const NavigationQuery& query, const 
 			return {};
 		}
 		for (const auto& point: newPath->path) {
-			result.emplace_back(point);
+			result.emplace_back(NavigationPath::Point{ point.pos, region.regionNodeId });
 		}
 		lastPosition = endPos;
 	}
@@ -455,6 +466,23 @@ Vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Ve
 	}
 	
 	return {};
+}
+
+void NavmeshSet::postProcessPath(NavigationPath& path) const
+{
+	if (path.query.postProcessingType != NavigationQuery::PostProcessingType::None) {
+		//postProcessPath(points, query.postProcessingType);
+	}
+	if (path.query.quantizationType != NavigationQuery::QuantizationType::None) {
+		//quantizePath(points, query.quantizationType);
+	}
+}
+
+void NavmeshSet::assignNavmeshIds()
+{
+	for (uint16_t i = 0; i < static_cast<uint16_t>(navmeshes.size()); ++i) {
+		navmeshes[i].setId(i);
+	}
 }
 
 std::pair<uint16_t, uint16_t> NavmeshSet::getPortalDestination(uint16_t region, uint16_t edge) const

@@ -108,8 +108,10 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		void setId(uint16_t id);
+
 		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
-		[[nodiscard]] std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath, bool postProcess) const;
+		[[nodiscard]] std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 		void postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
 		void quantizePath(Vector<Vector2f>& points, NavigationQuery::QuantizationType type) const;
@@ -165,6 +167,8 @@ namespace Halley {
 		private:
 			const Vector<State>& state;
 		};
+
+		uint16_t id;
 
 		Vector<Node> nodes;
 		Vector<Polygon> polygons;

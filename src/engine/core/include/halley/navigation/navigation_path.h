@@ -7,14 +7,26 @@
 namespace Halley {
 	class NavigationPath {
 	public:
-		// The path is defined by a sequence of points, followed by additional paths
-		Vector<WorldPosition> path;
-		Vector<NavigationPath> followUpPaths;
+		struct Point {
+			WorldPosition pos;
+			uint16_t navmeshId;
 
+			Point() = default;
+			Point(WorldPosition pos, uint16_t navmeshId = std::numeric_limits<uint16_t>::max())
+				: pos(pos)
+				, navmeshId(navmeshId)
+			{}
+			Point(Vector2f pos, int subWorld, uint16_t navmeshId = std::numeric_limits<uint16_t>::max())
+				: pos(pos, subWorld)
+				, navmeshId(navmeshId)
+			{}
+		};
+
+		Vector<Point> path;
 		NavigationQuery query;
 
 		NavigationPath();
-		NavigationPath(NavigationQuery query, Vector<WorldPosition> path);
+		NavigationPath(NavigationQuery query, Vector<Point> path);
 		explicit NavigationPath(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;

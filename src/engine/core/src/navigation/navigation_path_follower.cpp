@@ -60,7 +60,7 @@ const std::optional<NavigationPath>& NavigationPathFollower::getPath() const
 	return path;
 }
 
-gsl::span<const WorldPosition> NavigationPathFollower::getNextPathPoints() const
+gsl::span<const NavigationPath::Point> NavigationPathFollower::getNextPathPoints() const
 {
 	if (!path) {
 		return {};
@@ -91,7 +91,7 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 	}
 	
 	const auto nextPos = path->path[nextPathIdx];
-	const bool arrivedAtNextNode = (nextPos.pos - curPos.pos).squaredLength() < threshold * threshold;
+	const bool arrivedAtNextNode = (nextPos.pos.pos - curPos.pos).squaredLength() < threshold * threshold;
 	
 	if (arrivedAtNextNode) {
 		nextPathIdx++;
@@ -105,15 +105,7 @@ void NavigationPathFollower::nextSubPath()
 {
 	assert(path.has_value());
 
-	if (path->followUpPaths.empty()) {
-		doSetPath({});
-	} else {
-		auto followUpPaths = std::move(path->followUpPaths);
-		auto newPath = std::move(followUpPaths.front());
-		followUpPaths.erase(followUpPaths.begin());
-		newPath.followUpPaths = std::move(followUpPaths);
-		doSetPath(std::move(newPath));
-	}
+	doSetPath({});
 }
 
 void NavigationPathFollower::reEvaluatePath(const NavmeshSet& navmeshSet)
@@ -126,12 +118,7 @@ void NavigationPathFollower::reEvaluatePath(const NavmeshSet& navmeshSet)
 
 WorldPosition NavigationPathFollower::getNextPosition() const
 {
-	return path->path.size() > nextPathIdx ? path->path[nextPathIdx] : curPos;
-}
-
-WorldPosition NavigationPathFollower::getCurPosition() const
-{
-	return curPos;
+	return path->path.size() > nextPathIdx ? path->path[nextPathIdx].pos : curPos;
 }
 
 size_t NavigationPathFollower::getNextPathIdx() const
@@ -149,18 +136,14 @@ bool NavigationPathFollower::isDone() const
 	return !path;
 }
 
-void NavigationPathFollower::setAllPathSubWorld(int value)
+void NavigationPathFollower::detachFromNavmesh()
 {
 	if (path) {
 		for (auto& p: path->path) {
-			p.subWorld = value;
+			p.navmeshId = std::numeric_limits<uint16_t>::max();
+			p.pos.subWorld = -1;
 		}
 	}
-}
-
-int NavigationPathFollower::getNavmeshSubWorld() const
-{
-	return getNextPosition().subWorld;
 }
 
 const ConfigNode& NavigationPathFollower::getParams() const

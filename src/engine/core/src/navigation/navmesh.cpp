@@ -121,6 +121,11 @@ void Navmesh::deserialize(Deserializer& s)
 	generateOpenEdges();
 }
 
+void Navmesh::setId(uint16_t id)
+{
+	this->id = id;
+}
+
 const Polygon& Navmesh::getPolygon(int id) const
 {
 	return polygons[id];
@@ -374,7 +379,7 @@ std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) co
 		return {};
 	}
 
-	return makePath(query, nodePath.value(), true);
+	return makePath(query, nodePath.value());
 }
 
 Vector<Navmesh::NodeAndConn> Navmesh::makeResult(const Vector<State>& state, int startId, int endId) const
@@ -464,34 +469,25 @@ std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, int to
 	return {};
 }
 
-std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath, bool postProcess) const
+std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const
 {
-	Vector<WorldPosition> points;
+	Vector<NavigationPath::Point> points;
 	points.reserve(nodePath.size() + 1);
 
-	points.push_back(WorldPosition(query.from.pos, subWorld));
+	points.emplace_back(query.from.pos, subWorld, id);
 	for (size_t i = 1; i < nodePath.size(); ++i) {
 		const auto cur = nodePath[i - 1];
 
 		const auto& prevPoly = polygons[cur.node];
 		const auto edge = prevPoly.getEdge(cur.connectionIdx);
 		
-		points.push_back(WorldPosition(0.5f * (edge.a + edge.b), subWorld));
+		points.emplace_back(0.5f * (edge.a + edge.b), subWorld, id);
 	}
-	points.push_back(WorldPosition(query.to.pos, subWorld));
-
-	if (postProcess) {
-		if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
-			//postProcessPath(points, query.postProcessingType);
-		}
-		if (query.quantizationType != NavigationQuery::QuantizationType::None) {
-			//quantizePath(points, query.quantizationType);
-		}
-	}
+	points.emplace_back(query.to.pos, subWorld, id);
 
 	// Check for NaN/inf
 	for (auto& p: points) {
-		if (!p.pos.isValid()) {
+		if (!p.pos.pos.isValid()) {
 			Logger::logError("Navmesh query " + toString(query) + " generated NaNs and/or infs. Aborting.");
 			return NavigationPath(query, {});
 		}
