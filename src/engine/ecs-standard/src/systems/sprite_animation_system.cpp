@@ -70,7 +70,7 @@ private:
 		auto tryReplicating = [&] (EntityId id)
 		{
 			auto entity = getWorld().getEntity(id);
-			if (const auto parent = entity.tryGetParent()) {
+			if (const auto parent = entity.tryGetParent(); parent.has_value()) {
 				if (const auto* parentAnimation = parent->tryGetComponent<SpriteAnimationComponent>()) {
 					const bool parentHasReplicator = parent->hasComponent<SpriteAnimationReplicatorComponent>();
 					if (parentHasReplicator && !replicatorsUpdated.contains(parent->getEntityId())) {
