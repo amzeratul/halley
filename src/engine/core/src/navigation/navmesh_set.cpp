@@ -471,10 +471,144 @@ Vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Ve
 void NavmeshSet::postProcessPath(NavigationPath& path) const
 {
 	if (path.query.postProcessingType != NavigationQuery::PostProcessingType::None) {
-		//postProcessPath(points, query.postProcessingType);
+		postProcessPath(path.path, path.query.postProcessingType);
 	}
 	if (path.query.quantizationType != NavigationQuery::QuantizationType::None) {
-		//quantizePath(points, query.quantizationType);
+		quantizePath(path.path, path.query.quantizationType);
+	}
+}
+
+void NavmeshSet::postProcessPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const
+{
+	if (type == NavigationQuery::PostProcessingType::None || points.size() <= 2) {
+		return;
+	}
+
+	Vector<NodeId> nodeIds;
+	nodeIds.resize(points.size());
+	for (size_t i = 0; i < points.size(); ++i) {
+		auto& navmesh = navmeshes[points[i].navmeshId];
+		nodeIds[i] = navmesh.getNodeAt(points[i].pos.pos).value_or(static_cast<NodeId>(-1));
+		assert(nodeIds[i] != static_cast<NodeId>(-1));
+	}
+
+	for (size_t i = 1; i < points.size() - 1; ) {
+		// This point can be removed if the previous point has direct line of sight to the next
+
+		const auto p0 = points.at(i - 1);
+		const auto p1 = points.at(i);
+		const auto p2 = points.at(i + 1);
+
+		const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
+
+		if (!col.first) {
+			// No collision, so this is a candidate for removal
+			// But first, make sure that the new path is not much more expensive than the previous
+
+			const auto col0 = findRayCollision(p0, p1, nodeIds[i - 1]);
+			const auto col1 = findRayCollision(p1, p2, nodeIds[i]);
+			const float oldCost = col0.second + col1.second;
+			if (col.second < oldCost * 1.2f) {
+				points.erase(points.begin() + i);
+				nodeIds.erase(nodeIds.begin() + i);
+
+				// i is now the next item, so no need to increment
+				continue;
+			}
+		}
+
+		// Didn't remove a point, so increment i
+		++i;
+	}
+}
+
+void NavmeshSet::quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const
+{
+	if (type == NavigationQuery::QuantizationType::Quantize8Way) {
+		quantizePath8Way(points, Vector2f(1, 1));
+	} else if (type == NavigationQuery::QuantizationType::Quantize8WayIsometric) {
+		quantizePath8Way(points, Vector2f(1, 2));
+	}
+}
+
+void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const
+{
+	if (points.size() < 2) {
+		return;
+	}
+
+	Vector<NavigationPath::Point> result;
+	result.reserve(points.size());
+	result.push_back(points[0]);
+
+	for (size_t i = 1; i < points.size(); i++) {
+		const auto a = points[i - 1];
+		const auto b = points[i];
+
+		if (a.navmeshId != b.navmeshId) {
+			result.push_back(b);
+			continue;
+		}
+
+		// Construct a parallelogram around the path
+		// One of these will be a diagonal, the other will be horizontal or vertical
+		// d0 is the diagonal, d1 is the remaining (horizontal or vertical)
+		const auto delta = (b.pos.pos - a.pos.pos) * scale;
+		const auto d0 = std::abs(delta.x) > std::abs(delta.y) ? Vector2f(signOf(delta.x) * std::abs(delta.y), delta.y) : Vector2f(delta.x, signOf(delta.y) * std::abs(delta.x));
+		const auto d1 = delta - d0;
+
+		// If either vector is too small, then it's not worth doing it
+		const float threshold = 1.0f;
+		if (d0.length() >= threshold && d1.length() >= threshold) {
+			// Two potential target points, c and d, are constructed
+			const auto c = NavigationPath::Point(a.pos + d0 / scale, a.navmeshId);
+			const auto d = NavigationPath::Point(a.pos + d1 / scale, a.navmeshId);
+
+			// See if either path is acceptable
+			if (isPathClear(a, c, b)) {
+				result.push_back(c);
+			} else if (isPathClear(a, d, b)) {
+				result.push_back(d);
+			}
+		}
+
+		result.push_back(b);
+	}
+
+	points = std::move(result);
+}
+
+bool NavmeshSet::isPathClear(NavigationPath::Point a, NavigationPath::Point b, NavigationPath::Point c) const
+{
+	return !findRayCollision(b, c).first && !findRayCollision(a, b).first;
+}
+
+std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const
+{
+	if (from.navmeshId != to.navmeshId) {
+		// TODO
+		return { std::optional(from.pos.pos), 0.0f };
+	} else {
+		auto& navmesh = navmeshes[from.navmeshId];
+		auto nodeId = navmesh.getNodeAt(from.pos.pos);
+		if (!nodeId) {
+			return { std::optional(from.pos.pos), 0.0f };
+		}
+		return findRayCollision(from, to, *nodeId);
+	}
+}
+
+std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const
+{
+	if (from.navmeshId != to.navmeshId) {
+		// TODO
+		return { std::optional(from.pos.pos), 0.0f };
+	} else {
+		auto& navmesh = navmeshes[from.navmeshId];
+		const auto delta = to.pos.pos - from.pos.pos;
+		const float len = delta.length();
+		const auto dir = delta / len;
+		return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, startNodeId);
 	}
 }
 

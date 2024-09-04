@@ -111,7 +111,14 @@ namespace Halley {
 
 		NavigationPath extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& path) const;
 		Vector<NodeAndConn> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
+
 		void postProcessPath(NavigationPath& path) const;
+		void postProcessPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const;
+		void quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const;
+		void quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const;
+		bool isPathClear(NavigationPath::Point a, NavigationPath::Point b, NavigationPath::Point c) const;
+		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
+		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
 
 		void assignNavmeshIds();
 	};

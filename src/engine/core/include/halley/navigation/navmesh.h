@@ -113,8 +113,6 @@ namespace Halley {
 		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
-		void postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
-		void quantizePath(Vector<Vector2f>& points, NavigationQuery::QuantizationType type) const;
 
 		[[nodiscard]] const Vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const Vector<Polygon>& getPolygons() const { return polygons; }
@@ -192,7 +190,6 @@ namespace Halley {
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;
-		void quantizePath8Way(Vector<Vector2f>& points, Vector2f scale) const;
 
 		void processPolygons();
 		void addPolygonsToGrid();
@@ -209,7 +206,5 @@ namespace Halley {
 		void computeBoundingCircle();
 
 		void generateOpenEdges();
-
-		bool isPathClear(Vector2f a, Vector2f b, Vector2f c) const;
 	};
 }
