@@ -85,26 +85,31 @@ void NavmeshSet::clearSubWorld(int subWorld)
 	assignNavmeshIds();
 }
 
-std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut, float anisotropy, float nudge) const
+std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQuery, String* errorOut, float anisotropy, float nudge) const
 {
-	const float maxDist = 10; // TODO: this should be roughly equivalent to the agent radius
-	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(query.from, maxDist, anisotropy, nudge);
-	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(query.to, maxDist, anisotropy, nudge);
+	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(origQuery.from, maxStartDistanceToNavMesh, anisotropy, nudge);
+	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(origQuery.to, maxEndDistanceToNavMesh, anisotropy, nudge);
 	constexpr size_t notFound = std::numeric_limits<size_t>::max();
 
 	if (fromRegion == notFound || toRegion == notFound) {
 		// Failed
 		if (errorOut) {
 			if (fromRegion == notFound && toRegion == notFound) {
-				*errorOut = "neither the start position " + query.from + " nor the end position " + query.to + " are on the navmesh";
+				*errorOut = "neither the start position " + origQuery.from + " nor the end position " + origQuery.to + " are on the navmesh";
 			} else if (fromRegion == notFound) {
-				*errorOut = "start position " + query.from + " is not on the navmesh";
+				*errorOut = "start position " + origQuery.from + " is not on the navmesh";
 			} else {
-				*errorOut = "end position " + query.to + " is not on the navmesh";
+				*errorOut = "end position " + origQuery.to + " is not on the navmesh";
 			}
 		}
 		return {};
-	} else if (fromRegion == toRegion) {
+	}
+
+	auto query = origQuery;
+	query.from = fromPos;
+	query.to = toPos;
+
+	if (fromRegion == toRegion) {
 		// Just path in that mesh
 		auto path = pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
 		if (path) {
@@ -322,6 +327,12 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 	}
 }
 
+void NavmeshSet::setMaxDistancesToNavmesh(float startDistance, float endDistance)
+{
+	maxStartDistanceToNavMesh = startDistance;
+	maxEndDistanceToNavMesh = endDistance;
+}
+
 void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 {
 	constexpr float epsilon = 5.0f;
@@ -521,7 +532,6 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 
 			size_t bestCandidate = 0;
 			float bestRatio = distThreshold;
-			std::pair<std::optional<Vector2f>, float> bestCol;
 
 			const auto lastCheck = std::min(points.size() - 1, i + maxLookAhead);
 			float oldCost = costs[i - 1];
@@ -545,7 +555,6 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 					if (costRatio < bestRatio) {
 						bestRatio = costRatio;
 						bestCandidate = j;
-						bestCol = col;
 					}
 				}
 			}
@@ -574,6 +583,15 @@ void NavmeshSet::quantizePath(Vector<NavigationPath::Point>& points, NavigationQ
 
 void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const
 {
+	auto makePoint = [this] (WorldPosition pos) -> std::optional<NavigationPath::Point>
+	{
+		auto navmeshIdx = getNavMeshIdxAt(pos);
+		if (navmeshIdx == std::numeric_limits<decltype(navmeshIdx)>::max()) {
+			return std::nullopt;
+		}
+		return NavigationPath::Point(pos, static_cast<uint16_t>(navmeshIdx));
+	};
+
 	if (points.size() < 2) {
 		return;
 	}
@@ -597,19 +615,34 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 		const auto delta = (b.pos.pos - a.pos.pos) * scale;
 		const auto d0 = std::abs(delta.x) > std::abs(delta.y) ? Vector2f(signOf(delta.x) * std::abs(delta.y), delta.y) : Vector2f(delta.x, signOf(delta.y) * std::abs(delta.x));
 		const auto d1 = delta - d0;
+		const auto d0s = d0 / scale;
+		const auto d1s = d1 / scale;
 
 		// If either vector is too small, then it's not worth doing it
 		const float threshold = 1.0f;
 		if (d0.length() >= threshold && d1.length() >= threshold) {
 			// Two potential target points, c and d, are constructed
-			const auto c = NavigationPath::Point(a.pos + d0 / scale, a.navmeshId);
-			const auto d = NavigationPath::Point(a.pos + d1 / scale, a.navmeshId);
+			const auto c = makePoint(a.pos + d0s);
+			const auto d = makePoint(a.pos + d1s);
 
 			// See if either path is acceptable
-			if (isPathClear(a, c, b)) {
-				result.push_back(c);
-			} else if (isPathClear(a, d, b)) {
-				result.push_back(d);
+			if (c && isPathClear({ a, *c, b })) {
+				result.push_back(*c);
+			} else if (d && isPathClear({ a, *d, b })) {
+				result.push_back(*d);
+			} else {
+				// Try a more zig-zaggy path, composed of half of one leg, then the full other leg, followed by another half leg
+				const auto e = makePoint(a.pos + 0.5f * d1s);
+				const auto f = makePoint(a.pos + 0.5f * d1s + d0s);
+				const auto g = makePoint(a.pos + 0.5f * d0s);
+				const auto h = makePoint(a.pos + 0.5f * d0s + d1s);
+				if (e && f && isPathClear({ a, *e, *f, b })) {
+					result.push_back(*e);
+					result.push_back(*f);
+				} else if (g && h && isPathClear({ a, *g, *h, b})) {
+					result.push_back(*g);
+					result.push_back(*h);
+				}
 			}
 		}
 
@@ -619,9 +652,24 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 	points = std::move(result);
 }
 
-bool NavmeshSet::isPathClear(NavigationPath::Point a, NavigationPath::Point b, NavigationPath::Point c) const
+bool NavmeshSet::isPathClear(std::initializer_list<const NavigationPath::Point> points) const
 {
-	return !findRayCollision(b, c).first && !findRayCollision(a, b).first;
+	for (size_t i = 1; i < points.size(); ++i) {
+		if (findRayCollision(*(points.begin() + (i - 1)), *(points.begin() + i)).first) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool NavmeshSet::isPathClear(gsl::span<const NavigationPath::Point> points) const
+{
+	for (size_t i = 1; i < points.size(); ++i) {
+		if (findRayCollision(points[i - 1], points[i]).first) {
+			return false;
+		}
+	}
+	return true;
 }
 
 std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const

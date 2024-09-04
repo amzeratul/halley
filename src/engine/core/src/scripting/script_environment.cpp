@@ -101,7 +101,9 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		graphState.updateDisplayOffset(time);
 		graphState.incrementFrameNumber();
 	} catch (const std::exception& e) {
-		Logger::logError("Exception while executing script \"" + currentGraph->getAssetId() + "\":");
+		auto entity = getWorld().tryGetEntity(curEntity);
+		String name = entity.isValid() ? entity.getName() : "<invalidEntity>";
+		Logger::logError("Exception while executing script \"" + currentGraph->getAssetId() + "\" attached to entity \"" + name + "\":");
 		Logger::logException(e);
 	}
 
