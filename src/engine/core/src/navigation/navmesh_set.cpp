@@ -484,6 +484,7 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 		return;
 	}
 
+	// Pre-calculate node ids
 	Vector<NodeId> nodeIds;
 	nodeIds.resize(points.size());
 	for (size_t i = 0; i < points.size(); ++i) {
@@ -492,34 +493,71 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 		assert(nodeIds[i] != static_cast<NodeId>(-1));
 	}
 
-	for (size_t i = 1; i < points.size() - 1; ++i) {
-		// This point can be removed if the previous point has direct line of sight to the next
+	constexpr size_t maxLookAhead = 30;
 
-		const auto p0 = points.at(i - 1);
-		const auto p1 = points.at(i);
-		const auto p2 = points.at(i + 1);
+	// This algorithm is run in two passes; the first one only accepts paths which are substantially shorter, the second one accepts most simplifications
+	for (int pass = 0; pass < 2; ++pass) {
+		float distThreshold = pass == 0 ? 0.8f : 1.25f;
 
-		if (p0.pos.subWorld != p1.pos.subWorld) {
-			continue;
+		// Pre-calculate costs
+		Vector<float> costs;
+		costs.resize(points.size());
+		for (size_t i = 0; i < points.size(); ++i) {
+			if (i < points.size() - 1) {
+				costs[i] = findRayCollision(points[i], points[i + 1], nodeIds[i]).second;
+			} else {
+				costs[i] = 0;
+			}
 		}
 
-		const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
+		for (size_t i = 1; i < points.size() - 1; ++i) {
+			// This point can be removed if the previous point has direct line of sight to one of the points after this
 
-		if (!col.first) {
-			// No collision, so this is a candidate for removal
-			// But first, make sure that the new path is not much more expensive than the previous
+			const auto p0 = points.at(i - 1);
+			const auto p1 = points.at(i);
+			if (p0.pos.subWorld != p1.pos.subWorld) {
+				continue;
+			}
 
-			const auto col0 = findRayCollision(p0, p1, nodeIds[i - 1]);
-			const auto col1 = findRayCollision(p1, p2, nodeIds[i]);
-			const float oldCost = col0.second + col1.second;
-			if (col.second < oldCost * 1.2f) {
-				points.erase(points.begin() + i);
-				nodeIds.erase(nodeIds.begin() + i);
+			size_t bestCandidate = 0;
+			float bestRatio = distThreshold;
+			std::pair<std::optional<Vector2f>, float> bestCol;
+
+			const auto lastCheck = std::min(points.size() - 1, i + maxLookAhead);
+			float oldCost = costs[i - 1];
+			for (size_t j = i + 1; j <= lastCheck; ++j) {
+				const auto p2 = points.at(j);
+				if (p2.pos.subWorld != p0.pos.subWorld) {
+					break;
+				}
+
+				const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
+				oldCost += costs[j - 1];
+				
+				if (col.first) {
+					// Blocked, give up
+					break;
+				} else {
+					// No collision, so this is a candidate for removal
+					// (Keep searching for a better candidate)
+
+					float costRatio = col.second / oldCost;
+					if (costRatio < bestRatio) {
+						bestRatio = costRatio;
+						bestCandidate = j;
+						bestCol = col;
+					}
+				}
+			}
+
+			if (bestCandidate != 0) {
+				points.erase(points.begin() + i, points.begin() + bestCandidate);
+				nodeIds.erase(nodeIds.begin() + i, nodeIds.begin() + bestCandidate);
+				costs.erase(costs.begin() + i, costs.begin() + bestCandidate);
 
 				// i is now the next item, so decrement (so when it increments on the loop, it ends up where it started)
 				// Note that this is only safe because the loop starts on 1, otherwise it could overflow and stop the loop
 				--i;
-				continue;
 			}
 		}
 	}
@@ -548,7 +586,7 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 		const auto a = points[i - 1];
 		const auto b = points[i];
 
-		if (a.navmeshId != b.navmeshId) {
+		if (a.pos.subWorld != b.pos.subWorld) {
 			result.push_back(b);
 			continue;
 		}
