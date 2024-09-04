@@ -42,6 +42,11 @@ namespace Halley {
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;
 
+		bool isPathClear(std::initializer_list<const NavigationPath::Point> points) const;
+		bool isPathClear(gsl::span<const NavigationPath::Point> points) const;
+		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
+		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
+
 	private:
 		struct PortalConnection {
 			uint16_t portalId;
@@ -119,10 +124,6 @@ namespace Halley {
 		void simplifyPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const;
 		void quantizePath(Vector<NavigationPath::Point>& points, NavigationQuery::QuantizationType type) const;
 		void quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2f scale) const;
-		bool isPathClear(std::initializer_list<const NavigationPath::Point> points) const;
-		bool isPathClear(gsl::span<const NavigationPath::Point> points) const;
-		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
-		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
 
 		void assignNavmeshIds();
 	};
