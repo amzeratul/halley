@@ -1,6 +1,7 @@
 #include "halley/data_structures/temp_allocator.h"
 
 #include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 #include "halley/utils/utils.h"
 
 using namespace Halley;
@@ -36,6 +37,9 @@ char* TempMemoryPool::allocate(size_t n, size_t alignment)
 		}
 		return nextPage->allocate(n, alignment);
 	}
+
+	auto e = Halley::Exception("Out of space on temp memory pool, requested = " + String::prettySize(n) + ", capacity = " + String::prettySize(capacity) + ", free = " + String::prettySize(capacity - pos), HalleyExceptions::DataStructures);
+	Logger::logException(e);
 
 	throw std::bad_alloc();
 }
