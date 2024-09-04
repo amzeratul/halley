@@ -6,6 +6,7 @@
 #include "halley/maths/base_transform.h"
 
 namespace Halley {
+	class NavmeshSet;
 	class Random;
 
 	struct NavmeshBounds {
@@ -67,6 +68,9 @@ namespace Halley {
 			NodeAndConn(NodeId node = -1, uint16_t connection = std::numeric_limits<uint16_t>::max()) : node(node), connectionIdx(connection) {}
 			NodeAndConn(const ConfigNode& node);
 
+			bool operator==(const NodeAndConn& other) const;
+			bool operator!=(const NodeAndConn& other) const;
+
 			ConfigNode toConfigNode() const;
 
 			void serialize(Serializer& s) const;
@@ -78,7 +82,7 @@ namespace Halley {
 			Vector2f pos;
 			Vector<NodeAndConn> connections;
 			Vector<Vector2f> vertices;
-			bool connected = false;
+			OptionalLite<uint16_t> connected;
 			bool regionLink = false;
 			bool subWorldLink = false;
 
@@ -129,14 +133,14 @@ namespace Halley {
 		// Otherwise returns collision point
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Vector2f from, Vector2f to) const;
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance) const;
-		[[nodiscard]] std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
+		[[nodiscard]] std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr) const;
 
 		void setWorldPosition(Vector2f offset, Vector2i worldGridPos);
 		[[nodiscard]] Vector2i getWorldGridPos() const { return worldGridPos; }
 		[[nodiscard]] int getSubWorld() const { return subWorld; }
 		[[nodiscard]] Vector2f getOffset() const { return offset; }
 
-		void markPortalConnected(size_t idx);
+		void markPortalConnected(size_t portalId, uint16_t navmeshId);
 		void markPortalsDisconnected();
 
 		float getArea() const;
@@ -206,5 +210,7 @@ namespace Halley {
 		void computeBoundingCircle();
 
 		void generateOpenEdges();
+
+		OptionalLite<uint16_t> getNavmeshFromEdge(NodeAndConn edge) const;
 	};
 }

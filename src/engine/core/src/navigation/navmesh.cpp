@@ -7,6 +7,7 @@
 #include "halley/maths/ray.h"
 #include "halley/support/logger.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/navigation/navmesh_set.h"
 using namespace Halley;
 
 Navmesh::Navmesh()
@@ -22,26 +23,26 @@ Navmesh::Navmesh(Vector<PolygonData> polys, const NavmeshBounds& bounds, int sub
 
 	// Generate nodes
 	nodes.resize(polys.size());
-	for (size_t i = 0; i < polys.size(); ++i) {
-		assert(polys[i].connections.size() == polys[i].polygon.getNumSides());
+	for (size_t nodeId = 0; nodeId < polys.size(); ++nodeId) {
+		assert(polys[nodeId].connections.size() == polys[nodeId].polygon.getNumSides());
 
-		auto& node = nodes[i];
+		auto& node = nodes[nodeId];
 		
-		node.pos = polys[i].polygon.getBoundingCircle().getCentre();
-		node.nConnections = polys[i].connections.size();
-		size_t j = 0;
-		for (auto& connection: polys[i].connections) {
-			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[i].polygon.getCentre()) * scaleFactor).length() * polys[connection].weight : std::numeric_limits<float>::infinity();
-			node.connections[j] = connection >= 0 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(connection)) : OptionalLite<NodeId>();
-			node.costs[j] = cost;
+		node.pos = polys[nodeId].polygon.getBoundingCircle().getCentre();
+		node.nConnections = polys[nodeId].connections.size();
+		size_t edgeId = 0;
+		for (auto& connection: polys[nodeId].connections) {
+			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[nodeId].polygon.getCentre()) * scaleFactor).length() * polys[connection].weight : std::numeric_limits<float>::infinity();
+			node.connections[edgeId] = connection >= 0 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(connection)) : OptionalLite<NodeId>();
+			node.costs[edgeId] = cost;
 			
 			if (connection < -1) {
 				// Portal
-				const int id = -connection - 2;
-				addToPortals(NodeAndConn(static_cast<uint16_t>(i), static_cast<uint16_t>(j)), id);
+				const int portalId = -connection - 2;
+				addToPortals(NodeAndConn(static_cast<uint16_t>(nodeId), static_cast<uint16_t>(edgeId)), portalId);
 			}
 			
-			++j;
+			++edgeId;
 		}
 	}
 
@@ -339,6 +340,16 @@ Navmesh::NodeAndConn::NodeAndConn(const ConfigNode& configNode)
 {
 }
 
+bool Navmesh::NodeAndConn::operator==(const NodeAndConn& other) const
+{
+	return node == other.node && connectionIdx == other.connectionIdx;
+}
+
+bool Navmesh::NodeAndConn::operator!=(const NodeAndConn& other) const
+{
+	return !(*this == other);
+}
+
 ConfigNode Navmesh::NodeAndConn::toConfigNode() const
 {
 	return ConfigNode(Vector2i(node, connectionIdx));
@@ -512,10 +523,9 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) co
 	}
 }
 
-std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
+std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet) const
 {
 	float distanceLeft = maxDistance;
-	float weightedDistance = 0.0f;
 	NodeId curPoly = initialPolygon;
 	std::optional<NodeId> prevPoly;
 	while (distanceLeft > 0) {
@@ -584,7 +594,16 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 			curPoly = nextPoly.value();
 			ray = Ray(intersection.value(), ray.dir);
 		} else {
-			// Hit the edge of the navmesh
+			// Hit the edge of the navmesh - continue on next navmesh if available, otherwise stop here
+			if (navmeshSet) {
+				if (auto nextNavmeshId = getNavmeshFromEdge(NodeAndConn(curPoly, static_cast<uint16_t>(*edgeIdx)))) {
+					const auto& nextNavmesh = navmeshSet->getNavmeshes()[*nextNavmeshId];
+					if (auto nextNodeId = nextNavmesh.getNodeAt(*intersection)) {
+						return nextNavmesh.findRayCollision(Ray(*intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
+					}
+				}
+			}
+
 			return { intersection.value(), weightedDistance };
 		}
 	}
@@ -616,15 +635,15 @@ void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 	computeBoundingCircle();
 }
 
-void Navmesh::markPortalConnected(size_t idx)
+void Navmesh::markPortalConnected(size_t portalId, uint16_t navmeshId)
 {
-	portals[idx].connected = true;
+	portals[portalId].connected = navmeshId;
 }
 
 void Navmesh::markPortalsDisconnected()
 {
 	for (auto& portal: portals) {
-		portal.connected = false;
+		portal.connected = OptionalLite<uint16_t>();
 	}
 }
 
@@ -756,6 +775,18 @@ void Navmesh::generateOpenEdges()
 	}
 }
 
+OptionalLite<uint16_t> Navmesh::getNavmeshFromEdge(NodeAndConn edge) const
+{
+	for (const auto& p: portals) {
+		for (const auto& c: p.connections) {
+			if (c == edge) {
+				return p.connected;
+			}
+		}
+	}
+	return {};
+}
+
 void Navmesh::addToPortals(NodeAndConn nodeAndConn, int id)
 {
 	getPortals(id).connections.push_back(nodeAndConn);
@@ -826,8 +857,13 @@ void Navmesh::Portal::deserialize(Deserializer& s)
 
 void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Portal>& dst)
 {
+	struct Chain {
+		std::deque<Vector2f> points;
+		std::deque<NodeAndConn> connections;
+	};
+
 	const float epsilon = 0.01f;
-	Vector<std::deque<Vector2f>> chains;
+	Vector<Chain> chains;
 	for (auto& conn: connections) {
 		const auto edge = polygons[conn.node].getEdge(conn.connectionIdx);
 
@@ -836,41 +872,50 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Port
 		std::optional<size_t> mergedRight;
 		for (size_t i = 0; i < chains.size(); ++i) {
 			auto& chain = chains[i];
-			if (!mergedLeft && edge.a.epsilonEquals(chain.back(), epsilon)) {
-				chain.push_back(edge.b);
+			if (!mergedLeft && edge.a.epsilonEquals(chain.points.back(), epsilon)) {
+				chain.points.push_back(edge.b);
+				chain.connections.push_back(conn);
 				mergedLeft = i;
 			}
-			if (!mergedRight && edge.b.epsilonEquals(chain.front(), epsilon)) {
-				chain.push_front(edge.a);
+			if (!mergedRight && edge.b.epsilonEquals(chain.points.front(), epsilon)) {
+				chain.points.push_front(edge.a);
+				chain.connections.push_front(conn);
 				mergedRight = i;
 			}
 		}
 
 		// Found no chains
 		if (!mergedLeft && !mergedRight) {
-			chains.push_back(std::deque<Vector2f>{ edge.a, edge.b });
+			auto& chain = chains.emplace_back();
+			chain.points.push_back(edge.a);
+			chain.points.push_back(edge.b);
+			chain.connections.push_back(conn);
 		}
 
 		// Found two chains, merge them
 		if (mergedLeft && mergedRight) {
 			auto& left = chains[mergedLeft.value()];
 			auto& right = chains[mergedRight.value()];
-			left.pop_back();
-			left.pop_back();
-			left.insert(left.end(), right.begin(), right.end());
+			left.points.pop_back();
+			left.points.pop_back();
+			left.connections.pop_back();
+			left.points.insert(left.points.end(), right.points.begin(), right.points.end());
+			left.connections.insert(left.connections.end(), right.connections.begin(), right.connections.end());
 			chains.erase(chains.begin() + mergedRight.value());
 		}
 	}
 
 	// Output edges
 	for (auto& chain: chains) {
-		auto& result = dst.emplace_back(id);
-		auto& vs = result.vertices;
-		vs.insert(vs.end(), chain.begin(), chain.end());
+		auto& outPortal = dst.emplace_back(id);
+		auto& vs = outPortal.vertices;
+		auto& conns = outPortal.connections;
+		vs.insert(vs.end(), chain.points.begin(), chain.points.end());
+		conns.insert(conns.end(), chain.connections.begin(), chain.connections.end());
 
 		// Find the centre of edge
 		// First find the length of the edge, then pick the point at half of that length
-		result.pos = vs[0]; // Fallback
+		outPortal.pos = vs[0]; // Fallback
 		float midLen = 0;
 		for (size_t i = 1; i < vs.size(); ++i) {
 			midLen += (vs[i] - vs[i - 1]).length();
@@ -881,15 +926,12 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Port
 			const float segmentLen = (vs[i] - vs[i - 1]).length();
 			if (curLen + segmentLen > midLen) {
 				const float t = (midLen - curLen) / segmentLen;
-				result.pos = lerp(vs[i - 1], vs[i], t);
+				outPortal.pos = lerp(vs[i - 1], vs[i], t);
 				break;
 			} else {
 				curLen += segmentLen;
 			}
 		}
-		
-		// TODO: output connections too
-		
 	}
 }
 

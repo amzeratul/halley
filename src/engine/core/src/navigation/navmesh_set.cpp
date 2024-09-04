@@ -359,8 +359,8 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 			
 			if (edgeA.canJoinWith(edgeB, epsilon)) {
 				// Join edges
-				a.markPortalConnected(edgeAIdx);
-				b.markPortalConnected(edgeBIdx);
+				a.markPortalConnected(edgeAIdx, idxB);
+				b.markPortalConnected(edgeBIdx, idxA);
 
 				const auto curPos = edgeA.pos;
 
@@ -492,12 +492,16 @@ void NavmeshSet::postProcessPath(Vector<NavigationPath::Point>& points, Navigati
 		assert(nodeIds[i] != static_cast<NodeId>(-1));
 	}
 
-	for (size_t i = 1; i < points.size() - 1; ) {
+	for (size_t i = 1; i < points.size() - 1; ++i) {
 		// This point can be removed if the previous point has direct line of sight to the next
 
 		const auto p0 = points.at(i - 1);
 		const auto p1 = points.at(i);
 		const auto p2 = points.at(i + 1);
+
+		if (p0.pos.subWorld != p2.pos.subWorld) {
+			continue;
+		}
 
 		const auto col = findRayCollision(p0, p2, nodeIds[i - 1]);
 
@@ -512,13 +516,12 @@ void NavmeshSet::postProcessPath(Vector<NavigationPath::Point>& points, Navigati
 				points.erase(points.begin() + i);
 				nodeIds.erase(nodeIds.begin() + i);
 
-				// i is now the next item, so no need to increment
+				// i is now the next item, so decrement (so when it increments on the loop, it ends up where it started)
+				// Note that this is only safe because the loop starts on 1, otherwise it could overflow and stop the loop
+				--i;
 				continue;
 			}
 		}
-
-		// Didn't remove a point, so increment i
-		++i;
 	}
 }
 
@@ -585,31 +588,21 @@ bool NavmeshSet::isPathClear(NavigationPath::Point a, NavigationPath::Point b, N
 
 std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const
 {
-	if (from.navmeshId != to.navmeshId) {
-		// TODO
+	auto& navmesh = navmeshes[from.navmeshId];
+	auto nodeId = navmesh.getNodeAt(from.pos.pos);
+	if (!nodeId) {
 		return { std::optional(from.pos.pos), 0.0f };
-	} else {
-		auto& navmesh = navmeshes[from.navmeshId];
-		auto nodeId = navmesh.getNodeAt(from.pos.pos);
-		if (!nodeId) {
-			return { std::optional(from.pos.pos), 0.0f };
-		}
-		return findRayCollision(from, to, *nodeId);
 	}
+	return findRayCollision(from, to, *nodeId);
 }
 
 std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const
 {
-	if (from.navmeshId != to.navmeshId) {
-		// TODO
-		return { std::optional(from.pos.pos), 0.0f };
-	} else {
-		auto& navmesh = navmeshes[from.navmeshId];
-		const auto delta = to.pos.pos - from.pos.pos;
-		const float len = delta.length();
-		const auto dir = delta / len;
-		return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, startNodeId);
-	}
+	auto& navmesh = navmeshes[from.navmeshId];
+	const auto delta = to.pos.pos - from.pos.pos;
+	const float len = delta.length();
+	const auto dir = delta / len;
+	return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, startNodeId, 0, this);
 }
 
 void NavmeshSet::assignNavmeshIds()
