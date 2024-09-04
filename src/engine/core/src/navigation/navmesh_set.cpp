@@ -471,14 +471,14 @@ Vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Ve
 void NavmeshSet::postProcessPath(NavigationPath& path) const
 {
 	if (path.query.postProcessingType != NavigationQuery::PostProcessingType::None) {
-		postProcessPath(path.path, path.query.postProcessingType);
+		simplifyPath(path.path, path.query.postProcessingType);
 	}
 	if (path.query.quantizationType != NavigationQuery::QuantizationType::None) {
 		quantizePath(path.path, path.query.quantizationType);
 	}
 }
 
-void NavmeshSet::postProcessPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const
+void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQuery::PostProcessingType type) const
 {
 	if (type == NavigationQuery::PostProcessingType::None || points.size() <= 2) {
 		return;
@@ -499,7 +499,7 @@ void NavmeshSet::postProcessPath(Vector<NavigationPath::Point>& points, Navigati
 		const auto p1 = points.at(i);
 		const auto p2 = points.at(i + 1);
 
-		if (p0.pos.subWorld != p2.pos.subWorld) {
+		if (p0.pos.subWorld != p1.pos.subWorld) {
 			continue;
 		}
 
