@@ -44,6 +44,7 @@ namespace Halley {
 
 		bool isPathClear(std::initializer_list<const NavigationPath::Point> points) const;
 		bool isPathClear(gsl::span<const NavigationPath::Point> points) const;
+		bool isPathClear(gsl::span<const WorldPosition> points) const;
 		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
 		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
 

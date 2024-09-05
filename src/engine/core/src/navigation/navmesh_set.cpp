@@ -654,6 +654,10 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 
 bool NavmeshSet::isPathClear(std::initializer_list<const NavigationPath::Point> points) const
 {
+	if (points.size() < 2) {
+		return false;
+	}
+
 	for (size_t i = 1; i < points.size(); ++i) {
 		if (findRayCollision(*(points.begin() + (i - 1)), *(points.begin() + i)).first) {
 			return false;
@@ -664,10 +668,47 @@ bool NavmeshSet::isPathClear(std::initializer_list<const NavigationPath::Point> 
 
 bool NavmeshSet::isPathClear(gsl::span<const NavigationPath::Point> points) const
 {
+	if (points.size() < 2) {
+		return false;
+	}
+
 	for (size_t i = 1; i < points.size(); ++i) {
 		if (findRayCollision(points[i - 1], points[i]).first) {
 			return false;
 		}
+	}
+	return true;
+}
+
+bool NavmeshSet::isPathClear(gsl::span<const WorldPosition> points) const
+{
+	if (points.size() < 2) {
+		return false;
+	}
+
+	auto prevPoint = NavigationPath::Point(points[0], static_cast<uint16_t>(getNavMeshIdxAt(points[0])));
+	auto prevNodeId = navmeshes[prevPoint.navmeshId].getNodeAt(points[0].pos);
+	if (!prevNodeId) {
+		return false;
+	}
+
+	for (size_t i = 1; i < points.size(); ++i) {
+		auto curPoint = NavigationPath::Point(points[i], prevPoint.navmeshId);
+		auto curNodeId = navmeshes[curPoint.navmeshId].getNodeAt(curPoint.pos.pos);
+		if (!curNodeId) {
+			curPoint.navmeshId = static_cast<uint16_t>(getNavMeshIdxAt(curPoint.pos));
+			curNodeId = navmeshes[curPoint.navmeshId].getNodeAt(curPoint.pos.pos);
+			if (!curNodeId) {
+				return false;
+			}
+		}
+
+		if (findRayCollision(prevPoint, curPoint, *prevNodeId).first) {
+			return false;
+		}
+
+		prevPoint = curPoint;
+		prevNodeId = curNodeId;
 	}
 	return true;
 }

@@ -7,6 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include <stdexcept>
+#include <optional>
 #include <gsl/span>
 #include <string_view>
 #include <cstring>
@@ -540,6 +541,18 @@ namespace Halley {
 			set_size(st_size() - 1);
 		}
 
+		VectorStd& operator+= (const T& value)
+		{
+			push_back(value);
+			return *this;
+		}
+
+		VectorStd& operator+= (T&& value)
+		{
+			push_back(std::move(value));
+			return *this;
+		}
+
 		void swap(VectorStd& other) noexcept
 		{
 			std::swap(m_data, other.m_data);
@@ -643,6 +656,81 @@ namespace Halley {
 		[[nodiscard]] gsl::span<const gsl::byte> const_byte_span() const
 		{
 			return gsl::as_bytes(span());
+		}
+
+		[[nodiscard]] bool contains(const T& elem) const
+		{
+			return std::find(begin(), end(), elem) != end();
+		}
+
+		template <typename F>
+		[[nodiscard]] bool contains_if(F predicate)
+		{
+			return std::find_if(begin(), end(), predicate) != end();
+		}
+
+		auto find(const T& value) const
+		{
+			return std::find(begin(), end(), value);
+		}
+
+		auto find(const T& value)
+		{
+			return std::find(begin(), end(), value);
+		}
+
+		template <typename F>
+		auto find_if(F predicate) const
+		{
+			return std::find_if(begin(), end(), predicate);
+		}
+
+		template <typename F>
+		auto find_if(F predicate)
+		{
+			return std::find_if(begin(), end(), predicate);
+		}
+
+		std::optional<size_t> find_index(const T& value)
+		{
+			const auto iter = std::find(begin(), end(), value);
+			if (iter == end()) {
+				return {};
+			} else {
+				return iter - begin();
+			}
+		}
+
+		std::optional<size_t> find_index(const T& value) const
+		{
+			const auto iter = std::find(begin(), end(), value);
+			if (iter == end()) {
+				return {};
+			} else {
+				return iter - begin();
+			}
+		}
+
+		template <typename F>
+		std::optional<size_t> find_index_if(F predicate)
+		{
+			const auto iter = std::find_if(begin(), end(), predicate);
+			if (iter == end()) {
+				return {};
+			} else {
+				return iter - begin();
+			}
+		}
+
+		template <typename F>
+		std::optional<size_t> find_index_if(F predicate) const
+		{
+			const auto iter = std::find_if(begin(), end(), predicate);
+			if (iter == end()) {
+				return {};
+			} else {
+				return iter - begin();
+			}
 		}
 
 	private:
