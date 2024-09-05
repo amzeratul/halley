@@ -36,8 +36,8 @@ namespace Halley {
 
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
 		const Navmesh* getNavMeshAt(WorldPosition pos) const;
-		size_t getNavMeshIdxAt(WorldPosition pos) const;
-		std::pair<size_t, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist = std::numeric_limits<float>::infinity(), float anisotropy = 1.0f, float nudge = 0.1f) const;
+		OptionalLite<uint16_t> getNavMeshIdxAt(WorldPosition pos) const;
+		std::pair<OptionalLite<uint16_t>, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist = std::numeric_limits<float>::infinity(), float anisotropy = 1.0f, float nudge = 0.1f) const;
 		std::optional<WorldPosition> getClosestPointTo(WorldPosition pos, float maxDist = std::numeric_limits<float>::infinity(), float anisotropy = 1.0f, float nudge = 0.1f, bool anySubWorld = false) const;
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;

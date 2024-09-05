@@ -89,14 +89,13 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQu
 {
 	const auto [fromRegion, fromPos] = getNavMeshIdxAtWithTolerance(origQuery.from, maxStartDistanceToNavMesh, anisotropy, nudge);
 	const auto [toRegion, toPos] = getNavMeshIdxAtWithTolerance(origQuery.to, maxEndDistanceToNavMesh, anisotropy, nudge);
-	constexpr size_t notFound = std::numeric_limits<size_t>::max();
 
-	if (fromRegion == notFound || toRegion == notFound) {
+	if (!fromRegion || !toRegion) {
 		// Failed
 		if (errorOut) {
-			if (fromRegion == notFound && toRegion == notFound) {
+			if (!fromRegion && !toRegion) {
 				*errorOut = "neither the start position " + origQuery.from + " nor the end position " + origQuery.to + " are on the navmesh";
-			} else if (fromRegion == notFound) {
+			} else if (!fromRegion) {
 				*errorOut = "start position " + origQuery.from + " is not on the navmesh";
 			} else {
 				*errorOut = "end position " + origQuery.to + " is not on the navmesh";
@@ -111,14 +110,14 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& origQu
 
 	if (fromRegion == toRegion) {
 		// Just path in that mesh
-		auto path = pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
+		auto path = pathfindInRegion(query, *fromRegion);
 		if (path) {
 			postProcessPath(*path);
 		}
 		return path;
 	} else {
 		// Gotta path between regions first
-		auto regionPath = findRegionPath(fromPos.pos, toPos.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
+		auto regionPath = findRegionPath(fromPos.pos, toPos.pos, *fromRegion, *toRegion);
 		if (regionPath.size() <= 1) {
 			// Failed
 			if (errorOut) {
@@ -182,9 +181,9 @@ const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos) const
 	return nullptr;
 }
 
-size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
+OptionalLite<uint16_t> NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 {
-	size_t i = 0;
+	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
 		if (navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
 			return i;
@@ -192,22 +191,23 @@ size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 		i++;
 	}
 	
-	return std::numeric_limits<size_t>::max();
+	return std::nullopt;
 }
 
-std::pair<size_t, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist, float anisotropy, float nudge) const
+std::pair<OptionalLite<uint16_t>, WorldPosition> NavmeshSet::getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist, float anisotropy, float nudge) const
 {
-	auto navMeshIdx = getNavMeshIdxAt(pos);
-	if (navMeshIdx != std::numeric_limits<size_t>::max()) {
-		return { navMeshIdx, pos };
+	if (auto idx = getNavMeshIdxAt(pos)) {
+		return { *idx, pos };
 	}
 
 	// Find closest and try again
 	if (auto p = getClosestPointTo(pos, maxDist, anisotropy, nudge)) {
-		return { getNavMeshIdxAt(*p), *p };
+		if (auto idx = getNavMeshIdxAt(*p)) {
+			return { *idx, *p };
+		}
 	}
 
-	return { std::numeric_limits<size_t>::max(), pos };
+	return { std::nullopt, pos };
 }
 
 std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float maxDist, float anisotropy, float nudge, bool anySubWorld) const
@@ -586,10 +586,10 @@ void NavmeshSet::quantizePath8Way(Vector<NavigationPath::Point>& points, Vector2
 	auto makePoint = [this] (WorldPosition pos) -> std::optional<NavigationPath::Point>
 	{
 		auto navmeshIdx = getNavMeshIdxAt(pos);
-		if (navmeshIdx == std::numeric_limits<decltype(navmeshIdx)>::max()) {
+		if (!navmeshIdx) {
 			return std::nullopt;
 		}
-		return NavigationPath::Point(pos, static_cast<uint16_t>(navmeshIdx));
+		return NavigationPath::Point(pos, *navmeshIdx);
 	};
 
 	if (points.size() < 2) {
@@ -686,7 +686,12 @@ bool NavmeshSet::isPathClear(gsl::span<const WorldPosition> points) const
 		return false;
 	}
 
-	auto prevPoint = NavigationPath::Point(points[0], static_cast<uint16_t>(getNavMeshIdxAt(points[0])));
+	auto startNavmesh = getNavMeshIdxAt(points[0]);
+	if (!startNavmesh) {
+		return false;
+	}
+
+	auto prevPoint = NavigationPath::Point(points[0], *startNavmesh);
 	auto prevNodeId = navmeshes[prevPoint.navmeshId].getNodeAt(points[0].pos);
 	if (!prevNodeId) {
 		return false;
@@ -696,7 +701,11 @@ bool NavmeshSet::isPathClear(gsl::span<const WorldPosition> points) const
 		auto curPoint = NavigationPath::Point(points[i], prevPoint.navmeshId);
 		auto curNodeId = navmeshes[curPoint.navmeshId].getNodeAt(curPoint.pos.pos);
 		if (!curNodeId) {
-			curPoint.navmeshId = static_cast<uint16_t>(getNavMeshIdxAt(curPoint.pos));
+			auto newNavmesh = getNavMeshIdxAt(curPoint.pos);
+			if (!newNavmesh) {
+				return false;
+			}
+			curPoint.navmeshId = *newNavmesh;
 			curNodeId = navmeshes[curPoint.navmeshId].getNodeAt(curPoint.pos.pos);
 			if (!curNodeId) {
 				return false;
