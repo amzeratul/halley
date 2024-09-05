@@ -510,10 +510,10 @@ bool EntityNetworkSession::isLobbyReady() const
 	return lobbyReady;
 }
 
-bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const
+bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
 {
 	Expects(listener);
-	return listener->isEntityInView(entity, clientData);
+	return listener->isEntityInView(entity, clientData, peerId);
 }
 
 Vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const

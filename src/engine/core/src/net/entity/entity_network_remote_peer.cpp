@@ -47,7 +47,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 		}
 
 		const auto entity = parent->getWorld().getEntity(entry.entityId);
-		if (peerId == 0 || parent->isEntityInView(entity, clientData)) { // Always send to host
+		if (parent->isEntityInView(entity, clientData, peerId)) {
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parent->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);

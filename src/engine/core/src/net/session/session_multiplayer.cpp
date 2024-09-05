@@ -190,7 +190,7 @@ void SessionMultiplayer::setupInterpolators(DataInterpolatorSet& interpolatorSet
 {
 }
 
-bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData)
+bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId)
 {
 	const auto* transform = entity.tryGetComponent<Transform2DComponent>();
 
@@ -198,7 +198,12 @@ bool SessionMultiplayer::isEntityInView(EntityRef entity, const EntityClientShar
 		return true;
 	}
 
-	// Rect not defined, don't send
+    // Ignore view rect if send to host
+    if (peerId == 0) {
+        return true;
+    }
+
+    // Rect not defined, don't send
 	if (!clientData.viewRect) {
 		return false;
 	}
