@@ -118,7 +118,18 @@ void NavigationPathFollower::reEvaluatePath(const NavmeshSet& navmeshSet)
 
 WorldPosition NavigationPathFollower::getNextPosition() const
 {
-	return path->path.size() > nextPathIdx ? path->path[nextPathIdx].pos : curPos;
+	return getPointAtIdx(nextPathIdx);
+}
+
+WorldPosition NavigationPathFollower::getPointAtIdx(size_t idx) const
+{
+	if (!path || path->path.empty()) {
+		return curPos;
+	}
+	if (nextPathIdx < path->path.size()) {
+		return path->path[idx].pos;
+	}
+	return path->path.back().pos;
 }
 
 size_t NavigationPathFollower::getNextPathIdx() const

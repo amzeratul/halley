@@ -21,6 +21,7 @@ namespace Halley {
 		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold);
 		
 		WorldPosition getNextPosition() const;
+		WorldPosition getPointAtIdx(size_t idx) const;
 
 		size_t getNextPathIdx() const;
 		bool isFollowingPath() const;
