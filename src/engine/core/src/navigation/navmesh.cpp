@@ -711,6 +711,9 @@ gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2f pos, bool allow
 
 gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2i gridPos) const
 {
+	if (gridPos.x < 0 || gridPos.y < 0) {
+		return {};
+	}
 	return polyGrid[gridPos.x + gridPos.y * gridSize.x];
 }
 
