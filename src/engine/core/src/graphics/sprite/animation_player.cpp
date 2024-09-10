@@ -439,6 +439,9 @@ void AnimationPlayer::doResolveSprite()
 		curFrame = &curSeq->getFrame(curFrameN);
 		spriteData = &(curFrame->getSprite(dirId));
 		hasUpdate = true;
+	} else {
+		curFrame = nullptr;
+		spriteData = nullptr;
 	}
 }
 
