@@ -112,7 +112,7 @@ String Encode::encodeBase64(gsl::span<const gsl::byte> in)
 	return String(reinterpret_cast<const char*>(result.data()), result.size());
 }
 
-Bytes Encode::decodeBase64(const String& in)
+Bytes Encode::decodeBase64(std::string_view in)
 {
 	initBase64();
 

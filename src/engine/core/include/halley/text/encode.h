@@ -30,7 +30,7 @@ namespace Halley {
 		void decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes);
 
 		String encodeBase64(gsl::span<const gsl::byte> in);
-		Bytes decodeBase64(const String& in);
+		Bytes decodeBase64(std::string_view in);
 
 		Vector<char> encodeRLE(const Vector<char>& in);
 		Vector<char> decodeRLE(const Vector<char>& in);

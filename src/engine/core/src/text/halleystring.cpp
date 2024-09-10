@@ -1091,14 +1091,17 @@ namespace {
 void String::secureClear()
 {
 	str.resize(str.capacity(), 0);
-
-#ifdef WIN32
-	SecureZeroMemory(str.data(), str.size());
-#else
-	cleanse(&str[0], str.size());
-#endif
-
+	secureClearData(str.data(), str.size());
 	str.clear();
+}
+
+void String::secureClearData(void* data, size_t size)
+{
+#ifdef WIN32
+	SecureZeroMemory(data, size);
+#else
+	cleanse(data, size);
+#endif
 }
 
 String Halley::operator+ (const String& lhp, const String& rhp)
