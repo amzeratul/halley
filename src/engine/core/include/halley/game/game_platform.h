@@ -19,12 +19,17 @@ namespace Halley {
 		Android,
 		iOS,
         Emscripten,
-		FreeBSD
+		FreeBSD,
+        FuturePlatform1,
+        FuturePlatform2,
+        FuturePlatform3,
+        FuturePlatform4,
+        FuturePlatform5,
 	};
 
 	template <>
 	struct EnumNames<GamePlatform> {
-		constexpr std::array<const char*, 12> operator()() const {
+		constexpr std::array<const char*, 17> operator()() const {
 			return {{
 				"unknown",
 				"windows",
@@ -37,14 +42,29 @@ namespace Halley {
 				"android",
 				"ios",
                 "emscripten",
-				"freebsd"
+				"freebsd",
+                "futurePlatform1",
+                "futurePlatform2",
+                "futurePlatform3",
+                "futurePlatform4",
+                "futurePlatform5"
 			}};
 		}
 	};
 
     constexpr inline GamePlatform getPlatform()
     {
-    #if defined(__NX_TOOLCHAIN_MAJOR__)
+	#if defined(__FUTURE_PLATFORM_1__)
+        return GamePlatform::FuturePlatform1;
+	#elif defined(__FUTURE_PLATFORM_2__)
+        return GamePlatform::FuturePlatform2;
+	#elif defined(__FUTURE_PLATFORM_3__)
+        return GamePlatform::FuturePlatform3;
+	#elif defined(__FUTURE_PLATFORM_4__)
+        return GamePlatform::FuturePlatform4;
+	#elif defined(__FUTURE_PLATFORM_5__)
+        return GamePlatform::FuturePlatform5;
+	#elif defined(__NX_TOOLCHAIN_MAJOR__)
         return GamePlatform::Switch;
     #elif defined(__ORBIS__)
         return GamePlatform::PS4;

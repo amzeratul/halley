@@ -226,11 +226,6 @@ void Core::init()
 
 	// Start game
 	setStage(game->startGame());
-	
-	// Get video resources
-	if (api->video) {
-		painter = api->videoInternal->makePainter(*resources);
-	}
 }
 
 DevConClient* Core::getDevConClient() const
@@ -527,52 +522,62 @@ void Core::variableUpdate(Time time)
 
 void Core::render()
 {
-	if (api->video) {
-		{
-			ProfilerEvent event(ProfilerEventType::CoreStartRender);
-			api->video->startRender();
+	if (!api->video) {
+		return;
+	}
+
+	if (!currentStage || !currentStage->canRender()) {
+		return;
+	}
+		
+	if (!painter) {
+		painter = api->videoInternal->makePainter(*resources);
+	}
+
+	{
+		ProfilerEvent event(ProfilerEventType::CoreStartRender);
+		api->video->startRender();
+	}
+
+	std::unique_ptr<RenderSnapshot> snapshot;
+	{
+		ProfilerEvent event(ProfilerEventType::CoreRender);
+
+		painter->startRender();
+
+		if (!pendingSnapshots.empty()) {
+			snapshot = std::make_unique<RenderSnapshot>();
+			painter->startRecording(snapshot.get());
+		} else if (game->canCollectVideoPerformance() && isDevMode()) {
+			painter->startRecording(nullptr);
 		}
 
-		std::unique_ptr<RenderSnapshot> snapshot;
-		{
-			ProfilerEvent event(ProfilerEventType::CoreRender);
-
-			painter->startRender();
-
-			if (!pendingSnapshots.empty()) {
-				snapshot = std::make_unique<RenderSnapshot>();
-				painter->startRecording(snapshot.get());
-			} else if (game->canCollectVideoPerformance() && isDevMode()) {
-				painter->startRecording(nullptr);
+		if (currentStage) {
+			auto windowSize = api->video->getWindow().getDefinition().getSize();
+			if (windowSize != prevWindowSize) {
+				screenTarget.reset();
+				screenTarget = api->video->createScreenRenderTarget();
+				camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
+				prevWindowSize = windowSize;
 			}
+			RenderContext context(*painter, *camera, *screenTarget);
 
-			if (currentStage) {
-				auto windowSize = api->video->getWindow().getDefinition().getSize();
-				if (windowSize != prevWindowSize) {
-					screenTarget.reset();
-					screenTarget = api->video->createScreenRenderTarget();
-					camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
-					prevWindowSize = windowSize;
-				}
-				RenderContext context(*painter, *camera, *screenTarget);
-
-				try {
-					currentStage->onRender(context, *frameDataRender);
-				}
-				catch (Exception& e) {
-					game->onUncaughtException(e, TimeLine::Render);
-				}
+			try {
+				currentStage->onRender(context, *frameDataRender);
 			}
-
+			catch (Exception& e) {
+				game->onUncaughtException(e, TimeLine::Render);
+			}
 		}
-		{
-			painter->endRender();
 
-			if (!pendingSnapshots.empty() && snapshot) {
-				snapshot->finish();
-				pendingSnapshots.front().setValue(std::move(snapshot));
-				pendingSnapshots.erase(pendingSnapshots.begin());
-			}
+	}
+	{
+		painter->endRender();
+
+		if (!pendingSnapshots.empty() && snapshot) {
+			snapshot->finish();
+			pendingSnapshots.front().setValue(std::move(snapshot));
+			pendingSnapshots.erase(pendingSnapshots.begin());
 		}
 	}
 }

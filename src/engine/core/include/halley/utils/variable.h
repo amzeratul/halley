@@ -43,6 +43,11 @@ namespace Halley {
 		Variable& operator=(const Variable<T>& other) = delete;
 		Variable& operator=(Variable<T>&& other) = default;
 
+		bool isValid() const
+		{
+			return parent != nullptr;
+		}
+
 		operator T() const
 		{
 			refresh();

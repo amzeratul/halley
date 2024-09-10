@@ -419,6 +419,7 @@ const AudioProperties& AudioFacade::getAudioProperties() const
 {
 	if (!resources->exists<GameProperties>("game_properties")) {
 		static AudioProperties dummy;
+		Logger::logWarning("Initializing audio without audio properties");
 		return dummy;
 	}
 	const auto properties = resources->get<GameProperties>("game_properties");

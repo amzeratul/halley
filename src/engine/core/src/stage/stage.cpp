@@ -49,6 +49,11 @@ void Stage::onRender(RenderContext& rc, BaseFrameData& frameData) const
 	onRender(rc);
 }
 
+bool Stage::canRender() const
+{
+	return true;
+}
+
 const HalleyAPI& Stage::getAPI() const
 {
 	return *api;

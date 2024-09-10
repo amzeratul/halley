@@ -23,6 +23,14 @@
 #pragma warning(disable: 4748)
 #endif
 
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <winbase.h>
+#undef min
+#undef max
+#endif
+
 #include "halley/text/halleystring.h"
 #include "halley/support/exception.h"
 #include "halley/support/assert.h"
@@ -1068,6 +1076,29 @@ const String& String::emptyString()
 {
 	static String str;
 	return str;
+}
+
+namespace {
+	typedef void* (*memset_t)(void*, int, size_t);
+
+	static volatile memset_t memset_func = memset;
+
+	void cleanse(void* ptr, size_t len) {
+		memset_func(ptr, 0, len);
+	}
+}
+
+void String::secureClear()
+{
+	str.resize(str.capacity(), 0);
+
+#ifdef WIN32
+	SecureZeroMemory(str.data(), str.size());
+#else
+	cleanse(&str[0], str.size());
+#endif
+
+	str.clear();
 }
 
 String Halley::operator+ (const String& lhp, const String& rhp)

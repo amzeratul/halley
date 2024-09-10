@@ -31,6 +31,7 @@ namespace Halley
 		virtual void onFixedUpdate(Time dt, BaseFrameData& frameData);
 		virtual void onVariableUpdate(Time dt, BaseFrameData& frameData);
 		virtual void onRender(RenderContext& rc, BaseFrameData& frameData) const;
+		virtual bool canRender() const;
 
 		const HalleyAPI& getAPI() const;
 

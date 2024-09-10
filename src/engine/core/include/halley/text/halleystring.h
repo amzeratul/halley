@@ -205,6 +205,8 @@ namespace Halley {
 
 		static const String& emptyString();
 
+		void secureClear();
+
 	private:
 		Character* getCharPointer(size_t pos);
 		static size_t UTF8toUTF16(const char *utf8,wchar_t *utf16);
