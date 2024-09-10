@@ -33,6 +33,16 @@ bool NavigationPath::operator!=(const NavigationPath& other) const
 	return !(*this == other);
 }
 
+float NavigationPath::getLength() const
+{
+	float len = 0;
+	const auto ps = path.span();
+	for (size_t i = 1; i < ps.size(); ++i) {
+		len += (ps[i].pos.pos - ps[i - 1].pos.pos).length();
+	}
+	return len;
+}
+
 NavigationPath NavigationPath::merge(gsl::span<const NavigationPath> paths)
 {
 	if (paths.empty()) {

@@ -277,18 +277,27 @@ void NavmeshSet::linkNavmeshes()
 
 	// Generate portal graph
 	for (size_t curPortalId = 0; curPortalId < portalNodes.size(); ++curPortalId) {
-		auto& portalNode = portalNodes[curPortalId];
+		auto& portal = portalNodes[curPortalId];
 		
 		// Insert all edges that can be reached by these two regions as neighbours of this edge
-		const auto& dstRegion = regionNodes[portalNode.toRegion];
-		const auto curPos = portalNode.pos;
+		const auto& dstRegion = regionNodes[portal.toRegion];
+		const auto& dstNavmesh = navmeshes[portal.toRegion];
+		const auto curPos = portal.pos;
 		
-		portalNode.connections.reserve(dstRegion.portals.size() - 1);
+		portal.connections.reserve(dstRegion.portals.size() - 1);
 		for (size_t i = 0; i < dstRegion.portals.size(); ++i) {
-			if (curPortalId != portalNode.toPortal) {
-				const auto dstPortalId = dstRegion.portals[i];
-				const auto& other = portalNodes[dstPortalId];
-				portalNode.connections.emplace_back(dstPortalId, portalNode.toRegion, (other.pos - curPos).length());
+			const auto dstPortalId = dstRegion.portals[i];
+			const auto& other = portalNodes[dstPortalId];
+
+			if (portal.fromRegion != other.toRegion || portal.fromPortal != other.toPortal) {
+				auto query = NavigationQuery(WorldPosition(curPos, dstNavmesh.getSubWorld()), WorldPosition(other.pos, dstNavmesh.getSubWorld()), NavigationQuery::PostProcessingType::Normal, NavigationQuery::QuantizationType::None);
+				const auto interPortalPath = dstNavmesh.pathfind(query);
+				if (!interPortalPath) {
+					Logger::logError("Unable to compute distance between portals on same navmesh.");
+				}
+				const float cost = interPortalPath ? interPortalPath->getLength() : std::numeric_limits<float>::infinity(); 
+
+				portal.connections.emplace_back(dstPortalId, portal.toRegion, cost);
 			}
 		}
 	}
