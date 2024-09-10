@@ -25,7 +25,7 @@ void AudioFilterBiquad::setParameters(float a1, float a2, float b0, float b1, fl
 
 void AudioFilterBiquad::setLowPass(float cutoffHz, float sampleRate)
 {
-	const float Q = 1 / std::sqrtf(2); // Butterworth filter
+	const float Q = 1 / std::sqrt(2.0f); // Butterworth filter
 	const float w0 = 2 * pif() * cutoffHz / sampleRate;
 	const float alpha = std::sin(w0) / (2 * Q);
 	const float cosw0 = std::cos(w0);

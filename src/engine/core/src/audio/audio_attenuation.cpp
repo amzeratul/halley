@@ -61,7 +61,7 @@ float AudioAttenuation::getProximity(float distance) const
 		return referenceDistance / (referenceDistance + rollOffFactor * (distance - referenceDistance)) * linearBit;
 
 	case AudioAttenuationCurve::Exponential:
-		return std::powf(distance / referenceDistance, -rollOffFactor) * linearBit;
+		return std::pow(distance / referenceDistance, -rollOffFactor) * linearBit;
 	}
 
 	return 1.0f;
