@@ -261,7 +261,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 
 	oldPack = {}; // Release file handle!
 
-	if (!packListing.getEncryptionKey().has_value()) {
+	if (packListing.getEncryptionKey().has_value()) {
 		Logger::logInfo("- Encrypting \"" + packId + "\"...");
 		pack.encrypt(*packListing.getEncryptionKey());
 	}
