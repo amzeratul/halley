@@ -85,6 +85,14 @@ void Encode::decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes)
 	}
 }
 
+Bytes Encode::decodeBase16(std::string_view in)
+{
+	Bytes result;
+	result.resize(in.size() / 2);
+	decodeBase16(in, result.byte_span());
+	return result;
+}
+
 String Encode::encodeBase64(gsl::span<const gsl::byte> in)
 {
 	size_t sz = in.size();

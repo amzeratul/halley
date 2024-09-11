@@ -28,6 +28,7 @@ namespace Halley {
 	namespace Encode {
 		String encodeBase16(gsl::span<const gsl::byte> in);
 		void decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes);
+		Bytes decodeBase16(std::string_view in);
 
 		String encodeBase64(gsl::span<const gsl::byte> in);
 		Bytes decodeBase64(std::string_view in);
