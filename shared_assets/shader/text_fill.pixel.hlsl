@@ -23,5 +23,5 @@ float4 main(VOut input) : SV_TARGET {
 
 	float4 colFill = input.colour;
 	float alpha = colFill.a * edge;
-	return float4(colFill.rgb * alpha, alpha);
+	return float4(colFill.rgb * edge, alpha);
 }

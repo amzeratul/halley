@@ -12,9 +12,9 @@ namespace Halley {
 	public:
 		virtual ~IScreenServiceInterface() = default;
 
-		virtual Vector2i getGameResolution() = 0;
+		virtual Vector2i getGameResolution() const = 0;
 		virtual Vector2i getScreenResolution() const = 0;
-		virtual Vector2i getUIResolution() = 0;
+		virtual Vector2i getUIResolution() const = 0;
 		virtual float getZoomLevel() const = 0;
 	};
 
