@@ -28,7 +28,7 @@ AssetPack::AssetPack(AssetPack&& other) noexcept
 	*this = std::move(other);
 }
 
-AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& encryptionKey, bool preLoad)
+AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad)
 	: reader(std::move(_reader))
 	, hasReader(true)
 {
@@ -62,14 +62,14 @@ AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, const String& 
 
 	std::array<char, 16> ivEmpty;
 	memset(ivEmpty.data(), 0, ivEmpty.size());
-	const bool hasCrypt = memcmp(iv.data(), ivEmpty.data(), iv.size()) != 0 && !encryptionKey.isEmpty();
+	const bool hasCrypt = memcmp(iv.data(), ivEmpty.data(), iv.size()) != 0 && encryptionKey.has_value();
 
 	if (preLoad || hasCrypt) {
 		readToMemory();
 	}
 
 	if (hasCrypt) {
-		decrypt(encryptionKey);
+		decrypt(*encryptionKey);
 	}
 }
 
@@ -175,22 +175,17 @@ void AssetPack::readToMemory()
 	reader.reset();
 }
 
-void AssetPack::encrypt(const String& key)
+void AssetPack::encrypt(Encrypt::AESKey key)
 {
 	// Generate IV
-	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<char>(iv)));
-	Bytes ivBytes(iv.size());
-	memcpy(ivBytes.data(), iv.data(), iv.size());
+	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<uint8_t>(iv)));
 
-	data = Encrypt::encrypt(ivBytes, key, data);
+	data = Encrypt::encryptAES(iv, key, data);
 }
 
-void AssetPack::decrypt(const String& key)
+void AssetPack::decrypt(Encrypt::AESKey key)
 {
-	Bytes ivBytes(iv.size());
-	memcpy(ivBytes.data(), iv.data(), iv.size());
-
-	data = Encrypt::decrypt(ivBytes, key, data);
+	data = Encrypt::decryptAES(iv, key, data);
 }
 
 void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)

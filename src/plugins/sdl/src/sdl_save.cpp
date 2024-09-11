@@ -63,14 +63,21 @@ bool SDLSaveHeader::isValidHeader() const
 	return true;
 }
 
-bool SDLSaveHeader::isValid(const String& path, const String& key) const
+bool SDLSaveHeader::isValid(const String& path, const Vector<uint8_t>& key) const
 {
 	if (!isValidHeader()) {
 		return false;
 	}
-	if (v0.fileNameHash != computeHash(path, key)) {
-		// Corrupt
-		return false;
+	if (v0.version == 1) {
+		if (v0.fileNameHash != computeHash(path, key)) {
+			// Corrupt
+			return false;
+		}
+	} else {
+		if (v0.fileNameHash != computeHash(path, key)) {
+			// Corrupt
+			return false;
+		}
 	}
 
 	return true;
@@ -78,18 +85,18 @@ bool SDLSaveHeader::isValid(const String& path, const String& key) const
 
 void SDLSaveHeader::generateIV()
 {
-	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<char>(v0.iv.data(), v0.iv.size())));
+	Random::getGlobal().getBytes(gsl::as_writable_bytes(gsl::span<uint8_t>(v0.iv.data(), v0.iv.size())));
 }
 
-Bytes SDLSaveHeader::getIV() const
+Vector<uint8_t> SDLSaveHeader::getIV() const
 {
-	Bytes result;
+	Vector<uint8_t> result;
 	result.resize(v0.iv.size());
 	memcpy(result.data(), v0.iv.data(), v0.iv.size());
 	return result;
 }
 
-uint64_t SDLSaveHeader::computeHash(const String& path, const String& key)
+uint64_t SDLSaveHeader::computeHash(const String& path, const Vector<uint8_t>& key)
 {
 	String filename = path + ":" + key;
 	return Hash::hash(gsl::as_bytes(gsl::span<const char>(filename.c_str(), filename.length())));
@@ -154,16 +161,15 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit,
 	Expects (!path.isEmpty());
 
 	Bytes finalData;
-	const bool encrypted = static_cast<bool>(key);
 
-	if (encrypted) {
+	if (key.has_value()) {
 		// Encrypt
-		auto k = getKey();
+		auto k = getKeyV2();
 		SDLSaveHeader header;
 		header.generateIV();
 		header.v0.fileNameHash = SDLSaveHeader::computeHash(path, k);
 		header.v1.dataHash = Hash::hash(rawData);
-		auto encryptedData = Encrypt::encrypt(header.getIV(), k, rawData);
+		auto encryptedData = Encrypt::encryptAES(header.getIV().const_span_size<16>(), k.const_span_size<16>(), rawData);
 		
 		// Pack
 		finalData.resize(sizeof(header) + encryptedData.size());
@@ -200,13 +206,29 @@ void SDLSaveData::commit()
 {
 }
 
-String SDLSaveData::getKey() const
+Vector<uint8_t> SDLSaveData::getKeyV2() const
 {
-	if (key) {
-		return key.value() + ":" + toString(type);
-	} else {
-		return "";
-	}
+	assert(key.has_value());
+
+	Random rng;
+	auto key2 = *key + ":" + toString(type);
+	rng.setSeed(gsl::as_bytes(gsl::span<const char>(key2.c_str(), key2.length())));
+
+	Vector<uint8_t> key;
+	key.resize(16);
+	rng.getBytes(key.byte_span());
+	return key;
+}
+
+Vector<uint8_t> SDLSaveData::getKeyV1() const
+{
+	assert(key.has_value());
+
+	Vector<uint8_t> result;
+	result.resize(16, 0);
+	auto str = key.value() + ":" + toString(type);
+	memcpy(result.data(), str.c_str(), std::min<size_t>(16, str.length()));
+	return result;
 }
 
 std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& filename)
@@ -228,7 +250,7 @@ std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& file
 	}
 
 	// Basic header validation
-	const auto k = getKey();
+	const auto k = header.v0.version == 1 ? getKeyV1() : getKeyV2();
 	if (!header.isValid(filename, k)) {
 		Logger::logError("Invalid save file: " + filename);
 		return {};
@@ -236,7 +258,7 @@ std::optional<Bytes> SDLSaveData::doGetData(const Path& path, const String& file
 
 	// Decrypt data
 	rawData.erase(rawData.begin(), rawData.begin() + headerSize);
-	auto finalData = Encrypt::decrypt(header.getIV(), k, rawData);
+	auto finalData = Encrypt::decryptAES(header.getIV().const_span_size<16>(), k.const_span_size<16>(), rawData);
 
 	// Final validation
 	if (header.v0.version >= 1 && header.v1.dataHash != Hash::hash(finalData)) {

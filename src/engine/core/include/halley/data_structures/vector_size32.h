@@ -642,6 +642,24 @@ namespace Halley {
 		{
 			return gsl::span<const T>(data(), size());
 		}
+		
+		template <size_t Size>
+		[[nodiscard]] gsl::span<T, Size> span_size()
+		{
+			if (size() != Size) {
+				HalleyExceptions::throwException("const_span_size argument does not match size of vector.", 217);
+			}
+			return gsl::span<T, Size>(data(), size());
+		}
+
+		template <size_t Size>
+		[[nodiscard]] gsl::span<const T, Size> const_span_size() const
+		{
+			if (size() != Size) {
+				HalleyExceptions::throwException("const_span_size argument does not match size of vector.", 217);
+			}
+			return gsl::span<const T, Size>(data(), size());
+		}
 
 		[[nodiscard]] gsl::span<const gsl::byte> byte_span() const
 		{

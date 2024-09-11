@@ -131,7 +131,7 @@ void ResourceLocator::addFileSystem(const Path& path, IFileSystemCache* cache)
 	add(std::make_unique<FileSystemResourceLocator>(system, path, cache), path);
 }
 
-void ResourceLocator::addPack(const Path& path, const String& encryptionKey, bool preLoad, bool allowFailure, std::optional<int> priority)
+void ResourceLocator::addPack(const Path& path, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad, bool allowFailure, std::optional<int> priority)
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {
@@ -171,11 +171,11 @@ void ResourceLocator::removePack(const Path& path)
 	}
 }
 
-Vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
+Vector<String> ResourceLocator::getAssetsFromPack(const Path& path, std::optional<Encrypt::AESKey> encryptionKey) const
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {
-		std::unique_ptr<IResourceLocatorProvider> resourceLocator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, "", true);
+		std::unique_ptr<IResourceLocatorProvider> resourceLocator = std::make_unique<PackResourceLocator>(std::move(dataReader), path, encryptionKey, true);
 		auto& db = resourceLocator->getAssetDatabase();
 		return db.getAssets();
 	}

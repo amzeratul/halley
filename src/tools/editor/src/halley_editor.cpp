@@ -46,7 +46,7 @@ ResourceOptions HalleyEditor::initResourceLocator(const Path& gamePath, const Pa
 {
 	const auto path = Path(assetsPath) / "editor.dat";
 	if (Path::exists(path)) {
-		locator.addPack(path, "", true);
+		locator.addPack(path, std::nullopt, true);
 	} else {
 		Logger::logWarning("editor.dat not found, falling back to loading unpacked assets");
 		locator.addFileSystem(unpackedAssetsPath);

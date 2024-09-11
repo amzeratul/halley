@@ -15,11 +15,11 @@ namespace Halley {
 		const String& getName() const;
 		bool checkMatch(const String& asset) const;
 		bool isEncrypted() const;
-		const String& getEncryptionKey() const;
+		const Vector<uint8_t>& getEncryptionKey() const;
 
 	private:
 		String name;
-		String encryptionKey;
+		Vector<uint8_t> encryptionKey;
 		Vector<String> matches;
 	};
 

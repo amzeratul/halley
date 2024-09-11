@@ -4,6 +4,7 @@
 #include <memory>
 #include <gsl/span>
 #include "halley/resources/resource_data.h"
+#include "halley/utils/encrypt.h"
 
 namespace Halley {
 	enum class AssetType;
@@ -15,7 +16,7 @@ namespace Halley {
 
 	struct AssetPackHeader {
 		std::array<char, 8> identifier;
-		std::array<char, 16> iv;
+		std::array<uint8_t, 16> iv;
 		uint64_t assetDbStartPos;
 		uint64_t dataStartPos;
 
@@ -27,7 +28,7 @@ namespace Halley {
 		AssetPack();
 		AssetPack(const AssetPack& other) = delete;
 		AssetPack(AssetPack&& other) noexcept;
-		AssetPack(std::unique_ptr<ResourceDataReader> reader, const String& encryptionKey = "", bool preLoad = false);
+		AssetPack(std::unique_ptr<ResourceDataReader> reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad = false);
 		~AssetPack();
 
 		AssetPack& operator=(const AssetPack& other) = delete;
@@ -43,8 +44,8 @@ namespace Halley {
 		std::unique_ptr<ResourceData> getData(const String& asset, AssetType type, bool stream);
 
 		void readToMemory();
-		void encrypt(const String& key);
-		void decrypt(const String& key);
+		void encrypt(Encrypt::AESKey key);
+		void decrypt(Encrypt::AESKey key);
 	    
     	void readData(size_t pos, gsl::span<gsl::byte> dst);
 
@@ -61,7 +62,7 @@ namespace Halley {
 		std::mutex readerMutex;
 		size_t dataOffset = 0;
 		Bytes data;
-		std::array<char, 16> iv;
+		std::array<uint8_t, 16> iv;
 		mutable std::shared_ptr<bool> aliveToken;
     };
 

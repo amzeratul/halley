@@ -5,13 +5,13 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String key, bool preLoad, std::optional<int> priority)
+PackResourceLocator::PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, std::optional<Encrypt::AESKey> key, bool preLoad, std::optional<int> priority)
 	: path(std::move(path))
-	, encryptionKey(std::move(key))
+	, wasEncrypted(key.has_value())
 	, preLoad(preLoad)
 	, priority(priority)
 {
-	assetPack = std::make_unique<AssetPack>(std::move(reader), encryptionKey, preLoad);
+	assetPack = std::make_unique<AssetPack>(std::move(reader), key, preLoad);
 }
 
 PackResourceLocator::~PackResourceLocator()
@@ -54,7 +54,10 @@ bool PackResourceLocator::purgeIfAffected(SystemAPI& system, gsl::span<const Str
 
 void PackResourceLocator::loadAfterPurge()
 {
-	assetPack = std::make_unique<AssetPack>(system->getDataReader(path.string()), encryptionKey, preLoad);
+	if (wasEncrypted) {
+		throw Exception("Attempting to hot reload a pack, but key has been lost.", HalleyExceptions::Resources);
+	}
+	assetPack = std::make_unique<AssetPack>(system->getDataReader(path.string()), std::nullopt, preLoad);
 }
 
 int PackResourceLocator::getPriority() const

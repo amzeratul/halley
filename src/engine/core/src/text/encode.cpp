@@ -114,20 +114,22 @@ String Encode::encodeBase64(gsl::span<const gsl::byte> in)
 
 Bytes Encode::decodeBase64(std::string_view in)
 {
+	Bytes result(getBase64Length(in));
+	decodeBase64(in, result.byte_span());
+	return result;
+}
+
+void Encode::decodeBase64(std::string_view in, gsl::span<gsl::byte> out)
+{
 	initBase64();
 
-	size_t sz = in.length();
-	assert(sz % 4 == 0);
-	size_t resLen = sz * 3 / 4;
-	if (in[sz-2] == '=') resLen -= 2;
-	else if (in[sz-1] == '=') resLen -= 1;
-	Bytes result(resLen);
+	const auto outWrite = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(out.data()), out.size());
 
-	for (size_t i=0; i<sz; i+=4) {
+	for (size_t i = 0; i < in.length(); i += 4) {
 		int b0 = base64reverse[in[i]];
-		int b1 = base64reverse[in[i+1]];
-		int b2 = base64reverse[in[i+2]];
-		int b3 = base64reverse[in[i+3]];
+		int b1 = base64reverse[in[i + 1]];
+		int b2 = base64reverse[in[i + 2]];
+		int b3 = base64reverse[in[i + 3]];
 
 		int available = 3;
 		if (b3 == 255) {
@@ -142,12 +144,29 @@ Bytes Encode::decodeBase64(std::string_view in)
 		unsigned int val = static_cast<unsigned int>((b0 << 18) | (b1 << 12) | (b2 << 6) | (b3));
 		size_t outPos = i * 3 / 4;
 
-		result[outPos] = (val >> 16) & 0xFF;
-		if (available >= 2) result[outPos+1] = (val >> 8) & 0xFF;
-		if (available == 3) result[outPos+2] = (val >> 0) & 0xFF;
+		outWrite[outPos] = (val >> 16) & 0xFF;
+		if (available >= 2) {
+			outWrite[outPos + 1] = (val >> 8) & 0xFF;
+		}
+		if (available == 3) {
+			outWrite[outPos + 2] = (val >> 0) & 0xFF;
+		}
+	}
+}
+
+size_t Encode::getBase64Length(std::string_view in)
+{
+	size_t sz = in.length();
+	assert(sz % 4 == 0);
+
+	size_t resLen = sz * 3 / 4;
+	if (in[sz-2] == '=') {
+		resLen -= 2;
+	} else if (in[sz-1] == '=') {
+		resLen -= 1;
 	}
 
-	return result;
+	return resLen;
 }
 
 static void flushTo(Vector<char>& toFlush, Vector<char>& dest)

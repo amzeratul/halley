@@ -2,6 +2,7 @@
 
 #include "halley/resources/resource_locator.h"
 #include "halley/resources/asset_database.h"
+#include "halley/utils/encrypt.h"
 
 namespace Halley {
 	class SystemAPI;
@@ -9,7 +10,7 @@ namespace Halley {
 
 	class PackResourceLocator final : public IResourceLocatorProvider {
 	public:
-		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, String encryptionKey = "", bool preLoad = false, std::optional<int> priority = {});
+		explicit PackResourceLocator(std::unique_ptr<ResourceDataReader> reader, Path path, std::optional<Encrypt::AESKey> encryptionKey = std::nullopt, bool preLoad = false, std::optional<int> priority = {});
 		~PackResourceLocator();
 
 	protected:
@@ -27,8 +28,8 @@ namespace Halley {
 		std::unique_ptr<AssetPack> assetPack;
 
 		Path path;
-		String encryptionKey; // :(
-		bool preLoad;
+		bool wasEncrypted = false;
+		bool preLoad = false;
 		std::optional<int> priority;
 		SystemAPI* system = nullptr;
 	};

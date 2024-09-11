@@ -6,6 +6,8 @@
 #include "halley/data_structures/maybe.h"
 #include <set>
 
+#include "halley/utils/encrypt.h"
+
 namespace Halley {
 	class Project;
 	class AssetPackManifest;
@@ -24,11 +26,11 @@ namespace Halley {
 		};
 		
 		AssetPackListing();
-		AssetPackListing(String name, String encryptionKey);
+		AssetPackListing(String name, Vector<uint8_t> encryptionKey);
 		
 		void addFile(AssetType type, const String& name, const AssetDatabase::Entry& entry, bool modified);
 		const Vector<Entry>& getEntries() const;
-		const String& getEncryptionKey() const;
+		std::optional<Encrypt::AESKey> getEncryptionKey() const;
 		
 		void setActive(bool active);
 		bool isActive() const;
@@ -36,7 +38,7 @@ namespace Halley {
 
 	private:
 		String name;
-		String encryptionKey;
+		Vector<uint8_t> encryptionKey;
 
 		bool active = false;
 

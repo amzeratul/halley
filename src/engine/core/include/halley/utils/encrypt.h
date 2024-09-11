@@ -7,7 +7,10 @@ namespace Halley {
 
 	class Encrypt {
 	public:
-		static Bytes encrypt(const Bytes& iv, const String& key, const Bytes& data);
-		static Bytes decrypt(const Bytes& iv, const String& key, const Bytes& data);
+		using AESKey = gsl::span<const uint8_t, 16>;
+		using AESIV = gsl::span<const uint8_t, 16>;
+
+		static Bytes encryptAES(AESIV iv, AESKey key, const Bytes& data);
+		static Bytes decryptAES(AESIV iv, AESKey key, const Bytes& data);
 	};
 }

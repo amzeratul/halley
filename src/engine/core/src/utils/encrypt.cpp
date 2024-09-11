@@ -8,10 +8,8 @@
 
 using namespace Halley;
 
-Bytes Encrypt::encrypt(const Bytes& iv, const String& key, const Bytes& data)
+Bytes Encrypt::encryptAES(AESIV iv, AESKey key, const Bytes& data)
 {
-	Expects(iv.size() == 16);
-
 	// Prepare buffer
 	Bytes result = data;
 	const size_t origSize = result.size();
@@ -30,17 +28,14 @@ Bytes Encrypt::encrypt(const Bytes& iv, const String& key, const Bytes& data)
 
 	// Encrypt
 	AES_ctx ctx;
-	AES_init_ctx_iv(&ctx, reinterpret_cast<const uint8_t*>(key.c_str()), iv.data());
+	AES_init_ctx_iv(&ctx, key.data(), iv.data());
 	AES_CBC_encrypt_buffer(&ctx, result.data(), uint32_t(result.size()));
 
 	return result;
 }
 
-Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
+Bytes Encrypt::decryptAES(AESIV iv, AESKey key, const Bytes& data)
 {
-	Expects(iv.size() == 16);
-	Expects(key.size() >= 16);
-
 	// Prepare buffer
 	Bytes result = data;
 
@@ -53,7 +48,7 @@ Bytes Encrypt::decrypt(const Bytes& iv, const String& key, const Bytes& data)
 	// Decrypt
 	AES_ctx ctx;
 	std::memset(&ctx, 0, sizeof(ctx));
-	AES_init_ctx_iv(&ctx, reinterpret_cast<const uint8_t*>(key.c_str()), iv.data());
+	AES_init_ctx_iv(&ctx, key.data(), iv.data());
 	AES_CBC_decrypt_buffer(&ctx, result.data(), uint32_t(result.size()));
 
 	// Remove padding

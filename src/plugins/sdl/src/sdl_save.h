@@ -7,9 +7,9 @@ namespace Halley {
 	struct SDLSaveHeaderV0
 	{
 		std::array<char, 8> formatId;
-		uint32_t version = 1;
+		uint32_t version = 2;
 		uint32_t reserved = 0;
-		std::array<char, 16> iv;
+		std::array<uint8_t, 16> iv;
 		uint64_t fileNameHash = 0;
 
 		SDLSaveHeaderV0();
@@ -27,11 +27,11 @@ namespace Halley {
 		size_t read(gsl::span<const gsl::byte> data);
 
 		bool isValidHeader() const;
-		bool isValid(const String& path, const String& key) const;
+		bool isValid(const String& path, const Vector<uint8_t>& key) const;
 		void generateIV();
 
-		Bytes getIV() const;
-		static uint64_t computeHash(const String& path, const String& key);
+		Vector<uint8_t> getIV() const;
+		static uint64_t computeHash(const String& path, const Vector<uint8_t>& key);
 	};
 
 	class SDLSaveData : public ISaveData {
@@ -50,7 +50,8 @@ namespace Halley {
 		std::optional<String> key;
 		std::set<String> corruptedFiles;
 
-		String getKey() const;
+		Vector<uint8_t> getKeyV2() const;
+		Vector<uint8_t> getKeyV1() const;
 		std::optional<Bytes> doGetData(const Path& path, const String& filename);
 	};
 }

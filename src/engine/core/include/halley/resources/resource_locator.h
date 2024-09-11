@@ -27,6 +27,7 @@
 #include <halley/data_structures/hash_map.h>
 #include <halley/data_structures/vector.h>
 #include "halley/data_structures/maybe.h"
+#include "halley/utils/encrypt.h"
 
 namespace Halley {
 	class IFileSystemCache;
@@ -52,8 +53,8 @@ namespace Halley {
 	public:
 		explicit ResourceLocator(SystemAPI& system);
 		void addFileSystem(const Path& path, IFileSystemCache* cache = nullptr);
-		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, std::optional<int> priority = {});
-		Vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
+		void addPack(const Path& path, std::optional<Encrypt::AESKey> encryptionKey = std::nullopt, bool preLoad = false, bool allowFailure = false, std::optional<int> priority = {});
+		Vector<String> getAssetsFromPack(const Path& path, std::optional<Encrypt::AESKey> encryptionKey = std::nullopt) const;
 		void removePack(const Path& path);
 
 		const Metadata* getMetaData(const String& resource, AssetType type) const override;

@@ -3,6 +3,7 @@
 #include "halley/tools/packer/asset_packer.h"
 #include <yaml-cpp/yaml.h>
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/text/encode.h"
 using namespace Halley;
 
 AssetPackManifestEntry::AssetPackManifestEntry()
@@ -12,7 +13,7 @@ AssetPackManifestEntry::AssetPackManifestEntry()
 AssetPackManifestEntry::AssetPackManifestEntry(const ConfigNode& node)
 {
 	name = node["name"].asString();
-	encryptionKey = node["encryptionKey"].asString("");
+	encryptionKey = Encode::decodeBase64(node["encryptionKey"].asString(""));
 	if (node.hasKey("matches")) {
 		for (auto& m: node["matches"].asSequence()) {
 			matches.push_back(m.asString());
@@ -37,10 +38,10 @@ bool AssetPackManifestEntry::checkMatch(const String& asset) const
 
 bool AssetPackManifestEntry::isEncrypted() const
 {
-	return !encryptionKey.isEmpty();
+	return !encryptionKey.empty();
 }
 
-const String& AssetPackManifestEntry::getEncryptionKey() const
+const Vector<uint8_t>& AssetPackManifestEntry::getEncryptionKey() const
 {
 	return encryptionKey;
 }

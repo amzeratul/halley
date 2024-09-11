@@ -22,9 +22,9 @@ AssetPackListing::AssetPackListing()
 {
 }
 
-AssetPackListing::AssetPackListing(String name, String encryptionKey)
-	: name(name)
-	, encryptionKey(encryptionKey)
+AssetPackListing::AssetPackListing(String name, Vector<uint8_t> encryptionKey)
+	: name(std::move(name))
+	, encryptionKey(std::move(encryptionKey))
 {
 }
 
@@ -38,9 +38,12 @@ const Vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
 	return entries;
 }
 
-const String& AssetPackListing::getEncryptionKey() const
+std::optional<Encrypt::AESKey> AssetPackListing::getEncryptionKey() const
 {
-	return encryptionKey;
+	if (encryptionKey.empty()) {
+		return std::nullopt;
+	}
+	return encryptionKey.const_span_size<16>();
 }
 
 void AssetPackListing::setActive(bool a)
@@ -99,7 +102,7 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 			// Find which pack this asset goes into
 			auto packEntry = manifest.getPack("~:" + assetName);
 			String packName;
-			String encryptionKey;
+			Vector<uint8_t> encryptionKey;
 			if (packEntry) {
 				packName = packEntry->get().getName();
 				encryptionKey = packEntry->get().getEncryptionKey();
@@ -258,9 +261,9 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 
 	oldPack = {}; // Release file handle!
 
-	if (!packListing.getEncryptionKey().isEmpty()) {
+	if (!packListing.getEncryptionKey().has_value()) {
 		Logger::logInfo("- Encrypting \"" + packId + "\"...");
-		pack.encrypt(packListing.getEncryptionKey());
+		pack.encrypt(*packListing.getEncryptionKey());
 	}
 
 	// Write pack
