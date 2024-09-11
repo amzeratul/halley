@@ -1,9 +1,7 @@
 #include "halley/sprite_attribute.hlsl"
 
 Texture2D tex0 : register(t0);
-SamplerState sampler0 : register(s0) {
-	Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-};
+SamplerState sampler0 : register(s0);
 
 cbuffer MaterialBlock : register(b1) {
 	float u_smoothness;
