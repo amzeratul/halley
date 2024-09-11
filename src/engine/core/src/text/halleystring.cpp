@@ -1097,6 +1097,10 @@ void String::secureClear()
 
 void String::secureClearData(void* data, size_t size)
 {
+	if (size == 0) {
+		return;
+	}
+
 #ifdef WIN32
 	SecureZeroMemory(data, size);
 #else
