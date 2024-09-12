@@ -141,6 +141,12 @@ namespace Halley {
 	}
 
 	template <typename T>
+	[[nodiscard]] constexpr inline float invLerpClamp(T value, T minVal, T maxVal)
+	{
+		return clamp<T>(static_cast<float>(value - minVal) / static_cast<float>(maxVal - minVal), 0, 1);
+	}
+
+	template <typename T>
 	[[nodiscard]] constexpr inline T damp(T a, T b, float lambda, float dt)
 	{
 		return lerp<T>(a, b, 1.0f - std::exp(-lambda * dt));
