@@ -272,7 +272,7 @@ void NetworkSession::sendToPeers(OutboundNetworkPacket packet, std::optional<Pee
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToAllPeers;
-	header.srcPeerId = myPeerId.value();
+	header.srcPeerId = myPeerId ? myPeerId.value() : 0;
 	header.dstPeerId = 0;
 
 	doSendToAll(makeOutbound(packet.getBytes(), header), except);
@@ -282,7 +282,7 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToPeer;
-	header.srcPeerId = myPeerId.value();
+	header.srcPeerId = myPeerId ? myPeerId.value() : 0;
 	header.dstPeerId = peerId;
 	packet.addHeader(header);
 
