@@ -168,10 +168,12 @@ size_t Encode::getBase64Length(std::string_view in)
 	assert(sz % 4 == 0);
 
 	size_t resLen = sz * 3 / 4;
-	if (in[sz-2] == '=') {
-		resLen -= 2;
-	} else if (in[sz-1] == '=') {
-		resLen -= 1;
+	if (resLen > 0) {
+		if (in[sz-2] == '=') {
+			resLen -= 2;
+		} else if (in[sz-1] == '=') {
+			resLen -= 1;
+		}
 	}
 
 	return resLen;
