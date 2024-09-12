@@ -737,6 +737,7 @@ void Core::registerDefaultPlugins()
 	registerPlugin(std::make_unique<DummyPlatformPlugin>());
 	registerPlugin(std::make_unique<DummyMoviePlugin>());
 	registerPlugin(std::make_unique<DummyAnalyticsPlugin>());
+	registerPlugin(std::make_unique<DummyWebPlugin>());
 }
 
 void Core::registerPlugin(std::unique_ptr<Plugin> plugin)
