@@ -14,14 +14,14 @@ TextRenderer::TextRenderer()
 {
 }
 
-TextRenderer::TextRenderer(std::shared_ptr<const Font> font, String text, float size, Colour colour, float outline, Colour outlineColour)
+TextRenderer::TextRenderer(std::shared_ptr<const Font> font, const String& text, float size, Colour colour, float outline, Colour outlineColour)
 	: text(text.getUTF32())
 	, size(size)
 	, outline(outline)
 	, colour(colour)
 	, outlineColour(outlineColour)
 {
-	setFont(font);
+	setFont(std::move(font));
 }
 
 TextRenderer& TextRenderer::setPosition(Vector2f pos)
@@ -36,7 +36,7 @@ TextRenderer& TextRenderer::setPosition(Vector2f pos)
 TextRenderer& TextRenderer::setFont(std::shared_ptr<const Font> v)
 {
 	if (font != v) {
-		font = v;
+		font = std::move(v);
 
 		if (font->isDistanceField()) {
 			materialDirty = true;
@@ -261,24 +261,9 @@ TextRenderer TextRenderer::clone() const
 
 void TextRenderer::generateSprites() const
 {
-	generateSprites(spritesCache);
-}
-
-void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
-{
 	if (!font) {
 		return;
 	}
-
-	bool floorEnabled = font->shouldFloorGlyphPosition();
-	auto floorAlign = [floorEnabled] (Vector2f a) -> Vector2f
-	{
-		if (floorEnabled) {
-			return a.floor();
-		} else {
-			return a;
-		}
-	};
 
 	const bool hasMaterialOverride = font->isDistanceField();
 	if (hasMaterialOverride && materialDirty) {
@@ -287,18 +272,66 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 	}
 
 	if (glyphsDirty || positionDirty) {
-		float mainScale = getScale(*font);
-		Vector2f p = floorAlign(position + Vector2f(0, font->getAscenderDistance() * mainScale));
-		if (offset != Vector2f(0, 0)) {
-			p -= floorAlign(getExtents() * offset);
+		generateSprites(spritesCache);
+
+		glyphsDirty = false;
+		positionDirty = false;
+	}
+}
+
+void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
+{
+	const bool hasMaterialOverride = font->isDistanceField();
+	const bool floorEnabled = font->shouldFloorGlyphPosition();
+	const auto floorAlign = [floorEnabled] (Vector2f a) { return floorEnabled ? a.floor() : a; };
+
+	const float mainScale = getScale(*font);
+	Vector2f lineStartPos = floorAlign(position + Vector2f(0, font->getAscenderDistance() * mainScale));
+	if (offset != Vector2f(0, 0)) {
+		lineStartPos -= floorAlign(getExtents() * offset);
+	}
+
+	size_t startPos = 0;
+	size_t spritesInserted = 0;
+	Vector2f lineOffset;
+
+	sprites.resize(getGlyphCount());
+
+	const Font::Glyph* lastGlyph = nullptr;
+	const Font* lastFont = nullptr;
+	auto curCol = TextOverrideCursor(colour, colourOverrides);
+
+	// Go through every character
+	const size_t n = text.size();
+	for (size_t i = 0; i < n; i++) {
+		const char32_t c = text[i];
+		curCol.setPos(i);
+		
+		if (c != '\n') {
+			const auto& [glyph, fontForGlyph] = font->getGlyph(c);
+			const float curScale = getScale(fontForGlyph);
+			const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * curScale);
+
+			const Vector2f kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
+			const Vector2f glyphPos = lineStartPos + lineOffset + pixelOffset + fontAdjustment + kerning * curScale + glyph.horizontalBearing * curScale * Vector2f(1, -1);
+			const Vector2f renderPos = (glyphPos - position).rotate(angle) + position;
+
+			sprites[spritesInserted++] = Sprite()
+				.setMaterial(hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial())
+				.setSize(glyph.size)
+				.setTexRect(glyph.area)
+				.setPos(renderPos)
+				.setScale(curScale)
+				.setColour(curCol.getCurValue())
+				.setRotation(angle);
+
+			lineOffset.x += (glyph.advance.x + kerning.x) * curScale;
+
+			lastGlyph = &glyph;
+			lastFont = font.get();
 		}
 
-		size_t startPos = 0;
-		size_t spritesInserted = 0;
-		Vector2f lineOffset;
-
-		auto flush = [&] ()
-		{
+		if (c == '\n' || i == n - 1) {
 			// Line break, update previous characters!
 			if (align != 0) {
 				Vector2f off = floorAlign(-lineOffset * align).rotate(angle);
@@ -309,80 +342,18 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 			}
 
 			// Move pen
-			p.y += getLineHeight();
+			lineStartPos.y += getLineHeight();
 
 			// Reset
 			startPos = spritesInserted;
 			lineOffset.x = 0;
-		};
-
-		auto curCol = colour;
-		size_t curOverride = 0;
-
-		const size_t n = text.size();
-
-		size_t nGlyphs = 0;
-		for (size_t i = 0; i < n; i++) {
-			if (text[i] != '\n') {
-				++nGlyphs;
-			}
 		}
-		sprites.resize(nGlyphs);
-
-		const Font::Glyph* lastGlyph = nullptr;
-		const Font* lastFont = nullptr;
-
-		for (size_t i = 0; i < n; i++) {
-			int c = text[i];
-
-			// Check for colour override
-			while (curOverride < colourOverrides.size() && colourOverrides[curOverride].first == i) {
-				curCol = colourOverrides[curOverride].second ? colourOverrides[curOverride].second.value() : colour;
-				++curOverride;
-			}
-			
-			if (c == '\n') {
-				flush();
-			} else {
-				const auto& [glyph, fontForGlyph] = font->getGlyph(c);
-				const float scale = getScale(fontForGlyph);
-				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
-
-				const auto kerning = lastGlyph && lastFont == font.get() ? lastGlyph->getKerning(c) : Vector2f();
-				const auto glyphPos = p + lineOffset + pixelOffset + fontAdjustment + kerning * scale;
-				const auto renderPos = (glyphPos - position).rotate(angle) + position;
-
-				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
-
-				sprites[spritesInserted++] = Sprite()
-					.setMaterial(std::move(materialToUse))
-					.setSize(glyph.size)
-					.setTexRect(glyph.area)
-					.setColour(curCol)
-					.setPivot(glyph.horizontalBearing / glyph.size * Vector2f(-1, 1))
-					.setScale(scale)
-					.setPos(renderPos)
-					.setRotation(angle);
-
-				lineOffset.x += (glyph.advance.x + kerning.x) * scale;
-
-				lastGlyph = &glyph;
-				lastFont = font.get();
-
-				if (i == n - 1) {
-					flush();
-				}
-			}
-		}
-
-		glyphsDirty = false;
-		positionDirty = false;
 	}
 }
 
 void TextRenderer::draw(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	generateSprites(spritesCache);
+	generateSprites();
 
 	if (spriteFilter) {
 		// We don't know what the user will do with glyphs, so mark them as dirty
@@ -709,6 +680,18 @@ void TextRenderer::markGlyphsDirty() const
 {
 	glyphsDirty = true;
 	hasExtents = false;
+}
+
+size_t TextRenderer::getGlyphCount() const
+{
+	size_t nGlyphs = 0;
+	const auto n = text.size();
+	for (size_t i = 0; i < n; i++) {
+		if (text[i] != '\n') {
+			++nGlyphs;
+		}
+	}
+	return nGlyphs;
 }
 
 const std::shared_ptr<Material>& TextRenderer::getMaterial(const Font& font) const

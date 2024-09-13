@@ -18,13 +18,43 @@ namespace Halley
 
 	using ColourOverride = std::pair<size_t, std::optional<Colour4f>>;
 
+	template <typename T>
+	class TextOverrideCursor {
+	public:
+		TextOverrideCursor(T defaultValue, const Vector<std::pair<size_t, std::optional<T>>>& data)
+			: curValue(defaultValue)
+			, defaultValue(std::move(defaultValue))
+			, dataPtr(&data)
+		{}
+
+		const T& getCurValue() const
+		{
+			return curValue;
+		}
+
+		void setPos(size_t i)
+		{
+			const auto& data = *dataPtr;
+			while (curIdx < data.size() && data[curIdx].first <= i) {
+				curValue = data[curIdx].second ? data[curIdx].second.value() : defaultValue;
+				++curIdx;
+			}
+		}
+
+	private:
+		size_t curIdx = 0;
+		T curValue;
+		T defaultValue;
+		const Vector<std::pair<size_t, std::optional<T>>>* dataPtr = nullptr;
+	};
+
 	class TextRenderer
 	{
 	public:
 		using SpriteFilter = std::function<void(gsl::span<Sprite>)>;
 
 		TextRenderer();
-		explicit TextRenderer(std::shared_ptr<const Font> font, String text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));
+		explicit TextRenderer(std::shared_ptr<const Font> font, const String& text = "", float size = 20, Colour colour = Colour(1, 1, 1, 1), float outline = 0, Colour outlineColour = Colour(0, 0, 0, 1));
 
 		TextRenderer& setPosition(Vector2f pos);
 		TextRenderer& setFont(std::shared_ptr<const Font> font);
@@ -130,6 +160,8 @@ namespace Halley
 		float getScale(const Font& font) const;
 
 		void markGlyphsDirty() const;
+
+		size_t getGlyphCount() const;
 	};
 
 	class ColourStringBuilder {
