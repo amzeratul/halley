@@ -284,7 +284,7 @@ void TextRenderer::generateLayoutIfNeeded() const
 	}
 
 	if (layoutDirty || positionDirty) {
-		generateLayout(text, &positionsCache, extents);
+		generateLayout(text, &layoutCache, extents);
 		hasExtents = true;
 		positionDirty = false;
 		layoutDirty = false;
@@ -305,7 +305,7 @@ void TextRenderer::generateGlyphsIfNeeded() const
 	}
 
 	if (glyphsDirty) {
-		generateSprites(spritesCache, positionsCache);
+		generateSprites(spritesCache, layoutCache);
 		glyphsDirty = false;
 	}
 }
@@ -316,21 +316,20 @@ void TextRenderer::generateSprites() const
 	generateGlyphsIfNeeded();
 }
 
-void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* positions, Vector2f& extents) const
+void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const
 {
 	const bool floorEnabled = font->shouldFloorGlyphPosition();
 	const auto floorAlign = [floorEnabled] (Vector2f a) { return floorEnabled ? a.floor() : a; };
 
 	Vector2f lineStartPos;
 
-	size_t firstSpriteInCurrentLine = 0;
-	size_t spritesInserted = 0;
+	size_t firstIdxInCurLine = 0;
 	Vector2f curLineOffset;
 	float curLineHeight = 0;
 	float curAscender = 0;
 
-	if (positions) {
-		positions->resize(getGlyphCount(text));
+	if (layouts) {
+		layouts->resize(text.size());
 	}
 
 	const Font::Glyph* lastGlyph = nullptr;
@@ -342,7 +341,6 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 	float minX = std::numeric_limits<float>::infinity();
 	float maxX = -std::numeric_limits<float>::infinity();
 	float height = 0;
-	bool gotCharacter = false;
 
 	// Go through every character
 	const size_t n = text.size();
@@ -351,37 +349,41 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 		curFont.setPos(i);
 		curFontSize.setPos(i);
 		
-		if (c != '\n') {
-			const auto& [glyph, fontForGlyph] = curFont->getGlyph(c);
-			const float curScale = getScale(fontForGlyph, *curFontSize);
-			const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - curFont->getAscenderDistance()) * curScale);
+		const auto& [glyph, fontForGlyph] = curFont->getGlyph(c);
+		const float curScale = getScale(fontForGlyph, *curFontSize);
+		const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - curFont->getAscenderDistance()) * curScale);
 
-			const Vector2f kerning = lastGlyph && lastFont == (*curFont).get() ? lastGlyph->getKerning(c) : Vector2f();
-			const Vector2f cursorPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment;
-			const Vector2f glyphPos = cursorPos + (kerning + glyph.horizontalBearing.flipVertical()) * curScale;
+		const Vector2f kerning = lastGlyph && lastFont == (*curFont).get() ? lastGlyph->getKerning(c) : Vector2f();
+		const Vector2f cursorPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment;
+		const Vector2f glyphPos = cursorPos + (kerning + glyph.horizontalBearing.flipVertical()) * curScale;
+		const float advance = (glyph.advance.x + kerning.x) * curScale;
 
-			if (positions) {
-				(*positions)[spritesInserted++] = glyphPos;
-			}
-
-			curLineOffset.x += (glyph.advance.x + kerning.x) * curScale;
-			curLineHeight = std::max(curLineHeight, getLineHeight(*(*curFont), *curFontSize));
-			curAscender = std::max(curAscender, curFont->getAscenderDistance() * curScale);
-
-			minX = std::min(minX, glyphPos.x);
-			maxX = std::max(maxX, curLineOffset.x);
-			gotCharacter = true;
-
-			lastGlyph = &glyph;
-			lastFont = (*curFont).get();
+		if (layouts) {
+			auto& layout = (*layouts)[i];
+			layout.pos = glyphPos;
+			layout.penPos = cursorPos;
+			layout.advanceX = advance;
 		}
 
-		if (c == '\n' || i == n - 1) {
+		curLineOffset.x += advance;
+		curLineHeight = std::max(curLineHeight, getLineHeight(*(*curFont), *curFontSize));
+		curAscender = std::max(curAscender, curFont->getAscenderDistance() * curScale);
+
+		minX = std::min(minX, glyphPos.x);
+		maxX = std::max(maxX, curLineOffset.x);
+
+		lastGlyph = &glyph;
+		lastFont = (*curFont).get();
+
+		auto lineBreak = [&] {
 			// Line break, update previous characters!
-			if (positions) {
+			if (layouts) {
 				const Vector2f lineOffset = floorAlign(position + Vector2f(0, curAscender) - curLineOffset * align);
-				for (size_t j = firstSpriteInCurrentLine; j < spritesInserted; j++) {
-					(*positions)[j] += lineOffset;
+				for (size_t j = firstIdxInCurLine; j <= i; j++) {
+					auto& layout = (*layouts)[j];
+					layout.pos += lineOffset;
+					layout.lineStartY = lineStartPos.y;
+					layout.lineEndY = lineStartPos.y + curLineHeight;
 				}
 			}
 
@@ -392,30 +394,36 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 			curAscender = 0;
 
 			// Reset
-			firstSpriteInCurrentLine = spritesInserted;
+			firstIdxInCurLine = i + 1;
 			curLineOffset.x = 0;
+		};
+
+		if (c == '\n') {
+			lineBreak();
+		}
+		if (i == n - 1) {
+			lineBreak();
 		}
 	}
 
-	extents = Vector2f(gotCharacter ? (maxX - minX) : 0.0f, height);
+	extents = Vector2f(!text.empty() ? (maxX - minX) : 0.0f, height);
 
-	if (positions) {
+	if (layouts) {
 		if (offset != Vector2f(0, 0)) {
-			for (auto& p : *positions) {
-				p -= floorAlign(extents * offset);
+			for (auto& p : *layouts) {
+				p.pos -= floorAlign(extents * offset);
 			}
 		}
 	}
 }
 
-void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<Vector2f>& positions) const
+void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLayout>& layouts) const
 {
 	const bool hasMaterialOverride = font->isDistanceField();
 
 	size_t spritesInserted = 0;
 
 	sprites.resize(getGlyphCount(text));
-	assert(sprites.size() == positions.size());
 
 	auto curCol = TextOverrideCursor(colour, colourOverrides);
 	auto curFont = TextOverrideCursor(font, fontOverrides);
@@ -432,12 +440,10 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<Vector2
 			const auto& [glyph, fontForGlyph] = curFont->getGlyph(c);
 			const float curScale = getScale(fontForGlyph, *curFontSize);
 
-			auto idx = spritesInserted++;
-
-			const Vector2f glyphPos = positions[idx];
+			const Vector2f glyphPos = layouts[i].pos;
 			const Vector2f renderPos = (glyphPos - position).rotate(angle) + position;
 
-			sprites[idx] = Sprite()
+			sprites.at(spritesInserted++) = Sprite()
 				.setMaterial(hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial())
 				.setSize(glyph.size)
 				.setTexRect(glyph.area)
@@ -508,25 +514,17 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 	return result;
 }
 
-Vector2f TextRenderer::getCharacterPosition(size_t character) const
+Vector2f TextRenderer::getCharacterPosition(size_t idx) const
 {
 	if (text.empty()) {
 		return {};
 	}
 	generateLayoutIfNeeded();
 
-	size_t nLineBreaks = 0;
-	for (size_t i = 0; i <= character && i < text.size(); ++i) {
-		if (text[i] == '\n') {
-			++nLineBreaks;
-		}
+	if (idx >= layoutCache.size()) {
+		return layoutCache.back().penPos += Vector2f(layoutCache.back().advanceX, 0);
 	}
-
-	size_t idx = character - std::min(character, nLineBreaks);
-	if (idx >= positionsCache.size()) {
-		return positionsCache.back() - position;
-	}
-	return positionsCache[idx] - position;
+	return layoutCache[idx].penPos;
 }
 
 size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const
@@ -537,8 +535,8 @@ size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const
 	size_t bestResult = 0;
 
 	for (size_t i = 0; i < text.size(); ++i) {
-		const auto pos = positionsCache[i];
-		const auto delta = (targetPos - pos);
+		const auto pos = layoutCache[i];
+		const auto delta = (targetPos - pos.penPos);
 		if (delta.y < 0) {
 			return bestResult;
 		}

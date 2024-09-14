@@ -104,7 +104,6 @@ namespace Halley
 		TextRenderer clone() const;
 
 		void generateSprites() const;
-		void generateSprites(Vector<Sprite>& sprites, const Vector<Vector2f>& positions) const;
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 
 		void setSpriteFilter(SpriteFilter f);
@@ -137,6 +136,14 @@ namespace Halley
 		bool isCompatibleWith(const TextRenderer& other) const; // Can be drawn as part of the same draw call
 
 	private:
+		struct GlyphLayout {
+			Vector2f pos;
+			Vector2f penPos;
+			float lineStartY;
+			float lineEndY;
+			float advanceX;
+		};
+
 		std::shared_ptr<const Font> font;
 		mutable HashMap<const Font*, std::shared_ptr<Material>> materials;
 		StringUTF32 text;
@@ -164,7 +171,7 @@ namespace Halley
 		Vector<FontOverride> fontOverrides;
 		Vector<FontSizeOverride> fontSizeOverrides;
 
-		mutable Vector<Vector2f> positionsCache;
+		mutable Vector<GlyphLayout> layoutCache;
 		mutable Vector<Sprite> spritesCache;
 		mutable bool materialDirty = true;
 		mutable bool glyphsDirty = true;
@@ -186,7 +193,8 @@ namespace Halley
 
 		void generateLayoutIfNeeded() const;
 		void generateGlyphsIfNeeded() const;
-		void generateLayout(const StringUTF32& text, Vector<Vector2f>* positions, Vector2f& extents) const;
+		void generateLayout(const StringUTF32& text, Vector<GlyphLayout>* layouts, Vector2f& extents) const;
+		void generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLayout>& layouts) const;
 		static size_t getGlyphCount(const StringUTF32& text);
 	};
 
