@@ -17,15 +17,27 @@ namespace Halley
 	class Material;
 
 	using ColourOverride = std::pair<size_t, std::optional<Colour4f>>;
+	using FontOverride = std::pair<size_t, std::shared_ptr<const Font>>;
+	using FontSizeOverride = std::pair<size_t, std::optional<float>>;
 
-	template <typename T>
+	template <typename T, typename C = std::optional<T>>
 	class TextOverrideCursor {
 	public:
-		TextOverrideCursor(T defaultValue, const Vector<std::pair<size_t, std::optional<T>>>& data)
+		TextOverrideCursor(T defaultValue, const Vector<std::pair<size_t, C>>& data)
 			: curValue(defaultValue)
 			, defaultValue(std::move(defaultValue))
 			, dataPtr(&data)
 		{}
+
+		const T& operator*() const
+		{
+			return curValue;
+		}
+
+		const T& operator->() const
+		{
+			return curValue;
+		}
 
 		const T& getCurValue() const
 		{
@@ -36,7 +48,11 @@ namespace Halley
 		{
 			const auto& data = *dataPtr;
 			while (curIdx < data.size() && data[curIdx].first <= i) {
-				curValue = data[curIdx].second ? data[curIdx].second.value() : defaultValue;
+				if constexpr (std::is_same_v<T, C>) {
+					curValue = data[curIdx].second ? data[curIdx].second : defaultValue;
+				} else {
+					curValue = data[curIdx].second ? *(data[curIdx].second) : defaultValue;
+				}
 				++curIdx;
 			}
 		}
@@ -45,7 +61,7 @@ namespace Halley
 		size_t curIdx = 0;
 		T curValue;
 		T defaultValue;
-		const Vector<std::pair<size_t, std::optional<T>>>* dataPtr = nullptr;
+		const Vector<std::pair<size_t, C>>* dataPtr = nullptr;
 	};
 
 	class TextRenderer
@@ -76,6 +92,8 @@ namespace Halley
 		TextRenderer& setSmoothness(float smoothness);
 		TextRenderer& setPixelOffset(Vector2f offset);
 		TextRenderer& setColourOverride(Vector<ColourOverride> colOverride);
+		TextRenderer& setFontOverride(Vector<FontOverride> fontOverride);
+		TextRenderer& setFontSizeOverride(Vector<FontSizeOverride> fontSizeOverride);
 		TextRenderer& setLineSpacing(float spacing);
 		TextRenderer& setAlpha(float alpha);
 		TextRenderer& setScale(float scale);
@@ -86,7 +104,7 @@ namespace Halley
 		TextRenderer clone() const;
 
 		void generateSprites() const;
-		void generateSprites(Vector<Sprite>& sprites) const;
+		void generateSprites(Vector<Sprite>& sprites, const Vector<Vector2f>& positions) const;
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 
 		void setSpriteFilter(SpriteFilter f);
@@ -94,12 +112,10 @@ namespace Halley
 		Vector2f getExtents() const;
 		Vector2f getExtents(const StringUTF32& str) const;
 		Vector2f getCharacterPosition(size_t character) const;
-		Vector2f getCharacterPosition(size_t character, const StringUTF32& str) const;
 		size_t getCharacterAt(const Vector2f& position) const;
-		size_t getCharacterAt(const Vector2f& position, const StringUTF32& str) const;
 
 		StringUTF32 split(const String& str, float width) const;
-		StringUTF32 split(const StringUTF32& str, float width, std::function<bool(int32_t)> filter = {}) const;
+		StringUTF32 split(const StringUTF32& str, float width, std::function<bool(int32_t)> filter = {}, const Vector<FontOverride>& fontOverrides = {}, const Vector<FontSizeOverride>& fontSizeOverrides = {}) const;
 		StringUTF32 split(float width) const;
 
 		Vector2f getPosition() const;
@@ -112,6 +128,7 @@ namespace Halley
 		float getSmoothness() const;
 		std::optional<Rect4f> getClip() const;
 		float getLineHeight() const;
+		float getLineHeight(const Font& font, float size) const;
 		float getAlignment() const;
 
 		bool empty() const;
@@ -144,10 +161,14 @@ namespace Halley
 		std::optional<Rect4f> clip;
 
 		Vector<ColourOverride> colourOverrides;
+		Vector<FontOverride> fontOverrides;
+		Vector<FontSizeOverride> fontSizeOverrides;
 
+		mutable Vector<Vector2f> positionsCache;
 		mutable Vector<Sprite> spritesCache;
 		mutable bool materialDirty = true;
 		mutable bool glyphsDirty = true;
+		mutable bool layoutDirty = true;
 		mutable bool positionDirty = true;
 		mutable bool hasExtents = false;
 
@@ -158,10 +179,15 @@ namespace Halley
 		void updateMaterialForFont(const Font& font) const;
 		void updateMaterials() const;
 		float getScale(const Font& font) const;
+		float getScale(const Font& font, float size) const;
 
-		void markGlyphsDirty() const;
+		void markLayoutDirty() const;
+		void markSpritesDirty() const;
 
-		size_t getGlyphCount() const;
+		void generateLayoutIfNeeded() const;
+		void generateGlyphsIfNeeded() const;
+		void generateLayout(const StringUTF32& text, Vector<Vector2f>* positions, Vector2f& extents) const;
+		static size_t getGlyphCount(const StringUTF32& text);
 	};
 
 	class ColourStringBuilder {

@@ -220,7 +220,7 @@ void UITextInput::updateCaret()
 		caretTime = 0;
 		caretShowing = true;
 		caretPos = pos;
-		caretPhysicalPos = label.getCharacterPosition(caretPos, label.getTextUTF32());
+		caretPhysicalPos = label.getCharacterPosition(caretPos);
 	}
 }
 
