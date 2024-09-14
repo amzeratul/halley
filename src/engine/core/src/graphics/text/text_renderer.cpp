@@ -522,7 +522,7 @@ Vector2f TextRenderer::getCharacterPosition(size_t idx) const
 	generateLayoutIfNeeded();
 
 	if (idx >= layoutCache.size()) {
-		return layoutCache.back().penPos += Vector2f(layoutCache.back().advanceX, 0);
+		return layoutCache.back().penPos + Vector2f(layoutCache.back().advanceX, 0);
 	}
 	return layoutCache[idx].penPos;
 }
