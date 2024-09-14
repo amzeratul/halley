@@ -321,16 +321,13 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 	const bool floorEnabled = font->shouldFloorGlyphPosition();
 	const auto floorAlign = [floorEnabled] (Vector2f a) { return floorEnabled ? a.floor() : a; };
 
-	const float mainScale = getScale(*font);
-	Vector2f lineStartPos = floorAlign(position + Vector2f(0, font->getAscenderDistance() * mainScale));
-	if (offset != Vector2f(0, 0)) {
-		lineStartPos -= floorAlign(getExtents() * offset);
-	}
+	Vector2f lineStartPos;
 
 	size_t firstSpriteInCurrentLine = 0;
 	size_t spritesInserted = 0;
-	Vector2f lineOffset;
+	Vector2f curLineOffset;
 	float curLineHeight = 0;
+	float curAscender = 0;
 
 	if (positions) {
 		positions->resize(getGlyphCount(text));
@@ -360,17 +357,18 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 			const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - curFont->getAscenderDistance()) * curScale);
 
 			const Vector2f kerning = lastGlyph && lastFont == (*curFont).get() ? lastGlyph->getKerning(c) : Vector2f();
-			const Vector2f glyphPos = lineStartPos + lineOffset + pixelOffset + fontAdjustment + kerning * curScale + glyph.horizontalBearing * curScale * Vector2f(1, -1);
+			const Vector2f glyphPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment + kerning * curScale + glyph.horizontalBearing * curScale * Vector2f(1, -1);
 
 			if (positions) {
 				(*positions)[spritesInserted++] = glyphPos;
 			}
 
-			lineOffset.x += (glyph.advance.x + kerning.x) * curScale;
+			curLineOffset.x += (glyph.advance.x + kerning.x) * curScale;
 			curLineHeight = std::max(curLineHeight, getLineHeight(*(*curFont), *curFontSize));
+			curAscender = std::max(curAscender, curFont->getAscenderDistance() * curScale);
 
 			minX = std::min(minX, glyphPos.x);
-			maxX = std::max(maxX, lineOffset.x);
+			maxX = std::max(maxX, curLineOffset.x);
 			gotCharacter = true;
 
 			lastGlyph = &glyph;
@@ -379,10 +377,10 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 
 		if (c == '\n' || i == n - 1) {
 			// Line break, update previous characters!
-			if (align != 0) {
-				Vector2f off = floorAlign(-lineOffset * align).rotate(angle);
+			if (positions) {
+				const Vector2f lineOffset = floorAlign(position + Vector2f(0, curAscender) - curLineOffset * align);
 				for (size_t j = firstSpriteInCurrentLine; j < spritesInserted; j++) {
-					positions[j] += off;
+					(*positions)[j] += lineOffset;
 				}
 			}
 
@@ -390,14 +388,23 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 			lineStartPos.y += curLineHeight;
 			height += curLineHeight;
 			curLineHeight = 0;
+			curAscender = 0;
 
 			// Reset
 			firstSpriteInCurrentLine = spritesInserted;
-			lineOffset.x = 0;
+			curLineOffset.x = 0;
 		}
 	}
 
 	extents = Vector2f(gotCharacter ? (maxX - minX) : 0.0f, height);
+
+	if (positions) {
+		if (offset != Vector2f(0, 0)) {
+			for (auto& p : *positions) {
+				p -= floorAlign(extents * offset);
+			}
+		}
+	}
 }
 
 void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<Vector2f>& positions) const
@@ -502,10 +509,10 @@ Vector2f TextRenderer::getExtents(const StringUTF32& str) const
 
 Vector2f TextRenderer::getCharacterPosition(size_t character) const
 {
-	generateLayoutIfNeeded();
 	if (text.empty()) {
 		return {};
 	}
+	generateLayoutIfNeeded();
 
 	size_t nLineBreaks = 0;
 	for (size_t i = 0; i <= character && i < text.size(); ++i) {
@@ -515,6 +522,9 @@ Vector2f TextRenderer::getCharacterPosition(size_t character) const
 	}
 
 	size_t idx = character - std::min(character, nLineBreaks);
+	if (idx >= positionsCache.size()) {
+		return positionsCache.back();
+	}
 	return positionsCache[idx];
 }
 
