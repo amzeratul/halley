@@ -357,7 +357,8 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<Vector2f>* pos
 			const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - curFont->getAscenderDistance()) * curScale);
 
 			const Vector2f kerning = lastGlyph && lastFont == (*curFont).get() ? lastGlyph->getKerning(c) : Vector2f();
-			const Vector2f glyphPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment + kerning * curScale + glyph.horizontalBearing * curScale * Vector2f(1, -1);
+			const Vector2f cursorPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment;
+			const Vector2f glyphPos = cursorPos + (kerning + glyph.horizontalBearing.flipVertical()) * curScale;
 
 			if (positions) {
 				(*positions)[spritesInserted++] = glyphPos;
@@ -523,9 +524,9 @@ Vector2f TextRenderer::getCharacterPosition(size_t character) const
 
 	size_t idx = character - std::min(character, nLineBreaks);
 	if (idx >= positionsCache.size()) {
-		return positionsCache.back();
+		return positionsCache.back() - position;
 	}
-	return positionsCache[idx];
+	return positionsCache[idx] - position;
 }
 
 size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const

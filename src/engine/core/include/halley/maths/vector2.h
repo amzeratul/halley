@@ -135,18 +135,22 @@ namespace Halley {
 		}
 
 		// Get the orthogonal vector
-		[[nodiscard]] constexpr Vector2D orthoLeft () const { return Vector2D(-y, x); }
-		[[nodiscard]] constexpr Vector2D orthoRight () const { return Vector2D(y, -x); }
+		[[nodiscard]] constexpr Vector2D orthoLeft() const { return Vector2D(-y, x); }
+		[[nodiscard]] constexpr Vector2D orthoRight() const { return Vector2D(y, -x); }
+
+		// Flips
+		[[nodiscard]] constexpr Vector2D flipHorizontal() const { return Vector2D(-x, y); }
+		[[nodiscard]] constexpr Vector2D flipVertical() const { return Vector2D(x, -y); }
 
 		// Cross product (the Z component of it)
-		[[nodiscard]] constexpr T cross (Vector2D param) const { return x * param.y - y * param.x; }
+		[[nodiscard]] constexpr T cross(Vector2D param) const { return x * param.y - y * param.x; }
 
 		// Dot product
-		[[nodiscard]] constexpr T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
+		[[nodiscard]] constexpr T dot(Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
-		[[nodiscard]] constexpr T length () const { return static_cast<T>(std::sqrt(squaredLength())); }
-		[[nodiscard]] constexpr T len () const { return length(); }
+		[[nodiscard]] constexpr T length() const { return static_cast<T>(std::sqrt(squaredLength())); }
+		[[nodiscard]] constexpr T len() const { return length(); }
 		[[nodiscard]] constexpr T manhattanLength() const { return std::abs(x) + std::abs(y); }
 
 		// Squared length, often useful and much faster
