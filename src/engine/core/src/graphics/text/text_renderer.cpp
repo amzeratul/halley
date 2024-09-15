@@ -341,6 +341,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 	float minX = std::numeric_limits<float>::infinity();
 	float maxX = -std::numeric_limits<float>::infinity();
 	float height = 0;
+	bool gotExtents = false;
 
 	// Go through every character
 	const size_t n = text.size();
@@ -369,8 +370,11 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		curLineHeight = std::max(curLineHeight, getLineHeight(fontForGlyph, *curFontSize));
 		curAscender = std::max(curAscender, fontForGlyph.getAscenderDistance() * curScale);
 
-		minX = std::min(minX, glyphPos.x);
-		maxX = std::max(maxX, curLineOffset.x);
+		if (c != ' ' && c != '\n') {
+			minX = std::min(minX, glyphPos.x);
+			maxX = std::max(maxX, curLineOffset.x);
+			gotExtents = true;
+		}
 
 		lastGlyph = &glyph;
 		lastFont = &fontForGlyph;
@@ -406,7 +410,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		}
 	}
 
-	extents = Vector2f(!text.empty() ? maxX : 0.0f, height);
+	extents = Vector2f(gotExtents ? maxX : 0.0f, height);
 
 	if (layouts) {
 		if (offset != Vector2f(0, 0)) {
