@@ -142,6 +142,7 @@ namespace Halley
 			float lineStartY;
 			float lineEndY;
 			float advanceX;
+			float ascender;
 		};
 
 		std::shared_ptr<const Font> font;

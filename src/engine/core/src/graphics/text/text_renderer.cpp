@@ -351,10 +351,9 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		
 		const auto& [glyph, fontForGlyph] = curFont->getGlyph(c);
 		const float curScale = getScale(fontForGlyph, *curFontSize);
-		const Vector2f fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - curFont->getAscenderDistance()) * curScale);
 
-		const Vector2f kerning = lastGlyph && lastFont == (*curFont).get() ? lastGlyph->getKerning(c) : Vector2f();
-		const Vector2f cursorPos = lineStartPos + curLineOffset + pixelOffset + fontAdjustment;
+		const Vector2f kerning = lastGlyph && lastFont == &fontForGlyph ? lastGlyph->getKerning(c) : Vector2f();
+		const Vector2f cursorPos = lineStartPos + curLineOffset + pixelOffset;
 		const Vector2f glyphPos = cursorPos + (kerning + glyph.horizontalBearing.flipVertical()) * curScale;
 		const float advance = (glyph.advance.x + kerning.x) * curScale;
 
@@ -363,17 +362,18 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 			layout.pos = glyphPos;
 			layout.penPos = cursorPos;
 			layout.advanceX = advance;
+			layout.ascender = curAscender;
 		}
 
 		curLineOffset.x += advance;
-		curLineHeight = std::max(curLineHeight, getLineHeight(*(*curFont), *curFontSize));
-		curAscender = std::max(curAscender, curFont->getAscenderDistance() * curScale);
+		curLineHeight = std::max(curLineHeight, getLineHeight(fontForGlyph, *curFontSize));
+		curAscender = std::max(curAscender, fontForGlyph.getAscenderDistance() * curScale);
 
 		minX = std::min(minX, glyphPos.x);
 		maxX = std::max(maxX, curLineOffset.x);
 
 		lastGlyph = &glyph;
-		lastFont = (*curFont).get();
+		lastFont = &fontForGlyph;
 
 		auto lineBreak = [&] {
 			// Line break, update previous characters!
@@ -406,7 +406,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		}
 	}
 
-	extents = Vector2f(!text.empty() ? (maxX - minX) : 0.0f, height);
+	extents = Vector2f(!text.empty() ? maxX : 0.0f, height);
 
 	if (layouts) {
 		if (offset != Vector2f(0, 0)) {
@@ -606,11 +606,11 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 
 			const auto& [glyph, f] = curFont->getGlyph(c);
 			const float scale = getScale(f, *curFontSize);
-			const auto kerning = lastFont == (*curFont).get() && lastGlyph ? lastGlyph->getKerning(c) : Vector2f();
+			const auto kerning = lastFont == &f && lastGlyph ? lastGlyph->getKerning(c) : Vector2f();
 			const float w = accepted ? (glyph.advance.x + kerning.x) * scale : 0.0f;
 			curWidth += w;
 
-			lastFont = (*curFont).get();
+			lastFont = &f;
 			lastGlyph = &glyph;
 
 			const bool firstCharInRun = i == 0; // It MUST fit at least the first character, or we'll infinite loop
