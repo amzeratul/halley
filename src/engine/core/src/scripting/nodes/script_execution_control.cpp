@@ -412,13 +412,19 @@ Vector<IScriptNodeType::SettingType> ScriptStopTag::getSettingTypes() const
 {
 	return {
 		SettingType{ "tag", "Halley::String", Vector<String>{""} },
+		SettingType{ "notMatching", "bool", Vector<String>{""} },
 	};
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	const auto matching = !node.getSettings()["notMatching"].asBool(false);
 	auto str = ColourStringBuilder(true);
-	str.append("Stop all Scripts matching tag ");
+	if (matching) {
+		str.append("Stop all Scripts matching tag ");
+	} else {
+		str.append("Stop all Scripts not matching tag ");
+	}
 	str.append(node.getSettings()["tag"].asString(""), settingColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
@@ -436,10 +442,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptStopTag::getPinConfiguration(con
 IScriptNodeType::Result ScriptStopTag::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto& tag = node.getSettings()["tag"].asString("");
+	const auto matching = !node.getSettings()["notMatching"].asBool(false);
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!tag.isEmpty()) {
-		environment.stopScriptTag(target, tag);
+		environment.stopScriptTag(target, tag, true, matching);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);

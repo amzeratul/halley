@@ -59,6 +59,7 @@ namespace Halley {
             Vector<String> startTags;
             Vector<ConfigNode> params;
             bool allThreads = false;
+            bool matching = true;
         };
 
         enum class NetworkControlMsgType {
@@ -134,8 +135,8 @@ namespace Halley {
         void sendSystemMessage(SystemMessageData message);
 
         void startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params);
-        void stopScript(EntityId target, const String& scriptName, bool allThreads = true);
-        void stopScriptTag(EntityId target, const String& tag, bool allThreads = true);
+        void stopScript(EntityId target, const String& scriptName, bool allThreads = true, bool matching = true);
+        void stopScriptTag(EntityId target, const String& tag, bool allThreads = true, bool matching = true);
 
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();

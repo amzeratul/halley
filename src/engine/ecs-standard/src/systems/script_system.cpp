@@ -143,6 +143,13 @@ public:
 		return false;
 	}
 
+	void resetStartedScripts(EntityId target) override
+	{
+		if (const auto* scriptable = scriptableFamily.tryFind(target)) {
+			scriptable->scriptable.scriptsStarted.clear();
+		}
+	}
+
 	void onMessageReceived(const TerminateScriptMessage& msg, ScriptableFamily& e) override
 	{
 		auto& env = getScriptingService().getEnvironment();
@@ -290,8 +297,8 @@ private:
 			if (r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop || r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag) {
 				if (auto* scriptable = scriptableFamily.tryFind(r.target)) {
 					for (auto& state: scriptable->scriptable.activeStates) {
-						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && state->getScriptId() == r.value)
-							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state->hasTag(r.value))) {
+						if ((r.type == ScriptEnvironment::ScriptExecutionRequestType::Stop && (state->getScriptId() == r.value) == r.matching)
+							|| (r.type == ScriptEnvironment::ScriptExecutionRequestType::StopTag && state->hasTag(r.value) == r.matching)) {
 							getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, r.allThreads);
 						}
 					}

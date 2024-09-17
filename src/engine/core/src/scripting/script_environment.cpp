@@ -698,17 +698,17 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 
 void ScriptEnvironment::startScript(EntityId target, const String& scriptName, Vector<String> tags, Vector<ConfigNode> params)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params), false });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags), std::move(params), false, true });
 }
 
-void ScriptEnvironment::stopScript(EntityId target, const String& scriptName, bool allThreads)
+void ScriptEnvironment::stopScript(EntityId target, const String& scriptName, bool allThreads, bool matching)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName, {}, {}, allThreads });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName, {}, {}, allThreads, matching });
 }
 
-void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag, bool allThreads)
+void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag, bool allThreads, bool matching)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag, {}, {}, allThreads });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag, {}, {}, allThreads, matching });
 }
 
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()

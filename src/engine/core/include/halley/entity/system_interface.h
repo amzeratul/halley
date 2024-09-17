@@ -51,6 +51,8 @@ namespace Halley {
 		virtual bool stopScript(EntityId target, const String& scriptId, bool allThreads = false) = 0;
 		virtual bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId = "", bool allThreads = false) = 0;
 		virtual bool isRunningScript(EntityId target, const String& scriptId) = 0;
+		virtual void resetStartedScripts(EntityId target) = 0;
+
 		virtual void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) = 0;
 		virtual void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) = 0;
 		virtual void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) = 0;
