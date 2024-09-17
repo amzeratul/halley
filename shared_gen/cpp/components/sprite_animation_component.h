@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 136
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -38,6 +38,12 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, Halley::AnimationPlayer{}, _context, _node, componentName, "player", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(updateSprite)>::deserialize(updateSprite, bool{ true }, _context, _node, componentName, "updateSprite", makeMask(Type::Prefab));
+	}
+
+	static void sanitize(Halley::ConfigNode& _node, int _mask) {
+		using namespace Halley::EntitySerialization;
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("player");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("updateSprite");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

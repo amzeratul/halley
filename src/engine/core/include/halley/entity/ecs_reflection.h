@@ -37,7 +37,9 @@ namespace Halley {
 		virtual const Component* tryGetComponent(ConstEntityRef entity) const = 0;
 
 		virtual void rebindComponent(Component& component, EntityRef entity) const = 0;
-    };
+
+		virtual void sanitize(ConfigNode& data, int mask) const = 0;
+	};
 
 	class MessageReflector {
     public:

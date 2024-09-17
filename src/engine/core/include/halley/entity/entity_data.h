@@ -4,6 +4,7 @@
 #include <set>
 
 namespace Halley {
+	class WorldReflection;
 	class EntityData;
     class EntityDataDelta;
     class EntityDataInstanced;
@@ -144,6 +145,8 @@ namespace Halley {
 
 	    void postProcessAddedChild(const std::set<String>& ignoreComponents, bool removeEmptyComponents);
         void makeComponentChangesIntoDeltas();
+
+    	void sanitize(const WorldReflection& worldReflection, int mask);
 
         bool operator==(const EntityData& other) const;
         bool operator!=(const EntityData& other) const;

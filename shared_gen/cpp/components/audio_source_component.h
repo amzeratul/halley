@@ -1,4 +1,4 @@
-// Halley codegen version 129
+// Halley codegen version 136
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -57,6 +57,16 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::deserialize(rollOff, float{ 1 }, _context, _node, componentName, "rollOff", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(curve)>::deserialize(curve, Halley::AudioAttenuationCurve{ Halley::AudioAttenuationCurve::Linear }, _context, _node, componentName, "curve", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::deserialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
+	}
+
+	static void sanitize(Halley::ConfigNode& _node, int _mask) {
+		using namespace Halley::EntitySerialization;
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("event");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rangeMin");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rangeMax");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rollOff");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("curve");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("canAutoVel");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 134
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -26,6 +26,11 @@ public:
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
+		using namespace Halley::EntitySerialization;
+		
+	}
+
+	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
 		
 	}

@@ -149,7 +149,7 @@ ConfigNode::ConfigNode(Range<int> value)
 
 bool ConfigNode::removeKey(std::string_view key, bool unsetMapIfEmpty)
 {
-	if (getType() == ConfigNodeType::Map) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		auto& map = asMap();
 		const auto iter = map.find(key);
 		const bool hadKey = iter != map.end();

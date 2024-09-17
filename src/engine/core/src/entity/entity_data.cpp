@@ -2,6 +2,7 @@
 #include "halley/entity/entity_data_delta.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/world_reflection.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
@@ -674,6 +675,17 @@ void EntityData::makeComponentChangesIntoDeltas()
 
 	for (auto& c: children) {
 		c.makeComponentChangesIntoDeltas();
+	}
+}
+
+void EntityData::sanitize(const WorldReflection& worldReflection, int mask)
+{
+	for (auto& child: children) {
+		child.sanitize(worldReflection, mask);
+	}
+
+	for (auto& [componentId, compData]: components) {
+		worldReflection.getComponentReflector(componentId).sanitize(compData, mask);
 	}
 }
 

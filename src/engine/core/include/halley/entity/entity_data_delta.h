@@ -69,6 +69,8 @@ namespace Halley {
 		bool operator==(const EntityDataDelta& other) const;
 		bool operator!=(const EntityDataDelta& other) const;
 
+		void sanitize(const WorldReflection& worldReflection, int mask);
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;

@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 136
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -42,6 +42,13 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(text)>::deserialize(text, Halley::TextRenderer{}, _context, _node, componentName, "text", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<int>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+	}
+
+	static void sanitize(Halley::ConfigNode& _node, int _mask) {
+		using namespace Halley::EntitySerialization;
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("text");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("layer");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("mask");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

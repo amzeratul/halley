@@ -1,4 +1,4 @@
-// Halley codegen version 128
+// Halley codegen version 136
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -53,6 +53,16 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(variables)>::deserialize(variables, Halley::ScriptVariables{}, _context, _node, componentName, "variables", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(entityReferences)>::deserialize(entityReferences, Halley::HashMap<Halley::String, Halley::EntityId>{}, _context, _node, componentName, "entityReferences", makeMask(Type::Prefab, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(entityParams)>::deserialize(entityParams, Halley::HashMap<Halley::String, Halley::ConfigNode>{}, _context, _node, componentName, "entityParams", makeMask(Type::Prefab, Type::Dynamic));
+	}
+
+	static void sanitize(Halley::ConfigNode& _node, int _mask) {
+		using namespace Halley::EntitySerialization;
+		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("activeStates");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("tags");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("scripts");
+		if ((_mask & makeMask(Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("variables");
+		if ((_mask & makeMask(Type::Prefab, Type::Dynamic)) == 0) _node.removeKey("entityReferences");
+		if ((_mask & makeMask(Type::Prefab, Type::Dynamic)) == 0) _node.removeKey("entityParams");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {

@@ -68,6 +68,11 @@ namespace Halley {
 			}
 		}
 
+		void sanitize(ConfigNode& data, int mask) const override
+		{
+			T::sanitize(data, mask);
+		}
+
 		Component* tryGetComponent(EntityRef entity) const override
 		{
 			return entity.tryGetComponent<T>();

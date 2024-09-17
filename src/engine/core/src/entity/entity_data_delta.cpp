@@ -6,6 +6,7 @@
 #include "halley/entity/entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/world_reflection.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 
@@ -426,6 +427,21 @@ bool EntityDataDelta::operator==(const EntityDataDelta& other) const
 bool EntityDataDelta::operator!=(const EntityDataDelta& other) const
 {
 	return !(*this == other);
+}
+
+void EntityDataDelta::sanitize(const WorldReflection& worldReflection, int mask)
+{
+	for (auto& child: childrenAdded) {
+		child.sanitize(worldReflection, mask);
+	}
+
+	for (auto& child: childrenChanged) {
+		child.second.sanitize(worldReflection, mask);
+	}
+
+	for (auto& [componentId, data]: componentsChanged) {
+		worldReflection.getComponentReflector(componentId).sanitize(data, mask);
+	}
 }
 
 static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)

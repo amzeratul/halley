@@ -22,7 +22,7 @@ namespace Halley {
 			DevCon    // Context is DevCon
         };
 
-		inline int makeMask(Type t)
+		[[nodiscard]] constexpr int makeMask(Type t)
 		{
 			if (t == Type::Undefined) {
 				return 0;
@@ -31,7 +31,7 @@ namespace Halley {
 		}
 		
 		template <typename T, typename ... Ts>
-		[[nodiscard]] int makeMask(T v, Ts ... vs)
+		[[nodiscard]] constexpr int makeMask(T v, Ts ... vs)
 		{
 			return makeMask(v) | makeMask(vs...);
 		}
