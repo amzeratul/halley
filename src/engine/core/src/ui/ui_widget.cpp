@@ -86,7 +86,10 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		addNewChildren(inputType);
-		collectWidgetsForUpdating(dst);
+
+		if (isActive()) {
+			collectWidgetsForUpdating(dst);
+		}
 	}
 }
 
