@@ -279,10 +279,25 @@ namespace Halley {
 		template <typename T, typename U>
 		ConfigNode& operator=(const std::pair<T, U>& value)
 		{
-			MapType map;
-			map["first"] = value.first;
-			map["second"] = value.second;
-			return *this = std::move(map);
+			//MapType map;
+			//map["first"] = value.first;
+			//map["second"] = value.second;
+			//return *this = std::move(map);
+
+			SequenceType seq;
+			seq.reserve(2);
+			if constexpr (HasToConfigNode<T>::value) {
+				seq.push_back(value.first.toConfigNode());
+			} else {
+				seq.push_back(ConfigNode(value.first));
+			}
+			if constexpr (HasToConfigNode<U>::value) {
+				seq.push_back(value.second.toConfigNode());
+			} else {
+				seq.push_back(ConfigNode(value.second));
+			}
+			*this = std::move(seq);
+			return *this;
 		}
 
 		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
@@ -460,6 +475,9 @@ namespace Halley {
 		{
 			if (type == ConfigNodeType::Map) {
 				return std::pair<P1, P2>{ (*this)["first"].convertTo(Tag<P1>()), (*this)["second"].convertTo(Tag<P2>()) };
+			} else if (type == ConfigNodeType::Sequence) {
+				const auto& seq = asSequence();
+				return std::pair<P1, P2>{ seq.size() >= 1 ? seq[0].convertTo(Tag<P1>()) : P1(), seq.size() >= 2 ? seq[1].convertTo(Tag<P2>()) : P2() };
 			} else if (type == ConfigNodeType::Undefined) {
 				return {};
 			} else {
