@@ -72,7 +72,10 @@ void UIRenderSurface::drawChildren(UIPainter& origPainter) const
 			params.border.w = myRect.getBottom() - spriteBounds.getBottom();
 		}
 
-		paramsSync.write(std::move(params));
+		bool success = paramsSync.write(std::move(params));
+		if (!success) {
+			Logger::logError("Error writing UIRenderSurface::paramsSync");
+		}
 	}
 }
 

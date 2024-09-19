@@ -28,7 +28,9 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 	}
 
 	if (previous) {
-		frameIdx = previous->frameIdx;
+		frameIdx = previous->frameIdx + 1;
+	} else {
+		frameIdx = 0;
 	}
 
 	for (auto& painter: painters) {
