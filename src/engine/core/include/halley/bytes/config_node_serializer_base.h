@@ -79,6 +79,7 @@ namespace Halley {
 		const IEntityFactoryContext* entityContext = nullptr;
 		const IDataInterpolatorSetRetriever* interpolators = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
+		mutable String debugCurrentContext;
 
 		[[nodiscard]] bool matchType(int typeMask) const
 		{

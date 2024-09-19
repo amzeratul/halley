@@ -183,7 +183,7 @@ EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 	if (result.isValid()) {
 		return result.getEntityId();
 	}
-	Logger::logError("Couldn't find entity with UUID " + uuid.toString() + " while instantiating entity.");
+	Logger::logWarning("Couldn't find entity with UUID " + uuid.toString() + " while instantiating entity. Context: " + entitySerializationContext.debugCurrentContext);
 	return EntityId();
 }
 
