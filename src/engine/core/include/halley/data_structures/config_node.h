@@ -455,6 +455,18 @@ namespace Halley {
 			}
 		}
 
+		template <typename P1, typename P2>
+		std::pair<P1, P2> asPair() const
+		{
+			if (type == ConfigNodeType::Map) {
+				return std::pair<P1, P2>{ (*this)["first"].convertTo(Tag<P1>()), (*this)["second"].convertTo(Tag<P2>()) };
+			} else if (type == ConfigNodeType::Undefined) {
+				return {};
+			} else {
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::pair<P1, P2>.", HalleyExceptions::Resources);
+			}
+		}
+
 		template <typename T>
 		T asType() const
 		{
@@ -659,6 +671,12 @@ namespace Halley {
 		HashMap<String, T> convertTo(Tag<HashMap<String, T>> tag) const
 		{
 			return asHashMap<String, T>();
+		}
+
+		template <typename P1, typename P2>
+		std::pair<P1, P2> convertTo(Tag<std::pair<P1, P2>> tag) const
+		{
+			return asPair<P1, P2>();
 		}
 
 		bool isNullOrEmpty() const;
