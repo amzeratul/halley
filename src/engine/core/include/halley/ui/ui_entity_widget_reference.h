@@ -11,6 +11,7 @@ namespace Halley {
 
         bool alive = true;
         bool screenBound = false;
+        bool round = false;
         Vector4f screenBorders;
 
         UIEntityWidgetReference() = default;
