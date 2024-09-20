@@ -540,25 +540,30 @@ size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const
 
 	bool lineFound = false;
 
+	if (layoutCache.empty() || targetPos.y < layoutCache[0].lineStartY) {
+		return 0;
+	}
+
 	for (size_t i = 0; i < text.size(); ++i) {
-		if (!lineFound) {
-			if (layoutCache[i].lineStartY < targetPos.y) {
-				lineFound = true;
-				const auto dist = std::abs(targetPos.x - layoutCache[i].penPos.x);
-				if (dist < bestDist) {
-					bestDist = dist;
-					bestResult = i;
-				}
+		const auto& layout = layoutCache[i];
+		const bool inThisLine = layout.lineStartY <= targetPos.y && targetPos.y < layout.lineEndY;
+
+		if (layout.lineStartY > targetPos.y) {
+			break;
+		}
+
+		if (!lineFound && inThisLine) {
+			lineFound = true;
+			const auto dist = std::abs(targetPos.x - layout.penPos.x);
+			if (dist < bestDist) {
+				bestDist = dist;
+				bestResult = i;
 			}
 		}
 
 		// Don't else, we want to run both checks for the first character in the target line
 		if (lineFound) {
-			if (layoutCache[i].lineEndY < targetPos.y) {
-				return bestResult;
-			}
-
-			const auto pos = layoutCache[i];
+			const auto pos = layout;
 			const auto dist = std::abs(targetPos.x - (pos.penPos.x + pos.advanceX));
 			if (dist < bestDist) {
 				bestDist = dist;
