@@ -520,12 +520,24 @@ namespace {
 
 void AudioEngine::loadBuses()
 {
+	HashMap<String, float> prevGain;
+	for (const auto& bus: buses) {
+		prevGain[bus.name] = bus.gain;
+	}
+
 	buses.clear();
 	buses.reserve(countBuses(audioProperties->getBuses()));
 
 	for (const auto& bus: audioProperties->getBuses()) {
 		loadBus(bus, OptionalLite<uint8_t>{});
 	}
+
+	for (auto& bus: buses) {
+		if (prevGain.contains(bus.name)) {
+			bus.gain = prevGain.at(bus.name);
+		}
+	}
+	updateBusGains();
 }
 
 uint8_t AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
