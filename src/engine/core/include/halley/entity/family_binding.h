@@ -46,55 +46,98 @@ namespace Halley {
 		std::function<void(void*, size_t)> reloadedCallback;
 	};
 
+	
+	template <typename T>
+	class FamilyBindingIterator {
+	public:
+	#ifdef __cpp_lib_concepts
+	    using iterator_concept = std::contiguous_iterator_tag;
+	#endif // __cpp_lib_concepts
+	    using iterator_category = std::forward_iterator_tag;
+	    using value_type        = T;
+	    using difference_type   = std::ptrdiff_t;
+	    using pointer           = T*;
+	    using reference         = T&;
+
+		FamilyBindingIterator() : v(nullptr) {}
+		FamilyBindingIterator(pointer v, uint32_t prefetchDist, uint32_t elemsLeft) : v(v), prefetchDist(prefetchDist), elemsLeft(elemsLeft) {}
+		FamilyBindingIterator(const FamilyBindingIterator& o) = default;
+		
+		reference operator*() const { return *v; }
+		pointer operator->() const { return v; }
+		
+		FamilyBindingIterator& operator++()
+		{
+			assert(elemsLeft > 0);
+			++v;
+			--elemsLeft;
+			if (prefetchDist > 0 && elemsLeft >= prefetchDist) {
+				//(v + prefetchDist)->prefetch();
+			}
+			return *this;
+		}
+		
+		bool operator==(const FamilyBindingIterator& other) const { return v == other.v; }
+		bool operator!=(const FamilyBindingIterator& other) const { return v != other.v; }
+
+		friend void swap(FamilyBindingIterator& a, FamilyBindingIterator& b) noexcept { std::swap(a.v, b.v); }
+
+	private:
+		pointer v;
+		uint32_t prefetchDist = 1;
+		uint32_t elemsLeft = 0;
+	};
+
 	template <typename T>
 	class FamilyBinding : public FamilyBindingBase
 	{
 	public:
+
 		FamilyBinding()
 		{
 			bindFamily = &bindFamilyImpl;
 		}
 		
 		T& operator[](size_t index) {
-			Expects(index < count());
+			assert(index < count());
 			return *getFamilyElement(index);
 		}
 		
 		const T& operator[](size_t index) const {
-			Expects(index < count());
+			assert(index < count());
 			return *getFamilyElement(index);
 		}
 
-		T* begin()
+		FamilyBindingIterator<T> begin()
 		{
-			return getFamilyElement(0);
+			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()));
 		}
 
-		const T* begin() const
+		FamilyBindingIterator<T> begin() const
 		{
-			return getFamilyElement(0);
+			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()));
 		}
 
-		T* end()
+		FamilyBindingIterator<T> end()
 		{
-			return getFamilyElement(count());
+			return FamilyBindingIterator(getFamilyElement(count()), 5, 0);
 		}
 
-		const T* end() const
+		FamilyBindingIterator<T> end() const
 		{
-			return getFamilyElement(count());
+			return FamilyBindingIterator(getFamilyElement(count()), 5, 0);
 		}
 
 		T& getSingleton()
 		{
-			Expects(count() == 1);
-			return *begin();
+			assert(count() == 1);
+			return *getFamilyElement(0);
 		}
 
 		const T& getSingleton() const
 		{
-			Expects(count() == 1);
-			return *begin();
+			assert(count() == 1);
+			return *getFamilyElement(0);
 		}
 
 		T& operator()()
@@ -181,12 +224,12 @@ namespace Halley {
 
 		gsl::span<T> getSpan()
 		{
-			return gsl::span<T>(begin(), count());
+			return gsl::span<T>(getFamilyElement(0), count());
 		}
 
 		gsl::span<const T> getSpan() const
 		{
-			return gsl::span<const T>(begin(), count());
+			return gsl::span<const T>(getFamilyElement(0), count());
 		}
 
 	private:

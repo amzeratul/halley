@@ -1,4 +1,4 @@
-// Halley codegen version 131
+// Halley codegen version 136
 #pragma once
 
 #include <halley.hpp>
@@ -21,6 +21,11 @@ public:
 	
 		using Type = Halley::FamilyType<AudioListenerComponent, Transform2DComponent>;
 	
+		void prefetch() const {
+			prefetchL2(&audioListener);
+			prefetchL2(&transform2D);
+		}
+	
 	protected:
 		ListenerFamily(AudioListenerComponent& audioListener, const Transform2DComponent& transform2D)
 			: audioListener(audioListener)
@@ -36,6 +41,12 @@ public:
 		const Halley::MaybeRef<VelocityComponent> velocity{};
 	
 		using Type = Halley::FamilyType<AudioSourceComponent, Transform2DComponent, Halley::MaybeRef<VelocityComponent>>;
+	
+		void prefetch() const {
+			prefetchL2(&audioSource);
+			prefetchL2(&transform2D);
+			prefetchL2(velocity.tryGet());
+		}
 	
 	protected:
 		SourceFamily(AudioSourceComponent& audioSource, const Transform2DComponent& transform2D, const Halley::MaybeRef<VelocityComponent> velocity)

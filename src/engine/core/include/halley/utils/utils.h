@@ -353,14 +353,14 @@ namespace Halley {
     }
 
 	// Prefetch data from memory
-	static inline void prefetchL1(void* p) {
+	static inline void prefetchL1(const void* p) {
 #ifdef _MSC_VER
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T0);
 #else
 		__builtin_prefetch(p);
 #endif
 	}
-	static inline void prefetchL2(void* p) {
+	static inline void prefetchL2(const void* p) {
 #ifdef _MSC_VER
 		_mm_prefetch(static_cast<const char*>(p), _MM_HINT_T1);
 #else

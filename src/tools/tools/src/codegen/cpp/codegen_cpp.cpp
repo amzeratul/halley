@@ -484,6 +484,11 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			return MemberSchema(TypeSchema(type, !comp.write), lowerFirst(comp.name));
 		});
 
+		Vector<String> prefetchBody;
+		for (const auto& comp: fam.components) {
+			prefetchBody += "prefetchL2(" + (comp.optional ? (lowerFirst(comp.name) + ".tryGet()") : ("&" + lowerFirst(comp.name))) + ");";
+		}
+
 		sysClassGen
 			.addClass(CPPClassGenerator(upperFirst(fam.name) + "Family", "Halley::FamilyBaseOf<" + upperFirst(fam.name) + "Family>")
 				.setAccessLevel(MemberAccess::Public)
@@ -493,6 +498,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				{
 					return comp.optional ? "Halley::MaybeRef<" + comp.name + "Component>" : comp.name + "Component";
 				}), ", ") + ">")
+				.addBlankLine()
+				.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "prefetch", true), prefetchBody)
 				.addBlankLine()
 				.setAccessLevel(MemberAccess::Protected)
 				.addConstructor(MemberSchema::toVariableSchema(members), false)

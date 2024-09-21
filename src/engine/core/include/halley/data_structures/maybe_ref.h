@@ -18,37 +18,37 @@ namespace Halley {
 
         T& get()
         {
-            Expects(pointer != nullptr);
+            assert(pointer != nullptr);
             return *pointer;
         }
 
         const T& get() const
         {
-            Expects(pointer != nullptr);
+            assert(pointer != nullptr);
             return *pointer;
         }
 
     	T* operator->()
         {
-        	Expects(pointer != nullptr);
+        	assert(pointer != nullptr);
 			return pointer;
         }
 
     	const T* operator->() const
         {
-        	Expects(pointer != nullptr);
+        	assert(pointer != nullptr);
 			return pointer;
         }
 
         T& operator*()
         {
-        	Expects(pointer != nullptr);
+        	assert(pointer != nullptr);
             return *pointer;
         }
 
         const T& operator*() const
         {
-        	Expects(pointer != nullptr);
+        	assert(pointer != nullptr);
             return *pointer;
         }
 

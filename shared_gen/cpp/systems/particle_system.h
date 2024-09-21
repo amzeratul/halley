@@ -1,4 +1,4 @@
-// Halley codegen version 131
+// Halley codegen version 136
 #pragma once
 
 #include <halley.hpp>
@@ -21,6 +21,11 @@ public:
 		const Transform2DComponent& transform2D;
 	
 		using Type = Halley::FamilyType<ParticlesComponent, Transform2DComponent>;
+	
+		void prefetch() const {
+			prefetchL2(&particles);
+			prefetchL2(&transform2D);
+		}
 	
 	protected:
 		ParticleFamily(ParticlesComponent& particles, const Transform2DComponent& transform2D)

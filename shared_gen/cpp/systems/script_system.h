@@ -1,4 +1,4 @@
-// Halley codegen version 131
+// Halley codegen version 136
 #pragma once
 
 #include <halley.hpp>
@@ -29,6 +29,10 @@ public:
 	
 		using Type = Halley::FamilyType<ScriptableComponent>;
 	
+		void prefetch() const {
+			prefetchL2(&scriptable);
+		}
+	
 	protected:
 		ScriptableFamily(ScriptableComponent& scriptable)
 			: scriptable(scriptable)
@@ -43,6 +47,11 @@ public:
 	
 		using Type = Halley::FamilyType<EmbeddedScriptComponent, ScriptableComponent>;
 	
+		void prefetch() const {
+			prefetchL2(&embeddedScript);
+			prefetchL2(&scriptable);
+		}
+	
 	protected:
 		EmbeddedScriptFamily(EmbeddedScriptComponent& embeddedScript, ScriptableComponent& scriptable)
 			: embeddedScript(embeddedScript)
@@ -56,6 +65,10 @@ public:
 		const ScriptTargetComponent& scriptTarget;
 	
 		using Type = Halley::FamilyType<ScriptTargetComponent>;
+	
+		void prefetch() const {
+			prefetchL2(&scriptTarget);
+		}
 	
 	protected:
 		TargetFamily(const ScriptTargetComponent& scriptTarget)
