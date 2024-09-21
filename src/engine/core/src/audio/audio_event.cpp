@@ -152,13 +152,6 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	auto event = std::make_shared<AudioEvent>();
 	s >> *event;
 
-	for (auto& a: event->actions) {
-		if (a->getType() == AudioEventActionType::PlayLegacy) {
-			Logger::logWarning("Event " + loader.getName() + " contains legacy play events.");
-			break;
-		}
-	}
-
 	event->loadDependencies(loader.getResources());
 	return event;
 }
@@ -185,10 +178,8 @@ void AudioEvent::loadDependencies(Resources& resources)
 std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType type)
 {
 	switch (type) {
-	case AudioEventActionType::PlayLegacy:
-		return std::make_unique<AudioEventActionPlay>(true);
 	case AudioEventActionType::Play:
-		return std::make_unique<AudioEventActionPlay>(false);
+		return std::make_unique<AudioEventActionPlay>();
 	case AudioEventActionType::Stop:
 		return std::make_unique<AudioEventActionStop>();
 	case AudioEventActionType::Pause:
@@ -216,8 +207,6 @@ std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType ty
 String AudioEvent::getActionName(AudioEventActionType type)
 {
 	switch (type) {
-	case AudioEventActionType::PlayLegacy:
-		return "Play (Legacy)";
 	case AudioEventActionType::Play:
 		return "Play";
 	case AudioEventActionType::Stop:
@@ -267,12 +256,15 @@ ConfigNode AudioEventAction::toConfigNode() const
 	return result;
 }
 
-void AudioEventActionObject::loadObject(const ConfigNode& node, bool loadObject)
+void AudioEventActionObject::loadObject(const ConfigNode& node, bool requiresObject)
 {
 	AudioEventAction::load(node);
-	if (loadObject) {
+	if (requiresObject) {
 		objectName = node["object"].asString();
+	} else {
+		objectName = node["object"].asString("");
 	}
+
 	if (node.hasKey("fade")) {
 		fade = AudioFade(node["fade"]);
 	}
@@ -290,13 +282,6 @@ void AudioEventActionObject::deserialize(Deserializer& s)
 	AudioEventAction::deserialize(s);
 	s >> objectName;
 	s >> fade;
-}
-
-void AudioEventActionObject::loadDependencies(Resources& resources)
-{
-	if (!objectName.isEmpty() && (!object || object->getAssetId() != objectName)) {
-		object = resources.get<AudioObject>(objectName);
-	}
 }
 
 ConfigNode AudioEventActionObject::toConfigNode() const
@@ -339,7 +324,16 @@ AudioFade& AudioEventActionObject::getFade()
 	return fade;
 }
 
-
+void AudioEventActionObject::loadDependencies(Resources& resources)
+{
+	if (objectName.isEmpty()) {
+		object = {};
+		objectId = {};
+	} else {
+		object = resources.get<AudioObject>(objectName);
+		objectId = object->getAudioObjectId();
+	}
+}
 
 void AudioEventActionBus::load(const ConfigNode& config)
 {
@@ -395,27 +389,17 @@ AudioEventScope AudioEventActionBus::getScope() const
 }
 
 
-AudioEventActionPlay::AudioEventActionPlay(bool legacy)
-	: legacy(legacy)
-	, playGain(1, 1)
+AudioEventActionPlay::AudioEventActionPlay()
+	: playGain(1, 1)
 	, playPitch(1, 1)
 {
 }
 
 void AudioEventActionPlay::load(const ConfigNode& node)
 {
-	loadObject(node, false);
-	legacy = !node.hasKey("object");
+	loadObject(node);
 	
-	if (legacy) {
-		objectName = "";
-		auto obj = std::make_shared<AudioObject>();
-		obj->loadLegacyEvent(node);
-		object = obj;
-		playGain = Range<float>(1, 1);
-		playPitch = Range<float>(1, 1);
-	} else {
-		objectName = node["object"].asString();
+	if (node.hasKey("object")) {
 		playGain = node["gain"].asFloatRange(Range<float>(1, 1));
 		playPitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 		singleton = node["singleton"].asBool(false);
@@ -426,12 +410,12 @@ void AudioEventActionPlay::load(const ConfigNode& node)
 
 bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, AudioEmitter& emitter) const
 {
-	if (!object) {
+	if (!objectId) {
 		return false;
 	}
 
 	if (singleton) {
-		const size_t nPlaying = emitter.forVoices(object->getAudioObjectId(), [&] (AudioVoice&) {});
+		const size_t nPlaying = emitter.forVoices(*objectId, [&] (AudioVoice&) {});
 		if (nPlaying > 0) {
 			return false;
 		}
@@ -448,7 +432,7 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 
 AudioEventActionType AudioEventActionPlay::getType() const
 {
-	return legacy ? AudioEventActionType::PlayLegacy : AudioEventActionType::Play;
+	return AudioEventActionType::Play;
 }
 
 float AudioEventActionPlay::getDelay() const
@@ -503,41 +487,20 @@ void AudioEventActionPlay::setSingleton(bool value)
 
 void AudioEventActionPlay::serialize(Serializer& s) const
 {
-	s << legacy;
 	s << singleton;
-	if (legacy) {
-		s << *object;
-	} else {
-		AudioEventActionObject::serialize(s);
-	}
 	s << playGain;
 	s << playPitch;
 	s << delay;
+	AudioEventActionObject::serialize(s);
 }
 
 void AudioEventActionPlay::deserialize(Deserializer& s)
 {
-	s >> legacy;
 	s >> singleton;
-	if (legacy) {
-		auto obj = std::make_shared<AudioObject>();
-		s >> *obj;
-		object = obj;
-	} else {
-		AudioEventActionObject::deserialize(s);
-	}
 	s >> playGain;
 	s >> playPitch;
 	s >> delay;
-}
-
-void AudioEventActionPlay::loadDependencies(Resources& resources)
-{
-	if (legacy) {
-		const_cast<AudioObject&>(*object).loadDependencies(resources); // :|
-	} else {
-		AudioEventActionObject::loadDependencies(resources);
-	}
+	AudioEventActionObject::deserialize(s);
 }
 
 ConfigNode AudioEventActionPlay::toConfigNode() const
@@ -551,15 +514,11 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 		result["singleton"] = singleton;
 	}
 
-	if (legacy) {
-		object->legacyToConfigNode(result);
-	} else {
-		if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
-			result["gain"] = playGain;
-		}
-		if (std::abs(playPitch.start - 1.0f) > 0.0001f && std::abs(playPitch.end - 1.0f) > 0.0001f) {
-			result["pitch"] = playPitch;
-		}
+	if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
+		result["gain"] = playGain;
+	}
+	if (std::abs(playPitch.start - 1.0f) > 0.0001f && std::abs(playPitch.end - 1.0f) > 0.0001f) {
+		result["pitch"] = playPitch;
 	}
 	
 	return result;
@@ -572,13 +531,11 @@ void AudioEventActionStop::load(const ConfigNode& config)
 
 bool AudioEventActionStop::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	if (!object) {
+	if (!objectId) {
 		return false;
 	}
 	
-	const AudioObjectId audioObjectId = object->getAudioObjectId();
-
-	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(*objectId, [&] (AudioVoice& voice)
 	{
 		voice.stop(fade);
 	});
@@ -593,13 +550,11 @@ void AudioEventActionPause::load(const ConfigNode& config)
 
 bool AudioEventActionPause::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	if (!object) {
+	if (!objectId) {
 		return false;
 	}
 	
-	const AudioObjectId audioObjectId = object->getAudioObjectId();
-
-	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(*objectId, [&] (AudioVoice& voice)
 	{
 		voice.pause(fade);
 	});
@@ -615,13 +570,11 @@ void AudioEventActionResume::load(const ConfigNode& config)
 
 bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	if (!object) {
+	if (!objectId) {
 		return false;
 	}
 	
-	const AudioObjectId audioObjectId = object->getAudioObjectId();
-
-	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(*objectId, [&] (AudioVoice& voice)
 	{
 		voice.resume(fade, force);
 	});
@@ -772,13 +725,11 @@ ConfigNode AudioEventActionSetVolume::toConfigNode() const
 
 bool AudioEventActionSetVolume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	if (!object) {
+	if (!objectId) {
 		return false;
 	}
 	
-	const AudioObjectId audioObjectId = object->getAudioObjectId();
-
-	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(*objectId, [&] (AudioVoice& voice)
 	{
 		voice.setUserGain(gain);
 	});

@@ -18,7 +18,6 @@ namespace Halley
 
 	enum class AudioEventActionType
 	{
-		PlayLegacy,
 		Play,
 		Stop,
 		Pause,
@@ -34,9 +33,8 @@ namespace Halley
 	
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 12> operator()() const {
+		constexpr std::array<const char*, 11> operator()() const {
 			return{{
-				"playLegacy",
 				"play",
 				"stop",
 				"pause",
@@ -101,7 +99,6 @@ namespace Halley
 
 	private:
 		Vector<std::unique_ptr<AudioEventAction>> actions;
-		
 		void loadDependencies(Resources& resources);
 	};
 
@@ -129,12 +126,10 @@ namespace Halley
 	class AudioEventActionObject : public AudioEventAction
 	{
 	public:
-		void loadObject(const ConfigNode& config, bool loadObject = true);
+		void loadObject(const ConfigNode& config, bool requiresObject = true);
 		
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
-
-		void loadDependencies(Resources& resources) override;
 
 		ConfigNode toConfigNode() const override;
 
@@ -145,10 +140,15 @@ namespace Halley
 		const AudioFade& getFade() const;
 		AudioFade& getFade();
 
+		void loadDependencies(Resources& resources) override;
+
 	protected:
+		std::optional<AudioObjectId> objectId;
 		std::shared_ptr<const AudioObject> object;
 		String objectName;
 		AudioFade fade;
+
+		void loadObjectReference();
 	};
 
 	class AudioEventActionBus : public AudioEventAction {
@@ -173,7 +173,7 @@ namespace Halley
 	class AudioEventActionPlay final : public AudioEventActionObject
 	{
 	public:
-		AudioEventActionPlay(bool legacy);
+		AudioEventActionPlay();
 		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
@@ -193,12 +193,9 @@ namespace Halley
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void loadDependencies(Resources& resources) override;
-
 		ConfigNode toConfigNode() const override;
 
 	private:
-		bool legacy = false;
 		bool singleton = false;
 		Range<float> playGain;
 		Range<float> playPitch;

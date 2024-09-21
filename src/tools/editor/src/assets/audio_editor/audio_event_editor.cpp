@@ -427,10 +427,8 @@ ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback call
 	Vector<String> names;
 	for (auto id: EnumNames<AudioEventActionType>()()) {
 		const auto type = fromString<AudioEventActionType>(id);
-		if (type != AudioEventActionType::PlayLegacy) {
-			ids.push_back(id);
-			names.push_back(AudioEvent::getActionName(type));
-		}
+		ids.push_back(id);
+		names.push_back(AudioEvent::getActionName(type));
 	}
 	setTitle(LocalisedString::fromHardcodedString("Add Audio Event Action"));
 	setAssetIds(ids, names, "play");
