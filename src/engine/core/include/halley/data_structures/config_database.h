@@ -230,6 +230,7 @@ namespace Halley {
         static size_t nextIdx;
 
         std::optional<Vector<String>> onlyLoad;
+        std::mutex mutex;
 
         template <typename T>
         ConfigDatabaseType<T>& of() const

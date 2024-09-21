@@ -53,6 +53,7 @@ void ConfigDatabase::loadFile(Resources& resources, const String& configName)
 	loadConfig(configFile->getRoot(), true);
 
 	if (allowHotReload) {
+		auto lock = std::unique_lock(mutex);
 		observers[configFile->getAssetId()] = ConfigObserver(*configFile);
 	} else {
 		resources.unload<ConfigFile>(configName);
