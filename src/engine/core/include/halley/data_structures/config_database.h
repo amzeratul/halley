@@ -6,6 +6,8 @@
 #include "../text/halleystring.h"
 #include <typeinfo>
 
+#include "halley/utils/algorithm.h"
+
 namespace Halley {
     class ConfigNode;
     class ConfigFile;
@@ -111,27 +113,16 @@ namespace Halley {
         void loadConfigs(const ConfigNode& nodes, bool enforceUnique) override
         {
             if (nodes.getType() == ConfigNodeType::Sequence) {
-                for (const auto& n : nodes.asSequence()) {
-                    loadConfig(n, enforceUnique);
-                }
-            }
-            keys.clear();
-        }
+                const auto& seq = nodes.asSequence();
+                Vector<T> result = std_ex::transform(seq, [] (const ConfigNode& node) { return T(node); });
 
-        void loadConfig(const ConfigNode& node, bool enforceUnique)
-        {
-            auto id = node["id"].asString();
-            if (enforceUnique && entries.contains(id)) {
-                auto typeName = String(typeid(T).name());
-                if (typeName.startsWith("class ")) {
-	                typeName = typeName.mid(6);
+                auto lock = std::unique_lock(mutex);
+                for (size_t i = 0; i < result.size(); ++i) {
+                    loadEntry(seq[i]["id"].asString(), result[i], enforceUnique);
                 }
-	            Logger::logError("Duplicate " + typeName + " id \"" + id + "\"");
-                return;
+                result.clear();
+				keys.clear();
             }
-
-            entries[std::move(id)] = T(node);
-            keys.clear();
         }
 
         static size_t& getIdx()
@@ -148,14 +139,29 @@ namespace Halley {
     private:
         HashMap<String, T> entries;
         mutable Vector<String> keys;
+        std::mutex mutex; // Only used for parallel loading atm
+
+        void loadEntry(const String& id, T& entry, bool enforceUnique)
+        {
+        	if (enforceUnique && entries.contains(id)) {
+                auto typeName = String(typeid(T).name());
+                if (typeName.startsWith("class ")) {
+	                typeName = typeName.mid(6);
+                }
+	            Logger::logError("Duplicate " + typeName + " id \"" + id + "\"");
+                return;
+            }
+
+            entries[id] = std::move(entry);
+        }
     };
 
     class ConfigDatabase {
     public:
         ConfigDatabase(std::optional<Vector<String>> onlyLoad = std::nullopt);
 
-        void load(Resources& resources, const String& prefix);
-        void loadFile(const ConfigFile& configFile);
+        void loadConfigs(Resources& resources, const std::function<bool(const String&)>& filter);
+        void loadFile(Resources& resources, const String& configName);
         void loadConfig(const ConfigNode& node, bool enforceUnique);
         void update();
 

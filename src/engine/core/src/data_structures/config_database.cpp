@@ -1,5 +1,6 @@
 #include "halley/data_structures/config_database.h"
 
+#include "halley/concurrency/concurrent.h"
 #include "halley/resources/resources.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/game/game_platform.h"
@@ -21,24 +22,41 @@ ConfigDatabase::ConfigDatabase(std::optional<Vector<String>> onlyLoad)
 {
 }
 
-void ConfigDatabase::load(Resources& resources, const String& prefix)
+void ConfigDatabase::loadConfigs(Resources& resources, const std::function<bool(const String&)>& filter)
 {
-	for (const auto& configName: resources.enumerate<ConfigFile>()) {
-		if (configName.startsWith(prefix)) {
-			loadFile(*resources.get<ConfigFile>(configName));
-			if (!allowHotReload) {
-				resources.unload<ConfigFile>(configName);
+	bool threadedLoad = true;
+
+	Vector<Future<void>> pending;
+
+	for (auto configName: resources.enumerate<ConfigFile>()) {
+		if (filter(configName)) {
+			if (threadedLoad) {
+				pending += Concurrent::execute([this, &resources, configName = std::move(configName)]
+				{
+					loadFile(resources, configName);
+				});
+			} else {
+				loadFile(resources, configName);
 			}
 		}
 	}
+
+	if (threadedLoad) {
+		Concurrent::whenAll(pending.begin(), pending.end()).wait();
+	}
 }
 
-void ConfigDatabase::loadFile(const ConfigFile& configFile)
+void ConfigDatabase::loadFile(Resources& resources, const String& configName)
 {
+	auto configFile = resources.get<ConfigFile>(configName);
+
+	loadConfig(configFile->getRoot(), true);
+
 	if (allowHotReload) {
-		observers[configFile.getAssetId()] = ConfigObserver(configFile);
+		observers[configFile->getAssetId()] = ConfigObserver(*configFile);
+	} else {
+		resources.unload<ConfigFile>(configName);
 	}
-	loadConfig(configFile.getRoot(), true);
 }
 
 int ConfigDatabase::getVersion() const
