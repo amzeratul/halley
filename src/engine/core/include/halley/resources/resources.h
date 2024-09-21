@@ -23,6 +23,7 @@
 
 #include <ctime>
 #include <algorithm>
+#include <halley/concurrency/concurrent.h>
 #include <halley/support/exception.h>
 #include "halley/resources/resource.h"
 #include "resource_collection.h"
@@ -78,6 +79,35 @@ namespace Halley {
 			for (const auto& e: enumerate<T>()) {
 				preload<T>(e);
 			}
+		}
+
+		template <typename T>
+		Vector<Future<void>> preloadAllParallel(size_t nThreadsReq) const
+		{
+			const auto entries = enumerate<T>();
+			const auto nEntries = entries.size();
+			const auto nThreads = std::min(nEntries, nThreadsReq);
+			Vector<Future<void>> pending;
+
+			for (size_t i = 0; i < nThreads; ++i) {
+				auto e0 = (nEntries * i) / nThreads;
+				auto e1 = (nEntries * (i + 1)) / nThreads;
+
+				Vector<String> es;
+				es.reserve(e1 - e0);
+				for (size_t e = e0; e < e1; ++e) {
+					es.push_back(std::move(entries[e]));
+				}
+
+				pending += Concurrent::execute([this, es = std::move(es)]
+				{
+					for (auto& e: es) {
+						preload<T>(e);
+					}
+				});
+			}
+
+			return pending;
 		}
 
 		template <typename T>
