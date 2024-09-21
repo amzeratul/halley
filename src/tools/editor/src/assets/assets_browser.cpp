@@ -341,6 +341,12 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 	if (assetId.isEmpty()) {
 		makeEntry("add", "New asset...", "Create new asset.", "new_file.png", canAdd);
 		makeEntry("addFolder", "New folder...", "Create new folder.", "new_folder.png", true);
+
+		if (handler) {
+			for (auto& e: handler->getEmptySpaceContextMenuEntries()) {
+				makeEntry(e.id, e.text, e.tooltip, e.icon);
+			}
+		}
 	} else {
 		const bool isDirectory = assetId.endsWith("/.");
 
@@ -351,6 +357,12 @@ void AssetsBrowser::openContextMenu(const String& assetId)
 			makeEntry("rename", "Rename", "Rename Asset.", "rename.png", true);
 			makeEntry("duplicate", "Duplicate", "Duplicate Asset.", "duplicate.png", canDuplicate);
 			makeEntry("delete", "Delete", "Delete Asset.", "delete.png", true);
+
+			if (handler) {
+				for (auto& e: handler->getContextMenuEntries()) {
+					makeEntry(e.id, e.text, e.tooltip, e.icon);
+				}
+			}
 		}
 	}
 
@@ -414,6 +426,10 @@ void AssetsBrowser::onContextMenuAction(const String& assetId, const String& act
 				removeFolder(assetId);
 			}
 		}));
+	} else {
+		if (auto* handler = getHandlerForCurType()) {
+			handler->onContextMenu(action, *getRoot(), factory, assetId, project);
+		}
 	}
 }
 
@@ -526,8 +542,7 @@ void AssetsBrowser::doSetCollapsed(bool c)
 		auto button = getWidgetAs<UIButton>("collapseButton");
 		button->setLabel(LocalisedString::fromHardcodedString(collapsed ? ">>" : "<< Collapse"));
 
-		auto* parent = dynamic_cast<UIWidget*>(button->getParent());
-		if (parent) {
+		if (auto* parent = dynamic_cast<UIWidget*>(button->getParent())) {
 			parent->getSizer()[0].setBorder(collapsed ? Vector4f(-10, 0, -15, 0) : Vector4f(0, 0, 6, 0));
 		}
 		

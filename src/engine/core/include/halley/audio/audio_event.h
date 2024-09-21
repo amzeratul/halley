@@ -97,6 +97,8 @@ namespace Halley
 		static std::unique_ptr<AudioEventAction> makeAction(AudioEventActionType type);
 		static String getActionName(AudioEventActionType type);
 
+		static Vector<AudioObject> convertLegacy(const String& audioEventId, ConfigNode& audioEventNode);
+
 	private:
 		Vector<std::unique_ptr<AudioEventAction>> actions;
 		

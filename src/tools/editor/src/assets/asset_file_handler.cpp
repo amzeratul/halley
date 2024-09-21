@@ -1,6 +1,8 @@
 #include "asset_file_handler.h"
 
 #include "halley/audio/audio_object.h"
+#include "halley/tools/file/filesystem_cache.h"
+#include "halley/tools/project/project.h"
 
 using namespace Halley;
 
@@ -79,6 +81,20 @@ std::string_view AssetFileHandlerBase::getFileExtension() const
 	return fileExtension;
 }
 
+Vector<IAssetFileHandler::MenuEntry> AssetFileHandlerBase::getContextMenuEntries() const
+{
+	return {};
+}
+
+void AssetFileHandlerBase::onContextMenu(const String& actionId, UIRoot& ui, EditorUIFactory& factory, const String& assetId, Project& project) const
+{
+}
+
+Vector<IAssetFileHandler::MenuEntry> AssetFileHandlerBase::getEmptySpaceContextMenuEntries() const
+{
+	return {};
+}
+
 AssetFileHandlerPrefab::AssetFileHandlerPrefab()
 	: AssetFileHandlerBase(AssetType::Prefab, "prefab", "Prefab", ".prefab")
 {}
@@ -147,6 +163,61 @@ String AssetFileHandlerAudioEvent::makeDefaultFile() const
 String AssetFileHandlerAudioEvent::duplicateAsset(const ConfigNode& node) const
 {
 	return AudioEvent(node).toYAML();
+}
+
+Vector<IAssetFileHandler::MenuEntry> AssetFileHandlerAudioEvent::getEmptySpaceContextMenuEntries() const
+{
+	return {
+		MenuEntry { "convertAllLegacy", "Convert All Legacy Events", "Convert all legacy events, creating AudioObjects for them.", "" }
+	};
+}
+
+void AssetFileHandlerAudioEvent::onContextMenu(const String& actionId, UIRoot& ui, EditorUIFactory& factory, const String& assetId, Project& project) const
+{
+	if (actionId == "convertAllLegacy") {
+		convertLegacyEvents(project);
+	}
+}
+
+void AssetFileHandlerAudioEvent::convertLegacyEvents(Project& project) const
+{
+	Logger::logInfo("Converting all legacy events...");
+
+	auto& fs = project.getFileSystemCache();
+
+	auto rootDir = project.getAssetsSrcPath() / "audio_event";
+	auto objectDir = project.getAssetsSrcPath() / "audio_object";
+
+	for (auto& f: fs.enumerateDirectory(rootDir)) {
+		auto eventPath = rootDir / f;
+		auto id = f.replaceExtension("").getString();
+
+		auto data = YAMLConvert::parseConfig(fs.readFile(eventPath));
+		auto newObjects = AudioEvent::convertLegacy(id, data.getRoot());
+
+		if (!newObjects.empty()) {
+			Logger::logInfo("+ Found legacy: " + id);
+			bool allGood = true;
+
+			for (auto& o: newObjects) {
+				const auto objectPath = (objectDir / o.getAssetId()).replaceExtension(".audioobject");
+				if (fs.exists(objectPath)) {
+					Logger::logError("- AudioObject already exists: " + o.getAssetId());
+					allGood = false;
+				}
+			}
+
+			if (allGood) {
+				for (auto& o: newObjects) {
+					const auto objectPath = (objectDir / o.getAssetId()).replaceExtension(".audioobject");
+					fs.writeFile(objectPath, o.toYAML());
+				}
+				fs.writeFile(eventPath, YAMLConvert::generateYAML(data));
+			}
+		}
+	}
+
+	Logger::logInfo("Done");
 }
 
 AssetFileHandlerUI::AssetFileHandlerUI()

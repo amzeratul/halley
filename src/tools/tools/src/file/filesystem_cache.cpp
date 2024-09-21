@@ -46,6 +46,11 @@ void FileSystemCache::writeFile(const Path& path, Bytes data)
 	}
 }
 
+void FileSystemCache::writeFile(const Path& path, const String& data)
+{
+	writeFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
+}
+
 const Bytes& FileSystemCache::readFile(const Path& path)
 {
 	const auto key = path.getString();

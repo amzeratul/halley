@@ -56,7 +56,9 @@ ConfigNode AudioObject::toConfigNode() const
 	if (attenuationOverride) {
 		result["attenuationOverride"] = *attenuationOverride;
 	}
-	result["pruneDistant"] = pruneDistant;
+	if (!pruneDistant) {
+		result["pruneDistant"] = pruneDistant;
+	}
 	if (cooldown) {
 		result["cooldown"] = cooldown;
 	}

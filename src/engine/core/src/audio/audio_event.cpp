@@ -43,6 +43,33 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	}
 }
 
+Vector<AudioObject> AudioEvent::convertLegacy(const String& audioEventId, ConfigNode& node)
+{
+	Vector<AudioObject> output;
+
+	if (node.hasKey("actions")) {
+		for (auto& actionNode: node["actions"]) {
+			const auto type = fromString<AudioEventActionType>(actionNode["type"].asString());
+			if (type == AudioEventActionType::Play) {
+				if (!actionNode.hasKey("object")) {
+					// Legacy play
+					AudioObject obj;
+					obj.loadLegacyEvent(actionNode);
+					obj.setAssetId(output.empty() ? audioEventId : audioEventId + "_" + toString(output.size()));
+
+					actionNode.asMap().clear();
+					actionNode["type"] = "play";
+					actionNode["object"] = obj.getAssetId();
+
+					output.push_back(obj);
+				}
+			}
+		}
+	}
+
+	return output;
+}
+
 String AudioEvent::toYAML() const
 {
 	auto actionsNode = ConfigNode::SequenceType();
@@ -124,6 +151,14 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	Deserializer s(staticData->getSpan());
 	auto event = std::make_shared<AudioEvent>();
 	s >> *event;
+
+	for (auto& a: event->actions) {
+		if (a->getType() == AudioEventActionType::PlayLegacy) {
+			Logger::logWarning("Event " + loader.getName() + " contains legacy play events.");
+			break;
+		}
+	}
+
 	event->loadDependencies(loader.getResources());
 	return event;
 }
@@ -208,7 +243,6 @@ String AudioEvent::getActionName(AudioEventActionType type)
 	}
 	return "Unknown";
 }
-
 
 void AudioEventAction::serialize(Serializer& s) const
 {

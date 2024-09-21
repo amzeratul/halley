@@ -10,6 +10,7 @@ namespace Halley {
     public:
         void writeFile(const Path& path, gsl::span<const gsl::byte> data);
         void writeFile(const Path& path, Bytes data);
+        void writeFile(const Path& path, const String& data);
 		const Bytes& readFile(const Path& path) override;
         bool remove(const Path& path);
         bool hasCached(const Path& path) const;
