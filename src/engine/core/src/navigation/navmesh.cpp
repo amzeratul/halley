@@ -62,6 +62,7 @@ Navmesh::Navmesh(Vector<PolygonData> polys, const NavmeshBounds& bounds, int sub
 	// Generate edges
 	postProcessPortals();
 	generateOpenEdges();
+	computePortalDistances();
 }
 
 Navmesh::Navmesh(const ConfigNode& nodeData)
@@ -808,9 +809,31 @@ Navmesh::Portal& Navmesh::getPortals(int id)
 void Navmesh::postProcessPortals()
 {
 	auto edges = std::move(portals);
-
 	for (auto& edge: edges) {
 		edge.postProcess(polygons, portals);
+	}
+}
+
+void Navmesh::computePortalDistances()
+{
+	const size_t nPortals = portals.size();
+	for (auto& p: portals) {
+		p.costToOtherPortalsHere.resize(nPortals, std::numeric_limits<float>::infinity());
+	}
+
+	for (size_t i = 0; i < nPortals; ++i) {
+		for (size_t j = i + 1; j < nPortals; ++j) {
+			auto& p0 = portals[i];
+			auto& p1 = portals[j];
+
+			const auto interPortalPath = pathfind(NavigationQuery(WorldPosition(p0.pos, subWorld), WorldPosition(p1.pos, subWorld), NavigationQuery::PostProcessingType::Normal, NavigationQuery::QuantizationType::None));
+			if (!interPortalPath) {
+				Logger::logError("Unable to compute distance between portals on same navmesh.");
+			}
+			const float cost = interPortalPath ? interPortalPath->getLength() : std::numeric_limits<float>::infinity();
+			p0.costToOtherPortalsHere[j] = cost;
+			p1.costToOtherPortalsHere[i] = cost;
+		}
 	}
 }
 
@@ -826,6 +849,7 @@ Navmesh::Portal::Portal(const ConfigNode& node)
 	pos = node["pos"].asVector2f();
 	vertices = node["vertices"].asVector<Vector2f>();
 	connections = node["connections"].asVector<NodeAndConn>();
+	costToOtherPortalsHere = node["costToOtherPortalsHere"].asVector<float>({});
 	updateLocal();
 }
 
@@ -837,6 +861,7 @@ ConfigNode Navmesh::Portal::toConfigNode() const
 	result["pos"] = pos;
 	result["vertices"] = vertices;
 	result["connections"] = connections;
+	result["costToOtherPortalsHere"] = costToOtherPortalsHere;
 	
 	return result;
 }
@@ -847,6 +872,7 @@ void Navmesh::Portal::serialize(Serializer& s) const
 	s << pos;
 	s << vertices;
 	s << connections;
+	s << costToOtherPortalsHere;
 }
 
 void Navmesh::Portal::deserialize(Deserializer& s)
@@ -855,6 +881,7 @@ void Navmesh::Portal::deserialize(Deserializer& s)
 	s >> pos;
 	s >> vertices;
 	s >> connections;
+	s >> costToOtherPortalsHere;
 	updateLocal();
 }
 

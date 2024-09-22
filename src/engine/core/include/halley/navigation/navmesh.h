@@ -85,6 +85,7 @@ namespace Halley {
 			OptionalLite<uint16_t> connected;
 			bool regionLink = false;
 			bool subWorldLink = false;
+			Vector<float> costToOtherPortalsHere;
 
 			Portal(int id = 0);
 			explicit Portal(const ConfigNode& node);
@@ -205,6 +206,7 @@ namespace Halley {
 		void addToPortals(NodeAndConn nodeAndConn, int id);
 		Portal& getPortals(int id);
 		void postProcessPortals();
+		void computePortalDistances();
 
 		void computeArea();
 		void computeBoundingCircle();
