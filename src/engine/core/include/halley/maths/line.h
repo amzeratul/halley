@@ -296,14 +296,19 @@ namespace Halley {
 			return a != other.a || b != other.b;
 		}
 
-		Vector2f getCentre() const
+		[[nodiscard]] constexpr Vector2f getCentre() const
 		{
 			return (a + b) * 0.5f;
 		}
 
-		Vector2f getDirection() const
+		[[nodiscard]] constexpr Vector2f getDirection() const
 		{
 			return (b - a).unit();
+		}
+
+		[[nodiscard]] constexpr float getLength() const
+		{
+			return (a - b).length();
 		}
 
 		[[nodiscard]] std::optional<LineSegment> clip(const Circle& circle) const;
