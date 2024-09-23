@@ -65,7 +65,8 @@ gsl::span<const NavigationPath::Point> NavigationPathFollower::getNextPathPoints
 	if (!path) {
 		return {};
 	}
-	return path->path.span().subspan(nextPathIdx);
+	auto span = path->path.span();
+	return nextPathIdx <= span.size() ? span.subspan(nextPathIdx) : gsl::span<const NavigationPath::Point>();
 }
 
 void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold)
