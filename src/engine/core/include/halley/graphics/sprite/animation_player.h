@@ -13,24 +13,28 @@ namespace Halley
 	class AnimationPlayer
 	{
 	public:
+		using AnimationPlayId = size_t;
+
 		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
 
-		AnimationPlayer& playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {}, bool reverse = false);
-		AnimationPlayer& stop();
+		AnimationPlayId playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {}, bool reverse = false);
+		AnimationPlayId stop();
 
-		AnimationPlayer& setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
-		AnimationPlayer& setSequence(const String& sequence);
-		AnimationPlayer& setDirection(int direction);
-		AnimationPlayer& setDirection(const String& direction);
+		AnimationPlayId setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
+		AnimationPlayId setSequence(const String& sequence);
+		void setDirection(int direction);
+		void setDirection(const String& direction);
 		bool trySetSequence(const String& sequence);
 
-		AnimationPlayer& setApplyPivot(bool apply);
+		AnimationPlayId getCurrentPlayId() const;
+
+		void setApplyPivot(bool apply);
 		bool isApplyingPivot() const;
 
 		void update(Time time);
 		void updateSprite(Sprite& sprite) const;
 
-		AnimationPlayer& setMaterialOverride(std::shared_ptr<const Material> material);
+		void setMaterialOverride(std::shared_ptr<const Material> material);
 		std::shared_ptr<const Material> getMaterialOverride() const;
 		std::shared_ptr<const Material> getMaterial() const;
 		void setApplyMaterial(bool apply);
@@ -50,14 +54,14 @@ namespace Halley
 		int getCurrentDirectionId() const;
 		bool isFlipped() const;
 
-		AnimationPlayer& setPlaybackSpeed(float value);
+		void setPlaybackSpeed(float value);
 		float getPlaybackSpeed() const;
 
 		const Animation& getAnimation() const;
 		std::shared_ptr<const Animation> getAnimationPtr() const;
 		bool hasAnimation() const;
 
-		AnimationPlayer& setOffsetPivot(Vector2f offset);
+		void setOffsetPivot(Vector2f offset);
 
 		void syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized);
 		void setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized);
@@ -108,6 +112,8 @@ namespace Halley
 		bool playing = false;
 		bool reverse = false;
 		std::optional<bool> visibleOverride;
+
+		AnimationPlayId curPlayId = 0;
 
 		bool applyPivot = true;
 		bool applyMaterial = true;

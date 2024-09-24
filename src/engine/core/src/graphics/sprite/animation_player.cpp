@@ -13,36 +13,43 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse)
+AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse)
 {
 	updateResourceIfNeeded();
 
-	curSeq = nullptr;
-	setSequence(sequence);
-	seqLooping = false;
+	if (animation->hasSequence(sequence)) {
+		curSeq = nullptr;
+		setSequence(sequence);
+		seqLooping = false;
 
-	nextSequence = nextLoopingSequence;
+		nextSequence = nextLoopingSequence;
 
-	this->reverse = reverse;
-	if (reverse) {
-		curFrameN = static_cast<int>(curSeq->numFrames() - 1);
+		this->reverse = reverse;
+		if (reverse) {
+			curFrameN = static_cast<int>(curSeq->numFrames() - 1);
+		}
+	} else if (nextLoopingSequence) {
+		setSequence(*nextLoopingSequence);
 	}
 
-	return *this;
+	return curPlayId;
 }
 
-AnimationPlayer& AnimationPlayer::stop()
+AnimationPlayer::AnimationPlayId AnimationPlayer::stop()
 {
-	curSeq = nullptr;
-	playing = false;
+	if (curSeq || playing) {
+		curSeq = nullptr;
+		playing = false;
+		++curPlayId;
+	}
 
 	updateResourceIfNeeded();
 	
-	return *this;
+	return curPlayId;
 }
 
 
-AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, const String& sequence, const String& direction)
+AnimationPlayer::AnimationPlayId AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, const String& sequence, const String& direction)
 {
 	if (animation != v) {
 		animation = v;
@@ -55,6 +62,7 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 		curSeq = nullptr;
 		curFrame = nullptr;
 		dirId = -1;
+		++curPlayId;
 	}
 
 	updateResourceIfNeeded();
@@ -63,13 +71,15 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 		setSequence(sequence);
 		setDirection(direction);
 	}
-	return *this;
+
+	return curPlayId;
 }
 
-AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
+AnimationPlayer::AnimationPlayId AnimationPlayer::setSequence(const String& _sequence)
 {
 	curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
 	nextSequence = {};
+	reverse = false;
 	updateResourceIfNeeded();
 
 	if (animation && (!curSeq || curSeq->getName() != curSeqName)) {
@@ -85,13 +95,14 @@ AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
 		seqNoFlip = curSeq->isNoFlip();
 
 		dirty = true;
+		++curPlayId;
 
 		onSequenceStarted();
 	}
-	return *this;
+	return curPlayId;
 }
 
-AnimationPlayer& AnimationPlayer::setDirection(int direction)
+void AnimationPlayer::setDirection(int direction)
 {
 	updateResourceIfNeeded();
 
@@ -104,10 +115,9 @@ AnimationPlayer& AnimationPlayer::setDirection(int direction)
 			dirty = true;
 		}
 	}
-	return *this;
 }
 
-AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
+void AnimationPlayer::setDirection(const String& direction)
 {
 	curDirName = direction;
 	updateResourceIfNeeded();
@@ -121,7 +131,6 @@ AnimationPlayer& AnimationPlayer::setDirection(const String& direction)
 			dirty = true;
 		}
 	}
-	return *this;
 }
 
 bool AnimationPlayer::trySetSequence(const String& sequence)
@@ -134,10 +143,14 @@ bool AnimationPlayer::trySetSequence(const String& sequence)
 	return false;
 }
 
-AnimationPlayer& AnimationPlayer::setApplyPivot(bool apply)
+AnimationPlayer::AnimationPlayId AnimationPlayer::getCurrentPlayId() const
+{
+	return curPlayId;
+}
+
+void AnimationPlayer::setApplyPivot(bool apply)
 {
 	applyPivot = apply;
-	return *this;
 }
 
 bool AnimationPlayer::isApplyingPivot() const
@@ -249,10 +262,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 	}
 }
 
-AnimationPlayer& AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
+void AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
 {
 	materialOverride = std::move(material);
-	return *this;
 }
 
 std::shared_ptr<const Material> AnimationPlayer::getMaterialOverride() const
@@ -337,10 +349,9 @@ bool AnimationPlayer::isFlipped() const
 	return dirFlip && !seqNoFlip;
 }
 
-AnimationPlayer& AnimationPlayer::setPlaybackSpeed(float value)
+void AnimationPlayer::setPlaybackSpeed(float value)
 {
 	playbackSpeed = value;
-	return *this;
 }
 
 float AnimationPlayer::getPlaybackSpeed() const
@@ -363,11 +374,10 @@ bool AnimationPlayer::hasAnimation() const
 	return static_cast<bool>(animation);
 }
 
-AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
+void AnimationPlayer::setOffsetPivot(Vector2f offset)
 {
 	offsetPivot = offset;
 	hasUpdate = true;
-	return *this;
 }
 
 void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
@@ -455,7 +465,10 @@ void AnimationPlayer::onSequenceDone()
 	if (nextSequence) {
 		setSequence(nextSequence.value());
 	} else {
-		playing = false;
+		if (playing) {
+			playing = false;
+			++curPlayId;
+		}
 	}
 }
 
