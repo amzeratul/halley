@@ -141,6 +141,7 @@ namespace Halley {
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();
         Vector<ScriptExecutionRequest> getScriptExecutionRequests();
+        bool hasStopRequests() const;
 
         void startHostThread(int node, ConfigNode params);
         void cancelHostThread(int node);

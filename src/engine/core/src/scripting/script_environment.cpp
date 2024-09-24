@@ -711,6 +711,21 @@ void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag, bool a
 	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag, {}, {}, allThreads, matching });
 }
 
+Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptExecutionRequests()
+{
+	return std::move(scriptExecutionRequestOutbox);
+}
+
+bool ScriptEnvironment::hasStopRequests() const
+{
+	for (auto& request: scriptExecutionRequestOutbox) {
+		if (request.type == ScriptExecutionRequestType::Stop || request.type == ScriptExecutionRequestType::StopTag) {
+			return true;
+		}
+	}
+	return false;
+}
+
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()
 {
 	return std::move(scriptOutbox);
@@ -719,11 +734,6 @@ Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptM
 Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntityMessages()
 {
 	return std::move(entityOutbox);
-}
-
-Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptExecutionRequests()
-{
-	return std::move(scriptExecutionRequestOutbox);
 }
 
 void ScriptEnvironment::startHostThread(int node, ConfigNode params)

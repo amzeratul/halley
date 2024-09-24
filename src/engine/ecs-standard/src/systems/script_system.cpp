@@ -15,11 +15,11 @@ public:
 	{
 		initializeEnvironment();
 		initializeScripts();
-		bool run = true;
-		while (run) {
+
+		while (hasScriptPendingUpdate()) {
 			updateScripts(t);
 			updatePendingMessages(t);
-			run = fulfillScriptExecutionRequests();
+			fulfillScriptExecutionRequests();
 			sendMessages();
 		}
 
@@ -264,6 +264,18 @@ private:
 		}
 	}
 
+	bool hasScriptPendingUpdate()
+	{
+		for (auto& e : scriptableFamily) {
+			for (auto& state: e.scriptable.activeStates) {
+				if (!state->getFrameFlag()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	void updateScripts(Time t)
 	{
 		auto& env = getScriptingService().getEnvironment();
@@ -274,6 +286,10 @@ private:
 				if (!state->getFrameFlag()) {
 					env.update(t, *state, e.entityId, e.scriptable.variables);
 					state->setFrameFlag(true);
+				}
+
+				if (env.hasStopRequests()) {
+					break;
 				}
 			}
 
