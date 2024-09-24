@@ -422,22 +422,29 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityTargetReference::getPinCon
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ 
+		PinType{ ET::TargetPin, PD::Output }, 
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
+	auto targetId = getConnectedNodeName(node, graph, 2);
+
 	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
-	str.append(node.getSettings()["scriptTargetId"].asString(""), settingColour);
+	str.append(targetId != "<empty>" ? targetId :  node.getSettings()["scriptTargetId"].asString(""), settingColour);
 	return str.moveResults();
 }
 
 String ScriptEntityTargetReference::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
-		return node.getSettings()["scriptTargetId"].asString("");
+		auto targetId = getConnectedNodeName(node, graph, 2);
+		return targetId != "<empty>" ? targetId : node.getSettings()["scriptTargetId"].asString("");
 	} else {
 		return "pos(" + node.getSettings()["scriptTargetId"].asString("") + ")";
 	}
@@ -450,7 +457,8 @@ String ScriptEntityTargetReference::getLargeLabel(const BaseGraphNode& node) con
 
 EntityId ScriptEntityTargetReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	return environment.getScriptTarget(node.getSettings()["scriptTargetId"].asString(""));
+	auto targetId = readDataPin(environment, node, 2).asString("");
+	return environment.getScriptTarget(targetId.isEmpty() ? node.getSettings()["scriptTargetId"].asString("") : targetId);
 }
 
 ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
