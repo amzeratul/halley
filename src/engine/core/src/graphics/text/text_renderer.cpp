@@ -410,7 +410,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		}
 	}
 
-	extents = Vector2f(gotExtents ? maxX : 0.0f, height);
+	extents = Vector2f(gotExtents ? maxX : 0.0f, std::max(getLineHeight(*font, size), height));
 
 	if (layouts) {
 		if (offset != Vector2f(0, 0)) {
