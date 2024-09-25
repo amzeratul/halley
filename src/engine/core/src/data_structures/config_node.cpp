@@ -1115,6 +1115,8 @@ String ConfigNode::asString() const
 		return "<del>";
 	} else if (type == ConfigNodeType::Noop) {
 		return "<noop>";
+	} else if (type == ConfigNodeType::Bytes) {
+		return Encode::encodeBase16(asBytes().const_byte_span());
 	} else {
 		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to String.", HalleyExceptions::Resources);
 	}
