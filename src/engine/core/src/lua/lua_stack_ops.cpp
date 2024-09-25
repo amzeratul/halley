@@ -211,8 +211,9 @@ ConfigNode LuaStackOps::popConfigNode()
 		return ConfigNode(float(popDouble()));
 	case LUA_TBOOLEAN:
 		return ConfigNode(popBool());
-	case LUA_TSTRING:
 	case LUA_TTABLE:
+		return popTable();
+	case LUA_TSTRING:
 	case LUA_TFUNCTION:
 	case LUA_TUSERDATA:
 	case LUA_TTHREAD:
@@ -220,6 +221,39 @@ ConfigNode LuaStackOps::popConfigNode()
 		return ConfigNode(popString());
 	}
 	return ConfigNode();
+}
+
+ConfigNode LuaStackOps::popTable()
+{
+	auto L = state.getRawState();
+	if (!lua_istable(L, -1)) {
+		throw Exception("Invalid value at Lua stack", HalleyExceptions::Lua);
+	}
+
+	ConfigNode::MapType mapResult;
+	ConfigNode::SequenceType seqResult;
+
+	lua_pushnil(L);
+	while (lua_next(L, -2)) {
+		auto value = popConfigNode();
+
+		if (lua_type(L, -1) == LUA_TSTRING) {
+			mapResult[lua_tostring(state.getRawState(), -1)] = std::move(value);
+		} else if (lua_type(L, -1) == LUA_TNUMBER) {
+			auto idx = lua_tointeger(L, -1) - 1;
+			if (idx < 0) {
+				continue;
+			}
+			if (static_cast<int>(seqResult.size()) == idx) {
+				seqResult.push_back(std::move(value));
+			} else {
+				seqResult.resize(std::max(static_cast<size_t>(idx + 1), seqResult.size()));
+				seqResult[idx] = std::move(value);
+			}			
+		}
+	}
+
+	return seqResult.empty() ? ConfigNode(std::move(mapResult)) : ConfigNode(std::move(seqResult));
 }
 
 bool LuaStackOps::isTopNil()

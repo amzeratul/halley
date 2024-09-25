@@ -74,6 +74,7 @@ namespace Halley {
 		String popString();
 		Vector2i popVector2i();
 		ConfigNode popConfigNode();
+		ConfigNode popTable();
 		
 		bool isTopNil();
 		int getLength();
