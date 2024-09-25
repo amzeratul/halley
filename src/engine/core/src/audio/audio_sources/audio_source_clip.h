@@ -9,6 +9,7 @@ namespace Halley
 	public:
 		AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> clip, bool looping, float gain, int64_t loopStart, int64_t loopEnd, bool randomiseStart);
 
+		String getName() const override;
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;

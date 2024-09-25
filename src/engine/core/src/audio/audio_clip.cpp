@@ -79,6 +79,11 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	doneLoading();
 }
 
+String AudioClip::getName() const
+{
+	return getAssetId();
+}
+
 size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	Expects(pos + len <= sampleLength);

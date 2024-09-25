@@ -20,6 +20,11 @@ AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAud
 	Expects(clip != nullptr);
 }
 
+String AudioSourceClip::getName() const
+{
+	return clip->getName();
+}
+
 uint8_t AudioSourceClip::getNumberOfChannels() const
 {
 	return clip->getNumberOfChannels();

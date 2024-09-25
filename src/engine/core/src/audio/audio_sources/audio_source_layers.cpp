@@ -24,6 +24,11 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 	}
 }
 
+String AudioSourceLayers::getName() const
+{
+	return layerConfig.getName();
+}
+
 uint8_t AudioSourceLayers::getNumberOfChannels() const
 {
 	for (auto& layer: layers) {

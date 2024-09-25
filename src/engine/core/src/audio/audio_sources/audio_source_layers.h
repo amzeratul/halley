@@ -13,6 +13,7 @@ namespace Halley
 	public:
 		AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig, AudioFade fadeConfig);
 
+		String getName() const override;
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;
