@@ -93,12 +93,12 @@ namespace Halley {
 	class LerpDataInterpolator : public Base {
 	public:
 		template <typename ... Args>
-		LerpDataInterpolator(Time length, Args... args)
+		explicit LerpDataInterpolator(Time length, Args... args)
 			: Base(args...)
 			, length(length)
 		{}
 
-		bool update(Time t) override
+		bool update(Time t, World& world, EntityId entityId) override
 		{
 			if (targetValue) {
 				const Time stepT = std::min(t, timeLeft);
@@ -157,11 +157,9 @@ namespace Halley {
 	template <typename T, typename Intermediate = T>
 	using QuantizingLerpDataInterpolator = LerpDataInterpolator<T, Intermediate, QuantizingDataInterpolator<T, Intermediate>>;
 
-
-
 	class DeadReckoningInterpolator : public DataInterpolator<Vector2f> {
 	public:
-		bool update(Time t) override;
+		bool update(Time t, World& world, EntityId entityId) override;
 		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
 
 		void setVelocity(Vector2f vel);
@@ -179,7 +177,7 @@ namespace Halley {
 	public:
 		DeadReckoningVelocityInterpolator(std::shared_ptr<DeadReckoningInterpolator> parent);
 
-		bool update(Time t) override;
+		bool update(Time t, World& world, EntityId entityId) override;
 		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
 
 	protected:

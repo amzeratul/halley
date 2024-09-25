@@ -63,7 +63,7 @@ void DataInterpolatorSet::markReady()
 void DataInterpolatorSet::update(Time time, World& world) const
 {
 	for (auto& e: interpolators) {
-		const bool modified = e.second->update(time);
+		const bool modified = e.second->update(time, world, std::get<0>(e.first));
 
 		// This hack is needed to make sure that transform 2D gets marked as dirty properly
 		if (modified && std::get<1>(e.first) == "Transform2D") {
@@ -141,7 +141,7 @@ void DataInterpolatorSetRetriever::collectUUIDs(EntityRef entity)
 
 
 
-bool DeadReckoningInterpolator::update(Time time)
+bool DeadReckoningInterpolator::update(Time time, World& world, EntityId entityId)
 {
 	return false;
 }
@@ -170,7 +170,7 @@ DeadReckoningVelocityInterpolator::DeadReckoningVelocityInterpolator(std::shared
 {
 }
 
-bool DeadReckoningVelocityInterpolator::update(Time time)
+bool DeadReckoningVelocityInterpolator::update(Time time, World& world, EntityId entityId)
 {
 	return false;
 }
