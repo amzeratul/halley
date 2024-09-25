@@ -51,7 +51,32 @@ void FileSystemCache::writeFile(const Path& path, const String& data)
 	writeFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
 }
 
-const Bytes& FileSystemCache::readFile(const Path& path)
+gsl::span<const gsl::byte> FileSystemCache::readFile(const Path& path)
+{
+	const auto key = path.getString();
+	{
+		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+		const auto iter = fileDataCache.find(key);
+		if (iter != fileDataCache.end()) {
+			return iter->second.const_byte_span();
+		}
+	}
+
+	auto bytes = FileSystem::readFile(path);
+
+	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	if (shouldCache(path, bytes.size())) {
+		fileDataCache[key] = std::move(bytes);
+		return fileDataCache.at(key).const_byte_span();
+	} else {
+		fileDataCache.erase(key);
+		static thread_local Bytes temp;
+		temp = std::move(bytes);
+		return temp.const_byte_span();
+	}
+}
+
+Bytes FileSystemCache::readFileCopy(const Path& path)
 {
 	const auto key = path.getString();
 	{
@@ -66,14 +91,12 @@ const Bytes& FileSystemCache::readFile(const Path& path)
 
 	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
 	if (shouldCache(path, bytes.size())) {
-		fileDataCache[key] = std::move(bytes);
-		return fileDataCache.at(key);
+		fileDataCache[key] = bytes;
 	} else {
 		fileDataCache.erase(key);
-		static thread_local Bytes temp;
-		temp = std::move(bytes);
-		return temp;
 	}
+
+	return bytes;
 }
 
 bool FileSystemCache::remove(const Path& path)

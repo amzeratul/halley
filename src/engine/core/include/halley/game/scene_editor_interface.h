@@ -491,7 +491,8 @@ namespace Halley {
 	class IFileSystemCache {
 	public:
 		virtual ~IFileSystemCache() = default;
-		virtual const Bytes& readFile(const Path& path) = 0;
+		virtual gsl::span<const gsl::byte> readFile(const Path& path) = 0;
+		virtual Bytes readFileCopy(const Path& path) = 0;
 	};
 
     class IEditorCustomTools { 

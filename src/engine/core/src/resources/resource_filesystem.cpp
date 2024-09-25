@@ -30,6 +30,7 @@ using namespace Halley;
 FileSystemResourceLocator::FileSystemResourceLocator(SystemAPI& system, const Path& _basePath, IFileSystemCache* cache)
 	: system(system)
     , basePath(_basePath)
+	, assetDBLoaded(false)
 	, cache(cache)
 {
 	loadAssetDb();
@@ -71,6 +72,11 @@ size_t FileSystemResourceLocator::getMemoryUsage() const
 
 void FileSystemResourceLocator::loadAssetDb()
 {
+	auto lock = std::unique_lock(mutex);
+	if (assetDb) {
+		return;
+	}
+
 	assetDb = std::make_unique<AssetDatabase>();
 	auto reader = system.getDataReader((basePath / "assets.db").string());
 	if (!reader) {
@@ -78,11 +84,13 @@ void FileSystemResourceLocator::loadAssetDb()
 	}
 
 	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
+
+	assetDBLoaded = true;
 }
 
 std::unique_ptr<ResourceData> FileSystemResourceLocator::getData(const String& asset, AssetType type, bool stream)
 {
-	if (!assetDb) {
+	if (!assetDBLoaded) {
 		loadAssetDb();
 	}
 

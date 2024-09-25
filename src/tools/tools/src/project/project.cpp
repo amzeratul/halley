@@ -382,8 +382,7 @@ bool Project::isAssetSaveNotificationEnabled() const
 bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;
-	auto existing = fileSystemCache->readFile(filePath);
-	auto oldData = gsl::as_bytes(gsl::span<const Byte>(existing));
+	auto oldData = fileSystemCache->readFile(filePath);
 	
 	if (!std::equal(oldData.begin(), oldData.end(), data.begin(), data.end())) {
 		fileSystemCache->writeFile(filePath, data);
@@ -409,7 +408,7 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 
 Bytes Project::readAssetFromDisk(const Path& filePath)
 {
-	return fileSystemCache->readFile(getAssetsSrcPath() / filePath);
+	return fileSystemCache->readFileCopy(getAssetsSrcPath() / filePath);
 }
 
 bool Project::deleteAssetFromDisk(const Path& filePath)
@@ -709,7 +708,7 @@ void Project::loadECSData()
 	Vector<Bytes> inputData(n);
 	
 	for (size_t i = 0; i < n; ++i) {
-		inputData[i] = fileSystemCache->readFile(getGenSrcPath() / inputFiles[i]);
+		inputData[i] = fileSystemCache->readFileCopy(getGenSrcPath() / inputFiles[i]);
 		auto data = gsl::as_bytes(gsl::span<Byte>(inputData[i].data(), inputData[i].size()));
 		sources[i] = CodegenSourceInfo{inputFiles[i], data, true};
 	}

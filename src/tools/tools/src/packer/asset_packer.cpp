@@ -228,7 +228,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 		Bytes fileData;
 		if (entry.modified || fs.hasCached(src / entry.path) || !oldPack) {
 			// Read from cache or filesystem
-			fileData = fs.readFile(src / entry.path);
+			fileData = fs.readFileCopy(src / entry.path);
 		} else {
 			// Read from pack
 			auto oldData = oldPack->getData(entry.name, entry.type, false);
@@ -237,7 +237,7 @@ void AssetPacker::generatePack(Project& project, const String& packId, const Ass
 				fileData = Bytes(reinterpret_cast<const Byte*>(data.data()), reinterpret_cast<const Byte*>(data.data()) + data.size());
 			} else {
 				// Read from cache after all...
-				fileData = fs.readFile(src / entry.path);
+				fileData = fs.readFileCopy(src / entry.path);
 			}
 		}
 

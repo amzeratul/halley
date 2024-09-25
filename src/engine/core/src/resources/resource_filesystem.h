@@ -22,9 +22,12 @@ namespace Halley {
 		SystemAPI& system;
 		Path basePath;
 		std::unique_ptr<AssetDatabase> assetDb;
+		std::atomic<bool> assetDBLoaded;
 		IFileSystemCache* cache = nullptr;
 
 	private:
 		void loadAssetDb();
+
+		std::mutex mutex;
 	};
 }
