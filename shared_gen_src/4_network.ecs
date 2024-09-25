@@ -8,6 +8,10 @@ component:
       type: 'std::optional<uint8_t>'
       canSave: false
       canEdit: false
+  - authorityId: 
+      type: 'std::optional<uint8_t>'
+      canSave: false
+      canEdit: false
   - dataInterpolatorSet:
       type: 'Halley::DataInterpolatorSet'
       canSave: false

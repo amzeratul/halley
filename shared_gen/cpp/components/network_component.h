@@ -15,6 +15,7 @@ public:
 	static const constexpr char* componentName{ "Network" };
 
 	std::optional<uint8_t> ownerId{};
+	std::optional<uint8_t> authorityId{};
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
 	bool sendUpdates{ false };

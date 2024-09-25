@@ -359,6 +359,17 @@ std::optional<uint8_t> Entity::getOwnerPeerId() const
 	}
 }
 
+std::optional<uint8_t> Entity::getAuthorityPeerId() const
+{
+    if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
+        return networkComponent->authorityId;
+    } else if (parent) {
+        return parent->getAuthorityPeerId();
+    } else {
+        return {};
+    }
+}
+
 void Entity::setFromNetwork(bool fromNetwork)
 {
 	this->fromNetwork = fromNetwork;

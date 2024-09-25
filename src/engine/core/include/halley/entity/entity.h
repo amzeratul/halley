@@ -241,6 +241,7 @@ namespace Halley {
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
 		std::optional<uint8_t> getOwnerPeerId() const;
+        std::optional<uint8_t> getAuthorityPeerId() const;
 		void setFromNetwork(bool fromNetwork);
 
 		void destroy(World& world);
@@ -881,6 +882,12 @@ namespace Halley {
 			return entity->getOwnerPeerId();
 		}
 
+        std::optional<uint8_t> getAuthorityPeerId() const
+        {
+            Expects(entity);
+            return entity->getAuthorityPeerId();
+        }
+
 		bool isRemote() const
 		{
 			Expects(entity);
@@ -1068,6 +1075,12 @@ namespace Halley {
 			Expects(entity);
 			return entity->getOwnerPeerId();
 		}
+
+        std::optional<uint8_t> getAuthorityPeerId() const
+        {
+            Expects(entity);
+            return entity->getAuthorityPeerId();
+        }
 
 		bool isRemote() const
 		{

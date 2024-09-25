@@ -92,6 +92,9 @@ public:
 			if (iter->second.playerId == playerId) {
 				// Already locked by this player, just increment count!
 				iter->second.refCount++;
+                if (iter->second.withAuthority != acquireAuthority) {
+                    Logger::logWarning("Trying to acquire lock to already locked entity, but with different authority flag");
+                }
 				return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
 			} else {
 				// Locked by someone else
@@ -106,6 +109,7 @@ public:
 				auto& l = myLocks[targetId];
 				l.playerId = playerId;
 				l.refCount++;
+                l.withAuthority = acquireAuthority;
 				return std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId);
 			}
 			return {};
@@ -120,7 +124,7 @@ public:
 			if (l.playerId == playerId) {
 				l.refCount--;
 				if (l.refCount == 0) {
-					doLockReleaseForMe(targetId);
+					doLockReleaseForMe(targetId, l.withAuthority);
 					myLocks.erase(iter);
 				}
 			} else {
@@ -139,11 +143,10 @@ public:
 private:
 	struct LocalLock {
 		EntityId playerId;
-		int refCount;
+		int refCount = 0;
+        bool withAuthority = false;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
-
-	SessionMultiplayer* mpSession = nullptr;
 
 	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
 	{
@@ -154,18 +157,28 @@ private:
 			auto future = promise.getFuture();
 			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
 			{
+                //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to acquire lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
+                if (value && withAuthority) {
+                    changeAuthority(targetId, getMyPeerId());
+                }
 				promise.setValue(value);
 			});
 			return future;
 		}
 	}
 
-	void doLockReleaseForMe(EntityId targetId)
+	void doLockReleaseForMe(EntityId targetId, bool withAuthority)
 	{
 		if (isHost()) {
-			doEntityLock(targetId, getMyPeerId(), false, false);
+			doEntityLock(targetId, getMyPeerId(), false, withAuthority);
 		} else {
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, false, getMyPeerId()));
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, getMyPeerId()), [=] (bool value) mutable
+            {
+                //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to release lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
+                if (value && withAuthority) {
+                    changeAuthority(targetId, {});
+                }
+            });
 		}
 	}
 
@@ -183,7 +196,7 @@ private:
 				return false;
 			}
 
-			// TODO: assign authority
+            //Logger::logDev("Peer " + toString(int(peerId)) + " attempts to " + (lock ? "lock" : "unlock") + " entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
 
 			auto& locks = e->network.locks;
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
@@ -193,6 +206,9 @@ private:
 				if (lock) {
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " locked by " + toString(int(peerId)));
 					locks.emplace_back(targetId, peerId);
+                    if (withAuthority) {
+                        changeAuthority(e->network, peerId);
+                    }
 				}
 				return true;
 			} else if (iter->second == peerId) {
@@ -201,6 +217,9 @@ private:
 					// Release lock
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " unlocked by " + toString(int(peerId)));
 					locks.erase(iter);
+                    if (withAuthority) {
+                        changeAuthority(e->network, {});
+                    }
 				}
 				return true;
 			} else {
@@ -212,7 +231,7 @@ private:
 			// Entity not found
 			const auto entity = getWorld().tryGetEntity(targetId);
 			if (entity.isValid()) {
-				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity or descendent of one.");
+				Logger::logWarning("Peer attempted to lock entity " + entity.getName() + " which isn't a network entity or descendant of one.");
 			}
 			return false;
 		}
@@ -262,6 +281,26 @@ private:
 		}
 		return {};
 	}
+
+    void changeAuthority(EntityId targetId, std::optional<NetworkSession::PeerId> authorityId)
+    {
+        if (!targetId.isValid()) {
+            Logger::logWarning("Trying to change authority of invalid entity.");
+            return;
+        }
+
+        const auto* e = getRootEntity(targetId);
+        if (e) {
+            changeAuthority(e->network, authorityId);
+        } else {
+            Logger::logWarning("Trying to change authority of entity " + toString(targetId) + " which is unknown, or not a network entity");
+        }
+    }
+
+    void changeAuthority(NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId)
+    {
+        networkComponent.authorityId = authorityId;
+    }
 };
 
 REGISTER_SYSTEM(NetworkLockSystem)
