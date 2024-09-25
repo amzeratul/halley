@@ -352,6 +352,7 @@ namespace Halley {
 		Range<int> asIntRange() const;
 		Range<float> asFloatRange() const;
 		String asString() const;
+		String asStringNoUndefined() const;
 		std::string_view asStringView() const;
 		const Bytes& asBytes() const;
 

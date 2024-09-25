@@ -1120,6 +1120,15 @@ String ConfigNode::asString() const
 	}
 }
 
+String ConfigNode::asStringNoUndefined() const
+{
+	if (type == ConfigNodeType::Undefined) {
+		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to String.", HalleyExceptions::Resources);
+	} else {
+		return asString();
+	}
+}
+
 std::string_view ConfigNode::asStringView() const
 {
 	if (type == ConfigNodeType::String) {
