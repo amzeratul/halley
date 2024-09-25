@@ -139,11 +139,17 @@ void AudioExpressionEditorExpression::onMakeUI()
 		getWidgetAs<UIDropdown>("switchId")->setOptions(audioProperties.getSwitchIds());
 
 		auto updateSwitchValues = [=] (const String& value) {
-			const auto* switchConf = audioProperties.tryGetSwitch(value);
-			if (switchConf) {
+			if (const auto* switchConf = audioProperties.tryGetSwitch(value)) {
 				getWidgetAs<UIDropdown>("switchValue")->setOptions(switchConf->getValues());
+
+				auto& expr = parent.getExpressionTerm(idx);
+				if (!std_ex::contains(switchConf->getValues(), expr.value)) {
+					expr.value = switchConf->getValues().empty() ? "" : switchConf->getValues().front();
+					getWidgetAs<UIDropdown>("switchValue")->setSelectedOption(expr.value);
+				}
 			} else {
 				getWidgetAs<UIDropdown>("switchValue")->clear();
+				parent.getExpressionTerm(idx).value = "";
 			}
 		};
 
