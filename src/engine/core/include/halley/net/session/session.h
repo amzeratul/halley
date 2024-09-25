@@ -2,6 +2,7 @@
 #include "halley/maths/rect.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/maths/uuid.h"
 #include "halley/time/halleytime.h"
 
 namespace Halley {
@@ -34,6 +35,8 @@ namespace Halley {
 
 		ConfigNode& getOptions() { return options; }
 		const ConfigNode& getOptions() const { return options; }
+
+		virtual UUID getSessionSeed() const { return {}; }
 
 	private:
 		ConfigNode options;
