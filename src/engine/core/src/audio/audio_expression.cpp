@@ -3,6 +3,8 @@
 #include "audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/properties/audio_properties.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -147,6 +149,25 @@ float AudioExpression::evaluate(const AudioEmitter& emitter) const
 
 	}
 	return clamp(value, 0.0f, 1.0f);
+}
+
+void AudioExpression::validate(const AudioProperties& audioProperties, const String& breadCrumbs) const
+{
+	for (auto& t: terms) {
+		if (t.type == AudioExpressionTermType::Switch) {
+			if (const auto* switchProperties = audioProperties.tryGetSwitch(t.id)) {
+				if (!std_ex::contains(switchProperties->getValues(), t.value)) {
+					Logger::logError("Invalid audio switch value: " + t.value + " on switch " + t.id + " [" + breadCrumbs + "]");
+				}
+			} else {
+				Logger::logError("Invalid audio switch: " + t.id + " [" + breadCrumbs + "]");
+			}
+		} else if (t.type == AudioExpressionTermType::Variable) {
+			if (!std_ex::contains(audioProperties.getVariableIds(), t.id)) {
+				Logger::logError("Invalid audio variable: " + t.id + " [" + breadCrumbs + "]");
+			}
+		}
+	}
 }
 
 void AudioExpression::serialize(Serializer& s) const

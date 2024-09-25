@@ -272,6 +272,7 @@ std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
 	Deserializer s(staticData->getSpan());
 	auto object = std::make_shared<AudioObject>();
 	s >> *object;
+	object->propagateObjectName(loader.getName());
 	object->loadDependencies(loader.getResources());
 	return object;
 }

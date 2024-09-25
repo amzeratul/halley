@@ -58,6 +58,8 @@ namespace Halley {
 		void resume();
 		void pause();
 
+		const AudioProperties& getAudioProperties() const;
+
 		void generateBuffer();
 	    
     	Random& getRNG() override;

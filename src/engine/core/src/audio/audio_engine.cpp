@@ -206,6 +206,12 @@ void AudioEngine::pause()
 	needsBuffer = false;
 }
 
+const AudioProperties& AudioEngine::getAudioProperties() const
+{
+	assert(audioProperties != nullptr);
+	return *audioProperties;
+}
+
 void AudioEngine::generateBuffer()
 {
 	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer);

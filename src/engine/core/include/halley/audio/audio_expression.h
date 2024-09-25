@@ -5,6 +5,7 @@
 #include "halley/text/string_converter.h"
 
 namespace Halley {
+	class AudioProperties;
 	class ConfigNode;
 	class AudioEmitter;
     class Serializer;
@@ -87,6 +88,7 @@ namespace Halley {
         ConfigNode toConfigNode() const;
 
         float evaluate(const AudioEmitter& emitter) const;
+		void validate(const AudioProperties& audioProperties, const String& breadCrumbs) const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
@@ -95,7 +97,7 @@ namespace Halley {
         AudioExpressionOperation getOperation() const;
         void setOperation(AudioExpressionOperation op);
 
-	private:
+    private:
         Vector<AudioExpressionTerm> terms;
         AudioExpressionOperation operation = AudioExpressionOperation::Multiply;
     };

@@ -39,7 +39,7 @@ ConfigNode AudioSubObjectLayers::toConfigNode() const
 
 String AudioSubObjectLayers::getName() const
 {
-	return name.isEmpty() ? "Layers" : name;
+	return objectName + ":" + name;
 }
 
 const String& AudioSubObjectLayers::getRawName() const
@@ -50,6 +50,11 @@ const String& AudioSubObjectLayers::getRawName() const
 void AudioSubObjectLayers::setName(String name)
 {
 	this->name = std::move(name);
+}
+
+void AudioSubObjectLayers::setObjectName(const String& name)
+{
+	objectName = name;
 }
 
 size_t AudioSubObjectLayers::getNumSubObjects() const
@@ -130,6 +135,13 @@ gsl::span<AudioSubObjectLayers::Layer> AudioSubObjectLayers::getLayers()
 AudioFade& AudioSubObjectLayers::getFade()
 {
 	return fadeConfig;
+}
+
+void AudioSubObjectLayers::validate(const AudioProperties& audioProperties) const
+{
+	for (auto& layer: layers) {
+		layer.expression.validate(audioProperties, getName());
+	}
 }
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)

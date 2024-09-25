@@ -32,6 +32,8 @@ namespace Halley {
 		String getName() const override;
 		const String& getRawName() const;
 		void setName(String name);
+		void setObjectName(const String& name) override;
+
 		size_t getNumSubObjects() const override;
 		AudioSubObjectHandle& getSubObject(size_t n) override;
 		bool canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const override;
@@ -49,8 +51,11 @@ namespace Halley {
 		gsl::span<Layer> getLayers();
 		AudioFade& getFade();
 
+		void validate(const AudioProperties& audioProperties) const;
+
 	private:
 		String name;
+		String objectName;
 		Vector<Layer> layers;
 		AudioFade fadeConfig;
 	};

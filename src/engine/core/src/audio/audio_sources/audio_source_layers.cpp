@@ -17,6 +17,8 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 	, layerConfig(layerConfig)
 	, fadeConfig(fadeConfig)
 {
+	layerConfig.validate(engine.getAudioProperties());
+
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		layers.emplace_back(std::move(layerSources[i]), i);

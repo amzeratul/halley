@@ -120,6 +120,15 @@ void IAudioObject::swapClips(size_t idxA, size_t idxB)
 {
 }
 
+void IAudioObject::propagateObjectName(const String& name)
+{
+	setObjectName(name);
+	const auto n = getNumSubObjects();
+	for (size_t i = 0; i < n; ++i) {
+		getSubObject(i)->propagateObjectName(name);
+	}
+}
+
 AudioSubObjectHandle::AudioSubObjectHandle()
 	: id(UUID::generate().toString())
 {
