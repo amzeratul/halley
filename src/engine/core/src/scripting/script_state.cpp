@@ -432,6 +432,11 @@ bool ScriptState::isDead() const
 	return isDone() && !persistAfterDone;
 }
 
+void ScriptState::markTerminated()
+{
+	started = true;
+}
+
 void ScriptState::setFrameFlag(bool flag)
 {
 	frameFlag = flag;

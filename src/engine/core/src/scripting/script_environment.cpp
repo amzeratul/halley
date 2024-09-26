@@ -240,6 +240,7 @@ void ScriptEnvironment::doTerminateState()
 		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
+	currentState->markTerminated();
 
 	for (auto& node: currentGraph->getNodes()) {
 		if (node.getType() == "destructor") {

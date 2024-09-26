@@ -177,6 +177,7 @@ namespace Halley {
 		bool hasStarted() const { return started; }
 		bool isDone() const;
 		bool isDead() const;
+		void markTerminated();
 
 		void setFrameFlag(bool flag);
 		bool getFrameFlag() const;
