@@ -27,11 +27,13 @@ EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
 {
-	if (from.name != to.name) {
-		name = to.name;
-	}
 	if (from.prefab != to.prefab) {
 		prefab = to.prefab;
+	}
+	if (from.name != to.name) {
+		if (prefab || to.prefab.isEmpty() || !options.ignoreNameChangesInInstances) {
+			name = to.name;
+		}
 	}
 	if (from.icon != to.icon) {
 		icon = to.icon;

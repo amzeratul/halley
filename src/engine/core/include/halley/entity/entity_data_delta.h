@@ -22,6 +22,7 @@ namespace Halley {
             bool deltaComponents = true;
 			bool allowNonSerializable = true;
 			bool omitEmptyComponents = false;
+			bool ignoreNameChangesInInstances = false;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
 			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
