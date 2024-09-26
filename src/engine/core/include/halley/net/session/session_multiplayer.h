@@ -58,7 +58,7 @@ namespace Halley {
 		struct SessionSettings {
 			uint32_t networkVersion;
 			std::shared_ptr<const ConfigFile> serializationDict;
-			std::set<String> ignoreComponents;
+			HashSet<String> ignoreComponents;
 		};
 
 		SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings);

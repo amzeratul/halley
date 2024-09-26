@@ -655,11 +655,11 @@ void EntityData::updateComponentUUIDs(const HashMap<UUID, UUID>& changes)
 	}
 }
 
-void EntityData::postProcessAddedChild(const std::set<String>& ignoredComponents, bool removeEmptyComponents)
+void EntityData::postProcessAddedChild(const HashSet<String>& ignoredComponents, bool removeEmptyComponents)
 {
 	std_ex::erase_if(components, [&] (const std::pair<String, ConfigNode>& entry)
 	{
-		return ignoredComponents.find(entry.first) != ignoredComponents.end() || (removeEmptyComponents && entry.second.asMap().empty());
+		return ignoredComponents.contains(entry.first) || (removeEmptyComponents && entry.second.asMap().empty());
 	});
 
 	for (auto& c: children) {

@@ -100,7 +100,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	for (const auto& toComponent: to.components) {
 		const String& compId = toComponent.first;
 
-		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
+		if (!options.ignoreComponents.contains(compId)) {
 			const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
 			if (fromIter != from.components.end()) {
 				// Potentially modified, compute delta
@@ -120,7 +120,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				}
 			} else {
 				// Inserted
-				componentsChanged.emplace_back(toComponent.first, ConfigNode::createDelta(ConfigNode::MapType(), toComponent.second));
+				if (!options.ignoreInsertComponents.contains(compId)) {
+					componentsChanged.emplace_back(toComponent.first, ConfigNode::createDelta(ConfigNode::MapType(), toComponent.second));
+				}
 			}
 		}
 	}
@@ -151,7 +153,8 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 bool EntityDataDelta::hasChange() const
 {
-	return name || prefab || icon || variant || flags || instanceUUID || prefabUUID || parentUUID
+	// Checking instance/prefab UUID causes issues with spurious serialisation of entities - if they cause other issues, this method might need to be split/take parameters
+	return name || prefab || icon || variant || flags || parentUUID /*|| instanceUUID || prefabUUID*/
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }

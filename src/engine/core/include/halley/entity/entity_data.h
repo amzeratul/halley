@@ -143,7 +143,7 @@ namespace Halley {
         void generateUUIDs(HashMap<UUID, UUID>& changes);
         void updateComponentUUIDs(const HashMap<UUID, UUID>& changes);
 
-	    void postProcessAddedChild(const std::set<String>& ignoreComponents, bool removeEmptyComponents);
+	    void postProcessAddedChild(const HashSet<String>& ignoreComponents, bool removeEmptyComponents);
         void makeComponentChangesIntoDeltas();
 
     	void sanitize(const WorldReflection& worldReflection, int mask);

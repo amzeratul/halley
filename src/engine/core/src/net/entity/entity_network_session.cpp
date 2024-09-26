@@ -13,7 +13,7 @@
 class NetworkComponent;
 using namespace Halley;
 
-EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener)
+EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 	: resources(resources)
 	, listener(listener)
 	, session(std::move(session))

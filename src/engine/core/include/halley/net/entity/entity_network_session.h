@@ -47,7 +47,7 @@ namespace Halley {
 			virtual void onReceiveLobbyInfo(const ConfigNode& lobbyInfo) = 0;
 		};
 		
-		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
+		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener);
 		~EntityNetworkSession() override;
 
 		void setWorld(World& world, SystemMessageBridge bridge);

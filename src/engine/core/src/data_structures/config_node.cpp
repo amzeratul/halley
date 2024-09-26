@@ -1699,6 +1699,15 @@ bool ConfigNode::BreadCrumb::hasIndexAt(int idx, int depth) const
 
 ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints)
 {
+	// If destination is a delta map, this isn't going to work...
+	// So assume that it's a delta on top of from, then re-compute a delta
+	// This is different from just returning to because sometimes it will have no-op delta ops
+	if (from.getType() == ConfigNodeType::Map && to.getType() == ConfigNodeType::DeltaMap) {
+		ConfigNode to2 = ConfigNode(from);
+		to2.applyMapDelta(to);
+		return doCreateDelta(from, to2, BreadCrumb(), hints);
+	}
+
 	return doCreateDelta(from, to, BreadCrumb(), hints);
 }
 
