@@ -471,27 +471,28 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 		}
 	}
 
+	// Pick which widget will receive mouse events
+	const std::shared_ptr<UIWidget> activeMouseTarget = exclusive && exclusive->canReceiveMouseExclusive() ? exclusive : actuallyUnderMouse;
+
 	// Mouse wheel
 	const auto wheelDelta = mouse->getWheelMove();
 	const auto wheelDeltaDiscrete = mouse->getWheelMoveDiscrete();
-	const std::shared_ptr<UIWidget> exclusiveUnderMouse = exclusive ? exclusive : actuallyUnderMouse;
-	if ((wheelDelta.squaredLength() > 0.00001f || wheelDeltaDiscrete != Vector2i()) && exclusiveUnderMouse) {
-		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, exclusiveUnderMouse->getId(), wheelDelta, wheelDeltaDiscrete.y, keyMods));
+	if ((wheelDelta.squaredLength() > 0.00001f || wheelDeltaDiscrete != Vector2i()) && activeMouseTarget) {
+		activeMouseTarget->sendEvent(UIEvent(UIEventType::MouseWheel, activeMouseTarget->getId(), wheelDelta, wheelDeltaDiscrete.y, keyMods));
 	}
 
 	// Mouse position
-	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
-	if (mousePosTarget) {
-		mousePosTarget->onMouseOver(mousePos, keyMods);
-		inputAPI->setMouseCursorMode(mousePosTarget->getMouseCursorMode());
+	if (activeMouseTarget) {
+		activeMouseTarget->onMouseOver(mousePos, keyMods);
+		inputAPI->setMouseCursorMode(activeMouseTarget->getMouseCursorMode());
 	} else {
 		inputAPI->setMouseCursorMode(std::nullopt);
 	}
 
 	// Show tooltip
-	if (mousePosTarget && !exclusive) {
+	if (activeMouseTarget && !exclusive) {
 		if (toolTip) {
-			toolTip->showToolTipForWidget(*mousePosTarget, mousePos);
+			toolTip->showToolTipForWidget(*activeMouseTarget, mousePos);
 		}
 	} else {
 		if (toolTip) {
@@ -499,7 +500,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 		}
 	}
 	
-	updateMouseOver(exclusiveUnderMouse);
+	updateMouseOver(activeMouseTarget);
 }
 
 void UIRoot::mouseOverNext(bool forward)

@@ -186,6 +186,7 @@ namespace Halley {
 		void markAsNeedingLayout() final override;
 
 		virtual bool canReceiveFocus() const;
+		virtual bool canReceiveMouseExclusive() const;
 		std::shared_ptr<UIWidget> getFocusableOrAncestor();
 
 		virtual void onAddedToRoot(UIRoot& root);

@@ -1063,6 +1063,11 @@ bool UIWidget::canReceiveFocus() const
 	return false;
 }
 
+bool UIWidget::canReceiveMouseExclusive() const
+{
+	return true;
+}
+
 std::shared_ptr<UIWidget> UIWidget::getFocusableOrAncestor()
 {
 	if (canReceiveFocus()) {
