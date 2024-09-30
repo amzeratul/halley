@@ -253,6 +253,14 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		return;
 	}
 
+	if (entityData->getParentUUID().isValid()) {
+		// The same check is done below, but the entity has already been created then.
+		if (!parent->getWorld().findEntity(entityData->getParentUUID())) {
+			Logger::logError("Parent " + toString(entityData->getParentUUID()) + "not found trying to instantiate network entity");
+			return;
+		}
+	}
+
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 	stripNestedNetworkComponents(entity);
 	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") from network:\n\n" + EntityData(delta).toYAML());
