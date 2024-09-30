@@ -62,6 +62,7 @@ namespace Halley {
 		};
 
 		SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings);
+		~SessionMultiplayer() override;
 
 		bool update(Time t) override;
 
@@ -102,6 +103,7 @@ namespace Halley {
 		ConfigNode getServerSideData(String uniqueKey) override;
 
 	private:
+		const HalleyAPI& api;
 		bool host = false;
 		String playerName;
 		SessionState curState = SessionState::Disconnected;
@@ -112,5 +114,10 @@ namespace Halley {
 		std::unique_ptr<MultiplayerLobby> lobby;
 
 		void setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> config);
+
+		static SessionMultiplayer* joinLobbyInstance;
+		static std::optional<PlatformJoinCallbackParameters> joinLobbyParameters;
+		void onJoinCallback();
+		static void onPlatformJoinCallback(PlatformJoinCallbackParameters params);
 	};
 }

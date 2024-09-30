@@ -9,13 +9,14 @@
 using namespace Halley;
 
 SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings)
-	: host(options.mode == Mode::Host)
+	: api(api)
+	, host(options.mode == Mode::Host)
 {
 	playerName = api.platform->getPlayerName();
 
 	service = api.platform->createNetworkService(6060);
 	if (!service) {
-		throw Exception("Unable to initialize Witchbrook multiplayer: platform has no network service implementation.", 0);
+		throw Exception("Unable to initialize multiplayer session: platform has no network service implementation.", 0);
 	}
 	
 	session = std::make_shared<NetworkSession>(*service, settings.networkVersion, playerName);
@@ -35,17 +36,20 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	} else if (options.mode == Mode::WaitForLobby) {
 		Logger::logDev("Waiting for lobby callback...");
 		setState(SessionState::WaitingForPlatformLobbyCallback);
-		api.platform->setJoinCallback([=] (PlatformJoinCallbackParameters params)
-		{
-			if (curState == SessionState::WaitingForPlatformLobbyCallback) {
-				Logger::logDev("Starting multiplayer session as a client, connecting to " + params.param);
-				setState(SessionState::JoiningSession);
-				session->join(params.param);
-				api.platform->setJoinCallback({});
-			} else {
-				Logger::logError("Received platform join lobby callback at unexpected time.");
-			}
-		});
+		if (joinLobbyParameters) {
+			// A callback is already pending.
+			onJoinCallback();
+		} else {
+			joinLobbyInstance = this;
+			api.platform->setJoinCallback(onPlatformJoinCallback);
+		}
+	}
+}
+
+SessionMultiplayer::~SessionMultiplayer()
+{
+	if (joinLobbyInstance == this) {
+		joinLobbyInstance = nullptr;
 	}
 }
 
@@ -247,4 +251,28 @@ void SessionMultiplayer::setupDictionary(SerializationDictionary& dict, std::sha
 {
 	dict = SerializationDictionary(serializationDict->getRoot());
 	//dict.setLogMissingStrings(true, 30, 100);
+}
+
+SessionMultiplayer* SessionMultiplayer::joinLobbyInstance = nullptr;
+std::optional<PlatformJoinCallbackParameters> SessionMultiplayer::joinLobbyParameters;
+
+void SessionMultiplayer::onJoinCallback()
+{
+	if (joinLobbyParameters && curState == SessionState::WaitingForPlatformLobbyCallback) {
+		Logger::logDev("Starting multiplayer session as a client, connecting to " + joinLobbyParameters->param);
+		setState(SessionState::JoiningSession);
+		session->join(joinLobbyParameters->param);
+		api.platform->setJoinCallback({});
+		joinLobbyParameters.reset();
+	} else {
+		Logger::logError("Received platform join lobby callback at unexpected time.");
+	}
+}
+
+void SessionMultiplayer::onPlatformJoinCallback(PlatformJoinCallbackParameters params)
+{
+	joinLobbyParameters = params;
+	if (joinLobbyInstance != nullptr) {
+		joinLobbyInstance->onJoinCallback();
+	}
 }
