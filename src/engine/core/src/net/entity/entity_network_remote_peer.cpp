@@ -238,6 +238,14 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	}
 
 	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
+	if (!delta.getInstanceUUID()) {
+		if (delta.getPrefab()) {
+			Logger::logWarning("Unable to instantiate network entity, no instance UUID, prefab: " + delta.getPrefab());
+		} else {
+			Logger::logWarning("Unable to instantiate network entity, no instance UUID");
+		}
+		return;
+	}
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID());
 	if (!entityData) {
