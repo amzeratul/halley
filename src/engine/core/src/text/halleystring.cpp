@@ -991,6 +991,42 @@ void String::appendCharacter(int unicode)
 	}
 }
 
+int32_t String::toInteger() const
+{
+	try {
+		return std::stoi(str);
+	} catch (const std::exception& e) {
+		throw Exception("Unable to convert string \"" + str + "\" to int32_t due to: " + e.what(), HalleyExceptions::Utils);
+	}
+}
+
+int64_t String::toInteger64() const
+{
+	try {
+		return std::stoll(str);
+	} catch (const std::exception& e) {
+		throw Exception("Unable to convert string \"" + str + "\" to int64_t due to: " + e.what(), HalleyExceptions::Utils);
+	}
+}
+
+uint32_t String::toUInteger() const
+{
+	try {
+		return std::stoul(str);
+	} catch (const std::exception& e) {
+		throw Exception("Unable to convert string \"" + str + "\" to uint32_t due to: " + e.what(), HalleyExceptions::Utils);
+	}
+}
+
+uint64_t String::toUInteger64() const
+{
+	try {
+		return std::stoull(str);
+	} catch (const std::exception& e) {
+		throw Exception("Unable to convert string \"" + str + "\" to uint64_t due to: " + e.what(), HalleyExceptions::Utils);
+	}
+}
+
 String String::replaceAll(const std::string_view& before, const std::string_view& after) const
 {
 	const size_t pos = find(before);

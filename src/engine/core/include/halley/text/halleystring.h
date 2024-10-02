@@ -113,10 +113,10 @@ namespace Halley {
 		void appendCharacter(int unicode);
 
 		// Convert a string to a number
-		int toInteger() const { return std::stoi(str); }
-		long long toInteger64() const { return std::stoll(str); }
-		unsigned long toUInteger() const { return std::stoul(str); }
-		unsigned long long toUInteger64() const { return std::stoull(str); }
+		int32_t toInteger() const;
+		int64_t toInteger64() const;
+		uint32_t toUInteger() const;
+		uint64_t toUInteger64() const;
 		float toFloat() const;
 		double toDouble() const;
 		int subToInteger(size_t start,size_t end) const;
