@@ -728,12 +728,19 @@ ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGra
 		const auto from = readDataPin(environment, node, 2);
 		const auto to = readDataPin(environment, node, 3);
 
-		if (from.getType() != to.getType()) {
-			Logger::logError("Trying to lerp between 2 different types! " + toString(from.getType()) + " " + toString(to.getType()));
-		    return {};
+		auto fromType = from.getType();
+		auto toType = to.getType();
+
+		if (fromType != toType) {
+			if ((fromType == ConfigNodeType::Int && toType == ConfigNodeType::Float) || (fromType == ConfigNodeType::Float && toType == ConfigNodeType::Int)) {
+				fromType = ConfigNodeType::Float;
+			} else {
+				Logger::logError("Trying to lerp between 2 different types! " + toString(from.getType()) + " " + toString(to.getType()));
+			    return {};
+			}
 		}
 
-		switch(from.getType()) {
+		switch(fromType) {
 		case ConfigNodeType::Float:
 			return ConfigNode(lerp(from.asFloat(), to.asFloat(), factor));
 		case ConfigNodeType::Float2:
