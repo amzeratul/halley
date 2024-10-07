@@ -22,7 +22,6 @@
 #pragma once
 
 #include "halley/api/halley_api_internal.h"
-#include <map>
 #include <SDL.h>
 #include "input_joystick_sdl.h"
 
@@ -37,7 +36,7 @@ namespace Halley {
 		friend class HalleyAPI;
 
 	public:
-		explicit InputSDL(SystemAPI& system);
+		explicit InputSDL(SystemAPI& system, bool allowXInput);
 		~InputSDL();
 
 		void setResources(Resources& resources) override;
@@ -75,6 +74,7 @@ namespace Halley {
 		void addJoystick(int idx);
 
 		SystemSDL& system;
+		const bool allowXInput;
 		
 		Vector<std::shared_ptr<InputKeyboardSDL>> keyboards;
 		Vector<std::shared_ptr<InputJoystick>> joysticks;

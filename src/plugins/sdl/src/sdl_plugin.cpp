@@ -20,9 +20,17 @@ namespace Halley {
 	};
 
 	class SDLInputPlugin : public Plugin {
-		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new InputSDL(*system); }
+	public:
+		SDLInputPlugin(bool allowXInput)
+			: allowXInput(allowXInput)
+		{}
+
+		HalleyAPIInternal* createAPI(SystemAPI* system) override { return new InputSDL(*system, allowXInput); }
 		PluginType getType() override { return PluginType::InputAPI; }
 		String getName() override { return "Input/SDL"; }
+
+	private:
+		bool allowXInput;
 	};
 
 	class SDLAudioPlugin : public Plugin {
@@ -38,9 +46,9 @@ void initSDLSystemPlugin(Halley::IPluginRegistry &registry, std::optional<Halley
 	registry.registerPlugin(std::make_unique<Halley::SDLSystemPlugin>(std::move(saveCryptKey)));
 }
 
-void initSDLInputPlugin(Halley::IPluginRegistry &registry)
+void initSDLInputPlugin(Halley::IPluginRegistry &registry, bool allowXInput)
 {
-	registry.registerPlugin(std::make_unique<Halley::SDLInputPlugin>());
+	registry.registerPlugin(std::make_unique<Halley::SDLInputPlugin>(allowXInput));
 }
 
 void initSDLAudioPlugin(Halley::IPluginRegistry &registry)
