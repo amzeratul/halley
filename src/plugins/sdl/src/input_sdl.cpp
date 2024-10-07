@@ -81,6 +81,10 @@ void InputSDL::setResources(Resources& resources)
 
 	SDL_JoystickEventState(SDL_QUERY);
 	SDL_JoystickEventState(SDL_ENABLE);
+
+	for (int i = 0; i < SDL_NumJoysticks(); i++) {
+		addJoystick(i);
+	}
 }
 
 void InputSDL::init()
@@ -304,17 +308,19 @@ void InputSDL::addJoystick(int idx)
 			if (SDL_IsGameController(idx)) {
 				const auto joy = std::make_shared<InputGameControllerSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
-				assert(!sdlGameControllers.contains(id));
-				assert(!sdlJoys.contains(id));
-				sdlGameControllers[id] = joy;
-				joysticks.push_back(joy);
+				if (!sdlGameControllers.contains(id)) {
+					assert(!sdlJoys.contains(id));
+					sdlGameControllers[id] = joy;
+					joysticks.push_back(joy);
+				}
 			} else {
 				const auto joy = std::make_shared<InputJoystickSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
-				assert(!sdlGameControllers.contains(id));
-				assert(!sdlJoys.contains(id));
-				sdlJoys[id] = joy;
-				joysticks.push_back(joy);
+				if (!sdlJoys.contains(id)) {
+					assert(!sdlGameControllers.contains(id));
+					sdlJoys[id] = joy;
+					joysticks.push_back(joy);
+				}
 			}
 		}
 	} catch (const std::exception& e) {

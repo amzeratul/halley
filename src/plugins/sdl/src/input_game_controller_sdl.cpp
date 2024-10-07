@@ -96,9 +96,10 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 
 void InputGameControllerSDL::processEvent(const SDL_Event& event)
 {
-	if (event.type == SDL_CONTROLLERBUTTONDOWN || event.type == SDL_CONTROLLERBUTTONUP) {
-		const bool down = event.type == SDL_CONTROLLERBUTTONDOWN;
-		onButtonStatus(event.cbutton.button, down);
+	if (event.type == SDL_CONTROLLERBUTTONDOWN) {
+		onButtonPressed(event.cbutton.button);
+	} else if (event.type == SDL_CONTROLLERBUTTONUP) {
+		onButtonReleased(event.cbutton.button);
 	} else if (event.type == SDL_CONTROLLERAXISMOTION) {
 		const auto id = event.caxis.axis;
 		const auto value = static_cast<float>(event.caxis.value) / static_cast<float>(std::numeric_limits<int16_t>::max());
