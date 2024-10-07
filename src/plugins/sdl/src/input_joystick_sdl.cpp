@@ -56,6 +56,8 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	baseButtons = SDL_JoystickNumButtons(joy);
 	init(std::min(baseButtons + 4, 512));
 
+	setEnabled(true);
+
 	std::cout << "\tInitialized SDL Joystick: \"" << ConsoleColour(Console::DARK_GREY) << getName() << ConsoleColour() << "\".\n";
 }
 
@@ -84,6 +86,7 @@ void InputJoystickSDL::close()
 		SDL_JoystickClose(static_cast<SDL_Joystick*>(joystick));
 		joystick = nullptr;
 		id = -1;
+		setEnabled(false);
 	}
 }
 
