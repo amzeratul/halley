@@ -332,7 +332,9 @@ namespace Halley {
 		[[nodiscard]] reference at(size_t index)
 		{
 			if (index >= size()) {
-				HalleyExceptions::throwException("Index out of vector range", 217);
+				char buffer[128];
+				sprintf_s(buffer, sizeof(buffer), "Index %zu out of vector range %zu", index, size());
+				HalleyExceptions::throwException(buffer, 217);
 			}
 			return data()[index];
 		}
@@ -340,7 +342,9 @@ namespace Halley {
 		[[nodiscard]] const_reference at(size_t index) const
 		{
 			if (index >= size()) {
-				HalleyExceptions::throwException("Index out of vector range", 217);
+				char buffer[128];
+				sprintf_s(buffer, sizeof(buffer), "Index %zu out of vector range %zu", index, size());
+				HalleyExceptions::throwException(buffer, 217);
 			}
 			return data()[index];			
 		}
