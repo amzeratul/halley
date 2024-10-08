@@ -84,7 +84,7 @@ ConfigNode ScriptUIInWorldData::toConfigNode(const EntitySerializationContext& c
 Vector<IScriptNodeType::SettingType> ScriptUIInWorld::getSettingTypes() const
 {
 	return {
-		SettingType{ "ui", "Halley::ResourceReference<Halley::UIDefinition>", Vector<String>{""} },
+		SettingType{ "ui", "Halley::String", Vector<String>{""} },
 		SettingType{ "alignment", "Halley::Vector2f", Vector<String>{"0.5", "0.5"}},
 		SettingType{ "offset", "Halley::Vector2f", Vector<String>{"0", "0"}}
 	};
@@ -129,7 +129,11 @@ IScriptNodeType::Result ScriptUIInWorld::doUpdate(ScriptEnvironment& environment
 		return Result(ScriptNodeExecutionState::Fork);
 	}
 
-	return Result(ScriptNodeExecutionState::Executing, time);
+	if (data.ui->isAlive()) {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	} else {
+		return Result(ScriptNodeExecutionState::Done);
+	}
 }
 
 void ScriptUIInWorld::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIInWorldData& data) const
