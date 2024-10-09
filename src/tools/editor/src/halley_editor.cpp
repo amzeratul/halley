@@ -11,7 +11,7 @@ using namespace Halley;
 void initOpenGLPlugin(IPluginRegistry &registry);
 void initSDLSystemPlugin(IPluginRegistry &registry, std::optional<String> cryptKey);
 void initSDLAudioPlugin(IPluginRegistry &registry);
-void initSDLInputPlugin(IPluginRegistry &registry);
+void initSDLInputPlugin(IPluginRegistry &registry, bool allowXInput);
 void initAsioPlugin(IPluginRegistry &registry);
 void initDX11Plugin(IPluginRegistry &registry);
 void initMetalPlugin(IPluginRegistry &registry);
@@ -29,7 +29,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	initSDLSystemPlugin(registry, {});
 	initAsioPlugin(registry);
 	initSDLAudioPlugin(registry);
-	initSDLInputPlugin(registry);
+	initSDLInputPlugin(registry, true);
 
 #ifdef _WIN32
 	initDX11Plugin(registry);
