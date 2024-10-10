@@ -417,6 +417,8 @@ namespace Halley {
 					
 					if constexpr (HasConfigNodeConstructor<V>::value) {
 						result[std::move(key)] = V(v);
+					} else if constexpr (std::is_enum_v<V>) {
+						result[std::move(key)] = fromString<V>(v.asString());
 					} else {
 						result[std::move(key)] = v.convertTo(Tag<V>());
 					}
@@ -439,6 +441,8 @@ namespace Halley {
 					
 					if constexpr (HasConfigNodeConstructor<V>::value) {
 						result[std::move(key)] = V(v);
+					} else if constexpr (std::is_enum_v<V>) {
+						result[std::move(key)] = fromString<V>(v.asString());
 					} else {
 						result[std::move(key)] = v.convertTo(Tag<V>());
 					}
