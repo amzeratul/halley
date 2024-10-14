@@ -213,7 +213,8 @@ void OSWin32::createLogConsole(String winTitle, std::optional<size_t> monitor, V
 		RECT curRect;
 		GetWindowRect(con, &curRect);
         const auto limitWidth = std::min(curMonitor.getWidth(), curMonitor.getHeight() * 16 / 9) / 2;
-		const auto targetSize = Vector2i(limitWidth, curMonitor.getHeight() - 64);
+		const auto limitHeight = (curMonitor.getHeight() - 64) / (1 + int(2.001f * std::abs(align.y - 0.5f)));
+		const auto targetSize = Vector2i(limitWidth, limitHeight);
 		
 		SetWindowPos(con, HWND_TOP, int((curMonitor.getWidth() - targetSize.x) * align.x) + curMonitor.getLeft(), int((curMonitor.getHeight() - targetSize.y) * align.y) + curMonitor.getTop(), targetSize.x, targetSize.y, 0);
 	}
