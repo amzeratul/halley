@@ -51,6 +51,10 @@ SessionMultiplayer::~SessionMultiplayer()
 	if (joinLobbyInstance == this) {
 		joinLobbyInstance = nullptr;
 	}
+
+    entitySession.reset();
+    session.reset();
+    service.reset();
 }
 
 bool SessionMultiplayer::isMultiplayer() const
