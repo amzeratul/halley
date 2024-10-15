@@ -20,4 +20,15 @@ component:
       canSave: false
       defaultValue: false
 
+---
+
+system:
+    name: EnableRules
+    families: []
+    strategy: global
+    services:
+    - ScriptingService
+    access:
+    - world
+
 ...

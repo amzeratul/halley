@@ -142,6 +142,7 @@ namespace Halley {
 
 		const String& getVariant() const;
 		bool canInstantiateVariant(const String& value) const;
+		bool canInstantiateEnableRules(const String& enableRules) const;
 
 		void setCurrentEntity(EntityId entity);
 		EntityId getCurrentEntityId() const override;

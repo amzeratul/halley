@@ -1,4 +1,4 @@
-// Halley codegen version 132
+// Halley codegen version 136
 #include <halley.hpp>
 using namespace Halley;
 
@@ -37,6 +37,7 @@ using namespace Halley;
 // System factory functions
 System* halleyCreateAudioSystem();
 System* halleyCreateCameraRenderSystem();
+System* halleyCreateEnableRulesSystem();
 System* halleyCreateNetworkLockSystem();
 System* halleyCreateNetworkReceiveSystem();
 System* halleyCreateNetworkSendSystem();
@@ -50,9 +51,10 @@ class GameCodegenFunctions : public CodegenFunctions {
 public:
 	Vector<SystemReflector> makeSystemReflectors() override {
 		Vector<SystemReflector> result;
-		result.reserve(9);
+		result.reserve(10);
 		result.push_back(SystemReflector("AudioSystem", &halleyCreateAudioSystem));
 		result.push_back(SystemReflector("CameraRenderSystem", &halleyCreateCameraRenderSystem));
+		result.push_back(SystemReflector("EnableRulesSystem", &halleyCreateEnableRulesSystem));
 		result.push_back(SystemReflector("NetworkLockSystem", &halleyCreateNetworkLockSystem));
 		result.push_back(SystemReflector("NetworkReceiveSystem", &halleyCreateNetworkReceiveSystem));
 		result.push_back(SystemReflector("NetworkSendSystem", &halleyCreateNetworkSendSystem));

@@ -76,7 +76,6 @@ namespace Halley {
 		std::shared_ptr<UIDropdown> variant;
 		std::shared_ptr<SelectAssetWidget> prefabName;
 		std::shared_ptr<UITextInput> enableRules;
-		std::shared_ptr<UICheckbox> enabledCheckbox;
 
 		EntityData* currentEntityData = nullptr;
 		EntityData prevEntityData;

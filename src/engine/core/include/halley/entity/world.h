@@ -120,6 +120,8 @@ namespace Halley {
 		Vector<EntityRef> getTopLevelEntities();
 		Vector<ConstEntityRef> getTopLevelEntities() const;
 
+		gsl::span<Entity*> getRawEntities();
+
 		void spawnPending(); // Warning: use with care, will invalidate entities
 
 		void onEntityDirty();

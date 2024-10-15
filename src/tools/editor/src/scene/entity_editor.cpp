@@ -93,7 +93,6 @@ void EntityEditor::makeUI()
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 	variant = getWidgetAs<UIDropdown>("variant");
 	enableRules = getWidgetAs<UITextInput>("enableRules");
-	enabledCheckbox = getWidgetAs<UICheckbox>("enable");
 
 	entityValidatorUI = getWidgetAs<EntityValidatorUI>("entityValidatorUI");
 
@@ -242,7 +241,7 @@ void EntityEditor::reloadEntity()
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
 		enableRules->setText(getEntityData().getEnableRules());
-		enabledCheckbox->setEnabled(getEntityData().getEnableRules().isEmpty());
+		//enabledCheckbox->setEnabled(getEntityData().getEnableRules().isEmpty());
 		variant->setSelectedOption(getEntityData().getVariant());
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
 		getWidgetAs<UICheckbox>("serializable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSerializable));
@@ -665,7 +664,7 @@ void EntityEditor::setEnableRules(const String& enableRules, bool markModified)
 		}
 	}
 
-	enabledCheckbox->setEnabled(enableRules.isEmpty());
+	//enabledCheckbox->setEnabled(enableRules.isEmpty());
 }
 
 void EntityEditor::setIcon(const String& icon)
