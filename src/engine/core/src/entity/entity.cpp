@@ -338,7 +338,13 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();
 	if (networkComponent) {
-		networkComponent->ownerId = peerId;
+        // On the host this can be called multiple times, need to check for existing ownership.
+        // see EntityNetworkSession::setupOutboundInterpolators().
+        if (!networkComponent->ownerId.has_value()) {
+            networkComponent->ownerId = peerId;
+        } else if (peerId != 0) {
+            Logger::logError("Tried to reassign ownership for network component.");
+        }
 		return networkComponent->dataInterpolatorSet;
 	} else {
 		NetworkComponent component;
