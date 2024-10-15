@@ -17,3 +17,50 @@ std::unique_ptr<NetworkService> AsioNetworkAPI::createService(NetworkProtocol pr
 
 void AsioNetworkAPI::init() {}
 void AsioNetworkAPI::deInit() {}
+
+void AsioPlatformAPI::init() {}
+void AsioPlatformAPI::deInit() {}
+
+AsioPlatformAPI::AsioPlatformAPI(String playerName)
+    : playerName(std::move(playerName))
+{
+}
+
+String AsioPlatformAPI::getId()
+{
+    return "asio";
+}
+
+void AsioPlatformAPI::update() {}
+
+String AsioPlatformAPI::getPlayerName()
+{
+    return playerName;
+}
+
+String AsioPlatformAPI::getAccountId()
+{
+    return playerName;
+}
+
+bool AsioPlatformAPI::canProvideAuthToken() const
+{
+    return true;
+}
+
+Future<AuthTokenResult> AsioPlatformAPI::getAuthToken(const Halley::AuthTokenParameters& parameters)
+{
+    OnlineCapabilities capabilities;
+    capabilities.onlinePlay = true;
+    AuthTokenResult result(AuthTokenRetrievalResult::OK, capabilities);
+
+    Promise<AuthTokenResult> promise;
+    promise.setValue(std::move(result));
+
+    return promise.getFuture();
+}
+
+std::shared_ptr<NetworkService> AsioPlatformAPI::createNetworkService(uint16_t port)
+{
+    return AsioNetworkAPI().createService(NetworkProtocol::TCP, port);
+}
