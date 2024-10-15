@@ -41,6 +41,7 @@ namespace Halley {
 		const std::optional<String>& getPrefab() const { return prefab; }
 		const std::optional<String>& getIcon() const { return icon; }
 		const std::optional<String>& getVariant() const { return variant; }
+		const std::optional<String>& getEnableRules() const { return enableRules; }
 		const std::optional<uint8_t>& getFlags() const { return flags; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		const std::optional<UUID>& getInstanceUUID() const { return instanceUUID; }
@@ -78,6 +79,7 @@ namespace Halley {
     	std::optional<String> prefab;
 		std::optional<String> icon;
 		std::optional<String> variant;
+		std::optional<String> enableRules;
 		std::optional<uint8_t> flags;
     	std::optional<UUID> instanceUUID;
     	std::optional<UUID> prefabUUID;
@@ -95,7 +97,7 @@ namespace Halley {
 		Vector<UUID> childrenOrder;
 
         enum class FieldId {
-        	RESERVED,
+        	RESERVED, // DO NOT USE THIS, it's reserved in case the format needs to change
 	        Name,
         	Prefab,
         	InstanceUUID,
@@ -110,14 +112,15 @@ namespace Halley {
         	ChildrenOrder,
         	Icon,
 			Flags,
-			Variant
+			Variant,
+			EnableRules
         };
 
-    	static uint16_t getFieldBit(FieldId id);
-    	static void setFieldPresent(uint16_t& value, FieldId id, bool present);
-    	static bool isFieldPresent(uint16_t value, FieldId id);
+    	static uint32_t getFieldBit(FieldId id);
+    	static void setFieldPresent(uint32_t& value, FieldId id, bool present);
+    	static bool isFieldPresent(uint32_t value, FieldId id);
 
-		uint16_t getFieldsPresent() const;
+		uint32_t getFieldsPresent() const;
 
 		Vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
 	};

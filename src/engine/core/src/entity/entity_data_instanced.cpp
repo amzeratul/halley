@@ -50,6 +50,11 @@ const String& EntityDataInstanced::getVariant() const
 	return prefabData->getVariant();
 }
 
+const String& EntityDataInstanced::getEnableRules() const
+{
+	return prefabData->getEnableRules();
+}
+
 uint8_t EntityDataInstanced::getFlags() const
 {
 	return prefabData->getFlags() | flags;

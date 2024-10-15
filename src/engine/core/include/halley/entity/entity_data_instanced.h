@@ -13,6 +13,7 @@ namespace Halley {
 		const String& getName() const override;
 		const String& getPrefab() const override;
 		const String& getVariant() const override;
+		const String& getEnableRules() const override;
 		uint8_t getFlags() const override;
 		bool getFlag(Flag flag) const override;
 		const UUID& getInstanceUUID() const override;

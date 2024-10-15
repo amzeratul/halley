@@ -391,22 +391,14 @@ ConfigNode ScriptEntityParameter::doGetData(ScriptEnvironment& environment, cons
 		return {};
 	}
 
-	const auto entityRef = environment.tryGetEntity(readEntityId(environment, node, 1));
-	if (!entityRef.isValid()) {
-		Logger::logError("Trying to access ScriptEntityParameter, but EntityRef is not valid! " + toString(readEntityId(environment, node, 1)));
-		return {};
+	if (auto* scriptableComponent = environment.tryGetComponent<ScriptableComponent>(readEntityId(environment, node, 1))) {
+		const auto& params = scriptableComponent->entityParams;
+		const auto find = params.find(key);
+		if (find != params.end()) {
+			return ConfigNode(find->second);
+		}
 	}
-    if (!entityRef.hasComponent<ScriptableComponent>()) {
-		Logger::logError("Entity with name " + entityRef.getName() + " does not have ScriptableComponent attached to it!");
-		return {};
-	}
-	const auto& params = entityRef.getComponent<ScriptableComponent>().entityParams;
-	const auto find = params.find(key);
-	if (find == params.end()) {
-		return {};
-	}
-
-	return ConfigNode(find->second);
+	return {};
 }
 
 

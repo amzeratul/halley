@@ -19,7 +19,7 @@ children:
     widget:
       class: scrollBarPane
       id: scrollBarPane
-      size: [0, 220]
+      size: [0, 240]
     children:
       - uuid: 5d3fe2cd-643e-45e1-8954-8e0ff60390b8
         sizer:
@@ -42,104 +42,11 @@ children:
             border: [4, 4, 4, 4]
             sizer:
               columnProportions: []
+              gap: 2
               type: vertical
             widget:
               class: widget
             children:
-              - uuid: c15de552-1f2e-4e1a-b536-a2e50937429a
-                sizer:
-                  columnProportion: [0, 1]
-                  columnProportions:
-                    - ~
-                    - 1
-                  columns: 2
-                  gap: 2
-                  type: grid
-                widget:
-                  class: widget
-                  id: commonFields
-                children:
-                  - uuid: 7200c6ae-e9f4-4f34-835a-b27e16e31108
-                    sizer:
-                      columnProportions: []
-                    widget:
-                      class: widget
-                      size: [100, 20]
-                    children:
-                      - uuid: d9dfcec3-d477-427f-b8ed-aa72534e7413
-                        widget:
-                          class: label
-                          id: ""
-                          style: labelLight
-                          text: Enabled
-                        fill: centreVertical
-                  - uuid: 1c3b1cec-a4c2-421d-8aab-3efc2cf8d33d
-                    proportion: 1
-                    widget:
-                      class: checkbox
-                      id: enabled
-                  - uuid: 2b8d34de-16e0-4dc9-bb7d-60d3ba34f64e
-                    widget:
-                      class: label
-                      id: ""
-                      style: labelLight
-                      text: Serializable
-                    fill: centreVertical
-                  - uuid: d6cf52cb-8269-41a2-9a10-cb03042dc9e0
-                    proportion: 1
-                    widget:
-                      class: checkbox
-                      id: serializable
-                  - uuid: daf1bf75-b756-47e5-b596-131a4312b3cf
-                    widget:
-                      class: label
-                      id: ""
-                      style: labelLight
-                      text: Selectable
-                    fill: centreVertical
-                  - uuid: 394f53d4-b9d0-45f7-9614-56558ac997fb
-                    proportion: 1
-                    widget:
-                      class: checkbox
-                      id: selectable
-                fill: fill
-              - uuid: d8140fc0-8e9b-47d8-b5e5-0ce866df5c8e
-                sizer:
-                  columnProportion: [0, 1]
-                  columnProportions:
-                    - ~
-                    - 1
-                  columns: 2
-                  gap: 2
-                  type: grid
-                widget:
-                  class: widget
-                  id: sceneFields
-                children:
-                  - uuid: 8f03c406-669b-4012-ba24-4f9df33d7d92
-                    sizer:
-                      columnProportions: []
-                    widget:
-                      class: widget
-                      size: [100, 20]
-                    children:
-                      - uuid: 49f8d179-77d4-41b5-b7f0-77cc1651dc86
-                        widget:
-                          class: label
-                          id: ""
-                          style: labelLight
-                          text: Variant
-                        fill: centreVertical
-                  - uuid: 0f51b876-0277-44b0-a76b-b2ef9e531ab7
-                    proportion: 1
-                    border: [0, 0, 0, 1]
-                    widget:
-                      class: dropdown
-                      id: variant
-                      options: []
-                      size: [200, 22]
-                      style: dropdownLight
-                fill: fill
               - uuid: 41bef486-a1c3-4997-8208-fe1210c445cc
                 sizer:
                   columnProportion: [0, 1]
@@ -190,9 +97,123 @@ children:
                       size: [200, 22]
                       style: dropdownLight
                 fill: fill
+              - uuid: c15de552-1f2e-4e1a-b536-a2e50937429a
+                sizer:
+                  columnProportion: [0, 1]
+                  columnProportions:
+                    - ~
+                    - 1
+                  columns: 2
+                  gap: 2
+                  type: grid
+                widget:
+                  class: widget
+                  id: commonFields
+                children:
+                  - uuid: 7200c6ae-e9f4-4f34-835a-b27e16e31108
+                    sizer:
+                      columnProportions: []
+                    widget:
+                      class: widget
+                      size: [100, 20]
+                    children:
+                      - uuid: d9dfcec3-d477-427f-b8ed-aa72534e7413
+                        widget:
+                          class: label
+                          id: ""
+                          style: labelLight
+                          text: Enabled
+                        fill: centreVertical
+                  - uuid: 1c3b1cec-a4c2-421d-8aab-3efc2cf8d33d
+                    proportion: 1
+                    widget:
+                      class: checkbox
+                      id: enabled
+                  - uuid: 008cde31-e063-4801-aece-5a996b8fa3f7
+                    widget:
+                      class: label
+                      id: ""
+                      style: labelLight
+                      text: Enable Rules
+                    fill: centreVertical
+                  - uuid: d5867fed-d2ac-4365-a383-53377b139d49
+                    proportion: 1
+                    widget:
+                      class: textInput
+                      id: enableRules
+                      size: [200, 22]
+                      style: inputThin
+                  - uuid: 2b8d34de-16e0-4dc9-bb7d-60d3ba34f64e
+                    widget:
+                      class: label
+                      id: ""
+                      style: labelLight
+                      text: Serializable
+                    fill: centreVertical
+                  - uuid: d6cf52cb-8269-41a2-9a10-cb03042dc9e0
+                    proportion: 1
+                    widget:
+                      class: checkbox
+                      id: serializable
+                  - uuid: daf1bf75-b756-47e5-b596-131a4312b3cf
+                    widget:
+                      class: label
+                      id: ""
+                      style: labelLight
+                      text: Selectable
+                    fill: centreVertical
+                  - uuid: 394f53d4-b9d0-45f7-9614-56558ac997fb
+                    proportion: 1
+                    widget:
+                      class: checkbox
+                      id: selectable
+                fill: fill
+              - uuid: d8140fc0-8e9b-47d8-b5e5-0ce866df5c8e
+                border: [0, 0, 0, 0]
+                sizer:
+                  columnProportion: [0, 1]
+                  columnProportions:
+                    - ~
+                    - 1
+                  columns: 2
+                  gap: 2
+                  type: grid
+                widget:
+                  class: widget
+                  id: sceneFields
+                children:
+                  - uuid: 8f03c406-669b-4012-ba24-4f9df33d7d92
+                    sizer:
+                      columnProportions: []
+                    widget:
+                      active: true
+                      class: widget
+                      enabled: true
+                      size: [100, 16]
+                    children:
+                      - uuid: 49f8d179-77d4-41b5-b7f0-77cc1651dc86
+                        widget:
+                          class: label
+                          id: ""
+                          style: labelLight
+                          text: Variant
+                        fill: centreVertical
+                  - uuid: 0f51b876-0277-44b0-a76b-b2ef9e531ab7
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      active: true
+                      class: dropdown
+                      id: variant
+                      options: []
+                      size: [0, 0]
+                      style: dropdownLight
+                    fill: [fillHorizontal, centreVertical]
+                fill: fill
               - uuid: a821da0d-329f-4896-bbdb-fcb16b6ced78
                 sizer:
                   columnProportions: []
+                  gap: 2
                   type: vertical
                 widget:
                   class: widget
