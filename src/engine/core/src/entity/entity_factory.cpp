@@ -275,6 +275,15 @@ bool EntityFactoryContext::canInstantiateVariant(const String& value) const
 	return value.isEmpty() || value == getVariant();
 }
 
+bool EntityFactoryContext::canInstantiateEnableRules(const String& enableRules) const
+{
+	if (enableRules.isEmpty()) {
+		return true;
+	}
+	// TODO
+	return true;
+}
+
 EntityId EntityFactoryContext::getCurrentEntityId() const
 {
 	return curEntity;
@@ -421,6 +430,11 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 			enabled = enabled && context->canInstantiateVariant(delta.getVariant().value());
 		}
 
+		if (delta.getEnableRules()) {
+			enabled = enabled && context->canInstantiateEnableRules(delta.getEnableRules().value());
+			entity.setEnableRules(*delta.getEnableRules());
+		}
+
 		entity.setEnabled(enabled);
 
 		const auto prefabUUID = delta.getPrefabUUID().value_or(entity.getPrefabUUID());
@@ -432,7 +446,8 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		entity.setName(data.getName());
 		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
 		entity.setSerializable(!data.getFlag(EntityData::Flag::NotSerializable));
-		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled) && context->canInstantiateVariant(data.getVariant()));
+		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled) && context->canInstantiateVariant(data.getVariant()) && context->canInstantiateEnableRules(data.getEnableRules()));
+		entity.setEnableRules(data.getEnableRules());
 		if (data.getPrefabUUID().isValid()) {
 			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 		}

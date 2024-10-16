@@ -466,6 +466,11 @@ Vector<ConstEntityRef> World::getTopLevelEntities() const
 	return result;
 }
 
+gsl::span<Entity*> World::getRawEntities()
+{
+	return entities.span();
+}
+
 void World::onEntityDirty()
 {
 	entityDirty = true;

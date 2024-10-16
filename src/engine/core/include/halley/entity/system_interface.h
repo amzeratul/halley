@@ -86,4 +86,11 @@ namespace Halley {
 
 		virtual void exitGame() = 0;
 	};
+
+	class IEnableRulesSystemInterface : public ISystemInterface {
+	public:
+		virtual ~IEnableRulesSystemInterface() = default;
+
+		virtual void refreshEnabled() = 0;
+	};
 }

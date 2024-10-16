@@ -13,6 +13,7 @@ file (GLOB_RECURSE HEADERS_GEN "../../../shared_gen/*.h")
 set(SOURCES
     "src/systems/audio_system.cpp"
     "src/systems/camera_render_system.cpp"
+    "src/systems/enable_rules_system.cpp"
     "src/systems/network_lock_system.cpp"
     "src/systems/network_receive_system.cpp"
     "src/systems/network_send_system.cpp"

@@ -40,7 +40,7 @@ namespace Halley {
 	class ConstEntityRef;
 
 	using WorldPartitionId = uint16_t;
-
+	
 	class Entity
 	{
 		friend class World;
@@ -164,6 +164,9 @@ namespace Halley {
 
 		int getParentingDepth() const;
 
+		const String& getEnableRules() const;
+		void setEnableRules(String rules);
+
 	private:
 		// !!! WARNING !!!
 		// The order of elements in this class was carefully chosen to maximise cache performance!
@@ -196,6 +199,7 @@ namespace Halley {
 		UUID prefabUUID;
 		std::shared_ptr<const Prefab> prefab;
 		std::unique_ptr<String> name;
+		std::unique_ptr<String> enableRules;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -272,6 +276,8 @@ namespace Halley {
 			}
 		}
 	};
+
+	static_assert(sizeof(Entity) <= 128); // We'll lose some significant perf due to going over two cache lines
 
 	class EntityRef;
 	
@@ -615,6 +621,18 @@ namespace Halley {
 			} else {
 				entity->name = std::make_unique<String>(std::move(name));
 			}
+		}
+
+		const String& getEnableRules() const
+		{
+			validate();
+			return entity->getEnableRules();
+		}
+
+		void setEnableRules(String enableRules)
+		{
+			validate();
+			entity->setEnableRules(std::move(enableRules));
 		}
 
 		const UUID& getInstanceUUID() const

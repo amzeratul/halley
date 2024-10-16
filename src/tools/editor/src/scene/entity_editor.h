@@ -75,6 +75,7 @@ namespace Halley {
 		std::shared_ptr<UIDropdown> entityIcon;
 		std::shared_ptr<UIDropdown> variant;
 		std::shared_ptr<SelectAssetWidget> prefabName;
+		std::shared_ptr<UITextInput> enableRules;
 
 		EntityData* currentEntityData = nullptr;
 		EntityData prevEntityData;
@@ -98,6 +99,7 @@ namespace Halley {
 
 		void loadVariants();
 		void setName(const String& name, bool markModified = true);
+		void setEnableRules(const String& enableRules, bool markModified = true);
 		String getName() const;
 		void setPrefabName(const String& prefab);
 		void setSelectable(bool selectable);

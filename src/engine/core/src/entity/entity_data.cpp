@@ -71,6 +71,7 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	prefab = data["prefab"].asString("");
 	icon = data["icon"].asString("");
 	variant = data["variant"].asString("");
+	enableRules = data["enableRules"].asString("");
 	flags = static_cast<uint8_t>(data["flags"].asInt(0));
 
 	if (isPrefab) {
@@ -124,6 +125,9 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 	}
 	if (!variant.isEmpty()) {
 		result["variant"] = variant;
+	}
+	if (!enableRules.isEmpty()) {
+		result["enableRules"] = enableRules;
 	}
 	if (instanceUUID.isValid()) {
 		result["uuid"] = instanceUUID.toString();
@@ -321,6 +325,11 @@ void EntityData::setVariant(String variant)
 	this->variant = std::move(variant);
 }
 
+void EntityData::setEnableRules(String enableRules)
+{
+	this->enableRules = std::move(enableRules);
+}
+
 bool EntityData::setFlag(Flag f, bool value)
 {
 	const auto flag = static_cast<uint8_t>(f);
@@ -389,6 +398,9 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	if (delta.variant) {
 		variant = delta.variant.value();
+	}
+	if (delta.enableRules) {
+		enableRules = delta.enableRules.value();
 	}
 	if (delta.flags) {
 		flags = delta.flags.value();
@@ -510,6 +522,7 @@ void EntityData::instantiateWith(const EntityData& instance)
 
 	flags |= instance.flags;
 	variant = instance.getVariant();
+	enableRules = instance.getEnableRules();
 }
 
 void EntityData::generateChildUUID(const UUID& root)
@@ -594,6 +607,7 @@ size_t EntityData::getSizeBytes() const
 	result += prefab.getSizeBytes();
 	result += icon.getSizeBytes();
 	result += variant.getSizeBytes();
+	result += enableRules.getSizeBytes();
 
 	for (const auto& c: children) {
 		result += c.getSizeBytes();
@@ -695,6 +709,7 @@ bool EntityData::operator==(const EntityData& other) const
 		prefab == other.prefab &&
 		icon == other.icon &&
 		variant == other.variant &&
+		enableRules == other.enableRules &&
 		flags == other.flags &&
 		instanceUUID == other.instanceUUID &&
 		prefabUUID == other.prefabUUID &&

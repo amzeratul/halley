@@ -334,6 +334,20 @@ int Entity::getParentingDepth() const
 	return parent ? parent->getParentingDepth() + 1 : 0;
 }
 
+const String& Entity::getEnableRules() const
+{
+	return enableRules ? *enableRules : String::emptyString();
+}
+
+void Entity::setEnableRules(String rules)
+{
+	if (!rules.isEmpty() && enableRules) {
+		*enableRules = std::move(rules);
+	} else {
+		enableRules = rules.isEmpty() ? std::unique_ptr<String>() : std::make_unique<String>(std::move(rules));
+	}
+}
+
 DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();

@@ -92,6 +92,7 @@ void EntityEditor::makeUI()
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 	variant = getWidgetAs<UIDropdown>("variant");
+	enableRules = getWidgetAs<UITextInput>("enableRules");
 
 	entityValidatorUI = getWidgetAs<EntityValidatorUI>("entityValidatorUI");
 
@@ -125,9 +126,24 @@ void EntityEditor::makeUI()
 		setEntityEnabled(event.getBoolData());
 	});
 
+	setHandle(UIEventType::TextSubmit, "enableRules", [=] (const UIEvent& event)
+	{
+		setEnableRules(event.getStringData());
+	});
+
+	setHandle(UIEventType::FocusLost, "enableRules", [=] (const UIEvent& event)
+	{
+		setEnableRules(enableRules->getText());
+	});
+
 	setHandle(UIEventType::TextSubmit, "entityName", [=] (const UIEvent& event)
 	{
 		setName(event.getStringData());
+	});
+
+	setHandle(UIEventType::FocusLost, "entityName", [=] (const UIEvent& event)
+	{
+		setName(entityName->getText());
 	});
 
 	setHandle(UIEventType::TextChanged, "prefabName", [=] (const UIEvent& event)
@@ -224,6 +240,8 @@ void EntityEditor::reloadEntity()
 			entityName->setText(getEntityData().getName());
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
+		enableRules->setText(getEntityData().getEnableRules());
+		//enabledCheckbox->setEnabled(getEntityData().getEnableRules().isEmpty());
 		variant->setSelectedOption(getEntityData().getVariant());
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
 		getWidgetAs<UICheckbox>("serializable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSerializable));
@@ -635,6 +653,18 @@ void EntityEditor::setName(const String& name, bool markModified)
 			onEntityUpdated();
 		}
 	}
+}
+
+void EntityEditor::setEnableRules(const String& enableRules, bool markModified)
+{
+	if (getEntityData().getEnableRules() != enableRules) {
+		getEntityData().setEnableRules(enableRules);
+		if (markModified) {
+			onEntityUpdated();
+		}
+	}
+
+	//enabledCheckbox->setEnabled(enableRules.isEmpty());
 }
 
 void EntityEditor::setIcon(const String& icon)

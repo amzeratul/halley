@@ -41,6 +41,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	if (from.variant != to.variant) {
 		variant = to.variant;
 	}
+	if (from.enableRules != to.enableRules) {
+		enableRules = to.enableRules;
+	}
 	if (from.flags != to.flags) {
 		flags = to.flags;
 	}
@@ -156,14 +159,14 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 bool EntityDataDelta::hasChange() const
 {
 	// Checking instance/prefab UUID causes issues with spurious serialisation of entities - if they cause other issues, this method might need to be split/take parameters
-	return name || prefab || icon || variant || flags || parentUUID /*|| instanceUUID || prefabUUID*/
+	return name || prefab || icon || variant || enableRules || flags || parentUUID /*|| instanceUUID || prefabUUID*/
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
 
 void EntityDataDelta::serialize(Serializer& s) const
 {
-	uint16_t fieldsPresent = getFieldsPresent();
+	uint32_t fieldsPresent = getFieldsPresent();
 	s << fieldsPresent;
 
 	auto encodeField = [&] (auto& v, FieldId id)
@@ -195,11 +198,12 @@ void EntityDataDelta::serialize(Serializer& s) const
 	encodeOptField(icon, FieldId::Icon);
 	encodeOptField(flags, FieldId::Flags);
 	encodeOptField(variant, FieldId::Variant);
+	encodeOptField(enableRules, FieldId::EnableRules);
 }
 
 void EntityDataDelta::deserialize(Deserializer& s)
 {
-	uint16_t fieldsPresent;
+	uint32_t fieldsPresent;
 	s >> fieldsPresent;
 
 	auto decodeField = [&] (auto& v, FieldId id)
@@ -233,6 +237,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(icon, FieldId::Icon);
 	decodeOptField(flags, FieldId::Flags);
 	decodeOptField(variant, FieldId::Variant);
+	decodeOptField(enableRules, FieldId::EnableRules);
 
 	if (deserializeChildrenComponentsAsDeltas) {
 		for (auto& c : childrenAdded) {
@@ -343,6 +348,9 @@ ConfigNode EntityDataDelta::toConfigNode() const
 	if (variant) {
 		result["variant"] = variant.value();
 	}
+	if (enableRules) {
+		result["enableRules"] = enableRules.value();
+	}
 	if (instanceUUID) {
 		result["uuid"] = instanceUUID->toString();
 	}
@@ -416,6 +424,7 @@ bool EntityDataDelta::operator==(const EntityDataDelta& other) const
 		prefab == other.prefab &&
 		icon == other.icon &&
 		variant == other.variant &&
+		enableRules == other.enableRules &&
 		flags == other.flags &&
 		instanceUUID == other.instanceUUID &&
 		prefabUUID == other.prefabUUID &&
@@ -479,12 +488,12 @@ Vector<std::pair<String, ConfigNode>> EntityDataDelta::getComponentEmptyStructur
 	return result;
 }
 
-uint16_t EntityDataDelta::getFieldBit(FieldId id)
+uint32_t EntityDataDelta::getFieldBit(FieldId id)
 {
-	return static_cast<uint16_t>(1 << static_cast<int>(id));
+	return static_cast<uint32_t>(1 << static_cast<int>(id));
 }
 
-void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
+void EntityDataDelta::setFieldPresent(uint32_t& value, FieldId id, bool present)
 {
 	if (present) {
 		value |= getFieldBit(id);
@@ -493,14 +502,14 @@ void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
 	}
 }
 
-bool EntityDataDelta::isFieldPresent(uint16_t value, FieldId id)
+bool EntityDataDelta::isFieldPresent(uint32_t value, FieldId id)
 {
 	return (value & getFieldBit(id)) != 0;
 }
 
-uint16_t EntityDataDelta::getFieldsPresent() const
+uint32_t EntityDataDelta::getFieldsPresent() const
 {
-	uint16_t value = 0;
+	uint32_t value = 0;
 	
 	auto checkField = [&] (const auto& v, FieldId id)
 	{
@@ -531,6 +540,7 @@ uint16_t EntityDataDelta::getFieldsPresent() const
 	checkField(icon, FieldId::Icon);
 	checkField(flags, FieldId::Flags);
 	checkField(variant, FieldId::Variant);
+	checkField(enableRules, FieldId::EnableRules);
 
 	return value;
 }
