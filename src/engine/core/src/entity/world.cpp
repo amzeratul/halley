@@ -193,6 +193,7 @@ Service& World::addService(std::shared_ptr<Service> service)
 		throw Exception("Service already registered: " + service->getName(), HalleyExceptions::Entity);
 	}
 	services[service->getName()] = std::move(service);
+	ref.onAddedToWorld(*this);
 	return ref;
 }
 

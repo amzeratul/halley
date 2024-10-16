@@ -10,6 +10,7 @@
 #include "halley/entity/world.h"
 #include "halley/entity/registry.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/entity/services/enable_rules_service.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resources.h"
 #include "halley/utils/algorithm.h"
@@ -168,6 +169,7 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 	entitySerializationContext.entitySerializationTypeMask = entitySerializationMask;
 	entitySerializationContext.interpolators = interpolators;
 	worldPartition = scene ? scene->getWorldPartition() : 0;
+	enableRulesService = world.tryGetService<EnableRulesService>();
 
 	if (origEntityData) {
 		setEntityData(*origEntityData);
@@ -277,11 +279,7 @@ bool EntityFactoryContext::canInstantiateVariant(const String& value) const
 
 bool EntityFactoryContext::canInstantiateEnableRules(const String& enableRules) const
 {
-	if (enableRules.isEmpty()) {
-		return true;
-	}
-	// TODO
-	return true;
+	return !enableRules.isEmpty() && enableRulesService ? enableRulesService->evaluateEnableRules(enableRules) : true;
 }
 
 EntityId EntityFactoryContext::getCurrentEntityId() const

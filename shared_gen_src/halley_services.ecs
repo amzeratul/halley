@@ -34,4 +34,10 @@ type:
   name: PainterService
   include: "halley/entity/services/painter_service.h"
 
+---
+
+type:
+  name: EnableRulesService
+  include: "halley/entity/services/enable_rules_service.h"
+
 ...

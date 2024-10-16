@@ -27,7 +27,7 @@ system:
     families: []
     strategy: global
     services:
-    - ScriptingService
+    - EnableRulesService
     access:
     - world
 

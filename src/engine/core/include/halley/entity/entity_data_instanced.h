@@ -27,6 +27,8 @@ namespace Halley {
 		const EntityData* prefabData = nullptr;
 		UUID instanceUUID;
 		uint8_t flags = 0;
+		String variant;
+		String enableRules;
 
 		Vector<EntityDataInstanced> children;
 		HashMap<String, std::pair<String, ConfigNode>> componentOverrides;

@@ -60,6 +60,7 @@ namespace Halley {
 		Bytes compileAndEval(const String& v, const String& name = "", bool stripDebug = false);
 
 		void makeGlobal(const String& name);
+		void getGlobal(const String& name);
 
 		void setField(const String& name);
 		void setField(int idx);

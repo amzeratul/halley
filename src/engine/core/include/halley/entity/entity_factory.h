@@ -13,6 +13,7 @@ namespace Halley {
 	class Resources;
 	class EntityScene;
 	class EntityData;
+	class EnableRulesService;
 	
 	class EntityFactory {
 	public:
@@ -176,6 +177,8 @@ namespace Halley {
 		EntityDataInstanced instancedEntityData;
 
 		Vector<EntityRef> toDelete;
+
+		EnableRulesService* enableRulesService = nullptr;
 
 		void setEntityData(const IEntityData& iData);
 	};

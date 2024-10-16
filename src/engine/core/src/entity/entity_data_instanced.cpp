@@ -6,6 +6,8 @@ EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEn
 {
 	instanceUUID = instanceData.getInstanceUUID();
 	flags = instanceData.getFlags();
+	variant = instanceData.getVariant();
+	enableRules = instanceData.getEnableRules();
 
 	children.reserve(prefabData.getNumChildren());
 	for (const auto& child: prefabData.getChildren()) {
@@ -47,12 +49,12 @@ const String& EntityDataInstanced::getPrefab() const
 
 const String& EntityDataInstanced::getVariant() const
 {
-	return prefabData->getVariant();
+	return variant.isEmpty() ? prefabData->getVariant() : variant;
 }
 
 const String& EntityDataInstanced::getEnableRules() const
 {
-	return prefabData->getEnableRules();
+	return enableRules.isEmpty() ? prefabData->getEnableRules() : enableRules;
 }
 
 uint8_t EntityDataInstanced::getFlags() const

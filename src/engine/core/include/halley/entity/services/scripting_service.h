@@ -21,13 +21,22 @@ namespace Halley {
 			auto stack = LuaStackOps(*luaState);
 			stack.push(value);
 			stack.makeGlobal(key);
+
+			globals[key] = ConfigNode(value);
 		}
 
+		ConfigNode getLuaGlobal(const String& key);
+		void copyLuaGlobal(const String& key, ScriptingService& source);
 		LuaState& getLuaState() override;
+
+		std::shared_ptr<ScriptingService> clone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
 
 	private:
 		std::unique_ptr<ScriptEnvironment> scriptEnvironment;
 		std::unique_ptr<LuaState> luaState;
+		HashMap<String, ConfigNode> globals;
+		String initialModule;
+		Resources& resources;
 	};
 }
 

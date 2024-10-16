@@ -5,6 +5,8 @@
 
 namespace Halley
 {
+	class World;
+
 	class Service
 	{
 	public:
@@ -17,5 +19,20 @@ namespace Halley
 		Service& operator=(Service&& other) noexcept = default;
 
 		String getName() const { return typeid(*this).name(); }
+
+		void onAddedToWorld(World& world)
+		{
+			this->world = &world;
+		}
+
+	protected:
+		World& getWorld() const
+		{
+			assert(world != nullptr);
+			return *world;
+		}
+
+	private:
+		World* world = nullptr;
 	};
 }

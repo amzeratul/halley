@@ -3,7 +3,7 @@
 
 #include <halley.hpp>
 
-#include "halley/entity/services/scripting_service.h"
+#include "halley/entity/services/enable_rules_service.h"
 
 
 // Generated file; do not modify.
@@ -23,16 +23,16 @@ protected:
 		return doGetWorld().getUpdateMemoryPool();
 	}
 
-	ScriptingService& getScriptingService() const {
-		return *scriptingService;
+	EnableRulesService& getEnableRulesService() const {
+		return *enableRulesService;
 	}
 
 private:
 	friend Halley::System* halleyCreateEnableRulesSystem();
 
-	ScriptingService* scriptingService{ nullptr };
+	EnableRulesService* enableRulesService{ nullptr };
 	void initBase() override final {
-		scriptingService = &doGetWorld().template getService<ScriptingService>(getName());
+		enableRulesService = &doGetWorld().template getService<EnableRulesService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 	}
 

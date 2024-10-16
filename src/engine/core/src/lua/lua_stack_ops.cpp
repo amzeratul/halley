@@ -146,6 +146,11 @@ void LuaStackOps::makeGlobal(const String& name)
 	lua_setglobal(state.getRawState(), name.c_str());
 }
 
+void LuaStackOps::getGlobal(const String& name)
+{
+	lua_getglobal(state.getRawState(), name.c_str());
+}
+
 void LuaStackOps::pop()
 {
 	lua_pop(state.getRawState(), 1);

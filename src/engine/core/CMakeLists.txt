@@ -140,6 +140,7 @@ set(SOURCES
 
         "src/entity/services/debug_draw_service.cpp"
         "src/entity/services/dev_service.cpp"
+        "src/entity/services/enable_rules_service.cpp"
         "src/entity/services/painter_service.cpp"
         "src/entity/services/screen_service.cpp"
         "src/entity/services/scripting_service.cpp"
@@ -589,6 +590,7 @@ set(HEADERS
 
         "include/halley/entity/services/debug_draw_service.h"
         "include/halley/entity/services/dev_service.h"
+        "include/halley/entity/services/enable_rules_service.h"
         "include/halley/entity/services/painter_service.h"
         "include/halley/entity/services/screen_service.h"
         "include/halley/entity/services/scripting_service.h"

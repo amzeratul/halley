@@ -1,8 +1,8 @@
 #pragma once
 
+#include "halley/entity/service.h"
 #include "halley/net/session/session.h"
 #include "halley/net/session/session_multiplayer.h"
-
 namespace Halley {
 
 	class SessionService : public Service {

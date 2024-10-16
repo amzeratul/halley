@@ -169,6 +169,18 @@ namespace Halley {
 			*this = values;
 		}
 
+		template <typename K, typename V>
+		explicit ConfigNode(const HashMap<K, V>& values)
+		{
+			*this = values;
+		}
+
+		template <typename K>
+		explicit ConfigNode(const HashSet<K>& values)
+		{
+			*this = values;
+		}
+
 		template <typename T, typename U>
 		explicit ConfigNode(const std::pair<T, U>& values)
 		{

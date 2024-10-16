@@ -2,10 +2,14 @@
 
 using namespace Halley;
 
-Halley::ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resources& resources, const String& initialModule)
+ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resources& resources, const String& initialModule)
+	: initialModule(initialModule)
+	, resources(resources)
 {
 	scriptEnvironment = std::move(env);
-	scriptEnvironment->getWorld().setInterface(static_cast<ILuaInterface*>(this));
+	if (scriptEnvironment) {
+		scriptEnvironment->getWorld().setInterface(static_cast<ILuaInterface*>(this));
+	}
 
 	luaState = std::make_unique<LuaState>(resources);
 	if (!initialModule.isEmpty()) {
@@ -33,7 +37,30 @@ ConfigNode Halley::ScriptingService::evaluateExpression(const LuaExpression& exp
 	return expression.get(*luaState).call<ConfigNode>();
 }
 
+ConfigNode ScriptingService::getLuaGlobal(const String& key)
+{
+	auto stack = LuaStackOps(*luaState);
+	stack.getGlobal(key);
+	return stack.popConfigNode();
+}
+
+void ScriptingService::copyLuaGlobal(const String& key, ScriptingService& source)
+{
+	auto stack = LuaStackOps(*luaState);
+	stack.push(source.getLuaGlobal(key));
+	stack.makeGlobal(key);
+}
+
 LuaState& Halley::ScriptingService::getLuaState()
 {
 	return *luaState;
+}
+
+std::shared_ptr<ScriptingService> ScriptingService::clone(std::unique_ptr<ScriptEnvironment> environment) const
+{
+	auto result = std::make_shared<ScriptingService>(std::move(environment), resources, initialModule);
+	for (const auto& [key, value]: globals) {
+		result->setLuaGlobal(key, value);
+	}
+	return result;
 }
