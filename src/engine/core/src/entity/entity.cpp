@@ -227,13 +227,17 @@ void Entity::propagateEnabled(bool enabledStatus, bool parentStatus)
 			child->propagateEnabled(child->enabled, newStatus);
 		}
 		dirty = true;
+		++componentRevision;
 		markHierarchyDirty();
 	}
 }
 
-void Entity::setEnabled(bool enabled)
+void Entity::setEnabled(World& world, bool enabled)
 {
-	propagateEnabled(enabled, parentEnabled);
+	if (enabled != this->enabled) {
+		propagateEnabled(enabled, parentEnabled);
+		world.onEntityDirty();
+	}
 }
 
 FamilyMaskType Entity::getMask() const

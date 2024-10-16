@@ -15,9 +15,12 @@ namespace Halley {
 
 	private:
 		ScriptingService* scriptingService = nullptr;
+		bool initialized = false;
 
-    	HashMap<String, LuaExpression> expressionCache;
+		HashMap<String, LuaExpression> expressionCache;
 	    HashMap<String, bool> resultCache;
+
+		void initialize();
 	};
 }
 

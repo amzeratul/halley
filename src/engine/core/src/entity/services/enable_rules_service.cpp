@@ -11,12 +11,9 @@ void EnableRulesService::resetCache()
 bool EnableRulesService::evaluateEnableRules(const String& enableRules)
 {
 	// Ensure scripting service is loaded
+	initialize();
 	if (!scriptingService) {
-		scriptingService = getWorld().tryGetService<ScriptingService>();
-		if (!scriptingService) {
-			Logger::logError("Unable to evaluate enable rules since ScriptingService is not present in world.");
-			return true;
-		}
+		return true;
 	}
 
 	// See if it's cached
@@ -37,4 +34,12 @@ bool EnableRulesService::evaluateEnableRules(const String& enableRules)
 	resultCache[enableRules] = result;
 	//Logger::logDev(enableRules + " = " + toString(result));
 	return result;
+}
+
+void EnableRulesService::initialize()
+{
+	if (!initialized) {
+		scriptingService = getWorld().tryGetService<ScriptingService>();
+		initialized = true;
+	}
 }

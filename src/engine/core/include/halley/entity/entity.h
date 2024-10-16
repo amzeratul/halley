@@ -139,8 +139,6 @@ namespace Halley {
 			return enabled;
 		}
 
-		void setEnabled(bool enabled);
-		
 		const UUID& getPrefabUUID() const
 		{
 			return prefabUUID;
@@ -227,6 +225,7 @@ namespace Halley {
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
 		void keepOnlyComponentsWithIds(const Vector<int>& ids, World& world);
+		void setEnabled(World& world, bool enabled);
 
 		void onReady();
 
@@ -784,7 +783,7 @@ namespace Halley {
 		void setEnabled(bool enabled)
 		{
 			validate();
-			entity->setEnabled(enabled);
+			entity->setEnabled(*world, enabled);
 		}
 
 		bool operator==(const EntityRef& other) const
