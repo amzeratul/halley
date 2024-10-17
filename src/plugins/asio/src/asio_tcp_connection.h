@@ -14,14 +14,15 @@ namespace asio = boost::asio;
 namespace Halley
 {
 	class String;
+    class INetworkServiceStatsListener;
 	using TCPEndpoint = asio::ip::tcp::endpoint;
 	using TCPSocket = asio::ip::tcp::socket;
 
 	class AsioTCPConnection : public IConnection
 	{
 	public:
-		AsioTCPConnection(asio::io_service& service, String host, int port);
-		AsioTCPConnection(asio::io_service& service, TCPSocket socket);
+		AsioTCPConnection(asio::io_service& service, String host, int port, INetworkServiceStatsListener& statsListener);
+		AsioTCPConnection(asio::io_service& service, TCPSocket socket, INetworkServiceStatsListener& statsListener);
 		~AsioTCPConnection();
 
 		void update();
@@ -37,6 +38,7 @@ namespace Halley
 		asio::io_service& service;
 		std::unique_ptr<asio::ip::tcp::resolver> resolver;
 		TCPSocket socket;
+        INetworkServiceStatsListener& statsListener;
 		ConnectionStatus status;
 
 		std::list<Bytes> sendQueue;

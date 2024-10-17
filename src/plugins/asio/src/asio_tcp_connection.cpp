@@ -3,17 +3,20 @@
 #include "halley/text/halleystring.h"
 #include "halley/text/string_converter.h"
 #include "halley/net/connection/network_packet.h"
+#include "halley/net/connection/network_service.h"
 using namespace Halley;
 
-AsioTCPConnection::AsioTCPConnection(asio::io_service& service, TCPSocket socket)
+AsioTCPConnection::AsioTCPConnection(asio::io_service& service, TCPSocket socket, INetworkServiceStatsListener& statsListener)
 	: service(service)
 	, socket(std::move(socket))
+    , statsListener(statsListener)
 	, status(ConnectionStatus::Connected)
 {}
 
-AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int port)
+AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int port, INetworkServiceStatsListener& statsListener)
 	: service(service)
 	, socket(service)
+    , statsListener(statsListener)
 	, status(ConnectionStatus::Connecting)
 {
 	resolver = std::make_unique<asio::ip::tcp::resolver>(service);
@@ -99,6 +102,8 @@ bool AsioTCPConnection::isSupported(TransmissionType type) const
 
 void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
+    statsListener.onSendData(packet.getSize(), 1);
+
 	packet.addHeader(uint32_t(packet.getSize()));
 	auto bytes = packet.getBytes();
 	auto bs = Bytes(bytes.size_bytes());
@@ -130,6 +135,7 @@ bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 			uint32_t size2;
 			packet.extractHeader(size2);
 			receiveQueue.erase(receiveQueue.begin(), receiveQueue.begin() + packetSize);
+            statsListener.onReceiveData(packet.getSize(), 1);
 			return true;
 		}
 	}
