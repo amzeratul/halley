@@ -39,7 +39,7 @@ public:
 					e.network.ownerId = peerId;
 				}
 
-				if ((e.network.ownerId == peerId || mpSession.isHost()) && e.network.sendUpdates) {
+				if (e.network.sendUpdates && (e.network.ownerId == peerId || mpSession.isHost())) {
 					entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, e.network.ownerId.value() });
 				}
 

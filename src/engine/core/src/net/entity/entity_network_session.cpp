@@ -81,9 +81,15 @@ void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<
 	}
 
 	// Update entities
-	for (auto& peer: peers) {
-		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
-	}
+    Vector<Future<void>> tasks;
+
+    for (auto& peer : peers) {
+        tasks += Concurrent::execute([&]() {
+            peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
+        });
+    }
+
+    Concurrent::whenAll(tasks.begin(), tasks.end()).wait();
 }
 
 void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
