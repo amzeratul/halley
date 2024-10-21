@@ -17,6 +17,7 @@ children:
       gap: 8
       type: vertical
     widget:
+      childLayerAdjustment: 0
       class: scrollBarPane
       id: scrollBarPane
       size: [0, 240]
@@ -26,6 +27,7 @@ children:
           columnProportions: []
           type: vertical
         widget:
+          childLayerAdjustment: 1
           class: image
           colour: $ui_staticBoxSubdue
           id: header
