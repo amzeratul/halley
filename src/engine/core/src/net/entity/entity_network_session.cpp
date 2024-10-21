@@ -108,7 +108,7 @@ void EntityNetworkSession::requestLobbyInfo()
 		if (listener) {
 			listener->onReceiveLobbyInfo(getLobbyInfo());
 		}
-	} else {
+	} else if (!peers.empty()) {
 		peers.back().requestLobbyInfo();
 	}
 }
@@ -121,7 +121,7 @@ void EntityNetworkSession::setLobbyInfo(ConfigNode info)
 				sendUpdatedLobbyInfos({});
 			}
 		}
-	} else {
+	} else if (!peers.empty()) {
 		peers.back().setLobbyInfo(std::move(info));
 	}
 }
@@ -493,7 +493,7 @@ void EntityNetworkSession::startGame()
 
 void EntityNetworkSession::joinGame()
 {
-	if (!isHost()) {
+	if (!isHost() && !peers.empty()) {
 		peers.back().requestJoinWorld();
 	}
 }
