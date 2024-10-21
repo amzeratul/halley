@@ -256,7 +256,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	if (entityData->getParentUUID().isValid()) {
 		// The same check is done below, but the entity has already been created then.
 		if (!parent->getWorld().findEntity(entityData->getParentUUID())) {
-			Logger::logError("Parent " + toString(entityData->getParentUUID()) + "not found trying to instantiate network entity");
+			Logger::logError("Parent " + toString(entityData->getParentUUID()) + " not found trying to instantiate network entity");
 			return;
 		}
 	}

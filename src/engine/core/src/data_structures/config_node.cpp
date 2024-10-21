@@ -425,7 +425,7 @@ namespace {
 			Cmp<op> cmp;
 			switch (a.getType()) {
 				case ConfigNodeType::String:
-					return cmp.compare(a.asString(), b.asString());
+					return cmp.compare(a.asStringView(), b.asStringView());
 				case ConfigNodeType::Sequence:
 				case ConfigNodeType::DeltaSequence:
 					return cmp.compare(a.asSequence(), b.asSequence());
@@ -1829,7 +1829,6 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 	
 	const auto& fromSeq = from.asSequence();
 	const auto& toSeq = to.asSequence();
-	auto& resultSeq = result.asSequence();
 
 	if (fromSeq == toSeq) {
 		return ConfigNode(NoopType());
@@ -1837,6 +1836,8 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 	if (!hints) {
 		return ConfigNode(to);
 	}
+
+    auto& resultSeq = result.asSequence();
 
 	bool hasNewData = false;
 	size_t refCount = 0;

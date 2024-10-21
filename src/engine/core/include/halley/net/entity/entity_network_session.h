@@ -133,6 +133,8 @@ namespace Halley {
 		bool gameStarted = false;
 		bool lobbyReady = false;
 
+        std::mutex outboundInterpolatorLock;
+
 		bool canProcessMessage(const EntityNetworkMessage& msg) const;
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);

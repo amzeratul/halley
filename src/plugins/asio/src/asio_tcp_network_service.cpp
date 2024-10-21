@@ -64,7 +64,7 @@ void AsioTCPNetworkService::stopListening()
 std::shared_ptr<IConnection> AsioTCPNetworkService::connect(const String& address)
 {
 	const auto splitAddr = address.split(':');
-	auto conn = std::make_shared<AsioTCPConnection>(service, splitAddr.at(0), splitAddr.at(1).toInteger());
+	auto conn = std::make_shared<AsioTCPConnection>(service, splitAddr.at(0), splitAddr.at(1).toInteger(), *this);
 	activeConnections.push_back(conn);
 	return conn;
 }
@@ -85,7 +85,7 @@ void AsioTCPNetworkService::TCPAcceptor::doReject()
 
 std::shared_ptr<AsioTCPConnection> AsioTCPNetworkService::acceptConnection()
 {
-	auto conn = std::make_shared<AsioTCPConnection>(service, std::move(acceptingSocket.value()));
+	auto conn = std::make_shared<AsioTCPConnection>(service, std::move(acceptingSocket.value()), *this);
 	activeConnections.push_back(conn);
 	doStartListening();
 	return conn;
