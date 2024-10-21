@@ -1016,12 +1016,14 @@ namespace Halley {
 	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
 	bool operator==(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
+        if (a.size() != b.size()) return false;
 		return std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
 	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
 	bool operator!=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
+        if (a.size() != b.size()) return true;
 		return !std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
