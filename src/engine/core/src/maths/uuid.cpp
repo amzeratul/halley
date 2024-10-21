@@ -95,11 +95,14 @@ String UUID::toString() const
 {
 	using namespace Encode;
 	const auto span = getBytes();
-	return encodeBase16(span.subspan(0, 4)) + "-"
- 		 + encodeBase16(span.subspan(4, 2)) + "-"
-		 + encodeBase16(span.subspan(6, 2)) + "-"
-		 + encodeBase16(span.subspan(8, 2)) + "-"
-		 + encodeBase16(span.subspan(10, 6));
+    String result("........-....-....-....-............");
+    auto resultSpan = result.asSpan();
+    encodeBase16(span.subspan(0, 4), resultSpan.subspan(0, 8));
+    encodeBase16(span.subspan(4, 2), resultSpan.subspan(9, 4));
+    encodeBase16(span.subspan(6, 2), resultSpan.subspan(14, 4));
+    encodeBase16(span.subspan(8, 2), resultSpan.subspan(19, 4));
+    encodeBase16(span.subspan(10, 6), resultSpan.subspan(24, 12));
+    return result;
 }
 
 ConfigNode UUID::toConfigNode() const

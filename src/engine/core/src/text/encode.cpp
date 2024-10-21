@@ -26,6 +26,8 @@
 
 using namespace Halley;
 
+static const char* base16dict = "0123456789abcdef";
+
 static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static Bytes base64reverse;
 
@@ -56,6 +58,21 @@ String Encode::encodeBase16(gsl::span<const gsl::byte> in)
 	}
 
 	return result;
+}
+
+void Encode::encodeBase16(gsl::span<const gsl::byte> in, gsl::span<char> out)
+{
+    size_t size = in.size();
+    Expects(out.size() == 2 * size);
+
+    const gsl::byte* src = in.data();
+    char* dst = out.data();
+
+    for (auto i = 0; i < size; i++, src++, dst += 2) {
+        auto c = uint8_t(*src);
+        dst[0] = base16dict[(c & 0xf0) >> 4];
+        dst[1] = base16dict[c & 0x0f];
+    }
 }
 
 void Encode::decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes)
