@@ -1455,7 +1455,7 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes(
 String SceneEditorWindow::serializeEntities(gsl::span<const EntityData> nodes) const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "flags", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "flags", "components", "variant", "enableRules", "children" }};
 
 	ConfigNode result;
 	if (nodes.size() == 1) {
@@ -1549,7 +1549,7 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 		return false;
 	}
 	for (const auto& [k, v]: node.asMap()) {
-		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab" && k != "icon" && k != "flags") {
+		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab" && k != "icon" && k != "flags" && k != "enableRules" && k != "variant") {
 			return false;
 		}
 	}
