@@ -12,8 +12,9 @@ namespace Halley {
 
 		ScriptEnvironment& getEnvironment() const;
 
-		ConfigNode evaluateExpression(const String& expression) const;
-		ConfigNode evaluateExpression(const LuaExpression& expression) const;
+		ConfigNode evaluateExpression(const String& expression, bool useResultCache = false) const;
+		ConfigNode evaluateExpression(const LuaExpression& expression, bool useResultCache = false) const;
+		void clearResultCache();
 
 		template <typename T>
 		void setLuaGlobal(const String& key, const T& value)
@@ -37,6 +38,8 @@ namespace Halley {
 		HashMap<String, ConfigNode> globals;
 		String initialModule;
 		Resources& resources;
+
+	    mutable HashMap<String, ConfigNode> resultCache;
 	};
 }
 

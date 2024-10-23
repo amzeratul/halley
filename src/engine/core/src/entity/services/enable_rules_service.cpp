@@ -3,9 +3,11 @@
 
 using namespace Halley;
 
-void EnableRulesService::resetCache()
+void EnableRulesService::clearCache()
 {
-	resultCache.clear();
+	if (scriptingService) {
+		scriptingService->clearResultCache();
+	}
 }
 
 bool EnableRulesService::evaluateEnableRules(const String& enableRules)
@@ -16,24 +18,7 @@ bool EnableRulesService::evaluateEnableRules(const String& enableRules)
 		return true;
 	}
 
-	// See if it's cached
-	if (auto iter = resultCache.find(enableRules); iter != resultCache.end()) {
-		//Logger::logDev(enableRules + " = " + toString(iter->second) + " (cached)");
-		return iter->second;
-	}
-
-	// Find the expression in the cache, or create one if needed
-	auto iter = expressionCache.find(enableRules);
-	if (iter == expressionCache.end()) {
-		expressionCache[enableRules] = LuaExpression(enableRules);
-		iter = expressionCache.find(enableRules);
-	}
-
-	// Evaluate, cache, and return
-	bool result = scriptingService->evaluateExpression(iter->second).asBool(true);
-	resultCache[enableRules] = result;
-	//Logger::logDev(enableRules + " = " + toString(result));
-	return result;
+	return scriptingService->evaluateExpression(enableRules, true).asBool(true);
 }
 
 void EnableRulesService::initialize()

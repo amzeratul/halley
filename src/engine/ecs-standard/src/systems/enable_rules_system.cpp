@@ -15,7 +15,7 @@ public:
 
     void refreshEnabled() override
     {
-		getEnableRulesService().resetCache();
+		getEnableRulesService().clearCache();
 
 		auto& world = getWorld();
 		for (auto* e: world.getRawEntities()) {

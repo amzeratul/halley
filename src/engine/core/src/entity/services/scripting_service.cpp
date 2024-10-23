@@ -17,24 +17,52 @@ ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resou
 	}
 }
 
-ScriptEnvironment& Halley::ScriptingService::getEnvironment() const
+ScriptEnvironment& ScriptingService::getEnvironment() const
 {
 	return *scriptEnvironment;
 }
 
-ConfigNode Halley::ScriptingService::evaluateExpression(const String& expression) const
+ConfigNode ScriptingService::evaluateExpression(const String& expression, bool useResultCache) const
 {
+	if (useResultCache) {
+		if (auto iter = resultCache.find(expression); iter != resultCache.end()) {
+			return ConfigNode(iter->second);
+		}
+	}
+
 	auto stack = LuaStackOps(*luaState);
 	stack.eval("return " + expression);
-	return stack.popConfigNode();
+	auto result = stack.popConfigNode();
+
+	if (useResultCache) {
+		resultCache[expression] = ConfigNode(result);
+	}
+	return result;
 }
 
-ConfigNode Halley::ScriptingService::evaluateExpression(const LuaExpression& expression) const
+ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression, bool useResultCache) const
 {
 	if (expression.isEmpty()) {
 		return ConfigNode();
 	}
-	return expression.get(*luaState).call<ConfigNode>();
+
+	if (useResultCache) {
+		if (auto iter = resultCache.find(expression.getExpression()); iter != resultCache.end()) {
+			return ConfigNode(iter->second);
+		}
+	}
+
+	auto result = expression.get(*luaState).call<ConfigNode>();
+
+	if (useResultCache) {
+		resultCache[expression.getExpression()] = ConfigNode(result);
+	}
+	return result;
+}
+
+void ScriptingService::clearResultCache()
+{
+	resultCache.clear();
 }
 
 ConfigNode ScriptingService::getLuaGlobal(const String& key)
@@ -51,7 +79,7 @@ void ScriptingService::copyLuaGlobal(const String& key, ScriptingService& source
 	stack.makeGlobal(key);
 }
 
-LuaState& Halley::ScriptingService::getLuaState()
+LuaState& ScriptingService::getLuaState()
 {
 	return *luaState;
 }
@@ -62,5 +90,6 @@ std::shared_ptr<ScriptingService> ScriptingService::clone(std::unique_ptr<Script
 	for (const auto& [key, value]: globals) {
 		result->setLuaGlobal(key, value);
 	}
+	result->resultCache = resultCache;
 	return result;
 }
