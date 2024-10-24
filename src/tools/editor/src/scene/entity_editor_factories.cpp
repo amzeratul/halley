@@ -1357,6 +1357,8 @@ public:
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Altitude"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("altitude", {"0", "0"}), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Randomise Animation Start"));
+		initialContainer->add(context.makeField("bool", pars.withSubKey("randomiseAnimationTime", "false"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Lifetime"));
 		dynamicsContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("ttl", { "1", "1" }), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Colour"));

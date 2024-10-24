@@ -88,6 +88,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	startHeight = node["startHeight"].asFloat(0);
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
+	randomiseAnimationTime = node["randomiseAnimationTime"].asBool(false);
 	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
 	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
 
@@ -120,6 +121,7 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["startHeight"] = startHeight;
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
+	result["randomiseAnimationTime"] = randomiseAnimationTime;
 	result["onSpawn"] = ConfigNodeSerializer<EntityId>().serialize(onSpawn, context);
 	result["onDeath"] = ConfigNodeSerializer<EntityId>().serialize(onDeath, context);
 
@@ -346,6 +348,11 @@ void Particles::setAnimation(std::shared_ptr<const Animation> animation)
 	baseAnimation = std::move(animation);
 }
 
+bool Particles::isRandomisingAnimationTime() const
+{
+	return randomiseAnimationTime;
+}
+
 bool Particles::isAnimated() const
 {
 	return !!baseAnimation;
@@ -453,6 +460,9 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 	if (isAnimated()) {
 		auto& anim = animationPlayers[index];
 		anim.update(0, sprite);
+		if (randomiseAnimationTime) {
+			anim.update(Random::getGlobal().getFloat({0.0f, 42.0f}), sprite);
+		}
 	} else if (!baseSprites.empty()) {
 		// Optimization: if there's only one baseSprite, and this sprite has a material, then we don't need to update it at all here
 		if (!sprite.hasMaterial() || baseSprites.size() >= 2) {

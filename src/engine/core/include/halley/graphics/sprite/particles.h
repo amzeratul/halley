@@ -100,6 +100,7 @@ namespace Halley {
 		void setSprites(Vector<Sprite> sprites);
 		void setAnimation(std::shared_ptr<const Animation> animation);
 
+		bool isRandomisingAnimationTime() const;
 		bool isAnimated() const;
 		bool isAlive() const;
 		
@@ -153,6 +154,7 @@ namespace Halley {
 		bool destroyWhenDone = false;
 		bool positionSet = false;
 		bool relativePosition = false;
+		bool randomiseAnimationTime = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
