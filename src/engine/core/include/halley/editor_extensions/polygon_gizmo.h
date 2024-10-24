@@ -59,7 +59,9 @@ namespace Halley {
 		Vector<SceneEditorGizmoHandle> handles;
 
 		ConfigNode& getField(ConfigNode& node, const String& fieldName);
-		
+		PolygonGizmoMode getMode() const;
+		std::optional<Vertex> getPreview() const;
+
 	private:
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;

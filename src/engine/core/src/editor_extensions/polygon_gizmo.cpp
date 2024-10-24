@@ -260,6 +260,16 @@ ConfigNode& PolygonGizmo::getField(ConfigNode& node, const String& fieldName)
 	}
 }
 
+PolygonGizmoMode PolygonGizmo::getMode() const
+{
+	return mode;
+}
+
+std::optional<Vertex> PolygonGizmo::getPreview() const
+{
+	return preview;
+}
+
 void PolygonGizmo::writePoints(const VertexList& ps)
 {
 	auto* data = getComponentData(componentName);
