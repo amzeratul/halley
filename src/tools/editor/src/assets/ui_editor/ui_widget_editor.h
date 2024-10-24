@@ -38,6 +38,7 @@ namespace Halley {
         void populateFillBox(UIWidget& root, ConfigNode& widgetNode);
         void populateSpacerBox(UIWidget& root, ConfigNode& widgetNode, ConfigNode& rootNode);
         void populateSizerBox(UIWidget& root, ConfigNode& widgetNode);
+        void populateBehavioursBox(UIWidget& root, ConfigNode& widgetNode);
 
         void populateBox(UIWidget& root, ConfigNode& node, gsl::span<const UIFactoryWidgetProperties::Entry> entries);
     };

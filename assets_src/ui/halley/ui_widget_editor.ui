@@ -47,6 +47,7 @@ children:
             children: []
       - uuid: 2c749d0a-d0b2-45e2-9441-3bc9a163a295
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: image
@@ -103,6 +104,7 @@ children:
             children: []
       - uuid: ab319286-7a39-4f98-8751-af9db9a101cf
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: image
@@ -125,6 +127,7 @@ children:
             children: []
       - uuid: 74276cde-c80e-4a59-bbdb-5616d94115b6
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: image
@@ -182,3 +185,33 @@ children:
           class: button
           id: addSizer
           text: Add Sizer
+      - uuid: 90890021-b6b8-44bd-89c9-f737f04f638e
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_staticBoxSubdue
+          id: behavioursBox
+          image: $ui_title_capsule
+        children:
+          - uuid: 5d42e67a-a678-4a14-8812-714e52db77d5
+            widget:
+              class: label
+              text: Behaviours
+            fill: centre
+          - uuid: b2ee2bdb-f3c9-431f-a431-9557ecd249f6
+            border: [4, 4, 4, 0]
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: widget
+              id: behavioursContents
+            children: []
+          - uuid: b320faf3-4722-4faa-a872-ffa0adb9aa94
+            border: [5, 0, 5, 5]
+            widget:
+              class: button
+              id: addBehaviour
+              text: Add Behaviour

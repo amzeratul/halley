@@ -41,6 +41,13 @@ void UIWidgetEditor::onMakeUI()
 		curNode->removeKey("sizer");
 		onEntityUpdated(false);
 	});
+
+	setHandle(UIEventType::ButtonClicked, "addBehaviour", [=] (const UIEvent& event)
+	{
+		// TODO
+		//(*curNode)["behaviours"].ensureType(ConfigNodeType::Sequence);
+		//onEntityUpdated(false);
+	});
 }
 
 void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node, const ConfigNode* parent)
@@ -90,6 +97,7 @@ void UIWidgetEditor::refresh()
 	auto spacerBox = getWidget("spacerBox");
 	auto addSizerButton = getWidget("addSizer");
 	auto removeSizerButton = getWidget("removeSizer");
+	auto behavioursBox = getWidget("behavioursBox");
 
 	parentWidgetBox->setActive(false);
 	widgetBox->setActive(false);
@@ -98,6 +106,7 @@ void UIWidgetEditor::refresh()
 	sizerBox->setActive(false);
 	spacerBox->setActive(false);
 	addSizerButton->setActive(false);
+	behavioursBox->setActive(false);
 	
 	if (curNode && entityFieldFactory) {
 		bool hasSizer = curNode->hasKey("sizer") || curNode->hasKey("children");
@@ -140,6 +149,9 @@ void UIWidgetEditor::refresh()
 			fillBox->setActive(true);
 			populateFillBox(*fillBox->getWidget("fillContents"), *curNode);
 		}
+
+		behavioursBox->setActive(true);
+		populateBehavioursBox(*behavioursBox->getWidget("behavioursContents"), *curNode);
 	}
 
 	if (curNode && curParent && entityFieldFactory) {
@@ -225,6 +237,11 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 		Entry{ "Column Proportions", "columnProportions", "Halley::Vector<int>", Vector<String>{}}
 	};
 	populateBox(root, node, entries);
+}
+
+void UIWidgetEditor::populateBehavioursBox(UIWidget& root, ConfigNode& node)
+{
+	// TODO
 }
 
 void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<const UIFactoryWidgetProperties::Entry> entries)
