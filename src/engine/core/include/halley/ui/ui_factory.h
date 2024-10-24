@@ -24,6 +24,7 @@ namespace Halley
 	class UIStyle;
 	class IClipboard;
 	class InputKeyboard;
+	class UIBehaviour;
 
 	class UIFactoryWidgetProperties {
 	public:
@@ -58,6 +59,7 @@ namespace Halley
 	{
 	public:
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
+		using BehaviourFactory = std::function<std::shared_ptr<UIBehaviour>(const ConfigNode&)>;
 		using ConstructionCallback = std::function<void(const std::shared_ptr<IUIElement>&, const String& uuid)>;
 
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet = {}, std::shared_ptr<const UIColourScheme> colourScheme = {});
@@ -74,6 +76,9 @@ namespace Halley
 		bool hasFactoryFor(const String& key) const;
 		std::shared_ptr<UIWidget> makeWidgetFromFactory(const String& key, const ConfigNode& config);
 		void setFallbackFactory(UIFactory& factory);
+
+		void addBehaviourFactory(const String& key, BehaviourFactory factory, UIFactoryWidgetProperties properties = {});
+		std::shared_ptr<UIBehaviour> makeBehaviourFromFactory(const String& key, const ConfigNode& config);
 
 		void pushConditions(Vector<String> conditions);
 		void popConditions();

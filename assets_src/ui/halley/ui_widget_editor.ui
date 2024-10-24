@@ -19,7 +19,7 @@ children:
     widget:
       class: scrollBarPane
       id: scrollBarPane
-      size: [0, 300]
+      size: [0, 360]
       style: scrollbarHalley
     children:
       - uuid: ea0f0402-63fa-4986-98b4-d5f1d8d8a24a
@@ -82,6 +82,7 @@ children:
             children: []
       - uuid: 63e3d0b7-20a0-4085-aa5f-08ae8176ec2e
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: image
@@ -180,7 +181,7 @@ children:
               id: removeSizer
               text: Remove Sizer
       - uuid: c266adb6-03b5-4805-b05d-80d46a4e2e44
-        border: [0, 0, 0, 0]
+        border: [5, 0, 5, 0]
         widget:
           class: button
           id: addSizer
@@ -209,9 +210,23 @@ children:
               class: widget
               id: behavioursContents
             children: []
-          - uuid: b320faf3-4722-4faa-a872-ffa0adb9aa94
+          - uuid: 8e92775f-275a-4beb-b1b9-c994bb073928
             border: [5, 0, 5, 5]
-            widget:
-              class: button
-              id: addBehaviour
-              text: Add Behaviour
+            sizer:
+              columnProportions: []
+              gap: 4
+            children:
+              - uuid: b320faf3-4722-4faa-a872-ffa0adb9aa94
+                proportion: 1
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  id: addBehaviour
+                  text: Add Behaviour
+              - uuid: 315b7a9d-a69b-474d-bd9f-44a981186ffb
+                proportion: 1
+                border: [0, 0, 0, 0]
+                widget:
+                  class: button
+                  id: pasteBehaviour
+                  text: Paste Behaviour

@@ -141,6 +141,17 @@ void UIFactory::setFallbackFactory(UIFactory& factory)
 	fallbackFactory = &factory;
 }
 
+void UIFactory::addBehaviourFactory(const String& key, BehaviourFactory factory, UIFactoryWidgetProperties properties)
+{
+	// TODO
+}
+
+std::shared_ptr<UIBehaviour> UIFactory::makeBehaviourFromFactory(const String& key, const ConfigNode& config)
+{
+	// TODO
+	return {};
+}
+
 void UIFactory::pushConditions(Vector<String> conds)
 {
 	conditionStack.push_back(conds.size());
