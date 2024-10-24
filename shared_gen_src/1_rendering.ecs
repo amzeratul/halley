@@ -89,6 +89,10 @@ component:
   - offset:
       type: 'Halley::Vector2f'
       displayName: Offset
+  - integerCoords:
+      type: bool
+      defaultValue: false
+      displayName: Snap to Integer Coords
 
 ---
 
