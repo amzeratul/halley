@@ -80,7 +80,8 @@ namespace Halley {
 		void setId(const String& id);
 		const String& getId() const final override;
 
-		Vector2f getPosition() const;
+		Vector2f getPosition(bool ignoreOffset = false) const;
+		void setPositionOffset(Vector2f offset);
 		virtual Vector2f getLayoutOriginPosition() const;
 		virtual Vector2f getLayoutSize(Vector2f size) const;
 		Vector2f getSize() const;
@@ -289,6 +290,7 @@ namespace Halley {
 		Vector2f position;
 		Vector2f size;
 		Vector2f minSize;
+		Vector2f positionOffset;
 		std::optional<Rect4f> mouseClip;
 
 		Vector4f innerBorder;

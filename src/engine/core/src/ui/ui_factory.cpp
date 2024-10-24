@@ -473,6 +473,9 @@ std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 		if (widgetNode.hasKey("tooltipKey")) {
 			widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
 		}
+		if (widgetNode.hasKey("positionOffset")) {
+			widget->setPositionOffset(widgetNode["positionOffset"].asVector2f({}));
+		}
 
 		element = widget;
 	} else {
@@ -499,6 +502,7 @@ UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
 	result.entries.emplace_back("Child Layer Adjustment", "childLayerAdjustment", "int", "0");
 	result.entries.emplace_back("Tooltip", "tooltip", "Halley::String");
 	result.entries.emplace_back("Tooltip (Key)", "tooltipKey", "Halley::String");
+	result.entries.emplace_back("Position Offset", "positionOffset", "Halley::Vector2f", "");
 	return result;
 }
 

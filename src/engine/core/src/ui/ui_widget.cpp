@@ -375,9 +375,17 @@ const String& UIWidget::getId() const
 	return id;
 }
 
-Vector2f UIWidget::getPosition() const
+Vector2f UIWidget::getPosition(bool ignoreOffset) const
 {
-	return position;
+	return ignoreOffset ? position : position + positionOffset;
+}
+
+void UIWidget::setPositionOffset(Vector2f offset)
+{
+	if (positionOffset != offset) {
+		positionOffset = offset;
+		positionUpdated = true;
+	}
 }
 
 Vector2f UIWidget::getSize() const
