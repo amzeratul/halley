@@ -19,22 +19,24 @@ namespace Halley {
 
         struct Page
         {
+            explicit Page() {};
+
             union
             {
                 UUID uuid;
                 uint16_t componentId = 0;
             };
 
-            uint64_t hash; // XXH64 over data in scratchpad
+            uint64_t hash = 0; // XXH64 over data in scratchpad
 
-            uint16_t from; // points to start of data in scratchpad
-            uint16_t to; // points to end of data in scratchpad
+            uint16_t from = 0; // points to start of data in scratchpad
+            uint16_t to = 0; // points to end of data in scratchpad
 
-            Type type;
+            Type type = Type::Unknown;
 
             // Volatile, intermediate, per-frame data; not serialized!
 
-            mutable bool modified;
+            mutable bool modified = false;
         };
 
         explicit EntityNetworkChanges() = default;
@@ -66,9 +68,9 @@ namespace Halley {
         [[nodiscard]] int findEntityByUUID(Page& out, const UUID& uuid) const;
 
     private:
-        Page curPage = {};
+        Page curPage;
 
-        std::array<Page, 192> pages = {};
+        std::array<Page, 192> pages;
         int pp = 0;
 
         uint64_t contentHash = 0;

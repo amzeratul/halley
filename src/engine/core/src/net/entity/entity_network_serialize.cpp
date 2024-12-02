@@ -40,11 +40,8 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
         pages[pp] = curPage;
         pp++;
 
-        // update "global" hashes
+        // update "global" hash
         contentHasher.feed(curPage.hash);
-    } else {
-        // need to rewind serialize buffer
-        serializer.rewind(curPage.from);
     }
 }
 
@@ -165,6 +162,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
         auto& page = pages[p];
 
         bool skip = false;
+        size_t size = page.to - page.from;
 
         if (page.type == Type::Entity) {
             if (!page.modified) {
@@ -182,20 +180,28 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
                     p++;
                 }
             }
+        } else if (page.type == Type::Component) {
+            if (!page.modified || size == 0) {
+                skip = true;
+                p++;
+            }
         }
 
         if (!skip) {
-            if (page.type == Type::Entity ||
-                page.type == Type::Component) {
+            Expects(page.type == Type::Entity ||
+                page.type == Type::Component);
 
-                size_t size = page.to - page.from;
+            serializer << (uint8_t) page.type;
+            serializer << (uint16_t) size;
 
-                serializer << (uint8_t) page.type;
-                serializer << (uint16_t) size;
-
-                auto span = buffer.const_byte_span().subspan(page.from, size);
-                serializer << span;
+            if (page.type == Type::Component) {
+                // "Inject" component ID
+                serializer << (uint16_t) page.componentId;
             }
+
+            Expects(size > 0);
+            auto span = buffer.const_byte_span().subspan(page.from, size);
+            serializer << span;
 
             p++;
         }
@@ -300,37 +306,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
         const auto& reflector = reflection.getComponentReflector(componentId);
 
         journal.beginComponent(serializer, (uint16_t) componentId);
-
-        // Serialize once, to know the size we need. Then rewind and serialize
-        // again. TODO: this is pretty terrible
-
-        size_t marker = serializer.getPosition();
         reflector.serializeNetwork(serializationContext, serializer, *component);
-
-        size_t componentSize = serializer.getPosition() - marker;
-
-        if (componentSize > 0) {
-            serializer.rewind(marker);
-        }
-
-        // NOTE: serializing the component ID here, not as part of the page
-        // "header", ensures that the page isn't thrown away at the end. We
-        // need to keep track of all components to figure out which have
-        // been added/removed/modified.
-
-        Expects(componentId < 65536);
-        Expects(componentSize < 65536);
-
-        serializer << (uint16_t) componentId;
-        serializer << (uint16_t) componentSize;
-
-        // NOTE: components with no networking data end up empty, so we only
-        // store the component ID and size (4 bytes) for those.
-
-        if (componentSize > 0) {
-            reflector.serializeNetwork(serializationContext, serializer, *component);
-        }
-
         journal.endComponent(serializer, scratchpad);
     }
 
@@ -435,7 +411,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         uint16_t componentId, componentSize;
 
         deserializer >> componentId;
-        deserializer >> componentSize;
+        componentSize = size;
 
         const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
 
