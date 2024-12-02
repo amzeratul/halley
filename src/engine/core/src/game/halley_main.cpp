@@ -11,6 +11,10 @@
 #include <shellapi.h>
 #endif
 
+#if defined(DEV_BUILD) && defined(__NX_TOOLCHAIN_MAJOR__)
+#include <nn/os.h>
+#endif
+
 using namespace Halley;
 
 class SystemMainLoopHandler : public ISystemMainLoopHandler {
@@ -106,6 +110,10 @@ Vector<std::string> HalleyMain::getWin32Args()
 
 Vector<std::string> HalleyMain::getArgs(int argc, char* argv[])
 {
+#if defined(DEV_BUILD) && defined(__NX_TOOLCHAIN_MAJOR__)
+	argc = nn::os::GetHostArgc();
+	argv = nn::os::GetHostArgv();
+#endif
 	Vector<std::string> args;
 	args.reserve(argc);
 	for (int i = 0; i < argc; i++) {
