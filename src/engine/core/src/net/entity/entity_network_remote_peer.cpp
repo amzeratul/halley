@@ -206,7 +206,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
         fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions());
 
         bool modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
-        bool modifiedInStructure = EntityNetworkSerialize::hasEntityChanges();
+        bool modifiedInStructure = fastSerialize.hasEntityChanges();
 
         if (modified && !modifiedInStructure) {
             remote.timeSinceSend = 0;

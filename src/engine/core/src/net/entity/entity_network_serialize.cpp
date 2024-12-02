@@ -11,7 +11,6 @@ thread_local Bytes EntityNetworkSerialize::scratchpad;
 thread_local HashSet<UUID> EntityNetworkSerialize::childrenAdded;
 thread_local HashSet<UUID> EntityNetworkSerialize::childrenChanged;
 thread_local HashSet<UUID> EntityNetworkSerialize::childrenRemoved;
-thread_local HashMap<UUID, HashSet<uint16_t>> EntityNetworkSerialize::componentsRemoved;
 
 void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 {
@@ -167,26 +166,23 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
 
         bool skip = false;
 
-#if 0
         if (page.type == Type::Entity) {
             if (!page.modified) {
                 skip = true;
+                p++;
 
                 // Seek forward until end of this entity, including its components.
 
-                p++;
                 while (p < pp) {
                     auto& next = pages[p];
-                    p++;
-                    if (next.type == Type::ChildEntityEnd) {
-                        if (next.from == page.from && next.to == page.to) {
-                            break;
-                        }
+                    if (next.type != Type::Component) {
+                        break;
                     }
+                    Ensures(!next.modified);
+                    p++;
                 }
             }
         }
-#endif
 
         if (!skip) {
             if (page.type == Type::Entity ||
@@ -228,7 +224,7 @@ void EntityNetworkChanges::enumerateEntities(const std::function<void (const Pag
     }
 }
 
-bool EntityNetworkChanges::findNextComponent(uint16_t& componentId, int& pageIdx) const
+bool EntityNetworkChanges::findNextComponent(Page& out, int& pageIdx) const
 {
     while (pageIdx < pp) {
         auto& page = pages[pageIdx];
@@ -240,7 +236,7 @@ bool EntityNetworkChanges::findNextComponent(uint16_t& componentId, int& pageIdx
         pageIdx++;
 
         if (page.type == Type::Component) {
-            componentId = page.componentId;
+            out = page;
             return true;
         }
     }
@@ -515,7 +511,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
             // Enumerate again, but only care about entities marked as
             // "changed". This includes to root entity though.
 
-            componentsRemoved.clear();
+            hasComponentsAddedOrRemoved = false;
 
             journal.enumerateEntityPages(
                     childrenChanged,
@@ -524,31 +520,64 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         EntityNetworkChanges::Page prevEntityPage {};
                         int prevPageIdx = previousJournal.findEntityByUUID(prevEntityPage, page.uuid);
 
-                        // Fast check by hash - no need to scan further if nothing has
-                        // changed.
-
+                        // Compare hashes for the entity page.
                         page.modified = page.hash != prevEntityPage.hash;
 
-                        if (!page.modified) {
-                            return;
+                        // Enumerate components for this entity.
+                        {
+                            EntityNetworkChanges::Page componentPage;
+                            int componentPageIdx = pageIdx;
+
+                            while (journal.findNextComponent(componentPage, componentPageIdx)) {
+                                // Search for the same component, by ID, in the previous journal.
+                                EntityNetworkChanges::Page prevComponentPage;
+                                int prevComponentPageIdx = prevPageIdx + 1;
+                                bool foundMatchingComponent = false;
+
+                                while (previousJournal.findNextComponent(prevComponentPage, prevComponentPageIdx)) {
+                                    if (componentPage.componentId == prevComponentPage.componentId) {
+                                        foundMatchingComponent = true;
+                                        break;
+                                    }
+                                }
+
+                                if (foundMatchingComponent) {
+                                    // Compare hashes of current and previous components.
+                                    componentPage.modified = componentPage.hash != prevComponentPage.hash;
+
+                                    // If any component has been modified, mark the entity page as modified too.
+                                    page.modified |= componentPage.modified;
+                                } else {
+                                    // not found in previous journal
+                                    hasComponentsAddedOrRemoved = true;
+                                }
+                            }
                         }
 
-                        // Enumerate components in previous journal, those are
-                        // potential candidates for being "removed".
+                        // If no components have been added, compare the components again,
+                        // but "reversed" - check for components that have been removed.
 
-                        uint16_t componentId;
+                        if (!hasComponentsAddedOrRemoved) {
+                            EntityNetworkChanges::Page prevComponentPage;
+                            int prevComponentPageIdx = prevPageIdx + 1;
 
-                        int componentPageIdx = prevPageIdx + 1;
-                        while (previousJournal.findNextComponent(componentId, componentPageIdx)) {
-                            componentsRemoved[page.uuid].emplace(componentId);
-                        }
+                            while (previousJournal.findNextComponent(prevComponentPage, prevComponentPageIdx)) {
+                                EntityNetworkChanges::Page componentPage;
+                                int componentPageIdx = pageIdx;
+                                bool foundMatchingComponent = false;
 
-                        // Enumerate components in current journal, remove those again
-                        // from set of candidates to be "removed".
+                                while (journal.findNextComponent(componentPage, componentPageIdx)) {
+                                    if (componentPage.componentId == prevComponentPage.componentId) {
+                                        foundMatchingComponent = true;
+                                        break;
+                                    }
+                                }
 
-                        componentPageIdx = pageIdx;
-                        while (journal.findNextComponent(componentId, componentPageIdx)) {
-                            componentsRemoved[page.uuid].erase(componentId);
+                                if (!foundMatchingComponent) {
+                                    hasComponentsAddedOrRemoved = true;
+                                    break;
+                                }
+                            }
                         }
                     }
             );
@@ -570,20 +599,9 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
     return modified;
 }
 
-bool EntityNetworkSerialize::hasEntityChanges()
+bool EntityNetworkSerialize::hasEntityChanges() const
 {
-    bool modified = !childrenAdded.empty() || !childrenRemoved.empty();
-
-    if (!modified) {
-        for (const auto& pair: componentsRemoved) {
-            if (!pair.second.empty()) {
-                modified = true;
-                break;
-            }
-        }
-    }
-
-    return modified;
+    return hasComponentsAddedOrRemoved || !childrenAdded.empty() || !childrenRemoved.empty();
 }
 
 void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options) const

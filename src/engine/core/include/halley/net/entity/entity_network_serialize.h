@@ -61,7 +61,7 @@ namespace Halley {
 
         void enumerateEntities(const std::function<void (const Page& page, int pageIdx)>& onEntity) const;
 
-        [[nodiscard]] bool findNextComponent(uint16_t& componentId, int& pageIdx) const;
+        [[nodiscard]] bool findNextComponent(Page& out, int& pageIdx) const;
 
         [[nodiscard]] int findEntityByUUID(Page& out, const UUID& uuid) const;
 
@@ -87,7 +87,7 @@ namespace Halley {
         void deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options, const std::shared_ptr<EntityFactoryContext>& context);
 
         bool processEntityUpdateChanges(Bytes& previous);
-        static bool hasEntityChanges();
+        bool hasEntityChanges() const;
 
         void getBytes(Bytes& data, const SerializerOptions& options) const;
 
@@ -100,13 +100,13 @@ namespace Halley {
         Resources& resources;
         EntityNetworkChanges journal;
 
+        bool hasComponentsAddedOrRemoved;
+
         static thread_local Bytes scratchpad;
 
         static thread_local HashSet<UUID> childrenAdded;
         static thread_local HashSet<UUID> childrenChanged;
         static thread_local HashSet<UUID> childrenRemoved;
-
-        static thread_local HashMap<UUID, HashSet<uint16_t>> componentsRemoved;
     };
 
 }
