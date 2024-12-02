@@ -73,7 +73,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 	result.setFlag(EntityData::Flag::Disabled, !entity.isEnabled());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
-	const auto prefabId = entity.getPrefabAssetId().value_or("");
+	const auto& prefabId = entity.getPrefabAssetId().value_or("");
 	if (prefabId != lastPrefab) {
 		result.setPrefab(prefabId);
 	}
@@ -372,6 +372,19 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 	for (auto& c : context->getToDeleteEntities()) {
 		destroyEntity(c);
 	}
+}
+
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeUpdateEntityContext(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators)
+{
+    Expects(entity.isValid());
+    return makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators);
+}
+
+void EntityFactory::finalizeUpdateEntityContext(const std::shared_ptr<EntityFactoryContext>& context)
+{
+    for (auto& c : context->getToDeleteEntities()) {
+        destroyEntity(c);
+    }
 }
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)

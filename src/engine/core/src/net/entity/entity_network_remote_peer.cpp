@@ -1,13 +1,16 @@
 #include "halley/net/entity/entity_network_remote_peer.h"
+#include "halley/net/entity/entity_network_serialize.h"
 #include "halley/net/entity/entity_network_session.h"
-#include "halley/entity/entity_factory.h"
-#include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "halley/entity/data_interpolator.h"
 #include "components/network_component.h"
 
+#define USE_FAST_NETWORK_COMPONENT_UPDATES 1
+
 using namespace Halley;
+
+thread_local Bytes EntityNetworkRemotePeer::fastUpdateOutboundData;
 
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId)
 	: parent(&parent)
@@ -171,9 +174,10 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	OutboundEntity result;
 
 	result.networkId = assignId();
-	result.data = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
 
-	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
+    result.data = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
+    auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
+
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
 	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
 	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
@@ -190,23 +194,67 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		return;
 	}
 
-	// Encode delta using interpolators
-	auto newData = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
-	auto retriever = DataInterpolatorSetRetriever(entity, true);
-	auto options = parent->getEntityDeltaOptions();
-	options.interpolatorSet = &retriever;
-	auto deltaData = EntityDataDelta(remote.data, newData, options);
-	
-	if (deltaData.hasChange()) {
-		remote.data = std::move(newData);
-		remote.timeSinceSend = 0;
+#if USE_FAST_NETWORK_COMPONENT_UPDATES
+    // Fast updates are possible only if a previous journal is available to compare to.
+    bool canFastUpdate = !remote.fastUpdateJournal.empty();
 
-		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
-		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
-		
-		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
-	}
+    if (canFastUpdate) {
+        Expects(parent->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
+        Expects(!parent->getEntitySerializationOptions().serializeAsStub);
+
+        auto fastSerialize = EntityNetworkSerialize(parent->getResources());
+        fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions());
+
+        bool modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+        bool modifiedInStructure = EntityNetworkSerialize::hasEntityChanges();
+
+        if (modified && !modifiedInStructure) {
+            remote.timeSinceSend = 0;
+
+            fastUpdateOutboundData.reserve(4096);
+            fastSerialize.getBytes(fastUpdateOutboundData, parent->getByteSerializationOptions());
+            //Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+
+            Bytes bytes(fastUpdateOutboundData);
+            send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true));
+        }
+
+        if (modifiedInStructure) {
+            canFastUpdate = false;
+            // Wipe the existing journal
+            remote.fastUpdateJournal.clear();
+        }
+    }
+#else
+    constexpr bool canFastUpdate = false;
+#endif
+
+    if (!canFastUpdate) {
+        // Encode delta using interpolators
+        auto newData = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
+        auto retriever = DataInterpolatorSetRetriever(entity, true);
+        auto options = parent->getEntityDeltaOptions();
+        options.interpolatorSet = &retriever;
+        auto deltaData = EntityDataDelta(remote.data, newData, options);
+
+        if (deltaData.hasChange()) {
+            remote.data = std::move(newData);
+            remote.timeSinceSend = 0;
+
+            auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
+            //Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
+            //Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+
+            send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false));
+        }
+
+#if USE_FAST_NETWORK_COMPONENT_UPDATES
+        // Binary serialization to (re-)build the update journal.
+        auto serialize = EntityNetworkSerialize(parent->getResources());
+        serialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions());
+        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+#endif
+    }
 }
 
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
@@ -303,21 +351,41 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 		Logger::logWarning("Caused by trying to update entity:\n" + delta.toYAML());
 		return;
 	}
-	
-	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
-	auto retriever = DataInterpolatorSetRetriever(entity, false);
-	//Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
-	//Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
+    if (msg.fastSerialize) {
+        //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
+        auto delta = EntityDataDelta();
+        auto retriever = DataInterpolatorSetRetriever(entity, false);
+        auto context = parent->getFactory().makeUpdateEntityContext(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
 
-	try {
-		parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
-		stripNestedNetworkComponents(entity);
-	} catch (const std::exception& e) {
-		Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
-		Logger::logException(e);
-	}
-	remote.data.applyDelta(delta);
+        auto serialize = EntityNetworkSerialize(parent->getResources());
+
+        try {
+            serialize.deserializeEntityUpdate(entity, msg.bytes, parent->getByteSerializationOptions(), context);
+            parent->getFactory().finalizeUpdateEntityContext(context);
+            stripNestedNetworkComponents(entity);
+        } catch (const std::exception& e) {
+            Logger::logError("Exception while processing update entity from network");
+            Logger::logException(e);
+        }
+    } else {
+        const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
+
+        auto retriever = DataInterpolatorSetRetriever(entity, false);
+        //Logger::logDev("Receive Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
+        //Logger::logDev("Updating entity " + entity.getName() + ":\n" + delta.toYAML());
+
+        try {
+            parent->getFactory().updateEntity(entity, delta,
+                                              EntitySerialization::makeMask(EntitySerialization::Type::Network),
+                                              nullptr, &retriever);
+            stripNestedNetworkComponents(entity);
+        } catch (const std::exception &e) {
+            Logger::logError("Exception while processing update entity from network:\n" + delta.toYAML());
+            Logger::logException(e);
+        }
+        remote.data.applyDelta(delta);
+    }
 }
 
 void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDestroy& msg)

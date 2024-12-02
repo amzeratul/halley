@@ -46,6 +46,7 @@ namespace Halley {
             Time timeSinceSend = 0;
             EntityNetworkId networkId = 0;
             EntityData data;
+            Bytes fastUpdateJournal;
         };
 
         class InboundEntity {
@@ -67,6 +68,8 @@ namespace Halley {
         uint16_t nextId = 0;
 
         Time timeSinceSend = 0;
+
+        static thread_local Bytes fastUpdateOutboundData;
 
         uint16_t assignId();
         void sendCreateEntity(EntityRef entity);

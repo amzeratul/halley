@@ -1,0 +1,623 @@
+#include "halley/net/entity/entity_network_serialize.h"
+
+#include "halley/bytes/byte_serializer.h"
+#include "halley/entity/world.h"
+#include "halley/utils/algorithm.h"
+
+using namespace Halley;
+
+thread_local Bytes EntityNetworkSerialize::scratchpad;
+
+thread_local HashSet<UUID> EntityNetworkSerialize::childrenAdded;
+thread_local HashSet<UUID> EntityNetworkSerialize::childrenChanged;
+thread_local HashSet<UUID> EntityNetworkSerialize::childrenRemoved;
+thread_local HashMap<UUID, HashSet<uint16_t>> EntityNetworkSerialize::componentsRemoved;
+
+void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
+{
+    curPage.hash = 0;
+    curPage.from = (uint16_t) serializer.getPosition();
+    curPage.to = curPage.from;
+
+    curPage.type = type;
+
+    curPage.modified = true;
+}
+
+void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type type)
+{
+    curPage.to = (uint16_t) serializer.getPosition();
+
+    Ensures(curPage.type == type);
+    Ensures(curPage.to >= curPage.from);
+
+    size_t size = curPage.to - curPage.from;
+
+    if (size > 0) {
+        // hash content of the current page
+        curPage.hash = Hash::hash(buffer.const_byte_span().subspan(curPage.from, size));
+
+        // append to pages
+        pages[pp] = curPage;
+        pp++;
+
+        // update "global" hashes
+        contentHasher.feed(curPage.hash);
+    } else {
+        // need to rewind serialize buffer
+        serializer.rewind(curPage.from);
+    }
+}
+
+void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
+{
+    beginPage(serializer, Type::Entity);
+    curPage.uuid = entity.getInstanceUUID();
+
+    bool isRootEntity = !parent.has_value();
+    serializer << isRootEntity;
+
+    UUID parentUUID;
+    if (isRootEntity) {
+        if (auto parentEntity = entity.tryGetParent()) {
+            parentUUID = parentEntity->getInstanceUUID();
+        }
+    } else {
+        parentUUID = parent->getInstanceUUID();
+    }
+
+    serializer << entity.getInstanceUUID();
+    serializer << parentUUID;
+
+    uint8_t flags = 0;
+    if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
+    if (!entity.isEnabled()) flags |= (uint8_t) EntityData::Flag::Disabled;
+
+    serializer << entity.getName();
+    serializer << flags;
+    serializer << entity.getPrefabUUID();
+}
+
+void EntityNetworkChanges::endEntity(Serializer& serializer, Bytes& buffer)
+{
+    endPage(serializer, buffer, Type::Entity);
+}
+
+void EntityNetworkChanges::beginComponent(Serializer& serializer, uint16_t componentId)
+{
+    beginPage(serializer, Type::Component);
+    curPage.componentId = componentId;
+}
+
+void EntityNetworkChanges::endComponent(Serializer& serializer, Bytes& buffer)
+{
+    endPage(serializer, buffer, Type::Component);
+}
+
+void EntityNetworkChanges::digest()
+{
+    contentHash = contentHasher.digest();
+}
+
+void EntityNetworkChanges::serialize(Serializer& s) const
+{
+    s << (uint16_t) pp;
+
+    for (int p = 0; p < pp; p++) {
+        auto& page = pages[p];
+        s << page.uuid;
+        s << page.hash;
+        s << page.from;
+        s << page.to;
+        s << page.type;
+    }
+}
+
+void EntityNetworkChanges::deserialize(Deserializer& s)
+{
+    uint16_t count;
+    s >> count;
+    pp = count;
+
+    contentHasher.reset();
+
+    for (int p = 0; p < pp; p++) {
+        auto& page = pages[p];
+        s >> page.uuid;
+        s >> page.hash;
+        s >> page.from;
+        s >> page.to;
+        s >> page.type;
+
+        contentHasher.feed(page.hash);
+    }
+
+    contentHash = contentHasher.digest();
+}
+
+size_t EntityNetworkChanges::getRequiredSerializeSize() const
+{
+    return pp * sizeof(Page); // technically less without padding
+}
+
+bool EntityNetworkChanges::operator==(const EntityNetworkChanges& other) const
+{
+    bool eq = pp == other.pp;
+
+    if (eq && pp > 0) {
+        // NOTE: this should be exhaustive. If any sub-page changes,
+        // the content hash will change, too.
+        Expects(contentHash != 0);
+        Expects(other.contentHash != 0);
+        eq = contentHash == other.contentHash;
+    }
+
+    return eq;
+}
+
+// Parses the journal, along with the entity data, and writes everything to the
+// output buffer. Tries to skip unmodified data along the way.
+void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buffer) const
+{
+    Expects(pp > 0);
+
+    int p = 0;
+    while (p < pp) {
+        auto& page = pages[p];
+
+        bool skip = false;
+
+#if 0
+        if (page.type == Type::Entity) {
+            if (!page.modified) {
+                skip = true;
+
+                // Seek forward until end of this entity, including its components.
+
+                p++;
+                while (p < pp) {
+                    auto& next = pages[p];
+                    p++;
+                    if (next.type == Type::ChildEntityEnd) {
+                        if (next.from == page.from && next.to == page.to) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+#endif
+
+        if (!skip) {
+            if (page.type == Type::Entity ||
+                page.type == Type::Component) {
+
+                size_t size = page.to - page.from;
+
+                serializer << (uint8_t) page.type;
+                serializer << (uint16_t) size;
+
+                auto span = buffer.const_byte_span().subspan(page.from, size);
+                serializer << span;
+            }
+
+            p++;
+        }
+    }
+}
+
+void EntityNetworkChanges::enumerateEntityPages(const HashSet<UUID>& filter,
+        const std::function<void (const Page& page, int pageIdx)>& onEntity) const
+{
+    enumerateEntities(
+            [&filter, onEntity](const Page &page, int pageIdx) {
+                if (filter.contains(page.uuid)) {
+                    onEntity(page, pageIdx);
+                }
+            }
+    );
+}
+
+void EntityNetworkChanges::enumerateEntities(const std::function<void (const Page& page, int pageIdx)>& onEntity) const
+{
+    for (int p = 0; p < pp; p++) {
+        auto& page = pages[p];
+        if (page.type == Type::Entity) {
+            onEntity(page, p);
+        }
+    }
+}
+
+bool EntityNetworkChanges::findNextComponent(uint16_t& componentId, int& pageIdx) const
+{
+    while (pageIdx < pp) {
+        auto& page = pages[pageIdx];
+
+        if (page.type != Type::Component) {
+            break;
+        }
+
+        pageIdx++;
+
+        if (page.type == Type::Component) {
+            componentId = page.componentId;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int EntityNetworkChanges::findEntityByUUID(Page& out, const UUID& uuid) const
+{
+    for (int p = 0; p < pp; p++) {
+        auto &page = pages[p];
+
+        if (page.type == Type::Entity) {
+            if (page.uuid == uuid) {
+                out = page;
+                return p;
+            }
+        }
+    }
+
+    throw Exception("No journal page found for entity", HalleyExceptions::Network);
+}
+
+EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources)
+    : resources(resources)
+    , journal()
+{
+    scratchpad.reserve(4096);
+    scratchpad.resize_no_init(scratchpad.capacity());
+}
+
+void EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+{
+    SerializerOptions opt(SerializerOptions::maxVersion);
+    opt.dictionary = options.dictionary;
+    opt.world = &entity.getWorld();
+
+    Serializer serializer(scratchpad.byte_span(), opt);
+
+    doSerializeEntityUpdate(serializer, entity, {});
+
+    journal.digest();
+}
+
+void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
+{
+    Expects(entity.isSerializable());
+
+    EntitySerializationContext serializationContext = {};
+    serializationContext.resources = &resources;
+
+    // Entity
+    journal.beginEntity(serializer, entity, parent);
+    journal.endEntity(serializer, scratchpad);
+
+    // Components
+    auto& reflection = serializer.getOptions().world->getReflection();
+
+    for (auto [componentId, component] : entity) {
+        const auto& reflector = reflection.getComponentReflector(componentId);
+
+        journal.beginComponent(serializer, (uint16_t) componentId);
+
+        // Serialize once, to know the size we need. Then rewind and serialize
+        // again. TODO: this is pretty terrible
+
+        size_t marker = serializer.getPosition();
+        reflector.serializeNetwork(serializationContext, serializer, *component);
+
+        size_t componentSize = serializer.getPosition() - marker;
+
+        if (componentSize > 0) {
+            serializer.rewind(marker);
+        }
+
+        // NOTE: serializing the component ID here, not as part of the page
+        // "header", ensures that the page isn't thrown away at the end. We
+        // need to keep track of all components to figure out which have
+        // been added/removed/modified.
+
+        Expects(componentId < 65536);
+        Expects(componentSize < 65536);
+
+        serializer << (uint16_t) componentId;
+        serializer << (uint16_t) componentSize;
+
+        // NOTE: components with no networking data end up empty, so we only
+        // store the component ID and size (4 bytes) for those.
+
+        if (componentSize > 0) {
+            reflector.serializeNetwork(serializationContext, serializer, *component);
+        }
+
+        journal.endComponent(serializer, scratchpad);
+    }
+
+    // Children
+    for (const auto& child : entity.getChildren()) {
+        if (!child.isSerializable()) {
+            continue;
+        }
+        doSerializeEntityUpdate(serializer, child, entity);
+    }
+}
+
+void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options, const std::shared_ptr<EntityFactoryContext>& context)
+{
+    SerializerOptions opt(SerializerOptions::maxVersion);
+    opt.dictionary = options.dictionary;
+    opt.world = &entity.getWorld();
+
+    Deserializer deserializer(bytes, opt);
+
+    EntityNetworkChanges::Type type;
+    uint16_t size;
+
+    fetchNextPage(deserializer, type, size);
+
+    while (type != EntityNetworkChanges::Type::Unknown) {
+        if (type != EntityNetworkChanges::Type::Entity) {
+            throw Exception("Unexpected entity network change type", HalleyExceptions::Network);
+        }
+
+        bool isRootEntity;
+        deserializer >> isRootEntity;
+
+        UUID instanceUUID, parentInstanceUUID;
+        deserializer >> instanceUUID;
+        deserializer >> parentInstanceUUID;
+
+        std::optional<EntityRef> parentEntity;
+        std::optional<EntityRef> childEntity;
+
+        if (isRootEntity) {
+            childEntity = entity;
+            Expects(entity.getInstanceUUID() == instanceUUID);
+        } else {
+            childEntity = entity.getWorld().findEntity(instanceUUID);
+        }
+
+        type = doDeserializeEntityUpdate(deserializer, childEntity.value(), parentEntity, context);
+
+        if (isRootEntity && parentInstanceUUID.isValid()) {
+            if (auto p = entity.getWorld().findEntity(parentInstanceUUID)) {
+                entity.setParent(p.value());
+            }
+        }
+    }
+
+    if (deserializer.getBytesLeft() != 0) {
+        throw Exception("Not at end of entity network update byte stream", HalleyExceptions::Network);
+    }
+}
+
+EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
+{
+    Expects(entity.isValid());
+    Expects(entity.isSerializable());
+
+    EntitySerializationContext serializationContext = {};
+    serializationContext.resources = &resources;
+
+    context->setCurrentEntity(entity.getEntityId());
+
+    {
+        String name;
+        deserializer >> name;
+
+        entity.setName(name);
+
+        uint8_t flags;
+        deserializer >> flags;
+
+        entity.setSelectable((flags & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
+
+        bool enabled = (flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
+        entity.setEnabled(enabled);
+
+        // TODO: see EntityFactory::updateEntityNode()
+        // - variants and rules
+
+        UUID prefabUUID;
+        deserializer >> prefabUUID;
+
+        entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
+    }
+
+    EntityNetworkChanges::Type type;
+    uint16_t size;
+
+    fetchNextPage(deserializer, type, size);
+
+    while (type == EntityNetworkChanges::Type::Component) {
+        uint16_t componentId, componentSize;
+
+        deserializer >> componentId;
+        deserializer >> componentSize;
+
+        const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
+
+        if (auto component = reflector.tryGetComponent(entity)) {
+            reflector.deserializeNetwork(serializationContext, deserializer, *component);
+        } else {
+            // TODO:
+            if (componentSize > 0) {
+                deserializer.skipBytes(componentSize);
+            }
+        }
+
+        fetchNextPage(deserializer, type, size);
+    }
+
+    return type;
+}
+
+bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
+{
+    bool modified = previous.empty();
+
+    // Compare with previously saved journal.
+
+    if (!previous.empty()) {
+        Deserializer s(previous);
+        EntityNetworkChanges previousJournal;
+
+        s >> previousJournal;
+
+        // Fast check. We don't want to do the rather expensive work below if
+        // nothing has changed since the last visit.
+
+        modified = !(journal == previousJournal);
+
+        if (modified) {
+            // Something has changed. We need to do a more detailed inspection
+            // to check for entity/component updates, additions and deletions.
+
+            childrenAdded.clear();
+            childrenChanged.clear();
+            childrenRemoved.clear();
+
+            // Enumerate all child entities in current journal. Mark all of
+            // them as "potentially added".
+
+            journal.enumerateEntities(
+                    [](const EntityNetworkChanges::Page& page, int pageIdx) {
+                        if (pageIdx > 0) {
+                            childrenAdded.emplace(page.uuid);
+                        }
+                    }
+            );
+
+            // Enumerate all child entities in previous journal. Compare with
+            // current set to check which have been added, changed or removed.
+
+            previousJournal.enumerateEntities(
+                    [](const EntityNetworkChanges::Page& page, int pageIdx) {
+                        if (pageIdx > 0) {
+                            if (childrenAdded.contains(page.uuid)) {
+                                // Found in both - mark as "changed".
+                                childrenAdded.erase(page.uuid);
+                                childrenChanged.emplace(page.uuid);
+                            } else {
+                                // Not found in current journal - mark as "removed".
+                                childrenRemoved.emplace(page.uuid);
+                            }
+                        }
+                    }
+            );
+
+            // Enumerate again, but only care about entities marked as
+            // "changed". This includes to root entity though.
+
+            componentsRemoved.clear();
+
+            journal.enumerateEntityPages(
+                    childrenChanged,
+                    [&](const EntityNetworkChanges::Page& page, int pageIdx) {
+                        // Search the matching page in previous journal.
+                        EntityNetworkChanges::Page prevEntityPage {};
+                        int prevPageIdx = previousJournal.findEntityByUUID(prevEntityPage, page.uuid);
+
+                        // Fast check by hash - no need to scan further if nothing has
+                        // changed.
+
+                        page.modified = page.hash != prevEntityPage.hash;
+
+                        if (!page.modified) {
+                            return;
+                        }
+
+                        // Enumerate components in previous journal, those are
+                        // potential candidates for being "removed".
+
+                        uint16_t componentId;
+
+                        int componentPageIdx = prevPageIdx + 1;
+                        while (previousJournal.findNextComponent(componentId, componentPageIdx)) {
+                            componentsRemoved[page.uuid].emplace(componentId);
+                        }
+
+                        // Enumerate components in current journal, remove those again
+                        // from set of candidates to be "removed".
+
+                        componentPageIdx = pageIdx;
+                        while (journal.findNextComponent(componentId, componentPageIdx)) {
+                            componentsRemoved[page.uuid].erase(componentId);
+                        }
+                    }
+            );
+        }
+    }
+
+    // Serialize & store the new journal.
+
+    if (modified) {
+        previous.resize_no_init(journal.getRequiredSerializeSize());
+
+        Serializer s(previous.byte_span(), {});
+
+        s << journal;
+
+        previous.resize(s.getSize());
+    }
+
+    return modified;
+}
+
+bool EntityNetworkSerialize::hasEntityChanges()
+{
+    bool modified = !childrenAdded.empty() || !childrenRemoved.empty();
+
+    if (!modified) {
+        for (const auto& pair: componentsRemoved) {
+            if (!pair.second.empty()) {
+                modified = true;
+                break;
+            }
+        }
+    }
+
+    return modified;
+}
+
+void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options) const
+{
+    data.resize_no_init(data.capacity());
+
+    SerializerOptions opt(SerializerOptions::maxVersion);
+    opt.dictionary = options.dictionary;
+
+    Serializer s(data.byte_span(), opt);
+    journal.writeJournal(s, scratchpad);
+
+    data.resize(s.getSize());
+}
+
+void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size)
+{
+    type = EntityNetworkChanges::Type::Unknown;
+    size = 0;
+
+    if (deserializer.getBytesLeft() > 0) {
+        uint8_t t;
+        deserializer >> t;
+        type = (EntityNetworkChanges::Type) t;
+    }
+
+    // Only fetch size for page types which actually contain data; keep size=0
+    // for everything else.
+
+    if (type == EntityNetworkChanges::Type::Entity ||
+        type == EntityNetworkChanges::Type::Component) {
+
+        if (deserializer.getBytesLeft() > 0) {
+            uint16_t s;
+            deserializer >> s;
+            size = s;
+        }
+    }
+}

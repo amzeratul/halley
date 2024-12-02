@@ -24,6 +24,14 @@ Serializer::Serializer(gsl::span<gsl::byte> dst, SerializerOptions options)
 	, dryRun(false)
 {}
 
+void Serializer::rewind(size_t position)
+{
+    if (position >= size) {
+        throw Exception("Rewind position out of range.", HalleyExceptions::Utils);
+    }
+    size = position;
+}
+
 Serializer& Serializer::operator<<(const std::string& str)
 {
 	return *this << String(str);

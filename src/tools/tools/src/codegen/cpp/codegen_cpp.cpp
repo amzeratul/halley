@@ -199,7 +199,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		"#ifndef DONT_INCLUDE_HALLEY_HPP",
 		"#include <halley.hpp>",
 		"#else",
-		"#include \"halley/entity/component.h\"",
+		"#include \"halley/bytes/byte_serializer.h\"",
+        "#include \"halley/entity/component.h\"",
 		"#endif",
 		"#include \"halley/support/exception.h\"",
 		""
@@ -272,6 +273,36 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		deserializeFieldBody += lineBreak + "throw Halley::Exception(\"Unknown or non-serializable field \\\"\" + Halley::String(_fieldName) + \"\\\"\", Halley::HalleyExceptions::Entity);";
 	}
 
+    String serializeNetworkBody;
+    String deserializeNetworkBody;
+    {
+        size_t numNetworkMembers = 0;
+        for (const auto& member: component.members) {
+            if (member.serializationTypes.contains(EntitySerialization::Type::Network)) {
+                numNetworkMembers++;
+            }
+        }
+
+        if (numNetworkMembers > 0) {
+            bool first = true;
+            for (const auto& member: component.members) {
+                if (!member.serializationTypes.contains(EntitySerialization::Type::Network)) {
+                    continue;
+                }
+
+                if (first) {
+                    first = false;
+                } else {
+                    serializeNetworkBody += lineBreak;
+                    deserializeNetworkBody += lineBreak;
+                }
+
+                serializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", _context, _serializer);";
+                deserializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", _context, _deserializer);";
+            }
+        }
+    }
+
 	if (component.customImplementation) {
 		contents.push_back("template <typename T>");
 	}
@@ -338,6 +369,14 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("std::string_view"), "_fieldName"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "_node")
 		}, "deserializeField"), deserializeFieldBody)
+        .addBlankLine()
+        .addMethodDefinition(MethodSchema(TypeSchema("void"), {
+            VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Serializer&"), "_serializer")
+        }, "serializeNetwork", true), serializeNetworkBody)
+        .addBlankLine()
+        .addMethodDefinition(MethodSchema(TypeSchema("void"), {
+            VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Deserializer&"), "_deserializer")
+        }, "deserializeNetwork"), deserializeNetworkBody)
 		.addBlankLine();
 
 	// New and delete methods

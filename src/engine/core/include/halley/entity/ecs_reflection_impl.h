@@ -73,7 +73,17 @@ namespace Halley {
 			T::sanitize(data, mask);
 		}
 
-		Component* tryGetComponent(EntityRef entity) const override
+        void serializeNetwork(const EntitySerializationContext& context, Serializer& serializer, const Component& component) const override
+        {
+            static_cast<const T&>(component).serializeNetwork(context, serializer);
+        }
+
+        void deserializeNetwork(const EntitySerializationContext& context, Deserializer& deserializer, Component& component) const override
+        {
+            static_cast<T&>(component).deserializeNetwork(context, deserializer);
+        }
+
+        Component* tryGetComponent(EntityRef entity) const override
 		{
 			return entity.tryGetComponent<T>();
 		}

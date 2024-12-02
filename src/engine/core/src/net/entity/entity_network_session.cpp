@@ -408,6 +408,11 @@ World& EntityNetworkSession::getWorld() const
 	return factory->getWorld();
 }
 
+Resources& EntityNetworkSession::getResources() const
+{
+    return resources;
+}
+
 EntityFactory& EntityNetworkSession::getFactory() const
 {
 	Expects(factory);

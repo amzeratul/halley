@@ -52,9 +52,10 @@ namespace Halley {
 	public:
         EntityNetworkId entityId;
         Bytes bytes;
+        bool fastSerialize = false;
 
         EntityNetworkMessageUpdate() = default;
-		EntityNetworkMessageUpdate(EntityNetworkId id, Bytes bytes) : entityId(id), bytes(std::move(bytes)) {}
+		EntityNetworkMessageUpdate(EntityNetworkId id, Bytes bytes, bool fastSerialize) : entityId(id), bytes(std::move(bytes)), fastSerialize(fastSerialize) {}
 
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Update; }
         bool needsWorld() const override { return true; }

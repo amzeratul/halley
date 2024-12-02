@@ -58,6 +58,7 @@ namespace Halley {
 		void receiveUpdates();
 
 		World& getWorld() const;
+        Resources& getResources() const;
 		EntityFactory& getFactory() const;
 		NetworkSession& getSession() const;
 		bool hasWorld() const;

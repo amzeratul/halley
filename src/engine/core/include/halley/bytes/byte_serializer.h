@@ -16,6 +16,7 @@
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 #include "halley/maths/vector4.h"
+#include "halley/resources/resource_reference.h"
 #include "iserialization_dictionary.h"
 
 namespace Halley {
@@ -32,7 +33,7 @@ namespace Halley {
 		World* world = nullptr;
 
 		SerializerOptions() = default;
-		SerializerOptions(int version)
+		explicit SerializerOptions(int version)
 			: version(version)
 		{}
 	};
@@ -103,6 +104,8 @@ namespace Halley {
 
 		size_t getSize() const { return size; }
 		size_t getPosition() const { return size; }
+
+        void rewind(size_t position); // Rewind to a previous write position; use with care!
 
 		Serializer& operator<<(bool val) { return serializePod(val); }
 		Serializer& operator<<(int8_t val) { return serializeInteger(val); }
@@ -203,11 +206,23 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T>
+        template <typename T>
+        Serializer& operator<<(const Angle<T>& val)
+        {
+            return *this << val.toDegrees();
+        }
+
+        template <typename T>
 		Serializer& operator<<(const Vector2D<T>& val)
 		{
 			return *this << val.x << val.y;
 		}
+
+        template <typename T>
+        Serializer& operator<<(const Vector3D<T>& val)
+        {
+            return *this << val.x << val.y << val.z;
+        }
 
 		template <typename T>
 		Serializer& operator<<(const Vector4D<T>& val)
@@ -450,6 +465,15 @@ namespace Halley {
 			return *this;
 		}
 
+        template <typename T>
+        Deserializer& operator>>(Angle<T>& val)
+        {
+            T deg;
+            *this >> deg;
+            val = Angle<T>::fromDegrees(deg);
+            return *this;
+        }
+
 		template <typename T>
 		Deserializer& operator>>(Vector2D<T>& val)
 		{
@@ -457,6 +481,15 @@ namespace Halley {
 			*this >> val.y;
 			return *this;
 		}
+
+        template <typename T>
+        Deserializer& operator>>(Vector3D<T>& val)
+        {
+            *this >> val.x;
+            *this >> val.y;
+            *this >> val.z;
+            return *this;
+        }
 
 		template <typename T>
 		Deserializer& operator>>(Vector4D<T>& val)
@@ -603,4 +636,65 @@ namespace Halley {
 		void ensureSufficientBytesRemaining(size_t bytes);
 		size_t getBytesRemaining() const;
 	};
+
+    template <typename T>
+    class ByteSerializationHelper {
+    public:
+        static void serialize(const T& value, const EntitySerializationContext& context, Serializer& serializer)
+        {
+            serializer << value;
+        }
+
+        static void deserialize(T& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        {
+            deserializer >> dst;
+        }
+    };
+
+    template <typename T>
+    class ByteSerializationHelper<Vector<T>> {
+    public:
+        static void serialize(const Vector<T>& value, const EntitySerializationContext& context, Serializer& serializer)
+        {
+            uint32_t sz = static_cast<uint32_t>(value.size());
+            serializer << sz;
+            for (uint32_t i = 0; i < sz; i++) {
+                ByteSerializationHelper<T>::serialize(value[i], context, serializer);
+            }
+        }
+
+        static void deserialize(Vector<T>& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        {
+            uint32_t sz;
+            deserializer >> sz;
+
+            dst.clear();
+            dst.reserve(sz);
+            for (uint32_t i = 0; i < sz; i++) {
+                dst.push_back(T());
+                ByteSerializationHelper<T>::deserialize(dst[i], context, deserializer);
+            }
+        }
+    };
+
+    template <typename T>
+    class ByteSerializationHelper<ResourceReference<T>> {
+    public:
+        static void serialize(const ResourceReference<T>& value, const EntitySerializationContext& context, Serializer& serializer)
+        {
+            serializer << value.getAssetId();
+        }
+
+        static void deserialize(ResourceReference<T>& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        {
+            String assetId;
+            deserializer >> assetId;
+
+            if (!assetId.isEmpty() && context.resources->exists<T>(assetId)) {
+                dst = ResourceReference<T>(context.resources->get<T>(assetId));
+            } else {
+                Logger::logWarning("ResourceReference<" + String(typeid(T).name()) + "> could not load " + assetId, true);
+            }
+        }
+    };
 }

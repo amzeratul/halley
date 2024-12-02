@@ -107,6 +107,7 @@ set(SOURCES
 
         "src/net/entity/entity_network_message.cpp"
         "src/net/entity/entity_network_remote_peer.cpp"
+		"src/net/entity/entity_network_serialize.cpp"
         "src/net/entity/entity_network_session.cpp"
 
         "src/net/session/network_session_control_messages.cpp"
@@ -543,6 +544,7 @@ set(HEADERS
 
         "include/halley/net/entity/entity_network_message.h"
         "include/halley/net/entity/entity_network_remote_peer.h"
+		"include/halley/net/entity/entity_network_serialize.h"
         "include/halley/net/entity/entity_network_session.h"
 
         "include/halley/net/session/network_session_control_messages.h"

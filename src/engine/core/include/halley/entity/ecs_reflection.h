@@ -39,6 +39,9 @@ namespace Halley {
 		virtual void rebindComponent(Component& component, EntityRef entity) const = 0;
 
 		virtual void sanitize(ConfigNode& data, int mask) const = 0;
+
+        virtual void serializeNetwork(const EntitySerializationContext& context, Serializer& serializer, const Component& component) const = 0;
+        virtual void deserializeNetwork(const EntitySerializationContext& context, Deserializer& deserializer, Component& component) const = 0;
 	};
 
 	class MessageReflector {
