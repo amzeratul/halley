@@ -1,5 +1,6 @@
 #include "halley/net/connection/ack_unreliable_connection.h"
 #include "halley/net/connection/network_packet.h"
+#include "halley/net/connection/network_service.h"
 #include <iostream>
 #include <chrono>
 #include <utility>
@@ -13,6 +14,7 @@
 
 using namespace Halley;
 
+#if 0
 struct AckUnreliableHeader
 {
 	uint16_t sequence = 0xFFFF;
@@ -373,4 +375,314 @@ void AckUnreliableConnection::notifyReceive(uint16_t sequence, size_t size, bool
 	if (statsListener) {
 		statsListener->onPacketReceived(sequence, size, resend);
 	}
+}
+#endif
+
+AckUnreliableConnectionV2::AckUnreliableConnectionV2(std::shared_ptr<IConnection> parent, INetworkServiceStatsListener& networkStatsListener)
+    : parent(std::move(parent))
+    , networkStatsListener(networkStatsListener)
+{
+    this->parent->setUnreliablePacketListener(this);
+
+    maxPacketSize = this->parent->getMaxUnreliablePacketSize();
+
+    inboundCache.resize_no_init(16 * maxPacketSize);
+
+    for (auto &p: inbound.packets) {
+        p.data.resize_no_init(maxPacketSize);
+        p.seqIdx = 0xffff;
+    }
+
+    for (auto &p: outbound.packets) {
+        p.data.resize_no_init(maxPacketSize);
+        p.seqIdx = 0xffff;
+    }
+}
+
+void AckUnreliableConnectionV2::close()
+{
+    parent->close();
+}
+
+bool AckUnreliableConnectionV2::isSupported(TransmissionType type) const
+{
+    return type == TransmissionType::Unreliable;
+}
+
+ConnectionStatus AckUnreliableConnectionV2::getStatus() const
+{
+    return parent->getStatus();
+}
+
+void AckUnreliableConnectionV2::send(TransmissionType type, OutboundNetworkPacket packet)
+{
+    Expects(type == TransmissionType::Unreliable);
+
+    auto status = parent->getStatus();
+    if (status != ConnectionStatus::Connected) {
+        return;
+    }
+
+    size_t size = packet.getSize();
+    size_t maxSize = maxPacketSize - headerSize;
+
+    if (maxSize >= size) {
+        auto& slot = outbound.packets[outbound.packetIdx];
+
+        if (slot.seqIdx < 0x8000) {
+            Logger::logError("Outbound packet queue is full");
+            close();
+            return;
+        }
+
+        slot.dataSize = packet.copyTo(slot.data.byte_span().subspan(headerSize));
+        slot.seqIdx = outbound.curSeqIdx;
+        slot.subIdx = 0;
+
+        doSend(slot, outbound.packetIdx);
+
+        outbound.packetIdx = (outbound.packetIdx + 1) % 256;
+    } else {
+        size_t numSubPackets = size / maxSize;
+        if (size % maxSize != 0) {
+            numSubPackets++;
+        }
+
+        if (numSubPackets > 16) {
+            throw Exception("Packet size too large: " + toString(packet.getSize()) + " bytes", HalleyExceptions::Network);
+        }
+
+        auto packetData = packet.getBytes();
+
+        for (size_t i = 0; i < numSubPackets; i++) {
+            auto& slot = outbound.packets[outbound.packetIdx];
+
+            if (slot.seqIdx < 0x8000) {
+                Logger::logError("Outbound packet queue is full");
+                close();
+                return;
+            }
+
+            slot.dataSize = std::min(packetData.size(), maxSize);
+            memcpy(slot.data.data() + headerSize, packetData.data(), slot.dataSize);
+
+            packetData = packetData.subspan(slot.dataSize);
+
+            slot.seqIdx = outbound.curSeqIdx;
+            slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
+
+            doSend(slot, outbound.packetIdx);
+
+            outbound.packetIdx = (outbound.packetIdx + 1) % 256;
+        }
+
+        Expects(packetData.empty());
+    }
+
+    networkStatsListener.onSendData(size, 1);
+
+    if (statsListener) {
+        statsListener->onPacketSent(outbound.curSeqIdx, size);
+    }
+
+    outbound.curSeqIdx = (outbound.curSeqIdx + 1) % 0x8000;
+}
+
+void AckUnreliableConnectionV2::doSend(SubPacket& packet, int packetIdx)
+{
+    Expects(packetIdx >= 0 && packetIdx < 256);
+
+    uint8_t* header = packet.data.data();
+
+    header[0] = headerSignature[0];
+    header[1] = headerSignature[1];
+    header[2] = headerSignature[2];
+    header[3] = headerSignature[3];
+
+    header[4] = packet.seqIdx >> 8;
+    header[5] = packet.seqIdx & 0xff;
+    header[6] = packet.subIdx;
+    header[7] = packetIdx & 0xff;
+
+    // bytes 8 to 13 are unused right now
+
+    // bytes 14+15 are reserved!
+    header[14] = 0;
+    header[15] = 0;
+
+    parent->sendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize));
+}
+
+bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
+{
+    auto status = parent->getStatus();
+    if (status != ConnectionStatus::Connected) {
+        return false;
+    }
+
+    auto& slot = inbound.packets[inbound.packetIdx];
+
+    if (slot.seqIdx < 0x8000) {
+        if (slot.seqIdx != inbound.curSeqIdx) {
+            throw Exception("Unexpected packet sequence index", HalleyExceptions::Network);
+        }
+
+        if (slot.subIdx == 0) {
+            packet = InboundNetworkPacket(slot.data.byte_span().subspan(0, slot.dataSize));
+
+            slot.seqIdx = 0xffff;
+
+            networkStatsListener.onReceiveData(slot.dataSize, 1);
+
+            if (statsListener) {
+                statsListener->onPacketReceived(inbound.curSeqIdx, slot.dataSize, false);
+            }
+
+            inbound.packetIdx = (inbound.packetIdx + 1) % 256;
+            inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
+
+            return true;
+        } else {
+            // Check if all sub-packets have arrived.
+            int numSubPackets = slot.subIdx >> 4;
+            Expects(numSubPackets > 1 && (slot.subIdx & 15) == 0);
+
+            bool isComplete = true;
+            for (size_t i = 1; isComplete && i < numSubPackets; i++) {
+                const auto& sub = inbound.packets[(inbound.packetIdx + i) % 256];
+                isComplete &= sub.seqIdx == slot.seqIdx;
+                isComplete &= (sub.subIdx & 15) == i;
+                isComplete &= (sub.subIdx >> 4) == numSubPackets;
+            }
+
+            if (isComplete) {
+                size_t totalSize = 0;
+
+                for (size_t i = 0; i < numSubPackets; i++) {
+                    auto& sub = inbound.packets[(inbound.packetIdx + i) % 256];
+
+                    memcpy(inboundCache.data() + totalSize, sub.data.data(), sub.dataSize);
+                    totalSize += sub.dataSize;
+
+                    sub.seqIdx = 0xffff;
+                }
+
+                packet = InboundNetworkPacket(inboundCache.byte_span().subspan(0, totalSize));
+
+                networkStatsListener.onReceiveData(totalSize, numSubPackets);
+
+                if (statsListener) {
+                    statsListener->onPacketReceived(inbound.curSeqIdx, totalSize, false);
+                }
+
+                inbound.packetIdx = (inbound.packetIdx + numSubPackets) % 256;
+                inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
+
+                return true;
+            }
+        }
+    }
+
+    doSendAckPackets();
+
+    return false;
+}
+
+void AckUnreliableConnectionV2::onSend(gsl::span<const gsl::byte> packet)
+{
+}
+
+void AckUnreliableConnectionV2::onReceive(gsl::span<const gsl::byte> packet)
+{
+    size_t packetSize = packet.size();
+    auto* header = (const uint8_t*) packet.data();
+
+    if (packetSize < 6 || memcmp(header, headerSignature, 4) != 0) {
+        return; // too small, or wrong signature
+    }
+
+    uint16_t seqIdx = uint16_t(header[4] << 8) | header[5];
+
+    if (seqIdx == 0xffff) {
+        onAckPacketsReceive(packet.subspan(6));
+        return;
+    }
+
+    uint8_t subIdx = header[6];
+    int packetIdx = header[7];
+
+    size_t connIdLen = 0;
+    /*size_t connIdLen = 1;
+    if ((header[15] & 0x80) != 0) {
+        connIdLen = 2;
+    }*/
+
+    auto& slot = inbound.packets[packetIdx];
+
+    if (slot.seqIdx < 0x8000) {
+        throw Exception("Too many inbound packets", HalleyExceptions::Network);
+    }
+
+    slot.dataSize = packetSize - headerSize + connIdLen;
+    memcpy(slot.data.data(), packet.data() + headerSize - connIdLen, slot.dataSize);
+
+    slot.seqIdx = seqIdx;
+    slot.subIdx = subIdx;
+
+    Expects(numAckPackets < 256);
+    ackPackets[numAckPackets++] = packetIdx;
+}
+
+void AckUnreliableConnectionV2::doSendAckPackets()
+{
+    if (numAckPackets == 0) {
+        return;
+    }
+
+    std::array<uint8_t, 6 + 256> packet = {};
+
+    uint8_t* msg = packet.data();
+
+    msg[0] = headerSignature[0];
+    msg[1] = headerSignature[1];
+    msg[2] = headerSignature[2];
+    msg[3] = headerSignature[3];
+
+    msg[4] = 0xff;
+    msg[5] = 0xff;
+
+    for (int i = 0; i < numAckPackets; i++) {
+        msg[6 + i] = ackPackets[i];
+    }
+
+    // TODO: this isn't reliable - if this ACK package doesn't arrive, we are in trouble.
+    parent->sendUnreliablePacket(gsl::span<gsl::byte>((gsl::byte*) packet.data(), 6 + numAckPackets));
+
+    numAckPackets = 0;
+}
+
+void AckUnreliableConnectionV2::onAckPacketsReceive(gsl::span<const gsl::byte> data)
+{
+    auto ids = (const uint8_t*) data.data();
+    size_t size = data.size();
+
+    for (size_t i = 0; i < size; i++) {
+        auto slot = &outbound.packets[ids[i]];
+
+        if (statsListener) {
+            statsListener->onPacketAcked(slot->seqIdx);
+        }
+
+        slot->seqIdx = 0xffff;
+    }
+}
+
+float AckUnreliableConnectionV2::getLatency() const
+{
+    return lag;
+}
+
+void AckUnreliableConnectionV2::setStatsListener(IAckUnreliableConnectionStatsListener* listener)
+{
+    statsListener = listener;
 }

@@ -15,7 +15,7 @@ namespace Halley
 	class IAckUnreliableConnectionListener
 	{
 	public:
-		virtual ~IAckUnreliableConnectionListener() {}
+		virtual ~IAckUnreliableConnectionListener() = default;
 
 		virtual void onPacketAcked(int tag) = 0;
 	};
@@ -23,7 +23,7 @@ namespace Halley
 	class IAckUnreliableConnectionStatsListener
 	{
 	public:
-		virtual ~IAckUnreliableConnectionStatsListener() {}
+		virtual ~IAckUnreliableConnectionStatsListener() = default;
 
 		virtual void onPacketSent(uint16_t sequence, size_t size) = 0;
 		virtual void onPacketResent(uint16_t sequence) = 0;
@@ -31,6 +31,7 @@ namespace Halley
 		virtual void onPacketReceived(uint16_t sequence, size_t size, bool resend) = 0;
 	};
 
+#if 0
 	class AckUnreliableSubPacket
 	{
 	public:
@@ -126,4 +127,69 @@ namespace Halley
 		void notifyAck(uint16_t sequence);
 		void notifyReceive(uint16_t sequence, size_t size, bool resend);
 	};
+#endif
+
+    class INetworkServiceStatsListener;
+
+    class AckUnreliableConnectionV2 : public IConnection, IConnection::IPacketListener
+    {
+    public:
+        explicit AckUnreliableConnectionV2(std::shared_ptr<IConnection> parent, INetworkServiceStatsListener& networkStatsListener);
+
+        void close() override;
+        [[nodiscard]] ConnectionStatus getStatus() const override;
+
+        [[nodiscard]] bool isSupported(TransmissionType type) const override;
+
+        void send(TransmissionType type, OutboundNetworkPacket packet) override;
+        bool receive(InboundNetworkPacket& packet) override;
+
+        void onSend(gsl::span<const gsl::byte> packet) override;
+        void onReceive(gsl::span<const gsl::byte> packet) override;
+
+        [[nodiscard]] float getLatency() const;
+
+        void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
+
+    private:
+        struct SubPacket
+        {
+            Bytes data;
+            size_t dataSize;
+            uint16_t seqIdx;
+            uint8_t subIdx;
+        };
+
+        struct InOutQueue
+        {
+            std::array<SubPacket, 256> packets;
+            int packetIdx = 0;
+            uint16_t curSeqIdx = 0;
+        };
+
+        std::shared_ptr<IConnection> parent;
+        INetworkServiceStatsListener& networkStatsListener;
+
+        size_t maxPacketSize;
+        static constexpr size_t headerSize = 16;
+        static constexpr uint8_t headerSignature[4] = {'h', 'l', 'y', '0'};
+
+        Bytes inboundCache;
+        InOutQueue inbound;
+        InOutQueue outbound;
+
+        std::array<uint8_t, 256> ackPackets = {};
+        int numAckPackets = 0;
+
+        float lag = 1.0f;
+
+        Vector<IAckUnreliableConnectionListener*> ackListeners;
+        IAckUnreliableConnectionStatsListener* statsListener = nullptr;
+
+        void doSend(SubPacket& packet, int packetIdx);
+
+        void doSendAckPackets();
+        void onAckPacketsReceive(gsl::span<const gsl::byte> data);
+    };
+
 }

@@ -331,7 +331,6 @@ std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSe
 
 void NetworkSession::processReceive()
 {
-	InboundNetworkPacket packet;
 	for (auto& peer: peers) {
 		const PeerId peerId = peer.peerId;
 
@@ -752,10 +751,10 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	const size_t lineSize = 64; // TODO
 
 	auto stats = std::make_shared<AckUnreliableConnectionStats>(statsCapacity, lineSize);
-	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection));
+	auto ackConn = std::make_shared<AckUnreliableConnectionV2>(std::move(connection), service);
 	ackConn->setStatsListener(stats.get());
 
-	auto messageQueue = std::make_shared<MessageQueueUDP>(ackConn);
+	auto messageQueue = std::make_shared<MessageQueueUDPV2>(ackConn);
 	messageQueue->setChannel(0, ChannelSettings(true, true));
 
 	return Peer{ peerId, true, std::move(messageQueue), std::move(stats) };

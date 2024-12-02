@@ -5,6 +5,7 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
+#if 0
 void MessageQueueUDP::Channel::getReadyMessages(Vector<InboundNetworkPacket>& out)
 {
 	if (settings.ordered) {
@@ -108,7 +109,7 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<Outbound>& msg
 	return result;
 }
 
-void MessageQueueUDP::receiveMessages()
+void MessageQueueUDP::receiveAll()
 {
 	try {
 		InboundNetworkPacket packet;
@@ -143,7 +144,7 @@ void MessageQueueUDP::receiveMessages()
 Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()
 {
 	if (connection->getStatus() == ConnectionStatus::Connected) {
-		receiveMessages();
+		receiveAll();
 	}
 
 	Vector<InboundNetworkPacket> result;
@@ -332,4 +333,62 @@ AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<Outbound>& msgs,
 	result.resends = resends;
 	result.resendSeq = resendSeq;
 	return result;
+}
+#endif
+
+MessageQueueUDPV2::MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnectionV2> connection)
+    : connection(std::move(connection))
+{
+
+}
+
+bool MessageQueueUDPV2::isConnected() const
+{
+    return connection->getStatus() == ConnectionStatus::Connected;
+}
+
+void MessageQueueUDPV2::enqueue(OutboundNetworkPacket packet, uint8_t channel)
+{
+    Outbound p = {packet, channel};
+    outboundQueued.emplace_back(p);
+}
+
+void MessageQueueUDPV2::sendAll()
+{
+    if (connection->getStatus() != ConnectionStatus::Connected) {
+        return;
+    }
+
+    for (auto& p : outboundQueued) {
+        connection->send(IConnection::TransmissionType::Unreliable, p.packet);
+    }
+
+    outboundQueued.clear();
+}
+
+Vector<InboundNetworkPacket> MessageQueueUDPV2::receivePackets()
+{
+    Vector<InboundNetworkPacket> packetsIn;
+
+    InboundNetworkPacket packet;
+    while (connection->receive(packet)) {
+        packetsIn.push_back(std::move(packet));
+    }
+
+    return packetsIn;
+}
+
+void MessageQueueUDPV2::close()
+{
+    connection->close();
+}
+
+ConnectionStatus MessageQueueUDPV2::getStatus() const
+{
+    return connection->getStatus();
+}
+
+float MessageQueueUDPV2::getLatency() const
+{
+    return connection->getLatency();
 }

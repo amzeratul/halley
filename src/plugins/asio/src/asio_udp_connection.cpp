@@ -1,28 +1,17 @@
-#include <iostream>
 #include "asio_udp_connection.h"
+
 #include "halley/net/connection/network_packet.h"
+#include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
-
-
-struct HandshakeAccept
-{
-	HandshakeAccept()
-		: handshake("halley_accp")
-	{
-	}
-
-	const char handshake[12];
-	short id = -1;
-	// TODO: encrypted session key
-};
-
-
+static const uint64_t handshakeSnd = 0x51662937cc774b87;
+static const uint64_t handshakeAck = 0xc3717eacac75d888;
 
 AsioUDPConnection::AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
-	, remote(remote)
+	, remote(std::move(remote))
 	, status(ConnectionStatus::Connecting)
 	, connectionId(0)
 {
@@ -47,39 +36,12 @@ void AsioUDPConnection::terminateConnection()
 
 void AsioUDPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
-	Expects(type == TransmissionType::Unreliable);
-	
-	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
-		// Insert header
-		std::array<unsigned char, 2> id = { 0, 0 };
-		size_t len = 0;
-		if (connectionId >= 128) {
-			id[0] = (connectionId >> 8) & 0x7F;
-			id[1] = connectionId & 0xFF;
-			len = 2;
-		} else {
-			id[0] = connectionId & 0x7F;
-			len = 1;
-		}
-		packet.addHeader(gsl::as_bytes(gsl::span<unsigned char>(id).subspan(0, len)));
-
-		bool needsSend = pendingSend.empty();
-		pendingSend.emplace_back(std::move(packet));
-		if (needsSend) {
-			sendNext();
-		}
-	}
+    throw Exception("Not implemented", HalleyExceptions::Network);
 }
 
 bool AsioUDPConnection::receive(InboundNetworkPacket& packet)
 {
-	if (pendingReceive.empty()) {
-		return false;
-	} else {
-		packet = std::move(pendingReceive.front());
-		pendingReceive.pop_front();
-		return true;
-	}
+    throw Exception("Not implemented", HalleyExceptions::Network);
 }
 
 bool AsioUDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
@@ -87,67 +49,100 @@ bool AsioUDPConnection::matchesEndpoint(const UDPEndpoint& remoteEndpoint) const
 	return remote == remoteEndpoint;
 }
 
-void AsioUDPConnection::onReceive(gsl::span<const gsl::byte> data)
-{
-	Expects(data.size() <= 1500);
-
-	if (status == ConnectionStatus::Connecting) {
-		if (data.size_bytes() == sizeof(HandshakeAccept)) {
-			HandshakeAccept accept;
-			if (memcmp(data.data(), &accept, sizeof(accept.handshake)) == 0) {
-				// Yep, accept handshake
-				memcpy(&accept, data.data(), data.size_bytes());
-				onOpen(accept.id);
-			}
-		}
-	} else if (status == ConnectionStatus::Connected) {
-		if (data.size() <= 1500) {
-			pendingReceive.push_back(InboundNetworkPacket(data));
-		}
-	}
-}
-
 void AsioUDPConnection::setError(const std::string& cs)
 {
 	error = cs;
 }
 
-void AsioUDPConnection::open(short id)
+size_t AsioUDPConnection::getMaxUnreliablePacketSize() const
 {
-	if (status == ConnectionStatus::Connecting) {
-		// Handshake
-		HandshakeAccept accept;
-		accept.id = id;
-		send(TransmissionType::Unreliable, OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeAccept>(&accept, 1))));
-
-		onOpen(id);
-	}
+    return 1400;
 }
 
-void AsioUDPConnection::onOpen(short id)
+void AsioUDPConnection::onConnect(short connId)
 {
-	std::cout << "Connection open on id = " << id << std::endl;
-	connectionId = id;
-	status = ConnectionStatus::Connected;
+    if (status == ConnectionStatus::Connecting) {
+        Logger::logDev("Connection established as id = " + toString(connId));
+        connectionId = connId;
+        status = ConnectionStatus::Connected;
+    }
 }
 
-void AsioUDPConnection::sendNext()
+void AsioUDPConnection::sendUnreliablePacket(gsl::span<gsl::byte> packet)
 {
-	if (pendingSend.empty()) {
-		return;
-	}
+    if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
+        Logger::logError("Attempting to send packet, but not in connected state", true);
+        return;
+    }
 
-	auto& packet = pendingSend.front();
-	size_t size = packet.copyTo(sendBuffer);
-	pendingSend.pop_front();
+    auto buffer = boost::asio::buffer(packet.data(), packet.size());
+    boost::system::error_code err;
 
-	socket.async_send_to(boost::asio::buffer(sendBuffer, size), remote, [this] (const boost::system::error_code& error, std::size_t)
-	{
-		if (error) {
-			std::cout << "Error sending packet: " << error.message() << std::endl;
-			close();
-		} else if (!pendingSend.empty()) {
-			sendNext();
-		}
-	});
+    size_t size = socket.send_to(buffer, remote, 0, err);
+
+    if (err.failed()) {
+        Logger::logError("Error sending packet: " + err.message());
+        close();
+    } else if (size != packet.size()) {
+        Logger::logError("Error sending packet, size mismatch");
+        close();
+    }
+
+    if (status == ConnectionStatus::Connected && packetListener != nullptr) {
+        packetListener->onSend(packet);
+    }
+}
+
+void AsioUDPConnection::setUnreliablePacketListener(IConnection::IPacketListener* listener)
+{
+    packetListener = listener;
+}
+
+void AsioUDPConnection::receiveAll(
+        UDPSocket &socket, HashMap<short, std::shared_ptr<AsioUDPConnection>> &connections,
+        const std::function<void(UDPEndpoint &remote, gsl::span<gsl::byte> packet)> &unknownConnCallback)
+{
+    std::array<gsl::byte, 2048> cache = {};
+    auto buffer = boost::asio::buffer(cache.data(), cache.size());
+
+    for (;;) {
+        UDPEndpoint from;
+        boost::system::error_code err;
+
+        size_t size = socket.receive_from(buffer, from, 0, err);
+
+        if (err.failed()) {
+            if (err == boost::asio::error::would_block) {
+                break;
+            } else {
+                Logger::logError("Error receiving packet: " + err.message());
+                for (auto& conn: connections) {
+                    conn.second->close();
+                }
+                break;
+            }
+        }
+
+        if (size == 0) {
+            break;
+        }
+
+        bool foundEndpoint = false;
+        for (const auto& pair : connections) {
+            const auto& conn = pair.second;
+            if (conn->matchesEndpoint(from) && conn->getStatus() == ConnectionStatus::Connected) {
+                if (conn->packetListener != nullptr) {
+                    conn->packetListener->onReceive(gsl::span(cache.data(), size));
+                } else {
+                    Logger::logError("No packet listener registered, packet will be lost", true);
+                }
+                foundEndpoint = true;
+                break;
+            }
+        }
+
+        if (!foundEndpoint) {
+            unknownConnCallback(from, gsl::span(cache.data(), size));
+        }
+    }
 }

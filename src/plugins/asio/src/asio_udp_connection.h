@@ -13,18 +13,16 @@
 #include <deque>
 #include <array>
 #include <string>
-#include <gsl/gsl>
 
 namespace Halley
 {
-	class NetworkService;
 	using UDPEndpoint = boost::asio::ip::udp::endpoint;
 	using UDPSocket = boost::asio::ip::udp::socket;
 
 	class AsioUDPConnection : public IConnection
 	{
 	public:
-		AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote);
+		explicit AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote);
 
 		void close() override;
 		ConnectionStatus getStatus() const override { return status; }
@@ -33,13 +31,21 @@ namespace Halley
 		bool receive(InboundNetworkPacket& packet) override;
 		
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;
-		void onReceive(gsl::span<const gsl::byte> data);
 		void setError(const std::string& cs);
-		
-		void open(short connectionId);
-		void onOpen(short connectionId);
+
 		void terminateConnection();
 		short getConnectionId() const { return connectionId; }
+
+        [[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
+
+        void onConnect(short connId) override;
+
+        void sendUnreliablePacket(gsl::span<gsl::byte> packet) override;
+        void setUnreliablePacketListener(IConnection::IPacketListener* listener) override;
+
+        static void receiveAll(
+                UDPSocket &socket, HashMap<short, std::shared_ptr<AsioUDPConnection>>& connections,
+                const std::function<void(UDPEndpoint& remote, gsl::span<gsl::byte> packet)>& unknownConnCallback);
 
 	private:
 		UDPSocket& socket;
@@ -47,11 +53,8 @@ namespace Halley
 		ConnectionStatus status;
 		short connectionId;
 
-		std::deque<OutboundNetworkPacket> pendingSend;
-		std::deque<InboundNetworkPacket> pendingReceive;
-		std::array<gsl::byte, 2048> sendBuffer;
 		std::string error;
 
-		void sendNext();
+        IConnection::IPacketListener* packetListener = nullptr;
 	};
 }

@@ -10,7 +10,7 @@
 
 namespace Halley {
 	class AckUnreliableConnectionStats;
-	class MessageQueueUDP;
+	class MessageQueueUDPV2;
 	class NetworkService;
 
 	class NetworkSession {
@@ -123,7 +123,7 @@ namespace Halley {
 		struct Peer {
 			PeerId peerId = -1;
 			bool alive = true;
-			std::shared_ptr<MessageQueueUDP> connection;
+			std::shared_ptr<MessageQueueUDPV2> connection;
 			std::shared_ptr<AckUnreliableConnectionStats> stats;
 
 			ConnectionStatus getStatus() const;

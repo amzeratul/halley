@@ -48,15 +48,12 @@ namespace Halley
 		asio::ip::udp::socket socket;
 		HashMap<short, std::shared_ptr<AsioUDPConnection>> activeConnections;
 
-		std::array<gsl::byte, 2048> receiveBuffer;
+		void receivePacket(UDPEndpoint& endpoint, gsl::span<gsl::byte> data, std::string* error);
 
-		void receiveNext();
-		void receivePacket(gsl::span<gsl::byte> data, std::string* error);
-		bool isValidConnectionRequest(gsl::span<const gsl::byte> data);
-		short getFreeId() const;
+        [[nodiscard]] bool hasConnectionWithId(short connId) const override;
 
-		std::shared_ptr<AsioUDPConnection> acceptConnection(UDPEndpoint endPoint);
-		void rejectConnection();
+		std::shared_ptr<AsioUDPConnection> doAcceptConnection(UDPEndpoint endPoint);
+		void doRejectConnection();
 	};
 
 }

@@ -27,7 +27,7 @@ namespace Halley
 	public:
 		virtual ~MessageQueue();
 		
-		virtual bool isConnected() const = 0;
+		[[nodiscard]] virtual bool isConnected() const = 0;
 		virtual void enqueue(OutboundNetworkPacket packet, uint8_t channel) = 0;
 		virtual void sendAll() = 0;
 		virtual Vector<InboundNetworkPacket> receivePackets() = 0;

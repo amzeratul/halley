@@ -12,8 +12,7 @@
 
 namespace Halley
 {
-	class AckUnreliableConnection;
-
+#if 0
 	class MessageQueueUDP : public MessageQueue, private IAckUnreliableConnectionListener
 	{
 		struct Outbound {
@@ -81,6 +80,34 @@ namespace Halley
 		AckUnreliableSubPacket makeTaggedPacket(Vector<Outbound>& msgs, size_t size, bool resends = false, uint16_t resendSeq = 0);
 		Vector<gsl::byte> serializeMessages(const Vector<Outbound>& msgs, size_t size) const;
 
-		void receiveMessages();
+		void receiveAll();
 	};
+#endif
+
+    class MessageQueueUDPV2 : public MessageQueue, private IAckUnreliableConnectionListener
+    {
+    public:
+        explicit MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnectionV2> connection);
+
+        [[nodiscard]] bool isConnected() const override;
+        void enqueue(OutboundNetworkPacket packet, uint8_t channel) override;
+        void sendAll() override;
+        Vector<InboundNetworkPacket> receivePackets() override;
+
+        void close();
+        [[nodiscard]] ConnectionStatus getStatus() const;
+        [[nodiscard]] float getLatency() const;
+
+        void onPacketAcked(int tag) override {};
+
+    private:
+        struct Outbound {
+            OutboundNetworkPacket packet;
+            uint8_t channel = 0;
+        };
+
+        std::shared_ptr<AckUnreliableConnectionV2> connection;
+
+        Vector<Outbound> outboundQueued;
+    };
 }

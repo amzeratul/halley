@@ -62,5 +62,5 @@ Future<AuthTokenResult> AsioPlatformAPI::getAuthToken(const Halley::AuthTokenPar
 
 std::shared_ptr<NetworkService> AsioPlatformAPI::createNetworkService(uint16_t port)
 {
-    return AsioNetworkAPI().createService(NetworkProtocol::TCP, port);
+    return AsioNetworkAPI().createService(NetworkProtocol::UDP, port);
 }

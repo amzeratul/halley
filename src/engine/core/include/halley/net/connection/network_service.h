@@ -62,6 +62,14 @@ namespace Halley
 		virtual std::shared_ptr<IConnection> connect(const String& address) = 0;
 
 		virtual void setSimulateQualityLevel(Quality quality) {}
+
+    protected:
+        static void sendHandshake(IConnection& connection);
+        static void sendHandshakeAccept(IConnection& connection, short id);
+        static bool isValidHandshake(gsl::span<const gsl::byte> data, short* connId);
+
+        [[nodiscard]] short getFreeConnectionId() const;
+        [[nodiscard]] virtual bool hasConnectionWithId(short connId) const { return true; }
 	};
 
 	template <>
