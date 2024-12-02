@@ -291,6 +291,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
+    serializationContext.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Network);
 
     // Entity
     journal.beginEntity(serializer, entity, parent);
@@ -402,6 +403,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
+    serializationContext.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Network);
 
     context->setCurrentEntity(entity.getEntityId());
 
