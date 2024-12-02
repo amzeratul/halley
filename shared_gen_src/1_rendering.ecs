@@ -67,6 +67,7 @@ component:
       type: 'Halley::AnimationPlayer'
       displayName: Player
       collapse: true
+      canNetwork: false
   - updateSprite:
       type: bool
       defaultValue: true
