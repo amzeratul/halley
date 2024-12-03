@@ -37,6 +37,11 @@ String InputDevice::getButtonName(int code) const
 	return "";
 }
 
+String InputDevice::getButtonName(int code, std::optional<JoystickType> typeOverride) const
+{
+	return getButtonName(code);
+}
+
 int InputDevice::getButtonAtPosition(JoystickButtonPosition position) const
 {
 	return -1;

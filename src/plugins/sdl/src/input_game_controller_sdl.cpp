@@ -128,7 +128,14 @@ int InputGameControllerSDL::getButtonAtPosition(JoystickButtonPosition position)
 
 String InputGameControllerSDL::getButtonName(int code) const
 {
-	if (joystickType == JoystickType::Xbox || joystickType == JoystickType::Generic) {
+	return getButtonName(code, {});
+}
+
+String InputGameControllerSDL::getButtonName(int code, std::optional<JoystickType> typeOverride) const
+{
+	const auto type = typeOverride.value_or(joystickType);
+
+	if (type == JoystickType::Xbox || type == JoystickType::Generic) {
 		auto buttons = std::array<const char*, 23>{
 			"xbox_a",
 			"xbox_b",
@@ -155,7 +162,7 @@ String InputGameControllerSDL::getButtonName(int code) const
 			"xbox_rt",
 		};
 		return buttons[code];
-	} else if (joystickType == JoystickType::Playstation) {
+	} else if (type == JoystickType::Playstation) {
 		auto buttons = std::array<const char*, 23>{
 			"playstation_cross",
 			"playstation_circle",
@@ -182,7 +189,7 @@ String InputGameControllerSDL::getButtonName(int code) const
 			"playstation_r2",
 		};
 		return buttons[code];
-	} else if (joystickType == JoystickType::SwitchFull) {
+	} else if (type == JoystickType::SwitchFull) {
 		auto buttons = std::array<const char*, 23>{
 			"switch_b",
 			"switch_a",
@@ -209,7 +216,7 @@ String InputGameControllerSDL::getButtonName(int code) const
 			"switch_zr",
 		};
 		return buttons[code];
-	} else if (joystickType == JoystickType::SwitchLeftJoycon) {
+	} else if (type == JoystickType::SwitchLeftJoycon) {
 		auto buttons = std::array<const char*, 23>{
 			"switch_alt_b",
 			"switch_alt_a",
@@ -236,7 +243,7 @@ String InputGameControllerSDL::getButtonName(int code) const
 			"switch_zr",
 		};
 		return buttons[code];
-	} else if (joystickType == JoystickType::SwitchRightJoycon) {
+	} else if (type == JoystickType::SwitchRightJoycon) {
 		auto buttons = std::array<const char*, 23>{
 			"switch_alt_b",
 			"switch_alt_a",
