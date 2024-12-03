@@ -230,7 +230,7 @@ void EntityNetworkChanges::enumerateEntities(const std::function<void (const Pag
     }
 }
 
-bool EntityNetworkChanges::findNextComponent(Page& out, int& pageIdx) const
+EntityNetworkChanges::Page* EntityNetworkChanges::findNextComponent(int& pageIdx)
 {
     while (pageIdx < pp) {
         auto& page = pages[pageIdx];
@@ -242,23 +242,22 @@ bool EntityNetworkChanges::findNextComponent(Page& out, int& pageIdx) const
         pageIdx++;
 
         if (page.type == Type::Component) {
-            out = page;
-            return true;
+            return &page;
         }
     }
 
-    return false;
+    return nullptr;
 }
 
-int EntityNetworkChanges::findEntityByUUID(Page& out, const UUID& uuid) const
+const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const UUID& uuid, int& pageIdx) const
 {
     for (int p = 0; p < pp; p++) {
         auto &page = pages[p];
 
         if (page.type == Type::Entity) {
             if (page.uuid == uuid) {
-                out = page;
-                return p;
+                pageIdx = p;
+                return page;
             }
         }
     }
@@ -433,6 +432,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
 bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
 {
     bool modified = previous.empty();
+   hasComponentsAddedOrRemoved = false;
 
     // Compare with previously saved journal.
 
@@ -487,42 +487,37 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
             // Enumerate again, but only care about entities marked as
             // "changed". This includes to root entity though.
 
-            hasComponentsAddedOrRemoved = false;
-
             journal.enumerateEntityPages(
                     childrenChanged,
                     [&](const EntityNetworkChanges::Page& page, int pageIdx) {
                         // Search the matching page in previous journal.
-                        EntityNetworkChanges::Page prevEntityPage {};
-                        int prevPageIdx = previousJournal.findEntityByUUID(prevEntityPage, page.uuid);
+                        int prevPageIdx;
+                        auto& prevEntityPage = previousJournal.findEntityByUUID(page.uuid, prevPageIdx);
 
                         // Compare hashes for the entity page.
                         page.modified = page.hash != prevEntityPage.hash;
 
                         // Enumerate components for this entity.
                         {
-                            EntityNetworkChanges::Page componentPage;
-                            int componentPageIdx = pageIdx;
+                            int componentPageIdx = pageIdx + 1;
 
-                            while (journal.findNextComponent(componentPage, componentPageIdx)) {
+                            while (auto componentPage = journal.findNextComponent(componentPageIdx)) {
                                 // Search for the same component, by ID, in the previous journal.
-                                EntityNetworkChanges::Page prevComponentPage;
+                                EntityNetworkChanges::Page* prevComponentPage = nullptr;
                                 int prevComponentPageIdx = prevPageIdx + 1;
-                                bool foundMatchingComponent = false;
 
-                                while (previousJournal.findNextComponent(prevComponentPage, prevComponentPageIdx)) {
-                                    if (componentPage.componentId == prevComponentPage.componentId) {
-                                        foundMatchingComponent = true;
+                                while ((prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) != nullptr) {
+                                    if (componentPage->componentId == prevComponentPage->componentId) {
                                         break;
                                     }
                                 }
 
-                                if (foundMatchingComponent) {
+                                if (prevComponentPage != nullptr) {
                                     // Compare hashes of current and previous components.
-                                    componentPage.modified = componentPage.hash != prevComponentPage.hash;
+                                    componentPage->modified = componentPage->hash != prevComponentPage->hash;
 
                                     // If any component has been modified, mark the entity page as modified too.
-                                    page.modified |= componentPage.modified;
+                                    page.modified |= componentPage->modified;
                                 } else {
                                     // not found in previous journal
                                     hasComponentsAddedOrRemoved = true;
@@ -534,22 +529,19 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         // but "reversed" - check for components that have been removed.
 
                         if (!hasComponentsAddedOrRemoved) {
-                            EntityNetworkChanges::Page prevComponentPage;
                             int prevComponentPageIdx = prevPageIdx + 1;
 
-                            while (previousJournal.findNextComponent(prevComponentPage, prevComponentPageIdx)) {
-                                EntityNetworkChanges::Page componentPage;
-                                int componentPageIdx = pageIdx;
-                                bool foundMatchingComponent = false;
+                            while (auto prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) {
+                                EntityNetworkChanges::Page* componentPage = nullptr;
+                                int componentPageIdx = pageIdx + 1;
 
-                                while (journal.findNextComponent(componentPage, componentPageIdx)) {
-                                    if (componentPage.componentId == prevComponentPage.componentId) {
-                                        foundMatchingComponent = true;
+                                while ((componentPage = journal.findNextComponent(componentPageIdx)) != nullptr) {
+                                    if (componentPage->componentId == prevComponentPage->componentId) {
                                         break;
                                     }
                                 }
 
-                                if (!foundMatchingComponent) {
+                                if (componentPage != nullptr) {
                                     hasComponentsAddedOrRemoved = true;
                                     break;
                                 }

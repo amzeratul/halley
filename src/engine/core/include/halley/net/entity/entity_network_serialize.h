@@ -63,9 +63,9 @@ namespace Halley {
 
         void enumerateEntities(const std::function<void (const Page& page, int pageIdx)>& onEntity) const;
 
-        [[nodiscard]] bool findNextComponent(Page& out, int& pageIdx) const;
+        Page* findNextComponent(int& pageIdx);
 
-        [[nodiscard]] int findEntityByUUID(Page& out, const UUID& uuid) const;
+        const Page& findEntityByUUID(const UUID& uuid, int& pageIdx) const;
 
     private:
         Page curPage;
