@@ -48,8 +48,13 @@ UUID::UUID(std::string_view strView)
 }
 
 UUID::UUID(const ConfigNode& node)
-	: UUID(node.asString())
+	: UUID()
 {
+	if (node.getType() == ConfigNodeType::String) {
+		tryParse(node.asString());
+	} else if (node.getType() == ConfigNodeType::Bytes) {
+		*this = UUID(node.asBytes());
+	}
 }
 
 bool UUID::isUUID(std::string_view strView)
