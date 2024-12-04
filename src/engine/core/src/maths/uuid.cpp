@@ -51,7 +51,9 @@ UUID::UUID(const ConfigNode& node)
 	: UUID()
 {
 	if (node.getType() == ConfigNodeType::String) {
-		tryParse(node.asString());
+		if (auto value = tryParse(node.asString())) {
+			*this = *value;
+		}
 	} else if (node.getType() == ConfigNodeType::Bytes) {
 		*this = UUID(node.asBytes());
 	}
