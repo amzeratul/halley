@@ -165,3 +165,16 @@ void ConfigNodeSerializer<ScriptStateSet>::deserialize(const EntitySerialization
 {
 	target.load(node, context);
 }
+
+void ByteSerializationHelper<ScriptStateSet>::serialize(const ScriptStateSet& value, const EntitySerializationContext& context, Serializer& serializer)
+{
+    auto node = ConfigNodeSerializer<ScriptStateSet>().serialize(value, context);
+    serializer << node;
+}
+
+void ByteSerializationHelper<ScriptStateSet>::deserialize(ScriptStateSet& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+{
+    ConfigNode node;
+    deserializer >> node;
+    ConfigNodeSerializer<ScriptStateSet>().deserialize(context, node, dst);
+}

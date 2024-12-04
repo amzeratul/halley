@@ -103,4 +103,14 @@ namespace Halley {
 		ScriptStateSet deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptStateSet& target);
 	};
+
+    template <typename T>
+    class ByteSerializationHelper;
+
+    template <>
+    class ByteSerializationHelper<ScriptStateSet> {
+    public:
+        static void serialize(const ScriptStateSet& value, const EntitySerializationContext& context, Serializer& serializer);
+        static void deserialize(ScriptStateSet& dst, const EntitySerializationContext& context, Deserializer& deserializer);
+    };
 }

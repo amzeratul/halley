@@ -1,4 +1,5 @@
 #include "halley/scripting/script_variables.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/entity/entity_id.h"
 
@@ -100,4 +101,17 @@ ScriptVariables ConfigNodeSerializer<ScriptVariables>::deserialize(const EntityS
 void ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptVariables& target)
 {
 	target.load(node, context);
+}
+
+void ByteSerializationHelper<ScriptVariables>::serialize(const ScriptVariables& value, const EntitySerializationContext& context, Serializer& serializer)
+{
+    auto node = ConfigNodeSerializer<ScriptVariables>().serialize(value, context);
+    serializer << node;
+}
+
+void ByteSerializationHelper<ScriptVariables>::deserialize(ScriptVariables& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+{
+    ConfigNode node;
+    deserializer >> node;
+    ConfigNodeSerializer<ScriptVariables>().deserialize(context, node, dst);
 }

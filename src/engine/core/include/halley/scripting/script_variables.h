@@ -32,4 +32,14 @@ namespace Halley {
 		ScriptVariables deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptVariables& target);
     };
+
+    template <typename T>
+    class ByteSerializationHelper;
+
+    template <>
+    class ByteSerializationHelper<ScriptVariables> {
+    public:
+        static void serialize(const ScriptVariables& value, const EntitySerializationContext& context, Serializer& serializer);
+        static void deserialize(ScriptVariables& dst, const EntitySerializationContext& context, Deserializer& deserializer);
+    };
 }
