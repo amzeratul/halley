@@ -144,6 +144,7 @@ namespace Halley {
 		virtual size_t getNumberAxes();
 
 		virtual String getButtonName(int code) const;
+		virtual String getButtonName(int code, std::optional<JoystickType> typeOverride) const;
 		virtual int getButtonAtPosition(JoystickButtonPosition position) const;
 
 		virtual bool isAnyButtonPressed();

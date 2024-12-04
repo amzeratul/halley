@@ -23,6 +23,7 @@ namespace Halley {
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
 		String getButtonName(int code) const override;
+		String getButtonName(int code, std::optional<JoystickType> typeOverride) const override;
 
 		bool hasLED() const override;
 		void setLED(Colour4c colour) const override;

@@ -23,8 +23,8 @@ namespace Halley {
         explicit UUID(std::string_view str);
         explicit UUID(const ConfigNode& node);
 
-        static bool isUUID(std::string_view str);
-        static std::optional<UUID> tryParse(std::string_view str);
+        [[nodiscard]] static bool isUUID(std::string_view str);
+        [[nodiscard]] static std::optional<UUID> tryParse(std::string_view str);
 
         bool operator==(const UUID& other) const;
         bool operator!=(const UUID& other) const;
@@ -33,9 +33,9 @@ namespace Halley {
 		String toString() const;
         ConfigNode toConfigNode() const;
 
-        static UUID generate();
-        static UUID generateFromUUIDs(const UUID& one, const UUID& two);
-    	bool isValid() const;
+        [[nodiscard]] static UUID generate();
+        [[nodiscard]] static UUID generateFromUUIDs(const UUID& one, const UUID& two);
+    	[[nodiscard]] bool isValid() const;
 
         gsl::span<const gsl::byte> getBytes() const;
 		gsl::span<gsl::byte> getWriteableBytes();
