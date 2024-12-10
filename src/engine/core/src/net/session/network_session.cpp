@@ -751,7 +751,7 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	const size_t lineSize = 64; // TODO
 
 	auto stats = std::make_shared<AckUnreliableConnectionStats>(statsCapacity, lineSize);
-	auto ackConn = std::make_shared<AckUnreliableConnectionV2>(std::move(connection), service);
+	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection), service);
 	ackConn->setStatsListener(stats.get());
 
 	auto messageQueue = std::make_shared<MessageQueueUDPV2>(ackConn);

@@ -84,10 +84,10 @@ namespace Halley
 	};
 #endif
 
-    class MessageQueueUDPV2 : public MessageQueue, private IAckUnreliableConnectionListener
+    class MessageQueueUDPV2 : public MessageQueue
     {
     public:
-        explicit MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnectionV2> connection);
+        explicit MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnection> connection);
 
         [[nodiscard]] bool isConnected() const override;
         void enqueue(OutboundNetworkPacket packet, uint8_t channel) override;
@@ -98,15 +98,13 @@ namespace Halley
         [[nodiscard]] ConnectionStatus getStatus() const;
         [[nodiscard]] float getLatency() const;
 
-        void onPacketAcked(int tag) override {};
-
     private:
         struct Outbound {
             OutboundNetworkPacket packet;
             uint8_t channel = 0;
         };
 
-        std::shared_ptr<AckUnreliableConnectionV2> connection;
+        std::shared_ptr<AckUnreliableConnection> connection;
 
         Vector<Outbound> outboundQueued;
     };

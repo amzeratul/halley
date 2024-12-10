@@ -336,7 +336,7 @@ AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<Outbound>& msgs,
 }
 #endif
 
-MessageQueueUDPV2::MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnectionV2> connection)
+MessageQueueUDPV2::MessageQueueUDPV2(std::shared_ptr<AckUnreliableConnection> connection)
     : connection(std::move(connection))
 {
 
