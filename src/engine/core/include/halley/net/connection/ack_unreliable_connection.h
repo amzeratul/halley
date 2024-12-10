@@ -152,18 +152,22 @@ namespace Halley
         void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
 
     private:
+    	using Clock = std::chrono::steady_clock;
+
         struct SubPacket
         {
             Bytes data;
             size_t dataSize;
             uint16_t seqIdx;
             uint8_t subIdx;
+        	Clock::time_point timestamp;
         };
 
         struct InOutQueue
         {
             std::array<SubPacket, 256> packets;
-            int packetIdx = 0;
+            int curPacketIdx = 0;
+        	int firstPacketIdx = 0;
             uint16_t curSeqIdx = 0;
         };
 
@@ -178,18 +182,25 @@ namespace Halley
         InOutQueue inbound;
         InOutQueue outbound;
 
-        std::array<uint8_t, 256> ackPackets = {};
-        int numAckPackets = 0;
+        std::array<uint8_t, 256> outboundAckPackets = {};
+        int numOutboundAckPackets = 0;
 
         float lag = 1.0f;
+
+    	float simulatePacketLoss = 0.2f;
 
         Vector<IAckUnreliableConnectionListener*> ackListeners;
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
         void doSend(SubPacket& packet, int packetIdx);
+    	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx);
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const gsl::byte> data);
+
+    	void resendUnAckPackets(float minResendTimeDiff);
+
+    	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx);
     };
 
 }

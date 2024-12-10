@@ -18,8 +18,8 @@ namespace Halley
 	class AsioUDPNetworkService : public NetworkServiceWithStats
 	{
 	public:
-		AsioUDPNetworkService(int port, IPVersion version = IPVersion::IPv4);
-		~AsioUDPNetworkService();
+		explicit AsioUDPNetworkService(int port, IPVersion version = IPVersion::IPv4);
+		~AsioUDPNetworkService() override;
 
 		void update(Time t) override;
 

@@ -10,10 +10,6 @@
 #define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
 
-#include <deque>
-#include <array>
-#include <string>
-
 namespace Halley
 {
 	using UDPEndpoint = boost::asio::ip::udp::endpoint;
@@ -40,8 +36,8 @@ namespace Halley
 
         void onConnect(short connId) override;
 
-        void sendUnreliablePacket(gsl::span<gsl::byte> packet) override;
-        void setUnreliablePacketListener(IConnection::IPacketListener* listener) override;
+        void sendUnreliablePacket(gsl::span<const gsl::byte> packet) override;
+        void setUnreliablePacketListener(IPacketListener* listener) override;
 
         static void receiveAll(
                 UDPSocket &socket, HashMap<short, std::shared_ptr<AsioUDPConnection>>& connections,
@@ -55,6 +51,6 @@ namespace Halley
 
 		std::string error;
 
-        IConnection::IPacketListener* packetListener = nullptr;
+        IPacketListener* packetListener = nullptr;
 	};
 }

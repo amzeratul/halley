@@ -48,7 +48,7 @@ namespace Halley
 
         virtual void onConnect(short connId) {}
 
-        virtual void sendUnreliablePacket(gsl::span<gsl::byte> packet) {}
+        virtual void sendUnreliablePacket(gsl::span<const gsl::byte> packet) {}
 
         virtual void setUnreliablePacketListener(IPacketListener* listener) {}
 	};

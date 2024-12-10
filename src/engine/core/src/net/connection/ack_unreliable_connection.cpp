@@ -1,15 +1,14 @@
 #include "halley/net/connection/ack_unreliable_connection.h"
 #include "halley/net/connection/network_packet.h"
 #include "halley/net/connection/network_service.h"
-#include <iostream>
 #include <chrono>
 #include <utility>
 #include <halley/utils/utils.h>
 #include <halley/support/exception.h>
 
 #include "halley/bytes/byte_serializer.h"
+#include <halley/maths/random.h>
 #include "halley/support/logger.h"
-#include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -427,7 +426,7 @@ void AckUnreliableConnectionV2::send(TransmissionType type, OutboundNetworkPacke
     size_t maxSize = maxPacketSize - headerSize;
 
     if (maxSize >= size) {
-        auto& slot = outbound.packets[outbound.packetIdx];
+        auto& slot = outbound.packets[outbound.curPacketIdx];
 
         if (slot.seqIdx < 0x8000) {
             Logger::logError("Outbound packet queue is full");
@@ -439,9 +438,9 @@ void AckUnreliableConnectionV2::send(TransmissionType type, OutboundNetworkPacke
         slot.seqIdx = outbound.curSeqIdx;
         slot.subIdx = 0;
 
-        doSend(slot, outbound.packetIdx);
+        doSend(slot, outbound.curPacketIdx);
 
-        outbound.packetIdx = (outbound.packetIdx + 1) % 256;
+        outbound.curPacketIdx = (outbound.curPacketIdx + 1) % 256;
     } else {
         size_t numSubPackets = size / maxSize;
         if (size % maxSize != 0) {
@@ -455,7 +454,7 @@ void AckUnreliableConnectionV2::send(TransmissionType type, OutboundNetworkPacke
         auto packetData = packet.getBytes();
 
         for (size_t i = 0; i < numSubPackets; i++) {
-            auto& slot = outbound.packets[outbound.packetIdx];
+            auto& slot = outbound.packets[outbound.curPacketIdx];
 
             if (slot.seqIdx < 0x8000) {
                 Logger::logError("Outbound packet queue is full");
@@ -471,9 +470,9 @@ void AckUnreliableConnectionV2::send(TransmissionType type, OutboundNetworkPacke
             slot.seqIdx = outbound.curSeqIdx;
             slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
 
-            doSend(slot, outbound.packetIdx);
+            doSend(slot, outbound.curPacketIdx);
 
-            outbound.packetIdx = (outbound.packetIdx + 1) % 256;
+            outbound.curPacketIdx = (outbound.curPacketIdx + 1) % 256;
         }
 
         Expects(packetData.empty());
@@ -510,7 +509,23 @@ void AckUnreliableConnectionV2::doSend(SubPacket& packet, int packetIdx)
     header[14] = 0;
     header[15] = 0;
 
-    parent->sendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize));
+	packet.timestamp = Clock::now();
+
+	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), packet.seqIdx);
+}
+
+void AckUnreliableConnectionV2::doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx)
+{
+#ifdef DEV_BUILD
+	if (simulatePacketLoss > 0.0f && seqIdx != 0xffff) {
+		if (Random::getGlobal().getFloat(0.0f, 1.0f) < simulatePacketLoss) {
+			Logger::logDev("[x] lose " + toString(seqIdx));
+			return;
+		}
+	}
+#endif
+
+	parent->sendUnreliablePacket(packet);
 }
 
 bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
@@ -520,7 +535,10 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
         return false;
     }
 
-    auto& slot = inbound.packets[inbound.packetIdx];
+	// Need to send ack packets first, code below invalidates the sequence indices.
+	doSendAckPackets();
+
+    auto& slot = inbound.packets[inbound.curPacketIdx];
 
     if (slot.seqIdx < 0x8000) {
         if (slot.seqIdx != inbound.curSeqIdx) {
@@ -538,7 +556,9 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
                 statsListener->onPacketReceived(inbound.curSeqIdx, slot.dataSize, false);
             }
 
-            inbound.packetIdx = (inbound.packetIdx + 1) % 256;
+        	//Logger::logDev("[#] complete " + toString(inbound.curSeqIdx));
+
+        	inbound.curPacketIdx = (inbound.curPacketIdx + 1) % 256;
             inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
 
             return true;
@@ -549,7 +569,7 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
 
             bool isComplete = true;
             for (size_t i = 1; isComplete && i < numSubPackets; i++) {
-                const auto& sub = inbound.packets[(inbound.packetIdx + i) % 256];
+                const auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
                 isComplete &= sub.seqIdx == slot.seqIdx;
                 isComplete &= (sub.subIdx & 15) == i;
                 isComplete &= (sub.subIdx >> 4) == numSubPackets;
@@ -559,7 +579,7 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
                 size_t totalSize = 0;
 
                 for (size_t i = 0; i < numSubPackets; i++) {
-                    auto& sub = inbound.packets[(inbound.packetIdx + i) % 256];
+                    auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
 
                     memcpy(inboundCache.data() + totalSize, sub.data.data(), sub.dataSize);
                     totalSize += sub.dataSize;
@@ -575,7 +595,9 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
                     statsListener->onPacketReceived(inbound.curSeqIdx, totalSize, false);
                 }
 
-                inbound.packetIdx = (inbound.packetIdx + numSubPackets) % 256;
+            	//Logger::logDev("[#] complete " + toString(inbound.curSeqIdx));
+
+            	inbound.curPacketIdx = (inbound.curPacketIdx + numSubPackets) % 256;
                 inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
 
                 return true;
@@ -583,7 +605,7 @@ bool AckUnreliableConnectionV2::receive(InboundNetworkPacket& packet)
         }
     }
 
-    doSendAckPackets();
+	resendUnAckPackets(std::clamp(lag * 1.5f, 0.025f, 1.0f));
 
     return false;
 }
@@ -604,6 +626,7 @@ void AckUnreliableConnectionV2::onReceive(gsl::span<const gsl::byte> packet)
     uint16_t seqIdx = uint16_t(header[4] << 8) | header[5];
 
     if (seqIdx == 0xffff) {
+    	// This is an ACK packet.
         onAckPacketsReceive(packet.subspan(6));
         return;
     }
@@ -617,29 +640,49 @@ void AckUnreliableConnectionV2::onReceive(gsl::span<const gsl::byte> packet)
         connIdLen = 2;
     }*/
 
+	size_t dataSize = packetSize - headerSize + connIdLen;
+
     auto& slot = inbound.packets[packetIdx];
+
+	if (slot.seqIdx == seqIdx) {
+		// Already got this packet.
+		if (slot.subIdx != subIdx || slot.dataSize != dataSize) {
+	        throw Exception("Rcv resent packet, but data mismatch", HalleyExceptions::Network);
+		}
+		if (statsListener) {
+			statsListener->onPacketReceived(seqIdx, dataSize, true);
+		}
+		Logger::logDev("[x] drop " + toString(seqIdx));
+		return;
+	}
+
+	if (isExpiredSeqIndex(inbound, seqIdx)) {
+		return;
+	}
 
     if (slot.seqIdx < 0x8000) {
         throw Exception("Too many inbound packets", HalleyExceptions::Network);
     }
 
-    slot.dataSize = packetSize - headerSize + connIdLen;
-    memcpy(slot.data.data(), packet.data() + headerSize - connIdLen, slot.dataSize);
+	//Logger::logDev("[ ] recv " + toString(seqIdx));
+
+    slot.dataSize = dataSize;
+    memcpy(slot.data.data(), packet.data() + headerSize - connIdLen, dataSize);
 
     slot.seqIdx = seqIdx;
     slot.subIdx = subIdx;
 
-    Expects(numAckPackets < 256);
-    ackPackets[numAckPackets++] = packetIdx;
+    Expects(numOutboundAckPackets < 256);
+    outboundAckPackets[numOutboundAckPackets++] = packetIdx;
 }
 
 void AckUnreliableConnectionV2::doSendAckPackets()
 {
-    if (numAckPackets == 0) {
+    if (numOutboundAckPackets == 0) {
         return;
     }
 
-    std::array<uint8_t, 6 + 256> packet = {};
+    std::array<uint8_t, 6 + 256 * 3> packet = {};
 
     uint8_t* msg = packet.data();
 
@@ -651,30 +694,128 @@ void AckUnreliableConnectionV2::doSendAckPackets()
     msg[4] = 0xff;
     msg[5] = 0xff;
 
-    for (int i = 0; i < numAckPackets; i++) {
-        msg[6 + i] = ackPackets[i];
+    for (int i = 0; i < numOutboundAckPackets; i++) {
+    	uint8_t packetIdx = outboundAckPackets[i];
+
+    	auto& slot = inbound.packets[packetIdx];
+
+        msg[6 + 3 * i] = packetIdx;
+        msg[6 + 3 * i + 1] = slot.seqIdx >> 8;
+        msg[6 + 3 * i + 2] = slot.seqIdx & 0xff;
+
+    	//Logger::logDev("[ ] ack " + toString(slot.seqIdx));
     }
 
-    // TODO: this isn't reliable - if this ACK package doesn't arrive, we are in trouble.
-    parent->sendUnreliablePacket(gsl::span<gsl::byte>((gsl::byte*) packet.data(), 6 + numAckPackets));
+    // NOTE: this isn't sent reliably either
+	doSendUnreliablePacket(gsl::span<const gsl::byte>(reinterpret_cast<gsl::byte *>(packet.data()), 6 + 3 * numOutboundAckPackets), 0xffff);
 
-    numAckPackets = 0;
+	numOutboundAckPackets = 0;
+
+#if 0
+	// Walk forward the "first packet in use" index.
+	while (inbound.firstPacketIdx != inbound.curPacketIdx) {
+		auto slot = &inbound.packets[inbound.firstPacketIdx];
+		if (slot->seqIdx != 0xffff) {
+			break;
+		}
+		inbound.firstPacketIdx = (inbound.firstPacketIdx + 1) % 256;
+	}
+#endif
 }
 
 void AckUnreliableConnectionV2::onAckPacketsReceive(gsl::span<const gsl::byte> data)
 {
-    auto ids = (const uint8_t*) data.data();
+    auto ackData = reinterpret_cast<const uint8_t *>(data.data());
     size_t size = data.size();
 
-    for (size_t i = 0; i < size; i++) {
-        auto slot = &outbound.packets[ids[i]];
+	Ensures(size > 0 && (size % 3) == 0);
 
-        if (statsListener) {
-            statsListener->onPacketAcked(slot->seqIdx);
-        }
+	float avgLatencySum = 0.f;
+	size_t avgLatencyCount = 0;
+	const Clock::time_point now = Clock::now();
 
-        slot->seqIdx = 0xffff;
+    for (size_t i = 0; i < size; i += 3) {
+    	uint8_t packetIdx = ackData[i];
+    	uint16_t seqIdx = uint16_t(ackData[i + 1] << 8) | ackData[i + 2];
+
+        auto slot = &outbound.packets[packetIdx];
+
+    	if (slot->seqIdx != 0xffff) {
+    		if (slot->seqIdx == seqIdx) {
+    			if (statsListener) {
+    				statsListener->onPacketAcked(slot->seqIdx);
+    			}
+
+    			//Logger::logDev("[ ] rcv ack " + toString(seqIdx));
+
+    			slot->seqIdx = 0xffff;
+
+    			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
+    			avgLatencyCount++;
+    		} else {
+	    		Logger::logDev("rcv mismatch ACK for slot " + toString((int) packetIdx) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
+    		}
+    	} else {
+    		if (!isExpiredSeqIndex(outbound, seqIdx)) {
+    			// Resent packets can be ack'd more than once.
+    			Logger::logDev("rcv ACK for empty slot " + toString((int) packetIdx) + ", remote seqIdx " + toString(seqIdx));
+    		}
+    	}
     }
+
+	// Now that this ACK packet has been processed, walk forward the "first
+	// packet in use" index.
+	while (outbound.firstPacketIdx != outbound.curPacketIdx) {
+		auto slot = &outbound.packets[outbound.firstPacketIdx];
+		if (slot->seqIdx != 0xffff) {
+			break;
+		}
+		outbound.firstPacketIdx = (outbound.firstPacketIdx + 1) % 256;
+	}
+
+	// Re-send packets which are not yet acknowledged.
+	// Ignore packet age, we just re-send everything that still lingers at start of the
+	// outbound queue.
+	//resendUnAckPackets(0.0f);
+
+	// Update latency
+	if (avgLatencyCount > 0) {
+		avgLatencySum /= static_cast<float>(avgLatencyCount);
+		lag = lerp(lag, avgLatencySum, 0.2f);
+	}
+}
+
+void AckUnreliableConnectionV2::resendUnAckPackets(float minResendTimeDiff)
+{
+	const Clock::time_point now = Clock::now();
+
+	// This re-sends packets which are not yet acknowledged.
+	// Stops at the first "gap", which would be a packet which we already got
+	// an ACK for.
+	int idx = outbound.firstPacketIdx;
+	while (idx != outbound.curPacketIdx) {
+		auto slot = &outbound.packets[idx];
+
+		if (slot->seqIdx == 0xffff) {
+			break; // stop at the first index not in use
+		}
+
+		float timeSinceSent = std::chrono::duration<float>(now - slot->timestamp).count();
+		if (timeSinceSent < minResendTimeDiff) {
+			break; // stop at first packet queued up too recently
+		}
+
+		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize), slot->seqIdx);
+
+		if (statsListener) {
+			statsListener->onPacketResent(slot->seqIdx);
+		}
+
+		// Update timestamp, or this will spam each frame.
+		slot->timestamp = now;
+
+		idx = (idx + 1) % 256;
+	}
 }
 
 float AckUnreliableConnectionV2::getLatency() const
@@ -685,4 +826,14 @@ float AckUnreliableConnectionV2::getLatency() const
 void AckUnreliableConnectionV2::setStatsListener(IAckUnreliableConnectionStatsListener* listener)
 {
     statsListener = listener;
+}
+
+bool AckUnreliableConnectionV2::isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx)
+{
+	// Sequence indices wrap, so we can't just plain compare.
+	if (seqIdx > queue.curSeqIdx) {
+		return (static_cast<size_t>(queue.curSeqIdx) + 4096) < seqIdx;
+	}
+
+	return seqIdx < queue.curSeqIdx;
 }

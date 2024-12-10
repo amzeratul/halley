@@ -6,9 +6,6 @@
 
 using namespace Halley;
 
-static const uint64_t handshakeSnd = 0x51662937cc774b87;
-static const uint64_t handshakeAck = 0xc3717eacac75d888;
-
 AsioUDPConnection::AsioUDPConnection(UDPSocket& socket, UDPEndpoint remote)
 	: socket(socket)
 	, remote(std::move(remote))
@@ -68,7 +65,7 @@ void AsioUDPConnection::onConnect(short connId)
     }
 }
 
-void AsioUDPConnection::sendUnreliablePacket(gsl::span<gsl::byte> packet)
+void AsioUDPConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
 {
     if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
         Logger::logError("Attempting to send packet, but not in connected state", true);
@@ -93,7 +90,7 @@ void AsioUDPConnection::sendUnreliablePacket(gsl::span<gsl::byte> packet)
     }
 }
 
-void AsioUDPConnection::setUnreliablePacketListener(IConnection::IPacketListener* listener)
+void AsioUDPConnection::setUnreliablePacketListener(IPacketListener* listener)
 {
     packetListener = listener;
 }

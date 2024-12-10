@@ -1,10 +1,9 @@
 #include "halley/data_structures/vector.h"
-#include <list>
 #include "halley/net/connection/network_packet.h"
+#include "halley/net/connection/instability_simulator.h"
 #include "asio_udp_network_service.h"
 #include "asio_udp_connection.h"
 #include <iostream>
-#include <halley/support/exception.h>
 
 using namespace Halley;
 namespace asio = boost::asio;
