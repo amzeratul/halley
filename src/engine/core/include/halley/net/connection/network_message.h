@@ -1,18 +1,11 @@
 #pragma once
-#include <gsl/gsl>
-#include <typeindex>
+
 #include "halley/utils/utils.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/bytes/byte_serializer.h"
-#include <cstdint>
 
 namespace Halley
 {
-	class IMessageStream;
-	class MessageQueue;
-	class MessageQueueUDP;
-	class MessageQueueTCP;
-	
 	class NetworkMessage
 	{
 	public:

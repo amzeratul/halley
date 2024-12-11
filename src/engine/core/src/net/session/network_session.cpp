@@ -754,7 +754,7 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection), service);
 	ackConn->setStatsListener(stats.get());
 
-	auto messageQueue = std::make_shared<MessageQueueUDPV2>(ackConn);
+	auto messageQueue = std::make_shared<MessageQueueUDP>(ackConn);
 	messageQueue->setChannel(0, ChannelSettings(true, true));
 
 	return Peer{ peerId, true, std::move(messageQueue), std::move(stats) };
