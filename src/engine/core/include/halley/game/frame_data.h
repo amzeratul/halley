@@ -5,6 +5,7 @@
 #include "halley/maths/polygon.h"
 #include "halley/data_structures/tree_map.h"
 #include "halley/graphics/camera.h"
+#include "halley/graphics/painter.h"
 #include "halley/graphics/sprite/ipainter.h"
 #include "halley/maths/colour.h"
 
@@ -14,11 +15,12 @@ namespace Halley {
 
 	struct DebugLine
 	{
-		DebugLine(Vector<Vector2f> points, Colour4f colour, float thickness, bool loop)
+		DebugLine(Vector<Vector2f> points, Colour4f colour, float thickness, bool loop, Painter::LineParameters params = {})
 			: points(std::move(points))
 			, colour(colour)
 			, thickness(thickness)
 			, loop(loop)
+			, params(params)
 		{
 		}
 
@@ -26,6 +28,7 @@ namespace Halley {
 		Colour4f colour;
 		float thickness;
 		bool loop;
+		Painter::LineParameters params;
 	};
 
 	struct DebugPoint
@@ -53,17 +56,19 @@ namespace Halley {
 	};
 
 	struct DebugEllipse {
-		DebugEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour)
+		DebugEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, Painter::LineParameters params = {})
 			: centre(centre)
 			, radius(radius)
 			, width(width)
 			, colour(colour)
+			, params(params)
 		{}
 
 		Vector2f centre;
 		Vector2f radius;
 		float width;
 		Colour4f colour;
+		Painter::LineParameters params;
 	};
 
 	struct DebugText {

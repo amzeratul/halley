@@ -191,10 +191,10 @@ String InputGameControllerSDL::getButtonName(int code, std::optional<JoystickTyp
 		return buttons[code];
 	} else if (type == JoystickType::SwitchFull) {
 		auto buttons = std::array<const char*, 23>{
-			"switch_b",
 			"switch_a",
-			"switch_y",
+			"switch_b",
 			"switch_x",
+			"switch_y",
 			"switch_minus",
 			"switch_guide",
 			"switch_plus",
@@ -218,10 +218,10 @@ String InputGameControllerSDL::getButtonName(int code, std::optional<JoystickTyp
 		return buttons[code];
 	} else if (type == JoystickType::SwitchLeftJoycon) {
 		auto buttons = std::array<const char*, 23>{
-			"switch_alt_b",
 			"switch_alt_a",
-			"switch_alt_y",
+			"switch_alt_b",
 			"switch_alt_x",
+			"switch_alt_y",
 			"switch_minus",
 			"switch_guide",
 			"switch_plus",
@@ -245,10 +245,10 @@ String InputGameControllerSDL::getButtonName(int code, std::optional<JoystickTyp
 		return buttons[code];
 	} else if (type == JoystickType::SwitchRightJoycon) {
 		auto buttons = std::array<const char*, 23>{
-			"switch_alt_b",
 			"switch_alt_a",
-			"switch_alt_y",
+			"switch_alt_b",
 			"switch_alt_x",
+			"switch_alt_y",
 			"switch_minus",
 			"switch_guide",
 			"switch_plus",

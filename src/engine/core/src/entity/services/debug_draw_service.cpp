@@ -14,9 +14,9 @@ const Vector<DebugLine>& DebugDrawService::getDebugLines()
 	return BaseFrameData::getCurrent().debugLines;
 }
 
-void DebugDrawService::addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness, bool loop)
+void DebugDrawService::addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness, bool loop, Painter::LineParameters params)
 {
-	BaseFrameData::getCurrent().debugLines.emplace_back(std::move(line), colour, thickness, loop);
+	BaseFrameData::getCurrent().debugLines.emplace_back(std::move(line), colour, thickness, loop, params);
 }
 
 void DebugDrawService::addDebugArrow(Vector2f from, Vector2f to, Colour4f colour, float headSize, float thickness, float sideShift)
@@ -65,9 +65,9 @@ const Vector<DebugWorldText>& DebugDrawService::getDebugWorldTexts()
 	return BaseFrameData::getCurrent().debugWorldTexts;
 }
 
-void DebugDrawService::addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness)
+void DebugDrawService::addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness, Painter::LineParameters params)
 {
-	BaseFrameData::getCurrent().debugEllipses.emplace_back(point, radius, thickness, colour);
+	BaseFrameData::getCurrent().debugEllipses.emplace_back(point, radius, thickness, colour, params);
 }
 
 const TreeMap<String, DebugText>& DebugDrawService::getDebugTexts()

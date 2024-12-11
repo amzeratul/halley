@@ -3,6 +3,7 @@
 #include "halley/scripting/script_renderer.h"
 #include "halley/entity/service.h"
 #include "halley/data_structures/tree_map.h"
+#include "halley/graphics/painter.h"
 #include "halley/maths/polygon.h"
 
 namespace Halley {
@@ -25,11 +26,11 @@ namespace Halley {
 		const Vector<DebugWorldText>& getDebugWorldTexts();
 		const TreeMap<String, DebugText>& getDebugTexts();
 
-		void addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness = 1.0f, bool loop = false);
+		void addDebugLine(Vector<Vector2f> line, Colour4f colour, float thickness = 1.0f, bool loop = false, Painter::LineParameters params = {});
 		void addDebugArrow(Vector2f from, Vector2f to, Colour4f colour, float headSize = 10.0f, float thickness = 1.0f, float sideShift = 0.0f);
 		void addDebugPoint(Vector2f point, Colour4f colour, float radius = 1.0f);
 		void addDebugPolygon(Polygon polygon, Colour4f colour);
-		void addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness = 1.0f);
+		void addDebugEllipse(Vector2f point, Vector2f radius, Colour4f colour, float thickness = 1.0f, Painter::LineParameters params = {});
 		void addDebugText(std::string_view key, String value);
 		void addDebugText(String value, Vector2f position);
 
