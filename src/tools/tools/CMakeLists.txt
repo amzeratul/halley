@@ -108,6 +108,7 @@ set(SOURCES
     )
 
 set(HEADERS
+    "include/halley/plugin/halley_editor_plugin.h"
     "include/halley/plugin/halley_plugin.h"
     "include/halley/plugin/iasset_importer.h"
 

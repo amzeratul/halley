@@ -80,6 +80,17 @@ void Project::setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& i
 	}
 }
 
+Vector<std::unique_ptr<IHalleyEditorPlugin>> Project::makeEditorPlugins() const
+{
+	Vector<std::unique_ptr<IHalleyEditorPlugin>> result;
+	for (auto& plugin: plugins) {
+		if (auto editorPlugin = plugin->makeHalleyEditorPlugin()) {
+			result.push_back(std::move(editorPlugin));
+		}
+	}
+	return result;
+}
+
 void Project::update(Time time)
 {
 	withDLL([&] (ProjectDLL& dll)
@@ -236,7 +247,7 @@ Vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(Im
 {
 	Vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
-		auto importer = plugin->getAssetImporter(type);
+		auto importer = plugin->makeAssetImporter(type);
 		if (importer) {
 			result.emplace_back(std::move(importer));
 		}

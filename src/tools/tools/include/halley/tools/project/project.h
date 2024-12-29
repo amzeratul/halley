@@ -55,7 +55,8 @@ namespace Halley
 
 		void loadDLL(const HalleyStatics& statics, bool load);
 		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
-		
+		Vector<std::unique_ptr<IHalleyEditorPlugin>> makeEditorPlugins() const;
+
 		void update(Time time);
 
 		bool isBuildPending() const;

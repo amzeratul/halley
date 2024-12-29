@@ -2,6 +2,7 @@
 
 #include "prec.h"
 #include "ui/toolbar.h"
+#include "halley/plugin/halley_editor_plugin.h"
 
 namespace Halley {
 	class HalleyEditor;
@@ -12,7 +13,10 @@ namespace Halley {
 	{
 	public:
 		EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project, std::optional<String> launcherPath);
-		~EditorRootStage();
+		~EditorRootStage() override;
+
+		EditorRootStage(const EditorRootStage& other) = delete;
+		EditorRootStage& operator=(const EditorRootStage& other) = delete;
 
 		void init() override;
 		void onVariableUpdate(Time time) override;
@@ -42,6 +46,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> topLevelUI;
 		std::shared_ptr<ProjectWindow> projectWindow;
 
+		Vector<std::unique_ptr<IHalleyEditorPlugin>> editorPlugins;
 		std::unique_ptr<DevConServer> devConServer;
 
 		bool softCursor = false;

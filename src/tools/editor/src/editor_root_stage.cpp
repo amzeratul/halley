@@ -1,13 +1,10 @@
 #include "editor_root_stage.h"
 #include "halley_editor.h"
-#include "halley/tools/assets/check_assets_task.h"
-#include "halley/audio/resampler.h"
 #include "preferences.h"
 #include "halley/tools/project/project.h"
 #include "ui/editor_ui_factory.h"
 #include "ui/console_window.h"
 #include "ui/load_project_window.h"
-#include "assets/assets_browser.h"
 #include "halley/tools/project/project_properties.h"
 #include "scene/scene_editor_window.h"
 #include "ui/project_window.h"
@@ -29,6 +26,7 @@ EditorRootStage::~EditorRootStage()
 	projectWindow.reset();
 	uiFactory.reset();
 	devConServer.reset();
+	editorPlugins.clear();
 
 	project.reset();
 }
@@ -54,6 +52,10 @@ void EditorRootStage::onVariableUpdate(Time time)
 	if (!topLevelUI || !topLevelUI->isAlive()) {
 		unloadProject();
 		createLoadProjectUI();
+	}
+
+	for (auto& plugin: editorPlugins) {
+		plugin->update(time);
 	}
 
 	if (devConServer) {
@@ -209,6 +211,8 @@ void EditorRootStage::updateUI(Time time)
 
 void EditorRootStage::loadProject()
 {
+	editorPlugins = project->makeEditorPlugins();
+
 	project->setDevConServer(devConServer.get());
 
 	projectWindow = std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI());
@@ -225,6 +229,7 @@ void EditorRootStage::unloadProject()
 	setTopLevelUI({});
 	uiFactory->setProject(nullptr, nullptr);
 	projectWindow.reset();
+	editorPlugins.clear();
 	project.reset();
 }
 
