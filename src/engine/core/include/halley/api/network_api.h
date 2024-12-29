@@ -15,6 +15,10 @@ namespace Halley
 	{
 	public:
 		virtual ~NetworkAPI() {}
+
 		virtual std::unique_ptr<NetworkService> createService(NetworkProtocol protocol, int port = 0) = 0;
+
+		virtual std::optional<String> getFixedDevconHost() { return {}; }
+		virtual std::optional<int> getFixedDevconPort() { return {}; }
 	};
 }

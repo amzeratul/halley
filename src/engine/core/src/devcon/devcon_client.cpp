@@ -90,7 +90,9 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 
 	connect();
 
-	Logger::addSink(*this);
+	if (queue) {
+		Logger::addSink(*this);
+	}
 }
 
 DevConClient::~DevConClient()
@@ -102,6 +104,10 @@ DevConClient::~DevConClient()
 
 void DevConClient::update(Time t)
 {
+	if (!queue) {
+		return;
+	}
+
 	queue->sendAll();
 	service->update(t);
 
@@ -162,20 +168,24 @@ DevConInterest& DevConClient::getInterest() const
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 {
+	if (!queue) {
+		return;
+	}
+
 	queue->enqueue(std::make_unique<DevCon::NotifyInterestMsg>(handle, std::move(data)), 0);
 }
 
 void DevConClient::connect()
 {
-	queue = std::make_shared<MessageQueueTCP>(service->connect(address + ":" + toString(port)));
-	DevCon::setupMessageQueue(*queue);
+	if (auto connection = service->connect(address + ":" + toString(port))) {
+		queue = std::make_shared<MessageQueueTCP>(std::move(connection));
+		DevCon::setupMessageQueue(*queue);
+	}
 }
 
 void DevConClient::log(LoggerLevel level, const std::string_view msg)
 {
-	if (level != LoggerLevel::Dev) {
-		if (queue->isConnected()) {
-			queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
-		}
+	if (queue && queue->isConnected()) {
+		queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
 	}
 }

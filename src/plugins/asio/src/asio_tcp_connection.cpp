@@ -196,7 +196,9 @@ void AsioTCPConnection::tryReceive()
 				if (ec.value() == asio::error::would_block || ec.value() == asio::error::try_again) {
 					tryReceive();
 				} else {
-					Logger::logError("Error reading data on TCP socket: " + ec.message());
+					if (ec.value() != asio::error::eof) {
+						Logger::logError("Error reading data on TCP socket: " + ec.message());
+					}
 					close();
 				}
 			} else {

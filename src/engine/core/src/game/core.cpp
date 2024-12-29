@@ -219,9 +219,14 @@ void Core::init()
 	game->resources = resources.get();
 
 	// Create devcon connection
-	String devConAddress = game->getDevConAddress();
-	if (!devConAddress.isEmpty()) {
-		devConClient = std::make_unique<DevConClient>(*api, *resources, api->network->createService(NetworkProtocol::TCP), std::move(devConAddress), game->getDevConPort());
+	if (api->network) {
+		const String devConAddress = api->network->getFixedDevconHost().value_or(game->getDevConAddress());
+		if (!devConAddress.isEmpty()) {
+			if (auto service = api->network->createService(NetworkProtocol::TCP)) {
+				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
+				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service), devConAddress, port);
+			}
+		}
 	}
 
 	// Start game
