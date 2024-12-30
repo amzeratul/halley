@@ -1,0 +1,66 @@
+uuid: 5ee0e6bf-9936-4c58-b895-5998cf82d6f1
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: a3814755-6cc8-444e-8c91-8c9b2041d843
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+    widget:
+      class: widget
+      id: noRemoteConnections
+    children:
+      - uuid: 763e1327-0b4a-4986-a165-0d67cddc71a4
+        border: [0, 0, 4, 0]
+        widget:
+          class: label
+          id: ""
+          text: No Active Remote Connections.
+          wordWrapped: false
+        fill: left
+    fill: [centreHorizontal, centreVertical]
+  - uuid: 68f9e2a9-61a5-4124-947b-721f0f2287cd
+    proportion: 1
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: widget
+      id: hasRemoteConnections
+    children:
+      - uuid: f6ca7a85-e474-4737-8f7a-1d6d7acb56ec
+        proportion: 0
+        sizer:
+          columnProportions: []
+          gap: 0
+          type: horizontal
+        widget:
+          autoHide: true
+          class: scrollBarPane
+          scrollHorizontal: true
+          scrollVertical: false
+          size: [50, 10]
+        children:
+          - uuid: 3e751eac-29d6-4769-8cb4-34b3a51241f2
+            widget:
+              class: widget
+              size: [0, 24]
+          - uuid: 91770a11-1bb2-4e22-b25b-b42568b6fae2
+            proportion: 1
+            widget:
+              class: list
+              id: tabs
+              options: []
+              style: tabs
+              type: horizontal
+      - uuid: 1b83b840-97df-4010-be94-7a42bd51f223
+        proportion: 1
+        border: [-12, 0, 0, 0]
+        widget:
+          class: pagedPane
+          id: pages

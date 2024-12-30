@@ -16,6 +16,7 @@ void DevCon::setupMessageQueue(MessageQueue& queue)
 	queue.addFactory<UpdateInterestMsg>();
 	queue.addFactory<UnregisterInterestMsg>();
 	queue.addFactory<NotifyInterestMsg>();
+	queue.addFactory<SetClientDataMsg>();
 }
 
 
@@ -126,4 +127,25 @@ void NotifyInterestMsg::deserialize(Deserializer& s)
 {
 	s >> handle;
 	s >> data;
+}
+
+SetClientDataMsg::SetClientDataMsg(GamePlatform platform, String deviceName, ConfigNode params)
+	: platform(platform)
+	, deviceName(std::move(deviceName))
+	, params(std::move(params))
+{
+}
+
+void SetClientDataMsg::serialize(Serializer& s) const
+{
+	s << platform;
+	s << deviceName;
+	s << params;
+}
+
+void SetClientDataMsg::deserialize(Deserializer& s)
+{
+	s >> platform;
+	s >> deviceName;
+	s >> params;
 }

@@ -143,6 +143,12 @@ bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 	return false;
 }
 
+String AsioTCPConnection::getRemoteAddress() const
+{
+	const auto& remote = socket.remote_endpoint();
+	return remote.address().to_string() + ":" + toString(static_cast<int32_t>(remote.port()));
+}
+
 bool AsioTCPConnection::needsPolling() const
 {
 	return needsPoll;

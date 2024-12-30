@@ -26,7 +26,6 @@ EditorRootStage::~EditorRootStage()
 	projectWindow.reset();
 	uiFactory.reset();
 	devConServer.reset();
-	editorPlugins.clear();
 
 	project.reset();
 }
@@ -52,10 +51,6 @@ void EditorRootStage::onVariableUpdate(Time time)
 	if (!topLevelUI || !topLevelUI->isAlive()) {
 		unloadProject();
 		createLoadProjectUI();
-	}
-
-	for (auto& plugin: editorPlugins) {
-		plugin->update(time);
 	}
 
 	if (devConServer) {
@@ -211,8 +206,7 @@ void EditorRootStage::updateUI(Time time)
 
 void EditorRootStage::loadProject()
 {
-	editorPlugins = project->makeEditorPlugins();
-
+	project->loadEditorPlugins();
 	project->setDevConServer(devConServer.get());
 
 	projectWindow = std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI());
@@ -229,7 +223,6 @@ void EditorRootStage::unloadProject()
 	setTopLevelUI({});
 	uiFactory->setProject(nullptr, nullptr);
 	projectWindow.reset();
-	editorPlugins.clear();
 	project.reset();
 }
 

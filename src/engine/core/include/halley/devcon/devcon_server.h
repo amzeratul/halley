@@ -11,11 +11,13 @@
 
 namespace Halley
 {
+	class IProject;
 	class NetworkService;
 	class IConnection;
 	class MessageQueue;
 
 	namespace DevCon {
+		class SetClientDataMsg;
 		constexpr static int devConPort = 12500;
 		class LogMsg;
 		class ReloadAssetsMsg;
@@ -23,6 +25,13 @@ namespace Halley
 	}
 
 	class DevConServer;
+
+	class DevConClientInfo {
+	public:
+		GamePlatform platform;
+		String name;
+		ConfigNode params;
+	};
 
 	class DevConServerConnection
 	{
@@ -39,14 +48,20 @@ namespace Halley
 		void updateInterest(uint32_t handle, const ConfigNode& params);
 		void unregisterInterest(uint32_t handle);
 
+		const std::optional<DevConClientInfo>& getClientInfo() const;
+		String getAddress() const;
+
 	private:
 		DevConServer& parent;
 		size_t id;
 		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
-		void onReceiveLogMsg(DevCon::LogMsg& msg);
-		void onReceiveNotifyInterestMsg(DevCon::NotifyInterestMsg& msg);
+		std::optional<DevConClientInfo> clientInfo;
+
+		void onReceiveMsg(DevCon::LogMsg& msg);
+		void onReceiveMsg(DevCon::NotifyInterestMsg& msg);
+		void onReceiveMsg(DevCon::SetClientDataMsg& msg);
 	};
 
 	class DevConServer
@@ -68,6 +83,10 @@ namespace Halley
 		void unregisterInterest(InterestHandle handle);
 		const ConfigNode& getInterestParams(InterestHandle handle) const;
 
+		gsl::span<std::shared_ptr<DevConServerConnection>> getConnections();
+
+		void setProject(IProject* project);
+
 	protected:
 		void onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg);
 
@@ -85,6 +104,8 @@ namespace Halley
 
 		HashMap<InterestHandle, Interest> interest;
 		InterestHandle interestId = 0;
+
+		IProject* project = nullptr;
 
 		void initConnection(DevConServerConnection& conn);
 		void terminateConnection(DevConServerConnection& conn);

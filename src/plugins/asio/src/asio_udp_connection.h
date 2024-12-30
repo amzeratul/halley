@@ -41,6 +41,8 @@ namespace Halley
 		void terminateConnection();
 		short getConnectionId() const { return connectionId; }
 
+		String getRemoteAddress() const override;
+
 	private:
 		UDPSocket& socket;
 		UDPEndpoint remote;

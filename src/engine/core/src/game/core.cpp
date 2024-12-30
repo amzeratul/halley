@@ -224,7 +224,10 @@ void Core::init()
 		if (!devConAddress.isEmpty()) {
 			if (auto service = api->network->createService(NetworkProtocol::TCP)) {
 				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
-				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service), devConAddress, port);
+				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service));
+
+				String deviceName; // TODO
+				devConClient->connect(deviceName, {}, devConAddress, port);
 			}
 		}
 	}

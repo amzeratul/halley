@@ -50,9 +50,10 @@ namespace Halley
 		friend class DevConInterest;
 
 	public:
-		DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port = DevCon::devConPort);
+		DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service);
 		~DevConClient();
 
+		void connect(const String& deviceName, const ConfigNode& clientParams, const String& address, int port = DevCon::devConPort);
 		void update(Time t);
 
 		DevConInterest& getInterest() const;
@@ -68,14 +69,11 @@ namespace Halley
 		const HalleyAPI& api;
 		Resources& resources;
 		std::unique_ptr<NetworkService> service;
-		String address;
-		int port;
 
 		std::shared_ptr<MessageQueue> queue;
 
 		std::unique_ptr<DevConInterest> interest;
 
-		void connect();
 		void log(LoggerLevel level, const std::string_view msg) override;
 	};
 }

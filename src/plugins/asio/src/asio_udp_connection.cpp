@@ -1,6 +1,7 @@
 #include <iostream>
 #include "asio_udp_connection.h"
 #include "halley/net/connection/network_packet.h"
+#include "halley/text/string_converter.h"
 
 using namespace Halley;
 
@@ -43,6 +44,12 @@ void AsioUDPConnection::terminateConnection()
 	if (status != ConnectionStatus::Closed) {
 		status = ConnectionStatus::Closed;
 	}
+}
+
+String AsioUDPConnection::getRemoteAddress() const
+{
+	const auto& remote = socket.remote_endpoint();
+	return remote.address().to_string() + ":" + toString(static_cast<int32_t>(remote.port()));
 }
 
 void AsioUDPConnection::send(TransmissionType type, OutboundNetworkPacket packet)

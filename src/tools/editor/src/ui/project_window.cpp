@@ -7,6 +7,7 @@
 #include "game_properties_window.h"
 #include "src/localisation/localisation_editor.h"
 #include "plotter.h"
+#include "remotes_window.h"
 #include "status_bar.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
@@ -155,7 +156,7 @@ void ProjectWindow::makePagedPane()
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
-	auto remotes = std::make_shared<UIWidget>();
+	auto remotes = std::make_shared<RemotesWindow>(factory, *this);
 	auto localisation = std::make_shared<LocalisationEditorRoot>(project, factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);

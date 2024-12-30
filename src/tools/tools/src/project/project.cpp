@@ -53,6 +53,10 @@ Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disab
 
 Project::~Project()
 {
+	if (devConServer) {
+		devConServer->setProject(nullptr);
+		devConServer = nullptr;
+	}
 	clearCachedAssetPreviews();
 	editorData.reset();
 	gameResources.reset();
@@ -80,15 +84,14 @@ void Project::setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& i
 	}
 }
 
-Vector<std::unique_ptr<IHalleyEditorPlugin>> Project::makeEditorPlugins() const
+void Project::loadEditorPlugins()
 {
-	Vector<std::unique_ptr<IHalleyEditorPlugin>> result;
+	editorPlugins.clear();
 	for (auto& plugin: plugins) {
 		if (auto editorPlugin = plugin->makeHalleyEditorPlugin()) {
-			result.push_back(std::move(editorPlugin));
+			editorPlugins.push_back(std::move(editorPlugin));
 		}
 	}
-	return result;
 }
 
 void Project::update(Time time)
@@ -104,6 +107,10 @@ void Project::update(Time time)
 
 	if (editorData) {
 		editorData->update();
+	}
+
+	for (auto& plugin: editorPlugins) {
+		plugin->update(time);
 	}
 }
 
@@ -142,6 +149,11 @@ void Project::setPlatforms(Vector<String> platforms)
 const Vector<String>& Project::getPlatforms() const
 {
 	return platforms;
+}
+
+gsl::span<std::unique_ptr<IHalleyEditorPlugin>> Project::getEditorPlugins()
+{
+	return editorPlugins.span();
 }
 
 const Path& Project::getHalleyRootPath() const
@@ -263,6 +275,9 @@ void Project::setAssetPackManifest(const Path& path)
 void Project::setDevConServer(DevConServer* server)
 {
 	devConServer = server;
+	if (devConServer) {
+		devConServer->setProject(this);
+	}
 	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds, gsl::span<const String> packIds) {
 		devConServer->reloadAssets(Vector<String>(assetIds.begin(), assetIds.end()), Vector<String>(packIds.begin(), packIds.end()));
 	});
@@ -703,6 +718,14 @@ void Project::onDLLUnload()
 	clearCachedAssetPreviews();
 	editorData = {};
 	editorDataLoading = {};
+}
+
+std::optional<String> Project::tryGetConnectedMachineSerial(GamePlatform platform, const String& remoteAddress)
+{
+	for (auto& plugin: editorPlugins) {
+		// TODO
+	}
+	return {};
 }
 
 void Project::loadECSData()

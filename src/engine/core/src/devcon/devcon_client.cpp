@@ -79,20 +79,12 @@ void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNo
 
 
 
-DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port)
+DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service)
 	: api(api)
 	, resources(resources)
 	, service(std::move(service))
-	, address(std::move(address))
-	, port(port)
 {
 	interest = std::make_unique<DevConInterest>(*this);
-
-	connect();
-
-	if (queue) {
-		Logger::addSink(*this);
-	}
 }
 
 DevConClient::~DevConClient()
@@ -175,11 +167,19 @@ void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 	queue->enqueue(std::make_unique<DevCon::NotifyInterestMsg>(handle, std::move(data)), 0);
 }
 
-void DevConClient::connect()
+void DevConClient::connect(const String& deviceName, const ConfigNode& clientParams, const String& address, int port)
 {
+	if (queue) {
+		Logger::logError("DevConClient already connected");
+		return;
+	}
+
 	if (auto connection = service->connect(address + ":" + toString(port))) {
 		queue = std::make_shared<MessageQueueTCP>(std::move(connection));
 		DevCon::setupMessageQueue(*queue);
+
+		queue->enqueue(std::make_unique<DevCon::SetClientDataMsg>(getPlatform(), deviceName, ConfigNode(clientParams)), 0);
+		Logger::addSink(*this);
 	}
 }
 

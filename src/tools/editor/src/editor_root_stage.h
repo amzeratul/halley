@@ -46,7 +46,6 @@ namespace Halley {
 		std::shared_ptr<UIWidget> topLevelUI;
 		std::shared_ptr<ProjectWindow> projectWindow;
 
-		Vector<std::unique_ptr<IHalleyEditorPlugin>> editorPlugins;
 		std::unique_ptr<DevConServer> devConServer;
 
 		bool softCursor = false;

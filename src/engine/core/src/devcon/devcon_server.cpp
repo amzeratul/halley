@@ -6,6 +6,7 @@
 #include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
 #include "halley/devcon/devcon_messages.h"
+#include "halley/game/scene_editor_interface.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -25,13 +26,19 @@ void DevConServerConnection::update(Time t)
 
 	for (auto& m: queue->receiveMessages()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
+
 		switch (msg.getMessageType()) {
 		case DevCon::MessageType::Log:
-			onReceiveLogMsg(dynamic_cast<DevCon::LogMsg&>(msg));
+			onReceiveMsg(dynamic_cast<DevCon::LogMsg&>(msg));
 			break;
 
 		case DevCon::MessageType::NotifyInterest:
-			onReceiveNotifyInterestMsg(dynamic_cast<DevCon::NotifyInterestMsg&>(msg));
+			onReceiveMsg(dynamic_cast<DevCon::NotifyInterestMsg&>(msg));
+			break;
+
+		case DevCon::MessageType::SetClientData:
+			onReceiveMsg(dynamic_cast<DevCon::SetClientDataMsg&>(msg));
+			break;
 
 		default:
 			break;
@@ -69,16 +76,41 @@ void DevConServerConnection::unregisterInterest(uint32_t handle)
 	queue->enqueue(std::make_unique<DevCon::UnregisterInterestMsg>(handle), 0);
 }
 
+const std::optional<DevConClientInfo>& DevConServerConnection::getClientInfo() const
+{
+	return clientInfo;
+}
+
+String DevConServerConnection::getAddress() const
+{
+	return connection->getRemoteAddress();
+}
 
 
-void DevConServerConnection::onReceiveLogMsg(DevCon::LogMsg& msg)
+void DevConServerConnection::onReceiveMsg(DevCon::LogMsg& msg)
 {
 	Logger::log(msg.level, "[REMOTE] " + msg.msg);
 }
 
-void DevConServerConnection::onReceiveNotifyInterestMsg(DevCon::NotifyInterestMsg& msg)
+void DevConServerConnection::onReceiveMsg(DevCon::NotifyInterestMsg& msg)
 {
 	parent.onReceiveNotifyInterestMsg(*this, msg);
+}
+
+void DevConServerConnection::onReceiveMsg(DevCon::SetClientDataMsg& msg)
+{
+	DevConClientInfo info;
+	info.platform = msg.platform;
+	info.name = msg.deviceName;
+	info.params = msg.params;
+	clientInfo = std::move(info);
+
+	if (parent.project) {
+		std::optional<String> serial = parent.project->tryGetConnectedMachineSerial(info.platform, connection->getRemoteAddress());
+		if (serial) {
+			info.name = *serial;
+		}
+	}
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
@@ -86,7 +118,6 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 {
 	service->startListening([=] (NetworkService::Acceptor& a)
 	{
-		Logger::logInfo("New incoming DevCon connection.");
 		connections.push_back(std::make_shared<DevConServerConnection>(*this, connId++, a.accept()));
 		initConnection(*connections.back());
 	});
@@ -150,6 +181,16 @@ const ConfigNode& DevConServer::getInterestParams(InterestHandle handle) const
 	return interest.at(handle).config;
 }
 
+gsl::span<std::shared_ptr<DevConServerConnection>> DevConServer::getConnections()
+{
+	return connections.span();
+}
+
+void DevConServer::setProject(IProject* project)
+{
+	this->project = project;
+}
+
 void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg)
 {
 	const auto iter = interest.find(msg.handle);
@@ -163,6 +204,7 @@ void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& conn
 
 void DevConServer::initConnection(DevConServerConnection& conn)
 {
+	Logger::logInfo("New incoming DevCon connection from " + conn.getAddress());
 	for (const auto& [handle, val]: interest) {
 		conn.registerInterest(val.id, val.config, handle);
 	}

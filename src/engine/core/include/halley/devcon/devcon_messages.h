@@ -23,7 +23,8 @@ namespace Halley
 			RegisterInterest,
 			UpdateInterest,
 			UnregisterInterest,
-			NotifyInterest
+			NotifyInterest,
+			SetClientData
 		};
 
 		class DevConMessage : public NetworkMessage
@@ -130,6 +131,20 @@ namespace Halley
 			
 			uint32_t handle;
 			ConfigNode data;
+		};
+
+		class SetClientDataMsg final : public DevConMessageBase<MessageType::SetClientData>
+		{
+		public:
+			SetClientDataMsg() = default;
+			SetClientDataMsg(GamePlatform platform, String deviceName, ConfigNode params);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			GamePlatform platform;
+			String deviceName;
+			ConfigNode params;
 		};
 	}
 }

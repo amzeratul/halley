@@ -55,7 +55,6 @@ namespace Halley
 
 		void loadDLL(const HalleyStatics& statics, bool load);
 		void setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& importerOptions);
-		Vector<std::unique_ptr<IHalleyEditorPlugin>> makeEditorPlugins() const;
 
 		void update(Time time);
 
@@ -66,6 +65,9 @@ namespace Halley
 
 		void setPlatforms(Vector<String> platforms);
 		const Vector<String>& getPlatforms() const;
+
+		void loadEditorPlugins();
+		gsl::span<std::unique_ptr<IHalleyEditorPlugin>> getEditorPlugins();
 
 		const Path& getHalleyRootPath() const;
 		
@@ -182,6 +184,8 @@ namespace Halley
 		void onDLLLoaded();
 		void onDLLUnload();
 
+		std::optional<String> tryGetConnectedMachineSerial(GamePlatform platform, const String& remoteAddress) override;
+
 	private:
 		Vector<String> platforms;
 		Path rootPath;
@@ -206,6 +210,8 @@ namespace Halley
 		std::unique_ptr<ECSData> ecsData;
 
 		Vector<HalleyPluginPtr> plugins;
+		Vector<std::unique_ptr<IHalleyEditorPlugin>> editorPlugins;
+
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
