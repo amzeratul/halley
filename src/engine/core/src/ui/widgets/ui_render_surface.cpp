@@ -140,25 +140,27 @@ void UIRenderSurface::render(RenderContext& rc) const
 	const auto borderSize = renderParams->border.xy() + renderParams->border.zw();
 	renderSurface->setSize(Vector2i((renderParams->size - borderSize) * scale));
 
-	rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
-	{
-		painter.clear(Colour4f(0, 0, 0, 0));
-		renderParams->spritePainter->draw(renderParams->mask, painter);
-	});
+	if (renderSurface->isReady()) {
+		rc.with(renderSurface->getRenderTarget()).with(cam).bind([&](Painter& painter)
+		{
+			painter.clear(Colour4f(0, 0, 0, 0));
+			renderParams->spritePainter->draw(renderParams->mask, painter);
+		});
+	}
 }
 
 // Render thread
 void UIRenderSurface::drawOnPainter(Painter& painter) const
 {
 	if (renderParams) {
-		assert(renderSurface->isReady());
+		if (renderSurface->isReady()) {
+			auto sprite = renderSurface->getSurfaceSprite(material).clone()
+				.setPosition(renderParams->pos + renderParams->border.xy() * renderParams->scale)
+				.setColour(renderParams->colour)
+				.setScale(Vector2f(1.0f, 1.0f) / origScale);
 
-		auto sprite = renderSurface->getSurfaceSprite(material).clone()
-			.setPosition(renderParams->pos + renderParams->border.xy() * renderParams->scale)
-			.setColour(renderParams->colour)
-			.setScale(Vector2f(1.0f, 1.0f) / origScale);
-
-		sprite.draw(painter);
+			sprite.draw(painter);
+		}
 
 		renderParams = {};
 	}
