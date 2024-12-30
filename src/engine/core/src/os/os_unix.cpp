@@ -54,6 +54,14 @@ Halley::ComputerData Halley::OSUnix::getComputerData()
 	return data;
 }
 
+Halley::String Halley::OSUnix::getComputerName()
+{
+	char hostname[1024];
+	hostname[1023] = '\0';
+	gethostname(hostname, 1023);
+	return String(hostname);
+}
+
 String Halley::OSUnix::getCurrentWorkingDir()
 {
 	String result;

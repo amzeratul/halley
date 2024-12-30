@@ -720,14 +720,6 @@ void Project::onDLLUnload()
 	editorDataLoading = {};
 }
 
-std::optional<String> Project::tryGetConnectedMachineSerial(GamePlatform platform, const String& remoteAddress)
-{
-	for (auto& plugin: editorPlugins) {
-		// TODO
-	}
-	return {};
-}
-
 void Project::loadECSData()
 {
 	if (!ecsData) {

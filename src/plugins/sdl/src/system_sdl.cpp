@@ -273,6 +273,11 @@ SystemAPI::MemoryUsage SystemSDL::getMemoryUsage()
 	return result;
 }
 
+String SystemSDL::getDeviceName() const
+{
+	return OS::get().getComputerName();
+}
+
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
 {
 	return SDLRWOps::fromPath(path, start, end);

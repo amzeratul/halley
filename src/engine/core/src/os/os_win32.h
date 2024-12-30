@@ -37,6 +37,7 @@ namespace Halley {
 		void initializeConsole() override;
 
 		ComputerData getComputerData() override;
+		String getComputerName() override;
 		String getUserDataDir() override;
 		String getCurrentWorkingDir() override;
 		String getEnvironmentVariable(const String& name) override;

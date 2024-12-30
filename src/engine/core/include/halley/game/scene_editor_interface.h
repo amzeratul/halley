@@ -457,7 +457,6 @@ namespace Halley {
 		virtual Resources& getGameResources() = 0;
 		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;
         virtual Vector<Path> enumerateDirectory(const Path& path) = 0;
-        virtual std::optional<String> tryGetConnectedMachineSerial(GamePlatform platform, const String& remoteAddress) = 0;
 
 		template <typename T>
 		T* getGameEditorDataAs() const

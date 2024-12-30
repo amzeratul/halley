@@ -226,7 +226,7 @@ void Core::init()
 				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
 				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service));
 
-				String deviceName; // TODO
+				String deviceName = api->system->getDeviceName();
 				devConClient->connect(deviceName, {}, devConAddress, port);
 			}
 		}

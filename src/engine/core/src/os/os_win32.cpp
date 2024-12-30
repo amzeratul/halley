@@ -283,6 +283,17 @@ ComputerData OSWin32::getComputerData()
 	return data;
 }
 
+String OSWin32::getComputerName()
+{
+	char buffer[1024];
+	DWORD n = sizeof(buffer) - 1;
+	if (GetComputerNameEx(ComputerNamePhysicalDnsHostname, buffer, &n)) {
+		return String(buffer, n);
+	} else {
+		return "Unknown";
+	}
+}
+
 String OSWin32::getUserDataDir()
 {
 	PWSTR path;

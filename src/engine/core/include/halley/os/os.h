@@ -67,6 +67,7 @@ namespace Halley {
 		virtual void onWindowCreated(void* windowHandle);
 
 		virtual ComputerData getComputerData();
+		virtual String getComputerName();
 		virtual String getUserDataDir();
 		virtual String getCurrentWorkingDir();
 		virtual String getEnvironmentVariable(const String& name);

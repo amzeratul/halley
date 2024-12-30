@@ -110,12 +110,9 @@ void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet
 	memcpy(bs.data(), bytes.data(), bytes.size());
 
 	std::unique_lock<std::mutex> lock(mutex);
-	if (status == ConnectionStatus::Connected) {
+	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		sendQueue.emplace_back(std::move(bs));
-
-		if (sendQueue.size() == 1) {
-			trySend();
-		}
+		trySend();
 	}
 }
 

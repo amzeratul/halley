@@ -104,13 +104,6 @@ void DevConServerConnection::onReceiveMsg(DevCon::SetClientDataMsg& msg)
 	info.name = msg.deviceName;
 	info.params = msg.params;
 	clientInfo = std::move(info);
-
-	if (parent.project) {
-		std::optional<String> serial = parent.project->tryGetConnectedMachineSerial(info.platform, connection->getRemoteAddress());
-		if (serial) {
-			info.name = *serial;
-		}
-	}
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)

@@ -84,6 +84,8 @@ namespace Halley
 
 		virtual void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) {}
 
+		virtual String getDeviceName() const { return "Unknown"; }
+
 		struct MemoryUsage {
 			uint64_t ramUsage = 0;
 			std::optional<uint64_t> ramMax;

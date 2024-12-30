@@ -85,6 +85,11 @@ Halley::ComputerData Halley::OS::getComputerData()
 	return ComputerData();
 }
 
+String OS::getComputerName()
+{
+	return "Unknown";
+}
+
 String OS::getUserDataDir()
 {
 	return "";

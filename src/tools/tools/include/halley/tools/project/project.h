@@ -184,8 +184,6 @@ namespace Halley
 		void onDLLLoaded();
 		void onDLLUnload();
 
-		std::optional<String> tryGetConnectedMachineSerial(GamePlatform platform, const String& remoteAddress) override;
-
 	private:
 		Vector<String> platforms;
 		Path rootPath;
