@@ -86,10 +86,18 @@ String DevConServerConnection::getAddress() const
 	return connection->getRemoteAddress();
 }
 
+Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
+{
+	auto result = std::move(pendingLogs);
+	pendingLogs.clear();
+	return result;
+}
+
 
 void DevConServerConnection::onReceiveMsg(DevCon::LogMsg& msg)
 {
-	Logger::log(msg.level, "[REMOTE] " + msg.msg);
+	pendingLogs.push_back(std::move(msg));
+	//Logger::log(msg.level, "[REMOTE] " + msg.msg);
 }
 
 void DevConServerConnection::onReceiveMsg(DevCon::NotifyInterestMsg& msg)
@@ -101,7 +109,7 @@ void DevConServerConnection::onReceiveMsg(DevCon::SetClientDataMsg& msg)
 {
 	DevConClientInfo info;
 	info.platform = msg.platform;
-	info.name = msg.deviceName;
+	info.deviceName = msg.deviceName;
 	info.params = msg.params;
 	clientInfo = std::move(info);
 }

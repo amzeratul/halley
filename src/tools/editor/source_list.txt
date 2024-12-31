@@ -163,8 +163,8 @@ src/ui/popup_window.cpp
 src/ui/popup_window.h
 src/ui/project_window.cpp
 src/ui/project_window.h
-src/ui/remote_tab.cpp
-src/ui/remote_tab.h
+src/ui/remote_connection_window.cpp
+src/ui/remote_connection_window.h
 src/ui/remotes_window.cpp
 src/ui/remotes_window.h
 src/ui/scroll_background.cpp

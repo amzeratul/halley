@@ -1486,7 +1486,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 
 UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 {
-	UIFactoryWidgetProperties result = getBaseListProperties();
+	UIFactoryWidgetProperties result = getBaseListProperties(false);
 	result.name = "Tabbed Pane";
 	result.iconName = "widget_icons/tabbedPane.png";
 	result.childName = "Tab";
@@ -1733,7 +1733,7 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 	list.setShowSelection(node["showSelection"].asBool(true));
 }
 
-UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
+UIFactoryWidgetProperties UIFactory::getBaseListProperties(bool includeOptions) const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "List";
@@ -1752,7 +1752,9 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
 	result.entries.emplace_back("Show Selection", "showSelection", "bool", "true");
 	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
 
-	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
+	if (includeOptions) {
+		result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
+	}
 
 	return result;
 }
@@ -1762,7 +1764,7 @@ std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNod
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	
-	auto widget = std::make_shared<UIDebugConsole>(id, *this, std::make_shared<UIDebugConsoleController>(getResources(), api));
+	auto widget = std::make_shared<UIDebugConsole>(id, *this);
 
 	return widget;
 }

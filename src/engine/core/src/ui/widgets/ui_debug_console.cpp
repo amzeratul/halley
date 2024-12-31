@@ -10,12 +10,19 @@
 
 using namespace Halley;
 
-UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, std::shared_ptr<UIDebugConsoleController> controller)
+
+UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical))
 	, factory(factory)
-	, controller(std::move(controller))
 {
-	Expects(this->controller);
+	setup();
+}
+
+UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, IUIDebugConsoleController& controller)
+	: UIWidget(id, {}, UISizer(UISizerType::Vertical))
+	, factory(factory)
+	, controller(&controller)
+{
 	setup();
 }
 
@@ -349,6 +356,11 @@ UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const S
 	return VariantMatch{ curVariant, argN, argStart, invalidArg };
 }
 
+void UIDebugConsole::setController(IUIDebugConsoleController* controller)
+{
+	this->controller = controller;
+}
+
 void UIDebugConsole::show()
 {
 	setActive(true);
@@ -434,11 +446,6 @@ void UIDebugConsole::addLine(const String& line, Colour colour)
 void UIDebugConsole::setForcePaintMask(int mask)
 {
 	forceMask = mask;
-}
-
-const std::shared_ptr<UIDebugConsoleController>& UIDebugConsole::getController() const
-{
-	return controller;
 }
 
 void UIDebugConsole::onAddedToRoot(UIRoot& root)

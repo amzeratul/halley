@@ -9,7 +9,7 @@ ConsoleWindow::ConsoleWindow(UIFactory& ui, const HalleyAPI& api)
 	, factory(ui)
 {
 	controller = std::make_shared<UIDebugConsoleController>(ui.getResources(), api);
-	console = std::make_shared<UIDebugConsole>("debugConsole", ui, controller);
+	console = std::make_shared<UIDebugConsole>("debugConsole", ui, *controller);
 
 	Logger::addSink(*this);
 	ConsoleWindow::add(console, 1);

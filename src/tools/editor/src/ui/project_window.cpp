@@ -470,7 +470,7 @@ void ProjectWindow::toggleDebugConsole()
 	} else {
 		if (debugConsoleController) { // Don't create unless ready
 			if (!debugConsole) {
-				debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, debugConsoleController);
+				debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, *debugConsoleController);
 				debugConsole->setChildLayerAdjustment(50);
 				debugConsole->setMinSize(Vector2f(640, 320));
 				debugConsole->setAnchor(UIAnchor(Vector2f(1.0f, 1.0f), Vector2f(1.0f, 1.0f), Vector2f(-10.0f, -10.0f)));

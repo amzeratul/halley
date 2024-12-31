@@ -29,7 +29,7 @@ namespace Halley
 	class DevConClientInfo {
 	public:
 		GamePlatform platform;
-		String name;
+		String deviceName;
 		ConfigNode params;
 	};
 
@@ -51,6 +51,8 @@ namespace Halley
 		const std::optional<DevConClientInfo>& getClientInfo() const;
 		String getAddress() const;
 
+		Vector<DevCon::LogMsg> movePendingLogs();
+
 	private:
 		DevConServer& parent;
 		size_t id;
@@ -58,6 +60,8 @@ namespace Halley
 		std::shared_ptr<MessageQueue> queue;
 
 		std::optional<DevConClientInfo> clientInfo;
+
+		Vector<DevCon::LogMsg> pendingLogs;
 
 		void onReceiveMsg(DevCon::LogMsg& msg);
 		void onReceiveMsg(DevCon::NotifyInterestMsg& msg);

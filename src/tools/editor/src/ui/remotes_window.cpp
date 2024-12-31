@@ -1,6 +1,7 @@
 #include "remotes_window.h"
 
 #include "project_window.h"
+#include "remote_connection_window.h"
 
 using namespace Halley;
 
@@ -20,6 +21,11 @@ void RemotesWindow::onMakeUI()
 	tabs = getWidgetAs<UIList>("tabs");
 	pages = getWidgetAs<UIPagedPane>("pages");
 
+	setHandle(UIEventType::ListSelectionChanged, "tabs", [=](const UIEvent& event)
+	{
+		pages->setPage(event.getIntData());
+	});
+
 	updateTabs();
 }
 
@@ -35,11 +41,34 @@ void RemotesWindow::updateTabs()
 	noRemoteConnections->setActive(connections.empty());
 
 	Vector<size_t> desiredTabs;
+	Vector<std::shared_ptr<DevConServerConnection>> desiredConnections;
 	for (const auto& conn: connections) {
-		desiredTabs.push_back(conn->getId());
+		if (conn->getClientInfo()) {
+			desiredTabs.push_back(conn->getId());
+			desiredConnections.push_back(conn);
+		}
 	}
 
 	if (desiredTabs != curTabs) {
-		
+		const int n = static_cast<int>(curTabs.size());
+		for (int i = n; --i >= 0;) {
+			if (!desiredTabs.contains(curTabs[i])) {
+				pages->removePage(i);
+				tabs->removeItem(i);
+			}
+		}
+
+		for (size_t i = 0; i < desiredTabs.size(); ++i) {
+			const auto id = desiredTabs[i];
+			if (!curTabs.contains(id)) {
+				auto conn = desiredConnections[i];
+				tabs->addTextItem(toString(id), LocalisedString::fromUserString(conn->getClientInfo()->deviceName));
+				pages->addPage()->add(std::make_shared<RemoteConnectionWindow>(factory, projectWindow, conn), 1);
+			}
+		}
+
+		pages->setPage(tabs->getSelectedOption());
+
+		curTabs = desiredTabs;
 	}
 }

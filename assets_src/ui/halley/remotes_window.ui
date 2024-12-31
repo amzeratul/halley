@@ -60,7 +60,7 @@ children:
               type: horizontal
       - uuid: 1b83b840-97df-4010-be94-7a42bd51f223
         proportion: 1
-        border: [-12, 0, 0, 0]
+        border: [4, 4, 4, 4]
         widget:
           class: pagedPane
           id: pages

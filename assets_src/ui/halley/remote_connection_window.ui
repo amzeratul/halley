@@ -1,0 +1,48 @@
+uuid: 8979669c-8bb7-45fc-b505-2154ef479e4f
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: c421a538-318f-4368-8f62-dc92fb30b3b6
+    proportion: 1
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: tabbedPane
+      id: tabs
+      options: []
+    children:
+      - uuid: ff0afb5e-966b-494c-aafe-e7321af73e0f
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: widget
+          id: consoleRoot
+        id: console
+        if: []
+        text: Console
+      - uuid: c6a4ca30-88de-4028-a823-1a9387b7095b
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: widget
+          id: inspectorRoot
+        id: inspector
+        if: []
+        text: Inspector
+      - uuid: 1de5e8f8-743a-4058-8dda-fab0a53c6986
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: widget
+          id: profilerRoot
+        id: profiler
+        if: []
+        text: Profiler
