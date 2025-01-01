@@ -5,11 +5,26 @@
 
 using namespace Halley;
 
-RemoteConnectionWindow::RemoteConnectionWindow(UIFactory& factory, ProjectWindow& projectWindow, std::shared_ptr<DevConServerConnection> connection)
-	: UIWidget("remote_tab", {}, UISizer())
+RemoteConnectionTab::RemoteConnectionTab(UIFactory& factory, GamePlatform platform, String name)
+	: UIWidget("remote_connection_tab", {}, UISizer())
+	, factory(factory)
+	, platform(platform)
+	, name(std::move(name))
+{
+	factory.loadUI(*this, "halley/remote_tab_contents");
+}
+
+void RemoteConnectionTab::onMakeUI()
+{
+	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromUserString(name));
+}
+
+RemoteConnectionWindow::RemoteConnectionWindow(UIFactory& factory, ProjectWindow& projectWindow, std::shared_ptr<DevConServerConnection> connection, std::shared_ptr<RemoteConnectionTab> tab)
+	: UIWidget("remote_connection_window", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, connection(std::move(connection))
+	, tab(std::move(tab))
 {
 	factory.loadUI(*this, "halley/remote_connection_window");
 }

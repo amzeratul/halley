@@ -62,8 +62,12 @@ void RemotesWindow::updateTabs()
 			const auto id = desiredTabs[i];
 			if (!curTabs.contains(id)) {
 				auto conn = desiredConnections[i];
-				tabs->addTextItem(toString(id), LocalisedString::fromUserString(conn->getClientInfo()->deviceName));
-				pages->addPage()->add(std::make_shared<RemoteConnectionWindow>(factory, projectWindow, conn), 1);
+
+				const auto& info = *conn->getClientInfo();
+				auto tab = std::make_shared<RemoteConnectionTab>(factory, info.platform, info.deviceName);
+
+				tabs->addItem(toString(id), tab);
+				pages->addPage()->add(std::make_shared<RemoteConnectionWindow>(factory, projectWindow, conn, tab), 1);
 			}
 		}
 

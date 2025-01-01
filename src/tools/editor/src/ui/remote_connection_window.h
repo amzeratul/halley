@@ -5,9 +5,21 @@
 namespace Halley {
 	class ProjectWindow;
 
+    class RemoteConnectionTab : public UIWidget {
+    public:
+        RemoteConnectionTab(UIFactory& factory, GamePlatform platform, String name);
+
+        void onMakeUI() override;
+
+    private:
+        UIFactory& factory;
+        GamePlatform& platform;
+        String name;
+    };
+
 	class RemoteConnectionWindow : public UIWidget, public IUIDebugConsoleController {
     public:
-        RemoteConnectionWindow(UIFactory& factory, ProjectWindow& projectWindow, std::shared_ptr<DevConServerConnection> connection);
+        RemoteConnectionWindow(UIFactory& factory, ProjectWindow& projectWindow, std::shared_ptr<DevConServerConnection> connection, std::shared_ptr<RemoteConnectionTab> tab);
 
         void onMakeUI() override;
 
@@ -21,6 +33,7 @@ namespace Halley {
         UIFactory& factory;
         ProjectWindow& projectWindow;
         std::shared_ptr<DevConServerConnection> connection;
+        std::shared_ptr<RemoteConnectionTab> tab;
 
 		std::shared_ptr<UIDebugConsole> console;
 	};

@@ -30,6 +30,7 @@ children:
   - uuid: e6a8389e-1170-4a72-9b35-60d8de68187d
     border: [5, -1, -1, 1]
     widget:
+      active: false
       class: button
       id: close
       size: [20, 20]
