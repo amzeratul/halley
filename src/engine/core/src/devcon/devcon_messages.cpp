@@ -17,6 +17,8 @@ void DevCon::setupMessageQueue(MessageQueue& queue)
 	queue.addFactory<UnregisterInterestMsg>();
 	queue.addFactory<NotifyInterestMsg>();
 	queue.addFactory<SetClientDataMsg>();
+	queue.addFactory<RPCMsg>();
+	queue.addFactory<RPCReplyMsg>();
 }
 
 
@@ -148,4 +150,44 @@ void SetClientDataMsg::deserialize(Deserializer& s)
 	s >> platform;
 	s >> deviceName;
 	s >> params;
+}
+
+RPCMsg::RPCMsg(uint64_t id, String method, ConfigNode params)
+	: id(id)
+	, method(std::move(method))
+	, params(std::move(params))
+{
+}
+
+void RPCMsg::serialize(Serializer& s) const
+{
+	s << id;
+	s << method;
+	s << params;
+}
+
+void RPCMsg::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> method;
+	s >> params;
+}
+
+
+RPCReplyMsg::RPCReplyMsg(uint64_t id, ConfigNode result)
+	: id(id)
+	, result(std::move(result))
+{
+}
+
+void RPCReplyMsg::serialize(Serializer& s) const
+{
+	s << id;
+	s << result;
+}
+
+void RPCReplyMsg::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> result;
 }

@@ -107,19 +107,23 @@ void DevConClient::update(Time t)
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
 		switch (msg.getMessageType()) {
 		case DevCon::MessageType::ReloadAssets:
-			onReceiveReloadAssets(dynamic_cast<DevCon::ReloadAssetsMsg&>(msg));
+			onReceiveMessage(dynamic_cast<DevCon::ReloadAssetsMsg&>(msg));
 			break;
 
 		case DevCon::MessageType::RegisterInterest:
-			onReceiveRegisterInterest(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
+			onReceiveMessage(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
 			break;
 
 		case DevCon::MessageType::UpdateInterest:
-			onReceiveUpdateInterest(dynamic_cast<DevCon::UpdateInterestMsg&>(msg));
+			onReceiveMessage(dynamic_cast<DevCon::UpdateInterestMsg&>(msg));
 			break;
 
 		case DevCon::MessageType::UnregisterInterest:
-			onReceiveUnregisterInterest(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
+			onReceiveMessage(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
+			break;
+
+		case DevCon::MessageType::RPC:
+			onReceiveMessage(dynamic_cast<DevCon::RPCMsg&>(msg));
 			break;
 
 		default:
@@ -128,7 +132,7 @@ void DevConClient::update(Time t)
 	}
 }
 
-void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
+void DevConClient::onReceiveMessage(const DevCon::ReloadAssetsMsg& msg)
 {
 	if (msg.assetIds.size() <= 5) {
 		Logger::logDev("Reloading " + toString(msg.assetIds.size()) + " assets: " + toString(msg.assetIds));
@@ -138,24 +142,59 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 	resources.reloadAssets(msg.assetIds, msg.packIds);
 }
 
-void DevConClient::onReceiveRegisterInterest(DevCon::RegisterInterestMsg& msg)
+void DevConClient::onReceiveMessage(DevCon::RegisterInterestMsg& msg)
 {
 	interest->registerInterest(msg.id, std::move(msg.params), msg.handle);
 }
 
-void DevConClient::onReceiveUpdateInterest(DevCon::UpdateInterestMsg& msg)
+void DevConClient::onReceiveMessage(DevCon::UpdateInterestMsg& msg)
 {
 	interest->updateInterest(msg.handle, std::move(msg.params));
 }
 
-void DevConClient::onReceiveUnregisterInterest(const DevCon::UnregisterInterestMsg& msg)
+void DevConClient::onReceiveMessage(const DevCon::UnregisterInterestMsg& msg)
 {
 	interest->unregisterInterest(msg.handle);
+}
+
+void DevConClient::onReceiveMessage(DevCon::RPCMsg& msg)
+{
+	if (const auto iter = rpcHandles.find(msg.method); iter != rpcHandles.end()) {
+		auto id = msg.id;
+		iter->second(std::move(msg.params)).then([this, id] (ConfigNode result)
+		{
+			queue->enqueue(std::make_unique<DevCon::RPCReplyMsg>(id, std::move(result)), 0);
+		});
+	} else {
+		queue->enqueue(std::make_unique<DevCon::RPCReplyMsg>(msg.id, UIDebugConsoleResponse("<DevCon has no handle registered for RPC \"" + msg.method +"\">").toConfigNode()), 0);
+	}
 }
 
 DevConInterest& DevConClient::getInterest() const
 {
 	return *interest;
+}
+
+void DevConClient::setRPCHandle(const String& method, RPCHandle handle)
+{
+	rpcHandles[method] = std::move(handle);
+}
+
+void DevConClient::setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> consoleController)
+{
+	auto weakPtr = std::weak_ptr<UIDebugConsoleController>(consoleController);
+
+	setRPCHandle("consoleCommand", [weakPtr] (ConfigNode params) -> Future<ConfigNode>
+	{
+		if (auto consoleController = weakPtr.lock()) {
+			return consoleController->runCommand(params["command"].asString(), params["args"].asVector<String>()).then([] (UIDebugConsoleResponse result)
+			{
+				return result.toConfigNode();
+			});
+		} else {
+			return Future<ConfigNode>::makeImmediate(ConfigNode("<UIDebugConsoleController expired>"));
+		}
+	});
 }
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)

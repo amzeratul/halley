@@ -219,18 +219,7 @@ void Core::init()
 	game->resources = resources.get();
 
 	// Create devcon connection
-	if (api->network) {
-		const String devConAddress = api->network->getFixedDevconHost().value_or(game->getDevConAddress());
-		if (!devConAddress.isEmpty()) {
-			if (auto service = api->network->createService(NetworkProtocol::TCP)) {
-				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
-				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service));
-
-				String deviceName = api->system->getDeviceName();
-				devConClient->connect(deviceName, {}, devConAddress, port);
-			}
-		}
-	}
+	initDevCon();
 
 	// Start game
 	setStage(game->startGame());
@@ -316,6 +305,23 @@ void Core::setOutRedirect(bool appendToExisting)
 	}
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 #endif
+}
+
+void Core::initDevCon()
+{
+	if (api->network) {
+		const String devConAddress = api->network->getFixedDevconHost().value_or(game->getDevConAddress());
+		if (!devConAddress.isEmpty()) {
+			if (auto service = api->network->createService(NetworkProtocol::TCP)) {
+				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
+				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service));
+
+				String deviceName = api->system->getDeviceName();
+				devConClient->connect(deviceName, {}, devConAddress, port);
+			}
+		}
+	}
+
 }
 
 void Core::processEvents(Time time)

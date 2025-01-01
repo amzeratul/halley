@@ -24,7 +24,9 @@ namespace Halley
 			UpdateInterest,
 			UnregisterInterest,
 			NotifyInterest,
-			SetClientData
+			SetClientData,
+			RPC,
+			RPCReply
 		};
 
 		class DevConMessage : public NetworkMessage
@@ -145,6 +147,33 @@ namespace Halley
 			GamePlatform platform;
 			String deviceName;
 			ConfigNode params;
+		};
+
+		class RPCMsg final : public DevConMessageBase<MessageType::RPC>
+		{
+		public:
+			RPCMsg() = default;
+			RPCMsg(uint64_t id, String method, ConfigNode params);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint64_t id;
+			String method;
+			ConfigNode params;
+		};
+
+		class RPCReplyMsg final : public DevConMessageBase<MessageType::RPCReply>
+		{
+		public:
+			RPCReplyMsg() = default;
+			RPCReplyMsg(uint64_t id, ConfigNode result);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint64_t id;
+			ConfigNode result;
 		};
 	}
 }

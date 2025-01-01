@@ -79,6 +79,8 @@ colours:
   ui_logWarningText: "#CA8D00"
   ui_logErrorText: "#A60000"
   ui_logDevText: "#1A60A6"
+  ui_consoleUserText: "#3FDC66"
+  ui_consoleResponse: "#24C84E"
 
   ui_inputCaret: "#000000"
   

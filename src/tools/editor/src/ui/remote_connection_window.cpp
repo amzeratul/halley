@@ -16,7 +16,10 @@ RemoteConnectionWindow::RemoteConnectionWindow(UIFactory& factory, ProjectWindow
 
 void RemoteConnectionWindow::onMakeUI()
 {
+	const auto& colourScheme = factory.getColourScheme();
+
 	console = std::make_shared<UIDebugConsole>("remoteConsole", factory, *this);
+	console->setUserTextColour(colourScheme->getColour("ui_consoleUserText"), colourScheme->getColour("ui_consoleResponse"));
 
 	getWidget("consoleRoot")->add(console, 1);
 }
@@ -32,8 +35,13 @@ void RemoteConnectionWindow::update(Time t, bool moved)
 
 Future<UIDebugConsoleResponse> RemoteConnectionWindow::runCommand(String command, Vector<String> args)
 {
-	auto response = UIDebugConsoleResponse("TODO", false);
-	return Future<UIDebugConsoleResponse>::makeImmediate(response);
+	ConfigNode params;
+	params["command"] = std::move(command);
+	params["args"] = std::move(args);
+	return connection->sendRPC("consoleCommand", std::move(params)).then([] (ConfigNode result)
+	{
+		return UIDebugConsoleResponse(result);
+	});
 }
 
 Vector<StringUTF32> RemoteConnectionWindow::getAutoComplete(const StringUTF32& line) const

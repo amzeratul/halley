@@ -36,6 +36,16 @@ UIDebugConsoleResponse::UIDebugConsoleResponse(String response, bool closeConsol
 {
 }
 
+UIDebugConsoleResponse::UIDebugConsoleResponse(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::String) {
+		response = node.asString();
+	} else {
+		response = node["response"].asString("");
+		closeConsole = node["closeConsole"].asBool(false);
+	}
+}
+
 const String& UIDebugConsoleResponse::getResponse() const
 {
 	return response;
@@ -44,6 +54,18 @@ const String& UIDebugConsoleResponse::getResponse() const
 bool UIDebugConsoleResponse::isCloseConsole() const
 {
 	return closeConsole;
+}
+
+ConfigNode UIDebugConsoleResponse::toConfigNode() const
+{
+	ConfigNode result;
+	if (!response.isEmpty()) {
+		result["response"] = response;
+	}
+	if (closeConsole) {
+		result["closeConsole"] = closeConsole;
+	}
+	return result;
 }
 
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback)
@@ -379,6 +401,9 @@ void UIDebugConsole::hide()
 
 void UIDebugConsole::setup()
 {
+	userInputColour = Colour::fromString("#FFFFFF");
+	responseColour = Colour::fromString("#E2D5EA");
+
 	add(factory.makeUI("halley/debug_console"), 1);
 
 	inputField = getWidgetAs<UITextInput>("input");
@@ -411,7 +436,7 @@ void UIDebugConsole::setup()
 
 void UIDebugConsole::runCommand(const String& rawCommand)
 {
-	addLine("> " + rawCommand, Colour::fromString("#FFFFFF"));
+	addLine("> " + rawCommand, userInputColour);
 	inputField->setEnabled(false);
 
 	auto args = rawCommand.split(' ');
@@ -420,7 +445,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	
 	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
-			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
+			addLine(result.getResponse(), responseColour);
 		}
 		inputField->setEnabled(true);
 		getRoot()->setFocus(inputField);
@@ -441,6 +466,12 @@ void UIDebugConsole::addLine(const String& line, Colour colour)
 	scrollPane->add(newLabel);
 	scrollPane->getPane()->refresh();
 	scrollPane->getPane()->setRelativeScroll(1.0f, UIScrollDirection::Vertical);
+}
+
+void UIDebugConsole::setUserTextColour(Colour4f userInputColour, Colour4f responseColour)
+{
+	this->userInputColour = userInputColour;
+	this->responseColour = responseColour;
 }
 
 void UIDebugConsole::setForcePaintMask(int mask)

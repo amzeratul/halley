@@ -40,6 +40,9 @@ void DevConServerConnection::update(Time t)
 			onReceiveMsg(dynamic_cast<DevCon::SetClientDataMsg&>(msg));
 			break;
 
+		case DevCon::MessageType::RPCReply:
+			onReceiveMsg(dynamic_cast<DevCon::RPCReplyMsg&>(msg));
+
 		default:
 			break;
 		}
@@ -93,6 +96,17 @@ Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
 	return result;
 }
 
+Future<ConfigNode> DevConServerConnection::sendRPC(String method, ConfigNode params)
+{
+	const auto id = rpcId++;
+	queue->enqueue(std::make_unique<DevCon::RPCMsg>(id, std::move(method), std::move(params)), 0);
+
+	Promise<ConfigNode> promise;
+	auto future = promise.getFuture();
+	pendingRPC[id] = std::move(promise);
+	return future;
+}
+
 
 void DevConServerConnection::onReceiveMsg(DevCon::LogMsg& msg)
 {
@@ -112,6 +126,15 @@ void DevConServerConnection::onReceiveMsg(DevCon::SetClientDataMsg& msg)
 	info.deviceName = msg.deviceName;
 	info.params = msg.params;
 	clientInfo = std::move(info);
+}
+
+void DevConServerConnection::onReceiveMsg(DevCon::RPCReplyMsg& msg)
+{
+	if (const auto iter = pendingRPC.find(msg.id); iter != pendingRPC.end()) {
+		auto promise = std::move(iter->second);
+		pendingRPC.erase(iter);
+		promise.setValue(std::move(msg.result));
+	}
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)

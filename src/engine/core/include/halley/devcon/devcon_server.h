@@ -8,6 +8,7 @@
 
 #include "halley/data_structures/config_node.h"
 #include "halley/time/halleytime.h"
+#include "halley/ui/widgets/ui_debug_console.h"
 
 namespace Halley
 {
@@ -17,6 +18,7 @@ namespace Halley
 	class MessageQueue;
 
 	namespace DevCon {
+		class RPCReplyMsg;
 		class SetClientDataMsg;
 		constexpr static int devConPort = 12500;
 		class LogMsg;
@@ -53,6 +55,8 @@ namespace Halley
 
 		Vector<DevCon::LogMsg> movePendingLogs();
 
+		Future<ConfigNode> sendRPC(String method, ConfigNode params);
+
 	private:
 		DevConServer& parent;
 		size_t id;
@@ -63,9 +67,13 @@ namespace Halley
 
 		Vector<DevCon::LogMsg> pendingLogs;
 
+		uint64_t rpcId = 0;
+		HashMap<uint64_t, Promise<ConfigNode>> pendingRPC;
+
 		void onReceiveMsg(DevCon::LogMsg& msg);
 		void onReceiveMsg(DevCon::NotifyInterestMsg& msg);
 		void onReceiveMsg(DevCon::SetClientDataMsg& msg);
+		void onReceiveMsg(DevCon::RPCReplyMsg& msg);
 	};
 
 	class DevConServer

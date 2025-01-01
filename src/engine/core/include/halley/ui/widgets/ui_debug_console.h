@@ -11,9 +11,12 @@ namespace Halley {
 	public:
 		UIDebugConsoleResponse();
 		UIDebugConsoleResponse(String response, bool closeConsole = false);
+		UIDebugConsoleResponse(const ConfigNode& node);
 
 		const String& getResponse() const;
 		bool isCloseConsole() const;
+
+		ConfigNode toConfigNode() const;
 		
 	private:
 		String response;
@@ -127,6 +130,7 @@ namespace Halley {
 		void show();
 		void hide();
 		void addLine(const String& line, Colour colour);
+		void setUserTextColour(Colour4f userInputColour, Colour4f responseColour);
 
     	void setForcePaintMask(int mask);
 
@@ -144,5 +148,8 @@ namespace Halley {
 		Future<String> pendingCommand;
 		std::shared_ptr<UITextInput> inputField;
     	std::optional<int> forceMask;
+
+		Colour4f userInputColour;
+		Colour4f responseColour;
     };
 }

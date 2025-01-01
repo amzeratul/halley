@@ -81,6 +81,7 @@ namespace Halley
 
 		void initResources();
 		void setOutRedirect(bool appendToExisting);
+		void initDevCon();
 
 		void tickFrame(Time time);
 		void render();
