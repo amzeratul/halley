@@ -6,21 +6,6 @@
 using namespace Halley;
 using namespace DevCon;
 
-void DevCon::setupMessageQueue(MessageQueue& queue)
-{
-	queue.setChannel(0, ChannelSettings(true, true));
-
-	queue.addFactory<LogMsg>();
-	queue.addFactory<ReloadAssetsMsg>();
-	queue.addFactory<RegisterInterestMsg>();
-	queue.addFactory<UpdateInterestMsg>();
-	queue.addFactory<UnregisterInterestMsg>();
-	queue.addFactory<NotifyInterestMsg>();
-	queue.addFactory<SetClientDataMsg>();
-	queue.addFactory<RPCMsg>();
-	queue.addFactory<RPCReplyMsg>();
-}
-
 
 LogMsg::LogMsg(LoggerLevel level, const String& msg)
 	: level(level)

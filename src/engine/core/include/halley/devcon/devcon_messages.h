@@ -13,9 +13,6 @@ namespace Halley
 
 	namespace DevCon
 	{
-		void setupMessageQueue(MessageQueue& queue);
-
-		
 		enum class MessageType
 		{
 			Log,

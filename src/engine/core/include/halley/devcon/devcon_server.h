@@ -9,6 +9,7 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/time/halleytime.h"
 #include "halley/ui/widgets/ui_debug_console.h"
+#include "devcon_connection.h"
 
 namespace Halley
 {
@@ -35,13 +36,11 @@ namespace Halley
 		ConfigNode params;
 	};
 
-	class DevConServerConnection
+	class DevConServerConnection : public DevConConnection
 	{
 	public:
 		DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> connection);
 		
-		void update(Time t);
-		bool isAlive() const;
 		size_t getId() const;
 		
 		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
@@ -51,29 +50,20 @@ namespace Halley
 		void unregisterInterest(uint32_t handle);
 
 		const std::optional<DevConClientInfo>& getClientInfo() const;
-		String getAddress() const;
 
 		Vector<DevCon::LogMsg> movePendingLogs();
-
-		Future<ConfigNode> sendRPC(String method, ConfigNode params);
 
 	private:
 		DevConServer& parent;
 		size_t id;
-		std::shared_ptr<IConnection> connection;
-		std::shared_ptr<MessageQueue> queue;
 
 		std::optional<DevConClientInfo> clientInfo;
 
 		Vector<DevCon::LogMsg> pendingLogs;
 
-		uint64_t rpcId = 0;
-		HashMap<uint64_t, Promise<ConfigNode>> pendingRPC;
-
-		void onReceiveMsg(DevCon::LogMsg& msg);
-		void onReceiveMsg(DevCon::NotifyInterestMsg& msg);
-		void onReceiveMsg(DevCon::SetClientDataMsg& msg);
-		void onReceiveMsg(DevCon::RPCReplyMsg& msg);
+		void onReceiveMessage(DevCon::LogMsg& msg) override;
+		void onReceiveMessage(DevCon::NotifyInterestMsg& msg) override;
+		void onReceiveMessage(DevCon::SetClientDataMsg& msg) override;
 	};
 
 	class DevConServer

@@ -3,6 +3,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/support/logger.h"
 #include "devcon_server.h"
+#include "devcon_connection.h"
 
 namespace Halley
 {
@@ -45,31 +46,25 @@ namespace Halley
 		HashMap<String, InterestGroup> interests;
 	};
 
-	class DevConClient : private ILoggerSink
+	class DevConClient : public DevConConnection, private ILoggerSink
 	{
 		friend class DevConClientonnection;
 		friend class DevConInterest;
 
 	public:
-		using RPCHandle = std::function<Future<ConfigNode>(ConfigNode)>;
-
 		DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service);
 		~DevConClient() override;
 
 		void connect(const String& deviceName, const ConfigNode& clientParams, const String& address, int port = DevCon::devConPort);
-		void update(Time t);
+		void update(Time t) override;
 
 		DevConInterest& getInterest() const;
 
-		void setRPCHandle(const String& method, RPCHandle handle);
-		void setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> consoleController);
-
 	protected:
-		void onReceiveMessage(const DevCon::ReloadAssetsMsg& msg);
-		void onReceiveMessage(DevCon::RegisterInterestMsg& msg);
-		void onReceiveMessage(DevCon::UpdateInterestMsg& msg);
-		void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg);
-		void onReceiveMessage(DevCon::RPCMsg& msg);
+		void onReceiveMessage(const DevCon::ReloadAssetsMsg& msg) override;
+		void onReceiveMessage(DevCon::RegisterInterestMsg& msg) override;
+		void onReceiveMessage(DevCon::UpdateInterestMsg& msg) override;
+		void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg) override;
 
 		void notifyInterest(uint32_t handle, ConfigNode data);
 
@@ -78,12 +73,8 @@ namespace Halley
 		Resources& resources;
 		std::unique_ptr<NetworkService> service;
 
-		std::shared_ptr<MessageQueue> queue;
-
 		std::unique_ptr<DevConInterest> interest;
-
-		HashMap<String, RPCHandle> rpcHandles;
-
+		
 		void log(LoggerLevel level, const std::string_view msg) override;
 	};
 }

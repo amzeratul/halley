@@ -91,6 +91,7 @@ set(SOURCES
         "src/version/version.cpp"
 
         "src/devcon/devcon_client.cpp"
+        "src/devcon/devcon_connection.cpp"
         "src/devcon/devcon_messages.cpp"
         "src/devcon/devcon_server.cpp"
 
@@ -523,6 +524,7 @@ set(HEADERS
         "include/halley/version/version.h"
 
         "include/halley/devcon/devcon_client.h"
+        "include/halley/devcon/devcon_connection.h"
         "include/halley/devcon/devcon_messages.h"
         "include/halley/devcon/devcon_server.h"
 

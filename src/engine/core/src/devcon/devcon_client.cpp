@@ -90,46 +90,12 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 DevConClient::~DevConClient()
 {
 	Logger::removeSink(*this);
-	queue.reset();
-	service.reset();
 }
 
 void DevConClient::update(Time t)
 {
-	if (!queue) {
-		return;
-	}
-
-	queue->sendAll();
 	service->update(t);
-
-	for (auto& m: queue->receiveMessages()) {
-		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
-		switch (msg.getMessageType()) {
-		case DevCon::MessageType::ReloadAssets:
-			onReceiveMessage(dynamic_cast<DevCon::ReloadAssetsMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::RegisterInterest:
-			onReceiveMessage(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::UpdateInterest:
-			onReceiveMessage(dynamic_cast<DevCon::UpdateInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::UnregisterInterest:
-			onReceiveMessage(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::RPC:
-			onReceiveMessage(dynamic_cast<DevCon::RPCMsg&>(msg));
-			break;
-
-		default:
-			break;
-		}
-	}
+	DevConConnection::update(t);
 }
 
 void DevConClient::onReceiveMessage(const DevCon::ReloadAssetsMsg& msg)
@@ -157,44 +123,9 @@ void DevConClient::onReceiveMessage(const DevCon::UnregisterInterestMsg& msg)
 	interest->unregisterInterest(msg.handle);
 }
 
-void DevConClient::onReceiveMessage(DevCon::RPCMsg& msg)
-{
-	if (const auto iter = rpcHandles.find(msg.method); iter != rpcHandles.end()) {
-		auto id = msg.id;
-		iter->second(std::move(msg.params)).then([this, id] (ConfigNode result)
-		{
-			queue->enqueue(std::make_unique<DevCon::RPCReplyMsg>(id, std::move(result)), 0);
-		});
-	} else {
-		queue->enqueue(std::make_unique<DevCon::RPCReplyMsg>(msg.id, UIDebugConsoleResponse("<DevCon has no handle registered for RPC \"" + msg.method +"\">").toConfigNode()), 0);
-	}
-}
-
 DevConInterest& DevConClient::getInterest() const
 {
 	return *interest;
-}
-
-void DevConClient::setRPCHandle(const String& method, RPCHandle handle)
-{
-	rpcHandles[method] = std::move(handle);
-}
-
-void DevConClient::setDebugConsoleController(std::shared_ptr<UIDebugConsoleController> consoleController)
-{
-	auto weakPtr = std::weak_ptr<UIDebugConsoleController>(consoleController);
-
-	setRPCHandle("consoleCommand", [weakPtr] (ConfigNode params) -> Future<ConfigNode>
-	{
-		if (auto consoleController = weakPtr.lock()) {
-			return consoleController->runCommand(params["command"].asString(), params["args"].asVector<String>()).then([] (UIDebugConsoleResponse result)
-			{
-				return result.toConfigNode();
-			});
-		} else {
-			return Future<ConfigNode>::makeImmediate(ConfigNode("<UIDebugConsoleController expired>"));
-		}
-	});
 }
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
@@ -214,8 +145,7 @@ void DevConClient::connect(const String& deviceName, const ConfigNode& clientPar
 	}
 
 	if (auto connection = service->connect(address + ":" + toString(port))) {
-		queue = std::make_shared<MessageQueueTCP>(std::move(connection));
-		DevCon::setupMessageQueue(*queue);
+		setConnection(connection);
 
 		queue->enqueue(std::make_unique<DevCon::SetClientDataMsg>(getPlatform(), deviceName, ConfigNode(clientParams)), 0);
 		Logger::addSink(*this);

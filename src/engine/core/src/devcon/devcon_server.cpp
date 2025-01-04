@@ -14,44 +14,8 @@ using namespace Halley;
 DevConServerConnection::DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> conn)
 	: parent(parent)
 	, id(id)
-	, connection(conn)
-	, queue(std::make_shared<MessageQueueTCP>(connection))
 {
-	DevCon::setupMessageQueue(*queue);
-}
-
-void DevConServerConnection::update(Time t)
-{
-	queue->sendAll();
-
-	for (auto& m: queue->receiveMessages()) {
-		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
-
-		switch (msg.getMessageType()) {
-		case DevCon::MessageType::Log:
-			onReceiveMsg(dynamic_cast<DevCon::LogMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::NotifyInterest:
-			onReceiveMsg(dynamic_cast<DevCon::NotifyInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::SetClientData:
-			onReceiveMsg(dynamic_cast<DevCon::SetClientDataMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::RPCReply:
-			onReceiveMsg(dynamic_cast<DevCon::RPCReplyMsg&>(msg));
-
-		default:
-			break;
-		}
-	}
-}
-
-bool DevConServerConnection::isAlive() const
-{
-	return connection->getStatus() != ConnectionStatus::Closed && connection->getStatus() != ConnectionStatus::Closing;
+	setConnection(conn);
 }
 
 size_t DevConServerConnection::getId() const
@@ -84,11 +48,6 @@ const std::optional<DevConClientInfo>& DevConServerConnection::getClientInfo() c
 	return clientInfo;
 }
 
-String DevConServerConnection::getAddress() const
-{
-	return connection->getRemoteAddress();
-}
-
 Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
 {
 	auto result = std::move(pendingLogs);
@@ -96,45 +55,25 @@ Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
 	return result;
 }
 
-Future<ConfigNode> DevConServerConnection::sendRPC(String method, ConfigNode params)
-{
-	const auto id = rpcId++;
-	queue->enqueue(std::make_unique<DevCon::RPCMsg>(id, std::move(method), std::move(params)), 0);
 
-	Promise<ConfigNode> promise;
-	auto future = promise.getFuture();
-	pendingRPC[id] = std::move(promise);
-	return future;
-}
-
-
-void DevConServerConnection::onReceiveMsg(DevCon::LogMsg& msg)
+void DevConServerConnection::onReceiveMessage(DevCon::LogMsg& msg)
 {
 	pendingLogs.push_back(std::move(msg));
 	//Logger::log(msg.level, "[REMOTE] " + msg.msg);
 }
 
-void DevConServerConnection::onReceiveMsg(DevCon::NotifyInterestMsg& msg)
+void DevConServerConnection::onReceiveMessage(DevCon::NotifyInterestMsg& msg)
 {
 	parent.onReceiveNotifyInterestMsg(*this, msg);
 }
 
-void DevConServerConnection::onReceiveMsg(DevCon::SetClientDataMsg& msg)
+void DevConServerConnection::onReceiveMessage(DevCon::SetClientDataMsg& msg)
 {
 	DevConClientInfo info;
 	info.platform = msg.platform;
 	info.deviceName = msg.deviceName;
 	info.params = msg.params;
 	clientInfo = std::move(info);
-}
-
-void DevConServerConnection::onReceiveMsg(DevCon::RPCReplyMsg& msg)
-{
-	if (const auto iter = pendingRPC.find(msg.id); iter != pendingRPC.end()) {
-		auto promise = std::move(iter->second);
-		pendingRPC.erase(iter);
-		promise.setValue(std::move(msg.result));
-	}
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
