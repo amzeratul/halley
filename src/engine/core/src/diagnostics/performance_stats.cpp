@@ -16,8 +16,9 @@
 
 using namespace Halley;
 
-PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
+PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api, bool local)
 	: StatsView(resources, api)
+	, isLocal(local)
 	, totalFrameTime(60)
 	, updateTime(60)
 	, cpuRenderTime(60)
@@ -28,7 +29,9 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
-	api.core->addProfilerCallback(this);
+	if (isLocal) {
+		api.core->addProfilerCallback(this);
+	}
 	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setOffset(Vector2f(0.5f, 0.5f));
@@ -46,7 +49,9 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 
 PerformanceStatsView::~PerformanceStatsView()
 {
-	api.core->removeProfilerCallback(this);
+	if (isLocal) {
+		api.core->removeProfilerCallback(this);
+	}
 }
 
 void PerformanceStatsView::paint(Painter& painter)
@@ -57,7 +62,6 @@ void PerformanceStatsView::paint(Painter& painter)
 	const auto now = std::chrono::steady_clock::now();
 	const Time t = std::min(0.2, std::chrono::duration<Time>(now - lastUpdateTime).count());
 	lastUpdateTime = now;
-	memoryUsageRefreshTime += t;
 
 	if (active) {
 		if (page == 0) {
@@ -92,7 +96,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	gpuTime.pushValue(data->getElapsedTime(ProfilerEventType::GPU));
 	totalRenderTime.pushValue(data->getElapsedTime(std::array<ProfilerEventType, 2>({ ProfilerEventType::GPU, ProfilerEventType::CoreRender })));
 	totalFrameTime.pushValue((data->getEndTime() - data->getStartTime()));
-	audioTime.pushValue(api.audio->getLastTimeElapsed());
+	audioTime.pushValue(data->getAudioTime());
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -126,9 +130,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	std_ex::erase_if_value(systemHistory, [&](const auto& e) { return !e.isVisited(); });
 	std_ex::erase_if_value(scriptHistory, [&](const auto& e) { return !e.isVisited(); });
 	
-	if (capturing) {
-		lastProfileData = std::move(data);
-	}
+	lastProfileData = std::move(data);
 }
 
 void PerformanceStatsView::setNetworkStats(NetworkSession& session)
@@ -260,7 +262,7 @@ void PerformanceStatsView::EventHistoryData::sortIfNeeded() const
 
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
-	const bool hasVSync = api.video->hasVsync();
+	const bool hasVSync = lastProfileData ? lastProfileData->getHasVsync() : false;
 
 	const auto frameAvgTime = totalFrameTime.getAverage();
 	const auto updateAvgTime = updateTime.getAverage();
@@ -277,11 +279,6 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	const auto gpuCol = Colour4f(0.98f, 0.85f, 0.55f);
 	const auto ramCol = Colour4f(0.6f, 0.6f, 0.7f);
 	const auto vramCol = Colour4f(0.6f, 0.7f, 0.6f);
-
-	if (memoryUsageRefreshTime >= 1.0) {
-		memoryUsage = api.system->getMemoryUsage();
-		memoryUsageRefreshTime = 0;
-	}
 
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
@@ -301,25 +298,28 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(formatTime(gpuAvgTime), gpuCol);
 	strBuilder.append(" ms");
 
-	if (memoryUsage.ramUsage > 0) {
-		strBuilder.append("\nRAM ");
-		strBuilder.append(String::prettySize(memoryUsage.ramUsage), ramCol);
-		if (memoryUsage.ramMax) {
-			//strBuilder.append(" / ");
-			//strBuilder.append(String::prettySize(*memoryUsage.ramMax), ramCol);
-			strBuilder.append(" (");
-			strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.ramUsage) / double(*memoryUsage.ramMax))), ramCol);
-			strBuilder.append("%)");
-		}
-		if (memoryUsage.vramUsage > 0) {
-			strBuilder.append(" | VRAM ");
-			strBuilder.append(String::prettySize(memoryUsage.vramUsage), vramCol);
-			if (memoryUsage.vramMax) {
+	if (lastProfileData) {
+		const auto& memoryUsage = lastProfileData->getMemoryUsage();
+		if (memoryUsage.ramUsage > 0) {
+			strBuilder.append("\nRAM ");
+			strBuilder.append(String::prettySize(memoryUsage.ramUsage), ramCol);
+			if (memoryUsage.ramMax) {
 				//strBuilder.append(" / ");
-				//strBuilder.append(String::prettySize(*memoryUsage.vramMax), vramCol);
+				//strBuilder.append(String::prettySize(*memoryUsage.ramMax), ramCol);
 				strBuilder.append(" (");
-				strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.vramUsage) / double(*memoryUsage.vramMax))), vramCol);
+				strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.ramUsage) / double(*memoryUsage.ramMax))), ramCol);
 				strBuilder.append("%)");
+			}
+			if (memoryUsage.vramUsage > 0) {
+				strBuilder.append(" | VRAM ");
+				strBuilder.append(String::prettySize(memoryUsage.vramUsage), vramCol);
+				if (memoryUsage.vramMax) {
+					//strBuilder.append(" / ");
+					//strBuilder.append(String::prettySize(*memoryUsage.vramMax), vramCol);
+					strBuilder.append(" (");
+					strBuilder.append(toString(lroundl(100.0 * double(memoryUsage.vramUsage) / double(*memoryUsage.vramMax))), vramCol);
+					strBuilder.append("%)");
+				}
 			}
 		}
 	}
@@ -337,9 +337,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (!simple) {
-		const auto audioSpec = api.audio->getAudioSpec();
-		if (audioSpec) {
-			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
+		if (lastProfileData && lastProfileData->getAudioBufferLen() > 0) {
+			const int64_t totalTimePerBuffer = int64_t(lastProfileData->getAudioBufferLen()) * 1'000'000'000 / int64_t(lastProfileData->getAudioSampleRate());
 			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerBuffer);
 			strBuilder.append(" | ");
 			strBuilder.append(formatTime(audioAvgTime));

@@ -21,6 +21,21 @@ ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, Vec
 	processEvents(std::move(events));
 }
 
+void ProfilerData::collectAPIData(const HalleyAPI& api, std::optional<SystemAPI::MemoryUsage> memoryUsage)
+{
+	const auto audioSpec = api.audio->getAudioSpec().value_or(AudioSpec());
+	audioBufferLen = audioSpec.bufferSize;
+	audioSampleRate = audioSpec.sampleRate;
+	audioTime = api.audio->getLastTimeElapsed();
+	hasVsync = api.video->hasVsync();
+
+	if (memoryUsage) {
+		this->memoryUsage = *memoryUsage;
+	} else {
+		this->memoryUsage = api.system->getMemoryUsage();
+	}
+}
+
 ProfilerData::TimePoint ProfilerData::getStartTime() const
 {
 	return frameStartTime;
@@ -65,6 +80,31 @@ ProfilerData::Duration ProfilerData::getElapsedTime(gsl::span<const ProfilerEven
 gsl::span<const ProfilerData::ThreadInfo> ProfilerData::getThreads() const
 {
 	return threads;
+}
+
+bool ProfilerData::getHasVsync() const
+{
+	return hasVsync;
+}
+
+int64_t ProfilerData::getAudioTime() const
+{
+	return audioTime;
+}
+
+uint32_t ProfilerData::getAudioSampleRate() const
+{
+	return audioSampleRate;
+}
+
+uint32_t ProfilerData::getAudioBufferLen() const
+{
+	return audioBufferLen;
+}
+
+SystemAPI::MemoryUsage ProfilerData::getMemoryUsage() const
+{
+	return memoryUsage;
 }
 
 void ProfilerData::processEvents(Vector<Event> pendingEvents)
@@ -191,7 +231,7 @@ bool ProfilerCapture::isRecording() const
 	return recording;
 }
 
-void ProfilerCapture::startFrame(bool rec)
+void ProfilerCapture::startFrame(bool rec, Time dt)
 {
 	Expects(state != State::FrameStarted);
 	
@@ -207,6 +247,12 @@ void ProfilerCapture::startFrame(bool rec)
 
 	recording = rec;
 	state = State::FrameStarted;
+
+	memoryUsageRefreshTime -= dt;
+	if (memoryUsageRefreshTime < 0) {
+		memoryUsageRefreshTime = 1.0;
+		memoryUsage = {};
+	}
 }
 
 void ProfilerCapture::endFrame()
@@ -217,7 +263,7 @@ void ProfilerCapture::endFrame()
 	state = State::FrameEnded;
 }
 
-ProfilerData ProfilerCapture::getCapture()
+ProfilerData ProfilerCapture::getCapture(const HalleyAPI& api)
 {
 	Expects(state == State::FrameEnded);
 
@@ -232,7 +278,12 @@ ProfilerData ProfilerCapture::getCapture()
 		eventsCopy.insert(eventsCopy.end(), events.begin(), events.begin() + endIdx);
 	}
 	
-	return ProfilerData(frameStartTime.time_since_epoch().count(), frameEndTime.time_since_epoch().count(), std::move(eventsCopy));
+	auto result = ProfilerData(frameStartTime.time_since_epoch().count(), frameEndTime.time_since_epoch().count(), std::move(eventsCopy));
+	result.collectAPIData(api, memoryUsage);
+	if (!memoryUsage) {
+		memoryUsage = result.getMemoryUsage();
+	}
+	return result;
 }
 
 Time ProfilerCapture::getFrameTime() const
@@ -326,6 +377,11 @@ void ProfilerData::serialize(Serializer& s) const
 	s << frameStartTime;
     s << frameEndTime;
     s << threads;
+	s << hasVsync;
+    s << audioTime;
+    s << audioSampleRate;
+    s << audioBufferLen;
+    s << memoryUsage;
 }
 
 void ProfilerData::deserialize(Deserializer& s)
@@ -333,4 +389,9 @@ void ProfilerData::deserialize(Deserializer& s)
 	s >> frameStartTime;
     s >> frameEndTime;
     s >> threads;
+	s >> hasVsync;
+    s >> audioTime;
+    s >> audioSampleRate;
+    s >> audioBufferLen;
+    s >> memoryUsage;
 }

@@ -396,13 +396,13 @@ void Core::onTick(Time delta)
 {
 	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
-	capture.startFrame(record);
+	capture.startFrame(record, delta);
 	
 	tickFrame(delta);
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
-		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
+		onProfileData(std::make_shared<ProfilerData>(capture.getCapture(*api)));
 	}
 }
 
