@@ -167,6 +167,8 @@ src/ui/remote_connection_window.cpp
 src/ui/remote_connection_window.h
 src/ui/remote_profiler_window.cpp
 src/ui/remote_profiler_window.h
+src/ui/remotes_status_bar.cpp
+src/ui/remotes_status_bar.h
 src/ui/remotes_window.cpp
 src/ui/remotes_window.h
 src/ui/scroll_background.cpp

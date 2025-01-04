@@ -7,6 +7,7 @@
 #include "game_properties_window.h"
 #include "src/localisation/localisation_editor.h"
 #include "plotter.h"
+#include "remotes_status_bar.h"
 #include "remotes_window.h"
 #include "status_bar.h"
 #include "taskbar.h"
@@ -104,9 +105,14 @@ void ProjectWindow::makeUI()
 	makeToolbar();
 	makePagedPane();
 
+	auto statusSizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 	auto statusBar = std::make_shared<StatusBar>(factory, *this);
+	auto remotesStatusBar = std::make_shared<RemotesStatusBar>(factory, *this);
+	statusSizer->add(statusBar, 1);
+	statusSizer->add(remotesStatusBar, 0);
+
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 0));
-	uiBottom->add(statusBar, 0, Vector4f(8, 0, 8, 4));
+	uiBottom->add(statusSizer, 0, Vector4f(8, 0, 8, 4));
 
 	consoleWindow->setStatusBar(statusBar);
 

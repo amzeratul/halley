@@ -1,0 +1,37 @@
+uuid: 8b0036cf-d9a6-4167-9546-6ab9ab479a88
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: a69dc539-3961-427a-8fb1-f26013cfac26
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      columns: 1
+      gap: 6
+      type: horizontal
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [65, 0]
+    children:
+      - uuid: ca39c30f-5ae1-48fa-befb-3480f97c1dbd
+        border: [0, 0, 0, 0]
+        widget:
+          class: image
+          image: ui/remote_status.png
+      - uuid: d4497234-e8a7-4e0e-8d77-f92c6e72432d
+        proportion: 1
+        border: [2, 0, 3, 0]
+        widget:
+          class: label
+          id: connectionsActive
+          text: 0
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
+    fill: [centreHorizontal, centreVertical]
