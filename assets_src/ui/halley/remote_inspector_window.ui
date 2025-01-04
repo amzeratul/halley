@@ -1,0 +1,33 @@
+uuid: 20554523-0388-4d91-b63b-4288460f47d3
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: d9d5db3f-11b6-4d91-97cf-4599f9500c77
+    proportion: 1
+    border: [4, 4, 4, 4]
+    sizer:
+      columnProportions: []
+      columns: 1
+      gap: 1
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [0, 0]
+    children:
+      - uuid: fa1ef77b-ea19-4fba-a254-b072e4566972
+        border: [10, 10, 10, 10]
+        widget:
+          class: label
+          id: ""
+          text: Coming Soon (tm)!™™
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
+    fill: [centreHorizontal, centreVertical]

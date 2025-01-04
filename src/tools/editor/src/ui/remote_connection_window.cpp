@@ -2,6 +2,7 @@
 
 #include "console_window.h"
 #include "project_window.h"
+#include "remote_inspector_window.h"
 #include "remote_profiler_window.h"
 #include "halley/devcon/devcon_messages.h"
 
@@ -39,9 +40,11 @@ void RemoteConnectionWindow::onMakeUI()
 	console = std::make_shared<UIDebugConsole>("remoteConsole", factory, *this);
 	console->setUserTextColour(colourScheme->getColour("ui_consoleUserText"), colourScheme->getColour("ui_consoleResponse"));
 
+	auto inspector = std::make_shared<RemoteInspectorWindow>(factory, connection, projectWindow.getAPI());
 	auto profiler = std::make_shared<RemoteProfilerWindow>(factory, connection, projectWindow.getAPI());
 
 	getWidget("consoleRoot")->add(console, 1);
+	getWidget("inspectorRoot")->add(inspector, 1);
 	getWidget("profilerRoot")->add(profiler, 1);
 }
 

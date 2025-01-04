@@ -165,6 +165,8 @@ src/ui/project_window.cpp
 src/ui/project_window.h
 src/ui/remote_connection_window.cpp
 src/ui/remote_connection_window.h
+src/ui/remote_inspector_window.cpp
+src/ui/remote_inspector_window.h
 src/ui/remote_profiler_window.cpp
 src/ui/remote_profiler_window.h
 src/ui/remotes_status_bar.cpp
