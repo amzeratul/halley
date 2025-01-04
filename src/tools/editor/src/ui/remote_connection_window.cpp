@@ -19,6 +19,7 @@ RemoteConnectionTab::RemoteConnectionTab(UIFactory& factory, GamePlatform platfo
 void RemoteConnectionTab::onMakeUI()
 {
 	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromUserString(name));
+	getWidgetAs<UIImage>("icon")->setSprite(Sprite().setImage(factory.getResources(), "ui/platforms/" + toString(platform) + "_16.png"));
 }
 
 RemoteConnectionWindow::RemoteConnectionWindow(UIFactory& factory, ProjectWindow& projectWindow, std::shared_ptr<DevConServerConnection> connection, std::shared_ptr<RemoteConnectionTab> tab)

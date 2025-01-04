@@ -95,6 +95,8 @@ DevConClient::~DevConClient()
 	}
 
 	Logger::removeSink(*this);
+
+	setConnection({});
 }
 
 void DevConClient::update(Time t)

@@ -13,20 +13,25 @@ DevConConnection::~DevConConnection()
 
 void DevConConnection::setConnection(std::shared_ptr<IConnection> connection)
 {
-	this->connection = std::move(connection);
+	if (connection) {
+		this->connection = std::move(connection);
 
-	queue = std::make_shared<MessageQueueTCP>(this->connection);
-	queue->setChannel(0, ChannelSettings(true, true));
+		queue = std::make_shared<MessageQueueTCP>(this->connection);
+		queue->setChannel(0, ChannelSettings(true, true));
 
-	queue->addFactory<DevCon::LogMsg>();
-	queue->addFactory<DevCon::ReloadAssetsMsg>();
-	queue->addFactory<DevCon::RegisterInterestMsg>();
-	queue->addFactory<DevCon::UpdateInterestMsg>();
-	queue->addFactory<DevCon::UnregisterInterestMsg>();
-	queue->addFactory<DevCon::NotifyInterestMsg>();
-	queue->addFactory<DevCon::SetClientDataMsg>();
-	queue->addFactory<DevCon::RPCMsg>();
-	queue->addFactory<DevCon::RPCReplyMsg>();
+		queue->addFactory<DevCon::LogMsg>();
+		queue->addFactory<DevCon::ReloadAssetsMsg>();
+		queue->addFactory<DevCon::RegisterInterestMsg>();
+		queue->addFactory<DevCon::UpdateInterestMsg>();
+		queue->addFactory<DevCon::UnregisterInterestMsg>();
+		queue->addFactory<DevCon::NotifyInterestMsg>();
+		queue->addFactory<DevCon::SetClientDataMsg>();
+		queue->addFactory<DevCon::RPCMsg>();
+		queue->addFactory<DevCon::RPCReplyMsg>();
+	} else {
+		this->queue = {};
+		this->connection = {};
+	}
 }
 
 void DevConConnection::update(Time t)

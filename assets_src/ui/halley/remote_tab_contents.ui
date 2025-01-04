@@ -10,7 +10,7 @@ children:
     widget:
       class: image
       id: icon
-      image: whitebox.png
+      image: ui/platforms/pc_16.png
     fill: centre
   - uuid: 9e0724a4-54f7-4998-81ce-462c55d2a837
     border: [0, 0, 4, 0]

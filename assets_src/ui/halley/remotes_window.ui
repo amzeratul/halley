@@ -6,23 +6,38 @@ sizer:
 widget:
   class: widget
 children:
-  - uuid: a3814755-6cc8-444e-8c91-8c9b2041d843
+  - uuid: d28e75ec-45bb-4c2d-9458-d0402b5b608f
     proportion: 1
-    border: [0, 0, 0, 0]
+    border: [4, 4, 4, 4]
     sizer:
       columnProportions: []
+      columns: 1
+      gap: 1
+      type: vertical
     widget:
-      class: widget
+      class: image
+      colour: $ui_popupWindow
       id: noRemoteConnections
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [0, 0]
     children:
       - uuid: 763e1327-0b4a-4986-a165-0d67cddc71a4
-        border: [0, 0, 4, 0]
+        border: [10, 10, 10, 10]
         widget:
           class: label
           id: ""
           text: No Active Remote Connections.
           wordWrapped: false
-        fill: left
+        fill: [centreHorizontal, centreVertical]
+      - uuid: 6a1f7a98-e993-421a-871c-ad0c82500e17
+        border: [10, 10, 10, 10]
+        widget:
+          class: label
+          id: ""
+          text: Standing by...
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
     fill: [centreHorizontal, centreVertical]
   - uuid: 68f9e2a9-61a5-4124-947b-721f0f2287cd
     proportion: 1
