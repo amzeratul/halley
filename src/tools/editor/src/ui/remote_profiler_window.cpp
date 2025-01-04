@@ -65,7 +65,12 @@ void RemoteProfilerWindow::setListeningToProfile(bool listening)
 		if (listening) {
 			activeInterest = connection->getParent().registerInterest("profiler", {}, [=] (size_t idx, ConfigNode result)
 			{
-				onProfileData(std::make_shared<ProfilerData>(Deserializer::fromBytes<ProfilerData>(result.asBytes(), SerializerOptions(SerializerOptions::maxVersion))));
+				if (result.getType() == ConfigNodeType::Bytes) {
+					auto profilerData = Deserializer::fromBytes<ProfilerData>(result.asBytes(), SerializerOptions(SerializerOptions::maxVersion));
+					onProfileData(std::make_shared<ProfilerData>(std::move(profilerData)));
+				} else {
+					lastProfileData = {};
+				}
 			}, connection->getId());
 		}
 
@@ -75,5 +80,5 @@ void RemoteProfilerWindow::setListeningToProfile(bool listening)
 
 void RemoteProfilerWindow::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	lastProfileData = data;
+	lastProfileData = std::move(data);
 }

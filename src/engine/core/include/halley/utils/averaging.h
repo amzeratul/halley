@@ -84,6 +84,11 @@ namespace Halley {
             return latest;
         }
 
+        void clear()
+    	{
+            *this = AveragingLatched(nSamples);
+    	}
+
     private:
         uint32_t nValues = 0;
     	uint32_t nSamples;

@@ -94,6 +94,22 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
+	if (!data) {
+		vsyncTime.clear();
+		updateTime.clear();
+		cpuRenderTime.clear();
+		gpuTime.clear();
+		totalRenderTime.clear();
+		totalFrameTime.clear();
+		audioTime.clear();
+
+		systemHistory.clear();
+		scriptHistory.clear();
+
+		lastProfileData = {};
+		return;
+	}
+
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync));
 	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate) + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate));
 	cpuRenderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender));
