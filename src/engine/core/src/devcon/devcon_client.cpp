@@ -85,14 +85,14 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 	, resources(resources)
 	, service(std::move(service))
 {
-	api.core->addProfilerCallback(this);
-
 	interest = std::make_unique<DevConInterest>(*this);
 }
 
 DevConClient::~DevConClient()
 {
-	api.core->removeProfilerCallback(this);
+	if (receivingProfilerData) {
+		api.core->removeProfilerCallback(this);
+	}
 
 	Logger::removeSink(*this);
 }
@@ -101,6 +101,16 @@ void DevConClient::update(Time t)
 {
 	service->update(t);
 	DevConConnection::update(t);
+
+	const bool shouldHaveProfilerData = interest->hasInterest("profiler");
+	if (shouldHaveProfilerData != receivingProfilerData) {
+		if (shouldHaveProfilerData) {
+			api.core->addProfilerCallback(this);
+		} else {
+			api.core->removeProfilerCallback(this);
+		}
+		receivingProfilerData = shouldHaveProfilerData;
+	}
 }
 
 void DevConClient::onReceiveMessage(const DevCon::ReloadAssetsMsg& msg)
@@ -145,7 +155,7 @@ void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 void DevConClient::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	if (interest->hasInterest("profiler")) {
-		auto bytes = Serializer::toBytes(*data);
+		auto bytes = Serializer::toBytes(*data, SerializerOptions(SerializerOptions::maxVersion));
 		interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));
 	}
 }

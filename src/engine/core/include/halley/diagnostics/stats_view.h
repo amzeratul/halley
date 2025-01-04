@@ -30,13 +30,15 @@ namespace Halley {
 		
         virtual void draw(RenderContext& context);
 		virtual void update(Time t);
+		void paintAt(Rect4f viewPort, Painter& painter);
 
 	protected:
         virtual void paint(Painter& painter) = 0;
 		Vector2f getScreenSize() const;
+		Rect4f getViewPort() const;
 
 	private:
-		Vector2f screenSize;
+		Rect4f viewPort;
 	};
 
 	class StatsView : public ScreenOverlay {
@@ -45,7 +47,6 @@ namespace Halley {
         virtual ~StatsView() = default;
 
 		void update(Time t) override;
-		void draw(RenderContext& context) override;
 
 		void setActive(bool active);
 		bool isActive() const;

@@ -38,18 +38,17 @@ namespace Halley
 
 	class DevConServerConnection : public DevConConnection
 	{
+		friend class DevConServer;
+
 	public:
 		DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> connection);
 		
 		size_t getId() const;
-		
-		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
-
-		void registerInterest(const String& id, const ConfigNode& params, uint32_t handle);
-		void updateInterest(uint32_t handle, const ConfigNode& params);
-		void unregisterInterest(uint32_t handle);
-
 		const std::optional<DevConClientInfo>& getClientInfo() const;
+
+		DevConServer& getParent();
+	
+		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
 
 		Vector<DevCon::LogMsg> movePendingLogs();
 
@@ -60,6 +59,10 @@ namespace Halley
 		std::optional<DevConClientInfo> clientInfo;
 
 		Vector<DevCon::LogMsg> pendingLogs;
+
+		void registerInterest(const String& id, const ConfigNode& params, uint32_t handle);
+		void updateInterest(uint32_t handle, const ConfigNode& params);
+		void unregisterInterest(uint32_t handle);
 
 		void onReceiveMessage(DevCon::LogMsg& msg) override;
 		void onReceiveMessage(DevCon::NotifyInterestMsg& msg) override;
@@ -80,7 +83,7 @@ namespace Halley
 
 		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
 
-		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback);
+		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback, std::optional<size_t> connectionId = {});
 		void updateInterest(InterestHandle handle, ConfigNode params);
 		void unregisterInterest(InterestHandle handle);
 		const ConfigNode& getInterestParams(InterestHandle handle) const;

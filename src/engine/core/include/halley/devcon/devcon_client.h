@@ -77,6 +77,8 @@ namespace Halley
 		std::unique_ptr<NetworkService> service;
 
 		std::unique_ptr<DevConInterest> interest;
+
+		bool receivingProfilerData = false;
 		
 		void log(LoggerLevel level, const std::string_view msg) override;
 	};

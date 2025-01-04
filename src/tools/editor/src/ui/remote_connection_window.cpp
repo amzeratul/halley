@@ -1,6 +1,8 @@
 #include "remote_connection_window.h"
 
 #include "console_window.h"
+#include "project_window.h"
+#include "remote_profiler_window.h"
 #include "halley/devcon/devcon_messages.h"
 
 using namespace Halley;
@@ -36,7 +38,10 @@ void RemoteConnectionWindow::onMakeUI()
 	console = std::make_shared<UIDebugConsole>("remoteConsole", factory, *this);
 	console->setUserTextColour(colourScheme->getColour("ui_consoleUserText"), colourScheme->getColour("ui_consoleResponse"));
 
+	auto profiler = std::make_shared<RemoteProfilerWindow>(factory, connection, projectWindow.getAPI());
+
 	getWidget("consoleRoot")->add(console, 1);
+	getWidget("profilerRoot")->add(profiler, 1);
 }
 
 void RemoteConnectionWindow::update(Time t, bool moved)

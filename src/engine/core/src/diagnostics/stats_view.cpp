@@ -11,15 +11,13 @@ using namespace Halley;
 
 ScreenOverlay::ScreenOverlay()
 {
-	screenSize = Vector2f(1280, 720);
+	viewPort = Rect4f(0, 0, 1280, 720);
 }
 
 void ScreenOverlay::draw(RenderContext& context)
 {
-	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
-	screenSize = viewPort.getSize();
-
-	const auto camera = Camera(screenSize * 0.5f);
+	viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
+	const auto camera = viewPort.getCenter();
 
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);
@@ -30,9 +28,20 @@ void ScreenOverlay::update(Time t)
 {
 }
 
+void ScreenOverlay::paintAt(Rect4f viewPort, Painter& painter)
+{
+	this->viewPort = viewPort;
+	paint(painter);
+}
+
 Vector2f ScreenOverlay::getScreenSize() const
 {
-	return screenSize;
+	return viewPort.getSize();
+}
+
+Rect4f ScreenOverlay::getViewPort() const
+{
+	return viewPort;
 }
 
 
@@ -46,11 +55,6 @@ void StatsView::update(Time t)
 	if (input) {
 		input->setEnabled(isInputActive());
 	}
-}
-
-void StatsView::draw(RenderContext& context)
-{
-	ScreenOverlay::draw(context);
 }
 
 void StatsView::setActive(bool active)

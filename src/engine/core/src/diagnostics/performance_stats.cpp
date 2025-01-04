@@ -67,20 +67,24 @@ void PerformanceStatsView::paint(Painter& painter)
 		if (page == 0) {
 			drawHeader(painter, true);
 		} else {
-			const auto rect = Rect4f(painter.getViewPort());
-			whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+			const auto rect = getViewPort();
+			const auto origin = rect.getTopLeft();
+
+			if (drawBg) {
+				whitebox.clone().setPosition(origin).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+			}
 
 			drawHeader(painter, false);
-			drawTimeline(painter, Rect4f(20, 80, rect.getWidth() - 40, 100));
+			drawTimeline(painter, Rect4f(20, 80, rect.getWidth() - 40, 100) + origin);
 
 			if (page == 1) {
-				drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+				drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin);
 			} else if (page == 2) {
-				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, systemHistory);
+				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin, t, systemHistory);
 			} else if (page == 3) {
-				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, scriptHistory);
+				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin, t, scriptHistory);
 			} else if (page == 4) {
-				drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+				drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin);
 			}
 		}
 	}
@@ -152,6 +156,11 @@ int PerformanceStatsView::getPage() const
 void PerformanceStatsView::setPage(int page)
 {
 	this->page = page;
+}
+
+void PerformanceStatsView::setDrawBg(bool drawBg)
+{
+	this->drawBg = drawBg;
 }
 
 bool PerformanceStatsView::isInputActive() const
@@ -349,10 +358,10 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (simple) {
-		const auto pos = Vector2f(painter.getViewPort().getBottomLeft()) + Vector2f(5, -5);
+		const auto pos = getViewPort().getBottomLeft() + Vector2f(5, -5);
 		headerText.setPosition(pos).setOffset(Vector2f(0, 1)).setOutline(2.0f);
 	} else {
-		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
+		headerText.setPosition(getViewPort().getTopLeft() + Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
 
 	auto [str, colours] = strBuilder.moveResults();

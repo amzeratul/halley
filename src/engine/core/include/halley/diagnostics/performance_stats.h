@@ -29,6 +29,8 @@ namespace Halley
 		int getPage() const;
 		void setPage(int page);
 
+		void setDrawBg(bool drawBg);
+
 	protected:
 		bool isInputActive() const override;
 
@@ -103,6 +105,7 @@ namespace Halley
 
 		bool capturing = true;
 		int page = 0;
+		bool drawBg = true;
 
 		INetworkServiceStatsListener* networkStats = nullptr;
 		const NetworkSession* networkSession;

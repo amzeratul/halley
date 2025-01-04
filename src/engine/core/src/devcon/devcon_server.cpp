@@ -48,6 +48,11 @@ const std::optional<DevConClientInfo>& DevConServerConnection::getClientInfo() c
 	return clientInfo;
 }
 
+DevConServer& DevConServerConnection::getParent()
+{
+	return parent;
+}
+
 Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
 {
 	auto result = std::move(pendingLogs);
@@ -107,12 +112,14 @@ void DevConServer::reloadAssets(Vector<String> assetIds, Vector<String> packIds)
 	}
 }
 
-DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNode params, InterestCallback callback)
+DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNode params, InterestCallback callback, std::optional<size_t> connectionId)
 {
 	const InterestHandle handle = interestId++;
 
 	for (const auto& c: connections) {
-		c->registerInterest(id, params, handle);
+		if (!connectionId || connectionId == c->getId()) {
+			c->registerInterest(id, params, handle);
+		}
 	}
 
 	interest[handle] = Interest{ std::move(id), std::move(params), std::move(callback) };
