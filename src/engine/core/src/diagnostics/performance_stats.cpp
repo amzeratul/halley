@@ -86,12 +86,12 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
-	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate).count() + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate).count());
-	cpuRenderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count());
-	gpuTime.pushValue(data->getElapsedTime(ProfilerEventType::GPU).count());
-	totalRenderTime.pushValue(data->getElapsedTime(std::array<ProfilerEventType, 2>({ ProfilerEventType::GPU, ProfilerEventType::CoreRender })).count());
-	totalFrameTime.pushValue((data->getEndTime() - data->getStartTime()).count());
+	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync));
+	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate) + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate));
+	cpuRenderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender));
+	gpuTime.pushValue(data->getElapsedTime(ProfilerEventType::GPU));
+	totalRenderTime.pushValue(data->getElapsedTime(std::array<ProfilerEventType, 2>({ ProfilerEventType::GPU, ProfilerEventType::CoreRender })));
+	totalFrameTime.pushValue((data->getEndTime() - data->getStartTime()));
 	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
 	auto getTime = [&](TimeLine timeline) -> int
@@ -112,13 +112,15 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	for (auto& [k, e]: scriptHistory) {
 		e.startUpdate();
 	}
-	for (const auto& e: data->getEvents()) {
-		if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
-			systemHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
-		} else if (e.type == ProfilerEventType::ScriptUpdate) {
-			scriptHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
-		} else if (e.type == ProfilerEventType::WorldSystemMessages) {
-			systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime).count());
+	for (const auto& t: data->getThreads()) {
+		for (const auto& e: t.events) {
+			if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
+				systemHistory[e.name].update(e.type, (e.endTime - e.startTime));
+			} else if (e.type == ProfilerEventType::ScriptUpdate) {
+				scriptHistory[e.name].update(e.type, (e.endTime - e.startTime));
+			} else if (e.type == ProfilerEventType::WorldSystemMessages) {
+				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime));
+			}
 		}
 	}
 	std_ex::erase_if_value(systemHistory, [&](const auto& e) { return !e.isVisited(); });
@@ -437,9 +439,9 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		return;
 	}
 
-	const auto duration = std::chrono::duration<int64_t, std::nano>(16'999'999);
+	const auto duration = 16'999'999LL;
 	const auto timeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
-	const int64_t numMs = timeRange.getLength().count() / 1'000'000;
+	const int64_t numMs = timeRange.getLength() / 1'000'000LL;
 
 	boxBg
 		.clone()
@@ -448,7 +450,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		.draw(painter);
 
 	// Vertical dividers
-	const float divPerNs = rect.getWidth() / static_cast<float>(timeRange.getLength().count());
+	const float divPerNs = rect.getWidth() / static_cast<float>(timeRange.getLength());
 	auto drawDivider = [&] (int64_t ns, Colour4f col, String label)
 	{
 		const float xPos = static_cast<float>(ns) * divPerNs;
@@ -508,28 +510,26 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 	const auto origin = rect.getTopLeft();
 	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth + 1));
 
-	for (const auto& e: lastProfileData->getEvents()) {
-		if (e.threadId == threadInfo.id) {
-			const float relativeStart = static_cast<float>((e.startTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
-			const float relativeEnd = static_cast<float>((e.endTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
+	for (const auto& e: threadInfo.events) {
+		const float relativeStart = static_cast<float>(e.startTime - frameStartTime) / static_cast<float>(frameLength);
+		const float relativeEnd = static_cast<float>(e.endTime - frameStartTime) / static_cast<float>(frameLength);
 
-			const float startPos = std::floor(relativeStart * rect.getWidth());
-			const float endPos = std::floor(relativeEnd * rect.getWidth());
-			const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
+		const float startPos = std::floor(relativeStart * rect.getWidth());
+		const float endPos = std::floor(relativeEnd * rect.getWidth());
+		const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
 
-			const auto col = getEventColour(e.type);
-			if (eventRect.getSize().x > 0.95f) {
-				box
-					.setColour(col.multiplyAlpha(0.5f))
-					.setPosition(eventRect.getTopLeft() + Vector2f(1, 0))
-					.scaleTo(eventRect.getSize() - Vector2f(1, 0))
-					.draw(painter);
-			}
+		const auto col = getEventColour(e.type);
+		if (eventRect.getSize().x > 0.95f) {
 			box
-				.setColour(col)
-				.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
+				.setColour(col.multiplyAlpha(0.5f))
+				.setPosition(eventRect.getTopLeft() + Vector2f(1, 0))
+				.scaleTo(eventRect.getSize() - Vector2f(1, 0))
 				.draw(painter);
 		}
+		box
+			.setColour(col)
+			.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
+			.draw(painter);
 	}
 }
 
@@ -809,9 +809,9 @@ int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& d
 	const auto vsyncTime = data.getElapsedTime(ProfilerEventType::CoreVSync);
 	
 	if (timeline == TimeLine::VariableUpdate) {
-		return (totalTime - renderTime - vsyncTime).count();
+		return totalTime - renderTime - vsyncTime;
 	} else if (timeline == TimeLine::Render) {
-		return renderTime.count();
+		return renderTime;
 	} else {
 		return 0;
 	}

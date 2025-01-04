@@ -4,6 +4,7 @@
 #include "halley/support/logger.h"
 #include "devcon_server.h"
 #include "devcon_connection.h"
+#include "halley/api/core_api.h"
 
 namespace Halley
 {
@@ -46,7 +47,7 @@ namespace Halley
 		HashMap<String, InterestGroup> interests;
 	};
 
-	class DevConClient : public DevConConnection, private ILoggerSink
+	class DevConClient : public DevConConnection, private ILoggerSink, private CoreAPI::IProfileCallback
 	{
 		friend class DevConClientonnection;
 		friend class DevConInterest;
@@ -67,6 +68,8 @@ namespace Halley
 		void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg) override;
 
 		void notifyInterest(uint32_t handle, ConfigNode data);
+
+		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 
 	private:
 		const HalleyAPI& api;

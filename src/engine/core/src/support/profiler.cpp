@@ -1,6 +1,7 @@
 #include "halley/support/profiler.h"
 
 #include "halley/utils/algorithm.h"
+#include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
 
@@ -16,9 +17,8 @@ bool ProfilerData::ThreadInfo::operator<(const ThreadInfo& other) const
 ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, Vector<Event> events)
 	: frameStartTime(frameStartTime)
 	, frameEndTime(frameEndTime)
-	, events(std::move(events))
 {
-	processEvents();
+	processEvents(std::move(events));
 }
 
 ProfilerData::TimePoint ProfilerData::getStartTime() const
@@ -29,11 +29,6 @@ ProfilerData::TimePoint ProfilerData::getStartTime() const
 ProfilerData::TimePoint ProfilerData::getEndTime() const
 {
 	return frameEndTime;
-}
-
-const Vector<ProfilerData::Event>& ProfilerData::getEvents() const
-{
-	return events;
 }
 
 ProfilerData::Duration ProfilerData::getTotalElapsedTime() const
@@ -51,14 +46,16 @@ ProfilerData::Duration ProfilerData::getElapsedTime(gsl::span<const ProfilerEven
 	TimePoint start = {};
 	TimePoint end = {};
 	bool first = true;
-	
-	for (const auto& e: events) {
-		if (std_ex::contains(eventTypes, e.type)) {
-			if (first) {
-				start = e.startTime;
-				first = false;
+
+	for (const auto& t : threads) {
+		for (const auto& e : t.events) {
+			if (std_ex::contains(eventTypes, e.type)) {
+				if (first) {
+					start = e.startTime;
+					first = false;
+				}
+				end = e.endTime;
 			}
-			end = e.endTime;
 		}
 	}
 
@@ -70,7 +67,7 @@ gsl::span<const ProfilerData::ThreadInfo> ProfilerData::getThreads() const
 	return threads;
 }
 
-void ProfilerData::processEvents()
+void ProfilerData::processEvents(Vector<Event> pendingEvents)
 {
 	struct ThreadCurInfo {
 		size_t maxDepth = 0;
@@ -80,12 +77,14 @@ void ProfilerData::processEvents()
 		Duration totalTime;
 		bool first = true;
 		ThreadType type = ThreadType::Misc;
+		Vector<Event> events;
 	};
 	HashMap<std::thread::id, ThreadCurInfo> threadInfo;
 
 	// Process each event
-	for (auto& e: events) {
-		auto& curThread = threadInfo[e.threadId];
+	for (auto& pe: pendingEvents) {
+		auto& curThread = threadInfo[pe.threadId];
+		auto& e = curThread.events.emplace_back(std::move(pe));
 
 		// Normalize ends
 		if (e.startTime == TimePoint{}) {
@@ -132,7 +131,7 @@ void ProfilerData::processEvents()
 	// Generate the thread list
 	for (const auto& [k, v]: threadInfo) {
 		const String name; // TODO
-		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name, v.start, v.end, v.totalTime, v.type });
+		threads.emplace_back(ThreadInfo{ static_cast<int>(v.maxDepth), name, v.start, v.end, v.totalTime, v.type, std::move(v.events) });
 	}
 	std::sort(threads.begin(), threads.end());
 }
@@ -168,7 +167,7 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 		if (id < endId) {
 			const auto pos = id % events.size();
 			const auto threadId = type == ProfilerEventType::GPU ? std::thread::id() : std::this_thread::get_id();
-			events[pos] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
+			events[pos] = ProfilerData::Event{ name, type, 0, id, time.time_since_epoch().count(), {}, threadId };
 			return id;
 		} else {
 			--curId;
@@ -182,7 +181,7 @@ void ProfilerCapture::recordEventEnd(EventId id, std::chrono::steady_clock::time
 	if (recording && id != 0) {
 		const auto pos = id % events.size();
 		if (events[pos].id == id) { // Dodgy, potential race condition here
-			events[pos].endTime = time;
+			events[pos].endTime = time.time_since_epoch().count();
 		}
 	}
 }
@@ -233,7 +232,7 @@ ProfilerData ProfilerCapture::getCapture()
 		eventsCopy.insert(eventsCopy.end(), events.begin(), events.begin() + endIdx);
 	}
 	
-	return ProfilerData(frameStartTime, frameEndTime, std::move(eventsCopy));
+	return ProfilerData(frameStartTime.time_since_epoch().count(), frameEndTime.time_since_epoch().count(), std::move(eventsCopy));
 }
 
 Time ProfilerCapture::getFrameTime() const
@@ -278,4 +277,60 @@ ProfilerEvent::~ProfilerEvent() noexcept
 	if (id != 0) {
 		ProfilerCapture::get().recordEventEnd(id);
 	}
+}
+
+void ProfilerData::Event::serialize(Serializer& s) const
+{
+	s << name;
+	s << type;
+	s << depth;
+	s << id;
+	s << startTime;
+	s << endTime;
+}
+
+void ProfilerData::Event::deserialize(Deserializer& s)
+{
+	s >> name;
+	s >> type;
+	s >> depth;
+	s >> id;
+	s >> startTime;
+	s >> endTime;
+}
+
+void ProfilerData::ThreadInfo::serialize(Serializer& s) const
+{
+    s << maxDepth;
+    s << name;
+    s << startTime;
+    s << endTime;
+    s << totalTime;
+    s << type;
+	s << events;
+}
+
+void ProfilerData::ThreadInfo::deserialize(Deserializer& s)
+{
+    s >> maxDepth;
+    s >> name;
+    s >> startTime;
+    s >> endTime;
+    s >> totalTime;
+    s >> type;
+	s >> events;
+}
+
+void ProfilerData::serialize(Serializer& s) const
+{
+	s << frameStartTime;
+    s << frameEndTime;
+    s << threads;
+}
+
+void ProfilerData::deserialize(Deserializer& s)
+{
+	s >> frameStartTime;
+    s >> frameEndTime;
+    s >> threads;
 }

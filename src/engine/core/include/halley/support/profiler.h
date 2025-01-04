@@ -5,6 +5,7 @@
 #include <gsl/span>
 #include <atomic>
 
+#include "halley/data_structures/config_node.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/time/halleytime.h"
 
@@ -51,8 +52,8 @@ namespace Halley {
 
     class ProfilerData {
     public:
-        using TimePoint = std::chrono::steady_clock::time_point;
-    	using Duration = std::chrono::duration<int64_t, std::nano>;
+        using TimePoint = int64_t;// std::chrono::steady_clock::time_point;
+        using Duration = int64_t;// std::chrono::duration<int64_t, std::nano>;
 
         enum class ThreadType {
 	        Update,
@@ -66,17 +67,21 @@ namespace Halley {
 		class Event {
         public:
 	        String name;
-        	std::thread::id threadId;
 			ProfilerEventType type;
 			int16_t depth;
         	uint64_t id;
         	TimePoint startTime;
         	TimePoint endTime;
+
+            // Non-serializable
+			std::thread::id threadId;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
         };
 
     	class ThreadInfo {
     	public:
-    		std::thread::id id;
     		int maxDepth = 0;
     		String name;
     		TimePoint startTime;
@@ -84,7 +89,12 @@ namespace Halley {
     		Duration totalTime;
             ThreadType type;
 
+            Vector<Event> events;
+
     		bool operator< (const ThreadInfo& other) const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
     	};
 
     	ProfilerData() = default;
@@ -92,21 +102,22 @@ namespace Halley {
 
     	TimePoint getStartTime() const;
     	TimePoint getEndTime() const;
-    	const Vector<Event>& getEvents() const;
     	Duration getTotalElapsedTime() const;
 		Duration getElapsedTime(ProfilerEventType eventType) const;
 		Duration getElapsedTime(gsl::span<const ProfilerEventType> eventTypes) const;
 
     	gsl::span<const ThreadInfo> getThreads() const;
 
+        void serialize(Serializer& s) const;
+        void deserialize(Deserializer& s);
+
     private:
     	TimePoint frameStartTime;
     	TimePoint frameEndTime;
-    	Vector<Event> events;
 
     	Vector<ThreadInfo> threads;
 
-    	void processEvents();
+    	void processEvents(Vector<Event> pendingEvents);
     };
 	
     class ProfilerCapture {

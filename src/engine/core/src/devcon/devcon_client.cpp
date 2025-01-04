@@ -5,6 +5,7 @@
 #include "halley/api/halley_api.h"
 #include "halley/net/connection/message_queue.h"
 #include "halley/devcon/devcon_messages.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -84,11 +85,15 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 	, resources(resources)
 	, service(std::move(service))
 {
+	api.core->addProfilerCallback(this);
+
 	interest = std::make_unique<DevConInterest>(*this);
 }
 
 DevConClient::~DevConClient()
 {
+	api.core->removeProfilerCallback(this);
+
 	Logger::removeSink(*this);
 }
 
@@ -135,6 +140,14 @@ void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 	}
 
 	queue->enqueue(std::make_unique<DevCon::NotifyInterestMsg>(handle, std::move(data)), 0);
+}
+
+void DevConClient::onProfileData(std::shared_ptr<ProfilerData> data)
+{
+	if (interest->hasInterest("profiler")) {
+		auto bytes = Serializer::toBytes(*data);
+		interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));
+	}
 }
 
 void DevConClient::connect(const String& deviceName, const ConfigNode& clientParams, const String& address, int port)

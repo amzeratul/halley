@@ -32,6 +32,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, con
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
 	setInputButtons("treeList", listButtons);
+	setInputButtons("tabs", listButtons);
 
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
 	addFactory("infiniCanvas", [=] (const ConfigNode& node) { return makeInfiniCanvas(node); });
