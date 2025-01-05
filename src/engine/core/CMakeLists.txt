@@ -937,6 +937,15 @@ target_link_libraries(halley-engine halley-contrib  ${OPENSSL_SSL_LIBRARY} ${OPE
 
 add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
 
+if (_GAMING_DESKTOP OR _GAMING_XBOX)
+	target_include_directories(halley-engine PRIVATE $ENV{GRDKLatest}GameKit/Include $ENV{GXDKLatest}gameKit/Include)
+	if (_GAMING_XBOX_XBOXONE)
+		target_include_directories(halley-engine PRIVATE $ENV{GXDKLatest}gameKit/Include/XboxOne)
+    elseif (_GAMING_XBOX_SCARLETT)
+		target_include_directories(halley-engine PRIVATE $ENV{GXDKLatest}gameKit/Include/Scarlett)
+	endif()
+endif ()
+
 # Hack, there should be no platform specific stuff in core...
 if (USE_ANDROID)
     target_link_libraries(halley-engine log android)

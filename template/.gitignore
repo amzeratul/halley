@@ -1,6 +1,5 @@
 bin/
 bin32/
-bin-uwp/
 gen/
 assets/
 assets-nx/
@@ -9,7 +8,6 @@ assets_unpacked/
 .vscode/
 build/
 build32/
-build-uwp/
 build-external/
 build-ninja/
 build-ninja-external/

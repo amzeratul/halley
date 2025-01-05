@@ -24,7 +24,7 @@
 using namespace Halley;
 
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 
 #include <comutil.h>
 #include <objbase.h>

@@ -56,7 +56,7 @@ void DX11Video::initD3D(Window& window)
 		return;
 	}
 
-#ifndef WINDOWS_STORE
+#if !defined(_GAMING_DESKTOP)
 	{
 		IDXGIFactory* factory;
 		CreateDXGIFactory(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&factory));

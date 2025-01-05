@@ -15,7 +15,7 @@ namespace Halley {
 		Switch,
 		XboxOne,
 		PS4,
-		UWP,
+		WindowsGaming,
 		Android,
 		iOS,
         Emscripten,
@@ -38,7 +38,7 @@ namespace Halley {
 				"switch",
 				"xboxone",
 				"ps4",
-				"uwp",
+				"windowsgaming",
 				"android",
 				"ios",
                 "emscripten",
@@ -68,10 +68,10 @@ namespace Halley {
         return GamePlatform::Switch;
     #elif defined(__ORBIS__)
         return GamePlatform::PS4;
-    #elif defined(_XBOX_ONE)
+    #elif defined(_GAMING_XBOX)
         return GamePlatform::XboxOne;
-    #elif defined(WINDOWS_STORE)
-        return GamePlatform::UWP;
+    #elif defined(_GAMING_DESKTOP)
+        return GamePlatform::WindowsGaming;
     #elif defined(_WIN32)
         return GamePlatform::Windows;
     #elif defined(__ANDROID__)
@@ -95,7 +95,7 @@ namespace Halley {
 
     constexpr inline bool isPCPlatform()
     {
-        return getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::Linux || getPlatform() == GamePlatform::MacOS || getPlatform() == GamePlatform::FreeBSD || getPlatform() == GamePlatform::Emscripten;
+        return getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::Linux || getPlatform() == GamePlatform::MacOS || getPlatform() == GamePlatform::FreeBSD || getPlatform() == GamePlatform::Emscripten || getPlatform() == GamePlatform::WindowsGaming;
     }
 
     constexpr inline bool isMobilePlatform()
@@ -105,6 +105,6 @@ namespace Halley {
 
     constexpr inline bool isConsolePlatform()
     {
-        return getPlatform() == GamePlatform::Switch || getPlatform() == GamePlatform::PS4 || getPlatform() == GamePlatform::XboxOne || getPlatform() == GamePlatform::UWP;
+        return getPlatform() == GamePlatform::Switch || getPlatform() == GamePlatform::PS4 || getPlatform() == GamePlatform::XboxOne;
     }
 }

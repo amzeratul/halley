@@ -273,7 +273,7 @@ void Core::deInit()
 	Logger::removeSink(*this);
 	out.reset();
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 	if (hasError && hasConsole) {
 		system("pause");
 	}
