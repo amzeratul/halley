@@ -10,7 +10,7 @@
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
-	: Task("Building " + project.getProperties().getName(), true, true, { "code" })
+	: Task("Building " + project.getProperties().getName() + " (" + toString(project.getTargetPlatform()) + ")", true, true, {"code"})
 	, project(project)
 {
 	if (!project.getEditorPluginForBuildPlatform(project.getTargetPlatform())) {
@@ -41,7 +41,7 @@ void BuildProjectTask::run()
 	Future<int> future;
 
 	if (auto* plugin = project.getEditorPluginForBuildPlatform(project.getTargetPlatform())) {
-		future = plugin->buildGame(&project, this).then([](bool result) { return result ? 0 : 1; });
+		future = plugin->buildGame(OS::get(), &project, this);
 	} else {
 		future = OS::get().runCommandAsync(command, "", this);
 	}

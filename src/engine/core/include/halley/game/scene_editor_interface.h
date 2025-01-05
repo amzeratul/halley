@@ -445,14 +445,23 @@ namespace Halley {
 	class IProject {
     public:		
         virtual ~IProject() = default;
+
+		virtual const String& getProjectName() const = 0;
+		virtual const String& getBinName() const = 0;
+
+		virtual const Path& getRootPath() const = 0;
 		virtual Path getAssetsSrcPath() const = 0;
+
 		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, const Bytes& data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, std::string_view str) = 0;
 		virtual Bytes readAssetFromDisk(const Path& filePath) = 0;
+
 		virtual void setAssetSaveNotification(bool enabled) = 0;
+
 		virtual Game* getGameInstance() const = 0;
 		virtual IGameEditorData* getGameEditorData() const = 0;
+
 		virtual void launchGame(Vector<String> params) const = 0;
 		virtual Resources& getGameResources() = 0;
 		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;

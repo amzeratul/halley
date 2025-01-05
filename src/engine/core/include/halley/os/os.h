@@ -93,6 +93,9 @@ namespace Halley {
 
         virtual bool isDebuggerAttached() const;
 
+		virtual String runQuery(std::string_view query, const String& parameter, std::string_view queryNamespace = "") const;
+		virtual Vector<String> runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace = "") const;
+
 	private:
 		static OS* osInstance;
 	};

@@ -4,6 +4,7 @@
 #include "halley/concurrency/future.h"
 
 namespace Halley {
+	class OS;
 	class IProject;
 
 	class IHalleyEditorPlugin {
@@ -13,7 +14,7 @@ namespace Halley {
     	virtual void update(Time time) {}
 
         virtual std::optional<GamePlatform> getBuildPlatform() { return {}; }
-        virtual void launchGame(const IProject* project, const Vector<String>& params) {}
-        virtual Future<bool> buildGame(IProject* project, ILoggerSink* logger) { return Future<bool>::makeImmediate(false); }
+        virtual void launchGame(OS& os, const IProject* project, const Vector<String>& params) {}
+        virtual Future<int> buildGame(OS& os, IProject* project, ILoggerSink* logger) { return Future<int>::makeImmediate(1); }
     };
 }

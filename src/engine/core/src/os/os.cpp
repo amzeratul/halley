@@ -186,4 +186,18 @@ bool OS::isDebuggerAttached() const
     return false;
 }
 
+String OS::runQuery(std::string_view query, const String& parameter, std::string_view queryNamespace) const
+{
+	auto result = runQuery(query, gsl::span<const String>(&parameter, 1), queryNamespace);
+	if (result.empty()) {
+		return "";
+	}
+	return result[0];
+}
+
+Vector<String, std::allocator<String>, 0, true> OS::runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace) const
+{
+	return {};
+}
+
 OS* OS::osInstance = nullptr;

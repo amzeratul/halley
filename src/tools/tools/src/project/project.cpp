@@ -391,6 +391,16 @@ void Project::removeAssetSrcChangeListener(IAssetSrcChangeListener& listener)
 	std_ex::erase(assetSrcChangeListeners, &listener);
 }
 
+const String& Project::getProjectName() const
+{
+	return properties->getName();
+}
+
+const String& Project::getBinName() const
+{
+	return properties->getBinName();
+}
+
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
@@ -703,7 +713,7 @@ void Project::launchGame(Vector<String> params) const
 		const String args = String::concatList(params, " ");
 		OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
 	} else if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		plugin->launchGame(this, params);
+		plugin->launchGame(OS::get(), this, params);
 	}
 }
 

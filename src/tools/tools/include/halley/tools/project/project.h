@@ -76,7 +76,7 @@ namespace Halley
 
 		const Path& getHalleyRootPath() const;
 		
-		const Path& getRootPath() const;		
+		const Path& getRootPath() const override;		
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const override;
@@ -115,6 +115,9 @@ namespace Halley
 		void notifyGenSrcChanged();
 		void addAssetSrcChangeListener(IAssetSrcChangeListener& listener);
 		void removeAssetSrcChangeListener(IAssetSrcChangeListener& listener);
+
+		const String& getProjectName() const override;
+		const String& getBinName() const override;
 
 		ProjectProperties& getProperties() const;
 		ProjectComments& getComments() const;
