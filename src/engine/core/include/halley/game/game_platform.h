@@ -20,6 +20,8 @@ namespace Halley {
 		iOS,
         Emscripten,
 		FreeBSD,
+		XboxSeries,
+		PS5,
         FuturePlatform1,
         FuturePlatform2,
         FuturePlatform3,
@@ -29,7 +31,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<GamePlatform> {
-		constexpr std::array<const char*, 17> operator()() const {
+		constexpr std::array<const char*, 19> operator()() const {
 			return {{
 				"unknown",
 				"windows",
@@ -43,6 +45,8 @@ namespace Halley {
 				"ios",
                 "emscripten",
 				"freebsd",
+				"xboxseries",
+				"ps5",
                 "futurePlatform1",
                 "futurePlatform2",
                 "futurePlatform3",
@@ -93,18 +97,33 @@ namespace Halley {
     #endif
     }
 
-    constexpr inline bool isPCPlatform()
+    constexpr inline bool isPCPlatform(GamePlatform platform = getPlatform())
     {
-        return getPlatform() == GamePlatform::Windows || getPlatform() == GamePlatform::Linux || getPlatform() == GamePlatform::MacOS || getPlatform() == GamePlatform::FreeBSD || getPlatform() == GamePlatform::Emscripten;
+        return platform == GamePlatform::Windows
+    		|| platform == GamePlatform::Linux
+    		|| platform == GamePlatform::MacOS
+    		|| platform == GamePlatform::FreeBSD
+    		|| platform == GamePlatform::Emscripten;
     }
 
-    constexpr inline bool isMobilePlatform()
+    constexpr inline bool isMobilePlatform(GamePlatform platform = getPlatform())
     {
-        return getPlatform() == GamePlatform::Android || getPlatform() == GamePlatform::iOS;
+        return platform == GamePlatform::Android
+    		|| platform == GamePlatform::iOS;
     }
 
-    constexpr inline bool isConsolePlatform()
+    constexpr inline bool isConsolePlatform(GamePlatform platform = getPlatform())
     {
-        return getPlatform() == GamePlatform::Switch || getPlatform() == GamePlatform::PS4 || getPlatform() == GamePlatform::XboxOne || getPlatform() == GamePlatform::UWP;
+        return platform == GamePlatform::Switch
+            || platform == GamePlatform::PS4
+            || platform == GamePlatform::PS5
+            || platform == GamePlatform::XboxOne
+            || platform == GamePlatform::XboxSeries
+            || platform == GamePlatform::UWP
+            || platform == GamePlatform::FuturePlatform1
+            || platform == GamePlatform::FuturePlatform2
+            || platform == GamePlatform::FuturePlatform3
+            || platform == GamePlatform::FuturePlatform4
+            || platform == GamePlatform::FuturePlatform5;
     }
 }

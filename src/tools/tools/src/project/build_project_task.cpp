@@ -13,22 +13,24 @@ BuildProjectTask::BuildProjectTask(Project& project)
 	: Task("Building " + project.getProperties().getName(), true, true, { "code" })
 	, project(project)
 {
-	const String scriptName = [] ()
-	{
-		if constexpr (getPlatform() == GamePlatform::Windows) {
-			return "build_project_win.bat";
-			//return "build_project_win_ninja.bat";
-		} else if constexpr (getPlatform() == GamePlatform::MacOS) {
-			return "build_project_mac.sh";
-		} else if constexpr (getPlatform() == GamePlatform::Linux) {
-			return "build_project_linux.sh";
-		} else {
-			throw Exception("No project build script available for this platform.", HalleyExceptions::Tools);
-		}
-	}();
-	const auto buildScript = project.getHalleyRootPath() / "scripts" / scriptName;
-	const String buildConfig = Debug::isDebug() ? "Debug" : "RelWithDebInfo";
-	command = "\"" + buildScript + "\" \"" + project.getRootPath().getNativeString(false) + "\" " + project.getProperties().getBinName() + " " + buildConfig;
+	if (!project.getEditorPluginForBuildPlatform(project.getTargetPlatform())) {
+		const String scriptName = [] ()
+		{
+			if constexpr (getPlatform() == GamePlatform::Windows) {
+				return "build_project_win.bat";
+				//return "build_project_win_ninja.bat";
+			} else if constexpr (getPlatform() == GamePlatform::MacOS) {
+				return "build_project_mac.sh";
+			} else if constexpr (getPlatform() == GamePlatform::Linux) {
+				return "build_project_linux.sh";
+			} else {
+				throw Exception("No project build script available for this platform.", HalleyExceptions::Tools);
+			}
+		}();
+		const auto buildScript = project.getHalleyRootPath() / "scripts" / scriptName;
+		const String buildConfig = Debug::isDebug() ? "Debug" : "RelWithDebInfo";
+		command = "\"" + buildScript + "\" \"" + project.getRootPath().getNativeString(false) + "\" " + project.getProperties().getBinName() + " " + buildConfig;
+	}
 }
 
 void BuildProjectTask::run()
@@ -36,14 +38,20 @@ void BuildProjectTask::run()
 	clearTask("Update Project");
 	project.onBuildStarted();
 
-	using namespace std::literals::chrono_literals;
-	auto future = OS::get().runCommandAsync(command, "", this);
+	Future<int> future;
+
+	if (auto* plugin = project.getEditorPluginForBuildPlatform(project.getTargetPlatform())) {
+		future = plugin->buildGame(&project, this).then([](bool result) { return result ? 0 : 1; });
+	} else {
+		future = OS::get().runCommandAsync(command, "", this);
+	}
 
 	while (!future.isReady()) {
 		if (isCancelled()) {
 			future.cancel();
 			return;
 		}
+		using namespace std::literals::chrono_literals;
 		std::this_thread::sleep_for(10ms);
 	}
 

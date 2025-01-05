@@ -50,5 +50,6 @@ namespace Halley {
 		std::shared_ptr<UIList> list;
 
 		void makeUI();
+		String getPlatformName(GamePlatform platform) const;
 	};
 }

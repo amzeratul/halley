@@ -66,8 +66,13 @@ namespace Halley
 		void setPlatforms(Vector<String> platforms);
 		const Vector<String>& getPlatforms() const;
 
+		Vector<GamePlatform> getBuildPlatforms() const;
+		GamePlatform getTargetPlatform() const;
+		void setTargetPlatform(GamePlatform platform);
+
 		void loadEditorPlugins();
 		gsl::span<std::unique_ptr<IHalleyEditorPlugin>> getEditorPlugins();
+		IHalleyEditorPlugin* getEditorPluginForBuildPlatform(GamePlatform platform) const;
 
 		const Path& getHalleyRootPath() const;
 		
@@ -225,6 +230,8 @@ namespace Halley
 
 		bool buildPending = false;
 		uint32_t buildCount = 0;
+
+		std::optional<GamePlatform> targetPlatform;
 
 		DevConServer* devConServer = nullptr;
 		const HalleyAPI* api = nullptr;

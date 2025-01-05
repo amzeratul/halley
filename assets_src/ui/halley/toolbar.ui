@@ -1,68 +1,146 @@
----
-
-widget: { class: widget }
-sizer: { type: horizontal, gap: 0 }
+uuid: d640172d-c645-46e5-a058-e200cf9c2d79
+sizer:
+  columnProportions: []
+  gap: 0
+  type: horizontal
+widget:
+  class: widget
 children:
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [50, 32], colour: $toolbarNormal }
-  border: [-10, 3, -5, 3]
-- widget: 
-    id: toolbarList
-    class: list
-    type: horizontal
-    style: toolbar
-    options:
-    - id: assets
-      image: ui/toolbar_assets.png
-      tooltip: Asset Browser
-    - id: ecs
-      image: ui/toolbar_ecs.png
-      tooltip: Entity-Component-System
-    - id: remotes
-      image: ui/toolbar_remote.png
-      tooltip: Remote connections
-    - id: localisation
-      image: ui/toolbar_localisation.png
-      tooltip: Localisation
-    - id: properties
-      image: ui/toolbar_properties.png
-      tooltip: Project Properties
-    - id: settings
-      image: ui/toolbar_settings.png
-      tooltip: Halley Settings
-    - id: terminal
-      image: ui/toolbar_terminal.png
-      tooltip: Terminal
-    - id: plot
-      image: ui/toolbar_plot.png
-      tooltip: Plotter
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: $toolbarNormal }
-  children:
-  - widget: { class: label, id: toolName, text: Assets, style: labelToolbar }
-    fill: centre
+  - uuid: 0e89b18b-a91c-4bb7-949d-1e79848c91b2
+    border: [-10, 3, -5, 3]
+    widget:
+      class: image
+      colour: $toolbarNormal
+      image: ui/slant_capsule_short.png
+      size: [50, 32]
+  - uuid: 06444591-909f-4a07-84a3-9f9483074c38
+    widget:
+      class: list
+      id: toolbarList
+      options:
+        - id: assets
+          image: ui/toolbar_assets.png
+          tooltip: Asset Browser
+        - id: ecs
+          image: ui/toolbar_ecs.png
+          tooltip: Entity-Component-System
+        - id: remotes
+          image: ui/toolbar_remote.png
+          tooltip: Remote connections
+        - id: localisation
+          image: ui/toolbar_localisation.png
+          tooltip: Localisation
+        - id: properties
+          image: ui/toolbar_properties.png
+          tooltip: Project Properties
+        - id: settings
+          image: ui/toolbar_settings.png
+          tooltip: Halley Settings
+        - id: terminal
+          image: ui/toolbar_terminal.png
+          tooltip: Terminal
+        - id: plot
+          image: ui/toolbar_plot.png
+          tooltip: Plotter
+      style: toolbar
+      type: horizontal
+  - uuid: 296805e8-3bc8-4532-b278-6e4761bf34d8
+    border: [-5, 3, 0, 3]
+    widget:
+      class: image
+      colour: $toolbarNormal
+      image: ui/slant_capsule_short.png
+      size: [140, 32]
+    children:
+      - uuid: 0c874b19-985a-40aa-94b6-e5b068480631
+        proportion: 1
+        widget:
+          class: label
+          id: toolName
+          style: labelToolbar
+          text: Assets
+        fill: centre
+  - uuid: 6d2f3ee2-e7fd-4c3b-9e63-d804e6b73958
     proportion: 1
-  border: [-5, 3, 0, 3]
-
-- stretchSpacer: {}
-  proportion: 1
-
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [120, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
-  border: [0, 3, 0, 3]
-  children:
-  - widget: { class: label, id: gameName, text: Halley Game, style: labelToolbar }
-    fill: centre
-    proportion: 1
-    border: [0, 0, 0, 0]
-- widget: { id: runProject, class: button, icon: ui/play.png, style: slantButton, size: [42, 42], tooltip: "Run Project" }
-  border: [-5, 0, 0, 0]
-- widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42], tooltip: "Build Project" }
-  border: [-5, 0, 0, 0]
-- widget: { id: import, class: button, icon: ui/import.png, style: slantButton, size: [42, 42], tooltip: "Import Assets" }
-  border: [-5, 0, 0, 0]
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
-  border: [-5, 3, 0, 3]
-- widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42], tooltip: "Close Project" }
-  border: [-5, 0, 0, 0]
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
-  border: [-5, 3, -10, 3]
-
-...
+    stretchSpacer: {}
+  - uuid: 31f5b2a1-43a9-4b6a-808e-3ac87cea057e
+    border: [0, 3, 0, 3]
+    sizer:
+      columnProportions: []
+      gap: 10
+    widget:
+      class: image
+      colour: $toolbarNormal
+      image: ui/slant_capsule_short.png
+      innerBorder: [20, 0, 20, 0]
+      size: [120, 32]
+    children:
+      - uuid: 2d4e6ff8-0185-47ef-ac3f-00aa10ab00af
+        proportion: 1
+        border: [0, 0, 0, 0]
+        widget:
+          class: label
+          id: gameName
+          style: labelToolbar
+          text: Halley Game
+        fill: centre
+      - uuid: 1fa6307e-21a3-4c00-9677-999c27ae9570
+        border: [0, 0, -5, 0]
+        widget:
+          active: true
+          class: dropdown
+          id: platform
+          options: []
+        fill: [fillHorizontal, centreVertical]
+  - uuid: f16fdbb5-8858-4c78-a534-a480fc868da8
+    border: [-5, 0, 0, 0]
+    widget:
+      class: button
+      icon: ui/play.png
+      id: runProject
+      size: [42, 42]
+      style: slantButton
+      tooltip: Run Project
+  - uuid: ae43e1b0-3e92-4965-aff8-23847532b74d
+    border: [-5, 0, 0, 0]
+    widget:
+      class: button
+      icon: ui/build.png
+      id: buildProject
+      size: [42, 42]
+      style: slantButton
+      tooltip: Build Project
+  - uuid: a9b74bdc-0dcd-4afe-b2d5-0e9e6bb75e4f
+    border: [-5, 0, 0, 0]
+    widget:
+      class: button
+      icon: ui/import.png
+      id: import
+      size: [42, 42]
+      style: slantButton
+      tooltip: Import Assets
+  - uuid: d623a7e5-5e3b-4ed9-bcbd-b015f2f0ebfc
+    border: [-5, 3, 0, 3]
+    widget:
+      class: image
+      colour: $toolbarNormal
+      image: ui/slant_capsule_short.png
+      innerBorder: [20, 0, 20, 0]
+      size: [20, 32]
+  - uuid: 15c2054d-941f-4cc1-8abb-8fa8c73e7157
+    border: [-5, 0, 0, 0]
+    widget:
+      class: button
+      icon: ui/exit.png
+      id: exitProject
+      size: [42, 42]
+      style: slantButton
+      tooltip: Close Project
+  - uuid: c18dd2f5-a413-40a0-bfb6-6efd2cbd9933
+    border: [-5, 3, -10, 3]
+    widget:
+      class: image
+      colour: $toolbarNormal
+      image: ui/slant_capsule_short.png
+      innerBorder: [20, 0, 20, 0]
+      size: [30, 32]

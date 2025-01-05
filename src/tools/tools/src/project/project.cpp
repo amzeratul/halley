@@ -86,6 +86,8 @@ void Project::setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& i
 
 void Project::loadEditorPlugins()
 {
+	targetPlatform = getPlatform();
+
 	editorPlugins.clear();
 	for (auto& plugin: plugins) {
 		if (auto editorPlugin = plugin->makeHalleyEditorPlugin()) {
@@ -151,9 +153,43 @@ const Vector<String>& Project::getPlatforms() const
 	return platforms;
 }
 
+Vector<GamePlatform> Project::getBuildPlatforms() const
+{
+	Vector<GamePlatform> platforms;
+	if (isPCPlatform()) {
+		platforms.push_back(getPlatform());
+	}
+	for (auto& plugin: editorPlugins) {
+		if (auto platform = plugin->getBuildPlatform()) {
+			platforms.push_back(*platform);
+		}
+	}
+	return platforms;
+}
+
+GamePlatform Project::getTargetPlatform() const
+{
+	return targetPlatform.value_or(getPlatform());
+}
+
+void Project::setTargetPlatform(GamePlatform platform)
+{
+	targetPlatform = platform;
+}
+
 gsl::span<std::unique_ptr<IHalleyEditorPlugin>> Project::getEditorPlugins()
 {
 	return editorPlugins.span();
+}
+
+IHalleyEditorPlugin* Project::getEditorPluginForBuildPlatform(GamePlatform platform) const
+{
+	for (auto& plugin: editorPlugins) {
+		if (plugin->getBuildPlatform() == platform) {
+			return plugin.get();
+		}
+	}
+	return nullptr;
 }
 
 const Path& Project::getHalleyRootPath() const
@@ -663,8 +699,12 @@ void Project::requestReimport(ReimportType reimport)
 
 void Project::launchGame(Vector<String> params) const
 {
-	const String args = String::concatList(params, " ");
-	OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
+	if (getTargetPlatform() == getPlatform()) {
+		const String args = String::concatList(params, " ");
+		OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
+	} else if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		plugin->launchGame(this, params);
+	}
 }
 
 uint64_t Project::getSourceHash(const Path& projectRoot)
