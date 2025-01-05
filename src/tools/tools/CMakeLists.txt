@@ -46,6 +46,7 @@ set(SOURCES
     "src/assets/importers/sprite_importer.cpp"
     "src/assets/importers/spritesheet_importer.cpp"
     "src/assets/importers/shader_importer.cpp"
+    "src/assets/importers/shader_importer_dxc.cpp"
     "src/assets/importers/texture_importer.cpp"
     "src/assets/importers/variable_importer.cpp"
     "src/assets/importers/ui_importer.cpp"
@@ -190,6 +191,7 @@ set(HEADERS
     "src/assets/importers/sprite_importer.h"
     "src/assets/importers/spritesheet_importer.h"
     "src/assets/importers/shader_importer.h"
+    "src/assets/importers/shader_importer_dxc.h"
     "src/assets/importers/texture_importer.h"
     "src/assets/importers/variable_importer.h"
     "src/assets/importers/ui_importer.h"
@@ -222,4 +224,14 @@ target_link_libraries (halley-tools
 
 if (WIN32)
     target_link_libraries(halley-tools d3d12 dxc)
+endif()
+
+if (HALLEY_HAS_DXC_X)
+    target_compile_definitions(halley-tools PRIVATE HAS_DXC_X)
+    add_dependencies(halley-tools dxc_x)
+endif()
+
+if (HALLEY_HAS_DXC_XS)
+    target_compile_definitions(halley-tools PRIVATE HAS_DXC_XS)
+    add_dependencies(halley-tools dxc_xs)
 endif()
