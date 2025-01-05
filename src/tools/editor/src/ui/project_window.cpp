@@ -682,6 +682,13 @@ void ProjectWindow::buildGame()
 	addTask(std::make_unique<BuildProjectTask>(project));
 }
 
+void ProjectWindow::deployGame()
+{
+	if (auto task = project.deployGame()) {
+		addTask(std::move(task));
+	}
+}
+
 void ProjectWindow::updateEditor()
 {
 	if (requestQuit([=] () { doUpdateEditor(); })) {

@@ -104,6 +104,26 @@ void Toolbar::makeUI()
 		project.launchGame(projectWindow.getLaunchArguments());
 	});
 
+	setHandle(UIEventType::ButtonRightClicked, "runProject", [=] (const UIEvent& event)
+	{
+		auto menuOptions = Vector<UIPopupMenuItem>();
+		
+		menuOptions.push_back(UIPopupMenuItem("run", LocalisedString::fromHardcodedString("Run"), {}, LocalisedString::fromHardcodedString("Run game directly on target")));
+		menuOptions.push_back(UIPopupMenuItem("deploy", LocalisedString::fromHardcodedString("Deploy"), {}, LocalisedString::fromHardcodedString("Deploy game to target")));
+		menuOptions.back().enabled = project.canDeployGame();
+
+		auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+		menu->spawnOnRoot(*getRoot());
+
+		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+			if (e.getStringData() == "run") {
+				project.launchGame(projectWindow.getLaunchArguments());
+			} else if (e.getStringData() == "deploy") {
+				projectWindow.deployGame();
+			}
+		});
+	});
+
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
 		projectWindow.buildGame();

@@ -180,6 +180,8 @@ namespace Halley
 		void requestReimport(ReimportType reimport);
 
 		void launchGame(Vector<String> params) const override;
+		bool canDeployGame() const;
+		std::unique_ptr<Task> deployGame() const;
 
 		static uint64_t getSourceHash(const Path& projectRoot);
 		uint64_t getSourceHash() const;

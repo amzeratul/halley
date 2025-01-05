@@ -717,6 +717,22 @@ void Project::launchGame(Vector<String> params) const
 	}
 }
 
+bool Project::canDeployGame() const
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->canDeployGame();
+	}
+	return false;
+}
+
+std::unique_ptr<Task> Project::deployGame() const
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->deployGame(OS::get(), this);
+	}
+	return {};
+}
+
 uint64_t Project::getSourceHash(const Path& projectRoot)
 {
 	const auto srcRoot = projectRoot / "src";
