@@ -16,8 +16,8 @@ namespace Halley {
 
         virtual std::optional<GamePlatform> getBuildPlatform() { return {}; }
         virtual void launchGame(OS& os, const IProject* project, const Vector<String>& params) {}
-        virtual std::unique_ptr<Task> deployGame(OS& os, const IProject* project) { return {}; }
-        virtual Future<int> buildGame(OS& os, IProject* project, ILoggerSink* logger) { return Future<int>::makeImmediate(1); }
+        virtual std::unique_ptr<Task> deployGame(OS& os, const IProject& project) { return {}; }
+        virtual std::unique_ptr<Task> buildGame(OS& os, const IProject& project) { return {}; }
         virtual bool canDeployGame() const { return false; }
     };
 }

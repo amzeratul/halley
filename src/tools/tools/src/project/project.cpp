@@ -21,6 +21,7 @@
 #include "halley/os/os.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/tools/file/filesystem_cache.h"
+#include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 
@@ -725,10 +726,18 @@ bool Project::canDeployGame() const
 	return false;
 }
 
+std::unique_ptr<Task> Project::buildGame()
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->buildGame(OS::get(), *this);
+	}
+	return std::make_unique<BuildProjectTask>(*this);
+}
+
 std::unique_ptr<Task> Project::deployGame() const
 {
 	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		return plugin->deployGame(OS::get(), this);
+		return plugin->deployGame(OS::get(), *this);
 	}
 	return {};
 }

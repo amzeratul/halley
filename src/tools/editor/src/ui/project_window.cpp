@@ -679,7 +679,9 @@ std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
 
 void ProjectWindow::buildGame()
 {
-	addTask(std::make_unique<BuildProjectTask>(project));
+	if (auto task = project.buildGame()) {
+		addTask(std::move(task));
+	}
 }
 
 void ProjectWindow::deployGame()
