@@ -1,0 +1,39 @@
+uuid: f2455b47-4db3-439a-9430-ca0a5ba4046f
+sizer:
+  columnProportions: []
+  type: horizontal
+widget:
+  class: widget
+children:
+  - uuid: 58bc74ec-047e-421f-9218-ffd2f312b2aa
+    border: [0, 0, 4, 0]
+    widget:
+      class: image
+      id: icon
+      image: ui/platforms/pc_16.png
+    fill: centre
+  - uuid: 9e0724a4-54f7-4998-81ce-462c55d2a837
+    border: [0, 0, 4, 0]
+    widget:
+      active: false
+      class: image
+      colour: $ui_text
+      id: modified
+      image: $ui_tab_modified
+    fill: centre
+  - uuid: 2394e545-61fe-4b61-8de3-6b683951f87e
+    proportion: 1
+    widget:
+      class: label
+      id: label
+      text: ""
+  - uuid: e6a8389e-1170-4a72-9b35-60d8de68187d
+    border: [5, -1, -1, 1]
+    widget:
+      active: false
+      class: button
+      id: close
+      size: [20, 20]
+      style: buttonThin
+      text: x
+      tooltip: Close Tab

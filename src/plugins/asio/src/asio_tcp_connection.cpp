@@ -110,12 +110,9 @@ void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet
 	memcpy(bs.data(), bytes.data(), bytes.size());
 
 	std::unique_lock<std::mutex> lock(mutex);
-	if (status == ConnectionStatus::Connected) {
+	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		sendQueue.emplace_back(std::move(bs));
-
-		if (sendQueue.size() == 1) {
-			trySend();
-		}
+		trySend();
 	}
 }
 
@@ -141,6 +138,12 @@ bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 	}
 	
 	return false;
+}
+
+String AsioTCPConnection::getRemoteAddress() const
+{
+	const auto& remote = socket.remote_endpoint();
+	return remote.address().to_string() + ":" + toString(static_cast<int32_t>(remote.port()));
 }
 
 bool AsioTCPConnection::needsPolling() const
@@ -196,7 +199,9 @@ void AsioTCPConnection::tryReceive()
 				if (ec.value() == asio::error::would_block || ec.value() == asio::error::try_again) {
 					tryReceive();
 				} else {
-					Logger::logError("Error reading data on TCP socket: " + ec.message());
+					if (ec.value() != asio::error::eof) {
+						Logger::logError("Error reading data on TCP socket: " + ec.message());
+					}
 					close();
 				}
 			} else {

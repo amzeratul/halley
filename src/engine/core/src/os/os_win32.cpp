@@ -53,7 +53,6 @@ using namespace Halley;
 
 OSWin32::OSWin32()
 	: pLoc(nullptr)
-	, pSvc(nullptr)
 {
 	// From http://msdn.microsoft.com/en-us/library/aa389762(v=VS.85).aspx
 	// "Creating a WMI Application Using C++"
@@ -69,20 +68,11 @@ OSWin32::OSWin32()
 		// Initialize WMI
 		hr = CoCreateInstance(CLSID_WbemAdministrativeLocator, nullptr, CLSCTX_INPROC_SERVER, IID_IWbemLocator, reinterpret_cast<void**>(&pLoc));
 		if (FAILED(hr)) throw Exception("Unable to obtain locator", HalleyExceptions::OS);
-		//hr = pLoc->ConnectServer(BSTR(L"ROOT\\DEFAULT"), nullptr, nullptr, 0, 0, 0, 0, &pSvc);
-		hr = pLoc->ConnectServer(BSTR(L"root\\cimv2"), nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
-		if (FAILED(hr)) throw Exception("Unable to connect to WMI service", HalleyExceptions::OS);
-
-		// Set security on WMI connection
-		hr = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
-		if (FAILED(hr)) throw Exception("Unable to set WMI security", HalleyExceptions::OS);
 	} catch (std::exception& e) {
 		std::cout << "Exception initializing COM/WMI: " << e.what() << std::endl;
-		pSvc = nullptr;
 		pLoc = nullptr;
 	} catch (...) {
 		std::cout << "Unknown exception initializing COM/WMI.";
-		pSvc = nullptr;
 		pLoc = nullptr;
 	}
 
@@ -93,8 +83,11 @@ OSWin32::OSWin32()
 
 OSWin32::~OSWin32()
 {
-	if (pSvc) {
-		pSvc->Release();
+	for (const auto& [k, v]: pSvcs) {
+		v->Release();
+	}
+	pSvcs.clear();
+	if (pLoc) {
 		pLoc->Release();
 		CoUninitialize();
 	}
@@ -111,12 +104,12 @@ static String getCOMError(int hr)
 	return "\"" + String(LPCSTR(tmp)) + "\", code 0x"+ toString(hr, 16);
 }
 
-String OSWin32::runWMIQuery(std::string_view query, const String& parameter) const
+String OSWin32::runWMIQuery(std::string_view query, const String& parameter, std::string_view queryNamespace) const
 {
-	return runWMIQuery(query, gsl::span<const String>(&parameter, 1)).at(0);
+	return runWMIQuery(query, gsl::span<const String>(&parameter, 1), queryNamespace).at(0);
 }
 
-Vector<String> OSWin32::runWMIQuery(std::string_view query, gsl::span<const String> parameters) const
+Vector<String> OSWin32::runWMIQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace) const
 {
 	Vector<String> results;
 	results.resize(parameters.size());
@@ -125,6 +118,7 @@ Vector<String> OSWin32::runWMIQuery(std::string_view query, gsl::span<const Stri
 	// http://www.codeproject.com/KB/system/UsingWMI.aspx
 	// http://www.codeproject.com/KB/system/Using_WMI_in_Visual_C__.aspx
 
+	auto pSvc = getIWbemService(queryNamespace);
 	if (pSvc) {
 		try {
 			HRESULT hr;
@@ -167,6 +161,27 @@ Vector<String> OSWin32::runWMIQuery(std::string_view query, gsl::span<const Stri
 	return results;
 }
 
+IWbemServices* OSWin32::getIWbemService(std::string_view queryNamespace) const
+{
+	if (const auto iter = pSvcs.find(queryNamespace); iter != pSvcs.end()) {
+		return iter->second;
+	}
+
+	IWbemServices* pSvc = nullptr;
+
+	auto hr = pLoc->ConnectServer(BSTR(String(queryNamespace).getUTF16().c_str()), nullptr, nullptr, nullptr, WBEM_FLAG_CONNECT_USE_MAX_WAIT, nullptr, nullptr, &pSvc);
+	if (FAILED(hr)) {
+		throw Exception("Unable to connect to WMI service", HalleyExceptions::OS);
+	}
+
+	// Set security on WMI connection
+	hr = CoSetProxyBlanket(pSvc, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr, RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE);
+	if (FAILED(hr)) {
+		throw Exception("Unable to set WMI security", HalleyExceptions::OS);
+	}
+
+	return pSvc;
+}
 
 
 void OSWin32::loadWindowIcon(HWND hwnd)
@@ -281,6 +296,17 @@ ComputerData OSWin32::getComputerData()
 	retrieved = true;
 
 	return data;
+}
+
+String OSWin32::getComputerName()
+{
+	char buffer[1024];
+	DWORD n = sizeof(buffer) - 1;
+	if (GetComputerNameEx(ComputerNamePhysicalDnsHostname, buffer, &n)) {
+		return String(buffer, n);
+	} else {
+		return "Unknown";
+	}
 }
 
 String OSWin32::getUserDataDir()
@@ -929,6 +955,11 @@ uint64_t OSWin32::getMemoryUsage()
 	PROCESS_MEMORY_COUNTERS counters;
 	GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters));
 	return counters.WorkingSetSize;
+}
+
+Vector<String, std::allocator<String>, 0, true> OSWin32::runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace) const
+{
+	return runWMIQuery(query, parameters, queryNamespace);
 }
 
 #endif

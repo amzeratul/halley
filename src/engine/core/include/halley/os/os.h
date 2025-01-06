@@ -67,6 +67,7 @@ namespace Halley {
 		virtual void onWindowCreated(void* windowHandle);
 
 		virtual ComputerData getComputerData();
+		virtual String getComputerName();
 		virtual String getUserDataDir();
 		virtual String getCurrentWorkingDir();
 		virtual String getEnvironmentVariable(const String& name);
@@ -91,6 +92,9 @@ namespace Halley {
 		virtual uint64_t getMemoryUsage();
 
         virtual bool isDebuggerAttached() const;
+
+		virtual String runQuery(std::string_view query, const String& parameter, std::string_view queryNamespace = "") const;
+		virtual Vector<String> runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace = "") const;
 
 	private:
 		static OS* osInstance;

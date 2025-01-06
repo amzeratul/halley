@@ -182,13 +182,11 @@ void MFMoviePlayer::init()
 							Logger::logInfo("Original subType: " + guidToString(origSubType));
 
 							if (SUCCEEDED(hr)) {
-#ifndef WINDOWS_STORE
 								LONG tmp;
 								hr = MFGetStrideForBitmapInfoHeader(subType.Data1, videoSize.x, &tmp);
 								if (SUCCEEDED(hr)) {
 									minStride = int(tmp);
 								}
-#endif
 							}
 							if (minStride == -1) {
 								if (subType == MFVideoFormat_NV12) {

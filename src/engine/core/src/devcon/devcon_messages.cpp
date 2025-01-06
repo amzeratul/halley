@@ -6,18 +6,6 @@
 using namespace Halley;
 using namespace DevCon;
 
-void DevCon::setupMessageQueue(MessageQueue& queue)
-{
-	queue.setChannel(0, ChannelSettings(true, true));
-
-	queue.addFactory<LogMsg>();
-	queue.addFactory<ReloadAssetsMsg>();
-	queue.addFactory<RegisterInterestMsg>();
-	queue.addFactory<UpdateInterestMsg>();
-	queue.addFactory<UnregisterInterestMsg>();
-	queue.addFactory<NotifyInterestMsg>();
-}
-
 
 LogMsg::LogMsg(LoggerLevel level, const String& msg)
 	: level(level)
@@ -126,4 +114,65 @@ void NotifyInterestMsg::deserialize(Deserializer& s)
 {
 	s >> handle;
 	s >> data;
+}
+
+SetClientDataMsg::SetClientDataMsg(GamePlatform platform, String deviceName, ConfigNode params)
+	: platform(platform)
+	, deviceName(std::move(deviceName))
+	, params(std::move(params))
+{
+}
+
+void SetClientDataMsg::serialize(Serializer& s) const
+{
+	s << platform;
+	s << deviceName;
+	s << params;
+}
+
+void SetClientDataMsg::deserialize(Deserializer& s)
+{
+	s >> platform;
+	s >> deviceName;
+	s >> params;
+}
+
+RPCMsg::RPCMsg(uint64_t id, String method, ConfigNode params)
+	: id(id)
+	, method(std::move(method))
+	, params(std::move(params))
+{
+}
+
+void RPCMsg::serialize(Serializer& s) const
+{
+	s << id;
+	s << method;
+	s << params;
+}
+
+void RPCMsg::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> method;
+	s >> params;
+}
+
+
+RPCReplyMsg::RPCReplyMsg(uint64_t id, ConfigNode result)
+	: id(id)
+	, result(std::move(result))
+{
+}
+
+void RPCReplyMsg::serialize(Serializer& s) const
+{
+	s << id;
+	s << result;
+}
+
+void RPCReplyMsg::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> result;
 }

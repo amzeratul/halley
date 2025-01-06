@@ -11,9 +11,12 @@ namespace Halley {
 	public:
 		UIDebugConsoleResponse();
 		UIDebugConsoleResponse(String response, bool closeConsole = false);
+		UIDebugConsoleResponse(const ConfigNode& node);
 
 		const String& getResponse() const;
 		bool isCloseConsole() const;
+
+		ConfigNode toConfigNode() const;
 		
 	private:
 		String response;
@@ -89,7 +92,15 @@ namespace Halley {
 		std::map<String, UIDebugConsoleCommandData> commands;
 	};
 
-	class UIDebugConsoleController {
+	class IUIDebugConsoleController {
+	public:
+		virtual ~IUIDebugConsoleController() = default;
+
+		virtual Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args) = 0;
+		virtual Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const = 0;
+	};
+
+	class UIDebugConsoleController : public IUIDebugConsoleController {
 	public:
 		UIDebugConsoleController(Resources& resources, const HalleyAPI& api);
 
@@ -111,15 +122,17 @@ namespace Halley {
 
     class UIDebugConsole : public UIWidget {
     public:
-		UIDebugConsole(const String& id, UIFactory& factory, std::shared_ptr<UIDebugConsoleController> controller);
-    	
+		UIDebugConsole(const String& id, UIFactory& factory);
+		UIDebugConsole(const String& id, UIFactory& factory, IUIDebugConsoleController& controller);
+
+		void setController(IUIDebugConsoleController* controller);
+
 		void show();
 		void hide();
 		void addLine(const String& line, Colour colour);
+		void setUserTextColour(Colour4f userInputColour, Colour4f responseColour);
 
     	void setForcePaintMask(int mask);
-
-    	const std::shared_ptr<UIDebugConsoleController>& getController() const;
 
 		void onAddedToRoot(UIRoot& root) override;
     
@@ -131,9 +144,12 @@ namespace Halley {
 		void runCommand(const String& command);
 
 		UIFactory& factory;
-		std::shared_ptr<UIDebugConsoleController> controller;
+		IUIDebugConsoleController* controller = nullptr;
 		Future<String> pendingCommand;
 		std::shared_ptr<UITextInput> inputField;
     	std::optional<int> forceMask;
+
+		Colour4f userInputColour;
+		Colour4f responseColour;
     };
 }

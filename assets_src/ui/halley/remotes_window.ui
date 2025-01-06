@@ -1,0 +1,81 @@
+uuid: 5ee0e6bf-9936-4c58-b895-5998cf82d6f1
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
+children:
+  - uuid: d28e75ec-45bb-4c2d-9458-d0402b5b608f
+    proportion: 1
+    border: [4, 4, 4, 4]
+    sizer:
+      columnProportions: []
+      columns: 1
+      gap: 1
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: noRemoteConnections
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [0, 0]
+    children:
+      - uuid: 763e1327-0b4a-4986-a165-0d67cddc71a4
+        border: [10, 10, 10, 10]
+        widget:
+          class: label
+          id: ""
+          text: No Active Remote Connections.
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
+      - uuid: 6a1f7a98-e993-421a-871c-ad0c82500e17
+        border: [10, 10, 10, 10]
+        widget:
+          class: label
+          id: ""
+          text: Standing by...
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
+    fill: [centreHorizontal, centreVertical]
+  - uuid: 68f9e2a9-61a5-4124-947b-721f0f2287cd
+    proportion: 1
+    sizer:
+      columnProportions: []
+      type: vertical
+    widget:
+      class: widget
+      id: hasRemoteConnections
+    children:
+      - uuid: f6ca7a85-e474-4737-8f7a-1d6d7acb56ec
+        proportion: 0
+        sizer:
+          columnProportions: []
+          gap: 0
+          type: horizontal
+        widget:
+          autoHide: true
+          class: scrollBarPane
+          scrollHorizontal: true
+          scrollVertical: false
+          size: [50, 10]
+        children:
+          - uuid: 3e751eac-29d6-4769-8cb4-34b3a51241f2
+            widget:
+              class: widget
+              size: [0, 24]
+          - uuid: 91770a11-1bb2-4e22-b25b-b42568b6fae2
+            proportion: 1
+            widget:
+              class: list
+              id: tabs
+              options: []
+              style: tabs
+              type: horizontal
+      - uuid: 1b83b840-97df-4010-be94-7a42bd51f223
+        proportion: 1
+        border: [4, 4, 4, 4]
+        widget:
+          class: pagedPane
+          id: pages

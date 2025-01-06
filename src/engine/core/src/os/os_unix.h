@@ -34,6 +34,7 @@ namespace Halley {
 		~OSUnix();
 
 		ComputerData getComputerData() override;
+		String getComputerName() override;
 		String getUserDataDir() override;
 		String getCurrentWorkingDir() override;
 		void createDirectories(const Path& path) override;

@@ -32,6 +32,8 @@ namespace Halley
 		void terminateConnection();
 		short getConnectionId() const { return connectionId; }
 
+		String getRemoteAddress() const override;
+
         [[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
 
         void onConnect(short connId) override;

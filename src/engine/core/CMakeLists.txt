@@ -91,6 +91,7 @@ set(SOURCES
         "src/version/version.cpp"
 
         "src/devcon/devcon_client.cpp"
+        "src/devcon/devcon_connection.cpp"
         "src/devcon/devcon_messages.cpp"
         "src/devcon/devcon_server.cpp"
 
@@ -524,6 +525,7 @@ set(HEADERS
         "include/halley/version/version.h"
 
         "include/halley/devcon/devcon_client.h"
+        "include/halley/devcon/devcon_connection.h"
         "include/halley/devcon/devcon_messages.h"
         "include/halley/devcon/devcon_server.h"
 
@@ -936,6 +938,15 @@ add_library (halley-engine ${SOURCES} ${HEADERS})
 target_link_libraries(halley-engine halley-contrib  ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
 
 add_definitions(-DDONT_INCLUDE_HALLEY_HPP)
+
+if (_GAMING_DESKTOP OR _GAMING_XBOX)
+	target_include_directories(halley-engine PRIVATE $ENV{GRDKLatest}GameKit/Include $ENV{GXDKLatest}gameKit/Include)
+	if (_GAMING_XBOX_XBOXONE)
+		target_include_directories(halley-engine PRIVATE $ENV{GXDKLatest}gameKit/Include/XboxOne)
+    elseif (_GAMING_XBOX_SCARLETT)
+		target_include_directories(halley-engine PRIVATE $ENV{GXDKLatest}gameKit/Include/Scarlett)
+	endif()
+endif ()
 
 # Hack, there should be no platform specific stuff in core...
 if (USE_ANDROID)

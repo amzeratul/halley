@@ -44,7 +44,7 @@ namespace Halley
 #endif
 
 #if defined(HALLEY_EXECUTABLE)
-	#if defined(_WIN32) || defined(WINDOWS_STORE)
+	#if defined(_WIN32) || defined(WITH_GDK)
 		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { Halley::InitEntities<T>(); return Halley::HalleyMain::winMain<T>(); }
 	#else
 		#define HalleyGame(T) int main(int argc, char* argv[]) { Halley::InitEntities<T>(); return Halley::HalleyMain::main<T>(argc, argv); }

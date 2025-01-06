@@ -248,10 +248,11 @@ void UIDropdown::update(Time t, bool moved)
 
 	sprite.setPos(getPosition()).scaleTo(getSize());
 
-	const Vector2f basePos = getPosition() + style.getBorder("labelBorder").xy();
+	const auto border = style.getBorder("labelBorder");
+	const Vector2f basePos = getPosition() + border.xy();
 	Vector2f iconOffset;
 	if (icon.hasMaterial()) {
-		icon.setPosition(basePos);
+		icon.setPosition(getPosition() + Vector2f(border.x, std::floor((getSize().y - icon.getScaledSize().y) / 2.0f)));
 		iconOffset = Vector2f(style.getFloat("iconGap") + icon.getScaledSize().x, 0.0f);
 	}
 	label.setAlignment(0.0f).setPosition(basePos + iconOffset);

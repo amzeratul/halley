@@ -225,7 +225,7 @@ namespace Halley
 		UIFactoryWidgetProperties getSpinListProperties() const;
 		UIFactoryWidgetProperties getOptionListMorpherProperties() const;
 		UIFactoryWidgetProperties getDebugConsoleProperties() const;
-		UIFactoryWidgetProperties getBaseListProperties() const;
+		UIFactoryWidgetProperties getBaseListProperties(bool includeOptions = true) const;
 		UIFactoryWidgetProperties getListProperties() const;
 		UIFactoryWidgetProperties getTreeListProperties() const;
 		UIFactoryWidgetProperties getRenderSurfaceProperties() const;

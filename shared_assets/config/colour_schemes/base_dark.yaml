@@ -80,6 +80,10 @@ colours:
   ui_logWarningText: "#FFDD1C"
   ui_logErrorText: "#E84A4A"
   ui_logDevText: "#3060FF"
+  ui_consoleUserText: "#3FDC66"
+  ui_consoleResponse: "#24C84E"
+  ui_remotes_active: "#3FDC66"
+  ui_remotes_inactive: "#E84A4A80"
 
   ui_inputCaret: "#FFFFFF"
   

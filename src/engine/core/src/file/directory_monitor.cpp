@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

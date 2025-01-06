@@ -28,7 +28,7 @@
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
-#if defined(_MSC_VER) && !defined(WINDOWS_STORE)
+#if defined(_MSC_VER) && !defined(WITH_GDK)
 #define HAS_STACKWALKER
 #include "StackWalker/StackWalker.h"
 

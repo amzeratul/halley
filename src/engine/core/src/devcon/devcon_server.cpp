@@ -6,6 +6,7 @@
 #include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
 #include "halley/devcon/devcon_messages.h"
+#include "halley/game/scene_editor_interface.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -13,35 +14,8 @@ using namespace Halley;
 DevConServerConnection::DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> conn)
 	: parent(parent)
 	, id(id)
-	, connection(conn)
-	, queue(std::make_shared<MessageQueueTCP>(connection))
 {
-	DevCon::setupMessageQueue(*queue);
-}
-
-void DevConServerConnection::update(Time t)
-{
-	queue->sendAll();
-
-	for (auto& m: queue->receiveMessages()) {
-		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
-		switch (msg.getMessageType()) {
-		case DevCon::MessageType::Log:
-			onReceiveLogMsg(dynamic_cast<DevCon::LogMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::NotifyInterest:
-			onReceiveNotifyInterestMsg(dynamic_cast<DevCon::NotifyInterestMsg&>(msg));
-
-		default:
-			break;
-		}
-	}
-}
-
-bool DevConServerConnection::isAlive() const
-{
-	return connection->getStatus() != ConnectionStatus::Closed && connection->getStatus() != ConnectionStatus::Closing;
+	setConnection(conn);
 }
 
 size_t DevConServerConnection::getId() const
@@ -69,16 +43,42 @@ void DevConServerConnection::unregisterInterest(uint32_t handle)
 	queue->enqueue(std::make_unique<DevCon::UnregisterInterestMsg>(handle), 0);
 }
 
-
-
-void DevConServerConnection::onReceiveLogMsg(DevCon::LogMsg& msg)
+const std::optional<DevConClientInfo>& DevConServerConnection::getClientInfo() const
 {
-	Logger::log(msg.level, "[REMOTE] " + msg.msg);
+	return clientInfo;
 }
 
-void DevConServerConnection::onReceiveNotifyInterestMsg(DevCon::NotifyInterestMsg& msg)
+DevConServer& DevConServerConnection::getParent()
+{
+	return parent;
+}
+
+Vector<DevCon::LogMsg> DevConServerConnection::movePendingLogs()
+{
+	auto result = std::move(pendingLogs);
+	pendingLogs.clear();
+	return result;
+}
+
+
+void DevConServerConnection::onReceiveMessage(DevCon::LogMsg& msg)
+{
+	pendingLogs.push_back(std::move(msg));
+	//Logger::log(msg.level, "[REMOTE] " + msg.msg);
+}
+
+void DevConServerConnection::onReceiveMessage(DevCon::NotifyInterestMsg& msg)
 {
 	parent.onReceiveNotifyInterestMsg(*this, msg);
+}
+
+void DevConServerConnection::onReceiveMessage(DevCon::SetClientDataMsg& msg)
+{
+	DevConClientInfo info;
+	info.platform = msg.platform;
+	info.deviceName = msg.deviceName;
+	info.params = msg.params;
+	clientInfo = std::move(info);
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
@@ -86,7 +86,6 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 {
 	service->startListening([=] (NetworkService::Acceptor& a)
 	{
-		Logger::logInfo("New incoming DevCon connection.");
 		connections.push_back(std::make_shared<DevConServerConnection>(*this, connId++, a.accept()));
 		initConnection(*connections.back());
 	});
@@ -113,12 +112,14 @@ void DevConServer::reloadAssets(Vector<String> assetIds, Vector<String> packIds)
 	}
 }
 
-DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNode params, InterestCallback callback)
+DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNode params, InterestCallback callback, std::optional<size_t> connectionId)
 {
 	const InterestHandle handle = interestId++;
 
 	for (const auto& c: connections) {
-		c->registerInterest(id, params, handle);
+		if (!connectionId || connectionId == c->getId()) {
+			c->registerInterest(id, params, handle);
+		}
 	}
 
 	interest[handle] = Interest{ std::move(id), std::move(params), std::move(callback) };
@@ -150,6 +151,16 @@ const ConfigNode& DevConServer::getInterestParams(InterestHandle handle) const
 	return interest.at(handle).config;
 }
 
+gsl::span<std::shared_ptr<DevConServerConnection>> DevConServer::getConnections()
+{
+	return connections.span();
+}
+
+void DevConServer::setProject(IProject* project)
+{
+	this->project = project;
+}
+
 void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg)
 {
 	const auto iter = interest.find(msg.handle);
@@ -163,6 +174,7 @@ void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& conn
 
 void DevConServer::initConnection(DevConServerConnection& conn)
 {
+	Logger::logInfo("New incoming DevCon connection from " + conn.getAddress());
 	for (const auto& [handle, val]: interest) {
 		conn.registerInterest(val.id, val.config, handle);
 	}

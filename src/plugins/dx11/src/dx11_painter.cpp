@@ -20,12 +20,7 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 	: Painter(video, resources)
 	, dx11Video(video)
 {
-#ifdef WINDOWS_STORE
-	// Due to the architecture of "some" platforms available here, updating a dynamic buffer is extremely slow if it's still in use
-	constexpr size_t numBuffers = 2;
-#else
 	constexpr size_t numBuffers = 1;
-#endif
 	for (size_t i = 0; i < numBuffers; ++i) {
 		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex, 8 * 1024 * 1024);
 		indexBuffers.emplace_back(video, DX11Buffer::Type::Index, 128 * 1024);
@@ -119,15 +114,8 @@ void DX11Painter::setMaterialData(const Material& material)
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
 			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(getConstantBuffer(block)).getBuffer();
 			auto dxBuffer = buffer.getBuffer();
-			if (Halley::getPlatform() == GamePlatform::UWP || Halley::getPlatform() == GamePlatform::XboxOne) {
-				UINT firstConstant[] = { buffer.getOffset() / 16 };
-				UINT numConstants[] = { buffer.getLastSize() / 16 };
-				devCon.VSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
-				devCon.PSSetConstantBuffers1(block.getBindPoint(), 1, &dxBuffer, firstConstant, numConstants);
-			} else {
-				devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
-				devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
-			}
+            devCon.VSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
+            devCon.PSSetConstantBuffers(block.getBindPoint(), 1, &dxBuffer);
 		}
 	}
 }

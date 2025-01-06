@@ -13,9 +13,6 @@ namespace Halley
 
 	namespace DevCon
 	{
-		void setupMessageQueue(MessageQueue& queue);
-
-		
 		enum class MessageType
 		{
 			Log,
@@ -23,7 +20,10 @@ namespace Halley
 			RegisterInterest,
 			UpdateInterest,
 			UnregisterInterest,
-			NotifyInterest
+			NotifyInterest,
+			SetClientData,
+			RPC,
+			RPCReply
 		};
 
 		class DevConMessage : public NetworkMessage
@@ -130,6 +130,47 @@ namespace Halley
 			
 			uint32_t handle;
 			ConfigNode data;
+		};
+
+		class SetClientDataMsg final : public DevConMessageBase<MessageType::SetClientData>
+		{
+		public:
+			SetClientDataMsg() = default;
+			SetClientDataMsg(GamePlatform platform, String deviceName, ConfigNode params);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			GamePlatform platform;
+			String deviceName;
+			ConfigNode params;
+		};
+
+		class RPCMsg final : public DevConMessageBase<MessageType::RPC>
+		{
+		public:
+			RPCMsg() = default;
+			RPCMsg(uint64_t id, String method, ConfigNode params);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint64_t id;
+			String method;
+			ConfigNode params;
+		};
+
+		class RPCReplyMsg final : public DevConMessageBase<MessageType::RPCReply>
+		{
+		public:
+			RPCReplyMsg() = default;
+			RPCReplyMsg(uint64_t id, ConfigNode result);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint64_t id;
+			ConfigNode result;
 		};
 	}
 }

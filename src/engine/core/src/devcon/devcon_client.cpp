@@ -5,6 +5,7 @@
 #include "halley/api/halley_api.h"
 #include "halley/net/connection/message_queue.h"
 #include "halley/devcon/devcon_messages.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -79,58 +80,42 @@ void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNo
 
 
 
-DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port)
+DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service)
 	: api(api)
 	, resources(resources)
 	, service(std::move(service))
-	, address(std::move(address))
-	, port(port)
 {
 	interest = std::make_unique<DevConInterest>(*this);
-
-	connect();
-
-	Logger::addSink(*this);
 }
 
 DevConClient::~DevConClient()
 {
+	if (receivingProfilerData) {
+		api.core->removeProfilerCallback(this);
+	}
+
 	Logger::removeSink(*this);
-	queue.reset();
-	service.reset();
+
+	setConnection({});
 }
 
 void DevConClient::update(Time t)
 {
-	queue->sendAll();
 	service->update(t);
+	DevConConnection::update(t);
 
-	for (auto& m: queue->receiveMessages()) {
-		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
-		switch (msg.getMessageType()) {
-		case DevCon::MessageType::ReloadAssets:
-			onReceiveReloadAssets(dynamic_cast<DevCon::ReloadAssetsMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::RegisterInterest:
-			onReceiveRegisterInterest(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::UpdateInterest:
-			onReceiveUpdateInterest(dynamic_cast<DevCon::UpdateInterestMsg&>(msg));
-			break;
-
-		case DevCon::MessageType::UnregisterInterest:
-			onReceiveUnregisterInterest(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
-			break;
-
-		default:
-			break;
+	const bool shouldHaveProfilerData = interest->hasInterest("profiler");
+	if (shouldHaveProfilerData != receivingProfilerData) {
+		if (shouldHaveProfilerData) {
+			api.core->addProfilerCallback(this);
+		} else {
+			api.core->removeProfilerCallback(this);
 		}
+		receivingProfilerData = shouldHaveProfilerData;
 	}
 }
 
-void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
+void DevConClient::onReceiveMessage(const DevCon::ReloadAssetsMsg& msg)
 {
 	if (msg.assetIds.size() <= 5) {
 		Logger::logDev("Reloading " + toString(msg.assetIds.size()) + " assets: " + toString(msg.assetIds));
@@ -140,17 +125,17 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 	resources.reloadAssets(msg.assetIds, msg.packIds);
 }
 
-void DevConClient::onReceiveRegisterInterest(DevCon::RegisterInterestMsg& msg)
+void DevConClient::onReceiveMessage(DevCon::RegisterInterestMsg& msg)
 {
 	interest->registerInterest(msg.id, std::move(msg.params), msg.handle);
 }
 
-void DevConClient::onReceiveUpdateInterest(DevCon::UpdateInterestMsg& msg)
+void DevConClient::onReceiveMessage(DevCon::UpdateInterestMsg& msg)
 {
 	interest->updateInterest(msg.handle, std::move(msg.params));
 }
 
-void DevConClient::onReceiveUnregisterInterest(const DevCon::UnregisterInterestMsg& msg)
+void DevConClient::onReceiveMessage(const DevCon::UnregisterInterestMsg& msg)
 {
 	interest->unregisterInterest(msg.handle);
 }
@@ -162,20 +147,39 @@ DevConInterest& DevConClient::getInterest() const
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 {
+	if (!queue) {
+		return;
+	}
+
 	queue->enqueue(std::make_unique<DevCon::NotifyInterestMsg>(handle, std::move(data)), 0);
 }
 
-void DevConClient::connect()
+void DevConClient::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	queue = std::make_shared<MessageQueueTCP>(service->connect(address + ":" + toString(port)));
-	DevCon::setupMessageQueue(*queue);
+	if (interest->hasInterest("profiler")) {
+		auto bytes = Serializer::toBytes(*data, SerializerOptions(SerializerOptions::maxVersion));
+		interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));
+	}
+}
+
+void DevConClient::connect(const String& deviceName, const ConfigNode& clientParams, const String& address, int port)
+{
+	if (queue) {
+		Logger::logError("DevConClient already connected");
+		return;
+	}
+
+	if (auto connection = service->connect(address + ":" + toString(port))) {
+		setConnection(connection);
+
+		queue->enqueue(std::make_unique<DevCon::SetClientDataMsg>(getPlatform(), deviceName, ConfigNode(clientParams)), 0);
+		Logger::addSink(*this);
+	}
 }
 
 void DevConClient::log(LoggerLevel level, const std::string_view msg)
 {
-	if (level != LoggerLevel::Dev) {
-		if (queue->isConnected()) {
-			queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
-		}
+	if (queue && queue->isConnected()) {
+		queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
 	}
 }

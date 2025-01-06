@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cstddef>
-#include <gsl/gsl>
+#include "halley/text/halleystring.h"
 
 namespace Halley
 {
@@ -34,6 +33,8 @@ namespace Halley
 
 		virtual void send(TransmissionType type, OutboundNetworkPacket packet) = 0;
 		virtual bool receive(InboundNetworkPacket& packet) = 0;
+
+		virtual String getRemoteAddress() const { return String("0.0.0.0:0"); }
 
         /* 2nd, very minimal interface to send/receive unreliable packets. */
 

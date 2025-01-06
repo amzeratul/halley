@@ -2,6 +2,10 @@ if (USE_DX11)
     add_subdirectory(dx11)
 endif ()
 
+if (USE_DX12)
+    add_subdirectory(dx12)
+endif ()
+
 if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
     add_subdirectory(opengl)
 endif ()
@@ -14,12 +18,16 @@ if (USE_SDL2)
     add_subdirectory(sdl)
 endif ()
 
+if (USE_SDL3)
+    add_subdirectory(sdl3)
+endif ()
+
 if (USE_ASIO)
     add_subdirectory(asio)
 endif ()
 
-if (USE_WINRT)
-    add_subdirectory(winrt)
+if (USE_GDK)
+    add_subdirectory(gdk)
 endif ()
 
 if (USE_XAUDIO2)

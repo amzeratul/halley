@@ -6,6 +6,7 @@
 #include "halley/concurrency/concurrent.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/input/input_keys.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley
 {
@@ -84,11 +85,29 @@ namespace Halley
 
 		virtual void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) {}
 
+		virtual String getDeviceName() const { return "Unknown"; }
+
 		struct MemoryUsage {
 			uint64_t ramUsage = 0;
-			std::optional<uint64_t> ramMax;
 			uint64_t vramUsage = 0;
+			std::optional<uint64_t> ramMax;
 			std::optional<uint64_t> vramMax;
+
+			void serialize(Serializer& s) const
+			{
+				s << ramUsage;
+				s << vramUsage;
+				s << ramMax;
+				s << vramMax;
+			}
+
+			void deserialize(Deserializer& s)
+			{
+				s >> ramUsage;
+				s >> vramUsage;
+				s >> ramMax;
+				s >> vramMax;
+			}
 		};
 		virtual MemoryUsage getMemoryUsage() { return {}; }
 

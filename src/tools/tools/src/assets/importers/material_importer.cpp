@@ -4,6 +4,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/text/string_converter.h"
 #include "shader_importer.h"
+#include "shader_importer_dxc.h"
 #include "halley/graphics/shader.h"
 #include "halley/file_formats/yaml_convert.h"
 
@@ -47,7 +48,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 	const String shaderName = passName;
 
 	const auto shaderTypes = { ShaderType::Pixel, ShaderType::Vertex, ShaderType::Geometry, ShaderType::Combined };
-	const String languages[] = { "hlsl", "glsl", "glsl410", "glsl300es", "metal", "spirv", "dxil" };
+	const String languages[] = { "hlsl", "glsl", "glsl410", "glsl300es", "metal", "spirv", "dxil", "dxbc_x", "dxbc_xs" };
 
 	// Map languages to nodes
 	std::map<String, const ConfigNode*> langToNode;
@@ -78,8 +79,8 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 			if (shaderEntry.hasKey(curTypeName)) {
 				auto data = loadShader(shaderEntry[curTypeName].asString(), collector);
 				if (!hasEntry) {
-                    if (language == "dxil") {
-                        data = ShaderImporter::compileDXIL(shaderName, curType, data, material);
+                    if (language == "dxil" || language == "dxbc_x" || language == "dxbc_xs") {
+                        data = ShaderImporterDXC::compileDXIL(shaderName, curType, data, language, material);
                     } else {
                         data = ShaderImporter::convertHLSL(shaderName, curType, data, language);
                     }

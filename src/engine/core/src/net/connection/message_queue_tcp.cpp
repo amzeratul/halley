@@ -24,6 +24,8 @@ void MessageQueueTCP::enqueue(OutboundNetworkPacket packet, uint8_t channel)
 {
 	if (isConnected()) {
 		connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
+	} else {
+		Logger::logError("Unable to send TCP message, not connected");
 	}
 }
 

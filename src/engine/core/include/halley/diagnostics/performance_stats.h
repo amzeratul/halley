@@ -17,7 +17,7 @@ namespace Halley
 	class PerformanceStatsView : public StatsView, public CoreAPI::IProfileCallback
 	{
 	public:
-		PerformanceStatsView(Resources& resources, const HalleyAPI& api);
+		PerformanceStatsView(Resources& resources, const HalleyAPI& api, bool local = true);
 		~PerformanceStatsView() override;
 		
 		void paint(Painter& painter) override;
@@ -28,6 +28,8 @@ namespace Halley
 		int getNumPages() const;
 		int getPage() const;
 		void setPage(int page);
+
+		void setDrawBg(bool drawBg);
 
 	protected:
 		bool isInputActive() const override;
@@ -76,6 +78,8 @@ namespace Halley
 			void sortIfNeeded() const;
 		};
 		
+		const bool isLocal;
+
 		TextRenderer headerText;
 		TextRenderer fpsLabel;
 		TextRenderer graphLabel;
@@ -101,15 +105,13 @@ namespace Halley
 
 		bool capturing = true;
 		int page = 0;
+		bool drawBg = true;
 
 		INetworkServiceStatsListener* networkStats = nullptr;
 		const NetworkSession* networkSession;
 
 		const Sprite boxBg;
 		const Sprite whitebox;
-
-		SystemAPI::MemoryUsage memoryUsage;
-		Time memoryUsageRefreshTime = 1;
 
 		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);

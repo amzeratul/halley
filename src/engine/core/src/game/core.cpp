@@ -219,10 +219,7 @@ void Core::init()
 	game->resources = resources.get();
 
 	// Create devcon connection
-	String devConAddress = game->getDevConAddress();
-	if (!devConAddress.isEmpty()) {
-		devConClient = std::make_unique<DevConClient>(*api, *resources, api->network->createService(NetworkProtocol::TCP), std::move(devConAddress), game->getDevConPort());
-	}
+	initDevCon();
 
 	// Start game
 	setStage(game->startGame());
@@ -276,7 +273,7 @@ void Core::deInit()
 	Logger::removeSink(*this);
 	out.reset();
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 	if (hasError && hasConsole) {
 		system("pause");
 	}
@@ -308,6 +305,23 @@ void Core::setOutRedirect(bool appendToExisting)
 	}
 	out = std::make_unique<RedirectStreamToStream>(std::cout, outStream, false);
 #endif
+}
+
+void Core::initDevCon()
+{
+	if (api->network) {
+		const String devConAddress = api->network->getFixedDevconHost().value_or(game->getDevConAddress());
+		if (!devConAddress.isEmpty()) {
+			if (auto service = api->network->createService(NetworkProtocol::TCP)) {
+				auto port = api->network->getFixedDevconPort().value_or(game->getDevConPort());
+				devConClient = std::make_unique<DevConClient>(*api, *resources, std::move(service));
+
+				String deviceName = api->system->getDeviceName();
+				devConClient->connect(deviceName, {}, devConAddress, port);
+			}
+		}
+	}
+
 }
 
 void Core::processEvents(Time time)
@@ -382,13 +396,13 @@ void Core::onTick(Time delta)
 {
 	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
-	capture.startFrame(record);
+	capture.startFrame(record, delta);
 	
 	tickFrame(delta);
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
-		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
+		onProfileData(std::make_shared<ProfilerData>(capture.getCapture(*api)));
 	}
 }
 

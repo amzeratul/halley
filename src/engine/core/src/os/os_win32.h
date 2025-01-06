@@ -37,6 +37,7 @@ namespace Halley {
 		void initializeConsole() override;
 
 		ComputerData getComputerData() override;
+		String getComputerName() override;
 		String getUserDataDir() override;
 		String getCurrentWorkingDir() override;
 		String getEnvironmentVariable(const String& name) override;
@@ -60,15 +61,18 @@ namespace Halley {
 		Future<std::optional<Path>>	openFileChooser(FileChooserParameters parameters) override;
 
 		uint64_t getMemoryUsage() override;
+
+		Vector<String> runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace) const override;
 		
 	private:
-		String runWMIQuery(std::string_view query, const String& parameter) const;
-		Vector<String> runWMIQuery(std::string_view query, gsl::span<const String> parameters) const;
+		String runWMIQuery(std::string_view query, const String& parameter, std::string_view queryNamespace = "root/cimv2") const;
+		Vector<String> runWMIQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace = "root/cimv2") const;
+		IWbemServices* getIWbemService(std::string_view queryNamespace) const;
 		void loadWindowIcon(HWND hwnd);
 
 	private:
 		IWbemLocator *pLoc;
-		IWbemServices *pSvc;
+		mutable HashMap<String, IWbemServices*> pSvcs;
 		HICON icon;
 	};
 }

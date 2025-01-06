@@ -10,7 +10,7 @@
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
-	: Task("Building " + project.getProperties().getName(), true, true, { "code" })
+	: Task("Building " + project.getProperties().getName(), true, true, {"code"})
 	, project(project)
 {
 	const String scriptName = [] ()
@@ -36,7 +36,6 @@ void BuildProjectTask::run()
 	clearTask("Update Project");
 	project.onBuildStarted();
 
-	using namespace std::literals::chrono_literals;
 	auto future = OS::get().runCommandAsync(command, "", this);
 
 	while (!future.isReady()) {
@@ -44,6 +43,7 @@ void BuildProjectTask::run()
 			future.cancel();
 			return;
 		}
+		using namespace std::literals::chrono_literals;
 		std::this_thread::sleep_for(10ms);
 	}
 

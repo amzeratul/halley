@@ -34,6 +34,8 @@ namespace Halley
 		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
+		String getRemoteAddress() const override;
+
 	private:
 		asio::io_service& service;
 		std::unique_ptr<asio::ip::tcp::resolver> resolver;

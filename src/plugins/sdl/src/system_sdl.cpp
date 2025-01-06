@@ -273,6 +273,11 @@ SystemAPI::MemoryUsage SystemSDL::getMemoryUsage()
 	return result;
 }
 
+String SystemSDL::getDeviceName() const
+{
+	return OS::get().getComputerName();
+}
+
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)
 {
 	return SDLRWOps::fromPath(path, start, end);
@@ -495,7 +500,7 @@ std::shared_ptr<IClipboard> SystemSDL::getClipboard() const
 }
 
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 #pragma warning(default: 6320 6322)
 #include <Windows.h>
 const DWORD MS_VC_EXCEPTION=0x406D1388;
@@ -531,7 +536,7 @@ void SetThreadName( DWORD dwThreadID, const char* name)
 
 void SystemSDL::setThreadName(const String& name)
 {
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) && !defined(WITH_GDK)
 	if (name != "main") {
 		SetThreadName(static_cast<DWORD>(-1), name.c_str());
 	}

@@ -7,6 +7,8 @@
 #include "game_properties_window.h"
 #include "src/localisation/localisation_editor.h"
 #include "plotter.h"
+#include "remotes_status_bar.h"
+#include "remotes_window.h"
 #include "status_bar.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
@@ -103,9 +105,14 @@ void ProjectWindow::makeUI()
 	makeToolbar();
 	makePagedPane();
 
+	auto statusSizer = std::make_shared<UISizer>(UISizerType::Horizontal, 4.0f);
 	auto statusBar = std::make_shared<StatusBar>(factory, *this);
+	auto remotesStatusBar = std::make_shared<RemotesStatusBar>(factory, *this);
+	statusSizer->add(statusBar, 1);
+	statusSizer->add(remotesStatusBar, 0);
+
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 0));
-	uiBottom->add(statusBar, 0, Vector4f(8, 0, 8, 4));
+	uiBottom->add(statusSizer, 0, Vector4f(8, 0, 8, 4));
 
 	consoleWindow->setStatusBar(statusBar);
 
@@ -155,7 +162,7 @@ void ProjectWindow::makePagedPane()
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
-	auto remotes = std::make_shared<UIWidget>();
+	auto remotes = std::make_shared<RemotesWindow>(factory, *this);
 	auto localisation = std::make_shared<LocalisationEditorRoot>(project, factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
@@ -446,8 +453,11 @@ const AssetFileHandler& ProjectWindow::getAssetFileHandler() const
 
 Vector<String> ProjectWindow::getLaunchArguments() const
 {
+	auto targetPlatform = project.getTargetPlatform();
 	auto args = String(getSetting(EditorSettingType::Project, "commandLineArguments").asString("")).split(' ');
-	args.push_back("--devcon=127.0.0.1");
+	if (isPCPlatform(targetPlatform)) {
+		args.push_back("--devcon=127.0.0.1");
+	}
 
 	return args;
 }
@@ -469,7 +479,7 @@ void ProjectWindow::toggleDebugConsole()
 	} else {
 		if (debugConsoleController) { // Don't create unless ready
 			if (!debugConsole) {
-				debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, debugConsoleController);
+				debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, *debugConsoleController);
 				debugConsole->setChildLayerAdjustment(50);
 				debugConsole->setMinSize(Vector2f(640, 320));
 				debugConsole->setAnchor(UIAnchor(Vector2f(1.0f, 1.0f), Vector2f(1.0f, 1.0f), Vector2f(-10.0f, -10.0f)));
@@ -669,7 +679,16 @@ std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
 
 void ProjectWindow::buildGame()
 {
-	addTask(std::make_unique<BuildProjectTask>(project));
+	if (auto task = project.buildGame()) {
+		addTask(std::move(task));
+	}
+}
+
+void ProjectWindow::deployGame()
+{
+	if (auto task = project.deployGame()) {
+		addTask(std::move(task));
+	}
 }
 
 void ProjectWindow::updateEditor()

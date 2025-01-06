@@ -163,6 +163,16 @@ src/ui/popup_window.cpp
 src/ui/popup_window.h
 src/ui/project_window.cpp
 src/ui/project_window.h
+src/ui/remote_connection_window.cpp
+src/ui/remote_connection_window.h
+src/ui/remote_inspector_window.cpp
+src/ui/remote_inspector_window.h
+src/ui/remote_profiler_window.cpp
+src/ui/remote_profiler_window.h
+src/ui/remotes_status_bar.cpp
+src/ui/remotes_status_bar.h
+src/ui/remotes_window.cpp
+src/ui/remotes_window.h
 src/ui/scroll_background.cpp
 src/ui/scroll_background.h
 src/ui/select_asset_widget.cpp

@@ -21,6 +21,7 @@
 #include "halley/os/os.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/tools/file/filesystem_cache.h"
+#include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 
@@ -53,6 +54,10 @@ Project::Project(Path projectRootPath, Path halleyRootPath, Vector<String> disab
 
 Project::~Project()
 {
+	if (devConServer) {
+		devConServer->setProject(nullptr);
+		devConServer = nullptr;
+	}
 	clearCachedAssetPreviews();
 	editorData.reset();
 	gameResources.reset();
@@ -80,6 +85,18 @@ void Project::setupImporter(Vector<HalleyPluginPtr> plugins, const ConfigNode& i
 	}
 }
 
+void Project::loadEditorPlugins()
+{
+	targetPlatform = getPlatform();
+
+	editorPlugins.clear();
+	for (auto& plugin: plugins) {
+		if (auto editorPlugin = plugin->makeHalleyEditorPlugin()) {
+			editorPlugins.push_back(std::move(editorPlugin));
+		}
+	}
+}
+
 void Project::update(Time time)
 {
 	withDLL([&] (ProjectDLL& dll)
@@ -93,6 +110,10 @@ void Project::update(Time time)
 
 	if (editorData) {
 		editorData->update();
+	}
+
+	for (auto& plugin: editorPlugins) {
+		plugin->update(time);
 	}
 }
 
@@ -131,6 +152,45 @@ void Project::setPlatforms(Vector<String> platforms)
 const Vector<String>& Project::getPlatforms() const
 {
 	return platforms;
+}
+
+Vector<GamePlatform> Project::getBuildPlatforms() const
+{
+	Vector<GamePlatform> platforms;
+	if (isPCPlatform()) {
+		platforms.push_back(getPlatform());
+	}
+	for (auto& plugin: editorPlugins) {
+		if (auto platform = plugin->getBuildPlatform()) {
+			platforms.push_back(*platform);
+		}
+	}
+	return platforms;
+}
+
+GamePlatform Project::getTargetPlatform() const
+{
+	return targetPlatform.value_or(getPlatform());
+}
+
+void Project::setTargetPlatform(GamePlatform platform)
+{
+	targetPlatform = platform;
+}
+
+gsl::span<std::unique_ptr<IHalleyEditorPlugin>> Project::getEditorPlugins()
+{
+	return editorPlugins.span();
+}
+
+IHalleyEditorPlugin* Project::getEditorPluginForBuildPlatform(GamePlatform platform) const
+{
+	for (auto& plugin: editorPlugins) {
+		if (plugin->getBuildPlatform() == platform) {
+			return plugin.get();
+		}
+	}
+	return nullptr;
 }
 
 const Path& Project::getHalleyRootPath() const
@@ -236,7 +296,7 @@ Vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(Im
 {
 	Vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
-		auto importer = plugin->getAssetImporter(type);
+		auto importer = plugin->makeAssetImporter(type);
 		if (importer) {
 			result.emplace_back(std::move(importer));
 		}
@@ -252,6 +312,9 @@ void Project::setAssetPackManifest(const Path& path)
 void Project::setDevConServer(DevConServer* server)
 {
 	devConServer = server;
+	if (devConServer) {
+		devConServer->setProject(this);
+	}
 	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds, gsl::span<const String> packIds) {
 		devConServer->reloadAssets(Vector<String>(assetIds.begin(), assetIds.end()), Vector<String>(packIds.begin(), packIds.end()));
 	});
@@ -327,6 +390,16 @@ void Project::addAssetSrcChangeListener(IAssetSrcChangeListener& listener)
 void Project::removeAssetSrcChangeListener(IAssetSrcChangeListener& listener)
 {
 	std_ex::erase(assetSrcChangeListeners, &listener);
+}
+
+const String& Project::getProjectName() const
+{
+	return properties->getName();
+}
+
+const String& Project::getBinName() const
+{
+	return properties->getBinName();
 }
 
 ProjectProperties& Project::getProperties() const
@@ -637,8 +710,36 @@ void Project::requestReimport(ReimportType reimport)
 
 void Project::launchGame(Vector<String> params) const
 {
-	const String args = String::concatList(params, " ");
-	OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
+	if (getTargetPlatform() == getPlatform()) {
+		const String args = String::concatList(params, " ");
+		OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
+	} else if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		plugin->launchGame(OS::get(), this, params);
+	}
+}
+
+bool Project::canDeployGame() const
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->canDeployGame();
+	}
+	return false;
+}
+
+std::unique_ptr<Task> Project::buildGame()
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->buildGame(OS::get(), *this);
+	}
+	return std::make_unique<BuildProjectTask>(*this);
+}
+
+std::unique_ptr<Task> Project::deployGame() const
+{
+	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
+		return plugin->deployGame(OS::get(), *this);
+	}
+	return {};
 }
 
 uint64_t Project::getSourceHash(const Path& projectRoot)

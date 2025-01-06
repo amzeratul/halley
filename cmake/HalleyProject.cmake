@@ -74,15 +74,23 @@ if (MSVC)
 	
 		if (FASTLINK)
 			set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG:FASTLINK")
+			set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /DEBUG:FASTLINK")
 		else()
 			set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG:FULL")		
+			set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /DEBUG:FULL")
 		endif()
 	endif()
 	set(CMAKE_CXX_STANDARD 17)
 
-	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DWINDOWS_STORE)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await")
+	if (_GAMING_DESKTOP)
+		add_definitions(-D_GAMING_DESKTOP -DWINAPI_FAMILY=WINAPI_FAMILY_GAMES)
+		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00)
+    elseif (_GAMING_XBOX_XBOXONE)
+		add_definitions(-D_GAMING_XBOX -D_GAMING_XBOX_XBOXONE -DWINAPI_FAMILY=WINAPI_FAMILY_GAMES)
+		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00)
+	elseif (_GAMING_XBOX_SCARLETT)
+		add_definitions(-D_GAMING_XBOX -D_GAMING_XBOX_SCARLETT -DWINAPI_FAMILY=WINAPI_FAMILY_GAMES)
+		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00)
 	elseif(REQUIRE_WINDOWS_10)
 		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00)
 	else()
@@ -122,10 +130,12 @@ set(USE_OPENGL 1)
 set(USE_OPENGL_ES2 0)
 set(USE_OPENGL_ES3 0)
 set(USE_DX11 0)
+set(USE_DX12 0)
 set(USE_METAL 0)
 set(USE_SDL2 1)
+set(USE_SDL3 0)
 set(USE_ASIO 1)
-set(USE_WINRT 0)
+set(USE_GDK 0)
 set(USE_XAUDIO2 0)
 set(USE_MEDIA_FOUNDATION 0)
 set(USE_AVFOUNDATION 0)
@@ -148,22 +158,24 @@ if (ANDROID_NDK)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set(USE_DX11 1)
-	set(USE_MEDIA_FOUNDATION 1)
-	if (REQUIRE_WINDOWS_10)
-		set(USE_XAUDIO2 1)
-	endif()
-endif ()
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-	set(USE_DX11 1)
-	set(USE_MEDIA_FOUNDATION 1)
+if (_GAMING_DESKTOP OR _GAMING_XBOX)
+	set(USE_DX12 1)
 	set(USE_SDL2 0)
+	set(USE_SDL3 1)
 	set(USE_OPENGL 0)
 	set(USE_ASIO 0)
-	set(USE_WINRT 1)
+	set(USE_GDK 1)
 	set(USE_XAUDIO2 1)
+	set(USE_MEDIA_FOUNDATION 1)
+else ()
+	if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		set(USE_DX11 1)
+		set(USE_DX12 1)
+		set(USE_MEDIA_FOUNDATION 1)
+		if (REQUIRE_WINDOWS_10)
+			set(USE_XAUDIO2 1)
+		endif()
+	endif ()
 endif ()
 
 if (APPLE)
@@ -189,6 +201,11 @@ if (USE_SDL2)
 		set (SDL2_BUILDING_LIBRARY 1)
 		find_Package(SDL2 REQUIRED)
 	endif()
+endif()
+
+# SDL3
+if (USE_SDL3)
+	add_definitions(-DWITH_SDL3)
 endif()
 
 # Boost::Asio
@@ -239,6 +256,11 @@ if (USE_DX11)
 	add_definitions(-DWITH_DX11)
 endif()
 
+# DX12
+if (USE_DX12)
+	add_definitions(-DWITH_DX12)
+endif()
+
 # Metal
 if (USE_METAL AND HALLEY_NO_METAL)
 	set(USE_METAL 0)
@@ -247,11 +269,9 @@ if (USE_METAL)
 	add_definitions(-DWITH_METAL)
 endif()
 
-# WinRT
-if (USE_WINRT)
-	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-		add_definitions(-DWITH_WINRT)
-	endif()
+# Microsoft GDK
+if (USE_GDK)
+	add_definitions(-DWITH_GDK)
 endif()
 
 # XAudio2
@@ -362,6 +382,14 @@ if (USE_DX11)
 		)
 endif ()
 
+if (USE_DX12)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-dx12
+		debug halley-dx12_d
+		${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
 if (USE_MEDIA_FOUNDATION)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-mf
@@ -383,6 +411,14 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-sdl
 	debug halley-sdl_d
 	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
+if (USE_SDL3)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-sdl3
+		debug halley-sdl3_d
+		${HALLEY_PROJECT_LIBS}
 	)
 endif ()
 
@@ -410,11 +446,11 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
-if (USE_WINRT)
-set(HALLEY_PROJECT_LIBS
-	optimized halley-winrt
-	debug halley-winrt_d
-	${HALLEY_PROJECT_LIBS}
+if (USE_GDK)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-gdk
+		debug halley-gdk_d
+		${HALLEY_PROJECT_LIBS}
 	)
 endif ()
 
@@ -455,10 +491,12 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		add_subdirectory(halley)
 	endif()
 
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${targetDir})
+	if (NOT USE_GDK)
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${targetDir})
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${targetDir})
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${targetDir})
+		set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${targetDir})
+	endif()
 
 	file (GLOB_RECURSE ${name}_sources_gen "gen/*.cpp")
 	file (GLOB_RECURSE ${name}_sources_systems "src/systems/*.cpp")
@@ -541,14 +579,21 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		if (USE_SDL2)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-sdl)
 		endif ()
+		if (USE_SDL3)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-sdl3)
+			add_sdl3_runtime_dependencies(${name})
+		endif ()
 		if (USE_ASIO)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-asio)
 		endif ()
 		if (USE_DX11)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-dx11)
 		endif ()
-		if (USE_WINRT)
-			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-winrt)
+		if (USE_DX12)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-dx12)
+		endif ()
+		if (USE_GDK)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-gdk)
 		endif ()
 		if (USE_XAUDIO2)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-xaudio2)
@@ -582,15 +627,17 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 	set_property(TARGET ${name} PROPERTY VS_DPI_AWARE "PerMonitor")
 	#set_property(TARGET ${name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
-	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
-		set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-		if (TARGET ${name}-game)
-			set_target_properties(${name}-game PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-		endif()
-		if (TARGET ${name}-dll)
-			set_target_properties(${name}-dll PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
-		endif()
-	endif ()
+	if (USE_GDK)
+		halleyProjectSetupGDK(${name})
+	endif()
+
+	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	if (TARGET ${name}-game)
+		set_target_properties(${name}-game PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	endif()
+	if (TARGET ${name}-dll)
+		set_target_properties(${name}-dll PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+	endif()
 
 	if (BUILD_MACOSX_BUNDLE AND NOT ${name} MATCHES "halley-editor")
 		add_custom_command(TARGET ${name} POST_BUILD

@@ -35,11 +35,7 @@ void DX11Buffer::setData(gsl::span<const gsl::byte> data)
 {
 	Expects(data.size_bytes() > 0);
 
-#ifdef WINDOWS_STORE
 	constexpr bool useImmutable = false;
-#else
-	constexpr bool useImmutable = false;
-#endif
 
 	if (useImmutable) {
 		clear();

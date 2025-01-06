@@ -69,6 +69,7 @@ namespace Halley {
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
         void buildGame() override;
+        void deployGame();
         void updateEditor() override;
 
     	void openAssetFinder(std::optional<String> initialQuery);

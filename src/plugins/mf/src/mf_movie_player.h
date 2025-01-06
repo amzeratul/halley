@@ -21,7 +21,7 @@ namespace Halley
 	{
 	public:
 		MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
-		~MFMoviePlayer() noexcept;
+		~MFMoviePlayer() noexcept override;
 
 	protected:
 		void requestVideoFrame() override;
@@ -35,7 +35,7 @@ namespace Halley
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
-		int minStride;
+		int minStride = -1;
 		bool supportIMF2DBuffer = true;
 
 		void init();
