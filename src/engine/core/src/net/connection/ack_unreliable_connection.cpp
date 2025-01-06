@@ -301,8 +301,20 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 	}
 
 	// Need to always ACK, even for duplicated and expired packets.
-    Expects(numAckPackets < 256);
-    ackPackets[numAckPackets++] = {packetIdx, seqIdx};
+
+	int ackIdx = 0;
+	while (ackIdx < numAckPackets) {
+		// TODO: a hash set may be faster?
+		if (ackPackets[ackIdx].first == packetIdx && ackPackets[ackIdx].second == seqIdx) {
+			break;
+		}
+		ackIdx++;
+	}
+
+	if (ackIdx >= numAckPackets) {
+		Expects(numAckPackets < 256);
+		ackPackets[numAckPackets++] = {packetIdx, seqIdx};
+	}
 }
 
 void AckUnreliableConnection::doSendAckPackets()
