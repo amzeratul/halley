@@ -15,7 +15,7 @@ namespace Halley {
 		Switch,
 		XboxOne,
 		PS4,
-		UWP,
+		WindowsGDK,
 		Android,
 		iOS,
         Emscripten,
@@ -40,7 +40,7 @@ namespace Halley {
 				"switch",
 				"xboxone",
 				"ps4",
-				"uwp",
+				"windowsgdk",
 				"android",
 				"ios",
                 "emscripten",
@@ -72,10 +72,12 @@ namespace Halley {
         return GamePlatform::Switch;
     #elif defined(__ORBIS__)
         return GamePlatform::PS4;
-    #elif defined(_XBOX_ONE)
+    #elif defined(_GAMING_XBOX_XBOXONE)
         return GamePlatform::XboxOne;
-    #elif defined(WINDOWS_STORE)
-        return GamePlatform::UWP;
+	#elif defined(_GAMING_XBOX_SCARLETT)
+    		return GamePlatform::XboxSeries;
+	#elif defined(_GAMING_DESKTOP)
+        return GamePlatform::WindowsGDK;
     #elif defined(_WIN32)
         return GamePlatform::Windows;
     #elif defined(__ANDROID__)
@@ -100,6 +102,7 @@ namespace Halley {
     constexpr inline bool isPCPlatform(GamePlatform platform = getPlatform())
     {
         return platform == GamePlatform::Windows
+            || platform == GamePlatform::WindowsGDK
     		|| platform == GamePlatform::Linux
     		|| platform == GamePlatform::MacOS
     		|| platform == GamePlatform::FreeBSD
@@ -119,7 +122,6 @@ namespace Halley {
             || platform == GamePlatform::PS5
             || platform == GamePlatform::XboxOne
             || platform == GamePlatform::XboxSeries
-            || platform == GamePlatform::UWP
             || platform == GamePlatform::FuturePlatform1
             || platform == GamePlatform::FuturePlatform2
             || platform == GamePlatform::FuturePlatform3

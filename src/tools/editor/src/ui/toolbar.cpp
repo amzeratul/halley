@@ -170,8 +170,8 @@ String Toolbar::getPlatformName(GamePlatform platform) const
 		return "PS4";
 	case GamePlatform::PS5:
 		return "PS5";
-	case GamePlatform::UWP:
-		return "UWP";
+	case GamePlatform::WindowsGDK:
+		return "GDK";
 	case GamePlatform::Android:
 		return "Android";
 	case GamePlatform::iOS:
