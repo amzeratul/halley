@@ -201,7 +201,7 @@ void UIDebugConsoleController::clearCommands()
 	addCommands(*baseCommandSet);
 }
 
-Vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
+Future<Vector<StringUTF32>> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
 {
 	Vector<StringUTF32> results;
 	
@@ -210,7 +210,7 @@ Vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32&
 			const auto& c = command.second.command.getUTF32();
 			if (line.size() > c.size() && line.substr(0, c.size()) == c && line[c.size()] == ' ') {
 				// Line starts with command, autocomplete for it
-				return command.second.syntax.getAutoComplete(line);
+				return Future<Vector<StringUTF32>>::makeImmediate(command.second.syntax.getAutoComplete(line));
 			}
 			if (c.substr(0, line.size()) == line) {
 				// This command could be an autocomplete
@@ -218,7 +218,7 @@ Vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32&
 			}
 		}
 	}
-	return results;
+	return Future<Vector<StringUTF32>>::makeImmediate(results);
 }
 
 bool UIDebugConsoleSyntax::Arg::checkArgument(const String& arg) const
@@ -407,12 +407,12 @@ void UIDebugConsole::setup()
 	add(factory.makeUI("halley/debug_console"), 1);
 
 	inputField = getWidgetAs<UITextInput>("input");
-	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> Vector<StringUTF32>
+	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> Future<Vector<StringUTF32>>
 	{
 		if (controller) {
 			return controller->getAutoComplete(str);
 		} else {
-			return {};
+			return Future<Vector<StringUTF32>>::makeImmediate({});
 		}
 	});
 

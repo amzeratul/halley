@@ -27,7 +27,7 @@ namespace Halley {
 
 	protected:
         Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args) override;
-        Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const override;
+        Future<Vector<StringUTF32>> getAutoComplete(const StringUTF32& line) const override;
 
     private:
         UIFactory& factory;

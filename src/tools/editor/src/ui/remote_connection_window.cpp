@@ -68,7 +68,15 @@ Future<UIDebugConsoleResponse> RemoteConnectionWindow::runCommand(String command
 	});
 }
 
-Vector<StringUTF32> RemoteConnectionWindow::getAutoComplete(const StringUTF32& line) const
+Future<Vector<StringUTF32>> RemoteConnectionWindow::getAutoComplete(const StringUTF32& line) const
 {
-	return {};
+	return connection->sendRPC("autoCompleteConsoleCommand", ConfigNode(String(line))).then([] (ConfigNode result) -> Vector<StringUTF32>
+	{
+		auto strs = result.asVector<String>({});
+		Vector<StringUTF32> strs32;
+		for (const auto& str: strs) {
+			strs32.push_back(str.getUTF32());
+		}
+		return strs32;
+	});
 }

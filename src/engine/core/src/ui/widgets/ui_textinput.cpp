@@ -35,10 +35,16 @@ UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString 
 	, ghostLabel(style.getTextRenderer("labelGhost"))
 	, text(text.getUTF32())
 	, ghostText(std::move(ghostText))
+	, aliveFlag(std::make_shared<bool>(true))
 {
 	styles.emplace_back(std::move(style));
 	label.setText(text);
 	setValidator(std::move(validator));
+}
+
+UITextInput::~UITextInput()
+{
+	*aliveFlag = false;
 }
 
 bool UITextInput::canInteractWithMouse() const
@@ -588,19 +594,33 @@ void UITextInput::refreshAutoCompleteOptions()
 	if (!autoCompleteHandle || userInputForAutoComplete.empty()) {
 		autoCompleteCurOption.reset();
 	} else {
-		const StringUTF32 prevOption = autoCompleteCurOption ? autoCompleteOptions[autoCompleteCurOption.value()] : StringUTF32();
-		
-		autoCompleteOptions = autoCompleteHandle(userInputForAutoComplete);
-		if (autoCompleteOptions.empty()) {
-			autoCompleteCurOption.reset();
-		} else {
-			const auto iter = std::find(autoCompleteOptions.begin(), autoCompleteOptions.end(), prevOption);
-			if (iter != autoCompleteOptions.end()) {
-				autoCompleteCurOption = iter - autoCompleteOptions.begin();
-			} else {
-				autoCompleteCurOption = 0;
+		auto origInput = userInputForAutoComplete;
+		auto flag = aliveFlag;
+		autoCompleteHandle(userInputForAutoComplete).then(Executors::getMainUpdateThread(), [origInput, flag, this] (Vector<StringUTF32> opts)
+		{
+			if (!*flag) {
+				return;
 			}
-		}
+
+			const StringUTF32 prevOption = autoCompleteCurOption ? autoCompleteOptions[autoCompleteCurOption.value()] : StringUTF32();
+
+			if (userInputForAutoComplete != origInput) {
+				opts = {};
+			}
+
+			autoCompleteOptions = std::move(opts);
+			if (autoCompleteOptions.empty()) {
+				autoCompleteCurOption.reset();
+			} else {
+				const auto iter = std::find(autoCompleteOptions.begin(), autoCompleteOptions.end(), prevOption);
+				if (iter != autoCompleteOptions.end()) {
+					autoCompleteCurOption = iter - autoCompleteOptions.begin();
+				} else {
+					autoCompleteCurOption = 0;
+				}
+			}
+			
+		});
 	}
 }
 
