@@ -453,8 +453,11 @@ const AssetFileHandler& ProjectWindow::getAssetFileHandler() const
 
 Vector<String> ProjectWindow::getLaunchArguments() const
 {
+	auto targetPlatform = project.getTargetPlatform();
 	auto args = String(getSetting(EditorSettingType::Project, "commandLineArguments").asString("")).split(' ');
-	args.push_back("--devcon=127.0.0.1");
+	if (isPCPlatform(targetPlatform)) {
+		args.push_back("--devcon=127.0.0.1");
+	}
 
 	return args;
 }
@@ -676,7 +679,16 @@ std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
 
 void ProjectWindow::buildGame()
 {
-	addTask(std::make_unique<BuildProjectTask>(project));
+	if (auto task = project.buildGame()) {
+		addTask(std::move(task));
+	}
+}
+
+void ProjectWindow::deployGame()
+{
+	if (auto task = project.deployGame()) {
+		addTask(std::move(task));
+	}
 }
 
 void ProjectWindow::updateEditor()

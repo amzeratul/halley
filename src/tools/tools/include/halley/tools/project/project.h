@@ -66,12 +66,17 @@ namespace Halley
 		void setPlatforms(Vector<String> platforms);
 		const Vector<String>& getPlatforms() const;
 
+		Vector<GamePlatform> getBuildPlatforms() const;
+		GamePlatform getTargetPlatform() const;
+		void setTargetPlatform(GamePlatform platform);
+
 		void loadEditorPlugins();
 		gsl::span<std::unique_ptr<IHalleyEditorPlugin>> getEditorPlugins();
+		IHalleyEditorPlugin* getEditorPluginForBuildPlatform(GamePlatform platform) const;
 
 		const Path& getHalleyRootPath() const;
 		
-		const Path& getRootPath() const;		
+		const Path& getRootPath() const override;		
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath(const String& platform) const;
 		Path getAssetsSrcPath() const override;
@@ -110,6 +115,9 @@ namespace Halley
 		void notifyGenSrcChanged();
 		void addAssetSrcChangeListener(IAssetSrcChangeListener& listener);
 		void removeAssetSrcChangeListener(IAssetSrcChangeListener& listener);
+
+		const String& getProjectName() const override;
+		const String& getBinName() const override;
 
 		ProjectProperties& getProperties() const;
 		ProjectComments& getComments() const;
@@ -172,6 +180,9 @@ namespace Halley
 		void requestReimport(ReimportType reimport);
 
 		void launchGame(Vector<String> params) const override;
+		bool canDeployGame() const;
+		std::unique_ptr<Task> buildGame();
+		std::unique_ptr<Task> deployGame() const;
 
 		static uint64_t getSourceHash(const Path& projectRoot);
 		uint64_t getSourceHash() const;
@@ -225,6 +236,8 @@ namespace Halley
 
 		bool buildPending = false;
 		uint32_t buildCount = 0;
+
+		std::optional<GamePlatform> targetPlatform;
 
 		DevConServer* devConServer = nullptr;
 		const HalleyAPI* api = nullptr;

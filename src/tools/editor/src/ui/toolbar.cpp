@@ -37,6 +37,18 @@ void Toolbar::makeUI()
 	list = getWidgetAs<UIList>("toolbarList");
 	list->setFocusable(false);
 
+	auto platformDropdown = getWidgetAs<UIDropdown>("platform");
+	auto buildPlatforms = project.getBuildPlatforms();
+	platformDropdown->setActive(buildPlatforms.size() >= 2);
+	if (buildPlatforms.size() >= 2) {
+		Vector<UIDropdown::Entry> entries;
+		for (const auto platform: buildPlatforms) {
+			auto icon = Sprite().setImage(factory.getResources(), "ui/platforms/" + toString(platform) + "_16.png");
+			entries.emplace_back(UIDropdown::Entry{ toString(platform), LocalisedString::fromUserString(getPlatformName(platform)), std::move(icon) });
+		}
+		platformDropdown->setOptions(std::move(entries));
+	}
+
 	setHandle(UIEventType::ListSelectionChanged, "toolbarList", [=] (const UIEvent& event)
 	{
 		String toolName;
@@ -92,6 +104,26 @@ void Toolbar::makeUI()
 		project.launchGame(projectWindow.getLaunchArguments());
 	});
 
+	setHandle(UIEventType::ButtonRightClicked, "runProject", [=] (const UIEvent& event)
+	{
+		auto menuOptions = Vector<UIPopupMenuItem>();
+		
+		menuOptions.push_back(UIPopupMenuItem("run", LocalisedString::fromHardcodedString("Run"), {}, LocalisedString::fromHardcodedString("Run game directly on target")));
+		menuOptions.push_back(UIPopupMenuItem("deploy", LocalisedString::fromHardcodedString("Deploy"), {}, LocalisedString::fromHardcodedString("Deploy game to target")));
+		menuOptions.back().enabled = project.canDeployGame();
+
+		auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+		menu->spawnOnRoot(*getRoot());
+
+		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+			if (e.getStringData() == "run") {
+				project.launchGame(projectWindow.getLaunchArguments());
+			} else if (e.getStringData() == "deploy") {
+				projectWindow.deployGame();
+			}
+		});
+	});
+
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
 		projectWindow.buildGame();
@@ -112,4 +144,43 @@ void Toolbar::makeUI()
 			project.requestReimport(fromString<ReimportType>(e.getStringData()));
 		});
 	});
+
+	setHandle(UIEventType::DropdownSelectionChanged, "platform", [=] (const UIEvent& event)
+	{
+		project.setTargetPlatform(fromString<GamePlatform>(event.getStringData()));
+	});
+}
+
+String Toolbar::getPlatformName(GamePlatform platform) const
+{
+	switch (platform) {
+	case GamePlatform::Windows:
+		return "Windows";
+	case GamePlatform::MacOS:
+		return "macOS";
+	case GamePlatform::Linux:
+		return "Linux";
+	case GamePlatform::Switch:
+		return "Switch";
+	case GamePlatform::XboxOne:
+		return "Xbox One";
+	case GamePlatform::XboxSeries:
+		return "Xbox Series";
+	case GamePlatform::PS4:
+		return "PS4";
+	case GamePlatform::PS5:
+		return "PS5";
+	case GamePlatform::UWP:
+		return "UWP";
+	case GamePlatform::Android:
+		return "Android";
+	case GamePlatform::iOS:
+		return "iOS";
+	case GamePlatform::Emscripten:
+		return "Emscripten";
+	case GamePlatform::FreeBSD:
+		return "FreeBSD";
+	default:
+		return toString(platform);
+	}
 }
