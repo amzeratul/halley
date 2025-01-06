@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef DEV_BUILD
-#define D3D12_DEBUG 1
+#define D3D12_DEBUG 0
 #else
 #define D3D12_DEBUG 0
 #endif
