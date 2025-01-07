@@ -29,11 +29,6 @@ AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imag
 	}
 }
 
-int AnimationFrame::getDuration() const
-{
-	return duration;
-}
-
 AnimationFrameDefinition::AnimationFrameDefinition()
 	: frameNumber(-1)
 {}

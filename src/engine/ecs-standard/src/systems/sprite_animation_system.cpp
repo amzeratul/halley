@@ -45,16 +45,18 @@ private:
 	{
 		const auto viewPort = getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
 		for (auto& e : mainFamily) {
-			auto& sprite = e.sprite.sprite;
+			e.spriteAnimation.player.update(time);
+			updateSprite(e, viewPort);
+		}
+	}
 
-			auto& player = e.spriteAnimation.player;
-			player.update(time);
-
-			if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-				auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPositionWithHeight();
-				if (spriteBounds.overlaps(viewPort)) {
-					player.updateSprite(sprite);
-				}
+	void updateSprite(MainFamily& e, Rect4f viewPort)
+	{
+		auto& player = e.spriteAnimation.player;
+		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
+			auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPositionWithHeight();
+			if (spriteBounds.overlaps(viewPort)) {
+				player.updateSprite(e.sprite.sprite);
 			}
 		}
 	}
@@ -67,7 +69,7 @@ private:
 		HashSet<EntityId> replicatorsUpdated;
 		HashSet<EntityId> availableReplicators;
 		HashMap<EntityId, Vector<EntityId>> dependencies;
-		std::list<EntityId> toReplicate;
+		std::deque<EntityId> toReplicate;
 
 		auto tryReplicating = [&] (EntityId id)
 		{
@@ -86,7 +88,7 @@ private:
 					auto& sprite = entity.getComponent<SpriteComponent>();
 
 					spriteAnimation.player.syncWith(parentAnimation->player, false);
-					if (spriteAnimation.updateSprite) {
+					if (spriteAnimation.updateSprite && spriteAnimation.player.hasAnimation()) {
 						spriteAnimation.player.updateSprite(sprite.sprite);
 					}
 					replicatorsUpdated.emplace(id);
