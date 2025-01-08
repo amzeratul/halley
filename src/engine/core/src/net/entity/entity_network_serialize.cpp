@@ -269,7 +269,7 @@ EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources)
     : resources(resources)
     , journal()
 {
-    scratchpad.reserve(4096);
+    scratchpad.reserve(8192);
     scratchpad.resize_no_init(scratchpad.capacity());
 }
 

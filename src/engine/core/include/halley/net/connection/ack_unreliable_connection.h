@@ -75,7 +75,7 @@ namespace Halley
 
         float lag = 1.0f;
 
-    	float simulatePacketLoss = 0.2f;
+    	float simulatePacketLoss = 0.0f;
 
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
