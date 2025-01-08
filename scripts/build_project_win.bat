@@ -18,8 +18,7 @@ set exeName="%~2.exe"
 taskkill /IM %exeName% /F >nul 2>nul
 
 IF NOT EXIST %slnName% (
-cmake -G "Visual Studio 16 2019" ^
-    -A x64 ^
+cmake -A x64 ^
     -DHALLEY_PATH=../halley ^
     -DBUILD_HALLEY_TOOLS=0 ^
     -DBUILD_HALLEY_TESTS=0 ^
