@@ -426,7 +426,14 @@ void Core::tickFrame(Time time)
 	}
 	
 	if (multithreaded) {
-		auto updateTask = Concurrent::execute([&] () {
+		if (!updateThread) {
+			updateThread = std::make_unique<SingleThreadExecutor>("update", [=] (String name, std::function<void()> run)
+			{
+				return api->system->createThread(name, ThreadPriority::High, run);
+			});
+		}
+
+		auto updateTask = Concurrent::execute(updateThread->getQueue(), [&] () {
 			BaseFrameData::setThreadFrameData(frameDataUpdate.get());
 			update(time, multithreaded);
 		});

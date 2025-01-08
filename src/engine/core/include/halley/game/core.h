@@ -127,6 +127,7 @@ namespace Halley
 
 		std::unique_ptr<BaseFrameData> frameDataUpdate;
 		std::unique_ptr<BaseFrameData> frameDataRender;
+		std::unique_ptr<SingleThreadExecutor> updateThread;
 
 		bool initialized = false;
 		bool running = true;
