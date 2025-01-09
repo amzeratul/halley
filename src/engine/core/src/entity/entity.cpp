@@ -361,9 +361,7 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
         if (!networkComponent->ownerId) {
             networkComponent->ownerId = peerId;
         } else if (networkComponent->ownerId != peerId) {
-            if (networkComponent->ownerId == 0) {
-                Logger::logError("Tried to reassign ownership for network component.");
-            }
+            Logger::logError("Tried to reassign ownership for network component from peer " + toString(int(networkComponent->ownerId.value())) + " to peer " + toString(int(peerId)) + ".");
         }
 		return networkComponent->dataInterpolatorSet;
 	} else {
@@ -415,7 +413,9 @@ void Entity::doDestroy(World& world, bool updateParenting)
 
 	if (fromNetwork) {
 		if (!world.isTerminating()) {
-			throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
+			if (worldPartition == 0) {
+				throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
+			}
 		}
 	}
 	

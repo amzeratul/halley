@@ -2,7 +2,6 @@
 
 #include "halley/bytes/byte_serializer.h"
 #include "halley/entity/world.h"
-#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -288,11 +287,13 @@ void EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
 
 void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
 {
-    Expects(entity.isSerializable());
+    if (!entity.isSerializable()) {
+        Logger::logError("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
+    }
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
-    serializationContext.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Network);
+    serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     // Entity
     journal.beginEntity(serializer, entity, parent);
@@ -350,13 +351,13 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
             childEntity = entity;
             Expects(entity.getInstanceUUID() == instanceUUID);
         } else {
-            childEntity = entity.getWorld().findEntity(instanceUUID);
+            childEntity = opt.world->findEntity(instanceUUID);
         }
 
         type = doDeserializeEntityUpdate(deserializer, childEntity.value(), parentEntity, context);
 
         if (isRootEntity && parentInstanceUUID.isValid()) {
-            if (auto p = entity.getWorld().findEntity(parentInstanceUUID)) {
+            if (auto p = opt.world->findEntity(parentInstanceUUID)) {
                 entity.setParent(p.value());
             }
         }
@@ -374,7 +375,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
-    serializationContext.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Network);
+    serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     context->setCurrentEntity(entity.getEntityId());
 
