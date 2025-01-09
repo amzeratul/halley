@@ -611,7 +611,11 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		case ConfigNodeType::EntityId:
 			if (s.getOptions().world) {
-				s << s.getOptions().world->getEntity(asEntityId()).getInstanceUUID();
+				if (auto entityId = asEntityId(); entityId.isValid()) {
+					s << s.getOptions().world->getEntity(entityId).getInstanceUUID();
+				} else {
+					s << UUID();
+				}
 			} else {
 				s << asEntityId().value;
 			}
@@ -690,8 +694,11 @@ void ConfigNode::deserialize(Deserializer& s)
 			if (s.getOptions().world != nullptr) {
 				UUID uuid;
 				s >> uuid;
-				auto entity = s.getOptions().world->findEntity(uuid);
-				*this = entity->getEntityId();
+				if (auto entity = s.getOptions().world->findEntity(uuid)) {
+					*this = entity->getEntityId();
+				} else {
+					*this = EntityId();
+				}
 			} else {
 				EntityId result;
 				s >> result.value;
