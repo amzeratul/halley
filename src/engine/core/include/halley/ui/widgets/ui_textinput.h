@@ -14,9 +14,10 @@ namespace Halley {
 
 	class UITextInput : public UIWidget {
 	public:
-		using AutoCompleteHandle = std::function<Vector<StringUTF32>(StringUTF32)>;
+		using AutoCompleteHandle = std::function<Future<Vector<StringUTF32>>(StringUTF32)>;
 		
 		UITextInput(String id, UIStyle style, String text = "", LocalisedString ghostText = {}, std::shared_ptr<UIValidator> validator = {});
+		~UITextInput();
 
 		UITextInput(UITextInput&& other) = delete;
 		UITextInput(const UITextInput& other) = delete;
@@ -140,6 +141,8 @@ namespace Halley {
 
 		bool autoSizeHorizontal = true;
 		std::optional<Range<float>> autoSizeRange;
+
+		std::shared_ptr<bool> aliveFlag;
 
 		Vector2f textScrollPos;
 		Vector2f caretPhysicalPos;

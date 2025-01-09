@@ -250,7 +250,7 @@ void ProfilerCapture::startFrame(bool rec, Time dt)
 
 	memoryUsageRefreshTime -= dt;
 	if (memoryUsageRefreshTime < 0) {
-		memoryUsageRefreshTime = 1.0;
+		memoryUsageRefreshTime = 5.0;
 		memoryUsage = {};
 	}
 }

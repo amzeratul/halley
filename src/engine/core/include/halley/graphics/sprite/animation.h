@@ -29,7 +29,10 @@ namespace Halley
 			return *sprites[dir];
 		}
 
-		int getDuration() const;
+		int getDuration() const
+		{
+			return duration;
+		}
 
 	private:
 		Vector<const SpriteSheetEntry*> sprites;

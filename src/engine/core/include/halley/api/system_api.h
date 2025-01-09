@@ -114,6 +114,13 @@ namespace Halley
 		using ResolutionChangeCallback = std::function<void(Vector2i)>;
 		virtual void setResolutionChangeCallback(int screen, ResolutionChangeCallback callback) {}
 
+		enum class CPUBoostMode {
+			Disabled,
+			TempBoostCPUBySacrificingGPU
+		};
+
+		virtual void setCPUBoost(CPUBoostMode mode) {}
+
 	private:
 		friend class HalleyAPI;
 		friend class Core;

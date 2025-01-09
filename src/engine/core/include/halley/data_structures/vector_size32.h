@@ -480,7 +480,11 @@ namespace Halley {
 				return de_const_iter(last);
 			}
 			const auto idx = first - begin();
-			std::rotate(de_const_iter(first), de_const_iter(last), end());
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				memmove(&*de_const_iter(first), &*de_const_iter(last), (end() - last) * sizeof(T));
+			} else {
+				std::rotate(de_const_iter(first), de_const_iter(last), end());
+			}
 			resize_down(static_cast<size_type>(size() - (last - first)));
 			return begin() + idx;
 		}

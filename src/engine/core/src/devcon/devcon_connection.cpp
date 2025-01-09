@@ -117,6 +117,23 @@ void DevConConnection::setDebugConsoleController(std::shared_ptr<UIDebugConsoleC
 			return Future<ConfigNode>::makeImmediate(ConfigNode("<UIDebugConsoleController expired>"));
 		}
 	});
+
+	setRPCHandle("autoCompleteConsoleCommand", [weakPtr] (ConfigNode params) -> Future<ConfigNode>
+	{
+		if (auto consoleController = weakPtr.lock()) {
+			return consoleController->getAutoComplete(params.asString().getUTF32()).then([=] (Vector<StringUTF32> strs)
+			{
+				ConfigNode::SequenceType strConfigs;
+				strConfigs.reserve(strs.size());
+				for (const auto& str: strs) {
+					strConfigs.push_back(ConfigNode(String(str)));
+				}
+				return ConfigNode(strConfigs);
+			});
+		} else {
+			return Future<ConfigNode>::makeImmediate({});
+		}
+	});
 }
 
 String DevConConnection::getAddress() const

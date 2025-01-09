@@ -97,7 +97,7 @@ namespace Halley {
 		virtual ~IUIDebugConsoleController() = default;
 
 		virtual Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args) = 0;
-		virtual Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const = 0;
+		virtual Future<Vector<StringUTF32>> getAutoComplete(const StringUTF32& line) const = 0;
 	};
 
 	class UIDebugConsoleController : public IUIDebugConsoleController {
@@ -111,7 +111,7 @@ namespace Halley {
 		void removeCommands(UIDebugConsoleCommands& commands);
 		void clearCommands();
 
-		Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
+		Future<Vector<StringUTF32>> getAutoComplete(const StringUTF32& line) const;
 
 	private:
 		Vector<UIDebugConsoleCommands*> commands;

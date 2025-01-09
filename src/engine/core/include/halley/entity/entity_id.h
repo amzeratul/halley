@@ -36,6 +36,8 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 	};
+
+	static_assert(std::is_trivially_copyable_v<EntityId>);
 }
 
 
