@@ -32,6 +32,11 @@ namespace Halley
 			: val(getDefaultValue())
 		{}
 
+		constexpr OptionalLite(std::optional<T> value)
+			: val(value ? *value : getDefaultValue())
+		{
+		}
+
 		[[maybe_unused]] constexpr OptionalLite& operator=(T v)
 		{
 			val = v;
@@ -157,6 +162,11 @@ namespace Halley
 			} else {
 				return has_value();
 			}
+		}
+
+		[[nodiscard]] constexpr std::optional<T> to_optional() const
+		{
+			return has_value() ? std::optional<T>(val) : std::nullopt;
 		}
 
 		void reset()
