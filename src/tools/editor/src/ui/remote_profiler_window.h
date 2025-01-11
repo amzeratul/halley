@@ -11,6 +11,10 @@ namespace Halley {
         void draw(UIPainter& painter) const override;
         void setProfileData(std::shared_ptr<ProfilerData> profileData);
 
+        void setPage(int page);
+        int getPage() const;
+        int getNumPages() const;
+
     private:
         std::shared_ptr<PerformanceStatsView> statsView;
     };

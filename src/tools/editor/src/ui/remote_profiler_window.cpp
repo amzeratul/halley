@@ -6,8 +6,8 @@ RemoteProfilerDisplay::RemoteProfilerDisplay(UIFactory& factory, const HalleyAPI
 	: UIWidget("remote_profiler_display", {}, {})
 {
 	statsView = std::make_shared<PerformanceStatsView>(factory.getResources(), api, false);
-	statsView->setPage(2);
 	statsView->setDrawBg(false);
+	setPage(0);
 }
 
 void RemoteProfilerDisplay::update(Time t, bool moved)
@@ -28,6 +28,21 @@ void RemoteProfilerDisplay::setProfileData(std::shared_ptr<ProfilerData> profile
 	statsView->onProfileData(std::move(profileData));
 }
 
+void RemoteProfilerDisplay::setPage(int page)
+{
+	statsView->setPage(page + 1);
+}
+
+int RemoteProfilerDisplay::getPage() const
+{
+	return statsView->getPage() - 1;
+}
+
+int RemoteProfilerDisplay::getNumPages() const
+{
+	return statsView->getNumPages() - 1;
+}
+
 RemoteProfilerWindow::RemoteProfilerWindow(UIFactory& factory, std::shared_ptr<DevConServerConnection> connection, const HalleyAPI& api)
 	: UIWidget("remote_profiler_window", {}, UISizer())
 	, factory(factory)
@@ -42,6 +57,16 @@ void RemoteProfilerWindow::onMakeUI()
 	display = std::make_shared<RemoteProfilerDisplay>(factory, api);
 	auto displayContainer = getWidget("profilerDisplayContainer");
 	displayContainer->add(display, 1);
+
+	setHandle(UIEventType::ButtonClicked, "prevPage", [=] (const UIEvent& event)
+	{
+		display->setPage(modulo(display->getPage() - 1, display->getNumPages()));
+	});
+
+	setHandle(UIEventType::ButtonClicked, "nextPage", [=] (const UIEvent& event)
+	{
+		display->setPage(modulo(display->getPage() + 1, display->getNumPages()));
+	});
 }
 
 void RemoteProfilerWindow::onActiveChanged(bool active)

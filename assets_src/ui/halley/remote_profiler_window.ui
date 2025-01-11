@@ -12,7 +12,7 @@ children:
     sizer:
       columnProportions: []
       columns: 1
-      gap: 1
+      gap: 4
       type: vertical
     widget:
       class: image
@@ -25,9 +25,28 @@ children:
       - uuid: 347a5259-5ad5-4041-9917-cd9fcbebfcf4
         proportion: 1
         sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: widget
           id: profilerDisplayContainer
           size: [0, 0]
+      - uuid: 82ce2bb8-1061-4fe9-81ed-eb701bb5055d
+        sizer:
+          columnProportions: []
+          gap: 4
+        children:
+          - uuid: 3ae183ac-2e3e-4f69-9dd2-f54fd3974ec9
+            proportion: 1
+            widget:
+              class: button
+              id: prevPage
+              text: Prev Page
+          - uuid: 452e860d-67d3-4d22-8bb9-ae5c73b1178f
+            proportion: 1
+            widget:
+              class: button
+              id: nextPage
+              text: Next Page
+        fill: [centreHorizontal, centreVertical]
     fill: [fillHorizontal, fillVertical]
