@@ -8,6 +8,8 @@ RemoteInspectorWindow::RemoteInspectorWindow(UIFactory& factory, std::shared_ptr
 	, connection(std::move(connection))
 	, api(api)
 {
+	inspectorServer = std::make_shared<InspectorServer>(this->connection);
+
 	factory.loadUI(*this, "halley/remote_inspector_window");
 }
 
@@ -18,7 +20,7 @@ void RemoteInspectorWindow::onMakeUI()
 
 void RemoteInspectorWindow::onActiveChanged(bool active)
 {
-	// TODO
+	inspectorServer->setListening(active);
 }
 
 void RemoteInspectorWindow::update(Time t, bool moved)
