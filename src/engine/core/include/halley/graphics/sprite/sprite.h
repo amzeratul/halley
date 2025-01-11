@@ -46,7 +46,7 @@ namespace Halley
 		char _padding[8];
 	};
 
-	static_assert(std::is_trivially_copyable_v<SpriteVertexAttrib>);
+	static_assert(std::is_trivially_copyable_v<SpriteObjectAttrib>);
 
 	class Sprite
 	{

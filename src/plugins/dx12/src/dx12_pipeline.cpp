@@ -203,7 +203,7 @@ void DX12Pipeline::bind(DX12Video& video, const Material& material, int passN)
 
         // Parse material attributes to assemble input layout.
         Vector<D3D12_INPUT_ELEMENT_DESC> layout;
-        auto& attribs = material.getDefinition().getAttributes();
+        auto& attribs = material.getDefinition().getObjectAttributes();
 
         for (auto& attr : attribs) {
             D3D12_INPUT_ELEMENT_DESC elem = {};
