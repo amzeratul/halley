@@ -19,5 +19,12 @@ namespace Halley {
         const HalleyAPI& api;
 
         std::shared_ptr<InspectorServer> inspectorServer;
-    };
+
+        UUID curWorld;
+        EntityId curEntity;
+
+    	void onWorldInfo(const Vector<InspectorWorldInfo>& infos);
+
+        void setWorld(const String& id);
+	};
 }

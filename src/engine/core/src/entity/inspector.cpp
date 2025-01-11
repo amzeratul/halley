@@ -6,6 +6,36 @@
 
 using namespace Halley;
 
+InspectorWorldInfo::InspectorWorldInfo(const ConfigNode& node)
+	: name(node["name"].asString())
+	, uuid(node["uuid"].asString())
+{
+}
+
+InspectorWorldInfo::InspectorWorldInfo(const World& world)
+	: name(world.getName())
+	, uuid(world.getUUID())
+{
+}
+
+ConfigNode InspectorWorldInfo::toConfigNode() const
+{
+	ConfigNode result;
+	result["name"] = name;
+	result["uuid"] = uuid;
+	return result;
+}
+
+bool InspectorWorldInfo::operator==(const InspectorWorldInfo& other) const
+{
+	return name == other.name && uuid == other.uuid;
+}
+
+bool InspectorWorldInfo::operator!=(const InspectorWorldInfo& other) const
+{
+	return !(*this == other);
+}
+
 InspectorClient::InspectorClient(DevConClient& devcon)
 	: devcon(devcon)
 {
@@ -30,10 +60,7 @@ ConfigNode InspectorClient::getInspectorData(const ConfigNode& params, gsl::span
 {
 	ConfigNode::SequenceType worldNodes;
 	for (auto* world: worlds) {
-		ConfigNode worldNode;
-		worldNode["name"] = world->getName();
-		worldNode["uuid"] = world->getUUID().toString();
-		worldNodes.push_back(std::move(worldNode));
+		worldNodes.push_back(InspectorWorldInfo(*world).toConfigNode());
 	}
 
 	ConfigNode result;
@@ -47,7 +74,9 @@ ConfigNode InspectorClient::getInspectorData(const ConfigNode& params, gsl::span
 
 				if (params.hasKey("entity")) {
 					const auto entityId = params["entity"].asEntityId();
-					result["entity"] = getEntityData(world->getEntity(entityId));
+					if (entityId.isValid()) {
+						result["entity"] = getEntityData(world->getEntity(entityId));
+					}
 				}
 			}
 		}
@@ -89,8 +118,7 @@ void InspectorServer::setListening(bool listening)
 		}
 
 		if (listening) {
-			ConfigNode params;
-			interestHandle = connection->getParent().registerInterest("inspector", std::move(params), [=](size_t idx, ConfigNode result)
+			interestHandle = connection->getParent().registerInterest("inspector", ConfigNode(params), [=](size_t idx, ConfigNode result)
 			{
 				onData(std::move(result));
 			}, connection->getId());
@@ -100,7 +128,32 @@ void InspectorServer::setListening(bool listening)
 	}
 }
 
+void InspectorServer::setParams(ConfigNode params)
+{
+	this->params = std::move(params);
+	if (listening) {
+		connection->getParent().updateInterest(*interestHandle, ConfigNode(this->params));
+	}
+}
+
+void InspectorServer::setWorldInfoCallback(WorldInfoCallback callback)
+{
+	worldInfoCallback = std::move(callback);
+}
+
+void InspectorServer::setWorldDataCallback(WorldDataCallback callback)
+{
+	worldDataCallback = std::move(callback);
+}
+
 void InspectorServer::onData(ConfigNode data)
 {
-	// TODO
+	auto newWorldInfos = data["worlds"].asVector<InspectorWorldInfo>();
+
+	if (newWorldInfos != worldInfos) {
+		worldInfos = std::move(newWorldInfos);
+		if (worldInfoCallback) {
+			worldInfoCallback(worldInfos);
+		}
+	}
 }

@@ -9,13 +9,20 @@ RemoteInspectorWindow::RemoteInspectorWindow(UIFactory& factory, std::shared_ptr
 	, api(api)
 {
 	inspectorServer = std::make_shared<InspectorServer>(this->connection);
+	inspectorServer->setWorldInfoCallback([=](const Vector<InspectorWorldInfo>& infos)
+	{
+		onWorldInfo(infos);
+	});
 
 	factory.loadUI(*this, "halley/remote_inspector_window");
 }
 
 void RemoteInspectorWindow::onMakeUI()
 {
-	// TODO
+	setHandle(UIEventType::DropdownSelectionChanged, "worlds", [=] (const UIEvent& event)
+	{
+		setWorld(event.getStringData());
+	});
 }
 
 void RemoteInspectorWindow::onActiveChanged(bool active)
@@ -25,5 +32,24 @@ void RemoteInspectorWindow::onActiveChanged(bool active)
 
 void RemoteInspectorWindow::update(Time t, bool moved)
 {
-	// TODO
+	ConfigNode params;
+	params["world"] = curWorld;
+	params["entity"] = curEntity;
+	inspectorServer->setParams(std::move(params));
+}
+
+void RemoteInspectorWindow::onWorldInfo(const Vector<InspectorWorldInfo>& infos)
+{
+	Vector<UIDropdown::Entry> entries;
+	for (auto& info: infos) {
+		entries.push_back(UIDropdown::Entry(info.uuid.toString(), LocalisedString::fromUserString(info.name)));
+	}
+
+	auto dropdown = getWidgetAs<UIDropdown>("worlds");
+	dropdown->setOptions(std::move(entries));
+}
+
+void RemoteInspectorWindow::setWorld(const String& id)
+{
+	curWorld = UUID(id);
 }
