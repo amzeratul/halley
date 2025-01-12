@@ -28,12 +28,19 @@ children:
           class: dropdown
           id: worlds
           options: []
-      - uuid: 8d925658-b97b-45dc-8693-573b8d8c67e8
+      - uuid: 2ef1e94c-c535-49ea-9470-8ac180fe6cfc
+        proportion: 1
+        sizer:
+          columnProportions: []
         widget:
-          class: treeList
-          id: entityList
-          options: []
-          size: [300, 0]
+          class: scrollBarPane
+        children:
+          - uuid: 8d925658-b97b-45dc-8693-573b8d8c67e8
+            widget:
+              class: treeList
+              id: entityList
+              options: []
+              size: [300, 0]
     fill: [fillHorizontal, fillVertical]
   - uuid: da758033-ae69-472d-ada1-5a9562e36a73
     proportion: 1

@@ -25,10 +25,38 @@ namespace Halley {
 		EntityId parentId;
 		WorldPartitionId partition;
 		String name;
+
+		InspectorEntityInfo() = default;
+		InspectorEntityInfo(const ConfigNode& node);
+		InspectorEntityInfo(ConstEntityRef entity);
+
+		ConfigNode toConfigNode() const;
+
+		bool operator==(const InspectorEntityInfo& other) const;
+		bool operator!=(const InspectorEntityInfo& other) const;
 	};
 
 	struct InspectorWorldData {
 		Vector<InspectorEntityInfo> entities;
+
+		InspectorWorldData() = default;
+		InspectorWorldData(const ConfigNode& node);
+		InspectorWorldData(const World& world);
+
+		ConfigNode toConfigNode() const;
+
+		bool operator==(const InspectorWorldData& other) const;
+		bool operator!=(const InspectorWorldData& other) const;
+	};
+
+	struct InspectorEntityData {
+		Vector<InspectorEntityInfo> entities;
+
+		InspectorEntityData() = default;
+		InspectorEntityData(const ConfigNode& node);
+		InspectorEntityData(EntityRef entity);
+
+		ConfigNode toConfigNode() const;
 	};
 
 	class InspectorClient {
@@ -42,8 +70,6 @@ namespace Halley {
 		DevConClient& devcon;
 
 		ConfigNode getInspectorData(const ConfigNode& params, gsl::span<World*> worlds);
-		ConfigNode getWorldData(World& world);
-		ConfigNode getEntityData(EntityRef entity);
 	};
 
 	class InspectorServer {
@@ -70,6 +96,7 @@ namespace Halley {
 		WorldDataCallback worldDataCallback;
 
 		Vector<InspectorWorldInfo> worldInfos;
+		InspectorWorldData worldData;
 
 		void onData(ConfigNode data);
 	};

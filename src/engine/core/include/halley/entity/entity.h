@@ -1141,6 +1141,11 @@ namespace Halley {
 			return nullptr;
 		}
 
+		WorldPartitionId getWorldPartition() const
+		{
+			return entity->worldPartition;
+		}
+
 	private:
 		friend class World;
 

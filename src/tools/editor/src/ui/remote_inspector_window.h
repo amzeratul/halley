@@ -24,6 +24,7 @@ namespace Halley {
         EntityId curEntity;
 
     	void onWorldInfo(const Vector<InspectorWorldInfo>& infos);
+    	void onWorldData(const InspectorWorldData& worldData);
 
         void setWorld(const String& id);
 	};

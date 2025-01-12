@@ -13,6 +13,10 @@ RemoteInspectorWindow::RemoteInspectorWindow(UIFactory& factory, std::shared_ptr
 	{
 		onWorldInfo(infos);
 	});
+	inspectorServer->setWorldDataCallback([=](const InspectorWorldData& data)
+	{
+		onWorldData(data);
+	});
 
 	factory.loadUI(*this, "halley/remote_inspector_window");
 }
@@ -46,10 +50,23 @@ void RemoteInspectorWindow::onWorldInfo(const Vector<InspectorWorldInfo>& infos)
 	}
 
 	auto dropdown = getWidgetAs<UIDropdown>("worlds");
+	auto prevSel = dropdown->getSelectedOptionId();
 	dropdown->setOptions(std::move(entries));
+	dropdown->setSelectedOption(prevSel);
+	setWorld(dropdown->getSelectedOptionId());
+}
+
+void RemoteInspectorWindow::onWorldData(const InspectorWorldData& worldData)
+{
+	auto entityList = getWidgetAs<UITreeList>("entityList");
+
+	entityList->clear();
+	for (const auto& entityInfo : worldData.entities) {
+		entityList->addTreeItem(entityInfo.id.toString(), entityInfo.parentId.toString(), std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(entityInfo.name));
+	}
 }
 
 void RemoteInspectorWindow::setWorld(const String& id)
 {
-	curWorld = UUID(id);
+	curWorld = UUID::tryParse(id).value_or(UUID());
 }
