@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/entity/inspector.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
@@ -16,5 +17,15 @@ namespace Halley {
         UIFactory& factory;
         std::shared_ptr<DevConServerConnection> connection;
         const HalleyAPI& api;
-    };
+
+        std::shared_ptr<InspectorServer> inspectorServer;
+
+        UUID curWorld;
+        EntityId curEntity;
+
+    	void onWorldInfo(const Vector<InspectorWorldInfo>& infos);
+    	void onWorldData(const InspectorWorldData& worldData);
+
+        void setWorld(const String& id);
+	};
 }

@@ -584,7 +584,8 @@ Vector2f Sprite::getRelativePosition(Vector2f pos, Vector2f size, Vector2f origS
 		} else if (v > size - s1 * scale) {
 			return (origSize - ((size - v) / scale)) / origSize;
 		} else {
-			return (v - s0 * (1 - scale)) / origSize;
+			const auto totalBorder = (s0 + s1) * scale;
+			return lerp(s0 / origSize, (origSize - s1) / origSize, (v - s0 * scale) / (size - totalBorder));
 		}
 	};
 

@@ -238,6 +238,7 @@ children:
                   id: currentToolUI
                   image: halley_ui/ui_list_item.png
                   innerBorder: [5, 5, 5, 5]
+                  interactWithMouse: true
                   size: [100, 32]
                 children: []
                 fill: right

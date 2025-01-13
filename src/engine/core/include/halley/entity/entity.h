@@ -205,8 +205,9 @@ namespace Halley {
 		template <typename T>
 		Entity& addComponent(World& world, T* component)
 		{
-			addComponent(component, T::componentIndex);
-			TypeDeleter<T>::initialize(getComponentDeleterTable(world));
+			auto& deleterTable = getComponentDeleterTable(world);
+			addComponent(component, T::componentIndex, T::componentName, deleterTable);
+			TypeDeleter<T>::initialize(deleterTable);
 
 			markDirty(world);
 			return *this;
@@ -219,7 +220,7 @@ namespace Halley {
 			return *this;
 		}
 
-		void addComponent(Component* component, int id);
+		void addComponent(Component* component, int id, const char* componentName, ComponentDeleterTable& deleterTable);
 		void removeComponentAt(int index);
 		void removeComponentById(World& world, int id);
 		void removeAllComponents(World& world);
@@ -1138,6 +1139,11 @@ namespace Halley {
 				}
 			}
 			return nullptr;
+		}
+
+		WorldPartitionId getWorldPartition() const
+		{
+			return entity->worldPartition;
 		}
 
 	private:

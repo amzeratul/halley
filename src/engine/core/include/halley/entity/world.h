@@ -224,6 +224,10 @@ namespace Halley {
 		void sendEntityMessage(EntityId target, MessageEntry msg);
 		Vector<std::pair<MessageEntry, EntityId>>* getEntityMessageInbox(int messageType);
 
+		void setName(const String& name);
+		const String& getName() const;
+		const UUID& getUUID() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -263,6 +267,9 @@ namespace Halley {
 		std::unique_ptr<TempMemoryPool> renderMemoryPool;
 
 		HashMap<int, Vector<std::pair<MessageEntry, EntityId>>> entityMessageInbox;
+
+		String name;
+		UUID uuid;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

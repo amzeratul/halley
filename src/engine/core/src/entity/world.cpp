@@ -33,6 +33,7 @@ World::World(const HalleyAPI& api, Resources& resources, std::shared_ptr<WorldRe
 	, entityPool(std::make_shared<TypedPool<Entity>>())
 	, updateMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
 	, renderMemoryPool(std::make_unique<TempMemoryPool>(1 * 1024 * 1024))
+	, uuid(UUID::generate())
 {
 }
 
@@ -48,6 +49,7 @@ World::World(World& world, StagingWorldTag tag)
 	, transform2DAnisotropy(world.transform2DAnisotropy)
 	, updateMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
 	, renderMemoryPool(std::make_unique<TempMemoryPool>(16 * 1024))
+	, uuid(UUID::generate())
 {
 }
 
@@ -90,6 +92,7 @@ std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, c
 {
 	auto world = std::make_unique<World>(api, resources, std::make_shared<WorldReflection>(*CreateEntityFunctions::getCodegenFunctions()));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
+	world->setName(sceneName);
 	world->loadSystems(sceneConfig, systemTag);
 	return world;
 }
@@ -1016,5 +1019,20 @@ Vector<std::pair<MessageEntry, EntityId>>* World::getEntityMessageInbox(int mess
 		return &iter->second;
 	}
 	return nullptr;
+}
+
+void World::setName(const String& name)
+{
+	this->name = name;
+}
+
+const String& World::getName() const
+{
+	return name;
+}
+
+const UUID& World::getUUID() const
+{
+	return uuid;
 }
 

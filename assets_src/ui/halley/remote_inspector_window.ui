@@ -2,17 +2,18 @@ uuid: 20554523-0388-4d91-b63b-4288460f47d3
 proportion: 1
 sizer:
   columnProportions: []
-  type: vertical
+  gap: 4
+  type: horizontal
 widget:
   class: widget
 children:
   - uuid: d9d5db3f-11b6-4d91-97cf-4599f9500c77
-    proportion: 1
-    border: [4, 4, 4, 4]
+    proportion: 0
+    border: [0, 0, 0, 0]
     sizer:
       columnProportions: []
       columns: 1
-      gap: 1
+      gap: 4
       type: vertical
     widget:
       class: image
@@ -22,12 +23,39 @@ children:
       innerBorder: [4, 4, 4, 4]
       size: [0, 0]
     children:
-      - uuid: fa1ef77b-ea19-4fba-a254-b072e4566972
-        border: [10, 10, 10, 10]
+      - uuid: 32368464-8a53-4f59-9310-9c4d66d8a310
         widget:
-          class: label
-          id: ""
-          text: Coming Soon (tm)!™™
-          wordWrapped: false
-        fill: [centreHorizontal, centreVertical]
-    fill: [centreHorizontal, centreVertical]
+          class: dropdown
+          id: worlds
+          options: []
+      - uuid: 2ef1e94c-c535-49ea-9470-8ac180fe6cfc
+        proportion: 1
+        sizer:
+          columnProportions: []
+        widget:
+          class: scrollBarPane
+        children:
+          - uuid: 8d925658-b97b-45dc-8693-573b8d8c67e8
+            widget:
+              class: treeList
+              id: entityList
+              options: []
+              size: [300, 0]
+    fill: [fillHorizontal, fillVertical]
+  - uuid: da758033-ae69-472d-ada1-5a9562e36a73
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      columns: 1
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: entityInspector
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [0, 0]
+    children: []
+    fill: [fillHorizontal, fillVertical]
