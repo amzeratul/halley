@@ -1,9 +1,10 @@
-// Halley codegen version 134
+// Halley codegen version 136
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
 #else
+#include "halley/bytes/byte_serializer.h"
 #include "halley/entity/component.h"
 #endif
 #include "halley/support/exception.h"
@@ -43,6 +44,14 @@ public:
 	void deserializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName, const Halley::ConfigNode& _node) {
 		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
+		
+	}
+
+	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
+		
 	}
 
 

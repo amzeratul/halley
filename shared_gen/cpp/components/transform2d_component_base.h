@@ -4,6 +4,7 @@
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
 #else
+#include "halley/bytes/byte_serializer.h"
 #include "halley/entity/component.h"
 #endif
 #include "halley/support/exception.h"
@@ -110,6 +111,24 @@ public:
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(position)>::serialize(position, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(scale)>::serialize(scale, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(rotation)>::serialize(rotation, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(height)>::serialize(height, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(fixedHeight)>::serialize(fixedHeight, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(subWorld)>::serialize(subWorld, _context, _serializer);
+	}
+
+	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(position)>::deserialize(position, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(scale)>::deserialize(scale, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(rotation)>::deserialize(rotation, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(height)>::deserialize(height, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(fixedHeight)>::deserialize(fixedHeight, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(subWorld)>::deserialize(subWorld, _context, _deserializer);
 	}
 
 

@@ -4,6 +4,7 @@
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
 #else
+#include "halley/bytes/byte_serializer.h"
 #include "halley/entity/component.h"
 #endif
 #include "halley/support/exception.h"
@@ -92,6 +93,20 @@ public:
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(zoom)>::serialize(zoom, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(id)>::serialize(id, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(offset)>::serialize(offset, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(integerCoords)>::serialize(integerCoords, _context, _serializer);
+	}
+
+	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(zoom)>::deserialize(zoom, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(id)>::deserialize(id, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(offset)>::deserialize(offset, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(integerCoords)>::deserialize(integerCoords, _context, _deserializer);
 	}
 
 

@@ -4,6 +4,7 @@
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
 #else
+#include "halley/bytes/byte_serializer.h"
 #include "halley/entity/component.h"
 #endif
 #include "halley/support/exception.h"
@@ -101,6 +102,18 @@ public:
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
+	}
+
+	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(activeStates)>::serialize(activeStates, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(tags)>::serialize(tags, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(variables)>::serialize(variables, _context, _serializer);
+	}
+
+	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(activeStates)>::deserialize(activeStates, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(tags)>::deserialize(tags, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(variables)>::deserialize(variables, _context, _deserializer);
 	}
 
 
