@@ -91,7 +91,11 @@ void ConfigDatabase::loadConfig(const ConfigNode& node, bool enforceUnique)
 
 			for (auto& db: dbs) {
 				if (db && db->getKey() == k) {
-					db->loadConfigs(v, enforceUnique);
+					try {
+						db->loadConfigs(v, enforceUnique);
+					} catch (const std::exception& e) {
+						Logger::logException(e);
+					}
 					break;
 				}
 			}
