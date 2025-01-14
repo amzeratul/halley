@@ -48,6 +48,7 @@ namespace Halley {
         void endComponent(Serializer& serializer, Bytes& buffer);
 
         void digest();
+        bool isFull() const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
@@ -70,7 +71,7 @@ namespace Halley {
     private:
         Page curPage;
 
-        std::array<Page, 192> pages;
+        std::array<Page, 512> pages;
         int pp = 0;
 
         uint64_t contentHash = 0;
@@ -85,7 +86,7 @@ namespace Halley {
     public:
         explicit EntityNetworkSerialize(Resources& resources);
 
-        void serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
+        bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         void deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options, const std::shared_ptr<EntityFactoryContext>& context);
 
         bool processEntityUpdateChanges(Bytes& previous);

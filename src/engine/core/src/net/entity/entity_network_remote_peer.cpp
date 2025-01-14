@@ -203,27 +203,33 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
         Expects(!parent->getEntitySerializationOptions().serializeAsStub);
 
         auto fastSerialize = EntityNetworkSerialize(parent->getResources());
-        fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions());
 
-        bool modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
-        bool modifiedInStructure = fastSerialize.hasEntityChanges();
+    	if (fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions())) {
+    		bool modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+    		bool modifiedInStructure = fastSerialize.hasEntityChanges();
 
-        if (modified && !modifiedInStructure) {
-            remote.timeSinceSend = 0;
+    		if (modified && !modifiedInStructure) {
+    			remote.timeSinceSend = 0;
 
-            fastUpdateOutboundData.reserve(4096);
-            fastSerialize.getBytes(fastUpdateOutboundData, parent->getByteSerializationOptions());
-            //Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+    			fastUpdateOutboundData.reserve(4096);
+    			fastSerialize.getBytes(fastUpdateOutboundData, parent->getByteSerializationOptions());
+    			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
-            Bytes bytes(fastUpdateOutboundData);
-            send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true));
-        }
+    			Bytes bytes(fastUpdateOutboundData);
+    			send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true));
+    		}
 
-        if (modifiedInStructure) {
-            canFastUpdate = false;
-            // Wipe the existing journal
-            remote.fastUpdateJournal.clear();
-        }
+    		if (modifiedInStructure) {
+    			canFastUpdate = false;
+    			// Wipe the existing journal
+    			remote.fastUpdateJournal.clear();
+    		}
+    	} else {
+    		// Something went wrong, fall back to the slow path.
+    		canFastUpdate = false;
+    		remote.fastUpdateJournal.clear();
+    		Logger::logWarning("Fast network serialize has failed, fall back using slow path");
+    	}
     }
 #else
     constexpr bool canFastUpdate = false;
@@ -251,8 +257,14 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
         // Binary serialization to (re-)build the update journal.
         auto serialize = EntityNetworkSerialize(parent->getResources());
-        serialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions());
-        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+        if (serialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions())) {
+	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+        } else {
+	        // If the fast update further above failed, for example because of a full journal,
+        	// this one here will probably fail too - so we just drop the changes and retry
+        	// next time.
+    		remote.fastUpdateJournal.clear();
+        }
 #endif
     }
 }

@@ -31,7 +31,7 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
 
     size_t size = curPage.to - curPage.from;
 
-    if (size > 0) {
+    if (size > 0 && pp < pages.size()) {
         // hash content of the current page
         curPage.hash = Hash::hash(buffer.const_byte_span().subspan(curPage.from, size));
 
@@ -92,6 +92,11 @@ void EntityNetworkChanges::endComponent(Serializer& serializer, Bytes& buffer)
 void EntityNetworkChanges::digest()
 {
     contentHash = contentHasher.digest();
+}
+
+bool EntityNetworkChanges::isFull() const
+{
+    return pp >= pages.size();
 }
 
 void EntityNetworkChanges::serialize(Serializer& s) const
@@ -272,7 +277,7 @@ EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources)
     scratchpad.resize_no_init(scratchpad.capacity());
 }
 
-void EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
@@ -283,6 +288,8 @@ void EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
     doSerializeEntityUpdate(serializer, entity, {});
 
     journal.digest();
+
+    return !journal.isFull();
 }
 
 void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
@@ -433,7 +440,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
 bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
 {
     bool modified = previous.empty();
-   hasComponentsAddedOrRemoved = false;
+    hasComponentsAddedOrRemoved = false;
 
     // Compare with previously saved journal.
 
