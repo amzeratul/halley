@@ -612,7 +612,11 @@ void ConfigNode::serialize(Serializer& s) const
 		case ConfigNodeType::EntityId:
 			if (s.getOptions().world) {
 				if (auto entityId = asEntityId(); entityId.isValid()) {
-					s << s.getOptions().world->getEntity(entityId).getInstanceUUID();
+					if (auto entity = s.getOptions().world->tryGetRawEntity(entityId)) {
+						s << entity->getInstanceUUID();
+					} else {
+						s << UUID();
+					}
 				} else {
 					s << UUID();
 				}
