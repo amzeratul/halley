@@ -217,7 +217,7 @@ void EntityNetworkChanges::enumerateEntityPages(const HashSet<UUID>& filter,
 {
     enumerateEntities(
             [&filter, onEntity](const Page &page, int pageIdx) {
-                if (filter.contains(page.uuid)) {
+                if (pageIdx == 0 || filter.contains(page.uuid)) {
                     onEntity(page, pageIdx);
                 }
             }
@@ -496,7 +496,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
             );
 
             // Enumerate again, but only care about entities marked as
-            // "changed". This includes to root entity though.
+            // "changed". This time include the root entity though.
 
             journal.enumerateEntityPages(
                     childrenChanged,
