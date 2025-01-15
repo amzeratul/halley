@@ -94,7 +94,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIInWorld::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	const static auto data = std::array<PinType, 4>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+	};
 	return data;
 }
 
@@ -107,8 +112,11 @@ std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(co
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
 	str.append(" with alignment ");
 	str.append(toString(node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f))), settingColour);
-	str.append(" and offset ");
+	str.append(", offset ");
 	str.append(toString(node.getSettings()["offset"].asVector2f(Vector2f())), settingColour);
+	str.append(", and data ");
+	str.append(getConnectedNodeName(node, graph, 3), parameterColour);
+
 	return str.moveResults();
 }
 
@@ -125,7 +133,7 @@ IScriptNodeType::Result ScriptUIInWorld::doUpdate(ScriptEnvironment& environment
 		const auto alignment = node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f));
 		const auto offset = node.getSettings()["offset"].asVector2f(Vector2f());
 
-		data.ui = environment.createInWorldUI(ui, offset, alignment, entityId);
+		data.ui = environment.createInWorldUI(ui, offset, alignment, entityId, readDataPin(environment, node, 3));
 		return Result(ScriptNodeExecutionState::Fork);
 	}
 

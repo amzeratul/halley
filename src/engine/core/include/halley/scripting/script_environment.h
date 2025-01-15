@@ -147,7 +147,7 @@ namespace Halley {
         void cancelHostThread(int node);
         void returnHostThread(ConfigNode params);
 
-        virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
+        virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId, ConfigNode data);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
 
         EntityId getScriptTarget(const String& id) const;

@@ -772,7 +772,7 @@ void ScriptEnvironment::returnHostThread(ConfigNode params)
 	}
 }
 
-std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId)
+std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId, ConfigNode data)
 {
 	return {};
 }
