@@ -378,7 +378,10 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
 EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
     Expects(entity.isValid());
-    Expects(entity.isSerializable());
+
+    if (!entity.isSerializable()) {
+        Logger::logError("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
+    }
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
@@ -549,7 +552,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                                     }
                                 }
 
-                                if (componentPage != nullptr) {
+                                if (componentPage == nullptr) {
                                     hasComponentsAddedOrRemoved = true;
                                     break;
                                 }
