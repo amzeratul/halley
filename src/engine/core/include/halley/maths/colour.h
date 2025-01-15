@@ -176,7 +176,7 @@ namespace Halley {
 			return false;
 		}
 
-		[[nodiscard]] static Colour4 fromString(std::string_view str)
+		[[nodiscard]] constexpr static Colour4 fromHexString(std::string_view str)
 		{
 			Colour4 col;
 			size_t len = str.length();
@@ -193,6 +193,16 @@ namespace Halley {
 				if (len >= 9) {
 					col.a = parseHex(str.substr(7, 2));
 				}
+			}
+			return col;
+		}
+
+		[[nodiscard]] static Colour4 fromString(std::string_view str)
+		{
+			Colour4 col;
+			size_t len = str.length();
+			if (len >= 1 && str[0] == '#') {
+				return fromHexString(str);
 			} else if (len >= 5 && str.substr(0, 4) == "col(" && str.substr(len - 1, 1) == ")") {
 				auto args = String(str.substr(4, len - 5)).split(',');
 				if (args.size() >= 1) {
@@ -414,7 +424,7 @@ namespace Halley {
 			return convertColour<T, uint8_t>(v);
 		}
 
-		static T parseHex(std::string_view str)
+		constexpr static T parseHex(std::string_view str)
 		{
 			auto decode = [] (char character) -> uint8_t
 			{
@@ -433,7 +443,7 @@ namespace Halley {
 			return convertColour<uint8_t, T>(out);
 		}
 
-		static T parseDecimal(const String& str)
+		constexpr static T parseDecimal(const String& str)
 		{
 			if constexpr (std::is_integral_v<T>) {
 				return str.toInteger();

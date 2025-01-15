@@ -6,7 +6,7 @@ using namespace Halley;
 
 PainterService::PainterService()
 {
-	clearColour = Colour4f::fromString("#B0B0B0");
+	clearColour = Colour4f::fromHexString("#B0B0B0");
 	stencilClear = static_cast<uint8_t>(0);
 	depthClear = 1.0f;
 }

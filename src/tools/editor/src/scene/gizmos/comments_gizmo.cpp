@@ -158,13 +158,13 @@ Colour4f CommentsGizmo::getCommentColour(ProjectCommentPriority priority) const
 {
 	switch (priority) {
 	case ProjectCommentPriority::Note:
-		return Colour4f::fromString("#3D4988");
+		return Colour4f::fromHexString("#3D4988");
 	case ProjectCommentPriority::Low:
-		return Colour4f::fromString("#14C03A");
+		return Colour4f::fromHexString("#14C03A");
 	case ProjectCommentPriority::Medium:
-		return Colour4f::fromString("#ECBC1A");
+		return Colour4f::fromHexString("#ECBC1A");
 	case ProjectCommentPriority::High:
-		return Colour4f::fromString("#EA3A1C");
+		return Colour4f::fromHexString("#EA3A1C");
 	}
 	return Colour4f();
 }

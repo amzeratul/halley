@@ -107,8 +107,8 @@ void FrameDebugger::paint(Painter& painter)
 	ColourStringBuilder str;
 
 	if (renderSnapshot) {
-		const auto green = Colour4f::fromString("#69E479");
-		const auto red = Colour4f::fromString("#E66F68");
+		const auto green = Colour4f::fromHexString("#69E479");
+		const auto red = Colour4f::fromHexString("#E66F68");
 
 		auto [frameStart, frameEnd] = renderSnapshot->getFrameTimeRange();
 		if (frameEnd != frameStart) {
