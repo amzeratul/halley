@@ -25,6 +25,8 @@
 #include <cstdlib>
 #include <random>
 #include "mt199937ar.h"
+#include "halley/support/logger.h"
+#include "halley/text/string_converter.h"
 using namespace Halley;
 
 Random::Random(bool threadSafe)
@@ -154,7 +156,10 @@ double Random::getDouble(double min, double max)
 
 int32_t Random::get(int32_t min, int32_t max)
 {
-	Expects(max >= min);
+	if (min >= max) {
+		throw Exception("Unable to generate Random int32_t between " + toString(min) + " and " + toString(max), HalleyExceptions::Utils);
+	}
+
 	const auto value = getInt(min, max - 1);
 	Ensures(value >= min);
 	Ensures(value < max);
@@ -163,7 +168,10 @@ int32_t Random::get(int32_t min, int32_t max)
 
 float Random::get(float min, float max)
 {
-	Expects(max >= min);
+	if (min >= max) {
+		throw Exception("Unable to generate Random float between " + toString(min) + " and " + toString(max), HalleyExceptions::Utils);
+	}
+
 	const auto value = getFloat(min, max);
 	Ensures(value >= min);
 	Ensures(value < max);

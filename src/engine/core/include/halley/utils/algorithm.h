@@ -91,13 +91,18 @@ namespace Halley
 	template<typename Iter, typename W, typename R, typename F>
 	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
+		const size_t n = static_cast<size_t>(end - begin);
+		if (n == 0) {
+			return end;
+		} else if (n == 1) {
+			return begin;
+		}
+
 		using WeightType = decltype(weightFunc(deRefFunc(begin)));
 		WeightType totalWeight = 0;
-
 		for (Iter iter = begin; iter != end; ++iter) {
 			totalWeight += weightFunc(deRefFunc(iter));
 		}
-	
 		if (totalWeight <= 0) {
 			return end;
 		}
@@ -123,9 +128,15 @@ namespace Halley
 	template<typename Iter, typename W, typename R, typename F>
 	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
-		using WeightType = decltype(weightFunc(deRefFunc(begin)));
 		const size_t n = static_cast<size_t>(end - begin);
 
+		if (n == 0) {
+			return end;
+		} else if (n == 1) {
+			return begin;
+		}
+
+		using WeightType = decltype(weightFunc(deRefFunc(begin)));
 		WeightType totalWeight = 0;
 		Vector<WeightType> weights;
 		weights.resize(n);
