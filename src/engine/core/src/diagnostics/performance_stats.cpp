@@ -37,6 +37,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setOffset(Vector2f(0.5f, 0.5f));
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 	connLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
+	toolTipLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setOffset(Vector2f(0.5f, 1.0f));
 
 	for (size_t i = 0; i < 3; ++i) {
 		systemLabels.push_back(headerText.clone());
@@ -63,6 +64,8 @@ void PerformanceStatsView::paint(Painter& painter)
 	const Time t = std::min(0.2, std::chrono::duration<Time>(now - lastUpdateTime).count());
 	lastUpdateTime = now;
 
+	curToolTip = {};
+
 	if (active) {
 		if (page == 0) {
 			drawHeader(painter, true);
@@ -86,6 +89,8 @@ void PerformanceStatsView::paint(Painter& painter)
 			} else if (page == 4) {
 				drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin);
 			}
+
+			drawToolTip(painter, rect);
 		}
 	}
 	
@@ -94,6 +99,9 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
+	if (paused) {
+		return;
+	}
 	if (!data) {
 		vsyncTime.clear();
 		updateTime.clear();
@@ -174,9 +182,24 @@ void PerformanceStatsView::setPage(int page)
 	this->page = page;
 }
 
+void PerformanceStatsView::setPaused(bool paused)
+{
+	this->paused = paused;
+}
+
+bool PerformanceStatsView::isPaused() const
+{
+	return paused;
+}
+
 void PerformanceStatsView::setDrawBg(bool drawBg)
 {
 	this->drawBg = drawBg;
+}
+
+void PerformanceStatsView::setMousePos(std::optional<Vector2f> mousePos)
+{
+	this->curMousePos = mousePos;
 }
 
 bool PerformanceStatsView::isInputActive() const
@@ -554,6 +577,11 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 			.setColour(col)
 			.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
 			.draw(painter);
+
+		if (curMousePos && eventRect.contains(*curMousePos)) {
+			auto timeUs = (e.endTime - e.startTime) / 1000;
+			setToolTip(eventRect.getTopCenter(), e.name + " [" + e.type + "] (" + timeUs + u8" µs)");
+		}
 	}
 }
 
@@ -823,6 +851,19 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 	}
 }
 
+void PerformanceStatsView::drawToolTip(Painter& painter, Rect4f rect)
+{
+	if (!curToolTip) {
+		return;
+	}
+
+	toolTipLabel
+		.setOffset(Vector2f(0.5f, 1.0f))
+		.setPosition(curToolTip->first)
+		.setText(curToolTip->second)
+		.draw(painter);
+}
+
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)
 {
 	// Total time
@@ -839,4 +880,9 @@ int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& d
 	} else {
 		return 0;
 	}
+}
+
+void PerformanceStatsView::setToolTip(Vector2f pos, String label)
+{
+	curToolTip = { pos, label };
 }

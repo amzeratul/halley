@@ -15,8 +15,14 @@ namespace Halley {
         int getPage() const;
         int getNumPages() const;
 
+        PerformanceStatsView& getView() const;
+
+        void onMouseOver(Vector2f mousePos) override;
+        void onMouseLeft(Vector2f mousePos) override;
+
     private:
         std::shared_ptr<PerformanceStatsView> statsView;
+        std::optional<Vector2f> mousePos;
     };
 
     class RemoteProfilerWindow : public UIWidget {

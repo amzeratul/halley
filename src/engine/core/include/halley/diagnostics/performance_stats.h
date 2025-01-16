@@ -29,7 +29,11 @@ namespace Halley
 		int getPage() const;
 		void setPage(int page);
 
+        void setPaused(bool paused);
+        bool isPaused() const;
+
 		void setDrawBg(bool drawBg);
+		void setMousePos(std::optional<Vector2f> mousePos);
 
 	protected:
 		bool isInputActive() const override;
@@ -84,6 +88,7 @@ namespace Halley
 		TextRenderer fpsLabel;
 		TextRenderer graphLabel;
 		TextRenderer connLabel;
+		TextRenderer toolTipLabel;
 		Vector<TextRenderer> systemLabels;
 
 		AveragingLatched<int64_t> totalFrameTime;
@@ -113,6 +118,11 @@ namespace Halley
 		const Sprite boxBg;
 		const Sprite whitebox;
 
+		std::optional<Vector2f> curMousePos;
+		std::optional<std::pair<Vector2f, String>> curToolTip;
+
+		bool paused = false;
+
 		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
@@ -120,10 +130,13 @@ namespace Halley
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
 		void drawTopEvents(Painter& painter, Rect4f rect, Time t, const HashMap<String, EventHistoryData>& eventHistory);
 		void drawNetworkStats(Painter& painter, Rect4f rect);
+		void drawToolTip(Painter& painter, Rect4f rect);
 		
 		Colour4f getEventColour(ProfilerEventType event) const;
 		Colour4f getNetworkStatsCol(const AckUnreliableConnectionStats::PacketStats& stats) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
+
+		void setToolTip(Vector2f pos, String label);
 	};
 }

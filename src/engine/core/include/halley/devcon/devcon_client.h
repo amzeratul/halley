@@ -45,6 +45,7 @@ namespace Halley
 		};
 
 		HashMap<String, InterestGroup> interests;
+		mutable std::mutex mutex;
 	};
 
 	class DevConClient : public DevConConnection, private ILoggerSink, private CoreAPI::IProfileCallback

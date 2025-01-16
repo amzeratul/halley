@@ -16,6 +16,7 @@ DevConInterest::DevConInterest(DevConClient& parent)
 
 void DevConInterest::registerInterest(String id, ConfigNode config, uint32_t handle)
 {
+	std::unique_lock lock(mutex);
 	auto& group = interests[id];
 	group.configs.push_back(config);
 	group.handles.push_back(handle);
@@ -24,6 +25,7 @@ void DevConInterest::registerInterest(String id, ConfigNode config, uint32_t han
 
 void DevConInterest::updateInterest(uint32_t handle, ConfigNode config)
 {
+	std::unique_lock lock(mutex);
 	for (auto& [k, v] : interests) {
 		const auto iter = std::find(v.handles.begin(), v.handles.end(), handle);
 		if (iter != v.handles.end()) {
@@ -37,6 +39,7 @@ void DevConInterest::updateInterest(uint32_t handle, ConfigNode config)
 
 void DevConInterest::unregisterInterest(uint32_t handle)
 {
+	std::unique_lock lock(mutex);
 	for (auto& [k, v]: interests) {
 		const auto iter = std::find(v.handles.begin(), v.handles.end(), handle);
 		if (iter != v.handles.end()) {
@@ -56,11 +59,14 @@ void DevConInterest::unregisterInterest(uint32_t handle)
 
 bool DevConInterest::hasInterest(const String& id) const
 {
+	std::unique_lock lock(mutex);
 	return interests.contains(id);
 }
 
 gsl::span<const ConfigNode> DevConInterest::getInterestConfigs(const String& id) const
 {
+	std::unique_lock lock(mutex);
+
 	const auto iter = interests.find(id);
 	if (iter != interests.end()) {
 		return iter->second.configs;
@@ -70,6 +76,8 @@ gsl::span<const ConfigNode> DevConInterest::getInterestConfigs(const String& id)
 
 void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNode data)
 {
+	std::unique_lock lock(mutex);
+
 	auto& group = interests.at(id);
 	if (data != group.lastResults.at(configIdx)) {
 		const auto handle = group.handles.at(configIdx);
@@ -157,8 +165,11 @@ void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
 void DevConClient::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	if (interest->hasInterest("profiler")) {
-		auto bytes = Serializer::toBytes(*data, SerializerOptions(SerializerOptions::maxVersion));
-		interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));
+		Concurrent::execute([=] ()
+		{
+			auto bytes = Serializer::toBytes(*data, SerializerOptions(SerializerOptions::maxVersion));
+			interest->notifyInterest("profiler", 0, ConfigNode(std::move(bytes)));
+		});
 	}
 }
 

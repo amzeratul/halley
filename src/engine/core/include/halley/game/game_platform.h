@@ -22,6 +22,7 @@ namespace Halley {
 		FreeBSD,
 		XboxSeries,
 		PS5,
+        Switch2,
         FuturePlatform1,
         FuturePlatform2,
         FuturePlatform3,
@@ -31,7 +32,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<GamePlatform> {
-		constexpr std::array<const char*, 19> operator()() const {
+		constexpr std::array<const char*, 20> operator()() const {
 			return {{
 				"unknown",
 				"windows",
@@ -47,6 +48,7 @@ namespace Halley {
 				"freebsd",
 				"xboxseries",
 				"ps5",
+                "switch2",
                 "futurePlatform1",
                 "futurePlatform2",
                 "futurePlatform3",
@@ -68,6 +70,8 @@ namespace Halley {
         return GamePlatform::FuturePlatform4;
 	#elif defined(__FUTURE_PLATFORM_5__)
         return GamePlatform::FuturePlatform5;
+	#elif defined(__SWITCH2__) // ?
+        return GamePlatform::Switch2;
 	#elif defined(__NX_TOOLCHAIN_MAJOR__)
         return GamePlatform::Switch;
     #elif defined(__ORBIS__)
@@ -118,6 +122,7 @@ namespace Halley {
     constexpr inline bool isConsolePlatform(GamePlatform platform = getPlatform())
     {
         return platform == GamePlatform::Switch
+            || platform == GamePlatform::Switch2
             || platform == GamePlatform::PS4
             || platform == GamePlatform::PS5
             || platform == GamePlatform::XboxOne

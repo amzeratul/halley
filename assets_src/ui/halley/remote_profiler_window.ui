@@ -38,6 +38,13 @@ children:
         children:
           - uuid: 3ae183ac-2e3e-4f69-9dd2-f54fd3974ec9
             proportion: 1
+            border: [0, 0, 8, 0]
+            widget:
+              class: button
+              id: pause
+              text: Pause
+          - uuid: d8d6de0e-be03-44ec-a687-82453026029e
+            proportion: 1
             widget:
               class: button
               id: prevPage

@@ -49,7 +49,52 @@ namespace Halley {
 
         ExternalCode,
         UserDefined
-    };	
+    };
+
+	template <>
+	struct EnumNames<ProfilerEventType> {
+		constexpr std::array<const char*, 28> operator()() const {
+			return{{
+			    "CorePumpEvents",
+				"CoreDevConClient",
+				"CorePumpAudio",
+				"CoreFixedUpdate",
+				"CoreVariableUpdate",
+				"CoreUpdateSystem",
+				"CoreUpdatePlatform",
+				"CoreUpdate",
+				"CoreStartRender",
+				"CoreRender",
+				"CoreVSync",
+
+				"PainterDrawCall",
+				"PainterEndRender",
+				"PainterUpdateProjection",
+
+				"WorldVariableUpdate",
+				"WorldFixedUpdate",
+				"WorldRender",
+				"WorldSystemUpdate",
+				"WorldSystemRender",
+				"WorldSystemMessages",
+
+		        "ScriptUpdate",
+
+				"AudioGenerateBuffer",
+
+		        "GPU",
+
+				"DiskIO",
+
+				"StatsView",
+
+				"Game",
+
+		        "ExternalCode",
+		        "UserDefined",
+			}};
+		}
+	};
 
     class ProfilerData {
     public:

@@ -8,6 +8,7 @@ RemoteProfilerDisplay::RemoteProfilerDisplay(UIFactory& factory, const HalleyAPI
 	statsView = std::make_shared<PerformanceStatsView>(factory.getResources(), api, false);
 	statsView->setDrawBg(false);
 	setPage(0);
+	setInteractWithMouse(true);
 }
 
 void RemoteProfilerDisplay::update(Time t, bool moved)
@@ -19,6 +20,7 @@ void RemoteProfilerDisplay::draw(UIPainter& painter) const
 {
 	painter.withClip(getRect()).draw([=](Painter& p)
 	{
+		statsView->setMousePos(mousePos);
 		statsView->paintAt(getRect(), p);
 	});
 }
@@ -41,6 +43,21 @@ int RemoteProfilerDisplay::getPage() const
 int RemoteProfilerDisplay::getNumPages() const
 {
 	return statsView->getNumPages() - 1;
+}
+
+PerformanceStatsView& RemoteProfilerDisplay::getView() const
+{
+	return *statsView;
+}
+
+void RemoteProfilerDisplay::onMouseOver(Vector2f mousePos)
+{
+	this->mousePos = mousePos;
+}
+
+void RemoteProfilerDisplay::onMouseLeft(Vector2f mousePos)
+{
+	this->mousePos = {};
 }
 
 RemoteProfilerWindow::RemoteProfilerWindow(UIFactory& factory, std::shared_ptr<DevConServerConnection> connection, const HalleyAPI& api)
@@ -66,6 +83,13 @@ void RemoteProfilerWindow::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "nextPage", [=] (const UIEvent& event)
 	{
 		display->setPage(modulo(display->getPage() + 1, display->getNumPages()));
+	});
+
+	setHandle(UIEventType::ButtonClicked, "pause", [=] (const UIEvent& event)
+	{
+		const bool paused = !display->getView().isPaused();
+		display->getView().setPaused(paused);
+		getWidgetAs<UIButton>("pause")->setLabel(LocalisedString::fromHardcodedString(paused ? "Resume" : "Pause"));
 	});
 }
 
