@@ -81,7 +81,10 @@ void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNo
 	auto& group = interests.at(id);
 	if (data != group.lastResults.at(configIdx)) {
 		const auto handle = group.handles.at(configIdx);
-		parent.notifyInterest(handle, ConfigNode(data));
+		Concurrent::execute(Executors::getMainUpdateThread(), [this, handle, data = ConfigNode(data)]() mutable
+		{
+			parent.notifyInterest(handle, std::move(data));
+		});
 		group.lastResults[configIdx] = std::move(data);
 	}
 }
