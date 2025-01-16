@@ -44,6 +44,9 @@ namespace Halley {
         std::shared_ptr<ProfilerData> lastProfileData;
         std::shared_ptr<RemoteProfilerDisplay> display;
 
+    	int autoPauseTime = 16000;
+        bool autoPause = false;
+
         void setListeningToProfile(bool listening);
         void onProfileData(std::shared_ptr<ProfilerData> data);
     };

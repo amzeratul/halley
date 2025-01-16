@@ -6,6 +6,58 @@ sizer:
 widget:
   class: widget
 children:
+  - uuid: 52c417d6-ca94-42f8-9404-e040426d6ce0
+    proportion: 0
+    border: [4, 4, 4, 0]
+    sizer:
+      columnProportions: []
+      columns: 1
+      gap: 4
+      type: horizontal
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_list_item.png
+      innerBorder: [4, 4, 4, 4]
+      size: [0, 0]
+    children:
+      - uuid: 87705078-d004-4885-9503-fa1c70cf608f
+        proportion: 1
+        sizer:
+          columnProportions: []
+          gap: 4
+        children:
+          - uuid: f65b5bba-503d-4f20-863a-022ef9c3f4de
+            proportion: 1
+            border: [0, 0, 0, 0]
+            widget:
+              class: button
+              id: pause
+              size: [100, 0]
+              text: Pause
+            fill: [centreHorizontal, centreVertical]
+          - uuid: 8a7fd4ec-b6a1-41fd-ba79-157294b1be6a
+            border: [6, 0, 0, 0]
+            widget:
+              class: label
+              text: "Auto pause:"
+            fill: [fillHorizontal, centreVertical]
+          - uuid: d9f39c27-2fe5-4261-a23a-c298875866da
+            widget:
+              class: spinControl2
+              id: autoPauseTime
+              maxValue: 50000
+              minValue: 100
+              size: [100, 0]
+            fill: [fillHorizontal, centreVertical]
+          - uuid: 7eaacc65-4929-49a6-95a5-f571b0a9d409
+            widget:
+              class: checkbox
+              id: autoPause
+            fill: [fillHorizontal, centreVertical]
+        fill: [left, centreVertical]
+    fill: [fillHorizontal, fillVertical]
   - uuid: d9d5db3f-11b6-4d91-97cf-4599f9500c77
     proportion: 1
     border: [4, 4, 4, 4]
@@ -36,13 +88,6 @@ children:
           columnProportions: []
           gap: 4
         children:
-          - uuid: 3ae183ac-2e3e-4f69-9dd2-f54fd3974ec9
-            proportion: 1
-            border: [0, 0, 8, 0]
-            widget:
-              class: button
-              id: pause
-              text: Pause
           - uuid: d8d6de0e-be03-44ec-a687-82453026029e
             proportion: 1
             widget:

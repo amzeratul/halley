@@ -89,7 +89,16 @@ void RemoteProfilerWindow::onMakeUI()
 	{
 		const bool paused = !display->getView().isPaused();
 		display->getView().setPaused(paused);
-		getWidgetAs<UIButton>("pause")->setLabel(LocalisedString::fromHardcodedString(paused ? "Resume" : "Pause"));
+	});
+
+	bindData("autoPauseTime", autoPauseTime, [=] (int valueUs)
+	{
+		autoPauseTime = valueUs;
+	});
+
+	bindData("autoPause", autoPause, [=] (bool enabled)
+	{
+		autoPause = enabled;
 	});
 }
 
@@ -101,6 +110,17 @@ void RemoteProfilerWindow::onActiveChanged(bool active)
 void RemoteProfilerWindow::update(Time t, bool moved)
 {
 	display->setProfileData(lastProfileData);
+
+	if (lastProfileData) {
+		const auto updateTime = lastProfileData->getElapsedTime(ProfilerEventType::CoreVariableUpdate) / 1000;
+		//const auto renderTime = lastProfileData->getElapsedTime(ProfilerEventType::CoreRender) / 1000;
+		if (autoPause && updateTime > autoPauseTime) {
+			display->getView().setPaused(true);
+		}
+	}
+
+	const bool paused = !display->getView().isPaused();
+	getWidgetAs<UIButton>("pause")->setLabel(LocalisedString::fromHardcodedString(paused ? "Pause" : "Resume"));
 }
 
 void RemoteProfilerWindow::setListeningToProfile(bool listening)
