@@ -66,7 +66,7 @@ namespace Halley {
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		Service& addService(std::shared_ptr<Service> service);
-		void loadSystems(const ConfigNode& config, const std::optional<String>& systemTag = {});
+		void loadSystems(const ConfigNode& config, const std::optional<String>& systemTag = {}, bool devMode = false);
 		
 		template <typename T>
 		T* tryGetService(std::string_view systemName = "")

@@ -93,11 +93,11 @@ std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, c
 	auto world = std::make_unique<World>(api, resources, std::make_shared<WorldReflection>(*CreateEntityFunctions::getCodegenFunctions()));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->setName(sceneName);
-	world->loadSystems(sceneConfig, systemTag);
+	world->loadSystems(sceneConfig, systemTag, devMode);
 	return world;
 }
 
-void World::loadSystems(const ConfigNode& root, const std::optional<String>& systemTag)
+void World::loadSystems(const ConfigNode& root, const std::optional<String>& systemTag, bool devMode)
 {
 	for (const auto& [timelineName, tlSystems]: root["timelines"].asMap()) {
 		const TimeLine timeline = fromString<TimeLine>(timelineName);
@@ -105,17 +105,21 @@ void World::loadSystems(const ConfigNode& root, const std::optional<String>& sys
 		for (auto& systemEntry: tlSystems) {
 			String systemName;
 			Vector<String> systemTags;
+			bool devOnly = false;
 
 			if (systemEntry.getType() == ConfigNodeType::String) {
 				systemName = systemEntry.asString();
 			} else if (systemEntry.getType() == ConfigNodeType::Map) {
 				systemName = systemEntry["name"].asString();
 				systemTags = systemEntry["tags"].asVector<String>({});
+				devOnly = systemEntry["devOnly"].asBool(false);
 			}
 
-			if (systemTags.empty() || !systemTag || std_ex::contains(systemTags, *systemTag)) {
-				if (auto system = reflection->createSystem(systemName + "System")) {
-					addSystem(std::move(system), timeline).setName(systemName);
+			if (!devOnly || devMode) {
+				if (systemTags.empty() || !systemTag || std_ex::contains(systemTags, *systemTag)) {
+					if (auto system = reflection->createSystem(systemName + "System")) {
+						addSystem(std::move(system), timeline).setName(systemName);
+					}
 				}
 			}
 		}
