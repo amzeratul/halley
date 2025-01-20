@@ -263,6 +263,12 @@ void Transform2DComponent::deserialize(const EntitySerializationContext& context
 	markDirty();
 }
 
+void Transform2DComponent::deserializeNetwork(const EntitySerializationContext& context, Deserializer& deserializer)
+{
+	Transform2DComponentBase::deserializeNetwork(context, deserializer);
+	markDirty();
+}
+
 void Transform2DComponent::markDirty()
 {
 	markDirty(DirtyPropagationMode::Changed);

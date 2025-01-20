@@ -70,6 +70,7 @@ public:
 	Halley::WorldPartitionId getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
+	void deserializeNetwork(const Halley::EntitySerializationContext& context, Halley::Deserializer& deserializer);
 
 	void markDirty();
 
