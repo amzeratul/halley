@@ -20,6 +20,7 @@ namespace Halley {
 
         TextRenderer text;
 
-		void drawLine(UIPainter& painter, int idx) const;
+		void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
+		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings) const;
     };
 }

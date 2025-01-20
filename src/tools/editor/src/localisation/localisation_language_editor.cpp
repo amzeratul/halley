@@ -30,7 +30,7 @@ void LocalisationLanguageEditor::onMakeUI()
 	}
 
 	grid = std::make_shared<LocalisationGrid>(factory);
-	getWidget("keysContainer")->add(grid);
+	getWidget("keysContainer")->add(grid, 1);
 
 	Vector<UIDropdown::Entry> chunks;
 	chunks.push_back(UIDropdown::Entry("", "[All]"));

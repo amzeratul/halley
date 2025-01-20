@@ -152,10 +152,10 @@ children:
                 proportion: 1
                 border: [0, 0, 4, 0]
                 sizer:
-                  columnProportions: [2, 1, 1, 1]
-                  columns: 4
-                  gap: 3
-                  type: grid
+                  columnProportions: []
+                  columns: 1
+                  gap: 1
+                  type: vertical
                 widget:
                   class: widget
                   id: keysContainer
