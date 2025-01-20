@@ -74,6 +74,8 @@ namespace Halley {
 
 		void alignWith(const LocalisationData& original);
 
+		void setValue(const String& key, String value);
+
 		static LocalisationData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
 	};
 }

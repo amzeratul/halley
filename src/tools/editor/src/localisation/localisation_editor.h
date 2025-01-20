@@ -54,5 +54,8 @@ namespace Halley {
         void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
 
         void openLanguage(LocalisationData& localisationData, bool canEdit);
+
+        bool canViewLanguage(const I18NLanguage& language) const;
+        bool canEditLanguage(const I18NLanguage& language) const;
     };
 }

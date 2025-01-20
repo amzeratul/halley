@@ -18,11 +18,14 @@ namespace Halley {
 		LocalisationData& srcLanguage;
 		LocalisationData* dstLanguage;
 		bool canEdit = false;
+		bool acceptingTextInput = false;
 
 		LocalisationDataChunk* srcData = nullptr;
 		LocalisationDataChunk* dstData = nullptr;
 
 		std::shared_ptr<LocalisationGrid> grid;
+
+		String curEditingKey = "";
 
 		void setChunk(const String& chunkId);
 		void setSelectedLine(int idx, const String& key);

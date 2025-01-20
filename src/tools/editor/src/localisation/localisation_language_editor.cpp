@@ -65,6 +65,20 @@ void LocalisationLanguageEditor::onMakeUI()
 		setSelectedLine(event.getIntData(), event.getStringData());
 	});
 	setSelectedLine(grid->getSelectedLine(), grid->getSelectedKey());
+
+	setHandle(UIEventType::TextChanged, "srcCurLine", [=] (const UIEvent& event)
+	{
+		if (canEdit && acceptingTextInput) {
+			srcLanguage.setValue(curEditingKey, event.getStringData());
+		}
+	});
+
+	setHandle(UIEventType::TextChanged, "dstCurLine", [=] (const UIEvent& event)
+	{
+		if (canEdit && acceptingTextInput && dstLanguage) {
+			dstLanguage->setValue(curEditingKey, event.getStringData());
+		}
+	});
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
@@ -80,19 +94,23 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 	auto srcCurLine = getWidgetAs<UITextInput>("srcCurLine");
 	auto dstCurLine = getWidgetAs<UITextInput>("dstCurLine");
 
+	curEditingKey = key;
+
+	acceptingTextInput = false;
 	if (idx >= 0) {
 		curKey->setText(LocalisedString::fromUserString(key));
 		srcCurLine->setText(srcData->entries.at(idx).value);
-		srcCurLine->setReadOnly(!!dstData);
+		srcCurLine->setReadOnly(!canEdit || dstData);
 		if (dstData) {
 			dstCurLine->setText(dstData->entries.at(idx).value);
-			dstCurLine->setReadOnly(false);
+			dstCurLine->setReadOnly(!canEdit);
 		}
 	} else {
 		curKey->setText(LocalisedString::fromHardcodedString("N/A"));
 		srcCurLine->setText("");
-		srcCurLine->setReadOnly(false);
+		srcCurLine->setReadOnly(true);
 		dstCurLine->setText("");
-		dstCurLine->setReadOnly(false);
+		dstCurLine->setReadOnly(true);
 	}
+	acceptingTextInput = true;
 }

@@ -189,6 +189,19 @@ void LocalisationData::alignWith(const LocalisationData& original)
 	}
 }
 
+void LocalisationData::setValue(const String& key, String value)
+{
+	// TODO: this code is awful
+	for (auto& chunk: chunks) {
+		for (auto& entry: chunk.entries) {
+			if (entry.key == key) {
+				entry.value = std::move(value);
+				return;
+			}
+		}
+	}
+}
+
 namespace {
 	LocalisationDataChunk generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
 	{

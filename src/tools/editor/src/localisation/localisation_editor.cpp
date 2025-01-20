@@ -143,7 +143,7 @@ void LocalisationEditor::populateData()
 		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
 	}
 
-	bool canEditOriginal = true; // TODO
+	bool canEditOriginal = canEditLanguage(originalLanguage.language);
 	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
 	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
 	{
@@ -155,8 +155,10 @@ void LocalisationEditor::populateData()
 
 	for (const auto& lang: project.getProperties().getLanguages()) {
 		if (lang != originalLanguage.language) {
-			bool canEdit = false; // TODO
-			addTranslationData(*languagesContainer, lang, origStats.totalKeys, canEdit);
+			bool canEdit = canEditLanguage(lang);
+			if (canEdit || canViewLanguage(lang)) {
+				addTranslationData(*languagesContainer, lang, origStats.totalKeys, canEdit);
+			}
 		}
 	}
 }
@@ -199,4 +201,16 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 void LocalisationEditor::openLanguage(LocalisationData& localisationData, bool canEdit)
 {
 	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, originalLanguage, &localisationData == &originalLanguage ? nullptr : &localisationData, canEdit));
+}
+
+bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
+{
+	// TODO
+	return true;
+}
+
+bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
+{
+	// TODO
+	return true;
 }
