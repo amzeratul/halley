@@ -28,28 +28,20 @@ namespace Halley {
 	public:
 		int translatedKeys = 0;
 		int outdatedKeys = 0;
-	};
-
-	class LocalisationDataValue {
-	public:
-		String value;
-		LocalisationHashType hash = 0;
-
-		LocalisationDataValue() = default;
-		LocalisationDataValue(String value);
-
-		void computeHash();
-	};
+	};;
 
 	class LocalisationDataEntry {
 	public:
 		String key;
-		Vector<LocalisationDataValue> values;
+		LocalisationHashType hash = 0;
+		String value;
 		String context;
 		String comment;
 
 		LocalisationDataEntry() = default;
 		LocalisationDataEntry(String key, String value, String context = "", String comment = "");
+
+		void computeHash();
 	};
 
 	class LocalisationDataChunk {
@@ -64,6 +56,7 @@ namespace Halley {
 		bool operator<(const LocalisationDataChunk& other) const;
 
 		void computeHash();
+		void alignWith(const LocalisationDataChunk& origData);
 	};
 
 	class LocalisationData {

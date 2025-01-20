@@ -20,109 +20,28 @@ children:
       image: halley_ui/ui_list_item.png
       innerBorder: [15, 15, 15, 15]
     children:
-      - uuid: f9502d89-f5bd-4d95-a260-442138a3ca0a
-        sizer:
-          columnProportions: [1, 1]
-          columns: 2
-          gap: 6
-          type: horizontal
+      - uuid: 2f80cb32-9799-4c45-be49-fd49c2c7ff71
         widget:
           class: widget
-          size: [0, 0]
         children:
-          - uuid: 832a151a-7968-416e-ad32-6cd63303e17e
+          - uuid: e91d5c87-e9c5-42c4-b5ff-95835543ce2b
+            widget:
+              class: dropdown
+              id: chunk
+              options: []
+              size: [400, 22]
+            fill: [left, centreVertical]
+          - uuid: 3f7f490d-3882-4a2b-abd5-65b99e811cdc
+            proportion: 1
             border: [0, 0, 0, 0]
-            sizer:
-              columnProportions: []
-              columns: 2
-              gap: 10
-              type: horizontal
             widget:
-              class: image
-              colour: $ui_popupWindow
-              id: ""
-              image: halley_ui/ui_list_item.png
-              innerBorder: [4, 4, 4, 4]
-              size: [300, 0]
-            children:
-              - uuid: 2faff763-ce42-4893-8072-7a8ecc817423
-                proportion: 1
-                sizer:
-                  columnProportions: []
-                  gap: 10
-                widget:
-                  class: widget
-                children:
-                  - uuid: ac35cd51-afd6-47fc-a610-ad3449b835af
-                    widget:
-                      class: image
-                      id: srcLanguageFlag
-                      image: flags/h20/gb.png
-                  - uuid: 64997d81-62c9-408b-a380-d8234701a1ca
-                    border: [0, 1, 0, 0]
-                    widget:
-                      class: label
-                      id: srcLanguage
-                      text: English
-                      wordWrapped: false
-                    fill: left
-                fill: [centreHorizontal, centreVertical]
-            fill: [fillHorizontal, fillVertical]
-          - uuid: 4280c08c-68e9-4512-9b74-5074aa32ecb6
-            border: [10, 0, 10, 0]
-            widget:
-              class: image
-              id: dstArrow
-              image: arrows/arrow_right.png
-            fill: [centreHorizontal, centreVertical]
-          - uuid: 1dd8947e-abf8-4764-b90f-ab1b1012751e
-            border: [0, 0, 0, 0]
-            sizer:
-              columnProportions: []
-              columns: 2
-              gap: 10
-              type: horizontal
-            widget:
-              childLayerAdjustment: 0
-              class: image
-              colour: $ui_popupWindow
-              id: dstLanguageContainer
-              image: halley_ui/ui_list_item.png
-              innerBorder: [4, 4, 4, 4]
-              size: [300, 0]
-            children:
-              - uuid: 1f6a9644-dc7d-4690-b84e-9460b68f4138
-                proportion: 1
-                sizer:
-                  columnProportions: []
-                  gap: 10
-                widget:
-                  class: widget
-                  id: ""
-                children:
-                  - uuid: 1e682d80-2bc6-4bdc-a1dd-af23c6e5330d
-                    widget:
-                      class: image
-                      id: dstLanguageFlag
-                      image: flags/h20/gb.png
-                  - uuid: 02b68813-f12a-41a3-bc16-37c5f894a067
-                    border: [0, 1, 0, 0]
-                    widget:
-                      class: label
-                      id: dstLanguage
-                      text: English
-                      wordWrapped: false
-                    fill: left
-                fill: [centreHorizontal, centreVertical]
-            fill: [fillHorizontal, fillVertical]
-        fill: [centreHorizontal, fillVertical]
-      - uuid: e91d5c87-e9c5-42c4-b5ff-95835543ce2b
-        widget:
-          class: dropdown
-          id: chunk
-          options: []
-          size: [400, 22]
-        fill: [left, fillVertical]
+              class: button
+              enabled: true
+              id: close
+              mouseBorder: [0, 0, 0, 0]
+              size: [200, 0]
+              text: Close
+            fill: [right, fillVertical]
       - uuid: f0c18d5d-5061-475d-b536-e9d41b4ba6a0
         proportion: 1
         border: [0, 0, 0, 0]
@@ -164,13 +83,142 @@ children:
                 fill: [fillHorizontal, top]
             fill: [fillHorizontal, fillVertical]
         fill: [fillHorizontal, fillVertical]
-      - uuid: 3f7f490d-3882-4a2b-abd5-65b99e811cdc
-        border: [0, 0, 0, 0]
+      - uuid: 9b61bf06-5e61-4fb4-9d1e-db4c74b71da8
+        proportion: 0
+        border: [0, 0, 0, -10]
+        sizer:
+          columnProportions: []
+          columns: 2
+          gap: 2
+          type: vertical
         widget:
-          class: button
-          enabled: true
-          id: close
-          mouseBorder: [0, 0, 0, 0]
-          size: [200, 0]
-          text: Close
-        fill: [left, fillVertical]
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: halley_ui/ui_list_item.png
+          innerBorder: [4, 4, 4, 4]
+          size: [300, 0]
+        children:
+          - uuid: e2d19fc9-2d1b-4d60-9d3f-81da6598d7e9
+            border: [0, 1, 0, 0]
+            widget:
+              class: label
+              id: curKey
+              text: N/A
+              wordWrapped: false
+            fill: [centreHorizontal, centreVertical]
+        fill: [centreHorizontal, fillVertical]
+      - uuid: 02bc2fbd-b35e-423e-9248-49da31ede717
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 6
+          type: horizontal
+        widget:
+          class: widget
+          size: [0, 0]
+        children:
+          - uuid: 578dc037-4931-4763-8373-8097b977506d
+            proportion: 1
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 2
+              type: vertical
+            widget:
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [4, 4, 4, 4]
+              size: [300, 0]
+            children:
+              - uuid: a6bebdde-12bc-4d21-a03c-90c5449c7f22
+                proportion: 1
+                border: [0, 2, 0, 3]
+                sizer:
+                  columnProportions: []
+                  gap: 10
+                widget:
+                  class: widget
+                children:
+                  - uuid: b1b9282f-2898-44bc-9c80-cff2ab0b2af3
+                    widget:
+                      class: image
+                      id: srcLanguageFlag
+                      image: flags/h20/gb.png
+                  - uuid: 326687ee-8bf8-4c8b-a889-f697d554ded1
+                    border: [0, 1, 0, 0]
+                    widget:
+                      class: label
+                      id: srcLanguage
+                      text: English
+                      wordWrapped: false
+                    fill: left
+                fill: [centreHorizontal, centreVertical]
+              - uuid: cc416469-7ee9-41b1-8b52-851b81c362ba
+                widget:
+                  class: textInput
+                  id: srcCurLine
+                  multiLine: true
+                  readOnly: true
+                  size: [0, 60]
+            fill: [fillHorizontal, fillVertical]
+          - uuid: 304e8ebd-deda-43e5-b3aa-be6f892cfc40
+            border: [10, 0, 10, 0]
+            widget:
+              class: image
+              id: dstArrow
+              image: arrows/arrow_right.png
+            fill: [centreHorizontal, centreVertical]
+          - uuid: ef05c7a4-9fa7-49fe-ab69-7fa72cc88d96
+            proportion: 1
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 2
+              type: vertical
+            widget:
+              childLayerAdjustment: 0
+              class: image
+              colour: $ui_popupWindow
+              id: dstLanguageContainer
+              image: halley_ui/ui_list_item.png
+              innerBorder: [4, 4, 4, 4]
+              size: [300, 0]
+            children:
+              - uuid: a0d115e0-fbe1-4b5b-be68-ec4782ddbdf9
+                proportion: 1
+                border: [0, 2, 0, 3]
+                sizer:
+                  columnProportions: []
+                  gap: 10
+                widget:
+                  class: widget
+                  id: ""
+                children:
+                  - uuid: 8758a5b3-0a2d-4d6c-9c3c-feed23179e23
+                    widget:
+                      class: image
+                      id: dstLanguageFlag
+                      image: flags/h20/gb.png
+                  - uuid: 07391ade-cbbb-4c77-82c4-cccfedae094c
+                    border: [0, 1, 0, 0]
+                    widget:
+                      class: label
+                      id: dstLanguage
+                      text: English
+                      wordWrapped: false
+                    fill: left
+                fill: [centreHorizontal, centreVertical]
+              - uuid: 869313bd-adf6-4114-b10e-676d9188c72f
+                widget:
+                  class: textInput
+                  id: dstCurLine
+                  multiLine: true
+                  readOnly: false
+                  size: [0, 60]
+            fill: [fillHorizontal, fillVertical]
+        fill: [fillHorizontal, fillVertical]

@@ -77,13 +77,16 @@ void LocalisationEditor::loadFromResources()
 		auto& project = info.getProject();
 
 		// Scan for original language
-		result.originalLanguage = LocalisationData::generateFromProject(project.getProperties().getOriginalLanguage(), project, info);
+		const auto origLanguageCode = project.getProperties().getOriginalLanguage();
+		result.originalLanguage = LocalisationData::generateFromProject(origLanguageCode, project, info);
 
 		// Scan for localisation from HDD
 		for (const auto& lang: project.getProperties().getLanguages()) {
-			auto data = LocalisationData::generateFromProject(lang, project, info);
-			data.alignWith(result.originalLanguage);
-			result.localised[lang.getISOCode()] = std::move(data);
+			if (lang != origLanguageCode) {
+				auto data = LocalisationData::generateFromProject(lang, project, info);
+				data.alignWith(result.originalLanguage);
+				result.localised[lang.getISOCode()] = std::move(data);
+			}
 		}
 
 		return result;

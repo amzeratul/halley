@@ -59,13 +59,40 @@ void LocalisationLanguageEditor::onMakeUI()
 	{
 		root.returnToRoot();
 	});
+
+	setHandle(UIEventType::ListSelectionChanged, "localisation_grid", [=] (const UIEvent& event)
+	{
+		setSelectedLine(event.getIntData(), event.getStringData());
+	});
+	setSelectedLine(grid->getSelectedLine(), grid->getSelectedKey());
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
-	if (dstLanguage) {
-		grid->setData(srcLanguage.tryGetChunk(chunkId), dstLanguage->tryGetChunk(chunkId));
+	srcData = srcLanguage.tryGetChunk(chunkId);
+	dstData = dstLanguage ? dstLanguage->tryGetChunk(chunkId) : nullptr;
+	grid->setData(srcData, dstData);
+}
+
+void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
+{
+	auto curKey = getWidgetAs<UILabel>("curKey");
+	auto srcCurLine = getWidgetAs<UITextInput>("srcCurLine");
+	auto dstCurLine = getWidgetAs<UITextInput>("dstCurLine");
+
+	if (idx >= 0) {
+		curKey->setText(LocalisedString::fromUserString(key));
+		srcCurLine->setText(srcData->entries.at(idx).value);
+		srcCurLine->setReadOnly(!!dstData);
+		if (dstData) {
+			dstCurLine->setText(dstData->entries.at(idx).value);
+			dstCurLine->setReadOnly(false);
+		}
 	} else {
-		grid->setData(nullptr, srcLanguage.tryGetChunk(chunkId));
+		curKey->setText(LocalisedString::fromHardcodedString("N/A"));
+		srcCurLine->setText("");
+		srcCurLine->setReadOnly(false);
+		dstCurLine->setText("");
+		dstCurLine->setReadOnly(false);
 	}
 }

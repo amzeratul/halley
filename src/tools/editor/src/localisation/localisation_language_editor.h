@@ -19,8 +19,12 @@ namespace Halley {
 		LocalisationData* dstLanguage;
 		bool canEdit = false;
 
+		LocalisationDataChunk* srcData = nullptr;
+		LocalisationDataChunk* dstData = nullptr;
+
 		std::shared_ptr<LocalisationGrid> grid;
 
 		void setChunk(const String& chunkId);
+		void setSelectedLine(int idx, const String& key);
     };
 }

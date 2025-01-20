@@ -18,24 +18,18 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 	return *this;
 }
 
-LocalisationDataValue::LocalisationDataValue(String value)
-	: value(std::move(value))
-{
-	computeHash();
-}
-
-void LocalisationDataValue::computeHash()
-{
-	// TODO
-	hash = 0;
-}
-
 LocalisationDataEntry::LocalisationDataEntry(String key, String value, String context, String comment)
 	: key(std::move(key))
+	, value(std::move(value))
 	, context(std::move(context))
 	, comment(std::move(comment))
 {
-	values.push_back(std::move(value));
+}
+
+void LocalisationDataEntry::computeHash()
+{
+	// TODO
+	hash = 0;
 }
 
 namespace {
@@ -64,7 +58,7 @@ LocalisationStats LocalisationDataChunk::getStats() const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
-		const auto wordCount = getWordCount(entry.values.back().value);
+		const auto wordCount = getWordCount(entry.value);
 		result.totalKeys++;
 		result.keysPerCategory[category]++;
 		result.totalWords += wordCount;
@@ -82,6 +76,29 @@ void LocalisationDataChunk::computeHash()
 {
 	// TODO
 	hash = 0;
+}
+
+void LocalisationDataChunk::alignWith(const LocalisationDataChunk& origData)
+{
+	name = origData.name;
+	category = origData.category;
+
+	HashMap<String, size_t> prevEntries;
+	for (size_t i = 0; i < entries.size(); ++i) {
+		prevEntries[entries[i].key] = i;
+	}
+
+	Vector<LocalisationDataEntry> newEntries;
+	newEntries.resize(origData.entries.size());
+	for (size_t i = 0; i < origData.entries.size(); ++i) {
+		if (const auto iter = prevEntries.find(origData.entries[i].key); iter != prevEntries.end()) {
+			newEntries[i] = entries[iter->second];
+		} else {
+			newEntries[i].key = origData.entries[i].key;
+		}
+	}
+
+	entries = std::move(newEntries);
 }
 
 LocalisationStats LocalisationData::getStats() const
@@ -220,8 +237,7 @@ LocalisationData LocalisationData::generateFromProject(const I18NLanguage& langu
 
 	for (const auto& chunk: result.chunks) {
 		for (const auto& entry: chunk.entries) {
-			const auto& value = entry.values.back();
-			result.keyHashes[value.value] = value.hash;
+			result.keyHashes[entry.value] = entry.hash;
 		}
 	}
 
