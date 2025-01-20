@@ -52,25 +52,27 @@ void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& 
     bool isRootEntity = !parent.has_value();
     serializer << isRootEntity;
 
-    UUID parentUUID;
     if (isRootEntity) {
+        UUID parentUUID;
         if (auto parentEntity = entity.tryGetParent()) {
             parentUUID = parentEntity->getInstanceUUID();
         }
-    } else {
-        parentUUID = parent->getInstanceUUID();
+        serializer << parentUUID;
     }
 
     serializer << entity.getInstanceUUID();
-    serializer << parentUUID;
 
     uint8_t flags = 0;
     if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
+	if (!entity.isSerializable()) flags |= (uint8_t) EntityData::Flag::NotSerializable;
     if (!entity.isEnabled()) flags |= (uint8_t) EntityData::Flag::Disabled;
 
     serializer << entity.getName();
     serializer << flags;
     serializer << entity.getPrefabUUID();
+
+    const auto& prefabId = entity.getPrefabAssetId().value_or("");
+    serializer << prefabId;
 }
 
 void EntityNetworkChanges::endEntity(Serializer& serializer, Bytes& buffer)
@@ -347,9 +349,21 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
         bool isRootEntity;
         deserializer >> isRootEntity;
 
-        UUID instanceUUID, parentInstanceUUID;
+        if (isRootEntity) {
+            UUID parentInstanceUUID;
+            deserializer >> parentInstanceUUID;
+
+            if (parentInstanceUUID.isValid()) {
+                if (auto p = opt.world->findEntity(parentInstanceUUID)) {
+                    entity.setParent(p.value());
+                } else {
+                    Logger::logError("Parent to attach to not found!");
+                }
+            }
+        }
+
+        UUID instanceUUID;
         deserializer >> instanceUUID;
-        deserializer >> parentInstanceUUID;
 
         std::optional<EntityRef> parentEntity;
         std::optional<EntityRef> childEntity;
@@ -362,12 +376,6 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
         }
 
         type = doDeserializeEntityUpdate(deserializer, childEntity.value(), parentEntity, context);
-
-        if (isRootEntity && parentInstanceUUID.isValid()) {
-            if (auto p = opt.world->findEntity(parentInstanceUUID)) {
-                entity.setParent(p.value());
-            }
-        }
     }
 
     if (deserializer.getBytesLeft() != 0) {
@@ -381,6 +389,10 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
 
     if (!entity.isSerializable()) {
         Logger::logError("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
+    }
+
+    if (parent) {
+        entity.setParent(parent.value());
     }
 
     EntitySerializationContext serializationContext = {};
@@ -399,15 +411,17 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         deserializer >> flags;
 
         entity.setSelectable((flags & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
-
-        bool enabled = (flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
-        entity.setEnabled(enabled);
+        entity.setSerializable((flags & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
+        entity.setEnabled((flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
 
         // TODO: see EntityFactory::updateEntityNode()
         // - variants and rules
 
         UUID prefabUUID;
         deserializer >> prefabUUID;
+
+        String prefabId;
+        deserializer >> prefabId;
 
         entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
     }
@@ -431,6 +445,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
             // TODO:
             if (componentSize > 0) {
                 deserializer.skipBytes(componentSize);
+                Logger::logError("No reflector found or deserialize failed, componentId=" + toString(componentId), true);
             }
         }
 
