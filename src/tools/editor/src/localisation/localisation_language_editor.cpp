@@ -29,6 +29,9 @@ void LocalisationLanguageEditor::onMakeUI()
 		getWidgetAs<UILabel>("dstLanguage")->setText(root.getLanguageName(dstLanguage->language));
 	}
 
+	grid = std::make_shared<LocalisationGrid>(factory);
+	getWidget("keysContainer")->add(grid);
+
 	Vector<UIDropdown::Entry> chunks;
 	chunks.push_back(UIDropdown::Entry("", "[All]"));
 	for (auto& chunk: srcLanguage.chunks) {
@@ -50,6 +53,7 @@ void LocalisationLanguageEditor::onMakeUI()
 	{
 		setChunk(chunkId);
 	});
+	setChunk(chunks.empty() ? "" : chunks.front().id);
 
 	setHandle(UIEventType::ButtonClicked, "close", [this] (const UIEvent& event)
 	{
@@ -59,5 +63,9 @@ void LocalisationLanguageEditor::onMakeUI()
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
-	// TODO
+	if (dstLanguage) {
+		grid->setData(srcLanguage.tryGetChunk(chunkId), dstLanguage->tryGetChunk(chunkId));
+	} else {
+		grid->setData(nullptr, srcLanguage.tryGetChunk(chunkId));
+	}
 }

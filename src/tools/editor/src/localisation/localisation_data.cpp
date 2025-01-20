@@ -123,6 +123,26 @@ LocalisationDataChunk& LocalisationData::getChunk(const String& name)
 	throw Exception("Chunk not found: " + name, HalleyExceptions::Tools);
 }
 
+LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name)
+{
+	for (auto& chunk: chunks) {
+		if (chunk.name == name) {
+			return &chunk;
+		}
+	}
+	return nullptr;
+}
+
+const LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name) const
+{
+	for (auto& chunk: chunks) {
+		if (chunk.name == name) {
+			return &chunk;
+		}
+	}
+	return nullptr;
+}
+
 void LocalisationData::alignWith(const LocalisationData& original)
 {
 	// Store original entries

@@ -83,6 +83,8 @@ src/localisation/localisation_editor.cpp
 src/localisation/localisation_editor.h
 src/localisation/localisation_editor_root.cpp
 src/localisation/localisation_editor_root.h
+src/localisation/localisation_grid.cpp
+src/localisation/localisation_grid.h
 src/localisation/localisation_language_editor.cpp
 src/localisation/localisation_language_editor.h
 src/preferences.cpp

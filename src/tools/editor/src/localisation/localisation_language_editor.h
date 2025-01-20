@@ -1,4 +1,5 @@
 #pragma once
+#include "localisation_grid.h"
 
 namespace Halley {
 	class LocalisationEditorRoot;
@@ -17,6 +18,8 @@ namespace Halley {
 		LocalisationData& srcLanguage;
 		LocalisationData* dstLanguage;
 		bool canEdit = false;
+
+		std::shared_ptr<LocalisationGrid> grid;
 
 		void setChunk(const String& chunkId);
     };

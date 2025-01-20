@@ -7,6 +7,20 @@
 
 using namespace Halley;
 
+LocalisationInfoRetriever::LocalisationInfoRetriever(Project& project)
+	: project(project)
+{
+}
+
+String LocalisationInfoRetriever::getCategory(const String& assetId) const
+{
+	if (project.getGameInstance()) {
+		return project.getGameInstance()->getLocalisationFileCategory(assetId);
+	} else {
+		return "unknown";
+	}
+}
+
 LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory)
 	: UIWidget("localisation_editor", {}, UISizer())
 	, root(root)
@@ -20,24 +34,31 @@ void LocalisationEditor::update(Time t, bool moved)
 	if (!loaded && project.isDLLLoaded()) {
 		load();
 	}
+	if (waitingToPopulate.isValid() && waitingToPopulate.isReady()) {
+		auto result = waitingToPopulate.get();
+		originalLanguage = std::move(result.originalLanguage);
+		localised = std::move(result.localised);
+		waitingToPopulate = {};
+		populateData();
+	}
 }
 
 void LocalisationEditor::onMakeUI()
 {
-	populateData();
+	requestPopulateData();
 }
 
 void LocalisationEditor::onActiveChanged(bool active)
 {
 	if (active && project.isDLLLoaded()) {
-		//populateData();
+		//requestPopulateData();
 	}
 }
 
 void LocalisationEditor::onAssetsLoaded()
 {
 	if (isActiveInHierarchy() && project.isDLLLoaded()) {
-		populateData();
+		requestPopulateData();
 	}
 }
 
@@ -50,25 +71,23 @@ void LocalisationEditor::load()
 
 void LocalisationEditor::loadFromResources()
 {
-	// Scan for original language
-	originalLanguage = LocalisationData::generateFromProject(project.getProperties().getOriginalLanguage(), project, *this);
+	waitingToPopulate = Concurrent::execute([info = LocalisationInfoRetriever(project)]() -> Result
+	{
+		Result result;
+		auto& project = info.getProject();
 
-	// Scan for localisation from HDD
-	localised.clear();
-	for (const auto& lang: project.getProperties().getLanguages()) {
-		auto data = LocalisationData::generateFromProject(lang, project, *this);
-		data.alignWith(originalLanguage);
-		localised[lang.getISOCode()] = std::move(data);
-	}
-}
+		// Scan for original language
+		result.originalLanguage = LocalisationData::generateFromProject(project.getProperties().getOriginalLanguage(), project, info);
 
-String LocalisationEditor::getCategory(const String& assetId) const
-{
-	if (project.getGameInstance()) {
-		return project.getGameInstance()->getLocalisationFileCategory(assetId);
-	} else {
-		return "unknown";
-	}
+		// Scan for localisation from HDD
+		for (const auto& lang: project.getProperties().getLanguages()) {
+			auto data = LocalisationData::generateFromProject(lang, project, info);
+			data.alignWith(result.originalLanguage);
+			result.localised[lang.getISOCode()] = std::move(data);
+		}
+
+		return result;
+	});
 }
 
 String LocalisationEditor::getNumberWithCommas(int number) const
@@ -82,7 +101,7 @@ String LocalisationEditor::getNumberWithCommas(int number) const
 	}
 }
 
-void LocalisationEditor::populateData()
+void LocalisationEditor::requestPopulateData()
 {
 	if (loaded) {
 		loadFromResources();
@@ -93,7 +112,10 @@ void LocalisationEditor::populateData()
 			return;
 		}
 	}
+}
 
+void LocalisationEditor::populateData()
+{
 	const auto origStats = originalLanguage.getStats();
 	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.language));
 	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.language));
@@ -151,7 +173,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	const auto locData = iter == localised.end() ? LocalisationData{} : iter->second;
 	const auto locStats = locData.getTranslationStats(originalLanguage);
 
-	const int translatedPercent = std::max((locStats.translatedKeys * 100) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
+	const auto translatedPercent = std::max(static_cast<float>(locStats.translatedKeys * 100) / totalKeys, static_cast<float>(locStats.translatedKeys > 0 ? 1 : 0));
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
@@ -159,7 +181,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	const int greenW = std::max((locStats.translatedKeys * totalW) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
 	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalKeys, locStats.outdatedKeys > 0 ? 1 : 0);
 
-	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent) + "%"));
+	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent, 1) + "%"));
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 

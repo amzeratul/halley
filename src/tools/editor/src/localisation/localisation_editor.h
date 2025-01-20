@@ -7,7 +7,18 @@
 namespace Halley {
 	class LocalisationEditorRoot;
 
-	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener, public ILocalisationInfoRetriever {
+    class LocalisationInfoRetriever : public ILocalisationInfoRetriever {
+    public:
+        LocalisationInfoRetriever(Project& project);
+
+        String getCategory(const String& assetId) const override;
+        Project& getProject() const { return project; }
+
+    private:
+        Project& project;
+    };
+
+	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
         LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory);
 
@@ -25,14 +36,20 @@ namespace Halley {
         LocalisationData originalLanguage;
         HashMap<String, LocalisationData> localised;
 
+        struct Result {
+        	LocalisationData originalLanguage;
+			HashMap<String, LocalisationData> localised;
+        };
+
         bool loaded = false;
+        Future<Result> waitingToPopulate;
 
         void load();
 
         void loadFromResources();
-        String getCategory(const String& assetId) const override;
         String getNumberWithCommas(int number) const;
 
+        void requestPopulateData();
         void populateData();
         void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
 

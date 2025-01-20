@@ -76,6 +76,8 @@ namespace Halley {
 		TranslationStats getTranslationStats(const LocalisationData& original) const;
 
 		LocalisationDataChunk& getChunk(const String& name);
+		LocalisationDataChunk* tryGetChunk(const String& name);
+		const LocalisationDataChunk* tryGetChunk(const String& name) const;
 
 		void alignWith(const LocalisationData& original);
 
