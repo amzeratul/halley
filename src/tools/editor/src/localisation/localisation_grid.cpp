@@ -197,10 +197,17 @@ int LocalisationGrid::getSelectedLine() const
 
 void LocalisationGrid::setSelectedLine(int line)
 {
+	std::optional<int> targetLine;
 	if (!origData || line < 0 || line >= static_cast<int>(origData->getNumEntries())) {
-		selectedLine = {};
+		targetLine = {};
 	} else {
-		selectedLine = line;
+		targetLine = line;
+	}
+
+	if (selectedLine != targetLine) {
+		selectedLine = targetLine;
+		auto id = selectedLine ? origData->getEntry(*selectedLine).key : "";
+		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, selectedLine.value_or(-1)));
 	}
 }
 
@@ -232,9 +239,7 @@ void LocalisationGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods
 {
 	if (button == 0) {
 		if (selectedLine != lineUnderMouse) {
-			selectedLine = lineUnderMouse;
-			auto id = selectedLine ? origData->getEntry(*selectedLine).key : "";
-			sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, selectedLine.value_or(-1)));
+			setSelectedLine(lineUnderMouse.value_or(-1));
 		}
 	}
 }

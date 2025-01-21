@@ -78,6 +78,11 @@ void LocalisationLanguageEditor::onMakeUI()
 			dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), event.getStringData());
 		}
 	});
+
+	setHandle(UIEventType::TextSubmit, "dstCurLine", [=] (const UIEvent& event)
+	{
+		grid->setSelectedLine(grid->getSelectedLine() + 1);
+	});
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
