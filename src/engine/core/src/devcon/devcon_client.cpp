@@ -78,14 +78,17 @@ void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNo
 {
 	std::unique_lock lock(mutex);
 
-	auto& group = interests.at(id);
-	if (data != group.lastResults.at(configIdx)) {
-		const auto handle = group.handles.at(configIdx);
-		Concurrent::execute(Executors::getMainUpdateThread(), [this, handle, data = ConfigNode(data)]() mutable
-		{
-			parent.notifyInterest(handle, std::move(data));
-		});
-		group.lastResults[configIdx] = std::move(data);
+	const auto iter = interests.find(id);
+	if (iter != interests.end()) {
+		auto& group = iter->second;
+		if (data != group.lastResults.at(configIdx)) {
+			const auto handle = group.handles.at(configIdx);
+			Concurrent::execute(Executors::getMainUpdateThread(), [this, handle, data = ConfigNode(data)]() mutable
+			{
+				parent.notifyInterest(handle, std::move(data));
+			});
+			group.lastResults[configIdx] = std::move(data);
+		}
 	}
 }
 
