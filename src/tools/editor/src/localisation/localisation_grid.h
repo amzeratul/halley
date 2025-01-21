@@ -11,7 +11,7 @@ namespace Halley {
         void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 
-    	void setData(LocalisationDataChunk* origData, LocalisationDataChunk* translatedData);
+    	void setData(LocOriginalDataChunk* origData, LocTranslationData* translatedData);
 
     	int getSelectedLine() const;
         void setSelectedLine(int line);
@@ -25,15 +25,17 @@ namespace Halley {
 
     private:
         UIFactory& factory;
-        LocalisationDataChunk* origData = nullptr;
-        LocalisationDataChunk* translatedData = nullptr;
+        LocOriginalDataChunk* origData = nullptr;
+        LocTranslationData* translatedData = nullptr;
 
         TextRenderer text;
+        Colour4f textCol;
+        Colour4f outdatedCol;
 
         std::optional<int> lineUnderMouse;
         std::optional<int> selectedLine;
 
 		void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
-		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings) const;
+		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
     };
 }

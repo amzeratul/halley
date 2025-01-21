@@ -54,7 +54,7 @@ namespace {
 	}
 }
 
-LocalisationStats LocalisationDataChunk::getStats() const
+LocalisationStats LocOriginalDataChunk::getStats() const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
@@ -67,41 +67,33 @@ LocalisationStats LocalisationDataChunk::getStats() const
 	return result;
 }
 
-bool LocalisationDataChunk::operator<(const LocalisationDataChunk& other) const
+LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& translated) const
+{
+	LocalisationStats result;
+	for (const auto& entry: entries) {
+		if (const auto* translatedEntry = translated.tryGetEntry(entry.key)) {
+			const auto wordCount = getWordCount(translatedEntry->value);
+			result.totalKeys++;
+			result.keysPerCategory[category]++;
+			result.totalWords += wordCount;
+			result.wordsPerCategory[category] += wordCount;
+		}
+	}
+	return result;
+}
+
+bool LocOriginalDataChunk::operator<(const LocOriginalDataChunk& other) const
 {
 	return name < other.name;
 }
 
-void LocalisationDataChunk::computeHash()
+void LocOriginalDataChunk::computeHash()
 {
 	// TODO
 	hash = 0;
 }
 
-void LocalisationDataChunk::alignWith(const LocalisationDataChunk& origData)
-{
-	name = origData.name;
-	category = origData.category;
-
-	HashMap<String, size_t> prevEntries;
-	for (size_t i = 0; i < entries.size(); ++i) {
-		prevEntries[entries[i].key] = i;
-	}
-
-	Vector<LocalisationDataEntry> newEntries;
-	newEntries.resize(origData.entries.size());
-	for (size_t i = 0; i < origData.entries.size(); ++i) {
-		if (const auto iter = prevEntries.find(origData.entries[i].key); iter != prevEntries.end()) {
-			newEntries[i] = entries[iter->second];
-		} else {
-			newEntries[i].key = origData.entries[i].key;
-		}
-	}
-
-	entries = std::move(newEntries);
-}
-
-LocalisationStats LocalisationData::getStats() const
+LocalisationStats LocOriginalData::getStats() const
 {
 	LocalisationStats result;
 	for (auto& chunk: chunks) {
@@ -110,27 +102,7 @@ LocalisationStats LocalisationData::getStats() const
 	return result;
 }
 
-TranslationStats LocalisationData::getTranslationStats(const LocalisationData& original) const
-{
-	TranslationStats result;
-	const auto& origKeys = original.keyHashes;
-
-	for (const auto& keyHash: keyHashes) {
-		const auto iter = origKeys.find(keyHash.first);
-
-		if (iter != origKeys.end()) {
-			if (iter->second == keyHash.second) {
-				result.translatedKeys++;
-			} else {
-				result.outdatedKeys++;
-			}
-		}
-	}
-
-	return result;
-}
-
-LocalisationDataChunk& LocalisationData::getChunk(const String& name)
+LocOriginalDataChunk& LocOriginalData::getChunk(const String& name)
 {
 	for (auto& chunk: chunks) {
 		if (chunk.name == name) {
@@ -140,7 +112,7 @@ LocalisationDataChunk& LocalisationData::getChunk(const String& name)
 	throw Exception("Chunk not found: " + name, HalleyExceptions::Tools);
 }
 
-LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name)
+LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name)
 {
 	for (auto& chunk: chunks) {
 		if (chunk.name == name) {
@@ -150,7 +122,7 @@ LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name)
 	return nullptr;
 }
 
-const LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name) const
+const LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name) const
 {
 	for (auto& chunk: chunks) {
 		if (chunk.name == name) {
@@ -160,52 +132,19 @@ const LocalisationDataChunk* LocalisationData::tryGetChunk(const String& name) c
 	return nullptr;
 }
 
-void LocalisationData::alignWith(const LocalisationData& original)
+LocalisationHashType LocOriginalData::getVersion(const String& key) const
 {
-	// Store original entries
-	HashMap<String, LocalisationDataEntry> entries;
-	for (auto& chunk: chunks) {
-		for (auto& entry: chunk.entries) {
-			const auto key = entry.key;
-			entries[key] = std::move(entry);
-		}
+	const auto iter = keyVersions.find(key);
+	if (iter != keyVersions.end()) {
+		return iter->second;
 	}
-
-	// Copy chunks from original
-	chunks = original.chunks;
-
-	// Replace entry data
-	for (auto& chunk: chunks) {
-		auto origEntries = std::move(chunk.entries);
-		chunk.entries.clear();
-
-		for (auto& entry: origEntries) {
-			const auto iter = entries.find(entry.key);
-			if (iter != entries.end()) {
-				chunk.entries.push_back(std::move(iter->second));
-			}
-		}
-		chunk.computeHash();
-	}
-}
-
-void LocalisationData::setValue(const String& key, String value)
-{
-	// TODO: this code is awful
-	for (auto& chunk: chunks) {
-		for (auto& entry: chunk.entries) {
-			if (entry.key == key) {
-				entry.value = std::move(value);
-				return;
-			}
-		}
-	}
+	return 0;
 }
 
 namespace {
-	LocalisationDataChunk generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
+	LocOriginalDataChunk generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
 	{
-		LocalisationDataChunk result;
+		LocOriginalDataChunk result;
 		result.category = infoRetriever.getCategory(name);
 		result.name = std::move(name);
 
@@ -221,10 +160,9 @@ namespace {
 	}
 }
 
-LocalisationData LocalisationData::generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever)
+Vector<std::pair<String, ConfigNode>> LocOriginalData::getProjectLocData(const I18NLanguage& language, Project& project)
 {
-	LocalisationData result;
-	result.language = language;
+	Vector<std::pair<String, ConfigNode>> result;
 
 	auto suffix = language.getISOCode();
 
@@ -242,15 +180,71 @@ LocalisationData LocalisationData::generateFromProject(const I18NLanguage& langu
 				const auto curLang = I18NLanguage(languageNode["key"].asString());
 				if (curLang == language) {
 					auto chunkName = assetName.replaceExtension("").getString(false).replaceAll("-" + suffix, "").replaceAll("_" + suffix, "");
-					result.chunks.push_back(generateChunk(std::move(chunkName), languageNode["value"], infoRetriever));
+					result.emplace_back(chunkName, languageNode["value"]);
 				}
 			}
 		}
 	}
 
-	for (const auto& chunk: result.chunks) {
-		for (const auto& entry: chunk.entries) {
-			result.keyHashes[entry.value] = entry.hash;
+	return result;
+}
+
+LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever)
+{
+	LocOriginalData result;
+	result.language = language;
+
+	for (const auto& [name, data]: getProjectLocData(language, project)) {
+		result.chunks.push_back(generateChunk(name, data, infoRetriever));
+		for (const auto& entry: result.chunks.back().entries) {
+			result.keyVersions[entry.key] = entry.hash;
+		}
+	}
+
+	return result;
+}
+
+void LocTranslationData::setValue(const String& key, LocalisationHashType curVersion, String value)
+{
+	entries[key] = LocTranslationEntry{ std::move(value), curVersion };
+}
+
+const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) const
+{
+	const auto iter = entries.find(key);
+	if (iter != entries.end()) {
+		return &iter->second;
+	}
+	return nullptr;
+}
+
+TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original) const
+{
+	TranslationStats result;
+	const auto& origKeys = original.keyVersions;
+
+	for (const auto& entry: entries) {
+		const auto iter = origKeys.find(entry.first);
+
+		if (iter != origKeys.end()) {
+			if (iter->second == entry.second.origVersion) {
+				result.translatedKeys++;
+			} else {
+				result.outdatedKeys++;
+			}
+		}
+	}
+
+	return result;
+}
+
+LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& language, Project& project)
+{
+	LocTranslationData result;
+
+	for (const auto& [name, data]: LocOriginalData::getProjectLocData(language, project)) {
+		for (const auto& entry: data.asSequence()) {
+			result.entries[entry["key"].asString()] = LocTranslationEntry { entry["value"].asString(""), 0 };
 		}
 	}
 

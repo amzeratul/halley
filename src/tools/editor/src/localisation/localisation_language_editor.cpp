@@ -5,7 +5,7 @@
 
 using namespace Halley;
 
-LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocalisationData& srcLanguage, LocalisationData* dstLanguage, bool canEdit)
+LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, bool canEdit)
 	: UIWidget("localisation_language_editor", {}, UISizer())
 	, root(root)
 	, project(project)
@@ -38,9 +38,8 @@ void LocalisationLanguageEditor::onMakeUI()
 		String name = chunk.name;
 
 		if (dstLanguage) {
-			const auto& dstChunk = dstLanguage->getChunk(chunk.name);
 			const auto srcStats = chunk.getStats();
-			const auto dstStats = dstChunk.getStats();
+			const auto dstStats = chunk.getStats(*dstLanguage);
 			const int complete = srcStats.totalKeys > 0 ? std::max(dstStats.totalKeys * 100 / srcStats.totalKeys, dstStats.totalKeys > 0 ? 1 : 0) : 0;
 			name = "[" + toString(complete, 10, 3, ' ') + "%] " + name;
 		}
@@ -69,14 +68,14 @@ void LocalisationLanguageEditor::onMakeUI()
 	setHandle(UIEventType::TextChanged, "srcCurLine", [=] (const UIEvent& event)
 	{
 		if (canEdit && acceptingTextInput) {
-			srcLanguage.setValue(curEditingKey, event.getStringData());
+			//srcLanguage.setValue(curEditingKey, event.getStringData());
 		}
 	});
 
 	setHandle(UIEventType::TextChanged, "dstCurLine", [=] (const UIEvent& event)
 	{
 		if (canEdit && acceptingTextInput && dstLanguage) {
-			dstLanguage->setValue(curEditingKey, event.getStringData());
+			dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), event.getStringData());
 		}
 	});
 }
@@ -84,8 +83,7 @@ void LocalisationLanguageEditor::onMakeUI()
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
 	srcData = srcLanguage.tryGetChunk(chunkId);
-	dstData = dstLanguage ? dstLanguage->tryGetChunk(chunkId) : nullptr;
-	grid->setData(srcData, dstData);
+	grid->setData(srcData, dstLanguage);
 }
 
 void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
@@ -100,9 +98,10 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 	if (idx >= 0) {
 		curKey->setText(LocalisedString::fromUserString(key));
 		srcCurLine->setText(srcData->entries.at(idx).value);
-		srcCurLine->setReadOnly(!canEdit || dstData);
-		if (dstData) {
-			dstCurLine->setText(dstData->entries.at(idx).value);
+		srcCurLine->setReadOnly(true);
+		if (dstLanguage) {
+			const auto* entry = dstLanguage->tryGetEntry(srcData->entries.at(idx).key);
+			dstCurLine->setText(entry ? entry->value : "");
 			dstCurLine->setReadOnly(!canEdit);
 		}
 	} else {

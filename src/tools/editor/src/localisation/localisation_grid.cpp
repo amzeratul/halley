@@ -12,12 +12,13 @@ LocalisationGrid::LocalisationGrid(UIFactory& factory)
 	: UIWidget("localisation_grid")
 	, factory(factory)
 {
-	const auto col = factory.getColourScheme()->getColour("ui_text");
+	textCol = factory.getColourScheme()->getColour("ui_text");
+	outdatedCol = factory.getColourScheme()->getColour("ui_logWarningText");
 
 	text = TextRenderer()
 		.setFont(factory.getResources().get<Font>("Ubuntu Regular"))
 		.setSize(fontSize)
-		.setColour(col);
+		.setColour(textCol);
 
 	setInteractWithMouse(true);
 }
@@ -127,7 +128,7 @@ void LocalisationGrid::draw(UIPainter& painter) const
 	});
 
 	// Header text
-	drawLine(painter, relClip.getTopLeft() + getPosition(), columns, Vector<String>{ "#", "Key", "Original", "Translated" }.const_span().subspan(0, columns.size()));
+	drawLine(painter, relClip.getTopLeft() + getPosition(), columns, Vector<String>{ "#", "Key", "Original", "Translated" }.const_span().subspan(0, columns.size()), {});
 }
 
 void LocalisationGrid::drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const
@@ -135,32 +136,40 @@ void LocalisationGrid::drawLine(UIPainter& painter, int idx, const Vector<float>
 	const auto basePos = getPosition() + Vector2f(0, static_cast<float>(idx + 1) * lineHeight);
 
 	Vector<String> strs;
+	Vector<Colour4f> colours;
 
 	if (origData) {
 		const auto& entry = origData->entries.at(idx);
 		strs.push_back(toString(idx + 1));
 		strs.push_back(entry.key);
 		strs.push_back(entry.value);
+		colours.resize(3, textCol);
+
+		if (translatedData) {
+			if (auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+				strs.push_back(translatedEntry->value);
+				colours.push_back(entry.hash == translatedEntry->origVersion ? textCol : outdatedCol);
+			}
+		}
 	}
 
-	if (translatedData) {
-		const auto& entry = translatedData->entries.at(idx);
-		strs.push_back(entry.value);
-	}
-
-	drawLine(painter, basePos, columns, strs.const_span());
+	drawLine(painter, basePos, columns, strs.const_span(), colours.const_span());
 }
 
-void LocalisationGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings) const
+void LocalisationGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const
 {
 	float curPos = 0;
 
-	auto drawColumn = [&] (float width, const String& str)
+	auto drawColumn = [&] (float width, const String& str, std::optional<Colour4f> col)
 	{
 		auto t = text.clone()
 			.setPosition(pos + Vector2f(curPos + cellBorder, cellBorder))
 			.setText(str)
 			.setClip(Rect4f(0, 0, width - 2 * cellBorder, lineHeight - 2 * cellBorder));
+
+		if (col) {
+			t.setColour(*col);
+		}
 
 		painter.draw(std::move(t));
 
@@ -168,16 +177,12 @@ void LocalisationGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<cons
 	};
 
 	for (size_t i = 0; i < strings.size(); ++i) {
-		drawColumn(columns[i], strings[i]);
+		drawColumn(columns[i], strings[i], colours.size() > i ? std::optional(colours[i]) : std::nullopt);
 	}
 }
 
-void LocalisationGrid::setData(LocalisationDataChunk* origData, LocalisationDataChunk* translatedData)
+void LocalisationGrid::setData(LocOriginalDataChunk* origData, LocTranslationData* translatedData)
 {
-	if (origData && translatedData) {
-		translatedData->alignWith(*origData);
-	}
-
 	this->origData = origData;
 	this->translatedData = translatedData;
 

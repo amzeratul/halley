@@ -33,12 +33,12 @@ namespace Halley {
         Project& project;
         UIFactory& factory;
 
-        LocalisationData originalLanguage;
-        HashMap<String, LocalisationData> localised;
+        LocOriginalData originalLanguage;
+        HashMap<String, LocTranslationData> localised;
 
         struct Result {
-        	LocalisationData originalLanguage;
-			HashMap<String, LocalisationData> localised;
+        	LocOriginalData originalLanguage;
+			HashMap<String, LocTranslationData> localised;
         };
 
         bool loaded = false;
@@ -53,7 +53,7 @@ namespace Halley {
         void populateData();
         void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
 
-        void openLanguage(LocalisationData& localisationData, bool canEdit);
+        void openLanguage(LocTranslationData* localisationData, bool canEdit);
 
         bool canViewLanguage(const I18NLanguage& language) const;
         bool canEditLanguage(const I18NLanguage& language) const;

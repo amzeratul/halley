@@ -6,6 +6,7 @@
 
 namespace Halley {
 	using LocalisationHashType = uint64_t;
+	class LocTranslationData;
 
 	class ILocalisationInfoRetriever {
 	public:
@@ -44,7 +45,7 @@ namespace Halley {
 		void computeHash();
 	};
 
-	class LocalisationDataChunk {
+	class LocOriginalDataChunk {
 	public:
 		String name;
 		String category;
@@ -52,30 +53,46 @@ namespace Halley {
 		LocalisationHashType hash = 0;
 
 		LocalisationStats getStats() const;
+		LocalisationStats getStats(const LocTranslationData& translated) const;
 
-		bool operator<(const LocalisationDataChunk& other) const;
+		bool operator<(const LocOriginalDataChunk& other) const;
 
 		void computeHash();
-		void alignWith(const LocalisationDataChunk& origData);
 	};
 
-	class LocalisationData {
+	class LocOriginalData {
 	public:
 		I18NLanguage language;
-		Vector<LocalisationDataChunk> chunks;
-		HashMap<String, LocalisationHashType> keyHashes;
+		Vector<LocOriginalDataChunk> chunks;
+		HashMap<String, LocalisationHashType> keyVersions;
 
 		LocalisationStats getStats() const;
-		TranslationStats getTranslationStats(const LocalisationData& original) const;
 
-		LocalisationDataChunk& getChunk(const String& name);
-		LocalisationDataChunk* tryGetChunk(const String& name);
-		const LocalisationDataChunk* tryGetChunk(const String& name) const;
+		LocOriginalDataChunk& getChunk(const String& name);
+		LocOriginalDataChunk* tryGetChunk(const String& name);
+		const LocOriginalDataChunk* tryGetChunk(const String& name) const;
 
-		void alignWith(const LocalisationData& original);
+		LocalisationHashType getVersion(const String& key) const;
 
-		void setValue(const String& key, String value);
+		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
+		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
+	};
 
-		static LocalisationData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
+	class LocTranslationEntry {
+	public:
+		String value;
+		LocalisationHashType origVersion;
+	};
+
+	class LocTranslationData {
+	public:
+		I18NLanguage language;
+		HashMap<String, LocTranslationEntry> entries;
+
+		void setValue(const String& key, LocalisationHashType curVersion, String value);
+		const LocTranslationEntry* tryGetEntry(const String& key) const;
+
+		TranslationStats getTranslationStats(const LocOriginalData& original) const;
+		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
 	};
 }

@@ -3,11 +3,11 @@
 
 namespace Halley {
 	class LocalisationEditorRoot;
-	class LocalisationData;
+	class LocOriginalData;
 
 	class LocalisationLanguageEditor : public UIWidget {
     public:
-        LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocalisationData& srcLanguage, LocalisationData* dstLanguage, bool canEdit);
+        LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, bool canEdit);
 
 		void onMakeUI() override;
 
@@ -15,13 +15,12 @@ namespace Halley {
 		LocalisationEditorRoot& root;
 		Project& project;
 		UIFactory& factory;
-		LocalisationData& srcLanguage;
-		LocalisationData* dstLanguage;
+		LocOriginalData& srcLanguage;
+		LocTranslationData* dstLanguage;
 		bool canEdit = false;
 		bool acceptingTextInput = false;
 
-		LocalisationDataChunk* srcData = nullptr;
-		LocalisationDataChunk* dstData = nullptr;
+		LocOriginalDataChunk* srcData = nullptr;
 
 		std::shared_ptr<LocalisationGrid> grid;
 

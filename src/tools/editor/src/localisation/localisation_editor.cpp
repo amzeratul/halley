@@ -78,14 +78,12 @@ void LocalisationEditor::loadFromResources()
 
 		// Scan for original language
 		const auto origLanguageCode = project.getProperties().getOriginalLanguage();
-		result.originalLanguage = LocalisationData::generateFromProject(origLanguageCode, project, info);
+		result.originalLanguage = LocOriginalData::generateFromProject(origLanguageCode, project, info);
 
 		// Scan for localisation from HDD
 		for (const auto& lang: project.getProperties().getLanguages()) {
 			if (lang != origLanguageCode) {
-				auto data = LocalisationData::generateFromProject(lang, project, info);
-				data.alignWith(result.originalLanguage);
-				result.localised[lang.getISOCode()] = std::move(data);
+				result.localised[lang.getISOCode()] = LocTranslationData::generateFromProject(lang, project);
 			}
 		}
 
@@ -147,7 +145,7 @@ void LocalisationEditor::populateData()
 	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
 	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
 	{
-		openLanguage(originalLanguage, true);
+		openLanguage(nullptr, true);
 	});
 
 	auto languagesContainer = getWidget("languages");
@@ -163,6 +161,21 @@ void LocalisationEditor::populateData()
 	}
 }
 
+namespace {
+	float getPercent(int cur, int total)
+	{
+		// Note: round to closest per thousand, don't report 0 unless there are 0 keys, don't report 100% unless we have every key
+		if (cur == 0) {
+			return 0.0f;
+		} else if (cur == total) {
+			return 100.0f;
+		}
+
+		const auto result = std::round(static_cast<float>(cur) * 1000.0f / static_cast<float>(total)) / 10.0f;
+		return clamp(result, 0.1f, 99.9f);
+	}
+}
+
 void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit)
 {
 	totalKeys = std::max(totalKeys, 1); // Avoid divisions by zero
@@ -175,10 +188,10 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	widget->getWidgetAs<UIButton>("edit")->setLabel(LocalisedString::fromHardcodedString(canEdit ? "Edit..." : "View..."));
 
 	const auto iter = localised.find(language.getISOCode());
-	const auto locData = iter == localised.end() ? LocalisationData{} : iter->second;
+	const auto locData = iter == localised.end() ? LocTranslationData{} : iter->second;
 	const auto locStats = locData.getTranslationStats(originalLanguage);
 
-	const auto translatedPercent = std::max(static_cast<float>(locStats.translatedKeys * 100) / totalKeys, static_cast<float>(locStats.translatedKeys > 0 ? 1 : 0));
+	const auto translatedPercent = getPercent(locStats.translatedKeys, totalKeys);
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
@@ -192,15 +205,15 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 
 	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = language, canEdit] (const UIEvent& event)
 	{
-		openLanguage(localised.at(language.getISOCode()), canEdit);
+		openLanguage(&localised.at(language.getISOCode()), canEdit);
 	});
 
 	container.add(widget);
 }
 
-void LocalisationEditor::openLanguage(LocalisationData& localisationData, bool canEdit)
+void LocalisationEditor::openLanguage(LocTranslationData* localisationData, bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, originalLanguage, &localisationData == &originalLanguage ? nullptr : &localisationData, canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, originalLanguage, localisationData, canEdit));
 }
 
 bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const

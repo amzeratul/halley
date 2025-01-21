@@ -21,6 +21,8 @@ children:
       innerBorder: [15, 15, 15, 15]
     children:
       - uuid: 2f80cb32-9799-4c45-be49-fd49c2c7ff71
+        sizer:
+          columnProportions: []
         widget:
           class: widget
         children:
