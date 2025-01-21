@@ -11,7 +11,7 @@ namespace Halley {
         void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 
-    	void setData(LocOriginalDataChunk* origData, LocTranslationData* translatedData);
+    	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData);
 
     	int getSelectedLine() const;
         void setSelectedLine(int line);
@@ -25,7 +25,7 @@ namespace Halley {
 
     private:
         UIFactory& factory;
-        LocOriginalDataChunk* origData = nullptr;
+        const ILocOriginalData* origData = nullptr;
         LocTranslationData* translatedData = nullptr;
 
         TextRenderer text;

@@ -19,8 +19,8 @@ LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& r
 
 void LocalisationLanguageEditor::onMakeUI()
 {
-	getWidgetAs<UIImage>("srcLanguageFlag")->setSprite(root.getFlag(srcLanguage.language));
-	getWidgetAs<UILabel>("srcLanguage")->setText(root.getLanguageName(srcLanguage.language));
+	getWidgetAs<UIImage>("srcLanguageFlag")->setSprite(root.getFlag(srcLanguage.getLanguage()));
+	getWidgetAs<UILabel>("srcLanguage")->setText(root.getLanguageName(srcLanguage.getLanguage()));
 
 	getWidget("dstLanguageContainer")->setActive(dstLanguage != nullptr);
 	getWidget("dstArrow")->setActive(dstLanguage != nullptr);
@@ -34,7 +34,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	Vector<UIDropdown::Entry> chunks;
 	chunks.push_back(UIDropdown::Entry("", "[All]"));
-	for (auto& chunk: srcLanguage.chunks) {
+	for (auto& chunk: srcLanguage.getChunks()) {
 		String name = chunk.name;
 
 		if (dstLanguage) {
@@ -82,7 +82,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
-	srcData = srcLanguage.tryGetChunk(chunkId);
+	srcData = chunkId.isEmpty() ? static_cast<const ILocOriginalData*>(&srcLanguage) : srcLanguage.tryGetChunk(chunkId);
 	grid->setData(srcData, dstLanguage);
 }
 
@@ -97,10 +97,10 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 	acceptingTextInput = false;
 	if (idx >= 0) {
 		curKey->setText(LocalisedString::fromUserString(key));
-		srcCurLine->setText(srcData->entries.at(idx).value);
+		srcCurLine->setText(srcData->getEntry(idx).value);
 		srcCurLine->setReadOnly(true);
 		if (dstLanguage) {
-			const auto* entry = dstLanguage->tryGetEntry(srcData->entries.at(idx).key);
+			const auto* entry = dstLanguage->tryGetEntry(srcData->getEntry(idx).key);
 			dstCurLine->setText(entry ? entry->value : "");
 			dstCurLine->setReadOnly(!canEdit);
 		}

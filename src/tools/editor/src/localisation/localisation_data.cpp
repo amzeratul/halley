@@ -82,6 +82,16 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	return result;
 }
 
+size_t LocOriginalDataChunk::getNumEntries() const
+{
+	return entries.size();
+}
+
+const LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx) const
+{
+	return entries[idx];
+}
+
 bool LocOriginalDataChunk::operator<(const LocOriginalDataChunk& other) const
 {
 	return name < other.name;
@@ -93,6 +103,11 @@ void LocOriginalDataChunk::computeHash()
 	hash = 0;
 }
 
+const I18NLanguage& LocOriginalData::getLanguage() const
+{
+	return language;
+}
+
 LocalisationStats LocOriginalData::getStats() const
 {
 	LocalisationStats result;
@@ -100,26 +115,6 @@ LocalisationStats LocOriginalData::getStats() const
 		result += chunk.getStats();
 	}
 	return result;
-}
-
-LocOriginalDataChunk& LocOriginalData::getChunk(const String& name)
-{
-	for (auto& chunk: chunks) {
-		if (chunk.name == name) {
-			return chunk;
-		}
-	}
-	throw Exception("Chunk not found: " + name, HalleyExceptions::Tools);
-}
-
-LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name)
-{
-	for (auto& chunk: chunks) {
-		if (chunk.name == name) {
-			return &chunk;
-		}
-	}
-	return nullptr;
 }
 
 const LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name) const
@@ -132,6 +127,11 @@ const LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name) con
 	return nullptr;
 }
 
+const Vector<LocOriginalDataChunk>& LocOriginalData::getChunks() const
+{
+	return chunks;
+}
+
 LocalisationHashType LocOriginalData::getVersion(const String& key) const
 {
 	const auto iter = keyVersions.find(key);
@@ -139,6 +139,26 @@ LocalisationHashType LocOriginalData::getVersion(const String& key) const
 		return iter->second;
 	}
 	return 0;
+}
+
+std::optional<LocalisationHashType> LocOriginalData::tryGetVersion(const String& key) const
+{
+	const auto iter = keyVersions.find(key);
+	if (iter != keyVersions.end()) {
+		return iter->second;
+	}
+	return std::nullopt;
+}
+
+size_t LocOriginalData::getNumEntries() const
+{
+	return keyIndices.size();
+}
+
+const LocalisationDataEntry& LocOriginalData::getEntry(size_t idx) const
+{
+	const auto index = keyIndices[idx];
+	return chunks[index.first].getEntry(index.second);
 }
 
 namespace {
@@ -196,8 +216,11 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 
 	for (const auto& [name, data]: getProjectLocData(language, project)) {
 		result.chunks.push_back(generateChunk(name, data, infoRetriever));
+
+		size_t i = 0;
 		for (const auto& entry: result.chunks.back().entries) {
 			result.keyVersions[entry.key] = entry.hash;
+			result.keyIndices.emplace_back(result.chunks.size() - 1, i++);
 		}
 	}
 
@@ -221,13 +244,11 @@ const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) co
 TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original) const
 {
 	TranslationStats result;
-	const auto& origKeys = original.keyVersions;
 
 	for (const auto& entry: entries) {
-		const auto iter = origKeys.find(entry.first);
-
-		if (iter != origKeys.end()) {
-			if (iter->second == entry.second.origVersion) {
+		auto version = original.tryGetVersion(entry.first);
+		if (version) {
+			if (version == entry.second.origVersion) {
 				result.translatedKeys++;
 			} else {
 				result.outdatedKeys++;

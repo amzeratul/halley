@@ -33,15 +33,15 @@ void LocalisationGrid::draw(UIPainter& painter) const
 	const auto clip = painter.getClip();
 	const Rect4f relClip = (clip ? *clip : getRect()) - getPosition();
 
-	const auto n = static_cast<int>(origData ? origData->entries.size() : 0);
+	const auto n = static_cast<int>(origData ? origData->getNumEntries() : 0);
 	const auto firstLine = clamp(static_cast<int>(std::floor(relClip.getTop() / lineHeight)) - 1, 0, n - 1);
 	const auto lastLine = clamp(static_cast<int>(std::ceil(relClip.getBottom() / lineHeight)) - 1, 0, n - 1);
 
 	Vector<float> columns;
 	const float width = getSize().x - 1;
-	const float dynamicWidth = std::floor((width - 100) / (translatedData && origData ? 2 : 1));
 	columns.push_back(40);
 	columns.push_back(250);
+	const float dynamicWidth = std::floor((width - std::accumulate(columns.begin(), columns.end(), 0.0f)) / (translatedData && origData ? 2 : 1));
 	if (origData) {
 		columns.push_back(dynamicWidth);
 	}
@@ -139,7 +139,7 @@ void LocalisationGrid::drawLine(UIPainter& painter, int idx, const Vector<float>
 	Vector<Colour4f> colours;
 
 	if (origData) {
-		const auto& entry = origData->entries.at(idx);
+		const auto& entry = origData->getEntry(idx);
 		strs.push_back(toString(idx + 1));
 		strs.push_back(entry.key);
 		strs.push_back(entry.value);
@@ -181,12 +181,12 @@ void LocalisationGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<cons
 	}
 }
 
-void LocalisationGrid::setData(LocOriginalDataChunk* origData, LocTranslationData* translatedData)
+void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationData* translatedData)
 {
 	this->origData = origData;
 	this->translatedData = translatedData;
 
-	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(origData ? static_cast<int>(origData->entries.size()) : 0) + 2)));
+	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(origData ? static_cast<int>(origData->getNumEntries()) : 0) + 2)));
 	setSelectedLine(0);
 }
 
@@ -197,7 +197,7 @@ int LocalisationGrid::getSelectedLine() const
 
 void LocalisationGrid::setSelectedLine(int line)
 {
-	if (!origData || line < 0 || line >= static_cast<int>(origData->entries.size())) {
+	if (!origData || line < 0 || line >= static_cast<int>(origData->getNumEntries())) {
 		selectedLine = {};
 	} else {
 		selectedLine = line;
@@ -207,7 +207,7 @@ void LocalisationGrid::setSelectedLine(int line)
 const String& LocalisationGrid::getSelectedKey() const
 {
 	if (origData && selectedLine) {
-		return origData->entries.at(*selectedLine).key;
+		return origData->getEntry(*selectedLine).key;
 	} else {
 		return String::emptyString();
 	}
@@ -216,7 +216,7 @@ const String& LocalisationGrid::getSelectedKey() const
 void LocalisationGrid::onMouseOver(Vector2f mousePos)
 {
 	const auto line = static_cast<int>((mousePos.y - getPosition().y) / lineHeight) - 1;
-	if (!origData || line < 0 || line >= static_cast<int>(origData->entries.size())) {
+	if (!origData || line < 0 || line >= static_cast<int>(origData->getNumEntries())) {
 		lineUnderMouse = {};
 	} else {
 		lineUnderMouse = line;
@@ -233,7 +233,7 @@ void LocalisationGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods
 	if (button == 0) {
 		if (selectedLine != lineUnderMouse) {
 			selectedLine = lineUnderMouse;
-			auto id = selectedLine ? origData->entries[*selectedLine].key : "";
+			auto id = selectedLine ? origData->getEntry(*selectedLine).key : "";
 			sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, selectedLine.value_or(-1)));
 		}
 	}

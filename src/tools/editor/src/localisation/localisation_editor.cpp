@@ -118,8 +118,8 @@ void LocalisationEditor::requestPopulateData()
 void LocalisationEditor::populateData()
 {
 	const auto origStats = originalLanguage.getStats();
-	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.language));
-	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.language));
+	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.getLanguage()));
+	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.getLanguage()));
 	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
 	getWidgetAs<UILabel>("keyCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalKeys)));
 
@@ -141,7 +141,7 @@ void LocalisationEditor::populateData()
 		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
 	}
 
-	bool canEditOriginal = canEditLanguage(originalLanguage.language);
+	bool canEditOriginal = canEditLanguage(originalLanguage.getLanguage());
 	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
 	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
 	{
@@ -152,7 +152,7 @@ void LocalisationEditor::populateData()
 	languagesContainer->clear();
 
 	for (const auto& lang: project.getProperties().getLanguages()) {
-		if (lang != originalLanguage.language) {
+		if (lang != originalLanguage.getLanguage()) {
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
 				addTranslationData(*languagesContainer, lang, origStats.totalKeys, canEdit);

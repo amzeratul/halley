@@ -45,7 +45,15 @@ namespace Halley {
 		void computeHash();
 	};
 
-	class LocOriginalDataChunk {
+	class ILocOriginalData {
+	public:
+		virtual ~ILocOriginalData() = default;
+
+		virtual size_t getNumEntries() const = 0;
+		virtual const LocalisationDataEntry& getEntry(size_t idx) const = 0;
+	};
+
+	class LocOriginalDataChunk : public ILocOriginalData {
 	public:
 		String name;
 		String category;
@@ -55,27 +63,36 @@ namespace Halley {
 		LocalisationStats getStats() const;
 		LocalisationStats getStats(const LocTranslationData& translated) const;
 
+		size_t getNumEntries() const override;
+		const LocalisationDataEntry& getEntry(size_t idx) const override;
+
 		bool operator<(const LocOriginalDataChunk& other) const;
 
 		void computeHash();
 	};
 
-	class LocOriginalData {
+	class LocOriginalData : public ILocOriginalData {
 	public:
-		I18NLanguage language;
-		Vector<LocOriginalDataChunk> chunks;
-		HashMap<String, LocalisationHashType> keyVersions;
-
+		const I18NLanguage& getLanguage() const;
 		LocalisationStats getStats() const;
 
-		LocOriginalDataChunk& getChunk(const String& name);
-		LocOriginalDataChunk* tryGetChunk(const String& name);
 		const LocOriginalDataChunk* tryGetChunk(const String& name) const;
+		const Vector<LocOriginalDataChunk>& getChunks() const;
 
 		LocalisationHashType getVersion(const String& key) const;
+		std::optional<LocalisationHashType> tryGetVersion(const String& key) const;
+
+		size_t getNumEntries() const override;
+		const LocalisationDataEntry& getEntry(size_t idx) const override;
 
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
+
+	private:
+		I18NLanguage language;
+		Vector<LocOriginalDataChunk> chunks;
+		HashMap<String, LocalisationHashType> keyVersions;
+		Vector<std::pair<size_t, size_t>> keyIndices;
 	};
 
 	class LocTranslationEntry {

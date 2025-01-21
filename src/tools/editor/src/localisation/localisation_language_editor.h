@@ -20,7 +20,7 @@ namespace Halley {
 		bool canEdit = false;
 		bool acceptingTextInput = false;
 
-		LocOriginalDataChunk* srcData = nullptr;
+		const ILocOriginalData* srcData = nullptr;
 
 		std::shared_ptr<LocalisationGrid> grid;
 
