@@ -11,7 +11,7 @@
 #include <shellapi.h>
 #endif
 
-#if defined(DEV_BUILD) && defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(__NX_TOOLCHAIN_MAJOR__)
 #include <nn/os.h>
 #endif
 
@@ -110,7 +110,7 @@ Vector<std::string> HalleyMain::getWin32Args()
 
 Vector<std::string> HalleyMain::getArgs(int argc, char* argv[])
 {
-#if defined(DEV_BUILD) && defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(__NX_TOOLCHAIN_MAJOR__)
 	argc = nn::os::GetHostArgc();
 	argv = nn::os::GetHostArgv();
 #endif
