@@ -299,7 +299,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
 void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
 {
     if (!entity.isSerializable()) {
-        Logger::logError("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
+        Logger::logDev("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
     }
 
     EntitySerializationContext serializationContext = {};
@@ -358,7 +358,8 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
     type = doDeserializeEntityUpdate(deserializer, entity, instanceUUID, prefabUUID, {}, context);
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
-        throw Exception("Not at end of entity network update byte stream", HalleyExceptions::Network);
+        Logger::logDev("Not at end of entity network update byte stream, " +
+            toString(deserializer.getBytesLeft()) + " bytes left", true);
     }
 }
 
@@ -371,7 +372,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     Expects(entity.isValid());
 
     if (!entity.isSerializable()) {
-        Logger::logError("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
+        Logger::logDev("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
     }
 
     if (parent) {
