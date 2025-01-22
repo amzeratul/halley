@@ -344,3 +344,11 @@ size_t Deserializer::getBytesRemaining() const
 		return size_t(src.size_bytes()) - pos;
 	}
 }
+
+void Deserializer::rewind(size_t position)
+{
+	if (position >= pos) {
+		throw Exception("Rewind position out of range.", HalleyExceptions::Utils);
+	}
+	pos = position;
+}

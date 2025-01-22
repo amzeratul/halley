@@ -596,6 +596,7 @@ namespace Halley {
 		size_t getPosition() const { return pos; }
 		size_t getBytesLeft() const { return src.size() - pos; }
 		void skipBytes(size_t len) { pos += len; }
+		void rewind(size_t position);
 
 	private:
 		size_t pos = 0;

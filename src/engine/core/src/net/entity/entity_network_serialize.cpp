@@ -5,6 +5,8 @@
 
 using namespace Halley;
 
+#define SERIALIZE_PARITY_BYTE 0xae
+
 thread_local Bytes EntityNetworkSerialize::scratchpad;
 
 thread_local HashSet<UUID> EntityNetworkSerialize::childrenAdded;
@@ -49,18 +51,14 @@ void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& 
     beginPage(serializer, Type::Entity);
     curPage.uuid = entity.getInstanceUUID();
 
-    bool isRootEntity = !parent.has_value();
-    serializer << isRootEntity;
-
-    if (isRootEntity) {
-        UUID parentUUID;
-        if (auto parentEntity = entity.tryGetParent()) {
-            parentUUID = parentEntity->getInstanceUUID();
-        }
-        serializer << parentUUID;
+    UUID parentInstanceUUID = {};
+    if (parent.has_value()) {
+        parentInstanceUUID = parent->getInstanceUUID();
     }
 
+    serializer << parentInstanceUUID;
     serializer << entity.getInstanceUUID();
+    serializer << entity.getPrefabUUID();
 
     uint8_t flags = 0;
     if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
@@ -69,7 +67,6 @@ void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& 
 
     serializer << entity.getName();
     serializer << flags;
-    serializer << entity.getPrefabUUID();
 
     const auto& prefabId = entity.getPrefabAssetId().value_or("");
     serializer << prefabId;
@@ -198,6 +195,10 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
             Expects(page.type == Type::Entity ||
                 page.type == Type::Component);
 
+#ifdef SERIALIZE_PARITY_BYTE
+            serializer << (uint8_t) SERIALIZE_PARITY_BYTE;
+#endif
+
             serializer << (uint8_t) page.type;
             serializer << (uint16_t) size;
 
@@ -274,7 +275,7 @@ const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const U
 
 EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources)
     : resources(resources)
-    , journal()
+    , hasComponentsAddedOrRemoved(false)
 {
     scratchpad.reserve(16384);
     scratchpad.resize_no_init(scratchpad.capacity());
@@ -339,52 +340,33 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
 
     EntityNetworkChanges::Type type;
     uint16_t size;
-
     fetchNextPage(deserializer, type, size);
 
-    while (type != EntityNetworkChanges::Type::Unknown) {
-        if (type != EntityNetworkChanges::Type::Entity) {
-            throw Exception("Unexpected entity network change type", HalleyExceptions::Network);
-        }
-
-        bool isRootEntity;
-        deserializer >> isRootEntity;
-
-        if (isRootEntity) {
-            UUID parentInstanceUUID;
-            deserializer >> parentInstanceUUID;
-
-            if (parentInstanceUUID.isValid()) {
-                if (auto p = opt.world->findEntity(parentInstanceUUID)) {
-                    entity.setParent(p.value());
-                } else {
-                    Logger::logError("Parent to attach to not found!");
-                }
-            }
-        }
-
-        UUID instanceUUID;
-        deserializer >> instanceUUID;
-
-        std::optional<EntityRef> parentEntity;
-        std::optional<EntityRef> childEntity;
-
-        if (isRootEntity) {
-            childEntity = entity;
-            Expects(entity.getInstanceUUID() == instanceUUID);
-        } else {
-            childEntity = opt.world->findEntity(instanceUUID);
-        }
-
-        type = doDeserializeEntityUpdate(deserializer, childEntity.value(), parentEntity, context);
+    if (type != EntityNetworkChanges::Type::Entity) {
+        throw Exception("Unexpected entity network change type", HalleyExceptions::Network);
     }
 
-    if (deserializer.getBytesLeft() != 0) {
+    UUID parentInstanceUUID;
+    deserializer >> parentInstanceUUID;
+
+    UUID instanceUUID;
+    deserializer >> instanceUUID;
+
+    UUID prefabUUID;
+    deserializer >> prefabUUID;
+
+    type = doDeserializeEntityUpdate(deserializer, entity, instanceUUID, prefabUUID, {}, context);
+
+    if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         throw Exception("Not at end of entity network update byte stream", HalleyExceptions::Network);
     }
 }
 
-EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
+// See EntityFactory::updateEntityNode().
+EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
+    Deserializer& deserializer, EntityRef& entity,
+    const UUID& instanceUUID, const UUID& prefabUUID,
+    std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
     Expects(entity.isValid());
 
@@ -396,47 +378,46 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         entity.setParent(parent.value());
     }
 
+    context->setCurrentEntity(entity.getEntityId());
+
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
-    context->setCurrentEntity(entity.getEntityId());
+    // Entity
 
-    {
-        String name;
-        deserializer >> name;
+    String name;
+    deserializer >> name;
+    entity.setName(name);
 
-        entity.setName(name);
+    uint8_t flags;
+    deserializer >> flags;
 
-        uint8_t flags;
-        deserializer >> flags;
+    entity.setSelectable((flags & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
+    entity.setSerializable((flags & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
+    bool enabled = (flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0;
 
-        entity.setSelectable((flags & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
-        entity.setSerializable((flags & static_cast<uint8_t>(EntityData::Flag::NotSerializable)) == 0);
-        entity.setEnabled((flags & static_cast<uint8_t>(EntityData::Flag::Disabled)) == 0);
+    // TODO: see EntityFactory::updateEntityNode()
+    // - variants and rules
 
-        // TODO: see EntityFactory::updateEntityNode()
-        // - variants and rules
+    entity.setEnabled(enabled);
 
-        UUID prefabUUID;
-        deserializer >> prefabUUID;
+    String prefabId;
+    deserializer >> prefabId;
 
-        String prefabId;
-        deserializer >> prefabId;
+    entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 
-        entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
-    }
-
+    // Components
     EntityNetworkChanges::Type type;
     uint16_t size;
 
     fetchNextPage(deserializer, type, size);
 
     while (type == EntityNetworkChanges::Type::Component) {
-        uint16_t componentId, componentSize;
-
+        uint16_t componentId;
         deserializer >> componentId;
-        componentSize = size;
+
+        uint16_t componentSize = size;
 
         const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
 
@@ -446,12 +427,39 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
             // TODO:
             if (componentSize > 0) {
                 deserializer.skipBytes(componentSize);
-                Logger::logError("No reflector found or deserialize failed, componentId=" + toString(componentId), true);
+                Logger::logError("No reflector found or deserialize failed, componentId=" + toString(componentId), false);
             }
         }
 
         fetchNextPage(deserializer, type, size);
     }
+
+    // Children
+    while (type == EntityNetworkChanges::Type::Entity) {
+        size_t marker = deserializer.getPosition();
+
+        UUID parentInstanceUUID;
+        deserializer >> parentInstanceUUID;
+
+        UUID childInstanceUUID;
+        deserializer >> childInstanceUUID;
+
+        UUID childPrefabUUID;
+        deserializer >> childPrefabUUID;
+
+        auto childEntity = findChildEntity(entity, childInstanceUUID);
+
+        if (childEntity) {
+            type = doDeserializeEntityUpdate(deserializer, childEntity.value(), childInstanceUUID, childPrefabUUID, entity, context);
+        } else {
+            // Not a child entity, so it should be a sibling, or child of sibling, further up the
+            // call chain. Need to rewind the deserializer, so the caller can read the UUIDs again.
+            deserializer.rewind(marker);
+            break;
+        }
+    }
+
+    context->setCurrentEntity(EntityId());
 
     return type;
 }
@@ -618,6 +626,14 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
     size = 0;
 
     if (deserializer.getBytesLeft() > 0) {
+#ifdef SERIALIZE_PARITY_BYTE
+        uint8_t parity;
+        deserializer >> parity;
+        if (parity != SERIALIZE_PARITY_BYTE) {
+            throw Exception("Not a valid entity change page", HalleyExceptions::Network);
+        }
+#endif
+
         uint8_t t;
         deserializer >> t;
         type = (EntityNetworkChanges::Type) t;
@@ -634,5 +650,21 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
             deserializer >> s;
             size = s;
         }
+    } else if (type != EntityNetworkChanges::Type::Unknown) {
+        throw Exception("Not a valid entity change page", HalleyExceptions::Network);
     }
+}
+
+std::optional<EntityRef> EntityNetworkSerialize::findChildEntity(const EntityRef& entity, const UUID& instanceUUID)
+{
+    for (auto child : entity.getChildren()) {
+        if (child.getInstanceUUID() == instanceUUID) {
+            return child;
+        }
+        if (const auto descend = findChildEntity(child, instanceUUID)) {
+            return descend;
+        }
+    }
+
+    return {};
 }

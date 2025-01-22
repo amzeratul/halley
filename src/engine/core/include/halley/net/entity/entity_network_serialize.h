@@ -96,9 +96,13 @@ namespace Halley {
 
     private:
         void doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent);
-        EntityNetworkChanges::Type doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
+
+        EntityNetworkChanges::Type doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity,
+            const UUID& instanceUUID, const UUID& prefabUUID,
+            std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size);
+        static std::optional<EntityRef> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         Resources& resources;
         EntityNetworkChanges journal;
