@@ -25,6 +25,8 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 	Json::Value root;
 	auto& keys = root["keys"];
 	auto& values = root["values"];
+	keys = Json::Value();
+	values = Json::Value();
 
 	for (int i = 0; i < n; ++i) {
 		const auto& entry = origData.getEntry(i);
@@ -39,7 +41,7 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 	data.resize(str.length());
 	memcpy(data.data(), str.c_str(), data.size());
 
-	const auto url = baseURL + "/strings-chunk/" + project + "/" + origData.name;
+	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
 	Logger::logDev("Sending " + String::prettySize(data.size()) + " to " + url);
 
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);

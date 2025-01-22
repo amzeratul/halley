@@ -260,3 +260,42 @@ Vector<char> Encode::decodeRLE(const Vector<char>& in)
 	}
 	return result;
 }
+
+String Encode::encodeURL(std::string_view in)
+{
+	auto isValid = [] (char c)
+	{
+		return (c >= 'A' && c <= 'Z')
+			|| (c >= 'a' && c <= 'z')
+			|| (c >= '0' && c <= '9')
+			|| (c == '-')
+			|| (c == '.')
+			|| (c == '_')
+			|| (c == '~');
+	};
+
+	char buffer[4];
+	buffer[0] = '%';
+	buffer[3] = 0;
+
+	size_t len = 0;
+	for (auto c: in) {
+		len += isValid(c) ? 1 : 3;
+	}
+
+	std::string result;
+	result.reserve(len);
+
+	for (auto c: in) {
+		if (isValid(c)) {
+			result += c;
+		} else {
+			const auto b = uint8_t(c);
+			buffer[1] = base16dict[(b & 0xf0) >> 4];
+			buffer[2] = base16dict[b & 0x0f];
+			result += buffer;
+		}
+	}
+
+	return result;
+}
