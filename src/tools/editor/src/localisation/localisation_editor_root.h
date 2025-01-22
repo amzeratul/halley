@@ -5,7 +5,7 @@ namespace Halley {
 
 	class LocalisationEditorRoot : public UIWidget {
     public:
-        LocalisationEditorRoot(Project& project, UIFactory& factory);
+        LocalisationEditorRoot(Project& project, UIFactory& factory, const HalleyAPI& api);
 
         void drillDown(std::shared_ptr<UIWidget> widget);
         void returnToRoot();

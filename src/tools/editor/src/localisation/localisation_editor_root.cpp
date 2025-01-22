@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-LocalisationEditorRoot::LocalisationEditorRoot(Project& project, UIFactory& factory)
+LocalisationEditorRoot::LocalisationEditorRoot(Project& project, UIFactory& factory, const HalleyAPI& api)
 	: UIWidget("localisation_editor_root", {}, UISizer(UISizerType::Vertical))
 	, project(project)
 	, factory(factory)
@@ -12,7 +12,7 @@ LocalisationEditorRoot::LocalisationEditorRoot(Project& project, UIFactory& fact
 	setupCountryNames();
 	setupLanguageNames();
 
-	editor = std::make_shared<LocalisationEditor>(*this, project, factory);
+	editor = std::make_shared<LocalisationEditor>(*this, project, factory, api);
 
 	add(editor, 1);
 }

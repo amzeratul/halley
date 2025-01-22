@@ -7,6 +7,43 @@
 
 using namespace Halley;
 
+namespace {
+	String getNumberWithCommas(int number)
+	{
+		if (number >= 1'000'000) {
+			return toString(number / 1'000'000) + "," + toString((number % 1000000) / 1000, 10, 3) + "," + toString(number % 1000, 10, 3);
+		} else if (number >= 1000) {
+			return toString(number / 1000) + "," + toString(number % 1000, 10, 3);
+		} else {
+			return toString(number);
+		}
+	}
+
+	float getPercent(int cur, int total)
+	{
+		// Note: round to closest per thousand, don't report 0 unless there are 0 keys, don't report 100% unless we have every key
+		if (cur == 0) {
+			return 0.0f;
+		} else if (cur == total) {
+			return 100.0f;
+		}
+
+		const auto result = std::round(static_cast<float>(cur) * 1000.0f / static_cast<float>(total)) / 10.0f;
+		return clamp(result, 0.1f, 99.9f);
+	}
+
+	String getCurrencyString(float value, const String& currency)
+	{
+		if (currency == "GBP") {
+			return u8"£" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+		}
+		if (currency == "USD") {
+			return u8"$" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+		}
+		return toString(value, 2) + " " + currency;
+	}
+}
+
 LocalisationInfoRetriever::LocalisationInfoRetriever(Project& project)
 	: project(project)
 {
@@ -21,11 +58,12 @@ String LocalisationInfoRetriever::getCategory(const String& assetId) const
 	}
 }
 
-LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory)
+LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, const HalleyAPI& api)
 	: UIWidget("localisation_editor", {}, UISizer())
 	, root(root)
     , project(project)
 	, factory(factory)
+	, api(api)
 {
 }
 
@@ -46,6 +84,11 @@ void LocalisationEditor::update(Time t, bool moved)
 void LocalisationEditor::onMakeUI()
 {
 	requestPopulateData();
+
+	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
+	{
+		uploadOriginalStrings();
+	});
 }
 
 void LocalisationEditor::onActiveChanged(bool active)
@@ -67,6 +110,8 @@ void LocalisationEditor::load()
 	loaded = true;
 	factory.loadUI(*this, "halley/localisation_editor");
 	project.addAssetLoadedListener(this);
+
+	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
 }
 
 void LocalisationEditor::loadFromResources()
@@ -91,17 +136,6 @@ void LocalisationEditor::loadFromResources()
 	});
 }
 
-String LocalisationEditor::getNumberWithCommas(int number) const
-{
-	if (number >= 1'000'000) {
-		return toString(number / 1'000'000) + "," + toString((number % 1000000) / 1000, 10, 3) + "," + toString(number % 1000, 10, 3);
-	} else if (number >= 1000) {
-		return toString(number / 1000) + "," + toString(number % 1000, 10, 3);
-	} else {
-		return toString(number);
-	}
-}
-
 void LocalisationEditor::requestPopulateData()
 {
 	if (loaded) {
@@ -122,6 +156,18 @@ void LocalisationEditor::populateData()
 	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.getLanguage()));
 	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
 	getWidgetAs<UILabel>("keyCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalKeys)));
+
+	HashMap<String, float> costPerWord;
+	for (auto& lang: project.getProperties().getLanguages()) {
+		if (auto cost = project.getProperties().getLanguageCost(lang)) {
+			costPerWord[cost->second] += cost->first;
+		}
+	}
+	Vector<String> costStrs;
+	for (const auto& [currency, cost]: costPerWord) {
+		costStrs += getCurrencyString(cost * origStats.totalWords, currency);
+	}
+	getWidgetAs<UILabel>("totalCost")->setText(LocalisedString::fromUserString(String::concatList(costStrs, " + ")));
 
 	auto labelStyle = factory.getStyle("label");
 	auto labelLightStyle = factory.getStyle("labelLight");
@@ -155,30 +201,15 @@ void LocalisationEditor::populateData()
 		if (lang != originalLanguage.getLanguage()) {
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
-				addTranslationData(*languagesContainer, lang, origStats.totalKeys, canEdit);
+				addTranslationData(*languagesContainer, lang, origStats.totalKeys, origStats.totalWords, canEdit);
 			}
 		}
 	}
 }
 
-namespace {
-	float getPercent(int cur, int total)
-	{
-		// Note: round to closest per thousand, don't report 0 unless there are 0 keys, don't report 100% unless we have every key
-		if (cur == 0) {
-			return 0.0f;
-		} else if (cur == total) {
-			return 100.0f;
-		}
-
-		const auto result = std::round(static_cast<float>(cur) * 1000.0f / static_cast<float>(total)) / 10.0f;
-		return clamp(result, 0.1f, 99.9f);
-	}
-}
-
-void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit)
+void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int origTotalKeys, int totalWords, bool canEdit)
 {
-	totalKeys = std::max(totalKeys, 1); // Avoid divisions by zero
+	const auto totalKeys = std::max(origTotalKeys, 1); // Avoid divisions by zero
 
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 	widget->layout();
@@ -203,6 +234,12 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
+	auto cost = project.getProperties().getLanguageCost(language);
+	widget->getWidget("costBox")->setActive(cost.has_value());
+	if (cost) {
+		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
+	}
+
 	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = language, canEdit] (const UIEvent& event)
 	{
 		openLanguage(&localised.at(language.getISOCode()), canEdit);
@@ -226,4 +263,21 @@ bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 {
 	// TODO
 	return true;
+}
+
+void LocalisationEditor::uploadOriginalStrings()
+{
+	Vector<Future<bool>> results;
+	for (const auto& chunk: originalLanguage.getChunks()) {
+		results.push_back(client->postOriginalStrings(chunk));
+	}
+	Concurrent::whenAll(results.begin(), results.end()).wait();
+
+	bool allOK = true;
+	for (auto& result: results) {
+		allOK = result.get() && allOK;
+	}
+	if (!allOK) {
+		Logger::logError("Unable to upload strings");
+	}
 }

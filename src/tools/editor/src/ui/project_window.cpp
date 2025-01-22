@@ -163,7 +163,7 @@ void ProjectWindow::makePagedPane()
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto remotes = std::make_shared<RemotesWindow>(factory, *this);
-	auto localisation = std::make_shared<LocalisationEditorRoot>(project, factory);
+	auto localisation = std::make_shared<LocalisationEditorRoot>(project, factory, getAPI());
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);

@@ -93,6 +93,15 @@ const Vector<I18NLanguage>& ProjectProperties::getLanguages() const
 	return languages;
 }
 
+std::optional<std::pair<float, String>> ProjectProperties::getLanguageCost(const I18NLanguage& language) const
+{
+	if (const auto iter = languageCosts.find(language.getISOCode()); iter != languageCosts.end()) {
+		auto split = iter->second.split(' ');
+		return std::pair{ split[0].toFloat(), split.size() >= 2 ? split[1] : "" };
+	}
+	return std::nullopt;
+}
+
 void ProjectProperties::loadDefaults()
 {
 	uuid = UUID::generate();
@@ -142,6 +151,9 @@ void ProjectProperties::load()
 		}
 		if (node.hasKey("languages")) {
 			languages = node["languages"].asVector<I18NLanguage>();
+		}
+		if (node.hasKey("languageCosts")) {
+			languageCosts = node["languageCosts"].asHashMap<String, String>();
 		}
 	}
 }

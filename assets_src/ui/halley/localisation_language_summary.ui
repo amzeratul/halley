@@ -83,3 +83,26 @@ children:
       id: edit
       size: [100, 0]
       text: Edit...
+  - uuid: ecee5ce4-673b-4752-a09f-5c859b7a3744
+    border: [6, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      columns: 2
+      gap: 10
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: costBox
+      image: halley_ui/ui_list_item.png
+      innerBorder: [0, 2, 0, 2]
+      size: [100, 0]
+    children:
+      - uuid: 5c961807-af82-40bc-b9c0-a2d2cdf0201f
+        widget:
+          class: label
+          id: cost
+          text: 0
+          wordWrapped: false
+        fill: [centreHorizontal, centreVertical]
+    fill: [left, centreVertical]

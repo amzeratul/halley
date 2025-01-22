@@ -1,5 +1,6 @@
 #pragma once
 
+#include "localisation_client.h"
 #include "localisation_data.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
@@ -20,7 +21,7 @@ namespace Halley {
 
 	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
-        LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory);
+        LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, const HalleyAPI& api);
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
@@ -32,6 +33,9 @@ namespace Halley {
         LocalisationEditorRoot& root;
         Project& project;
         UIFactory& factory;
+        const HalleyAPI& api;
+
+        std::unique_ptr<LocalisationClient> client;
 
         LocOriginalData originalLanguage;
         HashMap<String, LocTranslationData> localised;
@@ -47,15 +51,16 @@ namespace Halley {
         void load();
 
         void loadFromResources();
-        String getNumberWithCommas(int number) const;
 
         void requestPopulateData();
         void populateData();
-        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
+        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, int totalWords, bool canEdit);
 
         void openLanguage(LocTranslationData* localisationData, bool canEdit);
 
         bool canViewLanguage(const I18NLanguage& language) const;
         bool canEditLanguage(const I18NLanguage& language) const;
+
+        void uploadOriginalStrings();
     };
 }

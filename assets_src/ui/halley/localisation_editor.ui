@@ -16,7 +16,7 @@ children:
       - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
         widget:
           class: button
-          enabled: false
+          enabled: true
           icon: ui/upload.png
           id: upload
           size: [250, 0]
@@ -156,6 +156,36 @@ children:
                 widget:
                   class: label
                   id: keyCount
+                  text: 0
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+            fill: [left, fillVertical]
+          - uuid: 0cabc038-0e51-4224-b3b4-17ba5968a89d
+            widget:
+              class: label
+              id: ""
+              text: "Current total cost:"
+              wordWrapped: false
+            fill: left
+          - uuid: 0917043e-72c2-474c-8b74-13250dc8740a
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 10
+              type: vertical
+            widget:
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [0, 2, 0, 2]
+              size: [100, 0]
+            children:
+              - uuid: 6ee4e18a-e643-4d93-9802-2849ed3ad332
+                widget:
+                  class: label
+                  id: totalCost
                   text: 0
                   wordWrapped: false
                 fill: [centreHorizontal, centreVertical]

@@ -15,6 +15,7 @@ void initSDLInputPlugin(IPluginRegistry &registry);
 void initAsioPlugin(IPluginRegistry &registry);
 void initDX11Plugin(IPluginRegistry &registry);
 void initMetalPlugin(IPluginRegistry &registry);
+void initHTTPLibPlugin(IPluginRegistry& registry);
 
 HalleyEditor::HalleyEditor()
 {
@@ -30,6 +31,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	initAsioPlugin(registry);
 	initSDLAudioPlugin(registry);
 	initSDLInputPlugin(registry);
+	initHTTPLibPlugin(registry);
 
 #ifdef _WIN32
 	initDX11Plugin(registry);
@@ -39,7 +41,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	initOpenGLPlugin(registry);
 #endif
 	
-	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
+	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network | HalleyAPIFlags::Web;
 }
 
 ResourceOptions HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)

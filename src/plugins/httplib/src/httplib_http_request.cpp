@@ -37,10 +37,10 @@ HTTPLibHTTPRequest::HTTPLibHTTPRequest(HTTPMethod method, std::pair<String, Stri
 	};
 }
 
-void HTTPLibHTTPRequest::setPostData(const String& contentType, const Bytes& data)
+void HTTPLibHTTPRequest::setBody(const String& contentType, const Bytes& data)
 {
 	this->contentType = contentType;
-	postData = data;
+	body = data;
 }
 
 void HTTPLibHTTPRequest::setHeader(const String& headerName, const String& headerValue)
@@ -57,19 +57,19 @@ httplib::Result HTTPLibHTTPRequest::run()
 {
 	using namespace std::chrono_literals;
 	httplib::Client client(host.cppStr());
-	client.set_write_timeout(2s);
-	client.set_read_timeout(2s);
+	client.set_write_timeout(20s);
+	client.set_read_timeout(20s);
 
 	if (method == HTTPMethod::GET) {
 		return client.Get(path.cppStr(), headers, progress);
 	} else if (method == HTTPMethod::POST) {
-		return client.Post(path.cppStr(), headers, reinterpret_cast<const char*>(postData.data()), postData.size(), contentType.cppStr());
+		return client.Post(path.cppStr(), headers, reinterpret_cast<const char*>(body.data()), body.size(), contentType.cppStr());
 	} else if (method == HTTPMethod::PUT) {
-		return client.Put(path.cppStr(), headers, reinterpret_cast<const char*>(postData.data()), postData.size(), contentType.cppStr());
+		return client.Put(path.cppStr(), headers, reinterpret_cast<const char*>(body.data()), body.size(), contentType.cppStr());
 	} else if (method == HTTPMethod::DELETE) {
 		return client.Delete(path.cppStr(), headers);
 	} else if (method == HTTPMethod::PATCH) {
-		return client.Patch(path.cppStr(), headers, reinterpret_cast<const char*>(postData.data()), postData.size(), contentType.cppStr());
+		return client.Patch(path.cppStr(), headers, reinterpret_cast<const char*>(body.data()), body.size(), contentType.cppStr());
 	} else {
 		throw Exception("Unknwown HTTP method: " + toString(method), HalleyExceptions::Web);
 	}

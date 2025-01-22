@@ -26,12 +26,6 @@ LocalisationDataEntry::LocalisationDataEntry(String key, String value, String co
 {
 }
 
-void LocalisationDataEntry::computeHash()
-{
-	// TODO
-	hash = 0;
-}
-
 namespace {
 	int getWordCount(const String& line)
 	{
@@ -132,7 +126,7 @@ const Vector<LocOriginalDataChunk>& LocOriginalData::getChunks() const
 	return chunks;
 }
 
-LocalisationHashType LocOriginalData::getVersion(const String& key) const
+int32_t LocOriginalData::getVersion(const String& key) const
 {
 	const auto iter = keyVersions.find(key);
 	if (iter != keyVersions.end()) {
@@ -141,7 +135,7 @@ LocalisationHashType LocOriginalData::getVersion(const String& key) const
 	return 0;
 }
 
-std::optional<LocalisationHashType> LocOriginalData::tryGetVersion(const String& key) const
+std::optional<int32_t> LocOriginalData::tryGetVersion(const String& key) const
 {
 	const auto iter = keyVersions.find(key);
 	if (iter != keyVersions.end()) {
@@ -219,7 +213,7 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 
 		size_t i = 0;
 		for (const auto& entry: result.chunks.back().entries) {
-			result.keyVersions[entry.key] = entry.hash;
+			result.keyVersions[entry.key] = entry.version;
 			result.keyIndices.emplace_back(result.chunks.size() - 1, i++);
 		}
 	}
@@ -227,7 +221,7 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 	return result;
 }
 
-void LocTranslationData::setValue(const String& key, LocalisationHashType curVersion, String value)
+void LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
 {
 	entries[key] = LocTranslationEntry{ std::move(value), curVersion };
 }
