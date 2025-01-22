@@ -180,10 +180,12 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
 	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
-	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() +
+		") with EntityNetworkId (" + result.networkId +
+		") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
-	
+
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
@@ -316,7 +318,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	if (entityData->getParentUUID().isValid()) {
 		// The same check is done below, but the entity has already been created then.
 		if (!parent->getWorld().findEntity(entityData->getParentUUID())) {
-			Logger::logError("Parent " + toString(entityData->getParentUUID()) + " not found trying to instantiate network entity");
+			Logger::logError("Parent " + toString(entityData->getParentUUID()) + " not found trying to instantiate network entity " + msg.entityId);
 			return;
 		}
 	}
