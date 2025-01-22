@@ -267,17 +267,8 @@ bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 
 void LocalisationEditor::uploadOriginalStrings()
 {
-	Vector<Future<bool>> results;
-	for (const auto& chunk: originalLanguage.getChunks()) {
-		results.push_back(client->postOriginalStrings(chunk));
-	}
-	Concurrent::whenAll(results.begin(), results.end()).wait();
-
-	bool allOK = true;
-	for (auto& result: results) {
-		allOK = result.get() && allOK;
-	}
-	if (!allOK) {
-		Logger::logError("Unable to upload strings");
-	}
+	client->postOriginalStrings(originalLanguage).then([] (bool result)
+	{
+		Logger::logInfo("Done posting to server, result was: " + toString(result));
+	});
 }
