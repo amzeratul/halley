@@ -49,10 +49,9 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 	const auto data = jsonToBytes(root);
 
 	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
-	Logger::logDev("Sending " + String::prettySize(data.size()) + " to " + url);
-
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
 	request->setBody("application/json", data);
+
 	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
 	{
 		Logger::logDev("Got response: " + toString(response->getResponseCode()));
@@ -62,7 +61,20 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 
 Future<LocOriginalData> LocalisationClient::getOriginalStrings(const LocOriginalData& origData) const
 {
-	return Future<LocOriginalData>::makeImmediate({});
+	int minVersion = 0; // TODO
+	String languages = ""; // TODO
+
+	const auto url = baseURL + "/strings/" + Encode::encodeURL(project) + "?minVersion=" + toString(minVersion) + "&languages=" + Encode::encodeURL(languages);
+	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
+
+	return request->send().then([] (std::unique_ptr<HTTPResponse> response) -> LocOriginalData
+	{
+		if (response->getResponseCode() == 200) {
+			auto body = response->getBody();
+			Logger::logDev("Got a response of size " + String::prettySize(body.size()));
+		}
+		return {};
+	});
 }
 
 void LocalisationClient::addChunkToJsonObject(const LocOriginalDataChunk& data, Json::Value& dst) const

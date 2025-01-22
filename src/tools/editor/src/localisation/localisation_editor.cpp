@@ -271,4 +271,6 @@ void LocalisationEditor::uploadOriginalStrings()
 	{
 		Logger::logInfo("Done posting to server, result was: " + toString(result));
 	});
+
+	client->getOriginalStrings({});
 }
