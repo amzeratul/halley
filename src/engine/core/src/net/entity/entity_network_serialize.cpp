@@ -171,7 +171,8 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
         size_t size = page.to - page.from;
 
         if (page.type == Type::Entity) {
-            if (!page.modified) {
+            // The check for page 0 is important here - we don't want to skip the root entity!
+            if (p > 0 && !page.modified) {
                 skip = true;
                 p++;
 
