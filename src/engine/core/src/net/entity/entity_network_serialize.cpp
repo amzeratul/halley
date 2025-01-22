@@ -427,7 +427,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
             // TODO:
             if (componentSize > 0) {
                 deserializer.skipBytes(componentSize);
-                Logger::logError("No reflector found or deserialize failed, componentId=" + toString(componentId), false);
+                Logger::logDev("No reflector found or deserialize failed, componentId=" + toString(componentId));
             }
         }
 
