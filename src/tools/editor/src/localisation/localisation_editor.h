@@ -6,6 +6,7 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class LocalisationEditorRoot;
 
     class LocalisationInfoRetriever : public ILocalisationInfoRetriever {
@@ -21,8 +22,8 @@ namespace Halley {
 
 	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
-        LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, const HalleyAPI& api);
-        ~LocalisationEditor();
+        LocalisationEditor(LocalisationEditorRoot& root, ProjectWindow& projectWindow, UIFactory& factory);
+        ~LocalisationEditor() override;
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
@@ -32,6 +33,7 @@ namespace Halley {
 
     private:
         LocalisationEditorRoot& root;
+        ProjectWindow& projectWindow;
         Project& project;
         UIFactory& factory;
         const HalleyAPI& api;

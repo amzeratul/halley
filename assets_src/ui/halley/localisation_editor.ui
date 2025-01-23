@@ -83,6 +83,7 @@ children:
         children:
           - uuid: 58b99f4c-1c02-4c74-a82c-2b22671efe70
             proportion: 0
+            border: [0, 0, 20, 0]
             sizer:
               columnProportions: []
               gap: 10
@@ -111,7 +112,7 @@ children:
                 fill: [centreHorizontal, centreVertical]
             fill: [centreHorizontal, centreVertical]
           - uuid: 659bc489-6c03-4a4d-85a3-05512e7a2c9d
-            proportion: 1
+            proportion: 0
             border: [0, 0, 0, 0]
             widget:
               class: button
@@ -119,6 +120,7 @@ children:
               size: [120, 0]
               text: Sign Out
             fill: [centreHorizontal, centreVertical]
+        fill: [centreHorizontal, fillVertical]
       - uuid: cd7bf4db-1bc8-4932-9aef-a9703b710198
         proportion: 1
         sizer:

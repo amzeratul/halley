@@ -4,6 +4,7 @@
 #include "localisation_language_editor.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -58,12 +59,13 @@ String LocalisationInfoRetriever::getCategory(const String& assetId) const
 	}
 }
 
-LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, const HalleyAPI& api)
+LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWindow& projectWindow, UIFactory& factory)
 	: UIWidget("localisation_editor", {}, UISizer())
 	, root(root)
-    , project(project)
+    , projectWindow(projectWindow)
+	, project(projectWindow.getProject())
 	, factory(factory)
-	, api(api)
+	, api(projectWindow.getAPI())
 	, aliveFlag(std::make_shared<bool>(true))
 {
 	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
@@ -97,6 +99,12 @@ void LocalisationEditor::onMakeUI()
 	{
 		auto username = getWidgetAs<UITextInput>("username")->getText();
 		auto password = getWidgetAs<UITextInput>("password")->getText();
+
+		ConfigNode credentials;
+		credentials["username"] = username;
+		credentials["password"] = password;
+		projectWindow.setSetting(EditorSettingType::Project, "localisation_credentials", std::move(credentials));
+
 		signIn(username, password);
 	});
 
@@ -104,6 +112,10 @@ void LocalisationEditor::onMakeUI()
 	{
 		signOut();
 	});
+
+	const auto& credentials = projectWindow.getSetting(EditorSettingType::Project, "localisation_credentials");
+	getWidgetAs<UITextInput>("username")->setText(credentials["username"].asString(""));
+	getWidgetAs<UITextInput>("password")->setText(credentials["password"].asString(""));
 }
 
 void LocalisationEditor::update(Time t, bool moved)
@@ -304,7 +316,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
 	auto cost = project.getProperties().getLanguageCost(translationData.language);
-	widget->getWidget("costBox")->setActive(cost.has_value());
+	widget->getWidget("costBox")->setActive(isDevEnvironment() && cost.has_value());
 	if (cost) {
 		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
 	}
