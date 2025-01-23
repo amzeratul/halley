@@ -68,7 +68,7 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWind
 	, api(projectWindow.getAPI())
 	, aliveFlag(std::make_shared<bool>(true))
 {
-	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
+	client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName());
 }
 
 LocalisationEditor::~LocalisationEditor()
@@ -277,7 +277,7 @@ void LocalisationEditor::populateTranslationData()
 	auto languagesContainer = getWidget("languages");
 	languagesContainer->clear();
 
-	for (const auto& lang: project.getProperties().getLanguages()) {
+	for (const auto& lang: getLanguages()) {
 		if (lang != originalLanguage.getLanguage()) {
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
@@ -398,8 +398,7 @@ void LocalisationEditor::importLanguage(const I18NLanguage& language)
 
 bool LocalisationEditor::isDevEnvironment() const
 {
-	// TODO
-	return true;
+	return project.getProperties().isDevEnvironment();
 }
 
 bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
@@ -462,4 +461,34 @@ void LocalisationEditor::uploadOriginalStrings()
 void LocalisationEditor::downloadTranslations()
 {
 	// TODO
+}
+
+Vector<I18NLanguage> LocalisationEditor::getLanguages() const
+{
+	auto projLangs = project.getProperties().getLanguages();
+	if (localStrings) {
+		for (const auto& loc: localStrings->localised) {
+			auto lang = I18NLanguage(loc.first);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	if (remoteStrings) {
+		for (const auto& loc: remoteStrings->localised) {
+			auto lang = I18NLanguage(loc.first);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	for (auto& langId: client->getLanguages()) {
+		if (langId != "*") {
+			auto lang = I18NLanguage(langId);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	return projLangs;
 }

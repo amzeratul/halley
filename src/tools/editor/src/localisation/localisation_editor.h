@@ -89,5 +89,7 @@ namespace Halley {
 
 		void uploadOriginalStrings();
         void downloadTranslations();
+
+        Vector<I18NLanguage> getLanguages() const;
     };
 }

@@ -36,6 +36,9 @@ namespace Halley {
 
     	std::optional<std::pair<float, String>> getLanguageCost(const I18NLanguage& language) const;
 
+    	const String& getLocalisationServer() const;
+        bool isDevEnvironment() const;
+
 	private:
 		const Path& propertiesFile;
     	UUID uuid;
@@ -48,6 +51,8 @@ namespace Halley {
     	bool importByExtension = false;
     	float defaultZoom = 1.0f;
     	Vector<String> platforms;
+        String localisationServer;
+        bool devEnviromnent = true;
 
     	bool dirty = false;
 
