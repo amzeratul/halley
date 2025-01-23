@@ -72,22 +72,32 @@ void LocalisationEditor::update(Time t, bool moved)
 	if (!loaded && project.isDLLLoaded()) {
 		load();
 	}
-	if (waitingToPopulate.isValid() && waitingToPopulate.isReady()) {
-		auto result = waitingToPopulate.get();
-		originalLanguage = std::move(result.originalLanguage);
-		localised = std::move(result.localised);
-		waitingToPopulate = {};
+
+	if (localStringsFuture.isReady()) {
+		localStrings = localStringsFuture.get();
+		localStringsFuture = {};
+		populateData();
+	}
+
+	if (remoteStringsFuture.isReady()) {
+		remoteStrings = remoteStringsFuture.get();
+		remoteStringsFuture = {};
 		populateData();
 	}
 }
 
 void LocalisationEditor::onMakeUI()
 {
-	requestPopulateData();
+	requestPopulateDataFromResources();
 
 	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
 	{
 		uploadOriginalStrings();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
+	{
+		openOriginalLanguage(true);
 	});
 }
 
@@ -101,7 +111,7 @@ void LocalisationEditor::onActiveChanged(bool active)
 void LocalisationEditor::onAssetsLoaded()
 {
 	if (isActiveInHierarchy() && project.isDLLLoaded()) {
-		requestPopulateData();
+		requestPopulateDataFromResources();
 	}
 }
 
@@ -112,11 +122,17 @@ void LocalisationEditor::load()
 	project.addAssetLoadedListener(this);
 
 	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
+	loadCurrentStrings();
 }
 
-void LocalisationEditor::loadFromResources()
+void LocalisationEditor::loadData()
 {
-	waitingToPopulate = Concurrent::execute([info = LocalisationInfoRetriever(project)]() -> Result
+	loadOriginalDataFromDisk();
+}
+
+void LocalisationEditor::loadOriginalDataFromDisk()
+{
+	localStringsFuture = Concurrent::execute([info = LocalisationInfoRetriever(project)]() -> Result
 	{
 		Result result;
 		auto& project = info.getProject();
@@ -136,10 +152,10 @@ void LocalisationEditor::loadFromResources()
 	});
 }
 
-void LocalisationEditor::requestPopulateData()
+void LocalisationEditor::requestPopulateDataFromResources()
 {
 	if (loaded) {
-		loadFromResources();
+		loadData();
 	} else {
 		if (project.isDLLLoaded()) {
 			load(); // Calls loadFromResources();
@@ -151,7 +167,19 @@ void LocalisationEditor::requestPopulateData()
 
 void LocalisationEditor::populateData()
 {
+	if (!localStrings && !remoteStrings) {
+		return;
+	}
+
+	populateOriginalLanguageData();
+	populateTranslationData();
+}
+
+void LocalisationEditor::populateOriginalLanguageData()
+{
+	auto& originalLanguage = getOriginalData();
 	const auto origStats = originalLanguage.getStats();
+
 	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.getLanguage()));
 	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.getLanguage()));
 	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
@@ -189,10 +217,12 @@ void LocalisationEditor::populateData()
 
 	bool canEditOriginal = canEditLanguage(originalLanguage.getLanguage());
 	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
-	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
-	{
-		openLanguage(nullptr, true);
-	});
+}
+
+void LocalisationEditor::populateTranslationData()
+{
+	auto& originalLanguage = getOriginalData();
+	const auto origStats = originalLanguage.getStats();
 
 	auto languagesContainer = getWidget("languages");
 	languagesContainer->clear();
@@ -201,26 +231,26 @@ void LocalisationEditor::populateData()
 		if (lang != originalLanguage.getLanguage()) {
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
-				addTranslationData(*languagesContainer, lang, origStats.totalKeys, origStats.totalWords, canEdit);
+				if (auto* translation = getTranslationData(lang)) {
+					addTranslationData(*languagesContainer, originalLanguage, *translation, origStats.totalKeys, origStats.totalWords, canEdit);
+				}
 			}
 		}
 	}
 }
 
-void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLanguage& language, int origTotalKeys, int totalWords, bool canEdit)
+void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, int origTotalKeys, int totalWords, bool canEdit)
 {
 	const auto totalKeys = std::max(origTotalKeys, 1); // Avoid divisions by zero
 
 	auto widget = factory.makeUI("halley/localisation_language_summary");
 	widget->layout();
 
-	widget->getWidgetAs<UIImage>("flag")->setSprite(root.getFlag(language));
-	widget->getWidgetAs<UILabel>("languageName")->setText(root.getLanguageName(language));
+	widget->getWidgetAs<UIImage>("flag")->setSprite(root.getFlag(translationData.language));
+	widget->getWidgetAs<UILabel>("languageName")->setText(root.getLanguageName(translationData.language));
 	widget->getWidgetAs<UIButton>("edit")->setLabel(LocalisedString::fromHardcodedString(canEdit ? "Edit..." : "View..."));
 
-	const auto iter = localised.find(language.getISOCode());
-	const auto locData = iter == localised.end() ? LocTranslationData{} : iter->second;
-	const auto locStats = locData.getTranslationStats(originalLanguage);
+	const auto locStats = translationData.getTranslationStats(origData);
 
 	const auto translatedPercent = getPercent(locStats.translatedKeys, totalKeys);
 
@@ -234,23 +264,62 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const I18NLangu
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
-	auto cost = project.getProperties().getLanguageCost(language);
+	auto cost = project.getProperties().getLanguageCost(translationData.language);
 	widget->getWidget("costBox")->setActive(cost.has_value());
 	if (cost) {
 		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
 	}
 
-	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = language, canEdit] (const UIEvent& event)
+	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = translationData.language, canEdit] (const UIEvent& event)
 	{
-		openLanguage(&localised.at(language.getISOCode()), canEdit);
+		openLanguage(language, canEdit);
 	});
 
 	container.add(widget);
 }
 
-void LocalisationEditor::openLanguage(LocTranslationData* localisationData, bool canEdit)
+LocOriginalData& LocalisationEditor::getOriginalData()
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, originalLanguage, localisationData, canEdit));
+	assert(remoteStrings || localStrings);
+
+	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
+}
+
+const LocOriginalData& LocalisationEditor::getOriginalData() const
+{
+	assert(remoteStrings || localStrings);
+
+	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
+}
+
+LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& language)
+{
+	const auto code = language.getLanguageCode();
+	if (remoteStrings) {
+		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
+			return &iter->second;
+		}
+	}
+	if (localStrings) {
+		if (const auto iter = localStrings->localised.find(code); iter != localStrings->localised.end()) {
+			return &iter->second;
+		}
+		LocTranslationData data;
+		data.language = language;
+		localStrings->localised[code] = std::move(data);
+		return &localStrings->localised.at(code);
+	}
+	return nullptr;
+}
+
+void LocalisationEditor::openOriginalLanguage(bool canEdit)
+{
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, canEdit));
+}
+
+void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit)
+{
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), canEdit));
 }
 
 bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
@@ -265,12 +334,18 @@ bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 	return true;
 }
 
+void LocalisationEditor::loadCurrentStrings()
+{
+	int minVersion = 0;
+	remoteStringsFuture = client->getStrings(minVersion);
+}
+
 void LocalisationEditor::uploadOriginalStrings()
 {
-	client->postOriginalStrings(originalLanguage).then([] (bool result)
-	{
-		Logger::logInfo("Done posting to server, result was: " + toString(result));
-	});
-
-	client->getOriginalStrings({});
+	if (localStrings) {
+		client->postOriginalStrings(localStrings->originalLanguage).then([] (bool result)
+		{
+			Logger::logInfo("Done posting to server, result was: " + toString(result));
+		});
+	}
 }

@@ -10,6 +10,8 @@ LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String proje
 	, baseURL(std::move(baseURL))
 	, project(std::move(project))
 {
+	// TODO
+	languages.push_back("*");
 }
 
 Future<bool> LocalisationClient::login(const String& user, const String& password)
@@ -20,33 +22,27 @@ Future<bool> LocalisationClient::login(const String& user, const String& passwor
 
 Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalData& origData) const
 {
-	Json::Value root;
+	ConfigNode root;
 	auto& chunks = root["chunks"];
-
 	for (const auto& chunk: origData.getChunks()) {
-		auto& chunkRoot = chunks.append({});
-		addChunkToJsonObject(chunk, chunkRoot);
+		chunks.push_back(getChunkConfig(chunk));
 	}
 
-	const auto data = jsonToBytes(root);
+	const auto data = JSONConvert::generateJSON(root).toBytes();
 
 	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project);
-	Logger::logDev("Sending " + String::prettySize(data.size()) + " to " + url);
 
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
 	request->setBody("application/json", data);
 	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
 	{
-		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
 	});
 }
 
 Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk& origData) const
 {
-	Json::Value root;
-	addChunkToJsonObject(origData, root);
-	const auto data = jsonToBytes(root);
+	const auto data = JSONConvert::generateJSON(getChunkConfig(origData)).toBytes();
 
 	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
@@ -59,47 +55,36 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 	});
 }
 
-Future<LocOriginalData> LocalisationClient::getOriginalStrings(const LocOriginalData& origData) const
+Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(int minVersion) const
 {
-	int minVersion = 0; // TODO
-	String languages = ""; // TODO
-
-	const auto url = baseURL + "/strings/" + Encode::encodeURL(project) + "?minVersion=" + toString(minVersion) + "&languages=" + Encode::encodeURL(languages);
+	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
+		+ "?minVersion=" + toString(minVersion)
+		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return request->send().then([] (std::unique_ptr<HTTPResponse> response) -> LocOriginalData
+	return request->send().then([] (std::unique_ptr<HTTPResponse> response) -> StringsResult
 	{
 		if (response->getResponseCode() == 200) {
-			auto body = response->getBody();
-			Logger::logDev("Got a response of size " + String::prettySize(body.size()));
+			auto result = JSONConvert::parseConfig(response->getBody());
 		}
 		return {};
 	});
 }
 
-void LocalisationClient::addChunkToJsonObject(const LocOriginalDataChunk& data, Json::Value& dst) const
+ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const
 {
-	dst["chunkId"] = data.name.cppStr();
+	ConfigNode result;
+	result["chunkId"] = data.name;
 
-	auto& keys = dst["keys"];
-	auto& values = dst["values"];
+	auto& keys = result["keys"];
+	auto& values = result["values"];
 
 	const auto n = data.getNumEntries();
 	for (int i = 0; i < n; ++i) {
 		const auto& entry = data.getEntry(i);
-		keys.append(entry.key.cppStr());
-		values.append(entry.value.cppStr());
+		keys.push_back(ConfigNode(entry.key));
+		values.push_back(ConfigNode(entry.value));
 	}
-}
 
-Bytes LocalisationClient::jsonToBytes(const Json::Value& src) const
-{
-	Json::FastWriter writer;
-	auto str = writer.write(src);
-
-	Bytes data;
-	data.resize(str.length());
-	memcpy(data.data(), str.c_str(), data.size());
-
-	return data;
+	return result;
 }

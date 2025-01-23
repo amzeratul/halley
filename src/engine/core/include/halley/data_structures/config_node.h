@@ -571,6 +571,7 @@ namespace Halley {
 
 		ConfigNode& operator[](std::string_view key);
 		ConfigNode& operator[](size_t idx);
+		void push_back(ConfigNode node);
 
 		const ConfigNode& operator[](std::string_view key) const;
 		const ConfigNode& operator[](size_t idx) const;

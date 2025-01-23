@@ -37,30 +37,35 @@ namespace Halley {
 
         std::unique_ptr<LocalisationClient> client;
 
-        LocOriginalData originalLanguage;
-        HashMap<String, LocTranslationData> localised;
-
-        struct Result {
-        	LocOriginalData originalLanguage;
-			HashMap<String, LocTranslationData> localised;
-        };
-
         bool loaded = false;
-        Future<Result> waitingToPopulate;
+
+        using Result = LocalisationClient::StringsResult;
+        std::optional<Result> localStrings;
+        std::optional<Result> remoteStrings;
+        Future<Result> localStringsFuture;
+        Future<Result> remoteStringsFuture;
 
         void load();
+        void loadData();
+        void loadOriginalDataFromDisk();
 
-        void loadFromResources();
-
-        void requestPopulateData();
+        void requestPopulateDataFromResources();
         void populateData();
-        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, int totalWords, bool canEdit);
+        void populateOriginalLanguageData();
+        void populateTranslationData();
+        void addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, int totalKeys, int totalWords, bool canEdit);
 
-        void openLanguage(LocTranslationData* localisationData, bool canEdit);
+        LocOriginalData& getOriginalData();
+        const LocOriginalData& getOriginalData() const;
+        LocTranslationData* getTranslationData(const I18NLanguage& language);
+
+        void openOriginalLanguage(bool canEdit);
+        void openLanguage(const I18NLanguage& language, bool canEdit);
 
         bool canViewLanguage(const I18NLanguage& language) const;
         bool canEditLanguage(const I18NLanguage& language) const;
 
+        void loadCurrentStrings();
         void uploadOriginalStrings();
     };
 }
