@@ -358,7 +358,7 @@ const LocOriginalData& LocalisationEditor::getOriginalData() const
 
 LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& language)
 {
-	const auto code = language.getLanguageCode();
+	const auto code = language.getISOCode();
 	if (remoteStrings) {
 		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
 			return &iter->second;

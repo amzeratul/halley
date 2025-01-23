@@ -256,6 +256,7 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& language, Project& project)
 {
 	LocTranslationData result;
+	result.language = language;
 
 	for (const auto& [name, data]: LocOriginalData::getProjectLocData(language, project)) {
 		for (const auto& entry: data.asSequence()) {
