@@ -79,6 +79,8 @@ namespace Halley
 
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
+    	void close(const std::optional<String>& reason);
+
         void doSend(SubPacket& packet, int packetIdx);
     	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx);
 

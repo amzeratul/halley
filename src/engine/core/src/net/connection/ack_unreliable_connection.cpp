@@ -35,6 +35,15 @@ void AckUnreliableConnection::close()
     parent->close();
 }
 
+void AckUnreliableConnection::close(const std::optional<String>& reason)
+{
+	if (reason) {
+		Logger::logError("Connection closed, " + reason.value());
+	}
+
+	close();
+}
+
 bool AckUnreliableConnection::isSupported(TransmissionType type) const
 {
     return type == TransmissionType::Unreliable;
@@ -61,8 +70,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
         auto& slot = outbound.packets[outbound.curPacketIdx];
 
         if (slot.seqIdx < 0x8000) {
-            Logger::logError("Outbound packet queue is full");
-            close();
+            close("outbound packet queue is full");
             return;
         }
 
@@ -89,8 +97,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
             auto& slot = outbound.packets[outbound.curPacketIdx];
 
             if (slot.seqIdx < 0x8000) {
-                Logger::logError("Outbound packet queue is full");
-                close();
+	            close("outbound packet queue is full");
                 return;
             }
 
@@ -290,7 +297,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 
 	if (!isDupe && !isExpired) {
 		if (slot.seqIdx < 0x8000) {
-			throw Exception("Too many inbound packets", HalleyExceptions::Network);
+			close("too many inbound packets");
 		}
 
 		slot.dataSize = dataSize;
