@@ -19,11 +19,15 @@ namespace Halley {
 		Future<bool> postOriginalStrings(const LocOriginalDataChunk& origData) const;
 		Future<StringsResult> getStrings(int minVersion) const;
 
+		bool isConnected() const;
+
 	private:
 		WebAPI& web;
 		String baseURL;
 		String project;
 		Vector<String> languages;
+
+		bool connected = false;
 
 		ConfigNode getChunkConfig(const LocOriginalDataChunk& data) const;
 	};

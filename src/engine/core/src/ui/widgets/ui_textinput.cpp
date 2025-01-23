@@ -187,6 +187,16 @@ bool UITextInput::isSelectAllOnClick() const
 	return selectAllOnClick;
 }
 
+void UITextInput::setPassword(bool enabled)
+{
+	this->password = enabled;
+}
+
+bool UITextInput::isPassword() const
+{
+	return password;
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	auto clippedPainter = painter.withClip(textClip);
@@ -324,9 +334,11 @@ void UITextInput::setCapturePageUpDown(bool enable)
 
 void UITextInput::update(Time t, bool moved)
 {
+	const auto& textToDisplay = getTextToDisplay(text.getText());
+
 	// Update auto text
 	const bool showAutoComplete = autoCompleteCurOption.has_value();
-	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
+	const bool showGhost = textToDisplay.empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
 	const bool showAppend = !showGhost && !appendText.getString().isEmpty();
 	ghostText.checkForUpdates();
 	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : (showAppend ? appendText.getString().getUTF32() : StringUTF32())));
@@ -334,14 +346,14 @@ void UITextInput::update(Time t, bool moved)
 	// Update text
 	const auto textBounds = getTextBounds();
 	if (multiLine) {
-		const auto extents = label.getExtents(text.getText());
+		const auto extents = label.getExtents(textToDisplay);
 		if (extents.x > textBounds.getWidth()) {
-			label.setText(label.split(text.getText(), textBounds.getWidth() - 1));
+			label.setText(label.split(textToDisplay, textBounds.getWidth() - 1));
 		} else {
-			label.setText(text.getText());
+			label.setText(textToDisplay);
 		}
 	} else {
-		label.setText(text.getText());
+		label.setText(textToDisplay);
 	}
 
 	// Caret
@@ -691,4 +703,14 @@ void UITextInput::drawSelectionRow(Range<int> row, UIPainter& painter) const
 		.setPosition(left + label.getPosition())
 		.scaleTo(Vector2f(right.x - left.x, label.getLineHeight()));
 	painter.draw(bg, true);
+}
+
+const StringUTF32& UITextInput::getTextToDisplay(const StringUTF32& orig) const
+{
+	if (password) {
+		textToDisplay = StringUTF32(orig.size(), '*');
+		return textToDisplay;
+	} else {
+		return orig;
+	}
 }

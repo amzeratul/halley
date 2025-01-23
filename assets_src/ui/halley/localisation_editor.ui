@@ -11,27 +11,113 @@ children:
       columnProportions: []
       gap: 10
     widget:
-      class: widget
+      class: image
+      colour: $ui_backgroundBox
+      image: halley_ui/ui_list_item.png
+      innerBorder: [10, 10, 10, 10]
+      size: [0, 66]
     children:
-      - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+      - uuid: d7cf2c57-92dc-4b41-bc74-67f6d98c4440
+        proportion: 1
+        sizer:
+          columnProportions: []
+          gap: 6
         widget:
-          class: button
-          enabled: true
-          icon: ui/upload.png
-          id: upload
-          size: [250, 0]
-          text: Upload Original
+          active: false
+          class: widget
+          id: signInPanel
+        children:
+          - uuid: d9577787-f3ff-40a6-a69b-520ec1afd278
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 3
+              type: grid
+            widget:
+              class: widget
+            children:
+              - uuid: a62a67e5-c1f3-4eae-b6a2-b883088722b6
+                border: [0, 0, 4, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Username:"
+                  wordWrapped: false
+                fill: left
+              - uuid: b12d40f4-77c0-4f84-b8c8-06f10c655b2c
+                widget:
+                  class: textInput
+                  id: username
+                  size: [150, 20]
+              - uuid: 9b0d886c-0b95-4e86-b8ea-a4a3d2e582d1
+                border: [0, 0, 4, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Password:"
+                  wordWrapped: false
+                fill: left
+              - uuid: dc99f4f7-a75e-4b63-8c6c-e16bbb059790
+                widget:
+                  class: textInput
+                  id: password
+            fill: [fillHorizontal, centreVertical]
+          - uuid: c34ac842-0e92-4304-850a-d071c191fe33
+            widget:
+              class: button
+              id: signIn
+              size: [120, 0]
+              text: Sign In
         fill: [centreHorizontal, centreVertical]
-      - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
+      - uuid: 58b99f4c-1c02-4c74-a82c-2b22671efe70
+        proportion: 1
+        sizer:
+          columnProportions: []
+          gap: 10
         widget:
-          class: button
-          enabled: false
-          icon: ui/download.png
-          id: download
-          size: [250, 0]
-          text: Download Translations
+          active: false
+          class: widget
+          id: developerPanel
+        children:
+          - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+            widget:
+              class: button
+              enabled: true
+              icon: ui/upload.png
+              id: upload
+              size: [250, 0]
+              text: Upload Original
+            fill: [centreHorizontal, centreVertical]
+          - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
+            widget:
+              class: button
+              enabled: false
+              icon: ui/download.png
+              id: download
+              size: [250, 0]
+              text: Download Translations
+            fill: [centreHorizontal, centreVertical]
         fill: [centreHorizontal, centreVertical]
-    fill: [centreHorizontal, fillVertical]
+      - uuid: cd7bf4db-1bc8-4932-9aef-a9703b710198
+        proportion: 1
+        sizer:
+          columnProportions: []
+          gap: 10
+        widget:
+          active: true
+          class: widget
+          id: messagePanel
+        children:
+          - uuid: d4593234-8e2b-4d9e-afba-d90ad0496ffc
+            border: [0, 0, 4, 0]
+            widget:
+              class: label
+              id: connectionMessage
+              text: Connecting...
+              wordWrapped: false
+            fill: left
+        fill: [centreHorizontal, centreVertical]
+    fill: [fillHorizontal, fillVertical]
   - uuid: a44bd871-594e-497a-92f0-fab31b060e49
     border: [0, 0, 0, 0]
     sizer:
@@ -42,7 +128,7 @@ children:
     widget:
       class: image
       colour: $ui_backgroundBox
-      id: ""
+      id: originalLanguagePanel
       image: halley_ui/ui_list_item.png
       innerBorder: [15, 15, 15, 15]
     children:
@@ -258,7 +344,7 @@ children:
     widget:
       class: image
       colour: $ui_backgroundBox
-      id: ""
+      id: translationPanel
       image: halley_ui/ui_list_item.png
       innerBorder: [15, 15, 15, 15]
     children:

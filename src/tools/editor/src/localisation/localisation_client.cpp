@@ -17,7 +17,8 @@ LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String proje
 Future<bool> LocalisationClient::login(const String& user, const String& password)
 {
 	// TODO
-	return Future<bool>::makeImmediate(false);
+	connected = true;
+	return Future<bool>::makeImmediate(connected);
 }
 
 Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalData& origData) const
@@ -69,6 +70,11 @@ Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(int min
 		}
 		return {};
 	});
+}
+
+bool LocalisationClient::isConnected() const
+{
+	return connected;
 }
 
 ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const
