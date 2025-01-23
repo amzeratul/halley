@@ -74,6 +74,7 @@ namespace Halley {
 		const I18NLanguage& getLanguage() const;
 		LocalisationStats getStats() const;
 
+		LocOriginalDataChunk& getChunk(const String& name);
 		const LocOriginalDataChunk* tryGetChunk(const String& name) const;
 		const Vector<LocOriginalDataChunk>& getChunks() const;
 

@@ -9,6 +9,8 @@ namespace Halley {
 		struct StringsResult {
 			LocOriginalData originalLanguage;
 			HashMap<String, LocTranslationData> localised;
+			bool success = false;
+			int highestVersion = 0;
 		};
 
 		enum class LoginResult {
@@ -44,5 +46,7 @@ namespace Halley {
 		bool connected = false;
 
 		ConfigNode getChunkConfig(const LocOriginalDataChunk& data) const;
+
+		static StringsResult toStringsResult(const ConfigNode& data);
 	};
 }

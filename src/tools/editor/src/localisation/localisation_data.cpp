@@ -111,6 +111,18 @@ LocalisationStats LocOriginalData::getStats() const
 	return result;
 }
 
+LocOriginalDataChunk& LocOriginalData::getChunk(const String& name)
+{
+	for (auto& chunk: chunks) {
+		if (chunk.name == name) {
+			return chunk;
+		}
+	}
+	auto& chunk = chunks.emplace_back();
+	chunk.name = name;
+	return chunk;
+}
+
 const LocOriginalDataChunk* LocOriginalData::tryGetChunk(const String& name) const
 {
 	for (auto& chunk: chunks) {

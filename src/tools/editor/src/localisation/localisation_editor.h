@@ -61,10 +61,9 @@ namespace Halley {
         Future<Result> localStringsFuture;
         Future<Result> remoteStringsFuture;
 
-        void load();
+        void tryLoading();
         void loadOriginalDataFromDisk();
 
-        void tryLoading();
         void populateData();
         void populateOriginalLanguageData();
         void populateTranslationData();

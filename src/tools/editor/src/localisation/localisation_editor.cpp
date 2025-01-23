@@ -68,7 +68,6 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWind
 	, api(projectWindow.getAPI())
 	, aliveFlag(std::make_shared<bool>(true))
 {
-	client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName());
 }
 
 LocalisationEditor::~LocalisationEditor()
@@ -78,7 +77,9 @@ LocalisationEditor::~LocalisationEditor()
 
 void LocalisationEditor::onMakeUI()
 {
-	tryLoading();
+	if (isDevEnvironment()) {
+		loadOriginalDataFromDisk();
+	}
 
 	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
 	{
@@ -120,9 +121,7 @@ void LocalisationEditor::onMakeUI()
 
 void LocalisationEditor::update(Time t, bool moved)
 {
-	if (!loaded && project.isDLLLoaded()) {
-		load();
-	}
+	tryLoading();
 
 	if (localStringsFuture.isReady()) {
 		localStrings = localStringsFuture.get();
@@ -159,23 +158,20 @@ void LocalisationEditor::update(Time t, bool moved)
 
 void LocalisationEditor::onActiveChanged(bool active)
 {
-	if (active && project.isDLLLoaded()) {
-		//requestPopulateData();
-	}
 }
 
 void LocalisationEditor::onAssetsLoaded()
 {
-	if (isActiveInHierarchy() && project.isDLLLoaded()) {
-		tryLoading();
-	}
 }
 
-void LocalisationEditor::load()
+void LocalisationEditor::tryLoading()
 {
-	loaded = true;
-	factory.loadUI(*this, "halley/localisation_editor");
-	project.addAssetLoadedListener(this);
+	if (!loaded) {
+		client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName());
+		factory.loadUI(*this, "halley/localisation_editor");
+		project.addAssetLoadedListener(this);
+		loaded = true;
+	}
 }
 
 void LocalisationEditor::loadOriginalDataFromDisk()
@@ -198,21 +194,6 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 
 		return result;
 	});
-}
-
-void LocalisationEditor::tryLoading()
-{
-	if (loaded) {
-		if (isDevEnvironment()) {
-			loadOriginalDataFromDisk();
-		}
-	} else {
-		if (project.isDLLLoaded()) {
-			load();
-		} else {
-			return;
-		}
-	}
 }
 
 void LocalisationEditor::populateData()
@@ -414,6 +395,36 @@ bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 	return client->getLanguages().contains("*") || client->getLanguages().contains(language.getISOCode());
 }
 
+Vector<I18NLanguage> LocalisationEditor::getLanguages() const
+{
+	auto projLangs = project.getProperties().getLanguages();
+	if (localStrings) {
+		for (const auto& loc: localStrings->localised) {
+			auto lang = I18NLanguage(loc.first);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	if (remoteStrings) {
+		for (const auto& loc: remoteStrings->localised) {
+			auto lang = I18NLanguage(loc.first);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	for (auto& langId: client->getLanguages()) {
+		if (langId != "*") {
+			auto lang = I18NLanguage(langId);
+			if (!projLangs.contains(lang)) {
+				projLangs.push_back(lang);
+			}
+		}
+	}
+	return projLangs;
+}
+
 void LocalisationEditor::signIn(const String& username, const String& password)
 {
 	curMessage = "Connecting...";
@@ -451,9 +462,16 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings) {
-		client->postOriginalStrings(localStrings->originalLanguage).then([] (bool result)
+		curMessage = "Uploading original strings...";
+		client->postOriginalStrings(localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
 		{
-			Logger::logInfo("Done posting to server, result was: " + toString(result));
+			if (*aliveFlag) {
+				if (result) {
+					curMessage = {};
+				} else {
+					curMessage = "Error uploading original strings.";
+				}
+			}
 		});
 	}
 }
@@ -461,34 +479,4 @@ void LocalisationEditor::uploadOriginalStrings()
 void LocalisationEditor::downloadTranslations()
 {
 	// TODO
-}
-
-Vector<I18NLanguage> LocalisationEditor::getLanguages() const
-{
-	auto projLangs = project.getProperties().getLanguages();
-	if (localStrings) {
-		for (const auto& loc: localStrings->localised) {
-			auto lang = I18NLanguage(loc.first);
-			if (!projLangs.contains(lang)) {
-				projLangs.push_back(lang);
-			}
-		}
-	}
-	if (remoteStrings) {
-		for (const auto& loc: remoteStrings->localised) {
-			auto lang = I18NLanguage(loc.first);
-			if (!projLangs.contains(lang)) {
-				projLangs.push_back(lang);
-			}
-		}
-	}
-	for (auto& langId: client->getLanguages()) {
-		if (langId != "*") {
-			auto lang = I18NLanguage(langId);
-			if (!projLangs.contains(lang)) {
-				projLangs.push_back(lang);
-			}
-		}
-	}
-	return projLangs;
 }

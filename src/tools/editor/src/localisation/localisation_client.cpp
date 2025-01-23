@@ -84,7 +84,7 @@ Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(int min
 	return request->send().then([] (std::unique_ptr<HTTPResponse> response) -> StringsResult
 	{
 		if (response->getResponseCode() == 200) {
-			auto result = JSONConvert::parseConfig(response->getBody());
+			return toStringsResult(JSONConvert::parseConfig(response->getBody()));
 		}
 		return {};
 	});
@@ -124,6 +124,46 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 		keys.push_back(ConfigNode(entry.key));
 		values.push_back(ConfigNode(entry.value));
 	}
+
+	return result;
+}
+
+LocalisationClient::StringsResult LocalisationClient::toStringsResult(const ConfigNode& data)
+{
+	int version = 0;
+
+	StringsResult result;
+
+	for (const auto& entryNode: data.asSequence()) {
+		const auto key = entryNode["key"].asString();
+		const auto chunk = entryNode["chunk"].asString("");
+		version = std::max(version, entryNode["version"].asInt(0));
+
+		LocalisationDataEntry entry;
+		entry.key = key;
+		entry.value = entryNode["originalValue"].asString("");
+		entry.version = entryNode["originalVersion"].asInt(0);
+		entry.comment = entryNode["comment"].asString("");
+		entry.context = entryNode["context"].asString("");
+		result.originalLanguage.getChunk(chunk).entries.push_back(entry);
+
+		if (entryNode.hasKey("translations")) {
+			for (const auto& [lang, translationNode]: entryNode["translations"].asMap()) {
+				LocTranslationEntry translatedEntry;
+				translatedEntry.value = translationNode["value"].asString("");
+				translatedEntry.origVersion = translationNode["version"].asInt(0);
+
+				result.localised[lang].entries[key] = translatedEntry;
+			}
+		}
+	}
+
+	for (auto& [lang, loc] : result.localised) {
+		loc.language = I18NLanguage(lang);
+	}
+
+	result.success = true;
+	result.highestVersion = version;
 
 	return result;
 }
