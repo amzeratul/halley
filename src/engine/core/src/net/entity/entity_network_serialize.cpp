@@ -452,11 +452,30 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
         if (childEntity) {
             type = doDeserializeEntityUpdate(deserializer, childEntity.value(), childInstanceUUID, childPrefabUUID, entity, context);
-        } else {
+
+            // Restore context
+            context->setCurrentEntity(entity.getEntityId());
+        } else if (parent) {
             // Not a child entity, so it should be a sibling, or child of sibling, further up the
             // call chain. Need to rewind the deserializer, so the caller can read the UUIDs again.
             deserializer.rewind(marker);
             break;
+        } else {
+            // No child entity found, and we are at the root already. Something went wrong.
+            // Let's skip this entity data and any components that follow.
+            deserializer.rewind(marker);
+            deserializer.skipBytes(size);
+
+            fetchNextPage(deserializer, type, size);
+
+            while (type == EntityNetworkChanges::Type::Component) {
+                uint16_t componentId;
+                deserializer >> componentId;
+
+                deserializer.skipBytes(size);
+
+                fetchNextPage(deserializer, type, size);
+            }
         }
     }
 
