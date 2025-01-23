@@ -8,7 +8,11 @@ namespace Halley {
     class JSONConvert {
     public:
         struct Options {
-	        bool compact = true;
+            Options(bool compact = true)
+	            : compact(compact)
+            {}
+
+	        bool compact;
         };
 
         [[nodiscard]] static ConfigNode parseConfig(gsl::span<const gsl::byte> data);
