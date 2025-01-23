@@ -46,9 +46,25 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
     }
 }
 
-void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
+void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent, Bytes& buffer)
 {
+    // Entity "header"
     beginPage(serializer, Type::Entity);
+    curPage.uuid = entity.getInstanceUUID();
+
+    serializer << entity.getInstanceUUID();
+
+    uint8_t flags = 0;
+    if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
+    if (!entity.isSerializable()) flags |= (uint8_t) EntityData::Flag::NotSerializable;
+    if (!entity.isEnabled()) flags |= (uint8_t) EntityData::Flag::Disabled;
+
+    serializer << flags;
+
+    endPage(serializer, buffer, Type::Entity);
+
+    // Identity
+    beginPage(serializer, Type::EntityIdentity);
     curPage.uuid = entity.getInstanceUUID();
 
     UUID parentInstanceUUID = {};
@@ -57,24 +73,14 @@ void EntityNetworkChanges::beginEntity(Serializer& serializer, const EntityRef& 
     }
 
     serializer << parentInstanceUUID;
-    serializer << entity.getInstanceUUID();
     serializer << entity.getPrefabUUID();
 
-    uint8_t flags = 0;
-    if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
-	if (!entity.isSerializable()) flags |= (uint8_t) EntityData::Flag::NotSerializable;
-    if (!entity.isEnabled()) flags |= (uint8_t) EntityData::Flag::Disabled;
-
     serializer << entity.getName();
-    serializer << flags;
 
     const auto& prefabId = entity.getPrefabAssetId().value_or("");
     serializer << prefabId;
-}
 
-void EntityNetworkChanges::endEntity(Serializer& serializer, Bytes& buffer)
-{
-    endPage(serializer, buffer, Type::Entity);
+    endPage(serializer, buffer, Type::EntityIdentity);
 }
 
 void EntityNetworkChanges::beginComponent(Serializer& serializer, uint16_t componentId)
@@ -173,16 +179,21 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
                 skip = true;
                 p++;
 
-                // Seek forward until end of this entity, including its components.
+                // Seek forward to the next entity.
 
                 while (p < pp) {
                     auto& next = pages[p];
-                    if (next.type != Type::Component) {
+                    if (next.type == Type::Entity) {
                         break;
                     }
                     Ensures(!next.modified);
                     p++;
                 }
+            }
+        } else if (page.type == Type::EntityIdentity) {
+            if (!page.modified) {
+                skip = true;
+                p++;
             }
         } else if (page.type == Type::Component) {
             if (!page.modified || size == 0) {
@@ -193,6 +204,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
 
         if (!skip) {
             Expects(page.type == Type::Entity ||
+                page.type == Type::EntityIdentity ||
                 page.type == Type::Component);
 
 #ifdef SERIALIZE_PARITY_BYTE
@@ -204,7 +216,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
 
             if (page.type == Type::Component) {
                 // "Inject" component ID
-                serializer << (uint16_t) page.componentId;
+                serializer << page.componentId;
             }
 
             Expects(size > 0);
@@ -236,6 +248,15 @@ void EntityNetworkChanges::enumerateEntities(const std::function<void (const Pag
             onEntity(page, p);
         }
     }
+}
+
+EntityNetworkChanges::Page* EntityNetworkChanges::getEntityIdentity(int pageIdx)
+{
+    Ensures(pageIdx + 1 < pp);
+    Ensures(pages[pageIdx].type == Type::Entity);
+    Ensures(pages[pageIdx + 1].type == Type::EntityIdentity);
+
+    return &pages[pageIdx + 1];
 }
 
 EntityNetworkChanges::Page* EntityNetworkChanges::findNextComponent(int& pageIdx)
@@ -307,8 +328,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     // Entity
-    journal.beginEntity(serializer, entity, parent);
-    journal.endEntity(serializer, scratchpad);
+    journal.pushEntity(serializer, entity, parent, scratchpad);
 
     // Components
     auto& reflection = serializer.getOptions().world->getReflection();
@@ -346,27 +366,30 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
         throw Exception("Unexpected entity network change type", HalleyExceptions::Network);
     }
 
-    UUID parentInstanceUUID;
-    deserializer >> parentInstanceUUID;
-
     UUID instanceUUID;
     deserializer >> instanceUUID;
 
-    UUID prefabUUID;
-    deserializer >> prefabUUID;
-
-    type = doDeserializeEntityUpdate(deserializer, entity, instanceUUID, prefabUUID, {}, context);
+    type = doDeserializeEntityUpdate(deserializer, entity, instanceUUID, {}, context);
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         Logger::logDev("Not at end of entity network update byte stream, " +
             toString(deserializer.getBytesLeft()) + " bytes left", true);
     }
+
+#if 0
+    if (parentInstanceUUID.isValid()) {
+        if (auto parentEntity = entity.getWorld().findEntity(parentInstanceUUID); parentEntity) {
+            entity.setParent(parentEntity.value());
+        } else {
+            Logger::logError("Parent " + toString(parentInstanceUUID) + " not found for network entity \"" + entity.getName() + "\"");
+        }
+    }
+#endif
 }
 
 // See EntityFactory::updateEntityNode().
-EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
-    Deserializer& deserializer, EntityRef& entity,
-    const UUID& instanceUUID, const UUID& prefabUUID,
+EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Deserializer& deserializer,
+    EntityRef& entity, const UUID& instanceUUID,
     std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
     Expects(entity.isValid());
@@ -386,11 +409,6 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     // Entity
-
-    String name;
-    deserializer >> name;
-    entity.setName(name);
-
     uint8_t flags;
     deserializer >> flags;
 
@@ -403,17 +421,32 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
     entity.setEnabled(enabled);
 
-    String prefabId;
-    deserializer >> prefabId;
-
-    entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
-
-    // Components
+    // EntityIdentity
     EntityNetworkChanges::Type type;
     uint16_t size;
 
     fetchNextPage(deserializer, type, size);
 
+    if (type == EntityNetworkChanges::Type::EntityIdentity) {
+        UUID parentInstanceUUID;
+        deserializer >> parentInstanceUUID;
+
+        UUID prefabUUID;
+        deserializer >> prefabUUID;
+
+        String name;
+        deserializer >> name;
+        entity.setName(name);
+
+        String prefabId;
+        deserializer >> prefabId;
+
+        entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
+
+        fetchNextPage(deserializer, type, size);
+    }
+
+    // Components
     while (type == EntityNetworkChanges::Type::Component) {
         uint16_t componentId;
         deserializer >> componentId;
@@ -439,19 +472,13 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     while (type == EntityNetworkChanges::Type::Entity) {
         size_t marker = deserializer.getPosition();
 
-        UUID parentInstanceUUID;
-        deserializer >> parentInstanceUUID;
-
         UUID childInstanceUUID;
         deserializer >> childInstanceUUID;
-
-        UUID childPrefabUUID;
-        deserializer >> childPrefabUUID;
 
         auto childEntity = findChildEntity(entity, childInstanceUUID);
 
         if (childEntity) {
-            type = doDeserializeEntityUpdate(deserializer, childEntity.value(), childInstanceUUID, childPrefabUUID, entity, context);
+            type = doDeserializeEntityUpdate(deserializer, childEntity.value(), childInstanceUUID, entity, context);
 
             // Restore context
             context->setCurrentEntity(entity.getEntityId());
@@ -467,6 +494,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
             deserializer.skipBytes(size);
 
             fetchNextPage(deserializer, type, size);
+
+            if (type == EntityNetworkChanges::Type::EntityIdentity) {
+                deserializer.skipBytes(size);
+
+                fetchNextPage(deserializer, type, size);
+            }
 
             while (type == EntityNetworkChanges::Type::Component) {
                 uint16_t componentId;
@@ -552,14 +585,24 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         // Compare hashes for the entity page.
                         page.modified = page.hash != prevEntityPage.hash;
 
+                        // Compare identity pages.
+                        {
+                            auto identityPage = journal.getEntityIdentity(pageIdx);
+                            auto prevIdentityPage = previousJournal.getEntityIdentity(prevPageIdx);
+
+                            identityPage->modified = identityPage->hash != prevIdentityPage->hash;
+
+                            page.modified |= identityPage->modified;
+                        }
+
                         // Enumerate components for this entity.
                         {
-                            int componentPageIdx = pageIdx + 1;
+                            int componentPageIdx = pageIdx + 2;
 
                             while (auto componentPage = journal.findNextComponent(componentPageIdx)) {
                                 // Search for the same component, by ID, in the previous journal.
                                 EntityNetworkChanges::Page* prevComponentPage = nullptr;
-                                int prevComponentPageIdx = prevPageIdx + 1;
+                                int prevComponentPageIdx = prevPageIdx + 2;
 
                                 while ((prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) != nullptr) {
                                     if (componentPage->componentId == prevComponentPage->componentId) {
@@ -584,11 +627,11 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         // but "reversed" - check for components that have been removed.
 
                         if (!hasComponentsAddedOrRemoved) {
-                            int prevComponentPageIdx = prevPageIdx + 1;
+                            int prevComponentPageIdx = prevPageIdx + 2;
 
                             while (auto prevComponentPage = previousJournal.findNextComponent(prevComponentPageIdx)) {
                                 EntityNetworkChanges::Page* componentPage = nullptr;
-                                int componentPageIdx = pageIdx + 1;
+                                int componentPageIdx = pageIdx + 2;
 
                                 while ((componentPage = journal.findNextComponent(componentPageIdx)) != nullptr) {
                                     if (componentPage->componentId == prevComponentPage->componentId) {
@@ -663,6 +706,7 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
     // for everything else.
 
     if (type == EntityNetworkChanges::Type::Entity ||
+        type == EntityNetworkChanges::Type::EntityIdentity ||
         type == EntityNetworkChanges::Type::Component) {
 
         if (deserializer.getBytesLeft() > 0) {

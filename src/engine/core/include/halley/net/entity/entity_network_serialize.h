@@ -14,6 +14,7 @@ namespace Halley {
         {
             Unknown = 0,
             Entity,
+            EntityIdentity,
             Component,
         };
 
@@ -41,8 +42,7 @@ namespace Halley {
 
         explicit EntityNetworkChanges() = default;
 
-        void beginEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent);
-        void endEntity(Serializer& serializer, Bytes& buffer);
+        void pushEntity(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent, Bytes& buffer);
 
         void beginComponent(Serializer& serializer, uint16_t componentId);
         void endComponent(Serializer& serializer, Bytes& buffer);
@@ -64,6 +64,7 @@ namespace Halley {
 
         void enumerateEntities(const std::function<void (const Page& page, int pageIdx)>& onEntity) const;
 
+        Page* getEntityIdentity(int pageIdx);
         Page* findNextComponent(int& pageIdx);
 
         const Page& findEntityByUUID(const UUID& uuid, int& pageIdx) const;
@@ -97,8 +98,8 @@ namespace Halley {
     private:
         void doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent);
 
-        EntityNetworkChanges::Type doDeserializeEntityUpdate(Deserializer& deserializer, EntityRef& entity,
-            const UUID& instanceUUID, const UUID& prefabUUID,
+        EntityNetworkChanges::Type doDeserializeEntityUpdate(Deserializer& deserializer,
+            EntityRef& entity, const UUID& instanceUUID,
             std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size);
