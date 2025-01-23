@@ -10,15 +10,33 @@ LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String proje
 	, baseURL(std::move(baseURL))
 	, project(std::move(project))
 {
-	// TODO
-	languages.push_back("*");
 }
 
-Future<bool> LocalisationClient::login(const String& user, const String& password)
+Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String& username, const String& password)
 {
-	// TODO
+	this->username = username;
+	this->password = password;
+
+	if (username.isEmpty() || password.isEmpty() || username.length() > 128 || password.length() > 128) {
+		return Future<LoginResult>::makeImmediate(LoginResult::InvalidLogin);
+	}
+
+	// TODO: talk to server
+
 	connected = true;
-	return Future<bool>::makeImmediate(connected);
+	languages.push_back("*");
+	permissions.push_back("orig");
+
+	return Future<LoginResult>::makeImmediate(LoginResult::Success);
+}
+
+void LocalisationClient::signOut()
+{
+	connected = false;
+	languages = {};
+	permissions = {};
+	username = {};
+	password = {};
 }
 
 Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalData& origData) const
@@ -75,6 +93,21 @@ Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(int min
 bool LocalisationClient::isConnected() const
 {
 	return connected;
+}
+
+const Vector<String>& LocalisationClient::getPermissions() const
+{
+	return permissions;
+}
+
+const Vector<String>& LocalisationClient::getLanguages() const
+{
+	return languages;
+}
+
+bool LocalisationClient::hasPermission(std::string_view str) const
+{
+	return permissions.contains(str);
 }
 
 ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const

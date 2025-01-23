@@ -1,6 +1,7 @@
 uuid: f88e9af7-33d1-4332-83d5-80e97b9060af
 sizer:
   columnProportions: []
+  gap: 4
 widget:
   class: widget
 children:
@@ -75,16 +76,8 @@ children:
               text: 0%
             fill: [centreHorizontal, centreVertical]
         fill: [fillHorizontal, centreVertical]
-  - uuid: 1d5be313-a529-4140-b753-82386003d69a
-    border: [10, 0, 0, 0]
-    widget:
-      class: button
-      enabled: true
-      id: edit
-      size: [100, 0]
-      text: Edit...
   - uuid: ecee5ce4-673b-4752-a09f-5c859b7a3744
-    border: [6, 0, 0, 0]
+    border: [2, 0, 0, 0]
     sizer:
       columnProportions: []
       columns: 2
@@ -106,3 +99,32 @@ children:
           wordWrapped: false
         fill: [centreHorizontal, centreVertical]
     fill: [left, centreVertical]
+  - uuid: 1d5be313-a529-4140-b753-82386003d69a
+    border: [6, 0, 0, 0]
+    widget:
+      class: button
+      enabled: true
+      icon: ui/edit.png
+      id: edit
+      size: [150, 0]
+      text: Edit...
+    fill: [fillHorizontal, centreVertical]
+  - uuid: dc5ef981-9856-440a-86e6-0d02a01b4a53
+    border: [6, 0, 0, 0]
+    widget:
+      class: button
+      enabled: true
+      icon: ui/save.png
+      id: export
+      size: [120, 0]
+      text: Export...
+    fill: [centreHorizontal, centreVertical]
+  - uuid: 287bdcaf-41a9-4b4d-b245-82ace985450f
+    widget:
+      class: button
+      enabled: true
+      icon: ui/open.png
+      id: import
+      size: [120, 0]
+      text: Import...
+    fill: [centreHorizontal, centreVertical]

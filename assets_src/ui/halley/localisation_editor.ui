@@ -10,6 +10,7 @@ children:
     sizer:
       columnProportions: []
       gap: 10
+      type: vertical
     widget:
       class: image
       colour: $ui_backgroundBox
@@ -23,7 +24,7 @@ children:
           columnProportions: []
           gap: 6
         widget:
-          active: false
+          active: true
           class: widget
           id: signInPanel
         children:
@@ -48,6 +49,7 @@ children:
                 widget:
                   class: textInput
                   id: username
+                  password: false
                   size: [150, 20]
               - uuid: 9b0d886c-0b95-4e86-b8ea-a4a3d2e582d1
                 border: [0, 0, 4, 0]
@@ -61,6 +63,7 @@ children:
                 widget:
                   class: textInput
                   id: password
+                  password: true
             fill: [fillHorizontal, centreVertical]
           - uuid: c34ac842-0e92-4304-850a-d071c191fe33
             widget:
@@ -69,35 +72,53 @@ children:
               size: [120, 0]
               text: Sign In
         fill: [centreHorizontal, centreVertical]
-      - uuid: 58b99f4c-1c02-4c74-a82c-2b22671efe70
+      - uuid: b87dd53d-c318-496c-bc04-3963fe050299
         proportion: 1
         sizer:
           columnProportions: []
           gap: 10
         widget:
-          active: false
           class: widget
-          id: developerPanel
+          id: toolbar
         children:
-          - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+          - uuid: 58b99f4c-1c02-4c74-a82c-2b22671efe70
+            proportion: 0
+            sizer:
+              columnProportions: []
+              gap: 10
+            widget:
+              active: true
+              class: widget
+              id: developerPanel
+            children:
+              - uuid: 3d2a4188-b457-425c-b791-c281c6bca29f
+                widget:
+                  class: button
+                  enabled: true
+                  icon: ui/upload.png
+                  id: upload
+                  size: [200, 0]
+                  text: Upload Original
+                fill: [centreHorizontal, centreVertical]
+              - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
+                widget:
+                  class: button
+                  enabled: true
+                  icon: ui/download.png
+                  id: download
+                  size: [220, 0]
+                  text: Download Translations
+                fill: [centreHorizontal, centreVertical]
+            fill: [centreHorizontal, centreVertical]
+          - uuid: 659bc489-6c03-4a4d-85a3-05512e7a2c9d
+            proportion: 1
+            border: [0, 0, 0, 0]
             widget:
               class: button
-              enabled: true
-              icon: ui/upload.png
-              id: upload
-              size: [250, 0]
-              text: Upload Original
+              id: signOut
+              size: [120, 0]
+              text: Sign Out
             fill: [centreHorizontal, centreVertical]
-          - uuid: ffdb656c-960e-4e67-8b85-d5b149c3bcbc
-            widget:
-              class: button
-              enabled: false
-              icon: ui/download.png
-              id: download
-              size: [250, 0]
-              text: Download Translations
-            fill: [centreHorizontal, centreVertical]
-        fill: [centreHorizontal, centreVertical]
       - uuid: cd7bf4db-1bc8-4932-9aef-a9703b710198
         proportion: 1
         sizer:

@@ -64,7 +64,46 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, Project& pr
     , project(project)
 	, factory(factory)
 	, api(api)
+	, aliveFlag(std::make_shared<bool>(true))
 {
+	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
+}
+
+LocalisationEditor::~LocalisationEditor()
+{
+	*aliveFlag = false;
+}
+
+void LocalisationEditor::onMakeUI()
+{
+	tryLoading();
+
+	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
+	{
+		uploadOriginalStrings();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "download", [=] (const UIEvent& event)
+	{
+		downloadTranslations();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
+	{
+		openOriginalLanguage(true);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "signIn", [this] (const UIEvent& event)
+	{
+		auto username = getWidgetAs<UITextInput>("username")->getText();
+		auto password = getWidgetAs<UITextInput>("password")->getText();
+		signIn(username, password);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "signOut", [this] (const UIEvent& event)
+	{
+		signOut();
+	});
 }
 
 void LocalisationEditor::update(Time t, bool moved)
@@ -76,29 +115,34 @@ void LocalisationEditor::update(Time t, bool moved)
 	if (localStringsFuture.isReady()) {
 		localStrings = localStringsFuture.get();
 		localStringsFuture = {};
+		gotLocalStrings = true;
 		populateData();
 	}
 
 	if (remoteStringsFuture.isReady()) {
 		remoteStrings = remoteStringsFuture.get();
 		remoteStringsFuture = {};
+		state = State::Synchronised;
+		curMessage = "Waiting on Strings...";
+		gotRemoteStrings = true;
+	}
+
+	if (state == State::Synchronised && gotRemoteStrings && (!isDevEnvironment() || gotLocalStrings)) {
+		state = State::Ready;
+		curMessage = {};
 		populateData();
 	}
-}
 
-void LocalisationEditor::onMakeUI()
-{
-	requestPopulateDataFromResources();
+	getWidget("signInPanel")->setActive(state == State::NotConnected);
+	getWidget("messagePanel")->setActive(curMessage.has_value());
+	getWidget("toolbar")->setActive(state == State::Ready);
+	getWidget("developerPanel")->setActive(isDevEnvironment());
+	getWidget("originalLanguagePanel")->setActive(state == State::Ready || gotLocalStrings);
+	getWidget("translationPanel")->setActive(state == State::Ready || gotLocalStrings);
 
-	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
-	{
-		uploadOriginalStrings();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "editOriginal", [this] (const UIEvent& event)
-	{
-		openOriginalLanguage(true);
-	});
+	if (curMessage) {
+		getWidgetAs<UILabel>("connectionMessage")->setText(LocalisedString::fromUserString(*curMessage));
+	}
 }
 
 void LocalisationEditor::onActiveChanged(bool active)
@@ -111,7 +155,7 @@ void LocalisationEditor::onActiveChanged(bool active)
 void LocalisationEditor::onAssetsLoaded()
 {
 	if (isActiveInHierarchy() && project.isDLLLoaded()) {
-		requestPopulateDataFromResources();
+		tryLoading();
 	}
 }
 
@@ -120,14 +164,6 @@ void LocalisationEditor::load()
 	loaded = true;
 	factory.loadUI(*this, "halley/localisation_editor");
 	project.addAssetLoadedListener(this);
-
-	client = std::make_unique<LocalisationClient>(*api.web, "http://localhost:8080", "witchbrook");
-	loadCurrentStrings();
-}
-
-void LocalisationEditor::loadData()
-{
-	loadOriginalDataFromDisk();
 }
 
 void LocalisationEditor::loadOriginalDataFromDisk()
@@ -152,13 +188,15 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 	});
 }
 
-void LocalisationEditor::requestPopulateDataFromResources()
+void LocalisationEditor::tryLoading()
 {
 	if (loaded) {
-		loadData();
+		if (isDevEnvironment()) {
+			loadOriginalDataFromDisk();
+		}
 	} else {
 		if (project.isDLLLoaded()) {
-			load(); // Calls loadFromResources();
+			load();
 		} else {
 			return;
 		}
@@ -249,6 +287,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidgetAs<UIImage>("flag")->setSprite(root.getFlag(translationData.language));
 	widget->getWidgetAs<UILabel>("languageName")->setText(root.getLanguageName(translationData.language));
 	widget->getWidgetAs<UIButton>("edit")->setLabel(LocalisedString::fromHardcodedString(canEdit ? "Edit..." : "View..."));
+	widget->getWidget("import")->setEnabled(canEdit);
 
 	const auto locStats = translationData.getTranslationStats(origData);
 
@@ -270,9 +309,22 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
 	}
 
-	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language = translationData.language, canEdit] (const UIEvent& event)
+	const auto language = translationData.language;
+	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language, canEdit] (const UIEvent& event)
 	{
 		openLanguage(language, canEdit);
+	});
+
+	widget->setHandle(UIEventType::ButtonClicked, "export", [this, language] (const UIEvent& event)
+	{
+		exportLanguage(language);
+	});
+
+	widget->setHandle(UIEventType::ButtonClicked, "import", [this, language, canEdit] (const UIEvent& event)
+	{
+		if (canEdit) {
+			importLanguage(language);
+		}
 	});
 
 	container.add(widget);
@@ -322,22 +374,67 @@ void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit
 	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), canEdit));
 }
 
-bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
+void LocalisationEditor::exportLanguage(const I18NLanguage& language)
+{
+	// TODO
+}
+
+void LocalisationEditor::importLanguage(const I18NLanguage& language)
+{
+	// TODO
+}
+
+bool LocalisationEditor::isDevEnvironment() const
 {
 	// TODO
 	return true;
+}
+
+bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
+{
+	if (isDevEnvironment()) {
+		return true;
+	}
+	return canEditLanguage(language);
 }
 
 bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 {
-	// TODO
-	return true;
+	return client->getLanguages().contains("*") || client->getLanguages().contains(language.getISOCode());
 }
 
-void LocalisationEditor::loadCurrentStrings()
+void LocalisationEditor::signIn(const String& username, const String& password)
 {
-	int minVersion = 0;
-	remoteStringsFuture = client->getStrings(minVersion);
+	curMessage = "Connecting...";
+	state = State::Connecting;
+	client->signIn(username, password).then(Executors::getMainUpdateThread(), [this, aliveFlag = aliveFlag] (LocalisationClient::LoginResult result)
+	{
+		if (*aliveFlag) {
+			onConnected(result);
+		}
+	});
+}
+
+void LocalisationEditor::signOut()
+{
+	client->signOut();
+	state = State::NotConnected;
+}
+
+void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
+{
+	if (result == LocalisationClient::LoginResult::Success) {
+		state = State::Synchronising;
+		int minVersion = 0;
+		remoteStringsFuture = client->getStrings(minVersion);
+		curMessage = "Synchronising...";
+	} else if (result == LocalisationClient::LoginResult::ServerNotFound) {
+		state = State::NotConnected;
+		curMessage = "Could not connect to localisation server.";
+	} else if (result == LocalisationClient::LoginResult::InvalidLogin) {
+		state = State::NotConnected;
+		curMessage = "Invalid username/password.";
+	}
 }
 
 void LocalisationEditor::uploadOriginalStrings()
@@ -348,4 +445,9 @@ void LocalisationEditor::uploadOriginalStrings()
 			Logger::logInfo("Done posting to server, result was: " + toString(result));
 		});
 	}
+}
+
+void LocalisationEditor::downloadTranslations()
+{
+	// TODO
 }

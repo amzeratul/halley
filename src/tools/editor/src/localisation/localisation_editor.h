@@ -22,6 +22,7 @@ namespace Halley {
 	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
         LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, const HalleyAPI& api);
+        ~LocalisationEditor();
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
@@ -35,9 +36,22 @@ namespace Halley {
         UIFactory& factory;
         const HalleyAPI& api;
 
+        std::shared_ptr<bool> aliveFlag;
         std::unique_ptr<LocalisationClient> client;
 
+        enum class State {
+	        NotConnected,
+            Connecting,
+            Synchronising,
+            Synchronised,
+            Ready
+        };
+
         bool loaded = false;
+        bool gotLocalStrings = false;
+        bool gotRemoteStrings = false;
+        State state = State::NotConnected;
+        std::optional<String> curMessage;
 
         using Result = LocalisationClient::StringsResult;
         std::optional<Result> localStrings;
@@ -46,10 +60,9 @@ namespace Halley {
         Future<Result> remoteStringsFuture;
 
         void load();
-        void loadData();
         void loadOriginalDataFromDisk();
 
-        void requestPopulateDataFromResources();
+        void tryLoading();
         void populateData();
         void populateOriginalLanguageData();
         void populateTranslationData();
@@ -61,11 +74,18 @@ namespace Halley {
 
         void openOriginalLanguage(bool canEdit);
         void openLanguage(const I18NLanguage& language, bool canEdit);
+        void exportLanguage(const I18NLanguage& language);
+        void importLanguage(const I18NLanguage& language);
 
+        bool isDevEnvironment() const;
         bool canViewLanguage(const I18NLanguage& language) const;
         bool canEditLanguage(const I18NLanguage& language) const;
 
-        void loadCurrentStrings();
-        void uploadOriginalStrings();
+        void signIn(const String& username, const String& password);
+        void signOut();
+        void onConnected(LocalisationClient::LoginResult result);
+
+		void uploadOriginalStrings();
+        void downloadTranslations();
     };
 }
