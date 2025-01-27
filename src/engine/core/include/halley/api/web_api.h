@@ -34,7 +34,7 @@ namespace Halley
 	public:
 		virtual ~HTTPRequest() {}
 
-		[[deprecated("Use setBody instead")]] void setPostData(const String& contentType, const Bytes& data) { setPostData(contentType, data); }
+		[[deprecated("Use setBody instead")]] void setPostData(const String& contentType, const Bytes& data) { setBody(contentType, data); }
 		virtual void setBody(const String& contentType, const Bytes& data) = 0;
 		virtual void setHeader(const String& headerName, const String& headerValue) = 0;
 		virtual void setProgressCallback(std::function<bool(uint64_t, uint64_t)> callback) {}
