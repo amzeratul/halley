@@ -33,7 +33,7 @@ void VSProjectManipulator::load(const Bytes& data)
 			for (ticpp::Element* l1Node = l0Node->FirstChildElement(); l1Node != nullptr; l1Node = l1Node->NextSiblingElement(false)) {
 				l1Node->GetValue(&name);
 				if (name == "ItemGroup") {
-					for (ticpp::Element* l2Node = l1Node->FirstChildElement(); l2Node != nullptr; l2Node = l2Node->NextSiblingElement(false)) {
+					for (ticpp::Element* l2Node = l1Node->FirstChildElement(false); l2Node != nullptr; l2Node = l2Node->NextSiblingElement(false)) {
 						l2Node->GetValue(&name);
 						String fileName = l2Node->GetAttribute("Include");
 						if (fileName.contains("cmake_pch")) {
