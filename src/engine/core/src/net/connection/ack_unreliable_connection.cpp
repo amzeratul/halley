@@ -20,13 +20,15 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
     inboundCache.resize_no_init(16 * maxPacketSize);
 
     for (auto &p: inbound.packets) {
-        p.data.resize_no_init(maxPacketSize);
+        p.data.resize(maxPacketSize);
         p.seqIdx = 0xffff;
     }
 
     for (auto &p: outbound.packets) {
-        p.data.resize_no_init(maxPacketSize);
+        p.data.resize(maxPacketSize);
         p.seqIdx = 0xffff;
+    	memcpy(p.data.data(), headerSignature, 4);
+    	memset(p.data.data() + 4, 0, maxPacketSize - 4);
     }
 }
 
@@ -54,16 +56,26 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
     return parent->getStatus();
 }
 
-void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet)
+void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
+	Expects(type == TransmissionType::Unreliable);
+
+	auto status = parent->getStatus();
+	if (status != ConnectionStatus::Connected) {
+		return;
+	}
+
+	if (tryCacheSmallPacket(packet)) {
+		return;
+	}
+
+	doFlushSmallPackets();
+
+	doSend(packet.getBytes(), false);
+}
+
+void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool small)
 {
-    Expects(type == TransmissionType::Unreliable);
-
-    auto status = parent->getStatus();
-    if (status != ConnectionStatus::Connected) {
-        return;
-    }
-
-    size_t size = packet.getSize();
+    size_t size = packet.size();
     size_t maxSize = maxPacketSize - headerSize;
 
     if (maxSize >= size) {
@@ -74,7 +86,16 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
             return;
         }
 
-        slot.dataSize = packet.copyTo(slot.data.byte_span().subspan(headerSize));
+    	if (small) {
+    		// This is a small packet cache - need to copy parts of the cached header.
+    		const auto& cache = outbound.packets[256];
+    		memcpy(slot.data.data() + 8, cache.data.data() + 8, cache.subIdx);
+    	}
+
+	    networkStatsListener.onSendData(size, 1);
+
+    	slot.dataSize = size;
+        memcpy(slot.data.data() + headerSize, packet.data(), size);
         slot.seqIdx = outbound.curSeqIdx;
         slot.subIdx = 0;
 
@@ -82,16 +103,16 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 
         outbound.curPacketIdx = (outbound.curPacketIdx + 1) % 256;
     } else {
+    	Ensures(!small);
+
         size_t numSubPackets = size / maxSize;
         if (size % maxSize != 0) {
             numSubPackets++;
         }
 
         if (numSubPackets > 16) {
-            throw Exception("Packet size too large: " + toString(packet.getSize()) + " bytes", HalleyExceptions::Network);
+            throw Exception("Packet size too large: " + toString(size) + " bytes", HalleyExceptions::Network);
         }
-
-        auto packetData = packet.getBytes();
 
         for (size_t i = 0; i < numSubPackets; i++) {
             auto& slot = outbound.packets[outbound.curPacketIdx];
@@ -101,10 +122,10 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
                 return;
             }
 
-            slot.dataSize = std::min(packetData.size(), maxSize);
-            memcpy(slot.data.data() + headerSize, packetData.data(), slot.dataSize);
+            slot.dataSize = std::min(packet.size(), maxSize);
+            memcpy(slot.data.data() + headerSize, packet.data(), slot.dataSize);
 
-            packetData = packetData.subspan(slot.dataSize);
+            packet = packet.subspan(slot.dataSize);
 
             slot.seqIdx = outbound.curSeqIdx;
             slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
@@ -114,10 +135,10 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
             outbound.curPacketIdx = (outbound.curPacketIdx + 1) % 256;
         }
 
-        Expects(packetData.empty());
-    }
+    	networkStatsListener.onSendData(size, numSubPackets);
 
-    networkStatsListener.onSendData(size, 1);
+        Expects(packet.empty());
+    }
 
     if (statsListener) {
         statsListener->onPacketSent(outbound.curSeqIdx, size);
@@ -126,27 +147,49 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
     outbound.curSeqIdx = (outbound.curSeqIdx + 1) % 0x8000;
 }
 
+bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& packet)
+{
+	const size_t size = packet.getSize();
+
+	if (size >= 256) {
+		return false;
+	}
+
+	// Uses outbound queue index 256 to cache small packets.
+
+	auto& slot = outbound.packets[256];
+
+	if (slot.subIdx > 7) {
+		return false; // too many small packets in cache already
+	}
+
+	size_t maxSize = maxPacketSize - headerSize;
+	if (maxSize < slot.dataSize + size) {
+		return false; // would overflow buffer size
+	}
+
+	// copy the packet data
+	slot.dataSize += packet.copyTo(slot.data.byte_span().subspan(headerSize + slot.dataSize));
+
+	// update header and counter
+	slot.data.data()[8 + slot.subIdx] = (uint8_t) size;
+	slot.subIdx++;
+
+	return true;
+}
+
 void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 {
     Expects(packetIdx >= 0 && packetIdx < 256);
 
-    uint8_t* header = packet.data.data();
+	// Only patch parts of the header we need to update.
 
-    header[0] = headerSignature[0];
-    header[1] = headerSignature[1];
-    header[2] = headerSignature[2];
-    header[3] = headerSignature[3];
+    uint8_t* header = packet.data.data();
 
     header[4] = packet.seqIdx >> 8;
     header[5] = packet.seqIdx & 0xff;
     header[6] = packet.subIdx;
     header[7] = packetIdx & 0xff;
-
-    // bytes 8 to 13 are unused right now
-
-    // bytes 14+15 are reserved!
-    header[14] = 0;
-    header[15] = 0;
 
 	packet.timestamp = Clock::now();
 
@@ -166,12 +209,35 @@ void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const gsl::byte> 
 	parent->sendUnreliablePacket(packet);
 }
 
+void AckUnreliableConnection::flushOutboundQueue()
+{
+	doFlushSmallPackets();
+}
+
+void AckUnreliableConnection::doFlushSmallPackets()
+{
+	auto& slot = outbound.packets[256];
+
+	if (slot.subIdx > 0) {
+		doSend(slot.data.const_byte_span().subspan(headerSize, slot.dataSize), true);
+		memset(slot.data.data() + 8, 0, 8);
+
+		slot.dataSize = 0;
+		slot.subIdx = 0;
+	}
+}
+
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 {
     auto status = parent->getStatus();
     if (status != ConnectionStatus::Connected) {
         return false;
     }
+
+	// Try cached small packets first.
+	if (tryReceiveSmallPacket(packet)) {
+		return true;
+	}
 
 	// Need to send ack packets first, code below invalidates the sequence indices.
 	doSendAckPackets();
@@ -184,20 +250,42 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         }
 
         if (slot.subIdx == 0) {
-            packet = InboundNetworkPacket(slot.data.byte_span().subspan(0, slot.dataSize));
+	        if (slot.data[8] != 0) {
+        		// This is a "small packets" packet. Copy to sub-packet slot #256.
+        		auto& cache = inbound.packets[256];
+        		memcpy(cache.data.data(), slot.data.data(), headerSize + slot.dataSize);
 
-            slot.seqIdx = 0xffff;
+        		cache.subIdx = 1; // used as counter
+        		size_t offset = slot.data[8];
+        		for (int i = 1; i < 8; i++, cache.subIdx++) {
+        			const size_t sz = cache.data[8 + i];
+        			if (sz == 0) {
+        				break;
+        			}
+        			offset += sz;
+        		}
 
-            networkStatsListener.onReceiveData(slot.dataSize, 1);
+        		Ensures(offset == slot.dataSize);
+        		cache.dataSize = headerSize; // used as offset
 
-            if (statsListener) {
-                statsListener->onPacketReceived(inbound.curSeqIdx, slot.dataSize, false);
-            }
+        		// Return the first small packet
+        		tryReceiveSmallPacket(packet);
+        	} else {
+	      		packet = InboundNetworkPacket(slot.data.byte_span().subspan(headerSize, slot.dataSize));
+        	}
+
+        	slot.seqIdx = 0xffff;
+
+        	networkStatsListener.onReceiveData(slot.dataSize, 1);
+
+        	if (statsListener) {
+        		statsListener->onPacketReceived(inbound.curSeqIdx, slot.dataSize, false);
+        	}
 
         	inbound.curPacketIdx = (inbound.curPacketIdx + 1) % 256;
-            inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
+        	inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
 
-            return true;
+        	return true;
         } else {
             // Check if all sub-packets have arrived.
             int numSubPackets = slot.subIdx >> 4;
@@ -217,7 +305,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
                 for (size_t i = 0; i < numSubPackets; i++) {
                     auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
 
-                    memcpy(inboundCache.data() + totalSize, sub.data.data(), sub.dataSize);
+                    memcpy(inboundCache.data() + totalSize, sub.data.data() + headerSize, sub.dataSize);
                     totalSize += sub.dataSize;
 
                     sub.seqIdx = 0xffff;
@@ -242,6 +330,35 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 	resendUnAckPackets(std::clamp(lag * 1.5f, 0.025f, 1.0f));
 
     return false;
+}
+
+bool AckUnreliableConnection::tryReceiveSmallPacket(InboundNetworkPacket& packet)
+{
+	auto& slot = inbound.packets[256];
+
+	if (slot.subIdx == 0) {
+		return false;
+	}
+
+	for (uint8_t i = 0; i < slot.subIdx; i++) {
+		const uint8_t size = slot.data[8 + i];
+
+		if (size == 0) {
+			continue;
+		}
+
+		packet = InboundNetworkPacket(slot.data.byte_span().subspan(slot.dataSize, size));
+
+		slot.data[8 + i] = 0;
+		slot.dataSize += size;
+
+		return true;
+	}
+
+	// all done, "flush"
+	slot.subIdx = 0;
+
+	return false;
 }
 
 void AckUnreliableConnection::onSend(gsl::span<const gsl::byte> packet)
@@ -269,13 +386,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
     uint8_t subIdx = header[6];
     int packetIdx = header[7];
 
-    size_t connIdLen = 0;
-    /*size_t connIdLen = 1;
-    if ((header[15] & 0x80) != 0) {
-        connIdLen = 2;
-    }*/
-
-	size_t dataSize = packetSize - headerSize + connIdLen;
+	size_t dataSize = packetSize - headerSize;
 
 	bool isDupe = false;
 	bool isExpired = false;
@@ -301,7 +412,9 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 		}
 
 		slot.dataSize = dataSize;
-		memcpy(slot.data.data(), packet.data() + headerSize - connIdLen, dataSize);
+
+		// Copy the full packet, including the header.
+		memcpy(slot.data.data(), packet.data(), packetSize);
 
 		slot.seqIdx = seqIdx;
 		slot.subIdx = subIdx;
@@ -381,6 +494,9 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> dat
     			}
 
     			slot->seqIdx = 0xffff;
+
+    			// Clear header bytes
+    			memset(slot->data.data() + 4, 0, headerSize - 4);
 
     			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
     			avgLatencyCount++;

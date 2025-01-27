@@ -39,24 +39,26 @@ namespace Halley
 
         void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
 
+    	void flushOutboundQueue();
+
     private:
     	using Clock = std::chrono::steady_clock;
 
         struct SubPacket
         {
             Bytes data;
-            size_t dataSize;
-            uint16_t seqIdx;
-            uint8_t subIdx;
+            size_t dataSize = 0;
+            uint16_t seqIdx = 0;
+            uint8_t subIdx = 0;
         	Clock::time_point timestamp;
         };
 
         struct InOutQueue
         {
-            std::array<SubPacket, 256> packets;
+            std::array<SubPacket, 256 + 1> packets;
             int curPacketIdx = 0;
         	int firstPacketIdx = 0;
-            uint16_t curSeqIdx = 0;
+            uint16_t curSeqIdx = 0x7e00;
         };
 
         std::shared_ptr<IConnection> parent;
@@ -81,6 +83,11 @@ namespace Halley
 
     	void close(const std::optional<String>& reason);
 
+    	bool tryCacheSmallPacket(const OutboundNetworkPacket& packet);
+    	bool tryReceiveSmallPacket(InboundNetworkPacket& packet);
+    	void doFlushSmallPackets();
+
+        void doSend(gsl::span<const gsl::byte> packet, bool small);
         void doSend(SubPacket& packet, int packetIdx);
     	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx);
 

@@ -29,6 +29,8 @@ void MessageQueueUDP::sendAll()
         connection->send(IConnection::TransmissionType::Unreliable, p.packet);
     }
 
+    connection->flushOutboundQueue();
+
     outboundQueued.clear();
 }
 
