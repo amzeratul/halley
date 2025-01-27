@@ -12,7 +12,7 @@ namespace Halley {
 
 		HTTPLibHTTPRequest& operator=(HTTPLibHTTPRequest&& other) = default;
 
-		void setPostData(const String& contentType, const Bytes& data) override;
+		void setBody(const String& contentType, const Bytes& data) override;
 		void setHeader(const String& headerName, const String& headerValue) override;
 		void setProgressCallback(std::function<bool(uint64_t current, uint64_t total)> callback) override;
 		
@@ -26,7 +26,7 @@ namespace Halley {
 		String host;
 		String path;
 		String contentType;
-		Bytes postData;
+		Bytes body;
 
 		httplib::Result run();
 	};

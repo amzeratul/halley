@@ -45,5 +45,7 @@ namespace Halley {
 
 		Vector<char> encodeRLE(const Vector<char>& in);
 		Vector<char> decodeRLE(const Vector<char>& in);
+
+		String encodeURL(std::string_view in);
 	}
 }

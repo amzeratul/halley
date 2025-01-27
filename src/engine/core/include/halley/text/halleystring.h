@@ -72,8 +72,8 @@ namespace Halley {
 
 		operator std::string() const;
 		
-		bool isEmpty() const;
-		size_t length() const;
+		[[nodiscard]] bool isEmpty() const;
+		[[nodiscard]] size_t length() const;
 		
 		void setSize(size_t size);
 		void truncate(size_t size);
@@ -81,31 +81,31 @@ namespace Halley {
 		String& trim(bool fromRight);
 		String& trimBoth();
 
-		bool contains(Character chr) const;
-		bool contains(const std::string_view& string) const;
-		size_t find(std::string_view str) const;
+		[[nodiscard]] bool contains(Character chr) const;
+		[[nodiscard]] bool contains(const std::string_view& string) const;
+		[[nodiscard]] size_t find(std::string_view str) const;
 
-		String replaceAll(const std::string_view& before, const std::string_view& after) const;
-		String replaceOne(const std::string_view& before, const std::string_view& after) const;
+		[[nodiscard]] String replaceAll(const std::string_view& before, const std::string_view& after) const;
+		[[nodiscard]] String replaceOne(const std::string_view& before, const std::string_view& after) const;
 		void shrink();
 
-		String left(size_t n) const;
-		String right(size_t n) const;
-		String mid(size_t start, size_t count=npos) const;
+		[[nodiscard]] String left(size_t n) const;
+		[[nodiscard]] String right(size_t n) const;
+		[[nodiscard]] String mid(size_t start, size_t count=npos) const;
 
-		bool startsWith(const std::string_view& string, bool caseSensitive=true) const;
-		bool endsWith(const std::string_view& string, bool caseSensitive=true) const;
+		[[nodiscard]] bool startsWith(const std::string_view& string, bool caseSensitive=true) const;
+		[[nodiscard]] bool endsWith(const std::string_view& string, bool caseSensitive=true) const;
 
 		void writeText(const Character* src, size_t len, size_t &pos);
 		void writeChar(const Character &src, size_t &pos);
 		void writeNumber(Character *temp, int number, int pad, size_t &pos);
 
-		bool isNumber() const;
-		bool isInteger() const;
-		static bool isAlphanumeric(uint32_t character);
+		[[nodiscard]] bool isNumber() const;
+		[[nodiscard]] bool isInteger() const;
+		[[nodiscard]] static bool isAlphanumeric(uint32_t character);
 
-		String asciiLower() const;
-		String asciiUpper() const;
+		[[nodiscard]] String asciiLower() const;
+		[[nodiscard]] String asciiUpper() const;
 		void asciiMakeUpper();
 		void asciiMakeLower();
 		bool asciiCompareNoCase(const Character *src) const;
@@ -113,56 +113,56 @@ namespace Halley {
 		void appendCharacter(int unicode);
 
 		// Convert a string to a number
-		int32_t toInteger() const;
-		int64_t toInteger64() const;
-		uint32_t toUInteger() const;
-		uint64_t toUInteger64() const;
-		float toFloat() const;
-		double toDouble() const;
-		int subToInteger(size_t start,size_t end) const;
+		[[nodiscard]] int32_t toInteger() const;
+		[[nodiscard]] int64_t toInteger64() const;
+		[[nodiscard]] uint32_t toUInteger() const;
+		[[nodiscard]] uint64_t toUInteger64() const;
+		[[nodiscard]] float toFloat() const;
+		[[nodiscard]] double toDouble() const;
+		[[nodiscard]] int subToInteger(size_t start,size_t end) const;
 
 		// std::string methods
-		const char* c_str() const;
-		String substr(size_t pos, size_t len=npos) const;
-		size_t find(Character character, size_t pos=0) const;
-		size_t find(const char* str, size_t pos=0) const;
-		size_t find_last_of(char character) const;
-		size_t size() const;
-		const char& operator[](size_t pos) const;
-		char& operator[](size_t pos);
+		[[nodiscard]] const char* c_str() const;
+		[[nodiscard]] String substr(size_t pos, size_t len=npos) const;
+		[[nodiscard]] size_t find(Character character, size_t pos=0) const;
+		[[nodiscard]] size_t find(const char* str, size_t pos=0) const;
+		[[nodiscard]] size_t find_last_of(char character) const;
+		[[nodiscard]] size_t size() const;
+		[[nodiscard]] const char& operator[](size_t pos) const;
+		[[nodiscard]] char& operator[](size_t pos);
 
-		Bytes toBytes() const;
-		gsl::span<const char> asSpan() const;
-		gsl::span<char> asSpan();
+		[[nodiscard]] Bytes toBytes() const;
+		[[nodiscard]] gsl::span<const char> asSpan() const;
+		[[nodiscard]] gsl::span<char> asSpan();
 
-		static const Character* stringPtrTrim(Character *chr,size_t len,size_t startPos);
-		static const Character* stringTrim(String &str,size_t startPos);
+		[[nodiscard]] static const Character* stringPtrTrim(Character *chr,size_t len,size_t startPos);
+		[[nodiscard]] static const Character* stringTrim(String &str,size_t startPos);
 
 		// Number tidy up functions
-		static String prettyFloat(String src);
-		static String prettySize(uint64_t bytes);
+		[[nodiscard]] static String prettyFloat(String src);
+		[[nodiscard]] static String prettySize(uint64_t bytes);
 
 		// Unicode routines
-		StringUTF16 getUTF16() const;
-		StringUTF32 getUTF32() const;
-		size_t getUTF32Len() const;
-		static size_t getUTF32Len(std::string_view str);
+		[[nodiscard]] StringUTF16 getUTF16() const;
+		[[nodiscard]] StringUTF32 getUTF32() const;
+		[[nodiscard]] size_t getUTF32Len() const;
+		[[nodiscard]] static size_t getUTF32Len(std::string_view str);
 
 		// Static unicode routines
-		static size_t getUTF8Len(const wchar_t *utf16);
-		static size_t getUTF8Len(const StringUTF32 &utf32);
-		static size_t getUTF16Len(const StringUTF32 &utf32);
+		[[nodiscard]] static size_t getUTF8Len(const wchar_t *utf16);
+		[[nodiscard]] static size_t getUTF8Len(const StringUTF32 &utf32);
+		[[nodiscard]] static size_t getUTF16Len(const StringUTF32 &utf32);
 
-		inline std::string& cppStr() { return str; }
-		inline const std::string& cppStr() const { return str; }
+		[[nodiscard]] inline std::string& cppStr() { return str; }
+		[[nodiscard]] inline const std::string& cppStr() const { return str; }
 
-		Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
-		Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
+		[[nodiscard]] Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
+		[[nodiscard]] Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 
-		static String concatList(gsl::span<const String> list, std::string_view separator);
+		[[nodiscard]] static String concatList(gsl::span<const String> list, std::string_view separator);
 
 		template <typename T>
-		static String concat(gsl::span<const T> list, std::string_view separator)
+		[[nodiscard]] static String concat(gsl::span<const T> list, std::string_view separator)
 		{
 			Vector<String> text;
 			text.reserve(list.size());
@@ -173,7 +173,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename F>
-		static String concat(gsl::span<const T> list, std::string_view separator, F toStringConv)
+		[[nodiscard]] static String concat(gsl::span<const T> list, std::string_view separator, F toStringConv)
 		{
 			Vector<String> text;
 			text.reserve(list.size());
@@ -201,9 +201,9 @@ namespace Halley {
 		operator std::string_view() const noexcept { return str; }
 		const String& toString() const { return *this; }
 
-		size_t getSizeBytes() const;
+		[[nodiscard]] size_t getSizeBytes() const;
 
-		static const String& emptyString();
+		[[nodiscard]] static const String& emptyString();
 
 		void secureClear();
 

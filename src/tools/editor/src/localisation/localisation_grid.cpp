@@ -148,7 +148,7 @@ void LocalisationGrid::drawLine(UIPainter& painter, int idx, const Vector<float>
 		if (translatedData) {
 			if (auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
 				strs.push_back(translatedEntry->value);
-				colours.push_back(entry.hash == translatedEntry->origVersion ? textCol : outdatedCol);
+				colours.push_back(entry.version == translatedEntry->origVersion ? textCol : outdatedCol);
 			}
 		}
 	}

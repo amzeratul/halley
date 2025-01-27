@@ -1,10 +1,12 @@
 #pragma once
 
+#include "localisation_client.h"
 #include "localisation_data.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class LocalisationEditorRoot;
 
     class LocalisationInfoRetriever : public ILocalisationInfoRetriever {
@@ -20,7 +22,8 @@ namespace Halley {
 
 	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
-        LocalisationEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory);
+        LocalisationEditor(LocalisationEditorRoot& root, ProjectWindow& projectWindow, UIFactory& factory);
+        ~LocalisationEditor() override;
 
         void update(Time t, bool moved) override;
         void onMakeUI() override;
@@ -30,32 +33,62 @@ namespace Halley {
 
     private:
         LocalisationEditorRoot& root;
+        ProjectWindow& projectWindow;
         Project& project;
         UIFactory& factory;
+        const HalleyAPI& api;
 
-        LocOriginalData originalLanguage;
-        HashMap<String, LocTranslationData> localised;
+        std::shared_ptr<bool> aliveFlag;
+        std::unique_ptr<LocalisationClient> client;
 
-        struct Result {
-        	LocOriginalData originalLanguage;
-			HashMap<String, LocTranslationData> localised;
+        enum class State {
+	        NotConnected,
+            Connecting,
+            Synchronising,
+            Synchronised,
+            Ready
         };
 
         bool loaded = false;
-        Future<Result> waitingToPopulate;
+        bool gotLocalStrings = false;
+        bool gotRemoteStrings = false;
+        State state = State::NotConnected;
+        std::optional<String> curMessage;
 
-        void load();
+        using Result = LocalisationClient::StringsResult;
+        std::optional<Result> localStrings;
+        std::optional<Result> remoteStrings;
+        Future<Result> localStringsFuture;
+        Future<Result> remoteStringsFuture;
 
-        void loadFromResources();
-        String getNumberWithCommas(int number) const;
+        void tryLoading();
+        void loadOriginalDataFromDisk();
 
-        void requestPopulateData();
         void populateData();
-        void addTranslationData(UIWidget& container, const I18NLanguage& language, int totalKeys, bool canEdit);
+        void populateOriginalLanguageData();
+        void populateTranslationData();
+        void addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, int totalKeys, int totalWords, bool canEdit);
 
-        void openLanguage(LocTranslationData* localisationData, bool canEdit);
+        LocOriginalData& getOriginalData();
+        const LocOriginalData& getOriginalData() const;
+        LocTranslationData* getTranslationData(const I18NLanguage& language);
 
+        void openOriginalLanguage(bool canEdit);
+        void openLanguage(const I18NLanguage& language, bool canEdit);
+        void exportLanguage(const I18NLanguage& language);
+        void importLanguage(const I18NLanguage& language);
+
+        bool isDevEnvironment() const;
         bool canViewLanguage(const I18NLanguage& language) const;
         bool canEditLanguage(const I18NLanguage& language) const;
+
+        void signIn(const String& username, const String& password);
+        void signOut();
+        void onConnected(LocalisationClient::LoginResult result);
+
+		void uploadOriginalStrings();
+        void downloadTranslations();
+
+        Vector<I18NLanguage> getLanguages() const;
     };
 }

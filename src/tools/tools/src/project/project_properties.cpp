@@ -93,6 +93,25 @@ const Vector<I18NLanguage>& ProjectProperties::getLanguages() const
 	return languages;
 }
 
+std::optional<std::pair<float, String>> ProjectProperties::getLanguageCost(const I18NLanguage& language) const
+{
+	if (const auto iter = languageCosts.find(language.getISOCode()); iter != languageCosts.end()) {
+		auto split = iter->second.split(' ');
+		return std::pair{ split[0].toFloat(), split.size() >= 2 ? split[1] : "" };
+	}
+	return std::nullopt;
+}
+
+const String& ProjectProperties::getLocalisationServer() const
+{
+	return localisationServer;
+}
+
+bool ProjectProperties::isDevEnvironment() const
+{
+	return devEnviromnent;
+}
+
 void ProjectProperties::loadDefaults()
 {
 	uuid = UUID::generate();
@@ -105,6 +124,8 @@ void ProjectProperties::loadDefaults()
 	originalLanguage = I18NLanguage("en");
 	languages.clear();
 	languages.push_back(originalLanguage);
+	localisationServer = {};
+	devEnviromnent = true;
 }
 
 void ProjectProperties::load()
@@ -142,6 +163,15 @@ void ProjectProperties::load()
 		}
 		if (node.hasKey("languages")) {
 			languages = node["languages"].asVector<I18NLanguage>();
+		}
+		if (node.hasKey("languageCosts")) {
+			languageCosts = node["languageCosts"].asHashMap<String, String>();
+		}
+		if (node.hasKey("localisationServer")) {
+			localisationServer = node["localisationServer"].asString();
+		}
+		if (node.hasKey("devEnvironment")) {
+			devEnviromnent = node["devEnvironment"].asBool(true);
 		}
 	}
 }

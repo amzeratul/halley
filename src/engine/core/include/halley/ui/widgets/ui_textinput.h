@@ -63,6 +63,9 @@ namespace Halley {
 		void setSelectAllOnClick(bool enabled);
 		bool isSelectAllOnClick() const;
 
+		void setPassword(bool enabled);
+		bool isPassword() const;
+
 		void submit();
 		void setClearOnSubmit(bool enabled);
 		bool isClearOnSubmit() const;
@@ -114,6 +117,8 @@ namespace Halley {
 		void drawSelection(Range<int> sel, UIPainter& painter) const;
 		void drawSelectionRow(Range<int> row, UIPainter& painter) const;
 
+		const StringUTF32& getTextToDisplay(const StringUTF32& orig) const;
+
 		Sprite sprite;
 		Sprite caret;
 		Sprite selectionBg;
@@ -127,6 +132,7 @@ namespace Halley {
 		LocalisedString appendText;
 		StringUTF32 lastText;
 		std::optional<Rect4f> textClip;
+		mutable StringUTF32 textToDisplay;
 		
 		AutoCompleteHandle autoCompleteHandle;
 		StringUTF32 userInputForAutoComplete;
@@ -155,6 +161,7 @@ namespace Halley {
 		bool clearOnSubmit = false;
 		bool showGhostWhenFocused = false;
 		bool selectAllOnClick = false;
+		bool password = false;
 
 		uint8_t clickTimeout = 0;
 		Time timeSinceLastClick = 1;

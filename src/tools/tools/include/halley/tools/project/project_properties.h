@@ -34,6 +34,11 @@ namespace Halley {
 		const I18NLanguage& getOriginalLanguage() const;
 		const Vector<I18NLanguage>& getLanguages() const;
 
+    	std::optional<std::pair<float, String>> getLanguageCost(const I18NLanguage& language) const;
+
+    	const String& getLocalisationServer() const;
+        bool isDevEnvironment() const;
+
 	private:
 		const Path& propertiesFile;
     	UUID uuid;
@@ -42,9 +47,12 @@ namespace Halley {
         String binName;
         I18NLanguage originalLanguage;
         Vector<I18NLanguage> languages;
+        HashMap<String, String> languageCosts;
     	bool importByExtension = false;
     	float defaultZoom = 1.0f;
     	Vector<String> platforms;
+        String localisationServer;
+        bool devEnviromnent = true;
 
     	bool dirty = false;
 

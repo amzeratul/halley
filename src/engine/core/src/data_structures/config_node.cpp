@@ -1340,6 +1340,11 @@ ConfigNode& ConfigNode::operator[](size_t idx)
 	return asSequence().at(idx);
 }
 
+void ConfigNode::push_back(ConfigNode node)
+{
+	asSequence().push_back(std::move(node));
+}
+
 const ConfigNode& ConfigNode::operator[](std::string_view key) const
 {
 	if (getType() == ConfigNodeType::Undefined) {

@@ -34,15 +34,13 @@ namespace Halley {
 	class LocalisationDataEntry {
 	public:
 		String key;
-		LocalisationHashType hash = 0;
 		String value;
 		String context;
 		String comment;
+		int version = 0;
 
 		LocalisationDataEntry() = default;
 		LocalisationDataEntry(String key, String value, String context = "", String comment = "");
-
-		void computeHash();
 	};
 
 	class ILocOriginalData {
@@ -76,11 +74,12 @@ namespace Halley {
 		const I18NLanguage& getLanguage() const;
 		LocalisationStats getStats() const;
 
+		LocOriginalDataChunk& getChunk(const String& name);
 		const LocOriginalDataChunk* tryGetChunk(const String& name) const;
 		const Vector<LocOriginalDataChunk>& getChunks() const;
 
-		LocalisationHashType getVersion(const String& key) const;
-		std::optional<LocalisationHashType> tryGetVersion(const String& key) const;
+		int32_t getVersion(const String& key) const;
+		std::optional<int32_t> tryGetVersion(const String& key) const;
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
@@ -91,14 +90,14 @@ namespace Halley {
 	private:
 		I18NLanguage language;
 		Vector<LocOriginalDataChunk> chunks;
-		HashMap<String, LocalisationHashType> keyVersions;
+		HashMap<String, int32_t> keyVersions;
 		Vector<std::pair<size_t, size_t>> keyIndices;
 	};
 
 	class LocTranslationEntry {
 	public:
 		String value;
-		LocalisationHashType origVersion;
+		int32_t origVersion;
 	};
 
 	class LocTranslationData {
@@ -106,7 +105,7 @@ namespace Halley {
 		I18NLanguage language;
 		HashMap<String, LocTranslationEntry> entries;
 
-		void setValue(const String& key, LocalisationHashType curVersion, String value);
+		void setValue(const String& key, int32_t curVersion, String value);
 		const LocTranslationEntry* tryGetEntry(const String& key) const;
 
 		TranslationStats getTranslationStats(const LocOriginalData& original) const;
