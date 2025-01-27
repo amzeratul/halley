@@ -70,10 +70,10 @@ namespace Halley {
         return GamePlatform::FuturePlatform4;
 	#elif defined(__FUTURE_PLATFORM_5__)
         return GamePlatform::FuturePlatform5;
-	#elif defined(__SWITCH2__) // ?
-        return GamePlatform::Switch2;
 	#elif defined(__NX_TOOLCHAIN_MAJOR__)
         return GamePlatform::Switch;
+	#elif defined(NN_NINTENDO_SDK) // ?
+        return GamePlatform::Switch2;
     #elif defined(__ORBIS__)
         return GamePlatform::PS4;
     #elif defined(_GAMING_XBOX_XBOXONE)

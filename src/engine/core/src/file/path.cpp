@@ -405,7 +405,7 @@ void Path::touchFile(const Path& path)
 
 bool Path::exists(const Path& path)
 {
-#if !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY) && !defined(__NX_TOOLCHAIN_MAJOR__)
+#if !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY) && !defined(NN_NINTENDO_SDK)
 	std::error_code ec;
 	return std::filesystem::exists(path.string(), ec);
 #else

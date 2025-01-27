@@ -10,7 +10,7 @@ using namespace Halley;
 
 namespace {
 #ifdef DEV_BUILD
-	constexpr bool doAllowHotReload = getPlatform() != GamePlatform::Switch;
+	constexpr bool doAllowHotReload = isPCPlatform();
 #else
 	constexpr bool doAllowHotReload = false;
 #endif

@@ -11,7 +11,7 @@
 #include <shellapi.h>
 #endif
 
-#if defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(NN_NINTENDO_SDK)
 #include <nn/os.h>
 #endif
 
@@ -110,7 +110,7 @@ Vector<std::string> HalleyMain::getWin32Args()
 
 Vector<std::string> HalleyMain::getArgs(int argc, char* argv[])
 {
-#if defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(NN_NINTENDO_SDK)
 	argc = nn::os::GetHostArgc();
 	argv = nn::os::GetHostArgv();
 #endif

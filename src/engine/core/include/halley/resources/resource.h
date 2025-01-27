@@ -8,7 +8,7 @@
 #include "halley/concurrency/future.h"
 #include "halley/text/enum_names.h"
 
-#if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(DEV_BUILD) && !defined(NN_NINTENDO_SDK)
 #define ENABLE_HOT_RELOAD
 #endif
 

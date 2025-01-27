@@ -59,7 +59,7 @@ namespace Halley
 
 		virtual std::thread createThread(const String& name, ThreadPriority priority, std::function<void()> runnable)
 		{
-			return std::thread([=] () {
+			return std::thread([this, name, priority, runnable = std::move(runnable)]() {
 				setThreadName(name);
 				setThreadPriority(priority);
 				runnable();

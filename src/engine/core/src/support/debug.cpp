@@ -90,7 +90,7 @@ private:
 
 #endif
 
-#if !defined(__NX_TOOLCHAIN_MAJOR__) && !defined(__ORBIS__)
+#if !defined(NN_NINTENDO_SDK) && !defined(__ORBIS__)
 #define HAS_SIGNAL
 #include <csignal>
 #endif
