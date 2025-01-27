@@ -38,7 +38,7 @@ namespace {
 			break;
 		case ConfigNodeType::Int64:
 		case ConfigNodeType::EntityId:
-			result = src.asInt64();
+			result = static_cast<Json::Int64>(src.asInt64());
 			break;
 		case ConfigNodeType::Float:
 			result = src.asFloat();
