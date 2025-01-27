@@ -246,7 +246,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 
     if (slot.seqIdx < 0x8000) {
         if (slot.seqIdx != inbound.curSeqIdx) {
-            throw Exception("Unexpected packet sequence index", HalleyExceptions::Network);
+            throw Exception("Unexpected packet sequence index: found " + toString(slot.seqIdx) + ", expected " + toString(inbound.curSeqIdx), HalleyExceptions::Network);
         }
 
         if (slot.subIdx == 0) {
