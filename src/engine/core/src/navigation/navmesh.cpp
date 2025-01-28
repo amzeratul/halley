@@ -551,20 +551,26 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) co
 	}
 }
 
+
 std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet) const
+{
+	return findRayCollision(this, ray, maxDistance, initialPolygon, weightedDistance, navmeshSet);
+}
+
+std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmesh* curNavmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance, const NavmeshSet* navmeshSet)
 {
 	float distanceLeft = maxDistance;
 	NodeId curPoly = initialPolygon;
 	std::optional<NodeId> prevPoly;
 	while (distanceLeft > 0) {
-		const auto& poly = polygons.at(curPoly);
+		const auto& poly = curNavmesh->polygons.at(curPoly);
 		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
 			return { ray.p, weightedDistance };
 		}
 
-		const auto nextPoly = nodes[curPoly].connections[edgeIdx.value()];
+		const auto nextPoly = curNavmesh->nodes[curPoly].connections[edgeIdx.value()];
 		if (nextPoly && (nextPoly == prevPoly)) {
 			//Logger::logError("Navmesh::findRayCollision error: ping-ponging on navmesh. Prev = " + toString(prevPoly) + ", cur = " + toString(curPoly) + ", next = " + toString(nextPoly));
 
@@ -610,7 +616,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 			// If distMoved is zero, this can infinite loop (seen it in practice)
 			distMoved = epsilon;
 		}
-		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
+		weightedDistance += std::min(distMoved, distanceLeft) * (curNavmesh->weights.empty() ? 1.0f : curNavmesh->weights.at(curPoly));
 		distanceLeft -= distMoved;
 		if (distanceLeft < epsilon) {
 			return { {}, weightedDistance };
@@ -624,10 +630,14 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 		} else {
 			// Hit the edge of the navmesh - continue on next navmesh if available, otherwise stop here
 			if (navmeshSet) {
-				if (auto nextNavmeshId = getNavmeshFromEdge(NodeAndConn(curPoly, static_cast<uint16_t>(*edgeIdx)))) {
+				if (auto nextNavmeshId = curNavmesh->getNavmeshFromEdge(NodeAndConn(curPoly, static_cast<uint16_t>(*edgeIdx)))) {
 					const auto& nextNavmesh = navmeshSet->getNavmeshes()[*nextNavmeshId];
 					if (auto nextNodeId = nextNavmesh.getNodeAt(*intersection)) {
-						return nextNavmesh.findRayCollision(Ray(*intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
+						curNavmesh = &nextNavmesh;
+						ray = Ray(*intersection, ray.dir);
+						curPoly = *nextNodeId;
+						continue;
+						//return nextNavmesh.findRayCollision(Ray(*intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
 					}
 				}
 			}

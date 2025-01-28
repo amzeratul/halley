@@ -216,5 +216,7 @@ namespace Halley {
 		void generateOpenEdges();
 
 		OptionalLite<uint16_t> getNavmeshFromEdge(NodeAndConn edge) const;
+
+		static std::pair<std::optional<Vector2f>, float> findRayCollision(const Navmesh* navmesh, Ray ray, float maxDistance, NodeId initialPolygon, float weightedDistance = 0, const NavmeshSet* navmeshSet = nullptr);
 	};
 }
