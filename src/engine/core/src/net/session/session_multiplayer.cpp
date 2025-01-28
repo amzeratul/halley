@@ -8,11 +8,11 @@
 
 using namespace Halley;
 
-SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings)
+SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resources, const ConnectionOptions& options, SessionSettings settings)
 	: api(api)
 	, host(options.mode == Mode::Host)
 {
-	playerName = api.platform->getPlayerName();
+	playerName = options.clientPlayerName.value_or(api.platform->getPlayerName());
 
 	service = api.platform->createNetworkService(host ? 6060 : 0);
 	if (!service) {

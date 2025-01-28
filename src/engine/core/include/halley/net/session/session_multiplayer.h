@@ -53,6 +53,7 @@ namespace Halley {
 			Mode mode = Mode::Host;
 			int16_t maxPlayers = 8;
 			std::optional<String> clientConnectTo;
+			std::optional<String> clientPlayerName;
 		};
 
 		struct SessionSettings {
@@ -61,7 +62,7 @@ namespace Halley {
 			HashSet<String> ignoreComponents;
 		};
 
-		SessionMultiplayer(const HalleyAPI& api, Resources& resources, ConnectionOptions options, SessionSettings settings);
+		SessionMultiplayer(const HalleyAPI& api, Resources& resources, const ConnectionOptions& options, SessionSettings settings);
 		~SessionMultiplayer() override;
 
 		bool update(Time t) override;
