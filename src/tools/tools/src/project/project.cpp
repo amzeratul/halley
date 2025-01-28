@@ -161,8 +161,8 @@ Vector<GamePlatform> Project::getBuildPlatforms() const
 		platforms.push_back(getPlatform());
 	}
 	for (auto& plugin: editorPlugins) {
-		if (auto platform = plugin->getBuildPlatform()) {
-			platforms.push_back(*platform);
+		for (const auto platform: plugin->getBuildPlatforms()) {
+			platforms.push_back(platform);
 		}
 	}
 	return platforms;
@@ -186,7 +186,7 @@ gsl::span<std::unique_ptr<IHalleyEditorPlugin>> Project::getEditorPlugins()
 IHalleyEditorPlugin* Project::getEditorPluginForBuildPlatform(GamePlatform platform) const
 {
 	for (auto& plugin: editorPlugins) {
-		if (plugin->getBuildPlatform() == platform) {
+		if (plugin->getBuildPlatforms().contains(platform)) {
 			return plugin.get();
 		}
 	}
@@ -296,9 +296,10 @@ Vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(Im
 {
 	Vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
-		auto importer = plugin->makeAssetImporter(type);
-		if (importer) {
-			result.emplace_back(std::move(importer));
+		for (auto& importer : plugin->makeAssetImporters(type)) {
+			if (importer) {
+				result.emplace_back(std::move(importer));
+			}
 		}
 	}
 	return result;
@@ -714,14 +715,14 @@ void Project::launchGame(Vector<String> params) const
 		const String args = String::concatList(params, " ");
 		OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
 	} else if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		plugin->launchGame(OS::get(), this, params);
+		plugin->launchGame(getTargetPlatform(), OS::get(), this, params);
 	}
 }
 
 bool Project::canDeployGame() const
 {
 	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		return plugin->canDeployGame();
+		return plugin->canDeployGame(getTargetPlatform());
 	}
 	return false;
 }
@@ -729,7 +730,7 @@ bool Project::canDeployGame() const
 std::unique_ptr<Task> Project::buildGame()
 {
 	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		return plugin->buildGame(OS::get(), *this);
+		return plugin->buildGame(getTargetPlatform(), OS::get(), *this);
 	}
 	return std::make_unique<BuildProjectTask>(*this);
 }
@@ -737,7 +738,7 @@ std::unique_ptr<Task> Project::buildGame()
 std::unique_ptr<Task> Project::deployGame() const
 {
 	if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
-		return plugin->deployGame(OS::get(), *this);
+		return plugin->deployGame(getTargetPlatform(), OS::get(), *this);
 	}
 	return {};
 }

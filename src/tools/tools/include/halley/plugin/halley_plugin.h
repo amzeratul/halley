@@ -12,7 +12,7 @@ namespace Halley {
 		virtual const char* getName() const = 0;
         virtual Vector<String> getSupportedPlatforms() const { return {"*"}; }
 
-		virtual std::unique_ptr<IAssetImporter> makeAssetImporter(ImportAssetType /*type*/) { return {}; }
+		virtual Vector<std::unique_ptr<IAssetImporter>> makeAssetImporters(ImportAssetType type) { return {}; }
 		virtual std::unique_ptr<IHalleyEditorPlugin> makeHalleyEditorPlugin() { return {}; }
     };
 }

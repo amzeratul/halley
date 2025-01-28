@@ -151,7 +151,7 @@ HalleyPluginPtr ProjectLoader::loadPlugin(const Path& path) const
 	}
 
 	auto getHalleyPluginVersion = reinterpret_cast<GetHalleyPluginVersionFn*>(dlsym(module, "getHalleyPluginVersion"));
-	if (!getHalleyPluginVersion || getHalleyPluginVersion() != 1) {
+	if (!getHalleyPluginVersion || getHalleyPluginVersion() != 2) {
 		dlclose(module);
 		return {};
 	}

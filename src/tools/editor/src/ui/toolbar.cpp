@@ -162,6 +162,8 @@ String Toolbar::getPlatformName(GamePlatform platform) const
 		return "Linux";
 	case GamePlatform::Switch:
 		return "Switch";
+	case GamePlatform::Switch2:
+		return "Switch 2";
 	case GamePlatform::XboxOne:
 		return "Xbox One";
 	case GamePlatform::XboxSeries:
