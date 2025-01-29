@@ -644,6 +644,7 @@ bool SpriteSheet::ImageData::operator!=(const SpriteSheet::ImageData& other) con
 SpriteResource::SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteSheet, size_t idx)
 	: spriteSheet(spriteSheet)
 	, idx(idx)
+	, spriteSheetName(spriteSheet->getAssetId())
 {
 }
 
@@ -666,17 +667,28 @@ size_t SpriteResource::getIdx() const
 
 std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 {
-	return spriteSheet.lock();
+	auto sheet = spriteSheet.lock();
+	if (sheet) {
+		return sheet;
+	}
+
+	sheet = resources->get<SpriteSheet>(spriteSheetName);
+	if (sheet) {
+		spriteSheet = sheet;
+		return sheet;
+	} else {
+		throw Exception("Failed to load spriteSheet for SpriteResource \"" + getAssetId() + "\"", HalleyExceptions::Graphics);
+	}
 }
 
 std::shared_ptr<Material> SpriteResource::getMaterial(std::string_view name) const
 {
-	return spriteSheet.lock()->getMaterial(name);
+	return getSpriteSheet()->getMaterial(name);
 }
 
 const String& SpriteResource::getDefaultMaterialName() const
 {
-	return spriteSheet.lock()->getDefaultMaterialName();
+	return getSpriteSheet()->getDefaultMaterialName();
 }
 
 std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
@@ -698,6 +710,7 @@ void SpriteResource::reload(Resource&& resource)
 {
 	auto& reloaded = dynamic_cast<SpriteResource&>(resource);
 	spriteSheet = std::move(reloaded.spriteSheet);
+	spriteSheetName = std::move(reloaded.spriteSheetName);
 	idx = reloaded.idx;
 
 #ifdef ENABLE_HOT_RELOAD
@@ -715,16 +728,14 @@ const String& SpriteResource::getHotReloaderId() const
 
 void SpriteResource::serialize(Serializer& s) const
 {
-	const auto ss = spriteSheet.lock();
-	s << ss->getAssetId();
+	s << spriteSheetName;
 	s << idx;
 }
 
 void SpriteResource::deserialize(Deserializer& s)
 {
-	String ssName;
-	s >> ssName;
-	spriteSheet = resources->get<SpriteSheet>(ssName);
+	s >> spriteSheetName;
+	spriteSheet = resources->get<SpriteSheet>(spriteSheetName);
 
 	s >> idx;
 }

@@ -218,8 +218,9 @@ namespace Halley
 		ResourceMemoryUsage getMemoryUsage() const override;
 
 	private:
-		std::weak_ptr<const SpriteSheet> spriteSheet;
+		mutable std::weak_ptr<const SpriteSheet> spriteSheet;
 		uint64_t idx = -1;
 		Resources* resources = nullptr;
+		String spriteSheetName;
 	};
 }
