@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <cmath>
 #include "vector2.h"
 #include <optional>
 #include "range.h"
@@ -179,11 +180,20 @@ namespace Halley {
 		std::optional<Vector2f> intersection(const LineSegment& other, const float epsilon = 0) const
 		{
 			const float len = (this->b - this->a).length();
+			if (len <= std::numeric_limits<float>::min()) {
+				return {};
+			}
 			const float otherLen = (other.b - other.a).length();
 			const auto a = this->a;
 			const auto b = (this->b - this->a) / len;
+			if (!b.isValid()) {
+				return {};
+			}
 			const auto c = other.a;
 			const auto d = (other.b - other.a) / otherLen;
+			if (!d.isValid()) {
+				return {};
+			}
 			const float divisor = b.x * d.y - b.y * d.x;
 			if (std::abs(divisor) < 0.000001f) {
 				// Parallel lines
@@ -202,8 +212,14 @@ namespace Halley {
 		std::optional<Vector2f> intersection(const Line& other, const float epsilon = 0) const
 		{
 			const float len = (this->b - this->a).length();
+			if (len <= std::numeric_limits<float>::min()) {
+				return {};
+			}
 			const auto a = this->a;
 			const auto b = (this->b - this->a) / len;
+			if (!b.isValid()) {
+				return {};
+			}
 			const auto c = other.origin;
 			const auto d = other.dir;
 			const float divisor = b.x * d.y - b.y * d.x;
@@ -223,8 +239,14 @@ namespace Halley {
 		std::optional<float> intersectionParametric(const Line& other, const float epsilon = 0) const
 		{
 			const float len = (this->b - this->a).length();
+			if (len <= std::numeric_limits<float>::min()) {
+				return {};
+			}
 			const auto a = this->a;
 			const auto b = (this->b - this->a) / len;
+			if (!b.isValid()) {
+				return {};
+			}
 			const auto c = other.origin;
 			const auto d = other.dir;
 			const float divisor = b.x * d.y - b.y * d.x;
