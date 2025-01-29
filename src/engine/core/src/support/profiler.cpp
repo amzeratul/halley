@@ -317,6 +317,7 @@ constexpr static bool alwaysLogType(ProfilerEventType type)
 }
 
 ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)
+	: id(0)
 {
 	if (isDevMode() || alwaysLogType(type)) {
 		id = ProfilerCapture::get().recordEventStart(type, name);

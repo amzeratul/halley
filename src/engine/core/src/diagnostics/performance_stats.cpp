@@ -13,6 +13,7 @@
 #include "halley/time/halleytime.h"
 #include "halley/time/stopwatch.h"
 #include "halley/utils/algorithm.h"
+#include "halley/utils/utils.h"
 
 using namespace Halley;
 
@@ -486,7 +487,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		return;
 	}
 
-	const auto duration = 16'999'999LL;
+	const auto duration = std::max<int64_t>(16'999'999LL, alignUp<int64_t>(lastProfileData->getTotalElapsedTime(), 1'000'000LL) - 1);
 	const auto timeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
 	const int64_t numMs = timeRange.getLength() / 1'000'000LL;
 

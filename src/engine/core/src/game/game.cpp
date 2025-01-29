@@ -185,7 +185,9 @@ std::optional<int> Game::getCurrentDisplay() const
 
 size_t Game::getMaxThreads() const
 {
-	return std::thread::hardware_concurrency();
+	auto n = std::thread::hardware_concurrency();
+	Logger::logInfo("Using " + toString(n) + " hardware threads.");
+	return n;
 }
 
 bool Game::shouldProcessEventsOnFixedUpdate() const
