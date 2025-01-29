@@ -176,8 +176,11 @@ namespace Halley {
 		// Gets the angle that this vector is pointing to
 		[[nodiscard]] constexpr U angle () const
 		{
+			const auto result = std::atan2(y, x);
 			U angle;
-			angle.setRadians(std::atan2(y, x));
+			if (!std::isnan(result) && !std::isinf(result)) {
+				angle.setRadians(result);
+			}
 			return angle;
 		}
 
