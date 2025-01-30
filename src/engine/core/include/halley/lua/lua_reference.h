@@ -47,7 +47,7 @@ namespace Halley {
 		{
 			LuaFunctionCaller::startCall(*lua);
 			pushToLuaStack();
-			LuaFunctionBind<Us...>::call(*lua, 0, LuaReturnSize<T>::value, us...);
+			LuaFunctionBind<Us...>::call(*lua, 0, LuaReturnSize<T>::value, true, us...);
 			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
 		}
 
@@ -56,7 +56,25 @@ namespace Halley {
 		{
 			LuaFunctionCaller::startCall(*lua);
 			pushToLuaStack();
-			LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value);
+			LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value, true);
+			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+		}
+
+		template <typename T, typename... Us>
+		T callNoThrow(Us... us) const
+		{
+			LuaFunctionCaller::startCall(*lua);
+			pushToLuaStack();
+			LuaFunctionBind<Us...>::call(*lua, 0, LuaReturnSize<T>::value, false, us...);
+			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+		}
+
+		template <typename T>
+		T callNoThrow() const
+		{
+			LuaFunctionCaller::startCall(*lua);
+			pushToLuaStack();
+			LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value, false);
 			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
 		}
 

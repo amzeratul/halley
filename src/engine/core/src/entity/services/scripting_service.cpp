@@ -22,7 +22,7 @@ ScriptEnvironment& ScriptingService::getEnvironment() const
 	return *scriptEnvironment;
 }
 
-ConfigNode ScriptingService::evaluateExpression(const String& expression, bool useResultCache) const
+ConfigNode ScriptingService::evaluateExpression(const String& expression, bool useResultCache, bool throwOnError) const
 {
 	if (useResultCache) {
 		if (auto iter = resultCache.find(expression); iter != resultCache.end()) {
@@ -31,7 +31,7 @@ ConfigNode ScriptingService::evaluateExpression(const String& expression, bool u
 	}
 
 	auto stack = LuaStackOps(*luaState);
-	stack.eval("return " + expression);
+	stack.eval("return " + expression, "", throwOnError);
 	auto result = stack.popConfigNode();
 
 	if (useResultCache) {
@@ -40,7 +40,7 @@ ConfigNode ScriptingService::evaluateExpression(const String& expression, bool u
 	return result;
 }
 
-ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression, bool useResultCache) const
+ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression, bool useResultCache, bool throwOnError) const
 {
 	if (expression.isEmpty()) {
 		return ConfigNode();
@@ -52,7 +52,8 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression,
 		}
 	}
 
-	auto result = expression.get(*luaState).call<ConfigNode>();
+	auto& expr = expression.get(*luaState);
+	auto result = throwOnError ? expr.call<ConfigNode>() : expr.callNoThrow<ConfigNode>();
 
 	if (useResultCache) {
 		resultCache[expression.getExpression()] = ConfigNode(result);

@@ -105,12 +105,20 @@ void LuaState::unloadModule(const String& moduleName)
 	modules.erase(iter);
 }
 
-void LuaState::call(int nArgs, int nRets)
+void LuaState::call(int nArgs, int nRets, bool throwOnError)
 {
 	int result = lua_pcall(lua, nArgs, nRets, errorHandlerStackPos.empty() ? 0 : errorHandlerStackPos.back());
 
 	if (result != 0) {
-		throw Exception("Lua exception:\n\t" + LuaStackOps(*this).popString(), HalleyExceptions::Lua);
+		const auto message = "Lua exception:\n\t" + LuaStackOps(*this).popString();
+		if (throwOnError) {
+			throw Exception(message, HalleyExceptions::Lua);
+		} else {
+			for (int i = 0; i < nRets; ++i) {
+				lua_pushnil(lua);
+			}
+			Logger::logError(message, true);
+		}		
 	}
 }
 

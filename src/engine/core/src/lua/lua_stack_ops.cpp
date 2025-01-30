@@ -94,22 +94,22 @@ void LuaStackOps::load(const Bytes& bytes, const String& name)
 	load(gsl::as_bytes(gsl::span<const Byte>(bytes)), name);
 }
 
-void LuaStackOps::eval(const String& v, const String& name)
+void LuaStackOps::eval(const String& v, const String& name, bool throwOnError)
 {
 	load(v, name);
-	state.call(0, 1);
+	state.call(0, 1, throwOnError);
 }
 
-void LuaStackOps::eval(gsl::span<const gsl::byte> bytes, const String& name)
+void LuaStackOps::eval(gsl::span<const gsl::byte> bytes, const String& name, bool throwOnError)
 {
 	load(bytes, name);
-	state.call(0, 1);
+	state.call(0, 1, throwOnError);
 }
 
-void LuaStackOps::eval(const Bytes& bytes, const String& name)
+void LuaStackOps::eval(const Bytes& bytes, const String& name, bool throwOnError)
 {
 	load(bytes, name);
-	state.call(0, 1);
+	state.call(0, 1, throwOnError);
 }
 
 namespace {

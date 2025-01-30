@@ -53,9 +53,9 @@ namespace Halley {
 		void load(const String& v, const String& name = "");
 		void load(gsl::span<const gsl::byte> bytes, const String& name = "");
 		void load(const Bytes& bytes, const String& name = "");
-		void eval(const String& v, const String& name = "");
-		void eval(gsl::span<const gsl::byte> bytes, const String& name = "");
-		void eval(const Bytes& bytes, const String& name = "");
+		void eval(const String& v, const String& name = "", bool throwOnError = true);
+		void eval(gsl::span<const gsl::byte> bytes, const String& name = "", bool throwOnError = true);
+		void eval(const Bytes& bytes, const String& name = "", bool throwOnError = false);
 		Bytes compile(const String& v, bool stripDebug = false);
 		Bytes compileAndEval(const String& v, const String& name = "", bool stripDebug = false);
 

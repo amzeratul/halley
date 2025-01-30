@@ -132,7 +132,7 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 	for (size_t i = 0; i < argsN; ++i) {
 		stackOps.push(readDataPin(environment, node, i + firstInputPin));
 	}
-	LuaFunctionCaller::call(state, static_cast<int>(argsN), static_cast<int>(outputs));
+	LuaFunctionCaller::call(state, static_cast<int>(argsN), static_cast<int>(outputs), true);
 
 	data.results.resize(outputs);
 	for (size_t i = 0; i < outputs; ++i) {
