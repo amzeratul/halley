@@ -419,8 +419,8 @@ void Entity::doDestroy(World& world, bool updateParenting)
 		if (!world.isTerminating()) {
 			if (worldPartition == 0) {
 				throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
-			} else {
-				Logger::logError("Destroying entity that was created from network");
+			} else if (getOwnerPeerId().value_or(0) != 0) {
+				Logger::logError("Destroying entity " + entityId.toString() + " that was created from network");
 			}
 		}
 	}

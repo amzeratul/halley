@@ -1,7 +1,5 @@
 #include "halley/net/connection/network_service.h"
 
-#include "halley/maths/vector2.h"
-
 using namespace Halley;
 
 static const uint64_t handshakeSnd = 0x51662937cc774b87;
@@ -9,8 +7,6 @@ static const uint64_t handshakeAck = 0xc3717eacac75d888;
 
 std::shared_ptr<IConnection> NetworkService::Acceptor::accept()
 {
-	auto v = quantize(Vector2f(0, 1), 0.5f);
-	
 	if (!choiceMade) {
 		choiceMade = true;
 		return doAccept();

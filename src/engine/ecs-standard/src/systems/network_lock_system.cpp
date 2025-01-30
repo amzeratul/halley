@@ -185,7 +185,7 @@ private:
 	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority)
 	{
 		if (!targetId.isValid()) {
-			Logger::logError("Peer attempted to lock invalid entity.");
+			Logger::logDev("Peer attempted to lock invalid entity.");
 			return false;
 		}
 

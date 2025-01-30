@@ -94,21 +94,21 @@ bool MaterialDataBlock::isEqualTo(size_t offset, ShaderParameterType type, const
 
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
-	, dataBlocks(other.dataBlocks)
-	, textures(other.textures)
 	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
+	, dataBlocks(other.dataBlocks)
+	, textures(other.textures)
 {
 }
 
 Material::Material(Material&& other) noexcept
 	: materialDefinition(std::move(other.materialDefinition))
-	, dataBlocks(std::move(other.dataBlocks))
-	, textures(std::move(other.textures))
 	, depthStencilEnabled(other.depthStencilEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
 	, passEnabled(other.passEnabled)
+	, dataBlocks(std::move(other.dataBlocks))
+	, textures(std::move(other.textures))
 {
 	other.fullHashValue = 0;
 	other.partialHashValue = 0;
