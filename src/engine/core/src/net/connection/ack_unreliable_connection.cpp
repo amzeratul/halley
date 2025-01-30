@@ -75,8 +75,8 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 
 void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool small)
 {
-    size_t size = packet.size();
-    size_t maxSize = maxPacketSize - headerSize;
+    const size_t size = packet.size();
+    const size_t maxSize = maxPacketSize - headerSize;
 
     if (maxSize >= size) {
         auto& slot = outbound.packets[outbound.curPacketIdx];
@@ -98,6 +98,7 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
         memcpy(slot.data.data() + headerSize, packet.data(), size);
         slot.seqIdx = outbound.curSeqIdx;
         slot.subIdx = 0;
+    	slot.resend = 0;
 
         doSend(slot, outbound.curPacketIdx);
 
@@ -129,6 +130,7 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
 
             slot.seqIdx = outbound.curSeqIdx;
             slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
+        	slot.resend = 0;
 
             doSend(slot, outbound.curPacketIdx);
 
@@ -163,7 +165,7 @@ bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& p
 		return false; // too many small packets in cache already
 	}
 
-	size_t maxSize = maxPacketSize - headerSize;
+	const size_t maxSize = maxPacketSize - headerSize;
 	if (maxSize < slot.dataSize + size) {
 		return false; // would overflow buffer size
 	}
@@ -180,6 +182,7 @@ bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& p
 
 void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 {
+	Expects(packet.seqIdx < 0x8000);
     Expects(packetIdx >= 0 && packetIdx < 256);
 
 	// Only patch parts of the header we need to update.
@@ -193,10 +196,10 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
 	packet.timestamp = Clock::now();
 
-	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize), packet.seqIdx);
+	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize));
 }
 
-void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx)
+void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const gsl::byte> packet)
 {
 #ifdef DEV_BUILD
 	if (simulatePacketLoss > 0.0f) {
@@ -294,7 +297,11 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
             bool isComplete = true;
             for (size_t i = 1; isComplete && i < numSubPackets; i++) {
                 const auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
-                isComplete &= sub.seqIdx == slot.seqIdx;
+            	if (sub.seqIdx == slot.seqIdx) {
+            		Expects((sub.subIdx & 15) == i);
+            		Expects((sub.subIdx >> 4) == numSubPackets);
+            	}
+            	isComplete &= sub.seqIdx == slot.seqIdx;
                 isComplete &= (sub.subIdx & 15) == i;
                 isComplete &= (sub.subIdx >> 4) == numSubPackets;
             }
@@ -402,6 +409,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 			statsListener->onPacketReceived(seqIdx, dataSize, true);
 		}
 		isDupe = true;
+		slot.resend++;
 	}
 
 	isExpired = !isDupe && isExpiredSeqIndex(inbound, seqIdx);
@@ -418,6 +426,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 
 		slot.seqIdx = seqIdx;
 		slot.subIdx = subIdx;
+		slot.resend = 0;
 	}
 
 	// Need to always ACK, even for duplicated and expired packets.
@@ -465,7 +474,7 @@ void AckUnreliableConnection::doSendAckPackets()
 
     // NOTE: This isn't sent reliably either. The ACK mechanism on both sides
 	// makes sure that duplicates are caught.
-	doSendUnreliablePacket(gsl::span<const gsl::byte>(reinterpret_cast<gsl::byte *>(packet.data()), 6 + 3 * numAckPackets), 0xffff);
+	doSendUnreliablePacket(gsl::span<const gsl::byte>(reinterpret_cast<gsl::byte *>(packet.data()), 6 + 3 * numAckPackets));
 
 	numAckPackets = 0;
 }
@@ -495,7 +504,7 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> dat
 
     			slot->seqIdx = 0xffff;
 
-    			// Clear header bytes
+    			// Clear header bytes (keep the signature)
     			memset(slot->data.data() + 4, 0, headerSize - 4);
 
     			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
@@ -535,7 +544,7 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 	// Stops at the first "gap", which would be a packet which we already got
 	// an ACK for.
 	int idx = outbound.firstPacketIdx;
-	while (idx != outbound.curPacketIdx) {
+	do {
 		auto slot = &outbound.packets[idx];
 
 		if (slot->seqIdx == 0xffff) {
@@ -547,7 +556,7 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 			break; // stop at first packet queued up too recently
 		}
 
-		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize), slot->seqIdx);
+		doSendUnreliablePacket(slot->data.byte_span().subspan(0, headerSize + slot->dataSize));
 
 		if (statsListener) {
 			statsListener->onPacketResent(slot->seqIdx);
@@ -557,7 +566,7 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 		slot->timestamp = now;
 
 		idx = (idx + 1) % 256;
-	}
+	} while (idx != outbound.curPacketIdx);
 }
 
 float AckUnreliableConnection::getLatency() const

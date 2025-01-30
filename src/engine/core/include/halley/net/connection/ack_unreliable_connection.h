@@ -50,6 +50,7 @@ namespace Halley
             size_t dataSize = 0;
             uint16_t seqIdx = 0;
             uint8_t subIdx = 0;
+        	uint8_t resend = 0;
         	Clock::time_point timestamp;
         };
 
@@ -89,7 +90,7 @@ namespace Halley
 
         void doSend(gsl::span<const gsl::byte> packet, bool small);
         void doSend(SubPacket& packet, int packetIdx);
-    	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet, uint16_t seqIdx);
+    	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet);
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const gsl::byte> data);
