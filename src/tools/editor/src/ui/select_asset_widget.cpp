@@ -257,7 +257,7 @@ std::shared_ptr<UIWidget> SelectEntityWidget::makeChooseWindow(std::function<voi
 
 void SelectEntityWidget::goToValue(KeyMods keyMods)
 {
-	if (entityEditor) {
+	if (entityEditor && !value.isEmpty()) {
 		entityEditor->goToEntity(UUID(value));
 	}
 }
