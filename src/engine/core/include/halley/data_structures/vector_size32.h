@@ -699,7 +699,8 @@ namespace Halley {
 			return gsl::as_bytes(span());
 		}
 
-		[[nodiscard]] bool contains(const T& elem) const
+		template <typename U>
+		[[nodiscard]] bool contains(const U& elem) const
 		{
 			return std::find(begin(), end(), elem) != end();
 		}

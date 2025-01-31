@@ -154,7 +154,9 @@ protected:
 	Halley::Angle1f rotation{};
 	float height{};
 	bool fixedHeight{ false };
+	mutable uint8_t cachedValues{ 0 };
 	Halley::OptionalLite<int16_t> subWorld{};
 	mutable uint16_t revision{ 0 };
+	mutable uint16_t subWorldRevision{ 0 };
 
 };

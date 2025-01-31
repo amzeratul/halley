@@ -44,7 +44,7 @@ void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 void Transform2DComponent::onHierarchyChanged()
 {
 	updateParentTransform();	
-	markDirtyShallow();
+	markDirtyShallow(0xFF);
 }
 
 void Transform2DComponent::updateParentTransform()
@@ -56,7 +56,7 @@ void Transform2DComponent::setLocalPosition(Vector2f v)
 {
 	if (position != v) {
 		position = v;
-		markDirty();
+		markDirty(CachedIndices::Position);
 	}
 }
 
@@ -64,7 +64,7 @@ void Transform2DComponent::setLocalScale(Vector2f v)
 {
 	if (scale != v) {
 		scale = v;
-		markDirty();
+		markDirty(CachedIndices::Scale);
 	}
 }
 
@@ -72,7 +72,7 @@ void Transform2DComponent::setLocalRotation(Angle1f v)
 {
 	if (rotation != v) {
 		rotation = v;
-		markDirty();
+		markDirty(CachedIndices::Rotation);
 	}
 }
 
@@ -80,7 +80,7 @@ void Transform2DComponent::setLocalHeight(float v)
 {
 	if (height != v) {
 		height = v;
-		markDirty();
+		markDirty(CachedIndices::Height);
 	}
 }
 
@@ -203,7 +203,7 @@ void Transform2DComponent::setSubWorld(int world)
 {
 	if (subWorld != static_cast<int16_t>(world)) {
 		subWorld = static_cast<int16_t>(world);
-		markDirty();
+		markDirty(CachedIndices::SubWorld);
 	}
 }
 
@@ -269,25 +269,29 @@ void Transform2DComponent::deserializeNetwork(const EntitySerializationContext& 
 	markDirty();
 }
 
-void Transform2DComponent::markDirty()
+void Transform2DComponent::markDirty(CachedIndices index)
 {
-	markDirty(DirtyPropagationMode::Changed);
+	markDirty(static_cast<uint8_t>(1 << static_cast<int>(index)));
 }
 
-void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
+void Transform2DComponent::markDirty(uint8_t changeMask)
+{
+	markDirty(DirtyPropagationMode::Changed, 0, changeMask);
+}
+
+void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8_t changeMask) const
 {
 	// For "Changed" mode only:
 	// If cachedValues is zero, it means that nobody has read this (any read MUST set cachedValues to non-zero)
 	// Since nobody read it, then there's no need to do anything, or indeed to even propagate changes down
 	
-	if (cachedValues != 0 || mode != DirtyPropagationMode::Changed) {
-		markDirtyShallow();
+	if ((cachedValues & changeMask) != 0 || mode != DirtyPropagationMode::Changed) {
+		markDirtyShallow(changeMask);
 
 		// Propagate to all children
 		for (auto& c: entity.getRawChildren()) {
-			const auto childTransform = c->tryGetComponent<Transform2DComponent>();
-			if (childTransform) {
-				childTransform->markDirty(mode, depth + 1);
+			if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
+				childTransform->markDirty(mode, depth + 1, changeMask);
 			}
 		}
 
@@ -302,10 +306,13 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth) const
 	}
 }
 
-void Transform2DComponent::markDirtyShallow() const
+void Transform2DComponent::markDirtyShallow(uint8_t changeMask) const
 {
 	++revision;
-	cachedValues = 0;
+	if ((changeMask & (1 << static_cast<int>(CachedIndices::SubWorld))) != 0) {
+		++subWorldRevision;
+	}
+	cachedValues = cachedValues & ~changeMask;
 }
 
 bool Transform2DComponent::isCached(CachedIndices index) const

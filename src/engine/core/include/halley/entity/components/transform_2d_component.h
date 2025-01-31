@@ -67,12 +67,13 @@ public:
 	void onHierarchyChanged();
 
 	uint16_t getRevision() const { return revision; }
+	uint16_t getSubWorldRevision() const { return subWorldRevision; }
 	Halley::WorldPartitionId getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
 	void deserializeNetwork(const Halley::EntitySerializationContext& context, Halley::Deserializer& deserializer);
 
-	void markDirty();
+	void markDirty(uint8_t changeMask = (uint8_t)0xFF);
 
 private:
 	friend class Halley::EntityRef;
@@ -80,16 +81,15 @@ private:
 	mutable Transform2DComponent* parentTransform = nullptr;
 	mutable Halley::WorldPartitionId worldPartition = 0;
 
-	mutable uint8_t cachedValues = 0;
 	mutable int16_t cachedSubWorld = 0;
-	mutable Halley::Angle1f cachedGlobalRotation;
-	mutable Halley::Vector2f cachedGlobalPos;
-	mutable Halley::Vector2f cachedGlobalScale;
 	mutable float cachedGlobalHeight;
+	mutable Halley::Vector2f cachedGlobalPos;
+	mutable Halley::Angle1f cachedGlobalRotation;
+	mutable Halley::Vector2f cachedGlobalScale;
 
 	mutable Halley::EntityRef entity;
 
-	enum class CachedIndices {
+	enum class CachedIndices: uint8_t {
 		Position,
 		Scale,
 		Rotation,
@@ -97,15 +97,16 @@ private:
 		Height
 	};
 
-	enum class DirtyPropagationMode {
+	enum class DirtyPropagationMode: uint8_t {
 		Changed,
 		Added,
 		Removed
 	};
 
 	void updateParentTransform();
-	void markDirty(DirtyPropagationMode mode, int depth = 0) const;
-	void markDirtyShallow() const;
+	void markDirty(CachedIndices index);
+	void markDirty(DirtyPropagationMode mode, int depth = 0, uint8_t changeMask = (uint8_t)0xFF) const;
+	void markDirtyShallow(uint8_t changeMask) const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;
 };

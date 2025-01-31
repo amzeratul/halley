@@ -29,11 +29,23 @@ component:
       access: protected
       displayName: Fixed Height
       defaultValue: false
+  - cachedValues:
+      type: 'mutable uint8_t'
+      access: protected
+      canEdit: false
+      canSave: false
+      defaultValue: 0
   - subWorld:
       type: 'Halley::OptionalLite<int16_t>'
       access: protected
       displayName: Subworld
   - revision:
+      type: 'mutable uint16_t'
+      access: protected
+      canEdit: false
+      canSave: false
+      defaultValue: 0
+  - subWorldRevision:
       type: 'mutable uint16_t'
       access: protected
       canEdit: false

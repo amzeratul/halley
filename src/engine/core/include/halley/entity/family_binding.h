@@ -72,7 +72,7 @@ namespace Halley {
 			++v;
 			--elemsLeft;
 			if (prefetchDist > 0 && elemsLeft >= prefetchDist) {
-				//(v + prefetchDist)->prefetch();
+				(v + prefetchDist)->prefetch();
 			}
 			return *this;
 		}

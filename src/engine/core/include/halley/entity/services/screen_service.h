@@ -69,7 +69,7 @@ namespace Halley {
 			return roundPosition(pos, zoom);
 		}
 
-		static Vector2f roundPosition(Vector2f pos, float zoom)
+		constexpr inline static Vector2f roundPosition(Vector2f pos, float zoom)
 		{
 			const float effectiveZoom = std::max(1.0f, zoom);
 			return (pos * effectiveZoom).floor() / effectiveZoom;

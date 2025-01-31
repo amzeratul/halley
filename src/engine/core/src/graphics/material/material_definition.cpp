@@ -410,7 +410,7 @@ void MaterialDefinition::setTags(Vector<String> tags)
 
 bool MaterialDefinition::hasTag(std::string_view tag) const
 {
-	return std_ex::contains(tags, tag);
+	return tags.contains(tag);
 }
 
 void MaterialDefinition::serialize(Serializer& s) const
