@@ -24,6 +24,7 @@ Sprite::Sprite()
 	absoluteClip = false;
 	sliced = false;
 	rotated = false;
+	rotateable = false;
 	setScale(Vector2f(1, 1));
 	setColour(Colour4f(1, 1, 1, 1));
 }
@@ -327,6 +328,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 
 	const bool hadMaterial = static_cast<bool>(material);
 	material = std::move(m);
+	rotateable = !material->getDefinition().hasTag("no_rotate");
 
 	if (!hadMaterial && material->getNumTextureUnits() > 0) {
 		if (const auto& tex0 = material->getRawTexture(0)) {
@@ -957,6 +959,7 @@ void Sprite::copyFrom(const Sprite& other, bool enableHotReload)
 	absoluteClip = other.absoluteClip;
 	sliced = other.sliced;
 	rotated = other.rotated;
+	rotateable = other.rotateable;
 	sliceScale = other.sliceScale;
 	vertexAttrib = other.vertexAttrib;
 	slices = other.slices;
@@ -988,6 +991,7 @@ void Sprite::moveFrom(Sprite&& other, bool enableHotReload)
 	absoluteClip = other.absoluteClip;
 	sliced = other.sliced;
 	rotated = other.rotated;
+	rotateable = other.rotateable;
 	sliceScale = other.sliceScale;
 	vertexAttrib = other.vertexAttrib;
 	slices = other.slices;

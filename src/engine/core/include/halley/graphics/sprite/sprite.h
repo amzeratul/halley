@@ -105,6 +105,7 @@ namespace Halley
 
 		Sprite& setRotation(Angle1f angle);
 		Angle1f getRotation() const { return Angle1f::fromRadians(vertexAttrib.rotation, false); }
+		bool canRotate() const { return rotateable; }
 
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
@@ -198,6 +199,7 @@ namespace Halley
 		bool absoluteClip : 1;
 		bool sliced : 1;
 		bool rotated : 1;
+		bool rotateable : 1;
 		float sliceScale = 1;
 
 		SpriteVertexAttrib vertexAttrib;
