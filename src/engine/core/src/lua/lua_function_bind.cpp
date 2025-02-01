@@ -3,7 +3,7 @@
 
 void Halley::LuaFunctionCaller::startCall(LuaState& state)
 {
-	state.pushErrorHandler();
+	//state.pushErrorHandler();
 }
 
 void Halley::LuaFunctionCaller::call(LuaState& state, int nArgs, int nRets, bool throwOnError)
@@ -13,5 +13,5 @@ void Halley::LuaFunctionCaller::call(LuaState& state, int nArgs, int nRets, bool
 
 void Halley::LuaFunctionCaller::endCall(LuaState& state)
 {
-	state.popErrorHandler();
+	//state.popErrorHandler();
 }

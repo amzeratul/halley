@@ -46,6 +46,8 @@ LuaState::LuaState(Resources& resources)
 	errorHandlerRef = std::make_unique<LuaReference>(*this);
 	lua_pop(lua, 1);
 
+	pushErrorHandler();
+
 	auto res = resources.get<BinaryFile>("lua/halley/halley.lua");
 	loadModule("halley", res->getSpan());
 }
@@ -58,6 +60,7 @@ LuaState::~LuaState()
 
 	modules.clear();
 	closures.clear();
+	popErrorHandler();
 	errorHandlerRef.reset();
 	lua_close(lua);
 }

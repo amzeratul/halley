@@ -78,11 +78,6 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDe
 	return builder.moveResults();
 }
 
-ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
-{
-	return environment.readInputDataPin(node, static_cast<GraphPinId>(pinN));
-}
-
 void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
 	const auto& pins = node.getPins();

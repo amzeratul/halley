@@ -11,6 +11,9 @@ namespace Halley {
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 
 		std::optional<LuaExpression> expr;
+		Vector<String> args;
+		size_t nOutputs;
+
 		Vector<ConfigNode> results;
 	};
 

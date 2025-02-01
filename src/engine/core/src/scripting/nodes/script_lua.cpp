@@ -108,23 +108,24 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 	auto& state = environment.getInterface<ILuaInterface>().getLuaState();
 	auto stackOps = LuaStackOps(state);
 
-	const auto args = node.getSettings()["args"].asVector<String>({});
-	const size_t argsN = args.size();
-	const size_t outputs = node.getSettings()["outputs"].asInt(1);
-
 	if (!data.expr) {
+		data.args = node.getSettings()["args"].asVector<String>({});
+		data.nOutputs = node.getSettings()["outputs"].asInt(1);
+
 		auto code = node.getSettings()["code"].asString("");
 		if (!code.startsWith("return") && !code.contains('\n')) {
 			code = "return " + code;
 		}
-		if (argsN > 0) {
-			String exprStr = "local " + String::concatList(args, ", ") + " = ...\n" + code;
+		if (!data.args.empty()) {
+			String exprStr = "local " + String::concatList(data.args, ", ") + " = ...\n" + code;
 			data.expr = LuaExpression(std::move(exprStr));
 		} else {
 			data.expr = LuaExpression(std::move(code));
 		}
 	}
 
+	const size_t argsN = data.args.size();
+	const size_t outputs = data.nOutputs;
 	const int firstInputPin = static_cast<int>(nFlowPins());
 
 	LuaFunctionCaller::startCall(state);
