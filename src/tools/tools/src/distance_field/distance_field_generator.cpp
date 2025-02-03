@@ -107,39 +107,56 @@ std::unique_ptr<Image> DistanceFieldGenerator::generateSDF(Image& srcImg, Vector
 	return generateSDFInternal(srcImg, size, radius);
 }
 
-std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, const FontFace& fontFace, float fontSize, int charcode, Vector2i size, float radius)
+std::optional<msdfgen::Shape> DistanceFieldGenerator::generateMSDFShape(const FontFace& fontFace, int charcode)
 {
 	const auto ftFace = static_cast<FT_Face>(fontFace.getFreeTypeFace());
 	const auto font = std::unique_ptr<msdfgen::FontHandle, void(*)(msdfgen::FontHandle*)>(msdfgen::adoptFreetypeFont(ftFace), [](msdfgen::FontHandle* p) { msdfgen::destroyFont(p); });
 
 	msdfgen::Shape shape;
 	if (msdfgen::loadGlyph(shape, font.get(), charcode) && !shape.contours.empty()) {
-		//const double scale = fontSize / (2048 / 64 * 2048 / ftFace->units_per_EM);
-		//const double scale = fontSize * ftFace->units_per_EM / 65536; // ???
-		const double scale = fontSize / (ftFace->units_per_EM / 64);
-		const double range = 2.0f * radius / scale;
-		const auto pos = Vector2d(Vector2f(radius, radius) / scale);
+		return shape;
+    } else {
+		return {};
+    }
+}
 
-		shape.inverseYAxis = false;
-		shape.normalize();
-		const auto bounds = shape.getBounds();
-		//Logger::logInfo(String(char32_t(charcode)) + ": size: " + toString(size) + ", pos: " + toString(pos) + ", scale: " + toString(scale) + ", bounds: " + toString(bounds.l) + ", " + toString(bounds.b) + ", " + toString(bounds.r) + ", " + toString(bounds.t));
-
-		edgeColoringSimple(shape, 3.0);
-		msdfgen::Projection projection({ scale, scale }, { pos.x - bounds.l, pos.y - bounds.b });
-
-		if (type == Type::MTSDF) {
-			msdfgen::MSDFGeneratorConfig config;
-			auto bmp = msdfgen::Bitmap<float, 4>(size.x, size.y);
-			msdfgen::generateMTSDF(bmp, shape, projection, range, config);
-			return msdfgenImageToHalleyImage(bmp);
-		} else {
-			msdfgen::GeneratorConfig config;
-			auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
-			msdfgen::generateSDF(bmp, shape, projection, range, config);
-			return msdfgenImageToHalleyImage(bmp);
-		}
+std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, const FontFace& fontFace, float fontSize, int charcode, Vector2i size, float radius)
+{
+	if (auto shape = generateMSDFShape(fontFace, charcode)) {
+		return generateMSDF(type, *shape, getScale(fontFace, fontSize), size, radius);
     } else {
 		return std::make_unique<Image>(type == Type::MTSDF ? Image::Format::RGBA : Image::Format::SingleChannel, size, true);
     }
+}
+
+std::unique_ptr<Image> DistanceFieldGenerator::generateMSDF(Type type, msdfgen::Shape shape, float scale, Vector2i size, float radius)
+{
+	const double range = 2.0f * radius / scale;
+	const auto pos = Vector2d(Vector2f(radius, radius) / scale);
+
+	shape.inverseYAxis = false;
+	shape.normalize();
+	const auto bounds = shape.getBounds();
+	//Logger::logInfo(String(char32_t(charcode)) + ": size: " + toString(size) + ", pos: " + toString(pos) + ", scale: " + toString(scale) + ", bounds: " + toString(bounds.l) + ", " + toString(bounds.b) + ", " + toString(bounds.r) + ", " + toString(bounds.t));
+
+	edgeColoringSimple(shape, 3.0);
+	msdfgen::Projection projection({ scale, scale }, { pos.x - bounds.l, pos.y - bounds.b });
+
+	if (type == Type::MTSDF) {
+		msdfgen::MSDFGeneratorConfig config;
+		auto bmp = msdfgen::Bitmap<float, 4>(size.x, size.y);
+		msdfgen::generateMTSDF(bmp, shape, projection, range, config);
+		return msdfgenImageToHalleyImage(bmp);
+	} else {
+		msdfgen::GeneratorConfig config;
+		auto bmp = msdfgen::Bitmap<float, 1>(size.x, size.y);
+		msdfgen::generateSDF(bmp, shape, projection, range, config);
+		return msdfgenImageToHalleyImage(bmp);
+	}
+}
+
+float DistanceFieldGenerator::getScale(const FontFace& font, float fontSize)
+{
+	const auto ftFace = static_cast<FT_Face>(font.getFreeTypeFace());
+	return fontSize / (ftFace->units_per_EM / 64);
 }

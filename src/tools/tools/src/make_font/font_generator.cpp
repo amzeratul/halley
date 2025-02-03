@@ -13,17 +13,18 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/graphics/text/font.h"
 #include "halley/support/logger.h"
+#include "../msdfgen/msdfgen.h"
 
 using namespace Halley;
 
-static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, int border, const Vector<int>& characters)
+static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, int border, const Vector<char32_t>& characters)
 {
 	font.setSize(fontSize);
 
 	Vector<BinPackEntry> entries;
-	for (int code : font.getCharCodes()) {
+	for (char32_t code : font.getCharCodes()) {
 		if (std::binary_search(characters.begin(), characters.end(), code)) {
-			Vector2i glyphSize = font.getGlyphSize(code);
+			Vector2i glyphSize = font.getGlyphSize((int)code);
 			const int padding = 2 * border + 1;
 			Vector2i superSampleSize = glyphSize + Vector2i(padding, padding);
 			Vector2i finalSize(Vector2f(superSampleSize) + Vector2f(1, 1));
@@ -74,7 +75,7 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<int> characters) {
+FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<char32_t> characters) {
 	std::sort(characters.begin(), characters.end());
 
 	const int borderFinal = static_cast<int>(ceil(radius));
@@ -143,20 +144,35 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 	auto& pack = result.value();
 
 	for (auto& r : pack) {
-		int charcode = int(reinterpret_cast<size_t>(r.data));
+		const int charcode = int(reinterpret_cast<size_t>(r.data));
 		Rect4i dstRect = Rect4i(r.rect.getTopLeft(), r.rect.getBottomRight() - Vector2i(1, 1));
 		Rect4i srcRect = dstRect;
 		codes.push_back(CharcodeEntry(charcode, dstRect));
 
 		const bool useMsdfgen = meta.getBool("msdfgen", true);
 		if (useMsdfgen) {
-			auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, font, font.getSize(), charcode, dstRect.getSize(), radius);
-			dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
+			futures.push_back(Concurrent::execute([=, &m, &font, &dstImg, &nDone, &keepGoing] {
+				if (!keepGoing) {
+					return;
+				}
 
-			const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
-			if (!progressReporter(progress, "Generating")) {
-				keepGoing = false;
-			}
+				std::optional<msdfgen::Shape> shape;
+				{
+					std::unique_lock<std::mutex> lock(m);
+					shape = DistanceFieldGenerator::generateMSDFShape(font, charcode);
+				}
+
+				if (shape) {
+					auto scale = DistanceFieldGenerator::getScale(font, font.getSize());
+					auto finalGlyphImg = DistanceFieldGenerator::generateMSDF(type, *shape, scale, dstRect.getSize(), radius);
+					dstImg->blitFrom(dstRect.getTopLeft(), *finalGlyphImg);
+				}
+
+				const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
+				if (!progressReporter(progress, "Generating")) {
+					keepGoing = false;
+				}
+			}));
 		} else {
 			futures.push_back(Concurrent::execute([=, &m, &font, &dstImg, &nDone, &keepGoing] {
 				if (!keepGoing) {
@@ -180,7 +196,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 				finalGlyphImg.reset();
 
 				const float progress = lerp(0.1f, 0.95f, static_cast<float>(++nDone) / static_cast<float>(pack.size()));
-				if (!progressReporter(progress, "Generating")) {
+				if (!progressReporter(progress, "Generating Glyphs")) {
 					keepGoing = false;
 				}
 			}));

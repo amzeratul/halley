@@ -109,12 +109,13 @@ void MetadataEditor::makeUI()
 		addStringField("Font Name", "fontName", "");
 		addInt2Field("Image Size", "width", "height", Vector2i(512, 512));
 		addInt2Field("Range", "rangeStart", "rangeEnd", Vector2i(0, 255));
+		addStringField("Extra characters", "extraCharacters", "");
+		addStringField("Scripts", "scripts", "");
 		addIntField("Ascender Adj.", "ascenderAdjustment", 0);
 		addIntField("Line Spacing", "lineSpacing", 0);
 		addFloatField("Radius", "radius", 8.0f);
 		addStringField("Fallback", "fallback", "");
 		addFloatField("Fallback Scale", "replacementScale", 1.0f);
-		addStringField("Extra characters", "extraCharacters", "");
 		addBoolField("Floor Glyph Pos.", "floorGlyphPosition", false);
 		break;
 	}
