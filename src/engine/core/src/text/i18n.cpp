@@ -8,10 +8,13 @@ I18N::I18N()
 {
 }
 
-I18N::I18N(Resources& resources, I18NLanguage currentLanguage)
+I18N::I18N(Resources& resources, I18NLanguage currentLanguage, std::optional<I18NLanguage> fallbackLanguage)
 {
 	loadStrings(resources);
 	setCurrentLanguage(currentLanguage);
+	if (fallbackLanguage) {
+		setFallbackLanguage(*fallbackLanguage);
+	}
 }
 
 void I18N::update()

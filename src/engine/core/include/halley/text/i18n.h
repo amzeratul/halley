@@ -109,7 +109,7 @@ namespace Halley {
 	class I18N : public II18N {
 	public:
 		I18N();
-		I18N(Resources& resources, I18NLanguage currentLanguage = I18NLanguage("en-GB"));
+		I18N(Resources& resources, I18NLanguage currentLanguage = I18NLanguage("en-GB"), std::optional<I18NLanguage> fallbackLanguage = {});
 
 		void update();
 		void loadStrings(Resources& resources);
