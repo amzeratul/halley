@@ -78,11 +78,13 @@ namespace Halley
 		Resources& getResources() const;
 
 		std::optional<int> getCurrentDisplay() const;
+		UIDebugConsoleCommands& initBaseCommands();
 
 	private:
 		friend class Core;
 		
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
+		UIDebugConsoleCommands baseCommands;
 	};
 }

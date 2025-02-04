@@ -51,7 +51,7 @@ namespace Halley
 		virtual int getNumDisplays() const { return 1; }
 		virtual Rect4i getDisplayRect(int screen) const = 0;
 		virtual void setEnableScreensaver(bool enabled) const {}
-		virtual void setDisplayRenderTarget(int displayN, Vector2i resolution, int refreshRate) {}
+		virtual std::optional<std::pair<Vector2i, int>> setDisplayRenderTarget(int displayN, Vector2i resolution, int refreshRate) { return {}; }
 
 		virtual void showCursor(bool show) = 0;
 		virtual bool hasBeenDisconnectedFromTheInternet() { return false; }

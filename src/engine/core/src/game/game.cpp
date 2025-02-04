@@ -183,6 +183,22 @@ std::optional<int> Game::getCurrentDisplay() const
 	return {};
 }
 
+UIDebugConsoleCommands& Game::initBaseCommands()
+{
+	baseCommands.addCommand("displayRes", [=] (Vector<String> args) -> String {
+		const auto idx = args[0].toInteger();
+		const auto res = Vector2i(args[1].toInteger(), args[2].toInteger());
+		const auto refresh = args[3].toInteger();
+		if (auto result = api->system->setDisplayRenderTarget(1, res, refresh)) {
+			return "Setting display #" + toString(idx) + " to " + toString(result->first.x) + "x" + toString(result->first.y) + " @ " + toString(result->second) + " Hz";
+		} else {
+			return "Couldn't set resolution for display #" + toString(idx);
+		}
+	}, { { { "idx", "int" }, { "resX", "int" }, { "resY", "int" }, { "refreshRate", "int" } } });
+
+	return baseCommands;
+}
+
 size_t Game::getMaxThreads() const
 {
 	auto n = std::thread::hardware_concurrency();
