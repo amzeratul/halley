@@ -48,7 +48,7 @@ public:
 							Logger::logDev("Peer " + toString((int) peerId) + " is claiming network ownership for " + entity.getName());
 							e.network.ownerId = peerId;
 						} else {
-							Logger::logDev("Peer " + toString((int) peerId) + " assigns network ownership for " + entity.getName() + " to host");
+							Logger::logDev("Peer " + toString((int) peerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ")" + " to host");
 							e.network.ownerId = 0;
 						}
 					}

@@ -335,7 +335,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
 			entity.setParent(parentEntity.value());
 		} else {
-			Logger::logError("Parent " + toString(*parentUUID) + " not found for network entity \"" + entity.getName() + "\"");
+			Logger::logError("Parent " + toString(*parentUUID) + " not found for network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
 		}
 	}
 
