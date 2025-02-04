@@ -374,13 +374,15 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef
 
 	// Mix every region
 	for (auto& listenerRegion: listener.regions) {
-		auto& region = *regions.at(listenerRegion.regionId);
+		if (auto iter = regions.find(listenerRegion.regionId); iter != regions.end()) {
+			auto& region = *iter->second;
 
-		float gain = listenerRegion.presence;
-		const float prevGain = region.getPrevGain();
-		region.setPrevGain(gain);
+			float gain = listenerRegion.presence;
+			const float prevGain = region.getPrevGain();
+			region.setPrevGain(gain);
 
-		mixMainRegion(numSamples, nChannels, region, buffers, prevGain, gain);
+			mixMainRegion(numSamples, nChannels, region, buffers, prevGain, gain);
+		}
 	}
 
 	// Clear voice buffers
