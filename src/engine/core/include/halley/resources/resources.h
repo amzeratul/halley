@@ -68,6 +68,16 @@ namespace Halley {
 		}
 
 		template <typename T>
+		std::shared_ptr<const T> tryGet(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
+		{
+			auto& collection = of<T>();
+			if (collection.exists(name)) {
+				return collection.get(name, priority);
+			}
+			return {};
+		}
+
+		template <typename T>
 		void preload(std::string_view name) const
 		{
 			static_cast<void>(of<T>().get(name, ResourceLoadPriority::Low));

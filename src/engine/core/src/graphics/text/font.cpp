@@ -108,7 +108,9 @@ void Font::reload(Resource&& resource)
 void Font::onLoaded(Resources& resources)
 {
 	for (auto& fontName: fallback) {
-		fallbackFont.push_back(resources.get<Font>(fontName));
+		if (auto f = resources.tryGet<Font>(fontName)) {
+			fallbackFont.push_back(f);
+		}
 	}
 }
 
