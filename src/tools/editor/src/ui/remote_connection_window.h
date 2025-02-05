@@ -36,5 +36,13 @@ namespace Halley {
         std::shared_ptr<RemoteConnectionTab> tab;
 
 		std::shared_ptr<UIDebugConsole> console;
+        std::shared_ptr<UIDebugConsoleController> consoleController;
+        std::shared_ptr<UIDebugConsoleCommands> consoleCommands;
+        std::shared_ptr<const UIColourScheme> colourScheme;
+
+        void makeCommands();
+        void saveRemoteSave(String name, Bytes data) const;
+        Future<Bytes> loadRemoteSave(String name) const;
+        void addConsoleLine(LoggerLevel level, const String& msg) const;
 	};
 }

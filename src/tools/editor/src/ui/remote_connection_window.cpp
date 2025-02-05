@@ -5,6 +5,7 @@
 #include "remote_inspector_window.h"
 #include "remote_profiler_window.h"
 #include "halley/devcon/devcon_messages.h"
+#include "halley/tools/file/filesystem.h"
 
 using namespace Halley;
 
@@ -30,12 +31,13 @@ RemoteConnectionWindow::RemoteConnectionWindow(UIFactory& factory, ProjectWindow
 	, connection(std::move(connection))
 	, tab(std::move(tab))
 {
+	makeCommands();
 	factory.loadUI(*this, "halley/remote_connection_window");
 }
 
 void RemoteConnectionWindow::onMakeUI()
 {
-	const auto& colourScheme = factory.getColourScheme();
+	colourScheme = factory.getColourScheme();
 
 	console = std::make_shared<UIDebugConsole>("remoteConsole", factory, *this);
 	console->setUserTextColour(colourScheme->getColour("ui_consoleUserText"), colourScheme->getColour("ui_consoleResponse"));
@@ -50,15 +52,17 @@ void RemoteConnectionWindow::onMakeUI()
 
 void RemoteConnectionWindow::update(Time t, bool moved)
 {
-	const auto& colourScheme = factory.getColourScheme();
-
 	for (auto& log: connection->movePendingLogs()) {
-		console->addLine(log.msg, ConsoleWindow::getColour(*colourScheme, log.level));
+		addConsoleLine(log.level, log.msg);
 	}
 }
 
 Future<UIDebugConsoleResponse> RemoteConnectionWindow::runCommand(String command, Vector<String> args)
 {
+	if (command != "help" && consoleController->hasCommand(command)) {
+		return consoleController->runCommand(std::move(command), std::move(args));
+	}
+
 	ConfigNode params;
 	params["command"] = std::move(command);
 	params["args"] = std::move(args);
@@ -78,5 +82,76 @@ Future<Vector<StringUTF32>> RemoteConnectionWindow::getAutoComplete(const String
 			strs32.push_back(str.getUTF32());
 		}
 		return strs32;
+	}).then([this, line] (Vector<StringUTF32> result) {
+		for (auto& e: consoleController->getAutoComplete(line).get()) {
+			result.push_back(e);
+		}
+		return result;
 	});
+}
+
+void RemoteConnectionWindow::makeCommands()
+{
+	consoleCommands = std::make_shared<UIDebugConsoleCommands>();
+	consoleController = std::make_shared<UIDebugConsoleController>();
+	consoleController->addCommands(*consoleCommands);
+
+	consoleCommands->addCommand("pullSave", [=] (Vector<String> args) -> String {
+		ConfigNode params;
+		params["name"] = args[0];
+		connection->sendRPC("pullSave", std::move(params)).then([this, file = args[0]] (ConfigNode result) {
+			saveRemoteSave(file, result.asBytes());
+		});
+		return "";
+	});
+	consoleCommands->addCommand("pushSave", [=] (Vector<String> args) -> String {
+		loadRemoteSave(args[0]).then([this, file = args[0]] (Bytes bytes) {
+			ConfigNode params;
+			params["name"] = file;
+			params["data"] = std::move(bytes);
+			connection->sendRPC("pushSave", std::move(params));
+		});
+		return "";
+	});
+}
+
+void RemoteConnectionWindow::saveRemoteSave(String name, Bytes data) const
+{
+	auto basePath = projectWindow.getAPI().core->getEnvironment().getDataPath() / "remote_saves" / projectWindow.getProject().getBinName() / ".";
+	FileSystem::createDir(basePath);
+
+	FileChooserParameters fileChooserParams;
+	fileChooserParams.defaultPath = basePath;
+	fileChooserParams.fileName = name;
+	fileChooserParams.save = true;
+	OS::get().openFileChooser(fileChooserParams).then([this, data = std::move(data)](std::optional<Path> path) {
+		if (path) {
+			addConsoleLine(LoggerLevel::Dev, "Saving " + String::prettySize(data.size()) + " to " + path->toString());
+			Path::writeFile(*path, data);
+		}
+	});
+}
+
+Future<Bytes> RemoteConnectionWindow::loadRemoteSave(String name) const
+{
+	auto basePath = projectWindow.getAPI().core->getEnvironment().getDataPath() / "remote_saves" / projectWindow.getProject().getBinName() / ".";
+	FileSystem::createDir(basePath);
+
+	FileChooserParameters fileChooserParams;
+	fileChooserParams.defaultPath = basePath;
+	fileChooserParams.fileName = name;
+	fileChooserParams.save = false;
+	return OS::get().openFileChooser(fileChooserParams).then([this](std::optional<Path> path) -> Bytes {
+		if (path) {
+			auto data = Path::readFile(*path);
+			addConsoleLine(LoggerLevel::Dev, "Loaded " + String::prettySize(data.size()) + " from " + path->toString());
+			return data;
+		}
+		return {};
+	});
+}
+
+void RemoteConnectionWindow::addConsoleLine(LoggerLevel level, const String& msg) const
+{
+	console->addLine(msg, ConsoleWindow::getColour(*colourScheme, level));
 }

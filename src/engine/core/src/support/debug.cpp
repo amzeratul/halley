@@ -144,21 +144,22 @@ static void signalHandler(int signum)
 }
 #endif
 
-static void terminateHandler()
-{
-	std::stringstream ss;
-	ss << "std::terminate() invoked.\n";
+namespace {
+	void terminateHandler()
+	{
+		std::stringstream ss;
+		ss << "std::terminate() invoked.\n";
 
-#if defined(HAS_STACKWALKER)
-	OStreamStackWalker walker(ss, 3);
-	walker.ShowCallstack();
-#endif
+	#if defined(HAS_STACKWALKER)
+		OStreamStackWalker walker(ss, 3);
+		walker.ShowCallstack();
+	#endif
 
-	errorHandler(ss.str());
+		errorHandler(ss.str());
 
-	std::abort();
+		std::abort();
+	}
 }
-
 
 void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> eh)
 {
@@ -169,7 +170,10 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 	::signal(SIGABRT, &signalHandler);
 #endif
 
+#ifndef NN_NINTENDO_SDK
 	std::set_terminate(&terminateHandler);
+#endif
+
 	errorHandler = std::move(eh);
 }
 

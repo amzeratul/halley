@@ -98,6 +98,16 @@ void UIDebugConsoleCommands::clear()
 	commands.clear();
 }
 
+UIDebugConsoleController::UIDebugConsoleController()
+{
+	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
+	
+	baseCommandSet->addCommand("help", [=](Vector<String>)
+	{
+		return runHelp();
+	});
+}
+
 UIDebugConsoleController::UIDebugConsoleController(Resources& resources, const HalleyAPI& api)
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
@@ -107,6 +117,7 @@ UIDebugConsoleController::UIDebugConsoleController(Resources& resources, const H
 		return runHelp();
 	});
 	
+	// TODO: move these two out of here?
 	baseCommandSet->addCommand("audioGlobalSwitch", [&api] (Vector<String> args) -> String
 	{
 		if (args.size() != 2) {
@@ -146,6 +157,17 @@ Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String comma
 	Promise<UIDebugConsoleResponse> value;
 	value.setValue("Command not found: \"" + command + "\".");
 	return value.getFuture();
+}
+
+bool UIDebugConsoleController::hasCommand(const String& command) const
+{
+	for (auto& commandSet: commands) {
+		const auto& cs = commandSet->getCommands();
+		if (cs.find(command.asciiLower()) != cs.end()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, const UIDebugConsoleCommandData& commandData, Vector<String> args)
