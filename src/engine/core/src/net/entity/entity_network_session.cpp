@@ -22,7 +22,6 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	Expects(this->listener);
 	
 	this->session->addListener(this);
-	this->session->setSharedDataHandler(this);
 
 	entitySerializationOptions.type = EntitySerialization::Type::Network;
 
@@ -602,16 +601,6 @@ void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 	sendUpdatedLobbyInfos({});
 
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
-}
-
-std::unique_ptr<SharedData> EntityNetworkSession::makeSessionSharedData()
-{
-	return std::make_unique<EntitySessionSharedData>();
-}
-
-std::unique_ptr<SharedData> EntityNetworkSession::makePeerSharedData()
-{
-	return std::make_unique<EntityClientSharedData>();
 }
 
 void EntitySessionSharedData::serialize(Serializer& s) const

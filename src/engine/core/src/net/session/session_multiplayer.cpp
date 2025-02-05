@@ -10,6 +10,7 @@ using namespace Halley;
 
 SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resources, const ConnectionOptions& options, SessionSettings settings)
 	: api(api)
+	, options(options)
 	, host(options.mode == Mode::Host)
 {
 	playerName = options.clientPlayerName.value_or(api.platform->getPlayerName());
@@ -22,8 +23,24 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 	session = std::make_shared<NetworkSession>(*service, settings.networkVersion, playerName);
 	entitySession = std::make_unique<EntityNetworkSession>(session, resources, std::move(settings.ignoreComponents), this);
 	setupDictionary(entitySession->getSerializationDictionary(), std::move(settings.serializationDict));
+}
+
+SessionMultiplayer::~SessionMultiplayer()
+{
+	if (joinLobbyInstance == this) {
+		joinLobbyInstance = nullptr;
+	}
+
+    entitySession.reset();
+    session.reset();
+    service.reset();
+}
+
+void SessionMultiplayer::start()
+{
 	session->setServerSideDataHandler(this);
-	
+	session->setSharedDataHandler(this);
+
 	if (options.mode == Mode::Host) {
 		Logger::logDev("Starting multiplayer session as the host.");
 		setState(SessionState::GameLobbyReady);
@@ -44,17 +61,6 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 			api.platform->setJoinCallback(onPlatformJoinCallback);
 		}
 	}
-}
-
-SessionMultiplayer::~SessionMultiplayer()
-{
-	if (joinLobbyInstance == this) {
-		joinLobbyInstance = nullptr;
-	}
-
-    entitySession.reset();
-    session.reset();
-    service.reset();
 }
 
 bool SessionMultiplayer::isMultiplayer() const
@@ -99,6 +105,11 @@ size_t SessionMultiplayer::getNumberOfPlayers() const
 uint8_t SessionMultiplayer::getMyClientId() const
 {
 	return *session->getMyPeerId();
+}
+
+SharedData* SessionMultiplayer::tryGetMySharedData() const
+{
+	return session->tryGetMySharedData<SharedData>();
 }
 
 SessionState SessionMultiplayer::getState() const
@@ -249,6 +260,16 @@ bool SessionMultiplayer::setServerSideData(String uniqueKey, ConfigNode data)
 ConfigNode SessionMultiplayer::getServerSideData(String uniqueKey)
 {
 	return {};
+}
+
+std::unique_ptr<SharedData> SessionMultiplayer::makeSessionSharedData()
+{
+	return std::make_unique<EntitySessionSharedData>();
+}
+
+std::unique_ptr<SharedData> SessionMultiplayer::makePeerSharedData()
+{
+	return std::make_unique<EntityClientSharedData>();
 }
 
 void SessionMultiplayer::setupDictionary(SerializationDictionary& dict, std::shared_ptr<const ConfigFile> serializationDict)

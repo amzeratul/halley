@@ -79,7 +79,13 @@ namespace Halley {
 		{
 			return dynamic_cast<T&>(doGetMySharedData());
 		}
-		
+
+		template <typename T>
+		T* tryGetMySharedData()
+		{
+			return dynamic_cast<T*>(doTryGetMySharedData());
+		}
+
 		template <typename T>
 		T& getMutableSessionSharedData()
 		{
@@ -111,6 +117,7 @@ namespace Halley {
 
 	protected:
 		SharedData& doGetMySharedData();
+		SharedData* doTryGetMySharedData();
 		SharedData& doGetMutableSessionSharedData();
 		const SharedData& doGetSessionSharedData() const;
 		const SharedData& doGetClientSharedData(PeerId clientId) const;

@@ -32,7 +32,7 @@ namespace Halley {
 		void deserialize(Deserializer& s) override;
 	};
 
-	class EntityNetworkSession : NetworkSession::IListener, NetworkSession::ISharedDataHandler, public IWorldNetworkInterface {
+	class EntityNetworkSession : NetworkSession::IListener, public IWorldNetworkInterface {
     public:
 		class IEntityNetworkSessionListener {
 		public:
@@ -98,9 +98,7 @@ namespace Halley {
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
 		void onPeerDisconnected(NetworkSession::PeerId peerId) override;
-		std::unique_ptr<SharedData> makeSessionSharedData() override;
-		std::unique_ptr<SharedData> makePeerSharedData() override;
-	
+
 	private:
 		struct QueuedMessage {
 			NetworkSession::PeerId fromPeerId;

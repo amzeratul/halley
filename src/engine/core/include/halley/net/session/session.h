@@ -31,6 +31,7 @@ namespace Halley {
 
 		virtual const String& getPlayerName() const { return String::emptyString(); }
 
+		virtual void start() {};
 		[[nodiscard]] virtual bool update(Time t) { return true; }
 
 		ConfigNode& getOptions() { return options; }

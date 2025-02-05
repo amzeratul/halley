@@ -41,7 +41,7 @@ namespace Halley {
 		}
 	};
 
-	class SessionMultiplayer : public Session, public EntityNetworkSession::IEntityNetworkSessionListener, public NetworkSession::IServerSideDataHandler {
+	class SessionMultiplayer : public Session, public EntityNetworkSession::IEntityNetworkSessionListener, public NetworkSession::IServerSideDataHandler, public NetworkSession::ISharedDataHandler {
 	public:
 		enum class Mode {
 			Host,
@@ -65,6 +65,7 @@ namespace Halley {
 		SessionMultiplayer(const HalleyAPI& api, Resources& resources, const ConnectionOptions& options, SessionSettings settings);
 		~SessionMultiplayer() override;
 
+		void start() override;
 		bool update(Time t) override;
 
 		bool isMultiplayer() const override;
@@ -74,6 +75,7 @@ namespace Halley {
 		Vector<Rect4f> getRemoteViewPorts() const override;
 		size_t getNumberOfPlayers() const override;
 		uint8_t getMyClientId() const override;
+		SharedData* tryGetMySharedData() const;
 		SessionState getState() const;
 		bool hasGameStarted() const;
 
@@ -102,9 +104,12 @@ namespace Halley {
 		void setState(SessionState state);
 		bool setServerSideData(String uniqueKey, ConfigNode data) override;
 		ConfigNode getServerSideData(String uniqueKey) override;
+		std::unique_ptr<SharedData> makeSessionSharedData() override;
+		std::unique_ptr<SharedData> makePeerSharedData() override;
 
 	private:
 		const HalleyAPI& api;
+		const ConnectionOptions options;
 		bool host = false;
 		String playerName;
 		SessionState curState = SessionState::Disconnected;

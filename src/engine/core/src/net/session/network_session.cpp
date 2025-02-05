@@ -188,6 +188,18 @@ SharedData& NetworkSession::doGetMySharedData()
 	return *iter->second;
 }
 
+SharedData* NetworkSession::doTryGetMySharedData()
+{
+	if (type == NetworkSessionType::Undefined || !myPeerId) {
+		return nullptr;
+	}
+	const auto iter = sharedData.find(myPeerId.value());
+	if (iter == sharedData.end()) {
+		return nullptr;
+	}
+	return iter->second.get();
+}
+
 SharedData& NetworkSession::doGetMutableSessionSharedData()
 {
 	if (type != NetworkSessionType::Host) {
