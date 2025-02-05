@@ -149,6 +149,7 @@ void FontImporter::getCharactersForScript(std::set<char32_t>& charsOutput, const
 	if (script == "japanese" || script == "chinese" || script == "korean" || script == "hiragana" || script == "katakana") {
 		addRange(charsOutput, 0x3000, 0x303F); // CJK Symbols and Punctuation
 		addRange(charsOutput, 0xFF00, 0xFFEF); // Halfwidth and Fullwidth Forms
+		addRange(charsOutput, 0x2026, 0x2026); // Ellipses
 		//addRange(charsOutput, 0x4E00, 0x9FFF); // CJK Unified Ideographs
 	}
 }

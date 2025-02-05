@@ -566,9 +566,7 @@ void ProjectWindow::setSetting(EditorSettingType type, std::string_view id, Conf
 
 const ConfigNode& ProjectWindow::getAssetSetting(std::string_view assetKey, std::string_view id)
 {
-	auto& data = settings.at(EditorSettingType::Project)->getMutableData(String("asset:") + assetKey);
-	data.ensureType(ConfigNodeType::Map);
-	return data[id];
+	return settings.at(EditorSettingType::Project)->getData(String("asset:") + assetKey)[id];
 }
 
 void ProjectWindow::setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode value)
