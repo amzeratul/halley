@@ -3,6 +3,7 @@
 #include <halley/support/exception.h>
 
 #include "halley/game/game_platform.h"
+#include "halley/support/debug.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
 
@@ -16,7 +17,7 @@ ExecutionQueue::ExecutionQueue()
 	hasTasks.store(false);
 }
 
-TaskBase ExecutionQueue::getNext()
+ExecutionQueue::Entry ExecutionQueue::getNext()
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	while (queue.empty()) {
@@ -25,46 +26,46 @@ TaskBase ExecutionQueue::getNext()
 		}
 		if (aborted) {
 			queue.clear();
-			return TaskBase([] () {});
+			return { TaskBase([] () {}) };
 		}
 	}
 
-	TaskBase value = queue.front();
+	Entry value = queue.front();
 	queue.pop_front();
 	return value;
 }
 
-Vector<TaskBase> ExecutionQueue::getUpTo(size_t n)
+Vector<ExecutionQueue::Entry> ExecutionQueue::getUpTo(size_t n)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	if (queue.size() <= n) {
 		hasTasks.store(false);
-		Vector<TaskBase> tasks(queue.begin(), queue.end());
+		Vector<ExecutionQueue::Entry> tasks(queue.begin(), queue.end());
 		queue.clear();
 		return tasks;
 	} else {
-		Vector<TaskBase> tasks(queue.begin(), queue.begin() + n);
+		Vector<ExecutionQueue::Entry> tasks(queue.begin(), queue.begin() + n);
 		queue.erase(queue.begin(), queue.begin() + n);
 		return tasks;
 	}
 }
 
-Vector<TaskBase> ExecutionQueue::getAll()
+Vector<ExecutionQueue::Entry> ExecutionQueue::getAll()
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	hasTasks.store(false);
-	Vector<TaskBase> tasks(queue.begin(), queue.end());
+	Vector<Entry> tasks(queue.begin(), queue.end());
 	queue.clear();
 	return tasks;
 }
 
-void ExecutionQueue::addToQueue(TaskBase task)
+void ExecutionQueue::addToQueue(TaskBase task, std::string_view name)
 {
 	if (immediate) {
 		task();
 	} else {
 		std::unique_lock<std::mutex> lock(mutex);
-		queue.emplace_back(task);
+		queue.emplace_back(task, name);
 		hasTasks.store(true);
 
 		condition.notify_one();
@@ -147,7 +148,7 @@ void Executor::runUpTo(size_t n)
 #if HAS_THREADS
 	auto tasks = queue.getUpTo(n);
 	for (auto& t : tasks) {
-		t();
+		t.task();
 	}
 #endif
 }
@@ -157,7 +158,7 @@ void Executor::runPending()
 #if HAS_THREADS
 	auto tasks = queue.getAll();
 	for (auto& t : tasks) {
-		t();
+		t.task();
 	}
 #endif
 }
@@ -167,9 +168,11 @@ void Executor::runForever()
 	while (running)	{
 		auto next = queue.getNext();
 		try {
-			next();
+			next.task();
 		} catch (std::exception& e) {
+			Logger::logError("Crash executing task " + String(next.name) + ":");
 			Logger::logException(e);
+			std::abort();
 		} catch (...) {
 			Logger::logError("Unknown exception in executor.");
 		}

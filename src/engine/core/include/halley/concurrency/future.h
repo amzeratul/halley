@@ -497,18 +497,18 @@ namespace Halley
 	class TaskQueueHelper
 	{
 	public:
-		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload)
+		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, std::string_view name)
 		{
 			Promise<T> promise;
-			enqueueOn(e, std::move(payload), promise);
+			enqueueOn(e, std::move(payload), promise, name);
 			return promise.getFuture();
 		}
 		
-		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise)
+		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise, std::string_view name)
 		{
 			e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
 				TaskHelper<T>::setPromise(promise, payload);
-			});
+			}, name);
 		}
 	};
 
@@ -521,7 +521,7 @@ namespace Halley
 
 		auto promise = Promise<R>();
 		data->addContinuation([promise, f, executor](typename TaskHelper<T>::DataType v) mutable {
-			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise);
+			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, typeid(f).name());
 		});
 		return promise.getFuture();
 	}

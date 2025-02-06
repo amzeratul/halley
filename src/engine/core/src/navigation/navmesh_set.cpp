@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/priority_queue.h"
 #include "halley/maths/ray.h"
+#include "halley/support/debug.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
@@ -168,6 +169,11 @@ NavigationPath NavmeshSet::extendToFullPath(const NavigationQuery& query, const 
 	}
 
 	return NavigationPath(query, std::move(result));
+}
+
+const Navmesh& NavmeshSet::getNavmesh(uint16_t idx) const
+{
+	return navmeshes.at(idx);
 }
 
 const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos) const
@@ -743,6 +749,38 @@ std::pair<std::optional<Vector2f>, float> NavmeshSet::findRayCollision(Navigatio
 	const float len = delta.length();
 	const auto dir = delta / len;
 	return navmesh.findRayCollision(Ray(from.pos.pos, dir), len, startNodeId, 0, this);
+}
+
+ResourceMemoryUsage NavmeshSet::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage += sizeof(*this);
+
+	for (const auto& navmesh: navmeshes) {
+		result += navmesh.getMemoryUsage();
+	}
+	for (const auto& portal: portalNodes) {
+		result += portal.getMemoryUsage();
+	}
+	for (const auto& region: regionNodes) {
+		result += region.getMemoryUsage();
+	}
+
+	return result;
+}
+
+ResourceMemoryUsage NavmeshSet::PortalNode::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage += sizeof(*this) + connections.const_byte_span().size_bytes();
+	return result;
+}
+
+ResourceMemoryUsage NavmeshSet::RegionNode::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage += sizeof(*this) + portals.const_byte_span().size_bytes();
+	return result;
 }
 
 void NavmeshSet::assignNavmeshIds()

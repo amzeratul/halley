@@ -228,6 +228,8 @@ namespace Halley {
 		const String& getName() const;
 		const UUID& getUUID() const;
 
+		void generateMemoryReport() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;

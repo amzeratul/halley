@@ -275,6 +275,8 @@ namespace Halley {
 				return false;
 			}
 		}
+
+		size_t getMemoryUsage(ComponentDeleterTable& table) const;
 	};
 
 	static_assert(sizeof(Entity) <= 128); // We'll lose some significant perf due to going over two cache lines

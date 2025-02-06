@@ -7,6 +7,7 @@
 #include "halley/game/game_platform.h"
 #include "halley/support/logger.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -127,25 +128,35 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	{
 		auto& meta = texture->getMeta();
 		const auto& compression = meta.getString("compression");
+		const bool masked = meta.getBool("withMask", false);
 
-		Bytes imageBytes;
-		ImageMask alphaMask;
-		if (meta.getBool("withMask", false)) {
-			const auto options = SerializerOptions(SerializerOptions::maxVersion);
-			auto imageDataAndMask = Deserializer::fromBytes<ImageDataAndMask>(data->getSpan(), options);
-			imageBytes = std::move(imageDataAndMask.imageData);
-			alphaMask = std::move(imageDataAndMask.mask);
-		}
+		try {
+			Bytes imageBytes;
+			ImageMask alphaMask;
+			if (masked) {
+				const auto options = SerializerOptions(SerializerOptions::maxVersion);
+				auto imageDataAndMask = Deserializer::fromBytes<ImageDataAndMask>(data->getSpan(), options);
+				imageBytes = std::move(imageDataAndMask.imageData);
+				alphaMask = std::move(imageDataAndMask.mask);
+			}
 
-		gsl::span<const gsl::byte> imageData = imageBytes.empty() ? data->getSpan() : imageBytes.byte_span();
+			if (compression == "png" || compression == "qoi" || compression == "hlif") {
+				gsl::span<const gsl::byte> imageData = imageBytes.empty() ? data->getSpan() : imageBytes.byte_span();
 
-		if (compression == "png" || compression == "qoi" || compression == "hlif") {
-			const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
-			auto image = std::make_unique<Image>(imageData, format);
-			alphaMask = ImageMask::fromAlpha(*image);
-			return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
-		} else {
-			return { TextureDescriptorImageData(imageData), std::move(alphaMask) };
+				const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
+				auto image = std::make_unique<Image>(imageData, format);
+				alphaMask = ImageMask::fromAlpha(*image);
+				return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
+			} else {
+				if (imageBytes.empty()) {
+					return { TextureDescriptorImageData(data->getSpan()), std::move(alphaMask) };
+				} else {
+					return { TextureDescriptorImageData(std::move(imageBytes)), std::move(alphaMask) };
+				}
+			}
+		} catch (...) {
+			Logger::logError("Exception when trying to load texture " + texture->getAssetId() + " (compression = \"" + compression + "\", masked = " + masked + "\", size = " + String::prettySize(data->getSpan().size_bytes()) + ")");
+			throw;
 		}
 	})
 	.then(Executors::getVideoAux(), [texture, retain](std::pair<TextureDescriptorImageData, ImageMask> imgPair)

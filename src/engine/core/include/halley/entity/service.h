@@ -25,6 +25,11 @@ namespace Halley
 			this->world = &world;
 		}
 
+		virtual size_t getMemoryUsage() const
+		{
+			return 0;
+		}
+
 	protected:
 		World& getWorld() const
 		{
