@@ -27,8 +27,8 @@ AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> pa
     for (auto &p: outbound.packets) {
         p.data.resize(maxPacketSize);
         p.seqIdx = 0xffff;
-    	memcpy(p.data.data(), headerSignature, 4);
-    	memset(p.data.data() + 4, 0, maxPacketSize - 4);
+    	memcpy(p.data.data(), headerSignature2, 3);
+    	memset(p.data.data() + 3, 0, maxPacketSize - 3);
     }
 }
 
@@ -96,8 +96,9 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
 
     	slot.dataSize = size;
         memcpy(slot.data.data() + headerSize, packet.data(), size);
-        slot.seqIdx = outbound.curSeqIdx;
+        slot.seqIdx = outbound.seqIndex.toSlot();
         slot.subIdx = 0;
+    	slot.parity = outbound.seqIndex.parity();
     	slot.resend = 0;
 
         doSend(slot, outbound.curPacketIdx);
@@ -128,8 +129,9 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
 
             packet = packet.subspan(slot.dataSize);
 
-            slot.seqIdx = outbound.curSeqIdx;
+            slot.seqIdx = outbound.seqIndex.toSlot();
             slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
+        	slot.parity = outbound.seqIndex.parity();
         	slot.resend = 0;
 
             doSend(slot, outbound.curPacketIdx);
@@ -143,10 +145,10 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
     }
 
     if (statsListener) {
-        statsListener->onPacketSent(outbound.curSeqIdx, size);
+        statsListener->onPacketSent(outbound.seqIndex.toSlot(), size);
     }
 
-    outbound.curSeqIdx = (outbound.curSeqIdx + 1) % 0x8000;
+    outbound.seqIndex.update();
 }
 
 bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& packet)
@@ -189,6 +191,7 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
     uint8_t* header = packet.data.data();
 
+	header[3] = packet.parity;
     header[4] = packet.seqIdx >> 8;
     header[5] = packet.seqIdx & 0xff;
     header[6] = packet.subIdx;
@@ -248,8 +251,11 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
     auto& slot = inbound.packets[inbound.curPacketIdx];
 
     if (slot.seqIdx < 0x8000) {
-        if (slot.seqIdx != inbound.curSeqIdx) {
-            throw Exception("Unexpected packet sequence index: found " + toString(slot.seqIdx) + ", expected " + toString(inbound.curSeqIdx), HalleyExceptions::Network);
+        if (slot.seqIdx != inbound.seqIndex.toSlot()) {
+            throw Exception("Unexpected packet sequence index:\n"
+            	"found " + toString(slot.seqIdx) + ", parity " + toString((int) slot.parity) + "\n"
+            	"expected " + toString(inbound.seqIndex.toSlot()) + ", parity " + toString((int) inbound.seqIndex.parity()),
+            	HalleyExceptions::Network);
         }
 
         if (slot.subIdx == 0) {
@@ -282,11 +288,11 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         	networkStatsListener.onReceiveData(slot.dataSize, 1);
 
         	if (statsListener) {
-        		statsListener->onPacketReceived(inbound.curSeqIdx, slot.dataSize, false);
+        		statsListener->onPacketReceived(inbound.seqIndex.toSlot(), slot.dataSize, false);
         	}
 
         	inbound.curPacketIdx = (inbound.curPacketIdx + 1) % 256;
-        	inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
+        	inbound.seqIndex.update();
 
         	return true;
         } else {
@@ -300,8 +306,9 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
             	if (sub.seqIdx == slot.seqIdx) {
             		Expects((sub.subIdx & 15) == i);
             		Expects((sub.subIdx >> 4) == numSubPackets);
+            		Expects(sub.parity == slot.parity);
             	}
-            	isComplete &= sub.seqIdx == slot.seqIdx;
+            	isComplete &= sub.seqIdx == slot.seqIdx && sub.parity == slot.parity;
                 isComplete &= (sub.subIdx & 15) == i;
                 isComplete &= (sub.subIdx >> 4) == numSubPackets;
             }
@@ -323,11 +330,11 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
                 networkStatsListener.onReceiveData(totalSize, numSubPackets);
 
                 if (statsListener) {
-                    statsListener->onPacketReceived(inbound.curSeqIdx, totalSize, false);
+                    statsListener->onPacketReceived(inbound.seqIndex.toSlot(), totalSize, false);
                 }
 
             	inbound.curPacketIdx = (inbound.curPacketIdx + numSubPackets) % 256;
-                inbound.curSeqIdx = (inbound.curSeqIdx + 1) % 0x8000;
+                inbound.seqIndex.update();
 
                 return true;
             }
@@ -375,20 +382,26 @@ void AckUnreliableConnection::onSend(gsl::span<const gsl::byte> packet)
 void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 {
     size_t packetSize = packet.size();
-    auto* header = (const uint8_t*) packet.data();
+    auto* header = reinterpret_cast<const uint8_t*>(packet.data());
 
-    if (packetSize < 6 || memcmp(header, headerSignature, 4) != 0) {
+    if (packetSize < 6 || memcmp(header, headerSignature2, 3) != 0) {
     	Logger::logWarning("rcv packet too small, or wrong signature");
         return;
     }
 
-    uint16_t seqIdx = uint16_t(header[4] << 8) | header[5];
+	uint8_t parity = header[3];
+    uint16_t seqIdx = static_cast<uint16_t>(header[4] << 8) | header[5];
 
     if (seqIdx == 0xffff) {
     	// This is an ACK packet.
-        onAckPacketsReceive(packet.subspan(6));
+        onAckPacketsReceive(packet.subspan(6), parity);
         return;
     }
+
+	if (!inbound.seqIndex.isInValidRange(SeqIndex::make(seqIdx, parity), 256)) {
+		// The seqIdx/parity pair of this packet is far off the inbound queue.
+		evictInboundQueue(seqIdx, parity);
+	}
 
     uint8_t subIdx = header[6];
     int packetIdx = header[7];
@@ -412,7 +425,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 		slot.resend++;
 	}
 
-	isExpired = !isDupe && isExpiredSeqIndex(inbound, seqIdx);
+	isExpired = !isDupe && isExpiredSeqIndex(inbound, seqIdx, parity);
 
 	if (!isDupe && !isExpired) {
 		if (slot.seqIdx < 0x8000) {
@@ -426,6 +439,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 
 		slot.seqIdx = seqIdx;
 		slot.subIdx = subIdx;
+		slot.parity = parity;
 		slot.resend = 0;
 	}
 
@@ -456,10 +470,10 @@ void AckUnreliableConnection::doSendAckPackets()
 
     uint8_t* msg = packet.data();
 
-    msg[0] = headerSignature[0];
-    msg[1] = headerSignature[1];
-    msg[2] = headerSignature[2];
-    msg[3] = headerSignature[3];
+    msg[0] = headerSignature2[0];
+    msg[1] = headerSignature2[1];
+    msg[2] = headerSignature2[2];
+    msg[3] = inbound.seqIndex.parity();
 
     msg[4] = 0xff;
     msg[5] = 0xff;
@@ -479,7 +493,7 @@ void AckUnreliableConnection::doSendAckPackets()
 	numAckPackets = 0;
 }
 
-void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> data)
+void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> data, uint8_t parity)
 {
     auto ackData = reinterpret_cast<const uint8_t *>(data.data());
     size_t size = data.size();
@@ -509,11 +523,11 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> dat
 
     			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
     			avgLatencyCount++;
-    		} else if (!isExpiredSeqIndex(outbound, seqIdx)) {
+    		} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
     			// ACKs can be lost and resent too.
 	    		Logger::logDev("rcv mismatch ACK for slot " + toString((int) packetIdx) + ", seqIdx " + toString(slot->seqIdx) + ", remote seqIdx " + toString(seqIdx));
     		}
-    	} else if (!isExpiredSeqIndex(outbound, seqIdx)) {
+    	} else if (!isExpiredSeqIndex(outbound, seqIdx, parity)) {
     		// Resent packets can be ACKd more than once.
    			Logger::logDev("rcv ACK for empty slot " + toString((int) packetIdx) + ", remote seqIdx " + toString(seqIdx));
     	}
@@ -579,12 +593,55 @@ void AckUnreliableConnection::setStatsListener(IAckUnreliableConnectionStatsList
     statsListener = listener;
 }
 
-bool AckUnreliableConnection::isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx)
+void AckUnreliableConnection::evictInboundQueue(uint16_t seqIdx, uint8_t parity)
 {
-	// Sequence indices wrap, so we can't just plain compare.
-	if (seqIdx > queue.curSeqIdx) {
-		return (static_cast<size_t>(queue.curSeqIdx) + 4096) < seqIdx;
+	int lost = 0;
+
+	for (auto &p: inbound.packets) {
+		if (p.seqIdx != 0xffff) {
+			lost++;
+		}
+		p.seqIdx = 0xffff;
+		p.subIdx = 0;
+		p.parity = parity;
 	}
 
-	return seqIdx < queue.curSeqIdx;
+	if (lost > 0) {
+		Logger::logError("Inbound network queue has been flushed, " + toString(lost) + " packets dropped.");
+	}
+
+	Logger::logWarning("Inbound network queue has been reset.");
+
+	inbound.seqIndex = SeqIndex::make(seqIdx, parity);
+}
+
+bool AckUnreliableConnection::isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity)
+{
+	// Sequence indices wrap, so we can't just plain compare.
+	const SeqIndex cmp = SeqIndex::make(seqIdx, parity);
+
+	if (cmp.count < queue.seqIndex.count) {
+		return true;
+	}
+
+	if (cmp.count >= queue.seqIndex.count + 0x8000) {
+		return true;
+	}
+
+	return false;
+}
+
+bool AckUnreliableConnection::SeqIndex::isInValidRange(SeqIndex other, size_t range) const
+{
+	if (count < other.count) {
+		return count + range >= other.count;
+	} else {
+		return other.count + range >= count;
+	}
+}
+
+AckUnreliableConnection::SeqIndex AckUnreliableConnection::SeqIndex::make(uint16_t seqIdx, uint8_t parity)
+{
+	Ensures(seqIdx < 0x8000);
+	return { static_cast<size_t>(parity) << 15 | seqIdx };
 }

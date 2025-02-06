@@ -44,22 +44,47 @@ namespace Halley
     private:
     	using Clock = std::chrono::steady_clock;
 
+    	struct SeqIndex
+    	{
+    		size_t count = 0;
+
+    		void update()
+    		{
+    			count = count + 1;
+    		}
+
+    		[[nodiscard]] uint16_t toSlot() const
+    		{
+    			return count & 0x7fff;
+    		}
+
+    		[[nodiscard]] uint8_t parity() const
+    		{
+    			return static_cast<uint8_t>((count & 0x78000) >> 15);
+    		}
+
+    		[[nodiscard]] bool isInValidRange(SeqIndex other, size_t range) const;
+
+    		static SeqIndex make(uint16_t seqIdx, uint8_t parity);
+    	};
+
         struct SubPacket
         {
             Bytes data;
+        	Clock::time_point timestamp;
             size_t dataSize = 0;
             uint16_t seqIdx = 0;
             uint8_t subIdx = 0;
+            uint8_t parity = 0;
         	uint8_t resend = 0;
-        	Clock::time_point timestamp;
         };
 
         struct InOutQueue
         {
             std::array<SubPacket, 256 + 1> packets;
+        	SeqIndex seqIndex;
             int curPacketIdx = 0;
         	int firstPacketIdx = 0;
-            uint16_t curSeqIdx = 0x7e00;
         };
 
         std::shared_ptr<IConnection> parent;
@@ -67,7 +92,7 @@ namespace Halley
 
         size_t maxPacketSize;
         static constexpr size_t headerSize = 16;
-        static constexpr uint8_t headerSignature[4] = {'h', 'l', 'y', '0'};
+        static constexpr uint8_t headerSignature2[3] = {'h', 'l', 'y'};
 
         Bytes inboundCache;
         InOutQueue inbound;
@@ -93,11 +118,13 @@ namespace Halley
     	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet);
 
         void doSendAckPackets();
-        void onAckPacketsReceive(gsl::span<const gsl::byte> data);
+        void onAckPacketsReceive(gsl::span<const gsl::byte> data, uint8_t parity);
 
     	void resendUnAckPackets(float minResendTimeDiff);
 
-    	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx);
+    	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
+
+    	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity);
     };
 
 }
