@@ -29,6 +29,8 @@ namespace Halley
 
 		std::shared_ptr<ResourceDataStream> getStream() const;
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	private:
 		Bytes data;
 		std::shared_ptr<ResourceDataStream> stream;

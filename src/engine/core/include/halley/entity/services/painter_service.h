@@ -50,6 +50,8 @@ namespace Halley {
 			return *getFrameData().tryGetPainter<T>();
 		}
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	private:
 		bool updateEnabled = true;
 		bool depthQueriesEnabled = false;

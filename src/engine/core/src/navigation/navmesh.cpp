@@ -783,7 +783,7 @@ Vector2f Navmesh::getRandomPoint(Random& rng) const
 ResourceMemoryUsage Navmesh::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
-	result.ramUsage += sizeof(*this) + nodes.const_byte_span().size() + weights.const_byte_span().size() + openEdges.const_byte_span().size();
+	result.ramUsage += sizeof(*this) + nodes.size_bytes() + weights.size_bytes() + openEdges.size_bytes();
 
 	for (const auto& polygon: polygons) {
 		result.ramUsage += polygon.getSizeBytes();
@@ -792,7 +792,7 @@ ResourceMemoryUsage Navmesh::getMemoryUsage() const
 		result.ramUsage += portal.getSizeBytes();
 	}
 	for (const auto& poly: polyGrid) {
-		result.ramUsage += sizeof(Vector<NodeId>) + poly.const_byte_span().size();
+		result.ramUsage += sizeof(Vector<NodeId>) + poly.size_bytes();
 	}
 
 	return result;
@@ -1117,5 +1117,5 @@ Vector2f Navmesh::Portal::getClosestPoint(Vector2f pos) const
 
 size_t Navmesh::Portal::getSizeBytes() const
 {
-	return sizeof(*this) + vertices.const_byte_span().size() + costToOtherPortalsHere.const_byte_span().size() + connections.const_byte_span().size();
+	return sizeof(*this) + vertices.size_bytes() + costToOtherPortalsHere.size_bytes() + connections.size_bytes();
 }

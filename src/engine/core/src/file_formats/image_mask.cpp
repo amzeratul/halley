@@ -94,7 +94,7 @@ Rect4i ImageMask::getRect() const
 
 size_t ImageMask::getSizeBytes() const
 {
-	return sizeof(*this) + values.size();
+	return sizeof(*this) + values.size_bytes();
 }
 
 void ImageMask::serialize(Serializer& s) const

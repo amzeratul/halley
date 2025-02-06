@@ -161,6 +161,7 @@ namespace Halley {
 		const ResourceOptions& getOptions() const { return options; }
 
 		void generateMemoryReport();
+		void generateDetailedMemoryReport(AssetType type, std::optional<int> limit = {});
 
 	private:
 		const std::unique_ptr<ResourceLocator> locator;

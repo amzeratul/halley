@@ -34,6 +34,8 @@ namespace Halley {
 		String toYAML() const;
         void makeDefault();
 
+        ResourceMemoryUsage getMemoryUsage() const override;
+
     private:
         ConfigFile data;
 

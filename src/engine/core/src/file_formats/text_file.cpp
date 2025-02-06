@@ -28,3 +28,8 @@ void TextFile::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<TextFile&>(resource));
 }
+
+ResourceMemoryUsage TextFile::getMemoryUsage() const
+{
+	return { sizeof(*this) + data.getSizeBytes(), 0 };
+}

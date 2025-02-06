@@ -105,3 +105,12 @@ bool PainterService::hasRenderGraph() const
 {
 	return !!renderGraph;
 }
+
+ResourceMemoryUsage PainterService::getMemoryUsage() const
+{
+	ResourceMemoryUsage result = { sizeof(this), 0 };
+	if (renderGraph) {
+		result += renderGraph->getMemoryUsage();
+	}
+	return result;
+}

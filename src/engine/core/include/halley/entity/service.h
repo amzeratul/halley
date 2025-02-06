@@ -1,6 +1,8 @@
 #pragma once
 
 #include <typeinfo>
+
+#include "halley/resources/resource.h"
 #include "halley/text/halleystring.h"
 
 namespace Halley
@@ -25,9 +27,9 @@ namespace Halley
 			this->world = &world;
 		}
 
-		virtual size_t getMemoryUsage() const
+		virtual ResourceMemoryUsage getMemoryUsage() const
 		{
-			return 0;
+			return {};
 		}
 
 	protected:

@@ -133,6 +133,27 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
 	return usage;
 }
 
+void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> limit) const
+{
+	Vector<std::pair<String, ResourceMemoryUsage>> usages;
+
+	{
+		std::shared_lock lock(mutex);
+
+		for (auto& r: resources) {
+			usages.emplace_back(r.first, r.second.res->getMemoryUsage());
+		}
+	}
+
+	std::sort(usages.begin(), usages.end(), [] (const auto& a, const auto& b) { return b.second < a.second; });
+	Logger::logInfo("Detailed memory report for " + toString(getAssetType()) + ":");
+
+	const int n = std::min(static_cast<int>(usages.size()), limit.value_or(std::numeric_limits<int>::max()));
+	for (int i = 0; i < n; ++i) {
+		Logger::logInfo("\t" + toString(i + 1) + ": " + usages[i].first + ": " + String::prettySize(usages[i].second.getTotal()));
+	}
+}
+
 void ResourceCollectionBase::age(float time)
 {
 	std::shared_lock lock(mutex);

@@ -340,6 +340,15 @@ void RenderGraph::resetGraph()
 	loadDefinition(graphDefinition);
 }
 
+ResourceMemoryUsage RenderGraph::getMemoryUsage() const
+{
+	ResourceMemoryUsage result = { sizeof(*this), 0 };
+	for (const auto& n: nodes) {
+		result += n->getMemoryUsage();
+	}
+	return result;
+}
+
 void RenderGraph::Variable::apply(Material& material, const String& name) const
 {
 	switch (type) {

@@ -1048,26 +1048,28 @@ const UUID& World::getUUID() const
 
 void World::generateMemoryReport() const
 {
-	size_t serviceTotal = 0;
-	Vector<std::pair<String, size_t>> serviceUsage;
+	ResourceMemoryUsage serviceTotal;
+	Vector<std::pair<String, ResourceMemoryUsage>> named;
+
+	ResourceMemoryUsage entityTotal;
+	for (const auto& entity: entities) {
+		entityTotal.ramUsage += entity->getMemoryUsage(*componentDeleterTable);
+	}
+	named.emplace_back("Entities", entityTotal);
 
 	for (const auto& service: services) {
 		const auto usage = service.second->getMemoryUsage();
-		if (usage > 0) {
-			serviceUsage.emplace_back(service.first, usage);
+		if (usage.getTotal() > 0) {
+			named.emplace_back(service.first, usage);
 			serviceTotal += usage;
 		}
 	}
 
-	size_t entityTotal = 0;
-	for (const auto& entity: entities) {
-		entityTotal += entity->getMemoryUsage(*componentDeleterTable);
-	}
 	const auto total = serviceTotal + entityTotal;
 
-	Logger::logInfo("World memory usage: " + String::prettySize(total) + " (Entities: " + String::prettySize(entityTotal) + ", services: " + String::prettySize(serviceTotal) + ")");
-	for (const auto& [k, v]: serviceUsage) {
-		Logger::logInfo("\t" + k + ": " + String::prettySize(v));
+	Logger::logInfo("World memory usage: " + total.toString());
+	for (const auto& [k, v]: named) {
+		Logger::logInfo("\t" + k + ": " + v.toString());
 	}
 }
 

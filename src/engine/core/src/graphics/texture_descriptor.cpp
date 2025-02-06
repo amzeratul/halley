@@ -121,7 +121,7 @@ size_t TextureDescriptorImageData::getMemoryUsage() const
 		result += imgShared->getByteSize() + sizeof(Image);
 	}
 
-	result += rawBytes.size();
+	result += rawBytes.size_bytes();
 	return result;
 }
 

@@ -70,6 +70,8 @@ namespace Halley {
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 		std::shared_ptr<TextureRenderTarget> getRenderTarget(VideoAPI& video);
 
+		ResourceMemoryUsage getMemoryUsage() const;
+
 		String id;
 		RenderGraphMethod method;
 

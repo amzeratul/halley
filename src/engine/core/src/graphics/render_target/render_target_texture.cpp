@@ -71,3 +71,17 @@ bool TextureRenderTarget::hasDepthBuffer() const
 {
 	return !!depthStencilBuffer;
 }
+
+ResourceMemoryUsage TextureRenderTarget::getMemoryUsage() const
+{
+	ResourceMemoryUsage result = { sizeof(*this), 0 };
+
+	for (const auto& t: colourBuffer) {
+		result += t->getMemoryUsage();
+	}
+	if (depthStencilBuffer) {
+		result += depthStencilBuffer->getMemoryUsage();
+	}
+
+	return result;
+}

@@ -155,6 +155,28 @@ namespace Halley
 			return *this;
 		}
 
+		ResourceMemoryUsage operator+(const ResourceMemoryUsage& other) const
+		{
+			ResourceMemoryUsage result = *this;
+			result.ramUsage += other.ramUsage;
+			result.vramUsage += other.vramUsage;
+			return result;
+		}
+
+		bool operator<(const ResourceMemoryUsage& other) const
+		{
+			const auto t0 = getTotal();
+			const auto t1 = other.getTotal();
+
+			if (t0 != t1) {
+				return t0 < t1;
+			} else if (vramUsage != other.vramUsage) {
+				return vramUsage < other.vramUsage;
+			} else {
+				return ramUsage < other.ramUsage;
+			}
+		}
+
 		String toString() const
 		{
 			if (vramUsage > 0) {
