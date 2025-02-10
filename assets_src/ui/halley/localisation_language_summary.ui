@@ -57,6 +57,14 @@ children:
             widget:
               active: true
               class: image
+              colour: "#004de0"
+              id: bar_blue
+              image: $ui_list_item
+          - uuid: 3ca866b7-c282-4e80-8fb4-ac4f8ffe06a7
+            border: [1, 1, 1, 1]
+            widget:
+              active: true
+              class: image
               colour: "#e0a800"
               id: bar_yellow
               image: $ui_list_item
@@ -127,4 +135,14 @@ children:
       id: import
       size: [120, 0]
       text: Import...
+    fill: [centreHorizontal, centreVertical]
+  - uuid: 2c4e913f-719a-48fe-a570-88bed865ebf8
+    border: [6, 0, 0, 0]
+    widget:
+      class: button
+      enabled: true
+      icon: ui/upload.png
+      id: upload
+      size: [200, 0]
+      text: Upload Changes
     fill: [centreHorizontal, centreVertical]
