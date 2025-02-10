@@ -15,12 +15,22 @@ namespace Halley
 	class ExecutionQueue
 	{
 	public:
-		ExecutionQueue();
-		void addToQueue(TaskBase task);
+		struct Entry {
+			TaskBase task;
+			String name;
 
-		TaskBase getNext();
-		Vector<TaskBase> getUpTo(size_t n);
-		Vector<TaskBase> getAll();
+			Entry(TaskBase task = {}, String name = {})
+				: task(std::move(task))
+				, name(std::move(name))
+			{}
+		};
+
+		ExecutionQueue();
+		void addToQueue(TaskBase task, std::string_view name);
+
+		Entry getNext();
+		Vector<Entry> getUpTo(size_t n);
+		Vector<Entry> getAll();
 
 		size_t threadCount() const;
 		void onAttached();
@@ -32,7 +42,7 @@ namespace Halley
 		static ExecutionQueue& getDefault();
 
 	private:
-		std::deque<TaskBase> queue;
+		std::deque<Entry> queue;
 		std::mutex mutex;
 		std::condition_variable condition;
 

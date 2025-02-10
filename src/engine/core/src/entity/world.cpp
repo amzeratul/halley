@@ -1046,3 +1046,30 @@ const UUID& World::getUUID() const
 	return uuid;
 }
 
+void World::generateMemoryReport() const
+{
+	ResourceMemoryUsage serviceTotal;
+	Vector<std::pair<String, ResourceMemoryUsage>> named;
+
+	ResourceMemoryUsage entityTotal;
+	for (const auto& entity: entities) {
+		entityTotal.ramUsage += entity->getMemoryUsage(*componentDeleterTable);
+	}
+	named.emplace_back("Entities", entityTotal);
+
+	for (const auto& service: services) {
+		const auto usage = service.second->getMemoryUsage();
+		if (usage.getTotal() > 0) {
+			named.emplace_back(service.first, usage);
+			serviceTotal += usage;
+		}
+	}
+
+	const auto total = serviceTotal + entityTotal;
+
+	Logger::logInfo("World memory usage: " + total.toString());
+	for (const auto& [k, v]: named) {
+		Logger::logInfo("\t" + k + ": " + v.toString());
+	}
+}
+

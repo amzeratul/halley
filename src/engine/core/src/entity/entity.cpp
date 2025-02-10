@@ -450,6 +450,21 @@ bool Entity::hasAnyBit(const World& world, gsl::span<const int> indices) const
 	return FamilyMask::hasAnyBit(mask, indices, world.getMaskStorage());
 }
 
+size_t Entity::getMemoryUsage(ComponentDeleterTable& table) const
+{
+	size_t total = sizeof(*this);
+	for (const auto& c: components) {
+		total += table.get(c.first)->getSize();
+	}
+	if (name) {
+		total += name->getSizeBytes();
+	}
+	if (enableRules) {
+		total += enableRules->getSizeBytes();
+	}
+	return total;
+}
+
 void EntityRef::setReloaded()
 {
 	Expects(entity);

@@ -100,6 +100,25 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 	, service(std::move(service))
 {
 	interest = std::make_unique<DevConInterest>(*this);
+
+	setRPCHandle("pullSave", [=] (ConfigNode params) -> Future<ConfigNode> {
+		const auto name = params["name"].asString();
+
+		auto data = api.system->getStorageContainer(SaveDataType::SaveRoaming)->getData(name);
+		Logger::logInfo("Pulling save file \"" + name + "\": " + String::prettySize(data.size()));
+
+		return Future<ConfigNode>::makeImmediate(ConfigNode(std::move(data)));
+	});
+
+	setRPCHandle("pushSave", [=] (ConfigNode params) -> Future<ConfigNode> {
+		const auto name = params["name"].asString();
+		const auto data = params["name"].asBytes();
+
+		Logger::logInfo("Pushing save file \"" + name + "\": " + String::prettySize(data.size()));
+		api.system->getStorageContainer(SaveDataType::SaveRoaming)->setData(name, data, true);
+
+		return Future<ConfigNode>::makeImmediate(ConfigNode(true));
+	});
 }
 
 DevConClient::~DevConClient()

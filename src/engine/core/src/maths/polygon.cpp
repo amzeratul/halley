@@ -1206,6 +1206,11 @@ Vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 	}
 }
 
+size_t Polygon::getSizeBytes() const
+{
+	return sizeof(*this) + vertices.size_bytes();
+}
+
 Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
 {
 	const float x = origin.x;

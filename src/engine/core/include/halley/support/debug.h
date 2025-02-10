@@ -48,15 +48,15 @@ namespace Halley {
 		static void setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> errorHandler);
 		static String getCallStack(int skip = 3);
 
-		static void trace(const char* filename, int line, const char* arg = nullptr);
+		static void trace(const char* filename, int line, std::string_view arg = {});
 		static String getLastTraces();
 		static void printLastTraces();
 
 	private:
 		Debug();
 		static bool debugging;
-		static std::array<DebugTraceEntry, 16> lastTraces;
-		static int tracePos;
+		static std::array<DebugTraceEntry, 32> lastTraces;
+		static std::atomic<int> tracePos;
 	};
 
 	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)

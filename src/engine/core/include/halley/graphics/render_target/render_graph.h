@@ -62,6 +62,8 @@ namespace Halley {
 
 		void resetGraph();
 
+		ResourceMemoryUsage getMemoryUsage() const;
+
 	private:
 		enum class VariableType {
 			None,

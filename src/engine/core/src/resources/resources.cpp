@@ -88,4 +88,14 @@ void Resources::generateMemoryReport()
 	locator->generateMemoryReport();
 }
 
+void Resources::generateDetailedMemoryReport(AssetType type, std::optional<int> limit)
+{
+	for (auto& res: resources) {
+		if (res && res->getAssetType() == type) {
+			res->generateDetailedMemoryReport(limit);
+			return;
+		}
+	}
+}
+
 Resources::~Resources() = default;

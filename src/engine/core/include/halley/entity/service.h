@@ -1,6 +1,8 @@
 #pragma once
 
 #include <typeinfo>
+
+#include "halley/resources/resource.h"
 #include "halley/text/halleystring.h"
 
 namespace Halley
@@ -23,6 +25,11 @@ namespace Halley
 		void onAddedToWorld(World& world)
 		{
 			this->world = &world;
+		}
+
+		virtual ResourceMemoryUsage getMemoryUsage() const
+		{
+			return {};
 		}
 
 	protected:

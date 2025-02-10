@@ -74,3 +74,8 @@ std::shared_ptr<ResourceDataStream> BinaryFile::getStream() const
 	}
 	return stream;
 }
+
+ResourceMemoryUsage BinaryFile::getMemoryUsage() const
+{
+	return ResourceMemoryUsage{ sizeof(*this) + data.size_bytes(), 0 };
+}

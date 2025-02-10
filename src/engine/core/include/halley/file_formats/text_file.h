@@ -20,6 +20,8 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::TextFile; }
 		void reload(Resource&& resource) override;
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	private:
 		String data;
 	};

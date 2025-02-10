@@ -102,6 +102,8 @@ namespace Halley {
 			void translate(Vector2f offset);
 
 			Vector2f getClosestPoint(Vector2f pos) const;
+
+			size_t getSizeBytes() const;
 		};
 		
 		Navmesh();
@@ -150,6 +152,8 @@ namespace Halley {
 		Vector2f getRandomPoint(Random& rng) const;
 
 		Base2D getNormalisedCoordinatesBase() const { return normalisedCoordinatesBase; }
+
+		ResourceMemoryUsage getMemoryUsage() const;
 
 	private:
 		struct State {

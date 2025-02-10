@@ -1,6 +1,7 @@
 #pragma once
 #include "render_target.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/resources/resource.h"
 
 namespace Halley
 {
@@ -24,7 +25,9 @@ namespace Halley
 
 		bool hasColourBuffer(int attachmentNumber) const override;
 		bool hasDepthBuffer() const override;
-	
+
+		ResourceMemoryUsage getMemoryUsage() const;
+
 	protected:
 		Vector<std::shared_ptr<Texture>> colourBuffer;
 		std::shared_ptr<Texture> depthStencilBuffer;

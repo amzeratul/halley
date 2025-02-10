@@ -58,6 +58,7 @@ namespace Halley
 		AssetType getAssetType() const;
 
 		ResourceMemoryUsage getMemoryUsage() const;
+		void generateDetailedMemoryReport(std::optional<int> limit) const;
 		ResourceMemoryUsage getMemoryUsageAndAge(float time);
 		void age(float time);
 

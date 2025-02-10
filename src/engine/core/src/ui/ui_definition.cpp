@@ -121,3 +121,8 @@ void UIDefinition::makeDefault()
 	assignIds(node);
 	data.getRoot() = std::move(node);
 }
+
+ResourceMemoryUsage UIDefinition::getMemoryUsage() const
+{
+	return ResourceMemoryUsage{ data.getSizeBytes(), 0 };
+}

@@ -2118,7 +2118,7 @@ size_t ConfigNode::getSizeBytes() const
 
 	switch (type) {
 	case ConfigNodeType::Bytes:
-		result += sizeof(Bytes) + bytesData->size();
+		result += sizeof(*bytesData) + bytesData->size_bytes();
 		break;
 	case ConfigNodeType::Map:
 	case ConfigNodeType::DeltaMap:
@@ -2130,9 +2130,9 @@ size_t ConfigNode::getSizeBytes() const
 		break;
 	case ConfigNodeType::DeltaSequence:
 	case ConfigNodeType::Sequence:
-		result += sizeof(SequenceType);
+		result += sizeof(*sequenceData) + sequenceData->size_bytes();
 		for (auto& e: *sequenceData) {
-			result += e.getSizeBytes();
+			result += e.getSizeBytes() - sizeof(ConfigNode); // Double counting with size_bytes above
 		}
 		break;
 	case ConfigNodeType::String:

@@ -173,6 +173,15 @@ std::shared_ptr<TextureRenderTarget> RenderGraphNode::getRenderTarget(VideoAPI& 
 	return renderTarget;
 }
 
+ResourceMemoryUsage RenderGraphNode::getMemoryUsage() const
+{
+	ResourceMemoryUsage result = { sizeof(*this), 0 };
+	if (ownRenderTarget && renderTarget) {
+		result += renderTarget->getMemoryUsage();
+	}
+	return result;
+}
+
 void RenderGraphNode::resetTextures()
 {
 	renderTarget.reset();

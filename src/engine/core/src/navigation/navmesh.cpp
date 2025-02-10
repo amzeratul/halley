@@ -570,7 +570,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 			return { ray.p, weightedDistance };
 		}
 
-		const auto nextPoly = curNavmesh->nodes[curPoly].connections[edgeIdx.value()];
+		const auto nextPoly = curNavmesh->nodes.at(curPoly).connections.at(edgeIdx.value());
 		if (nextPoly && (nextPoly == prevPoly)) {
 			//Logger::logError("Navmesh::findRayCollision error: ping-ponging on navmesh. Prev = " + toString(prevPoly) + ", cur = " + toString(curPoly) + ", next = " + toString(nextPoly));
 
@@ -607,6 +607,8 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 				}
 			}
 		}
+		assert(intersection.has_value());
+		assert(intersection->isValid());
 
 		// Check how much more we have left to go and stop if we reach the destination
 		constexpr float epsilon = 0.1f;
@@ -631,11 +633,12 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 			// Hit the edge of the navmesh - continue on next navmesh if available, otherwise stop here
 			if (navmeshSet) {
 				if (auto nextNavmeshId = curNavmesh->getNavmeshFromEdge(NodeAndConn(curPoly, static_cast<uint16_t>(*edgeIdx)))) {
-					const auto& nextNavmesh = navmeshSet->getNavmeshes()[*nextNavmeshId];
+					const auto& nextNavmesh = navmeshSet->getNavmesh(*nextNavmeshId);
 					if (auto nextNodeId = nextNavmesh.getNodeAt(*intersection)) {
 						curNavmesh = &nextNavmesh;
 						ray = Ray(*intersection, ray.dir);
 						curPoly = *nextNodeId;
+						prevPoly = {};
 						continue;
 						//return nextNavmesh.findRayCollision(Ray(*intersection, ray.dir), distanceLeft, *nextNodeId, weightedDistance, navmeshSet);
 					}
@@ -775,6 +778,24 @@ Vector2f Navmesh::getRandomPoint(Random& rng) const
 		}
 	}
 	return polygons[0].getCentre();
+}
+
+ResourceMemoryUsage Navmesh::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage += sizeof(*this) + nodes.size_bytes() + weights.size_bytes() + openEdges.size_bytes();
+
+	for (const auto& polygon: polygons) {
+		result.ramUsage += polygon.getSizeBytes();
+	}
+	for (const auto& portal: portals) {
+		result.ramUsage += portal.getSizeBytes();
+	}
+	for (const auto& poly: polyGrid) {
+		result.ramUsage += sizeof(Vector<NodeId>) + poly.size_bytes();
+	}
+
+	return result;
 }
 
 void Navmesh::computeArea()
@@ -1092,4 +1113,9 @@ Vector2f Navmesh::Portal::getClosestPoint(Vector2f pos) const
 	// NB: this assumes a linear portal
 	const auto segment = LineSegment(vertices.front(), vertices.back());
 	return segment.getClosestPoint(pos);
+}
+
+size_t Navmesh::Portal::getSizeBytes() const
+{
+	return sizeof(*this) + vertices.size_bytes() + costToOtherPortalsHere.size_bytes() + connections.size_bytes();
 }

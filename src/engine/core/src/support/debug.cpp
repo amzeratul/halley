@@ -144,21 +144,22 @@ static void signalHandler(int signum)
 }
 #endif
 
-static void terminateHandler()
-{
-	std::stringstream ss;
-	ss << "std::terminate() invoked.\n";
+namespace {
+	void terminateHandler()
+	{
+		std::stringstream ss;
+		ss << "std::terminate() invoked.\n";
 
-#if defined(HAS_STACKWALKER)
-	OStreamStackWalker walker(ss, 3);
-	walker.ShowCallstack();
-#endif
+	#if defined(HAS_STACKWALKER)
+		OStreamStackWalker walker(ss, 3);
+		walker.ShowCallstack();
+	#endif
 
-	errorHandler(ss.str());
+		errorHandler(ss.str());
 
-	std::abort();
+		std::abort();
+	}
 }
-
 
 void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> eh)
 {
@@ -169,7 +170,10 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 	::signal(SIGABRT, &signalHandler);
 #endif
 
+#ifndef NN_NINTENDO_SDK
 	std::set_terminate(&terminateHandler);
+#endif
+
 	errorHandler = std::move(eh);
 }
 
@@ -184,16 +188,17 @@ String Debug::getCallStack(int skip)
 	return ss.str();
 }
 
-void Debug::trace(const char* filename, int line, const char* arg)
+void Debug::trace(const char* filename, int line, std::string_view arg)
 {
-	auto& trace = lastTraces[tracePos];
-	tracePos = (tracePos + 1) % int(lastTraces.size());
+	auto& trace = lastTraces[tracePos.fetch_add(1) % lastTraces.size()];
 	trace.filename = filename;
 	trace.line = line;
 
-	if (arg) {
-		size_t len = std::min(trace.arg.size() - 1, strlen(arg));
-		memcpy(trace.arg.data(), arg, len);
+	//Logger::logDev(String(filename) + ":" + line + " - " + (arg.empty() ? String() : String(arg)));
+
+	if (!arg.empty()) {
+		size_t len = std::min(trace.arg.size() - 1, arg.length());
+		memcpy(trace.arg.data(), arg.data(), len);
 		trace.arg[len] = 0;
 	} else {
 		trace.arg[0] = 0;
@@ -202,20 +207,21 @@ void Debug::trace(const char* filename, int line, const char* arg)
 
 String Debug::getLastTraces()
 {
-	String result;
+	std::stringstream result;
 	const size_t n = lastTraces.size();
+	const int startPos = tracePos;
 	for (size_t i = 0; i < n; ++i) {
-		auto& trace = lastTraces[(i + tracePos) % n];
-		result += " - " + String(trace.filename) + ":" + toString(trace.line);
+		auto& trace = lastTraces[(i + startPos) % n];
+		result << " - " + String(trace.filename) + ":" + toString(trace.line);
 		if (trace.arg[0] != 0) {
-			result += String(" [") + trace.arg.data() + "]";
+			result << String(" [") + trace.arg.data() + "]";
 		}
 		if (i == n - 1) {
-			result += " [latest]";
+			result << " [latest]";
 		}
-		result += "\n";
+		result << "\n";
 	}
-	return result;
+	return result.str();
 }
 
 void Debug::printLastTraces()
@@ -237,5 +243,5 @@ void Debug::printLastTraces()
 	}
 }
 
-std::array<DebugTraceEntry, 16> Debug::lastTraces;
-int Debug::tracePos = 0;
+std::array<DebugTraceEntry, 32> Debug::lastTraces;
+std::atomic<int> Debug::tracePos = 0;

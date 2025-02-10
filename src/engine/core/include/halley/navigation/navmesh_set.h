@@ -35,6 +35,8 @@ namespace Halley {
 		std::optional<NavigationPath> pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const;
 
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
+		const Navmesh& getNavmesh(uint16_t idx) const;
+
 		const Navmesh* getNavMeshAt(WorldPosition pos) const;
 		OptionalLite<uint16_t> getNavMeshIdxAt(WorldPosition pos) const;
 		std::pair<OptionalLite<uint16_t>, WorldPosition> getNavMeshIdxAtWithTolerance(WorldPosition pos, float maxDist = std::numeric_limits<float>::infinity(), float anisotropy = 1.0f, float nudge = 0.1f) const;
@@ -47,6 +49,8 @@ namespace Halley {
 		bool isPathClear(gsl::span<const WorldPosition> points) const;
 		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to) const;
 		std::pair<std::optional<Vector2f>, float> findRayCollision(NavigationPath::Point from, NavigationPath::Point to, uint16_t startNodeId) const;
+
+		ResourceMemoryUsage getMemoryUsage() const override;
 
 	private:
 		struct PortalConnection {
@@ -74,10 +78,14 @@ namespace Halley {
 			PortalNode(Vector2f pos, uint16_t fromRegion, uint16_t fromPortal, uint16_t toRegion, uint16_t toPortal)
 				: pos(pos), fromRegion(fromRegion), fromPortal(fromPortal), toRegion(toRegion), toPortal(toPortal)
 			{}
+
+			ResourceMemoryUsage getMemoryUsage() const;
 		};
 
 		struct RegionNode {
 			Vector<uint16_t> portals;
+
+			ResourceMemoryUsage getMemoryUsage() const;
 		};
 
 		struct NodeAndConn {

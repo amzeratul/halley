@@ -64,6 +64,8 @@ namespace Halley {
 		Polygon& operator=(const Polygon& other) = default;
 		Polygon& operator=(Polygon&& other) noexcept = default;
 
+		size_t getSizeBytes() const;
+
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
 		bool isPointInside(Vector2f point) const;

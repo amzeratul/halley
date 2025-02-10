@@ -141,6 +141,7 @@ namespace Halley {
 					memcpy(this, &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
+					shrink_to_fit();
 					memcpy(data(), other.data(), other.size() * sizeof(T));
 				}
 			} else {
@@ -253,6 +254,7 @@ namespace Halley {
 		{
 			clear();
 			resize(count, value);
+			shrink_to_fit();
 		}
 
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
@@ -277,6 +279,7 @@ namespace Halley {
 					push_back(*iter);
 				}
 			}
+			shrink_to_fit();
 		}
 
 		void assign(std::initializer_list<T> list)
@@ -775,6 +778,11 @@ namespace Halley {
 			}
 		}
 
+		size_t size_bytes() const
+		{
+			return (sbo_active() ? 0 : capacity() * sizeof(T));
+		}
+
 	private:
 		struct SBO {
 			union {
@@ -817,7 +825,7 @@ namespace Halley {
 			assert(newCapacity >= size);
 			if (newCapacity != capacity) {
 				// Allocate new memory
-				const bool canUseSBO = sbo_max_objects() >= newCapacity;
+				const bool canUseSBO = sbo_enabled() && (newCapacity == 0 || (newCapacity < sbo_max_objects() && sbo_active())); // Last check is to prevent going from allocated back to SBO
 				pointer newData = canUseSBO ? sbo_data() : (newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr);
 				construct(newData);
 
@@ -939,9 +947,9 @@ namespace Halley {
 		void move_data_from(VectorStd& other)
 		{
 			if (other.sbo_active()) {
-				// Using SBO, move elements
 				m_size = other.m_size;
 
+				// Using SBO, move elements
 				if constexpr (std::is_trivially_copyable_v<T>) {
 					memcpy(data(), other.data(), size() * sizeof(T));
 					other.set_size(0);
@@ -954,6 +962,9 @@ namespace Halley {
 					}
 					other.clear();
 				}
+
+				shrink_to_fit();
+				other.shrink_to_fit();
 			} else {
 				// No SBO, steal data
 				m_size = other.m_size;
