@@ -200,4 +200,9 @@ Vector<String, std::allocator<String>, 0, true> OS::runQuery(std::string_view qu
 	return {};
 }
 
+ConfigNode OS::getRegistryString(std::string_view key) const
+{
+	return {};
+}
+
 OS* OS::osInstance = nullptr;
