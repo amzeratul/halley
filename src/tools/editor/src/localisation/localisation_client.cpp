@@ -74,17 +74,17 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk&
 	});
 }
 
-Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(int minVersion) const
+Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
 {
 	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
 		+ "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return request->send().then([] (std::unique_ptr<HTTPResponse> response) -> StringsResult
+	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> StringsResult
 	{
 		if (response->getResponseCode() == 200) {
-			return toStringsResult(JSONConvert::parseConfig(response->getBody()));
+			return toStringsResult(origLanguage, JSONConvert::parseConfig(response->getBody()));
 		}
 		return {};
 	});
@@ -128,7 +128,7 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 	return result;
 }
 
-LocalisationClient::StringsResult LocalisationClient::toStringsResult(const ConfigNode& data)
+LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLanguage origLanguage, const ConfigNode& data)
 {
 	int version = 0;
 
@@ -161,6 +161,9 @@ LocalisationClient::StringsResult LocalisationClient::toStringsResult(const Conf
 	for (auto& [lang, loc] : result.localised) {
 		loc.language = I18NLanguage(lang);
 	}
+
+	result.originalLanguage.setLanguage(std::move(origLanguage));
+	result.originalLanguage.indexData();
 
 	result.success = true;
 	result.highestVersion = version;

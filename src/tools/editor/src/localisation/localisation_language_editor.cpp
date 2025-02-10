@@ -5,13 +5,15 @@
 
 using namespace Halley;
 
-LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, bool canEdit)
+LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit)
 	: UIWidget("localisation_language_editor", {}, UISizer())
 	, root(root)
 	, project(project)
 	, factory(factory)
 	, srcLanguage(srcLanguage)
 	, dstLanguage(dstLanguage)
+	, srcRemote(srcRemote)
+	, locRemote(locRemote)
 	, canEdit(canEdit)
 {
 	factory.loadUI(*this, "halley/localisation_language_editor");
@@ -88,6 +90,32 @@ void LocalisationLanguageEditor::onMakeUI()
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
 	srcData = chunkId.isEmpty() ? static_cast<const ILocOriginalData*>(&srcLanguage) : srcLanguage.tryGetChunk(chunkId);
+
+	srcRemoteDataIndex.clear();
+	if (srcRemote) {
+		const auto n = srcRemote->getNumEntries();
+		for (size_t i = 0; i < n; ++i) {
+			srcRemoteDataIndex[srcRemote->getEntry(i).key] = i;
+		}
+	}
+
+	grid->setLineColourFilter([this] (int idx) -> std::optional<Colour4f> {
+		if (srcRemote) {
+			const auto& localEntry = srcData->getEntry(idx);
+			const auto& key = localEntry.key;
+			const auto iter = srcRemoteDataIndex.find(key);
+			if (iter != srcRemoteDataIndex.end()) {
+				const auto& remoteEntry = srcRemote->getEntry(iter->second);
+				if (remoteEntry.value != localEntry.value) {
+					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
+				}
+			} else {
+				return Colour4f(0.0f, 1.0f, 0.0f, 0.2f);
+			}
+		}
+
+		return {};
+	});
 	grid->setData(srcData, dstLanguage);
 }
 

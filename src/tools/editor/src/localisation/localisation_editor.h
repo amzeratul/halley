@@ -70,8 +70,9 @@ namespace Halley {
         void addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, int totalKeys, int totalWords, bool canEdit);
 
         LocOriginalData& getOriginalData();
-        const LocOriginalData& getOriginalData() const;
+        LocOriginalData* getOriginalDataRemote();
         LocTranslationData* getTranslationData(const I18NLanguage& language);
+        LocTranslationData* getTranslationDataRemote(const I18NLanguage& language);
 
         void openOriginalLanguage(bool canEdit);
         void openLanguage(const I18NLanguage& language, bool canEdit);

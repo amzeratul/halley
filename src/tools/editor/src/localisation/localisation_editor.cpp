@@ -330,11 +330,13 @@ LocOriginalData& LocalisationEditor::getOriginalData()
 	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
 }
 
-const LocOriginalData& LocalisationEditor::getOriginalData() const
+LocOriginalData* LocalisationEditor::getOriginalDataRemote()
 {
-	assert(remoteStrings || localStrings);
-
-	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
+	if (localStrings && remoteStrings) {
+		return &remoteStrings->originalLanguage;
+	} else {
+		return nullptr;
+	}
 }
 
 LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& language)
@@ -357,14 +359,30 @@ LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& l
 	return nullptr;
 }
 
+LocTranslationData* LocalisationEditor::getTranslationDataRemote(const I18NLanguage& language)
+{
+	const auto code = language.getISOCode();
+	if (localStrings && remoteStrings) {
+		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
+			return &iter->second;
+		} else {
+			LocTranslationData data;
+			data.language = language;
+			remoteStrings->localised[code] = std::move(data);
+			return &remoteStrings->localised.at(code);
+		}
+	}
+	return nullptr;
+}
+
 void LocalisationEditor::openOriginalLanguage(bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, getOriginalDataRemote(), nullptr, canEdit));
 }
 
 void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), getOriginalDataRemote(), getTranslationDataRemote(language), canEdit));
 }
 
 void LocalisationEditor::exportLanguage(const I18NLanguage& language)
@@ -448,7 +466,7 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 	if (result == LocalisationClient::LoginResult::Success) {
 		state = State::Synchronising;
 		int minVersion = 0;
-		remoteStringsFuture = client->getStrings(minVersion);
+		remoteStringsFuture = client->getStrings(project.getProperties().getOriginalLanguage(), minVersion);
 		curMessage = "Synchronising...";
 	} else if (result == LocalisationClient::LoginResult::ServerNotFound) {
 		state = State::NotConnected;

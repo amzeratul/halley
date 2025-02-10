@@ -91,6 +91,11 @@ bool LocOriginalDataChunk::operator<(const LocOriginalDataChunk& other) const
 	return name < other.name;
 }
 
+void LocOriginalData::setLanguage(I18NLanguage language)
+{
+	this->language = language;
+}
+
 void LocOriginalDataChunk::computeHash()
 {
 	// TODO
@@ -231,6 +236,18 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 	}
 
 	return result;
+}
+
+void LocOriginalData::indexData()
+{
+	keyIndices.clear();
+	const auto nChunks = chunks.size();
+	for (size_t j = 0; j < nChunks; ++j) {
+		const auto n = chunks[j].getNumEntries();
+		for (size_t i = 0; i < n; ++i) {
+			keyIndices.emplace_back(j, i);
+		}
+	}
 }
 
 void LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
