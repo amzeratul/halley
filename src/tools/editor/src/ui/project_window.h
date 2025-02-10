@@ -116,8 +116,6 @@ namespace Halley {
 			mutable bool dirty = false;
 		};
     	
-		constexpr static int numOfStandardTools = 8;
-
     	EditorUIFactory& factory;
         HalleyEditor& editor;
     	Project& project;
@@ -129,7 +127,10 @@ namespace Halley {
 		std::shared_ptr<UIWidget> uiMid;
 		std::shared_ptr<UIWidget> uiBottom;
 		std::shared_ptr<Toolbar> toolbar;
+
 		std::shared_ptr<UIPagedPane> pagedPane;
+        Vector<int> pageTypes;
+        int numOfStandardTools = 0;
 
 		std::unique_ptr<TaskSet> tasks;
 
@@ -138,6 +139,7 @@ namespace Halley {
     	bool hasAssets = false;
     	bool hasDLL = false;
         bool firstDLLLoad = true;
+        bool devEnvironment = true;
 
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<ConsoleWindow> consoleWindow;
@@ -155,7 +157,8 @@ namespace Halley {
     	std::map<EditorSettingType, std::unique_ptr<SettingsStorage>> settings;
     	Time timeSinceSettingsSaved = 0;
 
-    	void makeToolbar();
+        void makeToolbar();
+        void addPage(int id, std::shared_ptr<UIWidget> page);
     	void makePagedPane();
 
     	void tryLoadCustomUI();

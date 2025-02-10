@@ -39,6 +39,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, resources(resources)
 	, api(api)
 	, assetFileHandler(std::make_unique<AssetFileHandler>())
+	, devEnvironment(project.getProperties().isDevEnvironment())
 {
 	settings[EditorSettingType::Temp] = std::make_unique<SettingsStorage>(std::shared_ptr<ISaveData>(), "");
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
@@ -62,9 +63,11 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	});
 	project.addAssetLoadedListener(this);
 
-	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
-	tasks->addTask(std::make_unique<CheckUpdateTask>(*this, project.getRootPath()));
-	tasks->addTask(std::make_unique<CheckSourceUpdateTask>(project, getPreferences().isAutoBuild(), false));
+	if (project.getProperties().isDevEnvironment()) {
+		tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
+		tasks->addTask(std::make_unique<CheckUpdateTask>(*this, project.getRootPath()));
+		tasks->addTask(std::make_unique<CheckSourceUpdateTask>(project, getPreferences().isAutoBuild(), false));
+	}
 }
 
 ProjectWindow::~ProjectWindow()
@@ -149,6 +152,11 @@ void ProjectWindow::makeToolbar()
 	}
 	
 	toolbar = std::make_shared<Toolbar>(factory, *this, project);
+	toolbar->getList()->setItemActive("assets", devEnvironment);
+	toolbar->getList()->setItemActive("ecs", devEnvironment);
+	if (!devEnvironment) {
+		toolbar->getList()->setSelectedOptionId("remotes");
+	}
 	
 	uiTop->add(toolbar, 1, Vector4f(0, 8, 0, 0));
 }
@@ -160,28 +168,44 @@ void ProjectWindow::makePagedPane()
 		uiMid->clear();
 	}
 
-	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto remotes = std::make_shared<RemotesWindow>(factory, *this);
 	auto localisation = std::make_shared<LocalisationEditorRoot>(*this, factory, getAPI());
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
-	auto ecs = std::make_shared<ECSWindow>(factory, project);
 	auto plot = std::make_shared<Plotter>(factory);
 
-	const auto margin = Vector4f(8, 8, 8, 4);
-	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
+	pageTypes.clear();
+	numOfStandardTools = 0;
+
+	pagedPane = std::make_shared<UIPagedPane>("pages");
 	pagedPane->setGuardedUpdate(true);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(remotes, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Localisation))->add(localisation, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Terminal))->add(consoleWindow, 1, margin);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Plot))->add(plot, 1, margin);
+
+	if (devEnvironment) {
+		assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
+		auto ecs = std::make_shared<ECSWindow>(factory, project);
+
+		addPage(static_cast<int>(EditorTabs::Assets), assetEditorWindow);
+		addPage(static_cast<int>(EditorTabs::ECS), ecs);
+	}
+	addPage(static_cast<int>(EditorTabs::Remotes), remotes);
+	addPage(static_cast<int>(EditorTabs::Localisation), localisation);
+	addPage(static_cast<int>(EditorTabs::Properties), properties);
+	addPage(static_cast<int>(EditorTabs::Settings), settings);
+	addPage(static_cast<int>(EditorTabs::Terminal), consoleWindow);
+	addPage(static_cast<int>(EditorTabs::Plot), plot);
+	pagedPane->setPage(0);
+
+	numOfStandardTools = static_cast<int>(pageTypes.size());
 
 	uiMid->add(pagedPane, 1);
+}
+
+void ProjectWindow::addPage(int id, std::shared_ptr<UIWidget> page)
+{
+	const auto margin = Vector4f(8, 8, 8, 4);
+	pagedPane->addPage()->add(std::move(page), 1, margin);
+	pageTypes.push_back(id);
 }
 
 void ProjectWindow::tryLoadCustomUI()
@@ -217,7 +241,7 @@ bool ProjectWindow::loadCustomUI()
 				const auto img = std::make_shared<UIImage>(tool.icon);
 				toolbar->getList()->addImage(tool.id, img, 1, {}, UISizerAlignFlags::Centre);
 				toolbar->getList()->getItem(tool.id)->setToolTip(tool.tooltip);
-				pagedPane->addPage()->add(tool.widget, 1, Vector4f(8, 8, 8, 8));
+				addPage(-1, tool.widget);
 			}
 		}
 	}
@@ -303,8 +327,10 @@ void ProjectWindow::update(Time t, bool moved)
 bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::P, KeyMods::Ctrl)) {
-		openAssetFinder("");
-		return true;
+		if (devEnvironment) {
+			openAssetFinder("");
+			return true;
+		}
 	}
 
 	if (assetEditorWindow && assetEditorWindow->isActiveInHierarchy()) {
@@ -354,8 +380,11 @@ ConfigNode ProjectWindow::getUISetting(std::string_view key)
 
 void ProjectWindow::setPage(EditorTabs tab)
 {
-	pagedPane->setPage(static_cast<int>(tab));
-	toolbar->onPageSet(toString(tab));
+	const auto iter = pageTypes.find(static_cast<int>(tab));
+	if (iter != pageTypes.end()) {
+		pagedPane->setPage(static_cast<int>(iter - pageTypes.begin()));
+		toolbar->onPageSet(toString(tab));
+	}
 }
 
 LocalisedString ProjectWindow::setCustomPage(const String& pageId)
@@ -588,7 +617,10 @@ void ProjectWindow::showFileExternally(const Path& path)
 
 bool ProjectWindow::requestQuit(std::function<void()> callback)
 {
-	return assetEditorWindow->requestQuit(std::move(callback));
+	if (assetEditorWindow) {
+		return assetEditorWindow->requestQuit(std::move(callback));
+	}
+	return true;
 }
 
 bool ProjectWindow::onQuitRequested()
