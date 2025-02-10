@@ -1003,7 +1003,7 @@ ConfigNode OSWin32::getRegistryString(std::string_view key) const
 	}
 
 	if (type == REG_SZ) {
-		return ConfigNode(String(buffer));
+		return ConfigNode(String(buffer, size));
 	} else if (type == REG_DWORD) {
 		return ConfigNode(reinterpret_cast<const int*>(buffer)[0]);
 	} else if (type == REG_DWORD_BIG_ENDIAN) {
