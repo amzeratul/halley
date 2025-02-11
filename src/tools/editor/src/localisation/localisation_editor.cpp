@@ -80,6 +80,8 @@ void LocalisationEditor::onMakeUI()
 {
 	if (isDevEnvironment()) {
 		loadOriginalDataFromDisk();
+	} else {
+		loadLocalStringsFromStorage();
 	}
 
 	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
@@ -149,8 +151,8 @@ void LocalisationEditor::update(Time t, bool moved)
 	getWidget("messagePanel")->setActive(curMessage.has_value());
 	getWidget("toolbar")->setActive(state == State::Ready);
 	getWidget("developerPanel")->setActive(isDevEnvironment());
-	getWidget("originalLanguagePanel")->setActive(state == State::Ready || gotLocalStrings);
-	getWidget("translationPanel")->setActive(state == State::Ready || gotLocalStrings);
+	getWidget("originalLanguagePanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
+	getWidget("translationPanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
 
 	if (curMessage) {
 		getWidgetAs<UILabel>("connectionMessage")->setText(LocalisedString::fromUserString(*curMessage));
@@ -197,14 +199,18 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 	});
 }
 
+void LocalisationEditor::loadLocalStringsFromStorage()
+{
+	Result result;
+	localStringsFuture = Future<Result>::makeImmediate(result);
+}
+
 void LocalisationEditor::populateData()
 {
-	if (!localStrings && !remoteStrings) {
-		return;
+	if ((localStrings && localStrings->originalLanguage) || remoteStrings) {
+		populateOriginalLanguageData();
+		populateTranslationData();
 	}
-
-	populateOriginalLanguageData();
-	populateTranslationData();
 }
 
 void LocalisationEditor::populateOriginalLanguageData()
@@ -217,34 +223,42 @@ void LocalisationEditor::populateOriginalLanguageData()
 	getWidgetAs<UILabel>("wordCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalWords)));
 	getWidgetAs<UILabel>("keyCount")->setText(LocalisedString::fromUserString(getNumberWithCommas(origStats.totalKeys)));
 
-	HashMap<String, float> costPerWord;
-	for (auto& lang: project.getProperties().getLanguages()) {
-		if (auto cost = project.getProperties().getLanguageCost(lang)) {
-			costPerWord[cost->second] += cost->first;
+	const auto isDev = isDevEnvironment();
+	getWidget("byCategoryPanel")->setActive(isDev);
+	getWidget("totalCostPanel")->setActive(isDev);
+
+	if (isDev) {
+		// Total cost
+		HashMap<String, float> costPerWord;
+		for (auto& lang: project.getProperties().getLanguages()) {
+			if (auto cost = project.getProperties().getLanguageCost(lang)) {
+				costPerWord[cost->second] += cost->first;
+			}
 		}
-	}
-	Vector<String> costStrs;
-	for (const auto& [currency, cost]: costPerWord) {
-		costStrs += getCurrencyString(cost * origStats.totalWords, currency);
-	}
-	getWidgetAs<UILabel>("totalCost")->setText(LocalisedString::fromUserString(String::concatList(costStrs, " + ")));
+		Vector<String> costStrs;
+		for (const auto& [currency, cost]: costPerWord) {
+			costStrs += getCurrencyString(cost * origStats.totalWords, currency);
+		}
+		getWidgetAs<UILabel>("totalCost")->setText(LocalisedString::fromUserString(String::concatList(costStrs, " + ")));
 
-	auto labelStyle = factory.getStyle("label");
-	auto labelLightStyle = factory.getStyle("labelLight");
-	auto byCategory = getWidget("byCategory");
-	byCategory->clear();
-	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Category")));
-	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")));
-	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
-	byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
+		// Category breakdown
+		auto labelStyle = factory.getStyle("label");
+		auto labelLightStyle = factory.getStyle("labelLight");
+		auto byCategory = getWidget("byCategory");
+		byCategory->clear();
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Category")));
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")));
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
 
-	for (const auto& [k, v]: origStats.wordsPerCategory) {
-		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(k)));
-		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
+		for (const auto& [k, v]: origStats.wordsPerCategory) {
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(k)));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
 
-		auto keys = origStats.keysPerCategory.at(k);
-		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(keys))));
-		byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
+			auto keys = origStats.keysPerCategory.at(k);
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(keys))));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
+		}
 	}
 
 	bool canEditOriginal = canEditLanguage(originalLanguage.getLanguage());
@@ -345,13 +359,13 @@ LocOriginalData& LocalisationEditor::getOriginalData()
 {
 	assert(remoteStrings || localStrings);
 
-	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
+	return localStrings && localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 }
 
 LocOriginalData* LocalisationEditor::getOriginalDataRemote()
 {
 	if (localStrings && remoteStrings) {
-		return &remoteStrings->originalLanguage;
+		return &(*remoteStrings->originalLanguage);
 	} else {
 		return nullptr;
 	}
@@ -433,6 +447,10 @@ bool LocalisationEditor::canViewLanguage(const I18NLanguage& language) const
 
 bool LocalisationEditor::canEditLanguage(const I18NLanguage& language) const
 {
+	if (language == project.getProperties().getOriginalLanguage()) {
+		return false;
+		//return isDevEnvironment();
+	}
 	return client->getLanguages().contains("*") || client->getLanguages().contains(language.getISOCode());
 }
 
@@ -504,7 +522,7 @@ void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings) {
 		curMessage = "Uploading original strings...";
-		client->postOriginalStrings(localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
+		client->postOriginalStrings(*localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
 		{
 			if (*aliveFlag) {
 				if (result) {
@@ -529,7 +547,7 @@ void LocalisationEditor::downloadTranslations()
 			str << lang.getISOCode().cppStr() << ":\n";
 			int nEntries = 0;
 
-			for (const auto& chunk: orig.getChunks()) {
+			for (const auto& chunk: orig->getChunks()) {
 				bool firstInChunk = true;
 
 				for (const auto& entry: chunk.entries) {

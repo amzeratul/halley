@@ -63,6 +63,7 @@ namespace Halley {
 
         void tryLoading();
         void loadOriginalDataFromDisk();
+        void loadLocalStringsFromStorage();
 
         void populateData();
         void populateOriginalLanguageData();

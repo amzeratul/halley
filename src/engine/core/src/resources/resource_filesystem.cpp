@@ -78,12 +78,9 @@ void FileSystemResourceLocator::loadAssetDb()
 	}
 
 	assetDb = std::make_unique<AssetDatabase>();
-	auto reader = system.getDataReader((basePath / "assets.db").string());
-	if (!reader) {
-		throw Exception("Unable to load assets.", HalleyExceptions::Resources);
+	if (auto reader = system.getDataReader((basePath / "assets.db").string())) {
+		Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
 	}
-
-	Deserializer::fromBytes<AssetDatabase>(*assetDb, reader->readAll());
 
 	assetDBLoaded = true;
 }

@@ -152,10 +152,12 @@ void ProjectWindow::makeToolbar()
 	}
 	
 	toolbar = std::make_shared<Toolbar>(factory, *this, project);
-	toolbar->getList()->setItemActive("assets", devEnvironment);
-	toolbar->getList()->setItemActive("ecs", devEnvironment);
+	auto& list = toolbar->getList();
+	list->setItemActive("assets", devEnvironment);
+	list->setItemActive("ecs", devEnvironment);
+	list->setItemActive("plot", devEnvironment);
 	if (!devEnvironment) {
-		toolbar->getList()->setSelectedOptionId("remotes");
+		list->setSelectedOptionId("remotes");
 	}
 	
 	uiTop->add(toolbar, 1, Vector4f(0, 8, 0, 0));
@@ -173,7 +175,6 @@ void ProjectWindow::makePagedPane()
 	auto localisation = std::make_shared<LocalisationEditorRoot>(*this, factory, getAPI());
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, *this);
-	auto plot = std::make_shared<Plotter>(factory);
 
 	pageTypes.clear();
 	numOfStandardTools = 0;
@@ -193,7 +194,11 @@ void ProjectWindow::makePagedPane()
 	addPage(static_cast<int>(EditorTabs::Properties), properties);
 	addPage(static_cast<int>(EditorTabs::Settings), settings);
 	addPage(static_cast<int>(EditorTabs::Terminal), consoleWindow);
-	addPage(static_cast<int>(EditorTabs::Plot), plot);
+	if (devEnvironment) {
+		auto plot = std::make_shared<Plotter>(factory);
+		addPage(static_cast<int>(EditorTabs::Plot), plot);
+	}
+
 	pagedPane->setPage(0);
 
 	numOfStandardTools = static_cast<int>(pageTypes.size());

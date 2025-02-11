@@ -7,7 +7,7 @@ namespace Halley {
 	class LocalisationClient {
 	public:
 		struct StringsResult {
-			LocOriginalData originalLanguage;
+			std::optional<LocOriginalData> originalLanguage;
 			HashMap<String, LocTranslationData> localised;
 			bool success = false;
 			int highestVersion = 0;

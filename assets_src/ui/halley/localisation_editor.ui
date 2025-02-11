@@ -269,14 +269,27 @@ children:
                   wordWrapped: false
                 fill: [centreHorizontal, centreVertical]
             fill: [left, fillVertical]
-          - uuid: 0cabc038-0e51-4224-b3b4-17ba5968a89d
+        fill: [left, fillVertical]
+      - uuid: fbef1e2c-da8c-40f2-9a11-d3e48a8aff42
+        border: [0, -4, 0, 0]
+        sizer:
+          columnProportions: [1, 1]
+          columns: 2
+          gap: 6
+          type: grid
+        widget:
+          class: widget
+          id: totalCostPanel
+          size: [500, 0]
+        children:
+          - uuid: bb2a14f0-6287-476c-8710-5bb80a4c4ad1
             widget:
               class: label
               id: ""
               text: "Current total cost:"
               wordWrapped: false
             fill: left
-          - uuid: 0917043e-72c2-474c-8b74-13250dc8740a
+          - uuid: 9835f7f8-fd58-4580-9950-6131dec7d3c6
             border: [0, 0, 0, 0]
             sizer:
               columnProportions: []
@@ -291,7 +304,7 @@ children:
               innerBorder: [0, 2, 0, 2]
               size: [100, 0]
             children:
-              - uuid: 6ee4e18a-e643-4d93-9802-2849ed3ad332
+              - uuid: b4912b64-028e-4fd1-8200-15188b1a610b
                 widget:
                   class: label
                   id: totalCost
@@ -300,53 +313,63 @@ children:
                 fill: [centreHorizontal, centreVertical]
             fill: [left, fillVertical]
         fill: [left, fillVertical]
-      - uuid: 704fed0e-cc96-44c0-aa87-3b861a186f3f
+      - uuid: 051fb284-5637-4378-a99e-673fbf445a9c
         border: [0, 15, 0, 0]
-        widget:
-          class: label
-          id: ""
-          text: "Breakdown by category:"
-          wordWrapped: false
-        fill: left
-      - uuid: 75945935-94b4-415d-9212-2361002b34ea
-        border: [0, 0, 0, 0]
         sizer:
           columnProportions: []
-          columns: 2
           gap: 10
           type: vertical
         widget:
-          class: image
-          colour: $ui_popupWindow
-          id: ""
-          image: halley_ui/ui_list_item.png
-          innerBorder: [6, 6, 6, 6]
-          size: [100, 0]
+          class: widget
+          id: byCategoryPanel
         children:
-          - uuid: c559b6ca-4d9d-4149-aef6-86c282c913e6
+          - uuid: 704fed0e-cc96-44c0-aa87-3b861a186f3f
+            border: [0, 0, 0, 0]
+            widget:
+              class: label
+              id: ""
+              text: "Breakdown by category:"
+              wordWrapped: false
+            fill: left
+          - uuid: 75945935-94b4-415d-9212-2361002b34ea
+            border: [0, 0, 0, 0]
             sizer:
               columnProportions: []
+              columns: 2
+              gap: 10
+              type: vertical
             widget:
-              class: scrollBarPane
-              clipSize: [0, 0]
-              size: [0, 150]
+              class: image
+              colour: $ui_popupWindow
+              id: ""
+              image: halley_ui/ui_list_item.png
+              innerBorder: [6, 6, 6, 6]
+              size: [100, 0]
             children:
-              - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
-                proportion: 1
-                border: [0, 0, 4, 0]
+              - uuid: c559b6ca-4d9d-4149-aef6-86c282c913e6
                 sizer:
-                  columnProportions: [2, 1, 1, 1]
-                  columns: 4
-                  gap: 3
-                  type: grid
+                  columnProportions: []
                 widget:
-                  class: widget
-                  id: byCategory
-                  size: [470, 0]
-                children: []
-                fill: [fillHorizontal, top]
-            fill: [left, centreVertical]
-        fill: [left, fillVertical]
+                  class: scrollBarPane
+                  clipSize: [0, 0]
+                  size: [0, 150]
+                children:
+                  - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
+                    proportion: 1
+                    border: [0, 0, 4, 0]
+                    sizer:
+                      columnProportions: [2, 1, 1, 1]
+                      columns: 4
+                      gap: 3
+                      type: grid
+                    widget:
+                      class: widget
+                      id: byCategory
+                      size: [470, 0]
+                    children: []
+                    fill: [fillHorizontal, top]
+                fill: [left, centreVertical]
+            fill: [left, fillVertical]
       - uuid: 05e11bcb-8c98-4bc3-b224-4e77b5c450dc
         border: [0, 0, 0, 0]
         widget:

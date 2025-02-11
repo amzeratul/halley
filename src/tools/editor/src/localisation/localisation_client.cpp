@@ -133,6 +133,7 @@ LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLangua
 	int version = 0;
 
 	StringsResult result;
+	result.originalLanguage = LocOriginalData();
 
 	for (const auto& entryNode: data.asSequence()) {
 		const auto key = entryNode["key"].asString();
@@ -145,7 +146,7 @@ LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLangua
 		entry.version = entryNode["originalVersion"].asInt(0);
 		entry.comment = entryNode["comment"].asString("");
 		entry.context = entryNode["context"].asString("");
-		result.originalLanguage.getChunk(chunk).entries.push_back(entry);
+		result.originalLanguage->getChunk(chunk).entries.push_back(entry);
 
 		if (entryNode.hasKey("translations")) {
 			for (const auto& [lang, translationNode]: entryNode["translations"].asMap()) {
@@ -162,8 +163,8 @@ LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLangua
 		loc.language = I18NLanguage(lang);
 	}
 
-	result.originalLanguage.setLanguage(std::move(origLanguage));
-	result.originalLanguage.indexData();
+	result.originalLanguage->setLanguage(std::move(origLanguage));
+	result.originalLanguage->indexData();
 
 	result.success = true;
 	result.highestVersion = version;
