@@ -446,7 +446,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLa
 
 			const Vector2f glyphPos = layouts[i].pos;
 			const Vector2f renderPos = (glyphPos - position).rotate(angle) + position;
-
+			
 			sprites.at(spritesInserted++) = Sprite()
 				.setMaterial(hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial())
 				.setSize(glyph.size)
@@ -454,6 +454,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLa
 				.setPos(renderPos)
 				.setScale(curScale)
 				.setColour(curCol.getCurValue())
+				.setAlpha(colour.a)
 				.setRotation(angle);
 		}
 	}
