@@ -167,6 +167,11 @@ void LocalisationEditor::onAssetsLoaded()
 {
 }
 
+void LocalisationEditor::onReturnedFromDrillDown()
+{
+	saveLocalStringsToStorage();
+}
+
 void LocalisationEditor::tryLoading()
 {
 	if (!loaded) {
@@ -202,7 +207,17 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 void LocalisationEditor::loadLocalStringsFromStorage()
 {
 	Result result;
+	// TODO
 	localStringsFuture = Future<Result>::makeImmediate(result);
+}
+
+void LocalisationEditor::saveLocalStringsToStorage()
+{
+	if (isDevEnvironment()) {
+		return;
+	}
+
+	// TODO
 }
 
 void LocalisationEditor::populateData()

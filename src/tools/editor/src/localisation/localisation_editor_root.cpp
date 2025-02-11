@@ -34,6 +34,7 @@ void LocalisationEditorRoot::returnToRoot()
 	curWidget->destroy();
 	curWidget = {};
 	editor->setActive(true);
+	editor->onReturned();
 }
 
 void LocalisationEditorRoot::setupCountryNames()
