@@ -67,7 +67,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	// Destroy dead entities
 	for (auto& e: outboundEntities) {
 		if (!e.second.alive) {
-			sendDestroyEntity(e.second);
+			sendDestroyEntity(e.second, e.first);
 		}
 	}
 
@@ -180,9 +180,9 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
 	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
-	Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() +
-		") with EntityNetworkId (" + result.networkId +
-		") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
+	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() +
+	//	") with EntityNetworkId (" + result.networkId +
+	//	") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
 
@@ -271,13 +271,17 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
     }
 }
 
-void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
+void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId entityId)
 {
 	allocatedOutboundIds.erase(remote.networkId);
 
 	send(EntityNetworkMessageDestroy(remote.networkId));
 
-	//Logger::logDev("Send Destroy entity to peer " + toString(static_cast<int>(peerId)));
+	//if (const auto entity = parent->getWorld().tryGetEntity(entityId); entity.isValid()) {
+	//	Logger::logDev("Send Destroy: " + entity.getName() + " (" + entity.getInstanceUUID() +
+	//		") with EntityNetworkId (" + remote.networkId +
+	//		") to peer " + toString(static_cast<int>(peerId)));
+	//}
 }
 
 void EntityNetworkRemotePeer::sendKeepAlive()
@@ -413,8 +417,9 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	}
 	auto& remote = iter->second;
 
-	//const auto entityRef = parent->getWorld().getEntity(remote.worldId);
-	//Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()) + " NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
+	//if (const auto entityRef = parent->getWorld().tryGetEntity(remote.worldId); entityRef.isValid()) {
+	//	Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()) + " NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
+	//}
 
 	destroyRemoteEntity(remote.worldId);
 

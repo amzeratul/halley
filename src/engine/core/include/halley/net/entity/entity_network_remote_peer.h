@@ -74,7 +74,7 @@ namespace Halley {
         uint16_t assignId();
         void sendCreateEntity(EntityRef entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
-        void sendDestroyEntity(OutboundEntity& remote);
+        void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();
         void send(EntityNetworkMessage message);
 
