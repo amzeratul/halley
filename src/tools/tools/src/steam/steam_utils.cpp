@@ -23,7 +23,7 @@ std::optional<Path> SteamUtils::getSteamGameDir(int gameId)
 	String libraryPath;
 	const auto& foldersNode = libraryData["libraryfolders"];
 	for (const auto& [k, v]: foldersNode.asMap()) {
-		if (v["apps"].hasKey(String(gameId))) {
+		if (v["apps"].hasKey(toString(gameId))) {
 			libraryPath = v["path"].asString("");
 			break;
 		}
@@ -40,7 +40,7 @@ std::optional<Path> SteamUtils::getSteamGameDir(int gameId)
 	}
 
 	// Finally, build the final path
-	return Path(libraryPath) / "common" / installDir;
+	return Path(libraryPath) / "steamapps" / "common" / installDir;
 }
 
 ConfigNode SteamUtils::parseVDF(const String& strData)
@@ -104,13 +104,9 @@ ConfigNode SteamUtils::makeVDFNode(gsl::span<const String> tokens, int& idx)
 				result[*key] = makeVDFNode(tokens, idx);
 			} else {
 				// Insert literal
-				if (token.isInteger()) {
-					result[*key] = token.toInteger64();
-				} else {
-					result[*key] = token.replaceAll("\\\\", "\\");
-				}
-				key = {};
+				result[*key] = token.replaceAll("\\\\", "\\");
 			}
+			key = {};
 		}
 	}
 	return result;
