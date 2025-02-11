@@ -172,6 +172,11 @@ void LocalisationEditor::onReturnedFromDrillDown()
 	saveLocalStringsToStorage();
 }
 
+void LocalisationEditor::onReturned()
+{
+	
+}
+
 void LocalisationEditor::tryLoading()
 {
 	if (!loaded) {
