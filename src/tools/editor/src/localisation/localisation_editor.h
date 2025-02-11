@@ -31,6 +31,9 @@ namespace Halley {
 
         void onAssetsLoaded() override;
 
+        void onReturnedFromDrillDown();
+        void onReturned();
+
     private:
         LocalisationEditorRoot& root;
         ProjectWindow& projectWindow;
