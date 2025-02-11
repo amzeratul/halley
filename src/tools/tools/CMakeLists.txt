@@ -97,6 +97,8 @@ set(SOURCES
     "src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
 
+    "src/steam/steam_utils.cpp"
+
     "src/project/build_project_task.cpp"
     "src/project/project.cpp"
     "src/project/project_comments.cpp"
@@ -203,6 +205,8 @@ set(HEADERS
 
 	"src/sprites/aseprite_file.h"
     "src/sprites/aseprite_reader.h"
+
+    "src/steam/steam_utils.h"
     )
 
 
