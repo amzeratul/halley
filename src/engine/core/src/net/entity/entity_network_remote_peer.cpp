@@ -425,8 +425,20 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id)
 {
 	auto entity = parent->getWorld().tryGetEntity(id);
 	if (entity.isValid()) {
+		bool hasBeenAssignedToHost = false;
+		if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent && networkComponent->creatorId) {
+			// Checks if the entity was created locally, and network ownership assigned to host.
+			// In this case, do not destroy the entity. See NetworkSendSystem::update().
+			hasBeenAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
+		}
+
 		entity.setFromNetwork(false);
-		parent->getWorld().destroyEntity(entity);
+
+		if (!hasBeenAssignedToHost) {
+			parent->getWorld().destroyEntity(entity);
+		} else {
+			//Logger::logDev("Network ownership for local entity was auto-assigned to host, ignoring destroy msg.");
+		}
 	} else {
 		Logger::logWarning("Network entity has gone missing.");
 	}

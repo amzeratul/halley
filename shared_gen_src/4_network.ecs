@@ -25,6 +25,10 @@ component:
       type: bool
       canEdit: false
       defaultValue: false
+  - creatorId:
+      type: 'std::optional<uint8_t>'
+      canSave: false
+      canEdit: false
 
 ---
 

@@ -52,6 +52,8 @@ public:
 							e.network.ownerId = 0;
 						}
 					}
+
+					e.network.creatorId = peerId;
 				}
 
 				if (e.network.sendUpdates && e.network.ownerId && (e.network.ownerId == peerId || isHost)) {

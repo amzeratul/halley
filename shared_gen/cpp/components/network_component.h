@@ -20,6 +20,7 @@ public:
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
 	bool sendUpdates{ false };
+	std::optional<uint8_t> creatorId{};
 
 	NetworkComponent() {
 	}
