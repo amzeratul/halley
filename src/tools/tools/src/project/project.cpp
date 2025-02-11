@@ -627,6 +627,8 @@ Path Project::getExecutablePath() const
 	} else if (getPlatform() == GamePlatform::Windows && properties->getSteamAppId() != 0) {
 		if (auto steamPath = SteamUtils::getSteamGameDir(properties->getSteamAppId())) {
 			return *steamPath / properties->getSteamBinPath();
+		} else {
+			Logger::logError("Unable to launch game - could not find game installed on Steam");
 		}
 	}
 

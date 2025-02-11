@@ -18,10 +18,16 @@ std::optional<Path> SteamUtils::getSteamGameDir(int gameId)
 	// Parse the library manifest
 	const auto steamApps = steamPath / "steamapps";
 	const auto libraryData = parseVDF(Path::readFileString(steamApps / "libraryfolders.vdf"));
+	if (libraryData.getType() == ConfigNodeType::Undefined) {
+		return {};
+	}
 
 	// Find the library path
 	String libraryPath;
 	const auto& foldersNode = libraryData["libraryfolders"];
+	if (foldersNode.getType() != ConfigNodeType::Map) {
+		return {};
+	}
 	for (const auto& [k, v]: foldersNode.asMap()) {
 		if (v["apps"].hasKey(toString(gameId))) {
 			libraryPath = v["path"].asString("");
@@ -34,6 +40,9 @@ std::optional<Path> SteamUtils::getSteamGameDir(int gameId)
 
 	// Parse the game manifest
 	const auto gameManifestData = parseVDF(Path::readFileString(steamApps / "appmanifest_" + toString(gameId) + ".acf"));
+	if (gameManifestData.getType() == ConfigNodeType::Undefined || !gameManifestData.hasKey("AppState") || !gameManifestData["AppState"].hasKey("installdir")) {
+		return {};
+	}
 	const auto installDir = gameManifestData["AppState"]["installdir"].asString("");
 	if (installDir.isEmpty()) {
 		return {};
