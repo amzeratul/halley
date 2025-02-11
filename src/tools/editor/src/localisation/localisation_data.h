@@ -64,13 +64,14 @@ namespace Halley {
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
 
-		bool operator<(const LocOriginalDataChunk& other) const;
-
 		void computeHash();
+
+		bool operator<(const LocOriginalDataChunk& other) const;
 	};
 
 	class LocOriginalData : public ILocOriginalData {
 	public:
+		void setLanguage(I18NLanguage language);
 		const I18NLanguage& getLanguage() const;
 		LocalisationStats getStats() const;
 
@@ -86,6 +87,8 @@ namespace Halley {
 
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
+
+		void indexData();
 
 	private:
 		I18NLanguage language;

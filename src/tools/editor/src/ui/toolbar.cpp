@@ -93,6 +93,10 @@ void Toolbar::makeUI()
 		toolNameWidget->setText(LocalisedString::fromHardcodedString(toolName));
 		projectWindow.setPage(tab);
 	});
+
+	const bool devEnvironment = project.getProperties().isDevEnvironment();
+	getWidget("buildProject")->setActive(devEnvironment);
+	getWidget("import")->setActive(devEnvironment);
 	
 	setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)
 	{
@@ -126,23 +130,27 @@ void Toolbar::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "buildProject", [=] (const UIEvent& event)
 	{
-		projectWindow.buildGame();
+		if (devEnvironment) {
+			projectWindow.buildGame();
+		}
 	});
 
 	setHandle(UIEventType::ButtonClicked, "import", [=] (const UIEvent& event)
 	{
-		auto menuOptions = Vector<UIPopupMenuItem>();
-		
-		menuOptions.push_back(UIPopupMenuItem("ImportAll", LocalisedString::fromHardcodedString("Import Assets"), {}, LocalisedString::fromHardcodedString("Import all assets")));
-		menuOptions.push_back(UIPopupMenuItem("ReimportAll", LocalisedString::fromHardcodedString("Re-Import All Assets"), {}, LocalisedString::fromHardcodedString("Reimport all assets from scratch")));
-		menuOptions.push_back(UIPopupMenuItem("Codegen", LocalisedString::fromHardcodedString("Re-Run Codegen"), {}, LocalisedString::fromHardcodedString("Re-run codegen")));
+		if (devEnvironment) {
+			auto menuOptions = Vector<UIPopupMenuItem>();
+			
+			menuOptions.push_back(UIPopupMenuItem("ImportAll", LocalisedString::fromHardcodedString("Import Assets"), {}, LocalisedString::fromHardcodedString("Import all assets")));
+			menuOptions.push_back(UIPopupMenuItem("ReimportAll", LocalisedString::fromHardcodedString("Re-Import All Assets"), {}, LocalisedString::fromHardcodedString("Reimport all assets from scratch")));
+			menuOptions.push_back(UIPopupMenuItem("Codegen", LocalisedString::fromHardcodedString("Re-Run Codegen"), {}, LocalisedString::fromHardcodedString("Re-run codegen")));
 
-		auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
-		menu->spawnOnRoot(*getRoot());
+			auto menu = std::make_shared<UIPopupMenu>("asset_browser_context_menu", factory.getStyle("popupMenu"), menuOptions);
+			menu->spawnOnRoot(*getRoot());
 
-		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
-			project.requestReimport(fromString<ReimportType>(e.getStringData()));
-		});
+			menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+				project.requestReimport(fromString<ReimportType>(e.getStringData()));
+			});
+		}
 	});
 
 	setHandle(UIEventType::DropdownSelectionChanged, "platform", [=] (const UIEvent& event)

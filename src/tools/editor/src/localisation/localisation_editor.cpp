@@ -2,6 +2,7 @@
 
 #include "localisation_editor_root.h"
 #include "localisation_language_editor.h"
+#include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
 #include "src/ui/project_window.h"
@@ -263,14 +264,14 @@ void LocalisationEditor::populateTranslationData()
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
 				if (auto* translation = getTranslationData(lang)) {
-					addTranslationData(*languagesContainer, originalLanguage, *translation, origStats.totalKeys, origStats.totalWords, canEdit);
+					addTranslationData(*languagesContainer, originalLanguage, *translation, getTranslationDataRemote(lang), origStats.totalKeys, origStats.totalWords, canEdit);
 				}
 			}
 		}
 	}
 }
 
-void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, int origTotalKeys, int totalWords, bool canEdit)
+void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, int origTotalKeys, int totalWords, bool canEdit)
 {
 	const auto totalKeys = std::max(origTotalKeys, 1); // Avoid divisions by zero
 
@@ -281,28 +282,38 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidgetAs<UILabel>("languageName")->setText(root.getLanguageName(translationData.language));
 	widget->getWidgetAs<UIButton>("edit")->setLabel(LocalisedString::fromHardcodedString(canEdit ? "Edit..." : "View..."));
 	widget->getWidget("import")->setEnabled(canEdit);
+	widget->getWidget("upload")->setEnabled(canEdit);
 
+	const auto language = translationData.language;
 	const auto locStats = translationData.getTranslationStats(origData);
+	const auto locStatsRemote = translationDataRemote ? translationDataRemote->getTranslationStats(origData) : TranslationStats{};
 
 	const auto translatedPercent = getPercent(locStats.translatedKeys, totalKeys);
+	const auto translatedPercentRemote = getPercent(locStatsRemote.translatedKeys, totalKeys);
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
 	const int totalH = rect.getHeight();
+	const int blueW = std::max((locStatsRemote.translatedKeys * totalW) / totalKeys, locStatsRemote.translatedKeys > 0 ? 1 : 0);
 	const int greenW = std::max((locStats.translatedKeys * totalW) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
 	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalKeys, locStats.outdatedKeys > 0 ? 1 : 0);
 
-	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(toString(translatedPercent, 1) + "%"));
+	auto percentString = toString(translatedPercent, 1) + "%";
+	if (locStats.translatedKeys != locStatsRemote.translatedKeys) {
+		percentString += " / " + toString(translatedPercentRemote, 1) + "%";
+	}
+
+	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(percentString));
+	widget->getWidgetAs<UIImage>("bar_blue")->setLocalClip(Rect4f(Rect4i(0, 0, blueW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
 
-	auto cost = project.getProperties().getLanguageCost(translationData.language);
+	auto cost = project.getProperties().getLanguageCost(language);
 	widget->getWidget("costBox")->setActive(isDevEnvironment() && cost.has_value());
 	if (cost) {
 		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
 	}
 
-	const auto language = translationData.language;
 	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language, canEdit] (const UIEvent& event)
 	{
 		openLanguage(language, canEdit);
@@ -320,6 +331,13 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 		}
 	});
 
+	widget->setHandle(UIEventType::ButtonClicked, "upload", [this, language, canEdit] (const UIEvent& event)
+	{
+		if (canEdit) {
+			uploadLanguage(language);
+		}
+	});
+
 	container.add(widget);
 }
 
@@ -330,11 +348,13 @@ LocOriginalData& LocalisationEditor::getOriginalData()
 	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
 }
 
-const LocOriginalData& LocalisationEditor::getOriginalData() const
+LocOriginalData* LocalisationEditor::getOriginalDataRemote()
 {
-	assert(remoteStrings || localStrings);
-
-	return localStrings ? localStrings->originalLanguage : remoteStrings->originalLanguage;
+	if (localStrings && remoteStrings) {
+		return &remoteStrings->originalLanguage;
+	} else {
+		return nullptr;
+	}
 }
 
 LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& language)
@@ -357,14 +377,30 @@ LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& l
 	return nullptr;
 }
 
+LocTranslationData* LocalisationEditor::getTranslationDataRemote(const I18NLanguage& language)
+{
+	const auto code = language.getISOCode();
+	if (/*localStrings && */ remoteStrings) {
+		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
+			return &iter->second;
+		} else {
+			LocTranslationData data;
+			data.language = language;
+			remoteStrings->localised[code] = std::move(data);
+			return &remoteStrings->localised.at(code);
+		}
+	}
+	return nullptr;
+}
+
 void LocalisationEditor::openOriginalLanguage(bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, getOriginalDataRemote(), nullptr, canEdit));
 }
 
 void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), getOriginalDataRemote(), getTranslationDataRemote(language), canEdit));
 }
 
 void LocalisationEditor::exportLanguage(const I18NLanguage& language)
@@ -373,6 +409,11 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language)
 }
 
 void LocalisationEditor::importLanguage(const I18NLanguage& language)
+{
+	// TODO
+}
+
+void LocalisationEditor::uploadLanguage(const I18NLanguage& language)
 {
 	// TODO
 }
@@ -448,7 +489,7 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 	if (result == LocalisationClient::LoginResult::Success) {
 		state = State::Synchronising;
 		int minVersion = 0;
-		remoteStringsFuture = client->getStrings(minVersion);
+		remoteStringsFuture = client->getStrings(project.getProperties().getOriginalLanguage(), minVersion);
 		curMessage = "Synchronising...";
 	} else if (result == LocalisationClient::LoginResult::ServerNotFound) {
 		state = State::NotConnected;
@@ -478,5 +519,41 @@ void LocalisationEditor::uploadOriginalStrings()
 
 void LocalisationEditor::downloadTranslations()
 {
-	// TODO
+	if (remoteStrings) {
+		const auto& orig = remoteStrings->originalLanguage;
+		
+		for (const auto& [langId, localisedData]: remoteStrings->localised) {
+			const auto lang = I18NLanguage(langId);
+
+			std::stringstream str;
+			str << lang.getISOCode().cppStr() << ":\n";
+			int nEntries = 0;
+
+			for (const auto& chunk: orig.getChunks()) {
+				bool firstInChunk = true;
+
+				for (const auto& entry: chunk.entries) {
+					if (const auto iter = localisedData.entries.find(entry.key); iter != localisedData.entries.end()) {
+						if (firstInChunk) {
+							str << "\n\t# " << chunk.name << "\n";
+							firstInChunk = false;
+						}
+
+						str << "\t" << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"") << "\"\n";
+						++nEntries;
+					}
+				}
+			}
+
+			const auto dirPath = project.getAssetsSrcPath() / "config" / "strings" / "localised";
+			const auto path = dirPath / (lang.getISOCode() + ".yaml");
+			if (nEntries > 0 || Path::exists(path)) {
+				if (nEntries == 0) {
+					str << "\t{}";
+				}
+				FileSystem::createDir(dirPath);
+				Path::writeFile(path, str.str());
+			}
+		}
+	}
 }

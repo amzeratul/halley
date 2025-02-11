@@ -39,6 +39,9 @@ namespace Halley {
     	const String& getLocalisationServer() const;
         bool isDevEnvironment() const;
 
+    	int getSteamAppId() const;
+        const String& getSteamBinPath() const;
+
 	private:
 		const Path& propertiesFile;
     	UUID uuid;
@@ -53,6 +56,8 @@ namespace Halley {
     	Vector<String> platforms;
         String localisationServer;
         bool devEnviromnent = true;
+        int steamAppId = 0;
+        String steamBinPath;
 
     	bool dirty = false;
 

@@ -63,6 +63,7 @@ namespace Halley {
 		uint64_t getMemoryUsage() override;
 
 		Vector<String> runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace) const override;
+		ConfigNode getRegistryString(std::string_view key) const override;
 		
 	private:
 		String runWMIQuery(std::string_view query, const String& parameter, std::string_view queryNamespace = "root/cimv2") const;

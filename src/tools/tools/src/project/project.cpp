@@ -615,14 +615,36 @@ Path Project::getDLLPath() const
 	return rootPath / "bin" / (binName + suffix + getDLLExtension());
 }
 
+#ifdef _WIN32
+namespace {
+	std::optional<Path> getSteamGameDir(int gameId)
+	{
+		// Referencing https://github.com/NPBruce/valkyrie/issues/1056
+		
+		// First, read Steam's install dir from registry
+		auto steamPath = OS::get().getRegistryString("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam\\InstallPath");
+		Logger::logInfo("Got Steam Path: " + steamPath.asString(""));
+
+		return {};
+	}
+}
+#endif
+
 Path Project::getExecutablePath() const
 {
-	const auto& binName = getProperties().getBinName();
-	if (binName.isEmpty()) {
-		return "";
+	if (properties->isDevEnvironment()) {
+		const auto& binName = getProperties().getBinName();
+		if (!binName.isEmpty()) {
+			const String suffix = Debug::isDebug() ? "_d" : "";
+			return rootPath / "bin" / (binName + suffix + getExecutableExtension());
+		}
+	} else if (getPlatform() == GamePlatform::Windows && properties->getSteamAppId() != 0) {
+		if (auto steamPath = getSteamGameDir(properties->getSteamAppId())) {
+			return *steamPath / properties->getSteamBinPath();
+		}
 	}
-	const String suffix = Debug::isDebug() ? "_d" : "";
-	return rootPath / "bin" / (binName + suffix + getExecutableExtension());
+
+	return "";
 }
 
 void Project::loadGameResources(const HalleyAPI& api)
@@ -713,7 +735,8 @@ void Project::launchGame(Vector<String> params) const
 {
 	if (getTargetPlatform() == getPlatform()) {
 		const String args = String::concatList(params, " ");
-		OS::get().runCommandAsync("\"" + getExecutablePath().getNativeString() + "\" " + args, getExecutablePath().parentPath().getNativeString());
+		const auto executablePath = getExecutablePath();
+		OS::get().runCommandAsync("\"" + executablePath.getNativeString() + "\" " + args, executablePath.parentPath().getNativeString());
 	} else if (auto* plugin = getEditorPluginForBuildPlatform(getTargetPlatform())) {
 		plugin->launchGame(getTargetPlatform(), OS::get(), this, params);
 	}

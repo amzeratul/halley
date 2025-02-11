@@ -112,6 +112,16 @@ bool ProjectProperties::isDevEnvironment() const
 	return devEnviromnent;
 }
 
+int ProjectProperties::getSteamAppId() const
+{
+	return steamAppId;
+}
+
+const String& ProjectProperties::getSteamBinPath() const
+{
+	return steamBinPath;
+}
+
 void ProjectProperties::loadDefaults()
 {
 	uuid = UUID::generate();
@@ -126,6 +136,8 @@ void ProjectProperties::loadDefaults()
 	languages.push_back(originalLanguage);
 	localisationServer = {};
 	devEnviromnent = true;
+	steamAppId = 0;
+	steamBinPath = "";
 }
 
 void ProjectProperties::load()
@@ -172,6 +184,12 @@ void ProjectProperties::load()
 		}
 		if (node.hasKey("devEnvironment")) {
 			devEnviromnent = node["devEnvironment"].asBool(true);
+		}
+		if (node.hasKey("steamAppId")) {
+			steamAppId = node["steamAppId"].asInt(0);
+		}
+		if (node.hasKey("steamBinPath")) {
+			steamBinPath = node["steamBinPath"].asString();
 		}
 	}
 }

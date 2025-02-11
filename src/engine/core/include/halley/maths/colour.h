@@ -418,6 +418,14 @@ namespace Halley {
 			return colMaxValue<T>();
 		}
 
+		[[nodiscard]] constexpr Colour4 over(Colour4 bottom) const
+		{
+			const float a0 = a;
+			const float a1 = bottom.a * (1.0f - a);
+			const float alpha = a0 + a1;
+			return ((*this * a0 + bottom * a1) / alpha).withAlpha(alpha);
+		}
+
 	private:
 		uint8_t byteRep(T v) const
 		{

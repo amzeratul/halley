@@ -26,7 +26,7 @@ namespace Halley {
 
 		Future<bool> postOriginalStrings(const LocOriginalData& origData) const;
 		Future<bool> postOriginalStrings(const LocOriginalDataChunk& origData) const;
-		Future<StringsResult> getStrings(int minVersion) const;
+		Future<StringsResult> getStrings(I18NLanguage origLanguage, int minVersion) const;
 
 		bool isConnected() const;
 		const Vector<String>& getPermissions() const;
@@ -47,6 +47,6 @@ namespace Halley {
 
 		ConfigNode getChunkConfig(const LocOriginalDataChunk& data) const;
 
-		static StringsResult toStringsResult(const ConfigNode& data);
+		static StringsResult toStringsResult(I18NLanguage origLanguage, const ConfigNode& data);
 	};
 }

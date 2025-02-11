@@ -962,4 +962,67 @@ Vector<String, std::allocator<String>, 0, true> OSWin32::runQuery(std::string_vi
 	return runWMIQuery(query, parameters, queryNamespace);
 }
 
+ConfigNode OSWin32::getRegistryString(std::string_view key) const
+{
+	HashMap<String, HKEY> rootKeys;
+	rootKeys["HKEY_CLASSES_ROOT"] = HKEY_CLASSES_ROOT;
+	rootKeys["HKEY_CURRENT_CONFIG"] = HKEY_CURRENT_CONFIG;
+	rootKeys["HKEY_CURRENT_USER"] = HKEY_CURRENT_USER;
+	rootKeys["HKEY_LOCAL_MACHINE"] = HKEY_LOCAL_MACHINE;
+	rootKeys["HKEY_PERFORMANCE_DATA"] = HKEY_PERFORMANCE_DATA;
+	rootKeys["HKEY_PERFORMANCE_NLSTEXT"] = HKEY_PERFORMANCE_NLSTEXT;
+	rootKeys["HKEY_PERFORMANCE_TEXT"] = HKEY_PERFORMANCE_TEXT;
+	rootKeys["HKEY_USERS"] = HKEY_USERS;
+
+	const auto split = String(key).split('\\');
+	if (split.size() <= 2) {
+		Logger::logError("Unable to read " + String(key) + " from registry due to invalid registry path");
+		return {};
+	}
+
+	const auto rootIter = rootKeys.find(split[0]);
+	if (rootIter == rootKeys.end()) {
+		Logger::logError("Unable to read " + String(key) + " from registry due to unknown root HKEY");
+		return {};
+	}
+
+	const auto hKey = rootIter->second;
+	const auto subKey = String::concatList(split.const_span().subspan(1, split.size() - 2), "\\");
+
+	char buffer[1024];
+	DWORD type;
+	DWORD size = sizeof(buffer);
+	const auto result = RegGetValueW(hKey, subKey.getUTF16().c_str(), split.back().getUTF16().c_str(), RRF_RT_ANY, &type, buffer, &size);
+	if (result != ERROR_SUCCESS) {
+		if (result != ERROR_FILE_NOT_FOUND) {
+			Logger::logError("Unable to read " + String(key) + " from registry: " + toString(static_cast<int>(result)));
+		} else {
+			Logger::logWarning("Registry key doesn't exist: " + String(key));
+		}
+		return {};
+	}
+
+	if (type == REG_SZ) {
+		return ConfigNode(String(buffer, size));
+	} else if (type == REG_DWORD) {
+		return ConfigNode(reinterpret_cast<const int*>(buffer)[0]);
+	} else if (type == REG_DWORD_BIG_ENDIAN) {
+		std::swap(buffer[0], buffer[3]);
+		std::swap(buffer[1], buffer[2]);
+		return ConfigNode(reinterpret_cast<const int*>(buffer)[0]);
+	} else if (type == REG_QWORD) {
+		return ConfigNode(reinterpret_cast<const int64_t*>(buffer)[0]);
+	} else if (type == REG_BINARY) {
+		Bytes result;
+		result.resize(size);
+		memcpy(result.data(), buffer, size);
+		return ConfigNode(std::move(result));
+	} else if (type == REG_NONE) {
+		return {};
+	}
+
+	Logger::logError("Unknown registry type: " + toString(static_cast<int>(type)));
+	return {};
+}
+
 #endif

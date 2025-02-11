@@ -28,6 +28,26 @@ void LocalisationGrid::update(Time t, bool moved)
 
 }
 
+namespace {
+	std::optional<Colour4f> blendColours(std::optional<Colour4f> bottom, std::optional<Colour4f> top)
+	{
+		if (bottom && top) {
+			return top->over(*bottom);
+		} else if (bottom) {
+			return bottom;
+		} else if (top) {
+			return top;
+		} else {
+			return {};
+		}
+	}
+
+	std::optional<Colour4f> blendColours(std::optional<Colour4f> col0, std::optional<Colour4f> col1, std::optional<Colour4f> col2)
+	{
+		return blendColours(blendColours(col0, col1), col2);
+	}
+}
+
 void LocalisationGrid::draw(UIPainter& painter) const
 {
 	const auto clip = painter.getClip();
@@ -57,24 +77,30 @@ void LocalisationGrid::draw(UIPainter& painter) const
 
 	// Draw grid
 	const auto gridCol = factory.getColourScheme()->getColour("ui_text");
-	p2.draw([firstLine, lastLine, pos = getPosition(), columns, size = getSize(), gridCol, lineUnderMouse = lineUnderMouse, selectedLine = selectedLine](Painter& painter)
+	p2.draw([firstLine, lastLine, pos = getPosition(), columns, size = getSize(), gridCol, this](Painter& painter)
 	{
 		// Backgrounds
 		std::optional<Rect4f> drewSelectedLine;
 		for (int i = firstLine; i <= lastLine + 1; ++i) {
-			if (i % 2 == 0 || lineUnderMouse == i || selectedLine == i) {
-				const auto linePos = pos + Vector2f(0, static_cast<float>(i + 1) * lineHeight);
-				const auto rect = Rect4f(linePos, size.x, lineHeight);
+			std::optional<Colour4f> col0 = colours[i];
+			std::optional<Colour4f> col1;
+			std::optional<Colour4f> col2;
 
-				auto col = Colour4f(0, 0, 0).withAlpha(0.1f);
-				if (selectedLine == i) {
-					col = Colour4f(1, 1, 1, 0.2f);
-					drewSelectedLine = rect;
-				} else if (lineUnderMouse == i) {
-					col = Colour4f(1, 1, 1, 0.1f);
-				}
+			const auto linePos = pos + Vector2f(0, static_cast<float>(i + 1) * lineHeight);
+			const auto rect = Rect4f(linePos, size.x, lineHeight);
 
-				painter.drawPolygon(Polygon(rect), col);
+			if (i % 2 == 0) {
+				col1 = Colour4f(0, 0, 0).withAlpha(0.1f);
+			}
+			if (selectedLine == i) {
+				col2 = Colour4f(1, 1, 1, 0.2f);
+				drewSelectedLine = rect;
+			} else if (lineUnderMouse == i) {
+				col2 = Colour4f(1, 1, 1, 0.1f);
+			}
+
+			if (const auto col = blendColours(col0, col1, col2)) {
+				painter.drawPolygon(Polygon(rect), *col);
 			}
 		}
 
@@ -186,8 +212,22 @@ void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationD
 	this->origData = origData;
 	this->translatedData = translatedData;
 
-	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(origData ? static_cast<int>(origData->getNumEntries()) : 0) + 2)));
+	const int numLines = origData ? static_cast<int>(origData->getNumEntries()) : 0;
+
+	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(numLines + 2))));
 	setSelectedLine(0);
+
+	colours.resize(numLines);
+	if (lineColourFilter) {
+		for (int i = 0; i < numLines; ++i) {
+			colours[i] = lineColourFilter(i);
+		}
+	}
+}
+
+void LocalisationGrid::setLineColourFilter(LineColourCallback callback)
+{
+	lineColourFilter = std::move(callback);
 }
 
 int LocalisationGrid::getSelectedLine() const

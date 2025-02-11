@@ -96,6 +96,8 @@ namespace Halley {
 		virtual String runQuery(std::string_view query, const String& parameter, std::string_view queryNamespace = "") const;
 		virtual Vector<String> runQuery(std::string_view query, gsl::span<const String> parameters, std::string_view queryNamespace = "") const;
 
+		virtual ConfigNode getRegistryString(std::string_view key) const;
+
 	private:
 		static OS* osInstance;
 	};
