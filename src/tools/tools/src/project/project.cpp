@@ -24,6 +24,7 @@
 #include "halley/tools/project/build_project_task.h"
 #include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
+#include "../steam/steam_utils.h"
 
 using namespace Halley;
 
@@ -615,21 +616,6 @@ Path Project::getDLLPath() const
 	return rootPath / "bin" / (binName + suffix + getDLLExtension());
 }
 
-#ifdef _WIN32
-namespace {
-	std::optional<Path> getSteamGameDir(int gameId)
-	{
-		// Referencing https://github.com/NPBruce/valkyrie/issues/1056
-		
-		// First, read Steam's install dir from registry
-		auto steamPath = OS::get().getRegistryString("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Valve\\Steam\\InstallPath");
-		Logger::logInfo("Got Steam Path: " + steamPath.asString(""));
-
-		return {};
-	}
-}
-#endif
-
 Path Project::getExecutablePath() const
 {
 	if (properties->isDevEnvironment()) {
@@ -639,8 +625,10 @@ Path Project::getExecutablePath() const
 			return rootPath / "bin" / (binName + suffix + getExecutableExtension());
 		}
 	} else if (getPlatform() == GamePlatform::Windows && properties->getSteamAppId() != 0) {
-		if (auto steamPath = getSteamGameDir(properties->getSteamAppId())) {
+		if (auto steamPath = SteamUtils::getSteamGameDir(properties->getSteamAppId())) {
 			return *steamPath / properties->getSteamBinPath();
+		} else {
+			Logger::logError("Unable to launch game - could not find game installed on Steam");
 		}
 	}
 

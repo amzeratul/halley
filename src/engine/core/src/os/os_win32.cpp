@@ -989,10 +989,16 @@ ConfigNode OSWin32::getRegistryString(std::string_view key) const
 	const auto hKey = rootIter->second;
 	const auto subKey = String::concatList(split.const_span().subspan(1, split.size() - 2), "\\");
 
-	char buffer[1024];
+	Vector<char> buffer;
+	buffer.resize(1024);
 	DWORD type;
-	DWORD size = sizeof(buffer);
-	const auto result = RegGetValueW(hKey, subKey.getUTF16().c_str(), split.back().getUTF16().c_str(), RRF_RT_ANY, &type, buffer, &size);
+	DWORD size = static_cast<DWORD>(buffer.size());
+	auto result = RegGetValueW(hKey, subKey.getUTF16().c_str(), split.back().getUTF16().c_str(), RRF_RT_ANY, &type, buffer.data(), &size);
+	if (result == ERROR_MORE_DATA) {
+		buffer.resize(size);
+		result = RegGetValueW(hKey, subKey.getUTF16().c_str(), split.back().getUTF16().c_str(), RRF_RT_ANY, &type, buffer.data(), &size);
+	}
+
 	if (result != ERROR_SUCCESS) {
 		if (result != ERROR_FILE_NOT_FOUND) {
 			Logger::logError("Unable to read " + String(key) + " from registry: " + toString(static_cast<int>(result)));
@@ -1003,22 +1009,35 @@ ConfigNode OSWin32::getRegistryString(std::string_view key) const
 	}
 
 	if (type == REG_SZ) {
-		return ConfigNode(String(buffer, size));
+		Vector<wchar_t> wideStr;
+		wideStr.resize(size / 2);
+		memcpy(wideStr.data(), buffer.data(), size);
+		return ConfigNode(String(wideStr.data()));
 	} else if (type == REG_DWORD) {
-		return ConfigNode(reinterpret_cast<const int*>(buffer)[0]);
+		int data;
+		memcpy(&data, buffer.data(), sizeof(data));
+		return ConfigNode(data);
 	} else if (type == REG_DWORD_BIG_ENDIAN) {
 		std::swap(buffer[0], buffer[3]);
 		std::swap(buffer[1], buffer[2]);
-		return ConfigNode(reinterpret_cast<const int*>(buffer)[0]);
+		int data;
+		memcpy(&data, buffer.data(), sizeof(data));
+		return ConfigNode(data);
 	} else if (type == REG_QWORD) {
-		return ConfigNode(reinterpret_cast<const int64_t*>(buffer)[0]);
+		int64_t data;
+		memcpy(&data, buffer.data(), sizeof(data));
+		return ConfigNode(data);
 	} else if (type == REG_BINARY) {
-		Bytes result;
-		result.resize(size);
-		memcpy(result.data(), buffer, size);
-		return ConfigNode(std::move(result));
+		Bytes bytes;
+		bytes.resize(size);
+		memcpy(bytes.data(), buffer.data(), size);
+		return ConfigNode(std::move(bytes));
 	} else if (type == REG_NONE) {
 		return {};
+	} else if (type == REG_MULTI_SZ) {
+		// TODO
+	} else if (type == REG_EXPAND_SZ) {
+		// TODO
 	}
 
 	Logger::logError("Unknown registry type: " + toString(static_cast<int>(type)));
