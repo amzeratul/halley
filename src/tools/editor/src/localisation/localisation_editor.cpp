@@ -444,7 +444,9 @@ void LocalisationEditor::importLanguage(const I18NLanguage& language)
 
 void LocalisationEditor::uploadLanguage(const I18NLanguage& language)
 {
-	// TODO
+	if (localStrings) {
+		client->putTranslatedStrings(language, localStrings->localised.at(language.getISOCode()));
+	}
 }
 
 bool LocalisationEditor::isDevEnvironment() const
@@ -537,7 +539,7 @@ void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings) {
 		curMessage = "Uploading original strings...";
-		client->postOriginalStrings(*localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
+		client->putOriginalStrings(*localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
 		{
 			if (*aliveFlag) {
 				if (result) {

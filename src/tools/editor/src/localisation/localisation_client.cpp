@@ -39,7 +39,7 @@ void LocalisationClient::signOut()
 	password = {};
 }
 
-Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalData& origData) const
+Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData) const
 {
 	ConfigNode root;
 	auto& chunks = root["chunks"];
@@ -59,7 +59,7 @@ Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalData& orig
 	});
 }
 
-Future<bool> LocalisationClient::postOriginalStrings(const LocOriginalDataChunk& origData) const
+Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData) const
 {
 	const auto data = JSONConvert::generateJSON(getChunkConfig(origData)).toBytes();
 
@@ -87,6 +87,21 @@ Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(I18NLan
 			return toStringsResult(origLanguage, JSONConvert::parseConfig(response->getBody()));
 		}
 		return {};
+	});
+}
+
+Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData)
+{
+	const auto data = JSONConvert::generateJSON(getTranslationConfig(translationData)).toBytes();
+
+	const auto url = baseURL + "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());
+	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
+	request->setBody("application/json", data);
+
+	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
+	{
+		Logger::logDev("Got response: " + toString(response->getResponseCode()));
+		return response->getResponseCode() == 200;
 	});
 }
 
@@ -124,6 +139,27 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 		keys.push_back(ConfigNode(entry.key));
 		values.push_back(ConfigNode(entry.value));
 	}
+
+	return result;
+}
+
+ConfigNode LocalisationClient::getTranslationConfig(const LocTranslationData& data) const
+{
+	ConfigNode result;
+
+	ConfigNode::SequenceType keys;
+	ConfigNode::SequenceType values;
+	ConfigNode::SequenceType originalVersions;
+
+	for (const auto& [k, v]: data.entries) {
+		keys.push_back(ConfigNode(k));
+		values.push_back(ConfigNode(v.value));
+		originalVersions.push_back(ConfigNode(v.origVersion));
+	}
+
+	result["keys"] = std::move(keys);
+	result["values"] = std::move(values);
+	result["originalVersions"] = std::move(originalVersions);
 
 	return result;
 }
