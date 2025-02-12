@@ -67,6 +67,9 @@ namespace Halley {
         void loadLocalStringsFromStorage();
         void saveLocalStringsToStorage();
 
+        void onLocalStringsModified();
+        void onRemoteStringsModified();
+
         void populateData();
         void populateOriginalLanguageData();
         void populateTranslationData();
@@ -79,9 +82,15 @@ namespace Halley {
 
         void openOriginalLanguage(bool canEdit);
         void openLanguage(const I18NLanguage& language, bool canEdit);
-        void exportLanguage(const I18NLanguage& language);
-        void importLanguage(const I18NLanguage& language);
-        void uploadLanguage(const I18NLanguage& language);
+
+		void exportLanguage(const I18NLanguage& language);
+
+		void importLanguage(const I18NLanguage& language);
+        void doImportLanguage(const I18NLanguage& language, const String& extension, Bytes data);
+        void importLanguageFromYAML(const I18NLanguage& language, const Bytes& data);
+        void importLanguageFromCSV(const I18NLanguage& language, const Bytes& data);
+
+		void uploadLanguage(const I18NLanguage& language);
 
         bool isDevEnvironment() const;
         bool canViewLanguage(const I18NLanguage& language) const;

@@ -169,7 +169,7 @@ void LocalisationEditor::onAssetsLoaded()
 
 void LocalisationEditor::onReturnedFromDrillDown()
 {
-	saveLocalStringsToStorage();
+	onLocalStringsModified();
 }
 
 void LocalisationEditor::tryLoading()
@@ -218,6 +218,17 @@ void LocalisationEditor::saveLocalStringsToStorage()
 	}
 
 	// TODO
+}
+
+void LocalisationEditor::onLocalStringsModified()
+{
+	saveLocalStringsToStorage();
+	populateData();
+}
+
+void LocalisationEditor::onRemoteStringsModified()
+{
+	populateData();
 }
 
 void LocalisationEditor::populateData()
@@ -438,6 +449,71 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language)
 }
 
 void LocalisationEditor::importLanguage(const I18NLanguage& language)
+{
+	if (!localStrings || !remoteStrings) {
+		Logger::logError("Unable to import: strings not ready.");
+		return;
+	}
+
+	auto basePath = project.getRootPath();
+
+	FileChooserParameters fileChooserParams;
+	fileChooserParams.defaultPath = basePath;
+	fileChooserParams.fileName = "";
+	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values (CSV)", {"csv"}, true });
+	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, false });
+	fileChooserParams.save = false;
+
+	OS::get().openFileChooser(fileChooserParams).then([this, language](std::optional<Path> path) {
+		if (path) {
+			auto data = Path::readFile(*path);
+			if (!data.empty()) {
+				doImportLanguage(language, path->getExtension(), std::move(data));
+			}
+		}
+	});
+}
+
+void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const String& extension, Bytes data)
+{
+	if (extension == ".csv") {
+		importLanguageFromCSV(language, data);
+	} else if (extension == ".yaml" || extension == ".yml") {
+		importLanguageFromYAML(language, data);
+	} else {
+		Logger::logError("Unknown extension for localisation import: \"" + extension + "\"");
+	}
+}
+
+void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)
+{
+	assert(localStrings.has_value());
+	assert(remoteStrings.has_value());
+
+	const auto configFile = YAMLConvert::parseConfig(data, {});
+	const auto langId = language.getISOCode();
+	if (!configFile.getRoot().hasKey(langId)) {
+		Logger::logError("Failed to import YAML: not a localisation file for " + langId);
+		return;
+	}
+
+	const auto& orig = *remoteStrings->originalLanguage;
+	auto& translation = localStrings->localised[langId];
+	translation.language = language;
+
+	const auto& locRoot = configFile.getRoot()[langId];
+	int n = 0;
+	for (const auto& [k, v]: locRoot.asMap()) {
+		translation.setValue(k, orig.getVersion(k), v.asString(""));
+		++n;
+	}
+
+	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
+
+	onLocalStringsModified();
+}
+
+void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, const Bytes& data)
 {
 	// TODO
 }
