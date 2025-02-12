@@ -618,6 +618,17 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 	const auto& loc = localStrings->getLocalised(language);
 	const auto& orig = localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 
+	CSVFile csv;
+	csv.setColumns({{ "key", "version", "comment", "context", "chunkIdx", "original", "translation" }});
+
+	const auto keyIdx = csv.getColumnIndex("key");
+	const auto versionIdx = csv.getColumnIndex("version");
+	const auto commentIdx = csv.getColumnIndex("comment");
+	const auto contextIdx = csv.getColumnIndex("context");
+	const auto chunkIdx = csv.getColumnIndex("chunk");
+	const auto originalIdx = csv.getColumnIndex("original");
+	const auto translationIdx = csv.getColumnIndex("translation");
+
 	for (const auto& chunk: orig.getChunks()) {
 		if (options.allChunks || options.chunksToInclude.contains(chunk.name)) {
 			for (const auto& origEntry: chunk.entries) {
@@ -630,10 +641,22 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 					continue;
 				}
 
-				// TODO: add to CSV
+				auto rowIdx = csv.addRow();
+				csv.setCell(rowIdx, keyIdx, origEntry.key);
+				csv.setCell(rowIdx, versionIdx, toString(origEntry.version));
+				csv.setCell(rowIdx, commentIdx, origEntry.comment);
+				csv.setCell(rowIdx, contextIdx, origEntry.context);
+				csv.setCell(rowIdx, originalIdx, origEntry.value);
+				csv.setCell(rowIdx, chunkIdx, chunk.name);
+
+				if (locEntry) {
+					csv.setCell(rowIdx, translationIdx, locEntry->value);
+				}
 			}
 		}
 	}
+
+	Path::writeFile(path, csv.save());
 }
 
 void LocalisationEditor::importLanguage(const I18NLanguage& language)

@@ -41,6 +41,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "file_formats/binary_file.h"
 #include "file_formats/config_file.h"
+#include "file_formats/csv_file.h"
 #include "file_formats/image.h"
 #include "file_formats/ini_reader.h"
 #include "file_formats/json_convert.h"
