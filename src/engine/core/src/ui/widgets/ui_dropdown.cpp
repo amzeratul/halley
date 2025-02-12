@@ -283,6 +283,7 @@ bool UIDropdown::onKeyPress(KeyboardKeyPress key)
 		int ch = 'a' + (int(key.key) - int(KeyCode::A));
 		keypressMatch += char(ch);
 		setSelectedOptionPartialMatch(keypressMatch);
+		return true;
 	}
 
 	return false;
