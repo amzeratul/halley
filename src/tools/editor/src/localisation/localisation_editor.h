@@ -50,6 +50,20 @@ namespace Halley {
             Ready
         };
 
+        struct ExportOptions {
+	        bool emitUntranslated = true;
+	        bool emitOutOfDate = true;
+	        bool emitTranslated = true;
+            bool allChunks = true;
+            HashSet<String> chunksToInclude;
+        };
+
+        enum class KeyState {
+	        Untranslated,
+            Translated,
+            OutOfDate
+        };
+
         bool loaded = false;
         bool gotLocalStrings = false;
         bool gotRemoteStrings = false;
@@ -84,6 +98,8 @@ namespace Halley {
         void openLanguage(const I18NLanguage& language, bool canEdit);
 
 		void exportLanguage(const I18NLanguage& language);
+        void exportLanguage(const I18NLanguage& language, const ExportOptions& options);
+        void doExportLanguage(const I18NLanguage& language, const ExportOptions& options, const Path& path);
 
 		void importLanguage(const I18NLanguage& language);
         void doImportLanguage(const I18NLanguage& language, const String& extension, Bytes data);
