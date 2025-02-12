@@ -726,5 +726,31 @@ void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, co
 
 void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, const Bytes& data)
 {
-	// TODO
+	CSVFile csv;
+	csv.load(std::string_view(reinterpret_cast<const char*>(data.data()), data.size()));
+
+	const auto langId = language.getISOCode();
+	auto& translation = localStrings->localised[langId];
+	translation.language = language;
+
+	const auto keyIdx = csv.getColumnIndex("key");
+	const auto versionIdx = csv.getColumnIndex("version");
+	const auto translationIdx = csv.getColumnIndex("translation");
+
+	int n = 0;
+	const auto nRows = csv.getNumRows();
+	for (size_t i = 0; i < nRows; ++i) {
+		const auto& key = csv.getCell(i, keyIdx);
+		const auto version = csv.getCell(i, versionIdx).toInteger();
+		const auto& translatedValue = csv.getCell(i, translationIdx);
+
+		if (!translatedValue.isEmpty()) {
+			translation.setValue(key, version, translatedValue);
+			++n;
+		}
+	}
+
+	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
+
+	onLocalStringsModified();
 }

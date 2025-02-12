@@ -18,7 +18,7 @@ namespace Halley {
 
         void clear();
 
-        void load(const String& str);
+        void load(std::string_view origStr);
         String save() const;
 
     private:
