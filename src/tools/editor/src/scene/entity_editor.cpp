@@ -1024,20 +1024,37 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 	// This will split the C++ type for templates, e.g.:
 	// std::optional<Halley::String> -> "std::optional<>", {"Halley::String"}
 	// std::map<int, Halley::Colour4f> -> "std::map<>", {"int", "Halley::Colour4f"}
-	// Multiple levels of nesting are not supported atm
 
 	const auto openPos = type.find('<');
 	const auto closePos = type.find_last_of('>');
 	if (openPos != String::npos && closePos != String::npos) {		
 		auto base = type.left(openPos) + "<>";
 
+		Vector<String> params;
+		String curStr;
+		int depth = 0;
 		const auto remainSubstr = type.substr(openPos + 1, closePos - openPos - 1);
-		if (remainSubstr.contains('<')) {
-			return { base, {remainSubstr} };
+
+		for (auto c: remainSubstr.cppStr()) {
+			if (depth == 0 && c == ',') {
+				curStr.trimBoth();
+				params.push_back(std::move(curStr));
+				curStr = "";
+			} else {
+				curStr += c;
+				if (c == '<') {
+					++depth;
+				} else if (c == '>') {
+					--depth;
+				}
+			}
 		}
-		
-		auto remain = remainSubstr.split(',');
-		return {base, remain};
+		curStr.trimBoth();
+		if (!curStr.isEmpty()) {
+			params.push_back(curStr);			
+		}
+
+		return { base, params };
 	}
 	return {type, {}};
 }

@@ -24,17 +24,19 @@ public:
 	Halley::Vector3f lastPos{};
 	bool canAutoVel{ false };
 	bool moved{ false };
+	Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents{};
 
 	AudioSourceComponent() {
 	}
 
-	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, bool canAutoVel)
+	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, bool canAutoVel, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents)
 		: event(std::move(event))
 		, rangeMin(std::move(rangeMin))
 		, rangeMax(std::move(rangeMax))
 		, rollOff(std::move(rollOff))
 		, curve(std::move(curve))
 		, canAutoVel(std::move(canAutoVel))
+		, dynamicEvents(std::move(dynamicEvents))
 	{
 	}
 
@@ -47,6 +49,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::serialize(rollOff, float{ 1 }, _context, _node, componentName, "rollOff", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(curve)>::serialize(curve, Halley::AudioAttenuationCurve{ Halley::AudioAttenuationCurve::Linear }, _context, _node, componentName, "curve", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::serialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::serialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
 		return _node;
 	}
 
@@ -58,6 +61,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::deserialize(rollOff, float{ 1 }, _context, _node, componentName, "rollOff", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(curve)>::deserialize(curve, Halley::AudioAttenuationCurve{ Halley::AudioAttenuationCurve::Linear }, _context, _node, componentName, "curve", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::deserialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::deserialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
@@ -68,6 +72,7 @@ public:
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rollOff");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("curve");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("canAutoVel");
+		if ((_mask & makeMask(Type::Prefab, Type::Dynamic)) == 0) _node.removeKey("dynamicEvents");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
@@ -86,6 +91,9 @@ public:
 		}
 		if (_fieldName == "curve") {
 			return Halley::ConfigNodeHelper<decltype(curve)>::serialize(curve, _context);
+		}
+		if (_fieldName == "dynamicEvents") {
+			return Halley::ConfigNodeHelper<decltype(dynamicEvents)>::serialize(dynamicEvents, _context);
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
@@ -110,6 +118,10 @@ public:
 		}
 		if (_fieldName == "curve") {
 			Halley::ConfigNodeHelper<decltype(curve)>::deserialize(curve, _context, _node);
+			return;
+		}
+		if (_fieldName == "dynamicEvents") {
+			Halley::ConfigNodeHelper<decltype(dynamicEvents)>::deserialize(dynamicEvents, _context, _node);
 			return;
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);

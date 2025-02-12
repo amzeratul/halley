@@ -1035,8 +1035,40 @@ public:
 		const auto containerPtr = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
 		const auto containerWeak = std::weak_ptr<UIWidget>(containerPtr);
 
+		struct BookkeepingData {
+			Vector<String> curKeys;
+
+			BookkeepingData()
+			{
+				curKeys.push_back("__dummy");
+			}
+
+			void fromKeys(const ConfigNode& data)
+			{
+				curKeys = getKeys(data);
+			}
+
+			static Vector<String> getKeys(const ConfigNode& data)
+			{
+				Vector<String> result;
+				if (data.getType() == ConfigNodeType::Map) {
+					for (const auto& [k, v]: data.asMap()) {
+						result.push_back(k);
+					}
+				}
+				return result;
+			}
+		};
+		auto bookkeepingData = std::make_shared<BookkeepingData>();
+
 		auto buildList = [=, &context]()
 		{
+			auto newKeys = BookkeepingData::getKeys(data.getFieldData());
+			if (newKeys == bookkeepingData->curKeys) {
+				return;
+			}
+			bookkeepingData->curKeys = std::move(newKeys);
+
 			const auto container = containerWeak.lock();
 			container->clear();
 			

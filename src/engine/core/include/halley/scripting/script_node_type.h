@@ -63,6 +63,7 @@ namespace Halley {
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		EntityId readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
+		std::optional<String> tryGetConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
 		String getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
 
 		String getPinTypeName(PinType type) const override;

@@ -97,14 +97,14 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data), environment.getNodeData(dst.dstNode.value()));
 }
 
-String IScriptNodeType::getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
+std::optional<String> IScriptNodeType::tryGetConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
 		if (dynamic_cast<const ScriptGraphNode&>(node).getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 			return "<current entity>";
 		} else {
-			return "<empty>";
+			return std::nullopt;
 		}
 	}
 	assert(pin.connections.size() == 1);
@@ -115,6 +115,11 @@ String IScriptNodeType::getConnectedNodeName(const BaseGraphNode& node, const Ba
 	}
 	
 	return "<unknown>";
+}
+
+String IScriptNodeType::getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
+{
+	return tryGetConnectedNodeName(node, graph, pinN).value_or("<empty>");
 }
 
 String IScriptNodeType::getPinTypeName(PinType type) const

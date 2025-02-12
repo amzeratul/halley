@@ -24,7 +24,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 8>{
+	const static auto data = std::array<PinType, 10>{
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::TargetPin, PD::Input },
@@ -33,16 +33,18 @@ gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
 	};
 
-	const auto nPins = 3 + node.getSettings()["variables"].asVector<String>({}).size();
+	const auto nPins = 5 + node.getSettings()["variables"].asVector<String>({}).size();
 	return gsl::span<const PinType>(data).subspan(0, nPins);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
-	const auto& event = node.getSettings()["event"].asString("");
-	const auto& destroyEvent = node.getSettings()["destroyEvent"].asString("");
+	const auto& event = tryGetConnectedNodeName(node, graph, 3).value_or(node.getSettings()["event"].asString(""));
+	const auto& destroyEvent = tryGetConnectedNodeName(node, graph, 4).value_or(node.getSettings()["destroyEvent"].asString(""));
 
 	auto str = ColourStringBuilder(true);
 	str.append("Post audio event ");
@@ -59,16 +61,21 @@ std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(c
 
 String ScriptAudioEvent::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
-	if (elementIdx >= 3) {
+	if (elementIdx == 3) {
+		return "Event";
+	} else if (elementIdx == 4) {
+		return "Destroy Event";
+	} else if (elementIdx >= 5) {
 		auto variableNames = node.getSettings()["variables"].asVector<String>({});
-		return variableNames.at(elementIdx - 3);
+		return variableNames.at(elementIdx - 5);
 	}
 	return ScriptNodeTypeBase<ScriptAudioEventData>::getPinDescription(node, elementType, elementIdx);
 }
 
 bool ScriptAudioEvent::hasDestructor(const ScriptGraphNode& node) const
 {
-	return !node.getSettings()["destroyEvent"].asString("").isEmpty();
+	return true;
+	//return !node.getSettings()["destroyEvent"].asString("").isEmpty();
 }
 
 void ScriptAudioEvent::doInitData(ScriptAudioEventData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
@@ -82,14 +89,15 @@ IScriptNodeType::Result ScriptAudioEvent::doUpdate(ScriptEnvironment& environmen
 
 	auto variableNames = node.getSettings()["variables"].asVector<String>({});
 	for (size_t i = 0; i < variableNames.size(); ++i) {
-		const auto value = readDataPin(environment, node, i + 3).asFloat(0);
+		const auto value = readDataPin(environment, node, i + 5).asFloat(0);
 		environment.getInterface<IAudioSystemInterface>().setVariable(entityId, variableNames[i], value);
 	}
 
 	if (data.active) {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	} else {
-		environment.postAudioEvent(node.getSettings()["event"].asString(""), entityId);
+		auto event = readDataPin(environment, node, 3).asString(node.getSettings()["event"].asString(""));
+		environment.postAudioEvent(event, entityId);
 
 		if (variableNames.empty()) {
 			return Result(ScriptNodeExecutionState::Done);
@@ -103,6 +111,7 @@ IScriptNodeType::Result ScriptAudioEvent::doUpdate(ScriptEnvironment& environmen
 void ScriptAudioEvent::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptAudioEventData& data) const
 {
 	data.active = false;
-	environment.postAudioEvent(node.getSettings()["destroyEvent"].asString(""), readEntityId(environment, node, 2));
+	auto destroyEvent = readDataPin(environment, node, 4).asString(node.getSettings()["destroyEvent"].asString(""));
+	environment.postAudioEvent(destroyEvent, readEntityId(environment, node, 2));
 }
 
