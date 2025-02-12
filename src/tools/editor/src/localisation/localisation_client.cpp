@@ -5,6 +5,18 @@
 
 using namespace Halley;
 
+LocTranslationData& LocalisationClient::StringsResult::getLocalised(const I18NLanguage& language)
+{
+	const auto code = language.getISOCode();
+	if (const auto iter = localised.find(code); iter != localised.end()) {
+		return iter->second;
+	}
+	LocTranslationData data;
+	data.language = language;
+	localised[code] = std::move(data);
+	return localised.at(code);
+}
+
 LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String project)
 	: web(web)
 	, baseURL(std::move(baseURL))

@@ -11,6 +11,8 @@ namespace Halley {
 			HashMap<String, LocTranslationData> localised;
 			bool success = false;
 			int highestVersion = 0;
+
+			LocTranslationData& getLocalised(const I18NLanguage& language);
 		};
 
 		enum class LoginResult {

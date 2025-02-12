@@ -339,7 +339,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalKeys, locStats.outdatedKeys > 0 ? 1 : 0);
 
 	auto percentString = toString(translatedPercent, 1) + "%";
-	if (locStats.translatedKeys != locStatsRemote.translatedKeys) {
+	if (translationDataRemote && locStats.translatedKeys != locStatsRemote.translatedKeys) {
 		percentString += " / " + toString(translatedPercentRemote, 1) + "%";
 	}
 
@@ -390,7 +390,7 @@ LocOriginalData& LocalisationEditor::getOriginalData()
 
 LocOriginalData* LocalisationEditor::getOriginalDataRemote()
 {
-	if (localStrings && remoteStrings) {
+	if (remoteStrings) {
 		return &(*remoteStrings->originalLanguage);
 	} else {
 		return nullptr;
@@ -399,36 +399,16 @@ LocOriginalData* LocalisationEditor::getOriginalDataRemote()
 
 LocTranslationData* LocalisationEditor::getTranslationData(const I18NLanguage& language)
 {
-	const auto code = language.getISOCode();
-	if (remoteStrings) {
-		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
-			return &iter->second;
-		}
-	}
 	if (localStrings) {
-		if (const auto iter = localStrings->localised.find(code); iter != localStrings->localised.end()) {
-			return &iter->second;
-		}
-		LocTranslationData data;
-		data.language = language;
-		localStrings->localised[code] = std::move(data);
-		return &localStrings->localised.at(code);
+		return &localStrings->getLocalised(language);
 	}
 	return nullptr;
 }
 
 LocTranslationData* LocalisationEditor::getTranslationDataRemote(const I18NLanguage& language)
 {
-	const auto code = language.getISOCode();
-	if (/*localStrings && */ remoteStrings) {
-		if (const auto iter = remoteStrings->localised.find(code); iter != remoteStrings->localised.end()) {
-			return &iter->second;
-		} else {
-			LocTranslationData data;
-			data.language = language;
-			remoteStrings->localised[code] = std::move(data);
-			return &remoteStrings->localised.at(code);
-		}
+	if (remoteStrings) {
+		return &remoteStrings->getLocalised(language);
 	}
 	return nullptr;
 }
@@ -460,7 +440,7 @@ void LocalisationEditor::importLanguage(const I18NLanguage& language)
 	FileChooserParameters fileChooserParams;
 	fileChooserParams.defaultPath = basePath;
 	fileChooserParams.fileName = "";
-	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values (CSV)", {"csv"}, true });
+	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values", {"csv"}, true });
 	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, false });
 	fileChooserParams.save = false;
 

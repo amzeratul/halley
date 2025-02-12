@@ -93,7 +93,7 @@ namespace Halley {
 	private:
 		I18NLanguage language;
 		Vector<LocOriginalDataChunk> chunks;
-		HashMap<String, int32_t> keyVersions;
+		HashMap<String, int32_t> keyMap;
 		Vector<std::pair<size_t, size_t>> keyIndices;
 	};
 

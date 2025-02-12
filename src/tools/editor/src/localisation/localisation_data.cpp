@@ -145,18 +145,14 @@ const Vector<LocOriginalDataChunk>& LocOriginalData::getChunks() const
 
 int32_t LocOriginalData::getVersion(const String& key) const
 {
-	const auto iter = keyVersions.find(key);
-	if (iter != keyVersions.end()) {
-		return iter->second;
-	}
-	return 0;
+	return tryGetVersion(key).value_or(0);
 }
 
 std::optional<int32_t> LocOriginalData::tryGetVersion(const String& key) const
 {
-	const auto iter = keyVersions.find(key);
-	if (iter != keyVersions.end()) {
-		return iter->second;
+	const auto iter = keyMap.find(key);
+	if (iter != keyMap.end()) {
+		return getEntry(iter->second).version;
 	}
 	return std::nullopt;
 }
@@ -230,7 +226,7 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 
 		size_t i = 0;
 		for (const auto& entry: result.chunks.back().entries) {
-			result.keyVersions[entry.key] = entry.version;
+			result.keyMap[entry.key] = static_cast<int32_t>(result.keyIndices.size());
 			result.keyIndices.emplace_back(result.chunks.size() - 1, i++);
 		}
 	}
@@ -241,10 +237,13 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 void LocOriginalData::indexData()
 {
 	keyIndices.clear();
+	keyMap.clear();
+
 	const auto nChunks = chunks.size();
 	for (size_t j = 0; j < nChunks; ++j) {
 		const auto n = chunks[j].getNumEntries();
 		for (size_t i = 0; i < n; ++i) {
+			keyMap[chunks[j].getEntry(i).key] = static_cast<int32_t>(keyIndices.size());
 			keyIndices.emplace_back(j, i);
 		}
 	}

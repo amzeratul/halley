@@ -886,9 +886,13 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 		}
 		fileDialog->SetOptions(flags);
 
+		// NB: these must remain in scope until the end
+		Vector<StringUTF16> stringBuffer;
+		Vector<COMDLG_FILTERSPEC> spec;
+
 		if (!parameters.fileTypes.empty()) {
-			Vector<StringUTF16> stringBuffer;
-			Vector<COMDLG_FILTERSPEC> spec;
+			stringBuffer.reserve(parameters.fileTypes.size() * 3); // Preallocate since we're collecting pointers to elements in the middle of push_back()s
+
 			for (const auto& type: parameters.fileTypes) {
 				String pattern;
 				for (const auto& ext: type.extensions) {
