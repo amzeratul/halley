@@ -30,6 +30,7 @@ namespace Halley {
         void onActiveChanged(bool active) override;
 
         void onAssetsLoaded() override;
+        void onReturnedFromDrillDown();
 
         void onReturnedFromDrillDown();
         void onReturned();
