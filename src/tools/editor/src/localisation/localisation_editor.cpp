@@ -221,8 +221,13 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 void LocalisationEditor::loadLocalStringsFromStorage()
 {
 	if (!isDevEnvironment()) {
-		const auto& configFile = Deserializer::fromBytes<ConfigFile>(storageContainer->getData("localStrings"), SerializerOptions(1));
-		localStringsFuture = Future<LocStringSet>::makeImmediate(LocStringSet(configFile.getRoot()));
+		const auto bytes = storageContainer->getData("localStrings");
+		if (!bytes.empty()) {
+			const auto& configFile = Deserializer::fromBytes<ConfigFile>(bytes, SerializerOptions(1));
+			localStringsFuture = Future<LocStringSet>::makeImmediate(LocStringSet(configFile.getRoot()));
+		} else {
+			localStringsFuture = Future<LocStringSet>::makeImmediate(LocStringSet());
+		}
 	}
 }
 
@@ -604,7 +609,7 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language, const Expo
 
 	FileChooserParameters fileChooserParams;
 	fileChooserParams.defaultPath = basePath;
-	fileChooserParams.fileName = language.getISOCode() + ".csv";
+	fileChooserParams.fileName = project.getBinName() + "_" + language.getISOCode() + ".csv";
 	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "Comma-Separated Values", {"csv"}, true });
 	//fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, false });
 	fileChooserParams.save = true;

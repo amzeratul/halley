@@ -55,6 +55,7 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origD
 	request->setBody("application/json", data);
 	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
 	{
+		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
 	});
 }
@@ -127,11 +128,8 @@ bool LocalisationClient::hasPermission(std::string_view str) const
 
 ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const
 {
-	ConfigNode result;
-	result["chunkId"] = data.name;
-
-	auto& keys = result["keys"];
-	auto& values = result["values"];
+	ConfigNode keys;
+	ConfigNode values;
 
 	const auto n = data.getNumEntries();
 	for (int i = 0; i < n; ++i) {
@@ -140,6 +138,10 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 		values.push_back(ConfigNode(entry.value));
 	}
 
+	ConfigNode result;
+	result["chunkId"] = data.name;
+	result["keys"] = std::move(keys);
+	result["values"] = std::move(values);
 	return result;
 }
 
