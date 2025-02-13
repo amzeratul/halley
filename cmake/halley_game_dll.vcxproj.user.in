@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommand>@HALLEY_RUNNER_DEBUG_PATH@</LocalDebuggerCommand>
+  <!-- Global settings for all configurations -->
+  <PropertyGroup>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>run $(OutDir)$(TargetName)$(TargetExt)</LocalDebuggerCommandArguments>
+  </PropertyGroup>
+  
+  <!-- Configuration-specific debugger command paths -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommand>@HALLEY_RUNNER_DEBUG_PATH@</LocalDebuggerCommand>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <LocalDebuggerCommand>@HALLEY_RUNNER_PATH@</LocalDebuggerCommand>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>run $(OutDir)$(TargetName)$(TargetExt)</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommand>@HALLEY_RUNNER_PATH@</LocalDebuggerCommand>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>run $(OutDir)$(TargetName)$(TargetExt)</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <LocalDebuggerCommand>@HALLEY_RUNNER_PATH@</LocalDebuggerCommand>
-    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>run $(OutDir)$(TargetName)$(TargetExt)</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
+
