@@ -79,6 +79,7 @@ namespace Halley {
 
 		int32_t getVersion(const String& key) const;
 		std::optional<int32_t> tryGetVersion(const String& key) const;
+		bool hasKey(const String& key) const;
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
@@ -129,6 +130,10 @@ namespace Halley {
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
 
 		bool updateFromRemote(const LocTranslationData& remote);
+		bool pruneKeys(const LocOriginalData& originalLanguage);
+
+		bool operator==(const LocTranslationData& other) const;
+		bool operator!=(const LocTranslationData& other) const;
 	};
 
 	class LocStringSet {

@@ -255,14 +255,18 @@ void LocalisationEditor::onRemoteStringsModified()
 
 bool LocalisationEditor::updateLocalFromRemote()
 {
-	if (!isDevEnvironment()) {
+	if (isDevEnvironment()) {
 		return false;
 	}
 
 	bool modified = false;
 
 	for (auto& remoteLoc: remoteStrings->localised) {
-		modified = localStrings->getLocalised(I18NLanguage(remoteLoc.first)).updateFromRemote(remoteLoc.second) || modified;
+		auto& locData = localStrings->getLocalised(I18NLanguage(remoteLoc.first));
+		if (remoteStrings->originalLanguage) {
+			modified = locData.pruneKeys(*remoteStrings->originalLanguage) || modified;
+		}
+		modified = locData.updateFromRemote(remoteLoc.second) || modified;
 	}
 
 	if (modified) {
@@ -387,6 +391,8 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidgetAs<UIImage>("bar_blue")->setLocalClip(Rect4f(Rect4i(0, 0, blueW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
+
+	widget->getWidget("upload")->setEnabled(translationDataRemote && translationData != *translationDataRemote);
 
 	auto cost = project.getProperties().getLanguageCost(language);
 	widget->getWidget("costBox")->setActive(isDevEnvironment() && cost.has_value());

@@ -151,6 +151,11 @@ std::optional<int32_t> LocOriginalData::tryGetVersion(const String& key) const
 	return std::nullopt;
 }
 
+bool LocOriginalData::hasKey(const String& key) const
+{
+	return keyMap.contains(key);
+}
+
 size_t LocOriginalData::getNumEntries() const
 {
 	return keyIndices.size();
@@ -294,7 +299,13 @@ ConfigNode LocTranslationData::toConfigNode() const
 
 void LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
 {
-	entries[key] = LocTranslationEntry{ std::move(value), curVersion };
+	if (curVersion < 0) {
+		throw Exception("Invalid current version for key", HalleyExceptions::Tools);
+	}
+
+	if (entries.contains(key) || !value.isEmpty()) {
+		entries[key] = LocTranslationEntry{ std::move(value), curVersion };
+	}
 }
 
 const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) const
@@ -361,9 +372,22 @@ bool LocTranslationData::updateFromRemote(const LocTranslationData& remote)
 		}
 	}
 
-	Logger::logInfo("Updated " + toString(nModified) + " keys in " + language.getISOCode() + " from remote strings");
+	if (nModified > 0) {
+		Logger::logInfo("Updated " + toString(nModified) + " keys in " + language.getISOCode() + " from remote strings");
+	}
 
 	return nModified > 0;
+}
+
+bool LocTranslationData::pruneKeys(const LocOriginalData& originalLanguage)
+{
+	const auto nPruned = std_ex::erase_if_key(entries, [&] (const String& key) { return !originalLanguage.hasKey(key); });
+
+	if (nPruned > 0) {
+		Logger::logInfo("Pruned " + toString(nPruned) + " keys from " + language.getISOCode());
+	}
+
+	return nPruned > 0;
 }
 
 LocStringSet::LocStringSet(const ConfigNode& node)
@@ -397,3 +421,14 @@ LocTranslationData& LocStringSet::getLocalised(const I18NLanguage& language)
 	localised[code] = std::move(data);
 	return localised.at(code);
 }
+
+bool LocTranslationData::operator==(const LocTranslationData& other) const
+{
+	return language == other.language && entries == other.entries;
+}
+
+bool LocTranslationData::operator!=(const LocTranslationData& other) const
+{
+	return !(*this == other);
+}
+
