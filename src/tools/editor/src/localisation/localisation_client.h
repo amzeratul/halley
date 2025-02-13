@@ -28,7 +28,7 @@ namespace Halley {
 
 		Future<bool> putOriginalStrings(const LocOriginalData& origData) const;
 		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData) const;
-		Future<StringsResult> getStrings(I18NLanguage origLanguage, int minVersion) const;
+		Future<std::optional<StringsResult>> getStrings(I18NLanguage origLanguage, int minVersion) const;
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 

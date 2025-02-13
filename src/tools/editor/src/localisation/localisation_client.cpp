@@ -86,19 +86,19 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& 
 	});
 }
 
-Future<LocalisationClient::StringsResult> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
+Future<std::optional<LocalisationClient::StringsResult>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
 {
 	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
 		+ "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> StringsResult
+	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<StringsResult>
 	{
 		if (response->getResponseCode() == 200) {
 			return toStringsResult(origLanguage, JSONConvert::parseConfig(response->getBody()));
 		}
-		return {};
+		return std::nullopt;
 	});
 }
 

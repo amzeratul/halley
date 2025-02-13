@@ -134,11 +134,17 @@ void LocalisationEditor::update(Time t, bool moved)
 	}
 
 	if (remoteStringsFuture.isReady()) {
-		remoteStrings = remoteStringsFuture.get();
-		remoteStringsFuture = {};
-		state = State::Synchronised;
-		curMessage = "Waiting on Strings...";
-		gotRemoteStrings = true;
+		if (auto result = remoteStringsFuture.get()) {
+			remoteStrings = *result;
+			remoteStringsFuture = {};
+			state = State::Synchronised;
+			curMessage = "Waiting on Strings...";
+			gotRemoteStrings = true;
+		} else {
+			remoteStringsFuture = {};
+			state = State::NotConnected;
+			curMessage = "Unable to retrieve Strings.";
+		}
 	}
 
 	if (state == State::Synchronised && gotRemoteStrings && (!isDevEnvironment() || gotLocalStrings)) {
@@ -596,7 +602,7 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language, const Expo
 	//fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, false });
 	fileChooserParams.save = true;
 
-	OS::get().openFileChooser(fileChooserParams).then([this, language, options](std::optional<Path> path) {
+	OS::get().openFileChooser(fileChooserParams).then(Executors::getMainUpdateThread(), [this, language, options](std::optional<Path> path) {
 		if (path) {
 			doExportLanguage(language, options, *path);
 		}
@@ -675,7 +681,7 @@ void LocalisationEditor::importLanguage(const I18NLanguage& language)
 	fileChooserParams.fileTypes.emplace_back(FileChooserParameters::FileType{ "YAML", {"yaml"}, false });
 	fileChooserParams.save = false;
 
-	OS::get().openFileChooser(fileChooserParams).then([this, language](std::optional<Path> path) {
+	OS::get().openFileChooser(fileChooserParams).then(Executors::getMainUpdateThread(), [this, language](std::optional<Path> path) {
 		if (path) {
 			auto data = Path::readFile(*path);
 			if (!data.empty()) {

@@ -74,7 +74,7 @@ namespace Halley {
         std::optional<Result> localStrings;
         std::optional<Result> remoteStrings;
         Future<Result> localStringsFuture;
-        Future<Result> remoteStringsFuture;
+        Future<std::optional<Result>> remoteStringsFuture;
 
         void tryLoading();
         void loadOriginalDataFromDisk();

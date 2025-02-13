@@ -1,6 +1,7 @@
 #include "halley/file_formats/csv_file.h"
 
 #include "halley/text/string_converter.h"
+#include "halley/utils/utils.h"
 
 using namespace Halley;
 
@@ -32,7 +33,9 @@ std::optional<size_t> CSVFile::getColumnIndex(const String& column) const
 size_t CSVFile::addRow()
 {
 	const auto idx = getNumRows();
-	data.resize(data.size() + columns.size(), String());
+	const auto newSize = data.size() + columns.size();
+	data.reserve(nextPowerOf2(newSize)); // Important, otherwise we get O(n^2) performance
+	data.resize(newSize, String());
 	return idx;
 }
 
@@ -45,6 +48,11 @@ size_t CSVFile::addRow(gsl::span<const String> newData)
 	const auto idx = getNumRows();
 	data.insert(data.end(), newData.begin(), newData.end());
 	return idx;
+}
+
+void CSVFile::reserveRows(size_t nRows)
+{
+	data.reserve(nRows * columns.size());
 }
 
 void CSVFile::setCell(size_t row, std::optional<size_t> column, String value)
@@ -172,11 +180,7 @@ String CSVFile::save() const
 {
 	auto toCSVFormat = [](const String& str) -> String
 	{
-		if (str.startsWith("What'd you")) {
-			int a = 0;
-		}
-
-		if (str.startsWith(" ") || str.endsWith(" ") || str.contains(',') || str.contains('\"') || str.contains('\n') || str.contains('r')) {
+		if (str.startsWith(" ") || str.endsWith(" ") || str.contains(',') || str.contains('\"') || str.contains('\n') || str.contains('\r')) {
 			return "\"" + str.replaceAll("\"", "\"\"").replaceAll("\r\n", "\n").replaceAll("\r", "\n") + "\"";
 		}
 

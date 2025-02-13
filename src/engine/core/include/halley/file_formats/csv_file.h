@@ -11,7 +11,9 @@ namespace Halley {
 
         size_t addRow();
         size_t addRow(gsl::span<const String> data);
-        gsl::span<const String> getRow(size_t idx) const;
+        void reserveRows(size_t nRows);
+
+    	gsl::span<const String> getRow(size_t idx) const;
         gsl::span<String> getRow(size_t idx);
         size_t getNumRows() const;
 
