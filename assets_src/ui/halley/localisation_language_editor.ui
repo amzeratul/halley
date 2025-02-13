@@ -85,6 +85,104 @@ children:
                 fill: [fillHorizontal, top]
             fill: [fillHorizontal, fillVertical]
         fill: [fillHorizontal, fillVertical]
+      - uuid: 08928fe7-dd89-43c3-b0dc-6a2a309211b6
+        proportion: 0
+        border: [0, 0, 0, 0]
+        sizer:
+          columnProportions: []
+          columns: 2
+          gap: 2
+          type: horizontal
+        widget:
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: halley_ui/ui_list_item.png
+          innerBorder: [6, 4, 4, 4]
+          size: [300, 0]
+        children:
+          - uuid: fa28ca33-b5a5-4b71-9cfc-1977d6090dbe
+            sizer:
+              columnProportions: []
+            widget:
+              class: widget
+              size: [80, 0]
+            children:
+              - uuid: fd2554a1-ff7a-4ea5-ae73-434e3486103e
+                border: [0, 1, 0, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Comment: "
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+          - uuid: 7568505f-7284-428a-9d24-25ff7e116bc3
+            proportion: 1
+            border: [4, 0, 0, 0]
+            widget:
+              class: textInput
+              id: comment
+        fill: [fillHorizontal, fillVertical]
+      - uuid: 7b3693b6-0c3d-40bd-a25b-fd495d5f96a9
+        proportion: 0
+        border: [0, -10, 0, 0]
+        sizer:
+          columnProportions: []
+          columns: 2
+          gap: 2
+          type: horizontal
+        widget:
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: halley_ui/ui_list_item.png
+          innerBorder: [6, 4, 4, 4]
+          size: [300, 0]
+        children:
+          - uuid: f31847b5-349e-45b7-91c6-f811ca9bc766
+            sizer:
+              columnProportions: []
+            widget:
+              class: widget
+              size: [80, 0]
+            children:
+              - uuid: 6f7ef9e1-283a-4cd9-b66d-91b150e25811
+                border: [0, 1, 0, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Context: "
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+          - uuid: 01fe5a7e-0b33-43a5-bc13-2d468dfa3633
+            proportion: 1
+            border: [4, 0, 0, 0]
+            widget:
+              class: textInput
+              id: context
+          - uuid: be0ef790-2d3c-4f99-b20e-9b851cbb1abc
+            border: [20, 0, 0, 0]
+            sizer:
+              columnProportions: []
+            widget:
+              class: widget
+              size: [80, 0]
+            children:
+              - uuid: 05665421-d450-4d34-8677-fce520b08c5c
+                border: [0, 1, 0, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Priority: "
+                  wordWrapped: false
+                fill: [centreHorizontal, centreVertical]
+          - uuid: ecf4bd7d-7646-41b8-a9de-892c6b5173cd
+            proportion: 1
+            border: [4, 0, 0, 0]
+            widget:
+              class: textInput
+              id: priority
+        fill: [fillHorizontal, fillVertical]
       - uuid: 9b61bf06-5e61-4fb4-9d1e-db4c74b71da8
         proportion: 0
         border: [0, 0, 0, -10]
