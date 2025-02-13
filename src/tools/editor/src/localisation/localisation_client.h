@@ -6,15 +6,6 @@ namespace Halley {
 
 	class LocalisationClient {
 	public:
-		struct StringsResult {
-			std::optional<LocOriginalData> originalLanguage;
-			HashMap<String, LocTranslationData> localised;
-			bool success = false;
-			int highestVersion = 0;
-
-			LocTranslationData& getLocalised(const I18NLanguage& language);
-		};
-
 		enum class LoginResult {
 			Success,
 			ServerNotFound,
@@ -28,7 +19,7 @@ namespace Halley {
 
 		Future<bool> putOriginalStrings(const LocOriginalData& origData) const;
 		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData) const;
-		Future<std::optional<StringsResult>> getStrings(I18NLanguage origLanguage, int minVersion) const;
+		Future<std::optional<LocStringSet>> getStrings(I18NLanguage origLanguage, int minVersion) const;
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
@@ -52,6 +43,6 @@ namespace Halley {
 		ConfigNode getChunkConfig(const LocOriginalDataChunk& data) const;
 		ConfigNode getTranslationConfig(const LocTranslationData& data) const;
 
-		static StringsResult toStringsResult(I18NLanguage origLanguage, const ConfigNode& data);
+		static LocStringSet toLocStringSet(I18NLanguage origLanguage, const ConfigNode& data);
 	};
 }

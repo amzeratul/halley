@@ -249,6 +249,45 @@ void LocOriginalData::indexData()
 	}
 }
 
+LocTranslationEntry::LocTranslationEntry(const ConfigNode& node)
+{
+	value = node["value"].asString("");
+	origVersion = node["origVersion"].asInt(0);
+}
+
+LocTranslationEntry::LocTranslationEntry(String value, int32_t origVersion)
+	: value(std::move(value))
+	, origVersion(origVersion)
+{
+}
+
+ConfigNode LocTranslationEntry::toConfigNode() const
+{
+	ConfigNode result = ConfigNode::MapType();
+	result["value"] = value;
+	result["origVersion"] = origVersion;
+	return result;
+}
+
+LocTranslationData::LocTranslationData(const ConfigNode& node)
+{
+	load(node);
+}
+
+void LocTranslationData::load(const ConfigNode& node)
+{
+	language = I18NLanguage(node["language"].asString());
+	entries = node["entries"].asHashMap<String, LocTranslationEntry>();
+}
+
+ConfigNode LocTranslationData::toConfigNode() const
+{
+	ConfigNode result = ConfigNode::MapType();
+	result["language"] = language.getISOCode();
+	result["entries"] = entries;
+	return result;
+}
+
 void LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
 {
 	entries[key] = LocTranslationEntry{ std::move(value), curVersion };
@@ -268,13 +307,14 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 	TranslationStats result;
 
 	for (const auto& entry: entries) {
-		auto version = original.tryGetVersion(entry.first);
-		if (version) {
+		if (auto version = original.tryGetVersion(entry.first)) {
 			if (version == entry.second.origVersion) {
 				result.translatedKeys++;
 			} else {
 				result.outdatedKeys++;
 			}
+		} else {
+			result.superfluousKeys++;
 		}
 	}
 
@@ -293,4 +333,36 @@ LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& l
 	}
 
 	return result;
+}
+
+LocStringSet::LocStringSet(const ConfigNode& node)
+{
+	highestVersion = node["highestVersion"].asInt(0);
+	if (node.hasKey("originalLanguage")) {
+		//originalLanguage = LocOriginalData(node["originalLanguage"]); // Not implemented
+	}
+	localised = node["localised"].asHashMap<String, LocTranslationData>();
+}
+
+ConfigNode LocStringSet::toConfigNode() const
+{
+	ConfigNode result = ConfigNode::MapType();
+	result["highestVersion"] = highestVersion;
+	if (originalLanguage) {
+		//result["originalLanguage"] = *originalLanguage; // Not implemented
+	}
+	result["localised"] = localised;
+	return result;
+}
+
+LocTranslationData& LocStringSet::getLocalised(const I18NLanguage& language)
+{
+	const auto code = language.getISOCode();
+	if (const auto iter = localised.find(code); iter != localised.end()) {
+		return iter->second;
+	}
+	LocTranslationData data;
+	data.language = language;
+	localised[code] = std::move(data);
+	return localised.at(code);
 }

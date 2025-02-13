@@ -5,18 +5,6 @@
 
 using namespace Halley;
 
-LocTranslationData& LocalisationClient::StringsResult::getLocalised(const I18NLanguage& language)
-{
-	const auto code = language.getISOCode();
-	if (const auto iter = localised.find(code); iter != localised.end()) {
-		return iter->second;
-	}
-	LocTranslationData data;
-	data.language = language;
-	localised[code] = std::move(data);
-	return localised.at(code);
-}
-
 LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String project)
 	: web(web)
 	, baseURL(std::move(baseURL))
@@ -86,17 +74,17 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& 
 	});
 }
 
-Future<std::optional<LocalisationClient::StringsResult>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
+Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
 {
 	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
 		+ "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<StringsResult>
+	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
-			return toStringsResult(origLanguage, JSONConvert::parseConfig(response->getBody()));
+			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
 		}
 		return std::nullopt;
 	});
@@ -176,11 +164,11 @@ ConfigNode LocalisationClient::getTranslationConfig(const LocTranslationData& da
 	return result;
 }
 
-LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLanguage origLanguage, const ConfigNode& data)
+LocStringSet LocalisationClient::toLocStringSet(I18NLanguage origLanguage, const ConfigNode& data)
 {
 	int version = 0;
 
-	StringsResult result;
+	LocStringSet result;
 	result.originalLanguage = LocOriginalData();
 
 	for (const auto& entryNode: data.asSequence()) {
@@ -214,7 +202,6 @@ LocalisationClient::StringsResult LocalisationClient::toStringsResult(I18NLangua
 	result.originalLanguage->setLanguage(std::move(origLanguage));
 	result.originalLanguage->indexData();
 
-	result.success = true;
 	result.highestVersion = version;
 
 	return result;

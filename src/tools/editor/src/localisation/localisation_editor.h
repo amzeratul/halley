@@ -41,6 +41,7 @@ namespace Halley {
 
         std::shared_ptr<bool> aliveFlag;
         std::unique_ptr<LocalisationClient> client;
+        std::shared_ptr<ISaveData> storageContainer;
 
         enum class State {
 	        NotConnected,
@@ -70,13 +71,14 @@ namespace Halley {
         State state = State::NotConnected;
         std::optional<String> curMessage;
 
-        using Result = LocalisationClient::StringsResult;
-        std::optional<Result> localStrings;
-        std::optional<Result> remoteStrings;
-        Future<Result> localStringsFuture;
-        Future<std::optional<Result>> remoteStringsFuture;
+        std::optional<LocStringSet> localStrings;
+        std::optional<LocStringSet> remoteStrings;
+        Future<LocStringSet> localStringsFuture;
+        Future<std::optional<LocStringSet>> remoteStringsFuture;
 
         void tryLoading();
+
+        void loadLocalStrings();
         void loadOriginalDataFromDisk();
         void loadLocalStringsFromStorage();
         void saveLocalStringsToStorage();

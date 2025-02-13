@@ -29,6 +29,7 @@ namespace Halley {
 	public:
 		int translatedKeys = 0;
 		int outdatedKeys = 0;
+		int superfluousKeys = 0;
 	};;
 
 	class LocalisationDataEntry {
@@ -101,6 +102,12 @@ namespace Halley {
 	public:
 		String value;
 		int32_t origVersion;
+
+		LocTranslationEntry() = default;
+		LocTranslationEntry(const ConfigNode& node);
+		LocTranslationEntry(String value, int32_t origVersion);
+
+		ConfigNode toConfigNode() const;
 	};
 
 	class LocTranslationData {
@@ -108,10 +115,30 @@ namespace Halley {
 		I18NLanguage language;
 		HashMap<String, LocTranslationEntry> entries;
 
+		LocTranslationData() = default;
+		LocTranslationData(const ConfigNode& node);
+
+		void load(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
+
 		void setValue(const String& key, int32_t curVersion, String value);
 		const LocTranslationEntry* tryGetEntry(const String& key) const;
 
 		TranslationStats getTranslationStats(const LocOriginalData& original) const;
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
+	};
+
+	class LocStringSet {
+	public:
+		std::optional<LocOriginalData> originalLanguage;
+		HashMap<String, LocTranslationData> localised;
+		int highestVersion = 0;
+
+		LocStringSet() = default;
+		LocStringSet(const ConfigNode& node);
+
+		ConfigNode toConfigNode() const;
+
+		LocTranslationData& getLocalised(const I18NLanguage& language);
 	};
 }

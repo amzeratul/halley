@@ -69,6 +69,9 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWind
 	, api(projectWindow.getAPI())
 	, aliveFlag(std::make_shared<bool>(true))
 {
+	if (!project.getProperties().isDevEnvironment()) {
+		storageContainer = api.system->getStorageContainer(SaveDataType::SaveLocal, "loc_data_" + project.getBinName());
+	}
 }
 
 LocalisationEditor::~LocalisationEditor()
@@ -78,11 +81,7 @@ LocalisationEditor::~LocalisationEditor()
 
 void LocalisationEditor::onMakeUI()
 {
-	if (isDevEnvironment()) {
-		loadOriginalDataFromDisk();
-	} else {
-		loadLocalStringsFromStorage();
-	}
+	loadLocalStrings();
 
 	setHandle(UIEventType::ButtonClicked, "upload", [=] (const UIEvent& event)
 	{
@@ -188,11 +187,20 @@ void LocalisationEditor::tryLoading()
 	}
 }
 
+void LocalisationEditor::loadLocalStrings()
+{
+	if (isDevEnvironment()) {
+		loadOriginalDataFromDisk();
+	} else {
+		loadLocalStringsFromStorage();
+	}
+}
+
 void LocalisationEditor::loadOriginalDataFromDisk()
 {
-	localStringsFuture = Concurrent::execute([info = LocalisationInfoRetriever(project)]() -> Result
+	localStringsFuture = Concurrent::execute([info = LocalisationInfoRetriever(project)]() -> LocStringSet
 	{
-		Result result;
+		LocStringSet result;
 		auto& project = info.getProject();
 
 		// Scan for original language
@@ -212,18 +220,17 @@ void LocalisationEditor::loadOriginalDataFromDisk()
 
 void LocalisationEditor::loadLocalStringsFromStorage()
 {
-	Result result;
-	// TODO
-	localStringsFuture = Future<Result>::makeImmediate(result);
+	if (!isDevEnvironment()) {
+		const auto& configFile = Deserializer::fromBytes<ConfigFile>(storageContainer->getData("localStrings"), SerializerOptions(1));
+		localStringsFuture = Future<LocStringSet>::makeImmediate(LocStringSet(configFile.getRoot()));
+	}
 }
 
 void LocalisationEditor::saveLocalStringsToStorage()
 {
-	if (isDevEnvironment()) {
-		return;
+	if (!isDevEnvironment()) {
+		storageContainer->setData("localStrings", Serializer::toBytes(ConfigFile(localStrings->toConfigNode()), SerializerOptions(1)));
 	}
-
-	// TODO
 }
 
 void LocalisationEditor::onLocalStringsModified()
@@ -700,6 +707,7 @@ void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const St
 	} else {
 		Logger::logError("Unknown extension for localisation import: \"" + extension + "\"");
 	}
+	onLocalStringsModified();
 }
 
 void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)
@@ -726,8 +734,6 @@ void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, co
 	}
 
 	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
-
-	onLocalStringsModified();
 }
 
 void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, const Bytes& data)
@@ -757,6 +763,4 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 	}
 
 	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
-
-	onLocalStringsModified();
 }
