@@ -96,12 +96,6 @@ void LocOriginalData::setLanguage(I18NLanguage language)
 	this->language = language;
 }
 
-void LocOriginalDataChunk::computeHash()
-{
-	// TODO
-	hash = 0;
-}
-
 const I18NLanguage& LocOriginalData::getLanguage() const
 {
 	return language;
@@ -180,8 +174,6 @@ namespace {
 			String comment; // TODO
 			result.entries.emplace_back(entry["key"].asString(), entry["value"].asString(""), std::move(context), std::move(comment));
 		}
-
-		result.computeHash();
 
 		return result;
 	}
@@ -314,7 +306,7 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 				result.outdatedKeys++;
 			}
 		} else {
-			result.superfluousKeys++;
+			result.obsoleteKeys++;
 		}
 	}
 

@@ -29,7 +29,7 @@ namespace Halley {
 	public:
 		int translatedKeys = 0;
 		int outdatedKeys = 0;
-		int superfluousKeys = 0;
+		int obsoleteKeys = 0;
 	};;
 
 	class LocalisationDataEntry {
@@ -57,15 +57,12 @@ namespace Halley {
 		String name;
 		String category;
 		Vector<LocalisationDataEntry> entries;
-		LocalisationHashType hash = 0;
 
 		LocalisationStats getStats() const;
 		LocalisationStats getStats(const LocTranslationData& translated) const;
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
-
-		void computeHash();
 
 		bool operator<(const LocOriginalDataChunk& other) const;
 	};
