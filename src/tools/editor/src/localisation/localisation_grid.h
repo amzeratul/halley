@@ -42,6 +42,8 @@ namespace Halley {
         HashSet<int> selectedLines;
         Vector<std::optional<Colour4f>> colours;
 
+        std::optional<int> holdingLine;
+
 		void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
 		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
 

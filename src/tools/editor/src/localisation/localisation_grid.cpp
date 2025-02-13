@@ -279,6 +279,15 @@ void LocalisationGrid::onMouseOver(Vector2f mousePos)
 	} else {
 		lineUnderMouse = line;
 	}
+
+	if (holdingLine && lineUnderMouse != holdingLine) {
+		selectedLines.clear();
+		int start = std::min(*holdingLine, *lineUnderMouse);
+		int end = std::max(*holdingLine, *lineUnderMouse);
+		for (int i = start; i <= end; ++i) {
+			selectedLines.insert(i);
+		}
+	}
 }
 
 void LocalisationGrid::onMouseLeft(Vector2f mousePos)
@@ -290,11 +299,15 @@ void LocalisationGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods
 {
 	if (button == 0) {
 		onClickLine(lineUnderMouse.value_or(-1), keyMods);
+		holdingLine = lineUnderMouse;
 	}
 }
 
 void LocalisationGrid::releaseMouse(Vector2f mousePos, int button)
 {
+	if (button == 0) {
+		holdingLine = {};
+	}
 }
 
 void LocalisationGrid::onClickLine(std::optional<int> line, KeyMods mods)
