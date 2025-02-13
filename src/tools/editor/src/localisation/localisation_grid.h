@@ -16,9 +16,9 @@ namespace Halley {
     	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData);
         void setLineColourFilter(LineColourCallback callback);
 
-    	int getSelectedLine() const;
+    	int getActiveSelectedLine() const;
+        const String& getActiveSelectedKey() const;
         void setSelectedLine(int line);
-        const String& getSelectedKey() const;
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
@@ -38,10 +38,13 @@ namespace Halley {
         Colour4f outdatedCol;
 
         std::optional<int> lineUnderMouse;
-        std::optional<int> selectedLine;
+        std::optional<int> activeSelectedLine;
+        HashSet<int> selectedLines;
         Vector<std::optional<Colour4f>> colours;
 
 		void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
 		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
+
+        void onClickLine(std::optional<int> line, KeyMods mods);
     };
 }

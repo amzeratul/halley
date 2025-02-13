@@ -65,7 +65,7 @@ void LocalisationLanguageEditor::onMakeUI()
 	{
 		setSelectedLine(event.getIntData(), event.getStringData());
 	});
-	setSelectedLine(grid->getSelectedLine(), grid->getSelectedKey());
+	setSelectedLine(grid->getActiveSelectedLine(), grid->getActiveSelectedKey());
 
 	setHandle(UIEventType::TextChanged, "srcCurLine", [=] (const UIEvent& event)
 	{
@@ -83,7 +83,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	setHandle(UIEventType::TextSubmit, "dstCurLine", [=] (const UIEvent& event)
 	{
-		grid->setSelectedLine(grid->getSelectedLine() + 1);
+		grid->setSelectedLine(grid->getActiveSelectedLine() + 1);
 	});
 }
 
