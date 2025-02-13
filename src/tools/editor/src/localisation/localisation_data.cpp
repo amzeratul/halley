@@ -244,6 +244,7 @@ void LocOriginalData::indexData()
 LocTranslationEntry::LocTranslationEntry(const ConfigNode& node)
 {
 	value = node["value"].asString("");
+	version = node["version"].asInt(0);
 	origVersion = node["origVersion"].asInt(0);
 }
 
@@ -253,10 +254,21 @@ LocTranslationEntry::LocTranslationEntry(String value, int32_t origVersion)
 {
 }
 
+bool LocTranslationEntry::operator==(const LocTranslationEntry& other) const
+{
+	return value == other.value && version == other.version && origVersion == other.origVersion;
+}
+
+bool LocTranslationEntry::operator!=(const LocTranslationEntry& other) const
+{
+	return !(*this == other);
+}
+
 ConfigNode LocTranslationEntry::toConfigNode() const
 {
 	ConfigNode result = ConfigNode::MapType();
 	result["value"] = value;
+	result["version"] = version;
 	result["origVersion"] = origVersion;
 	return result;
 }
@@ -325,6 +337,33 @@ LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& l
 	}
 
 	return result;
+}
+
+bool LocTranslationData::updateFromRemote(const LocTranslationData& remote)
+{
+	if (remote.language != language) {
+		throw Exception("Language mismatch: local is " + language.getISOCode() + ", remote is " + remote.language.getISOCode(), HalleyExceptions::Tools);
+	}
+
+	int nModified = 0;
+	for (const auto& [key, remoteEntry]: remote.entries) {
+		auto iter = entries.find(key);
+		if (iter == entries.end()) {
+			iter = entries.insert_or_assign(key, LocTranslationEntry()).first;
+		}
+		auto& myEntry = iter->second;
+
+		if (remoteEntry.version > myEntry.version || myEntry.value.isEmpty()) {
+			if (remoteEntry != myEntry) {
+				myEntry = remoteEntry;
+				++nModified;
+			}
+		}
+	}
+
+	Logger::logInfo("Updated " + toString(nModified) + " keys in " + language.getISOCode() + " from remote strings");
+
+	return nModified > 0;
 }
 
 LocStringSet::LocStringSet(const ConfigNode& node)

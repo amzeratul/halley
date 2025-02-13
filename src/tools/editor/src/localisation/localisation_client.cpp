@@ -190,7 +190,8 @@ LocStringSet LocalisationClient::toLocStringSet(I18NLanguage origLanguage, const
 			for (const auto& [lang, translationNode]: entryNode["translations"].asMap()) {
 				LocTranslationEntry translatedEntry;
 				translatedEntry.value = translationNode["value"].asString("");
-				translatedEntry.origVersion = translationNode["version"].asInt(0);
+				translatedEntry.version = translationNode["version"].asInt(0);
+				translatedEntry.origVersion = translationNode["origVersion"].asInt(0);
 
 				result.localised[lang].entries[key] = translatedEntry;
 			}

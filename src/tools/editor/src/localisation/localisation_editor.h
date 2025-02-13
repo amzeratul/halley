@@ -85,6 +85,7 @@ namespace Halley {
 
         void onLocalStringsModified();
         void onRemoteStringsModified();
+        bool updateLocalFromRemote();
 
         void populateData();
         void populateOriginalLanguageData();

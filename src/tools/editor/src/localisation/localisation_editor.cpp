@@ -146,10 +146,10 @@ void LocalisationEditor::update(Time t, bool moved)
 		}
 	}
 
-	if (state == State::Synchronised && gotRemoteStrings && (!isDevEnvironment() || gotLocalStrings)) {
+	if (state == State::Synchronised && gotRemoteStrings && gotLocalStrings) {
 		state = State::Ready;
 		curMessage = {};
-		populateData();
+		onRemoteStringsModified();
 	}
 
 	getWidget("signInPanel")->setActive(state == State::NotConnected);
@@ -246,7 +246,29 @@ void LocalisationEditor::onLocalStringsModified()
 
 void LocalisationEditor::onRemoteStringsModified()
 {
-	populateData();
+	const bool updated = updateLocalFromRemote();
+	if (!updated) {
+		// The above will call this already if it detects local changes
+		populateData();
+	}
+}
+
+bool LocalisationEditor::updateLocalFromRemote()
+{
+	if (!isDevEnvironment()) {
+		return false;
+	}
+
+	bool modified = false;
+
+	for (auto& remoteLoc: remoteStrings->localised) {
+		modified = localStrings->getLocalised(I18NLanguage(remoteLoc.first)).updateFromRemote(remoteLoc.second) || modified;
+	}
+
+	if (modified) {
+		onLocalStringsModified();
+	}
+	return modified;
 }
 
 void LocalisationEditor::populateData()

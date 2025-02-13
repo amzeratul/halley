@@ -98,11 +98,15 @@ namespace Halley {
 	class LocTranslationEntry {
 	public:
 		String value;
+		int32_t version;
 		int32_t origVersion;
 
 		LocTranslationEntry() = default;
 		LocTranslationEntry(const ConfigNode& node);
 		LocTranslationEntry(String value, int32_t origVersion);
+
+		bool operator==(const LocTranslationEntry& other) const;
+		bool operator!=(const LocTranslationEntry& other) const;
 
 		ConfigNode toConfigNode() const;
 	};
@@ -123,6 +127,8 @@ namespace Halley {
 
 		TranslationStats getTranslationStats(const LocOriginalData& original) const;
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
+
+		bool updateFromRemote(const LocTranslationData& remote);
 	};
 
 	class LocStringSet {
