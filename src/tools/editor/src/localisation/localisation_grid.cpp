@@ -25,7 +25,9 @@ LocalisationGrid::LocalisationGrid(UIFactory& factory)
 
 void LocalisationGrid::update(Time t, bool moved)
 {
-
+	if (scrollCooldown >= 0) {
+		scrollCooldown -= t;
+	}
 }
 
 namespace {
@@ -51,6 +53,7 @@ namespace {
 void LocalisationGrid::draw(UIPainter& painter) const
 {
 	const auto clip = painter.getClip();
+	drawClip = clip;
 	const Rect4f relClip = (clip ? *clip : getRect()) - getPosition();
 
 	const auto n = static_cast<int>(origData ? origData->getNumEntries() : 0);
@@ -273,19 +276,40 @@ void LocalisationGrid::setSelectedLine(int line)
 
 void LocalisationGrid::onMouseOver(Vector2f mousePos)
 {
+	const auto nLines = static_cast<int>(origData->getNumEntries());
 	const auto line = static_cast<int>((mousePos.y - getPosition().y) / lineHeight) - 1;
-	if (!origData || line < 0 || line >= static_cast<int>(origData->getNumEntries())) {
+	boundedLineUnderMouse = nLines >= 0 ? std::optional<int>(clamp(line, 0, nLines - 1)) : std::nullopt;
+
+	if (line != boundedLineUnderMouse) {
 		lineUnderMouse = {};
 	} else {
 		lineUnderMouse = line;
 	}
 
-	if (holdingLine && lineUnderMouse != holdingLine) {
+	if (holdingLine && boundedLineUnderMouse != holdingLine) {
+		holdingMoved = true;
+	}
+
+	if (holdingLine && boundedLineUnderMouse && holdingMoved) {
 		selectedLines.clear();
-		int start = std::min(*holdingLine, *lineUnderMouse);
-		int end = std::max(*holdingLine, *lineUnderMouse);
+		const int start = std::min(*holdingLine, *boundedLineUnderMouse);
+		const int end = std::max(*holdingLine, *boundedLineUnderMouse);
 		for (int i = start; i <= end; ++i) {
 			selectedLines.insert(i);
+		}
+	}
+
+	if (scrollCooldown <= 0 && drawClip) {
+		const auto clipRect = *drawClip;
+		const auto rect = clipRect - getPosition();
+		constexpr auto scrollDelta = 20.0f;
+		constexpr auto cooldown = 0.016;
+		if (mousePos.y < clipRect.getTop()) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), Rect4f(rect.getTopLeft() - Vector2f(0, scrollDelta), rect.getTopRight())));
+			scrollCooldown = cooldown;
+		} else if (mousePos.y > clipRect.getBottom()) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), Rect4f(rect.getBottomLeft(), rect.getBottomRight() + Vector2f(0, scrollDelta))));
+			scrollCooldown = cooldown;
 		}
 	}
 }
@@ -300,6 +324,8 @@ void LocalisationGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods
 	if (button == 0) {
 		onClickLine(lineUnderMouse.value_or(-1), keyMods);
 		holdingLine = lineUnderMouse;
+		holdingMoved = false;
+		focus();
 	}
 }
 
@@ -307,7 +333,18 @@ void LocalisationGrid::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0) {
 		holdingLine = {};
+		holdingMoved = false;
 	}
+}
+
+bool LocalisationGrid::isFocusLocked() const
+{
+	return holdingLine.has_value();
+}
+
+bool LocalisationGrid::canReceiveFocus() const
+{
+	return true;
 }
 
 void LocalisationGrid::onClickLine(std::optional<int> line, KeyMods mods)

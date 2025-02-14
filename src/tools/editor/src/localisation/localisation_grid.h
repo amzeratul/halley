@@ -25,6 +25,8 @@ namespace Halley {
         void onMouseLeft(Vector2f mousePos) override;
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
         void releaseMouse(Vector2f mousePos, int button) override;
+        bool isFocusLocked() const override;
+        bool canReceiveFocus() const override;
 
     private:
         UIFactory& factory;
@@ -38,13 +40,18 @@ namespace Halley {
         Colour4f outdatedCol;
 
         std::optional<int> lineUnderMouse;
+        std::optional<int> boundedLineUnderMouse;
         std::optional<int> activeSelectedLine;
         HashSet<int> selectedLines;
         Vector<std::optional<Colour4f>> colours;
 
         std::optional<int> holdingLine;
+        bool holdingMoved = false;
 
-		void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
+        Time scrollCooldown = 0;
+        mutable std::optional<Rect4f> drawClip;
+
+        void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
 		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
 
         void onClickLine(std::optional<int> line, KeyMods mods);
