@@ -18,8 +18,8 @@ namespace Halley
 	public:
 		virtual ~HTTPResponse() {}
 
-		virtual int getResponseCode() const = 0;
-		virtual const Bytes& getBody() const = 0;
+		virtual int getResponseCode() const { return 0; }
+		virtual const Bytes& getBody() const { const static Bytes bytes; return bytes; }
 		virtual Bytes moveBody() { return getBody(); }
 		virtual String getRedirectLocation() { return ""; }
 

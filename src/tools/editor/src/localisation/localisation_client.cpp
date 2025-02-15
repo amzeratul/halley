@@ -14,6 +14,11 @@ LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String proje
 
 Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String& username, const String& password)
 {
+	if (connecting) {
+		Logger::logError("Already trying to connect to server");
+		return Future<LoginResult>::makeImmediate(LoginResult::InvalidLogin);
+	}
+
 	this->username = username;
 	this->password = password;
 
@@ -21,13 +26,31 @@ Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String&
 		return Future<LoginResult>::makeImmediate(LoginResult::InvalidLogin);
 	}
 
-	// TODO: talk to server
+	ConfigNode reqInfo;
+	reqInfo["username"] = username;
+	reqInfo["password"] = password;
+	const auto reqBody = JSONConvert::generateJSON(reqInfo).toBytes();
 
-	connected = true;
-	languages.push_back("*");
-	permissions.push_back("orig");
+	const auto url = baseURL + "/sessions";
+	auto request = web.makeHTTPRequest(HTTPMethod::POST, url);
+	request->setBody("application/json", reqBody);
 
-	return Future<LoginResult>::makeImmediate(LoginResult::Success);
+	connecting = true;
+	return request->send().then(Executors::getMainUpdateThread(), [=] (std::unique_ptr<HTTPResponse> response) -> LoginResult
+	{
+		connecting = false;
+		if (response->getResponseCode() == 0) {
+			setToken("");
+			return LoginResult::ServerNotFound;
+		} else if (response->getResponseCode() == 200) {
+			const auto responseBody = JSONConvert::parseConfig(response->getBody());
+			setToken(responseBody["token"].asString(""));
+			return connected ? LoginResult::Success : LoginResult::InvalidLogin;
+		} else {
+			setToken("");
+			return LoginResult::InvalidLogin;
+		}
+	});
 }
 
 void LocalisationClient::signOut()
@@ -39,7 +62,7 @@ void LocalisationClient::signOut()
 	password = {};
 }
 
-Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData) const
+Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData)
 {
 	ConfigNode root;
 	auto& chunks = root["chunks"];
@@ -53,14 +76,14 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origD
 
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
 	request->setBody("application/json", data);
-	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
+	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
 	{
 		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
 	});
 }
 
-Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData) const
+Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData)
 {
 	const auto data = JSONConvert::generateJSON(getChunkConfig(origData)).toBytes();
 
@@ -68,21 +91,21 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& 
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
 	request->setBody("application/json", data);
 
-	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
+	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
 	{
 		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
 	});
 }
 
-Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion) const
+Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion)
 {
 	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
 		+ "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return request->send().then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
+	return sendWithAuthorization(std::move(request)).then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
@@ -99,7 +122,7 @@ Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, con
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
 	request->setBody("application/json", data);
 
-	return request->send().then([] (std::unique_ptr<HTTPResponse> response)
+	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
 	{
 		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
@@ -208,4 +231,55 @@ LocStringSet LocalisationClient::toLocStringSet(I18NLanguage origLanguage, const
 	result.highestVersion = version;
 
 	return result;
+}
+
+void LocalisationClient::setToken(String _token)
+{
+	token = std::move(_token);
+
+	connected = !token.isEmpty();
+
+	// TODO: extract from Token
+	languages.push_back("*");
+	permissions.push_back("orig");
+
+	if (connected) {
+		sendPending();
+	}
+}
+
+Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(std::unique_ptr<HTTPRequest> request)
+{
+	if (connected) {
+		addAuthorization(*request);
+		return request->send();
+	} else {
+		auto& pending = pendingRequests.emplace_back();
+		pending.request = std::move(request);
+
+		if (!connecting) {
+			signIn(username, password);
+		}
+
+		return pending.promise.getFuture();
+	}
+}
+
+void LocalisationClient::sendPending()
+{
+	if (connected) {
+		for (auto& pending: pendingRequests) {
+			addAuthorization(*pending.request);
+			pending.request->send().then([=, promise = std::move(pending.promise)](std::unique_ptr<HTTPResponse> response) mutable
+			{
+				promise.setValue(std::move(response));
+			});
+		}
+		pendingRequests.clear();
+	}
+}
+
+void LocalisationClient::addAuthorization(HTTPRequest& req) const
+{
+	req.setHeader("authorization", "Bearer " + token);
 }
