@@ -237,11 +237,26 @@ void LocalisationClient::setToken(String _token)
 {
 	token = std::move(_token);
 
-	connected = !token.isEmpty();
+	connected = false;
+	languages.clear();
+	permissions.clear();
 
-	// TODO: extract from Token
-	languages.push_back("*");
-	permissions.push_back("orig");
+	try {
+		if (!token.isEmpty()) {
+			const auto split = token.split('.');
+			if (split.size() == 3) {
+				const auto jsonClaims = String(Encode::decodeBase64(split[1]));
+				Logger::logDev("Auth token claims:\n" + jsonClaims);
+				const auto claims = JSONConvert::parseConfig(jsonClaims);
+
+				connected = true;
+				languages.push_back("*");
+				permissions.push_back("orig");
+			}
+		}
+	} catch (...) {
+		Logger::logError("Invalid token returned from server: " + token);
+	}
 
 	if (connected) {
 		sendPending();

@@ -26,18 +26,23 @@
 
 using namespace Halley;
 
-static const char* base16dict = "0123456789abcdef";
-
-static const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static Bytes base64reverse;
+namespace {
+	const char* base16dict = "0123456789abcdef";
+	const char* base64dict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	const char* base64URLdict = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+	Bytes base64reverse;
+}
 
 static void initBase64()
 {
 	static bool hasInit = false;
 	if (!hasInit) {
-		base64reverse.resize(256);
-		for (size_t i=0; i<64; i++) {
+		base64reverse.resize(256, 254);
+		for (size_t i = 0; i < 64; i++) {
 			base64reverse[base64dict[i]] = char(i);
+		}
+		for (size_t i = 62; i < 64; i++) {
+			base64reverse[base64URLdict[i]] = char(i);
 		}
 		base64reverse['='] = 255;
 		hasInit = true;
@@ -110,10 +115,11 @@ Bytes Encode::decodeBase16(std::string_view in)
 	return result;
 }
 
-String Encode::encodeBase64(gsl::span<const gsl::byte> in)
+String Encode::encodeBase64(gsl::span<const gsl::byte> in, bool url)
 {
 	size_t sz = in.size();
 	Bytes result(((sz+2) / 3) * 4);
+	const char* dict = url ? base64URLdict : base64dict;
 
 	for (size_t i=0; i<sz; i+=3) {
 		// Input bytes
@@ -128,10 +134,16 @@ String Encode::encodeBase64(gsl::span<const gsl::byte> in)
 		unsigned int o3 = (inByte >> 0) & 0x3F;
 
 		size_t outPos = i / 3 * 4;
-		result[outPos] = base64dict[o0];
-		result[outPos+1] = base64dict[o1];
-		result[outPos+2] = available >= 2 ? base64dict[o2] : '=';
-		result[outPos+3] = available >= 3 ? base64dict[o3] : '=';
+		result[outPos] = dict[o0];
+		result[outPos+1] = dict[o1];
+		result[outPos+2] = available >= 2 ? dict[o2] : '=';
+		result[outPos+3] = available >= 3 ? dict[o3] : '=';
+	}
+
+	if (url) {
+		while (!result.empty() && result.back() == '=') {
+			result.pop_back();
+		}
 	}
 
 	return String(reinterpret_cast<const char*>(result.data()), result.size());
@@ -148,13 +160,24 @@ void Encode::decodeBase64(std::string_view in, gsl::span<gsl::byte> out)
 {
 	initBase64();
 
+	const auto& reverse = base64reverse.const_span();
 	const auto outWrite = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(out.data()), out.size());
 
-	for (size_t i = 0; i < in.length(); i += 4) {
-		int b0 = base64reverse[in[i]];
-		int b1 = base64reverse[in[i + 1]];
-		int b2 = base64reverse[in[i + 2]];
-		int b3 = base64reverse[in[i + 3]];
+	const auto n = in.length();
+	auto getIn = [&](size_t i) -> int
+	{
+		return i >= n ? 255 : reverse[in[i]];
+	};
+
+	for (size_t i = 0; i < n; i += 4) {
+		const int b0 = getIn(i);
+		const int b1 = getIn(i + 1);
+		int b2 = getIn(i + 2);
+		int b3 = getIn(i + 3);
+
+		if (b0 == 254 || b1 == 254 || b2 == 254 || b3 == 254) {
+			throw Exception("Invalid Base64 encoded string", HalleyExceptions::Utils);
+		}
 
 		int available = 3;
 		if (b3 == 255) {
@@ -182,13 +205,14 @@ void Encode::decodeBase64(std::string_view in, gsl::span<gsl::byte> out)
 size_t Encode::getBase64Length(std::string_view in)
 {
 	size_t sz = in.length();
+	sz = alignUp<size_t>(sz, 4);
 	assert(sz % 4 == 0);
 
 	size_t resLen = sz * 3 / 4;
 	if (resLen > 0) {
-		if (in[sz-2] == '=') {
+		if (in.length() <= sz - 2 || in[sz - 2] == '=') {
 			resLen -= 2;
-		} else if (in[sz-1] == '=') {
+		} else if (in.length() <= sz - 1 || in[sz - 1] == '=') {
 			resLen -= 1;
 		}
 	}

@@ -31,7 +31,7 @@ namespace Halley {
 		void decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes);
 		Bytes decodeBase16(std::string_view in);
 
-		String encodeBase64(gsl::span<const gsl::byte> in);
+		String encodeBase64(gsl::span<const gsl::byte> in, bool url = false);
 		Bytes decodeBase64(std::string_view in);
 		void decodeBase64(std::string_view in, gsl::span<gsl::byte> out);
 		size_t getBase64Length(std::string_view in);
