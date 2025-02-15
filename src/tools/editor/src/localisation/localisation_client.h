@@ -24,7 +24,6 @@ namespace Halley {
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
 		bool isConnected() const;
-		const Vector<String>& getPermissions() const;
 		const Vector<String>& getLanguages() const;
 		bool hasPermission(std::string_view str) const;
 
@@ -37,10 +36,12 @@ namespace Halley {
 		String password;
 
 		String token;
-		bool connected = false;
-		bool connecting = false;
+		std::optional<long long> tokenExpiration;
 		Vector<String> permissions;
 		Vector<String> languages;
+
+		bool connected = false;
+		bool connecting = false;
 
 		struct PendingRequest {
 			Promise<std::unique_ptr<HTTPResponse>> promise;

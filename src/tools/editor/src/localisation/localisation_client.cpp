@@ -29,6 +29,7 @@ Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String&
 	ConfigNode reqInfo;
 	reqInfo["username"] = username;
 	reqInfo["password"] = password;
+	reqInfo["project"] = project;
 	const auto reqBody = JSONConvert::generateJSON(reqInfo).toBytes();
 
 	const auto url = baseURL + "/sessions";
@@ -47,6 +48,8 @@ Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String&
 			setToken(responseBody["token"].asString(""));
 			return connected ? LoginResult::Success : LoginResult::InvalidLogin;
 		} else {
+			const auto responseBody = JSONConvert::parseConfig(response->getBody());
+			Logger::logError("Error attempting to login: " + responseBody["errorMsg"].asString(""));
 			setToken("");
 			return LoginResult::InvalidLogin;
 		}
@@ -132,11 +135,6 @@ Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, con
 bool LocalisationClient::isConnected() const
 {
 	return connected;
-}
-
-const Vector<String>& LocalisationClient::getPermissions() const
-{
-	return permissions;
 }
 
 const Vector<String>& LocalisationClient::getLanguages() const
@@ -240,6 +238,7 @@ void LocalisationClient::setToken(String _token)
 	connected = false;
 	languages.clear();
 	permissions.clear();
+	tokenExpiration = {};
 
 	try {
 		if (!token.isEmpty()) {
@@ -249,9 +248,11 @@ void LocalisationClient::setToken(String _token)
 				Logger::logDev("Auth token claims:\n" + jsonClaims);
 				const auto claims = JSONConvert::parseConfig(jsonClaims);
 
+				tokenExpiration = claims["exp"].asOptional<int64_t>();
+				permissions = claims["permissions"].asVector<String>({});
+				languages = claims["languages"].asVector<String>({});
+
 				connected = true;
-				languages.push_back("*");
-				permissions.push_back("orig");
 			}
 		}
 	} catch (...) {
@@ -265,6 +266,17 @@ void LocalisationClient::setToken(String _token)
 
 Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(std::unique_ptr<HTTPRequest> request)
 {
+	if (tokenExpiration) {
+		// Check for expiration
+		const auto secondsSinceEpoch = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		int64_t secondsLeft = *tokenExpiration - secondsSinceEpoch;
+		if (secondsLeft < 60) {
+			// Expire token
+			Logger::logInfo("Localisation token expiring, will obtain a new one");
+			setToken("");
+		}
+	}
+
 	if (connected) {
 		addAuthorization(*request);
 		return request->send();
