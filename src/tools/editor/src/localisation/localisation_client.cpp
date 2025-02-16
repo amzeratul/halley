@@ -308,5 +308,5 @@ void LocalisationClient::sendPending()
 
 void LocalisationClient::addAuthorization(HTTPRequest& req) const
 {
-	req.setHeader("authorization", "Bearer " + token);
+	req.setHeader("Authorization", "Bearer " + token);
 }
