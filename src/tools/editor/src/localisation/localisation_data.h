@@ -87,6 +87,8 @@ namespace Halley {
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
 
+		bool updateFromRemote(const LocOriginalData& remote);
+
 		void indexData();
 
 	private:

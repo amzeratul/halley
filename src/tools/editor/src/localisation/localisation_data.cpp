@@ -231,6 +231,23 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 	return result;
 }
 
+bool LocOriginalData::updateFromRemote(const LocOriginalData& remote)
+{
+	// This only updates versions
+	bool modified = false;
+	for (auto& chunk: chunks) {
+		for (auto& entry: chunk.entries) {
+			if (const auto remoteVersion = remote.tryGetVersion(entry.key)) {
+				if (entry.version != *remoteVersion) {
+					entry.version = *remoteVersion;
+					modified = true;
+				}
+			}
+		}
+	}
+	return modified;
+}
+
 void LocOriginalData::indexData()
 {
 	keyIndices.clear();

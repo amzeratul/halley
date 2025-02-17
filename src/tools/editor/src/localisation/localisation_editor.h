@@ -84,7 +84,7 @@ namespace Halley {
         void saveLocalStringsToStorage();
 
         void onLocalStringsModified();
-        void onRemoteStringsModified();
+        void onRemoteStringsReceived();
         bool updateLocalFromRemote();
 
         void populateData();
