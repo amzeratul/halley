@@ -9,7 +9,7 @@ namespace Halley {
         using VoiceCallback = std::function<void(AudioVoice&)>;
 
         AudioEmitter() = default;
-        explicit AudioEmitter(AudioEmitterId id, AudioPosition position, bool temporary = false, AudioEmitter* fallback = nullptr);
+        explicit AudioEmitter(AudioEngine& engine, AudioEmitterId id, AudioPosition position, bool temporary = false, AudioEmitter* fallback = nullptr);
 
         [[nodiscard]] AudioEmitterId getId() const;
 
@@ -35,6 +35,7 @@ namespace Halley {
     	AudioDebugData::EmitterData getDebugData() const;
 
     private:
+        AudioEngine& engine;
         AudioEmitterId id = 0;
         bool temporary = false;
         AudioPosition position;
@@ -42,7 +43,7 @@ namespace Halley {
         AudioRegionId regionId = 0;
 
         Vector<std::unique_ptr<AudioVoice>> voices;
-        HashMap<String, String> switchValues;
-        HashMap<String, float> variableValues;
+        mutable HashMap<String, String> switchValues;
+        mutable HashMap<String, float> variableValues;
     };
 }

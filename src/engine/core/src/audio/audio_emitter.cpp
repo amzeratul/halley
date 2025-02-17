@@ -1,11 +1,13 @@
 #include "audio_emitter.h"
 
+#include "audio_engine.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
-AudioEmitter::AudioEmitter(AudioEmitterId id, AudioPosition position, bool temporary, AudioEmitter* fallback)
-	: id(id)
+AudioEmitter::AudioEmitter(AudioEngine& engine, AudioEmitterId id, AudioPosition position, bool temporary, AudioEmitter* fallback)
+	: engine(engine)
+	, id(id)
 	, temporary(temporary)
 	, position(std::move(position))
 	, fallback(fallback)
@@ -86,7 +88,13 @@ const String& AudioEmitter::getSwitchValue(const String& id) const
 {
 	const auto iter = switchValues.find(id);
 	if (iter == switchValues.end()) {
-		return fallback ? fallback->getSwitchValue(id) : String::emptyString();
+		if (fallback) {
+			return fallback->getSwitchValue(id);
+		} else {
+			const auto& value = engine.getSwitchDefault(id);
+			switchValues[id] = value;
+			return value;
+		}
 	}
 	return iter->second;
 }

@@ -19,8 +19,11 @@ namespace Halley {
 		gsl::span<const String> getValues() const;
 		gsl::span<String> getValues();
 
+		const String& getDefaultValue() const;
+
 	private:
 		String id;
+		String defaultValue;
 		Vector<String> values;
 	};
 

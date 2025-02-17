@@ -35,7 +35,7 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::createEmitter(AudioEmitterId id, AudioPosition position, bool temporary)
 {
-	emitters[id] = std::make_unique<AudioEmitter>(id, std::move(position), temporary, id == 0 ? nullptr : emitters.at(0).get());
+	emitters[id] = std::make_unique<AudioEmitter>(*this, id, std::move(position), temporary, id == 0 ? nullptr : emitters.at(0).get());
 }
 
 void AudioEngine::destroyEmitter(AudioEmitterId id)
@@ -639,6 +639,14 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	voice->setAttenuationOverride(object.getAttenuationOverride());
 
 	return voice;
+}
+
+const String& AudioEngine::getSwitchDefault(const String& switchId) const
+{
+	if (const auto* switchProps = audioProperties->tryGetSwitch(switchId)) {
+		return switchProps->getDefaultValue();
+	}
+	return String::emptyString();
 }
 
 AudioDebugData AudioEngine::generateDebugData() const

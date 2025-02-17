@@ -7,6 +7,7 @@ using namespace Halley;
 AudioSwitchProperties::AudioSwitchProperties(const ConfigNode& node)
 {
 	id = node["id"].asString();
+	defaultValue = node["defaultValue"].asString("");
 	values = node["values"].asVector<String>();
 }
 
@@ -14,6 +15,7 @@ ConfigNode AudioSwitchProperties::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["id"] = id;
+	result["defaultValue"] = defaultValue;
 	result["values"] = values;
 	return result;
 }
@@ -21,12 +23,14 @@ ConfigNode AudioSwitchProperties::toConfigNode() const
 void AudioSwitchProperties::serialize(Serializer& s) const
 {
 	s << id;
+	s << defaultValue;
 	s << values;
 }
 
 void AudioSwitchProperties::deserialize(Deserializer& s)
 {
 	s >> id;
+	s >> defaultValue;
 	s >> values;
 }
 
@@ -48,6 +52,11 @@ gsl::span<const String> AudioSwitchProperties::getValues() const
 gsl::span<String> AudioSwitchProperties::getValues()
 {
 	return values;
+}
+
+const String& AudioSwitchProperties::getDefaultValue() const
+{
+	return defaultValue;
 }
 
 AudioVariableProperties::AudioVariableProperties(const ConfigNode& node)

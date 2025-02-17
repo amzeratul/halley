@@ -80,6 +80,8 @@ namespace Halley {
 
 		std::unique_ptr<AudioVoice> makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> gain = { 1, 1 }, Range<float> pitch = { 1, 1 }, uint32_t delaySamples = 0);
 
+		const String& getSwitchDefault(const String& switchId) const;
+
 	private:
 		struct BusData {
 			String name;
