@@ -25,6 +25,21 @@ void UIGrid::update(Time t, bool moved)
 	if (scrollCooldown >= 0) {
 		scrollCooldown -= t;
 	}
+
+	std::tie(columns, columnNames) = getColumns();
+
+	columnUnderMouse = std::nullopt;
+	if (lastMousePos) {
+		const auto px = (*lastMousePos - getPosition()).x;
+		float accum = 0;
+		for (int i = 0; i < static_cast<int>(columns.size()); ++i) {
+			accum += columns[i];
+			if (accum > px) {
+				columnUnderMouse = i;
+				break;
+			}
+		}
+	}
 }
 
 namespace {
@@ -58,8 +73,6 @@ void UIGrid::draw(UIPainter& painter) const
 	const auto firstLine = clamp(static_cast<int>(std::floor(relClip.getTop() / lineHeight)) - 1, 0, n - 1);
 	const auto lastLine = clamp(static_cast<int>(std::ceil(relClip.getBottom() / lineHeight)) - 1, 0, n - 1);
 
-	const auto [columns, columnNames] = getColumns();
-
 	// Entries
 	auto p2 = painter.withClip(relClip.grow(0, -lineHeight - 1, 0, 0) + getPosition());
 	for (int i = firstLine; i <= lastLine; ++i) {
@@ -68,7 +81,7 @@ void UIGrid::draw(UIPainter& painter) const
 
 	// Draw grid
 	const auto gridCol = factory.getColourScheme()->getColour("ui_text");
-	p2.draw([firstLine, lastLine, pos = getPosition(), columns, size = getSize(), gridCol, lineHeight, this](Painter& painter)
+	p2.draw([firstLine, lastLine, pos = getPosition(), columns = columns, size = getSize(), gridCol, lineHeight, this](Painter& painter)
 	{
 		// Backgrounds
 		std::optional<Rect4f> drewSelectedLine;
@@ -123,7 +136,7 @@ void UIGrid::draw(UIPainter& painter) const
 
 	// Draw header
 	const auto headerCol = Colour4f::fromHexString("#BD40B0");
-	painter.draw([pos = getPosition(), columns, size = getSize(), headerCol, relClip, lineHeight](Painter& painter)
+	painter.draw([pos = getPosition(), columns = columns, size = getSize(), headerCol, relClip, lineHeight](Painter& painter)
 	{
 		const auto linePos0 = relClip.getTopLeft() + pos;
 		const auto linePos1 = linePos0 + Vector2f(0, lineHeight);
@@ -224,6 +237,8 @@ void UIGrid::onMouseOver(Vector2f mousePos)
 		lineUnderMouse = line;
 	}
 
+	lastMousePos = mousePos;
+
 	if (holdingLine && boundedLineUnderMouse != holdingLine) {
 		holdingMoved = true;
 	}
@@ -255,6 +270,7 @@ void UIGrid::onMouseOver(Vector2f mousePos)
 void UIGrid::onMouseLeft(Vector2f mousePos)
 {
 	lineUnderMouse = std::nullopt;
+	lastMousePos = std::nullopt;
 }
 
 void UIGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)

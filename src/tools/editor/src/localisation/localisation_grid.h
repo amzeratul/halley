@@ -10,6 +10,9 @@ namespace Halley {
 
     	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData);
 
+        LocalisedString getToolTip() const override;
+        bool hasDynamicToolTip() const override;
+
     protected:
         size_t getNumRows() const override;
         std::pair<Vector<float>, Vector<String>> getColumns() const override;

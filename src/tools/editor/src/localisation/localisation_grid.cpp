@@ -84,3 +84,26 @@ void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationD
 
 	onDataUpdated();
 }
+
+LocalisedString LocalisationGrid::getToolTip() const
+{
+	if (columnUnderMouse && lineUnderMouse) {
+		const auto& entry = origData->getEntry(*lineUnderMouse);
+		const auto colName = columnNames[*columnUnderMouse];
+		if (colName == "Key") {
+			return LocalisedString::fromUserString(entry.key);
+		} else if (colName == "Original") {
+			return LocalisedString::fromUserString(entry.value);
+		} else if (colName == "Translated") {
+			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+				return LocalisedString::fromUserString(translatedEntry->value);
+			}
+		}
+	}
+	return {};
+}
+
+bool LocalisationGrid::hasDynamicToolTip() const
+{
+	return true;
+}

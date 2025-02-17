@@ -38,6 +38,12 @@ namespace Halley {
 
     	Colour4f textCol;
 
+        std::optional<int> lineUnderMouse;
+        std::optional<int> columnUnderMouse;
+
+    	Vector<float> columns;
+    	Vector<String> columnNames;
+
     private:
         UIFactory& factory;
 
@@ -47,11 +53,12 @@ namespace Halley {
         LineColourCallback lineColourFilter;
         TextRenderer text;
 
-        std::optional<int> lineUnderMouse;
         std::optional<int> boundedLineUnderMouse;
         std::optional<int> activeSelectedLine;
         HashSet<int> selectedLines;
         Vector<std::optional<Colour4f>> colours;
+
+        std::optional<Vector2f> lastMousePos;
 
         std::optional<int> holdingLine;
         bool holdingMoved = false;
