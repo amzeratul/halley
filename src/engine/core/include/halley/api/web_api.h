@@ -6,6 +6,7 @@
 #include <halley/utils/utils.h>
 #include "halley/text/i18n.h"
 #include "halley/text/enum_names.h"
+#include "halley/data_structures/vector.h"
 
 namespace Halley
 {
