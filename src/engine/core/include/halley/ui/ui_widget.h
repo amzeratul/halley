@@ -198,6 +198,7 @@ namespace Halley {
 		
 		virtual void onMakeUI();
 
+		virtual bool hasDynamicToolTip() const;
 		virtual LocalisedString getToolTip() const;
 		void setToolTip(LocalisedString toolTip);
 

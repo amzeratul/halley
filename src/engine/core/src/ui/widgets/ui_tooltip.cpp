@@ -18,12 +18,14 @@ void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
 {
 	lastMousePos = mousePos;
 	
-	if (curWidget == &widget) {
+	if (curWidget == &widget && !widget.hasDynamicToolTip()) {
 		return;
 	}
-	
-	hide();
-	curWidget = &widget;
+
+	if (curWidget != &widget) {
+		hide();
+		curWidget = &widget;
+	}
 
 	const auto& toolTipText = widget.getToolTip();
 	if (!toolTipText.getString().isEmpty()) {

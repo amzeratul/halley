@@ -1137,6 +1137,11 @@ void UIWidget::onMakeUI()
 {
 }
 
+bool UIWidget::hasDynamicToolTip() const
+{
+	return false;
+}
+
 LocalisedString UIWidget::getToolTip() const
 {
 	return toolTip ? *toolTip : LocalisedString();

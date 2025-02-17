@@ -1,59 +1,24 @@
 #pragma once
 
 #include "localisation_data.h"
-#include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_grid.h"
 
 namespace Halley {
-    class LocalisationGrid : public UIWidget {
+    class LocalisationGrid : public UIGrid {
     public:
-        using LineColourCallback = std::function<std::optional<Colour4f>(int)>;
-
         LocalisationGrid(UIFactory& factory);
 
-        void update(Time t, bool moved) override;
-		void draw(UIPainter& painter) const override;
-
     	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData);
-        void setLineColourFilter(LineColourCallback callback);
-
-    	int getActiveSelectedLine() const;
-        const String& getActiveSelectedKey() const;
-        void setSelectedLine(int line);
 
     protected:
-        void onMouseOver(Vector2f mousePos) override;
-        void onMouseLeft(Vector2f mousePos) override;
-        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
-        void releaseMouse(Vector2f mousePos, int button) override;
-        bool isFocusLocked() const override;
-        bool canReceiveFocus() const override;
+        size_t getNumRows() const override;
+        std::pair<Vector<float>, Vector<String>> getColumns() const override;
+        void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours) const override;
+        const String& getKeyAt(int idx) const override;
 
     private:
-        UIFactory& factory;
         const ILocOriginalData* origData = nullptr;
         LocTranslationData* translatedData = nullptr;
-
-        LineColourCallback lineColourFilter;
-
-        TextRenderer text;
-        Colour4f textCol;
         Colour4f outdatedCol;
-
-        std::optional<int> lineUnderMouse;
-        std::optional<int> boundedLineUnderMouse;
-        std::optional<int> activeSelectedLine;
-        HashSet<int> selectedLines;
-        Vector<std::optional<Colour4f>> colours;
-
-        std::optional<int> holdingLine;
-        bool holdingMoved = false;
-
-        Time scrollCooldown = 0;
-        mutable std::optional<Rect4f> drawClip;
-
-        void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
-		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
-
-        void onClickLine(std::optional<int> line, KeyMods mods);
     };
 }
