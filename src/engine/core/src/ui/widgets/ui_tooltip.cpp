@@ -33,6 +33,10 @@ void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
 		text.setText(text.split(toolTipText.getString(), maxWidth));
 		const auto size = text.getExtents();
 		setMinSize(size + border.xy() + border.zw());
+
+		if (widget.hasDynamicToolTip()) {
+			positionAt(lastMousePos);
+		}
 	}
 }
 
@@ -50,13 +54,7 @@ void UIToolTip::update(Time t, bool moved)
 		timeOnWidget += t;
 		if (timeOnWidget > delay && !visible) {
 			visible = true;
-
-			auto pos = lastMousePos + Vector2f(12, 20);
-			const auto screenRect = getRoot()->getRect();
-			pos = Vector2f::max(pos, screenRect.getTopLeft());
-			pos = Vector2f::min(pos, screenRect.getBottomRight() - getSize());
-			
-			setPosition(pos);
+			positionAt(lastMousePos);
 		}
 	}
 	text.setPosition(getPosition() + border.xy());
@@ -70,4 +68,14 @@ void UIToolTip::draw(UIPainter& painter) const
 		p2.draw(background);
 		p2.draw(text);
 	}
+}
+
+void UIToolTip::positionAt(Vector2f basePos)
+{
+	auto pos = basePos + Vector2f(12, 20);
+	const auto screenRect = getRoot()->getRect();
+	pos = Vector2f::max(pos, screenRect.getTopLeft());
+	pos = Vector2f::min(pos, screenRect.getBottomRight() - getSize());
+	
+	setPosition(pos);
 }

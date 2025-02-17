@@ -24,5 +24,7 @@ namespace Halley {
 		Time timeOnWidget = 0;
 		bool visible;
 		float maxWidth = 100;
+
+		void positionAt(Vector2f pos);
 	};
 }
