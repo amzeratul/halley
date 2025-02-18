@@ -21,6 +21,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/support/profiler.h"
 #include "nodes/script_network.h"
+#include "system_messages/play_network_sound_system_message.h"
 
 using namespace Halley;
 
@@ -888,7 +889,16 @@ EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, Grap
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (!id.isEmpty()) {
-		getInterface<IAudioSystemInterface>().playAudio(id, entityId);
+		auto msg = std::make_unique<PlayNetworkSoundSystemMessage>(entityId, id);
+		const auto msgId = msg->getId();
+
+		SystemMessageContext context;
+		context.msg = std::move(msg);
+		context.msgId = msgId;
+		context.remote = false;
+		context.callback = nullptr;
+
+		world.sendSystemMessage(std::move(context), "Audio", SystemMessageDestination::AllClients);
 	}
 }
 
