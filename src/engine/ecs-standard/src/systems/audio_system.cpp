@@ -38,9 +38,7 @@ public:
 
 	void onMessageReceived(const PlayNetworkSoundSystemMessage& msg) override
 	{
-		if (const auto* source = sourceFamily.tryFind(msg.emitter)) {
-			getAPI().audio->postEvent(msg.event, source->audioSource.emitter);
-		}
+		playAudio(msg.event, msg.emitter);
 	}
 
 	void playAudio(const String& eventId, EntityId entityId) override
