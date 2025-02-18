@@ -534,7 +534,8 @@ String ScriptToggleEntityEnabled::getIconName(const BaseGraphNode& node) const
 Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes() const
 {
 	return {
-		SettingType{ "enabled", "bool", Vector<String>{"true"} }
+		SettingType{ "enabled", "bool", Vector<String>{"true"} },
+		SettingType{ "restore", "bool", Vector<String>{"true"} },
 	};
 }
 
@@ -551,8 +552,15 @@ std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDesc
 	auto str = ColourStringBuilder(true);
 	str.append("Toggle entity enabled to ");
 	str.append(node.getSettings()["enabled"].asString("true"), parameterColour);
-	str.append(" and return to previous after");
+	if (node.getSettings()["restore"].asBool(true)) {
+		str.append(" and return to previous after");
+	}
 	return str.moveResults();
+}
+
+bool ScriptToggleEntityEnabled::hasDestructor(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["restore"].asBool(true);
 }
 
 void ScriptToggleEntityEnabled::doInitData(ScriptToggleEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
@@ -582,7 +590,7 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 void ScriptToggleEntityEnabled::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
 {
 	auto entityRef = environment.getWorld().tryGetEntity(data.entityId);
-	if (entityRef.isValid()) {
+	if (entityRef.isValid() && node.getSettings()["restore"].asBool(true)) {
 		entityRef.setEnabled(data.previousState);
 	}
 }

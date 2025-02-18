@@ -148,11 +148,11 @@ namespace Halley {
 		String getName() const override { return "Toggle Enabled"; }
 		String getIconName(const BaseGraphNode& node) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 
 		Vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		bool hasDestructor(const ScriptGraphNode& node) const override;
 
 		void doInitData(ScriptToggleEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const override;
