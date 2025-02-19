@@ -563,6 +563,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 	// Depth first
 	if (!curWidget->canPropagateMouseToChildren()) {
 		ignoreMouseInteraction = true;
+		includeDisabled = true;
 	}
 	const auto childMousePos = curWidget->transformToChildSpace(mousePos);
 	if (childMousePos) {
