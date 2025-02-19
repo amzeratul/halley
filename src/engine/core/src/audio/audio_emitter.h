@@ -8,7 +8,6 @@ namespace Halley {
     public:
         using VoiceCallback = std::function<void(AudioVoice&)>;
 
-        AudioEmitter() = default;
         explicit AudioEmitter(AudioEngine& engine, AudioEmitterId id, AudioPosition position, bool temporary = false, AudioEmitter* fallback = nullptr);
 
         [[nodiscard]] AudioEmitterId getId() const;
