@@ -271,7 +271,7 @@ void Transform2DComponent::deserializeNetwork(const EntitySerializationContext& 
 
 void Transform2DComponent::markDirty(CachedIndices index)
 {
-	markDirty(static_cast<uint8_t>(1 << static_cast<int>(index)));
+	markDirty(getMaskBit(index));
 }
 
 void Transform2DComponent::markDirty(uint8_t changeMask)
@@ -288,10 +288,15 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8
 	if ((cachedValues & changeMask) != 0 || mode != DirtyPropagationMode::Changed) {
 		markDirtyShallow(changeMask);
 
+		// Find the child propagation mask - it might not be the same as e.g. a rotation of the parent can induce a change in position in the child
+		const uint8_t childChangeMask = changeMask | 
+			(hasMaskBits<CachedIndices::Position, CachedIndices::Rotation, CachedIndices::Scale>(changeMask) ? getMaskBit<CachedIndices::Position>() : 0);
+
 		// Propagate to all children
 		for (auto& c: entity.getRawChildren()) {
 			if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
-				childTransform->markDirty(mode, depth + 1, changeMask);
+				// Propagate change on all bits of the flag, since they all potentially affect others
+				childTransform->markDirty(mode, depth + 1, childChangeMask);
 			}
 		}
 

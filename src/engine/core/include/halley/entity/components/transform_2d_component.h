@@ -109,4 +109,36 @@ private:
 	void markDirtyShallow(uint8_t changeMask) const;
 	bool isCached(CachedIndices index) const;
 	void setCached(CachedIndices index) const;
+
+	template<CachedIndices c, CachedIndices ... cs>
+	inline static constexpr uint8_t getMaskBits()
+	{
+		uint8_t result = getMaskBit<c>();
+		if constexpr (sizeof...(cs) > 0) {
+			result |= getMaskBits<cs...>();
+		}
+		return result;
+	}
+
+	template<CachedIndices c>
+	inline static constexpr uint8_t getMaskBit()
+	{
+		return static_cast<uint8_t>(1 << static_cast<uint8_t>(c));
+	}
+
+	inline static constexpr uint8_t getMaskBit(CachedIndices index)
+	{
+		return static_cast<uint8_t>(1 << static_cast<uint8_t>(index));
+	}
+
+	inline static constexpr bool hasMaskBit(uint8_t mask, CachedIndices index)
+	{
+		return (getMaskBit(index) & mask) != 0;
+	}
+
+	template<CachedIndices ... cs>
+	inline static constexpr bool hasMaskBits(uint8_t mask)
+	{
+		return (getMaskBits<cs...>() & mask) != 0;
+	}
 };
