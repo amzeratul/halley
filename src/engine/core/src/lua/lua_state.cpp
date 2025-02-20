@@ -121,7 +121,7 @@ void LuaState::call(int nArgs, int nRets, bool throwOnError)
 				lua_pushnil(lua);
 			}
 			Logger::logError(message, true);
-		}		
+		}
 	}
 }
 
