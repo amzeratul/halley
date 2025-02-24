@@ -53,6 +53,7 @@ namespace Halley {
 			Mode mode = Mode::Host;
 			int16_t maxPlayers = 8;
 			std::optional<String> clientConnectTo;
+			std::optional<String> clientAccountId;
 			std::optional<String> clientPlayerName;
 		};
 
