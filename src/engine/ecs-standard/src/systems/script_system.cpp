@@ -115,10 +115,19 @@ public:
 
 	bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId, bool allThreads) override
 	{
+		Vector<String> except;
+		if (!exceptScriptId.isEmpty()) {
+			except.push_back(exceptScriptId);
+		}
+		return stopTag(target, tagId, except, allThreads);
+	}
+
+	bool stopTag(EntityId target, const String& tagId, const Vector<String>& exceptScriptIds, bool allThreads) override
+	{
 		if (auto* scriptable = scriptableFamily.tryFind(target)) {
 			bool foundAny = false;
 			for (auto& state: scriptable->scriptable.activeStates) {
-				if (state->hasTag(tagId) && state->getScriptId() != exceptScriptId) {
+				if (state->hasTag(tagId) && !exceptScriptIds.contains(state->getScriptId())) {
 					getScriptingService().getEnvironment().stopState(*state, scriptable->entityId, scriptable->scriptable.variables, allThreads);
 					foundAny = true;
 				}
