@@ -51,6 +51,7 @@ namespace Halley {
 		virtual bool stopScript(EntityId target, const String& scriptId, bool allThreads = false) = 0;
 		virtual bool stopTag(EntityId target, const String& tagId, const String& exceptScriptId, bool allThreads = false) = 0;
 		virtual bool stopTag(EntityId target, const String& tagId, const Vector<String>& exceptScriptIds = {}, bool allThreads = false) = 0;
+		virtual void setLoadedScriptsWithTag(EntityId target, const String& tagId, const Vector<String>& scriptIds) = 0;
 		virtual bool isRunningScript(EntityId target, const String& scriptId) = 0;
 		virtual void resetStartedScripts(EntityId target) = 0;
 

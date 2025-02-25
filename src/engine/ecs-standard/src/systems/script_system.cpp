@@ -140,6 +140,16 @@ public:
 		}
 	}
 
+	void setLoadedScriptsWithTag(EntityId target, const String& tagId, const Vector<String>& scriptIds) override
+	{
+		stopTag(target, tagId, scriptIds, false);
+		for (const auto& script: scriptIds) {
+			if (!script.isEmpty() && !isRunningScript(target, script)) {
+				addScript(target, script, {{ tagId, }}, {});
+			}
+		}
+	}
+
 	bool isRunningScript(EntityId entityId, const String& scriptId) override
 	{
 		if (const auto* scriptable = scriptableFamily.tryFind(entityId)) {
