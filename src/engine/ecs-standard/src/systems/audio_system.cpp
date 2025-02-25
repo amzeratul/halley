@@ -38,7 +38,9 @@ public:
 
 	void onMessageReceived(const PlayNetworkSoundSystemMessage& msg) override
 	{
-		playAudio(msg.event, msg.emitter);
+		if (msg.emitter.isValid()) {
+			playAudio(msg.event, msg.emitter);
+		}
 	}
 
 	void playAudio(const String& eventId, EntityId entityId) override
