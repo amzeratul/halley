@@ -130,13 +130,17 @@ namespace Halley {
 
 		T& getSingleton()
 		{
-			assert(count() == 1);
+			if (count() != 1) {
+				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
+			}
 			return *getFamilyElement(0);
 		}
 
 		const T& getSingleton() const
 		{
-			assert(count() == 1);
+			if (count() != 1) {
+				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
+			}
 			return *getFamilyElement(0);
 		}
 
