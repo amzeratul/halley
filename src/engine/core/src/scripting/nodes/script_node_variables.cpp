@@ -2,6 +2,7 @@
 
 #include "halley/maths/interpolation_curve.h"
 #include "halley/maths/ops.h"
+#include "halley/maths/random.h"
 #include "halley/maths/tween.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
@@ -1630,4 +1631,86 @@ ConfigNode ScriptSizeOf::doGetData(ScriptEnvironment& environment, const ScriptG
 	}
 
 	return ConfigNode(static_cast<int>(size));
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptRandomElement::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+String ScriptRandomElement::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "randomElement(" + getConnectedNodeName(node, graph, 0) + ")";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptRandomElement::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Random element from ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+ConfigNode ScriptRandomElement::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto data = readDataPin(environment, node, 0);
+	if (data.getType() == ConfigNodeType::Sequence) {
+		return ConfigNode(Random::getGlobal().getRandomElement(data.asSequence()));
+	}
+	return data;
+}
+
+Vector<IGraphNodeType::SettingType> ScriptRandomOf::getSettingTypes() const
+{
+	return {
+		SettingType{ "nInputs", "Halley::Range<int, 2, 8>", Vector<String>{"2"} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptRandomOf::getPinConfiguration(const BaseGraphNode& node) const
+{
+	const auto nInputs = clamp(node.getSettings()["nInputs"].asInt(2), 2, 8);
+
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 9>{
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+	};
+	return gsl::span(data).subspan(0, 1 + nInputs);
+}
+
+String ScriptRandomOf::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Random input";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptRandomOf::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Random element from ");
+	str.append(toString(node.getSettings()["nInputs"].asInt(2)), settingColour);
+	str.append(" inputs");
+	return str.moveResults();}
+
+ConfigNode ScriptRandomOf::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto nInputs = clamp(node.getSettings()["nInputs"].asInt(2), 2, 8);
+	const auto pick = Random::getGlobal().getInt(0, nInputs);
+	return readDataPin(environment, node, 1 + pick);
 }
