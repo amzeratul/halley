@@ -89,6 +89,17 @@ String UIList::getSelectedOptionId() const
 	return getItem(curOption)->getId();
 }
 
+int UIList::getSelectedCount() const
+{
+	int result = 0;
+	for (const auto& item: items) {
+		if (item->isSelected()) {
+			++result;
+		}
+	}
+	return result;
+}
+
 Vector<int> UIList::getSelectedOptions() const
 {
 	Vector<int> result;
