@@ -1711,6 +1711,6 @@ std::pair<String, Vector<ColourOverride>> ScriptRandomOf::getNodeDescription(con
 ConfigNode ScriptRandomOf::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto nInputs = clamp(node.getSettings()["nInputs"].asInt(2), 2, 8);
-	const auto pick = Random::getGlobal().getInt(0, nInputs);
+	const auto pick = Random::getGlobal().getInt(0, nInputs - 1);
 	return readDataPin(environment, node, 1 + pick);
 }
