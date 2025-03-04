@@ -155,6 +155,8 @@ namespace Halley {
 
 		void editTimeline(const String& uuid, std::unique_ptr<Timeline> timeline);
 
+		const HalleyAPI& getAPI() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 

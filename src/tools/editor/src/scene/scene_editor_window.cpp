@@ -1746,6 +1746,11 @@ void SceneEditorWindow::editTimeline(const String& uuid, std::unique_ptr<Timelin
 	timelineEditor->open(uuid, std::move(timeline), *this);
 }
 
+const HalleyAPI& SceneEditorWindow::getAPI() const
+{
+	return api;
+}
+
 void SceneEditorWindow::onStartTimelineRecording()
 {
 	// TODO
