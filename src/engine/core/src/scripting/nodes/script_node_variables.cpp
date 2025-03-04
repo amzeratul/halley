@@ -1706,7 +1706,8 @@ std::pair<String, Vector<ColourOverride>> ScriptRandomOf::getNodeDescription(con
 	str.append("Random element from ");
 	str.append(toString(node.getSettings()["nInputs"].asInt(2)), settingColour);
 	str.append(" inputs");
-	return str.moveResults();}
+	return str.moveResults();
+}
 
 ConfigNode ScriptRandomOf::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
