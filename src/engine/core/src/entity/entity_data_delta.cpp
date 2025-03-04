@@ -131,13 +131,15 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		}
 	}
-	for (const auto& fromComponent: from.components) {
-		const String& compId = fromComponent.first;
-		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
-			const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == compId; }) != to.components.end();
-			if (!stillExists) {
-				// Removed
-				componentsRemoved.emplace_back(compId);
+	if (!options.ignoreComponentsRemoved) {
+		for (const auto& fromComponent: from.components) {
+			const String& compId = fromComponent.first;
+			if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
+				const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == compId; }) != to.components.end();
+				if (!stillExists) {
+					// Removed
+					componentsRemoved.emplace_back(compId);
+				}
 			}
 		}
 	}

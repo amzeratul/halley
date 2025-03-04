@@ -25,6 +25,7 @@ namespace Halley {
 			bool ignoreNameChangesInInstances = false;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
+        	bool ignoreComponentsRemoved = false;
 			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
         };
 		
