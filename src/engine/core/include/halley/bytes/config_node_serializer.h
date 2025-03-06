@@ -419,6 +419,8 @@ namespace Halley {
         		for (auto& s: seq) {
 					result.push_back(ConfigNodeSerializer<T>().deserialize(context, s));
 				}
+			} else if (node.getType() != ConfigNodeType::Undefined) {
+				result.push_back(ConfigNodeSerializer<T>().deserialize(context, node));
 			}
 			return result;
         }
@@ -431,6 +433,9 @@ namespace Halley {
 				for (size_t i = 0; i < target.size(); ++i) {
 					ConfigNodeHelper<T>::deserialize(target[i], context, seq[i]);
 				}
+			} else if (node.getType() != ConfigNodeType::Undefined) {
+				target.resize(1);
+				ConfigNodeHelper<T>::deserialize(target[0], context, node);
 			} else {
 				target.clear();
 			}
