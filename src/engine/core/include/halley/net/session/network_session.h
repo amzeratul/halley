@@ -71,6 +71,7 @@ namespace Halley {
 		NetworkService& getService() const;
 
 		size_t getNumConnections() const;
+		bool isConnected(size_t idx) const;
 		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
 		float getLatency(size_t idx) const;
 

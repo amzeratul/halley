@@ -657,6 +657,16 @@ size_t NetworkSession::getNumConnections() const
 	return peers.size();
 }
 
+bool NetworkSession::isConnected(size_t idx) const
+{
+	if (idx >= peers.size()) {
+		return false;
+	}
+
+	const auto& peer = peers[idx];
+	return peer.alive && peer.connection->isConnected();
+}
+
 const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t idx) const
 {
 	return *peers.at(idx).stats;

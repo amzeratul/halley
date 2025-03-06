@@ -827,6 +827,10 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 			.scaleTo(area.getSize())
 			.draw(painter);
 
+		if (!networkSession->isConnected(i)) {
+			continue;
+		}
+
 		const auto& connStats = networkSession->getConnectionStats(i);
 		const auto& stats = connStats.getPacketStats();
 		const auto start = connStats.getLineStart();
