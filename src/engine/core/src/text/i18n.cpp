@@ -328,6 +328,9 @@ LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, cons
 
 LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
 {
+	if (toks.empty()) {
+		return *this;
+	}
 	auto str = string;
 	for (int i = 0; i < int(toks.size()); ++i) {
 		str = str.replaceAll("{" + Halley::toString(i) + "}", toks[i].getString());
@@ -338,6 +341,9 @@ LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> 
 std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
 {
 	assert(toks.size() == colours.size());
+	if (toks.empty()) {
+		return { *this, {} };
+	}
 
 	Vector<std::pair<int, size_t>> indices;
 
