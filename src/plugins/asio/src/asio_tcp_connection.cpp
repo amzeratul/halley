@@ -74,7 +74,6 @@ void AsioTCPConnection::close()
 	std::unique_lock<std::mutex> lock(mutex);
 	resolver.reset();
 	if (status != ConnectionStatus::Closed) {
-		Logger::logInfo("Asio TCP socket disconnected");
 		try {
 			if (!socket.is_open()) {
 				socket.shutdown(TCPSocket::shutdown_both);
