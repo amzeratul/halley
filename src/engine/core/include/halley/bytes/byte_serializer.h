@@ -185,6 +185,17 @@ namespace Halley {
 			return *this;
 		}
 
+		template <typename T>
+		Serializer& operator<<(const HashSet<T>& val)
+		{
+			uint32_t sz = static_cast<uint32_t>(val.size());
+			*this << sz;
+			for (auto& v: val) {
+				*this << v;
+			}
+			return *this;
+		}
+
 		template <typename K, typename V, typename Cmp, typename Allocator>
 		Serializer& operator<<(const std::map<K, V, Cmp, Allocator>& val)
 		{
@@ -451,6 +462,22 @@ namespace Halley {
 
 		template <typename T>
 		Deserializer& operator>>(std::set<T>& val)
+		{
+			uint32_t sz;
+			*this >> sz;
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per set entry
+
+			val.clear();
+			for (uint32_t i = 0; i < sz; i++) {
+				T v;
+				*this >> v;
+				val.insert(std::move(v));
+			}
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(HashSet<T>& val)
 		{
 			uint32_t sz;
 			*this >> sz;
