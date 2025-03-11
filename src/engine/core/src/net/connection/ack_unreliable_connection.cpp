@@ -79,12 +79,13 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
     const size_t maxSize = maxPacketSize - headerSize;
 
     if (maxSize >= size) {
-        auto& slot = outbound.packets[outbound.curPacketIdx];
+    	if (!checkOutboundQueue(1)) {
+    		close("outbound packet queue is full");
+    		return;
+    	}
 
-        if (slot.seqIdx < 0x8000) {
-            close("outbound packet queue is full");
-            return;
-        }
+        auto& slot = outbound.packets[outbound.curPacketIdx];
+        Ensures(slot.seqIdx == 0xffff);
 
     	if (small) {
     		// This is a small packet cache - need to copy parts of the cached header.
@@ -116,13 +117,14 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
             throw Exception("Packet size too large: " + toString(size) + " bytes", HalleyExceptions::Network);
         }
 
+    	if (!checkOutboundQueue(static_cast<int>(numSubPackets))) {
+    		close("outbound packet queue is full");
+    		return;
+    	}
+
         for (size_t i = 0; i < numSubPackets; i++) {
             auto& slot = outbound.packets[outbound.curPacketIdx];
-
-            if (slot.seqIdx < 0x8000) {
-	            close("outbound packet queue is full");
-                return;
-            }
+        	Ensures(slot.seqIdx == 0xffff);
 
             slot.dataSize = std::min(packet.size(), maxSize);
             memcpy(slot.data.data() + headerSize, packet.data(), slot.dataSize);
@@ -252,10 +254,11 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 
     if (slot.seqIdx < 0x8000) {
         if (slot.seqIdx != inbound.seqIndex.toSlot()) {
-            throw Exception("Unexpected packet sequence index:\n"
+        	/*throw Exception("Unexpected packet sequence index:\n"
             	"found " + toString(slot.seqIdx) + ", parity " + toString((int) slot.parity) + "\n"
             	"expected " + toString(inbound.seqIndex.toSlot()) + ", parity " + toString((int) inbound.seqIndex.parity()),
-            	HalleyExceptions::Network);
+            	HalleyExceptions::Network);*/
+        	evictInboundQueue(inbound.seqIndex.toSlot(), inbound.seqIndex.parity());
         }
 
         if (slot.subIdx == 0) {
@@ -454,8 +457,7 @@ void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
 		ackIdx++;
 	}
 
-	if (ackIdx >= numAckPackets) {
-		Expects(numAckPackets < 256);
+	if (ackIdx >= numAckPackets && numAckPackets < 256) {
 		ackPackets[numAckPackets++] = {packetIdx, seqIdx};
 	}
 }
@@ -516,10 +518,7 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> dat
     				statsListener->onPacketAcked(slot->seqIdx);
     			}
 
-    			slot->seqIdx = 0xffff;
-
-    			// Clear header bytes (keep the signature)
-    			memset(slot->data.data() + 4, 0, headerSize - 4);
+    			slot->clear();
 
     			avgLatencySum += std::chrono::duration<float>(now - slot->timestamp).count();
     			avgLatencyCount++;
@@ -533,20 +532,25 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> dat
     	}
     }
 
-	// Now that this ACK packet has been processed, walk forward the "first
-	// packet in use" index.
+	// Now that this ACK packet has been fully processed, walk forward
+	// the "first packet in use" index.
+	forwardOutboundQueue();
+
+	// Update latency
+	if (avgLatencyCount > 0) {
+		avgLatencySum /= static_cast<float>(avgLatencyCount);
+		lag = lerp(lag, avgLatencySum, 0.2f);
+	}
+}
+
+void AckUnreliableConnection::forwardOutboundQueue()
+{
 	while (outbound.firstPacketIdx != outbound.curPacketIdx) {
 		auto slot = &outbound.packets[outbound.firstPacketIdx];
 		if (slot->seqIdx != 0xffff) {
 			break;
 		}
 		outbound.firstPacketIdx = (outbound.firstPacketIdx + 1) % 256;
-	}
-
-	// Update latency
-	if (avgLatencyCount > 0) {
-		avgLatencySum /= static_cast<float>(avgLatencyCount);
-		lag = lerp(lag, avgLatencySum, 0.2f);
 	}
 }
 
@@ -563,6 +567,10 @@ void AckUnreliableConnection::resendUnAckPackets(float minResendTimeDiff)
 
 		if (slot->seqIdx == 0xffff) {
 			break; // stop at the first index not in use
+		}
+
+		if (slot->dataSize == 0) {
+			break;
 		}
 
 		float timeSinceSent = std::chrono::duration<float>(now - slot->timestamp).count();
@@ -613,6 +621,26 @@ void AckUnreliableConnection::evictInboundQueue(uint16_t seqIdx, uint8_t parity)
 	Logger::logWarning("Inbound network queue has been reset.");
 
 	inbound.seqIndex = SeqIndex::make(seqIdx, parity);
+}
+
+bool AckUnreliableConnection::checkOutboundQueue(int numPacketsToSend) const
+{
+	int free = 0;
+
+	while (free < numPacketsToSend) {
+		int packetIdx = (outbound.curPacketIdx + free) % 256;
+		auto& slot = outbound.packets[packetIdx];
+
+		// If the slot is not in use, we are good. Step forward, and keep looking.
+		if (slot.seqIdx == 0xffff) {
+			free++;
+			continue;
+		}
+
+		break;
+	}
+
+	return free >= numPacketsToSend;
 }
 
 bool AckUnreliableConnection::isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity)

@@ -77,6 +77,14 @@ namespace Halley
             uint8_t subIdx = 0;
             uint8_t parity = 0;
         	uint8_t resend = 0;
+
+        	void clear()
+        	{
+        		seqIdx = 0xffff;
+        		// Clear header bytes (keep the signature)
+        		memset(data.data() + 4, 0, headerSize - 4);
+        		dataSize = 0;
+        	}
         };
 
         struct InOutQueue
@@ -119,10 +127,12 @@ namespace Halley
 
         void doSendAckPackets();
         void onAckPacketsReceive(gsl::span<const gsl::byte> data, uint8_t parity);
+    	void forwardOutboundQueue();
 
     	void resendUnAckPackets(float minResendTimeDiff);
 
     	void evictInboundQueue(uint16_t seqIdx, uint8_t parity);
+    	bool checkOutboundQueue(int numPacketsToSend) const;
 
     	static bool isExpiredSeqIndex(const InOutQueue& queue, uint16_t seqIdx, uint8_t parity);
     };
