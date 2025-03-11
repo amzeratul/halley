@@ -13,7 +13,7 @@ AnimationPlayer::AnimationPlayer(std::shared_ptr<const Animation> animation, con
 	setAnimation(animation, sequence, direction);
 }
 
-AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse)
+AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence, bool reverse, std::optional<int> startFrame)
 {
 	updateResourceIfNeeded();
 
@@ -25,9 +25,9 @@ AnimationPlayer::AnimationPlayId AnimationPlayer::playOnce(const String& sequenc
 		nextSequence = nextLoopingSequence;
 
 		this->reverse = reverse;
-		if (reverse) {
-			curFrameN = static_cast<int>(curSeq->numFrames() - 1);
-		}
+
+		curFrameN = clamp(startFrame.value_or(reverse ? static_cast<int>(curSeq->numFrames() - 1): 0), 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
+		curFrameTime = 0;
 	} else if (nextLoopingSequence) {
 		setSequence(*nextLoopingSequence);
 	}
