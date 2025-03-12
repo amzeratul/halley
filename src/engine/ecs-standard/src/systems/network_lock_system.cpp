@@ -76,7 +76,7 @@ public:
 			const auto entity = getWorld().tryGetEntity(targetId);
 			if (entity.isValid()) {
 				Logger::logWarning("Trying to get lock status of non-network entity \"" + entity.getName() + "\" (" + toString(entity.getEntityId()) + ") (missing NetworkComponent?)", true);
-			} else {
+			} else if (targetId.isValid()) {
 				Logger::logWarning("Trying to get lock status of unknown entity " + toString(targetId), true);
 			}
 			return true;
