@@ -17,7 +17,7 @@ namespace Halley
 
 		explicit AnimationPlayer(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
 
-		AnimationPlayId playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {}, bool reverse = false);
+		AnimationPlayId playOnce(const String& sequence, const std::optional<String>& nextLoopingSequence = {}, bool reverse = false, std::optional<int> startFrame = {});
 		AnimationPlayId stop();
 
 		AnimationPlayId setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
