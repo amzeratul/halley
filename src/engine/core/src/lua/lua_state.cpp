@@ -63,6 +63,7 @@ LuaState::~LuaState()
 	popErrorHandler();
 	errorHandlerRef.reset();
 	lua_close(lua);
+	lua = nullptr;
 }
 
 const LuaReference* LuaState::tryGetModule(const String& moduleName) const

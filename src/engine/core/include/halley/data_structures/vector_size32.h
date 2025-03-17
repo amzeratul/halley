@@ -411,8 +411,11 @@ namespace Halley {
 
 		void clear() noexcept
 		{
-			for (size_type i = 0; i < st_size(); ++i) {
-				std::allocator_traits<Allocator>::destroy(as_allocator(), data() + i);
+			if constexpr (!std::is_trivially_destructible_v<T>) {
+				const auto n = st_size();
+				for (size_type i = 0; i < n; ++i) {
+					std::allocator_traits<Allocator>::destroy(as_allocator(), data() + (n - i - 1));
+				}
 			}
 			set_size(0);
 		}
