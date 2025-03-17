@@ -78,6 +78,21 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 
 	// Create new entities
 	for (auto& e: toCreate) {
+		if (e.hasParent()) {
+			// NB: These checks defer create messages for child entities if the message to
+			// create their parent entity has not been sent yet. Tries to avoid problems
+			// with order of creation on the receiver side - there's code to attach children
+			// to their parents post-creation, but that doesn't seem to resolve all our edge
+			// cases.
+			//
+			// Simply skipping the sendCreateEntity() call works here because the alive check
+			// will just pick them up again to be sent on the next update.
+			if (const auto parent = e.getParent(); parent.getWorldPartition() == 0) {
+				if (outboundEntities.find(parent.getEntityId()) == outboundEntities.end()) {
+					continue;
+				}
+			}
+		}
 		sendCreateEntity(e);
 	}
 
