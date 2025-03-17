@@ -38,6 +38,8 @@ namespace Halley {
 		void addTrackedReference(LuaReference& ref);
 		void removeTrackedReference(LuaReference& ref);
 
+		int getStackSize() const;
+
 	private:
 		lua_State* lua;
 		Vector<lua_State*> pushedStates;

@@ -209,9 +209,6 @@ ConfigNode LuaStackOps::popConfigNode()
 {
 	auto type = lua_type(state.getRawState(), -1);
 	switch (type) {
-	case LUA_TNIL:
-		pop();
-		return ConfigNode();
 	case LUA_TNUMBER:
 		return ConfigNode(float(popDouble()));
 	case LUA_TBOOLEAN:
@@ -224,8 +221,11 @@ ConfigNode LuaStackOps::popConfigNode()
 	case LUA_TTHREAD:
 	case LUA_TLIGHTUSERDATA:
 		return ConfigNode(popString());
+	case LUA_TNIL:
+	default:
+		pop();
+		return ConfigNode();
 	}
-	return ConfigNode();
 }
 
 ConfigNode LuaStackOps::popTable()
@@ -257,6 +257,7 @@ ConfigNode LuaStackOps::popTable()
 			}			
 		}
 	}
+	pop();
 
 	return seqResult.empty() ? ConfigNode(std::move(mapResult)) : ConfigNode(std::move(seqResult));
 }
