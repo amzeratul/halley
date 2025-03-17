@@ -603,6 +603,16 @@ void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 }
 
+void EntityNetworkSession::findEntity(EntityNetworkId networkId, bool inbound, std::function<void(EntityId, NetworkSession::PeerId)> callback) const
+{
+	for (auto& peer: peers) {
+		auto entityId = inbound ? peer.findInboundEntity(networkId) : peer.findOutboundEntity(networkId);
+		if (entityId.isValid()) {
+			callback(entityId, peer.getPeerId());
+		}
+	}
+}
+
 void EntitySessionSharedData::serialize(Serializer& s) const
 {
 	s << gameStarted;

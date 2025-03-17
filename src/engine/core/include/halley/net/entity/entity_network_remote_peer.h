@@ -39,6 +39,9 @@ namespace Halley {
     	void sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
+    	[[nodiscard]] EntityId findInboundEntity(EntityNetworkId networkId) const;
+    	[[nodiscard]] EntityId findOutboundEntity(EntityNetworkId networkId) const;
+
     private:
         class OutboundEntity {
         public:

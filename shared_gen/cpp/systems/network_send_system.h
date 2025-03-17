@@ -5,6 +5,7 @@
 
 #include "halley/entity/services/session_service.h"
 #include "halley/entity/services/screen_service.h"
+#include "halley/entity/services/dev_service.h"
 
 #include "components/network_component.h"
 
@@ -52,6 +53,10 @@ protected:
 	ScreenService& getScreenService() const {
 		return *screenService;
 	}
+
+	DevService& getDevService() const {
+		return *devService;
+	}
 	Halley::FamilyBinding<NetworkFamily> networkFamily{};
 
 private:
@@ -59,9 +64,11 @@ private:
 
 	SessionService* sessionService{ nullptr };
 	ScreenService* screenService{ nullptr };
+	DevService* devService{ nullptr };
 	void initBase() override final {
 		sessionService = &doGetWorld().template getService<SessionService>(getName());
 		screenService = &doGetWorld().template getService<ScreenService>(getName());
+		devService = &doGetWorld().template getService<DevService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, NetworkFamily>(networkFamily, static_cast<T*>(this));
 	}

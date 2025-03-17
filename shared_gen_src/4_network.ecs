@@ -86,6 +86,7 @@ system:
   services:
     - SessionService
     - ScreenService
+    - DevService
   access:
     - world
     - resources

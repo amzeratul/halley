@@ -94,6 +94,8 @@ namespace Halley {
 		void requestLobbyInfo();
 		void setLobbyInfo(ConfigNode info);
 
+		void findEntity(EntityNetworkId networkId, bool inbound, std::function<void(EntityId, NetworkSession::PeerId)> callback) const;
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;

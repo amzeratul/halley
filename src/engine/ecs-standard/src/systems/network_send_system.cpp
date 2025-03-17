@@ -7,6 +7,9 @@ class NetworkSendSystem final : public NetworkSendSystemBase<NetworkSendSystem> 
 public:
 	void init()
 	{
+		if (getSessionService().isMultiplayer()) {
+			setupCheats();
+		}
 	}
 
 	void update(Time t)
@@ -48,7 +51,7 @@ public:
 							Logger::logDev("Peer " + toString((int) peerId) + " is claiming network ownership for " + entity.getName());
 							e.network.ownerId = peerId;
 						} else {
-							Logger::logDev("Peer " + toString((int) peerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ")" + " to host");
+							Logger::logDev("Peer " + toString((int) peerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
 							e.network.ownerId = 0;
 						}
 					}
@@ -81,6 +84,36 @@ private:
 
 			disableSendUpdateForChildren(c);
 		}
+	}
+
+	void setupCheats()
+	{
+		auto& consoleCommands = getDevService().getConsoleCommands();
+
+		consoleCommands.addCommand("findNetworkEntityOutbound", [this](Vector<String> args) -> String
+		{
+			if (args.size() != 1 || !args[0].isInteger()) {
+				return "Error: no or malformed network ID";
+			}
+
+			EntityNetworkId networkId(args[0].toInteger());
+			String output = "";
+
+			getSessionService().getMultiplayerSession().getEntityNetworkSession()->findEntity(networkId, false, [&](EntityId entityId, NetworkSession::PeerId peerId) {
+				const auto e = getWorld().tryGetEntity(entityId);
+				if (e.isValid()) {
+					output += e.getName() + ", entity ID " + toString(entityId) + ", peer " + toString((int) peerId) + "\n";
+				} else {
+					output += "invalid entity ID " + toString(entityId) + " for network ID " + toString(networkId) + ", peer " + toString((int) peerId) + "\n";
+				}
+			});
+
+			if (output.isEmpty()) {
+				output += "no outbound entities found with network ID " + toString(networkId) + " for active peers\n";
+			}
+
+			return output;
+		}, UIDebugConsoleSyntax());
 	}
 };
 

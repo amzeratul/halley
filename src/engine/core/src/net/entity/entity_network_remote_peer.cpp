@@ -475,3 +475,20 @@ void EntityNetworkRemotePeer::stripNestedNetworkComponents(EntityRef entity, int
 	}
 }
 
+EntityId EntityNetworkRemotePeer::findInboundEntity(EntityNetworkId networkId) const
+{
+	if (inboundEntities.contains(networkId)) {
+		return inboundEntities.at(networkId).worldId;
+	}
+	return {};
+}
+
+EntityId EntityNetworkRemotePeer::findOutboundEntity(EntityNetworkId networkId) const
+{
+	for (const auto& e: outboundEntities) {
+		if (e.second.networkId == networkId) {
+			return e.first;
+		}
+	}
+	return {};
+}
