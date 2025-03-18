@@ -16,12 +16,14 @@ public:
 	static const constexpr char* componentName{ "Velocity" };
 
 	Halley::Vector2f velocity{};
+	bool enabled{ true };
 
 	VelocityComponent() {
 	}
 
-	VelocityComponent(Halley::Vector2f velocity)
+	VelocityComponent(Halley::Vector2f velocity, bool enabled)
 		: velocity(std::move(velocity))
+		, enabled(std::move(enabled))
 	{
 	}
 
@@ -29,23 +31,29 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(velocity)>::serialize(velocity, Halley::Vector2f{}, _context, _node, componentName, "velocity", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(enabled)>::serialize(enabled, bool{ true }, _context, _node, componentName, "enabled", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(velocity)>::deserialize(velocity, Halley::Vector2f{}, _context, _node, componentName, "velocity", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(enabled)>::deserialize(enabled, bool{ true }, _context, _node, componentName, "enabled", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("velocity");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("enabled");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
 		using namespace Halley::EntitySerialization;
 		if (_fieldName == "velocity") {
 			return Halley::ConfigNodeHelper<decltype(velocity)>::serialize(velocity, _context);
+		}
+		if (_fieldName == "enabled") {
+			return Halley::ConfigNodeHelper<decltype(enabled)>::serialize(enabled, _context);
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
@@ -56,15 +64,21 @@ public:
 			Halley::ConfigNodeHelper<decltype(velocity)>::deserialize(velocity, _context, _node);
 			return;
 		}
+		if (_fieldName == "enabled") {
+			Halley::ConfigNodeHelper<decltype(enabled)>::deserialize(enabled, _context, _node);
+			return;
+		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
 		Halley::ByteSerializationHelper<decltype(velocity)>::serialize(velocity, _context, _serializer);
+		Halley::ByteSerializationHelper<decltype(enabled)>::serialize(enabled, _context, _serializer);
 	}
 
 	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
 		Halley::ByteSerializationHelper<decltype(velocity)>::deserialize(velocity, _context, _deserializer);
+		Halley::ByteSerializationHelper<decltype(enabled)>::deserialize(enabled, _context, _deserializer);
 	}
 
 

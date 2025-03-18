@@ -63,5 +63,11 @@ component:
       canEdit: true
       canSave: true
       canNetwork: true
+  - enabled:
+      type: bool
+      defaultValue: true
+      canEdit: true
+      canSave: true
+      canNetwork: true
 
 ...
