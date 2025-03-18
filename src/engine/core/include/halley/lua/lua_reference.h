@@ -101,6 +101,7 @@ namespace Halley {
 		int getRefId() const { return refId; }
 		void onStateDestroyed();
 		bool isValid() const;
+		bool isValid(const LuaState& state) const;
 
 	private:
 		LuaState* lua = nullptr;

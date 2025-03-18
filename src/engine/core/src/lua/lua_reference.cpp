@@ -97,6 +97,11 @@ bool LuaReference::isValid() const
 	return refId != LUA_NOREF;
 }
 
+bool LuaReference::isValid(const LuaState& state) const
+{
+	return isValid() && lua == &state;
+}
+
 LuaReference LuaReference::operator[](const String& name) const
 {
 	pushToLuaStack();
@@ -127,7 +132,7 @@ bool LuaExpression::isEmpty() const
 
 LuaReference& LuaExpression::get(LuaState& state) const
 {
-	if (!luaRef || !luaRef->isValid()) {
+	if (!luaRef || !luaRef->isValid(state)) {
 		auto stack = LuaStackOps(state);
 		if (expression.startsWith("return") || expression.contains('\n')) {
 			stack.load(expression);

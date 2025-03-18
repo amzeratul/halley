@@ -63,6 +63,7 @@ LuaState::~LuaState()
 	popErrorHandler();
 	errorHandlerRef.reset();
 	lua_close(lua);
+	lua = nullptr;
 }
 
 const LuaReference* LuaState::tryGetModule(const String& moduleName) const
@@ -180,7 +181,7 @@ void LuaState::popErrorHandler()
 			throw Exception("Error handler not set.", HalleyExceptions::Lua);
 		}
 		if (errorHandlerStackPos.back() != lua_gettop(lua)) {
-			throw Exception("Stack corruption.", HalleyExceptions::Lua);
+			throw Exception("Lua stack corruption: expected " + toString(errorHandlerStackPos.back()) + ", got " + toString(lua_gettop(lua)), HalleyExceptions::Lua);
 		}
 		lua_pop(lua, 1);
 		errorHandlerStackPos.pop_back();
@@ -234,6 +235,11 @@ void LuaState::addTrackedReference(LuaReference& ref)
 void LuaState::removeTrackedReference(LuaReference& ref)
 {
 	trackedReferences.erase(&ref);
+}
+
+int LuaState::getStackSize() const
+{
+	return lua_gettop(lua);
 }
 
 const LuaReference& LuaState::packageLoader(String module)
