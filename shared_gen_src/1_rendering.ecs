@@ -31,12 +31,14 @@ component:
       canSave: false # Saving this is dangerous, hard to keep state consistency
       canEdit: true
       canModifyDynamic: true
+      canNetwork: true
   - intensity:
       type: float
       defaultValue: 1
       canSave: false
       canEdit: true
       canModifyDynamic: true
+      canNetwork: true
 
 ---
 

@@ -7,6 +7,7 @@
 #include <components/sprite_component.h>
 
 #include "halley/entity/world.h"
+#include "components/colour_component.h"
 #include "components/sprite_animation_component.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/maths/colour_gradient.h"
@@ -204,9 +205,11 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAlpha::getNodeDescription(
 
 IScriptNodeType::Result ScriptSpriteAlpha::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto* sprite = environment.tryGetComponent<SpriteComponent>(readRawEntityId(environment, node, 2));
-	if (sprite) {
-		const float value = readDataPin(environment, node, 3).asFloat(1.0f);
+	auto entityId = readRawEntityId(environment, node, 2);
+	const float value = readDataPin(environment, node, 3).asFloat(1.0f);
+	if (auto* colour = environment.tryGetComponent<ColourComponent>(entityId)) {
+		colour->colour.a = value;
+	} else if (auto* sprite = environment.tryGetComponent<SpriteComponent>(entityId)) {
 		sprite->sprite.getColour().a = value;
 	}
 	return Result(ScriptNodeExecutionState::Done);
