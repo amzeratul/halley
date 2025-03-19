@@ -92,6 +92,10 @@ LocalisedString I18N::get(const String& key) const
 
 std::optional<LocalisedString> I18N::tryGet(const String& key) const
 {
+	if (key.isEmpty()) {
+		return std::nullopt;
+	}
+
 	auto curLang = strings.find(currentLanguage);
 	if (curLang != strings.end()) {
 		auto i = curLang->second.find(key);
