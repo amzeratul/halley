@@ -1,6 +1,6 @@
 project (halley-metal)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories(${Boost_INCLUDE_DIR} ${SDL2_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
         "src/metal_plugin.mm"
@@ -13,6 +13,7 @@ set(SOURCES
         "src/metal_shader.mm"
         "src/metal_texture.mm"
         "src/metal_video.mm"
+        "src/metal_depth_stencil.mm"
         )
 
 set(HEADERS
@@ -24,6 +25,7 @@ set(HEADERS
         "src/metal_shader.h"
         "src/metal_texture.h"
         "src/metal_video.h"
+        "src/metal_depth_stencil.h"
         )
 
 assign_source_group(${SOURCES})
@@ -36,3 +38,7 @@ set_target_properties(halley-metal PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
 find_library(METAL_LIBRARY Metal)
 find_library(QUARTZ_LIBRARY QuartzCore)
 target_link_libraries(halley-metal halley-engine "${METAL_LIBRARY}" "${QUARTZ_LIBRARY}")
+
+if(IOS)
+        target_link_libraries( halley-metal "${SDL2_LIBRARIES}" )
+endif()

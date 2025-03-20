@@ -36,3 +36,13 @@ assign_source_group(${HEADERS})
 
 add_library (halley-sdl ${SOURCES} ${HEADERS})
 target_link_libraries(halley-sdl halley-engine ${SDL2_LIBRARIES})
+
+if(APPLE)
+    target_link_options( halley-sdl PUBLIC "-Wl,-weak_framework,GameController" "-Wl,-weak_framework,CoreHaptics")
+
+    if(IOS OR TVOS)
+        target_link_options( halley-sdl PUBLIC "-Wl,-framework,Metal")
+    else()
+        target_link_options( halley-sdl PUBLIC "-Wl,-weak_framework,Metal")
+    endif()
+endif()

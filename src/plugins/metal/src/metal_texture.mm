@@ -24,7 +24,7 @@ void MetalTexture::doLoad(TextureDescriptor& descriptor)
 			throw Exception("RGB textures are not supported", HalleyExceptions::VideoPlugin);
 			break;
 		case TextureFormat::RGBA:
-			pixelFormat = MTLPixelFormatRGBA8Unorm;
+			pixelFormat = descriptor.isRenderTarget ? MTLPixelFormatBGRA8Unorm : MTLPixelFormatRGBA8Unorm;
 			bytesPerPixel = 4;
 			break;
 		case TextureFormat::Depth:
@@ -35,33 +35,42 @@ void MetalTexture::doLoad(TextureDescriptor& descriptor)
 			throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
 	}
 
-	auto textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
+	MTLTextureDescriptor * textureDescriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
 		width:descriptor.size.x
 		height:descriptor.size.y
 		mipmapped:descriptor.useMipMap
 	];
-	metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
 
-	NSUInteger bytesPerRow = bytesPerPixel * descriptor.size.x;
-	MTLRegion region = {
-		{ 0, 0, 0 },
-		{static_cast<NSUInteger>(descriptor.size.x), static_cast<NSUInteger>(descriptor.size.y), 1}
-	};
-
-	Byte* imageBytes;
-	if (descriptor.pixelData.empty()) {
-		Vector<Byte> blank;
-		blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(descriptor.format));
-		imageBytes = blank.data();
-	} else {
-		imageBytes = descriptor.pixelData.getBytes();
+	if( descriptor.isRenderTarget || descriptor.isDepthStencil ) {
+		textureDescriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+		textureDescriptor.storageMode = MTLStorageModePrivate;
 	}
 
-	[metalTexture replaceRegion:region
-		mipmapLevel:0
-		withBytes:imageBytes
-		bytesPerRow:bytesPerRow
-	];
+	metalTexture = [video.getDevice() newTextureWithDescriptor:textureDescriptor];
+
+	if( !descriptor.isRenderTarget && !descriptor.isDepthStencil ) {
+		NSUInteger bytesPerRow = bytesPerPixel * descriptor.size.x;
+		MTLRegion region = {
+			{ 0, 0, 0 },
+			{static_cast<NSUInteger>(descriptor.size.x), static_cast<NSUInteger>(descriptor.size.y), 1}
+		};
+
+		Byte* imageBytes;
+
+		Vector<Byte> blank;
+		if (descriptor.pixelData.empty()) {
+			blank.resize(size.x * size.y * TextureDescriptor::getBytesPerPixel(descriptor.format));
+			imageBytes = blank.data();
+		} else {
+			imageBytes = descriptor.pixelData.getBytes();
+		}
+
+		[metalTexture replaceRegion:region
+			mipmapLevel:0
+			withBytes:imageBytes
+			bytesPerRow:bytesPerRow
+		];
+	}
 
 	MTLSamplerDescriptor* samplerDescriptor = [[MTLSamplerDescriptor alloc] init];
 	samplerDescriptor.maxAnisotropy = 1;
@@ -98,5 +107,7 @@ MTLSamplerAddressMode MetalTexture::getMetalAddressMode(TextureDescriptor& descr
 		return MTLSamplerAddressModeMirrorRepeat;
 	case TextureAddressMode::Repeat:
 		return MTLSamplerAddressModeRepeat;
+	case TextureAddressMode::Border:
+		return MTLSamplerAddressModeClampToBorderColor;
 	}
 }

@@ -8,11 +8,8 @@
 #include <dxcapi.h>
 #include <wrl.h>
 using namespace Microsoft::WRL;
-#endif
 
 #include "shader_importer_dxc.inl"
-
-using namespace Halley;
 
 static DxcCreateInstanceProc getDxcCreateInstanceFunction(const char* dllName)
 {
@@ -34,6 +31,9 @@ static DxcCreateInstanceProc getDxcCreateInstanceFunction(const char* dllName)
 
 	return fn;
 }
+#endif
+
+using namespace Halley;
 
 Bytes ShaderImporterDXC::compileDXIL(const String& name, ShaderType type, const Bytes& bytes, const String& language, const MaterialDefinition& material) {
 #ifdef _MSC_VER

@@ -20,7 +20,11 @@ endif()
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
 halleyProjectCodegenV2(halley-editor "${editor_sources}" "${editor_resources}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
-add_dependencies(halley-editor halley-cmd halley-engine halley-opengl)
+add_dependencies(halley-editor halley-cmd halley-engine)
+
+if (USE_OPENGL)
+	add_dependencies(halley-editor halley-opengl)
+endif()
 if (USE_SDL2)
 	add_dependencies(halley-editor halley-sdl)
 elseif (USE_SDL3)
