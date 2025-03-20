@@ -29,6 +29,10 @@ namespace Halley
 		void setScale(Vector2f scale);
 		Vector2f getScale() const;
 
+		void setAnimateWhileInvisible(bool animate);
+
+		void setDynamicValue(std::string_view key, ConfigNode value) override;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
@@ -39,5 +43,6 @@ namespace Halley
 		AnimationPlayer animation;
 		Sprite sprite;
 		Colour4f colour;
+		bool animateWhileInvisible = false;
 	};
 }

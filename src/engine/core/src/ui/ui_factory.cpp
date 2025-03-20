@@ -1226,6 +1226,7 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
 	result.entries.emplace_back("Playback Speed", "playbackSpeed", "float", "1");
 	result.entries.emplace_back("Occupy Space", "occupySpace", "bool", "false");
+	result.entries.emplace_back("Animate if Invisible", "animateWhileInvisible", "bool", "false");
 	result.entries.emplace_back("Scale", "scale", "std::optional<Halley::Vector2f>", "");
 	return result;
 }
@@ -1240,6 +1241,7 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto playbackSpeed = node["playbackSpeed"].asFloat(1.0f);
 	auto scale = node["scale"].asVector2f(Vector2f(1, 1));
 	bool occupySpace = node["occupySpace"].asBool(false);
+	bool animateWhileInvisible = node["animateWhileInvisible"].asBool(false);
 
 	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
 	animation.setPlaybackSpeed(playbackSpeed);
@@ -1251,6 +1253,7 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto anim = std::make_shared<UIAnimation>(id, size, makeSizer(entryNode), offset, animation);
 	anim->setColour(Colour4f::fromString(node["colour"].asString("#FFFFFF")));
 	anim->setScale(scale);
+	anim->setAnimateWhileInvisible(animateWhileInvisible);
 
 	return anim;
 }

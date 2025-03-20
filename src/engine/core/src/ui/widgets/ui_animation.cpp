@@ -70,10 +70,24 @@ Vector2f UIAnimation::getScale() const
 	return scale;
 }
 
+void UIAnimation::setAnimateWhileInvisible(bool animate)
+{
+	animateWhileInvisible = animate;
+}
+
+void UIAnimation::setDynamicValue(std::string_view key, ConfigNode value)
+{
+	if (key == "alpha") {
+		colour.a = value.asFloat(1.0f);
+	}
+}
+
 void UIAnimation::update(Time t, bool moved)
 {
 	if (animation.hasAnimation()) {
-		animation.update(t);
+		if (colour.a >= 0.001f || animateWhileInvisible) {
+			animation.update(t);
+		}
 		animation.updateSprite(sprite);
 		sprite.setPos(getPosition() + offset).setColour(colour).setScale(scale);
 	}
