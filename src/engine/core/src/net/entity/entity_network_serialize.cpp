@@ -9,10 +9,6 @@ using namespace Halley;
 
 thread_local Bytes EntityNetworkSerialize::scratchpad;
 
-thread_local HashSet<UUID> EntityNetworkSerialize::childrenAdded;
-thread_local HashSet<UUID> EntityNetworkSerialize::childrenChanged;
-thread_local HashSet<UUID> EntityNetworkSerialize::childrenRemoved;
-
 void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 {
     curPage.hash = 0;
@@ -538,6 +534,9 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
         if (modified) {
             // Something has changed. We need to do a more detailed inspection
             // to check for entity/component updates, additions and deletions.
+            thread_local HashSet<UUID> childrenAdded;
+            thread_local HashSet<UUID> childrenChanged;
+            thread_local HashSet<UUID> childrenRemoved;
 
             childrenAdded.clear();
             childrenChanged.clear();
@@ -647,6 +646,9 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         }
                     }
             );
+
+            hasComponentsAddedOrRemoved |= !childrenAdded.empty();
+            hasComponentsAddedOrRemoved |= !childrenRemoved.empty();
         }
     }
 
@@ -667,7 +669,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
 
 bool EntityNetworkSerialize::hasEntityChanges() const
 {
-    return hasComponentsAddedOrRemoved || !childrenAdded.empty() || !childrenRemoved.empty();
+    return hasComponentsAddedOrRemoved;
 }
 
 void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options) const

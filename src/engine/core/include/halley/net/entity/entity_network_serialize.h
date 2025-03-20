@@ -111,10 +111,6 @@ namespace Halley {
         bool hasComponentsAddedOrRemoved;
 
         static thread_local Bytes scratchpad;
-
-        static thread_local HashSet<UUID> childrenAdded;
-        static thread_local HashSet<UUID> childrenChanged;
-        static thread_local HashSet<UUID> childrenRemoved;
     };
 
 }
