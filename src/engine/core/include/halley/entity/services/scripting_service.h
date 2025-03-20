@@ -12,8 +12,8 @@ namespace Halley {
 
 		ScriptEnvironment& getEnvironment() const;
 
-		ConfigNode evaluateExpression(const String& expression, bool useResultCache = false, bool throwOnError = true) const;
-		ConfigNode evaluateExpression(const LuaExpression& expression, bool useResultCache = false, bool throwOnError = true) const;
+		[[maybe_unused]] ConfigNode evaluateExpression(const String& expression, bool useResultCache = false, bool throwOnError = true) const;
+		[[maybe_unused]] ConfigNode evaluateExpression(const LuaExpression& expression, bool useResultCache = false, bool throwOnError = true) const;
 		void clearResultCache();
 
 		template <typename T>
