@@ -66,6 +66,8 @@ namespace Halley {
 
 		void setPrefab(std::shared_ptr<Prefab> prefab);
 
+		IProject& getProject() const override;
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		bool deleteAsset(const Path& path) override;

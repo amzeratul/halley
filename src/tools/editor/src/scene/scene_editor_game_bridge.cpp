@@ -408,6 +408,11 @@ void SceneEditorGameBridge::setPrefab(std::shared_ptr<Prefab> prefab)
 	this->prefab = std::move(prefab);
 }
 
+IProject& SceneEditorGameBridge::getProject() const
+{
+	return project;
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
