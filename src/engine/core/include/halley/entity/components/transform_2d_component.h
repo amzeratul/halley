@@ -71,7 +71,7 @@ public:
 	Halley::WorldPartitionId getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
-	void deserializeNetwork(const Halley::EntitySerializationContext& context, Halley::Deserializer& deserializer);
+	void deserializeNetwork(const Halley::ByteSerializationContext& context, Halley::Deserializer& deserializer);
 
 	void markDirty(uint8_t changeMask = (uint8_t)0xFF);
 

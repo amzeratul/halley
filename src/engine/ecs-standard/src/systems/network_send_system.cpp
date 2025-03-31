@@ -114,6 +114,19 @@ private:
 
 			return output;
 		}, UIDebugConsoleSyntax());
+
+		consoleCommands.addCommand("logNetworkEntityUpdates", [this](Vector<String> args) -> String
+		{
+			int count = 1;
+
+			if (args.size() == 1 && args[0].isInteger()) {
+				count = args[0].toInteger();
+			}
+
+			getSessionService().getMultiplayerSession().getEntityNetworkSession()->logUpdates(count);
+
+			return "Logging for " + toString(count) + " network frames";
+		}, UIDebugConsoleSyntax());
 	}
 };
 

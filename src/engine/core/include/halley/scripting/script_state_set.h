@@ -106,11 +106,12 @@ namespace Halley {
 
     template <typename T>
     class ByteSerializationHelper;
+    class ByteSerializationContext;
 
     template <>
     class ByteSerializationHelper<ScriptStateSet> {
     public:
-        static void serialize(const ScriptStateSet& value, const EntitySerializationContext& context, Serializer& serializer);
-        static void deserialize(ScriptStateSet& dst, const EntitySerializationContext& context, Deserializer& deserializer);
+        static void serialize(const ScriptStateSet& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName);
+        static void deserialize(ScriptStateSet& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName);
     };
 }

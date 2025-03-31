@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -127,20 +127,20 @@ public:
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
-	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(event)>::serialize(event, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(rangeMin)>::serialize(rangeMin, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(rangeMax)>::serialize(rangeMax, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(rollOff)>::serialize(rollOff, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(curve)>::serialize(curve, _context, _serializer);
+	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(event)>::serialize(event, _context, _serializer, componentIndex, "event");
+		Halley::ByteSerializationHelper<decltype(rangeMin)>::serialize(rangeMin, _context, _serializer, componentIndex, "rangeMin");
+		Halley::ByteSerializationHelper<decltype(rangeMax)>::serialize(rangeMax, _context, _serializer, componentIndex, "rangeMax");
+		Halley::ByteSerializationHelper<decltype(rollOff)>::serialize(rollOff, _context, _serializer, componentIndex, "rollOff");
+		Halley::ByteSerializationHelper<decltype(curve)>::serialize(curve, _context, _serializer, componentIndex, "curve");
 	}
 
-	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(event)>::deserialize(event, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(rangeMin)>::deserialize(rangeMin, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(rangeMax)>::deserialize(rangeMax, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(rollOff)>::deserialize(rollOff, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(curve)>::deserialize(curve, _context, _deserializer);
+	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(event)>::deserialize(event, _context, _deserializer, componentIndex, "event");
+		Halley::ByteSerializationHelper<decltype(rangeMin)>::deserialize(rangeMin, _context, _deserializer, componentIndex, "rangeMin");
+		Halley::ByteSerializationHelper<decltype(rangeMax)>::deserialize(rangeMax, _context, _deserializer, componentIndex, "rangeMax");
+		Halley::ByteSerializationHelper<decltype(rollOff)>::deserialize(rollOff, _context, _deserializer, componentIndex, "rollOff");
+		Halley::ByteSerializationHelper<decltype(curve)>::deserialize(curve, _context, _deserializer, componentIndex, "curve");
 	}
 
 

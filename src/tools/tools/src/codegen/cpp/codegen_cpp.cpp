@@ -297,8 +297,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
                     deserializeNetworkBody += lineBreak;
                 }
 
-                serializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", _context, _serializer);";
-                deserializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", _context, _deserializer);";
+                serializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", _context, _serializer, componentIndex, \"" + member.name + "\");";
+                deserializeNetworkBody += "Halley::ByteSerializationHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", _context, _deserializer, componentIndex, \"" + member.name + "\");";
             }
         }
     }
@@ -371,11 +371,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 		}, "deserializeField"), deserializeFieldBody)
         .addBlankLine()
         .addMethodDefinition(MethodSchema(TypeSchema("void"), {
-            VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Serializer&"), "_serializer")
+            VariableSchema(TypeSchema("Halley::ByteSerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Serializer&"), "_serializer")
         }, "serializeNetwork", true), serializeNetworkBody)
         .addBlankLine()
         .addMethodDefinition(MethodSchema(TypeSchema("void"), {
-            VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Deserializer&"), "_deserializer")
+            VariableSchema(TypeSchema("Halley::ByteSerializationContext&", true), "_context"), VariableSchema(TypeSchema("Halley::Deserializer&"), "_deserializer")
         }, "deserializeNetwork"), deserializeNetworkBody)
 		.addBlankLine();
 

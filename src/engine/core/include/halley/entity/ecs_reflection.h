@@ -10,6 +10,7 @@ namespace Halley {
 	class EntityRef;
 	class Component;
 	class EntitySerializationContext;
+	class ByteSerializationContext;
 
 	class CreateComponentFunctionResult {
 	public:
@@ -40,8 +41,8 @@ namespace Halley {
 
 		virtual void sanitize(ConfigNode& data, int mask) const = 0;
 
-        virtual void serializeNetwork(const EntitySerializationContext& context, Serializer& serializer, const Component& component) const = 0;
-        virtual void deserializeNetwork(const EntitySerializationContext& context, Deserializer& deserializer, Component& component) const = 0;
+        virtual void serializeNetwork(const ByteSerializationContext& context, Serializer& serializer, const Component& component) const = 0;
+        virtual void deserializeNetwork(const ByteSerializationContext& context, Deserializer& deserializer, Component& component) const = 0;
 	};
 
 	class MessageReflector {

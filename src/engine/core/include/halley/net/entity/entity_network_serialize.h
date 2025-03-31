@@ -1,10 +1,13 @@
 #pragma once
 
 #include "halley/entity/entity.h"
+#include "halley/entity/entity_factory.h"
+#include "halley/entity/world.h"
 #include "halley/utils/hash.h"
 
 namespace Halley {
 
+    class IByteDataInterpolatorSet;
     class SerializerOptions;
 
     class EntityNetworkChanges
@@ -57,7 +60,7 @@ namespace Halley {
 
         bool operator==(const EntityNetworkChanges& other) const;
 
-        void writeJournal(Serializer& serializer, const Bytes& buffer) const;
+        void writeJournal(Serializer& serializer, const Bytes& buffer, bool log) const;
 
         void enumerateEntityPages(const HashSet<UUID>& filter,
                 const std::function<void (const Page& page, int pageIdx)>& onEntity) const;
@@ -85,27 +88,71 @@ namespace Halley {
     class EntityNetworkSerialize
     {
     public:
-        explicit EntityNetworkSerialize(Resources& resources);
+        explicit EntityNetworkSerialize(Resources& resources, const IByteDataInterpolatorSet* interpolators);
 
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
-        void deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options, const std::shared_ptr<EntityFactoryContext>& context);
+        void deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
 
         bool processEntityUpdateChanges(Bytes& previous);
         bool hasEntityChanges() const;
 
-        void getBytes(Bytes& data, const SerializerOptions& options) const;
+        void getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
 
     private:
-        void doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent);
+        class SerializationContext : public IEntityFactoryContext
+        {
+        public:
+            explicit SerializationContext(const EntityRef& entity, const std::shared_ptr<const Prefab>& prefab = {})
+                : entity(entity)
+                , prefab(prefab)
+            {
 
-        EntityNetworkChanges::Type doDeserializeEntityUpdate(Deserializer& deserializer,
-            EntityRef& entity, const UUID& instanceUUID,
-            std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
+            }
+
+            EntityId getEntityIdFromUUID(const UUID &uuid) const override
+            {
+                if (const auto e = entity.getWorld().findEntity(uuid)) {
+                    return e->getEntityId();
+                }
+                return {};
+            }
+
+            UUID getUUIDFromEntityId(EntityId id) const override
+            {
+                if (const auto e = entity.getWorld().tryGetEntity(id); e.isValid()) {
+                    return e.getInstanceUUID();
+                }
+                return {};
+            }
+
+            EntityId getCurrentEntityId() const override
+            {
+                return entity.getEntityId();
+            }
+
+            const std::shared_ptr<const Prefab>& getPrefab() const
+            {
+                return prefab;
+            }
+
+        private:
+            const EntityRef entity;
+            const std::shared_ptr<const Prefab> prefab;
+        };
+
+        void doSerializeEntityUpdate(
+            const SerializationContext& context, Serializer& serializer,
+            const EntityRef& entity, const std::optional<EntityRef>& parent);
+
+        EntityNetworkChanges::Type doDeserializeEntityUpdate(
+            const SerializationContext& context, Deserializer& deserializer,
+            EntityRef& entity, const std::optional<EntityRef>& parent);
 
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size);
         static std::optional<EntityRef> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         Resources& resources;
+        const IByteDataInterpolatorSet* interpolators;
         EntityNetworkChanges journal;
 
         bool hasComponentsAddedOrRemoved;

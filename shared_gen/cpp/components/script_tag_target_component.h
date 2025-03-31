@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -52,11 +52,11 @@ public:
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
-	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
+	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
 		
 	}
 
-	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
+	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
 		
 	}
 

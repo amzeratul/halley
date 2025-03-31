@@ -158,7 +158,7 @@ bool EntityNetworkChanges::operator==(const EntityNetworkChanges& other) const
 
 // Parses the journal, along with the entity data, and writes everything to the
 // output buffer. Tries to skip unmodified data along the way.
-void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buffer) const
+void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buffer, bool log) const
 {
     Expects(pp > 0);
 
@@ -218,6 +218,20 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
             Expects(size > 0);
             auto span = buffer.const_byte_span().subspan(page.from, size);
             serializer << span;
+
+            if (log) {
+                if (page.type == Type::Entity) {
+                    if (p == 0) {
+                        Logger::logInfo("  - root, " + toString(size) + " bytes");
+                    } else {
+                        Logger::logInfo("  - entity, " + toString(size) + " bytes");
+                    }
+                } else if (page.type == Type::EntityIdentity) {
+                    Logger::logInfo("  - identity, " + toString(size) + " bytes");
+                } else if (page.type == Type::Component) {
+                    Logger::logInfo("  - component " + toString(page.componentId) + ", " + toString(size) + " bytes");
+                }
+            }
 
             p++;
         }
@@ -290,8 +304,9 @@ const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const U
     throw Exception("No journal page found for entity", HalleyExceptions::Network);
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources)
+EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources, const IByteDataInterpolatorSet* interpolators)
     : resources(resources)
+    , interpolators(interpolators)
     , hasComponentsAddedOrRemoved(false)
 {
     scratchpad.reserve(16384);
@@ -305,15 +320,18 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
     opt.world = &entity.getWorld();
 
     Serializer serializer(scratchpad.byte_span(), opt);
+    const SerializationContext context(entity);
 
-    doSerializeEntityUpdate(serializer, entity, {});
+    doSerializeEntityUpdate(context, serializer, entity, {});
 
     journal.digest();
 
     return !journal.isFull();
 }
 
-void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, const EntityRef& entity, std::optional<EntityRef> parent)
+void EntityNetworkSerialize::doSerializeEntityUpdate(
+    const SerializationContext& context, Serializer& serializer,
+    const EntityRef& entity, const std::optional<EntityRef>& parent)
 {
     if (!entity.isSerializable()) {
         Logger::logDev("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
@@ -321,7 +339,14 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
 
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
+    serializationContext.entityContext = &context;
+    serializationContext.interpolators = nullptr;
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
+
+    ByteSerializationContext byteSerializationContext = {};
+    byteSerializationContext.resources = &resources;
+    byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.entitySerializationContext = &serializationContext;
 
     // Entity
     journal.pushEntity(serializer, entity, parent, scratchpad);
@@ -333,7 +358,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
         const auto& reflector = reflection.getComponentReflector(componentId);
 
         journal.beginComponent(serializer, (uint16_t) componentId);
-        reflector.serializeNetwork(serializationContext, serializer, *component);
+        reflector.serializeNetwork(byteSerializationContext, serializer, *component);
         journal.endComponent(serializer, scratchpad);
     }
 
@@ -342,17 +367,18 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(Serializer& serializer, con
         if (!child.isSerializable()) {
             continue;
         }
-        doSerializeEntityUpdate(serializer, child, entity);
+        doSerializeEntityUpdate(context, serializer, child, entity);
     }
 }
 
-void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const Bytes& bytes, const SerializerOptions& options, const std::shared_ptr<EntityFactoryContext>& context)
+void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
     opt.world = &entity.getWorld();
 
     Deserializer deserializer(bytes, opt);
+    const SerializationContext context(entity, prefab);
 
     EntityNetworkChanges::Type type;
     uint16_t size;
@@ -365,7 +391,7 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
     UUID instanceUUID;
     deserializer >> instanceUUID;
 
-    type = doDeserializeEntityUpdate(deserializer, entity, instanceUUID, {}, context);
+    type = doDeserializeEntityUpdate(context, deserializer, entity, {});
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         Logger::logDev("Not at end of entity network update byte stream, " +
@@ -384,9 +410,9 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const By
 }
 
 // See EntityFactory::updateEntityNode().
-EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Deserializer& deserializer,
-    EntityRef& entity, const UUID& instanceUUID,
-    std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
+EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
+    const SerializationContext& context, Deserializer& deserializer,
+    EntityRef& entity, const std::optional<EntityRef>& parent)
 {
     Expects(entity.isValid());
 
@@ -398,11 +424,16 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         entity.setParent(parent.value());
     }
 
-    context->setCurrentEntity(entity.getEntityId());
-
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
+    serializationContext.entityContext = &context;
+    serializationContext.interpolators = nullptr;
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
+
+    ByteSerializationContext byteSerializationContext = {};
+    byteSerializationContext.resources = &resources;
+    byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.entitySerializationContext = &serializationContext;
 
     // Entity
     uint8_t flags;
@@ -437,7 +468,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         String prefabId;
         deserializer >> prefabId;
 
-        entity.setPrefab(prefabUUID.isValid() ? context->getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
+        entity.setPrefab(prefabUUID.isValid() ? context.getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 
         fetchNextPage(deserializer, type, size);
     }
@@ -452,7 +483,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
 
         if (auto component = reflector.tryGetComponent(entity)) {
-            reflector.deserializeNetwork(serializationContext, deserializer, *component);
+            reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
         } else {
             // TODO:
             if (componentSize > 0) {
@@ -474,10 +505,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
         auto childEntity = findChildEntity(entity, childInstanceUUID);
 
         if (childEntity) {
-            type = doDeserializeEntityUpdate(deserializer, childEntity.value(), childInstanceUUID, entity, context);
-
-            // Restore context
-            context->setCurrentEntity(entity.getEntityId());
+            type = doDeserializeEntityUpdate(context, deserializer, childEntity.value(), entity);
         } else if (parent) {
             // Not a child entity, so it should be a sibling, or child of sibling, further up the
             // call chain. Need to rewind the deserializer, so the caller can read the UUIDs again.
@@ -507,8 +535,6 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(Des
             }
         }
     }
-
-    context->setCurrentEntity(EntityId());
 
     return type;
 }
@@ -672,7 +698,7 @@ bool EntityNetworkSerialize::hasEntityChanges() const
     return hasComponentsAddedOrRemoved;
 }
 
-void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options) const
+void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options, bool log) const
 {
     data.resize_no_init(data.capacity());
 
@@ -680,7 +706,7 @@ void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& opti
     opt.dictionary = options.dictionary;
 
     Serializer s(data.byte_span(), opt);
-    journal.writeJournal(s, scratchpad);
+    journal.writeJournal(s, scratchpad, log);
 
     data.resize(s.getSize());
 }

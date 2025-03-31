@@ -42,6 +42,8 @@ namespace Halley {
     	[[nodiscard]] EntityId findInboundEntity(EntityNetworkId networkId) const;
     	[[nodiscard]] EntityId findOutboundEntity(EntityNetworkId networkId) const;
 
+    	void logUpdates(bool enabled);
+
     private:
         class OutboundEntity {
         public:
@@ -71,6 +73,7 @@ namespace Halley {
         uint16_t nextId = 0;
 
         Time timeSinceSend = 0;
+    	bool log = false;
 
         static thread_local Bytes fastUpdateOutboundData;
 

@@ -18,6 +18,7 @@
 #include "halley/maths/vector4.h"
 #include "halley/resources/resource_reference.h"
 #include "iserialization_dictionary.h"
+#include "byte_serializer_base.h"
 
 namespace Halley {
 	class World;
@@ -668,30 +669,48 @@ namespace Halley {
     template <typename T>
     class ByteSerializationHelper {
     public:
-        static void serialize(const T& value, const EntitySerializationContext& context, Serializer& serializer)
+        static void serialize(const T& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
-            serializer << value;
+        	if (context.interpolators) {
+        		if (auto interpolator = context.interpolators->tryGetInterpolator(context, componentIndex, fieldName)) {
+        			if (interpolator->isEnabled()) {
+        				interpolator->serialize(&value, sizeof(T), serializer);
+        				return;
+        			}
+        		}
+        	}
+
+        	serializer << value;
         }
 
-        static void deserialize(T& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        static void deserialize(T& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
         {
-            deserializer >> dst;
+        	if (context.interpolators) {
+        		if (auto interpolator = context.interpolators->tryGetInterpolator(context, componentIndex, fieldName)) {
+        			if (interpolator->isEnabled()) {
+        				interpolator->deserialize(&dst, sizeof(T), deserializer);
+        				return;
+        			}
+        		}
+        	}
+
+        	deserializer >> dst;
         }
     };
 
     template <typename T>
     class ByteSerializationHelper<Vector<T>> {
     public:
-        static void serialize(const Vector<T>& value, const EntitySerializationContext& context, Serializer& serializer)
+        static void serialize(const Vector<T>& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
             uint32_t sz = static_cast<uint32_t>(value.size());
             serializer << sz;
             for (uint32_t i = 0; i < sz; i++) {
-                ByteSerializationHelper<T>::serialize(value[i], context, serializer);
+                ByteSerializationHelper<T>::serialize(value[i], context, serializer, componentIndex, fieldName);
             }
         }
 
-        static void deserialize(Vector<T>& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        static void deserialize(Vector<T>& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
         {
             uint32_t sz;
             deserializer >> sz;
@@ -700,7 +719,7 @@ namespace Halley {
             dst.reserve(sz);
             for (uint32_t i = 0; i < sz; i++) {
                 dst.push_back(T());
-                ByteSerializationHelper<T>::deserialize(dst[i], context, deserializer);
+                ByteSerializationHelper<T>::deserialize(dst[i], context, deserializer, componentIndex, fieldName);
             }
         }
     };
@@ -708,12 +727,12 @@ namespace Halley {
     template <typename T>
     class ByteSerializationHelper<ResourceReference<T>> {
     public:
-        static void serialize(const ResourceReference<T>& value, const EntitySerializationContext& context, Serializer& serializer)
+        static void serialize(const ResourceReference<T>& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
             serializer << value.getAssetId();
         }
 
-        static void deserialize(ResourceReference<T>& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+        static void deserialize(ResourceReference<T>& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
         {
             String assetId;
             deserializer >> assetId;

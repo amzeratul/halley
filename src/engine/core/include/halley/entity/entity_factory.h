@@ -44,8 +44,6 @@ namespace Halley {
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, WorldPartitionId worldPartition = 0, String variant = "");
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
-        std::shared_ptr<EntityFactoryContext> makeUpdateEntityContext(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
-        void finalizeUpdateEntityContext(const std::shared_ptr<EntityFactoryContext>& context);
 
 		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask); // Returns entity and parent UUID
 		std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID) const;

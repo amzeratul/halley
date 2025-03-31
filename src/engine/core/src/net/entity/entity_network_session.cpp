@@ -383,6 +383,14 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("position");
 }
 
+void EntityNetworkSession::setupByteSerializationInterpolators()
+{
+	Expects(listener != nullptr);
+	if (listener) {
+		listener->setupByteInterpolators(byteDataInterpolatorSet);
+	}
+}
+
 ConfigNode EntityNetworkSession::getLobbyInfo()
 {
 	return listener ? listener->getLobbyInfo() : ConfigNode();
@@ -437,6 +445,11 @@ const SerializerOptions& EntityNetworkSession::getByteSerializationOptions() con
 SerializationDictionary& EntityNetworkSession::getSerializationDictionary()
 {
 	return serializationDictionary;
+}
+
+const IByteDataInterpolatorSet* EntityNetworkSession::getByteDataInterpolatorSet() const
+{
+	return &byteDataInterpolatorSet;
 }
 
 Time EntityNetworkSession::getMinSendInterval() const
@@ -577,6 +590,7 @@ void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 		lobbyReady = true;
 	}
 	listener->onStartSession(myPeerId);
+	setupByteSerializationInterpolators();
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
@@ -610,6 +624,13 @@ void EntityNetworkSession::findEntity(EntityNetworkId networkId, bool inbound, s
 		if (entityId.isValid()) {
 			callback(entityId, peer.getPeerId());
 		}
+	}
+}
+
+void EntityNetworkSession::logUpdates(int numFrames)
+{
+	for (auto& peer: peers) {
+		peer.logUpdates(numFrames);
 	}
 }
 

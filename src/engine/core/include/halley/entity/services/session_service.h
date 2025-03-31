@@ -16,6 +16,7 @@ namespace Halley {
 		bool isMultiplayer() const;
 		bool canSave() const;
 		bool hasHostAuthority() const;
+		bool hasEntityAuthority(EntityId entityId) const;
 
 		String getSessionClientName() const;
 		uint8_t getMyClientId() const;

@@ -166,15 +166,15 @@ void ConfigNodeSerializer<ScriptStateSet>::deserialize(const EntitySerialization
 	target.load(node, context);
 }
 
-void ByteSerializationHelper<ScriptStateSet>::serialize(const ScriptStateSet& value, const EntitySerializationContext& context, Serializer& serializer)
+void ByteSerializationHelper<ScriptStateSet>::serialize(const ScriptStateSet& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
 {
-    auto node = ConfigNodeSerializer<ScriptStateSet>().serialize(value, context);
+    auto node = ConfigNodeSerializer<ScriptStateSet>().serialize(value, *context.entitySerializationContext);
     serializer << node;
 }
 
-void ByteSerializationHelper<ScriptStateSet>::deserialize(ScriptStateSet& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+void ByteSerializationHelper<ScriptStateSet>::deserialize(ScriptStateSet& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
 {
     ConfigNode node;
     deserializer >> node;
-    ConfigNodeSerializer<ScriptStateSet>().deserialize(context, node, dst);
+    ConfigNodeSerializer<ScriptStateSet>().deserialize(*context.entitySerializationContext, node, dst);
 }

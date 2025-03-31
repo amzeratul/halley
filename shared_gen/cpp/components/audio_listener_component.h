@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -77,14 +77,14 @@ public:
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
-	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(referenceDistance)>::serialize(referenceDistance, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(lastPos)>::serialize(lastPos, _context, _serializer);
+	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(referenceDistance)>::serialize(referenceDistance, _context, _serializer, componentIndex, "referenceDistance");
+		Halley::ByteSerializationHelper<decltype(lastPos)>::serialize(lastPos, _context, _serializer, componentIndex, "lastPos");
 	}
 
-	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(referenceDistance)>::deserialize(referenceDistance, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(lastPos)>::deserialize(lastPos, _context, _deserializer);
+	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(referenceDistance)>::deserialize(referenceDistance, _context, _deserializer, componentIndex, "referenceDistance");
+		Halley::ByteSerializationHelper<decltype(lastPos)>::deserialize(lastPos, _context, _deserializer, componentIndex, "lastPos");
 	}
 
 

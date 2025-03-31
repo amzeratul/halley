@@ -27,6 +27,16 @@ bool SessionService::hasHostAuthority() const
 	return session ? session->hasHostAuthority() : true;
 }
 
+bool SessionService::hasEntityAuthority(EntityId entityId) const
+{
+	if (session) {
+		if (const auto owner = getWorld().tryGetEntity(entityId).getAuthorityPeerId()) {
+			return owner == getMyClientId();
+		}
+	}
+	return true;
+}
+
 String SessionService::getSessionClientName() const
 {
 	if (isMultiplayer()) {

@@ -116,6 +116,7 @@ set(SOURCES
         "src/net/session/session_multiplayer.cpp"
         "src/net/session/shared_data.cpp"
 
+		"src/entity/byte_data_interpolator.cpp"
         "src/entity/component.cpp"
         "src/entity/create_functions.cpp"
         "src/entity/data_interpolator.cpp"
@@ -563,6 +564,7 @@ set(HEADERS
 
         "include/halley/entity/halley_entity.h"
 
+		"include/halley/entity/byte_data_interpolator.h"
         "include/halley/entity/component.h"
         "include/halley/entity/create_functions.h"
         "include/halley/entity/data_interpolator.h"
@@ -744,6 +746,7 @@ set(HEADERS
         "include/halley/audio/resampler.h"
         
         "include/halley/bytes/byte_serializer.h"
+		"include/halley/bytes/byte_serializer_base.h"
         "include/halley/bytes/config_node_serializer.h"
         "include/halley/bytes/config_node_serializer_base.h"
         "include/halley/bytes/compression.h"

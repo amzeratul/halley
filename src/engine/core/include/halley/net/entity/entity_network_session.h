@@ -9,6 +9,7 @@
 #include "halley/bytes/serialization_dictionary.h"
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"
+#include "halley/entity/byte_data_interpolator.h"
 
 namespace Halley {
 	class EntityFactory;
@@ -41,6 +42,7 @@ namespace Halley {
 			virtual void onStartGame() = 0;
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
+			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
 			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
@@ -67,6 +69,7 @@ namespace Halley {
 		const EntityDataDelta::Options& getEntityDeltaOptions() const;
 		const SerializerOptions& getByteSerializationOptions() const;
 		SerializationDictionary& getSerializationDictionary();
+		const IByteDataInterpolatorSet* getByteDataInterpolatorSet() const;
 
 		Time getMinSendInterval() const;
 
@@ -95,6 +98,7 @@ namespace Halley {
 		void setLobbyInfo(ConfigNode info);
 
 		void findEntity(EntityNetworkId networkId, bool inbound, std::function<void(EntityId, NetworkSession::PeerId)> callback) const;
+		void logUpdates(int numFrames);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
@@ -135,6 +139,7 @@ namespace Halley {
 		bool lobbyReady = false;
 
         std::mutex outboundInterpolatorLock;
+		ByteDataInterpolatorSet byteDataInterpolatorSet;
 
 		bool canProcessMessage(const EntityNetworkMessage& msg) const;
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
@@ -151,6 +156,7 @@ namespace Halley {
 		void sendMessages();
 		
 		void setupDictionary();
+		void setupByteSerializationInterpolators();
 
 		ConfigNode getLobbyInfo();
 		void sendUpdatedLobbyInfos(std::optional<NetworkSession::PeerId> toPeerId);

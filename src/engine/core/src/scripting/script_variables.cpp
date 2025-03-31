@@ -103,15 +103,15 @@ void ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializatio
 	target.load(node, context);
 }
 
-void ByteSerializationHelper<ScriptVariables>::serialize(const ScriptVariables& value, const EntitySerializationContext& context, Serializer& serializer)
+void ByteSerializationHelper<ScriptVariables>::serialize(const ScriptVariables& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
 {
-    auto node = ConfigNodeSerializer<ScriptVariables>().serialize(value, context);
+    auto node = ConfigNodeSerializer<ScriptVariables>().serialize(value, *context.entitySerializationContext);
     serializer << node;
 }
 
-void ByteSerializationHelper<ScriptVariables>::deserialize(ScriptVariables& dst, const EntitySerializationContext& context, Deserializer& deserializer)
+void ByteSerializationHelper<ScriptVariables>::deserialize(ScriptVariables& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
 {
     ConfigNode node;
     deserializer >> node;
-    ConfigNodeSerializer<ScriptVariables>().deserialize(context, node, dst);
+    ConfigNodeSerializer<ScriptVariables>().deserialize(*context.entitySerializationContext, node, dst);
 }

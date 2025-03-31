@@ -374,19 +374,6 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 	}
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeUpdateEntityContext(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators)
-{
-    Expects(entity.isValid());
-    return makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators);
-}
-
-void EntityFactory::finalizeUpdateEntityContext(const std::shared_ptr<EntityFactoryContext>& context)
-{
-    for (auto& c : context->getToDeleteEntities()) {
-        destroyEntity(c);
-    }
-}
-
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
 {
 	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent, interpolators);

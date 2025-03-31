@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -104,16 +104,16 @@ public:
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
-	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(activeStates)>::serialize(activeStates, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(tags)>::serialize(tags, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(variables)>::serialize(variables, _context, _serializer);
+	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(activeStates)>::serialize(activeStates, _context, _serializer, componentIndex, "activeStates");
+		Halley::ByteSerializationHelper<decltype(tags)>::serialize(tags, _context, _serializer, componentIndex, "tags");
+		Halley::ByteSerializationHelper<decltype(variables)>::serialize(variables, _context, _serializer, componentIndex, "variables");
 	}
 
-	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(activeStates)>::deserialize(activeStates, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(tags)>::deserialize(tags, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(variables)>::deserialize(variables, _context, _deserializer);
+	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(activeStates)>::deserialize(activeStates, _context, _deserializer, componentIndex, "activeStates");
+		Halley::ByteSerializationHelper<decltype(tags)>::deserialize(tags, _context, _deserializer, componentIndex, "tags");
+		Halley::ByteSerializationHelper<decltype(variables)>::deserialize(variables, _context, _deserializer, componentIndex, "variables");
 	}
 
 

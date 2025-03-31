@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -71,14 +71,14 @@ public:
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
-	void serializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(colour)>::serialize(colour, _context, _serializer);
-		Halley::ByteSerializationHelper<decltype(intensity)>::serialize(intensity, _context, _serializer);
+	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
+		Halley::ByteSerializationHelper<decltype(colour)>::serialize(colour, _context, _serializer, componentIndex, "colour");
+		Halley::ByteSerializationHelper<decltype(intensity)>::serialize(intensity, _context, _serializer, componentIndex, "intensity");
 	}
 
-	void deserializeNetwork(const Halley::EntitySerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(colour)>::deserialize(colour, _context, _deserializer);
-		Halley::ByteSerializationHelper<decltype(intensity)>::deserialize(intensity, _context, _deserializer);
+	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
+		Halley::ByteSerializationHelper<decltype(colour)>::deserialize(colour, _context, _deserializer, componentIndex, "colour");
+		Halley::ByteSerializationHelper<decltype(intensity)>::deserialize(intensity, _context, _deserializer, componentIndex, "intensity");
 	}
 
 
