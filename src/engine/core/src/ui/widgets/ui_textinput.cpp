@@ -62,8 +62,8 @@ UITextInput& UITextInput::setText(StringUTF32 t)
 {
 	if (t != text.getText()) {
 		text.setText(std::move(t));
-		onMaybeTextModified();
 	}
+	onMaybeTextModified();
 	return *this;
 }
 
