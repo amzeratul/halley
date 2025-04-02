@@ -51,7 +51,7 @@ namespace Halley
 		return result;
 	}
 
-	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+	template <typename T, typename std::enable_if<std::is_integral_v<T> && !std::is_same_v<T, bool>, int>::type = 0>
 	String toString(T value, int base = 10, int width = 1, char fill = '0', char thousandsSeparator = 0)
 	{
 		Expects(base == 10 || base == 16 || base == 8);
@@ -292,7 +292,7 @@ namespace Halley
 		}
 	};
 
-	template <typename T, typename std::enable_if<!std::is_integral<T>::value && !std::is_floating_point<T>::value, int>::type = 0>
+	template <typename T, typename std::enable_if<!(std::is_integral_v<T> && !std::is_same_v<T, bool>) && !std::is_floating_point_v<T>, int>::type = 0>
 	String toString(const T& value)
 	{
 		return ToStringConverter<typename std::remove_cv<T>::type>()(value);
@@ -356,7 +356,7 @@ namespace Halley
 	template <typename T>
 	String toString(const Vector<T>& values, std::string_view separator)
 	{
-		return toString(gsl::span<const T>(values), separator);
+		return "[ " + toString(gsl::span<const T>(values), separator) + " ]";
 	}
 	
 	template <typename T, typename F>
