@@ -331,12 +331,14 @@ namespace Halley
 	String toString(gsl::span<const T> values, std::string_view separator)
 	{
 		std::stringstream ss;
+		ss << "[";
 		for (size_t i = 0; i < values.size(); i++) {
 			if (i != 0) {
 				ss << separator;
 			}
 			ss << toString(values[i]).cppStr();
 		}
+		ss << "]";
 		return ss.str();
 	}
 
@@ -344,19 +346,21 @@ namespace Halley
 	String toString(gsl::span<const T> values, std::string_view separator, F f)
 	{
 		std::stringstream ss;
+		ss << "[";
 		for (size_t i = 0; i < values.size(); i++) {
 			if (i != 0) {
 				ss << separator;
 			}
 			ss << f(values[i]).cppStr();
 		}
+		ss << "]";
 		return ss.str();
 	}
 	
 	template <typename T>
 	String toString(const Vector<T>& values, std::string_view separator)
 	{
-		return "[ " + toString(gsl::span<const T>(values), separator) + " ]";
+		return toString(gsl::span<const T>(values), separator);
 	}
 	
 	template <typename T, typename F>
