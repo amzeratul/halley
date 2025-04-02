@@ -401,12 +401,14 @@ namespace Halley
 		String operator()(const Vector<T>& v) const
 		{
 			String result;
+			result += "[";
 			for (size_t i = 0; i < v.size(); i++) {
 				if (i != 0) {
 					result += ", ";
 				}
 				result += toString(v[i]);
 			}
+			result += "]";
 			return result;
 		}
 	};
