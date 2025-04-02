@@ -19,7 +19,7 @@ namespace Halley {
 	protected:
 		using BindFamilyCallback = void (*)(FamilyBindingBase&, World&) noexcept;
 
-		void doInit(FamilyMaskType readMask, FamilyMaskType writeMask) noexcept;
+		void doInit(FamilyMaskType readMask, FamilyMaskType writeMask, World& world) noexcept;
 		
 		void* getElement(size_t index) const noexcept { return family->getElement(index); }
 		void setFamily(Family* family) noexcept;
@@ -44,8 +44,14 @@ namespace Halley {
 		std::function<void(void*, size_t)> addedCallback;
 		std::function<void(void*, size_t)> removedCallback;
 		std::function<void(void*, size_t)> reloadedCallback;
+
+	protected:
+		World* world = nullptr;
 	};
 
+#ifdef _DEBUG
+#define FAMILY_BINDING_DEBUG_ITERATORS
+#endif
 	
 	template <typename T>
 	class FamilyBindingIterator {
@@ -59,8 +65,21 @@ namespace Halley {
 	    using pointer           = T*;
 	    using reference         = T&;
 
-		FamilyBindingIterator() : v(nullptr) {}
-		FamilyBindingIterator(pointer v, uint32_t prefetchDist, uint32_t elemsLeft) : v(v), prefetchDist(prefetchDist), elemsLeft(elemsLeft) {}
+		FamilyBindingIterator()
+			: v(nullptr)
+		{}
+		FamilyBindingIterator(pointer v, uint32_t prefetchDist, uint32_t elemsLeft, World& world)
+			: v(v)
+			, prefetchDist(prefetchDist)
+			, elemsLeft(elemsLeft)
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+			, world(&world)
+#endif
+		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+			familyRevision = world.getFamilyRevision();
+#endif
+		}
 		FamilyBindingIterator(const FamilyBindingIterator& o) = default;
 		
 		reference operator*() const { return *v; }
@@ -68,6 +87,12 @@ namespace Halley {
 		
 		FamilyBindingIterator& operator++()
 		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+			if (familyRevision != world->getFamilyRevision()) {
+				throw Exception("World family revision changed due to World::updateEntities(), this iterator has been invalidated", HalleyExceptions::Entity);
+			}
+#endif
+
 			assert(elemsLeft > 0);
 			++v;
 			--elemsLeft;
@@ -86,6 +111,10 @@ namespace Halley {
 		pointer v;
 		uint32_t prefetchDist = 1;
 		uint32_t elemsLeft = 0;
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+		World* world = nullptr;
+		uint32_t familyRevision = 0;
+#endif
 	};
 
 	template <typename T>
@@ -110,22 +139,22 @@ namespace Halley {
 
 		FamilyBindingIterator<T> begin()
 		{
-			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()));
+			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
 		FamilyBindingIterator<T> begin() const
 		{
-			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()));
+			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
 		FamilyBindingIterator<T> end()
 		{
-			return FamilyBindingIterator(getFamilyElement(count()), 5, 0);
+			return FamilyBindingIterator(getFamilyElement(count()), 5, 0, *world);
 		}
 
 		FamilyBindingIterator<T> end() const
 		{
-			return FamilyBindingIterator(getFamilyElement(count()), 5, 0);
+			return FamilyBindingIterator(getFamilyElement(count()), 5, 0, *world);
 		}
 
 		T& getSingleton()
@@ -237,9 +266,10 @@ namespace Halley {
 		}
 
 	private:
-		void init(MaskStorage& storage) noexcept
+		void init(World& world) noexcept
 		{
-			doInit(T::Type::readMask(storage), T::Type::writeMask(storage));
+			auto& storage = world.getMaskStorage();
+			doInit(T::Type::readMask(storage), T::Type::writeMask(storage), world);
 		}
 
 		T* getFamilyElement(size_t i) const
@@ -251,7 +281,7 @@ namespace Halley {
 		static void bindFamilyImpl(FamilyBindingBase& obj, World& world) noexcept
 		{
 			auto& self = static_cast<FamilyBinding&>(obj);
-			self.init(world.getMaskStorage());
+			self.init(world);
 			self.setFamily(&world.getFamily<T>());
 		}
 	};

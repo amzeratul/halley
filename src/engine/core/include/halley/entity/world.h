@@ -230,6 +230,8 @@ namespace Halley {
 
 		void generateMemoryReport() const;
 
+		uint32_t getFamilyRevision() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -272,6 +274,8 @@ namespace Halley {
 
 		String name;
 		UUID uuid;
+
+		uint32_t familyRevision = 0;
 
 		struct StagingWorldTag{};
 		World(World& world, StagingWorldTag tag);

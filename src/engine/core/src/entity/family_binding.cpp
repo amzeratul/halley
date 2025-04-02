@@ -12,10 +12,11 @@ FamilyBindingBase::~FamilyBindingBase()
 	}
 }
 
-void FamilyBindingBase::doInit(FamilyMaskType read, FamilyMaskType write) noexcept
+void FamilyBindingBase::doInit(FamilyMaskType read, FamilyMaskType write, World& world) noexcept
 {
 	readMask = read;
 	writeMask = write;
+	this->world = &world;
 }
 
 void FamilyBindingBase::onEntitiesAdded(void* entity, size_t count)

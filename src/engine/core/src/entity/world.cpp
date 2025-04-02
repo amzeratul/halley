@@ -696,6 +696,8 @@ void World::updateEntities()
 		return;
 	}
 
+	++familyRevision;
+
 	entityDirty = false;
 
 	HALLEY_DEBUG_TRACE();
@@ -1071,5 +1073,10 @@ void World::generateMemoryReport() const
 	for (const auto& [k, v]: named) {
 		Logger::logInfo("\t" + k + ": " + v.toString());
 	}
+}
+
+uint32_t World::getFamilyRevision() const
+{
+	return familyRevision;
 }
 
