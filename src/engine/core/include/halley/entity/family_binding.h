@@ -49,7 +49,7 @@ namespace Halley {
 		World* world = nullptr;
 	};
 
-#ifdef _DEBUG
+#ifdef DEV_BUILD
 #define FAMILY_BINDING_DEBUG_ITERATORS
 #endif
 	
