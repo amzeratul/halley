@@ -297,13 +297,23 @@ private:
 
 	void updateScripts(Time t)
 	{
-		auto& env = getScriptingService().getEnvironment();
+		// Make a copy since script updates can result in World entity refresh, which invalidates iterators
+		auto scriptables = VectorTemp<std::pair<EntityId, ScriptableComponent*>>(getWorld().getUpdateMemoryPool());
+		scriptables.reserve(scriptableFamily.size());
 		for (auto& e : scriptableFamily) {
-			e.scriptable.activeStates.terminateMarkedDead(env, e.entityId, e.scriptable.variables);
+			scriptables.emplace_back(e.entityId, &e.scriptable);
+		}
 
-			for (auto& state: e.scriptable.activeStates) {
+		auto& env = getScriptingService().getEnvironment();
+		for (auto& e: scriptables) {
+			const auto entityId = e.first;
+			auto& scriptable = *e.second;
+
+			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
+
+			for (auto& state: scriptable.activeStates) {
 				if (!state->getFrameFlag()) {
-					env.update(t, *state, e.entityId, e.scriptable.variables);
+					env.update(t, *state, entityId, scriptable.variables);
 					state->setFrameFlag(true);
 				}
 
@@ -312,13 +322,18 @@ private:
 				}
 			}
 
-			eraseDeadScripts(e);
+			eraseDeadScripts(entityId, scriptable);
 		}
 	}
 
 	void eraseDeadScripts(ScriptableFamily& e)
 	{
 		e.scriptable.activeStates.removeDeadLocalStates(getWorld(), e.entityId);
+	}
+
+	void eraseDeadScripts(EntityId id, ScriptableComponent& scriptable)
+	{
+		scriptable.activeStates.removeDeadLocalStates(getWorld(), id);
 	}
 
 	bool fulfillScriptExecutionRequests()
