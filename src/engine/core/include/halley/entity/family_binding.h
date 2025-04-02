@@ -74,16 +74,30 @@ namespace Halley {
 			, elemsLeft(elemsLeft)
 #ifdef FAMILY_BINDING_DEBUG_ITERATORS
 			, world(&world)
+			, familyRevision(world.getFamilyRevision())
 #endif
-		{
-#ifdef FAMILY_BINDING_DEBUG_ITERATORS
-			familyRevision = world.getFamilyRevision();
-#endif
-		}
+		{}
 		FamilyBindingIterator(const FamilyBindingIterator& o) = default;
 		
-		reference operator*() const { return *v; }
-		pointer operator->() const { return v; }
+		reference operator*() const
+		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+			if (familyRevision != world->getFamilyRevision()) {
+				throw Exception("World family revision changed due to World::updateEntities(), this iterator has been invalidated", HalleyExceptions::Entity);
+			}
+#endif
+			return *v;
+		}
+
+		pointer operator->() const
+		{
+#ifdef FAMILY_BINDING_DEBUG_ITERATORS
+			if (familyRevision != world->getFamilyRevision()) {
+				throw Exception("World family revision changed due to World::updateEntities(), this iterator has been invalidated", HalleyExceptions::Entity);
+			}
+#endif
+			return v;
+		}
 		
 		FamilyBindingIterator& operator++()
 		{
