@@ -56,10 +56,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 {
 	Vector<std::string> args;
 	for (int i = 2; i < argc; i++) {
-		String arg = argv[i];
-		if (!arg.startsWith("--")) {
-			args.push_back(arg.cppStr());
-		}
+		args.push_back(std::string(argv[i]));
 	}
 
 	statics = std::make_unique<HalleyStatics>();
