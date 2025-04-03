@@ -43,6 +43,7 @@ namespace Halley {
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;
+			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity) = 0;
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
 			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
@@ -75,6 +76,7 @@ namespace Halley {
 
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
 		void requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
+		void requestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
 		void setupOutboundInterpolators(EntityRef entity);
 
 		void startGame();

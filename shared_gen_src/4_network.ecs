@@ -16,6 +16,10 @@ component:
       type: 'Halley::DataInterpolatorSet'
       canSave: false
       canEdit: false
+  - byteDataInterpolatorSet:
+      type: 'Halley::ByteDataInterpolatorSet'
+      canSave: false
+      canEdit: false
   - locks:
       type: 'Halley::Vector<std::pair<Halley::EntityId, uint8_t>>'
       canSave: false

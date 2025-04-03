@@ -3,11 +3,12 @@
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #define DONT_INCLUDE_HALLEY_HPP
 #endif
-#include <components/network_component.h>
 
+#include "halley/entity/byte_data_interpolator.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/entity/components/transform_2d_component.h"
+#include "components/network_component.h"
 
 class Transform2DComponent;
 using namespace Halley;

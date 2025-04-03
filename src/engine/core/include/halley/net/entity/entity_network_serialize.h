@@ -4,6 +4,9 @@
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/utils/hash.h"
+#include "halley/entity/data_interpolator.h"
+#include "halley/entity/byte_data_interpolator.h"
+#include "components/network_component.h"
 
 namespace Halley {
 
@@ -102,11 +105,13 @@ namespace Halley {
         class SerializationContext : public IEntityFactoryContext
         {
         public:
-            explicit SerializationContext(const EntityRef& entity, const std::shared_ptr<const Prefab>& prefab = {})
-                : entity(entity)
+            explicit SerializationContext(const std::shared_ptr<const Prefab>& prefab = {})
+                : entity({})
                 , prefab(prefab)
             {
-
+                if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>()) {
+                    interpolators = &networkComponent->byteDataInterpolatorSet;
+                }
             }
 
             EntityId getEntityIdFromUUID(const UUID &uuid) const override
@@ -130,14 +135,25 @@ namespace Halley {
                 return entity.getEntityId();
             }
 
+            void setCurrentEntity(const EntityRef& entity) const
+            {
+                this->entity = entity;
+            }
+
             const std::shared_ptr<const Prefab>& getPrefab() const
             {
                 return prefab;
             }
 
+            const IByteDataInterpolatorSet* getByteDataInterpolators() const
+            {
+                return interpolators;
+            }
+
         private:
-            const EntityRef entity;
+            mutable EntityRef entity;
             const std::shared_ptr<const Prefab> prefab;
+            const IByteDataInterpolatorSet* interpolators = nullptr;
         };
 
         void doSerializeEntityUpdate(

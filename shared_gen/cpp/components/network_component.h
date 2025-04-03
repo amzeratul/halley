@@ -18,6 +18,7 @@ public:
 	std::optional<uint8_t> ownerId{};
 	std::optional<uint8_t> authorityId{};
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
+	Halley::ByteDataInterpolatorSet byteDataInterpolatorSet{};
 	Halley::Vector<std::pair<Halley::EntityId, uint8_t>> locks{};
 	bool sendUpdates{ false };
 	std::optional<uint8_t> creatorId{};

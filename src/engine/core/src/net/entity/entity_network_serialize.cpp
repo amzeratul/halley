@@ -320,7 +320,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
     opt.world = &entity.getWorld();
 
     Serializer serializer(scratchpad.byte_span(), opt);
-    const SerializationContext context(entity);
+    const SerializationContext context{};
 
     doSerializeEntityUpdate(context, serializer, entity, {});
 
@@ -337,6 +337,8 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
         Logger::logDev("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
     }
 
+    context.setCurrentEntity(entity);
+
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
     serializationContext.entityContext = &context;
@@ -346,6 +348,8 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     ByteSerializationContext byteSerializationContext = {};
     byteSerializationContext.resources = &resources;
     byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.entityId = context.getCurrentEntityId();
+    byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
 
     // Entity
@@ -378,7 +382,7 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const st
     opt.world = &entity.getWorld();
 
     Deserializer deserializer(bytes, opt);
-    const SerializationContext context(entity, prefab);
+    const SerializationContext context(prefab);
 
     EntityNetworkChanges::Type type;
     uint16_t size;
@@ -424,6 +428,8 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         entity.setParent(parent.value());
     }
 
+    context.setCurrentEntity(entity);
+
     EntitySerializationContext serializationContext = {};
     serializationContext.resources = &resources;
     serializationContext.entityContext = &context;
@@ -433,6 +439,8 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     ByteSerializationContext byteSerializationContext = {};
     byteSerializationContext.resources = &resources;
     byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.entityId = context.getCurrentEntityId();
+    byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
 
     // Entity

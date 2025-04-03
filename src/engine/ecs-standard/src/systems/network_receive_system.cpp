@@ -30,6 +30,7 @@ public:
 
 		for (auto& e: networkFamily) {
 			e.network.dataInterpolatorSet.update(t, world);
+			e.network.byteDataInterpolatorSet.update(t, world);
 		}
 	}
 

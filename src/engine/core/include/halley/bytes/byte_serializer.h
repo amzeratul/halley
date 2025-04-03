@@ -671,8 +671,17 @@ namespace Halley {
     public:
         static void serialize(const T& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
+        	if (context.entityInterpolators) {
+        		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
+        			if (interpolator->isEnabled()) {
+        				interpolator->serialize(&value, sizeof(T), serializer);
+        				return;
+        			}
+        		}
+        	}
+
         	if (context.interpolators) {
-        		if (auto interpolator = context.interpolators->tryGetInterpolator(context, componentIndex, fieldName)) {
+        		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
         			if (interpolator->isEnabled()) {
         				interpolator->serialize(&value, sizeof(T), serializer);
         				return;
@@ -685,8 +694,17 @@ namespace Halley {
 
         static void deserialize(T& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
         {
+        	if (context.entityInterpolators) {
+        		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
+        			if (interpolator->isEnabled()) {
+        				interpolator->deserialize(&dst, sizeof(T), deserializer);
+        				return;
+        			}
+        		}
+        	}
+
         	if (context.interpolators) {
-        		if (auto interpolator = context.interpolators->tryGetInterpolator(context, componentIndex, fieldName)) {
+        		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
         			if (interpolator->isEnabled()) {
         				interpolator->deserialize(&dst, sizeof(T), deserializer);
         				return;

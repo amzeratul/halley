@@ -4,11 +4,13 @@
 
 #include "halley/bytes/compression.h"
 #include "halley/entity/data_interpolator.h"
+#include "halley/entity/byte_data_interpolator.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+#include "components/network_component.h"
 
 class NetworkComponent;
 using namespace Halley;
@@ -483,6 +485,23 @@ void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interp
 	}
 }
 
+void EntityNetworkSession::requestSetupByteDataInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
+{
+	if (!entity.isSerializable()) {
+		return;
+	}
+
+	if (listener) {
+		listener->setupByteInterpolators(interpolatorSet, entity);
+
+		for (const auto& c: entity.getChildren()) {
+			if (!c.getOwnerPeerId()) {
+				requestSetupByteDataInterpolators(interpolatorSet, c, remote);
+			}
+		}
+	}
+}
+
 void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 {
 	if (!entity.isSerializable()) {
@@ -494,6 +513,9 @@ void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 		auto& interpolatorSet = entity.setupNetwork(session->getMyPeerId().value());
 		if (!interpolatorSet.isReady()) {
 			requestSetupInterpolators(interpolatorSet, entity, false);
+
+			auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+			requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, false);
 		}
 	}
 }

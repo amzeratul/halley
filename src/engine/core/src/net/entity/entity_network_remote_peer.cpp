@@ -382,6 +382,9 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	auto& interpolatorSet = entity.setupNetwork(peerId);
 	parent->onRemoteEntityCreated(entity, peerId);
 	parent->requestSetupInterpolators(interpolatorSet, entity, true);
+
+	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+	parent->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
 }
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)
