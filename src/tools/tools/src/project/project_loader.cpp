@@ -3,6 +3,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/support/debug.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 
@@ -35,10 +36,10 @@ std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 void ProjectLoader::setupPlugins(Project& project) const
 {
 	auto platforms = project.getPlatforms();
-	platforms.erase(std::remove_if(platforms.begin(), platforms.end(), [&] (const String& platform)
+	std_ex::erase_if(platforms, [&] (const String& platform)
 	{
 		return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), platform) != disabledPlatforms.end();
-	}), platforms.end());
+	});
 
 	project.setPlatforms(platforms);
 	project.setupImporter(getPlugins(platforms), importerOptions);
@@ -75,7 +76,7 @@ void ProjectLoader::loadPlugins()
 			// Don't mix debug and release plugin/editor
 			if (plugin && plugin->isDebug() == Debug::isDebug()) {
 				for (auto& plat: plugin->getSupportedPlatforms()) {
-					if (plat != "*" && std::find(knownPlatforms.begin(), knownPlatforms.end(), plat) == knownPlatforms.end()) {
+					if (plat != "*" && !knownPlatforms.contains(plat)) {
 						knownPlatforms.push_back(plat);
 					}
 				}
