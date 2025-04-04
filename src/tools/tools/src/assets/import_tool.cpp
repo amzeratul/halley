@@ -33,7 +33,7 @@ int ImportTool::run(Vector<std::string> args)
 		Vector<String> disabledPlatforms;
 
 		CurArgType curArgType = CurArgType::Manifest;
-		for (size_t i = 2; i <= args.size(); ++i) {
+		for (size_t i = 2; i < args.size(); ++i) {
 			const auto arg = String(args[i]);
 
 			if (arg.startsWith("--")) {
