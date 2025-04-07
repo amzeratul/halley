@@ -15,6 +15,13 @@
 using namespace Halley;
 using namespace std::chrono_literals;
 
+namespace {
+	enum class CurArgType {
+		Manifest,
+		DisabledPlatforms
+	};
+}
+
 int ImportTool::run(Vector<std::string> args)
 {
 	if (args.size() >= 2) {
@@ -22,13 +29,30 @@ int ImportTool::run(Vector<std::string> args)
 		const Path halleyRootPath = FileSystem::getAbsolute(Path(args[1]));
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath);
 
-		ProjectLoader loader(*statics, halleyRootPath);
+		std::optional<Path> manifestPath;
+		Vector<String> disabledPlatforms;
+
+		CurArgType curArgType = CurArgType::Manifest;
+		for (size_t i = 2; i < args.size(); ++i) {
+			const auto arg = String(args[i]);
+
+			if (arg.startsWith("--")) {
+				if (arg == "--disabled-platforms") {
+					curArgType = CurArgType::DisabledPlatforms;
+				}
+			} else if (curArgType == CurArgType::Manifest) {
+				manifestPath = FileSystem::getAbsolute(Path(arg));
+			} else if (curArgType == CurArgType::DisabledPlatforms) {
+				disabledPlatforms += arg;
+			}
+		}
+
+		ProjectLoader loader(*statics, halleyRootPath, disabledPlatforms);
 		auto proj = loader.loadProject(projectPath);
 		Logger::logInfo("Project loaded.");
 
-		if (args.size() >= 3) {
-			const Path manifestPath = FileSystem::getAbsolute(Path(args[2]));
-			proj->setAssetPackManifest(manifestPath);
+		if (manifestPath) {
+			proj->setAssetPackManifest(*manifestPath);
 		}
 		Logger::logInfo("Using manifest at \"" + proj->getAssetPackManifestPath() + "\"");
 

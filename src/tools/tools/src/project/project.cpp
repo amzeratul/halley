@@ -297,7 +297,7 @@ Vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(Im
 {
 	Vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
-		for (auto& importer : plugin->makeAssetImporters(type)) {
+		for (auto& importer : plugin->makeAssetImporters(type, platforms)) {
 			if (importer) {
 				result.emplace_back(std::move(importer));
 			}
