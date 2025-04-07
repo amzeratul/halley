@@ -320,7 +320,7 @@ bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, cons
     opt.world = &entity.getWorld();
 
     Serializer serializer(scratchpad.byte_span(), opt);
-    const SerializationContext context{};
+    const SerializationContext context(entity);
 
     doSerializeEntityUpdate(context, serializer, entity, {});
 
@@ -382,7 +382,7 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const st
     opt.world = &entity.getWorld();
 
     Deserializer deserializer(bytes, opt);
-    const SerializationContext context(prefab);
+    const SerializationContext context(entity, prefab);
 
     EntityNetworkChanges::Type type;
     uint16_t size;

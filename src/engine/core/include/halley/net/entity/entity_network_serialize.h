@@ -105,11 +105,11 @@ namespace Halley {
         class SerializationContext : public IEntityFactoryContext
         {
         public:
-            explicit SerializationContext(const std::shared_ptr<const Prefab>& prefab = {})
+            explicit SerializationContext(const EntityRef& root, const std::shared_ptr<const Prefab>& prefab = {})
                 : entity({})
                 , prefab(prefab)
             {
-                if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>()) {
+                if (const auto networkComponent = root.tryGetComponent<NetworkComponent>()) {
                     interpolators = &networkComponent->byteDataInterpolatorSet;
                 }
             }

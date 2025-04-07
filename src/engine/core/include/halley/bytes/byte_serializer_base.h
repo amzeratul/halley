@@ -9,7 +9,7 @@ namespace Halley {
     public:
         virtual ~IByteDataInterpolator() = default;
 
-        virtual void setEnabled(bool enabled) {};
+        virtual void setEnabled(bool enabled) {}
         [[nodiscard]] virtual bool isEnabled() const { return true; }
 
         virtual void serialize(const void* value, size_t size, Serializer& serializer) {}
