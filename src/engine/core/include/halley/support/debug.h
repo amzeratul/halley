@@ -57,6 +57,7 @@ namespace Halley {
 		static bool debugging;
 		static std::array<DebugTraceEntry, 32> lastTraces;
 		static std::atomic<int> tracePos;
+		static std::mutex mutex;
 	};
 
 	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)
