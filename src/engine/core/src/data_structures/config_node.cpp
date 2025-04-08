@@ -886,6 +886,8 @@ Vector3i ConfigNode::asVector3i() const
 		return Vector3i(seq.at(0).asInt(), seq.size() >= 2 ? seq.at(1).asInt() : 0, seq.size() >= 3 ? seq.at(2).asInt() : 0);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3i(asVector2i(), 0);
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		return Vector3i(asInt(), 0, 0);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -898,6 +900,8 @@ Vector3f ConfigNode::asVector3f() const
 		return Vector3f(seq.at(0).asFloat(), seq.size() >= 2 ? seq.at(1).asFloat() : 0.0f, seq.size() >= 3 ? seq.at(2).asFloat() : 0.0f);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3f(asVector2f(), 0);
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		return Vector3f(asFloat(), 0, 0);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -908,6 +912,8 @@ Vector4i ConfigNode::asVector4i() const
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector4i(seq.at(0).asInt(), seq.at(1).asInt(), seq.at(2).asInt(), seq.at(3).asInt());
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		return Vector4i(asInt(), 0, 0, 0);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
@@ -918,6 +924,8 @@ Vector4f ConfigNode::asVector4f() const
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		return Vector4f(asFloat(), 0, 0, 0);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
