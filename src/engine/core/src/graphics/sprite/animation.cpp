@@ -9,6 +9,7 @@
 #include <gsl/assert>
 #include <utility>
 
+#include "halley/graphics/sprite/animation_player.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 
@@ -418,6 +419,11 @@ std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, int
 		}
 	}
 	return {};
+}
+
+std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, const AnimationPlayer& animationPlayer) const
+{
+	return getActionPoint(actionPoint, animationPlayer.getCurrentSequenceName(), animationPlayer.getCurrentDirectionName(), animationPlayer.getCurrentSequenceFrame());
 }
 
 Vector2i Animation::getPivot() const

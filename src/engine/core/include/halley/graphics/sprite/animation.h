@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class AnimationPlayer;
 	class Animation;
 	class Deserializer;
 	class Serializer;
@@ -162,6 +163,7 @@ namespace Halley
 
 		std::optional<Vector2i> getActionPoint(const String& actionPoint, const String& sequenceName, const String& directionName, int frameNumber) const;
 		std::optional<Vector2i> getActionPoint(const String& actionPoint, int sequenceIdx, int directionIdx, int frameNumber) const;
+		std::optional<Vector2i> getActionPoint(const String& actionPoint, const AnimationPlayer& animationPlayer) const;
 		
 		Vector2i getPivot() const;
 		Rect4i getBounds() const;
