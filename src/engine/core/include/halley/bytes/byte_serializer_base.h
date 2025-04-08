@@ -16,6 +16,7 @@ namespace Halley {
         virtual void deserialize(void* value, size_t size, Deserializer& deserializer) {}
 
         virtual bool update(Time t, World& world, EntityId entityId) { return false; }
+        [[nodiscard]] virtual bool isUpdating() const { return false; }
     };
 
     class IByteDataInterpolatorSet
