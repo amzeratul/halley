@@ -11,16 +11,17 @@ void getColours(float4 inColour, out float4 baseColour, out float4 addColour, bo
     addColour = saturate(inColour - float4(1, 1, 1, 1));
 }
 
-float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vertPos, float angle) {
+float2 getWorldPosition(float2 position, float2 pivot, float2 size, float2 vertPos, float angle) {
     float c = cos(angle);
     float s = sin(angle);
     float2x2 m = { c, -s, s, c };
     
-    float2 pos = position + mul(m, ((vertPos - pivot) * size));
-    return mul(u_mvp, float4(pos, 0.0, 1.0));
+    return position + mul(m, ((vertPos - pivot) * size));
 }
 
 void basicVertex(VIn input, out VOut output, bool premultiply) {
+    const float2 worldPos = getWorldPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
+
     output.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
     output.texCoord1 = getTexCoord(input.texCoord1, input.vertPos.zw, input.textureRotation);
     output.pixelTexCoord0 = output.texCoord0 * input.size;
@@ -30,12 +31,12 @@ void basicVertex(VIn input, out VOut output, bool premultiply) {
     output.custom2 = input.custom2;
     output.custom3 = input.custom3;
     output.vertPos = input.vertPos.xy;
-    output.pixelPos = input.size * input.scale * input.vertPos.xy;
+    output.pixelPos = worldPos;
     output.pivot = input.pivot;
     output.scale = input.scale;
     getColours(input.colour, output.colour, output.colourAdd, premultiply);
     output.colourNoPremultiply = input.colour;
-    output.position = getVertexPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
+    output.position = mul(u_mvp, float4(worldPos, 0.0, 1.0));
     output.size = input.size.xy;
     output.texCoord0Bounds = input.texCoord0;
     output.texCoord1Bounds = input.texCoord1;
