@@ -42,7 +42,7 @@ namespace Halley {
     	[[nodiscard]] EntityId findInboundEntity(EntityNetworkId networkId) const;
     	[[nodiscard]] EntityId findOutboundEntity(EntityNetworkId networkId) const;
 
-    	void logUpdates(bool enabled);
+    	void logUpdates();
 
     private:
         class OutboundEntity {

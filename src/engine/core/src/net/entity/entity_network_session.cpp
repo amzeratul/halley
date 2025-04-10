@@ -649,10 +649,10 @@ void EntityNetworkSession::findEntity(EntityNetworkId networkId, bool inbound, s
 	}
 }
 
-void EntityNetworkSession::logUpdates(int numFrames)
+void EntityNetworkSession::logUpdates()
 {
 	for (auto& peer: peers) {
-		peer.logUpdates(numFrames);
+		peer.logUpdates();
 	}
 }
 

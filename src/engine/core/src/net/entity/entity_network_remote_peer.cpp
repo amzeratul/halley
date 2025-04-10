@@ -524,7 +524,7 @@ EntityId EntityNetworkRemotePeer::findOutboundEntity(EntityNetworkId networkId) 
 	return {};
 }
 
-void EntityNetworkRemotePeer::logUpdates(bool enabled)
+void EntityNetworkRemotePeer::logUpdates()
 {
-	log = enabled;
+	log = !log;
 }
