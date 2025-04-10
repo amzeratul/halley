@@ -576,7 +576,7 @@ const UIRoot* UIWidget::getRoot() const
 
 void UIWidget::notifyDataBind(bool data, bool force) const
 {
-	if (dataBind) {
+	if (dataBind && canSendEvents) {
 		if (force) {
 			dataBind->setAcceptingDataFromWidget(true);
 		}
@@ -586,7 +586,7 @@ void UIWidget::notifyDataBind(bool data, bool force) const
 
 void UIWidget::notifyDataBind(int data, bool force) const
 {
-	if (dataBind) {
+	if (dataBind && canSendEvents) {
 		if (force) {
 			dataBind->setAcceptingDataFromWidget(true);
 		}
@@ -596,7 +596,7 @@ void UIWidget::notifyDataBind(int data, bool force) const
 
 void UIWidget::notifyDataBind(float data, bool force) const
 {
-	if (dataBind) {
+	if (dataBind && canSendEvents) {
 		if (force) {
 			dataBind->setAcceptingDataFromWidget(true);
 		}
@@ -606,7 +606,7 @@ void UIWidget::notifyDataBind(float data, bool force) const
 
 void UIWidget::notifyDataBind(const String& data, bool force) const
 {
-	if (dataBind) {
+	if (dataBind && canSendEvents) {
 		if (force) {
 			dataBind->setAcceptingDataFromWidget(true);
 		}
@@ -616,7 +616,7 @@ void UIWidget::notifyDataBind(const String& data, bool force) const
 
 void UIWidget::notifyDataBind(const ConfigNode& data, bool force) const
 {
-	if (dataBind) {
+	if (dataBind && canSendEvents) {
 		if (force) {
 			dataBind->setAcceptingDataFromWidget(true);
 		}
@@ -1044,10 +1044,12 @@ bool UIWidget::onDestroyRequested()
 
 void UIWidget::sendEvent(UIEvent event, bool includeSelf) const
 {
-	if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
-		eventHandler->queue(event, UIEventDirection::Up);
-	} else if (parent && canSendEvents) {
-		parent->sendEvent(std::move(event), true);
+	if (canSendEvents) {
+		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
+			eventHandler->queue(event, UIEventDirection::Up);
+		} else if (parent) {
+			parent->sendEvent(std::move(event), true);
+		}
 	}
 }
 
