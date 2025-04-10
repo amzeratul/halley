@@ -429,7 +429,11 @@ std::optional<Vector2i> Animation::getActionPoint(const String& actionPoint, con
 Vector2i Animation::getPivot() const
 {
 	if (!hasPivot) {
-		pivot = sequences.at(0).getFrame(0).getSprite(0).origPivot;
+		if (sequences.empty() || sequences[0].numFrames() == 0) {
+			pivot = {};
+		} else {
+			pivot = sequences.at(0).getFrame(0).getSprite(0).origPivot;
+		}
 		hasPivot = true;
 	}
 	return pivot;
@@ -438,10 +442,14 @@ Vector2i Animation::getPivot() const
 Rect4i Animation::getBounds() const
 {
 	if (!hasBounds) {
-		auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
-		const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.xy() + sprite.trimBorder.zw());
-		const auto pivot = sprite.origPivot;
-		bounds = Rect4i(-pivot, -pivot + size);
+		if (sequences.empty() || sequences[0].numFrames() == 0) {
+			bounds = Rect4i(-pivot, -pivot);
+		} else {
+			auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
+			const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.xy() + sprite.trimBorder.zw());
+			const auto pivot = sprite.origPivot;
+			bounds = Rect4i(-pivot, -pivot + size);
+		}
 		hasBounds = true;
 	}
 	return bounds;
