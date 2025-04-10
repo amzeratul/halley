@@ -1,17 +1,27 @@
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: bf8c49f4-5554-4fa7-8bd0-8639b1403e1e
+sizer:
+  columnProportions: []
+  gap: 4
+  type: vertical
+widget:
+  class: widget
 children:
-- widget:
-    id: mode
-    class: list
-    type: horizontal
-    options:
-      - id: move
-        text: Move
-      - id: append
-        text: Append
-      - id: insert
-        text: Insert
-      - id: delete
-        text: Delete
-- widget: { class: button, id: addComponent, text: Add Component }
+  - uuid: 9a2da7e6-4c2f-49cd-bcc8-77b989b2d493
+    widget:
+      class: list
+      id: mode
+      options:
+        - id: move
+          text: Move
+        - id: append
+          text: Append
+        - id: insert
+          text: Insert
+        - id: delete
+          text: Delete
+      type: horizontal
+  - uuid: defda50e-e309-4ea8-9d21-578265054de5
+    widget:
+      class: button
+      id: addComponent
+      text: Add Component
