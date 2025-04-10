@@ -673,19 +673,15 @@ namespace Halley {
         {
         	if (context.entityInterpolators) {
         		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
-        			if (interpolator->isEnabled()) {
-        				interpolator->serialize(&value, sizeof(T), serializer);
-        				return;
-        			}
+        			interpolator->serialize(&value, sizeof(T), serializer);
+        			return;
         		}
         	}
 
         	if (context.interpolators) {
         		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
-        			if (interpolator->isEnabled()) {
-        				interpolator->serialize(&value, sizeof(T), serializer);
-        				return;
-        			}
+        			interpolator->serialize(&value, sizeof(T), serializer);
+        			return;
         		}
         	}
 
@@ -696,19 +692,15 @@ namespace Halley {
         {
         	if (context.entityInterpolators) {
         		if (const auto interpolator = context.entityInterpolators->tryGetInterpolator(context.entityId, componentIndex, fieldName)) {
-        			if (interpolator->isEnabled()) {
-        				interpolator->deserialize(&dst, sizeof(T), deserializer);
-        				return;
-        			}
+        			interpolator->deserialize(&dst, sizeof(T), deserializer);
+        			return;
         		}
         	}
 
         	if (context.interpolators) {
         		if (const auto interpolator = context.interpolators->tryGetInterpolator({}, componentIndex, fieldName)) {
-        			if (interpolator->isEnabled()) {
-        				interpolator->deserialize(&dst, sizeof(T), deserializer);
-        				return;
-        			}
+        			interpolator->deserialize(&dst, sizeof(T), deserializer);
+        			return;
         		}
         	}
 

@@ -486,17 +486,14 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         uint16_t componentId;
         deserializer >> componentId;
 
-        uint16_t componentSize = size;
+        if (size > 0) {
+            const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
 
-        const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
-
-        if (auto component = reflector.tryGetComponent(entity)) {
-            reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
-        } else {
-            // TODO:
-            if (componentSize > 0) {
-                deserializer.skipBytes(componentSize);
-                Logger::logDev("No reflector found or deserialize failed, componentId=" + toString(componentId));
+            if (auto component = reflector.tryGetComponent(entity)) {
+                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+            } else {
+                deserializer.skipBytes(size);
+                Logger::logDev("No component " + toString(componentId) + " found in entity " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
             }
         }
 

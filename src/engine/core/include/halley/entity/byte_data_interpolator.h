@@ -22,24 +22,36 @@ namespace Halley {
     {
     public:
         void setEnabled(bool enabled) override { this->enabled = enabled; }
-        [[nodiscard]] bool isEnabled() const override { return enabled; }
 
         void serialize(const void* value, size_t size, Serializer& serializer) override
         {
             Ensures(size == sizeof(T));
-            doSerialize(*static_cast<const T*>(value), serializer);
+
+            serializer << enabled;
+
+            if (enabled) {
+                doSerialize(*static_cast<const T*>(value), serializer);
+            }
         }
 
         void deserialize(void* value, size_t size, Deserializer& deserializer) override
         {
             Ensures(size == sizeof(T));
-            doDeserialize(*static_cast<T*>(value), deserializer);
+
+            bool hasPayload; // TODO: should this set the 'enabled' flag?
+            deserializer >> hasPayload;
+
+            if (hasPayload) {
+                doDeserialize(*static_cast<T*>(value), deserializer);
+            }
         }
 
         virtual void doSerialize(const T& value, Serializer& serializer) = 0;
         virtual void doDeserialize(T& value, Deserializer& deserializer) = 0;
 
     protected:
+        [[nodiscard]] bool isEnabled() const override { return enabled; }
+
         template <typename Intermediate = T, typename Discrete = T>
         Discrete quantize(const Intermediate value, Intermediate minValue, Intermediate maxValue, Intermediate granularity)
         {
