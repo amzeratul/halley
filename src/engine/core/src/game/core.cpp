@@ -2,6 +2,7 @@
 #include "halley/game/core.h"
 #include "halley/game/game.h"
 #include "halley/game/environment.h"
+#include "halley/game/livepp.h"
 #include "halley/api/halley_api.h"
 #include "halley/graphics/camera.h"
 #include "halley/graphics/render_context.h"
@@ -37,6 +38,8 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 {
 	statics.setupGlobals();
 	Logger::addSink(*this);
+
+	setupLivePP();
 
 	game = std::move(g);
 
@@ -266,6 +269,8 @@ void Core::deInit()
 	// Deinit API (note that this has to happen after resources, otherwise resources which rely on an API to de-init, such as textures, will crash)
 	api->deInit();
 	api.reset();
+
+	shutdownLivePP();
 
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
@@ -499,6 +504,7 @@ void Core::postUpdate(Time time)
 	pumpAudio();
 	updatePlatform();
 	updateSystem(time);
+	updateLivePP();
 }
 
 std::pair<size_t, Time> Core::getFixedUpdateCount(Time time)

@@ -53,3 +53,8 @@ endif()
 
 add_subdirectory(deps)
 add_subdirectory(src)
+
+if (DEV_BUILD AND HALLEY_HAS_LIVEPP)
+    target_compile_definitions(halley-engine PUBLIC -DHAS_LIVEPP PRIVATE -DLIVEPP_PATH="${CMAKE_SOURCE_DIR}/LivePP")
+    target_include_directories(halley-engine PRIVATE ${CMAKE_SOURCE_DIR}/LivePP/API/x64)
+endif()

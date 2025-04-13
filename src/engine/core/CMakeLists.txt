@@ -23,6 +23,7 @@ set(SOURCES
         "src/game/game_console.cpp"
         "src/game/halley_main.cpp"
         "src/game/halley_statics.cpp"
+        "src/game/livepp.cpp"
         "src/game/main_loop.cpp"
 
         "src/graph/base_graph_node.cpp"
@@ -444,6 +445,7 @@ set(HEADERS
         "include/halley/game/halley_main.h"
         "include/halley/game/halley_statics.h"
         "include/halley/game/game_platform.h"
+        "include/halley/game/livepp.h"
         "include/halley/game/main_loop.h"
         "include/halley/game/scene_editor_interface.h"
 
