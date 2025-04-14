@@ -10,18 +10,20 @@ namespace Halley {
 		Move,
 		Append,
 		Insert,
-		Delete
+		Delete,
+		AppendBefore
 	};
 
 	template <>
 	struct EnumNames<PolygonGizmoMode> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return{{
-					"move",
-					"append",
-					"insert",
-					"delete"
-				}};
+				"move",
+				"append",
+				"insert",
+				"delete",
+				"appendBefore"
+			}};
 		}
 	};
 
