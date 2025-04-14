@@ -31,12 +31,20 @@ namespace {
 	}
 
 	template <typename T>
-	Vector<Vector2f> bezierToLineSegmentsSubdivision(const T& curve, float tolerance)
+	void bezierToLineSegments(Vector<Vector2f>& result, const T& curve, float tolerance, bool includeFirst = true)
 	{
-		Vector<Vector2f> result;
-		result.push_back(curve.getStartPoint());
+		if (includeFirst) {
+			result.push_back(curve.getStartPoint());
+		}
 		bezierToLineSegmentsSubdivision(result, curve, tolerance);
-		return result;
+	}
+
+	std::pair<Vector2f, Vector2f> getSplineControlPoints(Vector2f prev, Vector2f a, Vector2f b, Vector2f next)
+	{
+		const auto abLen = (b - a).length();
+		const auto n0 = ((a - prev).normalized() + (b - a).normalized()).normalized();
+		const auto n1 = ((b - a).normalized() + (next - b).normalized()).normalized();
+		return { a + n0 * (abLen / 3), b - n1 * (abLen / 3) };
 	}
 }
 
@@ -57,7 +65,9 @@ bool BezierQuadratic::isFlat(float tolerance) const
 
 Vector<Vector2f> BezierQuadratic::toLineSegments() const
 {
-	return bezierToLineSegmentsSubdivision(*this, 0.25f);
+	Vector<Vector2f> result;
+	bezierToLineSegments(result, *this, 0.25f);
+	return result;
 }
 
 std::pair<BezierCubic, BezierCubic> BezierCubic::splitAt(float t) const
@@ -92,5 +102,61 @@ bool BezierCubic::isFlat(float tolerance) const
 
 Vector<Vector2f> BezierCubic::toLineSegments() const
 {
-	return bezierToLineSegmentsSubdivision(*this, 0.25f);
+	Vector<Vector2f> result;
+	bezierToLineSegments(result, *this, 0.25f);
+	return result;
 }
+
+void BezierCubic::toLineSegments(Vector<Vector2f>& output, bool includeFirst) const
+{
+	bezierToLineSegments(output, *this, 0.25f, includeFirst);
+}
+
+BezierCubicSpline BezierCubicSpline::fromEndPoints(Vector<Vector2f> points)
+{
+	if (points.size() < 2) {
+		return points;
+	}
+
+	BezierCubicSpline result;
+	result.points.reserve((points.size() - 1) * 3 + 1);
+	result.points += points.front();
+
+	for (size_t i = 1; i < points.size(); ++i) {
+		const Vector2f a = points[i - 1];
+		const Vector2f d = points[i];
+		const Vector2f prev = i >= 2 ? points[i - 2] : a - (d - a);
+		const Vector2f next = i < points.size() - 1 ? points[i + 1] : d + (d - a);
+
+		const auto [b, c] = getSplineControlPoints(prev, a, d, next);
+
+		result.points += b;
+		result.points += c;
+		result.points += d;
+	}
+
+	return result;
+}
+
+Vector<Vector2f> BezierCubicSpline::toLineSegments() const
+{
+	if (points.empty()) {
+		return {};
+	}
+	if (points.size() < 4) {
+		return Vector<Vector2f>{{ points.front(), }};
+	}
+	assert(points.size() % 3 == 1);
+
+	Vector<Vector2f> result;
+	result.push_back(points.front());
+
+	const size_t nSegments = (points.size() - 1) / 3;
+	for (size_t i = 0; i < nSegments; ++i) {
+		size_t i0 = i * 3;
+		BezierCubic(points[i0], points[i0 + 1], points[i0 + 2], points[i0 + 3]).toLineSegments(result, false);
+	}
+
+	return result;
+}
+

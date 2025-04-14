@@ -53,6 +53,7 @@ namespace Halley {
         std::pair<BezierCubic, BezierCubic> splitAt(float t) const;
         bool isFlat(float tolerance) const;
     	Vector<Vector2f> toLineSegments() const;
+    	void toLineSegments(Vector<Vector2f>& output, bool includeFirst = true) const;
 
         Vector2f getStartPoint() const { return p0; }
         Vector2f getEndPoint() const { return p3; }
@@ -66,5 +67,19 @@ namespace Halley {
     	{
     		return BezierCubic{ p0 - v, p1 - v, p2 - v, p3 - v };
     	}
+    };
+
+    class BezierCubicSpline {
+    public:
+        Vector<Vector2f> points;
+
+        BezierCubicSpline() = default;
+        BezierCubicSpline(Vector<Vector2f> points)
+	        : points(std::move(points))
+		{}
+
+        static BezierCubicSpline fromEndPoints(Vector<Vector2f> points);
+
+        Vector<Vector2f> toLineSegments() const;
     };
 }
