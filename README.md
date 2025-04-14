@@ -72,6 +72,7 @@ The following platforms are supported:
 ### Library dependencies
 * Engine:
   * Boost 1.72.0 (header only)
+  * ShaderConductor
   * OpenGL [optional]
   * SDL 2.0.2 (2.0.7 recommended) [optional]
   * Windows 10 SDK [optional]
