@@ -102,6 +102,9 @@ void UISlider::readFromDataBind()
 void UISlider::setGranularity(std::optional<float> g)
 {
 	granularity = g;
+	if (spinControl) {
+		spinControl->setIncrement(granularity.value_or(1.0f));
+	}
 }
 
 std::optional<float> UISlider::getGranularity() const
