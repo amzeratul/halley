@@ -370,5 +370,21 @@ namespace Halley {
 		{
 			return "(" + Halley::toString(a) + ", " + Halley::toString(b) + ")";
 		}
+
+		[[nodiscard]] Vector2f getVerticalProjection(Vector2f p) const
+		{
+			if (std::abs(b.x - a.x) < 0.000001f) {
+				return getPoint(0.5f);
+			}
+			return getPoint((p.x - a.x) / (b.x - a.x));
+		}
+
+		[[nodiscard]] Vector2f getHorizontalProjection(Vector2f p) const
+		{
+			if (std::abs(b.y - a.y) < 0.000001f) {
+				return getPoint(0.5f);
+			}
+			return getPoint((p.y - a.y) / (b.y - a.y));
+		}
 	};
 }
