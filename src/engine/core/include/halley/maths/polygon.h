@@ -115,6 +115,7 @@ namespace Halley {
 
 		float getDistanceTo(Vector2f point, float anisotropy = 1.0f) const;
 		float getDistanceTo(const Line& line) const;
+		float getDistanceTo(const LineSegment& line) const;
 
 		bool operator==(const Polygon& other) const;
 		bool operator!=(const Polygon& other) const;

@@ -1387,6 +1387,28 @@ float Polygon::getDistanceTo(const Line& line) const
 	}
 }
 
+float Polygon::getDistanceTo(const LineSegment& line) const
+{	
+	// Distance between the segment and my edges
+	float bestDist = std::min(getDistanceTo(line.a), getDistanceTo(line.b));
+	if (bestDist <= 0.0001f) {
+		return 0;
+	}
+
+	// Check for edge-edge overlaps
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		if (getEdge(i).intersection(line)) {
+			return 0;
+		}
+	}
+
+	// Distance between my vertices and the segment
+	for (auto& v: vertices) {
+		bestDist = std::min(bestDist, line.getDistance(v));
+	}
+	return bestDist;
+}
+
 std::optional<size_t> Polygon::getExitEdge(const Ray& ray, size_t startFromEdge) const
 {
 	const size_t n = vertices.size();
