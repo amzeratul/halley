@@ -1,6 +1,8 @@
 #pragma once
 #include <halley/graphics/painter.h>
 #include <Metal/Metal.h>
+#include "metal_depth_stencil.h"
+#include "metal_render_target.h"
 
 namespace Halley {
 	class MetalVideo;
@@ -19,16 +21,27 @@ namespace Halley {
 		void setClip(Rect4i clip, bool enable) override;
 		void setMaterialData(const Material& material) override;
 		void onUpdateProjection(Material& material, bool hashChanged) override;
-		void startEncoding(id<MTLTexture> texture);
+		void startEncoding(IMetalRenderTarget * renderTarget);
 		void endEncoding();
 
 	private:
 		void setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment);
+		void setDepthStencil(const MaterialDepthStencil& depthStencilDefinition);
 		void setBlendFactor(MTLRenderPipelineColorAttachmentDescriptor* colorAttachment, MTLBlendFactor src, MTLBlendFactor dst);
-		MTLRenderPassDescriptor* renderPassDescriptorForTextureAndColour(id<MTLTexture> texture, Colour& colour);
+		MTLRenderPassDescriptor* renderPassDescriptorForTexture(id<MTLTexture> texture, id<MTLTexture> depthTexture);
+		void ensureEncoder();
+
+		MetalDepthStencil& getDepthStencil(const MaterialDepthStencil& depthStencilDefinition);
 
 		MetalVideo& video;
 		id<MTLRenderCommandEncoder> encoder;
 		id<MTLBuffer> indexBuffer;
+		MTLRenderPassDescriptor* nextRenderPassDescriptor;
+		IMetalRenderTarget *currentRenderTarget = nullptr;
+		std::optional<Rect4i> viewPort;
+		std::optional<Rect4i> clipRect;
+
+		HashMap<MaterialDepthStencil, std::unique_ptr<MetalDepthStencil>> depthStencils;
+		MetalDepthStencil* curDepthStencil = nullptr;
 	};
 }

@@ -35,7 +35,7 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 
 #ifdef _WIN32
 	initDX11Plugin(registry);
-#elif USE_METAL
+#elif defined WITH_METAL
 	initMetalPlugin(registry);
 #else
 	initOpenGLPlugin(registry);

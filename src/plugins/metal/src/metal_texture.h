@@ -1,6 +1,5 @@
 #pragma once
 
-#include "metal_render_target.h"
 #include <halley/graphics/texture.h>
 #include <halley/graphics/texture_descriptor.h>
 
@@ -12,6 +11,7 @@ namespace Halley {
 	class MetalTexture : public Texture
 	{
 	friend class MetalTextureRenderTarget;
+	friend class MetalScreenRenderTarget;
 	public:
 		explicit MetalTexture(MetalVideo& video, Vector2i size);
 		void doLoad(TextureDescriptor& descriptor) override;

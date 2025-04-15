@@ -38,6 +38,8 @@ namespace Halley {
 		id<MTLDevice> getDevice();
 		id<MTLCommandBuffer> getCommandBuffer();
 
+		void addBufferToRelease( id<MTLBuffer> buffer );
+
 	private:
 		std::shared_ptr<Window> window;
 		std::unique_ptr<MetalLoader> loader;
@@ -48,8 +50,10 @@ namespace Halley {
 		id<MTLCommandQueue> command_queue;
 		NSAutoreleasePool *pool;
 		id<MTLCommandBuffer> command_buffer;
+		std::vector<id<MTLBuffer>> bufferToRelease;
 
 		void initSwapChain(Window& window);
+		void purgeBuffers();
 	};
 
 }

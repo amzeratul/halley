@@ -6,7 +6,14 @@
 
 #include <halley/graphics/texture.h>
 #include <halley/graphics/shader.h>
+#if __has_include(<SDL.h>)
+#include <SDL.h>
+#include <SDL_metal.h>
+#else
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_metal.h>
+
+#endif
 #include <iostream>
 
 using namespace Halley;
@@ -31,6 +38,7 @@ void MetalVideo::deInit()
 
 void MetalVideo::startRender()
 {
+	purgeBuffers();
 	pool = [[NSAutoreleasePool alloc] init];
 	surface = [swap_chain nextDrawable];
 	command_buffer = [command_queue commandBuffer];
@@ -47,6 +55,10 @@ void MetalVideo::finishRender()
 
 void MetalVideo::setWindow(WindowDefinition&& windowDescriptor)
 {
+	if( window )
+	{
+		system.destroyWindow( window );
+	}
 	window = system.createWindow(windowDescriptor);
 	initSwapChain(*window);
 }
@@ -94,7 +106,21 @@ std::unique_ptr<TextureRenderTarget> MetalVideo::createTextureRenderTarget()
 
 std::unique_ptr<ScreenRenderTarget> MetalVideo::createScreenRenderTarget()
 {
-	return std::make_unique<MetalScreenRenderTarget>(*this, Rect4i({}, getWindow().getWindowRect().getSize()));
+	auto & window = getWindow();
+	if (window.getNativeHandleType() != "SDL") {
+		throw Exception("Only SDL2 windows are supported by Metal", HalleyExceptions::VideoPlugin);
+	}
+
+	Vector2i size;
+	SDL_Window* sdl_window = static_cast<SDL_Window*>(window.getNativeHandle());
+	SDL_Metal_GetDrawableSize(sdl_window, &size.x, &size.y);
+
+	Vector2i logical_size = window.getWindowRect().getSize();
+
+	int scale_factor = size.x / logical_size.x;
+
+	// :TODO: Make sure size.y / logical_size.y is the same
+	return std::make_unique<MetalScreenRenderTarget>(*this, Rect4i({}, logical_size), scale_factor);
 }
 
 std::unique_ptr<MaterialConstantBuffer> MetalVideo::createConstantBuffer()
@@ -127,4 +153,19 @@ id<MTLDevice> MetalVideo::getDevice() {
 
 id<MTLCommandBuffer> MetalVideo::getCommandBuffer() {
 	return command_buffer;
+}
+
+void MetalVideo::addBufferToRelease( id<MTLBuffer> buffer )
+{
+	bufferToRelease.push_back(buffer);
+}
+
+void MetalVideo::purgeBuffers()
+{
+	for(auto & buffer : bufferToRelease)
+	{
+		[buffer setPurgeableState:MTLPurgeableStateEmpty];
+		[buffer release];
+	}
+	bufferToRelease.clear();
 }

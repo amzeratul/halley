@@ -14,13 +14,13 @@ MetalMaterialConstantBuffer::~MetalMaterialConstantBuffer() {}
 void MetalMaterialConstantBuffer::update(gsl::span<const gsl::byte> data) {
   // We must pad up to a multiple of 16 (float4)
   // TODO we ought to move this somewhere it won't be called so often.
-  const size_t padding = alignUp<char>(data.size_bytes(), 16);
+  const size_t padded_size = alignUp<size_t>(data.size_bytes(), 16);
 
-  auto padded = malloc(data.size_bytes() + padding);
+  auto padded = malloc(padded_size);
   memcpy(padded, data.data(), data.size_bytes());
 
   buffer.setData(gsl::span{reinterpret_cast<gsl::byte *>(padded),
-                           static_cast<std::size_t>(static_cast<long>(data.size_bytes() + padding))});
+                           static_cast<std::size_t>(static_cast<long>(padded_size))});
 
   free(padded);
 }

@@ -9,12 +9,12 @@ MetalBuffer::MetalBuffer(MetalVideo& video, Type type, size_t initialSize)
 {}
 
 MetalBuffer::~MetalBuffer() {
-	[buffer setPurgeableState:MTLPurgeableStateEmpty];
-	[buffer release];
+	video.addBufferToRelease( buffer );
+	buffer = nil;
 }
 
 void MetalBuffer::setData(gsl::span<const gsl::byte> data) {
-	auto oldBuffer = std::move(buffer);
+	auto oldBuffer = buffer;
 	buffer = [video.getDevice() newBufferWithBytes:data.data() length:data.size_bytes() options:MTLResourceStorageModeShared];
 	[oldBuffer setPurgeableState:MTLPurgeableStateEmpty];
 	[oldBuffer release];
