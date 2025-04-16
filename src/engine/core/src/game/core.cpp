@@ -39,8 +39,6 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	statics.setupGlobals();
 	Logger::addSink(*this);
 
-	setupLivePP();
-
 	game = std::move(g);
 
 	// Set paths
@@ -52,6 +50,10 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	}
 	environment->setDataPath(game->getDataPath(args));
 	environment->setArguments(_args);
+
+	if (environment->hasArgument("--enable-lpp")) {
+		setupLivePP();
+	}
 
 	// Basic initialization
 	game->init(*environment, args);
