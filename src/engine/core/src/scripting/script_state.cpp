@@ -314,7 +314,7 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 		needsStateLoading = true;
 	}
 
-	const bool isNetwork = context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
+	const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
 
 	if (isNetwork) {
 		if (!getScriptGraphPtr()->isNetwork()) {

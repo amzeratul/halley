@@ -15,20 +15,44 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 		return;
 	}
 
+	const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
+
 	if (node.hasKey("curId") && node["curId"].getType() != ConfigNodeType::Noop) {
 		curId = node["curId"].asInt64(0);
 	}
 
 	if (node.hasKey("states") && node["states"].getType() != ConfigNodeType::Noop) {
 		for (auto& state: states) {
-			state.present = false;
+			// For network updates, keep all local states (states attached to scripts
+			// which do not set the "Synchronize over the network" property).
+			//
+			// Makes sure we do not mark them as "dead" down below.
+			state.present = isNetwork && !state.state->getScriptGraphPtr()->isNetwork();
 		}
 
 		for (const auto& [stateId, stateNode]: node["states"].asMap()) {
 			const auto id = stateId.toInteger64();
-			if (stateNode.getType() == ConfigNodeType::Del) {
+
+			if (isNetwork && stateNode.getType() == ConfigNodeType::Del) {
+				if (auto* stateData = tryGetStateData(id)) {
+					stateData->present = false;
+				} else {
+					// TODO:
+					// Right now this can - unintentionally - happen if a network entity changes
+					// in structure (child entities or components are added or removed). This case
+					// triggers the "slow" update path using EntityDataDelta, which can work on
+					// outdated information.
+					Logger::logWarning("Want to delete non-existing script state " + toString(id) + "\n" + stateNode.asString());
+				}
 				continue;
 			}
+
+			/*if (isNetwork && stateNode.getType() == ConfigNodeType::Noop) {
+				if (auto* stateData = tryGetStateData(id)) {
+					stateData->present = true;
+				}
+				continue;
+			}*/
 
 			auto& stateData = getStateData(id);
 			stateData.present = true;
@@ -54,7 +78,7 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 
 ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& context) const
 {
-	const bool isNetwork = context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
+	const bool isNetwork = context.matchType(makeMask(EntitySerialization::Type::Network));
 
 	ConfigNode::MapType statesNode;
 	for (auto& state: states) {
@@ -142,6 +166,16 @@ ScriptStateSet::State& ScriptStateSet::getStateData(int64_t id)
 		}
 	}
 	return states.emplace_back(State{ id, {}, true });
+}
+
+ScriptStateSet::State* ScriptStateSet::tryGetStateData(int64_t id)
+{
+	for (auto& state: states) {
+		if (state.id == id) {
+			return &state;
+		}
+	}
+	return nullptr;
 }
 
 bool ScriptStateSet::isValid() const
