@@ -104,7 +104,7 @@ size_t SessionMultiplayer::getNumberOfPlayers() const
 
 uint8_t SessionMultiplayer::getMyClientId() const
 {
-	return *session->getMyPeerId();
+	return session->getMyPeerId().value_or(0);
 }
 
 SharedData* SessionMultiplayer::tryGetMySharedData() const
