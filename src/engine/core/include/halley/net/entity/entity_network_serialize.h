@@ -97,7 +97,7 @@ namespace Halley {
         void deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
 
         bool processEntityUpdateChanges(Bytes& previous);
-        bool hasEntityChanges() const;
+        bool hasEntityChanges(const EntityRef& entity, bool log) const;
 
         void getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
 
@@ -174,6 +174,10 @@ namespace Halley {
         bool hasComponentsAddedOrRemoved;
 
         static thread_local Bytes scratchpad;
+
+        HashSet<UUID> childrenAdded;
+        HashSet<UUID> childrenChanged;
+        HashSet<UUID> childrenRemoved;
     };
 
 }

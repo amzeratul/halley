@@ -565,9 +565,6 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
         if (modified) {
             // Something has changed. We need to do a more detailed inspection
             // to check for entity/component updates, additions and deletions.
-            thread_local HashSet<UUID> childrenAdded;
-            thread_local HashSet<UUID> childrenChanged;
-            thread_local HashSet<UUID> childrenRemoved;
 
             childrenAdded.clear();
             childrenChanged.clear();
@@ -577,7 +574,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
             // them as "potentially added".
 
             journal.enumerateEntities(
-                    [](const EntityNetworkChanges::Page& page, int pageIdx) {
+                    [this](const EntityNetworkChanges::Page& page, int pageIdx) {
                         if (pageIdx > 0) {
                             childrenAdded.emplace(page.uuid);
                         }
@@ -588,7 +585,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
             // current set to check which have been added, changed or removed.
 
             previousJournal.enumerateEntities(
-                    [](const EntityNetworkChanges::Page& page, int pageIdx) {
+                    [this](const EntityNetworkChanges::Page& page, int pageIdx) {
                         if (pageIdx > 0) {
                             if (childrenAdded.contains(page.uuid)) {
                                 // Found in both - mark as "changed".
@@ -677,9 +674,6 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                         }
                     }
             );
-
-            hasComponentsAddedOrRemoved |= !childrenAdded.empty();
-            hasComponentsAddedOrRemoved |= !childrenRemoved.empty();
         }
     }
 
@@ -698,9 +692,29 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
     return modified;
 }
 
-bool EntityNetworkSerialize::hasEntityChanges() const
+bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log) const
 {
-    return hasComponentsAddedOrRemoved;
+    bool changes = hasComponentsAddedOrRemoved;
+
+    if (!childrenAdded.empty()) {
+        if (log) {
+            Logger::logDev("  - " + toString(childrenAdded.size()) + " children added");
+            for (const auto& child : childrenAdded) {
+                auto ce = findChildEntity(entity, child);
+                Logger::logDev("    + " + child + " - " + (ce ? ce->getName() : "unknown"));
+            }
+        }
+        changes = true;
+    }
+
+    if (!childrenRemoved.empty()) {
+        if (log) {
+            Logger::logDev("  - " + toString(childrenRemoved.size()) + " children removed");
+        }
+        changes = true;
+    }
+
+    return changes;
 }
 
 void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options, bool log) const
