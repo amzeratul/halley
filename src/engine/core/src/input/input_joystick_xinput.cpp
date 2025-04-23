@@ -25,32 +25,63 @@
 
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
+
 #ifdef XINPUT_AVAILABLE
+
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <Xinput.h>
-#include <sstream>
-#include <ctime>
-using namespace Halley;
+#endif
 
 #define XINPUT_GAMEPAD_GUIDE 0x400
+
+#if defined(WITH_GDK)
+/*
+ * GDK and Xbox use <XInputOnGameInput.h>.
+ *
+ * In the GDK header, XINPUT_STATE already maps 1:1 to XINPUT_STATE_EX
+ * defined for Win32 below.
+ *
+ * We don't try to do any GetProcAddress() lookups on XInput DLLs on those
+ * platforms, so local wrapper functions just forward the calls.
+ */
+#include <XInputOnGameInput.h>
+using namespace XInputOnGameInput;
+
+using namespace Halley;
+
+namespace {
+    struct XINPUT_CAPABILITIES_EX
+    {
+        XINPUT_CAPABILITIES Capabilities;
+        WORD vendorId;
+        WORD productId;
+        WORD revisionId;
+        DWORD a4; //unknown
+    };
+
+    DWORD XInputGetStateEx(DWORD index, XINPUT_STATE* state)
+    {
+        return XInputGetState(index, state);
+    }
+
+    DWORD XInputGetCapabilitiesEx(DWORD userIndex, DWORD flags, XINPUT_CAPABILITIES_EX* capabilities)
+    {
+        ZeroMemory(capabilities, sizeof(XINPUT_CAPABILITIES_EX));
+        return XInputGetCapabilities(userIndex, flags, &capabilities->Capabilities);
+    }
+}
+
+#else
+
+#include <Windows.h>
+#include <Xinput.h>
 
 #pragma comment(lib, "XInput9_1_0.lib")
 //#pragma comment(lib, "XInput.lib")
 
-namespace {
-	struct XINPUT_STATE_EX
-	{
-	    uint32_t eventCount;
-	    WORD wButtons;
-	    BYTE bLeftTrigger;
-	    BYTE bRightTrigger;
-	    SHORT sThumbLX;
-	    SHORT sThumbLY;
-	    SHORT sThumbRX;
-	    SHORT sThumbRY;
-	};
+using namespace Halley;
 
+namespace {
 	struct XINPUT_CAPABILITIES_EX
 	{
 	    XINPUT_CAPABILITIES Capabilities;
@@ -60,7 +91,15 @@ namespace {
 	    DWORD a4; //unknown
 	};
 
-	typedef int (__stdcall* _XInputGetStateEx)(int, XINPUT_STATE_EX*);
+    struct XINPUT_VIBRATION_EX
+    {
+        WORD wLeftMotorSpeed;
+        WORD wRightMotorSpeed;
+        WORD wLeftTriggerSpeed;
+        WORD wRightTriggerSpeed;
+    };
+
+	typedef int (__stdcall* _XInputGetStateEx)(DWORD, XINPUT_STATE*);
 	typedef DWORD(_stdcall* _XInputGetCapabilitiesEx)(DWORD a1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities);
 	_XInputGetStateEx XInputGetStateExPtr;
 	_XInputGetCapabilitiesEx XInputGetCapabilitiesExPtr;
@@ -92,22 +131,7 @@ namespace {
 	{
 		initXInputDLL();
 		if (XInputGetStateExPtr) {
-			XINPUT_STATE_EX stateEx;
-			ZeroMemory(&stateEx, sizeof(stateEx));
-			const auto result = XInputGetStateExPtr(index, &stateEx);
-			if (result != ERROR_SUCCESS) {
-				return result;
-			}
-
-			state->dwPacketNumber = stateEx.eventCount;
-			state->Gamepad.wButtons = stateEx.wButtons;
-			state->Gamepad.bLeftTrigger = stateEx.bLeftTrigger;
-			state->Gamepad.bRightTrigger = stateEx.bRightTrigger;
-			state->Gamepad.sThumbLX = stateEx.sThumbLX;
-			state->Gamepad.sThumbLY = stateEx.sThumbLY;
-			state->Gamepad.sThumbRX = stateEx.sThumbRX;
-			state->Gamepad.sThumbRY = stateEx.sThumbRY;
-			return 0;
+			return XInputGetStateExPtr(index, state);
 		}
 		return XInputGetState(index, state);
 	}
@@ -120,8 +144,14 @@ namespace {
 		}
 		return 0;
 	}
+
+    DWORD XInputSetStateEx(DWORD userIndex, XINPUT_VIBRATION_EX* vibration)
+    {
+        return XInputSetState(userIndex, (XINPUT_VIBRATION*) vibration);
+    }
 }
 
+#endif
 
 InputJoystickXInput::InputJoystickXInput(int number)
 	: index(number)
@@ -292,11 +322,10 @@ String InputJoystickXInput::getButtonName(int code) const
 
 void InputJoystickXInput::doSetVibration(float low, float high)
 {
-	XINPUT_VIBRATION vibration;
-	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
+	XINPUT_VIBRATION_EX vibration = {};
 	vibration.wLeftMotorSpeed = static_cast<WORD>(clamp(low * 65535, 0.0f, 65535.0f));
 	vibration.wRightMotorSpeed = static_cast<WORD>(clamp(high * 65535, 0.0f, 65535.0f));
-	XInputSetState(index, &vibration);
+	XInputSetStateEx(index, &vibration);
 }
 
 #endif
