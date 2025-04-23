@@ -26,10 +26,6 @@ if (USE_ASIO)
     add_subdirectory(asio)
 endif ()
 
-if (USE_GDK)
-    add_subdirectory(gdk)
-endif ()
-
 if (USE_XAUDIO2)
     add_subdirectory(xaudio2)
 endif ()

@@ -124,6 +124,7 @@ namespace Halley
 		virtual MultiplayerStatus getStatus() const = 0;
 		virtual void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) = 0;
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
+		virtual void setParameter(const String& name, const String& value) {}
 	};
 
 	// This is the join callback, see PlatformAPI's method for more details
@@ -244,6 +245,7 @@ namespace Halley
 		virtual void showPlayerInfo(String playerId) {}
 		virtual bool canGetPlayerAvatars() const { return false; }
 		virtual Future<std::unique_ptr<Image>> getPlayerAvatar(const String& playerId, Vector2i sizeHint) { return Future<std::unique_ptr<Image>>::makeImmediate({}); }
+		virtual void updateRecentPlayers(const Vector<String>& playerIds) {}
 
 
 		////////////////////////////
