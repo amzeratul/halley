@@ -60,18 +60,20 @@ namespace Halley {
 		void reset();
 
 		bool isButtonPressed(UIGamepadInput::Button button) const;
+		bool isButtonPressedRepeat(UIGamepadInput::Button button) const;
 		bool isButtonReleased(UIGamepadInput::Button button) const;
 		bool isButtonHeld(UIGamepadInput::Button button) const;
 		float getAxis(UIGamepadInput::Axis axis) const;
 		int getAxisRepeat(UIGamepadInput::Axis axis) const;
 		
-		void setButton(UIGamepadInput::Button button, bool pressed, bool released, bool held);
+		void setButton(UIGamepadInput::Button button, bool pressed, bool pressedRepeat, bool released, bool held);
 		void setAxis(UIGamepadInput::Axis axis, float value);
 		void setAxisRepeat(UIGamepadInput::Axis axis, int value);
 		void clearPress(UIGamepadInput::Button button);
 
 	private:
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsPressed;
+		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsPressedRepeat;
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsReleased;
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsHeld;
 		std::array<int8_t, UIGamepadInput::NumberOfAxes> axesRepeat;

@@ -10,26 +10,22 @@ UIInputResults::UIInputResults()
 
 void UIInputResults::reset()
 {
-	for (auto& b: buttonsPressed) {
-		b = false;
-	}
-	for (auto& b: buttonsReleased) {
-		b = false;
-	}
-	for (auto& b: buttonsHeld) {
-		b = false;
-	}
-	for (auto& a: axes) {
-		a = 0;
-	}
-	for (auto& a: axesRepeat) {
-		a = 0;
-	}
+	buttonsPressed.fill(false);
+	buttonsPressedRepeat.fill(false);
+	buttonsReleased.fill(false);
+	buttonsHeld.fill(false);
+	axes.fill(0);
+	axesRepeat.fill(0);
 }
 
 bool UIInputResults::isButtonPressed(UIGamepadInput::Button button) const
 {
 	return buttonsPressed[int(button)];
+}
+
+bool UIInputResults::isButtonPressedRepeat(UIGamepadInput::Button button) const
+{
+	return buttonsPressedRepeat[int(button)];
 }
 
 bool UIInputResults::isButtonReleased(UIGamepadInput::Button button) const
@@ -52,9 +48,10 @@ int UIInputResults::getAxisRepeat(UIGamepadInput::Axis axis) const
 	return axesRepeat[int(axis)];
 }
 
-void UIInputResults::setButton(UIGamepadInput::Button button, bool pressed, bool released, bool held)
+void UIInputResults::setButton(UIGamepadInput::Button button, bool pressed, bool pressedRepeat, bool released, bool held)
 {
 	buttonsPressed[int(button)] = pressed;
+	buttonsPressedRepeat[int(button)] = pressedRepeat;
 	buttonsReleased[int(button)] = released;
 	buttonsHeld[int(button)] = held;
 }
@@ -72,5 +69,5 @@ void UIInputResults::setAxisRepeat(UIGamepadInput::Axis axis, int value)
 void UIInputResults::clearPress(UIGamepadInput::Button button)
 {
 	bool isHeld = isButtonHeld(button);
-	setButton(button, false, false, isHeld);
+	setButton(button, false, false, false, isHeld);
 }

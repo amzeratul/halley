@@ -201,25 +201,25 @@ void UIRoot::updateGamepadInput(const spInputDevice& input)
 		auto& results = target->gamepadInputResults;
 		results.reset();
 		if (b.accept != -1) {
-			results.setButton(UIGamepadInput::Button::Accept, input->isButtonPressed(b.accept), input->isButtonReleased(b.accept), input->isButtonDown(b.accept));
+			results.setButton(UIGamepadInput::Button::Accept, input->isButtonPressed(b.accept), input->isButtonPressedRepeat(b.accept), input->isButtonReleased(b.accept), input->isButtonDown(b.accept));
 		}
 		if (b.cancel != -1) {
-			results.setButton(UIGamepadInput::Button::Cancel, input->isButtonPressed(b.cancel), input->isButtonReleased(b.cancel), input->isButtonDown(b.cancel));
+			results.setButton(UIGamepadInput::Button::Cancel, input->isButtonPressed(b.cancel), input->isButtonPressedRepeat(b.cancel), input->isButtonReleased(b.cancel), input->isButtonDown(b.cancel));
 		}
 		if (b.prev != -1) {
-			results.setButton(UIGamepadInput::Button::Prev, input->isButtonPressed(b.prev), input->isButtonReleased(b.prev), input->isButtonDown(b.prev));
+			results.setButton(UIGamepadInput::Button::Prev, input->isButtonPressed(b.prev), input->isButtonPressedRepeat(b.prev), input->isButtonReleased(b.prev), input->isButtonDown(b.prev));
 		}
 		if (b.next != -1) {
-			results.setButton(UIGamepadInput::Button::Next, input->isButtonPressed(b.next), input->isButtonReleased(b.next), input->isButtonDown(b.next));
+			results.setButton(UIGamepadInput::Button::Next, input->isButtonPressed(b.next), input->isButtonPressedRepeat(b.next), input->isButtonReleased(b.next), input->isButtonDown(b.next));
 		}
 		if (b.hold != -1) {
-			results.setButton(UIGamepadInput::Button::Hold, input->isButtonPressed(b.hold), input->isButtonReleased(b.hold), input->isButtonDown(b.hold));
+			results.setButton(UIGamepadInput::Button::Hold, input->isButtonPressed(b.hold), input->isButtonPressedRepeat(b.hold), input->isButtonReleased(b.hold), input->isButtonDown(b.hold));
 		}
 		if (b.secondary != -1) {
-			results.setButton(UIGamepadInput::Button::Secondary, input->isButtonPressed(b.secondary), input->isButtonReleased(b.secondary), input->isButtonDown(b.secondary));
+			results.setButton(UIGamepadInput::Button::Secondary, input->isButtonPressed(b.secondary), input->isButtonPressedRepeat(b.secondary), input->isButtonReleased(b.secondary), input->isButtonDown(b.secondary));
 		}
 		if (b.tertiary != -1) {
-			results.setButton(UIGamepadInput::Button::Tertiary, input->isButtonPressed(b.tertiary), input->isButtonReleased(b.tertiary), input->isButtonDown(b.tertiary));
+			results.setButton(UIGamepadInput::Button::Tertiary, input->isButtonPressed(b.tertiary), input->isButtonPressedRepeat(b.tertiary), input->isButtonReleased(b.tertiary), input->isButtonDown(b.tertiary));
 		}
 		results.setAxis(UIGamepadInput::Axis::X, (b.xAxis != -1 ? input->getAxis(b.xAxis) : 0) + (b.xAxisAlt != -1 ? input->getAxis(b.xAxisAlt) : 0));
 		results.setAxis(UIGamepadInput::Axis::Y, (b.yAxis != -1 ? input->getAxis(b.yAxis) : 0) + (b.yAxisAlt != -1 ? input->getAxis(b.yAxisAlt) : 0));
