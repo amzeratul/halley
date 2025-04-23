@@ -125,6 +125,7 @@ namespace Halley {
 		void clear();
 		bool isActive() const override;
 
+		void setColumns(int nCols);
 		void setColumnProportions(const Vector<float>& values);
 		void setRowProportions(const Vector<float>& values);
 		void setEvenColumns();
