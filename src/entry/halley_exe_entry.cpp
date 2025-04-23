@@ -3,8 +3,23 @@ using namespace Halley;
 
 IHalleyEntryPoint* getHalleyEntryStatic();
 
+#if defined(WITH_SDL3)
 
-#if defined(_WIN32) || defined(WINDOWS_STORE)
+#include <SDL3/SDL_main.h>
+
+void SDL_GDKSuspendComplete_Proxy()
+{
+#if defined(WITH_GDK)
+	SDL_GDKSuspendComplete();
+#endif
+}
+
+extern "C" int main(int argc, char* argv[])
+{
+    return HalleyMain::runMain(std::make_unique<EntryPointGameLoader>(*getHalleyEntryStatic()), HalleyMain::getArgs(argc, argv));
+}
+
+#elif defined(_WIN32) || defined(WITH_GDK)
 
 int __stdcall WinMain(void*, void*, char*, int)
 {
