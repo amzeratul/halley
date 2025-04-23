@@ -49,7 +49,7 @@ void SystemSDL3::init()
 	std::cout << "\tVersion/Linked: " << ConsoleColour(Console::DARK_GREY) << SDL_VERSIONNUM_MAJOR(linked) << "." << SDL_VERSIONNUM_MINOR(linked) << "." << SDL_VERSIONNUM_MICRO(linked) << ConsoleColour() << std::endl;
 
 	// Initialize SDL
-	if (!SDL_WasInit(0)) {
+	if (SDL_WasInit(0) == 0) {
 		if (!SDL_Init(0)) {
 			throw Exception(String("Exception initializing SDL: ") + SDL_GetError(), HalleyExceptions::SystemPlugin);
 		}

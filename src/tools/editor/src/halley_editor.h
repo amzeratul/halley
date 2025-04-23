@@ -44,6 +44,7 @@ namespace Halley
 		std::optional<String> projectPath;
 		std::optional<String> launcherPath;
 		bool loadDLL = true;
+		bool useDX12 = false;
 
 		void parseArguments(const Vector<String>& args);
 	};

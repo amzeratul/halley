@@ -204,8 +204,10 @@ if (CMAKE_LIBRARY_PATH)
 	link_directories("${CMAKE_LIBRARY_PATH}")
 endif()
 
-# SDL2
-if (USE_SDL2)
+# SDL
+if (USE_SDL3)
+	add_definitions(-DWITH_SDL3)
+elseif (USE_SDL2)
 	add_definitions(-DWITH_SDL2)
 	if(EMSCRIPTEN)
 		set(SDL2_INCLUDE_DIR "")
@@ -214,11 +216,6 @@ if (USE_SDL2)
 		set (SDL2_BUILDING_LIBRARY 1)
 		find_Package(SDL2 REQUIRED)
 	endif()
-endif()
-
-# SDL3
-if (USE_SDL3)
-	add_definitions(-DWITH_SDL3)
 endif()
 
 # Boost::Asio
@@ -359,8 +356,6 @@ endfunction(assign_source_group)
 set(CMAKE_DEBUG_POSTFIX "_d")
 
 set(HALLEY_PROJECT_EXTERNAL_LIBS
-	${SDL2_LIBRARIES}
-	${OPENGL_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${X11_LIBRARIES}
 	${EXTRA_LIBS}
@@ -419,20 +414,25 @@ if (USE_AVFOUNDATION)
 		)
 endif ()
 
-if (USE_SDL2)
-set(HALLEY_PROJECT_LIBS
-	optimized halley-sdl
-	debug halley-sdl_d
-	${HALLEY_PROJECT_LIBS}
-	)
-endif ()
-
 if (USE_SDL3)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-sdl3
 		debug halley-sdl3_d
+		optimized SDL3::SDL3
+		debug SDL3::SDL3
 		${HALLEY_PROJECT_LIBS}
-	)
+		)
+elseif (USE_SDL2)
+	set(HALLEY_PROJECT_EXTERNAL_LIBS
+		${SDL2_LIBRARIES}
+		${OPENGL_LIBRARIES}
+		${HALLEY_PROJECT_EXTERNAL_LIBS}
+		)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-sdl
+		debug halley-sdl_d
+		${HALLEY_PROJECT_LIBS}
+		)
 endif ()
 
 if (USE_ASIO)
@@ -594,7 +594,6 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		endif ()
 		if (USE_SDL3)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-sdl3)
-			add_sdl3_runtime_dependencies(${name})
 		endif ()
 		if (USE_ASIO)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-asio)

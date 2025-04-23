@@ -11,9 +11,13 @@ using namespace Halley;
 void initOpenGLPlugin(IPluginRegistry &registry);
 void initSDLSystemPlugin(IPluginRegistry &registry, std::optional<String> cryptKey);
 void initSDLAudioPlugin(IPluginRegistry &registry);
-void initSDLInputPlugin(IPluginRegistry &registry);
+void initSDLInputPlugin(IPluginRegistry &registry, bool allowXInput);
+void initSDL3SystemPlugin(IPluginRegistry& registry, std::optional<String> cryptKey);
+void initSDL3AudioPlugin(IPluginRegistry& registry);
+void initSDL3InputPlugin(IPluginRegistry& registry);
 void initAsioPlugin(IPluginRegistry &registry);
 void initDX11Plugin(IPluginRegistry &registry);
+void initDX12Plugin(IPluginRegistry& registry);
 void initMetalPlugin(IPluginRegistry &registry);
 void initHTTPLibPlugin(IPluginRegistry& registry);
 
@@ -27,13 +31,28 @@ HalleyEditor::~HalleyEditor()
 
 int HalleyEditor::initPlugins(IPluginRegistry &registry)
 {
+#if defined(WITH_SDL3)
+	initSDL3SystemPlugin(registry, std::nullopt);
+	initSDL3AudioPlugin(registry);
+	initSDL3InputPlugin(registry);
+#else
 	initSDLSystemPlugin(registry, {});
-	initAsioPlugin(registry);
 	initSDLAudioPlugin(registry);
-	initSDLInputPlugin(registry);
+	initSDLInputPlugin(registry, true);
+#endif
+
+	initAsioPlugin(registry);
 	initHTTPLibPlugin(registry);
 
-#ifdef _WIN32
+#if defined(WITH_DX12) && defined(WITH_DX11)
+	if (useDX12) {
+		initDX12Plugin(registry);
+	} else {
+		initDX11Plugin(registry);
+	}
+#elif defined(WITH_DX12)
+	initDX12Plugin(registry);
+#elif defined(WITH_DX11)
 	initDX11Plugin(registry);
 #elif USE_METAL
 	initMetalPlugin(registry);
@@ -140,6 +159,8 @@ void HalleyEditor::parseArguments(const Vector<String>& args)
 			} else if (arg == "--dont-load-dll") {
 				type = ArgType::NoDLL;
 				loadDLL = false;
+			} else if (arg == "--dx12") {
+				useDX12 = true;
 			}
 		} else {
 			if (type == ArgType::ProjectPath) {
