@@ -36,7 +36,7 @@ namespace Halley {
 
 		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);
 		void addCapture(ITextInputCapture* capture);
-		void removeCapture(ITextInputCapture* capture);
+		virtual void removeCapture(ITextInputCapture* capture);
 
 		InputType getInputType() const override;
 

@@ -25,7 +25,7 @@
 #include <chrono>
 #include "input_button_base.h"
 
-#if defined(_WIN32) && !defined(WINDOWS_STORE)
+#if defined(_WIN32) || defined(WITH_GDK)
 #define XINPUT_AVAILABLE
 #endif
 
