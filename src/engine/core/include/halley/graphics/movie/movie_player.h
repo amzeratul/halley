@@ -125,6 +125,7 @@ namespace Halley
 		std::shared_ptr<MoviePlayerAliveFlag> aliveFlag;
 
 		Time time = 0;
+		int framesRendered = 0;
 
 		void startThread();
 		void stopThread();
