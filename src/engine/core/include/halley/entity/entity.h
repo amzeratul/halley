@@ -80,9 +80,9 @@ namespace Halley {
 		}
 
 		template <typename T>
-		T& getComponent()
+		T& getComponent(bool evenIfDisabled = false)
 		{
-			auto value = tryGetComponent<T>();
+			auto value = tryGetComponent<T>(evenIfDisabled);
 			if (value) {
 				return *value;
 			} else {
@@ -91,9 +91,9 @@ namespace Halley {
 		}
 
 		template <typename T>
-		const T& getComponent() const
+		const T& getComponent(bool evenIfDisabled = false) const
 		{
-			auto value = tryGetComponent<T>();
+			auto value = tryGetComponent<T>(evenIfDisabled);
 			if (value) {
 				return *value;
 			} else {
@@ -418,19 +418,19 @@ namespace Halley {
 		}
 
 		template <typename T>
-		T& getComponent()
+		T& getComponent(bool evenIfDisabled = false)
 		{
 			validateComponentType<T>();
 			validate();
-			return entity->getComponent<T>();
+			return entity->getComponent<T>(evenIfDisabled);
 		}
 
 		template <typename T>
-		const T& getComponent() const
+		const T& getComponent(bool evenIfDisabled = false) const
 		{
 			validateComponentType<T>();
 			validate();
-			return entity->getComponent<T>();
+			return entity->getComponent<T>(evenIfDisabled);
 		}
 
 		template <typename T>
@@ -447,6 +447,19 @@ namespace Halley {
 			validateComponentType<T>();
 			validate();
 			return entity->tryGetComponent<T>(evenIfDisabled);
+		}
+
+		template <typename T>
+		T& getOrAddComponent()
+		{
+			validateComponentType<T>();
+			validate();
+			if (auto* existing = entity->tryGetComponent<T>(true)) {
+				return *existing;
+			} else {
+				addComponent(T());
+				return getComponent<T>(true);
+			}
 		}
 
 		template <typename T>
