@@ -31,7 +31,6 @@ namespace Halley {
         friend class InputVirtual;
 
     public:
-		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, InputLabel label);
         ~InputExclusiveButton();
 
         void update(Time t) override;
@@ -52,7 +51,9 @@ namespace Halley {
         InputPriority priority = InputPriority::Normal;
         Vector<uint32_t> activeBinds;
         InputLabel label;
-        
+
+        InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, InputLabel label);
+
         InputPriority getPriority() const override;
         Vector<uint32_t>& getActiveBinds() override;
 	};
@@ -61,7 +62,6 @@ namespace Halley {
         friend class InputVirtual;
 
     public:
-		InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, InputLabel label);
         ~InputExclusiveAxis();
 
         void update(Time t) override;
@@ -81,7 +81,9 @@ namespace Halley {
         InputAxisRepeater repeater;
         int repeatValue;
         
-        InputPriority getPriority() const override;
+		InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, InputLabel label);
+
+		InputPriority getPriority() const override;
         Vector<uint32_t>& getActiveBinds() override;
     };
 

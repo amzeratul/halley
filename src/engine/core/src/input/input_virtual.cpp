@@ -736,14 +736,14 @@ void InputVirtual::setLastDevice(const std::shared_ptr<InputDevice>& device)
 
 std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority, const InputLabel& label)
 {
-	auto exclusive = std::make_unique<InputExclusiveButton>(*this, priority, button, label);
+	auto exclusive = std::unique_ptr<InputExclusiveButton>(new InputExclusiveButton(*this, priority, button, label));
 	addExclusiveButton(*exclusive);
 	return exclusive;
 }
 
 std::unique_ptr<InputExclusiveAxis> InputVirtual::makeExclusiveAxis(int axis, InputPriority priority, const InputLabel& label)
 {
-	auto exclusive = std::make_unique<InputExclusiveAxis>(*this, priority, axis, label);
+	auto exclusive = std::unique_ptr<InputExclusiveAxis>(new InputExclusiveAxis(*this, priority, axis, label));
 	addExclusiveAxis(*exclusive);
 	return exclusive;
 }

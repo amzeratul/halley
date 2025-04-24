@@ -129,6 +129,7 @@ namespace Halley {
 		Vector<ExclusiveButtonInfo> getExclusiveButtonLabels(InputDevice* preferredDevice);
 
 		std::pair<InputDevice*, int> getPhysicalButton(ConvertibleTo<int> button, InputDevice* preferredDevice) const;
+		std::pair<InputDevice*, int> getPhysicalButton(const InputExclusiveButton& button, InputDevice* device = nullptr) const;
 
 		void clearPresses() override;
 
@@ -212,7 +213,6 @@ namespace Halley {
 		void addExclusiveAxis(InputExclusiveAxis& exclusive);
 		void removeExclusiveAxis(InputExclusiveAxis& exclusive);
 		void refreshExclusives();
-		std::pair<InputDevice*, int> getPhysicalButton(const InputExclusiveButton& button, InputDevice* device = nullptr) const;
 		bool checkBinds(gsl::span<const uint32_t> activeBinds, const Bind& bind) const;
 	};
 
