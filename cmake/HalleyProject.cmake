@@ -544,7 +544,12 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		#add_dependencies(${name}-game halley-cmd)
 		add_dependencies(${name}-dll ${name}-game)
 		add_dependencies(${name} ${name}-game)
-		
+
+		if (USE_SDL3)
+			# I'm not sure why I need to do this here.
+			target_link_libraries(${name}-game SDL3::SDL3)
+		endif()
+
 		target_compile_definitions(${name}-game PUBLIC HALLEY_STATIC_LIBRARY)
 		target_compile_definitions(${name}-dll PUBLIC HALLEY_SHARED_LIBRARY)
 		target_compile_definitions(${name} PUBLIC HALLEY_EXECUTABLE)

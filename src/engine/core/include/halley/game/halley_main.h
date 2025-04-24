@@ -25,6 +25,12 @@ namespace Halley
 			return runMain(std::make_unique<StaticGameLoader<T>>(), getArgs(argc, argv));
 		}
 
+		template <typename T>
+		static int SDL_main(int argc, char* argv[])
+		{
+			return runMain(std::make_unique<StaticGameLoader<T>>(), getArgs(argc, argv));
+		}
+
 		static int runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args);
 
 		static Vector<std::string> getWin32Args();
@@ -44,7 +50,7 @@ namespace Halley
 #endif
 
 #if defined(HALLEY_EXECUTABLE)
-	#if defined(_WIN32) || defined(WITH_GDK)
+	#if (defined(_WIN32) || defined(WITH_GDK)) && !defined(_GAMING_XBOX)
 		#define HalleyGame(T) int __stdcall WinMain(void*, void*, char*, int) { Halley::InitEntities<T>(); return Halley::HalleyMain::winMain<T>(); }
 	#else
 		#define HalleyGame(T) int main(int argc, char* argv[]) { Halley::InitEntities<T>(); return Halley::HalleyMain::main<T>(argc, argv); }
