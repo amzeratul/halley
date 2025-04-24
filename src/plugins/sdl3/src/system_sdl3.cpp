@@ -20,7 +20,11 @@
 
 #ifdef WITH_GDK
 #include <appnotify.h>
-extern void SDL_GDKSuspendComplete_Proxy();
+extern "C" void SDL_GDKSuspendComplete(); // Declared in SDL_main.h, but we don't want to include this here.
+extern "C" void SDL_GDKSuspendComplete_Proxy()
+{
+	SDL_GDKSuspendComplete();
+}
 #endif
 
 using namespace Halley;

@@ -643,6 +643,10 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		halleyProjectSetupGDK(${name})
 	endif()
 
+	if (USE_SDL3)
+		add_sdl3_runtime_dependencies(${name})
+	endif()
+
 	set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 	if (TARGET ${name}-game)
 		set_target_properties(${name}-game PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})

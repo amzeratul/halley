@@ -7,13 +7,6 @@ IHalleyEntryPoint* getHalleyEntryStatic();
 
 #include <SDL3/SDL_main.h>
 
-void SDL_GDKSuspendComplete_Proxy()
-{
-#if defined(WITH_GDK)
-	SDL_GDKSuspendComplete();
-#endif
-}
-
 extern "C" int main(int argc, char* argv[])
 {
     return HalleyMain::runMain(std::make_unique<EntryPointGameLoader>(*getHalleyEntryStatic()), HalleyMain::getArgs(argc, argv));
