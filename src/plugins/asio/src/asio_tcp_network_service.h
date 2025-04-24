@@ -26,8 +26,7 @@ namespace Halley
 			AsioTCPNetworkService& service;
 		};
 		
-		asio::io_service service;
-		asio::io_service::work work;
+		asio::io_context service;
 		TCPEndpoint localEndpoint;
 		asio::ip::tcp::acceptor acceptor;
 

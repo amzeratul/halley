@@ -6,7 +6,6 @@
 #include <iostream>
 
 using namespace Halley;
-namespace asio = boost::asio;
 
 AsioUDPNetworkService::AsioUDPNetworkService(int port, IPVersion version)
 	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), static_cast<unsigned short>(port))
@@ -74,7 +73,7 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& addres
 	
 	assert(port > 1024);
 	assert(port < 65536);
-	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
+	auto remoteAddr = asio::ip::make_address(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, static_cast<unsigned short>(port)); 
 	auto conn = std::make_shared<AsioUDPConnection>(socket, remote);
 	activeConnections[0] = conn;

@@ -4,8 +4,7 @@
 using namespace Halley;
 
 AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
-	: work(service)
-	, localEndpoint(version == IPVersion::IPv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), static_cast<unsigned short>(port))
+	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), static_cast<unsigned short>(port))
 	, acceptor(service, localEndpoint)
 {
 	Expects(port == 0 || port > 1024);
@@ -42,7 +41,7 @@ void AsioTCPNetworkService::doStartListening()
 {
 	acceptor.cancel();
 	acceptingSocket = TCPSocket(service);
-	acceptor.async_accept(acceptingSocket.value(), [this] (const boost::system::error_code& ec) {
+	acceptor.async_accept(acceptingSocket.value(), [this] (const asio::error_code& ec) {
 		if (ec) {
 			Logger::logError("Error accepting connection: " + ec.message());
 		} else {

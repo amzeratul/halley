@@ -6,27 +6,27 @@
 #include "halley/net/connection/network_service.h"
 using namespace Halley;
 
-AsioTCPConnection::AsioTCPConnection(asio::io_service& service, TCPSocket socket, INetworkServiceStatsListener& statsListener)
+AsioTCPConnection::AsioTCPConnection(asio::io_context& service, TCPSocket socket, INetworkServiceStatsListener& statsListener)
 	: service(service)
 	, socket(std::move(socket))
     , statsListener(statsListener)
 	, status(ConnectionStatus::Connected)
 {}
 
-AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int port, INetworkServiceStatsListener& statsListener)
+AsioTCPConnection::AsioTCPConnection(asio::io_context& service, String host, int port, INetworkServiceStatsListener& statsListener)
 	: service(service)
 	, socket(service)
     , statsListener(statsListener)
 	, status(ConnectionStatus::Connecting)
 {
 	resolver = std::make_unique<asio::ip::tcp::resolver>(service);
-	resolver->async_resolve(host.cppStr(), toString(port).cppStr(), [=] (const boost::system::error_code& ec, asio::ip::tcp::resolver::results_type result)
+	resolver->async_resolve(host.cppStr(), toString(port).cppStr(), [=] (const asio::error_code& ec, asio::ip::tcp::resolver::results_type result)
 	{
 		if (ec) {
 			Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ": " + ec.message());
 		} else {
 			for (auto& r: result) {
-				socket.async_connect(r, [=] (const boost::system::error_code ec2)
+				socket.async_connect(r, [=] (const asio::error_code ec2)
 				{
 					if (!ec2) {
 						Logger::logDev("Connected to " + host + ":" + toString(port));
@@ -159,7 +159,7 @@ void AsioTCPConnection::trySend()
 		sendQueue.pop_front();
 		auto& toSend = sendingQueue.back();
 
-		socket.async_write_some(asio::buffer(toSend.data(), toSend.size()), [=] (const boost::system::error_code& ec, size_t bytesWritten)
+		socket.async_write_some(asio::buffer(toSend.data(), toSend.size()), [=] (const asio::error_code& ec, size_t bytesWritten)
 		{
 			if (ec) {
 				Logger::logError("Error sending data on TCP socket: " + ec.message());
@@ -189,7 +189,7 @@ void AsioTCPConnection::tryReceive()
 			receiveBuffer.resize(4096);
 		}
 
-		socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const boost::system::error_code& ec, size_t nBytesReceived)
+		socket.async_read_some(asio::mutable_buffer(receiveBuffer.data(), receiveBuffer.size()), [=] (const asio::error_code& ec, size_t nBytesReceived)
 		{
 			reading = false;
 

@@ -78,12 +78,12 @@ void AsioUDPConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
         return;
     }
 
-    auto buffer = boost::asio::buffer(packet.data(), packet.size());
-    boost::system::error_code err;
+    auto buffer = asio::buffer(packet.data(), packet.size());
+    asio::error_code err;
 
     size_t size = socket.send_to(buffer, remote, 0, err);
 
-    if (err.failed()) {
+    if (err) {
         Logger::logError("Error sending packet: " + err.message());
         close();
     } else if (size != packet.size()) {
@@ -106,16 +106,16 @@ void AsioUDPConnection::receiveAll(
         const std::function<void(UDPEndpoint &remote, gsl::span<gsl::byte> packet)> &unknownConnCallback)
 {
     std::array<gsl::byte, 2048> cache = {};
-    auto buffer = boost::asio::buffer(cache.data(), cache.size());
+    auto buffer = asio::buffer(cache.data(), cache.size());
 
     for (;;) {
         UDPEndpoint from;
-        boost::system::error_code err;
+        asio::error_code err;
 
         size_t size = socket.receive_from(buffer, from, 0, err);
 
-        if (err.failed()) {
-            if (err == boost::asio::error::would_block) {
+        if (err) {
+            if (err == asio::error::would_block) {
                 break;
             } else {
                 Logger::logError("Error receiving packet: " + err.message());

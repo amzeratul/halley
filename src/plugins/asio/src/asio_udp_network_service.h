@@ -4,13 +4,10 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4834)
 #endif
-#define BOOST_SYSTEM_NO_DEPRECATED
-#define BOOST_ERROR_CODE_HEADER_ONLY
-#include <boost/asio.hpp>
+
+#include <asio.hpp>
 
 #include "halley/data_structures/hash_map.h"
-namespace asio = boost::asio;
-
 #include "asio_udp_connection.h"
 
 namespace Halley
@@ -42,7 +39,7 @@ namespace Halley
 		AcceptCallback acceptCallback;
 		bool startedListening = false;
 
-		asio::io_service service;
+		asio::io_context service;
 		UDPEndpoint localEndpoint;
 		UDPEndpoint remoteEndpoint;
 		asio::ip::udp::socket socket;

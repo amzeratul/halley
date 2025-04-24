@@ -6,14 +6,13 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4834)
 #endif
-#define BOOST_SYSTEM_NO_DEPRECATED
-#define BOOST_ERROR_CODE_HEADER_ONLY
-#include <boost/asio.hpp>
+
+#include <asio.hpp>
 
 namespace Halley
 {
-	using UDPEndpoint = boost::asio::ip::udp::endpoint;
-	using UDPSocket = boost::asio::ip::udp::socket;
+	using UDPEndpoint = asio::ip::udp::endpoint;
+	using UDPSocket = asio::ip::udp::socket;
 
 	class AsioUDPConnection : public IConnection
 	{

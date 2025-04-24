@@ -5,11 +5,10 @@
 #endif
 #define BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_ERROR_CODE_HEADER_ONLY
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include "halley/net/connection/iconnection.h"
 #include "halley/utils/utils.h"
 #include <mutex>
-namespace asio = boost::asio;
 
 namespace Halley
 {
@@ -21,8 +20,8 @@ namespace Halley
 	class AsioTCPConnection : public IConnection
 	{
 	public:
-		AsioTCPConnection(asio::io_service& service, String host, int port, INetworkServiceStatsListener& statsListener);
-		AsioTCPConnection(asio::io_service& service, TCPSocket socket, INetworkServiceStatsListener& statsListener);
+		AsioTCPConnection(asio::io_context& service, String host, int port, INetworkServiceStatsListener& statsListener);
+		AsioTCPConnection(asio::io_context& service, TCPSocket socket, INetworkServiceStatsListener& statsListener);
 		~AsioTCPConnection();
 
 		void update();
@@ -37,7 +36,7 @@ namespace Halley
 		String getRemoteAddress() const override;
 
 	private:
-		asio::io_service& service;
+		asio::io_context& service;
 		std::unique_ptr<asio::ip::tcp::resolver> resolver;
 		TCPSocket socket;
         INetworkServiceStatsListener& statsListener;
