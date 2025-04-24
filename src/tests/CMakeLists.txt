@@ -1,7 +1,6 @@
 project (halley-tests)
 
 include_directories(
-        ${Boost_INCLUDE_DIR}
         "include"
         "../../include"
         "../../src/engine/core/include"

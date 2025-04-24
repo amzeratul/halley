@@ -218,18 +218,9 @@ elseif (USE_SDL2)
 	endif()
 endif()
 
-# Boost::Asio
+# Asio
 if (USE_ASIO)
 	add_definitions(-DWITH_ASIO)
-	if (NOT CMAKE_VERSION VERSION_LESS 3.30)
-    	cmake_policy(SET CMP0167 OLD)
-	endif()
-	find_package(Boost REQUIRED)
-	add_definitions(-DBOOST_ALL_NO_LIB -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
-	if (BOOST_INCLUDE_DIR)
-	else()
-		set(BOOST_INCLUDE_DIR "${Boost_INCLUDE_DIRS}")
-	endif()
 endif()
 
 # OpenGL
@@ -368,7 +359,6 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/src/engine/core/include
 	${HALLEY_PATH}/src/engine/lua/include
 	${HALLEY_PATH}/src/engine/editor_extensions/include
-	${Boost_INCLUDE_DIR} 
 	${OPENSSL_INCLUDE_DIR}
 	)
 
