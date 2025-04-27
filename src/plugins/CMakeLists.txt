@@ -26,6 +26,10 @@ if (USE_ASIO)
     add_subdirectory(asio)
 endif ()
 
+if (USE_SOCKETIO)
+    add_subdirectory(socketio)
+endif ()
+
 if (USE_XAUDIO2)
     add_subdirectory(xaudio2)
 endif ()

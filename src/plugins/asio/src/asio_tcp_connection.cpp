@@ -123,6 +123,7 @@ bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 		if (size > 128 * 1024 * 1024) {
 			Logger::logError("Invalid packet size.");
 			close();
+			return false;
 		}
 
 		const auto packetSize = sizeof(uint32_t) + size;

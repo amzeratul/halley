@@ -41,6 +41,7 @@ namespace Halley
         class IPacketListener
         {
         public:
+			virtual ~IPacketListener() = default;
             virtual void onSend(gsl::span<const gsl::byte> packet) = 0;
             virtual void onReceive(gsl::span<const gsl::byte> packet) = 0;
         };
