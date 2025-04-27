@@ -17,7 +17,7 @@ namespace Halley
 			struct
 			{
 				uint8_t zeros[10];
-				uint16_t ones;
+				uint16_t ones = 0xffff;
 				in_addr ip;
 			} ipv4;
 		};
@@ -43,7 +43,6 @@ namespace Halley
 		bool receive(InboundNetworkPacket& packet) override;
 
 		[[nodiscard]] bool matchesEndpoint(const Endpoint& remoteEndpoint) const;
-		void setError(const std::string& cs);
 
 		void terminateConnection();
 		[[nodiscard]] short getConnectionId() const { return connectionId; }
@@ -55,11 +54,8 @@ namespace Halley
 		void onConnect(short connId) override;
 
 		void sendUnreliablePacket(gsl::span<const gsl::byte> packet) override;
+		void receiveUnreliablePacket(gsl::span<const gsl::byte> packet) const;
 		void setUnreliablePacketListener(IPacketListener* listener) override;
-
-		static void receiveAll(
-				Socket &socket, HashMap<short, std::shared_ptr<SocketIOConnection>>& connections,
-				const std::function<void(Endpoint& remote, gsl::span<gsl::byte> packet)>& unknownConnCallback);
 
 	private:
 		const Socket sock;
@@ -103,26 +99,25 @@ namespace Halley
 
 		HashMap<short, std::shared_ptr<SocketIOConnection>> activeConnections;
 
-		AcceptCallback acceptCallback;
+		AcceptCallback acceptCallback = {};
 		Socket acceptSock = -1;
 		Endpoint acceptEndpoint = {};
 		bool startedListening = false;
 
 		void tryListen();
+		void tryReceiveUnreliable();
 
-		void receivePacket(Endpoint& endpoint, gsl::span<gsl::byte> data, std::string* error);
+		void receivePacket(const Endpoint& endpoint, gsl::span<gsl::byte> data);
 
         [[nodiscard]] bool hasConnectionWithId(short connId) const override;
 
 		std::shared_ptr<IConnection> doAccept() override;
 		void doReject() override;
 
-		std::shared_ptr<SocketIOConnection> doAcceptConnection(Endpoint endPoint);
-		void doRejectConnection();
-
 		static void setEndpointFromAddrInfo(Endpoint& endpoint, uint16_t port, const addrinfo* addr);
 		static void setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, int addrLen);
-		static void setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen);
 	};
+
+	extern void setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen);
 
 }

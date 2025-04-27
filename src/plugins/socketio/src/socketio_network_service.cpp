@@ -27,6 +27,14 @@ SocketIOConnection::~SocketIOConnection()
 void SocketIOConnection::close()
 {
 	if (status != ConnectionStatus::Closed) {
+		if (sock >= 0) {
+#ifdef _WIN32
+			closesocket(sock);
+#else
+			close(sock);
+#endif
+		}
+
 		status = ConnectionStatus::Closed;
 	}
 }
@@ -37,7 +45,7 @@ void SocketIOConnection::update()
 		close();
 	}
 
-	if (status == ConnectionStatus::Connected) {
+	if (protocol == NetworkProtocol::TCP && status == ConnectionStatus::Connected) {
 		std::unique_lock lock(mutex);
 		tryReceive();
 		trySend();
@@ -181,12 +189,9 @@ void SocketIOConnection::tryReceive()
 
 bool SocketIOConnection::matchesEndpoint(const Endpoint& remoteEndpoint) const
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
-}
-
-void SocketIOConnection::setError(const std::string& cs)
-{
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	// TODO: IPv6
+	return (remote.port == remoteEndpoint.port) &&
+		memcmp(&remote.ipv4.ip, &remoteEndpoint.ipv4.ip, sizeof(in_addr)) == 0;
 }
 
 void SocketIOConnection::terminateConnection()
@@ -199,7 +204,7 @@ String SocketIOConnection::getRemoteAddress() const
 	// TODO: IPv6
 	sockaddr_in addr = {};
 	addr.sin_family = AF_INET;
-	addr.sin_port = remote.port;
+	addr.sin_port = htons(remote.port);
 	addr.sin_addr = remote.ipv4.ip;
 
 	char node[NI_MAXHOST] = {};
@@ -221,24 +226,51 @@ size_t SocketIOConnection::getMaxUnreliablePacketSize() const
 
 void SocketIOConnection::onConnect(short connId)
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	if (status == ConnectionStatus::Connecting) {
+		Logger::logDev("Connection established as id = " + toString(connId));
+		connectionId = connId;
+		status = ConnectionStatus::Connected;
+	}
 }
 
 void SocketIOConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
+		Logger::logError("Attempting to send packet, but not in connected state", true);
+		return;
+	}
+
+	const int len = static_cast<int>(packet.size_bytes());
+
+	sockaddr addr = {};
+	int addrLen = sizeof(addr);
+	setSockAddrFromEndpoint(remote, &addr, &addrLen);
+
+	const int bytesSent = ::sendto(sock, reinterpret_cast<const char *>(packet.data()), len, 0, &addr, addrLen);
+
+	if (bytesSent == SOCKET_ERROR || bytesSent != len) {
+		Logger::logError("Error sending data on UDP socket");
+		close();
+		return;
+	}
+
+	if (packetListener != nullptr) {
+		packetListener->onSend(packet);
+	}
+}
+
+void SocketIOConnection::receiveUnreliablePacket(gsl::span<const gsl::byte> packet) const
+{
+	if (packetListener != nullptr) {
+		packetListener->onReceive(packet);
+	} else {
+		Logger::logError("No packet listener registered, packet will be lost", true);
+	}
 }
 
 void SocketIOConnection::setUnreliablePacketListener(IPacketListener* listener)
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
-}
-
-void SocketIOConnection::receiveAll(
-	Socket &socket, HashMap<short, std::shared_ptr<SocketIOConnection>>& connections,
-	const std::function<void(Endpoint& remote, gsl::span<gsl::byte> packet)>& unknownConnCallback)
-{
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	packetListener = listener;
 }
 
 SocketIONetworkService::SocketIONetworkService(int port, NetworkProtocol protocol, IPVersion version)
@@ -254,13 +286,7 @@ SocketIONetworkService::SocketIONetworkService(int port, NetworkProtocol protoco
 
 SocketIONetworkService::~SocketIONetworkService()
 {
-	if (sock >= 0) {
-#ifdef _WIN32
-		closesocket(sock);
-#else
-		close(sock);
-#endif
-	}
+	SocketIONetworkService::stopListening();
 }
 
 void SocketIONetworkService::update(Time t)
@@ -280,6 +306,7 @@ void SocketIONetworkService::update(Time t)
 	}
 
 	tryListen();
+	tryReceiveUnreliable();
 }
 
 String SocketIONetworkService::startListening(AcceptCallback callback)
@@ -288,36 +315,51 @@ String SocketIONetworkService::startListening(AcceptCallback callback)
 
 	acceptCallback = std::move(callback);
 
-	if (protocol == NetworkProtocol::TCP) {
-		// Create local, listening socket.
+	// Create local socket.
+	int sockType = protocol == NetworkProtocol::TCP ? SOCK_STREAM : SOCK_DGRAM;
+	int sockProtocol = protocol == NetworkProtocol::TCP ? IPPROTO_TCP : IPPROTO_UDP;
+
 #ifdef _WIN32
-		const SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	const SOCKET s = socket(AF_INET, sockType, sockProtocol);
 
-		if (s == INVALID_SOCKET) {
-			throw Exception("Failed to create local socket", HalleyExceptions::Network);
-		}
+	if (s == INVALID_SOCKET) {
+		throw Exception("Failed to create local socket", HalleyExceptions::Network);
+	}
 
-		sock = s;
+	sock = s;
 #else
-		throw Exception("Not implemented", HalleyExceptions::Network);
+	throw Exception("Not implemented", HalleyExceptions::Network);
 #endif
 
-		// Bind to local port.
-		sockaddr_in addr = {};
-		addr.sin_family = AF_INET;
-		addr.sin_port = htons(localEndpoint.port);
-		inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
-
-		if (bind(sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0) {
-			throw Exception("Failed to bind local socket", HalleyExceptions::Network);
+	// non-blocking
+	if (protocol != NetworkProtocol::TCP) {
+#ifdef _WIN32
+		DWORD noBlock = 1;
+		if (ioctlsocket(sock, FIONBIO, &noBlock)) {
+			throw Exception("Failed to set socket to non-blocking", HalleyExceptions::Network);
 		}
+#else
+		if (fcntl(sock, F_SETFL, O_NONBLOCK, 1) == -1) {
+			throw Exception("Failed to set socket to non-blocking", HalleyExceptions::Network);
+		}
+#endif
+	}
 
+	// Bind to local port.
+	sockaddr_in addr = {};
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(localEndpoint.port);
+	inet_pton(AF_INET, "127.0.0.1", &addr.sin_addr);
+
+	if (bind(sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0) {
+		throw Exception("Failed to bind local socket", HalleyExceptions::Network);
+	}
+
+	if (protocol == NetworkProtocol::TCP) {
 		// Start to listen.
 		if (listen(sock, 1) == SOCKET_ERROR) {
 			throw Exception("Failed to listen on local socket", HalleyExceptions::Network);
 		}
-	} else {
-		throw Exception("Not implemented", HalleyExceptions::Network);
 	}
 
 	startedListening = true;
@@ -327,14 +369,20 @@ String SocketIONetworkService::startListening(AcceptCallback callback)
 
 void SocketIONetworkService::stopListening()
 {
-	Ensures(startedListening);
+	if (!startedListening) {
+		return;
+	}
 
 	acceptCallback = {};
 	startedListening = false;
 
 	if (protocol == NetworkProtocol::TCP) {
 		if (sock >= 0) {
+#ifdef _WIN32
 			closesocket(sock);
+#else
+			close(sock);
+#endif
 			sock = -1;
 		}
 	}
@@ -458,10 +506,12 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 	setEndpointFromAddrInfo(remoteEndpoint, port, result);
 
 	// Connect.
-	if (::connect(sock, result->ai_addr, static_cast<int>(result->ai_addrlen)) != 0) {
-		Logger::logError("Failed to connect socket to " + address);
-		freeaddrinfo(result);
-		return {};
+	if (protocol == NetworkProtocol::TCP) {
+		if (::connect(sock, result->ai_addr, static_cast<int>(result->ai_addrlen)) != 0) {
+			Logger::logError("Failed to connect socket to " + address);
+			freeaddrinfo(result);
+			return {};
+		}
 	}
 
 	// Need to free up this.
@@ -478,25 +528,170 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 	}
 
 	auto conn = std::make_shared<SocketIOConnection>(sock, protocol, remoteEndpoint, *this);
-	activeConnections[localEndpoint.port] = conn;
+	activeConnections[0] = conn;
+
+	// Handshake
+	if (protocol == NetworkProtocol::UDP) {
+		sendHandshake(*conn);
+	}
 
 	return conn;
 }
 
-void SocketIONetworkService::receivePacket(Endpoint& endpoint, gsl::span<gsl::byte> data, std::string* error)
+void SocketIONetworkService::tryReceiveUnreliable()
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	if (protocol != NetworkProtocol::UDP) {
+		return;
+	}
+
+	// Poll until there's no more data.
+	std::array<char, 2048> buffer;
+
+	for (;;) {
+		sockaddr addr = {};
+		int addrLen = sizeof(addr);
+
+		const int bytesRecv = ::recvfrom(sock, buffer.data(), (int) buffer.size(), 0, &addr, &addrLen);
+
+		if (bytesRecv == 0) {
+			break;
+		}
+
+		Endpoint remote = {};
+		setEndpointFromSockAddr(remote, &addr, addrLen);
+
+		std::shared_ptr<SocketIOConnection> conn;
+		for (const auto& active : activeConnections) {
+			if (active.second->matchesEndpoint(remote)) {
+				conn = active.second;
+				break;
+			}
+		}
+
+		if (bytesRecv == SOCKET_ERROR) {
+			const int err = WSAGetLastError();
+
+			if (err == WSAEWOULDBLOCK) {
+				break; // No more data available, stop polling.
+			}
+
+			if (err == WSAECONNRESET) {
+				// Connection closed by remote host.
+				if (conn != nullptr) {
+					conn->close();
+					break;
+				}
+			}
+
+			// TODO: might need more checks by error code
+			Logger::logError("Error receiving UDP packet: " + toString(err));
+			break;
+		}
+
+		auto packet = gsl::span(reinterpret_cast<gsl::byte *>(buffer.data()), bytesRecv);
+
+		if (conn != nullptr && conn->getStatus() == ConnectionStatus::Connected) {
+			conn->receiveUnreliablePacket(packet);
+		} else {
+			receivePacket(remote, packet);
+		}
+	}
+}
+
+void SocketIONetworkService::receivePacket(const Endpoint& endpoint, gsl::span<gsl::byte> data)
+{
+	if (data.size_bytes() == 0) {
+		return;
+	}
+
+	// Read connection id
+	short id = -1;
+	std::array<unsigned char, 2> bytes;
+	const auto dst = gsl::as_writable_bytes(gsl::span(bytes));
+	dst[0] = data[0];
+	if (bytes[0] & 0x80) {
+		if (data.size_bytes() < 2) {
+			// Invalid header
+			std::cout << "Invalid header\n";
+			return;
+		}
+		dst[1] = data[1];
+		data = data.subspan(2);
+		id = static_cast<short>((bytes[0] & 0x7F) << 8) | static_cast<short>(bytes[1]);
+	} else {
+		data = data.subspan(1);
+		id = static_cast<short>(bytes[0]);
+	}
+
+	// No connection id, check if it's a connection request
+	if (id == 0 && isValidHandshake(data, nullptr)) {
+		if (acceptCallback) {
+			acceptEndpoint = endpoint;
+			if (acceptCallback) {
+				acceptCallback(*this);
+			}
+			ensureChoiceMade();
+			return;
+		}
+	}
+
+	// Find the owner of this remote endpoint
+	auto conn = activeConnections.find(id);
+	if (conn == activeConnections.end()) {
+		// Connection doesn't exist, but check the pending slot
+		conn = activeConnections.find(0);
+		if (conn == activeConnections.end()) {
+			// Nope, give up
+			return;
+		}
+	}
+
+	// Validate that this connection is who it claims to be
+	if (conn->second->matchesEndpoint(endpoint)) {
+		auto connection = conn->second;
+
+		try {
+			if (conn->first == 0) {
+				// Hold on, we're still on 0, re-bind to the id
+				Expects(id != 0);
+				connection->onConnect(id);
+
+				activeConnections[id] = connection;
+				activeConnections.erase(conn);
+			}
+		/*} catch (std::exception& e) {
+			//connection->setError(e.what());
+			connection->close();
+		*/} catch (...) {
+			//connection->setError("Unknown error receiving packet.");
+			connection->close();
+		}
+	}
 }
 
 bool SocketIONetworkService::hasConnectionWithId(short connId) const
 {
-    throw Exception("Not implemented", HalleyExceptions::Network);
+    return activeConnections.find(connId) != activeConnections.end();
 }
 
 std::shared_ptr<IConnection> SocketIONetworkService::doAccept()
 {
-	auto conn = std::make_shared<SocketIOConnection>(acceptSock, protocol, remoteEndpoint, *this);
-	activeConnections[acceptEndpoint.port] = conn;
+	std::shared_ptr<SocketIOConnection> conn;
+
+	if (protocol == NetworkProtocol::TCP) {
+		conn = std::make_shared<SocketIOConnection>(acceptSock, protocol, remoteEndpoint, *this);
+		activeConnections[acceptEndpoint.port] = conn;
+	} else {
+		conn = std::make_shared<SocketIOConnection>(sock, protocol, acceptEndpoint, *this);
+
+		const short id = getFreeConnectionId();
+
+		sendHandshakeAccept(*conn, id);
+		conn->onConnect(id);
+
+		activeConnections[id] = conn;
+	}
+
 	return conn;
 }
 
@@ -505,44 +700,46 @@ void SocketIONetworkService::doReject()
 
 }
 
-std::shared_ptr<SocketIOConnection> SocketIONetworkService::doAcceptConnection(Endpoint endPoint)
-{
-	throw Exception("Not implemented", HalleyExceptions::Network);
-}
-
-void SocketIONetworkService::doRejectConnection()
-{
-	throw Exception("Not implemented", HalleyExceptions::Network);
-}
-
 void SocketIONetworkService::setEndpointFromAddrInfo(Endpoint& endpoint, uint16_t port, const addrinfo* addr)
 {
-	if (!addr || addr->ai_addrlen > sizeof(Endpoint)) {
-		throw Exception("Invalid addrinfo", HalleyExceptions::Network);
+	endpoint = {};
+
+	if (addr->ai_family == AF_INET6) {
+		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr->ai_addr);
+		memcpy(&endpoint.ipv6, &addr6->sin6_addr, addr->ai_addrlen);
+	} else if (addr->ai_family == AF_INET) {
+		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr->ai_addr);
+		memcpy(&endpoint.ipv4.ip, &addr4->sin_addr, addr->ai_addrlen);
 	}
 
-	memcpy(&endpoint, addr->ai_addr, addr->ai_addrlen);
 	endpoint.port = port;
 }
 
 void SocketIONetworkService::setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, int addrLen)
 {
+	endpoint = {};
+
 	if (addr->sa_family == AF_INET6) {
 		Expects(addrLen == sizeof(sockaddr_in6));
 		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr);
 		endpoint.ipv6 = addr6->sin6_addr;
-		endpoint.port = addr6->sin6_port;
+		endpoint.port = ntohs(addr6->sin6_port);
 	} else if (addr->sa_family == AF_INET) {
 		Expects(addrLen == sizeof(sockaddr_in));
 		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr);
 		endpoint.ipv4.ip = addr4->sin_addr;
-		endpoint.port = addr4->sin_port;
-	} else {
+		endpoint.port = ntohs(addr4->sin_port);
+	} else if (addr->sa_family != AF_UNSPEC) {
 		throw Exception("Unexpected addr family", HalleyExceptions::Network);
 	}
 }
 
-void SocketIONetworkService::setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen)
+void Halley::setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen)
 {
-	throw Exception("Not implemented", HalleyExceptions::Network);
+	// TODO: IPv6
+	auto addr4 = reinterpret_cast<sockaddr_in *>(addr);
+	addr4->sin_family = AF_INET;
+	addr4->sin_port = htons(endpoint.port);
+	addr4->sin_addr = endpoint.ipv4.ip;
+	*addrLen = sizeof(sockaddr_in);
 }
