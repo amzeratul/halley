@@ -1042,13 +1042,13 @@ bool UIWidget::onDestroyRequested()
 	return true;
 }
 
-void UIWidget::sendEvent(UIEvent event, bool includeSelf) const
+void UIWidget::sendEvent(UIEvent event, bool includeSelf, bool originatesHere) const
 {
-	if (canSendEvents) {
+	if (canSendEvents || !originatesHere) {
 		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
 			eventHandler->queue(event, UIEventDirection::Up);
 		} else if (parent) {
-			parent->sendEvent(std::move(event), true);
+			parent->sendEvent(std::move(event), true, false);
 		}
 	}
 }

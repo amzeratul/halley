@@ -478,7 +478,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	const auto wheelDelta = mouse->getWheelMove();
 	const auto wheelDeltaDiscrete = mouse->getWheelMoveDiscrete();
 	if ((wheelDelta.squaredLength() > 0.00001f || wheelDeltaDiscrete != Vector2i()) && activeMouseTarget) {
-		activeMouseTarget->sendEvent(UIEvent(UIEventType::MouseWheel, activeMouseTarget->getId(), wheelDelta, wheelDeltaDiscrete.y, keyMods));
+		activeMouseTarget->sendEvent(UIEvent(UIEventType::MouseWheel, activeMouseTarget->getId(), wheelDelta, wheelDeltaDiscrete.y, keyMods), true, false);
 	}
 
 	// Mouse position
@@ -789,7 +789,7 @@ std::optional<AudioHandle> UIRoot::playSound(const String& eventName)
 	return {};
 }
 
-void UIRoot::sendEvent(UIEvent, bool includeSelf) const
+void UIRoot::sendEvent(UIEvent, bool includeSelf, bool originatesHere) const
 {
 	// Unhandled event
 }
