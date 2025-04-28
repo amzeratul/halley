@@ -148,6 +148,7 @@ set(USE_METAL 0)
 set(USE_SDL2 1)
 set(USE_SDL3 0)
 set(USE_ASIO 1)
+set(USE_SOCKETIO 0)
 set(USE_GDK 0)
 set(USE_XAUDIO2 0)
 set(USE_MEDIA_FOUNDATION 0)
@@ -177,6 +178,7 @@ if (_GAMING_DESKTOP OR _GAMING_XBOX)
 	set(USE_SDL3 1)
 	set(USE_OPENGL 0)
 	set(USE_ASIO 0)
+	set(USE_SOCKETIO 1)
 	set(USE_GDK 1)
 	set(USE_XAUDIO2 1)
 	set(USE_MEDIA_FOUNDATION 1)
@@ -221,6 +223,11 @@ endif()
 # Asio
 if (USE_ASIO)
 	add_definitions(-DWITH_ASIO)
+endif()
+
+# SocketIO
+if (USE_SOCKETIO)
+	add_definitions(-DWITH_SOCKETIO)
 endif()
 
 # OpenGL
@@ -433,6 +440,14 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
+if (USE_SOCKETIO)
+	set(HALLEY_PROJECT_LIBS
+		optimized halley-socketio
+		debug halley-socketio_d
+		${HALLEY_PROJECT_LIBS}
+		)
+endif()
+
 if (USE_OPENGL)
 set(HALLEY_PROJECT_LIBS
 	optimized halley-opengl
@@ -592,6 +607,9 @@ function(halleyProjectV2 name sources proj_resources targetDir)
 		endif ()
 		if (USE_ASIO)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-asio)
+		endif ()
+		if (USE_SOCKETIO)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-socketio)
 		endif ()
 		if (USE_DX11)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-dx11)

@@ -16,6 +16,7 @@ void initSDL3SystemPlugin(IPluginRegistry& registry, std::optional<String> crypt
 void initSDL3AudioPlugin(IPluginRegistry& registry);
 void initSDL3InputPlugin(IPluginRegistry& registry);
 void initAsioPlugin(IPluginRegistry &registry);
+void initSocketIOPlugin(IPluginRegistry& registry);
 void initDX11Plugin(IPluginRegistry &registry);
 void initDX12Plugin(IPluginRegistry& registry);
 void initMetalPlugin(IPluginRegistry &registry);
@@ -41,7 +42,12 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	initSDLInputPlugin(registry, true);
 #endif
 
+#if defined(WITH_ASIO)
 	initAsioPlugin(registry);
+#elif defined(WITH_SOCKETIO)
+	initSocketIOPlugin(registry);
+#endif
+
 	initHTTPLibPlugin(registry);
 
 #if defined(WITH_DX12) && defined(WITH_DX11)
