@@ -208,14 +208,15 @@ void SocketIOConnection::terminateConnection()
 
 String SocketIOConnection::getRemoteAddress() const
 {
-	sockaddr addr = {};
-	int addrLen;
-	setSockAddrFromEndpoint(remote, &addr, &addrLen);
+	sockaddr_storage addrStorage = {};
+	auto addr = reinterpret_cast<sockaddr*>(&addrStorage);
+	int addrLen = remote.version == IPVersion::IPv6 ? sizeof(sockaddr_in6) : sizeof(sockaddr_in);
+	setSockAddrFromEndpoint(remote, addr, &addrLen);
 
 	char node[NI_MAXHOST] = {};
 	char serv[NI_MAXSERV] = {};
 
-	const int err = getnameinfo(&addr, addrLen, node, sizeof(node), serv, sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV);
+	const int err = getnameinfo(addr, addrLen, node, sizeof(node), serv, sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV);
 
 	if (err == 0) {
 		return String(node) + ":" + String(serv);
@@ -249,7 +250,7 @@ void SocketIOConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
 
 	sockaddr_storage addrStore = {};
 	sockaddr* addr = reinterpret_cast<sockaddr *>(&addrStore);
-	int addrLen = sizeof(addrStore);
+	int addrLen = remote.version == IPVersion::IPv6 ? sizeof(sockaddr_in6) : sizeof(sockaddr_in);
 	setSockAddrFromEndpoint(remote, addr, &addrLen);
 
 	const int bytesSent = ::sendto(sock, reinterpret_cast<const char *>(packet.data()), len, 0, addr, addrLen);
