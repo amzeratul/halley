@@ -111,6 +111,9 @@ namespace Halley {
 
 		virtual Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const;
 
+		void setMaxItems(std::optional<int> maxItems);
+		std::optional<int> getMaxItems() const;
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -158,6 +161,8 @@ namespace Halley {
 
 		bool requiresSelection = true;
 
+		std::optional<int> maxItems;
+
 		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
 		void onItemClickReleased(UIListItem& item, int button, KeyMods keyMods);
 		SelectionMode getMode(KeyMods mods, int button) const;
@@ -175,6 +180,9 @@ namespace Halley {
 		void notifyNewItemSelected();
 
 		void updateShowSelection();
+
+		UIStyle getNextItemStyle() const;
+		UIStyle getNextItemStyle(const UIStyle& style) const;
 	};
 
 	class UIListItem : public UIClickable {
