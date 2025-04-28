@@ -2,10 +2,6 @@
 
 #include "halley/net/connection/network_packet.h"
 
-#ifdef _WIN32
-#pragma comment(lib, "ws2_32.lib")
-#endif
-
 using namespace Halley;
 
 SocketIOConnection::SocketIOConnection(Socket socket, NetworkProtocol protocol, Endpoint remote, INetworkServiceStatsListener& statsListener)
@@ -27,7 +23,8 @@ SocketIOConnection::~SocketIOConnection()
 void SocketIOConnection::close()
 {
 	if (status != ConnectionStatus::Closed) {
-		if (sock >= 0) {
+		// UDP connections do not "own" the socket, so don't close it here.
+		if (sock >= 0 && protocol == NetworkProtocol::TCP) {
 #ifdef _WIN32
 			closesocket(sock);
 #else
@@ -189,9 +186,19 @@ void SocketIOConnection::tryReceive()
 
 bool SocketIOConnection::matchesEndpoint(const Endpoint& remoteEndpoint) const
 {
-	// TODO: IPv6
-	return (remote.port == remoteEndpoint.port) &&
-		memcmp(&remote.ipv4.ip, &remoteEndpoint.ipv4.ip, sizeof(in_addr)) == 0;
+	if (remote.version != remoteEndpoint.version) {
+		return false;
+	}
+
+	if (remote.port != remoteEndpoint.port) {
+		return false;
+	}
+
+	if (remote.version == IPVersion::IPv6) {
+		return memcmp(&remote.addr.v6, &remoteEndpoint.addr.v6, sizeof(in6_addr)) == 0;
+	} else {
+		return memcmp(&remote.addr.v4, &remoteEndpoint.addr.v4, sizeof(in_addr)) == 0;
+	}
 }
 
 void SocketIOConnection::terminateConnection()
@@ -201,16 +208,14 @@ void SocketIOConnection::terminateConnection()
 
 String SocketIOConnection::getRemoteAddress() const
 {
-	// TODO: IPv6
-	sockaddr_in addr = {};
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(remote.port);
-	addr.sin_addr = remote.ipv4.ip;
+	sockaddr addr = {};
+	int addrLen;
+	setSockAddrFromEndpoint(remote, &addr, &addrLen);
 
 	char node[NI_MAXHOST] = {};
 	char serv[NI_MAXSERV] = {};
 
-	int err = getnameinfo(reinterpret_cast<const sockaddr*>(&addr), sizeof(addr), node, sizeof(node), serv, sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV);
+	const int err = getnameinfo(&addr, addrLen, node, sizeof(node), serv, sizeof(serv), NI_NUMERICHOST | NI_NUMERICSERV);
 
 	if (err == 0) {
 		return String(node) + ":" + String(serv);
@@ -221,7 +226,7 @@ String SocketIOConnection::getRemoteAddress() const
 
 size_t SocketIOConnection::getMaxUnreliablePacketSize() const
 {
-	return 1400;
+	return 1384;
 }
 
 void SocketIOConnection::onConnect(short connId)
@@ -242,14 +247,16 @@ void SocketIOConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
 
 	const int len = static_cast<int>(packet.size_bytes());
 
-	sockaddr addr = {};
-	int addrLen = sizeof(addr);
-	setSockAddrFromEndpoint(remote, &addr, &addrLen);
+	sockaddr_storage addrStore = {};
+	sockaddr* addr = reinterpret_cast<sockaddr *>(&addrStore);
+	int addrLen = sizeof(addrStore);
+	setSockAddrFromEndpoint(remote, addr, &addrLen);
 
-	const int bytesSent = ::sendto(sock, reinterpret_cast<const char *>(packet.data()), len, 0, &addr, addrLen);
+	const int bytesSent = ::sendto(sock, reinterpret_cast<const char *>(packet.data()), len, 0, addr, addrLen);
 
 	if (bytesSent == SOCKET_ERROR || bytesSent != len) {
-		Logger::logError("Error sending data on UDP socket");
+		int err = WSAGetLastError();
+		Logger::logError("Error sending data on UDP socket: " + toString(err));
 		close();
 		return;
 	}
@@ -278,10 +285,8 @@ SocketIONetworkService::SocketIONetworkService(int port, NetworkProtocol protoco
 {
 	Expects(port == 0 || port > 1024);
 	Expects(port < 65536);
-
-	localEndpoint.port = port;
-
-	Expects(version == IPVersion::IPv4); // No IPv6 support yet.
+	localEndpoint.port = static_cast<uint16_t>(port);
+	localEndpoint.version = version;
 }
 
 SocketIONetworkService::~SocketIONetworkService()
@@ -376,15 +381,15 @@ void SocketIONetworkService::stopListening()
 	acceptCallback = {};
 	startedListening = false;
 
-	if (protocol == NetworkProtocol::TCP) {
-		if (sock >= 0) {
+	// For TCP services, this closes the listen socket.
+	// For UDP, this closes the one and only DGRAM socket.
+	if (sock >= 0) {
 #ifdef _WIN32
-			closesocket(sock);
+		closesocket(sock);
 #else
-			close(sock);
+		close(sock);
 #endif
-			sock = -1;
-		}
+		sock = -1;
 	}
 }
 
@@ -448,14 +453,15 @@ void SocketIONetworkService::tryListen()
 
 std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& address)
 {
-	const auto splitAddr = address.split(':');
-	const auto& ip = splitAddr.at(0);
-	const auto& portAsString = splitAddr.at(1);
+	size_t lastDelim = address.find_last_of(':');
+	Ensures(lastDelim != String::npos);
+	const auto ip = address.substr(0, lastDelim);
+	const auto& portAsString = address.substr(lastDelim + 1);
 	const uint16_t port = portAsString.toInteger();
 
 	// Figure out socket parameters for connecting to remote address.
 	addrinfo hint = {};
-	hint.ai_flags = 0; // AI_PASSIVE?
+	hint.ai_flags = 0;
 	hint.ai_family = AF_UNSPEC;
 	hint.ai_socktype = protocol == NetworkProtocol::TCP ? SOCK_STREAM : SOCK_DGRAM;
 
@@ -466,7 +472,7 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 	}
 
 	// Create the local socket.
-#ifdef _WIN32
+#if defined(_WIN32) || defined(WITH_GDK)
 	const SOCKET s = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
 	if (s == INVALID_SOCKET) {
@@ -477,6 +483,13 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 #else
 	throw Exception("Not implemented", HalleyExceptions::Network);
 #endif
+
+	if (result->ai_family == AF_INET6) {
+		int ipv6only = 1;
+		if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&ipv6only), sizeof(ipv6only)) == SOCKET_ERROR) {
+			throw Exception("Failed to set IPv6-only on local socket", HalleyExceptions::Network);
+		}
+	}
 
 	// TCP_NODELAY
 	if (protocol == NetworkProtocol::TCP) {
@@ -518,11 +531,11 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 	freeaddrinfo(result);
 
 	// Obtain the local address
-	sockaddr localAddr = {};
-	int localAddrLen = sizeof(localAddr);
-	if (getsockname(sock, &localAddr, &localAddrLen) == 0) {
-		Expects(localEndpoint.port == 0);
-		setEndpointFromSockAddr(localEndpoint, &localAddr, localAddrLen);
+	sockaddr_storage localAddrStorage = {};
+	auto localAddr = reinterpret_cast<sockaddr*>(&localAddrStorage);
+	int localAddrLen = localEndpoint.version == IPVersion::IPv6 ? sizeof(sockaddr_in6) : sizeof(sockaddr_in);
+	if (getsockname(sock, localAddr, &localAddrLen) == 0) {
+		setEndpointFromSockAddr(localEndpoint, localAddr, localAddrLen);
 	} else {
 		Logger::logError("Failed to get local socket name");
 	}
@@ -548,22 +561,23 @@ void SocketIONetworkService::tryReceiveUnreliable()
 	std::array<char, 2048> buffer;
 
 	for (;;) {
-		sockaddr addr = {};
-		int addrLen = sizeof(addr);
+		sockaddr_storage addrStorage = {};
+		auto addr = reinterpret_cast<sockaddr*>(&addrStorage);
+		int addrLen = localEndpoint.version == IPVersion::IPv6 ? sizeof(sockaddr_in6) : sizeof(sockaddr_in);
 
-		const int bytesRecv = ::recvfrom(sock, buffer.data(), (int) buffer.size(), 0, &addr, &addrLen);
+		const int bytesRecv = ::recvfrom(sock, buffer.data(), (int) buffer.size(), 0, addr, &addrLen);
 
 		if (bytesRecv == 0) {
 			break;
 		}
 
 		Endpoint remote = {};
-		setEndpointFromSockAddr(remote, &addr, addrLen);
+		setEndpointFromSockAddr(remote, addr, addrLen);
 
-		std::shared_ptr<SocketIOConnection> conn;
+		short activeConnId = -1;
 		for (const auto& active : activeConnections) {
-			if (active.second->matchesEndpoint(remote)) {
-				conn = active.second;
+			if (active.second->getStatus() == ConnectionStatus::Connected && active.second->matchesEndpoint(remote)) {
+				activeConnId = active.first;
 				break;
 			}
 		}
@@ -577,10 +591,11 @@ void SocketIONetworkService::tryReceiveUnreliable()
 
 			if (err == WSAECONNRESET) {
 				// Connection closed by remote host.
-				if (conn != nullptr) {
-					conn->close();
-					break;
+				if (activeConnId >= 0) {
+					activeConnections[activeConnId]->close();
+					Logger::logWarning("Connection " + toString(activeConnId) + " reset by remote host");
 				}
+				break;
 			}
 
 			// TODO: might need more checks by error code
@@ -590,8 +605,8 @@ void SocketIONetworkService::tryReceiveUnreliable()
 
 		auto packet = gsl::span(reinterpret_cast<gsl::byte *>(buffer.data()), bytesRecv);
 
-		if (conn != nullptr && conn->getStatus() == ConnectionStatus::Connected) {
-			conn->receiveUnreliablePacket(packet);
+		if (activeConnId >= 0) {
+			activeConnections[activeConnId]->receiveUnreliablePacket(packet);
 		} else {
 			receivePacket(remote, packet);
 		}
@@ -703,43 +718,56 @@ void SocketIONetworkService::doReject()
 void SocketIONetworkService::setEndpointFromAddrInfo(Endpoint& endpoint, uint16_t port, const addrinfo* addr)
 {
 	endpoint = {};
-
-	if (addr->ai_family == AF_INET6) {
-		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr->ai_addr);
-		memcpy(&endpoint.ipv6, &addr6->sin6_addr, addr->ai_addrlen);
-	} else if (addr->ai_family == AF_INET) {
-		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr->ai_addr);
-		memcpy(&endpoint.ipv4.ip, &addr4->sin_addr, addr->ai_addrlen);
-	}
-
+	endpoint.version = addr->ai_family == AF_INET6 ? IPVersion::IPv6 : IPVersion::IPv4;
 	endpoint.port = port;
+
+	if (endpoint.version == IPVersion::IPv6) {
+		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr->ai_addr);
+		endpoint.addr.v6 = addr6->sin6_addr;
+	} else {
+		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr->ai_addr);
+		endpoint.addr.v4 = addr4->sin_addr;
+	}
 }
 
 void SocketIONetworkService::setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, int addrLen)
 {
 	endpoint = {};
+	endpoint.version = addr->sa_family == AF_INET6 ? IPVersion::IPv6 : IPVersion::IPv4;
 
-	if (addr->sa_family == AF_INET6) {
-		Expects(addrLen == sizeof(sockaddr_in6));
+	if (endpoint.version == IPVersion::IPv6) {
+		Expects(addrLen >= sizeof(sockaddr_in6));
 		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr);
-		endpoint.ipv6 = addr6->sin6_addr;
+		endpoint.addr.v6 = addr6->sin6_addr;
 		endpoint.port = ntohs(addr6->sin6_port);
-	} else if (addr->sa_family == AF_INET) {
-		Expects(addrLen == sizeof(sockaddr_in));
+	} else {
+		Expects(addrLen >= sizeof(sockaddr_in));
 		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr);
-		endpoint.ipv4.ip = addr4->sin_addr;
+		endpoint.addr.v4 = addr4->sin_addr;
 		endpoint.port = ntohs(addr4->sin_port);
-	} else if (addr->sa_family != AF_UNSPEC) {
-		throw Exception("Unexpected addr family", HalleyExceptions::Network);
 	}
+}
+
+bool SocketIONetworkService::selectAdapterForAddress(const sockaddr* hint, sockaddr* addr, int* addrLen)
+{
+	return false;
 }
 
 void Halley::setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen)
 {
-	// TODO: IPv6
-	auto addr4 = reinterpret_cast<sockaddr_in *>(addr);
-	addr4->sin_family = AF_INET;
-	addr4->sin_port = htons(endpoint.port);
-	addr4->sin_addr = endpoint.ipv4.ip;
-	*addrLen = sizeof(sockaddr_in);
+	if (endpoint.version == IPVersion::IPv6) {
+		Expects(*addrLen >= sizeof(sockaddr_in6));
+		auto addr6 = reinterpret_cast<sockaddr_in6*>(addr);
+		addr6->sin6_family = AF_INET6;
+		addr6->sin6_port = htons(endpoint.port);
+		addr6->sin6_addr = endpoint.addr.v6;
+		*addrLen = sizeof(sockaddr_in6);
+	} else {
+		Expects(*addrLen >= sizeof(sockaddr_in));
+		auto addr4 = reinterpret_cast<sockaddr_in*>(addr);
+		addr4->sin_family = AF_INET;
+		addr4->sin_port = htons(endpoint.port);
+		addr4->sin_addr = endpoint.addr.v4;
+		*addrLen = sizeof(sockaddr_in);
+	}
 }

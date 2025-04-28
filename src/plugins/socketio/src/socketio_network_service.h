@@ -3,7 +3,13 @@
 #include "halley/api/network_api.h"
 #include "halley/net/connection/network_service.h"
 
-#ifdef _WIN32
+#if defined(WITH_GDK)
+#include <Windows.h>
+#include <winhttp.h>
+#endif
+
+#if defined(_WIN32)
+#include <WinSock2.h>
 #include <ws2tcpip.h>
 #endif
 
@@ -11,17 +17,12 @@ namespace Halley
 {
 	struct Endpoint
 	{
-		union
-		{
-			in6_addr ipv6;
-			struct
-			{
-				uint8_t zeros[10];
-				uint16_t ones = 0xffff;
-				in_addr ip;
-			} ipv4;
-		};
-		uint16_t port;
+		union {
+			in6_addr v6;
+			in_addr v4;
+		} addr;
+		uint16_t port; // stored in HOST byte order (little endian)
+		IPVersion version;
 	};
 
 	using Socket = int64_t;
@@ -116,6 +117,8 @@ namespace Halley
 
 		static void setEndpointFromAddrInfo(Endpoint& endpoint, uint16_t port, const addrinfo* addr);
 		static void setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, int addrLen);
+
+		static bool selectAdapterForAddress(const sockaddr* hint, sockaddr* addr, int* addrLen);
 	};
 
 	extern void setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen);

@@ -236,7 +236,7 @@ namespace Halley
 		virtual void setInviteExtraData(const Bytes& data) {}
 
 		virtual std::shared_ptr<NetworkService> createNetworkService(uint16_t port) { return {}; }
-
+		virtual uint16_t getPreferredLocalNetworkPort() { return 0; }
 		
 		///////////////////////
 		// Player info/profile

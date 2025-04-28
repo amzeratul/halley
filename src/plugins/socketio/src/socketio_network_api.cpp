@@ -2,6 +2,10 @@
 
 #include "socketio_network_service.h"
 
+#if defined(_WIN32) && !defined(WITH_GDK)
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 using namespace Halley;
 
 std::unique_ptr<NetworkService> SocketIONetworkAPI::createService(NetworkProtocol protocol, int port)

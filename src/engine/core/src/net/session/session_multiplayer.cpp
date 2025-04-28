@@ -15,7 +15,18 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 {
 	playerName = options.clientPlayerName.value_or(api.platform->getPlayerName());
 
-	service = api.platform->createNetworkService(host ? 6060 : 0);
+	uint16_t port = api.platform->getPreferredLocalNetworkPort();
+
+	if (port == 0) {
+		port = host ? 6060 : 0;
+	}
+
+	service = api.network->createService(NetworkProtocol::UDP, port);
+
+	if (!service) {
+		service = api.platform->createNetworkService(port);
+	}
+
 	if (!service) {
 		throw Exception("Unable to initialize multiplayer session: platform has no network service implementation.", 0);
 	}
