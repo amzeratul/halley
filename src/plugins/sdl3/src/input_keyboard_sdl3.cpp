@@ -98,11 +98,17 @@ void InputKeyboardSDL3::update()
 void InputKeyboardSDL3::removeCapture(ITextInputCapture* capture)
 {
 	InputKeyboard::removeCapture(capture);
-	SDL_StopTextInput(system.getWindow(0)->getSDLWindow());
+
+	Concurrent::execute(Executors::getMainRenderThread(), [=] {
+		SDL_StopTextInput(system.getWindow(0)->getSDLWindow());
+	});
 }
 
 std::unique_ptr<ITextInputCapture> InputKeyboardSDL3::makeTextInputCapture()
 {
-	SDL_StartTextInput(system.getWindow(0)->getSDLWindow());
+	Concurrent::execute(Executors::getMainRenderThread(), [=] {
+		SDL_StartTextInput(system.getWindow(0)->getSDLWindow());
+	});
+
 	return InputKeyboard::makeTextInputCapture();
 }
