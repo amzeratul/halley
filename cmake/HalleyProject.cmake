@@ -421,13 +421,14 @@ if (USE_SDL3)
 		)
 elseif (USE_SDL2)
 	set(HALLEY_PROJECT_EXTERNAL_LIBS
-		${SDL2_LIBRARIES}
 		${OPENGL_LIBRARIES}
 		${HALLEY_PROJECT_EXTERNAL_LIBS}
 		)
 	set(HALLEY_PROJECT_LIBS
 		optimized halley-sdl
 		debug halley-sdl_d
+		optimized ${SDL2_LIBRARIES}
+		debug ${SDL2_LIBRARIES}
 		${HALLEY_PROJECT_LIBS}
 		)
 endif ()
