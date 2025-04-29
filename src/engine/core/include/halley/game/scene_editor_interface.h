@@ -453,6 +453,8 @@ namespace Halley {
 		virtual const String& getProjectName() const = 0;
 		virtual const String& getBinName() const = 0;
 
+		virtual const Path& getHalleyRootPath() const = 0;
+
 		virtual const Path& getRootPath() const = 0;
 		virtual Path getAssetsSrcPath() const = 0;
 

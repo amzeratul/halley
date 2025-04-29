@@ -14,6 +14,7 @@ namespace Halley {
         ~OSGDK() override;
 
         ComputerData getComputerData() override;
+        String getComputerName() override;
         String getUserDataDir() override;
 
         void openURL(const String& url) override;

@@ -74,7 +74,7 @@ namespace Halley
 		gsl::span<std::unique_ptr<IHalleyEditorPlugin>> getEditorPlugins();
 		IHalleyEditorPlugin* getEditorPluginForBuildPlatform(GamePlatform platform) const;
 
-		const Path& getHalleyRootPath() const;
+		const Path& getHalleyRootPath() const override;
 		
 		const Path& getRootPath() const override;		
 		Path getUnpackedAssetsPath() const;

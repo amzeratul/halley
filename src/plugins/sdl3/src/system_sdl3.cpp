@@ -273,6 +273,11 @@ void SystemSDL3::registerGlobalHotkey(KeyCode key, KeyMods mods, std::function<v
 	globalHotkeyCallbacks.push_back(std::move(callback));
 }
 
+String SystemSDL3::getDeviceName() const
+{
+	return OS::get().getComputerName();
+}
+
 std::unique_ptr<ResourceDataReader> SystemSDL3::getDataReader(String path, int64_t start, int64_t end)
 {
 	return SDL3RWOps::fromPath(path, start, end);

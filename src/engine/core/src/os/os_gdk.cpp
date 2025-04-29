@@ -55,6 +55,17 @@ ComputerData OSGDK::getComputerData()
 	return computerData;
 }
 
+String OSGDK::getComputerName()
+{
+	char buffer[1024];
+	DWORD n = sizeof(buffer) - 1;
+	if (GetComputerNameEx(ComputerNamePhysicalDnsHostname, buffer, &n)) {
+		return {buffer, n};
+	} else {
+		return "Unknown";
+	}
+}
+
 String OSGDK::getUserDataDir()
 {
     /*
