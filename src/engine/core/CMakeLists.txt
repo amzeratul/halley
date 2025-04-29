@@ -1,6 +1,6 @@
 project (halley-engine)
 
-include_directories(${Boost_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
+include_directories(${OPENSSL_INCLUDE_DIR} "include" "include/halley/core" "../../../shared_gen/cpp"  "../../contrib/libogg/include" "../../contrib/libogg/lib" "../../contrib/libvorbis/include" "../../contrib/libvorbis/lib"  "../../contrib/yaml-cpp/include" "../../contrib/lua/src")
 
 set(SOURCES
         "src/api/halley_api.cpp"

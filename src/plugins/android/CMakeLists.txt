@@ -1,6 +1,6 @@
 project (halley-android)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include" ${ANDROID_NDK}/sources/android/native_app_glue)
+include_directories("../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include" ${ANDROID_NDK}/sources/android/native_app_glue)
 
 set(SOURCES
     "src/android_system.cpp"

@@ -1,6 +1,6 @@
 project (halley-mf)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include")
+include_directories("../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include")
 
 set(SOURCES
     "src/mf_plugin.cpp"

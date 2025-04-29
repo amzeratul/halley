@@ -1,7 +1,6 @@
 project (halley-tools)
 
 include_directories(
-    ${BOOST_INCLUDE_DIR}
     ${FREETYPE_INCLUDE_DIRS}
     ${ShaderConductor_INCLUDE_DIR}
     "include"

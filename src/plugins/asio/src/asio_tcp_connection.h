@@ -3,8 +3,6 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4834)
 #endif
-#define BOOST_SYSTEM_NO_DEPRECATED
-#define BOOST_ERROR_CODE_HEADER_ONLY
 #include <asio.hpp>
 #include "halley/net/connection/iconnection.h"
 #include "halley/utils/utils.h"

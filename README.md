@@ -71,12 +71,10 @@ The following platforms are supported:
 
 ### Library dependencies
 * Engine:
-  * Boost 1.72.0 (header only)
   * OpenGL [optional]
   * SDL 2.0.2 (2.0.7 recommended) [optional]
   * Windows 10 SDK [optional]
 * Also required if building Tools:
-  * Boost 1.72.0 libraries: filesystem, system
   * Freetype 2.6.3
   * yaml-cpp 0.5.3
 
@@ -87,7 +85,7 @@ The following platforms are supported:
      ```
      cmake -DCMAKE_INCLUDE_PATH=path/to/headers \
            -DCMAKE_LIBRARY_PATH=path/to/libs \
-           -DBOOST_ROOT=path/to/boost ..
+           ..
      ```
   * Engine only:
     ```

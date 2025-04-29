@@ -1,6 +1,6 @@
 project (halley-avf)
 
-include_directories(${BOOST_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include")
+include_directories("../../engine/utils/include" "../../engine/core/include" "../../engine/audio/include")
 
 set(SOURCES
 	"src/avf_plugin.cpp"

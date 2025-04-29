@@ -1,6 +1,6 @@
 project (halley-cmd)
 
-include_directories(${BOOST_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIR} "../tools/include" "../../engine/utils/include" "../../engine/core/include" "../../contrib/yaml-cpp/include")
+include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include" "../../engine/utils/include" "../../engine/core/include" "../../contrib/yaml-cpp/include")
 link_directories(${CMAKE_HOME_DIRECTORY}/lib)
 
 set(SOURCES "src/main.cpp")

@@ -1,6 +1,6 @@
 project (halley-dx12)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories("../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
         "src/dx12_descriptor_pool.cpp"

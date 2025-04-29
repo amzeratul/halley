@@ -1,7 +1,6 @@
 project (halley-ecs-standard)
 
 include_directories(
-    ${Boost_INCLUDE_DIR}
     ${HALLEY_PATH}/include
     ${HALLEY_PATH}/shared_gen/cpp
     "../../engine/utils/include"

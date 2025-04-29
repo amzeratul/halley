@@ -1,6 +1,6 @@
 project (halley-xaudio2)
 
-include_directories(${Boost_INCLUDE_DIR} "../../engine/utils/include" "../../engine/core/include")
+include_directories("../../engine/utils/include" "../../engine/core/include")
 
 set(SOURCES
     "src/xaudio2_audio_output.cpp"

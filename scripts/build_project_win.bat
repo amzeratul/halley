@@ -24,8 +24,6 @@ cmake -A x64 ^
     -DBUILD_HALLEY_TESTS=0 ^
     -DCMAKE_INCLUDE_PATH="lib\include" ^
     -DCMAKE_LIBRARY_PATH="lib\windows64" ^
-    -DBOOST_ROOT="lib\boost" ^
-    -DBoost_USE_STATIC_LIBS=1 ^
     .. || exit /b 1
 )
 
