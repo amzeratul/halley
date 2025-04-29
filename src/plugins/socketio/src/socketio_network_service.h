@@ -44,10 +44,7 @@ namespace Halley
 		bool receive(InboundNetworkPacket& packet) override;
 
 		[[nodiscard]] bool matchesEndpoint(const Endpoint& remoteEndpoint) const;
-
-		void terminateConnection();
 		[[nodiscard]] short getConnectionId() const { return connectionId; }
-
 		[[nodiscard]] String getRemoteAddress() const override;
 
 		[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
@@ -74,11 +71,14 @@ namespace Halley
 
 		mutable std::mutex mutex;
 
+		String disconnectReason;
+
 		void trySend();
 		void tryReceive();
+		void disconnect(const String& reason);
 	};
 
-	class SocketIONetworkService : public NetworkServiceWithStats, public NetworkService::Acceptor
+	class SocketIONetworkService : public NetworkServiceWithStats
 	{
 	public:
 		explicit SocketIONetworkService(int port, NetworkProtocol protocol, IPVersion version);
@@ -92,6 +92,19 @@ namespace Halley
 		std::shared_ptr<IConnection> connect(const String& address) override;
 
 	private:
+		class SocketAcceptor : public Acceptor
+		{
+		public:
+			explicit SocketAcceptor(SocketIONetworkService& service, Socket socket, const Endpoint& endpoint);
+			std::shared_ptr<IConnection> doAccept() override;
+			void doReject() override;
+
+		private:
+			SocketIONetworkService& service;
+			Socket sock;
+			Endpoint endpoint;
+		};
+
 		Socket sock = -1;
 		const NetworkProtocol protocol;
 
@@ -101,8 +114,6 @@ namespace Halley
 		HashMap<short, std::shared_ptr<SocketIOConnection>> activeConnections;
 
 		AcceptCallback acceptCallback = {};
-		Socket acceptSock = -1;
-		Endpoint acceptEndpoint = {};
 		bool startedListening = false;
 
 		void tryListen();
@@ -112,15 +123,8 @@ namespace Halley
 
         [[nodiscard]] bool hasConnectionWithId(short connId) const override;
 
-		std::shared_ptr<IConnection> doAccept() override;
-		void doReject() override;
-
-		static void setEndpointFromAddrInfo(Endpoint& endpoint, uint16_t port, const addrinfo* addr);
-		static void setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, int addrLen);
-
-		static bool selectAdapterForAddress(const sockaddr* hint, sockaddr* addr, int* addrLen);
+		std::shared_ptr<SocketIOConnection> doAcceptConnection(Socket socket, const Endpoint& endpoint);
+		void doRejectConnection();
 	};
-
-	extern void setSockAddrFromEndpoint(const Endpoint& endpoint, sockaddr* addr, int* addrLen);
 
 }

@@ -26,7 +26,7 @@ namespace Halley
         String getAccountId() override;
 
         bool canProvideAuthToken() const override;
-        Future<AuthTokenResult> getAuthToken(const Halley::AuthTokenParameters& parameters) override;
+        Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) override;
 
         std::shared_ptr<NetworkService> createNetworkService(uint16_t port) override;
 
