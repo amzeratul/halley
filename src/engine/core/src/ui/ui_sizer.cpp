@@ -343,6 +343,14 @@ bool UISizer::isActive() const
 	return false;
 }
 
+void UISizer::setColumns(int nCols)
+{
+	if (gridProportions) {
+		gridProportions->nColumns = nCols;
+		gridProportions->columnProportions.resize(gridProportions->nColumns, 0);
+	}
+}
+
 void UISizer::setColumnProportions(const Vector<float>& values)
 {
 	if (gridProportions) {

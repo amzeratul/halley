@@ -184,6 +184,16 @@ Vector2f UIList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) cons
 	return pos;
 }
 
+void UIList::setMaxItems(std::optional<int> maxItems)
+{
+	this->maxItems = maxItems;
+}
+
+std::optional<int> UIList::getMaxItems() const
+{
+	return maxItems;
+}
+
 void UIList::setItemText(int optionId, const String& text)
 {
 	if (optionId < 0 || optionId >= static_cast<int>(getNumberOfItems())) {
@@ -213,7 +223,7 @@ std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedStrin
 std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, LocalisedString label, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
 {
 	const auto& style = styles.at(0);
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, getNextItemStyle(), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
@@ -224,7 +234,7 @@ std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, Localis
 std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedString label, Sprite icon, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
 {
 	const auto& style = styles.at(0);
-	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, getNextItemStyle(), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
@@ -378,7 +388,7 @@ void UIList::notifyNewItemSelected()
 std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	const auto& itemStyle = styleOverride ? *styleOverride : styles.at(0);
-	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
+	auto item = std::make_shared<UIListItem>(id, *this, getNextItemStyle(itemStyle), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(element, proportion, border, fillFlags);
 	return addItem(item, Vector4f{}, fillFlags);
 }
@@ -488,6 +498,11 @@ void UIList::filterOptions(const String& filter)
 
 std::shared_ptr<UIListItem> UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fillFlags)
 {
+	if (maxItems == getNumberOfItems()) {
+		Logger::logError("Attempting to add more items to UIList \"" + getId() + "\" than maxItems");
+		return {};
+	}
+
 	add(item, uniformSizedItems ? 1.0f : 0.0f, border, fillFlags);
 	items.push_back(item);
 
@@ -728,6 +743,24 @@ void UIList::updateShowSelection()
 	if (item) {
 		item->refreshSelectionState();
 	}
+}
+
+UIStyle UIList::getNextItemStyle() const
+{
+	return getNextItemStyle(styles.at(0));
+}
+
+UIStyle UIList::getNextItemStyle(const UIStyle& style) const
+{
+	const auto nItems = getNumberOfItems();
+	if (nItems == 0 && style.hasSubStyle("itemFirst")) {
+		return style.getSubStyle("itemFirst");
+	}
+	if (nItems + 1 == maxItems && style.hasSubStyle("itemLast")) {
+		return style.getSubStyle("itemLast");
+	}
+
+	return style.getSubStyle("item");
 }
 
 bool UIList::ignoreClip() const
