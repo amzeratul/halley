@@ -146,6 +146,11 @@ void DevConClient::update(Time t)
 		}
 		receivingProfilerData = shouldHaveProfilerData;
 	}
+
+	if (queue && !queue->isConnected()) {
+		setConnection({});
+		Logger::logDev("DevConClient: connection lost");
+	}
 }
 
 void DevConClient::onReceiveMessage(const DevCon::ReloadAssetsMsg& msg)
