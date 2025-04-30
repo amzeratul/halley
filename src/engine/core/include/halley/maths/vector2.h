@@ -204,6 +204,11 @@ namespace Halley {
 			return *this - dot(param)*param;
 		}
 
+		[[nodiscard]] constexpr T productOfElements() const
+		{
+			return x * y;
+		}
+
 		[[nodiscard]] String toString() const
 		{
 			return String("(") + x + ", " + y + ")";

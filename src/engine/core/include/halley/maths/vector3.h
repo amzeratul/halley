@@ -148,6 +148,11 @@ namespace Halley {
 			*this = unit();
 		}
 
+		[[nodiscard]] constexpr T productOfElements() const
+		{
+			return x * y * z;
+		}
+
 		String toString() const
 		{
 			return String("(") + x + ", " + y + ", " + z + ")";

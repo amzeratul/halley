@@ -177,6 +177,11 @@ namespace Halley {
 			*this = unit();
 		}
 
+		[[nodiscard]] constexpr T productOfElements() const
+		{
+			return x * y * z * w;
+		}
+
 		// Dot product
 		constexpr inline T dot (Vector4D param) const
 		{
