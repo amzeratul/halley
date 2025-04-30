@@ -168,6 +168,11 @@ std::shared_ptr<UIWidget> UIParent::tryGetAncestorWidget(const String& id)
 	return {};
 }
 
+int UIParent::getAbsoluteChildLayerAdjustment() const
+{
+	return 0;
+}
+
 std::shared_ptr<UIWidget> UIParent::doGetWidget(const String& id) const
 {
 	auto lists = { children, childrenWaiting };

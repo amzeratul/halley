@@ -1344,6 +1344,14 @@ int UIWidget::getChildLayerAdjustment() const
 	return childLayerAdjustment;
 }
 
+int UIWidget::getAbsoluteChildLayerAdjustment() const
+{
+	if (parent) {
+		return parent->getAbsoluteChildLayerAdjustment() + childLayerAdjustment;
+	}
+	return childLayerAdjustment;
+}
+
 void UIWidget::setNoClipChildren(bool noClip)
 {
 	dontClipChildren = noClip;

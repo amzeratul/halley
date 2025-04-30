@@ -171,6 +171,7 @@ namespace Halley {
 
 		void setChildLayerAdjustment(int delta);
 		int getChildLayerAdjustment() const;
+		int getAbsoluteChildLayerAdjustment() const override;
 		void setNoClipChildren(bool noClip);
 		bool getNoClipChildren() const;
 
