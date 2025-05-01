@@ -512,8 +512,7 @@ void UIRoot::mouseOverNext(bool forward)
 	}
 
 	size_t nextIdx = 0;
-	auto current = currentMouseOver.lock();
-	if (current) {
+	if (auto current = currentMouseOver.lock()) {
 		auto i = std::find(widgets.begin(), widgets.end(), current);
 		if (i != widgets.end()) {
 			nextIdx = ((i - widgets.begin()) + widgets.size() + (forward ? 1 : -1)) % widgets.size();
@@ -544,7 +543,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bo
 	const auto& cs = getChildren();
 	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
 		const auto& curRootWidget = cs[i];
-		const auto result = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
+		auto result = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
 		if (result.widget) {
 			return result;
 		} else if (curRootWidget->isMouseBlocker() && curRootWidget->isActiveInHierarchy()) {
