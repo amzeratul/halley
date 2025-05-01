@@ -219,6 +219,8 @@ namespace Halley {
 
 		virtual void setDynamicValue(std::string_view key, ConfigNode value);
 
+		virtual int getRootPriority() const;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;

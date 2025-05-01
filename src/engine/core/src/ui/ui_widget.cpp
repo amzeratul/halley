@@ -137,6 +137,11 @@ void UIWidget::setDynamicValue(std::string_view key, ConfigNode value)
 {
 }
 
+int UIWidget::getRootPriority() const
+{
+	return 0;
+}
+
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 {
 	if (!isActive() && !force) {

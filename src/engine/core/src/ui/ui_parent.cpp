@@ -1,6 +1,7 @@
 #include "halley/ui/ui_parent.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 UIParent::~UIParent()
@@ -33,10 +34,7 @@ void UIParent::removeChild(UIWidget& widget)
 	Expects(widget.getParent() == this);
 	widget.setParent(nullptr);
 
-	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
-	{
-		return c.get() == &widget;
-	}), children.end());
+	std_ex::erase_if(children, [&] (auto& c) { return c.get() == &widget; });
 
 	markAsNeedingLayout();
 }
@@ -71,6 +69,10 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 	childrenWaiting.clear();
 
+	std::sort(children.begin(), children.end(), [=] (const std::shared_ptr<UIWidget>& a, const std::shared_ptr<UIWidget>& b) {
+		return a->getRootPriority() < b->getRootPriority();
+	});
+
 	markAsNeedingLayout();
 	onChildrenAdded();
 	return true;
@@ -78,20 +80,14 @@ bool UIParent::addNewChildren(UIInputType inputType)
 
 bool UIParent::removeDeadChildren()
 {
-	auto before = children.size();
-
 	for (auto& child: children) {
 		if (!child->isAlive() && child->getParent()) {
 			child->setParent(nullptr);
 		}
 	}
 
-	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
-	{
-		return !c->isAlive();
-	}), children.end());
+	const bool removedAny = std_ex::erase_if(children, [&] (auto& c) { return !c->isAlive(); });
 
-	const bool removedAny = before != children.size();
 	if (removedAny) {
 		markAsNeedingLayout();
 		onChildrenRemoved();
