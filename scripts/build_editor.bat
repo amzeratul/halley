@@ -26,6 +26,10 @@ if defined NINTENDO_SDK_ROOT (
     echo Nintendo SDK detected
     set ignoreconsoles=0
 )
+if defined GameDK (
+    echo Microsoft GDK detected
+    set ignoreconsoles=0
+)
 
 cmake -A x64 ^
     -DHALLEY_PATH=../halley ^
