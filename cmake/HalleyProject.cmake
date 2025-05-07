@@ -309,6 +309,10 @@ if (OpenSSL_FOUND)
 	set(OPENSSL_USE_STATIC_LIBS TRUE)
 	set(OPENSSL_MSVC_STATIC_RT TRUE)
 	add_definitions(-DWITH_SSL)
+else()
+	unset(OPENSSL_INCLUDE_DIR)
+	unset(OPENSSL_SSL_LIBRARY)
+	unset(OPENSSL_CRYPTO)
 endif()
 
 # Apple AVFoundation
