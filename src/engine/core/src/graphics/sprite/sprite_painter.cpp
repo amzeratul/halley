@@ -144,6 +144,10 @@ bool SpritePainterEntry::isCompatibleWith(const SpritePainterEntry& other, const
 		return false;
 	}
 
+	if (layer != other.layer) {
+		return false;
+	}
+
 	if (type == SpritePainterEntryType::SpriteCached || type == SpritePainterEntryType::SpriteRef) {
 		const auto& s0 = getSprites(cachedSprites)[0];
 		const auto& s1 = other.getSprites(cachedSprites)[0];
