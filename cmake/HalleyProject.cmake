@@ -313,7 +313,7 @@ else()
 	unset(OPENSSL_INCLUDE_DIR)
 	unset(OPENSSL_LIBRARIES)
 	unset(OPENSSL_SSL_LIBRARY)
-	unset(OPENSSL_CRYPTO)
+	unset(OPENSSL_CRYPTO_LIBRARY)
 endif()
 
 # Apple AVFoundation
