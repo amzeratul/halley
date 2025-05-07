@@ -5,15 +5,20 @@
 
 using namespace Halley;
 
-LocalisationClient::LocalisationClient(WebAPI& web, String baseURL, String project)
+LocalisationClient::LocalisationClient(WebAPI& web, String origBaseURL, String project)
 	: web(web)
-	, baseURL(std::move(baseURL))
+	, baseURL(std::move(origBaseURL))
 	, project(std::move(project))
 {
+	if (baseURL.endsWith("/")) {
+		baseURL = baseURL.left(baseURL.size() - 1);
+	}
 }
 
 Future<LocalisationClient::LoginResult> LocalisationClient::signIn(const String& username, const String& password)
 {
+	Logger::logInfo("Connecting to " + baseURL + "...");
+
 	if (connecting) {
 		Logger::logError("Already trying to connect to server");
 		return Future<LoginResult>::makeImmediate(LoginResult::InvalidLogin);

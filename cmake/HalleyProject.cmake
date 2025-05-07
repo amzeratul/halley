@@ -303,10 +303,11 @@ if (USE_HTTPLIB)
 endif()
 
 # SSL
-if (USE_SSL)
+find_package(OpenSSL)
+if (OpenSSL_FOUND)
+	set(USE_SSL TRUE)
 	set(OPENSSL_USE_STATIC_LIBS TRUE)
 	set(OPENSSL_MSVC_STATIC_RT TRUE)
-	find_Package(OpenSSL REQUIRED)
 	add_definitions(-DWITH_SSL)
 endif()
 
