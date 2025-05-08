@@ -490,7 +490,16 @@ Vector<String> ProjectWindow::getLaunchArguments() const
 	auto targetPlatform = project.getTargetPlatform();
 	auto args = String(getSetting(EditorSettingType::Project, "commandLineArguments").asString("")).split(' ');
 	if (isPCPlatform(targetPlatform)) {
-		args.push_back("--devcon=127.0.0.1");
+		bool foundDevconArg = false;
+		for (const auto& arg : args) {
+			if (arg.startsWith("--devcon=")) {
+				foundDevconArg = true;
+				break;
+			}
+		}
+		if (!foundDevconArg) {
+			args.push_back("--devcon=127.0.0.1");
+		}
 	}
 
 	return args;
