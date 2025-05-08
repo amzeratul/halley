@@ -52,7 +52,7 @@ void LocalisationManageUsers::onMakeUI()
 
 void LocalisationManageUsers::populateList()
 {
-	// TODO
+	client.getUsers();
 }
 
 void LocalisationManageUsers::setCurrentUser(String user)

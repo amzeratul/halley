@@ -137,6 +137,12 @@ Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, con
 	});
 }
 
+Future<LocUserData> LocalisationClient::getUsers()
+{
+	// TODO
+	return {};
+}
+
 bool LocalisationClient::isConnected() const
 {
 	return connected;

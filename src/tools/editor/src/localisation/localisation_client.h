@@ -4,6 +4,18 @@
 namespace Halley {
 	class LocOriginalData;
 
+	class LocProjectData {
+	public:
+		Vector<String> languages;
+	};
+
+	class LocUserData {
+	public:
+		String username;
+		bool isAdmin;
+		HashMap<String, LocProjectData> projects;
+	};
+
 	class LocalisationClient {
 	public:
 		enum class LoginResult {
@@ -22,6 +34,8 @@ namespace Halley {
 		Future<std::optional<LocStringSet>> getStrings(I18NLanguage origLanguage, int minVersion);
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
+
+		Future<LocUserData> getUsers();
 
 		bool isConnected() const;
 		const Vector<String>& getLanguages() const;
