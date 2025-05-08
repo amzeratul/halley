@@ -17,4 +17,16 @@ cmake -A Gaming.Xbox.Scarlett.x64 ^
     -D_GAMING_XBOX_SCARLETT=1 ^
     .. || exit /b 1
 
+:: - copy meta file(s)
+:: - create symbolic link to assets folder
+set deploy="%1\%2\Gaming.Xbox.Scarlett.x64\Layout\Image\Loose"
+
+if not exist "%1\assets-xboxseries" (
+    mkdir "%1\assets-xboxseries"
+)
+
+if not exist "%deploy%\assets" (
+    mklink /J "%deploy%\assets" "%1\assets-xboxseries"
+)
+
 echo Configuration done.
