@@ -87,6 +87,8 @@ src/localisation/localisation_grid.cpp
 src/localisation/localisation_grid.h
 src/localisation/localisation_language_editor.cpp
 src/localisation/localisation_language_editor.h
+src/localisation/localisation_manage_users.cpp
+src/localisation/localisation_manage_users.h
 src/preferences.cpp
 src/preferences.h
 src/project/check_update_task.cpp

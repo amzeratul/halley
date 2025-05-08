@@ -152,6 +152,11 @@ bool LocalisationClient::hasPermission(std::string_view str) const
 	return permissions.contains(str);
 }
 
+bool LocalisationClient::isAdmin() const
+{
+	return hasPermission("admin");
+}
+
 ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const
 {
 	ConfigNode keys;

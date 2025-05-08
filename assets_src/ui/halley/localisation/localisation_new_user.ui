@@ -1,0 +1,115 @@
+uuid: 373af10e-5e71-4100-994c-09d99dddeac0
+widget:
+  class: widget
+children:
+  - uuid: 6d3e52a8-b985-4e9a-af1a-2fed5f151e92
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_title_capsule.png
+      innerBorder: [5, 2, 4, 4]
+      size: [400, 0]
+    children:
+      - uuid: 9399e556-1281-48b5-99fe-90a2f405f2a0
+        border: [0, 0, 0, 3]
+        widget:
+          class: label
+          text: New User
+        fill: [centreHorizontal, fillVertical]
+      - uuid: 26075b1b-4937-480f-baac-9af69e9ed1e7
+        sizer:
+          columnProportions: []
+          gap: 4
+        children:
+          - uuid: a500498c-05bf-4273-8daf-3c39ec20e154
+            proportion: 1
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 5
+              type: vertical
+            widget:
+              class: widget
+              id: translationPanel
+            children:
+              - uuid: 780a295e-babc-4353-9cbf-c9138be611b0
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 688e95fa-d107-4cbe-92ae-0b0997c7dde2
+                    proportion: 0
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: label
+                      size: [100, 0]
+                      text: "Username:"
+                    fill: [left, fillVertical]
+                  - uuid: 80ef1115-9ba2-43c0-bafe-05c0d1e7d068
+                    proportion: 1
+                    widget:
+                      class: textInput
+                      id: username
+              - uuid: 84c90301-7f6d-40d1-b6b7-d397bb89cfbb
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: a914e36a-3030-480f-a403-af4da9344310
+                    proportion: 0
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: label
+                      size: [100, 0]
+                      text: "Password:"
+                    fill: [left, centreVertical]
+                  - uuid: 284345d8-5d54-4b49-b2cd-e1aef7604fa2
+                    proportion: 1
+                    widget:
+                      class: textInput
+                      id: password
+                      password: false
+                    fill: [fillHorizontal, centreVertical]
+                  - uuid: 542ee032-ca64-4880-a20e-7341ca8d5087
+                    border: [2, 0, 0, 0]
+                    widget:
+                      class: button
+                      id: generate
+                      text: Generate
+      - uuid: b52a6d48-2124-48c4-8ace-fa465f57ce77
+        sizer:
+          columnProportions: []
+          gap: 8
+          type: horizontal
+        widget:
+          class: widget
+          id: ""
+        children:
+          - uuid: 0956e2c6-96eb-4803-bbe6-a2bc7569e4e4
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: create
+              size: [120, 0]
+              text: Create
+            fill: [right, fillVertical]
+          - uuid: 2205fe64-43ed-4970-a8d3-2739ef41bcc8
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: cancel
+              size: [120, 0]
+              text: Cancel
+            fill: [right, fillVertical]
+        fill: [right, fillVertical]
+    fill: [centreHorizontal, centreVertical]

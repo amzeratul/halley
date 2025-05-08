@@ -26,6 +26,7 @@ namespace Halley {
 		bool isConnected() const;
 		const Vector<String>& getLanguages() const;
 		bool hasPermission(std::string_view str) const;
+		bool isAdmin() const;
 
 	private:
 		WebAPI& web;

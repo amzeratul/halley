@@ -16,7 +16,7 @@ LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& r
 	, locRemote(locRemote)
 	, canEdit(canEdit)
 {
-	factory.loadUI(*this, "halley/localisation_language_editor");
+	factory.loadUI(*this, "halley/localisation/localisation_language_editor");
 }
 
 void LocalisationLanguageEditor::onMakeUI()

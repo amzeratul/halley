@@ -1,0 +1,70 @@
+uuid: 4421dbf1-9b2e-46c2-b311-599be611fce2
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: "#00000080"
+  image: whitebox.png
+  size: [6000, 3000]
+children:
+  - uuid: 66d0fae7-834e-46bc-89fc-03ab269dc1ef
+    proportion: 1
+    sizer:
+      gap: 16
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      image: $ui_title_capsule
+      innerBorder: [6, 3, 6, 6]
+      size: [500, 50]
+    children:
+      - uuid: efb56c50-cc5c-4266-bf73-7ef65837c40b
+        sizer:
+          type: horizontal
+        children:
+          - uuid: ff12bed7-fc1a-41ed-8f6f-3b2991f3efe3
+            proportion: 1
+            widget:
+              class: label
+              id: title
+              text: Enter Value
+            fill: centre
+      - uuid: d2effce2-9c8b-4600-a1a6-235e54fb6058
+        border: [10, 0, 10, 0]
+        widget:
+          class: label
+          id: message
+          text: "Please enter the requested value:"
+      - uuid: da51ba53-bab2-42b9-8352-0bef4ee77a11
+        border: [10, 0, 10, 0]
+        widget:
+          class: textInput
+          id: input
+      - uuid: 70e96c10-2b8c-4386-8924-c82c0978e1b7
+        sizer:
+          gap: 4
+          type: horizontal
+        children:
+          - uuid: 60bf039b-71c9-468c-a012-6941b0b73d65
+            proportion: 1
+            stretchSpacer: {}
+          - uuid: 59c75e5d-0063-4258-a3fd-8b783ff08176
+            widget:
+              class: button
+              id: ok
+              size: [100, 22]
+              text: OK
+          - uuid: 182acef9-55cb-4c20-b76b-a261da40c37f
+            widget:
+              class: button
+              id: cancel
+              size: [100, 22]
+              text: Cancel
+          - uuid: 7e9355ea-3e68-4652-8270-2ea5fd9671d8
+            proportion: 1
+            stretchSpacer: {}
+    fill: centre
+fill: centre

@@ -119,6 +119,8 @@ namespace Halley {
         void signOut();
         void onConnected(LocalisationClient::LoginResult result);
 
+        void manageUsers();
+
 		void uploadOriginalStrings();
         void downloadTranslations();
 

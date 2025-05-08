@@ -161,7 +161,6 @@ namespace Halley {
 		bool clearOnSubmit = false;
 		bool showGhostWhenFocused = false;
 		bool selectAllOnClick = false;
-		bool password = false;
 
 		uint8_t clickTimeout = 0;
 		Time timeSinceLastClick = 1;

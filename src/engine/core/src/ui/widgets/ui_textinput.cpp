@@ -189,12 +189,12 @@ bool UITextInput::isSelectAllOnClick() const
 
 void UITextInput::setPassword(bool enabled)
 {
-	this->password = enabled;
+	text.setPassword(enabled);
 }
 
 bool UITextInput::isPassword() const
 {
-	return password;
+	return text.isPassword();
 }
 
 void UITextInput::draw(UIPainter& painter) const
@@ -707,7 +707,7 @@ void UITextInput::drawSelectionRow(Range<int> row, UIPainter& painter) const
 
 const StringUTF32& UITextInput::getTextToDisplay(const StringUTF32& orig) const
 {
-	if (password) {
+	if (text.isPassword()) {
 		textToDisplay = StringUTF32(orig.size(), '*');
 		return textToDisplay;
 	} else {

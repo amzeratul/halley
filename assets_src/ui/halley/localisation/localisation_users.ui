@@ -1,0 +1,182 @@
+uuid: 6c8a4e52-13c2-4f62-a215-ff79663dab42
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 17a31a49-bfc0-47a3-8068-6c78b80c8647
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_title_capsule.png
+      innerBorder: [5, 2, 4, 4]
+      size: [600, 0]
+    children:
+      - uuid: 398d777b-a2a0-40d6-aa47-2a986ab7aff7
+        border: [0, 0, 0, 3]
+        widget:
+          class: label
+          text: Users
+        fill: [centreHorizontal, fillVertical]
+      - uuid: 9bea698a-b26d-4a6c-af7f-aa0656b7e110
+        sizer:
+          columnProportions: []
+          gap: 4
+        children:
+          - uuid: 43a3ebc5-08e4-42ed-b404-2ee104e8ba9a
+            proportion: 1
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: widget
+            children:
+              - uuid: 26fe2d03-a5a4-4719-b503-5d18da045a74
+                proportion: 1
+                sizer:
+                  columnProportions: []
+                  type: vertical
+                widget:
+                  class: scrollBarPane
+                  scrollHorizontal: true
+                  size: [0, 300]
+                  style: scrollbarHalley
+                children:
+                  - uuid: c56c25ac-dc11-4f51-83a4-740390f9c385
+                    widget:
+                      class: list
+                      id: users
+                      options: []
+                      style: listClear
+              - uuid: 653338e5-fd32-491a-8577-ac4071df7f55
+                proportion: 0
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: button
+                  id: addUser
+                  size: [120, 0]
+                  text: Add User...
+                fill: [fillHorizontal, fillVertical]
+          - uuid: c4e3c216-a1d1-4069-864e-ef470570e2a9
+            proportion: 1
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 5
+              type: vertical
+            widget:
+              class: widget
+              id: translationPanel
+            children:
+              - uuid: 0081e65c-6b98-4aee-8978-fd7a20518bee
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: eeb1fcc8-1367-4637-9fa4-34320494ad54
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: label
+                      size: [100, 0]
+                      text: "User:"
+                    fill: [left, fillVertical]
+                  - uuid: 9f56f020-dafe-40fe-938b-4889c8196995
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: label
+                      id: username
+                      text: username
+                    fill: [left, fillVertical]
+              - uuid: 92e253c9-1729-49a4-b4b4-f2e17d9494c4
+                sizer:
+                  columnProportions: []
+                  gap: 2
+                  type: vertical
+                children:
+                  - uuid: f4cfc542-cb75-407c-ac7e-14c2bca36d3f
+                    proportion: 1
+                    widget:
+                      class: button
+                      id: changePassword
+                      text: Change Password
+                  - uuid: 4c46d739-3708-429b-9acb-d3fdb6936881
+                    proportion: 1
+                    widget:
+                      class: button
+                      id: makeAdmin
+                      text: Make Admin
+                  - uuid: 3cfdedc9-ea0c-4a91-89fa-0e97bbabb141
+                    proportion: 1
+                    widget:
+                      class: button
+                      id: deleteUser
+                      text: Delete User
+              - uuid: bc22921a-866a-429a-919c-0c0961aae5c3
+                proportion: 1
+                sizer:
+                  columnProportions: []
+                  type: vertical
+                widget:
+                  class: widget
+                children:
+                  - uuid: 48b6fd11-7d3b-4ff9-8222-3f99fcc936f7
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: label
+                      text: "Languages:"
+                    fill: [left, fillVertical]
+                  - uuid: 8db26282-b612-40f5-92a0-4dc3a7ae44c3
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    sizer:
+                      columnProportions: []
+                      type: vertical
+                    widget:
+                      class: scrollBarPane
+                    children:
+                      - uuid: 75f00c93-b648-417c-9816-6f2190b220c7
+                        proportion: 0
+                        sizer:
+                          columnProportions: [1, 1]
+                          columns: 2
+                          gap: 4
+                          type: vertical
+                        widget:
+                          class: widget
+                          id: languages
+                        children: []
+                  - uuid: 481928eb-9b42-4b43-b95e-96303b2a6332
+                    widget:
+                      class: button
+                      id: updateLanguages
+                      text: Update Languages
+      - uuid: 7b07b5ed-45ba-468f-9b95-5904d4355a1c
+        sizer:
+          columnProportions: []
+          gap: 8
+          type: horizontal
+        widget:
+          class: widget
+          id: ""
+        children:
+          - uuid: e92bc6e3-ab7b-4a17-8daa-34169de19245
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: close
+              size: [120, 0]
+              text: Close
+            fill: [right, fillVertical]
+    fill: [centreHorizontal, centreVertical]

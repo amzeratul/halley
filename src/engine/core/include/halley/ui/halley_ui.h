@@ -36,6 +36,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "widgets/ui_grid.h"
 #include "widgets/ui_hybrid_list.h"
 #include "widgets/ui_image.h"
+#include "widgets/ui_input_popup.h"
 #include "widgets/ui_label.h"
 #include "widgets/ui_list.h"
 #include "widgets/ui_menu_button.h"

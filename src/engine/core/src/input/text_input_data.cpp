@@ -165,12 +165,7 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	
 	if (c.is(KeyCode::C, KeyMods::Ctrl)) {
 		if (clipboard) {
-			const auto sel = getSelection();
-			if (sel.start != sel.end) {
-				clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
-			} else {
-				clipboard->setData(String(text));
-			}
+			clipboard->setData(getSelectedText());
 		}
 		return true;
 	}
@@ -186,12 +181,12 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 	
 	if (c.is(KeyCode::X, KeyMods::Ctrl)) {
 		if (clipboard && !readOnly) {
+			clipboard->setData(getSelectedText());
+
 			const auto sel = getSelection();
 			if (sel.start != sel.end) {
-				clipboard->setData(String(text.substr(sel.start, sel.end - sel.start)));
 				onDelete();
 			} else {
-				clipboard->setData(String(text));
 				setText(StringUTF32());
 			}
 		}
@@ -272,6 +267,16 @@ void TextInputData::setMultiline(bool enable)
 	multiline = enable;
 }
 
+bool TextInputData::isPassword() const
+{
+	return password;
+}
+
+void TextInputData::setPassword(bool enable)
+{
+	password = enable;
+}
+
 void TextInputData::onTextModified()
 {
 	++textRevision;
@@ -315,8 +320,12 @@ void TextInputData::onBackspace(bool wholeWord)
 
 int TextInputData::getWordBoundary(int cursorPos, int dir) const
 {
-	auto classifyCharacter = [] (uint32_t c) -> int
+	auto classifyCharacter = [password=password] (uint32_t c) -> int
 	{
+		if (password) {
+			return 2;
+		}
+
 		if (c == '\n') {
 			return 0;
 		} else if (c == ' ' || c == '\t') {
@@ -414,4 +423,24 @@ bool TextInputData::moveCursor(int position, KeyMods mods)
 		return true;
 	}
 	return false;
+}
+
+String TextInputData::getSelectedText() const
+{
+	if (password) {
+		const auto orig = getRawSelectedText();
+		return std::string(orig.size(), '*');
+	} else {
+		return getRawSelectedText();
+	}
+}
+
+String TextInputData::getRawSelectedText() const
+{
+	const auto sel = getSelection();
+	if (sel.start != sel.end) {
+		return String(text.substr(sel.start, sel.end - sel.start));
+	} else {
+		return String(text);
+	}
 }

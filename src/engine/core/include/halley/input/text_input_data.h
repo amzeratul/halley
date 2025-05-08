@@ -66,6 +66,8 @@ namespace Halley {
 		void setSelection(int selection);
 		void setSelection(Selection selection);
 		bool moveCursor(int position, KeyMods mods);
+		String getSelectedText() const;
+		String getRawSelectedText() const;
 
 		void setLengthLimits(int min, std::optional<int> max);
 		int getMinLength() const;
@@ -90,6 +92,9 @@ namespace Halley {
 		bool isMultiline() const;
 		void setMultiline(bool enable);
 
+		bool isPassword() const;
+		void setPassword(bool enable);
+
 		int getWordBoundary(int cursorPos, int dir) const;
 		int getLineBoundary(int cursorPos, int dir) const;
 		int getPageBoundary(int cursorPos, int dir) const;
@@ -107,6 +112,7 @@ namespace Halley {
 		bool captureSubmit = false;
 		bool capturePageUpDown = true;
 		bool multiline = false;
+		bool password = false;
 
 		enum class ChangeSelectionMode {
 			Character,

@@ -2,6 +2,7 @@
 
 #include "localisation_editor_root.h"
 #include "localisation_language_editor.h"
+#include "localisation_manage_users.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
@@ -116,6 +117,11 @@ void LocalisationEditor::onMakeUI()
 		signOut();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "manageUsers", [this] (const UIEvent& event)
+	{
+		manageUsers();
+	});
+
 	const auto& credentials = projectWindow.getSetting(EditorSettingType::Project, "localisation_credentials");
 	getWidgetAs<UITextInput>("username")->setText(credentials["username"].asString(""));
 	getWidgetAs<UITextInput>("password")->setText(credentials["password"].asString(""));
@@ -155,6 +161,7 @@ void LocalisationEditor::update(Time t, bool moved)
 	getWidget("signInPanel")->setActive(state == State::NotConnected);
 	getWidget("messagePanel")->setActive(curMessage.has_value());
 	getWidget("toolbar")->setActive(state == State::Ready);
+	getWidget("manageUsers")->setActive(state == State::Ready && client->isAdmin());
 	getWidget("developerPanel")->setActive(isDevEnvironment());
 	getWidget("originalLanguagePanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
 	getWidget("translationPanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
@@ -181,7 +188,7 @@ void LocalisationEditor::tryLoading()
 {
 	if (!loaded) {
 		client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName());
-		factory.loadUI(*this, "halley/localisation_editor");
+		factory.loadUI(*this, "halley/localisation/localisation_editor");
 		project.addAssetLoadedListener(this);
 		loaded = true;
 	}
@@ -359,7 +366,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 {
 	const auto totalKeys = std::max(origTotalKeys, 1); // Avoid divisions by zero
 
-	auto widget = factory.makeUI("halley/localisation_language_summary");
+	auto widget = factory.makeUI("halley/localisation/localisation_language_summary");
 	widget->layout();
 
 	widget->getWidgetAs<UIImage>("flag")->setSprite(root.getFlag(translationData.language));
@@ -796,4 +803,9 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 	}
 
 	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
+}
+
+void LocalisationEditor::manageUsers()
+{
+	getRoot()->addChild(std::make_shared<LocalisationManageUsers>(factory, *client));
 }

@@ -116,6 +116,15 @@ children:
             border: [0, 0, 0, 0]
             widget:
               class: button
+              id: manageUsers
+              size: [120, 0]
+              text: Manage Users...
+            fill: [centreHorizontal, centreVertical]
+          - uuid: dee4d323-c773-48ff-9662-2c0c3dfe335d
+            proportion: 0
+            border: [0, 0, 0, 0]
+            widget:
+              class: button
               id: signOut
               size: [120, 0]
               text: Sign Out
