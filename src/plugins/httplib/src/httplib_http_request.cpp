@@ -71,7 +71,7 @@ httplib::Result HTTPLibHTTPRequest::run()
 	} else if (method == HTTPMethod::PATCH) {
 		return client.Patch(path.cppStr(), headers, reinterpret_cast<const char*>(body.data()), body.size(), contentType.cppStr());
 	} else {
-		throw Exception("Unknwown HTTP method: " + toString(method), HalleyExceptions::Web);
+		throw Exception("Unknown HTTP method: " + toString(method), HalleyExceptions::Web);
 	}
 }
 
