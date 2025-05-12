@@ -5,6 +5,40 @@
 
 using namespace Halley;
 
+LocProjectData::LocProjectData(const ConfigNode& node)
+{
+	languages = node["languages"].asVector<String>({});
+}
+
+bool LocProjectData::operator==(const LocProjectData& other) const
+{
+	return languages == other.languages;
+}
+
+bool LocProjectData::operator!=(const LocProjectData& other) const
+{
+	return !(*this == other);
+}
+
+LocUserData::LocUserData(const ConfigNode& node)
+{
+	username = node["username"].asString("");
+	isAdmin = node["isAdmin"].asBool(false);
+	projects = node["projects"].asHashMap<String, LocProjectData>();
+}
+
+bool LocUserData::operator==(const LocUserData& other) const
+{
+	return username == other.username
+		&& isAdmin == other.isAdmin
+		&& projects == other.projects;
+}
+
+bool LocUserData::operator!=(const LocUserData& other) const
+{
+	return !(*this == other);
+}
+
 LocalisationClient::LocalisationClient(WebAPI& web, String origBaseURL, String project)
 	: web(web)
 	, baseURL(std::move(origBaseURL))
@@ -132,15 +166,19 @@ Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, con
 
 	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
 	{
-		Logger::logDev("Got response: " + toString(response->getResponseCode()));
 		return response->getResponseCode() == 200;
 	});
 }
 
-Future<LocUserData> LocalisationClient::getUsers()
+Future<Vector<LocUserData>> LocalisationClient::getUsers()
 {
-	// TODO
-	return {};
+	const auto url = baseURL + "/users";
+	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
+
+	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response) -> Vector<LocUserData>
+	{
+		return JSONConvert::parseConfig(response->getBody()).asVector<LocUserData>({});
+	});
 }
 
 bool LocalisationClient::isConnected() const
@@ -161,6 +199,11 @@ bool LocalisationClient::hasPermission(std::string_view str) const
 bool LocalisationClient::isAdmin() const
 {
 	return hasPermission("admin");
+}
+
+const String& LocalisationClient::getProject() const
+{
+	return project;
 }
 
 ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) const

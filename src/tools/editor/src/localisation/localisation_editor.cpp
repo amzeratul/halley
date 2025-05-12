@@ -807,5 +807,5 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 
 void LocalisationEditor::manageUsers()
 {
-	getRoot()->addChild(std::make_shared<LocalisationManageUsers>(factory, *client));
+	getRoot()->addChild(std::make_shared<LocalisationManageUsers>(factory, *client, project, root));
 }

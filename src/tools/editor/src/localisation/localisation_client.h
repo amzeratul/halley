@@ -7,6 +7,12 @@ namespace Halley {
 	class LocProjectData {
 	public:
 		Vector<String> languages;
+
+		LocProjectData() = default;
+		LocProjectData(const ConfigNode& node);
+
+		bool operator==(const LocProjectData& other) const;
+		bool operator!=(const LocProjectData& other) const;
 	};
 
 	class LocUserData {
@@ -14,6 +20,12 @@ namespace Halley {
 		String username;
 		bool isAdmin;
 		HashMap<String, LocProjectData> projects;
+
+		LocUserData() = default;
+		LocUserData(const ConfigNode& node);
+
+		bool operator==(const LocUserData& other) const;
+		bool operator!=(const LocUserData& other) const;
 	};
 
 	class LocalisationClient {
@@ -35,12 +47,13 @@ namespace Halley {
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
-		Future<LocUserData> getUsers();
+		Future<Vector<LocUserData>> getUsers();
 
 		bool isConnected() const;
 		const Vector<String>& getLanguages() const;
 		bool hasPermission(std::string_view str) const;
 		bool isAdmin() const;
+		const String& getProject() const;
 
 	private:
 		WebAPI& web;

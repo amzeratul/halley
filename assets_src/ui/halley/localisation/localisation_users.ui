@@ -17,7 +17,7 @@ children:
       id: ""
       image: halley_ui/ui_title_capsule.png
       innerBorder: [5, 2, 4, 4]
-      size: [600, 0]
+      size: [600, 60]
     children:
       - uuid: 398d777b-a2a0-40d6-aa47-2a986ab7aff7
         border: [0, 0, 0, 3]
@@ -26,6 +26,7 @@ children:
           text: Users
         fill: [centreHorizontal, fillVertical]
       - uuid: 9bea698a-b26d-4a6c-af7f-aa0656b7e110
+        proportion: 1
         sizer:
           columnProportions: []
           gap: 4
@@ -46,7 +47,7 @@ children:
                 widget:
                   class: scrollBarPane
                   scrollHorizontal: true
-                  size: [0, 300]
+                  size: [0, 500]
                   style: scrollbarHalley
                 children:
                   - uuid: c56c25ac-dc11-4f51-83a4-740390f9c385
@@ -113,7 +114,7 @@ children:
                     proportion: 1
                     widget:
                       class: button
-                      id: makeAdmin
+                      id: toggleAdmin
                       text: Make Admin
                   - uuid: 3cfdedc9-ea0c-4a91-89fa-0e97bbabb141
                     proportion: 1

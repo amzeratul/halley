@@ -5,26 +5,32 @@
 #include "localisation_client.h"
 
 namespace Halley {
-    class LocalisationManageUsers : public UIWidget {
+	class LocalisationEditorRoot;
+
+	class LocalisationManageUsers : public UIWidget {
     public:
-        LocalisationManageUsers(UIFactory& factory, LocalisationClient& client);
-        ~LocalisationManageUsers();
+        LocalisationManageUsers(UIFactory& factory, LocalisationClient& client, Project& project, LocalisationEditorRoot& editorRoot);
+        ~LocalisationManageUsers() override;
 
         void onMakeUI() override;
 
     private:
         UIFactory& factory;
         LocalisationClient& client;
+        Project& project;
+        LocalisationEditorRoot& editorRoot;
 
-        String currentUser;
+        String currentUserId;
 
         std::shared_ptr<bool> aliveFlag;
+        Vector<LocUserData> curUsers;
 
         void addUser();
         void deleteUser();
 
-    	void populateList();
-        void setCurrentUser(String user);
+    	void requestUserList();
+        void populateUserList(Vector<LocUserData> users);
+        void setCurrentUser(String _userId);
 
         void changePassword();
         void updateLanguages();
