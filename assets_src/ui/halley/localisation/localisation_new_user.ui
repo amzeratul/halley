@@ -1,4 +1,6 @@
 uuid: 373af10e-5e71-4100-994c-09d99dddeac0
+sizer:
+  columnProportions: []
 widget:
   class: widget
 children:
@@ -30,7 +32,7 @@ children:
         children:
           - uuid: a500498c-05bf-4273-8daf-3c39ec20e154
             proportion: 1
-            border: [0, 0, 0, 0]
+            border: [5, 5, 5, 5]
             sizer:
               columnProportions: []
               columns: 2
@@ -51,7 +53,7 @@ children:
                       class: label
                       size: [100, 0]
                       text: "Username:"
-                    fill: [left, fillVertical]
+                    fill: [left, centreVertical]
                   - uuid: 80ef1115-9ba2-43c0-bafe-05c0d1e7d068
                     proportion: 1
                     widget:
@@ -81,6 +83,8 @@ children:
                     widget:
                       class: button
                       id: generate
+                      size: [0, 0]
+                      style: buttonThin
                       text: Generate
       - uuid: b52a6d48-2124-48c4-8ace-fa465f57ce77
         sizer:

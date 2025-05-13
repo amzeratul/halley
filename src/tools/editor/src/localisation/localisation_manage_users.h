@@ -40,4 +40,20 @@ namespace Halley {
 		void changePassword();
     	void toggleAdmin();
     };
+
+    class LocalisationNewUser : public UIWidget {
+    public:
+        using Callback = std::function<void(String, String)>;
+
+        LocalisationNewUser(UIFactory& factory, Callback callback);
+
+        void onMakeUI() override;
+        void update(Time t, bool moved) override;
+
+    private:
+        UIFactory& factory;
+        Callback callback;
+
+        String generatePassword();
+    };
 }

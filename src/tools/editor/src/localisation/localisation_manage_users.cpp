@@ -65,9 +65,9 @@ void LocalisationManageUsers::populateUserList(Vector<LocUserData> users)
 	curUsers = std::move(users);
 
 	auto userList = getWidgetAs<UIList>("users");
-	userList->clear();
-
 	const auto curUserId = userList->getSelectedOptionId();
+
+	userList->clear();
 	userList->setCanSendEvents(false);
 
 	for (const auto& user: curUsers) {
@@ -140,7 +140,17 @@ const LocUserData& LocalisationManageUsers::getUser(const String& userId)
 
 void LocalisationManageUsers::addUser()
 {
-	// TODO
+	getRoot()->addChild(std::make_shared<LocalisationNewUser>(factory, [=] (String username, String password) {
+		if (!username.isEmpty() && !password.isEmpty()) {
+			client.createUser(username, password).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+				if (ok) {
+					requestUserList();
+				} else {
+					Logger::logError("Failed to create new user.");
+				}
+			});
+		}
+	}));
 }
 
 void LocalisationManageUsers::deleteUser()
@@ -151,7 +161,7 @@ void LocalisationManageUsers::deleteUser()
 				if (ok) {
 					requestUserList();
 				} else {
-					Logger::logError("Failed to change user admin flag.");
+					Logger::logError("Failed to delete user.");
 				}
 			});
 		}
@@ -191,9 +201,59 @@ void LocalisationManageUsers::updateLanguages()
 {
 	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
 	client.setUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
-		if (!ok) {
+		if (ok) {
+			requestUserList();
+		} else {
 			setCurrentUser(currentUserId);
 		}
 	});
 }
 
+LocalisationNewUser::LocalisationNewUser(UIFactory& factory, Callback callback)
+	: UIWidget("new_user", {}, UISizer())
+	, factory(factory)
+	, callback(std::move(callback))
+{
+	factory.loadUI(*this, "halley/localisation/localisation_new_user");
+	UIWidget::setAnchor({});
+}
+
+void LocalisationNewUser::onMakeUI()
+{
+	setHandle(UIEventType::ButtonClicked, "create", [=] (const UIEvent& event)
+	{
+		const auto& username = getWidgetAs<UITextInput>("username")->getText();
+		const auto& password = getWidgetAs<UITextInput>("password")->getText();
+		callback(username, password);
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "cancel", [=] (const UIEvent& event)
+	{
+		callback("", "");
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "generate", [=] (const UIEvent& event)
+	{
+		getWidgetAs<UITextInput>("password")->setText(generatePassword());
+	});
+}
+
+void LocalisationNewUser::update(Time t, bool moved)
+{
+	const auto& username = getWidgetAs<UITextInput>("username")->getText();
+	const auto& password = getWidgetAs<UITextInput>("password")->getText();
+	getWidget("create")->setEnabled(username.length() >= 3 && password.length() >= 8);
+}
+
+String LocalisationNewUser::generatePassword()
+{
+	auto& rng = Random::getGlobal();
+	String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*_-";
+	String result;
+	for (int i = 0; i < 12; ++i) {
+		result += rng.getRandomElement(characters.asSpan());
+	}
+	return result;
+}

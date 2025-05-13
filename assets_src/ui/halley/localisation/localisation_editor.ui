@@ -117,7 +117,7 @@ children:
             widget:
               class: button
               id: manageUsers
-              size: [120, 0]
+              size: [150, 0]
               text: Manage Users...
             fill: [centreHorizontal, centreVertical]
           - uuid: dee4d323-c773-48ff-9662-2c0c3dfe335d

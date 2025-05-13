@@ -45,17 +45,19 @@ children:
                   columnProportions: []
                   type: vertical
                 widget:
+                  autoHide: true
                   class: scrollBarPane
                   scrollHorizontal: true
                   size: [0, 500]
                   style: scrollbarHalley
                 children:
                   - uuid: c56c25ac-dc11-4f51-83a4-740390f9c385
+                    proportion: 1
                     widget:
                       class: list
                       id: users
                       options: []
-                      style: listClear
+                      style: list
               - uuid: 653338e5-fd32-491a-8577-ac4071df7f55
                 proportion: 0
                 sizer:
@@ -143,6 +145,7 @@ children:
                       columnProportions: []
                       type: vertical
                     widget:
+                      autoHide: true
                       class: scrollBarPane
                     children:
                       - uuid: 75f00c93-b648-417c-9816-6f2190b220c7

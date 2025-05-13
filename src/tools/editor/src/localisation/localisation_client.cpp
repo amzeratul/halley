@@ -417,7 +417,12 @@ Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(
 Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request)
 {
 	return sendWithAuthorization(std::move(request)).then([=] (std::unique_ptr<HTTPResponse> response) {
-		return response->getResponseCode() == 200;
+		if (response->getResponseCode() == 200) {
+			return true;
+		} else {
+			Logger::logError("Request returned " + toString(response->getResponseCode()));
+			return false;
+		}
 	});
 }
 
