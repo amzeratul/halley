@@ -123,36 +123,31 @@ void LocalisationClient::signOut()
 
 Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData)
 {
+	const auto url = "/strings-chunk/" + Encode::encodeURL(project);
+
 	ConfigNode payload;
 	auto& chunks = payload["chunks"];
 	for (const auto& chunk: origData.getChunks()) {
 		chunks.push_back(getChunkConfig(chunk));
 	}
 
-	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project);
-
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(payload);
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
 }
 
 Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData)
 {
-	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(getChunkConfig(origData));
+	const auto url = "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
 
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, getChunkConfig(origData));
 }
 
 Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion)
 {
-	const auto url = baseURL + "/strings/" + Encode::encodeURL(project)
+	const auto url = "/strings/" + Encode::encodeURL(project)
 		+ "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
-	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
 
-	return sendWithAuthorization(std::move(request)).then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
+	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));
@@ -163,19 +158,16 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage 
 
 Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData)
 {
-	const auto url = baseURL + "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(getTranslationConfig(translationData));
+	const auto url = "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());
 
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, getTranslationConfig(translationData));
 }
 
 Future<Vector<LocUserData>> LocalisationClient::getUsers()
 {
-	const auto url = baseURL + "/users";
-	auto request = web.makeHTTPRequest(HTTPMethod::GET, url);
+	const auto url = "/users";
 
-	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response) -> Vector<LocUserData>
+	return sendWithAuthorization(HTTPMethod::GET, url).then([] (std::unique_ptr<HTTPResponse> response) -> Vector<LocUserData>
 	{
 		return JSONConvert::parseConfig(response->getBody()).asVector<LocUserData>({});
 	});
@@ -183,60 +175,51 @@ Future<Vector<LocUserData>> LocalisationClient::getUsers()
 
 Future<bool> LocalisationClient::createUser(const String& userId, const String& password)
 {
+	const auto url = "/users";
+
 	ConfigNode payload;
 	payload["username"] = userId;
 	payload["password"] = password;
 
-	const auto url = baseURL + "/users";
-	auto request = web.makeHTTPRequest(HTTPMethod::POST, url);
-	request->setJsonBody(payload);
-
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::POST, url, payload);
 }
 
 Future<bool> LocalisationClient::deleteUser(const String& userId)
 {
-	const auto url = baseURL + "/users/" + Encode::encodeURL(userId);
-	auto request = web.makeHTTPRequest(HTTPMethod::DELETE, url);
+	const auto url = "/users/" + Encode::encodeURL(userId);
 
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::DELETE, url);
 }
 
 Future<bool> LocalisationClient::setUserAdmin(const String& userId, bool admin, const String& adminPassword)
 {
+	const auto url = "/users/" + Encode::encodeURL(userId) + "/admin";
+
 	ConfigNode payload;
 	payload["isAdmin"] = admin;
 	payload["adminPassword"] = adminPassword;
 
-	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/admin";
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(payload);
-
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
 }
 
 Future<bool> LocalisationClient::setUserPassword(const String& userId, const String& newPassword)
 {
+	const auto url = "/users/" + Encode::encodeURL(userId) + "/password";
+
 	ConfigNode payload;
 	payload["password"] = newPassword;
 
-	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/password";
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(payload);
-
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
 }
 
 Future<bool> LocalisationClient::setUserProjectSettings(const String& userId, const Vector<String>& languages)
 {
+	const auto url = "/users/" + Encode::encodeURL(userId) + "/project/" + Encode::encodeURL(project);
+
 	ConfigNode payload;
 	payload["languages"] = languages;
 
-	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/project/" + Encode::encodeURL(project);
-	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setJsonBody(payload);
-
-	return sendWithAuthorizationSimple(std::move(request));
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
 }
 
 const String& LocalisationClient::getMyUsername() const
@@ -414,6 +397,20 @@ Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(
 	}
 }
 
+std::unique_ptr<HTTPRequest> LocalisationClient::makeRequest(HTTPMethod method, const String& path, const ConfigNode& payload) const
+{
+	auto request = web.makeHTTPRequest(method, baseURL + path);
+	if (payload.getType() != ConfigNodeType::Undefined) {
+		request->setJsonBody(payload);
+	}
+	return request;
+}
+
+Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(HTTPMethod method, const String& url, const ConfigNode& payload)
+{
+	return sendWithAuthorization(makeRequest(method, url, payload));
+}
+
 Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request)
 {
 	return sendWithAuthorization(std::move(request)).then([=] (std::unique_ptr<HTTPResponse> response) {
@@ -424,6 +421,11 @@ Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTT
 			return false;
 		}
 	});
+}
+
+Future<bool> LocalisationClient::sendWithAuthorizationSimple(HTTPMethod method, const String& path, const ConfigNode& payload)
+{
+	return sendWithAuthorizationSimple(makeRequest(method, path, payload));
 }
 
 void LocalisationClient::sendPending()
