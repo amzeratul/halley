@@ -88,6 +88,7 @@ void LocalisationManageUsers::setCurrentUser(String _userId)
 
 	getWidgetAs<UILabel>("username")->setText(LocalisedString::fromUserString(userInfo.username));
 	getWidgetAs<UIButton>("toggleAdmin")->setLabel(LocalisedString::fromUserString(userInfo.isAdmin ? "Remove Admin" : "Make Admin"));
+	getWidgetAs<UIButton>("toggleAdmin")->setEnabled(userInfo.username != client.getMyUsername());
 	getWidgetAs<UIButton>("deleteUser")->setEnabled(!userInfo.isAdmin);
 	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
 
@@ -119,6 +120,7 @@ void LocalisationManageUsers::setLanguageEnabled(const I18NLanguage& language, b
 		if (!curUserDataWorkingCopy.languages.contains(code)) {
 			curUserDataWorkingCopy.languages.push_back(code);
 		}
+		std::sort(curUserDataWorkingCopy.languages.begin(), curUserDataWorkingCopy.languages.end());
 	} else {
 		std_ex::erase(curUserDataWorkingCopy.languages, code);
 	}
@@ -143,23 +145,52 @@ void LocalisationManageUsers::addUser()
 
 void LocalisationManageUsers::deleteUser()
 {
-	// TODO
+	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Delete User?", "Are you sure you want to delete user \"" + currentUserId + "\"?", Vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel }, [=] (UIConfirmationPopup::ButtonType result) {
+		if (result == UIConfirmationPopup::ButtonType::Yes) {
+			client.deleteUser(currentUserId).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+				if (ok) {
+					requestUserList();
+				} else {
+					Logger::logError("Failed to change user admin flag.");
+				}
+			});
+		}
+	}));
 }
 
 void LocalisationManageUsers::toggleAdmin()
 {
-	// TODO
+	const auto& user = getUser(currentUserId);
+	getRoot()->addChild(std::make_shared<UIInputPopup>(factory, "Enter Password", "Please enter the global admin password to execute this action:", "", [=] (std::optional<String> value) {
+		if (value) {
+			client.setUserAdmin(currentUserId, !user.isAdmin, *value).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+				if (ok) {
+					requestUserList();
+				} else {
+					Logger::logError("Failed to change user admin flag.");
+				}
+			});
+		}
+	}));
 }
 
 void LocalisationManageUsers::changePassword()
 {
-	// TODO
+	getRoot()->addChild(std::make_shared<UIInputPopup>(factory, "Enter New Password", "Please enter the new password for this user:", "", [=] (std::optional<String> value) {
+		if (value) {
+			client.setUserPassword(currentUserId, *value).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+				if (!ok) {
+					Logger::logError("Failed to change user password.");
+				}
+			});
+		}
+	}));
 }
 
 void LocalisationManageUsers::updateLanguages()
 {
 	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
-	client.putUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+	client.setUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
 		if (!ok) {
 			setCurrentUser(currentUserId);
 		}

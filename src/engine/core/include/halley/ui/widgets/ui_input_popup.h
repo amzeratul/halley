@@ -17,11 +17,14 @@ namespace Halley
 		void onMakeUI() override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 
+		void update(Time t, bool moved) override;
+
 	private:
 		String title;
 		String message;
 		String defaultValue;
 		Callback callback;
+		bool needFocus = false;
 
 		void onResult(bool ok);
 	};

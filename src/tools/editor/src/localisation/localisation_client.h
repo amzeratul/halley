@@ -51,14 +51,20 @@ namespace Halley {
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
 		Future<Vector<LocUserData>> getUsers();
-		Future<bool> putUserProjectSettings(const String& userId, const Vector<String>& languages);
+		Future<bool> createUser(const String& userId, const String& password);
+		Future<bool> deleteUser(const String& userId);
+		Future<bool> setUserAdmin(const String& userId, bool admin, const String& adminPassword);
+		Future<bool> setUserProjectSettings(const String& userId, const Vector<String>& languages);
+		Future<bool> setUserPassword(const String& userId, const String& newPassword);
 
+		const String& getMyUsername() const;
 		bool isConnected() const;
+
 		const Vector<String>& getLanguages() const;
 		bool hasPermission(std::string_view str) const;
 		bool isAdmin() const;
 		const String& getProject() const;
-		
+
 	private:
 		WebAPI& web;
 		String baseURL;
@@ -88,6 +94,7 @@ namespace Halley {
 
 		void setToken(String token);
 		Future<std::unique_ptr<HTTPResponse>> sendWithAuthorization(std::unique_ptr<HTTPRequest> request);
+		Future<bool> sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request);
 		void sendPending();
 		void addAuthorization(HTTPRequest& req) const;
 	};

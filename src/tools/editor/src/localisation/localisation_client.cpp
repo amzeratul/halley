@@ -8,6 +8,7 @@ using namespace Halley;
 LocProjectData::LocProjectData(const ConfigNode& node)
 {
 	languages = node["languages"].asVector<String>({});
+	std::sort(languages.begin(), languages.end());
 }
 
 bool LocProjectData::operator==(const LocProjectData& other) const
@@ -122,38 +123,26 @@ void LocalisationClient::signOut()
 
 Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData)
 {
-	ConfigNode root;
-	auto& chunks = root["chunks"];
+	ConfigNode payload;
+	auto& chunks = payload["chunks"];
 	for (const auto& chunk: origData.getChunks()) {
 		chunks.push_back(getChunkConfig(chunk));
 	}
 
-	const auto data = JSONConvert::generateJSON(root).toBytes();
-
 	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project);
 
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setBody("application/json", data);
-	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
-	{
-		Logger::logDev("Got response: " + toString(response->getResponseCode()));
-		return response->getResponseCode() == 200;
-	});
+	request->setJsonBody(payload);
+	return sendWithAuthorizationSimple(std::move(request));
 }
 
 Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData)
 {
-	const auto data = JSONConvert::generateJSON(getChunkConfig(origData)).toBytes();
-
 	const auto url = baseURL + "/strings-chunk/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(origData.name);
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setBody("application/json", data);
+	request->setJsonBody(getChunkConfig(origData));
 
-	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
-	{
-		Logger::logDev("Got response: " + toString(response->getResponseCode()));
-		return response->getResponseCode() == 200;
-	});
+	return sendWithAuthorizationSimple(std::move(request));
 }
 
 Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion)
@@ -174,16 +163,11 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage 
 
 Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData)
 {
-	const auto data = JSONConvert::generateJSON(getTranslationConfig(translationData)).toBytes();
-
 	const auto url = baseURL + "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setBody("application/json", data);
+	request->setJsonBody(getTranslationConfig(translationData));
 
-	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
-	{
-		return response->getResponseCode() == 200;
-	});
+	return sendWithAuthorizationSimple(std::move(request));
 }
 
 Future<Vector<LocUserData>> LocalisationClient::getUsers()
@@ -197,19 +181,67 @@ Future<Vector<LocUserData>> LocalisationClient::getUsers()
 	});
 }
 
-Future<bool> LocalisationClient::putUserProjectSettings(const String& userId, const Vector<String>& languages)
+Future<bool> LocalisationClient::createUser(const String& userId, const String& password)
+{
+	ConfigNode payload;
+	payload["username"] = userId;
+	payload["password"] = password;
+
+	const auto url = baseURL + "/users";
+	auto request = web.makeHTTPRequest(HTTPMethod::POST, url);
+	request->setJsonBody(payload);
+
+	return sendWithAuthorizationSimple(std::move(request));
+}
+
+Future<bool> LocalisationClient::deleteUser(const String& userId)
+{
+	const auto url = baseURL + "/users/" + Encode::encodeURL(userId);
+	auto request = web.makeHTTPRequest(HTTPMethod::DELETE, url);
+
+	return sendWithAuthorizationSimple(std::move(request));
+}
+
+Future<bool> LocalisationClient::setUserAdmin(const String& userId, bool admin, const String& adminPassword)
+{
+	ConfigNode payload;
+	payload["isAdmin"] = admin;
+	payload["adminPassword"] = adminPassword;
+
+	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/admin";
+	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
+	request->setJsonBody(payload);
+
+	return sendWithAuthorizationSimple(std::move(request));
+}
+
+Future<bool> LocalisationClient::setUserPassword(const String& userId, const String& newPassword)
+{
+	ConfigNode payload;
+	payload["password"] = newPassword;
+
+	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/password";
+	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
+	request->setJsonBody(payload);
+
+	return sendWithAuthorizationSimple(std::move(request));
+}
+
+Future<bool> LocalisationClient::setUserProjectSettings(const String& userId, const Vector<String>& languages)
 {
 	ConfigNode payload;
 	payload["languages"] = languages;
 
 	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/project/" + Encode::encodeURL(project);
 	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
-	request->setBody("application/json", JSONConvert::generateJSON(payload).toBytes());
+	request->setJsonBody(payload);
 
-	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
-	{
-		return response->getResponseCode() == 200;
-	});
+	return sendWithAuthorizationSimple(std::move(request));
+}
+
+const String& LocalisationClient::getMyUsername() const
+{
+	return username;
 }
 
 bool LocalisationClient::isConnected() const
@@ -380,6 +412,13 @@ Future<std::unique_ptr<HTTPResponse>> LocalisationClient::sendWithAuthorization(
 
 		return pending.promise.getFuture();
 	}
+}
+
+Future<bool> LocalisationClient::sendWithAuthorizationSimple(std::unique_ptr<HTTPRequest> request)
+{
+	return sendWithAuthorization(std::move(request)).then([=] (std::unique_ptr<HTTPResponse> response) {
+		return response->getResponseCode() == 200;
+	});
 }
 
 void LocalisationClient::sendPending()

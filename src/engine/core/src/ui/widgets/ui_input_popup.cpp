@@ -24,7 +24,6 @@ UIInputPopup::UIInputPopup(UIFactory& factory, String title, String message, Str
 void UIInputPopup::onAddedToRoot(UIRoot& root)
 {
 	root.registerKeyPressListener(shared_from_this(), 10);
-	focus();
 }
 
 void UIInputPopup::onRemovedFromRoot(UIRoot& root)
@@ -66,4 +65,12 @@ void UIInputPopup::onResult(bool ok)
 		callback(std::nullopt);
 	}
 	destroy();
+}
+
+void UIInputPopup::update(Time t, bool moved)
+{
+	if (needFocus) {
+		getWidget("input")->focus();
+		needFocus = false;
+	}
 }

@@ -7,6 +7,7 @@
 #include "halley/text/i18n.h"
 #include "halley/text/enum_names.h"
 #include "halley/data_structures/vector.h"
+#include "halley/file_formats/json_convert.h"
 
 namespace Halley
 {
@@ -36,7 +37,13 @@ namespace Halley
 		virtual ~HTTPRequest() {}
 
 		[[deprecated("Use setBody instead")]] void setPostData(const String& contentType, const Bytes& data) { setBody(contentType, data); }
+
 		virtual void setBody(const String& contentType, const Bytes& data) = 0;
+		virtual void setJsonBody(const ConfigNode& data)
+		{
+			setBody("application/json", JSONConvert::generateJSON(data).toBytes());
+		}
+
 		virtual void setHeader(const String& headerName, const String& headerValue) = 0;
 		virtual void setProgressCallback(std::function<bool(uint64_t, uint64_t)> callback) {}
 
