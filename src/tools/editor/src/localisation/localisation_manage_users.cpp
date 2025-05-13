@@ -58,8 +58,8 @@ void LocalisationManageUsers::onMakeUI()
 
 void LocalisationManageUsers::requestUserList()
 {
-	client.getUsers().then(Executors::getMainUpdateThread(), [=] (Vector<LocUserData> users) {
-		if (*aliveFlag) {
+	client.getUsers().then(Executors::getMainUpdateThread(), [=, flag = aliveFlag] (Vector<LocUserData> users) {
+		if (*flag) {
 			populateUserList(std::move(users));
 		}
 	});
@@ -91,27 +91,24 @@ void LocalisationManageUsers::populateUserList(Vector<LocUserData> users)
 void LocalisationManageUsers::setCurrentUser(String _userId)
 {
 	currentUserId = std::move(_userId);
-	const auto userIter = curUsers.find_if([&] (const auto& u) { return u.username == currentUserId; });
-	const auto& userInfo = userIter == curUsers.end() ? LocUserData() : *userIter;
+	const auto& userInfo = getUser(currentUserId);
+	curUserDataWorkingCopy = userInfo.getProject(client.getProject()); // Copy
 
 	getWidgetAs<UILabel>("username")->setText(LocalisedString::fromUserString(userInfo.username));
 	getWidgetAs<UIButton>("toggleAdmin")->setLabel(LocalisedString::fromUserString(userInfo.isAdmin ? "Remove Admin" : "Make Admin"));
 	getWidgetAs<UIButton>("deleteUser")->setEnabled(!userInfo.isAdmin);
-	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false); // TODO
-
-	Vector<String> languagesEnabled;
-	const auto projIter = userInfo.projects.find(client.getProject());
-	if (projIter != userInfo.projects.end()) {
-		languagesEnabled = projIter->second.languages;
-	}
+	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
 
 	auto languageContainer = getWidget("languages");
 	languageContainer->clear();
 	for (const auto& lang: project.getProperties().getLanguages()) {
 		const auto isoCode = lang.getISOCode();
 
-		const auto enabled = languagesEnabled.contains(isoCode);
+		const auto enabled = curUserDataWorkingCopy.languages.contains(isoCode);
 		auto checkbox = std::make_shared<UICheckbox>(isoCode, factory.getStyle("checkbox"), enabled);
+		checkbox->setHandle(UIEventType::CheckboxUpdated, [=] (const UIEvent& event) {
+			setLanguageEnabled(lang, event.getBoolData());
+		});
 		auto icon = std::make_shared<UIImage>(editorRoot.getFlag(lang));
 		auto label = std::make_shared<UILabel>("", factory.getStyle("label"), editorRoot.getLanguageName(lang));
 
@@ -121,6 +118,30 @@ void LocalisationManageUsers::setCurrentUser(String _userId)
 		entry->add(label, 0, {}, UISizerAlignFlags::Centre);
 		languageContainer->add(std::move(entry));
 	}
+}
+
+void LocalisationManageUsers::setLanguageEnabled(const I18NLanguage& language, bool enabled)
+{
+	const auto code = language.getISOCode();
+	if (enabled) {
+		if (!curUserDataWorkingCopy.languages.contains(code)) {
+			curUserDataWorkingCopy.languages.push_back(code);
+		}
+	} else {
+		std_ex::erase(curUserDataWorkingCopy.languages, code);
+	}
+
+	getWidgetAs<UIButton>("updateLanguages")->setEnabled(curUserDataWorkingCopy != getUser(currentUserId).getProject(client.getProject()));
+}
+
+const LocUserData& LocalisationManageUsers::getUser(const String& userId)
+{
+	const auto userIter = curUsers.find_if([&] (const auto& u) { return u.username == userId; });
+	if (userIter == curUsers.end()) {
+		static LocUserData dummy;
+		return dummy;
+	}
+	return *userIter;
 }
 
 void LocalisationManageUsers::addUser()
@@ -145,6 +166,13 @@ void LocalisationManageUsers::changePassword()
 
 void LocalisationManageUsers::updateLanguages()
 {
-	// TODO
+	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
+	client.putUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(Executors::getMainUpdateThread(), [=, flag = aliveFlag] (bool ok) {
+		if (*flag) {
+			if (!ok) {
+				setCurrentUser(currentUserId);
+			}
+		}
+	});
 }
 

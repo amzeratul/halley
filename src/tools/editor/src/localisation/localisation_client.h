@@ -24,6 +24,9 @@ namespace Halley {
 		LocUserData() = default;
 		LocUserData(const ConfigNode& node);
 
+		const LocProjectData& getProject(const String& projectId) const;
+		LocProjectData& getProject(const String& projectId);
+
 		bool operator==(const LocUserData& other) const;
 		bool operator!=(const LocUserData& other) const;
 	};
@@ -48,13 +51,14 @@ namespace Halley {
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
 		Future<Vector<LocUserData>> getUsers();
+		Future<bool> putUserProjectSettings(const String& userId, const Vector<String>& languages);
 
 		bool isConnected() const;
 		const Vector<String>& getLanguages() const;
 		bool hasPermission(std::string_view str) const;
 		bool isAdmin() const;
 		const String& getProject() const;
-
+		
 	private:
 		WebAPI& web;
 		String baseURL;

@@ -27,6 +27,22 @@ LocUserData::LocUserData(const ConfigNode& node)
 	projects = node["projects"].asHashMap<String, LocProjectData>();
 }
 
+const LocProjectData& LocUserData::getProject(const String& projectId) const
+{
+	const auto projIter = projects.find(projectId);
+	if (projIter != projects.end()) {
+		return projIter->second;
+	} else {
+		static LocProjectData dummy;
+		return dummy;
+	}
+}
+
+LocProjectData& LocUserData::getProject(const String& projectId)
+{
+	return projects[projectId];
+}
+
 bool LocUserData::operator==(const LocUserData& other) const
 {
 	return username == other.username
@@ -178,6 +194,21 @@ Future<Vector<LocUserData>> LocalisationClient::getUsers()
 	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response) -> Vector<LocUserData>
 	{
 		return JSONConvert::parseConfig(response->getBody()).asVector<LocUserData>({});
+	});
+}
+
+Future<bool> LocalisationClient::putUserProjectSettings(const String& userId, const Vector<String>& languages)
+{
+	ConfigNode payload;
+	payload["languages"] = languages;
+
+	const auto url = baseURL + "/users/" + Encode::encodeURL(userId) + "/project/" + Encode::encodeURL(project);
+	auto request = web.makeHTTPRequest(HTTPMethod::PUT, url);
+	request->setBody("application/json", JSONConvert::generateJSON(payload).toBytes());
+
+	return sendWithAuthorization(std::move(request)).then([] (std::unique_ptr<HTTPResponse> response)
+	{
+		return response->getResponseCode() == 200;
 	});
 }
 

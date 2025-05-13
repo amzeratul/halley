@@ -24,6 +24,9 @@ namespace Halley {
 
         std::shared_ptr<bool> aliveFlag;
         Vector<LocUserData> curUsers;
+        LocProjectData curUserDataWorkingCopy;
+
+        const LocUserData& getUser(const String& userId);
 
         void addUser();
         void deleteUser();
@@ -32,8 +35,10 @@ namespace Halley {
         void populateUserList(Vector<LocUserData> users);
         void setCurrentUser(String _userId);
 
-        void changePassword();
+        void setLanguageEnabled(const I18NLanguage& language, bool enabled);
         void updateLanguages();
+
+		void changePassword();
     	void toggleAdmin();
     };
 }
