@@ -1,6 +1,7 @@
 #pragma once
 
 #include "executor.h"
+#include "alive_flag.h"
 #include <memory>
 #include <atomic>
 #include <halley/data_structures/maybe.h>
@@ -13,6 +14,8 @@
 
 namespace Halley
 {
+	class AliveFlag;
+
 	struct VoidWrapper
 	{};
 
@@ -262,6 +265,9 @@ namespace Halley
 		template <typename E, typename F>
 		auto then(E& e, F f)->Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>;
 
+		template <typename E, typename F>
+		auto then(const AliveFlag& flag, E& e, F f)->Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>;
+
 		template <typename F>
 		auto thenNotify(F joinFuture) -> void
 		{
@@ -497,18 +503,26 @@ namespace Halley
 	class TaskQueueHelper
 	{
 	public:
-		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, std::string_view name)
+		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, std::string_view name, const NonOwningAliveFlag* aliveFlag = nullptr)
 		{
 			Promise<T> promise;
-			enqueueOn(e, std::move(payload), promise, name);
+			enqueueOn(e, std::move(payload), promise, name, aliveFlag);
 			return promise.getFuture();
 		}
 		
-		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise, std::string_view name)
+		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise, std::string_view name, const NonOwningAliveFlag* aliveFlag = nullptr)
 		{
-			e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
-				TaskHelper<T>::setPromise(promise, payload);
-			}, name);
+			if (aliveFlag) {
+				e.addToQueue([payload(std::move(payload)), promise(promise), flag=*aliveFlag]() mutable {
+					if (flag) {
+						TaskHelper<T>::setPromise(promise, payload);
+					}
+				}, name);
+			} else {
+				e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
+					TaskHelper<T>::setPromise(promise, payload);
+				}, name);
+			}
 		}
 	};
 
@@ -522,6 +536,22 @@ namespace Halley
 		auto promise = Promise<R>();
 		data->addContinuation([promise, f, executor](typename TaskHelper<T>::DataType v) mutable {
 			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, typeid(f).name());
+		});
+		return promise.getFuture();
+	}
+
+	bool isAliveFlagValid(const AliveFlag& flag);
+
+	template<typename T>
+	template<typename E, typename F>
+	inline auto Future<T>::then(const AliveFlag& flag, E & e, F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
+	{
+		using R = typename TaskHelper<T>::template FunctionHelper<F>::ReturnType;
+		std::reference_wrapper<E> executor(e);
+
+		auto promise = Promise<R>();
+		data->addContinuation([promise, f, executor, flag=NonOwningAliveFlag(flag)](typename TaskHelper<T>::DataType v) mutable {
+			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise, typeid(f).name(), &flag);
 		});
 		return promise.getFuture();
 	}

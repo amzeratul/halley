@@ -285,6 +285,7 @@ set(SOURCES
         "src/bytes/fuzzer.cpp"
         "src/bytes/serialization_dictionary.cpp"
         
+        "src/concurrency/alive_flag.cpp"
         "src/concurrency/concurrent.cpp"
         "src/concurrency/executor.cpp"
         "src/concurrency/shared_recursive_mutex.cpp"
@@ -758,6 +759,7 @@ set(HEADERS
         "include/halley/bytes/iserialization_dictionary.h"
         "include/halley/bytes/serialization_dictionary.h"
 
+        "include/halley/concurrency/alive_flag.h"
         "include/halley/concurrency/concurrent.h"
         "include/halley/concurrency/executor.h"
         "include/halley/concurrency/future.h"

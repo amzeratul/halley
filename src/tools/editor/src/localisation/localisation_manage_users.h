@@ -10,7 +10,6 @@ namespace Halley {
 	class LocalisationManageUsers : public UIWidget {
     public:
         LocalisationManageUsers(UIFactory& factory, LocalisationClient& client, Project& project, LocalisationEditorRoot& editorRoot);
-        ~LocalisationManageUsers() override;
 
         void onMakeUI() override;
 
@@ -22,7 +21,7 @@ namespace Halley {
 
         String currentUserId;
 
-        std::shared_ptr<bool> aliveFlag;
+        AliveFlag aliveFlag;
         Vector<LocUserData> curUsers;
         LocProjectData curUserDataWorkingCopy;
 

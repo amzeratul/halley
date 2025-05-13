@@ -12,15 +12,9 @@ LocalisationManageUsers::LocalisationManageUsers(UIFactory& factory, Localisatio
 	, client(client)
 	, project(project)
 	, editorRoot(editorRoot)
-	, aliveFlag(std::make_shared<bool>(true))
 {
 	UIWidget::setAnchor(UIAnchor());
 	factory.loadUI(*this, "halley/localisation/localisation_users");
-}
-
-LocalisationManageUsers::~LocalisationManageUsers()
-{
-	*aliveFlag = false;
 }
 
 void LocalisationManageUsers::onMakeUI()
@@ -58,10 +52,8 @@ void LocalisationManageUsers::onMakeUI()
 
 void LocalisationManageUsers::requestUserList()
 {
-	client.getUsers().then(Executors::getMainUpdateThread(), [=, flag = aliveFlag] (Vector<LocUserData> users) {
-		if (*flag) {
-			populateUserList(std::move(users));
-		}
+	client.getUsers().then(aliveFlag, Executors::getMainUpdateThread(), [=] (Vector<LocUserData> users) {
+		populateUserList(std::move(users));
 	});
 }
 
@@ -167,11 +159,9 @@ void LocalisationManageUsers::changePassword()
 void LocalisationManageUsers::updateLanguages()
 {
 	getWidgetAs<UIButton>("updateLanguages")->setEnabled(false);
-	client.putUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(Executors::getMainUpdateThread(), [=, flag = aliveFlag] (bool ok) {
-		if (*flag) {
-			if (!ok) {
-				setCurrentUser(currentUserId);
-			}
+	client.putUserProjectSettings(currentUserId, curUserDataWorkingCopy.languages).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+		if (!ok) {
+			setCurrentUser(currentUserId);
 		}
 	});
 }

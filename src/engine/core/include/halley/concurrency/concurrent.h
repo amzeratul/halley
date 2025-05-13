@@ -73,4 +73,25 @@ namespace Halley
 			foreach(ExecutionQueue::getDefault(), begin, end, f);
 		}
 	}
+
+	
+	template <typename F>
+	void AliveFlag::runOnUpdate(F f)
+	{
+		Concurrent::execute(Executors::getMainUpdateThread(), [flag = flag, f = std::move(f)] {
+			if (*flag) {
+				f();
+			}
+		});
+	}
+
+	template <typename E, typename F>
+	void AliveFlag::runOnExecutor(E& e, F f)
+	{
+		Concurrent::execute(e, [flag = flag, f = std::move(f)] {
+			if (*flag) {
+				f();
+			}
+		});
+	}
 }
