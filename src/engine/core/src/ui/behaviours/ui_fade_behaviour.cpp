@@ -17,7 +17,8 @@ void UIFadeBehaviour::init()
 void UIFadeBehaviour::update(Time time)
 {
 	curTime += time;
-	const auto t = curve.evaluate(static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0)));
+	const auto alpha = static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0));
+	const auto t = curve.evaluate(isReversed() ? 1.0f - alpha : alpha);
 	getWidget()->setDynamicValue("alpha", ConfigNode(t));
 }
 

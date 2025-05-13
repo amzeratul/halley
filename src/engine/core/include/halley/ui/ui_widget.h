@@ -182,7 +182,7 @@ namespace Halley {
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();
 		const Vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
-		void replayInitialBehaviours();
+		void replayInitialBehaviours(bool reversed = false);
 
 		std::optional<AudioHandle> playSound(const String& eventName);
 
