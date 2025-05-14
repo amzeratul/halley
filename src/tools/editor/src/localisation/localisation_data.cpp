@@ -188,6 +188,15 @@ LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key)
 	return &getEntry(iter->second);
 }
 
+const LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key) const
+{
+	const auto iter = keyMap.find(key);
+	if (iter == keyMap.end()) {
+		return nullptr;
+	}
+	return &getEntry(iter->second);
+}
+
 bool LocOriginalData::setValue(const String& key, const String& value)
 {
 	if (auto* entry = tryGetEntry(key)) {
@@ -263,15 +272,20 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 
 bool LocOriginalData::updateFromRemote(const LocOriginalData& remote)
 {
-	// This only updates versions
+	// This method won't pull actual strings, as the local is considered authoritative
+	// Only mark as modified if versions have changed
+
 	bool modified = false;
 	for (auto& chunk: chunks) {
 		for (auto& entry: chunk.entries) {
-			if (const auto remoteVersion = remote.tryGetVersion(entry.key)) {
-				if (entry.version != *remoteVersion) {
-					entry.version = *remoteVersion;
+			if (const auto* remoteEntry = remote.tryGetEntry(entry.key)) {
+				if (entry.version != remoteEntry->version) {
+					entry.version = remoteEntry->version;
 					modified = true;
 				}
+				entry.comment = remoteEntry->comment;
+				entry.context = remoteEntry->context;
+				entry.priority = remoteEntry->priority;
 			}
 		}
 	}
