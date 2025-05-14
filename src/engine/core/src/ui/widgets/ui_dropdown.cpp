@@ -252,8 +252,8 @@ void UIDropdown::update(Time t, bool moved)
 	const Vector2f basePos = getPosition() + border.xy();
 	Vector2f iconOffset;
 	if (icon.hasMaterial()) {
-		icon.setPosition(getPosition() + Vector2f(border.x, std::floor((getSize().y - icon.getScaledSize().y) / 2.0f)));
-		iconOffset = Vector2f(style.getFloat("iconGap") + icon.getScaledSize().x, 0.0f);
+		icon.setPosition(getPosition() + Vector2f(border.x, std::floor((getSize().y - icon.getUncroppedScaledSize().y) / 2.0f)));
+		iconOffset = Vector2f(style.getFloat("iconGap") + icon.getUncroppedScaledSize().x, 0.0f);
 	}
 	label.setAlignment(0.0f).setPosition(basePos + iconOffset);
 

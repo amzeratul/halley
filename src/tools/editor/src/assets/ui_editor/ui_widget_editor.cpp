@@ -263,7 +263,7 @@ void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<con
 	node.ensureType(ConfigNodeType::Map);
 	for (const auto& e: entries) {
 		const auto params = ComponentFieldParameters("", ComponentDataRetriever(node, e.name, e.label), e.defaultValue, {}, ConfigNode(e.options));
-		auto field = entityFieldFactory->makeField(e.type, params, ComponentEditorLabelCreation::Always);
+		auto field = entityFieldFactory->makeField(e.type, params, e.createLabel ? ComponentEditorLabelCreation::Always : ComponentEditorLabelCreation::Never);
 		root.add(field);
 	}
 }

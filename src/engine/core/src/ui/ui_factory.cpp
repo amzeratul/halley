@@ -39,20 +39,22 @@
 
 using namespace Halley;
 
-UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, Vector<String> defaultValue, ConfigNode options)
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, Vector<String> defaultValue, ConfigNode options, bool createLabel)
 	: label(std::move(label))
 	, name(std::move(name))
 	, type(std::move(type))
 	, defaultValue(std::move(defaultValue))
 	, options(std::move(options))
+	, createLabel(createLabel)
 {
 }
 
-UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, String defaultValue, ConfigNode options)
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, String defaultValue, ConfigNode options, bool createLabel)
 	: label(std::move(label))
 	, name(std::move(name))
 	, type(std::move(type))
 	, options(std::move(options))
+	, createLabel(createLabel)
 {
 	this->defaultValue.emplace_back(std::move(defaultValue));
 }
@@ -1052,9 +1054,9 @@ UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
 	result.canHaveChildren = false;
 
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<dropdown>", "dropdown");
-	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
 	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
 	result.entries.emplace_back("Notify on Hover", "notifyOnHover", "bool", "");
+	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "", ConfigNode(), false);
 
 	return result;
 }
@@ -1572,11 +1574,14 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 UIFactoryWidgetProperties UIFactory::getListProperties() const
 {
 	UIFactoryWidgetProperties result = getBaseListProperties();
+	auto options = result.entries.back();
+	result.entries.pop_back();
 
 	result.entries.emplace_back("Columns", "columns", "int", "1");
 	result.entries.emplace_back("Type", "type", "Halley::UISizerType", "vertical");
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Style", "style", "Halley::UIStyle<list>", "list");
+	result.entries.push_back(std::move(options));
 
 	return result;
 }
@@ -1758,7 +1763,7 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties(bool includeOptions) 
 	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
 
 	if (includeOptions) {
-		result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
+		result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "", ConfigNode(), false);
 	}
 
 	return result;
