@@ -644,6 +644,19 @@ String SocketIONetworkService::startListening(AcceptCallback callback)
 #endif
 	}
 
+	// Allow to reuse address/port.
+	if (protocol == NetworkProtocol::TCP) {
+		int reuse = 1;
+		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char *>(&reuse), sizeof(reuse)) != 0) {
+			Logger::logWarning("Failed to set SO_REUSEADDR option");
+		}
+#if defined(SO_REUSEPORT)
+		if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, reinterpret_cast<const char *>(&reuse), sizeof(reuse)) != 0) {
+			Logger::logWarning("Failed to set SO_REUSEPORT option");
+		}
+#endif
+	}
+
 	// Bind to local port.
 	int bindAddrLen;
 	const auto bindAddr = getSockAddrFromEndpoint(localEndpoint, &bindAddrLen);
