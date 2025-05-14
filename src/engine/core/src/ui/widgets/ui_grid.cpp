@@ -160,21 +160,19 @@ void UIGrid::draw(UIPainter& painter) const
 	});
 
 	// Header text
-	drawLine(painter, relClip.getTopLeft() + getPosition(), columns, columnNames.const_span(), {});
+	drawLine(painter, relClip.getTopLeft() + getPosition(), columns, columnNames.const_span(), {}, {});
 }
 
 void UIGrid::drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const
 {
-	const float lineHeight = getLineHeight();
-	const auto basePos = getPosition() + Vector2f(0, static_cast<float>(idx + 1) * lineHeight);
-
 	Vector<String> strs;
 	Vector<Colour4f> colours;
-	getLineDrawData(idx, strs, colours);
-	drawLine(painter, basePos, columns, strs.const_span(), colours.const_span());
+	Vector<Sprite> sprites;
+	getLineDrawData(idx, strs, colours, sprites);
+	drawLine(painter, getRowBasePos(idx), columns, strs.const_span(), colours.const_span(), sprites.const_span());
 }
 
-void UIGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const
+void UIGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites) const
 {
 	const float lineHeight = getLineHeight();
 	float curPos = 0;
@@ -195,7 +193,16 @@ void UIGrid::drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> c
 		curPos += width;
 	};
 
+	auto drawSprite = [&] (float width, const Sprite& sprite) {
+		const auto height = getLineHeight();
+		const auto cellSize = Vector2f(width, height);
+		painter.draw(sprite.clone(false).setPosition((pos + Vector2f(curPos, 0) + (cellSize - sprite.getUncroppedScaledSize()) / 2).floor()), true);
+	};
+
 	for (size_t i = 0; i < strings.size(); ++i) {
+		if (i < sprites.size() && sprites[i].hasMaterial()) {
+			drawSprite(columns[i], sprites[i]);
+		}
 		drawColumn(columns[i], strings[i], colours.size() > i ? std::optional(colours[i]) : std::nullopt);
 	}
 }
@@ -379,8 +386,23 @@ std::pair<Vector<float>, Vector<String>> UIGrid::getColumns() const
 	return { { 100.0f, 200.0f }, { "Key", "Value" } };
 }
 
-void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours) const
+void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const
 {
+}
+
+Vector2f UIGrid::getRowBasePos(int row) const
+{
+	return getPosition() + Vector2f(0, static_cast<float>(row + 1) * getLineHeight());
+}
+
+Vector2f UIGrid::getCellBasePos(int row, int column) const
+{
+	float x = 0;
+	for (int i = 0; i < std::min(column, static_cast<int>(columns.size())); ++i) {
+		x += columns[i];
+	}
+
+	return getRowBasePos(row) + Vector2f(x, 0);
 }
 
 const String& UIGrid::getKeyAt(int idx) const

@@ -163,7 +163,7 @@ children:
                 border: [4, 0, 0, 0]
                 widget:
                   class: textInput
-                  enabled: false
+                  enabled: true
                   id: context
               - uuid: be0ef790-2d3c-4f99-b20e-9b851cbb1abc
                 border: [20, 0, 0, 0]

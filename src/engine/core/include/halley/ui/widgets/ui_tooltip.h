@@ -18,7 +18,7 @@ namespace Halley {
 		Sprite background;
 		TextRenderer text;
 		Vector4f border;
-		Vector2f lastMousePos;
+		Vector2f displayPos;
 		
 		Time delay = 0;
 		Time timeOnWidget = 0;

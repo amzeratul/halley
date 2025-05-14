@@ -1150,6 +1150,11 @@ bool UIWidget::hasDynamicToolTip() const
 	return false;
 }
 
+Vector2f UIWidget::getToolTipPosition(Vector2f mousePos) const
+{
+	return mousePos + Vector2f(12, 20);
+}
+
 LocalisedString UIWidget::getToolTip() const
 {
 	return toolTip ? *toolTip : LocalisedString();

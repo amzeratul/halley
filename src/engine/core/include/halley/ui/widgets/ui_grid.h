@@ -20,6 +20,7 @@ namespace Halley {
         const String& getActiveSelectedKey() const;
         void setSelectedLine(int line);
         const HashSet<int>& getSelectedLines() const;
+        virtual const String& getKeyAt(int idx) const;
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
@@ -34,8 +35,10 @@ namespace Halley {
         void onDataUpdated();
 
         virtual std::pair<Vector<float>, Vector<String>> getColumns() const;
-        virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours) const;
-        virtual const String& getKeyAt(int idx) const;
+        virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;
+
+        Vector2f getRowBasePos(int row) const;
+        Vector2f getCellBasePos(int row, int column) const;
 
     	Colour4f textCol;
 
@@ -68,7 +71,7 @@ namespace Halley {
         mutable std::optional<Rect4f> drawClip;
 
         void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
-		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours) const;
+		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites) const;
 
         void onClickLine(std::optional<int> line, KeyMods mods);
     };

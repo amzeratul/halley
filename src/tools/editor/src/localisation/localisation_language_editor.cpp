@@ -195,21 +195,30 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 
 void LocalisationLanguageEditor::setComment(const String& comment)
 {
-	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
-		entry->comment = comment;
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* entry = srcLanguage.tryGetEntry(key)) {
+			entry->comment = comment;
+		}
 	}
 }
 
 void LocalisationLanguageEditor::setContext(const String& context)
 {
-	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
-		entry->context = context;
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* entry = srcLanguage.tryGetEntry(key)) {
+			entry->context = context;
+		}
 	}
 }
 
 void LocalisationLanguageEditor::setPriority(LocPriority priority)
 {
-	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
-		entry->priority = priority;
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* entry = srcLanguage.tryGetEntry(key)) {
+			entry->priority = priority;
+		}
 	}
 }
