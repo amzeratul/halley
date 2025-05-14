@@ -224,6 +224,11 @@ void UIGrid::setSelectedLine(int line)
 	onClickLine(line, KeyMods::None);
 }
 
+const HashSet<int>& UIGrid::getSelectedLines() const
+{
+	return selectedLines;
+}
+
 void UIGrid::onMouseOver(Vector2f mousePos)
 {
 	const float lineHeight = getLineHeight();

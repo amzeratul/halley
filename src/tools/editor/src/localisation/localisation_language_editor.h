@@ -10,6 +10,7 @@ namespace Halley {
         LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
 
 		void onMakeUI() override;
+		void update(Time t, bool moved) override;
 
 	private:
 		LocalisationEditorRoot& root;
@@ -31,5 +32,11 @@ namespace Halley {
 
 		void setChunk(const String& chunkId);
 		void setSelectedLine(int idx, const String& key);
+
+		void setSrcValue(const String& value);
+		void setDstValue(const String& value);
+		void setComment(const String& comment);
+		void setContext(const String& context);
+		void setPriority(LocPriority priority);
     };
 }

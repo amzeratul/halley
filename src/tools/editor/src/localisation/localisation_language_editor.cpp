@@ -69,22 +69,40 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	setHandle(UIEventType::TextChanged, "srcCurLine", [=] (const UIEvent& event)
 	{
-		if (canEdit && acceptingTextInput) {
-			//srcLanguage.setValue(curEditingKey, event.getStringData());
-		}
+		setSrcValue(event.getStringData());
 	});
 
 	setHandle(UIEventType::TextChanged, "dstCurLine", [=] (const UIEvent& event)
 	{
-		if (canEdit && acceptingTextInput && dstLanguage) {
-			dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), event.getStringData());
-		}
+		setDstValue(event.getStringData());
 	});
 
 	setHandle(UIEventType::TextSubmit, "dstCurLine", [=] (const UIEvent& event)
 	{
+		// Go to next line
 		grid->setSelectedLine(grid->getActiveSelectedLine() + 1);
 	});
+
+	setHandle(UIEventType::TextSubmit, "comment", [=] (const UIEvent& event)
+	{
+		setComment(event.getStringData());
+	});
+
+	setHandle(UIEventType::TextSubmit, "context", [=] (const UIEvent& event)
+	{
+		setContext(event.getStringData());
+	});
+
+	setHandle(UIEventType::DropdownSelectionChanged, "priority", [=] (const UIEvent& event)
+	{
+		setPriority(fromString<LocPriority>(event.getStringData()));
+	});
+
+	getWidget("editProperties")->setActive(canEdit);
+}
+
+void LocalisationLanguageEditor::update(Time t, bool moved)
+{
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
@@ -121,20 +139,34 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 
 void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 {
+	const bool hasMultiSel = grid->getSelectedLines().size() > 1;
+
 	auto curKey = getWidgetAs<UILabel>("curKey");
 	auto srcCurLine = getWidgetAs<UITextInput>("srcCurLine");
 	auto dstCurLine = getWidgetAs<UITextInput>("dstCurLine");
+	auto comment = getWidgetAs<UITextInput>("comment");
+	auto context = getWidgetAs<UITextInput>("context");
+	auto priority = getWidgetAs<UIDropdown>("priority");
 
 	curEditingKey = key;
 
 	acceptingTextInput = false;
 	if (idx >= 0) {
+		const auto& srcEntry = srcData->getEntry(idx);
+
 		curKey->setText(LocalisedString::fromUserString(key));
-		srcCurLine->setText(srcData->getEntry(idx).value);
+		srcCurLine->setText(srcEntry.value);
 		srcCurLine->setReadOnly(true);
+
+		if (canEdit) {
+			comment->setText(srcEntry.comment);
+			context->setText(srcEntry.context);
+			priority->setSelectedOption(toString(srcEntry.priority));
+		}
+
 		if (dstLanguage) {
-			const auto* entry = dstLanguage->tryGetEntry(srcData->getEntry(idx).key);
-			dstCurLine->setText(entry ? entry->value : "");
+			const auto* dstEntry = dstLanguage->tryGetEntry(srcEntry.key);
+			dstCurLine->setText(dstEntry ? dstEntry->value : "");
 			dstCurLine->setReadOnly(!canEdit);
 		}
 	} else {
@@ -145,4 +177,39 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 		dstCurLine->setReadOnly(true);
 	}
 	acceptingTextInput = true;
+}
+
+void LocalisationLanguageEditor::setSrcValue(const String& value)
+{
+	if (canEdit && acceptingTextInput) {
+		srcLanguage.setValue(curEditingKey, value);
+	}
+}
+
+void LocalisationLanguageEditor::setDstValue(const String& value)
+{
+	if (canEdit && acceptingTextInput && dstLanguage) {
+		dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), value);
+	}
+}
+
+void LocalisationLanguageEditor::setComment(const String& comment)
+{
+	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
+		entry->comment = comment;
+	}
+}
+
+void LocalisationLanguageEditor::setContext(const String& context)
+{
+	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
+		entry->context = context;
+	}
+}
+
+void LocalisationLanguageEditor::setPriority(LocPriority priority)
+{
+	if (auto* entry = srcLanguage.tryGetEntry(curEditingKey)) {
+		entry->priority = priority;
+	}
 }

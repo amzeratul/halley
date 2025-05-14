@@ -32,6 +32,27 @@ namespace Halley {
 		int obsoleteKeys = 0;
 	};;
 
+	enum class LocPriority : uint8_t {
+		Lowest,
+		Low,
+		Normal,
+		High,
+		Highest
+	};
+
+	template <>
+	struct EnumNames<LocPriority> {
+		constexpr std::array<const char*, 5> operator()() const {
+			return{{
+				"lowest",
+				"low",
+				"normal",
+				"high",
+				"highest"
+			}};
+		}
+	};
+
 	class LocalisationDataEntry {
 	public:
 		String key;
@@ -39,9 +60,10 @@ namespace Halley {
 		String context;
 		String comment;
 		int version = 0;
+		LocPriority priority = LocPriority::Normal;
 
 		LocalisationDataEntry() = default;
-		LocalisationDataEntry(String key, String value, String context = "", String comment = "");
+		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
 	};
 
 	class ILocOriginalData {
@@ -63,6 +85,7 @@ namespace Halley {
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
+		LocalisationDataEntry& getEntry(size_t idx);
 
 		bool operator<(const LocOriginalDataChunk& other) const;
 	};
@@ -83,6 +106,10 @@ namespace Halley {
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
+		LocalisationDataEntry& getEntry(size_t idx);
+		LocalisationDataEntry* tryGetEntry(const String& key);
+
+		bool setValue(const String& key, const String& value);
 
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);

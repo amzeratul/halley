@@ -18,11 +18,12 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 	return *this;
 }
 
-LocalisationDataEntry::LocalisationDataEntry(String key, String value, String context, String comment)
+LocalisationDataEntry::LocalisationDataEntry(String key, String value, String context, String comment, LocPriority priority)
 	: key(std::move(key))
 	, value(std::move(value))
 	, context(std::move(context))
 	, comment(std::move(comment))
+	, priority(priority)
 {
 }
 
@@ -82,6 +83,11 @@ size_t LocOriginalDataChunk::getNumEntries() const
 }
 
 const LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx) const
+{
+	return entries[idx];
+}
+
+LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx)
 {
 	return entries[idx];
 }
@@ -165,6 +171,30 @@ const LocalisationDataEntry& LocOriginalData::getEntry(size_t idx) const
 {
 	const auto index = keyIndices[idx];
 	return chunks[index.first].getEntry(index.second);
+}
+
+LocalisationDataEntry& LocOriginalData::getEntry(size_t idx)
+{
+	const auto index = keyIndices[idx];
+	return chunks[index.first].getEntry(index.second);
+}
+
+LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key)
+{
+	const auto iter = keyMap.find(key);
+	if (iter == keyMap.end()) {
+		return nullptr;
+	}
+	return &getEntry(iter->second);
+}
+
+bool LocOriginalData::setValue(const String& key, const String& value)
+{
+	if (auto* entry = tryGetEntry(key)) {
+		entry->value = value;
+		return true;
+	}
+	return false;
 }
 
 namespace {

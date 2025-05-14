@@ -19,6 +19,7 @@ namespace Halley {
     	int getActiveSelectedLine() const;
         const String& getActiveSelectedKey() const;
         void setSelectedLine(int line);
+        const HashSet<int>& getSelectedLines() const;
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
