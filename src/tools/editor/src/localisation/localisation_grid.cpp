@@ -32,7 +32,7 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 	const float priorityWidth = 30;
 	const float commentWidth = 30;
 	const float contextWidth = 30;
-	const float fixedWidth = numWidth + keyWidth + priorityWidth + commentWidth + contextWidth;
+	const float fixedWidth = numWidth + keyWidth + (showProperties ? priorityWidth + commentWidth + contextWidth : 0);
 	columns.push_back(numWidth);
 	columnNames.push_back("#");
 	columns.push_back(keyWidth);
@@ -48,12 +48,14 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 		columnNames.push_back("Translated");
 	}
 
-	columns.push_back(priorityWidth);
-	columnNames.push_back("Pri");
-	columns.push_back(commentWidth);
-	columnNames.push_back("Cmt");
-	columns.push_back(contextWidth);
-	columnNames.push_back("Ctx");
+	if (showProperties) {
+		columns.push_back(priorityWidth);
+		columnNames.push_back("Pri");
+		columns.push_back(commentWidth);
+		columnNames.push_back("Cmt");
+		columns.push_back(contextWidth);
+		columnNames.push_back("Ctx");
+	}
 
 	return { columns, columnNames };
 }
@@ -63,7 +65,7 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 	if (origData) {
 		const auto& entry = origData->getEntry(idx);
 
-		size_t len = 6 + (translatedData ? 1 : 0);
+		size_t len = 3 + (translatedData ? 1 : 0) + (showProperties ? 3 : 0);
 		size_t firstIcon = len - 3;
 		strs.resize(len);
 		colours.resize(len, textCol);
@@ -80,12 +82,14 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 			}
 		}
 
-		sprites[firstIcon] = priorityIcons.at(entry.priority);
-		if (!entry.comment.isEmpty()) {
-			sprites[firstIcon + 1] = commentIcon;
-		}
-		if (!entry.context.isEmpty()) {
-			sprites[firstIcon + 2] = contextIcon;
+		if (showProperties) {
+			sprites[firstIcon] = priorityIcons.at(entry.priority);
+			if (!entry.comment.isEmpty()) {
+				sprites[firstIcon + 1] = commentIcon;
+			}
+			if (!entry.context.isEmpty()) {
+				sprites[firstIcon + 2] = contextIcon;
+			}
 		}
 	}
 }
@@ -99,10 +103,11 @@ const String& LocalisationGrid::getKeyAt(int idx) const
 	}
 }
 
-void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationData* translatedData)
+void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties)
 {
 	this->origData = origData;
 	this->translatedData = translatedData;
+	this->showProperties = showProperties;
 
 	onDataUpdated();
 }

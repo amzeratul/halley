@@ -630,6 +630,11 @@ void LocalisationEditor::signOut()
 {
 	client->signOut();
 	state = State::NotConnected;
+	remoteStrings = {};
+	remoteStringsChunk = {};
+	remoteStringsFuture = {};
+	highestVersions = {};
+	gotRemoteStrings = false;
 }
 
 void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)

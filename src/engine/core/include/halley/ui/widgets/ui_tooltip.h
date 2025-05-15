@@ -15,6 +15,8 @@ namespace Halley {
 		
 	private:
 		const UIWidget* curWidget = nullptr;
+		LocalisedString curToolTipText;
+
 		Sprite background;
 		TextRenderer text;
 		Vector4f border;

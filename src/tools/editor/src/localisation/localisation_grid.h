@@ -8,7 +8,7 @@ namespace Halley {
     public:
         LocalisationGrid(UIFactory& factory);
 
-    	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData);
+    	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties);
 
         LocalisedString getToolTip() const override;
         bool hasDynamicToolTip() const override;
@@ -28,5 +28,7 @@ namespace Halley {
         HashMap<LocPriority, Sprite> priorityIcons;
         Sprite commentIcon;
         Sprite contextIcon;
+
+        bool showProperties = false;
     };
 }

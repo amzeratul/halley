@@ -100,7 +100,7 @@ void LocalisationLanguageEditor::onMakeUI()
 		setPriority(fromString<LocPriority>(event.getStringData()));
 	});
 
-	getWidget("editProperties")->setActive(canEdit);
+	getWidget("editProperties")->setActive(srcRemote != nullptr);
 }
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
@@ -136,7 +136,7 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 
 		return {};
 	});
-	grid->setData(srcData, dstLanguage);
+	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
 }
 
 void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)

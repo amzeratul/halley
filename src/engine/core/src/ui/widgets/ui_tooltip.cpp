@@ -16,30 +16,31 @@ UIToolTip::UIToolTip(const UIStyle& style)
 
 void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
 {
-	displayPos = mousePos;
+	displayPos = widget.getToolTipPosition(mousePos);
 	
 	if (curWidget == &widget && !widget.hasDynamicToolTip()) {
 		return;
 	}
 
-	if (curWidget != &widget) {
+	const auto& toolTipText = widget.getToolTip();
+	if (curWidget != &widget || widget.hasDynamicToolTip() && toolTipText != curToolTipText) {
 		hide();
 		curWidget = &widget;
 	}
 
-	const auto& toolTipText = widget.getToolTip();
-	if (toolTipText.getString().isEmpty()) {
+	curToolTipText = toolTipText;
+	if (curToolTipText.getString().isEmpty()) {
 		setActive(false);
 	} else {
 		setActive(true);
-		text.setText(text.split(toolTipText.getString(), maxWidth));
+		text.setText(text.split(curToolTipText.getString(), maxWidth));
 		const auto size = text.getExtents();
 		setMinSize(size + border.xy() + border.zw());
 
-		displayPos = widget.getToolTipPosition(mousePos);
 		if (widget.hasDynamicToolTip()) {
 			positionAt(displayPos);
 		}
+		layout();
 	}
 }
 
@@ -47,6 +48,7 @@ void UIToolTip::hide()
 {
 	setActive(false);
 	curWidget = nullptr;
+	curToolTipText = {};
 	timeOnWidget = 0;
 	visible = false;
 }
