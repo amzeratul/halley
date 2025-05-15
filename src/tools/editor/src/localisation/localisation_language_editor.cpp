@@ -1,13 +1,15 @@
 #include "localisation_language_editor.h"
 
+#include "localisation_client.h"
 #include "localisation_data.h"
 #include "localisation_editor_root.h"
 
 using namespace Halley;
 
-LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit)
+LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit)
 	: UIWidget("localisation_language_editor", {}, UISizer())
 	, root(root)
+	, client(client)
 	, project(project)
 	, factory(factory)
 	, srcLanguage(srcLanguage)
@@ -150,6 +152,11 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 
 	curEditingKey = key;
 
+	bool canEditProperties = canEdit && srcRemote;
+	comment->setReadOnly(!canEditProperties);
+	context->setReadOnly(!canEditProperties);
+	priority->setEnabled(canEditProperties);
+
 	acceptingTextInput = false;
 	if (idx >= 0) {
 		const auto& srcEntry = srcData->getEntry(idx);
@@ -195,30 +202,63 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 
 void LocalisationLanguageEditor::setComment(const String& comment)
 {
+	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			entry->comment = comment;
+			if (entry->comment != comment) {
+				entry->comment = comment;
+				modified += key;
+			}
 		}
 	}
+	onStringPropertiesModified(modified);
 }
 
 void LocalisationLanguageEditor::setContext(const String& context)
 {
+	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			entry->context = context;
+			if (entry->context != context) {
+				entry->context = context;
+				modified += key;
+			}
 		}
 	}
+	onStringPropertiesModified(modified);
 }
 
 void LocalisationLanguageEditor::setPriority(LocPriority priority)
 {
+	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			entry->priority = priority;
+			if (entry->priority != priority) {
+				entry->priority = priority;
+				modified += key;
+			}
 		}
+	}
+	onStringPropertiesModified(modified);
+}
+
+void LocalisationLanguageEditor::onStringPropertiesModified(const Vector<String>& keys)
+{
+	if (!srcRemote || keys.empty()) {
+		return;
+	}
+
+	auto entries = srcLanguage.makeStringPropertiesDelta(*srcRemote, keys);
+	if (!entries.empty()) {
+		auto future = client.putStringProperties(entries);
+
+		future.then(aliveFlag, Executors::getMainUpdateThread(), [remote = srcRemote, entries = std::move(entries)](bool ok) {
+			if (ok) {
+				remote->applyStringProperties(entries);
+			}
+		});
 	}
 }

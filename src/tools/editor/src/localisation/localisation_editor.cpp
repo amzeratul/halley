@@ -471,12 +471,12 @@ LocTranslationData* LocalisationEditor::getTranslationDataRemote(const I18NLangu
 
 void LocalisationEditor::openOriginalLanguage(bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), nullptr, getOriginalDataRemote(), nullptr, canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, *client, project, factory, getOriginalData(), nullptr, getOriginalDataRemote(), nullptr, canEdit));
 }
 
 void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit)
 {
-	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, project, factory, getOriginalData(), getTranslationData(language), getOriginalDataRemote(), getTranslationDataRemote(language), canEdit));
+	root.drillDown(std::make_shared<LocalisationLanguageEditor>(root, *client, project, factory, getOriginalData(), getTranslationData(language), getOriginalDataRemote(), getTranslationDataRemote(language), canEdit));
 }
 
 void LocalisationEditor::uploadLanguage(const I18NLanguage& language)

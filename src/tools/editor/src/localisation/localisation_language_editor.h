@@ -4,16 +4,18 @@
 namespace Halley {
 	class LocalisationEditorRoot;
 	class LocOriginalData;
+	class LocalisationClient;
 
 	class LocalisationLanguageEditor : public UIWidget {
     public:
-        LocalisationLanguageEditor(LocalisationEditorRoot& root, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
+        LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
 
 		void onMakeUI() override;
 		void update(Time t, bool moved) override;
 
 	private:
 		LocalisationEditorRoot& root;
+		LocalisationClient& client;
 		Project& project;
 		UIFactory& factory;
 		LocOriginalData& srcLanguage;
@@ -22,6 +24,8 @@ namespace Halley {
 		LocTranslationData* locRemote;
 		bool canEdit = false;
 		bool acceptingTextInput = false;
+
+		AliveFlag aliveFlag;
 
 		const ILocOriginalData* srcData = nullptr;
 		HashMap<String, size_t> srcRemoteDataIndex;
@@ -38,5 +42,7 @@ namespace Halley {
 		void setComment(const String& comment);
 		void setContext(const String& context);
 		void setPriority(LocPriority priority);
+
+		void onStringPropertiesModified(const Vector<String>& keys);
     };
 }

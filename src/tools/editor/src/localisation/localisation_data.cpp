@@ -206,6 +206,34 @@ bool LocOriginalData::setValue(const String& key, const String& value)
 	return false;
 }
 
+Vector<LocStringProperties> LocOriginalData::makeStringPropertiesDelta(const LocOriginalData& remote, const Vector<String>& keysModified) const
+{
+	Vector<LocStringProperties> result;
+
+	for (const auto& key: keysModified) {
+		const auto* mine = tryGetEntry(key);
+		const auto* theirs = remote.tryGetEntry(key);
+
+		if (mine && theirs) {
+			auto entry = LocStringProperties(*theirs, *mine);
+			if (entry.hasChange()) {
+				result += std::move(entry);
+			}
+		}
+	}
+
+	return result;
+}
+
+void LocOriginalData::applyStringProperties(const Vector<LocStringProperties>& entries)
+{
+	for (const auto& change: entries) {
+		if (auto* entry = tryGetEntry(change.key)) {
+			change.apply(*entry);
+		}
+	}
+}
+
 namespace {
 	LocOriginalDataChunk generateChunk(String name, const ConfigNode& data, const ILocalisationInfoRetriever& infoRetriever)
 	{
@@ -493,3 +521,52 @@ bool LocTranslationData::operator!=(const LocTranslationData& other) const
 	return !(*this == other);
 }
 
+LocStringProperties::LocStringProperties(const LocalisationDataEntry& from, const LocalisationDataEntry& to)
+{
+	assert(from.key == to.key);
+
+	key = from.key;
+	if (from.comment != to.comment) {
+		comment = to.comment;
+	}
+	if (from.context != to.context) {
+		context = to.context;
+	}
+	if (from.priority != to.priority) {
+		priority = to.priority;
+	}
+}
+
+void LocStringProperties::apply(LocalisationDataEntry& entry) const
+{
+	if (comment) {
+		entry.comment = *comment;
+	}
+	if (context) {
+		entry.context = *context;
+	}
+	if (priority) {
+		entry.priority = *priority;
+	}
+}
+
+bool LocStringProperties::hasChange() const
+{
+	return comment || context || priority;
+}
+
+ConfigNode LocStringProperties::toConfigNode() const
+{
+	ConfigNode result;
+	result["key"] = key;
+	if (context) {
+		result["context"] = context;
+	}
+	if (comment) {
+		result["comment"] = comment;
+	}
+	if (priority) {
+		result["priority"] = priority;
+	}
+	return result;
+}

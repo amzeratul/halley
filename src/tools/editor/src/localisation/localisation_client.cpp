@@ -141,6 +141,21 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& 
 	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, getChunkConfig(origData));
 }
 
+Future<bool> LocalisationClient::putStringProperties(const Vector<LocStringProperties>& data)
+{
+	const auto url = "/strings-properties/" + Encode::encodeURL(project);
+
+	ConfigNode entries = ConfigNode::SequenceType();
+	for (const auto& entry: data) {
+		entries.push_back(entry.toConfigNode());
+	}
+
+	ConfigNode payload;
+	payload["entries"] = std::move(entries);
+
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, std::move(payload));
+}
+
 Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion)
 {
 	const auto url = "/strings/" + Encode::encodeURL(project)
@@ -256,27 +271,18 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 {
 	ConfigNode keys;
 	ConfigNode values;
-	ConfigNode comments;
-	ConfigNode contexts;
-	ConfigNode priorities;
 
 	const auto n = data.getNumEntries();
 	for (int i = 0; i < n; ++i) {
 		const auto& entry = data.getEntry(i);
 		keys.push_back(ConfigNode(entry.key));
 		values.push_back(ConfigNode(entry.value));
-		comments.push_back(ConfigNode(entry.comment));
-		contexts.push_back(ConfigNode(entry.context));
-		priorities.push_back(ConfigNode(entry.priority == LocPriority::Normal ? "" : toString(entry.priority)));
 	}
 
 	ConfigNode result;
 	result["chunkId"] = data.name;
 	result["keys"] = std::move(keys);
 	result["values"] = std::move(values);
-	result["comments"] = std::move(comments);
-	result["contexts"] = std::move(contexts);
-	result["priorities"] = priorities;
 
 	return result;
 }

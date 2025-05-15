@@ -90,6 +90,22 @@ namespace Halley {
 		bool operator<(const LocOriginalDataChunk& other) const;
 	};
 
+	class LocStringProperties {
+	public:
+		String key;
+		std::optional<String> comment;
+		std::optional<String> context;
+		std::optional<LocPriority> priority;
+
+		LocStringProperties() = default;
+		LocStringProperties(const LocalisationDataEntry& from, const LocalisationDataEntry& to);
+
+		void apply(LocalisationDataEntry& entry) const;
+		bool hasChange() const;
+
+		ConfigNode toConfigNode() const;
+	};
+
 	class LocOriginalData : public ILocOriginalData {
 	public:
 		void setLanguage(I18NLanguage language);
@@ -111,6 +127,9 @@ namespace Halley {
 		const LocalisationDataEntry* tryGetEntry(const String& key) const;
 
 		bool setValue(const String& key, const String& value);
+
+		Vector<LocStringProperties> makeStringPropertiesDelta(const LocOriginalData& remote, const Vector<String>& keysModified) const;
+		void applyStringProperties(const Vector<LocStringProperties>& entries);
 
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
