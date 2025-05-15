@@ -39,7 +39,7 @@ namespace Halley {
 			InvalidLogin
 		};
 
-		LocalisationClient(WebAPI& web, String baseUrl, String project);
+		LocalisationClient(WebAPI& web, String baseUrl, String project, I18NLanguage origLanguage);
 
 		Future<LoginResult> signIn(const String& username, const String& password);
 		void signOut();
@@ -47,7 +47,7 @@ namespace Halley {
 		Future<bool> putOriginalStrings(const LocOriginalData& origData);
 		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData);
 		Future<bool> putStringProperties(const Vector<LocStringProperties>& data);
-		Future<std::optional<LocStringSet>> getStrings(I18NLanguage origLanguage, int minVersion);
+		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 
@@ -70,6 +70,7 @@ namespace Halley {
 		WebAPI& web;
 		String baseURL;
 		String project;
+		I18NLanguage origLanguage;
 
 		String username;
 		String password;

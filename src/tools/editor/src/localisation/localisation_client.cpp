@@ -56,10 +56,11 @@ bool LocUserData::operator!=(const LocUserData& other) const
 	return !(*this == other);
 }
 
-LocalisationClient::LocalisationClient(WebAPI& web, String origBaseURL, String project)
+LocalisationClient::LocalisationClient(WebAPI& web, String origBaseURL, String project, I18NLanguage origLanguage)
 	: web(web)
 	, baseURL(std::move(origBaseURL))
 	, project(std::move(project))
+	, origLanguage(origLanguage)
 {
 	if (baseURL.endsWith("/")) {
 		baseURL = baseURL.left(baseURL.size() - 1);
@@ -156,13 +157,16 @@ Future<bool> LocalisationClient::putStringProperties(const Vector<LocStringPrope
 	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, std::move(payload));
 }
 
-Future<std::optional<LocStringSet>> LocalisationClient::getStrings(I18NLanguage origLanguage, int minVersion)
+Future<std::optional<LocStringSet>> LocalisationClient::getStrings(std::optional<String> chunkId, int minVersion)
 {
-	const auto url = "/strings/" + Encode::encodeURL(project)
-		+ "?minVersion=" + toString(minVersion)
+	auto url = "/strings/" + Encode::encodeURL(project);
+	if (chunkId) {
+		url += "/" + *chunkId;
+	}
+	url += "?minVersion=" + toString(minVersion)
 		+ "&languages=" + Encode::encodeURL(String::concatList(languages, ","));
 
-	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
+	return sendWithAuthorization(HTTPMethod::GET, url).then([origLanguage = origLanguage] (std::unique_ptr<HTTPResponse> response) -> std::optional<LocStringSet>
 	{
 		if (response->getResponseCode() == 200) {
 			return toLocStringSet(origLanguage, JSONConvert::parseConfig(response->getBody()));

@@ -190,7 +190,7 @@ void LocalisationEditor::onReturnedFromDrillDown()
 void LocalisationEditor::tryLoading()
 {
 	if (!loaded) {
-		client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName());
+		client = std::make_unique<LocalisationClient>(*api.web, project.getProperties().getLocalisationServer(), project.getBinName(), project.getProperties().getOriginalLanguage());
 		factory.loadUI(*this, "halley/localisation/localisation_editor");
 		project.addAssetLoadedListener(this);
 		loaded = true;
@@ -560,8 +560,7 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 {
 	if (result == LocalisationClient::LoginResult::Success) {
 		state = State::Synchronising;
-		int minVersion = 0;
-		remoteStringsFuture = client->getStrings(project.getProperties().getOriginalLanguage(), minVersion);
+		remoteStringsFuture = client->getStrings();
 		curMessage = "Synchronising...";
 	} else if (result == LocalisationClient::LoginResult::ServerNotFound) {
 		state = State::NotConnected;
