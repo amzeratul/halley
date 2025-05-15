@@ -446,7 +446,7 @@ LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& l
 
 	for (const auto& [name, data]: LocOriginalData::getProjectLocData(language, project)) {
 		for (const auto& entry: data.asSequence()) {
-			result.entries[entry["key"].asString()] = LocTranslationEntry { entry["value"].asString(""), 0 };
+			result.entries[entry["key"].asString()] = LocTranslationEntry { entry["value"].asString(""), -1 };
 		}
 	}
 
@@ -496,6 +496,17 @@ bool LocTranslationData::updateLocalFromRemote(const LocTranslationData& remote)
 	}
 
 	return nModified > 0;
+}
+
+void LocTranslationData::updateOriginalVersions(const LocOriginalData& originalLanguage)
+{
+	for (auto& [k, e]: entries) {
+		if (e.origVersion == -1) {
+			if (const auto* orig = originalLanguage.tryGetEntry(k)) {
+				e.origVersion = orig->version;
+			}
+		}
+	}
 }
 
 bool LocTranslationData::pruneKeys(const LocOriginalData& originalLanguage)

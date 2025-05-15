@@ -181,6 +181,7 @@ namespace Halley {
 
 		bool update(const LocTranslationData& remote);
 		bool updateLocalFromRemote(const LocTranslationData& remote);
+		void updateOriginalVersions(const LocOriginalData& originalLanguage);
 		bool pruneKeys(const LocOriginalData& originalLanguage);
 
 		bool operator==(const LocTranslationData& other) const;

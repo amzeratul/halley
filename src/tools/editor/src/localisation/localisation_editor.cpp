@@ -496,7 +496,13 @@ void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit
 void LocalisationEditor::uploadLanguage(const I18NLanguage& language)
 {
 	if (localStrings) {
-		client->putTranslatedStrings(language, localStrings->localised.at(language.getISOCode()));
+		auto& localised = localStrings->localised.at(language.getISOCode());
+
+		if (remoteStrings && remoteStrings->originalLanguage && isDevEnvironment()) {
+			localised.updateOriginalVersions(*remoteStrings->originalLanguage);
+		}
+
+		client->putTranslatedStrings(language, localised);
 	}
 }
 
