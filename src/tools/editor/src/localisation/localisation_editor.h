@@ -4,6 +4,7 @@
 #include "localisation_data.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
+#include "halley/text/halleystring.h"
 
 namespace Halley {
 	class ProjectWindow;
@@ -23,9 +24,9 @@ namespace Halley {
 	class LocalisationEditor : public UIWidget, public Project::IAssetLoadListener {
     public:
         LocalisationEditor(LocalisationEditorRoot& root, ProjectWindow& projectWindow, UIFactory& factory);
-        ~LocalisationEditor() override;
 
         void update(Time t, bool moved) override;
+        void onEditorRootUpdate(Time t);
         void onMakeUI() override;
         void onActiveChanged(bool active) override;
 
@@ -39,9 +40,11 @@ namespace Halley {
         UIFactory& factory;
         const HalleyAPI& api;
 
-        std::shared_ptr<bool> aliveFlag;
+        AliveFlag aliveFlag;
         std::unique_ptr<LocalisationClient> client;
         std::shared_ptr<ISaveData> storageContainer;
+
+        Time timeSinceLastStringCheck = 0;
 
         enum class State {
 	        NotConnected,
@@ -68,13 +71,18 @@ namespace Halley {
         bool loaded = false;
         bool gotLocalStrings = false;
         bool gotRemoteStrings = false;
+        bool pendingRemoteStrings = false;
+        bool firstUpdate = true;
         State state = State::NotConnected;
         std::optional<String> curMessage;
 
         std::optional<LocStringSet> localStrings;
         std::optional<LocStringSet> remoteStrings;
         Future<LocStringSet> localStringsFuture;
-        Future<std::optional<LocStringSet>> remoteStringsFuture;
+
+		Future<std::optional<LocStringSet>> remoteStringsFuture;
+        std::optional<String> remoteStringsChunk;
+        HashMap<String, int> highestVersions;
 
         void tryLoading();
 
@@ -84,7 +92,7 @@ namespace Halley {
         void saveLocalStringsToStorage();
 
         void onLocalStringsModified();
-        void onRemoteStringsReceived();
+        void onStringsReady(bool forceUpdate);
         bool updateLocalFromRemote();
 
         void populateData();
@@ -125,5 +133,10 @@ namespace Halley {
         void downloadTranslations();
 
         Vector<I18NLanguage> getLanguages() const;
+
+        int getHighestVersion(std::optional<String> chunk) const;
+        void updateCheckForNewStrings(Time t);
+        void checkForNewStrings();
+        void onRemoteStringsReceived(LocStringSet result);
     };
 }

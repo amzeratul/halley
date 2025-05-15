@@ -175,6 +175,21 @@ Future<std::optional<LocStringSet>> LocalisationClient::getStrings(std::optional
 	});
 }
 
+Future<int> LocalisationClient::getStringsVersion()
+{
+	const auto url = "/strings-version/" + Encode::encodeURL(project);
+
+	return sendWithAuthorization(HTTPMethod::GET, url).then([] (std::unique_ptr<HTTPResponse> response) -> int
+	{
+		if (response->getResponseCode() == 200) {
+			auto body = JSONConvert::parseConfig(response->getBody());
+			return body["version"].asInt(-1);
+		} else {
+			return -2;
+		}
+	});
+}
+
 Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData)
 {
 	const auto url = "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());

@@ -134,7 +134,8 @@ namespace Halley {
 		static Vector<std::pair<String, ConfigNode>> getProjectLocData(const I18NLanguage& language, Project& project);
 		static LocOriginalData generateFromProject(const I18NLanguage& language, Project& project, const ILocalisationInfoRetriever& infoRetriever);
 
-		bool updateFromRemote(const LocOriginalData& remote);
+		bool update(const LocOriginalData& other);
+		bool updateLocalFromRemote(const LocOriginalData& remote);
 
 		void indexData();
 
@@ -178,7 +179,8 @@ namespace Halley {
 		TranslationStats getTranslationStats(const LocOriginalData& original) const;
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
 
-		bool updateFromRemote(const LocTranslationData& remote);
+		bool update(const LocTranslationData& remote);
+		bool updateLocalFromRemote(const LocTranslationData& remote);
 		bool pruneKeys(const LocOriginalData& originalLanguage);
 
 		bool operator==(const LocTranslationData& other) const;
@@ -197,5 +199,6 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
 
 		LocTranslationData& getLocalised(const I18NLanguage& language);
+		bool updateWith(const LocStringSet& other);
 	};
 }

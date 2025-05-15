@@ -71,16 +71,10 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWind
 	, project(projectWindow.getProject())
 	, factory(factory)
 	, api(projectWindow.getAPI())
-	, aliveFlag(std::make_shared<bool>(true))
 {
 	if (!project.getProperties().isDevEnvironment()) {
 		storageContainer = api.system->getStorageContainer(SaveDataType::SaveLocal, "loc_data_" + project.getBinName());
 	}
-}
-
-LocalisationEditor::~LocalisationEditor()
-{
-	*aliveFlag = false;
 }
 
 void LocalisationEditor::onMakeUI()
@@ -134,33 +128,6 @@ void LocalisationEditor::update(Time t, bool moved)
 {
 	tryLoading();
 
-	if (localStringsFuture.isReady()) {
-		localStrings = localStringsFuture.get();
-		localStringsFuture = {};
-		gotLocalStrings = true;
-		populateData();
-	}
-
-	if (remoteStringsFuture.isReady()) {
-		if (auto result = remoteStringsFuture.get()) {
-			remoteStrings = *result;
-			remoteStringsFuture = {};
-			state = State::Synchronised;
-			curMessage = "Waiting on Strings...";
-			gotRemoteStrings = true;
-		} else {
-			remoteStringsFuture = {};
-			state = State::NotConnected;
-			curMessage = "Unable to retrieve Strings.";
-		}
-	}
-
-	if (state == State::Synchronised && gotRemoteStrings && gotLocalStrings) {
-		state = State::Ready;
-		curMessage = {};
-		onRemoteStringsReceived();
-	}
-
 	getWidget("signInPanel")->setActive(state == State::NotConnected);
 	getWidget("messagePanel")->setActive(curMessage.has_value());
 	getWidget("toolbar")->setActive(state == State::Ready);
@@ -174,6 +141,48 @@ void LocalisationEditor::update(Time t, bool moved)
 	}
 }
 
+void LocalisationEditor::onEditorRootUpdate(Time t)
+{
+	tryLoading();
+
+	if (localStringsFuture.isReady()) {
+		localStrings = localStringsFuture.get();
+		localStringsFuture = {};
+		gotLocalStrings = true;
+		populateData();
+	}
+
+	if (remoteStringsFuture.isReady()) {
+		if (auto result = remoteStringsFuture.get()) {
+			onRemoteStringsReceived(std::move(*result));
+			remoteStringsFuture = {};
+			if (state == State::Synchronising) {
+				state = State::Synchronised;
+				curMessage = "Waiting on Strings...";
+			}
+		} else {
+			if (state == State::Synchronising) {
+				remoteStringsFuture = {};
+				state = State::NotConnected;
+				curMessage = "Unable to retrieve Strings.";
+			}
+		}
+	}
+
+	if (state == State::Synchronised && gotRemoteStrings && gotLocalStrings) {
+		state = State::Ready;
+		curMessage = {};
+	}
+
+	if (pendingRemoteStrings && state == State::Ready) {
+		pendingRemoteStrings = false;
+		onStringsReady(firstUpdate);
+		firstUpdate = false;
+	}
+
+	updateCheckForNewStrings(t);
+}
+
 void LocalisationEditor::onActiveChanged(bool active)
 {
 }
@@ -184,6 +193,7 @@ void LocalisationEditor::onAssetsLoaded()
 
 void LocalisationEditor::onReturnedFromDrillDown()
 {
+	checkForNewStrings();
 	onLocalStringsModified();
 }
 
@@ -254,10 +264,10 @@ void LocalisationEditor::onLocalStringsModified()
 	populateData();
 }
 
-void LocalisationEditor::onRemoteStringsReceived()
+void LocalisationEditor::onStringsReady(bool forceUpdate)
 {
 	const bool updated = updateLocalFromRemote();
-	if (!updated) {
+	if (!updated && forceUpdate) {
 		// The above will call this already if it detects local changes
 		populateData();
 	}
@@ -265,10 +275,14 @@ void LocalisationEditor::onRemoteStringsReceived()
 
 bool LocalisationEditor::updateLocalFromRemote()
 {
+	if (!localStrings || !remoteStrings) {
+		return false;
+	}
+
 	bool modified = false;
 
 	if (localStrings->originalLanguage && remoteStrings->originalLanguage) {
-		modified = localStrings->originalLanguage->updateFromRemote(*remoteStrings->originalLanguage) || modified;
+		modified = localStrings->originalLanguage->updateLocalFromRemote(*remoteStrings->originalLanguage) || modified;
 	}
 
 	for (auto& remoteLoc: remoteStrings->localised) {
@@ -276,7 +290,7 @@ bool LocalisationEditor::updateLocalFromRemote()
 		if (remoteStrings->originalLanguage) {
 			modified = locData.pruneKeys(*remoteStrings->originalLanguage) || modified;
 		}
-		modified = locData.updateFromRemote(remoteLoc.second) || modified;
+		modified = locData.updateLocalFromRemote(remoteLoc.second) || modified;
 	}
 
 	if (modified) {
@@ -538,15 +552,77 @@ Vector<I18NLanguage> LocalisationEditor::getLanguages() const
 	return projLangs;
 }
 
+int LocalisationEditor::getHighestVersion(std::optional<String> chunk) const
+{
+	int highest = 0;
+
+	const auto iter = highestVersions.find("*");
+	if (iter != highestVersions.end()) {
+		highest = iter->second;
+	}
+
+	if (chunk) {
+		const auto iter2 = highestVersions.find(*chunk);
+		if (iter2 != highestVersions.end()) {
+			highest = std::max(highest, iter2->second);
+		}
+	}
+
+	return highest;
+}
+
+void LocalisationEditor::updateCheckForNewStrings(Time t)
+{
+	const Time timeBetweenChecks = 3;//remoteStringsChunk ? 3 : 5;
+
+	timeSinceLastStringCheck += t;
+	if (timeSinceLastStringCheck >= timeBetweenChecks) {
+		checkForNewStrings();
+	}
+}
+
+void LocalisationEditor::checkForNewStrings()
+{
+	if (!remoteStrings || remoteStringsFuture.isValid()) {
+		return;
+	}
+
+	timeSinceLastStringCheck = 0;
+
+	const auto curVersion = getHighestVersion(remoteStringsChunk);
+
+	client->getStringsVersion().then(aliveFlag, Executors::getMainUpdateThread(), [this, curVersion] (int latestVersion) {
+		if (latestVersion > curVersion) {
+			remoteStringsFuture = client->getStrings(remoteStringsChunk, curVersion + 1);
+		}
+	});
+}
+
+void LocalisationEditor::onRemoteStringsReceived(LocStringSet result)
+{
+	auto& highest = highestVersions[remoteStringsChunk.value_or("*")];
+	highest = std::max(highest, result.highestVersion);
+
+	if (gotRemoteStrings) {
+		const bool changed = remoteStrings->updateWith(result);
+		pendingRemoteStrings = changed;
+		if (changed) {
+			Logger::logInfo("Got updated remote Strings!");
+		}
+	} else {
+		remoteStrings = std::move(result);
+		gotRemoteStrings = true;
+		pendingRemoteStrings = true;
+	}
+}
+
 void LocalisationEditor::signIn(const String& username, const String& password)
 {
 	curMessage = "Connecting...";
 	state = State::Connecting;
-	client->signIn(username, password).then(Executors::getMainUpdateThread(), [this, aliveFlag = aliveFlag] (LocalisationClient::LoginResult result)
+	client->signIn(username, password).then(aliveFlag, Executors::getMainUpdateThread(), [this] (LocalisationClient::LoginResult result)
 	{
-		if (*aliveFlag) {
-			onConnected(result);
-		}
+		onConnected(result);
 	});
 }
 
@@ -575,14 +651,12 @@ void LocalisationEditor::uploadOriginalStrings()
 {
 	if (localStrings) {
 		curMessage = "Uploading original strings...";
-		client->putOriginalStrings(*localStrings->originalLanguage).then([this, aliveFlag = aliveFlag] (bool result)
+		client->putOriginalStrings(*localStrings->originalLanguage).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
 		{
-			if (*aliveFlag) {
-				if (result) {
-					curMessage = {};
-				} else {
-					curMessage = "Error uploading original strings.";
-				}
+			if (result) {
+				curMessage = {};
+			} else {
+				curMessage = "Error uploading original strings.";
 			}
 		});
 	}

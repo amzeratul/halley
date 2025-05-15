@@ -11,6 +11,8 @@ namespace Halley {
         void drillDown(std::shared_ptr<UIWidget> widget);
         void returnToRoot();
 
+        void update(Time t, bool moved) override;
+
         LocalisedString getLanguageName(const I18NLanguage& language) const;
         Sprite getFlag(const I18NLanguage& language) const;
 

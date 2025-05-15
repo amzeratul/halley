@@ -37,6 +37,11 @@ void LocalisationEditorRoot::returnToRoot()
 	editor->onReturnedFromDrillDown();
 }
 
+void LocalisationEditorRoot::update(Time t, bool moved)
+{
+	editor->onEditorRootUpdate(t);
+}
+
 void LocalisationEditorRoot::setupCountryNames()
 {
 	countryNames["GB"] = "United Kingdom";

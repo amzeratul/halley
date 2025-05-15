@@ -48,6 +48,7 @@ namespace Halley {
 		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData);
 		Future<bool> putStringProperties(const Vector<LocStringProperties>& data);
 		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);
+		Future<int> getStringsVersion();
 
 		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
 

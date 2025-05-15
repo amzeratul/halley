@@ -298,7 +298,21 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 	return result;
 }
 
-bool LocOriginalData::updateFromRemote(const LocOriginalData& remote)
+bool LocOriginalData::update(const LocOriginalData& other)
+{
+	bool modified = false;
+	for (const auto& otherChunk: other.chunks) {
+		for (const auto& otherEntry: otherChunk.entries) {
+			if (auto* entry = tryGetEntry(otherEntry.key)) {
+				*entry = otherEntry;
+				modified = true;
+			}
+		}
+	}
+	return modified;
+}
+
+bool LocOriginalData::updateLocalFromRemote(const LocOriginalData& remote)
 {
 	// This method won't pull actual strings, as the local is considered authoritative
 	// Only mark as modified if versions have changed
@@ -439,7 +453,23 @@ LocTranslationData LocTranslationData::generateFromProject(const I18NLanguage& l
 	return result;
 }
 
-bool LocTranslationData::updateFromRemote(const LocTranslationData& remote)
+bool LocTranslationData::update(const LocTranslationData& other)
+{
+	int nModified = 0;
+	for (const auto& [key, otherEntry]: other.entries) {
+		auto iter = entries.find(key);
+		if (iter == entries.end()) {
+			iter = entries.insert_or_assign(key, LocTranslationEntry()).first;
+		}
+		auto& myEntry = iter->second;
+
+		myEntry = otherEntry;
+		++nModified;
+	}
+	return nModified > 0;
+}
+
+bool LocTranslationData::updateLocalFromRemote(const LocTranslationData& remote)
 {
 	if (remote.language != language) {
 		throw Exception("Language mismatch: local is " + language.getISOCode() + ", remote is " + remote.language.getISOCode(), HalleyExceptions::Tools);
@@ -509,6 +539,26 @@ LocTranslationData& LocStringSet::getLocalised(const I18NLanguage& language)
 	data.language = language;
 	localised[code] = std::move(data);
 	return localised.at(code);
+}
+
+bool LocStringSet::updateWith(const LocStringSet& other)
+{
+	bool modified = false;
+
+	// Note: do NOT update version here! Partial updates need separate version tracking
+
+	if (originalLanguage && other.originalLanguage) {
+		modified = originalLanguage->update(*other.originalLanguage) || modified;
+	}
+
+	for (const auto& [k, v]: other.localised) {
+		const auto iter = localised.find(k);
+		if (iter != localised.end()) {
+			modified = iter->second.update(v) || modified;
+		}
+	}
+
+	return modified;
 }
 
 bool LocTranslationData::operator==(const LocTranslationData& other) const
