@@ -86,36 +86,45 @@ String AudioClip::getName() const
 
 size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
-	Expects(pos + len <= sampleLength);
+	try {
+		Expects(pos + len <= sampleLength);
 
-	if (streaming) {
-		// NB: this assumes the channels will be read in order.
-		if (channelN == 0) {
-			if (buffer.size() != numChannels) {
-				buffer.resize(numChannels);
-			}
-			for (auto& b: buffer) {
-				if (b.size() <= len) {
-					b.resize(len);
+		if (streaming) {
+			// NB: this assumes the channels will be read in order.
+			if (channelN == 0) {
+				if (buffer.size() != numChannels) {
+					buffer.resize(numChannels);
 				}
+				for (auto& b: buffer) {
+					if (b.size() <= len) {
+						b.resize(len);
+					}
+				}
+
+				auto* vorbis = getVorbisData(pos);
+				if (vorbis) {
+					vorbis->read(buffer);
+				} else {
+					for (auto& b : buffer) {
+						AudioMixer::zero(b);
+					}
+				}
+				streamPos = pos + len;
 			}
 
-			auto* vorbis = getVorbisData(pos);
-			if (vorbis) {
-				vorbis->read(buffer);
-			} else {
-				for (auto& b : buffer) {
-					AudioMixer::zero(b);
-				}
-			}
-			streamPos = pos + len;
+			AudioMixer::copy(dst, AudioSamples(buffer[channelN]).subspan(0, len), gain0, gain1);
+		} else {
+			AudioMixer::copy(dst, AudioSamples(samples.at(channelN)).subspan(pos, len), gain0, gain1);
 		}
-
-		AudioMixer::copy(dst, AudioSamples(buffer[channelN]).subspan(0, len), gain0, gain1);
-	} else {
-		AudioMixer::copy(dst, AudioSamples(samples.at(channelN)).subspan(pos, len), gain0, gain1);
+		return len;
+	} catch (std::exception& e) {
+		Logger::logError("Exception while trying to read data from AudioClip \"" + getAssetId() + "\":");
+		Logger::logException(e);
+		return 0;
+	} catch (...) {
+		Logger::logError("Unknown exception while trying to read data from AudioClip \"" + getAssetId() + "\"");
+		return 0;
 	}
-	return len;
 }
 
 VorbisData* AudioClip::getVorbisData(size_t targetPos) const
