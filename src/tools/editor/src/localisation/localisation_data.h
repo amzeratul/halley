@@ -149,8 +149,8 @@ namespace Halley {
 	class LocTranslationEntry {
 	public:
 		String value;
-		int32_t version;
-		int32_t origVersion;
+		int32_t version = -1;
+		int32_t origVersion = -1;
 
 		LocTranslationEntry() = default;
 		LocTranslationEntry(const ConfigNode& node);
@@ -183,6 +183,9 @@ namespace Halley {
 		bool updateLocalFromRemote(const LocTranslationData& remote);
 		void updateOriginalVersions(const LocOriginalData& originalLanguage);
 		bool pruneKeys(const LocOriginalData& originalLanguage);
+
+		LocTranslationData makeDeltaFrom(const LocTranslationData& other) const;
+		LocTranslationData makeDeltaFrom(const LocTranslationData& other, gsl::span<const String> keys) const;
 
 		bool operator==(const LocTranslationData& other) const;
 		bool operator!=(const LocTranslationData& other) const;

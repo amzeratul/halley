@@ -190,9 +190,9 @@ Future<int> LocalisationClient::getStringsVersion()
 	});
 }
 
-Future<bool> LocalisationClient::putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData)
+Future<bool> LocalisationClient::putTranslatedStrings(const LocTranslationData& translationData)
 {
-	const auto url = "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(language.getISOCode());
+	const auto url = "/translated-strings/" + Encode::encodeURL(project) + "/" + Encode::encodeURL(translationData.language.getISOCode());
 
 	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, getTranslationConfig(translationData));
 }

@@ -60,7 +60,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	setHandle(UIEventType::ButtonClicked, "close", [this] (const UIEvent& event)
 	{
-		root.returnToRoot();
+		close();
 	});
 
 	setHandle(UIEventType::ListSelectionChanged, "localisation_grid", [=] (const UIEvent& event)
@@ -105,6 +105,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
 {
+	uploadPendingTranslations(false);
 }
 
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
@@ -197,6 +198,8 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 {
 	if (canEdit && acceptingTextInput && dstLanguage) {
 		dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), value);
+
+		pendingTranslationModifiedKeys += curEditingKey;
 	}
 }
 
@@ -253,12 +256,48 @@ void LocalisationLanguageEditor::onStringPropertiesModified(const Vector<String>
 
 	auto entries = srcLanguage.makeStringPropertiesDelta(*srcRemote, keys);
 	if (!entries.empty()) {
-		auto future = client.putStringProperties(entries);
-
+		auto future = client.putStringProperties(entries); // Do not merge these two lines, note the std::move(entries) below
 		future.then(aliveFlag, Executors::getMainUpdateThread(), [remote = srcRemote, entries = std::move(entries)](bool ok) {
 			if (ok) {
 				remote->applyStringProperties(entries);
 			}
 		});
 	}
+}
+
+void LocalisationLanguageEditor::uploadPendingTranslations(bool force)
+{
+	if (uploadingKeys && !force) {
+		return;
+	}
+
+	auto keys = std::move(pendingTranslationModifiedKeys);
+	pendingTranslationModifiedKeys = {};
+	auto localisedDelta = force ? dstLanguage->makeDeltaFrom(*locRemote) : dstLanguage->makeDeltaFrom(*locRemote, keys);
+
+	if (localisedDelta.entries.empty()) {
+		// Nothing to do here
+		return;
+	}
+
+	uploadingKeys = true;
+	auto future = client.putTranslatedStrings(localisedDelta);
+	auto future2 = future.then(aliveFlag, Executors::getMainUpdateThread(), [this, keys = std::move(keys), localisedDelta = std::move(localisedDelta)](bool ok) {
+		uploadingKeys = false;
+		if (ok) {
+			locRemote->update(localisedDelta);
+		} else {
+			pendingTranslationModifiedKeys += keys;
+		}
+	});
+
+	if (force) {
+		future2.wait();
+	}
+}
+
+void LocalisationLanguageEditor::close()
+{
+	uploadPendingTranslations(true);
+	root.returnToRoot();
 }

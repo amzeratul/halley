@@ -495,14 +495,14 @@ void LocalisationEditor::openLanguage(const I18NLanguage& language, bool canEdit
 
 void LocalisationEditor::uploadLanguage(const I18NLanguage& language)
 {
-	if (localStrings) {
-		auto& localised = localStrings->localised.at(language.getISOCode());
+	if (localStrings && remoteStrings) {
+		auto localisedDelta = localStrings->getLocalised(language).makeDeltaFrom(remoteStrings->getLocalised(language));
 
-		if (remoteStrings && remoteStrings->originalLanguage && isDevEnvironment()) {
-			localised.updateOriginalVersions(*remoteStrings->originalLanguage);
+		if (remoteStrings->originalLanguage && isDevEnvironment()) {
+			localisedDelta.updateOriginalVersions(*remoteStrings->originalLanguage);
 		}
 
-		client->putTranslatedStrings(language, localised);
+		client->putTranslatedStrings(localisedDelta);
 	}
 }
 
@@ -835,6 +835,7 @@ void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const St
 		Logger::logError("Unknown extension for localisation import: \"" + extension + "\"");
 	}
 	onLocalStringsModified();
+	uploadLanguage(language);
 }
 
 void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)

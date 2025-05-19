@@ -520,6 +520,40 @@ bool LocTranslationData::pruneKeys(const LocOriginalData& originalLanguage)
 	return nPruned > 0;
 }
 
+LocTranslationData LocTranslationData::makeDeltaFrom(const LocTranslationData& other) const
+{
+	assert(this->language == other.language);
+
+	LocTranslationData result;
+	result.language = language;
+
+	for (const auto& [key, myEntry]: entries) {
+		const auto* otherEntry = other.tryGetEntry(key);
+		if (!otherEntry || myEntry.value != otherEntry->value || myEntry.origVersion != otherEntry->origVersion) {
+			result.entries[key] = myEntry;
+		}
+	}
+
+	return result;
+}
+
+LocTranslationData LocTranslationData::makeDeltaFrom(const LocTranslationData& other, gsl::span<const String> keys) const
+{
+	LocTranslationData result;
+	result.language = language;
+
+	for (const auto& key: keys) {
+		if (const auto* myEntry = tryGetEntry(key)) {
+			const auto* otherEntry = other.tryGetEntry(key);
+			if (!otherEntry || myEntry->value != otherEntry->value || myEntry->origVersion != otherEntry->origVersion) {
+				result.entries[key] = *myEntry;
+			}
+		}
+	}
+
+	return result;
+}
+
 LocStringSet::LocStringSet(const ConfigNode& node)
 {
 	highestVersion = node["highestVersion"].asInt(0);

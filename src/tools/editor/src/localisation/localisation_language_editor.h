@@ -33,6 +33,8 @@ namespace Halley {
 		std::shared_ptr<LocalisationGrid> grid;
 
 		String curEditingKey = "";
+		Vector<String> pendingTranslationModifiedKeys;
+		bool uploadingKeys = false;
 
 		void setChunk(const String& chunkId);
 		void setSelectedLine(int idx, const String& key);
@@ -44,5 +46,8 @@ namespace Halley {
 		void setPriority(LocPriority priority);
 
 		void onStringPropertiesModified(const Vector<String>& keys);
+
+		void uploadPendingTranslations(bool force);
+		void close();
     };
 }

@@ -50,7 +50,7 @@ namespace Halley {
 		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);
 		Future<int> getStringsVersion();
 
-		Future<bool> putTranslatedStrings(I18NLanguage language, const LocTranslationData& translationData);
+		Future<bool> putTranslatedStrings(const LocTranslationData& translationData);
 
 		Future<Vector<LocUserData>> getUsers();
 		Future<bool> createUser(const String& userId, const String& password);
