@@ -120,6 +120,15 @@ children:
               size: [150, 0]
               text: Manage Users...
             fill: [centreHorizontal, centreVertical]
+          - uuid: ded56f8e-ad30-4af0-b35f-b28cf6d8d910
+            proportion: 0
+            border: [0, 0, 0, 0]
+            widget:
+              class: button
+              id: manageProject
+              size: [150, 0]
+              text: Manage Project...
+            fill: [centreHorizontal, centreVertical]
           - uuid: dee4d323-c773-48ff-9662-2c0c3dfe335d
             proportion: 0
             border: [0, 0, 0, 0]

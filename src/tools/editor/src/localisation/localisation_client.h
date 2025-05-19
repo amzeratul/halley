@@ -59,6 +59,8 @@ namespace Halley {
 		Future<bool> setUserProjectSettings(const String& userId, const Vector<String>& languages);
 		Future<bool> setUserPassword(const String& userId, const String& newPassword);
 
+		Future<bool> putExternalProjectProperties(const HashMap<String, Bytes>& files);
+
 		const String& getMyUsername() const;
 		bool isConnected() const;
 

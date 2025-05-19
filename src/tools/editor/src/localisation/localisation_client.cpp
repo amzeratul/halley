@@ -246,6 +246,24 @@ Future<bool> LocalisationClient::setUserPassword(const String& userId, const Str
 	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
 }
 
+Future<bool> LocalisationClient::putExternalProjectProperties(const HashMap<String, Bytes>& files)
+{
+	const auto url = "/external-project-properties/" + Encode::encodeURL(project);
+
+	ConfigNode::SequenceType fileData;
+	for (const auto& [k, v]: files) {
+		ConfigNode entry;
+		entry["path"] = k;
+		entry["bytes"] = Encode::encodeBase64(v.const_byte_span());
+		fileData += std::move(entry);
+	}
+
+	ConfigNode payload;
+	payload["files"] = std::move(fileData);
+
+	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
+}
+
 Future<bool> LocalisationClient::setUserProjectSettings(const String& userId, const Vector<String>& languages)
 {
 	const auto url = "/users/" + Encode::encodeURL(userId) + "/project/" + Encode::encodeURL(project);

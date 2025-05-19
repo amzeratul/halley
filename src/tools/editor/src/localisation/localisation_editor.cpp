@@ -119,6 +119,11 @@ void LocalisationEditor::onMakeUI()
 		manageUsers();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "manageProject", [this] (const UIEvent& event)
+	{
+		manageProject();
+	});
+
 	const auto& credentials = projectWindow.getSetting(EditorSettingType::Project, "localisation_credentials");
 	getWidgetAs<UITextInput>("username")->setText(credentials["username"].asString(""));
 	getWidgetAs<UITextInput>("password")->setText(credentials["password"].asString(""));
@@ -132,6 +137,7 @@ void LocalisationEditor::update(Time t, bool moved)
 	getWidget("messagePanel")->setActive(curMessage.has_value());
 	getWidget("toolbar")->setActive(state == State::Ready);
 	getWidget("manageUsers")->setActive(state == State::Ready && client->isAdmin());
+	getWidget("manageProject")->setActive(state == State::Ready && client->isAdmin());
 	getWidget("developerPanel")->setActive(isDevEnvironment());
 	getWidget("originalLanguagePanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
 	getWidget("translationPanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
@@ -896,4 +902,20 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 void LocalisationEditor::manageUsers()
 {
 	getRoot()->addChild(std::make_shared<LocalisationManageUsers>(factory, *client, project, root));
+}
+
+void LocalisationEditor::manageProject()
+{
+	HashMap<String, Bytes> files;
+
+	auto properties = YAMLConvert::parseConfig(Path::readFile(project.getRootPath() / "halley_project" / "properties.yaml"));
+	auto& root = properties.getRoot();
+	root.removeKey("languageCosts");
+	root["devEnvironment"] = false;
+	root["halleyVersion"] = getHalleyVersion().toString();
+
+	files["halley_project/icon48.png"] = Path::readFile(project.getRootPath() / "halley_project" / "icon48.png");
+	files["halley_project/properties.yaml"] = YAMLConvert::generateYAML(properties, {}).toBytes();
+
+	client->putExternalProjectProperties(files);
 }
