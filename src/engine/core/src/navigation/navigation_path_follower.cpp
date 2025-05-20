@@ -69,7 +69,7 @@ gsl::span<const NavigationPath::Point> NavigationPathFollower::getNextPathPoints
 	return nextPathIdx <= span.size() ? span.subspan(nextPathIdx) : gsl::span<const NavigationPath::Point>();
 }
 
-void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold)
+void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navmeshSet, float minThreshold, float maxThreshold)
 {
 	this->curPos = curPos;
 
@@ -90,10 +90,12 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 			return;
 		}
 	}
-	
+
+	const bool isLastPoint = nextPathIdx + 1 == path->path.size();
+	const float threshold = isLastPoint ? minThreshold : maxThreshold;
 	const auto nextPos = path->path[nextPathIdx];
 	const bool arrivedAtNextNode = (nextPos.pos.pos - curPos.pos).squaredLength() < threshold * threshold;
-	
+
 	if (arrivedAtNextNode) {
 		nextPathIdx++;
 		if (nextPathIdx >= path->path.size()) {

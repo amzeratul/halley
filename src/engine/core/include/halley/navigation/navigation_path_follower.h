@@ -18,7 +18,7 @@ namespace Halley {
 		const std::optional<NavigationPath>& getPath() const;
 		gsl::span<const NavigationPath::Point> getNextPathPoints() const;
 
-		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold);
+		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float minThreshold, float maxThreshold);
 		
 		WorldPosition getNextPosition() const;
 		WorldPosition getPointAtIdx(size_t idx) const;
