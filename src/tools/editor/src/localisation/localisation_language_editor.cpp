@@ -121,21 +121,7 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 	}
 
 	grid->setLineColourFilter([this] (int idx) -> std::optional<Colour4f> {
-		if (srcRemote) {
-			const auto& localEntry = srcData->getEntry(idx);
-			const auto& key = localEntry.key;
-			const auto iter = srcRemoteDataIndex.find(key);
-			if (iter != srcRemoteDataIndex.end()) {
-				const auto& remoteEntry = srcRemote->getEntry(iter->second);
-				if (remoteEntry.value != localEntry.value) {
-					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
-				}
-			} else {
-				return Colour4f(0.0f, 1.0f, 0.0f, 0.2f);
-			}
-		}
-
-		return {};
+		return getRowColour(idx);
 	});
 	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
 }
@@ -267,6 +253,10 @@ void LocalisationLanguageEditor::onStringPropertiesModified(const Vector<String>
 
 void LocalisationLanguageEditor::uploadPendingTranslations(bool force)
 {
+	if (!locRemote || !dstLanguage) {
+		return;
+	}
+
 	if (uploadingKeys && !force) {
 		return;
 	}
@@ -300,4 +290,36 @@ void LocalisationLanguageEditor::close()
 {
 	uploadPendingTranslations(true);
 	root.returnToRoot();
+}
+
+std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
+{
+	if (srcRemote) {
+		const auto& localEntry = srcData->getEntry(idx);
+		const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.key);
+
+		if (dstLanguage) {
+			// Editing translation
+			const auto* localTranslation = dstLanguage->tryGetEntry(localEntry.key);
+			if (remoteEntry && localTranslation) {
+				if (localTranslation->origVersion < remoteEntry->version) {
+					// Outdated
+					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
+				}
+			}
+		} else {
+			// Editing original language
+			if (remoteEntry) {
+				if (remoteEntry->value != localEntry.value) {
+					// This entry is different from remote
+					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
+				}
+			} else {
+				// This entry doesn't exist on remote
+				return Colour4f(0.0f, 1.0f, 0.0f, 0.2f);
+			}
+		}
+	}
+
+	return {};
 }

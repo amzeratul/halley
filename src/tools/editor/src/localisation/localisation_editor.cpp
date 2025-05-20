@@ -155,7 +155,12 @@ void LocalisationEditor::onEditorRootUpdate(Time t)
 		localStrings = localStringsFuture.get();
 		localStringsFuture = {};
 		gotLocalStrings = true;
-		populateData();
+		if (gotRemoteStrings) {
+			onStringsReady(firstUpdate);
+			firstUpdate = false;
+		} else {
+			populateData();
+		}
 	}
 
 	if (remoteStringsFuture.isReady()) {
@@ -765,12 +770,13 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 	const auto& orig = localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 
 	CSVFile csv;
-	csv.setColumns({{ "key", "version", "comment", "context", "chunkIdx", "original", "translation" }});
+	csv.setColumns({{ "key", "version", "comment", "context", "priority", "chunkIdx", "original", "translation" }});
 
 	const auto keyIdx = csv.getColumnIndex("key");
 	const auto versionIdx = csv.getColumnIndex("version");
 	const auto commentIdx = csv.getColumnIndex("comment");
 	const auto contextIdx = csv.getColumnIndex("context");
+	const auto priorityIdx = csv.getColumnIndex("priority");
 	const auto chunkIdx = csv.getColumnIndex("chunk");
 	const auto originalIdx = csv.getColumnIndex("original");
 	const auto translationIdx = csv.getColumnIndex("translation");
@@ -792,6 +798,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 				csv.setCell(rowIdx, versionIdx, toString(origEntry.version));
 				csv.setCell(rowIdx, commentIdx, origEntry.comment);
 				csv.setCell(rowIdx, contextIdx, origEntry.context);
+				csv.setCell(rowIdx, priorityIdx, toString(origEntry.priority));
 				csv.setCell(rowIdx, originalIdx, origEntry.value);
 				csv.setCell(rowIdx, chunkIdx, chunk.name);
 

@@ -118,7 +118,20 @@ LocalisedString LocalisationGrid::getToolTip() const
 		const auto& entry = origData->getEntry(*lineUnderMouse);
 		const auto colName = columnNames[*columnUnderMouse];
 		if (colName == "Key") {
-			return LocalisedString::fromUserString(entry.key);
+			String tooltip = entry.key;
+
+			if (translatedData) {
+				if (const auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+					tooltip += "\nv" + toString(translatedEntry->origVersion);
+					if (translatedEntry->origVersion != entry.version) {
+						tooltip += " (src at v" + toString(entry.version) + ")";
+					}
+				}
+			} else {
+				tooltip += "\nv" + toString(entry.version);
+			}
+
+			return LocalisedString::fromUserString(tooltip);
 		} else if (colName == "Original") {
 			return LocalisedString::fromUserString(entry.value);
 		} else if (colName == "Translated") {

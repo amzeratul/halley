@@ -49,5 +49,7 @@ namespace Halley {
 
 		void uploadPendingTranslations(bool force);
 		void close();
+
+		std::optional<Colour4f> getRowColour(int idx) const;
     };
 }
