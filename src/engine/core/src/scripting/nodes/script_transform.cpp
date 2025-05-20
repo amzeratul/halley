@@ -76,6 +76,38 @@ IScriptNodeType::Result ScriptSetHeight::doUpdate(ScriptEnvironment& environment
 
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptGetHeight::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptGetHeight::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder result;
+	result.append("Get the height of ");
+	result.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	return result.moveResults();
+}
+
+ConfigNode ScriptGetHeight::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0))) {
+		return ConfigNode(transform->getGlobalHeight());
+	}
+
+	return {};
+}
+
+
+
+
+
 gsl::span<const IGraphNodeType::PinType> ScriptSetSubworld::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;

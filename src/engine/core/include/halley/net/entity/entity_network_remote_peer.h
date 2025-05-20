@@ -16,6 +16,7 @@ namespace Halley {
     struct EntityNetworkUpdateInfo {
 		EntityId entityId;
 		uint8_t ownerId;
+    	uint8_t authorityId;
 	};
 
     class EntityNetworkRemotePeer {
@@ -36,7 +37,7 @@ namespace Halley {
         void sendLobbyInfo(ConfigNode data);
         void setLobbyInfo(ConfigNode info);
 
-    	void sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
+    	void sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData);
         void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
     	[[nodiscard]] EntityId findInboundEntity(EntityNetworkId networkId) const;
@@ -44,10 +45,14 @@ namespace Halley {
 
     	void logUpdates();
 
+    	void prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
+			NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId);
+
     private:
         class OutboundEntity {
         public:
             bool alive = true;
+        	bool hasAuthorityOnly = false;
             Time timeSinceSend = 0;
             EntityNetworkId networkId = 0;
             EntityData data;
@@ -58,6 +63,7 @@ namespace Halley {
         public:
             EntityId worldId;
             EntityData data;
+        	bool forChangedAuthorityOnly = false;
         };
 
         EntityNetworkSession* parent = nullptr;

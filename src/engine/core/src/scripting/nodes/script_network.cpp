@@ -88,8 +88,22 @@ gsl::span<const IScriptNodeType::PinType> ScriptIfHostAuthority::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+	};
 	return data;
+}
+
+String ScriptIfHostAuthority::getPinDescription(const BaseGraphNode &node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "If Host";
+	} else if (elementIdx == 2) {
+		return "If Client";
+	}
+	return ScriptNodeTypeBase::getPinDescription(node, elementType, elementIdx);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptIfHostAuthority::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
@@ -100,7 +114,7 @@ std::pair<String, Vector<ColourOverride>> ScriptIfHostAuthority::getNodeDescript
 IScriptNodeType::Result ScriptIfHostAuthority::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const bool hasAuthority = environment.hasHostNetworkAuthority();
-	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
+	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 2);
 }
 
 

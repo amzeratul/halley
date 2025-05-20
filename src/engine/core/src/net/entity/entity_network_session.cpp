@@ -69,7 +69,7 @@ void EntityNetworkSession::sendUpdates()
 	sendMessages();
 }
 
-void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds)
+void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds)
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();
@@ -86,7 +86,7 @@ void EntityNetworkSession::sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<
 
     for (auto& peer : peers) {
         tasks += Concurrent::execute([&]() {
-            peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
+            peer.sendEntities(t, myPeerId, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
         });
     }
 
@@ -654,6 +654,70 @@ void EntityNetworkSession::logUpdates()
 	for (auto& peer: peers) {
 		peer.logUpdates();
 	}
+}
+
+bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId)
+{
+	const auto myPeerId = session->getMyPeerId();
+	Expects(myPeerId.has_value());
+
+	const auto ownerId = networkComponent.ownerId;
+	Expects(ownerId.has_value());
+
+	// This looks complicated, but it's just trying to unravel who gives, takes or returns
+	// authority to what peer, and notifies the right EntityNetworkRemotePeer instance about it.
+	//
+	// This whole block could be shortened down a lot, but this wouldn't be very readable.
+
+	if (authorityId.has_value()) {
+		// Authority is taken by someone.
+		Expects(!networkComponent.authorityId.has_value());
+
+		if (networkComponent.ownerId == myPeerId) {
+			// Local peer is giving away authority.
+			for (auto& peer: peers) {
+				if (peer.getPeerId() == authorityId) {
+					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					break;
+				}
+			}
+		} else if (authorityId == myPeerId) {
+			// Local peer is taking authority.
+			for (auto& peer: peers) {
+				if (peer.getPeerId() == ownerId) {
+					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					break;
+				}
+			}
+		} else {
+			// Remote peer is taking authority from another remote peer. We are not involved.
+		}
+	} else {
+		// Authority is given back to owner.
+		Expects(networkComponent.authorityId.has_value());
+
+		if (networkComponent.authorityId == myPeerId) {
+			// Local peer is losing authority. Revoke the outbound entity.
+			for (auto& peer: peers) {
+				if (peer.getPeerId() == ownerId) {
+					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					break;
+				}
+			}
+		} else if (networkComponent.ownerId == myPeerId) {
+			// Authority returned to local peer. Revoke the inbound entity.
+			for (auto& peer: peers) {
+				if (peer.getPeerId() == networkComponent.authorityId) {
+					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					break;
+				}
+			}
+		} else {
+			// Remote peer is returning authority to another remote peer. We are not involved.
+		}
+	}
+
+	return true;
 }
 
 void EntitySessionSharedData::serialize(Serializer& s) const

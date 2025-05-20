@@ -30,11 +30,16 @@ bool SessionService::hasHostAuthority() const
 bool SessionService::hasEntityAuthority(EntityId entityId) const
 {
 	if (session) {
-		if (const auto owner = getWorld().tryGetEntity(entityId).getAuthorityPeerId()) {
-			return owner == getMyClientId();
+		if (const auto entity = getWorld().tryGetEntity(entityId); entity.isValid()) {
+			uint8_t myPeerId = getMyClientId();
+			if (const auto authority = entity.getAuthorityPeerId()) {
+				return authority == myPeerId;
+			} else {
+				return entity.getOwnerPeerId().value_or(myPeerId) == myPeerId;
+			}
 		}
 	}
-	return true;
+	return hasHostAuthority();
 }
 
 String SessionService::getSessionClientName() const

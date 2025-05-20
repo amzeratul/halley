@@ -309,7 +309,7 @@ EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources, const IByte
     , interpolators(interpolators)
     , hasComponentsAddedOrRemoved(false)
 {
-    scratchpad.reserve(16384);
+    scratchpad.reserve(65536);
     scratchpad.resize_no_init(scratchpad.capacity());
 }
 

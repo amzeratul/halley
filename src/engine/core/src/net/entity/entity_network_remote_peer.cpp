@@ -22,9 +22,10 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 	return peerId;
 }
 
-void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
+void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
 {
 	Expects(isAlive());
+	Expects(myPeerId != peerId);
 
 	if (!isRemoteReady()) {
 		if (timeSinceSend > maxSendInterval) {
@@ -43,18 +44,59 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	Vector<EntityRef> toCreate;
 	Vector<std::pair<EntityRef, OutboundEntity*>> toUpdate;
 
-	for (auto entry: entityIds) {
-		if (entry.ownerId == peerId) {
-			// Don't send updates back to the owner
+	for (const auto& entry: entityIds) {
+		if (entry.ownerId == peerId && entry.authorityId == peerId) {
+			// Don't send updates to the owner, if it has authority.
 			continue;
 		}
 
 		const auto entity = parent->getWorld().getEntity(entry.entityId);
+
+		if (entry.ownerId == peerId && entry.authorityId == myPeerId) {
+			// Owned by remote peer, but authority has been given to local peer. We want to create
+			// some outbound entity that can be used to send updates, until the authority is given
+			// back.
+			//
+			// This outbound entity isn't created here, but in prepareChangeEntityAuthority().
+			//
+			// TODO: auto-release authority if goes out of view?
+			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
+				// Has an outbound entity assigned. Keep it alive and updating.
+				Expects(iter->second.hasAuthorityOnly);
+				iter->second.alive = true;
+				toUpdate.emplace_back(entity, &iter->second);
+			} else {
+				Logger::logWarning("No temporary outbound entity found for " + toString(entry.entityId & 0xffffffff));
+			}
+			continue;
+		}
+
+		if (entry.ownerId == myPeerId && entry.authorityId != myPeerId) {
+			// Owned by host/this local peer, but authority has been transferred. There should be
+			// a regular outbound entity.
+			//
+			// We don't want to send updates to the peer who took authority, but we want to keep
+			// this outbound entity alive until authority is given back.
+			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
+				Expects(!iter->second.hasAuthorityOnly);
+				iter->second.alive = true;
+				if (entry.authorityId != peerId) {
+					toUpdate.emplace_back(entity, &iter->second);
+				}
+			} else {
+				Logger::logError("No outbound entity found that is owned by local peer");
+			}
+			continue;
+		}
+
+		Expects(entry.ownerId == myPeerId && entry.ownerId == entry.authorityId);
+
 		if (parent->isEntityInView(entity, clientData, peerId)) {
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parent->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);
 			} else {
+				Expects(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				toUpdate.emplace_back(entity, &iter->second);
 			}
@@ -62,7 +104,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	}
 
 	// Order is important here, we need to first destroy, then update, then create
-	// This is so we don't run into an issue where an entity is moved inside another and we attempt to create/update the new one while the old one is still present
+	// This is so we don't run into an issue where an entity is moved inside another, and we
+	// attempt to create/update the new one while the old one is still present.
 
 	// Destroy dead entities
 	for (auto& e: outboundEntities) {
@@ -77,7 +120,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 	}
 
 	// Create new entities
-	for (auto& e: toCreate) {
+	for (const auto& e: toCreate) {
 		if (e.hasParent()) {
 			// NB: These checks defer create messages for child entities if the message to
 			// create their parent entity has not been sent yet. Tries to avoid problems
@@ -111,6 +154,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const EntityNetwork
 void EntityNetworkRemotePeer::receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
 {
 	Expects(isAlive());
+	Expects(fromPeerId == peerId);
 
 	if (msg.getType() == EntityNetworkHeaderType::Create) {
 		receiveCreateEntity(msg.getMessage<EntityNetworkMessageCreate>());
@@ -214,8 +258,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 	bool wantToLog = USE_FAST_NETWORK_COMPONENT_UPDATES && log;
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
-    // Fast updates are possible only if a previous journal is available to compare to.
-    bool canFastUpdate = !remote.fastUpdateJournal.empty();
+    // Fast updates are possible only if a previous journal is available to compare to,
+    // or if it's an outbound entity marked as "for changed authority".
+    bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
 
     if (canFastUpdate) {
         Expects(parent->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
@@ -224,8 +269,21 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
         auto fastSerialize = EntityNetworkSerialize(parent->getResources(), parent->getByteDataInterpolatorSet());
 
     	if (fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions())) {
-    		bool modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
-    		bool modifiedInStructure = fastSerialize.hasEntityChanges(entity, wantToLog);
+    		bool modified = false;
+    		bool modifiedInStructure = false;
+
+    		if (remote.fastUpdateJournal.empty()) {
+    			// This must be an outbound entity with "hasAuthorityOnly". If it just has been
+    			// created, its previous journal is still empty.
+    			Expects(remote.hasAuthorityOnly);
+    			// Just process and store the journal, but keep marked as "not modified".
+		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+    			// TODO: can this miss some intermediate, local modifications?
+    			Logger::logDev("populating outbound entity journal, authority-only");
+    		} else {
+    			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
+    			modifiedInStructure = fastSerialize.hasEntityChanges(entity, wantToLog);
+    		}
 
     		wantToLog &= modified;
 
@@ -236,7 +294,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
     		if (modified && !modifiedInStructure) {
     			remote.timeSinceSend = 0;
 
-    			fastUpdateOutboundData.reserve(16384);
+    			fastUpdateOutboundData.reserve(65536);
     			fastSerialize.getBytes(fastUpdateOutboundData, parent->getByteSerializationOptions(), wantToLog);
     			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
@@ -252,6 +310,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
     			canFastUpdate = false;
     			// Wipe the existing journal
     			remote.fastUpdateJournal.clear();
+	    		Logger::logWarning("Network entity for fast update has been modified in structure, fall back using slow path");
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.
@@ -265,6 +324,11 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 #endif
 
     if (!canFastUpdate) {
+    	if (remote.hasAuthorityOnly) {
+            Logger::logError("Full network updates unsupported for entities with changed authority");
+    		return;
+    	}
+
         // Encode delta using interpolators
         auto newData = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
         auto retriever = DataInterpolatorSetRetriever(entity, true);
@@ -304,6 +368,12 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId entityId)
 {
+	if (remote.hasAuthorityOnly) {
+		// Don't want (and not allowed to) destroy this here.
+		Logger::logError("Attempt to destroy temporary outbound entity");
+		return;
+	}
+
 	allocatedOutboundIds.erase(remote.networkId);
 
 	send(EntityNetworkMessageDestroy(remote.networkId));
@@ -420,6 +490,11 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
             Logger::logException(e);
         }
     } else {
+    	if (iter->second.forChangedAuthorityOnly) {
+            Logger::logError("Full network updates unsupported for temporary inbound entities");
+    		return;
+    	}
+
         const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
         auto retriever = DataInterpolatorSetRetriever(entity, false);
@@ -527,4 +602,78 @@ EntityId EntityNetworkRemotePeer::findOutboundEntity(EntityNetworkId networkId) 
 void EntityNetworkRemotePeer::logUpdates()
 {
 	log = !log;
+}
+
+void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
+	NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId)
+{
+	if (authorityId.has_value()) {
+		if (myPeerId == ownerId) {
+			// I lose authority. Create a temporary inbound entity.
+			Logger::logDev(" +++ I lose authority to " + toString((int) authorityId.value()));
+
+			// There should be some outbound entity available.
+			if (outboundEntities.contains(entityId)) {
+				const auto &oe = outboundEntities[entityId];
+
+				InboundEntity remote;
+				remote.worldId = entityId;
+				remote.forChangedAuthorityOnly = true;
+
+				if (!inboundEntities.contains(oe.networkId)) {
+					inboundEntities[oe.networkId] = std::move(remote);
+				} else {
+					Logger::logWarning("Entity with network id " + toString(static_cast<int>(oe.networkId)) + " already has an inbound entity");
+				}
+			} else {
+				Logger::logWarning("No outbound entity found to create temporary inbound entity from");
+			}
+		} else if (myPeerId == authorityId) {
+			// I'm taking authority. Create a temporary outbound entity.
+			Logger::logDev(" +++ I gain authority from " + toString((int) ownerId));
+
+			// Search for inbound entity.
+			const auto inboundIter = std_ex::find_if(inboundEntities, [&](const auto& kv) {
+				return kv.second.worldId == entityId;
+			});
+
+			if (inboundIter != inboundEntities.end()) {
+				OutboundEntity outbound = {};
+				outbound.alive = true;
+				outbound.hasAuthorityOnly = true;
+				outbound.networkId = inboundIter->first;
+
+				if (!outboundEntities.contains(entityId)) {
+					outboundEntities[entityId] = std::move(outbound);
+				} else {
+					Logger::logWarning("Entity id " + toString(static_cast<int>(entityId)) + " already has an outbound entity");
+				}
+			} else {
+				Logger::logWarning("No inbound entity found to create temporary outbound entity from");
+			}
+		}
+	} else {
+		if (myPeerId == ownerId) {
+			// I've been given back authority. Remove the temporary inbound entity.
+			Logger::logDev(" +++ I regain authority");
+			const size_t found = std_ex::erase_if_value(inboundEntities, [&](const auto &value) {
+				if (value.worldId == entityId) {
+					Expects(value.forChangedAuthorityOnly);
+					return true;
+				}
+				return false;
+			});
+			if (found != 1) {
+				Logger::logWarning(toString(found) + " temporary inbound entities deleted, should be 1");
+			}
+		} else {
+			// I'm returning authority to owner. Remove the temporary outbound entity.
+			Logger::logDev(" +++ I gave back authority to " + toString((int) ownerId));
+			if (outboundEntities.contains(entityId)) {
+				outboundEntities.erase(entityId);
+			} else {
+				Logger::logWarning("No temporary outbound entity found for deletion");
+			}
+		}
+	}
 }
