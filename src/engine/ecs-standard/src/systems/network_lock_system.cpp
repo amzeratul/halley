@@ -202,28 +202,35 @@ private:
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
 
 			if (iter == locks.end()) {
-				// Unlocked
+				// No existing lock
 				if (lock) {
+					// New lock
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " locked by " + toString(int(peerId)));
 					locks.emplace_back(targetId, peerId);
                     if (withAuthority) {
-                        changeAuthority(e->network, peerId);
+                        changeAuthority(e, peerId);
                     }
+					return true;
+				} else {
+					// Tries to unlock non-existing lock
+					return false;
 				}
-				return true;
 			} else if (iter->second == peerId) {
-				// Locked by this peer
+				// Lock exists, locked by this peer
 				if (!lock) {
 					// Release lock
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " unlocked by " + toString(int(peerId)));
 					locks.erase(iter);
                     if (withAuthority) {
-                        changeAuthority(e->network, {});
+                        changeAuthority(e, {});
                     }
+					return true;
+				} else {
+					// Wants to lock again
+					return true;
 				}
-				return true;
 			} else {
-				// Locked by someone else
+				// Lock exists, locked by someone else
 				//Logger::logDev("Locked by someone else");
 				return false;
 			}
@@ -291,15 +298,28 @@ private:
 
         const auto* e = getRootEntity(targetId);
         if (e) {
-            changeAuthority(e->network, authorityId);
+            changeAuthority(e, authorityId);
         } else {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId) + " which is unknown, or not a network entity");
         }
     }
 
-    void changeAuthority(NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId)
+    void changeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId)
     {
-        networkComponent.authorityId = authorityId;
+		if (getSessionService().isMultiplayer()) {
+			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
+			if (!entityNetworkSession->prepareChangeEntityAuthority(networkFamily->entityId, networkFamily->network, authorityId)) {
+				Logger::logWarning("Network session failed to change authority for local entity");
+			}
+		}
+
+		networkFamily->network.authorityId = authorityId;
+
+		if (authorityId) {
+			Logger::logDev("changed authority to " + toString((int) authorityId.value()));
+		} else if (networkFamily->network.ownerId) {
+			Logger::logDev("gave authority back to owner " + toString(networkFamily->network.ownerId.value()));
+		}
     }
 };
 

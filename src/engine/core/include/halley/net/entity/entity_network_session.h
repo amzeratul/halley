@@ -11,6 +11,8 @@
 #include "halley/entity/world.h"
 #include "halley/entity/byte_data_interpolator.h"
 
+class NetworkComponent;
+
 namespace Halley {
 	class EntityFactory;
 	class Resources;
@@ -57,7 +59,7 @@ namespace Halley {
 
 		void update(Time t);
 		void sendUpdates();
-		void sendEntityUpdates(Time t, Rect4i viewRect, gsl::span<const EntityNetworkUpdateInfo> entityIds); // Takes pairs of entity id and owner peer id
+		void sendEntityUpdates(Time t, Rect4i viewRect, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds);
 		void receiveUpdates();
 
 		World& getWorld() const;
@@ -101,6 +103,8 @@ namespace Halley {
 
 		void findEntity(EntityNetworkId networkId, bool inbound, std::function<void(EntityId, NetworkSession::PeerId)> callback) const;
 		void logUpdates();
+
+		bool prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;

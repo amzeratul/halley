@@ -23,7 +23,7 @@ public:
 				return;
 			}
 			
-			const auto peerId = maybePeerId.value();
+			const auto myPeerId = maybePeerId.value();
 			const bool isHost = mpSession.isHost();
 
 			// Enable only network components which aren't nested in another
@@ -41,32 +41,37 @@ public:
 
 					if (isHost) {
 						// The host always claims ownership.
-						Expects(peerId == 0);
+						Expects(myPeerId == 0);
 						//Logger::logDev("Host is claiming network ownership for " + entity.getName());
-						e.network.ownerId = peerId;
+						e.network.ownerId = myPeerId;
 					} else {
 						// Entities created locally belong to this peer. Entities loaded from world chunks are
 						// supposed to be claimed by the host.
+						Expects(myPeerId != 0);
 						if (entity.getWorldPartition() == 0) {
-							Logger::logDev("Peer " + toString((int) peerId) + " is claiming network ownership for " + entity.getName());
-							e.network.ownerId = peerId;
+							Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
+							e.network.ownerId = myPeerId;
 						} else {
-							Logger::logDev("Peer " + toString((int) peerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
+							Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
 							e.network.ownerId = 0;
 						}
 					}
 
-					e.network.creatorId = peerId;
+					e.network.creatorId = myPeerId;
 				}
 
-				if (e.network.sendUpdates && e.network.ownerId && (e.network.ownerId == peerId || isHost)) {
-					entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, e.network.ownerId.value() });
+				if (e.network.sendUpdates && e.network.ownerId) {
+					uint8_t ownerId = e.network.ownerId.value();
+					uint8_t authorityId = e.network.authorityId.value_or(ownerId);
+					if (ownerId == myPeerId || authorityId == myPeerId || isHost) {
+						entities.emplace_back(EntityNetworkUpdateInfo{ e.entityId, ownerId, authorityId });
+					}
 				}
 			}
 
 			const auto viewPort = Rect4i(getScreenService().getCameraViewPort());
 			
-			entityNetworkSession.sendEntityUpdates(t, viewPort, entities);
+			entityNetworkSession.sendEntityUpdates(t, viewPort, myPeerId, entities);
 			entityNetworkSession.sendUpdates();
 			entityNetworkSession.update(0.0);
 		}
