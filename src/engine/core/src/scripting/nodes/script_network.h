@@ -51,6 +51,7 @@ namespace Halley {
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::NetworkFlow; }
 
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		String getPinDescription(const BaseGraphNode &node, PinType elementType, GraphPinId elementIdx) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
