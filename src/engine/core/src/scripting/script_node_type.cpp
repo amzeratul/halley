@@ -326,6 +326,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptUIInWorld>());
 	addScriptNode(std::make_unique<ScriptSetPosition>());
 	addScriptNode(std::make_unique<ScriptSetHeight>());
+    addScriptNode(std::make_unique<ScriptGetHeight>());
 	addScriptNode(std::make_unique<ScriptSetSubworld>());
 	addScriptNode(std::make_unique<ScriptGetPosition>());
 	addScriptNode(std::make_unique<ScriptGetRotation>());

@@ -27,6 +27,19 @@ namespace Halley {
 		
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
+	
+	class ScriptGetHeight final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "getHeight"; }
+		String getName() const override { return "Get Height"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/height.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+
+        ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
 
 	class ScriptSetSubworld final : public ScriptNodeTypeBase<void> {
 	public:
