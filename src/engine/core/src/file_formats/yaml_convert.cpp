@@ -1,7 +1,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/file_formats/halley-yamlcpp.h"
 #include "halley/bytes/byte_serializer.h"
-#include "halley/text/encode.h"
+
 using namespace Halley;
 
 ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions& options)
@@ -23,7 +23,7 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions
 			for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
 				String key = it->first.as<std::string>();
 				if (map.contains(key)) {
-					Logger::logError("Duplicated YAML key \"" + key + "\"" 
+					options.reportError("Duplicated YAML key \"" + key + "\"" 
 						+ (options.assetId.isEmpty() ? "" :  + " in asset \"" + options.assetId + "\"")
 						+ " on line " + toString(it->second.Mark().line + 1));
 				}
@@ -66,6 +66,15 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions
 
 	result.setOriginalPosition(node.Mark().line, node.Mark().column);
 	return result;
+}
+
+void YAMLConvert::ParseOptions::reportError(const String& error) const
+{
+	if (throwOnError) {
+		throw Exception(error, HalleyExceptions::File);
+	} else {
+		Logger::logError(error);
+	}
 }
 
 void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options)
