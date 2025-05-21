@@ -21,10 +21,10 @@ SessionMultiplayer::SessionMultiplayer(const HalleyAPI& api, Resources& resource
 		port = host ? 6060 : 0;
 	}
 
-	service = api.network->createService(NetworkProtocol::UDP, port);
+	service = api.platform->createNetworkService(port);
 
 	if (!service) {
-		service = api.platform->createNetworkService(port);
+		service = api.network->createService(NetworkProtocol::UDP, port);
 	}
 
 	if (!service) {
