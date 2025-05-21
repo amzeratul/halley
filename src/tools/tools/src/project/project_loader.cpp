@@ -36,9 +36,10 @@ std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 void ProjectLoader::setupPlugins(Project& project) const
 {
 	auto platforms = project.getPlatforms();
+
 	std_ex::erase_if(platforms, [&] (const String& platform)
 	{
-		return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), platform) != disabledPlatforms.end();
+		return disabledPlatforms.contains(platform) || (platform != "pc" && !knownPlatforms.contains(platform));
 	});
 
 	project.setPlatforms(platforms);

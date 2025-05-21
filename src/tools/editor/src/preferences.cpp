@@ -140,7 +140,7 @@ const Vector<String>& Preferences::getDisabledPlatforms() const
 
 bool Preferences::isPlatformDisabled(const String& name) const
 {
-	return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), name) != disabledPlatforms.end();
+	return disabledPlatforms.contains(name);
 }
 
 void Preferences::setPlatformDisabled(const String& name, bool disabled)
