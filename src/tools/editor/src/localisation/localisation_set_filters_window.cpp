@@ -28,14 +28,17 @@ void LocalisationSetFiltersWindow::onMakeUI()
 
 	bindData("priorityEnable", workingCopy.priorityEnabled, [=] (bool value) {
 		workingCopy.priorityEnabled = value;
+		setPriorityEnabled(value);
 	});
 
 	bindData("translationStatusEnable", workingCopy.translatedEnabled, [=] (bool value) {
 		workingCopy.translatedEnabled = value;
+		setTranslatedEnabled(value);
 	});
 
 	bindData("outdatedStatusEnable", workingCopy.outdatedEnabled, [=] (bool value) {
 		workingCopy.outdatedEnabled = value;
+		setOutdatedEnabled(value);
 	});
 
 	bindData("minPriority", toString(workingCopy.minPriority), [=] (String value) {
@@ -53,6 +56,26 @@ void LocalisationSetFiltersWindow::onMakeUI()
 	bindData("outdatedStatus", toString(workingCopy.outdated), [=] (String value) {
 		workingCopy.outdated = fromString<LocOutdatedStatus>(value);
 	});
+
+	setPriorityEnabled(workingCopy.priorityEnabled);
+	setTranslatedEnabled(workingCopy.translatedEnabled);
+	setOutdatedEnabled(workingCopy.outdatedEnabled);
+}
+
+void LocalisationSetFiltersWindow::setPriorityEnabled(bool enabled)
+{
+	getWidget("minPriority")->setEnabled(enabled);
+	getWidget("maxPriority")->setEnabled(enabled);
+}
+
+void LocalisationSetFiltersWindow::setTranslatedEnabled(bool enabled)
+{
+	getWidget("translationStatus")->setEnabled(enabled);
+}
+
+void LocalisationSetFiltersWindow::setOutdatedEnabled(bool enabled)
+{
+	getWidget("outdatedStatus")->setEnabled(enabled);
 }
 
 void LocalisationSetFiltersWindow::applyFilters()

@@ -160,10 +160,20 @@ children:
                       text: Clear All
                   - uuid: e9cb9b0c-8c57-4d1f-a80d-478eb2783dc1
                     proportion: 1
-                    sizer: {}
+                    sizer:
+                      columnProportions: []
                     widget:
                       class: widget
                       id: filterList
+                    children:
+                      - uuid: 385abda8-3b8a-4b6a-925e-d0fc38774597
+                        border: [4, 0, 0, 0]
+                        widget:
+                          class: label
+                          id: filtersLabel
+                          text: "[Filters]"
+                          wordWrapped: false
+                        fill: [left, centreVertical]
             fill: [fillHorizontal, fillVertical]
           - uuid: 14fc5dc6-726b-4f42-aea5-8b1c4a3881e5
             border: [0, 4, 0, 0]

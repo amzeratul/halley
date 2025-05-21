@@ -54,6 +54,8 @@ namespace Halley {
 
 		void setFilters();
 		void onFiltersUpdated();
+		void updateFilterDisplay();
+		void applyFilters();
 
 		std::optional<Colour4f> getRowColour(int idx) const;
     };

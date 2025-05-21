@@ -119,6 +119,8 @@ void LocalisationLanguageEditor::onMakeUI()
 	});
 
 	getWidget("editProperties")->setActive(srcRemote != nullptr);
+
+	onFiltersUpdated();
 }
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
@@ -322,7 +324,49 @@ void LocalisationLanguageEditor::setFilters()
 
 void LocalisationLanguageEditor::onFiltersUpdated()
 {
-	// TODO
+	getWidget("clearFilters")->setEnabled(filters.hasFiltersActive());
+
+	updateFilterDisplay();
+	applyFilters();
+}
+
+void LocalisationLanguageEditor::updateFilterDisplay()
+{
+	Vector<String> filterStrings;
+	if (filters.hasFiltersActive()) {
+		if (filters.priorityEnabled) {
+			filterStrings += "Priority between " + toString(filters.minPriority) + " and " + toString(filters.maxPriority);
+		}
+		if (filters.translatedEnabled) {
+			if (filters.translated == LocTranslatedStatus::Translated) {
+				filterStrings += "Translated";
+			} else {
+				filterStrings += "Untranslated";
+			}
+		}
+		if (filters.outdatedEnabled) {
+			if (filters.outdated == LocOutdatedStatus::OutOfDate) {
+				filterStrings += "Out of Date";
+			} else {
+				filterStrings += "Up to Date";
+			}
+		}
+	}
+
+	String filterString;
+	if (filterStrings.empty()) {
+		filterString = "[No filters enabled]";
+	} else {
+		filterString = String::concatList(filterStrings, ", ");
+	}
+
+	getWidgetAs<UILabel>("filtersLabel")->setText(LocalisedString::fromUserString(filterString));
+}
+
+void LocalisationLanguageEditor::applyFilters()
+{
+	String showingString = "<TODO>";
+	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
 }
 
 std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const

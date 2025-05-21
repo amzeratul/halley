@@ -18,7 +18,10 @@ namespace Halley {
 		LocalisationFilters workingCopy;
 		Callback callback;
 
-		void loadFilters();
 		void applyFilters();
+
+		void setPriorityEnabled(bool enabled);
+		void setTranslatedEnabled(bool enabled);
+		void setOutdatedEnabled(bool enabled);
 	};
 }
