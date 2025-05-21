@@ -212,6 +212,17 @@ void UIGrid::setLineColourFilter(LineColourCallback callback)
 	lineColourFilter = std::move(callback);
 }
 
+void UIGrid::setFilter(FilterCallback callback)
+{
+	filter = std::move(callback);
+	refreshFilter();
+}
+
+void UIGrid::refreshFilter()
+{
+	onDataUpdated();
+}
+
 int UIGrid::getActiveSelectedLine() const
 {
 	return activeSelectedLine.value_or(-1);
@@ -360,6 +371,18 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 
 }
 
+void UIGrid::generateLineIndex()
+{
+	const size_t nRows = getNumRows();
+	lineIndex.resize(nRows);
+
+	// TODO: use filtering
+
+	for (size_t i = 0; i < nRows; ++i) {
+		lineIndex[i] = i;
+	}
+}
+
 float UIGrid::getLineHeight() const
 {
 	return fontSize + 2 + 2 * cellBorder;
@@ -367,7 +390,8 @@ float UIGrid::getLineHeight() const
 
 void UIGrid::onDataUpdated()
 {
-	const auto numLines = getNumRows();
+	generateLineIndex();
+	const auto numLines = lineIndex.size();
 	const float lineHeight = getLineHeight();
 
 	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(numLines + 2))));
@@ -376,7 +400,7 @@ void UIGrid::onDataUpdated()
 	colours.resize(numLines);
 	if (lineColourFilter) {
 		for (int i = 0; i < numLines; ++i) {
-			colours[i] = lineColourFilter(i);
+			colours[i] = lineColourFilter(static_cast<int>(lineIndex[i]));
 		}
 	}
 }

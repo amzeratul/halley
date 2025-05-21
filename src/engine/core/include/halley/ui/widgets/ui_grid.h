@@ -8,6 +8,7 @@ namespace Halley {
     class UIGrid : public UIWidget {
     public:
         using LineColourCallback = std::function<std::optional<Colour4f>(int)>;
+        using FilterCallback = std::function<bool(int)>;
 
         UIGrid(String id, UIFactory& factory);
 
@@ -15,6 +16,8 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 
         void setLineColourFilter(LineColourCallback callback);
+        void setFilter(FilterCallback callback);
+        void refreshFilter();
 
     	int getActiveSelectedLine() const;
         const String& getActiveSelectedKey() const;
@@ -55,6 +58,7 @@ namespace Halley {
 		float cellBorder = 3;
 
         LineColourCallback lineColourFilter;
+        FilterCallback filter;
         TextRenderer text;
 
         std::optional<int> boundedLineUnderMouse;
@@ -70,9 +74,13 @@ namespace Halley {
         Time scrollCooldown = 0;
         mutable std::optional<Rect4f> drawClip;
 
+        Vector<size_t> lineIndex;
+
         void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
 		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites) const;
 
         void onClickLine(std::optional<int> line, KeyMods mods);
+
+        void generateLineIndex();
     };
 }

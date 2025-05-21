@@ -58,5 +58,6 @@ namespace Halley {
 		void applyFilters();
 
 		std::optional<Colour4f> getRowColour(int idx) const;
+		bool isRowVisible(int idx) const;
     };
 }

@@ -143,6 +143,9 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 	grid->setLineColourFilter([this] (int idx) -> std::optional<Colour4f> {
 		return getRowColour(idx);
 	});
+	grid->setFilter([this] (int idx) -> bool {
+		return isRowVisible(idx);
+	});
 	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
 }
 
@@ -367,6 +370,8 @@ void LocalisationLanguageEditor::applyFilters()
 {
 	String showingString = "<TODO>";
 	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
+
+	grid->refreshFilter();
 }
 
 std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
@@ -399,4 +404,12 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 	}
 
 	return {};
+}
+
+bool LocalisationLanguageEditor::isRowVisible(int idx) const
+{
+	const auto& original = srcData->getEntry(idx);
+	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.key) : nullptr;
+
+	return filters.shouldShow(original, translated);
 }
