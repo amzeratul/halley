@@ -1,0 +1,54 @@
+#pragma once
+
+#include <halley.hpp>
+#include "localisation_data.h"
+
+namespace Halley {
+	enum class LocTranslatedStatus {
+		Untranslated,
+		Translated
+	};
+
+	template <>
+	struct EnumNames<LocTranslatedStatus> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"untranslated",
+				"translated"
+			}};
+		}
+	};
+
+	enum class LocOutdatedStatus {
+		UpToDate,
+		OutOfDate
+	};
+
+	template <>
+	struct EnumNames<LocOutdatedStatus> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"upToDate",
+				"outOfDate"
+			}};
+		}
+	};
+
+	class LocalisationFilters {
+	public:
+		String searchString;
+
+		bool priorityEnabled = false;
+		bool outdatedEnabled = false;
+		bool translatedEnabled = false;
+
+		LocOutdatedStatus outdated = LocOutdatedStatus::OutOfDate;
+		LocTranslatedStatus translated = LocTranslatedStatus::Untranslated;
+		LocPriority minPriority = LocPriority::Lowest;
+		LocPriority maxPriority = LocPriority::Highest;
+
+		bool shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation) const;
+		bool hasFiltersActive() const;
+		void clearFilters();
+	};
+}

@@ -1,4 +1,5 @@
 #pragma once
+#include "localisation_filters.h"
 #include "localisation_grid.h"
 
 namespace Halley {
@@ -31,6 +32,7 @@ namespace Halley {
 		HashMap<String, size_t> srcRemoteDataIndex;
 
 		std::shared_ptr<LocalisationGrid> grid;
+		LocalisationFilters filters;
 
 		String curEditingKey = "";
 		Vector<String> pendingTranslationModifiedKeys;
@@ -49,6 +51,9 @@ namespace Halley {
 
 		void uploadPendingTranslations(bool force);
 		void close();
+
+		void setFilters();
+		void onFiltersUpdated();
 
 		std::optional<Colour4f> getRowColour(int idx) const;
     };

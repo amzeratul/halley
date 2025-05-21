@@ -1,0 +1,190 @@
+uuid: 8ce45167-237c-4341-9e76-4fc3fc14d998
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 7fa6a322-4768-4cda-a438-4126f088340b
+    proportion: 1
+    border: [0, 0, 0, 0]
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: ""
+      image: halley_ui/ui_title_capsule.png
+      innerBorder: [5, 2, 4, 4]
+      size: [400, 0]
+    children:
+      - uuid: 0c9d0da9-b158-42ac-8d75-188bcc38ea34
+        border: [0, 0, 0, 3]
+        widget:
+          class: label
+          text: Filters
+        fill: [centreHorizontal, fillVertical]
+      - uuid: 218d5584-6e78-4014-b19c-a04b7c61d581
+        sizer:
+          columnProportions: []
+          gap: 4
+        children:
+          - uuid: 16ff6d9d-54db-442a-a450-71387bdf36f7
+            proportion: 1
+            border: [5, 5, 5, 5]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 5
+              type: vertical
+            widget:
+              class: widget
+              id: ""
+            children:
+              - uuid: 3490db87-92b5-49f5-a540-a6cdad71cbdb
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 2cd70eac-2ef2-4d32-81e0-eb402b6166ef
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: priorityEnable
+                      label: "Priority:"
+                      size: [200, 0]
+                  - uuid: 4dbf03a7-2b2d-47c8-810f-03d32c7b4299
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: dropdown
+                      id: minPriority
+                      options:
+                        - id: highest
+                          image: ui/priority_highest.png
+                          imageColour: "#df3434"
+                          text: Highest
+                        - id: high
+                          image: ui/priority_high.png
+                          imageColour: "#ffbf00"
+                          text: High
+                        - id: normal
+                          image: ui/priority_normal.png
+                          imageColour: "#40bc2a"
+                          text: Normal
+                        - id: low
+                          image: ui/priority_low.png
+                          imageColour: "#00abdf"
+                          text: Low
+                        - id: lowest
+                          image: ui/priority_lowest.png
+                          imageColour: "#3930d2"
+                          text: Lowest
+                  - uuid: 12a5400e-80f6-4549-a45c-2cf5008eb12d
+                    proportion: 0
+                    border: [4, 0, 4, 0]
+                    widget:
+                      class: label
+                      size: [0, 0]
+                      text: to
+                    fill: [left, centreVertical]
+                  - uuid: 3db2e02f-a03b-42f6-8457-541a59808f5f
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: dropdown
+                      id: maxPriority
+                      options:
+                        - id: highest
+                          image: ui/priority_highest.png
+                          imageColour: "#df3434"
+                          text: Highest
+                        - id: high
+                          image: ui/priority_high.png
+                          imageColour: "#ffbf00"
+                          text: High
+                        - id: normal
+                          image: ui/priority_normal.png
+                          imageColour: "#40bc2a"
+                          text: Normal
+                        - id: low
+                          image: ui/priority_low.png
+                          imageColour: "#00abdf"
+                          text: Low
+                        - id: lowest
+                          image: ui/priority_lowest.png
+                          imageColour: "#3930d2"
+                          text: Lowest
+              - uuid: 91446eb9-c660-4b9a-8823-796bf8fc7b29
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: aec27a59-98e2-4e1b-aa0b-a1a40d581bae
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: translationStatusEnable
+                      label: "Translation status: "
+                      size: [200, 0]
+                  - uuid: eb5d5f55-9b30-4400-87e4-975759b6ac11
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: translationStatus
+                      options:
+                        - id: translated
+                          text: Translated
+                        - id: untranslated
+                          text: Untranslated
+              - uuid: c910c195-7324-4b12-8815-c797604994a2
+                sizer:
+                  columnProportions: []
+                children:
+                  - uuid: 4dd4f5eb-9450-4ecd-a711-331b6442fc4f
+                    border: [0, 0, 6, 0]
+                    widget:
+                      class: checkbox
+                      id: outdatedStatusEnable
+                      label: "Outdated status: "
+                      size: [200, 0]
+                  - uuid: d613a0b6-d467-4b62-8132-6bc89838caf6
+                    proportion: 1
+                    widget:
+                      class: dropdown
+                      id: outdatedStatus
+                      options:
+                        - id: upToDate
+                          text: Up to date
+                        - id: outOfDate
+                          text: Out of date
+      - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
+        sizer:
+          columnProportions: []
+          gap: 8
+          type: horizontal
+        widget:
+          class: widget
+          id: ""
+        children:
+          - uuid: 9427e14f-f0fd-45fa-8ba5-525655be56da
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: set
+              size: [120, 0]
+              text: Set Filters
+            fill: [right, fillVertical]
+          - uuid: 0a815566-4bde-4bec-8b95-fde6ae5181ae
+            proportion: 0
+            sizer:
+              columnProportions: []
+            widget:
+              class: button
+              id: cancel
+              size: [120, 0]
+              text: Cancel
+            fill: [right, fillVertical]
+        fill: [right, fillVertical]
+    fill: [centreHorizontal, centreVertical]

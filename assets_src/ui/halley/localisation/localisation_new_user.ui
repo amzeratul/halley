@@ -40,7 +40,7 @@ children:
               type: vertical
             widget:
               class: widget
-              id: translationPanel
+              id: ""
             children:
               - uuid: 780a295e-babc-4353-9cbf-c9138be611b0
                 sizer:

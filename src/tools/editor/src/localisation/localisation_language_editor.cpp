@@ -3,6 +3,7 @@
 #include "localisation_client.h"
 #include "localisation_data.h"
 #include "localisation_editor_root.h"
+#include "localisation_set_filters_window.h"
 
 using namespace Halley;
 
@@ -61,6 +62,23 @@ void LocalisationLanguageEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "close", [this] (const UIEvent& event)
 	{
 		close();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "setFilters", [this] (const UIEvent& event)
+	{
+		setFilters();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "clearFilters", [this] (const UIEvent& event)
+	{
+		filters.clearFilters();
+		onFiltersUpdated();
+	});
+
+	bindData("searchBar", filters.searchString, [this] (String value)
+	{
+		filters.searchString = std::move(value);
+		onFiltersUpdated();
 	});
 
 	setHandle(UIEventType::ListSelectionChanged, "localisation_grid", [=] (const UIEvent& event)
@@ -290,6 +308,21 @@ void LocalisationLanguageEditor::close()
 {
 	uploadPendingTranslations(true);
 	root.returnToRoot();
+}
+
+void LocalisationLanguageEditor::setFilters()
+{
+	const auto pos = getWidget("setFilters")->getRect().getBottomLeft();
+	getRoot()->addChild(std::make_shared<LocalisationSetFiltersWindow>(factory, filters, pos, [=] (bool changed) {
+		if (changed) {
+			onFiltersUpdated();
+		}
+	}));
+}
+
+void LocalisationLanguageEditor::onFiltersUpdated()
+{
+	// TODO
 }
 
 std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const

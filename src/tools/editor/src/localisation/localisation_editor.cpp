@@ -72,6 +72,7 @@ LocalisationEditor::LocalisationEditor(LocalisationEditorRoot& root, ProjectWind
 	, factory(factory)
 	, api(projectWindow.getAPI())
 {
+	setupCurrencyConversion();
 	if (!project.getProperties().isDevEnvironment()) {
 		storageContainer = api.system->getStorageContainer(SaveDataType::SaveLocal, "loc_data_" + project.getBinName());
 	}
@@ -334,14 +335,8 @@ void LocalisationEditor::populateOriginalLanguageData()
 
 	if (isDev) {
 		// Total cost
-		HashMap<String, float> costPerWord;
-		for (auto& lang: project.getProperties().getLanguages()) {
-			if (auto cost = project.getProperties().getLanguageCost(lang)) {
-				costPerWord[cost->second] += cost->first;
-			}
-		}
 		Vector<String> costStrs;
-		for (const auto& [currency, cost]: costPerWord) {
+		for (const auto& [currency, cost]: getLocCosts("GBP")) {
 			costStrs += getCurrencyString(cost * origStats.totalWords, currency);
 		}
 		getWidgetAs<UILabel>("totalCost")->setText(LocalisedString::fromUserString(String::concatList(costStrs, " + ")));
@@ -432,6 +427,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	auto cost = project.getProperties().getLanguageCost(language);
 	widget->getWidget("costBox")->setActive(isDevEnvironment() && cost.has_value());
 	if (cost) {
+		cost = convertCurrency(*cost, "GBP");
 		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
 	}
 
@@ -631,6 +627,53 @@ void LocalisationEditor::onRemoteStringsReceived(LocStringSet result)
 		gotRemoteStrings = true;
 		pendingRemoteStrings = true;
 	}
+}
+
+HashMap<String, float> LocalisationEditor::getLocCosts(std::optional<String> convertToCurrency) const
+{
+	HashMap<String, float> costPerCurrency;
+	for (auto& lang: project.getProperties().getLanguages()) {
+		if (auto cost = project.getProperties().getLanguageCost(lang)) {
+			if (convertToCurrency && cost->second != convertToCurrency) {
+				cost = convertCurrency(*cost, *convertToCurrency);
+			}
+
+			costPerCurrency[cost->second] += cost->first;
+		}
+	}
+	return costPerCurrency;
+}
+
+std::pair<float, String> LocalisationEditor::convertCurrency(std::pair<float, String> cost, const String& dstCurrency) const
+{
+	if (auto result = convertCurrency(cost.first, cost.second, dstCurrency)) {
+		return { *result, dstCurrency };
+	} else {
+		return cost;
+	}
+}
+
+std::optional<float> LocalisationEditor::convertCurrency(float cost, const String& srcCurrency, const String& dstCurrency) const
+{
+	const auto srcValue = currencyDollarValues.contains(srcCurrency) ? std::optional(currencyDollarValues.at(srcCurrency)) : std::nullopt;
+	const auto dstValue = currencyDollarValues.contains(dstCurrency) ? std::optional(currencyDollarValues.at(dstCurrency)) : std::nullopt;
+
+	if (srcValue && dstValue) {
+		return cost * (*srcValue / *dstValue);
+	} else {
+		return std::nullopt;
+	}
+}
+
+void LocalisationEditor::setupCurrencyConversion()
+{
+	// TODO: don't hardcode this? :)
+	// Could get it from https://api.fxratesapi.com/latest, but then gotta deal with it being async
+
+	// Current as of 2025-05-21
+	currencyDollarValues["USD"] = 1;
+	currencyDollarValues["GBP"] = 1.34f;
+	currencyDollarValues["EUR"] = 1.13f;
 }
 
 void LocalisationEditor::signIn(const String& username, const String& password)

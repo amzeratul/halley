@@ -26,13 +26,46 @@ children:
         widget:
           class: widget
         children:
-          - uuid: e91d5c87-e9c5-42c4-b5ff-95835543ce2b
+          - uuid: e9a1500c-73ed-45b6-8b55-f59bd33e988e
+            proportion: 0
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              columns: 2
+              gap: 3
+              type: horizontal
             widget:
-              class: dropdown
-              id: chunk
-              options: []
-              size: [400, 22]
-            fill: [left, centreVertical]
+              active: true
+              class: image
+              colour: $ui_popupWindow
+              id: filter
+              image: halley_ui/ui_list_item.png
+              innerBorder: [6, 4, 4, 4]
+              size: [300, 0]
+            children:
+              - uuid: ee532100-1208-4c59-bdc1-8e5a33b0766d
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [100, 0]
+                children:
+                  - uuid: b7bab7e4-c90c-4163-a3d6-253cd8c375ae
+                    border: [0, 1, 0, 0]
+                    widget:
+                      class: label
+                      id: ""
+                      text: "String group: "
+                      wordWrapped: false
+                    fill: [centreHorizontal, centreVertical]
+              - uuid: e91d5c87-e9c5-42c4-b5ff-95835543ce2b
+                widget:
+                  class: dropdown
+                  id: chunk
+                  options: []
+                  size: [400, 22]
+                fill: [left, centreVertical]
+            fill: [left, fillVertical]
           - uuid: 3f7f490d-3882-4a2b-abd5-65b99e811cdc
             proportion: 1
             border: [0, 0, 0, 0]
@@ -44,6 +77,103 @@ children:
               size: [200, 0]
               text: Close
             fill: [right, fillVertical]
+      - uuid: 9508a58c-18e2-4e3e-a166-6e89d49d9312
+        proportion: 0
+        border: [0, 0, 0, 0]
+        sizer:
+          columnProportions: []
+          columns: 2
+          gap: 3
+          type: vertical
+        widget:
+          active: true
+          class: image
+          colour: $ui_popupWindow
+          id: filter
+          image: halley_ui/ui_list_item.png
+          innerBorder: [6, 4, 4, 4]
+          size: [300, 0]
+        children:
+          - uuid: 67c9b928-ccee-4691-a133-31fc3e15ad04
+            proportion: 0
+            border: [0, 0, 2, 0]
+            sizer:
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
+            widget:
+              class: widget
+              id: ""
+              size: [300, 0]
+            children:
+              - uuid: 874a86a2-aeb6-4ead-9bfa-d22efa3446fa
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [100, 0]
+                children:
+                  - uuid: a59a5748-0803-411b-bcf0-40a962d31b1b
+                    border: [0, 1, 0, 0]
+                    widget:
+                      class: label
+                      id: ""
+                      text: "Search: "
+                      wordWrapped: false
+                    fill: [left, centreVertical]
+              - uuid: e4a9f74b-a4a4-4d0b-a35e-aefffa9b4150
+                proportion: 1
+                border: [0, 0, 0, 0]
+                widget:
+                  class: textInput
+                  enabled: true
+                  id: searchBar
+              - uuid: ed03dab8-be6e-4e2d-b200-256e5c363972
+                border: [0, 1, 0, 0]
+                widget:
+                  class: label
+                  id: ""
+                  text: "Filters: "
+                  wordWrapped: false
+                fill: [left, centreVertical]
+              - uuid: 1b35970d-0aa4-4a9e-a16c-ba4867399e6b
+                sizer:
+                  columnProportions: []
+                  gap: 2
+                widget:
+                  class: widget
+                children:
+                  - uuid: 36b8abb9-88e3-4df9-933d-74e6e73a4cc8
+                    widget:
+                      class: button
+                      enabled: true
+                      id: setFilters
+                      style: buttonThin
+                      text: Set Filters...
+                  - uuid: 757c7d2b-680a-43f8-ac13-773a509629a8
+                    widget:
+                      class: button
+                      enabled: true
+                      id: clearFilters
+                      style: buttonThin
+                      text: Clear All
+                  - uuid: e9cb9b0c-8c57-4d1f-a80d-478eb2783dc1
+                    proportion: 1
+                    sizer: {}
+                    widget:
+                      class: widget
+                      id: filterList
+            fill: [fillHorizontal, fillVertical]
+          - uuid: 14fc5dc6-726b-4f42-aea5-8b1c4a3881e5
+            border: [0, 4, 0, 0]
+            widget:
+              class: label
+              id: showingLabel
+              text: Showing
+              wordWrapped: false
+            fill: [left, centreVertical]
+        fill: [fillHorizontal, fillVertical]
       - uuid: f0c18d5d-5061-475d-b536-e9d41b4ba6a0
         proportion: 1
         border: [0, 0, 0, 0]

@@ -84,6 +84,8 @@ namespace Halley {
         std::optional<String> remoteStringsChunk;
         HashMap<String, int> highestVersions;
 
+        HashMap<String, float> currencyDollarValues;
+
         void tryLoading();
 
         void loadLocalStrings();
@@ -139,5 +141,10 @@ namespace Halley {
         void updateCheckForNewStrings(Time t);
         void checkForNewStrings();
         void onRemoteStringsReceived(LocStringSet result);
+
+        HashMap<String, float> getLocCosts(std::optional<String> convertToCurrency) const;
+        std::pair<float, String> convertCurrency(std::pair<float, String> cost, const String& dstCurrency) const;
+        std::optional<float> convertCurrency(float cost, const String& srcCurrency, const String& dstCurrency) const;
+        void setupCurrencyConversion();
     };
 }
