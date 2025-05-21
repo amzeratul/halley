@@ -22,7 +22,7 @@ void I18N::update()
 	for (auto& o: observers) {
 		if (o.second.needsUpdate()) {
 			o.second.update();
-			loadLocalisation(o.second.getRoot());
+			loadLocalisation(o.second.getRoot(), o.first, true);
 		}
 	}
 }
@@ -37,6 +37,37 @@ void I18N::loadStrings(Resources& resources)
 	}
 }
 
+void I18N::loadLocalisationFile(const ConfigFile& config)
+{
+	loadLocalisation(config.getRoot(), config.getAssetId(), false);
+#ifdef DEV_BUILD
+	observers[config.getAssetId()] = ConfigObserver(config);
+#endif
+}
+
+void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool allowUpdating)
+{
+	for (auto& language: root.asMap()) {
+		auto langCode = I18NLanguage(language.first);
+		auto& lang = strings[langCode];
+		for (auto& e: language.second.asMap()) {
+			if (e.first == "null") {
+				Logger::logWarning("null key found on localisation file " + assetId);
+				continue;
+			}
+
+			if (!allowUpdating) {
+				if (const auto iter = lang.find(e.first); iter != lang.end()) {
+					Logger::logError("Duplicated localisation key \"" + e.first + "\": Previously set to \"" + iter->second + "\", now \"" + e.second.asString() + "\" in " + assetId);
+					continue;
+				}
+			}
+			lang[e.first] = e.second.asString();
+		}
+	}
+	++version;
+}
+
 void I18N::setCurrentLanguage(const I18NLanguage& code)
 {
 	currentLanguage = code;
@@ -46,26 +77,6 @@ void I18N::setCurrentLanguage(const I18NLanguage& code)
 void I18N::setFallbackLanguage(const I18NLanguage& code)
 {
 	fallbackLanguage = code;
-}
-
-void I18N::loadLocalisationFile(const ConfigFile& config)
-{
-	loadLocalisation(config.getRoot());
-#ifdef DEV_BUILD
-	observers[config.getAssetId()] = ConfigObserver(config);
-#endif
-}
-
-void I18N::loadLocalisation(const ConfigNode& root)
-{
-	for (auto& language: root.asMap()) {
-		auto langCode = I18NLanguage(language.first);
-		auto& lang = strings[langCode];
-		for (auto& e: language.second.asMap()) {
-			lang[e.first] = e.second.asString();
-		}
-	}
-	++version;
 }
 
 Vector<I18NLanguage> I18N::getLanguagesAvailable() const

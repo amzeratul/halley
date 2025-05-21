@@ -146,7 +146,7 @@ namespace Halley {
 		std::map<String, ConfigObserver> observers;
 		int version = 0;
 
-		void loadLocalisation(const ConfigNode& node);
+		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
 	};
 }
 

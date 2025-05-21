@@ -21,7 +21,9 @@ static void loadMetaTable(Metadata& meta, const ConfigNode& root, bool dirMeta)
 void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDirectoryMeta, const Path& inputFilePath)
 {
 	const auto data = ResourceDataStatic::loadFromFileSystem(path);
-	const auto configFile = YAMLConvert::parseConfig(data ? data->getSpan() : gsl::span<const gsl::byte>());
+	YAMLConvert::ParseOptions options;
+	options.assetId = path.getNativeString(false);
+	const auto configFile = YAMLConvert::parseConfig(data ? data->getSpan() : gsl::span<const gsl::byte>(), options);
 	const auto& root = configFile.getRoot();
 
 	const String inputFilePathStr = inputFilePath.toString();

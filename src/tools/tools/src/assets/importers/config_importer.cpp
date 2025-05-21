@@ -9,7 +9,9 @@ using namespace Halley;
 
 void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	ConfigFile config = YAMLConvert::parseConfig(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	YAMLConvert::ParseOptions options;
+	options.assetId = asset.inputFiles.at(0).name.getNativeString(false);
+	ConfigFile config = YAMLConvert::parseConfig(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)), options);
 	
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "lz4");

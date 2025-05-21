@@ -32,6 +32,7 @@ namespace Halley {
 			{}
 
 			bool parseMapsAsSequencesOfPairs;
+			String assetId;
 		};
 		
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options = {});

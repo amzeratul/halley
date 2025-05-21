@@ -22,6 +22,11 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions
 			ConfigNode::MapType map;
 			for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
 				String key = it->first.as<std::string>();
+				if (map.contains(key)) {
+					Logger::logError("Duplicated YAML key \"" + key + "\"" 
+						+ (options.assetId.isEmpty() ? "" :  + " in asset \"" + options.assetId + "\"")
+						+ " on line " + toString(it->second.Mark().line + 1));
+				}
 				map[std::move(key)] = parseYAMLNode(it->second, options);
 			}
 			result = std::move(map);
