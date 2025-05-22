@@ -16,24 +16,22 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 		}
 	}
 
-	if (translation) {
-		const bool isTranslated = !translation->value.isEmpty();
+	const bool isTranslated = translation && !translation->value.isEmpty();
 
-		if (outdatedEnabled) {
-			if (!isTranslated) { // If it's empty, ignore this check - we want to match it either way
-				const bool isOutOfDate = translation->origVersion < entry.version;
-				const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
-				if (isOutOfDate != wantsOutOfDate) {
-					return false;
-				}
-			}
-		}
-
-		if (translatedEnabled) {
-			const bool wantsTranslated = translated == LocTranslatedStatus::Translated;
-			if (isTranslated != wantsTranslated) {
+	if (outdatedEnabled) {
+		if (isTranslated) { // If it's empty, ignore this check - we want to match it either way
+			const bool isOutOfDate = translation->origVersion < entry.version;
+			const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
+			if (isOutOfDate != wantsOutOfDate) {
 				return false;
 			}
+		}
+	}
+
+	if (translatedEnabled) {
+		const bool wantsTranslated = translated == LocTranslatedStatus::Translated;
+		if (isTranslated != wantsTranslated) {
+			return false;
 		}
 	}
 
