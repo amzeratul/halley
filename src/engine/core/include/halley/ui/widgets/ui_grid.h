@@ -23,13 +23,16 @@ namespace Halley {
         const String& getActiveSelectedKey() const;
 
     	void setSelectedLine(int line);
-        void selectNextLine();
+        void moveSelection(int delta);
+        void selectAll();
         const HashSet<int>& getSelectedLines() const;
 
         virtual const String& getKeyAt(int idx) const;
 
     	size_t getActiveRowCount() const;
         virtual size_t getSrcRowCount() const;
+
+        const Vector<int>& getActiveRows() const;
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
@@ -42,6 +45,8 @@ namespace Halley {
         float getLineHeight() const;
         void onDataUpdated();
         void refreshLines();
+
+        bool onKeyPress(KeyboardKeyPress key) override;
 
         virtual std::pair<Vector<float>, Vector<String>> getColumns() const;
         virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;

@@ -75,6 +75,11 @@ void LocalisationLanguageEditor::onMakeUI()
 		onFiltersUpdated();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "clearSearch", [this] (const UIEvent& event)
+	{
+		getWidgetAs<UITextInput>("searchBar")->setText(StringUTF32());
+	});
+
 	bindData("searchBar", filters.searchString, [this] (String value)
 	{
 		filters.searchString = std::move(value);
@@ -99,7 +104,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	setHandle(UIEventType::TextSubmit, "dstCurLine", [=] (const UIEvent& event)
 	{
-		grid->selectNextLine();
+		grid->moveSelection(1);
 	});
 
 	setHandle(UIEventType::TextSubmit, "comment", [=] (const UIEvent& event)
@@ -124,6 +129,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
 {
+	getWidget("clearSearch")->setEnabled(!filters.searchString.isEmpty());
 	uploadPendingTranslations(false);
 }
 
@@ -372,11 +378,16 @@ void LocalisationLanguageEditor::applyFilters()
 	const auto activeRows = grid->getActiveRowCount();
 	const auto srcRows = grid->getSrcRowCount();
 
+	int wordCount = 0;
+	for (const auto idx: grid->getActiveRows()) {
+		wordCount += LocalisationStats::getWordCount(srcData->getEntry(idx).value);
+	}
+
 	String showingString;
 	if (activeRows < srcRows) {
-		showingString = "Showing " + toString(activeRows) + "/" + toString(srcRows) + " rows";
+		showingString = "Showing " + toString(activeRows) + "/" + toString(srcRows) + " rows - " + toString(wordCount) + " original words";
 	} else {
-		showingString = "Showing all " + toString(srcRows) + " rows";
+		showingString = "Showing all " + toString(srcRows) + " rows - " + toString(wordCount) + " original words";
 	}
 
 	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));

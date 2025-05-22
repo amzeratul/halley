@@ -239,14 +239,23 @@ void UIGrid::setSelectedLine(int line)
 	onClickLine(line, KeyMods::None);
 }
 
-void UIGrid::selectNextLine()
+void UIGrid::moveSelection(int delta)
 {
 	const auto iter = lineIndex.find(getActiveSelectedLine());
 	if (iter != lineIndex.end()) {
-		auto next = iter;
-		++next;
-		if (next != lineIndex.end()) {
-			setSelectedLine(*next);
+		const auto idx = static_cast<int>(iter - lineIndex.begin());
+		const auto newIdx = lineIndex.at(clamp(idx + delta, 0, static_cast<int>(lineIndex.size()) - 1));
+		setSelectedLine(newIdx);
+	}
+}
+
+void UIGrid::selectAll()
+{
+	selectedLines.clear();
+	const auto n = getActiveRowCount();
+	for (int i = 0; i < n; ++i) {
+		if (auto curLine = getLineAtRow(i)) {
+			selectedLines.insert(*curLine);
 		}
 	}
 }
@@ -344,6 +353,11 @@ size_t UIGrid::getSrcRowCount() const
 	return 0;
 }
 
+const Vector<int>& UIGrid::getActiveRows() const
+{
+	return lineIndex;
+}
+
 void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 {
 	if (line && !getRowForLine(*line)) {
@@ -370,10 +384,16 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 	} else if (mods == KeyMods::Shift) {
 		if (line) {
 			selectedLines.clear();
-			int start = std::min(*line, *activeSelectedLine);
-			int end = std::max(*line, *activeSelectedLine);
-			for (int i = start; i <= end; ++i) {
-				selectedLines.insert(i);
+			const auto clickedIdx = getRowForLine(*line);
+			const auto selectedIdx = getRowForLine(*line);
+			if (clickedIdx && selectedIdx) {
+				const int start = std::min(*clickedIdx, *selectedIdx);
+				const int end = std::max(*clickedIdx, *selectedIdx);
+				for (int i = start; i <= end; ++i) {
+					if (auto curLine = getLineAtRow(i)) {
+						selectedLines.insert(*curLine);
+					}
+				}
 			}
 		}
 	}
@@ -450,6 +470,26 @@ void UIGrid::refreshLines()
 			colours[i] = lineColourFilter(static_cast<int>(lineIndex[i]));
 		}
 	}
+}
+
+bool UIGrid::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
+		selectAll();
+		return true;
+	}
+
+	if (key.is(KeyCode::Up)) {
+		moveSelection(-1);
+		return true;
+	}
+
+	if (key.is(KeyCode::Down)) {
+		moveSelection(1);
+		return true;
+	}
+
+	return false;
 }
 
 std::pair<Vector<float>, Vector<String>> UIGrid::getColumns() const

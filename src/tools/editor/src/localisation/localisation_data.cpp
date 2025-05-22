@@ -18,6 +18,26 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 	return *this;
 }
 
+int LocalisationStats::getWordCount(const String& line)
+{
+	constexpr char32_t delims[] = U" ,;.?!:\"¿¡[]{}()\n\t";
+	const auto* start = delims;
+	const auto* end = delims + (sizeof(delims) / sizeof(char32_t) - 1);
+
+	bool isInWord = false;
+	int count = 0;
+
+	for (auto c: line.getUTF32()) {
+		const bool isWordCharacter = std::find(start, end, c) == end;
+		if (isWordCharacter && !isInWord) {
+			++count;
+		}
+		isInWord = isWordCharacter;
+	}
+
+	return count;
+}
+
 LocalisationDataEntry::LocalisationDataEntry(String key, String value, String context, String comment, LocPriority priority)
 	: key(std::move(key))
 	, value(std::move(value))
@@ -27,33 +47,11 @@ LocalisationDataEntry::LocalisationDataEntry(String key, String value, String co
 {
 }
 
-namespace {
-	int getWordCount(const String& line)
-	{
-		const char* delims = " ,;.?![]{}()";
-		auto start = delims;
-		auto end = delims + strlen(delims);
-
-		bool isInWord = false;
-		int count = 0;
-
-		for (auto c: line.cppStr()) {
-			const bool isWordCharacter = std::find(start, end, c) == end;
-			if (isWordCharacter && !isInWord) {
-				++count;
-			}
-			isInWord = isWordCharacter;
-		}
-
-		return count;
-	}
-}
-
 LocalisationStats LocOriginalDataChunk::getStats() const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
-		const auto wordCount = getWordCount(entry.value);
+		const auto wordCount = LocalisationStats::getWordCount(entry.value);
 		result.totalKeys++;
 		result.keysPerCategory[category]++;
 		result.totalWords += wordCount;
@@ -67,7 +65,7 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.key)) {
-			const auto wordCount = getWordCount(translatedEntry->value);
+			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->value);
 			result.totalKeys++;
 			result.keysPerCategory[category]++;
 			result.totalWords += wordCount;

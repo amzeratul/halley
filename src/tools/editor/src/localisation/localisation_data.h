@@ -23,6 +23,8 @@ namespace Halley {
 		HashMap<String, int> keysPerCategory;
 
 		LocalisationStats& operator+=(const LocalisationStats& other);
+
+		static int getWordCount(const String& line);
 	};
 
 	class TranslationStats {
