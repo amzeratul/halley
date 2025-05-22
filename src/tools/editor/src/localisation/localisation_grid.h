@@ -15,8 +15,9 @@ namespace Halley {
         Vector2f getToolTipPosition(Vector2f mousePos) const override;
         const String& getKeyAt(int idx) const override;
 
+    	size_t getSrcRowCount() const override;
+
     protected:
-        size_t getNumRows() const override;
         std::pair<Vector<float>, Vector<String>> getColumns() const override;
         void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const override;
 

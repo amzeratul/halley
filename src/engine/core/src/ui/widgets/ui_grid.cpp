@@ -69,8 +69,8 @@ void UIGrid::draw(UIPainter& painter) const
 	const Rect4f relClip = (clip ? *clip : getRect()) - getPosition();
 
 	const float lineHeight = getLineHeight();
-	const auto n = static_cast<int>(getNumRows());
-	const auto firstLine = clamp(static_cast<int>(std::floor(relClip.getTop() / lineHeight)) - 1, 0, n - 1);
+	const auto n = static_cast<int>(getActiveRowCount());
+	const auto firstLine = clamp(static_cast<int>(std::floor(relClip.getTop() / lineHeight)) - 1, 0, std::max(0, n - 1));
 	const auto lastLine = clamp(static_cast<int>(std::ceil(relClip.getBottom() / lineHeight)) - 1, 0, n - 1);
 
 	// Entries
@@ -85,7 +85,9 @@ void UIGrid::draw(UIPainter& painter) const
 	{
 		// Backgrounds
 		std::optional<Rect4f> drewSelectedLine;
-		for (int i = firstLine; i <= lastLine + 1; ++i) {
+		for (int i = firstLine; i <= lastLine; ++i) {
+			const auto lineNumber = lineIndex.at(i);
+
 			std::optional<Colour4f> col0 = colours[i];
 			std::optional<Colour4f> col1;
 			std::optional<Colour4f> col2;
@@ -96,12 +98,12 @@ void UIGrid::draw(UIPainter& painter) const
 			if (i % 2 == 0) {
 				col1 = Colour4f(0, 0, 0).withAlpha(0.1f);
 			}
-			if (selectedLines.contains(i)) {
+			if (selectedLines.contains(lineNumber)) {
 				col2 = Colour4f(1, 1, 1, 0.2f);
-			} else if (lineUnderMouse == i) {
+			} else if (lineUnderMouse == lineNumber) {
 				col2 = Colour4f(1, 1, 1, 0.1f);
 			}
-			if (activeSelectedLine == i) {
+			if (activeSelectedLine == lineNumber) {
 				drewSelectedLine = rect;
 			}
 
@@ -168,7 +170,7 @@ void UIGrid::drawLine(UIPainter& painter, int idx, const Vector<float>& columns)
 	Vector<String> strs;
 	Vector<Colour4f> colours;
 	Vector<Sprite> sprites;
-	getLineDrawData(idx, strs, colours, sprites);
+	getLineDrawData(lineIndex.at(idx), strs, colours, sprites);
 	drawLine(painter, getRowBasePos(idx), columns, strs.const_span(), colours.const_span(), sprites.const_span());
 }
 
@@ -218,11 +220,6 @@ void UIGrid::setFilter(FilterCallback callback)
 	refreshFilter();
 }
 
-void UIGrid::refreshFilter()
-{
-	onDataUpdated();
-}
-
 int UIGrid::getActiveSelectedLine() const
 {
 	return activeSelectedLine.value_or(-1);
@@ -242,6 +239,18 @@ void UIGrid::setSelectedLine(int line)
 	onClickLine(line, KeyMods::None);
 }
 
+void UIGrid::selectNextLine()
+{
+	const auto iter = lineIndex.find(getActiveSelectedLine());
+	if (iter != lineIndex.end()) {
+		auto next = iter;
+		++next;
+		if (next != lineIndex.end()) {
+			setSelectedLine(*next);
+		}
+	}
+}
+
 const HashSet<int>& UIGrid::getSelectedLines() const
 {
 	return selectedLines;
@@ -250,14 +259,15 @@ const HashSet<int>& UIGrid::getSelectedLines() const
 void UIGrid::onMouseOver(Vector2f mousePos)
 {
 	const float lineHeight = getLineHeight();
-	const auto nLines = static_cast<int>(getNumRows());
+	const auto nLines = static_cast<int>(getActiveRowCount());
 	const auto line = static_cast<int>((mousePos.y - getPosition().y) / lineHeight) - 1;
-	boundedLineUnderMouse = nLines >= 0 ? std::optional<int>(clamp(line, 0, nLines - 1)) : std::nullopt;
+	auto boundedDisplayLineUnderMouse = nLines > 0 ? std::optional<int>(clamp(line, 0, nLines - 1)) : std::nullopt;
+	boundedLineUnderMouse = boundedDisplayLineUnderMouse ? std::optional<int>(lineIndex.at(*boundedDisplayLineUnderMouse)) : std::nullopt;
 
-	if (line != boundedLineUnderMouse) {
+	if (line != boundedDisplayLineUnderMouse) {
 		lineUnderMouse = {};
 	} else {
-		lineUnderMouse = line;
+		lineUnderMouse = lineIndex.at(line);
 	}
 
 	lastMousePos = mousePos;
@@ -271,7 +281,7 @@ void UIGrid::onMouseOver(Vector2f mousePos)
 		const int start = std::min(*holdingLine, *boundedLineUnderMouse);
 		const int end = std::max(*holdingLine, *boundedLineUnderMouse);
 		for (int i = start; i <= end; ++i) {
-			selectedLines.insert(i);
+			selectedLines.insert(lineIndex.at(i));
 		}
 	}
 
@@ -324,15 +334,19 @@ bool UIGrid::canReceiveFocus() const
 	return true;
 }
 
-size_t UIGrid::getNumRows() const
+size_t UIGrid::getActiveRowCount() const
+{
+	return lineIndex.size();
+}
+
+size_t UIGrid::getSrcRowCount() const
 {
 	return 0;
 }
 
 void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 {
-	auto lines = getNumRows();
-	if (lines == 0 || line < 0 || line >= static_cast<int>(lines)) {
+	if (line && !getRowForLine(*line)) {
 		line = {};
 	}
 
@@ -368,18 +382,37 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 		auto id = activeSelectedLine ? getKeyAt(*activeSelectedLine) : "";
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, activeSelectedLine.value_or(-1)));
 	}
-
 }
 
-void UIGrid::generateLineIndex()
+bool UIGrid::generateLineIndex()
 {
-	const size_t nRows = getNumRows();
-	lineIndex.resize(nRows);
+	const int nRows = static_cast<int>(getSrcRowCount());
 
-	// TODO: use filtering
+	auto prev = lineIndex;
+	lineIndex.clear();
 
-	for (size_t i = 0; i < nRows; ++i) {
-		lineIndex[i] = i;
+	if (filter) {
+		for (int i = 0; i < nRows; ++i) {
+			if (filter(i)) {
+				lineIndex += i;
+			}
+		}
+	} else {
+		lineIndex.resize(nRows);
+		for (int i = 0; i < nRows; ++i) {
+			lineIndex[i] = i;
+		}
+	}
+
+	if (prev != lineIndex) {
+		reverseLineIndex.clear();
+		for (int i = 0; i < static_cast<int>(lineIndex.size()); ++i) {
+			reverseLineIndex[lineIndex[i]] = i;
+		}
+
+		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -388,14 +421,28 @@ float UIGrid::getLineHeight() const
 	return fontSize + 2 + 2 * cellBorder;
 }
 
+bool UIGrid::refreshFilter()
+{
+	if (generateLineIndex()) {
+		refreshLines();
+		return true;
+	}
+	return false;
+}
+
 void UIGrid::onDataUpdated()
 {
 	generateLineIndex();
+	refreshLines();
+}
+
+void UIGrid::refreshLines()
+{
 	const auto numLines = lineIndex.size();
 	const float lineHeight = getLineHeight();
 
 	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(numLines + 2))));
-	setSelectedLine(0);
+	setSelectedLine(lineIndex.empty() ? 0 : lineIndex[0]);
 
 	colours.resize(numLines);
 	if (lineColourFilter) {
@@ -427,6 +474,30 @@ Vector2f UIGrid::getCellBasePos(int row, int column) const
 	}
 
 	return getRowBasePos(row) + Vector2f(x, 0);
+}
+
+std::optional<int> UIGrid::getLineAtRow(int rowIdx) const
+{
+	if (rowIdx < 0 || rowIdx >= static_cast<int>(lineIndex.size())) {
+		return std::nullopt;
+	}
+	return lineIndex[rowIdx];
+}
+
+std::optional<int> UIGrid::getRowForLine(int line) const
+{
+	/*
+	const auto iter = std::lower_bound(lineIndex.begin(), lineIndex.end(), line);
+	if (iter == lineIndex.end() || *iter != line) {
+		return std::nullopt;
+	}
+	return static_cast<int>(iter - lineIndex.begin());
+	*/
+	const auto iter = reverseLineIndex.find(line);
+	if (iter != reverseLineIndex.end()) {
+		return iter->second;
+	}
+	return std::nullopt;
 }
 
 const String& UIGrid::getKeyAt(int idx) const

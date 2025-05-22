@@ -5,7 +5,7 @@ using namespace Halley;
 bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation) const
 {
 	if (!searchString.isEmpty()) {
-		if (entry.value.contains(searchString) && entry.key.contains(searchString)) {
+		if (!entry.value.contains(searchString) && !entry.key.contains(searchString)) {
 			return false;
 		}
 	}

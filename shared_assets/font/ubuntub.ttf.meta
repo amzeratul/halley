@@ -1,4 +1,4 @@
-height: 512
+height: 1024
 width: 1024
 fallback: Noto Sans JP Regular
-extraCharacters: €
+scripts: [latin, latin-extended, greek, cyrillic]

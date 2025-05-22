@@ -17,13 +17,19 @@ namespace Halley {
 
         void setLineColourFilter(LineColourCallback callback);
         void setFilter(FilterCallback callback);
-        void refreshFilter();
+        bool refreshFilter();
 
     	int getActiveSelectedLine() const;
         const String& getActiveSelectedKey() const;
-        void setSelectedLine(int line);
+
+    	void setSelectedLine(int line);
+        void selectNextLine();
         const HashSet<int>& getSelectedLines() const;
+
         virtual const String& getKeyAt(int idx) const;
+
+    	size_t getActiveRowCount() const;
+        virtual size_t getSrcRowCount() const;
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
@@ -33,15 +39,18 @@ namespace Halley {
         bool isFocusLocked() const override;
         bool canReceiveFocus() const override;
 
-        virtual size_t getNumRows() const;
         float getLineHeight() const;
         void onDataUpdated();
+        void refreshLines();
 
         virtual std::pair<Vector<float>, Vector<String>> getColumns() const;
         virtual void getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const;
 
         Vector2f getRowBasePos(int row) const;
         Vector2f getCellBasePos(int row, int column) const;
+
+        std::optional<int> getLineAtRow(int rowIdx) const;
+        std::optional<int> getRowForLine(int line) const;
 
     	Colour4f textCol;
 
@@ -74,13 +83,14 @@ namespace Halley {
         Time scrollCooldown = 0;
         mutable std::optional<Rect4f> drawClip;
 
-        Vector<size_t> lineIndex;
+        Vector<int> lineIndex;
+        HashMap<int, int> reverseLineIndex;
 
         void drawLine(UIPainter& painter, int idx, const Vector<float>& columns) const;
 		void drawLine(UIPainter& painter, Vector2f pos, gsl::span<const float> columns, gsl::span<const String> strings, gsl::span<const Colour4f> colours, gsl::span<const Sprite> sprites) const;
 
         void onClickLine(std::optional<int> line, KeyMods mods);
 
-        void generateLineIndex();
+        bool generateLineIndex();
     };
 }

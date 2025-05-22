@@ -122,13 +122,26 @@ children:
                       text: "Search: "
                       wordWrapped: false
                     fill: [left, centreVertical]
-              - uuid: e4a9f74b-a4a4-4d0b-a35e-aefffa9b4150
-                proportion: 1
-                border: [0, 0, 0, 0]
+              - uuid: 68daebc2-45e2-4f00-91dc-7bba3e2f33b1
+                sizer:
+                  columnProportions: []
                 widget:
-                  class: textInput
-                  enabled: true
-                  id: searchBar
+                  class: widget
+                children:
+                  - uuid: e9661b65-e1ca-4ee6-9c86-55f520e2fb30
+                    widget:
+                      class: button
+                      enabled: true
+                      id: clearSearch
+                      style: buttonThin
+                      text: x
+                  - uuid: e4a9f74b-a4a4-4d0b-a35e-aefffa9b4150
+                    proportion: 1
+                    border: [0, 0, 0, 0]
+                    widget:
+                      class: textInput
+                      enabled: true
+                      id: searchBar
               - uuid: ed03dab8-be6e-4e2d-b200-256e5c363972
                 border: [0, 1, 0, 0]
                 widget:
@@ -179,10 +192,11 @@ children:
             border: [0, 4, 0, 0]
             widget:
               class: label
+              font: Ubuntu Regular
               id: showingLabel
               text: Showing
               wordWrapped: false
-            fill: [left, centreVertical]
+            fill: [centreHorizontal, centreVertical]
         fill: [fillHorizontal, fillVertical]
       - uuid: f0c18d5d-5061-475d-b536-e9d41b4ba6a0
         proportion: 1

@@ -16,7 +16,7 @@ LocalisationGrid::LocalisationGrid(UIFactory& factory)
 	commentIcon = Sprite().setImage(factory.getResources(), "ui/loc_comment.png").setColour(Colour4f::fromHexString("#ffffff"));
 }
 
-size_t LocalisationGrid::getNumRows() const
+size_t LocalisationGrid::getSrcRowCount() const
 {
 	return origData ? origData->getNumEntries() : 0;
 }
@@ -27,7 +27,7 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 	Vector<String> columnNames;
 
 	const float width = getSize().x - 1;
-	const float numWidth = 40;
+	const float numWidth = 50;
 	const float keyWidth = 250;
 	const float priorityWidth = 30;
 	const float commentWidth = 30;
@@ -96,7 +96,7 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 
 const String& LocalisationGrid::getKeyAt(int idx) const
 {
-	if (origData && idx >= 0 && idx < static_cast<int>(getNumRows())) {
+	if (origData && idx >= 0 && idx < static_cast<int>(getSrcRowCount())) {
 		return origData->getEntry(idx).key;
 	} else {
 		return String::emptyString();
@@ -157,8 +157,9 @@ bool LocalisationGrid::hasDynamicToolTip() const
 Vector2f LocalisationGrid::getToolTipPosition(Vector2f mousePos) const
 {
 	if (columnUnderMouse && lineUnderMouse) {
-		return getCellBasePos(*lineUnderMouse, *columnUnderMouse) + Vector2f(0, getLineHeight());
-	} else {
-		return mousePos;
+		if (const auto row = getRowForLine(*lineUnderMouse)) {
+			return getCellBasePos(*row, *columnUnderMouse) + Vector2f(0, getLineHeight());
+		}
 	}
+	return mousePos;
 }

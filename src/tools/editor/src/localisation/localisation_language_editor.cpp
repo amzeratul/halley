@@ -99,8 +99,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	setHandle(UIEventType::TextSubmit, "dstCurLine", [=] (const UIEvent& event)
 	{
-		// Go to next line
-		grid->setSelectedLine(grid->getActiveSelectedLine() + 1);
+		grid->selectNextLine();
 	});
 
 	setHandle(UIEventType::TextSubmit, "comment", [=] (const UIEvent& event)
@@ -368,10 +367,19 @@ void LocalisationLanguageEditor::updateFilterDisplay()
 
 void LocalisationLanguageEditor::applyFilters()
 {
-	String showingString = "<TODO>";
-	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
-
 	grid->refreshFilter();
+
+	const auto activeRows = grid->getActiveRowCount();
+	const auto srcRows = grid->getSrcRowCount();
+
+	String showingString;
+	if (activeRows < srcRows) {
+		showingString = "Showing " + toString(activeRows) + "/" + toString(srcRows) + " rows";
+	} else {
+		showingString = "Showing all " + toString(srcRows) + " rows";
+	}
+
+	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
 }
 
 std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
