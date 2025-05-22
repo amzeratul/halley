@@ -310,7 +310,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
     			canFastUpdate = false;
     			// Wipe the existing journal
     			remote.fastUpdateJournal.clear();
-	    		Logger::logWarning("Network entity for fast update has been modified in structure, fall back using slow path");
+	    		Logger::logWarning("Network entity " + entity.getName() + " has been modified in structure, fall back using slow path");
     		}
     	} else {
     		// Something went wrong, fall back to the slow path.

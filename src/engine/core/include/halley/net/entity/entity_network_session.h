@@ -147,6 +147,9 @@ namespace Halley {
         std::mutex outboundInterpolatorLock;
 		ByteDataInterpolatorSet byteDataInterpolatorSet;
 
+		Bytes receiveBuffer;
+		HashMap<NetworkSession::PeerId, Bytes> largePacketBuffer;
+
 		bool canProcessMessage(const EntityNetworkMessage& msg) const;
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);

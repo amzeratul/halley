@@ -15,6 +15,9 @@
 class NetworkComponent;
 using namespace Halley;
 
+static constexpr size_t receiveBufferSize = 32 * 1024;
+static constexpr size_t maxCompressedMessageSize = 16000;
+
 EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 	: resources(resources)
 	, listener(listener)
@@ -37,6 +40,8 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	setupDictionary();
 	byteSerializationOptions.version = SerializerOptions::maxVersion;
 	byteSerializationOptions.dictionary = &serializationDictionary;
+
+	receiveBuffer.resize(receiveBufferSize);
 }
 
 EntityNetworkSession::~EntityNetworkSession()
@@ -132,15 +137,17 @@ void EntityNetworkSession::sendMessages()
 	auto tryCompress = [&](size_t startIdx, size_t count, const Vector<EntityNetworkMessage>& msgs) -> std::optional<Bytes>
 	{
 		auto data = Serializer::toBytes(msgs.span().subspan(startIdx, count), byteSerializationOptions);
-        if (data.size() > 32 * 1024) {
+        if (data.size() > receiveBuffer.capacity()) {
             // EntityNetworkSession::receiveUpdates() uses a fixed sized buffer to decompress into.
             // Let's just check the size right here, and split if needed.
             return std::nullopt;
         }
 		auto compressed = Compression::lz4Compress(gsl::as_bytes(gsl::span<const Byte>(data)));
-		if (compressed.size() <= 16000) {
+		if (compressed.size() <= maxCompressedMessageSize) {
 			return std::move(compressed);
 		} else {
+			// Compressed packet data may be larger than 16x MTU, which currently is a hard
+			// limit of AckUnreliableConnection.
 			return std::nullopt;
 		}
 	};
@@ -152,6 +159,7 @@ void EntityNetworkSession::sendMessages()
 		while (startIdx < msgs.size()) {
 			if (auto data = tryCompress(startIdx, curCount, msgs)) {
 				auto packet = OutboundNetworkPacket(*data);
+				packet.addHeader(static_cast<uint8_t>(0x00));
 				if (peerId == -1) {
 					session->sendToPeers(std::move(packet));
 				} else {
@@ -162,10 +170,37 @@ void EntityNetworkSession::sendMessages()
 			} else {
 				if (curCount > 1) {
 					// Has more than one pack, but couldn't fit them - try fitting half.
-					// It might be able to fit more, but halving will approach the solution faster than trying to find the exact number, at a cost of a bit of inefficiency
+					// It might be able to fit more, but halving will approach the solution faster
+					// than trying to find the exact number, at a cost of a bit of inefficiency.
 					curCount /= 2;
 				} else {
-					Logger::logError("Individual entity network message is too big to send over network, skipping it!");
+					// Single packet, too big to send. Split it up into multiple messages, and use
+					// the message header to "encode" information for the receiver.
+					auto largeData = Serializer::toBytes(msgs.span().subspan(startIdx, 1), byteSerializationOptions);
+
+					const size_t splitSize = receiveBuffer.capacity();
+					size_t numSplit = largeData.size() / splitSize;
+					if (largeData.size() % splitSize != 0) numSplit++;
+
+					Expects(numSplit < 16); // Larger than 16x32 kb. We shouldn't do that!
+
+					for (size_t split = 0, splitOffset = 0; split < numSplit; split++, splitOffset += splitSize) {
+						size_t remain = std::min(largeData.size() - splitOffset, splitSize);
+						auto subData = largeData.const_byte_span().subspan(splitOffset, remain);
+						auto compressed = Compression::lz4Compress(subData);
+
+						Expects(compressed.size() <= maxCompressedMessageSize);
+
+						auto packet = OutboundNetworkPacket(compressed);
+						packet.addHeader(static_cast<uint8_t>(numSplit << 4 | split));
+
+						if (peerId == -1) {
+							session->sendToPeers(std::move(packet));
+						} else {
+							session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+						}
+					}
+
 					++startIdx;
 					curCount = msgs.size() - startIdx;
 				}
@@ -183,22 +218,67 @@ void EntityNetworkSession::receiveUpdates()
 		const auto fromPeerId = result->first;
 		auto& packet = result->second;
 
-		Bytes bytes;
-		bytes.resize(32 * 1024);
-		const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(bytes.span()));
+		// Read header to check if this is a regular, or part of a large message.
+		uint8_t largeSplitHeader;
+		packet.extractHeader(largeSplitHeader);
+
+		receiveBuffer.resize(receiveBuffer.capacity());
+		const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()));
 		if (size) {
-			bytes.resize(*size);
+			receiveBuffer.resize(*size);
 		} else {
 			Logger::logError("Failed to decompress network packet");
 			continue;
 		}
-		auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(bytes, byteSerializationOptions);
 
-		for (auto& msg: msgs) {
-			if (canProcessMessage(msg)) {
-				processMessage(fromPeerId, std::move(msg));
-			} else {
-				queuedPackets.emplace_back(QueuedMessage{ fromPeerId, std::move(msg) });
+		if (largeSplitHeader == 0) {
+			auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(receiveBuffer, byteSerializationOptions);
+
+			for (auto& msg: msgs) {
+				if (canProcessMessage(msg)) {
+					processMessage(fromPeerId, std::move(msg));
+				} else {
+					queuedPackets.emplace_back(QueuedMessage{ fromPeerId, std::move(msg) });
+				}
+			}
+		} else {
+			if (!largePacketBuffer.contains(fromPeerId)) {
+				// Only reserve on demand, 512 kb right now, per peer that sends large packets.
+				largePacketBuffer[fromPeerId] = Bytes(16 * receiveBuffer.capacity());
+			}
+
+			Bytes& buffer = largePacketBuffer[fromPeerId];
+
+			// NB: the network connection makes sure that messages are received in order, so we
+			// (hopefully) don't have to take care of that right here.
+			size_t numSplit = largeSplitHeader >> 4;
+			size_t curSplit = largeSplitHeader & 15;
+
+			size_t srcSize = receiveBuffer.size();
+			size_t dstOffs = buffer.size();
+
+			if (curSplit == 0) {
+				// First part, reset the buffer.
+				buffer.resize_no_init(0);
+				dstOffs = 0;
+			}
+
+			// Resize first, then copy.
+			buffer.resize_no_init(dstOffs + srcSize);
+			auto dst = buffer.byte_span().subspan(dstOffs, srcSize);
+			memcpy(dst.data(), receiveBuffer.data(), srcSize);
+
+			if (curSplit == numSplit - 1) {
+				// Last part of large message. Can process it now.
+				auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(buffer, byteSerializationOptions);
+
+				for (auto& msg: msgs) {
+					if (canProcessMessage(msg)) {
+						processMessage(fromPeerId, std::move(msg));
+					} else {
+						queuedPackets.emplace_back(QueuedMessage{ fromPeerId, std::move(msg) });
+					}
+				}
 			}
 		}
 	}
@@ -658,11 +738,8 @@ void EntityNetworkSession::logUpdates()
 
 bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId)
 {
-	const auto myPeerId = session->getMyPeerId();
-	Expects(myPeerId.has_value());
-
-	const auto ownerId = networkComponent.ownerId;
-	Expects(ownerId.has_value());
+	const auto myPeerId = session->getMyPeerId().value(); // non-optional
+	const auto ownerId = networkComponent.ownerId; // can be none
 
 	// This looks complicated, but it's just trying to unravel who gives, takes or returns
 	// authority to what peer, and notifies the right EntityNetworkRemotePeer instance about it.
@@ -673,11 +750,11 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 		// Authority is taken by someone.
 		Expects(!networkComponent.authorityId.has_value());
 
-		if (networkComponent.ownerId == myPeerId) {
+		if (ownerId == myPeerId) {
 			// Local peer is giving away authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == authorityId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -685,7 +762,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is taking authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -700,15 +777,15 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is losing authority. Revoke the outbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
-		} else if (networkComponent.ownerId == myPeerId) {
+		} else if (ownerId == myPeerId) {
 			// Authority returned to local peer. Revoke the inbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == networkComponent.authorityId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId.value(), ownerId.value(), authorityId);
+					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}

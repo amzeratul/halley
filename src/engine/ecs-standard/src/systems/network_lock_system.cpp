@@ -153,6 +153,12 @@ private:
 		if (isHost()) {
 			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true, withAuthority));
 		} else {
+			/*auto target = getWorld().tryGetEntity(targetId);
+			if (target.isValid()) {
+				Logger::logDev("- acquire lock for me, id=" + toString(targetId.value & 0xffffffff) + ", " + target.getName());
+			} else {
+				Logger::logDev("- acquire lock for me, but no entity found, id=" + toString(targetId.value & 0xffffffff));
+			}*/
 			Promise<bool> promise;
 			auto future = promise.getFuture();
 			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
@@ -172,12 +178,25 @@ private:
 		if (isHost()) {
 			doEntityLock(targetId, getMyPeerId(), false, withAuthority);
 		} else {
+			/*auto target = getWorld().tryGetEntity(targetId);
+			if (target.isValid()) {
+				Logger::logDev("- release lock for me, id=" + toString(targetId.value & 0xffffffff) + ", " + target.getName());
+			} else {
+				Logger::logDev("- release lock for me, but target entity not found, id=" + toString(targetId.value & 0xffffffff));
+			}*/
+			if (withAuthority) {
+				// On a peer, give up authority right away, no matter if the network message below
+				// is delivered successfully or not.
+				// This avoids some confusion with entity network updates working on "wrong" state
+				// while the message to change authority itself is still in flight.
+				changeAuthority(targetId, {});
+			}
 			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, getMyPeerId()), [=] (bool value) mutable
             {
+				if (!value && withAuthority) {
+	                Logger::logWarning("client failed to tell host to release lock, with authority, for entity " + getWorld().getEntity(targetId).getName());
+				}
                 //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to release lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
-                if (value && withAuthority) {
-                    changeAuthority(targetId, {});
-                }
             });
 		}
 	}
@@ -208,7 +227,7 @@ private:
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " locked by " + toString(int(peerId)));
 					locks.emplace_back(targetId, peerId);
                     if (withAuthority) {
-                        changeAuthority(e, peerId);
+                        doChangeAuthority(e, peerId);
                     }
 					return true;
 				} else {
@@ -222,7 +241,7 @@ private:
 					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " unlocked by " + toString(int(peerId)));
 					locks.erase(iter);
                     if (withAuthority) {
-                        changeAuthority(e, {});
+                        doChangeAuthority(e, {});
                     }
 					return true;
 				} else {
@@ -298,13 +317,13 @@ private:
 
         const auto* e = getRootEntity(targetId);
         if (e) {
-            changeAuthority(e, authorityId);
+            doChangeAuthority(e, authorityId);
         } else {
             Logger::logWarning("Trying to change authority of entity " + toString(targetId) + " which is unknown, or not a network entity");
         }
     }
 
-    void changeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId)
+    void doChangeAuthority(const NetworkFamily* networkFamily, std::optional<NetworkSession::PeerId> authorityId)
     {
 		if (getSessionService().isMultiplayer()) {
 			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
