@@ -9,7 +9,7 @@ namespace Halley {
 
 	class LocalisationLanguageEditor : public UIWidget {
     public:
-        LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
+        LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, const HalleyAPI& api, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
 
 		void onMakeUI() override;
 		void update(Time t, bool moved) override;
@@ -19,6 +19,8 @@ namespace Halley {
 		LocalisationClient& client;
 		Project& project;
 		UIFactory& factory;
+		const HalleyAPI& api;
+
 		LocOriginalData& srcLanguage;
 		LocTranslationData* dstLanguage;
 		LocOriginalData* srcRemote;

@@ -328,6 +328,9 @@ void UIGrid::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		holdingLine = lineUnderMouse;
 		holdingMoved = false;
 		focus();
+	} else if (button == 2) {
+		onRightClick(lineUnderMouse);
+		focus();
 	}
 }
 
@@ -495,6 +498,11 @@ bool UIGrid::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		copySelection();
+		return true;
+	}
+
 	return false;
 }
 
@@ -504,6 +512,14 @@ std::pair<Vector<float>, Vector<String>> UIGrid::getColumns() const
 }
 
 void UIGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Colour4f>& colours, Vector<Sprite>& sprites) const
+{
+}
+
+void UIGrid::onRightClick(std::optional<int> line)
+{
+}
+
+void UIGrid::copySelection()
 {
 }
 

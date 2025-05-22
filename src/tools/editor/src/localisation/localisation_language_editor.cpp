@@ -7,12 +7,13 @@
 
 using namespace Halley;
 
-LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit)
+LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, const HalleyAPI& api, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit)
 	: UIWidget("localisation_language_editor", {}, UISizer())
 	, root(root)
 	, client(client)
 	, project(project)
 	, factory(factory)
+	, api(api)
 	, srcLanguage(srcLanguage)
 	, dstLanguage(dstLanguage)
 	, srcRemote(srcRemote)
@@ -34,7 +35,7 @@ void LocalisationLanguageEditor::onMakeUI()
 		getWidgetAs<UILabel>("dstLanguage")->setText(root.getLanguageName(dstLanguage->language));
 	}
 
-	grid = std::make_shared<LocalisationGrid>(factory);
+	grid = std::make_shared<LocalisationGrid>(factory, api);
 	getWidget("keysContainer")->add(grid, 1);
 
 	Vector<UIDropdown::Entry> chunks;

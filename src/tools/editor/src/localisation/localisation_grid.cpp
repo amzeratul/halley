@@ -2,8 +2,10 @@
 
 using namespace Halley;
 
-LocalisationGrid::LocalisationGrid(UIFactory& factory)
+LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api)
 	: UIGrid("localisation_grid", factory)
+	, factory(factory)
+	, api(api)
 {
 	outdatedCol = factory.getColourScheme()->getColour("ui_logWarningText");
 
@@ -91,6 +93,66 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 				sprites[firstIcon + 2] = contextIcon;
 			}
 		}
+	}
+}
+
+void LocalisationGrid::onRightClick(std::optional<int> line)
+{
+	if (!line) {
+		return;
+	}
+
+	auto menuOptions = Vector<UIPopupMenuItem>();
+
+	menuOptions.push_back(UIPopupMenuItem("copyKey", LocalisedString::fromHardcodedString("Copy Key"), {}));
+	menuOptions.push_back(UIPopupMenuItem("copyOriginal", LocalisedString::fromHardcodedString("Copy Original String"), {}));
+	if (translatedData) {
+		menuOptions.push_back(UIPopupMenuItem("copyTranslation", LocalisedString::fromHardcodedString("Copy Translated String"), {}));
+	}
+
+	auto menu = std::make_shared<UIPopupMenu>("loc_grid_context_menu", factory.getStyle("popupMenu"), menuOptions);
+	menu->spawnOnRoot(*getRoot());
+
+	menu->setHandle(UIEventType::PopupAccept, [this, line] (const UIEvent& e) {
+		const auto& choice = e.getStringData();
+		const auto& entry = origData->getEntry(*line);
+
+		if (choice == "copyKey") {
+			sendToClipboard(entry.key);
+		} else if (choice == "copyOriginal") {
+			sendToClipboard(entry.value);
+		} else if (choice == "copyTranslation") {
+			if (auto* translated = translatedData ? translatedData->tryGetEntry(entry.key) : nullptr) {
+				sendToClipboard(translated->value);
+			}
+		}
+	});
+}
+
+void LocalisationGrid::copySelection()
+{
+	if (getSelectedLines().empty()) {
+		return;
+	}
+
+	ConfigNode result;
+	Vector<String> keyOrder;
+
+	for (const auto row: getSelectedLines()) {
+		const auto& entry = origData->getEntry(row);
+		result[entry.key] = entry.value;
+		keyOrder += entry.key;
+	}
+
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = keyOrder;
+	sendToClipboard(YAMLConvert::generateYAML(result, options));
+}
+
+void LocalisationGrid::sendToClipboard(const String& str)
+{
+	if (const auto clipboard = api.system->getClipboard()) {
+		clipboard->setData(str);
 	}
 }
 
