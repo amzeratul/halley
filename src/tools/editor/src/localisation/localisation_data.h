@@ -175,7 +175,7 @@ namespace Halley {
 		void load(const ConfigNode& node);
 		ConfigNode toConfigNode() const;
 
-		void setValue(const String& key, int32_t curVersion, String value);
+		bool setValue(const String& key, int32_t curVersion, String value);
 		const LocTranslationEntry* tryGetEntry(const String& key) const;
 
 		TranslationStats getTranslationStats(const LocOriginalData& original) const;

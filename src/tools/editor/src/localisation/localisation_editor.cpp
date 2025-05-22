@@ -813,7 +813,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 	const auto& orig = localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 
 	CSVFile csv;
-	csv.setColumns({{ "key", "version", "comment", "context", "priority", "chunkIdx", "original", "translation" }});
+	csv.setColumns({{ "key", "priority", "original", "translation", "comment", "context" , "chunk", "version" }});
 
 	const auto keyIdx = csv.getColumnIndex("key");
 	const auto versionIdx = csv.getColumnIndex("version");
@@ -913,8 +913,9 @@ void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, co
 	const auto& locRoot = configFile.getRoot()[langId];
 	int n = 0;
 	for (const auto& [k, v]: locRoot.asMap()) {
-		translation.setValue(k, orig.getVersion(k), v.asString(""));
-		++n;
+		if (translation.setValue(k, orig.getVersion(k), v.asString(""))) {
+			++n;
+		}
 	}
 
 	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
@@ -937,12 +938,20 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 	const auto nRows = csv.getNumRows();
 	for (size_t i = 0; i < nRows; ++i) {
 		const auto& key = csv.getCell(i, keyIdx);
-		const auto version = csv.getCell(i, versionIdx).toInteger();
+		const auto* versionCell = csv.tryGetCell(i, versionIdx);
 		const auto& translatedValue = csv.getCell(i, translationIdx);
 
+		int version = -1;
+		if (versionCell && versionCell->isInteger()) {
+			version = versionCell->toInteger();
+		} else {
+			version = localStrings->originalLanguage->tryGetEntry(key)->version;
+		}
+
 		if (!translatedValue.isEmpty()) {
-			translation.setValue(key, version, translatedValue);
-			++n;
+			if (translation.setValue(key, version, translatedValue)) {
+				++n;
+			}
 		}
 	}
 

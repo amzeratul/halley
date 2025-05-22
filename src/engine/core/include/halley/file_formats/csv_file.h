@@ -19,6 +19,7 @@ namespace Halley {
 
     	void setCell(size_t row, std::optional<size_t> column, String value);
     	const String& getCell(size_t row, std::optional<size_t> column) const;
+    	const String* tryGetCell(size_t row, std::optional<size_t> column) const;
 
         void clear();
 

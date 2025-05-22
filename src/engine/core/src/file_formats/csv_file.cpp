@@ -64,10 +64,19 @@ void CSVFile::setCell(size_t row, std::optional<size_t> column, String value)
 
 const String& CSVFile::getCell(size_t row, std::optional<size_t> column) const
 {
-	if (column && *column < columns.size()) {
-		return getRow(row)[*column];
+	if (const auto* str = tryGetCell(row, column)) {
+		return *str;
 	} else {
 		return String::emptyString();
+	}
+}
+
+const String* CSVFile::tryGetCell(size_t row, std::optional<size_t> column) const
+{
+	if (column && *column < columns.size()) {
+		return &getRow(row)[*column];
+	} else {
+		return nullptr;
 	}
 }
 
@@ -155,6 +164,7 @@ void CSVFile::load(std::string_view origStr)
 		}
 		if (!quoting && curChar == '\"') {
 			quoting = true;
+			doubleQuotesInARow = 0;
 			lastTokenWasQuoted = true;
 		} else if (quoting && curChar == '\"' && doubleQuotesInARow % 2 == 1 && nextChar != '\"') {
 			quoting = false;

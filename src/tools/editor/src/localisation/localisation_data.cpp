@@ -398,15 +398,29 @@ ConfigNode LocTranslationData::toConfigNode() const
 	return result;
 }
 
-void LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
+bool LocTranslationData::setValue(const String& key, int32_t curVersion, String value)
 {
 	if (curVersion < 0) {
 		throw Exception("Invalid current version for key", HalleyExceptions::Tools);
 	}
 
-	if (entries.contains(key) || !value.isEmpty()) {
-		entries[key] = LocTranslationEntry{ std::move(value), curVersion };
+	const auto iter = entries.find(key);
+	if (iter == entries.end()) {
+		// New key
+		if (!value.isEmpty()) {
+			entries[key] = LocTranslationEntry{ std::move(value), curVersion };
+			return true;
+		}
+	} else {
+		// Key exists
+		if (iter->second.value != value) {
+			iter->second.value = value;
+			iter->second.origVersion = curVersion;
+			return true;
+		}
 	}
+
+	return false;
 }
 
 const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) const
