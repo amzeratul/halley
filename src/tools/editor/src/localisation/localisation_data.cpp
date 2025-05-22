@@ -21,8 +21,8 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 int LocalisationStats::getWordCount(const String& line)
 {
 	constexpr char32_t delims[] = U" ,;.?!:\"¿¡[]{}()\n\t";
-	const auto* start = delims;
-	const auto* end = delims + (sizeof(delims) / sizeof(char32_t) - 1);
+	const auto* start = std::begin(delims);
+	const auto* end = std::end(delims);
 
 	bool isInWord = false;
 	int count = 0;

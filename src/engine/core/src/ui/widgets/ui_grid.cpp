@@ -287,10 +287,16 @@ void UIGrid::onMouseOver(Vector2f mousePos)
 
 	if (holdingLine && boundedLineUnderMouse && holdingMoved) {
 		selectedLines.clear();
-		const int start = std::min(*holdingLine, *boundedLineUnderMouse);
-		const int end = std::max(*holdingLine, *boundedLineUnderMouse);
-		for (int i = start; i <= end; ++i) {
-			selectedLines.insert(lineIndex.at(i));
+		const auto holdingIdx = getRowForLine(*holdingLine);
+		const auto underMouseIdx = getRowForLine(*boundedLineUnderMouse);
+		if (holdingIdx && underMouseIdx) {
+			const int start = std::min(*holdingIdx, *underMouseIdx);
+			const int end = std::max(*holdingIdx, *underMouseIdx);
+			for (int i = start; i <= end; ++i) {
+				if (auto curLine = getLineAtRow(i)) {
+					selectedLines.insert(*curLine);
+				}
+			}
 		}
 	}
 
@@ -385,7 +391,7 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 		if (line) {
 			selectedLines.clear();
 			const auto clickedIdx = getRowForLine(*line);
-			const auto selectedIdx = getRowForLine(*line);
+			const auto selectedIdx = getRowForLine(*activeSelectedLine);
 			if (clickedIdx && selectedIdx) {
 				const int start = std::min(*clickedIdx, *selectedIdx);
 				const int end = std::max(*clickedIdx, *selectedIdx);
