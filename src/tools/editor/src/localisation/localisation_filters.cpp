@@ -19,12 +19,10 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	const bool isTranslated = translation && !translation->value.isEmpty();
 
 	if (outdatedEnabled) {
-		if (isTranslated) { // If it's empty, ignore this check - we want to match it either way
-			const bool isOutOfDate = translation->origVersion < entry.version;
-			const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
-			if (isOutOfDate != wantsOutOfDate) {
-				return false;
-			}
+		const bool isOutOfDate = isTranslated && translation->origVersion < entry.version;
+		const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
+		if (isOutOfDate != wantsOutOfDate) {
+			return false;
 		}
 	}
 

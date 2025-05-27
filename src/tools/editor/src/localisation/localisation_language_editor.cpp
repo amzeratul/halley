@@ -123,14 +123,31 @@ void LocalisationLanguageEditor::onMakeUI()
 		setPriority(fromString<LocPriority>(event.getStringData()));
 	});
 
+	setHandle(UIEventType::ButtonClicked, "markUpToDate", [this] (const UIEvent& event)
+	{
+		markUpToDate();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "markOutOfDate", [this] (const UIEvent& event)
+	{
+		markOutOfDate();
+	});
+
 	getWidget("editProperties")->setActive(srcRemote != nullptr);
+	getWidget("markUpToDate")->setActive(canEdit && srcRemote != nullptr);
+	getWidget("markOutOfDate")->setActive(canEdit && srcRemote != nullptr);
 
 	onFiltersUpdated();
 }
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
 {
+	const auto [outOfDate, upToDate] = getOutOfDateAndUpToDateCountInSelection();
+
 	getWidget("clearSearch")->setEnabled(!filters.searchString.isEmpty());
+	getWidget("markUpToDate")->setEnabled(outOfDate > 0);
+	getWidget("markOutOfDate")->setEnabled(upToDate > 0);
+
 	uploadPendingTranslations(false);
 }
 
@@ -207,6 +224,7 @@ void LocalisationLanguageEditor::setSrcValue(const String& value)
 	if (canEdit && acceptingTextInput) {
 		srcLanguage.setValue(curEditingKey, value);
 	}
+	grid->refreshContents();
 }
 
 void LocalisationLanguageEditor::setDstValue(const String& value)
@@ -214,8 +232,11 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 	if (canEdit && acceptingTextInput && dstLanguage) {
 		dstLanguage->setValue(curEditingKey, srcLanguage.getVersion(curEditingKey), value);
 
-		pendingTranslationModifiedKeys += curEditingKey;
+		if (!pendingTranslationTextEditedKeys.contains(curEditingKey)) {
+			pendingTranslationTextEditedKeys += curEditingKey;
+		}
 	}
+	grid->refreshContents();
 }
 
 void LocalisationLanguageEditor::setComment(const String& comment)
@@ -231,6 +252,7 @@ void LocalisationLanguageEditor::setComment(const String& comment)
 		}
 	}
 	onStringPropertiesModified(modified);
+	grid->refreshContents();
 }
 
 void LocalisationLanguageEditor::setContext(const String& context)
@@ -246,6 +268,7 @@ void LocalisationLanguageEditor::setContext(const String& context)
 		}
 	}
 	onStringPropertiesModified(modified);
+	grid->refreshContents();
 }
 
 void LocalisationLanguageEditor::setPriority(LocPriority priority)
@@ -261,6 +284,61 @@ void LocalisationLanguageEditor::setPriority(LocPriority priority)
 		}
 	}
 	onStringPropertiesModified(modified);
+	grid->refreshContents();
+}
+
+void LocalisationLanguageEditor::markUpToDate()
+{
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
+			if (srcEntry->version >= 0) {
+				if (dstLanguage->setVersion(key, srcEntry->version)) {
+					pendingTranslationModifiedKeys += key;
+				}
+			}
+		}
+	}
+	grid->refreshContents();
+}
+
+void LocalisationLanguageEditor::markOutOfDate()
+{
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
+			if (srcEntry->version > 0) {
+				if (dstLanguage->setVersion(key, srcEntry->version - 1)) {
+					pendingTranslationModifiedKeys += key;
+				}
+			}
+		}
+	}
+	grid->refreshContents();
+}
+
+std::pair<int, int> LocalisationLanguageEditor::getOutOfDateAndUpToDateCountInSelection() const
+{
+	if (!srcRemote) {
+		return {};
+	}
+	
+	int upToDate = 0;
+	int outOfDate = 0;
+
+	for (const auto lineNumber: grid->getSelectedLines()) {
+		const auto& key = grid->getKeyAt(lineNumber);
+		if (auto* srcEntry = srcRemote->tryGetEntry(key)) {
+			if (auto* dstEntry = dstLanguage->tryGetEntry(key)) {
+				if (dstEntry->origVersion != srcEntry->version) {
+					++outOfDate;
+				} else {
+					++upToDate;
+				}
+			}
+		}
+	}
+	return { outOfDate, upToDate };
 }
 
 void LocalisationLanguageEditor::onStringPropertiesModified(const Vector<String>& keys)
@@ -290,6 +368,17 @@ void LocalisationLanguageEditor::uploadPendingTranslations(bool force)
 		return;
 	}
 
+	// Editing text keys, if no longer active (or forcing an upload), move it to pending changes list
+	Vector<String> toRemoveEditing;
+	for (auto& key: pendingTranslationTextEditedKeys) {
+		if (key != curEditingKey || force) {
+			toRemoveEditing += key;
+			pendingTranslationModifiedKeys += key;
+		}
+	}
+	std_ex::erase_if(pendingTranslationTextEditedKeys, [&] (const auto& key) { return toRemoveEditing.contains(key); });
+
+	// Create a list of actual changes to upload
 	auto keys = std::move(pendingTranslationModifiedKeys);
 	pendingTranslationModifiedKeys = {};
 	auto localisedDelta = force ? dstLanguage->makeDeltaFrom(*locRemote) : dstLanguage->makeDeltaFrom(*locRemote, keys);
@@ -301,11 +390,13 @@ void LocalisationLanguageEditor::uploadPendingTranslations(bool force)
 
 	uploadingKeys = true;
 	auto future = client.putTranslatedStrings(localisedDelta);
-	auto future2 = future.then(aliveFlag, Executors::getMainUpdateThread(), [this, keys = std::move(keys), localisedDelta = std::move(localisedDelta)](bool ok) {
+	auto future2 = future.then(aliveFlag, force ? Executors::getCPU() : Executors::getMainUpdateThread(), [this, keys = std::move(keys), localisedDelta = std::move(localisedDelta)](bool ok) {
 		uploadingKeys = false;
 		if (ok) {
+			//Logger::logInfo("Uploaded " + toString(keys.size()) + " entries.");
 			locRemote->update(localisedDelta);
 		} else {
+			Logger::logWarning("Failed to upload " + toString(keys.size()) + " modified entries.");
 			pendingTranslationModifiedKeys += keys;
 		}
 	});

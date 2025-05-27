@@ -38,6 +38,7 @@ namespace Halley {
 
 		String curEditingKey = "";
 		Vector<String> pendingTranslationModifiedKeys;
+		Vector<String> pendingTranslationTextEditedKeys;
 		bool uploadingKeys = false;
 
 		void setChunk(const String& chunkId);
@@ -48,6 +49,10 @@ namespace Halley {
 		void setComment(const String& comment);
 		void setContext(const String& context);
 		void setPriority(LocPriority priority);
+
+		void markUpToDate();
+		void markOutOfDate();
+		std::pair<int, int> getOutOfDateAndUpToDateCountInSelection() const;
 
 		void onStringPropertiesModified(const Vector<String>& keys);
 

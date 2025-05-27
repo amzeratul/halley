@@ -412,6 +412,8 @@ void LocalisationClient::setToken(String _token)
 				languages = claims["languages"].asVector<String>({});
 
 				connected = true;
+
+				Logger::logInfo("Connected to server.");
 			}
 		}
 	} catch (...) {

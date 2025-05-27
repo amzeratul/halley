@@ -459,6 +459,11 @@ bool UIGrid::refreshFilter()
 	return false;
 }
 
+void UIGrid::refreshContents()
+{
+	refreshColours();
+}
+
 void UIGrid::onDataUpdated()
 {
 	generateLineIndex();
@@ -473,10 +478,20 @@ void UIGrid::refreshLines()
 	setMinSize(Vector2f(0, lineHeight * (static_cast<float>(numLines + 2))));
 	setSelectedLine(lineIndex.empty() ? 0 : lineIndex[0]);
 
+	refreshColours();
+}
+
+void UIGrid::refreshColours()
+{
+	const auto numLines = lineIndex.size();
 	colours.resize(numLines);
 	if (lineColourFilter) {
 		for (int i = 0; i < numLines; ++i) {
 			colours[i] = lineColourFilter(static_cast<int>(lineIndex[i]));
+		}
+	} else {
+		for (int i = 0; i < numLines; ++i) {
+			colours[i] = {};
 		}
 	}
 }

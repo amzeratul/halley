@@ -18,6 +18,7 @@ namespace Halley {
         void setLineColourFilter(LineColourCallback callback);
         void setFilter(FilterCallback callback);
         bool refreshFilter();
+        void refreshContents();
 
     	int getActiveSelectedLine() const;
         const String& getActiveSelectedKey() const;
@@ -45,6 +46,7 @@ namespace Halley {
         float getLineHeight() const;
         void onDataUpdated();
         void refreshLines();
+        void refreshColours();
 
         bool onKeyPress(KeyboardKeyPress key) override;
 

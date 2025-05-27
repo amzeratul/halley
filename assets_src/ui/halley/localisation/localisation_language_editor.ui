@@ -204,7 +204,7 @@ children:
         sizer:
           columnProportions: []
           columns: 2
-          gap: 10
+          gap: 4
           type: vertical
         widget:
           class: image
@@ -238,6 +238,28 @@ children:
                 children: []
                 fill: [fillHorizontal, top]
             fill: [fillHorizontal, fillVertical]
+          - uuid: 0f06fb97-909a-48c6-8650-e5025866659b
+            sizer:
+              columnProportions: []
+              gap: 4
+            widget:
+              class: widget
+            children:
+              - uuid: f2ddfd09-36ed-4cba-93cf-762b804b93b5
+                widget:
+                  class: button
+                  id: markOutOfDate
+                  size: [160, 0]
+                  text: Mark as out of date
+                fill: [right, fillVertical]
+              - uuid: 8e357cdf-b053-46f7-a586-0223480e6b7c
+                widget:
+                  class: button
+                  id: markUpToDate
+                  size: [160, 0]
+                  text: Mark as up to date
+                fill: [right, fillVertical]
+            fill: [right, fillVertical]
         fill: [fillHorizontal, fillVertical]
       - uuid: 08928fe7-dd89-43c3-b0dc-6a2a309211b6
         proportion: 0

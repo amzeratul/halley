@@ -695,6 +695,7 @@ void LocalisationEditor::signOut()
 	remoteStringsFuture = {};
 	highestVersions = {};
 	gotRemoteStrings = false;
+	firstUpdate = true;
 }
 
 void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)

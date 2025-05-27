@@ -423,6 +423,23 @@ bool LocTranslationData::setValue(const String& key, int32_t curVersion, String 
 	return false;
 }
 
+bool LocTranslationData::setVersion(const String& key, int32_t curVersion)
+{
+	if (curVersion < 0) {
+		return false;
+	}
+
+	const auto iter = entries.find(key);
+	if (iter != entries.end()) {
+		if (iter->second.origVersion != curVersion) {
+			iter->second.origVersion = curVersion;
+		}
+		return true;
+	}
+
+	return false;
+}
+
 const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) const
 {
 	const auto iter = entries.find(key);
