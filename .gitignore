@@ -77,5 +77,8 @@ _ReSharper*/
 /shared_gen/*.db
 /shared_gen/cpp/registry.*
 
+# Dist
+/dist/
+
 # Apple
 .DS_Store
