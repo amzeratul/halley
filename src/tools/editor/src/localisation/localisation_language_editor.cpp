@@ -168,7 +168,7 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 	});
 	grid->setFilter([this] (int idx) -> bool {
 		return isRowVisible(idx);
-	});
+	}, false);
 	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
 }
 

@@ -16,7 +16,7 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 
         void setLineColourFilter(LineColourCallback callback);
-        void setFilter(FilterCallback callback);
+        void setFilter(FilterCallback callback, bool refresh = true);
         bool refreshFilter();
         void refreshContents();
 

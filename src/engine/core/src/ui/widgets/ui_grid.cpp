@@ -214,10 +214,12 @@ void UIGrid::setLineColourFilter(LineColourCallback callback)
 	lineColourFilter = std::move(callback);
 }
 
-void UIGrid::setFilter(FilterCallback callback)
+void UIGrid::setFilter(FilterCallback callback, bool refresh)
 {
 	filter = std::move(callback);
-	refreshFilter();
+	if (refresh) {
+		refreshFilter();
+	}
 }
 
 int UIGrid::getActiveSelectedLine() const
