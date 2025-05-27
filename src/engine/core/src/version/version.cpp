@@ -42,11 +42,21 @@ String HalleyVersion::toString() const
 
 void HalleyVersion::parse(const String& string)
 {
-	const auto split = string.split('.');
-	if (split.size() == 3) {
-		major = split[0].toInteger();
-		minor = split[1].toInteger();
-		revision = split[2].toInteger();
+	major = 0;
+	minor = 0;
+	revision = 0;
+
+	try {
+		const auto split = string.split('.');
+		if (split.size() == 3 && split[0].isInteger() && split[1].isInteger() && split[2].isInteger()) {
+			major = split[0].toInteger();
+			minor = split[1].toInteger();
+			revision = split[2].toInteger();
+		} else {
+			Logger::logError("Invalid Halley version string: \"" + string + "\"");
+		}
+	} catch (...) {
+		Logger::logError("Exception parsing Halley version string: \"" + string + "\"");
 	}
 }
 

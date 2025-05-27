@@ -36,6 +36,8 @@ void UIInputPopup::onMakeUI()
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(title));
 	getWidgetAs<UILabel>("message")->setText(LocalisedString::fromUserString(message));
 
+	getWidgetAs<UITextInput>("input")->setText(defaultValue);
+
 	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
 	{
 		onResult(event.getSourceId() == "ok");

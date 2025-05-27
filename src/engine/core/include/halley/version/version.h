@@ -7,9 +7,9 @@ namespace Halley {
 	class String;
 
 	struct HalleyVersion {
-		uint8_t major;
-		uint8_t minor;
-		uint16_t revision;
+		uint8_t major = 0;
+		uint8_t minor = 0;
+		uint16_t revision = 0;
 
 		bool operator==(const HalleyVersion& other) const;
 		bool operator!=(const HalleyVersion& other) const;

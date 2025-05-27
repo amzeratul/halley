@@ -965,14 +965,16 @@ void LocalisationEditor::manageUsers()
 
 void LocalisationEditor::manageProject()
 {
-	const auto version = getHalleyVersion();
-	const auto title = "Update Project?";
-	const auto msg = "Are you sure you want to update the project to use Halley v" + version.toString() + "?\nPlease make sure that the editor bin has been uploaded first!";
-	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel };
+	const auto title = "Set project version";
+	const auto msg = "Enter the Halley editor version to set the project to use.\nPlease make sure that the editor bin has been uploaded first!";
 
-	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, title, msg, buttons, [=] (UIConfirmationPopup::ButtonType result) {
-		if (result == UIConfirmationPopup::ButtonType::Yes) {
-			uploadProjectProperties(version);
+	getRoot()->addChild(std::make_shared<UIInputPopup>(factory, title, msg, getHalleyVersion().toString(), [=](std::optional<String> result) {
+		if (result) {
+			HalleyVersion version;
+			version.parse(*result);
+			if (version.isValid()) {
+				uploadProjectProperties(version);
+			}
 		}
 	}));
 }
@@ -992,7 +994,7 @@ void LocalisationEditor::uploadProjectProperties(HalleyVersion version)
 
 	client->putExternalProjectProperties(files).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
 		if (ok) {
-			Logger::logInfo("Updated project info, using version = " + version.toString());
+			Logger::logInfo("Updated project info, using v" + version.toString());
 		} else {
 			Logger::logError("Unable to update project info");
 		}
