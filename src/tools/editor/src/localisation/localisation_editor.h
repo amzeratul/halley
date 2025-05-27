@@ -131,6 +131,7 @@ namespace Halley {
 
         void manageUsers();
         void manageProject();
+        void uploadProjectProperties(HalleyVersion version);
 
 		void uploadOriginalStrings();
         void downloadTranslations();

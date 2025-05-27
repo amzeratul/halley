@@ -138,7 +138,7 @@ void LocalisationEditor::update(Time t, bool moved)
 	getWidget("messagePanel")->setActive(curMessage.has_value());
 	getWidget("toolbar")->setActive(state == State::Ready);
 	getWidget("manageUsers")->setActive(state == State::Ready && client->isAdmin());
-	getWidget("manageProject")->setActive(state == State::Ready && client->isAdmin());
+	getWidget("manageProject")->setActive(isDevEnvironment() && state == State::Ready && client->isAdmin());
 	getWidget("developerPanel")->setActive(isDevEnvironment());
 	getWidget("originalLanguagePanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
 	getWidget("translationPanel")->setActive(state == State::Ready || (gotLocalStrings && localStrings->originalLanguage));
@@ -965,16 +965,36 @@ void LocalisationEditor::manageUsers()
 
 void LocalisationEditor::manageProject()
 {
+	const auto version = getHalleyVersion();
+	const auto title = "Update Project?";
+	const auto msg = "Are you sure you want to update the project to use Halley v" + version.toString() + "?\nPlease make sure that the editor bin has been uploaded first!";
+	const auto buttons = Vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::Cancel };
+
+	getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, title, msg, buttons, [=] (UIConfirmationPopup::ButtonType result) {
+		if (result == UIConfirmationPopup::ButtonType::Yes) {
+			uploadProjectProperties(version);
+		}
+	}));
+}
+
+void LocalisationEditor::uploadProjectProperties(HalleyVersion version)
+{
 	HashMap<String, Bytes> files;
 
 	auto properties = YAMLConvert::parseConfig(Path::readFile(project.getRootPath() / "halley_project" / "properties.yaml"));
-	auto& root = properties.getRoot();
-	root.removeKey("languageCosts");
-	root["devEnvironment"] = false;
-	root["halleyVersion"] = getHalleyVersion().toString();
+	auto& nodeRoot = properties.getRoot();
+	nodeRoot.removeKey("languageCosts");
+	nodeRoot["devEnvironment"] = false;
+	nodeRoot["halleyVersion"] = version.toString();
 
 	files["halley_project/icon48.png"] = Path::readFile(project.getRootPath() / "halley_project" / "icon48.png");
 	files["halley_project/properties.yaml"] = YAMLConvert::generateYAML(properties, {}).toBytes();
 
-	client->putExternalProjectProperties(files);
+	client->putExternalProjectProperties(files).then(aliveFlag, Executors::getMainUpdateThread(), [=] (bool ok) {
+		if (ok) {
+			Logger::logInfo("Updated project info, using version = " + version.toString());
+		} else {
+			Logger::logError("Unable to update project info");
+		}
+	});
 }
