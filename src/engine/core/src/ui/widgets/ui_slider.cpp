@@ -49,6 +49,8 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 
 void UISlider::setValue(float v)
 {
+	const auto prevValue = getValue();
+
 	value = clamp(v, minValue, maxValue);
 	if (box) {
 		box->layout();
@@ -57,7 +59,13 @@ void UISlider::setValue(float v)
 	if (!fromInput) {
 		updateLabel();
 	}
-	notifyDataBind(getValue());
+
+	const auto curValue = getValue();
+	notifyDataBind(curValue);
+
+	if (std::abs(curValue - prevValue) > 0.00001f) {
+		playStyleSound("valueChangedSound");
+	}
 }
 
 void UISlider::setRelativeValue(float v)
@@ -244,7 +252,11 @@ bool UISliderBar::isFocusLocked() const
 void UISliderBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0 && isEnabled()) {
-		held = true;
+		if (!held) {
+			playStyleSound("downSound");
+			held = true;
+		}
+
 		auto relative = (mousePos - getPosition()) / getSize();
 		parent.setRelativeValue(relative.x);
 
@@ -255,7 +267,10 @@ void UISliderBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 void UISliderBar::releaseMouse(Vector2f mousePos, int button)
 {
 	if (button == 0 && isEnabled()) {
-		held = false;
+		if (held) {
+			playStyleSound("upSound");
+			held = false;
+		}
 
 		dirtyThumb = true;
 	}
@@ -268,7 +283,11 @@ void UISliderBar::onMouseOver(Vector2f mousePos)
 		parent.setRelativeValue(relative.x);
 	}
 
-	over = true;
+	if (!over) {
+		over = true;
+		playStyleSound("hoverSound");
+	}
+
 	dirtyThumb = true;
 }
 
