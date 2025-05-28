@@ -13,7 +13,7 @@ namespace Halley {
 
         void update(Time t, bool moved) override;
 
-        LocalisedString getLanguageName(const I18NLanguage& language) const;
+        LocalisedString getLanguageName(const I18NLanguage& language, bool includeCountry = true) const;
         Sprite getFlag(const I18NLanguage& language) const;
 
     private:

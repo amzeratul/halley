@@ -96,7 +96,7 @@ void LocalisationEditorRoot::setupLanguageNames()
 	languageNeedsQualifier.insert("es");
 }
 
-LocalisedString LocalisationEditorRoot::getLanguageName(const I18NLanguage& ln) const
+LocalisedString LocalisationEditorRoot::getLanguageName(const I18NLanguage& ln, bool includeCountry) const
 {
 	auto cc = ln.getCountryCode();
 	auto lc = ln.getLanguageCode();
@@ -108,7 +108,7 @@ LocalisedString LocalisationEditorRoot::getLanguageName(const I18NLanguage& ln) 
 		language = lc;
 	}
 	
-	if (cc && languageNeedsQualifier.contains(lc)) {
+	if (includeCountry && cc && languageNeedsQualifier.contains(lc)) {
 		if (const auto iter = countryNames.find(*cc); iter != countryNames.end()) {
 			country = iter->second;
 		} else {

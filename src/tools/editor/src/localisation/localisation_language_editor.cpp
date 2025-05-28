@@ -4,6 +4,8 @@
 #include "localisation_data.h"
 #include "localisation_editor_root.h"
 #include "localisation_set_filters_window.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/project/project_properties.h"
 
 using namespace Halley;
 
@@ -174,6 +176,8 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 		return isRowVisible(idx);
 	}, false);
 	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
+
+	applyFilters();
 }
 
 void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
@@ -487,12 +491,14 @@ void LocalisationLanguageEditor::applyFilters()
 		wordCount += LocalisationStats::getWordCount(srcData->getEntry(idx).value);
 	}
 
+	const auto origLang = project.getProperties().getOriginalLanguage();
 	String showingString;
 	if (activeRows < srcRows) {
-		showingString = "Showing " + toString(activeRows) + "/" + toString(srcRows) + " rows - " + toString(wordCount) + " original words";
+		showingString = "Showing " + toString(activeRows) + " out of " + toString(srcRows) + " rows";
 	} else {
-		showingString = "Showing all " + toString(srcRows) + " rows - " + toString(wordCount) + " original words";
+		showingString = "Showing all " + toString(srcRows) + " rows";
 	}
+	showingString += " (" + toString(wordCount) + " " + root.getLanguageName(origLang, false) + " words)";
 
 	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
 }

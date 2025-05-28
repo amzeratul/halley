@@ -195,9 +195,9 @@ children:
                 widget:
                   class: label
                   id: ""
-                  text: "Main language:"
+                  text: "Original language:"
                   wordWrapped: false
-                fill: left
+                fill: [left, centreVertical]
           - uuid: 741c3f8f-322c-4990-9ce5-08b9ff962d40
             border: [0, 0, 0, 0]
             sizer:
