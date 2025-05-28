@@ -134,19 +134,23 @@ void LocalisationLanguageEditor::onMakeUI()
 	});
 
 	getWidget("editProperties")->setActive(srcRemote != nullptr);
-	getWidget("markUpToDate")->setActive(canEdit && srcRemote != nullptr);
-	getWidget("markOutOfDate")->setActive(canEdit && srcRemote != nullptr);
+	const auto canEditTranslation = canEdit && srcRemote != nullptr && dstLanguage != nullptr;
+	getWidget("markUpToDate")->setActive(canEditTranslation);
+	getWidget("markOutOfDate")->setActive(canEditTranslation);
 
 	onFiltersUpdated();
 }
 
 void LocalisationLanguageEditor::update(Time t, bool moved)
 {
-	const auto [outOfDate, upToDate] = getOutOfDateAndUpToDateCountInSelection();
-
 	getWidget("clearSearch")->setEnabled(!filters.searchString.isEmpty());
-	getWidget("markUpToDate")->setEnabled(outOfDate > 0);
-	getWidget("markOutOfDate")->setEnabled(upToDate > 0);
+
+	const auto canEditTranslation = canEdit && srcRemote != nullptr && dstLanguage != nullptr;
+	if (canEditTranslation) {
+		const auto [outOfDate, upToDate] = getOutOfDateAndUpToDateCountInSelection();
+		getWidget("markUpToDate")->setEnabled(outOfDate > 0);
+		getWidget("markOutOfDate")->setEnabled(upToDate > 0);
+	}
 
 	uploadPendingTranslations(false);
 }
@@ -289,6 +293,10 @@ void LocalisationLanguageEditor::setPriority(LocPriority priority)
 
 void LocalisationLanguageEditor::markUpToDate()
 {
+	if (!srcRemote || !dstLanguage) {
+		return;
+	}
+
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
@@ -304,6 +312,10 @@ void LocalisationLanguageEditor::markUpToDate()
 
 void LocalisationLanguageEditor::markOutOfDate()
 {
+	if (!srcRemote || !dstLanguage) {
+		return;
+	}
+
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
@@ -319,7 +331,7 @@ void LocalisationLanguageEditor::markOutOfDate()
 
 std::pair<int, int> LocalisationLanguageEditor::getOutOfDateAndUpToDateCountInSelection() const
 {
-	if (!srcRemote) {
+	if (!srcRemote || !dstLanguage) {
 		return {};
 	}
 	
