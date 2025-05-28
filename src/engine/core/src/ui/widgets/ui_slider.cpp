@@ -224,10 +224,11 @@ float UISlider::getValueWithGranularity() const
 	}
 }
 
-UISliderBar::UISliderBar(UISlider& parent, UIStyle style)
+UISliderBar::UISliderBar(UISlider& parent, UIStyle _style)
 	: UIWidget("")
 	, parent(parent)
 {
+	auto& style = styles.emplace_back(std::move(_style));
 	thumbStyle = style.getSubStyle("thumb");
 
 	bar = style.getSprite("emptyBar");
