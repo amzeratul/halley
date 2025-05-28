@@ -55,6 +55,10 @@ void AudioEngine::destroyRegion(AudioRegionId id)
 
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
 {
+	if (eventLogging) {
+		Logger::log(*eventLogging, "AudioEvent posted: " + event.getAssetId());
+	}
+
 	const auto iter = emitters.find(emitterId);
 	if (iter == emitters.end()) {
 		finishedSounds.push_back(id);
@@ -647,6 +651,11 @@ const String& AudioEngine::getSwitchDefault(const String& switchId) const
 		return switchProps->getDefaultValue();
 	}
 	return String::emptyString();
+}
+
+void AudioEngine::setEventLogging(std::optional<LoggerLevel> level)
+{
+	eventLogging = level;
 }
 
 AudioDebugData AudioEngine::generateDebugData() const

@@ -82,6 +82,8 @@ namespace Halley {
 
 		const String& getSwitchDefault(const String& switchId) const;
 
+		void setEventLogging(std::optional<LoggerLevel> level);
+
 	private:
 		struct BusData {
 			String name;
@@ -127,6 +129,8 @@ namespace Halley {
 		std::shared_ptr<IAudioBufferSizeController> bufferSizeController;
 
 		bool debugDataEnabled = false;
+
+		std::optional<LoggerLevel> eventLogging;
 
 		void mixVoices(size_t numSamples, size_t channels, AudioBuffersRef& buffers);
 		void mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion& region, AudioBuffersRef& outputBuffers, float prevGain, float gain);

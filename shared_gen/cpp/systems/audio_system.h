@@ -3,6 +3,7 @@
 
 #include <halley.hpp>
 
+#include "halley/entity/services/dev_service.h"
 
 #include "components/audio_listener_component.h"
 #include "halley/entity/components/transform_2d_component.h"
@@ -74,13 +75,19 @@ protected:
 	Halley::TempMemoryPool& getTempMemoryPool() const {
 		return doGetWorld().getUpdateMemoryPool();
 	}
+
+	DevService* tryGetDevService() const {
+		return devService;
+	}
 	Halley::FamilyBinding<ListenerFamily> listenerFamily{};
 	Halley::FamilyBinding<SourceFamily> sourceFamily{};
 
 private:
 	friend Halley::System* halleyCreateAudioSystem();
 
+	DevService* devService{ nullptr };
 	void initBase() override final {
+		devService = doGetWorld().template tryGetService<DevService>(getName());
 		invokeInit<T>(static_cast<T*>(this));
 		initialiseFamilyBinding<T, ListenerFamily>(listenerFamily, static_cast<T*>(this));
 		initialiseFamilyBinding<T, SourceFamily>(sourceFamily, static_cast<T*>(this));

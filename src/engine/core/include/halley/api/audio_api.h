@@ -317,5 +317,8 @@ namespace Halley
 		virtual void setBufferSizeController(std::shared_ptr<IAudioBufferSizeController> controller) = 0;
 
 		virtual void setDebugListener(IAudioDebugDataListener* listener) {}
+
+		virtual void setEventLogging(std::optional<LoggerLevel> level) {}
+		virtual std::optional<LoggerLevel> getEventLogging() const { return {}; }
 	};
 }

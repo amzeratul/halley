@@ -7,6 +7,10 @@ public:
 	void init()
 	{
 		getWorld().setInterface(static_cast<IAudioSystemInterface*>(this));
+
+		if (auto* devService = tryGetDevService()) {
+			initConsoleCommands(*devService);
+		}
 	}
 
 	void onEntitiesAdded(Span<SourceFamily> es)
@@ -156,9 +160,7 @@ private:
 
 	void updateSources(Time t)
 	{
-		if (t < 0.00001) {
-			t = 0.00001;
-		}
+		t = std::max(t, 0.00001);
 
 		for (auto& source: sourceFamily) {
 			Vector3f vel;
@@ -175,6 +177,23 @@ private:
 
 			source.audioSource.emitter->setPosition(getAudioPosition(source, vel));
 		}
+	}
+
+	void initConsoleCommands(DevService& devService)
+	{
+		devService.getConsoleCommands().addCommand("audioLogEvents", [=] (Vector<String> args) -> String {
+			if (auto* audio = getAPI().audio) {
+				if (audio->getEventLogging()) {
+					audio->setEventLogging(std::nullopt);
+					return "Audio log disabled.";
+				} else {
+					audio->setEventLogging(LoggerLevel::Dev);
+					return "Audio log enabled.";					
+				}
+			} else {
+				return "No audio subsystem.";
+			}
+		}, { UIDebugConsoleSyntax() });
 	}
 };
 

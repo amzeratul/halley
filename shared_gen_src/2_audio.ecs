@@ -102,6 +102,8 @@ system:
   strategy: global
   systemMessages:
   - PlayNetworkSound: receive
+  services:
+  - DevService optional
   access:
   - api
   - world

@@ -77,6 +77,9 @@ namespace Halley {
 
 		void setDebugListener(IAudioDebugDataListener* listener) override;
 
+		void setEventLogging(std::optional<LoggerLevel> level) override;
+		std::optional<LoggerLevel> getEventLogging() const override;
+
 	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;
@@ -107,6 +110,7 @@ namespace Halley {
 
 		RingBuffer<AudioDebugData> audioDebugData;
 		IAudioDebugDataListener* debugListener = nullptr;
+		std::optional<LoggerLevel> eventLogging;
 
 		HashMap<AudioRegionId, String> regionNames;
 

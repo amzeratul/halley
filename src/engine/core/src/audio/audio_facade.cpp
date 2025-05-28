@@ -195,6 +195,19 @@ void AudioFacade::setDebugListener(IAudioDebugDataListener* listener)
 	});
 }
 
+void AudioFacade::setEventLogging(std::optional<LoggerLevel> level)
+{
+	this->eventLogging = level;
+	enqueue([=]() {
+		engine->setEventLogging(level);
+	});
+}
+
+std::optional<LoggerLevel> AudioFacade::getEventLogging() const
+{
+	return eventLogging;
+}
+
 
 AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {
