@@ -185,6 +185,8 @@ namespace Halley {
 		void replayInitialBehaviours(bool reversed = false);
 
 		std::optional<AudioHandle> playSound(const String& eventName);
+		std::optional<AudioHandle> playStyleSound(const String& keyId);
+		std::optional<AudioHandle> playStyleSound(const String& keyId, const UIStyle& style);
 
 		bool needsLayout() const;
 		void markAsNeedingLayout() final override;
@@ -262,8 +264,6 @@ namespace Halley {
 		virtual void onEnabledChanged();
 
 		virtual void checkActive();
-
-		void playStyleSound(const String& keyId);
 
 		Vector<UIStyle> styles = {};
 

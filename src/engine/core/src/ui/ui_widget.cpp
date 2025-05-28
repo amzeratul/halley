@@ -1084,6 +1084,25 @@ std::optional<AudioHandle> UIWidget::playSound(const String& eventName)
 	return {};
 }
 
+std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId)
+{
+	if (!styles.empty()) {
+		return playStyleSound(keyId, styles[0]);
+	}
+	return {};
+}
+
+std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId, const UIStyle& style)
+{
+	if (style.hasString(keyId)) {
+		const auto& eventId = style.getString(keyId);
+		if (!eventId.isEmpty()) {
+			return playSound(eventId);
+		}
+	}
+	return {};
+}
+
 bool UIWidget::needsLayout() const
 {
 	return layoutNeeded > 0;
@@ -1162,18 +1181,6 @@ LocalisedString UIWidget::getToolTip() const
 
 void UIWidget::checkActive()
 {
-}
-
-void UIWidget::playStyleSound(const String& keyId)
-{
-	if (!styles.empty()) {
-		if (styles.at(0).hasString(keyId)) {
-			const auto& eventId = styles.at(0).getString(keyId);
-			if (!eventId.isEmpty()) {
-				playSound(eventId);
-			}
-		}
-	}
 }
 
 void UIWidget::setWidgetRect(Rect4f rect)

@@ -207,17 +207,8 @@ void UIButton::doSetState(State state)
 
 void UIButton::onStateChanged(State prev, State next)
 {
-	if (isEnabled() && !borderOnly && prev != next) {
-		const auto& style = styles.at(0);
-		if (next == State::Up) {
-			playSound(style.getString("upSound"));
-		} else if (next == State::Down) {
-			playSound(style.getString("downSound"));
-		} else if (next == State::Hover) {
-			if (prev == State::Up) {
-				playSound(style.getString("hoverSound"));
-			}
-		}
+	if (!borderOnly) {
+		UIClickable::onStateChanged(prev, next);
 	}
 }
 
