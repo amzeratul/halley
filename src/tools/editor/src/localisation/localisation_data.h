@@ -35,6 +35,21 @@ namespace Halley {
 		int obsoleteKeys = 0;
 	};
 
+	enum class LocReadyStatus {
+		Ready,
+		NotReady
+	};
+
+	template <>
+	struct EnumNames<LocReadyStatus> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"ready",
+				"notReady"
+			}};
+		}
+	};
+
 	class LocalisationDataEntry {
 	public:
 		String key;
@@ -46,6 +61,8 @@ namespace Halley {
 
 		LocalisationDataEntry() = default;
 		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
+
+		LocReadyStatus getReadyState(const LocalisationFilterRules& rules) const;
 	};
 
 	class ILocOriginalData {

@@ -102,6 +102,12 @@ children:
                           innerBorder: [4, 4, 4, 4]
                         children: []
                         fill: [fillHorizontal, fillVertical]
+              - uuid: 7f932d72-b500-46f8-85cb-0a723b0c5a9e
+                proportion: 2
+                widget:
+                  class: label
+                  text: "Filters: (only strings that match these rules will be exported)"
+                fill: [fillHorizontal, centreVertical]
               - uuid: 630ecbe3-e8b8-4dda-b43b-45d05a456c59
                 sizer:
                   columnProportions: []
@@ -239,7 +245,7 @@ children:
                         - id: outOfDate
                           text: Out of date
       - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
-        border: [0, 10, 0, 0]
+        border: [0, 10, 2, 2]
         sizer:
           columnProportions: []
           gap: 8
@@ -254,9 +260,9 @@ children:
               columnProportions: []
             widget:
               class: button
-              id: set
+              id: export
               size: [120, 0]
-              text: Set Filters
+              text: Export...
             fill: [right, fillVertical]
           - uuid: 0a815566-4bde-4bec-8b95-fde6ae5181ae
             proportion: 0

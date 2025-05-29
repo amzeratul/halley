@@ -1,6 +1,7 @@
 #include "localisation_editor.h"
 
 #include "localisation_editor_root.h"
+#include "localisation_export_window.h"
 #include "localisation_language_editor.h"
 #include "localisation_manage_users.h"
 #include "halley/tools/file/filesystem.h"
@@ -776,8 +777,14 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language)
 		return;
 	}
 
-	// TODO: open export dialogue
-	exportLanguage(language, {});
+	getRoot()->addChild(std::make_shared<LocalisationExportWindow>(factory, [=] (bool ok, LocalisationFilters filters) {
+		if (ok) {
+			ExportOptions options;
+			options.allChunks = true;
+			options.filters = std::move(filters);
+			exportLanguage(language, std::move(options));
+		}
+	}));
 }
 
 void LocalisationEditor::exportLanguage(const I18NLanguage& language, const ExportOptions& options)
@@ -800,40 +807,30 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language, const Expo
 
 void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const ExportOptions& options, const Path& path)
 {
-	auto getKeyState = [] (const LocalisationDataEntry& origEntry, const LocTranslationEntry* locEntry) {
-		if (!locEntry || locEntry->value.isEmpty()) {
-			return KeyState::Untranslated;
-		} else if (locEntry->origVersion == origEntry.version) {
-			return KeyState::Translated;
-		} else {
-			return KeyState::OutOfDate;
-		}
-	};
-
 	const auto& loc = localStrings->getLocalised(language);
 	const auto& orig = localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 
 	CSVFile csv;
-	csv.setColumns({{ "key", "priority", "original", "translation", "comment", "context" , "chunk", "version" }});
+	csv.setColumns({{ "key", "priority", "ready", "original", "translation", "comment", "context" , "chunk", "version" }});
 
 	const auto keyIdx = csv.getColumnIndex("key");
 	const auto versionIdx = csv.getColumnIndex("version");
 	const auto commentIdx = csv.getColumnIndex("comment");
 	const auto contextIdx = csv.getColumnIndex("context");
 	const auto priorityIdx = csv.getColumnIndex("priority");
+	const auto readyIdx = csv.getColumnIndex("ready");
 	const auto chunkIdx = csv.getColumnIndex("chunk");
 	const auto originalIdx = csv.getColumnIndex("original");
 	const auto translationIdx = csv.getColumnIndex("translation");
+
+	const auto& filterRules = project.getProperties().getLocFilterRules();
 
 	for (const auto& chunk: orig.getChunks()) {
 		if (options.allChunks || options.chunksToInclude.contains(chunk.name)) {
 			for (const auto& origEntry: chunk.entries) {
 				const auto* locEntry = loc.tryGetEntry(origEntry.key);
 
-				const auto keyState = getKeyState(origEntry, locEntry);
-				if ((keyState == KeyState::Translated && !options.emitTranslated)
-					|| (keyState == KeyState::Untranslated && !options.emitUntranslated)
-					|| (keyState == KeyState::OutOfDate && !options.emitOutOfDate)) {
+				if (!options.filters.shouldShow(origEntry, locEntry, filterRules)) {
 					continue;
 				}
 
@@ -842,6 +839,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Ex
 				csv.setCell(rowIdx, versionIdx, toString(origEntry.version));
 				csv.setCell(rowIdx, commentIdx, origEntry.comment);
 				csv.setCell(rowIdx, contextIdx, origEntry.context);
+				csv.setCell(rowIdx, readyIdx, toString(origEntry.getReadyState(filterRules)));
 				csv.setCell(rowIdx, priorityIdx, toString(origEntry.priority));
 				csv.setCell(rowIdx, originalIdx, origEntry.value);
 				csv.setCell(rowIdx, chunkIdx, chunk.name);

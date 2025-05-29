@@ -179,6 +179,7 @@ children:
                         - id: outOfDate
                           text: Out of date
       - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
+        border: [0, 0, 2, 2]
         sizer:
           columnProportions: []
           gap: 8

@@ -1,5 +1,7 @@
 #include "localisation_grid.h"
 
+#include "localisation_filters.h"
+
 using namespace Halley;
 
 LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api, LocalisationFilterRules filterRules)
@@ -167,7 +169,7 @@ void LocalisationGrid::sendToClipboard(const String& str)
 
 bool LocalisationGrid::isReadyToTranslate(const LocalisationDataEntry& entry) const
 {
-	return entry.priority >= filterRules.minPriorityForReady;
+	return entry.getReadyState(filterRules) == LocReadyStatus::Ready;
 }
 
 const String& LocalisationGrid::getKeyAt(int idx) const

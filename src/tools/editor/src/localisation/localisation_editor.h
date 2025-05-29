@@ -2,6 +2,7 @@
 
 #include "localisation_client.h"
 #include "localisation_data.h"
+#include "localisation_filters.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/text/halleystring.h"
@@ -55,10 +56,8 @@ namespace Halley {
         };
 
         struct ExportOptions {
-	        bool emitUntranslated = true;
-	        bool emitOutOfDate = true;
-	        bool emitTranslated = true;
-            bool allChunks = true;
+			LocalisationFilters filters;
+        	bool allChunks = true;
             HashSet<String> chunksToInclude;
         };
 

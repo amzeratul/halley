@@ -47,6 +47,11 @@ LocalisationDataEntry::LocalisationDataEntry(String key, String value, String co
 {
 }
 
+LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRules& rules) const
+{
+	return priority >= rules.minPriorityForReady ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
+}
+
 LocalisationStats LocOriginalDataChunk::getStats() const
 {
 	LocalisationStats result;

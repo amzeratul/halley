@@ -40,9 +40,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	}
 
 	if (readyEnabled) {
-		const bool isReady = entry.priority >= rules.minPriorityForReady;
-		const bool wantsReady = ready == LocReadyStatus::Ready;
-		if (isReady != wantsReady) {
+		if (entry.getReadyState(rules) != ready) {
 			return false;
 		}
 	}

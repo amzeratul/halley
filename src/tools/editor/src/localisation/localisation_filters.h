@@ -34,21 +34,6 @@ namespace Halley {
 		}
 	};
 
-	enum class LocReadyStatus {
-		Ready,
-		NotReady
-	};
-
-	template <>
-	struct EnumNames<LocReadyStatus> {
-		constexpr std::array<const char*, 2> operator()() const {
-			return{{
-				"ready",
-				"notReady"
-			}};
-		}
-	};
-
 	class LocalisationFilters {
 	public:
 		String searchString;
