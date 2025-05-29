@@ -57,4 +57,10 @@ namespace Halley {
 
 		String toString() const;
 	};
+
+    struct LocalisationExportOptions {
+		LocalisationFilters filters;
+        bool allChunks = true;
+        HashSet<String> chunksToInclude;
+    };
 }

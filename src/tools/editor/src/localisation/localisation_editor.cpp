@@ -777,17 +777,20 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language)
 		return;
 	}
 
-	getRoot()->addChild(std::make_shared<LocalisationExportWindow>(factory, [=] (bool ok, LocalisationFilters filters) {
+	Vector<String> chunks;
+	chunks.reserve(getOriginalData().getChunks().size());
+	for (const auto& chunk: getOriginalData().getChunks()) {
+		chunks += chunk.name;
+	}
+
+	getRoot()->addChild(std::make_shared<LocalisationExportWindow>(factory, std::move(chunks), [=] (bool ok, LocalisationExportOptions options) {
 		if (ok) {
-			ExportOptions options;
-			options.allChunks = true;
-			options.filters = std::move(filters);
-			exportLanguage(language, std::move(options));
+			exportLanguage(language, options);
 		}
 	}));
 }
 
-void LocalisationEditor::exportLanguage(const I18NLanguage& language, const ExportOptions& options)
+void LocalisationEditor::exportLanguage(const I18NLanguage& language, const LocalisationExportOptions& options)
 {
 	auto basePath = project.getRootPath();
 
@@ -805,10 +808,10 @@ void LocalisationEditor::exportLanguage(const I18NLanguage& language, const Expo
 	});
 }
 
-void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const ExportOptions& options, const Path& path)
+void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const LocalisationExportOptions& options, const Path& path)
 {
-	const auto& loc = localStrings->getLocalised(language);
-	const auto& orig = localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
+	const auto& loc = *getTranslationData(language);
+	const auto& orig = getOriginalData();
 
 	CSVFile csv;
 	csv.setColumns({{ "key", "priority", "ready", "original", "translation", "comment", "context" , "chunk", "version" }});
