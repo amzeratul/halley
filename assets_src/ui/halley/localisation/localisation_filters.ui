@@ -17,7 +17,7 @@ children:
       id: ""
       image: halley_ui/ui_title_capsule.png
       innerBorder: [5, 2, 4, 4]
-      size: [400, 0]
+      size: [480, 0]
     children:
       - uuid: 0c9d0da9-b158-42ac-8d75-188bcc38ea34
         border: [0, 0, 0, 3]
@@ -51,70 +51,79 @@ children:
                     widget:
                       class: checkbox
                       id: priorityEnable
-                      label: "Priority:"
+                      label: Priority
                       size: [200, 0]
-                  - uuid: 4dbf03a7-2b2d-47c8-810f-03d32c7b4299
+                  - uuid: 994f4121-6be6-464d-ad59-565e45a20dd4
                     proportion: 1
-                    border: [0, 0, 0, 0]
+                    sizer:
+                      columnProportions: []
                     widget:
-                      class: dropdown
-                      id: minPriority
-                      options:
-                        - id: highest
-                          image: ui/priority_highest.png
-                          imageColour: "#df3434"
-                          text: Highest
-                        - id: high
-                          image: ui/priority_high.png
-                          imageColour: "#ffbf00"
-                          text: High
-                        - id: normal
-                          image: ui/priority_normal.png
-                          imageColour: "#40bc2a"
-                          text: Normal
-                        - id: low
-                          image: ui/priority_low.png
-                          imageColour: "#00abdf"
-                          text: Low
-                        - id: lowest
-                          image: ui/priority_lowest.png
-                          imageColour: "#3930d2"
-                          text: Lowest
-                  - uuid: 12a5400e-80f6-4549-a45c-2cf5008eb12d
-                    proportion: 0
-                    border: [4, 0, 4, 0]
-                    widget:
-                      class: label
-                      size: [0, 0]
-                      text: to
-                    fill: [left, centreVertical]
-                  - uuid: 3db2e02f-a03b-42f6-8457-541a59808f5f
-                    proportion: 1
-                    border: [0, 0, 0, 0]
-                    widget:
-                      class: dropdown
-                      id: maxPriority
-                      options:
-                        - id: highest
-                          image: ui/priority_highest.png
-                          imageColour: "#df3434"
-                          text: Highest
-                        - id: high
-                          image: ui/priority_high.png
-                          imageColour: "#ffbf00"
-                          text: High
-                        - id: normal
-                          image: ui/priority_normal.png
-                          imageColour: "#40bc2a"
-                          text: Normal
-                        - id: low
-                          image: ui/priority_low.png
-                          imageColour: "#00abdf"
-                          text: Low
-                        - id: lowest
-                          image: ui/priority_lowest.png
-                          imageColour: "#3930d2"
-                          text: Lowest
+                      active: true
+                      class: widget
+                      id: priorityFields
+                    children:
+                      - uuid: 7f3feea1-2b3d-4e08-a024-b629d95a1e0c
+                        proportion: 1
+                        border: [0, 0, 0, 0]
+                        widget:
+                          class: dropdown
+                          id: minPriority
+                          options:
+                            - id: highest
+                              image: ui/priority_highest.png
+                              imageColour: "#df3434"
+                              text: Highest
+                            - id: high
+                              image: ui/priority_high.png
+                              imageColour: "#ffbf00"
+                              text: High
+                            - id: normal
+                              image: ui/priority_normal.png
+                              imageColour: "#40bc2a"
+                              text: Normal
+                            - id: low
+                              image: ui/priority_low.png
+                              imageColour: "#00abdf"
+                              text: Low
+                            - id: lowest
+                              image: ui/priority_lowest.png
+                              imageColour: "#3930d2"
+                              text: Lowest
+                      - uuid: caa6f055-4efe-4e50-ac5d-1c0e3b39ec17
+                        proportion: 0
+                        border: [4, 0, 4, 0]
+                        widget:
+                          class: label
+                          size: [0, 0]
+                          text: to
+                        fill: [left, centreVertical]
+                      - uuid: 2932627d-92e8-49c6-85f4-44644cd46a41
+                        proportion: 1
+                        border: [0, 0, 0, 0]
+                        widget:
+                          class: dropdown
+                          id: maxPriority
+                          options:
+                            - id: highest
+                              image: ui/priority_highest.png
+                              imageColour: "#df3434"
+                              text: Highest
+                            - id: high
+                              image: ui/priority_high.png
+                              imageColour: "#ffbf00"
+                              text: High
+                            - id: normal
+                              image: ui/priority_normal.png
+                              imageColour: "#40bc2a"
+                              text: Normal
+                            - id: low
+                              image: ui/priority_low.png
+                              imageColour: "#00abdf"
+                              text: Low
+                            - id: lowest
+                              image: ui/priority_lowest.png
+                              imageColour: "#3930d2"
+                              text: Lowest
               - uuid: 91446eb9-c660-4b9a-8823-796bf8fc7b29
                 sizer:
                   columnProportions: []
@@ -124,11 +133,12 @@ children:
                     widget:
                       class: checkbox
                       id: readyStatusEnable
-                      label: "Ready status: "
+                      label: Ready status
                       size: [200, 0]
                   - uuid: eb5d5f55-9b30-4400-87e4-975759b6ac11
                     proportion: 1
                     widget:
+                      active: true
                       class: dropdown
                       id: readyStatus
                       options:
@@ -145,7 +155,7 @@ children:
                     widget:
                       class: checkbox
                       id: translationStatusEnable
-                      label: "Translation status: "
+                      label: Translation status
                       size: [200, 0]
                   - uuid: 7a4b7b14-a6d1-4002-8e04-b05b334fd904
                     proportion: 1
@@ -166,7 +176,7 @@ children:
                     widget:
                       class: checkbox
                       id: outdatedStatusEnable
-                      label: "Outdated status: "
+                      label: Outdated status
                       size: [200, 0]
                   - uuid: d613a0b6-d467-4b62-8132-6bc89838caf6
                     proportion: 1

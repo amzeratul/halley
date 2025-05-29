@@ -58,23 +58,22 @@ void LocalisationFiltersController::setup()
 
 void LocalisationFiltersController::setPriorityEnabled(bool enabled)
 {
-	ui.getWidget("minPriority")->setEnabled(enabled);
-	ui.getWidget("maxPriority")->setEnabled(enabled);
+	ui.getWidget("priorityFields")->setActive(enabled);
 }
 
 void LocalisationFiltersController::setTranslatedEnabled(bool enabled)
 {
-	ui.getWidget("translationStatus")->setEnabled(enabled);
+	ui.getWidget("translationStatus")->setActive(enabled);
 }
 
 void LocalisationFiltersController::setOutdatedEnabled(bool enabled)
 {
-	ui.getWidget("outdatedStatus")->setEnabled(enabled);
+	ui.getWidget("outdatedStatus")->setActive(enabled);
 }
 
 void LocalisationFiltersController::setReadyEnabled(bool enabled)
 {
-	ui.getWidget("readyStatus")->setEnabled(enabled);
+	ui.getWidget("readyStatus")->setActive(enabled);
 }
 
 
