@@ -129,6 +129,8 @@ void UIClickable::onStateChanged(State prev, State next)
 		} else if (next == State::Hover) {
 			if (prev == State::Up) {
 				playStyleSound("hoverSound");
+			} else if (prev == State::Down) {
+				playStyleSound("upSound");
 			}
 		}
 	}
