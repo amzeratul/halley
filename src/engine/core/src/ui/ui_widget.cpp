@@ -1084,15 +1084,46 @@ std::optional<AudioHandle> UIWidget::playSound(const String& eventName)
 	return {};
 }
 
-std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId)
+std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId, const std::optional<String>& idOverride)
 {
 	if (!styles.empty()) {
-		return playStyleSound(keyId, styles[0]);
+		return playStyleSound(keyId, styles[0], idOverride);
 	}
 	return {};
 }
 
-std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId, const UIStyle& style)
+std::optional<AudioHandle> UIWidget::playStyleSound(const String& keyId, const UIStyle& style, const std::optional<String>& idOverride)
+{
+	auto doLog = [&] () {
+		if (root && root->isAudioEventLoggingEnabled()) {
+			const auto& targetId = idOverride.value_or(getId());
+			Logger::logDev("Playing style sound \"" + keyId + "\" from UI widget with id \"" + targetId + "\" and style \"" + styles[0].getName() + "\"");
+		}		
+	};
+
+	if (style.hasSubStyle("soundsById")) {
+		const auto& byId = style.getSubStyle("soundsById");
+		const auto& targetId = idOverride.value_or(getId());
+		if (byId.hasSubStyle(targetId)) {
+			const auto& overrideStyle = byId.getSubStyle(targetId);
+			if (overrideStyle.hasString(keyId)) {
+				auto result = doPlayStyleSound(keyId, overrideStyle);
+				if (result) {
+					doLog();
+				}
+				return result;
+			}
+		}
+	}
+
+	auto result = doPlayStyleSound(keyId, style);
+	if (result) {
+		doLog();
+	}
+	return result;
+}
+
+std::optional<AudioHandle> UIWidget::doPlayStyleSound(const String& keyId, const UIStyle& style)
 {
 	if (style.hasString(keyId)) {
 		const auto& eventId = style.getString(keyId);

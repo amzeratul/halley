@@ -185,8 +185,8 @@ namespace Halley {
 		void replayInitialBehaviours(bool reversed = false);
 
 		std::optional<AudioHandle> playSound(const String& eventName);
-		std::optional<AudioHandle> playStyleSound(const String& keyId);
-		std::optional<AudioHandle> playStyleSound(const String& keyId, const UIStyle& style);
+		std::optional<AudioHandle> playStyleSound(const String& keyId, const std::optional<String>& idOverride = {});
+		std::optional<AudioHandle> playStyleSound(const String& keyId, const UIStyle& style, const std::optional<String>& idOverride = {});
 
 		bool needsLayout() const;
 		void markAsNeedingLayout() final override;
@@ -282,6 +282,8 @@ namespace Halley {
 		void notifyActivationChange(bool active);
 
 		void removeSizerDeadChildren();
+
+		std::optional<AudioHandle> doPlayStyleSound(const String& keyId, const UIStyle& style);
 
 		UIParent* parent = nullptr;
 		UIRoot* root = nullptr;

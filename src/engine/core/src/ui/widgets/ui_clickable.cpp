@@ -121,6 +121,10 @@ Rect4f UIClickable::getMouseRect() const
 
 void UIClickable::onStateChanged(State prev, State next)
 {
+	if (styles.empty()) {
+		return;
+	}
+
 	if (isEnabled() && prev != next) {
 		if (next == State::Up) {
 			playStyleSound("upSound");

@@ -552,10 +552,9 @@ void UIList::draw(UIPainter& painter) const
 	}
 }
 
-
 void UIList::onAccept()
 {
-	playStyleSound("acceptSound");
+	playStyleSound("acceptSound", getSelectedOptionId());
 	sendEvent(UIEvent(UIEventType::ListAccept, getId(), getSelectedOptionId(), curOption));
 }
 

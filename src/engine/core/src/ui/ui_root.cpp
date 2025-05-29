@@ -788,6 +788,11 @@ std::optional<AudioHandle> UIRoot::playSound(const String& eventName)
 	return {};
 }
 
+bool UIRoot::isAudioEventLoggingEnabled() const
+{
+	return audioAPI && audioAPI->getEventLogging().has_value();
+}
+
 void UIRoot::sendEvent(UIEvent, bool includeSelf, bool originatesHere) const
 {
 	// Unhandled event
