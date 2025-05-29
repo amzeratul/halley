@@ -102,6 +102,7 @@ set(SOURCES
     "src/project/project.cpp"
     "src/project/project_comments.cpp"
     "src/project/project_loader.cpp"
+    "src/project/project_loc_options.cpp"
     "src/project/project_properties.cpp"
     "src/project/write_version_tool.cpp"
 
@@ -164,6 +165,7 @@ set(HEADERS
     "include/halley/tools/project/project.h"
     "include/halley/tools/project/project_comments.h"
     "include/halley/tools/project/project_loader.h"
+    "include/halley/tools/project/project_loc_options.h"
     "include/halley/tools/project/project_properties.h"
     "include/halley/tools/project/write_version_tool.h"
 

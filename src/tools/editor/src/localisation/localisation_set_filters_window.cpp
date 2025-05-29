@@ -2,12 +2,89 @@
 
 using namespace Halley;
 
+LocalisationFiltersController::LocalisationFiltersController(UIWidget& ui, LocalisationFilters& filters)
+	: ui(ui)
+	, filters(filters)
+{
+}
+
+void LocalisationFiltersController::setup()
+{
+	ui.bindData("priorityEnable", filters.priorityEnabled, [=] (bool value) {
+		filters.priorityEnabled = value;
+		setPriorityEnabled(value);
+	});
+
+	ui.bindData("readyStatusEnable", filters.readyEnabled, [=] (bool value) {
+		filters.readyEnabled = value;
+		setReadyEnabled(value);
+	});
+
+	ui.bindData("translationStatusEnable", filters.translatedEnabled, [=] (bool value) {
+		filters.translatedEnabled = value;
+		setTranslatedEnabled(value);
+	});
+
+	ui.bindData("outdatedStatusEnable", filters.outdatedEnabled, [=] (bool value) {
+		filters.outdatedEnabled = value;
+		setOutdatedEnabled(value);
+	});
+
+	ui.bindData("minPriority", toString(filters.minPriority), [=] (String value) {
+		filters.minPriority = fromString<LocPriority>(value);
+	});
+
+	ui.bindData("maxPriority", toString(filters.maxPriority), [=] (String value) {
+		filters.maxPriority = fromString<LocPriority>(value);
+	});
+
+	ui.bindData("readyStatus", toString(filters.ready), [=] (String value) {
+		filters.ready = fromString<LocReadyStatus>(value);
+	});
+
+	ui.bindData("translationStatus", toString(filters.translated), [=] (String value) {
+		filters.translated = fromString<LocTranslatedStatus>(value);
+	});
+
+	ui.bindData("outdatedStatus", toString(filters.outdated), [=] (String value) {
+		filters.outdated = fromString<LocOutdatedStatus>(value);
+	});
+
+	setPriorityEnabled(filters.priorityEnabled);
+	setReadyEnabled(filters.readyEnabled);	
+	setTranslatedEnabled(filters.translatedEnabled);
+	setOutdatedEnabled(filters.outdatedEnabled);	
+}
+
+void LocalisationFiltersController::setPriorityEnabled(bool enabled)
+{
+	ui.getWidget("minPriority")->setEnabled(enabled);
+	ui.getWidget("maxPriority")->setEnabled(enabled);
+}
+
+void LocalisationFiltersController::setTranslatedEnabled(bool enabled)
+{
+	ui.getWidget("translationStatus")->setEnabled(enabled);
+}
+
+void LocalisationFiltersController::setOutdatedEnabled(bool enabled)
+{
+	ui.getWidget("outdatedStatus")->setEnabled(enabled);
+}
+
+void LocalisationFiltersController::setReadyEnabled(bool enabled)
+{
+	ui.getWidget("readyStatus")->setEnabled(enabled);
+}
+
+
 LocalisationSetFiltersWindow::LocalisationSetFiltersWindow(UIFactory& factory, LocalisationFilters& filters, Vector2f pos, Callback callback)
 	: UIWidget("set_filters", {}, UISizer())
 	, factory(factory)
 	, originalFilters(filters)
 	, workingCopy(filters)
 	, callback(std::move(callback))
+	, filterController(*this, workingCopy)
 {
 	factory.loadUI(*this, "halley/localisation/localisation_filters");
 	UIWidget::setAnchor(UIAnchor(Vector2f(), Vector2f(), pos));
@@ -26,56 +103,7 @@ void LocalisationSetFiltersWindow::onMakeUI()
 		destroy();
 	});
 
-	bindData("priorityEnable", workingCopy.priorityEnabled, [=] (bool value) {
-		workingCopy.priorityEnabled = value;
-		setPriorityEnabled(value);
-	});
-
-	bindData("translationStatusEnable", workingCopy.translatedEnabled, [=] (bool value) {
-		workingCopy.translatedEnabled = value;
-		setTranslatedEnabled(value);
-	});
-
-	bindData("outdatedStatusEnable", workingCopy.outdatedEnabled, [=] (bool value) {
-		workingCopy.outdatedEnabled = value;
-		setOutdatedEnabled(value);
-	});
-
-	bindData("minPriority", toString(workingCopy.minPriority), [=] (String value) {
-		workingCopy.minPriority = fromString<LocPriority>(value);
-	});
-
-	bindData("maxPriority", toString(workingCopy.maxPriority), [=] (String value) {
-		workingCopy.maxPriority = fromString<LocPriority>(value);
-	});
-
-	bindData("translationStatus", toString(workingCopy.translated), [=] (String value) {
-		workingCopy.translated = fromString<LocTranslatedStatus>(value);
-	});
-
-	bindData("outdatedStatus", toString(workingCopy.outdated), [=] (String value) {
-		workingCopy.outdated = fromString<LocOutdatedStatus>(value);
-	});
-
-	setPriorityEnabled(workingCopy.priorityEnabled);
-	setTranslatedEnabled(workingCopy.translatedEnabled);
-	setOutdatedEnabled(workingCopy.outdatedEnabled);
-}
-
-void LocalisationSetFiltersWindow::setPriorityEnabled(bool enabled)
-{
-	getWidget("minPriority")->setEnabled(enabled);
-	getWidget("maxPriority")->setEnabled(enabled);
-}
-
-void LocalisationSetFiltersWindow::setTranslatedEnabled(bool enabled)
-{
-	getWidget("translationStatus")->setEnabled(enabled);
-}
-
-void LocalisationSetFiltersWindow::setOutdatedEnabled(bool enabled)
-{
-	getWidget("outdatedStatus")->setEnabled(enabled);
+	filterController.setup();
 }
 
 void LocalisationSetFiltersWindow::applyFilters()

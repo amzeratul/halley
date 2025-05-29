@@ -3,6 +3,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/data_structures/vector.h"
 #include "halley/data_structures/hash_map.h"
+#include "halley/tools/project/project_loc_options.h"
 
 namespace Halley {
 	using LocalisationHashType = uint64_t;
@@ -32,27 +33,6 @@ namespace Halley {
 		int translatedKeys = 0;
 		int outdatedKeys = 0;
 		int obsoleteKeys = 0;
-	};;
-
-	enum class LocPriority : uint8_t {
-		Lowest,
-		Low,
-		Normal,
-		High,
-		Highest
-	};
-
-	template <>
-	struct EnumNames<LocPriority> {
-		constexpr std::array<const char*, 5> operator()() const {
-			return{{
-				"lowest",
-				"low",
-				"normal",
-				"high",
-				"highest"
-			}};
-		}
 	};
 
 	class LocalisationDataEntry {

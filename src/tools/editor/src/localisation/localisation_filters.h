@@ -34,6 +34,21 @@ namespace Halley {
 		}
 	};
 
+	enum class LocReadyStatus {
+		Ready,
+		NotReady
+	};
+
+	template <>
+	struct EnumNames<LocReadyStatus> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"ready",
+				"notReady"
+			}};
+		}
+	};
+
 	class LocalisationFilters {
 	public:
 		String searchString;
@@ -41,14 +56,20 @@ namespace Halley {
 		bool priorityEnabled = false;
 		bool outdatedEnabled = false;
 		bool translatedEnabled = false;
+		bool readyEnabled = false;
 
 		LocOutdatedStatus outdated = LocOutdatedStatus::OutOfDate;
 		LocTranslatedStatus translated = LocTranslatedStatus::Untranslated;
+		LocReadyStatus ready = LocReadyStatus::Ready;
 		LocPriority minPriority = LocPriority::Lowest;
 		LocPriority maxPriority = LocPriority::Highest;
 
-		bool shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation) const;
+		void initialise(bool translating);
+
+		bool shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules) const;
 		bool hasFiltersActive() const;
 		void clearFilters();
+
+		String toString() const;
 	};
 }

@@ -2,10 +2,11 @@
 
 using namespace Halley;
 
-LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api)
+LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api, LocalisationFilterRules filterRules)
 	: UIGrid("localisation_grid", factory)
 	, factory(factory)
 	, api(api)
+	, filterRules(filterRules)
 {
 	outdatedCol = factory.getColourScheme()->getColour("ui_logWarningText");
 
@@ -16,6 +17,7 @@ LocalisationGrid::LocalisationGrid(UIFactory& factory, const HalleyAPI& api)
 	priorityIcons[LocPriority::Highest] = Sprite().setImage(factory.getResources(), "ui/priority_highest.png").setColour(Colour4f::fromHexString("#df3434"));
 	contextIcon = Sprite().setImage(factory.getResources(), "ui/loc_context.png").setColour(Colour4f::fromHexString("#ffffff"));
 	commentIcon = Sprite().setImage(factory.getResources(), "ui/loc_comment.png").setColour(Colour4f::fromHexString("#ffffff"));
+	readyIcon = Sprite().setImage(factory.getResources(), "ui/loc_ready.png").setColour(Colour4f::fromHexString("#15BD2B"));
 }
 
 size_t LocalisationGrid::getSrcRowCount() const
@@ -32,9 +34,10 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 	const float numWidth = 50;
 	const float keyWidth = 250;
 	const float priorityWidth = 30;
+	const float readyWidth = 30;
 	const float commentWidth = 30;
 	const float contextWidth = 30;
-	const float fixedWidth = numWidth + keyWidth + (showProperties ? priorityWidth + commentWidth + contextWidth : 0);
+	const float fixedWidth = numWidth + keyWidth + (showProperties ? readyWidth + priorityWidth + commentWidth + contextWidth : 0);
 	columns.push_back(numWidth);
 	columnNames.push_back("#");
 	columns.push_back(keyWidth);
@@ -51,6 +54,8 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 	}
 
 	if (showProperties) {
+		columns.push_back(readyWidth);
+		columnNames.push_back("Rdy");
 		columns.push_back(priorityWidth);
 		columnNames.push_back("Pri");
 		columns.push_back(commentWidth);
@@ -67,8 +72,9 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 	if (origData) {
 		const auto& entry = origData->getEntry(idx);
 
-		size_t len = 3 + (translatedData ? 1 : 0) + (showProperties ? 3 : 0);
-		size_t firstIcon = len - 3;
+		size_t numIcons = (showProperties ? 4 : 0);
+		size_t len = 3 + (translatedData ? 1 : 0) + numIcons;
+		size_t firstIcon = len - numIcons;
 		strs.resize(len);
 		colours.resize(len, textCol);
 		sprites.resize(len);
@@ -85,12 +91,15 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 		}
 
 		if (showProperties) {
-			sprites[firstIcon] = priorityIcons.at(entry.priority);
+			if (isReadyToTranslate(entry)) {
+				sprites[firstIcon] = readyIcon;
+			}
+			sprites[firstIcon + 1] = priorityIcons.at(entry.priority);
 			if (!entry.comment.isEmpty()) {
-				sprites[firstIcon + 1] = commentIcon;
+				sprites[firstIcon + 2] = commentIcon;
 			}
 			if (!entry.context.isEmpty()) {
-				sprites[firstIcon + 2] = contextIcon;
+				sprites[firstIcon + 3] = contextIcon;
 			}
 		}
 	}
@@ -156,6 +165,11 @@ void LocalisationGrid::sendToClipboard(const String& str)
 	}
 }
 
+bool LocalisationGrid::isReadyToTranslate(const LocalisationDataEntry& entry) const
+{
+	return entry.priority >= filterRules.minPriorityForReady;
+}
+
 const String& LocalisationGrid::getKeyAt(int idx) const
 {
 	if (origData && idx >= 0 && idx < static_cast<int>(getSrcRowCount())) {
@@ -200,6 +214,8 @@ LocalisedString LocalisationGrid::getToolTip() const
 			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
 				return LocalisedString::fromUserString(translatedEntry->value);
 			}
+		} else if (colName == "Rdy") {
+			return LocalisedString::fromUserString(isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate");
 		} else if (colName == "Pri") {
 			return LocalisedString::fromUserString("Priority: " + toString(entry.priority));
 		} else if (colName == "Cmt") {

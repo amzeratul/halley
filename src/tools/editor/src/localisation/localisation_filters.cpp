@@ -2,7 +2,13 @@
 
 using namespace Halley;
 
-bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation) const
+void LocalisationFilters::initialise(bool translating)
+{
+	clearFilters();
+	readyEnabled = translating;
+}
+
+bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules) const
 {
 	if (!searchString.isEmpty()) {
 		if (!entry.value.contains(searchString) && !entry.key.contains(searchString)) {
@@ -33,12 +39,20 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 		}
 	}
 
+	if (readyEnabled) {
+		const bool isReady = entry.priority >= rules.minPriorityForReady;
+		const bool wantsReady = ready == LocReadyStatus::Ready;
+		if (isReady != wantsReady) {
+			return false;
+		}
+	}
+
 	return true;
 }
 
 bool LocalisationFilters::hasFiltersActive() const
 {
-	return outdatedEnabled || priorityEnabled || translatedEnabled;
+	return outdatedEnabled || priorityEnabled || translatedEnabled || readyEnabled;
 }
 
 void LocalisationFilters::clearFilters()
@@ -46,4 +60,42 @@ void LocalisationFilters::clearFilters()
 	outdatedEnabled = false;
 	priorityEnabled = false;
 	translatedEnabled = false;
+	readyEnabled = false;
+}
+
+String LocalisationFilters::toString() const
+{
+	Vector<String> filterStrings;
+	if (hasFiltersActive()) {
+		if (priorityEnabled) {
+			filterStrings += "Priority between " + Halley::toString(minPriority) + " and " + Halley::toString(maxPriority);
+		}
+		if (readyEnabled) {
+			if (ready == LocReadyStatus::Ready) {
+				filterStrings += "Ready to translate";
+			} else {
+				filterStrings += "Not ready";
+			}
+		}
+		if (translatedEnabled) {
+			if (translated == LocTranslatedStatus::Translated) {
+				filterStrings += "Translated";
+			} else {
+				filterStrings += "Untranslated";
+			}
+		}
+		if (outdatedEnabled) {
+			if (outdated == LocOutdatedStatus::OutOfDate) {
+				filterStrings += "Out of Date";
+			} else {
+				filterStrings += "Up to Date";
+			}
+		}
+	}
+
+	if (filterStrings.empty()) {
+		return "[No filters enabled]";
+	} else {
+		return String::concatList(filterStrings, ", ");
+	}
 }

@@ -6,7 +6,7 @@
 namespace Halley {
     class LocalisationGrid : public UIGrid {
     public:
-        LocalisationGrid(UIFactory& factory, const HalleyAPI& api);
+        LocalisationGrid(UIFactory& factory, const HalleyAPI& api, LocalisationFilterRules filterRules);
 
     	void setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties);
 
@@ -26,6 +26,7 @@ namespace Halley {
     private:
         UIFactory& factory;
         const HalleyAPI& api;
+        LocalisationFilterRules filterRules;
 
         const ILocOriginalData* origData = nullptr;
         LocTranslationData* translatedData = nullptr;
@@ -34,9 +35,12 @@ namespace Halley {
         HashMap<LocPriority, Sprite> priorityIcons;
         Sprite commentIcon;
         Sprite contextIcon;
+        Sprite readyIcon;
 
         bool showProperties = false;
 
         void sendToClipboard(const String& str);
+
+        bool isReadyToTranslate(const LocalisationDataEntry& entry) const;
     };
 }

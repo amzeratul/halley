@@ -22,6 +22,9 @@ LocalisationLanguageEditor::LocalisationLanguageEditor(LocalisationEditorRoot& r
 	, locRemote(locRemote)
 	, canEdit(canEdit)
 {
+	filterRules = project.getProperties().getLocFilterRules();
+	filters.initialise(srcRemote != nullptr && dstLanguage != nullptr);
+
 	factory.loadUI(*this, "halley/localisation/localisation_language_editor");
 }
 
@@ -37,7 +40,7 @@ void LocalisationLanguageEditor::onMakeUI()
 		getWidgetAs<UILabel>("dstLanguage")->setText(root.getLanguageName(dstLanguage->language));
 	}
 
-	grid = std::make_shared<LocalisationGrid>(factory, api);
+	grid = std::make_shared<LocalisationGrid>(factory, api, filterRules);
 	getWidget("keysContainer")->add(grid, 1);
 
 	Vector<UIDropdown::Entry> chunks;
@@ -448,35 +451,7 @@ void LocalisationLanguageEditor::onFiltersUpdated()
 
 void LocalisationLanguageEditor::updateFilterDisplay()
 {
-	Vector<String> filterStrings;
-	if (filters.hasFiltersActive()) {
-		if (filters.priorityEnabled) {
-			filterStrings += "Priority between " + toString(filters.minPriority) + " and " + toString(filters.maxPriority);
-		}
-		if (filters.translatedEnabled) {
-			if (filters.translated == LocTranslatedStatus::Translated) {
-				filterStrings += "Translated";
-			} else {
-				filterStrings += "Untranslated";
-			}
-		}
-		if (filters.outdatedEnabled) {
-			if (filters.outdated == LocOutdatedStatus::OutOfDate) {
-				filterStrings += "Out of Date";
-			} else {
-				filterStrings += "Up to Date";
-			}
-		}
-	}
-
-	String filterString;
-	if (filterStrings.empty()) {
-		filterString = "[No filters enabled]";
-	} else {
-		filterString = String::concatList(filterStrings, ", ");
-	}
-
-	getWidgetAs<UILabel>("filtersLabel")->setText(LocalisedString::fromUserString(filterString));
+	getWidgetAs<UILabel>("filtersLabel")->setText(LocalisedString::fromUserString(filters.toString()));
 }
 
 void LocalisationLanguageEditor::applyFilters()
@@ -540,5 +515,5 @@ bool LocalisationLanguageEditor::isRowVisible(int idx) const
 	const auto& original = srcData->getEntry(idx);
 	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.key) : nullptr;
 
-	return filters.shouldShow(original, translated);
+	return filters.shouldShow(original, translated, filterRules);
 }

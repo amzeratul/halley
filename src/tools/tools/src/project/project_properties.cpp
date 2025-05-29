@@ -122,6 +122,11 @@ const String& ProjectProperties::getSteamBinPath() const
 	return steamBinPath;
 }
 
+const LocalisationFilterRules& ProjectProperties::getLocFilterRules() const
+{
+	return locFilterRules;
+}
+
 void ProjectProperties::loadDefaults()
 {
 	uuid = UUID::generate();
@@ -138,6 +143,7 @@ void ProjectProperties::loadDefaults()
 	devEnviromnent = true;
 	steamAppId = 0;
 	steamBinPath = "";
+	locFilterRules = {};
 }
 
 void ProjectProperties::load()
@@ -190,6 +196,9 @@ void ProjectProperties::load()
 		}
 		if (node.hasKey("steamBinPath")) {
 			steamBinPath = node["steamBinPath"].asString();
+		}
+		if (node.hasKey("locFilterRules")) {
+			locFilterRules = LocalisationFilterRules(node["locFilterRules"]);
 		}
 	}
 }

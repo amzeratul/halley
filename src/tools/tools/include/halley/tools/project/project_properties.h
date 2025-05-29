@@ -1,6 +1,8 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
+
+#include "project_loc_options.h"
 #include "halley/maths/uuid.h"
 #include "halley/text/i18n.h"
 
@@ -42,6 +44,8 @@ namespace Halley {
     	int getSteamAppId() const;
         const String& getSteamBinPath() const;
 
+    	const LocalisationFilterRules& getLocFilterRules() const;
+
 	private:
 		const Path& propertiesFile;
     	UUID uuid;
@@ -58,6 +62,7 @@ namespace Halley {
         bool devEnviromnent = true;
         int steamAppId = 0;
         String steamBinPath;
+        LocalisationFilterRules locFilterRules;
 
     	bool dirty = false;
 

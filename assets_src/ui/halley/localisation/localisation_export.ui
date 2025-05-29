@@ -23,7 +23,7 @@ children:
         border: [0, 0, 0, 3]
         widget:
           class: label
-          text: Filters
+          text: Export CSV...
         fill: [centreHorizontal, fillVertical]
       - uuid: 218d5584-6e78-4014-b19c-a04b7c61d581
         sizer:
@@ -42,18 +42,78 @@ children:
               class: widget
               id: ""
             children:
-              - uuid: 3490db87-92b5-49f5-a540-a6cdad71cbdb
+              - uuid: af165513-981b-408c-b63f-7a6a7288652e
+                border: [0, 0, 0, 10]
+                sizer:
+                  columnProportions: []
+                  gap: 4
+                  type: vertical
+                widget:
+                  class: widget
+                children:
+                  - uuid: 579f5f9a-f4d6-4139-96c0-6c9824dfe030
+                    sizer:
+                      columnProportions: []
+                      gap: 4
+                    children:
+                      - uuid: 6bed519a-d6cb-4e3f-8805-0bbaf082298e
+                        proportion: 2
+                        widget:
+                          class: label
+                          text: "String groups to include:"
+                        fill: [fillHorizontal, centreVertical]
+                      - uuid: 786a5c7a-f9f7-4de1-8b5c-00bf209324ef
+                        proportion: 1
+                        widget:
+                          class: button
+                          id: groupSelectAll
+                          text: Select All
+                      - uuid: 4f85a632-7548-4285-8a1d-cb82020a9a27
+                        proportion: 1
+                        widget:
+                          class: button
+                          id: groupSelectNone
+                          text: Select None
+                  - uuid: 9104eb93-ad03-4070-9f22-856316a4b363
+                    proportion: 1
+                    sizer:
+                      columnProportions: []
+                      type: vertical
+                    widget:
+                      autoHide: true
+                      class: scrollBarPane
+                      scrollHorizontal: true
+                      size: [0, 200]
+                      style: scrollbarHalley
+                    children:
+                      - uuid: 13b4bcf8-fad2-4bed-a58c-6b8ae7d64bc7
+                        proportion: 1
+                        border: [0, 0, 0, 0]
+                        sizer:
+                          columnProportions: [1, 1]
+                          columns: 2
+                          gap: 4
+                          type: vertical
+                        widget:
+                          class: image
+                          colour: $ui_listBackground
+                          id: stringGroups
+                          image: $ui_list_background
+                          innerBorder: [4, 4, 4, 4]
+                        children: []
+                        fill: [fillHorizontal, fillVertical]
+              - uuid: 630ecbe3-e8b8-4dda-b43b-45d05a456c59
                 sizer:
                   columnProportions: []
                 children:
-                  - uuid: 2cd70eac-2ef2-4d32-81e0-eb402b6166ef
+                  - uuid: 879a6692-9cd7-49d7-9f49-fdb6cc8465fe
                     border: [0, 0, 6, 0]
                     widget:
                       class: checkbox
                       id: priorityEnable
                       label: "Priority:"
                       size: [200, 0]
-                  - uuid: 4dbf03a7-2b2d-47c8-810f-03d32c7b4299
+                  - uuid: 75177f1c-1cf7-4cc0-91c4-27cb3f52d237
                     proportion: 1
                     border: [0, 0, 0, 0]
                     widget:
@@ -80,7 +140,7 @@ children:
                           image: ui/priority_lowest.png
                           imageColour: "#3930d2"
                           text: Lowest
-                  - uuid: 12a5400e-80f6-4549-a45c-2cf5008eb12d
+                  - uuid: 37af3b77-3aad-4301-97e6-dd6782da8a95
                     proportion: 0
                     border: [4, 0, 4, 0]
                     widget:
@@ -88,7 +148,7 @@ children:
                       size: [0, 0]
                       text: to
                     fill: [left, centreVertical]
-                  - uuid: 3db2e02f-a03b-42f6-8457-541a59808f5f
+                  - uuid: 852bdfdf-524c-4016-a891-720017769b33
                     proportion: 1
                     border: [0, 0, 0, 0]
                     widget:
@@ -115,18 +175,18 @@ children:
                           image: ui/priority_lowest.png
                           imageColour: "#3930d2"
                           text: Lowest
-              - uuid: 91446eb9-c660-4b9a-8823-796bf8fc7b29
+              - uuid: 8a82a139-c171-4768-b014-f97ea06dfdd6
                 sizer:
                   columnProportions: []
                 children:
-                  - uuid: aec27a59-98e2-4e1b-aa0b-a1a40d581bae
+                  - uuid: 62295c7b-263f-415d-8998-79af1b45bedd
                     border: [0, 0, 6, 0]
                     widget:
                       class: checkbox
                       id: readyStatusEnable
                       label: "Ready status: "
                       size: [200, 0]
-                  - uuid: eb5d5f55-9b30-4400-87e4-975759b6ac11
+                  - uuid: 2024307e-78f0-4ad0-a0eb-c299880feae1
                     proportion: 1
                     widget:
                       class: dropdown
@@ -136,18 +196,18 @@ children:
                           text: Ready to Translate
                         - id: notReady
                           text: Not Ready
-              - uuid: e5eb9d46-8809-4231-b269-1ead58cda358
+              - uuid: 91446eb9-c660-4b9a-8823-796bf8fc7b29
                 sizer:
                   columnProportions: []
                 children:
-                  - uuid: e1b500fd-a7d5-46cd-aa3a-370a44985347
+                  - uuid: aec27a59-98e2-4e1b-aa0b-a1a40d581bae
                     border: [0, 0, 6, 0]
                     widget:
                       class: checkbox
                       id: translationStatusEnable
                       label: "Translation status: "
                       size: [200, 0]
-                  - uuid: 7a4b7b14-a6d1-4002-8e04-b05b334fd904
+                  - uuid: eb5d5f55-9b30-4400-87e4-975759b6ac11
                     proportion: 1
                     widget:
                       class: dropdown
@@ -179,6 +239,7 @@ children:
                         - id: outOfDate
                           text: Out of date
       - uuid: 3001c7bb-b5c9-4da9-ace2-2f6a4c87352a
+        border: [0, 10, 0, 0]
         sizer:
           columnProportions: []
           gap: 8

@@ -35,6 +35,7 @@ namespace Halley {
 
 		std::shared_ptr<LocalisationGrid> grid;
 		LocalisationFilters filters;
+		LocalisationFilterRules filterRules;
 
 		String curEditingKey = "";
 		Vector<String> pendingTranslationModifiedKeys;

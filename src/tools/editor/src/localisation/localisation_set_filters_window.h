@@ -5,6 +5,21 @@
 #include "localisation_filters.h"
 
 namespace Halley {
+	class LocalisationFiltersController {
+	public:
+		LocalisationFiltersController(UIWidget& ui, LocalisationFilters& filters);
+		void setup();
+
+	private:
+		UIWidget& ui;
+		LocalisationFilters& filters;
+
+		void setPriorityEnabled(bool enabled);
+		void setTranslatedEnabled(bool enabled);
+		void setOutdatedEnabled(bool enabled);
+		void setReadyEnabled(bool enabled);
+	};
+
 	class LocalisationSetFiltersWindow : public UIWidget {
 	public:
 		using Callback = std::function<void(bool)>;
@@ -18,10 +33,8 @@ namespace Halley {
 		LocalisationFilters workingCopy;
 		Callback callback;
 
-		void applyFilters();
+		LocalisationFiltersController filterController;
 
-		void setPriorityEnabled(bool enabled);
-		void setTranslatedEnabled(bool enabled);
-		void setOutdatedEnabled(bool enabled);
+		void applyFilters();
 	};
 }
