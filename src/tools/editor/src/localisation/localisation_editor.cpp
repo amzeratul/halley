@@ -747,11 +747,11 @@ void LocalisationEditor::downloadTranslations()
 				for (const auto& entry: chunk.entries) {
 					if (const auto iter = localisedData.entries.find(entry.key); iter != localisedData.entries.end()) {
 						if (firstInChunk) {
-							str << "\n\t# " << chunk.name << "\n";
+							str << "\n  # " << chunk.name << "\n";
 							firstInChunk = false;
 						}
 
-						str << "\t" << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"") << "\"\n";
+						str << "  " << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"") << "\"\n";
 						++nEntries;
 					}
 				}
@@ -761,7 +761,7 @@ void LocalisationEditor::downloadTranslations()
 			const auto path = dirPath / (lang.getISOCode() + ".yaml");
 			if (nEntries > 0 || Path::exists(path)) {
 				if (nEntries == 0) {
-					str << "\t{}";
+					str << "  {}";
 				}
 				FileSystem::createDir(dirPath);
 				Path::writeFile(path, str.str());
