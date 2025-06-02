@@ -91,10 +91,11 @@ namespace Halley {
 
 		[[nodiscard]] String left(size_t n) const;
 		[[nodiscard]] String right(size_t n) const;
-		[[nodiscard]] String mid(size_t start, size_t count=npos) const;
+		[[nodiscard]] String mid(size_t start, size_t count = npos) const;
 
-		[[nodiscard]] bool startsWith(const std::string_view& string, bool caseSensitive=true) const;
-		[[nodiscard]] bool endsWith(const std::string_view& string, bool caseSensitive=true) const;
+		[[nodiscard]] bool startsWith(const std::string_view& string, bool caseSensitive = true) const;
+		[[nodiscard]] bool startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive = true) const;
+		[[nodiscard]] bool endsWith(const std::string_view& string, bool caseSensitive = true) const;
 
 		void writeText(const Character* src, size_t len, size_t &pos);
 		void writeChar(const Character &src, size_t &pos);

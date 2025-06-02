@@ -169,6 +169,40 @@ char I18N::getDecimalSeparator() const
 	return '.';
 }
 
+void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) const
+{
+	HashMap<String, Vector<String>> strToKeys;
+
+	const auto& strs = strings.at(currentLanguage);
+	for (const auto& [k, v]: strs) {
+		if (!k.startsWithAnyOf(ignoredPrefixes)) {
+			strToKeys[v.toString()] += k;
+		}
+	}
+
+	Vector<std::pair<String, Vector<String>>> sortedResults;
+
+	for (const auto& [str, keys]: strToKeys) {
+		if (keys.size() > 1) {
+			sortedResults += std::pair(str, keys);
+			auto& ss = sortedResults.back().second;
+			std::sort(ss.begin(), ss.end());
+		}
+	}
+	std::sort(sortedResults.begin(), sortedResults.end(), [&] (const auto& a, const auto& b) {
+		return a.second.front() < b.second.front();
+	});
+
+	if (sortedResults.empty()) {
+		Logger::logDev("No duplicated strings found");
+	} else {
+		Logger::logDev("Found " + toString(sortedResults.size()) + " sets of duplicated strings:");
+		for (const auto& [str, keys]: sortedResults) {
+			Logger::logDev("* " + toString(keys.size()) + " duplicated keys: [" + String::concatList(keys, ", ") + "]: \"" + str + "\"");
+		}
+	}
+}
+
 LocalisedString::LocalisedString()
 {
 }
