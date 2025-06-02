@@ -21,6 +21,7 @@ public:
 	float rangeMax{ 100 };
 	float rollOff{ 1 };
 	Halley::AudioAttenuationCurve curve{ Halley::AudioAttenuationCurve::Linear };
+	Halley::Polygon polygon{};
 	Halley::Vector3f lastPos{};
 	bool canAutoVel{ false };
 	bool moved{ false };
@@ -29,12 +30,13 @@ public:
 	AudioSourceComponent() {
 	}
 
-	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, bool canAutoVel, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents)
+	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, Halley::Polygon polygon, bool canAutoVel, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents)
 		: event(std::move(event))
 		, rangeMin(std::move(rangeMin))
 		, rangeMax(std::move(rangeMax))
 		, rollOff(std::move(rollOff))
 		, curve(std::move(curve))
+		, polygon(std::move(polygon))
 		, canAutoVel(std::move(canAutoVel))
 		, dynamicEvents(std::move(dynamicEvents))
 	{
@@ -48,6 +50,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::serialize(rangeMax, float{ 100 }, _context, _node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::serialize(rollOff, float{ 1 }, _context, _node, componentName, "rollOff", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(curve)>::serialize(curve, Halley::AudioAttenuationCurve{ Halley::AudioAttenuationCurve::Linear }, _context, _node, componentName, "curve", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(polygon)>::serialize(polygon, Halley::Polygon{}, _context, _node, componentName, "polygon", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::serialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::serialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
 		return _node;
@@ -60,6 +63,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::deserialize(rangeMax, float{ 100 }, _context, _node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(rollOff)>::deserialize(rollOff, float{ 1 }, _context, _node, componentName, "rollOff", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(curve)>::deserialize(curve, Halley::AudioAttenuationCurve{ Halley::AudioAttenuationCurve::Linear }, _context, _node, componentName, "curve", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(polygon)>::deserialize(polygon, Halley::Polygon{}, _context, _node, componentName, "polygon", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::deserialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::deserialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
 	}
@@ -71,6 +75,7 @@ public:
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rangeMax");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("rollOff");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("curve");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("polygon");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("canAutoVel");
 		if ((_mask & makeMask(Type::Prefab, Type::Dynamic)) == 0) _node.removeKey("dynamicEvents");
 	}
@@ -91,6 +96,9 @@ public:
 		}
 		if (_fieldName == "curve") {
 			return Halley::ConfigNodeHelper<decltype(curve)>::serialize(curve, _context);
+		}
+		if (_fieldName == "polygon") {
+			return Halley::ConfigNodeHelper<decltype(polygon)>::serialize(polygon, _context);
 		}
 		if (_fieldName == "dynamicEvents") {
 			return Halley::ConfigNodeHelper<decltype(dynamicEvents)>::serialize(dynamicEvents, _context);
@@ -120,6 +128,10 @@ public:
 			Halley::ConfigNodeHelper<decltype(curve)>::deserialize(curve, _context, _node);
 			return;
 		}
+		if (_fieldName == "polygon") {
+			Halley::ConfigNodeHelper<decltype(polygon)>::deserialize(polygon, _context, _node);
+			return;
+		}
 		if (_fieldName == "dynamicEvents") {
 			Halley::ConfigNodeHelper<decltype(dynamicEvents)>::deserialize(dynamicEvents, _context, _node);
 			return;
@@ -133,6 +145,7 @@ public:
 		Halley::ByteSerializationHelper<decltype(rangeMax)>::serialize(rangeMax, _context, _serializer, componentIndex, "rangeMax");
 		Halley::ByteSerializationHelper<decltype(rollOff)>::serialize(rollOff, _context, _serializer, componentIndex, "rollOff");
 		Halley::ByteSerializationHelper<decltype(curve)>::serialize(curve, _context, _serializer, componentIndex, "curve");
+		Halley::ByteSerializationHelper<decltype(polygon)>::serialize(polygon, _context, _serializer, componentIndex, "polygon");
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
@@ -141,6 +154,7 @@ public:
 		Halley::ByteSerializationHelper<decltype(rangeMax)>::deserialize(rangeMax, _context, _deserializer, componentIndex, "rangeMax");
 		Halley::ByteSerializationHelper<decltype(rollOff)>::deserialize(rollOff, _context, _deserializer, componentIndex, "rollOff");
 		Halley::ByteSerializationHelper<decltype(curve)>::deserialize(curve, _context, _deserializer, componentIndex, "curve");
+		Halley::ByteSerializationHelper<decltype(polygon)>::deserialize(polygon, _context, _deserializer, componentIndex, "polygon");
 	}
 
 

@@ -233,6 +233,15 @@ void SceneEditorGizmoCollection::resetTools()
 			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow, sceneEditorWindow.getScriptNodeTypes());
 		}
 	);
+	addTool(Tool("audioSource", LocalisedString::fromHardcodedString("Audio Source"), {}, {}),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
+		{
+			const auto& comp = componentName.isEmpty() ? "AudioSource" : componentName;
+			const auto& field = fieldName.isEmpty() ? "polygon" : fieldName;
+			const auto col = Colour4f::fromHexString("#1DBDFA");
+			return std::make_unique<PolygonGizmo>(snapRules, comp, field, false, col, factory, sceneEditorWindow);
+		}
+	);
 }
 
 void SceneEditorGizmoCollection::clear()

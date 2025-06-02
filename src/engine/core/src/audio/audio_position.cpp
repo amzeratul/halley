@@ -25,6 +25,14 @@ AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Vector2f vel, AudioAtt
 {
 }
 
+AudioPosition::SpatialSource::SpatialSource(Vector2f pos, Polygon polygon, Vector2f vel, AudioAttenuation attenuation)
+	: pos(pos)
+	, velocity(vel)
+	, attenuation(attenuation)
+	, polygon(std::move(polygon))
+{
+}
+
 AudioPosition::SpatialSource::SpatialSource(Vector3f pos, Vector3f vel, AudioAttenuation attenuation)
 	: pos(pos)
 	, velocity(vel)
@@ -63,6 +71,13 @@ AudioPosition AudioPosition::makePositional(Vector2f pos, AudioAttenuation atten
 {
 	Vector<SpatialSource> sources;
 	sources.emplace_back(pos, velocity, attenuation);
+	return makePositional(std::move(sources));
+}
+
+AudioPosition AudioPosition::makePositional(Vector2f pos, Polygon polygon, AudioAttenuation attenuation, Vector2f velocity)
+{
+	Vector<SpatialSource> sources;
+	sources.emplace_back(pos, std::move(polygon), velocity, attenuation);
 	return makePositional(std::move(sources));
 }
 
@@ -130,11 +145,39 @@ namespace {
 		return std::sin(std::max(0.0f, 1.0f - 0.5f * panDistance) * piOverTwo);
 	}
 
-	void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, float& pan, float& distance)
+	void getPanAndDistance(Vector3f sourcePos, const AudioListenerData& listener, float& pan, float& distance)
 	{
-		auto delta = pos - listener.position;
+		auto delta = sourcePos - listener.position;
 		pan = clamp(delta.x / listener.referenceDistance, -1.0f, 1.0f);
 		distance = delta.length();
+	}
+
+	Vector3f getSourcePosition(Vector3f sourcePos, const Polygon& polygon, const AudioListenerData& listener, float maxDist)
+	{
+		if (polygon.isValid()) {
+			const auto relPos = listener.position.xy() - sourcePos.xy();
+
+			// Avoid the expensive polygon checks if too far away
+			const auto circle = polygon.getBoundingCircle();
+			if ((relPos - circle.getCentre()).length() > circle.getRadius() + maxDist) {
+				return sourcePos;
+			}
+
+			if (polygon.isPointInside(relPos)) {
+				return sourcePos;
+			} else {
+				const auto srcPos = polygon.getClosestPoint(relPos) + sourcePos.xy();
+				return Vector3f(srcPos, 0);
+			}
+		} else {
+			return sourcePos;
+		}
+	}
+
+	void getPanAndDistance(Vector3f pos, const Polygon& polygon, const AudioListenerData& listener, float& pan, float& distance, float maxDist)
+	{
+		const auto effectivePos = getSourcePosition(pos, polygon, listener, maxDist);
+		return getPanAndDistance(effectivePos, listener, pan, distance);
 	}
 }
 
@@ -187,7 +230,7 @@ std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const Audi
 	if (sources.size() == 1) {
 		// One source, do the simple algorithm
 		float len;
-		getPanAndDistance(sources[0].pos, listener, resultPan, len);
+		getPanAndDistance(sources[0].pos, sources[0].polygon, listener, resultPan, len, sources[0].attenuation.maximumDistance);
 		attenuation = attenuationOverride.value_or(sources[0].attenuation).getProximity(len);
 	} else {
 		// Multiple sources, average them
@@ -197,7 +240,7 @@ std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const Audi
 		for (auto& s: sources) {
 			float localPan;
 			float len;
-			getPanAndDistance(s.pos, listener, localPan, len);
+			getPanAndDistance(s.pos, s.polygon, listener, localPan, len, s.attenuation.maximumDistance);
 			const float localProximity = attenuationOverride.value_or(s.attenuation).getProximity(len);
 
 			panAccum += localProximity * localPan;

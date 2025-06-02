@@ -3,6 +3,7 @@
 #include <gsl/span>
 
 #include "audio_attenuation.h"
+#include "halley/maths/polygon.h"
 
 namespace Halley
 {
@@ -17,11 +18,13 @@ namespace Halley
 			[[deprecated]] SpatialSource(Vector2f pos, Vector2f vel, float referenceDistance, float maxDistance);
 			[[deprecated]] SpatialSource(Vector3f pos, Vector3f vel, float referenceDistance, float maxDistance);
 			SpatialSource(Vector2f pos, Vector2f vel, AudioAttenuation attenuation = {});
+			SpatialSource(Vector2f pos, Polygon polygon, Vector2f vel, AudioAttenuation attenuation = {});
 			SpatialSource(Vector3f pos, Vector3f vel, AudioAttenuation attenuation = {});
 
 			Vector3f pos;
 			Vector3f velocity;
 			AudioAttenuation attenuation;
+			Polygon polygon;
 		};
 
 		AudioPosition();
@@ -30,6 +33,7 @@ namespace Halley
 		[[deprecated]] static AudioPosition makePositional(Vector2f pos, float referenceDistance, float maxDistance, Vector2f velocity = {});
 		[[deprecated]] static AudioPosition makePositional(Vector3f pos, float referenceDistance, float maxDistance, Vector3f velocity = {});
 		static AudioPosition makePositional(Vector2f pos, AudioAttenuation attenuation = {}, Vector2f velocity = {});
+		static AudioPosition makePositional(Vector2f pos, Polygon polygon, AudioAttenuation attenuation = {}, Vector2f velocity = {});
 		static AudioPosition makePositional(Vector3f pos, AudioAttenuation attenuation = {}, Vector3f velocity = {});
 		static AudioPosition makePositional(Vector<SpatialSource> sources);
 		static AudioPosition makeFixed();
