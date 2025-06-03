@@ -21,9 +21,9 @@ set(RELEASE_BUILD 0)
 set(CI_BUILD 0)
 
 # Gitlab CI support
-if (DEFINED ENV{CI_COMMIT_REF_SLUG})
+if (DEFINED ENV{CI_COMMIT_REF_NAME})
 	set(CI_BUILD 1)
-	set(REF_SLUG $ENV{CI_COMMIT_REF_SLUG})
+	set(REF_SLUG $ENV{CI_COMMIT_REF_NAME})
 	string_starts_with(${REF_SLUG} "release" IS_RELEASE)
 	string_starts_with(${REF_SLUG} "dev_release" IS_DEV_RELEASE)
 	if (IS_RELEASE)
