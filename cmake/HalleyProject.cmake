@@ -35,9 +35,8 @@ if (DEFINED ENV{CI_COMMIT_REF_NAME})
 		set(RELEASE_BUILD 1)
 	endif()
 	message(STATUS "Building from branch ${BRANCH_NAME}")
+	message(STATUS "Build flags: DEV_BUILD=${DEV_BUILD}, RELEASE_BUILD=${RELEASE_BUILD}, CI_BUILD=${CI_BUILD}")
 endif()
-
-message(STATUS "Build flags: DEV_BUILD=${DEV_BUILD}, RELEASE_BUILD=${RELEASE_BUILD}, CI_BUILD=${CI_BUILD}")
 
 if (DEV_BUILD EQUAL 1)
 	add_definitions(-DDEV_BUILD)
