@@ -57,6 +57,9 @@ component:
       type: Halley::AudioAttenuationCurve
       defaultValue: Halley::AudioAttenuationCurve::Linear
       displayName: Curve
+  - polygon:
+      type: Halley::Polygon
+      displayName: Polygon
   - lastPos:
       type: Halley::Vector3f
       canEdit: false
@@ -65,6 +68,7 @@ component:
       type: bool
       canSave: false
       defaultValue: false
+      displayName: Auto Assign Velocity
   - moved:
       type: bool
       canSave: false

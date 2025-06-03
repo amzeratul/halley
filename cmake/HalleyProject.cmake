@@ -17,20 +17,32 @@ endfunction()
 
 
 set(DEV_BUILD 1)
+set(RELEASE_BUILD 0)
 set(CI_BUILD 0)
 
 # Gitlab CI support
-if (DEFINED ENV{CI_COMMIT_REF_SLUG})
+if (DEFINED ENV{CI_COMMIT_REF_NAME})
 	set(CI_BUILD 1)
-	set(REF_SLUG $ENV{CI_COMMIT_REF_SLUG})
-	string_starts_with(${REF_SLUG} "release" IS_RELEASE)
+	set(BRANCH_NAME $ENV{CI_COMMIT_REF_NAME})
+	string_starts_with(${BRANCH_NAME} "release" IS_RELEASE)
+	string_starts_with(${BRANCH_NAME} "dev_release" IS_DEV_RELEASE)
 	if (IS_RELEASE)
 		set(DEV_BUILD 0)
+		set(RELEASE_BUILD 1)
 	endif()
+	if (IS_DEV_RELEASE)
+		set(DEV_BUILD 1)
+		set(RELEASE_BUILD 1)
+	endif()
+	message(STATUS "Building from branch ${BRANCH_NAME}")
+	message(STATUS "Build flags: DEV_BUILD=${DEV_BUILD}, RELEASE_BUILD=${RELEASE_BUILD}, CI_BUILD=${CI_BUILD}")
 endif()
 
 if (DEV_BUILD EQUAL 1)
 	add_definitions(-DDEV_BUILD)
+endif()
+if (RELEASE_BUILD EQUAL 1)
+	add_definitions(-DRELEASE_BUILD)
 endif()
 
 # Live++ support

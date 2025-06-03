@@ -139,6 +139,8 @@ namespace Halley {
 		
 		char getDecimalSeparator() const;
 
+		void checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes = {}) const;
+
 	private:
 		I18NLanguage currentLanguage;
 		std::optional<I18NLanguage> fallbackLanguage;

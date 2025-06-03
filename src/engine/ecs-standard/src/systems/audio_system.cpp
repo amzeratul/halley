@@ -141,7 +141,12 @@ private:
 
 	AudioPosition getAudioPosition(SourceFamily& e, Vector3f vel)
 	{
-		return AudioPosition::makePositional(Vector3f(e.transform2D.getGlobalPosition()), AudioAttenuation(e.audioSource.rangeMin, e.audioSource.rangeMax, e.audioSource.rollOff, e.audioSource.curve), vel);
+		const auto attenuation = AudioAttenuation(e.audioSource.rangeMin, e.audioSource.rangeMax, e.audioSource.rollOff, e.audioSource.curve);
+		if (e.audioSource.polygon.isValid()) {
+			return AudioPosition::makePositional(e.transform2D.getGlobalPosition(), e.audioSource.polygon, attenuation, vel.xy());
+		} else {
+			return AudioPosition::makePositional(Vector3f(e.transform2D.getGlobalPosition()), attenuation, vel);
+		}
 	}
 
 	void initSource(SourceFamily& e)

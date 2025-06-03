@@ -216,6 +216,7 @@ file (GLOB_RECURSE MSDFGEN_HEADERS "src/msdfgen/*.h" "src/msdfgen/*.hpp")
 set(SOURCES ${SOURCES} ${MSDFGEN_SOURCES})
 set(HEADERS ${HEADERS} ${MSDFGEN_HEADERS})
 
+
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 

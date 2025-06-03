@@ -299,6 +299,16 @@ bool String::startsWith(const std::string_view& string, bool caseSensitive) cons
 	}
 }
 
+bool String::startsWithAnyOf(gsl::span<const String> strings, bool caseSensitive) const
+{
+	for (const auto& str: strings) {
+		if (startsWith(str, caseSensitive)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 
 bool String::endsWith(const std::string_view& string, bool caseSensitive) const
 {
