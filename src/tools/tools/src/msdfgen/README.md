@@ -4,7 +4,7 @@ This is a utility for generating signed distance fields from vector shapes and f
 which serve as a texture representation that can be used in real-time graphics to efficiently reproduce said shapes.
 Although it can also be used to generate conventional signed distance fields best known from
 [this Valve paper](https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf)
-and pseudo-distance fields, its primary purpose is to generate multi-channel distance fields,
+and perpendicular distance fields, its primary purpose is to generate multi-channel distance fields,
 using a method I have developed. Unlike monochrome distance fields, they have the ability
 to reproduce sharp corners almost perfectly by utilizing all three color channels.
 
@@ -15,7 +15,7 @@ The following comparison demonstrates the improvement in image quality.
 ![demo-sdf32](https://user-images.githubusercontent.com/18639794/106391906-e7aadc00-63ef-11eb-8f84-d402d0dd9174.png)
 
 - To learn more about this method, you can read my [Master's thesis](https://github.com/Chlumsky/msdfgen/files/3050967/thesis.pdf).
-- Check out my [MSDF-Atlas-Gen](https://github.com/Chlumsky/msdf-atlas-gen) if you want to generate entire glyph atlases for text rendering.
+- Check out my [MSDF-Atlas-Gen](https://github.com/Chlumsky/msdf-atlas-gen) if you want to generate entire font atlases for text rendering.
 - See what's new in the [changelog](CHANGELOG.md).
 
 ## Getting started
@@ -52,7 +52,7 @@ where only the input specification is required.
 
 Mode can be one of:
  - **sdf** &ndash; generates a conventional monochrome (true) signed distance field.
- - **psdf** &ndash; generates a monochrome signed pseudo-distance field.
+ - **psdf** &ndash; generates a monochrome signed perpendicular distance field.
  - **msdf** (default) &ndash; generates a multi-channel signed distance field using my new method.
  - **mtsdf** &ndash; generates a combined multi-channel and true signed distance field in the alpha channel.
 
@@ -67,8 +67,8 @@ The input can be specified as one of:
 The complete list of available options can be printed with **-help**.
 Some of the important ones are:
  - **-o \<filename\>** &ndash; specifies the output file name. The desired format will be deduced from the extension
-   (png, bmp, tif, txt, bin). Otherwise, use -format.
- - **-size \<width\> \<height\>** &ndash; specifies the dimensions of the output distance field (in pixels).
+   (png, bmp, tiff, rgba, fl32, txt, bin). Otherwise, use -format.
+ - **-dimensions \<width\> \<height\>** &ndash; specifies the dimensions of the output distance field (in pixels).
  - **-range \<range\>**, **-pxrange \<range\>** &ndash; specifies the width of the range around the shape
    between the minimum and maximum representable signed distance in shape units or distance field pixels, respectivelly.
  - **-scale \<scale\>** &ndash; sets the scale used to convert shape units to distance field pixels.
@@ -87,7 +87,7 @@ Some of the important ones are:
 
 For example,
 ```
-msdfgen.exe msdf -font C:\Windows\Fonts\arialbd.ttf 'M' -o msdf.png -size 32 32 -pxrange 4 -autoframe -testrender render.png 1024 1024
+msdfgen.exe msdf -font C:\Windows\Fonts\arialbd.ttf 'M' -o msdf.png -dimensions 32 32 -pxrange 4 -autoframe -testrender render.png 1024 1024
 ```
 
 will take the glyph capital M from the Arial Bold typeface, generate a 32&times;32 multi-channel distance field
@@ -104,35 +104,33 @@ in order to generate a distance field. Please note that all classes and function
    It consists of closed contours, which in turn consist of edges. An edge is represented by a `LinearEdge`, `QuadraticEdge`,
    or `CubicEdge`. You can construct them from two endpoints and 0 to 2 Bézier control points.
  - Normalize the shape using its `normalize` method and assign colors to edges if you need a multi-channel SDF.
-   This can be performed automatically using the `edgeColoringSimple` heuristic, or manually by setting each edge's
-   `color` member. Keep in mind that at least two color channels must be turned on in each edge, and iff two edges meet
-   at a sharp corner, they must only have one channel in common.
- - Call `generateSDF`, `generatePseudoSDF`, or `generateMSDF` to generate a distance field into a floating point
-   `Bitmap` object. This can then be worked with further or saved to a file using `saveBmp`, `savePng`, or `saveTiff`.
+   This can be performed automatically using the `edgeColoringSimple` (or other) heuristic, or manually by setting each edge's
+   `color` member. Keep in mind that at least two color channels must be turned on in each edge.
+ - Call `generateSDF`, `generatePSDF`, `generateMSDF`, or `generateMTSDF` to generate a distance field into a floating point
+   `Bitmap` object. This can then be worked with further or saved to a file using `saveBmp`, `savePng`, `saveTiff`, etc.
  - You may also render an image from the distance field using `renderSDF`. Consider calling `simulate8bit`
    on the distance field beforehand to simulate the standard 8 bits/channel image format.
 
 Example:
 ```c++
-#include "msdfgen.h"
-#include "msdfgen-ext.h"
+#include <msdfgen.h>
+#include <msdfgen-ext.h>
 
 using namespace msdfgen;
 
 int main() {
-    FreetypeHandle *ft = initializeFreetype();
-    if (ft) {
-        FontHandle *font = loadFont(ft, "C:\\Windows\\Fonts\\arialbd.ttf");
-        if (font) {
+    if (FreetypeHandle *ft = initializeFreetype()) {
+        if (FontHandle *font = loadFont(ft, "C:\\Windows\\Fonts\\arialbd.ttf")) {
             Shape shape;
-            if (loadGlyph(shape, font, 'A')) {
+            if (loadGlyph(shape, font, 'A', FONT_SCALING_EM_NORMALIZED)) {
                 shape.normalize();
                 //                      max. angle
                 edgeColoringSimple(shape, 3.0);
-                //           image width, height
+                //          output width, height
                 Bitmap<float, 3> msdf(32, 32);
-                //                     range, scale, translation
-                generateMSDF(msdf, shape, 4.0, 1.0, Vector2(4.0, 4.0));
+                //                            scale, translation (in em's)
+                SDFTransformation t(Projection(32.0, Vector2(0.125, 0.125)), Range(0.125));
+                generateMSDF(msdf, shape, t);
                 savePng(msdf, "output.png");
             }
             destroyFont(font);
@@ -141,7 +139,6 @@ int main() {
     }
     return 0;
 }
-
 ```
 
 ## Using a multi-channel distance field
@@ -149,6 +146,9 @@ int main() {
 Using a multi-channel distance field generated by this program is similarly simple to how a monochrome distance field is used.
 The only additional operation is computing the **median** of the three channels inside the fragment shader,
 right after sampling the distance field. This signed distance value can then be used the same way as usual.
+
+**Important:** Make sure to interpret the MSDF color channels in linear space just like the alpha channel and not as sRGB,
+even if the image format (PNG, BMP) may suggest otherwise.
 
 The following is an example GLSL fragment shader with anti-aliasing:
 

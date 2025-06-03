@@ -1,10 +1,11 @@
 
-#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable: 4996)
 #endif
 
 #include "shape-description.h"
+
+#include <cstdlib>
 
 namespace msdfgen {
 
@@ -28,15 +29,30 @@ int readCharS(const char **input) {
     return c;
 }
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
+
 int readCoordF(FILE *input, Point2 &coord) {
-    return fscanf(input, "%lf,%lf", &coord.x, &coord.y);
+    return fscanf(input, "%lf , %lf", &coord.x, &coord.y);
 }
 
 int readCoordS(const char **input, Point2 &coord) {
-    int read = 0;
-    int result = sscanf(*input, "%lf,%lf%n", &coord.x, &coord.y, &read);
-    *input += read;
-    return result;
+    char *end = NULL;
+    coord.x = strtod(*input, &end);
+    if (end <= *input)
+        return 0;
+    *input = end;
+    while (**input == ' ' || **input == '\t' || **input == '\n' || **input == '\r')
+        ++*input;
+    if (**input != ',')
+        return 1;
+    ++*input;
+    coord.y = strtod(*input, &end);
+    if (end <= *input)
+        return 1;
+    *input = end;
+    return 2;
 }
 
 static bool writeCoord(FILE *output, Point2 coord) {
@@ -245,37 +261,40 @@ bool writeShapeDescription(FILE *output, const Shape &shape) {
                         case MAGENTA: colorCode = 'm'; break;
                         case CYAN: colorCode = 'c'; break;
                         case WHITE: colorCode = 'w'; break;
-                        default: break;
+                        default:;
                     }
                 }
-                if (const LinearSegment *e = dynamic_cast<const LinearSegment *>(&**edge)) {
-                    fprintf(output, "\t");
-                    writeCoord(output, e->p[0]);
-                    fprintf(output, ";\n");
-                    if (colorCode)
-                        fprintf(output, "\t\t%c;\n", colorCode);
-                }
-                if (const QuadraticSegment *e = dynamic_cast<const QuadraticSegment *>(&**edge)) {
-                    fprintf(output, "\t");
-                    writeCoord(output, e->p[0]);
-                    fprintf(output, ";\n\t\t");
-                    if (colorCode)
-                        fprintf(output, "%c", colorCode);
-                    fprintf(output, "(");
-                    writeCoord(output, e->p[1]);
-                    fprintf(output, ");\n");
-                }
-                if (const CubicSegment *e = dynamic_cast<const CubicSegment *>(&**edge)) {
-                    fprintf(output, "\t");
-                    writeCoord(output, e->p[0]);
-                    fprintf(output, ";\n\t\t");
-                    if (colorCode)
-                        fprintf(output, "%c", colorCode);
-                    fprintf(output, "(");
-                    writeCoord(output, e->p[1]);
-                    fprintf(output, "; ");
-                    writeCoord(output, e->p[2]);
-                    fprintf(output, ");\n");
+                const Point2 *p = (*edge)->controlPoints();
+                switch ((*edge)->type()) {
+                    case (int) LinearSegment::EDGE_TYPE:
+                        fprintf(output, "\t");
+                        writeCoord(output, p[0]);
+                        fprintf(output, ";\n");
+                        if (colorCode)
+                            fprintf(output, "\t\t%c;\n", colorCode);
+                        break;
+                    case (int) QuadraticSegment::EDGE_TYPE:
+                        fprintf(output, "\t");
+                        writeCoord(output, p[0]);
+                        fprintf(output, ";\n\t\t");
+                        if (colorCode)
+                            fprintf(output, "%c", colorCode);
+                        fprintf(output, "(");
+                        writeCoord(output, p[1]);
+                        fprintf(output, ");\n");
+                        break;
+                    case (int) CubicSegment::EDGE_TYPE:
+                        fprintf(output, "\t");
+                        writeCoord(output, p[0]);
+                        fprintf(output, ";\n\t\t");
+                        if (colorCode)
+                            fprintf(output, "%c", colorCode);
+                        fprintf(output, "(");
+                        writeCoord(output, p[1]);
+                        fprintf(output, "; ");
+                        writeCoord(output, p[2]);
+                        fprintf(output, ");\n");
+                        break;
                 }
             }
             fprintf(output, "\t#\n");

@@ -4,7 +4,7 @@
 /*
  * MULTI-CHANNEL SIGNED DISTANCE FIELD GENERATOR
  * ---------------------------------------------
- * A utility by Viktor Chlumsky, (c) 2014 - 2023
+ * A utility by Viktor Chlumsky, (c) 2014 - 2025
  *
  * The extension module provides ways to easily load input and save output using popular formats.
  *
@@ -22,4 +22,5 @@
  */
 
 #include "ext/resolve-shape-geometry.h"
+#include "ext/import-svg.h"
 #include "ext/import-font.h"
