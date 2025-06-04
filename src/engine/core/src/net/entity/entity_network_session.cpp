@@ -758,6 +758,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 					break;
 				}
 			}
+			networkComponent.byteDataInterpolatorSet.reset();
 		} else if (authorityId == myPeerId) {
 			// Local peer is taking authority.
 			for (auto& peer: peers) {
@@ -766,6 +767,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 					break;
 				}
 			}
+			networkComponent.byteDataInterpolatorSet.reset();
 		} else {
 			// Remote peer is taking authority from another remote peer. We are not involved.
 		}
@@ -781,6 +783,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 					break;
 				}
 			}
+			networkComponent.byteDataInterpolatorSet.reset();
 		} else if (ownerId == myPeerId) {
 			// Authority returned to local peer. Revoke the inbound entity.
 			for (auto& peer: peers) {
@@ -789,6 +792,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 					break;
 				}
 			}
+			networkComponent.byteDataInterpolatorSet.reset();
 		} else {
 			// Remote peer is returning authority to another remote peer. We are not involved.
 		}

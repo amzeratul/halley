@@ -75,9 +75,9 @@ public:
 		} else if (getSessionService().isMultiplayer()) {
 			const auto entity = getWorld().tryGetEntity(targetId);
 			if (entity.isValid()) {
-				Logger::logWarning("Trying to get lock status of non-network entity \"" + entity.getName() + "\" (" + toString(entity.getEntityId()) + ") (missing NetworkComponent?)", true);
+				Logger::logWarning("Trying to get lock status of non-network entity \"" + entity.getName() + "\" (" + toString(entity.getEntityId().value & 0xffffffff) + ") (missing NetworkComponent?)", true);
 			} else if (targetId.isValid()) {
-				Logger::logWarning("Trying to get lock status of unknown entity " + toString(targetId), true);
+				Logger::logWarning("Trying to get lock status of unknown entity " + toString(targetId.value & 0xffffffff), true);
 			}
 			return true;
 		}
@@ -194,7 +194,7 @@ private:
 			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, getMyPeerId()), [=] (bool value) mutable
             {
 				if (!value && withAuthority) {
-	                Logger::logWarning("client failed to tell host to release lock, with authority, for entity " + getWorld().getEntity(targetId).getName());
+	                Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId));
 				}
                 //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to release lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
             });

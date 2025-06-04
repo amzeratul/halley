@@ -492,7 +492,8 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                 reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
             } else {
                 deserializer.skipBytes(size);
-                Logger::logDev("No component " + toString(componentId) + " found in entity " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
+                Logger::logDev("No component " + toString(componentId) + " found in entity " +
+                    toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
             }
         }
 

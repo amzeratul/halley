@@ -15,6 +15,7 @@ namespace Halley {
         virtual void serialize(const void* value, size_t size, Serializer& serializer) {}
         virtual void deserialize(void* value, size_t size, Deserializer& deserializer) {}
 
+        virtual void reset() {}
         virtual bool update(Time t, World& world, EntityId entityId) { return false; }
         [[nodiscard]] virtual bool isUpdating() const { return false; }
     };
@@ -25,6 +26,7 @@ namespace Halley {
         virtual ~IByteDataInterpolatorSet() = default;
         [[nodiscard]] virtual IByteDataInterpolator* tryGetInterpolator(EntityId entityId, int componentIndex, std::string_view fieldName) const = 0;
 
+        virtual void reset() const = 0;
         virtual void update(Time t, World& world) const = 0;
     };
 

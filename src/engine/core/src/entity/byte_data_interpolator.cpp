@@ -34,6 +34,13 @@ IByteDataInterpolator* ByteDataInterpolatorSet::tryGetInterpolator(EntityId enti
     return nullptr;
 }
 
+void ByteDataInterpolatorSet::reset() const
+{
+    for (const auto& entry : interpolators) {
+        entry.second->reset();
+    }
+}
+
 void ByteDataInterpolatorSet::update(Time t, World& world) const
 {
     for (const auto& entry : interpolators) {

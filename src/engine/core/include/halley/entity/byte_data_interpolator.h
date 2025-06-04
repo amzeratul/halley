@@ -10,6 +10,7 @@ namespace Halley {
 		void setInterpolator(std::shared_ptr<IByteDataInterpolator> interpolator, EntityId entityId, int componentIndex, std::string_view fieldName);
         [[nodiscard]] IByteDataInterpolator* tryGetInterpolator(EntityId entityId, int componentIndex, std::string_view fieldName) const override;
 
+        void reset() const override;
         void update(Time t, World& world) const override;
 
     private:
