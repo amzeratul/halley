@@ -610,7 +610,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 	if (authorityId.has_value()) {
 		if (myPeerId == ownerId) {
 			// I lose authority. Create a temporary inbound entity.
-			Logger::logDev(" +++ I lose authority to " + toString((int) authorityId.value()));
+			//Logger::logDev("Lost authority of " + toString(entityId.value & 0xffffffff) + " to " + toString((int) authorityId.value()));
 
 			// There should be some outbound entity available.
 			if (outboundEntities.contains(entityId)) {
@@ -630,7 +630,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 			}
 		} else if (myPeerId == authorityId) {
 			// I'm taking authority. Create a temporary outbound entity.
-			Logger::logDev(" +++ I gain authority from " + toString((int) ownerId));
+			//Logger::logDev("Took authority of " + toString(entityId.value & 0xffffffff) + " from " + toString((int) ownerId));
 
 			// Search for inbound entity.
 			const auto inboundIter = std_ex::find_if(inboundEntities, [&](const auto& kv) {
@@ -655,7 +655,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 	} else {
 		if (myPeerId == ownerId) {
 			// I've been given back authority. Remove the temporary inbound entity.
-			Logger::logDev(" +++ I regain authority");
+			//Logger::logDev("Recovered authority of " + toString(entityId.value & 0xffffffff));
 			const size_t found = std_ex::erase_if_value(inboundEntities, [&](const auto &value) {
 				if (value.worldId == entityId) {
 					Expects(value.forChangedAuthorityOnly);
@@ -668,7 +668,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 			}
 		} else {
 			// I'm returning authority to owner. Remove the temporary outbound entity.
-			Logger::logDev(" +++ I gave back authority to " + toString((int) ownerId));
+			//Logger::logDev("Gave back authority of " + toString(entityId.value & 0xffffffff) + " to " + toString((int) ownerId));
 			if (outboundEntities.contains(entityId)) {
 				outboundEntities.erase(entityId);
 			} else {
