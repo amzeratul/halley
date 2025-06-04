@@ -89,8 +89,6 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			continue;
 		}
 
-		Expects(entry.ownerId == myPeerId && entry.ownerId == entry.authorityId);
-
 		if (parent->isEntityInView(entity, clientData, peerId)) {
 			if (const auto iter = outboundEntities.find(entry.entityId); iter == outboundEntities.end()) {
 				parent->setupOutboundInterpolators(entity);
