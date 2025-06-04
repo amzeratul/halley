@@ -140,7 +140,7 @@ void Core::onReloaded()
 	if (game->shouldCreateSeparateConsole()) {
 		setOutRedirect(true);
 	}
-	statics.resume(api->system, game->getMaxThreads());
+	statics.resume(api->system, game->getMaxThreads(computerData));
 	if (api->system) {
 		api->system->setThreadName("main");
 	}
@@ -211,7 +211,7 @@ void Core::init()
 	// Initialize API
 	api->init();
 	api->systemInternal->setEnvironment(environment.get());
-	statics.resume(api->system, game->getMaxThreads());
+	statics.resume(api->system, game->getMaxThreads(computerData));
 	if (api->system) {
 		api->system->setThreadName("main");
 	}

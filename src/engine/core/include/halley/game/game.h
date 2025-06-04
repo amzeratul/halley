@@ -49,7 +49,7 @@ namespace Halley
 		virtual double getTargetFPS() const;
 		virtual double getTargetBackgroundFPS() const;
 		virtual double getFixedUpdateFPS() const;
-		virtual size_t getMaxThreads() const;
+		virtual size_t getMaxThreads(const ComputerData& computerData) const;
 		virtual bool shouldProcessEventsOnFixedUpdate() const;
 
 		virtual String getDevConAddress() const;

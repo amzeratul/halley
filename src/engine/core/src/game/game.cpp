@@ -199,9 +199,19 @@ UIDebugConsoleCommands& Game::initBaseCommands()
 	return baseCommands;
 }
 
-size_t Game::getMaxThreads() const
+size_t Game::getMaxThreads(const ComputerData& computerData) const
 {
-	auto n = std::thread::hardware_concurrency();
+	size_t n = std::thread::hardware_concurrency();
+
+	if constexpr (isPCPlatform()) {
+		// Prevent broken Intel CPUs from melting
+		if (computerData.cpuName.contains("i9-13900K") || computerData.cpuName.contains("i9-14900K")) {
+			const auto prev = n;
+			n = std::min<size_t>(n, 8);
+			Logger::logInfo("Throttling from " + toString(prev) + " to " + toString(n) + " threads due to i9-13900K/i9-14900K detected.");
+		}
+	}
+
 	Logger::logInfo("Using " + toString(n) + " hardware threads.");
 	return n;
 }
