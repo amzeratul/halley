@@ -1,5 +1,6 @@
 #pragma once
 
+#include "entity_network_session.h"
 #include "halley/entity/entity.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
@@ -91,7 +92,7 @@ namespace Halley {
     class EntityNetworkSerialize
     {
     public:
-        explicit EntityNetworkSerialize(Resources& resources, const IByteDataInterpolatorSet* interpolators);
+        explicit EntityNetworkSerialize(const EntityNetworkSession* session);
 
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
         void deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
@@ -167,8 +168,7 @@ namespace Halley {
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size);
         static std::optional<EntityRef> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
-        Resources& resources;
-        const IByteDataInterpolatorSet* interpolators;
+        const EntityNetworkSession* session;
         EntityNetworkChanges journal;
 
         bool hasComponentsAddedOrRemoved;

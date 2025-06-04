@@ -266,7 +266,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
         Expects(parent->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
         Expects(!parent->getEntitySerializationOptions().serializeAsStub);
 
-        auto fastSerialize = EntityNetworkSerialize(parent->getResources(), parent->getByteDataInterpolatorSet());
+        auto fastSerialize = EntityNetworkSerialize(parent);
 
     	if (fastSerialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions())) {
     		bool modified = false;
@@ -353,7 +353,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
         // Binary serialization to (re-)build the update journal.
-        auto serialize = EntityNetworkSerialize(parent->getResources(), parent->getByteDataInterpolatorSet());
+        auto serialize = EntityNetworkSerialize(parent);
         if (serialize.serializeEntityUpdate(entity, parent->getByteSerializationOptions())) {
 	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
         } else {
@@ -479,7 +479,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
     if (msg.fastSerialize) {
         //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
 
-        auto serialize = EntityNetworkSerialize(parent->getResources(), parent->getByteDataInterpolatorSet());
+        auto serialize = EntityNetworkSerialize(parent);
 
         try {
             serialize.deserializeEntityUpdate(entity, entity.getPrefab(), msg.bytes, parent->getByteSerializationOptions());

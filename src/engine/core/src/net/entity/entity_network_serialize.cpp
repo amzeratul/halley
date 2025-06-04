@@ -304,9 +304,8 @@ const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const U
     throw Exception("No journal page found for entity", HalleyExceptions::Network);
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(Resources& resources, const IByteDataInterpolatorSet* interpolators)
-    : resources(resources)
-    , interpolators(interpolators)
+EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session)
+    : session(session)
     , hasComponentsAddedOrRemoved(false)
 {
     scratchpad.reserve(65536);
@@ -340,14 +339,14 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     context.setCurrentEntity(entity);
 
     EntitySerializationContext serializationContext = {};
-    serializationContext.resources = &resources;
+    serializationContext.resources = &session->getResources();
     serializationContext.entityContext = &context;
     serializationContext.interpolators = nullptr;
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     ByteSerializationContext byteSerializationContext = {};
-    byteSerializationContext.resources = &resources;
-    byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.resources = &session->getResources();
+    byteSerializationContext.interpolators = session->getByteDataInterpolatorSet();
     byteSerializationContext.entityId = context.getCurrentEntityId();
     byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
@@ -431,14 +430,14 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     context.setCurrentEntity(entity);
 
     EntitySerializationContext serializationContext = {};
-    serializationContext.resources = &resources;
+    serializationContext.resources = &session->getResources();
     serializationContext.entityContext = &context;
     serializationContext.interpolators = nullptr;
     serializationContext.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Network);
 
     ByteSerializationContext byteSerializationContext = {};
-    byteSerializationContext.resources = &resources;
-    byteSerializationContext.interpolators = interpolators;
+    byteSerializationContext.resources = &session->getResources();
+    byteSerializationContext.interpolators = session->getByteDataInterpolatorSet();
     byteSerializationContext.entityId = context.getCurrentEntityId();
     byteSerializationContext.entityInterpolators = context.getByteDataInterpolators();
     byteSerializationContext.entitySerializationContext = &serializationContext;
@@ -643,8 +642,9 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
 
                                     // If any component has been modified, mark the entity page as modified too.
                                     page.modified |= componentPage->modified;
-                                } else {
-                                    // not found in previous journal
+                                } else if (!session->allowComponentAddedForFastUpdate(componentPage->componentId)) {
+                                    // Not found in previous journal.
+                                    // Ask the listener, might want to ignore by component type.
                                     hasComponentsAddedOrRemoved = true;
                                 }
                             }
@@ -666,7 +666,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
                                     }
                                 }
 
-                                if (componentPage == nullptr) {
+                                if (componentPage == nullptr && !session->allowComponentAddedForFastUpdate(prevComponentPage->componentId)) {
                                     hasComponentsAddedOrRemoved = true;
                                     break;
                                 }

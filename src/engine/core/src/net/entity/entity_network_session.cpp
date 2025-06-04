@@ -797,6 +797,14 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 	return true;
 }
 
+bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId) const
+{
+	if (listener) {
+		return listener->allowComponentAddedForFastUpdate(componentId);
+	}
+	return false;
+}
+
 void EntitySessionSharedData::serialize(Serializer& s) const
 {
 	s << gameStarted;

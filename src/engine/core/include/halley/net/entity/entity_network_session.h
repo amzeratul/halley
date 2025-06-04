@@ -46,6 +46,7 @@ namespace Halley {
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet, EntityRef entity) = 0;
+			virtual bool allowComponentAddedForFastUpdate(uint16_t componentId) const { return false; }
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) = 0;
 			virtual ConfigNode getLobbyInfo() = 0;
 			virtual bool setLobbyInfo(NetworkSession::PeerId fromPeerId, const ConfigNode& lobbyInfo) = 0;
@@ -105,6 +106,7 @@ namespace Halley {
 		void logUpdates();
 
 		bool prepareChangeEntityAuthority(EntityId entityId, const NetworkComponent& networkComponent, std::optional<NetworkSession::PeerId> authorityId);
+		bool allowComponentAddedForFastUpdate(uint16_t componentId) const;
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
