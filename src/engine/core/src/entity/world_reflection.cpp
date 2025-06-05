@@ -72,3 +72,13 @@ ComponentReflector& WorldReflection::getComponentReflector(const String& name) c
 {
 	return *componentReflectors[componentMap.at(name)];
 }
+
+MessageReflector& WorldReflection::getMessageReflector(int id) const
+{
+	return *messageReflectors.at(id);
+}
+
+SystemMessageReflector& WorldReflection::getSystemMessageReflector(int id) const
+{
+	return *systemMessageReflectors.at(id);
+}
