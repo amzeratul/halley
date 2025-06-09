@@ -352,7 +352,15 @@ void LocalisationEditor::populateOriginalLanguageData()
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
 
+		Vector<std::pair<String, int>> wordsPerCategory;
 		for (const auto& [k, v]: origStats.wordsPerCategory) {
+			wordsPerCategory += std::pair(k, v);
+		}
+		std::sort(wordsPerCategory.begin(), wordsPerCategory.end(), [&] (const auto& a, const auto& b) {
+			return a.second > b.second;
+		});
+
+		for (const auto& [k, v]: wordsPerCategory) {
 			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(k)));
 			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
 
