@@ -163,7 +163,6 @@ private:
 			auto future = promise.getFuture();
 			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
 			{
-                //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to acquire lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
                 if (value && withAuthority) {
                     changeAuthority(targetId, getMyPeerId());
                 }
@@ -196,7 +195,6 @@ private:
 				if (!value && withAuthority) {
 	                Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId));
 				}
-                //Logger::logDev("client " + String(value ? "succeeded" : "failed") + " to release lock for entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
             });
 		}
 	}
@@ -215,8 +213,6 @@ private:
 				return false;
 			}
 
-            //Logger::logDev("Peer " + toString(int(peerId)) + " attempts to " + (lock ? "lock" : "unlock") + " entity " + getWorld().getEntity(targetId).getName() + (withAuthority ? ", with authority" : ""));
-
 			auto& locks = e->network.locks;
 			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
 
@@ -224,7 +220,6 @@ private:
 				// No existing lock
 				if (lock) {
 					// New lock
-					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " locked by " + toString(int(peerId)));
 					locks.emplace_back(targetId, peerId);
                     if (withAuthority) {
                         doChangeAuthority(e, peerId);
@@ -238,7 +233,6 @@ private:
 				// Lock exists, locked by this peer
 				if (!lock) {
 					// Release lock
-					//Logger::logDev("Entity " + getWorld().getEntity(targetId).getName() + " unlocked by " + toString(int(peerId)));
 					locks.erase(iter);
                     if (withAuthority) {
                         doChangeAuthority(e, {});
@@ -250,7 +244,6 @@ private:
 				}
 			} else {
 				// Lock exists, locked by someone else
-				//Logger::logDev("Locked by someone else");
 				return false;
 			}
 		} else {
@@ -333,12 +326,6 @@ private:
 		}
 
 		networkFamily->network.authorityId = authorityId;
-
-		if (authorityId) {
-			Logger::logDev("changed authority to " + toString((int) authorityId.value()));
-		} else if (networkFamily->network.ownerId) {
-			Logger::logDev("gave authority back to owner " + toString(networkFamily->network.ownerId.value()));
-		}
     }
 };
 
