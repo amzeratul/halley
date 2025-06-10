@@ -229,9 +229,10 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect, std::shared_ptr<UIRootGroup> g
 
 UIRoot::~UIRoot()
 {
+	group->currentFocus = {};
+	UIParent::clear();
 	std_ex::erase(group->roots, this);
 	group = {};
-	UIParent::clear();
 }
 
 std::shared_ptr<UIRootGroup> UIRoot::getGroup() const
