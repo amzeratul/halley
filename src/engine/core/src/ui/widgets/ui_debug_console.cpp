@@ -508,6 +508,11 @@ void UIDebugConsole::onAddedToRoot(UIRoot& root)
 	}
 }
 
+bool UIDebugConsole::onKeyPress(KeyboardKeyPress key)
+{
+	return true;
+}
+
 void UIDebugConsole::drawChildren(UIPainter& painter) const
 {
 	if (forceMask) {

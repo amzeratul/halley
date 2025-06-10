@@ -34,11 +34,51 @@ namespace Halley {
 		virtual void setUISetting(std::string_view key, ConfigNode value) = 0;
 		virtual ConfigNode getUISetting(std::string_view key) = 0;
 	};
+
+	class UIRootGroup {
+		friend class UIRoot;
+
+	public:
+		UIRootGroup(const HalleyAPI& api);
+
+	private:
+		const HalleyAPI& api;
+
+		std::weak_ptr<UIWidget> currentFocus;
+		std::unique_ptr<TextInputCapture> textCapture;
+		Vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
+		std::function<bool(KeyboardKeyPress)> unhandledKeyPressListener;
+		std::shared_ptr<InputKeyboard> keyboard;
+
+		Vector<UIRoot*> roots;
+
+		void setFocus(const std::shared_ptr<UIWidget>& newFocus, bool byClicking = false);
+
+		void updateKeyboardInput();
+		void onUnhandledKeyPress(KeyboardKeyPress key);
+		void receiveKeyPress(KeyboardKeyPress key);
+		KeyMods getKeyMods();
+
+		void registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority = 0);
+		void removeKeyPressListener(const UIWidget& widget);
+		void setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler);
+
+		void focusNext(bool reverse);
+		void focusWidget(UIWidget& widget, bool byClicking);
+		void unfocusWidget(UIWidget& widget);
+		Vector<std::shared_ptr<UIWidget>> getFocusables();
+
+		bool isMainRoot(UIRoot* uiRoot) const;
+	};
 	
 	class UIRoot final : public UIParent {
+		friend class UIRootGroup;
+
 	public:
-		explicit UIRoot(const HalleyAPI& api, Rect4f rect = {});
+		explicit UIRoot(const HalleyAPI& api, Rect4f rect = {}, std::shared_ptr<UIRootGroup> group = {});
 		~UIRoot();
+
+		std::shared_ptr<UIRootGroup> getGroup() const;
 
 		UIRoot* getRoot() override;
 		const UIRoot* getRoot() const override;
@@ -100,7 +140,6 @@ namespace Halley {
 
 	private:
 		String id;
-		std::shared_ptr<InputKeyboard> keyboard;
 		InputAPI* inputAPI = nullptr;
 		AudioAPI* audioAPI = nullptr;
 		Rect4f uiRect;
@@ -109,7 +148,6 @@ namespace Halley {
 
 		std::weak_ptr<UIWidget> currentMouseOver;
 		std::weak_ptr<UIWidget> mouseExclusive; // A widget that's taking exclusive control of mouse
-		std::weak_ptr<UIWidget> currentFocus;
 		Vector2f lastMousePos;
 		std::shared_ptr<InputDevice> dummyInput;
 		Vector2f overscan;
@@ -117,14 +155,13 @@ namespace Halley {
 		std::optional<int> anyMouseButtonHeld;
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
-		std::unique_ptr<TextInputCapture> textCapture;
-		Vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
-		std::function<bool(KeyboardKeyPress)> unhandledKeyPressListener;
 
 		std::shared_ptr<UIToolTip> toolTip;
 		UIInputType lastInputType = UIInputType::Keyboard;
 
 		Vector<std::shared_ptr<UIWidget>> widgetsCache;
+
+		std::shared_ptr<UIRootGroup> group;
 
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 
@@ -133,10 +170,7 @@ namespace Halley {
 		void updateGamepadInput(const std::shared_ptr<InputDevice>& input);
 
 		void updateKeyboardInput();
-		void sendKeyPress(KeyboardKeyPress key);
-		void onUnhandledKeyPress(KeyboardKeyPress key);
 		void receiveKeyPress(KeyboardKeyPress key) override;
-		KeyMods getKeyMods();
 
 		struct WidgetUnderMouseResult {
 			std::shared_ptr<UIWidget> widget;
@@ -149,8 +183,6 @@ namespace Halley {
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::shared_ptr<UIWidget>>& output);
 
-		void focusWidget(UIWidget& widget, bool byClicking);
-		void unfocusWidget(UIWidget& widget);
-		Vector<std::shared_ptr<UIWidget>> getFocusables();
+		void getFocusables(Vector<std::shared_ptr<UIWidget>>& result);
 	};
 }

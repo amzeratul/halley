@@ -137,6 +137,7 @@ namespace Halley {
     	void setForcePaintMask(int mask);
 
 		void onAddedToRoot(UIRoot& root) override;
+		bool onKeyPress(KeyboardKeyPress key) override;
     
 	protected:
 		void drawChildren(UIPainter& painter) const override;

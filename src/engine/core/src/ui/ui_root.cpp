@@ -12,16 +12,12 @@
 #include "halley/support/logger.h"
 #include "halley/ui/widgets/ui_tooltip.h"
 #include "halley/graphics/render_context.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
-UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
-	: id("root")
-	, inputAPI(api.input)
-	, audioAPI(api.audio)
-	, uiRect(rect)
-	, dummyInput(std::make_shared<InputButtonBase>(4))
-	, mouseRemap([](Vector2f p) { return p; })
+UIRootGroup::UIRootGroup(const HalleyAPI& api)
+	: api(api)
 {
 	if (api.platform && api.platform->hasKeyboard()) {
 		keyboard = api.platform->getKeyboard();
@@ -30,11 +26,217 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 	}
 }
 
+void UIRootGroup::updateKeyboardInput()
+{
+	// Focus could have been destructed, clean up
+	if (currentFocus.expired()) {
+		setFocus({});
+	}
+
+	if (keyboard) {
+		auto focused = currentFocus.lock();
+		if (focused && !focused->isActiveInHierarchy()) {
+			focused.reset();
+		}
+
+		for (const auto& key: keyboard->getPendingKeys()) {
+			// Send to focused first
+			if (focused) {
+				focused->receiveKeyPress(key);
+			} else {
+				receiveKeyPress(key);
+			}
+		}
+	}
+	
+	if (textCapture) {
+		const bool stillCaptured = textCapture->update();
+		if (!stillCaptured) {
+			// This is used for soft keyboards, which will return false once they're done executing
+			// The widget then loses focus, so that being focused is equal to capturing soft keyboard
+			setFocus({});
+		}
+	}
+}
+
+void UIRootGroup::receiveKeyPress(KeyboardKeyPress key)
+{
+	// This means that a key press fell through the current focus, try sending directly to a registered listener
+	
+	// Remove expired
+	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& e) { return e.first.expired(); }), keyPressListeners.end());
+
+	// Finds one listener that can handle it (they are sorted by priority)
+	for (auto& listener: keyPressListeners) {
+		auto widget = listener.first.lock();
+		if (widget && widget->isActiveInHierarchy() && widget->onKeyPress(key)) {
+			return;
+		}
+	}
+
+	// None of the listeners handled it
+	onUnhandledKeyPress(key);
+}
+
+void UIRootGroup::onUnhandledKeyPress(KeyboardKeyPress key)
+{
+	if (unhandledKeyPressListener && unhandledKeyPressListener(key)) {
+		return;
+	}
+	
+	if (key.is(KeyCode::Tab)) {
+		focusNext(false);
+	}
+	if (key.is(KeyCode::Tab, KeyMods::Shift)) {
+		focusNext(true);
+	}
+}
+
+void UIRootGroup::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority)
+{
+	keyPressListeners.emplace_back(widget, priority);
+	std::sort(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& a, const auto& b)
+	{
+		return a.second > b.second;
+	});
+}
+
+void UIRootGroup::removeKeyPressListener(const UIWidget& widget)
+{
+	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [&] (const auto& v) -> bool
+	{
+		const auto sharedPtr = v.first.lock();
+		return sharedPtr && &(*sharedPtr) == &widget;
+	}), keyPressListeners.end());
+}
+
+void UIRootGroup::setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler)
+{
+	unhandledKeyPressListener = std::move(handler);
+}
+
+void UIRootGroup::focusNext(bool reverse)
+{
+	const auto focusables = getFocusables();
+
+	if (focusables.empty()) {
+		return;
+	}
+
+	const auto iter = std::find(focusables.begin(), focusables.end(), currentFocus.lock());
+	const int index = gsl::narrow<int>(iter - focusables.begin());
+	const int newIndex = iter != focusables.end() ? modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size())) : 0;
+	setFocus(focusables[newIndex]);
+}
+
+KeyMods UIRootGroup::getKeyMods()
+{
+	int result = 0;
+	if (keyboard) {
+		if (keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl)) {
+			result |= int(KeyMods::Ctrl);
+		}
+		if (keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift)) {
+			result |= int(KeyMods::Shift);
+		}
+		if (keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt)) {
+			result |= int(KeyMods::Alt);
+		}
+		if (keyboard->isButtonDown(KeyCode::LMod) || keyboard->isButtonDown(KeyCode::RMod)) {
+			result |= int(KeyMods::Mod);
+		}
+	}
+	return KeyMods(result);
+}
+
+void UIRootGroup::setFocus(const std::shared_ptr<UIWidget>& newFocus, bool byClicking)
+{
+	if (currentFocus.expired()) {
+		currentFocus.reset();
+		textCapture.reset();
+	}
+	
+	const auto prevFocus = currentFocus.lock();
+
+	if (prevFocus != newFocus) {
+		if (prevFocus) {
+			unfocusWidget(*prevFocus);
+		}
+
+		currentFocus = newFocus;
+
+		if (newFocus) {
+			focusWidget(*newFocus, byClicking);
+		}
+	}
+}
+
+void UIRootGroup::focusWidget(UIWidget& widget, bool byClicking)
+{
+	if (!widget.focused) {
+		widget.focused = true;
+		widget.onFocus(byClicking);
+
+		const auto text = widget.getTextInputData();
+		if (text && keyboard) {
+			textCapture = std::make_unique<TextInputCapture>(keyboard->captureText(*text, {}));
+		}
+		
+		widget.sendEvent(UIEvent(UIEventType::FocusGained, widget.getId()));
+	}
+}
+
+void UIRootGroup::unfocusWidget(UIWidget& widget)
+{
+	textCapture.reset();
+	
+	if (widget.focused) {
+		widget.focused = false;
+		widget.onFocusLost();
+		widget.sendEvent(UIEvent(UIEventType::FocusLost, widget.getId()));
+	}
+}
+
+Vector<std::shared_ptr<UIWidget>> UIRootGroup::getFocusables()
+{
+	Vector<std::shared_ptr<UIWidget>> result;
+	for (auto* root: roots) {
+		root->getFocusables(result);
+	}
+	return result;
+}
+
+bool UIRootGroup::isMainRoot(UIRoot* root) const
+{
+	return !roots.empty() && roots.front() == root;
+}
+
+
+UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect, std::shared_ptr<UIRootGroup> group)
+	: id("root")
+	, inputAPI(api.input)
+	, audioAPI(api.audio)
+	, uiRect(rect)
+	, dummyInput(std::make_shared<InputButtonBase>(4))
+	, mouseRemap([](Vector2f p) { return p; })
+	, group(std::move(group))
+{
+	if (!this->group) {
+		this->group = std::make_shared<UIRootGroup>(api);
+	}
+	this->group->roots.push_back(this);
+}
+
 UIRoot::~UIRoot()
 {
-	//Logger::logInfo(toString(keyPressListeners.size()) + " key press listeners left.");
-	keyPressListeners.clear();
+	std_ex::erase(group->roots, this);
+	group = {};
 	UIParent::clear();
+}
+
+std::shared_ptr<UIRootGroup> UIRoot::getGroup() const
+{
+	return group;
 }
 
 UIRoot* UIRoot::getRoot()
@@ -123,7 +325,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 		// Update input
 		if (mouse && activeInputType == UIInputType::Mouse) {
-			updateMouse(mouse, getKeyMods());
+			updateMouse(mouse, group->getKeyMods());
 		}
 		updateGamepadInput(manual);
 
@@ -230,111 +432,29 @@ void UIRoot::updateGamepadInput(const spInputDevice& input)
 
 void UIRoot::updateKeyboardInput()
 {
-	// Focus could have been destructed, clean up
-	if (currentFocus.expired()) {
-		setFocus({});
-	}
-
-	if (keyboard) {
-		auto focused = currentFocus.lock();
-		if (focused && !focused->isActiveInHierarchy()) {
-			focused.reset();
-		}
-
-		for (const auto& key: keyboard->getPendingKeys()) {
-			// Send to focused first
-			if (focused) {
-				focused->receiveKeyPress(key);
-			} else {
-				receiveKeyPress(key);
-			}
-		}
-	}
-	
-	if (textCapture) {
-		const bool stillCaptured = textCapture->update();
-		if (!stillCaptured) {
-			// This is used for soft keyboards, which will return false once they're done executing
-			// The widget then loses focus, so that being focused is equal to capturing soft keyboard
-			setFocus({});
-		}
+	if (group->isMainRoot(this)) {
+		group->updateKeyboardInput();
 	}
 }
 
 void UIRoot::receiveKeyPress(KeyboardKeyPress key)
 {
-	// This means that a key press fell through the current focus, try sending directly to a registered listener
-	
-	// Remove expired
-	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& e) { return e.first.expired(); }), keyPressListeners.end());
-
-	// Finds one listener that can handle it (they are sorted by priority)
-	for (auto& listener: keyPressListeners) {
-		auto widget = listener.first.lock();
-		if (widget && widget->isActiveInHierarchy() && widget->onKeyPress(key)) {
-			return;
-		}
-	}
-
-	// None of the listeners handled it
-	onUnhandledKeyPress(key);
-}
-
-KeyMods UIRoot::getKeyMods()
-{
-	int result = 0;
-	if (keyboard) {
-		if (keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl)) {
-			result |= int(KeyMods::Ctrl);
-		}
-		if (keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift)) {
-			result |= int(KeyMods::Shift);
-		}
-		if (keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt)) {
-			result |= int(KeyMods::Alt);
-		}
-		if (keyboard->isButtonDown(KeyCode::LMod) || keyboard->isButtonDown(KeyCode::RMod)) {
-			result |= int(KeyMods::Mod);
-		}
-	}
-	return KeyMods(result);
-}
-
-void UIRoot::onUnhandledKeyPress(KeyboardKeyPress key)
-{
-	if (unhandledKeyPressListener && unhandledKeyPressListener(key)) {
-		return;
-	}
-	
-	if (key.is(KeyCode::Tab)) {
-		focusNext(false);
-	}
-	if (key.is(KeyCode::Tab, KeyMods::Shift)) {
-		focusNext(true);
-	}
+	group->receiveKeyPress(key);
 }
 
 void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority)
 {
-	keyPressListeners.emplace_back(widget, priority);
-	std::sort(keyPressListeners.begin(), keyPressListeners.end(), [] (const auto& a, const auto& b)
-	{
-		return a.second > b.second;
-	});
+	group->registerKeyPressListener(std::move(widget), priority);
 }
 
 void UIRoot::removeKeyPressListener(const UIWidget& widget)
 {
-	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [&] (const auto& v) -> bool
-	{
-		const auto sharedPtr = v.first.lock();
-		return sharedPtr && &(*sharedPtr) == &widget;
-	}), keyPressListeners.end());
+	group->removeKeyPressListener(std::move(widget));
 }
 
 void UIRoot::setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler)
 {
-	unhandledKeyPressListener = std::move(handler);
+	group->setUnhandledKeyPressListener(std::move(handler));
 }
 
 void UIRoot::makeToolTip(const UIStyle& style)
@@ -351,7 +471,7 @@ Vector2f UIRoot::getLastMousePos() const
 
 void UIRoot::releaseWeakPtrs()
 {
-	currentFocus = {};
+	group->currentFocus = {};
 	currentMouseOver = {};
 	mouseExclusive = {};
 }
@@ -620,56 +740,11 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouseIncludingDisabled() const
 
 void UIRoot::setFocus(const std::shared_ptr<UIWidget>& newFocus, bool byClicking)
 {
-	if (currentFocus.expired()) {
-		currentFocus.reset();
-		textCapture.reset();
-	}
-	
-	const auto prevFocus = currentFocus.lock();
-
-	if (prevFocus != newFocus) {
-		if (prevFocus) {
-			unfocusWidget(*prevFocus);
-		}
-
-		currentFocus = newFocus;
-
-		if (newFocus) {
-			focusWidget(*newFocus, byClicking);
-		}
-	}
+	group->setFocus(newFocus, byClicking);
 }
 
-void UIRoot::focusWidget(UIWidget& widget, bool byClicking)
+void UIRoot::getFocusables(Vector<std::shared_ptr<UIWidget>>& result)
 {
-	if (!widget.focused) {
-		widget.focused = true;
-		widget.onFocus(byClicking);
-
-		const auto text = widget.getTextInputData();
-		if (text && keyboard) {
-			textCapture = std::make_unique<TextInputCapture>(keyboard->captureText(*text, {}));
-		}
-		
-		widget.sendEvent(UIEvent(UIEventType::FocusGained, widget.getId()));
-	}
-}
-
-void UIRoot::unfocusWidget(UIWidget& widget)
-{
-	textCapture.reset();
-	
-	if (widget.focused) {
-		widget.focused = false;
-		widget.onFocusLost();
-		widget.sendEvent(UIEvent(UIEventType::FocusLost, widget.getId()));
-	}
-}
-
-Vector<std::shared_ptr<UIWidget>> UIRoot::getFocusables()
-{
-	Vector<std::shared_ptr<UIWidget>> focusables;
-
 	const bool hasModal = hasModalUI();
 
 	for (const auto& cs: { getChildrenWaiting(), getChildren() }) {
@@ -678,35 +753,24 @@ Vector<std::shared_ptr<UIWidget>> UIRoot::getFocusables()
 				c->descend([&] (const std::shared_ptr<UIWidget>& e)
 				{
 					if (e->canReceiveFocus()) {
-						focusables.push_back(e);
+						result.push_back(e);
 					}
 				}, false, true);
 			}
 		}
 	}
-
-	return focusables;
 }
 
 void UIRoot::focusNext(bool reverse)
 {
-	const auto focusables = getFocusables();
-
-	if (focusables.empty()) {
-		return;
-	}
-
-	const auto iter = std::find(focusables.begin(), focusables.end(), currentFocus.lock());
-	const int index = gsl::narrow<int>(iter - focusables.begin());
-	const int newIndex = iter != focusables.end() ? modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size())) : 0;
-	setFocus(focusables[newIndex]);
+	group->focusNext(reverse);
 }
 
 void UIRoot::onWidgetRemoved(const UIWidget& widget)
 {
-	auto focus = currentFocus.lock();
+	auto focus = group->currentFocus.lock();
 	if (focus && focus.get() == &widget) {
-		currentFocus.reset();
+		group->currentFocus.reset();
 	}
 }
 
@@ -835,7 +899,7 @@ bool UIRoot::isMouseOverUI() const
 
 UIWidget* UIRoot::getCurrentFocus() const
 {
-	return currentFocus.lock().get();
+	return group->currentFocus.lock().get();
 }
 
 UIWidget* UIRoot::getCurrentMouseOver() const

@@ -21,6 +21,7 @@ namespace Halley {
 	class UIBehaviour;
 	class UIEventHandler;
 	class TextInputData;
+	class UIRootGroup;
 
 	enum class UIWidgetUpdateType {
 		First,
@@ -31,6 +32,7 @@ namespace Halley {
 	class UIWidget : public IUIElement, public UIParent, public IUISizer, public std::enable_shared_from_this<UIWidget> {
 		friend class UIParent;
 		friend class UIRoot;
+		friend class UIRootGroup;
 
 	public:
 		UIWidget(String id = "", Vector2f minSize = {}, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
