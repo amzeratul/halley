@@ -261,6 +261,8 @@ void UITextInput::onTextModified()
 
 	updateAutoCompleteOnTextModified();
 	updateHistoryOnTextModified();
+
+	playStyleSound("typingSound");
 }
 
 void UITextInput::validateText()
