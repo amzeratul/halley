@@ -109,7 +109,7 @@ void LuaState::unloadModule(const String& moduleName)
 	modules.erase(iter);
 }
 
-void LuaState::call(int nArgs, int nRets, bool throwOnError)
+bool LuaState::call(int nArgs, int nRets, bool throwOnError)
 {
 	int result = lua_pcall(lua, nArgs, nRets, errorHandlerStackPos.empty() ? 0 : errorHandlerStackPos.back());
 
@@ -123,7 +123,9 @@ void LuaState::call(int nArgs, int nRets, bool throwOnError)
 			}
 			Logger::logError(message, true);
 		}
+		return false;
 	}
+	return true;
 }
 
 lua_State* LuaState::getRawState()

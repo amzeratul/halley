@@ -70,12 +70,16 @@ namespace Halley {
 		}
 
 		template <typename T>
-		T callNoThrow() const
+		std::optional<T> callNoThrow() const
 		{
 			LuaFunctionCaller::startCall(*lua);
 			pushToLuaStack();
-			LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value, false);
-			return LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+			bool ok = LuaFunctionBind<>::call(*lua, 0, LuaReturnSize<T>::value, false);
+			std::optional<T> result = LuaReturnHelper<T>::cleanUpAndReturn(*lua);
+			if (!ok) {
+				result = {};
+			}
+			return result;
 		}
 
 		template <typename T, typename... Us>

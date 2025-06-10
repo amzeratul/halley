@@ -6,9 +6,9 @@ void Halley::LuaFunctionCaller::startCall(LuaState& state)
 	//state.pushErrorHandler();
 }
 
-void Halley::LuaFunctionCaller::call(LuaState& state, int nArgs, int nRets, bool throwOnError)
+bool Halley::LuaFunctionCaller::call(LuaState& state, int nArgs, int nRets, bool throwOnError)
 {
-	state.call(nArgs, nRets, throwOnError);
+	return state.call(nArgs, nRets, throwOnError);
 }
 
 void Halley::LuaFunctionCaller::endCall(LuaState& state)

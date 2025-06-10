@@ -53,7 +53,23 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression,
 	}
 
 	auto& expr = expression.get(*luaState);
-	auto result = throwOnError ? expr.call<ConfigNode>() : expr.callNoThrow<ConfigNode>();
+
+	ConfigNode result;
+
+	if (throwOnError) {
+		try {
+			result = expr.call<ConfigNode>();
+		} catch (...) {
+			Logger::logError("Error while executing Lua expression \"" + expression.getExpression() + "\"");
+			throw;
+		}
+	} else {
+		if (auto v = expr.callNoThrow<ConfigNode>()) {
+			result = std::move(*v);
+		} else {
+			Logger::logError("Error while executing Lua expression \"" + expression.getExpression() + "\"");
+		}
+	}
 
 	if (useResultCache) {
 		resultCache[expression.getExpression()] = ConfigNode(result);
