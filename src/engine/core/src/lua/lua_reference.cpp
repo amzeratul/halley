@@ -1,7 +1,10 @@
 #include <lua/src/lua.hpp>
 #include "halley/lua/lua_reference.h"
+
+#include "halley/bytes/byte_serializer.h"
 #include "halley/lua/lua_state.h"
 #include "halley/support/exception.h"
+#include "halley/bytes/config_node_serializer.h"
 
 using namespace Halley;
 
@@ -120,9 +123,11 @@ LuaExpression::LuaExpression(String expr)
 
 void LuaExpression::setExpression(String expr)
 {
-	expression = std::move(expr);
-	expression.trimBoth();
-	luaRef.reset();
+	expr.trimBoth();
+	if (expression != expr) {
+		expression = std::move(expr);
+		luaRef.reset();
+	}
 }
 
 bool LuaExpression::isEmpty() const
@@ -142,4 +147,31 @@ LuaReference& LuaExpression::get(LuaState& state) const
 		luaRef = std::make_shared<LuaReference>(state, true);
 	}
 	return *luaRef;
+}
+
+void LuaExpression::serialize(Serializer& s) const
+{
+	s << expression;
+}
+
+void LuaExpression::deserialize(Deserializer& s)
+{
+	String expr;
+	s >> expr;
+	setExpression(expr);
+}
+
+ConfigNode ConfigNodeSerializer<LuaExpression>::serialize(const LuaExpression& expression, const EntitySerializationContext& context)
+{
+	return ConfigNode(expression.getExpression());
+}
+
+LuaExpression ConfigNodeSerializer<LuaExpression>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return LuaExpression(node.asString(""));
+}
+
+void ConfigNodeSerializer<LuaExpression>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, LuaExpression& target)
+{
+	target.setExpression(node.asString(""));
 }

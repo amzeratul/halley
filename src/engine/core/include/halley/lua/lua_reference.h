@@ -2,6 +2,7 @@
 
 #include <halley/text/halleystring.h>
 #include "lua_function_bind.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
 	class LuaState;
@@ -129,10 +130,22 @@ namespace Halley {
 
 		LuaReference& get(LuaState& state) const;
 
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
 		String expression;
 		mutable std::shared_ptr<LuaReference> luaRef;
 		LuaState* state = nullptr;
+	};
+
+	class Resources;
+	template<>
+	class ConfigNodeSerializer<LuaExpression> {
+	public:
+		ConfigNode serialize(const LuaExpression& expression, const EntitySerializationContext& context);
+		LuaExpression deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, LuaExpression& target);
 	};
 
 }
