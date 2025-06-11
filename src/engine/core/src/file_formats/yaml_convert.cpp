@@ -48,7 +48,13 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node, const ParseOptions
 			auto str = String(node.as<std::string>());
 			if (str.isNumber()) {
 				if (str.isInteger()) {
-					result = str.toInteger();
+					const auto int64Value = str.toInteger64();
+					const auto int32Value = static_cast<int32_t>(int64Value);
+					if (static_cast<int64_t>(int32Value) == int64Value) {
+						result = int32Value;
+					} else {
+						result = int64Value;
+					}
 				} else {
 					result = str.toFloat();
 				}

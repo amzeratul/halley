@@ -787,7 +787,7 @@ int64_t ConfigNode::asInt64() const
 	} else if (type == ConfigNodeType::Bool) {
 		return intData;
 	} else if (type == ConfigNodeType::String) {
-		return asString().toInteger();
+		return asString().toInteger64();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
