@@ -68,6 +68,32 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 	++version;
 }
 
+I18NVersionChecker::I18NVersionChecker(const I18N& i18n)
+{
+	setI18N(i18n);
+}
+
+void I18NVersionChecker::setI18N(const I18N& i18n)
+{
+	this->i18n = &i18n;
+	version = i18n.getVersion();
+}
+
+bool I18NVersionChecker::checkChanged()
+{
+	if (!i18n) {
+		return false;
+	}
+
+	const auto curVersion = i18n->getVersion();
+	if (version != curVersion) {
+		version = curVersion;
+		return true;
+	}
+
+	return false;
+}
+
 void I18N::setCurrentLanguage(const I18NLanguage& code)
 {
 	currentLanguage = code;

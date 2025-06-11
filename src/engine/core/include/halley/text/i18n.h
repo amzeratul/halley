@@ -150,5 +150,19 @@ namespace Halley {
 
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
 	};
+
+	class I18NVersionChecker {
+	public:
+		I18NVersionChecker() = default;
+		I18NVersionChecker(const I18N& i18n);
+
+		void setI18N(const I18N& i18n);
+
+		bool checkChanged();
+
+	private:
+		const I18N* i18n = nullptr;
+		int version = -1;
+	};
 }
 
