@@ -65,8 +65,10 @@ void UICheckbox::onManualControlCycleValue(int delta)
 	if (isEnabled()) {
 		if (delta > 0) {
 			setChecked(true);
+			playStyleSound("downSound");
 		} else if (delta < 0) {
 			setChecked(false);
+			playStyleSound("downSound");
 		}
 	}
 }
@@ -75,6 +77,7 @@ void UICheckbox::onManualControlActivate()
 {
 	if (isEnabled()) {
 		setChecked(!checked);
+		playStyleSound("downSound");
 	}
 }
 

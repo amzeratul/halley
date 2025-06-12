@@ -127,7 +127,9 @@ void UIClickable::onStateChanged(State prev, State next)
 
 	if (isEnabled() && prev != next) {
 		if (next == State::Up) {
-			playStyleSound("upSound");
+			if (prev == State::Down) {
+				playStyleSound("upSound");
+			}
 		} else if (next == State::Down) {
 			playStyleSound("downSound");
 		} else if (next == State::Hover) {
