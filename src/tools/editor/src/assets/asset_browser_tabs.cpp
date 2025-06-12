@@ -70,22 +70,25 @@ static Vector<UIConfirmationPopup::ButtonType> makeButtons(bool canSave)
 
 bool AssetBrowserTabs::confirmTabAction(const String& key, std::function<void(bool)> action)
 {
-	tabs->setSelectedOptionId(key);
-	auto idx = tabs->getSelectedOption();
+	const auto idx = tabs->getOptionIndex(key);
+	if (!idx) {
+		return false;
+	}
 
-	if (windows[idx]->isModified()) {
+	if (windows[*idx]->isModified()) {
+		tabs->setSelectedOptionId(key);
 		if (getRoot() && !getRoot()->hasModalUI()) {
-			auto buttons = makeButtons(windows[idx]->canSave(true));
+			auto buttons = makeButtons(windows[*idx]->canSave(true));
 			
 			auto callback = [this, idx, action] (UIConfirmationPopup::ButtonType buttonType)
 			{
 				if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
-					windows[idx]->save();
+					windows[*idx]->save();
 				}
 				action(buttonType != UIConfirmationPopup::ButtonType::Cancel);
 			};
 
-			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", std::move(buttons), std::move(callback)));
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[*idx]->getName() + " before closing the tab?", std::move(buttons), std::move(callback)));
 		}
 
 		return false;

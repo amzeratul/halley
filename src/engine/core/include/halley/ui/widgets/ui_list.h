@@ -38,6 +38,7 @@ namespace Halley {
 		Vector<int> getSelectedOptions() const;
 		Vector<String> getSelectedOptionIds() const;
 		std::optional<int> getHoveredOption() const;
+		std::optional<int> getOptionIndex(const String& id) const;
 
 		size_t getCount() const;
 

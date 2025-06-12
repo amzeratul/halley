@@ -132,6 +132,20 @@ std::optional<int> UIList::getHoveredOption() const
 	return {};
 }
 
+std::optional<int> UIList::getOptionIndex(const String& id) const
+{
+	for (auto& i: items) {
+		if (i->getId() == id) {
+			if (i->isActive()) {
+				return i->getIndex();
+			} else {
+				return std::nullopt;
+			}
+		}
+	}
+	return std::nullopt;
+}
+
 size_t UIList::getCount() const
 {
 	return getNumberOfItems();
@@ -1395,13 +1409,9 @@ void UIListItem::setDraggableSubWidget(UIWidget* widget)
 
 bool UIList::setSelectedOptionId(const String& id, SelectionMode mode)
 {
-	for (auto& i: items) {
-		if (i->getId() == id) {
-			if (i->isActive()) {
-				setSelectedOption(i->getIndex(), mode);
-				return true;
-			}
-		}
+	if (auto idx = getOptionIndex(id)) {
+		setSelectedOption(*idx, mode);
+		return true;
 	}
 	return false;
 }
