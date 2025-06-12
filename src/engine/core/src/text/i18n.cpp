@@ -188,11 +188,7 @@ int I18N::getVersion() const
 
 char I18N::getDecimalSeparator() const
 {
-	const auto& lang = currentLanguage.getLanguageCode();
-	if (lang == "fr" || lang == "pt" || lang == "es" || lang == "it") {
-		return ',';
-	}
-	return '.';
+	return currentLanguage.getDecimalSeparator();
 }
 
 void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) const
@@ -309,6 +305,14 @@ String I18NLanguage::getISOCode() const
 	}
 }
 
+char I18NLanguage::getDecimalSeparator() const
+{
+	if (languageCode == "fr" || languageCode == "pt" || languageCode == "es" || languageCode == "it" || languageCode == "de") {
+		return ',';
+	}
+	return '.';
+}
+
 I18NLanguageMatch I18NLanguage::getMatch(const I18NLanguage& other) const
 {
 	if (languageCode != other.languageCode) {
@@ -379,6 +383,11 @@ LocalisedString LocalisedString::fromUserString(const String& str)
 LocalisedString LocalisedString::fromNumber(int number, int base, int width, char fill)
 {
 	return LocalisedString(Halley::toString(number, base, width, fill));
+}
+
+LocalisedString LocalisedString::fromNumber(float number, const I18NLanguage& language, int precisionDigits, bool fixed)
+{
+	return LocalisedString(Halley::toString(number, precisionDigits, language.getDecimalSeparator(), fixed));
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const

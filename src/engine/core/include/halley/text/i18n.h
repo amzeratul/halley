@@ -13,6 +13,7 @@ namespace Halley {
 	class ConfigFile;
 	class ConfigObserver;
 	class I18N;
+	class I18NLanguage;
 
 	class LocalisedString
 	{
@@ -33,6 +34,7 @@ namespace Halley {
 		[[nodiscard]] static LocalisedString fromHardcodedString(const String& str);
 		[[nodiscard]] static LocalisedString fromUserString(const String& str);
 		[[nodiscard]] static LocalisedString fromNumber(int number, int base = 10, int width = 1, char fill = '0');
+		[[nodiscard]] static LocalisedString fromNumber(float number, const I18NLanguage& code, int precisionDigits = -1, bool fixed = true);
 
 		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0) const;
 		[[nodiscard]] LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
@@ -84,6 +86,7 @@ namespace Halley {
 		const String& getLanguageCode() const;
 		const std::optional<String>& getCountryCode() const;
 		String getISOCode() const;
+		char getDecimalSeparator() const;
 
 		I18NLanguageMatch getMatch(const I18NLanguage& other) const;
 
