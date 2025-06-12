@@ -23,11 +23,11 @@ xcopy "%~dp0..\deps\bin\ShaderConductor.dll" "%~dp0..\bin\" /C /Q /Y
 
 set ignoreconsoles=1
 if defined NINTENDO_SDK_ROOT (
-    echo Nintendo SDK detected
+    echo Nintendo SDK detected at %NINTENDO_SDK_ROOT%
     set ignoreconsoles=0
 )
 if defined GameDK (
-    echo Microsoft GDK detected
+    echo Microsoft GDK detected at %GameSDK%
     set ignoreconsoles=0
 )
 
