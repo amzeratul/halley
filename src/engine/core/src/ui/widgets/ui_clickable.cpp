@@ -104,6 +104,7 @@ void UIClickable::onGamepadInput(const UIInputResults& input, Time time)
 	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		onShortcutPressed();
 		onClicked(Vector2f(), KeyMods::None);
+		playStyleSound("downSound");
 	}
 }
 
