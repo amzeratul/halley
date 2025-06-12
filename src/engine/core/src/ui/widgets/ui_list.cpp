@@ -546,15 +546,18 @@ std::optional<int> UIList::removeItem(const String& id)
 void UIList::removeItem(int idx)
 {
 	if (idx >= 0 && idx < static_cast<int>(items.size())) {
+		const auto startOption = curOption;
+
 		const auto item = items[idx];
 		remove(*item);
 		items.erase(items.begin() + idx);
 
 		layout();
 		reassignIds();
+		setSelectedOption(curOption);
 
-		if (curOption >= idx) {
-			setSelectedOption(curOption - 1);
+		if (startOption != curOption) {
+			notifyNewItemSelected();
 		}
 	}
 }

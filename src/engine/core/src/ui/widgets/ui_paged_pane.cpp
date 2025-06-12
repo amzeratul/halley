@@ -27,10 +27,8 @@ void UIPagedPane::removePage(int n)
 	if (n >= 0 && n < static_cast<int>(pages.size())) {
 		remove(*pages[n]);
 		pages.erase(pages.begin() + n);
-		if (currentPage == n) {
-			--currentPage;
-		}
-		setPage(currentPage);
+
+		setPage(n < currentPage ? currentPage - 1 : currentPage);
 	}
 }
 
