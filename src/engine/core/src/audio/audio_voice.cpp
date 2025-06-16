@@ -112,6 +112,13 @@ void AudioVoice::resume(AudioFade fade, bool force)
 				}
 			}
 		}
+	} else {
+		// Resuming while halfway through a pause fade
+		if (fader.isFading() && fadeEnd == FadeEndBehaviour::Pause) {
+			fader.startFade(fader.getCurrentValue(), 1, fade);
+			fadeEnd = FadeEndBehaviour::None;
+			--pendingPauses;
+		}
 	}
 }
 
