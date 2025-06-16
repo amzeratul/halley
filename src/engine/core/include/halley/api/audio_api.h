@@ -306,7 +306,7 @@ namespace Halley
 
 		virtual void setMasterVolume(float gain = 1.0f) = 0;
 		[[deprecated("Use setBusVolume")]] void setGroupVolume(const String& groupName, float gain = 1.0f) { setBusVolume(groupName, gain); }
-		virtual void setBusVolume(const String& busName, float gain = 1.0f) = 0;
+		virtual void setBusVolume(const String& busName, float gain = 1.0f, AudioFade fade = {}, const String& volumeId = "main") = 0;
 		virtual void setOutputChannels(Vector<AudioChannelData> audioChannelData) = 0;
 
 		virtual void setListener(AudioListenerData listener) = 0;

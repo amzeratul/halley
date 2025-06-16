@@ -186,6 +186,9 @@ void AudioEventEditorAction::onMakeUI()
 	case AudioEventActionType::ResumeBus:
 		makeResumeBusAction(dynamic_cast<AudioEventActionResumeBus&>(action));
 		break;
+	case AudioEventActionType::SetBusVolume:
+		makeSetBusVolumeAction(dynamic_cast<AudioEventActionSetBusVolume&>(action));
+		break;
 	}
 
 	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
@@ -419,6 +422,26 @@ void AudioEventEditorAction::makeResumeBusAction(AudioEventActionResumeBus& acti
 		editor.markModified();
 	});	
 }
+
+void AudioEventEditorAction::makeSetBusVolumeAction(AudioEventActionSetBusVolume& action)
+{
+	makeBusAction(action);
+
+	getWidget("volumeOptions")->setActive(true);
+
+	bindData("gain", action.getGain(), [=, &action] (float value)
+	{
+		action.setGain(value);
+		editor.markModified();
+	});
+
+	bindData("volumeName", action.getVolumeName(), [=, &action] (String value)
+	{
+		action.setVolumeName(value);
+		editor.markModified();
+	});
+}
+
 
 ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})

@@ -1,23 +1,112 @@
-widget: { class: widget }
-sizer: { type: vertical, gap: 4 }
+uuid: 7c3a3341-58c6-42c1-bcb9-aa21693014a6
+sizer:
+  columnProportions: []
+  gap: 4
+  type: vertical
+widget:
+  class: widget
 children:
-- sizer: { type: horizontal }
-  children:
-  - widget: { class: label, text: "Fade: " }
-    fill: centre
-  - widget: { class: widget, id: fadeContainer }
-    children: []
-- widget: { class: widget, id: busOptions }
-  sizer: { type: vertical, gap: 4 }
-  children:
-  - sizer: { horizontal }
+  - uuid: a16e45c3-8589-468d-b36c-aaa0c3d19b1a
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: widget
+      id: busOptions
     children:
-    - widget: { class: label, text: "Bus: " }
-      fill: centre
-    - widget: { id: busName, class: dropdown, size: [200, 20] }
-- widget: { class: widget, id: resumeOptions, active: false }
-  sizer: { horizontal }
-  children:
-  - widget: { class: label, text: "Force: " }
-    fill: centre
-  - widget: { id: force, class: checkbox }
+      - uuid: 7ca7b4ec-7392-4585-83f6-c7f855aef01e
+        sizer:
+          {}
+        children:
+          - uuid: bec4ccd1-4391-419d-b30f-dc09d889ccf3
+            widget:
+              class: label
+              text: "Bus: "
+            fill: centre
+          - uuid: 5f5fa676-21ee-44be-b94a-461138fe188b
+            border: [4, 0, 0, 0]
+            widget:
+              class: dropdown
+              id: busName
+              options: []
+              size: [200, 20]
+  - uuid: 41d3dffa-ae31-45ad-981c-8c868de74c74
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      active: false
+      class: widget
+      id: volumeOptions
+    children:
+      - uuid: 44e6660a-3881-44e8-aac6-0290f50070e9
+        sizer:
+          columnProportions: []
+        children:
+          - uuid: 9dfe1da8-6dba-44af-9980-b0958dc58a1e
+            widget:
+              class: label
+              text: "Gain: "
+            fill: centre
+          - uuid: 4a94ec74-2947-4504-bfcd-8948db6f528b
+            border: [4, 0, 0, 0]
+            widget:
+              allowFloat: true
+              class: spinControl2
+              id: gain
+              increment: 0.00999999978
+              maxValue: 2
+              minValue: 0
+              size: [100, 0]
+      - uuid: e47ee23e-eb56-45ca-85f8-120155ab0928
+        sizer:
+          columnProportions: []
+        children:
+          - uuid: 13c096f5-9c76-449f-bebd-f60de9582064
+            widget:
+              class: label
+              text: "Volume name:"
+            fill: centre
+          - uuid: d3590ea8-24b7-4a62-af20-f1780aae7da8
+            proportion: 1
+            border: [4, 0, 0, 0]
+            widget:
+              class: textInput
+              id: volumeName
+              size: [0, 0]
+  - uuid: 908a4a01-d9e1-4621-8a46-4d8f3b8283b0
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: 906a61fa-c477-41ef-b89f-3bf1826fa31f
+        widget:
+          class: label
+          text: "Fade: "
+        fill: centre
+      - uuid: 2a4fda84-6307-4e68-b164-05d2797c7264
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+          id: fadeContainer
+        children: []
+  - uuid: 844235cb-f5f0-428c-9507-882209926e5e
+    sizer:
+      columnProportions: []
+    widget:
+      active: false
+      class: widget
+      id: resumeOptions
+    children:
+      - uuid: da164c88-b5bf-4af9-acbd-41e01a1976c7
+        widget:
+          class: label
+          text: "Force: "
+        fill: centre
+      - uuid: 9e11ca73-9bd7-43ab-a635-19282e5ec8bd
+        widget:
+          class: checkbox
+          id: force

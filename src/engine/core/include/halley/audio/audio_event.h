@@ -25,6 +25,7 @@ namespace Halley
 		StopBus,
 		PauseBus,
 		ResumeBus,
+		SetBusVolume,
 		SetVolume,
 		SetSwitch,
 		CopySwitch,
@@ -33,7 +34,7 @@ namespace Halley
 	
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 12> operator()() const {
 			return{{
 				"play",
 				"stop",
@@ -42,6 +43,7 @@ namespace Halley
 				"stopBus",
 				"pauseBus",
 				"resumeBus",
+				"setBusVolume",
 				"setVolume",
 				"setSwitch",
 				"copySwitch",
@@ -276,6 +278,29 @@ namespace Halley
 
 	private:
 		bool force = false;
+	};
+
+	class AudioEventActionSetBusVolume final : public AudioEventActionBus
+	{
+	public:
+		void load(const ConfigNode& config) override;
+
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::SetBusVolume; }
+
+		float getGain() const;
+		void setGain(float value);
+		const String& getVolumeName() const;
+		void setVolumeName(String name);
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
+
+	private:
+		float gain = 1;
+		String volumeName;
 	};
 
 	class AudioEventActionSetVolume final : public AudioEventActionObject

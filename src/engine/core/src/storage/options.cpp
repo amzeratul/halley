@@ -174,7 +174,7 @@ void Options::setVolume(std::string_view bus, float value)
 void Options::applyVolumes(AudioAPI& audio)
 {
 	for (const auto& [k, v] : options["volume"].asMap()) {
-		audio.setBusVolume(k, v.asFloat(1.0f));
+		audio.setBusVolume(k, v.asFloat(1.0f), {}, "options");
 	}
 }
 

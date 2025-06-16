@@ -66,7 +66,7 @@ namespace Halley {
 		AudioBufferPool& getPool() const override;
 
 		void setMasterGain(float gain);
-		void setBusGain(const String& name, float gain);
+		bool setBusGain(const String& name, float gain, AudioFade fade, const String& volumeName = "");
     	float getCompositeBusGain(uint8_t bus) const;
 		int getBusId(const String& busName);
 		void getBusIds(const String& busName, Vector<int>& busIds);
@@ -85,12 +85,22 @@ namespace Halley {
 		void setEventLogging(std::optional<LoggerLevel> level);
 
 	private:
+		struct BusGain {
+			String id;
+			AudioFader fader;
+
+			BusGain() = default;
+			BusGain(String id);
+		};
+
 		struct BusData {
 			String name;
-			float gain = 1;
 			float compositeGain = 1;
 			OptionalLite<uint8_t> parent;
 			Vector<uint8_t> children;
+			Vector<BusGain> gains;
+
+			BusGain& getGain(const String& name);
 		};
 
 		struct PlayingObjectData {
@@ -146,7 +156,7 @@ namespace Halley {
 
     	void loadBuses();
 		uint8_t loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
-		void updateBusGains();
+		void computeBusGains(float deltaTime);
 		void collectBusChildren(Vector<int>& dst, const BusData& bus) const;
 
 		void updateRegions();

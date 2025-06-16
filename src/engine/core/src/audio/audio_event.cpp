@@ -192,6 +192,8 @@ std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType ty
 		return std::make_unique<AudioEventActionPauseBus>();
 	case AudioEventActionType::ResumeBus:
 		return std::make_unique<AudioEventActionResumeBus>();
+	case AudioEventActionType::SetBusVolume:
+		return std::make_unique<AudioEventActionSetBusVolume>();
 	case AudioEventActionType::SetVolume:
 		return std::make_unique<AudioEventActionSetVolume>();
 	case AudioEventActionType::SetSwitch:
@@ -221,6 +223,8 @@ String AudioEvent::getActionName(AudioEventActionType type)
 		return "Pause Bus";
 	case AudioEventActionType::ResumeBus:
 		return "Resume Bus";
+	case AudioEventActionType::SetBusVolume:
+		return "Set Bus Volume";
 	case AudioEventActionType::SetSwitch:
 		return "Set Switch";
 	case AudioEventActionType::CopySwitch:
@@ -709,6 +713,68 @@ ConfigNode AudioEventActionResumeBus::toConfigNode() const
 	result["force"] = force;
 	return result;
 }
+
+
+
+void AudioEventActionSetBusVolume::load(const ConfigNode& config)
+{
+	AudioEventActionBus::load(config);
+	gain = config["gain"].asFloat(0.0f);
+	volumeName = config["volumeName"].asString("");
+}
+
+ConfigNode AudioEventActionSetBusVolume::toConfigNode() const
+{
+	auto result = AudioEventActionBus::toConfigNode();
+	result["gain"] = gain;
+	result["volumeName"] = volumeName;
+	return result;
+}
+
+bool AudioEventActionSetBusVolume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+{
+	if (busName.isEmpty()) {
+		return false;
+	}
+
+	return engine.setBusGain(busName, gain, fade, volumeName);
+}
+
+float AudioEventActionSetBusVolume::getGain() const
+{
+	return gain;
+}
+
+void AudioEventActionSetBusVolume::setGain(float value)
+{
+	gain = value;
+}
+
+const String& AudioEventActionSetBusVolume::getVolumeName() const
+{
+	return volumeName;
+}
+
+void AudioEventActionSetBusVolume::setVolumeName(String name)
+{
+	volumeName = std::move(name);
+}
+
+void AudioEventActionSetBusVolume::serialize(Serializer& s) const
+{
+	AudioEventActionBus::serialize(s);
+	s << gain;
+	s << volumeName;
+}
+
+void AudioEventActionSetBusVolume::deserialize(Deserializer& s)
+{
+	AudioEventActionBus::deserialize(s);
+	s >> gain;
+	s >> volumeName;
+}
+
+
 
 void AudioEventActionSetVolume::load(const ConfigNode& config)
 {

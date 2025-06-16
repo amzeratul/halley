@@ -401,10 +401,10 @@ void AudioFacade::setMasterVolume(float volume)
 	});
 }
 
-void AudioFacade::setBusVolume(const String& busName, float volume)
+void AudioFacade::setBusVolume(const String& busName, float volume, AudioFade fade, const String& volumeId)
 {
 	enqueue([=] () {
-		engine->setBusGain(busName, volumeToGain(volume));
+		engine->setBusGain(busName, volumeToGain(volume), fade, volumeId);
 	});
 }
 

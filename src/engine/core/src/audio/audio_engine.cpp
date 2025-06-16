@@ -222,17 +222,18 @@ void AudioEngine::generateBuffer()
 	Stopwatch timer;
 	timer.start();
 
-	updateRegions();
-	updateBusGains();
-
 	const size_t targetSamples = bufferSizeController ? bufferSizeController->getTargetSamples() : spec.bufferSize;
 	const size_t samplesToRead = alignDown(targetSamples * 48000 / spec.sampleRate, static_cast<size_t>(16));
 	const size_t numChannels = spec.numChannels;
-	
+	const float deltaTime = static_cast<float>(samplesToRead) / static_cast<float>(spec.sampleRate);
+
+	updateRegions();
+	computeBusGains(deltaTime);
+
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
 	mixVoices(samplesToRead, numChannels, channelBuffersRef);
 	removeFinishedVoices();
-	updatePlayingObjectData(static_cast<float>(samplesToRead) / static_cast<float>(spec.sampleRate));
+	updatePlayingObjectData(deltaTime);
 
 	// Interleave
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
@@ -460,7 +461,7 @@ int AudioEngine::getBusId(const String& busName)
 		if (!busName.isEmpty()) {
 			Logger::logError("Unknown audio bus: " + busName);
 		}
-		return 0;
+		return -1;
 	}
 }
 
@@ -532,9 +533,10 @@ namespace {
 
 void AudioEngine::loadBuses()
 {
-	HashMap<String, float> prevGain;
-	for (const auto& bus: buses) {
-		prevGain[bus.name] = bus.gain;
+	HashMap<String, Vector<BusGain>> prevGains;
+	prevGains.reserve(buses.size());
+	for (auto& bus: buses) {
+		prevGains[bus.name] = std::move(bus.gains);
 	}
 
 	buses.clear();
@@ -545,17 +547,18 @@ void AudioEngine::loadBuses()
 	}
 
 	for (auto& bus: buses) {
-		if (prevGain.contains(bus.name)) {
-			bus.gain = prevGain.at(bus.name);
+		if (prevGains.contains(bus.name)) {
+			bus.gains = std::move(prevGains.at(bus.name));
 		}
 	}
-	updateBusGains();
+
+	computeBusGains(0.0f);
 }
 
 uint8_t AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
 {
 	const auto id = static_cast<uint8_t>(buses.size());
-	buses.push_back(BusData{ bus.getId(), 1.0f, 1.0f, parent });
+	buses.push_back(BusData{ bus.getId(), 1.0f, parent, {}, {} });
 	for (const auto& child: bus.getChildren()) {
 		buses[id].children.push_back(loadBus(child, id));
 	}
@@ -563,11 +566,15 @@ uint8_t AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t
 	return id;
 }
 
-void AudioEngine::updateBusGains()
+void AudioEngine::computeBusGains(float deltaTime)
 {
 	for (auto& bus: buses) {
 		const float base = bus.parent ? buses.at(bus.parent.value()).compositeGain : 1.0f;
-		bus.compositeGain = bus.gain * base;
+		bus.compositeGain = base;
+		for (auto& gain: bus.gains) {
+			gain.fader.update(deltaTime);
+			bus.compositeGain *= gain.fader.getCurrentValue();
+		}
 	}
 }
 
@@ -581,9 +588,17 @@ void AudioEngine::setBufferSizeController(std::shared_ptr<IAudioBufferSizeContro
 	bufferSizeController = std::move(controller);
 }
 
-void AudioEngine::setBusGain(const String& name, float gain)
+bool AudioEngine::setBusGain(const String& name, float gain, AudioFade fade, const String& volumeName)
 {
-	buses[getBusId(name)].gain = gain;
+	const auto busId = getBusId(name);
+	if (busId < 0) {
+		return false;
+	}
+
+	auto& busGain = buses[busId].getGain(volumeName);
+	busGain.fader.startFade(busGain.fader.getCurrentValue(), gain, fade);
+
+	return true;
 }
 
 float AudioEngine::getCompositeBusGain(uint8_t id) const
@@ -656,6 +671,23 @@ const String& AudioEngine::getSwitchDefault(const String& switchId) const
 void AudioEngine::setEventLogging(std::optional<LoggerLevel> level)
 {
 	eventLogging = level;
+}
+
+AudioEngine::BusGain::BusGain(String id)
+	: id (std::move(id))
+{
+	fader.stopAndSetValue(1.0f);
+}
+
+AudioEngine::BusGain& AudioEngine::BusData::getGain(const String& name)
+{
+	for (auto& gain: gains) {
+		if (gain.id == name) {
+			return gain;
+		}
+	}
+	gains.push_back(BusGain(name));
+	return gains.back();
 }
 
 AudioDebugData AudioEngine::generateDebugData() const
