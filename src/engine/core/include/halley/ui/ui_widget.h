@@ -105,6 +105,7 @@ namespace Halley {
 		virtual void releaseMouse(Vector2f mousePos, int button);
 		virtual void onMouseOver(Vector2f mousePos);
 		virtual void onMouseOver(Vector2f mousePos, KeyMods keyMods);
+		virtual void onMouseEnter(Vector2f mousePos);
 		virtual void onMouseLeft(Vector2f mousePos);
 		virtual Rect4f getMouseRect() const;
 

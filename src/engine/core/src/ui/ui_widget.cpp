@@ -498,6 +498,10 @@ void UIWidget::onMouseOver(Vector2f mousePos, KeyMods keyMods)
 	onMouseOver(mousePos);
 }
 
+void UIWidget::onMouseEnter(Vector2f mousePos)
+{
+}
+
 void UIWidget::onMouseLeft(Vector2f mousePos)
 {
 }
