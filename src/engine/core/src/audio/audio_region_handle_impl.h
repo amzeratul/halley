@@ -12,7 +12,7 @@ namespace Halley {
 
         AudioRegionId getId() const override;
 
-        void addNeighbour(AudioRegionNeighbour neighbour) override;
+        void addNeighbour(AudioRegionNeighbour neighbour, String name) override;
         void removeNeighbour(AudioRegionId id) override;
 
     private:

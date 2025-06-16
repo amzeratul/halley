@@ -230,7 +230,7 @@ namespace Halley
 
 		virtual AudioRegionId getId() const = 0;
 
-		virtual void addNeighbour(AudioRegionNeighbour neighbour) = 0;
+		virtual void addNeighbour(AudioRegionNeighbour neighbour, String name) = 0;
 		virtual void removeNeighbour(AudioRegionId id) = 0;
 	};
 	using AudioRegionHandle = std::shared_ptr<IAudioRegionHandle>;

@@ -1,11 +1,13 @@
 #include "audio_region.h"
 
+#include "audio_engine.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
-AudioRegion::AudioRegion(AudioRegionId id)
+AudioRegion::AudioRegion(AudioRegionId id, String name)
 	: id(id)
+	, name(std::move(name))
 {
 }
 
@@ -14,14 +16,19 @@ AudioRegionId AudioRegion::getId() const
 	return id;
 }
 
-void AudioRegion::addNeighbour(AudioRegionNeighbour neighbour)
+const String& AudioRegion::getName() const
+{
+	return name;
+}
+
+void AudioRegion::addNeighbour(AudioRegionNeighbour neighbour, String name)
 {
 	AudioFilterBiquad filter;
 	if (neighbour.lowPassHz) {
 		filter.setLowPass(*neighbour.lowPassHz);
 	}
 
-	neighbours.push_back(Neighbour{ neighbour, filter });
+	neighbours.push_back(Neighbour{ neighbour, filter, std::move(name) });
 }
 
 void AudioRegion::removeNeighbour(AudioRegionId id)
@@ -49,9 +56,15 @@ void AudioRegion::clearRefCount()
 	refCount = 0;
 }
 
-void AudioRegion::incRefCount()
+void AudioRegion::incRefCount(AudioEngine& engine)
 {
-	++refCount;
+	if (refCount++ == 0) {
+		for (const auto& n: neighbours) {
+			if (auto* other = engine.getRegion(n.props.id)) {
+				other->incRefCount(engine);
+			}
+		}
+	}
 }
 
 bool AudioRegion::shouldDestroy() const

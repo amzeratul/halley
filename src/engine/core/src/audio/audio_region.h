@@ -9,20 +9,22 @@ namespace Halley {
         struct Neighbour {
 	        AudioRegionNeighbour props;
             AudioFilterBiquad filter;
+            String name;
         };
 
-        AudioRegion(AudioRegionId id);
+        AudioRegion(AudioRegionId id, String name);
 
         AudioRegionId getId() const;
+        const String& getName() const;
 
-        void addNeighbour(AudioRegionNeighbour neighbour);
+        void addNeighbour(AudioRegionNeighbour neighbour, String name);
         void removeNeighbour(AudioRegionId id);
         const Vector<Neighbour>& getNeighbours() const;
         Vector<Neighbour>& getNeighbours();
 
     	void markAsReadyToDestroy();
     	void clearRefCount();
-        void incRefCount();
+        void incRefCount(AudioEngine& engine);
         bool shouldDestroy() const;
 
     	void setPrevGain(float gain);
@@ -36,5 +38,6 @@ namespace Halley {
         float prevGain = 0;
 
         Vector<Neighbour> neighbours;
+        String name;
     };
 }

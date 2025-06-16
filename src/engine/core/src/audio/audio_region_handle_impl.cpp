@@ -38,11 +38,11 @@ void AudioRegionHandleImpl::enqueue(std::function<void(AudioRegion& region)> f)
 	});
 }
 
-void AudioRegionHandleImpl::addNeighbour(AudioRegionNeighbour neighbour)
+void AudioRegionHandleImpl::addNeighbour(AudioRegionNeighbour neighbour, String name)
 {
-	enqueue([neighbour = std::move(neighbour)](AudioRegion& region)
+	enqueue([neighbour = std::move(neighbour), name = std::move(name)](AudioRegion& region) mutable
 	{
-		region.addNeighbour(neighbour);
+		region.addNeighbour(std::move(neighbour), std::move(name));
 	});
 }
 

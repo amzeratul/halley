@@ -230,7 +230,7 @@ AudioRegionHandle AudioFacade::createRegion(const String& name)
 	const auto regionId = curRegionId++;
 
 	enqueue([=]() {
-		engine->createRegion(regionId);
+		engine->createRegion(regionId, name);
 	});
 
 	regionNames[regionId] = name;

@@ -36,7 +36,7 @@ namespace Halley {
 		void createEmitter(AudioEmitterId id, AudioPosition position, bool temporary);
 		void destroyEmitter(AudioEmitterId id);
 
-		void createRegion(AudioRegionId id);
+		void createRegion(AudioRegionId id, String name);
 		void destroyRegion(AudioRegionId id);
 
 	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);

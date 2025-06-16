@@ -26,7 +26,7 @@ AudioEngine::AudioEngine()
 	rng.setSeed(Random::getGlobal().getRawInt());
 
 	createEmitter(0, AudioPosition::makeFixed(), false);
-	createRegion(0);
+	createRegion(0, "defaultRegion");
 }
 
 AudioEngine::~AudioEngine()
@@ -43,9 +43,9 @@ void AudioEngine::destroyEmitter(AudioEmitterId id)
 	emitters.erase(id);
 }
 
-void AudioEngine::createRegion(AudioRegionId id)
+void AudioEngine::createRegion(AudioRegionId id, String name)
 {
-	regions[id] = std::make_unique<AudioRegion>(id);
+	regions[id] = std::make_unique<AudioRegion>(id, std::move(name));
 }
 
 void AudioEngine::destroyRegion(AudioRegionId id)
@@ -382,11 +382,13 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, AudioBuffersRef
 		if (auto iter = regions.find(listenerRegion.regionId); iter != regions.end()) {
 			auto& region = *iter->second;
 
-			float gain = listenerRegion.presence;
-			const float prevGain = region.getPrevGain();
-			region.setPrevGain(gain);
+			if (!region.shouldDestroy()) {
+				float gain = listenerRegion.presence;
+				const float prevGain = region.getPrevGain();
+				region.setPrevGain(gain);
 
-			mixMainRegion(numSamples, nChannels, region, buffers, prevGain, gain);
+				mixMainRegion(numSamples, nChannels, region, buffers, prevGain, gain);
+			}
 		}
 	}
 
@@ -419,7 +421,7 @@ void AudioEngine::mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion
 				mixRegion(otherRegion, outputBuffers, gain0, gain1);
 			}
 		} else {
-			Logger::logError("Audio Region " + toString(static_cast<int>(region.getId())) + " has unknown neighbour " + toString(static_cast<int>(neighbour.props.id)), true);
+			Logger::logError("Audio Region \"" + region.getName() + "\" has unknown neighbour \"" + neighbour.name + "\"", true);
 		}
 	}
 }
@@ -495,20 +497,22 @@ void AudioEngine::updateRegions()
 	for (auto& region: regions) {
 		region.second->clearRefCount();
 	}
+
 	for (auto& emitter: emitters) {
 		const auto regionId = emitter.second->getRegion();
 		if (regionId != 0) {
 			if (auto iter = regions.find(regionId); iter != regions.end()) {
-				iter->second->incRefCount();
+				iter->second->incRefCount(*this);
 			} else {
 				Logger::logWarning("Unknown region referenced by audio emitter: " + toString(static_cast<int>(regionId)));
 			}
 		}
 	}
+
 	for (auto& listenerRegion: listener.regions) {
 		const auto regionId = listenerRegion.regionId;
 		if (auto iter = regions.find(regionId); iter != regions.end()) {
-			iter->second->incRefCount();
+			iter->second->incRefCount(*this);
 		} else {
 			Logger::logWarning("Unknown region referenced by audio emitter: " + toString(static_cast<int>(regionId)));
 		}
