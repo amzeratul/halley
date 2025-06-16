@@ -171,7 +171,7 @@ void AudioEvent::parseYAML(gsl::span<const gsl::byte> yaml)
 void AudioEvent::loadDependencies(Resources& resources)
 {
 	for (auto& a: actions) {
-		a->loadDependencies(resources);
+		a->loadDependencies(*this, resources);
 	}
 }
 
@@ -307,10 +307,10 @@ const String& AudioEventActionObject::getObjectName() const
 	return objectName;
 }
 
-void AudioEventActionObject::setObjectName(const String& name, Resources& resources)
+void AudioEventActionObject::setObjectName(const String& name, const AudioEvent& event, Resources& resources)
 {
 	objectName = name;
-	loadDependencies(resources);
+	loadDependencies(event, resources);
 }
 
 void AudioEventActionObject::setObjectName(const String& name)
@@ -328,14 +328,18 @@ AudioFade& AudioEventActionObject::getFade()
 	return fade;
 }
 
-void AudioEventActionObject::loadDependencies(Resources& resources)
+void AudioEventActionObject::loadDependencies(const AudioEvent& event, Resources& resources)
 {
-	if (objectName.isEmpty()) {
-		object = {};
-		objectId = {};
-	} else {
-		object = resources.get<AudioObject>(objectName);
-		objectId = object->getAudioObjectId();
+	object = {};
+	objectId = {};
+
+	if (!objectName.isEmpty()) {
+		object = resources.tryGet<AudioObject>(objectName);
+		if (object) {
+			objectId = object->getAudioObjectId();
+		} else {
+			Logger::logError("Error when loading dependencies for AudioEvent \"" + event.getAssetId() + "\": AudioObject not found: " + objectName);
+		}
 	}
 }
 

@@ -124,7 +124,7 @@ std::shared_ptr<const Resource> AudioEventEditor::loadResource(const Path& asset
 
 void AudioEventEditor::addActionUI(AudioEventAction& action)
 {
-	auto a = std::make_shared<AudioEventEditorAction>(factory, *this, action, actionId++);
+	auto a = std::make_shared<AudioEventEditorAction>(factory, *this, *audioEvent, action, actionId++);
 	auto id = a->getId();
 	actionList->addItem(id, std::move(a), 1);
 }
@@ -141,10 +141,11 @@ void AudioEventEditor::doLoadUI()
 	}
 }
 
-AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, AudioEventAction& action, int id)
+AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, const AudioEvent& event, AudioEventAction& action, int id)
 	: UIWidget(toString(id), {}, UISizer())
 	, factory(factory)
 	, editor(editor)
+	, event(event)
 	, action(action)
 {
 	factory.loadUI(*this, "halley/audio_editor/audio_action");
@@ -208,7 +209,7 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 
 	bindData("object", action.getObjectName(), [=, &action] (String value)
 	{
-		action.setObjectName(value, editor.getGameResources());
+		action.setObjectName(value, event, editor.getGameResources());
 		editor.markModified();
 	});
 

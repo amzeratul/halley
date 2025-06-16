@@ -39,12 +39,13 @@ namespace Halley {
 
 	class AudioEventEditorAction : public UIWidget {
 	public:
-        AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, AudioEventAction& action, int id);
+        AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, const AudioEvent& event, AudioEventAction& action, int id);
         void onMakeUI() override;
 	
 	private:
         UIFactory& factory;
         AudioEventEditor& editor;
+        const AudioEvent& event;
         AudioEventAction& action;
 		
         void makeObjectAction(AudioEventActionObject& action);

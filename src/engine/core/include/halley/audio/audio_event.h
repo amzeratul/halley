@@ -117,7 +117,7 @@ namespace Halley
 
 		virtual void serialize(Serializer& s) const;
 		virtual void deserialize(Deserializer& s);
-		virtual void loadDependencies(Resources& resources) {}
+		virtual void loadDependencies(const AudioEvent& event, Resources& resources) {}
 
 		virtual ConfigNode toConfigNode() const;
 
@@ -136,13 +136,13 @@ namespace Halley
 		ConfigNode toConfigNode() const override;
 
 		const String& getObjectName() const;
-		void setObjectName(const String& name, Resources& resources);
+		void setObjectName(const String& name, const AudioEvent& event, Resources& resources);
 		void setObjectName(const String& name);
 
 		const AudioFade& getFade() const;
 		AudioFade& getFade();
 
-		void loadDependencies(Resources& resources) override;
+		void loadDependencies(const AudioEvent& event, Resources& resources) override;
 
 	protected:
 		std::optional<AudioObjectId> objectId;
