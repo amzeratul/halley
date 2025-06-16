@@ -654,7 +654,7 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 		if (underMouse) {
 			underMouse->setMouseOver(true);
 			underMouse->onMouseEnter(lastMousePos);
-			underMouse->onMouseOver(lastMousePos);
+			underMouse->onMouseOver(lastMousePos, group->getKeyMods());
 		}
 		currentMouseOver = underMouse;
 	}
