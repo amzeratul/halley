@@ -22,8 +22,8 @@ colours:
   icon_scriptGraph: "#CE75EC"
   
   icon_audioClip: "#F479AD"
-  icon_audioEvent: "#EF83F8"
-  icon_audioObject: "#CE26CE"
+  icon_audioEvent: "#44C8AD"
+  icon_audioObject: "#4596C7"
   
   icon_font: "#D538E9"
   icon_bitmapFont: "#D538E9"
