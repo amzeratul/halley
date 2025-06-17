@@ -126,9 +126,11 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			// to their parents post-creation, but that doesn't seem to resolve all our edge
 			// cases.
 			//
+			// This must NOT be done for non-networked parent entities.
+			//
 			// Simply skipping the sendCreateEntity() call works here because the alive check
 			// will just pick them up again to be sent on the next update.
-			if (const auto parent = e.getParent(); parent.getWorldPartition() == 0) {
+			if (const auto parent = e.getParent(); parent.hasComponentInAncestors<NetworkComponent>()) {
 				if (outboundEntities.find(parent.getEntityId()) == outboundEntities.end()) {
 					continue;
 				}
