@@ -245,8 +245,15 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 	
 	if (data->streaming) {
 		auto res = data->stream;
+
+		const auto actualPos = res->tell();
+		if (actualPos != data->pos) {
+			Logger::logError("Failed to read OggVorbis stream: expected stream at " + toString(data->pos) + ", but instead it's at " + toString(actualPos));
+		}
+
 		size_t requested = size*nmemb;
 		size_t r = res->read(as_writable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
+		data->pos += r;
 		return r;
 	} else {
 		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource);
@@ -266,15 +273,34 @@ int VorbisData::vorbisSeek(void *datasource, OggOffsetType offset, int whence)
 {
 	VorbisData* data = static_cast<VorbisData*>(datasource);
 
+	int64_t dst = 0;
+	if (whence == SEEK_SET) {
+		dst = offset;
+	} else if (whence == SEEK_CUR) {
+		dst = data->pos + offset;
+	} else if (whence == SEEK_END) {
+		if (!data->streaming) {
+			if (auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource)) {
+				dst = data->pos + static_cast<int64_t>(res->getSize()) + offset;
+			}
+		}
+	}
+
 	if (data->streaming) {
 		auto res = data->stream;
 		res->seek(offset, whence);
-	} else {
-		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource);
-		if (whence == SEEK_SET) data->pos = offset;
-		else if (whence == SEEK_CUR) data->pos += offset;
-		else if (whence == SEEK_END) data->pos = int64_t(res->getSize()) + offset;
+
+		if (whence == SEEK_END) {
+			dst = res->tell();
+		} else {
+			const auto actualPos = res->tell();
+			if (actualPos != dst) {
+				Logger::logError("Failed to seek OggVorbis stream: tried seeking to " + toString(dst) + ", at " + toString(actualPos));
+			}
+		}
 	}
+
+	data->pos = dst;
 	
 	return 0;
 }
