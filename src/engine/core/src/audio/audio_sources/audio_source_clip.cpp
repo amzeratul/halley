@@ -66,7 +66,20 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 		streams[0].playbackPos = looping && randomiseStart ? engine.getRNG().getSizeT(0, streams[0].endPos) : 0;
 	}
 
-	const uint8_t nChannels = getNumberOfChannels();
+	uint8_t nDstChannels = 0;
+	for (auto& dst: dstChannels) {
+		if (!dst.empty()) {
+			++nDstChannels;
+		} else {
+			break;
+		}
+	}
+	const uint8_t nSrcChannels = getNumberOfChannels();
+	const uint8_t nChannels = std::min(nSrcChannels, nDstChannels);
+	if (nSrcChannels > nDstChannels) {
+		Logger::logError("AudioClip \"" + getName() + "\" has more channels (" + toString(static_cast<int>(nSrcChannels)) + ") than upstream is expecting (" + toString(static_cast<int>(nDstChannels)) + ")", true);
+	}
+
 	size_t samplesWritten = 0;
 
 	while (samplesWritten < samplesRequested) {
