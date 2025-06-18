@@ -48,10 +48,10 @@ public:
 						// supposed to be claimed by the host.
 						Expects(myPeerId != 0);
 						if (entity.getWorldPartition() == 0) {
-							Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
+							//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
 							e.network.ownerId = myPeerId;
 						} else {
-							Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
+							//Logger::logDev("Peer " + toString((int) myPeerId) + " assigns network ownership for " + entity.getName() + " (" + entity.getInstanceUUID() + ", world partition " + entity.getWorldPartition() + ") to host");
 							e.network.ownerId = 0;
 						}
 					}
