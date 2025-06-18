@@ -1100,6 +1100,7 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 {
 	sprite = style.getSprite("normal");
 	setMinSize(style.getVector2f("minSize", Vector2f()));
+	setHoverOnChildren(true);
 }
 
 void UIListItem::onClicked(Vector2f mousePos, KeyMods keyMods)
@@ -1301,18 +1302,16 @@ void UIListItem::doSetState(State state)
 		switch (state) {
 		case State::Up:
 			sprite = style.getSprite("normal");
-			hovered = false;
 			break;
 		case State::Hover:
 			sprite = style.getSprite("hover");
-			hovered = true;
 			break;
 		case State::Down:
 			sprite = style.hasSprite("selected") ? style.getSprite("selected") : style.getSprite("hover");
-			hovered = true;
 			break;
 		}
 	}
+	hovered = state == State::Hover;
 
 	if (wasHovered != hovered) {
 		sendEventDown(UIEvent(UIEventType::SetHovered, getId(), hovered, selected));
