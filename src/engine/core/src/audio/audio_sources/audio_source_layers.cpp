@@ -44,6 +44,13 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples dst)
 {
+	for (const auto& layer: layers) {
+		if (!layer.source->isReady()) {
+			Logger::logError("AudioSourceLayers (" + getName() + ") error, layer " + toString(layer.idx) + " (" + layer.source->getName() + ") is not ready");
+			return false;
+		}
+	}
+
 	if (!initialized) {
 		for (auto& layer : layers) {
 			layer.restart(layerConfig, emitter);
