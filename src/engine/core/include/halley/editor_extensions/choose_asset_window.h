@@ -12,8 +12,33 @@ namespace Halley {
 	class UILabel;
 
     class ChooseAssetWindow : public UIWidget {
-    public:		
-        using Callback = std::function<void(std::optional<String>)>;
+    public:
+		class Callback {
+		public:
+	        using SingleCallback = std::function<void(std::optional<String>)>;
+	        using MultiCallback = std::function<void(const Vector<String>&)>;
+
+			Callback() = default;
+			Callback(SingleCallback callback);
+			Callback(MultiCallback callback);
+
+			template <typename T>
+			Callback(T callback)
+				: Callback(SingleCallback(std::move(callback)))
+			{}
+
+			bool isMultiCallback() const;
+
+			void operator()() const;
+			void operator()(std::optional<String> result);
+			void operator()(const Vector<String>& result);
+			operator bool() const;
+
+		private:
+			SingleCallback singleCallback;
+			MultiCallback multiCallback;
+		};
+
 		using HighlightCallback = std::function<void(const String&)>;
 		
         ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank = "[None]", int resultLimit = 200);

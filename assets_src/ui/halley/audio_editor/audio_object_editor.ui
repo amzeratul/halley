@@ -42,8 +42,8 @@ children:
             proportion: 1
             widget:
               class: button
-              id: addClip
-              text: Add Clip
+              id: addClips
+              text: Add Clips
           - uuid: cdb16086-5779-4b08-9e1b-21620cf1efcd
             proportion: 1
             widget:

@@ -12,6 +12,47 @@
 using namespace Halley;
 
 
+ChooseAssetWindow::Callback::Callback(SingleCallback callback)
+	: singleCallback(std::move(callback))
+{}
+
+ChooseAssetWindow::Callback::Callback(MultiCallback callback)
+	: multiCallback(std::move(callback))
+{}
+
+bool ChooseAssetWindow::Callback::isMultiCallback() const
+{
+	return !!multiCallback;
+}
+
+void ChooseAssetWindow::Callback::operator()() const
+{
+	if (singleCallback) {
+		singleCallback({});
+	} else if (multiCallback) {
+		multiCallback({});
+	}
+}
+
+void ChooseAssetWindow::Callback::operator()(std::optional<String> result)
+{
+	assert(!!singleCallback);
+	singleCallback(std::move(result));
+	singleCallback = {};
+}
+
+void ChooseAssetWindow::Callback::operator()(const Vector<String>& result)
+{
+	assert(!!multiCallback);
+	multiCallback(result);
+	multiCallback = {};
+}
+
+ChooseAssetWindow::Callback::operator bool() const
+{
+	return singleCallback || multiCallback;
+}
+
 ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank, int resultsLimit)
 	: UIWidget("choose_asset_window", minSize, UISizer())
 	, factory(factory)
@@ -160,6 +201,7 @@ void ChooseAssetWindow::populateList()
 	const auto initialSize = options->getSize();
 	
 	options->clear();
+	options->setMultiSelect(entries[curEntry].callback.isMultiCallback());
 	const bool hasFilter = !filter.isEmpty();
 	const bool forceText = hasFilter;
 	
@@ -435,15 +477,23 @@ LocalisedString ChooseAssetWindow::getItemLabel(const String& id, const String& 
 
 void ChooseAssetWindow::accept()
 {
-	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
-	if (canShowBlank || !id.isEmpty()) {
-		if (entries[curEntry].callback) {
-			entries[curEntry].callback(id);
-			entries[curEntry].callback = {};
-		}
+	auto options = getWidgetAs<UIList>("options");
+	auto& callback = entries[curEntry].callback;
 
-		cancelAllExcept(curEntry);
-		destroy();
+	if (callback.isMultiCallback()) {
+		auto ids = options->getSelectedOptionIds();
+		if (!ids.empty()) {
+			callback(ids);
+			cancelAllExcept(curEntry);
+			destroy();
+		}
+	} else {
+		auto id = options->getSelectedOptionId();
+		if (canShowBlank || !id.isEmpty()) {
+			callback(std::move(id));
+			cancelAllExcept(curEntry);
+			destroy();
+		}
 	}
 }
 
@@ -456,9 +506,8 @@ void ChooseAssetWindow::cancel()
 void ChooseAssetWindow::cancelAllExcept(std::optional<size_t> idx)
 {
 	for (size_t i = 0; i < entries.size(); ++i) {
-		if (i != idx && entries[i].callback) {
-			entries[i].callback({});
-			entries[i].callback = {};
+		if (i != idx) {
+			entries[i].callback();
 		}
 	}
 }

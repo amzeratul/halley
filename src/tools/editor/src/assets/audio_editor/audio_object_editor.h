@@ -54,7 +54,7 @@ namespace Halley {
         void onSelectionChange(const String& id);
         void addObject();
         void addObject(AudioSubObjectType type);
-        void addClip();
+        void addClips();
         void addClip(const String& assetId);
         void removeCurrentSelection();
 

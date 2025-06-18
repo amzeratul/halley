@@ -40,9 +40,9 @@ void AudioObjectEditor::onMakeUI()
 		addObject();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "addClip", [=] (const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "addClips", [=] (const UIEvent& event)
 	{
-		addClip();
+		addClips();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "remove", [=] (const UIEvent& event)
@@ -278,7 +278,7 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 	const bool canRemove = id != "root" && !data.subCase;
 
 	getWidget("add")->setEnabled(canAdd);
-	getWidget("addClip")->setEnabled(canAddClip);
+	getWidget("addClips")->setEnabled(canAddClip);
 	getWidget("remove")->setEnabled(canRemove);
 
 	if (data.object) {
@@ -296,14 +296,14 @@ void AudioObjectEditor::addObject()
 	}));
 }
 
-void AudioObjectEditor::addClip()
+void AudioObjectEditor::addClips()
 {
-	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, AssetType::AudioClip, "", gameResources, projectWindow, false, std::optional<String>(), [=](std::optional<String> result)
+	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, AssetType::AudioClip, "", gameResources, projectWindow, false, std::optional<String>(), ChooseAssetTypeWindow::Callback::MultiCallback([=](const Vector<String>& result)
 	{
-		if (result) {
-			addClip(*result);
+		for (const auto& clip: result) {
+			addClip(clip);
 		}
-	}));
+	})));
 }
 
 void AudioObjectEditor::addObject(AudioSubObjectType type)
