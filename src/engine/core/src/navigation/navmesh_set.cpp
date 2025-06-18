@@ -62,8 +62,10 @@ void NavmeshSet::add(Navmesh navmesh)
 
 void NavmeshSet::addChunk(NavmeshSet navmeshSet, Vector2f origin, Vector2i gridPosition)
 {
+	int i = 0;
 	for (auto& navmesh: navmeshSet.navmeshes) {
 		navmesh.setWorldPosition(origin, gridPosition);
+		navmesh.setDebugName(navmeshSet.getAssetId() + ":" + toString(i++));
 		add(std::move(navmesh));
 	}
 }
@@ -317,7 +319,9 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 				if (portal.regionLink) {
 					// Local portals (always check)
 					const auto gridPos = navmesh.getWorldGridPos();
-					Logger::logError("\nUnlinked local Portal in \"" + getChunkName(gridPos) + "\" at " + portal.pos + ":" + toString(navmesh.getSubWorld()), true);
+					Logger::logError("\nUnlinked local Portal in \"" + getChunkName(gridPos) + "\" (" + toString(portal.id) + ") - \"" + navmesh.getDebugName() + "\" - "
+						+ " at " + portal.pos + ":" + toString(navmesh.getSubWorld())
+						+ "\n\t(portal vertices: " + String::concat(portal.vertices.span(), ", ") + ")", true);
 				} else {
 					// Portals between chunks
 					const auto& base = navmesh.getNormalisedCoordinatesBase();

@@ -798,6 +798,16 @@ ResourceMemoryUsage Navmesh::getMemoryUsage() const
 	return result;
 }
 
+void Navmesh::setDebugName(String name)
+{
+	debugName = std::move(name);
+}
+
+const String& Navmesh::getDebugName() const
+{
+	return debugName;
+}
+
 void Navmesh::computeArea()
 {
 	totalArea = 0;

@@ -155,6 +155,9 @@ namespace Halley {
 
 		ResourceMemoryUsage getMemoryUsage() const;
 
+		void setDebugName(String name);
+		const String& getDebugName() const;
+
 	private:
 		struct State {
 			float gScore = std::numeric_limits<float>::infinity();
@@ -198,6 +201,8 @@ namespace Halley {
 
 		float totalArea = 0;
 		Circle boundingCircle;
+
+		String debugName;
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;
