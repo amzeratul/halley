@@ -118,15 +118,14 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 {
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
-		const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID());
-		assert(prefabData);
-		auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
-		delta.setPrefabUUID(entityData.getPrefabUUID());
-		return delta;
-	} else {
-		//Logger::logInfo("Entity " + entity.getName() + " has no prefab associated with it.");
-		return EntityDataDelta(entityData, deltaOptions);
+		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
+			auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
+			delta.setPrefabUUID(entityData.getPrefabUUID());
+			return delta;
+		}
 	}
+	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");
+	return EntityDataDelta(entityData, deltaOptions);
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
