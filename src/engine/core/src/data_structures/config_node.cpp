@@ -2152,13 +2152,17 @@ size_t ConfigNode::getSizeBytes() const
 	return result;
 }
 
-void ConfigNode::asReferenceTo(const ConfigNode& other)
+ConfigNode ConfigNode::makeReference() const
 {
-	if (type == ConfigNodeType::Undefined && other.type == ConfigNodeType::Map) {
-		type = ConfigNodeType::MapRef;
-		mapData = other.mapData;
-		auxData = other.auxData;
+	ConfigNode result;
+
+	if (type == ConfigNodeType::Map) {
+		result.type = ConfigNodeType::MapRef;
+		result.mapData = mapData;
+		result.auxData = auxData;
 	} else {
 		throw Exception("Invalid ConfigNode type(s)", HalleyExceptions::Utils);
 	}
+
+	return result;
 }

@@ -640,7 +640,7 @@ namespace Halley {
 
 		static const ConfigNode& getUndefined();
 
-		void asReferenceTo(const ConfigNode& other);
+		ConfigNode makeReference() const;
 
 	private:
 		union {
