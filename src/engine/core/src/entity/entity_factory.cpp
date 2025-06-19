@@ -625,7 +625,11 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 		}
 	} else {
 		const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
-		const auto entity = instantiateEntity(data, context, context.isUpdateContext() && depth == 0);
+
+		const bool isNetworkUpdate = context.getEntitySerializationContext().matchType(makeMask(EntitySerialization::Type::Network));
+		const bool allowWorldLookup = context.isUpdateContext() && (depth == 0 || isNetworkUpdate);
+
+		const auto entity = instantiateEntity(data, context, allowWorldLookup);
 		if (depth == 0) {
 			context.notifyEntity(entity);
 		}
