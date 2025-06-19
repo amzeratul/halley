@@ -93,17 +93,30 @@ void Transform2DComponent::setFixedHeight(bool v)
 	}
 }
 
-Vector2f Transform2DComponent::getGlobalPosition() const
+void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
-	if (parentTransform) {
-		if (!isCached(CachedIndices::Position)) {
-			setCached(CachedIndices::Position);
-			cachedGlobalPos = parentTransform->transformPoint(position);
-		}
-		return cachedGlobalPos;
-	} else {
-		return position;
-	}
+	setLocalPosition(parentTransform ? parentTransform->inverseTransformPoint(v) : v);
+}
+
+void Transform2DComponent::setGlobalPosition(WorldPosition p)
+{
+	setGlobalPosition(p.pos);
+	setSubWorld(p.subWorld);
+}
+
+void Transform2DComponent::setGlobalScale(Vector2f v)
+{
+	setLocalScale(parentTransform ? v / parentTransform->getGlobalScale() : v);
+}
+
+void Transform2DComponent::setGlobalRotation(Angle1f v)
+{
+	setLocalRotation(parentTransform ? v - parentTransform->getGlobalRotation() : v);
+}
+
+void Transform2DComponent::setGlobalHeight(float v)
+{
+	setLocalHeight(parentTransform ? v - parentTransform->getGlobalHeight() : v);
 }
 
 Vector2f Transform2DComponent::getGlobalPositionWithHeight() const
@@ -116,69 +129,40 @@ WorldPosition Transform2DComponent::getWorldPosition() const
 	return WorldPosition(getGlobalPosition(), getSubWorld());
 }
 
-void Transform2DComponent::setGlobalPosition(Vector2f v)
+Vector2f Transform2DComponent::getGlobalPosition() const
 {
-	setLocalPosition(parentTransform ? parentTransform->inverseTransformPoint(v) : v);
-}
-
-void Transform2DComponent::setGlobalPosition(WorldPosition p)
-{
-	setGlobalPosition(p.pos);
-	setSubWorld(p.subWorld);
+	if (!isCached(CachedIndices::Position)) {
+		setCached(CachedIndices::Position);
+		cachedGlobalPos = parentTransform ? parentTransform->transformPoint(position) : position;
+	}
+	return cachedGlobalPos;
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
 {
-	if (parentTransform) {
-		if (!isCached(CachedIndices::Scale)) {
-			setCached(CachedIndices::Scale);
-			cachedGlobalScale = parentTransform->getGlobalScale() * scale;
-		}
-		return cachedGlobalScale;
-	} else {
-		return scale;
+	if (!isCached(CachedIndices::Scale)) {
+		setCached(CachedIndices::Scale);
+		cachedGlobalScale = parentTransform ? parentTransform->getGlobalScale() * scale : scale;
 	}
-}
-
-void Transform2DComponent::setGlobalScale(Vector2f v)
-{
-	setLocalScale(parentTransform ? v / parentTransform->getGlobalScale() : v);
+	return cachedGlobalScale;
 }
 
 Angle1f Transform2DComponent::getGlobalRotation() const
 {
-	if (parentTransform) {
-		if (!isCached(CachedIndices::Rotation)) {
-			setCached(CachedIndices::Rotation);
-			cachedGlobalRotation = parentTransform->getGlobalRotation() + rotation;
-		}
-		return cachedGlobalRotation;
-	} else {
-		return rotation;
+	if (!isCached(CachedIndices::Rotation)) {
+		setCached(CachedIndices::Rotation);
+		cachedGlobalRotation = parentTransform ? parentTransform->getGlobalRotation() + rotation : rotation;
 	}
-}
-
-void Transform2DComponent::setGlobalRotation(Angle1f v)
-{
-	setLocalRotation(parentTransform ? v - parentTransform->getGlobalRotation() : v);
+	return cachedGlobalRotation;
 }
 
 float Transform2DComponent::getGlobalHeight() const
 {
-	if (!fixedHeight && parentTransform) {
-		if (!isCached(CachedIndices::Height)) {
-			setCached(CachedIndices::Height);
-			cachedGlobalHeight = parentTransform->getGlobalHeight() + height;
-		}
-		return cachedGlobalHeight;
-	} else {
-		return height;
+	if (!isCached(CachedIndices::Height)) {
+		setCached(CachedIndices::Height);
+		cachedGlobalHeight = parentTransform ? parentTransform->getGlobalHeight() + height : height;
 	}
-}
-
-void Transform2DComponent::setGlobalHeight(float v)
-{
-	setLocalHeight(parentTransform ? v - parentTransform->getGlobalHeight() : v);
+	return cachedGlobalHeight;
 }
 
 int Transform2DComponent::getSubWorld() const
@@ -293,10 +277,12 @@ void Transform2DComponent::markDirty(DirtyPropagationMode mode, int depth, uint8
 			(hasMaskBits<CachedIndices::Position, CachedIndices::Rotation, CachedIndices::Scale>(changeMask) ? getMaskBit<CachedIndices::Position>() : 0);
 
 		// Propagate to all children
-		for (auto& c: entity.getRawChildren()) {
-			if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
-				// Propagate change on all bits of the flag, since they all potentially affect others
-				childTransform->markDirty(mode, depth + 1, childChangeMask);
+		if (entity.isValid()) {
+			for (auto& c: entity.getRawChildren()) {
+				if (const auto childTransform = c->tryGetComponent<Transform2DComponent>()) {
+					// Propagate change on all bits of the flag, since they all potentially affect others
+					childTransform->markDirty(mode, depth + 1, childChangeMask);
+				}
 			}
 		}
 
