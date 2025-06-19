@@ -36,6 +36,9 @@ void ImportAssetsTask::run()
 	assetsToImport = files.size();
 	Vector<Future<void>> tasks;
 
+	std::mutex importingLabelMutex;
+	Vector<String> importingLabels;
+
 	constexpr bool parallelImport = !Debug::isDebug();
 
 	for (size_t i = 0; i < files.size(); ++i) {
@@ -44,10 +47,25 @@ void ImportAssetsTask::run()
 				return;
 			}
 
+			{
+				auto lock = std::unique_lock<std::mutex>(importingLabelMutex);
+				importingLabels += files[i].assetId;
+			}
+
 			setProgressLabel(files[i].assetId);
-			if (doImportAsset(files[i])) {
+			doImportAsset(files[i]);
+
+			{
+				auto lock = std::unique_lock<std::mutex>(importingLabelMutex);
 				++assetsImported;
-				setProgress(float(assetsImported) * 0.98f / float(assetsToImport));
+				std_ex::erase(importingLabels, files[i].assetId);
+
+				const float progress = static_cast<float>(assetsImported) * 0.98f / static_cast<float>(assetsToImport);
+				if (importingLabels.empty()) {
+					setProgress(progress);
+				} else {
+					setProgress(progress, importingLabels.back());
+				}
 			}
 
 			auto now = std::chrono::steady_clock::now();
