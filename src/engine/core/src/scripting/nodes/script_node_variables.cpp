@@ -369,6 +369,7 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
+		context.shallow = true;
 		if (reflector.tryGetComponent(entityRef) != nullptr) {
 			return reflector.serializeField(context, entityRef, type.field);
 		} else {
@@ -1441,8 +1442,9 @@ ConfigNode ScriptUnpackMap::doGetData(ScriptEnvironment& environment, const Scri
 {
 	auto keys = node.getSettings()["keys"].asVector<String>({});
 	
-	auto config = readDataPin(environment, node, 0);
-	if (config.getType() == ConfigNodeType::Map) {
+	const auto config = readDataPin(environment, node, 0);
+	const auto type = config.getType();
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::MapRef) {
 		auto& map = config.asMap();
 		const auto iter = map.find(keys.at(pinN - 1));
 		if (iter != map.end()) {

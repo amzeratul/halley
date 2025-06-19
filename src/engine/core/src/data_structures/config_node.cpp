@@ -1233,7 +1233,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 
 const ConfigNode::MapType& ConfigNode::asMap() const
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
 		return *mapData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
@@ -1254,7 +1254,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 
 ConfigNode::MapType& ConfigNode::asMap()
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
 		return *mapData;
 	} else if (type == ConfigNodeType::Undefined) {
 		*this = MapType();
@@ -1329,7 +1329,7 @@ void ConfigNode::ensureType(ConfigNodeType t)
 
 bool ConfigNode::hasKey(std::string_view key) const
 {
-	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap || type == ConfigNodeType::MapRef) {
 		auto& map = asMap();
 		auto iter = map.find(key);
 		return iter != map.end() && iter->second.getType() != ConfigNodeType::Undefined;
@@ -2150,4 +2150,15 @@ size_t ConfigNode::getSizeBytes() const
 	}
 
 	return result;
+}
+
+void ConfigNode::asReferenceTo(const ConfigNode& other)
+{
+	if (type == ConfigNodeType::Undefined && other.type == ConfigNodeType::Map) {
+		type = ConfigNodeType::MapRef;
+		mapData = other.mapData;
+		auxData = other.auxData;
+	} else {
+		throw Exception("Invalid ConfigNode type(s)", HalleyExceptions::Utils);
+	}
 }

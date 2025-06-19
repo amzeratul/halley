@@ -72,12 +72,13 @@ namespace Halley {
 		Del, // For delta coding
 		Int64,
 		EntityId,
-		Bool
+		Bool,
+		MapRef, // Reference to a map node
 	};
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 17> operator()() const {
+		constexpr std::array<const char*, 18> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -95,7 +96,8 @@ namespace Halley {
 				"del",
 				"int64",
 				"entityId",
-				"bool"
+				"bool",
+				"mapRef"
 			}};
 		}
 	};
@@ -637,6 +639,8 @@ namespace Halley {
 		void feedToHash(Hash::Hasher& hasher) const;
 
 		static const ConfigNode& getUndefined();
+
+		void asReferenceTo(const ConfigNode& other);
 
 	private:
 		union {
