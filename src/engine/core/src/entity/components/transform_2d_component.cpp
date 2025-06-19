@@ -227,7 +227,6 @@ Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 		pos = (pos * Vector2f(1.0f, 1.0f / anisotropy)).rotate(-r) * Vector2f(1.0f, anisotropy);
 	}
 
-	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
 	return pos;
 }
 
