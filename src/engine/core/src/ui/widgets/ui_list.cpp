@@ -283,11 +283,15 @@ void UIList::applyImageColour(UIImage& image) const
 	} else {
 		baseCol = image.getSprite().getColour();
 	}
-	if (style.hasColour("selectedImageColour")) {
-		image.setSelectable(baseCol, style.getColour("selectedImageColour"));
-	}
-	if (style.hasColour("hoveredImageColour")) {
-		image.setHoverable(baseCol, style.getColour("hoveredImageColour"));
+	if (style.hasColour("selectedImageColour") && style.hasColour("hoveredImageColour")) {
+		image.setHoverableSelectable(baseCol, style.getColour("hoveredImageColour"), style.getColour("selectedImageColour"));
+	} else {
+		if (style.hasColour("selectedImageColour")) {
+			image.setSelectable(baseCol, style.getColour("selectedImageColour"));
+		}
+		if (style.hasColour("hoveredImageColour")) {
+			image.setHoverable(baseCol, style.getColour("hoveredImageColour"));
+		}
 	}
 	if (style.hasColour("disabledImageColour")) {
 		image.setDisablable(baseCol, style.getColour("disabledImageColour"));
