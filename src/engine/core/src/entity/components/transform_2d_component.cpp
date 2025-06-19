@@ -160,7 +160,7 @@ float Transform2DComponent::getGlobalHeight() const
 {
 	if (!isCached(CachedIndices::Height)) {
 		setCached(CachedIndices::Height);
-		cachedGlobalHeight = parentTransform ? parentTransform->getGlobalHeight() + height : height;
+		cachedGlobalHeight = !fixedHeight && parentTransform ? parentTransform->getGlobalHeight() + height : height;
 	}
 	return cachedGlobalHeight;
 }
