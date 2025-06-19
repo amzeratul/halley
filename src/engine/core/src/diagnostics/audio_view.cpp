@@ -96,6 +96,7 @@ void AudioView::paint(Painter& painter)
 
 		ColourStringBuilder str;
 
+		// TODO: very thread-unsafe, these two calls must happen on main thread!
 		str.append(getEmitterName(emitterData.emitterId), valueCol);
 		str.append(" at region ");
 		str.append(getRegionName(emitterData.regionId), valueCol);
