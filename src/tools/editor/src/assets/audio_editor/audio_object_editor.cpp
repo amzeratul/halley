@@ -13,6 +13,7 @@
 #include "halley/audio/sub_objects/audio_sub_object_sequence.h"
 #include "halley/audio/sub_objects/audio_sub_object_switch.h"
 #include "halley/properties/game_properties.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
@@ -32,7 +33,7 @@ void AudioObjectEditor::onMakeUI()
 			moveItem(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
 		}
 		populateTreeData();
-		onSelectionChange(hierarchy->getSelectedOptionId());
+		onSelectionChange(hierarchy->getSelectedOptionIds());
 	});
 
 	setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
@@ -52,7 +53,7 @@ void AudioObjectEditor::onMakeUI()
 
 	setHandle(UIEventType::ListSelectionChanged, "hierarchy", [=] (const UIEvent& event)
 	{
-		onSelectionChange(event.getStringData());
+		onSelectionChange(hierarchy->getSelectedOptionIds());
 	});
 
 	doLoadUI();
@@ -101,6 +102,26 @@ const AudioProperties& AudioObjectEditor::getAudioProperties() const
 	return project.getGameProperties().getAudioProperties();
 }
 
+bool AudioObjectEditor::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		copyToClipboard();
+		return true;
+	}
+
+	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
+		cutToClipboard();
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
+		pasteFromClipboard();
+		return true;
+	}
+
+	return false;
+}
+
 void AudioObjectEditor::onResourceLoaded()
 {
 	doLoadUI();
@@ -140,6 +161,19 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const Path& asse
 	setCurrentObject(audioObject.get());
 	
 	return audioObject;
+}
+
+ConfigNode AudioObjectEditor::TreeData::toConfigNode() const
+{
+	ConfigNode result;
+	if (object) {
+		result["object"] = object->toConfigNode();
+	} else if (clip) {
+		result["clip"] = *clip;
+	} else if (subCase) {
+		result["subCase"] = *subCase;
+	}
+	return result;
 }
 
 void AudioObjectEditor::markModified(bool refreshList)
@@ -269,20 +303,32 @@ void AudioObjectEditor::populateTreeData(const String& parentId, AudioSubObjectH
 	}
 }
 
-void AudioObjectEditor::onSelectionChange(const String& id)
+void AudioObjectEditor::onSelectionChange(gsl::span<const String> ids)
 {
-	auto& data = treeData.at(id);
+	bool canAdd = true;
+	bool canAddClip = true;
+	bool canRemove = true;
 
-	const bool canAdd = data.object && data.object->canAddObject(AudioSubObjectType::Switch, data.subCase);
-	const bool canAddClip = data.object && data.object->canAddObject(AudioSubObjectType::Clips, data.subCase);
-	const bool canRemove = id != "root" && !data.subCase;
+	for (const auto& id: ids) {
+		auto& data = treeData.at(id);
+		canAdd = ids.size() == 1 && canAdd && data.object && data.object->canAddObject(AudioSubObjectType::Switch, data.subCase);
+		canAddClip = ids.size() == 1 && canAddClip && data.object && data.object->canAddObject(AudioSubObjectType::Clips, data.subCase);
+		canRemove = canRemove && id != "root" && !data.subCase;
+	}
 
 	getWidget("add")->setEnabled(canAdd);
 	getWidget("addClips")->setEnabled(canAddClip);
 	getWidget("remove")->setEnabled(canRemove);
 
-	if (data.object) {
-		setCurrentObject(data.object);
+	if (ids.size() == 1) {
+		auto& data = treeData.at(ids[0]);
+		if (data.object) {
+			setCurrentObject(data.object);
+		} else {
+			setCurrentObject(nullptr);
+		}
+	} else {
+		setCurrentObject(nullptr);
 	}
 }
 
@@ -324,16 +370,56 @@ void AudioObjectEditor::addClip(const String& assetId)
 
 void AudioObjectEditor::removeCurrentSelection()
 {
-	auto& target = treeData.at(hierarchy->getSelectedOptionId());
-	auto& parent = treeData.at(target.parent);
-	if (target.clip) {
-		parent.object->removeClip(*target.clip);
-	} else {
-		parent.object->removeObject(target.object);
-	}
-	setCurrentObject(nullptr);
+	auto ids = hierarchy->getSelectedOptionIds();
+	std::reverse(ids.begin(), ids.end());
 
+	for (const auto& id: ids) {
+		auto& target = treeData.at(id);
+		auto& parent = treeData.at(target.parent);
+		if (target.clip) {
+			parent.object->removeClip(*target.clip);
+		} else {
+			parent.object->removeObject(target.object);
+		}
+	}
+
+	setCurrentObject(nullptr);
 	markModified(true);
+}
+
+bool AudioObjectEditor::isAncestorContainedInSet(const String& id, const Vector<String>& ids) const
+{
+	const auto& parentId = treeData.at(id).parent;
+	return !parentId.isEmpty() && (ids.contains(parentId) || isAncestorContainedInSet(parentId, ids));
+}
+
+void AudioObjectEditor::copyToClipboard()
+{
+	const auto ids = hierarchy->getSelectedOptionIds();
+
+	ConfigNode result = ConfigNode::SequenceType();
+
+	for (const auto& id: ids) {
+		if (!isAncestorContainedInSet(id, ids)) {
+			result.push_back(treeData.at(id).toConfigNode());
+		}
+	}
+
+	if (auto clipboard = projectWindow.getAPI().system->getClipboard()) {
+		clipboard->setData(YAMLConvert::generateYAML(result, {}));
+	}
+}
+
+void AudioObjectEditor::cutToClipboard()
+{
+	copyToClipboard();
+	removeCurrentSelection();
+}
+
+void AudioObjectEditor::pasteFromClipboard()
+{
+	// TODO
+	Logger::logInfo("TODO: paste");
 }
 
 void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)

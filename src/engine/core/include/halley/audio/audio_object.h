@@ -60,7 +60,7 @@ namespace Halley {
     	void loadDependencies(Resources& resources);
 
 		void makeDefault();
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode() const override;
         String toYAML() const;
 
         AudioSubObjectType getType() const override;

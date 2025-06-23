@@ -24,6 +24,8 @@ namespace Halley {
 
 		const AudioProperties& getAudioProperties() const;
 
+        bool onKeyPress(KeyboardKeyPress key) override;
+
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
@@ -34,6 +36,8 @@ namespace Halley {
 	        IAudioObject* object = nullptr;
             std::optional<String> subCase = {};
             std::optional<String> clip;
+
+            ConfigNode toConfigNode() const;
         };
 
         ProjectWindow& projectWindow;
@@ -51,12 +55,17 @@ namespace Halley {
         void populateTreeData();
         void populateTreeData(const String& parentId, AudioSubObjectHandle& subObject);
 
-        void onSelectionChange(const String& id);
+        void onSelectionChange(gsl::span<const String> id);
         void addObject();
         void addObject(AudioSubObjectType type);
         void addClips();
         void addClip(const String& assetId);
         void removeCurrentSelection();
+
+        void copyToClipboard();
+        void cutToClipboard();
+        void pasteFromClipboard();
+        bool isAncestorContainedInSet(const String& id, const Vector<String>& ids) const;
 
 		void moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
         void moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);

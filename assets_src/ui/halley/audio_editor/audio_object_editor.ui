@@ -28,6 +28,8 @@ children:
               canDrag: true
               class: audioObjectTreeList
               id: hierarchy
+              multiSelect: true
+              options: []
       - uuid: 379d2b1d-688a-4987-b99b-a266fcf396b0
         sizer:
           type: horizontal

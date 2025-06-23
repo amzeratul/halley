@@ -47,7 +47,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, con
 	addFactory("uiWidgetList", [=](const ConfigNode& node) { return makeUIWidgetList(node); });
 	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
-	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
+	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); }, getTreeListProperties());
 	addFactory("gradientEditor", [=](const ConfigNode& node) { return makeGradientEditor(node); });
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); }, getCurveEditorProperties());
 	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });

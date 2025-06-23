@@ -32,6 +32,9 @@ namespace Halley
 		mutable HashMap<AudioEmitterId, String> emitterNames;
 		mutable HashMap<AudioObjectId, String> objectNames;
 		mutable HashMap<AudioRegionId, String> regionNames;
+		mutable Vector<AudioEmitterId> emittersThatNeedName;
+		mutable Vector<AudioEmitterId> objectsThatNeedName;
+		mutable Vector<AudioEmitterId> regionsThatNeedName;
 
 		String getEmitterName(AudioEmitterId emitterId) const;
 		String getRegionName(AudioRegionId regionId) const;

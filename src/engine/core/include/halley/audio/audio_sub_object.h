@@ -50,6 +50,8 @@ namespace Halley {
 
 		void propagateObjectName(const String& name);
 		virtual void setObjectName(const String& name) {}
+
+		virtual ConfigNode toConfigNode() const = 0;
 	};
 
 	class IAudioSubObject : public IAudioObject {
@@ -67,8 +69,6 @@ namespace Halley {
 
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
-
-		virtual ConfigNode toConfigNode() const = 0;
 
 		virtual String getName() const = 0;
 	};
