@@ -65,6 +65,7 @@ namespace Halley {
         void copyToClipboard();
         void cutToClipboard();
         void pasteFromClipboard();
+        void paste(IAudioObject& dst, const std::optional<String>& subCase, const ConfigNode& node);
         bool isAncestorContainedInSet(const String& id, const Vector<String>& ids) const;
 
 		void moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);

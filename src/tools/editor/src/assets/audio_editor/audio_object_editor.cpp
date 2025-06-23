@@ -166,12 +166,16 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const Path& asse
 ConfigNode AudioObjectEditor::TreeData::toConfigNode() const
 {
 	ConfigNode result;
-	if (object) {
-		result["object"] = object->toConfigNode();
-	} else if (clip) {
+	if (clip) {
 		result["clip"] = *clip;
 	} else if (subCase) {
 		result["subCase"] = *subCase;
+	} else if (object) {
+		if (dynamic_cast<IAudioSubObject*>(object)) {
+			result["subObject"] = object->toConfigNode();
+		} else {
+			result["object"] = object->toConfigNode();
+		}
 	}
 	return result;
 }
@@ -418,8 +422,44 @@ void AudioObjectEditor::cutToClipboard()
 
 void AudioObjectEditor::pasteFromClipboard()
 {
-	// TODO
-	Logger::logInfo("TODO: paste");
+	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
+	if (!parent.object) {
+		return;
+	}
+	auto& dst = *parent.object;
+	const std::optional<String>& subCase = parent.subCase;
+
+	if (auto clipboard = projectWindow.getAPI().system->getClipboard()) {
+		if (const auto& strData = clipboard->getStringData()) {
+			const auto parsed = YAMLConvert::parseConfig(*strData);
+			if (parsed.getType() == ConfigNodeType::Sequence) {
+				for (const auto& node: parsed.asSequence()) {
+					paste(dst, subCase, node);
+				}
+			} else {
+				paste(dst, subCase, parsed);
+			}
+		}
+	}
+}
+
+void AudioObjectEditor::paste(IAudioObject& dst, const std::optional<String>& subCase, const ConfigNode& node)
+{
+	if (node.hasKey("clip")) {
+		if (dst.canAddObject(AudioSubObjectType::Clips, subCase)) {
+			const auto& assetId = node["clip"].asString("");
+			if (auto clip = gameResources.tryGet<AudioClip>(assetId)) {
+				dst.addClip(std::move(clip), subCase, std::numeric_limits<size_t>::max());
+			}
+		}
+	} else if (node.hasKey("subObject")) {
+		if (dst.canAddObject(AudioSubObjectType::Switch, subCase)) {
+			auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(node["subObject"]));
+			dst.addObject(subObject, subCase, std::numeric_limits<size_t>::max());
+		}
+	}
+
+	markModified(true);
 }
 
 void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
