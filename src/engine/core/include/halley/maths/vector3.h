@@ -172,6 +172,21 @@ namespace Halley {
 		{
 			return Vector2D<T>(y, z);
 		}
+
+		[[nodiscard]] Vector3D withX(T value) const
+		{
+			return Vector3D(value, y, z);
+		}
+
+		[[nodiscard]] Vector3D withY(T value) const
+		{
+			return Vector3D(x, value, z);
+		}
+
+		[[nodiscard]] Vector3D withZ(T value) const
+		{
+			return Vector3D(x, y, value);
+		}
 	};
 
 

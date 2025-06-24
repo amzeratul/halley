@@ -225,6 +225,26 @@ namespace Halley {
 		constexpr Vector2D<T> zw() const { return Vector2D<T>(z, w); }
 		constexpr Vector3D<T> xyz() const { return Vector3D<T>(x, y, z); }
 
+		[[nodiscard]] Vector4D withX(T value) const
+		{
+			return Vector4D(value, y, z, w);
+		}
+
+		[[nodiscard]] Vector4D withY(T value) const
+		{
+			return Vector4D(x, value, z, w);
+		}
+
+		[[nodiscard]] Vector4D withZ(T value) const
+		{
+			return Vector4D(x, y, value, w);
+		}
+
+		[[nodiscard]] Vector4D withW(T value) const
+		{
+			return Vector4D(x, y, z, value);
+		}
+
 		String toString(int precision = -1) const
 		{
 			return "(" + Halley::toString(x, precision) + ", " + Halley::toString(y, precision) + ", " + Halley::toString(z, precision) + ", " + Halley::toString(w, precision) + ")";

@@ -130,6 +130,21 @@ void Options::setFullscreen(bool fullscreen)
 	setOption("fullscreen", ConfigNode(fullscreen));
 }
 
+void Options::setUISize(Vector2f uiSize)
+{
+	setOption("uiSize", ConfigNode(uiSize));
+}
+
+Vector2f Options::getUISize() const
+{
+	return getOption("uiSize").asVector2f(Vector2f(1, 1));
+}
+
+Vector2f Options::getMaxOverscan(Vector2i resolution) const
+{
+	return Vector2f(0.1f, 0.1f); // TODO
+}
+
 bool Options::getVibration() const
 {
 	return getOption("vibration").asBool(true);

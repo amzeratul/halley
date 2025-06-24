@@ -239,6 +239,17 @@ namespace Halley {
 		{
 			return Vector2D<T,U>(std::max(a.x, b.x), std::max(a.y, b.y));
 		}
+
+		[[nodiscard]] Vector2D withX(T value) const
+		{
+			return Vector2D(value, y);
+		}
+
+		[[nodiscard]] Vector2D withY(T value) const
+		{
+			return Vector2D(x, value);
+		}
+
 	};
 
 	////////////////////

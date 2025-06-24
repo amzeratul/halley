@@ -58,6 +58,10 @@ namespace Halley {
 		bool getFullscreen() const;
 		void setFullscreen(bool fullscreen);
 
+		void setUISize(Vector2f uiSize);
+		Vector2f getUISize() const;
+		Vector2f getMaxOverscan(Vector2i resolution) const;
+
 		bool getVibration() const;
 		void setVibration(bool enabled);
 		bool getFlashingEffects() const;
