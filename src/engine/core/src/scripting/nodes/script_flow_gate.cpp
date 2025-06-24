@@ -467,6 +467,100 @@ ConfigNode ScriptCache::doGetData(ScriptEnvironment& environment, const ScriptGr
 	return ConfigNode(data.value);
 }
 
+ScriptCacheValueData::ScriptCacheValueData(const ConfigNode& node)
+{
+	values = node["values"].asVector<ConfigNode>({});
+}
+
+ConfigNode ScriptCacheValueData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode result;
+	result["values"] = values;
+	return result;
+}
+
+
+Vector<IGraphNodeType::SettingType> ScriptCacheValue::getSettingTypes() const
+{
+	return {
+		SettingType{ "nVariables", "Halley::Range<int, 1, 4>", Vector<String>{"1"} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptCacheValue::getPinConfiguration(const BaseGraphNode& node) const
+{
+	const auto nVariables = node.getSettings()["nVariables"].asInt(1);
+
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 10>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+
+	auto span = gsl::span<const IGraphNodeType::PinType>(data);
+	return span.subspan(0, 2 + 2 * nVariables);
+}
+
+String ScriptCacheValue::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx < 2) {
+		return ScriptNodeTypeBase<ScriptCacheValueData>::getShortDescription(node, graph, elementIdx);
+	} else {
+		return "cache(" + getConnectedNodeName(node, graph, elementIdx - 1) + ")";
+	}
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptCacheValue::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Caches values on enter and returns them later.");
+	return str.moveResults();
+}
+
+String ScriptCacheValue::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx < 2) {
+		return ScriptNodeTypeBase<ScriptCacheValueData>::getPinDescription(node, elementType, elementIdx);
+	} else if (elementIdx % 2 == 0) {
+		return "Input Variable #" + toString((elementIdx - 2) / 2 + 1);
+	} else {
+		return "Cached Variable #" + toString((elementIdx - 3) / 2 + 1);
+	}
+}
+
+void ScriptCacheValue::doInitData(ScriptCacheValueData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data.values = {};
+}
+
+ConfigNode ScriptCacheValue::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptCacheValueData& data) const
+{
+	const auto variableIdx = (pinN - 3) / 2;
+	if (variableIdx >= data.values.size()) {
+		return {};
+	} else {
+		return ConfigNode(data.values[variableIdx]);
+	}
+}
+
+IScriptNodeType::Result ScriptCacheValue::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptCacheValueData& curData) const
+{
+	const auto nVariables = node.getSettings()["nVariables"].asInt(1);
+	curData.values.resize(nVariables);
+	for (int i = 0; i < nVariables; ++i) {
+		curData.values[i] = readDataPin(environment, node, 2 + 2 * i);
+	}
+	return Result(ScriptNodeExecutionState::Done, 0);
+}
 
 
 ConfigNode ScriptFenceData::toConfigNode(const EntitySerializationContext& context)

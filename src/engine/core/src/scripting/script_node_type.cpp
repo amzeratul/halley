@@ -300,6 +300,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptFlowOnce>());
 	addScriptNode(std::make_unique<ScriptLatch>());
 	addScriptNode(std::make_unique<ScriptCache>());
+	addScriptNode(std::make_unique<ScriptCacheValue>());
 	addScriptNode(std::make_unique<ScriptFence>());
 	addScriptNode(std::make_unique<ScriptBreaker>());
 	addScriptNode(std::make_unique<ScriptSignal>());

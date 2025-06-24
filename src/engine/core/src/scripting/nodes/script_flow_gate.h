@@ -154,6 +154,35 @@ namespace Halley {
 	};
 
 
+	
+	class ScriptCacheValueData final : public ScriptStateData<ScriptCacheValueData> {
+	public:
+		Vector<ConfigNode> values;
+
+		ScriptCacheValueData() = default;
+		ScriptCacheValueData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptCacheValue final : public ScriptNodeTypeBase<ScriptCacheValueData> {
+	public:
+		String getId() const override { return "cacheValue"; }
+		String getName() const override { return "Cache Value"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/cache.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptCacheValueData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptCacheValueData& data) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptCacheValueData& curData) const override;
+	};
+
+
 	class ScriptFenceData final : public ScriptStateData<ScriptFenceData> {
 	public:
 		bool signaled = false;

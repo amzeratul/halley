@@ -21,7 +21,7 @@ namespace {
 			return node.asEntityId();
 		}
 
-		if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined) {
+		if (node.getType() == ConfigNodeType::Del || node.getType() == ConfigNodeType::Undefined || (node.getType() == ConfigNodeType::Int && node.asInt() == -1)) {
 			return {};
 		}
 
