@@ -17,6 +17,12 @@ ScriptingService::ScriptingService(std::unique_ptr<ScriptEnvironment> env, Resou
 	}
 }
 
+ScriptingService::~ScriptingService()
+{
+	luaReferences.clear();
+	luaState = {};
+}
+
 ScriptEnvironment& ScriptingService::getEnvironment() const
 {
 	return *scriptEnvironment;
@@ -52,7 +58,7 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression,
 		}
 	}
 
-	auto& expr = expression.get(*luaState);
+	auto& expr = getLuaReference(expression);
 
 	ConfigNode result;
 
@@ -96,9 +102,21 @@ void ScriptingService::copyLuaGlobal(const String& key, ScriptingService& source
 	stack.makeGlobal(key);
 }
 
-LuaState& ScriptingService::getLuaState()
+LuaState& ScriptingService::getLuaState() const
 {
 	return *luaState;
+}
+
+LuaReference& ScriptingService::getLuaReference(const LuaExpression& luaExpression) const
+{
+	const auto& key = luaExpression.getExpression();
+
+	const auto iter = luaReferences.find(key);
+	if (iter != luaReferences.end()) {
+		return *iter->second;
+	}
+	auto [iter2, inserted] = luaReferences.insert_or_assign(key, luaExpression.makeReference(*luaState));
+	return *iter2->second;
 }
 
 std::shared_ptr<ScriptingService> ScriptingService::clone(std::unique_ptr<ScriptEnvironment> environment) const

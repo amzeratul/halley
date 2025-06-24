@@ -124,10 +124,7 @@ LuaExpression::LuaExpression(String expr)
 void LuaExpression::setExpression(String expr)
 {
 	expr.trimBoth();
-	if (expression != expr) {
-		expression = std::move(expr);
-		luaRef.reset();
-	}
+	expression = std::move(expr);
 }
 
 bool LuaExpression::isEmpty() const
@@ -135,18 +132,15 @@ bool LuaExpression::isEmpty() const
 	return expression.isEmpty();
 }
 
-LuaReference& LuaExpression::get(LuaState& state) const
+std::unique_ptr<LuaReference> LuaExpression::makeReference(LuaState& state) const
 {
-	if (!luaRef || !luaRef->isValid(state)) {
-		auto stack = LuaStackOps(state);
-		if (expression.startsWith("return") || expression.contains('\n')) {
-			stack.load(expression);
-		} else {
-			stack.load("return " + expression);
-		}
-		luaRef = std::make_shared<LuaReference>(state, true);
+	auto stack = LuaStackOps(state);
+	if (expression.startsWith("return") || expression.contains('\n')) {
+		stack.load(expression);
+	} else {
+		stack.load("return " + expression);
 	}
-	return *luaRef;
+	return std::make_unique<LuaReference>(state, true);
 }
 
 void LuaExpression::serialize(Serializer& s) const

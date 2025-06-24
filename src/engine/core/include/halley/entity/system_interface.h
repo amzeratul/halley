@@ -8,6 +8,8 @@ namespace Halley {
 	class WorldPosition;
 	struct alignas(8) EntityId;
 	class LuaState;
+	class LuaReference;
+	class LuaExpression;
 	class ScriptState;
 	class ConfigNode;
 
@@ -40,7 +42,8 @@ namespace Halley {
 
     class ILuaInterface : public ISystemInterface {
     public:
-        virtual LuaState& getLuaState() = 0;
+        virtual LuaState& getLuaState() const = 0;
+		virtual LuaReference& getLuaReference(const LuaExpression& luaExpression) const = 0;
     };
 
 	class IScriptSystemInterface : public ISystemInterface {

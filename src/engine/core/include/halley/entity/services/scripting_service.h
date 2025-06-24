@@ -9,6 +9,7 @@ namespace Halley {
 	class ScriptingService : public Service, public ILuaInterface {
 	public:
 		ScriptingService(std::unique_ptr<ScriptEnvironment> environment, Resources& resources, const String& initialLuaModule = "");
+		~ScriptingService();
 
 		ScriptEnvironment& getEnvironment() const;
 
@@ -28,7 +29,9 @@ namespace Halley {
 
 		ConfigNode getLuaGlobal(const String& key);
 		void copyLuaGlobal(const String& key, ScriptingService& source);
-		LuaState& getLuaState() override;
+
+		LuaState& getLuaState() const override;
+		LuaReference& getLuaReference(const LuaExpression& luaExpression) const override;
 
 		std::shared_ptr<ScriptingService> clone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
 
@@ -40,6 +43,7 @@ namespace Halley {
 		Resources& resources;
 
 	    mutable HashMap<String, ConfigNode> resultCache;
+		mutable HashMap<String, std::unique_ptr<LuaReference>> luaReferences;
 	};
 }
 

@@ -1,5 +1,6 @@
 #include "script_lua.h"
 
+#include "halley/entity/services/scripting_service.h"
 #include "halley/lua/lua_reference.h"
 
 using namespace Halley;
@@ -105,7 +106,8 @@ size_t ScriptLuaExpression::nFlowPins() const
 
 void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptLuaExpressionData& data) const
 {
-	auto& state = environment.getInterface<ILuaInterface>().getLuaState();
+	auto& luaInterface = environment.getInterface<ILuaInterface>();
+	auto& state = luaInterface.getLuaState();
 	auto stackOps = LuaStackOps(state);
 
 	if (!data.expr) {
@@ -129,7 +131,7 @@ void ScriptLuaExpression::evaluate(ScriptEnvironment& environment, const ScriptG
 	const int firstInputPin = static_cast<int>(nFlowPins());
 
 	LuaFunctionCaller::startCall(state);
-	data.expr->get(state).pushToLuaStack();
+	luaInterface.getLuaReference(*data.expr).pushToLuaStack();
 	for (size_t i = 0; i < argsN; ++i) {
 		stackOps.push(readDataPin(environment, node, i + firstInputPin));
 	}
