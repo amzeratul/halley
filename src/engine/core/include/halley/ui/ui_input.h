@@ -28,6 +28,7 @@ namespace Halley {
 			None,
 			Lowest,
 			Normal,
+			High,
 			Focused
 		};
 
