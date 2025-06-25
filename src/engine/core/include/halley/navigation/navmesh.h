@@ -150,6 +150,7 @@ namespace Halley {
 
 		float getArea() const;
 		Vector2f getRandomPoint(Random& rng) const;
+		std::optional<WorldPosition> getFirstPoint() const;
 
 		Base2D getNormalisedCoordinatesBase() const { return normalisedCoordinatesBase; }
 
