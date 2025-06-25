@@ -27,7 +27,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 	const size_t additionalPaddingSamples = 2;
 	const size_t nLeftOver = leftoverSamples[0].n;
 	const size_t samplesToGenerate = numSamples >= nLeftOver ? numSamples - nLeftOver : 0;
-	const size_t numSamplesSrc = lroundl(samplesToGenerate * fromHz / toHz) + additionalPaddingSamples;
+	const size_t numSamplesSrc = lroundl(samplesToGenerate * fromHz / toHz) + std::max(static_cast<size_t>(std::ceil(additionalPaddingSamples * fromHz / toHz)), additionalPaddingSamples);
 
 	if (resamplers.empty()) {
 		for (size_t i = 0; i < nChannels; ++i) {
