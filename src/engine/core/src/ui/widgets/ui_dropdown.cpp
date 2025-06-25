@@ -123,6 +123,11 @@ bool UIDropdown::canNotifyAsDropdown() const
 	return true;
 }
 
+bool UIDropdown::areChildrenUnclipped() const
+{
+	return true;
+}
+
 void UIDropdown::setOptions(Vector<LocalisedString> os, int defaultOption)
 {
 	setOptions({}, std::move(os), defaultOption);
@@ -204,12 +209,6 @@ void UIDropdown::draw(UIPainter& painter) const
 		painter.draw(icon);
 	}
 	painter.draw(label);
-}
-
-void UIDropdown::drawChildren(UIPainter& painter) const
-{
-	auto p2 = painter.withNoClip();
-	UIClickable::drawChildren(p2);
 }
 
 void UIDropdown::update(Time t, bool moved)
