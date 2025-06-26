@@ -519,7 +519,9 @@ void AssetsBrowser::addFolder()
 {
 	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, LocalisedString::fromHardcodedString("New Folder"), "", "", [=](std::optional<String> newName)
 	{
-		addFolder(rootPath / curSrcPath / *newName / ".");
+		if (newName) {
+			addFolder(rootPath / curSrcPath / *newName / ".");
+		}
 	}));
 }
 
