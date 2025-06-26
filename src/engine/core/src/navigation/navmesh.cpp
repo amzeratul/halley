@@ -780,6 +780,14 @@ Vector2f Navmesh::getRandomPoint(Random& rng) const
 	return polygons[0].getCentre();
 }
 
+std::optional<WorldPosition> Navmesh::getFirstPoint() const
+{
+	if (polygons.empty()) {
+		return std::nullopt;
+	}
+	return WorldPosition(polygons[0].getCentre(), subWorld);
+}
+
 ResourceMemoryUsage Navmesh::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;

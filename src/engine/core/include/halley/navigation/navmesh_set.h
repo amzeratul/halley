@@ -29,6 +29,7 @@ namespace Halley {
 
 		void linkNavmeshes();
 		void reportUnlinkedPortals(std::function<String(Vector2i)> getChunkName) const;
+		size_t reportDisconnectedNavmeshes(Vector<WorldPosition> startPositions, std::function<String(Vector2i)> getChunkName) const;
 		void setMaxDistancesToNavmesh(float startDistance, float endDistance);
 
 		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr, float anisotropy = 1.0f, float nudge = 0.1f) const;

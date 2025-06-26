@@ -65,7 +65,7 @@ void NavmeshSet::addChunk(NavmeshSet navmeshSet, Vector2f origin, Vector2i gridP
 	int i = 0;
 	for (auto& navmesh: navmeshSet.navmeshes) {
 		navmesh.setWorldPosition(origin, gridPosition);
-		navmesh.setDebugName(navmeshSet.getAssetId() + ":" + toString(i++));
+		navmesh.setDebugName(navmeshSet.getAssetId() + "_" + toString(i++) + ":" + navmesh.getSubWorld());
 		add(std::move(navmesh));
 	}
 }
@@ -339,6 +339,67 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 			}
 		}
 	}
+}
+
+size_t NavmeshSet::reportDisconnectedNavmeshes(Vector<WorldPosition> startPositions, std::function<String(Vector2i)> getChunkName) const
+{
+	if (navmeshes.empty()) {
+		return 0;
+	}
+
+	struct Entry {
+		bool connected = false;
+		bool addedToQueue = false;
+	};
+	Vector<Entry> entries;
+	entries.resize(navmeshes.size());
+
+	// Initialize the queue
+	Vector<uint16_t> queue;
+	for (const auto& startPosition: startPositions) {
+		if (const auto navmeshIdx = getNavMeshIdxAt(startPosition)) {
+			if (!entries[*navmeshIdx].addedToQueue) {
+				entries[*navmeshIdx].addedToQueue = true;
+				queue += *navmeshIdx;
+			}
+		} else {
+			Logger::logError("Navmesh start position " + toString(startPosition) + " is not on navmesh");
+		}
+	}
+
+	// Propagate connectivity
+	while (!queue.empty()) {
+		const auto curIdx = queue.back();
+		queue.pop_back();
+
+		entries[curIdx].connected = true;
+
+		for (const auto& portal: navmeshes[curIdx].getPortals()) {
+			if (auto idx = portal.connected) {
+				if (!entries[*idx].addedToQueue) {
+					entries[*idx].addedToQueue = true;
+					queue += *idx;
+				}
+			}
+		}
+	}
+
+	// Check result
+	size_t nDisconnected = 0;
+	for (size_t i = 0; i < entries.size(); ++i) {
+		if (!entries[i].connected) {
+			++nDisconnected;
+			const auto& navmesh = navmeshes[i];
+			const auto gridPos = navmesh.getWorldGridPos();
+			Logger::logError("Unreachable navmesh \"" + navmesh.getDebugName() + "\" at " + navmesh.getFirstPoint() + " in chunk \"" + getChunkName(gridPos) + "\"");
+		}
+	}
+
+	if (nDisconnected > 0) {
+		Logger::logDev("Navmesh connectivity: " + toString(nDisconnected) + "/" + toString(entries.size()) + " are not connected.");
+	}
+
+	return nDisconnected;
 }
 
 void NavmeshSet::setMaxDistancesToNavmesh(float startDistance, float endDistance)

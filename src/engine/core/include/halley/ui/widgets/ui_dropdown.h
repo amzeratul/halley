@@ -74,7 +74,6 @@ namespace Halley {
 		Time timeSinceLastKeypress;
 
 		void draw(UIPainter& painter) const override;
-		void drawChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
 		bool onKeyPress(KeyboardKeyPress key) override;
@@ -89,6 +88,7 @@ namespace Halley {
 		virtual void updateOptionLabels();
 
 		virtual bool canNotifyAsDropdown() const;
+		bool areChildrenUnclipped() const override;
 
 	private:
 		enum class OpenState : uint8_t {

@@ -675,7 +675,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bo
 	return {};
 }
 
-UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, bool ignoreMouseInteraction, int childLayerAdjustment) const
+UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, bool ignoreMouseInteraction, int childLayerAdjustment, bool restricted) const
 {
 	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
@@ -691,13 +691,19 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 		const int adjustmentForChildren = childLayerAdjustment + curWidget->getChildLayerAdjustment();
 		WidgetUnderMouseResult bestResult;
 
-		if (curWidget->canChildrenInteractWithMouse() && curWidget->canChildrenInteractWithMouseAt(mousePos)) {
+		if (curWidget->canChildrenInteractWithMouse()) {
 			const auto& cs = curWidget->getChildren().span();
+
+			if (!restricted && !curWidget->canChildrenInteractWithMouseAt(mousePos)) {
+				restricted = true;
+			} else if (restricted && curWidget->areChildrenUnclipped()) {
+				restricted = false;
+			}
 
 			for (int i = int(cs.size()); --i >= 0;) {
 				auto& c = cs[i];
 
-				const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren);
+				const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren, restricted);
 				if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
 					bestResult = result;
 				}
@@ -712,7 +718,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 		}
 	}
 
-	if ((ignoreMouseInteraction || curWidget->canInteractWithMouse()) && curWidget->isMouseInside(mousePos)) {
+	if (!restricted && (ignoreMouseInteraction || curWidget->canInteractWithMouse()) && curWidget->isMouseInside(mousePos)) {
 		return { curWidget, {}, childLayerAdjustment };
 	} else {
 		return {};

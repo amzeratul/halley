@@ -370,6 +370,11 @@ void UIWidget::notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget)
 {
 }
 
+bool UIWidget::areChildrenUnclipped() const
+{
+	return false;
+}
+
 void UIWidget::setId(const String& i)
 {
 	id = i;
@@ -991,8 +996,15 @@ void UIWidget::drawAfterChildren(UIPainter& painter) const
 
 void UIWidget::drawChildren(UIPainter& painter) const
 {
-	for (auto& c: getChildren()) {
-		c->doDraw(painter);
+	if (areChildrenUnclipped()) {
+		auto p2 = painter.withNoClip();
+		for (auto& c: getChildren()) {
+			c->doDraw(p2);
+		}
+	} else {
+		for (auto& c: getChildren()) {
+			c->doDraw(painter);
+		}
 	}
 }
 

@@ -79,6 +79,7 @@ namespace Halley {
 		bool canPropagateMouseToChildren() const;
 		void setPropagateMouseToChildren(bool enabled);
 		virtual void notifyWidgetUnderMouse(const std::shared_ptr<UIWidget>& widget);
+		virtual bool areChildrenUnclipped() const;
 
 		void setId(const String& id);
 		const String& getId() const final override;
