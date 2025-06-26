@@ -1,4 +1,4 @@
-// Halley codegen version 136
+// Halley codegen version 138
 #include <halley.hpp>
 using namespace Halley;
 
@@ -32,6 +32,7 @@ using namespace Halley;
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
 #include "system_messages/cancel_host_script_thread_system_message.h"
+#include "system_messages/network_peer_disconnect_system_message.h"
 #include "system_messages/network_entity_lock_system_message.h"
 
 // System factory functions
@@ -102,11 +103,12 @@ public:
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(5);
+		result.reserve(6);
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkSoundSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<StartHostScriptThreadSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<CancelHostScriptThreadSystemMessage>>());
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<NetworkPeerDisconnectSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<NetworkEntityLockSystemMessage>>());
 		return result;
 	}

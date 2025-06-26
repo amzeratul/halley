@@ -27,22 +27,23 @@ private:
 	EntityId targetId;
 };
 
-class NetworkLockSystem final : public NetworkLockSystemBase<NetworkLockSystem>, INetworkLockSystemInterface, INetworkLockSystem {
+class NetworkLockSystem final : public NetworkLockSystemBase<NetworkLockSystem>, INetworkLockSystemInterface, INetworkLockSystem, NetworkSession::IListener
+{
 public:
 	
 	void init()
 	{
 		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
+
+		if (getSessionService().isMultiplayer()) {
+			const auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
+			entityNetworkSession->getSession().addListener(this);
+		}
 	}
 
 	void update(Time t)
 	{
-		if (getSessionService().isMultiplayer() && isHost()) {
-			// Check for stale locks (e.g. from disconnects)
-			for (const auto& e: networkFamily) {
-				std_ex::erase_if_value(e.network.locks, [&](uint8_t peerId) { return !isPeerPresent(peerId); });
-			}
-		}
+		checkStaleLocks({});
 	}
 
 	LockStatus getLockStatus(EntityId targetId) const override
@@ -147,6 +148,30 @@ private:
         bool withAuthority = false;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
+
+	void onPeerDisconnected(NetworkSession::PeerId peerId) override
+	{
+		checkStaleLocks(peerId);
+		sendMessage(NetworkPeerDisconnectSystemMessage(peerId));
+	}
+
+	void checkStaleLocks(std::optional<NetworkSession::PeerId> otherPeerId)
+	{
+		if (getSessionService().isMultiplayer() && isHost()) {
+			auto predicate = [&](uint8_t peerId) {
+				return otherPeerId ? peerId == otherPeerId : !isPeerPresent(peerId);
+			};
+
+			for (const auto& e: networkFamily) {
+				// If this peer took entity authority, return it to host.
+				if (e.network.authorityId && predicate(e.network.authorityId.value())) {
+					doChangeAuthority(&e, {});
+				}
+				// Erase any stale locks.
+				std_ex::erase_if_value(e.network.locks, predicate);
+			}
+		}
+	}
 
 	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
 	{

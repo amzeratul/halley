@@ -27,17 +27,23 @@ bool SessionService::hasHostAuthority() const
 	return session ? session->hasHostAuthority() : true;
 }
 
+bool SessionService::hasEntityAuthority(const EntityRef& entity) const
+{
+	if (session && entity.isValid()) {
+		uint8_t myPeerId = getMyClientId();
+		if (const auto authority = entity.getAuthorityPeerId()) {
+			return authority == myPeerId;
+		} else {
+			return entity.getOwnerPeerId().value_or(myPeerId) == myPeerId;
+		}
+	}
+	return hasHostAuthority();
+}
+
 bool SessionService::hasEntityAuthority(EntityId entityId) const
 {
 	if (session) {
-		if (const auto entity = getWorld().tryGetEntity(entityId); entity.isValid()) {
-			uint8_t myPeerId = getMyClientId();
-			if (const auto authority = entity.getAuthorityPeerId()) {
-				return authority == myPeerId;
-			} else {
-				return entity.getOwnerPeerId().value_or(myPeerId) == myPeerId;
-			}
-		}
+		return hasEntityAuthority(getWorld().tryGetEntity(entityId));
 	}
 	return hasHostAuthority();
 }

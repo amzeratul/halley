@@ -38,7 +38,7 @@ private:
 
 	bool requestedExit = false;
 
-	void setupCheats()
+	void setupCheats() const
 	{
 		auto& consoleCommands = getDevService().getConsoleCommands();
 
@@ -78,15 +78,6 @@ private:
 
 			return output;
 		}, UIDebugConsoleSyntax());
-	}
-
-	std::optional<NetworkSession::PeerId> getPeerId() const
-	{
-		if (!getSessionService().isMultiplayer()) {
-			return {};
-		}
-		auto& mpSession = getSessionService().getMultiplayerSession();
-		return mpSession.getNetworkSession()->getMyPeerId();
 	}
 };
 

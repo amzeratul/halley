@@ -7,7 +7,7 @@
 
 class NetworkEntityLockSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 4 };
+	static constexpr int messageIndex{ 5 };
 	static const constexpr char* messageName{ "NetworkEntityLock" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
 	using ReturnType = bool;

@@ -7,6 +7,7 @@
 
 #include "components/network_component.h"
 #include "system_messages/network_entity_lock_system_message.h"
+#include "system_messages/network_peer_disconnect_system_message.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -56,6 +57,11 @@ protected:
 		if (n != 1) {
 		    throw Halley::Exception("Sending non-multicast NetworkEntityLockSystemMessage, but there are " + Halley::toString(n) + " systems receiving it (expecting exactly one).", Halley::HalleyExceptions::Entity);
 		}
+	}
+
+	size_t sendMessage(NetworkPeerDisconnectSystemMessage msg, std::function<void()> callback = {}) {
+		Halley::String targetSystem = "";
+		return sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);
 	}
 
 

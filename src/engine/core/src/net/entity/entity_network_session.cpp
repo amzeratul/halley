@@ -773,8 +773,6 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 		}
 	} else {
 		// Authority is given back to owner.
-		Expects(networkComponent.authorityId.has_value());
-
 		if (networkComponent.authorityId == myPeerId) {
 			// Local peer is losing authority. Revoke the outbound entity.
 			for (auto& peer: peers) {

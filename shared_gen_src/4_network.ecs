@@ -37,6 +37,15 @@ component:
 ---
 
 systemMessage:
+  name: NetworkPeerDisconnect
+  members:
+    - peerId: uint8_t
+  destination: local
+  multicast: true
+
+---
+
+systemMessage:
   name: NetworkEntityLock
   members:
     - target: Halley::EntityId
@@ -74,6 +83,7 @@ system:
   strategy: global
   systemMessages:
     - NetworkEntityLock: send receive
+    - NetworkPeerDisconnect: send
   services:
     - SessionService
   access:

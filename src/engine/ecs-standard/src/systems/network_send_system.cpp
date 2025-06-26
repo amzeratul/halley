@@ -79,7 +79,7 @@ public:
 private:
 	Vector<EntityNetworkUpdateInfo> entities;
 
-	void disableSendUpdateForChildren(EntityRef entity)
+	static void disableSendUpdateForChildren(const EntityRef& entity)
 	{
 		for (auto c: entity.getChildren()) {
 			if (auto* network = c.tryGetComponent<NetworkComponent>()) {
@@ -90,7 +90,7 @@ private:
 		}
 	}
 
-	void setupCheats()
+	void setupCheats() const
 	{
 		auto& consoleCommands = getDevService().getConsoleCommands();
 
