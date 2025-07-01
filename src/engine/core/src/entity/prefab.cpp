@@ -271,10 +271,10 @@ ResourceMemoryUsage Prefab::getMemoryUsage() const
 	return result;
 }
 
-void Prefab::generateUUIDs()
+void Prefab::generateUUIDs(gsl::span<const UUID> uuidsToChange)
 {
 	HashMap<UUID, UUID> changes;
-	entityData.generateUUIDs(changes);
+	entityData.generateUUIDs(changes, uuidsToChange);
 	entityData.updateComponentUUIDs(changes);
 }
 

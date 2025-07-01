@@ -55,7 +55,7 @@ namespace Halley {
 
 		ResourceMemoryUsage getMemoryUsage() const override;
 
-		void generateUUIDs();
+		void generateUUIDs(gsl::span<const UUID> idsToChange = {}); // Will change all if this is empty
 
 	protected:
 		struct Deltas {

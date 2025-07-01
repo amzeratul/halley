@@ -620,18 +620,20 @@ size_t EntityData::getSizeBytes() const
 	return result;
 }
 
-void EntityData::generateUUIDs(HashMap<UUID, UUID>& changes)
+void EntityData::generateUUIDs(HashMap<UUID, UUID>& changes, gsl::span<const UUID> uuidsToChange)
 {
-	const auto newValue = UUID::generate();
-	changes[instanceUUID] = newValue;
-	instanceUUID = newValue;
+	if (uuidsToChange.empty() || std_ex::contains(uuidsToChange, instanceUUID)) {
+		const auto newValue = UUID::generate();
+		changes[instanceUUID] = newValue;
+		instanceUUID = newValue;
+	}
 
 	if (parentUUID.isValid()) {
 		parentUUID = changes.at(parentUUID);
 	}
 
 	for (auto& c: children) {
-		c.generateUUIDs(changes);
+		c.generateUUIDs(changes, uuidsToChange);
 	}
 }
 

@@ -143,7 +143,7 @@ namespace Halley {
 
         size_t getSizeBytes() const;
 
-        void generateUUIDs(HashMap<UUID, UUID>& changes);
+        void generateUUIDs(HashMap<UUID, UUID>& changes, gsl::span<const UUID> uuidsToChange);  // Will change all if the span is empty
         void updateComponentUUIDs(const HashMap<UUID, UUID>& changes);
 
 	    void postProcessAddedChild(const HashSet<String>& ignoreComponents, bool removeEmptyComponents);
