@@ -784,12 +784,13 @@ void SceneEditorWindow::extractPrefab(const String& id)
 
 void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName)
 {
-	const auto entityNodeData = sceneData->getEntityNodeData(id);
-	auto entityData = entityNodeData.getData();
+	Prefab prefab;
+	prefab.getEntityData() = EntityData(sceneData->getEntityNodeData(id).getData());
+	prefab.generateUUIDs();
 
 	// Generate instance components and clear prefab
 	auto components = Vector<std::pair<String, ConfigNode>>();
-	for (auto& c: entityData.getComponents()) {
+	for (auto& c: prefab.getEntityData().getComponents()) {
 		if (c.first == "Transform2D" || c.first == "Transform3D") {
 			components.emplace_back(c);
 			c.second = ConfigNode::MapType();
@@ -819,8 +820,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 	});
 		
 	// Write prefab
-	const auto serializedData = serializeEntities(gsl::span<const EntityData>(&entityData, 1));
-	project.writeAssetToDisk(Path("prefab") / (prefabName + ".prefab"), serializedData);
+	project.writeAssetToDisk(Path("prefab") / (prefabName + ".prefab"), prefab.toYAML());
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)
