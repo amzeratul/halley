@@ -203,7 +203,7 @@ private:
 			} else {
 				return "No audio subsystem.";
 			}
-		}, { { { } }, { { "prefix", "Halley::String "} } });
+		}, { UIDebugConsoleSyntax::Variant(), {{"prefix", "Halley::String "}}});
 	}
 };
 
