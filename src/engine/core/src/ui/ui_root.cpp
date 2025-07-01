@@ -865,6 +865,11 @@ bool UIRoot::isAudioEventLoggingEnabled() const
 	return audioAPI && audioAPI->getEventLogging().has_value();
 }
 
+std::optional<String> UIRoot::getAudioEventLoggingPrefix() const
+{
+	return audioAPI ? audioAPI->getEventLoggingPrefix() : std::nullopt;
+}
+
 void UIRoot::sendEvent(UIEvent, bool includeSelf, bool originatesHere) const
 {
 	// Unhandled event

@@ -195,17 +195,23 @@ void AudioFacade::setDebugListener(IAudioDebugDataListener* listener)
 	});
 }
 
-void AudioFacade::setEventLogging(std::optional<LoggerLevel> level)
+void AudioFacade::setEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix)
 {
 	this->eventLogging = level;
+	this->eventLoggingPrefix = prefix;
 	enqueue([=]() {
-		engine->setEventLogging(level);
+		engine->setEventLogging(level, prefix);
 	});
 }
 
 std::optional<LoggerLevel> AudioFacade::getEventLogging() const
 {
 	return eventLogging;
+}
+
+std::optional<String> AudioFacade::getEventLoggingPrefix() const
+{
+	return eventLoggingPrefix;
 }
 
 

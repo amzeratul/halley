@@ -318,7 +318,8 @@ namespace Halley
 
 		virtual void setDebugListener(IAudioDebugDataListener* listener) {}
 
-		virtual void setEventLogging(std::optional<LoggerLevel> level) {}
+		virtual void setEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix = {}) {}
 		virtual std::optional<LoggerLevel> getEventLogging() const { return {}; }
+		virtual std::optional<String> getEventLoggingPrefix() const { return {}; }
 	};
 }

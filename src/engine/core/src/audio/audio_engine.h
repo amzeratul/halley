@@ -82,7 +82,7 @@ namespace Halley {
 
 		const String& getSwitchDefault(const String& switchId) const;
 
-		void setEventLogging(std::optional<LoggerLevel> level);
+		void setEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix);
 
 	private:
 		struct BusGain {
@@ -141,6 +141,7 @@ namespace Halley {
 		bool debugDataEnabled = false;
 
 		std::optional<LoggerLevel> eventLogging;
+		std::optional<String> eventLogPrefix;
 
 		void mixVoices(size_t numSamples, size_t channels, AudioBuffersRef& buffers);
 		void mixMainRegion(size_t numSamples, size_t nChannels, AudioRegion& region, AudioBuffersRef& outputBuffers, float prevGain, float gain);

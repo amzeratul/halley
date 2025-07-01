@@ -56,7 +56,9 @@ void AudioEngine::destroyRegion(AudioRegionId id)
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
 {
 	if (eventLogging) {
-		Logger::log(*eventLogging, "AudioEvent posted: " + event.getAssetId());
+		if (!eventLogPrefix || event.getAssetId().startsWith(*eventLogPrefix)) {
+			Logger::log(*eventLogging, "AudioEvent posted: " + event.getAssetId());
+		}
 	}
 
 	const auto iter = emitters.find(emitterId);
@@ -672,9 +674,10 @@ const String& AudioEngine::getSwitchDefault(const String& switchId) const
 	return String::emptyString();
 }
 
-void AudioEngine::setEventLogging(std::optional<LoggerLevel> level)
+void AudioEngine::setEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix)
 {
 	eventLogging = level;
+	eventLogPrefix = std::move(prefix);
 }
 
 AudioEngine::BusGain::BusGain(String id)

@@ -97,6 +97,7 @@ namespace Halley {
 		
 		std::optional<std::shared_ptr<IAudioHandle>> playSound(const String& eventName);
 		bool isAudioEventLoggingEnabled() const;
+		std::optional<String> getAudioEventLoggingPrefix() const;
 		
 		void sendEvent(UIEvent event, bool includeSelf, bool originatesHere = true) const override;
 

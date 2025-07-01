@@ -188,17 +188,22 @@ private:
 	{
 		devService.getConsoleCommands().addCommand("audioLogEvents", [=] (Vector<String> args) -> String {
 			if (auto* audio = getAPI().audio) {
+				std::optional<String> prefix;
+				if (!args.empty()) {
+					prefix = args[0];
+				}
+
 				if (audio->getEventLogging()) {
 					audio->setEventLogging(std::nullopt);
 					return "Audio log disabled.";
 				} else {
-					audio->setEventLogging(LoggerLevel::Dev);
-					return "Audio log enabled.";					
+					audio->setEventLogging(LoggerLevel::Dev, prefix);
+					return prefix ? "Audio log enabled for " + *prefix + "." : "Audio log enabled.";
 				}
 			} else {
 				return "No audio subsystem.";
 			}
-		}, { UIDebugConsoleSyntax() });
+		}, { { { } }, { { "prefix", "Halley::String "} } });
 	}
 };
 
