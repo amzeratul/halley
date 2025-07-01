@@ -241,7 +241,13 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 			throw Exception("Error creating entity \"" + name + "\" - World::uuidMap is seemingly corrupted", HalleyExceptions::Entity);
 		} else {
 			if (oldEntity->parent || !oldEntity->children.empty() || !oldEntity->components.empty()) {
-				throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists as " + (oldEntity->name ? *oldEntity->name : String()), HalleyExceptions::Entity);
+				String parentInfo;
+				if (parent) {
+					parentInfo = " as child of " + parent->getName() + " [" + parent->getPrefabAssetId() + "]";
+				} else {
+					parentInfo = " (root)";
+				}
+				throw Exception("Error creating entity \"" +name + "\"" + parentInfo + " - UUID " + toString(uuid) + " already exists as " + (oldEntity->name ? *oldEntity->name : String()), HalleyExceptions::Entity);
 			} else if (oldEntity->fromNetwork) {
 				// NOTE: Currently this can happen on network clients sometimes. An empty entity
 				// seems to be alive still. For now, log an error instead of throwing an exception.

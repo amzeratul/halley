@@ -461,6 +461,8 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	const auto& reflection = world.getReflection();
 	const size_t nComponents = data.getNumComponents();
 
+	context.getEntitySerializationContext().debugCurrentContext = entity.getName() + " [" + entity.getPrefabAssetId() + "]";
+
 	if (entity.getNumComponents() == 0) {
 		// Simple population
 		for (size_t i = 0; i < nComponents; ++i) {
