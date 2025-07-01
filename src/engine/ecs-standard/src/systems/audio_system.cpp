@@ -193,7 +193,7 @@ private:
 					prefix = args[0];
 				}
 
-				if (audio->getEventLogging()) {
+				if (audio->getEventLogging() && !prefix) {
 					audio->setEventLogging(std::nullopt);
 					return "Audio log disabled.";
 				} else {
