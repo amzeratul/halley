@@ -35,9 +35,15 @@ public:
 	{
 		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
 
-		if (getSessionService().isMultiplayer()) {
-			const auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
-			entityNetworkSession->getSession().addListener(this);
+		if (const auto session = getEntityNetworkSession()) {
+			session->getSession().addListener(this);
+		}
+	}
+
+	void deInit() override
+	{
+		if (const auto session = getEntityNetworkSession()) {
+			session->getSession().removeListener(this);
 		}
 	}
 
@@ -148,6 +154,14 @@ private:
         bool withAuthority = false;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
+
+	const EntityNetworkSession* getEntityNetworkSession() const
+	{
+		if (getSessionService().isMultiplayer()) {
+			return getSessionService().getMultiplayerSession().getEntityNetworkSession();
+		}
+		return nullptr;
+	}
 
 	void onPeerDisconnected(NetworkSession::PeerId peerId) override
 	{
