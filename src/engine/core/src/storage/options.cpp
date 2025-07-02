@@ -63,8 +63,10 @@ ConfigNode Options::toConfigNode() const
 
 void Options::setOption(std::string_view name, ConfigNode value)
 {
-	options[name] = std::move(value);
-	modified = true;
+	if (options[name] != value) {
+		options[name] = std::move(value);
+		modified = true;
+	}
 }
 
 ConfigNode Options::getOption(std::string_view name) const
@@ -173,6 +175,18 @@ bool Options::getScreenShake() const
 void Options::setScreenShake(bool enabled)
 {
 	setOption("screenShake", ConfigNode(enabled));
+}
+
+void Options::setAudioEventLogging(std::optional<LoggerLevel> level, const std::optional<String>& prefix)
+{
+	setOption("audio_log_level", ConfigNode(level));
+	setOption("audio_log_prefix", ConfigNode(prefix));
+	save();
+}
+
+void Options::loadAudioEventLogging(AudioAPI& audioAPI) const
+{
+	audioAPI.setEventLogging(getOption("audio_log_level").asOptional<LoggerLevel>(), getOption("audio_log_prefix").asOptional<String>());
 }
 
 float Options::getVolume(std::string_view bus) const

@@ -10,6 +10,10 @@ public:
 
 		if (auto* devService = tryGetDevService()) {
 			initConsoleCommands(*devService);
+
+			if (devService->isDevMode()) {
+				devService->loadAudioEventLogging(*getAPI().audio);
+			}
 		}
 	}
 
@@ -193,11 +197,19 @@ private:
 					prefix = args[0];
 				}
 
+				auto* devService = tryGetDevService();
+
 				if (audio->getEventLogging() && !prefix) {
 					audio->setEventLogging(std::nullopt);
+					if (devService) {
+						devService->setAudioEventLogging(std::nullopt);
+					}
 					return "Audio log disabled.";
 				} else {
 					audio->setEventLogging(LoggerLevel::Dev, prefix);
+					if (devService) {
+						devService->setAudioEventLogging(LoggerLevel::Dev, prefix);
+					}
 					return prefix ? "Audio log enabled for " + *prefix + "." : "Audio log enabled.";
 				}
 			} else {

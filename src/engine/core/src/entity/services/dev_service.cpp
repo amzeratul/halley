@@ -218,6 +218,20 @@ void DevService::setActive(bool active)
 	setCommandsBound(active);
 }
 
+void DevService::setAudioEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix)
+{
+	if (options) {
+		options->setAudioEventLogging(level, prefix);
+	}
+}
+
+void DevService::loadAudioEventLogging(AudioAPI& audio)
+{
+	if (options) {
+		options->loadAudioEventLogging(audio);
+	}
+}
+
 void DevService::setCommandsBound(bool bound)
 {
 	if (consoleController && commands) {

@@ -76,6 +76,9 @@ namespace Halley {
 
 		void setActive(bool active);
 
+		void setAudioEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix = {});
+		void loadAudioEventLogging(AudioAPI& audio);
+
 	private:
 		std::shared_ptr<Options> options;
 		bool editorMode = false;

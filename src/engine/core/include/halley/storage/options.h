@@ -69,6 +69,9 @@ namespace Halley {
 		bool getScreenShake() const;
 		void setScreenShake(bool enabled);
 
+		void setAudioEventLogging(std::optional<LoggerLevel> level, const std::optional<String>& prefix);
+		void loadAudioEventLogging(AudioAPI& audioAPI) const;
+
 	protected:
 		
 		std::shared_ptr<ISaveData> saveData;
