@@ -10,6 +10,21 @@ BaseFrameData::BaseFrameData()
 	painters.push_back(std::make_unique<SpritePainter>());
 }
 
+void BaseFrameData::reset()
+{
+	debugLines.clear();
+	debugPoints.clear();
+	debugPolygons.clear();
+	debugEllipses.clear();
+	scriptStates.clear();
+	debugWorldTexts.clear();
+	uiRootData.clear();
+
+	cameras.clear();
+	renderGraphCommands.clear();
+	zoomLevel = 1;
+}
+
 void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime)
 {
 	if (multithreaded && previous) {
@@ -40,15 +55,5 @@ void BaseFrameData::baseStartFrame(bool multithreaded, BaseFrameData* previous, 
 
 void BaseFrameData::baseEndFrame()
 {
-	debugLines.clear();
-	debugPoints.clear();
-	debugPolygons.clear();
-	debugEllipses.clear();
-	scriptStates.clear();
-	debugWorldTexts.clear();
-	uiRootData.clear();
-
-	cameras.clear();
-	renderGraphCommands.clear();
-	zoomLevel = 1;
+	reset();
 }

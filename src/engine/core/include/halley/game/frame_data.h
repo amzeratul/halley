@@ -125,6 +125,8 @@ namespace Halley {
 		virtual void doStartFrame(bool multithreaded, BaseFrameData* previous, Time deltaTime) {}
 		virtual void doEndFrame() {}
 
+		void reset();
+
 		static BaseFrameData& getCurrentBase()
 		{
 			assert(hasCurrent());
