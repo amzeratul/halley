@@ -37,8 +37,17 @@ ConfigNode ScriptingService::evaluateExpression(const String& expression, bool u
 	}
 
 	auto stack = LuaStackOps(*luaState);
-	stack.eval("return " + expression, "", throwOnError);
+	const bool ok = stack.eval("return " + expression, "", throwOnError);
 	auto result = stack.popConfigNode();
+
+	if (!ok) {
+		String errorMsg = "Error evaluating Lua expression: \"" + expression + "\"";
+		if (throwOnError) {
+			throw Exception(errorMsg, HalleyExceptions::Scripting);
+		} else {
+			Logger::logError(errorMsg);
+		}
+	}
 
 	if (useResultCache) {
 		resultCache[expression] = ConfigNode(result);
