@@ -164,10 +164,9 @@ namespace {
 			}
 
 			if (polygon.isPointInside(relPos)) {
-				return sourcePos;
+				return listener.position;
 			} else {
-				const auto srcPos = polygon.getClosestPoint(relPos) + sourcePos.xy();
-				return Vector3f(srcPos, 0);
+				return Vector3f(polygon.getClosestPoint(relPos) + sourcePos.xy(), 0);
 			}
 		} else {
 			return sourcePos;
