@@ -113,7 +113,7 @@ namespace Halley {
 		void removeCommands(UIDebugConsoleCommands& commands);
 		void clearCommands();
 
-		Future<Vector<StringUTF32>> getAutoComplete(const StringUTF32& line) const;
+		Future<Vector<StringUTF32>> getAutoComplete(const StringUTF32& line) const override;
 
 	private:
 		Vector<UIDebugConsoleCommands*> commands;
