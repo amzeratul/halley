@@ -26,6 +26,11 @@ UIRootGroup::UIRootGroup(const HalleyAPI& api)
 	}
 }
 
+bool UIRootGroup::isInputActive() const
+{
+	return inputActive;
+}
+
 void UIRootGroup::updateKeyboardInput()
 {
 	// Focus could have been destructed, clean up
@@ -39,12 +44,14 @@ void UIRootGroup::updateKeyboardInput()
 			focused.reset();
 		}
 
-		for (const auto& key: keyboard->getPendingKeys()) {
-			// Send to focused first
-			if (focused) {
-				focused->receiveKeyPress(key);
-			} else {
-				receiveKeyPress(key);
+		if (inputActive) {
+			for (const auto& key: keyboard->getPendingKeys()) {
+				// Send to focused first
+				if (focused) {
+					focused->receiveKeyPress(key);
+				} else {
+					receiveKeyPress(key);
+				}
 			}
 		}
 	}
@@ -179,7 +186,7 @@ void UIRootGroup::focusWidget(UIWidget& widget, bool byClicking)
 
 		const auto text = widget.getTextInputData();
 		if (text && keyboard) {
-			textCapture = std::make_unique<TextInputCapture>(keyboard->captureText(*text, {}));
+			textCapture = std::make_unique<TextInputCapture>(keyboard->captureText(*text, {}, this));
 		}
 		
 		widget.sendEvent(UIEvent(UIEventType::FocusGained, widget.getId()));
@@ -512,6 +519,16 @@ ConfigNode UIRoot::getUISetting(std::string_view key)
 void UIRoot::setSettingProvider(IUIRootSettingsProvider* provider)
 {
 	this->provider = provider;
+}
+
+void UIRoot::setInputActive(bool active)
+{
+	group->inputActive = active;
+}
+
+bool UIRoot::isInputActive() const
+{
+	return group->inputActive;
 }
 
 void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)

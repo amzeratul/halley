@@ -32,9 +32,11 @@ InputKeyboard::InputKeyboard(int nButtons, std::shared_ptr<IClipboard> clipboard
 {
 }
 
-TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, SoftwareKeyboardData data)
+TextInputCapture InputKeyboard::captureText(TextInputData& textInputData, SoftwareKeyboardData data, UIRootGroup* rootGroup)
 {
-	return TextInputCapture(textInputData, std::move(data), makeTextInputCapture());
+	auto capture = makeTextInputCapture();
+	capture->setUIRootGroup(rootGroup);
+	return TextInputCapture(textInputData, std::move(data), std::move(capture));
 }
 
 void InputKeyboard::onKeyPressed(KeyCode code, KeyMods mods)
@@ -99,9 +101,11 @@ void InputKeyboard::onTextEntered(const char* text)
 bool InputKeyboard::sendKeyPress(KeyboardKeyPress chr)
 {
 	for (const auto& c: captures) {
-		const bool handled = c->onKeyPress(chr, clipboard.get());
-		if (handled) {
-			return true;
+		if (c->isActive()) {
+			const bool handled = c->onKeyPress(chr, clipboard.get());
+			if (handled) {
+				return true;
+			}
 		}
 	}
 

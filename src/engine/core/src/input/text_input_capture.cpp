@@ -4,6 +4,7 @@
 
 #include "halley/input/input_keyboard.h"
 #include "halley/input/text_input_data.h"
+#include "halley/ui/ui_root.h"
 
 using namespace Halley;
 
@@ -15,6 +16,15 @@ void ITextInputCapture::onTextEntered(const StringUTF32& text)
 bool ITextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
 	return false;
+}
+
+bool ITextInputCapture::isActive() const
+{
+	return true;
+}
+
+void ITextInputCapture::setUIRootGroup(UIRootGroup* rootGroup)
+{
 }
 
 StandardTextInputCapture::StandardTextInputCapture(InputKeyboard& parent)
@@ -56,6 +66,19 @@ void StandardTextInputCapture::onTextEntered(const StringUTF32& text)
 bool StandardTextInputCapture::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 {
 	return textInput->onKeyPress(c, clipboard);
+}
+
+bool StandardTextInputCapture::isActive() const
+{
+	if (rootGroup) {
+		return rootGroup->isInputActive();
+	}
+	return true;
+}
+
+void StandardTextInputCapture::setUIRootGroup(UIRootGroup* rootGroup)
+{
+	this->rootGroup = rootGroup;
 }
 
 size_t HotkeyTextInputCapture::addHotkey(KeyboardKeyPress c)

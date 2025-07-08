@@ -41,6 +41,8 @@ namespace Halley {
 	public:
 		UIRootGroup(const HalleyAPI& api);
 
+		bool isInputActive() const;
+
 	private:
 		const HalleyAPI& api;
 
@@ -49,6 +51,7 @@ namespace Halley {
 		Vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
 		std::function<bool(KeyboardKeyPress)> unhandledKeyPressListener;
 		std::shared_ptr<InputKeyboard> keyboard;
+		bool inputActive = true;
 
 		Vector<UIRoot*> roots;
 
@@ -138,6 +141,9 @@ namespace Halley {
 		void setUISetting(std::string_view key, ConfigNode value);
 		ConfigNode getUISetting(std::string_view key);
 		void setSettingProvider(IUIRootSettingsProvider* provider);
+
+		void setInputActive(bool active);
+		bool isInputActive() const;
 
 	private:
 		String id;

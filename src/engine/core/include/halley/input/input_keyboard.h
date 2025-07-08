@@ -34,7 +34,7 @@ namespace Halley {
 
 		gsl::span<const KeyboardKeyPress> getPendingKeys() const;
 
-		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData);
+		virtual TextInputCapture captureText(TextInputData& textInputData, SoftwareKeyboardData softKeyboardData, UIRootGroup* rootGroup = nullptr);
 		void addCapture(ITextInputCapture* capture);
 		virtual void removeCapture(ITextInputCapture* capture);
 

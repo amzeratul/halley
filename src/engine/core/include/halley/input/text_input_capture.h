@@ -3,6 +3,7 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	class UIRootGroup;
 	struct KeyboardKeyPress;
 	class InputKeyboard;
 	class TextInputData;
@@ -26,12 +27,15 @@ namespace Halley {
 
 		virtual void onTextEntered(const StringUTF32& text);
 		virtual bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard);
+
+		virtual bool isActive() const;
+		virtual void setUIRootGroup(UIRootGroup* rootGroup);
 	};
 
 	class StandardTextInputCapture final : public ITextInputCapture {
 	public:
 		StandardTextInputCapture(InputKeyboard& parent);
-		~StandardTextInputCapture();
+		~StandardTextInputCapture() override;
 
 		void open(TextInputData& input, SoftwareKeyboardData softKeyboardData) override;
 		void close() override;
@@ -40,11 +44,15 @@ namespace Halley {
 
 		void onTextEntered(const StringUTF32& text) override;
 		bool onKeyPress(KeyboardKeyPress c, IClipboard* clipboard) override;
+		bool isActive() const override;
+
+		void setUIRootGroup(UIRootGroup* rootGroup) override;
 
 	private:
 		bool currentlyOpen = false;
 		InputKeyboard& parent;
 		TextInputData* textInput;
+		UIRootGroup* rootGroup = nullptr;
 	};
 
 	class HotkeyTextInputCapture : public ITextInputCapture {
