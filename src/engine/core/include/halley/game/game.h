@@ -79,6 +79,7 @@ namespace Halley
 
 		std::optional<int> getCurrentDisplay() const;
 		UIDebugConsoleCommands& initBaseCommands();
+		UIDebugConsoleCommands& initBatchCommands(IUIDebugConsoleController& controller);
 
 	private:
 		friend class Core;
@@ -86,5 +87,6 @@ namespace Halley
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
 		UIDebugConsoleCommands baseCommands;
+		UIDebugConsoleCommands batchCommands;
 	};
 }

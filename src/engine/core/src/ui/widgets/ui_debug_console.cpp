@@ -30,9 +30,10 @@ UIDebugConsoleResponse::UIDebugConsoleResponse()
 {
 }
 
-UIDebugConsoleResponse::UIDebugConsoleResponse(String response, bool closeConsole)
-	: response(response)
+UIDebugConsoleResponse::UIDebugConsoleResponse(String response, bool closeConsole, bool error)
+	: response(std::move(response))
 	, closeConsole(closeConsole)
+	, error(error)
 {
 }
 
@@ -54,6 +55,11 @@ const String& UIDebugConsoleResponse::getResponse() const
 bool UIDebugConsoleResponse::isCloseConsole() const
 {
 	return closeConsole;
+}
+
+bool UIDebugConsoleResponse::hasError() const
+{
+	return error;
 }
 
 ConfigNode UIDebugConsoleResponse::toConfigNode() const
@@ -86,6 +92,32 @@ void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& que
 void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax)
 {
 	commands[command.asciiLower()] = UIDebugConsoleCommandData{ command, std::move(callback), &queue, std::move(syntax) };
+}
+
+void UIDebugConsoleCommands::addCommandBatches(const ConfigNode& node, IUIDebugConsoleController& controller)
+{
+	for (const auto& [commandId, commandsNode]: node.asMap()) {
+		addCommand(commandId, [&controller, commands = commandsNode.asVector<String>({})] (Vector<String> _args) -> UIDebugConsoleResponse {
+			Vector<String> outputs;
+
+			for (const auto& rawCommand: commands) {
+				auto args = rawCommand.split(' ');
+				String command = std::move(args[0]);
+				args.erase(args.begin());
+
+				auto result = controller.runCommand(std::move(command), std::move(args)).get();
+				if (result.hasError()) {
+					outputs += result.getResponse();
+				}
+			}
+
+			if (outputs.empty()) {
+				return UIDebugConsoleResponse("Done");
+			} else {
+				return UIDebugConsoleResponse(String::concatList(outputs.const_span(), "\n"), false, true);
+			}
+		}, { UIDebugConsoleSyntax() });
+	}
 }
 
 const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCommands() const
@@ -155,7 +187,7 @@ Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String comma
 		}
 	}
 	Promise<UIDebugConsoleResponse> value;
-	value.setValue("Command not found: \"" + command + "\".");
+	value.setValue(UIDebugConsoleResponse("Command not found: \"" + command + "\".", false, true));
 	return value.getFuture();
 }
 
@@ -177,7 +209,7 @@ Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String comma
 		if (result) {
 			// Syntax error
 			Promise<UIDebugConsoleResponse> value;
-			value.setValue(result.value());
+			value.setValue(UIDebugConsoleResponse(result.value(), false, true));
 			return value.getFuture();
 		}
 	}
@@ -425,6 +457,7 @@ void UIDebugConsole::setup()
 {
 	userInputColour = Colour::fromString("#FFFFFF");
 	responseColour = Colour::fromString("#E2D5EA");
+	errorResponseColour = Colour::fromString("#E76D6D");
 
 	add(factory.makeUI("halley/debug_console"), 1);
 
@@ -467,7 +500,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	
 	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
-			addLine(result.getResponse(), responseColour);
+			addLine(result.getResponse(), result.hasError() ? errorResponseColour : responseColour);
 		}
 		inputField->setEnabled(true);
 		getRoot()->setFocus(inputField);

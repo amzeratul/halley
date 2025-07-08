@@ -1,6 +1,7 @@
 #include "halley/game/game.h"
 
 #include "halley/editor_extensions/asset_preview_generator.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/scripting/script_node_type.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
@@ -197,6 +198,27 @@ UIDebugConsoleCommands& Game::initBaseCommands()
 	}, { { { "idx", "int" }, { "resX", "int" }, { "resY", "int" }, { "refreshRate", "int" } } });
 
 	return baseCommands;
+}
+
+UIDebugConsoleCommands& Game::initBatchCommands(IUIDebugConsoleController& controller)
+{
+	if (isDevMode()) {
+		if (const auto& batches = getResources().tryGet<ConfigFile>("dev/command_batches")) {
+			batchCommands.addCommandBatches(batches->getRoot(), controller);
+		}
+
+		const auto userPath = getAPI().core->getEnvironment().getDataPath() / "user_command_batches.yaml";
+		if (Path::exists(userPath)) {
+			Logger::logDev("Reading user batch commands from " + userPath.getNativeString(false));
+			const auto& data = Path::readFileString(userPath);
+			if (!data.isEmpty()) {
+				const auto& config = YAMLConvert::parseConfig(data);
+				batchCommands.addCommandBatches(config, controller);
+			}
+		}
+	}
+
+	return batchCommands;
 }
 
 size_t Game::getMaxThreads(const ComputerData& computerData) const

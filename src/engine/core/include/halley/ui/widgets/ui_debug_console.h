@@ -4,23 +4,26 @@
 #include "halley/concurrency/future.h"
 
 namespace Halley {
+	class IUIDebugConsoleController;
 	class UIFactory;
 	class UIStyle;
 
 	class UIDebugConsoleResponse {
 	public:
 		UIDebugConsoleResponse();
-		UIDebugConsoleResponse(String response, bool closeConsole = false);
-		UIDebugConsoleResponse(const ConfigNode& node);
+		UIDebugConsoleResponse(String response, bool closeConsole = false, bool error = false);
+		explicit UIDebugConsoleResponse(const ConfigNode& node);
 
 		const String& getResponse() const;
 		bool isCloseConsole() const;
+		bool hasError() const;
 
 		ConfigNode toConfigNode() const;
 		
 	private:
 		String response;
 		bool closeConsole = false;
+		bool error = false;
 	};
 
 	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(Vector<String>)>;
@@ -84,6 +87,8 @@ namespace Halley {
 		void addCommand(String command, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback);
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
+
+		void addCommandBatches(const ConfigNode& node, IUIDebugConsoleController& controller);
 
 		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
 		void clear();
@@ -154,5 +159,6 @@ namespace Halley {
 
 		Colour4f userInputColour;
 		Colour4f responseColour;
+		Colour4f errorResponseColour;
     };
 }
