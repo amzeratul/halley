@@ -18,6 +18,9 @@ namespace Halley {
 			: pos(pos)
 			, subWorld(subWorld)
 		{
+			if (!pos.isValid()) {
+				throw Exception("Invalid WorldPosition created", HalleyExceptions::Utils);
+			}
 		}
 
 		WorldPosition(const ConfigNode& node, Vector2f defaultPos = {}, int defaultSubWorld = 0);
@@ -32,6 +35,8 @@ namespace Halley {
 
 		WorldPosition operator*(float value) const;
 		WorldPosition operator/(float value) const;
+
+		WorldPosition& operator+=(const Vector2f& other);
 
 		bool operator==(const WorldPosition& other) const;
 		bool operator!=(const WorldPosition& other) const;

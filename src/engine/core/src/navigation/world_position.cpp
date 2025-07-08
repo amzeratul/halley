@@ -21,6 +21,10 @@ WorldPosition::WorldPosition(const ConfigNode& node, Vector2f defaultPos, int de
 			}
 		}
 	}
+
+	if (!pos.isValid()) {
+		throw Exception("Invalid WorldPosition created from ConfigNode", HalleyExceptions::Utils);
+	}
 }
 
 ConfigNode WorldPosition::toConfigNode() const
@@ -65,6 +69,12 @@ WorldPosition WorldPosition::operator*(float value) const
 WorldPosition WorldPosition::operator/(float value) const
 {
 	return WorldPosition(pos / value, subWorld);
+}
+
+WorldPosition& WorldPosition::operator+=(const Vector2f& other)
+{
+	pos += other;
+	return *this;
 }
 
 bool WorldPosition::operator==(const WorldPosition& other) const
