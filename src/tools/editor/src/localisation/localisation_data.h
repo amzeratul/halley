@@ -20,8 +20,11 @@ namespace Halley {
 	public:
 		int totalWords = 0;
 		int totalKeys = 0;
+		int readyWords = 0;
+		int readyKeys = 0;
 		HashMap<String, int> wordsPerCategory;
 		HashMap<String, int> keysPerCategory;
+		HashMap<String, int> wordsPerKey;
 
 		LocalisationStats& operator+=(const LocalisationStats& other);
 
@@ -33,6 +36,8 @@ namespace Halley {
 		int translatedKeys = 0;
 		int outdatedKeys = 0;
 		int obsoleteKeys = 0;
+		int translatedWords = 0;
+		int outdatedWords = 0;
 	};
 
 	enum class LocReadyStatus {
@@ -79,8 +84,8 @@ namespace Halley {
 		String category;
 		Vector<LocalisationDataEntry> entries;
 
-		LocalisationStats getStats() const;
-		LocalisationStats getStats(const LocTranslationData& translated) const;
+		LocalisationStats getStats(const LocalisationFilterRules& filterRules) const;
+		LocalisationStats getStats(const LocTranslationData& translated, const LocalisationFilterRules& filterRules) const;
 
 		size_t getNumEntries() const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
@@ -109,7 +114,7 @@ namespace Halley {
 	public:
 		void setLanguage(I18NLanguage language);
 		const I18NLanguage& getLanguage() const;
-		LocalisationStats getStats() const;
+		LocalisationStats getStats(const LocalisationFilterRules& filterRules) const;
 
 		LocOriginalDataChunk& getChunk(const String& name);
 		const LocOriginalDataChunk* tryGetChunk(const String& name) const;
@@ -176,7 +181,7 @@ namespace Halley {
 		bool setVersion(const String& key, int32_t curVersion);
 		const LocTranslationEntry* tryGetEntry(const String& key) const;
 
-		TranslationStats getTranslationStats(const LocOriginalData& original) const;
+		TranslationStats getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats) const;
 		static LocTranslationData generateFromProject(const I18NLanguage& language, Project& project);
 
 		bool update(const LocTranslationData& remote);

@@ -8,11 +8,16 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 {
 	totalWords += other.totalWords;
 	totalKeys += other.totalKeys;
+	readyWords += other.readyWords;
+	readyKeys += other.readyKeys;
 	for (auto& [k, v]: other.keysPerCategory) {
 		keysPerCategory[k] += v;
 	}
 	for (auto& [k, v]: other.wordsPerCategory) {
 		wordsPerCategory[k] += v;
+	}
+	for (auto& [k, v]: other.wordsPerKey) {
+		wordsPerKey[k] = v;
 	}
 
 	return *this;
@@ -52,29 +57,33 @@ LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRule
 	return priority >= rules.minPriorityForReady ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
 }
 
-LocalisationStats LocOriginalDataChunk::getStats() const
+LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& filterRules) const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		const auto wordCount = LocalisationStats::getWordCount(entry.value);
+		result.wordsPerKey[entry.key] = wordCount;
 		result.totalKeys++;
 		result.keysPerCategory[category]++;
 		result.totalWords += wordCount;
 		result.wordsPerCategory[category] += wordCount;
+		result.readyWords += entry.getReadyState(filterRules) == LocReadyStatus::Ready ? wordCount : 0;
 	}
 	return result;
 }
 
-LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& translated) const
+LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& translated, const LocalisationFilterRules& filterRules) const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.key)) {
 			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->value);
+			result.wordsPerKey[entry.key] = wordCount;
 			result.totalKeys++;
 			result.keysPerCategory[category]++;
 			result.totalWords += wordCount;
 			result.wordsPerCategory[category] += wordCount;
+			result.readyWords += entry.getReadyState(filterRules) == LocReadyStatus::Ready ? wordCount : 0;
 		}
 	}
 	return result;
@@ -110,11 +119,11 @@ const I18NLanguage& LocOriginalData::getLanguage() const
 	return language;
 }
 
-LocalisationStats LocOriginalData::getStats() const
+LocalisationStats LocOriginalData::getStats(const LocalisationFilterRules& filterRules) const
 {
 	LocalisationStats result;
 	for (auto& chunk: chunks) {
-		result += chunk.getStats();
+		result += chunk.getStats(filterRules);
 	}
 	return result;
 }
@@ -454,16 +463,21 @@ const LocTranslationEntry* LocTranslationData::tryGetEntry(const String& key) co
 	return nullptr;
 }
 
-TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original) const
+TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& original, const LocalisationStats& origStats) const
 {
 	TranslationStats result;
 
 	for (const auto& entry: entries) {
-		if (auto version = original.tryGetVersion(entry.first)) {
+		if (auto* originalEntry = original.tryGetEntry(entry.first)) {
+			const auto version = originalEntry->version;
+			const auto wordCount = origStats.wordsPerKey.value_or(entry.first, 0);
+
 			if (version == entry.second.origVersion) {
 				result.translatedKeys++;
+				result.translatedWords += wordCount;
 			} else {
 				result.outdatedKeys++;
+				result.outdatedWords += wordCount;
 			}
 		} else {
 			result.obsoleteKeys++;

@@ -57,6 +57,14 @@ children:
             widget:
               active: true
               class: image
+              colour: "#191919"
+              id: bar_grey
+              image: $ui_list_item
+          - uuid: 411081fb-0444-477b-9d20-d656b06842e1
+            border: [1, 1, 1, 1]
+            widget:
+              active: true
+              class: image
               colour: "#004de0"
               id: bar_blue
               image: $ui_list_item

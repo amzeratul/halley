@@ -322,8 +322,9 @@ void LocalisationEditor::populateData()
 
 void LocalisationEditor::populateOriginalLanguageData()
 {
+	const auto& filterRules = project.getProperties().getLocFilterRules();
 	auto& originalLanguage = getOriginalData();
-	const auto origStats = originalLanguage.getStats();
+	const auto origStats = originalLanguage.getStats(filterRules);
 
 	getWidgetAs<UIImage>("mainLanguageFlag")->setSprite(root.getFlag(originalLanguage.getLanguage()));
 	getWidgetAs<UILabel>("mainLanguage")->setText(root.getLanguageName(originalLanguage.getLanguage()));
@@ -376,8 +377,9 @@ void LocalisationEditor::populateOriginalLanguageData()
 
 void LocalisationEditor::populateTranslationData()
 {
+	const auto& filterRules = project.getProperties().getLocFilterRules();
 	auto& originalLanguage = getOriginalData();
-	const auto origStats = originalLanguage.getStats();
+	const auto origStats = originalLanguage.getStats(filterRules);
 
 	auto languagesContainer = getWidget("languages");
 	languagesContainer->clear();
@@ -387,16 +389,16 @@ void LocalisationEditor::populateTranslationData()
 			bool canEdit = canEditLanguage(lang);
 			if (canEdit || canViewLanguage(lang)) {
 				if (auto* translation = getTranslationData(lang)) {
-					addTranslationData(*languagesContainer, originalLanguage, *translation, getTranslationDataRemote(lang), origStats.totalKeys, origStats.totalWords, canEdit);
+					addTranslationData(*languagesContainer, originalLanguage, *translation, getTranslationDataRemote(lang), origStats, canEdit);
 				}
 			}
 		}
 	}
 }
 
-void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, int origTotalKeys, int totalWords, bool canEdit)
+void LocalisationEditor::addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, const LocalisationStats& origStats, bool canEdit)
 {
-	const auto totalKeys = std::max(origTotalKeys, 1); // Avoid divisions by zero
+	const auto totalWords = std::max(origStats.totalWords, 1); // Avoid divisions by zero
 
 	auto widget = factory.makeUI("halley/localisation/localisation_language_summary");
 	widget->layout();
@@ -408,25 +410,27 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidget("upload")->setEnabled(canEdit);
 
 	const auto language = translationData.language;
-	const auto locStats = translationData.getTranslationStats(origData);
-	const auto locStatsRemote = translationDataRemote ? translationDataRemote->getTranslationStats(origData) : TranslationStats{};
+	const auto locStats = translationData.getTranslationStats(origData, origStats);
+	const auto locStatsRemote = translationDataRemote ? translationDataRemote->getTranslationStats(origData, origStats) : TranslationStats{};
 
-	const auto translatedPercent = getPercent(locStats.translatedKeys, totalKeys);
-	const auto translatedPercentRemote = getPercent(locStatsRemote.translatedKeys, totalKeys);
+	const auto translatedPercent = getPercent(locStats.translatedWords, totalWords);
+	const auto translatedPercentRemote = getPercent(locStatsRemote.translatedWords, totalWords);
 
 	const auto rect = Rect4i(widget->getWidget("bar_full")->getRect());
 	const int totalW = rect.getWidth() - 2;
 	const int totalH = rect.getHeight();
-	const int blueW = std::max((locStatsRemote.translatedKeys * totalW) / totalKeys, locStatsRemote.translatedKeys > 0 ? 1 : 0);
-	const int greenW = std::max((locStats.translatedKeys * totalW) / totalKeys, locStats.translatedKeys > 0 ? 1 : 0);
-	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalKeys, locStats.outdatedKeys > 0 ? 1 : 0);
+	const int greyW = std::max(((totalWords - origStats.readyWords) * totalW) / totalWords, origStats.readyWords == totalWords ? 0 : 1);
+	const int blueW = std::max((locStatsRemote.translatedWords * totalW) / totalWords, locStatsRemote.translatedWords > 0 ? 1 : 0);
+	const int greenW = std::max((locStats.translatedWords * totalW) / totalWords, locStats.translatedWords > 0 ? 1 : 0);
+	const int yellowW = std::max((locStats.outdatedKeys * totalW) / totalWords, locStats.outdatedKeys > 0 ? 1 : 0);
 
 	auto percentString = toString(translatedPercent, 1) + "%";
-	if (translationDataRemote && locStats.translatedKeys != locStatsRemote.translatedKeys) {
+	if (translationDataRemote && locStats.translatedWords != locStatsRemote.translatedWords) {
 		percentString += " / " + toString(translatedPercentRemote, 1) + "%";
 	}
 
 	widget->getWidgetAs<UILabel>("completion")->setText(LocalisedString::fromUserString(percentString));
+	widget->getWidgetAs<UIImage>("bar_grey")->setLocalClip(Rect4f(Rect4i(totalW - greyW, 0, greyW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_blue")->setLocalClip(Rect4f(Rect4i(0, 0, blueW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_green")->setLocalClip(Rect4f(Rect4i(0, 0, greenW, totalH)));
 	widget->getWidgetAs<UIImage>("bar_yellow")->setLocalClip(Rect4f(Rect4i(greenW, 0, yellowW, totalH)));
@@ -437,7 +441,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 	widget->getWidget("costBox")->setActive(isDevEnvironment() && cost.has_value());
 	if (cost) {
 		cost = convertCurrency(*cost, "GBP");
-		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * totalWords, cost->second)));
+		widget->getWidgetAs<UILabel>("cost")->setText(LocalisedString::fromUserString(getCurrencyString(cost->first * origStats.totalWords, cost->second)));
 	}
 
 	widget->setHandle(UIEventType::ButtonClicked, "edit", [this, language, canEdit] (const UIEvent& event)

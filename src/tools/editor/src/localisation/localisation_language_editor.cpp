@@ -49,9 +49,9 @@ void LocalisationLanguageEditor::onMakeUI()
 		String name = chunk.name;
 
 		if (dstLanguage) {
-			const auto srcStats = chunk.getStats();
-			const auto dstStats = chunk.getStats(*dstLanguage);
-			const int complete = srcStats.totalKeys > 0 ? std::max(dstStats.totalKeys * 100 / srcStats.totalKeys, dstStats.totalKeys > 0 ? 1 : 0) : 0;
+			const auto srcStats = chunk.getStats(filterRules);
+			const auto dstStats = chunk.getStats(*dstLanguage, filterRules);
+			const int complete = srcStats.totalWords > 0 ? std::max(dstStats.totalWords * 100 / srcStats.totalWords, dstStats.totalWords > 0 ? 1 : 0) : 0;
 			name = "[" + toString(complete, 10, 3, ' ') + "%] " + name;
 		}
 

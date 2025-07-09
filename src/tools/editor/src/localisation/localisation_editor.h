@@ -93,7 +93,7 @@ namespace Halley {
         void populateData();
         void populateOriginalLanguageData();
         void populateTranslationData();
-        void addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, int totalKeys, int totalWords, bool canEdit);
+        void addTranslationData(UIWidget& container, const LocOriginalData& origData, const LocTranslationData& translationData, const LocTranslationData* translationDataRemote, const LocalisationStats& origStats, bool canEdit);
 
         LocOriginalData& getOriginalData();
         LocOriginalData* getOriginalDataRemote();
