@@ -12,6 +12,7 @@ namespace Halley {
 	public:
 		UIDebugConsoleResponse();
 		UIDebugConsoleResponse(String response, bool closeConsole = false, bool error = false);
+		UIDebugConsoleResponse(const char* response);
 		explicit UIDebugConsoleResponse(const ConfigNode& node);
 
 		const String& getResponse() const;

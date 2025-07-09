@@ -37,6 +37,11 @@ UIDebugConsoleResponse::UIDebugConsoleResponse(String response, bool closeConsol
 {
 }
 
+UIDebugConsoleResponse::UIDebugConsoleResponse(const char* response)
+	: response(response)
+{
+}
+
 UIDebugConsoleResponse::UIDebugConsoleResponse(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::String) {
