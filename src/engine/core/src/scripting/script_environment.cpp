@@ -787,6 +787,8 @@ EntityId ScriptEnvironment::getScriptTarget(const String& id) const
 {
 	if (scriptTargetRetriever) {
 		return scriptTargetRetriever(id);
+	} else {
+		Logger::logError("Unable to get script target: scriptTargetRetriever is not set.", true);
 	}
 	return {};
 }
