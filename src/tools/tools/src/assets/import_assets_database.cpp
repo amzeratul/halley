@@ -329,7 +329,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 		}
 	}
 
-	// At this point, iter points to the failed one if it failed, or the the old successful one if it didn't.
+	// At this point, iter points to the failed one if it failed, or to the old successful one if it didn't.
 	const auto& oldAsset = iter->second.asset;
 
 	// Input directory changed?
