@@ -81,6 +81,11 @@ int UIPainter::getMask() const
 	return mask;
 }
 
+void UIPainter::setAdjustedLayerToNextHighest()
+{
+	layer = highestLayer + 1;
+}
+
 float UIPainter::getCurrentPriorityAndIncrement() const
 {
 	if (rootPainter) {
@@ -90,14 +95,22 @@ float UIPainter::getCurrentPriorityAndIncrement() const
 	}
 }
 
+int UIPainter::getCurrentLayerAndReport() const
+{
+	if (rootPainter) {
+		rootPainter->highestLayer = layer;
+	}
+	return layer;
+}
+
 void UIPainter::draw(const Sprite& sprite, bool forceCopy)
 {
 	if (colourMultiplier) {
-		painter->add(applyColour(sprite), mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(applyColour(sprite), mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	} else if (forceCopy) {
-		painter->addCopy(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->addCopy(sprite, mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	} else {
-		painter->add(sprite, mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(sprite, mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	}
 }
 
@@ -105,27 +118,27 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 {
 	text.generateSprites();
 	if (colourMultiplier) {
-		painter->add(applyColour(text), mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(applyColour(text), mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	} else if (forceCopy) {
-		painter->addCopy(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->addCopy(text, mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	} else {
-		painter->add(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
+		painter->add(text, mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 	}
 }
 
 void UIPainter::draw(Sprite&& sprite)
 {
-	painter->add(applyColour(std::move(sprite)), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	painter->add(applyColour(std::move(sprite)), mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(TextRenderer&& text)
 {
-	painter->add(applyColour(std::move(text)), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	painter->add(applyColour(std::move(text)), mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::draw(std::function<void(Painter&)> f)
 {
-	painter->add(std::move(f), mask, layer, getCurrentPriorityAndIncrement(), clip);
+	painter->add(std::move(f), mask, getCurrentLayerAndReport(), getCurrentPriorityAndIncrement(), clip);
 }
 
 void UIPainter::addBounds(Rect4f bounds)

@@ -34,16 +34,20 @@ namespace Halley {
 		std::optional<Rect4f> getClip() const;
 		int getMask() const;
 
+		void setAdjustedLayerToNextHighest();
+
 	private:
 		SpritePainter* painter = nullptr;
 		std::optional<Rect4f> clip;
-		int mask;
-		int layer;
+		int mask = 0;
+		int layer = 0;
 		std::optional<Colour4f> colourMultiplier;
 		mutable int currentPriority = 0;
+		mutable int highestLayer = 0;
 		const UIPainter* rootPainter = nullptr;
 
 		float getCurrentPriorityAndIncrement() const;
+		int getCurrentLayerAndReport() const;
 
 		[[nodiscard]] TextRenderer applyColour(TextRenderer text) const;
 		[[nodiscard]] Sprite applyColour(Sprite sprite) const;

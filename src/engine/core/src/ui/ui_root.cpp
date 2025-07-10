@@ -831,6 +831,7 @@ void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 
 	for (auto& c: getChildren()) {
 		c->doDraw(p);
+		p.setAdjustedLayerToNextHighest();
 	}
 }
 
