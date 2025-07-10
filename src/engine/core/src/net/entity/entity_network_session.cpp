@@ -17,6 +17,7 @@ using namespace Halley;
 
 static constexpr size_t receiveBufferSize = 32 * 1024;
 static constexpr size_t maxCompressedMessageSize = 16000;
+static constexpr size_t maxLargeMessageSplitCount = 16;
 
 EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 	: resources(resources)
@@ -182,7 +183,7 @@ void EntityNetworkSession::sendMessages()
 					size_t numSplit = largeData.size() / splitSize;
 					if (largeData.size() % splitSize != 0) numSplit++;
 
-					Expects(numSplit < 16); // Larger than 16x32 kb. We shouldn't do that!
+					Expects(numSplit < maxLargeMessageSplitCount); // Larger than Nx32 kb. We shouldn't do that!
 
 					for (size_t split = 0, splitOffset = 0; split < numSplit; split++, splitOffset += splitSize) {
 						size_t remain = std::min(largeData.size() - splitOffset, splitSize);
@@ -244,7 +245,7 @@ void EntityNetworkSession::receiveUpdates()
 		} else {
 			if (!largePacketBuffer.contains(fromPeerId)) {
 				// Only reserve on demand, 512 kb right now, per peer that sends large packets.
-				largePacketBuffer[fromPeerId] = Bytes(16 * receiveBuffer.capacity());
+				largePacketBuffer[fromPeerId] = Bytes(maxLargeMessageSplitCount * receiveBuffer.capacity());
 			}
 
 			Bytes& buffer = largePacketBuffer[fromPeerId];

@@ -308,7 +308,10 @@ EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* sessi
     : session(session)
     , hasComponentsAddedOrRemoved(false)
 {
-    scratchpad.reserve(65536);
+    // Thread-local buffer to serialize/encode changes into.
+    // The maximum size depends on some limits: MTU, maximum UDP packet split size in AckUnreliableConnection,
+    // and maximum network message split size in EntityNetworkSession.
+    scratchpad.reserve(16 * 32 * 1024);
     scratchpad.resize_no_init(scratchpad.capacity());
 }
 
