@@ -37,8 +37,8 @@ namespace Halley {
 
             uint64_t hash = 0; // XXH64 over data in scratchpad
 
-            uint16_t from = 0; // points to start of data in scratchpad
-            uint16_t to = 0; // points to end of data in scratchpad
+            uint32_t from = 0; // points to start of data in scratchpad
+            uint32_t to = 0; // points to end of data in scratchpad
 
             Type type = Type::Unknown;
 
@@ -165,7 +165,7 @@ namespace Halley {
             const SerializationContext& context, Deserializer& deserializer,
             EntityRef& entity, const std::optional<EntityRef>& parent);
 
-        static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size);
+        static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size);
         static std::optional<EntityRef> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         const EntityNetworkSession* session;

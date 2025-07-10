@@ -5,14 +5,29 @@
 
 using namespace Halley;
 
-#define SERIALIZE_PARITY_BYTE 0xae
+static constexpr uint16_t SERIALIZE_CHECK_PARITY = 0xbaad;
+
+static void injectMagic(Serializer& serializer, uint16_t n)
+{
+    serializer << gsl::span(reinterpret_cast<gsl::byte *>(&n), sizeof(n));
+}
+
+static void checkMagic(Deserializer& deserializer, uint16_t n)
+{
+    uint16_t m;
+    deserializer >> gsl::span(reinterpret_cast<gsl::byte *>(&m), sizeof(m));
+
+    if (m != n) {
+        throw Exception("Network stream error", HalleyExceptions::Network);
+    }
+}
 
 thread_local Bytes EntityNetworkSerialize::scratchpad;
 
 void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 {
     curPage.hash = 0;
-    curPage.from = (uint16_t) serializer.getPosition();
+    curPage.from = static_cast<uint32_t>(serializer.getPosition());
     curPage.to = curPage.from;
 
     curPage.type = type;
@@ -22,7 +37,7 @@ void EntityNetworkChanges::beginPage(Serializer& serializer, Type type)
 
 void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type type)
 {
-    curPage.to = (uint16_t) serializer.getPosition();
+    curPage.to = static_cast<uint32_t>(serializer.getPosition());
 
     Ensures(curPage.type == type);
     Ensures(curPage.to >= curPage.from);
@@ -51,9 +66,9 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
     serializer << entity.getInstanceUUID();
 
     uint8_t flags = 0;
-    if (!entity.isSelectable()) flags |= (uint8_t) EntityData::Flag::NotSelectable;
-    if (!entity.isSerializable()) flags |= (uint8_t) EntityData::Flag::NotSerializable;
-    if (!entity.isEnabled()) flags |= (uint8_t) EntityData::Flag::Disabled;
+    if (!entity.isSelectable()) flags |= static_cast<uint8_t>(EntityData::Flag::NotSelectable);
+    if (!entity.isSerializable()) flags |= static_cast<uint8_t>(EntityData::Flag::NotSerializable);
+    if (!entity.isEnabled()) flags |= static_cast<uint8_t>(EntityData::Flag::Disabled);
 
     serializer << flags;
 
@@ -203,12 +218,10 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
                 page.type == Type::EntityIdentity ||
                 page.type == Type::Component);
 
-#ifdef SERIALIZE_PARITY_BYTE
-            serializer << (uint8_t) SERIALIZE_PARITY_BYTE;
-#endif
+            injectMagic(serializer, SERIALIZE_CHECK_PARITY);
 
-            serializer << (uint8_t) page.type;
-            serializer << (uint16_t) size;
+            serializer << static_cast<uint8_t>(page.type);
+            serializer << static_cast<uint32_t>(size);
 
             if (page.type == Type::Component) {
                 // "Inject" component ID
@@ -387,7 +400,7 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const st
     const SerializationContext context(entity, prefab);
 
     EntityNetworkChanges::Type type;
-    uint16_t size;
+    uint32_t size;
     fetchNextPage(deserializer, type, size);
 
     if (type != EntityNetworkChanges::Type::Entity) {
@@ -460,7 +473,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
     // EntityIdentity
     EntityNetworkChanges::Type type;
-    uint16_t size;
+    uint32_t size;
 
     fetchNextPage(deserializer, type, size);
 
@@ -488,16 +501,16 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         uint16_t componentId;
         deserializer >> componentId;
 
-        if (size > 0) {
-            const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
+        Expects(size > 0);
 
-            if (auto component = reflector.tryGetComponent(entity)) {
-                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
-            } else {
-                deserializer.skipBytes(size);
-                Logger::logDev("No component " + toString(componentId) + " found in entity " +
-                    toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
-            }
+        const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
+
+        if (auto component = reflector.tryGetComponent(entity)) {
+            reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+        } else {
+            deserializer.skipBytes(size);
+            Logger::logDev("No component " + toString(componentId) + " found in entity " +
+                toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
         }
 
         fetchNextPage(deserializer, type, size);
@@ -734,23 +747,17 @@ void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& opti
     data.resize(s.getSize());
 }
 
-void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint16_t& size)
+void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size)
 {
     type = EntityNetworkChanges::Type::Unknown;
     size = 0;
 
     if (deserializer.getBytesLeft() > 0) {
-#ifdef SERIALIZE_PARITY_BYTE
-        uint8_t parity;
-        deserializer >> parity;
-        if (parity != SERIALIZE_PARITY_BYTE) {
-            throw Exception("Not a valid entity change page", HalleyExceptions::Network);
-        }
-#endif
+        checkMagic(deserializer, SERIALIZE_CHECK_PARITY);
 
         uint8_t t;
         deserializer >> t;
-        type = (EntityNetworkChanges::Type) t;
+        type = static_cast<EntityNetworkChanges::Type>(t);
     }
 
     // Only fetch size for page types which actually contain data; keep size=0
@@ -761,7 +768,7 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
         type == EntityNetworkChanges::Type::Component) {
 
         if (deserializer.getBytesLeft() > 0) {
-            uint16_t s;
+            uint32_t s;
             deserializer >> s;
             size = s;
         }
