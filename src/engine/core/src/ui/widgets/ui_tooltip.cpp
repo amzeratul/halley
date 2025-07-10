@@ -12,6 +12,7 @@ UIToolTip::UIToolTip(const UIStyle& style)
 	maxWidth = style.getFloat("maxWidth");
 
 	setModal(false);
+	setMouseBlocker(false);
 }
 
 void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
@@ -51,6 +52,11 @@ void UIToolTip::hide()
 	curToolTipText = {};
 	timeOnWidget = 0;
 	visible = false;
+}
+
+int UIToolTip::getRootPriority() const
+{
+	return 100;
 }
 
 void UIToolTip::update(Time t, bool moved)

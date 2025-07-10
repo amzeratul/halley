@@ -9,6 +9,8 @@ namespace Halley {
 		void showToolTipForWidget(const UIWidget& widget, Vector2f mousePos);
 		void hide();
 
+		int getRootPriority() const override;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
