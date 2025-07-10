@@ -152,6 +152,7 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	auto event = std::make_shared<AudioEvent>();
 	s >> *event;
 
+	event->setAssetId(loader.getName());
 	event->loadDependencies(loader.getResources());
 	return event;
 }
