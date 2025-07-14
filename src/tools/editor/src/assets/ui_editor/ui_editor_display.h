@@ -28,6 +28,8 @@ namespace Halley {
 		bool ignoreClip() const override;
 		Rect4f getCurWidgetRect() const;
 
+		bool isMouseInside(Vector2f mousePos) const override;
+
 		void setCanvas(std::shared_ptr<BaseCanvas> canvas);
 
 	private:

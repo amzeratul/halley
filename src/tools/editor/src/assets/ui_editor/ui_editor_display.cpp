@@ -82,6 +82,11 @@ Rect4f UIEditorDisplay::getCurWidgetRect() const
 	return curRect - getPosition();
 }
 
+bool UIEditorDisplay::isMouseInside(Vector2f mousePos) const
+{
+	return true;
+}
+
 void UIEditorDisplay::setCanvas(std::shared_ptr<BaseCanvas> canvas)
 {
 	this->canvas = std::move(canvas);
