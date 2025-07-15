@@ -64,6 +64,7 @@ namespace Halley {
             EntityId worldId;
             EntityData data;
         	bool forChangedAuthorityOnly = false;
+        	String debugName; // for debug only, do a proper lookup if needed
         };
 
         EntityNetworkSession* parent = nullptr;
@@ -94,7 +95,7 @@ namespace Halley {
         void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
         void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
-        void destroyRemoteEntity(EntityId id);
+        void destroyRemoteEntity(EntityId id, const String& debugName);
 
         bool isRemoteReady() const;
         void onFirstDataBatchSent();

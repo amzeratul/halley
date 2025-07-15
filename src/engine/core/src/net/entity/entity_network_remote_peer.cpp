@@ -171,7 +171,7 @@ void EntityNetworkRemotePeer::destroy()
 		// Don't destroy host entities. Host disconnecting means that the session is terminating, and destroying host entities could lead to bugs.
 		if (parent->hasWorld() && peerId != 0) {
 			for (const auto& [k, v] : inboundEntities) {
-				destroyRemoteEntity(v.worldId);
+				destroyRemoteEntity(v.worldId, v.debugName);
 			}
 		}
 		
@@ -447,6 +447,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	InboundEntity remote;
 	remote.data = std::move(*entityData);
 	remote.worldId = entity.getEntityId();
+	remote.debugName = entity.getName() + "|" + entity.getPrefabAssetId();
 	inboundEntities[msg.entityId] = std::move(remote);
 
 	auto& interpolatorSet = entity.setupNetwork(peerId);
@@ -527,12 +528,12 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	//	Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()) + " NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
 	//}
 
-	destroyRemoteEntity(remote.worldId);
+	destroyRemoteEntity(remote.worldId, remote.debugName);
 
 	inboundEntities.erase(msg.entityId);
 }
 
-void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id)
+void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id, const String& debugName)
 {
 	auto entity = parent->getWorld().tryGetEntity(id);
 	if (entity.isValid()) {
@@ -549,8 +550,10 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id)
 		} else {
 			//Logger::logDev("Network ownership for local entity was auto-assigned to host, ignoring destroy msg.");
 		}
-	} else {
-		Logger::logWarning("Network entity has gone missing.");
+	} else if (parent->isHost()) {
+		// NB: This can be very legit for peers.
+		// Updates can arrive after a chunk has been unloaded.
+		Logger::logWarning("Network entity has gone missing: " + debugName);
 	}
 }
 
@@ -617,6 +620,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 
 				InboundEntity remote;
 				remote.worldId = entityId;
+				remote.debugName = "[temp authority]";
 				remote.forChangedAuthorityOnly = true;
 
 				if (!inboundEntities.contains(oe.networkId)) {
