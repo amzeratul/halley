@@ -502,6 +502,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	auto args = rawCommand.split(' ');
 	String command = std::move(args[0]);
 	args.erase(args.begin());
+	std_ex::erase_if(args, [](const auto& arg) {return arg.isEmpty();});
 	
 	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
