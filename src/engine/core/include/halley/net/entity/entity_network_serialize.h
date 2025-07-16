@@ -101,6 +101,7 @@ namespace Halley {
         bool hasEntityChanges(const EntityRef& entity, bool log) const;
 
         void getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
+        static size_t getBytesCapacity();
 
     private:
         class SerializationContext : public IEntityFactoryContext

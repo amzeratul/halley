@@ -85,7 +85,7 @@ namespace Halley {
         static thread_local Bytes fastUpdateOutboundData;
 
         uint16_t assignId();
-        void sendCreateEntity(EntityRef entity);
+        void sendCreateEntity(const EntityRef& entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();

@@ -37,9 +37,10 @@ namespace Halley {
 	public:
         EntityNetworkId entityId;
         Bytes bytes;
+		bool assignNetworkIdOnly;
 
         EntityNetworkMessageCreate() = default;
-		EntityNetworkMessageCreate(EntityNetworkId id, Bytes bytes) : entityId(id), bytes(std::move(bytes)) {}
+		EntityNetworkMessageCreate(EntityNetworkId id, Bytes bytes, bool assignNetworkIdOnly) : entityId(id), bytes(std::move(bytes)), assignNetworkIdOnly(assignNetworkIdOnly) {}
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Create; }
         bool needsWorld() const override { return true; }
