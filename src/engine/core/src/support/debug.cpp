@@ -95,6 +95,9 @@ private:
 #include <csignal>
 #endif
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
 
 using namespace Halley;
 
@@ -102,49 +105,52 @@ Debug::Debug()
 {
 }
 
-static String dumpFile;
-static std::function<void(const std::string&)> errorHandler;
-
+namespace {
+	String dumpFile;
+	std::function<void(const std::string&)> errorHandler;
 
 #ifdef HAS_SIGNAL
-static void signalHandler(int signum)
-{
-    ::signal(SIGSEGV, SIG_DFL);
-	::signal(SIGABRT, SIG_DFL);
+	void signalHandler(int signum)
+	{
+	    ::signal(SIGSEGV, SIG_DFL);
+		::signal(SIGABRT, SIG_DFL);
 
-	std::stringstream ss;
-	ss << "Process aborting with signal #";
-	switch (signum) {
-	case SIGINT:
-		ss << "SIGINT (2)";
-		break;
-	case SIGILL:
-		ss << "SIGILL (4)";
-		break;
-	case SIGFPE:
-		ss << "SIGFPE (8)";
-		break;
-	case SIGSEGV:
-		ss << "SIGSEGV (11)";
-		break;
-	case SIGTERM:
-		ss << "SIGTERM (15)";
-		break;
-	case SIGABRT:
-		ss << "SIGABRT (22)";
-		break;
-	default:
-		ss << "UNKNOWN (" << signum << ")";
+		char buffer[128];
+		const char* name = nullptr;
+
+		switch (signum) {
+		case SIGINT:
+			name = "External Interrupt (SIGINT)";
+			break;
+		case SIGILL:
+			name = "Invalid Program Image (SIGILL)";
+			break;
+		case SIGFPE:
+			name = "Erroneous Arithmetic Operation (SIGFPE)";
+			break;
+		case SIGSEGV:
+			name = "Segmentation Fault (SIGSEGV)";
+			break;
+		case SIGTERM:
+			name = "Termination Request (SIGTERM)";
+			break;
+		case SIGABRT:
+			name = "Abnormal Termination Condition (SIGABRT)";
+			break;
+		default:
+			name = "Unknown";
+		}
+
+		sprintf(buffer, "Process aborting due to: %s (%i)", name, signum);
+
+		Logger::logError(buffer);
+		//Logger::logError("Exception: " + Debug::getCallStack(3));
+		errorHandler(buffer);
+
+		::raise(SIGABRT);
 	}
-
-	Logger::logException(Exception(ss.str(), HalleyExceptions::Core));
-	errorHandler(ss.str());
-
-	::raise(SIGABRT);
-}
 #endif
 
-namespace {
 	void terminateHandler()
 	{
 		std::stringstream ss;
@@ -159,6 +165,89 @@ namespace {
 
 		std::abort();
 	}
+
+#ifdef WIN32
+	LONG unhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
+	{
+		char buffer[128];
+		const char* name = nullptr;
+
+		switch (exceptionInfo->ExceptionRecord->ExceptionCode) {
+		case EXCEPTION_ACCESS_VIOLATION:
+			name = "EXCEPTION_ACCESS_VIOLATION";
+			break;
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+			name = "EXCEPTION_ARRAY_BOUNDS_EXCEEDED";
+			break;
+		case EXCEPTION_BREAKPOINT:
+			name = "EXCEPTION_BREAKPOINT";
+			break;
+		case EXCEPTION_DATATYPE_MISALIGNMENT:
+			name = "EXCEPTION_DATATYPE_MISALIGNMENT";
+			break;
+		case EXCEPTION_FLT_DENORMAL_OPERAND:
+			name = "EXCEPTION_FLT_DENORMAL_OPERAND";
+			break;
+		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+			name = "EXCEPTION_FLT_DIVIDE_BY_ZERO";
+			break;
+		case EXCEPTION_FLT_INEXACT_RESULT:
+			name = "EXCEPTION_FLT_INEXACT_RESULT";
+			break;
+		case EXCEPTION_FLT_INVALID_OPERATION:
+			name = "EXCEPTION_FLT_INVALID_OPERATION";
+			break;
+		case EXCEPTION_FLT_OVERFLOW:
+			name = "EXCEPTION_FLT_OVERFLOW";
+			break;
+		case EXCEPTION_FLT_STACK_CHECK:
+			name = "EXCEPTION_FLT_STACK_CHECK";
+			break;
+		case EXCEPTION_FLT_UNDERFLOW:
+			name = "EXCEPTION_FLT_UNDERFLOW";
+			break;
+		case EXCEPTION_ILLEGAL_INSTRUCTION:
+			name = "EXCEPTION_ILLEGAL_INSTRUCTION";
+			break;
+		case EXCEPTION_IN_PAGE_ERROR:
+			name = "EXCEPTION_IN_PAGE_ERROR";
+			break;
+		case EXCEPTION_INT_DIVIDE_BY_ZERO:
+			name = "EXCEPTION_INT_DIVIDE_BY_ZERO";
+			break;
+		case EXCEPTION_INT_OVERFLOW:
+			name = "EXCEPTION_INT_OVERFLOW";
+			break;
+		case EXCEPTION_INVALID_DISPOSITION:
+			name = "EXCEPTION_INVALID_DISPOSITION";
+			break;
+		case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+			name = "EXCEPTION_NONCONTINUABLE_EXCEPTION";
+			break;
+		case EXCEPTION_PRIV_INSTRUCTION:
+			name = "EXCEPTION_PRIV_INSTRUCTION";
+			break;
+		case EXCEPTION_SINGLE_STEP:
+			name = "EXCEPTION_SINGLE_STEP";
+			break;
+		case EXCEPTION_STACK_OVERFLOW:
+			name = "EXCEPTION_STACK_OVERFLOW";
+			break;
+		default:
+			name = "Unknown Win32 Exception";
+		}
+
+		sprintf(buffer, "Process aborting due to: %s", name);
+		Logger::logError(buffer);
+		Logger::logError(Debug::getCallStack(4));
+
+		if (errorHandler) {
+			errorHandler(name);
+		}
+
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+#endif
 }
 
 void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> eh)
@@ -172,6 +261,10 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 
 #ifndef NN_NINTENDO_SDK
 	std::set_terminate(&terminateHandler);
+#endif
+
+#ifdef WIN32
+	SetUnhandledExceptionFilter(&unhandledExceptionFilter);
 #endif
 
 	errorHandler = std::move(eh);
