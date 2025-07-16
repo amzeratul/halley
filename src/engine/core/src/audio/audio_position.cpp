@@ -159,8 +159,10 @@ namespace {
 
 			// Avoid the expensive polygon checks if too far away
 			const auto circle = polygon.getBoundingCircle();
-			if ((relPos - circle.getCentre()).length() > circle.getRadius() + maxDist) {
-				return sourcePos;
+			const float dist2 = (relPos - circle.getCentre()).squaredLength();
+			const float maxRange = circle.getRadius() + maxDist;
+			if (dist2 > maxRange * maxRange) {
+				return sourcePos + Vector3f(circle.getCentre(), 0);
 			}
 
 			if (polygon.isPointInside(relPos)) {
