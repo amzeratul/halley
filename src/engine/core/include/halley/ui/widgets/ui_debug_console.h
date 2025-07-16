@@ -111,7 +111,7 @@ namespace Halley {
 		UIDebugConsoleController();
 		UIDebugConsoleController(Resources& resources, const HalleyAPI& api);
 
-		Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args);
+		Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args) override;
 		bool hasCommand(const String& command) const;
 		String runHelp();
 		
