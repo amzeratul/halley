@@ -747,6 +747,11 @@ void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& opti
     data.resize(s.getSize());
 }
 
+size_t EntityNetworkSerialize::getBytesCapacity()
+{
+    return scratchpad.capacity();
+}
+
 void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size)
 {
     type = EntityNetworkChanges::Type::Unknown;

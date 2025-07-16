@@ -302,7 +302,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
     		if (modified && !modifiedInStructure) {
     			remote.timeSinceSend = 0;
 
-    			fastUpdateOutboundData.reserve(65536);
+    			fastUpdateOutboundData.reserve(EntityNetworkSerialize::getBytesCapacity());
     			fastSerialize.getBytes(fastUpdateOutboundData, parent->getByteSerializationOptions(), wantToLog);
     			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
