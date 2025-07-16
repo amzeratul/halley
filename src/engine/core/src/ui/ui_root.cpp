@@ -564,13 +564,20 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 				
 				actuallyUnderMouse->sendEvent(UIEvent(pressEvent, "mouse", mousePos));
 			} else {
-				const auto& cs = getChildren();
-				if (!cs.empty()) {
-					UIEventType unhandledPressEvent;
-					if (i == 0) unhandledPressEvent = UIEventType::UnhandledMousePressLeft;
-					else if (i == 1) unhandledPressEvent = UIEventType::UnhandledMousePressMiddle;
-					else unhandledPressEvent = UIEventType::UnhandledMousePressRight;
-					cs.back()->sendEvent(UIEvent(unhandledPressEvent, "mouse", mousePos));
+				auto cs = getChildren();
+				std::reverse(cs.begin(), cs.end());
+				for (const auto& child: cs) {
+					if (child->isActive()) {
+						UIEventType unhandledPressEvent;
+						if (i == 0) {
+							unhandledPressEvent = UIEventType::UnhandledMousePressLeft;
+						} else if (i == 1) {
+							unhandledPressEvent = UIEventType::UnhandledMousePressMiddle;
+						} else {
+							unhandledPressEvent = UIEventType::UnhandledMousePressRight;
+						}
+						child->sendEvent(UIEvent(unhandledPressEvent, "mouse", mousePos));
+					}
 				}
 				setFocus({});
 			}
