@@ -357,14 +357,15 @@ static String buildRootSignature(const MaterialDefinition& material)
     //
     // One sampler per texture slot. Some parameters are not available at
     // compile time, so we can't use static samplers.
+    D3D12_DESCRIPTOR_RANGE1 srvRange = {};
+    D3D12_DESCRIPTOR_RANGE1 samRange = {};
     if (!material.getTextures().empty()) {
         uint32_t numTextures = (uint32_t) material.getTextures().size();
 
-        D3D12_ROOT_PARAMETER1 srv = {};
+	    D3D12_ROOT_PARAMETER1 srv = {};
         srv.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
         srv.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-        D3D12_DESCRIPTOR_RANGE1 srvRange = {};
         srvRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
         srvRange.NumDescriptors = numTextures;
         srvRange.BaseShaderRegister = 0;
@@ -377,11 +378,10 @@ static String buildRootSignature(const MaterialDefinition& material)
 
         parameters.emplace_back(srv);
 
-        D3D12_ROOT_PARAMETER1 sam = {};
+	    D3D12_ROOT_PARAMETER1 sam = {};
         sam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
         sam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-        D3D12_DESCRIPTOR_RANGE1 samRange = {};
         samRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
         samRange.NumDescriptors = numTextures;
         samRange.BaseShaderRegister = 0;
