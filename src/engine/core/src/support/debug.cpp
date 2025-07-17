@@ -383,8 +383,10 @@ String Debug::getCallStack(int skip)
 
 void Debug::getCallStack(gsl::span<char> dst, int skip)
 {
+#if defined(HAS_STACKWALKER)
 	NoAllocStackWalker walker(dst, skip);
 	walker.ShowCallstack();
+#endif
 }
 
 void Debug::trace(const char* filename, int line, std::string_view arg)
