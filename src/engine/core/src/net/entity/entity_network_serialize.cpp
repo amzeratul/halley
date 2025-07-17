@@ -88,8 +88,7 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
 
     serializer << entity.getName();
 
-    const auto& prefabId = entity.getPrefabAssetId().value_or("");
-    serializer << prefabId;
+    //serializer << entity.getPrefabAssetId();
 
     endPage(serializer, buffer, Type::EntityIdentity);
 }
@@ -488,8 +487,8 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         deserializer >> name;
         entity.setName(name);
 
-        String prefabId;
-        deserializer >> prefabId;
+        //std::optional<String> prefabId;
+        //deserializer >> prefabId;
 
         entity.setPrefab(prefabUUID.isValid() ? context.getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
 
