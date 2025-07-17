@@ -135,16 +135,16 @@ void FontImporter::getCharactersForScript(std::set<char32_t>& charsOutput, const
 		addRange(charsOutput, 0x30A0, 0x30FF); // Katakana
 	}
 	if (script == "japanese") {
-		addList(charsOutput, gsl::span<const char32_t>(joyoKanji, sizeof(joyoKanji)));
-		addList(charsOutput, gsl::span<const char32_t>(jinmeiyoKanji, sizeof(jinmeiyoKanji)));
-		addList(charsOutput, gsl::span<const char32_t>(otherCommonKanji, sizeof(otherCommonKanji)));
+		addList(charsOutput, gsl::span<const char32_t>(joyoKanji));
+		addList(charsOutput, gsl::span<const char32_t>(jinmeiyoKanji));
+		addList(charsOutput, gsl::span<const char32_t>(otherCommonKanji));
 	}
 	if (script == "chinese") {
-		addList(charsOutput, gsl::span<const char32_t>(chineseStd1, sizeof(chineseStd1)));
-		addList(charsOutput, gsl::span<const char32_t>(chineseStd2, sizeof(chineseStd2)));
+		addList(charsOutput, gsl::span<const char32_t>(chineseStd1));
+		addList(charsOutput, gsl::span<const char32_t>(chineseStd2));
 	}
 	if (script == "korean" || script == "hangul") {
-		addList(charsOutput, gsl::span<const char32_t>(modernHangul, sizeof(modernHangul)));
+		addList(charsOutput, gsl::span<const char32_t>(modernHangul));
 		//addRange(charsOutput, 0xAC00, 0xD7AF); // Hangul Syllables
 	}
 	if (script == "japanese" || script == "chinese" || script == "korean" || script == "hiragana" || script == "katakana") {

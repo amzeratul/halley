@@ -329,7 +329,7 @@ size_t AudioEngine::output(gsl::span<std::byte> dst, bool fill)
 	const auto remaining = dst.subspan(written);
 	if (!remaining.empty() && fill) {
 		// :(
-		Logger::logWarning("Insufficient audio data, padding with zeroes.");
+		Logger::logError("Insufficient audio data, padding with zeroes.", true);
 		memset(remaining.data(), 0, size_t(remaining.size_bytes()));
 		written = size_t(dst.size());
 	}

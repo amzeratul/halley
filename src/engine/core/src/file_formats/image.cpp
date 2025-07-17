@@ -195,10 +195,10 @@ void Image::clear(int colour)
 
 void Image::blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t srcBpp)
 {
-	const size_t xMin = std::max(0, -pos.x);
-	const size_t yMin = std::max(0, -pos.y);
-	const size_t xMax = std::min(size_t(w) - pos.x, width);
-	const size_t yMax = std::min(size_t(h) - pos.y, height);
+	const size_t xMin = std::max<int>(0, -pos.x);
+	const size_t yMin = std::max<int>(0, -pos.y);
+	const size_t xMax = clamp<int>(static_cast<int>(w) - pos.x, 0, static_cast<int>(width));
+	const size_t yMax = clamp<int>(static_cast<int>(h) - pos.y, 0, static_cast<int>(height));
 
 	if (getBytesPerPixel() == 1) {
 		unsigned char* dst = px.get() + pos.x + pos.y * w;

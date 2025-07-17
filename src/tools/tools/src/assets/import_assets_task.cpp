@@ -119,7 +119,11 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	auto& fs = project.getFileSystemCache();
 	Stopwatch timer;
 
-	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, *importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
+	auto result = importAsset(asset, [&] (const Path& path) {
+		return db.getMetadata(path);
+	}, *importer, assetsPath, [=] (float, const String&) -> bool {
+		return !isCancelled();
+	});
 	
 	if (!result.success) {
 		logError("\"" + asset.assetId + "\" - " + result.errorMsg);
