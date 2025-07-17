@@ -71,7 +71,9 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	}
 	std::cout << std::endl;
 
-	Debug::setErrorHandling("stack.dmp", [=](const std::string& error) { onTerminatedInError(error); });
+	Debug::setErrorHandling("stack.dmp", [=](std::string_view error) {
+		onTerminatedInError(error);
+	});
 	
 	const auto result = run(args);
 	std::cout << "halley-cmd done." << std::endl;
@@ -83,8 +85,8 @@ int CommandLineTool::run(Vector<std::string> args)
 	throw Exception("Tool's run() method not implemented", HalleyExceptions::Tools);
 }
 
-void CommandLineTool::onTerminatedInError(const std::string& error)
+void CommandLineTool::onTerminatedInError(std::string_view error)
 {
-	Logger::logError("Terminating in error: " + error);
+	Logger::logError("Terminating in error: " + String(error));
 	std::cout.flush();
 }

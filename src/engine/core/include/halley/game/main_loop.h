@@ -26,7 +26,7 @@ namespace Halley
 		virtual void init() = 0;
 		virtual void onSuspended() = 0;
 		virtual void onReloaded() = 0;
-		virtual void onTerminatedInError(const std::string& error) = 0;
+		virtual void onTerminatedInError(std::string_view error) = 0;
 
 		virtual double getTargetFPS() = 0;
 		virtual bool hasVsync() = 0;

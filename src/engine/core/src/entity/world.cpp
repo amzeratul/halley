@@ -59,7 +59,9 @@ World::~World()
 
 	for (auto& tl: systems) {
 		for (auto& s: tl) {
-			s->deInit();
+			if (s->initialised) {
+				s->deInit();
+			}
 		}
 	}
 	

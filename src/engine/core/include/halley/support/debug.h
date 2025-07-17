@@ -45,8 +45,9 @@ namespace Halley {
 		#endif
 		}
 
-		static void setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> errorHandler);
-		static String getCallStack(int skip = 3);
+		static void setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> errorHandler);
+		static String getCallStack(int skip = 3); // Thread safe
+		static void getCallStack(gsl::span<char> dst, int skip = 3); // Not thread safe, use in unsafe environments
 
 		static void trace(const char* filename, int line, std::string_view arg = {});
 		static String getLastTraces();

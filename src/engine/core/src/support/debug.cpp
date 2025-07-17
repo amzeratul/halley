@@ -32,6 +32,10 @@
 #define HAS_STACKWALKER
 #include "StackWalker/StackWalker.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
+
 class OStreamStackWalker : public StackWalker {
 public:
 	OStreamStackWalker(std::ostream& os, int startFrom)
@@ -88,6 +92,92 @@ private:
 	bool foundSkip = false;
 };
 
+
+class NoAllocStackWalker : public StackWalker {
+public:
+	NoAllocStackWalker(gsl::span<char> dst, int startFrom)
+		: dst(dst.data())
+		, spaceLeft(dst.size() - strlen(dst.data()))
+		, startFrom(startFrom)
+	{}
+
+	NoAllocStackWalker(gsl::span<char> dst, const char* skipUntil, int offset)
+		: dst(dst.data())
+		, spaceLeft(dst.size() - strlen(dst.data()))
+		, offset(offset)
+		, skipUntil(skipUntil)
+	{}
+
+protected:
+	void OnCallstackEntry(CallstackEntryType eType, CallstackEntry& entry) override
+	{
+		if (eType == firstEntry) {
+			curPos = 0;
+		}
+
+		if (skipUntil && !foundSkip) {
+			if (std::strstr(entry.name, skipUntil) == nullptr) {
+				startFrom = curPos + offset + 2;
+			} else {
+				foundSkip = true;
+			}
+		}
+
+		if (++curPos < startFrom) {
+			return;
+		}
+
+		cat(" ");
+		cat(curPos - startFrom);
+		cat(": ");
+		cat(entry.name);
+		if (entry.lineFileName[0] != 0) {
+			const char* lastSlash = strrchr(entry.lineFileName, '\\');
+			if (lastSlash) {
+				++lastSlash;
+			} else {
+				lastSlash = entry.lineFileName;
+			}
+			cat(" at ");
+			cat(lastSlash);
+			cat(":");
+			cat(static_cast<int>(entry.lineNumber));
+		} else if (entry.moduleName[0] != 0) {
+			cat(" [");
+			cat(entry.moduleName);
+			cat("]");
+		}
+		cat("\n");
+	}
+
+	void cat(const char* str)
+	{
+		const auto len = strlen(str);
+		if (spaceLeft >= len + 1) {
+			strcpy(dst, str);
+			spaceLeft -= len;
+		} else {
+			spaceLeft = 0;
+		}
+	}
+
+	void cat(int value)
+	{
+		char buffer[32];
+		_itoa(value, buffer, 10);
+		cat(buffer);
+	}
+	
+private:
+	char* dst;
+	size_t spaceLeft = 0;
+	int startFrom = 0;
+	int curPos = 0;
+	int offset = 0;
+	const char* skipUntil = nullptr;
+	bool foundSkip = false;
+};
+
 #endif
 
 #if !defined(NN_NINTENDO_SDK) && !defined(__ORBIS__)
@@ -107,7 +197,9 @@ Debug::Debug()
 
 namespace {
 	String dumpFile;
-	std::function<void(const std::string&)> errorHandler;
+	std::function<void(std::string_view)> errorHandler;
+
+	char stackTraceBuffer[32 * 1024];
 
 #ifdef HAS_SIGNAL
 	void signalHandler(int signum)
@@ -153,15 +245,15 @@ namespace {
 
 	void terminateHandler()
 	{
-		std::stringstream ss;
-		ss << "std::terminate() invoked.\n";
+		stackTraceBuffer[0] = 0;
+		strcpy(stackTraceBuffer, "std::terminate() invoked.\n");
 
 	#if defined(HAS_STACKWALKER)
-		OStreamStackWalker walker(ss, 3);
+		NoAllocStackWalker walker(gsl::span(stackTraceBuffer, sizeof(stackTraceBuffer)), 3);
 		walker.ShowCallstack();
 	#endif
 
-		errorHandler(ss.str());
+		errorHandler(stackTraceBuffer);
 
 		std::abort();
 	}
@@ -169,7 +261,6 @@ namespace {
 #ifdef WIN32
 	LONG unhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 	{
-		char buffer[128];
 		const char* name = nullptr;
 
 		switch (exceptionInfo->ExceptionRecord->ExceptionCode) {
@@ -237,9 +328,12 @@ namespace {
 			name = "Unknown Win32 Exception";
 		}
 
-		sprintf(buffer, "Process aborting due to: %s", name);
-		Logger::logError(buffer);
-		Logger::logError(Debug::getCallStack(4));
+		stackTraceBuffer[0] = 0;
+		strcpy(stackTraceBuffer, "Process aborting due to: ");
+		strcpy(stackTraceBuffer, name);
+		strcpy(stackTraceBuffer, "\n");
+		Debug::getCallStack(gsl::span(stackTraceBuffer), 4);
+		Logger::logError(stackTraceBuffer);
 
 		if (errorHandler) {
 			errorHandler(name);
@@ -250,7 +344,7 @@ namespace {
 #endif
 }
 
-void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(const std::string&)> eh)
+void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std::string_view)> eh)
 {
 	dumpFile = dumpFilePath;
 
@@ -273,15 +367,24 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 
 String Debug::getCallStack(int skip)
 {
-	std::stringstream ss;
 #if defined(HAS_STACKWALKER)
+
+	std::stringstream ss;
+
 	// NB: StackWalker isn't thread-safe - uses mutex if multiple sources are trying to retrieve
 	// callstacks at the same time, for example in the Editor when hitting asset build errors.
 	std::unique_lock lock(mutex);
 	OStreamStackWalker walker(ss, skip);
 	walker.ShowCallstack();
-#endif
 	return ss.str();
+
+#endif
+}
+
+void Debug::getCallStack(gsl::span<char> dst, int skip)
+{
+	NoAllocStackWalker walker(dst, skip);
+	walker.ShowCallstack();
 }
 
 void Debug::trace(const char* filename, int line, std::string_view arg)

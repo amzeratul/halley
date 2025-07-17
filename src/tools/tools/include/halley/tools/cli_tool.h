@@ -24,7 +24,7 @@ namespace Halley
 		Environment env;
 
 	private:
-		void onTerminatedInError(const std::string& error);
+		void onTerminatedInError(std::string_view error);
 	};
 
 	class CommandLineTools

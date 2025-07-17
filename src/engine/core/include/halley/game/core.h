@@ -53,7 +53,7 @@ namespace Halley
 
 		void onSuspended() override;
 		void onReloaded() override;
-		void onTerminatedInError(const std::string& error) override;
+		void onTerminatedInError(std::string_view error) override;
 
 		bool hasVsync() override;
 		void waitForVsync() override;
@@ -63,7 +63,7 @@ namespace Halley
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
 		Vector<Plugin*> getPlugins(PluginType type) override;
 
-		void log(LoggerLevel level, const std::string_view msg) override;
+		void log(LoggerLevel level, std::string_view msg) override;
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;

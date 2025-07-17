@@ -70,7 +70,9 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	std::cout << ConsoleColour(Console::GREEN) << "Halley v" << getHalleyVersion().toString() << " is initializing..." << ConsoleColour() << std::endl;
 
 	// Debugging initialization
-	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=] (const std::string& error) { onTerminatedInError(error); });
+	Debug::setErrorHandling((environment->getDataPath() / "stack.dmp").string(), [=] (std::string_view error) {
+		onTerminatedInError(error);
+	});
 
 	// Time
 	auto now = std::chrono::system_clock::now();
@@ -163,7 +165,7 @@ void Core::onReloaded()
 	HALLEY_DEBUG_TRACE();
 }
 
-void Core::onTerminatedInError(const std::string& error)
+void Core::onTerminatedInError(std::string_view error)
 {
 	if (!error.empty()) {
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnhandled exception: " << ConsoleColour(Console::DARK_RED) << error << ConsoleColour() << std::endl;
