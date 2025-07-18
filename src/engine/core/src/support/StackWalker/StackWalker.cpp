@@ -82,6 +82,8 @@
  *
  **********************************************************************/
 
+#if defined(_MSC_VER) && defined(_WIN32) && !defined(WITH_GDK)
+
 #include "StackWalker.h"
 
 #include <stdio.h>
@@ -1546,3 +1548,5 @@ void StackWalker::OnOutput(LPCSTR buffer)
 {
   OutputDebugStringA(buffer);
 }
+
+#endif
