@@ -64,6 +64,7 @@ void MoviePlayer::play()
 			desc.useFiltering = true;
 			desc.isRenderTarget = true;
 			renderTexture->load(std::move(desc));
+			renderTexture->waitForLoad();
 
 			renderTarget = video.createTextureRenderTarget();
 			renderTarget->setTarget(0, renderTexture);
@@ -139,6 +140,7 @@ void MoviePlayer::update(Time t)
 						onDoneUsingTexture(currentTexture);
 					}
 					currentTexture = next.texture;
+					currentTexture->waitForLoad();
 					pendingFrames.pop_front();
 				}
 			}
@@ -162,6 +164,9 @@ void MoviePlayer::update(Time t)
 
 void MoviePlayer::render(Resources& resources, RenderContext& rc)
 {
+	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
+	std::unique_lock<std::mutex> lock(alive->mutex);
+
 	if (needsYV12Conversion() && currentTexture) {
 		Camera cam;
 		cam.setPosition(Vector2f(videoSize) * 0.5f);
@@ -172,7 +177,9 @@ void MoviePlayer::render(Resources& resources, RenderContext& rc)
 		{
 			auto matDef = resources.get<MaterialDefinition>("Halley/NV12Video");
 			Sprite().setImage(currentTexture, matDef).setTexRect(Rect4f(0, 0, 1, 1)).setSize(Vector2f(videoSize)).draw(painter);
+			framesRendered++;
 		});
+
 		currentTexture.reset();
 	}
 }
@@ -183,7 +190,7 @@ Sprite MoviePlayer::getSprite(Resources& resources)
 	Rect4f texRect = Rect4f(crop) / Vector2f(videoSize);
 
 	if (needsYV12Conversion()) {
-		if (renderTexture) {
+		if (renderTexture && framesRendered > 0) {
 			auto matDef = resources.get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 			return Sprite().setImage(renderTexture, matDef).setTexRect(texRect).setSize(Vector2f(videoSize));
 		} else {
@@ -373,7 +380,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 		std::shared_ptr<Texture> tex;
 
 		{
-			std::unique_lock<std::mutex> lock(alive->mutex);
+			std::unique_lock lock(alive->mutex);
 
 			if (alive->isAlive) {
 				if (recycleTexture.empty()) {
@@ -383,7 +390,16 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 					tex = recycleTexture.front();
 					recycleTexture.pop_front();
 				}
+			}
+		}
 
+		if (tex) {
+			tex->load(std::move(descriptor));
+		}
+
+		{
+			std::unique_lock lock(alive->mutex);
+			if (alive->isAlive) {
 				const auto iter = std::find_if(pendingFrames.begin(), pendingFrames.end(), [=] (const PendingFrame& f)
 				{
 					return f.time > time;
@@ -391,11 +407,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 				pendingFrames.insert(iter, { tex, time });
 			}
 		}
-
-		if (tex) {
-			tex->load(std::move(descriptor));
-		}
-	});
+	}).wait();
 }
 
 void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture)

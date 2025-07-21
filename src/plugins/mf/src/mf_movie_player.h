@@ -23,12 +23,14 @@ namespace Halley
 	{
 	public:
 		MFMoviePlayer(VideoAPI& video, AudioAPI& audio, std::shared_ptr<ResourceDataStream> data);
-		~MFMoviePlayer() noexcept;
+		~MFMoviePlayer() noexcept override;
 
 	protected:
 		void requestVideoFrame() override;
 		void requestAudioFrame() override;
 		void onReset() override;
+
+        bool shouldRecycleTextures() const override { return false; }
 
 	private:
 		std::shared_ptr<ResourceDataStream> data;
@@ -37,7 +39,7 @@ namespace Halley
 		IMFByteStream* inputByteStream = nullptr;
 		IMFSourceReader *reader = nullptr;
 		IMFSourceReaderCallback* sampleReceiver = nullptr;
-		int minStride;
+		int minStride = -1;
 		bool supportIMF2DBuffer = true;
 
 		void init();
