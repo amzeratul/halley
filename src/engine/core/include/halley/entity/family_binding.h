@@ -110,7 +110,7 @@ namespace Halley {
 			assert(elemsLeft > 0);
 			++v;
 			--elemsLeft;
-			if (prefetchDist > 0 && elemsLeft >= prefetchDist) {
+			if (prefetchDist > 0 && elemsLeft > prefetchDist) {
 				(v + prefetchDist)->prefetch();
 			}
 			return *this;
