@@ -241,6 +241,7 @@ namespace Halley
 
 		DevConServer* devConServer = nullptr;
 		const HalleyAPI* api = nullptr;
+		OptionalLite<size_t> devConCallback;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;

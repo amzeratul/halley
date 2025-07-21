@@ -313,13 +313,23 @@ void Project::setAssetPackManifest(const Path& path)
 
 void Project::setDevConServer(DevConServer* server)
 {
+	if (devConCallback) {
+		removeAssetReloadCallback(*devConCallback);
+		devConCallback = std::nullopt;
+	}
+
+	if (devConServer) {
+		devConServer->setProject(nullptr);
+	}
+
 	devConServer = server;
+
 	if (devConServer) {
 		devConServer->setProject(this);
+		devConCallback = addAssetPackReloadCallback([this] (gsl::span<const String> assetIds, gsl::span<const String> packIds) {
+			devConServer->reloadAssets(Vector<String>(assetIds.begin(), assetIds.end()), Vector<String>(packIds.begin(), packIds.end()));
+		});
 	}
-	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds, gsl::span<const String> packIds) {
-		devConServer->reloadAssets(Vector<String>(assetIds.begin(), assetIds.end()), Vector<String>(packIds.begin(), packIds.end()));
-	});
 }
 
 DevConServer* Project::getDevConServer() const

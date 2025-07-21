@@ -25,6 +25,8 @@ EditorRootStage::~EditorRootStage()
 	ui.reset();
 	projectWindow.reset();
 	uiFactory.reset();
+
+	project->setDevConServer(nullptr);
 	devConServer.reset();
 
 	project.reset();
