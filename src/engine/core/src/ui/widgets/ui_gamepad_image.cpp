@@ -8,7 +8,7 @@ UIGamepadImage::UIGamepadImage(String id, JoystickButtonPosition button, std::fu
 	, iconRetriever(std::move(iconRetriever))
 	, colour(col)
 {
-	setOnlyEnabledWithInputs({ UIInputType::Gamepad });
+	setAlwaysShow(false, true);
 }
 
 void UIGamepadImage::update(Time t, bool moved)
@@ -29,6 +29,20 @@ void UIGamepadImage::setButtonPosition(JoystickButtonPosition position)
 {
 	if (button != position) {
 		button = position;
+
+		refreshSprite();
+	}
+}
+
+void UIGamepadImage::setAlwaysShow(bool enabled, bool force)
+{
+	if (enabled != alwaysShow || force) {
+		alwaysShow = enabled;
+		if (enabled) {
+			setOnlyEnabledWithInputs({});
+		} else {
+			setOnlyEnabledWithInputs({ UIInputType::Gamepad });	
+		}
 
 		refreshSprite();
 	}

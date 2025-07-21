@@ -899,9 +899,12 @@ void UIWidget::setCanSendEvents(bool canSend)
 void UIWidget::setInputType(UIInputType uiInput)
 {
 	lastInputType = uiInput;
+	const bool wasActive = isActive();
 	if (!onlyEnabledWithInputs.empty()) {
-		const bool wasActive = isActive();
 		activeByInput = std::find(onlyEnabledWithInputs.begin(), onlyEnabledWithInputs.end(), uiInput) != onlyEnabledWithInputs.end();
+		updateActive(wasActive);
+	} else {
+		activeByInput = true;
 		updateActive(wasActive);
 	}
 }

@@ -46,6 +46,9 @@ void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 			if (const auto widget = std::dynamic_pointer_cast<UIWidget>(element)) {
 				maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
 			}
+			if (auto* gamepadImage = dynamic_cast<UIGamepadImage*>(element.get())) {
+				gamepadImage->setAlwaysShow(true, true);
+			}
 		});
 	} else {
 		lastWidgetUnderMouse = {};

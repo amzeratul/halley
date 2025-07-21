@@ -11,12 +11,14 @@ namespace Halley {
 
 		void setJoystickType(JoystickType type) override;
 		void setButtonPosition(JoystickButtonPosition position);
+		void setAlwaysShow(bool enabled, bool force = false);
 
 	private:
 		JoystickButtonPosition button;
 		std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever;
 		Colour4f colour;
 		std::optional<JoystickType> curType;
+		bool alwaysShow = false;
 
 		void refreshSprite();
 	};
