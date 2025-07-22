@@ -7,7 +7,13 @@ SessionService::SessionService(std::shared_ptr<Session> session)
 {
 }
 
-std::shared_ptr<Session> SessionService::getSession() const
+Session& SessionService::getSession() const
+{
+	assert(session);
+	return *session;
+}
+
+const std::shared_ptr<Session>& SessionService::getSessionPtr() const
 {
 	return session;
 }

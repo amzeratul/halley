@@ -17,6 +17,11 @@ namespace Halley {
 		}
 		virtual ~Session() = default;
 
+		Session(const Session& other) = delete;
+		Session(Session&& other) = default;
+		Session& operator=(const Session& other) = delete;
+		Session& operator=(Session&& other) = default;
+
 		virtual bool isInteractive() const { return true; }
 		virtual bool isMultiplayer() const { return false; }
 		virtual bool hasLocalSave() const { return true; }
