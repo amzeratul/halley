@@ -44,7 +44,7 @@ namespace Halley {
 		Future<LoginResult> signIn(const String& username, const String& password);
 		void signOut();
 
-		Future<bool> putOriginalStrings(const LocOriginalData& origData);
+		Future<bool> putOriginalStrings(const LocOriginalData& origData, const LocOriginalData& curRemoteData);
 		Future<bool> putOriginalStrings(const LocOriginalDataChunk& origData);
 		Future<bool> putStringProperties(const Vector<LocStringProperties>& data);
 		Future<std::optional<LocStringSet>> getStrings(std::optional<String> chunkId = std::nullopt, int minVersion = 0);

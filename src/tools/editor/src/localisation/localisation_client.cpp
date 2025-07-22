@@ -122,14 +122,24 @@ void LocalisationClient::signOut()
 	password = {};
 }
 
-Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData)
+Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origData, const LocOriginalData& curRemoteData)
 {
 	const auto url = "/strings-chunk/" + Encode::encodeURL(project);
+
+	HashSet<String> chunkSet;
 
 	ConfigNode payload;
 	auto& chunks = payload["chunks"];
 	for (const auto& chunk: origData.getChunks()) {
+		chunkSet.insert(chunk.name);
 		chunks.push_back(getChunkConfig(chunk));
+	}
+
+	for (const auto& chunk: curRemoteData.getChunks()) {
+		if (!chunkSet.contains(chunk.name)) {
+			Logger::logInfo("Erasing chunk: " + chunk.name);
+			chunks.push_back(getChunkConfig(LocOriginalDataChunk(chunk.name, chunk.category, {})));
+		}
 	}
 
 	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);

@@ -57,6 +57,13 @@ LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRule
 	return priority >= rules.minPriorityForReady ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
 }
 
+LocOriginalDataChunk::LocOriginalDataChunk(String name, String category, Vector<LocalisationDataEntry> entries)
+	: name(std::move(name))
+	, category(std::move(category))
+	, entries(std::move(entries))
+{
+}
+
 LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& filterRules) const
 {
 	LocalisationStats result;
@@ -343,6 +350,17 @@ bool LocOriginalData::updateLocalFromRemote(const LocOriginalData& remote)
 			}
 		}
 	}
+
+	/*
+	for (const auto& chunk: remote.getChunks()) {
+		for (const auto& entry: chunk.entries) {
+			if (!hasKey(entry.key)) {
+				Logger::logInfo("Missing local key: " + entry.key + " [" + chunk.name + "]");
+			}
+		}
+	}
+	*/
+
 	return modified;
 }
 

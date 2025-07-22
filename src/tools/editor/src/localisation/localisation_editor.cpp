@@ -728,9 +728,9 @@ void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)
 
 void LocalisationEditor::uploadOriginalStrings()
 {
-	if (localStrings) {
+	if (localStrings && remoteStrings) {
 		curMessage = "Uploading original strings...";
-		client->putOriginalStrings(*localStrings->originalLanguage).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
+		client->putOriginalStrings(*localStrings->originalLanguage, *remoteStrings->originalLanguage).then(aliveFlag, Executors::getMainUpdateThread(), [this] (bool result)
 		{
 			if (result) {
 				curMessage = {};

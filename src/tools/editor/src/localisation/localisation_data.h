@@ -84,6 +84,9 @@ namespace Halley {
 		String category;
 		Vector<LocalisationDataEntry> entries;
 
+		LocOriginalDataChunk() = default;
+		LocOriginalDataChunk(String name, String category, Vector<LocalisationDataEntry> entries);
+
 		LocalisationStats getStats(const LocalisationFilterRules& filterRules) const;
 		LocalisationStats getStats(const LocTranslationData& translated, const LocalisationFilterRules& filterRules) const;
 
