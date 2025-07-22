@@ -158,6 +158,7 @@ void LocalisationEditor::onEditorRootUpdate(Time t)
 		localStringsFuture = {};
 		gotLocalStrings = true;
 		if (gotRemoteStrings) {
+			pendingRemoteStrings = false;
 			onStringsReady(firstUpdate);
 			firstUpdate = false;
 		} else {
