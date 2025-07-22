@@ -11,6 +11,8 @@ namespace Halley {
 		SessionService(std::shared_ptr<Session> session);
 
 		Session& getSession() const;
+		void setSession(std::shared_ptr<Session> session);
+
 		const std::shared_ptr<Session>& getSessionPtr() const;
 		SessionMultiplayer& getMultiplayerSession() const;
 
