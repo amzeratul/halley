@@ -1,36 +1,78 @@
----
-
-widget: { class: widget }
-sizer: { type: vertical }
+uuid: b8b103c6-5eb6-46cb-9a0a-3890f1414b24
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: widget
 children:
-- stretchSpacer: {}
-  proportion: 1
-- widget: { id: logo, class: image, image: "halley/halley_logo_dist.png" }
-  border: [0, -50, 0, -50]
-- stretchSpacer: {}
-  proportion: 0.5
-- widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow }
-  sizer: { type: vertical }
-  children:
-  - widget: { id: title, class: label, text: "Load Project" }
-    fill: centre
-  - widget: { id: topLabel, class: label, style: labelLight, text: "Enter the path of the project to load:" }
-    border: [0, 5, 0, 0]
-    fill: centre
-  - widget: { class: scrollBarPane, size: [200, 250] }
+  - uuid: f936304d-ad0d-41ac-9708-9cb811cf8515
     proportion: 1
-    border: [0, 5, 0, 2]
-    sizer: { type: vertical }
+    stretchSpacer: {}
+  - uuid: 1b9ae4e5-4a1e-4f7d-a455-8e18db3fdd6a
+    border: [0, -50, 0, -50]
+    widget:
+      class: image
+      id: logo
+      image: halley/halley_logo_dist.png
+    fill: [centreHorizontal, fillVertical]
+  - uuid: f01f31a1-27e7-4a7c-ab82-56e2812e8317
+    proportion: 0.5
+    stretchSpacer: {}
+  - uuid: 2c465481-c9c9-458e-90f8-343e15f0cfa0
+    sizer:
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      image: $ui_float_window
+      innerBorder: [14, 11, 14, 14]
     children:
-    - widget: { id: recent, class: list }
-      proportion: 1
-  - sizer: { type: horizontal }
-    children:
-    - widget: { id: input, class: textInput, size: [400, 22] }
-      proportion: 1
-    - widget: { id: ok, class: button, text: "OK", size: [80, 22], tooltip: "Load the selected Project" }
-      border: [2, 0, 0, 0]
-- stretchSpacer: {}
-  proportion: 1
-
-...
+      - uuid: 6e010877-7d8b-48ca-9fa9-55ba6ad10e37
+        widget:
+          class: label
+          id: title
+          text: Load Project
+        fill: centre
+      - uuid: 71a70f26-49cb-4632-8fc9-2cd9961df449
+        border: [0, 5, 0, 0]
+        widget:
+          class: label
+          id: topLabel
+          style: labelLight
+          text: "Enter the path of the project to load:"
+        fill: centre
+      - uuid: 5f96f1dd-9861-492e-a45d-8f673a8d30b6
+        proportion: 1
+        border: [0, 5, 0, 2]
+        sizer:
+          type: vertical
+        widget:
+          class: scrollBarPane
+          size: [200, 250]
+        children:
+          - uuid: 560917a9-ebcd-4c95-b834-0dfb2f4046d8
+            proportion: 1
+            widget:
+              class: list
+              id: recent
+      - uuid: 6f9a21e6-660c-4720-9aa9-468de9d7080a
+        sizer:
+          type: horizontal
+        children:
+          - uuid: 30b14f78-3b0c-4c1a-a9d8-5fcd8b01f062
+            proportion: 1
+            widget:
+              class: textInput
+              id: input
+              size: [400, 22]
+          - uuid: e48eaa54-d41e-49bb-a822-e65519c1c6da
+            border: [2, 0, 0, 0]
+            widget:
+              class: button
+              id: ok
+              size: [80, 22]
+              text: OK
+              tooltip: Load the selected Project
+  - uuid: 9fc71950-2365-41de-bb10-1c357fb200bc
+    proportion: 1
+    stretchSpacer: {}
