@@ -95,6 +95,8 @@ namespace Halley {
 		LocalisationDataEntry& getEntry(size_t idx);
 
 		bool operator<(const LocOriginalDataChunk& other) const;
+
+		bool hasKeyValueChanges(const LocOriginalDataChunk& other) const;
 	};
 
 	class LocStringProperties {

@@ -126,23 +126,46 @@ Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalData& origD
 {
 	const auto url = "/strings-chunk/" + Encode::encodeURL(project);
 
-	HashSet<String> chunkSet;
+	int nChunksUpdated = 0;
+	HashSet<String> existingChunks;
 
 	ConfigNode payload;
 	auto& chunks = payload["chunks"];
 	for (const auto& chunk: origData.getChunks()) {
-		chunkSet.insert(chunk.name);
+		existingChunks.insert(chunk.name);
+
+		if (auto* remote = curRemoteData.tryGetChunk(chunk.name)) {
+			// Exists in remote, skip if it's the same
+			if (!chunk.hasKeyValueChanges(*remote)) {
+				continue;
+			}
+		} else {
+			// Doesn't exist in remote, skip if empty
+			if (chunk.getNumEntries() == 0) {
+				continue;
+			}
+		}
+
+		Logger::logInfo("Updating chunk: " + chunk.name);
 		chunks.push_back(getChunkConfig(chunk));
+		++nChunksUpdated;
 	}
 
 	for (const auto& chunk: curRemoteData.getChunks()) {
-		if (!chunkSet.contains(chunk.name)) {
+		if (!existingChunks.contains(chunk.name)) {
 			Logger::logInfo("Erasing chunk: " + chunk.name);
 			chunks.push_back(getChunkConfig(LocOriginalDataChunk(chunk.name, chunk.category, {})));
+			++nChunksUpdated;
 		}
 	}
 
-	return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
+	if (nChunksUpdated > 0) {
+		Logger::logInfo("Sending " + toString(nChunksUpdated) + " chunks to update...");
+		return sendWithAuthorizationSimple(HTTPMethod::PUT, url, payload);
+	} else {
+		Logger::logInfo("No changes detected.");
+		return Future<bool>::makeImmediate(true);
+	}
 }
 
 Future<bool> LocalisationClient::putOriginalStrings(const LocOriginalDataChunk& origData)

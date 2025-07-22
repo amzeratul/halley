@@ -116,6 +116,34 @@ bool LocOriginalDataChunk::operator<(const LocOriginalDataChunk& other) const
 	return name < other.name;
 }
 
+bool LocOriginalDataChunk::hasKeyValueChanges(const LocOriginalDataChunk& other) const
+{
+	if (entries.size() != other.entries.size()) {
+		// Different number of keys
+		return true;
+	}
+
+	HashMap<String, String> myValues;
+	for (const auto& entry: entries) {
+		myValues[entry.key] = entry.value;
+	}
+	for (const auto& entry: other.entries) {
+		auto iter = myValues.find(entry.key);
+		if (iter != myValues.end()) {
+			if (iter->second != entry.value) {
+				// Our key values don't match
+				return true;
+			}
+		} else {
+			// Other has a key I don't have
+			return true;
+		}
+	}
+
+	// No need to check if I have a key that other doesn't - if I did, our key numbers wouldn't match, since we checked for other having keys I don't
+	return false;
+}
+
 void LocOriginalData::setLanguage(I18NLanguage language)
 {
 	this->language = language;
@@ -350,6 +378,8 @@ bool LocOriginalData::updateLocalFromRemote(const LocOriginalData& remote)
 			}
 		}
 	}
+
+	Logger::logInfo("Remote has " + toString(remote.getNumEntries()) + " strs, local has " + getNumEntries());
 
 	/*
 	for (const auto& chunk: remote.getChunks()) {
