@@ -23,7 +23,7 @@ namespace Halley
 		void paint(Painter& painter) override;
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
-		void setNetworkStats(NetworkSession& networkSession);
+		void setNetworkStats(NetworkSession* networkSession);
 
 		int getNumPages() const;
 		int getPage() const;

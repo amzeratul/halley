@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/data_structures/listener_set.h"
 #include "halley/entity/service.h"
 #include "halley/net/session/session.h"
 #include "halley/net/session/session_multiplayer.h"
@@ -7,6 +8,8 @@ namespace Halley {
 
 	class SessionService : public Service {
 	public:
+		using ChangeCallback = std::function<void(std::shared_ptr<Session>)>;
+
 		SessionService() = default;
 		SessionService(std::shared_ptr<Session> session);
 
@@ -25,8 +28,11 @@ namespace Halley {
 		String getSessionClientName() const;
 		uint8_t getMyClientId() const;
 
+		[[nodiscard]] ListenerSetToken addSessionChangeCallback(ChangeCallback callback);
+
 	private:
 		std::shared_ptr<Session> session;
+		ListenerSet<std::shared_ptr<Session>> callbacks;
 	};
 }
 

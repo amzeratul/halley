@@ -16,6 +16,7 @@ Session& SessionService::getSession() const
 void SessionService::setSession(std::shared_ptr<Session> session)
 {
 	this->session = std::move(session);
+	callbacks.notify(this->session);
 }
 
 const std::shared_ptr<Session>& SessionService::getSessionPtr() const
@@ -76,6 +77,11 @@ String SessionService::getSessionClientName() const
 uint8_t SessionService::getMyClientId() const
 {
 	return isMultiplayer() ? getMultiplayerSession().getMyClientId() : 0;
+}
+
+ListenerSetToken SessionService::addSessionChangeCallback(ChangeCallback callback)
+{
+	return callbacks.add(std::move(callback));
 }
 
 SessionMultiplayer& SessionService::getMultiplayerSession() const

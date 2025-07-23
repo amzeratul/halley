@@ -7,9 +7,10 @@ class NetworkSendSystem final : public NetworkSendSystemBase<NetworkSendSystem> 
 public:
 	void init()
 	{
-		if (getSessionService().isMultiplayer()) {
-			setupCheats();
-		}
+		setupSession();
+		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (std::shared_ptr<Session> session) {
+			setupSession();
+		});
 	}
 
 	void update(Time t)
@@ -78,6 +79,7 @@ public:
 
 private:
 	Vector<EntityNetworkUpdateInfo> entities;
+	ListenerSetToken sessionChangeToken;
 
 	static void disableSendUpdateForChildren(const EntityRef& entity)
 	{
@@ -87,6 +89,15 @@ private:
 			}
 
 			disableSendUpdateForChildren(c);
+		}
+	}
+
+	void setupSession()
+	{
+		if (getSessionService().isMultiplayer()) {
+			setupCheats();
+		} else {
+			clearCheats();
 		}
 	}
 
@@ -124,6 +135,13 @@ private:
 			getSessionService().getMultiplayerSession().getEntityNetworkSession()->logUpdates();
 			return "Ok.";
 		}, UIDebugConsoleSyntax());
+	}
+
+	void clearCheats()
+	{
+		auto& consoleCommands = getDevService().getConsoleCommands();
+		consoleCommands.removeCommand("findNetworkEntityOutbound");
+		consoleCommands.removeCommand("logNetworkEntityUpdates");
 	}
 };
 

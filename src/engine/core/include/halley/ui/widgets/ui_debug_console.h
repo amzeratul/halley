@@ -91,8 +91,10 @@ namespace Halley {
 
 		void addCommandBatches(const ConfigNode& node, IUIDebugConsoleController& controller);
 
-		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
+		void removeCommand(const String& command);
 		void clear();
+
+		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
 
 	private:
 		std::map<String, UIDebugConsoleCommandData> commands;

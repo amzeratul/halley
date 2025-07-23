@@ -125,6 +125,11 @@ void UIDebugConsoleCommands::addCommandBatches(const ConfigNode& node, IUIDebugC
 	}
 }
 
+void UIDebugConsoleCommands::removeCommand(const String& command)
+{
+	commands.erase(command.asciiLower());
+}
+
 const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCommands() const
 {
 	return commands;
@@ -235,7 +240,7 @@ String UIDebugConsoleController::runHelp()
 	String result = "Commands available:";
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
-			result += "\n  " + command.first;
+			result += "\n  " + command.second.command;
 		}
 	}
 	return result;

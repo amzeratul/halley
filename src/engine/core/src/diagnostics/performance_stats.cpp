@@ -162,10 +162,10 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	lastProfileData = std::move(data);
 }
 
-void PerformanceStatsView::setNetworkStats(NetworkSession& session)
+void PerformanceStatsView::setNetworkStats(NetworkSession* session)
 {
-	networkStats = &session.getService();
-	networkSession = &session;
+	networkStats = session ? &session->getService() : nullptr;
+	networkSession = session;
 }
 
 int PerformanceStatsView::getNumPages() const

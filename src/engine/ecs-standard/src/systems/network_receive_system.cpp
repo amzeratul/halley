@@ -4,14 +4,12 @@ using namespace Halley;
 
 class NetworkReceiveSystem final : public NetworkReceiveSystemBase<NetworkReceiveSystem> {
 public:
-	
 	void init()
 	{
-		if (getSessionService().isMultiplayer()) {
-			getSessionService().getMultiplayerSession().getEntityNetworkSession()->setWorld(getWorld(), getMessageBridge());
-
-			setupCheats();
-		}
+		updateSession();
+		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (std::shared_ptr<Session> session) {
+			updateSession();
+		});
 	}
 
 	void update(Time t)
@@ -36,7 +34,19 @@ public:
 
 private:
 
+	ListenerSetToken sessionChangeToken;
 	bool requestedExit = false;
+
+	void updateSession()
+	{
+		if (getSessionService().isMultiplayer()) {
+			getSessionService().getMultiplayerSession().getEntityNetworkSession()->setWorld(getWorld(), getMessageBridge());
+
+			setupCheats();
+		} else {
+			clearCheats();
+		}
+	}
 
 	void setupCheats() const
 	{
@@ -78,6 +88,13 @@ private:
 
 			return output;
 		}, UIDebugConsoleSyntax());
+	}
+
+	void clearCheats()
+	{
+		auto& consoleCommands = getDevService().getConsoleCommands();
+		consoleCommands.removeCommand("networkQuality");
+		consoleCommands.removeCommand("findNetworkEntityInbound");
 	}
 };
 

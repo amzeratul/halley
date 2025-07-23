@@ -21,6 +21,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "data_structures/config_node.h"
 #include "data_structures/dynamic_grid.h"
 #include "data_structures/hash_map.h"
+#include "data_structures/listener_set.h"
 #include "data_structures/mapped_pool.h"
 #include "data_structures/maybe.h"
 #include "data_structures/maybe_ref.h"

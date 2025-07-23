@@ -30,20 +30,28 @@ private:
 class NetworkLockSystem final : public NetworkLockSystemBase<NetworkLockSystem>, INetworkLockSystemInterface, INetworkLockSystem, NetworkSession::IListener
 {
 public:
-	
 	void init()
 	{
 		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
 
-		if (const auto session = getEntityNetworkSession()) {
-			session->getSession().addListener(this);
-		}
+		setupSession();
+		sessionChangedToken = getSessionService().addSessionChangeCallback([=] (std::shared_ptr<Session> session) {
+			// This doesn't unregister from the last one, which should be fine since it's destroyed by this point anyway
+			setupSession();
+		});
 	}
 
 	void deInit() override
 	{
 		if (const auto session = getEntityNetworkSession()) {
 			session->getSession().removeListener(this);
+		}
+	}
+
+	void setupSession()
+	{
+		if (const auto session = getEntityNetworkSession()) {
+			session->getSession().addListener(this);
 		}
 	}
 
@@ -154,6 +162,7 @@ private:
         bool withAuthority = false;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
+	ListenerSetToken sessionChangedToken;
 
 	const EntityNetworkSession* getEntityNetworkSession() const
 	{
@@ -171,7 +180,7 @@ private:
 
 	void checkStaleLocks(std::optional<NetworkSession::PeerId> otherPeerId)
 	{
-		if (getSessionService().isMultiplayer() && isHost()) {
+		if (isHost()) {
 			auto predicate = [&](uint8_t peerId) {
 				return otherPeerId ? peerId == otherPeerId : !isPeerPresent(peerId);
 			};
@@ -314,7 +323,10 @@ private:
 
 	bool isPeerPresent(NetworkSession::PeerId peerId)
 	{
-		return peerId == getMyPeerId() || std_ex::contains(getSessionService().getMultiplayerSession().getNetworkSession()->getRemotePeers(), peerId);
+		if (peerId == getMyPeerId()) {
+			return true;
+		}
+		return getSessionService().isMultiplayer() && std_ex::contains(getSessionService().getMultiplayerSession().getNetworkSession()->getRemotePeers(), peerId);
 	}
 
 	const NetworkFamily* getRootEntity(EntityId targetId) const
