@@ -561,8 +561,10 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 	}
 
 	if (!targetTimeline) {
-		const std::optional<String> name = reflection ? std::optional(reflection->getSystemMessageReflector(origContext.msgId).getName()) : std::nullopt;
-		Logger::logWarning("Message " + (name ? "\"" + *name + "\"" : "id " + toString(origContext.msgId)) + " sent to system \"" + targetSystem + "\" was not received by any systems.");
+		if (!targetSystem.isEmpty()) {
+			const std::optional<String> name = reflection ? std::optional(reflection->getSystemMessageReflector(origContext.msgId).getName()) : std::nullopt;
+			Logger::logWarning("Message " + (name ? "\"" + *name + "\"" : "id " + toString(origContext.msgId)) + " sent to system \"" + targetSystem + "\" was not received by any systems.");
+		}
 		return 0;
 	}
 
