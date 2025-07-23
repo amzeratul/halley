@@ -55,6 +55,7 @@ namespace Halley
 		
 		virtual ~NetworkService() = default;
 
+		virtual bool isReady();
 		virtual void update(Time t) {}
 
 		virtual String startListening(AcceptCallback callback) = 0; // Returns the address that clients will use to connect to

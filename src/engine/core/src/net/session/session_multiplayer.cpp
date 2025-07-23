@@ -47,8 +47,27 @@ SessionMultiplayer::~SessionMultiplayer()
     service.reset();
 }
 
+bool SessionMultiplayer::isReadyToStart() const
+{
+	return service->isReady();
+}
+
 void SessionMultiplayer::start()
 {
+	startRequestPending = true;
+	if (isReadyToStart()) {
+		doStart();
+	} else {
+		Logger::logInfo("Waiting for service...");
+		setState(SessionState::WaitingForService);
+	}
+}
+
+void SessionMultiplayer::doStart()
+{
+	Logger::logInfo("SessionMultiplayer::doStart");
+
+	startRequestPending = false;
 	session->setServerSideDataHandler(this);
 	session->setSharedDataHandler(this);
 
@@ -203,6 +222,14 @@ void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 
 bool SessionMultiplayer::update(Time t)
 {
+	if (startRequestPending) {
+		if (isReadyToStart()) {
+			doStart();
+		} else {
+			return true;
+		}
+	}
+
 	entitySession->update(0);
 	entitySession->receiveUpdates();
 	entitySession->sendUpdates();

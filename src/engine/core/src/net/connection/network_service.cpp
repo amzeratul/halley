@@ -28,6 +28,11 @@ void NetworkService::Acceptor::ensureChoiceMade()
 	reject();
 }
 
+bool NetworkService::isReady()
+{
+	return true;
+}
+
 void NetworkService::sendHandshake(IConnection& connection)
 {
     if (connection.getStatus() == ConnectionStatus::Connecting) {

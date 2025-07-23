@@ -10,6 +10,7 @@ namespace Halley {
 
 	enum class SessionState {
 		Idle,
+		WaitingForService, // Waiting for service to be ready
 		WaitingForPlatformLobbyCallback, // Waiting for platform e.g. Steam to give lobby info
 		JoiningSession, // Connecting, waiting for host to assign peer id
 		JoinedSession, // Joined
@@ -24,9 +25,10 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<SessionState> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 12> operator()() const {
 			return{ {
 				"Idle",
+				"WaitingForService",
 				"WaitingForPlatformLobbyCallback",
 				"JoiningSession",
 				"JoinedSession",
@@ -66,6 +68,7 @@ namespace Halley {
 		SessionMultiplayer(const HalleyAPI& api, Resources& resources, const ConnectionOptions& options, SessionSettings settings);
 		~SessionMultiplayer() override;
 
+		bool isReadyToStart() const;
 		void start() override;
 		bool update(Time t) override;
 
@@ -115,6 +118,7 @@ namespace Halley {
 		bool host = false;
 		String playerName;
 		SessionState curState = SessionState::Disconnected;
+		bool startRequestPending = false;
 
 		std::unique_ptr<EntityNetworkSession> entitySession;
 		std::shared_ptr<NetworkSession> session;
@@ -125,7 +129,10 @@ namespace Halley {
 
 		static SessionMultiplayer* joinLobbyInstance;
 		static std::optional<PlatformJoinCallbackParameters> joinLobbyParameters;
+
 		void onJoinCallback();
 		static void onPlatformJoinCallback(PlatformJoinCallbackParameters params);
+
+		void doStart();
 	};
 }
