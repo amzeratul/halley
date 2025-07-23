@@ -95,7 +95,6 @@ namespace Halley {
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
-		void onStartGame() override;
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) override;

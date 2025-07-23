@@ -41,7 +41,6 @@ namespace Halley {
 		public:
 			virtual ~IEntityNetworkSessionListener() = default;
 			virtual void onStartSession(NetworkSession::PeerId myPeerId) = 0;
-			virtual void onStartGame() = 0;
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual void setupByteInterpolators(ByteDataInterpolatorSet& interpolatorSet) = 0;

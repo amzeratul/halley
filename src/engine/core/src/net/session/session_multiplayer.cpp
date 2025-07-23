@@ -195,13 +195,6 @@ void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
 	setState(SessionState::JoinedSession);
 }
 
-void SessionMultiplayer::onStartGame()
-{
-	if (!host) {
-		setState(SessionState::WaitingForInitialViewport);
-	}
-}
-
 bool SessionMultiplayer::update(Time t)
 {
 	entitySession->update(0);
