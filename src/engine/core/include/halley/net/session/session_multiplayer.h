@@ -94,6 +94,8 @@ namespace Halley {
 		MultiplayerLobby& getLobby();
 
 	protected:
+		virtual void onStarted();
+
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) override;
 		void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) override;

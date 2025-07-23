@@ -72,6 +72,8 @@ void SessionMultiplayer::start()
 			api.platform->setJoinCallback(onPlatformJoinCallback);
 		}
 	}
+
+	onStarted();
 }
 
 bool SessionMultiplayer::isMultiplayer() const
@@ -188,6 +190,10 @@ void SessionMultiplayer::setNetworkQuality(NetworkService::Quality level)
 MultiplayerLobby& SessionMultiplayer::getLobby()
 {
 	return *lobby;
+}
+
+void SessionMultiplayer::onStarted()
+{
 }
 
 void SessionMultiplayer::onStartSession(NetworkSession::PeerId myPeerId)
