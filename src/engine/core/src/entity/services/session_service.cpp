@@ -13,10 +13,11 @@ Session& SessionService::getSession() const
 	return *session;
 }
 
-void SessionService::setSession(std::shared_ptr<Session> session)
+void SessionService::setSession(std::shared_ptr<Session> newSession)
 {
-	this->session = std::move(session);
-	callbacks.notify(this->session);
+	auto oldSession = std::move(session);
+	session = std::move(newSession);
+	callbacks.notify(ChangeData{ oldSession, session });
 }
 
 const std::shared_ptr<Session>& SessionService::getSessionPtr() const

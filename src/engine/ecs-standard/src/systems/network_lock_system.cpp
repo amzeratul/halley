@@ -34,24 +34,29 @@ public:
 	{
 		getWorld().setInterface(static_cast<INetworkLockSystemInterface*>(this));
 
-		setupSession();
-		sessionChangedToken = getSessionService().addSessionChangeCallback([=] (std::shared_ptr<Session> session) {
-			// This doesn't unregister from the last one, which should be fine since it's destroyed by this point anyway
-			setupSession();
+		initSession(getSessionService().getSession());
+		sessionChangedToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData data) {
+			deInitSession(*data.oldSession);
+			initSession(*data.newSession);
 		});
 	}
 
 	void deInit() override
 	{
-		if (const auto session = getEntityNetworkSession()) {
-			session->getSession().removeListener(this);
+		deInitSession(getSessionService().getSession());
+	}
+
+	void initSession(Session& session)
+	{
+		if (const auto networkSession = session.getEntityNetworkSession()) {
+			networkSession->getSession().addListener(this);
 		}
 	}
 
-	void setupSession()
+	void deInitSession(Session& session)
 	{
-		if (const auto session = getEntityNetworkSession()) {
-			session->getSession().addListener(this);
+		if (const auto networkSession = session.getEntityNetworkSession()) {
+			networkSession->getSession().addListener(this);
 		}
 	}
 
@@ -163,14 +168,6 @@ private:
 	};
 	HashMap<EntityId, LocalLock> myLocks;
 	ListenerSetToken sessionChangedToken;
-
-	const EntityNetworkSession* getEntityNetworkSession() const
-	{
-		if (getSessionService().isMultiplayer()) {
-			return getSessionService().getMultiplayerSession().getEntityNetworkSession();
-		}
-		return nullptr;
-	}
 
 	void onPeerDisconnected(NetworkSession::PeerId peerId) override
 	{

@@ -8,13 +8,17 @@ namespace Halley {
 
 	class SessionService : public Service {
 	public:
-		using ChangeCallback = std::function<void(std::shared_ptr<Session>)>;
+		struct ChangeData {
+			std::shared_ptr<Session> oldSession;
+			std::shared_ptr<Session> newSession;
+		};
+		using ChangeCallback = std::function<void(ChangeData)>;
 
 		SessionService() = default;
 		SessionService(std::shared_ptr<Session> session);
 
 		Session& getSession() const;
-		void setSession(std::shared_ptr<Session> session);
+		void setSession(std::shared_ptr<Session> newSession);
 
 		const std::shared_ptr<Session>& getSessionPtr() const;
 		SessionMultiplayer& getMultiplayerSession() const;
@@ -32,7 +36,7 @@ namespace Halley {
 
 	private:
 		std::shared_ptr<Session> session;
-		ListenerSet<std::shared_ptr<Session>> callbacks;
+		ListenerSet<ChangeData> callbacks;
 	};
 }
 

@@ -8,7 +8,7 @@ public:
 	void init()
 	{
 		setupSession();
-		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (std::shared_ptr<Session> session) {
+		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData data) {
 			setupSession();
 		});
 	}
