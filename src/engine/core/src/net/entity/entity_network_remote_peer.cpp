@@ -417,9 +417,11 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		auto entity = parent->getWorld().findEntity(uuid);
 
 		if (!entity || !entity->isValid()) {
-			Logger::logWarning("Unable to assign network entity, no instance found with UUID " + toString(uuid));
+			Logger::logWarning("Unable to assign network entity " + toString(static_cast<int>(msg.entityId)) + ", no instance found with UUID " + toString(uuid));
 			return;
 		}
+
+		//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to existing entity " + entity->getName());
 
 		InboundEntity remote;
 		// Construct entity data from local entity, since the host doesn't send any delta in this case.
@@ -459,7 +461,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	if (entityData->getParentUUID().isValid()) {
 		// The same check is done below, but the entity has already been created then.
 		if (!parent->getWorld().findEntity(entityData->getParentUUID())) {
-			Logger::logError("Parent " + toString(entityData->getParentUUID()) + " not found trying to instantiate network entity " + msg.entityId);
+			Logger::logError("Can't instantiate network entity " + toString(msg.entityId) + " from prefab \"" + prefab->getPrefabName() + "\" - parent " + toString(entityData->getParentUUID()) + " not found");
 			return;
 		}
 	}
@@ -479,9 +481,11 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
 			entity.setParent(parentEntity.value());
 		} else {
-			Logger::logError("Parent " + toString(*parentUUID) + " not found for network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
+			Logger::logError("Parent " + toString(*parentUUID) + " not found for already instantiated network entity \"" + entity.getName() + "\" (" + entity.getInstanceUUID() + ")");
 		}
 	}
+
+	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to new entity " + entity.getName());
 
 	InboundEntity remote;
 	remote.data = std::move(*entityData);
@@ -501,7 +505,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 {
 	const auto iter = inboundEntities.find(msg.entityId);
 	if (iter == inboundEntities.end()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not found from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not found from peer " + toString(static_cast<int>(peerId)), true);
 		return;
 	}
 	auto& remote = iter->second;
