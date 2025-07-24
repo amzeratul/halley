@@ -705,7 +705,7 @@ void EntityFactory::destroyEntity(EntityRef entity)
 	world.destroyEntity(entity);
 }
 
-std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask)
+std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo)
 {
 	std::optional<UUID> parentUUID;
 	
@@ -717,7 +717,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
-		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid);
+		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta, uuid, debugInfo);
 		if (entityData) {
 			entityData->setInstanceUUID(uuid);
 
@@ -746,20 +746,22 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	return std::make_pair(entity, parentUUID);
 }
 
-std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID) const
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, const DebugInfo& debugInfo) const
 {
-	return prefabDeltaToEntityData(delta, entityUUID, resources);
+	return prefabDeltaToEntityData(delta, entityUUID, resources, debugInfo);
 }
 
-std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources)
+std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, const DebugInfo& debugInfo)
 {
 	if (delta.getPrefab()) {
 		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
 		const auto& prefabDataRoot = prefab->getEntityData();
-		auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
+		const auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
 		const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
 		if (!prefabData) {
-			Logger::logError("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString());
+			Logger::logWarning("Error loading: \"" + debugInfo.label + "\" - Entity with UUID " + prefabUUID.toString()
+				+ " not found in prefab \"" + delta.getPrefab().value() + "\" while loading entity delta with context "
+				+ toString(debugInfo.type));
 			return {};
 		}
 

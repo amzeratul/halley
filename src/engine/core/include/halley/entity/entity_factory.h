@@ -14,6 +14,23 @@ namespace Halley {
 	class EntityScene;
 	class EntityData;
 	class EnableRulesService;
+
+	enum class EntityLoadContextType {
+		Unknown,
+		SaveData,
+		Network
+	};
+
+	template <>
+	struct EnumNames<EntityLoadContextType> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"unknown",
+				"saveData",
+				"network"
+			}};
+		}
+	};
 	
 	class EntityFactory {
 	public:
@@ -34,6 +51,16 @@ namespace Halley {
 			{}
 		};
 
+		struct DebugInfo {
+			String label;
+			EntityLoadContextType type = EntityLoadContextType::Unknown;
+
+			DebugInfo(String label = "", EntityLoadContextType type = EntityLoadContextType::Unknown)
+				: label(std::move(label))
+				, type(type)
+			{}
+		};
+
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 
@@ -45,9 +72,9 @@ namespace Halley {
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 
-		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask); // Returns entity and parent UUID
-		std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID) const;
-		static std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources);
+		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo = {}); // Returns entity and parent UUID
+		std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, const DebugInfo& debugInfo = {}) const;
+		static std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, const DebugInfo& debugInfo = {});
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true);
