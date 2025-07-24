@@ -30,7 +30,7 @@ colours:
   ui_inputNormalActual: "#1D2B34" # Actual display colour of input, considering the image is not white >:(
   ui_inputDown: "#BEBFD1"
   ui_inputHover: "#d7d8e3"
-  ui_inputDisabled: "#000000"
+  ui_inputDisabled: "#d7d8e380"
 
   ui_listBackground: "#22333b"
   ui_listSelected: "#5c80c3"  # main theme accent colour

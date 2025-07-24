@@ -30,7 +30,7 @@ colours:
   ui_inputNormalActual: "#ffffff"
   ui_inputDown: "#ffffff"
   ui_inputHover: "#ffffff"
-  ui_inputDisabled: "#000000"
+  ui_inputDisabled: "#ffffff80"
 
   ui_listBackground: "#ffffff"
   ui_listSelected: "#5c80c3"  # main theme accent colour

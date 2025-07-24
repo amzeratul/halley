@@ -24,7 +24,7 @@ colours:
   ui_inputNormalActual: "#F493AD"
   ui_inputDown: "#C4395C"
   ui_inputHover: "#F9BFCF"
-  ui_inputDisabled: "#D7AAB6"
+  ui_inputDisabled: "#F493AD80"
 
   ui_listBackground: "#F4A4B7C0"
   ui_listSelected: "#FFFFFF"
