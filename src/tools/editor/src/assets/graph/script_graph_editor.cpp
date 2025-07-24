@@ -431,6 +431,8 @@ void ScriptGraphProperties::onMakeUI()
 	{
 		properties["network"] = value;
 	});
+
+	getWidget("network")->setEnabled(!scriptGraph.isNetworkRequired());
 }
 
 ScriptGraphAssetEditor::ScriptGraphAssetEditor(UIFactory& factory, Resources& gameResoures, ProjectWindow& projectWindow)

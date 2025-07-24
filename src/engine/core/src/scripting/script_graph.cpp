@@ -259,7 +259,12 @@ bool ScriptGraph::isSupressDuplicateWarning() const
 
 bool ScriptGraph::isNetwork() const
 {
-	return properties["network"].asBool(true);
+	return needsNetwork || properties["network"].asBool(false);
+}
+
+bool ScriptGraph::isNetworkRequired() const
+{
+	return needsNetwork;
 }
 
 ConfigNode ScriptGraph::toConfigNode() const
@@ -525,6 +530,7 @@ void ScriptGraph::finishGraph()
 	properties.ensureType(ConfigNodeType::Map);
 
 	updateHash();
+	updateNeedsNetwork();
 }
 
 void ScriptGraph::updateHash()
@@ -541,6 +547,17 @@ void ScriptGraph::updateHash()
 	}
 	hash = hasher.digest();
 	assetHash = assetHasher.digest();
+}
+
+void ScriptGraph::updateNeedsNetwork()
+{
+	needsNetwork = false;
+	for (auto& node: nodes) {
+		if (node.getType() == "transferToHost") {
+			needsNetwork = true;
+			break;
+		}
+	}
 }
 
 void ScriptGraph::appendGraph(GraphNodeId parent, const ScriptGraph& other)

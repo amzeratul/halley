@@ -86,6 +86,7 @@ namespace Halley {
 		bool isMultiCopy() const;
 		bool isSupressDuplicateWarning() const;
 		bool isNetwork() const;
+		bool isNetworkRequired() const;
 
 		ConfigNode& getProperties();
 		const ConfigNode& getProperties() const;
@@ -143,9 +144,12 @@ namespace Halley {
 
 		std::shared_ptr<ScriptGraph> previousVersion;
 
+		bool needsNetwork = false;
+
 		GraphNodeId findNodeRoot(GraphNodeId nodeId) const;
 		void generateRoots();
 		[[nodiscard]] bool isMultiConnection(GraphNodePinType pinType) const override;
+		void updateNeedsNetwork();
 	};
 
 	template <>
