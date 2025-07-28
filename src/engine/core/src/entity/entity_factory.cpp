@@ -596,7 +596,12 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 
 		if (context->needsNewContextFor(childData)) {
 			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
-			updateEntityNode(newContext->getRootEntityData(), getEntity(childData.getInstanceUUID(), *newContext, false), entity, newContext);
+			auto child = tryGetEntity(childData.getInstanceUUID(), *newContext, false);
+			if (child.isValid()) {
+				updateEntityNode(newContext->getRootEntityData(), child, entity, newContext);
+			} else {
+				Logger::logError("Unable to find UUID " + childData.getInstanceUUID().toString() + " (" + childData.getParentUUID() + ") while updating entity children delta for entity " + entity.getName() + " (" + entity.getPrefabAssetId() + ")");
+			}
 		} else {
 			updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
 		}
