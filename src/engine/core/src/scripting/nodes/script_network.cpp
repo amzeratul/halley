@@ -263,11 +263,11 @@ ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const 
 	const auto player = readEntityId(environment, node, 0);
 	const auto toLock = readEntityId(environment, node, 1);
 
-	const auto& lockInterface = environment.getInterface<INetworkLockSystemInterface>();
+	const auto* lockInterface = environment.getWorld().tryGetInterface<INetworkLockSystemInterface>();
 	if (pinN == 2) {
-		return ConfigNode(lockInterface.isLockedByOrAvailableTo(player, toLock));
+		return ConfigNode(lockInterface ? lockInterface->isLockedByOrAvailableTo(player, toLock) : true);
 	} else if (pinN == 3) {
-		return ConfigNode(lockInterface.getLockStatus(toLock) == INetworkLockSystemInterface::LockStatus::Unlocked);
+		return ConfigNode((lockInterface ? lockInterface->getLockStatus(toLock) : INetworkLockSystemInterface::LockStatus::Unlocked) == INetworkLockSystemInterface::LockStatus::Unlocked);
 	}
 
 	return {};
