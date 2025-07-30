@@ -69,7 +69,7 @@ void ScriptRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, cons
 	}
 
 	// Destructor
-	if (nodeType->hasDestructor(dynamic_cast<const ScriptGraphNode&>(node)) && nodeType->showDestructor()) {
+	if (nodeType->hasDestructor(dynamic_cast<const ScriptGraphNode&>(node), dynamic_cast<const ScriptGraph&>(*graph)) && nodeType->showDestructor()) {
 		const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
 		const auto [col, iconCol, borderAlpha] = getNodeColour(*nodeType, drawMode);
 

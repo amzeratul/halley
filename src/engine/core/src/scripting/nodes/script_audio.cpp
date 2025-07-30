@@ -72,10 +72,10 @@ String ScriptAudioEvent::getPinDescription(const BaseGraphNode& node, PinType el
 	return ScriptNodeTypeBase<ScriptAudioEventData>::getPinDescription(node, elementType, elementIdx);
 }
 
-bool ScriptAudioEvent::hasDestructor(const ScriptGraphNode& node) const
+bool ScriptAudioEvent::hasDestructor(const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
-	return true;
-	//return !node.getSettings()["destroyEvent"].asString("").isEmpty();
+	const auto& destroyEvent = tryGetConnectedNodeName(node, graph, 4).value_or(node.getSettings()["destroyEvent"].asString(""));
+	return !destroyEvent.isEmpty();
 }
 
 void ScriptAudioEvent::doInitData(ScriptAudioEventData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const

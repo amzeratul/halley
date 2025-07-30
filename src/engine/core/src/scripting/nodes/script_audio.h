@@ -22,7 +22,7 @@ namespace Halley {
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
-		bool hasDestructor(const ScriptGraphNode& node) const override;
+		bool hasDestructor(const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 
 		void doInitData(ScriptAudioEventData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptAudioEventData& data) const override;

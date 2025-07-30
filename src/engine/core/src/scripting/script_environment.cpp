@@ -375,7 +375,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		}
 
 		if (nodeState.threadCount == 0) {
-			if (node.getNodeType().hasDestructor(node)) {
+			if (node.getNodeType().hasDestructor(node, *currentGraph)) {
 				node.getNodeType().destructor(*this, node, nodeState.data);
 			}
 			state.finishNode(node, nodeState, true);
