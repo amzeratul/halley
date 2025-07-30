@@ -58,7 +58,7 @@ public:
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
 			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::StartThread, static_cast<GraphNodeId>(msg.nodeId), Deserializer::fromBytes<ConfigNode>(msg.params, getSerializerOptions()), msg.fromPeerId});
 		} else {
-			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
+			Logger::logWarning("StartHostScript: Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
 	}
 
@@ -67,7 +67,8 @@ public:
 		if (const auto scriptable = getScriptState(msg.entity, msg.script)) {
 			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::CancelThread, static_cast<GraphNodeId>(msg.nodeId), ConfigNode(), msg.fromPeerId });
 		} else {
-			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
+			// NB: this happens when a script gets destroyed
+			//Logger::logWarning("CancelHostScript: Couldn't find script " + msg.script + " on entity " + toString(msg.entity));
 		}
 	}
 
@@ -76,7 +77,7 @@ public:
 		if (const auto scriptable = getScriptState(e, msg.script)) {
 			scriptable->receiveControlEvent(ScriptState::ControlEvent{ ScriptState::ControlEventType::NotifyReturn, static_cast<GraphNodeId>(msg.nodeId), Deserializer::fromBytes<ConfigNode>(msg.params, getSerializerOptions()), msg.fromPeerId });
 		} else {
-			Logger::logWarning("Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
+			Logger::logWarning("ReturnHostScript: Couldn't find script " + msg.script + " on entity " + toString(e.entityId));
 		}
 	}
 	
