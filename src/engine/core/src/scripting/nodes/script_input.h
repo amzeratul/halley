@@ -40,6 +40,23 @@ namespace Halley {
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptInputButtonData& curData) const override;
 	};
 
+	class ScriptInputAxis final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "inputAxis"; }
+		String getName() const override { return "Input Axis"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/input_axis.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		String getLabel(const BaseGraphNode& node) const override;
+		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
 	class ScriptHasInputLabel final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "hasInputLabel"; }

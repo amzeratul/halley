@@ -287,6 +287,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSetVariable>());
 	addScriptNode(std::make_unique<ScriptHoldVariable>());
 	addScriptNode(std::make_unique<ScriptInputButton>());
+	addScriptNode(std::make_unique<ScriptInputAxis>());
 	addScriptNode(std::make_unique<ScriptHasInputLabel>());
 	addScriptNode(std::make_unique<ScriptForLoop>());
 	addScriptNode(std::make_unique<ScriptForEachLoop>());

@@ -193,6 +193,68 @@ void ScriptInputButton::doDestructor(ScriptEnvironment& environment, const Scrip
 }
 
 
+String ScriptInputAxis::getLabel(const BaseGraphNode& node) const
+{
+	return node.getSettings()["axis"].asString("0");
+}
+
+String ScriptInputAxis::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "axis" + toString(node.getSettings()["axis"].asInt(0)) + ".input";
+	}
+	return ScriptNodeTypeBase<void>::getShortDescription(node, graph, elementIdx);
+}
+
+Vector<IGraphNodeType::SettingType> ScriptInputAxis::getSettingTypes() const
+{
+	return {
+		SettingType{ "axis", "Halley::InputAxis", Vector<String>{"0"} }
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptInputAxis::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptInputAxis::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Get value of axis ");
+	str.append(toString(node.getSettings()["axis"].asInt(0)), settingColour);
+	str.append(" for ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptInputAxis::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Entity";
+	} else if (elementIdx == 1) {
+		return "Axis value";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+ConfigNode ScriptInputAxis::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto axis = node.getSettings()["axis"].asInt(0);
+	const auto entity = readEntityId(environment, node, 0);
+	if (const auto inputDevice = environment.getInputDevice(entity, false)) {
+		return ConfigNode(inputDevice->getAxis(axis));
+	} else {
+		return ConfigNode(0.0f);
+	}
+}
+
 
 gsl::span<const IGraphNodeType::PinType> ScriptHasInputLabel::getPinConfiguration(const BaseGraphNode& node) const
 {

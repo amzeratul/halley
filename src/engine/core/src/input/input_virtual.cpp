@@ -246,6 +246,7 @@ void InputVirtual::clearButtonRelease(InputButton code)
 float InputVirtual::getAxis(int n)
 {
 	if (n < 0 || n >= axes.size()) {
+		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);
 		return 0;
 	}
 	return axes.at(n).getValue();
@@ -254,6 +255,7 @@ float InputVirtual::getAxis(int n)
 int InputVirtual::getAxisRepeat(int n)
 {
 	if (n < 0 || n >= axes.size()) {
+		Logger::logError("Attempting to read out of bounds virtual axis: " + toString(n) + " (has " + toString(axes.size()) + " axes)", true);
 		return 0;
 	}
 	return axes.at(n).curRepeatValue;
