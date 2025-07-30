@@ -414,7 +414,13 @@ namespace {
 		if (aType == ConfigNodeType::Sequence && bType == ConfigNodeType::Float2 && a.asSequence().size() >= 2) {
 			return cmp.compareEq(a.asVector2f(), b.asVector2f());
 		}
-		
+		if (aType == ConfigNodeType::Sequence && (bType == ConfigNodeType::Float || bType == ConfigNodeType::Int) && a.asSequence().size() == 2) {
+			return cmp.compare(a.asVector2f().length(), b.asFloat());
+		}
+		if ((aType == ConfigNodeType::Float || aType == ConfigNodeType::Int) && (bType == ConfigNodeType::Float2 || bType == ConfigNodeType::Int2)) {
+			return cmp.compare(a.asFloat(), b.asVector2f().length());
+		}
+
 		return cmp.compare(0, 1);
 	}
 

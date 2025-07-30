@@ -147,11 +147,8 @@ EntityId IScriptNodeType::readRawEntityId(ScriptEnvironment& environment, const 
 	return environment.readInputEntityIdRaw(node, static_cast<GraphPinId>(idx));
 }
 
-std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const
+gsl::span<IScriptNodeType::OutputNode> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask, gsl::span<OutputNode> dst) const
 {
-	std::array<OutputNode, 8> result;
-	result.fill({});
-	
 	const auto& pinConfig = getPinConfiguration(node);
 
 	size_t curOutputPin = 0;
@@ -163,7 +160,12 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 				const auto& output = node.getPin(i);
 				for (auto& conn: output.connections) {
 					if (conn.dstNode) {
-						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<GraphPinId>(i), conn.dstPin };
+						if (nOutputsFound < dst.size()) {
+							dst[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<GraphPinId>(i), conn.dstPin };
+						} else {
+							Logger::logError("ScriptNode \"" + node.getType() + "\" has too many output nodes.");
+							return dst.subspan(0, nOutputsFound);
+						}
 					}
 				}
 			}
@@ -172,7 +174,11 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 		}
 	}
 
-	return result;
+	if (nOutputsFound == 0) {
+		dst[0] = OutputNode{};
+		++nOutputsFound;
+	}
+	return dst.subspan(0, nOutputsFound);
 }
 
 GraphPinId IScriptNodeType::getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const

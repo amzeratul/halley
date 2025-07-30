@@ -619,6 +619,18 @@ String ScriptConditionalOperator::getShortDescription(const ScriptGraphNode& nod
 	return addParentheses(std::move(a)) + " ? " + addParentheses(std::move(b)) + " : " + addParentheses(std::move(c));
 }
 
+String ScriptConditionalOperator::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "Condition";
+	} else if (elementIdx == 1) {
+		return "If true";
+	} else if (elementIdx == 2) {
+		return "If false";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
 gsl::span<const IGraphNodeType::PinType> ScriptConditionalOperator::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;

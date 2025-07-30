@@ -119,6 +119,8 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 	currentThread = &thread;
 	float& timeLeft = thread.getTimeSlice();
 
+	std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
+
 	while (timeLeft > 0 && thread.isRunning()) {
 		// Get node type
 		const auto nodeId = thread.getCurNode().value();
@@ -147,7 +149,7 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			// Still running this node, suspend
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
+			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive, outputBuffer), pendingThreads);
 			if (result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
 				setWatcher(thread, true);
 			}
@@ -163,11 +165,11 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 					mergeThread(thread, false);
 				}
 
-				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive, outputBuffer);
 				forkThread(thread, outputNodes, pendingThreads, 1);
 				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
 			} else if (result.state == ScriptNodeExecutionState::Detach) {
-				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+				const auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive, outputBuffer);
 				advanceThread(thread, {}, 0, 0);
 				forkThread(thread, outputNodes, pendingThreads, 0);
 			} else if (result.state == ScriptNodeExecutionState::Terminate) {
@@ -316,7 +318,7 @@ void ScriptEnvironment::initNode(GraphNodeId nodeId, ScriptState::NodeState& nod
 	currentState->startNode(currentGraph->getNodes()[nodeId], nodeState);
 }
 
-size_t ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
+size_t ScriptEnvironment::forkThread(ScriptStateThread& thread, gsl::span<IScriptNodeType::OutputNode> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
 {
 	size_t n = 0;
 	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
@@ -463,7 +465,8 @@ void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t ou
 	if (nodeId) {
 		const auto& node = currentGraph->getNodes()[*nodeId];
 		const auto& nodeType = node.getNodeType();
-		const auto outputNodes = nodeType.getOutputNodes(node, outputPins);
+		std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
+		const auto outputNodes = nodeType.getOutputNodes(node, outputPins, outputBuffer);
 
 		forkThread(thread, outputNodes, pendingThreads, 1);
 		advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
@@ -483,12 +486,13 @@ void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pe
 
 void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread>& pending)
 {
+	std::array<IScriptNodeType::OutputNode, 32> outputBuffer;
 	for (auto& event: currentState->processControlEvents()) {
 		if (event.type == ScriptState::ControlEventType::StartThread) {
 			const auto& node = currentGraph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
 
-			const auto outputs = nodeType.getOutputNodes(node, 1);
+			const auto outputs = nodeType.getOutputNodes(node, 1, outputBuffer);
 			if (const auto dstNode = outputs[0].dstNode) {
 				const auto dstPin = outputs[0].inputPin;
 				pending.push_back(startThread(ScriptStateThread(*dstNode, dstPin)));
@@ -500,7 +504,7 @@ void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread
 		} else if (event.type == ScriptState::ControlEventType::CancelThread) {
 			const auto& node = currentGraph->getNodes()[event.nodeId];
 			const auto& nodeType = node.getNodeType();
-			const auto outputs = nodeType.getOutputNodes(node, 1);
+			const auto outputs = nodeType.getOutputNodes(node, 1, outputBuffer);
 			if (const auto dstNode = outputs[0].dstNode) {
 				abortCodePath(*dstNode, {}, true);
 			}

@@ -165,6 +165,7 @@ namespace Halley {
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
 
 		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+		String getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
