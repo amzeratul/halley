@@ -561,9 +561,19 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 		const auto& child = data.getChild(i);
 		if (context->needsNewContextFor(child)) {
 			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
-			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
+			auto childEntity = tryGetEntity(child.getInstanceUUID(), *newContext, false);
+			if (childEntity.isValid()) {
+				updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
+			} else {
+				Logger::logError("Could not find child with UUID" + child.getInstanceUUID().toString() + " when updating prefab " + newContext->getPrefabAssetId());
+			}
 		} else {
-			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);
+			auto childEntity = tryGetEntity(child.getInstanceUUID(), *context, false);
+			if (childEntity.isValid()) {
+				updateEntityNode(child, childEntity, entity, context);
+			} else {
+				Logger::logError("Could not find child with UUID" + child.getInstanceUUID().toString() + " when updating prefab " + context->getPrefabAssetId());
+			}
 		}
 	}
 

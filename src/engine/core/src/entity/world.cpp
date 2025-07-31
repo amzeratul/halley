@@ -948,7 +948,10 @@ void World::processSystemMessages(TimeLine timeline)
 
 bool World::isEntityNetworkRemote(EntityId entityId) const
 {
-	return isEntityNetworkRemote(getEntity(entityId));
+	if (networkInterface) {
+		return isEntityNetworkRemote(getEntity(entityId));
+	}
+	return false;
 }
 
 bool World::isEntityNetworkRemote(EntityRef entity) const

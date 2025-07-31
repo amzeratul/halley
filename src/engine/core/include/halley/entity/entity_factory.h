@@ -150,6 +150,7 @@ namespace Halley {
 		}
 
 		const std::shared_ptr<const Prefab>& getPrefab() const { return prefab; }
+		const String& getPrefabAssetId() const { return prefab ? prefab->getAssetId() : String::emptyString(); }
 		const EntitySerializationContext& getEntitySerializationContext() const { return entitySerializationContext; }
 
 		EntityId getEntityIdFromUUID(const UUID& uuid) const override;
