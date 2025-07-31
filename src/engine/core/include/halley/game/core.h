@@ -64,6 +64,7 @@ namespace Halley
 		Vector<Plugin*> getPlugins(PluginType type) override;
 
 		void log(LoggerLevel level, std::string_view msg) override;
+		bool canLogInInterruptContext() override;
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;

@@ -259,7 +259,7 @@ namespace {
 	}
 
 #ifdef WIN32
-	LONG unhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
+	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
 
@@ -333,13 +333,14 @@ namespace {
 		strcpy(stackTraceBuffer, name);
 		strcpy(stackTraceBuffer, "\n");
 		Debug::getCallStack(gsl::span(stackTraceBuffer), 4);
+		Logger::setInterruptContext();
 		Logger::logError(stackTraceBuffer);
 
 		if (errorHandler) {
 			errorHandler(name);
 		}
 
-		return EXCEPTION_EXECUTE_HANDLER;
+		return EXCEPTION_CONTINUE_SEARCH;
 	}
 #endif
 }
@@ -348,17 +349,17 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std:
 {
 	dumpFile = dumpFilePath;
 
-#ifdef HAS_SIGNAL
-	::signal(SIGSEGV, &signalHandler);
-	::signal(SIGABRT, &signalHandler);
-#endif
 
 #ifndef NN_NINTENDO_SDK
 	std::set_terminate(&terminateHandler);
 #endif
 
-#ifdef WIN32
-	SetUnhandledExceptionFilter(&unhandledExceptionFilter);
+#if defined(WIN32)
+	SetUnhandledExceptionFilter(&win32ExceptionHandler);
+	//AddVectoredExceptionHandler(1, win32ExceptionHandler);
+#elif defined(HAS_SIGNAL)
+	::signal(SIGSEGV, &signalHandler);
+	::signal(SIGABRT, &signalHandler);
 #endif
 
 	errorHandler = std::move(eh);

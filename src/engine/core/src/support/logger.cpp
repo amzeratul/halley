@@ -24,7 +24,10 @@ void StdOutSink::log(LoggerLevel level, std::string_view msg)
 		return;
 	}
 
-	std::unique_lock<std::mutex> lock(mutex);
+	std::unique_lock<std::mutex> lock(mutex, std::defer_lock_t());
+	if (!interruptContext) {
+		lock.lock();
+	}
 
 	switch (level) {
 	case LoggerLevel::Error:
@@ -47,6 +50,16 @@ void StdOutSink::log(LoggerLevel level, std::string_view msg)
 	}
 }
 
+bool StdOutSink::canLogInInterruptContext()
+{
+	return true;
+}
+
+void StdOutSink::setInterruptContext()
+{
+	interruptContext = true;
+}
+
 void Logger::setInstance(Logger& logger)
 {
 	instance = &logger;
@@ -55,7 +68,9 @@ void Logger::setInstance(Logger& logger)
 void Logger::addSink(ILoggerSink& sink)
 {
 	Expects(instance);
-	instance->sinks.insert(&sink);
+	if (!instance->interruptContext) {
+		instance->sinks.insert(&sink);
+	}
 }
 
 void Logger::removeSink(ILoggerSink& sink)
@@ -81,7 +96,9 @@ void Logger::log(LoggerLevel level, std::string_view msg, bool once)
 		}
 
 		for (const auto& s: instance->sinks) {
-			s->log(level, msg);
+			if (!instance->interruptContext || s->canLogInInterruptContext()) {
+				s->log(level, msg);
+			}
 		}
 	} else {
 		std::cout << msg << '\n';
@@ -120,6 +137,14 @@ void Logger::logError(std::string_view msg, bool once)
 void Logger::logException(const std::exception& e)
 {
 	logError(e.what());
+}
+
+void Logger::setInterruptContext()
+{
+	instance->interruptContext = true;
+	for (auto& sink: instance->sinks) {
+		sink->setInterruptContext();
+	}
 }
 
 Logger* Logger::instance = nullptr;

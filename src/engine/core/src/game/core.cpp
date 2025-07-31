@@ -812,6 +812,11 @@ void Core::log(LoggerLevel level, const std::string_view msg)
 	std::cout << msg << ConsoleColour() << std::endl;
 }
 
+bool Core::canLogInInterruptContext()
+{
+	return true;
+}
+
 void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)
 {
 	static HalleyStatics statics(parent);

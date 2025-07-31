@@ -36,6 +36,8 @@ namespace Halley
 	public:
 		virtual ~ILoggerSink() {}
 		virtual void log(LoggerLevel level, std::string_view msg) = 0;
+		virtual bool canLogInInterruptContext() { return false; }
+		virtual void setInterruptContext() {}
 	};
 
 	class StdOutSink final : public ILoggerSink {
@@ -43,11 +45,14 @@ namespace Halley
 		explicit StdOutSink(bool devMode, bool forceFlush = false);
 		~StdOutSink();
 		void log(LoggerLevel level, std::string_view msg) override;
+		bool canLogInInterruptContext() override;
+		void setInterruptContext() override;
 
 	private:
 		std::mutex mutex;
-		bool devMode;
-		bool forceFlush;
+		bool devMode = false;
+		bool forceFlush = false;
+		bool interruptContext = false;
 	};
 
 	class Logger
@@ -65,11 +70,13 @@ namespace Halley
 		static void logWarning(std::string_view msg, bool once = false);
 		static void logError(std::string_view msg, bool once = false);
 		static void logException(const std::exception& e);
+		static void setInterruptContext();
 
 	private:
 		static Logger* instance;
 
 		std::set<ILoggerSink*> sinks;
 		HashSet<uint64_t> logOnce;
+		bool interruptContext = false;
 	};
 }
