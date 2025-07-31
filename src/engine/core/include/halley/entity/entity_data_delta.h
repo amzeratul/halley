@@ -46,6 +46,7 @@ namespace Halley {
 		const std::optional<uint8_t>& getFlags() const { return flags; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		const std::optional<UUID>& getInstanceUUID() const { return instanceUUID; }
+		const std::optional<UUID>& getParentUUID() const { return parentUUID; }
 		void setInstanceUUID(const UUID& uuid);
 		void setPrefabUUID(const UUID& uuid);
 		void randomiseInstanceUUIDs();

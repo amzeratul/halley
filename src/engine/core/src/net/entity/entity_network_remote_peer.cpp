@@ -413,30 +413,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	}
 
 	if (msg.assignNetworkIdOnly) {
-		const auto uuid = Deserializer::fromBytes<UUID>(msg.bytes, parent->getByteSerializationOptions());
-		auto entity = parent->getWorld().findEntity(uuid);
-
-		if (!entity || !entity->isValid()) {
-			Logger::logWarning("Unable to assign network entity " + toString(static_cast<int>(msg.entityId)) + ", no instance found with UUID " + toString(uuid));
-			return;
-		}
-
-		//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to existing entity " + entity->getName());
-
-		InboundEntity remote;
-		// Construct entity data from local entity, since the host doesn't send any delta in this case.
-		remote.data = parent->getFactory().serializeEntity(*entity, parent->getEntitySerializationOptions());;
-		remote.worldId = entity->getEntityId();
-		remote.debugName = entity->getName();
-		inboundEntities[msg.entityId] = std::move(remote);
-
-		auto& interpolatorSet = entity->setupNetwork(peerId);
-		parent->onRemoteEntityCreated(*entity, peerId);
-		parent->requestSetupInterpolators(interpolatorSet, *entity, true);
-
-		auto& byteDataInterpolatorSet = entity->getComponent<NetworkComponent>().byteDataInterpolatorSet;
-		parent->requestSetupByteDataInterpolators(byteDataInterpolatorSet, *entity, true);
-
+		receiveAssignEntity(msg);
 		return;
 	}
 
@@ -450,20 +427,21 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		return;
 	}
 
+	const auto targetParentUUID = delta.getParentUUID().value_or(UUID());
+	if (targetParentUUID.isValid()) {
+		// The same check is done below, but the entity has already been created then.
+		if (!parent->getWorld().findEntity(targetParentUUID)) {
+			Logger::logError("Can't instantiate network entity " + toString(msg.entityId) + " from prefab \"" + delta.getPrefab() + "\" - parent " + toString(targetParentUUID) + " not found");
+			return;
+		}
+	}
+
 	const auto debugInfo = EntityFactory::DebugInfo("NetworkEntity" + toString(msg.entityId), EntityLoadContextType::Network);
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID(), debugInfo);
 	if (!entityData) {
 		Logger::logError("Unable to instantiate network entity");
 		return;
-	}
-
-	if (entityData->getParentUUID().isValid()) {
-		// The same check is done below, but the entity has already been created then.
-		if (!parent->getWorld().findEntity(entityData->getParentUUID())) {
-			Logger::logError("Can't instantiate network entity " + toString(msg.entityId) + " from prefab \"" + prefab->getPrefabName() + "\" - parent " + toString(entityData->getParentUUID()) + " not found");
-			return;
-		}
 	}
 
 	const auto mask = EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network);
@@ -499,6 +477,33 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 
 	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
 	parent->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
+}
+
+void EntityNetworkRemotePeer::receiveAssignEntity(const EntityNetworkMessageCreate& msg)
+{
+	const auto uuid = Deserializer::fromBytes<UUID>(msg.bytes, parent->getByteSerializationOptions());
+	auto entity = parent->getWorld().findEntity(uuid);
+
+	if (!entity || !entity->isValid()) {
+		Logger::logWarning("Unable to assign network entity " + toString(static_cast<int>(msg.entityId)) + ", no instance found with UUID " + toString(uuid));
+		return;
+	}
+
+	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to existing entity " + entity->getName());
+
+	InboundEntity remote;
+	// Construct entity data from local entity, since the host doesn't send any delta in this case.
+	remote.data = parent->getFactory().serializeEntity(*entity, parent->getEntitySerializationOptions());;
+	remote.worldId = entity->getEntityId();
+	remote.debugName = entity->getName();
+	inboundEntities[msg.entityId] = std::move(remote);
+
+	auto& interpolatorSet = entity->setupNetwork(peerId);
+	parent->onRemoteEntityCreated(*entity, peerId);
+	parent->requestSetupInterpolators(interpolatorSet, *entity, true);
+
+	auto& byteDataInterpolatorSet = entity->getComponent<NetworkComponent>().byteDataInterpolatorSet;
+	parent->requestSetupByteDataInterpolators(byteDataInterpolatorSet, *entity, true);
 }
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)

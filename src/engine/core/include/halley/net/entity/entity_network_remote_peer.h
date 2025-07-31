@@ -92,6 +92,7 @@ namespace Halley {
         void send(EntityNetworkMessage message);
 
         void receiveCreateEntity(const EntityNetworkMessageCreate& msg);
+        void receiveAssignEntity(const EntityNetworkMessageCreate& msg);
         void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
         void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
