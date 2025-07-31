@@ -259,6 +259,7 @@ namespace {
 	}
 
 #ifdef WIN32
+	char win32StackTraceBuffer[32 * 1024];
 	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
@@ -328,13 +329,13 @@ namespace {
 			name = "Unknown Win32 Exception";
 		}
 
-		stackTraceBuffer[0] = 0;
-		strcpy(stackTraceBuffer, "Process aborting due to: ");
-		strcpy(stackTraceBuffer, name);
-		strcpy(stackTraceBuffer, "\n");
-		Debug::getCallStack(gsl::span(stackTraceBuffer), 4);
+		win32StackTraceBuffer[0] = 0;
+		strcpy(win32StackTraceBuffer, "Process aborting due to: ");
+		strcpy(win32StackTraceBuffer, name);
+		strcpy(win32StackTraceBuffer, "\n");
+		Debug::getCallStack(gsl::span(win32StackTraceBuffer).subspan(strlen(win32StackTraceBuffer)), 4);
 		Logger::setInterruptContext();
-		Logger::logError(stackTraceBuffer);
+		Logger::logError(win32StackTraceBuffer);
 
 		if (errorHandler) {
 			errorHandler(name);
