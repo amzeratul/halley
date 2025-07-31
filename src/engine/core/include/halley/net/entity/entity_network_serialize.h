@@ -5,8 +5,8 @@
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/utils/hash.h"
-#include "halley/entity/data_interpolator.h"
-#include "halley/entity/byte_data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
+#include "halley/net/interpolators/byte_data_interpolator.h"
 #include "components/network_component.h"
 
 namespace Halley {

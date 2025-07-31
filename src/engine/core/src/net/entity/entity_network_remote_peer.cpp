@@ -3,7 +3,7 @@
 #include "halley/net/entity/entity_network_session.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
-#include "halley/entity/data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
 #include "components/network_component.h"
 
 #define USE_FAST_NETWORK_COMPONENT_UPDATES 1

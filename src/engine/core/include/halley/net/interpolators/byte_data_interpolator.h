@@ -1,5 +1,5 @@
 #pragma once
-#include "entity.h"
+#include "halley/entity/entity.h"
 #include "halley/bytes/byte_serializer.h"
 
 namespace Halley {

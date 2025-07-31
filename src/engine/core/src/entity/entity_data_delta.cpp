@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "halley/entity/data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
 #include "halley/entity/entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"

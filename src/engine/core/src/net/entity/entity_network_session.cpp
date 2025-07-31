@@ -3,8 +3,8 @@
 #include <cassert>
 
 #include "halley/bytes/compression.h"
-#include "halley/entity/data_interpolator.h"
-#include "halley/entity/byte_data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
+#include "halley/net/interpolators/byte_data_interpolator.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"

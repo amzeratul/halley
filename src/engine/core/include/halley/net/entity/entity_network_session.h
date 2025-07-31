@@ -9,7 +9,7 @@
 #include "halley/bytes/serialization_dictionary.h"
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"
-#include "halley/entity/byte_data_interpolator.h"
+#include "halley/net/interpolators/byte_data_interpolator.h"
 
 class NetworkComponent;
 

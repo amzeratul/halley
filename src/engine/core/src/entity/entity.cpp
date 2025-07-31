@@ -1,8 +1,8 @@
 #include <halley/data_structures/memory_pool.h>
 #include "halley/entity/entity.h"
 #include "halley/entity/world.h"
-#include "halley/entity/data_interpolator.h"
-#include "halley/entity/byte_data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
+#include "halley/net/interpolators/byte_data_interpolator.h"
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #define DONT_INCLUDE_HALLEY_HPP

@@ -15,6 +15,9 @@ namespace Halley {}
 
 #include "halley/net/entity/entity_network_session.h"
 
+#include "halley/net/interpolators/byte_data_interpolator.h"
+#include "halley/net/interpolators/data_interpolator.h"
+
 #include "halley/net/session/network_session.h"
 #include "halley/net/session/session.h"
 #include "halley/net/session/session_multiplayer.h"

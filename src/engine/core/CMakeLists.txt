@@ -117,10 +117,11 @@ set(SOURCES
         "src/net/session/session_multiplayer.cpp"
         "src/net/session/shared_data.cpp"
 
-		"src/entity/byte_data_interpolator.cpp"
+      	"src/net/interpolators/byte_data_interpolator.cpp"
+        "src/net/interpolators/data_interpolator.cpp"
+
         "src/entity/component.cpp"
         "src/entity/create_functions.cpp"
-        "src/entity/data_interpolator.cpp"
         "src/entity/entity.cpp"
         "src/entity/entity_data.cpp"
         "src/entity/entity_data_delta.cpp"
@@ -566,12 +567,13 @@ set(HEADERS
         "include/halley/net/session/session_multiplayer.h"
         "include/halley/net/session/shared_data.h"
 
+		"include/halley/net/interpolators/byte_data_interpolator.h"
+        "include/halley/net/interpolators/data_interpolator.h"
+
         "include/halley/entity/halley_entity.h"
 
-		"include/halley/entity/byte_data_interpolator.h"
         "include/halley/entity/component.h"
         "include/halley/entity/create_functions.h"
-        "include/halley/entity/data_interpolator.h"
         "include/halley/entity/ecs_reflection.h"
         "include/halley/entity/ecs_reflection_impl.h"
         "include/halley/entity/entity.h"
