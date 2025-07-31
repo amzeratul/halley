@@ -68,6 +68,10 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 void EntityNetworkSession::update(Time t)
 {
 	session->update(t);
+
+	for (auto& peer: peers) {
+		peer.update(t);
+	}
 }
 
 void EntityNetworkSession::sendUpdates()

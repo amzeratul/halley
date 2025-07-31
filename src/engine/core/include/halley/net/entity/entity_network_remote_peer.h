@@ -23,12 +23,13 @@ namespace Halley {
         constexpr static Time maxSendInterval = 1.0;
     	
     public:
-        EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId);
+        EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId);
 
         NetworkSession::PeerId getPeerId() const;
 
     	bool isAlive() const;
     	void destroy();
+        void update(Time dt);
 
     	bool hasJoinedWorld() const;
         void onJoinedWorld();
@@ -67,7 +68,14 @@ namespace Halley {
         	String debugName; // for debug only, do a proper lookup if needed
         };
 
-        EntityNetworkSession* parent = nullptr;
+        class PendingEntity {
+        public:
+            EntityNetworkId id;
+	        EntityDataDelta data;
+            Vector<EntityNetworkMessageUpdate> updates;
+        };
+
+        EntityNetworkSession* parentSession = nullptr;
         NetworkSession::PeerId peerId;
     	bool alive = true;
         bool hasSentData = false;
@@ -75,6 +83,7 @@ namespace Halley {
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
+        HashMap<EntityNetworkId, PendingEntity> pendingEntities;
 
     	HashSet<EntityNetworkId> allocatedOutboundIds;
         uint16_t nextId = 0;
@@ -96,7 +105,13 @@ namespace Halley {
         void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
         void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
+        EntityRef createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta);
+        void updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg);
         void destroyRemoteEntity(EntityId id, const String& debugName);
+
+        void trySpawningPendingEntities();
+        void createPendingEntity(const PendingEntity& pendingData);
+        void updatePendingEntity(PendingEntity& entity, const EntityNetworkMessageUpdate& msg);
 
         bool isRemoteReady() const;
         void onFirstDataBatchSent();
