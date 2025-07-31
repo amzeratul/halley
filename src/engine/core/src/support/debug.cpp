@@ -259,7 +259,6 @@ namespace {
 	}
 
 #ifdef WIN32
-	char win32StackTraceBuffer[32 * 1024];
 	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
@@ -329,13 +328,10 @@ namespace {
 			name = "Unknown Win32 Exception";
 		}
 
-		win32StackTraceBuffer[0] = 0;
-		strcpy(win32StackTraceBuffer, "Process aborting due to: ");
-		strcpy(win32StackTraceBuffer, name);
-		strcpy(win32StackTraceBuffer, "\n");
-		Debug::getCallStack(gsl::span(win32StackTraceBuffer).subspan(strlen(win32StackTraceBuffer)), 4);
-		Logger::setInterruptContext();
-		Logger::logError(win32StackTraceBuffer);
+		std::cout << "Process aborting due to: " << name << "\n";
+		std::cout << "[start of stack trace]\n";
+		Debug::printCallStackTo(std::cout, 4);
+		std::cout << "[end of stack trace]\n";
 
 		if (errorHandler) {
 			errorHandler(name);
@@ -387,6 +383,14 @@ void Debug::getCallStack(gsl::span<char> dst, int skip)
 {
 #if defined(HAS_STACKWALKER)
 	NoAllocStackWalker walker(dst, skip);
+	walker.ShowCallstack();
+#endif
+}
+
+void Debug::printCallStackTo(std::ostream& out, int skip)
+{
+#if defined(HAS_STACKWALKER)
+	OStreamStackWalker walker(out, skip);
 	walker.ShowCallstack();
 #endif
 }
