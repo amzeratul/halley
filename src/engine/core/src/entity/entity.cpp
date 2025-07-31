@@ -359,8 +359,7 @@ void Entity::setEnableRules(String rules)
 
 DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
-	auto* networkComponent = tryGetComponent<NetworkComponent>(true);
-	if (networkComponent) {
+	if (auto* networkComponent = tryGetComponent<NetworkComponent>(true)) {
         // On the host this can be called multiple times, need to check for existing ownership.
         // see EntityNetworkSession::setupOutboundInterpolators().
         if (!networkComponent->ownerId) {

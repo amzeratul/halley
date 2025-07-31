@@ -563,7 +563,7 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 	parentSession->onRemoteEntityCreated(entity, peerId);
 	parentSession->requestSetupInterpolators(interpolatorSet, entity, true);
 
-	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>(true).byteDataInterpolatorSet;
 	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
 
 	return entity;
@@ -691,7 +691,7 @@ void EntityNetworkRemotePeer::onFirstDataBatchSent()
 void EntityNetworkRemotePeer::stripNestedNetworkComponents(EntityRef entity, int depth)
 {
 	if (depth > 0) {
-		if (entity.hasComponent<NetworkComponent>()) {
+		if (entity.tryGetComponent<NetworkComponent>(true) != nullptr) {
 			entity.removeComponent<NetworkComponent>();
 		}
 	}
