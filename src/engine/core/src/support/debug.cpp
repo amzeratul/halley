@@ -245,15 +245,12 @@ namespace {
 
 	void terminateHandler()
 	{
-		stackTraceBuffer[0] = 0;
-		strcpy(stackTraceBuffer, "std::terminate() invoked.\n");
+		std::cout << "std::terminate() invoked.\n";
+		std::cout << "[start of stack trace]\n";
+		Debug::printCallStackTo(std::cout, 4);
+		std::cout << "[end of stack trace]\n";
 
-	#if defined(HAS_STACKWALKER)
-		NoAllocStackWalker walker(gsl::span(stackTraceBuffer, sizeof(stackTraceBuffer)), 3);
-		walker.ShowCallstack();
-	#endif
-
-		errorHandler(stackTraceBuffer);
+		errorHandler("std::terminate() invoked.");
 
 		std::abort();
 	}
