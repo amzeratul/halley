@@ -10,22 +10,19 @@ public:
 		sessionChangeToken = getSessionService().addSessionChangeCallback([=] (SessionService::ChangeData session) {
 			updateSession();
 		});
+
+		if (!getSessionService().getSession().update(0)) {
+			requestExit();
+		}
 	}
 
 	void update(Time t)
 	{
-		auto& world = getWorld();
-		const bool sessionAlive = getSessionService().getSession().update(t);
-
-		if (!sessionAlive && !requestedExit) {
-			requestedExit = true;
-			if (auto* exitGameInterface = world.tryGetInterface<IExitGameInterface>()) {
-				exitGameInterface->exitGame();
-			} else {
-				getAPI().core->quit();
-			}
+		if (!getSessionService().getSession().update(t)) {
+			requestExit();
 		}
 
+		auto& world = getWorld();
 		for (auto& e: networkFamily) {
 			e.network.dataInterpolatorSet.update(t, world);
 			e.network.byteDataInterpolatorSet.update(t, world);
@@ -36,6 +33,18 @@ private:
 
 	ListenerSetToken sessionChangeToken;
 	bool requestedExit = false;
+
+	void requestExit()
+	{
+		if (!requestedExit) {
+			requestedExit = true;
+			if (auto* exitGameInterface = getWorld().tryGetInterface<IExitGameInterface>()) {
+				exitGameInterface->exitGame();
+			} else {
+				getAPI().core->quit();
+			}
+		}
+	}
 
 	void updateSession()
 	{

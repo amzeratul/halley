@@ -678,7 +678,7 @@ void EntityNetworkRemotePeer::updatePendingEntity(PendingEntity& entity, const E
 bool EntityNetworkRemotePeer::isRemoteReady() const
 {
 	auto& sharedData = parentSession->getSession().getClientSharedData<EntityClientSharedData>(peerId);
-	return !!sharedData.viewRect;
+	return sharedData.viewRect.has_value();
 }
 
 void EntityNetworkRemotePeer::onFirstDataBatchSent()
