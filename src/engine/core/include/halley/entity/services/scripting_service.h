@@ -15,6 +15,8 @@ namespace Halley {
 
 		[[maybe_unused]] ConfigNode evaluateExpression(const String& expression, bool useResultCache = false, bool throwOnError = true) const;
 		[[maybe_unused]] ConfigNode evaluateExpression(const LuaExpression& expression, bool useResultCache = false, bool throwOnError = true) const;
+		[[nodiscard]] bool evaluateBoolExpression(const String& expression, bool onEmpty = true, bool useResultCache = false, bool throwOnError = true) const;
+		[[nodiscard]] bool evaluateBoolExpression(const LuaExpression& expression, bool onEmpty = true, bool useResultCache = false, bool throwOnError = true) const;
 		void clearResultCache();
 
 		template <typename T>

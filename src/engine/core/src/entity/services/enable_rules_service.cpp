@@ -18,7 +18,7 @@ bool EnableRulesService::evaluateEnableRules(const String& enableRules)
 		return true;
 	}
 
-	return scriptingService->evaluateExpression(enableRules, true, false).asBool(true);
+	return scriptingService->evaluateBoolExpression(enableRules, true, true, false);
 }
 
 void EnableRulesService::initialize()

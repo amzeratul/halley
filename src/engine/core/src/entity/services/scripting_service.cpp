@@ -92,6 +92,22 @@ ConfigNode ScriptingService::evaluateExpression(const LuaExpression& expression,
 	return result;
 }
 
+bool ScriptingService::evaluateBoolExpression(const String& expression, bool onEmpty, bool useResultCache, bool throwOnError) const
+{
+	if (expression.isEmpty()) {
+		return onEmpty;
+	}
+	return evaluateExpression(expression, useResultCache, throwOnError).asBool(false);
+}
+
+bool ScriptingService::evaluateBoolExpression(const LuaExpression& expression, bool onEmpty, bool useResultCache, bool throwOnError) const
+{
+	if (expression.isEmpty()) {
+		return onEmpty;
+	}
+	return evaluateExpression(expression, useResultCache, throwOnError).asBool(false);
+}
+
 void ScriptingService::clearResultCache()
 {
 	resultCache.clear();
