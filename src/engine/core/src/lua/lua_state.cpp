@@ -33,6 +33,9 @@ LuaState::LuaState(Resources& resources)
 	LuaStackUtils u(*this);
 	u.pushTable();
 	u.setField("print", LuaCallbackBind(this, &LuaState::print));
+	u.setField("printWarning", LuaCallbackBind(this, &LuaState::printWarning));
+	u.setField("printError", LuaCallbackBind(this, &LuaState::printError));
+	u.setField("printDev", LuaCallbackBind(this, &LuaState::printDev));
 	u.setField("errorHandler", LuaCallbackBind(this, &LuaState::errorHandler));
 	u.setField("packageLoader", LuaCallbackBind(this, &LuaState::packageLoader));
 
@@ -148,6 +151,21 @@ LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::
 void LuaState::print(String string)
 {
 	Logger::logInfo(string);
+}
+
+void LuaState::printWarning(String string)
+{
+	Logger::logWarning(string);
+}
+
+void LuaState::printError(String string)
+{
+	Logger::logError(string);
+}
+
+void LuaState::printDev(String string)
+{
+	Logger::logDev(string);
 }
 
 static int luaClosureInvoker(lua_State* lua)

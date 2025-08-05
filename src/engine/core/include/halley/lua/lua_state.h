@@ -54,6 +54,9 @@ namespace Halley {
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
 
 		void print(String string);
+		void printWarning(String string);
+		void printError(String string);
+		void printDev(String string);
 		const LuaReference& packageLoader(String moduleName);
 		String printVariableAtTop(int maxDepth = 2, bool quote = true);
 	};
