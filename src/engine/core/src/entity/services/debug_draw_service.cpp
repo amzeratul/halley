@@ -27,8 +27,8 @@ void DebugDrawService::addDebugArrow(Vector2f from, Vector2f to, Colour4f colour
 
 	const auto p0 = to + right * sideShift;
 	const auto p3 = from + right * sideShift;
-	const auto p1 = p0 - (headSize * fwd) + (headSize * 0.5f * right);
-	const auto p2 = p0 - (headSize * fwd) - (headSize * 0.5f * right);
+	const auto p1 = p0 - (headSize * fwd) + (headSize * 0.25f * right);
+	const auto p2 = p0 - (headSize * fwd) - (headSize * 0.25f * right);
 
 	lines.emplace_back(Vector<Vector2f>{{ p3, p0 }}, colour, thickness, false);
 	lines.emplace_back(Vector<Vector2f>{{ p1, to }}, colour, thickness, false);
