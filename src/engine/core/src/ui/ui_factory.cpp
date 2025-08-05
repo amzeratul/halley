@@ -945,7 +945,7 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("input"), styleSheet);
 	auto label = parseLabel(node);
 	auto ghostText = parseLabel(node, "", "ghost");
@@ -991,7 +991,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
 
 	auto result = std::make_shared<UISpinControl>(id, style, 0.0f);
@@ -1028,7 +1028,7 @@ UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
 std::shared_ptr<UIWidget> UIFactory::makeSpinControl2(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
 
 	auto result = std::make_shared<UISpinControl2>(id, style, 0.0f, node["allowFloat"].asBool(false));
@@ -1064,7 +1064,7 @@ UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("dropdown"), styleSheet);
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
@@ -1107,7 +1107,7 @@ UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeCheckbox(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("checkbox"), styleSheet);
 	const auto checked = node["checked"].asBool(false);
 	auto label = parseLabel(node, "", "label");
@@ -1236,7 +1236,7 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto animationName = node["animation"].asString("");
 	auto sequence = node["sequence"].asString("default");
 	auto direction = node["direction"].asString("default");
@@ -1373,7 +1373,7 @@ UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("slider"), styleSheet);
 	auto minValue = node["minValue"].asFloat(0);
 	auto maxValue = node["maxValue"].asFloat(1);
@@ -1446,7 +1446,7 @@ std::shared_ptr<UIWidget> UIFactory::makeDivider(const ConfigNode& entryNode, UI
 std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
-	auto id = widgetNode["id"].asString();
+	auto id = widgetNode["id"].asString("");
 	auto style = widgetNode["style"].asString("tabs");
 	auto tabs = std::make_shared<UIList>(id, getStyle(style), UISizerType::Horizontal, 1);
 	applyListProperties(*tabs, widgetNode, "tabs");
@@ -1533,7 +1533,7 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 		loadChildren(entryNode["children"]);
 	}
 
-	auto pane = std::make_shared<UIPagedPane>(widgetNode["id"].asString(), int(pageNodes.size()));
+	auto pane = std::make_shared<UIPagedPane>(widgetNode["id"].asString(""), int(pageNodes.size()));
 	for (int i = 0; i < int(pageNodes.size()); ++i) {
 		pane->getPage(i)->add(makeWidget(*pageNodes[i]), 1);
 	}
@@ -1565,7 +1565,7 @@ std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
 	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
 	int nColumns = node["columns"].asInt(1);
 
-	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
+	auto widget = std::make_shared<UIList>(node["id"].asString(""), style, orientation, nColumns);
 	applyListProperties(*widget, node, "list");
 
 	return widget;
@@ -1604,7 +1604,7 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 {
 	auto& widgetNode = node["widget"];
 	auto style = getStyle(widgetNode["style"].asString("hybridList"));
-	auto list = std::make_shared<UIHybridList>(widgetNode["id"].asString(), style);
+	auto list = std::make_shared<UIHybridList>(widgetNode["id"].asString(""), style);
 	if (widgetNode.hasKey("options")) {
 		for (auto& optionsNode: widgetNode["options"].asSequence()) {
 			if (optionsNode.hasKey("if")) {
@@ -1616,7 +1616,7 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 			if (optionsNode["divider"].asBool(false)) {
 				list->addDivider(optionsNode["id"].asString(""));
 			} else {
-				const auto id = optionsNode["id"].asString();
+				const auto id = optionsNode["id"].asString("");
 				const auto label = parseLabel(optionsNode);
 				list->addTextItem(id, label);
 			}
@@ -1628,7 +1628,7 @@ std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 
 std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("spinlist"), styleSheet);
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
@@ -1655,7 +1655,7 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
 
 std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& entryNode) {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto dropdownStyle = UIStyle(node["dropdownStyle"].asString("dropdown"), styleSheet);
 	auto spinlistStyle = UIStyle(node["spinlistStyle"].asString("spinlist"), styleSheet);
 	auto label = parseLabel(node);
@@ -1677,7 +1677,7 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("treeList"), styleSheet);
 	auto label = parseLabel(node);
 
@@ -1772,7 +1772,7 @@ UIFactoryWidgetProperties UIFactory::getBaseListProperties(bool includeOptions) 
 std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	
 	auto widget = std::make_shared<UIDebugConsole>(id, *this);
 
@@ -1798,7 +1798,7 @@ UIFactoryWidgetProperties UIFactory::getRenderSurfaceProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeRenderSurface(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	const auto material = node["material"].asString("Halley/Sprite");
 	const auto useFilter = node["useFilter"].asBool(false);
 
@@ -1832,7 +1832,7 @@ UIFactoryWidgetProperties UIFactory::getCustomPaintProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeCustomPaint(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto widget = std::make_shared<UICustomPaint>(std::move(id), makeSizer(entryNode));
 	return widget;
 }
@@ -1852,7 +1852,7 @@ UIFactoryWidgetProperties UIFactory::getResizeDividerProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeResizeDivider(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto type = node["type"].asEnum(UIResizeDividerType::HorizontalLeft);
 	auto styleName = node["style"].asString("resizeDivider");
 	auto widget = std::make_shared<UIResizeDivider>(std::move(id), type, getStyle(styleName));

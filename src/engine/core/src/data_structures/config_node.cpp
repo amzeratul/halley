@@ -1134,7 +1134,9 @@ String ConfigNode::asString() const
 		}
 		result += "}";
 		return result;
-	} else if (type == ConfigNodeType::Undefined) {
+	} else if (false && type == ConfigNodeType::Undefined) {
+		// Warning: this is a dangerous branch
+		// This makes undefined values in YAML load as "null", which is typically not checked against.
 		return "null";
 	} else if (type == ConfigNodeType::Del) {
 		return "<del>";

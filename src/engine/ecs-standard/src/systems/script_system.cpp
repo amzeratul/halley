@@ -469,7 +469,7 @@ private:
 		getDevService().getConsoleCommands().addCommand("eval", [=] (Vector<String> args) -> String
 		{
 			try {
-				return getScriptingService().evaluateExpression(String::concatList(args, " ")).asString();
+				return getScriptingService().evaluateExpression(String::concatList(args, " ")).asString("null");
 			} catch (const std::exception& e) {
 				Logger::logException(e);
 				return "Error";
