@@ -79,21 +79,21 @@ Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<ScrollBackground>(id, getStyle(node["style"].asString("scrollBackground")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeInfiniCanvas(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<InfiniCanvas>(id, getStyle(node["style"].asString("infiniCanvas")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<AnimationEditorDisplay>(id, resources);
 }
 
@@ -106,35 +106,35 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& 
 std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<SceneEditorCanvas>(id, *this, resources, api, projectWindow->getProject(), makeSizer(entryNode));
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityList(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<EntityList>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityValidator(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<EntityValidatorUI>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityValidatorList(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<EntityValidatorListUI>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<EntityEditor>(id, *this);
 }
 
@@ -158,7 +158,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& ent
 	Expects(projectWindow != nullptr);
 	
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	const auto assetType = fromString<AssetType>(node["assetType"].asString());
 
 	auto widget = std::make_shared<SelectAssetWidget>(id, *this, assetType, *gameResources, *projectWindow);
@@ -172,28 +172,28 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& ent
 std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetEditor(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<UIWidgetEditor>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetList(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<UIWidgetList>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeUIEditorDisplay(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	return std::make_shared<UIEditorDisplay>(id, Vector2f{}, makeSizer(entryNode).value_or(UISizer()), api, resources);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAudioObjectTreeList(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("treeList"), getStyleSheet());
 	auto label = parseLabel(node);
 
@@ -216,7 +216,7 @@ UIFactoryWidgetProperties EditorUIFactory::getCurveEditorProperties() const
 std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("curveEditor"), getStyleSheet());
 
 	auto widget = std::make_shared<CurveEditor>(*this, id, style);
@@ -227,7 +227,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& ent
 std::shared_ptr<UIWidget> EditorUIFactory::makeGradientEditor(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("gradientEditor"), getStyleSheet());
 
 	auto widget = std::make_shared<GradientEditor>(*this, id, style, *api.video);
@@ -238,7 +238,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeGradientEditor(const ConfigNode& 
 std::shared_ptr<UIWidget> EditorUIFactory::makeColourPickerDisplay(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto size = node["size"].asVector2f(Vector2f(16, 16));
 	auto material = node["material"].asString();
 	auto widget = std::make_shared<ColourPickerDisplay>(std::move(id), size, getResources(), material);
@@ -249,7 +249,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeColourPickerDisplay(const ConfigN
 std::shared_ptr<UIWidget> EditorUIFactory::makeScriptingVariableInspector(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto widget = std::make_shared<ScriptGraphVariableInspector>(*this);
 	return widget;
 }
@@ -257,7 +257,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeScriptingVariableInspector(const 
 std::shared_ptr<UIWidget> EditorUIFactory::makeTimelineEditor(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto widget = std::make_shared<TimelineEditor>(id, *this);
 	return widget;
 }
