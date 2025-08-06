@@ -52,21 +52,21 @@ void ScriptGraphVariableInspector::updateVariables(const ConfigNode& data)
 	int count = 0;
 	for (const auto& variable : entityVariables.asMap()) {
 		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString(), toString(variable.second.getType()), "Entity");
+		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Entity");
 		list->add(entry);
 		count++;
 	}
 
 	for (const auto& variable : localVariables.asMap()) {
 		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString(), toString(variable.second.getType()), "Local");
+		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Local");
 		list->add(entry);
 		count++;
 	}
 
 	for (const auto& variable : sharedVariables.asMap()) {
 		const auto entry = std::make_shared<ScriptGraphVariableEntry>(factory);
-		entry->setData(variable.first, variable.second.asString(), toString(variable.second.getType()), "Shared");
+		entry->setData(variable.first, variable.second.asString("null"), toString(variable.second.getType()), "Shared");
 		list->add(entry);
 		count++;
 	}
