@@ -893,12 +893,12 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 
 void SocketIONetworkService::tryReceiveUnreliable()
 {
-	if (protocol != NetworkProtocol::UDP) {
+	if (protocol != NetworkProtocol::UDP || sock == -1) {
 		return;
 	}
 
 	// Poll until there's no more data.
-	std::array<char, 2048> buffer;
+	std::array<char, 2048> buffer = {};
 
 	for (;;) {
 		sockaddr_storage addrStorage = {};
