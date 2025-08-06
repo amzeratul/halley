@@ -34,18 +34,19 @@ void SocketIONetworkAPI::deInit()
 #endif
 }
 
+SocketIOPlatformAPI::SocketIOPlatformAPI(String playerName, const std::optional<String>& joinLobbyAddress)
+    : playerName(std::move(playerName))
+    , joinLobbyAddress(joinLobbyAddress)
+{
+
+}
+
 void SocketIOPlatformAPI::init()
 {
 
 }
 
 void SocketIOPlatformAPI::deInit()
-{
-
-}
-
-SocketIOPlatformAPI::SocketIOPlatformAPI(String playerName)
-    : playerName(std::move(playerName))
 {
 
 }
@@ -57,7 +58,16 @@ String SocketIOPlatformAPI::getId()
 
 void SocketIOPlatformAPI::update()
 {
+    if (preparingInvitation && preparingToJoinCallback) {
+        preparingToJoinCallback();
+        preparingInvitation = false;
+        readyInvitation = true;
+    }
 
+    if (readyInvitation && joinCallback) {
+        joinCallback(PlatformJoinCallbackParameters{joinLobbyAddress.value_or("127.0.0.1:6060")});
+        readyInvitation = false;
+    }
 }
 
 String SocketIOPlatformAPI::getPlayerName()
@@ -85,6 +95,21 @@ Future<AuthTokenResult> SocketIOPlatformAPI::getAuthToken(const AuthTokenParamet
     promise.setValue(std::move(result));
 
     return promise.getFuture();
+}
+
+void SocketIOPlatformAPI::showBrowseGamesToJoinUI()
+{
+    preparingInvitation = true;
+}
+
+void SocketIOPlatformAPI::setJoinCallback(PlatformJoinCallback callback)
+{
+    joinCallback = callback;
+}
+
+void SocketIOPlatformAPI::setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback)
+{
+    preparingToJoinCallback = callback;
 }
 
 std::shared_ptr<NetworkService> SocketIOPlatformAPI::createNetworkService(uint16_t port)

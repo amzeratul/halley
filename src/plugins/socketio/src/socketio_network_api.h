@@ -14,7 +14,7 @@ namespace Halley
     class SocketIOPlatformAPI : public PlatformAPIInternal
     {
     public:
-        explicit SocketIOPlatformAPI(String playerName);
+        explicit SocketIOPlatformAPI(String playerName, const std::optional<String>& joinLobbyAddress);
 
         void init() override;
         void deInit() override;
@@ -28,9 +28,20 @@ namespace Halley
         bool canProvideAuthToken() const override;
         Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) override;
 
+    	void showBrowseGamesToJoinUI() override;
+    	void setJoinCallback(PlatformJoinCallback callback) override;
+    	void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback) override;
+
         std::shared_ptr<NetworkService> createNetworkService(uint16_t port) override;
 
     private:
         String playerName;
+    	std::optional<String> joinLobbyAddress;
+
+    	PlatformJoinCallback joinCallback;
+    	PlatformPreparingToJoinCallback preparingToJoinCallback;
+
+    	bool preparingInvitation = false;
+    	bool readyInvitation = false;
     };
 }

@@ -11,12 +11,13 @@ namespace Halley {
 
     class AsioPlatformPlugin : public Plugin {
     public:
-        explicit AsioPlatformPlugin(String playerName) : playerName(std::move(playerName)) {}
+        explicit AsioPlatformPlugin(String playerName, const std::optional<String>& joinLobbyAddress) : playerName(std::move(playerName)), joinLobbyAddress(joinLobbyAddress) {}
     private:
-        HalleyAPIInternal* createAPI(SystemAPI*) override { return new AsioPlatformAPI(playerName); }
+        HalleyAPIInternal* createAPI(SystemAPI*) override { return new AsioPlatformAPI(playerName, joinLobbyAddress); }
         PluginType getType() override { return PluginType::PlatformAPI; }
         String getName() override { return "Platform/ASIO"; }
         String playerName;
+    	std::optional<String> joinLobbyAddress;
     };
 
 }
@@ -26,7 +27,7 @@ void initAsioPlugin(Halley::IPluginRegistry &registry)
 	registry.registerPlugin(std::make_unique<Halley::AsioPlugin>());
 }
 
-void initAsioPlatformPlugin(Halley::IPluginRegistry& registry, const Halley::String& playerName)
+void initAsioPlatformPlugin(Halley::IPluginRegistry& registry, const Halley::String& playerName, const std::optional<Halley::String>& joinLobbyAddress)
 {
-    registry.registerPlugin(std::make_unique<Halley::AsioPlatformPlugin>(playerName));
+    registry.registerPlugin(std::make_unique<Halley::AsioPlatformPlugin>(playerName, joinLobbyAddress));
 }

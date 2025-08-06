@@ -18,20 +18,33 @@ std::unique_ptr<NetworkService> AsioNetworkAPI::createService(NetworkProtocol pr
 void AsioNetworkAPI::init() {}
 void AsioNetworkAPI::deInit() {}
 
-void AsioPlatformAPI::init() {}
-void AsioPlatformAPI::deInit() {}
-
-AsioPlatformAPI::AsioPlatformAPI(String playerName)
+AsioPlatformAPI::AsioPlatformAPI(String playerName, const std::optional<String>& joinLobbyAddress)
     : playerName(std::move(playerName))
+    , joinLobbyAddress(joinLobbyAddress)
 {
 }
+
+void AsioPlatformAPI::init() {}
+void AsioPlatformAPI::deInit() {}
 
 String AsioPlatformAPI::getId()
 {
     return "asio";
 }
 
-void AsioPlatformAPI::update() {}
+void AsioPlatformAPI::update()
+{
+    if (preparingInvitation && preparingToJoinCallback) {
+        preparingToJoinCallback();
+        preparingInvitation = false;
+        readyInvitation = true;
+    }
+
+    if (readyInvitation && joinCallback) {
+        joinCallback(PlatformJoinCallbackParameters{joinLobbyAddress.value_or("127.0.0.1:6060")});
+        readyInvitation = false;
+    }
+}
 
 String AsioPlatformAPI::getPlayerName()
 {
@@ -58,6 +71,21 @@ Future<AuthTokenResult> AsioPlatformAPI::getAuthToken(const Halley::AuthTokenPar
     promise.setValue(std::move(result));
 
     return promise.getFuture();
+}
+
+void AsioPlatformAPI::showBrowseGamesToJoinUI()
+{
+    preparingInvitation = true;
+}
+
+void AsioPlatformAPI::setJoinCallback(PlatformJoinCallback callback)
+{
+    joinCallback = callback;
+}
+
+void AsioPlatformAPI::setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback)
+{
+    preparingToJoinCallback = callback;
 }
 
 std::shared_ptr<NetworkService> AsioPlatformAPI::createNetworkService(uint16_t port)

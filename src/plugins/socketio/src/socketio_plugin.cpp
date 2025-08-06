@@ -11,12 +11,13 @@ namespace Halley {
 
     class SocketIOPlatformPlugin : public Plugin {
     public:
-        explicit SocketIOPlatformPlugin(String playerName) : playerName(std::move(playerName)) {}
+        explicit SocketIOPlatformPlugin(String playerName, const std::optional<String>& joinLobbyAddress) : playerName(std::move(playerName)), joinLobbyAddress(joinLobbyAddress) {}
     private:
-        HalleyAPIInternal* createAPI(SystemAPI*) override { return new SocketIOPlatformAPI(playerName); }
+        HalleyAPIInternal* createAPI(SystemAPI*) override { return new SocketIOPlatformAPI(playerName, joinLobbyAddress); }
         PluginType getType() override { return PluginType::PlatformAPI; }
         String getName() override { return "Platform/SocketIO"; }
         String playerName;
+    	std::optional<String> joinLobbyAddress;
     };
 
 }
@@ -26,7 +27,7 @@ void initSocketIOPlugin(Halley::IPluginRegistry &registry)
 	registry.registerPlugin(std::make_unique<Halley::SocketIOPlugin>());
 }
 
-void initSocketIOPlatformPlugin(Halley::IPluginRegistry& registry, const Halley::String& playerName)
+void initSocketIOPlatformPlugin(Halley::IPluginRegistry& registry, const Halley::String& playerName, const std::optional<Halley::String>& joinLobbyAddress)
 {
-    registry.registerPlugin(std::make_unique<Halley::SocketIOPlatformPlugin>(playerName));
+    registry.registerPlugin(std::make_unique<Halley::SocketIOPlatformPlugin>(playerName, joinLobbyAddress));
 }
