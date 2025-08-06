@@ -199,15 +199,12 @@ namespace {
 	String dumpFile;
 	std::function<void(std::string_view)> errorHandler;
 
-	char stackTraceBuffer[32 * 1024];
-
 #ifdef HAS_SIGNAL
 	void signalHandler(int signum)
 	{
 	    ::signal(SIGSEGV, SIG_DFL);
 		::signal(SIGABRT, SIG_DFL);
 
-		char buffer[128];
 		const char* name = nullptr;
 
 		switch (signum) {
@@ -233,13 +230,13 @@ namespace {
 			name = "Unknown";
 		}
 
-		std::cout << "Process aborting due to: " << name << "(" << signum << "\n";
+		std::cout << "Process aborting due to: " << name << " (" << signum << ")\n";
 		std::cout << "[start of stack trace]\n";
 		Debug::printCallStackTo(std::cout, 4);
 		std::cout << "[end of stack trace]\n";
 
 		if (errorHandler) {
-			errorHandler(buffer);
+			errorHandler(name);
 		}
 
 		Debug::abort();
