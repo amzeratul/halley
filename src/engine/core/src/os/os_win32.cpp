@@ -447,9 +447,9 @@ bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data,
 	}
 }
 
-void OSWin32::displayError(const std::string& cs)
+void OSWin32::displayError(std::string_view cs)
 {
-	std::string error = cs;
+	std::string error = std::string(cs);
 	int n = 0;
 	const size_t sz = error.size();
 	for (size_t i = 0; i < sz; ++i) {

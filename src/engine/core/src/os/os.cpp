@@ -72,7 +72,7 @@ void OS::initializeConsole()
 {
 }
 
-void OS::displayError(const std::string& cs)
+void OS::displayError(std::string_view cs)
 {
 }
 

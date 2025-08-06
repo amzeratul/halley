@@ -54,6 +54,9 @@ namespace Halley {
 		static String getLastTraces();
 		static void printLastTraces();
 
+		static void abort();
+		static void abort(std::string_view message);
+
 	private:
 		Debug();
 		static bool debugging;

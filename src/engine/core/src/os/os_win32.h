@@ -45,7 +45,7 @@ namespace Halley {
 		void setConsoleColor(int foreground, int background) override;
 		bool atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath) override;
 
-		void displayError(const std::string& cs) override;
+		void displayError(std::string_view cs) override;
 		void onWindowCreated(void* window) override;
 
 		int runCommand(String command, String cwd, ILoggerSink* sink) override;

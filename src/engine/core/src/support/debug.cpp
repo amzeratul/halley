@@ -233,13 +233,16 @@ namespace {
 			name = "Unknown";
 		}
 
-		sprintf(buffer, "Process aborting due to: %s (%i)", name, signum);
+		std::cout << "Process aborting due to: " << name << "(" << signum << "\n";
+		std::cout << "[start of stack trace]\n";
+		Debug::printCallStackTo(std::cout, 4);
+		std::cout << "[end of stack trace]\n";
 
-		Logger::logError(buffer);
-		//Logger::logError("Exception: " + Debug::getCallStack(3));
-		errorHandler(buffer);
+		if (errorHandler) {
+			errorHandler(buffer);
+		}
 
-		::raise(SIGABRT);
+		Debug::abort();
 	}
 #endif
 
@@ -252,7 +255,7 @@ namespace {
 
 		errorHandler("std::terminate() invoked.");
 
-		std::abort();
+		Debug::abort();
 	}
 
 #ifdef WIN32
@@ -351,12 +354,44 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std:
 #if defined(WIN32)
 	SetUnhandledExceptionFilter(&win32ExceptionHandler);
 	//AddVectoredExceptionHandler(1, win32ExceptionHandler);
-#elif defined(HAS_SIGNAL)
+#endif
+
+#if defined(HAS_SIGNAL)
 	::signal(SIGSEGV, &signalHandler);
 	::signal(SIGABRT, &signalHandler);
 #endif
 
 	errorHandler = std::move(eh);
+}
+
+void Debug::abort()
+{
+	std::cout << "Cleaning up debug setup...\n";
+
+#ifndef NN_NINTENDO_SDK
+	std::set_terminate(nullptr);
+#endif
+
+#if defined(WIN32)
+	SetUnhandledExceptionFilter(nullptr);
+#endif
+
+#if defined(HAS_SIGNAL)
+    ::signal(SIGSEGV, SIG_DFL);
+	::signal(SIGABRT, SIG_DFL);
+#endif
+
+	std::cout << "Invoking std::abort()\n";
+	std::abort();
+}
+
+void Debug::abort(std::string_view message)
+{
+	Logger::logError(message);
+
+	OS::get().displayError(message);
+
+	Debug::abort();
 }
 
 

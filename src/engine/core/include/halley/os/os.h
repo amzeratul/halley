@@ -62,7 +62,7 @@ namespace Halley {
 
 		virtual void createLogConsole(String name, std::optional<size_t> monitor, Vector2f align);
 		virtual void initializeConsole();
-		virtual void displayError(const std::string& cs);
+		virtual void displayError(std::string_view cs);
 
 		virtual void onWindowCreated(void* windowHandle);
 
