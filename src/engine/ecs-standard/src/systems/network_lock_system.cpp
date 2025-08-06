@@ -56,7 +56,7 @@ public:
 	void deInitSession(Session& session)
 	{
 		if (const auto networkSession = session.getEntityNetworkSession()) {
-			networkSession->getSession().addListener(this);
+			networkSession->getSession().removeListener(this);
 		}
 	}
 
