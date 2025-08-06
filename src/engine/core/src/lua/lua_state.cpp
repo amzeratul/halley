@@ -23,7 +23,7 @@ int handleCoroutineError(LuaState& state)
 	return 1;
 }
 
-LuaState::LuaState(Resources& resources)
+LuaState::LuaState(Resources& resources, bool isDevMode)
 	: lua(luaL_newstate())
 	, resources(&resources)
 {
@@ -40,7 +40,8 @@ LuaState::LuaState(Resources& resources)
 	u.setField("packageLoader", LuaCallbackBind(this, &LuaState::packageLoader));
 
 	pushCallback(&handleCoroutineError);
-	LuaStackOps(*this).setField("handleCoroutineError");
+	auto luaStackOps = LuaStackOps(*this);
+	luaStackOps.setField("handleCoroutineError");
 
 	u.makeGlobal("halleyAPI");
 
@@ -53,6 +54,10 @@ LuaState::LuaState(Resources& resources)
 
 	auto res = resources.get<BinaryFile>("lua/halley/halley.lua");
 	loadModule("halley", res->getSpan());
+	if (isDevMode) {
+		luaStackOps.eval("setStrictMode()");
+		luaStackOps.pop();
+	}
 }
 
 LuaState::~LuaState()

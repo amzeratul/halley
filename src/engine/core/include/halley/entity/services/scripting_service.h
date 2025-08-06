@@ -8,7 +8,7 @@ namespace Halley {
 
 	class ScriptingService : public Service, public ILuaInterface {
 	public:
-		ScriptingService(std::unique_ptr<ScriptEnvironment> environment, Resources& resources, const String& initialLuaModule = "");
+		ScriptingService(std::unique_ptr<ScriptEnvironment> environment, Resources& resources, const String& initialLuaModule = "", bool devMode = false);
 		~ScriptingService();
 
 		ScriptEnvironment& getEnvironment() const;
@@ -42,6 +42,7 @@ namespace Halley {
 		std::unique_ptr<LuaState> luaState;
 		HashMap<String, ConfigNode> globals;
 		String initialModule;
+		bool devMode;
 		Resources& resources;
 
 	    mutable HashMap<String, ConfigNode> resultCache;

@@ -166,6 +166,8 @@ namespace Halley {
         void setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future);
         std::optional<Future<ConfigNode>> getFutureNodeValue(const ScriptGraphNode& node);
 
+    	bool isDevMode() const;
+
     protected:
 		const HalleyAPI& api;
     	World& world;

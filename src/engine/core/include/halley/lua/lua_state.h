@@ -14,7 +14,7 @@ namespace Halley {
 
 	class LuaState {
 	public:
-		LuaState(Resources& resources);
+		LuaState(Resources& resources, bool isDevMode = false);
 		~LuaState();
 
 		const LuaReference* tryGetModule(const String& moduleName) const;

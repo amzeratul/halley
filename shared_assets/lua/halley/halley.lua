@@ -74,42 +74,45 @@ package.searchers = {package.searchers[1], halleyPackageLoader}
 
 
 
--- Load strict
+-- Strict mode reports undeclared variables
 local getinfo, error, rawset, rawget = debug.getinfo, error, rawset, rawget
+function setStrictMode()
+    --printDev("Setting Lua strict mode")
 
-local mt = getmetatable(_G)
-if mt == nil then
-    mt = {}
-    setmetatable(_G, mt)
-end
+    local mt = getmetatable(_G)
+    if mt == nil then
+        mt = {}
+        setmetatable(_G, mt)
+    end
+    mt.__declared = {}
 
-mt.__declared = {}
+    local function what ()
+        local d = getinfo(3, "S")
+        return d and d.what or "C"
+    end
 
-local function what ()
-    local d = getinfo(3, "S")
-    return d and d.what or "C"
-end
-
-mt.__newindex = function (t, n, v)
-    if not mt.__declared[n] then
-        local w = what()
-        if w ~= "main" and w ~= "C" then
-            printError("Lua error: assign to undeclared variable '"..n.."'")
+    mt.__newindex = function (t, n, v)
+        if not mt.__declared[n] then
+            local w = what()
+            if w ~= "main" and w ~= "C" then
+                printError("Lua error: assign to undeclared variable '"..n.."'")
+            end
+            mt.__declared[n] = true
         end
-        mt.__declared[n] = true
+        rawset(t, n, v)
     end
-    rawset(t, n, v)
-end
-  
-mt.__index = function (t, n)
-    if not mt.__declared[n] and what() ~= "C" then
-        printError("Lua error: variable '"..n.."' is not declared")
-        rawset(t, n, nil)
-        mt.__declared[n] = true
+    
+    mt.__index = function (t, n)
+        if not mt.__declared[n] and what() ~= "C" then
+            printError("Lua error: variable '"..n.."' is not declared")
+            rawset(t, n, nil)
+            mt.__declared[n] = true
+        end
+        return rawget(t, n)
     end
-    return rawget(t, n)
-end
 
+    return true
+end
 
 
 -- Disable unsafe tables

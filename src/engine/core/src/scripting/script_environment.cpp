@@ -827,6 +827,11 @@ std::optional<Future<ConfigNode>> ScriptEnvironment::getFutureNodeValue(const Sc
 	return {};
 }
 
+bool ScriptEnvironment::isDevMode() const
+{
+	return api.core->isDevMode();
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;
