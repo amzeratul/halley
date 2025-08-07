@@ -359,7 +359,8 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 	if (const auto entity = world.findEntity(msg.entityUUID)) {
 		messageBridge.sendMessageToEntity(entity->getEntityId(), msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), fromPeerId);
 	} else {
-		Logger::logError("Received message for entity " + toString(msg.entityUUID) + ", but entity was not found.");
+		const auto& messageName = String(world.getReflection().getMessageReflector(msg.messageType).getName());
+		Logger::logError("Received message \"" + messageName + "\" for entity " + toString(msg.entityUUID) + ", but entity was not found.");
 	}
 }
 
