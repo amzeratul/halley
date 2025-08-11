@@ -113,6 +113,8 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
             numSubPackets++;
         }
 
+    	Ensures(numSubPackets > 1);
+
         if (numSubPackets > 16) {
             throw Exception("Packet size too large: " + toString(size) + " bytes", HalleyExceptions::Network);
         }
@@ -132,7 +134,7 @@ void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool sma
             packet = packet.subspan(slot.dataSize);
 
             slot.seqIdx = outbound.seqIndex.toSlot();
-            slot.subIdx = uint8_t(i) | uint8_t(numSubPackets << 4);
+            slot.subIdx = uint8_t(i) | uint8_t((numSubPackets - 1) << 4);
         	slot.parity = outbound.seqIndex.parity();
         	slot.resend = 0;
 
@@ -300,7 +302,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         	return true;
         } else {
             // Check if all sub-packets have arrived.
-            int numSubPackets = slot.subIdx >> 4;
+            int numSubPackets = (slot.subIdx >> 4) + 1;
             Expects(numSubPackets > 1 && (slot.subIdx & 15) == 0);
 
             bool isComplete = true;
@@ -308,12 +310,12 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
                 const auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
             	if (sub.seqIdx == slot.seqIdx) {
             		Expects((sub.subIdx & 15) == i);
-            		Expects((sub.subIdx >> 4) == numSubPackets);
+            		Expects((sub.subIdx >> 4) + 1 == numSubPackets);
             		Expects(sub.parity == slot.parity);
             	}
             	isComplete &= sub.seqIdx == slot.seqIdx && sub.parity == slot.parity;
                 isComplete &= (sub.subIdx & 15) == i;
-                isComplete &= (sub.subIdx >> 4) == numSubPackets;
+                isComplete &= (sub.subIdx >> 4) + 1 == numSubPackets;
             }
 
             if (isComplete) {
