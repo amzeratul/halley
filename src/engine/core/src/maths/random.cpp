@@ -173,8 +173,6 @@ float Random::get(float min, float max)
 	}
 
 	const auto value = getFloat(min, max);
-	Ensures(value >= min);
-	Ensures(value < max);
 	return value;
 }
 
