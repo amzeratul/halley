@@ -32,6 +32,8 @@ namespace Halley
         void send(TransmissionType type, OutboundNetworkPacket packet) override;
         bool receive(InboundNetworkPacket& packet) override;
 
+    	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
+
         void onSend(gsl::span<const gsl::byte> packet) override;
         void onReceive(gsl::span<const gsl::byte> packet) override;
 

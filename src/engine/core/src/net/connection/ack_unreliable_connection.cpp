@@ -380,6 +380,11 @@ bool AckUnreliableConnection::tryReceiveSmallPacket(InboundNetworkPacket& packet
 	return false;
 }
 
+size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
+{
+	return maxPacketSize - headerSize;
+}
+
 void AckUnreliableConnection::onSend(gsl::span<const gsl::byte> packet)
 {
 }

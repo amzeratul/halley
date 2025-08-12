@@ -679,6 +679,11 @@ float NetworkSession::getLatency(size_t idx) const
 	return peers.at(idx).connection->getLatency();
 }
 
+size_t NetworkSession::getMaxPacketSize() const
+{
+	return peers.empty() ? (16 * 1400) : peers.at(0).connection->getMaxPacketSize();
+}
+
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 {
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });

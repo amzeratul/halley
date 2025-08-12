@@ -18,6 +18,7 @@ namespace Halley
         void close();
         [[nodiscard]] ConnectionStatus getStatus() const;
         [[nodiscard]] float getLatency() const;
+        [[nodiscard]] size_t getMaxPacketSize() const;
 
     private:
         struct Outbound {

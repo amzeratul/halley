@@ -74,6 +74,7 @@ namespace Halley {
 		bool isConnected(size_t idx) const;
 		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
 		float getLatency(size_t idx) const;
+		[[nodiscard]] size_t getMaxPacketSize() const;
 
 		template <typename T>
 		T& getMySharedData()

@@ -16,8 +16,22 @@ class NetworkComponent;
 using namespace Halley;
 
 static constexpr size_t receiveBufferSize = 32 * 1024;
-static constexpr size_t maxCompressedMessageSize = 16000;
+
+// NB (or TODO): This makes 512kb the current maximum size of a single EntityNetworkMessage.
+// The session could handle more, at the cost of processing power & memory, but right now this
+// would overflow the message queue in AckUnreliableConnection, which keeps up to 256 MTU-sized
+// packets around until they are acknowledged by the receiver.
+// Exceeding this limit would increase memory requirements in AckUnreliableConnection, and/or
+// require some kind of message throttling here, like delaying further sending of messages until
+// there's free space in the connection queue again.
 static constexpr size_t maxLargeMessageSplitCount = 16;
+
+struct LargeMessageInfoHeader
+{
+	uint32_t size{};
+	uint32_t offset{};
+	uint32_t totalSize{};
+};
 
 EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, HashSet<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 	: resources(resources)
@@ -139,6 +153,13 @@ void EntityNetworkSession::setLobbyInfo(ConfigNode info)
 
 void EntityNetworkSession::sendMessages()
 {
+	// This is the maximum size the underlying IConnection can handle. Should be about
+	// 16*MTU for AckUnreliableConnection.
+	// The maximum header size is up to 13 bytes we use below, plus what's added in
+	// session->sendToPeer[s]().
+	constexpr size_t maxHeaderSize = 13 + sizeof(NetworkSessionMessageHeader);
+	const size_t maxOutboundPacketSize = session->getMaxPacketSize() - maxHeaderSize;
+
 	auto tryCompress = [&](size_t startIdx, size_t count, const Vector<EntityNetworkMessage>& msgs) -> std::optional<Bytes>
 	{
 		auto data = Serializer::toBytes(msgs.span().subspan(startIdx, count), byteSerializationOptions);
@@ -148,11 +169,10 @@ void EntityNetworkSession::sendMessages()
             return std::nullopt;
         }
 		auto compressed = Compression::lz4Compress(gsl::as_bytes(gsl::span<const Byte>(data)));
-		if (compressed.size() <= maxCompressedMessageSize) {
+		if (compressed.size() <= maxOutboundPacketSize) {
 			return std::move(compressed);
 		} else {
-			// Compressed packet data may be larger than 16x MTU, which currently is a hard
-			// limit of AckUnreliableConnection.
+			// Packet data too large to send, split.
 			return std::nullopt;
 		}
 	};
@@ -164,7 +184,7 @@ void EntityNetworkSession::sendMessages()
 		while (startIdx < msgs.size()) {
 			if (auto data = tryCompress(startIdx, curCount, msgs)) {
 				auto packet = OutboundNetworkPacket(*data);
-				packet.addHeader(static_cast<uint8_t>(0x00));
+				packet.addHeader(static_cast<uint8_t>(0x0));
 				if (peerId == -1) {
 					session->sendToPeers(std::move(packet));
 				} else {
@@ -180,29 +200,67 @@ void EntityNetworkSession::sendMessages()
 					curCount /= 2;
 				} else {
 					// Single packet, too big to send. Split it up into multiple messages, and use
-					// the message header to "encode" information for the receiver.
+					// the message header to pass information to the receiver.
 					auto largeData = Serializer::toBytes(msgs.span().subspan(startIdx, 1), byteSerializationOptions);
+					//Logger::logDev("send large entity msg, " + toString(largeData.size()) + " bytes");
 
-					const size_t splitSize = receiveBuffer.capacity();
-					size_t numSplit = largeData.size() / splitSize;
-					if (largeData.size() % splitSize != 0) numSplit++;
+					// Can't know the size after compression yet, so we need to choose a reasonable
+					// split size. Some of that large data might be pretty tightly packed already.
+					// TODO: this might need reconsideration.
+					const size_t splitSize = maxOutboundPacketSize * 3 / 2;
+					size_t splitOffset = 0;
 
-					Expects(numSplit < maxLargeMessageSplitCount); // Larger than Nx32 kb. We shouldn't do that!
-
-					for (size_t split = 0, splitOffset = 0; split < numSplit; split++, splitOffset += splitSize) {
+					while (splitOffset < largeData.size()) {
+						// Pick up next chunk of data.
 						size_t remain = std::min(largeData.size() - splitOffset, splitSize);
 						auto subData = largeData.const_byte_span().subspan(splitOffset, remain);
+
+						// Try to compress it.
 						auto compressed = Compression::lz4Compress(subData);
 
-						Expects(compressed.size() <= maxCompressedMessageSize);
+						if (compressed.size() <= maxOutboundPacketSize) {
+							// Below our max size, send it!
+							auto packet = OutboundNetworkPacket(compressed);
 
-						auto packet = OutboundNetworkPacket(compressed);
-						packet.addHeader(static_cast<uint8_t>(numSplit << 4 | split));
+							LargeMessageInfoHeader header;
+							header.size = static_cast<uint32_t>(compressed.size());
+							header.offset = static_cast<uint32_t>(splitOffset);
+							header.totalSize = static_cast<uint32_t>(largeData.size());
 
-						if (peerId == -1) {
-							session->sendToPeers(std::move(packet));
+							packet.addHeader(header);
+							packet.addHeader(static_cast<uint8_t>(0x1)); // 1 == compressed
+
+							splitOffset += splitSize;
+							//Logger::logDev("- send compressed, " + toString(splitSize) + " -> " + toString(compressed.size()) + " bytes");
+
+							if (peerId == -1) {
+								session->sendToPeers(std::move(packet));
+							} else {
+								session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+							}
 						} else {
-							session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+							// Too large after compression. Send a chunk, uncompressed, of the
+							// maximum size our connection can handle.
+							auto uncompressed = largeData.const_byte_span().subspan(splitOffset, maxOutboundPacketSize);
+
+							auto packet = OutboundNetworkPacket(uncompressed);
+
+							LargeMessageInfoHeader header;
+							header.size = static_cast<uint32_t>(uncompressed.size());
+							header.offset = static_cast<uint32_t>(splitOffset);
+							header.totalSize = static_cast<uint32_t>(largeData.size());
+
+							packet.addHeader(header);
+							packet.addHeader(static_cast<uint8_t>(0x2)); // 2 == uncompressed
+
+							splitOffset += maxOutboundPacketSize;
+							//Logger::logDev("- send uncompressed, " + toString(uncompressed.size()) + " bytes");
+
+							if (peerId == -1) {
+								session->sendToPeers(std::move(packet));
+							} else {
+								session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+							}
 						}
 					}
 
@@ -227,16 +285,16 @@ void EntityNetworkSession::receiveUpdates()
 		uint8_t largeSplitHeader;
 		packet.extractHeader(largeSplitHeader);
 
-		receiveBuffer.resize(receiveBuffer.capacity());
-		const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()));
-		if (size) {
-			receiveBuffer.resize(*size);
-		} else {
-			Logger::logError("Failed to decompress network packet");
-			continue;
-		}
+		if (largeSplitHeader == 0x0) {
+			// Regular packet, decompress and queue/process.
+			receiveBuffer.resize(receiveBuffer.capacity());
+			if (const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()))) {
+				receiveBuffer.resize(*size);
+			} else {
+				Logger::logError("Failed to decompress network packet");
+				continue;
+			}
 
-		if (largeSplitHeader == 0) {
 			auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(receiveBuffer, byteSerializationOptions);
 
 			for (auto& msg: msgs) {
@@ -247,34 +305,67 @@ void EntityNetworkSession::receiveUpdates()
 				}
 			}
 		} else {
+			// Large packet, reserve buffer on demand, per peer.
 			if (!largePacketBuffer.contains(fromPeerId)) {
-				// Only reserve on demand, 512 kb right now, per peer that sends large packets.
 				largePacketBuffer[fromPeerId] = Bytes(maxLargeMessageSplitCount * receiveBuffer.capacity());
 			}
 
 			Bytes& buffer = largePacketBuffer[fromPeerId];
 
-			// NB: the network connection makes sure that messages are received in order, so we
-			// (hopefully) don't have to take care of that right here.
-			size_t numSplit = largeSplitHeader >> 4;
-			size_t curSplit = largeSplitHeader & 15;
+			// The network connection makes sure that messages are received in order, so we don't
+			// have to take care of that here.
 
-			size_t srcSize = receiveBuffer.size();
-			size_t dstOffs = buffer.size();
+			LargeMessageInfoHeader header;
+			packet.extractHeader(header);
 
-			if (curSplit == 0) {
+			Expects(largeSplitHeader == 0x1 || largeSplitHeader == 0x2);
+
+			size_t dstOffset = buffer.size();
+
+			if (header.offset == 0) {
 				// First part, reset the buffer.
 				buffer.resize_no_init(0);
-				dstOffs = 0;
+				dstOffset = 0;
+				//Logger::logDev("rcv large entity msg, " + toString(totalSize) + " bytes");
 			}
 
-			// Resize first, then copy.
-			buffer.resize_no_init(dstOffs + srcSize);
-			auto dst = buffer.byte_span().subspan(dstOffs, srcSize);
-			memcpy(dst.data(), receiveBuffer.data(), srcSize);
+			if (largeSplitHeader == 0x1) {
+				// Compressed - decompress, then copy.
+				receiveBuffer.resize(receiveBuffer.capacity());
+				const auto size = Compression::lz4Decompress(packet.getBytes(), gsl::as_writable_bytes(receiveBuffer.span()));
 
-			if (curSplit == numSplit - 1) {
-				// Last part of large message. Can process it now.
+				if (size) {
+					receiveBuffer.resize(*size);
+				} else {
+					throw Exception("Failed to decompress part of large network packet", HalleyExceptions::Network);
+				}
+
+				//Logger::logDev("- rcv compressed, " + toString(*size) + " <- " + toString(splitSize) + " bytes");
+
+				buffer.resize_no_init(dstOffset + size.value());
+				auto dst = buffer.byte_span().subspan(dstOffset, size.value());
+				memcpy(dst.data(), receiveBuffer.data(), size.value());
+
+				dstOffset += size.value();
+			} else if (largeSplitHeader == 0x2) {
+				// Uncompressed, just copy.
+				auto src = packet.getBytes();
+				Expects(src.size() == header.size);
+
+				//Logger::logDev("- rcv uncompressed, " + toString(splitSize) + " bytes");
+
+				buffer.resize_no_init(dstOffset + header.size);
+
+				auto dst = buffer.byte_span().subspan(dstOffset, header.size);
+				memcpy(dst.data(), src.data(), header.size);
+
+				dstOffset += header.size;
+			}
+
+			Expects(dstOffset <= header.totalSize);
+
+			if (dstOffset == header.totalSize) {
+				// Received the last part of this large message. Can process it now.
 				auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(buffer, byteSerializationOptions);
 
 				for (auto& msg: msgs) {

@@ -60,3 +60,9 @@ float MessageQueueUDP::getLatency() const
 {
     return connection->getLatency();
 }
+
+size_t MessageQueueUDP::getMaxPacketSize() const
+{
+    // AckUnreliableConnection can split up packets into up to 16*MTU
+    return connection->getMaxUnreliablePacketSize() * 16;
+}
