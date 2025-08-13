@@ -110,6 +110,17 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 
 	bool addedValues = false;
 
+	ticpp::Element* fallbackInsertNode = nullptr;
+
+	auto addTo = [&] (ticpp::Element* dst) {
+		addedValues = true;
+		for (auto& v: toAdd) {
+			ticpp::Element element(toolName);
+			element.SetAttribute("Include", v.cppStr());
+			dst->InsertEndChild(element);
+		}
+	};
+
 	std::string name;
 	for (ticpp::Element* l0Node = doc.FirstChildElement(); l0Node != nullptr; l0Node = l0Node->NextSiblingElement(false)) {
 		l0Node->GetValue(&name);
@@ -117,8 +128,9 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 			for (ticpp::Element* l1Node = l0Node->FirstChildElement(); l1Node != nullptr; l1Node = l1Node->NextSiblingElement(false)) {
 				l1Node->GetValue(&name);
 				if (name == "ItemGroup") {
+					auto* firstL2Node = l1Node->FirstChildElement(false);
 					bool compatibleItemGroup = false;
-					for (ticpp::Element* l2Node = l1Node->FirstChildElement(); l2Node != nullptr;) {
+					for (ticpp::Element* l2Node = firstL2Node; l2Node != nullptr;) {
 						auto nextNode = l2Node->NextSiblingElement(false);
 						l2Node->GetValue(&name);
 						if (String(name) == toolName) {
@@ -134,16 +146,23 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 						l2Node = nextNode;
 					}
 
+					if (!firstL2Node && !fallbackInsertNode) {
+						fallbackInsertNode = l1Node;
+					}
+
 					if (compatibleItemGroup && !addedValues) {
-						addedValues = true;
-						for (auto& v: toAdd) {
-							ticpp::Element element(toolName);
-							element.SetAttribute("Include", v.cppStr());
-							l1Node->InsertEndChild(element);
-						}
+						addTo(l1Node);
 					}
 				}
 			}
+		}
+	}
+
+	if (!addedValues) {
+		if (fallbackInsertNode) {
+			addTo(fallbackInsertNode);
+		} else {
+			Logger::logError("Unable to find insertion point for files in destination project file.");
 		}
 	}
 }

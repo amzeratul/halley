@@ -88,7 +88,15 @@ int VSProjectTool::copyFiles(const Vector<std::string>& args)
 	outProj.load(outputPath);
 	outProj.setCompileFiles(compile);
 	outProj.setIncludeFiles(include);
-	FileSystem::writeFile(outputPath.string(), outProj.write());
+
+	const auto newData = outProj.write();
+	const auto prevData = FileSystem::readFile(outputPath);
+	if (prevData != newData) {
+		FileSystem::writeFile(outputPath, newData);
+		Logger::logInfo("Wrote file: " + outputPath.getNativeString());
+	} else {
+		Logger::logInfo("No changes needed: " + outputPath.getNativeString());
+	}
 
 	return 0;
 }
