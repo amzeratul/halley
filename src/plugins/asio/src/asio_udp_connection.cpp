@@ -118,7 +118,11 @@ void AsioUDPConnection::receiveAll(
             if (err == asio::error::would_block) {
                 break;
             } else {
-                Logger::logError("Error receiving packet: " + err.message());
+                if (err == asio::error::connection_reset) {
+                    Logger::logWarning("Connection reset by peer");
+                } else {
+                    Logger::logError("Error receiving packet: " + err.message());
+                }
                 for (auto& conn: connections) {
                     conn.second->close();
                 }
