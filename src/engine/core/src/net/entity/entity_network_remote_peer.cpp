@@ -617,12 +617,17 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id, const String& deb
 		if (!shouldBeDeleted && entity.getPrefab()) {
 			// Don't delete non-prefab world entities.
 			// See sendCreateEntity() for the correlating check on network entity creation.
-			bool hasBeenAssignedToHost = false;
-			if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent && networkComponent->creatorId) {
-				// Checks if the entity was created locally, but network ownership assigned to host.
-				hasBeenAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
+			bool hasBeenCreatedByOrAssignedToHost = false;
+			if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent) {
+				if (networkComponent->creatorId) {
+					// Checks if the entity was created locally, but network ownership assigned to host.
+					hasBeenCreatedByOrAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
+				} else {
+					// Checks if the entity was created by the host
+					hasBeenCreatedByOrAssignedToHost = networkComponent->ownerId.value() == 0;
+				}
 			}
-			shouldBeDeleted = hasBeenAssignedToHost;
+			shouldBeDeleted = hasBeenCreatedByOrAssignedToHost;
 		}
 
 		entity.setFromNetwork(false);
