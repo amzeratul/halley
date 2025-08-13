@@ -206,8 +206,11 @@ void EntityNetworkSession::sendMessages()
 
 					// Can't know the size after compression yet, so we need to choose a reasonable
 					// split size. Some of that large data might be pretty tightly packed already.
+					//
+					// This is also limited, again, by the receiver's buffer size to decompress the data into.
+					//
 					// TODO: this might need reconsideration.
-					const size_t splitSize = maxOutboundPacketSize * 3 / 2;
+					const size_t splitSize = std::min(maxOutboundPacketSize * 3 / 2, receiveBuffer.capacity());
 					size_t splitOffset = 0;
 
 					while (splitOffset < largeData.size()) {
@@ -231,7 +234,7 @@ void EntityNetworkSession::sendMessages()
 							packet.addHeader(static_cast<uint8_t>(0x1)); // 1 == compressed
 
 							splitOffset += splitSize;
-							//Logger::logDev("- send compressed, " + toString(splitSize) + " -> " + toString(compressed.size()) + " bytes");
+							//Logger::logDev("- send compressed, " + toString(remain) + " -> " + toString(compressed.size()) + " bytes");
 
 							if (peerId == -1) {
 								session->sendToPeers(std::move(packet));
@@ -326,7 +329,7 @@ void EntityNetworkSession::receiveUpdates()
 				// First part, reset the buffer.
 				buffer.resize_no_init(0);
 				dstOffset = 0;
-				//Logger::logDev("rcv large entity msg, " + toString(totalSize) + " bytes");
+				//Logger::logDev("rcv large entity msg, " + toString(header.totalSize) + " bytes");
 			}
 
 			if (largeSplitHeader == 0x1) {
@@ -340,7 +343,7 @@ void EntityNetworkSession::receiveUpdates()
 					throw Exception("Failed to decompress part of large network packet", HalleyExceptions::Network);
 				}
 
-				//Logger::logDev("- rcv compressed, " + toString(*size) + " <- " + toString(splitSize) + " bytes");
+				//Logger::logDev("- rcv compressed, " + toString(*size) + " <- " + toString(header.size) + " bytes");
 
 				buffer.resize_no_init(dstOffset + size.value());
 				auto dst = buffer.byte_span().subspan(dstOffset, size.value());
@@ -352,7 +355,7 @@ void EntityNetworkSession::receiveUpdates()
 				auto src = packet.getBytes();
 				Expects(src.size() == header.size);
 
-				//Logger::logDev("- rcv uncompressed, " + toString(splitSize) + " bytes");
+				//Logger::logDev("- rcv uncompressed, " + toString(header.size) + " bytes");
 
 				buffer.resize_no_init(dstOffset + header.size);
 
