@@ -24,6 +24,22 @@ int VSProjectTool::run(Vector<std::string> args)
 	}
 }
 
+namespace {
+	Bytes convertLineBreaks(Bytes src)
+	{
+		Bytes result;
+		result.reserve(src.size());
+
+		for (auto b: src) {
+			if (b != '\r') {
+				result += b;
+			}
+		}
+
+		return result;
+	}
+}
+
 int VSProjectTool::copyFiles(const Vector<std::string>& args)
 {
 	Vector<String> input;
@@ -89,14 +105,17 @@ int VSProjectTool::copyFiles(const Vector<std::string>& args)
 	outProj.setCompileFiles(compile);
 	outProj.setIncludeFiles(include);
 
-	const auto newData = outProj.write();
-	const auto prevData = FileSystem::readFile(outputPath);
-	if (prevData != newData) {
-		FileSystem::writeFile(outputPath, newData);
-		Logger::logInfo("Wrote file: " + outputPath.getNativeString());
+	if (outProj.hasError()) {
+		return 1;
 	} else {
-		Logger::logInfo("No changes needed: " + outputPath.getNativeString());
+		const auto newData = outProj.write();
+		const auto prevData = convertLineBreaks(FileSystem::readFile(outputPath));
+		if (prevData != newData) {
+			FileSystem::writeFile(outputPath, newData);
+			Logger::logInfo("Wrote file: " + outputPath.getNativeString());
+		} else {
+			Logger::logInfo("No changes needed: " + outputPath.getNativeString());
+		}
+		return 0;
 	}
-
-	return 0;
 }

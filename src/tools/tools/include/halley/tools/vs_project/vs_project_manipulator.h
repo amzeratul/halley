@@ -15,6 +15,7 @@ namespace Halley {
 		void load(Path path);
 		void load(const Bytes& data);
 		Bytes write();
+		bool hasError() const;
 
 		std::set<String> getCompileFiles();
 		std::set<String> getIncludeFiles();
@@ -26,7 +27,8 @@ namespace Halley {
 		std::set<String> includeFiles;
 		std::set<String> compileFiles;
 		std::shared_ptr<ticpp::Document> document;
+		bool error = false;
 
-		void rewriteFiles(String toolName, const std::set<String>& oldSet, const std::set<String>& newSet);
+		void rewriteFiles(String toolName, std::optional<String> altToolName, const std::set<String>& oldSet, const std::set<String>& newSet);
 	};
 }

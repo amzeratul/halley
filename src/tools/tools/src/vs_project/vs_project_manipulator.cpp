@@ -66,6 +66,11 @@ Bytes VSProjectManipulator::write()
 	return result;
 }
 
+bool VSProjectManipulator::hasError() const
+{
+	return error;
+}
+
 std::set<String> VSProjectManipulator::getCompileFiles()
 {
 	return compileFiles;
@@ -78,17 +83,17 @@ std::set<String> VSProjectManipulator::getIncludeFiles()
 
 void VSProjectManipulator::setCompileFiles(const std::set<String>& files)
 {
-	rewriteFiles("ClCompile", compileFiles, files);
+	rewriteFiles("ClCompile", "ClInclude", compileFiles, files);
 	compileFiles = files;
 }
 
 void VSProjectManipulator::setIncludeFiles(const std::set<String>& files)
 {
-	rewriteFiles("ClInclude", includeFiles, files);
+	rewriteFiles("ClInclude", "ClCompile", includeFiles, files);
 	includeFiles = files;
 }
 
-void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>& oldSet, const std::set<String>& newSet)
+void VSProjectManipulator::rewriteFiles(String toolName, std::optional<String> altToolName, const std::set<String>& oldSet, const std::set<String>& newSet)
 {
 	std::set<String> toDelete;
 	std::set<String> toAdd;
@@ -128,12 +133,13 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 			for (ticpp::Element* l1Node = l0Node->FirstChildElement(); l1Node != nullptr; l1Node = l1Node->NextSiblingElement(false)) {
 				l1Node->GetValue(&name);
 				if (name == "ItemGroup") {
-					auto* firstL2Node = l1Node->FirstChildElement(false);
+					auto* const firstL2Node = l1Node->FirstChildElement(false);
 					bool compatibleItemGroup = false;
 					for (ticpp::Element* l2Node = firstL2Node; l2Node != nullptr;) {
 						auto nextNode = l2Node->NextSiblingElement(false);
 						l2Node->GetValue(&name);
-						if (String(name) == toolName) {
+						auto nameStr = String(name);
+						if (nameStr == toolName || nameStr == altToolName) {
 							compatibleItemGroup = true;
 
 							// Does it need to be removed?
@@ -147,6 +153,7 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 					}
 
 					if (!firstL2Node && !fallbackInsertNode) {
+						Logger::logInfo("Found fallback element");
 						fallbackInsertNode = l1Node;
 					}
 
@@ -163,6 +170,7 @@ void VSProjectManipulator::rewriteFiles(String toolName, const std::set<String>&
 			addTo(fallbackInsertNode);
 		} else {
 			Logger::logError("Unable to find insertion point for files in destination project file.");
+			error = true;
 		}
 	}
 }
