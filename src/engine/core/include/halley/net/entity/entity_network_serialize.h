@@ -100,7 +100,7 @@ namespace Halley {
         bool processEntityUpdateChanges(Bytes& previous);
         bool hasEntityChanges(const EntityRef& entity, bool log) const;
 
-        void getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
+        [[nodiscard]] size_t getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
         static size_t getBytesCapacity();
 
     private:

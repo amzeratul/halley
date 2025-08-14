@@ -733,7 +733,7 @@ bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log)
     return changes;
 }
 
-void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options, bool log) const
+size_t EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& options, bool log) const
 {
     data.resize_no_init(data.capacity());
 
@@ -743,7 +743,7 @@ void EntityNetworkSerialize::getBytes(Bytes& data, const SerializerOptions& opti
     Serializer s(data.byte_span(), opt);
     journal.writeJournal(s, scratchpad, log);
 
-    data.resize(s.getSize());
+    return s.getSize();
 }
 
 size_t EntityNetworkSerialize::getBytesCapacity()
