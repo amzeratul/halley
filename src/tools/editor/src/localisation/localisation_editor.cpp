@@ -764,7 +764,7 @@ void LocalisationEditor::downloadTranslations()
 							firstInChunk = false;
 						}
 
-						str << "  " << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"") << "\"\n";
+						str << "  " << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
 						++nEntries;
 					}
 				}
