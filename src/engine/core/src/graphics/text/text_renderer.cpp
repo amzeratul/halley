@@ -5,6 +5,7 @@
 #include "halley/graphics/material/material_parameter.h"
 #include <gsl/assert>
 
+#include "halley/resources/resources.h"
 #include "halley/text/i18n.h"
 
 using namespace Halley;

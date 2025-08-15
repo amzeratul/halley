@@ -147,6 +147,10 @@ void DevConClient::update(Time t)
 		receivingProfilerData = shouldHaveProfilerData;
 	}
 
+	if (i18n && interest->hasInterest("i18n")) {
+		updateI18NInterest();
+	}
+
 	if (queue && !queue->isConnected()) {
 		setConnection({});
 		Logger::logDev("DevConClient: connection lost");
@@ -178,9 +182,30 @@ void DevConClient::onReceiveMessage(const DevCon::UnregisterInterestMsg& msg)
 	interest->unregisterInterest(msg.handle);
 }
 
+void DevConClient::onReceiveMessage(DevCon::UpdateStringsMsg& msg)
+{
+	if (i18n) {
+		applyUpdateStrings(msg);
+	} else {
+		pendingUpdateStringMessages.emplace_back(std::move(msg));
+	}
+}
+
 DevConInterest& DevConClient::getInterest() const
 {
 	return *interest;
+}
+
+void DevConClient::setI18N(I18N* newI18n)
+{
+	i18n = newI18n;
+
+	if (i18n) {
+		while (!pendingUpdateStringMessages.empty()) {
+			applyUpdateStrings(pendingUpdateStringMessages.front());
+			pendingUpdateStringMessages.erase(pendingUpdateStringMessages.begin());
+		}
+	}
 }
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
@@ -223,4 +248,20 @@ void DevConClient::log(LoggerLevel level, const std::string_view msg)
 	if (queue && queue->isConnected()) {
 		queue->enqueue(std::make_unique<DevCon::LogMsg>(level, msg), 0);
 	}
+}
+
+void DevConClient::applyUpdateStrings(DevCon::UpdateStringsMsg& msg)
+{
+	assert(i18n != nullptr);
+
+	i18n->updateStrings(msg.language, std::move(msg.strings));
+}
+
+void DevConClient::updateI18NInterest()
+{
+	assert(i18n != nullptr);
+
+	ConfigNode data;
+	data["languageCode"] = i18n->getCurrentLanguage().getISOCode();
+	interest->notifyInterest("i18n", 0, std::move(data));
 }

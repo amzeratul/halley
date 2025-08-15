@@ -176,3 +176,24 @@ void RPCReplyMsg::deserialize(Deserializer& s)
 	s >> id;
 	s >> result;
 }
+
+UpdateStringsMsg::UpdateStringsMsg(I18NLanguage language, HashMap<String, String> strings)
+	: language(std::move(language))
+	, strings(std::move(strings))
+{
+}
+
+void UpdateStringsMsg::serialize(Serializer& s) const
+{
+	s << language.getISOCode();
+	s << strings;
+}
+
+void UpdateStringsMsg::deserialize(Deserializer& s)
+{
+	String languageCode;
+	s >> languageCode;
+	language = I18NLanguage(languageCode);
+
+	s >> strings;
+}

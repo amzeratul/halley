@@ -93,6 +93,8 @@ src/localisation/localisation_language_editor.cpp
 src/localisation/localisation_language_editor.h
 src/localisation/localisation_manage_users.cpp
 src/localisation/localisation_manage_users.h
+src/localisation/localisation_remote_client_updater.cpp
+src/localisation/localisation_remote_client_updater.h
 src/localisation/localisation_set_filters_window.cpp
 src/localisation/localisation_set_filters_window.h
 src/preferences.cpp

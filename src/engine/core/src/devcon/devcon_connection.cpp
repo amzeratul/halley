@@ -28,6 +28,7 @@ void DevConConnection::setConnection(std::shared_ptr<IConnection> connection)
 		queue->addFactory<DevCon::SetClientDataMsg>();
 		queue->addFactory<DevCon::RPCMsg>();
 		queue->addFactory<DevCon::RPCReplyMsg>();
+		queue->addFactory<DevCon::UpdateStringsMsg>();
 	} else {
 		this->queue = {};
 		this->connection = {};
@@ -79,6 +80,11 @@ void DevConConnection::update(Time t)
 
 		case DevCon::MessageType::RPCReply:
 			onReceiveMessage(dynamic_cast<DevCon::RPCReplyMsg&>(msg));
+			break;
+			
+		case DevCon::MessageType::UpdateStrings:
+			onReceiveMessage(dynamic_cast<DevCon::UpdateStringsMsg&>(msg));
+			break;
 
 		default:
 			break;

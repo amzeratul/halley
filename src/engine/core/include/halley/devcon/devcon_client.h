@@ -62,11 +62,14 @@ namespace Halley
 
 		DevConInterest& getInterest() const;
 
+		void setI18N(I18N* i18n);
+
 	protected:
 		void onReceiveMessage(const DevCon::ReloadAssetsMsg& msg) override;
 		void onReceiveMessage(DevCon::RegisterInterestMsg& msg) override;
 		void onReceiveMessage(DevCon::UpdateInterestMsg& msg) override;
 		void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg) override;
+		void onReceiveMessage(DevCon::UpdateStringsMsg& msg) override;
 
 		void notifyInterest(uint32_t handle, ConfigNode data);
 
@@ -80,7 +83,12 @@ namespace Halley
 		std::unique_ptr<DevConInterest> interest;
 
 		bool receivingProfilerData = false;
-		
+
+		I18N* i18n = nullptr;
+		Vector<DevCon::UpdateStringsMsg> pendingUpdateStringMessages;
+
 		void log(LoggerLevel level, const std::string_view msg) override;
+		void applyUpdateStrings(DevCon::UpdateStringsMsg& msg);
+		void updateI18NInterest();
 	};
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "localisation_remote_client_updater.h"
+
 namespace Halley {
 	class ProjectWindow;
 	class LocalisationEditor;
@@ -26,6 +28,8 @@ namespace Halley {
         HashMap<String, String> countryNames;
         HashMap<String, String> languageNames;
         HashSet<String> languageNeedsQualifier;
+
+		LocalisationRemoteClientUpdater remoteClientUpdater;
 
         void setupCountryNames();
         void setupLanguageNames();

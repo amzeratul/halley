@@ -4,6 +4,7 @@
 #include <gsl/gsl>
 
 #include "halley/data_structures/config_node.h"
+#include "halley/text/i18n.h"
 
 namespace Halley
 {
@@ -23,7 +24,8 @@ namespace Halley
 			NotifyInterest,
 			SetClientData,
 			RPC,
-			RPCReply
+			RPCReply,
+			UpdateStrings
 		};
 
 		class DevConMessage : public NetworkMessage
@@ -171,6 +173,19 @@ namespace Halley
 			
 			uint64_t id;
 			ConfigNode result;
+		};
+
+		class UpdateStringsMsg final : public DevConMessageBase<MessageType::UpdateStrings>
+		{
+		public:
+			UpdateStringsMsg() = default;
+			UpdateStringsMsg(I18NLanguage language, HashMap<String, String> strings);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+
+			I18NLanguage language;
+			HashMap<String, String> strings;
 		};
 	}
 }

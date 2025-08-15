@@ -4,8 +4,6 @@
 #include <map>
 
 #include "halley/graphics/text/text_renderer.h"
-#include "halley/resources/resources.h"
-#include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 
 namespace Halley {
@@ -117,6 +115,8 @@ namespace Halley {
 		void update();
 		void loadStrings(Resources& resources);
 		void loadLocalisationFile(const ConfigFile& config);
+
+		void updateStrings(const I18NLanguage& language, HashMap<String, String> strings);
 
 		void setCurrentLanguage(const I18NLanguage& code);
 		void setFallbackLanguage(const I18NLanguage& code);

@@ -32,6 +32,7 @@ namespace Halley {
 		virtual void onReceiveMessage(DevCon::RegisterInterestMsg& msg) {}
 		virtual void onReceiveMessage(DevCon::UpdateInterestMsg& msg) {}
 		virtual void onReceiveMessage(const DevCon::UnregisterInterestMsg& msg) {}
+		virtual void onReceiveMessage(DevCon::UpdateStringsMsg& msg) {}
 
 		virtual void onReceiveMessage(DevCon::RPCMsg& msg);
 		virtual void onReceiveMessage(DevCon::RPCReplyMsg& msg);

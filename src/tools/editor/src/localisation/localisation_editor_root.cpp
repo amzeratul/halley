@@ -9,6 +9,7 @@ LocalisationEditorRoot::LocalisationEditorRoot(ProjectWindow& projectWindow, UIF
 	: UIWidget("localisation_editor_root", {}, UISizer(UISizerType::Vertical))
 	, project(projectWindow.getProject())
 	, factory(factory)
+	, remoteClientUpdater(projectWindow.getProject())
 {
 	setupCountryNames();
 	setupLanguageNames();
@@ -16,6 +17,8 @@ LocalisationEditorRoot::LocalisationEditorRoot(ProjectWindow& projectWindow, UIF
 	editor = std::make_shared<LocalisationEditor>(*this, projectWindow, factory);
 
 	add(editor, 1);
+
+	remoteClientUpdater.setListeningToClient(true);
 }
 
 void LocalisationEditorRoot::drillDown(std::shared_ptr<UIWidget> widget)

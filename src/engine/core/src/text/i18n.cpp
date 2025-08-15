@@ -1,6 +1,7 @@
 #include <utility>
 #include "halley/text/i18n.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/resources/resources.h"
 
 using namespace Halley;
 
@@ -64,6 +65,15 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 			}
 			lang[e.first] = e.second.asString();
 		}
+	}
+	++version;
+}
+
+void I18N::updateStrings(const I18NLanguage& language, HashMap<String, String> newStrings)
+{
+	auto& lang = strings[language];
+	for (auto& [k, v]: newStrings) {
+		lang[k] = std::move(v);
 	}
 	++version;
 }
@@ -224,6 +234,8 @@ void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) cons
 		}
 	}
 }
+
+
 
 LocalisedString::LocalisedString()
 {
