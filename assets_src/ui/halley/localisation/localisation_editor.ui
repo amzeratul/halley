@@ -181,7 +181,7 @@ children:
           class: widget
         children:
           - uuid: f5dab320-5667-4ca2-b837-46080b2fb56d
-            proportion: 1
+            proportion: 0
             sizer:
               columnProportions: []
               gap: 10
@@ -227,29 +227,39 @@ children:
                       id: ""
                       image: halley_ui/ui_list_item.png
                       innerBorder: [4, 4, 4, 4]
-                      size: [200, 0]
+                      size: [200, 28]
                     children:
-                      - uuid: 928dfda7-5afb-4ce3-96ea-97f084dc4255
+                      - uuid: 1dbae88c-4c74-4cfb-be83-7a179bab7aa8
+                        proportion: 1
+                        sizer:
+                          columnProportions: []
+                          gap: 10
                         widget:
-                          class: image
-                          id: mainLanguageFlag
-                          image: flags/h20/gb.png
-                      - uuid: 5b4f0f75-8649-4a86-a163-eff8ffe5d56f
-                        border: [0, 1, 0, 0]
-                        widget:
-                          class: label
-                          id: mainLanguage
-                          text: English
-                          wordWrapped: false
-                        fill: left
-                    fill: [left, fillVertical]
+                          class: widget
+                        children:
+                          - uuid: 928dfda7-5afb-4ce3-96ea-97f084dc4255
+                            widget:
+                              class: image
+                              id: mainLanguageFlag
+                              image: flags/h20/gb.png
+                          - uuid: 5b4f0f75-8649-4a86-a163-eff8ffe5d56f
+                            border: [0, 1, 0, 0]
+                            widget:
+                              class: label
+                              id: mainLanguage
+                              text: English
+                              wordWrapped: false
+                            fill: left
+                        fill: [centreHorizontal, fillVertical]
+                    fill: [fillHorizontal, fillVertical]
                   - uuid: c04b8568-2193-4283-abe1-5b9514486099
+                    proportion: 0
                     widget:
                       class: label
                       id: ""
                       text: "Word Count:"
                       wordWrapped: false
-                    fill: left
+                    fill: [left, centreVertical]
                   - uuid: 6a57d2a7-68ca-474b-bdfa-7a2f32668675
                     border: [0, 0, 0, 0]
                     sizer:
@@ -263,23 +273,26 @@ children:
                       id: ""
                       image: halley_ui/ui_list_item.png
                       innerBorder: [0, 2, 0, 2]
-                      size: [100, 0]
+                      size: [100, 28]
                     children:
                       - uuid: 952b9097-b0bc-4ef8-9271-2e909dc11afb
+                        proportion: 1
+                        border: [5, 0, 5, 0]
                         widget:
                           class: label
                           id: wordCount
                           text: 0
                           wordWrapped: false
-                        fill: [centreHorizontal, centreVertical]
-                    fill: [left, fillVertical]
+                        fill: [right, centreVertical]
+                    fill: [fillHorizontal, fillVertical]
                   - uuid: 48f8aa27-b6c5-42d6-aea2-02483649f9f4
+                    proportion: 0
                     widget:
                       class: label
                       id: ""
                       text: "Key Count:"
                       wordWrapped: false
-                    fill: left
+                    fill: [left, centreVertical]
                   - uuid: a3dae772-fd15-48bb-af42-e49a99992bb9
                     border: [0, 0, 0, 0]
                     sizer:
@@ -293,16 +306,18 @@ children:
                       id: ""
                       image: halley_ui/ui_list_item.png
                       innerBorder: [0, 2, 0, 2]
-                      size: [100, 0]
+                      size: [100, 28]
                     children:
                       - uuid: 612e7b00-39dc-4e82-9674-ef072a6a0c98
+                        proportion: 1
+                        border: [5, 0, 5, 0]
                         widget:
                           class: label
                           id: keyCount
                           text: 0
                           wordWrapped: false
-                        fill: [centreHorizontal, centreVertical]
-                    fill: [left, fillVertical]
+                        fill: [right, centreVertical]
+                    fill: [fillHorizontal, fillVertical]
                 fill: [left, fillVertical]
               - uuid: fbef1e2c-da8c-40f2-9a11-d3e48a8aff42
                 border: [0, -4, 0, 0]
@@ -322,7 +337,7 @@ children:
                       id: ""
                       text: "Current total cost:"
                       wordWrapped: false
-                    fill: left
+                    fill: [left, centreVertical]
                   - uuid: 9835f7f8-fd58-4580-9950-6131dec7d3c6
                     border: [0, 0, 0, 0]
                     sizer:
@@ -336,16 +351,18 @@ children:
                       id: ""
                       image: halley_ui/ui_list_item.png
                       innerBorder: [0, 2, 0, 2]
-                      size: [100, 0]
+                      size: [100, 28]
                     children:
                       - uuid: b4912b64-028e-4fd1-8200-15188b1a610b
+                        proportion: 1
+                        border: [5, 0, 5, 0]
                         widget:
                           class: label
                           id: totalCost
                           text: 0
                           wordWrapped: false
-                        fill: [centreHorizontal, centreVertical]
-                    fill: [left, fillVertical]
+                        fill: [right, centreVertical]
+                    fill: [fillHorizontal, fillVertical]
                 fill: [left, fillVertical]
               - uuid: 05e11bcb-8c98-4bc3-b224-4e77b5c450dc
                 proportion: 1
@@ -356,7 +373,7 @@ children:
                   id: editOriginal
                   size: [200, 0]
                   text: Edit Original...
-                fill: [left, bottom]
+                fill: [centreHorizontal, bottom]
           - uuid: 051fb284-5637-4378-a99e-673fbf445a9c
             proportion: 1
             border: [0, 0, 0, 0]
@@ -368,14 +385,6 @@ children:
               class: widget
               id: byCategoryPanel
             children:
-              - uuid: 704fed0e-cc96-44c0-aa87-3b861a186f3f
-                border: [0, 0, 0, 0]
-                widget:
-                  class: label
-                  id: ""
-                  text: "Breakdown by category:"
-                  wordWrapped: false
-                fill: left
               - uuid: 75945935-94b4-415d-9212-2361002b34ea
                 border: [0, 0, 0, 0]
                 sizer:
@@ -397,7 +406,7 @@ children:
                     widget:
                       class: scrollBarPane
                       clipSize: [0, 0]
-                      size: [0, 250]
+                      size: [0, 320]
                     children:
                       - uuid: 76419a03-4add-40a9-a0b8-a0087ca1c559
                         proportion: 1
@@ -415,6 +424,7 @@ children:
                         fill: [fillHorizontal, top]
                     fill: [left, centreVertical]
                 fill: [left, fillVertical]
+        fill: [centreHorizontal, fillVertical]
   - uuid: 2e6c9059-28bd-4a02-b1aa-c3ac6468b51a
     proportion: 1
     border: [0, 0, 0, 0]
@@ -430,28 +440,39 @@ children:
       image: halley_ui/ui_list_item.png
       innerBorder: [15, 15, 15, 15]
     children:
-      - uuid: 8f5f1b0d-1572-457f-bdce-104afd8cad6d
-        border: [0, 0, 0, 0]
-        widget:
-          class: label
-          id: ""
-          text: "Translations:"
-          wordWrapped: false
-        fill: left
-      - uuid: c92807ed-e99b-47bb-a196-e06aa625c2a6
+      - uuid: 0a525dc6-55c5-47d7-83f8-c64ab3c3ec8d
         proportion: 1
         sizer:
           columnProportions: []
+          gap: 10
+          type: vertical
         widget:
-          class: scrollBarPane
+          class: widget
         children:
-          - uuid: 10f26ce6-756b-4157-af52-61bbde8927eb
-            sizer:
-              columnProportions: [1, 1]
-              columns: 2
-              gap: 4
-              type: vertical
+          - uuid: 8f5f1b0d-1572-457f-bdce-104afd8cad6d
+            border: [0, 0, 0, 0]
             widget:
-              class: widget
-              id: languages
-            children: []
+              class: label
+              id: ""
+              text: "Translations:"
+              wordWrapped: false
+            fill: left
+          - uuid: c92807ed-e99b-47bb-a196-e06aa625c2a6
+            proportion: 1
+            sizer:
+              columnProportions: []
+            widget:
+              autoHide: true
+              class: scrollBarPane
+            children:
+              - uuid: 10f26ce6-756b-4157-af52-61bbde8927eb
+                sizer:
+                  columnProportions: [1, 1]
+                  columns: 2
+                  gap: 4
+                  type: vertical
+                widget:
+                  class: widget
+                  id: languages
+                children: []
+        fill: [centreHorizontal, fillVertical]
