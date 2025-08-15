@@ -357,6 +357,10 @@ uiStyle:
     classes: [label]
     label: { font: Ubuntu Light, size: 14, colour: $ui_text }
 
+  labelLightDisabled:
+    classes: [label]
+    label: { font: Ubuntu Light, size: 14, colour: $ui_disabledText }
+
   labelSmall:
     classes: [label]
     label: { font: Ubuntu Light, size: 12, colour: $ui_text }

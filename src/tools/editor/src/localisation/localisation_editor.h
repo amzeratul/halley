@@ -61,6 +61,18 @@ namespace Halley {
             OutOfDate
         };
 
+        struct CategoryInfo {
+            String id;
+            int words;
+            int keys;
+            int readyWords;
+
+            Vector<CategoryInfo> children;
+
+            bool operator<(const CategoryInfo& other) const;
+            CategoryInfo& operator+=(const CategoryInfo& other);
+        };
+
         bool loaded = false;
         bool gotLocalStrings = false;
         bool gotRemoteStrings = false;
@@ -99,6 +111,7 @@ namespace Halley {
         LocOriginalData* getOriginalDataRemote();
         LocTranslationData* getTranslationData(const I18NLanguage& language);
         LocTranslationData* getTranslationDataRemote(const I18NLanguage& language);
+        Vector<CategoryInfo> generateCategoryInfo(const LocalisationStats& stats) const;
 
         void openOriginalLanguage(bool canEdit);
         void openLanguage(const I18NLanguage& language, bool canEdit);

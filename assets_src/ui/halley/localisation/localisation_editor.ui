@@ -403,8 +403,8 @@ children:
                         proportion: 1
                         border: [0, 0, 4, 0]
                         sizer:
-                          columnProportions: [2, 1, 1, 1, 1]
-                          columns: 5
+                          columnProportions: [2, 1, 1, 1]
+                          columns: 4
                           gap: 3
                           type: grid
                         widget:

@@ -347,36 +347,76 @@ void LocalisationEditor::populateOriginalLanguageData()
 		// Category breakdown
 		auto labelStyle = factory.getStyle("label");
 		auto labelLightStyle = factory.getStyle("labelLight");
+		auto labelLightSubStyle = factory.getStyle("labelLightDisabled");
 		auto byCategory = getWidget("byCategory");
 		byCategory->clear();
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Category")));
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")));
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
-		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("% Ready")));
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")), 0, {}, UISizerFillFlags::Right);
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")), 0, {}, UISizerFillFlags::Right);
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("% Ready")), 0, {}, UISizerFillFlags::Right);
 
-		Vector<std::pair<String, int>> wordsPerCategory;
-		for (const auto& [k, v]: origStats.wordsPerCategory) {
-			wordsPerCategory += std::pair(k, v);
-		}
-		std::sort(wordsPerCategory.begin(), wordsPerCategory.end(), [&] (const auto& a, const auto& b) {
-			return a.second > b.second;
-		});
+		const auto addCategory = [&](const CategoryInfo& info, int level)
+		{
+			auto style = level == 0 ? labelLightStyle : labelLightSubStyle;
+			byCategory->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(info.id)), 0, Vector4f(float(level) * 10.0f, 0, 0, 0));
+			byCategory->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(getNumberWithCommas(info.words))), 0, {}, UISizerFillFlags::Right);
+			byCategory->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(getNumberWithCommas(info.keys))), 0, {}, UISizerFillFlags::Right);
+			byCategory->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(toString(100.0f * static_cast<float>(info.readyWords) / static_cast<float>(info.words), 1) + "%")), 0, {}, UISizerFillFlags::Right);
+		};
 
-		for (const auto& [categoryId, wordsInCategory]: wordsPerCategory) {
-			auto numKeys = origStats.keysPerCategory.at(categoryId);
-			auto readyWordsInCategory = origStats.readyPerCategory.at(categoryId);
-
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(categoryId)));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(wordsInCategory))));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(numKeys))));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(wordsInCategory) / static_cast<float>(numKeys), 1))));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(100.0f * static_cast<float>(readyWordsInCategory) / static_cast<float>(wordsInCategory), 1) + "%")));
+		for (const auto& info: generateCategoryInfo(origStats)) {
+			addCategory(info, 0);
+			for (const auto& info2: info.children) {
+				addCategory(info2, 1);
+			}
 		}
 	}
 
 	bool canEditOriginal = canEditLanguage(originalLanguage.getLanguage());
 	getWidgetAs<UIButton>("editOriginal")->setLabel(LocalisedString::fromHardcodedString(canEditOriginal ? "Edit Original..." : "View Original..."));
+}
+
+Vector<LocalisationEditor::CategoryInfo> LocalisationEditor::generateCategoryInfo(const LocalisationStats& stats) const
+{
+	Vector<CategoryInfo> result;
+
+	auto getOrMakeCategory = [&](const String& id) -> CategoryInfo&
+	{
+		for (auto& c: result) {
+			if (c.id == id) {
+				return c;
+			}
+		}
+		auto& r = result.emplace_back();
+		r.id = id;
+		return r;
+	};
+
+	for (const auto& [categoryId, nWords]: stats.wordsPerCategory) {
+		auto splitCategory = categoryId.split('/');
+		assert(splitCategory.size() >= 1 && splitCategory.size() <= 2);
+
+		CategoryInfo info;
+		info.id = splitCategory.back();
+		info.words = nWords;
+		info.keys = stats.keysPerCategory.at(categoryId);
+		info.readyWords = stats.readyPerCategory.at(categoryId);
+
+		if (splitCategory.size() == 2) {
+			auto& parent = getOrMakeCategory(splitCategory.front());
+			parent += info;
+			parent.children += info;
+		} else {
+			result += info;
+		}
+	}
+
+	std::sort(result.begin(), result.end());
+	for (auto& r: result) {
+		std::sort(r.children.begin(), r.children.end());
+	}
+
+	return result;
 }
 
 void LocalisationEditor::populateTranslationData()
@@ -1017,4 +1057,17 @@ void LocalisationEditor::uploadProjectProperties(HalleyVersion version)
 			Logger::logError("Unable to update project info");
 		}
 	});
+}
+
+bool LocalisationEditor::CategoryInfo::operator<(const CategoryInfo& other) const
+{
+	return words > other.words;
+}
+
+LocalisationEditor::CategoryInfo& LocalisationEditor::CategoryInfo::operator+=(const CategoryInfo& other)
+{
+	words += other.words;
+	keys += other.keys;
+	readyWords += other.readyWords;
+	return *this;
 }
