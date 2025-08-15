@@ -353,6 +353,7 @@ void LocalisationEditor::populateOriginalLanguageData()
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words")));
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Keys")));
 		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("Words/Key")));
+		byCategory->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromHardcodedString("% Ready")));
 
 		Vector<std::pair<String, int>> wordsPerCategory;
 		for (const auto& [k, v]: origStats.wordsPerCategory) {
@@ -362,13 +363,15 @@ void LocalisationEditor::populateOriginalLanguageData()
 			return a.second > b.second;
 		});
 
-		for (const auto& [k, v]: wordsPerCategory) {
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(k)));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(v))));
+		for (const auto& [categoryId, wordsInCategory]: wordsPerCategory) {
+			auto numKeys = origStats.keysPerCategory.at(categoryId);
+			auto readyWordsInCategory = origStats.readyPerCategory.at(categoryId);
 
-			auto keys = origStats.keysPerCategory.at(k);
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(keys))));
-			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(v) / static_cast<float>(keys), 1))));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(categoryId)));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(wordsInCategory))));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(getNumberWithCommas(numKeys))));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(static_cast<float>(wordsInCategory) / static_cast<float>(numKeys), 1))));
+			byCategory->add(std::make_shared<UILabel>("", labelLightStyle, LocalisedString::fromUserString(toString(100.0f * static_cast<float>(readyWordsInCategory) / static_cast<float>(wordsInCategory), 1) + "%")));
 		}
 	}
 

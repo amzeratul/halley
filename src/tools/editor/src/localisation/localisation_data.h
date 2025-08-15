@@ -24,6 +24,7 @@ namespace Halley {
 		int readyKeys = 0;
 		HashMap<String, int> wordsPerCategory;
 		HashMap<String, int> keysPerCategory;
+		HashMap<String, int> readyPerCategory;
 		HashMap<String, int> wordsPerKey;
 
 		LocalisationStats& operator+=(const LocalisationStats& other);

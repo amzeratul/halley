@@ -64,6 +64,7 @@ namespace Halley
 		static void touchFile(const Path& path);
 
 		static bool exists(const Path& path);
+		static void rename(const Path& from, const Path& to);
 		static Bytes readFile(const Path& path);
 		static String readFileString(const Path& path);
 		static Vector<String> readFileLines(const Path& path);

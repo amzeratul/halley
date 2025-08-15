@@ -16,6 +16,9 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 	for (auto& [k, v]: other.wordsPerCategory) {
 		wordsPerCategory[k] += v;
 	}
+	for (auto& [k, v]: other.readyPerCategory) {
+		readyPerCategory[k] += v;
+	}
 	for (auto& [k, v]: other.wordsPerKey) {
 		wordsPerKey[k] = v;
 	}
@@ -69,12 +72,15 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& 
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		const auto wordCount = LocalisationStats::getWordCount(entry.value);
+		const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
+
 		result.wordsPerKey[entry.key] = wordCount;
 		result.totalKeys++;
 		result.keysPerCategory[category]++;
 		result.totalWords += wordCount;
 		result.wordsPerCategory[category] += wordCount;
-		result.readyWords += entry.getReadyState(filterRules) == LocReadyStatus::Ready ? wordCount : 0;
+		result.readyPerCategory[category] += ready ? wordCount : 0;
+		result.readyWords += ready ? wordCount : 0;
 	}
 	return result;
 }
@@ -85,12 +91,15 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.key)) {
 			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->value);
+			const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
+
 			result.wordsPerKey[entry.key] = wordCount;
 			result.totalKeys++;
 			result.keysPerCategory[category]++;
 			result.totalWords += wordCount;
 			result.wordsPerCategory[category] += wordCount;
-			result.readyWords += entry.getReadyState(filterRules) == LocReadyStatus::Ready ? wordCount : 0;
+			result.readyPerCategory[category] += ready ? wordCount : 0;
+			result.readyWords += ready ? wordCount : 0;
 		}
 	}
 	return result;

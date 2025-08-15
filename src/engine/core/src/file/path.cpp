@@ -413,6 +413,28 @@ bool Path::exists(const Path& path)
 #endif
 }
 
+void Path::rename(const Path& from, const Path& to)
+{
+#if !defined(_LIBCPP_HAS_NO_FILESYSTEM_LIBRARY) && !defined(NN_NINTENDO_SDK)
+	std::error_code ec;
+
+	if (!exists(to.parentPath())) {
+		std::filesystem::create_directories(to.parentPath().string(), ec);
+		if (ec) {
+			Logger::logError(ec.message());
+			return;
+		}
+	}
+
+	std::filesystem::rename(from.string(), to.string(), ec);
+	if (ec) {
+		Logger::logError(ec.message());
+	}
+#else
+	return;
+#endif
+}
+
 Bytes Path::readFile(const Path& path)
 {
 	Bytes result;
