@@ -107,6 +107,9 @@ HashMap<String, String> LocalisationRemoteClientUpdater::makeTranslatedStringDel
 	const LocTranslationData* src = localSet && localSet->localised.contains(code) ?
 		&localSet->localised.at(code) :
 		(remoteSet && remoteSet->localised.contains(code) ? &remoteSet->localised.at(code) : nullptr);
+	if (!src) {
+		return {};
+	}
 
 	HashMap<String, String> result;
 
