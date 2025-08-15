@@ -77,7 +77,11 @@ void I18N::updateStrings(const I18NLanguage& language, HashMap<String, String> n
 
 	auto& lang = strings[language];
 	for (auto& [k, v]: newStrings) {
-		lang[k] = std::move(v);
+		if (v.isEmpty()) {
+			lang.erase(k);
+		} else {
+			lang[k] = std::move(v);
+		}
 	}
 	++version;
 }
