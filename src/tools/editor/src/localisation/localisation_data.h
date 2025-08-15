@@ -76,6 +76,7 @@ namespace Halley {
 		virtual ~ILocOriginalData() = default;
 
 		virtual size_t getNumEntries() const = 0;
+		virtual const String& getGroupNameEntry(size_t idx) const = 0;
 		virtual const LocalisationDataEntry& getEntry(size_t idx) const = 0;
 	};
 
@@ -92,6 +93,7 @@ namespace Halley {
 		LocalisationStats getStats(const LocTranslationData& translated, const LocalisationFilterRules& filterRules) const;
 
 		size_t getNumEntries() const override;
+		const String& getGroupNameEntry(size_t idx) const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
 		LocalisationDataEntry& getEntry(size_t idx);
 
@@ -131,6 +133,7 @@ namespace Halley {
 		bool hasKey(const String& key) const;
 
 		size_t getNumEntries() const override;
+		const String& getGroupNameEntry(size_t idx) const override;
 		const LocalisationDataEntry& getEntry(size_t idx) const override;
 		LocalisationDataEntry& getEntry(size_t idx);
 		LocalisationDataEntry* tryGetEntry(const String& key);

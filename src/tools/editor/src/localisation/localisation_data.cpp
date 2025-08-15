@@ -110,6 +110,11 @@ size_t LocOriginalDataChunk::getNumEntries() const
 	return entries.size();
 }
 
+const String& LocOriginalDataChunk::getGroupNameEntry(size_t idx) const
+{
+	return name;
+}
+
 const LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx) const
 {
 	return entries[idx];
@@ -221,6 +226,12 @@ bool LocOriginalData::hasKey(const String& key) const
 size_t LocOriginalData::getNumEntries() const
 {
 	return keyIndices.size();
+}
+
+const String& LocOriginalData::getGroupNameEntry(size_t idx) const
+{
+	const auto index = keyIndices[idx];
+	return chunks[index.first].name;
 }
 
 const LocalisationDataEntry& LocOriginalData::getEntry(size_t idx) const

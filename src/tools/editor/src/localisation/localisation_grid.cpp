@@ -34,14 +34,17 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 
 	const float width = getSize().x - 1;
 	const float numWidth = 50;
+	const float fileWidth = 150;
 	const float keyWidth = 250;
 	const float priorityWidth = 30;
 	const float readyWidth = 30;
 	const float commentWidth = 30;
 	const float contextWidth = 30;
-	const float fixedWidth = numWidth + keyWidth + (showProperties ? readyWidth + priorityWidth + commentWidth + contextWidth : 0);
+	const float fixedWidth = numWidth + fileWidth + keyWidth + (showProperties ? readyWidth + priorityWidth + commentWidth + contextWidth : 0);
 	columns.push_back(numWidth);
 	columnNames.push_back("#");
+	columns.push_back(fileWidth);
+	columnNames.push_back("Group");
 	columns.push_back(keyWidth);
 	columnNames.push_back("Key");
 
@@ -50,6 +53,7 @@ std::pair<Vector<float>, Vector<String>> LocalisationGrid::getColumns() const
 		columns.push_back(dynamicWidth);
 		columnNames.push_back("Original");
 	}
+
 	if (translatedData) {
 		columns.push_back(dynamicWidth);
 		columnNames.push_back("Translated");
@@ -73,22 +77,26 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 {
 	if (origData) {
 		const auto& entry = origData->getEntry(idx);
+		const auto& groupName = origData->getGroupNameEntry(idx);
+		const size_t groupSlashPos = groupName.find_last_of('/');
+		const auto shortGroupName = groupSlashPos == std::string::npos ? groupName : groupName.mid(groupSlashPos + 1);
 
 		size_t numIcons = (showProperties ? 4 : 0);
-		size_t len = 3 + (translatedData ? 1 : 0) + numIcons;
+		size_t len = 4 + (translatedData ? 1 : 0) + numIcons;
 		size_t firstIcon = len - numIcons;
 		strs.resize(len);
 		colours.resize(len, textCol);
 		sprites.resize(len);
 
 		strs[0] = toString(idx + 1);
-		strs[1] = entry.key;
-		strs[2] = entry.value;
+		strs[1] = shortGroupName;
+		strs[2] = entry.key;
+		strs[3] = entry.value;
 
 		if (translatedData) {
 			if (auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
-				strs[3] = translatedEntry->value;
-				colours[3] = entry.version == translatedEntry->origVersion ? textCol : outdatedCol;
+				strs[4] = translatedEntry->value;
+				colours[4] = entry.version == translatedEntry->origVersion ? textCol : outdatedCol;
 			}
 		}
 
@@ -195,7 +203,9 @@ LocalisedString LocalisationGrid::getToolTip() const
 	if (columnUnderMouse && lineUnderMouse) {
 		const auto& entry = origData->getEntry(*lineUnderMouse);
 		const auto colName = columnNames[*columnUnderMouse];
-		if (colName == "Key") {
+		if (colName == "Group") {
+			return LocalisedString::fromUserString(origData->getGroupNameEntry(*lineUnderMouse));
+		} else if (colName == "Key") {
 			String tooltip = entry.key;
 
 			if (translatedData) {
