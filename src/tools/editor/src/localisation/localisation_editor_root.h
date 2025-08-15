@@ -18,6 +18,8 @@ namespace Halley {
         LocalisedString getLanguageName(const I18NLanguage& language, bool includeCountry = true) const;
         Sprite getFlag(const I18NLanguage& language) const;
 
+		LocalisationRemoteClientUpdater& getRemoteClientUpdater();
+
     private:
         Project& project;
         UIFactory& factory;

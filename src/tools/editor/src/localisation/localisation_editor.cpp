@@ -155,6 +155,7 @@ void LocalisationEditor::onEditorRootUpdate(Time t)
 
 	if (localStringsFuture.isReady()) {
 		localStrings = localStringsFuture.get();
+		root.getRemoteClientUpdater().setLocalStrings(&*localStrings);
 		localStringsFuture = {};
 		gotLocalStrings = true;
 		if (gotRemoteStrings) {
@@ -318,6 +319,7 @@ void LocalisationEditor::populateData()
 	if ((localStrings && localStrings->originalLanguage) || remoteStrings) {
 		populateOriginalLanguageData();
 		populateTranslationData();
+		root.getRemoteClientUpdater().onStringsUpdated();
 	}
 }
 
@@ -681,6 +683,7 @@ void LocalisationEditor::onRemoteStringsReceived(LocStringSet result)
 		}
 	} else {
 		remoteStrings = std::move(result);
+		root.getRemoteClientUpdater().setRemoteStrings(&*remoteStrings);
 		gotRemoteStrings = true;
 		pendingRemoteStrings = true;
 	}
@@ -753,6 +756,7 @@ void LocalisationEditor::signOut()
 	highestVersions = {};
 	gotRemoteStrings = false;
 	firstUpdate = true;
+	root.getRemoteClientUpdater().setRemoteStrings(nullptr);
 }
 
 void LocalisationEditor::onConnected(LocalisationClient::LoginResult result)

@@ -71,6 +71,10 @@ void I18N::loadLocalisation(const ConfigNode& root, const String& assetId, bool 
 
 void I18N::updateStrings(const I18NLanguage& language, HashMap<String, String> newStrings)
 {
+	if (newStrings.empty()) {
+		return;
+	}
+
 	auto& lang = strings[language];
 	for (auto& [k, v]: newStrings) {
 		lang[k] = std::move(v);

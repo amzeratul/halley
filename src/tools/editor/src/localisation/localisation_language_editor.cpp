@@ -236,6 +236,7 @@ void LocalisationLanguageEditor::setSrcValue(const String& value)
 		srcLanguage.setValue(curEditingKey, value);
 	}
 	grid->refreshContents();
+	root.getRemoteClientUpdater().onStringUpdated(curEditingKey);
 }
 
 void LocalisationLanguageEditor::setDstValue(const String& value)
@@ -248,6 +249,7 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 		}
 	}
 	grid->refreshContents();
+	root.getRemoteClientUpdater().onStringUpdated(curEditingKey);
 }
 
 void LocalisationLanguageEditor::setComment(const String& comment)

@@ -49,6 +49,7 @@ namespace Halley
 		DevConServer& getParent();
 	
 		void reloadAssets(Vector<String> assetIds, Vector<String> packIds);
+		void sendI18NStrings(const I18NLanguage& language, HashMap<String, String> strings);
 
 		Vector<DevCon::LogMsg> movePendingLogs();
 
@@ -89,6 +90,7 @@ namespace Halley
 		const ConfigNode& getInterestParams(InterestHandle handle) const;
 
 		gsl::span<std::shared_ptr<DevConServerConnection>> getConnections();
+		DevConServerConnection* tryGetConnection(size_t connId);
 
 		void setProject(IProject* project);
 

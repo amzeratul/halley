@@ -28,6 +28,13 @@ void DevConServerConnection::reloadAssets(Vector<String> assetIds, Vector<String
 	queue->enqueue(std::make_unique<DevCon::ReloadAssetsMsg>(std::move(assetIds), std::move(packIds)), 0);
 }
 
+void DevConServerConnection::sendI18NStrings(const I18NLanguage& language, HashMap<String, String> strings)
+{
+	if (!strings.empty()) {
+		queue->enqueue(std::make_unique<DevCon::UpdateStringsMsg>(language, std::move(strings)), 0);
+	}
+}
+
 void DevConServerConnection::registerInterest(const String& id, const ConfigNode& params, uint32_t handle)
 {
 	queue->enqueue(std::make_unique<DevCon::RegisterInterestMsg>(id, ConfigNode(params), handle), 0);
@@ -154,6 +161,16 @@ const ConfigNode& DevConServer::getInterestParams(InterestHandle handle) const
 gsl::span<std::shared_ptr<DevConServerConnection>> DevConServer::getConnections()
 {
 	return connections.span();
+}
+
+DevConServerConnection* DevConServer::tryGetConnection(size_t connId)
+{
+	for (auto& c: connections) {
+		if (c->getId() == connId) {
+			return c.get();
+		}
+	}
+	return nullptr;
 }
 
 void DevConServer::setProject(IProject* project)

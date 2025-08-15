@@ -137,3 +137,8 @@ Sprite LocalisationEditorRoot::getFlag(const I18NLanguage& language) const
 		return {};
 	}
 }
+
+LocalisationRemoteClientUpdater& LocalisationEditorRoot::getRemoteClientUpdater()
+{
+	return remoteClientUpdater;
+}
