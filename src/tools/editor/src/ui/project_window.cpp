@@ -157,7 +157,7 @@ void ProjectWindow::makeToolbar()
 	list->setItemActive("ecs", devEnvironment);
 	list->setItemActive("plot", devEnvironment);
 	if (!devEnvironment) {
-		list->setSelectedOptionId("remotes");
+		list->setSelectedOptionId("localisation");
 	}
 	
 	uiTop->add(toolbar, 1, Vector4f(0, 8, 0, 0));
