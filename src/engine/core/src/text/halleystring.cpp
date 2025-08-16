@@ -91,6 +91,15 @@ String::String(const wchar_t* utf16)
 	}
 }
 
+String::String(std::wstring_view utf16)
+{
+	size_t len = getUTF8Len(utf16);
+	str.resize(len);
+	if (len > 0) {
+		UTF16toUTF8(utf16.data(), getCharPointer(0));
+	}
+}
+
 String::String(const StringUTF32& utf32)
 {
 	size_t len = getUTF8Len(utf32);
@@ -659,14 +668,37 @@ size_t String::getUTF8Len(const wchar_t *utf16)
 {
 	size_t len = 0;
 	wchar_t curChar = utf16[0];
-	for (size_t i=0; curChar; curChar = utf16[++i]) {
-		if ((curChar & 0xFF80) == 0) len++;
-		else if ((curChar & 0xFC00) == 0xD800) {
+	for (size_t i = 0; curChar; curChar = utf16[++i]) {
+		if ((curChar & 0xFF80) == 0) {
+			len++;
+		} else if ((curChar & 0xFC00) == 0xD800) {
 			len += 4;
 			i++;
+		} else if (curChar & 0xF800) {
+			len += 3;
+		} else if (curChar & 0xFF80) {
+			len += 2;
 		}
-		else if (curChar & 0xF800) len += 3;
-		else if (curChar & 0xFF80) len += 2;
+	}
+
+	return len;
+}
+
+size_t String::getUTF8Len(std::wstring_view utf16)
+{
+	size_t len = 0;
+	wchar_t curChar = utf16[0];
+	for (size_t i = 0; curChar && i < utf16.length(); curChar = utf16[++i]) {
+		if ((curChar & 0xFF80) == 0) {
+			len++;
+		} else if ((curChar & 0xFC00) == 0xD800) {
+			len += 4;
+			i++;
+		} else if (curChar & 0xF800) {
+			len += 3;
+		} else if (curChar & 0xFF80) {
+			len += 2;
+		}
 	}
 
 	return len;

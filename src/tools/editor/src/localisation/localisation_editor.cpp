@@ -986,7 +986,7 @@ void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, co
 void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, const Bytes& data)
 {
 	CSVFile csv;
-	csv.load(std::string_view(reinterpret_cast<const char*>(data.data()), data.size()));
+	csv.load(data.const_byte_span());
 
 	const auto langId = language.getISOCode();
 	auto& translation = localStrings->localised[langId];
@@ -1017,7 +1017,7 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 		}
 	}
 
-	Logger::logInfo("Imported " + toString(n) + " keys to " + langId);
+	Logger::logInfo("Imported " + toString(n) + " keys (out of " + toString(nRows) + " in file) to " + langId);
 }
 
 void LocalisationEditor::manageUsers()

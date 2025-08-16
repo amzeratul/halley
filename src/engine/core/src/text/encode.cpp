@@ -23,6 +23,7 @@
 #include "halley/text/encode.h"
 #include "halley/support/assert.h"
 #include "halley/support/exception.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -322,4 +323,44 @@ String Encode::encodeURL(std::string_view in)
 	}
 
 	return result;
+}
+
+String Encode::readBytesAsUTF8String(gsl::span<const gsl::byte> bytes)
+{
+	String buffer;
+	std::string result;
+	auto utf8Src = std::string_view(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+
+	if (bytes.size() >= 3 && bytes[0] == std::byte{ 0xEF } && bytes[1] == std::byte{ 0xBB } && bytes[2] == std::byte{ 0xBF }) {
+		// UTF-8 BOM
+		utf8Src = utf8Src.substr(3);
+	} else if (bytes.size() >= 2 && bytes[0] == std::byte{ 0xFF } && bytes[1] == std::byte{ 0xFE }) {
+		// UTF-16 LE BOM
+		const auto wStrView = std::wstring_view(reinterpret_cast<const wchar_t*>(bytes.data()), bytes.size() / 2);
+		buffer = String(wStrView);
+		utf8Src = buffer;
+	} else if (bytes.size() >= 2 && bytes[0] == std::byte{ 0xFE } && bytes[1] == std::byte{ 0xFF }) {
+		// UTF-16 BE BOM
+		throw Exception("UTF-16 Big Endian is not supported", HalleyExceptions::Utils);
+	}
+
+	size_t len = utf8Src.size();
+	size_t outLen = 0;
+	result.reserve(len);
+	for (size_t i = 0; i < len; ++i) {
+		const char cur = utf8Src[i];
+		const char next = i < len - 1 ? utf8Src[i + 1] : 0;
+		if (cur == '\r' && next == '\n') {
+			continue;
+		} else if (cur == '\r') {
+			result += '\n';
+			++outLen;
+		} else {
+			result += cur;
+			++outLen;
+		}
+	}
+	result.resize(outLen);
+
+	return String(std::move(result));
 }

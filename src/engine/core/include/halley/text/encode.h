@@ -47,5 +47,8 @@ namespace Halley {
 		Vector<char> decodeRLE(const Vector<char>& in);
 
 		String encodeURL(std::string_view in);
+
+		// Strips BOM and converts UTF-16 to UTF-8, and normalises line endings to \n
+		String readBytesAsUTF8String(gsl::span<const gsl::byte> bytes);
 	}
 }

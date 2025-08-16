@@ -1,5 +1,6 @@
 #include "halley/file_formats/csv_file.h"
 
+#include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
 #include "halley/utils/utils.h"
 
@@ -100,6 +101,11 @@ void CSVFile::clear()
 	columns.clear();
 	data.clear();
 	data.shrink_to_fit();
+}
+
+void CSVFile::load(gsl::span<const gsl::byte> bytes)
+{
+	load(Encode::readBytesAsUTF8String(bytes));
 }
 
 void CSVFile::load(std::string_view origStr)
