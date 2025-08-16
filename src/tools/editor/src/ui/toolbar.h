@@ -11,8 +11,8 @@ namespace Halley {
 	enum class EditorTabs {
 		Assets,
 		ECS,
-		Remotes,
 		Localisation,
+		Remotes,
 		Properties,
 		Settings,
 		Terminal,
@@ -25,8 +25,8 @@ namespace Halley {
 			return{{
 				"assets",
 				"ecs",
-				"remotes",
 				"localisation",
+				"remotes",
 				"properties",
 				"settings",
 				"terminal",

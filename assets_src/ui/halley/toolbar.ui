@@ -24,12 +24,12 @@ children:
         - id: ecs
           image: ui/toolbar_ecs.png
           tooltip: Entity-Component-System
-        - id: remotes
-          image: ui/toolbar_remote.png
-          tooltip: Remote connections
         - id: localisation
           image: ui/toolbar_localisation.png
           tooltip: Localisation
+        - id: remotes
+          image: ui/toolbar_remote.png
+          tooltip: Remote connections
         - id: properties
           image: ui/toolbar_properties.png
           tooltip: Project Properties

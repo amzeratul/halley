@@ -189,8 +189,8 @@ void ProjectWindow::makePagedPane()
 		addPage(static_cast<int>(EditorTabs::Assets), assetEditorWindow);
 		addPage(static_cast<int>(EditorTabs::ECS), ecs);
 	}
-	addPage(static_cast<int>(EditorTabs::Remotes), remotes);
 	addPage(static_cast<int>(EditorTabs::Localisation), localisation);
+	addPage(static_cast<int>(EditorTabs::Remotes), remotes);
 	addPage(static_cast<int>(EditorTabs::Properties), properties);
 	addPage(static_cast<int>(EditorTabs::Settings), settings);
 	addPage(static_cast<int>(EditorTabs::Terminal), consoleWindow);
