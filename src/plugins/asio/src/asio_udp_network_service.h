@@ -45,7 +45,7 @@ namespace Halley
 		asio::ip::udp::socket socket;
 		HashMap<short, std::shared_ptr<AsioUDPConnection>> activeConnections;
 
-		void receivePacket(UDPEndpoint& endpoint, gsl::span<gsl::byte> data, std::string* error);
+		void receivePacket(UDPEndpoint& endpoint, gsl::span<std::byte> data, std::string* error);
 
         [[nodiscard]] bool hasConnectionWithId(short connId) const override;
 

@@ -31,7 +31,7 @@ DX11Buffer::~DX11Buffer()
 	clear();
 }
 
-void DX11Buffer::setData(gsl::span<const gsl::byte> data)
+void DX11Buffer::setData(gsl::span<const std::byte> data)
 {
 	Expects(data.size_bytes() > 0);
 

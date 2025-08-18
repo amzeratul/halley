@@ -9,7 +9,7 @@ uint64_t Hash::hash(const Bytes& bytes)
 	return hash(gsl::as_bytes(gsl::span<const Byte>(bytes)));
 }
 
-uint64_t Hash::hash(gsl::span<const gsl::byte> bytes)
+uint64_t Hash::hash(gsl::span<const std::byte> bytes)
 {
 	return XXH64(bytes.data(), size_t(bytes.size_bytes()), 0);
 }
@@ -33,7 +33,7 @@ Hash::Hasher::~Hasher()
 	XXH64_freeState(data);
 }
 
-void Hash::Hasher::feedBytes(gsl::span<const gsl::byte> bytes)
+void Hash::Hasher::feedBytes(gsl::span<const std::byte> bytes)
 {
 	if (!ready) {
 		XXH64_reset(data, 0);

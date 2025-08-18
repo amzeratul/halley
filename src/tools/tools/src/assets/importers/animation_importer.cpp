@@ -14,7 +14,7 @@ void AnimationImporter::import(const ImportingAsset& asset, IAssetCollector& col
 	collector.output(animation.getName(), AssetType::Animation, Serializer::toBytes(animation));
 }
 
-void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl::byte> data)
+void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const std::byte> data)
 {
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
 	YAML::Node root = YAML::Load(strData.cppStr());

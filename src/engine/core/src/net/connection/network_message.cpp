@@ -18,7 +18,7 @@ uint16_t NetworkMessageFactories::getMessageType(NetworkMessage& msg) const
 	return idxIter->second;
 }
 
-std::unique_ptr<NetworkMessage> NetworkMessageFactories::deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq)
+std::unique_ptr<NetworkMessage> NetworkMessageFactories::deserializeMessage(gsl::span<const std::byte> data, uint16_t msgType, uint16_t seq)
 {
 	auto msg = factories.at(msgType)->create(data);
 	msg->setSeq(seq);

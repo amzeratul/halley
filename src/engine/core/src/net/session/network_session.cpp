@@ -275,7 +275,7 @@ ConnectionStatus NetworkSession::getStatus() const
 	}
 }
 
-OutboundNetworkPacket NetworkSession::makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header)
+OutboundNetworkPacket NetworkSession::makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header)
 {
 	auto packet = OutboundNetworkPacket(data);
 	packet.addHeader(header);
@@ -411,7 +411,7 @@ void NetworkSession::closeConnection(PeerId peerId, const String& reason)
 	}
 }
 
-void NetworkSession::retransmitControlMessage(PeerId peerId, gsl::span<const gsl::byte> bytes)
+void NetworkSession::retransmitControlMessage(PeerId peerId, gsl::span<const std::byte> bytes)
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::Control;

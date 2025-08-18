@@ -70,7 +70,7 @@ namespace Halley {
 	class Serializer : public ByteSerializationBase {
 	public:
 		Serializer(SerializerOptions options);
-		explicit Serializer(gsl::span<gsl::byte> dst, SerializerOptions options);
+		explicit Serializer(gsl::span<std::byte> dst, SerializerOptions options);
 
 		template <typename T, typename std::enable_if<std::is_convertible<T, std::function<void(Serializer&)>>::value, int>::type = 0>
 		static Bytes toBytes(const T& f, SerializerOptions options = {})
@@ -124,8 +124,8 @@ namespace Halley {
 		Serializer& operator<<(const String& str);
 		Serializer& operator<<(const StringUTF32& str);
 		Serializer& operator<<(const Path& path);
-		Serializer& operator<<(gsl::span<const gsl::byte> span);
-		Serializer& operator<<(gsl::span<gsl::byte> span);
+		Serializer& operator<<(gsl::span<const std::byte> span);
+		Serializer& operator<<(gsl::span<std::byte> span);
 		Serializer& operator<<(const Bytes& bytes);
 
 		template <typename T>
@@ -308,7 +308,7 @@ namespace Halley {
 
 	private:
 		size_t size = 0;
-		gsl::span<gsl::byte> dst;
+		gsl::span<std::byte> dst;
 		bool dryRun;
 
 		template <typename T>
@@ -341,7 +341,7 @@ namespace Halley {
 
 	class Deserializer : public ByteSerializationBase {
 	public:
-		Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options = {});
+		Deserializer(gsl::span<const std::byte> src, SerializerOptions options = {});
 		Deserializer(const Bytes& src, SerializerOptions options = {});
 		
 		template <typename T>
@@ -354,7 +354,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		static T fromBytes(gsl::span<const gsl::byte> src, SerializerOptions options = {})
+		static T fromBytes(gsl::span<const std::byte> src, SerializerOptions options = {})
 		{
 			T result;
 			Deserializer s(src, std::move(options));
@@ -370,7 +370,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		static void fromBytes(T& target, gsl::span<const gsl::byte> src, SerializerOptions options = {})
+		static void fromBytes(T& target, gsl::span<const std::byte> src, SerializerOptions options = {})
 		{
 			Deserializer s(src, std::move(options));
 			s >> target;
@@ -392,7 +392,7 @@ namespace Halley {
 		Deserializer& operator>>(String& str);
 		Deserializer& operator>>(StringUTF32& str);
 		Deserializer& operator>>(Path& p);
-		Deserializer& operator>>(gsl::span<gsl::byte> span);
+		Deserializer& operator>>(gsl::span<std::byte> span);
 		Deserializer& operator>>(Bytes& bytes);
 
 		template <typename T>
@@ -628,7 +628,7 @@ namespace Halley {
 
 	private:
 		size_t pos = 0;
-		gsl::span<const gsl::byte> src;
+		gsl::span<const std::byte> src;
 
 		template <typename T>
 		Deserializer& deserializePod(T& val)

@@ -464,7 +464,7 @@ bool Project::isAssetSaveNotificationEnabled() const
 	return assetNotifyImportEnabled;
 }
 
-bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
+bool Project::writeAssetToDisk(const Path& path, gsl::span<const std::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;
 	auto oldData = fileSystemCache->readFile(filePath);

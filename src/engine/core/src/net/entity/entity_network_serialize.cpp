@@ -9,13 +9,13 @@ static constexpr uint16_t SERIALIZE_CHECK_PARITY = 0xbaad;
 
 static void injectMagic(Serializer& serializer, uint16_t n)
 {
-    serializer << gsl::span(reinterpret_cast<gsl::byte *>(&n), sizeof(n));
+    serializer << gsl::span(reinterpret_cast<std::byte *>(&n), sizeof(n));
 }
 
 static void checkMagic(Deserializer& deserializer, uint16_t n)
 {
     uint16_t m;
-    deserializer >> gsl::span(reinterpret_cast<gsl::byte *>(&m), sizeof(m));
+    deserializer >> gsl::span(reinterpret_cast<std::byte *>(&m), sizeof(m));
 
     if (m != n) {
         throw Exception("Network stream error", HalleyExceptions::Network);

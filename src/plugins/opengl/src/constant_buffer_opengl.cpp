@@ -17,7 +17,7 @@ ConstantBufferOpenGL::~ConstantBufferOpenGL()
 	
 }
 
-void ConstantBufferOpenGL::update(gsl::span<const gsl::byte> data)
+void ConstantBufferOpenGL::update(gsl::span<const std::byte> data)
 {
 	buffer.setData(data);
 }

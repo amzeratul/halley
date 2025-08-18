@@ -12,7 +12,7 @@ std::unique_ptr<ResourceDataReader> SDLRWOps::fromPath(const String& path, int64
 	return std::make_unique<SDLRWOps>(fp, start, end, true);
 }
 
-std::unique_ptr<ResourceDataReader> SDLRWOps::fromMemory(gsl::span<const gsl::byte> span)
+std::unique_ptr<ResourceDataReader> SDLRWOps::fromMemory(gsl::span<const std::byte> span)
 {
 	auto fp = SDL_RWFromConstMem(span.data(), int(span.size()));
 	if (!fp) {
@@ -52,7 +52,7 @@ size_t SDLRWOps::size() const
 	return size_t(end - start);
 }
 
-int SDLRWOps::read(gsl::span<gsl::byte> dst)
+int SDLRWOps::read(gsl::span<std::byte> dst)
 {
 	if (!fp) return -1;
 

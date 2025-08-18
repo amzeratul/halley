@@ -25,7 +25,7 @@ Bytes Compression::compress(const Bytes& bytes, int level)
 	return compress(gsl::as_bytes(gsl::span<const Byte>(bytes)), level);
 }
 
-Bytes Compression::compress(gsl::span<const gsl::byte> bytes, int level)
+Bytes Compression::compress(gsl::span<const std::byte> bytes, int level)
 {
 	return compressRaw(bytes, true, level);
 }
@@ -35,7 +35,7 @@ Bytes Compression::decompress(const Bytes& bytes, size_t maxSize)
 	return decompress(gsl::as_bytes(gsl::span<const Byte>(bytes)), maxSize);
 }
 
-Bytes Compression::decompress(gsl::span<const gsl::byte> bytes, size_t maxSize)
+Bytes Compression::decompress(gsl::span<const std::byte> bytes, size_t maxSize)
 {
 	Expects (sizeof(uint64_t) == 8);
 	Expects (bytes.size_bytes() >= 8);
@@ -50,7 +50,7 @@ static void deleter(const char* data)
 	delete[] data;
 }
 
-std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const gsl::byte> bytes, size_t& size, size_t maxSize)
+std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const std::byte> bytes, size_t& size, size_t maxSize)
 {
 	auto out = decompress(bytes, maxSize);
 	
@@ -61,7 +61,7 @@ std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const g
 	return result;
 }
 
-Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength, int level)
+Bytes Compression::compressRaw(gsl::span<const std::byte> bytes, bool insertLength, int level)
 {
 	const uint64_t inSize = bytes.size_bytes();
 	const size_t headerSize = insertLength ? 8 : 0;
@@ -73,7 +73,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 	return result;
 }
 
-gsl::span<gsl::byte> Compression::compressRaw(gsl::span<const gsl::byte> inBytes, gsl::span<gsl::byte> outBytes, bool insertLength, int level)
+gsl::span<std::byte> Compression::compressRaw(gsl::span<const std::byte> inBytes, gsl::span<std::byte> outBytes, bool insertLength, int level)
 {
 	Expects (sizeof(uint64_t) == 8);
 
@@ -95,9 +95,9 @@ gsl::span<gsl::byte> Compression::compressRaw(gsl::span<const gsl::byte> inBytes
 	}
 
 	stream.avail_in = uInt(inBytes.size_bytes());
-	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(inBytes.data()));
+	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<std::byte*>(inBytes.data()));
 	stream.avail_out = uInt(outBytes.size() - headerSize);
-	stream.next_out = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(outBytes.data())) + headerSize;
+	stream.next_out = reinterpret_cast<unsigned char*>(const_cast<std::byte*>(outBytes.data())) + headerSize;
 
 	do {
 		res = deflate(&stream, Z_FINISH);
@@ -113,7 +113,7 @@ gsl::span<gsl::byte> Compression::compressRaw(gsl::span<const gsl::byte> inBytes
 	return outBytes.subspan(0, headerSize + outSize);
 }
 
-Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, bool headerLess, size_t maxSize, size_t expectedSize)
+Bytes Compression::decompressRaw(gsl::span<const std::byte> bytes, bool headerLess, size_t maxSize, size_t expectedSize)
 {
 	if (expectedSize > uint64_t(maxSize)) {
 		throw Exception("File is too big to inflate: " + String::prettySize(expectedSize), HalleyExceptions::Compression);
@@ -130,7 +130,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, bool headerLe
 		throw Exception("Unable to initialise zlib", HalleyExceptions::Compression);
 	}
 	stream.avail_in = uInt(bytes.size_bytes());
-	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(bytes.data()));
+	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<std::byte*>(bytes.data()));
 
 	if (expectedSize > 0) {
 		Bytes result(expectedSize);
@@ -181,7 +181,7 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, bool headerLe
 	}
 }
 
-Bytes Compression::lz4Compress(gsl::span<const gsl::byte> src, LZ4Options options)
+Bytes Compression::lz4Compress(gsl::span<const std::byte> src, LZ4Options options)
 {
 	const auto size = LZ4_compressBound(static_cast<int>(src.size()));
 	Bytes result;
@@ -196,7 +196,7 @@ struct LZ4FileHeader {
 	uint32_t size = 0;
 };
 
-Bytes Compression::lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<const gsl::byte> header, LZ4Options options)
+Bytes Compression::lz4CompressFile(gsl::span<const std::byte> src, gsl::span<const std::byte> header, LZ4Options options)
 {
 	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
@@ -218,7 +218,7 @@ Bytes Compression::lz4CompressFile(gsl::span<const gsl::byte> src, gsl::span<con
 	return result;
 }
 
-Bytes Compression::lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header)
+Bytes Compression::lz4DecompressFile(gsl::span<const std::byte> src, gsl::span<std::byte> header)
 {
 	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
@@ -244,7 +244,7 @@ Bytes Compression::lz4DecompressFile(gsl::span<const gsl::byte> src, gsl::span<g
 	return output;
 }
 
-std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> header, size_t& outSize)
+std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<const std::byte> src, gsl::span<std::byte> header, size_t& outSize)
 {
 	constexpr size_t lz4HeaderSize = sizeof(LZ4FileHeader);
 	const size_t totalHeaderSize = lz4HeaderSize + header.size_bytes();
@@ -271,7 +271,7 @@ std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<
 	return output;
 }
 
-size_t Compression::lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst, LZ4Options options)
+size_t Compression::lz4Compress(gsl::span<const std::byte> src, gsl::span<std::byte> dst, LZ4Options options)
 {
 	if (options.mode == LZ4Mode::Normal) {
 		return LZ4_compress_default(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
@@ -290,7 +290,7 @@ size_t Compression::lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst, 
 	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst), options);
 }
 
-std::optional<size_t> Compression::lz4Decompress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst)
+std::optional<size_t> Compression::lz4Decompress(gsl::span<const std::byte> src, gsl::span<std::byte> dst)
 {
 	const auto result = LZ4_decompress_safe(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
 	if (result >= 0) {

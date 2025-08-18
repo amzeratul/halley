@@ -37,12 +37,12 @@ namespace Halley
 
         void onConnect(short connId) override;
 
-        void sendUnreliablePacket(gsl::span<const gsl::byte> packet) override;
+        void sendUnreliablePacket(gsl::span<const std::byte> packet) override;
         void setUnreliablePacketListener(IPacketListener* listener) override;
 
         static void receiveAll(
                 UDPSocket &socket, HashMap<short, std::shared_ptr<AsioUDPConnection>>& connections,
-                const std::function<void(UDPEndpoint& remote, gsl::span<gsl::byte> packet)>& unknownConnCallback);
+                const std::function<void(UDPEndpoint& remote, gsl::span<std::byte> packet)>& unknownConnCallback);
 
 	private:
 		UDPSocket& socket;

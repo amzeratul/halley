@@ -12,7 +12,7 @@ size_t Cryptography::getDigestSize(HashAlgorithm algorithm)
 	return 0;
 }
 
-Bytes Cryptography::hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> bytes)
+Bytes Cryptography::hash(HashAlgorithm algorithm, gsl::span<const std::byte> bytes)
 {
 	Bytes result;
 	result.resize(getDigestSize(algorithm));
@@ -27,14 +27,14 @@ Bytes Cryptography::hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> byt
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 
-void Cryptography::hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> bytes, gsl::span<gsl::byte> digest)
+void Cryptography::hash(HashAlgorithm algorithm, gsl::span<const std::byte> bytes, gsl::span<std::byte> digest)
 {
 	if (algorithm == HashAlgorithm::SHA256) {
 		SHA256(reinterpret_cast<const uint8_t*>(bytes.data()), bytes.size(), reinterpret_cast<uint8_t*>(digest.data()));
 	}
 }
 
-bool Cryptography::verifySignature(HashAlgorithm algorithm, gsl::span<const gsl::byte> publicKey, gsl::span<const gsl::byte> signature, gsl::span<const gsl::byte> bytes)
+bool Cryptography::verifySignature(HashAlgorithm algorithm, gsl::span<const std::byte> publicKey, gsl::span<const std::byte> signature, gsl::span<const std::byte> bytes)
 {
     auto bio = std::unique_ptr<BIO, decltype(&BIO_free)>(BIO_new_mem_buf(publicKey.data(), -1), &BIO_free);
     if (!bio) {
@@ -67,12 +67,12 @@ bool Cryptography::verifySignature(HashAlgorithm algorithm, gsl::span<const gsl:
 
 #else 
 
-void Cryptography::hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> bytes, gsl::span<gsl::byte> digest)
+void Cryptography::hash(HashAlgorithm algorithm, gsl::span<const std::byte> bytes, gsl::span<std::byte> digest)
 {
 	throw Exception("SSL not supported in this build, cryptography functions are unavailable.", HalleyExceptions::Utils);
 }
 
-bool Cryptography::verifySignature(HashAlgorithm algorithm, gsl::span<const gsl::byte> publicKey, gsl::span<const gsl::byte> signature, gsl::span<const gsl::byte> bytes)
+bool Cryptography::verifySignature(HashAlgorithm algorithm, gsl::span<const std::byte> publicKey, gsl::span<const std::byte> signature, gsl::span<const std::byte> bytes)
 {
 	throw Exception("SSL not supported in this build, cryptography functions are unavailable.", HalleyExceptions::Utils);
 }

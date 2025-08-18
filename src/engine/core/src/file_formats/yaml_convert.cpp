@@ -83,13 +83,13 @@ void YAMLConvert::ParseOptions::reportError(const String& error) const
 	}
 }
 
-void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options)
+void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const std::byte> data, const ParseOptions& options)
 {
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
 	config.getRoot() = parseConfig(strData, options);
 }
 
-ConfigFile YAMLConvert::parseConfig(gsl::span<const gsl::byte> data, const ParseOptions& options)
+ConfigFile YAMLConvert::parseConfig(gsl::span<const std::byte> data, const ParseOptions& options)
 {
 	ConfigFile config;
 	parseConfig(config, data, options);

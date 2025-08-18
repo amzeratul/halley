@@ -17,7 +17,7 @@
 #ifndef GSL_UTIL_H
 #define GSL_UTIL_H
 
-#include "assert" // for Expects
+#include "./assert" // for Expects
 
 #include <array>
 #include <cstddef>          // for ptrdiff_t, size_t
@@ -40,6 +40,14 @@
 
 #endif // _MSC_VER
 
+// Turn off clang unsafe buffer warnings as all accessed are guarded by runtime checks
+#if defined(__clang__)
+#if __has_warning("-Wunsafe-buffer-usage")
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunsafe-buffer-usage"
+#endif // __has_warning("-Wunsafe-buffer-usage")
+#endif // defined(__clang__)
+
 #if defined(__cplusplus) && (__cplusplus >= 201703L)
 #define GSL_NODISCARD [[nodiscard]]
 #else
@@ -51,6 +59,32 @@
 #else
 #define GSL_INLINE
 #endif
+
+#if defined(__has_cpp_attribute)
+#if __has_cpp_attribute(deprecated)
+#define GSL_DEPRECATED(msg) [[deprecated(msg)]]
+#endif // __has_cpp_attribute(deprecated)
+#endif // defined(__has_cpp_attribute)
+
+#if !defined(GSL_DEPRECATED)
+#if defined(__cplusplus)
+#if __cplusplus >= 201309L
+#define GSL_DEPRECATED(msg) [[deprecated(msg)]]
+#endif // __cplusplus >= 201309L
+#endif // defined(__cplusplus)
+#endif // !defined(GSL_DEPRECATED)
+
+#if !defined(GSL_DEPRECATED)
+#if defined(_MSC_VER)
+#define GSL_DEPRECATED(msg) __declspec(deprecated(msg))
+#elif defined(__GNUC__)
+#define GSL_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#endif // defined(_MSC_VER)
+#endif // !defined(GSL_DEPRECATED)
+
+#if !defined(GSL_DEPRECATED)
+#define GSL_DEPRECATED(msg)
+#endif // !defined(GSL_DEPRECATED)
 
 namespace gsl
 {
@@ -138,6 +172,9 @@ GSL_SUPPRESS(bounds.1) // NO-FORMAT: attribute
     return *(cont.begin() + i);
 }
 
+template <class T, std::enable_if_t<std::is_move_assignable<T>::value && std::is_move_constructible<T>::value>>
+void swap(T& a, T& b) { std::swap(a, b); }
+
 #if defined(__cpp_lib_span) && __cpp_lib_span >= 202002L
 template <class T, std::size_t extent = std::dynamic_extent>
 constexpr auto at(std::span<T, extent> sp, const index i) -> decltype(sp[sp.size()])
@@ -153,5 +190,11 @@ constexpr auto at(std::span<T, extent> sp, const index i) -> decltype(sp[sp.size
 #pragma warning(pop)
 
 #endif // _MSC_VER
+
+#if defined(__clang__)
+#if __has_warning("-Wunsafe-buffer-usage")
+#pragma clang diagnostic pop
+#endif // __has_warning("-Wunsafe-buffer-usage")
+#endif // defined(__clang__)
 
 #endif // GSL_UTIL_H

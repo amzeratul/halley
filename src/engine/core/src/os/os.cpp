@@ -119,7 +119,7 @@ void OS::createDirectories(const Path& path)
 {
 }
 
-bool OS::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
+bool OS::atomicWriteFile(const Path& path, gsl::span<const std::byte> data, std::optional<Path> backupOldVersionPath)
 {
 	std::ofstream fp(path.string(), std::ios::binary | std::ios::out);
 	if (fp.is_open()) {

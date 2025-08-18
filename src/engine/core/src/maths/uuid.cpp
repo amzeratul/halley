@@ -18,7 +18,7 @@ UUID::UUID(std::array<Byte, 16> b)
 	memcpy(qwords.data(), b.data(), 16);
 }
 
-UUID::UUID(gsl::span<const gsl::byte> b)
+UUID::UUID(gsl::span<const std::byte> b)
 {
 	if (b.size_bytes() < 16) {
 		qwords.fill(0);
@@ -156,12 +156,12 @@ bool UUID::isValid() const
 	return false;
 }
 
-gsl::span<const gsl::byte> UUID::getBytes() const
+gsl::span<const std::byte> UUID::getBytes() const
 {
 	return gsl::as_bytes(gsl::span<const uint64_t>(qwords));
 }
 
-gsl::span<gsl::byte> UUID::getWriteableBytes()
+gsl::span<std::byte> UUID::getWriteableBytes()
 {
 	return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords));
 }

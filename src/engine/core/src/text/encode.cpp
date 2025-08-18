@@ -50,7 +50,7 @@ static void initBase64()
 	}
 }
 
-String Encode::encodeBase16(gsl::span<const gsl::byte> in)
+String Encode::encodeBase16(gsl::span<const std::byte> in)
 {
 	const char characters[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
@@ -66,12 +66,12 @@ String Encode::encodeBase16(gsl::span<const gsl::byte> in)
 	return result;
 }
 
-void Encode::encodeBase16(gsl::span<const gsl::byte> in, gsl::span<char> out)
+void Encode::encodeBase16(gsl::span<const std::byte> in, gsl::span<char> out)
 {
     size_t size = in.size();
     Expects(out.size() == 2 * size);
 
-    const gsl::byte* src = in.data();
+    const std::byte* src = in.data();
     char* dst = out.data();
 
     for (auto i = 0; i < size; i++, src++, dst += 2) {
@@ -81,7 +81,7 @@ void Encode::encodeBase16(gsl::span<const gsl::byte> in, gsl::span<char> out)
     }
 }
 
-void Encode::decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes)
+void Encode::decodeBase16(std::string_view in, gsl::span<std::byte> bytes)
 {
 	auto charToVal = [&] (char character) -> uint32_t
 	{
@@ -104,7 +104,7 @@ void Encode::decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes)
 	for (size_t i = 0; i < outSize; ++i) {
 		const auto high = charToVal(in[i * 2]);
 		const auto low = charToVal(in[i * 2 + 1]);
-		bytes[i] = gsl::byte((high << 4) | low);
+		bytes[i] = std::byte((high << 4) | low);
 	}
 }
 
@@ -116,7 +116,7 @@ Bytes Encode::decodeBase16(std::string_view in)
 	return result;
 }
 
-String Encode::encodeBase64(gsl::span<const gsl::byte> in, bool url)
+String Encode::encodeBase64(gsl::span<const std::byte> in, bool url)
 {
 	size_t sz = in.size();
 	Bytes result(((sz+2) / 3) * 4);
@@ -157,7 +157,7 @@ Bytes Encode::decodeBase64(std::string_view in)
 	return result;
 }
 
-void Encode::decodeBase64(std::string_view in, gsl::span<gsl::byte> out)
+void Encode::decodeBase64(std::string_view in, gsl::span<std::byte> out)
 {
 	initBase64();
 
@@ -325,7 +325,7 @@ String Encode::encodeURL(std::string_view in)
 	return result;
 }
 
-String Encode::readBytesAsUTF8String(gsl::span<const gsl::byte> bytes)
+String Encode::readBytesAsUTF8String(gsl::span<const std::byte> bytes)
 {
 	String buffer;
 	std::string result;

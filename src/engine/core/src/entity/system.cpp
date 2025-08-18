@@ -17,7 +17,7 @@ bool SystemMessageBridge::isValid() const
 	return system != nullptr;
 }
 
-void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data, uint8_t fromPeerId)
+void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const std::byte> data, uint8_t fromPeerId)
 {
 	system->sendEntityMessage(target, msgId, data, fromPeerId);
 }

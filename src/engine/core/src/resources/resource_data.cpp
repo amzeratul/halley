@@ -49,7 +49,7 @@ size_t ResourceDataReaderFileSystem::size() const
 	return fileSize;
 }
 
-int ResourceDataReaderFileSystem::read(gsl::span<gsl::byte> dst)
+int ResourceDataReaderFileSystem::read(gsl::span<std::byte> dst)
 {
 	if (fp) {
 		FILE* f = static_cast<FILE*>(fp);
@@ -126,9 +126,9 @@ const void* ResourceDataStatic::getData() const
 	return data.get();
 }
 
-gsl::span<const gsl::byte> ResourceDataStatic::getSpan() const
+gsl::span<const std::byte> ResourceDataStatic::getSpan() const
 {
-	return gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(getData()), getSize());
+	return gsl::span<const std::byte>(reinterpret_cast<const std::byte*>(getData()), getSize());
 }
 
 size_t ResourceDataStatic::getSize() const

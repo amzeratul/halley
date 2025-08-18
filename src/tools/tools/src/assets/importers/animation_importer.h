@@ -13,6 +13,6 @@ namespace Halley
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
-		static void parseAnimation(Animation& animation, gsl::span<const gsl::byte> data);
+		static void parseAnimation(Animation& animation, gsl::span<const std::byte> data);
 	};
 }

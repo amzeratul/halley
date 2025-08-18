@@ -9,7 +9,7 @@ namespace Halley
 	public:
 		explicit ConstantBufferOpenGL();
 		~ConstantBufferOpenGL();
-		void update(gsl::span<const gsl::byte> data) override;
+		void update(gsl::span<const std::byte> data) override;
 		void bind(int bindPoint);
 
 	private:

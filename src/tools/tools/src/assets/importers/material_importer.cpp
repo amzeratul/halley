@@ -17,7 +17,7 @@ void MaterialImporter::import(const ImportingAsset& asset, IAssetCollector& coll
 	collector.output(material.getName(), AssetType::MaterialDefinition, Serializer::toBytes(material));
 }
 
-MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const
+MaterialDefinition MaterialImporter::parseMaterial(Path basePath, gsl::span<const std::byte> data, IAssetCollector& collector) const
 {
 	auto config = YAMLConvert::parseConfig(data);
 	const auto& root = config.getRoot();

@@ -136,7 +136,7 @@ String JSONConvert::generateJSON(const ConfigNode& config, const Options& option
 	}
 }
 
-ConfigNode JSONConvert::parseConfig(gsl::span<const gsl::byte> data)
+ConfigNode JSONConvert::parseConfig(gsl::span<const std::byte> data)
 {
 	Json::Value root;
 	Json::Reader reader;

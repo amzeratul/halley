@@ -47,7 +47,7 @@ namespace Halley {
 	class DummyMaterialConstantBuffer : public MaterialConstantBuffer
 	{
 	public:
-		void update(gsl::span<const gsl::byte> data) override;
+		void update(gsl::span<const std::byte> data) override;
 	};
 
 	class DummyPainter : public Painter

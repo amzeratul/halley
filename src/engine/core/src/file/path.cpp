@@ -373,7 +373,7 @@ bool Path::operator<(const Path& other) const
 	return pathParts < other.pathParts;
 }
 
-bool Path::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+bool Path::writeFile(const Path& path, gsl::span<const std::byte> data)
 {
 #ifdef _WIN32
 	std::ofstream fp(path.getString().getUTF16().c_str(), std::ios::binary | std::ios::out);

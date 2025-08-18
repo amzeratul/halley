@@ -28,7 +28,7 @@ namespace Halley
 	{
 	public:
 		explicit FontFace(String filename);
-		explicit FontFace(gsl::span<const gsl::byte> data);
+		explicit FontFace(gsl::span<const std::byte> data);
 		~FontFace();
 
 		void setSize(float size);

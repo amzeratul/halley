@@ -71,7 +71,7 @@ void AsioUDPConnection::onConnect(short connId)
     }
 }
 
-void AsioUDPConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
+void AsioUDPConnection::sendUnreliablePacket(gsl::span<const std::byte> packet)
 {
     if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
         Logger::logError("Attempting to send packet, but not in connected state", true);
@@ -103,9 +103,9 @@ void AsioUDPConnection::setUnreliablePacketListener(IPacketListener* listener)
 
 void AsioUDPConnection::receiveAll(
         UDPSocket &socket, HashMap<short, std::shared_ptr<AsioUDPConnection>> &connections,
-        const std::function<void(UDPEndpoint &remote, gsl::span<gsl::byte> packet)> &unknownConnCallback)
+        const std::function<void(UDPEndpoint &remote, gsl::span<std::byte> packet)> &unknownConnCallback)
 {
-    std::array<gsl::byte, 2048> cache = {};
+    std::array<std::byte, 2048> cache = {};
     auto buffer = asio::buffer(cache.data(), cache.size());
 
     for (;;) {

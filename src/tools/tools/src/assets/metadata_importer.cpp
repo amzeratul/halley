@@ -23,7 +23,7 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 	const auto data = ResourceDataStatic::loadFromFileSystem(path);
 	YAMLConvert::ParseOptions options;
 	options.assetId = path.getNativeString(false);
-	const auto configFile = YAMLConvert::parseConfig(data ? data->getSpan() : gsl::span<const gsl::byte>(), options);
+	const auto configFile = YAMLConvert::parseConfig(data ? data->getSpan() : gsl::span<const std::byte>(), options);
 	const auto& root = configFile.getRoot();
 
 	const String inputFilePathStr = inputFilePath.toString();

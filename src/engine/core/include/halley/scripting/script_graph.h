@@ -80,7 +80,7 @@ namespace Halley {
 
 		void load(const ConfigNode& node);
 		void load(const ConfigNode& node, Resources& resources) override;
-		void parseYAML(gsl::span<const gsl::byte> data);
+		void parseYAML(gsl::span<const std::byte> data);
 
 		bool isPersistent() const;
 		bool isMultiCopy() const;

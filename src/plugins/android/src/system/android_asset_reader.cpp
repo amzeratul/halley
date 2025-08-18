@@ -16,7 +16,7 @@ size_t AndroidAssetReader::size() const
     return size_t(AAsset_getLength64(asset));
 }
 
-int AndroidAssetReader::read(gsl::span<gsl::byte> dst)
+int AndroidAssetReader::read(gsl::span<std::byte> dst)
 {
     int nRead = AAsset_read(asset, dst.data(), size_t(dst.size()));
     if (nRead > 0) {

@@ -11,7 +11,7 @@ typedef struct XXH64_state_s XXH64_state_t;
 namespace Halley {
     namespace Hash {
         uint64_t hash(const Bytes& bytes);
-        uint64_t hash(gsl::span<const gsl::byte> bytes);
+        uint64_t hash(gsl::span<const std::byte> bytes);
 		
     	template <typename T>
     	uint64_t hashValue(const T& v)
@@ -44,7 +44,7 @@ namespace Halley {
 				feedBytes(gsl::as_bytes(gsl::span<const T>(&data, 1)));
 			}
 
-			void feedBytes(gsl::span<const gsl::byte> bytes);
+			void feedBytes(gsl::span<const std::byte> bytes);
 
 			[[nodiscard]] uint64_t digest();
 			void reset();

@@ -369,7 +369,7 @@ void OSWin32::setConsoleColor(int foreground, int background)
 	SetConsoleTextAttribute(hConsole, WORD(foreground | (background << 4)));
 }
 
-static bool writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
+static bool writeFile(const wchar_t* str, gsl::span<const std::byte> data)
 {
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
 	//fp.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -423,7 +423,7 @@ static bool writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 	return false;
 }
 
-bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
+bool OSWin32::atomicWriteFile(const Path& path, gsl::span<const std::byte> data, std::optional<Path> backupOldVersionPath)
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
 	if (PathFileExistsW(dstPath.c_str())) {

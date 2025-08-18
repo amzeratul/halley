@@ -60,7 +60,7 @@ AssetResource& AssetCollector::getAsset(const String& name, AssetType type, cons
 	return *result;
 }
 
-void AssetCollector::output(const String& name, AssetType type, const Path& path, gsl::span<const gsl::byte> data)
+void AssetCollector::output(const String& name, AssetType type, const Path& path, gsl::span<const std::byte> data)
 {
 	Bytes result;
 	result.resize(data.size());

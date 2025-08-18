@@ -73,7 +73,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 	doSend(packet.getBytes(), false);
 }
 
-void AckUnreliableConnection::doSend(gsl::span<const gsl::byte> packet, bool small)
+void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool small)
 {
     const size_t size = packet.size();
     const size_t maxSize = maxPacketSize - headerSize;
@@ -206,7 +206,7 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 	doSendUnreliablePacket(packet.data.byte_span().subspan(0, headerSize + packet.dataSize));
 }
 
-void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const gsl::byte> packet)
+void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet)
 {
 #ifdef DEV_BUILD
 	if (simulatePacketLoss > 0.0f) {
@@ -385,11 +385,11 @@ size_t AckUnreliableConnection::getMaxUnreliablePacketSize() const
 	return maxPacketSize - headerSize;
 }
 
-void AckUnreliableConnection::onSend(gsl::span<const gsl::byte> packet)
+void AckUnreliableConnection::onSend(gsl::span<const std::byte> packet)
 {
 }
 
-void AckUnreliableConnection::onReceive(gsl::span<const gsl::byte> packet)
+void AckUnreliableConnection::onReceive(gsl::span<const std::byte> packet)
 {
     size_t packetSize = packet.size();
     auto* header = reinterpret_cast<const uint8_t*>(packet.data());
@@ -497,12 +497,12 @@ void AckUnreliableConnection::doSendAckPackets()
 
     // NOTE: This isn't sent reliably either. The ACK mechanism on both sides
 	// makes sure that duplicates are caught.
-	doSendUnreliablePacket(gsl::span<const gsl::byte>(reinterpret_cast<gsl::byte *>(packet.data()), 6 + 3 * numAckPackets));
+	doSendUnreliablePacket(gsl::span<const std::byte>(reinterpret_cast<std::byte *>(packet.data()), 6 + 3 * numAckPackets));
 
 	numAckPackets = 0;
 }
 
-void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const gsl::byte> data, uint8_t parity)
+void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity)
 {
     auto ackData = reinterpret_cast<const uint8_t *>(data.data());
     size_t size = data.size();

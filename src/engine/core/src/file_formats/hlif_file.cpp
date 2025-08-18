@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-void HLIFFile::decode(Image& dst, gsl::span<const gsl::byte> bytes)
+void HLIFFile::decode(Image& dst, gsl::span<const std::byte> bytes)
 {
 	if (!isHLIF(bytes)) {
 		throw Exception("Not an HLIF file.", HalleyExceptions::Utils);
@@ -132,7 +132,7 @@ Bytes HLIFFile::encode(const Image& image, std::string_view name, bool lz4hc)
 	return finalData;
 }
 
-HLIFFile::Info HLIFFile::getInfo(gsl::span<const gsl::byte> bytes)
+HLIFFile::Info HLIFFile::getInfo(gsl::span<const std::byte> bytes)
 {
 	if (!isHLIF(bytes)) {
 		throw Exception("Not an HLIF file.", HalleyExceptions::Utils);
@@ -150,7 +150,7 @@ HLIFFile::Info HLIFFile::getInfo(gsl::span<const gsl::byte> bytes)
 	return Info{ imgSize, imgFormat };
 }
 
-bool HLIFFile::isHLIF(gsl::span<const gsl::byte> bytes)
+bool HLIFFile::isHLIF(gsl::span<const std::byte> bytes)
 {
 	return bytes.size() >= 8 && memcmp(bytes.data(), hlifId, 8) == 0;
 }

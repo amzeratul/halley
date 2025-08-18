@@ -233,7 +233,7 @@ std::optional<Vector2f> SceneEditorGameBridge::getWorldOffset() const
 	return {};
 }
 
-bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
+bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const std::byte> data)
 {
 	return project.writeAssetToDisk(path, data);
 }

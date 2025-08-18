@@ -103,7 +103,7 @@ void CSVFile::clear()
 	data.shrink_to_fit();
 }
 
-void CSVFile::load(gsl::span<const gsl::byte> bytes)
+void CSVFile::load(gsl::span<const std::byte> bytes)
 {
 	load(Encode::readBytesAsUTF8String(bytes));
 }

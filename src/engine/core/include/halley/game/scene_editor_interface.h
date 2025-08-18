@@ -156,7 +156,7 @@ namespace Halley {
 	public:
 		virtual ~IEditorInterface() = default;
 
-		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual bool saveAsset(const Path& path, gsl::span<const std::byte> data) = 0;
 		virtual bool deleteAsset(const Path& path) = 0;
 		virtual void openAsset(AssetType assetType, const String& assetId) = 0;
 		virtual void openAssetHere(AssetType assetType, const String& assetId) = 0;
@@ -458,7 +458,7 @@ namespace Halley {
 		virtual const Path& getRootPath() const = 0;
 		virtual Path getAssetsSrcPath() const = 0;
 
-		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) = 0;
+		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const std::byte> data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, const Bytes& data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, std::string_view str) = 0;
 		virtual Bytes readAssetFromDisk(const Path& filePath) = 0;
@@ -507,7 +507,7 @@ namespace Halley {
 	class IFileSystemCache {
 	public:
 		virtual ~IFileSystemCache() = default;
-		virtual gsl::span<const gsl::byte> readFile(const Path& path) = 0;
+		virtual gsl::span<const std::byte> readFile(const Path& path) = 0;
 		virtual Bytes readFileCopy(const Path& path) = 0;
 	};
 

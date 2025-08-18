@@ -114,7 +114,7 @@ namespace Halley {
     public:
 		AsepriteFile();
 
-		void load(gsl::span<const gsl::byte> data);
+		void load(gsl::span<const std::byte> data);
 
 		const Vector<AsepriteTag>& getTags() const;
 		std::map<String, std::unique_ptr<Image>> makeGroupFrameImages(int frameNumber, bool groupSeparated);
@@ -123,17 +123,17 @@ namespace Halley {
 
     private:
 	    void addFrame(uint16_t duration);
-	    void addChunk(uint16_t chunkType, gsl::span<const gsl::byte> data);
+	    void addChunk(uint16_t chunkType, gsl::span<const std::byte> data);
 
-	    void addLayerChunk(gsl::span<const gsl::byte> span);
-		void addCelChunk(gsl::span<const gsl::byte> span);
-		void addCelExtraChunk(gsl::span<const gsl::byte> span);
-		void addPaletteChunk(gsl::span<const gsl::byte> span);
-		void addTagsChunk(gsl::span<const gsl::byte> span);
+	    void addLayerChunk(gsl::span<const std::byte> span);
+		void addCelChunk(gsl::span<const std::byte> span);
+		void addCelExtraChunk(gsl::span<const std::byte> span);
+		void addPaletteChunk(gsl::span<const std::byte> span);
+		void addTagsChunk(gsl::span<const std::byte> span);
     	void postProcessLayers();
 
 		template <typename T>
-		void readData(T& dst, gsl::span<const gsl::byte>& data) const
+		void readData(T& dst, gsl::span<const std::byte>& data) const
 		{
 			if (data.size() < T::size) {
 				throw Exception("Insufficient data to decode Aseprite entry", HalleyExceptions::Tools);
@@ -142,7 +142,7 @@ namespace Halley {
 			data = data.subspan(T::size);
 		}
 
-		String readString(gsl::span<const gsl::byte>& data) const
+		String readString(gsl::span<const std::byte>& data) const
 		{
 			if (data.size() < 2) {
 				throw Exception("Insufficient data to decode Aseprite entry", HalleyExceptions::Tools);

@@ -26,7 +26,7 @@ namespace Halley
 
 	private:
 		struct PlaneData {
-			gsl::byte* data;
+			std::byte* data;
 			int stride;
 			int height;
 		};
@@ -36,7 +36,7 @@ namespace Halley
 		void translateError(NSError* error);
 
 		void readVideoSample(Time time, PlaneData yPlane, PlaneData uvPlane);
-		void readAudioSample(Time time, gsl::span<const gsl::byte> data);
+		void readAudioSample(Time time, gsl::span<const std::byte> data);
 
 		std::shared_ptr<ResourceDataStream> data;
 		String filePath;

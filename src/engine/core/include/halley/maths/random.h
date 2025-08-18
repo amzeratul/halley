@@ -38,7 +38,7 @@ namespace Halley {
 		Random(bool threadSafe = false);
 		Random(uint32_t seed, bool threadSafe = false);
 		Random(uint64_t seed, bool threadSafe = false);
-		Random(gsl::span<const gsl::byte> data, bool threadSafe = false);
+		Random(gsl::span<const std::byte> data, bool threadSafe = false);
 		~Random();
 
 		Random(const Random& other) = delete;
@@ -86,11 +86,11 @@ namespace Halley {
 			return vec[getRandomIndex(vec)];
 		}
 
-		void getBytes(gsl::span<gsl::byte> dst);
+		void getBytes(gsl::span<std::byte> dst);
 		void getBytes(gsl::span<Byte> dst);
 		void setSeed(uint32_t seed);
 		void setSeed(uint64_t seed);
-		void setSeed(gsl::span<const gsl::byte> data);
+		void setSeed(gsl::span<const std::byte> data);
 		void setSeed(gsl::span<Byte> data);
 
 		uint32_t getRawInt();

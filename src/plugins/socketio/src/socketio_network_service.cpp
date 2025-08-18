@@ -510,7 +510,7 @@ void SocketIOConnection::onConnect(short connId)
 	}
 }
 
-void SocketIOConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
+void SocketIOConnection::sendUnreliablePacket(gsl::span<const std::byte> packet)
 {
 	if (status != ConnectionStatus::Connected && status != ConnectionStatus::Connecting) {
 		Logger::logError("Attempting to send packet, but not in connected state", true);
@@ -535,7 +535,7 @@ void SocketIOConnection::sendUnreliablePacket(gsl::span<const gsl::byte> packet)
 	}
 }
 
-void SocketIOConnection::receiveUnreliablePacket(gsl::span<const gsl::byte> packet) const
+void SocketIOConnection::receiveUnreliablePacket(gsl::span<const std::byte> packet) const
 {
 	if (packetListener != nullptr) {
 		packetListener->onReceive(packet);
@@ -943,7 +943,7 @@ void SocketIONetworkService::tryReceiveUnreliable()
 			break;
 		}
 
-		auto packet = gsl::span(reinterpret_cast<gsl::byte *>(buffer.data()), bytesRecv);
+		auto packet = gsl::span(reinterpret_cast<std::byte *>(buffer.data()), bytesRecv);
 
 		if (activeConnId >= 0) {
 			activeConnections[activeConnId]->receiveUnreliablePacket(packet);
@@ -953,7 +953,7 @@ void SocketIONetworkService::tryReceiveUnreliable()
 	}
 }
 
-void SocketIONetworkService::receivePacket(const Endpoint& endpoint, gsl::span<gsl::byte> data)
+void SocketIONetworkService::receivePacket(const Endpoint& endpoint, gsl::span<std::byte> data)
 {
 	if (data.size_bytes() == 0) {
 		return;

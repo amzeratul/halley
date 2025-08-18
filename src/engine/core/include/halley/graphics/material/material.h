@@ -27,7 +27,7 @@ namespace Halley
 	public:
 		virtual ~MaterialConstantBuffer() {}
 
-		virtual void update(gsl::span<const gsl::byte> data) = 0;
+		virtual void update(gsl::span<const std::byte> data) = 0;
 	};
 
 	enum class MaterialDataBlockType : uint8_t
@@ -49,7 +49,7 @@ namespace Halley
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
 		int getBindPoint() const { return bindPoint; }
-		gsl::span<const gsl::byte> getData() const;
+		gsl::span<const std::byte> getData() const;
 		MaterialDataBlockType getType() const { return dataBlockType; }
 		uint64_t getHash() const;
 

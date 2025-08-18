@@ -43,7 +43,7 @@ namespace Halley {
 		String getEnvironmentVariable(const String& name) override;
 		Path parseProgramPath(const String&) override;
 		void setConsoleColor(int foreground, int background) override;
-		bool atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath) override;
+		bool atomicWriteFile(const Path& path, gsl::span<const std::byte> data, std::optional<Path> backupOldVersionPath) override;
 
 		void displayError(std::string_view cs) override;
 		void onWindowCreated(void* window) override;

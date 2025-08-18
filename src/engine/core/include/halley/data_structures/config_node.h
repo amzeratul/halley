@@ -220,7 +220,7 @@ namespace Halley {
 		ConfigNode& operator=(SequenceType entryList);
 		ConfigNode& operator=(String value);
 		ConfigNode& operator=(Bytes value);
-		ConfigNode& operator=(gsl::span<const gsl::byte> bytes);
+		ConfigNode& operator=(gsl::span<const std::byte> bytes);
 
 		ConfigNode& operator=(const char* value);
 		ConfigNode& operator=(const std::string_view& value);

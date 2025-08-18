@@ -45,7 +45,7 @@ namespace Halley {
 		};
 
 		Image(Format format = Format::RGBA, Vector2i size = {}, bool clear = true);
-		Image(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
+		Image(gsl::span<const std::byte> bytes, Format format = Format::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);
 		Image(Image&& other);
@@ -55,17 +55,17 @@ namespace Halley {
 
 		void setSize(Vector2i size, bool clear = true);
 
-		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined, const Path& originalPath = {});
+		void load(gsl::span<const std::byte> bytes, Format format = Format::Undefined, const Path& originalPath = {});
 
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
 		Bytes saveQOIToBytes() const;
 		Bytes saveHLIFToBytes(std::string_view name = {}, bool lz4hc = true) const;
 
-		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
+		static Vector2i getImageSize(gsl::span<const std::byte> bytes);
 		void setFormat(Format format);
 
-		static bool isQOI(gsl::span<const gsl::byte> bytes);
-		static bool isPNG(gsl::span<const gsl::byte> bytes);
+		static bool isQOI(gsl::span<const std::byte> bytes);
+		static bool isPNG(gsl::span<const std::byte> bytes);
 
 		gsl::span<unsigned char> getPixelBytes();
 		gsl::span<const unsigned char> getPixelBytes() const;

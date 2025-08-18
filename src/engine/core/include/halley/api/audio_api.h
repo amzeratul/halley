@@ -134,7 +134,7 @@ namespace Halley
 		virtual ~IAudioOutput() = default;
 		
 		virtual size_t getAvailable() = 0;
-		virtual size_t output(gsl::span<gsl::byte> dst, bool padWithZeroes) = 0;
+		virtual size_t output(gsl::span<std::byte> dst, bool padWithZeroes) = 0;
 	};
 
 	class IAudioBufferSizeController {

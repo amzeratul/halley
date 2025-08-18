@@ -18,7 +18,7 @@ namespace Halley {
     public:
         UUID();
         UUID(std::array<Byte, 16> bytes);
-        explicit UUID(gsl::span<const gsl::byte> bytes);
+        explicit UUID(gsl::span<const std::byte> bytes);
 		explicit UUID(const Bytes& bytes);
         explicit UUID(std::string_view str);
         explicit UUID(const ConfigNode& node);
@@ -37,8 +37,8 @@ namespace Halley {
         [[nodiscard]] static UUID generateFromUUIDs(const UUID& one, const UUID& two);
     	[[nodiscard]] bool isValid() const;
 
-        gsl::span<const gsl::byte> getBytes() const;
-		gsl::span<gsl::byte> getWriteableBytes();
+        gsl::span<const std::byte> getBytes() const;
+		gsl::span<std::byte> getWriteableBytes();
         gsl::span<const uint64_t> getUint64Bytes() const;
 
     	void serialize(Serializer& s) const;

@@ -302,7 +302,7 @@ void AudioEngine::queueAudioFloat(gsl::span<const float> data)
 	}
 }
 
-void AudioEngine::queueAudioBytes(gsl::span<const gsl::byte> data)
+void AudioEngine::queueAudioBytes(gsl::span<const std::byte> data)
 {
 	if (audioOutputBuffer.canWrite(size_t(data.size()))) {
 		audioOutputBuffer.write(data);

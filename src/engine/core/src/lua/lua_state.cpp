@@ -102,7 +102,7 @@ const LuaReference& LuaState::getOrLoadModule(const String& moduleName)
 	return *result;
 }
 
-const LuaReference& LuaState::loadModule(const String& moduleName, gsl::span<const gsl::byte> data)
+const LuaReference& LuaState::loadModule(const String& moduleName, gsl::span<const std::byte> data)
 {
 	modules[moduleName] = loadScript(moduleName, data);
 	return getModule(moduleName);
@@ -141,7 +141,7 @@ lua_State* LuaState::getRawState()
 	return lua;
 }
 
-LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const gsl::byte> data)
+LuaReference LuaState::loadScript(const String& chunkName, gsl::span<const std::byte> data)
 {
 	int result = luaL_loadbuffer(lua, reinterpret_cast<const char*>(data.data()), data.size_bytes(), chunkName.c_str());
 	if (result != 0) {

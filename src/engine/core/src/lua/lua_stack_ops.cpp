@@ -84,7 +84,7 @@ void LuaStackOps::load(const String& v, const String& name)
 	luaL_loadbufferx(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str(), "t");
 }
 
-void LuaStackOps::load(gsl::span<const gsl::byte> bytes, const String& name)
+void LuaStackOps::load(gsl::span<const std::byte> bytes, const String& name)
 {
 	luaL_loadbufferx(state.getRawState(), reinterpret_cast<const char*>(bytes.data()), bytes.size_bytes(), name.isEmpty() ? nullptr : name.c_str(), "b");
 }
@@ -100,7 +100,7 @@ bool LuaStackOps::eval(const String& v, const String& name, bool throwOnError)
 	return state.call(0, 1, throwOnError);
 }
 
-bool LuaStackOps::eval(gsl::span<const gsl::byte> bytes, const String& name, bool throwOnError)
+bool LuaStackOps::eval(gsl::span<const std::byte> bytes, const String& name, bool throwOnError)
 {
 	load(bytes, name);
 	return state.call(0, 1, throwOnError);

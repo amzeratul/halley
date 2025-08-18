@@ -18,7 +18,7 @@ namespace Halley {
 
         void loadLegacyEvent(const ConfigNode& node);
         void legacyToConfigNode(ConfigNode& result) const;
-		void parseYAML(gsl::span<const gsl::byte> yaml);
+		void parseYAML(gsl::span<const std::byte> yaml);
 
         AudioObjectId getAudioObjectId() const;
 

@@ -26,14 +26,14 @@
 
 namespace Halley {
 	namespace Encode {
-		String encodeBase16(gsl::span<const gsl::byte> in);
-        void encodeBase16(gsl::span<const gsl::byte> in, gsl::span<char> out);
-		void decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes);
+		String encodeBase16(gsl::span<const std::byte> in);
+        void encodeBase16(gsl::span<const std::byte> in, gsl::span<char> out);
+		void decodeBase16(std::string_view in, gsl::span<std::byte> bytes);
 		Bytes decodeBase16(std::string_view in);
 
-		String encodeBase64(gsl::span<const gsl::byte> in, bool url = false);
+		String encodeBase64(gsl::span<const std::byte> in, bool url = false);
 		Bytes decodeBase64(std::string_view in);
-		void decodeBase64(std::string_view in, gsl::span<gsl::byte> out);
+		void decodeBase64(std::string_view in, gsl::span<std::byte> out);
 		size_t getBase64Length(std::string_view in);
 
 		template<typename T>
@@ -49,6 +49,6 @@ namespace Halley {
 		String encodeURL(std::string_view in);
 
 		// Strips BOM and converts UTF-16 to UTF-8, and normalises line endings to \n
-		String readBytesAsUTF8String(gsl::span<const gsl::byte> bytes);
+		String readBytesAsUTF8String(gsl::span<const std::byte> bytes);
 	}
 }

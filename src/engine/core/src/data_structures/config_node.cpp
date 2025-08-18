@@ -523,7 +523,7 @@ ConfigNode& ConfigNode::operator=(Bytes value)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(gsl::span<const gsl::byte> bytes)
+ConfigNode& ConfigNode::operator=(gsl::span<const std::byte> bytes)
 {
 	reset();
 	type = ConfigNodeType::Bytes;

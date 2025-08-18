@@ -36,14 +36,14 @@ namespace Halley {
 
         ID3D12Resource* getResource() const { return resource.Get(); }
 
-        gsl::span<gsl::byte> map();
+        gsl::span<std::byte> map();
         void unmap(size_t written_pos, size_t written_len);
 
         static size_t copyRows(
-                gsl::byte* dst,
+                std::byte* dst,
                 size_t dst_size,
                 size_t dst_row_stride,
-                gsl::byte* src,
+                std::byte* src,
                 size_t src_row_stride,
                 size_t width,
                 size_t height,
@@ -54,7 +54,7 @@ namespace Halley {
         void resize(size_t requestedSize);
 
         void resetData();
-        std::pair<size_t, size_t> writeData(gsl::span<const gsl::byte> data);
+        std::pair<size_t, size_t> writeData(gsl::span<const std::byte> data);
 
     private:
         DX12Video& video;
@@ -129,7 +129,7 @@ namespace Halley {
     public:
         explicit DX12MaterialConstantBuffer(DX12Video& video);
 
-        void update(gsl::span<const gsl::byte> data) override;
+        void update(gsl::span<const std::byte> data) override;
 
         DX12Buffer& getBuffer() { return buffer; }
 

@@ -100,7 +100,7 @@ void UIDefinition::assignIds(ConfigNode& node)
 	}
 }
 
-void UIDefinition::parseYAML(gsl::span<const gsl::byte> yaml)
+void UIDefinition::parseYAML(gsl::span<const std::byte> yaml)
 {
 	YAMLConvert::parseConfig(data, yaml);
 }

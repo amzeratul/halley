@@ -19,7 +19,7 @@ namespace Halley
 			return serialized->size();
 		}
 
-		void serializeTo(gsl::span<gsl::byte> dst) const
+		void serializeTo(gsl::span<std::byte> dst) const
 		{
 			if (!serialized) {
 				serialized = Serializer::toBytes(*this, getSerializerOptions());
@@ -62,7 +62,7 @@ namespace Halley
 	public:
 		virtual ~NetworkMessageFactoryBase() {}
 
-		virtual std::unique_ptr<NetworkMessage> create(gsl::span<const gsl::byte> src) const = 0;
+		virtual std::unique_ptr<NetworkMessage> create(gsl::span<const std::byte> src) const = 0;
 		virtual uint16_t getTypeIndex() const = 0;
 	};
 
@@ -70,7 +70,7 @@ namespace Halley
 	class NetworkMessageFactory : public NetworkMessageFactoryBase
 	{
 	public:
-		std::unique_ptr<NetworkMessage> create(gsl::span<const gsl::byte> src) const override
+		std::unique_ptr<NetworkMessage> create(gsl::span<const std::byte> src) const override
 		{
 			auto result = std::make_unique<T>();
 			auto s = Deserializer(src, T::getSerializerOptions());
@@ -94,7 +94,7 @@ namespace Halley
 		}
 
 		uint16_t getMessageType(NetworkMessage& msg) const;
-		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq);
+		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const std::byte> data, uint16_t msgType, uint16_t seq);
 
 	private:
 		HashMap<uint16_t, uint16_t> typeToMsgIndex;

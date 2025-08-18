@@ -72,7 +72,7 @@ void Prefab::deserialize(Deserializer& s)
 	entityData.setSceneRoot(isScene());
 }
 
-void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
+void Prefab::parseYAML(gsl::span<const std::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);

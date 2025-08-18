@@ -188,7 +188,7 @@ void AssetPack::decrypt(Encrypt::AESKey key)
 	data = Encrypt::decryptAES(iv, key, data);
 }
 
-void AssetPack::readData(size_t pos, gsl::span<gsl::byte> dst)
+void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 {
 	if (hasReader) {
 		std::unique_lock<std::mutex> lock(readerMutex);
@@ -239,7 +239,7 @@ size_t PackDataReader::size() const
 	return fileSize;
 }
 
-int PackDataReader::read(gsl::span<gsl::byte> dst)
+int PackDataReader::read(gsl::span<std::byte> dst)
 {
 	if (!*aliveToken) {
 		return 0;

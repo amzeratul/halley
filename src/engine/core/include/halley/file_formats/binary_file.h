@@ -15,7 +15,7 @@ namespace Halley
 		BinaryFile();
 		explicit BinaryFile(const Bytes& data);
         explicit BinaryFile(Bytes&& data);
-		explicit BinaryFile(gsl::span<const gsl::byte> data);
+		explicit BinaryFile(gsl::span<const std::byte> data);
 		explicit BinaryFile(std::unique_ptr<ResourceDataStream> stream);
 
 		static std::unique_ptr<BinaryFile> loadResource(ResourceLoader& loader);
@@ -24,8 +24,8 @@ namespace Halley
 
 		const Bytes& getBytes() const;
 		Bytes& getBytes();
-		gsl::span<const gsl::byte> getSpan() const;
-		gsl::span<gsl::byte> getSpan();
+		gsl::span<const std::byte> getSpan() const;
+		gsl::span<std::byte> getSpan();
 
 		std::shared_ptr<ResourceDataStream> getStream() const;
 

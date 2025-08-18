@@ -131,7 +131,7 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 
 	{
 		auto& vb = vertexBuffers[curBuffer];
-		vb.setData(gsl::span<const gsl::byte>(reinterpret_cast<const gsl::byte*>(vertexData), vertexDataSize));
+		vb.setData(gsl::span<const std::byte>(reinterpret_cast<const std::byte*>(vertexData), vertexDataSize));
 		ID3D11Buffer* buffers[] = { vb.getBuffer() };
 		UINT strides[] = { UINT(stride) };
 		UINT offsets[] = { vb.getOffset() };

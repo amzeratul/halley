@@ -79,7 +79,7 @@ bool FileSystem::rename(const Path& src, const Path& dst)
 	return ec.value() == 0;
 }
 
-bool FileSystem::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+bool FileSystem::writeFile(const Path& path, gsl::span<const std::byte> data)
 {
 	createParentDir(path);
 

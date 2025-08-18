@@ -14,10 +14,10 @@ namespace Halley {
         	Image::Format format;
         };
 
-        static void decode(Image& dst, gsl::span<const gsl::byte> data);
+        static void decode(Image& dst, gsl::span<const std::byte> data);
         static Bytes encode(const Image& image, std::string_view name = {}, bool lz4hc = true);
-        static Info getInfo(gsl::span<const gsl::byte> data);
-        static bool isHLIF(gsl::span<const gsl::byte> data);
+        static Info getInfo(gsl::span<const std::byte> data);
+        static bool isHLIF(gsl::span<const std::byte> data);
 
     private:
      	constexpr static uint8_t hlifId[8] = "HLIFv01";

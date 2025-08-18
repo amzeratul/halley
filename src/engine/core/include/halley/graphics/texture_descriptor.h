@@ -73,13 +73,13 @@ namespace Halley
 		TextureDescriptorImageData(std::shared_ptr<Image> img);
 		TextureDescriptorImageData(Bytes&& bytes, std::optional<int> stride = {});
 		TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept;
-		TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, std::optional<int> stride = {});
+		TextureDescriptorImageData(gsl::span<const std::byte> bytes, std::optional<int> stride = {});
 
 		TextureDescriptorImageData& operator=(TextureDescriptorImageData&& other) noexcept;
 
 		bool empty() const;
 		Byte* getBytes();
-		gsl::span<const gsl::byte> getSpan() const;
+		gsl::span<const std::byte> getSpan() const;
 
 		Bytes moveBytes();
 

@@ -32,7 +32,7 @@ FontFace::FontFace(String filename)
 	}
 }
 
-FontFace::FontFace(gsl::span<const gsl::byte> data)
+FontFace::FontFace(gsl::span<const std::byte> data)
 	: pimpl (std::make_unique<FontFacePimpl>())
 {
 	int error = FT_Init_FreeType(&pimpl->library);

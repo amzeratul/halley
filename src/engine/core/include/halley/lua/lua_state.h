@@ -20,7 +20,7 @@ namespace Halley {
 		const LuaReference* tryGetModule(const String& moduleName) const;
 		const LuaReference& getModule(const String& moduleName) const;
 		const LuaReference& getOrLoadModule(const String& moduleName);
-		const LuaReference& loadModule(const String& moduleName, gsl::span<const gsl::byte> data);
+		const LuaReference& loadModule(const String& moduleName, gsl::span<const std::byte> data);
 		void unloadModule(const String& moduleName);
 
 		bool call(int nArgs, int nRets, bool throwOnError = true);
@@ -51,7 +51,7 @@ namespace Halley {
 		Vector<int> errorHandlerStackPos;
 		HashSet<LuaReference*> trackedReferences;
 
-		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
+		LuaReference loadScript(const String& chunkName, gsl::span<const std::byte> data);
 
 		void print(String string);
 		void printWarning(String string);

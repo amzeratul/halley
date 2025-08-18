@@ -51,8 +51,8 @@ namespace Halley
 
 		void onConnect(short connId) override;
 
-		void sendUnreliablePacket(gsl::span<const gsl::byte> packet) override;
-		void receiveUnreliablePacket(gsl::span<const gsl::byte> packet) const;
+		void sendUnreliablePacket(gsl::span<const std::byte> packet) override;
+		void receiveUnreliablePacket(gsl::span<const std::byte> packet) const;
 		void setUnreliablePacketListener(IPacketListener* listener) override;
 
 	private:
@@ -119,7 +119,7 @@ namespace Halley
 		void tryListen();
 		void tryReceiveUnreliable();
 
-		void receivePacket(const Endpoint& endpoint, gsl::span<gsl::byte> data);
+		void receivePacket(const Endpoint& endpoint, gsl::span<std::byte> data);
 
         [[nodiscard]] bool hasConnectionWithId(short connId) const override;
 

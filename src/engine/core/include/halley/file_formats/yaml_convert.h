@@ -38,9 +38,9 @@ namespace Halley {
 			void reportError(const String& error) const;
 		};
 		
-		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data, const ParseOptions& options = {});
+		static void parseConfig(ConfigFile& config, gsl::span<const std::byte> data, const ParseOptions& options = {});
 		static ConfigNode parseYAMLNode(const YAML::Node& node, const ParseOptions& options = {});
-		static ConfigFile parseConfig(gsl::span<const gsl::byte> data, const ParseOptions& options = {});
+		static ConfigFile parseConfig(gsl::span<const std::byte> data, const ParseOptions& options = {});
 		static ConfigFile parseConfig(const Bytes& data, const ParseOptions& options = {});
 		static ConfigNode parseConfig(const String& str, const ParseOptions& options = {});
 		static ConfigFile parseConfig(const Path& path, const ParseOptions& options = {});

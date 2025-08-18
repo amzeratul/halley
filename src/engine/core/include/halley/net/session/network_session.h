@@ -162,14 +162,14 @@ namespace Halley {
 		HashMap<uint32_t, Promise<bool>> setServerSideDataPending;
 		HashMap<uint32_t, Promise<ConfigNode>> getServerSideDataPending;
 
-		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
+		OutboundNetworkPacket makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
 		
 		void closeConnection(PeerId peerId, const String& reason);
 		void processReceive();
 
-		void retransmitControlMessage(PeerId peerId, gsl::span<const gsl::byte> bytes);
+		void retransmitControlMessage(PeerId peerId, gsl::span<const std::byte> bytes);
 		void receiveControlMessage(PeerId peerId, InboundNetworkPacket& packet);
 		void onControlMessage(PeerId peerId, const ControlMsgJoin& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg);

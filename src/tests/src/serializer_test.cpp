@@ -6,11 +6,11 @@ namespace {
 	template <typename T>
 	static T convertBackAndForth(T v)
 	{
-		static gsl::byte bytes[128];
+		static std::byte bytes[128];
 		Serializer s(bytes, SerializerOptions(SerializerOptions::maxVersion));
 		s << v;
 		
-		Deserializer ds(gsl::span<gsl::byte>(bytes, s.getPosition()), SerializerOptions(SerializerOptions::maxVersion));
+		Deserializer ds(gsl::span<std::byte>(bytes, s.getPosition()), SerializerOptions(SerializerOptions::maxVersion));
 		T result = 0;
 		ds >> result;
 		return result;

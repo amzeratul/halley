@@ -95,7 +95,7 @@ static void onVorbisError(int error)
 	throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Tools);
 }
 
-static void writeBytes(Bytes& dst, gsl::span<const gsl::byte> src)
+static void writeBytes(Bytes& dst, gsl::span<const std::byte> src)
 {
 	size_t start = dst.size();
 	size_t size = src.size();

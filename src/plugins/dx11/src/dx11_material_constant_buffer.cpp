@@ -6,7 +6,7 @@ DX11MaterialConstantBuffer::DX11MaterialConstantBuffer(DX11Video& video)
 {
 }
 
-void DX11MaterialConstantBuffer::update(gsl::span<const gsl::byte> data)
+void DX11MaterialConstantBuffer::update(gsl::span<const std::byte> data)
 {
 	buffer.reset();
 	buffer.setData(data);

@@ -162,7 +162,7 @@ void AudioEvent::makeDefault()
 	*this = AudioEvent();
 }
 
-void AudioEvent::parseYAML(gsl::span<const gsl::byte> yaml)
+void AudioEvent::parseYAML(gsl::span<const std::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);

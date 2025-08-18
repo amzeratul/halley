@@ -21,7 +21,7 @@ void GLBuffer::init(GLenum t, GLenum u)
 	}
 }
 
-void GLBuffer::setData(gsl::span<const gsl::byte> data)
+void GLBuffer::setData(gsl::span<const std::byte> data)
 {
 	bind();
 	size = data.size_bytes();

@@ -141,7 +141,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 			}
 
 			if (compression == "png" || compression == "qoi" || compression == "hlif") {
-				gsl::span<const gsl::byte> imageData = imageBytes.empty() ? data->getSpan() : imageBytes.byte_span();
+				gsl::span<const std::byte> imageData = imageBytes.empty() ? data->getSpan() : imageBytes.byte_span();
 
 				const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
 				auto image = std::make_unique<Image>(imageData, format);

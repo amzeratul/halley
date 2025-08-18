@@ -33,7 +33,7 @@ namespace Halley {
 		SystemMessageBridge(System& system);
 
 		bool isValid() const;
-		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data, uint8_t fromPeerId);
+		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const std::byte> data, uint8_t fromPeerId);
 		void sendMessageToEntity(EntityId target, const String& messageName, const ConfigNode& messageData);
 		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback, uint8_t fromPeerId);
 

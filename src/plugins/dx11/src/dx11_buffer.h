@@ -23,7 +23,7 @@ namespace Halley {
 		DX11Buffer& operator=(const DX11Buffer& other) = delete;
 		DX11Buffer& operator=(DX11Buffer&& other) = delete;
 
-		void setData(gsl::span<const gsl::byte> data);
+		void setData(gsl::span<const std::byte> data);
 		ID3D11Buffer*& getBuffer();
 		UINT getOffset() const;
 		UINT getLastSize() const;

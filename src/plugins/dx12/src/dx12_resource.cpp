@@ -86,7 +86,7 @@ DX12Buffer::~DX12Buffer()
     clear();
 }
 
-gsl::span<gsl::byte> DX12Buffer::map()
+gsl::span<std::byte> DX12Buffer::map()
 {
     const D3D12_RANGE range = {0, 0};
     void* ptr = nullptr;
@@ -95,7 +95,7 @@ gsl::span<gsl::byte> DX12Buffer::map()
         throw Exception("Failed to map resource", HalleyExceptions::VideoPlugin);
     }
 
-    return {(gsl::byte*) ptr, curSize};
+    return {(std::byte*) ptr, curSize};
 }
 
 void DX12Buffer::unmap(size_t written_pos, size_t written_len)
@@ -105,18 +105,18 @@ void DX12Buffer::unmap(size_t written_pos, size_t written_len)
 }
 
 size_t DX12Buffer::copyRows(
-        gsl::byte* dst,
+        std::byte* dst,
         size_t dst_size,
         size_t dst_row_stride,
-        gsl::byte* src,
+        std::byte* src,
         size_t src_row_stride,
         size_t width,
         size_t height,
         size_t bytes_per_element
 )
 {
-    gsl::byte* d = dst;
-    gsl::byte* s = src;
+    std::byte* d = dst;
+    std::byte* s = src;
 
     size_t row_size = width * bytes_per_element;
     size_t total_size = row_size * height;
@@ -205,7 +205,7 @@ void DX12Buffer::resetData()
     curWritePos = 0;
 }
 
-std::pair<size_t, size_t> DX12Buffer::writeData(gsl::span<const gsl::byte> data)
+std::pair<size_t, size_t> DX12Buffer::writeData(gsl::span<const std::byte> data)
 {
     size_t size = data.size();
     std::pair<size_t, size_t> written = {0, 0};
@@ -398,7 +398,7 @@ void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResou
                 bytes.data(),
                 bytes.size(),
                 rowPitch,
-                (gsl::byte*) descriptor.pixelData.getBytes(),
+                (std::byte*) descriptor.pixelData.getBytes(),
                 resourceDesc.Width * bpp,
                 resourceDesc.Width,
                 resourceDesc.Height,
@@ -630,7 +630,7 @@ DX12MaterialConstantBuffer::DX12MaterialConstantBuffer(DX12Video& video)
 
 }
 
-void DX12MaterialConstantBuffer::update(gsl::span<const gsl::byte> data)
+void DX12MaterialConstantBuffer::update(gsl::span<const std::byte> data)
 {
     size_t size = data.size_bytes();
     buffer.resize(size);

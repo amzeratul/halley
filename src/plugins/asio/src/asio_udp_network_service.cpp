@@ -57,7 +57,7 @@ void AsioUDPNetworkService::update(Time t)
 	// Update service
 	service.poll();
 
-    auto callback = [this](UDPEndpoint& remote, gsl::span<gsl::byte> packet) {
+    auto callback = [this](UDPEndpoint& remote, gsl::span<std::byte> packet) {
         std::string* errorMsgPtr = nullptr;
         receivePacket(remote, packet, errorMsgPtr);
     };
@@ -99,7 +99,7 @@ void AsioUDPNetworkService::stopListening()
 	acceptCallback = {};
 }
 
-void AsioUDPNetworkService::receivePacket(UDPEndpoint& endpoint, gsl::span<gsl::byte> received, std::string* error)
+void AsioUDPNetworkService::receivePacket(UDPEndpoint& endpoint, gsl::span<std::byte> received, std::string* error)
 {
 	if (error) {
 		std::cout << "Error receiving packet: " << (*error) << std::endl;

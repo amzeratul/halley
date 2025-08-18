@@ -38,7 +38,7 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	other.hash = 0;
 }
 
-gsl::span<const gsl::byte> MaterialDataBlock::getData() const
+gsl::span<const std::byte> MaterialDataBlock::getData() const
 {
 	return gsl::as_bytes(gsl::span<const Byte>(data));
 }

@@ -58,7 +58,7 @@ namespace Halley
 
 		std::string string() const;
 
-		static bool writeFile(const Path& path, gsl::span<const gsl::byte> data);
+		static bool writeFile(const Path& path, gsl::span<const std::byte> data);
 		static bool writeFile(const Path& path, const Bytes& data);
 		static bool writeFile(const Path& path, const String& data);
 		static void touchFile(const Path& path);

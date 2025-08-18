@@ -11,8 +11,8 @@ namespace Halley {
         };
 
         static size_t getDigestSize(HashAlgorithm algorithm);
-        static Bytes hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> bytes);
-        static void hash(HashAlgorithm algorithm, gsl::span<const gsl::byte> bytes, gsl::span<gsl::byte> digest);
-        static bool verifySignature(HashAlgorithm algorithm, gsl::span<const gsl::byte> publicKey, gsl::span<const gsl::byte> signature, gsl::span<const gsl::byte> bytes);
+        static Bytes hash(HashAlgorithm algorithm, gsl::span<const std::byte> bytes);
+        static void hash(HashAlgorithm algorithm, gsl::span<const std::byte> bytes, gsl::span<std::byte> digest);
+        static bool verifySignature(HashAlgorithm algorithm, gsl::span<const std::byte> publicKey, gsl::span<const std::byte> signature, gsl::span<const std::byte> bytes);
     };
 }

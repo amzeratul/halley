@@ -49,7 +49,7 @@ namespace Halley
 		};
 
 		explicit FontGenerator(bool verbose = false, std::function<bool(float, String)> progressReporter = ignoreReport);
-		FontGeneratorResult generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<char32_t> characters);
+		FontGeneratorResult generateFont(const Metadata& meta, gsl::span<const std::byte> fontFile, FontSizeInfo sizeInfo, float radius, Vector<char32_t> characters);
 
 	private:
 		std::unique_ptr<Font> generateFontMapBinary(const Metadata& meta, FontFace& font, Vector<CharcodeEntry>& entries, float renderScale, float radius, Vector2i imageSize) const;

@@ -24,7 +24,7 @@ namespace Halley {
 		SDLSaveHeaderV0 v0;
 		SDLSaveHeaderV1 v1;
 
-		size_t read(gsl::span<const gsl::byte> data);
+		size_t read(gsl::span<const std::byte> data);
 
 		bool isValidHeader() const;
 		bool isValid(const String& path, const Vector<uint8_t>& key) const;

@@ -15,7 +15,7 @@ BinaryFile::BinaryFile(Bytes&& data)
 	, streaming(false)
 {}
 
-BinaryFile::BinaryFile(gsl::span<const gsl::byte> d)
+BinaryFile::BinaryFile(gsl::span<const std::byte> d)
 	: streaming(false)
 {
 	data.resize(d.size_bytes());
@@ -55,13 +55,13 @@ Bytes& BinaryFile::getBytes()
 	return data;
 }
 
-gsl::span<const gsl::byte> BinaryFile::getSpan() const
+gsl::span<const std::byte> BinaryFile::getSpan() const
 {
 	Expects(!streaming);
 	return gsl::as_bytes(gsl::span<const Byte>(data));
 }
 
-gsl::span<gsl::byte> BinaryFile::getSpan()
+gsl::span<std::byte> BinaryFile::getSpan()
 {
 	Expects(!streaming);
 	return gsl::as_writable_bytes(gsl::span<Byte>(data));

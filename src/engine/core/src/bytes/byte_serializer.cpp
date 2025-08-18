@@ -18,7 +18,7 @@ Serializer::Serializer(SerializerOptions options)
 	, dryRun(true)
 {}
 
-Serializer::Serializer(gsl::span<gsl::byte> dst, SerializerOptions options)
+Serializer::Serializer(gsl::span<std::byte> dst, SerializerOptions options)
 	: ByteSerializationBase(std::move(options))
 	, dst(dst)
 	, dryRun(false)
@@ -82,13 +82,13 @@ Serializer& Serializer::operator<<(const Path& path)
 	return (*this << path.string());
 }
 
-Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
+Serializer& Serializer::operator<<(gsl::span<const std::byte> span)
 {
 	copyBytes(span.data(), span.size_bytes());
 	return *this;
 }
 
-Serializer& Serializer::operator<<(gsl::span<gsl::byte> span)
+Serializer& Serializer::operator<<(gsl::span<std::byte> span)
 {
 	copyBytes(span.data(), span.size_bytes());
 	return *this;
@@ -162,7 +162,7 @@ void Serializer::copyBytes(const void* src, size_t srcSize)
 	size += srcSize;
 }
 
-Deserializer::Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options)
+Deserializer::Deserializer(gsl::span<const std::byte> src, SerializerOptions options)
 	: ByteSerializationBase(std::move(options))
 	, src(src)
 {
@@ -233,7 +233,7 @@ Deserializer& Deserializer::operator>>(Path& p)
 	return *this;
 }
 
-Deserializer& Deserializer::operator>>(gsl::span<gsl::byte> span)
+Deserializer& Deserializer::operator>>(gsl::span<std::byte> span)
 {
 	if (span.empty()) {
 		return *this;

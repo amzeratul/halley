@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-void FileSystemCache::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+void FileSystemCache::writeFile(const Path& path, gsl::span<const std::byte> data)
 {
 	const auto key = path.getString();
 	if (matchesCache(key, data)) {
@@ -51,7 +51,7 @@ void FileSystemCache::writeFile(const Path& path, const String& data)
 	writeFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
 }
 
-gsl::span<const gsl::byte> FileSystemCache::readFile(const Path& path)
+gsl::span<const std::byte> FileSystemCache::readFile(const Path& path)
 {
 	const auto key = path.getString();
 	{
@@ -128,7 +128,7 @@ bool FileSystemCache::shouldCache(const Path& path, size_t size) const
 	return size < 2048;
 }
 
-bool FileSystemCache::matchesCache(const String& key, gsl::span<const gsl::byte> data) const
+bool FileSystemCache::matchesCache(const String& key, gsl::span<const std::byte> data) const
 {
 	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
 	if (const auto iter = fileDataCache.find(key); iter != fileDataCache.end()) {

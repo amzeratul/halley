@@ -82,7 +82,6 @@ set(HEADERS
         "gsl/span"
         "gsl/span.natvis"
         "gsl/span_ext"
-        "gsl/string_span"
         "gsl/narrow"
         "gsl/util"
         "gsl/zstring"

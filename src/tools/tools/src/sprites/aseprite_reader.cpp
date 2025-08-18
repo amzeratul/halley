@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, Vector<SpriteSheet::ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
+std::map<String, Vector<SpriteSheet::ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const std::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 

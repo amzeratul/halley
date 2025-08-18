@@ -8,10 +8,10 @@
 namespace Halley {
     class FileSystemCache: public IFileSystemCache {
     public:
-        void writeFile(const Path& path, gsl::span<const gsl::byte> data);
+        void writeFile(const Path& path, gsl::span<const std::byte> data);
         void writeFile(const Path& path, Bytes data);
         void writeFile(const Path& path, const String& data);
-		gsl::span<const gsl::byte> readFile(const Path& path) override;
+		gsl::span<const std::byte> readFile(const Path& path) override;
 		Bytes readFileCopy(const Path& path) override;
         bool remove(const Path& path);
         bool hasCached(const Path& path) const;
@@ -51,7 +51,7 @@ namespace Halley {
         mutable std::pair<Path, DirEntry*> lastDirCache;
 
         bool shouldCache(const Path& path, size_t size) const;
-        bool matchesCache(const String& key, gsl::span<const gsl::byte> data) const;
+        bool matchesCache(const String& key, gsl::span<const std::byte> data) const;
 
         void doEnumerate(const Path& root, const Path& path, Vector<Path>& dst, bool includeDirs, bool recursive);
 

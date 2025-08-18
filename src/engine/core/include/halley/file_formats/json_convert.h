@@ -15,7 +15,7 @@ namespace Halley {
 	        bool compact;
         };
 
-        [[nodiscard]] static ConfigNode parseConfig(gsl::span<const gsl::byte> data);
+        [[nodiscard]] static ConfigNode parseConfig(gsl::span<const std::byte> data);
         [[nodiscard]] static ConfigNode parseConfig(const Bytes& data);
         [[nodiscard]] static ConfigNode parseConfig(const String& str);
 

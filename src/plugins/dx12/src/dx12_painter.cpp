@@ -66,7 +66,7 @@ void DX12Painter::setVertices(const MaterialDefinition& material,
 
     {
         auto& vb = vertexBuffers[curBuffer];
-        auto range = vb.writeData(gsl::span((gsl::byte*) vertexData, vertexDataSize));
+        auto range = vb.writeData(gsl::span((std::byte*) vertexData, vertexDataSize));
         Ensures(vertexDataSize == range.second);
 
         D3D12_VERTEX_BUFFER_VIEW view = {};
@@ -79,7 +79,7 @@ void DX12Painter::setVertices(const MaterialDefinition& material,
 
     {
         auto& ib = indexBuffers[curBuffer];
-        auto range = ib.writeData(gsl::span((gsl::byte*) indices, indexDataSize));
+        auto range = ib.writeData(gsl::span((std::byte*) indices, indexDataSize));
         Ensures(indexDataSize == range.second);
 
         D3D12_INDEX_BUFFER_VIEW view = {};

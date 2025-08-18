@@ -49,7 +49,7 @@ Random::Random(uint64_t seed, bool threadSafe)
 	setSeed(seed);
 }
 
-Random::Random(gsl::span<const gsl::byte> data, bool threadSafe)
+Random::Random(gsl::span<const std::byte> data, bool threadSafe)
 	: generator(std::make_unique<MT199937AR>())
 	, threadSafe(threadSafe)
 {
@@ -192,7 +192,7 @@ Random& Random::getGlobal()
 	return *global;
 }
 
-void Random::getBytes(gsl::span<gsl::byte> dst)
+void Random::getBytes(gsl::span<std::byte> dst)
 {
 	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
 	if (threadSafe) {
@@ -208,14 +208,14 @@ void Random::getBytes(gsl::span<gsl::byte> dst)
 			step = 0;
 		}
 
-		dst[pos] = static_cast<gsl::byte>(static_cast<uint8_t>(number & 0xFF));
+		dst[pos] = static_cast<std::byte>(static_cast<uint8_t>(number & 0xFF));
 		number >>= 8;
 	}
 }
 
 void Random::getBytes(gsl::span<Byte> dst)
 {
-	getBytes(gsl::span<gsl::byte>(reinterpret_cast<gsl::byte*>(dst.data()), dst.size()));
+	getBytes(gsl::span<std::byte>(reinterpret_cast<std::byte*>(dst.data()), dst.size()));
 }
 
 void Random::setSeed(uint32_t seed)
@@ -228,7 +228,7 @@ void Random::setSeed(uint64_t seed)
 	setSeed(gsl::as_bytes(gsl::span<uint64_t>(&seed, 1)));
 }
 
-void Random::setSeed(gsl::span<const gsl::byte> data)
+void Random::setSeed(gsl::span<const std::byte> data)
 {
 	if (canSeed) {
 		Vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
@@ -241,7 +241,7 @@ void Random::setSeed(gsl::span<const gsl::byte> data)
 
 void Random::setSeed(gsl::span<Byte> data)
 {
-	setSeed(gsl::span<gsl::byte>(reinterpret_cast<gsl::byte*>(data.data()), data.size()));
+	setSeed(gsl::span<std::byte>(reinterpret_cast<std::byte*>(data.data()), data.size()));
 }
 
 uint32_t Random::getRawInt()

@@ -67,7 +67,7 @@ namespace Halley
     protected:
         static void sendHandshake(IConnection& connection);
         static void sendHandshakeAccept(IConnection& connection, short id);
-        static bool isValidHandshake(gsl::span<const gsl::byte> data, short* connId);
+        static bool isValidHandshake(gsl::span<const std::byte> data, short* connId);
 
         [[nodiscard]] short getFreeConnectionId() const;
         [[nodiscard]] virtual bool hasConnectionWithId(short connId) const { return true; }

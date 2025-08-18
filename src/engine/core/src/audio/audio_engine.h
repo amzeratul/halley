@@ -116,7 +116,7 @@ namespace Halley {
 		std::unique_ptr<AudioResampler> outResampler;
 		Vector<short> tmpShort;
 		Vector<int> tmpInt;
-		RingBuffer<gsl::byte> audioOutputBuffer;
+		RingBuffer<std::byte> audioOutputBuffer;
 
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
@@ -149,7 +149,7 @@ namespace Halley {
 
 	    void removeFinishedVoices();
 		void queueAudioFloat(gsl::span<const float> data);
-		void queueAudioBytes(gsl::span<const gsl::byte> data);
+		void queueAudioBytes(gsl::span<const std::byte> data);
 		bool needsMoreAudio();
 
 		size_t getAvailable() override;

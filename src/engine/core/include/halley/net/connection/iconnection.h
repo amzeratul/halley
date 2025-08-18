@@ -42,15 +42,15 @@ namespace Halley
         {
         public:
 			virtual ~IPacketListener() = default;
-            virtual void onSend(gsl::span<const gsl::byte> packet) = 0;
-            virtual void onReceive(gsl::span<const gsl::byte> packet) = 0;
+            virtual void onSend(gsl::span<const std::byte> packet) = 0;
+            virtual void onReceive(gsl::span<const std::byte> packet) = 0;
         };
 
         [[nodiscard]] virtual size_t getMaxUnreliablePacketSize() const { return 0; }
 
         virtual void onConnect(short connId) {}
 
-        virtual void sendUnreliablePacket(gsl::span<const gsl::byte> packet) {}
+        virtual void sendUnreliablePacket(gsl::span<const std::byte> packet) {}
 
         virtual void setUnreliablePacketListener(IPacketListener* listener) {}
 	};

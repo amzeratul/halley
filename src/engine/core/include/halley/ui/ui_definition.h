@@ -30,7 +30,7 @@ namespace Halley {
 
         FindResult findUUID(const String& id);
         
-        void parseYAML(gsl::span<const gsl::byte> yaml);
+        void parseYAML(gsl::span<const std::byte> yaml);
 		String toYAML() const;
         void makeDefault();
 

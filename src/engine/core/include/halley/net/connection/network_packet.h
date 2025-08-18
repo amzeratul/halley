@@ -8,19 +8,19 @@ namespace Halley
 	class NetworkPacketBase
 	{
 	public:
-		size_t copyTo(gsl::span<gsl::byte> dst) const;
+		size_t copyTo(gsl::span<std::byte> dst) const;
 		size_t getSize() const;
-		gsl::span<const gsl::byte> getBytes() const;
+		gsl::span<const std::byte> getBytes() const;
 
 		NetworkPacketBase(NetworkPacketBase&& other) = delete;
 		NetworkPacketBase& operator=(NetworkPacketBase&& other) = delete;
 
 	protected:
 		NetworkPacketBase();
-		NetworkPacketBase(gsl::span<const gsl::byte> data, size_t prePadding);
+		NetworkPacketBase(gsl::span<const std::byte> data, size_t prePadding);
 
 		size_t dataStart;
-		Vector<gsl::byte> data;
+		Vector<std::byte> data;
 	};
 
 	class OutboundNetworkPacket : public NetworkPacketBase
@@ -28,10 +28,10 @@ namespace Halley
 	public:
 		OutboundNetworkPacket(const OutboundNetworkPacket& other);
 		OutboundNetworkPacket(OutboundNetworkPacket&& other) noexcept;
-		explicit OutboundNetworkPacket(gsl::span<const gsl::byte> data);
+		explicit OutboundNetworkPacket(gsl::span<const std::byte> data);
 		explicit OutboundNetworkPacket(const Bytes& data);
 		
-		void addHeader(gsl::span<const gsl::byte> src);
+		void addHeader(gsl::span<const std::byte> src);
 
 		template <typename T>
 		void addHeader(const T& h)
@@ -47,8 +47,8 @@ namespace Halley
 	public:
 		InboundNetworkPacket();
 		InboundNetworkPacket(InboundNetworkPacket&& other) noexcept;
-		explicit InboundNetworkPacket(gsl::span<const gsl::byte> data);
-		void extractHeader(gsl::span<gsl::byte> dst);
+		explicit InboundNetworkPacket(gsl::span<const std::byte> data);
+		void extractHeader(gsl::span<std::byte> dst);
 
 		template <typename T>
 		void extractHeader(T& h)

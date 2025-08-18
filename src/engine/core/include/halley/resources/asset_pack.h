@@ -47,7 +47,7 @@ namespace Halley {
 		void encrypt(Encrypt::AESKey key);
 		void decrypt(Encrypt::AESKey key);
 	    
-    	void readData(size_t pos, gsl::span<gsl::byte> dst);
+    	void readData(size_t pos, gsl::span<std::byte> dst);
 
 		std::unique_ptr<ResourceDataReader> extractReader();
 
@@ -72,7 +72,7 @@ namespace Halley {
 		PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize);
 
 		size_t size() const override;
-		int read(gsl::span<gsl::byte> dst) override;
+		int read(gsl::span<std::byte> dst) override;
 		void seek(int64_t pos, int whence) override;
 		size_t tell() const override;
 		void close() override;

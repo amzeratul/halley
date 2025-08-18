@@ -15,7 +15,7 @@ namespace Halley
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
-		MaterialDefinition parseMaterial(Path basePath, gsl::span<const gsl::byte> data, IAssetCollector& collector) const;
+		MaterialDefinition parseMaterial(Path basePath, gsl::span<const std::byte> data, IAssetCollector& collector) const;
 
 	private:
 		static void loadPass(MaterialDefinition& material, const ConfigNode& node, IAssetCollector& collector, int passN);

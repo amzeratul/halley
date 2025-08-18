@@ -34,8 +34,8 @@ namespace Halley
 
     	[[nodiscard]] size_t getMaxUnreliablePacketSize() const override;
 
-        void onSend(gsl::span<const gsl::byte> packet) override;
-        void onReceive(gsl::span<const gsl::byte> packet) override;
+        void onSend(gsl::span<const std::byte> packet) override;
+        void onReceive(gsl::span<const std::byte> packet) override;
 
         [[nodiscard]] float getLatency() const;
 
@@ -123,12 +123,12 @@ namespace Halley
     	bool tryReceiveSmallPacket(InboundNetworkPacket& packet);
     	void doFlushSmallPackets();
 
-        void doSend(gsl::span<const gsl::byte> packet, bool small);
+        void doSend(gsl::span<const std::byte> packet, bool small);
         void doSend(SubPacket& packet, int packetIdx);
-    	void doSendUnreliablePacket(gsl::span<const gsl::byte> packet);
+    	void doSendUnreliablePacket(gsl::span<const std::byte> packet);
 
         void doSendAckPackets();
-        void onAckPacketsReceive(gsl::span<const gsl::byte> data, uint8_t parity);
+        void onAckPacketsReceive(gsl::span<const std::byte> data, uint8_t parity);
     	void forwardOutboundQueue();
 
     	void resendUnAckPackets(float minResendTimeDiff);

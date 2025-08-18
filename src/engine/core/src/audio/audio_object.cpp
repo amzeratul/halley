@@ -105,7 +105,7 @@ void AudioObject::legacyToConfigNode(ConfigNode& result) const
 	dynamic_cast<const AudioSubObjectClips&>(objects[0].getObject()).toLegacyConfigNode(result);
 }
 
-void AudioObject::parseYAML(gsl::span<const gsl::byte> yaml)
+void AudioObject::parseYAML(gsl::span<const std::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);

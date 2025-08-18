@@ -23,7 +23,7 @@ namespace Halley {
 
         void clear();
 
-        void load(gsl::span<const gsl::byte> bytes);
+        void load(gsl::span<const std::byte> bytes);
         void load(std::string_view origStr);
         String save() const;
 

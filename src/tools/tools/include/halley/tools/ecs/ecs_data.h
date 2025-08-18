@@ -17,7 +17,7 @@ namespace YAML
 namespace Halley {
 	struct CodegenSourceInfo {
 		String filename;
-		gsl::span<const gsl::byte> data;
+		gsl::span<const std::byte> data;
 		bool generate = false;
 
 		bool operator<(const CodegenSourceInfo& other) const;

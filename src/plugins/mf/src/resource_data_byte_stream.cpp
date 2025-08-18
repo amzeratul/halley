@@ -6,10 +6,10 @@ class AsyncReadOp final : public IUnknown
 {
 public:
 	size_t from = 0;
-	gsl::span<gsl::byte> dst;
+	gsl::span<std::byte> dst;
 	ULONG nRead = 0;
 
-    AsyncReadOp(size_t from, gsl::span<gsl::byte> dst) 
+    AsyncReadOp(size_t from, gsl::span<std::byte> dst) 
 		: from(from)
 		, dst(dst)
 	{}

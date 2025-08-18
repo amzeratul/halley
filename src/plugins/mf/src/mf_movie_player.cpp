@@ -325,7 +325,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					BYTE* src;
 					LONG pitch;
 					buffer2d->Lock2D(&src, &pitch);
-					readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), pitch);
+					readVideoSample(sampleTime, reinterpret_cast<std::byte*>(src), pitch);
 					buffer2d->Unlock2D();
 					buffer2d->Release();
 				} else if (hr == E_NOINTERFACE) {
@@ -333,7 +333,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 					DWORD maxLen;
 					DWORD curLen;
 					buffer->Lock(&src, &maxLen, &curLen);
-					readVideoSample(sampleTime, reinterpret_cast<gsl::byte*>(src), minStride);
+					readVideoSample(sampleTime, reinterpret_cast<std::byte*>(src), minStride);
 					buffer->Unlock();
 				} else {
 					throw Exception("Error while querying for 2D buffer: " + toString(hr), HalleyExceptions::MoviePlugin);
@@ -358,7 +358,7 @@ HRESULT MFMoviePlayer::onReadSample(HRESULT hr, DWORD streamIndex, DWORD streamF
 	return S_OK;
 }
 
-void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride)
+void MFMoviePlayer::readVideoSample(Time time, const std::byte* data, int stride)
 {
 	if (!data) {
 		throw Exception("Null pointer provided to MFMoviePlayer::readVideoSample.", HalleyExceptions::MoviePlugin);
@@ -373,7 +373,7 @@ void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride
 	const int width = alignUp(videoSize.x, 16);
 	const int height = yPlaneHeight + uvPlaneHeight;
 
-	auto srcData = gsl::span<const gsl::byte>(data, stride * height);
+	auto srcData = gsl::span<const std::byte>(data, stride * height);
 	Bytes myData(srcData.size_bytes());
 	memcpy(myData.data(), data, myData.size());
 
@@ -386,7 +386,7 @@ void MFMoviePlayer::readVideoSample(Time time, const gsl::byte* data, int stride
 	onVideoFrameAvailable(time, std::move(descriptor));
 }
 
-void MFMoviePlayer::readAudioSample(Time time, gsl::span<const gsl::byte> data)
+void MFMoviePlayer::readAudioSample(Time time, gsl::span<const std::byte> data)
 {
 	auto src = gsl::span<const short>(reinterpret_cast<const short*>(data.data()), data.size() / sizeof(short));
 

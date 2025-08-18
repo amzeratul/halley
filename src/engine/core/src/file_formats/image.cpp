@@ -50,7 +50,7 @@ Image::Image(Format format, Vector2i size, bool clear)
 	setSize(size, clear);
 }
 
-Image::Image(gsl::span<const gsl::byte> bytes, Format targetFormat)
+Image::Image(gsl::span<const std::byte> bytes, Format targetFormat)
 	: px(nullptr, [](unsigned char*) {})
 {
 	load(bytes, targetFormat);
@@ -427,7 +427,7 @@ void Image::deserialize(Deserializer& s)
 	s >> span;
 }
 
-void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat, const Path& path)
+void Image::load(gsl::span<const std::byte> bytes, Format targetFormat, const Path& path)
 {
 	int targetChannels;
 	switch (targetFormat) {
@@ -672,7 +672,7 @@ Bytes Image::saveHLIFToBytes(std::string_view name, bool lz4hc) const
 	return HLIFFile::encode(*this, name, lz4hc);
 }
 
-Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
+Vector2i Image::getImageSize(gsl::span<const std::byte> bytes)
 {
 	if (HLIFFile::isHLIF(bytes)) {
 		const auto info = HLIFFile::getInfo(bytes);
@@ -699,13 +699,13 @@ void Image::setFormat(Format f)
 	}
 }
 
-bool Image::isQOI(gsl::span<const gsl::byte> bytes)
+bool Image::isQOI(gsl::span<const std::byte> bytes)
 {
 	unsigned char header[] = { 'q', 'o', 'i', 'f' };
 	return bytes.size() >= 4 && memcmp(bytes.data(), header, 4) == 0;
 }
 
-bool Image::isPNG(gsl::span<const gsl::byte> bytes)
+bool Image::isPNG(gsl::span<const std::byte> bytes)
 {
 	unsigned char pngHeader[] = { 137, 80, 78, 71, 13, 10, 26, 10 };
 	return bytes.size() >= 8 && memcmp(bytes.data(), pngHeader, 8) == 0;

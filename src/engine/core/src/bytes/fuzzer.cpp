@@ -5,9 +5,9 @@ using namespace Halley;
 
 Fuzzer::Fuzzer()
 {
-	Vector<gsl::byte> initVec(128);
+	Vector<std::byte> initVec(128);
 	Random::getGlobal().getBytes(initVec);
-	rng.setSeed(gsl::span<gsl::byte>(initVec.data(), initVec.size()));
+	rng.setSeed(gsl::span<std::byte>(initVec.data(), initVec.size()));
 
 	setupMutators();
 }

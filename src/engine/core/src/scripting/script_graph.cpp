@@ -235,7 +235,7 @@ void ScriptGraph::load(const ConfigNode& node, Resources& resources)
 	load(node);
 }
 
-void ScriptGraph::parseYAML(gsl::span<const gsl::byte> yaml)
+void ScriptGraph::parseYAML(gsl::span<const std::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
