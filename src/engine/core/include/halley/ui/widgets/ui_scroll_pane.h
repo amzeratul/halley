@@ -23,7 +23,9 @@ namespace Halley {
 		UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true, float scrollSpeed = 50.0f, bool alwaysSmooth = false);
 		[[deprecated]] UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal = false, bool scrollVertical = true);
 
-		Vector2f getScrollPosition() const;
+    	void update(Time t, bool moved) override;
+
+    	Vector2f getScrollPosition() const;
 		Vector2f getRelativeScrollPosition() const;
 		Vector2f getRelativeScrollEndPosition() const;
 
@@ -36,8 +38,10 @@ namespace Halley {
 
 		float getScrollSpeed() const;
 		void setScrollSpeed(float speed);
-	    void update(Time t, bool moved) override;
 		bool isScrolling(float threshold = 0) const;
+
+		void setMarquee(std::optional<Vector2f> speed);
+		std::optional<Vector2f> getMarque() const;
 
 		bool canScroll(UIScrollDirection direction) const;
 		float getCoverageSize(UIScrollDirection direction) const;
@@ -67,12 +71,14 @@ namespace Halley {
 		Vector2f contentsSize;
 		Vector2f scrollPos;
 		std::optional<Vector2f> targetScrollTo;
+		std::optional<Vector2f> marquee;
 		float scrollSpeed = 0;
 		bool alwaysSmooth = false;
 		bool scrollHorizontal = false;
 		bool scrollVertical = false;
 		bool scrollWheelEnabled = true;
 		Time lastDeltaT = 0;
+		Vector2f marqueePhase;
 
 		void onMouseWheel(const UIEvent& event);
 		Vector2f getBasePosition(const String& widgetId);

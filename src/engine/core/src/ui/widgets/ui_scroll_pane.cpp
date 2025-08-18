@@ -126,6 +126,22 @@ void UIScrollPane::update(Time t, bool moved)
 		}
 	}
 
+	if (marquee) {
+		const Vector2f coverage = Vector2f(getCoverageSize(UIScrollDirection::Horizontal), getCoverageSize(UIScrollDirection::Vertical));
+		const Vector2f marqueeScrollSpeed = *marquee / (contentsSize * (Vector2f(1.0f, 1.0f) - coverage));
+		marqueePhase = (marqueePhase + static_cast<float>(t) * marqueeScrollSpeed).modulo(Vector2f(1.0f, 1.0f));
+		if (coverage.x >= 1.0f) {
+			marqueePhase.x = 0;
+		}
+		if (coverage.y >= 1.0f) {
+			marqueePhase.y = 0;
+		}
+		const auto marqueeScrollPosX = lerp(-0.1f, 1.1f, 0.5f - 0.5f * cos(marqueePhase.x * 2.0f * pif())) * (1.0f - coverage.x);
+		const auto marqueeScrollPosY = lerp(-0.1f, 1.1f, 0.5f - 0.5f * cos(marqueePhase.y * 2.0f * pif())) * (1.0f - coverage.y);
+		setRelativeScroll(marqueeScrollPosX, UIScrollDirection::Horizontal);
+		setRelativeScroll(marqueeScrollPosY, UIScrollDirection::Vertical);
+	}
+
 	refresh();
 	if (t > 0.0001) {
 		lastDeltaT = t;
@@ -143,6 +159,16 @@ bool UIScrollPane::isScrolling(float threshold) const
 	} else {
 		return false;
 	}
+}
+
+void UIScrollPane::setMarquee(std::optional<Vector2f> speed)
+{
+	this->marquee = speed;
+}
+
+std::optional<Vector2f> UIScrollPane::getMarque() const
+{
+	return marquee;
 }
 
 bool UIScrollPane::canScroll(UIScrollDirection direction) const

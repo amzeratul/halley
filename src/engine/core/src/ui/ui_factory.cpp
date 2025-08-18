@@ -1272,6 +1272,7 @@ UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
 	result.entries.emplace_back("Scroll Speed", "scrollSpeed", "float", "50");
 	result.entries.emplace_back("Smooth Go To", "smoothGoTo", "bool", "false");
 	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
+	result.entries.emplace_back("Marquee", "marquee", "std::optional<Halley::Vector2f>", "");
 
 	return result;
 }
@@ -1286,9 +1287,11 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
 	auto scrollSpeed = node["scrollSpeed"].asFloat(50.0f);
 	auto smoothGoTo = node["smoothGoTo"].asBool(false);
+	auto marquee = node["marquee"].asOptional<Vector2f>();
 
 	auto result = std::make_shared<UIScrollPane>(id, clipSize, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, scrollSpeed, smoothGoTo);
 	result->setScrollWheelEnabled(mouseWheelEnabled);
+	result->setMarquee(marquee);
 	return result;
 }
 
