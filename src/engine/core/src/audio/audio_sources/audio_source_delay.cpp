@@ -55,3 +55,8 @@ void AudioSourceDelay::setInitialDelay(size_t delay)
 {
 	initialDelay = delay;
 }
+
+bool AudioSourceDelay::isLooping()
+{
+	return src->isLooping();
+}

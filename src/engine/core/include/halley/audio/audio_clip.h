@@ -55,6 +55,9 @@ namespace Halley
 		uint8_t numChannels = 0;
 		bool streaming = false;
 
+		mutable uint8_t readsWithSeek = 0;
+		mutable uint8_t readsWithoutSeek = 0;
+
 		std::array<std::unique_ptr<VorbisData>, 2> vorbisData;
 
 		mutable Vector<Vector<AudioSample>> samples;

@@ -19,6 +19,7 @@ namespace Halley
 		bool isReady() const override;
 		size_t getSamplesLeft() const override;
 		void restart() override;
+		bool isLooping() override;
 
 	private:
 		class Layer {

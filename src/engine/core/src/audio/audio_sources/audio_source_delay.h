@@ -14,6 +14,7 @@ namespace Halley
 		size_t getSamplesLeft() const override;
         void restart() override;
 		void setInitialDelay(size_t delay);
+		bool isLooping() override;
 
 	private:
 		std::unique_ptr<AudioSource> src;

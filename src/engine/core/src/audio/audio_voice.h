@@ -89,6 +89,7 @@ namespace Halley {
 		float lastPostGain = 0;
 		float lastPitch = 1;
 		uint8_t lastDstChannels = 0;
+		bool hasMixOutput = false;
 
 		AudioBuffersRef audioData;
 		size_t startDstSample = 0;

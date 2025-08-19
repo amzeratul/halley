@@ -137,6 +137,11 @@ void AudioSourceSequence::restart()
 	initialize();
 }
 
+bool AudioSourceSequence::isLooping()
+{
+	return true;
+}
+
 size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeNextEvent(size_t fadeLen) const
 {
 	const auto left = source->getSamplesLeft();

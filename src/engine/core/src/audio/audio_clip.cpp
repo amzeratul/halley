@@ -150,7 +150,20 @@ VorbisData* AudioClip::getVorbisData(size_t targetPos) const
 	}
 
 	if (bestDist != 0) {
+		readsWithSeek++;
 		vorbisData[bestIdx]->seek(targetPos);
+	} else {
+		readsWithoutSeek++;
+		if (readsWithoutSeek >= 10) {
+			if (readsWithSeek > 0) {
+				--readsWithSeek;
+			}
+			readsWithoutSeek -= 10;
+		}
+	}
+
+	if (readsWithSeek >= 5) {
+		Logger::logWarning("Excessive seeking in streaming clip \"" + getAssetId() + "\" - streaming clips shouldn't have multiple instances.", true);
 	}
 	
 	return vorbisData[bestIdx].get();

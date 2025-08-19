@@ -103,6 +103,16 @@ void AudioSourceLayers::restart()
 	}
 }
 
+bool AudioSourceLayers::isLooping()
+{
+	for (auto& layer: layers) {
+		if (layer.source->isLooping()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, size_t idx)
 	: source(std::move(source))
 	, idx(idx)

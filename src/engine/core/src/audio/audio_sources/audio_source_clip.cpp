@@ -47,6 +47,11 @@ void AudioSourceClip::restart()
 	initialised = false;
 }
 
+bool AudioSourceClip::isLooping()
+{
+	return looping;
+}
+
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
 	Expects(isReady());

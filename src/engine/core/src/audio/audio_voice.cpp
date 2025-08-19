@@ -212,13 +212,26 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	// Mix
 	prevChannelMix = channelMix;
 	sourcePos.setMix(nChannels, channels, channelMix, gain, listener, attenuation);
-	
+
+	// Has any mix output?
+	const auto nMix = static_cast<size_t>(nChannels) * channels.size();
+	float totalMix = 0;
+	for (size_t i = 0; i < nMix; ++i) {
+		totalMix += channelMix[i];
+		totalMix += prevChannelMix[i];
+	}
+	hasMixOutput = totalMix > 0.0001f;
+		
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
 		isFirstUpdate = false;
 	}
 
 	elapsedTime = 0;
+	
+	if (!hasMixOutput && !source->isLooping()) {
+		stop({});
+	}
 }
 
 void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
@@ -245,7 +258,9 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 	bool isPlaying = true;
 	if (numSamples > 0) {
 		audioData = pool.getBuffers(getNumberOfChannels(), numSamples);
-		isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
+		if (hasMixOutput) {
+			isPlaying = source->getAudioData(numSamples, audioData.getSampleSpans());
+		}
 	}
 
 	// Advance playback state
@@ -259,7 +274,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 {
 	Expects(!dst.empty());
 
-	if (paused || !source) {
+	if (paused || !source || !hasMixOutput) {
 		return;
 	}
 

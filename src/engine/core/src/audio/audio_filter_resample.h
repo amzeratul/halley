@@ -15,6 +15,7 @@ namespace Halley
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		size_t getSamplesLeft() const override;
 		void restart() override;
+		bool isLooping() override;
 
 		void setFromHz(float fromHz);
 

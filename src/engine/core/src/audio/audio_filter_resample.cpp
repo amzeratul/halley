@@ -82,6 +82,11 @@ void AudioFilterResample::restart()
 	resamplers.clear();
 }
 
+bool AudioFilterResample::isLooping()
+{
+	return source->isLooping();
+}
+
 void AudioFilterResample::setFromHz(float fromHz)
 {
 	this->fromHz = fromHz;
