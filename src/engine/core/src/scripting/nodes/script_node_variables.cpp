@@ -213,7 +213,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 		quoting = true;
 	}
 	
-	str.append(data.asString(), settingColour);
+	str.append(data.asString("null"), settingColour);
 	if (quoting) {
 		str.append("\"", settingColour);
 	}
