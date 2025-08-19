@@ -135,15 +135,38 @@ const Font::Glyph& Font::getGlyphHere(int code) const
 
 const Font& Font::getFontForGlyph(int code) const
 {
-	const auto iter = glyphs.find(code);
-	if (iter == glyphs.end()) {
-		for (const auto& font: fallbackFont) {
-			if (font->glyphs.find(code) != font->glyphs.end()) {
-				return *font;
+	if (const auto iter = glyphs.find(code); iter != glyphs.end()) {
+		// Found here
+		return *this;
+	}
+
+	// Not found, try fallback fonts
+	for (const auto& font: fallbackFont) {
+		const auto iter = font->glyphs.find(code);
+		if (iter != font->glyphs.end()) {
+			return *font;
+		}
+	}
+
+	// Not found in fallback, return whichever has the best empty glyph (because some fonts don't seem to have a visible one)
+	float bestAdvance = 0;
+	const Font* bestFallbackFont = this;
+	if (const auto iter = glyphs.find(0); iter != glyphs.end()) {
+		bestAdvance = iter->second.advance.manhattanLength();
+	}
+	for (const auto& font: fallbackFont) {
+		const auto iter = font->glyphs.find(0);
+		if (iter != font->glyphs.end()) {
+			float advance = iter->second.advance.manhattanLength();
+			if (advance > bestAdvance) {
+				bestAdvance = advance;
+				bestFallbackFont = font.get();
 			}
 		}
 	}
-	return *this;
+
+	// Return the best one found
+	return *bestFallbackFont;
 }
 
 float Font::getLineHeightAtSize(float size) const
