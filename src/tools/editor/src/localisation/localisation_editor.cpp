@@ -791,21 +791,25 @@ void LocalisationEditor::uploadOriginalStrings()
 
 void LocalisationEditor::downloadTranslations()
 {
-	if (remoteStrings) {
-		const auto& orig = remoteStrings->originalLanguage;
-		
-		for (const auto& [langId, localisedData]: remoteStrings->localised) {
-			const auto lang = I18NLanguage(langId);
+	if (!remoteStrings) {
+		return;
+	}
 
-			std::stringstream str;
-			str << lang.getISOCode().cppStr() << ":\n";
-			int nEntries = 0;
+	const auto& orig = remoteStrings->originalLanguage;
+	
+	for (const auto& [langId, localisedData]: remoteStrings->localised) {
+		const auto lang = I18NLanguage(langId);
 
-			for (const auto& chunk: orig->getChunks()) {
-				bool firstInChunk = true;
+		std::stringstream str;
+		str << lang.getISOCode().cppStr() << ":\n";
+		int nEntries = 0;
 
-				for (const auto& entry: chunk.entries) {
-					if (const auto iter = localisedData.entries.find(entry.key); iter != localisedData.entries.end()) {
+		for (const auto& chunk: orig->getChunks()) {
+			bool firstInChunk = true;
+
+			for (const auto& entry: chunk.entries) {
+				if (const auto iter = localisedData.entries.find(entry.key); iter != localisedData.entries.end()) {
+					if (!iter->second.value.isEmpty()) {
 						if (firstInChunk) {
 							str << "\n  # " << chunk.name << "\n";
 							firstInChunk = false;
@@ -816,16 +820,16 @@ void LocalisationEditor::downloadTranslations()
 					}
 				}
 			}
+		}
 
-			const auto dirPath = project.getAssetsSrcPath() / "config" / "strings" / "localised";
-			const auto path = dirPath / (lang.getISOCode() + ".yaml");
-			if (nEntries > 0 || Path::exists(path)) {
-				if (nEntries == 0) {
-					str << "  {}";
-				}
-				FileSystem::createDir(dirPath);
-				Path::writeFile(path, str.str());
+		const auto dirPath = project.getAssetsSrcPath() / "config" / "strings" / "localised";
+		const auto path = dirPath / (lang.getISOCode() + ".yaml");
+		if (nEntries > 0 || Path::exists(path)) {
+			if (nEntries == 0) {
+				str << "  {}";
 			}
+			FileSystem::createDir(dirPath);
+			Path::writeFile(path, str.str());
 		}
 	}
 }
