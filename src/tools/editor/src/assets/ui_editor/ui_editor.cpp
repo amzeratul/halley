@@ -492,7 +492,9 @@ void UIEditor::deleteWidgets(const Vector<String>& uuids)
 
 void UIEditor::selectWidget(const String& id)
 {
-	widgetList->selectWidget(id);
+	if (widgetList) {
+		widgetList->selectWidget(id);
+	}
 }
 
 bool UIEditor::isEditingHalleyUI() const

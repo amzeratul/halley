@@ -201,7 +201,9 @@ void UIEditorDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	if (!canPropagateMouseToChildren()) {
 		if (button == 0) {
 			const auto uuid = lastWidgetUnderMouse ? getUUIDOfWidgetClicked(*lastWidgetUnderMouse) : UUID();
-			editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+			if (editor) {
+				editor->selectWidget(uuid.isValid() ? uuid.toString() : "");
+			}
 		}
 	}
 }
