@@ -50,7 +50,12 @@ std::unique_ptr<Message> WorldReflection::createMessage(int id) const
 
 std::unique_ptr<Message> WorldReflection::createMessage(const String& name) const
 {
-	return createMessage(messageMap.at(name));
+	auto iter = messageMap.find(name);
+	if (iter != messageMap.end()) {
+		return createMessage(iter->second);
+	} else {
+		throw Exception("Unknown Message \"" + name + "\"", HalleyExceptions::Entity);
+	}
 }
 
 std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(int id) const
@@ -60,7 +65,12 @@ std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(int id) cons
 
 std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(const String& name) const
 {
-	return createSystemMessage(systemMessageMap.at(name));
+	auto iter = systemMessageMap.find(name);
+	if (iter != systemMessageMap.end()) {
+		return createSystemMessage(iter->second);
+	} else {
+		throw Exception("Unknown SystemMessage \"" + name + "\"", HalleyExceptions::Entity);
+	}
 }
 
 ComponentReflector& WorldReflection::getComponentReflector(int id) const
