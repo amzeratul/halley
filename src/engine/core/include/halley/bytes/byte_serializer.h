@@ -19,6 +19,7 @@
 #include "halley/resources/resource_reference.h"
 #include "iserialization_dictionary.h"
 #include "byte_serializer_base.h"
+#include "halley/data_structures/bit_vector.h"
 
 namespace Halley {
 	class World;
@@ -127,6 +128,7 @@ namespace Halley {
 		Serializer& operator<<(gsl::span<const std::byte> span);
 		Serializer& operator<<(gsl::span<std::byte> span);
 		Serializer& operator<<(const Bytes& bytes);
+		Serializer& operator<<(const BitVector& val);
 
 		template <typename T>
 		Serializer& operator<<(const Vector<T>& val)
@@ -138,7 +140,7 @@ namespace Halley {
 			}
 			return *this;
 		}
-		
+
 		template <typename T>
 		Serializer& operator<<(gsl::span<T> val)
 		{
@@ -394,6 +396,7 @@ namespace Halley {
 		Deserializer& operator>>(Path& p);
 		Deserializer& operator>>(gsl::span<std::byte> span);
 		Deserializer& operator>>(Bytes& bytes);
+		Deserializer& operator>>(BitVector& val);
 
 		template <typename T>
 		Deserializer& operator>>(Vector<T>& val)
@@ -410,7 +413,7 @@ namespace Halley {
 			}
 			return *this;
 		}
-		
+	
 		template <typename T>
 		Deserializer& operator>>(std::list<T>& val)
 		{

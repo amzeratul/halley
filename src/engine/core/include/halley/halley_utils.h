@@ -17,6 +17,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "bytes/fuzzer.h"
 
 #include "data_structures/bin_pack.h"
+#include "data_structures/bit_vector.h"
 #include "data_structures/config_database.h"
 #include "data_structures/config_node.h"
 #include "data_structures/dynamic_grid.h"

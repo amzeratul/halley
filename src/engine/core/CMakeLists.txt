@@ -295,6 +295,7 @@ set(SOURCES
         "src/concurrency/task_set.cpp"
         
         "src/data_structures/bin_pack.cpp"
+        "src/data_structures/bit_vector.cpp"
         "src/data_structures/config_database.cpp"
         "src/data_structures/config_node.cpp"
         "src/data_structures/highscore.cpp"
@@ -771,6 +772,7 @@ set(HEADERS
         "include/halley/concurrency/task_set.h"
         
         "include/halley/data_structures/bin_pack.h"
+        "include/halley/data_structures/bit_vector.h"
         "include/halley/data_structures/config_database.h"
         "include/halley/data_structures/config_node.h"
         "include/halley/data_structures/config_node.natvis"

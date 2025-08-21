@@ -102,6 +102,11 @@ Serializer& Serializer::operator<<(const Bytes& bytes)
 	return *this;
 }
 
+Serializer& Serializer::operator<<(const BitVector& val)
+{
+	return *this << val.getVector();
+}
+
 void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign)
 {
 	// 7  0sxxxxxx
@@ -257,6 +262,11 @@ Deserializer& Deserializer::operator>>(Bytes& bytes)
 	auto dst = gsl::as_writable_bytes(gsl::span<Byte>(bytes));
 	*this >> dst;
 	return *this;
+}
+
+Deserializer& Deserializer::operator>>(BitVector& val)
+{
+	return *this >> val.getVector();
 }
 
 void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool isSigned)
