@@ -234,6 +234,10 @@ void UIClickable::setHoverOnChildren(bool enabled)
 
 bool UIClickable::isMouseOver() const
 {
+	if (getLastInputType() != UIInputType::Mouse) {
+		return false;
+	}
+
 	if (UIWidget::isMouseOver()) {
 		return true;
 	}
