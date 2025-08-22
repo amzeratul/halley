@@ -11,8 +11,12 @@
 	#include <sys/utime.h>
 #else
 	#include <sys/types.h>
+#ifdef __PROSPERO__
+	#include "kernel.h"
+#else
 	#include <utime.h>
-#endif
+#endif // __PROSPERO__
+#endif // _MSC_VER
 
 #include "halley/os/os.h"
 #include "halley/utils/hash.h"
@@ -207,7 +211,7 @@ std::string Path::makeString(bool includeDot, char dirSeparator) const
 		} else {
 			result += dirSeparator;
 		}
-		result += p;
+		result += (std::string_view)p;
 	}
 	return result;
 }
@@ -400,7 +404,11 @@ bool Path::writeFile(const Path& path, const String& data)
 
 void Path::touchFile(const Path& path)
 {
+#ifdef __PROSPERO__
+	sceKernelUtimes(path.string().c_str(), nullptr);
+#else
 	utime(path.string().c_str(), nullptr);
+#endif
 }
 
 bool Path::exists(const Path& path)

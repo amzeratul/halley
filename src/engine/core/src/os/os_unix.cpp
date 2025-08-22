@@ -20,7 +20,7 @@
 \*****************************************************************/
 
 #include "os_unix.h"
-#ifdef IS_UNIX
+#if defined(IS_UNIX) && !defined(__PROSPERO__)
 
 #include <halley/support/exception.h>
 #include <stdlib.h>

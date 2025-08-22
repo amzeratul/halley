@@ -55,7 +55,7 @@ OS* OS::createOS()
 	return new OSiOS();
 #elif defined(linux)
 	return new OSLinux();
-#elif defined(__FreeBSD__) && !defined(__ORBIS__)
+#elif defined(__FreeBSD__) && !defined(__ORBIS__) && !defined(__PROSPERO__)
 	return new OSFreeBSD();
 #elif defined(WITH_GDK)
     return new OSGDK();

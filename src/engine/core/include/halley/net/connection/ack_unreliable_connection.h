@@ -3,6 +3,7 @@
 #include "iconnection.h"
 #include "network_packet.h"
 #include "halley/data_structures/vector.h"
+#include <chrono>
 
 namespace Halley
 {

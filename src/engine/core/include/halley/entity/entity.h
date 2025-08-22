@@ -279,7 +279,9 @@ namespace Halley {
 		size_t getMemoryUsage(ComponentDeleterTable& table) const;
 	};
 
+#ifndef __PROSPERO__ // TODO
 	static_assert(sizeof(Entity) <= 128); // We'll lose some significant perf due to going over two cache lines
+#endif
 
 	class EntityRef;
 	

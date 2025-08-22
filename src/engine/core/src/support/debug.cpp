@@ -180,7 +180,7 @@ private:
 
 #endif
 
-#if !defined(NN_NINTENDO_SDK) && !defined(__ORBIS__)
+#if !defined(NN_NINTENDO_SDK) && !defined(__ORBIS__) && !defined(__PROSPERO__)
 #define HAS_SIGNAL
 #include <csignal>
 #endif

@@ -25,6 +25,8 @@
 #include <list>
 #include <array>
 #include <functional>
+#include <atomic>
+#include <mutex>
 
 namespace Halley {
 	struct DebugTraceEntry

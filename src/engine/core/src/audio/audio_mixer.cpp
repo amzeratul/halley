@@ -157,6 +157,12 @@ void AudioMixer::copy(AudioSamples dst, AudioSamples src, float gainStart, float
 	}
 }
 
+#ifdef __PROSPERO__
+// TODO
+#undef HAS_SSE
+#undef HAS_AVX
+#endif
+
 #ifdef HAS_SSE
 
 #ifdef _MSC_VER

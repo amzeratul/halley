@@ -571,7 +571,13 @@ void Painter::onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size
 
 		auto& profiler = ProfilerCapture::get();
 		const auto profilerEventId = profiler.recordEventStart(ProfilerEventType::GPU, "", frameStartCPUTime);
-		profiler.recordEventEnd(profilerEventId, frameStartCPUTime + std::chrono::nanoseconds(frameEnd - frameStart));
+#ifdef __PROSPERO__
+		// The units of time_point is microseconds on PS5
+		auto t = frameStartCPUTime + std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(frameEnd - frameStart));
+#else
+		auto t = frameStartCPUTime + std::chrono::nanoseconds(frameEnd - frameStart);
+#endif
+		profiler.recordEventEnd(profilerEventId, t);
 	}
 
 	if (snapshot) {

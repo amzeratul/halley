@@ -185,7 +185,7 @@ void BaseGraphRenderer::drawNodeBackground(Painter& painter, Vector2f basePos, c
 {
 }
 
-void BaseGraphRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
+void BaseGraphRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, const std::optional<GraphNodePinType>& highlightElement, GraphPinId highlightElementId)
 {
 	const auto* nodeType = tryGetNodeType(node.getType());
 	if (!nodeType) {
