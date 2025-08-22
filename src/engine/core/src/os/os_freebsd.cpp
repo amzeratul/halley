@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#if defined(__FreeBSD__) && !defined(__ORBIS__)
+#if defined(__FreeBSD__) && !defined(__ORBIS__) && !defined(__PROSPERO__)
 
 #include "os_freebsd.h"
 #include <sys/types.h>

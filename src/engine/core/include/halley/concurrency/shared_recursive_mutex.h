@@ -2,6 +2,7 @@
 
 #include <shared_mutex>
 #include <thread>
+#include <atomic>
 
 namespace Halley {
     class SharedRecursiveMutex {
