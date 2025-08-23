@@ -1,4 +1,5 @@
 #pragma once
+#include "ui_root.h"
 #include "halley/time/halleytime.h"
 
 namespace Halley {
@@ -12,6 +13,7 @@ namespace Halley {
 	    virtual void init();
 		virtual void deInit();
 		virtual void update(Time time);
+		virtual void onAddedToRoot(UIRoot& root);
 
 		virtual bool onParentDestroyed(); // Return true if OK, false to abort destruction
 		virtual void onParentAboutToDraw();

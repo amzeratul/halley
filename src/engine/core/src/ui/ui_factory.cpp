@@ -24,6 +24,7 @@
 #include "halley/ui/ui_validator.h"
 #include "halley/graphics/material/material_definition.h"
 #include "halley/ui/behaviours/ui_fade_behaviour.h"
+#include "halley/ui/behaviours/ui_fullscreen_behaviour.h"
 #include "halley/ui/widgets/ui_framed_image.h"
 #include "halley/ui/widgets/ui_hybrid_list.h"
 #include "halley/ui/widgets/ui_spin_list.h"
@@ -102,6 +103,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 
 	addBehaviourFactory("slide", [=](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
 	addBehaviourFactory("fade", [=](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
+	addBehaviourFactory("fullscreen", [=](const ConfigNode& node) { return makeFullscreenBehaviour(node); }, getFullscreenBehaviourProperties());
 }
 
 UIFactory::~UIFactory()
@@ -1897,12 +1899,24 @@ UIFactoryWidgetProperties UIFactory::getFadeBehaviourProperties() const
 	return result;
 }
 
+UIFactoryWidgetProperties UIFactory::getFullscreenBehaviourProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Fullscreen";
+	return result;
+}
+
 std::shared_ptr<UIBehaviour> UIFactory::makeFadeBehaviour(const ConfigNode& node)
 {
 	auto delay = node["delayIn"].asFloat(0);
 	auto length = node["lengthIn"].asFloat(0);
 	auto curve = InterpolationCurve(node["curveIn"]);
 	return std::make_shared<UIFadeBehaviour>(delay, length, curve);
+}
+
+std::shared_ptr<UIBehaviour> UIFactory::makeFullscreenBehaviour(const ConfigNode& node)
+{
+	return std::make_shared<UIFullscreenBehaviour>();
 }
 
 

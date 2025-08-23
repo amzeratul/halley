@@ -208,6 +208,7 @@ set(SOURCES
         "src/ui/ui_widget.cpp"
 
         "src/ui/behaviours/ui_fade_behaviour.cpp"
+        "src/ui/behaviours/ui_fullscreen_behaviour.cpp"
         "src/ui/behaviours/ui_reload_ui_behaviour.cpp"
         "src/ui/behaviours/ui_slide_behaviour.cpp"
         "src/ui/behaviours/ui_transition_slide_behaviour.cpp"
@@ -676,6 +677,7 @@ set(HEADERS
         "include/halley/ui/ui_widget.h"
 
         "include/halley/ui/behaviours/ui_fade_behaviour.h"
+        "include/halley/ui/behaviours/ui_fullscreen_behaviour.h"
         "include/halley/ui/behaviours/ui_reload_ui_behaviour.h"
         "include/halley/ui/behaviours/ui_slide_behaviour.h"
         "include/halley/ui/behaviours/ui_transition_slide_behaviour.h"

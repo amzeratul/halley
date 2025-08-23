@@ -779,10 +779,13 @@ void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 		this->root = &root;
 		onAddedToRoot(root);
 
-		for (auto& c : getChildren()) {
+		for (auto& b: behaviours) {
+			b->onAddedToRoot(root);
+		}
+		for (auto& c: getChildren()) {
 			c->notifyTreeAddedToRoot(root);
 		}
-		for (auto& c : getChildrenWaiting()) {
+		for (auto& c: getChildrenWaiting()) {
 			if (c) {
 				c->notifyTreeAddedToRoot(root);
 			}
