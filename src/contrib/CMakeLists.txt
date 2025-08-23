@@ -28,6 +28,7 @@ set(SOURCES
         "tinyxml/tinyxml.cpp"
         "tinyxml/tinyxmlerror.cpp"
         "tinyxml/tinyxmlparser.cpp"
+        "tinyxml2/tinyxml2.cpp"
 
         "xxhash/xxhash.c"
 
@@ -111,6 +112,7 @@ set(HEADERS
         "tinyxml/ticpprc.h"
         "tinyxml/tinystr.h"
         "tinyxml/tinyxml.h"
+        "tinyxml2/tinyxml2.h"
         
         "speex/arch.h"
         "speex/fixed_generic.h"
