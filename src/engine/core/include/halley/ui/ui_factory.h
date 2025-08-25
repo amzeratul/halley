@@ -235,9 +235,11 @@ namespace Halley
 
 		std::shared_ptr<UIBehaviour> makeSlideBehaviour(const ConfigNode& node);
 		std::shared_ptr<UIBehaviour> makeFadeBehaviour(const ConfigNode& node);
+		std::shared_ptr<UIBehaviour> makeFullscreenBehaviour(const ConfigNode& node);
 
 		UIFactoryWidgetProperties getSlideBehaviourProperties() const;
 		UIFactoryWidgetProperties getFadeBehaviourProperties() const;
+		UIFactoryWidgetProperties getFullscreenBehaviourProperties() const;
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

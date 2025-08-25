@@ -97,13 +97,14 @@ void Encode::decodeBase16(std::string_view in, gsl::span<std::byte> bytes)
 	};
 	
 	const size_t inSize = in.size();
-	const size_t outSize = inSize / 2;
-	Expects(inSize % 2 == 0);
+	const size_t outSize = (inSize + 1) / 2;
 	Expects(size_t(bytes.size()) >= outSize);
 
+	int readPos = inSize % 2 == 0 ? 0 : -1;
 	for (size_t i = 0; i < outSize; ++i) {
-		const auto high = charToVal(in[i * 2]);
-		const auto low = charToVal(in[i * 2 + 1]);
+		const uint32_t high = readPos >= 0 ? charToVal(in[readPos]) : 0;
+		const uint32_t low = charToVal(in[readPos + 1]);
+		readPos += 2;
 		bytes[i] = std::byte((high << 4) | low);
 	}
 }
@@ -111,7 +112,7 @@ void Encode::decodeBase16(std::string_view in, gsl::span<std::byte> bytes)
 Bytes Encode::decodeBase16(std::string_view in)
 {
 	Bytes result;
-	result.resize(in.size() / 2);
+	result.resize((in.size() + 1) / 2);
 	decodeBase16(in, result.byte_span());
 	return result;
 }

@@ -155,7 +155,7 @@ void ProjectWindow::makeToolbar()
 	auto& list = toolbar->getList();
 	list->setItemActive("assets", devEnvironment);
 	list->setItemActive("ecs", devEnvironment);
-	list->setItemActive("plot", devEnvironment);
+	list->setItemActive("plot", false && devEnvironment);
 	if (!devEnvironment) {
 		list->setSelectedOptionId("localisation");
 	}
@@ -194,7 +194,7 @@ void ProjectWindow::makePagedPane()
 	addPage(static_cast<int>(EditorTabs::Properties), properties);
 	addPage(static_cast<int>(EditorTabs::Settings), settings);
 	addPage(static_cast<int>(EditorTabs::Terminal), consoleWindow);
-	if (devEnvironment) {
+	if (false && devEnvironment) {
 		auto plot = std::make_shared<Plotter>(factory);
 		addPage(static_cast<int>(EditorTabs::Plot), plot);
 	}

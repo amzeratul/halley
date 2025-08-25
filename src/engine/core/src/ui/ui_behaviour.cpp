@@ -15,6 +15,10 @@ void UIBehaviour::update(Time time)
 {
 }
 
+void UIBehaviour::onAddedToRoot(UIRoot& root)
+{
+}
+
 bool UIBehaviour::onParentDestroyed()
 {
 	return true;
