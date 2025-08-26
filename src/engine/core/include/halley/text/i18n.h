@@ -54,6 +54,8 @@ namespace Halley {
 
 		bool checkForUpdates();
 
+		const String& getKey() const;
+
 	private:
 		explicit LocalisedString(String string);
 		explicit LocalisedString(const I18N& i18n, String key, String string);
