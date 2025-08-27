@@ -538,3 +538,8 @@ bool LocalisedString::checkForUpdates()
 #endif
 	return false;
 }
+
+const String& LocalisedString::getKey() const
+{
+	return key;
+}

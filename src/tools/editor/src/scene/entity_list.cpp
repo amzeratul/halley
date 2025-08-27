@@ -122,24 +122,28 @@ EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 	EntityInfo result;
 	result.enabled = !data.getFlag(EntityData::Flag::Disabled);
 
+	if (!icons) {
+		throw Exception("EntityIcons database not defined by EntityList", HalleyExceptions::Entity);
+	}
+
 	if (data.getPrefab().isEmpty()) {
 		result.name = data.getName().isEmpty() ? String("Unnamed Entity") : data.getName();
-		result.icon = icons->getIcon(data.getIcon());
+		result.icon = icons->getIcon(data.getIcon()).clone(false);
 		result.severity = getEntitySeverity(data, false);
 	} else {
 		if (const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab()); prefab && !prefab->hasFailed()) {
 			result.name = prefab->getPrefabName();
-			result.icon = icons->getIcon(prefab->getPrefabIcon());
+			result.icon = icons->getIcon(prefab->getPrefabIcon()).clone(false);
 			result.severity = getEntitySeverity(prefab->getEntityData().instantiateWithAsCopy(data), true);
 		} else {
 			result.name = "Missing prefab! [" + data.getPrefab() + "]";
-			result.icon = icons->getIcon("");
+			result.icon = icons->getIcon("").clone(false);
 			result.severity = IEntityValidator::Severity::Error;
 		}
 	}
 
 	if (result.severity != IEntityValidator::Severity::None) {
-		result.icon = icons->getInvalidEntityIcon(result.severity);
+		result.icon = icons->getInvalidEntityIcon(result.severity).clone(false);
 	}
 
 	return result;

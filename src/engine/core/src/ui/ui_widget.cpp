@@ -26,6 +26,7 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
+	canSendEvents = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);
 		dataBind.reset();
