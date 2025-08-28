@@ -217,7 +217,8 @@ std::optional<MouseCursorMode> UIClickable::getMouseCursorMode() const
 
 bool UIClickable::isHovered() const
 {
-	return curState == State::Hover;
+	// Not sure this logic is 100% correct, but we don't want it to stop hovering because the mouse is held
+	return curState == State::Hover || curState == State::Down;
 }
 
 void UIClickable::update(Time t, bool)
