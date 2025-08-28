@@ -243,7 +243,6 @@ void ScriptEnvironment::doTerminateState()
 		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
-	currentState->markTerminated();
 
 	if (!currentState->isTerminated()) {
 		for (auto& node: currentGraph->getNodes()) {
@@ -252,6 +251,8 @@ void ScriptEnvironment::doTerminateState()
 			}
 		}
 	}
+
+	currentState->markTerminated();
 }
 
 void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
