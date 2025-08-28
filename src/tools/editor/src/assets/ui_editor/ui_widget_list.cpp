@@ -179,7 +179,7 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 	}
 
 	if (!iconName.isEmpty()) {
-		result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), iconName);
+		result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), iconName).clone(false);
 	}
 
 	return result;
