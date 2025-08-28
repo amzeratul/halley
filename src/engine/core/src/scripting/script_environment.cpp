@@ -239,15 +239,17 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 
 void ScriptEnvironment::doTerminateState()
 {
-	for (auto& thread: currentState->getThreads()) {
-		terminateThread(thread, false);
-	}
-	currentState->getThreads().clear();
-	currentState->markTerminated();
+	if (!currentState->isTerminated()) {
+		for (auto& thread: currentState->getThreads()) {
+			terminateThread(thread, false);
+		}
+		currentState->getThreads().clear();
+		currentState->markTerminated();
 
-	for (auto& node: currentGraph->getNodes()) {
-		if (node.getType() == "destructor") {
-			runDestructor(node.getId());
+		for (auto& node: currentGraph->getNodes()) {
+			if (node.getType() == "destructor") {
+				runDestructor(node.getId());
+			}
 		}
 	}
 }

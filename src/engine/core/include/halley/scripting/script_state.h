@@ -177,6 +177,7 @@ namespace Halley {
 		bool hasStarted() const { return started; }
 		bool isDone() const;
 		bool isDead() const;
+		bool isTerminated() const;
 		void markTerminated();
 
 		void setFrameFlag(bool flag);
@@ -238,6 +239,7 @@ namespace Halley {
 		bool persistAfterDone = false;
 		bool needsStateLoading = false;
 		bool frameFlag = false;
+		bool terminated = false;
 
 		Vector2f displayOffset;
 
