@@ -239,8 +239,11 @@ DevConClient* Core::getDevConClient() const
 
 void Core::deInit()
 {
+	if (!initialized) {
+		return;
+	}
+
 	std::cout << "Game shutting down." << std::endl;
-	Expects(initialized);
 	initialized = false;
 
 	// Ensure stage is cleaned up
