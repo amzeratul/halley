@@ -13,20 +13,22 @@ UIParent::~UIParent()
 
 std::optional<float> UIParent::getMaxChildWidth() const
 {
-	return std::optional<float>();
+	return {};
 }
 
-void UIParent::addChild(std::shared_ptr<UIWidget> widget)
+UIWidget& UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
 	Expects(widget);
 	Expects(widget->getParent() == nullptr || widget->getParent() == this);
 
 	if (widget->getParent() == nullptr) {
-		childrenWaiting.push_back(widget);
 		widget->setParent(this);
+		childrenWaiting.push_back(std::move(widget));
 	}
 
 	markAsNeedingLayout();
+
+	return *childrenWaiting.back();
 }
 
 void UIParent::removeChild(UIWidget& widget)

@@ -22,7 +22,7 @@ namespace Halley {
 	    void deInit() override;
 	    void update(Time time) override;
 	    bool isAlive() const override;
-	    bool onParentDestroyed() override;
+	    bool onParentDestroyRequested() override;
 
 		void updateAnchors(UIAnchor newBase, UIAnchor newStartPos, UIAnchor newEndPos);
 
