@@ -23,6 +23,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "behaviours/ui_fade_behaviour.h"
 #include "behaviours/ui_fullscreen_behaviour.h"
+#include "behaviours/ui_notify_destroy_behaviour.h"
 #include "behaviours/ui_reload_ui_behaviour.h"
 #include "behaviours/ui_slide_behaviour.h"
 #include "behaviours/ui_transition_slide_behaviour.h"

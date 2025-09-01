@@ -821,7 +821,7 @@ void UIWidget::destroy()
 		destroying = true;
 		bool ok = onDestroyRequested();
 		for (auto& b: behaviours) {
-			ok = ok && b->onParentDestroyed();
+			ok = ok && b->onParentDestroyRequested();
 		}
 		if (ok) {
 			forceDestroy();
@@ -831,6 +831,10 @@ void UIWidget::destroy()
 
 void UIWidget::forceDestroy()
 {
+	for (auto& b: behaviours) {
+		b->onParentDestroyed();
+	}
+	behaviours.clear();
 	destroying = true;
 	const bool wasActive = isActive();
 	alive = false;

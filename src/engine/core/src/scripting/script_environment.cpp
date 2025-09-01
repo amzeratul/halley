@@ -522,7 +522,7 @@ void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread
 
 EntityId ScriptEnvironment::getEntityIdFromUUID(const UUID& uuid) const
 {
-	auto e = world.findEntity(uuid, true);
+	auto e = world.findEntity(uuid);
 	if (e) {
 		return e->getEntityId();
 	}
