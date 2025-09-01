@@ -44,6 +44,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	this->session->addListener(this);
 
 	entitySerializationOptions.type = EntitySerialization::Type::Network;
+	entitySerializationOptions.childrenCanStoreParent = true;
 
 	deltaOptions.preserveComponentOrder = false;
 	deltaOptions.shallow = false;

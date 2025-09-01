@@ -43,6 +43,7 @@ namespace Halley {
 		struct SerializationOptions {
 			EntitySerialization::Type type = EntitySerialization::Type::Undefined;
 			std::function<bool(EntityRef)> serializeAsStub;
+			bool childrenCanStoreParent = false;
 
 			SerializationOptions() = default;
 			explicit SerializationOptions(EntitySerialization::Type type, std::function<bool(EntityRef)> serializeAsStub = {})
