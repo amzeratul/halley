@@ -226,7 +226,7 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 	if (parent) {
 		return parent->getEntity(uuid, allowPrefabUUID, allowWorldLookup);
 	} else {
-		return allowWorldLookup ? world->findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
+		return allowWorldLookup ? world->findEntity(uuid).value_or(EntityRef()) : EntityRef();
 	}
 }
 
@@ -725,7 +725,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	std::optional<UUID> parentUUID;
 	
 	const UUID& uuid = uuidSrc.value_or(delta.getInstanceUUID().value_or(UUID::generate()));
-	EntityRef entity = uuidSrc ? getWorld().findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
+	EntityRef entity = uuidSrc ? getWorld().findEntity(uuid).value_or(EntityRef()) : EntityRef();
 
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
 		// Apply delta to existing entity
