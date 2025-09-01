@@ -17,7 +17,11 @@ namespace Halley {
 	private:
 		void* pimpl;
 		size_t size;
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 	};
 
 	// yo dawg

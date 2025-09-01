@@ -49,7 +49,11 @@ namespace Halley
 		void setInterruptContext() override;
 
 	private:
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 		bool devMode = false;
 		bool forceFlush = false;
 		bool interruptContext = false;

@@ -94,7 +94,11 @@ namespace Halley {
 		std::list<Block> blocks;
 		Entry* next = nullptr;
 
+#ifdef __PROSPERO__
+		mutable std::mutex mutex{ nullptr };
+#else
 		mutable std::mutex mutex;
+#endif
 
 		std::unique_lock<std::mutex> lockMutex() const
 		{

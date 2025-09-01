@@ -145,7 +145,12 @@ namespace Halley {
 		bool gameStarted = false;
 		bool lobbyReady = false;
 
+#ifdef __PROSPERO__
+        std::mutex outboundInterpolatorLock{ nullptr };
+#else
         std::mutex outboundInterpolatorLock;
+#endif
+
 		ByteDataInterpolatorSet byteDataInterpolatorSet;
 
 		Bytes receiveBuffer;

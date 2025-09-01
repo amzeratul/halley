@@ -153,7 +153,11 @@ namespace Halley {
 		uint32_t next = 0;
 		uint32_t nAllocs = 0;
 
+#ifdef __PROSPERO__
+		mutable std::mutex mutex{ nullptr };
+#else
 		mutable std::mutex mutex;
+#endif
 
 		std::unique_lock<std::mutex> lockMutex() const
 		{

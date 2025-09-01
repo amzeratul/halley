@@ -139,7 +139,11 @@ namespace Halley {
     private:
         HashMap<String, T> entries;
         mutable Vector<String> keys;
+#ifdef __PROSPERO__
+        std::mutex mutex{ nullptr };
+#else
         std::mutex mutex; // Only used for parallel loading atm
+#endif
 
         void loadEntry(const String& id, T& entry, bool enforceUnique)
         {
@@ -230,7 +234,11 @@ namespace Halley {
         static size_t nextIdx;
 
         std::optional<Vector<String>> onlyLoad;
+#ifdef __PROSPERO__
+        std::mutex mutex{ nullptr };
+#else
         std::mutex mutex;
+#endif
 
         template <typename T>
         ConfigDatabaseType<T>& of() const

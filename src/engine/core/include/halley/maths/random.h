@@ -102,7 +102,11 @@ namespace Halley {
 		std::unique_ptr<MT199937AR> generator;
 		bool canSeed = true;
 		bool threadSafe = false;
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 
 		uint32_t getRawIntUnsafe();
 	};

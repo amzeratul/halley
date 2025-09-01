@@ -189,7 +189,11 @@ namespace Halley
 		std::optional<T> data;
 
 		Vector<std::function<void(T)>> continuations;
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 		std::condition_variable condition;
 	};
 
@@ -384,7 +388,11 @@ namespace Halley
 		}
 
 	private:
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 		std::atomic<int> waitingFor;
 	};
 

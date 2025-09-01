@@ -40,7 +40,11 @@ namespace Halley {
         }
 
     private:
+#ifdef __PROSPERO__
+        std::mutex mutex{ nullptr };
+#else
         std::mutex mutex;
+#endif
         Vector<std::pair<int, T>> data;
     };
 }

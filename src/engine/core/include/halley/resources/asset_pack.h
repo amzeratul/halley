@@ -59,7 +59,11 @@ namespace Halley {
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;
 		std::atomic<bool> hasReader;
+#ifdef __PROSPERO__
+		std::mutex readerMutex{ nullptr };
+#else
 		std::mutex readerMutex;
+#endif
 		size_t dataOffset = 0;
 		Bytes data;
 		std::array<uint8_t, 16> iv;
@@ -83,7 +87,11 @@ namespace Halley {
 		const size_t startPos;
 		const size_t fileSize;
 		size_t curPos = 0;
+#ifdef __PROSPERO__
+		mutable std::mutex mutex{ nullptr };
+#else
 		mutable std::mutex mutex;
+#endif
 		std::shared_ptr<bool> aliveToken;
 	};
 }

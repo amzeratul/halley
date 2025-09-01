@@ -67,7 +67,11 @@ namespace Halley
 		Vector<std::unique_ptr<Task>> pendingTasks;
 		Vector<String> toClear;
 
+#ifdef __PROSPERO__
+		mutable std::mutex mutex{ nullptr };
+#else
 		mutable std::mutex mutex;
+#endif
 		std::atomic<float> progress;
 		String name;
 		String progressLabel;

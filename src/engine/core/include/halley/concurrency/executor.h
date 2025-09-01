@@ -43,7 +43,11 @@ namespace Halley
 
 	private:
 		std::deque<Entry> queue;
+#ifdef __PROSPERO__
+		std::mutex mutex{ nullptr };
+#else
 		std::mutex mutex;
+#endif
 		std::condition_variable condition;
 
 		std::atomic<int> attachedCount;

@@ -70,7 +70,11 @@ private:
 	Vector<PendingCapture> pendingCaptures;
 	Vector<PendingCapture> queuedCaptures;
 	std::optional<PendingCapture> pendingGlobalCapture;
+#ifdef __PROSPERO__
+	std::mutex captureMutex{ nullptr };
+#else
 	std::mutex captureMutex;
+#endif
 	String curRenderNode;
 
 	void setupRenderGraphMethods(RenderGraph& renderGraph)
