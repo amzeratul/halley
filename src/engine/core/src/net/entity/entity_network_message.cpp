@@ -9,6 +9,7 @@ using namespace Halley;
 void EntityNetworkMessageCreate::serialize(Serializer& s) const
 {
 	s << entityId;
+	s << worldPartition;
 	s << assignNetworkIdOnly;
 	s << bytes;
 }
@@ -16,6 +17,7 @@ void EntityNetworkMessageCreate::serialize(Serializer& s) const
 void EntityNetworkMessageCreate::deserialize(Deserializer& s)
 {
 	s >> entityId;
+	s >> worldPartition;
 	s >> assignNetworkIdOnly;
 	s >> bytes;
 }

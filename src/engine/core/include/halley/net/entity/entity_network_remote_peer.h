@@ -19,6 +19,13 @@ namespace Halley {
     	uint8_t authorityId;
 	};
 
+	struct EntityNetworkInstanceInfo {
+		UUID instanceUUID;
+		UUID parentUUID;
+		Serializer& serialize(Serializer& s) const;
+		Deserializer& deserialize(Deserializer& s);
+	};
+
     class EntityNetworkRemotePeer {
         constexpr static Time maxSendInterval = 1.0;
     	
@@ -64,6 +71,7 @@ namespace Halley {
         public:
             EntityId worldId;
             EntityData data;
+        	bool appliedOnExistingEntity = false;
         	bool forChangedAuthorityOnly = false;
         	String debugName; // for debug only, do a proper lookup if needed
         };
@@ -71,7 +79,9 @@ namespace Halley {
         class PendingEntity {
         public:
             EntityNetworkId id;
-	        EntityDataDelta data;
+        	EntityNetworkInstanceInfo instanceInfo;
+	        std::optional<EntityDataDelta> data;
+        	WorldPartitionId worldPartition;
             Vector<EntityNetworkMessageUpdate> updates;
         };
 
@@ -105,12 +115,14 @@ namespace Halley {
         void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
         void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
-        EntityRef createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta);
+        EntityRef createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta, bool allowExistingLookup);
+    	void assignRemoteEntity(EntityNetworkId id, EntityRef entity);
         void updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg);
-        void destroyRemoteEntity(EntityId id, const String& debugName);
+        void destroyRemoteEntity(const InboundEntity& inboundEntity);
 
         void trySpawningPendingEntities();
         void createPendingEntity(const PendingEntity& pendingData);
+        void assignPendingEntity(const PendingEntity& pendingData, EntityRef entity);
         void updatePendingEntity(PendingEntity& entity, const EntityNetworkMessageUpdate& msg);
 
         bool isRemoteReady() const;

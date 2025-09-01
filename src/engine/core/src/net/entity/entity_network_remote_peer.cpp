@@ -12,6 +12,20 @@ using namespace Halley;
 
 thread_local Bytes EntityNetworkRemotePeer::fastUpdateOutboundData;
 
+Serializer& EntityNetworkInstanceInfo::serialize(Serializer& s) const
+{
+	s << instanceUUID;
+	s << parentUUID;
+	return s;
+}
+
+Deserializer& EntityNetworkInstanceInfo::deserialize(Deserializer& s)
+{
+	s >> instanceUUID;
+	s >> parentUUID;
+	return s;
+}
+
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parentSession, NetworkSession::PeerId peerId)
 	: parentSession(&parentSession)
 	, peerId(peerId)
@@ -171,7 +185,7 @@ void EntityNetworkRemotePeer::destroy()
 		// Don't destroy host entities. Host disconnecting means that the session is terminating, and destroying host entities could lead to bugs.
 		if (parentSession->hasWorld() && peerId != 0) {
 			for (const auto& [k, v] : inboundEntities) {
-				destroyRemoteEntity(v.worldId, v.debugName);
+				destroyRemoteEntity(v);
 			}
 		}
 		
@@ -244,8 +258,9 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 	if (!entity.getPrefab() && entity.getWorldPartition() != 0) {
 		// This is loaded as part of a world chunk - peers already got all the data, they only
 		// need to know about the networkId assigned.
-		auto bytes = Serializer::toBytes(entity.getInstanceUUID(), parentSession->getByteSerializationOptions());
-		send(EntityNetworkMessageCreate(result.networkId, bytes, true));
+		const EntityNetworkInstanceInfo info = { entity.getInstanceUUID(), entity.getParent().getInstanceUUID() };
+		auto bytes = Serializer::toBytes(info, parentSession->getByteSerializationOptions());
+		send(EntityNetworkMessageCreate(result.networkId, std::move(bytes), entity.getWorldPartition(), true));
 	} else {
 		auto deltaData = parentSession->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parentSession->getEntityDeltaOptions());
 
@@ -255,7 +270,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 		//	") with EntityNetworkId (" + result.networkId +
 		//	") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B)");
 
-		send(EntityNetworkMessageCreate(result.networkId, std::move(bytes), false));
+		send(EntityNetworkMessageCreate(result.networkId, std::move(bytes), entity.getWorldPartition(), false));
 	}
 
 	outboundEntities[entity.getEntityId()] = std::move(result);
@@ -393,10 +408,13 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId
 
 	send(EntityNetworkMessageDestroy(remote.networkId));
 
-	//if (const auto entity = parent->getWorld().tryGetEntity(entityId); entity.isValid()) {
+	//if (const auto entity = parentSession->getWorld().tryGetEntity(entityId); entity.isValid()) {
 	//	Logger::logDev("Send Destroy: " + entity.getName() + " (" + entity.getInstanceUUID() +
 	//		") with EntityNetworkId (" + remote.networkId +
 	//		") to peer " + toString(static_cast<int>(peerId)));
+	//} else {
+	//	Logger::logDev("Send Destroy: entity does not exist anymore, but EntityNetworkId (" +
+	//		toString(remote.networkId) + ") to peer " + toString(static_cast<int>(peerId)));
 	//}
 }
 
@@ -413,8 +431,7 @@ void EntityNetworkRemotePeer::send(EntityNetworkMessage message)
 
 void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCreate& msg)
 {
-	const auto iter = inboundEntities.find(msg.entityId);
-	if (iter != inboundEntities.end()) {
+	if (const auto iter = inboundEntities.find(msg.entityId); iter != inboundEntities.end()) {
 		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " already exists from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
@@ -436,41 +453,37 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 
 	const auto targetParentUUID = delta.getParentUUID().value_or(UUID());
 	if (targetParentUUID.isValid()) {
-		if (!parentSession->getWorld().findEntity(targetParentUUID)) {
+		const auto parentEntity = parentSession->getWorld().findEntity(targetParentUUID);
+		if (!parentEntity) {
 			//Logger::logError("Can't instantiate network entity " + toString(msg.entityId) + " from prefab \"" + delta.getPrefab() + "\" - parent " + toString(targetParentUUID) + " not found");
-			pendingEntities[msg.entityId] = PendingEntity{ msg.entityId, std::move(delta), {} };
+			const auto instanceUUID = delta.getInstanceUUID().value_or(UUID());
+			pendingEntities[msg.entityId] = PendingEntity{ msg.entityId, {instanceUUID, targetParentUUID}, std::move(delta), msg.worldPartition, {} };
+			return;
+		} else if (!parentEntity->isValid() || !parentEntity->isAlive()) {
+			Logger::logError("Can't instantiate network entity " + toString(msg.entityId) + " from prefab \"" + delta.getPrefabUUID() + "\" - parent " + toString(targetParentUUID) + " found but in unexpected state");
 			return;
 		}
 	}
 
-	createRemoteEntity(msg.entityId, delta);
+	createRemoteEntity(msg.entityId, delta, msg.worldPartition != 0);
 }
 
 void EntityNetworkRemotePeer::receiveAssignEntity(const EntityNetworkMessageCreate& msg)
 {
-	const auto uuid = Deserializer::fromBytes<UUID>(msg.bytes, parentSession->getByteSerializationOptions());
-	auto entity = parentSession->getWorld().findEntity(uuid);
+	const auto info = Deserializer::fromBytes<EntityNetworkInstanceInfo>(msg.bytes, parentSession->getByteSerializationOptions());
+	auto entity = parentSession->getWorld().findEntity(info.instanceUUID);
 
-	if (!entity || !entity->isValid()) {
-		Logger::logWarning("Unable to assign network entity " + toString(static_cast<int>(msg.entityId)) + ", no instance found with UUID " + toString(uuid));
+	if (!entity) {
+		pendingEntities[msg.entityId] = PendingEntity{ msg.entityId, info, {}, msg.worldPartition, {} };
+		Logger::logDev("Store pending network entity " + toString(msg.entityId) + " for world entity - entity not found");
 		return;
 	}
 
-	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to existing entity " + entity->getName());
+	if (const auto parentEntity = parentSession->getWorld().findEntity(info.parentUUID)) {
+		entity->setParent(parentEntity.value());
+	}
 
-	InboundEntity remote;
-	// Construct entity data from local entity, since the host doesn't send any delta in this case.
-	remote.data = parentSession->getFactory().serializeEntity(*entity, parentSession->getEntitySerializationOptions());;
-	remote.worldId = entity->getEntityId();
-	remote.debugName = entity->getName();
-	inboundEntities[msg.entityId] = std::move(remote);
-
-	auto& interpolatorSet = entity->setupNetwork(peerId);
-	parentSession->onRemoteEntityCreated(*entity, peerId);
-	parentSession->requestSetupInterpolators(interpolatorSet, *entity, true);
-
-	auto& byteDataInterpolatorSet = entity->getComponent<NetworkComponent>().byteDataInterpolatorSet;
-	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, *entity, true);
+	assignRemoteEntity(msg.entityId, entity.value());
 }
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)
@@ -512,20 +525,22 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not found from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
-	auto& remote = iter->second;
+	const auto& remote = iter->second;
 
-	//if (const auto entityRef = parent->getWorld().tryGetEntity(remote.worldId); entityRef.isValid()) {
+	//if (const auto entityRef = parentSession->getWorld().tryGetEntity(remote.worldId); entityRef.isValid()) {
 	//	Logger::logDev("Destroying from network: " + entityRef.getName() + " UUID " + toString(entityRef.getInstanceUUID()) + " NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
+	//} else {
+	//	Logger::logDev("Destroying from network, but entity not found: NetworkEntityId (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId(" + toString(remote.worldId) + ")");
 	//}
 
-	destroyRemoteEntity(remote.worldId, remote.debugName);
+	destroyRemoteEntity(remote);
 
 	inboundEntities.erase(msg.entityId);
 }
 
-EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta)
+EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const EntityDataDelta& delta, bool allowExistingLookup)
 {
-	const auto debugInfo = EntityFactory::DebugInfo("NetworkEntity" + toString(id), EntityLoadContextType::Network);
+	const auto debugInfo = EntityFactory::DebugInfo("NetworkEntity " + toString(id), EntityLoadContextType::Network);
 
 	auto [entityData, prefab, prefabUUID] = parentSession->getFactory().prefabDeltaToEntityData(delta, *delta.getInstanceUUID(), debugInfo);
 	if (!entityData) {
@@ -533,17 +548,21 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 		return {};
 	}
 
+	bool appliedOnExistingEntity = false;
+	if (allowExistingLookup) {
+		const auto existingEntity = parentSession->getFactory().getWorld().findEntity(entityData->getInstanceUUID());
+		appliedOnExistingEntity = existingEntity && existingEntity->isValid();
+	}
+
 	const auto mask = EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network);
 	auto [entity, parentUUID] = parentSession->getFactory().loadEntityDelta(delta, delta.getInstanceUUID(), mask, debugInfo);
 	stripNestedNetworkComponents(entity);
 
-	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") from network:\n\n" + EntityData(delta).toYAML());
-	/*if (entity.getName().contains("tree_linden_")) {
-		Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") Instance UUID " + toString(entity.getInstanceUUID()));
-		if (entity.getParent().isValid()) {
-			Logger::logDev("with parent " + entity.getParent().getName());
-		}
-	}*/
+	// EntityFactory::loadEntityDelta() returns an empty parentUUID if it applies the delta to
+	// an existing entity, but we still want/need to update parenting here.
+	if (!parentUUID && entityData->getParentUUID().isValid()) {
+		parentUUID = entityData->getParentUUID();
+	}
 
 	if (parentUUID) {
 		if (auto parentEntity = parentSession->getWorld().findEntity(parentUUID.value()); parentEntity) {
@@ -553,11 +572,18 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 		}
 	}
 
+	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") from network:\n\n" + EntityData(delta).toYAML());
+	//Logger::logDev("Created entity " + entity.getName() + " with EntityNetworkId (" + toString(msg.entityId) + ") and EntityId (" + toString(entity.getEntityId()) + ") Instance UUID " + toString(entity.getInstanceUUID()));
+	//if (entity.getParent().isValid()) {
+	//	Logger::logDev("with parent " + entity.getParent().getName());
+	//}
+
 	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(msg.entityId)) + " to new entity " + entity.getName());
 
 	InboundEntity remote;
 	remote.data = std::move(*entityData);
 	remote.worldId = entity.getEntityId();
+	remote.appliedOnExistingEntity = appliedOnExistingEntity;
 	remote.debugName = entity.getName() + "|" + entity.getPrefabAssetId();
 	inboundEntities[id] = std::move(remote);
 
@@ -569,6 +595,28 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
 
 	return entity;
+}
+
+void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef entity)
+{
+	Expects(entity.hasParent());
+
+	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(id)) + " to existing entity " + entity->getName());
+
+	InboundEntity remote;
+	// Construct entity data from local entity, since the host doesn't send any delta in this case.
+	remote.data = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
+	remote.worldId = entity.getEntityId();
+	remote.appliedOnExistingEntity = true;
+	remote.debugName = entity.getName();
+	inboundEntities[id] = std::move(remote);
+
+	auto& interpolatorSet = entity.setupNetwork(peerId);
+	parentSession->onRemoteEntityCreated(entity, peerId);
+	parentSession->requestSetupInterpolators(interpolatorSet, entity, true);
+
+	auto& byteDataInterpolatorSet = entity.getComponent<NetworkComponent>().byteDataInterpolatorSet;
+	parentSession->requestSetupByteDataInterpolators(byteDataInterpolatorSet, entity, true);
 }
 
 void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg)
@@ -611,38 +659,36 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
     }
 }
 
-void EntityNetworkRemotePeer::destroyRemoteEntity(EntityId id, const String& debugName)
+void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEntity)
 {
-	auto entity = parentSession->getWorld().tryGetEntity(id);
+	auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId);
 	if (entity.isValid()) {
 		bool shouldBeDeleted = entity.getWorldPartition() == 0;
-		if (!shouldBeDeleted && entity.getPrefab()) {
+
+		if (!shouldBeDeleted && !inboundEntity.appliedOnExistingEntity) {
 			// Don't delete non-prefab world entities.
 			// See sendCreateEntity() for the correlating check on network entity creation.
-			bool hasBeenCreatedByOrAssignedToHost = false;
-			if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent) {
-				if (networkComponent->creatorId) {
-					// Checks if the entity was created locally, but network ownership assigned to host.
-					hasBeenCreatedByOrAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
-				} else {
-					// Checks if the entity was created by the host
-					hasBeenCreatedByOrAssignedToHost = networkComponent->ownerId.value() == 0;
+			if (entity.getPrefab()) {
+				bool hasBeenAssignedToHost = false;
+				if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent) {
+					if (networkComponent->creatorId) {
+						// Checks if the entity was created locally, but network ownership assigned to host.
+						hasBeenAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
+					}
 				}
+				shouldBeDeleted = hasBeenAssignedToHost;
 			}
-			shouldBeDeleted = hasBeenCreatedByOrAssignedToHost;
 		}
 
 		entity.setFromNetwork(false);
 
 		if (shouldBeDeleted) {
 			parentSession->getWorld().destroyEntity(entity);
-		} else {
-			//Logger::logDev("Network ownership for local entity was auto-assigned to host, ignoring destroy msg.");
 		}
 	} else if (parentSession->isHost()) {
 		// NB: This can be very legit for peers.
 		// Updates can arrive after a chunk has been unloaded.
-		Logger::logWarning("Network entity has gone missing: " + debugName);
+		Logger::logWarning("Network entity has gone missing: " + inboundEntity.debugName);
 	}
 }
 
@@ -650,9 +696,26 @@ void EntityNetworkRemotePeer::trySpawningPendingEntities()
 {
 	Vector<EntityNetworkId> toRemove;
 	for (auto& [id, data]: pendingEntities) {
-		if (parentSession->getWorld().findEntity(data.data.getParentUUID().value_or(UUID()))) {
-			createPendingEntity(data);
-			toRemove += id;
+		if (!data.data) {
+			if (auto entity = parentSession->getWorld().findEntity(data.instanceInfo.instanceUUID)) {
+				// Keeps this in pending state until both entity and parent are available.
+				// TODO: this doesn't check if it's the right parent though
+				if (!entity->hasParent()) {
+					if (auto parentEntity = parentSession->getWorld().findEntity(data.instanceInfo.parentUUID); parentEntity) {
+						entity->setParent(parentEntity.value());
+					}
+				} else {
+					assignPendingEntity(data, entity.value());
+					toRemove += id;
+				}
+			}
+		} else {
+			if (const auto parentEntity = parentSession->getWorld().findEntity(data.data->getParentUUID().value_or(UUID()))) {
+				if (parentEntity) {
+					createPendingEntity(data);
+					toRemove += id;
+				}
+			}
 		}
 	}
 
@@ -660,20 +723,39 @@ void EntityNetworkRemotePeer::trySpawningPendingEntities()
 		std_ex::erase_if_key(pendingEntities, [&] (EntityNetworkId id) {
 			return toRemove.contains(id);
 		});
+		//Logger::logDev("created " + toString(toRemove.size()) + " pending entities, " + toString(pendingEntities.size()) + " left");
 	}
 }
 
 void EntityNetworkRemotePeer::createPendingEntity(const PendingEntity& pendingData)
 {
-	auto entity = createRemoteEntity(pendingData.id, pendingData.data);
-	auto iter = inboundEntities.find(pendingData.id);
-	if (iter != inboundEntities.end()) {
+	Expects(pendingData.data);
+
+	const auto entity = createRemoteEntity(pendingData.id, pendingData.data.value(), pendingData.worldPartition != 0);
+
+	if (const auto iter = inboundEntities.find(pendingData.id); iter != inboundEntities.end()) {
 		auto& remote = iter->second;
 		for (const auto& update: pendingData.updates) {
 			updateRemoteEntity(remote, entity, update);
 		}
 	} else {
 		Logger::logError("Error when creating pending entity - inbound entity data not found");
+	}
+}
+
+void EntityNetworkRemotePeer::assignPendingEntity(const PendingEntity& pendingData, EntityRef entity)
+{
+	Expects(!pendingData.data);
+
+	assignRemoteEntity(pendingData.id, entity);
+
+	if (const auto iter = inboundEntities.find(pendingData.id); iter != inboundEntities.end()) {
+		auto& remote = iter->second;
+		for (const auto& update : pendingData.updates) {
+			updateRemoteEntity(remote, entity, update);
+		}
+	} else {
+		Logger::logError("Error when assigning pending entity - inbound entity data not found");
 	}
 }
 
