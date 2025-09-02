@@ -27,7 +27,7 @@ namespace Halley {
 		virtual Rect4f getRect() const = 0;
 		virtual std::optional<float> getMaxChildWidth() const;
 
-		void addChild(std::shared_ptr<UIWidget> widget);
+		UIWidget& addChild(std::shared_ptr<UIWidget> widget);
 		void removeChild(UIWidget& widget);
 		virtual void clear();
 

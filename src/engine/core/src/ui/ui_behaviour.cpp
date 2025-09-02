@@ -19,9 +19,13 @@ void UIBehaviour::onAddedToRoot(UIRoot& root)
 {
 }
 
-bool UIBehaviour::onParentDestroyed()
+bool UIBehaviour::onParentDestroyRequested()
 {
 	return true;
+}
+
+void UIBehaviour::onParentDestroyed()
+{
 }
 
 void UIBehaviour::onParentAboutToDraw()

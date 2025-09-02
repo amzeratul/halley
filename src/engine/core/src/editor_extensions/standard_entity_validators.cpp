@@ -15,7 +15,7 @@ Vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(Entity
 {
 	Vector<Result> result;
 
-	const auto entity = validator.getWorld().findEntity(entityData.getInstanceUUID(), true);
+	const auto entity = validator.getWorld().findEntity(entityData.getInstanceUUID());
 	if (entity && entity->isValid()) {
 		const bool hasTransform = entity->hasComponent<Transform2DComponent>();
 

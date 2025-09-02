@@ -12,6 +12,12 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& 
 {
 }
 
+Resources::~Resources()
+{
+	resources.clear();
+	Logger::logInfo("Resources destroyed");
+}
+
 void Resources::reloadAssets(const Vector<String>& ids, const Vector<String>& packIds)
 {
 	// Early out
@@ -97,5 +103,3 @@ void Resources::generateDetailedMemoryReport(AssetType type, std::optional<int> 
 		}
 	}
 }
-
-Resources::~Resources() = default;

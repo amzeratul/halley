@@ -34,6 +34,7 @@ namespace Halley
 		Core(std::unique_ptr<Game> game, Vector<std::string> args);
 		~Core();
 		void init() override;
+		void deInit();
 
 		void setStage(StageID stage) override;
 		void setStage(std::unique_ptr<Stage> stage) override;
@@ -78,8 +79,6 @@ namespace Halley
 		DevConClient* getDevConClient() const override;
 
 	private:
-		void deInit();
-
 		void initResources();
 		void setOutRedirect(bool appendToExisting);
 		void initDevCon();

@@ -243,13 +243,16 @@ void ScriptEnvironment::doTerminateState()
 		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
-	currentState->markTerminated();
 
-	for (auto& node: currentGraph->getNodes()) {
-		if (node.getType() == "destructor") {
-			runDestructor(node.getId());
+	if (!currentState->isTerminated()) {
+		for (auto& node: currentGraph->getNodes()) {
+			if (node.getType() == "destructor") {
+				runDestructor(node.getId());
+			}
 		}
 	}
+
+	currentState->markTerminated();
 }
 
 void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
@@ -519,7 +522,7 @@ void ScriptEnvironment::processControlEvents(Time time, Vector<ScriptStateThread
 
 EntityId ScriptEnvironment::getEntityIdFromUUID(const UUID& uuid) const
 {
-	auto e = world.findEntity(uuid, true);
+	auto e = world.findEntity(uuid);
 	if (e) {
 		return e->getEntityId();
 	}

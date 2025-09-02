@@ -1,6 +1,7 @@
 #include "halley/game/halley_main.h"
 #include "halley/game/core.h"
 #include "halley/support/console.h"
+#include "halley/utils/scoped_guard.h"
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -58,6 +59,11 @@ private:
 int HalleyMain::runMain(std::unique_ptr<GameLoader> loader, const Vector<std::string>& args)
 {
 	std::unique_ptr<Core> core;
+	auto guard = ScopedGuard([&] ()
+	{
+		core->deInit();
+	});
+
 	try {
 		core = loader->createCore(args);
 		loader->setCore(*core);

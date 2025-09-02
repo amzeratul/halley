@@ -771,7 +771,8 @@ void SpriteHotReloader::updateSpriteIndex(Sprite* sprite, uint32_t idx) const
 
 void SpriteHotReloader::clearSpriteRefs()
 {
-	auto lock = std::unique_lock(spriteMutex);
+	// This doesn't need a lock as it happens in destructor context only; a race condition in a destructor is UB
+	//auto lock = std::unique_lock(spriteMutex);
 	for (auto sprite: spriteRefs) {
 		sprite.first->clearSpriteSheetRef();
 	}

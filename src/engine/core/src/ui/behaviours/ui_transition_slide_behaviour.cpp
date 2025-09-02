@@ -77,7 +77,7 @@ bool UITransitionSlideBehaviour::isAlive() const
 	return true;
 }
 
-bool UITransitionSlideBehaviour::onParentDestroyed()
+bool UITransitionSlideBehaviour::onParentDestroyRequested()
 {
 	if (mode == Mode::FadeOut) {
 		return time >= length;

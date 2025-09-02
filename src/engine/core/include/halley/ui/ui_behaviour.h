@@ -15,7 +15,8 @@ namespace Halley {
 		virtual void update(Time time);
 		virtual void onAddedToRoot(UIRoot& root);
 
-		virtual bool onParentDestroyed(); // Return true if OK, false to abort destruction
+		virtual bool onParentDestroyRequested(); // Return true if OK, false to abort destruction
+		virtual void onParentDestroyed();
 		virtual void onParentAboutToDraw();
 
 		virtual bool isAlive() const;

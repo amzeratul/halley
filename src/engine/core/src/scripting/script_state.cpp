@@ -432,8 +432,14 @@ bool ScriptState::isDead() const
 	return isDone() && !persistAfterDone;
 }
 
+bool ScriptState::isTerminated() const
+{
+	return terminated;
+}
+
 void ScriptState::markTerminated()
 {
+	terminated = true;
 	started = true;
 }
 
