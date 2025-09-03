@@ -167,7 +167,7 @@ namespace Halley {
             EntityRef& entity, const std::optional<EntityRef>& parent);
 
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size);
-        static std::optional<EntityRef> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
+        static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         const EntityNetworkSession* session;
         EntityNetworkChanges journal;
