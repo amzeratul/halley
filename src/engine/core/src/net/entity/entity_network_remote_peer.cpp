@@ -670,13 +670,16 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEn
 			// See sendCreateEntity() for the correlating check on network entity creation.
 			if (entity.getPrefab()) {
 				bool hasBeenAssignedToHost = false;
+				bool hasBeenCreatedByHost = false;
 				if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent) {
 					if (networkComponent->creatorId) {
 						// Checks if the entity was created locally, but network ownership assigned to host.
 						hasBeenAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
+					} else {
+						hasBeenCreatedByHost = networkComponent->ownerId.value() == 0;
 					}
 				}
-				shouldBeDeleted = hasBeenAssignedToHost;
+				shouldBeDeleted = hasBeenAssignedToHost || hasBeenCreatedByHost;
 			}
 		}
 
