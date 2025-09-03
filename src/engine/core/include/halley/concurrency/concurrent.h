@@ -8,6 +8,10 @@
 
 #define HAS_THREADS 1
 
+#ifdef __PROSPERO__
+inline std::size_t sceLibcStdThreadStackSize = 4 * 1024 * 1024;
+#endif
+
 namespace Halley
 {
 	enum class ThreadPriority {
