@@ -92,7 +92,7 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 				// Store just a stub
 				result.getChildren().emplace_back(child.getInstanceUUID());
 			} else {
-				result.getChildren().push_back(doSerializeEntity(child, options, false, prefabId));
+				result.getChildren().push_back(doSerializeEntity(child, options, options.childrenCanStoreParent, prefabId));
 			}
 		}
 	}
@@ -565,14 +565,14 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 			if (childEntity.isValid()) {
 				updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
 			} else {
-				Logger::logError("Could not find child with UUID" + child.getInstanceUUID().toString() + " when updating prefab " + newContext->getPrefabAssetId());
+				Logger::logError("Could not find child with UUID " + child.getInstanceUUID().toString() + " when updating prefab " + newContext->getPrefabAssetId());
 			}
 		} else {
 			auto childEntity = tryGetEntity(child.getInstanceUUID(), *context, false);
 			if (childEntity.isValid()) {
 				updateEntityNode(child, childEntity, entity, context);
 			} else {
-				Logger::logError("Could not find child with UUID" + child.getInstanceUUID().toString() + " when updating prefab " + context->getPrefabAssetId());
+				Logger::logError("Could not find child with UUID " + child.getInstanceUUID().toString() + " when updating prefab " + context->getPrefabAssetId());
 			}
 		}
 	}
@@ -644,7 +644,7 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 		const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
 
 		const bool isNetworkUpdate = context.getEntitySerializationContext().matchType(makeMask(EntitySerialization::Type::Network));
-		const bool allowWorldLookup = (context.isUpdateContext() && depth == 0) || isNetworkUpdate;
+		const bool allowWorldLookup = context.isUpdateContext() && (depth == 0 || isNetworkUpdate);
 
 		const auto entity = instantiateEntity(data, context, allowWorldLookup);
 		if (depth == 0) {

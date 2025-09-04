@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-
+/*
 #if (defined(_M_X64) || defined(__x86_64__)) && !defined(__APPLE__)
 #define HAS_SSE
 #define HAS_AVX
@@ -30,7 +30,7 @@ using namespace Halley;
 #include <intrin.h>
 #endif
 #endif
-
+*/
 
 void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, float gain1)
 {
@@ -157,12 +157,7 @@ void AudioMixer::copy(AudioSamples dst, AudioSamples src, float gainStart, float
 	}
 }
 
-#ifdef __PROSPERO__
-// TODO
-#undef HAS_SSE
-#undef HAS_AVX
-#endif
-
+/*
 #ifdef HAS_SSE
 
 #ifdef _MSC_VER
@@ -220,7 +215,7 @@ static bool hasAVX()
 #endif
 }
 #endif
-
+*/
 
 /*
 #ifdef HAS_AVX

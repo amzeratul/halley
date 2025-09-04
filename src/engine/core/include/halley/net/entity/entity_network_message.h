@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "halley/data_structures/config_node.h"
+#include "halley/entity/entity.h"
 #include "halley/entity/system_message.h"
 #include "halley/maths/uuid.h"
 
@@ -37,10 +38,11 @@ namespace Halley {
 	public:
         EntityNetworkId entityId;
         Bytes bytes;
+		WorldPartitionId worldPartition;
 		bool assignNetworkIdOnly;
 
         EntityNetworkMessageCreate() = default;
-		EntityNetworkMessageCreate(EntityNetworkId id, Bytes bytes, bool assignNetworkIdOnly) : entityId(id), bytes(std::move(bytes)), assignNetworkIdOnly(assignNetworkIdOnly) {}
+		EntityNetworkMessageCreate(EntityNetworkId id, Bytes bytes, WorldPartitionId worldPartition, bool assignNetworkIdOnly) : entityId(id), bytes(std::move(bytes)), worldPartition(worldPartition), assignNetworkIdOnly(assignNetworkIdOnly) {}
 
         EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Create; }
         bool needsWorld() const override { return true; }

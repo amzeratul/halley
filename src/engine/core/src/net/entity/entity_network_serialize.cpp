@@ -522,10 +522,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         UUID childInstanceUUID;
         deserializer >> childInstanceUUID;
 
-        auto childEntity = findChildEntity(entity, childInstanceUUID);
+        auto childEntityInfo = findChildEntity(entity, childInstanceUUID);
 
-        if (childEntity) {
-            type = doDeserializeEntityUpdate(context, deserializer, childEntity.value(), entity);
+        if (childEntityInfo) {
+            auto& childEntity = childEntityInfo->first;
+            const auto& parentOfChildEntity = childEntityInfo->second;
+            type = doDeserializeEntityUpdate(context, deserializer, childEntity, parentOfChildEntity);
         } else if (parent) {
             // Not a child entity, so it should be a sibling, or child of sibling, further up the
             // call chain. Need to rewind the deserializer, so the caller can read the UUIDs again.
@@ -534,6 +536,8 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         } else {
             // No child entity found, and we are at the root already. Something went wrong.
             // Let's skip this entity data and any components that follow.
+            Logger::logWarning("Entity '" + childInstanceUUID + "' not found while deserializing update, skip " + toString(size) + " bytes");
+
             deserializer.rewind(marker);
             deserializer.skipBytes(size);
 
@@ -717,7 +721,7 @@ bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log)
             Logger::logDev("  - " + toString(childrenAdded.size()) + " children added");
             for (const auto& child : childrenAdded) {
                 auto ce = findChildEntity(entity, child);
-                Logger::logDev("    + " + child + " - " + (ce ? ce->getName() : "unknown"));
+                Logger::logDev("    + " + child + " - " + (ce ? ce->first.getName() : "unknown"));
             }
         }
         changes = true;
@@ -781,11 +785,11 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
     }
 }
 
-std::optional<EntityRef> EntityNetworkSerialize::findChildEntity(const EntityRef& entity, const UUID& instanceUUID)
+std::optional<std::pair<EntityRef, EntityRef>> EntityNetworkSerialize::findChildEntity(const EntityRef& entity, const UUID& instanceUUID)
 {
     for (auto child : entity.getChildren()) {
         if (child.getInstanceUUID() == instanceUUID) {
-            return child;
+            return std::make_pair(child, entity);
         }
         if (const auto descend = findChildEntity(child, instanceUUID)) {
             return descend;
