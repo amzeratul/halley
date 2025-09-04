@@ -111,24 +111,29 @@ void Texture::moveFrom(Texture& other)
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
-	const auto& meta = loader.getMeta();
+	const auto& loaderMeta = loader.getMeta();
 
-	Vector2i size(meta.getInt("width", -1), meta.getInt("height", -1));
+	Vector2i size(loaderMeta.getInt("width", -1), loaderMeta.getInt("height", -1));
 	if (size.x == -1 && size.y == -1) {
 		return {};
 	}
 
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
 	texture->setAssetId(loader.getName());
-	texture->setMeta(meta);
+	texture->setMeta(loaderMeta);
 	bool retain = loader.getResources().getOptions().retainPixelData;
 
+#if !HAS_THREADS
+	auto data = loader.getStatic();
+#else
 	loader.getAsync(true)
 	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
 	{
+#endif
 		auto& meta = texture->getMeta();
 		const auto& compression = meta.getString("compression");
 		const bool masked = meta.getBool("withMask", false);
+		std::pair<TextureDescriptorImageData, ImageMask> imgPair;
 
 		try {
 			Bytes imageBytes;
@@ -146,20 +151,23 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 				const auto format = fromString<Image::Format>(meta.getString("format", "undefined"));
 				auto image = std::make_unique<Image>(imageData, format);
 				alphaMask = ImageMask::fromAlpha(*image);
-				return { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
+				imgPair = { TextureDescriptorImageData(std::move(image)), std::move(alphaMask) };
 			} else {
 				if (imageBytes.empty()) {
-					return { TextureDescriptorImageData(data->getSpan()), std::move(alphaMask) };
+					imgPair = { TextureDescriptorImageData(data->getSpan()), std::move(alphaMask) };
 				} else {
-					return { TextureDescriptorImageData(std::move(imageBytes)), std::move(alphaMask) };
+					imgPair = { TextureDescriptorImageData(std::move(imageBytes)), std::move(alphaMask) };
 				}
 			}
 		} catch (...) {
 			Logger::logError("Exception when trying to load texture " + texture->getAssetId() + " (compression = \"" + compression + "\", masked = " + masked + "\", size = " + String::prettySize(data->getSpan().size_bytes()) + ")");
 			throw;
 		}
+#if HAS_THREADS
+		return imgPair;
 	})
 	.then(Executors::getVideoAux(), [texture, retain](std::pair<TextureDescriptorImageData, ImageMask> imgPair)
+#endif
 	{
 		auto& img = imgPair.first;
 		auto& alphaMask = imgPair.second;
@@ -198,7 +206,10 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.retainPixelData = retain;
 		texture->load(std::move(descriptor));
 		texture->setAlphaMask(std::move(alphaMask));
-	});
+	}
+#if HAS_THREADS
+	).wait(); // TODO!!!!!!!
+#endif
 
 	return texture;
 }

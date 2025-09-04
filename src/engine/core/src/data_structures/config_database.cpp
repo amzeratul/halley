@@ -24,7 +24,7 @@ ConfigDatabase::ConfigDatabase(std::optional<Vector<String>> onlyLoad)
 
 void ConfigDatabase::loadConfigs(Resources& resources, const std::function<bool(const String&)>& filter)
 {
-	bool threadedLoad = true;
+	constexpr bool threadedLoad = HAS_THREADS;
 
 	Vector<Future<void>> pending;
 

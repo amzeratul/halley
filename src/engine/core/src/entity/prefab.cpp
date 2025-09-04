@@ -11,7 +11,7 @@
 using namespace Halley;
 
 namespace {
-	constexpr static bool threadedLoad = true;
+	constexpr static bool threadedLoad = HAS_THREADS;
 }
 
 std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
