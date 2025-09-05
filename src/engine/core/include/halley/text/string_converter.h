@@ -105,7 +105,7 @@ namespace Halley
 		static String toString(const T& v)
 		{
 			if constexpr (std::is_enum<T>::value) {
-				return EnumNames<T>()()[int(v)];
+				return EnumNames<T>()().at(int(v));
 			} else if constexpr (std::is_same_v<T, String>) {
 				return v;
 			} else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
