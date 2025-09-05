@@ -7,6 +7,7 @@
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
 #include "halley/utils/scoped_guard.h"
+#include "halley/support/debug.h"
 
 using namespace Halley;
 
@@ -242,7 +243,14 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std
 	} else {
 		// Normal loading
 		auto resLoader = ResourceLoader(*(parent.locator), assetId, type, priority, parent.api, parent);		
-		newRes = loadResource(resLoader);
+		try
+		{
+			newRes = loadResource(resLoader);
+		}
+		catch (const std::exception& e)
+		{
+			Debug::abort("Exception while loading resource " + String(assetId) + ":\n" + e.what());
+		}
 		if (newRes) {
 			newRes->setMeta(resLoader.getMeta());
 		} else if (resLoader.loaded) {
