@@ -274,11 +274,13 @@ namespace Halley
 	private:
 		std::atomic<bool> failed;
 		std::atomic<bool> loading;
-		mutable std::condition_variable loadWait;
+		
 #ifdef __PROSPERO__
 		mutable std::mutex loadMutex{ nullptr };
+		mutable std::condition_variable loadWait{nullptr};
 #else
 		mutable std::mutex loadMutex;
+		mutable std::condition_variable loadWait;
 #endif
 		mutable Vector<Promise<void>> pendingPromises;
 	};

@@ -45,10 +45,12 @@ namespace Halley
 		std::deque<Entry> queue;
 #ifdef __PROSPERO__
 		std::mutex mutex{ nullptr };
+		std::condition_variable condition {nullptr};
 #else
 		std::mutex mutex;
-#endif
 		std::condition_variable condition;
+#endif
+		
 
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;
