@@ -93,7 +93,7 @@ void XAudio2SourceVoice::OnVoiceProcessingPassEnd() {}
 void XAudio2SourceVoice::OnStreamEnd()
 {
 	if (!running) {
-		condition.notify_one();
+		condition.notifyOne();
 	}
 }
 
@@ -214,7 +214,7 @@ uint64_t XAudio2AudioOutput::getSamplesPlayed() const
 	uint64_t pos;
 	uint64_t duration;
 	{
-		std::unique_lock<std::mutex> lock(playbackMutex);
+		UniqueLock lock(playbackMutex);
 		pos = playbackPos;
 		duration = std::chrono::duration(now - lastSubmissionTime).count();
 	}
@@ -233,7 +233,7 @@ uint64_t XAudio2AudioOutput::getSamplesLeft() const
 	int64_t duration;
 	int64_t submitted;
 	{
-		std::unique_lock<std::mutex> lock(playbackMutex);
+		UniqueLock lock(playbackMutex);
 		pos = static_cast<int64_t>(playbackPos);
 		duration = std::chrono::duration(now - lastSubmissionTime).count();
 		submitted = static_cast<int64_t>(samplesSubmitted);
@@ -260,7 +260,7 @@ void XAudio2AudioOutput::consumeAudio()
 		voice->queueAudio(buffer.span());
 		const auto samplesPlayed = voice->getSamplesPlayed();
 
-		std::unique_lock<std::mutex> lock(playbackMutex);
+		UniqueLock lock(playbackMutex);
 		playbackPos = samplesPlayed;
 		lastSubmissionTime = std::chrono::high_resolution_clock::now();
 	};

@@ -58,7 +58,7 @@ namespace Halley {
 
 		FlatMap<unsigned int, String> glEnumMap;
 		mutable Vector<std::function<void()>> messagesPending;
-		mutable std::mutex messagesMutex;
+		mutable Mutex messagesMutex;
 
 		std::unique_ptr<GLContext> context;
 		bool initialized = false;

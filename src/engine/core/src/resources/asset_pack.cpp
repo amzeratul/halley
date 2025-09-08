@@ -82,7 +82,7 @@ AssetPack::~AssetPack()
 
 AssetPack& AssetPack::operator=(AssetPack&& other) noexcept
 {
-	std::unique_lock<std::mutex> lock(other.readerMutex);
+	UniqueLock lock(other.readerMutex);
 
 	assetDb = std::move(other.assetDb);
 	dataOffset = other.dataOffset;
@@ -168,7 +168,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 
 void AssetPack::readToMemory()
 {
-	std::unique_lock<std::mutex> lock(readerMutex);
+	UniqueLock lock(readerMutex);
 	reader->seek(dataOffset, SEEK_SET);
 	data = reader->readAll();
 	hasReader = false;
@@ -191,7 +191,7 @@ void AssetPack::decrypt(Encrypt::AESKey key)
 void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 {
 	if (hasReader) {
-		std::unique_lock<std::mutex> lock(readerMutex);
+		UniqueLock lock(readerMutex);
 		if (reader) {
 			reader->seek(pos + dataOffset, SEEK_SET);
 			reader->read(dst);
@@ -208,7 +208,7 @@ void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 
 std::unique_ptr<ResourceDataReader> AssetPack::extractReader()
 {
-	std::unique_lock<std::mutex> lock(readerMutex);
+	UniqueLock lock(readerMutex);
 	hasReader = false;
 	return std::move(reader);
 }
@@ -245,7 +245,7 @@ int PackDataReader::read(gsl::span<std::byte> dst)
 		return 0;
 	}
 
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	size_t available = fileSize - curPos;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
@@ -261,7 +261,7 @@ void PackDataReader::seek(int64_t pos, int whence)
 		return;
 	}
 
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	switch (whence) {
 	case SEEK_SET:
 		curPos = size_t(pos);
@@ -281,7 +281,7 @@ size_t PackDataReader::tell() const
 		return 0;
 	}
 
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	return curPos;
 }
 

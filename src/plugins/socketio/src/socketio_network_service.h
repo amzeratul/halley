@@ -69,7 +69,7 @@ namespace Halley
 		IPacketListener* packetListener = nullptr;
 		INetworkServiceStatsListener& statsListener;
 
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 
 		String disconnectReason;
 

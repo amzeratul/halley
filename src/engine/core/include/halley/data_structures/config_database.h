@@ -116,7 +116,7 @@ namespace Halley {
                 const auto& seq = nodes.asSequence();
                 Vector<T> result = std_ex::transform(seq, [] (const ConfigNode& node) { return T(node); });
 
-                auto lock = std::unique_lock(mutex);
+                auto lock = UniqueLock(mutex);
                 for (size_t i = 0; i < result.size(); ++i) {
                     loadEntry(seq[i]["id"].asString(), result[i], enforceUnique);
                 }
@@ -139,7 +139,7 @@ namespace Halley {
     private:
         HashMap<String, T> entries;
         mutable Vector<String> keys;
-        std::mutex mutex; // Only used for parallel loading atm
+        Mutex mutex; // Only used for parallel loading atm
 
         void loadEntry(const String& id, T& entry, bool enforceUnique)
         {
@@ -230,7 +230,7 @@ namespace Halley {
         static size_t nextIdx;
 
         std::optional<Vector<String>> onlyLoad;
-        std::mutex mutex;
+        Mutex mutex;
 
         template <typename T>
         ConfigDatabaseType<T>& of() const

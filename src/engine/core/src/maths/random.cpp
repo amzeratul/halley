@@ -65,7 +65,7 @@ Random::Random(Random&& other) noexcept
 
 Random& Random::operator=(Random&& other) noexcept
 {
-	auto lock = std::unique_lock<std::mutex>(other.mutex, std::defer_lock_t());
+	auto lock = UniqueLock(other.mutex, std::defer_lock_t());
 	if (other.threadSafe) {
 		lock.lock();
 	}
@@ -194,7 +194,7 @@ Random& Random::getGlobal()
 
 void Random::getBytes(gsl::span<std::byte> dst)
 {
-	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	auto lock = UniqueLock(mutex, std::defer_lock_t());
 	if (threadSafe) {
 		lock.lock();
 	}
@@ -246,7 +246,7 @@ void Random::setSeed(gsl::span<Byte> data)
 
 uint32_t Random::getRawInt()
 {
-	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	auto lock = UniqueLock(mutex, std::defer_lock_t());
 	if (threadSafe) {
 		lock.lock();
 	}
@@ -256,7 +256,7 @@ uint32_t Random::getRawInt()
 
 float Random::getRawFloat()
 {
-	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	auto lock = UniqueLock(mutex, std::defer_lock_t());
 	if (threadSafe) {
 		lock.lock();
 	}
@@ -266,7 +266,7 @@ float Random::getRawFloat()
 
 double Random::getRawDouble()
 {
-	auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock_t());
+	auto lock = UniqueLock(mutex, std::defer_lock_t());
 	if (threadSafe) {
 		lock.lock();
 	}

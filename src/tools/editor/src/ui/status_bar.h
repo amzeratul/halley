@@ -33,7 +33,7 @@ namespace Halley {
 		Sprite statusLED;
 		TextRenderer statusText;
 
-		std::mutex mutex;
+		Mutex mutex;
 		std::list<std::pair<LoggerLevel, String>> pendingStatus;
 
 		std::list<LEDState> pendingLED;

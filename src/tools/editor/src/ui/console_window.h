@@ -32,6 +32,6 @@ namespace Halley
 
 		std::shared_ptr<StatusBar> statusBar;
 
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 	};
 }

@@ -34,7 +34,7 @@ namespace Halley
 		std::atomic_size_t length;
 		mutable std::atomic_size_t samplesLeft;
 		mutable Vector<RingBuffer<float>> buffers;
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 
 		uint8_t numChannels = 0;
 		bool ready = false;

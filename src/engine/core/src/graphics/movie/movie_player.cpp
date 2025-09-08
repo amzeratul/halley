@@ -31,7 +31,7 @@ MoviePlayer::~MoviePlayer()
 {
 	{
 		std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-		std::unique_lock<std::mutex> lock(alive->mutex);
+		UniqueLock lock(alive->mutex);
 		alive->isAlive = false;
 	}
 	stopThread();
@@ -129,7 +129,7 @@ void MoviePlayer::update(Time t)
 	if (state == MoviePlayerState::Playing || state == MoviePlayerState::StartingToPlay) {
 		{
 			std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-			std::unique_lock<std::mutex> lock(alive->mutex);
+			UniqueLock lock(alive->mutex);
 			if (!pendingFrames.empty()) {
 				auto& next = pendingFrames.front();
 				if (time >= next.time) {
@@ -165,7 +165,7 @@ void MoviePlayer::update(Time t)
 void MoviePlayer::render(Resources& resources, RenderContext& rc)
 {
 	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-	std::unique_lock<std::mutex> lock(alive->mutex);
+	UniqueLock lock(alive->mutex);
 
 	if (needsYV12Conversion() && currentTexture) {
 		Camera cam;
@@ -275,7 +275,7 @@ void MoviePlayer::stopCustomThreads()
 bool MoviePlayer::needsMoreVideoFrames() const
 {
 	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-	std::unique_lock<std::mutex> lock(alive->mutex);
+	UniqueLock lock(alive->mutex);
 
 	if (state != MoviePlayerState::Playing && state != MoviePlayerState::StartingToPlay) {
 		return false;
@@ -299,7 +299,7 @@ bool MoviePlayer::needsMoreVideoFrames() const
 bool MoviePlayer::needsMoreAudioFrames() const
 {
 	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-	std::unique_lock<std::mutex> lock(alive->mutex);
+	UniqueLock lock(alive->mutex);
 
 	if (state != MoviePlayerState::Playing && state != MoviePlayerState::StartingToPlay) {
 		return false;
@@ -380,7 +380,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 		std::shared_ptr<Texture> tex;
 
 		{
-			std::unique_lock lock(alive->mutex);
+			UniqueLock lock(alive->mutex);
 
 			if (alive->isAlive) {
 				if (recycleTexture.empty()) {
@@ -398,7 +398,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 		}
 
 		{
-			std::unique_lock lock(alive->mutex);
+			UniqueLock lock(alive->mutex);
 			if (alive->isAlive) {
 				const auto iter = std::find_if(pendingFrames.begin(), pendingFrames.end(), [=] (const PendingFrame& f)
 				{
@@ -413,7 +413,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, TextureDescriptor&& descripto
 void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> texture)
 {
 	std::shared_ptr<MoviePlayerAliveFlag> alive = getAliveFlag();
-	std::unique_lock<std::mutex> lock(alive->mutex);
+	UniqueLock lock(alive->mutex);
 	pendingFrames.push_back({texture, time});
 }
 

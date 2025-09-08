@@ -72,7 +72,7 @@ size_t FileSystemResourceLocator::getMemoryUsage() const
 
 void FileSystemResourceLocator::loadAssetDb()
 {
-	auto lock = std::unique_lock(mutex);
+	auto lock = UniqueLock(mutex);
 	if (assetDb) {
 		return;
 	}

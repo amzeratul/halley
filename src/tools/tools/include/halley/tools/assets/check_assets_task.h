@@ -52,8 +52,8 @@ namespace Halley
 		bool oneShot;
 		Vector<Path> directoryMetas;
 
-		std::mutex mutex;
-		std::condition_variable condition;
+		Mutex mutex;
+		ConditionVariable condition;
 
 		std::optional<ReimportType> pendingReimport;
 

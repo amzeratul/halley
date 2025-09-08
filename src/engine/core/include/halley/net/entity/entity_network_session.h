@@ -145,7 +145,7 @@ namespace Halley {
 		bool gameStarted = false;
 		bool lobbyReady = false;
 
-        std::mutex outboundInterpolatorLock;
+        Mutex outboundInterpolatorLock;
 		ByteDataInterpolatorSet byteDataInterpolatorSet;
 
 		Bytes receiveBuffer;

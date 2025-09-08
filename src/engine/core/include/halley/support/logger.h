@@ -2,7 +2,7 @@
 
 #include <exception>
 #include <set>
-#include <mutex>
+#include "../concurrency/mutex.h"
 
 #include "halley/data_structures/hash_map.h"
 #include "halley/text/enum_names.h"
@@ -49,7 +49,7 @@ namespace Halley
 		void setInterruptContext() override;
 
 	private:
-		std::mutex mutex;
+		Mutex mutex;
 		bool devMode = false;
 		bool forceFlush = false;
 		bool interruptContext = false;

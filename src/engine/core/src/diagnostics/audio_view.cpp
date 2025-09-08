@@ -50,7 +50,7 @@ void AudioView::paint(Painter& painter)
 	}
 
 	{
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		curData = lastData;
 	}
 
@@ -159,7 +159,7 @@ void AudioView::paint(Painter& painter)
 
 void AudioView::onAudioDebugData(AudioDebugData data)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	lastData = std::move(data);
 }
 

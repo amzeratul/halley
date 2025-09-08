@@ -153,14 +153,14 @@ namespace Halley {
 		uint32_t next = 0;
 		uint32_t nAllocs = 0;
 
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 
-		std::unique_lock<std::mutex> lockMutex() const
+		UniqueLock<Mutex> lockMutex() const
 		{
 			if constexpr (threadSafe) {
-				return std::unique_lock<std::mutex>(mutex);
+				return UniqueLock(mutex);
 			} else {
-				return std::unique_lock<std::mutex>();
+				return UniqueLock<Mutex>();
 			}
 		}
 	};

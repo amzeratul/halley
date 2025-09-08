@@ -5,6 +5,7 @@
 #include "executor.h"
 #include "future.h"
 #include "task.h"
+#include "mutex.h"
 
 #define HAS_THREADS 1
 

@@ -81,7 +81,7 @@ void TaskAnchor::update(TaskSet& taskSet, float time)
 			progress = 1;
 			progressLabel = "";
 		} else {
-			std::lock_guard<std::mutex> lock(task->mutex);
+			UniqueLock lock(task->mutex);
 			progress = task->progress;
 			progressLabel = task->progressLabel;
 		}
@@ -158,14 +158,14 @@ Vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesTail(size_t max, 
 
 Vector<std::unique_ptr<Task>> TaskAnchor::getContinuations()
 {
-	std::lock_guard<std::mutex> lock(task->mutex);
+	UniqueLock lock(task->mutex);
 	return std::move(task->continuations);
 }
 
 Vector<std::unique_ptr<Task>> TaskAnchor::getPendingTasks()
 {
 	if (task->hasPendingTasksOnQueue) {
-		std::lock_guard<std::mutex> lock(task->mutex);
+		UniqueLock lock(task->mutex);
 		if (task->hasPendingTasksOnQueue) {
 			task->hasPendingTasksOnQueue = false;
 			Vector<std::unique_ptr<Task>> result = std::move(task->pendingTasks);
@@ -179,24 +179,24 @@ Vector<std::unique_ptr<Task>> TaskAnchor::getPendingTasks()
 
 Vector<String> TaskAnchor::getPendingToClear()
 {
-	std::lock_guard<std::mutex> lock(task->mutex);
+	UniqueLock lock(task->mutex);
 	return std::move(task->toClear);
 }
 
 std::optional<String> TaskAnchor::getAction()
 {
-	std::lock_guard<std::mutex> lock(task->mutex);
+	UniqueLock lock(task->mutex);
 	return task->getAction();	
 }
 
 void TaskAnchor::doAction(TaskSet& taskSet)
 {
-	std::lock_guard<std::mutex> lock(task->mutex);
+	UniqueLock lock(task->mutex);
 	task->doAction(taskSet);
 }
 
 void TaskAnchor::clear()
 {
-	std::lock_guard<std::mutex> lock(task->mutex);
+	UniqueLock lock(task->mutex);
 	error = false;
 }

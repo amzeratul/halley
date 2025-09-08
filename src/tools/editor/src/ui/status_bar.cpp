@@ -41,7 +41,7 @@ void StatusBar::notifyConsoleOpen()
 void StatusBar::update(Time t, bool moved)
 {
 	{
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		if (!pendingStatus.empty()) {
 			const auto& next = pendingStatus.front();
 			const auto colour = ConsoleWindow::getColour(*factory.getColourScheme(), next.first);
@@ -119,7 +119,7 @@ void StatusBar::resetLED()
 void StatusBar::log(LoggerLevel level, std::string_view msg)
 {
 	if (level != LoggerLevel::Dev) {
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		pendingStatus.emplace_back(level, String(msg));
 	}
 }

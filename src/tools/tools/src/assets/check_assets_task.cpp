@@ -57,7 +57,7 @@ void CheckAssetsTask::run()
 
 		decltype(pendingReimport) curPendingReimport;
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			UniqueLock lock(mutex);
 			curPendingReimport = pendingReimport;
 			pendingReimport = {};
 		}
@@ -286,8 +286,8 @@ bool CheckAssetsTask::doImportFile(ImportAssetsDatabase& db, AssetTable& assets,
 
 void CheckAssetsTask::sleep(int timeMs)
 {
-	std::unique_lock<std::mutex> lock(mutex);
-	condition.wait_for(lock, timeMs * 1ms);
+	UniqueLock lock(mutex);
+	condition.waitFor(lock, timeMs * 1ms);
 }
 
 CheckAssetsTask::AssetTable CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, const Vector<Path>& srcPaths, bool collectDirMeta, Range<float> progressRange)
@@ -381,12 +381,12 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, AssetTable assets,
 
 void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 {
-	condition.notify_one();
+	condition.notifyOne();
 }
 
 void CheckAssetsTask::requestReimport(ReimportType type)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	pendingReimport = type;
 }
 

@@ -95,8 +95,8 @@ namespace Halley {
         HashSet<UUID> toSave;
         HashMap<UUID, uint64_t> lastSeenHash;
 
-        std::mutex mutex;
-        std::condition_variable loadWait;
+        Mutex mutex;
+        ConditionVariable loadWait;
         std::atomic<bool> loaded;
 
         void loadAll();

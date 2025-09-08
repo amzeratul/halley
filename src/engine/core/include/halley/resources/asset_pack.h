@@ -59,7 +59,7 @@ namespace Halley {
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;
 		std::atomic<bool> hasReader;
-		std::mutex readerMutex;
+		Mutex readerMutex;
 		size_t dataOffset = 0;
 		Bytes data;
 		std::array<uint8_t, 16> iv;
@@ -83,7 +83,7 @@ namespace Halley {
 		const size_t startPos;
 		const size_t fileSize;
 		size_t curPos = 0;
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 		std::shared_ptr<bool> aliveToken;
 	};
 }

@@ -23,7 +23,7 @@ ConsoleWindow::~ConsoleWindow()
 
 void ConsoleWindow::log(LoggerLevel level, const std::string_view msg)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	buffer.emplace_back(level, msg);
 }
 
@@ -49,7 +49,7 @@ Colour4f ConsoleWindow::getColour(const UIColourScheme& colourScheme, LoggerLeve
 
 void ConsoleWindow::update(Time t, bool moved)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	decltype(buffer) buf2 = std::move(buffer);
 	buffer.clear();
 	lock.unlock();

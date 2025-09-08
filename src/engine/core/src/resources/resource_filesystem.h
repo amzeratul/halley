@@ -28,6 +28,6 @@ namespace Halley {
 	private:
 		void loadAssetDb();
 
-		std::mutex mutex;
+		Mutex mutex;
 	};
 }

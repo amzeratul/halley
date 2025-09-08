@@ -79,7 +79,7 @@ namespace Halley
 			std::size_t operator()(Sprite* ptr) const noexcept;
 		};
 		
-		mutable std::mutex spriteMutex;
+		mutable Mutex spriteMutex;
 		mutable HashMap<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
 #endif
 	};
@@ -180,7 +180,7 @@ namespace Halley
 
 		String defaultMaterialName;
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
-		mutable std::mutex materialMutex;
+		mutable Mutex materialMutex;
 
 		void loadTexture(Resources& resources) const;
 		void loadPaletteTexture(Resources& resources) const;

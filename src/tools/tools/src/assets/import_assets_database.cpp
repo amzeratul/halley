@@ -145,7 +145,7 @@ ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path ass
 
 void ImportAssetsDatabase::load()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	auto data = FileSystem::readFile(dbFile);
 	if (data.size() > 0) {
 		auto s = Deserializer(data);
@@ -155,7 +155,7 @@ void ImportAssetsDatabase::load()
 
 void ImportAssetsDatabase::save() const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	FileSystem::writeFile(dbFile, Serializer::toBytes(*this));
 
 	const auto pcAssetDatabase = doMakeAssetDatabase("pc");
@@ -164,7 +164,7 @@ void ImportAssetsDatabase::save() const
 
 void ImportAssetsDatabase::clear()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	inputFiles.clear();
 	assetsImported.clear();
 	assetsFailed.clear();
@@ -173,7 +173,7 @@ void ImportAssetsDatabase::clear()
 
 bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<int64_t, 3> timestamps) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	// Is it an unknown file?
 	const auto iter = inputFiles.find(path.toString());
@@ -193,7 +193,7 @@ bool ImportAssetsDatabase::needToLoadInputMetadata(const Path& path, std::array<
 
 void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int64_t, 3> timestamps, const Metadata& data, Path basePath)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	auto& input = inputFiles[path.toString()];
 	input.timestamp = timestamps;
@@ -204,21 +204,21 @@ void ImportAssetsDatabase::setInputFileMetadata(const Path& path, std::array<int
 
 void ImportAssetsDatabase::markInputPresent(const Path& path)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	auto& input = inputFiles[path.toString()];
 	input.missing = false;
 }
 
 void ImportAssetsDatabase::markInputMissing(const Path& path)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	auto& input = inputFiles[path.toString()];
 	input.missing = true;
 }
 
 void ImportAssetsDatabase::markAllInputFilesAsMissing()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	
 	for (auto& i: inputFiles) {
 		i.second.missing = true;
@@ -227,7 +227,7 @@ void ImportAssetsDatabase::markAllInputFilesAsMissing()
 
 bool ImportAssetsDatabase::purgeMissingInputs()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	bool modified = false;
 	for (auto iter = inputFiles.begin(); iter != inputFiles.end();) {
@@ -244,7 +244,7 @@ bool ImportAssetsDatabase::purgeMissingInputs()
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	const auto pathStr = path.toString();
 	const auto iter = inputFiles.find(pathStr);
@@ -257,7 +257,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) cons
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	if (const auto * entry = findEntry(type, assetId); entry) {
 		const auto& asset = entry->asset;
@@ -279,7 +279,7 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 
 Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId, bool absolutePath) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	if (const auto* entry = findEntry(type, assetId); entry) {
 		const auto& asset = entry->asset;
@@ -300,7 +300,7 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 
 int64_t ImportAssetsDatabase::getAssetTimestamp(AssetType type, const String& assetId) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	if (const auto * entry = findEntry(type, assetId); entry) {
 		return entry->asset.getLatestTimestamp();
@@ -311,7 +311,7 @@ int64_t ImportAssetsDatabase::getAssetTimestamp(AssetType type, const String& as
 
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, FileSystemCache& fsCache, bool includeFailed) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	
 	// Check if it failed loading last time
 	auto iter = assetsFailed.find(std::pair{ asset.assetType, asset.assetId });
@@ -386,7 +386,7 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 	entry.asset = asset;
 	entry.present = true;
 
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	assetsImported[std::pair{ asset.assetType, asset.assetId }] = entry;
 	indexDirty = true;
 	
@@ -398,7 +398,7 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 
 void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	const auto key = std::pair{ asset.assetType, asset.assetId };
 	assetsImported.erase(key);
 	assetsFailed.erase(key);
@@ -411,13 +411,13 @@ void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
 	entry.asset = asset;
 	entry.present = true;
 
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	assetsFailed[std::pair{ asset.assetType, asset.assetId }] = entry;
 }
 
 void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<std::pair<ImportAssetType, String>, ImportAssetsDatabaseEntry>& assets)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	for (auto& e: assetsImported) {
 		e.second.present = assets.find(e.first) != assets.end();
 	}
@@ -425,7 +425,7 @@ void ImportAssetsDatabase::markAssetsAsStillPresent(const HashMap<std::pair<Impo
 
 Vector<Path> ImportAssetsDatabase::markMissingAssetsAndGetPartial()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Vector<Path> toImport;
 	HashSet<String> missingInputs;
 
@@ -467,7 +467,7 @@ Vector<Path> ImportAssetsDatabase::markMissingAssetsAndGetPartial()
 
 Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Vector<ImportAssetsDatabaseEntry> result;
 	for (auto& e: assetsImported) {
 		if (!e.second.present) {
@@ -479,7 +479,7 @@ Vector<ImportAssetsDatabaseEntry> ImportAssetsDatabase::getAllMissing() const
 
 Vector<Path> ImportAssetsDatabase::getAllFailedFilenames() const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Vector<Path> result;
 	for (const auto& [k, v] : assetsFailed) {
 		for (auto& file: v.asset.inputFiles) {
@@ -492,13 +492,13 @@ Vector<Path> ImportAssetsDatabase::getAllFailedFilenames() const
 
 bool ImportAssetsDatabase::hasFailedFiles() const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	return !assetsFailed.empty();
 }
 
 std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetType assetType, const String& assetId) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	const auto iter = assetsImported.find(std::pair{ assetType, assetId });
 	if (iter != assetsImported.end()) {
 		Vector<Path> result;
@@ -514,7 +514,7 @@ std::pair<Path, Vector<Path>> ImportAssetsDatabase::getInputFiles(ImportAssetTyp
 
 Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetType, const String& assetId) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	auto iter = assetsImported.find(std::pair{ assetType, assetId });
 	if (iter != assetsImported.end()) {
 		return iter->second.asset.outputFiles;
@@ -525,7 +525,7 @@ Vector<AssetResource> ImportAssetsDatabase::getOutFiles(ImportAssetType assetTyp
 
 Vector<String> ImportAssetsDatabase::getAllInputFiles() const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Vector<String> result;
 	for (auto& i: inputFiles) {
 		result.push_back(i.first);
@@ -540,7 +540,7 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 		return getAssetsFromFile(inputFile.dropFront(3)); // e.g. ../halley/assets_src
 	}
 
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Vector<std::pair<AssetType, String>> result;
 
 	for (auto& a: assetsImported) {
@@ -561,7 +561,7 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 
 void ImportAssetsDatabase::updateAdditionalFileCache()
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	assetsWithAdditionalFile.clear();
 	for (auto& a : assetsImported) {
 		const auto& asset = a.second.asset;
@@ -574,7 +574,7 @@ void ImportAssetsDatabase::updateAdditionalFileCache()
 
 Vector<std::pair<Path, Path>> ImportAssetsDatabase::getFilesForAssetsThatHasAdditionalFile(const Path& inputFile)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	const auto iter = assetsWithAdditionalFile.find(inputFile.getString());
 	if (iter != assetsWithAdditionalFile.end()) {
@@ -644,7 +644,7 @@ const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetTyp
 
 std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase(const String& platform) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	return doMakeAssetDatabase(platform);
 }
 

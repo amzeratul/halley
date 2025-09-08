@@ -107,28 +107,28 @@ HRESULT __stdcall ResourceDataByteStream::SetLength(QWORD qwLength)
 
 HRESULT __stdcall ResourceDataByteStream::GetCurrentPosition(QWORD* pqwPosition)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	*pqwPosition = QWORD(pos);
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::SetCurrentPosition(QWORD qwPosition)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	pos = size_t(qwPosition);
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::IsEndOfStream(BOOL* pfEndOfStream)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	*pfEndOfStream = pos >= len;
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::Read(BYTE* pb, ULONG cb, ULONG* pcbRead)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	reader->seek(pos, SEEK_SET);
 	const auto nRead = reader->read(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
 	pos += nRead;
@@ -145,7 +145,7 @@ HRESULT __stdcall ResourceDataByteStream::BeginRead(BYTE* pb, ULONG cb, IMFAsync
 		IMFAsyncResult* result;
 		MFCreateAsyncResult(nullptr, pCallback, punkState, &result);
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			UniqueLock lock(mutex);
 			ULONG nRead = reader->read(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
 			asyncNumRead[result] = nRead;
 		}
@@ -200,7 +200,7 @@ HRESULT ResourceDataByteStream::Invoke(IMFAsyncResult* pAsyncResult)
 	auto readOp = static_cast<AsyncReadOp*>(unknown);
 
 	{
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		reader->seek(readOp->from, SEEK_SET);
 		readOp->nRead = reader->read(readOp->dst);
 	}
@@ -255,7 +255,7 @@ HRESULT __stdcall ResourceDataByteStream::EndWrite(IMFAsyncResult* pResult, ULON
 
 HRESULT __stdcall ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLONG llSeekOffset, DWORD dwSeekFlags, QWORD* pqwCurrentPosition)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	if (SeekOrigin == msoCurrent) {
 		pos += size_t(llSeekOffset);
 	} else {

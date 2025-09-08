@@ -331,7 +331,7 @@ void SocketIOConnection::update()
 	}
 
 	if (protocol == NetworkProtocol::TCP && status == ConnectionStatus::Connected) {
-		std::unique_lock lock(mutex);
+		UniqueLock lock(mutex);
 		tryReceive();
 		trySend();
 	}
@@ -362,7 +362,7 @@ void SocketIOConnection::send(TransmissionType type, OutboundNetworkPacket packe
 
 	memcpy(dst.data(), src.data(), src.size());
 
-	std::unique_lock lock(mutex);
+	UniqueLock lock(mutex);
 	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		sendQueue.emplace_back(std::move(dst));
 		trySend();
@@ -392,7 +392,7 @@ void SocketIOConnection::trySend()
 
 bool SocketIOConnection::receive(InboundNetworkPacket& packet)
 {
-	std::unique_lock lock(mutex);
+	UniqueLock lock(mutex);
 
 	if (receiveQueue.size() >= sizeof(uint32_t) && status == ConnectionStatus::Connected) {
 		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());

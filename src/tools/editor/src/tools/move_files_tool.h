@@ -44,7 +44,7 @@ private:
 
 	ChangeList toChange;
 	ChangeList toChangeOutbox;
-	std::mutex toChangeMutex;
+	Mutex toChangeMutex;
 
 	Vector<ConfigBreadCrumb> configBreadCrumbs;
 	HashMap<String, Vector<std::pair<String, ImportAssetType>>> componentReplacementTable;

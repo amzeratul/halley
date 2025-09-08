@@ -27,7 +27,7 @@ namespace Halley
 		AudioDebugData lastData;
 		AudioDebugData curData;
 
-		std::mutex mutex;
+		Mutex mutex;
 
 		mutable HashMap<AudioEmitterId, String> emitterNames;
 		mutable HashMap<AudioObjectId, String> objectNames;

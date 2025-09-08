@@ -8,6 +8,8 @@
 #include "halley/utils/utils.h"
 #include <mutex>
 
+#include "halley/concurrency/mutex.h"
+
 namespace Halley
 {
 	class String;
@@ -47,7 +49,7 @@ namespace Halley
 		bool reading = false;
 		bool needsPoll = false;
 
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 
 		void trySend();
 		void tryReceive();

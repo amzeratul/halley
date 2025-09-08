@@ -690,7 +690,7 @@ void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
 	}
 
 	if (listener) {
-        std::unique_lock lock(outboundInterpolatorLock);
+        UniqueLock lock(outboundInterpolatorLock);
 		auto& interpolatorSet = entity.setupNetwork(session->getMyPeerId().value());
 		if (!interpolatorSet.isReady()) {
 			requestSetupInterpolators(interpolatorSet, entity, false);

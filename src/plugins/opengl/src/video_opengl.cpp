@@ -248,7 +248,7 @@ void VideoOpenGL::onGLDebugMessage(unsigned int source, unsigned int type, unsig
 #ifdef _DEBUG
 		std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
 #else
-		std::lock_guard<std::mutex> lock(messagesMutex);
+		UniqueLock lock(messagesMutex);
 		messagesPending.push_back([str] () {
 			std::cout << ConsoleColour(Console::YELLOW) << str << ConsoleColour() << std::endl;
 		});
@@ -343,7 +343,7 @@ void VideoOpenGL::flip()
 
 	Vector<std::function<void()>> msgs;
 	{
-		std::lock_guard<std::mutex> lock(messagesMutex);
+		UniqueLock lock(messagesMutex);
 		msgs = std::move(messagesPending);
 	}
 	for (const auto& m : msgs) {

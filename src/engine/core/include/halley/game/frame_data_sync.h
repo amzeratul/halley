@@ -11,7 +11,7 @@ namespace Halley {
     	bool write(T v)
     	{
             const auto curFrame = BaseFrameData::hasCurrent() ? BaseFrameData::getCurrent().frameIdx : 0;
-        	std::unique_lock lock(mutex);
+        	UniqueLock lock(mutex);
 
             for (const auto& d: data) {
 	            if (d.first >= curFrame) {
@@ -27,7 +27,7 @@ namespace Halley {
     	std::optional<T> read()
         {
             const auto curFrame = BaseFrameData::hasCurrent() ? BaseFrameData::getCurrent().frameIdx : 0;
-        	std::unique_lock lock(mutex);
+        	UniqueLock lock(mutex);
 
             std::optional<T> result;
             for (auto& d: data) {
@@ -40,7 +40,7 @@ namespace Halley {
         }
 
     private:
-        std::mutex mutex;
+        Mutex mutex;
         Vector<std::pair<int, T>> data;
     };
 }

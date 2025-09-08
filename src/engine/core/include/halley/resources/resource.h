@@ -274,8 +274,8 @@ namespace Halley
 	private:
 		std::atomic<bool> failed;
 		std::atomic<bool> loading;
-		mutable std::condition_variable loadWait;
-		mutable std::mutex loadMutex;
+		mutable ConditionVariable loadWait;
+		mutable Mutex loadMutex;
 		mutable Vector<Promise<void>> pendingPromises;
 	};
 

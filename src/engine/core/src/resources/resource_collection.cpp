@@ -124,7 +124,7 @@ AssetType ResourceCollectionBase::getAssetType() const
 ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
 {
 	ResourceMemoryUsage usage;
-	std::shared_lock lock(mutex);
+	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
 		usage += r.second.res->getMemoryUsage();
@@ -138,7 +138,7 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 	Vector<std::pair<String, ResourceMemoryUsage>> usages;
 
 	{
-		std::shared_lock lock(mutex);
+		SharedLock lock(mutex);
 
 		for (auto& r: resources) {
 			usages.emplace_back(r.first, r.second.res->getMemoryUsage());
@@ -156,7 +156,7 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 
 void ResourceCollectionBase::age(float time)
 {
-	std::shared_lock lock(mutex);
+	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
 		const auto& resourcePtr = r.second.res;
@@ -176,7 +176,7 @@ ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
 	ResourceMemoryUsage usage;
 
 	{
-		std::shared_lock lock(mutex);
+		SharedLock lock(mutex);
 
 		for (auto iter = resources.begin(); iter != resources.end(); ) {
 			auto next = iter;
@@ -205,7 +205,7 @@ ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
 
 void ResourceCollectionBase::notifyResourcesUnloaded()
 {
-	std::shared_lock lock(mutex);
+	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
 		r.second.res->onOtherResourcesUnloaded();
@@ -215,7 +215,7 @@ void ResourceCollectionBase::notifyResourcesUnloaded()
 ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
 {
 	ResourceMemoryUsage usage;
-	std::shared_lock lock(mutex);
+	SharedLock lock(mutex);
 
 	for (auto& r: resources) {
 		auto& resourcePtr = r.second.res;
@@ -270,7 +270,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 	for (int i = 0; true; ++i) {
 		{
 			// Look in cache and return if it's there
-			std::shared_lock lock(mutex);
+			SharedLock lock(mutex);
 			const auto res = resources.find(assetId);
 			if (res != resources.end()) {
 				// Found resource, all good
@@ -280,10 +280,10 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 
 		{
 			// Resource not found; claim loading it
-			std::unique_lock lock(mutex);
+			UniqueLock lock(mutex);
 			if (resourcesLoading.contains(assetId)) {
 				// Someone else already loading it, wait until signaled then do the whole thing again
-				resourceLoaded.wait_for(lock, 20us);
+				resourceLoaded.waitFor(lock, 20us);
 				continue;
 			}
 			resourcesLoading.insert(assetId);
@@ -295,19 +295,19 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		try {
 			std::tie(newRes, loaded) = loadAsset(assetId, priority, allowFallback);
 		} catch (...) {
-			std::unique_lock lock(mutex);
+			UniqueLock lock(mutex);
 			resourcesLoading.erase(assetId);
-			resourceLoaded.notify_all();
+			resourceLoaded.notifyAll();
 			throw;
 		}
 
 		// Store in cache
 		{
-			std::unique_lock lock(mutex);
+			UniqueLock lock(mutex);
 			resourcesLoading.erase(assetId);
 			if (loaded) {
 				resources.emplace(assetId, Wrapper(newRes, 0));
-				resourceLoaded.notify_all();
+				resourceLoaded.notifyAll();
 			}
 		}
 

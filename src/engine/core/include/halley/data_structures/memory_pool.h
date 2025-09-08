@@ -1,7 +1,7 @@
 #pragma once
 
 #include "flat_map.h"
-#include <mutex>
+#include "../concurrency/mutex.h"
 
 namespace Halley {
 	class SizePool
@@ -17,7 +17,7 @@ namespace Halley {
 	private:
 		void* pimpl;
 		size_t size;
-		std::mutex mutex;
+		Mutex mutex;
 	};
 
 	// yo dawg

@@ -55,16 +55,16 @@ ProjectComments::ProjectComments(Path commentsRoot)
 	Concurrent::execute([this] ()
 	{
 		loadAll();
-		auto lock = std::unique_lock(mutex);
+		auto lock = UniqueLock(mutex);
 		loaded = true;
-		loadWait.notify_all();
+		loadWait.notifyAll();
 	});
 }
 
 void ProjectComments::waitForLoad()
 {
 	if (!loaded) {
-		auto lock = std::unique_lock(mutex);
+		auto lock = UniqueLock(mutex);
 		if (!loaded) {
 			loadWait.wait(lock);
 		}

@@ -26,6 +26,8 @@
 #include <array>
 #include <functional>
 
+#include "halley/concurrency/mutex.h"
+
 namespace Halley {
 	struct DebugTraceEntry
 	{
@@ -62,7 +64,7 @@ namespace Halley {
 		static bool debugging;
 		static std::array<DebugTraceEntry, 32> lastTraces;
 		static std::atomic<int> tracePos;
-		static std::mutex mutex;
+		static Mutex mutex;
 	};
 
 	#define HALLEY_DEBUG_TRACE() Halley::Debug::trace(__FILE__, __LINE__)

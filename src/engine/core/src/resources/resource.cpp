@@ -164,11 +164,11 @@ void AsyncResource::doneLoading()
 	if (loading) {
 		Vector<Promise<void>> promises;
 		{
-			std::unique_lock<std::mutex> lock(loadMutex);
+			UniqueLock lock(loadMutex);
 			loading = false;
 			promises = std::move(pendingPromises);
 		}
-		loadWait.notify_all();
+		loadWait.notifyAll();
 		for (auto& p: promises) {
 			p.set();
 		}
@@ -184,7 +184,7 @@ void AsyncResource::loadingFailed()
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
 	if (loading) {
-		std::unique_lock<std::mutex> lock(loadMutex);
+		UniqueLock lock(loadMutex);
 		while (loading) {
 			loadWait.wait(lock);
 		}
@@ -196,7 +196,7 @@ void AsyncResource::waitForLoad(bool acceptFailed) const
 
 Future<void> AsyncResource::onLoad() const
 {
-	std::unique_lock<std::mutex> lock(loadMutex);
+	UniqueLock lock(loadMutex);
 	if (loading) {
 		pendingPromises.push_back({});
 		return pendingPromises.back().getFuture();

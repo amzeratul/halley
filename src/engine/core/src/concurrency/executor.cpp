@@ -19,7 +19,7 @@ ExecutionQueue::ExecutionQueue()
 
 ExecutionQueue::Entry ExecutionQueue::getNext()
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	while (queue.empty()) {
 		if (!aborted) {
 			condition.wait(lock);
@@ -37,7 +37,7 @@ ExecutionQueue::Entry ExecutionQueue::getNext()
 
 Vector<ExecutionQueue::Entry> ExecutionQueue::getUpTo(size_t n)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	if (queue.size() <= n) {
 		hasTasks.store(false);
 		Vector<ExecutionQueue::Entry> tasks(queue.begin(), queue.end());
@@ -52,7 +52,7 @@ Vector<ExecutionQueue::Entry> ExecutionQueue::getUpTo(size_t n)
 
 Vector<ExecutionQueue::Entry> ExecutionQueue::getAll()
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	hasTasks.store(false);
 	Vector<Entry> tasks(queue.begin(), queue.end());
 	queue.clear();
@@ -64,11 +64,11 @@ void ExecutionQueue::addToQueue(TaskBase task, std::string_view name)
 	if (immediate) {
 		task();
 	} else {
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		queue.emplace_back(task, name);
 		hasTasks.store(true);
 
-		condition.notify_one();
+		condition.notifyOne();
 	}
 }
 
@@ -108,13 +108,13 @@ void ExecutionQueue::onDetached()
 void ExecutionQueue::abort()
 {
 	{
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		if (aborted) {
 			return;
 		}
 		aborted = true;
 	}
-	condition.notify_all();
+	condition.notifyAll();
 }
 
 void ExecutionQueue::setImmediate(bool immediate)

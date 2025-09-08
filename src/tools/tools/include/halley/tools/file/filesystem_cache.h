@@ -40,8 +40,8 @@ namespace Halley {
             void removeDir(const String& name);
         };
 
-        mutable std::mutex fileDataMutex;
-        mutable std::mutex fileTreeMutex;
+        mutable Mutex fileDataMutex;
+        mutable Mutex fileTreeMutex;
 
         HashMap<String, Bytes> fileDataCache;
         HashMap<Path, DirEntry> dirs;

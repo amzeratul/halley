@@ -6,11 +6,11 @@
 #include <atomic>
 #include <halley/data_structures/maybe.h>
 #include <thread>
-#include <mutex>
 #include <condition_variable>
 #include <halley/support/exception.h>
 
 #include "halley/support/logger.h"
+#include "mutex.h"
 
 namespace Halley
 {
@@ -109,7 +109,7 @@ namespace Halley
 		void wait()
 		{
 			if (!available) {
-				std::unique_lock<std::mutex> lock(mutex);
+				UniqueLock lock(mutex);
 				while (!available) {
 					condition.wait(lock);
 				}
@@ -126,7 +126,7 @@ namespace Halley
 			if (available.load()) {
 				apply(f);
 			} else {
-				std::unique_lock<std::mutex> lock(mutex);
+				UniqueLock lock(mutex);
 				if (available.load()) {
 					lock.unlock();
 					apply(f);
@@ -172,11 +172,11 @@ namespace Halley
 			Vector<std::function<void(T)>> toRun;
 
 			{
-				std::unique_lock<std::mutex> lock(mutex);
+				UniqueLock lock(mutex);
 				toRun = std::move(continuations);
 				continuations.clear();
 				available.store(true);
-				condition.notify_all();
+				condition.notifyAll();
 			}
 
 			for (auto& f : toRun) {
@@ -189,8 +189,8 @@ namespace Halley
 		std::optional<T> data;
 
 		Vector<std::function<void(T)>> continuations;
-		std::mutex mutex;
-		std::condition_variable condition;
+		Mutex mutex;
+		ConditionVariable condition;
 	};
 
 	template <typename T>
@@ -368,7 +368,7 @@ namespace Halley
 
 		int notify()
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			UniqueLock lock(mutex);
 			return --waitingFor;
 			/*
 			// Lock-free, juggling razors here!
@@ -384,7 +384,7 @@ namespace Halley
 		}
 
 	private:
-		std::mutex mutex;
+		Mutex mutex;
 		std::atomic<int> waitingFor;
 	};
 

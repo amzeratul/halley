@@ -61,7 +61,7 @@ void AsioTCPConnection::update()
 		}
 
 		{
-			std::unique_lock<std::mutex> lock(mutex);
+			UniqueLock lock(mutex);
 			needsPoll = false;
 			tryReceive();
 			trySend();
@@ -71,7 +71,7 @@ void AsioTCPConnection::update()
 
 void AsioTCPConnection::close()
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	resolver.reset();
 	if (status != ConnectionStatus::Closed) {
 		try {
@@ -108,7 +108,7 @@ void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet
 	auto bs = Bytes(bytes.size_bytes());
 	memcpy(bs.data(), bytes.data(), bytes.size());
 
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		sendQueue.emplace_back(std::move(bs));
 		trySend();
@@ -117,7 +117,7 @@ void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet
 
 bool AsioTCPConnection::receive(InboundNetworkPacket& packet)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	if (receiveQueue.size() >= sizeof(uint32_t) && status == ConnectionStatus::Connected) {
 		const uint32_t size = *reinterpret_cast<uint32_t*>(receiveQueue.data());
 		if (size > 128 * 1024 * 1024) {
@@ -173,7 +173,7 @@ void AsioTCPConnection::trySend()
 					front.erase(front.begin(), front.begin() + bytesWritten);
 				}
 
-				std::unique_lock<std::mutex> lock(mutex);
+				UniqueLock lock(mutex);
 				trySend();
 			}
 		});

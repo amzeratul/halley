@@ -275,7 +275,7 @@ void SpriteSheet::setTextureName(String name)
 
 std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 {
-	auto lock = std::unique_lock(materialMutex);
+	auto lock = UniqueLock(materialMutex);
 
 	const auto iter = materials.find(name);
 	std::shared_ptr<Material> result;
@@ -301,7 +301,7 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 
 void SpriteSheet::clearMaterialCache() const
 {
-	auto lock = std::unique_lock(materialMutex);
+	auto lock = UniqueLock(materialMutex);
 	materials.clear();
 }
 
@@ -714,7 +714,7 @@ void SpriteResource::reload(Resource&& resource)
 	idx = reloaded.idx;
 
 #ifdef ENABLE_HOT_RELOAD
-	auto lock = std::unique_lock(spriteMutex);
+	auto lock = UniqueLock(spriteMutex);
 	for (auto& sprite: spriteRefs) {
 		sprite.first->reloadSprite(*this);
 	}
@@ -751,28 +751,28 @@ ResourceMemoryUsage SpriteResource::getMemoryUsage() const
 void SpriteHotReloader::addSprite(Sprite* sprite, uint32_t idx) const
 {
 	Expects(sprite != nullptr);
-	auto lock = std::unique_lock(spriteMutex);
+	auto lock = UniqueLock(spriteMutex);
 	spriteRefs[sprite] = idx;
 }
 
 void SpriteHotReloader::removeSprite(Sprite* sprite) const
 {
 	Expects(sprite != nullptr);
-	auto lock = std::unique_lock(spriteMutex);
+	auto lock = UniqueLock(spriteMutex);
 	spriteRefs.erase(sprite);
 }
 
 void SpriteHotReloader::updateSpriteIndex(Sprite* sprite, uint32_t idx) const
 {
 	Expects(sprite != nullptr);
-	auto lock = std::unique_lock(spriteMutex);
+	auto lock = UniqueLock(spriteMutex);
 	spriteRefs.at(sprite) = idx;
 }
 
 void SpriteHotReloader::clearSpriteRefs()
 {
 	// This doesn't need a lock as it happens in destructor context only; a race condition in a destructor is UB
-	//auto lock = std::unique_lock(spriteMutex);
+	//auto lock = UniqueLock(spriteMutex);
 	for (auto sprite: spriteRefs) {
 		sprite.first->clearSpriteSheetRef();
 	}
