@@ -550,15 +550,14 @@ void String::asciiMakeLower()
 
 String& String::operator += (const String &p)
 {
-	str.append(p);
+	str.append(std::string_view(p));
 	return *this;
 }
 
 #ifdef WX_COMPAT
 String String::operator += (const wxString &p)
 {
-	str.append(String(p));
-	return *this;
+	return operator +=(String(p));
 }
 #endif
 
@@ -570,20 +569,17 @@ String& String::operator += (const char* p)
 
 String& String::operator += (const wchar_t* p)
 {
-	str.append(String(p));
-	return *this;
+	return operator +=(String(p));
 }
 
 String& String::operator += (const double &p)
 {
-	str.append(Halley::toString(p));
-	return *this;
+	return operator +=(Halley::toString(p));
 }
 
 String& String::operator += (const int &p)
 {
-	str.append(Halley::toString(p));
-	return *this;
+	return operator +=(Halley::toString(p));
 }
 
 String& String::operator += (const Character &p)

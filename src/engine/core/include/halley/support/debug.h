@@ -25,6 +25,7 @@
 #include <list>
 #include <array>
 #include <functional>
+#include <atomic>
 
 #include "halley/concurrency/mutex.h"
 
