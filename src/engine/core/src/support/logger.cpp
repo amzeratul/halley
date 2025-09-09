@@ -24,7 +24,7 @@ void StdOutSink::log(LoggerLevel level, std::string_view msg)
 		return;
 	}
 
-	std::unique_lock<std::mutex> lock(mutex, std::defer_lock_t());
+	UniqueLock lock(mutex, std::defer_lock_t());
 	if (!interruptContext) {
 		lock.lock();
 	}

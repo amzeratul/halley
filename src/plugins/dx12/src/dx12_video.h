@@ -106,7 +106,7 @@ namespace Halley {
         ComPtr<ID3D12CommandQueue> commandQueue;
         ComPtr<ID3D12GraphicsCommandList> commandList;
 
-        std::mutex commandQueueLock;
+        Mutex commandQueueLock;
 
         std::unique_ptr<DX12DescriptorPool> srvPool;
         std::unique_ptr<DX12DescriptorPool> samPool;

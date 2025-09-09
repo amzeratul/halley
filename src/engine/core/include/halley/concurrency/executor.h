@@ -1,12 +1,12 @@
 #pragma once
 #include <deque>
 #include <thread>
-#include <mutex>
 #include <condition_variable>
 #include <functional>
 #include <atomic>
 #include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
+#include "mutex.h"
 
 namespace Halley
 {
@@ -43,14 +43,8 @@ namespace Halley
 
 	private:
 		std::deque<Entry> queue;
-#ifdef __PROSPERO__
-		std::mutex mutex{ nullptr };
-		std::condition_variable condition {nullptr};
-#else
-		std::mutex mutex;
-		std::condition_variable condition;
-#endif
-		
+		Mutex mutex;
+		ConditionVariable condition;
 
 		std::atomic<int> attachedCount;
 		std::atomic<bool> hasTasks;

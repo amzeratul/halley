@@ -29,7 +29,7 @@ AudioClipStreaming::~AudioClipStreaming()
 
 void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 {
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	std::array<float, 4096> tmp;
 	//assert(src.size() / numChannels < tmp.size());
@@ -100,7 +100,7 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 
 	auto& buffer = buffers[channelN];
 
-	std::unique_lock<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	const size_t toWrite = std::min(len, buffer.availableToRead());
 	if (channelN == 0) {
 		samplesLeft -= toWrite;

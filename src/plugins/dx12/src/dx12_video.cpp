@@ -83,7 +83,7 @@ void DX12Video::onResume()
 {
 #ifdef _GAMING_XBOX
     {
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
 	    commandQueue->ResumeX();
     }
 #endif
@@ -101,7 +101,7 @@ void DX12Video::onSuspend()
 
 #ifdef _GAMING_XBOX
     {
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
 	    commandQueue->SuspendX(0);
     }
 #endif
@@ -219,7 +219,7 @@ void DX12Video::finishRender()
 
         ID3D12CommandList *commandLists[1] = {commandList.Get()};
 
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
         commandQueue->ExecuteCommandLists(1, commandLists);
     }
 
@@ -233,7 +233,7 @@ void DX12Video::finishRender()
         planeParameters.ResourceCount = 1;
         planeParameters.ppResources = frame->backBuffer.GetAddressOf();
 
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
         commandQueue->PresentX(1, &planeParameters, nullptr);
 #else
         uint32_t syncInterval = (allowTearing && !useVSync) ? 0u : 1u;
@@ -259,7 +259,7 @@ void DX12Video::finishUpload()
     ID3D12CommandList* commandLists[1] = {loaderCommandList.Get()};
 
 	{
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
 		commandQueue->ExecuteCommandLists(1, commandLists);
 
 	    if (FAILED(commandQueue->Signal(loaderFence.Get(), loaderFenceValue + 1))) {
@@ -977,7 +977,7 @@ void DX12Video::waitForGpu()
     uint64_t fenceValue = frame->fenceValue;
 
 	{
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
 
     	if (FAILED(commandQueue->Signal(fence.Get(), fenceValue))) {
 	        return;
@@ -1007,7 +1007,7 @@ void DX12Video::moveToNextFrame()
     uint64_t currentFenceValue = frame->fenceValue;
 
 	{
-		std::unique_lock lock(commandQueueLock);
+		UniqueLock lock(commandQueueLock);
 
 	    if (FAILED(commandQueue->Signal(fence.Get(), currentFenceValue))) {
             throw Exception("Signal() failed", HalleyExceptions::VideoPlugin);

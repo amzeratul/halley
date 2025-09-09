@@ -400,7 +400,7 @@ String Debug::getCallStack(int skip)
 
 	// NB: StackWalker isn't thread-safe - uses mutex if multiple sources are trying to retrieve
 	// callstacks at the same time, for example in the Editor when hitting asset build errors.
-	std::unique_lock lock(mutex);
+	UniqueLock lock(mutex);
 	OStreamStackWalker walker(ss, skip);
 	walker.ShowCallstack();
 	return ss.str();
@@ -481,8 +481,4 @@ void Debug::printLastTraces()
 
 std::array<DebugTraceEntry, 32> Debug::lastTraces;
 std::atomic<int> Debug::tracePos = 0;
-#ifdef __PROSPERO__
-std::mutex Debug::mutex{ nullptr };
-#else
-std::mutex Debug::mutex;
-#endif
+Mutex Debug::mutex;

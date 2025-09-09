@@ -34,11 +34,7 @@ namespace Halley
 		std::atomic_size_t length;
 		mutable std::atomic_size_t samplesLeft;
 		mutable Vector<RingBuffer<float>> buffers;
-#ifdef __PROSPERO__
-		mutable std::mutex mutex{ nullptr };
-#else
-		mutable std::mutex mutex;
-#endif
+		mutable Mutex mutex;
 
 		uint8_t numChannels = 0;
 		bool ready = false;

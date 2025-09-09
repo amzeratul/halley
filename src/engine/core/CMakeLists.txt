@@ -770,6 +770,7 @@ set(HEADERS
         "include/halley/concurrency/concurrent.h"
         "include/halley/concurrency/executor.h"
         "include/halley/concurrency/future.h"
+        "include/halley/concurrency/mutex.h"
         "include/halley/concurrency/shared_recursive_mutex.h"
         "include/halley/concurrency/task.h"
         "include/halley/concurrency/task_anchor.h"

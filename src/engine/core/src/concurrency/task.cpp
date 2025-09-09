@@ -26,14 +26,14 @@ void Task::updateOnMain(float time)
 
 void Task::addContinuation(std::unique_ptr<Task> task)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	task->parent = parent;
 	continuations.emplace_back(std::move(task));
 }
 
 void Task::clearTask(String name)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	toClear.emplace_back(std::move(name));
 }
 
@@ -44,20 +44,20 @@ void Task::setName(String name)
 
 void Task::setProgress(float p)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	progress = std::max(0.0f, std::min(p, 1.0f));
 }
 
 void Task::setProgress(float p, String label)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	progress = std::max(0.0f, std::min(p, 1.0f));
 	progressLabel = std::move(label);
 }
 
 void Task::setProgressLabel(String label)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	progressLabel = std::move(label);
 }
 
@@ -85,7 +85,7 @@ void Task::log(LoggerLevel level, String message)
 {
 	Logger::log(level, name + "> " + message);
 
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	if (level == LoggerLevel::Error) {
 		error = true;
 	}
@@ -105,7 +105,7 @@ size_t Task::getNumMessages() const
 
 Vector<std::pair<LoggerLevel, String>> Task::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	Vector<std::pair<LoggerLevel, String>> result;
 	for (const auto& msg: messageLog) {
@@ -125,7 +125,7 @@ Vector<std::pair<LoggerLevel, String>> Task::copyMessagesTail(size_t max, std::o
 	Vector<std::pair<LoggerLevel, String>> result;
 
 	{
-		std::lock_guard<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		for (auto iter = messageLog.rbegin(); iter != messageLog.rend(); ++iter) {
 			if (!filter || iter->first == filter.value()) {
 				result.push_back(*iter);
@@ -148,7 +148,7 @@ bool Task::isCancelled() const
 
 void Task::setError(bool error)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	this->error = error;
 }
 
@@ -160,7 +160,7 @@ bool Task::hasPendingTasks() const
 void Task::addPendingTask(std::unique_ptr<Task> task)
 {
 	task->parent = this;
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 
 	++pendingTaskCount;
 	pendingTasks.emplace_back(std::move(task));
@@ -170,7 +170,7 @@ void Task::addPendingTask(std::unique_ptr<Task> task)
 
 void Task::onPendingTaskDone(size_t numContinuations)
 {
-	std::lock_guard<std::mutex> lock(mutex);
+	UniqueLock lock(mutex);
 	Expects(pendingTaskCount > 0);
 	pendingTaskCount += static_cast<int>(numContinuations) - 1;
 	Ensures(pendingTaskCount >= 0);

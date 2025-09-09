@@ -45,11 +45,7 @@ namespace Halley
 		};
 
 		HashMap<String, InterestGroup> interests;
-#ifdef __PROSPERO__
-		mutable std::mutex mutex{ nullptr };
-#else
-		mutable std::mutex mutex;
-#endif
+		mutable Mutex mutex;
 	};
 
 	class DevConClient : public DevConConnection, private ILoggerSink, private CoreAPI::IProfileCallback

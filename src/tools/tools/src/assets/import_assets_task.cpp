@@ -36,7 +36,7 @@ void ImportAssetsTask::run()
 	assetsToImport = files.size();
 	Vector<Future<void>> tasks;
 
-	std::mutex importingLabelMutex;
+	Mutex importingLabelMutex;
 	Vector<String> importingLabels;
 
 	constexpr bool parallelImport = !Debug::isDebug();
@@ -48,7 +48,7 @@ void ImportAssetsTask::run()
 			}
 
 			{
-				auto lock = std::unique_lock<std::mutex>(importingLabelMutex);
+				auto lock = UniqueLock(importingLabelMutex);
 				importingLabels += files[i].assetId;
 			}
 
@@ -56,7 +56,7 @@ void ImportAssetsTask::run()
 			doImportAsset(files[i]);
 
 			{
-				auto lock = std::unique_lock<std::mutex>(importingLabelMutex);
+				auto lock = UniqueLock(importingLabelMutex);
 				++assetsImported;
 				std_ex::erase(importingLabels, files[i].assetId);
 
@@ -167,7 +167,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 
 	// Add to list of output assets
 	{
-		std::unique_lock<std::mutex> lock(mutex);
+		UniqueLock lock(mutex);
 		for (auto& o: result.out) {
 			outputAssets.insert(toString(o.type) + ":" + o.name);
 		}

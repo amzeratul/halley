@@ -36,7 +36,7 @@ namespace Halley {
 
 	private:
 		std::unique_ptr<ResourceDataReader> reader;
-		std::mutex mutex;
+		Mutex mutex;
 		size_t len;
 		size_t pos = 0;
 		long refCount = 0;

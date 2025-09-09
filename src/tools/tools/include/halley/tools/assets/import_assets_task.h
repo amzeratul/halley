@@ -43,7 +43,7 @@ namespace Halley
 		std::atomic<size_t> assetsImported{};
 		size_t assetsToImport{};
 
-		std::mutex mutex;
+		Mutex mutex;
 		
 		std::string curFileLabel;
 

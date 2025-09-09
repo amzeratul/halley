@@ -53,11 +53,7 @@ namespace Halley
 	struct MoviePlayerAliveFlag
 	{
 		bool isAlive = true;
-#ifdef __PROSPERO__
-		mutable std::mutex mutex{ nullptr };
-#else
-		mutable std::mutex mutex;
-#endif
+		mutable Mutex mutex;
 	};
 	
 	class MoviePlayer

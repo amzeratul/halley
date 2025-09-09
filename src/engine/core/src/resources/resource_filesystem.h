@@ -28,10 +28,6 @@ namespace Halley {
 	private:
 		void loadAssetDb();
 
-#ifdef __PROSPERO__
-		std::mutex mutex{ nullptr };
-#else
-		std::mutex mutex;
-#endif
+		Mutex mutex;
 	};
 }

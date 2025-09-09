@@ -18,7 +18,7 @@ void FileSystemCache::writeFile(const Path& path, gsl::span<const std::byte> dat
 
 	FileSystem::writeFile(path, data);
 
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	if (shouldCache(path, data.size())) {
 		auto& result = fileDataCache[key];
 		result.resize(data.size());
@@ -38,7 +38,7 @@ void FileSystemCache::writeFile(const Path& path, Bytes data)
 
 	FileSystem::writeFile(path, data);
 
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	if (shouldCache(path, data.size())) {
 		fileDataCache[key] = std::move(data);
 	} else {
@@ -55,7 +55,7 @@ gsl::span<const std::byte> FileSystemCache::readFile(const Path& path)
 {
 	const auto key = path.getString();
 	{
-		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+		auto lock = UniqueLock(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			return iter->second.const_byte_span();
@@ -64,7 +64,7 @@ gsl::span<const std::byte> FileSystemCache::readFile(const Path& path)
 
 	auto bytes = FileSystem::readFile(path);
 
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	if (shouldCache(path, bytes.size())) {
 		fileDataCache[key] = std::move(bytes);
 		return fileDataCache.at(key).const_byte_span();
@@ -80,7 +80,7 @@ Bytes FileSystemCache::readFileCopy(const Path& path)
 {
 	const auto key = path.getString();
 	{
-		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+		auto lock = UniqueLock(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			return iter->second;
@@ -89,7 +89,7 @@ Bytes FileSystemCache::readFileCopy(const Path& path)
 
 	auto bytes = FileSystem::readFile(path);
 
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	if (shouldCache(path, bytes.size())) {
 		fileDataCache[key] = bytes;
 	} else {
@@ -105,7 +105,7 @@ bool FileSystemCache::remove(const Path& path)
 
 	const auto key = path.getString();
 	{
-		auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+		auto lock = UniqueLock(fileDataMutex);
 		const auto iter = fileDataCache.find(key);
 		if (iter != fileDataCache.end()) {
 			fileDataCache.erase(iter);
@@ -118,7 +118,7 @@ bool FileSystemCache::remove(const Path& path)
 
 bool FileSystemCache::hasCached(const Path& path) const
 {
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	const auto key = path.getString();
 	return fileDataCache.contains(key);
 }
@@ -130,7 +130,7 @@ bool FileSystemCache::shouldCache(const Path& path, size_t size) const
 
 bool FileSystemCache::matchesCache(const String& key, gsl::span<const std::byte> data) const
 {
-	auto lock = std::unique_lock<std::mutex>(fileDataMutex);
+	auto lock = UniqueLock(fileDataMutex);
 	if (const auto iter = fileDataCache.find(key); iter != fileDataCache.end()) {
 		if (gsl::as_bytes(iter->second.span()) == data) {
 			return true;
@@ -141,7 +141,7 @@ bool FileSystemCache::matchesCache(const String& key, gsl::span<const std::byte>
 
 Vector<Path> FileSystemCache::enumerateDirectory(const Path& path, bool includeDirs, bool recursive)
 {
-	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
+	auto lock = UniqueLock(fileTreeMutex);
 	Vector<Path> result;
 	const auto root = path.isDirectory() ? path : path / ".";
 	doEnumerate(root, root, result, includeDirs, recursive);
@@ -168,14 +168,14 @@ void FileSystemCache::doEnumerate(const Path& root, const Path& path, Vector<Pat
 
 bool FileSystemCache::exists(const Path& path)
 {
-	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
+	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
 	return dir.files.contains(path.getFilenameStr());
 }
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
 {
-	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
+	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
 	const auto key = path.getFilenameStr();
 	const auto iter = dir.files.find(key);
@@ -187,7 +187,7 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 
 void FileSystemCache::trackDirectory(const Path& path)
 {
-	auto lock = std::unique_lock<std::mutex>(fileTreeMutex);
+	auto lock = UniqueLock(fileTreeMutex);
 	const auto dirPath = path.isDirectory() ? path : path / ".";
 	if (!std_ex::contains(trackedDirs, dirPath)) {
 		trackedDirs.push_back(dirPath);

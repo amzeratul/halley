@@ -137,7 +137,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 	Vector<CharcodeEntry> codes;
 	Vector<Future<void>> futures;
-	std::mutex m;
+	Mutex m;
 	std::atomic<int> nDone(0);
 	std::atomic<bool> keepGoing(true);
 
@@ -158,7 +158,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 
 				std::optional<msdfgen::Shape> shape;
 				{
-					std::unique_lock<std::mutex> lock(m);
+					UniqueLock lock(m);
 					shape = DistanceFieldGenerator::generateMSDFShape(font, charcode);
 				}
 
@@ -182,7 +182,7 @@ FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<
 				auto tmpImg = std::make_unique<Image>(Image::Format::RGBA, srcRect.getSize());
 				tmpImg->clear(0);
 				{
-					std::lock_guard<std::mutex> g(m);
+					UniqueLock g(m);
 					font.drawGlyph(*tmpImg, charcode, Vector2i(borderFinal, borderFinal));
 				}
 

@@ -152,7 +152,7 @@ namespace Halley
 		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
 		mutable bool indexDirty = true;
 	
-		mutable std::mutex mutex;
+		mutable Mutex mutex;
 
 		const AssetEntry* findEntry(AssetType type, const String& id) const;
 		std::unique_ptr<AssetDatabase> doMakeAssetDatabase(const String& platform) const;

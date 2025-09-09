@@ -27,11 +27,7 @@ namespace Halley
 		AudioDebugData lastData;
 		AudioDebugData curData;
 
-#ifdef __PROSPERO__
-		std::mutex mutex{ nullptr };
-#else
-		std::mutex mutex;
-#endif
+		Mutex mutex;
 
 		mutable HashMap<AudioEmitterId, String> emitterNames;
 		mutable HashMap<AudioObjectId, String> objectNames;

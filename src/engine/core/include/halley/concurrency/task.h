@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mutex>
+#include "mutex.h"
 #include <atomic>
 #include <list>
 #include "halley/data_structures/vector.h"
@@ -67,11 +67,7 @@ namespace Halley
 		Vector<std::unique_ptr<Task>> pendingTasks;
 		Vector<String> toClear;
 
-#ifdef __PROSPERO__
-		mutable std::mutex mutex{ nullptr };
-#else
-		mutable std::mutex mutex;
-#endif
+		mutable Mutex mutex;
 		std::atomic<float> progress;
 		String name;
 		String progressLabel;

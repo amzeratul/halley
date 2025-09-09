@@ -2,7 +2,7 @@
 
 #include <exception>
 #include <set>
-#include <mutex>
+#include "../concurrency/mutex.h"
 
 #include "halley/data_structures/hash_map.h"
 #include "halley/text/enum_names.h"
@@ -49,11 +49,7 @@ namespace Halley
 		void setInterruptContext() override;
 
 	private:
-#ifdef __PROSPERO__
-		std::mutex mutex{ nullptr };
-#else
-		std::mutex mutex;
-#endif
+		Mutex mutex;
 		bool devMode = false;
 		bool forceFlush = false;
 		bool interruptContext = false;

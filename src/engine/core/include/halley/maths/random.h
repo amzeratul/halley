@@ -28,6 +28,7 @@
 #include <mutex>
 
 #include "range.h"
+#include "halley/concurrency/mutex.h"
 
 namespace Halley {
 	class MT199937AR;
@@ -102,11 +103,7 @@ namespace Halley {
 		std::unique_ptr<MT199937AR> generator;
 		bool canSeed = true;
 		bool threadSafe = false;
-#ifdef __PROSPERO__
-		std::mutex mutex{ nullptr };
-#else
-		std::mutex mutex;
-#endif
+		Mutex mutex;
 
 		uint32_t getRawIntUnsafe();
 	};

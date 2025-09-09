@@ -154,7 +154,7 @@ void MoveFilesTool::receiveChangedFiles()
 {
 	ChangeList newChanges;
 	{
-		auto lock = std::unique_lock<std::mutex>(toChangeMutex);
+		auto lock = UniqueLock(toChangeMutex);
 		newChanges = std::move(toChangeOutbox);
 		toChangeOutbox = {};
 	}
@@ -207,7 +207,7 @@ void MoveFilesTool::addChangedFile(Path filePath, String data)
 
 void MoveFilesTool::addChangedFile(Path filePath, Bytes data)
 {
-	auto lock = std::unique_lock<std::mutex>(toChangeMutex);
+	auto lock = UniqueLock(toChangeMutex);
 	toChangeOutbox.emplace_back(std::move(filePath), std::move(data));
 }
 

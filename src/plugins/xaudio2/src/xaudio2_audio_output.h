@@ -47,8 +47,8 @@ namespace Halley
 
 		IXAudio2SourceVoice* voice = nullptr;
 
-		std::condition_variable condition;
-		std::mutex mutex;
+		ConditionVariable condition;
+		Mutex mutex;
 
 		struct Buffer {
 			Vector<float> buffer;
@@ -106,7 +106,7 @@ namespace Halley
 
 		uint64_t playbackPos = 0;
 		std::chrono::high_resolution_clock::time_point lastSubmissionTime;
-		mutable std::mutex playbackMutex;
+		mutable Mutex playbackMutex;
 
 		void consumeAudio();
 	};

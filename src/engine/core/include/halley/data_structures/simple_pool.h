@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <list>
-#include <mutex>
+#include "../concurrency/mutex.h"
 #include "halley/data_structures/vector.h"
 
 namespace Halley {
@@ -94,18 +94,14 @@ namespace Halley {
 		std::list<Block> blocks;
 		Entry* next = nullptr;
 
-#ifdef __PROSPERO__
-		mutable std::mutex mutex{ nullptr };
-#else
-		mutable std::mutex mutex;
-#endif
+		mutable Mutex mutex;
 
-		std::unique_lock<std::mutex> lockMutex() const
+		UniqueLock<Mutex> lockMutex() const
 		{
 			if constexpr (threadSafe) {
-				return std::unique_lock<std::mutex>(mutex);
+				return UniqueLock(mutex);
 			} else {
-				return std::unique_lock<std::mutex>();
+				return UniqueLock<Mutex>();
 			}
 		}
 	};

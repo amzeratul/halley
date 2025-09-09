@@ -2,11 +2,13 @@
 
 #include <shared_mutex>
 #include <thread>
-#include <atomic>
+#include "mutex.h"
 
 namespace Halley {
     class SharedRecursiveMutex {
     public:
+        using MutexType = SharedRecursiveMutex;
+
         SharedRecursiveMutex() = default;
         SharedRecursiveMutex(const SharedRecursiveMutex& other) = delete;
         SharedRecursiveMutex(SharedRecursiveMutex&& other) = delete;
@@ -20,6 +22,9 @@ namespace Halley {
         void lock_shared();
         [[nodiscard]] bool try_lock_shared();
         void unlock_shared();
+
+        MutexType& getStdMutex() { return *this; }
+	    const MutexType& getStdMutex() const { return *this; }
 
     private:
         std::shared_mutex mutex;

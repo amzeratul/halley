@@ -45,7 +45,7 @@ public:
 
 	Future<std::unique_ptr<Image>> requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode) override
 	{
-		std::unique_lock<std::mutex> lock(captureMutex);
+		UniqueLock lock(captureMutex);
 		auto& pc = queuedCaptures.emplace_back(PendingCapture{ rect, mode });
 		return pc.promise.getFuture();
 	}
@@ -70,11 +70,7 @@ private:
 	Vector<PendingCapture> pendingCaptures;
 	Vector<PendingCapture> queuedCaptures;
 	std::optional<PendingCapture> pendingGlobalCapture;
-#ifdef __PROSPERO__
-	std::mutex captureMutex{ nullptr };
-#else
-	std::mutex captureMutex;
-#endif
+	Mutex captureMutex;
 	String curRenderNode;
 
 	void setupRenderGraphMethods(RenderGraph& renderGraph)
@@ -101,7 +97,7 @@ private:
 	void initializeRequestedScreenGrabs(RenderGraph& renderGraph)
 	{
 		{
-			std::unique_lock<std::mutex> lock(captureMutex);
+			UniqueLock lock(captureMutex);
 			pendingCaptures = std::move(queuedCaptures);
 			queuedCaptures.clear();
 		}
