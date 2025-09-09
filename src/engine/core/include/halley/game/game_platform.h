@@ -76,6 +76,8 @@ namespace Halley {
         return GamePlatform::Switch2;
     #elif defined(__ORBIS__)
         return GamePlatform::PS4;
+    #elif defined(__PROSPERO__)
+		return GamePlatform::PS5;
     #elif defined(_GAMING_XBOX_XBOXONE)
         return GamePlatform::XboxOne;
 	#elif defined(_GAMING_XBOX_SCARLETT)
