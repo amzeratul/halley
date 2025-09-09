@@ -27,7 +27,11 @@ namespace Halley {
 	    const MutexType& getStdMutex() const { return *this; }
 
     private:
+#ifdef __PROSPERO__
+        std::shared_mutex mutex{nullptr};
+#else
         std::shared_mutex mutex;
+#endif
         std::atomic<std::thread::id> owner;
         int count = 0;
     };
