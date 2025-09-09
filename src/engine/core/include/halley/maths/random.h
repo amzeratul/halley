@@ -25,7 +25,6 @@
 #include <halley/support/exception.h>
 #include <gsl/span>
 #include <cstdint>
-#include <mutex>
 
 #include "range.h"
 #include "halley/concurrency/mutex.h"
