@@ -553,7 +553,7 @@ namespace Halley {
 		template <typename T>
 		std::optional<T> asOptional() const
 		{
-			if (getType() == ConfigNodeType::Undefined) {
+			if (getType() == ConfigNodeType::Undefined || getType() == ConfigNodeType::Del) {
 				return {};
 			} else {
 				return asType<T>();
