@@ -311,7 +311,7 @@ void ScriptGraphEditor::onDebugDisplayData(const ConfigNode& node)
 	HashMap<int, String> values;
 	if (node.getType() == ConfigNodeType::Sequence) {
 		for (const auto& n: node.asSequence()) {
-			auto val = n["value"].asString();
+			auto val = n["value"].asString("");
 			if (n["value"].getType() == ConfigNodeType::String) {
 				val = "\"" + val + "\"";
 			}
