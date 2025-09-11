@@ -142,7 +142,15 @@ gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 6>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 7>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output }
+	};
 	return data;
 }
 
@@ -179,6 +187,8 @@ String ScriptGetPosition::getPinDescription(const BaseGraphNode& node, PinType e
 		return "SubWorld";
 	} else if (elementIdx == 5) {
 		return "Global Height";
+	} else if (elementIdx == 6) {
+		return "Has Transform?";
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
@@ -187,7 +197,13 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 {
 	const auto offset = readDataPin(environment, node, 2).asVector2f({});
 
-	const auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0));
+	const auto entityId = readEntityId(environment, node, 0);
+	const auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId);
+
+	if (pinN == 6) {
+		return ConfigNode(transform != nullptr);
+	}
+
 	if (transform) {
 		if (pinN == 1) {
 			return (WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()) + offset).toConfigNode();
@@ -197,6 +213,12 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 			return ConfigNode(transform->getSubWorld());
 		} else if (pinN == 5) {
 			return ConfigNode(transform->getGlobalHeight());
+		}
+	} else {
+		if (auto e = environment.getWorld().tryGetEntity(entityId); e.isValid()) {
+			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " (\"" + toString(e.getName()) + "\") has no Transform2DComponent", true);
+		} else {
+			Logger::logError("ScriptGetPosition: entity " + toString(entityId) + " does not exist", true);
 		}
 	}
 	return ConfigNode();
