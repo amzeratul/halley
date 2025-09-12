@@ -102,5 +102,6 @@ namespace Halley {
         void onClickLine(std::optional<int> line, KeyMods mods);
 
         bool generateLineIndex();
+        void notifySelectionChanged();
     };
 }

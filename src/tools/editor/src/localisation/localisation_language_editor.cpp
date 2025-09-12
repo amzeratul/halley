@@ -185,8 +185,6 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 
 void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 {
-	const bool hasMultiSel = grid->getSelectedLines().size() > 1;
-
 	auto curKey = getWidgetAs<UILabel>("curKey");
 	auto srcCurLine = getWidgetAs<UITextInput>("srcCurLine");
 	auto dstCurLine = getWidgetAs<UITextInput>("dstCurLine");
@@ -196,7 +194,7 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 
 	curEditingKey = key;
 
-	bool canEditProperties = canEdit && srcRemote;
+	bool canEditProperties = canEditPropertiesForSelection();
 	comment->setReadOnly(!canEditProperties);
 	context->setReadOnly(!canEditProperties);
 	priority->setEnabled(canEditProperties);
@@ -254,6 +252,10 @@ void LocalisationLanguageEditor::setDstValue(const String& value)
 
 void LocalisationLanguageEditor::setComment(const String& comment)
 {
+	if (!canEditPropertiesForSelection()) {
+		return;
+	}
+
 	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
@@ -270,6 +272,10 @@ void LocalisationLanguageEditor::setComment(const String& comment)
 
 void LocalisationLanguageEditor::setContext(const String& context)
 {
+	if (!canEditPropertiesForSelection()) {
+		return;
+	}
+
 	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
@@ -286,6 +292,10 @@ void LocalisationLanguageEditor::setContext(const String& context)
 
 void LocalisationLanguageEditor::setPriority(LocPriority priority)
 {
+	if (!canEditPropertiesForSelection()) {
+		return;
+	}
+
 	Vector<String> modified;
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
@@ -298,6 +308,40 @@ void LocalisationLanguageEditor::setPriority(LocPriority priority)
 	}
 	onStringPropertiesModified(modified);
 	grid->refreshContents();
+}
+
+bool LocalisationLanguageEditor::canEditProperties(int idx) const
+{
+	if (!canEdit || !srcRemote) {
+		return false;
+	}
+
+	const auto& localEntry = srcData->getEntry(idx);
+	const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.key);
+	if (!remoteEntry) {
+		return false;
+	}
+
+	return true;
+}
+
+bool LocalisationLanguageEditor::canEditPropertiesForSelection() const
+{
+	if (!canEdit || !srcRemote) {
+		return false;
+	}
+
+	const auto& sel = grid->getSelectedLines();
+	if (sel.empty()) {
+		return false;
+	}
+
+	for (const auto lineNumber : sel) {
+		if (!canEditProperties(lineNumber)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 void LocalisationLanguageEditor::markUpToDate()
@@ -370,6 +414,7 @@ void LocalisationLanguageEditor::onStringPropertiesModified(const Vector<String>
 
 	auto entries = srcLanguage.makeStringPropertiesDelta(*srcRemote, keys);
 	if (!entries.empty()) {
+		Logger::logDev(toString(keys.size()) + " keys marked as modified properties, sending delta for " + toString(entries.size()));
 		auto future = client.putStringProperties(entries); // Do not merge these two lines, note the std::move(entries) below
 		future.then(aliveFlag, Executors::getMainUpdateThread(), [remote = srcRemote, entries = std::move(entries)](bool ok) {
 			if (ok) {

@@ -253,12 +253,18 @@ void UIGrid::moveSelection(int delta)
 
 void UIGrid::selectAll()
 {
+	auto prevSelection = selectedLines;
+
 	selectedLines.clear();
 	const auto n = getActiveRowCount();
 	for (int i = 0; i < n; ++i) {
 		if (auto curLine = getLineAtRow(i)) {
 			selectedLines.insert(*curLine);
 		}
+	}
+
+	if (prevSelection != selectedLines) {
+		notifySelectionChanged();
 	}
 }
 
@@ -375,7 +381,7 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 		line = {};
 	}
 
-	const auto prevActive = activeSelectedLine;
+	const auto prevActive = selectedLines;
 
 	if (mods == KeyMods::None || (mods == KeyMods::Shift && !activeSelectedLine)) {
 		selectedLines.clear();
@@ -409,9 +415,8 @@ void UIGrid::onClickLine(std::optional<int> line, KeyMods mods)
 		}
 	}
 
-	if (activeSelectedLine != prevActive) {
-		auto id = activeSelectedLine ? getKeyAt(*activeSelectedLine) : "";
-		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, activeSelectedLine.value_or(-1)));
+	if (selectedLines != prevActive) {
+		notifySelectionChanged();
 	}
 }
 
@@ -445,6 +450,13 @@ bool UIGrid::generateLineIndex()
 	} else {
 		return false;
 	}
+}
+
+void UIGrid::notifySelectionChanged()
+{
+	// Note that we want to send this even if activeSelectedLine hasn't changed, because the full selection set might have
+	auto id = activeSelectedLine ? getKeyAt(*activeSelectedLine) : "";
+	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), id, activeSelectedLine.value_or(-1)));
 }
 
 float UIGrid::getLineHeight() const

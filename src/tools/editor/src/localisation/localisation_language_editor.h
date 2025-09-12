@@ -51,6 +51,9 @@ namespace Halley {
 		void setContext(const String& context);
 		void setPriority(LocPriority priority);
 
+		bool canEditProperties(int idx) const;
+		bool canEditPropertiesForSelection() const;
+
 		void markUpToDate();
 		void markOutOfDate();
 		std::pair<int, int> getOutOfDateAndUpToDateCountInSelection() const;
