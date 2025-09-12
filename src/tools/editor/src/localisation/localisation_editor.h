@@ -78,6 +78,7 @@ namespace Halley {
         bool gotRemoteStrings = false;
         bool pendingRemoteStrings = false;
         bool firstUpdate = true;
+        bool assetsChanged = false;
         State state = State::NotConnected;
         std::optional<String> curMessage;
 

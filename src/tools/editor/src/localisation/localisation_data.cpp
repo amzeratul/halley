@@ -117,12 +117,12 @@ const String& LocOriginalDataChunk::getGroupNameEntry(size_t idx) const
 
 const LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx) const
 {
-	return entries[idx];
+	return entries.at(idx);
 }
 
 LocalisationDataEntry& LocOriginalDataChunk::getEntry(size_t idx)
 {
-	return entries[idx];
+	return entries.at(idx);
 }
 
 bool LocOriginalDataChunk::operator<(const LocOriginalDataChunk& other) const
@@ -236,7 +236,7 @@ const String& LocOriginalData::getGroupNameEntry(size_t idx) const
 
 const LocalisationDataEntry& LocOriginalData::getEntry(size_t idx) const
 {
-	const auto index = keyIndices[idx];
+	const auto index = keyIndices.at(idx);
 	return chunks[index.first].getEntry(index.second);
 }
 

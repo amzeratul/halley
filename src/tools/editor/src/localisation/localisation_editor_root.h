@@ -6,6 +6,12 @@ namespace Halley {
 	class ProjectWindow;
 	class LocalisationEditor;
 
+    class ILocalisationStringsListener {
+    public:
+        virtual ~ILocalisationStringsListener() = default;
+        virtual void onStringsUpdated() = 0;
+    };
+
 	class LocalisationEditorRoot : public UIWidget {
     public:
         LocalisationEditorRoot(ProjectWindow& projectWindow, UIFactory& factory, const HalleyAPI& api);
@@ -19,6 +25,7 @@ namespace Halley {
         Sprite getFlag(const I18NLanguage& language) const;
 
 		LocalisationRemoteClientUpdater& getRemoteClientUpdater();
+        void onStringsUpdated();
 
     private:
         Project& project;

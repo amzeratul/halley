@@ -160,8 +160,14 @@ void LocalisationLanguageEditor::update(Time t, bool moved)
 	uploadPendingTranslations(false);
 }
 
+void LocalisationLanguageEditor::onStringsUpdated()
+{
+	setChunk(curChunk);
+}
+
 void LocalisationLanguageEditor::setChunk(const String& chunkId)
 {
+	curChunk = chunkId;
 	srcData = chunkId.isEmpty() ? static_cast<const ILocOriginalData*>(&srcLanguage) : srcLanguage.tryGetChunk(chunkId);
 
 	srcRemoteDataIndex.clear();

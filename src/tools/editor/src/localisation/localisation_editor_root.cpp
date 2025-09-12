@@ -142,3 +142,14 @@ LocalisationRemoteClientUpdater& LocalisationEditorRoot::getRemoteClientUpdater(
 {
 	return remoteClientUpdater;
 }
+
+void LocalisationEditorRoot::onStringsUpdated()
+{
+	remoteClientUpdater.onStringsUpdated();
+
+	if (curWidget) {
+		if (auto* listener = dynamic_cast<ILocalisationStringsListener*>(curWidget.get())) {
+			listener->onStringsUpdated();
+		}
+	}
+}

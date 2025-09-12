@@ -204,6 +204,7 @@ void LocalisationEditor::onActiveChanged(bool active)
 
 void LocalisationEditor::onAssetsLoaded()
 {
+	assetsChanged = true;
 }
 
 void LocalisationEditor::onReturnedFromDrillDown()
@@ -220,10 +221,19 @@ void LocalisationEditor::tryLoading()
 		project.addAssetLoadedListener(this);
 		loaded = true;
 	}
+
+	if (assetsChanged) {
+		assetsChanged = false;
+		loadLocalStrings();
+	}
 }
 
 void LocalisationEditor::loadLocalStrings()
 {
+	if (localStringsFuture.isValid()) {
+		return;
+	}
+
 	if (isDevEnvironment()) {
 		loadOriginalDataFromDisk();
 	} else {
@@ -319,7 +329,7 @@ void LocalisationEditor::populateData()
 	if ((localStrings && localStrings->originalLanguage) || remoteStrings) {
 		populateOriginalLanguageData();
 		populateTranslationData();
-		root.getRemoteClientUpdater().onStringsUpdated();
+		root.onStringsUpdated();
 	}
 }
 

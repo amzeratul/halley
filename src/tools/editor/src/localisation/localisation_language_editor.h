@@ -1,4 +1,5 @@
 #pragma once
+#include "localisation_editor_root.h"
 #include "localisation_filters.h"
 #include "localisation_grid.h"
 
@@ -7,12 +8,13 @@ namespace Halley {
 	class LocOriginalData;
 	class LocalisationClient;
 
-	class LocalisationLanguageEditor : public UIWidget {
+	class LocalisationLanguageEditor : public UIWidget, public ILocalisationStringsListener {
     public:
         LocalisationLanguageEditor(LocalisationEditorRoot& root, LocalisationClient& client, Project& project, UIFactory& factory, const HalleyAPI& api, LocOriginalData& srcLanguage, LocTranslationData* dstLanguage, LocOriginalData* srcRemote, LocTranslationData* locRemote, bool canEdit);
 
 		void onMakeUI() override;
 		void update(Time t, bool moved) override;
+		void onStringsUpdated() override;
 
 	private:
 		LocalisationEditorRoot& root;
@@ -41,8 +43,9 @@ namespace Halley {
 		Vector<String> pendingTranslationModifiedKeys;
 		Vector<String> pendingTranslationTextEditedKeys;
 		bool uploadingKeys = false;
+        String curChunk;
 
-		void setChunk(const String& chunkId);
+        void setChunk(const String& chunkId);
 		void setSelectedLine(int idx, const String& key);
 
 		void setSrcValue(const String& value);
