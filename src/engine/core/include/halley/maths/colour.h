@@ -104,9 +104,19 @@ namespace Halley {
 			, a(v.w)
 		{}
 
-		Colour4(const String& str)
+		constexpr Colour4(std::string_view str)
 		{
-			*this = fromString(str);
+			*this = fromHexString(str);
+		}
+
+		constexpr Colour4(const char* str)
+		{
+			*this = fromHexString(str);
+		}
+
+		constexpr Colour4(const String& str)
+		{
+			*this = fromHexString(str);
 		}
 
 		Colour4(const ConfigNode& node)
