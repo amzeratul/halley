@@ -8,8 +8,8 @@ using namespace Halley;
 
 UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasSpinControl, bool allowFloat)
 	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 0), style.getBorder("innerBorder"))
-	, minValue(minValue)
-	, maxValue(maxValue)
+	, minValue(std::min(minValue, maxValue))
+	, maxValue(std::max(this->minValue + 0.01f, maxValue))
 	, value(maxValue)
 {
 	styles.emplace_back(style);
