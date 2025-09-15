@@ -11,6 +11,23 @@ namespace Halley {
 	class AudioSource;
 	class Random;
 
+	enum class AudioObjectInstanceLimitType {
+		DontPlay,
+		StopOldest,
+		StopFarthest
+	};
+
+	template <>
+	struct EnumNames<AudioObjectInstanceLimitType> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"dontPlay",
+				"stopOldest",
+				"stopFarthest"
+			}};
+		}
+	};
+
 	class AudioObject final : public Resource, public IAudioObject {
     public:
     	AudioObject();
@@ -44,6 +61,8 @@ namespace Halley {
 		void setCooldown(std::optional<float> value);
 		std::optional<int> getMaxInstances() const;
 		void setMaxInstances(std::optional<int> value);
+	    AudioObjectInstanceLimitType getInstanceLimitType() const;
+	    void setInstanceLimitType(AudioObjectInstanceLimitType type);
 		int getPriority() const;
 		void setPriority(int value);
 
@@ -55,7 +74,7 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		void reload(Resource&& resource) override;
-        static std::shared_ptr<AudioObject> loadResource(ResourceLoader& loader);
+	    static std::shared_ptr<AudioObject> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioObject; }
     	void loadDependencies(Resources& resources);
 
@@ -82,7 +101,10 @@ namespace Halley {
 		bool pruneDistant = true;
 		std::optional<float> cooldown;
 		std::optional<int> maxInstances;
+		AudioObjectInstanceLimitType limitType = AudioObjectInstanceLimitType::DontPlay;
 		int priority = 0;
+		std::optional<float> minWidth;
+		std::optional<float> maxWidth;
 
 		void generateId();
     };

@@ -34,6 +34,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 	pruneDistant = node["pruneDistant"].asBool(true);
 	cooldown = node["cooldown"].asOptional<float>();
 	maxInstances = node["maxInstances"].asOptional<int>();
+	limitType = node["limitType"].asEnum(AudioObjectInstanceLimitType::DontPlay);
 	priority = node["priority"].asInt(0);
 }
 
@@ -64,6 +65,9 @@ ConfigNode AudioObject::toConfigNode() const
 	}
 	if (maxInstances) {
 		result["maxInstances"] = maxInstances;
+	}
+	if (limitType != AudioObjectInstanceLimitType::DontPlay) {
+		result["limitType"] = limitType;
 	}
 	if (priority) {
 		result["priority"] = priority;
@@ -200,6 +204,16 @@ void AudioObject::setMaxInstances(std::optional<int> maxInstances)
 	this->maxInstances = maxInstances;
 }
 
+AudioObjectInstanceLimitType AudioObject::getInstanceLimitType() const
+{
+	return limitType;
+}
+
+void AudioObject::setInstanceLimitType(AudioObjectInstanceLimitType type)
+{
+	this->limitType = type;
+}
+
 int AudioObject::getPriority() const
 {
 	return priority;
@@ -231,6 +245,9 @@ std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioE
 
 void AudioObject::serialize(Serializer& s) const
 {
+	int version = 1;
+
+	s << version;
 	s << bus;
 	s << pitch;
 	s << gain;
@@ -240,11 +257,17 @@ void AudioObject::serialize(Serializer& s) const
 	s << pruneDistant;
 	s << cooldown;
 	s << maxInstances;
+	s << limitType;
 	s << priority;
+	s << minWidth;
+	s << maxWidth;
 }
 
 void AudioObject::deserialize(Deserializer& s)
 {
+	int version;
+
+	s >> version;
 	s >> bus;
 	s >> pitch;
 	s >> gain;
@@ -254,7 +277,10 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> pruneDistant;
 	s >> cooldown;
 	s >> maxInstances;
+	s >> limitType;
 	s >> priority;
+	s >> minWidth;
+	s >> maxWidth;
 }
 
 void AudioObject::reload(Resource&& resource)

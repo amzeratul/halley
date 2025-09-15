@@ -17,6 +17,10 @@
 #include "halley/maths/random.h"
 
 namespace Halley {
+	enum class AudioObjectInstanceLimitType;
+}
+
+namespace Halley {
 	class AudioRegion;
 	class AudioBusProperties;
 	class AudioProperties;
@@ -31,7 +35,7 @@ namespace Halley {
 		using VoiceCallback = std::function<void(AudioVoice&)>;
     	
 	    AudioEngine();
-		~AudioEngine();
+		~AudioEngine() override;
 
 		void createEmitter(AudioEmitterId id, AudioPosition position, bool temporary);
 		void destroyEmitter(AudioEmitterId id);
@@ -79,6 +83,7 @@ namespace Halley {
 		std::optional<AudioDebugData> getDebugData() const;
 
 		std::unique_ptr<AudioVoice> makeObjectVoice(const AudioObject& object, AudioEventId uniqueId, AudioEmitter& emitter, Range<float> gain = { 1, 1 }, Range<float> pitch = { 1, 1 }, uint32_t delaySamples = 0);
+		void onVoiceFinished(const AudioVoice& voice);
 
 		const String& getSwitchDefault(const String& switchId) const;
 
@@ -105,8 +110,8 @@ namespace Halley {
 
 		struct PlayingObjectData {
 			AudioObjectId id = 0;
-			int count = 0;
 			float cooldown = 0;
+			Vector<AudioVoice*> voices;
 		};
 
 		AudioSpec spec;
@@ -163,7 +168,9 @@ namespace Halley {
 		void updateRegions();
 
 		PlayingObjectData& getMutablePlayingObjectData(AudioObjectId id);
+		PlayingObjectData* tryGetMutablePlayingObjectData(AudioObjectId id);
 		void updatePlayingObjectData(float deltaTime);
+		void onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType);
 
 		AudioDebugData generateDebugData() const;
     };

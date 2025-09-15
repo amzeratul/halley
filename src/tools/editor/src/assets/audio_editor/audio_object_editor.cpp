@@ -85,6 +85,7 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 	const auto& parent = treeData.at(parentId);
 
 	if (parent.clip) {
+		// Why was this ever enabled? It causes crashes if you try parenting a clip to another
 		return false;
 		//return (item.clip || (item.object && item.object->getType() == AudioSubObjectType::Clips));
 	}

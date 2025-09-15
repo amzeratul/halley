@@ -444,16 +444,10 @@ void AudioEngine::mixRegion(const AudioRegion& region, AudioBuffersRef& buffers,
 
 void AudioEngine::removeFinishedVoices()
 {
-	Vector<AudioObjectId> removedObjects;
-
 	for (auto& e: emitters) {
-		e.second->removeFinishedVoices(finishedSounds, removedObjects);
+		e.second->removeFinishedVoices(finishedSounds);
 	}
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
-
-	for (auto obj: removedObjects) {
-		--getMutablePlayingObjectData(obj).count;
-	}
 }
 
 int AudioEngine::getBusId(const String& busName)
@@ -639,15 +633,23 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	}
 
 	// Limit by number of instances or cooldown
+	PlayingObjectData* playingData = nullptr;
 	if (object.getMaxInstances() || object.getCooldown()) {
-		auto& data = getMutablePlayingObjectData(object.getAudioObjectId());
-		if ((object.getMaxInstances() && data.count >= object.getMaxInstances()) || data.cooldown > 0) {
+		playingData = &getMutablePlayingObjectData(object.getAudioObjectId());
+		if (playingData->cooldown > 0) {
 			return {};
-		} else {
-			++data.count;
-			if (object.getCooldown()) {
-				data.cooldown = *object.getCooldown();
+		}
+
+		if (object.getMaxInstances() && static_cast<int>(playingData->voices.size()) >= object.getMaxInstances()) {
+			// Max instances exceeded
+			if (object.getInstanceLimitType() == AudioObjectInstanceLimitType::DontPlay) {
+				return {};
 			}
+			onVoiceLimitReached(*playingData, object.getInstanceLimitType());
+		}
+
+		if (object.getCooldown()) {
+			playingData->cooldown = *object.getCooldown();
 		}
 	}
 
@@ -663,7 +665,18 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	voice->setIds(uniqueId, object.getAudioObjectId());
 	voice->setAttenuationOverride(object.getAttenuationOverride());
 
+	if (playingData) {
+		playingData->voices += voice.get();
+	}
+
 	return voice;
+}
+
+void AudioEngine::onVoiceFinished(const AudioVoice& voice)
+{
+	if (auto* data = tryGetMutablePlayingObjectData(voice.getAudioObjectId())) {
+		std_ex::erase(data->voices, &voice);
+	}
 }
 
 const String& AudioEngine::getSwitchDefault(const String& switchId) const
@@ -718,7 +731,17 @@ AudioEngine::PlayingObjectData& AudioEngine::getMutablePlayingObjectData(AudioOb
 			return data;
 		}
 	}
-	return playingObjectData.emplace_back(PlayingObjectData{ id, 0, 0 });
+	return playingObjectData.emplace_back(PlayingObjectData{ id, 0, {} });
+}
+
+AudioEngine::PlayingObjectData* AudioEngine::tryGetMutablePlayingObjectData(AudioObjectId id)
+{
+	for (auto& data: playingObjectData) {
+		if (data.id == id) {
+			return &data;
+		}
+	}
+	return nullptr;
 }
 
 void AudioEngine::updatePlayingObjectData(float deltaTime)
@@ -729,6 +752,15 @@ void AudioEngine::updatePlayingObjectData(float deltaTime)
 
 	std_ex::erase_if(playingObjectData, [] (const PlayingObjectData& entry)
 	{
-		return entry.count == 0 && entry.cooldown <= 0;
+		return entry.voices.empty() && entry.cooldown <= 0;
 	});
+}
+
+void AudioEngine::onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType)
+{
+	if (limitType == AudioObjectInstanceLimitType::StopOldest) {
+		// TODO
+	} else if (limitType == AudioObjectInstanceLimitType::StopFarthest) {
+		// TODO
+	}
 }
