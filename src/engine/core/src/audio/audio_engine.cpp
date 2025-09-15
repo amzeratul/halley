@@ -632,25 +632,9 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 		}
 	}
 
-	// Limit by number of instances or cooldown
-	PlayingObjectData* playingData = nullptr;
-	if (object.getMaxInstances() || object.getCooldown()) {
-		playingData = &getMutablePlayingObjectData(object.getAudioObjectId());
-		if (playingData->cooldown > 0) {
-			return {};
-		}
-
-		if (object.getMaxInstances() && static_cast<int>(playingData->voices.size()) >= object.getMaxInstances()) {
-			// Max instances exceeded
-			if (object.getInstanceLimitType() == AudioObjectInstanceLimitType::DontPlay) {
-				return {};
-			}
-			onVoiceLimitReached(*playingData, object.getInstanceLimitType());
-		}
-
-		if (object.getCooldown()) {
-			playingData->cooldown = *object.getCooldown();
-		}
+	auto [playingData, canPlay] = tryToStartVoiceForObject(object);
+	if (!canPlay) {
+		return {};
 	}
 
 	const auto gainRange = object.getGain() * playGain;
@@ -666,7 +650,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	voice->setAttenuationOverride(object.getAttenuationOverride());
 
 	if (playingData) {
-		playingData->voices += voice.get();
+		playingData->playingVoices += voice.get();
 	}
 
 	return voice;
@@ -675,7 +659,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 void AudioEngine::onVoiceFinished(const AudioVoice& voice)
 {
 	if (auto* data = tryGetMutablePlayingObjectData(voice.getAudioObjectId())) {
-		std_ex::erase(data->voices, &voice);
+		std_ex::erase(data->playingVoices, &voice);
 	}
 }
 
@@ -752,14 +736,46 @@ void AudioEngine::updatePlayingObjectData(float deltaTime)
 
 	std_ex::erase_if(playingObjectData, [] (const PlayingObjectData& entry)
 	{
-		return entry.voices.empty() && entry.cooldown <= 0;
+		return entry.playingVoices.empty() && entry.cooldown <= 0;
 	});
+}
+
+std::pair<AudioEngine::PlayingObjectData*, bool> AudioEngine::tryToStartVoiceForObject(const AudioObject& object)
+{
+	if (!object.getMaxInstances() && !object.getCooldown()) {
+		return { nullptr, true };
+	}
+
+	auto* playingData = &getMutablePlayingObjectData(object.getAudioObjectId());
+
+	// Sound is on cooldown
+	if (playingData->cooldown > 0) {
+		return { nullptr, false };
+	}
+
+	// Max instances exceeded
+	if (object.getMaxInstances() && static_cast<int>(playingData->playingVoices.size()) >= object.getMaxInstances()) {
+		if (object.getInstanceLimitType() == AudioObjectInstanceLimitType::DontPlay) {
+			return { nullptr, false };
+		}
+		onVoiceLimitReached(*playingData, object.getInstanceLimitType());
+	}
+
+	// Update cooldown
+	if (object.getCooldown()) {
+		playingData->cooldown = *object.getCooldown();
+	}
+
+	return { playingData, true };
 }
 
 void AudioEngine::onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType)
 {
 	if (limitType == AudioObjectInstanceLimitType::StopOldest) {
-		// TODO
+		if (!data.playingVoices.empty()) {
+			data.playingVoices[0]->stop({});
+			data.playingVoices.erase(data.playingVoices.begin());
+		}
 	} else if (limitType == AudioObjectInstanceLimitType::StopFarthest) {
 		// TODO
 	}

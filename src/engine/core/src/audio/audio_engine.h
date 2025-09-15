@@ -111,7 +111,7 @@ namespace Halley {
 		struct PlayingObjectData {
 			AudioObjectId id = 0;
 			float cooldown = 0;
-			Vector<AudioVoice*> voices;
+			Vector<AudioVoice*> playingVoices;
 		};
 
 		AudioSpec spec;
@@ -170,6 +170,7 @@ namespace Halley {
 		PlayingObjectData& getMutablePlayingObjectData(AudioObjectId id);
 		PlayingObjectData* tryGetMutablePlayingObjectData(AudioObjectId id);
 		void updatePlayingObjectData(float deltaTime);
+		std::pair<PlayingObjectData*, bool> tryToStartVoiceForObject(const AudioObject& object);
 		void onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType);
 
 		AudioDebugData generateDebugData() const;
