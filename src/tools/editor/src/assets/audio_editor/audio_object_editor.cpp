@@ -85,7 +85,8 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 	const auto& parent = treeData.at(parentId);
 
 	if (parent.clip) {
-		return (item.clip || (item.object && item.object->getType() == AudioSubObjectType::Clips));
+		return false;
+		//return (item.clip || (item.object && item.object->getType() == AudioSubObjectType::Clips));
 	}
 	if (item.clip) {
 		return (parent.object && parent.object->canAddObject(AudioSubObjectType::Clips, parent.subCase));
