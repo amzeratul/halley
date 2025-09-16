@@ -1,5 +1,6 @@
 #include "halley/audio/audio_position.h"
 #include "halley/api/audio_api.h"
+#include "halley/audio/audio_object.h"
 
 using namespace Halley;
 
@@ -182,14 +183,14 @@ namespace {
 	}
 }
 
-float AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+float AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const AudioMixingProperties& mixingProperties) const
 {
 	if (isPannable) {
 		if (isUI) {
 			setMixUI(dstChannels, dst, gain, listener);
 			return 0;
 		} else {
-			return setMixPositional(nSrcChannels, dstChannels, dst, gain, listener, attenuationOverride);
+			return setMixPositional(nSrcChannels, dstChannels, dst, gain, listener, mixingProperties);
 		}
 	} else {
 		setMixFixed(nSrcChannels, dstChannels, dst, gain, listener);
@@ -203,7 +204,7 @@ float AudioPosition::getDistance(const AudioListenerData& listener) const
 		return std::numeric_limits<float>::infinity();
 	}
 
-	return getAttenuationAndPanPositional(listener, std::nullopt).distance;
+	return getAttenuationAndPanPositional(listener, {}).distance;
 }
 
 void AudioPosition::setMixFixed(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
@@ -272,7 +273,7 @@ AudioPosition::AttenuationResult AudioPosition::getAttenuationAndPanPositional(c
 	return { attenuation, resultPan, distance };
 }
 
-float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const AudioMixingProperties& mixingProperties) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	if (sources.empty()) {
@@ -283,7 +284,7 @@ float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const Audio
 		return std::numeric_limits<float>::infinity();
 	}
 
-	const auto [attenuation, pan, distance] = getAttenuationAndPanPositional(listener, attenuationOverride);
+	const auto [attenuation, pan, distance] = getAttenuationAndPanPositional(listener, mixingProperties.attenuationOverride);
 
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer

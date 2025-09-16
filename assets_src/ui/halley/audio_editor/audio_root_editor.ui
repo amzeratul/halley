@@ -146,11 +146,11 @@ children:
             widget:
               class: label
               id: title
-              text: Attenuation
+              text: Mixing
             fill: centre
           - uuid: fa298439-ecf4-4822-b3b2-c2ef0a9c8881
-            proportion: 1
-            border: [1, 4, 1, 1]
+            proportion: 0
+            border: [1, 4, 1, 0]
             sizer:
               columnProportions: [0, 1]
               columns: 2
@@ -170,7 +170,7 @@ children:
                   - uuid: fd62fba7-9092-4030-99e3-738624f048e7
                     widget:
                       class: label
-                      text: "Override:"
+                      text: "Attenuation Override:"
                     fill: [fillHorizontal, centreVertical]
               - uuid: 320a3fa2-c80e-4b5e-8317-d5c9504d8b5e
                 widget:
@@ -257,27 +257,9 @@ children:
                       text: None
                   size: [200, 20]
                 fill: [left, centreVertical]
-      - uuid: 854b1cd5-2167-4ebd-9cdf-109f5415eb3c
-        sizer:
-          columnProportions: []
-          type: vertical
-        widget:
-          class: image
-          colour: $ui_popupWindow
-          id: ""
-          image: $ui_title_capsule
-          innerBorder: [4, 1, 4, 4]
-          size: [20, 20]
-        children:
-          - uuid: c3068fba-3d7c-4527-b899-4d86365366f4
-            widget:
-              class: label
-              id: title
-              text: Spatialisation
-            fill: centre
           - uuid: 0e1b4e37-e9f1-4af7-aa4d-b523ef425b24
             proportion: 1
-            border: [1, 4, 1, 1]
+            border: [1, 3, 1, 1]
             sizer:
               columnProportions: [0, 1]
               columns: 2

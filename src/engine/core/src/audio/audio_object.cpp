@@ -252,6 +252,11 @@ void AudioObject::setMaxStereoWidth(std::optional<float> value)
 	maxStereoWidth = value;
 }
 
+AudioMixingProperties AudioObject::getMixingProperties() const
+{
+	return AudioMixingProperties{ attenuationOverride, minStereoWidth, maxStereoWidth };
+}
+
 void AudioObject::setBus(String bus)
 {
 	this->bus = std::move(bus);

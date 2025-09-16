@@ -84,9 +84,10 @@ void AudioView::paint(Painter& painter)
 		textPos.y += extents.y + 16;
 	}
 
-	std::sort(curData.emitters.begin(), curData.emitters.end(), [=] (const auto& a, const auto& b)
+	std::sort(curData.emitters.begin(), curData.emitters.end(), [=] (const AudioDebugData::EmitterData& a, const AudioDebugData::EmitterData& b)
 	{
-		return a.emitterId < b.emitterId;
+		//return a.emitterId < b.emitterId;
+		return a.totalMix > b.totalMix;
 	});
 
 	for (auto& emitterData: curData.emitters) {
@@ -140,7 +141,7 @@ void AudioView::paint(Painter& painter)
 				str.append(", pause = ");
 				str.append(toString(voiceData.paused), valueCol);
 				str.append(", mix = ");
-				str.append("[" + String::concat(gsl::span<const float>(voiceData.channelMix).subspan(0, voiceData.dstChannels), ", ", [](float v) { return toString(v, 2); }) + "]", valueCol);
+				str.append(getMixString(voiceData), valueCol);
 			} else {
 				str.append(": not playing");
 			}
@@ -200,4 +201,23 @@ String AudioView::getObjectName(AudioObjectId objectId) const
 		return iter->second;
 	}
 	return "<unknown>";
+}
+
+String AudioView::getMixString(const AudioDebugData::VoiceData& voiceData) const
+{
+	const auto channels = gsl::span<const float>(voiceData.channelMix);
+
+	String result;
+	for (int src = 0; src < static_cast<int>(voiceData.srcChannels); ++src) {
+		if (voiceData.srcChannels > 1) {
+			result += toString(src) + ": ";
+		}
+
+		result += "[";
+		result += String::concat(channels.subspan(src * voiceData.dstChannels, voiceData.dstChannels), ", ", [](float v) {
+			return toString(v, 2);
+		});
+		result += "]";
+	}
+	return result;
 }

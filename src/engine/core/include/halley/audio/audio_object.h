@@ -28,6 +28,12 @@ namespace Halley {
 		}
 	};
 
+	struct AudioMixingProperties {
+		std::optional<AudioAttenuation> attenuationOverride;
+		std::optional<float> minStereoWidth;
+		std::optional<float> maxStereoWidth;
+	};
+
 	class AudioObject final : public Resource, public IAudioObject {
     public:
     	AudioObject();
@@ -55,6 +61,13 @@ namespace Halley {
 		AudioAttenuation& getMutableAttenuationOverride();
 		void setAttenuationOverride(std::optional<AudioAttenuation> value);
 
+		std::optional<float> getMinStereoWidth() const;
+		std::optional<float> getMaxStereoWidth() const;
+		void setMinStereoWidth(std::optional<float> value);
+		void setMaxStereoWidth(std::optional<float> value);
+
+		AudioMixingProperties getMixingProperties() const;
+
 		bool getPruneDistant() const;
 		void setPruneDistant(bool value);
 		std::optional<float> getCooldown() const;
@@ -65,11 +78,6 @@ namespace Halley {
 	    void setInstanceLimitType(AudioObjectInstanceLimitType type);
 		int getPriority() const;
 		void setPriority(int value);
-
-		std::optional<float> getMinStereoWidth() const;
-		std::optional<float> getMaxStereoWidth() const;
-		void setMinStereoWidth(std::optional<float> value);
-		void setMaxStereoWidth(std::optional<float> value);
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 

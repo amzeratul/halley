@@ -5,6 +5,10 @@
 #include "audio_attenuation.h"
 #include "halley/maths/polygon.h"
 
+namespace Halley {
+	struct AudioMixingProperties;
+}
+
 namespace Halley
 {
 	class AudioListenerData;
@@ -39,7 +43,7 @@ namespace Halley
 		static AudioPosition makeFixed();
 
 		// Returns distance
-		float setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		float setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const AudioMixingProperties& mixingProperties) const;
 		float getDistance(const AudioListenerData& listener) const;
 
 		void setPosition(Vector3f position);
@@ -61,7 +65,7 @@ namespace Halley
 
 		void setMixFixed(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
 		void setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
-		float setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		float setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const AudioMixingProperties& mixingProperties) const;
 		AttenuationResult getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
 	};
 }

@@ -243,9 +243,10 @@ namespace Halley
 			float pitch = 1;
 			float mixAmount = 0;
 			uint32_t paused = 0;
+			uint8_t srcChannels = 0;
 			uint8_t dstChannels = 0;
 			bool playing = true;
-			std::array<float, 8> channelMix;
+			std::array<float, 16> channelMix;
 		};
 
 		struct RegionData {
@@ -259,6 +260,7 @@ namespace Halley
 			HashMap<String, String> switches;
 			HashMap<String, float> variables;
 			Vector<VoiceData> voices;
+			float totalMix = 0;
 		};
 
 		Vector<EmitterData> emitters;

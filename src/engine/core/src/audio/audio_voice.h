@@ -5,6 +5,7 @@
 
 #include "halley/audio/audio_attenuation.h"
 #include "halley/audio/audio_fade.h"
+#include "halley/audio/audio_object.h"
 
 namespace Halley {
 	class AudioFilterResample;
@@ -46,7 +47,7 @@ namespace Halley {
 		void setIds(AudioEventId eventId, AudioObjectId audioObjectId = 0);
 		AudioEventId getEventId() const;
 		AudioObjectId getAudioObjectId() const;
-		void setAttenuationOverride(std::optional<AudioAttenuation> attenuation);
+		void setMixingProperties(AudioMixingProperties mixingProperties);
 		
 		uint8_t getBus() const;
 
@@ -98,7 +99,7 @@ namespace Halley {
 		size_t numSamplesRendered = 0;
 		float mixAmount = 0;
 
-		std::optional<AudioAttenuation> attenuation;
+		AudioMixingProperties mixingProperties;
 		float curDistance = 0;
 
 		void advancePlayback(size_t samples);

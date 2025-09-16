@@ -45,9 +45,9 @@ AudioObjectId AudioVoice::getAudioObjectId() const
 	return audioObjectId;
 }
 
-void AudioVoice::setAttenuationOverride(std::optional<AudioAttenuation> attenuation)
+void AudioVoice::setMixingProperties(AudioMixingProperties mixingProperties)
 {
-	this->attenuation = attenuation;
+	this->mixingProperties = std::move(mixingProperties);
 }
 
 void AudioVoice::start()
@@ -216,7 +216,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	// Mix
 	prevChannelMix = channelMix;
-	curDistance = sourcePos.setMix(nChannels, channels, channelMix, gain, listener, attenuation);
+	curDistance = sourcePos.setMix(nChannels, channels, channelMix, gain, listener, mixingProperties);
 
 	// Has any mix output?
 	const auto nMix = static_cast<size_t>(nChannels) * channels.size();
@@ -344,25 +344,19 @@ void AudioVoice::onFadeEnd()
 
 AudioDebugData::VoiceData AudioVoice::getDebugData() const
 {
+	const int nSrc = static_cast<int>(getNumberOfChannels());
+
 	AudioDebugData::VoiceData result;
 
 	result.gain = lastGain;
 	result.playing = playing;
 	result.paused = paused;
 	result.objectId = audioObjectId;
+	result.srcChannels = static_cast<uint8_t>(nSrc);
 	result.dstChannels = lastDstChannels;
 	result.pitch = lastPitch;
 	result.mixAmount = mixAmount;
-	result.channelMix.fill(0);
-
-	const int nSrc = static_cast<int>(getNumberOfChannels());
-	for (int dst = 0; dst < lastDstChannels; ++dst) {
-		float total = 0;
-		for (int src = 0; src < nSrc; ++src) {
-			total += channelMix[dst + src * nSrc] * lastPostGain;
-		}
-		result.channelMix[dst] = total;
-	}
+	result.channelMix = channelMix;
 
 	return result;
 }

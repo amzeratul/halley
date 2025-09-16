@@ -39,5 +39,7 @@ namespace Halley
 		String getEmitterName(AudioEmitterId emitterId) const;
 		String getRegionName(AudioRegionId regionId) const;
 		String getObjectName(AudioObjectId objectId) const;
+
+		String getMixString(const AudioDebugData::VoiceData& data) const;
 	};
 }

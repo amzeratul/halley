@@ -1,6 +1,7 @@
 #include "audio_emitter.h"
 
 #include "audio_engine.h"
+#include "halley/api/audio_api.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -118,6 +119,21 @@ AudioRegionId AudioEmitter::getRegion() const
 	return regionId;
 }
 
+namespace {
+	
+	float getTotalMixAmount(const AudioDebugData::VoiceData& voiceData)
+	{
+		if (voiceData.dstChannels == 0) {
+			return 0.0f;
+		}
+		float result = 0;
+		for (size_t i = 0; i < static_cast<size_t>(voiceData.srcChannels) * static_cast<size_t>(voiceData.dstChannels); ++i) {
+			result += voiceData.channelMix[i];
+		}
+		return result / static_cast<float>(voiceData.dstChannels);
+	}
+}
+
 AudioDebugData::EmitterData AudioEmitter::getDebugData() const
 {
 	AudioDebugData::EmitterData result;
@@ -126,10 +142,12 @@ AudioDebugData::EmitterData AudioEmitter::getDebugData() const
 	result.switches = switchValues;
 	result.variables = variableValues;
 	result.regionId = regionId;
+	result.totalMix = 0;
 
 	result.voices.reserve(voices.size());
 	for (const auto& voice: voices) {
 		result.voices.emplace_back(voice->getDebugData());
+		result.totalMix += getTotalMixAmount(result.voices.back());
 	}
 
 	return result;
