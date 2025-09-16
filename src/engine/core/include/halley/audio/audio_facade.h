@@ -81,6 +81,8 @@ namespace Halley {
 		std::optional<LoggerLevel> getEventLogging() const override;
 		std::optional<String> getEventLoggingPrefix() const override;
 
+		void resetObjectLimits() override;
+
 	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;

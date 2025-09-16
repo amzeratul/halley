@@ -214,6 +214,13 @@ std::optional<String> AudioFacade::getEventLoggingPrefix() const
 	return eventLoggingPrefix;
 }
 
+void AudioFacade::resetObjectLimits()
+{
+	enqueue([=]() {
+		engine->resetObjectLimits();
+	});
+}
+
 
 AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {

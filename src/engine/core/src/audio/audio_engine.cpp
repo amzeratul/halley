@@ -687,6 +687,11 @@ void AudioEngine::setEventLogging(std::optional<LoggerLevel> level, std::optiona
 	eventLogPrefix = std::move(prefix);
 }
 
+void AudioEngine::resetObjectLimits()
+{
+	playingObjectData.clear();
+}
+
 AudioEngine::BusGain::BusGain(String id)
 	: id (std::move(id))
 {
