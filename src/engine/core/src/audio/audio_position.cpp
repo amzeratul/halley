@@ -284,14 +284,26 @@ float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const Audio
 		return std::numeric_limits<float>::infinity();
 	}
 
-	const auto [attenuation, pan, distance] = getAttenuationAndPanPositional(listener, mixingProperties.attenuationOverride);
+	const auto [attenuation, centrePan, distance] = getAttenuationAndPanPositional(listener, mixingProperties.attenuationOverride);
+
+	float halfWidth = 0;
+	if (nSrcChannels == 2) {
+		// Stereo width
+		const float minWidth = mixingProperties.minStereoWidth.value_or(0);
+		const float maxWidth = mixingProperties.maxStereoWidth.value_or(180);
+		const float widthDegrees = clamp(lerp(minWidth, maxWidth, attenuation), 0.0f, 180.0f);
+		halfWidth = Angle1f::fromDegrees(widthDegrees / 2).sin();
+	}
+	const float limitedCentrePan = clamp(centrePan, -1.0f + halfWidth, 1.0f - halfWidth); // Clamp it closer to centre if needed due to width
 
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-		// Read to buffer
+		const float srcPan = nSrcChannels == 1 ? 0.0f : (srcChannel == 0 ? -1.0f : 1.0f);
+		const float srcChannelPan = limitedCentrePan + srcPan * halfWidth;
+
 		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
-			// Compute mix
+			const float panGain = gain2DPan(srcChannelPan, dstChannels[dstChannel].pan);
 			const size_t mixIndex = (srcChannel * nSrcChannels) + dstChannel;
-			dst[mixIndex] = gain2DPan(pan, dstChannels[dstChannel].pan) * gain * attenuation * dstChannels[dstChannel].gain;
+			dst[mixIndex] = panGain * gain * attenuation * dstChannels[dstChannel].gain;
 		}
 	}
 
