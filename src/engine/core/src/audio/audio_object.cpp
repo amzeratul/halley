@@ -36,6 +36,8 @@ AudioObject::AudioObject(const ConfigNode& node)
 	maxInstances = node["maxInstances"].asOptional<int>();
 	limitType = node["limitType"].asEnum(AudioObjectInstanceLimitType::DontPlay);
 	priority = node["priority"].asInt(0);
+	minStereoWidth = node["minStereoWidth"].asOptional<float>();
+	maxStereoWidth = node["maxStereoWidth"].asOptional<float>();
 }
 
 ConfigNode AudioObject::toConfigNode() const
@@ -71,6 +73,12 @@ ConfigNode AudioObject::toConfigNode() const
 	}
 	if (priority) {
 		result["priority"] = priority;
+	}
+	if (minStereoWidth) {
+		result["minStereoWidth"] = minStereoWidth;
+	}
+	if (maxStereoWidth) {
+		result["maxStereoWidth"] = maxStereoWidth;
 	}
 	result["objects"] = objects;
 	
@@ -224,6 +232,26 @@ void AudioObject::setPriority(int value)
 	priority = value;
 }
 
+std::optional<float> AudioObject::getMinStereoWidth() const
+{
+	return minStereoWidth;
+}
+
+std::optional<float> AudioObject::getMaxStereoWidth() const
+{
+	return maxStereoWidth;
+}
+
+void AudioObject::setMinStereoWidth(std::optional<float> value)
+{
+	minStereoWidth = value;
+}
+
+void AudioObject::setMaxStereoWidth(std::optional<float> value)
+{
+	maxStereoWidth = value;
+}
+
 void AudioObject::setBus(String bus)
 {
 	this->bus = std::move(bus);
@@ -259,8 +287,8 @@ void AudioObject::serialize(Serializer& s) const
 	s << maxInstances;
 	s << limitType;
 	s << priority;
-	s << minWidth;
-	s << maxWidth;
+	s << minStereoWidth;
+	s << maxStereoWidth;
 }
 
 void AudioObject::deserialize(Deserializer& s)
@@ -279,8 +307,8 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> maxInstances;
 	s >> limitType;
 	s >> priority;
-	s >> minWidth;
-	s >> maxWidth;
+	s >> minStereoWidth;
+	s >> maxStereoWidth;
 }
 
 void AudioObject::reload(Resource&& resource)

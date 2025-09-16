@@ -114,6 +114,12 @@ namespace Halley {
 			Vector<AudioVoice*> playingVoices;
 		};
 
+		enum class VoiceAllocationResult {
+			Playing,
+			InstanceLimited,
+			CooldownLimited
+		};
+
 		AudioSpec spec;
 		AudioOutputAPI* out = nullptr;
 		const AudioProperties* audioProperties = nullptr;
@@ -170,7 +176,7 @@ namespace Halley {
 		PlayingObjectData& getMutablePlayingObjectData(AudioObjectId id);
 		PlayingObjectData* tryGetMutablePlayingObjectData(AudioObjectId id);
 		void updatePlayingObjectData(float deltaTime);
-		std::pair<PlayingObjectData*, bool> tryToStartVoiceForObject(const AudioObject& object);
+		std::pair<PlayingObjectData*, VoiceAllocationResult> tryToStartVoiceForObject(const AudioObject& object);
 		void onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType);
 
 		AudioDebugData generateDebugData() const;

@@ -628,12 +628,22 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	// Prune if out of range
 	if (object.getPruneDistant()) {
 		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
+			if (eventLogging) {
+				Logger::log(*eventLogging, "AudioObject prunned due to distance to listener: " + object.getAssetId());
+			}
 			return {};
 		}
 	}
 
-	auto [playingData, canPlay] = tryToStartVoiceForObject(object);
-	if (!canPlay) {
+	auto [playingData, playStatus] = tryToStartVoiceForObject(object);
+	if (playStatus != VoiceAllocationResult::Playing) {
+		if (eventLogging) {
+			if (playStatus == VoiceAllocationResult::InstanceLimited) {
+				Logger::log(*eventLogging, "AudioObject not playing due to instance limit reached: " + object.getAssetId());
+			} else if (playStatus == VoiceAllocationResult::CooldownLimited) {
+				Logger::log(*eventLogging, "AudioObject not playing due to cooldown: " + object.getAssetId());
+			}
+		}
 		return {};
 	}
 
@@ -740,23 +750,23 @@ void AudioEngine::updatePlayingObjectData(float deltaTime)
 	});
 }
 
-std::pair<AudioEngine::PlayingObjectData*, bool> AudioEngine::tryToStartVoiceForObject(const AudioObject& object)
+std::pair<AudioEngine::PlayingObjectData*, AudioEngine::VoiceAllocationResult> AudioEngine::tryToStartVoiceForObject(const AudioObject& object)
 {
 	if (!object.getMaxInstances() && !object.getCooldown()) {
-		return { nullptr, true };
+		return { nullptr, VoiceAllocationResult::Playing };
 	}
 
 	auto* playingData = &getMutablePlayingObjectData(object.getAudioObjectId());
 
 	// Sound is on cooldown
 	if (playingData->cooldown > 0) {
-		return { nullptr, false };
+		return { nullptr, VoiceAllocationResult::CooldownLimited };
 	}
 
 	// Max instances exceeded
 	if (object.getMaxInstances() && static_cast<int>(playingData->playingVoices.size()) >= object.getMaxInstances()) {
 		if (object.getInstanceLimitType() == AudioObjectInstanceLimitType::DontPlay) {
-			return { nullptr, false };
+			return { nullptr, VoiceAllocationResult::InstanceLimited };
 		}
 		onVoiceLimitReached(*playingData, object.getInstanceLimitType());
 	}
@@ -766,7 +776,7 @@ std::pair<AudioEngine::PlayingObjectData*, bool> AudioEngine::tryToStartVoiceFor
 		playingData->cooldown = *object.getCooldown();
 	}
 
-	return { playingData, true };
+	return { playingData, VoiceAllocationResult::Playing };
 }
 
 void AudioEngine::onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType)

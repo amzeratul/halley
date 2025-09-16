@@ -99,6 +99,51 @@ void AudioRootEditor::onMakeUI()
 		editor.markModified(false);
 	});
 
+	
+	auto bindMinStereo = [this] ()
+	{
+		const bool hasValue = object.getMinStereoWidth().has_value();
+		getWidget("minStereoWidthContent")->setActive(hasValue);
+
+		if (hasValue) {
+			bindData("stereoMinWidth", *object.getMinStereoWidth(), [this] (float value)
+			{
+				object.setMinStereoWidth(value);
+				editor.markModified(false);
+			});
+		}
+	};
+	bindMinStereo();
+
+	auto bindMaxStereo = [this] ()
+	{
+		const bool hasValue = object.getMaxStereoWidth().has_value();
+		getWidget("maxStereoWidthContent")->setActive(hasValue);
+
+		if (hasValue) {
+			bindData("stereoMaxWidth", *object.getMaxStereoWidth(), [this] (float value)
+			{
+				object.setMaxStereoWidth(value);
+				editor.markModified(false);
+			});
+		}
+	};
+	bindMaxStereo();
+	
+	bindData("enableStereoMinWidth", object.getMinStereoWidth().has_value(), [this, bindMinStereo] (bool value)
+	{
+		object.setMinStereoWidth(value ? std::optional<float>(0.0f) : std::nullopt);
+		bindMinStereo();
+		editor.markModified(false);
+	});
+
+	bindData("enableStereoMaxWidth", object.getMaxStereoWidth().has_value(), [this, bindMaxStereo] (bool value)
+	{
+		object.setMaxStereoWidth(value ? std::optional<float>(180.0f) : std::nullopt);
+		bindMaxStereo();
+		editor.markModified(false);
+	});
+
 	bindData("pruneDistant", object.getPruneDistant(), [this] (bool value)
 	{
 		object.setPruneDistant(value);
@@ -123,12 +168,17 @@ void AudioRootEditor::onMakeUI()
 	auto bindMaxInstances = [this] ()
 	{
 		const bool hasValue = object.getMaxInstances().has_value();
-		getWidget("maxInstances")->setActive(hasValue);
+		getWidget("maxInstancesContainer")->setActive(hasValue);
 
 		if (hasValue) {
 			bindData("maxInstances", *object.getMaxInstances(), [this] (int value)
 			{
 				object.setMaxInstances(value);
+				editor.markModified(false);
+			});
+			bindData("instanceLimitType", toString(object.getInstanceLimitType()), [this] (String value)
+			{
+				object.setInstanceLimitType(fromString<AudioObjectInstanceLimitType>(value));
 				editor.markModified(false);
 			});
 		}

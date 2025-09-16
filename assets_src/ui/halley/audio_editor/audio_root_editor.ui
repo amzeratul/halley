@@ -257,6 +257,130 @@ children:
                       text: None
                   size: [200, 20]
                 fill: [left, centreVertical]
+      - uuid: 854b1cd5-2167-4ebd-9cdf-109f5415eb3c
+        sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          class: image
+          colour: $ui_popupWindow
+          id: ""
+          image: $ui_title_capsule
+          innerBorder: [4, 1, 4, 4]
+          size: [20, 20]
+        children:
+          - uuid: c3068fba-3d7c-4527-b899-4d86365366f4
+            widget:
+              class: label
+              id: title
+              text: Spatialisation
+            fill: centre
+          - uuid: 0e1b4e37-e9f1-4af7-aa4d-b523ef425b24
+            proportion: 1
+            border: [1, 4, 1, 1]
+            sizer:
+              columnProportions: [0, 1]
+              columns: 2
+              gap: 4
+              type: grid
+            widget:
+              class: widget
+              id: ""
+            children:
+              - uuid: bbd24212-b816-4d4d-bbfb-2ec271e07645
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: 4a2f416e-59d4-4fdd-88c9-350798522444
+                    widget:
+                      class: label
+                      text: Stereo Min Width
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: d29a01f0-7005-4a45-84e2-7988149fae48
+                sizer:
+                  columnProportions: []
+                  gap: 4
+                widget:
+                  class: widget
+                  id: ""
+                children:
+                  - uuid: efc5aced-0e17-4a74-9bc3-03d0db64de90
+                    widget:
+                      class: checkbox
+                      id: enableStereoMinWidth
+                    fill: [left, fillVertical]
+                  - uuid: 57616b8e-d31c-4eb4-9f7b-919564dfb755
+                    sizer:
+                      columnProportions: []
+                    widget:
+                      class: widget
+                      id: minStereoWidthContent
+                    children:
+                      - uuid: d6d79a3d-5a92-471b-83c2-55fb84e3928b
+                        widget:
+                          allowFloat: true
+                          class: spinControl2
+                          id: stereoMinWidth
+                          increment: 1
+                          maxValue: 180
+                          minValue: 0
+                          size: [100, 0]
+                        fill: [left, centreVertical]
+                      - uuid: d7c05a77-2264-44dd-aa19-bd21a4f8c12d
+                        widget:
+                          class: label
+                          text: °
+                        fill: [fillHorizontal, centreVertical]
+              - uuid: 78f63173-a981-42c5-abc8-52762d88d0a6
+                sizer:
+                  columnProportions: []
+                widget:
+                  class: widget
+                  size: [170, 20]
+                children:
+                  - uuid: 8dd9539a-b7c4-47af-874c-745a876de3cb
+                    widget:
+                      class: label
+                      text: Stereo Max Width
+                    fill: [fillHorizontal, centreVertical]
+              - uuid: 67e342fd-3875-44ce-becb-d70fb6d8799f
+                sizer:
+                  columnProportions: []
+                  gap: 4
+                widget:
+                  class: widget
+                  id: ""
+                children:
+                  - uuid: f0f97969-a6a8-4b21-a327-46c9a6dbb8e3
+                    widget:
+                      class: checkbox
+                      id: enableStereoMaxWidth
+                    fill: [left, fillVertical]
+                  - uuid: 45bc99d2-9655-4719-a2ed-bdf71c9bae6d
+                    sizer:
+                      columnProportions: []
+                    widget:
+                      class: widget
+                      id: maxStereoWidthContent
+                    children:
+                      - uuid: 96d83649-4d6c-4278-acf3-88d29deec2e8
+                        widget:
+                          allowFloat: true
+                          class: spinControl2
+                          id: stereoMaxWidth
+                          increment: 1
+                          maxValue: 180
+                          minValue: 0
+                          size: [100, 0]
+                        fill: [left, centreVertical]
+                      - uuid: b7d815ba-634b-483b-bb7d-8a4c10e05ce2
+                        widget:
+                          class: label
+                          text: °
+                        fill: [fillHorizontal, centreVertical]
       - uuid: 2c952b0a-084e-4d03-a8ef-8187b0e18ce2
         sizer:
           columnProportions: []
@@ -349,10 +473,11 @@ children:
                           class: label
                           text: " s"
               - uuid: c8dde413-411b-4d17-9470-4e6f5493e54b
+                border: [0, 1, 0, 0]
                 widget:
                   class: label
                   text: "Maximum Instances:"
-                fill: [fillHorizontal, centreVertical]
+                fill: [fillHorizontal, top]
               - uuid: f8cd770f-d251-42c6-9de9-b0f7a674a6e5
                 sizer:
                   columnProportions: []
@@ -363,11 +488,34 @@ children:
                     widget:
                       class: checkbox
                       id: enableMaxInstances
-                  - uuid: a4b06595-e902-4a76-a8a9-96f446492955
-                    proportion: 0
-                    border: [2, 0, 0, 0]
+                    fill: [fillHorizontal, top]
+                  - uuid: 396f38ee-068e-4709-a9f9-62c7b8ab611d
+                    proportion: 1
+                    sizer:
+                      columnProportions: []
+                      gap: 4
+                      type: vertical
                     widget:
-                      class: spinControl2
-                      id: maxInstances
-                      size: [100, 0]
+                      class: widget
+                      id: maxInstancesContainer
+                    children:
+                      - uuid: a4b06595-e902-4a76-a8a9-96f446492955
+                        proportion: 0
+                        border: [2, 0, 0, 0]
+                        widget:
+                          class: spinControl2
+                          id: maxInstances
+                          size: [100, 0]
+                        fill: [left, fillVertical]
+                      - uuid: 45b766e1-e33b-490d-80a7-2ee3f478a942
+                        widget:
+                          class: dropdown
+                          id: instanceLimitType
+                          options:
+                            - id: dontPlay
+                              text: Don't play new
+                            - id: stopOldest
+                              text: Stop oldest voice
+                            - id: stopFarthest
+                              text: Stop farthest voice
     fill: [left, fillVertical]

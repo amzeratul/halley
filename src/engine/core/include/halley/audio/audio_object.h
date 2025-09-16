@@ -66,6 +66,11 @@ namespace Halley {
 		int getPriority() const;
 		void setPriority(int value);
 
+		std::optional<float> getMinStereoWidth() const;
+		std::optional<float> getMaxStereoWidth() const;
+		void setMinStereoWidth(std::optional<float> value);
+		void setMaxStereoWidth(std::optional<float> value);
+
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
@@ -103,8 +108,8 @@ namespace Halley {
 		std::optional<int> maxInstances;
 		AudioObjectInstanceLimitType limitType = AudioObjectInstanceLimitType::DontPlay;
 		int priority = 0;
-		std::optional<float> minWidth;
-		std::optional<float> maxWidth;
+		std::optional<float> minStereoWidth;
+		std::optional<float> maxStereoWidth;
 
 		void generateId();
     };
