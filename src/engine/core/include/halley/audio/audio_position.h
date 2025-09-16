@@ -38,7 +38,10 @@ namespace Halley
 		static AudioPosition makePositional(Vector<SpatialSource> sources);
 		static AudioPosition makeFixed();
 
-		void setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		// Returns distance
+		float setMix(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		float getDistance(const AudioListenerData& listener) const;
+
 		void setPosition(Vector3f position);
 		float getAttenuation(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
 
@@ -46,13 +49,19 @@ namespace Halley
 
 	private:
 		Vector<SpatialSource> sources;
-		float pan = 0;
+		float uiPan = 0;
 		bool isUI = false;
 		bool isPannable = false;
 
+		struct AttenuationResult {
+			float attenuation;
+			float pan;
+			float distance;
+		};
+
 		void setMixFixed(size_t srcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
 		void setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const;
-		void setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
-		std::pair<float, float> getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		float setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
+		AttenuationResult getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const;
 	};
 }

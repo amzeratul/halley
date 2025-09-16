@@ -49,7 +49,7 @@ AudioPosition::AudioPosition()
 AudioPosition AudioPosition::makeUI(float pan)
 {
 	auto result = AudioPosition();
-	result.pan = pan;
+	result.uiPan = pan;
 	result.isUI = true;
 	result.isPannable = true;
 	return result;
@@ -182,17 +182,28 @@ namespace {
 	}
 }
 
-void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+float AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	if (isPannable) {
 		if (isUI) {
 			setMixUI(dstChannels, dst, gain, listener);
+			return 0;
 		} else {
-			setMixPositional(nSrcChannels, dstChannels, dst, gain, listener, attenuationOverride);
+			return setMixPositional(nSrcChannels, dstChannels, dst, gain, listener, attenuationOverride);
 		}
 	} else {
 		setMixFixed(nSrcChannels, dstChannels, dst, gain, listener);
+		return 0;
 	}
+}
+
+float AudioPosition::getDistance(const AudioListenerData& listener) const
+{
+	if (sources.empty()) {
+		return std::numeric_limits<float>::infinity();
+	}
+
+	return getAttenuationAndPanPositional(listener, std::nullopt).distance;
 }
 
 void AudioPosition::setMixFixed(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
@@ -211,28 +222,29 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	for (size_t i = 0; i < nDstChannels; ++i) {
-		dst[i] = gain2DPan(pan, dstChannels[i].pan) * gain * dstChannels[i].gain;
+		dst[i] = gain2DPan(uiPan, dstChannels[i].pan) * gain * dstChannels[i].gain;
 	}
 }
 
 float AudioPosition::getAttenuation(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	if (isPannable && !isUI) {
-		return getAttenuationAndPanPositional(listener, attenuationOverride).first;
+		return getAttenuationAndPanPositional(listener, attenuationOverride).attenuation;
 	} else {
 		return 1.0f;
 	}
 }
 
-std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+AudioPosition::AttenuationResult AudioPosition::getAttenuationAndPanPositional(const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
-	float attenuation;
-	float resultPan;
+	float attenuation = 0;
+	float resultPan = 0;
+	float distance = 0;
+
 	if (sources.size() == 1) {
 		// One source, do the simple algorithm
-		float len;
-		getPanAndDistance(sources[0].pos, sources[0].polygon, listener, resultPan, len, sources[0].attenuation.maximumDistance);
-		attenuation = attenuationOverride.value_or(sources[0].attenuation).getProximity(len);
+		getPanAndDistance(sources[0].pos, sources[0].polygon, listener, resultPan, distance, sources[0].attenuation.maximumDistance);
+		attenuation = attenuationOverride.value_or(sources[0].attenuation).getProximity(distance);
 	} else {
 		// Multiple sources, average them
 		float panAccum = 0;
@@ -246,7 +258,10 @@ std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const Audi
 
 			panAccum += localProximity * localPan;
 			proximityAccum += localProximity;
+			distance += len;
 		}
+
+		distance /= static_cast<float>(sources.size());
 
 		if (proximityAccum > 0.01f) {
 			resultPan = panAccum / proximityAccum;
@@ -254,10 +269,10 @@ std::pair<float, float> AudioPosition::getAttenuationAndPanPositional(const Audi
 		}
 	}
 
-	return { attenuation, resultPan };
+	return { attenuation, resultPan, distance };
 }
 
-void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
+float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener, const std::optional<AudioAttenuation>& attenuationOverride) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	if (sources.empty()) {
@@ -265,10 +280,10 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 		for (size_t i = 0; i < nDstChannels; ++i) {
 			dst[i] = 0;
 		}
-		return;
+		return std::numeric_limits<float>::infinity();
 	}
 
-	auto [attenuation, pan] = getAttenuationAndPanPositional(listener, attenuationOverride);
+	const auto [attenuation, pan, distance] = getAttenuationAndPanPositional(listener, attenuationOverride);
 
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		// Read to buffer
@@ -278,4 +293,6 @@ void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioC
 			dst[mixIndex] = gain2DPan(pan, dstChannels[dstChannel].pan) * gain * attenuation * dstChannels[dstChannel].gain;
 		}
 	}
+
+	return distance;
 }

@@ -142,6 +142,11 @@ uint8_t AudioVoice::getBus() const
 	return bus;
 }
 
+float AudioVoice::getDistance() const
+{
+	return curDistance;
+}
+
 void AudioVoice::setBaseGain(float gain)
 {
 	baseGain = gain;
@@ -211,7 +216,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 
 	// Mix
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, gain, listener, attenuation);
+	curDistance = sourcePos.setMix(nChannels, channels, channelMix, gain, listener, attenuation);
 
 	// Has any mix output?
 	const auto nMix = static_cast<size_t>(nChannels) * channels.size();

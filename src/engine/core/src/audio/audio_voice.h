@@ -50,6 +50,8 @@ namespace Halley {
 		
 		uint8_t getBus() const;
 
+		float getDistance() const;
+
 		AudioDebugData::VoiceData getDebugData() const;
 
 	private:
@@ -97,6 +99,7 @@ namespace Halley {
 		float mixAmount = 0;
 
 		std::optional<AudioAttenuation> attenuation;
+		float curDistance = 0;
 
 		void advancePlayback(size_t samples);
 		void onFadeEnd();

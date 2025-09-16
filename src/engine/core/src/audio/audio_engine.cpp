@@ -629,19 +629,19 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	if (object.getPruneDistant()) {
 		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
 			if (eventLogging) {
-				Logger::log(*eventLogging, "AudioObject prunned due to distance to listener: " + object.getAssetId());
+				Logger::log(*eventLogging, "- Prunned due to distance to listener: " + object.getAssetId());
 			}
 			return {};
 		}
 	}
 
-	auto [playingData, playStatus] = tryToStartVoiceForObject(object);
+	auto [playingData, playStatus] = tryToStartVoiceForObject(object, emitter);
 	if (playStatus != VoiceAllocationResult::Playing) {
 		if (eventLogging) {
 			if (playStatus == VoiceAllocationResult::InstanceLimited) {
-				Logger::log(*eventLogging, "AudioObject not playing due to instance limit reached: " + object.getAssetId());
+				Logger::log(*eventLogging, "- Instance limited: " + object.getAssetId());
 			} else if (playStatus == VoiceAllocationResult::CooldownLimited) {
-				Logger::log(*eventLogging, "AudioObject not playing due to cooldown: " + object.getAssetId());
+				Logger::log(*eventLogging, "- Cooldown limited: " + object.getAssetId());
 			}
 		}
 		return {};
@@ -750,7 +750,7 @@ void AudioEngine::updatePlayingObjectData(float deltaTime)
 	});
 }
 
-std::pair<AudioEngine::PlayingObjectData*, AudioEngine::VoiceAllocationResult> AudioEngine::tryToStartVoiceForObject(const AudioObject& object)
+std::pair<AudioEngine::PlayingObjectData*, AudioEngine::VoiceAllocationResult> AudioEngine::tryToStartVoiceForObject(const AudioObject& object, const AudioEmitter& emitter)
 {
 	if (!object.getMaxInstances() && !object.getCooldown()) {
 		return { nullptr, VoiceAllocationResult::Playing };
@@ -765,10 +765,10 @@ std::pair<AudioEngine::PlayingObjectData*, AudioEngine::VoiceAllocationResult> A
 
 	// Max instances exceeded
 	if (object.getMaxInstances() && static_cast<int>(playingData->playingVoices.size()) >= object.getMaxInstances()) {
-		if (object.getInstanceLimitType() == AudioObjectInstanceLimitType::DontPlay) {
+		const bool canPlay = onVoiceLimitReached(*playingData, object.getInstanceLimitType(), emitter);
+		if (!canPlay) {
 			return { nullptr, VoiceAllocationResult::InstanceLimited };
 		}
-		onVoiceLimitReached(*playingData, object.getInstanceLimitType());
 	}
 
 	// Update cooldown
@@ -779,14 +779,45 @@ std::pair<AudioEngine::PlayingObjectData*, AudioEngine::VoiceAllocationResult> A
 	return { playingData, VoiceAllocationResult::Playing };
 }
 
-void AudioEngine::onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType)
+bool AudioEngine::onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType, const AudioEmitter& emitter)
 {
+	if (limitType == AudioObjectInstanceLimitType::DontPlay) {
+		return false;
+	}
+
 	if (limitType == AudioObjectInstanceLimitType::StopOldest) {
-		if (!data.playingVoices.empty()) {
-			data.playingVoices[0]->stop({});
-			data.playingVoices.erase(data.playingVoices.begin());
+		data.stop(0);
+		return true;
+	}
+
+	if (limitType == AudioObjectInstanceLimitType::StopFarthest) {
+		// Populate with my data
+		int bestIdx = -1;
+		float bestDistance = emitter.getPosition().getDistance(listener);
+
+		for (int i = 0; i < static_cast<int>(data.playingVoices.size()); ++i) {
+			const float dist = data.playingVoices[i]->getDistance();
+			if (dist > bestDistance) {
+				bestIdx = i;
+			}
 		}
-	} else if (limitType == AudioObjectInstanceLimitType::StopFarthest) {
-		// TODO
+
+		if (bestIdx == -1) {
+			// I'm the farthest
+			return false;
+		} else {
+			data.stop(bestIdx);
+			return true;
+		}
+	}
+
+	return true;
+}
+
+void AudioEngine::PlayingObjectData::stop(size_t idx)
+{
+	if (playingVoices.size() > idx) {
+		playingVoices[idx]->stop({});
+		playingVoices.erase(playingVoices.begin() + idx);
 	}
 }
