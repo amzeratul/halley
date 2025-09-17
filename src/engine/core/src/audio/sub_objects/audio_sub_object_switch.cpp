@@ -144,10 +144,32 @@ void AudioSubObjectSwitch::deserialize(Deserializer& s)
 	s >> cases;
 }
 
-bool AudioSubObjectSwitch::reload(AudioSubObject&& other)
+bool AudioSubObjectSwitch::reload(AudioSubObject&& otherRaw)
 {
-	*this = dynamic_cast<AudioSubObjectSwitch&&>(std::move(other));
-	return true;
+	auto&& other = dynamic_cast<AudioSubObjectSwitch&&>(otherRaw);
+
+	bool modified = false;
+
+	if (switchId != other.switchId) {
+		switchId = std::move(other.switchId);
+		modified = true;
+	}
+
+	auto oldCases = std::move(cases);
+	cases = {};
+
+	for (auto& [k, v]: other.cases) {
+		const auto iter = oldCases.find(k);
+		if (iter != oldCases.end() && iter->second->getId() == v->getId()) {
+			auto obj = std::move(iter->second);
+			modified = obj->reload(std::move(v.getObject())) || modified;
+			cases[k] = std::move(obj);
+		} else {
+			cases[k] = std::move(v);
+		}
+	}
+
+	return modified;
 }
 
 const String& AudioSubObjectSwitch::getSwitchId() const

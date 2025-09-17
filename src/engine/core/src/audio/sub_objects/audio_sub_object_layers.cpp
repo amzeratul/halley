@@ -104,9 +104,13 @@ void AudioSubObjectLayers::deserialize(Deserializer& s)
 	s >> fadeConfig;
 }
 
-bool AudioSubObjectLayers::reload(AudioSubObject&& other)
+bool AudioSubObjectLayers::reload(AudioSubObject&& otherRaw)
 {
-	*this = dynamic_cast<AudioSubObjectLayers&&>(std::move(other));
+	auto&& other = dynamic_cast<AudioSubObjectLayers&&>(std::move(otherRaw));
+
+	// TODO
+	*this = std::move(other);
+
 	return true;
 }
 
