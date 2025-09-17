@@ -14,6 +14,7 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& 
 
 Resources::~Resources()
 {
+	Logger::logInfo("Destroying resources");
 	resources.clear();
 	Logger::logInfo("Resources destroyed");
 }
