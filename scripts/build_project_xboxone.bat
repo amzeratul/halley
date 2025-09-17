@@ -15,6 +15,7 @@ cmake -A Gaming.Xbox.XboxOne.x64 ^
     -DHALLEY_IGNORE_CONSOLES=0 ^
     -D_GAMING_XBOX=1 ^
     -D_GAMING_XBOX_XBOXONE=1 ^
+    -DCMAKE_TOOLCHAIN_FILE="halley/cmake/CMakeGDKXbox.cmake" ^
     .. || exit /b 1
 
 :: - copy meta file(s)

@@ -255,7 +255,7 @@ namespace {
 		Debug::abort();
 	}
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WITH_GDK)
 	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
@@ -348,7 +348,7 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std:
 	std::set_terminate(&terminateHandler);
 #endif
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(WITH_GDK)
 	SetUnhandledExceptionFilter(&win32ExceptionHandler);
 	//AddVectoredExceptionHandler(1, win32ExceptionHandler);
 #endif
@@ -369,7 +369,7 @@ void Debug::abort()
 	std::set_terminate(nullptr);
 #endif
 
-#if defined(WIN32)
+#if defined(WIN32) && !defined(WITH_GDK)
 	SetUnhandledExceptionFilter(nullptr);
 #endif
 
@@ -404,7 +404,8 @@ String Debug::getCallStack(int skip)
 	OStreamStackWalker walker(ss, skip);
 	walker.ShowCallstack();
 	return ss.str();
-
+#else
+	return "";
 #endif
 }
 
