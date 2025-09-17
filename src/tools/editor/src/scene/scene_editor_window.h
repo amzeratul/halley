@@ -176,6 +176,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		PrefabEditor& parentEditor;
 		AssetType assetType;
+		AliveFlag aliveFlag;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

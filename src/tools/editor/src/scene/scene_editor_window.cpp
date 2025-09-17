@@ -540,8 +540,14 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	const auto cameraStartPos = gameBridge->getCameraPos();
 	const auto initialSelection = entityList->getCurrentSelection();
 
+	auto flag = NonOwningAliveFlag(aliveFlag);
+
 	assetFinder.setAssetIds(std::move(ids), std::move(names), initialSelection, "@", [=](std::optional<String> result)
 	{
+		if (!flag) {
+			return;
+		}
+
 		if (result) {
 			selectEntity(*result);
 		} else {
@@ -551,6 +557,10 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 		gameBridge->setEntityHighlightedOnList(UUID(), true);
 	}, [=] (const String& toHighlight)
 	{
+		if (!flag) {
+			return;
+		}
+
 		gameBridge->setEntityHighlightedOnList(UUID(toHighlight), true);
 		selectEntity(toHighlight);
 		panCameraToEntity(toHighlight);
