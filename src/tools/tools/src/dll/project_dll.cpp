@@ -19,7 +19,10 @@ ProjectDLL::ProjectDLL(const Path& path, const HalleyStatics& statics)
 
 ProjectDLL::~ProjectDLL()
 {
+	dll.unload();
 	dll.removeReloadListener(*this);
+
+	Logger::logInfo("ProjectDLL destroyed");
 }
 
 void ProjectDLL::load()
