@@ -184,5 +184,6 @@ namespace Halley {
 		bool onVoiceLimitReached(PlayingObjectData& data, AudioObjectInstanceLimitType limitType, const AudioEmitter& emitter);
 
 		AudioDebugData generateDebugData() const;
+		bool canLog(const String& assetId) const;
     };
 }

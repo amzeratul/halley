@@ -1,5 +1,7 @@
 #include <systems/audio_system.h>
 
+#include <algorithm>
+
 using namespace Halley;
 
 class AudioSystem final : public AudioSystemBase<AudioSystem>, public IAudioSystemInterface {
@@ -127,9 +129,7 @@ private:
 	
 	void updateListeners(Time t)
 	{
-		if (t < 0.00001) {
-			t = 0.00001;
-		}
+		t = std::max(t, 0.00001);
 
 		AudioAPI& audio = *getAPI().audio;
 		for (auto& listener: listenerFamily) {
@@ -146,10 +146,12 @@ private:
 	AudioPosition getAudioPosition(SourceFamily& e, Vector3f vel)
 	{
 		const auto attenuation = AudioAttenuation(e.audioSource.rangeMin, e.audioSource.rangeMax, e.audioSource.rollOff, e.audioSource.curve);
+		const auto pos = e.transform2D.getGlobalPosition() + e.audioSource.offset;
+
 		if (e.audioSource.polygon.isValid()) {
-			return AudioPosition::makePositional(e.transform2D.getGlobalPosition(), e.audioSource.polygon, attenuation, vel.xy());
+			return AudioPosition::makePositional(pos, e.audioSource.polygon, attenuation, vel.xy());
 		} else {
-			return AudioPosition::makePositional(Vector3f(e.transform2D.getGlobalPosition()), attenuation, vel);
+			return AudioPosition::makePositional(Vector3f(pos), attenuation, vel);
 		}
 	}
 

@@ -79,6 +79,9 @@ component:
       displayName: Dynamic Events
       canSave: false
       canModifyDynamic: true
+  - offset:
+      type: Halley::Vector2f
+      displayName: Emitter Offset
 
 ---
 
