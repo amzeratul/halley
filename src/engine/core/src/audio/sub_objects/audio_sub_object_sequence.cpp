@@ -3,12 +3,14 @@
 #include "halley/utils/algorithm.h"
 #include "halley/bytes/byte_serializer.h"
 #include "../audio_sources/audio_source_sequence.h"
+#include "halley/maths/uuid.h"
 
 
 using namespace Halley;
 
 void AudioSubObjectSequence::load(const ConfigNode& node)
 {
+	setId(node["id"].asString(""));
 	name = node["name"].asString("");
 	segments = node["segments"].asVector<Segment>({});
 	crossFade = AudioFade(node["crossFade"]);
@@ -18,6 +20,7 @@ void AudioSubObjectSequence::load(const ConfigNode& node)
 ConfigNode AudioSubObjectSequence::toConfigNode() const
 {
 	ConfigNode::MapType result;
+	result["id"] = getId();
 	result["name"] = name;
 	result["type"] = toString(getType());
 	result["segments"] = segments;
@@ -91,6 +94,7 @@ void AudioSubObjectSequence::loadDependencies(Resources& resources)
 
 void AudioSubObjectSequence::serialize(Serializer& s) const
 {
+	AudioSubObject::serialize(s);
 	s << name;
 	s << segments;
 	s << crossFade;
@@ -99,10 +103,17 @@ void AudioSubObjectSequence::serialize(Serializer& s) const
 
 void AudioSubObjectSequence::deserialize(Deserializer& s)
 {
+	AudioSubObject::deserialize(s);
 	s >> name;
 	s >> segments;
 	s >> crossFade;
 	s >> sequenceType;
+}
+
+bool AudioSubObjectSequence::reload(AudioSubObject&& other)
+{
+	*this = dynamic_cast<AudioSubObjectSequence&&>(std::move(other));
+	return true;
 }
 
 AudioFade& AudioSubObjectSequence::getCrossFade()

@@ -278,9 +278,9 @@ std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioE
 
 void AudioObject::serialize(Serializer& s) const
 {
-	int version = 1;
+	int serializationVersion = 1;
+	s << serializationVersion;
 
-	s << version;
 	s << bus;
 	s << pitch;
 	s << gain;
@@ -298,9 +298,9 @@ void AudioObject::serialize(Serializer& s) const
 
 void AudioObject::deserialize(Deserializer& s)
 {
-	int version;
+	int serializationVersion;
+	s >> serializationVersion;
 
-	s >> version;
 	s >> bus;
 	s >> pitch;
 	s >> gain;
@@ -318,7 +318,16 @@ void AudioObject::deserialize(Deserializer& s)
 
 void AudioObject::reload(Resource&& resource)
 {
+	// Gotta juggle some objects around to ensure that we reload them, rather than replace them
+	auto oldObjects = std::move(objects);
 	*this = std::move(dynamic_cast<AudioObject&>(resource));
+	auto newObjects = std::move(objects);
+
+	objects = std::move(oldObjects);
+	const auto reloadResult = reloadObjects(objects, std::move(newObjects));
+
+	Logger::logDev("Reloaded AudioObject " + getAssetId() + ": " + toString(reloadResult.modified) + " modified, "
+		+ reloadResult.added + " added, " + reloadResult.removed + " removed," + reloadResult.unchanged + " unchanged.");
 }
 
 std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
@@ -394,4 +403,37 @@ void AudioObject::generateId()
 	static std::atomic<AudioObjectId> id = 1;
 	
 	audioObjectId = id++;
+}
+
+AudioObject::ReloadResult AudioObject::reloadObjects(Vector<AudioSubObjectHandle>& objects, Vector<AudioSubObjectHandle> newObjects)
+{
+	ReloadResult result;
+
+	Vector<AudioSubObjectHandle> prevObjects = std::move(objects);
+	objects = {};
+
+	for (auto& obj: newObjects) {
+		// Try matching new objects to existing ones
+		auto idx = std_ex::find_index_if(prevObjects, [&] (const AudioSubObjectHandle& prev) {
+			return prev.hasValue() && prev->getId() == obj->getId() && typeid(prev.getObject()) == typeid(obj.getObject());
+		});
+
+		if (idx) {
+			auto& oldObj = prevObjects[*idx];
+			const bool changed = oldObj->reload(std::move(*obj));
+			objects += std::move(oldObj);
+			(changed ? result.modified : result.unchanged)++;
+		} else {
+			objects += std::move(obj);
+			result.added++;
+		}
+	}
+
+	for (auto& prevObj: prevObjects) {
+		if (prevObj.hasValue()) {
+			++result.removed;
+		}
+	}
+
+	return result;
 }

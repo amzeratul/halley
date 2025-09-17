@@ -6,6 +6,7 @@
 #include "../audio_engine.h"
 #include "../audio_sources/audio_source_clip.h"
 #include "halley/audio/audio_clip.h"
+#include "halley/maths/uuid.h"
 
 namespace Halley {
 	class AudioSourceClip;
@@ -22,6 +23,7 @@ AudioSubObjectClips::AudioSubObjectClips(std::shared_ptr<const AudioClip> clip)
 
 void AudioSubObjectClips::load(const ConfigNode& node)
 {
+	setId(node["id"].asString(""));
 	clips = node["clips"].asVector<String>({});
 	loop = node["loop"].asBool(false);
 	randomiseStart = node["randomiseStart"].asBool(false);
@@ -34,6 +36,7 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
+	result["id"] = getId();
 	result["type"] = toString(getType());
 	if (!clips.empty()) {
 		result["clips"] = clips;
@@ -53,7 +56,7 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 	if (loopEnd != 0) {
 		result["loopEnd"] = loopEnd;
 	}
-		
+
 	return result;
 }
 
@@ -118,6 +121,7 @@ void AudioSubObjectClips::loadDependencies(Resources& resources)
 
 void AudioSubObjectClips::serialize(Serializer& s) const
 {
+	AudioSubObject::serialize(s);
 	s << clips;
 	s << loop;
 	s << randomiseStart;
@@ -128,6 +132,7 @@ void AudioSubObjectClips::serialize(Serializer& s) const
 
 void AudioSubObjectClips::deserialize(Deserializer& s)
 {
+	AudioSubObject::deserialize(s);
 	s >> clips;
 	s >> loop;
 	s >> randomiseStart;
@@ -178,6 +183,12 @@ void AudioSubObjectClips::swapClips(size_t idxA, size_t idxB)
 	if (depsLoaded) {
 		std::swap(clipData[idxA], clipData[idxB]);
 	}
+}
+
+bool AudioSubObjectClips::reload(AudioSubObject&& other)
+{
+	*this = dynamic_cast<AudioSubObjectClips&&>(std::move(other));
+	return true;
 }
 
 bool AudioSubObjectClips::getLoop() const

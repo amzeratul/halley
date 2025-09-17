@@ -5,7 +5,7 @@
 
 namespace Halley {
 	class AudioProperties;
-	class IAudioSubObject;
+	class AudioSubObject;
 	class AudioSubObjectHandle;
 	class AudioEmitter;
 
@@ -54,29 +54,39 @@ namespace Halley {
 		virtual ConfigNode toConfigNode() const = 0;
 	};
 
-	class IAudioSubObject : public IAudioObject {
+	class AudioSubObject : public IAudioObject {
 	public:
-		static std::unique_ptr<IAudioSubObject> makeSubObject(AudioSubObjectType type);
-		static void copySubObject(IAudioSubObject& dst, const IAudioSubObject& src);
-		static std::unique_ptr<IAudioSubObject> makeSubObject(const ConfigNode& node);
+		AudioSubObject();
+		AudioSubObject(String id);
+		~AudioSubObject() override = default;
 
-		virtual ~IAudioSubObject() = default;
+		const String& getId() const;
+		void setId(String newId);
 
 		virtual void load(const ConfigNode& node) = 0;
 
 		virtual std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const = 0;
 		virtual void loadDependencies(Resources& resources) = 0;
 
-		virtual void serialize(Serializer& s) const = 0;
-		virtual void deserialize(Deserializer& s) = 0;
+		virtual void serialize(Serializer& s) const;
+		virtual void deserialize(Deserializer& s);
 
 		virtual String getName() const = 0;
+
+		virtual bool reload(AudioSubObject&& other) = 0;
+
+		static std::unique_ptr<AudioSubObject> makeSubObject(AudioSubObjectType type);
+		static void copySubObject(AudioSubObject& dst, const AudioSubObject& src);
+		static std::unique_ptr<AudioSubObject> makeSubObject(const ConfigNode& node);
+
+	private:
+		String id;
 	};
 
 	class AudioSubObjectHandle {
 	public:
 		AudioSubObjectHandle();
-		AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj);
+		AudioSubObjectHandle(std::unique_ptr<AudioSubObject> obj);
 		AudioSubObjectHandle(const ConfigNode& node);
 
 		AudioSubObjectHandle(const AudioSubObjectHandle& other);
@@ -88,14 +98,14 @@ namespace Halley {
 
 		const String& getId() const;
 
-		IAudioSubObject& getObject();
-		const IAudioSubObject& getObject() const;
+		AudioSubObject& getObject();
+		const AudioSubObject& getObject() const;
 
-		IAudioSubObject& operator*();
-		IAudioSubObject& operator*() const;
+		AudioSubObject& operator*();
+		AudioSubObject& operator*() const;
 
-		IAudioSubObject* operator->();
-		IAudioSubObject* operator->() const;
+		AudioSubObject* operator->();
+		AudioSubObject* operator->() const;
 		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -104,7 +114,7 @@ namespace Halley {
 
 	private:
 		String id;
-		std::unique_ptr<IAudioSubObject> obj;
+		std::unique_ptr<AudioSubObject> obj;
 	};
 
 }

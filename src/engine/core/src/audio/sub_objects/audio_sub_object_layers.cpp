@@ -2,12 +2,14 @@
 #include "../audio_sources/audio_source_layers.h"
 #include "halley/audio/audio_sub_object.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/maths/uuid.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
 void AudioSubObjectLayers::load(const ConfigNode& node)
 {
+	setId(node["id"].asString(""));
 	if (node.hasKey("layers")) {
 		for (const auto& layerNode: node["layers"]) {
 			layers.emplace_back(layerNode);
@@ -25,6 +27,7 @@ ConfigNode AudioSubObjectLayers::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
+	result["id"] = getId();
 	result["type"] = toString(getType());
 	if (!layers.empty()) {
 		result["layers"] = layers;
@@ -87,6 +90,7 @@ void AudioSubObjectLayers::loadDependencies(Resources& resources)
 
 void AudioSubObjectLayers::serialize(Serializer& s) const
 {
+	AudioSubObject::serialize(s);
 	s << name;
 	s << layers;
 	s << fadeConfig;
@@ -94,9 +98,16 @@ void AudioSubObjectLayers::serialize(Serializer& s) const
 
 void AudioSubObjectLayers::deserialize(Deserializer& s)
 {
+	AudioSubObject::deserialize(s);
 	s >> name;
 	s >> layers;
 	s >> fadeConfig;
+}
+
+bool AudioSubObjectLayers::reload(AudioSubObject&& other)
+{
+	*this = dynamic_cast<AudioSubObjectLayers&&>(std::move(other));
+	return true;
 }
 
 const AudioSubObjectLayers::Layer& AudioSubObjectLayers::getLayer(size_t idx) const
@@ -146,7 +157,7 @@ void AudioSubObjectLayers::validate(const AudioProperties& audioProperties) cons
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 {
-	object = IAudioSubObject::makeSubObject(node["object"]);
+	object = AudioSubObject::makeSubObject(node["object"]);
 	expression.load(node["expression"]);
 	synchronised = node["synchronised"].asBool(false);
 	restartFromBeginning = node["restartFromBeginning"].asBool(false);

@@ -3,7 +3,7 @@
 #include "../audio_sub_object.h"
 
 namespace Halley {
-    class AudioSubObjectSwitch final : public IAudioSubObject {
+    class AudioSubObjectSwitch final : public AudioSubObject {
     public:
         AudioSubObjectSwitch() = default;
         AudioSubObjectSwitch(const ConfigNode& node);
@@ -26,6 +26,8 @@ namespace Halley {
         void loadDependencies(Resources& resources) override;
 	    void serialize(Serializer& s) const override;
 	    void deserialize(Deserializer& s) override;
+
+        bool reload(AudioSubObject&& other) override;
 
     	const String& getSwitchId() const;
         void setSwitchId(String value);

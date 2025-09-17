@@ -2,6 +2,7 @@
 
 #include "../audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/maths/uuid.h"
 #include "halley/properties/audio_properties.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
@@ -13,6 +14,7 @@ AudioSubObjectSwitch::AudioSubObjectSwitch(const ConfigNode& node)
 
 void AudioSubObjectSwitch::load(const ConfigNode& node)
 {
+	setId(node["id"].asString(""));
 	switchId = node["switchId"].asString();
 	cases = node["cases"].asHashMap<String, AudioSubObjectHandle>();
 }
@@ -20,6 +22,7 @@ void AudioSubObjectSwitch::load(const ConfigNode& node)
 ConfigNode AudioSubObjectSwitch::toConfigNode() const
 {
 	ConfigNode::MapType result;
+	result["id"] = getId();
 	result["type"] = toString(getType());
 	result["switchId"] = switchId;
 	result["cases"] = cases;
@@ -56,7 +59,7 @@ AudioSubObjectHandle& AudioSubObjectSwitch::getSubObject(size_t n)
 		}
 		++idx;
 	}
-	return IAudioSubObject::getSubObject(n);
+	return AudioSubObject::getSubObject(n);
 }
 
 Vector<String> AudioSubObjectSwitch::getSubCategories(const AudioProperties& audioProperties) const
@@ -129,14 +132,22 @@ void AudioSubObjectSwitch::loadDependencies(Resources& resources)
 
 void AudioSubObjectSwitch::serialize(Serializer& s) const
 {
+	AudioSubObject::serialize(s);
 	s << switchId;
 	s << cases;
 }
 
 void AudioSubObjectSwitch::deserialize(Deserializer& s)
 {
+	AudioSubObject::deserialize(s);
 	s >> switchId;
 	s >> cases;
+}
+
+bool AudioSubObjectSwitch::reload(AudioSubObject&& other)
+{
+	*this = dynamic_cast<AudioSubObjectSwitch&&>(std::move(other));
+	return true;
 }
 
 const String& AudioSubObjectSwitch::getSwitchId() const

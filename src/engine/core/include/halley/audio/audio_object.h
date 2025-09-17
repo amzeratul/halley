@@ -102,6 +102,14 @@ namespace Halley {
         void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
 		AudioSubObjectHandle removeObject(const IAudioObject* object) override;
 
+		struct ReloadResult {
+			size_t modified = 0;
+			size_t added = 0;
+			size_t removed = 0;
+			size_t unchanged = 0;
+		};
+		static ReloadResult reloadObjects(Vector<AudioSubObjectHandle>& objects, Vector<AudioSubObjectHandle> newObjects);
+
     private:
 		AudioObjectId audioObjectId = 0;
 		Vector<AudioSubObjectHandle> objects;

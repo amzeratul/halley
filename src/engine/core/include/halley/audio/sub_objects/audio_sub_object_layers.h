@@ -4,7 +4,7 @@
 #include "../audio_sub_object.h"
 
 namespace Halley {
-	class AudioSubObjectLayers final : public IAudioSubObject {
+	class AudioSubObjectLayers final : public AudioSubObject {
 	public:
 		struct Layer {
 			AudioSubObjectHandle object;
@@ -45,6 +45,8 @@ namespace Halley {
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
+
+		bool reload(AudioSubObject&& other) override;
 
 		const Layer& getLayer(size_t idx) const;
 

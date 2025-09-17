@@ -173,7 +173,7 @@ ConfigNode AudioObjectEditor::TreeData::toConfigNode() const
 	} else if (subCase) {
 		result["subCase"] = *subCase;
 	} else if (object) {
-		if (dynamic_cast<IAudioSubObject*>(object)) {
+		if (dynamic_cast<AudioSubObject*>(object)) {
 			result["subObject"] = object->toConfigNode();
 		} else {
 			result["object"] = object->toConfigNode();
@@ -360,7 +360,7 @@ void AudioObjectEditor::addClips()
 
 void AudioObjectEditor::addObject(AudioSubObjectType type)
 {
-	auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(type));
+	auto subObject = AudioSubObjectHandle(AudioSubObject::makeSubObject(type));
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
 	parent.object->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
 	markModified(true);
@@ -456,7 +456,7 @@ void AudioObjectEditor::paste(IAudioObject& dst, const std::optional<String>& su
 		}
 	} else if (node.hasKey("subObject")) {
 		if (dst.canAddObject(AudioSubObjectType::Switch, subCase)) {
-			auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(node["subObject"]));
+			auto subObject = AudioSubObjectHandle(AudioSubObject::makeSubObject(node["subObject"]));
 			dst.addObject(subObject, subCase, std::numeric_limits<size_t>::max());
 		}
 	}

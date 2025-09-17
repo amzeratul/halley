@@ -10,7 +10,42 @@
 
 using namespace Halley;
 
-std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(AudioSubObjectType type)
+AudioSubObject::AudioSubObject()
+{
+	setId("");
+}
+
+AudioSubObject::AudioSubObject(String id)
+{
+	setId(std::move(id));
+}
+
+const String& AudioSubObject::getId() const
+{
+	return id;
+}
+
+void AudioSubObject::setId(String newId)
+{
+	id = std::move(newId);
+	if (id.isEmpty()) {
+		id = UUID::generate().toString();
+	}
+}
+
+void AudioSubObject::serialize(Serializer& s) const
+{
+	s << id;
+}
+
+void AudioSubObject::deserialize(Deserializer& s)
+{
+	String newId;
+	s >> newId;
+	setId(newId);
+}
+
+std::unique_ptr<AudioSubObject> AudioSubObject::makeSubObject(AudioSubObjectType type)
 {
 	switch (type) {
 	case AudioSubObjectType::Clips:
@@ -26,12 +61,12 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(AudioSubObjectTy
 }
 
 template <typename T>
-static void castSubObjectCopy(IAudioSubObject& dst, const IAudioSubObject& src)
+static void castSubObjectCopy(AudioSubObject& dst, const AudioSubObject& src)
 {
 	dynamic_cast<T&>(dst) = dynamic_cast<const T&>(src);
 }
 
-void IAudioSubObject::copySubObject(IAudioSubObject& dst, const IAudioSubObject& src)
+void AudioSubObject::copySubObject(AudioSubObject& dst, const AudioSubObject& src)
 {
 	if (dst.getType() == src.getType()) {
 		switch (dst.getType()) {
@@ -53,7 +88,7 @@ void IAudioSubObject::copySubObject(IAudioSubObject& dst, const IAudioSubObject&
 	}
 }
 
-std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(const ConfigNode& node)
+std::unique_ptr<AudioSubObject> AudioSubObject::makeSubObject(const ConfigNode& node)
 {
 	const auto type = fromString<AudioSubObjectType>(node["type"].asString());
 	auto obj = makeSubObject(type);
@@ -134,7 +169,7 @@ AudioSubObjectHandle::AudioSubObjectHandle()
 {
 }
 
-AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
+AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<AudioSubObject> obj)
 	: id(UUID::generate().toString())
 	, obj(std::move(obj))
 {
@@ -142,7 +177,7 @@ AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
 
 AudioSubObjectHandle::AudioSubObjectHandle(const ConfigNode& node)
 	: id(UUID::generate().toString())
-	, obj(IAudioSubObject::makeSubObject(node))
+	, obj(AudioSubObject::makeSubObject(node))
 {
 }
 
@@ -155,7 +190,7 @@ AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle
 {
 	id = other.id;
 	if (hasValue() && other.hasValue() && obj->getType() == other->getType()) {
-		IAudioSubObject::copySubObject(*obj, other.getObject());
+		AudioSubObject::copySubObject(*obj, other.getObject());
 	} else {
 		// HACK
 		auto bytes = Serializer::toBytes(other);
@@ -175,32 +210,32 @@ const String& AudioSubObjectHandle::getId() const
 	return id;
 }
 
-IAudioSubObject& AudioSubObjectHandle::getObject()
+AudioSubObject& AudioSubObjectHandle::getObject()
 {
 	return *obj;
 }
 
-const IAudioSubObject& AudioSubObjectHandle::getObject() const
+const AudioSubObject& AudioSubObjectHandle::getObject() const
 {
 	return *obj;
 }
 
-IAudioSubObject& AudioSubObjectHandle::operator*()
+AudioSubObject& AudioSubObjectHandle::operator*()
 {
 	return *obj;
 }
 
-IAudioSubObject& AudioSubObjectHandle::operator*() const
+AudioSubObject& AudioSubObjectHandle::operator*() const
 {
 	return *obj;
 }
 
-IAudioSubObject* AudioSubObjectHandle::operator->()
+AudioSubObject* AudioSubObjectHandle::operator->()
 {
 	return obj.get();
 }
 
-IAudioSubObject* AudioSubObjectHandle::operator->() const
+AudioSubObject* AudioSubObjectHandle::operator->() const
 {
 	return obj.get();
 }
@@ -224,7 +259,7 @@ void AudioSubObjectHandle::deserialize(Deserializer& s)
 {
 	int type;
 	s >> type;
-	obj = IAudioSubObject::makeSubObject(static_cast<AudioSubObjectType>(type));
+	obj = AudioSubObject::makeSubObject(static_cast<AudioSubObjectType>(type));
 	if (obj) {
 		obj->deserialize(s);
 	}

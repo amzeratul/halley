@@ -2,7 +2,7 @@
 #include "../audio_sub_object.h"
 
 namespace Halley {
-	class AudioSubObjectClips final : public IAudioSubObject {
+	class AudioSubObjectClips final : public AudioSubObject {
 	public:
 		AudioSubObjectClips() = default;
 		explicit AudioSubObjectClips(std::shared_ptr<const AudioClip> clip);
@@ -29,6 +29,8 @@ namespace Halley {
 		void addClip(std::shared_ptr<const AudioClip> clip, const std::optional<String>& caseName, size_t idx) override;
 		void removeClip(const String& clipId) override;
 		void swapClips(size_t idxA, size_t idxB) override;
+
+		bool reload(AudioSubObject&& other) override;
 
 		bool getLoop() const;
 		void setLoop(bool loop);

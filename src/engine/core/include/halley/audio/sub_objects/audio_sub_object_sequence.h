@@ -22,7 +22,7 @@ namespace Halley {
 		}
 	};
 
-    class AudioSubObjectSequence final : public IAudioSubObject {
+    class AudioSubObjectSequence final : public AudioSubObject {
     public:
 		struct Segment {
 			AudioSubObjectHandle object;
@@ -56,6 +56,8 @@ namespace Halley {
         void loadDependencies(Resources& resources) override;
 	    void serialize(Serializer& s) const override;
 	    void deserialize(Deserializer& s) override;
+
+		bool reload(AudioSubObject&& other) override;
 
         AudioFade& getCrossFade();
 		AudioSequenceType& getSequenceType();
