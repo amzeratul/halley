@@ -146,7 +146,7 @@ UIFactoryWidgetProperties EditorUIFactory::getSelectAssetProperties() const
 	result.iconName = "widget_icons/widget.png";
 
 	result.entries.emplace_back("Asset Type", "assetType", "Halley::AssetType", "");
-	result.entries.emplace_back("Allow Empty", "allowEmpty", "std::optional<String>", "");
+	result.entries.emplace_back("Allow Empty", "allowEmpty", "std::optional<Halley::String>", "");
 	result.entries.emplace_back("Error on Empty", "displayErrorForEmpty", "bool", "true");
 
 	return result;
