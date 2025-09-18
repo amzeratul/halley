@@ -5,7 +5,7 @@
 namespace Halley {
     class AudioSubObjectSwitch final : public AudioSubObject {
     public:
-        AudioSubObjectSwitch() = default;
+        AudioSubObjectSwitch(std::optional<String> id);
         AudioSubObjectSwitch(const ConfigNode& node);
     	ConfigNode toConfigNode() const override;
     	

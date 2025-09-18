@@ -8,6 +8,11 @@
 
 using namespace Halley;
 
+AudioSubObjectSequence::AudioSubObjectSequence(std::optional<String> id)
+	: AudioSubObject(std::move(id))
+{
+}
+
 void AudioSubObjectSequence::load(const ConfigNode& node)
 {
 	setId(node["id"].asString(""));

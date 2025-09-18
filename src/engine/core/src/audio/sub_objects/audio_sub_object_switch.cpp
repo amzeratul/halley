@@ -7,7 +7,13 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
+AudioSubObjectSwitch::AudioSubObjectSwitch(std::optional<String> id)
+	: AudioSubObject(std::move(id))
+{
+}
+
 AudioSubObjectSwitch::AudioSubObjectSwitch(const ConfigNode& node)
+	: AudioSubObject({})
 {
 	load(node);
 }

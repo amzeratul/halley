@@ -28,6 +28,8 @@ namespace Halley {
 			bool reload(Layer&& other);
 		};
 
+		AudioSubObjectLayers(std::optional<String> id = {});
+
 		void load(const ConfigNode& node) override;
 		ConfigNode toConfigNode() const override;
 
@@ -53,8 +55,8 @@ namespace Halley {
 		bool reload(AudioSubObject&& other) override;
 
 		const Layer& getLayer(size_t idx) const;
-
 		gsl::span<Layer> getLayers();
+
 		AudioFade& getFade();
 
 		void validate(const AudioProperties& audioProperties) const;

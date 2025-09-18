@@ -7,6 +7,11 @@
 
 using namespace Halley;
 
+AudioSubObjectLayers::AudioSubObjectLayers(std::optional<String> id)
+	: AudioSubObject(id)
+{
+}
+
 void AudioSubObjectLayers::load(const ConfigNode& node)
 {
 	setId(node["id"].asString(""));
@@ -151,6 +156,9 @@ bool AudioSubObjectLayers::reload(AudioSubObject&& otherRaw)
 
 const AudioSubObjectLayers::Layer& AudioSubObjectLayers::getLayer(size_t idx) const
 {
+	if (idx >= layers.size()) {
+		Logger::logError("Invalid audio layer for \"" + getId() + "\": " + toString(idx) + " (has " + toString(layers.size()) + " layers)");
+	}
 	return layers.at(idx);
 }
 

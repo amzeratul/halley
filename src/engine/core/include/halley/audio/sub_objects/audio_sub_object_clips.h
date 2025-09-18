@@ -4,7 +4,7 @@
 namespace Halley {
 	class AudioSubObjectClips final : public AudioSubObject {
 	public:
-		AudioSubObjectClips() = default;
+		AudioSubObjectClips(std::optional<String> id);
 		explicit AudioSubObjectClips(std::shared_ptr<const AudioClip> clip);
 
 		void load(const ConfigNode& node) override;

@@ -56,12 +56,11 @@ namespace Halley {
 
 	class AudioSubObject : public IAudioObject {
 	public:
-		AudioSubObject();
-		AudioSubObject(String id);
+		AudioSubObject(std::optional<String> id);
 		~AudioSubObject() override = default;
 
 		const String& getId() const;
-		void setId(String newId);
+		bool setId(String newId);
 
 		virtual void load(const ConfigNode& node) = 0;
 
@@ -75,7 +74,7 @@ namespace Halley {
 
 		virtual bool reload(AudioSubObject&& other) = 0;
 
-		static std::unique_ptr<AudioSubObject> makeSubObject(AudioSubObjectType type);
+		static std::unique_ptr<AudioSubObject> makeSubObject(AudioSubObjectType type, bool withId);
 		static void copySubObject(AudioSubObject& dst, const AudioSubObject& src);
 		static std::unique_ptr<AudioSubObject> makeSubObject(const ConfigNode& node);
 
@@ -115,7 +114,6 @@ namespace Halley {
 		bool hasValue() const;
 
 	private:
-		String id;
 		std::unique_ptr<AudioSubObject> obj;
 	};
 

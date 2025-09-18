@@ -147,14 +147,14 @@ void AudioFacade::resumePlayback()
 void AudioFacade::pausePlayback()
 {
 	if (running) {
-		{
-			running = false;
-			engine->pause();
-		}
+		running = false;
+		engine->pause();
+
 		if (ownAudioThread) {
 			audioThread.join();
 			audioThread = {};
 		}
+
 		output.stopPlayback();
 	}
 }

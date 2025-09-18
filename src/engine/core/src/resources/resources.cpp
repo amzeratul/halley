@@ -44,29 +44,40 @@ void Resources::reloadAssets(const Vector<String>& ids, const Vector<String>& pa
 
 void Resources::reloadAssets(const std::map<AssetType, Vector<String>>& byType)
 {
+	// Pause audio if needed
+	bool needsAudioPause = false;
+	for (auto& curType: byType) {
+		if (curType.first == AssetType::AudioClip || curType.first == AssetType::AudioObject) {
+			needsAudioPause = true;
+			break;
+		}
+	}
+	if (needsAudioPause) {
+		Logger::logDev("Pausing audio playback...");
+		api->audio->pausePlayback();
+	}
+
 	// Purge assets first, to force re-loading of any affected packs
 	for (auto& curType: byType) {
-		if (curType.first == AssetType::AudioClip) {
-			api->audio->pausePlayback();
-		}
-
-		auto& resources = ofType(curType.first);
+		auto& res = ofType(curType.first);
 		for (auto& asset: curType.second) {
-			resources.purge(asset);
+			res.purge(asset);
 		}
 	}
 
 	// Reload assets
 	for (auto& curType: byType) {
-		auto& resources = ofType(curType.first);
+		auto& res = ofType(curType.first);
 		for (auto& asset: curType.second) {
 			//Logger::logInfo("Reloading " + curType.first + ": " + asset);
-			resources.reload(asset);
+			res.reload(asset);
 		}
+	}
 
-		if (curType.first == AssetType::AudioClip) {
-			api->audio->resumePlayback();
-		}
+	// Resume audio
+	if (needsAudioPause) {
+		Logger::logDev("Resuming audio playback...");
+		api->audio->resumePlayback();
 	}
 }
 

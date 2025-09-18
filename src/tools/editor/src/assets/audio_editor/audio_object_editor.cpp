@@ -360,7 +360,7 @@ void AudioObjectEditor::addClips()
 
 void AudioObjectEditor::addObject(AudioSubObjectType type)
 {
-	auto subObject = AudioSubObjectHandle(AudioSubObject::makeSubObject(type));
+	auto subObject = AudioSubObjectHandle(AudioSubObject::makeSubObject(type, true));
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
 	parent.object->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
 	markModified(true);

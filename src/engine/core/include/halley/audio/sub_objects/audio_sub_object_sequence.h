@@ -41,6 +41,8 @@ namespace Halley {
 			bool reload(Segment&& other);
 		};
 
+		AudioSubObjectSequence(std::optional<String> id);
+
     	void load(const ConfigNode& node) override;
     	ConfigNode toConfigNode() const override;
 

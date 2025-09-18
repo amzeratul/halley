@@ -15,7 +15,13 @@ namespace Halley {
 using namespace Halley;
 
 
+AudioSubObjectClips::AudioSubObjectClips(std::optional<String> id)
+	: AudioSubObject(std::move(id))
+{
+}
+
 AudioSubObjectClips::AudioSubObjectClips(std::shared_ptr<const AudioClip> clip)
+	: AudioSubObject(std::nullopt)
 {
 	clipData.push_back(std::move(clip));
 	clips.push_back(clipData.back()->getAssetId());

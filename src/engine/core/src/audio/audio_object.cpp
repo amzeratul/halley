@@ -96,7 +96,7 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 	}
 	dopplerScale = node["dopplerScale"].asFloat(0.0f);
 
-	auto clips = std::make_unique<AudioSubObjectClips>();
+	auto clips = std::make_unique<AudioSubObjectClips>("");
 	clips->load(node);
 
 	objects.clear();
@@ -325,9 +325,6 @@ void AudioObject::reload(Resource&& resource)
 
 	objects = std::move(oldObjects);
 	const auto reloadResult = reloadObjects(objects, std::move(newObjects));
-
-	Logger::logDev("Reloaded AudioObject " + getAssetId() + ": " + toString(reloadResult.modified) + " modified, "
-		+ reloadResult.added + " added, " + reloadResult.removed + " removed," + reloadResult.unchanged + " unchanged.");
 }
 
 std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
