@@ -265,3 +265,22 @@ void AudioSubObjectHandle::deserialize(Deserializer& s)
 	}
 }
 
+bool AudioSubObjectHandle::reload(AudioSubObjectHandle&& other)
+{
+	bool modified = false;
+
+	if (id != other.id) {
+		id = std::move(other.id);
+		modified = true;
+	}
+
+	if (!obj || !other.obj || obj->getType() != other.obj->getType()) {
+		obj = std::move(other.obj);
+		modified = true;
+	} else {
+		modified = obj->reload(std::move(*other.obj)) || modified;
+	}
+
+	return modified;
+}
+

@@ -76,6 +76,16 @@ float AudioExpressionTerm::evaluateVariable(const AudioEmitter& emitter) const
 	return points.evaluate(val);
 }
 
+bool AudioExpressionTerm::operator==(const AudioExpressionTerm& other) const
+{
+	return type == other.type && op == other.op && id == other.id && value == other.value && points == other.points && gain == other.gain;
+}
+
+bool AudioExpressionTerm::operator!=(const AudioExpressionTerm& other) const
+{
+	return !(*this == other);
+}
+
 void AudioExpressionTerm::serialize(Serializer& s) const
 {
 	s << static_cast<int>(type);
@@ -168,6 +178,16 @@ void AudioExpression::validate(const AudioProperties& audioProperties, const Str
 			}
 		}
 	}
+}
+
+bool AudioExpression::operator==(const AudioExpression& other) const
+{
+	return terms == other.terms && operation == other.operation;
+}
+
+bool AudioExpression::operator!=(const AudioExpression& other) const
+{
+	return !(*this == other);
 }
 
 void AudioExpression::serialize(Serializer& s) const

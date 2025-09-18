@@ -162,7 +162,7 @@ bool AudioSubObjectSwitch::reload(AudioSubObject&& otherRaw)
 		const auto iter = oldCases.find(k);
 		if (iter != oldCases.end() && iter->second->getId() == v->getId()) {
 			auto obj = std::move(iter->second);
-			modified = obj->reload(std::move(v.getObject())) || modified;
+			modified = obj.reload(std::move(v)) || modified;
 			cases[k] = std::move(obj);
 		} else {
 			cases[k] = std::move(v);

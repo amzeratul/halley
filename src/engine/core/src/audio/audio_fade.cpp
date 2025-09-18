@@ -38,6 +38,16 @@ ConfigNode AudioFade::toConfigNode() const
 	return result;
 }
 
+bool AudioFade::operator==(const AudioFade& other) const
+{
+	return length == other.length && delay == other.delay && curve == other.curve;
+}
+
+bool AudioFade::operator!=(const AudioFade& other) const
+{
+	return !(*this == other);
+}
+
 float AudioFade::evaluate(float time) const
 {
 	switch (curve) {

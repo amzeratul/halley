@@ -108,10 +108,45 @@ bool AudioSubObjectLayers::reload(AudioSubObject&& otherRaw)
 {
 	auto&& other = dynamic_cast<AudioSubObjectLayers&&>(std::move(otherRaw));
 
-	// TODO
-	*this = std::move(other);
+	bool modified = false;
+	if (name != other.name) {
+		name = std::move(other.name);
+		modified = true;
+	}
+	if (objectName != other.objectName) {
+		objectName = std::move(other.objectName);
+		modified = true;
+	}
+	if (fadeConfig != other.fadeConfig) {
+		fadeConfig = other.fadeConfig;
+		modified = true;
+	}
 
-	return true;
+	auto oldLayers = std::move(layers);
+	layers = {};
+	for (auto& newLayer: other.layers) {
+		auto iter = oldLayers.find_if([&] (const Layer& layer) {
+			return layer.getId() == newLayer.getId();
+		});
+
+		if (iter != oldLayers.end()) {
+			auto oldLayer = std::move(*iter);
+			modified = oldLayer.reload(std::move(newLayer)) || modified;
+			layers.push_back(std::move(oldLayer));
+		} else {
+			modified = true;
+			layers.push_back(std::move(newLayer));
+		}
+	}
+
+	for (const auto& oldLayer: oldLayers) {
+		if (oldLayer.object.hasValue()) {
+			// Removed
+			modified = true;
+		}
+	}
+
+	return modified;
 }
 
 const AudioSubObjectLayers::Layer& AudioSubObjectLayers::getLayer(size_t idx) const
@@ -201,6 +236,11 @@ ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
 	return result;
 }
 
+const String& AudioSubObjectLayers::Layer::getId() const
+{
+	return object.getId();
+}
+
 void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 {
 	s << object;
@@ -223,4 +263,42 @@ void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
 	s >> fadeIn;
 	s >> fadeOut;
 	s >> delay;
+}
+
+bool AudioSubObjectLayers::Layer::reload(Layer&& other)
+{
+	bool modified = false;
+
+	if (expression != other.expression) {
+		expression = other.expression;
+		modified = true;
+	}
+	if (fadeIn != other.fadeIn) {
+		fadeIn = other.fadeIn;
+		modified = true;
+	}
+	if (fadeOut != other.fadeOut) {
+		fadeOut = other.fadeOut;
+		modified = true;
+	}
+	if (delay != other.delay) {
+		delay = other.delay;
+		modified = true;
+	}
+	if (synchronised != other.synchronised) {
+		synchronised = other.synchronised;
+		modified = true;
+	}
+	if (restartFromBeginning != other.restartFromBeginning) {
+		restartFromBeginning = other.restartFromBeginning;
+		modified = true;
+	}
+	if (onlyFadeInWhenResuming != other.onlyFadeInWhenResuming) {
+		onlyFadeInWhenResuming = other.onlyFadeInWhenResuming;
+		modified = true;
+	}
+
+	modified = object.reload(std::move(other.object)) || modified;
+
+	return modified;
 }

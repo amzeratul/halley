@@ -110,10 +110,28 @@ void AudioSubObjectSequence::deserialize(Deserializer& s)
 	s >> sequenceType;
 }
 
-bool AudioSubObjectSequence::reload(AudioSubObject&& other)
+bool AudioSubObjectSequence::reload(AudioSubObject&& otherRaw)
 {
-	*this = dynamic_cast<AudioSubObjectSequence&&>(std::move(other));
-	return true;
+	bool modified = false;
+
+	auto other = dynamic_cast<AudioSubObjectSequence&&>(std::move(otherRaw));
+
+	if (name != other.name) {
+		name = std::move(other.name);
+		modified = true;
+	}
+	if (crossFade != other.crossFade) {
+		crossFade = other.crossFade;
+		modified = true;
+	}
+	if (sequenceType != other.sequenceType) {
+		sequenceType = other.sequenceType;
+		modified = true;
+	}
+
+	// TODO: segments
+
+	return modified;
 }
 
 AudioFade& AudioSubObjectSequence::getCrossFade()
@@ -171,6 +189,11 @@ ConfigNode AudioSubObjectSequence::Segment::toConfigNode() const
 	return result;
 }
 
+const String& AudioSubObjectSequence::Segment::getId() const
+{
+	return object.getId();
+}
+
 void AudioSubObjectSequence::Segment::serialize(Serializer& s) const
 {
 	s << object;
@@ -181,4 +204,10 @@ void AudioSubObjectSequence::Segment::deserialize(Deserializer& s)
 {
 	s >> object;
 	s >> endSample;
+}
+
+bool AudioSubObjectSequence::Segment::reload(Segment&& other)
+{
+	// TODO
+	return true;
 }

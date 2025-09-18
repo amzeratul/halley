@@ -58,6 +58,9 @@ namespace Halley {
         float evaluate(const AudioEmitter& emitter) const;
         float evaluateSwitch(const AudioEmitter& emitter) const;
         float evaluateVariable(const AudioEmitter& emitter) const;
+        
+        bool operator==(const AudioExpressionTerm& other) const;
+        bool operator!=(const AudioExpressionTerm& other) const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
@@ -89,6 +92,9 @@ namespace Halley {
 
         float evaluate(const AudioEmitter& emitter) const;
 		void validate(const AudioProperties& audioProperties, const String& breadCrumbs) const;
+
+        bool operator==(const AudioExpression& other) const;
+        bool operator!=(const AudioExpression& other) const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);

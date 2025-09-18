@@ -420,7 +420,7 @@ AudioObject::ReloadResult AudioObject::reloadObjects(Vector<AudioSubObjectHandle
 
 		if (idx) {
 			auto& oldObj = prevObjects[*idx];
-			const bool changed = oldObj->reload(std::move(*obj));
+			const bool changed = oldObj.reload(std::move(obj));
 			objects += std::move(oldObj);
 			(changed ? result.modified : result.unchanged)++;
 		} else {

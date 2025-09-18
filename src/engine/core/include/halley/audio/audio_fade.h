@@ -50,6 +50,9 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
+		bool operator==(const AudioFade& other) const;
+		bool operator!=(const AudioFade& other) const;
+
 	private:
 		float length = 0;
 		float delay = 0;

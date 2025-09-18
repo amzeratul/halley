@@ -110,6 +110,8 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		bool reload(AudioSubObjectHandle&& other);
+
 		bool hasValue() const;
 
 	private:

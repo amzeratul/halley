@@ -185,10 +185,50 @@ void AudioSubObjectClips::swapClips(size_t idxA, size_t idxB)
 	}
 }
 
-bool AudioSubObjectClips::reload(AudioSubObject&& other)
+bool AudioSubObjectClips::reload(AudioSubObject&& otherRaw)
 {
-	*this = dynamic_cast<AudioSubObjectClips&&>(std::move(other));
-	return true;
+	bool modified = false;
+
+	auto other = dynamic_cast<AudioSubObjectClips&&>(std::move(otherRaw));
+
+	if (clips != other.clips) {
+		clips = std::move(other.clips);
+		modified = true;
+	}
+	if (clipData != other.clipData) {
+		clipData = std::move(other.clipData);
+		modified = true;
+	}
+	if (loop != other.loop) {
+		loop = other.loop;
+		modified = true;
+	}
+	if (randomiseStart != other.randomiseStart) {
+		randomiseStart = other.randomiseStart;
+		modified = true;
+	}
+	if (randomiseStart != other.randomiseStart) {
+		randomiseStart = other.randomiseStart;
+		modified = true;
+	}
+	if (loopStart != other.loopStart) {
+		loopStart = other.loopStart;
+		modified = true;
+	}
+	if (loopEnd != other.loopEnd) {
+		loopEnd = other.loopEnd;
+		modified = true;
+	}
+	if (gain != other.gain) {
+		gain = other.gain;
+		modified = true;
+	}
+	if (depsLoaded != other.depsLoaded) {
+		depsLoaded = other.depsLoaded;
+		modified = true;
+	}
+
+	return modified;
 }
 
 bool AudioSubObjectClips::getLoop() const

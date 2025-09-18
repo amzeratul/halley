@@ -20,8 +20,12 @@ namespace Halley {
 			Layer(const ConfigNode& node);
 			ConfigNode toConfigNode() const;
 
+			const String& getId() const;
+
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			bool reload(Layer&& other);
 		};
 
 		void load(const ConfigNode& node) override;

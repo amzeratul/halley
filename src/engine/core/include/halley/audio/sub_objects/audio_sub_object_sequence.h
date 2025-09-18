@@ -33,8 +33,12 @@ namespace Halley {
 			Segment(AudioSubObjectHandle subObject);
 			ConfigNode toConfigNode() const;
 
+			const String& getId() const;
+
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			bool reload(Segment&& other);
 		};
 
     	void load(const ConfigNode& node) override;
