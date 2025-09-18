@@ -11,7 +11,7 @@ namespace Halley
 	class AudioSourceLayers final : public AudioSource
 	{
 	public:
-		AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig, AudioFade fadeConfig);
+		AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig);
 
 		String getName() const override;
 		uint8_t getNumberOfChannels() const override;
@@ -37,14 +37,13 @@ namespace Halley
 			void init(const AudioSubObjectLayers& layerConfig);
 			void restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
 			void setSourceDelay(float delay);
-			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& fade);
+			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter);
 		};
 
 		AudioEngine& engine;
 		AudioEmitter& emitter;
 		const AudioSubObjectLayers& layerConfig;
 		Vector<Layer> layers;
-		AudioFade fadeConfig;
 		bool initialized = false;
 	};
 }

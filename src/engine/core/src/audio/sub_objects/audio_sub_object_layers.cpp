@@ -83,7 +83,7 @@ std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engin
 		sources.push_back(l.object->makeSource(engine, emitter));
 	}
 
-	return std::make_unique<AudioSourceLayers>(engine, emitter, std::move(sources), *this, fadeConfig);
+	return std::make_unique<AudioSourceLayers>(engine, emitter, std::move(sources), *this);
 }
 
 void AudioSubObjectLayers::loadDependencies(Resources& resources)
@@ -191,6 +191,11 @@ gsl::span<AudioSubObjectLayers::Layer> AudioSubObjectLayers::getLayers()
 }
 
 AudioFade& AudioSubObjectLayers::getFade()
+{
+	return fadeConfig;
+}
+
+const AudioFade& AudioSubObjectLayers::getFade() const
 {
 	return fadeConfig;
 }

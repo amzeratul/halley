@@ -11,11 +11,10 @@
 
 using namespace Halley;
 
-AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig, AudioFade fadeConfig)
+AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig)
 	: engine(engine)
 	, emitter(emitter)
 	, layerConfig(layerConfig)
-	, fadeConfig(fadeConfig)
 {
 	layerConfig.validate(engine.getAudioProperties());
 
@@ -67,7 +66,7 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 
 	AudioMixer::zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
-		layer.update(deltaTime, layerConfig, emitter, fadeConfig);
+		layer.update(deltaTime, layerConfig, emitter);
 		if (layer.playing || layer.synchronised || layer.fader.isFading()) {
 			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
 
@@ -145,8 +144,9 @@ void AudioSourceLayers::Layer::setSourceDelay(float delay)
 	}
 }
 
-void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& generalFade)
+void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter)
 {
+	const auto& generalFade = layersConfig.getFade();
 	const auto& layer = layersConfig.getLayer(idx);
 	const auto targetGain = layer.expression.evaluate(emitter);
 

@@ -58,6 +58,7 @@ namespace Halley {
 		gsl::span<Layer> getLayers();
 
 		AudioFade& getFade();
+		const AudioFade& getFade() const;
 
 		void validate(const AudioProperties& audioProperties) const;
 
