@@ -9,6 +9,8 @@
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
 
+#include "halley/support/debug.h"
+
 namespace Halley
 {
 	enum class AssetType;
@@ -36,7 +38,7 @@ namespace Halley
 		using ResourceEnumeratorFunc = std::function<Vector<String>()>;
 
 		explicit ResourceCollectionBase(Resources& parent, AssetType type);
-		virtual ~ResourceCollectionBase() {}
+		virtual ~ResourceCollectionBase() = default;
 
 		void setResource(int curDepth, std::string_view assetId, std::shared_ptr<Resource> resource);
 		void setResourceLoader(ResourceLoaderFunc loader);
@@ -94,6 +96,11 @@ namespace Halley
 		ResourceCollection(Resources& parent, AssetType type)
 			: ResourceCollectionBase(parent, type)
 		{}
+
+		~ResourceCollection()
+		{
+			HALLEY_DEBUG_TRACE_COMMENT(typeid(T).name());
+		}
 
 		std::shared_ptr<const T> get(std::string_view assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{

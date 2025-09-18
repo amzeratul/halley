@@ -14,8 +14,9 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& 
 
 Resources::~Resources()
 {
+	HALLEY_DEBUG_TRACE();
 	resources.clear();
-	Logger::logInfo("Resources destroyed");
+	HALLEY_DEBUG_TRACE();
 }
 
 void Resources::reloadAssets(const Vector<String>& ids, const Vector<String>& packIds)

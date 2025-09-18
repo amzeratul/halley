@@ -55,10 +55,8 @@ void AudioEngine::destroyRegion(AudioRegionId id)
 
 void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId)
 {
-	if (eventLogging) {
-		if (!eventLogPrefix || event.getAssetId().startsWith(*eventLogPrefix)) {
-			Logger::log(*eventLogging, "AudioEvent posted: " + event.getAssetId());
-		}
+	if (canLog(event.getAssetId())) {
+		Logger::log(*eventLogging, "AudioEvent posted: " + event.getAssetId());
 	}
 
 	const auto iter = emitters.find(emitterId);
@@ -628,7 +626,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 	// Prune if out of range
 	if (object.getPruneDistant()) {
 		if (emitter.getPosition().getAttenuation(listener, object.getAttenuationOverride()) < 0.000001f) {
-			if (eventLogging) {
+			if (canLog(object.getAssetId())) {
 				Logger::log(*eventLogging, "- Prunned due to distance to listener: " + object.getAssetId());
 			}
 			return {};
@@ -637,7 +635,7 @@ std::unique_ptr<AudioVoice> AudioEngine::makeObjectVoice(const AudioObject& obje
 
 	auto [playingData, playStatus] = tryToStartVoiceForObject(object, emitter);
 	if (playStatus != VoiceAllocationResult::Playing) {
-		if (eventLogging) {
+		if (canLog(object.getAssetId())) {
 			if (playStatus == VoiceAllocationResult::InstanceLimited) {
 				Logger::log(*eventLogging, "- Instance limited: " + object.getAssetId());
 			} else if (playStatus == VoiceAllocationResult::CooldownLimited) {
@@ -721,6 +719,11 @@ AudioDebugData AudioEngine::generateDebugData() const
 	result.listener = listener;
 
 	return result;
+}
+
+bool AudioEngine::canLog(const String& assetId) const
+{
+	return eventLogging && (!eventLogPrefix || assetId.startsWith(*eventLogPrefix));
 }
 
 AudioEngine::PlayingObjectData& AudioEngine::getMutablePlayingObjectData(AudioObjectId id)

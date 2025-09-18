@@ -8,6 +8,7 @@
 #include "halley/ui/ui_behaviour.h"
 #include "halley/ui/ui_event_handler.h"
 #include "halley/input/input_keyboard.h"
+#include "halley/support/debug.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -26,6 +27,7 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
+	HALLEY_DEBUG_TRACE_COMMENT(id);
 	canSendEvents = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);

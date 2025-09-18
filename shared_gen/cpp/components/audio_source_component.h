@@ -26,11 +26,12 @@ public:
 	bool canAutoVel{ false };
 	bool moved{ false };
 	Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents{};
+	Halley::Vector2f offset{};
 
 	AudioSourceComponent() {
 	}
 
-	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, Halley::Polygon polygon, bool canAutoVel, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents)
+	AudioSourceComponent(Halley::ResourceReference<Halley::AudioEvent> event, float rangeMin, float rangeMax, float rollOff, Halley::AudioAttenuationCurve curve, Halley::Polygon polygon, bool canAutoVel, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>> dynamicEvents, Halley::Vector2f offset)
 		: event(std::move(event))
 		, rangeMin(std::move(rangeMin))
 		, rangeMax(std::move(rangeMax))
@@ -39,6 +40,7 @@ public:
 		, polygon(std::move(polygon))
 		, canAutoVel(std::move(canAutoVel))
 		, dynamicEvents(std::move(dynamicEvents))
+		, offset(std::move(offset))
 	{
 	}
 
@@ -53,6 +55,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(polygon)>::serialize(polygon, Halley::Polygon{}, _context, _node, componentName, "polygon", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::serialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::serialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(offset)>::serialize(offset, Halley::Vector2f{}, _context, _node, componentName, "offset", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		return _node;
 	}
 
@@ -66,6 +69,7 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(polygon)>::deserialize(polygon, Halley::Polygon{}, _context, _node, componentName, "polygon", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(canAutoVel)>::deserialize(canAutoVel, bool{ false }, _context, _node, componentName, "canAutoVel", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(dynamicEvents)>::deserialize(dynamicEvents, Halley::HashMap<Halley::String, Halley::ResourceReference<Halley::AudioEvent>>{}, _context, _node, componentName, "dynamicEvents", makeMask(Type::Prefab, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(offset)>::deserialize(offset, Halley::Vector2f{}, _context, _node, componentName, "offset", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
@@ -78,6 +82,7 @@ public:
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("polygon");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("canAutoVel");
 		if ((_mask & makeMask(Type::Prefab, Type::Dynamic)) == 0) _node.removeKey("dynamicEvents");
+		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("offset");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
@@ -102,6 +107,9 @@ public:
 		}
 		if (_fieldName == "dynamicEvents") {
 			return Halley::ConfigNodeHelper<decltype(dynamicEvents)>::serialize(dynamicEvents, _context);
+		}
+		if (_fieldName == "offset") {
+			return Halley::ConfigNodeHelper<decltype(offset)>::serialize(offset, _context);
 		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
@@ -136,6 +144,10 @@ public:
 			Halley::ConfigNodeHelper<decltype(dynamicEvents)>::deserialize(dynamicEvents, _context, _node);
 			return;
 		}
+		if (_fieldName == "offset") {
+			Halley::ConfigNodeHelper<decltype(offset)>::deserialize(offset, _context, _node);
+			return;
+		}
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
@@ -146,6 +158,7 @@ public:
 		Halley::ByteSerializationHelper<decltype(rollOff)>::serialize(rollOff, _context, _serializer, componentIndex, "rollOff");
 		Halley::ByteSerializationHelper<decltype(curve)>::serialize(curve, _context, _serializer, componentIndex, "curve");
 		Halley::ByteSerializationHelper<decltype(polygon)>::serialize(polygon, _context, _serializer, componentIndex, "polygon");
+		Halley::ByteSerializationHelper<decltype(offset)>::serialize(offset, _context, _serializer, componentIndex, "offset");
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
@@ -155,6 +168,7 @@ public:
 		Halley::ByteSerializationHelper<decltype(rollOff)>::deserialize(rollOff, _context, _deserializer, componentIndex, "rollOff");
 		Halley::ByteSerializationHelper<decltype(curve)>::deserialize(curve, _context, _deserializer, componentIndex, "curve");
 		Halley::ByteSerializationHelper<decltype(polygon)>::deserialize(polygon, _context, _deserializer, componentIndex, "polygon");
+		Halley::ByteSerializationHelper<decltype(offset)>::deserialize(offset, _context, _deserializer, componentIndex, "offset");
 	}
 
 
