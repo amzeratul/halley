@@ -134,7 +134,31 @@ bool AudioSubObjectSequence::reload(AudioSubObject&& otherRaw)
 		modified = true;
 	}
 
-	// TODO: segments
+	auto oldSegments = std::move(segments);
+	segments = {};
+	for (auto& newSegment: other.segments) {
+		const auto iter = oldSegments.find_if([&] (const Segment& seg) {
+			return seg.getId() == newSegment.getId();
+		});
+
+		if (iter != oldSegments.end()) {
+			auto seg = std::move(*iter);
+			modified = seg.reload(std::move(newSegment)) || modified;
+			segments.push_back(std::move(seg));
+		} else {
+			modified = true;
+			segments.push_back(std::move(newSegment));
+		}
+	}
+	for (const auto& oldSegment: oldSegments) {
+		if (oldSegment.object.hasValue()) {
+			modified = true;
+		}
+	}
+	
+	if (modified) {
+		++version;
+	}
 
 	return modified;
 }
@@ -177,6 +201,11 @@ AudioSubObjectSequence::Segment& AudioSubObjectSequence::getSegment(size_t idx)
 NonOwningAliveFlag AudioSubObjectSequence::makeAliveFlag() const
 {
 	return NonOwningAliveFlag(aliveFlag);
+}
+
+uint32_t AudioSubObjectSequence::getVersion() const
+{
+	return version;
 }
 
 

@@ -53,10 +53,12 @@ namespace Halley
 		size_t curTrack = 0;
 
 		bool initialized = false;
+		uint32_t version = 0;
 
 		Vector<PlayingTrack> playingTracks;
 
 		void initialize();
+		void checkForReload();
 		void nextTrack();
 		void loadCurrentTrack();
 	};

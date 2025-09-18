@@ -30,6 +30,8 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		return false;
 	}
 
+	checkForReload();
+
 	for (auto& track: playingTracks) {
 		if (!track.initialized) {
 			track.initialize();
@@ -123,6 +125,10 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 
 bool AudioSourceSequence::isReady() const
 {
+	if (!sequenceAliveFlag) {
+		return false;
+	}
+
 	for (auto& p: playingTracks) {
 		if (!p.source->isReady()) {
 			return false;
@@ -179,6 +185,7 @@ void AudioSourceSequence::PlayingTrack::initialize()
 void AudioSourceSequence::initialize()
 {
 	initialized = true;
+	version = sequenceConfig.getVersion();
 
 	playList.clear();
 	for (size_t i = 0; i < sequenceConfig.getNumSubObjects(); ++i) {
@@ -201,6 +208,13 @@ void AudioSourceSequence::initialize()
 	}
 
 	loadCurrentTrack();
+}
+
+void AudioSourceSequence::checkForReload()
+{
+	if (version != sequenceConfig.getVersion()) {
+		initialize();
+	}
 }
 
 void AudioSourceSequence::nextTrack()

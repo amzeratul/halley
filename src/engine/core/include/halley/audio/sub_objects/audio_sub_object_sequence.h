@@ -75,6 +75,7 @@ namespace Halley {
 		Segment& getSegment(size_t idx);
 
     	NonOwningAliveFlag makeAliveFlag() const;
+		uint32_t getVersion() const;
 
 	private:
 		String name;
@@ -84,5 +85,6 @@ namespace Halley {
         AudioSequenceType sequenceType;
 
 		AliveFlag aliveFlag;
+		uint32_t version = 0;
     };
 }

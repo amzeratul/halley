@@ -110,6 +110,9 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 
 bool AudioSourceLayers::isReady() const
 {
+	if (!layersAliveFlag) {
+		return false;
+	}
 	return std::all_of(layers.begin(), layers.end(), [=] (const auto& ls) { return ls.source->isReady(); });
 }
 
