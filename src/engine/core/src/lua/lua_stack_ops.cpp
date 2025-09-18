@@ -48,6 +48,37 @@ void LuaStackOps::push(Vector2i v)
 	lua_setfield(state.getRawState(), -2, "y");
 }
 
+void LuaStackOps::push(Vector2f v)
+{
+	lua_createtable(state.getRawState(), 0, 2);
+	push(v.x);
+	lua_setfield(state.getRawState(), -2, "x");
+	push(v.y);
+	lua_setfield(state.getRawState(), -2, "y");
+}
+
+void LuaStackOps::push(Vector3i v)
+{
+	lua_createtable(state.getRawState(), 0, 2);
+	push(v.x);
+	lua_setfield(state.getRawState(), -2, "x");
+	push(v.y);
+	lua_setfield(state.getRawState(), -2, "y");
+	push(v.z);
+	lua_setfield(state.getRawState(), -2, "z");
+}
+
+void LuaStackOps::push(Vector3f v)
+{
+	lua_createtable(state.getRawState(), 0, 2);
+	push(v.x);
+	lua_setfield(state.getRawState(), -2, "x");
+	push(v.y);
+	lua_setfield(state.getRawState(), -2, "y");
+	push(v.z);
+	lua_setfield(state.getRawState(), -2, "z");
+}
+
 void LuaStackOps::push(LuaCallback callback)
 {
 	state.pushCallback(std::move(callback));
@@ -67,6 +98,10 @@ void LuaStackOps::push(const ConfigNode& node)
 		push(node.asString());
 	} else if (node.getType() == ConfigNodeType::Sequence) {
 		push(node.asSequence());
+	} else if (node.getType() == ConfigNodeType::Int2) {
+		push(node.asVector2i());
+	} else if (node.getType() == ConfigNodeType::Float2) {
+		push(node.asVector2f());
 	} else if (node.getType() == ConfigNodeType::Map) {
 		push<ConfigNode>(node.asMap());
 	} else {
@@ -201,6 +236,20 @@ Vector2i LuaStackOps::popVector2i()
 	result.x = popInt();
 	lua_getfield(state.getRawState(), -1, "y");
 	result.y = popInt();
+	pop();
+	return result;
+}
+
+Vector2f LuaStackOps::popVector2f()
+{
+	if (!lua_istable(state.getRawState(), -1)) {
+		throw Exception("Invalid value at Lua stack", HalleyExceptions::Lua);
+	}
+	Vector2f result;
+	lua_getfield(state.getRawState(), -1, "x");
+	result.x = static_cast<float>(popDouble());
+	lua_getfield(state.getRawState(), -1, "y");
+	result.y = static_cast<float>(popDouble());
 	pop();
 	return result;
 }

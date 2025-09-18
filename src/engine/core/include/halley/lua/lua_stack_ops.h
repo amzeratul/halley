@@ -25,6 +25,9 @@ namespace Halley {
 		void push(const char* v);
 		void push(const String& v);
 		void push(Vector2i v);
+		void push(Vector2f v);
+		void push(Vector3i v);
+		void push(Vector3f v);
 		void push(LuaCallback callback);
 		void push(const ConfigNode& node);
 		void pushTable(int nArrayIndices = 0, int nRecords = 0);
@@ -74,6 +77,7 @@ namespace Halley {
 		double popDouble();
 		String popString();
 		Vector2i popVector2i();
+		Vector2f popVector2f();
 		ConfigNode popConfigNode();
 		ConfigNode popTable();
 		
@@ -159,6 +163,11 @@ namespace Halley {
 	template <>
 	struct FromLua<Vector2i> {
 		inline Vector2i operator()(LuaState& state) const { return LuaStackOps(state).popVector2i(); };
+	};
+
+	template <>
+	struct FromLua<Vector2f> {
+		inline Vector2f operator()(LuaState& state) const { return LuaStackOps(state).popVector2f(); };
 	};
 
 	template <>
