@@ -9,6 +9,7 @@ AudioSourceSequence::AudioSourceSequence(AudioEngine& engine, AudioEmitter& emit
 	: engine(engine)
 	, emitter(emitter)
 	, sequenceConfig(sequenceConfig)
+	, sequenceAliveFlag(sequenceConfig.makeAliveFlag())
 {
 	initialize();
 }
@@ -22,6 +23,10 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 {
 	if (playingTracks.empty()) {
 		AudioMixer::zero(dst);
+		return false;
+	}
+
+	if (!sequenceAliveFlag) {
 		return false;
 	}
 

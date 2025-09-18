@@ -8,7 +8,22 @@ AliveFlag::AliveFlag()
 
 AliveFlag::~AliveFlag()
 {
-	*flag = false;
+	if (flag) {
+		*flag = false;
+	}
+}
+
+AliveFlag::AliveFlag(const AliveFlag& other)
+	: flag(std::make_shared<bool>(true))
+{
+}
+
+AliveFlag& AliveFlag::operator=(const AliveFlag& other)
+{
+	if (this != &other) {
+		flag = std::make_shared<bool>(true);
+	}
+	return *this;
 }
 
 AliveFlag::operator bool() const

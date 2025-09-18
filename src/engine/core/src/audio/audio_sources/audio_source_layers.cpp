@@ -4,7 +4,6 @@
 #include "../audio_engine.h"
 #include "../audio_filter_resample.h"
 #include "halley/audio/audio_object.h"
-#include "audio_source_clip.h"
 #include "audio_source_delay.h"
 #include "../audio_mixer.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
@@ -15,6 +14,7 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 	: engine(engine)
 	, emitter(emitter)
 	, layerConfig(layerConfig)
+	, layersAliveFlag(layerConfig.makeAliveFlag())
 {
 	layerConfig.validate(engine.getAudioProperties());
 
@@ -27,7 +27,11 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 
 String AudioSourceLayers::getName() const
 {
-	return layerConfig.getName();
+	if (layersAliveFlag) {
+		return layerConfig.getName();
+	} else {
+		return {};
+	}
 }
 
 uint8_t AudioSourceLayers::getNumberOfChannels() const
@@ -48,6 +52,10 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 			Logger::logError("AudioSourceLayers (" + getName() + ") error, layer " + toString(layer.idx) + " (" + layer.source->getName() + ") is not ready");
 			return false;
 		}
+	}
+
+	if (!layersAliveFlag) {
+		return false;
 	}
 
 	if (!initialized) {
@@ -96,6 +104,9 @@ size_t AudioSourceLayers::getSamplesLeft() const
 
 void AudioSourceLayers::restart()
 {
+	if (!layersAliveFlag) {
+		return;
+	}
 	for (auto& layer: layers) {
 		layer.restart(layerConfig, emitter);
 		layer.source->restart();

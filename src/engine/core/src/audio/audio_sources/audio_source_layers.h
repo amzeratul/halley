@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/audio/audio_fade.h"
 #include "halley/audio/audio_source.h"
+#include "halley/concurrency/alive_flag.h"
 
 namespace Halley
 {
@@ -45,5 +46,6 @@ namespace Halley
 		const AudioSubObjectLayers& layerConfig;
 		Vector<Layer> layers;
 		bool initialized = false;
+		NonOwningAliveFlag layersAliveFlag;
 	};
 }

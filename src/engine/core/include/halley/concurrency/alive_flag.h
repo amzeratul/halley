@@ -11,9 +11,9 @@ namespace Halley {
 		AliveFlag();
 		~AliveFlag();
 
-		AliveFlag(const AliveFlag& other) = delete;
+		AliveFlag(const AliveFlag& other);
 		AliveFlag(AliveFlag&& other) = default;
-		AliveFlag& operator=(const AliveFlag& other) = delete;
+		AliveFlag& operator=(const AliveFlag& other);
 		AliveFlag& operator=(AliveFlag&& other) = default;
 
 		template <typename F>

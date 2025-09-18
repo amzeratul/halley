@@ -174,6 +174,11 @@ AudioSubObjectSequence::Segment& AudioSubObjectSequence::getSegment(size_t idx)
 	return segments.at(idx);
 }
 
+NonOwningAliveFlag AudioSubObjectSequence::makeAliveFlag() const
+{
+	return NonOwningAliveFlag(aliveFlag);
+}
+
 
 AudioSubObjectSequence::Segment::Segment(AudioSubObjectHandle subObject)
 	: object(std::move(subObject))

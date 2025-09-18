@@ -111,7 +111,7 @@ void AudioSubObjectLayers::deserialize(Deserializer& s)
 
 bool AudioSubObjectLayers::reload(AudioSubObject&& otherRaw)
 {
-	auto&& other = dynamic_cast<AudioSubObjectLayers&&>(std::move(otherRaw));
+	auto other = std::move(dynamic_cast<AudioSubObjectLayers&&>(std::move(otherRaw)));
 
 	bool modified = false;
 	if (name != other.name) {
@@ -205,6 +205,11 @@ void AudioSubObjectLayers::validate(const AudioProperties& audioProperties) cons
 	for (auto& layer: layers) {
 		layer.expression.validate(audioProperties, getName());
 	}
+}
+
+NonOwningAliveFlag AudioSubObjectLayers::makeAliveFlag() const
+{
+	return NonOwningAliveFlag(aliveFlag);
 }
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)

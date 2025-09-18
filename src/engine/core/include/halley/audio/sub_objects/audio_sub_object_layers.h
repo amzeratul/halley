@@ -62,10 +62,13 @@ namespace Halley {
 
 		void validate(const AudioProperties& audioProperties) const;
 
+		NonOwningAliveFlag makeAliveFlag() const;
+
 	private:
 		String name;
 		String objectName;
 		Vector<Layer> layers;
 		AudioFade fadeConfig;
+		AliveFlag aliveFlag;
 	};
 }

@@ -47,6 +47,7 @@ namespace Halley
 		AudioEngine& engine;
 		AudioEmitter& emitter;
 		const AudioSubObjectSequence& sequenceConfig;
+		NonOwningAliveFlag sequenceAliveFlag;
 
 		Vector<size_t> playList;
 		size_t curTrack = 0;

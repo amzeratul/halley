@@ -74,11 +74,15 @@ namespace Halley {
 		gsl::span<Segment> getSegments();
 		Segment& getSegment(size_t idx);
 
-    private:
+    	NonOwningAliveFlag makeAliveFlag() const;
+
+	private:
 		String name;
         Vector<Segment> segments;
 
         AudioFade crossFade;
         AudioSequenceType sequenceType;
+
+		AliveFlag aliveFlag;
     };
 }
