@@ -47,6 +47,8 @@ namespace Halley {
 		AudioSubObjectHandle removeObject(const IAudioObject* object) override;
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
+		Vector<std::unique_ptr<AudioSource>> makeLayerSources(AudioEngine& engine, AudioEmitter& emitter) const;
+
 		void loadDependencies(Resources& resources) override;
 
 		void serialize(Serializer& s) const override;
@@ -63,12 +65,15 @@ namespace Halley {
 		void validate(const AudioProperties& audioProperties) const;
 
 		NonOwningAliveFlag makeAliveFlag() const;
+		uint32_t getVersion() const;
 
 	private:
 		String name;
 		String objectName;
 		Vector<Layer> layers;
 		AudioFade fadeConfig;
+
 		AliveFlag aliveFlag;
+		uint32_t version = 0;
 	};
 }

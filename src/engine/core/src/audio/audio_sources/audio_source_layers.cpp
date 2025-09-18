@@ -10,18 +10,36 @@
 
 using namespace Halley;
 
-AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig)
+AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, const AudioSubObjectLayers& layerConfig)
 	: engine(engine)
 	, emitter(emitter)
 	, layerConfig(layerConfig)
 	, layersAliveFlag(layerConfig.makeAliveFlag())
 {
+	setupLayers();
+}
+
+void AudioSourceLayers::setupLayers()
+{
 	layerConfig.validate(engine.getAudioProperties());
 
+	auto layerSources = layerConfig.makeLayerSources(engine, emitter);
+
+	layers.clear();
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		layers.emplace_back(std::move(layerSources[i]), i);
 		layers.back().init(layerConfig);
+	}
+
+	initialized = false;
+	version = layerConfig.getVersion();
+}
+
+void AudioSourceLayers::checkForReload()
+{
+	if (layerConfig.getVersion() != version) {
+		setupLayers();
 	}
 }
 
@@ -47,15 +65,17 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples dst)
 {
+	if (!layersAliveFlag) {
+		return false;
+	}
+
+	checkForReload();
+
 	for (const auto& layer: layers) {
 		if (!layer.source->isReady()) {
 			Logger::logError("AudioSourceLayers (" + getName() + ") error, layer " + toString(layer.idx) + " (" + layer.source->getName() + ") is not ready");
 			return false;
 		}
-	}
-
-	if (!layersAliveFlag) {
-		return false;
 	}
 
 	if (!initialized) {

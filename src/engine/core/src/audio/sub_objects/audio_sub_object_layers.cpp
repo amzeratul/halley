@@ -77,13 +77,17 @@ AudioSubObjectHandle& AudioSubObjectLayers::getSubObject(size_t n)
 
 std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
+	return std::make_unique<AudioSourceLayers>(engine, emitter, *this);
+}
+
+Vector<std::unique_ptr<AudioSource>> AudioSubObjectLayers::makeLayerSources(AudioEngine& engine, AudioEmitter& emitter) const
+{
 	Vector<std::unique_ptr<AudioSource>> sources;
 	sources.reserve(layers.size());
 	for (auto& l: layers) {
 		sources.push_back(l.object->makeSource(engine, emitter));
 	}
-
-	return std::make_unique<AudioSourceLayers>(engine, emitter, std::move(sources), *this);
+	return sources;
 }
 
 void AudioSubObjectLayers::loadDependencies(Resources& resources)
@@ -151,6 +155,10 @@ bool AudioSubObjectLayers::reload(AudioSubObject&& otherRaw)
 		}
 	}
 
+	if (modified) {
+		++version;
+	}
+
 	return modified;
 }
 
@@ -210,6 +218,11 @@ void AudioSubObjectLayers::validate(const AudioProperties& audioProperties) cons
 NonOwningAliveFlag AudioSubObjectLayers::makeAliveFlag() const
 {
 	return NonOwningAliveFlag(aliveFlag);
+}
+
+uint32_t AudioSubObjectLayers::getVersion() const
+{
+	return version;
 }
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
