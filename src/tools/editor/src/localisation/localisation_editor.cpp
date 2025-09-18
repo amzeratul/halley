@@ -1000,7 +1000,12 @@ void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, co
 void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, const Bytes& data)
 {
 	CSVFile csv;
-	csv.load(data.const_byte_span());
+	try {
+		csv.load(data.const_byte_span());
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+		return;
+	}
 
 	const auto langId = language.getISOCode();
 	auto& translation = localStrings->localised[langId];
