@@ -30,6 +30,9 @@
 
 #if defined(_MSC_VER) && !defined(WITH_GDK)
 #define HAS_STACKWALKER
+#endif
+
+#if defined(HAS_STACKWALKER)
 #include "StackWalker/StackWalker.h"
 
 #ifdef _MSC_VER
@@ -255,7 +258,7 @@ namespace {
 		Debug::abort();
 	}
 
-#ifdef WIN32
+#if defined(HAS_STACKWALKER)
 	LONG WINAPI win32ExceptionHandler(EXCEPTION_POINTERS* exceptionInfo)
 	{
 		const char* name = nullptr;
@@ -348,7 +351,7 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(std:
 	std::set_terminate(&terminateHandler);
 #endif
 
-#if defined(WIN32)
+#if defined(HAS_STACKWALKER)
 	SetUnhandledExceptionFilter(&win32ExceptionHandler);
 	//AddVectoredExceptionHandler(1, win32ExceptionHandler);
 #endif
@@ -369,7 +372,7 @@ void Debug::abort()
 	std::set_terminate(nullptr);
 #endif
 
-#if defined(WIN32)
+#if defined(HAS_STACKWALKER)
 	SetUnhandledExceptionFilter(nullptr);
 #endif
 
@@ -404,7 +407,8 @@ String Debug::getCallStack(int skip)
 	OStreamStackWalker walker(ss, skip);
 	walker.ShowCallstack();
 	return ss.str();
-
+#else
+	return {};
 #endif
 }
 
