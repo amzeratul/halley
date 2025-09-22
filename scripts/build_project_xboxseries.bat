@@ -9,6 +9,7 @@ if not exist %2 (
 cd %2
 
 cmake -A Gaming.Xbox.Scarlett.x64 ^
+    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY ^
     -DHALLEY_PATH=../halley ^
     -DBUILD_HALLEY_TOOLS=0 ^
     -DBUILD_HALLEY_TESTS=0 ^
