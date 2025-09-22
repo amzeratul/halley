@@ -20,10 +20,15 @@ cmake -A Gaming.Xbox.XboxOne.x64 ^
 
 :: - copy meta file(s)
 :: - create symbolic link to assets folder
-set deploy="%1\%2\Gaming.Xbox.XboxOne.x64\Layout\Image\Loose"
 
 if not exist "%1\assets-xboxone" (
     mkdir "%1\assets-xboxone"
+)
+
+set deploy="%1\%2\Gaming.Xbox.XboxOne.x64\Layout\Image\Loose"
+
+if not exist "%deploy%" (
+    mkdir "%deploy%"
 )
 
 if not exist "%deploy%\assets" (
