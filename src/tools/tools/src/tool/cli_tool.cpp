@@ -76,7 +76,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	});
 	
 	const auto result = run(args);
-	std::cout << "halley-cmd done." << std::endl;
+	std::cout << "halley-cmd done with exit code " << result << "." << std::endl;
 	return result;
 }
 
