@@ -73,7 +73,7 @@ namespace Halley {
 		size_t getNumConnections() const;
 		bool isConnected(size_t idx) const;
 		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
-		float getLatency(size_t idx) const;
+		int32_t getLatency(size_t idx) const;
 		[[nodiscard]] size_t getMaxPacketSize() const;
 
 		template <typename T>
@@ -117,6 +117,9 @@ namespace Halley {
 		Future<bool> setServerSideData(String uniqueKey, ConfigNode data);
 		Future<ConfigNode> retrieveServerSideData(String uniqueKey);
 
+		int32_t getLocalSessionTimeMs() const;
+		int32_t getPeerSessionTimeMs(size_t idx) const;
+
 	protected:
 		SharedData& doGetMySharedData();
 		SharedData* doTryGetMySharedData();
@@ -129,11 +132,20 @@ namespace Halley {
 		std::unique_ptr<SharedData> makePeerSharedData();
 
 	private:
+		using Clock = std::chrono::steady_clock;
+
 		struct Peer {
 			PeerId peerId = -1;
 			bool alive = true;
 			std::shared_ptr<MessageQueueUDP> connection;
 			std::shared_ptr<AckUnreliableConnectionStats> stats;
+
+			ControlMsgPing lastPing {};
+			ControlMsgPingReply lastPingReply {};
+			float delayNextPingMsg = 0.0f;
+
+			ControlMsgPingReply lastPingResponse {};
+			int32_t latency = 0;
 
 			ConnectionStatus getStatus() const;
 		};
@@ -162,6 +174,9 @@ namespace Halley {
 		HashMap<uint32_t, Promise<bool>> setServerSideDataPending;
 		HashMap<uint32_t, Promise<ConfigNode>> getServerSideDataPending;
 
+		Clock::time_point curTime;
+		Clock::time_point startTime;
+
 		OutboundNetworkPacket makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
@@ -179,6 +194,8 @@ namespace Halley {
 		void onControlMessage(PeerId peerId, const ControlMsgSetServerSideDataReply& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgGetServerSideData& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgGetServerSideDataReply& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgPing& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgPingReply& msg);
 
 		void setMyPeerId(PeerId id);
 		Peer& getPeer(PeerId id);
@@ -198,5 +215,7 @@ namespace Halley {
 
 		bool doSetServerSideData(String uniqueKey, ConfigNode data);
 		ConfigNode doGetServerSideData(String uniqueKey);
+
+		void sendPing(Time t, Peer& peer);
 	};
 }

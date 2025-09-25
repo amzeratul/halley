@@ -818,7 +818,10 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 
 		connLabel
 			.setPosition(totalArea.getTopLeft())
-			.setText("Connection #" + toString(i + 1) + ": latency = " + toString(lroundl(networkSession->getLatency(i) * 1000)) + " ms.")
+			.setText("#" + toString(i + 1) +
+				": latency = " + toString(networkSession->getLatency(i)) + " ms"
+				", local = " + toString(networkSession->getLocalSessionTimeMs()) + " ms"
+				", remote = " + toString(networkSession->getPeerSessionTimeMs(i)) + " ms")
 			.draw(painter);
 
 		boxBg

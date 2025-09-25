@@ -11,7 +11,9 @@ namespace Halley {
 		SetServerSideData,
 		SetServerSideDataReply,
 		GetServerSideData,
-		GetServerSideDataReply
+		GetServerSideDataReply,
+		Ping,
+		PingReply
 	};
 
 	struct ControlMsgHeader
@@ -77,6 +79,21 @@ namespace Halley {
 	struct ControlMsgGetServerSideDataReply {
 		ConfigNode data;
 		uint32_t requestId;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgPing {
+		int32_t timestamp;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
+	struct ControlMsgPingReply {
+		int32_t timestamp;
+		int32_t remoteTimestamp;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

@@ -94,3 +94,25 @@ void ControlMsgGetServerSideDataReply::deserialize(Deserializer& s)
 	s >> data;
 	s >> requestId;
 }
+
+void ControlMsgPing::serialize(Serializer& s) const
+{
+	s << timestamp;
+}
+
+void ControlMsgPing::deserialize(Deserializer& s)
+{
+	s >> timestamp;
+}
+
+void ControlMsgPingReply::serialize(Serializer& s) const
+{
+	s << timestamp;
+	s << remoteTimestamp;
+}
+
+void ControlMsgPingReply::deserialize(Deserializer& s)
+{
+	s >> timestamp;
+	s >> remoteTimestamp;
+}
