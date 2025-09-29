@@ -1,14 +1,14 @@
 #include "halley/net/session/network_session.h"
 
-#include <cassert>
-
 #include "halley/net/connection/ack_unreliable_connection_stats.h"
+#include "halley/net/connection/instability_simulator.h"
 #include "halley/net/connection/message_queue_udp.h"
 #include "halley/net/session/network_session_control_messages.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/net/connection/network_packet.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+
 using namespace Halley;
 
 NetworkSession::NetworkSession(NetworkService& service, uint32_t networkVersion, String userName, ISharedDataHandler* sharedDataHandler)
@@ -120,6 +120,11 @@ Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
 		result.push_back(peer.peerId);
 	}
 	return result;
+}
+
+NetworkSession::PeerId NetworkSession::getRemotePeerAtIndex(size_t idx) const
+{
+	return peers.at(idx).peerId;
 }
 
 void NetworkSession::update(Time t)
@@ -746,6 +751,11 @@ NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
 }
 
+const NetworkSession::Peer& NetworkSession::getPeer(PeerId id) const
+{
+	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
+}
+
 void NetworkSession::checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId)
 {
 	SharedData& data = !ownerId ? *sessionSharedData : *sharedData.at(ownerId.value());
@@ -836,6 +846,11 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	const size_t statsCapacity = 256; // TODO
 	const size_t lineSize = 64; // TODO
 
+#ifdef DEV_BUILD
+	simulator = std::make_shared<InstabilitySimulator>(connection);
+	connection = simulator;
+#endif
+
 	auto stats = std::make_shared<AckUnreliableConnectionStats>(statsCapacity, lineSize);
 	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection), service);
 	ackConn->setStatsListener(stats.get());
@@ -913,9 +928,9 @@ int32_t NetworkSession::getLocalSessionTimeMs() const
 	return static_cast<int32_t>(milliseconds.count());
 }
 
-int32_t NetworkSession::getPeerSessionTimeMs(size_t idx) const
+int32_t NetworkSession::getPeerSessionTimeMs(PeerId clientId) const
 {
-	auto& peer = peers.at(idx);
+	auto& peer = getPeer(clientId);
 
 	// Estimate *current* local time on the remote peer.
 	int32_t localSessionTime = getLocalSessionTimeMs();
@@ -946,4 +961,15 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 
 	const auto bytes = Serializer::toBytes(peer.lastPing);
 	doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::Ping, OutboundNetworkPacket(bytes)));
+}
+
+void NetworkSession::simulateLatency(float average, float variance)
+{
+	simulator->setLag(average, variance);
+}
+
+void NetworkSession::simulateQuality(float packetLoss, float packetDuplicate)
+{
+	simulator->setPacketLoss(packetLoss);
+	simulator->setDuplication(packetDuplicate);
 }

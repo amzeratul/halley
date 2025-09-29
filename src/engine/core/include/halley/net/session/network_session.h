@@ -12,6 +12,7 @@ namespace Halley {
 	class AckUnreliableConnectionStats;
 	class MessageQueueUDP;
 	class NetworkService;
+	class InstabilitySimulator;
 
 	class NetworkSession {
 	public:
@@ -54,6 +55,7 @@ namespace Halley {
 		std::optional<PeerId> getMyPeerId() const;
 		uint16_t getClientCount() const;
 		Vector<PeerId> getRemotePeers() const;
+		PeerId getRemotePeerAtIndex(size_t idx) const;
 
 		ConnectionStatus getStatus() const;
 		NetworkSessionType getType() const;
@@ -118,7 +120,10 @@ namespace Halley {
 		Future<ConfigNode> retrieveServerSideData(String uniqueKey);
 
 		int32_t getLocalSessionTimeMs() const;
-		int32_t getPeerSessionTimeMs(size_t idx) const;
+		int32_t getPeerSessionTimeMs(PeerId clientId) const;
+
+		void simulateLatency(float average, float variance);
+		void simulateQuality(float packetLoss, float packetDuplicate);
 
 	protected:
 		SharedData& doGetMySharedData();
@@ -177,6 +182,8 @@ namespace Halley {
 		Clock::time_point curTime;
 		Clock::time_point startTime;
 
+		std::shared_ptr<InstabilitySimulator> simulator;
+
 		OutboundNetworkPacket makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
 		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
@@ -199,6 +206,7 @@ namespace Halley {
 
 		void setMyPeerId(PeerId id);
 		Peer& getPeer(PeerId id);
+		const Peer& getPeer(PeerId id) const;
 
 		void checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(std::optional<PeerId> ownerId);

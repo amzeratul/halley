@@ -374,12 +374,23 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (networkStats) {
-		strBuilder.append("\nNetwork | up: ");
-		strBuilder.append(toString(networkStats->getSentDataPerSecond() / 1000.0, 3) + " kBps");
+		int32_t avgLatency = 0;
+		size_t numConnections = networkSession->getNumConnections();
+		if (numConnections > 0) {
+			for (size_t idx = 0; idx < numConnections; idx++) {
+				avgLatency += networkSession->getLatency(idx);
+			}
+			avgLatency /= static_cast<int32_t>(numConnections);
+		}
+
+		strBuilder.append("\nNet | ");
+		strBuilder.append(toString(avgLatency));
+		strBuilder.append(" ms | up: ");
+		strBuilder.append(toString(networkStats->getSentDataPerSecond() / 1000.0, 2) + " kBps");
 		strBuilder.append(" (");
 		strBuilder.append(toString(networkStats->getSentPacketsPerSecond()));
 		strBuilder.append(") | down: ");
-		strBuilder.append(toString(networkStats->getReceivedDataPerSecond() / 1000.0, 3) + " kBps");
+		strBuilder.append(toString(networkStats->getReceivedDataPerSecond() / 1000.0, 2) + " kBps");
 		strBuilder.append(" (");
 		strBuilder.append(toString(networkStats->getReceivedPacketsPerSecond()));
 		strBuilder.append(")");
@@ -821,7 +832,7 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 			.setText("#" + toString(i + 1) +
 				": latency = " + toString(networkSession->getLatency(i)) + " ms"
 				", local = " + toString(networkSession->getLocalSessionTimeMs()) + " ms"
-				", remote = " + toString(networkSession->getPeerSessionTimeMs(i)) + " ms")
+				", remote = " + toString(networkSession->getPeerSessionTimeMs(networkSession->getRemotePeerAtIndex(i))) + " ms")
 			.draw(painter);
 
 		boxBg

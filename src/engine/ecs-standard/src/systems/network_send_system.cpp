@@ -135,6 +135,32 @@ private:
 			getSessionService().getMultiplayerSession().getEntityNetworkSession()->logUpdates();
 			return "Ok.";
 		}, UIDebugConsoleSyntax());
+
+		consoleCommands.addCommand("networkLag", [this](Vector<String> args) -> String
+		{
+			if (args.size() != 2 || !args[0].isNumber() || !args[1].isNumber()) {
+				return "Syntax: networkLag <average> <variance>";
+			}
+
+			float average = std::clamp(args[0].toFloat(), 0.0f, 1.0f);
+			float variance = std::clamp(args[1].toFloat(), 0.0f, 1.0f);
+			getSessionService().getMultiplayerSession().getNetworkSession()->simulateLatency(average, variance);
+
+			return "Ok.";
+		}, UIDebugConsoleSyntax());
+
+		consoleCommands.addCommand("networkQuality", [this](Vector<String> args) -> String
+		{
+			if (args.size() != 2 || !args[0].isNumber() || !args[1].isNumber()) {
+				return "Syntax: networkQuality <loss> <duplicate>";
+			}
+
+			float loss = std::clamp(args[0].toFloat(), 0.0f, 0.95f);
+			float dupe = std::clamp(args[1].toFloat(), 0.0f, 0.95f);
+			getSessionService().getMultiplayerSession().getNetworkSession()->simulateQuality(loss, dupe);
+
+			return "Ok.";
+		}, UIDebugConsoleSyntax());
 	}
 
 	void clearCheats()

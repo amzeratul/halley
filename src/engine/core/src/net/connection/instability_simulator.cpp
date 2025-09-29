@@ -7,7 +7,7 @@ using namespace Halley;
 InstabilitySimulator::DelayedPacket::DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet)
 	: when(when)
 	, type(type)
-	, packet(packet)
+	, packet(std::move(packet))
 {}
 
 bool InstabilitySimulator::DelayedPacket::operator<(const DelayedPacket& other) const
@@ -20,15 +20,31 @@ bool InstabilitySimulator::DelayedPacket::isReady() const
 	return std::chrono::system_clock::now() >= when;
 }
 
-InstabilitySimulator::InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss, float duplication)
-	: parent(parent)
-	, avgLag(avgLag)
-	, lagVariance(lagVariance)
-	, packetLoss(packetLoss)
-	, duplication(duplication)
+InstabilitySimulator::InstabilitySimulator(std::shared_ptr<IConnection> parent)
+	: parent(std::move(parent))
+	, avgLag(0.0f)
+	, lagVariance(0.0f)
+	, packetLoss(0.0f)
+	, duplication(0.0f)
 {
-	Expects(packetLoss < 0.95f);
-	Expects(duplication < 0.95f);
+}
+
+void InstabilitySimulator::setLag(float average, float variance)
+{
+	avgLag = average;
+	lagVariance = variance;
+}
+
+void InstabilitySimulator::setPacketLoss(float chance)
+{
+	Expects(chance < 0.95f);
+	packetLoss = chance;
+}
+
+void InstabilitySimulator::setDuplication(float chance)
+{
+	Expects(chance < 0.95f);
+	duplication = chance;
 }
 
 void InstabilitySimulator::close()
@@ -59,7 +75,7 @@ void InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket pac
 		float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
 		auto now = std::chrono::system_clock::now();
 		auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
-		packets.push(DelayedPacket(scheduledTime, type, packet));
+		packets.emplace(scheduledTime, type, packet);
 	} while (rng.getFloat(0.0f, 1.0f) < duplication);
 
 	sendPendingPackets();
@@ -73,11 +89,54 @@ bool InstabilitySimulator::receive(InboundNetworkPacket& packet)
 	return parent->receive(packet);
 }
 
+size_t InstabilitySimulator::getMaxUnreliablePacketSize() const
+{
+	return parent->getMaxUnreliablePacketSize();
+}
+
+void InstabilitySimulator::onConnect(short connId)
+{
+	return parent->onConnect(connId);
+}
+
+void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packet)
+{
+	Expects(getMaxUnreliablePacketSize() > 0);
+
+	auto& rng = Random::getGlobal();
+
+	if (rng.getFloat(0.0f, 1.0f) < packetLoss) {
+		// Drop packet
+		return;
+	}
+
+	do {
+		float delay = rng.getFloat(avgLag - lagVariance, avgLag + lagVariance);
+		auto now = std::chrono::system_clock::now();
+		auto scheduledTime = now + std::chrono::duration_cast<decltype(now)::duration>(std::chrono::duration<double>(delay));
+		packets.emplace(scheduledTime, TransmissionType::Unreliable, OutboundNetworkPacket(packet));
+	} while (rng.getFloat(0.0f, 1.0f) < duplication);
+
+	sendPendingPackets();
+}
+
+void InstabilitySimulator::setUnreliablePacketListener(IPacketListener* listener)
+{
+	parent->setUnreliablePacketListener(listener);
+}
+
 void InstabilitySimulator::sendPendingPackets()
 {
 	while (!packets.empty() && packets.top().isReady()) {
-		OutboundNetworkPacket packet = packets.top().packet;
-		parent->send(packets.top().type, std::move(packet));
+		const auto& head = packets.top();
+		OutboundNetworkPacket packet = head.packet;
+
+		if (head.type != TransmissionType::Unreliable || parent->getMaxUnreliablePacketSize() == 0) {
+			parent->send(head.type, std::move(packet));
+		} else {
+			parent->sendUnreliablePacket(packet.getBytes());
+		}
+
 		packets.pop();
 	}
 }
