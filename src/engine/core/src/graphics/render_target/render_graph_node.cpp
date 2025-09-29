@@ -95,17 +95,22 @@ void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, std::optional<Vect
 
 void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i targetSize)
 {
-	for (const auto& other: input.others) {
+	for (const auto& inputNode: input.others) {
+		// Skip if other node is not enabled
+		if (!inputNode.node->enabled) {
+			continue;
+		}
+
 		// Connected to another node
 		++depsLeft;
 
-		if (input.type != RenderGraphElementType::Dependency && other.node->activeInCurrentPass) {
-			if (other.node->currentSize != targetSize) {
+		if (input.type != RenderGraphElementType::Dependency && inputNode.node->activeInCurrentPass) {
+			if (inputNode.node->currentSize != targetSize) {
 				throw Exception("Mismatched target sizes: current node (\"" + id + "\") has size " + toString(targetSize) 
-					+ ", input (\"" + other.node->id + "\") has size " + other.node->currentSize, HalleyExceptions::Graphics);
+					+ ", input (\"" + inputNode.node->id + "\") has size " + inputNode.node->currentSize, HalleyExceptions::Graphics);
 			}
 		} else {
-			other.node->prepareDependencyGraph(video, targetSize);
+			inputNode.node->prepareDependencyGraph(video, targetSize);
 		}
 	}
 }

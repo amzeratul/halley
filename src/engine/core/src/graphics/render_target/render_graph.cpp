@@ -109,8 +109,9 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 
 	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
 	for (auto& node: nodes) {
-		if (node->method == RenderGraphMethod::Output
-			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {
+		if (node->enabled
+			&& (node->method == RenderGraphMethod::Output
+			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id)))) {
 			node->prepareDependencyGraph(video, renderSize);
 		}
 	}
@@ -270,6 +271,7 @@ void RenderGraph::setRenderSize(const String& id, const Vector2i& size)
 {
 	auto* targetNode = tryGetNode(id);
 	if (!targetNode) {
+		Logger::logWarning("Can't set size for unknown render graph node: \"" + id + "\"", true);
 		return;
 	}
 
@@ -277,6 +279,17 @@ void RenderGraph::setRenderSize(const String& id, const Vector2i& size)
 		targetNode->currentSize = size;
 		targetNode->renderTarget.reset();
 	}
+}
+
+void RenderGraph::setRenderEnabled(const String& id, bool enabled)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		Logger::logWarning("Can't set enabled status for unknown render graph node: \"" + id + "\"", true);
+		return;
+	}
+
+	targetNode->enabled = enabled;
 }
 
 void RenderGraph::clearImageOutputCallbacks()
