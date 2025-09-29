@@ -101,7 +101,8 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 
 		if (input.type != RenderGraphElementType::Dependency && other.node->activeInCurrentPass) {
 			if (other.node->currentSize != targetSize) {
-				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
+				throw Exception("Mismatched target sizes: current node (\"" + id + "\") has size " + toString(targetSize) 
+					+ ", input (\"" + other.node->id + "\") has size " + other.node->currentSize, HalleyExceptions::Graphics);
 			}
 		} else {
 			other.node->prepareDependencyGraph(video, targetSize);
