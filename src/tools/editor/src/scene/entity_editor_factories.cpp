@@ -305,6 +305,42 @@ public:
 	}
 };
 
+class ComponentEditorButtonFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UIButton<>";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(false);
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		String label = "Action";
+		if (pars.typeParameters.size() >= 1) {
+			label = pars.typeParameters[0];
+		}
+
+		auto data = pars.data;
+		const auto& defaultValue = pars.getBoolDefaultParameter();
+
+		const bool startValue = data.getFieldData().asBool(defaultValue);
+		auto val = std::make_shared<bool>(startValue);
+
+		auto field = std::make_shared<UIButton>("value", context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromUserString(label));
+		field->setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event) {
+			*val = !*val;
+			data.getWriteableFieldData() = ConfigNode(*val);
+			context.onEntityUpdated();
+		});
+
+		return field;
+	}
+};
+
 template <typename VecType, size_t nDimensions>
 class ComponentEditorVectorFieldFactory : public IComponentEditorFieldFactory {
 public:
@@ -1388,7 +1424,7 @@ public:
 		spawnContainer->add(context.makeLabel("Burst"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Trigger Burst"));
-		spawnContainer->add(context.makeField("bool", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeField("Halley::UIButton<Burst>", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
 		initialContainer->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Scale"));
@@ -2441,6 +2477,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorTimeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorButtonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2i, 2>>("Halley::Vector2i"));
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2f, 2>>("Halley::Vector2f"));
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector3i, 3>>("Halley::Vector3i"));

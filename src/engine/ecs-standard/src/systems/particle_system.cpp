@@ -59,7 +59,7 @@ private:
 		if (e.particles.animation) {
 			particles.setAnimation(e.particles.animation.get());
 		}
-		particles.reset();
+		//particles.reset();
 	}
 
 	void editorDebugDraw()
