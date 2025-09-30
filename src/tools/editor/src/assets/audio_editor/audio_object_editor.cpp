@@ -27,7 +27,7 @@ AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResource
 void AudioObjectEditor::onMakeUI()
 {
 	hierarchy = getWidgetAs<AudioObjectEditorTreeList>("hierarchy");
-	playbackPanel = std::make_shared<AudioPlaybackPanel>(factory, projectWindow.getAPI());
+	playbackPanel = std::make_shared<AudioPlaybackPanel>(factory, projectWindow.getAPI(), project);
 	getWidget("playbackContainer")->add(playbackPanel, 1);
 
 	setHandle(UIEventType::TreeItemReparented, "hierarchy", [=] (const UIEvent& event)

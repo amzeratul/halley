@@ -85,7 +85,11 @@ Vector<std::unique_ptr<AudioSource>> AudioSubObjectLayers::makeLayerSources(Audi
 	Vector<std::unique_ptr<AudioSource>> sources;
 	sources.reserve(layers.size());
 	for (auto& l: layers) {
-		sources.push_back(l.object->makeSource(engine, emitter));
+		if (auto source = l.object->makeSource(engine, emitter)) {
+			sources.push_back(std::move(source));
+		} else {
+			Logger::logWarning("Failed to create source for AudioSubObjectLayers");
+		}
 	}
 	return sources;
 }

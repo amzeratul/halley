@@ -139,6 +139,7 @@ namespace Halley {
     	bool hasAssets = false;
     	bool hasDLL = false;
         bool firstDLLLoad = true;
+        bool hasStartedAudio = false;
         bool devEnvironment = true;
 
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;

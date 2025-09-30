@@ -14,6 +14,7 @@
 
 namespace Halley
 {
+	class Resources;
 	class Deserializer;
 	class Serializer;
 	class ConfigNode;
@@ -283,6 +284,8 @@ namespace Halley
 		virtual void stopPlayback() = 0;
 		virtual void pausePlayback() = 0;
 		virtual void resumePlayback() = 0;
+
+		virtual void setResources(Resources& resources) = 0;
 
 		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
 		virtual AudioEmitterHandle getGlobalEmitter() = 0;

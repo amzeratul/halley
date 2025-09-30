@@ -5,10 +5,11 @@
 namespace Halley {
     class AudioPlaybackPanel : public UIWidget {
     public:
-        AudioPlaybackPanel(UIFactory& factory, const HalleyAPI& api);
+        AudioPlaybackPanel(UIFactory& factory, const HalleyAPI& api, Project& project);
 
         void onMakeUI() override;
         void update(Time t, bool moved) override;
+        void onActiveChanged(bool active) override;
 
         void setAudioObject(std::shared_ptr<const AudioObject> object);
         void setAudioEvent(std::shared_ptr<const AudioEvent> event);
@@ -16,9 +17,12 @@ namespace Halley {
     private:
         UIFactory& factory;
     	const HalleyAPI& api;
+        Project& project;
 
         std::shared_ptr<const AudioObject> object;
         std::shared_ptr<const AudioEvent> event;
+
+    	std::shared_ptr<AudioObject> playbackObject;
 
         bool needsIconUpdate = false;
 
@@ -29,5 +33,6 @@ namespace Halley {
         void play();
         void pause();
         bool isPlaying() const;
+        void updatePlaybackObject();
     };
 }
