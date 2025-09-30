@@ -42,6 +42,7 @@ namespace Halley {
 			float scale = 1;
 			float time = 0;
 			float ttl = 1;
+			float trailTime = 0;
 			bool alive = true;
 			bool firstFrame = true;
 		};
@@ -158,6 +159,7 @@ namespace Halley {
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
+		Range<float> trailSpawnInterval;
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
@@ -165,18 +167,19 @@ namespace Halley {
 		Vector3f lastPosition;
 		EntityId onSpawn;
 		EntityId onDeath;
+		EntityId onTrail;
 
 		IParticleSpawner* secondarySpawner = nullptr;
 
 		mutable std::optional<float> maxBorder;
 
 		void start();
-		void initializeParticle(size_t index, float time, float totalTime);
+		void initializeParticle(size_t index, float time, float totalTime, Vector3f origin);
 		void updateParticles(float t);
 		void removeDeadParticles();
-		void spawn(size_t n, float time);
+		void spawn(size_t n, float time, Vector3f origin);
 
-		Vector3f getSpawnPosition() const;
+		Vector3f getSpawnPosition(Vector3f origin) const;
 
 		void onSecondarySpawn(const Particle& particle, EntityId target);
 

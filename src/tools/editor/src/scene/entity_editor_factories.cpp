@@ -1419,6 +1419,8 @@ public:
 		dynamicsContainer->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Minimum Height"));
 		dynamicsContainer->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Trail Spawn Interval"));
+		dynamicsContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("trailSpawnInterval", {"0.1", "0.1"}), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Destroy When Done"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Relative Position"));
@@ -1427,6 +1429,8 @@ public:
 		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Death"));
 		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeLabel("On Trail"));
+		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onTrail", ""), ComponentEditorLabelCreation::Never));
 
 		container->add(std::move(spawnGroup));
 		container->add(std::move(initialGroup));

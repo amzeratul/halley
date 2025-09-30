@@ -89,8 +89,10 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
 	randomiseAnimationTime = node["randomiseAnimationTime"].asBool(false);
+	trailSpawnInterval = node["trailSpawnInterval"].asFloatRange(Range<float>(0.1f, 0.1f));
 	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
 	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
+	onTrail = ConfigNodeSerializer<EntityId>().deserialize(context, node["onTrail"]);
 
 	maxBorder = {};
 }
@@ -122,8 +124,10 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
 	result["randomiseAnimationTime"] = randomiseAnimationTime;
+	result["trailSpawnInterval"] = trailSpawnInterval;
 	result["onSpawn"] = ConfigNodeSerializer<EntityId>().serialize(onSpawn, context);
 	result["onDeath"] = ConfigNodeSerializer<EntityId>().serialize(onDeath, context);
+	result["onTrail"] = ConfigNodeSerializer<EntityId>().serialize(onTrail, context);
 
 	return result;
 }
@@ -307,7 +311,7 @@ void Particles::setSpawnPositionOffset(Vector2f offset)
 void Particles::start()
 {
 	if (burst) {
-		spawn(burst.value(), 0);
+		spawn(burst.value(), 0, position);
 	}
 	pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
 }
@@ -325,7 +329,7 @@ void Particles::update(Time t)
 
 	if (toSpawn > 0) {
 		// Spawn new particles
-		spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
+		spawn(static_cast<size_t>(toSpawn), static_cast<float>(t), position);
 	}
 
 	// Update particles
@@ -380,8 +384,8 @@ void Particles::setSecondarySpawner(IParticleSpawner* spawner)
 
 void Particles::spawnAt(Vector3f pos)
 {
-	spawn(1, 0.0f);
-	particles[nParticlesAlive - 1].pos = pos;
+	auto n = std::max(burst.value_or(1), 1);
+	spawn(n, 0.0f, pos);
 }
 
 void Particles::destroyOverlapping(const Polygon& polygon)
@@ -414,7 +418,7 @@ void Particles::destroyOverlapping(const Circle& circle)
 	}
 }
 
-void Particles::spawn(size_t n, float time)
+void Particles::spawn(size_t n, float time, Vector3f origin)
 {
 	if (maxParticles) {
 		n = std::min(n, maxParticles.value() - nParticlesAlive);
@@ -433,11 +437,11 @@ void Particles::spawn(size_t n, float time)
 
 	const float timeSlice = time / n;
 	for (size_t i = 0; i < n; ++i) {
-		initializeParticle(start + i, i * timeSlice, time);
+		initializeParticle(start + i, i * timeSlice, time, origin);
 	}
 }
 
-void Particles::initializeParticle(size_t index, float time, float totalTime)
+void Particles::initializeParticle(size_t index, float time, float totalTime, Vector3f origin)
 {
 	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(azimuth));
 	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(altitude));
@@ -447,6 +451,7 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 	particle.alive = true;
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
+	particle.trailTime = rng->getFloat(trailSpawnInterval) - time;
 	//particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = rng->getFloat(initialScale);
 
@@ -454,7 +459,7 @@ void Particles::initializeParticle(size_t index, float time, float totalTime)
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
 	const auto spawnPosSmear = totalTime > 0.00001f ? lerp(position - lastPosition, Vector3f(), time / totalTime) : Vector3f();
-	particle.pos = getSpawnPosition() + spawnPosSmear + (particle.vel * time + a * (0.5f * time * time)) * velScale;
+	particle.pos = getSpawnPosition(origin) + spawnPosSmear + (particle.vel * time + a * (0.5f * time * time)) * velScale;
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
@@ -489,8 +494,7 @@ void Particles::updateParticles(float time)
 		particle.time += time;
 		if (particle.time >= particle.ttl) {
 			particle.alive = false;
-		}
-		else {
+		} else {
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 			const auto a = stopped ? Vector3f() : acceleration;
 			if (particle.firstFrame) {
@@ -515,6 +519,14 @@ void Particles::updateParticles(float time)
 
 			if (directionScatter > 0.00001f) {
 				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
+			}
+
+			if (onTrail) {
+				particle.trailTime -= time;
+				if (particle.trailTime <= 0) { // Could be a while loop, but I'm worried about perf/infinite loops
+					particle.trailTime += rng->getFloat(trailSpawnInterval);
+					onSecondarySpawn(particle, onTrail);
+				}
 			}
 		}
 	}
@@ -567,7 +579,7 @@ void Particles::removeDeadParticles()
 	}
 }
 
-Vector3f Particles::getSpawnPosition() const
+Vector3f Particles::getSpawnPosition(Vector3f origin) const
 {
 	Vector2f pos;
 	if (spawnAreaShape == ParticleSpawnAreaShape::Rectangle) {
@@ -577,7 +589,7 @@ Vector3f Particles::getSpawnPosition() const
 		const float angle = rng->getFloat(0.0f, 2.0f * pif());
 		pos = Vector2f(radius, 0).rotate(Angle1f::fromRadians(angle)) * spawnArea * 0.5f;
 	}
-	return position + Vector3f(pos + spawnPositionOffset, startHeight);
+	return origin + Vector3f(pos + spawnPositionOffset, startHeight);
 }
 
 void Particles::onSecondarySpawn(const Particle& particle, EntityId target)
