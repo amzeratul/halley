@@ -66,6 +66,7 @@ namespace Halley {
 
 		virtual std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const = 0;
 		virtual void loadDependencies(Resources& resources) = 0;
+		virtual void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const {}
 
 		virtual void serialize(Serializer& s) const;
 		virtual void deserialize(Deserializer& s);

@@ -14,6 +14,8 @@ namespace Halley {
         AudioSubObjectType getType() const override { return AudioSubObjectType::Switch; }
 	    std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 
+        void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const override;
+
         String getName() const override;
         size_t getNumSubObjects() const override;
         AudioSubObjectHandle& getSubObject(size_t n) override;

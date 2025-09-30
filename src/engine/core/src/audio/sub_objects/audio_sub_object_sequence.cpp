@@ -39,6 +39,13 @@ std::unique_ptr<AudioSource> AudioSubObjectSequence::makeSource(AudioEngine& eng
 	return std::make_unique<AudioSourceSequence>(engine, emitter, *this);
 }
 
+void AudioSubObjectSequence::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	for (const auto& segment: segments) {
+		segment.object->collectVariablesUsed(variables, switches);
+	}
+}
+
 String AudioSubObjectSequence::getName() const
 {
 	return name.isEmpty() ? "Sequence" : name;

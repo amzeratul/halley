@@ -49,6 +49,8 @@ namespace Halley {
         AudioSubObjectType getType() const override { return AudioSubObjectType::Sequence; }
 	    std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 
+		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const override;
+
         String getName() const override;
 		const String& getRawName() const;
 		void setName(String name);

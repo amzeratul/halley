@@ -49,12 +49,15 @@ void AudioPlaybackPanel::onObjectModified()
 	if (object) {
 		needsObjectUpdate = true;
 	}
+
+	loadVariables();
 }
 
 void AudioPlaybackPanel::setAudioObject(std::shared_ptr<const AudioObject> object)
 {
 	this->object = std::move(object);
 	event = {};
+	loadVariables();
 	updatePlaybackObject();
 }
 
@@ -63,6 +66,7 @@ void AudioPlaybackPanel::setAudioEvent(std::shared_ptr<const AudioEvent> event)
 	this->event = std::move(event);
 	object = {};
 	needsObjectUpdate = false;
+	loadVariables();
 	updatePlaybackObject();
 }
 
@@ -129,4 +133,49 @@ void AudioPlaybackPanel::updatePlaybackObject()
 	} else {
 		playbackObject = {};
 	}
+}
+
+void AudioPlaybackPanel::loadVariables()
+{
+	auto vars = getCurrentVariableList();
+	if (vars != variables) {
+		variables = std::move(vars);
+		populateVariables();
+	}
+}
+
+void AudioPlaybackPanel::populateVariables()
+{
+	auto container = getWidget("variablesContainer");
+	container->clear();
+
+	auto labelStyle = factory.getStyle("label");
+
+	Logger::logInfo("Loading " + toString(variables.size()) + " variables");
+
+	for (const auto& [varType, varId]: variables) {
+		container->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromUserString(varId)));
+	}
+
+	getWidget("variablesArea")->setActive(!variables.empty());
+}
+
+Vector<std::pair<AudioPlaybackPanel::VariableType, String>> AudioPlaybackPanel::getCurrentVariableList() const
+{
+	Vector<String> variables;
+	Vector<String> switches;
+
+	if (object) {
+		object->collectVariablesUsed(variables, switches);
+	}
+
+	Vector<std::pair<VariableType, String>> result;
+	for (auto& var: variables) {
+		result += { VariableType::Variable, std::move(var) };
+	}
+	for (auto& sw: switches) {
+		result += { VariableType::Switch, std::move(sw) };
+	}
+
+	return result;
 }

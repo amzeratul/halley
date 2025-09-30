@@ -32,10 +32,21 @@ namespace Halley {
     	AudioEmitterHandle emitter;
         AudioHandle audioHandle;
 
+        enum class VariableType {
+	        Variable,
+            Switch
+        };
+
+        Vector<std::pair<VariableType, String>> variables;
+
         void onPlay();
         void play();
         void pause();
         bool isPlaying() const;
         void updatePlaybackObject();
+
+        void loadVariables();
+        void populateVariables();
+        Vector<std::pair<VariableType, String>> getCurrentVariableList() const;
     };
 }

@@ -100,6 +100,7 @@ namespace Halley {
         void deserialize(Deserializer& s);
 
         Vector<AudioExpressionTerm>& getTerms();
+        const Vector<AudioExpressionTerm>& getTerms() const;
         AudioExpressionOperation getOperation() const;
         void setOperation(AudioExpressionOperation op);
 
