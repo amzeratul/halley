@@ -26,12 +26,28 @@ void AudioPlaybackPanel::update(Time t, bool moved)
 		const char* image = isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png";
 		getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(factory.getResources(), image));
 	}
+
+	if (needsObjectUpdate && updateCooldown <= 0) {
+		needsObjectUpdate = false;
+		updateCooldown = 0.1;
+		updatePlaybackObject();
+	}
+	if (updateCooldown > 0) {
+		updateCooldown -= t;
+	}
 }
 
 void AudioPlaybackPanel::onActiveChanged(bool active)
 {
 	if (!active) {
 		pause();
+	}
+}
+
+void AudioPlaybackPanel::onObjectModified()
+{
+	if (object) {
+		needsObjectUpdate = true;
 	}
 }
 
@@ -46,6 +62,7 @@ void AudioPlaybackPanel::setAudioEvent(std::shared_ptr<const AudioEvent> event)
 {
 	this->event = std::move(event);
 	object = {};
+	needsObjectUpdate = false;
 	updatePlaybackObject();
 }
 
@@ -94,12 +111,22 @@ bool AudioPlaybackPanel::isPlaying() const
 
 void AudioPlaybackPanel::updatePlaybackObject()
 {
-	if (!playbackObject && object) {
-		playbackObject = std::make_shared<AudioObject>(*object);
-		playbackObject->loadDependencies(project.getGameResources());
-	}
+	if (object) {
+		if (playbackObject) {
+			// Update existing
+			auto newObject = AudioObject(*object);
+			newObject.loadDependencies(project.getGameResources());
 
-	if (!object && !playbackObject) {
+			// Note that this is only safe because it waits for the callback to complete
+			api.audio->runOnAudioThread([&] () {
+				playbackObject->reload(std::move(newObject));
+			}).wait();
+		} else {
+			// Create new
+			playbackObject = std::make_shared<AudioObject>(*object);
+			playbackObject->loadDependencies(project.getGameResources());
+		}
+	} else {
 		playbackObject = {};
 	}
 }

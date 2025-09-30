@@ -11,6 +11,7 @@
 
 #include "halley/data_structures/ring_buffer.h"
 #include "halley/audio/audio_fade.h"
+#include "halley/concurrency/future.h"
 
 namespace Halley
 {
@@ -328,5 +329,7 @@ namespace Halley
 		virtual std::optional<String> getEventLoggingPrefix() const { return {}; }
 
 		virtual void resetObjectLimits() = 0;
+
+		virtual Future<void> runOnAudioThread(std::function<void()> f) = 0;
 	};
 }

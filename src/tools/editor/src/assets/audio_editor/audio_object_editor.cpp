@@ -192,6 +192,7 @@ void AudioObjectEditor::markModified(bool refreshList)
 	if (refreshList) {
 		needFullRefresh = true;
 	}
+	playbackPanel->onObjectModified();
 }
 
 void AudioObjectEditor::update(Time t, bool moved)

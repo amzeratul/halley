@@ -83,6 +83,8 @@ namespace Halley {
 
 		void resetObjectLimits() override;
 
+		Future<void> runOnAudioThread(std::function<void()> f) override;
+
 	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;

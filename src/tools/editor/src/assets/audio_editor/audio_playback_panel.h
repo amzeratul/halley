@@ -11,6 +11,7 @@ namespace Halley {
         void update(Time t, bool moved) override;
         void onActiveChanged(bool active) override;
 
+        void onObjectModified();
         void setAudioObject(std::shared_ptr<const AudioObject> object);
         void setAudioEvent(std::shared_ptr<const AudioEvent> event);
 
@@ -25,6 +26,8 @@ namespace Halley {
     	std::shared_ptr<AudioObject> playbackObject;
 
         bool needsIconUpdate = false;
+        bool needsObjectUpdate = false;
+        Time updateCooldown = 0;
 
     	AudioEmitterHandle emitter;
         AudioHandle audioHandle;
