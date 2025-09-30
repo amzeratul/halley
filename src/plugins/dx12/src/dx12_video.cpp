@@ -20,6 +20,14 @@
 #pragma comment( lib, "dxguid.lib")
 #endif
 
+#ifdef WITH_GDK
+namespace
+{
+	HANDLE g_plmSuspendComplete = nullptr;
+	HANDLE g_plmSignalResume = nullptr;
+};
+#endif
+
 using namespace Halley;
 
 bool DX12Video::initialized = false;
@@ -38,22 +46,35 @@ void DX12Video::init()
     loader = std::make_unique<DX12Loader>(system);
 
 #ifdef WITH_GDK
+	g_plmSuspendComplete = CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+	g_plmSignalResume = CreateEventEx(nullptr, nullptr, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+
 	if (RegisterAppStateChangeNotification([](BOOLEAN quiesced, PVOID context)
-	{
-        DX12Video* self = static_cast<DX12Video*>(context);
-
-		Concurrent::execute(Executors::getMainUpdateThread(), [self, quiesced]
 		{
-            // TODO:
-            // This should actually be done by Core, but those are not called
-            // anywhere right now.
+			if (quiesced)
+			{
+				ResetEvent(g_plmSuspendComplete);
+				ResetEvent(g_plmSignalResume);
 
-			if (quiesced) {
-                self->onSuspend();
-            } else {
-	            self->onResume();
-            }
-		}).wait();
+				DX12Video* self = static_cast<DX12Video*>(context);
+
+				Concurrent::execute(Executors::getMainRenderThread(), [self, quiesced]
+					{
+						self->onSuspend();
+
+						SetEvent(g_plmSuspendComplete);
+
+						(void)WaitForSingleObject(g_plmSignalResume, INFINITE);
+
+                        self->onResume();
+					});
+
+				(void)WaitForSingleObject(g_plmSuspendComplete, INFINITE);
+			}
+			else
+			{
+				SetEvent(g_plmSignalResume);
+			}
 	}, this, &plmHandle)) {
 		Logger::logWarning("Couldn't register PLM state change notification");
 	}
@@ -64,6 +85,8 @@ void DX12Video::deInit()
 {
 #ifdef WITH_GDK
 	UnregisterAppStateChangeNotification(plmHandle);
+	CloseHandle(g_plmSuspendComplete);
+	CloseHandle(g_plmSignalResume);
 #endif
 
     if (initialized && device != nullptr) {

@@ -89,6 +89,7 @@ namespace Halley {
 		bool activeInCurrentPass = false;
 		int depsLeft = 0;
 		Vector2i currentSize;
+		bool enabled = true;
 
 		Vector<InputPin> inputPins;
 		Vector<OutputPin> outputPins;
