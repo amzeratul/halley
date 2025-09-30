@@ -43,6 +43,7 @@ namespace Halley {
         ProjectWindow& projectWindow;
 		bool modified = false;
         bool needFullRefresh = false;
+        bool hasPendingSelectionChange = false;
         std::shared_ptr<AudioObject> audioObject;
         std::shared_ptr<AudioObjectEditorTreeList> hierarchy;
         HashMap<String, TreeData> treeData;

@@ -33,7 +33,7 @@ void AudioObjectEditor::onMakeUI()
 			moveItem(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
 		}
 		populateTreeData();
-		onSelectionChange(hierarchy->getSelectedOptionIds());
+		hasPendingSelectionChange = true;
 	});
 
 	setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
@@ -197,6 +197,11 @@ void AudioObjectEditor::update(Time t, bool moved)
 	if (needFullRefresh) {
 		doLoadUI();
 		needFullRefresh = false;
+	}
+
+	if (hasPendingSelectionChange) {
+		hasPendingSelectionChange = false;
+		onSelectionChange(hierarchy->getSelectedOptionIds());
 	}
 }
 
