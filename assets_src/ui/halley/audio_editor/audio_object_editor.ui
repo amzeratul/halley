@@ -56,21 +56,37 @@ children:
     widget:
       class: resizeDivider
       id: audioObjectLeft
-  - uuid: a711ab27-0cf4-4b48-8937-a47cdb04f40a
+  - uuid: b9b087c3-94e9-4ae4-a1e1-91af2cf28ced
     proportion: 1
     sizer:
+      columnProportions: []
       type: vertical
     widget:
-      autoHide: true
-      class: scrollBarPane
-      scrollVertical: true
-      size: [300, 200]
+      class: widget
     children:
-      - uuid: 13d98257-0858-4a44-99d8-6e772fc7be1a
+      - uuid: a711ab27-0cf4-4b48-8937-a47cdb04f40a
         proportion: 1
         sizer:
+          columnProportions: []
+          type: vertical
+        widget:
+          autoHide: true
+          class: scrollBarPane
+          scrollVertical: true
+          size: [300, 200]
+        children:
+          - uuid: 13d98257-0858-4a44-99d8-6e772fc7be1a
+            proportion: 1
+            sizer:
+              type: vertical
+            widget:
+              class: widget
+              id: contents
+            children: []
+      - uuid: 152b7d33-f3c5-4688-b7d5-d3310807a90e
+        sizer:
+          columnProportions: []
           type: vertical
         widget:
           class: widget
-          id: contents
-        children: []
+          id: playbackContainer

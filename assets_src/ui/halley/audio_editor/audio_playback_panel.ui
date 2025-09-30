@@ -1,0 +1,38 @@
+uuid: 735c81bf-ff1b-40af-a939-02a73f115aee
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 51270410-9b5a-4b97-b4d9-f219f070c7d2
+    proportion: 1
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: background
+      image: $ui_title_capsule
+      innerBorder: [4, 1, 4, 4]
+      size: [200, 20]
+    children:
+      - uuid: fcc90a85-ad02-49d1-a679-e549ae2c4e52
+        border: [0, 0, 0, 1]
+        widget:
+          class: label
+          id: title
+          text: Playback
+        fill: centre
+      - uuid: 95178745-04f6-4208-b496-9ce0060afedb
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+        children:
+          - uuid: 96ea5df6-f3e0-411b-b0ca-6e68452f3fc1
+            widget:
+              class: button
+              icon: halley_ui/icon_play.png
+              id: play

@@ -2,6 +2,7 @@
 
 #include "audio_clips_editor.h"
 #include "audio_layers_editor.h"
+#include "audio_playback_panel.h"
 #include "audio_root_editor.h"
 #include "audio_sequence_editor.h"
 #include "audio_switch_editor.h"
@@ -26,6 +27,8 @@ AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResource
 void AudioObjectEditor::onMakeUI()
 {
 	hierarchy = getWidgetAs<AudioObjectEditorTreeList>("hierarchy");
+	playbackPanel = std::make_shared<AudioPlaybackPanel>(factory, projectWindow.getAPI());
+	getWidget("playbackContainer")->add(playbackPanel, 1);
 
 	setHandle(UIEventType::TreeItemReparented, "hierarchy", [=] (const UIEvent& event)
 	{
@@ -159,6 +162,7 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const Path& asse
 {
 	audioObject = std::make_shared<AudioObject>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
 	audioObject->setAssetId(assetId);
+	playbackPanel->setAudioObject(audioObject);
 
 	setCurrentObject(audioObject.get());
 	

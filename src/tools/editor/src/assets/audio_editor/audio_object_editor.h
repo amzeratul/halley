@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_playback_panel.h"
 #include "../asset_editor.h"
 #include "halley/audio/audio_sub_object.h"
 
@@ -46,6 +47,7 @@ namespace Halley {
         bool hasPendingSelectionChange = false;
         std::shared_ptr<AudioObject> audioObject;
         std::shared_ptr<AudioObjectEditorTreeList> hierarchy;
+        std::shared_ptr<AudioPlaybackPanel> playbackPanel;
         HashMap<String, TreeData> treeData;
 
         IAudioObject* currentObject = nullptr;
