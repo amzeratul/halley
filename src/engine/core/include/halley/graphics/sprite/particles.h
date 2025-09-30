@@ -160,6 +160,7 @@ namespace Halley {
 		std::optional<int> burst;
 		std::optional<float> minHeight;
 		Range<float> trailSpawnInterval;
+		bool toggleToBurst = false;
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;

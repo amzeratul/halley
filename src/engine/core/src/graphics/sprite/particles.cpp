@@ -95,6 +95,14 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	onTrail = ConfigNodeSerializer<EntityId>().deserialize(context, node["onTrail"]);
 
 	maxBorder = {};
+
+	const auto tempBurst = node["toggleToBurst"].asBool(false);
+	if (tempBurst != toggleToBurst) {
+		toggleToBurst = tempBurst;
+		if (burst) {
+			burstParticles(static_cast<float>(*burst));
+		}
+	}
 }
 
 ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) const

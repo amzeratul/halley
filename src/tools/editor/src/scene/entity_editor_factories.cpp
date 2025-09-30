@@ -1387,6 +1387,8 @@ public:
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Trigger Burst"));
+		spawnContainer->add(context.makeField("bool", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
 		initialContainer->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Scale"));
