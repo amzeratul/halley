@@ -1423,8 +1423,10 @@ public:
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
-		spawnContainer->add(context.makeLabel("Trigger Burst"));
-		spawnContainer->add(context.makeField("Halley::UIButton<Burst>", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Burst on Spawn"));
+		spawnContainer->add(context.makeField("bool", pars.withSubKey("burstOnSpawn", "true"), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel(""));
+		spawnContainer->add(context.makeField("Halley::UIButton<Trigger Burst>", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
 		initialContainer->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Scale"));
@@ -1464,11 +1466,11 @@ public:
 		systemContainer->add(context.makeLabel("Relative Position"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("relativePosition", "false"), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Spawn"));
-		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Death"));
-		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Trail"));
-		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onTrail", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onTrail", ""), ComponentEditorLabelCreation::Never));
 
 		container->add(std::move(spawnGroup));
 		container->add(std::move(initialGroup));

@@ -156,6 +156,7 @@ namespace Halley {
 		bool positionSet = false;
 		bool relativePosition = false;
 		bool randomiseAnimationTime = false;
+		bool burstOnSpawn = true;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
@@ -166,9 +167,9 @@ namespace Halley {
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector3f position;
 		Vector3f lastPosition;
-		EntityId onSpawn;
-		EntityId onDeath;
-		EntityId onTrail;
+		Vector<EntityId> onSpawn;
+		Vector<EntityId> onDeath;
+		Vector<EntityId> onTrail;
 
 		IParticleSpawner* secondarySpawner = nullptr;
 

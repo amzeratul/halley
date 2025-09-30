@@ -88,19 +88,20 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	startHeight = node["startHeight"].asFloat(0);
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
+	burstOnSpawn = node["burstOnSpawn"].asBool(true);
 	randomiseAnimationTime = node["randomiseAnimationTime"].asBool(false);
 	trailSpawnInterval = node["trailSpawnInterval"].asFloatRange(Range<float>(0.1f, 0.1f));
-	onSpawn = ConfigNodeSerializer<EntityId>().deserialize(context, node["onSpawn"]);
-	onDeath = ConfigNodeSerializer<EntityId>().deserialize(context, node["onDeath"]);
-	onTrail = ConfigNodeSerializer<EntityId>().deserialize(context, node["onTrail"]);
+	onSpawn = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["onSpawn"]);
+	onDeath = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["onDeath"]);
+	onTrail = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["onTrail"]);
 
 	maxBorder = {};
 
 	const auto tempBurst = node["toggleToBurst"].asBool(false);
 	if (tempBurst != toggleToBurst) {
 		toggleToBurst = tempBurst;
-		if (burst) {
-			burstParticles(static_cast<float>(*burst));
+		if (burst && !burstOnSpawn) {
+			spawn(burst.value(), 0, position);
 		}
 	}
 }
@@ -131,11 +132,12 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["startHeight"] = startHeight;
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
+	result["burstOnSpawn"] = burstOnSpawn;
 	result["randomiseAnimationTime"] = randomiseAnimationTime;
 	result["trailSpawnInterval"] = trailSpawnInterval;
-	result["onSpawn"] = ConfigNodeSerializer<EntityId>().serialize(onSpawn, context);
-	result["onDeath"] = ConfigNodeSerializer<EntityId>().serialize(onDeath, context);
-	result["onTrail"] = ConfigNodeSerializer<EntityId>().serialize(onTrail, context);
+	result["onSpawn"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onSpawn, context);
+	result["onDeath"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onDeath, context);
+	result["onTrail"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onTrail, context);
 
 	return result;
 }
@@ -318,7 +320,7 @@ void Particles::setSpawnPositionOffset(Vector2f offset)
 
 void Particles::start()
 {
-	if (burst) {
+	if (burst && burstOnSpawn) {
 		spawn(burst.value(), 0, position);
 	}
 	pendingSpawn = clamp(pendingSpawn, 0.0f, 1.0f);
@@ -483,8 +485,8 @@ void Particles::initializeParticle(size_t index, float time, float totalTime, Ve
 		}
 	}
 
-	if (onSpawn) {
-		onSecondarySpawn(particle, onSpawn);
+	for (const auto& system: onSpawn) {
+		onSecondarySpawn(particle, system);
 	}
 }
 
@@ -529,11 +531,13 @@ void Particles::updateParticles(float time)
 				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
 			}
 
-			if (onTrail) {
+			if (!onTrail.empty()) {
 				particle.trailTime -= time;
 				if (particle.trailTime <= 0) { // Could be a while loop, but I'm worried about perf/infinite loops
 					particle.trailTime += rng->getFloat(trailSpawnInterval);
-					onSecondarySpawn(particle, onTrail);
+					for (const auto& system: onTrail) {
+						onSecondarySpawn(particle, system);
+					}
 				}
 			}
 		}
@@ -567,8 +571,8 @@ void Particles::removeDeadParticles()
 {
 	for (size_t i = 0; i < nParticlesAlive; ) {
 		if (!particles[i].alive) {
-			if (onDeath) {
-				onSecondarySpawn(particles[i], onDeath);
+			for (const auto& system: onDeath) {
+				onSecondarySpawn(particles[i], system);
 			}
 
 			if (i != nParticlesAlive - 1) {
