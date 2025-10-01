@@ -85,6 +85,8 @@ namespace Halley {
 
 		Future<void> runOnAudioThread(std::function<void()> f) override;
 
+		const AudioProperties& getAudioProperties() const override;
+
 	private:
 		Resources* resources = nullptr;
 		AudioOutputAPI& output;
@@ -131,8 +133,6 @@ namespace Halley {
 		void stopMusic(AudioHandle& handle, float fade);
 
 		void onNeedBuffer();
-
-		const AudioProperties& getAudioProperties() const;
     };
 
 	inline float volumeToGain(float volume)

@@ -44,8 +44,11 @@ namespace Halley {
 		int getNumberOfHorizontalDividers() const;
 		void setNumberOfHorizontalDividers(int n);
 
+		float getDefaultValue() const;
+
 	private:
 		String id;
+		float defaultValue = 0;
 		Range<float> range;
 		int nHorizontalDividers = 10;
 	};

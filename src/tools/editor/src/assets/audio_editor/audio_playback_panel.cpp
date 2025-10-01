@@ -1,5 +1,6 @@
 #include "audio_playback_panel.h"
 
+#include "halley/properties/audio_properties.h"
 #include "halley/tools/project/project.h"
 
 using namespace Halley;
@@ -18,14 +19,17 @@ void AudioPlaybackPanel::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "play", [=] (const UIEvent& event) {
 		onPlay();
 	});
+
+	playButton = getWidgetAs<UIButton>("play");
 }
 
 void AudioPlaybackPanel::update(Time t, bool moved)
 {
 	if (needsIconUpdate) {
 		const char* image = isPlaying() ? "halley_ui/icon_pause.png" : "halley_ui/icon_play.png";
-		getWidgetAs<UIButton>("play")->setIcon(Sprite().setImage(factory.getResources(), image));
+		playButton->setIcon(Sprite().setImage(factory.getResources(), image));
 	}
+	playButton->setEnabled(isReadyToPlay());
 
 	if (needsObjectUpdate && updateCooldown <= 0) {
 		needsObjectUpdate = false;
@@ -34,6 +38,10 @@ void AudioPlaybackPanel::update(Time t, bool moved)
 	}
 	if (updateCooldown > 0) {
 		updateCooldown -= t;
+	}
+
+	if (needsLoadingVariables && isReadyToPlay()) {
+		loadVariables();
 	}
 }
 
@@ -88,6 +96,8 @@ void AudioPlaybackPanel::play()
 
 	if (!emitter) {
 		emitter = api.audio->createEmitter(AudioPosition());
+		applyVariablesToEmitter();
+
 		api.audio->setListener(AudioListenerData(Vector3f()));
 	}
 
@@ -111,6 +121,11 @@ void AudioPlaybackPanel::pause()
 bool AudioPlaybackPanel::isPlaying() const
 {
 	return static_cast<bool>(audioHandle);
+}
+
+bool AudioPlaybackPanel::isReadyToPlay() const
+{
+	return project.areAssetsLoaded();
 }
 
 void AudioPlaybackPanel::updatePlaybackObject()
@@ -137,6 +152,12 @@ void AudioPlaybackPanel::updatePlaybackObject()
 
 void AudioPlaybackPanel::loadVariables()
 {
+	if (!isReadyToPlay()) {
+		needsLoadingVariables = true;
+		return;
+	}
+	needsLoadingVariables = false;
+
 	auto vars = getCurrentVariableList();
 	if (vars != variables) {
 		variables = std::move(vars);
@@ -151,13 +172,78 @@ void AudioPlaybackPanel::populateVariables()
 
 	auto labelStyle = factory.getStyle("label");
 
-	Logger::logInfo("Loading " + toString(variables.size()) + " variables");
-
 	for (const auto& [varType, varId]: variables) {
-		container->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromUserString(varId)));
+		container->add(std::make_shared<UILabel>("", labelStyle, LocalisedString::fromUserString(varId + ":")), 1, Vector4f(0, 0, 4, 0), UISizerAlignFlags::Right | UISizerAlignFlags::CentreVertical);
+		container->add(makeVariableControl(varType, varId), 1, {}, UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 	}
 
 	getWidget("variablesArea")->setActive(!variables.empty());
+}
+
+std::shared_ptr<UIWidget> AudioPlaybackPanel::makeVariableControl(VariableType type, const String& id)
+{
+	if (type == VariableType::Variable) {
+		const auto style = factory.getStyle("slider");
+
+		const auto& properties = api.audio->getAudioProperties();
+		if (const auto* variable = properties.tryGetVariable(id)) {
+			const auto range = variable->getRange();
+			const auto startValue = curVars.value_or(id, variable->getDefaultValue());
+
+			auto control = std::make_shared<UISlider>(id, style, range.start, range.end, startValue, true, true);
+			control->bindData(id, variable->getDefaultValue(), [=] (float value) {
+				setVariable(id, value);
+			});
+			return control;
+		}
+	} else if (type == VariableType::Switch) {
+		const auto style = factory.getStyle("dropdownLight");
+
+		const auto& properties = api.audio->getAudioProperties();
+		if (const auto* swi = properties.tryGetSwitch(id)) {
+			Vector<UIDropdown::Entry> options;
+			for (const auto& v: swi->getValues()) {
+				options += UIDropdown::Entry(v, LocalisedString::fromUserString(v));
+			}
+			const auto startValue = curSwitches.value_or(id, swi->getDefaultValue());
+
+			auto control = std::make_shared<UIDropdown>(id, style);
+			control->setOptions(std::move(options));
+			control->bindData(id, startValue, [=] (String value) {
+				setSwitch(id, value);
+			});
+			return control;
+		}
+	}
+	return {};
+}
+
+void AudioPlaybackPanel::applyVariablesToEmitter()
+{
+	if (emitter) {
+		for (const auto& [id, value]: curVars) {
+			emitter->setVariable(id, value);
+		}
+		for (const auto& [id, value]: curSwitches) {
+			emitter->setSwitch(id, value);
+		}
+	}
+}
+
+void AudioPlaybackPanel::setVariable(const String& id, float value)
+{
+	if (emitter) {
+		emitter->setVariable(id, value);
+	}
+	curVars[id] = value;
+}
+
+void AudioPlaybackPanel::setSwitch(const String& id, const String& value)
+{
+	if (emitter) {
+		emitter->setSwitch(id, value);
+	}
+	curSwitches[id] = value;
 }
 
 Vector<std::pair<AudioPlaybackPanel::VariableType, String>> AudioPlaybackPanel::getCurrentVariableList() const

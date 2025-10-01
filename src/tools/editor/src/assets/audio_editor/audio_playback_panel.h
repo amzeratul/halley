@@ -22,11 +22,12 @@ namespace Halley {
 
         std::shared_ptr<const AudioObject> object;
         std::shared_ptr<const AudioEvent> event;
-
     	std::shared_ptr<AudioObject> playbackObject;
+        std::shared_ptr<UIButton> playButton;
 
         bool needsIconUpdate = false;
         bool needsObjectUpdate = false;
+        bool needsLoadingVariables = false;
         Time updateCooldown = 0;
 
     	AudioEmitterHandle emitter;
@@ -38,15 +39,23 @@ namespace Halley {
         };
 
         Vector<std::pair<VariableType, String>> variables;
+        HashMap<String, float> curVars;
+        HashMap<String, String> curSwitches;
 
         void onPlay();
         void play();
         void pause();
         bool isPlaying() const;
+        bool isReadyToPlay() const;
         void updatePlaybackObject();
 
+        Vector<std::pair<VariableType, String>> getCurrentVariableList() const;
         void loadVariables();
         void populateVariables();
-        Vector<std::pair<VariableType, String>> getCurrentVariableList() const;
+        std::shared_ptr<UIWidget> makeVariableControl(VariableType type, const String& id);
+        void applyVariablesToEmitter();
+
+        void setVariable(const String& id, float value);
+        void setSwitch(const String& id, const String& value);
     };
 }

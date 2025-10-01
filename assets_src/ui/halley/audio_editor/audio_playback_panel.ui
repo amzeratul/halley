@@ -29,6 +29,7 @@ children:
         proportion: 1
         sizer:
           columnProportions: []
+          gap: 4
         widget:
           class: widget
         children:
@@ -36,6 +37,7 @@ children:
             proportion: 1
             sizer:
               columnProportions: []
+              gap: 4
               type: vertical
             widget:
               class: widget
@@ -53,7 +55,8 @@ children:
                       class: button
                       icon: halley_ui/icon_play.png
                       id: play
-                      size: [50, 0]
+                      size: [100, 0]
+                      text: ""
                   - uuid: 2cef77c8-8e17-47f7-bd56-b7d02b37a646
                     proportion: 1
                     spacer: {}
@@ -66,14 +69,19 @@ children:
                       size: [100, 0]
                       text: Variables...
                     fill: [right, fillVertical]
-              - uuid: f85e881a-8340-4971-9c47-cb0eba607d4e
-                proportion: 1
+              - uuid: d30262ad-dadf-4fc6-a385-906174648e6f
                 sizer:
                   columnProportions: []
+                  gap: 1
                   type: vertical
                 widget:
-                  class: widget
+                  class: image
+                  colour: $ui_popupWindow
                   id: variablesArea
+                  image: halley_ui/ui_popup.png
+                  innerBorder: [8, 4, 8, 4]
+                  interactWithMouse: true
+                  size: [200, 150]
                 children:
                   - uuid: ce0eb369-0bb6-4ed9-bbe2-1ce68f9002a6
                     widget:
@@ -86,6 +94,7 @@ children:
                       gap: 3
                       type: vertical
                     widget:
+                      autoHide: true
                       class: scrollBarPane
                       id: ""
                       size: [0, 40]
@@ -94,6 +103,7 @@ children:
                         sizer:
                           columnProportions: [1, 2, 1, 2]
                           columns: 4
+                          gap: 4
                           type: grid
                         widget:
                           class: widget
@@ -102,3 +112,18 @@ children:
             widget:
               class: widget
               id: rightColumn
+            children:
+              - uuid: 03cd9f68-d0c9-47ad-ba98-8bf8de5ae26a
+                sizer:
+                  columnProportions: []
+                  gap: 4
+                  type: vertical
+                widget:
+                  class: image
+                  colour: $ui_popupWindow
+                  id: positionPanel
+                  image: halley_ui/ui_popup.png
+                  innerBorder: [8, 8, 8, 8]
+                  interactWithMouse: true
+                  size: [160, 100]
+                children: []
