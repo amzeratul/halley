@@ -38,6 +38,7 @@ namespace Halley {
         ScriptUpdate,
 
 		AudioGenerateBuffer,
+		AudioRenderVoice,
 
         GPU,
 
@@ -53,7 +54,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProfilerEventType> {
-		constexpr std::array<const char*, 28> operator()() const {
+		constexpr std::array<const char*, 29> operator()() const {
 			return{{
 			    "CorePumpEvents",
 				"CoreDevConClient",
@@ -81,6 +82,7 @@ namespace Halley {
 		        "ScriptUpdate",
 
 				"AudioGenerateBuffer",
+				"AudioRenderVoice",
 
 		        "GPU",
 

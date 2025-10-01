@@ -6,6 +6,7 @@
 #include "audio_mixer.h"
 #include "halley/audio/audio_source.h"
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -248,6 +249,8 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 	if (paused || !source) {
 		return;
 	}
+
+	ProfilerEvent event(ProfilerEventType::AudioRenderVoice, source->getName());
 
 	// Check delay
 	size_t numSamples = numSamplesRequested;

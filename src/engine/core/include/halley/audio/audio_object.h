@@ -80,6 +80,7 @@ namespace Halley {
 		void setPriority(int value);
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
+		gsl::span<const AudioSubObjectHandle> getSubObjects() const;
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
     	

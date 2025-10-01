@@ -1,5 +1,6 @@
 #include "halley/audio/audio_object.h"
 
+#include "audio_sources/audio_source_object.h"
 #include "halley/audio/audio_attenuation.h"
 #include "halley/audio/audio_clip.h"
 
@@ -267,10 +268,15 @@ gsl::span<AudioSubObjectHandle> AudioObject::getSubObjects()
 	return objects;
 }
 
+gsl::span<const AudioSubObjectHandle> AudioObject::getSubObjects() const
+{
+	return objects;
+}
+
 std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	if (!objects.empty()) {
-		return objects[0]->makeSource(engine, emitter);
+		return std::make_unique<AudioSourceObject>(engine, emitter, *this);
 	} else {
 		return {};
 	}
