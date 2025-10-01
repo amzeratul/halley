@@ -134,6 +134,12 @@ Resources& Stage::getResources() const
 	return *resources;
 }
 
+PlatformAPI& Stage::getPlatformAPI() const
+{
+	Expects(api->platform);
+	return *api->platform;
+}
+
 Game& Stage::getGame() const
 {
 	Expects(game);
@@ -151,3 +157,5 @@ void Stage::doInit(const HalleyAPI* _api, Resources& _resources)
 	api = _api;
 	init();
 }
+
+

@@ -53,6 +53,7 @@ namespace Halley
 		AnalyticsAPI& getAnalyticsAPI() const;
 		WebAPI& getWebAPI() const;
 		Resources& getResources() const;
+		PlatformAPI& getPlatformAPI() const;
 
 		Game& getGame() const;
 
