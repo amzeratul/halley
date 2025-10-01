@@ -207,6 +207,11 @@ Vector<AudioExpressionTerm>& AudioExpression::getTerms()
 	return terms;
 }
 
+const Vector<AudioExpressionTerm>& AudioExpression::getTerms() const
+{
+	return terms;
+}
+
 AudioExpressionOperation AudioExpression::getOperation() const
 {
 	return operation;

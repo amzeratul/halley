@@ -91,6 +91,8 @@ namespace Halley {
 		constexpr static AssetType getAssetType() { return AssetType::AudioObject; }
     	void loadDependencies(Resources& resources);
 
+		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const;
+
 		void makeDefault();
 		ConfigNode toConfigNode() const override;
         String toYAML() const;

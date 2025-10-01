@@ -49,6 +49,8 @@ namespace Halley {
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 		Vector<std::unique_ptr<AudioSource>> makeLayerSources(AudioEngine& engine, AudioEmitter& emitter) const;
 
+		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const override;
+
 		void loadDependencies(Resources& resources) override;
 
 		void serialize(Serializer& s) const override;

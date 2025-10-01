@@ -84,10 +84,30 @@ Vector<std::unique_ptr<AudioSource>> AudioSubObjectLayers::makeLayerSources(Audi
 {
 	Vector<std::unique_ptr<AudioSource>> sources;
 	sources.reserve(layers.size());
-	for (auto& l: layers) {
-		sources.push_back(l.object->makeSource(engine, emitter));
+	for (auto& layer: layers) {
+		if (auto source = layer.object->makeSource(engine, emitter)) {
+			sources.push_back(std::move(source));
+		} else {
+			Logger::logWarning("Failed to create source for AudioSubObjectLayers");
+		}
 	}
 	return sources;
+}
+
+void AudioSubObjectLayers::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	for (const auto& layer: layers) {
+		for (const auto& term: layer.expression.getTerms()) {
+			auto& dst = term.type == AudioExpressionTermType::Switch ? switches : variables;
+			if (!dst.contains(term.id)) {
+				dst += term.id;
+			}
+		}
+	}
+
+	for (const auto& layer: layers) {
+		layer.object->collectVariablesUsed(variables, switches);
+	}
 }
 
 void AudioSubObjectLayers::loadDependencies(Resources& resources)

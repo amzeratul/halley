@@ -305,6 +305,42 @@ public:
 	}
 };
 
+class ComponentEditorButtonFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UIButton<>";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(false);
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		String label = "Action";
+		if (pars.typeParameters.size() >= 1) {
+			label = pars.typeParameters[0];
+		}
+
+		auto data = pars.data;
+		const auto& defaultValue = pars.getBoolDefaultParameter();
+
+		const bool startValue = data.getFieldData().asBool(defaultValue);
+		auto val = std::make_shared<bool>(startValue);
+
+		auto field = std::make_shared<UIButton>("value", context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromUserString(label));
+		field->setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event) {
+			*val = !*val;
+			data.getWriteableFieldData() = ConfigNode(*val);
+			context.onEntityUpdated();
+		});
+
+		return field;
+	}
+};
+
 template <typename VecType, size_t nDimensions>
 class ComponentEditorVectorFieldFactory : public IComponentEditorFieldFactory {
 public:
@@ -1385,8 +1421,14 @@ public:
 		spawnContainer->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Max Particles"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Fixed Trigger Spawn Position"));
+		spawnContainer->add(context.makeField("bool", pars.withSubKey("fixedTriggerSpawnPosition", "false"), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Burst on Spawn"));
+		spawnContainer->add(context.makeField("bool", pars.withSubKey("burstOnSpawn", "true"), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel(""));
+		spawnContainer->add(context.makeField("Halley::UIButton<Trigger Burst>", pars.withSubKey("toggleToBurst", "false"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Height"));
 		initialContainer->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Scale"));
@@ -1395,6 +1437,10 @@ public:
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("speed", { "100", "100" }), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Velocity Mult"));
 		initialContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("velScale", {"1", "1", "1"}), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Angle"));
+		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("initialAngle", { "0", "0" }), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Angular Speed"));
+		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("angSpeed", { "0", "0" }), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Azimuth"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Altitude"));
@@ -1409,8 +1455,12 @@ public:
 		dynamicsContainer->add(context.makeField("Halley::InterpolationCurve", pars.withSubKey("scaleCurve", "1"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Acceleration"));
 		dynamicsContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
-		dynamicsContainer->add(context.makeLabel("Speed Damp"));
+		dynamicsContainer->add(context.makeLabel("Speed Dampening"));
 		dynamicsContainer->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Angular Acceleration"));
+		dynamicsContainer->add(context.makeField("float", pars.withSubKey("angAcceleration", "0"), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Angular Speed Damp."));
+		dynamicsContainer->add(context.makeField("float", pars.withSubKey("angSpeedDamp", "0"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Stop Time"));
 		dynamicsContainer->add(context.makeField("float", pars.withSubKey("stopTime", "0"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Direction Scatter"));
@@ -1419,14 +1469,18 @@ public:
 		dynamicsContainer->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Minimum Height"));
 		dynamicsContainer->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Trail Spawn Interval"));
+		dynamicsContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("trailSpawnInterval", {"0.1", "0.1"}), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Destroy When Done"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Relative Position"));
 		systemContainer->add(context.makeField("bool", pars.withSubKey("relativePosition", "false"), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Spawn"));
-		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onSpawn", ""), ComponentEditorLabelCreation::Never));
 		multiSystemContainer->add(context.makeLabel("On Death"));
-		multiSystemContainer->add(context.makeField("Halley::EntityId", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onDeath", ""), ComponentEditorLabelCreation::Never));
+		multiSystemContainer->add(context.makeLabel("On Trail"));
+		multiSystemContainer->add(context.makeField("Halley::Vector<Halley::EntityId>", pars.withSubKey("onTrail", ""), ComponentEditorLabelCreation::Never));
 
 		container->add(std::move(spawnGroup));
 		container->add(std::move(initialGroup));
@@ -2435,6 +2489,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorTimeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorButtonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2i, 2>>("Halley::Vector2i"));
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2f, 2>>("Halley::Vector2f"));
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector3i, 3>>("Halley::Vector3i"));

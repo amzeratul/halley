@@ -45,6 +45,17 @@ std::unique_ptr<AudioSource> AudioSubObjectSwitch::makeSource(AudioEngine& engin
 	return {};
 }
 
+void AudioSubObjectSwitch::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	if (!switches.contains(switchId)) {
+		switches += switchId;
+	}
+
+	for (const auto& cas: cases) {
+		cas.second->collectVariablesUsed(variables, switches);
+	}
+}
+
 String AudioSubObjectSwitch::getName() const
 {
 	return "Switch [" + switchId + "]";

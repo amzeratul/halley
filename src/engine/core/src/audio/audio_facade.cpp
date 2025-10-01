@@ -221,6 +221,26 @@ void AudioFacade::resetObjectLimits()
 	});
 }
 
+Future<void> AudioFacade::runOnAudioThread(std::function<void()> f)
+{
+	Promise<void> promise;
+	auto future = promise.getFuture();
+
+	auto action = [f = std::move(f), promise = std::move(promise)]() mutable {
+		f();
+		promise.set();
+	};
+
+	Vector<std::function<void()>> as;
+	as += std::move(action);
+	commandQueue.writeOne(std::move(as));
+
+	//enqueue(std::move(action));
+	//pump();
+
+	return future;
+}
+
 
 AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {

@@ -72,6 +72,8 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 ProjectWindow::~ProjectWindow()
 {
+	api.audio->stopPlayback();
+
 	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
@@ -309,6 +311,12 @@ void ProjectWindow::onAssetsLoaded()
 	project.withLoadedDLL([&](ProjectDLL& dll) {
 		entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories(project.getGameResources(), project.getGameEditorData()));
 	});
+
+	if (!hasStartedAudio) {
+		api.audio->setResources(project.getGameResources());
+		api.audio->startPlayback();
+		hasStartedAudio = true;
+	}
 }
 
 void ProjectWindow::update(Time t, bool moved)

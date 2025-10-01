@@ -349,6 +349,13 @@ void AudioObject::loadDependencies(Resources& resources)
 	}
 }
 
+void AudioObject::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	for (auto& object: objects) {
+		object->collectVariablesUsed(variables, switches);
+	}
+}
+
 void AudioObject::makeDefault()
 {
 }

@@ -46,8 +46,9 @@ public:
 	void spawn(Vector3f pos, EntityId target) override
 	{
 		// TODO: this could be a perf bottleneck
+		// Would it be faster to tryGetEntity(), then tryGetComponent()?
 		if (auto* particles = particleFamily.tryFind(target)) {
-			particles->particles.particles.spawnAt(pos);
+			particles->particles.particles.spawnTriggeredByAnotherSystem(pos);
 		}
 	}
 

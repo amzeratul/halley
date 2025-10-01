@@ -1,0 +1,104 @@
+uuid: 735c81bf-ff1b-40af-a939-02a73f115aee
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 51270410-9b5a-4b97-b4d9-f219f070c7d2
+    proportion: 1
+    sizer:
+      columnProportions: []
+      gap: 4
+      type: vertical
+    widget:
+      class: image
+      colour: $ui_popupWindow
+      id: background
+      image: $ui_title_capsule
+      innerBorder: [4, 1, 4, 4]
+      size: [200, 20]
+    children:
+      - uuid: fcc90a85-ad02-49d1-a679-e549ae2c4e52
+        border: [0, 0, 0, 1]
+        widget:
+          class: label
+          id: title
+          text: Playback
+        fill: centre
+      - uuid: f21a494e-48bf-47a8-b190-7bdd867a6aa2
+        proportion: 1
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+        children:
+          - uuid: 49130404-a938-4e11-82e5-4a9d2fe4421d
+            proportion: 1
+            sizer:
+              columnProportions: []
+              type: vertical
+            widget:
+              class: widget
+              id: leftColumn
+            children:
+              - uuid: 95178745-04f6-4208-b496-9ce0060afedb
+                sizer:
+                  columnProportions: []
+                  type: horizontal
+                widget:
+                  class: widget
+                children:
+                  - uuid: 96ea5df6-f3e0-411b-b0ca-6e68452f3fc1
+                    widget:
+                      class: button
+                      icon: halley_ui/icon_play.png
+                      id: play
+                      size: [50, 0]
+                  - uuid: 2cef77c8-8e17-47f7-bd56-b7d02b37a646
+                    proportion: 1
+                    spacer: {}
+                  - uuid: 82982958-d549-4eea-9cbc-859eb1894616
+                    widget:
+                      active: false
+                      class: button
+                      icon: ""
+                      id: variables
+                      size: [100, 0]
+                      text: Variables...
+                    fill: [right, fillVertical]
+              - uuid: f85e881a-8340-4971-9c47-cb0eba607d4e
+                proportion: 1
+                sizer:
+                  columnProportions: []
+                  type: vertical
+                widget:
+                  class: widget
+                  id: variablesArea
+                children:
+                  - uuid: ce0eb369-0bb6-4ed9-bbe2-1ce68f9002a6
+                    widget:
+                      class: resizeDivider
+                      type: verticalBottom
+                  - uuid: c4fde715-78c7-4066-9c60-dfb62de201b0
+                    proportion: 1
+                    sizer:
+                      columnProportions: []
+                      gap: 3
+                      type: vertical
+                    widget:
+                      class: scrollBarPane
+                      id: ""
+                      size: [0, 40]
+                    children:
+                      - uuid: b10822d3-0837-456c-a5f9-836f4161082e
+                        sizer:
+                          columnProportions: [1, 2, 1, 2]
+                          columns: 4
+                          type: grid
+                        widget:
+                          class: widget
+                          id: variablesContainer
+          - uuid: b2ca833b-224a-445e-bbce-5dacd5c5eea1
+            widget:
+              class: widget
+              id: rightColumn

@@ -902,7 +902,10 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	}
 	
 	if (node.hasKey("icon")) {
-		result->setIcon(Sprite().setImage(getResources(), node["icon"].asString()));
+		auto icon = node["icon"].asString();
+		if (!icon.isEmpty()) {
+			result->setIcon(Sprite().setImage(getResources(), icon));
+		}
 	}
 
 	if (node.hasKey("mouseBorder")) {

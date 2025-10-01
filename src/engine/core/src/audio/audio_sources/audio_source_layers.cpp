@@ -113,7 +113,9 @@ bool AudioSourceLayers::isReady() const
 	if (!layersAliveFlag) {
 		return false;
 	}
-	return std::all_of(layers.begin(), layers.end(), [=] (const auto& ls) { return ls.source->isReady(); });
+	return std::all_of(layers.begin(), layers.end(), [=] (const Layer& layer) {
+		return layer.source->isReady();
+	});
 }
 
 size_t AudioSourceLayers::getSamplesLeft() const
