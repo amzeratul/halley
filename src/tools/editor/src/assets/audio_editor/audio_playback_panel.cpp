@@ -191,7 +191,7 @@ std::shared_ptr<UIWidget> AudioPlaybackPanel::makeVariableControl(VariableType t
 			const auto startValue = curVars.value_or(id, variable->getDefaultValue());
 
 			auto control = std::make_shared<UISlider>(id, style, range.start, range.end, startValue, true, true);
-			control->bindData(id, variable->getDefaultValue(), [=] (float value) {
+			control->bindData(id, startValue, [=] (float value) {
 				setVariable(id, value);
 			});
 			return control;
