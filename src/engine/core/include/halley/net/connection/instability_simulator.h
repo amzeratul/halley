@@ -43,6 +43,8 @@ namespace Halley
 
 	private:
 		std::shared_ptr<IConnection> parent;
+		bool active = false;
+
 		float avgLag;
 		float lagVariance;
 		float packetLoss;
@@ -50,5 +52,7 @@ namespace Halley
 
 		std::priority_queue<DelayedPacket> packets;
 		void sendPendingPackets();
+
+		void checkActive();
 	};
 }

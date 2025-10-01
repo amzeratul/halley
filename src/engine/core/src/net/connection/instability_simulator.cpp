@@ -33,18 +33,19 @@ void InstabilitySimulator::setLag(float average, float variance)
 {
 	avgLag = average;
 	lagVariance = variance;
+	checkActive();
 }
 
 void InstabilitySimulator::setPacketLoss(float chance)
 {
-	Expects(chance < 0.95f);
-	packetLoss = chance;
+	packetLoss = std::clamp(chance, 0.0f, 0.95f);
+	checkActive();
 }
 
 void InstabilitySimulator::setDuplication(float chance)
 {
-	Expects(chance < 0.95f);
-	duplication = chance;
+	duplication = std::clamp(chance, 0.0f, 0.95f);
+	checkActive();
 }
 
 void InstabilitySimulator::close()
@@ -64,6 +65,11 @@ bool InstabilitySimulator::isSupported(TransmissionType type) const
 
 void InstabilitySimulator::send(TransmissionType type, OutboundNetworkPacket packet)
 {
+	if (!active) {
+		parent->send(type, packet);
+		return;
+	}
+
 	auto& rng = Random::getGlobal();
 
 	if (rng.getFloat(0.0f, 1.0f) < packetLoss) {
@@ -101,6 +107,11 @@ void InstabilitySimulator::onConnect(short connId)
 
 void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packet)
 {
+	if (!active) {
+		parent->sendUnreliablePacket(packet);
+		return;
+	}
+
 	Expects(getMaxUnreliablePacketSize() > 0);
 
 	auto& rng = Random::getGlobal();
@@ -139,4 +150,9 @@ void InstabilitySimulator::sendPendingPackets()
 
 		packets.pop();
 	}
+}
+
+void InstabilitySimulator::checkActive()
+{
+	active = avgLag > 0.0f || packetLoss > 0.0f || duplication > 0.0f;
 }
