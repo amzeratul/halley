@@ -26,6 +26,7 @@ void EntityNetworkMessageUpdate::serialize(Serializer& s) const
 {
 	s << entityId;
     s << fastSerialize;
+	s << timestamp;
 	s << bytes;
 }
 
@@ -33,6 +34,7 @@ void EntityNetworkMessageUpdate::deserialize(Deserializer& s)
 {
 	s >> entityId;
     s >> fastSerialize;
+	s >> timestamp;
 	s >> bytes;
 }
 

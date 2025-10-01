@@ -92,10 +92,15 @@ namespace Halley {
     class EntityNetworkSerialize
     {
     public:
+        struct InboundResult
+        {
+            std::optional<Vector2f> position;
+        };
+
         explicit EntityNetworkSerialize(const EntityNetworkSession* session);
 
         bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
-        void deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
+        InboundResult deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
 
         bool processEntityUpdateChanges(Bytes& previous);
         bool hasEntityChanges(const EntityRef& entity, bool log) const;
@@ -164,7 +169,7 @@ namespace Halley {
 
         EntityNetworkChanges::Type doDeserializeEntityUpdate(
             const SerializationContext& context, Deserializer& deserializer,
-            EntityRef& entity, const std::optional<EntityRef>& parent);
+            EntityRef& entity, const std::optional<EntityRef>& parent, InboundResult* result);
 
         static void fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size);
         static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);

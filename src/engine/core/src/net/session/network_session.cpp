@@ -122,6 +122,16 @@ Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
 	return result;
 }
 
+size_t NetworkSession::getIndexOfRemotePeer(PeerId clientId) const
+{
+	for (size_t idx = 0; idx < peers.size(); idx++) {
+		if (peers.at(idx).peerId == clientId) {
+			return idx;
+		}
+	}
+	throw Exception("Invalid peer ID.", HalleyExceptions::Network);
+}
+
 NetworkSession::PeerId NetworkSession::getRemotePeerAtIndex(size_t idx) const
 {
 	return peers.at(idx).peerId;
@@ -669,7 +679,8 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPingReply& 
 	peer.lastPingResponse.timestamp = curTimestamp; // our own current time
 	peer.lastPingResponse.remoteTimestamp = msg.timestamp; // "current" time on remote, ignoring latency
 
-	peer.latency = curTimestamp - msg.remoteTimestamp;
+	// Average with previous latency, to smooth temporary spikes.
+	peer.latency = ((curTimestamp - msg.remoteTimestamp) + peer.latency) / 2;
 }
 
 void NetworkSession::setMyPeerId(PeerId id)

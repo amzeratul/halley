@@ -138,12 +138,25 @@ private:
 
 		consoleCommands.addCommand("networkLag", [this](Vector<String> args) -> String
 		{
-			if (args.size() != 2 || !args[0].isNumber() || !args[1].isNumber()) {
-				return "Syntax: networkLag <average> <variance>";
+			if (args.empty() || args.size() > 2) {
+				return "Syntax: networkLag <average> [<variance>]";
+			}
+
+			if (!args[0].isNumber() || (args.size() > 1 && !args[1].isNumber())) {
+				return "Error: no numbers argument(s)";
 			}
 
 			float average = std::clamp(args[0].toFloat(), 0.0f, 1.0f);
-			float variance = std::clamp(args[1].toFloat(), 0.0f, 1.0f);
+
+			float variance = 0.0f;
+			if (args.size() > 1) {
+				variance = std::clamp(args[1].toFloat(), 0.0f, 1.0f);
+			}
+
+			if (variance > average * 0.5f) {
+				return "Error: high variance, ignoring";
+			}
+
 			getSessionService().getMultiplayerSession().getNetworkSession()->simulateLatency(average, variance);
 
 			return "Ok.";

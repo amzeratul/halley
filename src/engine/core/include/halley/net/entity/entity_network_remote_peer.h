@@ -71,6 +71,7 @@ namespace Halley {
         public:
             EntityId worldId;
             EntityData data;
+        	Vector<std::pair<Vector2f, int32_t>> positionUpdates;
         	bool appliedOnExistingEntity = false;
         	bool forChangedAuthorityOnly = false;
         	String debugName; // for debug only, do a proper lookup if needed
@@ -105,7 +106,7 @@ namespace Halley {
 
         uint16_t assignId();
         void sendCreateEntity(const EntityRef& entity);
-        void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
+        void sendUpdateEntity(Time t, int32_t sessionTimestamp, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote, EntityId entityId);
         void sendKeepAlive();
         void send(EntityNetworkMessage message);
@@ -129,5 +130,8 @@ namespace Halley {
         void onFirstDataBatchSent();
 
         void stripNestedNetworkComponents(EntityRef entity, int depth = 0);
+
+    	void updateRemoteEntityPosition(InboundEntity& inboundEntity, EntityRef entity, const Vector2f& position, int32_t timestamp, int32_t now);
+    	void interpolateRemoteEntityPositions(Time dt);
 	};
 }

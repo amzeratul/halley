@@ -2,6 +2,7 @@
 
 #include "halley/bytes/byte_serializer.h"
 #include "halley/entity/world.h"
+#include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;
 
@@ -389,7 +390,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     }
 }
 
-void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options)
+EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
@@ -409,7 +410,8 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const st
     UUID instanceUUID;
     deserializer >> instanceUUID;
 
-    type = doDeserializeEntityUpdate(context, deserializer, entity, {});
+    InboundResult result = {};
+    type = doDeserializeEntityUpdate(context, deserializer, entity, {}, &result);
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         Logger::logDev("Not at end of entity network update byte stream, " +
@@ -425,12 +427,14 @@ void EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const st
         }
     }
 #endif
+
+    return result;
 }
 
 // See EntityFactory::updateEntityNode().
 EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     const SerializationContext& context, Deserializer& deserializer,
-    EntityRef& entity, const std::optional<EntityRef>& parent)
+    EntityRef& entity, const std::optional<EntityRef>& parent, InboundResult* result)
 {
     Expects(entity.isValid());
 
@@ -505,7 +509,23 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
 
         if (auto component = reflector.tryGetComponent(entity)) {
-            reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+            if (result && componentId == Transform2DComponent::componentIndex) {
+                // Saves the current position before deserialization, and restores it afterward. Return the
+                // new position in the function result instead.
+                //
+                // Only done for transform components in root entities, skipped for child entities.
+                //
+                // TODO: for debugging, shouldn't be needed as it's updated later.
+                auto transform = reinterpret_cast<Transform2DComponent*>(component);
+                auto pos = transform->getLocalPosition();
+
+                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+
+                result->position = transform->getLocalPosition();
+                transform->setLocalPosition(pos);
+            } else {
+                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+            }
         } else {
             deserializer.skipBytes(size);
             Logger::logDev("No component " + toString(componentId) + " found in entity " +
@@ -527,7 +547,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         if (childEntityInfo) {
             auto& childEntity = childEntityInfo->first;
             const auto& parentOfChildEntity = childEntityInfo->second;
-            type = doDeserializeEntityUpdate(context, deserializer, childEntity, parentOfChildEntity);
+            type = doDeserializeEntityUpdate(context, deserializer, childEntity, parentOfChildEntity, nullptr);
         } else if (parent) {
             // Not a child entity, so it should be a sibling, or child of sibling, further up the
             // call chain. Need to rewind the deserializer, so the caller can read the UUIDs again.
