@@ -112,7 +112,7 @@ void AudioPlaybackPanel::play()
 	if (object) {
 		audioHandle = api.audio->play(playbackObject, emitter);
 	} else if (event) {
-		audioHandle = api.audio->postEvent(*event, emitter);
+		audioHandle = api.audio->postEvent(*playbackEvent, emitter);
 	}
 }
 
@@ -155,6 +155,13 @@ void AudioPlaybackPanel::updatePlaybackObject()
 		}
 	} else {
 		playbackObject = {};
+	}
+
+	if (event) {
+		playbackEvent = std::make_shared<AudioEvent>(*event);
+		playbackEvent->loadDependencies(project.getGameResources());
+	} else {
+		playbackEvent = {};
 	}
 }
 
@@ -261,6 +268,10 @@ Vector<std::pair<AudioPlaybackPanel::VariableType, String>> AudioPlaybackPanel::
 
 	if (object) {
 		object->collectVariablesUsed(variables, switches);
+	} else if (event) {
+		auto eventCopy = *event;
+		eventCopy.loadDependencies(project.getGameResources());
+		eventCopy.collectVariablesUsed(variables, switches);
 	}
 
 	Vector<std::pair<VariableType, String>> result;

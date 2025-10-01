@@ -1,13 +1,16 @@
 #include "audio_event_editor.h"
 
 #include "audio_fade_editor.h"
+#include "audio_playback_panel.h"
 #include "halley/properties/game_properties.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/project_window.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
 AudioEventEditor::AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, AssetType::AudioEvent)
+	, projectWindow(projectWindow)
 {
 	factory.loadUI(*this, "halley/audio_editor/audio_event_editor");
 }
@@ -22,6 +25,7 @@ void AudioEventEditor::refreshAssets()
 	if (audioEvent) {
 		audioEvent = std::make_shared<AudioEvent>(YAMLConvert::parseConfig(project.getAssetsSrcPath() / assetPath).getRoot());
 		audioEvent->setAssetId(assetId);
+		playbackPanel->setAudioEvent(audioEvent);
 		doLoadUI();
 	}
 }
@@ -29,6 +33,8 @@ void AudioEventEditor::refreshAssets()
 void AudioEventEditor::onMakeUI()
 {
 	actionList = getWidgetAs<UIList>("actions");
+	playbackPanel = std::make_shared<AudioPlaybackPanel>(factory, projectWindow.getAPI(), project);
+	getWidget("playbackContainer")->add(playbackPanel, 1);
 
 	setHandle(UIEventType::ListItemsSwapped, "actions", [=](const UIEvent& event)
 	{
@@ -66,6 +72,7 @@ bool AudioEventEditor::isModified()
 void AudioEventEditor::markModified()
 {
 	modified = true;
+	playbackPanel->onObjectModified();
 }
 
 void AudioEventEditor::addAction()
@@ -118,6 +125,7 @@ std::shared_ptr<const Resource> AudioEventEditor::loadResource(const Path& asset
 		markModified();
 	}
 	audioEvent->setAssetId(assetId);
+	playbackPanel->setAudioEvent(audioEvent);
 	
 	return audioEvent;
 }

@@ -23,6 +23,7 @@ namespace Halley {
         std::shared_ptr<const AudioObject> object;
         std::shared_ptr<const AudioEvent> event;
     	std::shared_ptr<AudioObject> playbackObject;
+    	std::shared_ptr<AudioEvent> playbackEvent;
         std::shared_ptr<UIButton> playButton;
 
         bool needsIconUpdate = false;

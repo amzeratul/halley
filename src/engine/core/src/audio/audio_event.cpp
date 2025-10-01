@@ -70,6 +70,13 @@ Vector<AudioObject> AudioEvent::convertLegacy(const String& audioEventId, Config
 	return output;
 }
 
+void AudioEvent::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	for (const auto& action: actions) {
+		action->collectVariablesUsed(variables, switches);
+	}
+}
+
 String AudioEvent::toYAML() const
 {
 	auto actionsNode = ConfigNode::SequenceType();
@@ -341,6 +348,13 @@ void AudioEventActionObject::loadDependencies(const AudioEvent& event, Resources
 		} else {
 			Logger::logError("Error when loading dependencies for AudioEvent \"" + event.getAssetId() + "\": AudioObject not found: " + objectName);
 		}
+	}
+}
+
+void AudioEventActionObject::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
+{
+	if (object) {
+		object->collectVariablesUsed(variables, switches);
 	}
 }
 

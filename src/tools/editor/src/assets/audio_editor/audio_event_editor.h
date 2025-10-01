@@ -2,6 +2,10 @@
 #include "../asset_editor.h"
 
 namespace Halley {
+	class AudioPlaybackPanel;
+}
+
+namespace Halley {
 	class AudioProperties;
 
 	class AudioEventEditor : public AssetEditor {
@@ -28,8 +32,10 @@ namespace Halley {
         std::shared_ptr<const Resource> loadResource(const Path& assetPath, const String& assetId, AssetType assetType) override;
 
 	private:
+        ProjectWindow& projectWindow;
         std::shared_ptr<AudioEvent> audioEvent;
         std::shared_ptr<UIList> actionList;
+        std::shared_ptr<AudioPlaybackPanel> playbackPanel;
         int actionId = 0;
         bool modified = false;
 

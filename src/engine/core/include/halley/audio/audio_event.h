@@ -99,9 +99,11 @@ namespace Halley
 
 		static Vector<AudioObject> convertLegacy(const String& audioEventId, ConfigNode& audioEventNode);
 
+		void loadDependencies(Resources& resources);
+		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const;
+
 	private:
 		Vector<std::unique_ptr<AudioEventAction>> actions;
-		void loadDependencies(Resources& resources);
 	};
 
 	class AudioEventAction
@@ -118,6 +120,7 @@ namespace Halley
 		virtual void serialize(Serializer& s) const;
 		virtual void deserialize(Deserializer& s);
 		virtual void loadDependencies(const AudioEvent& event, Resources& resources) {}
+		virtual void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const {}
 
 		virtual ConfigNode toConfigNode() const;
 
@@ -143,6 +146,7 @@ namespace Halley
 		AudioFade& getFade();
 
 		void loadDependencies(const AudioEvent& event, Resources& resources) override;
+		void collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const override;
 
 	protected:
 		std::optional<AudioObjectId> objectId;
