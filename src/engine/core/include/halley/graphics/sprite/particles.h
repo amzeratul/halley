@@ -39,6 +39,8 @@ namespace Halley {
 		struct Particle {
 			Vector3f pos;
 			Vector3f vel;
+			Angle1f angle;
+			float angSpeed = 0;
 			float scale = 1;
 			float time = 0;
 			float ttl = 1;
@@ -109,7 +111,7 @@ namespace Halley {
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;
 
 		void setSecondarySpawner(IParticleSpawner* spawner);
-		void spawnAt(Vector3f pos);
+		void spawnTriggeredByAnotherSystem(Vector3f triggerParticlePos);
 
 		std::optional<Rect4f> getAABB() const;
 		void destroyOverlapping(const Polygon& polygon);
@@ -141,12 +143,16 @@ namespace Halley {
 
 		Range<float> ttl;
 		Range<float> speed;
+		Range<float> angSpeed;
 		Range<float> azimuth;
 		Range<float> altitude;
 		Range<float> initialScale;
+		Range<float> initialAngle;
 		float speedDamp = 0;
+		float angSpeedDamp = 0;
 		Vector3f acceleration;
 		Vector3f velScale;
+		float angAcceleration = 0;
 		InterpolationCurve scaleCurve;
 		ColourGradient colourGradient;
 		float stopTime = 0;
@@ -157,6 +163,7 @@ namespace Halley {
 		bool relativePosition = false;
 		bool randomiseAnimationTime = false;
 		bool burstOnSpawn = true;
+		bool fixedTriggerSpawnPosition = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;

@@ -75,9 +75,13 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 		colourGradient = ColourGradient(node["colourGradient"]);
 	}
 
+	initialAngle = node["initialAngle"].asFloatRange(Range<float>(0.0f, 0.0f));
+	angSpeed = node["angSpeed"].asFloatRange(Range<float>(0.0f, 0.0f));
 	initialScale = node["initialScale"].asFloatRange(Range<float>(1.0f, 1.0f));
 	speedDamp = node["speedDamp"].asFloat(0.0f);
+	angSpeedDamp = node["angSpeedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
+	angAcceleration = node["angAcceleration"].asFloat(0);
 	stopTime = node["stopTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
@@ -90,6 +94,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	burst = node["burst"].asOptional<int>();
 	burstOnSpawn = node["burstOnSpawn"].asBool(true);
 	randomiseAnimationTime = node["randomiseAnimationTime"].asBool(false);
+	fixedTriggerSpawnPosition = node["fixedTriggerSpawnPosition"].asBool(false);
 	trailSpawnInterval = node["trailSpawnInterval"].asFloatRange(Range<float>(0.1f, 0.1f));
 	onSpawn = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["onSpawn"]);
 	onDeath = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["onDeath"]);
@@ -113,10 +118,14 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["spawnRate"] = spawnRate;
 	result["spawnArea"] = spawnArea;
 	result["spawnAreaShape"] = spawnAreaShape;
+	result["initialAngle"] = initialAngle;
 	result["ttl"] = ttl;
 	result["speed"] = speed;
+	result["angSpeed"] = angSpeed;
 	result["speedDamp"] = speedDamp;
+	result["angSpeedDamp"] = angSpeedDamp;
 	result["acceleration"] = acceleration;
+	result["angAcceleration"] = angAcceleration;
 	result["azimuth"] = azimuth;
 	result["altitude"] = altitude;
 	result["initialScale"] = initialScale;
@@ -135,6 +144,7 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["burstOnSpawn"] = burstOnSpawn;
 	result["randomiseAnimationTime"] = randomiseAnimationTime;
 	result["trailSpawnInterval"] = trailSpawnInterval;
+	result["fixedTriggerSpawnPosition"] = fixedTriggerSpawnPosition;
 	result["onSpawn"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onSpawn, context);
 	result["onDeath"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onDeath, context);
 	result["onTrail"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(onTrail, context);
@@ -392,10 +402,10 @@ void Particles::setSecondarySpawner(IParticleSpawner* spawner)
 	secondarySpawner = spawner;
 }
 
-void Particles::spawnAt(Vector3f pos)
+void Particles::spawnTriggeredByAnotherSystem(Vector3f triggerParticlePos)
 {
-	auto n = std::max(burst.value_or(1), 1);
-	spawn(n, 0.0f, pos);
+	const auto n = std::max(burst.value_or(1), 1);
+	spawn(n, 0.0f, fixedTriggerSpawnPosition ? position : triggerParticlePos);
 }
 
 void Particles::destroyOverlapping(const Polygon& polygon)
@@ -462,10 +472,11 @@ void Particles::initializeParticle(size_t index, float time, float totalTime, Ve
 	particle.time = time;
 	particle.ttl = rng->getFloat(ttl);
 	particle.trailTime = rng->getFloat(trailSpawnInterval) - time;
-	//particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
+	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f::fromDegrees(rng->getFloat(initialAngle));
 	particle.scale = rng->getFloat(initialScale);
 
 	particle.vel = Vector3f(rng->getFloat(speed) * speedMultiplier, startAzimuth, startElevation);
+	particle.angSpeed = rng->getFloat(angSpeed);
 	const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
 	const auto a = stopped ? Vector3f() : acceleration;
 	const auto spawnPosSmear = totalTime > 0.00001f ? lerp(position - lastPosition, Vector3f(), time / totalTime) : Vector3f();
@@ -494,6 +505,8 @@ void Particles::updateParticles(float time)
 {
 	const bool hasAnim = isAnimated();
 
+	const float angAccelRad = Angle1f::degToRad(angAcceleration);
+
 	for (size_t i = 0; i < nParticlesAlive; ++i) {
 		if (hasAnim) {
 			animationPlayers[i].update(time, sprites[i]);
@@ -506,13 +519,22 @@ void Particles::updateParticles(float time)
 			particle.alive = false;
 		} else {
 			const bool stopped = stopTime > 0.00001f && particle.time + stopTime >= particle.ttl;
-			const auto a = stopped ? Vector3f() : acceleration;
+
 			if (particle.firstFrame) {
 				particle.firstFrame = false;
+			} else {
+				const auto accel = stopped ? Vector3f() : acceleration;
+				const auto angAccel = stopped ? 0.0f : angAccelRad;
+
+				particle.pos += (particle.vel * time + accel * (0.5f * time * time)) * velScale;
+				particle.vel += accel * time;
+
+				particle.angle += Angle1f::fromRadians(particle.angSpeed * time);
+				particle.angSpeed += angAccel;
 			}
-			else {
-				particle.pos += (particle.vel * time + a * (0.5f * time * time)) * velScale;
-				particle.vel += a * time;
+
+			if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
+				particle.angle = (particle.vel.xy() + Vector2f(0, particle.vel.z)).angle();
 			}
 
 			if (minHeight && particle.pos.z < minHeight) {
@@ -525,6 +547,10 @@ void Particles::updateParticles(float time)
 
 			if (speedDamp > 0.0001f) {
 				particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
+			}
+
+			if (angSpeedDamp > 0.0001f) {
+				particle.angSpeed = damp(particle.angSpeed, 0.0f, angSpeedDamp, time);
 			}
 
 			if (directionScatter > 0.00001f) {
@@ -551,16 +577,11 @@ void Particles::updateSprites(Time t)
 	for (size_t i = 0; i < nParticlesAlive; ++i) {
 		const auto& particle = particles[i];
 
-		Angle1f angle;
-		if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
-			angle = (particle.vel.xy() + Vector2f(0, particle.vel.z)).angle();
-		}
-
 		const float t = particle.time / particle.ttl;
 
 		sprites[i]
 			.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
-			.setRotation(angle)
+			.setRotation(particle.angle)
 			.setScale(scaleCurve.evaluate(t) * particle.scale)
 			.setColour(colourGradient.evaluatePrecomputed(t))
 			.setCustom1(Vector4f(particle.pos.xy(), 0, 0));

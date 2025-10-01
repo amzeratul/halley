@@ -1421,6 +1421,8 @@ public:
 		spawnContainer->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Max Particles"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
+		spawnContainer->add(context.makeLabel("Fixed Trigger Spawn Position"));
+		spawnContainer->add(context.makeField("bool", pars.withSubKey("fixedTriggerSpawnPosition", "false"), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst"));
 		spawnContainer->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		spawnContainer->add(context.makeLabel("Burst on Spawn"));
@@ -1435,6 +1437,10 @@ public:
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("speed", { "100", "100" }), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Velocity Mult"));
 		initialContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("velScale", {"1", "1", "1"}), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Angle"));
+		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("initialAngle", { "0", "0" }), ComponentEditorLabelCreation::Never));
+		initialContainer->add(context.makeLabel("Angular Speed"));
+		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("angSpeed", { "0", "0" }), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Azimuth"));
 		initialContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("azimuth", {"0", "0"}), ComponentEditorLabelCreation::Never));
 		initialContainer->add(context.makeLabel("Altitude"));
@@ -1449,8 +1455,12 @@ public:
 		dynamicsContainer->add(context.makeField("Halley::InterpolationCurve", pars.withSubKey("scaleCurve", "1"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Acceleration"));
 		dynamicsContainer->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
-		dynamicsContainer->add(context.makeLabel("Speed Damp"));
+		dynamicsContainer->add(context.makeLabel("Speed Dampening"));
 		dynamicsContainer->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Angular Acceleration"));
+		dynamicsContainer->add(context.makeField("float", pars.withSubKey("angAcceleration", "0"), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Angular Speed Damp."));
+		dynamicsContainer->add(context.makeField("float", pars.withSubKey("angSpeedDamp", "0"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Stop Time"));
 		dynamicsContainer->add(context.makeField("float", pars.withSubKey("stopTime", "0"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Direction Scatter"));
