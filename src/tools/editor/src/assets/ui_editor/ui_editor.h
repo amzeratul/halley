@@ -99,7 +99,7 @@ namespace Halley {
 		ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Vector2f minSize, bool mustAllowChildren, Mode mode, Callback callback);
 
 	protected:
-		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+		std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch) override;
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
 		void sortItems(Vector<std::pair<String, String>>& items) override;
 

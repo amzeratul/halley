@@ -11,16 +11,16 @@ ScriptingChooseNode::ScriptingChooseNode(Vector2f minSize, UIFactory& factory, R
 	setTitle(LocalisedString::fromHardcodedString("Add Node"));
 }
 
-std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(std::shared_ptr<IUIElement> widget, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	if (hasSearch) {
-		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
+		return ChooseAssetWindow::makeItemSizer(std::move(widget), std::move(label), hasSearch);
 	} else {
-		return makeItemSizerBigIcon(std::move(icon), std::move(label));
+		return makeItemSizerBigIcon(std::move(widget), std::move(label));
 	}
 }
 
-std::shared_ptr<UIImage> ScriptingChooseNode::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ScriptingChooseNode::makePreview(const String& id, bool hasSearch)
 {
 	const auto* type = nodeTypes->tryGetGraphNodeType(id);
 	if (type) {

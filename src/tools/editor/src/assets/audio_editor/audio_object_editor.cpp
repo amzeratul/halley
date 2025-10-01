@@ -360,7 +360,7 @@ void AudioObjectEditor::addObject()
 
 void AudioObjectEditor::addClips()
 {
-	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, AssetType::AudioClip, "", gameResources, projectWindow, false, std::optional<String>(), ChooseAssetTypeWindow::Callback::MultiCallback([=](const Vector<String>& result)
+	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, AssetType::AudioClip, "", gameResources, projectWindow, true, std::optional<String>(), ChooseAssetTypeWindow::Callback::MultiCallback([=](const Vector<String>& result)
 	{
 		for (const auto& clip: result) {
 			addClip(clip);

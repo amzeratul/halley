@@ -315,6 +315,7 @@ void ProjectWindow::onAssetsLoaded()
 	if (!hasStartedAudio) {
 		api.audio->setResources(project.getGameResources());
 		api.audio->startPlayback();
+		api.audio->setListener(AudioListenerData(Vector3f()));
 		hasStartedAudio = true;
 	}
 }

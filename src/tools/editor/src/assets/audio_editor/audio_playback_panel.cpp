@@ -105,8 +105,6 @@ void AudioPlaybackPanel::play()
 	if (!emitter) {
 		emitter = api.audio->createEmitter(audioPosition);
 		applyVariablesToEmitter();
-
-		api.audio->setListener(AudioListenerData(Vector3f()));
 	}
 
 	api.audio->resetBuses();
@@ -130,7 +128,7 @@ void AudioPlaybackPanel::pause()
 
 bool AudioPlaybackPanel::isPlaying() const
 {
-	return static_cast<bool>(audioHandle);
+	return audioHandle && audioHandle->isPlaying();
 }
 
 bool AudioPlaybackPanel::isReadyToPlay() const

@@ -1,0 +1,15 @@
+uuid: 675384e2-1f0f-44a6-a1ee-aa3823457380
+sizer:
+  columnProportions: []
+widget:
+  class: widget
+children:
+  - uuid: 0b8a4616-1270-480c-ac36-4d0386ef4a5f
+    proportion: 1
+    widget:
+      class: button
+      icon: halley_ui/icon_play.png
+      id: play
+      size: [20, 0]
+      style: buttonThin
+      text: ""

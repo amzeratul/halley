@@ -521,7 +521,7 @@ ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFa
 	setTitle(LocalisedString::fromHardcodedString(mode == Mode::Widget ? "Choose Widget" : "Choose Behaviour"));
 }
 
-std::shared_ptr<UIImage> ChooseUIWidgetWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ChooseUIWidgetWindow::makePreview(const String& id, bool hasSearch)
 {
 	String iconName;
 	if (mode == Mode::Behaviour) {

@@ -62,11 +62,11 @@ namespace Halley {
 		UIFactory& getFactory() const;
         void onMakeUI() override;
 
-		virtual std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch);
+		virtual std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch);
 		virtual LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch);
 
-		virtual std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
-		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
+		virtual std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<IUIElement> icon, std::shared_ptr<UILabel> label, bool hasSearch);
+		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<IUIElement> widget, std::shared_ptr<UILabel> label);
 
         virtual void onCategorySet(const String& id);
 		virtual void onOptionSelected(const String& id);

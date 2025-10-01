@@ -182,7 +182,13 @@ std::shared_ptr<UIWidget> SelectAssetWidget::makeChooseWindow(std::function<void
 	if (type == AssetType::Prefab) {
 		return std::make_shared<ChoosePrefabWindow>(factory, getValue(), gameResources, projectWindow, callback);
 	} else {
-		const bool preview = type == AssetType::Sprite || type == AssetType::Animation || type == AssetType::Texture;
+		const bool preview =
+			type == AssetType::Sprite
+			|| type == AssetType::Animation
+			|| type == AssetType::Texture
+			|| type == AssetType::AudioObject
+			|| type == AssetType::AudioClip
+			|| type == AssetType::AudioEvent;
 		return std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), gameResources, projectWindow, preview, allowEmpty, callback);
 	}
 }

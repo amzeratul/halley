@@ -20,14 +20,16 @@ namespace Halley {
         ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, std::optional<String> allowEmpty, Callback callback);
 
     protected:
-        std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+        std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch) override;
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
-		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<IUIElement> preview, std::shared_ptr<UILabel> label, bool hasSearch) override;
 		void sortItems(Vector<std::pair<String, String>>& items) override;
 
 		LocalisedString getPreviewItemLabel(const String& id, const String& name, bool hasSearch);
-        std::shared_ptr<UIImage> makePreviewIcon(const String& id, bool hasSearch);
-		std::shared_ptr<UISizer> makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
+        std::shared_ptr<IUIElement> makePreviewWidget(const String& id, bool hasSearch);
+        std::shared_ptr<IUIElement> makeAudioPreview(const String& id, bool hasSearch);
+        std::shared_ptr<IUIElement> makeImagePreview(const String& id, bool hasSearch);
+		std::shared_ptr<UISizer> makePreviewItemSizer(std::shared_ptr<IUIElement> preview, std::shared_ptr<UILabel> label, bool compact);
 
         int getNumColumns(Vector2f scrollPaneSize) const override;
 		
@@ -42,6 +44,7 @@ namespace Halley {
 		Sprite emptyPreviewIcon;
 		Sprite emptyPreviewIconSmall;
 		bool hasPreview;
+        Resources& gameResources;
 	};
 
 	class ChooseUIStyleWindow : public ChooseAssetWindow {
@@ -60,7 +63,7 @@ namespace Halley {
 		void setIconRetriever(IconRetriever retriever);
 
 	protected:
-		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+		std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch) override;
 		bool canShowAll() const override;
 
 	private:
@@ -91,8 +94,8 @@ namespace Halley {
 
     protected:
 		int getNumColumns(Vector2f scrollPaneSize) const override;
-		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
-		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		std::shared_ptr<IUIElement> makePreview(const String& id, bool hasSearch) override;
+		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<IUIElement> preview, std::shared_ptr<UILabel> label, bool hasSearch) override;
 
     private:
 		HashMap<String, Sprite> icons;

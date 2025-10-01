@@ -35,6 +35,11 @@ namespace Halley {
 		virtual ConfigNode getUISetting(std::string_view key) = 0;
 	};
 
+	class IUISharedData {
+	public:
+		virtual ~IUISharedData() = default;
+	};
+
 	class UIRootGroup {
 		friend class UIRoot;
 
@@ -145,6 +150,18 @@ namespace Halley {
 		void setInputActive(bool active);
 		bool isInputActive() const;
 
+		template <typename T>
+		std::shared_ptr<T> getSharedData(const String& id)
+		{
+			if (auto data = tryGetSharedData(id)) {
+				return std::dynamic_pointer_cast<T>(data);
+			}
+
+			auto data = std::make_shared<T>();
+			setSharedData(id, data);
+			return data;
+		}
+
 	private:
 		String id;
 		InputAPI* inputAPI = nullptr;
@@ -170,6 +187,8 @@ namespace Halley {
 
 		std::shared_ptr<UIRootGroup> group;
 
+		HashMap<String, std::shared_ptr<IUISharedData>> sharedData;
+
 		void updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeInputType, JoystickType joystickType);
 
 		void updateMouse(const std::shared_ptr<InputDevice>& mouse, KeyMods keyMods);
@@ -191,5 +210,8 @@ namespace Halley {
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::shared_ptr<UIWidget>>& output);
 
 		void getFocusables(Vector<std::shared_ptr<UIWidget>>& result);
+
+		std::shared_ptr<IUISharedData> tryGetSharedData(const String& id) const;
+		void setSharedData(String id, std::shared_ptr<IUISharedData> data);
 	};
 }

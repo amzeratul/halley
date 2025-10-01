@@ -261,7 +261,7 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 	const bool hasSearch = !matchPositions.empty();
 	
 	// Make icon
-	auto icon = makeIcon(id, hasSearch);
+	auto icon = makePreview(id, hasSearch);
 
 	// Make label
 	auto label = options->makeLabel("", getItemLabel(id, name, hasSearch));
@@ -308,21 +308,21 @@ void ChooseAssetWindow::updateCurrentDataSet(const String& str)
 	}
 }
 
-std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(std::shared_ptr<IUIElement> widget, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	auto sizer = std::make_shared<UISizer>();
-	if (icon) {
-		sizer->add(icon, 0, Vector4f(0, 0, 4, 0));
+	if (widget) {
+		sizer->add(widget, 0, Vector4f(0, 0, 4, 0));
 	}
 	sizer->add(label, 0);
 	return sizer;
 }
 
-std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label)
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(std::shared_ptr<IUIElement> widget, std::shared_ptr<UILabel> label)
 {
 	auto sizer = std::make_shared<UISizer>(UISizerType::Vertical);
-	if (icon) {
-		sizer->add(icon, 0, Vector4f(0, 0, 4, 0), UISizerAlignFlags::CentreHorizontal);
+	if (widget) {
+		sizer->add(widget, 0, Vector4f(0, 0, 4, 0), UISizerAlignFlags::CentreHorizontal);
 	}
 	sizer->add(label, 0, {}, UISizerAlignFlags::CentreHorizontal);
 	return sizer;
@@ -460,7 +460,7 @@ bool ChooseAssetWindow::canShowAll() const
 	return true;
 }
 
-std::shared_ptr<UIImage> ChooseAssetWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ChooseAssetWindow::makePreview(const String& id, bool hasSearch)
 {
 	return {};
 }

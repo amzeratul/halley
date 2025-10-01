@@ -793,6 +793,20 @@ void UIRoot::getFocusables(Vector<std::shared_ptr<UIWidget>>& result)
 	}
 }
 
+std::shared_ptr<IUISharedData> UIRoot::tryGetSharedData(const String& id) const
+{
+	const auto iter = sharedData.find(id);
+	if (iter != sharedData.end()) {
+		return iter->second;
+	}
+	return {};
+}
+
+void UIRoot::setSharedData(String id, std::shared_ptr<IUISharedData> data)
+{
+	sharedData[std::move(id)] = std::move(data);
+}
+
 void UIRoot::focusNext(bool reverse)
 {
 	group->focusNext(reverse);

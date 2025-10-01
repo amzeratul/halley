@@ -6,6 +6,7 @@
 #include "halley/ui/widgets/ui_list.h"
 #include "src/ui/editor_ui_factory.h"
 #include "halley/tools/project/project.h"
+#include "src/assets/audio_editor/audio_preview_button.h"
 #include "src/ui/project_window.h"
 
 using namespace Halley;
@@ -61,7 +62,7 @@ void PaletteWindow::setIconRetriever(IconRetriever retriever)
 	iconRetriever = std::move(retriever);
 }
 
-std::shared_ptr<UIImage> PaletteWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> PaletteWindow::makePreview(const String& id, bool hasSearch)
 {
 	const auto prefix = getCurrentDataSetPrefix();
 	if (prefix != "") {
@@ -95,6 +96,7 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factor
 	, projectWindow(projectWindow)
 	, type(type)
 	, hasPreview(hasPreview)
+	, gameResources(gameResources)
 {
 	auto ids = gameResources.ofType(type).enumerate();
 	if (type == AssetType::Sprite) {
@@ -103,20 +105,22 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factor
 		}
 	}
 
-	setAssetIds(std::move(ids), defaultOption);
+	setAssetIds(std::move(ids), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 
-std::shared_ptr<UIImage> ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ChooseAssetTypeWindow::makePreview(const String& id, bool hasSearch)
 {
 	if (hasPreview) {
-		return makePreviewIcon(id, hasSearch);
-	} else {
-		if (!icon.hasMaterial()) {
-			icon = getFactory().makeAssetTypeIcon(type);
+		if (auto preview = makePreviewWidget(id, hasSearch)) {
+			return preview;
 		}
-		return std::make_shared<UIImage>(icon);
 	}
+
+	if (!icon.hasMaterial()) {
+		icon = getFactory().makeAssetTypeIcon(type);
+	}
+	return std::make_shared<UIImage>(icon);
 }
 
 LocalisedString ChooseAssetTypeWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
@@ -128,12 +132,14 @@ LocalisedString ChooseAssetTypeWindow::getItemLabel(const String& id, const Stri
 	}
 }
 
-std::shared_ptr<UISizer> ChooseAssetTypeWindow::makeItemSizer(std::shared_ptr<UIImage> uiImage, std::shared_ptr<UILabel> uiLabel, bool hasSearch)
+std::shared_ptr<UISizer> ChooseAssetTypeWindow::makeItemSizer(std::shared_ptr<IUIElement> preview, std::shared_ptr<UILabel> uiLabel, bool hasSearch)
 {
+	const bool compact = hasSearch || type == AssetType::AudioClip || type == AssetType::AudioObject || type == AssetType::AudioEvent;
+
 	if (hasPreview) {
-		return makePreviewItemSizer(uiImage, uiLabel, hasSearch);
+		return makePreviewItemSizer(preview, uiLabel, compact);
 	} else {
-		return ChooseAssetWindow::makeItemSizer(uiImage, uiLabel, hasSearch);
+		return ChooseAssetWindow::makeItemSizer(preview, uiLabel, compact);
 	}
 }
 
@@ -155,11 +161,25 @@ LocalisedString ChooseAssetTypeWindow::getPreviewItemLabel(const String& id, con
 	}
 }
 
-std::shared_ptr<UIImage> ChooseAssetTypeWindow::makePreviewIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ChooseAssetTypeWindow::makePreviewWidget(const String& id, bool hasSearch)
 {
-	const Vector2f thumbSizeBig = Vector2f(128, 128);
-	const Vector2f thumbSizeSmall = Vector2f(64, 64);
-	auto thumbSize = hasSearch ? thumbSizeSmall : thumbSizeBig;
+	if (type == AssetType::AudioObject || type == AssetType::AudioClip || type == AssetType::AudioEvent) {
+		return makeAudioPreview(id, hasSearch);
+	} else {
+		return makeImagePreview(id, hasSearch);
+	}
+}
+
+std::shared_ptr<IUIElement> ChooseAssetTypeWindow::makeAudioPreview(const String& id, bool hasSearch)
+{
+	return std::make_shared<AudioPreviewButton>(getFactory(), gameResources, projectWindow.getAPI(), type, id);
+}
+
+std::shared_ptr<IUIElement> ChooseAssetTypeWindow::makeImagePreview(const String& id, bool hasSearch)
+{
+	const auto thumbSizeBig = Vector2f(128, 128);
+	const auto thumbSizeSmall = Vector2f(64, 64);
+	const auto thumbSize = hasSearch ? thumbSizeSmall : thumbSizeBig;
 	
 	if (!icon.hasMaterial()) {
 		emptyPreviewIcon = Sprite().setImage(getFactory().getResources(), "whitebox.png").setColour(Colour4f(0, 0, 0, 0)).scaleTo(thumbSizeBig);
@@ -192,10 +212,10 @@ std::shared_ptr<UIImage> ChooseAssetTypeWindow::makePreviewIcon(const String& id
 	return image;
 }
 
-std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared_ptr<IUIElement> icon, std::shared_ptr<UILabel> label, bool compact)
 {
-	if (hasSearch) {
-		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
+	if (compact) {
+		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), compact);
 	} else {
 		label->setMaxWidth(128.0f);
 		return makeItemSizerBigIcon(std::move(icon), std::move(label));
@@ -204,6 +224,9 @@ std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared
 
 int ChooseAssetTypeWindow::getNumColumns(Vector2f scrollPaneSize) const
 {
+	if (type == AssetType::AudioObject || type == AssetType::AudioClip || type == AssetType::AudioEvent) {
+		return 1;
+	}
 	return hasPreview ? static_cast<int>(std::floor(scrollPaneSize.x / 150.0f)) : 1;
 }
 
@@ -262,7 +285,7 @@ int ChooseEntityWindow::getNumColumns(Vector2f scrollPaneSize) const
 	return 1;
 }
 
-std::shared_ptr<UIImage> ChooseEntityWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<IUIElement> ChooseEntityWindow::makePreview(const String& id, bool hasSearch)
 {
 	const auto iter = icons.find(id);
 	if (iter != icons.end()) {
@@ -271,7 +294,7 @@ std::shared_ptr<UIImage> ChooseEntityWindow::makeIcon(const String& id, bool has
 	return {};
 }
 
-std::shared_ptr<UISizer> ChooseEntityWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ChooseEntityWindow::makeItemSizer(std::shared_ptr<IUIElement> preview, std::shared_ptr<UILabel> label, bool hasSearch)
 {
-	return ChooseAssetWindow::makeItemSizer(icon, label, true);
+	return ChooseAssetWindow::makeItemSizer(preview, label, true);
 }
