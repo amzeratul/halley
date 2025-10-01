@@ -221,6 +221,13 @@ void AudioFacade::resetObjectLimits()
 	});
 }
 
+void AudioFacade::resetBuses()
+{
+	enqueue([=]() {
+		engine->resetBuses();
+	});
+}
+
 Future<void> AudioFacade::runOnAudioThread(std::function<void()> f)
 {
 	Promise<void> promise;

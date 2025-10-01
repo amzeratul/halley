@@ -331,6 +331,7 @@ namespace Halley
 		virtual std::optional<String> getEventLoggingPrefix() const { return {}; }
 
 		virtual void resetObjectLimits() = 0;
+		virtual void resetBuses() = 0;
 
 		virtual Future<void> runOnAudioThread(std::function<void()> f) = 0;
 	};

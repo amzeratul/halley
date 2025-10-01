@@ -82,6 +82,7 @@ namespace Halley {
 		std::optional<String> getEventLoggingPrefix() const override;
 
 		void resetObjectLimits() override;
+		void resetBuses() override;
 
 		Future<void> runOnAudioThread(std::function<void()> f) override;
 

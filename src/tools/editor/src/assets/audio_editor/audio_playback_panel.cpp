@@ -43,6 +43,10 @@ void AudioPlaybackPanel::update(Time t, bool moved)
 	if (needsLoadingVariables && isReadyToPlay()) {
 		loadVariables();
 	}
+
+	if (emitter) {
+		emitter->setPosition(audioPosition);
+	}
 }
 
 void AudioPlaybackPanel::onActiveChanged(bool active)
@@ -90,16 +94,22 @@ void AudioPlaybackPanel::onPlay()
 
 void AudioPlaybackPanel::play()
 {
+	if (!isReadyToPlay()) {
+		return;
+	}
+
 	if (isPlaying()) {
 		pause();
 	}
 
 	if (!emitter) {
-		emitter = api.audio->createEmitter(AudioPosition());
+		emitter = api.audio->createEmitter(audioPosition);
 		applyVariablesToEmitter();
 
 		api.audio->setListener(AudioListenerData(Vector3f()));
 	}
+
+	api.audio->resetBuses();
 
 	if (object) {
 		audioHandle = api.audio->play(playbackObject, emitter);

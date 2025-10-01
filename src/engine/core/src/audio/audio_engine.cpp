@@ -690,6 +690,13 @@ void AudioEngine::resetObjectLimits()
 	playingObjectData.clear();
 }
 
+void AudioEngine::resetBuses()
+{
+	for (auto& bus: buses) {
+		bus.gains.clear();
+	}
+}
+
 AudioEngine::BusGain::BusGain(String id)
 	: id (std::move(id))
 {

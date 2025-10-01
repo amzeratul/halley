@@ -32,6 +32,7 @@ namespace Halley {
 
     	AudioEmitterHandle emitter;
         AudioHandle audioHandle;
+        AudioPosition audioPosition;
 
         enum class VariableType {
 	        Variable,

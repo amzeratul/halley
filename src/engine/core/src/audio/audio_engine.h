@@ -90,6 +90,7 @@ namespace Halley {
 		void setEventLogging(std::optional<LoggerLevel> level, std::optional<String> prefix);
 
 		void resetObjectLimits();
+		void resetBuses();
 
 	private:
 		struct BusGain {

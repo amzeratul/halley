@@ -78,11 +78,18 @@ children:
                   class: image
                   colour: $ui_popupWindow
                   id: variablesArea
-                  image: halley_ui/ui_popup.png
-                  innerBorder: [8, 4, 8, 4]
+                  image: $ui_title_capsule
+                  innerBorder: [8, 2, 8, 4]
                   interactWithMouse: true
                   size: [200, 150]
                 children:
+                  - uuid: 1cbaa929-e0dc-4bb4-ad0f-615927f9106d
+                    border: [0, 0, 0, 1]
+                    widget:
+                      class: label
+                      id: ""
+                      text: Variables
+                    fill: centre
                   - uuid: ce0eb369-0bb6-4ed9-bbe2-1ce68f9002a6
                     widget:
                       class: resizeDivider
@@ -122,8 +129,28 @@ children:
                   class: image
                   colour: $ui_popupWindow
                   id: positionPanel
-                  image: halley_ui/ui_popup.png
-                  innerBorder: [8, 8, 8, 8]
+                  image: $ui_title_capsule
+                  innerBorder: [8, 2, 8, 8]
                   interactWithMouse: true
                   size: [160, 100]
-                children: []
+                children:
+                  - uuid: cb00ae94-45b4-4579-974a-c14a3b1ab31f
+                    border: [0, 0, 0, 1]
+                    widget:
+                      class: label
+                      id: title
+                      text: Spatial Positioning
+                    fill: centre
+                  - uuid: d53a3937-9dfe-4ca3-ac2b-5411243320d5
+                    proportion: 1
+                    widget:
+                      class: widget
+                    children:
+                      - uuid: 92f49c5c-8f9e-4560-ac3a-75291239ca69
+                        proportion: 1
+                        border: [0, 0, 0, 1]
+                        widget:
+                          class: label
+                          id: title
+                          text: TODO
+                        fill: centre
