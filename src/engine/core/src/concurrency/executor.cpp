@@ -170,9 +170,10 @@ void Executor::runForever()
 		try {
 			next.task();
 		} catch (std::exception& e) {
-			Debug::abort("Exception while executing task " + String(next.name) + ":\n" + e.what());
+			Logger::logException(e);
+			Debug::abort("Aborting due to exception while executing task " + String(next.name) + ":\n" + e.what());
 		} catch (...) {
-			Debug::abort("Unknown exception while executing task " + String(next.name));
+			Debug::abort("Aborting due to unknown exception while executing task " + String(next.name));
 		}
 	}
 }
