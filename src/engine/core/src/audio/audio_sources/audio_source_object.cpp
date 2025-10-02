@@ -29,6 +29,16 @@ String AudioSourceObject::getName() const
 	return object.getAssetId();
 }
 
+bool AudioSourceObject::isReady() const
+{
+	for (const auto& src: sources) {
+		if (!src->isReady()) {
+			return false;
+		}
+	}
+	return true;
+}
+
 uint8_t AudioSourceObject::getNumberOfChannels() const
 {
 	return sources[0]->getNumberOfChannels();

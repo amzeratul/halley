@@ -9,6 +9,11 @@ AudioSourceDelay::AudioSourceDelay(std::unique_ptr<AudioSource> src, size_t dela
 {
 }
 
+String AudioSourceDelay::getName() const
+{
+	return src->getName();
+}
+
 uint8_t AudioSourceDelay::getNumberOfChannels() const
 {
 	return src->getNumberOfChannels();

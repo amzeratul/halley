@@ -10,6 +10,7 @@ namespace Halley
 	public:
 		AudioSourceSequence(AudioEngine& engine, AudioEmitter& emitter, const AudioSubObjectSequence& sequenceConfig);
 
+		String getName() const override;
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t samplesRequested, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;

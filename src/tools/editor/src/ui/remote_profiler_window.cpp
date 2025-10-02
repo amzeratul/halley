@@ -32,12 +32,12 @@ void RemoteProfilerDisplay::setProfileData(std::shared_ptr<ProfilerData> profile
 
 void RemoteProfilerDisplay::setPage(int page)
 {
-	statsView->setPage(page + 1);
+	statsView->setPageNumber(page + 1);
 }
 
 int RemoteProfilerDisplay::getPage() const
 {
-	return statsView->getPage() - 1;
+	return statsView->getPageNumber() - 1;
 }
 
 int RemoteProfilerDisplay::getNumPages() const

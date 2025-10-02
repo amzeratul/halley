@@ -11,6 +11,11 @@ AudioFilterResample::AudioFilterResample(std::shared_ptr<AudioSource> source, fl
 {
 }
 
+String AudioFilterResample::getName() const
+{
+	return source->getName();
+}
+
 uint8_t AudioFilterResample::getNumberOfChannels() const
 {
 	return source->getNumberOfChannels();

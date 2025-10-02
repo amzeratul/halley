@@ -1,4 +1,6 @@
-﻿#include "halley/diagnostics/performance_stats.h"
+﻿#include <algorithm>
+
+#include "halley/diagnostics/performance_stats.h"
 
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"
@@ -47,6 +49,8 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
 	lastFrameData = frameDataCapacity - 1;
+	audioFrameData.resize(frameDataCapacity);
+	lastAudioFrameData = frameDataCapacity - 1;
 }
 
 PerformanceStatsView::~PerformanceStatsView()
@@ -68,7 +72,7 @@ void PerformanceStatsView::paint(Painter& painter)
 	curToolTip = {};
 
 	if (active) {
-		if (page == 0) {
+		if (page == Page::ShortSummary) {
 			drawHeader(painter, true);
 		} else {
 			const auto rect = getViewPort();
@@ -79,15 +83,23 @@ void PerformanceStatsView::paint(Painter& painter)
 			}
 
 			drawHeader(painter, false);
-			drawTimeline(painter, Rect4f(20, 80, rect.getWidth() - 40, 100) + origin);
 
-			if (page == 1) {
+			const auto timelineRect = Rect4f(20, 80, rect.getWidth() - 40, 100) + origin;
+			if (page == Page::Audio) {
+				drawAudioTimeline(painter, timelineRect);
+			} else {
+				drawFrameTimeline(painter, timelineRect);
+			}
+
+			if (page == Page::Overall) {
 				drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin);
-			} else if (page == 2) {
+			} else if (page == Page::Systems) {
 				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin, t, systemHistory);
-			} else if (page == 3) {
+			} else if (page == Page::Scripts) {
 				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin, t, scriptHistory);
-			} else if (page == 4) {
+			} else if (page == Page::Audio) {
+				drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin, t, audioHistory);
+			} else if (page == Page::Network) {
 				drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220) + origin);
 			}
 
@@ -145,6 +157,11 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	for (auto& [k, e]: scriptHistory) {
 		e.startUpdate();
 	}
+	for (auto& [k, e]: audioHistory) {
+		e.startUpdate();
+	}
+
+	int nAudioBuffers = 0;
 	for (const auto& t: data->getThreads()) {
 		for (const auto& e: t.events) {
 			if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
@@ -153,12 +170,30 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 				scriptHistory[e.name].update(e.type, (e.endTime - e.startTime));
 			} else if (e.type == ProfilerEventType::WorldSystemMessages) {
 				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime));
+			} else if (e.type == ProfilerEventType::AudioRenderVoice) {
+				audioHistory[e.name].update(e.type, (e.endTime - e.startTime));
+			} else if (e.type == ProfilerEventType::AudioGenerateBuffer) {
+				++nAudioBuffers;
+				lastAudioFrameData = (lastAudioFrameData + 1) % audioFrameData.size();
+				auto& curAudioFrameData = audioFrameData[lastAudioFrameData];
+				const auto ns = e.endTime - e.startTime;
+				curAudioFrameData.time = static_cast<int>((ns + 500) / 1000);
 			}
 		}
 	}
+
 	std_ex::erase_if_value(systemHistory, [&](const auto& e) { return !e.isVisited(); });
 	std_ex::erase_if_value(scriptHistory, [&](const auto& e) { return !e.isVisited(); });
-	
+
+	if (nAudioBuffers > 0) {
+		for (auto& [k, e]: audioHistory) {
+			e.divideInstances(nAudioBuffers);
+		}
+		std_ex::erase_if_value(audioHistory, [&](const auto& e) { return !e.isVisited(); });
+	}
+
+	totalTimePerAudioBuffer = int64_t(data->getAudioBufferLen()) * 1'000'000'000 / int64_t(data->getAudioSampleRate());
+
 	lastProfileData = std::move(data);
 }
 
@@ -170,17 +205,17 @@ void PerformanceStatsView::setNetworkStats(NetworkSession* session)
 
 int PerformanceStatsView::getNumPages() const
 {
-	return networkStats ? 5 : 4;
+	return 5 + (networkStats ? 1 : 0);
 }
 
-int PerformanceStatsView::getPage() const
+int PerformanceStatsView::getPageNumber() const
 {
-	return page;
+	return static_cast<int>(page);
 }
 
-void PerformanceStatsView::setPage(int page)
+void PerformanceStatsView::setPageNumber(int page)
 {
-	this->page = page;
+	this->page = static_cast<Page>(page);
 }
 
 void PerformanceStatsView::setPaused(bool paused)
@@ -205,7 +240,7 @@ void PerformanceStatsView::setMousePos(std::optional<Vector2f> mousePos)
 
 bool PerformanceStatsView::isInputActive() const
 {
-	return isActive() && page > 0;
+	return isActive() && page > Page::ShortSummary;
 }
 
 PerformanceStatsView::EventHistoryData::EventHistoryData()
@@ -278,6 +313,14 @@ int64_t PerformanceStatsView::EventHistoryData::getHistoricalMaximum() const
 int PerformanceStatsView::EventHistoryData::getNumInstances() const
 {
 	return instanceCounter;
+}
+
+void PerformanceStatsView::EventHistoryData::divideInstances(int nMeasurements)
+{
+	if (nMeasurements > 0) {
+		// Round up division so it still shows up if it's only been in some of the measurements
+		instanceCounter = alignUp(instanceCounter, nMeasurements) / nMeasurements;
+	}
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getHistoricalMinimum() const
@@ -398,8 +441,7 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 
 	if (!simple) {
 		if (lastProfileData && lastProfileData->getAudioBufferLen() > 0) {
-			const int64_t totalTimePerBuffer = int64_t(lastProfileData->getAudioBufferLen()) * 1'000'000'000 / int64_t(lastProfileData->getAudioSampleRate());
-			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerBuffer);
+			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerAudioBuffer);
 			strBuilder.append(" | ");
 			strBuilder.append(formatTime(audioAvgTime));
 			strBuilder.append(" ms audio (");
@@ -423,7 +465,7 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 		.draw(painter);
 }
 
-void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
+void PerformanceStatsView::drawFrameTimeline(Painter& painter, Rect4f rect)
 {
 	const Vector2f displaySize = rect.getSize() - Vector2f(40, 0);
 	const auto pos = rect.getTopLeft();
@@ -479,16 +521,65 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 		Vector2f s1 = Vector2f(w, std::min(frameData[index].variableTime * scale, displaySize.y));
 		Vector2f s2 = Vector2f(w, std::min(frameData[index].renderTime * scale, displaySize.y));
 		if (s1.y > s2.y) {
-			if (s1.y < 1) {
-				s1.y = 1;
-			}
+			s1.y = std::clamp(s1.y, 1.0f, displaySize.y);
 			variableSprite.setPosition(p).setSize(s1).draw(painter);
 		} else {
-			if (s2.y < 1) {
-				s2.y = 1;
-			}
+			s2.y = std::clamp(s2.y, 1.0f, displaySize.y);
 			renderSprite.setPosition(p).setSize(s2).draw(painter);
 		}
+	}
+}
+
+void PerformanceStatsView::drawAudioTimeline(Painter& painter, Rect4f rect)
+{
+	const Vector2f displaySize = rect.getSize() - Vector2f(60, 0);
+	const auto pos = rect.getTopLeft();
+	const float scale = displaySize.y / (static_cast<float>(totalTimePerAudioBuffer) * 1.5f / 1000.0f);
+
+	const Vector2f boxPos = pos + Vector2f(30, 0);
+	boxBg
+		.clone()
+		.setPosition(boxPos - Vector2f(2, 2))
+		.scaleTo(displaySize + Vector2f(4, 4))
+		.draw(painter);
+
+	auto drawBar = [&](Vector2f pos, const String& label, Colour4f col = Colour4f(0.75f))
+	{
+		whitebox
+			.clone()
+			.setPosition(pos)
+			.scaleTo(Vector2f(displaySize.x, 1))
+			.setColour(col)
+			.draw(painter);
+		fpsLabel.setPosition(pos - Vector2f(25.0f, 0.0f)).setText(label).draw(painter);
+		fpsLabel.setPosition(pos + Vector2f(displaySize.x + 25.0f, 00.0f)).draw(painter);
+	};
+
+	drawBar(boxPos, "150%");
+	drawBar(boxPos + Vector2f(0, displaySize.y / 3), "100%", Colour4f(0.8f, 0.0f, 0.0f));
+	drawBar(boxPos + Vector2f(0, displaySize.y * 2 / 3), "50%");
+
+	auto audioSprite = whitebox
+		.clone()
+		.setPivot(Vector2f(0, 1))
+		.setColour(Colour4f(0.5f, 0.9f, 1.0f));
+	
+	const size_t n = audioFrameData.size();
+	const float oneOverN = 1.0f / static_cast<float>(n);
+	const auto& xPos = [&](size_t i) -> float
+	{
+		return static_cast<float>(i) * displaySize.x * oneOverN;
+	};
+
+	for (size_t i = 0; i < n; ++i) {
+		const size_t index = (i + lastAudioFrameData + 1) % n;
+
+		const float x = xPos(i);
+		const float w = xPos(i + 1) - x;
+		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
+		Vector2f s = Vector2f(w, std::min(audioFrameData[index].time * scale, displaySize.y));
+		s.y = std::clamp(s.y, 1.0f, displaySize.y);
+		audioSprite.setPosition(p).setSize(s).draw(painter);
 	}
 }
 
@@ -624,6 +715,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(0.7f, 0.7f, 0.7f);
 	case ProfilerEventType::AudioGenerateBuffer:
 		return Colour4f(0.5f, 0.8f, 1.0f);
+	case ProfilerEventType::AudioRenderVoice:
+		return Colour4f(0.4f, 0.9f, 1.0f);
 	case ProfilerEventType::ScriptUpdate:
 		return Colour4f(0.8f, 0.51f, 0.97f);
 	case ProfilerEventType::GPU:

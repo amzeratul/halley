@@ -26,8 +26,8 @@ namespace Halley
 		void setNetworkStats(NetworkSession* networkSession);
 
 		int getNumPages() const;
-		int getPage() const;
-		void setPage(int page);
+		int getPageNumber() const;
+		void setPageNumber(int page);
 
         void setPaused(bool paused);
         bool isPaused() const;
@@ -39,11 +39,25 @@ namespace Halley
 		bool isInputActive() const override;
 
 	private:
+		enum class Page {
+			ShortSummary,
+			Overall,
+			Systems,
+			Scripts,
+			Audio,
+			Network
+		};
+
 		class FrameData {
 		public:
 			int variableTime = 0;
 			int fixedTime = 0;
 			int renderTime = 0;
+		};
+
+		class AudioFrameData {
+		public:
+			int time = 0;
 		};
 
 		class EventHistoryData {
@@ -62,6 +76,7 @@ namespace Halley
 			int64_t getHistoricalMaximum() const;
 
 			int getNumInstances() const;
+			void divideInstances(int nMeasurements);
 
 			ProfilerEventType getType() const;
 
@@ -100,16 +115,20 @@ namespace Halley
 		AveragingLatched<int64_t> gpuTime;
 		
 		Vector<FrameData> frameData;
+		Vector<AudioFrameData> audioFrameData;
 		size_t lastFrameData = 0;
+		size_t lastAudioFrameData = 0;
 		HashMap<String, EventHistoryData> systemHistory;
 		HashMap<String, EventHistoryData> scriptHistory;
+		HashMap<String, EventHistoryData> audioHistory;
 		std::shared_ptr<ProfilerData> lastProfileData;
 
 		float curMaxTime = 500000.0f;
 		std::chrono::steady_clock::time_point lastUpdateTime;
+		int64_t totalTimePerAudioBuffer = 0;
 
 		bool capturing = true;
-		int page = 0;
+		Page page = Page::ShortSummary;
 		bool drawBg = true;
 
 		INetworkServiceStatsListener* networkStats = nullptr;
@@ -124,7 +143,8 @@ namespace Halley
 		bool paused = false;
 
 		void drawHeader(Painter& painter, bool simple);
-		void drawTimeline(Painter& painter, Rect4f rect);
+		void drawFrameTimeline(Painter& painter, Rect4f rect);
+		void drawAudioTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
 		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);

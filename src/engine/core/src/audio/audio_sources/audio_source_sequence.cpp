@@ -14,6 +14,11 @@ AudioSourceSequence::AudioSourceSequence(AudioEngine& engine, AudioEmitter& emit
 	initialize();
 }
 
+String AudioSourceSequence::getName() const
+{
+	return sequenceConfig.getName();
+}
+
 uint8_t AudioSourceSequence::getNumberOfChannels() const
 {
 	return playingTracks.empty() ? 0 : playingTracks.front().source->getNumberOfChannels();
