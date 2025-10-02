@@ -190,9 +190,9 @@ ProfilerCapture& ProfilerCapture::get()
 	return profiler;
 }
 
-ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name)
+ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name, uint64_t sourceId)
 {
-	return recordEventStart(type, name, std::chrono::steady_clock::now());
+	return recordEventStart(type, name, sourceId, std::chrono::steady_clock::now());
 }
 
 void ProfilerCapture::recordEventEnd(EventId id)
@@ -200,14 +200,14 @@ void ProfilerCapture::recordEventEnd(EventId id)
 	recordEventEnd(id, std::chrono::steady_clock::now());
 }
 
-ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name, std::chrono::steady_clock::time_point time)
+ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name, uint64_t sourceId, std::chrono::steady_clock::time_point time)
 {
 	if (recording) {
 		const auto id = curId++; // I think this is thread-safe?
 		if (id < endId) {
 			const auto pos = id % events.size();
 			const auto threadId = type == ProfilerEventType::GPU ? std::thread::id() : std::this_thread::get_id();
-			events[pos] = ProfilerData::Event{ name, type, 0, id, time.time_since_epoch().count(), {}, threadId };
+			events[pos] = ProfilerData::Event{ name, type, 0, id, sourceId, time.time_since_epoch().count(), {}, threadId };
 			return id;
 		} else {
 			--curId;
@@ -316,11 +316,11 @@ constexpr static bool alwaysLogType(ProfilerEventType type)
 	}
 }
 
-ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)
+ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name, uint64_t sourceId)
 	: id(0)
 {
 	if (isDevMode() || alwaysLogType(type)) {
-		id = ProfilerCapture::get().recordEventStart(type, name);
+		id = ProfilerCapture::get().recordEventStart(type, name, sourceId);
 	}
 }
 
@@ -337,6 +337,7 @@ void ProfilerData::Event::serialize(Serializer& s) const
 	s << type;
 	s << depth;
 	s << id;
+	s << sourceId;
 	s << startTime;
 	s << endTime;
 }
@@ -347,6 +348,7 @@ void ProfilerData::Event::deserialize(Deserializer& s)
 	s >> type;
 	s >> depth;
 	s >> id;
+	s >> sourceId;
 	s >> startTime;
 	s >> endTime;
 }

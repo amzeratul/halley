@@ -250,7 +250,7 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 		return;
 	}
 
-	ProfilerEvent event(ProfilerEventType::AudioRenderVoice, source->getName());
+	ProfilerEvent event(ProfilerEventType::AudioRenderVoice, source->getName(), reinterpret_cast<uint64_t>(this));
 
 	// Check delay
 	size_t numSamples = numSamplesRequested;

@@ -64,7 +64,7 @@ void Painter::endRender()
 {
 	flush();
 	
-	ProfilerEvent event(ProfilerEventType::PainterEndRender);
+	ProfilerEvent event(ProfilerEventType::PainterEndRender, "", reinterpret_cast<uint64_t>(this));
 	doEndRender();
 
 	stopRecording();
@@ -570,7 +570,7 @@ void Painter::onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size
 		frameEnd = value;
 
 		auto& profiler = ProfilerCapture::get();
-		const auto profilerEventId = profiler.recordEventStart(ProfilerEventType::GPU, "", frameStartCPUTime);
+		const auto profilerEventId = profiler.recordEventStart(ProfilerEventType::GPU, "", 0, frameStartCPUTime);
 #ifdef __PROSPERO__
 		// The units of time_point is microseconds on PS5
 		auto t = frameStartCPUTime + std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::nanoseconds(frameEnd - frameStart));
@@ -759,7 +759,7 @@ void Painter::executeDrawPrimitives(const Material& material, size_t numVertices
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
-	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
+	ProfilerEvent event(ProfilerEventType::PainterDrawCall, "", reinterpret_cast<uint64_t>(this));
 
 	size_t commandIdx = 0;
 	if (recordingSnapshot) {
@@ -883,7 +883,7 @@ void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, Ind
 
 void Painter::updateProjection()
 {
-	ProfilerEvent event(ProfilerEventType::PainterUpdateProjection);
+	ProfilerEvent event(ProfilerEventType::PainterUpdateProjection, "", reinterpret_cast<uint64_t>(this));
 	
 	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera.getProjection();

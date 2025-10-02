@@ -64,7 +64,7 @@ namespace Halley
 		public:
 			EventHistoryData();
 			
-			void update(ProfilerEventType type, int64_t value);
+			void update(ProfilerEventType type, int64_t value, uint64_t sourceId);
 
 			int64_t getMinimum() const;
 			int64_t getFirstQuartile() const;
@@ -76,7 +76,6 @@ namespace Halley
 			int64_t getHistoricalMaximum() const;
 
 			int getNumInstances() const;
-			void divideInstances(int nMeasurements);
 
 			ProfilerEventType getType() const;
 
@@ -92,6 +91,7 @@ namespace Halley
 			int64_t lowestEver = std::numeric_limits<int64_t>::max();
 			int framesSinceLastVisit = 1;
 			int instanceCounter = 0;
+			Vector<uint64_t> sources;
 			mutable bool needsSorting = false;
 
 			void sortIfNeeded() const;

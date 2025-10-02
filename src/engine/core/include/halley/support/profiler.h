@@ -118,6 +118,7 @@ namespace Halley {
 			ProfilerEventType type;
 			int16_t depth;
         	uint64_t id;
+			uint64_t sourceId;
         	TimePoint startTime;
         	TimePoint endTime;
 
@@ -188,9 +189,9 @@ namespace Halley {
     	
     	[[nodiscard]] static ProfilerCapture& get();
 
-    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name);
+    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name, uint64_t sourceId);
     	void recordEventEnd(EventId id);
-    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name, std::chrono::steady_clock::time_point time);
+    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name, uint64_t sourceId, std::chrono::steady_clock::time_point time);
     	void recordEventEnd(EventId id, std::chrono::steady_clock::time_point time);
 
     	[[nodiscard]] bool isRecording() const;
@@ -225,7 +226,7 @@ namespace Halley {
 
 	class ProfilerEvent {
 	public:
-		ProfilerEvent(ProfilerEventType type, std::string_view name = "");
+		ProfilerEvent(ProfilerEventType type, std::string_view name = "", uint64_t sourceId = 0);
 		~ProfilerEvent() noexcept;
 
 		ProfilerEvent(const ProfilerEvent& other) = delete;

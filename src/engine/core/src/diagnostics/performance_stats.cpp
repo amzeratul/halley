@@ -62,7 +62,7 @@ PerformanceStatsView::~PerformanceStatsView()
 
 void PerformanceStatsView::paint(Painter& painter)
 {
-	ProfilerEvent event(ProfilerEventType::StatsView);
+	ProfilerEvent event(ProfilerEventType::StatsView, "", reinterpret_cast<uint64_t>(this));
 	painter.setLogging(false);
 
 	const auto now = std::chrono::steady_clock::now();
@@ -165,13 +165,13 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	for (const auto& t: data->getThreads()) {
 		for (const auto& e: t.events) {
 			if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
-				systemHistory[e.name].update(e.type, (e.endTime - e.startTime));
+				systemHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::ScriptUpdate) {
-				scriptHistory[e.name].update(e.type, (e.endTime - e.startTime));
+				scriptHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::WorldSystemMessages) {
-				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime));
+				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::AudioRenderVoice) {
-				audioHistory[e.name].update(e.type, (e.endTime - e.startTime));
+				audioHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::AudioGenerateBuffer) {
 				++nAudioBuffers;
 				lastAudioFrameData = (lastAudioFrameData + 1) % audioFrameData.size();
@@ -186,9 +186,6 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	std_ex::erase_if_value(scriptHistory, [&](const auto& e) { return !e.isVisited(); });
 
 	if (nAudioBuffers > 0) {
-		for (auto& [k, e]: audioHistory) {
-			e.divideInstances(nAudioBuffers);
-		}
 		std_ex::erase_if_value(audioHistory, [&](const auto& e) { return !e.isVisited(); });
 	}
 
@@ -247,7 +244,7 @@ PerformanceStatsView::EventHistoryData::EventHistoryData()
 {
 }
 
-void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int64_t value)
+void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int64_t value, uint64_t sourceId)
 {
 	this->type = type;
 	highestEver = std::max(highestEver, value);
@@ -269,6 +266,10 @@ void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int6
 			samples[samplePos] = value;
 			samplePos = (samplePos + 1) % sampleRange;
 		}
+	}
+
+	if (!sources.contains(sourceId)) {
+		sources += sourceId;
 	}
 
 	needsSorting = true;
@@ -312,14 +313,10 @@ int64_t PerformanceStatsView::EventHistoryData::getHistoricalMaximum() const
 
 int PerformanceStatsView::EventHistoryData::getNumInstances() const
 {
-	return instanceCounter;
-}
-
-void PerformanceStatsView::EventHistoryData::divideInstances(int nMeasurements)
-{
-	if (nMeasurements > 0) {
-		// Round up division so it still shows up if it's only been in some of the measurements
-		instanceCounter = alignUp(instanceCounter, nMeasurements) / nMeasurements;
+	if (type == ProfilerEventType::AudioRenderVoice) {
+		return static_cast<int>(sources.size());
+	} else {
+		return instanceCounter;
 	}
 }
 

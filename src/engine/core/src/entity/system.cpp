@@ -155,7 +155,7 @@ void System::prepareSystemMessages()
 
 void System::processSystemMessages()
 {
-	ProfilerEvent event(ProfilerEventType::WorldSystemMessages, name);
+	ProfilerEvent event(ProfilerEventType::WorldSystemMessages, name, reinterpret_cast<uint64_t>(this));
 
 	for (auto& message: systemMessages) {
 		onSystemMessageReceived(*message);
@@ -212,7 +212,7 @@ void System::sendSystemMessageConfig(const String& targetSystem, const String& m
 
 void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	ProfilerEvent event(ProfilerEventType::WorldSystemUpdate, name);
+	ProfilerEvent event(ProfilerEventType::WorldSystemUpdate, name, reinterpret_cast<uint64_t>(this));
 
 	if (!messageTypesReceived.empty()) {
 		processMessages();
@@ -232,7 +232,7 @@ void System::doRender(RenderContext& rc) {
 		throw Exception("System " + name + " is being rendered before being initialised. Make sure a World::step() happens before World::render().", HalleyExceptions::Entity);
 	}
 	
-	ProfilerEvent event(ProfilerEventType::WorldSystemRender, name);
+	ProfilerEvent event(ProfilerEventType::WorldSystemRender, name, reinterpret_cast<uint64_t>(this));
 	renderBase(rc);
 
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());

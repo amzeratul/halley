@@ -44,7 +44,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
 	}
 
-	ProfilerEvent event(ProfilerEventType::ScriptUpdate, currentGraph->getAssetId());
+	ProfilerEvent event(ProfilerEventType::ScriptUpdate, currentGraph->getAssetId(), reinterpret_cast<uint64_t>(this));
 
 	currentState = &graphState;
 	currentEntityVariables = &entityVariables;

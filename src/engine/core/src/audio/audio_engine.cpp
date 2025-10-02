@@ -218,7 +218,7 @@ const AudioProperties& AudioEngine::getAudioProperties() const
 
 void AudioEngine::generateBuffer()
 {
-	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer);
+	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer, "", reinterpret_cast<uint64_t>(this));
 	Stopwatch timer;
 	timer.start();
 
