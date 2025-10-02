@@ -107,31 +107,27 @@ HRESULT __stdcall ResourceDataByteStream::SetLength(QWORD qwLength)
 
 HRESULT __stdcall ResourceDataByteStream::GetCurrentPosition(QWORD* pqwPosition)
 {
-	UniqueLock lock(mutex);
 	*pqwPosition = QWORD(pos);
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::SetCurrentPosition(QWORD qwPosition)
 {
-	UniqueLock lock(mutex);
 	pos = size_t(qwPosition);
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::IsEndOfStream(BOOL* pfEndOfStream)
 {
-	UniqueLock lock(mutex);
 	*pfEndOfStream = pos >= len;
 	return S_OK;
 }
 
 HRESULT __stdcall ResourceDataByteStream::Read(BYTE* pb, ULONG cb, ULONG* pcbRead)
 {
-	UniqueLock lock(mutex);
-	reader->seek(pos, SEEK_SET);
-	const auto nRead = reader->read(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)));
-	pos += nRead;
+	size_t pos = this->pos;
+	const auto nRead = reader->readAt(gsl::as_writable_bytes(gsl::span<BYTE>(pb, cb)), pos);
+	this->pos = pos + nRead;
 	*pcbRead = nRead;
 	return S_OK;
 }
@@ -200,9 +196,7 @@ HRESULT ResourceDataByteStream::Invoke(IMFAsyncResult* pAsyncResult)
 	auto readOp = static_cast<AsyncReadOp*>(unknown);
 
 	{
-		UniqueLock lock(mutex);
-		reader->seek(readOp->from, SEEK_SET);
-		readOp->nRead = reader->read(readOp->dst);
+		readOp->nRead = reader->readAt(readOp->dst, readOp->from);
 	}
 
 	if (callerResult) {
@@ -255,13 +249,14 @@ HRESULT __stdcall ResourceDataByteStream::EndWrite(IMFAsyncResult* pResult, ULON
 
 HRESULT __stdcall ResourceDataByteStream::Seek(MFBYTESTREAM_SEEK_ORIGIN SeekOrigin, LONGLONG llSeekOffset, DWORD dwSeekFlags, QWORD* pqwCurrentPosition)
 {
-	UniqueLock lock(mutex);
+	size_t p = pos;
 	if (SeekOrigin == msoCurrent) {
-		pos += size_t(llSeekOffset);
+		p += size_t(llSeekOffset);
 	} else {
-		pos = size_t(llSeekOffset);
+		p = size_t(llSeekOffset);
 	}
-	*pqwCurrentPosition = QWORD(pos);
+	*pqwCurrentPosition = QWORD(p);
+	pos = p;
 
 	return S_OK;
 }

@@ -59,6 +59,17 @@ int ResourceDataReaderFileSystem::read(gsl::span<std::byte> dst)
 	}
 }
 
+int ResourceDataReaderFileSystem::readAt(gsl::span<std::byte> dst, size_t pos)
+{
+	if (fp) {
+		FILE* f = static_cast<FILE*>(fp);
+		fseek(f, static_cast<long>(pos), SEEK_SET);
+		return static_cast<int>(fread(dst.data(), 1, dst.size(), f));
+	} else {
+		return 0;
+	}
+}
+
 void ResourceDataReaderFileSystem::seek(int64_t pos, int whence)
 {
 	if (fp) {

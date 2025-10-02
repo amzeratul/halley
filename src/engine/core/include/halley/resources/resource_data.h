@@ -37,6 +37,7 @@ namespace Halley {
 		virtual ~ResourceDataReader() {}
 		virtual size_t size() const = 0;
 		virtual int read(gsl::span<std::byte> dst) = 0;
+		virtual int readAt(gsl::span<std::byte> dst, size_t pos) = 0;
 		virtual void seek(int64_t pos, int whence) = 0;
 		virtual size_t tell() const = 0;
 		virtual void close() = 0;
@@ -51,6 +52,7 @@ namespace Halley {
 		~ResourceDataReaderFileSystem() override;
 		size_t size() const override;
 		int read(gsl::span<std::byte> dst) override;
+		int readAt(gsl::span<std::byte> dst, size_t pos) override;
 		void seek(int64_t pos, int whence) override;
 		size_t tell() const override;
 		void close() override;

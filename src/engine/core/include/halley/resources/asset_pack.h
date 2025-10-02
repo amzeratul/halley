@@ -73,6 +73,7 @@ namespace Halley {
 
 		size_t size() const override;
 		int read(gsl::span<std::byte> dst) override;
+		int readAt(gsl::span<std::byte> dst, size_t pos) override;
 		void seek(int64_t pos, int whence) override;
 		size_t tell() const override;
 		void close() override;
@@ -82,8 +83,7 @@ namespace Halley {
 		AssetPack& pack;
 		const size_t startPos;
 		const size_t fileSize;
-		size_t curPos = 0;
-		mutable Mutex mutex;
+		std::atomic<size_t> curPos;
 		std::shared_ptr<bool> aliveToken;
 	};
 }

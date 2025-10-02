@@ -23,7 +23,7 @@ std::unique_ptr<ResourceDataReader> SDLRWOps::fromMemory(gsl::span<const std::by
 
 SDLRWOps::SDLRWOps(SDL_RWops* _fp, int64_t _start, int64_t _end, bool _closeOnFinish)
 	: fp(_fp)
-	, pos(_start)
+	, curPos(_start)
 	, start(_start)
 	, end(_end)
 	, closeOnFinish(_closeOnFinish)
@@ -54,13 +54,23 @@ size_t SDLRWOps::size() const
 
 int SDLRWOps::read(gsl::span<std::byte> dst)
 {
-	if (!fp) return -1;
+	if (!fp) {
+		return -1;
+	}
 
-	size_t toRead = std::min(size_t(dst.size()), size_t(end - pos));
-	SDL_RWseek(fp, pos, SEEK_SET);
+	size_t toRead = std::min(size_t(dst.size()), size_t(end - curPos));
+	SDL_RWseek(fp, curPos, SEEK_SET);
 	int n = static_cast<int>(SDL_RWread(fp, dst.data(), 1, static_cast<int>(toRead)));
-	if (n > 0) pos += n;
+	if (n > 0) {
+		curPos += n;
+	}
 	return n;
+}
+
+int SDLRWOps::readAt(gsl::span<std::byte> dst, size_t pos)
+{
+	curPos = pos;
+	return read(dst);
 }
 
 void SDLRWOps::close()
@@ -70,19 +80,19 @@ void SDLRWOps::close()
 			SDL_RWclose(fp);
 		}
 		fp = nullptr;
-		pos = end;
+		curPos = end;
 	}
 }
 
 void SDLRWOps::seek(int64_t offset, int whence)
 {
-	if (whence == SEEK_SET) pos = int(offset + start);
-	else if (whence == SEEK_CUR) pos += int(offset);
-	else if (whence == SEEK_END) pos = int(end + offset);
-	SDL_RWseek(fp, pos, SEEK_SET);
+	if (whence == SEEK_SET) curPos = int(offset + start);
+	else if (whence == SEEK_CUR) curPos += int(offset);
+	else if (whence == SEEK_END) curPos = int(end + offset);
+	SDL_RWseek(fp, curPos, SEEK_SET);
 }
 
 size_t SDLRWOps::tell() const
 {
-	return size_t(pos - start);
+	return size_t(curPos - start);
 }

@@ -193,8 +193,7 @@ void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 	if (hasReader) {
 		UniqueLock lock(readerMutex);
 		if (reader) {
-			reader->seek(pos + dataOffset, SEEK_SET);
-			reader->read(dst);
+			reader->readAt(dst, pos + dataOffset);
 			return;
 		}
 	}
@@ -231,6 +230,7 @@ PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize
 	, startPos(startPos)
 	, fileSize(fileSize)
 	, aliveToken(pack.getAliveToken())
+	, curPos(0)
 {
 }
 
@@ -245,12 +245,26 @@ int PackDataReader::read(gsl::span<std::byte> dst)
 		return 0;
 	}
 
-	UniqueLock lock(mutex);
-	size_t available = fileSize - curPos;
+	const size_t pos = curPos;
+	size_t available = fileSize - pos;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
-	pack.readData(startPos + curPos, dst.subspan(0, toRead));
+	pack.readData(startPos + pos, dst.subspan(0, toRead));
 	curPos += toRead;
+
+	return int(toRead);
+}
+
+int PackDataReader::readAt(gsl::span<std::byte> dst, size_t pos)
+{
+	if (!*aliveToken) {
+		return 0;
+	}
+
+	size_t available = fileSize - pos;
+	size_t toRead = std::min(available, size_t(dst.size()));
+
+	pack.readData(startPos + pos, dst.subspan(0, toRead));
 
 	return int(toRead);
 }
@@ -261,13 +275,12 @@ void PackDataReader::seek(int64_t pos, int whence)
 		return;
 	}
 
-	UniqueLock lock(mutex);
 	switch (whence) {
 	case SEEK_SET:
 		curPos = size_t(pos);
 		break;
 	case SEEK_CUR:
-		curPos = size_t(curPos + pos);
+		curPos += pos;
 		break;
 	case SEEK_END:
 		curPos = size_t(fileSize + pos);
@@ -281,7 +294,6 @@ size_t PackDataReader::tell() const
 		return 0;
 	}
 
-	UniqueLock lock(mutex);
 	return curPos;
 }
 

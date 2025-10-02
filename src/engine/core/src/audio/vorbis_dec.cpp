@@ -245,14 +245,8 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 	
 	if (data->streaming) {
 		auto res = data->stream;
-
-		const auto actualPos = res->tell();
-		if (actualPos != data->pos) {
-			Logger::logError("Failed to read OggVorbis stream: expected stream at " + toString(data->pos) + ", but instead it's at " + toString(actualPos));
-		}
-
 		size_t requested = size*nmemb;
-		size_t r = res->read(as_writable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
+		size_t r = res->readAt(as_writable_bytes(gsl::span<char>(static_cast<char*>(ptr), requested)), data->pos);
 		data->pos += r;
 		return r;
 	} else {
