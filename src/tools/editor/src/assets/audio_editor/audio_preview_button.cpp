@@ -77,11 +77,10 @@ void AudioPreviewButton::play()
 
 void AudioPreviewButton::stop()
 {
-	if (!isPlaying()) {
-		return;
+	if (audioHandle) {
+		audioHandle->stop();
 	}
 
-	audioHandle->stop();
 	audioHandle = {};
 	emitter = {};
 }

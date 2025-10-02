@@ -126,12 +126,22 @@ void AudioHandleImpl::enqueueForVoices(std::function<void(AudioVoice& src)> f)
 	auto id = emitterId;
 	auto evId = eventId;
 	AudioEngine* engine = facade.engine.get();
+
 	facade.enqueue([id, evId, engine, f = std::move(f)] () {
-		auto* emitter = engine->getEmitter(id);
-		if (emitter) {
+		if (auto* emitter = engine->getEmitter(id)) {
 			for (auto& v: emitter->getVoices()) {
 				if (v->getEventId() == evId) {
 					f(*v);
+				}
+			}
+		}
+
+		if (id != 0) {
+			if (auto* emitter = engine->getEmitter(0)) {
+				for (auto& v: emitter->getVoices()) {
+					if (v->getEventId() == evId) {
+						f(*v);
+					}
 				}
 			}
 		}
