@@ -882,7 +882,7 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 		whitebox.clone()
 			.setPos(rect.getTopLeft() + Vector2f(0, (i + 1) * lineHeight))
 			.scaleTo(Vector2f(rect.getWidth(), lineHeight * lines))
-			.setColour(Colour4f(0, 0, 0, 0.1f))
+			.setColour(Colour4f(0, 0, 0, 0.15f))
 			.draw(painter);
 	}
 

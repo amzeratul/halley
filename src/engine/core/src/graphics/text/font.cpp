@@ -140,6 +140,11 @@ const Font& Font::getFontForGlyph(int code) const
 		return *this;
 	}
 
+	// For empty characters, return here anyway, otherwise it can mess up text layout
+	if (code == '\n' || code == ' ' || code == '\t') {
+		return *this;
+	}
+
 	// Not found, try fallback fonts
 	for (const auto& font: fallbackFont) {
 		const auto iter = font->glyphs.find(code);
