@@ -54,28 +54,30 @@ size_t SDLRWOps::size() const
 
 int SDLRWOps::read(gsl::span<std::byte> dst)
 {
-	if (!fp) {
-		return -1;
-	}
-
-	size_t toRead = std::min(size_t(dst.size()), size_t(end - curPos));
-	SDL_RWseek(fp, curPos, SEEK_SET);
-	int n = static_cast<int>(SDL_RWread(fp, dst.data(), 1, static_cast<int>(toRead)));
-	if (n > 0) {
-		curPos += n;
-	}
-	return n;
+	return readAt(dst, curPos);
 }
 
 int SDLRWOps::readAt(gsl::span<std::byte> dst, size_t pos)
 {
-	curPos = pos;
-	return read(dst);
+	if (!fp) {
+		return -1;
+	}
+
+	size_t toRead = std::min(dst.size(), static_cast<size_t>(end) - pos);
+
+	UniqueLock lock(mutex);
+	SDL_RWseek(fp, pos, SEEK_SET);
+	const auto n = static_cast<int64_t>(SDL_RWread(fp, dst.data(), 1, static_cast<int>(toRead)));
+	curPos = pos + std::max(n, static_cast<int64_t>(0));
+
+	return static_cast<int>(n);
 }
 
 void SDLRWOps::close()
 {
 	if (fp) {
+		UniqueLock lock(mutex);
+
 		if (closeOnFinish) {
 			SDL_RWclose(fp);
 		}
@@ -86,13 +88,20 @@ void SDLRWOps::close()
 
 void SDLRWOps::seek(int64_t offset, int whence)
 {
-	if (whence == SEEK_SET) curPos = int(offset + start);
-	else if (whence == SEEK_CUR) curPos += int(offset);
-	else if (whence == SEEK_END) curPos = int(end + offset);
+	UniqueLock lock(mutex);
+
+	if (whence == SEEK_SET) {
+		curPos = offset + start;
+	} else if (whence == SEEK_CUR) {
+		curPos += offset;
+	} else if (whence == SEEK_END) {
+		curPos = end + offset;
+	}
+
 	SDL_RWseek(fp, curPos, SEEK_SET);
 }
 
 size_t SDLRWOps::tell() const
 {
-	return size_t(curPos - start);
+	return static_cast<size_t>(curPos - start);
 }

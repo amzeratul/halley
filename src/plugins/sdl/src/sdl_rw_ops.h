@@ -24,9 +24,10 @@ namespace Halley
 
 	private:
 		SDL_RWops* fp;
-		int64_t curPos;
+		std::atomic<int64_t> curPos;
 		int64_t start;
 		int64_t end;
 		bool closeOnFinish;
+		Mutex mutex;
 	};
 }
