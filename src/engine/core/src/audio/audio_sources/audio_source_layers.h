@@ -3,8 +3,13 @@
 #include "halley/audio/audio_source.h"
 #include "halley/concurrency/alive_flag.h"
 
+namespace Halley {
+	class AudioFilterResample;
+}
+
 namespace Halley
 {
+	class AudioSourceDelay;
 	class AudioSubObjectLayers;
 	class AudioEmitter;
 	class AudioObject;
@@ -25,7 +30,6 @@ namespace Halley
 	private:
 		class Layer {
 		public:
-			std::unique_ptr<AudioSource> source;
 			float prevGain = 0;
 			float gain = 0;
 			bool playing = false;
@@ -35,10 +39,20 @@ namespace Halley
 			AudioFader fader;
 
 			Layer(std::unique_ptr<AudioSource> source, size_t idx);
+
 			void init(const AudioSubObjectLayers& layerConfig);
-			void restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
+			void restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, AudioEngine& engine);
+			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, AudioEngine& engine);
+
 			void setSourceDelay(float delay);
-			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter);
+			void setSourcePitch(float pitch, AudioEngine& engine);
+
+			AudioSource& getSource() const;
+
+		private:
+			std::shared_ptr<AudioSource> origSource;
+			std::shared_ptr<AudioSourceDelay> delaySource;
+			std::shared_ptr<AudioFilterResample> resampleSource;
 		};
 
 		AudioEngine& engine;

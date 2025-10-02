@@ -2,11 +2,16 @@
 #include "../audio_mixer.h"
 using namespace Halley;
 
-AudioSourceDelay::AudioSourceDelay(std::unique_ptr<AudioSource> src, size_t delay)
+AudioSourceDelay::AudioSourceDelay(std::shared_ptr<AudioSource> src, size_t delay)
 	: src(std::move(src))
 	, initialDelay(delay)
 	, curDelay(delay)
 {
+}
+
+void AudioSourceDelay::setSource(std::shared_ptr<AudioSource> source)
+{
+	src = std::move(source);
 }
 
 String AudioSourceDelay::getName() const

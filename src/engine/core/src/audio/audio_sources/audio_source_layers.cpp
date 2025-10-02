@@ -55,7 +55,7 @@ String AudioSourceLayers::getName() const
 uint8_t AudioSourceLayers::getNumberOfChannels() const
 {
 	for (auto& layer: layers) {
-		auto n = layer.source->getNumberOfChannels();
+		auto n = layer.getSource().getNumberOfChannels();
 		if (n > 0) {
 			return n;
 		}
@@ -72,15 +72,15 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 	checkForReload();
 
 	for (const auto& layer: layers) {
-		if (!layer.source->isReady()) {
-			Logger::logError("AudioSourceLayers (" + getName() + ") error, layer " + toString(layer.idx) + " (" + layer.source->getName() + ") is not ready");
+		if (!layer.getSource().isReady()) {
+			Logger::logError("AudioSourceLayers (" + getName() + ") error, layer " + toString(layer.idx) + " (" + layer.getSource().getName() + ") is not ready");
 			return false;
 		}
 	}
 
 	if (!initialized) {
 		for (auto& layer : layers) {
-			layer.restart(layerConfig, emitter);
+			layer.restart(layerConfig, emitter, engine);
 		}
 		initialized = true;
 	}
@@ -94,9 +94,9 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 
 	AudioMixer::zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
-		layer.update(deltaTime, layerConfig, emitter);
+		layer.update(deltaTime, layerConfig, emitter, engine);
 		if (layer.playing || layer.synchronised || layer.fader.isFading()) {
-			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
+			ok = layer.getSource().getAudioData(numSamples, temp.getSampleSpans()) && ok;
 
 			if (layer.playing) {
 				AudioMixer::mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
@@ -114,7 +114,7 @@ bool AudioSourceLayers::isReady() const
 		return false;
 	}
 	return std::all_of(layers.begin(), layers.end(), [=] (const Layer& layer) {
-		return layer.source->isReady();
+		return layer.getSource().isReady();
 	});
 }
 
@@ -122,7 +122,7 @@ size_t AudioSourceLayers::getSamplesLeft() const
 {
 	size_t result = 0;
 	for (auto& l: layers) {
-		result = std::max(result, l.source->getSamplesLeft());
+		result = std::max(result, l.getSource().getSamplesLeft());
 	}
 	return result;
 }
@@ -133,15 +133,15 @@ void AudioSourceLayers::restart()
 		return;
 	}
 	for (auto& layer: layers) {
-		layer.restart(layerConfig, emitter);
-		layer.source->restart();
+		layer.restart(layerConfig, emitter, engine);
+		layer.getSource().restart();
 	}
 }
 
 bool AudioSourceLayers::isLooping()
 {
 	for (auto& layer: layers) {
-		if (layer.source->isLooping()) {
+		if (layer.getSource().isLooping()) {
 			return true;
 		}
 	}
@@ -149,8 +149,8 @@ bool AudioSourceLayers::isLooping()
 }
 
 AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, size_t idx)
-	: source(std::move(source))
-	, idx(idx)
+	: idx(idx)
+	, origSource(std::move(source))
 {
 }
 
@@ -160,31 +160,24 @@ void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig)
 	synchronised = curLayer.synchronised;
 }
 
-void AudioSourceLayers::Layer::restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+void AudioSourceLayers::Layer::restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, AudioEngine& engine)
 {
 	const auto& curLayer = layerConfig.getLayer(idx);
-	const auto targetGain = curLayer.expression.evaluate(emitter);
+	const auto targetGain = curLayer.gainExpression.evaluate(emitter, Range<float>(0, 1));
+	const auto targetPitch = curLayer.pitchExpression.evaluate(emitter, Range(0.25f, 4.0f));
 	fader.stopAndSetValue(targetGain);
 	prevGain = gain = targetGain;
 	playing = targetGain > 0.0001f;
+	setSourcePitch(targetPitch, engine);
 	setSourceDelay(playing ? 0 : curLayer.delay);
 }
 
-void AudioSourceLayers::Layer::setSourceDelay(float delay)
-{
-	const auto delaySamples = static_cast<size_t>(lroundl(delay * AudioConfig::sampleRate));
-	if (auto* delaySource = dynamic_cast<AudioSourceDelay*>(source.get())) {
-		delaySource->setInitialDelay(delaySamples);
-	} else if (delay > 0.0001f) {
-		source = std::make_unique<AudioSourceDelay>(std::move(source), delaySamples);
-	}
-}
-
-void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter)
+void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, AudioEngine& engine)
 {
 	const auto& generalFade = layersConfig.getFade();
 	const auto& layer = layersConfig.getLayer(idx);
-	const auto targetGain = layer.expression.evaluate(emitter);
+	const auto targetGain = layer.gainExpression.evaluate(emitter, Range<float>(0, 1));
+	const auto targetPitch = layer.pitchExpression.evaluate(emitter, Range(0.25f, 4.0f));
 
 	const auto delta = targetGain - fader.getTargetValue();
 	if (std::abs(delta) > 0.001f) {
@@ -200,6 +193,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	}
 
 	fader.update(time);
+	setSourcePitch(targetPitch, engine);
 
 	prevGain = gain;
 	gain = fader.getCurrentValue();
@@ -211,7 +205,45 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 		layerStarted = true;
 	} else if (wasPlaying && layer.restartFromBeginning) {
 		setSourceDelay(layer.delay);
-		source->restart();
+		getSource().restart();
 		layerStarted = false;
+	}
+}
+
+void AudioSourceLayers::Layer::setSourceDelay(float delay)
+{
+	const auto delaySamples = static_cast<size_t>(lroundl(delay * AudioConfig::sampleRate));
+
+	if (delaySource) {
+		delaySource->setInitialDelay(delaySamples);
+	} else {
+		auto curSource = resampleSource ? resampleSource : origSource;
+		delaySource = std::make_shared<AudioSourceDelay>(curSource, delaySamples);
+	}
+}
+
+void AudioSourceLayers::Layer::setSourcePitch(float pitch, AudioEngine& engine)
+{
+	const float toHz = 48000.0f;
+	const float fromHz = toHz * pitch;
+
+	if (resampleSource) {
+		resampleSource->setFromHz(fromHz);
+	} else if (std::abs(pitch - 1.0f) > 0.0001f) {
+		resampleSource = std::make_shared<AudioFilterResample>(origSource, fromHz, toHz, engine.getPool());
+		if (delaySource) {
+			delaySource->setSource(resampleSource);
+		}
+	}
+}
+
+AudioSource& AudioSourceLayers::Layer::getSource() const
+{
+	if (delaySource) {
+		return *delaySource;
+	} else if (resampleSource) {
+		return *resampleSource;
+	} else {
+		return *origSource;
 	}
 }

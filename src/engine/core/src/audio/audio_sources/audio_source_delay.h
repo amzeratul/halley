@@ -6,7 +6,9 @@ namespace Halley
 	class AudioSourceDelay final : public AudioSource
 	{
 	public:
-		AudioSourceDelay(std::unique_ptr<AudioSource> src, size_t delay);
+		AudioSourceDelay(std::shared_ptr<AudioSource> src, size_t delay);
+
+		void setSource(std::shared_ptr<AudioSource> source);
 
 		String getName() const override;
 		uint8_t getNumberOfChannels() const override;
@@ -18,7 +20,7 @@ namespace Halley
 		bool isLooping() override;
 
 	private:
-		std::unique_ptr<AudioSource> src;
+		std::shared_ptr<AudioSource> src;
         size_t initialDelay;
 		size_t curDelay;
 	};

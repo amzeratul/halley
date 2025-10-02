@@ -17,10 +17,14 @@ namespace Halley {
         Range<float> getHorizontalRange() const;
         void setHorizontalDividers(size_t n);
         void setVerticalDividers(size_t n);
+        void setVerticalPrimaryRange(Range<float> range);
+        void setReferenceValue(std::optional<float> refValue);
 
         void setCurve(InterpolationCurve curve);
         const InterpolationCurve& getCurve() const;
         InterpolationCurve& getCurve();
+
+        void setCanScaleZoom(bool enabled, Range<float> heightRange);
 
         void setChangeCallback(Callback callback);
 
@@ -43,6 +47,8 @@ namespace Halley {
         TextRenderer tooltipLabel;
 
     	Range<float> horizontalRange;
+        Range<float> verticalPrimaryRange;
+        std::optional<float> refValue;
         size_t nHorizontalDividers = 10;
         size_t nVerticalDividers = 5;
         InterpolationCurve curve;
@@ -53,10 +59,15 @@ namespace Halley {
         std::optional<Vector2f> mouseAnchor;
         bool dragging = false;
 
+        bool canScaleZoom = false;
+        Range<float> scaleZoomHeightRange;
+
         void normalizePoints();
         void notifyChange();
         Rect4f getDrawArea() const;
 
+        void drawHorizontalGrid(UIPainter& painter) const;
+        void drawVerticalGrid(UIPainter& painter) const;
         void drawLine(Painter& painter) const;
         void drawAnchor(Painter& painter, Vector2f pos, bool highlighted) const;
 
@@ -70,5 +81,7 @@ namespace Halley {
         void deletePoint(size_t idx);
         void updateDragging(Vector2f mousePos);
         void editSegment(size_t idx);
+
+        void scaleZoom(int delta);
     };
 }

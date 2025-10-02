@@ -97,7 +97,7 @@ Vector<std::unique_ptr<AudioSource>> AudioSubObjectLayers::makeLayerSources(Audi
 void AudioSubObjectLayers::collectVariablesUsed(Vector<String>& variables, Vector<String>& switches) const
 {
 	for (const auto& layer: layers) {
-		for (const auto& term: layer.expression.getTerms()) {
+		for (const auto& term: layer.gainExpression.getTerms()) {
 			auto& dst = term.type == AudioExpressionTermType::Switch ? switches : variables;
 			if (!dst.contains(term.id)) {
 				dst += term.id;
@@ -231,7 +231,7 @@ const AudioFade& AudioSubObjectLayers::getFade() const
 void AudioSubObjectLayers::validate(const AudioProperties& audioProperties) const
 {
 	for (auto& layer: layers) {
-		layer.expression.validate(audioProperties, getName());
+		layer.gainExpression.validate(audioProperties, getName());
 	}
 }
 
@@ -248,7 +248,8 @@ uint32_t AudioSubObjectLayers::getVersion() const
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 {
 	object = AudioSubObject::makeSubObject(node["object"]);
-	expression.load(node["expression"]);
+	gainExpression.load(node.hasKey("expression") ? node["expression"] : node["gainExpression"]);
+	pitchExpression.load(node["pitchExpression"]);
 	synchronised = node["synchronised"].asBool(false);
 	restartFromBeginning = node["restartFromBeginning"].asBool(false);
 	onlyFadeInWhenResuming = node["onlyFadeInWhenResuming"].asBool(false);
@@ -265,7 +266,8 @@ ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["object"] = object.toConfigNode();
-	result["expression"] = expression.toConfigNode();
+	result["gainExpression"] = gainExpression.toConfigNode();
+	result["pitchExpression"] = pitchExpression.toConfigNode();
 	if (synchronised) {
 		result["synchronised"] = synchronised;
 	}
@@ -295,7 +297,8 @@ const String& AudioSubObjectLayers::Layer::getId() const
 void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 {
 	s << object;
-	s << expression;
+	s << gainExpression;
+	s << pitchExpression;
 	s << synchronised;
 	s << restartFromBeginning;
 	s << onlyFadeInWhenResuming;
@@ -307,7 +310,8 @@ void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
 {
 	s >> object;
-	s >> expression;
+	s >> gainExpression;
+	s >> pitchExpression;
 	s >> synchronised;
 	s >> restartFromBeginning;
 	s >> onlyFadeInWhenResuming;
@@ -320,8 +324,12 @@ bool AudioSubObjectLayers::Layer::reload(Layer&& other)
 {
 	bool modified = false;
 
-	if (expression != other.expression) {
-		expression = other.expression;
+	if (gainExpression != other.gainExpression) {
+		gainExpression = other.gainExpression;
+		modified = true;
+	}
+	if (pitchExpression != other.pitchExpression) {
+		pitchExpression = other.pitchExpression;
 		modified = true;
 	}
 	if (fadeIn != other.fadeIn) {

@@ -1,51 +1,149 @@
-widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20], interactWithMouse: true }
-sizer: { type: vertical }
+uuid: d5c7097f-5bbc-41d5-b8b0-ba7970c038f6
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_staticBox
+  id: background
+  image: $ui_window
+  innerBorder: [8, 8, 8, 8]
+  interactWithMouse: true
+  size: [20, 20]
 children:
-- widget: { id: layerName, class: label, text: "Layer Name", colour: "$ui_unselectedTextAlt" }
-  fill: [left, centreVertical]
-  border: [0, 0, 0, 10]
-- widget: { id: layerContents, class: widget }
-  proportion: 1
-  sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 3 }
-  children:
-  - widget: { class: widget, size: [100, 10] }
+  - uuid: c148f888-b063-48e0-9ca1-9c65dbf6bacc
+    border: [0, 0, 0, 10]
+    widget:
+      class: label
+      colour: $ui_unselectedTextAlt
+      id: layerName
+      text: Layer Name
     fill: [left, centreVertical]
+  - uuid: e6953294-18e3-479d-af93-6d7d6d152293
+    proportion: 1
+    sizer:
+      columnProportions: [0, 1]
+      columns: 2
+      gap: 3
+      type: grid
+    widget:
+      class: widget
+      id: layerContents
     children:
-    - widget: { class: label, text: "Expression: " }
-  - widget: { class: widget, id: expressionContainer }
-    fill: [left, centreVertical]
-    children: []
-  - widget: { class: label, text: "Synchronised: " }
-    fill: [left, centreVertical]
-  - widget: { class: checkbox, id: synchronised }
-    fill: [left, centreVertical]
-  - widget: { class: label, text: "Restart From Beginning: " }
-    fill: [left, centreVertical]
-  - widget: { class: checkbox, id: restartFromBeginning }
-    fill: [left, centreVertical]
-  - widget: { class: label, text: "Only Fade In when Resuming: " }
-    fill: [left, centreVertical]
-  - widget: { class: checkbox, id: onlyFadeInWhenResuming }
-    fill: [left, centreVertical]
-  - widget: { class: label, text: "Override Fade In: " }
-    fill: [left, centreVertical]
-  - sizer: { type: horizontal }
-    children:
-    - widget: { class: checkbox, id: overrideFadeIn }
-      fill: [left, centreVertical]
-    - widget: { class: widget, id: fadeInContainer }
-      sizer: { type: horizontal }
-      children: []
-  - widget: { class: label, text: "Override Fade Out: " }
-    fill: [left, centreVertical]
-  - sizer: { type: horizontal }
-    children:
-    - widget: { class: checkbox, id: overrideFadeOut }
-      fill: [left, centreVertical]
-    - widget: { class: widget, id: fadeOutContainer }
-      sizer: { type: horizontal }
-      children: []
-  - widget: { class: label, text: "Delay on Enter: " }
-    fill: [left, centreVertical]
-  - widget: { class: spinControl2, id: delay, minValue: 0, maxValue: 30, increment: 0.1, size: [60, 20], allowFloat: true }
-    fill: [left, centreVertical]
+      - uuid: c7446984-4f20-4685-be80-4fe9dfd6cc7f
+        widget:
+          class: widget
+          size: [100, 10]
+        children:
+          - uuid: 863687ad-66d3-493c-a32b-b44fcf9d8344
+            widget:
+              class: label
+              text: "Gain Expression: "
+        fill: [left, centreVertical]
+      - uuid: 0c8c33aa-48e4-496e-9d86-e622d2ff134c
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+          id: gainExpressionContainer
+        children: []
+        fill: [left, centreVertical]
+      - uuid: db528fa7-1334-4815-b8eb-6a9c955aba09
+        widget:
+          class: label
+          text: "Pitch Expression: "
+      - uuid: af4c5c79-3d49-4cf3-8678-a00c4ea991a6
+        sizer:
+          columnProportions: []
+        widget:
+          class: widget
+          id: pitchExpressionContainer
+        children: []
+        fill: [left, centreVertical]
+      - uuid: df3f100a-5f03-46e0-bc25-b4ea9484b80e
+        widget:
+          class: label
+          text: "Synchronised: "
+        fill: [left, centreVertical]
+      - uuid: eb66d407-3694-469d-b46f-6e302c28be2f
+        widget:
+          class: checkbox
+          id: synchronised
+        fill: [left, centreVertical]
+      - uuid: a729a511-7e22-4ebf-9e32-ebbe657f6504
+        widget:
+          class: label
+          text: "Restart From Beginning: "
+        fill: [left, centreVertical]
+      - uuid: 759a1537-8ca4-448b-a648-443faa63ef09
+        widget:
+          class: checkbox
+          id: restartFromBeginning
+        fill: [left, centreVertical]
+      - uuid: fa9cd0b1-3490-4eeb-bafa-3015ba020620
+        widget:
+          class: label
+          text: "Only Fade In when Resuming: "
+        fill: [left, centreVertical]
+      - uuid: 42663f12-0283-44c7-8333-8deb52814957
+        widget:
+          class: checkbox
+          id: onlyFadeInWhenResuming
+        fill: [left, centreVertical]
+      - uuid: 614c6357-be08-4a52-a9bb-ddd369531293
+        widget:
+          class: label
+          text: "Override Fade In: "
+        fill: [left, centreVertical]
+      - uuid: 5484d4a7-2a56-4c35-b48b-3f0f719c69c6
+        sizer:
+          type: horizontal
+        children:
+          - uuid: 832d403a-2cfe-48f4-8e1a-532167517b26
+            widget:
+              class: checkbox
+              id: overrideFadeIn
+            fill: [left, centreVertical]
+          - uuid: f15bb772-9fc1-4167-9e11-8785023155b3
+            sizer:
+              type: horizontal
+            widget:
+              class: widget
+              id: fadeInContainer
+            children: []
+      - uuid: af6c9065-ba62-4702-9e88-bfb71691742b
+        widget:
+          class: label
+          text: "Override Fade Out: "
+        fill: [left, centreVertical]
+      - uuid: a268d9d7-3ec1-4b9b-9fde-8ed3bb8dcccd
+        sizer:
+          type: horizontal
+        children:
+          - uuid: ef4f77c5-4ef2-407c-8106-85fe3d222caf
+            widget:
+              class: checkbox
+              id: overrideFadeOut
+            fill: [left, centreVertical]
+          - uuid: ac07f1c4-df8a-4cf9-ada0-a76ca8913281
+            sizer:
+              type: horizontal
+            widget:
+              class: widget
+              id: fadeOutContainer
+            children: []
+      - uuid: 5a350371-1a3e-4617-84d8-eedfa40db96f
+        widget:
+          class: label
+          text: "Delay on Enter: "
+        fill: [left, centreVertical]
+      - uuid: 7ab51652-be69-4066-a95f-83fe8d2dd634
+        widget:
+          allowFloat: true
+          class: spinControl2
+          id: delay
+          increment: 0.100000001
+          maxValue: 30
+          minValue: 0
+          size: [60, 20]
+        fill: [left, centreVertical]

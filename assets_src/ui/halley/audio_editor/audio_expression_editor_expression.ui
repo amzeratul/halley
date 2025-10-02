@@ -91,7 +91,8 @@ children:
         widget:
           class: curveEditor
           id: variableCurve
-          size: [400, 60]
+          size: [500, 60]
+        fill: [left, fillVertical]
   - uuid: 939c447c-1617-45e5-a6af-acf089db8c92
     border: [4, 0, 0, 0]
     widget:

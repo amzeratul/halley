@@ -8,7 +8,8 @@ namespace Halley {
 	public:
 		struct Layer {
 			AudioSubObjectHandle object;
-			AudioExpression expression;
+			AudioExpression gainExpression;
+			AudioExpression pitchExpression;
 			std::optional<AudioFade> fadeIn;
 			std::optional<AudioFade> fadeOut;
 			float delay = 0;

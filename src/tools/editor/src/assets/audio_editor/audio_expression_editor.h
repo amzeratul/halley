@@ -11,7 +11,11 @@ namespace Halley {
 
 	class AudioExpressionEditor : public UIWidget {
 	public:
-		AudioExpressionEditor(UIFactory& factory, AudioExpression& expression, AudioObjectEditor& editor);
+		enum class Type {
+			Gain,
+			Pitch
+		};
+		AudioExpressionEditor(UIFactory& factory, AudioExpression& expression, AudioObjectEditor& editor, Type type);
 
 		void onMakeUI() override;
 
@@ -20,11 +24,16 @@ namespace Halley {
 		AudioObjectEditor& getEditor();
 		void deleteTerm(size_t idx);
 
+		Type getType() const;
+		Range<float> getRange() const;
+		std::optional<float> getReferenceValue() const;
+
 	private:
 		UIFactory& factory;
 		AudioExpression& expression;
 		Vector<std::shared_ptr<AudioExpressionEditorExpression>> expressionEditors;
 		AudioObjectEditor& editor;
+		Type type;
 
 		void loadUI();
 		void refreshIds();

@@ -82,7 +82,8 @@ void AudioLayersEditorLayer::onMakeUI()
 	const auto& name = layer.object->getName();
 	getWidgetAs<UILabel>("layerName")->setText(LocalisedString::fromUserString(name));
 
-	getWidget("expressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.expression, layersEditor.getEditor()), 1);
+	getWidget("gainExpressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.gainExpression, layersEditor.getEditor(), AudioExpressionEditor::Type::Gain), 1);
+	getWidget("pitchExpressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.pitchExpression, layersEditor.getEditor(), AudioExpressionEditor::Type::Pitch), 1);
 
 	bindData("synchronised", layer.synchronised, [this, &layer] (bool value)
 	{

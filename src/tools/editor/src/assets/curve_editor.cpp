@@ -20,6 +20,14 @@ CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle _style)
 	lineColour = style.getColour("lineColour");
 	gridLine = style.getSprite("gridLine");
 	tooltipLabel = style.getTextRenderer("tooltipLabel");
+
+	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event) {
+		if (canScaleZoom && (event.getKeyMods() & KeyMods::Ctrl) != KeyMods::None) {
+			scaleZoom(event.getIntData());
+		} else {
+			sendEvent(event, false, false);
+		}
+	});
 }
 
 void CurveEditor::update(Time time, bool moved)
@@ -44,32 +52,8 @@ void CurveEditor::draw(UIPainter& painter) const
 	p2.draw(background);
 	p2.draw(display);
 
-	const float y0 = -curve.baseline / curve.scale;
-	const float y1 = (-curve.baseline + 1.0f) / curve.scale;
-
-	// Horizontal grid
-	const auto drawArea = getDrawArea();
-	const auto vLine = gridLine.clone().scaleTo(Vector2f(1, drawArea.getHeight()));
-	for (size_t i = 0; i <= nHorizontalDividers; ++i) {
-		float t = static_cast<float>(i) / static_cast<float>(nHorizontalDividers);
-		p2.draw(vLine.clone().setPosition(lerp(drawArea.getTopLeft(), drawArea.getTopRight(), t)), true);
-	}
-
-	// Vertical grid
-	const auto hLine = gridLine.clone().scaleTo(Vector2f(drawArea.getWidth(), 1));
-	for (size_t i = 0; i <= nVerticalDividers; ++i) {
-		float t = lerp(y0, y1, static_cast<float>(i) / static_cast<float>(nVerticalDividers));
-		p2.draw(hLine.clone().setPosition(curveToMouseSpace(Vector2f(0, t))), true);
-	}
-
-	// Vertical baselines
-	const auto baseline = hLine.clone().setColour(lineColour.withAlpha(0.7f));
-	if (std::abs(y0) > 0.00001f) {
-		p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y0))), true);
-	}
-	if (std::abs(y1 - 1.0f) > 0.00001f) {
-		p2.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y1))), true);
-	}
+	drawHorizontalGrid(p2);
+	drawVerticalGrid(p2);
 
 	painter.draw([this] (Painter& painter)
 	{
@@ -80,6 +64,49 @@ void CurveEditor::draw(UIPainter& painter) const
 		}
 	});
 	painter.draw(tooltipLabel);
+}
+
+void CurveEditor::drawHorizontalGrid(UIPainter& painter) const
+{
+	const auto drawArea = getDrawArea();
+	const auto vLine = gridLine.clone().scaleTo(Vector2f(1, drawArea.getHeight()));
+	for (size_t i = 0; i <= nHorizontalDividers; ++i) {
+		float t = static_cast<float>(i) / static_cast<float>(nHorizontalDividers);
+		painter.draw(vLine.clone().setPosition(lerp(drawArea.getTopLeft(), drawArea.getTopRight(), t)), true);
+	}
+}
+
+void CurveEditor::drawVerticalGrid(UIPainter& painter) const
+{
+	const auto drawArea = getDrawArea();
+
+	const float c0 = curve.baseline;
+	const float c1 = curve.baseline + curve.scale;
+
+	const float y0 = invLerp(verticalPrimaryRange.start, c0, c1);
+	const float y1 = invLerp(verticalPrimaryRange.end, c0, c1);
+
+	// Vertical grid
+	const auto hLine = gridLine.clone().scaleTo(Vector2f(drawArea.getWidth(), 1));
+	for (size_t i = 0; i <= nVerticalDividers; ++i) {
+		float t = lerp(y0, y1, static_cast<float>(i) / static_cast<float>(nVerticalDividers));
+		painter.draw(hLine.clone().setPosition(curveToMouseSpace(Vector2f(0, t))), true);
+	}
+
+	// Vertical baselines
+	const auto baseline = hLine.clone().setColour(lineColour.withAlpha(0.7f));
+	if (y0 > 0.00001f) {
+		painter.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y0))), true);
+	}
+	if (y1 < 0.99999f) {
+		painter.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, y1))), true);
+	}
+
+	// Reference value
+	if (refValue) {
+		const float yr = invLerp(*refValue, c0, c1);
+		painter.draw(baseline.clone().setPosition(curveToMouseSpace(Vector2f(0, yr))), true);
+	}
 }
 
 void CurveEditor::setHorizontalRange(Range<float> range)
@@ -107,6 +134,16 @@ void CurveEditor::setVerticalDividers(size_t n)
 	nVerticalDividers = n;
 }
 
+void CurveEditor::setVerticalPrimaryRange(Range<float> range)
+{
+	verticalPrimaryRange = range;
+}
+
+void CurveEditor::setReferenceValue(std::optional<float> refValue)
+{
+	this->refValue = refValue;
+}
+
 void CurveEditor::setCurve(InterpolationCurve c)
 {
 	curve = std::move(c);
@@ -121,6 +158,12 @@ const InterpolationCurve& CurveEditor::getCurve() const
 InterpolationCurve& CurveEditor::getCurve()
 {
 	return curve;
+}
+
+void CurveEditor::setCanScaleZoom(bool enabled, Range<float> heightRange)
+{
+	canScaleZoom = enabled;
+	scaleZoomHeightRange = heightRange;
 }
 
 void CurveEditor::setChangeCallback(Callback callback)
@@ -429,4 +472,12 @@ void CurveEditor::editSegment(size_t idx)
 		curve.tweens[idx] = fromString<TweenCurve>(e.getStringData());
 		notifyChange();
 	});
+}
+
+void CurveEditor::scaleZoom(int delta)
+{
+	const auto curMinSize = getMinimumSize();
+	const auto curSize = getSize();
+	const float height = clamp(curSize.y * static_cast<float>(std::pow(2.0f, delta)), scaleZoomHeightRange.start, scaleZoomHeightRange.end);
+	setMinSize(Vector2f(curMinSize.x, height));
 }

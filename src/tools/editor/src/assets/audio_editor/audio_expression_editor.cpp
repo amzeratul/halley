@@ -8,11 +8,12 @@
 #include "src/assets/curve_editor.h"
 using namespace Halley;
 
-AudioExpressionEditor::AudioExpressionEditor(UIFactory& factory, AudioExpression& expression, AudioObjectEditor& editor)
+AudioExpressionEditor::AudioExpressionEditor(UIFactory& factory, AudioExpression& expression, AudioObjectEditor& editor, Type type)
 	: UIWidget("audio_expression_editor", Vector2f(), UISizer())
 	, factory(factory)
 	, expression(expression)
 	, editor(editor)
+	, type(type)
 {
 	factory.loadUI(*this, "halley/audio_editor/audio_expression_editor");
 }
@@ -67,6 +68,28 @@ void AudioExpressionEditor::deleteTerm(size_t idx)
 	});
 }
 
+AudioExpressionEditor::Type AudioExpressionEditor::getType() const
+{
+	return type;
+}
+
+Range<float> AudioExpressionEditor::getRange() const
+{
+	if (type == Type::Pitch) {
+		return { 0.25f, 4.0f };
+	} else {
+		return { 0.0f, 1.0f };
+	}
+}
+
+std::optional<float> AudioExpressionEditor::getReferenceValue() const
+{
+	if (type == Type::Pitch) {
+		return 1.0f;
+	}
+	return std::nullopt;
+}
+
 void AudioExpressionEditor::loadUI()
 {
 	auto exprList = getWidgetAs<UIList>("expressions");
@@ -102,6 +125,17 @@ void AudioExpressionEditor::addTerm(AudioExpressionTermType type)
 {
 	const auto idx = expression.getTerms().size();
 	expression.getTerms().push_back(AudioExpressionTerm(type));
+
+	auto& curve = expression.getTerms().back().points;
+	const auto range = getRange();
+	const auto referenceValue = getReferenceValue();
+	curve.baseline = range.start;
+	curve.scale = range.end - range.start;
+	if (referenceValue) {
+		for (auto& p: curve.points) {
+			p = (*referenceValue - curve.baseline) / curve.scale;
+		}
+	}
 
 	expressionEditors.push_back(std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
 	getWidgetAs<UIList>("expressions")->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
@@ -191,14 +225,21 @@ void AudioExpressionEditorExpression::onMakeUI()
 		auto updateVariableProps = [this, &audioProperties] (const String& variableName)
 		{
 			auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
-			auto variableConfig = audioProperties.tryGetVariable(variableName);
-			if (variableConfig) {
+			if (auto variableConfig = audioProperties.tryGetVariable(variableName)) {
 				curveEditor->setHorizontalRange(variableConfig->getRange());
 				curveEditor->setHorizontalDividers(variableConfig->getNumberOfHorizontalDividers());
 			} else {
 				curveEditor->setHorizontalRange(Range<float>(0, 1));
 				curveEditor->setHorizontalDividers(10);
 			}
+
+			if (parent.getType() == AudioExpressionEditor::Type::Pitch) {
+				curveEditor->setVerticalPrimaryRange(Range<float>(0.0f, 4.0f));
+				curveEditor->setVerticalDividers(4);
+			} else {
+				curveEditor->setVerticalPrimaryRange(parent.getRange());
+			}
+			curveEditor->setReferenceValue(parent.getReferenceValue());	
 		};
 
 		bindData("variableId", expression.id, [=] (String value)
@@ -212,6 +253,7 @@ void AudioExpressionEditorExpression::onMakeUI()
 		updateVariableProps(expression.id);
 		auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
 		curveEditor->setCurve(expression.points);
+		curveEditor->setCanScaleZoom(true, Range<float>(60, 240));
 		curveEditor->setChangeCallback([=] (const InterpolationCurve& points)
 		{
 			auto& expr = parent.getExpressionTerm(idx);

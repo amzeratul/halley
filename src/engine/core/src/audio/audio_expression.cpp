@@ -125,17 +125,22 @@ ConfigNode AudioExpression::toConfigNode() const
 	return result;
 }
 
-float AudioExpression::evaluate(const AudioEmitter& emitter) const
+float AudioExpression::evaluate(const AudioEmitter& emitter, Range<float> range) const
 {
 	float value;
 
 	switch (operation) {
 	case AudioExpressionOperation::Multiply:
-	case AudioExpressionOperation::Min:
 		value = 1.0f;
 		break;
-	default:
+	case AudioExpressionOperation::Add:
 		value = 0.0f;
+		break;
+	case AudioExpressionOperation::Max:
+		value = range.start;
+		break;
+	case AudioExpressionOperation::Min:
+		value = range.end;
 		break;
 	}
 
@@ -158,7 +163,7 @@ float AudioExpression::evaluate(const AudioEmitter& emitter) const
 		}
 
 	}
-	return clamp(value, 0.0f, 1.0f);
+	return clamp(value, range.start, range.end);
 }
 
 void AudioExpression::validate(const AudioProperties& audioProperties, const String& breadCrumbs) const

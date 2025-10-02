@@ -90,7 +90,7 @@ namespace Halley {
         void load(const ConfigNode& node);
         ConfigNode toConfigNode() const;
 
-        float evaluate(const AudioEmitter& emitter) const;
+        float evaluate(const AudioEmitter& emitter, Range<float> range) const;
 		void validate(const AudioProperties& audioProperties, const String& breadCrumbs) const;
 
         bool operator==(const AudioExpression& other) const;
