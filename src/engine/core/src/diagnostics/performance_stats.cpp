@@ -139,17 +139,22 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	totalFrameTime.pushValue((data->getEndTime() - data->getStartTime()));
 	audioTime.pushValue(data->getAudioTime());
 
-	auto getTime = [&](TimeLine timeline) -> int
+	auto toUs = [](uint64_t ns) -> int
 	{
-		const auto ns = getTimeNs(timeline, *data);
 		return static_cast<int>((ns + 500) / 1000);
 	};
+	auto getTime = [&](TimeLine timeline) -> int
+	{
+		return toUs(getTimeNs(timeline, *data));
+	};
 
-	lastFrameData = (lastFrameData + 1) % frameData.size();
-	auto& curFrameData = frameData[lastFrameData];
-	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
-	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
-	curFrameData.renderTime = getTime(TimeLine::Render);
+	{
+		lastFrameData = (lastFrameData + 1) % frameData.size();
+		auto& curFrameData = frameData[lastFrameData];
+		curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
+		curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
+		curFrameData.renderTime = getTime(TimeLine::Render);
+	}
 
 	for (auto& [k, e]: systemHistory) {
 		e.startUpdate();
@@ -160,6 +165,11 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	for (auto& [k, e]: audioHistory) {
 		e.startUpdate();
 	}
+
+	auto flushRenderVoiceTime = [&] () {
+		audioFrameData[lastAudioFrameData].renderVoiceTime += toUs(pendingVoiceRenderTime);
+		pendingVoiceRenderTime = 0;
+	};
 
 	int nAudioBuffers = 0;
 	for (const auto& t: data->getThreads()) {
@@ -172,12 +182,15 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 				systemHistory[e.name + "/Messages"].update(e.type, (e.endTime - e.startTime), e.sourceId);
 			} else if (e.type == ProfilerEventType::AudioRenderVoice) {
 				audioHistory[e.name].update(e.type, (e.endTime - e.startTime), e.sourceId);
+				pendingVoiceRenderTime += e.endTime - e.startTime;
 			} else if (e.type == ProfilerEventType::AudioGenerateBuffer) {
 				++nAudioBuffers;
+				flushRenderVoiceTime();
 				lastAudioFrameData = (lastAudioFrameData + 1) % audioFrameData.size();
 				auto& curAudioFrameData = audioFrameData[lastAudioFrameData];
+				curAudioFrameData.renderVoiceTime = 0;
 				const auto ns = e.endTime - e.startTime;
-				curAudioFrameData.time = static_cast<int>((ns + 500) / 1000);
+				curAudioFrameData.generateBufferTime = toUs(ns);
 			}
 		}
 	}
@@ -187,6 +200,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 
 	if (nAudioBuffers > 0) {
 		std_ex::erase_if_value(audioHistory, [&](const auto& e) { return !e.isVisited(); });
+		flushRenderVoiceTime();
 	}
 
 	totalTimePerAudioBuffer = int64_t(data->getAudioBufferLen()) * 1'000'000'000 / int64_t(data->getAudioSampleRate());
@@ -556,10 +570,15 @@ void PerformanceStatsView::drawAudioTimeline(Painter& painter, Rect4f rect)
 	drawBar(boxPos + Vector2f(0, displaySize.y / 3), "100%", Colour4f(0.8f, 0.0f, 0.0f));
 	drawBar(boxPos + Vector2f(0, displaySize.y * 2 / 3), "50%");
 
-	auto audioSprite = whitebox
+	auto voiceSprite = whitebox
 		.clone()
 		.setPivot(Vector2f(0, 1))
-		.setColour(Colour4f(0.5f, 0.9f, 1.0f));
+		.setColour(getEventColour(ProfilerEventType::AudioRenderVoice));
+
+	auto bufferSprite = whitebox
+		.clone()
+		.setPivot(Vector2f(0, 1))
+		.setColour(getEventColour(ProfilerEventType::AudioGenerateBuffer));
 	
 	const size_t n = audioFrameData.size();
 	const float oneOverN = 1.0f / static_cast<float>(n);
@@ -574,9 +593,12 @@ void PerformanceStatsView::drawAudioTimeline(Painter& painter, Rect4f rect)
 		const float x = xPos(i);
 		const float w = xPos(i + 1) - x;
 		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
-		Vector2f s = Vector2f(w, std::min(audioFrameData[index].time * scale, displaySize.y));
-		s.y = std::clamp(s.y, 1.0f, displaySize.y);
-		audioSprite.setPosition(p).setSize(s).draw(painter);
+		Vector2f s1 = Vector2f(w, std::min(audioFrameData[index].generateBufferTime * scale, displaySize.y));
+		Vector2f s2 = Vector2f(w, std::min(audioFrameData[index].renderVoiceTime * scale, displaySize.y));
+		s1.y = std::clamp(s1.y, 1.0f, displaySize.y);
+		s2.y = std::clamp(s2.y, 1.0f, displaySize.y);
+		bufferSprite.setPosition(p).setSize(s1).draw(painter);
+		voiceSprite.setPosition(p).setSize(s2).draw(painter);
 	}
 }
 
@@ -713,7 +735,7 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	case ProfilerEventType::AudioGenerateBuffer:
 		return Colour4f(0.5f, 0.8f, 1.0f);
 	case ProfilerEventType::AudioRenderVoice:
-		return Colour4f(0.4f, 0.9f, 1.0f);
+		return Colour4f(0.4f, 1.0, 0.9f);
 	case ProfilerEventType::ScriptUpdate:
 		return Colour4f(0.8f, 0.51f, 0.97f);
 	case ProfilerEventType::GPU:

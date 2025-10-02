@@ -57,7 +57,8 @@ namespace Halley
 
 		class AudioFrameData {
 		public:
-			int time = 0;
+			int generateBufferTime = 0;
+			int renderVoiceTime = 0;
 		};
 
 		class EventHistoryData {
@@ -126,6 +127,7 @@ namespace Halley
 		float curMaxTime = 500000.0f;
 		std::chrono::steady_clock::time_point lastUpdateTime;
 		int64_t totalTimePerAudioBuffer = 0;
+		int64_t pendingVoiceRenderTime = 0;
 
 		bool capturing = true;
 		Page page = Page::ShortSummary;
