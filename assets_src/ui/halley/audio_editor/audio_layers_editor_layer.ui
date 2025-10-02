@@ -52,6 +52,7 @@ children:
         widget:
           class: label
           text: "Pitch Expression: "
+        fill: [fillHorizontal, centreVertical]
       - uuid: af4c5c79-3d49-4cf3-8678-a00c4ea991a6
         sizer:
           columnProportions: []
