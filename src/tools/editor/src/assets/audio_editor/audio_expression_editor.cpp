@@ -250,10 +250,13 @@ void AudioExpressionEditorExpression::onMakeUI()
 			parent.markModified(idx);
 		});
 
+		auto style = factory.getStyle(parent.getType() == AudioExpressionEditor::Type::Pitch ? "curveEditorPitch" : "curveEditor");
+
 		updateVariableProps(expression.id);
 		auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
 		curveEditor->setCurve(expression.points);
 		curveEditor->setCanScaleZoom(true, Range<float>(60, 240));
+		curveEditor->setStyle(std::move(style));
 		curveEditor->setChangeCallback([=] (const InterpolationCurve& points)
 		{
 			auto& expr = parent.getExpressionTerm(idx);

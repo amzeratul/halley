@@ -4,22 +4,15 @@
 
 using namespace Halley;
 
-CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle _style)
+CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle style)
 	: UIWidget(std::move(id))
 	, factory(factory)
 	, horizontalRange(0, 1)
 {
 	curve.makeDefault();
 
-	styles.push_back(std::move(_style));
+	setStyle(std::move(style));
 	setInteractWithMouse(true);
-
-	const auto& style = styles.back();
-	background = style.getSprite("background");
-	display = style.getSprite("display");
-	lineColour = style.getColour("lineColour");
-	gridLine = style.getSprite("gridLine");
-	tooltipLabel = style.getTextRenderer("tooltipLabel");
 
 	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event) {
 		if (canScaleZoom && (event.getKeyMods() & KeyMods::Ctrl) != KeyMods::None) {
@@ -28,6 +21,19 @@ CurveEditor::CurveEditor(UIFactory& factory, String id, UIStyle _style)
 			sendEvent(event, false, false);
 		}
 	});
+}
+
+void CurveEditor::setStyle(UIStyle _style)
+{
+	styles.clear();
+	styles.push_back(std::move(_style));
+
+	const auto& style = styles.back();
+	background = style.getSprite("background");
+	display = style.getSprite("display");
+	lineColour = style.getColour("lineColour");
+	gridLine = style.getSprite("gridLine");
+	tooltipLabel = style.getTextRenderer("tooltipLabel");
 }
 
 void CurveEditor::update(Time time, bool moved)

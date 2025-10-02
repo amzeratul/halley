@@ -10,6 +10,8 @@ namespace Halley {
 
         CurveEditor(UIFactory& factory, String id, UIStyle style);
 
+        void setStyle(UIStyle style);
+
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
 

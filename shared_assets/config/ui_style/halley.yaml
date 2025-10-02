@@ -539,6 +539,13 @@ uiStyle:
     gridLine: { img: whitebox.png, colour: "#0E79E440" }
     tooltipLabel: { font: Ubuntu Light, size: 12, colour: $ui_text }
 
+  curveEditorPitch:
+    background: { img: $ui_window, colour: $ui_popupWindow }
+    display: { img: whitebox.png, colour: $ui_listBackground }
+    lineColour: "#28E40E"
+    gridLine: { img: whitebox.png, colour: "#28E40E40" }
+    tooltipLabel: { font: Ubuntu Light, size: 12, colour: $ui_text }
+
   gradientEditor:
     background: { img: $ui_window, colour: $ui_popupWindow }
     anchor: { img: ui/gradient_anchor.png, colour: $ui_listBackground }
