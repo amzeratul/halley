@@ -9,10 +9,11 @@
 
 using namespace Halley;
 
-Bytes ResourceDataReader::readAll()
+Bytes ResourceDataReader::readAll(std::optional<size_t> startPos)
 {
-	Bytes result(size() - tell());
-	read(gsl::as_writable_bytes(gsl::span<Byte>(result)));
+	size_t from = startPos ? *startPos : tell();
+	Bytes result(size() - from);
+	readAt(gsl::as_writable_bytes(gsl::span<Byte>(result)), from);
 	return result;
 }
 

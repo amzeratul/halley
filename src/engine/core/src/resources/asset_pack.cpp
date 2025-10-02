@@ -18,7 +18,6 @@ void AssetPackHeader::init(size_t assetDbSize)
 
 AssetPack::AssetPack()
 	: assetDb(std::make_unique<AssetDatabase>())
-	, hasReader(false)
 {
 	memset(iv.data(), 0, iv.size());
 }
@@ -30,7 +29,6 @@ AssetPack::AssetPack(AssetPack&& other) noexcept
 
 AssetPack::AssetPack(std::unique_ptr<ResourceDataReader> _reader, std::optional<Encrypt::AESKey> encryptionKey, bool preLoad)
 	: reader(std::move(_reader))
-	, hasReader(true)
 {
 	// Read header
 	size_t totalSize = reader->size();
@@ -82,15 +80,11 @@ AssetPack::~AssetPack()
 
 AssetPack& AssetPack::operator=(AssetPack&& other) noexcept
 {
-	UniqueLock lock(other.readerMutex);
-
 	assetDb = std::move(other.assetDb);
 	dataOffset = other.dataOffset;
 	reader = std::move(other.reader);
 	data = std::move(other.data);
-	hasReader = !!reader;
 
-	other.hasReader = false;
 	other.reader.reset();
 
 	return *this;
@@ -146,7 +140,7 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 			return std::make_unique<PackDataReader>(*this, pos, size);
 		});
 	} else {
-		if (hasReader) {
+		if (reader) {
 			auto result = new char[size];
 			try {
 				readData(pos, gsl::as_writable_bytes(gsl::span<char>(result, size)));
@@ -168,11 +162,8 @@ std::unique_ptr<ResourceData> AssetPack::getData(const String& asset, AssetType 
 
 void AssetPack::readToMemory()
 {
-	UniqueLock lock(readerMutex);
-	reader->seek(dataOffset, SEEK_SET);
-	data = reader->readAll();
-	hasReader = false;
-	reader.reset();
+	data = reader->readAll(dataOffset);
+	reader = {};
 }
 
 void AssetPack::encrypt(Encrypt::AESKey key)
@@ -190,12 +181,9 @@ void AssetPack::decrypt(Encrypt::AESKey key)
 
 void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 {
-	if (hasReader) {
-		UniqueLock lock(readerMutex);
-		if (reader) {
-			reader->readAt(dst, pos + dataOffset);
-			return;
-		}
+	if (reader) {
+		reader->readAt(dst, pos + dataOffset);
+		return;
 	}
 
 	// Didn't read with reader, read from data
@@ -207,8 +195,6 @@ void AssetPack::readData(size_t pos, gsl::span<std::byte> dst)
 
 std::unique_ptr<ResourceDataReader> AssetPack::extractReader()
 {
-	UniqueLock lock(readerMutex);
-	hasReader = false;
 	return std::move(reader);
 }
 

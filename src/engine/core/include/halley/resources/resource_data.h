@@ -43,7 +43,7 @@ namespace Halley {
 		virtual void close() = 0;
 		virtual bool isAvailable() const { return true; }
 
-		Bytes readAll();
+		Bytes readAll(std::optional<size_t> startPos = {});
 	};
 
 	class ResourceDataReaderFileSystem : public ResourceDataReader {

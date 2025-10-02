@@ -58,8 +58,6 @@ namespace Halley {
     private:
 		std::unique_ptr<AssetDatabase> assetDb;
 		std::unique_ptr<ResourceDataReader> reader;
-		std::atomic<bool> hasReader;
-		Mutex readerMutex;
 		size_t dataOffset = 0;
 		Bytes data;
 		std::array<uint8_t, 16> iv;
