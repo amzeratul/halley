@@ -300,9 +300,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         Expects(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
         Expects(!parentSession->getEntitySerializationOptions().serializeAsStub);
 
-        auto fastSerialize = EntityNetworkSerialize(parentSession);
+        auto fastSerialize = EntityNetworkSerialize(parentSession, entity);
 
-    	if (fastSerialize.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
+    	if (fastSerialize.serializeEntityUpdate(parentSession->getByteSerializationOptions())) {
     		bool modified = false;
     		bool modifiedInStructure = false;
 
@@ -316,7 +316,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			Logger::logDev("populating outbound entity journal, authority-only");
     		} else {
     			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
-    			modifiedInStructure = fastSerialize.hasEntityChanges(entity, wantToLog);
+    			modifiedInStructure = fastSerialize.hasEntityChanges(wantToLog);
     		}
 
     		wantToLog &= modified;
@@ -389,8 +389,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
         // Binary serialization to (re-)build the update journal.
-        auto serialize = EntityNetworkSerialize(parentSession);
-        if (serialize.serializeEntityUpdate(entity, parentSession->getByteSerializationOptions())) {
+        auto serialize = EntityNetworkSerialize(parentSession, entity);
+        if (serialize.serializeEntityUpdate(parentSession->getByteSerializationOptions())) {
 	        serialize.processEntityUpdateChanges(remote.fastUpdateJournal);
         } else {
 	        // If the fast update further above failed, for example because of a full journal,
@@ -633,10 +633,10 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
 	if (msg.fastSerialize) {
         //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
 
-        auto serialize = EntityNetworkSerialize(parentSession);
+        auto serialize = EntityNetworkSerialize(parentSession, entity);
 
         try {
-            auto result = serialize.deserializeEntityUpdate(entity, entity.getPrefab(), msg.bytes, parentSession->getByteSerializationOptions());
+            auto result = serialize.deserializeEntityUpdate(msg.bytes, parentSession->getByteSerializationOptions());
 			// TODO: is this still required?
         	stripNestedNetworkComponents(entity);
         	if (result.position) {

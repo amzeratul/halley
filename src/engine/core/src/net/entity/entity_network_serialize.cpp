@@ -317,8 +317,9 @@ const EntityNetworkChanges::Page& EntityNetworkChanges::findEntityByUUID(const U
     throw Exception("No journal page found for entity", HalleyExceptions::Network);
 }
 
-EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session)
+EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* session, EntityRef& entity)
     : session(session)
+    , rootEntity(entity)
     , hasComponentsAddedOrRemoved(false)
 {
     // Thread-local buffer to serialize/encode changes into.
@@ -328,16 +329,16 @@ EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* sessi
     scratchpad.resize_no_init(scratchpad.capacity());
 }
 
-bool EntityNetworkSerialize::serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options)
+bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
-    opt.world = &entity.getWorld();
+    opt.world = &rootEntity.getWorld();
 
     Serializer serializer(scratchpad.byte_span(), opt);
-    const SerializationContext context(entity);
+    const SerializationContext context(rootEntity);
 
-    doSerializeEntityUpdate(context, serializer, entity, {});
+    doSerializeEntityUpdate(context, serializer, rootEntity, {});
 
     journal.digest();
 
@@ -390,14 +391,14 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     }
 }
 
-EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options)
+EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityUpdate(const Bytes& bytes, const SerializerOptions& options)
 {
     SerializerOptions opt(SerializerOptions::maxVersion);
     opt.dictionary = options.dictionary;
-    opt.world = &entity.getWorld();
+    opt.world = &rootEntity.getWorld();
 
     Deserializer deserializer(bytes, opt);
-    const SerializationContext context(entity, prefab);
+    const SerializationContext context(rootEntity, rootEntity.getPrefab());
 
     EntityNetworkChanges::Type type;
     uint32_t size;
@@ -411,22 +412,12 @@ EntityNetworkSerialize::InboundResult EntityNetworkSerialize::deserializeEntityU
     deserializer >> instanceUUID;
 
     InboundResult result = {};
-    type = doDeserializeEntityUpdate(context, deserializer, entity, {}, &result);
+    type = doDeserializeEntityUpdate(context, deserializer, rootEntity, {}, &result);
 
     if (type != EntityNetworkChanges::Type::Unknown || deserializer.getBytesLeft() != 0) {
         Logger::logDev("Not at end of entity network update byte stream, " +
             toString(deserializer.getBytesLeft()) + " bytes left", true);
     }
-
-#if 0
-    if (parentInstanceUUID.isValid()) {
-        if (auto parentEntity = entity.getWorld().findEntity(parentInstanceUUID); parentEntity) {
-            entity.setParent(parentEntity.value());
-        } else {
-            Logger::logError("Parent " + toString(parentInstanceUUID) + " not found for network entity \"" + entity.getName() + "\"");
-        }
-    }
-#endif
 
     return result;
 }
@@ -732,7 +723,7 @@ bool EntityNetworkSerialize::processEntityUpdateChanges(Bytes& previous)
     return modified;
 }
 
-bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log) const
+bool EntityNetworkSerialize::hasEntityChanges(bool log) const
 {
     bool changes = hasComponentsAddedOrRemoved;
 
@@ -740,7 +731,7 @@ bool EntityNetworkSerialize::hasEntityChanges(const EntityRef& entity, bool log)
         if (log) {
             Logger::logDev("  - " + toString(childrenAdded.size()) + " children added");
             for (const auto& child : childrenAdded) {
-                auto ce = findChildEntity(entity, child);
+                auto ce = findChildEntity(rootEntity, child);
                 Logger::logDev("    + " + child + " - " + (ce ? ce->first.getName() : "unknown"));
             }
         }

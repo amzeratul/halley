@@ -97,13 +97,13 @@ namespace Halley {
             std::optional<Vector2f> position;
         };
 
-        explicit EntityNetworkSerialize(const EntityNetworkSession* session);
+        explicit EntityNetworkSerialize(const EntityNetworkSession* session, EntityRef& entity);
 
-        bool serializeEntityUpdate(const EntityRef& entity, const SerializerOptions& options);
-        InboundResult deserializeEntityUpdate(EntityRef& entity, const std::shared_ptr<const Prefab>& prefab, const Bytes& bytes, const SerializerOptions& options);
+        bool serializeEntityUpdate(const SerializerOptions& options);
+        InboundResult deserializeEntityUpdate(const Bytes& bytes, const SerializerOptions& options);
 
         bool processEntityUpdateChanges(Bytes& previous);
-        bool hasEntityChanges(const EntityRef& entity, bool log) const;
+        bool hasEntityChanges(bool log) const;
 
         [[nodiscard]] size_t getBytes(Bytes& data, const SerializerOptions& options, bool log) const;
         static size_t getBytesCapacity();
@@ -175,6 +175,7 @@ namespace Halley {
         static std::optional<std::pair<EntityRef, EntityRef>> findChildEntity(const EntityRef& entity, const UUID& instanceUUID);
 
         const EntityNetworkSession* session;
+        EntityRef& rootEntity;
         EntityNetworkChanges journal;
 
         bool hasComponentsAddedOrRemoved;
