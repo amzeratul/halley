@@ -23,7 +23,7 @@ std::unique_ptr<ResourceDataReader> SDL3RWOps::fromMemory(gsl::span<const std::b
 
 SDL3RWOps::SDL3RWOps(SDL_IOStream* _fp, int64_t _start, int64_t _end, bool _closeOnFinish)
 	: fp(_fp)
-	, pos(_start)
+	, curPos(_start)
 	, start(_start)
 	, end(_end)
 	, closeOnFinish(_closeOnFinish)
@@ -54,13 +54,23 @@ size_t SDL3RWOps::size() const
 
 int SDL3RWOps::read(gsl::span<std::byte> dst)
 {
-	if (!fp) return -1;
+	return readAt(dst, curPos);
+}
 
-	size_t toRead = std::min(size_t(dst.size()), size_t(end - pos));
+int SDL3RWOps::readAt(gsl::span<std::byte> dst, size_t pos)
+{
+	if (!fp) {
+		return -1;
+	}
+
+	size_t toRead = std::min(dst.size(), static_cast<size_t>(end) - pos);
+
+	UniqueLock lock(mutex);
 	SDL_SeekIO(fp, pos, SDL_IO_SEEK_SET);
-	int n = static_cast<int>(SDL_ReadIO(fp, dst.data(), static_cast<int>(toRead)));
-	if (n > 0) pos += n;
-	return n;
+	const auto n = static_cast<int64_t>(SDL_ReadIO(fp, dst.data(), static_cast<int>(toRead)));
+	curPos = pos + std::max(n, static_cast<int64_t>(0));
+
+	return static_cast<int>(n);
 }
 
 void SDL3RWOps::close()
@@ -70,19 +80,26 @@ void SDL3RWOps::close()
 			SDL_CloseIO(fp);
 		}
 		fp = nullptr;
-		pos = end;
+		curPos = end;
 	}
 }
 
 void SDL3RWOps::seek(int64_t offset, int whence)
 {
-	if (whence == SEEK_SET) pos = int(offset + start);
-	else if (whence == SEEK_CUR) pos += int(offset);
-	else if (whence == SEEK_END) pos = int(end + offset);
-	SDL_SeekIO(fp, pos, SDL_IO_SEEK_SET);
+	UniqueLock lock(mutex);
+
+	if (whence == SEEK_SET) {
+		curPos = offset + start;
+	} else if (whence == SEEK_CUR) {
+		curPos += offset;
+	} else if (whence == SEEK_END) {
+		curPos = end + offset;
+	}
+	
+	SDL_SeekIO(fp, curPos, SDL_IO_SEEK_SET);
 }
 
 size_t SDL3RWOps::tell() const
 {
-	return size_t(pos - start);
+	return size_t(curPos - start);
 }
