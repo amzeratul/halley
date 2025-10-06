@@ -858,7 +858,7 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	const size_t lineSize = 64; // TODO
 
 #ifdef DEV_BUILD
-	simulator = std::make_shared<InstabilitySimulator>(connection);
+	auto simulator = std::make_shared<InstabilitySimulator>(connection);
 	connection = simulator;
 #endif
 
@@ -869,7 +869,17 @@ NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<ICo
 	auto messageQueue = std::make_shared<MessageQueueUDP>(ackConn);
 	messageQueue->setChannel(0, ChannelSettings(true, true));
 
-	return Peer{ peerId, true, std::move(messageQueue), std::move(stats) };
+	Peer peer = {};
+	peer.peerId = peerId;
+	peer.alive = true;
+	peer.connection = std::move(messageQueue);
+	peer.stats = std::move(stats);
+
+#ifdef DEV_BUILD
+	peer.simulator = simulator;
+#endif
+
+	return peer;
 }
 
 Future<bool> NetworkSession::setServerSideData(String uniqueKey, ConfigNode data)
@@ -976,11 +986,19 @@ void NetworkSession::sendPing(Time t, Peer& peer)
 
 void NetworkSession::simulateLatency(float average, float variance)
 {
-	simulator->setLag(average, variance);
+#ifdef DEV_BUILD
+	for (const auto& peer : peers) {
+		peer.simulator->setLag(average, variance);
+	}
+#endif
 }
 
 void NetworkSession::simulateQuality(float packetLoss, float packetDuplicate)
 {
-	simulator->setPacketLoss(packetLoss);
-	simulator->setDuplication(packetDuplicate);
+#ifdef DEV_BUILD
+	for (const auto& peer : peers) {
+		peer.simulator->setPacketLoss(packetLoss);
+		peer.simulator->setDuplication(packetDuplicate);
+	}
+#endif
 }

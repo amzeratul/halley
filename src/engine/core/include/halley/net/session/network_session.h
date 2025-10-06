@@ -141,7 +141,7 @@ namespace Halley {
 		using Clock = std::chrono::steady_clock;
 
 		struct Peer {
-			PeerId peerId = -1;
+			PeerId peerId = 0xff;
 			bool alive = true;
 			std::shared_ptr<MessageQueueUDP> connection;
 			std::shared_ptr<AckUnreliableConnectionStats> stats;
@@ -152,6 +152,10 @@ namespace Halley {
 
 			ControlMsgPingReply lastPingResponse {};
 			int32_t latency = 0;
+
+#ifdef DEV_BUILD
+			std::shared_ptr<InstabilitySimulator> simulator = nullptr;
+#endif
 
 			ConnectionStatus getStatus() const;
 		};
@@ -182,8 +186,6 @@ namespace Halley {
 
 		Clock::time_point curTime;
 		Clock::time_point startTime;
-
-		std::shared_ptr<InstabilitySimulator> simulator;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const std::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
