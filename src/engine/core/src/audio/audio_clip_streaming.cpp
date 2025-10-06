@@ -91,6 +91,11 @@ String AudioClipStreaming::getName() const
 	return "AudioClipStreaming";
 }
 
+void AudioClipStreaming::prepareChannelData(size_t pos, size_t len) const
+{
+	
+}
+
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	if (paused) {
