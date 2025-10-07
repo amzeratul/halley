@@ -95,8 +95,7 @@ void AudioEmitterHandleImpl::setGain(float gain)
 
 	facade.enqueue([=] ()
 	{
-		auto* em = engine->getEmitter(emId);
-		if (em) {
+		if (auto* em = engine->getEmitter(emId)) {
 			em->forVoices(0, [&] (AudioVoice& voice)
 			{
 				voice.setUserGain(gain);

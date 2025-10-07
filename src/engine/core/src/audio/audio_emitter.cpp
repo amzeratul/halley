@@ -57,7 +57,7 @@ size_t AudioEmitter::forVoices(AudioObjectId audioObjectId, VoiceCallback callba
 {
 	size_t n = 0;
 	for (auto& v: voices) {
-		if (v->getAudioObjectId() == audioObjectId) {
+		if (audioObjectId == 0 || v->getAudioObjectId() == audioObjectId) {
 			callback(*v);
 			++n;
 		}
