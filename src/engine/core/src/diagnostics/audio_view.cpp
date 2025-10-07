@@ -174,7 +174,9 @@ String AudioView::getEmitterName(AudioEmitterId emitterId) const
 	if (iter != emitterNames.end()) {
 		return iter->second;
 	}
-	auto name = world->getInterface<IAudioSystemInterface>().getSourceName(emitterId) + " (" + toString(int(emitterId)) + ")";
+
+	auto sourceName = world->getInterface<IAudioSystemInterface>().getSourceName(emitterId);
+	auto name = sourceName.value_or("<unknown>") + " (" + toString(int(emitterId)) + ")";
 	emitterNames[emitterId] = name;
 	return name;
 }

@@ -93,14 +93,21 @@ public:
 		}
 	}
 
-	String getSourceName(AudioEmitterId id) const override
+	std::optional<String> getSourceName(AudioEmitterId id) const override
 	{
 		for (const auto& source: sourceFamily) {
 			if (source.audioSource.emitter && source.audioSource.emitter->getId() == id) {
 				return getWorld().getEntity(source.entityId).getName();
 			}
 		}
-		return "<unknown>";
+
+		for (auto& f: emitterNameLookups) {
+			if (auto value = f(id)) {
+				return *value;
+			}
+		}
+
+		return std::nullopt;
 	}
 
 	String getRegionName(AudioRegionId id) const override
@@ -121,11 +128,17 @@ public:
 		regionLookup = f;
 	}
 
+	void addEmitterNameLookup(std::function<std::optional<String>(AudioEmitterId)> f) override
+	{
+		emitterNameLookups += std::move(f);
+	}
+
 private:
 	String curRegionId;
 	String curRegionPreset;
 	String curFloorType;
 	std::function<AudioRegionId(WorldPosition pos)> regionLookup;
+	Vector<std::function<std::optional<String>(AudioEmitterId)>> emitterNameLookups;
 	
 	void updateListeners(Time t)
 	{
