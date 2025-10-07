@@ -38,6 +38,8 @@ namespace Halley {
         D3D12_CPU_DESCRIPTOR_HANDLE getRenderTargetView() const;
         D3D12_CPU_DESCRIPTOR_HANDLE getDepthStencilView() const;
 
+        bool enforcePowerOfTwoSize() const override { return true; }
+
     private:
         DX12Video& video;
         DX12DescriptorHandle rtvHandles = InvalidDescriptorHandle;

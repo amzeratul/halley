@@ -28,6 +28,8 @@ namespace Halley
 
 		ResourceMemoryUsage getMemoryUsage() const;
 
+		virtual bool enforcePowerOfTwoSize() const { return false; }
+
 	protected:
 		Vector<std::shared_ptr<Texture>> colourBuffer;
 		std::shared_ptr<Texture> depthStencilBuffer;

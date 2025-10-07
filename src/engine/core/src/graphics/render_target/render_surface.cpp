@@ -34,9 +34,11 @@ void RenderSurface::setSize(Vector2i size)
 		curRenderSize = size;
 
 		if (hasValidSize) {
-			const auto textureSize = options.powerOfTwo ? Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y)) : size;
-			if (textureSize != curTextureSize) {
-				curTextureSize = textureSize;
+			bool powerOfTwo = options.powerOfTwo || renderTarget->enforcePowerOfTwoSize();
+			const auto textureSize = powerOfTwo ? Vector2i(nextPowerOf2(size.x), nextPowerOf2(size.y)) : size;
+			if (textureSize.x > curTextureSize.x || textureSize.y > curTextureSize.y) {
+				curTextureSize.x = std::max(textureSize.x, curTextureSize.x);
+				curTextureSize.y = std::max(textureSize.y, curTextureSize.y);
 				needsNewBuffers = true;
 			}
 		}

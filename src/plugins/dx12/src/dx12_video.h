@@ -77,7 +77,6 @@ namespace Halley {
         void finishUpload();
 
         void addRecreateTexture(DX12Texture* texture);
-        void addEvictTexture(DX12Texture* texture);
         void addReleaseResource(ComPtr<ID3D12Resource>& resource);
 
         uint64_t getResourceVersionIndex() const { return resourceVersionIndex; }
