@@ -343,6 +343,11 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitt
 	uint32_t id = curEventId++;
 	const auto emitterId = emitter ? emitter->getId() : 0;
 
+	if (!clip) {
+		Logger::logError("Attempting to play an empty AudioClip reference");
+		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+	}
+
 	enqueue([=] () {
 		engine->play(id, clip, emitterId, volume, loop, fade);
 	});
@@ -355,6 +360,11 @@ AudioHandle AudioFacade::play(std::shared_ptr<const AudioObject> audioObject, Au
 {
 	uint32_t id = curEventId++;
 	const auto emitterId = emitter ? emitter->getId() : 0;
+	
+	if (!audioObject) {
+		Logger::logError("Attempting to play an empty AudioObject reference");
+		return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+	}
 
 	enqueue([=] () {
 		engine->play(id, audioObject, emitterId, volume, fade);

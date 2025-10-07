@@ -437,6 +437,11 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 		return false;
 	}
 
+	if (!object) {
+		Logger::logError("AudioEvent Play action has an object id assigned, but no object reference");
+		return false;
+	}
+
 	if (singleton) {
 		const size_t nPlaying = emitter.forVoices(*objectId, [&] (AudioVoice&) {});
 		if (nPlaying > 0) {
