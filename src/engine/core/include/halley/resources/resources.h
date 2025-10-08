@@ -56,6 +56,12 @@ namespace Halley {
 			return static_cast<ResourceCollection<T>&>(ofType(T::getAssetType()));
 		}
 
+		template <typename T>
+		[[nodiscard]] ResourceCollectionBase& ofBase() const
+		{
+			return ofType(T::getAssetType());
+		}
+
 		[[nodiscard]] ResourceCollectionBase& ofType(AssetType assetType) const
 		{
 			return *resources[int(assetType)];
@@ -123,31 +129,31 @@ namespace Halley {
 		template <typename T>
 		void unload(std::string_view name) const
 		{
-			of<T>().unload(name);
+			ofBase<T>().unload(name);
 		}
 
 		template <typename T>
 		void unload(const std::shared_ptr<const T>& res)
 		{
-			of<T>().unload(res->getAssetId());
+			ofBase<T>().unload(res->getAssetId());
 		}
 
 		template <typename T>
 		void setFallback(std::string_view name)
 		{
-			of<T>().setFallback(name);
+			ofBase<T>().setFallback(name);
 		}
 
 		template <typename T>
 		[[nodiscard]] bool exists(std::string_view name) const
 		{
-			return of<T>().exists(name);
+			return ofBase<T>().exists(name);
 		}
 
 		template <typename T>
 		[[nodiscard]] Vector<String> enumerate() const
 		{
-			return of<T>().enumerate();
+			return ofBase<T>().enumerate();
 		}
 
 		ResourceLocator& getLocator()
