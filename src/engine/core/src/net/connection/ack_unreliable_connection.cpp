@@ -208,14 +208,6 @@ void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 
 void AckUnreliableConnection::doSendUnreliablePacket(gsl::span<const std::byte> packet)
 {
-#ifdef DEV_BUILD
-	if (simulatePacketLoss > 0.0f) {
-		if (Random::getGlobal().getFloat(0.0f, 1.0f) < simulatePacketLoss) {
-			return;
-		}
-	}
-#endif
-
 	parent->sendUnreliablePacket(packet);
 }
 

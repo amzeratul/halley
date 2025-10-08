@@ -1,7 +1,6 @@
 #pragma once
 
 #include "iconnection.h"
-#include "network_packet.h"
 #include "halley/data_structures/vector.h"
 #include <chrono>
 
@@ -113,8 +112,6 @@ namespace Halley
         int numAckPackets = 0;
 
         float lag = 1.0f;
-
-    	float simulatePacketLoss = 0.0f;
 
         IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
