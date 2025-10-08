@@ -1037,6 +1037,11 @@ void World::setNetworkInterface(IWorldNetworkInterface* interface)
 	networkInterface = interface;
 }
 
+bool World::isNetworkConnected() const
+{
+	return networkInterface && networkInterface->isConnected();
+}
+
 void World::purgeMessages(int systemId, gsl::span<const int> messageTypes)
 {
 	for (const auto type: messageTypes) {
