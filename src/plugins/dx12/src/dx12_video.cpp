@@ -696,7 +696,7 @@ void DX12Video::initDeviceAndSwapChain()
     createCommandAllocator(loaderCommandAllocator, D3D12_COMMAND_LIST_TYPE_DIRECT);
     createCommandList(loaderCommandList, loaderCommandAllocator, D3D12_COMMAND_LIST_TYPE_DIRECT);
 
-    size_t transientBufferSize = 4096 * 4096 * 4;
+    size_t transientBufferSize = 4096 * 8192 * 4;
     loaderTransientBuffer = std::make_unique<DX12Buffer>(*this, DX12Buffer::Type::Upload, transientBufferSize);
 
     if (FAILED(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, D3D12_IID_ARGS(loaderFence)))) {
