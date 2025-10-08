@@ -91,6 +91,7 @@ namespace Halley {
 		Vector<Rect4i> getRemoteViewPorts() const;
 
 		bool isHost() const override;
+		bool isConnected() const override;
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
 		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;

@@ -760,6 +760,11 @@ bool EntityNetworkSession::isHost() const
 	return session->getType() == NetworkSessionType::Host;
 }
 
+bool EntityNetworkSession::isConnected() const
+{
+	return session->getStatus() == ConnectionStatus::Connected;
+}
+
 bool EntityNetworkSession::isRemote(ConstEntityRef entity) const
 {
     auto entityOwner = entity.getAuthorityPeerId();

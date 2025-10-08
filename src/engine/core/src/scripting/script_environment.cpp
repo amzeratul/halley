@@ -628,6 +628,11 @@ bool ScriptEnvironment::hasHostNetworkAuthority() const
 	return isHost;
 }
 
+bool ScriptEnvironment::isNetworkConnected() const
+{
+	return world.isNetworkConnected();
+}
+
 int ScriptEnvironment::getCurrentFrameNumber() const
 {
 	return currentState->getCurrentFrameNumber();
