@@ -135,7 +135,11 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 
 			for (auto& stream: streams) {
 				if (stream.active) {
-					clip->prepareChannelData(stream.playbackPos, samplesToRead);
+					if (clip->hasStreamHandles() && !stream.streamingHandle) {
+						stream.streamingHandle = clip->makeStreamHandle();
+					}
+
+					clip->prepareChannelData(stream.playbackPos, samplesToRead, stream.streamingHandle.get());
 					if (first) {
 						for (size_t ch = 0; ch < nChannels; ++ch) {
 							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);

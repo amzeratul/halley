@@ -26,11 +26,11 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 	sampleLength = other.sampleLength;
 	numChannels = other.numChannels;
 	loopPoint = other.loopPoint;
-	streamPos = other.streamPos;
 	streaming = other.streaming;
 	
 	samples = std::move(other.samples);
-	vorbisData = std::move(other.vorbisData);
+	buffer = std::move(other.buffer);
+	streamingResource = std::move(streamingResource);
 
 	doneLoading();
 
@@ -39,43 +39,37 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata metadata)
 {
-	VorbisData vorbis(data, true);
-	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
-		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
-	}	
-	numChannels = vorbis.getNumChannels();
-	sampleLength = vorbis.getNumSamples();
-	loopPoint = metadata.getInt("loopPoint", 0);
-	streaming = false;
-
-	samples.resize(numChannels);
-	for (size_t i = 0; i < numChannels; ++i) {
-		samples[i].resize(sampleLength);
-	}
-	
-	vorbis.read(samples);
-	vorbis.close();
-
-	doneLoading();
+	load(std::move(data), std::move(metadata), false);
 }
 
 void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata metadata)
 {
-	for (size_t i = 0; i < vorbisData.size(); ++i) {
-		vorbisData[i] = std::make_unique<VorbisData>(data, i == 0);
-	}
+	this->streamingResource = data;
+	load(std::move(data), std::move(metadata), true);
+}
 
-	uint8_t nChannels = vorbisData[0]->getNumChannels();
-	if (vorbisData[0]->getSampleRate() != AudioConfig::sampleRate) {
+void AudioClip::load(std::shared_ptr<ResourceData> data, Metadata metadata, bool stream)
+{
+	auto vorbis = VorbisData(std::move(data), true);
+	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
+	}	
+	numChannels = static_cast<uint8_t>(vorbis.getNumChannels());
+	sampleLength = vorbis.getNumSamples();
+	loopPoint = metadata.getInt("loopPoint", 0);
+	streaming = stream;
+
+	samples.resize(numChannels);
+
+	if (!stream) {
+		for (size_t i = 0; i < numChannels; ++i) {
+			samples[i].resize(sampleLength);
+		}
+		vorbis.read(samples);
 	}
 	
-	samples.resize(nChannels);
-	numChannels = nChannels;
-	sampleLength = vorbisData[0]->getNumSamples();
-	loopPoint = metadata.getInt("loopPoint", 0);
-	streamPos = 0;
-	streaming = true;
+	vorbis.close();
+
 	doneLoading();
 }
 
@@ -84,9 +78,24 @@ String AudioClip::getName() const
 	return getAssetId();
 }
 
-void AudioClip::prepareChannelData(size_t pos, size_t len) const
+bool AudioClip::hasStreamHandles() const
+{
+	return streaming;
+}
+
+std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle() const
+{
+	return std::make_unique<AudioClipStreamHandle>(*this);
+}
+
+void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
 {
 	if (!streaming) {
+		return;
+	}
+
+	if (!streamHandle) {
+		Logger::logError("Stream handle not provided to AudioClip, but is a streaming clip", true);
 		return;
 	}
 
@@ -102,14 +111,10 @@ void AudioClip::prepareChannelData(size_t pos, size_t len) const
 			}
 		}
 
-		if (auto* vorbis = getVorbisData(pos)) {
-			vorbis->read(buffer);
-		} else {
-			for (auto& b: buffer) {
-				AudioMixer::zero(b);
-			}
-		}
-		streamPos = pos + len;
+		auto& handle = *dynamic_cast<AudioClipStreamHandle*>(streamHandle);
+		handle.seek(pos);
+		handle.getVorbisData().read(buffer);
+		handle.advance(len);
 	} catch (std::exception& e) {
 		Logger::logError("Exception while trying to read data from AudioClip \"" + getAssetId() + "\":");
 		Logger::logException(e);
@@ -128,48 +133,6 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float
 		AudioMixer::copy(dst, AudioSamples(samples.at(channelN)).subspan(pos, len), gain0, gain1);
 	}
 	return len;
-}
-
-VorbisData* AudioClip::getVorbisData(size_t targetPos) const
-{
-	// This chooses which of the two vorbis data readers to use. This allows two simultaneous reads of the stream without insane seeking, needed for self-overlapping music loops.
-	// It'll basically pick whichever of the two readers is closer to the target position, and seek if needed.
-
-	const size_t nSamples = vorbisData[0]->getNumSamples();
-	if (nSamples == 0) {
-		// Happens when resource is unloaded, e.g. due to hot reload
-		return nullptr;
-	}
-	size_t bestDist = std::numeric_limits<size_t>::max();
-	size_t bestIdx = 0;
-
-	for (size_t i = 0; i < vorbisData.size(); ++i) {
-		const auto curPos = vorbisData[i]->tell();
-		const auto dist = (targetPos - curPos) % nSamples; // Unsigned subtraction is desirable here, seeking forward is faster than seeking backwards
-		if (dist < bestDist) {
-			bestDist = dist;
-			bestIdx = i;
-		}
-	}
-
-	if (bestDist != 0) {
-		readsWithSeek++;
-		vorbisData[bestIdx]->seek(targetPos);
-	} else {
-		readsWithoutSeek++;
-		if (readsWithoutSeek >= 10) {
-			if (readsWithSeek > 0) {
-				--readsWithSeek;
-			}
-			readsWithoutSeek -= 10;
-		}
-	}
-
-	if (readsWithSeek > 2) {
-		Logger::logWarning("Excessive seeking in streaming clip \"" + getAssetId() + "\" - streaming clips shouldn't have multiple instances.", true);
-	}
-	
-	return vorbisData[bestIdx].get();
 }
 
 size_t AudioClip::getLength() const
@@ -198,11 +161,6 @@ ResourceMemoryUsage AudioClip::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
 
-	for (auto& v: vorbisData) {
-		if (v) {
-			result.ramUsage += v->getSizeBytes() + sizeof(VorbisData);
-		}
-	}
 	for (auto& s: samples) {
 		result.ramUsage += s.byte_span().size();
 	}
@@ -240,4 +198,27 @@ std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 void AudioClip::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<AudioClip&>(resource));
+}
+
+AudioClipStreamHandle::AudioClipStreamHandle(const AudioClip& parent)
+{
+	vorbisData = std::make_unique<VorbisData>(parent.streamingResource, true);
+}
+
+void AudioClipStreamHandle::seek(size_t pos)
+{
+	if (streamPos != pos) {
+		vorbisData->seek(pos);
+		streamPos = pos;
+	}
+}
+
+void AudioClipStreamHandle::advance(size_t len)
+{
+	streamPos += len;
+}
+
+VorbisData& AudioClipStreamHandle::getVorbisData()
+{
+	return *vorbisData;
 }

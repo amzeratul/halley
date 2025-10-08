@@ -91,7 +91,7 @@ String AudioClipStreaming::getName() const
 	return "AudioClipStreaming";
 }
 
-void AudioClipStreaming::prepareChannelData(size_t pos, size_t len) const
+void AudioClipStreaming::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
 {
 	
 }

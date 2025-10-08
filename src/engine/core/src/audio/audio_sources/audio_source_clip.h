@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/audio/audio_clip.h"
 #include "halley/audio/audio_source.h"
 #include "halley/maths/range.h"
 
@@ -27,6 +28,7 @@ namespace Halley
 			bool active = false;
 			bool loop = false;
 			bool kickOffSecondStream = false;
+			std::unique_ptr<IAudioClipStreamHandle> streamingHandle;
 		};
 		std::array<PlayStream, 2> streams;
 
