@@ -114,7 +114,11 @@ void ResourceCollectionBase::purge(std::string_view assetId)
 
 std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(std::string_view name, ResourceLoadPriority priority)
 {
+#ifdef VIRTUAL_RESOURCE_GET
 	return get(name, priority, true);
+#else
+	return doGet(name, priority, true);
+#endif
 }
 
 Vector<String> ResourceCollectionBase::enumerate() const
