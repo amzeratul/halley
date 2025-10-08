@@ -280,6 +280,7 @@ set(SOURCES
         "src/audio/sub_objects/audio_sub_object_layers.cpp"
         "src/audio/sub_objects/audio_sub_object_sequence.cpp"
         "src/audio/sub_objects/audio_sub_object_switch.cpp"
+        "src/audio/lib_vorbis_decoder.cpp"
         "src/audio/vorbis_dec.cpp"
 
         "src/audio/resampler.cpp"
@@ -755,7 +756,7 @@ set(HEADERS
         "src/audio/audio_mixer.h"
         "src/audio/audio_region.h"
         "src/audio/audio_voice.h"
-
+        "src/audio/lib_vorbis_decoder.h"
 
         "include/halley/audio/resampler.h"
         

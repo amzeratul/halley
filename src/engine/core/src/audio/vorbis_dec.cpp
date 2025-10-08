@@ -22,44 +22,18 @@
 #include "halley/utils/utils.h"
 #include "halley/audio/vorbis_dec.h"
 
-#include "libogg/include/ogg/ogg.h"
-#include "halley/support/exception.h"
 #include "halley/resources/resource_data.h"
 #include <gsl/assert>
 
-#ifdef WITH_IVORBIS
-	#include "ivorbiscodec.h"
-	#include "ivorbisfile.h"
-#else
-	#include "libvorbis/include/vorbis/codec.h"
-	#include "libvorbis/include/vorbis/vorbisfile.h"
-#endif
+#include "lib_vorbis_decoder.h"
 
 using namespace Halley;
 
-static void onVorbisError(int error)
-{
-	String str;
-	switch (error) {
-	case OV_EREAD: str = "A read from media returned an error."; break;
-	case OV_ENOTVORBIS: str = "Bitstream does not contain any Vorbis data."; break;
-	case OV_EVERSION: str = "Vorbis version mismatch."; break;
-	case OV_EBADHEADER: str = "Invalid Vorbis bitstream header."; break;
-	case OV_EFAULT: str = "Internal logic fault; indicates a bug or heap/stack corruption."; break;
-	case OV_HOLE: str = "Indicates there was an interruption in the data."; break;
-	case OV_EBADLINK: str = "Indicates that an invalid stream section was supplied to libvorbisfile, or the requested link is corrupt."; break;
-	case OV_EINVAL: str = "Indicates the initial file headers couldn't be read or are corrupt, or that the initial open call for vf failed."; break;
-	case OV_ENOSEEK: str = "Stream is not seekable."; break;
-	default: str = "Unknown error.";
-	}
-	throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Resources);
-}
 
 VorbisData::VorbisData(std::shared_ptr<ResourceData> resource, bool doOpen)
 	: resource(resource)
-	, file(nullptr)
+	, decoder(nullptr)
 	, streaming(std::dynamic_pointer_cast<ResourceDataStream>(resource))
-	, pos(0)
 {
 	if (doOpen) {
 		open();
@@ -88,26 +62,12 @@ void VorbisData::open()
 		stream = std::dynamic_pointer_cast<ResourceDataStream>(resource)->getReader();
 	}
 
-	ov_callbacks callbacks;
-	callbacks.read_func = vorbisRead;
-	callbacks.close_func = vorbisClose;
-	callbacks.seek_func = vorbisSeek;
-	callbacks.tell_func = vorbisTell;
-
-	file = new OggVorbis_File();
-	int result = ov_open_callbacks(this, file, nullptr, 0, callbacks);
-	if (result != 0) {
-		onVorbisError(result);
-	}
+	decoder = std::make_unique<LibVorbisDecoder>(*this);
 }
 
 void VorbisData::close()
 {
-	if (file) {
-		ov_clear(file);
-		delete file;
-		file = nullptr;
-	}
+	decoder = {};
 }
 
 void VorbisData::reset()
@@ -127,7 +87,7 @@ size_t VorbisData::read(gsl::span<Vector<float>> dst)
 
 size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
 {
-	if (!file) {
+	if (!decoder) {
 		open();
 	}
 
@@ -136,55 +96,31 @@ size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
 		close();
 	}
 
-	if (error) {
+	if (!decoder || error) {
 		return 0;
 	}
 
 	Expects(nChannels == getNumChannels());
 
-	int bitstream;
-	size_t totalRead = 0;
-	size_t toReadLeft = dst[0].size();
-
-	while (toReadLeft > 0) {
-		float **pcm;
-		int nRead = ov_read_float(file, &pcm, int(toReadLeft), &bitstream);
-
-		if (nRead > 0) {
-			for (size_t i = 0; i < nChannels; ++i) {
-				memcpy(dst[i].data() + totalRead, pcm[i], nRead * sizeof(float));
-			}
-
-			totalRead += nRead;
-			toReadLeft -= nRead;
-		} else if (nRead == 0) {
-			break;
-		} else {
-			onVorbisError(nRead);
-		}
-	}
-	return totalRead;
+	return decoder->read(dst, nChannels);
 }
 
 size_t VorbisData::getNumSamples() const
 {
-	if (error || (stream && !stream->isAvailable())) {
+	if (!decoder || error || (stream && !stream->isAvailable())) {
 		return 0;
 	}
 
-	Expects(file);
-	return size_t(ov_pcm_total(file, -1));
+	return decoder->getNumSamples();
 }
 
 int VorbisData::getSampleRate() const
 {
-	if (error || (stream && !stream->isAvailable())) {
+	if (!decoder || error || (stream && !stream->isAvailable())) {
 		return 0;
 	}
 
-	Expects(file);
-	vorbis_info *info = ov_info(file, -1);
-	return info->rate;
+	return decoder->getSampleRate();
 }
 
 int VorbisData::getNumChannels() const
@@ -193,40 +129,23 @@ int VorbisData::getNumChannels() const
 		return 0;
 	}
 
-	Expects(file);
-	vorbis_info *info = ov_info(file, -1);
-	return info->channels;
-}
-
-void VorbisData::seek(double t)
-{
-	if (!file) {
-		open();
-	}
-	if (error) {
-		return;
-	}
-	ov_time_seek(file, t);
+	return decoder->getNumChannels();
 }
 
 void VorbisData::seek(size_t sample)
 {
-	if (!file) {
+	if (!decoder) {
 		open();
 	}
 	if (error) {
 		return;
 	}
-	ov_pcm_seek(file, ogg_int64_t(sample));
+	decoder->seek(sample);
 }
 
 size_t VorbisData::tell() const
 {
-	if (file) {
-		return ov_pcm_tell(file);
-	} else {
-		return 0;
-	}
+	return decoder ? decoder->tell() : 0;
 }
 
 size_t VorbisData::getSizeBytes() const
@@ -239,79 +158,17 @@ size_t VorbisData::getSizeBytes() const
 	}
 }
 
-size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource)
+bool VorbisData::isStreaming() const
 {
-	VorbisData* data = static_cast<VorbisData*>(datasource);
-	
-	if (data->streaming) {
-		auto res = data->stream;
-		size_t requested = size*nmemb;
-		size_t r = res->readAt(as_writable_bytes(gsl::span<char>(static_cast<char*>(ptr), requested)), data->pos);
-		data->pos += r;
-		return r;
-	} else {
-		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource);
-		long long totalSize = res->getSize();
-		size_t left = size_t(totalSize - data->pos);
-		size_t requested = size*nmemb;
-		size_t toRead = std::min(requested, left);
-
-		const char* src = static_cast<const char*>(res->getData());
-		memcpy(ptr, src+data->pos, toRead);
-		data->pos += toRead;
-		return toRead;
-	}
+	return streaming;
 }
 
-int VorbisData::vorbisSeek(void *datasource, OggOffsetType offset, int whence)
+const std::shared_ptr<ResourceData>& VorbisData::getResource() const
 {
-	VorbisData* data = static_cast<VorbisData*>(datasource);
-
-	int64_t dst = 0;
-	if (whence == SEEK_SET) {
-		dst = offset;
-	} else if (whence == SEEK_CUR) {
-		dst = data->pos + offset;
-	} else if (whence == SEEK_END) {
-		if (!data->streaming) {
-			if (auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource)) {
-				dst = data->pos + static_cast<int64_t>(res->getSize()) + offset;
-			}
-		}
-	}
-
-	if (data->streaming) {
-		auto res = data->stream;
-		res->seek(offset, whence);
-
-		if (whence == SEEK_END) {
-			dst = res->tell();
-		} else {
-			const auto actualPos = res->tell();
-			if (actualPos != dst) {
-				Logger::logError("Failed to seek OggVorbis stream: tried seeking to " + toString(dst) + ", at " + toString(actualPos));
-			}
-		}
-	}
-
-	data->pos = dst;
-	
-	return 0;
+	return resource;
 }
 
-int VorbisData::vorbisClose(void *)
+const std::shared_ptr<ResourceDataReader>& VorbisData::getStream() const
 {
-	return 0;
-}
-
-long VorbisData::vorbisTell(void *datasource)
-{
-	VorbisData* data = static_cast<VorbisData*>(datasource);
-
-	if (data->streaming) {
-		auto res = data->stream;
-		return static_cast<long>(res->tell());
-	} else {
-		return long(data->pos);
-	}
+	return stream;
 }
