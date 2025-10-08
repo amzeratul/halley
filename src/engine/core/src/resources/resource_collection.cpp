@@ -26,12 +26,22 @@ namespace {
 		return hMod;
 	}
 
+	constexpr bool checkForLoadingFromDLL = false;
+
 	bool isRunningFromDLL()
 	{
+		if (!checkForLoadingFromDLL) {
+			return false;
+		}
+
+#ifdef DEV_BUILD
 		char name[1024];
 		GetModuleFileNameA(getCurrentModuleHandle(), name, sizeof(name));
 		auto str = std::string_view(name);
 		return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll";
+#else
+		return false;
+#endif
 	}
 }
 #else
@@ -43,13 +53,13 @@ namespace {
 }
 #endif
 
-
-
 ResourceCollectionBase::ResourceCollectionBase(Resources& parent, AssetType type)
 	: parent(parent)
 	, type(type)
 {
-	//assert(!isRunningFromDLL());
+	if (isRunningFromDLL()) {
+		throw Exception("ResourceCollectionBase for " + toString(type) + " is being created within DLL code", HalleyExceptions::Resources);
+	}
 }
 
 void ResourceCollectionBase::clear()
@@ -104,7 +114,7 @@ void ResourceCollectionBase::purge(std::string_view assetId)
 
 std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(std::string_view name, ResourceLoadPriority priority)
 {
-	return doGet(name, priority, true);
+	return get(name, priority, true);
 }
 
 Vector<String> ResourceCollectionBase::enumerate() const
@@ -232,7 +242,9 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
 
 std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {
-	//assert(!isRunningFromDLL());
+	if (isRunningFromDLL()) {
+		throw Exception("Asset " + toString(type) + ":" + String(assetId) + " is being loaded within DLL code", HalleyExceptions::Resources);
+	}
 
 	std::shared_ptr<Resource> newRes;
 
@@ -262,6 +274,13 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std
 	newRes->setAssetId(assetId);
 	return std::make_pair(newRes, true);
 }
+
+#ifdef VIRTUAL_RESOURCE_GET
+std::shared_ptr<Resource> ResourceCollectionBase::get(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
+{
+	return doGet(assetId, priority, allowFallback);
+}
+#endif
 
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {

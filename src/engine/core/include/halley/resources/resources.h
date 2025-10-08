@@ -70,23 +70,39 @@ namespace Halley {
 		template <typename T>
 		std::shared_ptr<const T> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
+#ifdef VIRTUAL_RESOURCE_GET
+			return std::static_pointer_cast<T>(ofBase<T>().get(name, priority));
+#else
 			return of<T>().get(name, priority);
+#endif
 		}
 
 		template <typename T>
 		std::shared_ptr<const T> tryGet(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
+#ifdef VIRTUAL_RESOURCE_GET
+			auto& collection = ofBase<T>();
+			if (collection.exists(name)) {
+				return std::static_pointer_cast<T>(collection.get(name, priority));
+			}
+			return {};
+#else
 			auto& collection = of<T>();
 			if (collection.exists(name)) {
 				return collection.get(name, priority);
 			}
 			return {};
+#endif
 		}
 
 		template <typename T>
 		void preload(std::string_view name) const
 		{
+#ifdef VIRTUAL_RESOURCE_GET
+			static_cast<void>(ofBase<T>().get(name, ResourceLoadPriority::Low));
+#else
 			static_cast<void>(of<T>().get(name, ResourceLoadPriority::Low));
+#endif
 		}
 
 		template <typename T>

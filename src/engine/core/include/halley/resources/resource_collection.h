@@ -11,6 +11,11 @@
 
 #include "halley/support/debug.h"
 
+// Virtual resource get is necessary for proper editor functionality, but might incur a very small performance penalty
+#ifdef DEV_BUILD
+#define VIRTUAL_RESOURCE_GET
+#endif
+
 namespace Halley
 {
 	enum class AssetType;
@@ -68,6 +73,10 @@ namespace Halley
 		ResourceMemoryUsage clearOldResources(float maxAge);
 		void notifyResourcesUnloaded();
 
+#ifdef VIRTUAL_RESOURCE_GET
+		virtual std::shared_ptr<Resource> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal, bool allowFallback = true);
+#endif
+
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
@@ -102,10 +111,12 @@ namespace Halley
 			HALLEY_DEBUG_TRACE_COMMENT(typeid(T).name());
 		}
 
+#ifndef VIRTUAL_RESOURCE_GET
 		std::shared_ptr<const T> get(std::string_view assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return std::static_pointer_cast<T>(doGet(assetId, priority, true));
 		}
+#endif
 
 	protected:
 		std::shared_ptr<Resource> loadResource(ResourceLoader& loader) override {
