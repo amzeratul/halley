@@ -70,7 +70,9 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 	const auto variable = node.getSettings()["variable"].asString("");
 
 	if (scope != ScriptVariableScope::Local && !environment.hasNetworkAuthorityOver(environment.getCurrentEntityId())) {
-		Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Script/Entity Variable \"" + variable + "\", not owned by this client");
+		if (environment.isNetworkConnected()) {
+			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Script/Entity Variable \"" + variable + "\", not owned by this client");
+		}
 		return;
 	}
 
@@ -153,7 +155,9 @@ void ScriptEntityVariable::doSetData(ScriptEnvironment& environment, const Scrip
 	auto e = environment.tryGetEntity(readEntityId(environment, node, 0));
 	if (e.isValid()) {
 		if (!environment.hasNetworkAuthorityOver(e)) {
-			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Entity Variable \"" + node.getSettings()["variable"].asString("") + "\", not owned by this client");
+			if (environment.isNetworkConnected()) {
+				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to Entity Variable \"" + node.getSettings()["variable"].asString("") + "\", not owned by this client");
+			}
 			return;
 		}
 		environment.setEntityVariable(e.getEntityId(), node.getSettings()["variable"].asString(""), std::move(data));
@@ -393,7 +397,9 @@ void ScriptECSVariable::doSetData(ScriptEnvironment& environment, const ScriptGr
 		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
 
 		if (!environment.hasNetworkAuthorityOver(entityRef)) {
-			Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + type.getName() + "\", not owned by this client");
+			if (environment.isNetworkConnected()) {
+				Logger::logError(environment.getCurrentGraph()->getAssetId() + ": Cannot write to ECS Variable \"" + type.getName() + "\", not owned by this client");
+			}
 			return;
 		}
 

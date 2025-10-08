@@ -42,6 +42,7 @@ namespace Halley {
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
 		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) = 0;
 		virtual bool isHost() const = 0;
+		virtual bool isConnected() const = 0;
 	};
 
 	class World
@@ -151,6 +152,7 @@ namespace Halley {
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination);
 
 		void setNetworkInterface(IWorldNetworkInterface* interface);
+		bool isNetworkConnected() const;
 		bool isEntityNetworkRemote(EntityId entityId) const;
 		bool isEntityNetworkRemote(EntityRef entity) const;
 		bool isEntityNetworkRemote(ConstEntityRef entity) const;
