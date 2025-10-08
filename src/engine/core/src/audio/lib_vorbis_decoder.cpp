@@ -41,8 +41,8 @@ LibVorbisDecoder::LibVorbisDecoder(const VorbisData& data)
 	callbacks.seek_func = vorbisSeek;
 	callbacks.tell_func = vorbisTell;
 
-	file = new OggVorbis_File();
-	int result = ov_open_callbacks(this, file, nullptr, 0, callbacks);
+	handle = new OggVorbis_File();
+	int result = ov_open_callbacks(this, handle, nullptr, 0, callbacks);
 	if (result != 0) {
 		onVorbisError(result);
 	}
@@ -50,10 +50,10 @@ LibVorbisDecoder::LibVorbisDecoder(const VorbisData& data)
 
 LibVorbisDecoder::~LibVorbisDecoder()
 {
-	if (file) {
-		ov_clear(file);
-		delete file;
-		file = nullptr;
+	if (handle) {
+		ov_clear(handle);
+		delete handle;
+		handle = nullptr;
 	}
 }
 
@@ -65,7 +65,7 @@ size_t LibVorbisDecoder::read(AudioMultiChannelSamples dst, size_t nChannels)
 
 	while (toReadLeft > 0) {
 		float **pcm;
-		int nRead = ov_read_float(file, &pcm, int(toReadLeft), &bitstream);
+		int nRead = ov_read_float(handle, &pcm, int(toReadLeft), &bitstream);
 		if (nRead < 0) {
 			onVorbisError(nRead);
 		}
@@ -86,33 +86,33 @@ size_t LibVorbisDecoder::read(AudioMultiChannelSamples dst, size_t nChannels)
 
 size_t LibVorbisDecoder::getNumSamples() const
 {
-	Expects(file);
-	return size_t(ov_pcm_total(file, -1));
+	Expects(handle);
+	return size_t(ov_pcm_total(handle, -1));
 }
 
 int LibVorbisDecoder::getSampleRate() const
 {
-	Expects(file);
-	vorbis_info *info = ov_info(file, -1);
+	Expects(handle);
+	vorbis_info *info = ov_info(handle, -1);
 	return info->rate;
 }
 
 int LibVorbisDecoder::getNumChannels() const
 {
-	Expects(file);
-	vorbis_info *info = ov_info(file, -1);
+	Expects(handle);
+	vorbis_info *info = ov_info(handle, -1);
 	return info->channels;
 }
 
 void LibVorbisDecoder::seek(size_t sample)
 {
-	ov_pcm_seek(file, static_cast<ogg_int64_t>(sample));
+	ov_pcm_seek(handle, static_cast<ogg_int64_t>(sample));
 }
 
 size_t LibVorbisDecoder::tell() const
 {
-	if (file) {
-		return ov_pcm_tell(file);
+	if (handle) {
+		return ov_pcm_tell(handle);
 	} else {
 		return 0;
 	}

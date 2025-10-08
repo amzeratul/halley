@@ -25,6 +25,7 @@
 #include "halley/resources/resource_data.h"
 #include <gsl/assert>
 
+#include "lib_nogg_decoder.h"
 #include "lib_vorbis_decoder.h"
 
 using namespace Halley;
@@ -62,7 +63,11 @@ void VorbisData::open()
 		stream = std::dynamic_pointer_cast<ResourceDataStream>(resource)->getReader();
 	}
 
+#ifdef WITH_LIBNOGG
+	decoder = std::make_unique<LibNoggDecoder>(*this);
+#else
 	decoder = std::make_unique<LibVorbisDecoder>(*this);
+#endif
 }
 
 void VorbisData::close()

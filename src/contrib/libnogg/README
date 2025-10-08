@@ -1,0 +1,127 @@
+libnogg: a decoder library for Ogg Vorbis streams
+=================================================
+Copyright (c) 2014-2024 Andrew Church <achurch@achurch.org>
+See the file "COPYING" for conditions on use and redistribution.
+
+Version: 1.17
+
+
+Overview
+--------
+libnogg is a library for decoding Ogg Vorbis audio streams, written with
+the aims of (1) improved code quality and robustness compared to the
+reference libogg and libvorbis libraries, and (2) improved performance
+compared to those libraries.
+
+libnogg was originally developed from the public domain stb_vorbis
+decoder implementation, available as of this writing at
+<https://github.com/nothings/stb>.
+
+
+Requirements
+------------
+libnogg is written in pure C99 (with some additional compiler- and
+architecture-specific code used to improve performance) and should
+compile with any standards-compliant compiler.  The library does not
+rely on any external environmental services other than stdio for reading
+from file-based streams, and this specific functionality can be disabled
+for environments such as embedded systems in which stdio is unavailable
+or too expensive to include.
+
+The included Makefile is written for GNU Make and supports building in
+POSIX-compatible environments (such as Linux, Mac OS X, and Windows
+using MinGW), using Clang, GCC, or the Intel C compiler (icc).  With
+certain limitations, the Makefile can also be used to build native
+Windows objects with the Microsoft Visual C (MSVC) compiler; see under
+"Building" below.
+
+
+Building
+--------
+On POSIX-compatible systems, libnogg can be built by simply running the
+"make" command (or "gmake", if GNU Make is installed under that name on
+your system) in the top directory of the libnogg distribution.  This
+will create shared and static library files in the top directory, which
+can then be installed on the system with "make install" (this may
+require elevated system privileges, such as with the "sudo" command).
+
+Several configuration variables are available to control the build
+process or specify nonstandard paths for dependent libraries.  These can
+be set on the "make" command line; for example, "make ENABLE_ASSERT=1".
+See the "Configuration" section at the top of the "Makefile" file for
+details.
+
+The Makefile also includes rules for building Windows libraries using
+Microsoft's Visual C/C++ compiler, with the following limitations:
+   - The build must be run under the Windows Subsystem for Linux (see
+     <https://learn.microsoft.com/en-us/windows/wsl/>).
+   - The CC variable must point to the "cl.exe" compiler binary, and
+     "cl.exe" must be in lowercase.  If the compiler is installed in a
+     pathname containing a space (such as "Program Files"), the value of
+     CC must be quoted; for example: make CC=\''/mnt/c/.../cl.exe'\'
+   - The INCLUDE and LIB environment variables must be set as for an
+     MSVC command prompt (see the vcvars32.bat and vcvars64.bat scripts
+     included with MSVC).
+   - Only one of the shared or static library can be built in a single
+     call to "make".  By default, the static library is built.
+   - Automatic dependency generation is not supported; changes to header
+     files will not trigger rebuilds of source files which use them.
+   - Coverage analysis is not supported.
+   - Building of the nogg-benchmark tool has not been tested.
+
+To build libnogg as part of a project in another build system, add the
+"include/nogg.h" header and all files in the libnogg distribution
+matching the wildcard "src/*/*.c" to the project.  (It is recommended to
+use an actual wildcard, or a recursive reference to the directory "src",
+if the build system supports such a feature; this allows the project to
+automatically pick up files added in subsequent updates to the library
+without any changes to the project configuration.)  The libnogg source
+files should be configured to use the C99 language standard (or any
+later revision of the C standard, such as C11) if that is not the
+compiler's default.
+
+
+Using libnogg
+-------------
+The file "tools/nogg-decode.c" demonstrates how libnogg can be used to
+decode audio data from an Ogg Vorbis stream.
+
+See the documentation in include/nogg.h for further details.
+
+
+Performance
+-----------
+The following table shows decoding performance measured by running the
+nogg-benchmark tool on the files "tests/data/thingy.ogg" (monaural) and
+"tests/data/sketch039.ogg" (stereo), scaled so that the time taken by
+the reference decoder (libvorbis) is 1.0; thus, smaller values indicate
+better performance.
+
+                             |    Time (monaural decode)
+       Architecture (CPU)    | libvorbis | Tremor | libnogg
+    -------------------------+-----------+--------+---------
+    x86-64 (AMD Ryzen 3700X) |    1.00   |  1.19  |  0.44
+    ARM 32-bit (TI OMAP4460) |    1.00   |  0.70  |  0.61
+    ARM 64-bit (Apple A7)    |    1.00   |  1.31  |  0.78
+
+                             |     Time (stereo decode)
+       Architecture (CPU)    | libvorbis | Tremor | libnogg
+    -------------------------+-----------+--------+---------
+    x86-64 (AMD Ryzen 3700X) |    1.00   |  1.06  |  0.41
+    ARM 32-bit (TI OMAP4460) |    1.00   |  0.78  |  0.63
+    ARM 64-bit (Apple A7)    |    1.00   |  1.16  |  0.61
+
+
+Caveats
+-------
+libnogg only decodes the first Ogg bitstream found in the input data.
+Interleaved and concatenated bitstreams with different bitstream IDs are
+properly detected but will be ignored during decoding.
+
+libnogg does not support lossless deletion of samples from the beginning
+of the stream (negative initial sample position).
+
+
+Reporting bugs
+--------------
+Please send any bug reports or suggestions directly to the author.

@@ -50,7 +50,17 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 
 void AudioClip::load(std::shared_ptr<ResourceData> data, Metadata metadata, bool stream)
 {
+	if (stream) {
+		Logger::logInfo("Loading " + getAssetId());
+	}
+
 	auto vorbis = VorbisData(std::move(data), true);
+
+	
+	if (stream) {
+		Logger::logInfo("Opened " + getAssetId());
+	}
+
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}	
@@ -61,11 +71,20 @@ void AudioClip::load(std::shared_ptr<ResourceData> data, Metadata metadata, bool
 
 	samples.resize(numChannels);
 
+	
+	if (stream) {
+		Logger::logInfo("Reading " + getAssetId());
+	}
+
 	if (!stream) {
 		for (size_t i = 0; i < numChannels; ++i) {
 			samples[i].resize(sampleLength);
 		}
 		vorbis.read(samples);
+	}
+	
+	if (stream) {
+		Logger::logInfo("Read " + getAssetId());
 	}
 	
 	vorbis.close();

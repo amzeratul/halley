@@ -1,6 +1,6 @@
 project (halley-contrib)
 
-include_directories("libogg/include" "libvorbis/include" "libvorbis/lib" "yaml-cpp/include")
+include_directories("libogg/include" "libvorbis/include" "libvorbis/lib" "yaml-cpp/include" "libnogg")
 
 
 set(SOURCES
@@ -188,7 +188,8 @@ endif()
 file (GLOB_RECURSE OGG_FILES "libogg/*.c")
 file (GLOB_RECURSE VORBIS_FILES "libvorbis/*.c")
 file (GLOB_RECURSE LUA_FILES "lua/src/*.*")
-set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES} ${LUA_FILES})
+file (GLOB_RECURSE NOGG_FILES "libnogg/src/*.*")
+set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES} ${LUA_FILES} ${NOGG_FILES})
 
 assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})

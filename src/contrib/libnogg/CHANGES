@@ -1,0 +1,123 @@
+Version 1.17 (2024/6/11)
+------------
+- Reduced overhead when calling stream access (read/seek/etc) callbacks.
+- Clarified certain aspects of library behavior in the documentation.
+
+Version 1.16 (2023/7/14)
+------------
+- Updated SIMD fix for Clang to exclude fixed versions of the compiler.
+
+Version 1.15 (2022/5/30)
+------------
+- Added precomputed lookup tables to speed up initialization.
+- Added an optimized implementation for x86 CPUs with the AVX2
+  instruction set, enabled via the ENABLE_ASM_X86_AVX2 build flag.
+- Added build rules for the Microsoft Visual C compiler to the Makefile.
+  See the README file for limitations.
+- Fixed decoding errors from SIMD-optimized code when building for x86
+  using recent versions of Clang and -ffast-math.
+
+Version 1.14 (2019/8/27)
+------------
+- Added a packet-mode interface (vorbis_open_packet()) for decoding
+  Vorbis streams not embedded in Ogg containers.
+- vorbis_read_float() now returns the new error code
+  VORBIS_ERROR_INVALID_OPERATION instead of INVALID_ARGUMENT when called
+  on a decoder created with the READ_INT16_ONLY option.
+- Fixed decoding errors from SIMD-optimized code when building for x86
+  using recent versions of GCC and -ffast-math.
+
+Version 1.13 (2019/8/21)
+------------
+- No functional changes.
+- Removed reference to Bitbucket in documentation, since Bitbucket is
+  dropping Mercurial support.
+
+Version 1.12 (2019/3/1)
+------------
+- Improved seek performance.
+- Fixed a bug which could cause inaccurate seeks in streams with
+  non-audio packets interleaved into the stream.
+
+Version 1.11 (2017/11/17)
+------------
+- Fixed several cases discovered by the afl-fuzz tool in which malformed
+  input could cause crashes or memory corruption.
+- Fixed C99 noncompliance in compiler test macros.
+
+Version 1.10 (2017/6/3)
+------------
+- Fixed unintentional GCC-specific function attributes.
+- Fixed parameter attribute mismatches on internal functions.
+
+Version 1.9 (2016/3/29)
+-----------
+- Added vorbis_bitrate().
+- Changed vorbis_rate() to return an unsigned value, to match the Vorbis
+  specification.
+- Fixed inaccurate vorbis_channels() and vorbis_rate() documentation to
+  reflect that the functions always return positive values.
+
+Version 1.8 (2015/12/24)
+-----------
+- Refactored code to address false-positive Coverity defects (no change
+  in behavior).
+
+Version 1.7 (2015/2/28)
+-----------
+- Fixed a compilation error occurring when compiling the library for
+  64-bit ARM using GCC.
+
+Version 1.6 (2015/2/27)
+-----------
+- Updated the decoder logic for errata 20150226 to the Vorbis
+  specification, related to streams containing codebooks with only one
+  used symbol.  Previously, the specification and reference decoder
+  implementation differed in their handling of such codebooks; libnogg
+  followed the specification (after related fixes in version 1.4), and
+  consequently failed to decode some streams which the reference decoder
+  was able to successfully decode.  The errata modifies the
+  specification to conform to the behavior of the reference decoder in
+  such cases, and thus libnogg can now decode such streams.
+  (Conversely, streams which conformed to the pre-errata specification
+  can no longer be decoded correctly, though no such streams are known
+  to exist "in the wild".)
+- Fixed crash when decoding zero-length streams.
+- Removed declaration of nonexistent vorbis_set_options() function.
+- Moved internal headers out of the "include" directory.
+
+Version 1.5 (2015/1/12)
+-----------
+- Fixed duplicate "const" in variable declarations.
+
+Version 1.4 (2015/1/3)
+-----------
+- BACKWARDS-INCOMPATIBLE CHANGE: The malloc() callback function now
+  takes an additional parameter indicating the required address
+  alignment for the allocation.
+- Fixed failure to decode streams containing single-symbol codebooks.
+  Note that while the reference encoder does not generate such
+  codebooks, the reference decoder (as of libvorbis 1.3.4) does not
+  follow the Vorbis specification with regard to them, and consequently
+  any streams which do contain such codebooks and which decode correctly
+  using the (buggy) reference decoder may not decode correctly with
+  this library.
+- Fixed incorrect decoding of monaural streams using residue type 2.
+- Fixed low timing resolution in nogg-benchmark on Apple platforms.
+
+Version 1.3 (2014/9/10)
+-----------
+- Fixed identifier shadowing warnings when building with old versions of
+  GCC.
+
+Version 1.2 (2014/8/3)
+-----------
+- Fixed "make install" failure when BUILD_TOOLS was enabled.
+
+Version 1.1 (2014/7/6)
+-----------
+- Renamed internal symbols to avoid conflicts with client code.
+
+Version 1.0 (2014/7/6)
+-----------
+- Initial release.

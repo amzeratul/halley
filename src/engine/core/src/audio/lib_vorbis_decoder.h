@@ -16,11 +16,11 @@ namespace Halley {
 		size_t tell() const override;
 
 	private:
-		OggVorbis_File* file = nullptr;
-		size_t pos = 0;
-
 		const VorbisData& data;
-		
+
+		OggVorbis_File* handle = nullptr;
+		size_t pos = 0;
+	
 		static size_t vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource);
 		static int vorbisSeek(void *datasource, OggOffsetType offset, int whence);
 		static int vorbisClose(void *datasource);
