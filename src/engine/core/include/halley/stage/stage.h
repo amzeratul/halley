@@ -57,12 +57,6 @@ namespace Halley
 
 		Game& getGame() const;
 
-		template <typename T>
-		std::shared_ptr<const T> getResource(const String& name) const
-		{
-			return getResources().of<T>().get(name);
-		}
-
 	private:
 		friend class Core;
 
