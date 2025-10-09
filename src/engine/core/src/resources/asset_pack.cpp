@@ -264,7 +264,7 @@ void PackDataReader::seek(int64_t pos, int whence)
 
 	switch (whence) {
 	case SEEK_SET:
-		curPos = static_cast<size_t>(std::max(pos, 0LL));
+		curPos = std::max<size_t>(pos, 0);
 		break;
 	case SEEK_CUR:
 		curPos = static_cast<size_t>(static_cast<int64_t>(curPos) + pos);
