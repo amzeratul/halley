@@ -449,6 +449,11 @@ bool MaterialDefinition::hasAutoVariables() const
 	return autoVariables;
 }
 
+std::shared_ptr<Material> MaterialDefinition::createMaterial() const
+{
+	return std::make_shared<Material>(shared_from_this());
+}
+
 void MaterialDefinition::updateUniformBlocks()
 {
 	autoVariables = false;

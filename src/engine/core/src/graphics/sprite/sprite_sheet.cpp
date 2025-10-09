@@ -284,7 +284,7 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 	}
 
 	if (!result) {
-		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
+		result = resources->get<MaterialDefinition>(name)->createMaterial();
 		const auto& textures = result->getDefinition().getTextures();
 		for (size_t i = 0; i < textures.size(); ++i) {
 			if (textures[i].defaultTextureName == "$palette") {

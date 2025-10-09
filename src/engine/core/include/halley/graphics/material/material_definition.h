@@ -280,6 +280,8 @@ namespace Halley
 		bool isColumnMajor() const;
 		bool hasAutoVariables() const;
 
+		virtual std::shared_ptr<Material> createMaterial() const;
+
 	private:
 		String name;
 		Vector<MaterialPass> passes;
