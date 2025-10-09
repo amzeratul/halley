@@ -33,8 +33,6 @@ using OggOffsetType = int64_t;
 using OggOffsetType = long int;
 #endif
 
-#define WITH_LIBNOGG
-
 namespace Halley {
 	class IVorbisDecoder;
 	class ResourceData;

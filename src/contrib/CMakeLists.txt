@@ -188,7 +188,7 @@ endif()
 file (GLOB_RECURSE OGG_FILES "libogg/*.c")
 file (GLOB_RECURSE VORBIS_FILES "libvorbis/*.c")
 file (GLOB_RECURSE LUA_FILES "lua/src/*.*")
-file (GLOB_RECURSE NOGG_FILES "libnogg/src/*.*")
+#file (GLOB_RECURSE NOGG_FILES "libnogg/src/*.*")
 set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES} ${LUA_FILES} ${NOGG_FILES})
 
 assign_source_group(${SOURCES})

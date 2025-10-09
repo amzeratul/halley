@@ -1,3 +1,5 @@
+#ifdef WITH_LIBNOGG
+
 #include "lib_nogg_decoder.h"
 
 #include "halley/resources/resource_data.h"
@@ -11,21 +13,46 @@ namespace {
 	{
 		String str;
 		switch (error) {
-		case VORBIS_ERROR_INVALID_ARGUMENT: str = "An invalid argument was passed to a function."; break;
-		case VORBIS_ERROR_DISABLED_FUNCTION: str = "The requested function is not supported in this build of the library."; break;
-		case VORBIS_ERROR_INSUFFICIENT_RESOURCES: str = "Insufficient system resources were available for the operation."; break;
-		case VORBIS_ERROR_FILE_OPEN_FAILED: str = "vorbis_open_file() failed to open the requested file."; break;
-		case VORBIS_ERROR_INVALID_OPERATION: str = "An invalid operation was attempted."; break;
-		case VORBIS_ERROR_NO_CPU_SUPPORT: str = "The runtime environment does not support the CPU instruction set (including extensions) for which the library was compiled."; break;
-		case VORBIS_ERROR_STREAM_INVALID: str = "The stream is not a Vorbis stream or is corrupt."; break;
-		case VORBIS_ERROR_STREAM_NOT_SEEKABLE: str = "A seek operation was attempted on an unseekable stream."; break;
-		case VORBIS_ERROR_STREAM_END: str = " A read operation attempted to read past the end of the stream (for a packet-submission decoder, past the end of the packet)."; break;
-		case VORBIS_ERROR_DECODE_SETUP_FAILED: str = "An error occurred while initializing the Vorbis decoder."; break;
-		case VORBIS_ERROR_DECODE_FAILED: str = "An unrecoverable error occurred while decoding audio data."; break;
-		case VORBIS_ERROR_DECODE_RECOVERED: str = "An error was detected in the stream, but the decoder was able to recover and subsequent read operations may be attempted."; break;
-		default: str = "Unknown error.";
+		case VORBIS_ERROR_INVALID_ARGUMENT:
+			str = "An invalid argument was passed to a function.";
+			break;
+		case VORBIS_ERROR_DISABLED_FUNCTION:
+			str = "The requested function is not supported in this build of the library.";
+			break;
+		case VORBIS_ERROR_INSUFFICIENT_RESOURCES:
+			str = "Insufficient system resources were available for the operation.";
+			break;
+		case VORBIS_ERROR_FILE_OPEN_FAILED:
+			str = "vorbis_open_file() failed to open the requested file.";
+			break;
+		case VORBIS_ERROR_INVALID_OPERATION:
+			str = "An invalid operation was attempted.";
+			break;
+		case VORBIS_ERROR_NO_CPU_SUPPORT:
+			str = "The runtime environment does not support the CPU instruction set (including extensions) for which the library was compiled.";
+			break;
+		case VORBIS_ERROR_STREAM_INVALID:
+			str = "The stream is not a Vorbis stream or is corrupt.";
+			break;
+		case VORBIS_ERROR_STREAM_NOT_SEEKABLE:
+			str = "A seek operation was attempted on an unseekable stream.";
+			break;
+		case VORBIS_ERROR_STREAM_END:
+			str = " A read operation attempted to read past the end of the stream (for a packet-submission decoder, past the end of the packet).";
+			break;
+		case VORBIS_ERROR_DECODE_SETUP_FAILED:
+			str = "An error occurred while initializing the Vorbis decoder.";
+			break;
+		case VORBIS_ERROR_DECODE_FAILED:
+			str = "An unrecoverable error occurred while decoding audio data.";
+			break;
+		case VORBIS_ERROR_DECODE_RECOVERED:
+			str = "An error was detected in the stream, but the decoder was able to recover and subsequent read operations may be attempted.";
+			break;
+		default:
+			str = "Unknown error (" + toString(error) + ")";
 		}
-		throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Resources);
+		throw Exception("Error opening Ogg Vorbis: " + str, HalleyExceptions::Resources);
 	}
 
 }
@@ -207,3 +234,5 @@ void LibNoggDecoder::vorbisFree(void* opaque, void* ptr)
 	free(ptr);
 #endif
 }
+
+#endif

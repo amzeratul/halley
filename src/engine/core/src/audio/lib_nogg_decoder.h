@@ -1,3 +1,5 @@
+#ifdef WITH_LIBNOGG
+
 #include "halley/audio/vorbis_dec.h"
 
 typedef struct vorbis_t vorbis_t;
@@ -30,3 +32,5 @@ namespace Halley {
 		static void vorbisFree(void* opaque, void* ptr);
 	};
 }
+
+#endif

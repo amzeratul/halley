@@ -232,7 +232,7 @@ int PackDataReader::read(gsl::span<std::byte> dst)
 	}
 
 	const size_t pos = curPos;
-	size_t available = fileSize - pos;
+	size_t available = pos < fileSize ? fileSize - pos : 0;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
 	pack.readData(startPos + pos, dst.subspan(0, toRead));
@@ -247,10 +247,11 @@ int PackDataReader::readAt(gsl::span<std::byte> dst, size_t pos)
 		return 0;
 	}
 
-	size_t available = fileSize - pos;
+	size_t available = pos < fileSize ? fileSize - pos : 0;
 	size_t toRead = std::min(available, size_t(dst.size()));
 
 	pack.readData(startPos + pos, dst.subspan(0, toRead));
+	curPos = pos + toRead;
 
 	return int(toRead);
 }
@@ -263,14 +264,18 @@ void PackDataReader::seek(int64_t pos, int whence)
 
 	switch (whence) {
 	case SEEK_SET:
-		curPos = size_t(pos);
+		curPos = static_cast<size_t>(std::max(pos, 0LL));
 		break;
 	case SEEK_CUR:
-		curPos += pos;
+		curPos = static_cast<size_t>(static_cast<int64_t>(curPos) + pos);
 		break;
 	case SEEK_END:
-		curPos = size_t(fileSize + pos);
+		curPos = static_cast<size_t>(fileSize + pos);
 		break;
+	}
+
+	if (curPos > fileSize) {
+		curPos = fileSize;
 	}
 }
 
