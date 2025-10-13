@@ -594,3 +594,53 @@ void ScriptToggleEntityEnabled::doDestructor(ScriptEnvironment& environment, con
 		entityRef.setEnabled(data.previousState);
 	}
 }
+
+
+Vector<IGraphNodeType::SettingType> ScriptHasComponent::getSettingTypes() const
+{
+	return {
+		SettingType{ "components", "Halley::Vector<Halley::Component>", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptHasComponent::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptHasComponent::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Checks if ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	str.append(" has components ");
+	str.append("[" + String::concatList(node.getSettings()["components"].asVector<String>({}), ", ") + "]", settingColour);
+	return str.moveResults();
+}
+
+String ScriptHasComponent::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return getConnectedNodeName(node, graph, 0) + " has components " + "[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]";
+}
+
+ConfigNode ScriptHasComponent::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto components = node.getSettings()["components"].asVector<String>({});
+	const auto entity = environment.getWorld().getEntity(readEntityId(environment, node, 0));
+
+	Vector<ComponentReflector*> reflectors;
+	for (const auto& component: components) {
+		reflectors.push_back(&environment.getWorld().getReflection().getComponentReflector(component));
+	}
+
+	for (const auto& r:reflectors) {
+		if (r->tryGetComponent(entity) == nullptr) {
+			return ConfigNode(false);
+		}
+	}
+
+	return ConfigNode(true);
+}
