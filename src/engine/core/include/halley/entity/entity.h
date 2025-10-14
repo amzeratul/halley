@@ -102,10 +102,10 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent(const World& world) const
+		bool hasComponent(const World& world, bool evenIfDisabled = false) const
 		{
 			if (dirty) {
-				return tryGetComponent<T>() != nullptr;
+				return tryGetComponent<T>(evenIfDisabled) != nullptr;
 			} else {
 				return hasBit(world, FamilyMask::RetrieveComponentIndex<T>::componentIndex);
 			}
@@ -568,11 +568,11 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent() const
+		bool hasComponent(bool evenIfDisabled = false) const
 		{
 			validateComponentType<T>();
 			validate();
-			return entity->hasComponent<T>(*world);
+			return entity->hasComponent<T>(*world, evenIfDisabled);
 		}
 
 		template <typename ... Ts>

@@ -156,11 +156,12 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 	}
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 	: world(&world)
 	, scene(scene)
 	, parent(parent)
 	, update(update)
+	, fallbackVariant(std::move(fallbackVariant))
 {
 	prefab = std::move(_prefab);
 	entitySerializationContext.resources = &resources;
@@ -267,8 +268,13 @@ const String& EntityFactoryContext::getVariant() const
 	if (scene) {
 		return scene->getVariant();
 	} else {
-		return String::emptyString();
+		return fallbackVariant;
 	}
+}
+
+const String& EntityFactoryContext::getFallbackVariant() const
+{
+	return fallbackVariant;
 }
 
 bool EntityFactoryContext::canInstantiateVariant(const String& value) const
@@ -355,27 +361,27 @@ EntityRef EntityFactory::createEntity(const String& prefabName, EntityRef parent
 	return createEntity(data, mask, parent, scene);
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene, EntityFactoryContext* parentContext)
+EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene, EntityFactoryContext* parentContext, String fallbackVariant)
 {
-	const auto context = makeContext(data, {}, scene, false, mask, parentContext);
+	const auto context = makeContext(data, {}, scene, false, mask, parentContext, nullptr, std::move(fallbackVariant));
 	const auto entity = tryGetEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators)
+void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 {
 	Expects(entity.isValid());
-	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators);
+	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, fallbackVariant);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 	for (auto& c : context->getToDeleteEntities()) {
 		destroyEntity(c);
 	}
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent, interpolators);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent, interpolators, fallbackVariant);
 
 	if (existing) {
 		context->notifyEntity(existing.value());
@@ -560,7 +566,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcrete
 	for (size_t i = 0; i < nChildren; ++i) {
 		const auto& child = data.getChild(i);
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
+			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
 			auto childEntity = tryGetEntity(child.getInstanceUUID(), *newContext, false);
 			if (childEntity.isValid()) {
 				updateEntityNode(newContext->getRootEntityData(), childEntity, entity, newContext);
@@ -605,7 +611,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		context->removeDelete(childData.getInstanceUUID());
 
 		if (context->needsNewContextFor(childData)) {
-			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
+			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get(), nullptr, context->getFallbackVariant());
 			auto child = tryGetEntity(childData.getInstanceUUID(), *newContext, false);
 			if (child.isValid()) {
 				updateEntityNode(newContext->getRootEntityData(), child, entity, newContext);

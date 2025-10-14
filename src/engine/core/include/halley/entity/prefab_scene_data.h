@@ -18,12 +18,14 @@ namespace Halley {
         std::pair<String, size_t> getEntityParenting(const String& entityId) override;
         bool isSingleRoot() override;
     	Vector<const EntityData*> getEntityDataStack(const String& entityId) override;
-    	
+	    void setVariant(String variant);
+
     private:
     	Prefab& prefab;
         std::shared_ptr<EntityFactory> factory;
         World& world;
     	Resources& gameResources;
+        String variant;
 
     	struct EntityAndParent {
     		EntityData* entity = nullptr;

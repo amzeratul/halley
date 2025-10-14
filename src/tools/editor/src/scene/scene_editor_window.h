@@ -149,6 +149,8 @@ namespace Halley {
 		IProject& getProject() const override;
 		IProjectWindow& getIProjectWindow() const override;
 
+		String getVariant() const;
+
 		Future<std::optional<String>> openNewItemWindow(LocalisedString label, String defaultValue, String extension) override;
 
 		std::shared_ptr<const Prefab> getCurPrefab() const;

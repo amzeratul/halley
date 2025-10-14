@@ -217,11 +217,13 @@ void SceneEditorWindow::loadScene()
 
 	// Spawn scene
 	entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-	auto sceneCreated = entityFactory->createScene(prefab, true, 0, getAssetSetting("variant").asString(""));
+	auto sceneCreated = entityFactory->createScene(prefab, true, 0, getVariant());
 	interface.spawnPending();
 
 	// Setup editors
-	sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
+	auto scene = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
+	scene->setVariant(getVariant());
+	sceneData = std::move(scene);
 
 	entityEditor->setSceneEditorWindow(*this, api);
 	entityEditor->setECSData(project.getECSData());
@@ -328,7 +330,7 @@ void SceneEditorWindow::update(Time t, bool moved)
 	}
 
 	if (currentEntityScene && entityFactory) {
-		if (currentEntityScene->getVariant() != getAssetSetting("variant").asString("")) {
+		if (currentEntityScene->getVariant() != getVariant()) {
 			reloadScene();
 		}
 		
@@ -1719,6 +1721,11 @@ IProject& SceneEditorWindow::getProject() const
 IProjectWindow& SceneEditorWindow::getIProjectWindow() const
 {
 	return projectWindow;
+}
+
+String SceneEditorWindow::getVariant() const
+{
+	return getAssetSetting("variant").asString("");
 }
 
 Future<std::optional<String>> SceneEditorWindow::openNewItemWindow(LocalisedString label, String defaultValue, String extension)

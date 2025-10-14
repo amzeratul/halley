@@ -78,11 +78,11 @@ void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<cons
 			data = findEntity(prefab.getEntityDatas(), id);
 		}
 
-		auto entity = world.findEntity(UUID(id));
-		if (entity) {
+		const auto mask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab);
+		if (auto entity = world.findEntity(UUID(id))) {
 			if (data) {
 				// Update
-				factory->updateEntity(*entity, *data, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
+				factory->updateEntity(*entity, *data, mask, nullptr, nullptr, variant);
 			} else {
 				// Destroy
 				world.destroyEntity(entity.value());
@@ -90,7 +90,7 @@ void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<cons
 		} else {
 			if (data) {
 				// Create
-				factory->createEntity(*data, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
+				factory->createEntity(*data, mask, EntityRef(), nullptr, nullptr, variant);
 			}
 		}
 	}
@@ -197,6 +197,11 @@ Vector<const EntityData*> PrefabSceneData::getEntityDataStack(const String& enti
 	return {};
 }
 
+void PrefabSceneData::setVariant(String variant)
+{
+	this->variant = std::move(variant);
+}
+
 EntityData& PrefabSceneData::findEntity(const String& id)
 {
 	auto* data = prefab.findEntityData(id.isEmpty() ? UUID() : UUID(id));
@@ -292,22 +297,24 @@ void PrefabSceneData::moveChild(EntityData& parent, const String& childId, int t
 
 void PrefabSceneData::makeTransformRelative(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData)
 {
-	if (entity.hasComponent<Transform2DComponent>()) {
+	if (entity.hasComponent<Transform2DComponent>(true)) {
 		makeTransformRelative2D(entity, newParent, entityData);
 	}
 }
 
 void PrefabSceneData::makeTransformRelative2D(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData)
 {
-	const auto& transform = entity.getComponent<Transform2DComponent>();
+	const auto& transform = entity.getComponent<Transform2DComponent>(true);
 
 	// TODO: use matrix operations to do this properly
 	const auto pos = transform.getGlobalPosition();
 	Vector2f localPos = pos;
 
-	if (newParent && newParent->hasComponent<Transform2DComponent>()) {
-		const auto& parentTransform = newParent->getComponent<Transform2DComponent>();
+	if (newParent && newParent->hasComponent<Transform2DComponent>(true)) {
+		const auto& parentTransform = newParent->getComponent<Transform2DComponent>(true);
 		localPos = parentTransform.inverseTransformPoint(pos);
+	} else {
+		Logger::logWarning("Moving entity to new parent that isn't spawned in the world.");
 	}
 
 	// Apply to data

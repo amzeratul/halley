@@ -4,6 +4,7 @@
 #include "ecs_reflection.h"
 #include "entity_data_instanced.h"
 #include "prefab.h"
+#include "prefab_scene_data.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/entity/entity.h"
@@ -68,10 +69,10 @@ namespace Halley {
 		World& getWorld();
 		
 		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr);
+		EntityRef createEntity(const EntityData& data, int mask, EntityRef parent = EntityRef(), EntityScene* scene = nullptr, EntityFactoryContext* parentContext = nullptr, String fallbackVariant = "");
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, WorldPartitionId worldPartition = 0, String variant = "");
 
-		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
+		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
 
 		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask, const DebugInfo& debugInfo = {}); // Returns entity and parent UUID
 		std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, const DebugInfo& debugInfo = {}) const;
@@ -103,7 +104,7 @@ namespace Halley {
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		void destroyEntity(EntityRef entity);
 
-		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
+		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
 		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiate(const IEntityConcreteData& data, WorldPartitionId worldPartition, Vector<EntityRef>& entities);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
@@ -125,7 +126,7 @@ namespace Halley {
 
 	class EntityFactoryContext : public IEntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr, EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
+		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr, EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -171,6 +172,7 @@ namespace Halley {
 		void setWorldPartition(WorldPartitionId partition);
 
 		const String& getVariant() const;
+		const String& getFallbackVariant() const;
 		bool canInstantiateVariant(const String& value) const;
 		bool canInstantiateEnableRules(const String& enableRules) const;
 
@@ -201,6 +203,7 @@ namespace Halley {
 		bool update = false;
 		WorldPartitionId worldPartition = 0;
 		EntityId curEntity;
+		String fallbackVariant;
 
 		const IEntityData* entityData = nullptr;
 		EntityDataInstanced instancedEntityData;
