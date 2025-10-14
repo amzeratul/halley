@@ -106,6 +106,7 @@ namespace Halley {
 		bool isRandomisingAnimationTime() const;
 		bool isAnimated() const;
 		bool isAlive() const;
+		size_t getAliveParticleCount() const;
 		
 		[[nodiscard]] gsl::span<Sprite> getSprites();
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;

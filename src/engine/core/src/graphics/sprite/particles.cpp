@@ -387,6 +387,11 @@ bool Particles::isAlive() const
 	return nParticlesAlive > 0 || !destroyWhenDone;
 }
 
+size_t Halley::Particles::getAliveParticleCount() const
+{
+	return nParticlesAlive;
+}
+
 gsl::span<Sprite> Particles::getSprites()
 {
 	return gsl::span<Sprite>(sprites).subspan(0, nParticlesVisible);
