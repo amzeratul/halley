@@ -24,6 +24,8 @@ NetworkSession::~NetworkSession()
 {
 	if (type == NetworkSessionType::Host) {
 		service.stopListening();
+	} else {
+		service.disconnect();
 	}
 	close();
 }
