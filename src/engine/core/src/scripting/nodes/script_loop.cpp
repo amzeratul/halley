@@ -467,7 +467,11 @@ ConfigNode ScriptEveryTimeData::toConfigNode(const EntitySerializationContext& c
 
 String ScriptEveryTime::getLabel(const BaseGraphNode& node) const
 {
-	return toString(node.getSettings()["time"].asFloat(1.0f)) + " s";
+	if (!node.getPin(2).hasConnection()) {
+		return toString(node.getSettings()["time"].asFloat(1.0f)) + " s";
+	}
+
+	return String::emptyString();
 }
 
 Vector<IScriptNodeType::SettingType> ScriptEveryTime::getSettingTypes() const
@@ -479,7 +483,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ 
+		PinType{ ET::FlowPin, PD::Input }, 
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input }, 
+	};
 	return data;
 }
 
@@ -487,15 +495,30 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryTime::getNodeDescription(co
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Pulse every ");
-	str.append(toString(node.getSettings()["time"].asFloat(1.0f)), settingColour);
+
+	if (node.getPin(2).hasConnection()) {
+		str.append(getConnectedNodeName(node, graph, 2), parameterColour);
+	} else {
+		str.append(toString(node.getSettings()["time"].asFloat(1.0f)), settingColour);
+	}
+
 	str.append(" s");
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryTimeData& curData) const
 {
-	const float period = node.getSettings()["time"].asFloat(1.0f);
+	float period = node.getSettings()["time"].asFloat(1.0f);
+	if (node.getPin(2).hasConnection()) {
+		period = readDataPin(environment, node, 2).asFloat(1.0f);
+	}
+	
+	if (curData.time < 0.0f) {
+		curData.time = period;
+	}
+
 	const float timeToNextPulse = period - curData.time;
+
 	if (timeToNextPulse < static_cast<float>(time)) {
 		curData.time = 0;
 		return Result(ScriptNodeExecutionState::Fork, static_cast<Time>(timeToNextPulse), 1);
@@ -507,7 +530,7 @@ IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment
 
 void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data.time = node.getSettings()["time"].asFloat(1.0f);
+	data.time = -1.0f;
 }
 
 bool ScriptEveryTime::canKeepData() const
