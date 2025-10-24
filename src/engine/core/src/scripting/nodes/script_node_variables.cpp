@@ -1749,3 +1749,43 @@ ConfigNode ScriptRandomOf::doGetData(ScriptEnvironment& environment, const Scrip
 	const auto pick = Random::getGlobal().getInt(0, nInputs - 1);
 	return readDataPin(environment, node, 1 + pick);
 }
+
+
+Vector<IGraphNodeType::SettingType> ScriptRandomNumber::getSettingTypes() const
+{
+	return {
+		SettingType{ "min", "float", Vector<String>{""} },
+		SettingType{ "max", "float", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptRandomNumber::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+String ScriptRandomNumber::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Random number";
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptRandomNumber::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	ColourStringBuilder str;
+	str.append("Random number between ");
+	str.append(toString(node.getSettings()["min"].asFloat(0.0f)), settingColour);
+	str.append(" and ");
+	str.append(toString(node.getSettings()["max"].asFloat(1.0f)), settingColour);
+	return str.moveResults();
+}
+
+ConfigNode ScriptRandomNumber::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto number = Random::getGlobal().getFloat(node.getSettings()["min"].asFloat(0.0f), node.getSettings()["max"].asFloat(1.0f));
+	return ConfigNode(number);
+}

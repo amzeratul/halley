@@ -369,4 +369,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptToggleEntityEnabled>());
 	addScriptNode(std::make_unique<ScriptWaitUntilEndOfFrame>());
 	addScriptNode(std::make_unique<ScriptHasComponent>());
+	addScriptNode(std::make_unique<ScriptRandomNumber>());
 }
