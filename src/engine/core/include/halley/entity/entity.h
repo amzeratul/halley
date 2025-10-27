@@ -558,6 +558,25 @@ namespace Halley {
 			return {};
 		}
 
+		template <typename T>
+		size_t tryGetEntityIdsWithComponentInTree(Vector<EntityId>& entityIds) const
+		{
+			validateComponentType<T>();
+			size_t count = 0;
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				entityIds.emplace_back(getEntityId());
+				++count;
+			}
+			for (auto& child : getRawChildren()) {
+				auto childId = EntityRef(*child, getWorld());
+				if (childId.isValid()) {
+					count += childId.tryGetEntityIdsWithComponentInTree<T>(entityIds);
+				}
+			}
+			return count;
+		}
+
 		EntityId getEntityId() const
 		{
 			if (!entity) {
