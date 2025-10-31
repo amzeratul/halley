@@ -22,6 +22,10 @@ namespace Halley {
 
 		int getButtonAtPosition(JoystickButtonPosition position) const override;
 
+#ifdef WITH_GDK
+		String getButtonName(int code) const override;
+#endif
+
 	private:
 		SDL_Gamepad* controller = nullptr;
 		SDL_JoystickID id;

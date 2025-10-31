@@ -94,6 +94,45 @@ int InputGameControllerSDL3::getButtonAtPosition(JoystickButtonPosition position
 	}
 }
 
+#ifdef WITH_GDK
+Halley::String InputGameControllerSDL3::getButtonName(int code) const
+{
+	auto buttons = std::array<const char*, 17>{
+		"xbox_a",
+		"xbox_b",
+		"xbox_x",
+		"xbox_y",
+		"xbox_lb",
+		"xbox_rb",
+		"xbox_lsb",
+		"xbox_rsb",
+		"xbox_back",
+		"xbox_start",
+		"xbox_lt",
+		"xbox_rt",
+		"xbox_dpad_up",
+		"xbox_dpad_right",
+		"xbox_dpad_down",
+		"xbox_dpad_left",
+		"xbox_guide"
+	};
+	if (code < buttons.size())
+	{
+		return buttons[code];
+	}
+	if (code == 26)
+	{
+		return "xbox_lt";
+	}
+	if (code == 27)
+	{
+		return "xbox_rt";
+	}
+
+	return InputJoystick::getButtonName(code);
+}
+#endif
+
 void InputGameControllerSDL3::processEvent(const SDL_Event& event)
 {
 	if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN || event.type == SDL_EVENT_GAMEPAD_BUTTON_UP) {
