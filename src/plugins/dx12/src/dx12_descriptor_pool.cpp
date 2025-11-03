@@ -100,7 +100,7 @@ void DX12DescriptorPool::free(DX12DescriptorHandle handle)
     region.refs[shift] = 0;
 
     // Update mask to mark blocks as free
-    uint64_t mask = ((1u << count) - 1u) << shift;
+    uint64_t mask = ((1ull << count) - 1ull) << shift;
     region.mask &= ~mask;
 
     Ensures(countInUse >= count);

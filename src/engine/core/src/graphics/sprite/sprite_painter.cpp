@@ -271,6 +271,8 @@ void SpritePainter::clear()
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();
+	callbacks.clear();
+	extraBounds.clear();
 	memoryPool.reset();
 }
 
