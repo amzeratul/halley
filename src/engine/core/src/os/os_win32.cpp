@@ -1048,4 +1048,9 @@ ConfigNode OSWin32::getRegistryString(std::string_view key) const
 	return {};
 }
 
+void OSWin32::setEnvVariable(std::string_view name, std::string_view value)
+{
+	SetEnvironmentVariableW(String(name).getUTF16().c_str(), String(value).getUTF16().c_str());
+}
+
 #endif

@@ -205,4 +205,8 @@ ConfigNode OS::getRegistryString(std::string_view key) const
 	return {};
 }
 
+void OS::setEnvVariable(std::string_view name, std::string_view value)
+{
+}
+
 OS* OS::osInstance = nullptr;

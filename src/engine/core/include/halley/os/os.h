@@ -98,6 +98,8 @@ namespace Halley {
 
 		virtual ConfigNode getRegistryString(std::string_view key) const;
 
+		virtual void setEnvVariable(std::string_view name, std::string_view value);
+
 	private:
 		static OS* osInstance;
 	};
