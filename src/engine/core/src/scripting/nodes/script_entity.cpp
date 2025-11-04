@@ -288,9 +288,9 @@ String ScriptEntityReference::getShortDescription(const ScriptGraphNode& node, c
 		}
 	} else {
 		if (node.getPin(2).hasConnection()) {
-			return "pos(" + getConnectedNodeName(node, graph, 2) + ")";
+			return "entityRef(\"" + getConnectedNodeName(node, graph, 2) + "\")";
 		} else {
-			return "pos(" + node.getSettings()["key"].asString("") + ")";
+			return "entityRef(\"" + node.getSettings()["key"].asString("") + "\")";
 		}
 	}
 }
@@ -303,7 +303,7 @@ String ScriptEntityReference::getLargeLabel(const BaseGraphNode& node) const
 String ScriptEntityReference::getPinDescription(const BaseGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return "Position";
+		return "EntityId";
 	}
 	if (elementIdx == 2) {
 		return "Key";
