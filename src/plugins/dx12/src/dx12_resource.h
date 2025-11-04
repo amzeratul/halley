@@ -90,6 +90,9 @@ namespace Halley {
 
         void hash(Hash::Hasher& hasher) const;
 
+    protected:
+        size_t getVRamUsage() const override;
+
     private:
         DX12Video& video;
         ComPtr<ID3D12Resource> resource;
@@ -97,7 +100,9 @@ namespace Halley {
         mutable D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_COMMON;
 
         bool useFiltering = false;
-        TextureAddressMode addressMode;
+        TextureAddressMode addressMode = TextureAddressMode::Repeat;
+
+        size_t vramUsage = 0;
 
         void doCreateResource(TextureDescriptor& descriptor, bool keepResource);
         bool canKeepExistingResource(const TextureDescriptor& descriptor) const;

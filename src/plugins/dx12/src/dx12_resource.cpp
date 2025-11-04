@@ -373,6 +373,8 @@ void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResou
     resource->SetPrivateData(WKPDID_D3DDebugObjectName, (UINT) name.size(), name.c_str());
 #endif
 
+    vramUsage = bpp * size.x * size.y;
+
     if (!descriptor.pixelData.empty()) {
         /*
          * Might have started upload above already.
@@ -492,6 +494,11 @@ void DX12Texture::hash(Hash::Hasher& hasher) const
     waitForLoad();
     hasher.feed(resource.Get());
     hasher.feedBytes(gsl::as_bytes(gsl::span<const TextureDescriptor>(&descriptor, 1)));
+}
+
+size_t DX12Texture::getVRamUsage() const
+{
+	return vramUsage;
 }
 
 DX12TextureView::DX12TextureView(DX12Video& video)
