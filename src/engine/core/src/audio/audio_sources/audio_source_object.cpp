@@ -8,7 +8,9 @@ AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter,
 {
 	sources.reserve(object.getSubObjects().size());
 	for (const auto& subObject: object.getSubObjects()) {
-		sources += subObject->makeSource(engine, emitter);
+		if (auto source = subObject->makeSource(engine, emitter)) {
+			sources.emplace_back(std::move(source));
+		}
 	}
 
 	if (sources.empty()) {
@@ -31,6 +33,10 @@ String AudioSourceObject::getName() const
 
 bool AudioSourceObject::isReady() const
 {
+	if (sources.empty()) {
+		return false;
+	}
+
 	for (const auto& src: sources) {
 		if (!src->isReady()) {
 			return false;
@@ -41,7 +47,7 @@ bool AudioSourceObject::isReady() const
 
 uint8_t AudioSourceObject::getNumberOfChannels() const
 {
-	return sources[0]->getNumberOfChannels();
+	return sources.empty() ? 0 : sources[0]->getNumberOfChannels();
 }
 
 size_t AudioSourceObject::getSamplesLeft() const
