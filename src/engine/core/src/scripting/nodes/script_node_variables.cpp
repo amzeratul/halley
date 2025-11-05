@@ -1094,12 +1094,15 @@ std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescripti
 EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	auto data = readDataPin(environment, node, 0);
-	if (data.getType() == ConfigNodeType::String && UUID::isUUID(data.asStringView())) {
-		auto entity = environment.getWorld().findEntity(UUID(data));
-		if (entity) {
-			return entity->getEntityId();
-		} else {
-			return EntityId();
+	if (data.getType() == ConfigNodeType::String) {
+		if (UUID::isUUID(data.asStringView())) {
+			if (auto entity = environment.getWorld().findEntity(UUID(data))) {
+				return entity->getEntityId();
+			} else {
+				return EntityId();
+			}
+		} else if (data.asStringView().empty()) {
+			return {};
 		}
 	} 
 
