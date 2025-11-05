@@ -13,10 +13,6 @@ AudioSourceObject::AudioSourceObject(AudioEngine& engine, AudioEmitter& emitter,
 		}
 	}
 
-	if (sources.empty()) {
-		Logger::logError("AudioSourceObject has no sources: " + object.getAssetId());
-	}
-
 	if (sources.size() >= 2) {
 		for (size_t i = 1; i < sources.size(); ++i) {
 			if (sources[i]->getNumberOfChannels() != sources[0]->getNumberOfChannels()) {
@@ -63,9 +59,11 @@ bool AudioSourceObject::getAudioData(size_t numSamples, AudioMultiChannelSamples
 {
 	if (sources.size() == 1) {
 		return sources[0]->getAudioData(numSamples, dst);
-	} else {
+	} else if (!sources.empty()) {
 		// TODO: read and mix all sources
 		return sources[0]->getAudioData(numSamples, dst);
+	} else {
+		return false;
 	}
 }
 
