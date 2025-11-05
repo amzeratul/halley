@@ -292,6 +292,17 @@ void RenderGraph::setRenderEnabled(const String& id, bool enabled)
 	targetNode->enabled = enabled;
 }
 
+void RenderGraph::setIgnoreDependencies(const String& id, bool ignore)
+{
+	auto* targetNode = tryGetNode(id);
+	if (!targetNode) {
+		Logger::logWarning("Can't set ignore dependencies status for unknown render graph node: \"" + id + "\"", true);
+		return;
+	}
+
+	targetNode->ignoreDependencies = ignore;
+}
+
 void RenderGraph::clearImageOutputCallbacks()
 {
 	imageOutputCallbacks.clear();
@@ -323,6 +334,7 @@ void RenderGraph::resetRemapNode()
 		for (const auto& [otherId, otherPin]: mapping.second) {
 			if (auto* other = tryGetNode(otherId)) {
 				toNode->connectInput(mapping.first, *other, otherPin);
+				//Logger::logInfo("Connecting " + remapOutputNode + ":" + toString(static_cast<int>(mapping.first)) + " to " + otherId + ":" + static_cast<int>(otherPin));
 			}
 		}
 	}

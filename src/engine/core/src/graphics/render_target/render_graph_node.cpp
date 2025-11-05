@@ -101,6 +101,11 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 			continue;
 		}
 
+		// Skip if dependencies are ignored for this node
+		if (input.type == RenderGraphElementType::Dependency && ignoreDependencies) {
+			continue;
+		}
+
 		// Connected to another node
 		++depsLeft;
 

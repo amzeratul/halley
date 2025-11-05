@@ -90,6 +90,7 @@ namespace Halley {
 		int depsLeft = 0;
 		Vector2i currentSize;
 		bool enabled = true;
+		bool ignoreDependencies = false;
 
 		Vector<InputPin> inputPins;
 		Vector<OutputPin> outputPins;

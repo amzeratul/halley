@@ -56,6 +56,7 @@ namespace Halley {
 		std::shared_ptr<Texture> getOutputTexture(const String& id);
 		void setRenderSize(const String& id, const Vector2i& size);
 		void setRenderEnabled(const String& id, bool enabled);
+		void setIgnoreDependencies(const String& id, bool ignore);
 
 		void setRemapOutputNode(std::string_view toNodeName);
 		bool remapNode(uint8_t toNodeInputPin, std::string_view fromNodeName, uint8_t toNodeOutputPin);

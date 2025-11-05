@@ -204,11 +204,14 @@ private:
 		auto& renderGraph = getPainterService().getRenderGraph();
 		if (nodeId != curRenderNode) {
 			curRenderNode = nodeId;
+			Logger::logInfo("Setting render node to \"" + nodeId + "\"");
 
-			if (nodeId.isEmpty()) {
+			if (nodeId.isEmpty() || nodeId == "default") {
+				renderGraph.setIgnoreDependencies("ui", true); // This should say false, but something is fucky and it doesn't work
 				renderGraph.resetRemapNode();
 				return true;
 			} else {
+				renderGraph.setIgnoreDependencies("ui", true);
 				return renderGraph.remapNode(0, nodeId, 0)
 					&& renderGraph.remapNode(1, nodeId, 1);
 			}
