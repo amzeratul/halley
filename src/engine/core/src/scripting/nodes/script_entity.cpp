@@ -623,7 +623,7 @@ std::pair<String, Vector<ColourOverride>> ScriptHasComponent::getNodeDescription
 
 String ScriptHasComponent::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getConnectedNodeName(node, graph, 0) + " has components " + "[" + String::concatList(node.getSettings()["tags"].asVector<String>({}), ", ") + "]";
+	return getConnectedNodeName(node, graph, 0) + " has components " + "[" + String::concatList(node.getSettings()["components"].asVector<String>({}), ", ") + "]";
 }
 
 ConfigNode ScriptHasComponent::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
