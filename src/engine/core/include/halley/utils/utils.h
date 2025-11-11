@@ -39,47 +39,47 @@
 namespace Halley {
 	
 	template <typename T>
-	constexpr inline T clamp(T value, T minValue, T maxValue)
+	[[nodiscard]] constexpr inline T clamp(T value, T minValue, T maxValue)
 	{
 		return std::min(std::max(minValue, value), maxValue);
 	}
 
 	template <typename T>
-	constexpr inline T clamp2(T value, T minValue, T maxValue)
+	[[nodiscard]] constexpr inline T clamp2(T value, T minValue, T maxValue)
 	{
 		return std::max(minValue, std::min(value, maxValue));
 	}
 
 	template <typename T>
-	constexpr inline T maxAbs(T a, T b)
+	[[nodiscard]] constexpr inline T maxAbs(T a, T b)
 	{
 		return abs(a) > abs(b) ? a : b;
 	}
 
 	template <typename T>
-	constexpr inline T minAbs(T a, T b)
+	[[nodiscard]] constexpr inline T minAbs(T a, T b)
 	{
 		return abs(a) < abs(b) ? a : b;
 	}
 
 	template <typename T>
-	constexpr inline bool rangeIntersection(T s1, T e1, T s2, T e2)
+	[[nodiscard]] constexpr inline bool rangeIntersection(T s1, T e1, T s2, T e2)
 	{
 		return (s1 < e2) && (s2 < e1);
 	}
 
-	constexpr double pi()
+	[[nodiscard]] constexpr double pi()
 	{
 		return 3.1415926535897932384626433832795;
 	}
 
-	constexpr float pif()
+	[[nodiscard]] constexpr float pif()
 	{
 		return 3.1415926535897932384626433832795f;
 	}
 
 	// True modulo definition
-	template <typename T> constexpr inline T modulo (T a, T b)
+	template <typename T> [[nodiscard]] constexpr inline T modulo (T a, T b)
 	{
 		static_assert(std::is_signed<T>::value, "Must be signed to use modulo operation");
 		T res = a % b;
@@ -87,24 +87,24 @@ namespace Halley {
 		return res;
 	}
 
-	template <typename T> constexpr inline T floatModulo (T a, T b)
+	template <typename T> [[nodiscard]] constexpr inline T floatModulo (T a, T b)
 	{
 		if (b == 0) return a;
 		return a - b * std::floor(a/b);
 	}
-	template <> constexpr inline float modulo (float a, float b) { return floatModulo(a, b); }
-	template <> constexpr inline double modulo (double a, double b) { return floatModulo(a, b); }
+	template <> [[nodiscard]] constexpr inline float modulo (float a, float b) { return floatModulo(a, b); }
+	template <> [[nodiscard]] constexpr inline double modulo (double a, double b) { return floatModulo(a, b); }
 
 	// Float floor division (e.g. -0.5 / 2 = -1.0)
 	template <typename T>
-	constexpr inline T floorDivFloat (T a, T b)
+	[[nodiscard]] constexpr inline T floorDivFloat (T a, T b)
 	{
 		return floor(a / b);
 	}
 
 	// Int floor division (e.g. -2 / 3 = -1)
 	template <typename T>
-	constexpr inline T floorDivInt (T a, T b)
+	[[nodiscard]] constexpr inline T floorDivInt (T a, T b)
 	{
 		T result = a / b;
 		if (a % b < 0) {
@@ -114,12 +114,12 @@ namespace Halley {
 	}
 
 	// Generic floor divs
-	constexpr inline float floorDiv (float a, float b) { return floorDivFloat(a, b); }
-	constexpr inline double floorDiv (double a, double b) { return floorDivFloat(a, b); }
-	constexpr inline long floorDiv (long a, long b) { return floorDivInt(a, b); }
-	constexpr inline int floorDiv (int a, int b) { return floorDivInt(a, b); }
-	constexpr inline short floorDiv (short a, short b) { return floorDivInt(a, b); }
-	constexpr inline char floorDiv (char a, char b) { return floorDivInt(a, b); }
+	[[nodiscard]] constexpr inline float floorDiv (float a, float b) { return floorDivFloat(a, b); }
+	[[nodiscard]] constexpr inline double floorDiv (double a, double b) { return floorDivFloat(a, b); }
+	[[nodiscard]] constexpr inline long floorDiv (long a, long b) { return floorDivInt(a, b); }
+	[[nodiscard]] constexpr inline int floorDiv (int a, int b) { return floorDivInt(a, b); }
+	[[nodiscard]] constexpr inline short floorDiv (short a, short b) { return floorDivInt(a, b); }
+	[[nodiscard]] constexpr inline char floorDiv (char a, char b) { return floorDivInt(a, b); }
 
 	// Interpolation
 	template <typename T>
@@ -172,13 +172,13 @@ namespace Halley {
 	}
 
 	template <typename T>
-	constexpr T sinRange(T angle, T min, T max)
+	[[nodiscard]] constexpr T sinRange(T angle, T min, T max)
 	{
 		return lerp(min, max, sin(angle) * T(0.5) + T(0.5));
 	}
 
 	template <typename T>
-	constexpr T cosRange(T angle, T min, T max)
+	[[nodiscard]] constexpr T cosRange(T angle, T min, T max)
 	{
 		return lerp(min, max, cos(angle) * T(0.5) + T(0.5));
 	}
