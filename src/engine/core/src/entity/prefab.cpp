@@ -283,7 +283,7 @@ void Prefab::doPreloadDependencies(const EntityData& data, Resources& resources)
 	if (!data.getPrefab().isEmpty()) {
 		resources.preload<Prefab>(data.getPrefab());
 	}
-	for (auto c: data.getChildren()) {
+	for (const auto& c: data.getChildren()) {
 		doPreloadDependencies(c, resources);
 	}
 }
