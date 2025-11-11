@@ -83,16 +83,23 @@ public:
 	
 	std::shared_ptr<ScriptState> addScript(EntityId entityId, const String& scriptName, Vector<String> tags = {}, Vector<ConfigNode> params = {}) override
 	{
+		if (!getResources().exists<ScriptGraph>(scriptName)) {
+			Logger::logError("Script not found: " + scriptName);
+			return {};
+		}
+
+		auto script = getResources().get<ScriptGraph>(scriptName);
+
 		if (auto* scriptable = scriptableFamily.tryFind(entityId)) {
-			if (getResources().exists<ScriptGraph>(scriptName)) {
-				return addScript(entityId, scriptable->scriptable, getResources().get<ScriptGraph>(scriptName), std::move(tags), std::move(params));
+			return addScript(entityId, scriptable->scriptable, script, std::move(tags), std::move(params));
+		} else {
+			auto e = getWorld().tryGetEntity(entityId);
+			if (e.isValid()) {
+				return addScript(entityId, e.getOrAddComponent<ScriptableComponent>(), script, std::move(tags), std::move(params));
 			} else {
-				Logger::logError("Script not found: " + scriptName);
+				Logger::logError("Unable to add script " + scriptName + " to entity " + toString(entityId) + ": entity not found.");
 				return {};
 			}
-		} else {
-			Logger::logError("Unable to add script " + scriptName + " to entity " + toString(entityId) + ": entity not found.");
-			return {};
 		}
 	}
 
