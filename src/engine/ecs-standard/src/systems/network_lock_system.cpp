@@ -112,8 +112,8 @@ public:
 			if (iter->second.playerId == playerId) {
 				// Already locked by this player, just increment count!
 				iter->second.refCount++;
-                if (iter->second.withAuthority != acquireAuthority) {
-                    Logger::logWarning("Trying to acquire lock to already locked entity, but with different authority flag");
+                if (acquireAuthority && !iter->second.withAuthority && getSessionService().isMultiplayer()) {
+                    Logger::logWarning("Tried to acquire lock, with authority, for entity already locked");
                 }
 				return Future<NetworkLockHandle>::makeImmediate(std::make_shared<NetworkLock>(static_cast<INetworkLockSystem&>(*this), playerId, targetId));
 			} else {
