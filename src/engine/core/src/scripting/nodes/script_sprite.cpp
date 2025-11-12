@@ -228,8 +228,9 @@ gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfigur
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 3>{
+	const static auto data = std::array<PinType, 4>{
 		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Output }
 	};
@@ -252,6 +253,8 @@ String ScriptSpriteActionPoint::getPinDescription(const BaseGraphNode& node, Pin
 		return "World position";
 	} else if (elementIdx == 2) {
 		return "Offset";
+	} else if (elementIdx == 3) {
+		return "Has point";
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
@@ -264,6 +267,8 @@ String ScriptSpriteActionPoint::getShortDescription(const ScriptGraphNode& node,
 		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (world)";
 	} else if (elementIdx == 2) {
 		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (offset)";
+	} else if (elementIdx == 2) {
+		return getConnectedNodeName(node, graph, 0) + " has " + actionPoint;
 	}
 
 	return ScriptNodeTypeBase<void>::getShortDescription(node, graph, elementIdx);
@@ -289,6 +294,8 @@ ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, co
 		return (transform->getWorldPosition() + (point ? Vector2f(*point) : Vector2f())).toConfigNode();
 	} else if (pinN == 2) {
 		return point ? ConfigNode(Vector2f(*point)) : ConfigNode();
+	} else if (pinN == 3) {
+		return ConfigNode(point.has_value());
 	}
 
 	return {};
