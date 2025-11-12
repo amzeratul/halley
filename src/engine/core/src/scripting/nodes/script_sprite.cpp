@@ -228,11 +228,12 @@ gsl::span<const IGraphNodeType::PinType> ScriptSpriteActionPoint::getPinConfigur
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{
+	const static auto data = std::array<PinType, 5>{
 		PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Output },
-		PinType{ ET::ReadDataPin, PD::Output }
+		PinType{ ET::ReadDataPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input }
 	};
 	return data;
 }
@@ -252,9 +253,11 @@ String ScriptSpriteActionPoint::getPinDescription(const BaseGraphNode& node, Pin
 	if (elementIdx == 1) {
 		return "World position";
 	} else if (elementIdx == 2) {
-		return "Offset";
+		return "Local position";
 	} else if (elementIdx == 3) {
 		return "Has point";
+	} else if (elementIdx == 4) {
+		return "Offset";
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
@@ -266,7 +269,7 @@ String ScriptSpriteActionPoint::getShortDescription(const ScriptGraphNode& node,
 	if (elementIdx == 1) {
 		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (world)";
 	} else if (elementIdx == 2) {
-		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (offset)";
+		return actionPoint + " of " + getConnectedNodeName(node, graph, 0) + " (local)";
 	} else if (elementIdx == 2) {
 		return getConnectedNodeName(node, graph, 0) + " has " + actionPoint;
 	}
@@ -278,6 +281,7 @@ ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, co
 {
 	const auto actionPoint = node.getSettings()["actionPoint"].asString("");
 	const auto entityId = readEntityId(environment, node, 0);
+	const auto offset = readDataPin(environment, node, 4).asVector2f(Vector2f());
 
 	const auto* spriteAnimation = environment.tryGetComponent<SpriteAnimationComponent>(entityId);
 	if (!spriteAnimation) {
@@ -291,9 +295,9 @@ ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, co
 		if (!transform) {
 			return {};
 		}
-		return (transform->getWorldPosition() + (point ? Vector2f(*point) : Vector2f())).toConfigNode();
+		return (transform->getWorldPosition() + ((point ? Vector2f(*point) : Vector2f()) + offset)).toConfigNode();
 	} else if (pinN == 2) {
-		return point ? ConfigNode(Vector2f(*point)) : ConfigNode();
+		return point ? ConfigNode(Vector2f(*point) + offset) : ConfigNode();
 	} else if (pinN == 3) {
 		return ConfigNode(point.has_value());
 	}
