@@ -544,9 +544,16 @@ std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(c
 
 ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
-	const auto a = readDataPin(environment, node, 0);
-	const auto b = readDataPin(environment, node, 1);
+	auto a = readDataPin(environment, node, 0);
+	auto b = readDataPin(environment, node, 1);
 	const auto op = fromString<MathOp>(node.getSettings()["operator"].asString("+"));
+
+	if (a.getType() == ConfigNodeType::Undefined) {
+		a = ConfigNode(0);
+	}
+	if (b.getType() == ConfigNodeType::Undefined) {
+		b = ConfigNode(0);
+	}
 
 	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true);
 
