@@ -523,7 +523,6 @@ LocalisedString LocalisedString::operator+(const LocalisedString& other) const
 
 bool LocalisedString::checkForUpdates()
 {
-#ifdef DEV_BUILD
 	if (i18n) {
 		const auto curVersion = i18n->getVersion();
 		if (i18nVersion != curVersion) {
@@ -535,7 +534,6 @@ bool LocalisedString::checkForUpdates()
 			}
 		}
 	}
-#endif
 	return false;
 }
 
