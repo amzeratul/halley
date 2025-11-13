@@ -229,6 +229,14 @@ void SpritePainterMaterialParamUpdater::preProcessMaterial(Sprite& sprite) const
 						mat = sprite.getMutableMaterial();
 					}
 					iter->second(*mat, uniform.name, split1);
+				} else {
+					Vector<String> existingHandles;
+					for (const auto& [k, v]: handles) {
+						existingHandles += k;
+					}
+					Logger::logError("Auto material variable \"" + String(split0) + "\" needed by material "
+						+ sprite.getMaterial().getDefinition().getName() + " not found. These handles exist: "
+						+ String::concatList(existingHandles, ", "), true);
 				}
 			}
 		}
