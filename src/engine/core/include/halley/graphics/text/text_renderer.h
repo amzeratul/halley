@@ -78,6 +78,7 @@ namespace Halley
 		TextRenderer& setText(const StringUTF32& text);
 		TextRenderer& setText(const LocalisedString& text);
 		TextRenderer& setSize(float size);
+		TextRenderer& setFontSize(float size);
 		TextRenderer& setColour(Colour colour);
 		TextRenderer& setOutlineColour(Colour colour);
 		TextRenderer& setOutline(float width);
@@ -129,6 +130,7 @@ namespace Halley
 		float getLineHeight() const;
 		float getLineHeight(const Font& font, float size) const;
 		float getAlignment() const;
+		float getFontSize() const;
 
 		bool empty() const;
 		Rect4f getAABB() const;

@@ -85,6 +85,11 @@ TextRenderer& TextRenderer::setSize(float v)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setFontSize(float size)
+{
+	return setSize(size);
+}
+
 TextRenderer& TextRenderer::setColour(Colour v)
 {
 	if (colour != v) {
@@ -709,6 +714,11 @@ float TextRenderer::getLineHeight(const Font& font, float size) const
 float TextRenderer::getAlignment() const
 {
 	return align;
+}
+
+float TextRenderer::getFontSize() const
+{
+	return size;
 }
 
 bool TextRenderer::empty() const
