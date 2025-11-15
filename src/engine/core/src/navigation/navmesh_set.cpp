@@ -473,6 +473,8 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 
 void NavmeshSet::generateConnectivityFlags()
 {
+	size_t nConnected = 0;
+
 	auto closedSet = Vector<bool>(navmeshes.size(), false);
 	Vector<int> openSet;
 	for (int i = 0; i < static_cast<int>(navmeshes.size()); ++i) {
@@ -490,6 +492,7 @@ void NavmeshSet::generateConnectivityFlags()
 			closedSet[i] = true;
 			auto& navmesh = navmeshes[i];
 			navmesh.markConnectedSet();
+			++nConnected;
 
 			// Add all neighbours to the open set
 			for (const auto& portal: navmesh.getPortals()) {
@@ -501,6 +504,10 @@ void NavmeshSet::generateConnectivityFlags()
 				}
 			}
 		}
+	}
+
+	if (nConnected < navmeshes.size()) {
+		//Logger::logWarning(toString(navmeshes.size() - nConnected) + " navmeshes (out of " + toString(navmeshes.size()) + ") are not connected to root connectivity graph.");
 	}
 }
 
