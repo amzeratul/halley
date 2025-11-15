@@ -180,20 +180,18 @@ const Navmesh& NavmeshSet::getNavmesh(uint16_t idx) const
 
 const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos) const
 {
-	for (const auto& navmesh: navmeshes) {
-		if (navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
-			return &navmesh;
-		}
+	if (auto idx = getNavMeshIdxAt(pos)) {
+		return &navmeshes[*idx];
+	} else {
+		return nullptr;
 	}
-	
-	return nullptr;
 }
 
 OptionalLite<uint16_t> NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 {
 	uint16_t i = 0;
 	for (const auto& navmesh: navmeshes) {
-		if (navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
+		if (navmesh.isConnectedSet() && navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
 			return i;
 		}
 		i++;
@@ -224,7 +222,7 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 	float bestDist = maxDist;
 
 	for (const auto& navmesh: navmeshes) {
-		if (anySubWorld || navmesh.getSubWorld() == pos.subWorld) {
+		if (navmesh.isConnectedSet() && (anySubWorld || navmesh.getSubWorld() == pos.subWorld)) {
 			if (const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy, bestDist)) {
 				const float dist = (*curPoint - pos.pos).length();
 				if (dist < bestDist) {
@@ -265,7 +263,7 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 	return {};
 }
 
-void NavmeshSet::linkNavmeshes()
+void NavmeshSet::linkNavmeshes(bool markAllAsConnected)
 {
 	regionNodes.clear();
 	regionNodes.resize(navmeshes.size());
@@ -273,6 +271,11 @@ void NavmeshSet::linkNavmeshes()
 
 	for (auto& navmesh: navmeshes) {
 		navmesh.markPortalsDisconnected();
+		if (markAllAsConnected) {
+			navmesh.markConnectedSet();
+		} else {
+			navmesh.clearConnectedSet();
+		}
 	}
 
 	// Link meshes
@@ -303,6 +306,11 @@ void NavmeshSet::linkNavmeshes()
 				srcPortal.connections.emplace_back(dstPortalId, srcPortal.toRegion, cost);
 			}
 		}
+	}
+
+	// Generate connectivity flags
+	if (!markAllAsConnected) {
+		generateConnectivityFlags();
 	}
 }
 
@@ -458,6 +466,39 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 				// Add portal node to region node
 				regionNodes[idxA].portals.push_back(portalIdx);
 				regionNodes[idxB].portals.push_back(portalIdx + 1);
+			}
+		}
+	}
+}
+
+void NavmeshSet::generateConnectivityFlags()
+{
+	auto closedSet = Vector<bool>(navmeshes.size(), false);
+	Vector<int> openSet;
+	for (int i = 0; i < static_cast<int>(navmeshes.size()); ++i) {
+		navmeshes[i].clearConnectedSet();
+		if (navmeshes[i].isConnectivityRoot()) {
+			openSet += i;
+		}
+	}
+
+	while (!openSet.empty()) {
+		const auto i = openSet.back();
+		openSet.pop_back();
+		if (!closedSet[i]) {
+			// Not in the closed set, so we're processing this for the first time
+			closedSet[i] = true;
+			auto& navmesh = navmeshes[i];
+			navmesh.markConnectedSet();
+
+			// Add all neighbours to the open set
+			for (const auto& portal: navmesh.getPortals()) {
+				if (portal.connected) {
+					const auto dstIdx = *portal.connected;
+					if (!closedSet[dstIdx] && !openSet.contains(dstIdx)) {
+						openSet += dstIdx;
+					}
+				}
 			}
 		}
 	}

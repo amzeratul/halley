@@ -850,7 +850,7 @@ void Navmesh::clearConnectedSet()
 
 bool Navmesh::isConnectedSet() const
 {
-	return connectedSet;
+	return connectivityRoot || connectedSet;
 }
 
 void Navmesh::computeArea()

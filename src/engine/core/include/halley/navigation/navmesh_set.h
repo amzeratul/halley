@@ -27,7 +27,7 @@ namespace Halley {
 		void clear();
 		void clearSubWorld(int subWorld);
 
-		void linkNavmeshes();
+		void linkNavmeshes(bool markAllAsConnected = false);
 		void reportUnlinkedPortals(std::function<String(Vector2i)> getChunkName) const;
 		size_t reportDisconnectedNavmeshes(Vector<WorldPosition> startPositions, std::function<String(Vector2i)> getChunkName) const;
 		void setMaxDistancesToNavmesh(float startDistance, float endDistance);
@@ -126,6 +126,7 @@ namespace Halley {
 		float maxEndDistanceToNavMesh = 1.0f;
 
 		void tryLinkNavMeshes(uint16_t idxA, uint16_t idxB);
+		void generateConnectivityFlags();
 
 		NavigationPath extendToFullPath(const NavigationQuery& query, const Vector<NodeAndConn>& path) const;
 		Vector<NodeAndConn> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
