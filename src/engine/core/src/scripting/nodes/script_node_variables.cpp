@@ -544,17 +544,24 @@ std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(c
 
 ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
 {
-	auto a = readDataPin(environment, node, 0);
-	auto b = readDataPin(environment, node, 1);
+	const auto aOrig = readDataPin(environment, node, 0);
+	const auto bOrig = readDataPin(environment, node, 1);
 	const auto op = fromString<MathOp>(node.getSettings()["operator"].asString("+"));
 
-	if (a.getType() == ConfigNodeType::Undefined) {
-		a = ConfigNode(0);
-	}
-	if (b.getType() == ConfigNodeType::Undefined) {
-		b = ConfigNode(0);
-	}
+	const auto getTypeZero = [&](const ConfigNode& node) -> ConfigNode
+	{
+		switch (node.getType()) {
+		case ConfigNodeType::Float2:
+			return ConfigNode(Vector2f(0, 0));
+		case ConfigNodeType::Int2:
+			return ConfigNode(Vector2i(0, 0));
+		default:
+			return ConfigNode(0);
+		}
+	};
 
+	const auto a = aOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(bOrig) : ConfigNode(aOrig);
+	const auto b = bOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(aOrig) : ConfigNode(bOrig);
 	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true);
 
 	if (type == ConfigNodeType::String) {
@@ -566,7 +573,8 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 			return ConfigNode(a.asString("") + b.asString(""));
 		} else {
-			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types.");
+			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types."
+				+ " Requested operation: " + aOrig.asString("null") + toString(op) + bOrig.asString("null"));
 			return ConfigNode();
 		}
 	} else if (type == ConfigNodeType::Float) {
@@ -580,7 +588,8 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 	} else if (type == ConfigNodeType::Int2) {
 		return ConfigNode(MathOps::apply(op, a.asVector2i({}), b.asVector2i({})));
 	} else {
-		Logger::logError("ScriptArithmetic node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType()));
+		Logger::logError("ScriptArithmetic node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType())
+			+ ". Requested operation: " + aOrig.asString("null") + toString(op) + bOrig.asString("null"));
 		return ConfigNode();
 	}
 }
