@@ -148,16 +148,22 @@ namespace Halley {
 		void markPortalConnected(size_t portalId, uint16_t navmeshId);
 		void markPortalsDisconnected();
 
-		float getArea() const;
-		Vector2f getRandomPoint(Random& rng) const;
-		std::optional<WorldPosition> getFirstPoint() const;
+		void markConnectivityRoot();
+		[[nodiscard]] bool isConnectivityRoot() const;
+		void markConnectedSet();
+		void clearConnectedSet();
+		[[nodiscard]] bool isConnectedSet() const;
+
+		[[nodiscard]] float getArea() const;
+		[[nodiscard]] Vector2f getRandomPoint(Random& rng) const;
+		[[nodiscard]] std::optional<WorldPosition> getFirstPoint() const;
 
 		Base2D getNormalisedCoordinatesBase() const { return normalisedCoordinatesBase; }
 
 		ResourceMemoryUsage getMemoryUsage() const;
 
 		void setDebugName(String name);
-		const String& getDebugName() const;
+		[[nodiscard]] const String& getDebugName() const;
 
 	private:
 		struct State {
@@ -204,6 +210,9 @@ namespace Halley {
 		Circle boundingCircle;
 
 		String debugName;
+
+		bool connectivityRoot = false;
+		bool connectedSet = false;
 
 		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;

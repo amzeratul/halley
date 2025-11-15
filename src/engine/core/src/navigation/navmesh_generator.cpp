@@ -41,7 +41,9 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	NavmeshSet result;
 	for (int region = 0; region < nRegions; ++region) {
-		result.add(makeNavmesh(polygons, bounds, params.subworldPortals, region, params.subWorld, params.getPolygonWeightCallback, params.sceneName));
+		auto navmesh = makeNavmesh(polygons, bounds, params.subworldPortals, region, params.subWorld, params.getPolygonWeightCallback, params.sceneName);
+		checkForConnectivitySeeds(navmesh, params.seeds);
+		result.add(std::move(navmesh));
 	}
 	return result;
 }
@@ -738,4 +740,13 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 	}
 	
 	return Navmesh(std::move(output), bounds, subWorld, sceneName);
+}
+
+void NavmeshGenerator::checkForConnectivitySeeds(Navmesh& navmesh, gsl::span<const Vector2f> seeds)
+{
+	for (auto seed: seeds) {
+		if (navmesh.containsPoint(seed)) {
+			navmesh.markConnectivityRoot();
+		}
+	}
 }

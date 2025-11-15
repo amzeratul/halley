@@ -12,6 +12,7 @@ namespace Halley {
 			gsl::span<const Polygon> regions;
 			gsl::span<const NavmeshSubworldPortal> subworldPortals;
 			gsl::span<const Vector2f> poison; // These points destroy whatever navmesh they touch
+			gsl::span<const Vector2f> seeds; // These points mark their navmeshes as "connected"
 			int subWorld = 0;
 			float agentSize = 1.0f;
 			std::function<float(int, const Polygon&)> getPolygonWeightCallback;
@@ -86,5 +87,7 @@ namespace Halley {
 		static std::optional<size_t> getNavmeshEdge(NavmeshNode& node, size_t side, gsl::span<const Line> mapEdges, gsl::span<const NavmeshSubworldPortal> subworldPortals);
 
 		static Navmesh makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld, std::function<float(int, const Polygon&)> getPolygonWeightCallback, const String& sceneName);
+
+		static void checkForConnectivitySeeds(Navmesh& navmesh, gsl::span<const Vector2f> seeds);
 	};
 }

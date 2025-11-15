@@ -75,6 +75,7 @@ Navmesh::Navmesh(const ConfigNode& nodeData)
 	portals = nodeData["portals"].asVector<Portal>();
 	subWorld = nodeData["subWorld"].asInt(0);
 	weights = nodeData["weights"].asVector<float>({});
+	connectivityRoot = nodeData["connectivityRoot"].asBool(false);
 
 	processPolygons();
 	generateOpenEdges();
@@ -92,12 +93,18 @@ ConfigNode Navmesh::toConfigNode() const
 	result["portals"] = portals;
 	result["subWorld"] = subWorld;
 	result["weights"] = weights;
+	if (connectivityRoot) {
+		result["connectivityRoot"] = true;
+	}
 	
 	return result;
 }
 
 void Navmesh::serialize(Serializer& s) const
 {
+	int version = 1;
+
+	s << version;
 	s << scaleFactor;
 	s << origin;
 	s << normalisedCoordinatesBase;
@@ -106,10 +113,14 @@ void Navmesh::serialize(Serializer& s) const
 	s << portals;
 	s << subWorld;
 	s << weights;
+	s << connectivityRoot;
 }
 
 void Navmesh::deserialize(Deserializer& s)
 {
+	int version;
+
+	s >> version;
 	s >> scaleFactor;
 	s >> origin;
 	s >> normalisedCoordinatesBase;
@@ -118,6 +129,7 @@ void Navmesh::deserialize(Deserializer& s)
 	s >> portals;
 	s >> subWorld;
 	s >> weights;
+	s >> connectivityRoot;
 
 	processPolygons();
 	generateOpenEdges();
@@ -814,6 +826,31 @@ void Navmesh::setDebugName(String name)
 const String& Navmesh::getDebugName() const
 {
 	return debugName;
+}
+
+void Navmesh::markConnectivityRoot()
+{
+	connectivityRoot = true;
+}
+
+bool Navmesh::isConnectivityRoot() const
+{
+	return connectivityRoot;
+}
+
+void Navmesh::markConnectedSet()
+{
+	connectedSet = true;
+}
+
+void Navmesh::clearConnectedSet()
+{
+	connectedSet = false;
+}
+
+bool Navmesh::isConnectedSet() const
+{
+	return connectedSet;
 }
 
 void Navmesh::computeArea()
