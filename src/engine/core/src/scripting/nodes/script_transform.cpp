@@ -170,6 +170,8 @@ String ScriptGetPosition::getShortDescription(const ScriptGraphNode& node, const
 		return "Position of " + getConnectedNodeName(node, graph, 0) + " + " + getConnectedNodeName(node, graph, 2);
 	} else if (elementIdx == 4) {
 		return "Subworld of " + getConnectedNodeName(node, graph, 0);
+	} else if (elementIdx == 6) {
+		return getConnectedNodeName(node, graph, 0) + " has transform";
 	} else {
 		return "Height of " + getConnectedNodeName(node, graph, 0);
 	}
