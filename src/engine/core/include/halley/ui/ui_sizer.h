@@ -64,6 +64,7 @@ namespace Halley {
 		void updateEnabled() const;
 
 		void setBorder(const Vector4f& border);
+		void setFillFlags(int fillFlags);
 
 		void setProportion(float prop);
 

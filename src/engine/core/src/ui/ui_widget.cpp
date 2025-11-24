@@ -456,6 +456,18 @@ void UIWidget::setBorder(Vector4f border)
 	}
 }
 
+void UIWidget::setFillFlags(int fillFlags)
+{
+	if (auto* parentWidget = dynamic_cast<UIWidget*>(parent)) {
+		if (auto& parentSizer = parentWidget->tryGetSizer()) {
+			if (auto* entry = parentSizer->tryGetEntry(this)) {
+				entry->setFillFlags(fillFlags);
+				parentWidget->markAsNeedingLayout();
+			}
+		}
+	}
+}
+
 void UIWidget::setMinSize(Vector2f size)
 {
 	Expects(size.isValid());

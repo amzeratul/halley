@@ -98,6 +98,11 @@ void UISizerEntry::setBorder(const Vector4f& b)
 	border = b;
 }
 
+void UISizerEntry::setFillFlags(int ff)
+{
+	fillFlags = ff;
+}
+
 void UISizerEntry::setProportion(float prop)
 {
 	proportion = prop;
