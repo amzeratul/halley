@@ -12,7 +12,8 @@ using namespace Halley;
 Executors* Executors::instance = nullptr;
 
 ExecutionQueue::ExecutionQueue()
-	: aborted(false)
+	: attachedCount(0)
+	, aborted(false)
 {
 	hasTasks.store(false);
 }

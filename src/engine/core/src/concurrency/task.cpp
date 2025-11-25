@@ -17,6 +17,7 @@ Task::Task(String name, bool isCancellable, bool isVisible, Vector<String> exclu
 	, pendingTaskCount(0)
 	, isCancellable(isCancellable)
 	, isVisible(isVisible)
+	, numMessages(0)
 	, exclusivityTags(std::move(exclusivityTags))
 {}
 

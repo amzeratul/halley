@@ -23,6 +23,7 @@ MoviePlayer::MoviePlayer(VideoAPI& video, AudioAPI& audio)
 	, video(video)
 	, audio(audio)
 	, threadRunning(false)
+	, threadAborted(false)
 	, aliveFlag(std::make_shared<MoviePlayerAliveFlag>())
 {
 }

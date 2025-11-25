@@ -179,6 +179,7 @@ void ProfilerData::processEvents(Vector<Event> pendingEvents)
 ProfilerCapture::ProfilerCapture(size_t maxEvents)
 	: recording(false)
 	, curId(0)
+	, endId(0)
 {
 	events.resize(maxEvents);
 }

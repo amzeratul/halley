@@ -22,6 +22,7 @@ AudioEngine::AudioEngine()
 	, audioOutputBuffer(4096 * 8)
 	, running(true)
 	, needsBuffer(true)
+	, lastTimeElapsed(0)
 {
 	rng.setSeed(Random::getGlobal().getRawInt());
 
