@@ -207,6 +207,11 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 	return pos;
 }
 
+Vector2f Transform2DComponent::transformPointWithHeight(const Vector2f& p) const
+{
+	return transformPoint(p) + Vector2f(0, getGlobalHeight());
+}
+
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	const auto s = getGlobalScale();

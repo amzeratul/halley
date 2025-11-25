@@ -54,8 +54,9 @@ private:
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-			auto spriteBounds = Rect4f(player.getAnimation().getBounds()) + e.transform2D.getGlobalPositionWithHeight();
-			if (spriteBounds.overlaps(viewPort)) {
+			const auto localBounds = Rect4f(player.getAnimation().getBounds());
+			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(localBounds.getTopLeft()), e.transform2D.transformPointWithHeight(localBounds.getBottomRight()));
+			if (worldBounds.overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
 			}
 		}
