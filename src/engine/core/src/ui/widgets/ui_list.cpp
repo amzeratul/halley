@@ -53,6 +53,11 @@ UISizerType UIList::getOrientation() const
 	return orientation;
 }
 
+int UIList::getNumColumns() const
+{
+	return nColumns;
+}
+
 bool UIList::setSelectedOption(int option, SelectionMode mode)
 {
 	if (!multiSelect) {

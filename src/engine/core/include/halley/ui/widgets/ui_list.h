@@ -26,6 +26,7 @@ namespace Halley {
 
 		void setOrientation(UISizerType orientation, int nColumns = 1);
 		UISizerType getOrientation() const;
+		int getNumColumns() const;
 
 		virtual bool setSelectedOption(int option, SelectionMode mode = SelectionMode::Normal);
 		virtual bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal);
