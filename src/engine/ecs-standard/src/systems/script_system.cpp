@@ -318,6 +318,10 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e: scriptables) {
 			const auto entityId = e.first;
+			if (!getWorld().tryGetEntity(entityId).isValid()) {
+				// Entity no longer valid, can't access ScriptableComponent
+				continue;
+			}
 			auto& scriptable = *e.second;
 
 			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
