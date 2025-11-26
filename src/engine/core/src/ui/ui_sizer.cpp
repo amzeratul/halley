@@ -154,6 +154,7 @@ UISizer& UISizer::operator=(UISizer&& other) noexcept
 	type = other.type;
 	gap = other.gap;
 	gridProportions = std::move(other.gridProportions);
+	other.type = UISizerType::Horizontal; // If the old one remains grid, it will be in an inconsistent state due to lack of gridProportions
 
 	entries = std::move(other.entries);
 
@@ -174,8 +175,10 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 		return computeMinimumSizeBox(includeProportional);
 	} else if (type == UISizerType::Free) {
 		return computeMinimumSizeBoxFree();
-	} else {
+	} else if (type == UISizerType::Grid) {
 		return computeMinimumSizeGrid();
+	} else {
+		return {};
 	}
 }
 
@@ -185,7 +188,7 @@ void UISizer::setRect(Rect4f rect, IUIElementListener* listener)
 		setRectBox(rect, listener);
 	} else if (type == UISizerType::Free) {
 		setRectFree(rect, listener);
-	} else {
+	} else if (type == UISizerType::Grid) {
 		setRectGrid(rect, listener);
 	}
 }
@@ -523,9 +526,8 @@ void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
 void UISizer::computeGridSizes(Vector<float>& colSize, Vector<float>& rowSize) const
 {
 	Expects(gridProportions);
-	auto& nColumns = gridProportions->nColumns;
+	auto& nColumns = std::max(gridProportions->nColumns, 1);
 
-	Expects(nColumns > 0);
 	int nRows = std::max(1, int((entries.size() + nColumns - 1) / nColumns));
 
 	colSize.resize(nColumns, 0.0f);
@@ -601,11 +603,10 @@ Vector2f UISizer::computeMinimumSizeGrid() const
 void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 {
 	Expects(gridProportions);
-	auto& nColumns = gridProportions->nColumns;
+	auto& nColumns = std::max(gridProportions->nColumns, 1);
 	auto& columnProportions = gridProportions->columnProportions;
 	auto& rowProportions = gridProportions->rowProportions;
 
-	Expects(nColumns > 0);
 	int nRows = int((entries.size() + nColumns - 1) / nColumns);
 	
 	Vector2f startPos = rect.getTopLeft();
