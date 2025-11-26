@@ -528,7 +528,7 @@ void Project::onAllAssetsImported()
 	assetsImported = true;
 }
 
-void Project::reloadAssets(const std::set<String>& assets, const Vector<String>& packIds, bool packed)
+void Project::requestReloadAssets(const std::set<String>& assets, const Vector<String>& packIds, bool packed)
 {
 	// Build name list
 	Vector<String> assetIds;
@@ -537,8 +537,21 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 		assetIds.push_back(a);
 	}
 
+	pendingAssetReloads += PendingAssetReload{ std::move(assetIds), packIds, packed };
+}
+
+void Project::processReloadAssets()
+{
+	for (const auto& reload: pendingAssetReloads) {
+		doReloadAssets(reload);
+	}
+	pendingAssetReloads.clear();
+}	
+
+void Project::doReloadAssets(const PendingAssetReload& reload)
+{
 	// Reload game assets
-	if (packed && gameResources) {
+	if (reload.packed && gameResources) {
 		if (gameResources->getLocator().getLocatorCount() == 0) {
 			try {
 				if (allowPackedAssets && getGameInstance()) {
@@ -549,7 +562,7 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 			} catch (...) {}
 		}
 
-		gameResources->reloadAssets(assetIds, packIds);
+		gameResources->reloadAssets(reload.assetIds, reload.packIds);
 	}
 
 	// Erase any callbacks that got deleted (i.e. set to empty), then call remaining ones
@@ -561,18 +574,18 @@ void Project::reloadAssets(const std::set<String>& assets, const Vector<String>&
 	{
 		return !c.second;
 	});
-	if (packed) {
+	if (reload.packed) {
 		for (auto& callback : assetPackedReloadCallbacks) {
 			// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
 			if (callback.second) {
-				callback.second(assetIds, packIds);
+				callback.second(reload.assetIds, reload.packIds);
 			}
 		}
 	} else {
 		for (auto& callback : assetReloadCallbacks) {
 			// Can be set to empty in the middle of this loop, so this check is necessary despite the removal of empty ones above
 			if (callback.second) {
-				callback.second(assetIds);
+				callback.second(reload.assetIds);
 			}
 		}
 	}

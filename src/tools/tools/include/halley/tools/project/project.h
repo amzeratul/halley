@@ -138,7 +138,8 @@ namespace Halley
 		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void onAllAssetsImported();
-		void reloadAssets(const std::set<String>& assets, const Vector<String>& packs, bool packed);
+		void requestReloadAssets(const std::set<String>& assets, const Vector<String>& packs, bool packed);
+		void processReloadAssets();
 		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFilesModified(gsl::span<const Path> paths);
@@ -202,6 +203,13 @@ namespace Halley
 		Path assetPackManifest;
 		size_t callbackIdx = 0;
 
+		struct PendingAssetReload {
+			Vector<String> assetIds;
+			Vector<String> packIds;
+			bool packed;
+		};
+
+		Vector<PendingAssetReload> pendingAssetReloads;
 		Vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
 		Vector<std::pair<size_t, AssetPackedReloadCallback>> assetPackedReloadCallbacks;
 		Vector<IAssetLoadListener*> assetLoadedListeners;
@@ -252,5 +260,6 @@ namespace Halley
 		Path getDLLPath() const;
 		void loadECSData();
 		void loadGameEditorData() const;
+		void doReloadAssets(const PendingAssetReload& reload);
 	};
 }

@@ -326,6 +326,10 @@ void ProjectWindow::update(Time t, bool moved)
 		tasks->update(t);
 	}
 
+	if (!getRoot()->hasModalUI()) {
+		project.processReloadAssets();
+	}
+
 	timeSinceSettingsSaved += t;
 	if (timeSinceSettingsSaved >= 5) {
 		for (auto& s: settings) {
