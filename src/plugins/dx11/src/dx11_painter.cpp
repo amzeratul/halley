@@ -5,12 +5,10 @@
 #include "dx11_shader.h"
 #include "dx11_material_constant_buffer.h"
 #include "dx11_blend.h"
-#include "halley/graphics/material/material_parameter.h"
 #include "dx11_texture.h"
 #include "dx11_rasterizer.h"
 #include "halley/graphics/render_target/render_target.h"
 #include "dx11_render_target.h"
-#include "halley/game/game_platform.h"
 #include "dx11_depth_stencil.h"
 #include "halley/graphics/render_snapshot.h"
 #include "halley/support/logger.h"
@@ -25,6 +23,7 @@ DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
 		vertexBuffers.emplace_back(video, DX11Buffer::Type::Vertex, 8 * 1024 * 1024);
 		indexBuffers.emplace_back(video, DX11Buffer::Type::Index, 128 * 1024);
 	}
+	textureUnitBoundToRenderTarget.resize(8);
 }
 
 void DX11Painter::resetState()
@@ -32,7 +31,13 @@ void DX11Painter::resetState()
 	Painter::resetState();
 	curRaster = nullptr;
 	curDepthStencil = nullptr;
-	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
+	unbindTextureUnitsBoundToRenderTargets(0);
+}
+
+void DX11Painter::doBind(const Camera& camera, RenderTarget& renderTarget)
+{
+	unbindTextureUnitsBoundToRenderTargets(0);
+	Painter::doBind(camera, renderTarget);
 }
 
 void DX11Painter::doStartRender()
@@ -42,7 +47,7 @@ void DX11Painter::doStartRender()
 void DX11Painter::doEndRender()
 {
 	// Unbind recently bound render-target textures
-	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
+	unbindTextureUnitsBoundToRenderTargets(0);
 	dx11Video.getDeviceContext().Flush();
 }
 
@@ -90,7 +95,6 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Texture
 	int textureUnit = 0;
-	const size_t numRenderTargetTextureUnits = renderTargetTextureUnits.size();
 	for (auto& tex: material.getDefinition().getTextures()) {
 		const auto texture = std::static_pointer_cast<const DX11Texture>(material.getTexture(textureUnit));
 		if (!texture) {
@@ -98,13 +102,14 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		}
 
 		texture->bind(dx11Video, textureUnit, tex.getSamplerType());
-		if (texture->getDescriptor().isRenderTarget) {
-			// Remember units for textures which are also render targets
-			renderTargetTextureUnits.push_back(textureUnit);
-		}
+
+		// Remember which units are bound to render targets
+		Expects(textureUnit < textureUnitBoundToRenderTarget.size());
+		textureUnitBoundToRenderTarget[textureUnit] = texture->getDescriptor().isRenderTarget;
+
 		++textureUnit;
 	}
-	unbindRenderTargetTextureUnits(numRenderTargetTextureUnits, textureUnit);
+	unbindTextureUnitsBoundToRenderTargets(textureUnit);
 }
 
 void DX11Painter::setMaterialData(const Material& material)
@@ -261,23 +266,14 @@ void DX11Painter::setDepthStencil(const MaterialDepthStencil& depthStencilDefini
 	}
 }
 
-void DX11Painter::unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTextureUnit)
+void DX11Painter::unbindTextureUnitsBoundToRenderTargets(size_t firstTextureUnit)
 {
-	// Iterate texture units *previously* bound to render target textures. Unbind
-	// only if the texture unit is >= lastIndex.
-	// Effectively, this only calls PSSetShaderResources() if the current material
-	// pass does not use the texture unit anymore.
-	for (size_t idx = 0; idx < lastIndex; ++idx) {
-		int textureUnit = renderTargetTextureUnits[idx];
-		if (textureUnit >= minimumTextureUnit) {
+	for (size_t idx = firstTextureUnit; idx < textureUnitBoundToRenderTarget.size(); idx++) {
+		if (textureUnitBoundToRenderTarget[idx]) {
 			ID3D11ShaderResourceView* null_views[] = { nullptr };
-			dx11Video.getDeviceContext().PSSetShaderResources(textureUnit, 1, null_views);
+			dx11Video.getDeviceContext().PSSetShaderResources(static_cast<UINT>(idx), 1, null_views);
+			textureUnitBoundToRenderTarget[idx] = false;
 		}
-	}
-	// Remove units stored from the previous pass. Keep values of the current pass.
-	if (lastIndex > 0) {
-		const auto iter = renderTargetTextureUnits.begin();
-		renderTargetTextureUnits.erase(iter, iter + lastIndex);
 	}
 }
 

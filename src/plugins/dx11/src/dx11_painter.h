@@ -28,6 +28,7 @@ namespace Halley
 		void setMaterialPass(const Material& material, int pass) override;
 		void setMaterialData(const Material& material) override;
 
+		void doBind(const Camera& camera, RenderTarget& renderTarget) override;
 		void doStartRender() override;
 		void doEndRender() override;
 
@@ -61,7 +62,7 @@ namespace Halley
 
 		size_t curBuffer = 0;
 		std::optional<Rect4i> clipping;
-		Vector<int> renderTargetTextureUnits;
+		Vector<bool> textureUnitBoundToRenderTarget;
 
 		struct PerfQuery {
 			TimestampType type;
@@ -82,6 +83,6 @@ namespace Halley
 		DX11DepthStencil& getDepthStencil(const MaterialDepthStencil& depthStencil);
 		void setDepthStencil(const MaterialDepthStencil& depthStencil);
 
-		void unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTextureUnit);
+		void unbindTextureUnitsBoundToRenderTargets(size_t firstTextureUnit);
 	};
 }

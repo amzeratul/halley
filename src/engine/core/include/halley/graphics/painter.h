@@ -131,6 +131,7 @@ namespace Halley
 		void stopRecording();
 
 	protected:
+		virtual void doBind(const Camera& camera, RenderTarget& renderTarget);
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
 		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly) = 0;
@@ -217,7 +218,6 @@ namespace Halley
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
-		void doBind(const Camera& camera, RenderTarget& renderTarget);
 		void doUnbind();
 		
 		void startRender();
