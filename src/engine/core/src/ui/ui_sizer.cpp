@@ -526,7 +526,7 @@ void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
 void UISizer::computeGridSizes(Vector<float>& colSize, Vector<float>& rowSize) const
 {
 	Expects(gridProportions);
-	auto& nColumns = std::max(gridProportions->nColumns, 1);
+	auto nColumns = std::max(gridProportions->nColumns, 1);
 
 	int nRows = std::max(1, int((entries.size() + nColumns - 1) / nColumns));
 
@@ -603,7 +603,7 @@ Vector2f UISizer::computeMinimumSizeGrid() const
 void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 {
 	Expects(gridProportions);
-	auto& nColumns = std::max(gridProportions->nColumns, 1);
+	auto nColumns = std::max(gridProportions->nColumns, 1);
 	auto& columnProportions = gridProportions->columnProportions;
 	auto& rowProportions = gridProportions->rowProportions;
 
