@@ -353,7 +353,12 @@ Vector2f CurveEditor::curveToMouseSpace(Vector2f curvePos) const
 	const Vector2f curveOrigin = Vector2f(horizontalRange.start, 0);
 	const Vector2f curveScale = Vector2f(1.0f / horizontalRange.getLength(), -1.0f) * drawArea.getSize();
 
-	return (curvePos - curveOrigin) * curveScale + drawArea.getBottomLeft();
+	auto result = (curvePos - curveOrigin) * curveScale + drawArea.getBottomLeft();
+	if (result.isValid()) {
+		return result;
+	} else {
+		return drawArea.getBottomLeft();
+	}
 }
 
 Vector2f CurveEditor::mouseToCurveSpace(Vector2f mousePos) const
@@ -362,7 +367,12 @@ Vector2f CurveEditor::mouseToCurveSpace(Vector2f mousePos) const
 	const Vector2f curveOrigin = Vector2f(horizontalRange.start, 0);
 	const Vector2f curveScale = Vector2f(1.0f / horizontalRange.getLength(), -1.0f) * drawArea.getSize();
 
-	return (mousePos - drawArea.getBottomLeft()) / curveScale + curveOrigin;
+	auto result = (mousePos - drawArea.getBottomLeft()) / curveScale + curveOrigin;
+	if (result.isValid()) {
+		return result;
+	} else {
+		return curveOrigin;
+	}
 }
 
 std::optional<size_t> CurveEditor::getAnchorAt(Vector2f mousePos) const
