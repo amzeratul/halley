@@ -27,11 +27,7 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
-#ifdef DEV_BUILD
-	HALLEY_DEBUG_TRACE_COMMENT(String("~") + (debugId ? debugId : "") + ": " + id);
-#else
-	HALLEY_DEBUG_TRACE_COMMENT(id);
-#endif
+	HALLEY_DEBUG_TRACE_COMMENT(getDebugId());
 
 	canSendEvents = false;
 	if (dataBind) {
@@ -148,6 +144,17 @@ void UIWidget::setDynamicValue(std::string_view key, ConfigNode value)
 int UIWidget::getRootPriority() const
 {
 	return 0;
+}
+
+const String& UIWidget::getDebugId() const
+{
+#ifdef DEV_BUILD
+	thread_local String tmp;
+	tmp = "~UIWidget(): \"" + id + "\"" + (debugId ? String(" (") + debugId + ")" : "");
+	return tmp;
+#else
+	return id;
+#endif
 }
 
 Vector2f UIWidget::getLayoutMinimumSize(bool force) const

@@ -701,6 +701,10 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(Vector2f mousePos, bo
 
 UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, bool ignoreMouseInteraction, int childLayerAdjustment, bool restricted) const
 {
+#if DEV_BUILD
+	HALLEY_DEBUG_TRACE_COMMENT(curWidget->getDebugId());
+#endif
+	
 	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
 	}

@@ -229,6 +229,8 @@ namespace Halley {
 
 		virtual int getRootPriority() const;
 
+		const String& getDebugId() const;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
