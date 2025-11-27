@@ -729,11 +729,11 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 			}
 
 			for (int i = int(cs.size()); --i >= 0;) {
-				auto& c = cs[i];
-
-				const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren, restricted);
-				if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
-					bestResult = result;
+				if (auto& c = cs[i]) {
+					const auto result = getWidgetUnderMouse(c, *childMousePos, includeDisabled, ignoreMouseInteraction, adjustmentForChildren, restricted);
+					if (result.widget && (!bestResult.widget || result.childLayerAdjustment > bestResult.childLayerAdjustment)) {
+						bestResult = result;
+					}
 				}
 			}
 		}
