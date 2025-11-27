@@ -27,9 +27,13 @@ public:
 			const auto myPeerId = maybePeerId.value();
 			const bool isHost = mpSession.isHost();
 
-			// Enable only network components which aren't nested in another
+			// Enable updates for all network components
 			for (const auto& e: networkFamily) {
 				e.network.sendUpdates = true;
+			}
+
+			// Disable updates for nested entities
+			for (const auto& e: networkFamily) {
 				disableSendUpdateForChildren(getWorld().getEntity(e.entityId));
 			}
 
@@ -85,7 +89,8 @@ private:
 	{
 		for (auto c: entity.getChildren()) {
 			if (auto* network = c.tryGetComponent<NetworkComponent>()) {
-				network->sendUpdates = false;
+				// Disable updates by default, but keep them enabled if someone grabbed authority.
+				network->sendUpdates = network->authorityId.has_value();
 			}
 
 			disableSendUpdateForChildren(c);

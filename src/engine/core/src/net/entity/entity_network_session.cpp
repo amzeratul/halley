@@ -913,6 +913,14 @@ bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId
 	return false;
 }
 
+bool EntityNetworkSession::isEntitySerializableAsChild(EntityRef entity) const
+{
+	if (listener) {
+		return listener->isEntitySerializableAsChild(entity, getWorld());
+	}
+	return entity.isSerializable();
+}
+
 void EntitySessionSharedData::serialize(Serializer& s) const
 {
 	s << gameStarted;

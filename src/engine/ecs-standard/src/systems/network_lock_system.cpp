@@ -65,32 +65,31 @@ public:
 		checkStaleLocks({});
 	}
 
-	LockStatus getLockStatus(EntityId targetId) const override
+	[[nodiscard]] LockStatus getLockStatus(EntityId targetId) const override
 	{
 		if (const NetworkFamily* e = getRootEntity(targetId)) {
-			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
+			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
 				return iter->second == getMyPeerId() ? LockStatus::AcquiredByMe : LockStatus::AcquiredByOther;
 			}
 		} else {
-			return LockStatus::Unlocked;
 			//Logger::logError("Trying to get lock status of unknown network entity " + toString(targetId));
+			return LockStatus::Unlocked;
 		}
 		return LockStatus::Unlocked;
 	}
 
-	bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
+	[[nodiscard]] bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const override
 	{
 		if (const NetworkFamily* e = getRootEntity(targetId)) {
-			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& e) { return e.first == targetId; });
+			const auto iter = std_ex::find_if(e->network.locks, [&](const auto& lock) { return lock.first == targetId; });
 			if (iter != e->network.locks.end()) {
 				if (const NetworkFamily* playerEntity = getRootEntity(playerId)) {
 					const auto playerPeer = playerEntity->network.ownerId.value_or(0);
 					return iter->second == playerPeer;
-				} else {
-					Logger::logWarning("Couldn't find locker entity");
-					return false;
 				}
+				Logger::logWarning("Couldn't find locker entity");
+				return false;
 			}
 		} else if (getSessionService().isMultiplayer()) {
 			const auto entity = getWorld().tryGetEntity(targetId);
