@@ -340,6 +340,10 @@ namespace Halley {
 		bool canSendEvents = true;
 		bool dontClipChildren = false;
 		bool propagateMouseToChildren = true;
+
+#ifdef DEV_BUILD
+		const char* debugId = nullptr;
+#endif
 	};
 
 	template <typename F>

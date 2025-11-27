@@ -27,7 +27,12 @@ UIWidget::UIWidget(String id, Vector2f minSize, std::optional<UISizer> sizer, Ve
 
 UIWidget::~UIWidget()
 {
+#ifdef DEV_BUILD
+	HALLEY_DEBUG_TRACE_COMMENT(String("~") + (debugId ? debugId : "") + ": " + id);
+#else
 	HALLEY_DEBUG_TRACE_COMMENT(id);
+#endif
+
 	canSendEvents = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);
@@ -790,8 +795,13 @@ void UIWidget::setParent(UIParent* p)
 void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 {
 	if (this->root != &root) {
-		this->lastInputType = root.getLastInputType();
+		lastInputType = root.getLastInputType();
 		this->root = &root;
+
+#ifdef DEV_BUILD
+		debugId = typeid(*this).name();
+#endif
+
 		onAddedToRoot(root);
 
 		for (auto& b: behaviours) {
