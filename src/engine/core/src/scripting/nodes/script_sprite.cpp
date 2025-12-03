@@ -190,7 +190,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptSpriteGetDirection::getPinConfigu
 	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{
 		PinType{ ET::TargetPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }
+		PinType{ ET::ReadDataPin, PD::Output }
 	};
 	return data;
 }
