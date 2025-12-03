@@ -100,6 +100,7 @@ namespace Halley {
         bool hasComponent(const String& componentName) const;
         size_t getNumComponents() const override;
         const std::pair<String, ConfigNode>& getComponent(size_t idx) const override;
+        const ConfigNode* tryGetComponent(const String& componentName) const;
 
         bool fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const;
 
@@ -120,6 +121,7 @@ namespace Halley {
         void setParentUUID(UUID parentUUID);
 	   	void setChildren(Vector<EntityData> children);
     	void setComponents(Vector<std::pair<String, ConfigNode>> components);
+        void setComponent(const String& componentName, ConfigNode data);
 
     	void applyDelta(const EntityDataDelta& delta);
         static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
@@ -133,6 +135,8 @@ namespace Halley {
     	void instantiate(const UUID& uuid);
 		void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
+	    void instantiatePrefabs(const Resources& resources);
+	    EntityData instantiatePrefabsAsCopy(const Resources& resources) const;
     	
         Type getType() const override;
 

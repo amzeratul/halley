@@ -200,12 +200,7 @@ const IEntityConcreteData& EntityData::getChild(size_t idx) const
 
 bool EntityData::hasComponent(const String& componentName) const
 {
-	for (const auto& c: components) {
-		if (c.first == componentName) {
-			return true;
-		}
-	}
-	return false;
+	return tryGetComponent(componentName) != nullptr;
 }
 
 size_t EntityData::getNumComponents() const
@@ -216,6 +211,16 @@ size_t EntityData::getNumComponents() const
 const std::pair<String, ConfigNode>& EntityData::getComponent(size_t idx) const
 {
 	return components[idx];
+}
+
+const ConfigNode* EntityData::tryGetComponent(const String& componentName) const
+{
+	for (const auto& c: components) {
+		if (c.first == componentName) {
+			return &c.second;
+		}
+	}
+	return nullptr;
 }
 
 bool EntityData::fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const
@@ -369,6 +374,17 @@ void EntityData::setChildren(Vector<EntityData> children)
 void EntityData::setComponents(Vector<std::pair<String, ConfigNode>> components)
 {
 	this->components = std::move(components);
+}
+
+void EntityData::setComponent(const String& componentName, ConfigNode data)
+{
+	for (auto& c: components) {
+		if (c.first == componentName) {
+			c.second = std::move(data);
+			return;
+		}
+	}
+	components += { componentName, std::move(data) };
 }
 
 void EntityData::addComponent(String key, ConfigNode data)
@@ -525,6 +541,40 @@ void EntityData::instantiateWith(const EntityData& instance)
 	enableRules = instance.getEnableRules();
 }
 
+EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
+{
+	EntityData clone = *this;
+	clone.instantiateWith(instance);
+	return clone;
+}
+
+void EntityData::instantiatePrefabs(const Resources& resources)
+{
+	if (!prefab.isEmpty()) {
+		auto newData = resources.get<Prefab>(prefab)->getEntityData();
+		newData.instantiate(instanceUUID);
+
+		for (auto& [compName, compData]: components) {
+			newData.setComponent(compName, std::move(compData));
+		}
+
+		newData.prefab = prefab;
+		newData.name = name;
+		*this = std::move(newData);
+	}
+
+	for (auto& c: children) {
+		c.instantiatePrefabs(resources);
+	}
+}
+
+EntityData EntityData::instantiatePrefabsAsCopy(const Resources& resources) const
+{
+	EntityData clone = *this;
+	clone.instantiatePrefabs(resources);
+	return clone;
+}
+
 void EntityData::generateChildUUID(const UUID& root)
 {
 	instanceUUID = UUID::generateFromUUIDs(prefabUUID, root);
@@ -566,13 +616,6 @@ void EntityData::updateChild(const EntityData& instanceChildData)
 		}
 	}
 	children.emplace_back(instanceChildData);
-}
-
-EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
-{
-	EntityData clone = *this;
-	clone.instantiateWith(instance);
-	return clone;
 }
 
 IEntityData::Type EntityData::getType() const
