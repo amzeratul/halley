@@ -184,6 +184,38 @@ IScriptNodeType::Result ScriptSpriteDirection::doUpdate(ScriptEnvironment& envir
 }
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptSpriteGetDirection::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{
+		PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSpriteGetDirection::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Get direction of ");
+	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSpriteGetDirection::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Direction of " + getConnectedNodeName(node, graph, 2);
+}
+
+ConfigNode ScriptSpriteGetDirection::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	if (auto* spriteAnimation = environment.tryGetComponent<SpriteAnimationComponent>(readEntityId(environment, node, 0))) {
+		return ConfigNode(spriteAnimation->player.getCurrentDirectionName());
+	}
+	return {};
+}
+
 
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration(const BaseGraphNode& node) const
 {
