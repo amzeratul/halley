@@ -534,7 +534,11 @@ void AudioFacade::stepAudio()
 		while (commandQueue.canRead(1)) {
 			commandQueue.read(gsl::span<Vector<std::function<void()>>>(&inbox, 1));
 			for (auto& action: inbox) {
-				action();
+				if (action) {
+					action();
+				} else {
+					Logger::logError("Empty action found in AudioFacade::commandQueue - ignoring it, audio state might be corrupted");
+				}
 			}
 			inbox.clear();
 		}
@@ -552,6 +556,9 @@ void AudioFacade::stepAudio()
 void AudioFacade::enqueue(std::function<void()> action)
 {
 	if (running) {
+		if (!action) {
+			throw Exception("Attempted to enqueue empty action on AudioFacade", HalleyExceptions::AudioEngine);
+		}
 		outbox.push_back(std::move(action));
 	}
 }
