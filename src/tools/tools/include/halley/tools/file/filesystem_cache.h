@@ -58,5 +58,9 @@ namespace Halley {
         DirEntry& getDirectory(const Path& path);
         DirEntry* tryGetDirectory(const Path& path);
         void readDirFromFilesystem(const Path& rootDir);
+
+        static bool isCaseSensitive();
+        static Path getCaseCorrectedPath(Path p);
+        static String getCaseCorrectedPath(String p);
     };
 }

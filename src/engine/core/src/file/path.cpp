@@ -247,6 +247,11 @@ gsl::span<const String> Path::getParts() const
 	return pathParts;
 }
 
+gsl::span<String> Path::getParts()
+{
+	return pathParts;
+}
+
 size_t Path::getNumberPaths() const
 {
 	return pathParts.size();

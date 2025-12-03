@@ -415,9 +415,9 @@ Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAsset
 
 std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& path) const
 {
-	auto parent = path.parentPath();
+	const auto parent = path.parentPath();
 	std::optional<Path> longestPath;
-	for (auto& m: metas) {
+	for (const auto& m: metas) {
 		if (!longestPath || longestPath->getNumberPaths() < m.getNumberPaths()) {
 			const auto n = m.getNumberPaths() - 1;
 			if (m.getParts().subspan(0, n) == parent.getParts().subspan(0, std::min(n, parent.getNumberPaths()))) {

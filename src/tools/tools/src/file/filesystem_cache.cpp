@@ -170,7 +170,8 @@ bool FileSystemCache::exists(const Path& path)
 {
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
-	return dir.files.contains(path.getFilenameStr());
+	const auto& name = path.getFilenameStr();
+	return dir.files.contains(getCaseCorrectedPath(name));
 }
 
 int64_t FileSystemCache::getLastWriteTime(const Path& path)
@@ -178,7 +179,7 @@ int64_t FileSystemCache::getLastWriteTime(const Path& path)
 	auto lock = UniqueLock(fileTreeMutex);
 	const auto& dir = getDirectory(path);
 	const auto key = path.getFilenameStr();
-	const auto iter = dir.files.find(key);
+	const auto iter = dir.files.find(getCaseCorrectedPath(key));
 	if (iter != dir.files.end()) {
 		return iter->second.lastWriteTime;
 	}
@@ -266,27 +267,51 @@ void FileSystemCache::readDirFromFilesystem(const Path& rootDir)
 	}
 }
 
+bool FileSystemCache::isCaseSensitive()
+{
+	constexpr auto platform = getPlatform();
+	return platform != GamePlatform::Windows && platform != GamePlatform::MacOS;
+}
+
+Path FileSystemCache::getCaseCorrectedPath(Path p)
+{
+	if (!isCaseSensitive()) {
+		for (auto& part: p.getParts()) {
+			part.asciiMakeLower();
+		}
+	}
+	return p;
+}
+
+String FileSystemCache::getCaseCorrectedPath(String p)
+{
+	if (!isCaseSensitive()) {
+		p.asciiMakeLower();
+	}
+	return p;
+}
+
 void FileSystemCache::DirEntry::addFile(const Path& fullPath)
 {
 	const auto name = fullPath.getFilenameStr();
-	const auto iter = files.find(name);
+	const auto iter = files.find(getCaseCorrectedPath(name));
 	if (iter != files.end()) {
 		iter->second.lastWriteTime = FileSystem::getLastWriteTime(fullPath);
 	} else {
-		files[name] = FileEntry{ FileSystem::getLastWriteTime(fullPath) };
+		files[getCaseCorrectedPath(name)] = FileEntry{ FileSystem::getLastWriteTime(fullPath) };
 		filenames.push_back(name);
 	}
 }
 
 void FileSystemCache::DirEntry::updateFile(const Path& fullPath)
 {
-	files[fullPath.getFilenameStr()] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
+	files[getCaseCorrectedPath(fullPath.getFilenameStr())] = (FileEntry{ FileSystem::getLastWriteTime(fullPath) });
 }
 
 void FileSystemCache::DirEntry::removeFile(const Path& fullPath)
 {
 	const auto name = fullPath.getFilenameStr();
-	files.erase(name);
+	files.erase(getCaseCorrectedPath(name));
 	std_ex::erase(filenames, name);
 }
 
