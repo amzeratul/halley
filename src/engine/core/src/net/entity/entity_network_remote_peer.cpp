@@ -795,8 +795,15 @@ void EntityNetworkRemotePeer::onFirstDataBatchSent()
 void EntityNetworkRemotePeer::stripNestedNetworkComponents(EntityRef entity, int depth)
 {
 	if (depth > 0) {
-		if (entity.tryGetComponent<NetworkComponent>(true) != nullptr) {
-			entity.removeComponent<NetworkComponent>();
+		if (parentSession->isEntitySerializableAsChild(entity)) {
+			const auto* networkComponent = entity.tryGetComponent<NetworkComponent>(true);
+			if (networkComponent != nullptr) {
+				if (networkComponent->authorityId.has_value()) {
+					Logger::logWarning("Would strip network component of " + entity.getName() + ", but someone got authority");
+				} else {
+					entity.removeComponent<NetworkComponent>();
+				}
+			}
 		}
 	}
 

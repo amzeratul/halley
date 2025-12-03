@@ -34,7 +34,7 @@ public:
 
 			// Disable updates for nested entities
 			for (const auto& e: networkFamily) {
-				disableSendUpdateForChildren(getWorld().getEntity(e.entityId));
+				disableSendUpdateForChildren(getWorld().getEntity(e.entityId), getWorld(), mpSession);
 			}
 
 			entities.clear();
@@ -85,15 +85,20 @@ private:
 	Vector<EntityNetworkUpdateInfo> entities;
 	ListenerSetToken sessionChangeToken;
 
-	static void disableSendUpdateForChildren(const EntityRef& entity)
+	static void disableSendUpdateForChildren(const EntityRef& entity, const World& world, const SessionMultiplayer& session)
 	{
 		for (auto c: entity.getChildren()) {
+			if (!session.isEntitySerializableAsChild(c, world)) {
+				// Don't stop updating, as we don't serialize this with its parent.
+				continue;
+			}
+
 			if (auto* network = c.tryGetComponent<NetworkComponent>()) {
-				// Disable updates by default, but keep them enabled if someone grabbed authority.
+				// Disable updates by default, but keep updating if someone grabbed authority.
 				network->sendUpdates = network->authorityId.has_value();
 			}
 
-			disableSendUpdateForChildren(c);
+			disableSendUpdateForChildren(c, world, session);
 		}
 	}
 
