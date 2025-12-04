@@ -50,6 +50,7 @@ namespace Halley {
 		void setInstanceUUID(const UUID& uuid);
 		void setPrefabUUID(const UUID& uuid);
 		void randomiseInstanceUUIDs();
+		void assignChildUUIDs();
 
 		Vector<std::pair<String, ConfigNode>>& getComponentsChanged() { return componentsChanged; }
 		const Vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }

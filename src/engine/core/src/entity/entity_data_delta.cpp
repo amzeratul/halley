@@ -248,6 +248,8 @@ void EntityDataDelta::deserialize(Deserializer& s)
 			c.makeComponentChangesIntoDeltas();
 		}
 	}
+
+	assignChildUUIDs();
 }
 
 void EntityDataDelta::setInstanceUUID(const UUID& uuid)
@@ -268,6 +270,14 @@ void EntityDataDelta::randomiseInstanceUUIDs()
 	}
 	for (auto& c: childrenChanged) {
 		c.second.randomiseInstanceUUIDs();
+	}
+}
+
+void EntityDataDelta::assignChildUUIDs()
+{
+	for (auto& c: childrenChanged) {
+		c.second.setInstanceUUID(c.first);
+		c.second.assignChildUUIDs();
 	}
 }
 

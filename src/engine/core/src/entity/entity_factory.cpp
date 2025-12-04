@@ -119,13 +119,13 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
-			//auto data = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-			auto data = *prefabData;
-			auto delta = EntityDataDelta(data, entityData, deltaOptions);
+			const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+			auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
+			delta.setInstanceUUID(entityData.getInstanceUUID());
 			delta.setPrefabUUID(entityData.getPrefabUUID());
 
 			if (debugListener) {
-				debugListener->onSerializing(entityData, *prefabData, data, delta);
+				debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
 			}
 
 			return delta;
