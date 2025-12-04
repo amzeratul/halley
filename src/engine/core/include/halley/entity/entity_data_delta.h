@@ -22,7 +22,7 @@ namespace Halley {
             bool deltaComponents = true;
 			bool allowNonSerializable = true;
 			bool omitEmptyComponents = false;
-			bool ignoreNameChangesInInstances = false;
+			bool ignoreNameAndIconChangesInInstances = false;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
         	bool ignoreComponentsRemoved = false;

@@ -135,8 +135,8 @@ namespace Halley {
     	void instantiate(const UUID& uuid);
 		void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
-	    void instantiatePrefabs(const Resources& resources);
-	    EntityData instantiatePrefabsAsCopy(const Resources& resources) const;
+	    void instantiatePrefabs(const UUID& uuid, const Resources& resources);
+	    EntityData instantiatePrefabsAsCopy(const UUID& uuid, const Resources& resources) const;
     	
         Type getType() const override;
 

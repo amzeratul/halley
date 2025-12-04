@@ -31,12 +31,14 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		prefab = to.prefab;
 	}
 	if (from.name != to.name) {
-		if (prefab || to.prefab.isEmpty() || !options.ignoreNameChangesInInstances) {
+		if (prefab || to.prefab.isEmpty() || !options.ignoreNameAndIconChangesInInstances) {
 			name = to.name;
 		}
 	}
 	if (from.icon != to.icon) {
-		icon = to.icon;
+		if (prefab || to.prefab.isEmpty() || !options.ignoreNameAndIconChangesInInstances) {
+			icon = to.icon;
+		}
 	}
 	if (from.variant != to.variant) {
 		variant = to.variant;

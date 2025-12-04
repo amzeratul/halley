@@ -517,7 +517,7 @@ bool EntityData::matchesUUID(const EntityData& other) const
 
 void EntityData::instantiate(const UUID& uuid)
 {
-	instanceUUID = uuid;
+	//instanceUUID = uuid; // This doesn't do anything, it immediately gets overriden by the next method...
 	generateChildUUID(uuid);
 }
 
@@ -548,11 +548,11 @@ EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
 	return clone;
 }
 
-void EntityData::instantiatePrefabs(const Resources& resources)
+void EntityData::instantiatePrefabs(const UUID& uuid, const Resources& resources)
 {
 	if (!prefab.isEmpty()) {
 		auto newData = resources.get<Prefab>(prefab)->getEntityData();
-		newData.instantiate(instanceUUID);
+		newData.instantiate(UUID::xorUUIDs(UUID::xorUUIDs(uuid, instanceUUID), newData.prefabUUID));
 
 		for (auto& [compName, compData]: components) {
 			newData.setComponent(compName, std::move(compData));
@@ -564,14 +564,14 @@ void EntityData::instantiatePrefabs(const Resources& resources)
 	}
 
 	for (auto& c: children) {
-		c.instantiatePrefabs(resources);
+		c.instantiatePrefabs(uuid, resources);
 	}
 }
 
-EntityData EntityData::instantiatePrefabsAsCopy(const Resources& resources) const
+EntityData EntityData::instantiatePrefabsAsCopy(const UUID& uuid, const Resources& resources) const
 {
 	EntityData clone = *this;
-	clone.instantiatePrefabs(resources);
+	clone.instantiatePrefabs(uuid, resources);
 	return clone;
 }
 
