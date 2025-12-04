@@ -585,36 +585,25 @@ void EntityData::instantiatePrefabs(const UUID& rootUUID, const Resources& resou
 void EntityData::doInstantiatePrefabs(const UUID& rootUUID, const Resources& resources, int depth)
 {
 	if (prefab.isEmpty()) {
-		if (depth == 0) {
-			instanceUUID = rootUUID;
-		} else {
-			instanceUUID = rootUUID ^ prefabUUID;
-		}
+		instanceUUID = depth == 0 ? rootUUID : (rootUUID ^ prefabUUID);
 
 		for (auto& c: children) {
 			c.doInstantiatePrefabs(rootUUID, resources, depth + 1);
 		}
 	} else {
 		auto newData = resources.get<Prefab>(prefab)->getEntityData();
-		const auto targetUUID = rootUUID ^ instanceUUID;
-		const auto prefabUUID = newData.prefabUUID;
-		newData.instantiate(targetUUID ^ prefabUUID);
-		/*
-		Logger::logInfo("Instanced " + newData.instanceUUID.toString() + " from:"
-			+ "\n  target = " + targetUUID + "\n  instance = " + instanceUUID 
-			+ "\n  root = " + rootUUID + "\n  prefab = " + prefabUUID + "\n-");
-		*/
 
 		for (auto& [compName, compData]: components) {
 			newData.setComponent(compName, std::move(compData));
 		}
 
+		newData.instanceUUID = rootUUID ^ instanceUUID;
 		newData.prefab = prefab;
 		newData.name = name;
 		*this = std::move(newData);
 
 		for (auto& c: children) {
-			c.doInstantiatePrefabs(targetUUID, resources, depth + 1);
+			c.doInstantiatePrefabs(instanceUUID, resources, depth + 1);
 		}
 	}
 }
