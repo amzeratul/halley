@@ -217,7 +217,7 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 		return EntityRef();
 	}
 
-	const auto combined = UUID::generateFromUUIDs(uuid, getRootUUID());
+	const auto combined = UUID::xorUUIDs(uuid, getRootUUID());
 	for (const auto& e: entities) {
  		if (e.getInstanceUUID() == uuid || (allowPrefabUUID && (e.getPrefabUUID() == uuid || e.getInstanceUUID() == combined))) {
 			return e;

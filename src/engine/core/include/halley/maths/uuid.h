@@ -30,11 +30,13 @@ namespace Halley {
         bool operator!=(const UUID& other) const;
 		bool operator<(const UUID& other) const;
 
+        UUID operator^(const UUID& other) const;
+
 		String toString() const;
         ConfigNode toConfigNode() const;
 
         [[nodiscard]] static UUID generate();
-        [[nodiscard]] static UUID generateFromUUIDs(const UUID& one, const UUID& two);
+        [[nodiscard]] static UUID xorUUIDs(const UUID& one, const UUID& two);
     	[[nodiscard]] bool isValid() const;
 
         gsl::span<const std::byte> getBytes() const;
@@ -49,6 +51,8 @@ namespace Halley {
             std::array<uint64_t, 2> qwords;
             std::array<uint8_t, 16> bytes;
         };
+
+        void setVersionBits();
 	};
 
     template <>

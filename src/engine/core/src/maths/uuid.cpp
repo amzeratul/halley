@@ -98,6 +98,11 @@ bool UUID::operator<(const UUID& other) const
 	return qwords < other.qwords;
 }
 
+UUID UUID::operator^(const UUID& other) const
+{
+	return xorUUIDs(*this, other);
+}
+
 String UUID::toString() const
 {
 	using namespace Encode;
@@ -121,28 +126,18 @@ UUID UUID::generate()
 {
 	UUID result;
 	auto bs = result.getWriteableBytes();
-	auto bytes = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(bs.data()), 16);
 	Random::getGlobal().getBytes(bs);
-	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
-	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	result.setVersionBits();
 	return result;
 }
 
-UUID UUID::generateFromUUIDs(const UUID& one, const UUID& two)
+UUID UUID::xorUUIDs(const UUID& one, const UUID& two)
 {
-	const auto oneBytes = one.getBytes();
-	const auto twoBytes = two.getBytes();
-
-	Expects(oneBytes.size() == twoBytes.size());
-	
 	UUID result;
-	auto bs = result.getWriteableBytes();
-	auto bytes = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(bs.data()), 16);
-	for (auto i = 0; i < oneBytes.size(); i++) {
-		bytes[i] = Byte(oneBytes[i] ^ twoBytes[i]);
+	for (size_t i = 0; i < result.bytes.size(); i++) {
+		result.bytes[i] = static_cast<uint8_t>(one.bytes[i] ^ two.bytes[i]);
 	}
-	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
-	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	result.setVersionBits();
 	return result;
 }
 
@@ -179,6 +174,12 @@ void UUID::serialize(Serializer& s) const
 void UUID::deserialize(Deserializer& s)
 {
 	s >> getWriteableBytes();
+}
+
+void UUID::setVersionBits()
+{
+	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
+	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
 }
 
 ConfigNode ConfigNodeSerializer<UUID>::serialize(UUID id, const EntitySerializationContext& context)

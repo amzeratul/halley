@@ -577,7 +577,7 @@ EntityData EntityData::instantiatePrefabsAsCopy(const Resources& resources) cons
 
 void EntityData::generateChildUUID(const UUID& root)
 {
-	instanceUUID = UUID::generateFromUUIDs(prefabUUID, root);
+	instanceUUID = UUID::xorUUIDs(prefabUUID, root);
 
 	for (auto& c: children) {
 		c.generateChildUUID(root);

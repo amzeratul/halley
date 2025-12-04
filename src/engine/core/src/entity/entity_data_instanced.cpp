@@ -24,7 +24,7 @@ EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const IEn
 EntityDataInstanced::EntityDataInstanced(const EntityData& prefabData, const UUID& rootInstanceUUID)
 	: prefabData(&prefabData)
 {
-	instanceUUID = UUID::generateFromUUIDs(prefabData.getPrefabUUID(), rootInstanceUUID);
+	instanceUUID = UUID::xorUUIDs(prefabData.getPrefabUUID(), rootInstanceUUID);
 
 	children.reserve(prefabData.getNumChildren());
 	for (const auto& child: prefabData.getChildren()) {
