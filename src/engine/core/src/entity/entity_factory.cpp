@@ -108,19 +108,26 @@ EntityData EntityFactory::doSerializeEntity(EntityRef entity, const Serializatio
 	return result;
 }
 
-EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent)
+EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent, IEntityFactorySerializationDebugListener* debugListener)
 {
 	auto entityData = serializeEntity(entity, options, canStoreParent);
-	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions);
+	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions, debugListener);
 }
 
-EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions)
+EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener)
 {
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
-			auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
+			//auto data = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+			auto data = *prefabData;
+			auto delta = EntityDataDelta(data, entityData, deltaOptions);
 			delta.setPrefabUUID(entityData.getPrefabUUID());
+
+			if (debugListener) {
+				debugListener->onSerializing(entityData, *prefabData, data, delta);
+			}
+
 			return delta;
 		}
 	}

@@ -170,6 +170,35 @@ String EntityData::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(true), options);
 }
 
+namespace {
+	void stripToBareStructure(ConfigNode& node)
+	{
+		if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap || node.getType() == ConfigNodeType::MapRef) {
+			std_ex::erase_if_key(node.asMap(), [] (const String& key)
+			{
+				return key == "components" || key == "name" || key == "icon" || key == "variant" || key == "flags" || key == "parent";
+			});
+			for (auto& [k, v]: node.asMap()) {
+				stripToBareStructure(v);
+			}
+		}
+		if (node.getType() == ConfigNodeType::Sequence || node.getType() == ConfigNodeType::DeltaSequence) {
+			for (auto& v: node.asSequence()) {
+				stripToBareStructure(v);
+			}
+		}
+	}
+}
+
+String EntityData::toBareStuctureYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "prefab", "uuid", "prefabUUID", "children" }};
+	auto result = toConfigNode(true);
+	stripToBareStructure(result);
+	return YAMLConvert::generateYAML(result, options);
+}
+
 void EntityData::serialize(Serializer& s) const
 {
 	s << EntityDataDelta(*this);
@@ -548,11 +577,33 @@ EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
 	return clone;
 }
 
-void EntityData::instantiatePrefabs(const UUID& uuid, const Resources& resources)
+void EntityData::instantiatePrefabs(const UUID& rootUUID, const Resources& resources)
 {
-	if (!prefab.isEmpty()) {
+	doInstantiatePrefabs(rootUUID, resources, 0);
+}
+
+void EntityData::doInstantiatePrefabs(const UUID& rootUUID, const Resources& resources, int depth)
+{
+	if (prefab.isEmpty()) {
+		if (depth == 0) {
+			instanceUUID = rootUUID;
+		} else {
+			instanceUUID = rootUUID ^ prefabUUID;
+		}
+
+		for (auto& c: children) {
+			c.doInstantiatePrefabs(rootUUID, resources, depth + 1);
+		}
+	} else {
 		auto newData = resources.get<Prefab>(prefab)->getEntityData();
-		newData.instantiate(UUID::xorUUIDs(UUID::xorUUIDs(uuid, instanceUUID), newData.prefabUUID));
+		const auto targetUUID = rootUUID ^ instanceUUID;
+		const auto prefabUUID = newData.prefabUUID;
+		newData.instantiate(targetUUID ^ prefabUUID);
+		/*
+		Logger::logInfo("Instanced " + newData.instanceUUID.toString() + " from:"
+			+ "\n  target = " + targetUUID + "\n  instance = " + instanceUUID 
+			+ "\n  root = " + rootUUID + "\n  prefab = " + prefabUUID + "\n-");
+		*/
 
 		for (auto& [compName, compData]: components) {
 			newData.setComponent(compName, std::move(compData));
@@ -561,10 +612,10 @@ void EntityData::instantiatePrefabs(const UUID& uuid, const Resources& resources
 		newData.prefab = prefab;
 		newData.name = name;
 		*this = std::move(newData);
-	}
 
-	for (auto& c: children) {
-		c.instantiatePrefabs(uuid, resources);
+		for (auto& c: children) {
+			c.doInstantiatePrefabs(targetUUID, resources, depth + 1);
+		}
 	}
 }
 

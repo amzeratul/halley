@@ -75,6 +75,7 @@ namespace Halley {
 
     	ConfigNode toConfigNode(bool allowPrefabUUID) const;
         String toYAML() const;
+        String toBareStuctureYAML() const;
 
     	void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
@@ -135,7 +136,7 @@ namespace Halley {
     	void instantiate(const UUID& uuid);
 		void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
-	    void instantiatePrefabs(const UUID& uuid, const Resources& resources);
+	    void instantiatePrefabs(const UUID& rootUUID, const Resources& resources);
 	    EntityData instantiatePrefabsAsCopy(const UUID& uuid, const Resources& resources) const;
     	
         Type getType() const override;
@@ -177,5 +178,6 @@ namespace Halley {
     	void parseUUID(UUID& dst, const ConfigNode& node);
     	void generateChildUUID(const UUID& root);
     	void instantiateData(const EntityData& instance);
+	    void doInstantiatePrefabs(const UUID& rootUUID, const Resources& resources, int depth);
 	};
 }

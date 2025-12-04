@@ -32,6 +32,12 @@ namespace Halley {
 			}};
 		}
 	};
+
+	class IEntityFactorySerializationDebugListener {
+	public:
+		virtual ~IEntityFactorySerializationDebugListener() = default;
+		virtual void onSerializing(const EntityData& entityData, const EntityData& prefabData, const EntityData& instantiatedPrefabData, const EntityDataDelta& delta) = 0;
+	};
 	
 	class EntityFactory {
 	public:
@@ -79,8 +85,8 @@ namespace Halley {
 		static std::tuple<std::optional<EntityData>, std::shared_ptr<const Prefab>, UUID> prefabDeltaToEntityData(const EntityDataDelta& delta, UUID entityUUID, Resources& resources, const DebugInfo& debugInfo = {});
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
-		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true);
-		EntityDataDelta entityDataToPrefabDelta(EntityData data, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions);
+		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true, IEntityFactorySerializationDebugListener* debugListener = nullptr);
+		EntityDataDelta entityDataToPrefabDelta(EntityData data, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions, IEntityFactorySerializationDebugListener* debugListener = nullptr);
 		
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
