@@ -2,147 +2,167 @@
 
 #include <gsl/span>
 #include <atomic>
+#include <new>
 
 namespace Halley {
 	// This is a lock-free, wait-free ring buffer
 	// It is only thread safe for one producer and one consumer at any given time
-	// Loosely based on implementation from Game Audio Programming 2
+
+    // Inspired by "Single Producer Single Consumer Lock-free FIFO From the Ground Up - Charles Frasch - CppCon 2023"
+    // https://www.youtube.com/watch?v=K3P_Lmq6pw0
 	
     template <typename T>
     class RingBuffer {
     public:
     	explicit RingBuffer(size_t capacity)
-	        : numEntries(0)
     	{
             entries.resize(capacity);
     	}
 
         // Copy is not thread-safe
         RingBuffer(const RingBuffer& other)
-	        : readPos(other.readPos)
-			, writePos(other.writePos)
-			, numEntries(other.numEntries.load())
-			, entries(other.entries)
+	        : entries(other.entries)
+			, readPos(other.readPos.load())
+			, writePos(other.writePos.load())
         {}
 
         RingBuffer& operator=(const RingBuffer& other)
     	{
-            readPos = other.readPos;
-            writePos = other.writePos;
-            numEntries = other.numEntries.load();
+            readPos = other.readPos.load();
+            writePos = other.writePos.load();
             entries = other.entries;
             return *this;
     	}
 
-    	size_t availableToRead() const
+        [[nodiscard]] constexpr size_t capacity() const
     	{
-            return numEntries.load();
+            return entries.size();
     	}
 
-        size_t availableToWrite() const
+    	[[nodiscard]] size_t availableToRead() const
+    	{
+            return writePos.load(std::memory_order_acquire) - readPos.load(std::memory_order_relaxed);
+    	}
+
+        [[nodiscard]] size_t availableToWrite() const
         {
-            return entries.size() - numEntries.load();
+            return capacity() - (writePos.load(std::memory_order_relaxed) - readPos.load(std::memory_order_acquire));
         }
 
-    	bool canWrite(size_t n) const
+    	[[nodiscard]] bool canWrite(size_t n) const
     	{
-            return numEntries.load() + n <= entries.size();
+            return availableToWrite() >= n;
     	}
 
-    	bool canRead(size_t n) const
+    	[[nodiscard]] bool canRead(size_t n) const
     	{
-            return numEntries.load() >= n;
+            return availableToRead() >= n;
     	}
 
-    	bool empty() const
+    	[[nodiscard]] bool empty() const
     	{
-            return numEntries.load() == 0;
+            return availableToRead() == 0;
     	}
     	
         void writeOne(T e)
         {
-            Expects(canWrite(1));
-            entries[writePos] = std::move(e);
-            writePos = (writePos + 1) % entries.size();
-            ++numEntries;
+            assert(canWrite(1));
+
+            const auto pos = writePos.load(std::memory_order_relaxed);
+            entries[pos % capacity()] = std::move(e);
+            writePos.store(pos + 1, std::memory_order_release);
         }
-
-        void write(gsl::span<T> es)
-        {
-            const size_t numToWrite = size_t(es.size());
-            Expects(canWrite(numToWrite));
-            const size_t spaceToEnd = entries.size() - writePos;
-            const size_t nToWrite1 = std::min(spaceToEnd, numToWrite);
-
-            for (size_t i = 0; i < nToWrite1; ++i) {
-                entries[writePos + i] = std::move(es[i]);
-            }
-
-            const size_t nToWrite2 = numToWrite - nToWrite1;
-            for (size_t i = 0; i < nToWrite2; ++i) {
-                entries[i] = std::move(es[i + nToWrite1]);
-            }
-
-            writePos = (writePos + numToWrite) % entries.size();
-            numEntries.fetch_add(numToWrite);
-        }
-
-    	void write(gsl::span<const T> es)
-    	{
-            const size_t numToWrite = size_t(es.size());
-            Expects(canWrite(numToWrite));
-            const size_t spaceToEnd = entries.size() - writePos;
-            const size_t nToWrite1 = std::min(spaceToEnd, numToWrite);
-
-    		for (size_t i = 0; i < nToWrite1; ++i) {
-                entries[writePos + i] = es[i];
-    		}
-
-            const size_t nToWrite2 = numToWrite - nToWrite1;
-    		for (size_t i = 0; i < nToWrite2; ++i) {
-                entries[i] = es[i + nToWrite1];
-    		}
-
-            writePos = (writePos + numToWrite) % entries.size();
-            numEntries.fetch_add(numToWrite);
-    	}
 
     	T readOne()
     	{
-            Expects(canRead(1));
-            T v = std::move(entries[readPos]);
-    		entries[readPos] = T();
-            readPos = (readPos + 1) % entries.size();
-            --numEntries;
+            assert(canRead(1));
+
+            const auto pos = readPos.load(std::memory_order_relaxed);
+            T v = std::move(entries[pos % capacity()]);
+            readPos.store(pos + 1, std::memory_order_release);
+
             return v;
+    	}
+
+    	void write(gsl::span<const T> es)
+    	{
+            const size_t numToWrite = es.size();
+            assert(canWrite(numToWrite));
+
+            const auto startPos = writePos.load(std::memory_order_relaxed);
+            const auto endPos = startPos + numToWrite;
+
+            const auto sz = capacity();
+            const auto p0 = startPos % sz; // Actual first index
+            const auto b0sz = std::min(sz - p0, numToWrite); // Number of indices in the first batch
+            const auto b1sz = numToWrite - b0sz; // Number of indices in the second batch
+
+            copyData(entries.span().subspan(p0, b0sz), es.subspan(0, b0sz));
+            copyData(entries.span().subspan(0, b1sz), es.subspan(b0sz, b1sz));
+
+            writePos.store(endPos, std::memory_order_release);
+    	}
+
+    	void write(gsl::span<T> es)
+    	{
+            const size_t numToWrite = es.size();
+            assert(canWrite(numToWrite));
+
+            const auto startPos = writePos.load(std::memory_order_relaxed);
+            const auto endPos = startPos + numToWrite;
+
+            const auto sz = capacity();
+            const auto p0 = startPos % sz; // Actual first index
+            const auto b0sz = std::min(sz - p0, numToWrite); // Number of indices in the first batch
+            const auto b1sz = numToWrite - b0sz; // Number of indices in the second batch
+
+            moveData(entries.span().subspan(p0, b0sz), es.subspan(0, b0sz));
+            moveData(entries.span().subspan(0, b1sz), es.subspan(b0sz, b1sz));
+
+            writePos.store(endPos, std::memory_order_release);
     	}
 
     	void read(gsl::span<T> es)
     	{
-            const size_t numToRead = size_t(es.size());
-            Expects(canRead(numToRead));
-            const size_t spaceToEnd = entries.size() - readPos;
-            const size_t nToRead1 = std::min(spaceToEnd, numToRead);
+            const size_t numToRead = es.size();
+            assert(canRead(numToRead));
 
-            for (size_t i = 0; i < nToRead1; ++i) {
-                es[i] = std::move(entries[readPos + i]);
-            	entries[readPos + i] = T();
-            }
+            const auto startPos = readPos.load(std::memory_order_relaxed);
+            const auto endPos = startPos + numToRead;
 
-            const size_t nToRead2 = numToRead - nToRead1;
-            for (size_t i = 0; i < nToRead2; ++i) {
-                es[i + nToRead1] = std::move(entries[i]);
-            	entries[i] = T();
-            }
+            const auto sz = capacity();
+            const auto p0 = startPos % sz; // Actual first index
+            const auto b0sz = std::min(sz - p0, numToRead); // Number of indices in the first batch
+            const auto b1sz = numToRead - b0sz; // Number of indices in the second batch
 
-            readPos = (readPos + numToRead) % entries.size();
-            numEntries.fetch_sub(numToRead);
+            moveData(es.subspan(0, b0sz), entries.span().subspan(p0, b0sz));
+            moveData(es.subspan(b0sz, b1sz), entries.span().subspan(0, b1sz));
+
+            readPos.store(endPos, std::memory_order_release);
     	}
 
     private:
-        size_t readPos = 0;
-        size_t writePos = 0;
-        std::atomic<size_t> numEntries;
+        // Explanation on memory alignment stuff
+        // Multiple cores trying to access the same cache line will result in large performance penalty due to false sharing
+        // To avoid that issue, aligning as the interference size guarantees that each of those lives on their own cache line
+
         Vector<T> entries;
+        alignas(std::hardware_destructive_interference_size) std::atomic<size_t> readPos;
+        alignas(std::hardware_destructive_interference_size) std::atomic<size_t> writePos;
+
+        // Any sane version of C++ will ensure that; but we'll assert since the performance penalty for this being false would be enormous
+        static_assert(std::atomic<size_t>::is_always_lock_free);
+
+        constexpr void moveData(gsl::span<T> dst, gsl::span<T> src)
+        {
+            assert(dst.size() == src.size());
+            std::move(src.data(), src.data() + src.size(), dst.data()); // Don't use gsl::span iterator as that's bounds checked and disables memcpy
+        }
+
+        constexpr void copyData(gsl::span<T> dst, gsl::span<const T> src)
+        {
+            assert(dst.size() == src.size());
+            std::copy(src.data(), src.data() + src.size(), dst.data()); // Don't use gsl::span iterator as that's bounds checked and disables memcpy
+        }
     };
 }
