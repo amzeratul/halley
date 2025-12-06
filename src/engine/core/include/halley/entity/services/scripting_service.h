@@ -22,11 +22,13 @@ namespace Halley {
 		template <typename T>
 		void setLuaGlobal(const String& key, const T& value)
 		{
-			auto stack = LuaStackOps(*luaState);
-			stack.push(value);
-			stack.makeGlobal(key);
-
-			globals[key] = ConfigNode(value);
+			// If the value already exists in cache, only store it if it's different. This is due to performance reasons.
+			// This assumes this isn't modified in Lua itself; if it is, we'll have other issues (globals is used to clone Lua contexts)
+			if (cacheGlobalValue(key, value)) {
+				auto stack = LuaStackOps(*luaState);
+				stack.push(value);
+				stack.makeGlobal(key);
+			}
 		}
 
 		template <typename T, typename R, typename... Ps>
@@ -55,6 +57,29 @@ namespace Halley {
 
 	    mutable HashMap<String, ConfigNode> resultCache;
 		mutable HashMap<String, std::unique_ptr<LuaReference>> luaReferences;
+
+		template <typename T>
+		bool cacheGlobalValue(const String& key, const T& value)
+		{
+			const auto iter = globals.find(key);
+
+			ConfigNode result;
+
+			if constexpr (std::is_same_v<T, ConfigNode>) {
+				// This path avoids a copy if already in cache, which can be common and expensive
+				if (iter != globals.end() && iter->second == value) {
+					return false;
+				}
+				result = ConfigNode(value);
+			} else {
+				result = ConfigNode(value);
+				if (iter != globals.end() && iter->second == result) {
+					return false;
+				}
+			}
+			globals[key] = std::move(result);
+			return true;
+		}
 	};
 }
 
