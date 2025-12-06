@@ -10,7 +10,7 @@ namespace Halley {
 
     // Inspired by "Single Producer Single Consumer Lock-free FIFO From the Ground Up - Charles Frasch - CppCon 2023"
     // https://www.youtube.com/watch?v=K3P_Lmq6pw0
-	
+
     template <typename T>
     class RingBuffer {
     public:
@@ -146,9 +146,15 @@ namespace Halley {
         // Multiple cores trying to access the same cache line will result in large performance penalty due to false sharing
         // To avoid that issue, aligning as the interference size guarantees that each of those lives on their own cache line
 
+	#ifdef __cpp_lib_hardware_interference_size
+	    constexpr static size_t hardware_destructive_interference_size = std::hardware_destructive_interference_size;
+	#else
+	    constexpr static size_t hardware_destructive_interference_size = 64;
+	#endif
+
         Vector<T> entries;
-        alignas(std::hardware_destructive_interference_size) std::atomic<size_t> readPos;
-        alignas(std::hardware_destructive_interference_size) std::atomic<size_t> writePos;
+        alignas(hardware_destructive_interference_size) std::atomic<size_t> readPos;
+        alignas(hardware_destructive_interference_size) std::atomic<size_t> writePos;
 
         // Any sane version of C++ will ensure that; but we'll assert since the performance penalty for this being false would be enormous
         static_assert(std::atomic<size_t>::is_always_lock_free);
