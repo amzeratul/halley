@@ -126,6 +126,7 @@ namespace {
 
 		T a;
 
+		// Fill to SBO capacity
 		for (size_t i = 0; i < maxSBO; ++i) {
 			const auto val = i + 100;
 			if constexpr (std::is_same_v<typename T::value_type, Halley::String>) {
@@ -133,16 +134,21 @@ namespace {
 			} else {
 				a.push_back(T::value_type(val));
 			}
+			EXPECT_TRUE(a.sbo_active());
 		}
-		EXPECT_TRUE(a.sbo_active());
 
+		// Copy vector
 		T b = a;
 		EXPECT_TRUE(b.sbo_active());
+
+		// Should no longer fit
 		b.push_back({});
 		EXPECT_FALSE(b.sbo_active());
+
+		// Shrinking back shouldn't re-activate SBO
 		b.pop_back();
 		b.shrink_to_fit();
-		EXPECT_TRUE(b.sbo_active());
+		EXPECT_FALSE(b.sbo_active());
 	}
 }
 
@@ -188,10 +194,22 @@ TEST(VectorSize32, Assignment)
 	testAssignment<VectorSize32<int>>();
 }
 
-TEST(VectorSize32, SBO)
+TEST(VectorSize32, SBOChar)
 {
 	testSBO<VectorSize32<char>>(15);
+}
+
+TEST(VectorSize32, SBOInt)
+{
 	testSBO<VectorSize32<int>>(3);
+}
+
+TEST(VectorSize32, SBOSizeT)
+{
 	testSBO<VectorSize32<size_t>>(1);
+}
+
+TEST(VectorSize32, SBOString)
+{
 	testSBO<VectorSize32<String>>(0);
 }

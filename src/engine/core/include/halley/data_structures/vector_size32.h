@@ -137,7 +137,7 @@ namespace Halley {
 		VectorStd(const VectorStd& other)
 		{
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				if (sbo_active() && other.sbo_active()) {
+				if (other.sbo_active() && (sbo_active() || empty())) {
 					memcpy(this, &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
@@ -200,7 +200,7 @@ namespace Halley {
 			}
 
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				if (sbo_active() && other.sbo_active()) {
+				if (other.sbo_active() && (sbo_active() || empty())) {
 					memcpy(this, &other, sizeof(*this));
 				} else {
 					resize_no_init(other.size());
@@ -828,7 +828,8 @@ namespace Halley {
 			assert(newCapacity >= size);
 			if (newCapacity != capacity) {
 				// Allocate new memory
-				const bool canUseSBO = sbo_enabled() && (newCapacity == 0 || (newCapacity < sbo_max_objects() && sbo_active())); // Last check is to prevent going from allocated back to SBO
+				const bool canUseSBO = sbo_enabled() && newCapacity <= sbo_max_objects() && (sbo_active() || capacity == 0); // Last check is to prevent going from allocated back to SBO
+				//const bool canUseSBO = sbo_enabled() && (newCapacity == 0 || (newCapacity < sbo_max_objects() && sbo_active())); // Last check is to prevent going from allocated back to SBO
 				pointer newData = canUseSBO ? sbo_data() : (newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr);
 				construct(newData);
 
