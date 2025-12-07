@@ -15,7 +15,6 @@ ExecutionQueue::ExecutionQueue()
 	: attachedCount(0)
 	, aborted(false)
 {
-	hasTasks.store(false);
 }
 
 ExecutionQueue::Entry ExecutionQueue::getNext()
@@ -40,12 +39,11 @@ Vector<ExecutionQueue::Entry> ExecutionQueue::getUpTo(size_t n)
 {
 	UniqueLock lock(mutex);
 	if (queue.size() <= n) {
-		hasTasks.store(false);
-		Vector<ExecutionQueue::Entry> tasks(queue.begin(), queue.end());
+		Vector<Entry> tasks(queue.begin(), queue.end());
 		queue.clear();
 		return tasks;
 	} else {
-		Vector<ExecutionQueue::Entry> tasks(queue.begin(), queue.begin() + n);
+		Vector<Entry> tasks(queue.begin(), queue.begin() + n);
 		queue.erase(queue.begin(), queue.begin() + n);
 		return tasks;
 	}
@@ -54,7 +52,6 @@ Vector<ExecutionQueue::Entry> ExecutionQueue::getUpTo(size_t n)
 Vector<ExecutionQueue::Entry> ExecutionQueue::getAll()
 {
 	UniqueLock lock(mutex);
-	hasTasks.store(false);
 	Vector<Entry> tasks(queue.begin(), queue.end());
 	queue.clear();
 	return tasks;
@@ -65,9 +62,11 @@ void ExecutionQueue::addToQueue(TaskBase task, std::string_view name)
 	if (immediate) {
 		task();
 	} else {
-		UniqueLock lock(mutex);
-		queue.emplace_back(task, name);
-		hasTasks.store(true);
+		{
+			UniqueLock lock(mutex);
+			queue.emplace_back(task, name);
+			// NB: Unlocking before notifying
+		}
 
 		condition.notifyOne();
 	}

@@ -47,7 +47,6 @@ namespace Halley
 		ConditionVariable condition;
 
 		std::atomic<int> attachedCount;
-		std::atomic<bool> hasTasks;
 		std::atomic<bool> aborted;
 
 		bool immediate = false;
