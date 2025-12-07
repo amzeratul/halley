@@ -92,6 +92,7 @@ namespace Halley
 		ResourceEnumeratorFunc resourceEnumerator;
 
 		mutable SharedRecursiveMutex mutex;
+		mutable SharedRecursiveMutex loadingMutex;
 		mutable ConditionVariableAny resourceLoaded;
 		HashSet<String> resourcesLoading;
 	};

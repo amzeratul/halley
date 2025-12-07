@@ -292,23 +292,51 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 
 	for (int i = 0; true; ++i) {
 		{
-			// Look in cache and return if it's there
+			// First of all, look in cache and return if it's there
+			// This is the most common case, and we use a shared lock to avoid stopping other threads
 			SharedLock lock(mutex);
-			const auto res = resources.find(assetId);
-			if (res != resources.end()) {
+			if (const auto res = resources.find(assetId); res != resources.end()) {
 				// Found resource, all good
 				return res->second.res;
 			}
 		}
 
 		{
-			// Resource not found; claim loading it
-			UniqueLock lock(mutex);
+			// Resource is not cached
+			// Another thread might already be loading it - check for that, and wait if so
+			SharedLock lock(loadingMutex);
 			if (resourcesLoading.contains(assetId)) {
-				// Someone else already loading it, wait until signaled then do the whole thing again
-				resourceLoaded.waitFor(lock, 20us);
+				do {
+					resourceLoaded.waitFor(lock, 100us);
+				} while (resourcesLoading.contains(assetId));
+				lock.unlock();
+
+				// Should be loaded, try again
+				SharedLock lock2(mutex);
+				if (const auto res = resources.find(assetId); res != resources.end()) {
+					// Found resource
+					return res->second.res;
+				} else {
+					// This means the previous one failed, we're giving up
+					Logger::logError("Resource not found after waiting for it to be loaded elsewhere: \"" + toString(type) + ":" + assetId + "\"");
+					return {};
+				}
+			}
+		}
+
+		// If we got here, nobody is trying to load this resource (yet)
+		// We'll try to claim ownership of loading this resource
+
+		{
+			// Resource not found; claim loading it
+			UniqueLock lock(loadingMutex);
+			if (resourcesLoading.contains(assetId)) {
+				// Someone else already loading it, between our last lock and now.
+				// Wait until signaled then do the whole thing again
+				resourceLoaded.waitFor(lock, 100us);
 				continue;
 			}
+			// Claim loading, we're now responsible for this resource being loaded
 			resourcesLoading.insert(assetId);
 		}
 
@@ -318,25 +346,32 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		try {
 			std::tie(newRes, loaded) = loadAsset(assetId, priority, allowFallback);
 		} catch (...) {
-			UniqueLock lock(mutex);
+			UniqueLock lock(loadingMutex);
 			resourcesLoading.erase(assetId);
 			resourceLoaded.notifyAll();
 			throw;
 		}
 
-		// Store in cache
-		{
-			UniqueLock lock(mutex);
-			resourcesLoading.erase(assetId);
-			if (loaded) {
-				resources.emplace(assetId, Wrapper(newRes, 0));
-				resourceLoaded.notifyAll();
-			}
-		}
-
+		// Post-process
 		if (loaded) {
 			newRes->onLoaded(parent);
 		}
+
+		// Store in cache
+		if (loaded) {
+			UniqueLock lock2(mutex);
+			resources.emplace(assetId, Wrapper(newRes, 0));
+		}
+
+		// Notify done loading
+		{
+			UniqueLock lock(loadingMutex);
+			resourcesLoading.erase(assetId);
+		}
+		if (loaded) {
+			resourceLoaded.notifyAll();
+		}
+
 		return newRes;
 	}
 }
@@ -344,10 +379,12 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 bool ResourceCollectionBase::exists(std::string_view assetId) const
 {
 	// Look in cache
+	SharedLock lock(mutex);
 	const auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		return true;
 	}
+	lock.unlock();
 
 	return parent.locator->exists(assetId, type);
 }
