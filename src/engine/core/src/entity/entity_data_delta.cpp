@@ -281,6 +281,26 @@ void EntityDataDelta::assignChildUUIDs()
 	}
 }
 
+ConfigNode* EntityDataDelta::tryGetComponentChanged(const String& compName)
+{
+	for (auto& [k, v]: componentsChanged) {
+		if (k == compName) {
+			return &v;
+		}
+	}
+	return nullptr;
+}
+
+const ConfigNode* EntityDataDelta::tryGetComponentChanged(const String& compName) const
+{
+	for (auto& [k, v]: componentsChanged) {
+		if (k == compName) {
+			return &v;
+		}
+	}
+	return nullptr;
+}
+
 bool EntityDataDelta::isSimpleDelta() const
 {
 	if (!childrenAdded.empty() || !childrenRemoved.empty() || prefab) {
