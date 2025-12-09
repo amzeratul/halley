@@ -260,7 +260,7 @@ String ScriptFunctionReturn::getPinDescription(const BaseGraphNode& node, PinTyp
 	}
 
 	if (key) {
-		auto name = node.getSettings()[key].asSequence().at(idx).asString();
+		auto name = node.getSettings()[key].asSequence().at(idx).asString("");
 		if (!name.isEmpty()) {
 			return name;
 		}
