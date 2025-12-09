@@ -21,6 +21,8 @@ namespace Halley {
 			ShiftSelect,
 			AddToSelect
 		};
+
+		using CursorMoveCallback = std::function<Vector2i(Vector2i, Vector2i)>;
 		
 		explicit UIList(String id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
@@ -116,6 +118,11 @@ namespace Halley {
 		void setMaxItems(std::optional<int> maxItems);
 		std::optional<int> getMaxItems() const;
 
+		void setGridHorizontalMoveFollowsItems(bool enabled); // When pressing left or right at the edge of the grid, does it move on to next/previous row?
+		bool isGridHorizontalMoveFollowsItems() const;
+
+		void setCursorMoveCallback(CursorMoveCallback callback);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -159,11 +166,14 @@ namespace Halley {
 		bool notifyItemSelectionEnabled = true;
 		bool showSelection = true;
 		bool acceptKeyboardInput = true;
+		bool gridHorizontalMoveFollowsItems = true;
 		int itemUnderCursor = -1;
 
 		bool requiresSelection = true;
 
 		std::optional<int> maxItems;
+
+		CursorMoveCallback cursorMoveCallback;
 
 		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
 		void onItemClickReleased(UIListItem& item, int button, KeyMods keyMods);

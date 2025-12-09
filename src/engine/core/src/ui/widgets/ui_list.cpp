@@ -213,6 +213,21 @@ std::optional<int> UIList::getMaxItems() const
 	return maxItems;
 }
 
+void UIList::setGridHorizontalMoveFollowsItems(bool enabled)
+{
+	gridHorizontalMoveFollowsItems = enabled;
+}
+
+bool UIList::isGridHorizontalMoveFollowsItems() const
+{
+	return gridHorizontalMoveFollowsItems;
+}
+
+void UIList::setCursorMoveCallback(CursorMoveCallback callback)
+{
+	cursorMoveCallback = std::move(callback);
+}
+
 void UIList::setItemText(int optionId, const String& text)
 {
 	if (optionId < 0 || optionId >= static_cast<int>(getNumberOfItems())) {
@@ -969,7 +984,7 @@ void UIList::moveSelection(int dx, int dy)
 	int option = curOption;
 	const auto nItems = int(getNumberOfItems());
 
-	if (orientation == UISizerType::Grid && dx != 0) {
+	if (gridHorizontalMoveFollowsItems && orientation == UISizerType::Grid && dx != 0) {
 		option += dx;
 		dx = 0;
 	}
@@ -991,9 +1006,14 @@ void UIList::moveSelection(int dx, int dy)
 		cursorPos = Vector2i(option % nCols, option / nCols);
 	}
 
-	// Arrows
+	// Move cursor
 	cursorPos.x += dx;
 	cursorPos.y += dy;
+	if (cursorMoveCallback) {
+		cursorPos = cursorMoveCallback(cursorPos, Vector2i(nCols, nRows));
+	}
+
+	// Wrap around
 	cursorPos.y = modulo(cursorPos.y, nRows);
 	int columnsThisRow = (cursorPos.y == nRows - 1) ? nItems % nCols : nCols;
 	if (columnsThisRow == 0) { // If the last column is full, this will happen
