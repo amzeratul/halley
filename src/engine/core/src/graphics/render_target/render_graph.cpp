@@ -194,7 +194,11 @@ void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
 void RenderGraph::applyVariable(Material& material, const String& name, const ConfigNode& value) const
 {
 	if (value.getType() == ConfigNodeType::String) {
-		variables.at(value.asString()).apply(material, name);
+		if (const auto iter = variables.find(value.asString()); iter != variables.end()) {
+			iter->second.apply(material, name);
+		} else {
+			Logger::logWarning("RenderGraph variable not set: \"" + value.asString() + "\"", true);
+		}
 	} else if (value.getType() == ConfigNodeType::Float || value.getType() == ConfigNodeType::Int) {
 		material.set(name, value.asFloat());
 	}
