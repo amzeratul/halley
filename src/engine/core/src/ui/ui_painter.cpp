@@ -83,7 +83,7 @@ int UIPainter::getMask() const
 
 void UIPainter::setAdjustedLayerToNextHighest()
 {
-	layer = highestLayer + 1;
+	layer = std::max(layer, (rootPainter ? rootPainter->highestLayer : highestLayer)) + 1;
 }
 
 float UIPainter::getCurrentPriorityAndIncrement() const
@@ -98,7 +98,7 @@ float UIPainter::getCurrentPriorityAndIncrement() const
 int UIPainter::getCurrentLayerAndReport() const
 {
 	if (rootPainter) {
-		rootPainter->highestLayer = layer;
+		rootPainter->highestLayer = std::max(layer, rootPainter->highestLayer);
 	}
 	return layer;
 }

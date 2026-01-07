@@ -848,7 +848,7 @@ void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::
 
 void UIRoot::draw(SpritePainter& painter, int mask, int layer)
 {
-	UIPainter p(painter, mask, layer);
+	auto p = UIPainter(painter, mask, layer);
 
 	for (auto& c: getChildren()) {
 		c->doDraw(p);
