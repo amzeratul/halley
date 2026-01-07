@@ -68,7 +68,7 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	if (material) {
+	if (material && material->getDefinitionPtr()) {
 		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
 		paintWithClip(painter, extClip, [&] ()
@@ -80,7 +80,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
-	if (material) {
+	if (material && material->getDefinitionPtr()) {
 		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 		
 		paintWithClip(painter, extClip, [&] ()
@@ -198,7 +198,8 @@ bool Sprite::isInView(Rect4f rect) const
 		return false;
 	}
 
-	return getAABB().overlaps(rect);
+	const auto aabb = getAABB();
+	return aabb.overlaps(rect) && std::abs(aabb.getWidth()) > 0 && std::abs(aabb.getHeight()) > 0;
 }
 
 Sprite& Sprite::setRotation(Angle1f v)
