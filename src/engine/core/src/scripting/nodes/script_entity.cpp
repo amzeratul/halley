@@ -515,7 +515,7 @@ ConfigNode ScriptHasTags::doGetData(ScriptEnvironment& environment, const Script
 }
 
 
-ConfigNode ScriptToggleEntityEnabledData::toConfigNode(const EntitySerializationContext& context)
+ConfigNode ScriptSetEntityEnabledData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType result;
 	result["entityId"] = ConfigNodeSerializer<EntityId>().serialize(entityId, context);
@@ -523,7 +523,7 @@ ConfigNode ScriptToggleEntityEnabledData::toConfigNode(const EntitySerialization
 	return result;
 }
 
-String ScriptToggleEntityEnabled::getIconName(const BaseGraphNode& node) const
+String ScriptSetEntityEnabled::getIconName(const BaseGraphNode& node) const
 {
 	if (node.getSettings().getType() == ConfigNodeType::Map && node.getSettings()["enabled"].asBool(true)) {
 		return "script_icons/toggle_enabled_on.png";
@@ -531,7 +531,7 @@ String ScriptToggleEntityEnabled::getIconName(const BaseGraphNode& node) const
 	return "script_icons/toggle_enabled_off.png";
 }
 
-Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes() const
+Vector<IGraphNodeType::SettingType> ScriptSetEntityEnabled::getSettingTypes() const
 {
 	return {
 		SettingType{ "enabled", "bool", Vector<String>{"true"} },
@@ -539,7 +539,7 @@ Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes()
 	};
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfiguration(const BaseGraphNode& node) const
+gsl::span<const IScriptNodeType::PinType> ScriptSetEntityEnabled::getPinConfiguration(const BaseGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
@@ -547,23 +547,26 @@ gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfi
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetEntityEnabled::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Toggle entity enabled to ");
-	str.append(node.getSettings()["enabled"].asString("true"), parameterColour);
+	if (node.getSettings()["enabled"].asBool(true)) {
+		str.append("Enable entity");
+	} else {
+		str.append("Disable entity");
+	}
 	if (node.getSettings()["restore"].asBool(true)) {
-		str.append(" and return to previous after");
+		str.append(" and return to previous state after");
 	}
 	return str.moveResults();
 }
 
-bool ScriptToggleEntityEnabled::hasDestructor(const ScriptGraphNode& node) const
+bool ScriptSetEntityEnabled::hasDestructor(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["restore"].asBool(true);
 }
 
-void ScriptToggleEntityEnabled::doInitData(ScriptToggleEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+void ScriptSetEntityEnabled::doInitData(ScriptSetEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	if (nodeData.getType() != ConfigNodeType::Map) {
 		return;
@@ -573,7 +576,7 @@ void ScriptToggleEntityEnabled::doInitData(ScriptToggleEntityEnabledData& data, 
 	data.previousState = nodeData["previousState"].asBool(false);
 }
 
-IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
+IScriptNodeType::Result ScriptSetEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSetEntityEnabledData& data) const
 {
 	const auto entityId = readEntityId(environment, node, 2);
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
@@ -587,13 +590,47 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 	return Result(ScriptNodeExecutionState::Done);
 }
 
-void ScriptToggleEntityEnabled::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const
+void ScriptSetEntityEnabled::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSetEntityEnabledData& data) const
 {
 	auto entityRef = environment.getWorld().tryGetEntity(data.entityId);
 	if (entityRef.isValid() && node.getSettings()["restore"].asBool(true)) {
 		entityRef.setEnabled(data.previousState);
 	}
 }
+
+
+Vector<IGraphNodeType::SettingType> ScriptToggleEntityEnabled::getSettingTypes() const
+{
+	return { };
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptToggleEntityEnabled::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Toggle entity enabled state");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto entityId = readEntityId(environment, node, 2);
+	auto entityRef = environment.getWorld().tryGetEntity(entityId);
+	if (!entityRef.isValid()) {
+		Logger::logError("Entity with id " + toString(entityId) + " does not exist and can't be toggled!");
+		return Result(ScriptNodeExecutionState::Done);
+	}
+	entityRef.setEnabled(!entityRef.isEnabled());
+	return Result(ScriptNodeExecutionState::Done);
+}
+
 
 
 Vector<IGraphNodeType::SettingType> ScriptHasComponent::getSettingTypes() const

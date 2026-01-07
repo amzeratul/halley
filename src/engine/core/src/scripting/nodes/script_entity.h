@@ -135,17 +135,17 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
 
-	class ScriptToggleEntityEnabledData final : public ScriptStateData<ScriptToggleEntityEnabledData> {
+	class ScriptSetEntityEnabledData final : public ScriptStateData<ScriptSetEntityEnabledData> {
 	public:
 		EntityId entityId;
 		bool previousState = false;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
 
-	class ScriptToggleEntityEnabled final : public ScriptNodeTypeBase<ScriptToggleEntityEnabledData> {
+	class ScriptSetEntityEnabled final : public ScriptNodeTypeBase<ScriptSetEntityEnabledData> {
 	public:
-		String getId() const override { return "toggleEntityEnabled"; }
-		String getName() const override { return "Toggle Enabled"; }
+		String getId() const override { return "setEntityEnabled"; }
+		String getName() const override { return "Set Enabled"; }
 		String getIconName(const BaseGraphNode& node) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
@@ -154,10 +154,24 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		bool hasDestructor(const ScriptGraphNode& node) const override;
 
-		void doInitData(ScriptToggleEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& data) const override;
-		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptToggleEntityEnabledData& curData) const override;
+		void doInitData(ScriptSetEntityEnabledData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSetEntityEnabledData& data) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSetEntityEnabledData& curData) const override;
 	};
+
+    class ScriptToggleEntityEnabled final : public ScriptNodeTypeBase<void> {
+    public:
+        String getId() const override { return "toggleEntityEnabled"; }
+        String getName() const override { return "Toggle Enabled"; }
+        String getIconName(const BaseGraphNode& node) const override { return "script_icons/toggle_enabled_on.png"; }
+        ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+        Vector<SettingType> getSettingTypes() const override;
+        gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+        std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+
+        Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+    };
 
 	class ScriptHasComponent : public ScriptNodeTypeBase<void> {
 	public:
