@@ -93,6 +93,11 @@ public:
 		}
 	}
 
+	void setGlobalVariable(const String& variableName, float value) override
+	{
+		getAPI().audio->getGlobalEmitter()->setVariable(variableName, value);
+	}
+
 	std::optional<String> getSourceName(AudioEmitterId id) const override
 	{
 		for (const auto& source: sourceFamily) {
