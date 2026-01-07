@@ -123,8 +123,12 @@ void AsioUDPConnection::receiveAll(
                 } else {
                     Logger::logError("Error receiving packet: " + err.message());
                 }
-                for (auto& conn: connections) {
-                    conn.second->close();
+                for (const auto& pair: connections) {
+                    const auto& conn = pair.second;
+                    if (conn->matchesEndpoint(from)) {
+                        conn->close();
+                        break;
+                    }
                 }
                 break;
             }
