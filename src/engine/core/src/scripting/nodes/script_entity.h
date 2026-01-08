@@ -159,19 +159,33 @@ namespace Halley {
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptSetEntityEnabledData& curData) const override;
 	};
 
-    class ScriptToggleEntityEnabled final : public ScriptNodeTypeBase<void> {
-    public:
-        String getId() const override { return "toggleEntityEnabled"; }
-        String getName() const override { return "Toggle Enabled"; }
-        String getIconName(const BaseGraphNode& node) const override { return "script_icons/toggle_enabled_on.png"; }
-        ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+	class ScriptToggleEntityEnabled final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "toggleEntityEnabled"; }
+		String getName() const override { return "Toggle Enabled"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/toggle_enabled_on.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
-        Vector<SettingType> getSettingTypes() const override;
-        gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
-        std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 
-        Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
-    };
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+
+	class ScriptIsEntityEnabled final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "isEntityEnabled"; }
+		String getName() const override { return "Is Enabled"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/toggle_enabled_on.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
 
 	class ScriptHasComponent : public ScriptNodeTypeBase<void> {
 	public:

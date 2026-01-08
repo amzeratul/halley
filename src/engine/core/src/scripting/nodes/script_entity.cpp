@@ -633,6 +633,42 @@ IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& e
 
 
 
+Vector<IGraphNodeType::SettingType> ScriptIsEntityEnabled::getSettingTypes() const
+{
+	return { };
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptIsEntityEnabled::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptIsEntityEnabled::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Is ");
+	str.append(getConnectedNodeName(node, graph, 0), parameterColour);
+	str.append(" Enabled");
+	return str.moveResults();
+}
+
+ConfigNode ScriptIsEntityEnabled::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto entityId = readEntityId(environment, node, 2);
+	auto entityRef = environment.getWorld().tryGetEntity(entityId);
+	if (!entityRef.isValid()) {
+		Logger::logError("Entity with id " + toString(entityId) + " does not exist!");
+		return ConfigNode(false);
+	}
+	return ConfigNode(entityRef.isEnabled());
+}
+
+
+
+
 Vector<IGraphNodeType::SettingType> ScriptHasComponent::getSettingTypes() const
 {
 	return {
