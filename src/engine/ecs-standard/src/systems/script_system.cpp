@@ -272,19 +272,23 @@ private:
 		}
 
 		for (auto& e: scriptableFamily) {
-			if (getWorld().getEntity(e.entityId).isLocal()) {
-				for (const auto& script : e.scriptable.scripts) {
-                    if (!script.hasValue()) {
-                        Logger::logWarning("Found scriptable component with empty script resource reference", true);
-                    } else if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
-						e.scriptable.scriptsStarted.push_back(script.getAssetId());
-						const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv)
-						{
-							return kv->getScriptGraphPtr() == script.get().get();
-						});
-						if (!running) {
-							addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
-						}
+			const bool isLocalEntity = getWorld().getEntity(e.entityId).isLocal();
+			for (const auto& script : e.scriptable.scripts) {
+                if (!script.hasValue()) {
+                    Logger::logWarning("Found scriptable component with empty script resource reference", true);
+                    continue;
+                }
+				if (!isLocalEntity && script->isNetwork()) {
+					continue;
+				}
+				if (!std_ex::contains(e.scriptable.scriptsStarted, script.getAssetId())) {
+					e.scriptable.scriptsStarted.push_back(script.getAssetId());
+					const bool running = std_ex::contains_if(e.scriptable.activeStates, [&](const auto& kv)
+					{
+						return kv->getScriptGraphPtr() == script.get().get();
+					});
+					if (!running) {
+						addScript(e.entityId, e.scriptable, script.get(), e.scriptable.tags);
 					}
 				}
 			}
