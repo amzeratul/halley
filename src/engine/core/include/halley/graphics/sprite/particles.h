@@ -50,6 +50,8 @@ namespace Halley {
 		};
 		
 	public:
+		using SpawnPositionCallback = std::function<Vector3f(Vector3f)>;
+
 		Particles();
 		Particles(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
 		void load(const ConfigNode& node, Resources& resources, const EntitySerializationContext& context);
@@ -74,6 +76,8 @@ namespace Halley {
 		Vector2f getSpawnArea() const;
 		void setSpawnAreaShape(ParticleSpawnAreaShape shape);
 		ParticleSpawnAreaShape getSpawnAreaShape() const;
+
+		void setSpawnPositionCallback(SpawnPositionCallback callback);
 
 		void setAzimuth(Range<float> azimuth);
 		void setAzimuth(float azimuth);
@@ -182,6 +186,8 @@ namespace Halley {
 		IParticleSpawner* secondarySpawner = nullptr;
 
 		mutable std::optional<float> maxBorder;
+
+		SpawnPositionCallback spawnPositionCallback;
 
 		void start();
 		void initializeParticle(size_t index, float time, float totalTime, Vector3f origin);

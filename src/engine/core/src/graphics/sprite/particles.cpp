@@ -238,6 +238,11 @@ ParticleSpawnAreaShape Particles::getSpawnAreaShape() const
 	return spawnAreaShape;
 }
 
+void Particles::setSpawnPositionCallback(SpawnPositionCallback callback)
+{
+	spawnPositionCallback = std::move(callback);
+}
+
 void Particles::setAzimuth(Range<float> azimuth)
 {
 	this->azimuth = azimuth;
@@ -619,6 +624,10 @@ void Particles::removeDeadParticles()
 
 Vector3f Particles::getSpawnPosition(Vector3f origin) const
 {
+	if (spawnPositionCallback) {
+		return spawnPositionCallback(origin);
+	}
+
 	Vector2f pos;
 	if (spawnAreaShape == ParticleSpawnAreaShape::Rectangle) {
 		pos = Vector2f(rng->getFloat(-1, 1), rng->getFloat(-1, 1)) * spawnArea * 0.5f;
