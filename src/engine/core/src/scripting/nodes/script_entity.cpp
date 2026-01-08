@@ -578,7 +578,7 @@ void ScriptSetEntityEnabled::doInitData(ScriptSetEntityEnabledData& data, const 
 
 IScriptNodeType::Result ScriptSetEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSetEntityEnabledData& data) const
 {
-	const auto entityId = readEntityId(environment, node, 2);
+	const auto entityId = readRawEntityId(environment, node, 2);
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		Logger::logError("Entity with id " + toString(entityId) + " does not exist and can't be toggled!");
@@ -621,7 +621,7 @@ std::pair<String, Vector<ColourOverride>> ScriptToggleEntityEnabled::getNodeDesc
 
 IScriptNodeType::Result ScriptToggleEntityEnabled::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto entityId = readEntityId(environment, node, 2);
+	const auto entityId = readRawEntityId(environment, node, 2);
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		Logger::logError("Entity with id " + toString(entityId) + " does not exist and can't be toggled!");
@@ -657,7 +657,7 @@ std::pair<String, Vector<ColourOverride>> ScriptIsEntityEnabled::getNodeDescript
 
 ConfigNode ScriptIsEntityEnabled::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto entityId = readEntityId(environment, node, 2);
+	const auto entityId = readRawEntityId(environment, node, 2);
 	auto entityRef = environment.getWorld().tryGetEntity(entityId);
 	if (!entityRef.isValid()) {
 		Logger::logError("Entity with id " + toString(entityId) + " does not exist!");
