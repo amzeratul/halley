@@ -479,6 +479,10 @@ ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 	FunctionParameters result;
 
 	for (auto& node: nodes) {
+		if (node.getParentNode()) {
+			continue;
+		}
+
 		if (node.getType() == "start") {
 			result.nDataInput = static_cast<uint8_t>(node.getSettings()["dataPins"].getSequenceSize());
 			result.nTargetInput = static_cast<uint8_t>(node.getSettings()["targetPins"].getSequenceSize());
