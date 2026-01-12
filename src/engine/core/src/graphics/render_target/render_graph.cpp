@@ -378,6 +378,13 @@ ResourceMemoryUsage RenderGraph::getMemoryUsage() const
 	return result;
 }
 
+void RenderGraph::unloadTextures()
+{
+	for (auto& n: nodes) {
+		n->resetTextures();
+	}
+}
+
 void RenderGraph::Variable::apply(Material& material, const String& name) const
 {
 	switch (type) {
