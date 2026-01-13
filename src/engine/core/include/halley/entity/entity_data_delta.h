@@ -23,6 +23,7 @@ namespace Halley {
 			bool allowNonSerializable = true;
 			bool omitEmptyComponents = false;
 			bool ignoreNameAndIconChangesInInstances = false;
+        	bool instantiatePrefabs = true;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
         	bool ignoreComponentsRemoved = false;

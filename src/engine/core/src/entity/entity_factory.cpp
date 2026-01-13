@@ -119,16 +119,22 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
-			const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-			auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
-			delta.setInstanceUUID(entityData.getInstanceUUID());
-			delta.setPrefabUUID(entityData.getPrefabUUID());
+			if (deltaOptions.instantiatePrefabs) {
+				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+				auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
+				delta.setInstanceUUID(entityData.getInstanceUUID());
+				delta.setPrefabUUID(entityData.getPrefabUUID());
 
-			if (debugListener) {
-				debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
+				if (debugListener) {
+					debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
+				}
+
+				return delta;
+			} else {
+				auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
+				delta.setPrefabUUID(entityData.getPrefabUUID());
+				return delta;
 			}
-
-			return delta;
 		}
 	}
 	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");
