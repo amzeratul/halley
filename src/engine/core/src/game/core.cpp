@@ -835,7 +835,7 @@ void Core::onProfileData(std::shared_ptr<ProfilerData> data)
 
 Time Core::getProfileCaptureThreshold() const
 {
-	Time t = std::numeric_limits<Time>::infinity();
+	Time t = std::numeric_limits<float>::max();
 	for (const auto* c: profileCallbacks) {
 		t = std::min(t, c->getThreshold());
 	}

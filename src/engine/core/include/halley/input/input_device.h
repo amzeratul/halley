@@ -200,7 +200,7 @@ namespace Halley {
 
 	class InputAxisRepeater {
 	public:
-		InputAxisRepeater(Time firstDelay = 0.2, Time repeatInterval0 = 0.1, Time secondDelay = std::numeric_limits<Time>::infinity(), Time repeatInterval1 = 0);
+		InputAxisRepeater(Time firstDelay = 0.2, Time repeatInterval0 = 0.1, Time secondDelay = std::numeric_limits<float>::max(), Time repeatInterval1 = 0);
 		int update(float value, Time t);
 
 	private:

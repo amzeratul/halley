@@ -201,7 +201,7 @@ float AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelDat
 float AudioPosition::getDistance(const AudioListenerData& listener) const
 {
 	if (sources.empty()) {
-		return std::numeric_limits<float>::infinity();
+		return std::numeric_limits<float>::max();
 	}
 
 	return getAttenuationAndPanPositional(listener, {}).distance;
@@ -289,7 +289,7 @@ float AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const Audio
 		for (size_t i = 0; i < nDstChannels; ++i) {
 			dst[i] = 0;
 		}
-		return std::numeric_limits<float>::infinity();
+		return std::numeric_limits<float>::max();
 	}
 
 	const auto [attenuation, centrePan, distance] = getAttenuationAndPanPositional(listener, mixingProperties.attenuationOverride);

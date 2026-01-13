@@ -737,7 +737,7 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	if (sprite) {
 		return static_cast<float>(sprite->layer);
 	} else {
-		return -std::numeric_limits<float>::infinity();
+		return -std::numeric_limits<float>::max();
 	}
 }
 

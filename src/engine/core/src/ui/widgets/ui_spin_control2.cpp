@@ -30,7 +30,7 @@ UISpinControl2::UISpinControl2(String id, UIStyle style, float value, bool allow
 
 void UISpinControl2::setValue(float value)
 {
-	value = clamp(value, minValue.value_or(-std::numeric_limits<float>::infinity()), maxValue.value_or(std::numeric_limits<float>::infinity()));
+	value = clamp(value, minValue.value_or(-std::numeric_limits<float>::max()), maxValue.value_or(std::numeric_limits<float>::max()));
 	setText(toString(value));
 }
 

@@ -248,7 +248,7 @@ int InputAxisRepeater::update(float value, Time t)
 			return intValue;
 		}
 
-		const auto interval = std::array<Time, 3>{std::numeric_limits<Time>::infinity(), repeatInterval0, repeatInterval1}[intervalIdx];
+		const auto interval = std::array<Time, 3>{std::numeric_limits<float>::max(), repeatInterval0, repeatInterval1}[intervalIdx];
 		if (timeSinceLastRepeat > interval) {
 			timeSinceLastRepeat -= interval;
 			return intValue;

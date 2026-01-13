@@ -23,7 +23,7 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId)
 	NodeDrawMode drawMode = BaseGraphRenderer::getNodeDrawMode(nodeId);
 	if (state) {
 		const auto nodeIntrospection = state->getNodeIntrospection(nodeId);
-		drawMode.activationTime = nodeIntrospection.activationTime < 0.5f ? nodeIntrospection.activationTime * 2 : std::numeric_limits<float>::infinity();
+		drawMode.activationTime = nodeIntrospection.activationTime < 0.5f ? nodeIntrospection.activationTime * 2 : std::numeric_limits<float>::max();
 		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
 			drawMode.type = NodeDrawModeType::Active;
 			drawMode.time = nodeIntrospection.time;

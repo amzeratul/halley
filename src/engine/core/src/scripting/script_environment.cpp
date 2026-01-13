@@ -259,7 +259,7 @@ void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
 {
 	Vector<ScriptStateThread> threads;
 	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId, 0)));
-	t.getTimeSlice() = std::numeric_limits<float>::infinity();
+	t.getTimeSlice() = std::numeric_limits<float>::max();
 
 	while (true) {
 		Vector<ScriptStateThread> pending;

@@ -384,7 +384,7 @@ std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 
 	size_t bestIndex = 0;
 	Vector2f bestPoint;
-	float bestDist = std::numeric_limits<float>::infinity();
+	float bestDist = std::numeric_limits<float>::max();
 	const auto* transform = getComponent<Transform2DComponent>();
 	for (size_t i = 0; i < n; ++i) {
 		const auto v0 = transform->transformPoint((*vertices)[i]);

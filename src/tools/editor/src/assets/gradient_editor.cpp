@@ -236,7 +236,7 @@ std::optional<size_t> GradientEditor::getAnchorUnderMouse(Vector2f mousePos) con
 {
 	const auto gradientBox = getGradientBox();
 
-	float bestDist = std::numeric_limits<float>::infinity();
+	float bestDist = std::numeric_limits<float>::max();
 	std::optional<size_t> bestIdx;
 
 	for (size_t i = 0; i < gradient.positions.size(); ++i) {

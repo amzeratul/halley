@@ -85,7 +85,7 @@ void UILabel::setMarquee(std::optional<float> speed)
 void UILabel::updateMinSize()
 {
 	lastCellWidth = getCellWidth();
-	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth.value_or(std::numeric_limits<float>::infinity()));
+	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth.value_or(std::numeric_limits<float>::max()));
 
 	needsClipX = needsClipY = false;
 	textExtents = renderer.getExtents();
@@ -102,8 +102,8 @@ void UILabel::updateMinSize()
 			needsClipX = true;
 		}
 	}
-	if (textExtents.y > maxHeight.value_or(std::numeric_limits<float>::infinity())) {
-		float maxLines = std::floor(maxHeight.value_or(std::numeric_limits<float>::infinity()) / renderer.getLineHeight());
+	if (textExtents.y > maxHeight.value_or(std::numeric_limits<float>::max())) {
+		float maxLines = std::floor(maxHeight.value_or(std::numeric_limits<float>::max()) / renderer.getLineHeight());
 		textExtents.y = maxLines * renderer.getLineHeight();
 		needsClipY = true;
 	}
@@ -135,7 +135,7 @@ void UILabel::updateMarquee(Time t)
 			return;
 		}
 		const float speed = *marqueeSpeed;
-		const float maxMarquee = unclippedWidth - maxWidth.value_or(std::numeric_limits<float>::infinity());
+		const float maxMarquee = unclippedWidth - maxWidth.value_or(std::numeric_limits<float>::max());
 		marqueePos += float(marqueeDirection) * float(t) * speed;
 		if (marqueePos < 0 || marqueePos > maxMarquee) {
 			marqueePos = clamp(marqueePos, 0.0f, maxMarquee);
@@ -161,7 +161,7 @@ float UILabel::getCellWidth()
 		}
 	}
 	
-	return std::numeric_limits<float>::infinity();
+	return std::numeric_limits<float>::max();
 }
 
 void UILabel::setText(const LocalisedString& t)

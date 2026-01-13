@@ -194,7 +194,7 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 		pendingData = new ConfigNode(node["pendingData"]);
 		hasPendingData = true;
 	}
-	timeSinceStart = node["timeSinceStart"].asFloat(std::numeric_limits<float>::infinity());
+	timeSinceStart = node["timeSinceStart"].asFloat(std::numeric_limits<float>::max());
 }
 
 ScriptState::NodeState::NodeState(const NodeState& other)

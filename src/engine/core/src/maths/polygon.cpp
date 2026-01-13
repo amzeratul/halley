@@ -462,7 +462,7 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 	const auto point = rawPoint * scale;
 	
 	Vector2f bestPoint = vertices[0];
-	float closestDistance2 = std::numeric_limits<float>::infinity();
+	float closestDistance2 = std::numeric_limits<float>::max();
 	
 	const size_t n = vertices.size();
 	for (size_t i = 0; i < n; ++i) {
@@ -589,8 +589,8 @@ Polygon::SATClassification Polygon::classify(const LineSegment& line) const
 
 Range<float> Polygon::project(Vector2f axis) const
 {
-	float min = std::numeric_limits<float>::infinity();
-	float max = -std::numeric_limits<float>::infinity();
+	float min = std::numeric_limits<float>::max();
+	float max = -std::numeric_limits<float>::max();
 
 	const size_t len = vertices.size();
 	for (size_t i = 0; i < len; i++) {
@@ -717,7 +717,7 @@ Polygon Polygon::convolution(const Polygon& other) const
 		const auto& vs = other.vertices;
 		const auto n = dir.orthoRight();
 		size_t best = 0;
-		float bestVal = -std::numeric_limits<float>::infinity();
+		float bestVal = -std::numeric_limits<float>::max();
 		for (size_t i = 0; i < vs.size(); ++i) {
 			const float val = vs[i].dot(n);
 			if (val > bestVal) {
@@ -778,7 +778,7 @@ bool Polygon::splitIntoConvex(Vector<Polygon>& output, bool allowSimplify) const
 	
 	struct Score {
 		int divs = 0;
-		float dist = std::numeric_limits<float>::infinity();
+		float dist = std::numeric_limits<float>::max();
 
 		Score() = default;
 		Score(int divs, float dist) : divs(divs), dist(dist) {}
@@ -1158,7 +1158,7 @@ Vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 	
 	const bool allowSimplify = false;
 	std::pair<size_t, size_t> bestChord = {0, 0};
-	float bestChordDistance = std::numeric_limits<float>::infinity();
+	float bestChordDistance = std::numeric_limits<float>::max();
 	const size_t n = vertices.size();
 
 	for (size_t i = 0; i < n; ++i) {
@@ -1367,7 +1367,7 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 float Polygon::getDistanceTo(Vector2f point, float anisotropy) const
 {
 	if (vertices.empty()) {
-		return std::numeric_limits<float>::infinity();
+		return std::numeric_limits<float>::max();
 	}
 	if (isPointInside(point)) {
 		return 0;

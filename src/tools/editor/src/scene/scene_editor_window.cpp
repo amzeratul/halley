@@ -1542,7 +1542,7 @@ Vector2f SceneEditorWindow::getPositionClosestToAverage(gsl::span<const EntityDa
 		averagePos += getEntityPosition(data);
 	}
 	averagePos /= static_cast<float>(datas.size());
-	float bestDist = std::numeric_limits<float>::infinity();
+	float bestDist = std::numeric_limits<float>::max();
 	Vector2f bestPos;
 	for (const auto& data: datas) {
 		const auto pos = getEntityPosition(data);

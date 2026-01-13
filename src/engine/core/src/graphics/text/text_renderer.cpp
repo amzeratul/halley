@@ -344,8 +344,8 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 	auto curFont = TextOverrideCursor(font, fontOverrides);
 	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides);
 
-	float minX = std::numeric_limits<float>::infinity();
-	float maxX = -std::numeric_limits<float>::infinity();
+	float minX = std::numeric_limits<float>::max();
+	float maxX = -std::numeric_limits<float>::max();
 	float height = 0;
 	bool gotExtents = false;
 

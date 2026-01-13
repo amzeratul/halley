@@ -32,7 +32,7 @@ Navmesh::Navmesh(Vector<PolygonData> polys, const NavmeshBounds& bounds, int sub
 		node.nConnections = polys[nodeId].connections.size();
 		size_t edgeId = 0;
 		for (auto& connection: polys[nodeId].connections) {
-			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[nodeId].polygon.getCentre()) * scaleFactor).length() * polys[connection].weight : std::numeric_limits<float>::infinity();
+			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[nodeId].polygon.getCentre()) * scaleFactor).length() * polys[connection].weight : std::numeric_limits<float>::max();
 			node.connections[edgeId] = connection >= 0 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(connection)) : OptionalLite<NodeId>();
 			node.costs[edgeId] = cost;
 			
@@ -159,7 +159,7 @@ std::optional<Navmesh::NodeId> Navmesh::getNodeAt(Vector2f position) const
 
 	// Haven't found, look for the closest one in this grid cell...
 	{
-		float bestDist = std::numeric_limits<float>::infinity();
+		float bestDist = std::numeric_limits<float>::max();
 		int bestNode = -1;
 		for (auto i: polyIndices) {
 			const auto p = polygons[i].getClosestPoint(position);
@@ -176,7 +176,7 @@ std::optional<Navmesh::NodeId> Navmesh::getNodeAt(Vector2f position) const
 
 	// If we don't find it even in this cell, then look on the open edges
 	{
-		float bestDist = std::numeric_limits<float>::infinity();
+		float bestDist = std::numeric_limits<float>::max();
 		int bestNode = -1;
 		for (const auto& edge: openEdges) {
 			const float distSquared = (position - edge.second.getClosestPoint(position)).squaredLength();
@@ -299,7 +299,7 @@ Navmesh::Node::Node(const ConfigNode& node)
 		connections[i] = conn != -1 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(conn)) : OptionalLite<NodeId>();
 		costs[i] = connCosts[i].asFloat();
 		if (std::isnan(costs[i])) {
-			costs[i] = std::numeric_limits<float>::infinity();
+			costs[i] = std::numeric_limits<float>::max();
 		}
 	}
 }
@@ -931,7 +931,7 @@ void Navmesh::computePortalDistances(const String& name)
 {
 	const size_t nPortals = portals.size();
 	for (auto& p: portals) {
-		p.costToOtherPortalsHere.resize(nPortals, std::numeric_limits<float>::infinity());
+		p.costToOtherPortalsHere.resize(nPortals, std::numeric_limits<float>::max());
 	}
 
 	for (size_t i = 0; i < nPortals; ++i) {
@@ -945,7 +945,7 @@ void Navmesh::computePortalDistances(const String& name)
 			if (!interPortalPath) {
 				Logger::logError("Navmesh generation failure for \"" + name + "\": Unable to compute distance between portals on same navmesh - between " + toString(pos0) + " and " + toString(pos1));
 			}
-			const float cost = interPortalPath ? interPortalPath->getLength() : std::numeric_limits<float>::infinity();
+			const float cost = interPortalPath ? interPortalPath->getLength() : std::numeric_limits<float>::max();
 			p0.costToOtherPortalsHere[j] = cost;
 			p1.costToOtherPortalsHere[i] = cost;
 		}

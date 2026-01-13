@@ -655,10 +655,10 @@ void Painter::doUnbind()
 void Painter::setRelativeClip(Rect4f rect)
 {
 	std::array<Vector2f, 4> ps = {{ rect.getTopLeft(), rect.getTopRight(), rect.getBottomLeft(), rect.getBottomRight() }};
-	float x0 = -std::numeric_limits<float>::infinity();
-	float x1 = std::numeric_limits<float>::infinity();
-	float y0 = -std::numeric_limits<float>::infinity();
-	float y1 = std::numeric_limits<float>::infinity();
+	float x0 = -std::numeric_limits<float>::max();
+	float x1 = std::numeric_limits<float>::max();
+	float y0 = -std::numeric_limits<float>::max();
+	float y1 = std::numeric_limits<float>::max();
 	for (auto& p: ps) {
 		auto point = camera.worldToScreen(p, Rect4f(viewPort));
 		x0 = std::max(x0, point.x);
