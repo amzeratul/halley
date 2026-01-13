@@ -2,7 +2,6 @@
 using namespace Halley;
 
 WorldSceneData::WorldSceneData(World& world)
-	: world(world)
 {
 }
 

@@ -15,7 +15,7 @@ namespace Halley {
 		void free(void* p);
 
 	private:
-		void* pimpl;
+		[[maybe_unused]] void* pimpl;
 		size_t size;
 		Mutex mutex;
 	};

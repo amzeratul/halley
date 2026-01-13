@@ -30,7 +30,7 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 	
 	samples = std::move(other.samples);
 	buffer = std::move(other.buffer);
-	streamingResource = std::move(streamingResource);
+	streamingResource = std::move(other.streamingResource);
 
 	doneLoading();
 

@@ -618,7 +618,6 @@ void Core::render()
 void Core::waitForRenderEnd()
 {
 	if (api->video && painter) {
-		bool hasVsync = true; // TODO
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 		painter->onFinishRender();

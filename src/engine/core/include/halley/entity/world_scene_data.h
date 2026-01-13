@@ -17,8 +17,5 @@ namespace Halley {
         std::pair<String, size_t> getEntityParenting(const String& entityId) override;
         bool isSingleRoot() override;
     	Vector<const EntityData*> getEntityDataStack(const String& entityId) override;
-    	
-    private:
-    	World& world;
     };
 }

@@ -17,7 +17,6 @@
 using namespace Halley;
 
 UIRootGroup::UIRootGroup(const HalleyAPI& api)
-	: api(api)
 {
 	if (api.platform && api.platform->hasKeyboard()) {
 		keyboard = api.platform->getKeyboard();

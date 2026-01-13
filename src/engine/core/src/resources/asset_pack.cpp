@@ -215,8 +215,8 @@ PackDataReader::PackDataReader(AssetPack& pack, size_t startPos, size_t fileSize
 	: pack(pack)
 	, startPos(startPos)
 	, fileSize(fileSize)
-	, aliveToken(pack.getAliveToken())
 	, curPos(0)
+	, aliveToken(pack.getAliveToken())
 {
 }
 

@@ -478,10 +478,8 @@ std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceToken
 LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens) const
 {
 	auto curString = string;
-	int idx = 0;
 	for (const auto& token : tokens) {
 		curString = string.replaceAll("{" + token.first + "}", token.second.getString());
-		++idx;
 	}
 	return LocalisedString(curString);
 }

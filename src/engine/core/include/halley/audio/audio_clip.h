@@ -74,8 +74,8 @@ namespace Halley
 		uint8_t numChannels = 0;
 		bool streaming = false;
 
-		mutable uint8_t readsWithSeek = 0;
-		mutable uint8_t readsWithoutSeek = 0;
+		[[maybe_unused]] mutable uint8_t readsWithSeek = 0;
+		[[maybe_unused]] mutable uint8_t readsWithoutSeek = 0;
 
 		std::shared_ptr<ResourceData> streamingResource;
 

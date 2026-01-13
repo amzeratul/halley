@@ -284,7 +284,8 @@ bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth, const Emi
 			ok = ok && isCompactSequence(n, depth + 1, options);
 		}
 		return ok;
-	}
 
-	return false;
+	default:
+		return false;
+	}
 }

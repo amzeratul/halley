@@ -266,6 +266,8 @@ void BaseGraphRenderer::drawNode(Painter& painter, Vector2f basePos, const BaseG
 	case LabelType::Comment:
 		drawLabel(label, pos + iconOffset, 14.0f / curZoom, (nodeSize.x - 20.0f) / curZoom, true);
 		break;
+	default:
+		break;
 	}
 
 	// Draw pins
@@ -389,8 +391,9 @@ BezierCubic BaseGraphRenderer::makeBezier(const ConnectionPath& path) const
 			return Vector2f(0, -1);
 		case GraphPinSide::Bottom:
 			return Vector2f(0, 1);
+		default:
+			return {};
 		}
-		return Vector2f();
 	};
 	
 	const Vector2f fromDir = getSideNormal(getSide(path.fromType));

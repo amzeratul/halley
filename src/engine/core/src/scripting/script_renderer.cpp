@@ -165,6 +165,8 @@ Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
 		return Colour4f(0.91f, 0.2f, 0.2f);
 	case ScriptNodeElementType::TargetPin:
 		return Colour4f(0.35f, 1, 0.35f);
+	default:
+		break;
 	}
 
 	return Colour4f();

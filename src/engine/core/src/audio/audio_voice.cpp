@@ -342,6 +342,8 @@ void AudioVoice::onFadeEnd()
 	case FadeEndBehaviour::Stop:
 		stop(AudioFade());
 		break;
+	default:
+		break;
 	}
 }
 

@@ -17,8 +17,9 @@ Colour4f RenderGraphNodeType::getColour() const
 		return Colour4f(0.97f, 0.35f, 0.35f);
 	case RenderGraphNodeClassification::Texture:
 		return Colour4f(0.91f, 0.71f, 0.0f);
+	default:
+		return Colour4f(0.2f, 0.2f, 0.2f);
 	}
-	return Colour4f(0.2f, 0.2f, 0.2f);
 }
 
 String RenderGraphNodeType::getPinTypeName(PinType type) const
@@ -32,8 +33,9 @@ String RenderGraphNodeType::getPinTypeName(PinType type) const
 		return "Texture";
 	case RenderGraphElementType::Dependency:
 		return "Dependency";
+	default:
+		return "?";
 	}
-	return "?";
 }
 
 std::pair<String, Vector<ColourOverride>> RenderGraphNodeType::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const

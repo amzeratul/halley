@@ -290,7 +290,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 {
 	using namespace std::chrono_literals;
 
-	for (int i = 0; true; ++i) {
+	while (true) {
 		{
 			// First of all, look in cache and return if it's there
 			// This is the most common case, and we use a shared lock to avoid stopping other threads

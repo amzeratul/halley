@@ -167,7 +167,7 @@ bool SpritePainterEntry::isCompatibleWith(const SpritePainterEntry& other, const
 
 SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 {
-	setHandle("halley.texSize", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	setHandle("halley.texSize", [] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
 		if (const auto idx = stringViewToInt(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);
@@ -175,7 +175,7 @@ SpritePainterMaterialParamUpdater::SpritePainterMaterialParamUpdater()
 		}
 	});
 
-	setHandle("halley.texBPP", [this] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
+	setHandle("halley.texBPP", [] (MaterialUpdater& material, std::string_view uniformName, std::string_view autoVarArgs)
 	{
 		if (const auto idx = stringViewToInt(autoVarArgs)) {
 			const auto tex = material.getTexture(*idx);

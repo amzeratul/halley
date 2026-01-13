@@ -65,6 +65,8 @@ std::unique_ptr<AudioSubObject> AudioSubObject::makeSubObject(AudioSubObjectType
 		return std::make_unique<AudioSubObjectSwitch>(std::move(id));
 	case AudioSubObjectType::Sequence:
 		return std::make_unique<AudioSubObjectSequence>(std::move(id));
+	case AudioSubObjectType::None:
+		return {};
 	}
 	return {};
 }
@@ -90,6 +92,8 @@ void AudioSubObject::copySubObject(AudioSubObject& dst, const AudioSubObject& sr
 			break;
 		case AudioSubObjectType::Sequence:
 			castSubObjectCopy<AudioSubObjectSequence>(dst, src);
+			break;
+		case AudioSubObjectType::None:
 			break;
 		}
 	} else {

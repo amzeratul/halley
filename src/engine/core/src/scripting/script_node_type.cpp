@@ -133,8 +133,9 @@ String IScriptNodeType::getPinTypeName(PinType type) const
 		return "Write Data";
 	case ScriptNodeElementType::TargetPin:
 		return "Target";
+	default:
+		return "?";
 	}
-	return "?";
 }
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const

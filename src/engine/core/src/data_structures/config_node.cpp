@@ -1331,6 +1331,8 @@ void ConfigNode::ensureType(ConfigNodeType t)
 			reset();
 			type = ConfigNodeType::Undefined;
 			break;
+		default:
+			throw Exception("Unable to ensure type: " + toString(t), HalleyExceptions::Utils);
 		}
 	}
 }
@@ -1980,6 +1982,8 @@ void ConfigNode::decayDeltaArtifacts()
 	case ConfigNodeType::Del:
 		reset();
 		break;
+	default:
+		break;
 	}
 }
 
@@ -2070,6 +2074,8 @@ void ConfigNode::feedToHash(Hash::Hasher& hasher) const
 		break;
 	case ConfigNodeType::Undefined:
 		break;
+	default:
+		throw Exception("Unable to type " + toString(type) + " to hash in ConfigNode", HalleyExceptions::Utils);
 	}
 }
 
@@ -2154,6 +2160,8 @@ size_t ConfigNode::getSizeBytes() const
 	case ConfigNodeType::String:
 		result += sizeof(String);
 		result += strData->getSizeBytes();
+		break;
+	default:
 		break;
 	}
 

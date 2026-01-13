@@ -754,11 +754,14 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const E
 				node["tex_" + texDef.name] = assetId;
 			}
 		}
+
+		/*
 		for (const auto& ub: materialDef.getUniformBlocks()) {
 			for (const auto& u: ub.uniforms) {
 				// ?
 			}
 		}
+		*/
 	}
 	return node;
 }

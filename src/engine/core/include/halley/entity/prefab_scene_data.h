@@ -24,7 +24,6 @@ namespace Halley {
     	Prefab& prefab;
         std::shared_ptr<EntityFactory> factory;
         World& world;
-    	Resources& gameResources;
         String variant;
 
     	struct EntityAndParent {

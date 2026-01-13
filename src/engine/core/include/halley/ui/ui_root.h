@@ -49,8 +49,6 @@ namespace Halley {
 		bool isInputActive() const;
 
 	private:
-		const HalleyAPI& api;
-
 		std::weak_ptr<UIWidget> currentFocus;
 		std::unique_ptr<TextInputCapture> textCapture;
 		Vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;

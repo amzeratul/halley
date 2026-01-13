@@ -1,7 +1,5 @@
 #include "halley/entity/prefab_scene_data.h"
 
-#include "halley/bytes/byte_serializer.h"
-#include "halley/resources/resources.h"
 #include "halley/support/logger.h"
 #include "halley/entity/world.h"
 
@@ -13,7 +11,6 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 	: prefab(prefab)
 	, factory(std::move(factory))
 	, world(world)
-	, gameResources(gameResources)
 {
 }
 

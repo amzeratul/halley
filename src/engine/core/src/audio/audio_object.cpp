@@ -330,7 +330,7 @@ void AudioObject::reload(Resource&& resource)
 	auto newObjects = std::move(objects);
 
 	objects = std::move(oldObjects);
-	const auto reloadResult = reloadObjects(objects, std::move(newObjects));
+	reloadObjects(objects, std::move(newObjects));
 }
 
 std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
