@@ -415,6 +415,15 @@ void AudioObject::generateId()
 	audioObjectId = id++;
 }
 
+namespace {
+	// This exists to silence clang complaining about evaluation inside a typeid
+	template<typename T>
+	auto doTypeIdsMatch(const T& a, const T& b)
+	{
+		return typeid(a) == typeid(b);
+	}
+}
+
 AudioObject::ReloadResult AudioObject::reloadObjects(Vector<AudioSubObjectHandle>& objects, Vector<AudioSubObjectHandle> newObjects)
 {
 	ReloadResult result;
@@ -425,7 +434,7 @@ AudioObject::ReloadResult AudioObject::reloadObjects(Vector<AudioSubObjectHandle
 	for (auto& obj: newObjects) {
 		// Try matching new objects to existing ones
 		auto idx = std_ex::find_index_if(prevObjects, [&] (const AudioSubObjectHandle& prev) {
-			return prev.hasValue() && prev->getId() == obj->getId() && typeid(prev.getObject()) == typeid(obj.getObject());
+			return prev.hasValue() && prev->getId() == obj->getId() && doTypeIdsMatch(prev.getObject(), obj.getObject());
 		});
 
 		if (idx) {
