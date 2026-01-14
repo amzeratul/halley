@@ -149,22 +149,28 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
 
 void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> limit) const
 {
-	Vector<std::pair<String, ResourceMemoryUsage>> usages;
+	struct Info {
+		String assetId;
+		ResourceMemoryUsage usage;
+		int useCount = 0;
+	};
+	Vector<Info> usages;
 
 	{
 		SharedLock lock(mutex);
-
 		for (auto& r: resources) {
-			usages.emplace_back(r.first, r.second.res->getMemoryUsage());
+			usages.emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), r.second.res.use_count() });
 		}
 	}
 
-	std::sort(usages.begin(), usages.end(), [] (const auto& a, const auto& b) { return b.second < a.second; });
+	std::sort(usages.begin(), usages.end(), [] (const auto& a, const auto& b) { return b.usage < a.usage; });
 	Logger::logInfo("Detailed memory report for " + toString(getAssetType()) + ":");
 
 	const int n = std::min(static_cast<int>(usages.size()), limit.value_or(std::numeric_limits<int>::max()));
 	for (int i = 0; i < n; ++i) {
-		Logger::logInfo("\t" + toString(i + 1) + ": " + usages[i].first + ": " + String::prettySize(usages[i].second.getTotal()));
+		Logger::logInfo("\t" + toString(i + 1, 10, 3, ' ') + ": "
+			+ usages[i].assetId + " [" + usages[i].useCount + "]: "
+			+ String::prettySize(usages[i].usage.getTotal()));
 	}
 }
 

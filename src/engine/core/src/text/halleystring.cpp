@@ -1143,7 +1143,7 @@ bool Halley::operator==(const std::basic_string_view<char32_t>& lhp, const Strin
 
 size_t String::getSizeBytes() const
 {
-	return length() + 1;
+	return str.capacity();
 }
 
 const String& String::emptyString()

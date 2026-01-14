@@ -91,11 +91,8 @@ std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 	auto font = std::make_unique<Font>();
 	auto ds = Deserializer(data->getSpan());
 	font->deserialize(ds);
-
-	auto texture = loader.getResources().get<Texture>(font->imageName);
-	auto matDef = loader.getResources().get<MaterialDefinition>(font->distanceField ? "Halley/Text" : MaterialDefinition::defaultMaterial);
-	font->material = std::make_unique<Material>(matDef);
-	font->material->set(0, texture);
+	font->resources = &loader.getResources();
+	//font->loadMaterial(loader.getResources());
 
 	return font;
 }
@@ -231,6 +228,9 @@ void Font::addGlyph(const Glyph& glyph)
 
 std::shared_ptr<Material> Font::getMaterial() const
 {
+	if (!material && resources) {
+		loadMaterial(*resources);
+	}
 	return material;
 }
 
@@ -299,4 +299,12 @@ void Font::printGlyphs() const
 		}
 	}
 	std::cout << "]\n";
+}
+
+void Font::loadMaterial(Resources& resources) const
+{
+	auto texture = resources.get<Texture>(imageName);
+	auto matDef = resources.get<MaterialDefinition>(distanceField ? "Halley/Text" : MaterialDefinition::defaultMaterial);
+	material = std::make_unique<Material>(matDef);
+	material->set(0, texture);
 }

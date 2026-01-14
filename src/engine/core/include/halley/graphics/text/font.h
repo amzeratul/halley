@@ -85,8 +85,12 @@ namespace Halley
 		Vector<String> fallback;
 		bool floorGlyphPosition;
 
-		std::shared_ptr<Material> material;
+		mutable std::shared_ptr<Material> material;
 		HashMap<int, Glyph> glyphs;
+
+		Resources* resources = nullptr;
+
+		void loadMaterial(Resources& resources) const;
 	};
 	
 }
