@@ -117,7 +117,7 @@ const Resource* ResourceObserver::getResourceBeingObserved() const
 
 AsyncResource::AsyncResource() 
 	: failed(false)
-	, loading(false)
+	, loadState(State::Unloaded)
 {}
 
 AsyncResource::~AsyncResource()
@@ -126,6 +126,7 @@ AsyncResource::~AsyncResource()
 }
 
 AsyncResource::AsyncResource(const AsyncResource& other)
+	: Resource(other)
 {
 	other.waitForLoad(true);
 	*this = other;
@@ -155,17 +156,17 @@ AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
 
 void AsyncResource::startLoading()
 {
-	loading = true;
+	loadState = State::Loading;
 	failed = false;
 }
 
 void AsyncResource::doneLoading()
 {
-	if (loading) {
+	if (loadState == State::Loading) {
 		Vector<Promise<void>> promises;
 		{
 			UniqueLock lock(loadMutex);
-			loading = false;
+			loadState = State::Loaded;
 			promises = std::move(pendingPromises);
 		}
 		loadWait.notifyAll();
@@ -183,9 +184,12 @@ void AsyncResource::loadingFailed()
 
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
-	if (loading) {
+	if (loadState == State::Unloaded) {
+		requestLoading();
+	}
+	if (loadState != State::Loaded) {
 		UniqueLock lock(loadMutex);
-		while (loading) {
+		while (loadState != State::Loaded) {
 			loadWait.wait(lock);
 		}
 	}
@@ -197,7 +201,7 @@ void AsyncResource::waitForLoad(bool acceptFailed) const
 Future<void> AsyncResource::onLoad() const
 {
 	UniqueLock lock(loadMutex);
-	if (loading) {
+	if (loadState != State::Loaded) {
 		pendingPromises.push_back({});
 		return pendingPromises.back().getFuture();
 	} else {
@@ -207,7 +211,7 @@ Future<void> AsyncResource::onLoad() const
 
 bool AsyncResource::isLoaded() const
 {
-	return !loading;
+	return loadState == State::Loaded;
 }
 
 bool AsyncResource::hasSucceeded() const
@@ -218,4 +222,16 @@ bool AsyncResource::hasSucceeded() const
 bool AsyncResource::hasFailed() const
 {
 	return failed;
+}
+
+void AsyncResource::requestLoading() const
+{
+	if (loadState == State::Unloaded) {
+		UniqueLock lock(loadMutex);
+		doRequestLoading();
+	}
+}
+
+void AsyncResource::doRequestLoading() const
+{
 }

@@ -253,6 +253,12 @@ namespace Halley
 	class AsyncResource : public Resource
 	{
 	public:
+		enum class State : uint8_t {
+			Unloaded,
+			Loading,
+			Loaded
+		};
+
 		AsyncResource();
 		virtual ~AsyncResource();
 
@@ -264,6 +270,7 @@ namespace Halley
 		void startLoading(); // call from main thread before spinning worker thread
 		void doneLoading();  // call from worker thread when done loading
 		void loadingFailed(); // Call from worker thread if loading fails
+		void requestLoading() const;
 		void waitForLoad(bool acceptFailed = false) const;
 		Future<void> onLoad() const;
 
@@ -271,9 +278,12 @@ namespace Halley
 		bool hasSucceeded() const;
 		bool hasFailed() const;
 
+	protected:
+		virtual void doRequestLoading() const;
+
 	private:
 		std::atomic<bool> failed;
-		std::atomic<bool> loading;
+		std::atomic<State> loadState;
 		mutable ConditionVariable loadWait;
 		mutable Mutex loadMutex;
 		mutable Vector<Promise<void>> pendingPromises;
