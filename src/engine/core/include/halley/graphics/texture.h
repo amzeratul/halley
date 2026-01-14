@@ -6,6 +6,8 @@
 #include "texture_descriptor.h"
 #include <memory>
 
+#include "halley/resources/resource_data.h"
+
 namespace Halley
 {
 	class Painter;
@@ -21,7 +23,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 
-	class Texture : public AsyncResource
+	class Texture : public AsyncResource, public std::enable_shared_from_this<Texture>
 	{
 	public:
 		Texture(Vector2i size);
@@ -52,11 +54,18 @@ namespace Halley
 		TextureDescriptor descriptor;
 		ImageMask mask;
 
+		bool retainPixelData = false;
+		ResourceLoader::LoaderFunc loaderFunc;
+
 		virtual void doLoad(TextureDescriptor& descriptor);
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
 		virtual void doCopyToImage(Painter& painter, Image& image) const;
 		virtual size_t getVRamUsage() const;
 
 		void moveFrom(Texture& other);
+
+	private:
+		void loadFromDisk();
+		void loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool retainPixelData);
 	};
 }

@@ -121,12 +121,26 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	std::shared_ptr<Texture> texture = loader.getAPI().video->createTexture(size);
 	texture->setAssetId(loader.getName());
 	texture->setMeta(meta);
-	bool retain = loader.getResources().getOptions().retainPixelData;
+	texture->retainPixelData = loader.getResources().getOptions().retainPixelData;
+	texture->loaderFunc = loader.getLoaderFunction(true);
+	texture->loadFromDisk();
 
-	loader.getAsync(true)
-	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
+	return texture;
+}
+
+void Texture::loadFromDisk()
+{
+	loadFromDisk(loaderFunc, retainPixelData);
+}
+
+void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool retainPixelData)
+{
+	auto texture = shared_from_this();
+
+	Concurrent::execute(loaderFunc)
+		.then([texture] (std::unique_ptr<ResourceDataStatic> data) -> std::pair<TextureDescriptorImageData, ImageMask>
 	{
-		auto& meta = texture->getMeta();
+		const auto& meta = texture->getMeta();
 		const auto& compression = meta.getString("compression");
 		const bool masked = meta.getBool("withMask", false);
 
@@ -159,7 +173,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 			throw;
 		}
 	})
-	.then(Executors::getVideoAux(), [texture, retain](std::pair<TextureDescriptorImageData, ImageMask> imgPair)
+		.then(Executors::getVideoAux(), [texture, retainPixelData] (std::pair<TextureDescriptorImageData, ImageMask> imgPair)
 	{
 		auto& img = imgPair.first;
 		auto& alphaMask = imgPair.second;
@@ -195,12 +209,10 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 		descriptor.format = format;
 		descriptor.pixelData = std::move(img);
 		descriptor.pixelFormat = compression == "png" || compression == "qoi" || compression == "hlif" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
-		descriptor.retainPixelData = retain;
+		descriptor.retainPixelData = retainPixelData;
 		texture->load(std::move(descriptor));
 		texture->setAlphaMask(std::move(alphaMask));
 	});
-
-	return texture;
 }
 
 void Texture::setAlphaMask(ImageMask mask)

@@ -137,6 +137,8 @@ namespace Halley {
 		friend class ResourceCollectionBase;
 
 	public:
+		using LoaderFunc = std::function<std::unique_ptr<ResourceDataStatic>()>;
+
 		const String& getName() const { return name; }
 		ResourceLoadPriority getPriority() const { return priority; }
 		const HalleyAPI& getAPI() const { return *api; }
@@ -145,6 +147,7 @@ namespace Halley {
 		std::unique_ptr<ResourceDataStatic> getStatic(bool throwOnFail = true);
 		std::unique_ptr<ResourceDataStream> getStream(bool throwOnFail = true);
 		Future<std::unique_ptr<ResourceDataStatic>> getAsync(bool throwOnFail = true) const;
+		LoaderFunc getLoaderFunction(bool throwOnFail = true) const;
 		Resources& getResources() const;
 
 	private:

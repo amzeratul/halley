@@ -260,21 +260,26 @@ std::unique_ptr<ResourceDataStream> ResourceLoader::getStream(bool throwOnFail)
 
 Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync(bool throwOnFail) const
 {
-	std::reference_wrapper<IResourceLocator> loc = locator;
-	auto n = name;
-	auto t = type;
-	auto meta = getMeta();
-	return Concurrent::execute(Executors::getDiskIO(), [meta, loc, n, t, throwOnFail] () -> std::unique_ptr<ResourceDataStatic>
+	return Concurrent::execute(getLoaderFunction(throwOnFail));
+}
+
+ResourceLoader::LoaderFunc ResourceLoader::getLoaderFunction(bool throwOnFail) const
+{
+	return [meta = getMeta(), locator = &locator, name = name, type = type, throwOnFail] () -> std::unique_ptr<ResourceDataStatic>
 	{
-		ProfilerEvent event(ProfilerEventType::DiskIO);
-		auto result = loc.get().getStatic(n, t, throwOnFail);
+		std::unique_ptr<ResourceDataStatic> result;
+		{
+			ProfilerEvent event(ProfilerEventType::DiskIO);
+			result = locator->getStatic(name, type, throwOnFail);
+		}
+
 		if (meta.getString("asset_compression", "") == "lz4") {
 			result->lz4Decompress();
 		} else if (meta.getString("asset_compression", "") == "deflate") {
 			result->inflate();
 		}
 		return result;
-	});
+	};
 }
 
 Resources& ResourceLoader::getResources() const
