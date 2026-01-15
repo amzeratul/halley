@@ -111,7 +111,8 @@ void ImportAssetsTask::run()
 	timer.pause();
 	const Time realTime = timer.elapsedNanoseconds() / 1000000000.0;
 	const Time importTime = totalImportTime / 1000000000.0;
-	logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
+	//logInfo("Import took " + toString(realTime, 2) + " seconds, on which " + toString(importTime, 2) + " seconds of work were performed (" + toString(importTime / realTime, 2) + "x realtime)");
+	logInfo("Import took " + toString(realTime, 2) + " seconds");
 }
 
 bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)

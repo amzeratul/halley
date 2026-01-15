@@ -126,6 +126,11 @@ Vector<String> TaskSet::getToClear()
 	return std::move(toClear);
 }
 
+bool TaskSet::canReloadAssets() const
+{
+	return true;
+}
+
 TaskExclusivityHandle::TaskExclusivityHandle(TaskSet& parent, Vector<String> tags)
 	: parent(parent)
 	, tags(std::move(tags))

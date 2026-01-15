@@ -546,7 +546,12 @@ void Project::processReloadAssets()
 		doReloadAssets(reload);
 	}
 	pendingAssetReloads.clear();
-}	
+}
+
+bool Project::hasAssetsToReload() const
+{
+	return !pendingAssetReloads.empty();
+}
 
 void Project::doReloadAssets(const PendingAssetReload& reload)
 {

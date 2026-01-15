@@ -4,6 +4,7 @@
 #include <list>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/ui/ui_root.h"
 
 namespace Halley
 {
@@ -48,6 +49,8 @@ namespace Halley
 		void returnHandle(TaskExclusivityHandle& handle);
 
 		Vector<String> getToClear();
+
+		bool canReloadAssets() const;
 
 	private:
 		std::list<std::shared_ptr<TaskAnchor>> tasks;

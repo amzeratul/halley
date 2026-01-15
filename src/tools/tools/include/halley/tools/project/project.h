@@ -140,6 +140,7 @@ namespace Halley
 		void onAllAssetsImported();
 		void requestReloadAssets(const std::set<String>& assets, const Vector<String>& packs, bool packed);
 		void processReloadAssets();
+		bool hasAssetsToReload() const;
 		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
 		void notifyAssetFilesModified(gsl::span<const Path> paths);

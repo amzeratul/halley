@@ -326,7 +326,7 @@ void ProjectWindow::update(Time t, bool moved)
 		tasks->update(t);
 	}
 
-	if (!getRoot()->hasModalUI()) {
+	if (project.hasAssetsToReload() && canReloadAssets()) {
 		project.processReloadAssets();
 	}
 
@@ -340,6 +340,11 @@ void ProjectWindow::update(Time t, bool moved)
 
 	const auto size = api.video->getWindow().getDefinition().getSize();
 	setMinSize(Vector2f(size));
+}
+
+bool ProjectWindow::canReloadAssets()
+{
+	return getTasks().canReloadAssets() && !getRoot()->hasModalUI();
 }
 
 bool ProjectWindow::onKeyPress(KeyboardKeyPress key)

@@ -174,5 +174,7 @@ namespace Halley {
         void destroyConsole();
 
     	void doUpdateEditor();
+
+        bool canReloadAssets();
 	};
 }
