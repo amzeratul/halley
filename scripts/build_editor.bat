@@ -40,7 +40,10 @@ cmake -A x64 ^
     -DCMAKE_LIBRARY_PATH="%~dp0..\deps\lib64" ^
     .. || goto ERROR_CONFIGURE
 
-cmake.exe --build . --target halley-editor --config RelWithDebInfo || goto ERROR
+REM Try twice
+cmake.exe --build . --target halley-editor --config RelWithDebInfo ^
+    || cmake.exe --build . --target halley-editor --config RelWithDebInfo ^
+    || goto ERROR
 
 cd ..
 
