@@ -159,7 +159,7 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 	{
 		SharedLock lock(mutex);
 		for (auto& r: resources) {
-			usages.emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), r.second.res.use_count() });
+			usages.emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), static_cast<int>(r.second.res.use_count()) });
 		}
 	}
 
