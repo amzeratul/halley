@@ -187,7 +187,7 @@ void AsyncResource::waitForLoad(bool acceptFailed) const
 	if (loadState == State::Unloaded) {
 		requestLoading();
 	}
-	if (loadState != State::Loaded) {
+	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
 		while (loadState != State::Loaded) {
 			loadWait.wait(lock);
