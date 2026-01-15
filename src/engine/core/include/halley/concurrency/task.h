@@ -24,9 +24,9 @@ namespace Halley
 		virtual ~Task() {}
 
 		struct Permissions {
-			bool cancellable;
-			bool visible;
-			bool canReloadAssets;
+			bool cancellable = false;
+			bool visible = true;
+			bool canReloadAssets = true;
 		};
 
 	protected:

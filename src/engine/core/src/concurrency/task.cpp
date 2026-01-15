@@ -22,7 +22,7 @@ Task::Task(String name, Permissions permissions, Vector<String> exclusivityTags)
 {}
 
 Task::Task(String name, bool cancelable, bool visible, Vector<String> exclusivityTags)
-	: Task(std::move(name), Permissions{ cancelable, visible }, std::move(exclusivityTags))
+	: Task(std::move(name), Permissions{ cancelable, visible, true }, std::move(exclusivityTags))
 {
 }
 
