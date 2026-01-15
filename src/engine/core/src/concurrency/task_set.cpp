@@ -130,7 +130,7 @@ bool TaskSet::canReloadAssets() const
 {
 	for (auto& task: tasks) {
 		if (!task->canReloadAssets()) {
-			return false;
+			//return false;
 		}
 	}
 	return true;
