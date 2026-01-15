@@ -41,6 +41,7 @@ namespace Halley
 
 		bool canCancel() const;
 		bool isVisible() const;
+		bool canReloadAssets() const;
 		void cancel();
 
 		int getId() const { return id; }

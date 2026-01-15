@@ -1,4 +1,5 @@
 #include "halley/concurrency/task.h"
+#include "halley/concurrency/task.h"
 #include "halley/text/halleystring.h"
 #include <mutex>
 #include <gsl/assert>
@@ -9,17 +10,21 @@
 
 using namespace Halley;
 
-Task::Task(String name, bool isCancellable, bool isVisible, Vector<String> exclusivityTags) 
+Task::Task(String name, Permissions permissions, Vector<String> exclusivityTags) 
 	: progress(0)
 	, name(std::move(name))
 	, cancelled(false)
 	, hasPendingTasksOnQueue(false)
 	, pendingTaskCount(0)
-	, isCancellable(isCancellable)
-	, isVisible(isVisible)
+	, permissions(permissions)
 	, numMessages(0)
 	, exclusivityTags(std::move(exclusivityTags))
 {}
+
+Task::Task(String name, bool cancelable, bool visible, Vector<String> exclusivityTags)
+	: Task(std::move(name), Permissions{ cancelable, visible }, std::move(exclusivityTags))
+{
+}
 
 void Task::updateOnMain(float time)
 {
@@ -184,7 +189,7 @@ Task* Task::getParent() const
 
 void Task::setVisible(bool visible)
 {
-	isVisible = visible;
+	permissions.visible = visible;
 }
 
 std::optional<String> Task::getAction()

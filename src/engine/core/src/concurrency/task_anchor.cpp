@@ -113,12 +113,17 @@ String TaskAnchor::getProgressLabel() const
 
 bool TaskAnchor::canCancel() const
 {
-	return task->isCancellable;
+	return task->permissions.cancellable;
 }
 
 bool TaskAnchor::isVisible() const
 {
-	return task->isVisible;
+	return task->permissions.visible;
+}
+
+bool TaskAnchor::canReloadAssets() const
+{
+	return task->permissions.canReloadAssets;
 }
 
 void TaskAnchor::cancel()
@@ -126,7 +131,7 @@ void TaskAnchor::cancel()
 	if (status == TaskStatus::WaitingToStart || status == TaskStatus::ReadyToStart) {
 		status = TaskStatus::Done;
 	}
-	if (task->isCancellable) {
+	if (task->permissions.cancellable) {
 		task->cancelled = true;
 	}
 }

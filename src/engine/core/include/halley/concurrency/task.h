@@ -23,8 +23,15 @@ namespace Halley
 	public:
 		virtual ~Task() {}
 
+		struct Permissions {
+			bool cancellable;
+			bool visible;
+			bool canReloadAssets;
+		};
+
 	protected:
-		Task(String name, bool isCancellable, bool isVisible, Vector<String> exclusivityTags = {});
+		Task(String name, Permissions permissions, Vector<String> exclusivityTags = {});
+		Task(String name, bool cancelable, bool visible, Vector<String> exclusivityTags = {});
 
 		virtual void run() = 0;
 		virtual void updateOnMain(float time);
@@ -78,8 +85,7 @@ namespace Halley
 
 		Task* parent = nullptr;
 
-		const bool isCancellable;
-		bool isVisible;
+		Permissions permissions;
 		
 		bool error = false;
 		std::list<std::pair<LoggerLevel, String>> messageLog;
