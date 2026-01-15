@@ -63,6 +63,8 @@ namespace Halley
 		virtual size_t getVRamUsage() const;
 
 		void moveFrom(Texture& other);
+		
+		void doRequestLoading() override;
 
 	private:
 		void loadFromDisk();

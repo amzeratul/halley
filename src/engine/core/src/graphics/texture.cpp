@@ -109,6 +109,11 @@ void Texture::moveFrom(Texture& other)
 	mask = std::move(other.mask);
 }
 
+void Texture::doRequestLoading()
+{
+	loadFromDisk();
+}
+
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 {
 	const auto& meta = loader.getMeta();
@@ -123,7 +128,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	texture->setMeta(meta);
 	texture->retainPixelData = loader.getResources().getOptions().retainPixelData;
 	texture->loaderFunc = loader.getLoaderFunction(true);
-	texture->loadFromDisk();
+	//texture->loadFromDisk();
 
 	return texture;
 }
@@ -137,6 +142,7 @@ void Texture::loadFromDisk()
 
 void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool retainPixelData)
 {
+	startLoading();
 	auto texture = shared_from_this();
 
 	Concurrent::execute(loaderFunc)

@@ -7,7 +7,6 @@ DX11Texture::DX11Texture(DX11Video& video, Vector2i size)
 	: Texture(size)
 	, video(video)
 {
-	startLoading();
 }
 
 DX11Texture::DX11Texture(DX11Video& video, Vector2i size, ID3D11ShaderResourceView* srv)
@@ -261,7 +260,6 @@ void DX11Texture::doCopyToImage(Painter& painter, Image& image) const
 		auto temp = video.createTexture(getSize());
 		auto desc = TextureDescriptor(getSize(), descriptor.format);
 		desc.canBeReadOnCPU = true;
-		temp->startLoading();
 		temp->load(std::move(desc));
 		doCopyToTexture(painter, *temp);
 		dynamic_cast<DX11Texture&>(*temp).copyToImageDirectly(image);
