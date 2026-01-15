@@ -106,7 +106,7 @@ void Font::onLoaded(Resources& resources)
 {
 	for (auto& fontName: fallback) {
 		if (auto f = resources.tryGet<Font>(fontName)) {
-			fallbackFont.push_back(f);
+			fallbackFonts.push_back(f);
 		}
 	}
 }
@@ -130,33 +130,43 @@ const Font::Glyph& Font::getGlyphHere(int code) const
 	return iter->second;
 }
 
-const Font& Font::getFontForGlyph(int code) const
+const Font* Font::tryGetFontForGlyph(int code) const
 {
 	if (const auto iter = glyphs.find(code); iter != glyphs.end()) {
 		// Found here
-		return *this;
+		return this;
 	}
 
 	// For empty characters, return here anyway, otherwise it can mess up text layout
 	if (code == '\n' || code == ' ' || code == '\t') {
-		return *this;
+		return this;
 	}
 
 	// Not found, try fallback fonts
-	for (const auto& font: fallbackFont) {
-		const auto iter = font->glyphs.find(code);
-		if (iter != font->glyphs.end()) {
-			return *font;
+	for (const auto& fallbackFont: fallbackFonts) {
+		if (auto* result = fallbackFont->tryGetFontForGlyph(code)) {
+			return result;
 		}
 	}
 
-	// Not found in fallback, return whichever has the best empty glyph (because some fonts don't seem to have a visible one)
+	// Glyph not found
+	return nullptr;
+}
+
+const Font& Font::getFontForGlyph(int code) const
+{
+	if (auto* font = tryGetFontForGlyph(code)) {
+		return *font;
+	}
+
+	// Glyph not found.
+	// Return whichever has the best empty glyph (because some fonts don't seem to have a visible one)
 	float bestAdvance = 0;
 	const Font* bestFallbackFont = this;
 	if (const auto iter = glyphs.find(0); iter != glyphs.end()) {
 		bestAdvance = iter->second.advance.manhattanLength();
 	}
-	for (const auto& font: fallbackFont) {
+	for (const auto& font: fallbackFonts) {
 		const auto iter = font->glyphs.find(0);
 		if (iter != font->glyphs.end()) {
 			float advance = iter->second.advance.manhattanLength();

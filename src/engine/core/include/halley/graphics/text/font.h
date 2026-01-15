@@ -50,6 +50,7 @@ namespace Halley
 
 		std::pair<const Glyph&, const Font&> getGlyph(int code) const;
 		const Glyph& getGlyphHere(int code) const;
+		const Font* tryGetFontForGlyph(int code) const;
 		const Font& getFontForGlyph(int code) const;
 		float getLineHeightAtSize(float size) const;
 		float getAscenderDistance() const;
@@ -81,7 +82,7 @@ namespace Halley
 		float replacementScale = 1.0f;
 		Vector2i imageSize;
 		bool distanceField;
-		Vector<std::shared_ptr<const Font>> fallbackFont;
+		Vector<std::shared_ptr<const Font>> fallbackFonts;
 		Vector<String> fallback;
 		bool floorGlyphPosition;
 
