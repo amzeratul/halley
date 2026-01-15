@@ -185,7 +185,7 @@ void AsyncResource::loadingFailed()
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
 	if (loadState == State::Unloaded) {
-		requestLoading();
+		const_cast<AsyncResource*>(this)->requestLoading();
 	}
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
@@ -224,7 +224,7 @@ bool AsyncResource::hasFailed() const
 	return failed;
 }
 
-void AsyncResource::requestLoading() const
+void AsyncResource::requestLoading()
 {
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
@@ -232,6 +232,6 @@ void AsyncResource::requestLoading() const
 	}
 }
 
-void AsyncResource::doRequestLoading() const
+void AsyncResource::doRequestLoading()
 {
 }

@@ -130,7 +130,9 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 
 void Texture::loadFromDisk()
 {
-	loadFromDisk(loaderFunc, retainPixelData);
+	if (loaderFunc) {
+		loadFromDisk(loaderFunc, retainPixelData);
+	}
 }
 
 void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool retainPixelData)

@@ -270,7 +270,7 @@ namespace Halley
 		void startLoading(); // call from main thread before spinning worker thread
 		void doneLoading();  // call from worker thread when done loading
 		void loadingFailed(); // Call from worker thread if loading fails
-		void requestLoading() const;
+		void requestLoading();
 		void waitForLoad(bool acceptFailed = false) const;
 		Future<void> onLoad() const;
 
@@ -279,7 +279,7 @@ namespace Halley
 		bool hasFailed() const;
 
 	protected:
-		virtual void doRequestLoading() const;
+		virtual void doRequestLoading();
 
 	private:
 		std::atomic<bool> failed;
