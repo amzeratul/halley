@@ -13,6 +13,8 @@ namespace Halley
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 
+		static std::unique_ptr<Mesh> parse(const Path& filename, const Bytes& bytes, IAddionalFileReader& reader);
+
 	private:
 	};
 }

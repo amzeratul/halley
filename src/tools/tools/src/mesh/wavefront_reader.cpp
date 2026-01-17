@@ -1,9 +1,9 @@
 #include "wavefront_reader.h"
 using namespace Halley;
 
-std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data)
+std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data, IAddionalFileReader& reader)
 {
-	State state;
+	auto state = State(reader);
 
 	// TODO: improve this?
 	const auto strData = String(reinterpret_cast<const char*>(data.data()), data.size());
@@ -12,6 +12,11 @@ std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data)
 	}
 	
 	return state.makeMesh();
+}
+
+WavefrontReader::State::State(IAddionalFileReader& additionalFileReader)
+	: addionalFileReader(&additionalFileReader)
+{
 }
 
 std::unique_ptr<Mesh> WavefrontReader::State::makeMesh()
@@ -33,6 +38,10 @@ void WavefrontReader::State::parseLine(const String& line)
 
 	if (!tokens.empty()) {
 		const auto& cmd = tokens[0];
+		if (cmd.isEmpty()) {
+			return;
+		}
+
 		const auto args = tokens.const_span().subspan(1);
 
 		if (cmd == "v") {
@@ -49,6 +58,8 @@ void WavefrontReader::State::parseLine(const String& line)
 			setMaterialLib(args);
 		} else if (cmd == "usemtl") {
 			useMaterial(args);
+		} else {
+			Logger::logWarning("Unknown command in Wavefront Obj file: " + cmd, true);
 		}
 	}
 }
@@ -68,9 +79,6 @@ void WavefrontReader::State::resetObject()
 {
 	vertices.clear();
 	indices.clear();
-	v.clear();
-	vt.clear();
-	vn.clear();
 	vertexMap.clear();
 	name = {};
 	material = {};
@@ -119,7 +127,7 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 		const auto& pos = v.at(vert.v - 1);
 		const auto& normal = vn.at(vert.vn - 1);
 		const auto& tex = vt.at(vert.vt - 1);
-		const auto idx = IndexType(vertices.size());
+		const auto idx = static_cast<IndexType>(vertices.size());
 
 		vertices.emplace_back(VertexData{
 			Vector4f(pos.x, pos.y, pos.z, 1.0f),
@@ -136,11 +144,13 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 void WavefrontReader::State::setMaterialLib(gsl::span<const String> tokens)
 {
 	materialLibrary = !tokens.empty() ? tokens[0] : "";
+	// TODO: parse material library
 }
 
 void WavefrontReader::State::useMaterial(gsl::span<const String> tokens)
 {
 	material = !tokens.empty() ? tokens[0] : "";
+	// TODO: parse material
 }
 
 void WavefrontReader::State::startObject(gsl::span<const String> tokens)
@@ -154,6 +164,7 @@ void WavefrontReader::State::finishObject()
 	if (!vertices.empty()) {
 		meshObjects += makeMeshObject();
 	}
+	resetObject();
 }
 
 MeshObject WavefrontReader::State::makeMeshObject()
@@ -169,8 +180,6 @@ MeshObject WavefrontReader::State::makeMeshObject()
 
 	result.setMaterialName("Halley/StandardMesh"); // TODO
 	result.setTextureNames({"texture/meshTexture0.jpg"}); // TODO
-
-	resetObject();
 
 	return result;
 }

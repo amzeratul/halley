@@ -3,10 +3,12 @@
 
 namespace Halley
 {
+	class IAddionalFileReader;
+
 	class WavefrontReader
 	{
 	public:
-		std::unique_ptr<Mesh> parse(const Bytes& data);
+		static std::unique_ptr<Mesh> parse(const Bytes& data, IAddionalFileReader& reader);
 
 	private:
 		struct FaceVertex
@@ -23,6 +25,7 @@ namespace Halley
 
 		class State {
 		public:
+			State(IAddionalFileReader& additionalFileReader);
 
 			void parseLine(const String& data);
 			std::unique_ptr<Mesh> makeMesh();
@@ -41,6 +44,7 @@ namespace Halley
 			String materialLibrary;
 
 			Vector<MeshObject> meshObjects;
+			IAddionalFileReader* addionalFileReader = nullptr;
 
 			void resetObject();
 

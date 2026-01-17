@@ -6,10 +6,15 @@ using namespace Halley;
 void MeshImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	for (auto& f: asset.inputFiles) {
-		if (f.name.getExtension() == ".obj") {
-			auto reader = std::make_unique<WavefrontReader>();
-			std::unique_ptr<Mesh> result = reader->parse(f.data);
-			collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*result));
-		}
+		collector.output(asset.assetId, AssetType::Mesh, Serializer::toBytes(*parse(f.name, f.data, collector)));
 	}
+}
+
+std::unique_ptr<Mesh> MeshImporter::parse(const Path& filename, const Bytes& bytes, IAddionalFileReader& reader)
+{
+	if (filename.getExtension() == ".obj") {
+		return WavefrontReader::parse(bytes, reader);
+	}
+
+	return {};
 }
