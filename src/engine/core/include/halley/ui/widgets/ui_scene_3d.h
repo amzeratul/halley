@@ -34,7 +34,6 @@ namespace Halley {
 		Camera camera;
 
 		std::unique_ptr<RenderSurface> renderSurface;
-		Time curTime = 0;
 
         void drawOnPainter(Painter& painter) const;
     };

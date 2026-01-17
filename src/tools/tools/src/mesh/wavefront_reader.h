@@ -31,7 +31,7 @@ namespace Halley
 			std::unique_ptr<Mesh> makeMesh();
 
 		private:
-			Vector<VertexData> vertices;
+			Vector<MeshObject::VertexData> vertices;
 			Vector<IndexType> indices;
 			std::map<FaceVertex, IndexType> vertexMap;
 

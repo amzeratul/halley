@@ -8,39 +8,43 @@ namespace Halley {
 	class ResourceLoader;
 	class Material;
 
-	struct VertexData
-	{
-		Vector4f pos;
-		Vector4f normal;
-		Vector4f colour;
-		Vector4f texCoord0;
-	};
-
     class MeshObject final : public Resource {
     public:
+		struct VertexData
+		{
+			Vector4f pos;
+			Vector4f normal;
+			Vector4f colour;
+			Vector4f texCoord0;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+		};
+
 		MeshObject() = default;
 		MeshObject(String name);
 
     	void loadDependencies(Resources& resources);
 
-    	uint32_t getNumVertices() const;
-		gsl::span<const Byte> getVertexData() const;
+    	size_t getNumVertices() const;
+		gsl::span<const VertexData> getVertexData() const;
 		gsl::span<const IndexType> getIndices() const;
         std::shared_ptr<const Material> getMaterial() const;
 		const String& getName() const;
 
-		void setVertices(size_t num, Bytes vertexData);
+		void setVertices(Vector<VertexData> vertexData);
 		void setIndices(Vector<IndexType> indices);
 		void setMaterialName(String name);
 		void setTextureNames(Vector<String> textureNames);
 		void setName(String name);
 
+    	std::pair<Vector3f, Vector3f> getBounds() const;
+
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
 	private:
-		uint32_t numVertices = 0;
-        Bytes vertexData;
+        Vector<VertexData> vertexData;
         Vector<IndexType> indices;
 
 		String materialName;
@@ -62,6 +66,8 @@ namespace Halley {
 		constexpr static AssetType getAssetType() { return AssetType::Mesh; }
 
 		const Vector<MeshObject>& getObjects() const;
+    	std::pair<Vector3f, Vector3f> getBounds() const;
+		std::pair<Vector3f, Vector3f> getCentreAndSize() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

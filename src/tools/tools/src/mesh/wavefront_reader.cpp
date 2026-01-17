@@ -129,7 +129,7 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 		const auto& tex = vt.at(vert.vt - 1);
 		const auto idx = static_cast<IndexType>(vertices.size());
 
-		vertices.emplace_back(VertexData{
+		vertices.emplace_back(MeshObject::VertexData {
 			Vector4f(pos.x, pos.y, pos.z, 1.0f),
 			Vector4f(normal.x, normal.y, normal.z, 1.0f),
 			Vector4f(1, 1, 1, 1),
@@ -164,22 +164,18 @@ void WavefrontReader::State::finishObject()
 	if (!vertices.empty()) {
 		meshObjects += makeMeshObject();
 	}
-	resetObject();
 }
 
 MeshObject WavefrontReader::State::makeMeshObject()
 {
-	auto result = MeshObject(name);
-
+	auto result = MeshObject(std::move(name));
 	result.setIndices(std::move(indices));
-
-	Bytes vs;
-	vs.resize(vertices.size() * sizeof(decltype(vertices)::value_type));
-	memcpy(vs.data(), vertices.data(), vs.size());
-	result.setVertices(vertices.size(), vs);
+	result.setVertices(std::move(vertices));
 
 	result.setMaterialName("Halley/StandardMesh"); // TODO
 	result.setTextureNames({"texture/meshTexture0.jpg"}); // TODO
+	
+	resetObject();
 
 	return result;
 }

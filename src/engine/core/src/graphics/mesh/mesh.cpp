@@ -39,6 +39,27 @@ const Vector<MeshObject>& Mesh::getObjects() const
 	return objects;
 }
 
+std::pair<Vector3f, Vector3f> Mesh::getBounds() const
+{
+	if (objects.empty()) {
+		return {};
+	} else {
+		auto [p0, p1] = objects[0].getBounds();
+		for (size_t i = 1; i < objects.size(); ++i) {
+			auto [b0, b1] = objects[i].getBounds();
+			p0 = Vector3f::min(p0, b0);
+			p1 = Vector3f::max(p1, b1);
+		}
+		return { p0, p1 };
+	}
+}
+
+std::pair<Vector3f, Vector3f> Mesh::getCentreAndSize() const
+{
+	const auto [p0, p1] = getBounds();
+	return { (p0 + p1) * 0.5f, p1 - p0 };
+}
+
 void Mesh::serialize(Serializer& s) const
 {
 	s << objects;
@@ -68,14 +89,14 @@ void MeshObject::loadDependencies(Resources& resources)
 	}
 }
 
-uint32_t MeshObject::getNumVertices() const
+size_t MeshObject::getNumVertices() const
 {
-	return numVertices;
+	return vertexData.size();
 }
 
-gsl::span<const Byte> MeshObject::getVertexData() const
+gsl::span<const MeshObject::VertexData> MeshObject::getVertexData() const
 {
-	return gsl::span<const Byte>(vertexData.data(), vertexData.size());
+	return vertexData.const_span();
 }
 
 gsl::span<const IndexType> MeshObject::getIndices() const
@@ -93,9 +114,8 @@ const String& MeshObject::getName() const
 	return name;
 }
 
-void MeshObject::setVertices(size_t num, Bytes vertexData)
+void MeshObject::setVertices(Vector<VertexData> vertexData)
 {
-	numVertices = uint32_t(num);
 	this->vertexData = std::move(vertexData);
 }
 
@@ -119,10 +139,26 @@ void MeshObject::setName(String name)
 	this->name = std::move(name);
 }
 
+std::pair<Vector3f, Vector3f> MeshObject::getBounds() const
+{
+	if (vertexData.empty()) {
+		return {};
+	}
+
+	Vector3f a = vertexData[0].pos.xyz();
+	Vector3f b = vertexData[0].pos.xyz();
+
+	for (const auto& v: vertexData) {
+		a = Vector3f::min(a, v.pos.xyz());
+		b = Vector3f::max(b, v.pos.xyz());
+	}
+
+	return { a, b };
+}
+
 void MeshObject::serialize(Serializer& s) const
 {
 	s << name;
-	s << numVertices;
 	s << vertexData;
 	s << indices;
 	s << materialName;
@@ -132,9 +168,25 @@ void MeshObject::serialize(Serializer& s) const
 void MeshObject::deserialize(Deserializer& s)
 {
 	s >> name;
-	s >> numVertices;
 	s >> vertexData;
 	s >> indices;
 	s >> materialName;
 	s >> textureNames;
+}
+
+
+void MeshObject::VertexData::serialize(Serializer& s) const
+{
+	s << pos;
+	s << normal;
+	s << colour;
+	s << texCoord0;
+}
+
+void MeshObject::VertexData::deserialize(Deserializer& s)
+{
+	s >> pos;
+	s >> normal;
+	s >> colour;
+	s >> texCoord0;
 }

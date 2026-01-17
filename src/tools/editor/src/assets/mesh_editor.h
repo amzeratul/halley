@@ -23,5 +23,11 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 
 		std::shared_ptr<UIScene3D> scene3d;
+
+		Time curTime = 0;
+		Vector3f meshCentre;
+		Vector3f meshSize;
+
+		void updateCamera();
 	};
 }
