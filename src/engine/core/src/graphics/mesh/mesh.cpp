@@ -9,7 +9,8 @@
 
 using namespace Halley;
 
-Mesh::Mesh()
+Mesh::Mesh(Vector<MeshObject> objects)
+	: objects(std::move(objects))
 {
 }
 
@@ -19,6 +20,39 @@ Mesh::Mesh(ResourceLoader& loader)
 	Deserializer s(data->getSpan());
 	deserialize(s);
 
+	for (auto& o: objects) {
+		o.loadDependencies(loader);
+	}
+}
+
+std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
+{
+	return std::make_unique<Mesh>(loader);
+}
+
+const Vector<MeshObject>& Mesh::getObjects() const
+{
+	return objects;
+}
+
+void Mesh::serialize(Serializer& s) const
+{
+	s << objects;
+}
+
+void Mesh::deserialize(Deserializer& s)
+{
+	s >> objects;
+}
+
+
+MeshObject::MeshObject(String name)
+	: name(std::move(name))
+{
+}
+
+void MeshObject::loadDependencies(ResourceLoader& loader)
+{
 	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
 	material = std::make_unique<Material>(matDef);
 
@@ -30,54 +64,60 @@ Mesh::Mesh(ResourceLoader& loader)
 	}
 }
 
-std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
-{
-	return std::make_unique<Mesh>(loader);
-}
-
-uint32_t Mesh::getNumVertices() const
+uint32_t MeshObject::getNumVertices() const
 {
 	return numVertices;
 }
 
-gsl::span<const Byte> Mesh::getVertexData() const
+gsl::span<const Byte> MeshObject::getVertexData() const
 {
 	return gsl::span<const Byte>(vertexData.data(), vertexData.size());
 }
 
-gsl::span<const IndexType> Mesh::getIndices() const
+gsl::span<const IndexType> MeshObject::getIndices() const
 {
 	return indices;
 }
 
-std::shared_ptr<const Material> Mesh::getMaterial() const
+std::shared_ptr<const Material> MeshObject::getMaterial() const
 {
 	return material;
 }
 
-void Mesh::setVertices(size_t num, Bytes vertexData)
+const String& MeshObject::getName() const
+{
+	return name;
+}
+
+void MeshObject::setVertices(size_t num, Bytes vertexData)
 {
 	numVertices = uint32_t(num);
 	this->vertexData = std::move(vertexData);
 }
 
-void Mesh::setIndices(Vector<IndexType> indices)
+void MeshObject::setIndices(Vector<IndexType> indices)
 {
 	this->indices = std::move(indices);
 }
 
-void Mesh::setMaterialName(String name)
+void MeshObject::setMaterialName(String name)
 {
 	this->materialName = std::move(name);
 }
 
-void Mesh::setTextureNames(Vector<String> textureNames)
+void MeshObject::setTextureNames(Vector<String> textureNames)
 {
 	this->textureNames = std::move(textureNames);
 }
 
-void Mesh::serialize(Serializer& s) const
+void MeshObject::setName(String name)
 {
+	this->name = std::move(name);
+}
+
+void MeshObject::serialize(Serializer& s) const
+{
+	s << name;
 	s << numVertices;
 	s << vertexData;
 	s << indices;
@@ -85,8 +125,9 @@ void Mesh::serialize(Serializer& s) const
 	s << textureNames;
 }
 
-void Mesh::deserialize(Deserializer& s)
+void MeshObject::deserialize(Deserializer& s)
 {
+	s >> name;
 	s >> numVertices;
 	s >> vertexData;
 	s >> indices;

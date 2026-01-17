@@ -36,7 +36,7 @@ namespace Halley
 		Vector3f scale;
 
 		std::shared_ptr<const Mesh> mesh;
-		std::shared_ptr<Material> material;
+		Vector<std::shared_ptr<Material>> materials;
 
 		bool dirty = true;
 		void updateMatrix();
