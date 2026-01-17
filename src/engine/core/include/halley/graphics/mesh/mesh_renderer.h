@@ -26,6 +26,7 @@ namespace Halley
 		Vector3f getScale() const;
 		Quaternion getRotation() const;
 
+		void resetTransform();
 		MeshRenderer& setMesh(std::shared_ptr<const Mesh> mesh);
 		MeshRenderer& setPosition(Vector3f pos);
 		MeshRenderer& setScale(Vector3f scale);

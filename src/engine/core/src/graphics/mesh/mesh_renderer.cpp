@@ -10,6 +10,7 @@ using namespace Halley;
 
 MeshRenderer::MeshRenderer(std::shared_ptr<const Mesh> mesh)
 {
+	resetTransform();
 	setMesh(std::move(mesh));
 }
 
@@ -47,6 +48,13 @@ Vector3f MeshRenderer::getScale() const
 Quaternion MeshRenderer::getRotation() const
 {
 	return rot;
+}
+
+void MeshRenderer::resetTransform()
+{
+	pos = {};
+	scale = Vector3f(1, 1, 1);
+	rot = Quaternion();
 }
 
 MeshRenderer& MeshRenderer::setMesh(std::shared_ptr<const Mesh> mesh)

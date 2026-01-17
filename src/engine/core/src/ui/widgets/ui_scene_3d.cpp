@@ -22,13 +22,18 @@ void UIScene3D::update(Time t, bool moved)
 	{
 		const float c = std::cos(float(curTime));
 		const float s = std::sin(float(curTime));
-		const float r = 600;
-		const Vector3f p = Vector3f(r * s, r * -c, 100.0f);
-		const Vector3f t = Vector3f(0, 0, 50);
-		const auto q = Quaternion::lookAt(t - p, Vector3f(0, 0, 1));
+		const float r = 1200;
+		const Vector3f p = Vector3f(r * s, 500.0f, r * -c);
+		const Vector3f t = Vector3f(0, 200, 0);
+		const auto q = Quaternion::lookAt(t - p, Vector3f(0, 1, 0));
 
 		Camera cam;
-		cam.setPosition(p).setRotation(q).setCameraType(CameraType::Perspective).setFieldOfView(Angle1f::fromDegrees(75.0f));
+		cam
+			.setPosition(p)
+			.setRotation(q)
+			.setCameraType(CameraType::Perspective)
+			.setFieldOfView(Angle1f::fromDegrees(60.0f))
+			.setClippingPlanes(10.0f, 3000.0f);
 		setCamera(cam);
 	}
 

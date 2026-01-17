@@ -45,7 +45,8 @@ std::shared_ptr<const Resource> MeshEditor::loadResource(const Path& assetPath, 
 	mesh->loadDependencies(project.getGameResources());
 
 	scene3d->clearRenderers();
-	scene3d->addRenderer(std::make_unique<MeshRenderer>(mesh));
+	auto renderer = std::make_unique<MeshRenderer>(mesh);
+	scene3d->addRenderer(std::move(renderer));
 
 	return mesh;
 }
