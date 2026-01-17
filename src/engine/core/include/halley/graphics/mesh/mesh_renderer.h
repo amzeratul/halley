@@ -16,6 +16,8 @@ namespace Halley
 	class MeshRenderer
 	{
 	public:
+		MeshRenderer(std::shared_ptr<const Mesh> mesh = {});
+
 		void update(Time t);
 		void render(Painter& painter) const;
 

@@ -8,6 +8,11 @@
 
 using namespace Halley;
 
+MeshRenderer::MeshRenderer(std::shared_ptr<const Mesh> mesh)
+	: mesh(std::move(mesh))
+{
+}
+
 void MeshRenderer::update(Time t)
 {
 	updateMatrix();

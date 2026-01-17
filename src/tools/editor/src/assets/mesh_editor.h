@@ -21,5 +21,7 @@ namespace Halley {
 	private:
 		Project& project;
 		ProjectWindow& projectWindow;
+
+		std::shared_ptr<UIScene3D> scene3d;
 	};
 }
