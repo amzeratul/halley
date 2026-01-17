@@ -19,10 +19,14 @@ Mesh::Mesh(ResourceLoader& loader)
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	deserialize(s);
+	loadDependencies(loader.getResources());
+}
 
+void Mesh::loadDependencies(Resources& resources)
+{
 	for (auto& o: objects) {
-		o.loadDependencies(loader);
-	}
+		o.loadDependencies(resources);
+	}	
 }
 
 std::unique_ptr<Mesh> Mesh::loadResource(ResourceLoader& loader)
@@ -51,14 +55,14 @@ MeshObject::MeshObject(String name)
 {
 }
 
-void MeshObject::loadDependencies(ResourceLoader& loader)
+void MeshObject::loadDependencies(Resources& resources)
 {
-	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
+	auto matDef = resources.get<MaterialDefinition>(materialName);
 	material = std::make_unique<Material>(matDef);
 
 	int i = 0;
 	for (auto& t: textureNames) {
-		auto texture = loader.getResources().get<Texture>(t);
+		auto texture = resources.get<Texture>(t);
 		material->set("tex" + toString(i), texture);
 		++i;
 	}

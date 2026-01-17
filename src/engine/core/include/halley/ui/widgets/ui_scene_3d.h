@@ -4,9 +4,11 @@
 #include "halley/graphics/mesh/mesh_renderer.h"
 
 namespace Halley {
+	class RenderSurface;
+
 	class UIScene3D : public UIWidget {
 	public:
-		explicit UIScene3D(String id, Resources& resources);
+		explicit UIScene3D(String id, const HalleyAPI& api, Resources& resources);
 
 		void update(Time t, bool moved) override;
 
@@ -27,8 +29,13 @@ namespace Halley {
 	private:
 		Resources& resources;
 
-		Sprite bg;
+		Colour4f bgCol;
 		Vector<std::unique_ptr<MeshRenderer>> renderers;
 		Camera camera;
+
+		std::unique_ptr<RenderSurface> renderSurface;
+		Time curTime = 0;
+
+        void drawOnPainter(Painter& painter) const;
     };
 }

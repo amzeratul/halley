@@ -9,8 +9,8 @@
 using namespace Halley;
 
 MeshRenderer::MeshRenderer(std::shared_ptr<const Mesh> mesh)
-	: mesh(std::move(mesh))
 {
+	setMesh(std::move(mesh));
 }
 
 void MeshRenderer::update(Time t)
@@ -20,6 +20,8 @@ void MeshRenderer::update(Time t)
 
 void MeshRenderer::render(Painter& painter) const
 {
+	// TODO: multi-thread support?
+
 	const size_t n = mesh->getObjects().size();
 	for (size_t i = 0; i < n; ++i) {
 		const auto& object = mesh->getObjects()[i];

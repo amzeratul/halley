@@ -21,7 +21,7 @@ namespace Halley {
 		MeshObject() = default;
 		MeshObject(String name);
 
-    	void loadDependencies(ResourceLoader& loader);
+    	void loadDependencies(Resources& resources);
 
     	uint32_t getNumVertices() const;
 		gsl::span<const Byte> getVertexData() const;
@@ -55,6 +55,8 @@ namespace Halley {
 		Mesh() = default;
 		Mesh(Vector<MeshObject> objects);
 		explicit Mesh(ResourceLoader& loader);
+
+		void loadDependencies(Resources& resources);
 
 		static std::unique_ptr<Mesh> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Mesh; }

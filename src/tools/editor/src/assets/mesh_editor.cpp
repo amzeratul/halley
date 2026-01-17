@@ -2,6 +2,7 @@
 
 #include "../../../tools/src/assets/importers/mesh_importer.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -14,6 +15,7 @@ MeshEditor::MeshEditor(UIFactory& factory, Resources& resources, AssetType type,
 
 void MeshEditor::refreshAssets()
 {
+	AssetEditor::refreshAssets();
 }
 
 bool MeshEditor::isReadyToLoad() const
@@ -23,12 +25,13 @@ bool MeshEditor::isReadyToLoad() const
 
 void MeshEditor::update(Time t, bool moved)
 {
+	AssetEditor::update(t, moved);
 }
 
 std::shared_ptr<const Resource> MeshEditor::loadResource(const Path& assetPath, const String& assetId, AssetType assetType)
 {
 	if (!scene3d) {
-		scene3d = std::make_shared<UIScene3D>("scene3d", project.getGameResources());
+		scene3d = std::make_shared<UIScene3D>("scene3d", projectWindow.getAPI(), project.getGameResources());
 		add(scene3d, 1);
 	}
 
@@ -39,6 +42,7 @@ std::shared_ptr<const Resource> MeshEditor::loadResource(const Path& assetPath, 
 		mesh = std::shared_ptr(MeshImporter::parse(assetPath, assetData, *this));
 	}
 	mesh->setAssetId(assetId);
+	mesh->loadDependencies(project.getGameResources());
 
 	scene3d->clearRenderers();
 	scene3d->addRenderer(std::make_unique<MeshRenderer>(mesh));
