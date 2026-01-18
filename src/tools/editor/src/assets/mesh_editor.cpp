@@ -66,7 +66,7 @@ void MeshEditor::onTabbedIn()
 
 Bytes MeshEditor::readAdditionalFile(const Path& filePath)
 {
-	return Path::readFile(filePath);
+	return Path::readFile(project.getAssetsSrcPath() / filePath);
 }
 
 void MeshEditor::updateCamera()

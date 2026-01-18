@@ -1,14 +1,16 @@
 #pragma once
+#include "halley/file/path.h"
 #include "halley/graphics/mesh/mesh.h"
 
 namespace Halley
 {
+	class Path;
 	class IAddionalFileReader;
 
 	class WavefrontReader
 	{
 	public:
-		static std::unique_ptr<Mesh> parse(const Bytes& data, IAddionalFileReader& reader);
+		static std::unique_ptr<Mesh> parse(const Path& filename, const Bytes& data, IAddionalFileReader& reader);
 
 	private:
 		struct FaceVertex
@@ -23,9 +25,15 @@ namespace Halley
 			IndexType vn = 0;
 		};
 
+		class WFMaterial {
+		public:
+			String name;
+			String diffuseTexture;
+		};
+
 		class State {
 		public:
-			State(IAddionalFileReader& additionalFileReader);
+			State(Path filename, IAddionalFileReader& additionalFileReader);
 
 			void parseLine(const String& data);
 			std::unique_ptr<Mesh> makeMesh();
@@ -40,10 +48,14 @@ namespace Halley
 			Vector<Vector3f> vn;
 
 			String name;
-			String material;
-			String materialLibrary;
+			String materialName;
+
+			WFMaterial curMaterial;
+			HashMap<String, WFMaterial> materials;
 
 			Vector<MeshObject> meshObjects;
+
+			Path filename;
 			IAddionalFileReader* addionalFileReader = nullptr;
 
 			void resetObject();
@@ -57,6 +69,11 @@ namespace Halley
 
 			void setMaterialLib(gsl::span<const String> tokens);
 			void useMaterial(gsl::span<const String> tokens);
+			void parseMaterialLibrary(const Path& path);
+
+			void parseMtlLine(const String& line);
+			void parseMtlCommand(const String& cmd, gsl::span<const String> args);
+			void finishMaterial();
 
 			void startObject(gsl::span<const String> tokens);
 			void finishObject();

@@ -1,9 +1,11 @@
 #include "wavefront_reader.h"
+
+#include "halley/plugin/iasset_importer.h"
 using namespace Halley;
 
-std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data, IAddionalFileReader& reader)
+std::unique_ptr<Mesh> WavefrontReader::parse(const Path& filename, const Bytes& data, IAddionalFileReader& reader)
 {
-	auto state = State(reader);
+	auto state = State(filename, reader);
 
 	// TODO: improve this?
 	const auto strData = String(reinterpret_cast<const char*>(data.data()), data.size());
@@ -14,8 +16,10 @@ std::unique_ptr<Mesh> WavefrontReader::parse(const Bytes& data, IAddionalFileRea
 	return state.makeMesh();
 }
 
-WavefrontReader::State::State(IAddionalFileReader& additionalFileReader)
-	: addionalFileReader(&additionalFileReader)
+
+WavefrontReader::State::State(Path filename, IAddionalFileReader& additionalFileReader)
+	: filename(std::move(filename))
+	, addionalFileReader(&additionalFileReader)
 {
 }
 
@@ -81,7 +85,7 @@ void WavefrontReader::State::resetObject()
 	indices.clear();
 	vertexMap.clear();
 	name = {};
-	material = {};
+	materialName = {};
 }
 
 void WavefrontReader::State::parseV(gsl::span<const String> tokens)
@@ -143,14 +147,69 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 
 void WavefrontReader::State::setMaterialLib(gsl::span<const String> tokens)
 {
-	materialLibrary = !tokens.empty() ? tokens[0] : "";
-	// TODO: parse material library
+	if (!tokens.empty() && !tokens[0].isEmpty()) {
+		parseMaterialLibrary(filename.parentPath() / tokens[0]);
+	}
 }
 
 void WavefrontReader::State::useMaterial(gsl::span<const String> tokens)
 {
-	material = !tokens.empty() ? tokens[0] : "";
-	// TODO: parse material
+	materialName = !tokens.empty() ? tokens[0] : "";
+}
+
+void WavefrontReader::State::parseMaterialLibrary(const Path& path)
+{
+	auto bytes = addionalFileReader->readAdditionalFile(path);
+	if (bytes.empty()) {
+		Logger::logError("Unable to load material library: " + path.getString());
+		return;
+	}
+
+	const auto strData = String(reinterpret_cast<const char*>(bytes.data()), bytes.size());
+	for (auto& line: strData.split('\n')) {
+		parseMtlLine(line);
+	}
+	finishMaterial();
+}
+
+void WavefrontReader::State::parseMtlLine(const String& line)
+{
+	auto cleanLine = line.replaceAll("  ", " ");
+	cleanLine.trimBoth();
+
+	if (cleanLine.startsWith("#")) {
+		return;
+	}
+
+	auto tokens = cleanLine.split(' ');
+
+	if (!tokens.empty()) {
+		const auto& cmd = tokens[0];
+		if (cmd.isEmpty()) {
+			return;
+		}
+
+		parseMtlCommand(cmd, tokens.const_span().subspan(1));
+	}
+}
+
+void WavefrontReader::State::parseMtlCommand(const String& cmd, gsl::span<const String> args)
+{
+	if (cmd == "newmtl") {
+		finishMaterial();
+		curMaterial = WFMaterial();
+		curMaterial.name = args[0];
+	} else if (cmd == "map_Kd") {
+		curMaterial.diffuseTexture = args[0];
+	}
+}
+
+void WavefrontReader::State::finishMaterial()
+{
+	if (!curMaterial.name.isEmpty()) {
+		auto name = curMaterial.name; // Copy is intentional due to move below
+		materials[std::move(name)] = std::move(curMaterial);
+	}
 }
 
 void WavefrontReader::State::startObject(gsl::span<const String> tokens)
@@ -172,8 +231,19 @@ MeshObject WavefrontReader::State::makeMeshObject()
 	result.setIndices(std::move(indices));
 	result.setVertices(std::move(vertices));
 
-	result.setMaterialName("Halley/StandardMesh"); // TODO
-	result.setTextureNames({"texture/meshTexture0.jpg"}); // TODO
+	auto matIter = materials.find(materialName);
+	if (matIter != materials.end()) {
+		const auto& matDef = matIter->second;
+		result.setMaterialName("Halley/StandardMesh"); // TODO?
+		result.setTextureNames({ matDef.diffuseTexture });
+	} else {
+		if (!materialName.isEmpty()) {
+			Logger::logWarning("Material not found while importing WaveFront Obj: " + materialName);
+		}
+		result.setMaterialName("Halley/StandardMesh");
+		result.setTextureNames({});
+	}
+
 	
 	resetObject();
 
