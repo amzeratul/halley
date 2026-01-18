@@ -77,6 +77,14 @@ namespace {
 			return 0.0f;
 		}
 	}
+
+	IndexType tryParseIndex(const String& str)
+	{
+		if (!str.isEmpty() && str.isInteger()) {
+			return static_cast<IndexType>(str.toInteger());
+		}
+		return 0;
+	}
 }
 
 void WavefrontReader::State::resetObject()
@@ -128,9 +136,9 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 	if (iter != vertexMap.end()) {
 		return iter->second;
 	} else {
-		const auto& pos = v.at(vert.v - 1);
-		const auto& normal = vn.at(vert.vn - 1);
-		const auto& tex = vt.at(vert.vt - 1);
+		const auto pos = vert.v > 0 ? v.at(vert.v - 1) : Vector3f();
+		const auto normal = vert.vn > 0 ? vn.at(vert.vn - 1) : Vector3f();
+		const auto tex = vert.vt > 0 ? vt.at(vert.vt - 1) : Vector3f();
 		const auto idx = static_cast<IndexType>(vertices.size());
 
 		vertices.emplace_back(MeshObject::VertexData {
@@ -253,9 +261,9 @@ MeshObject WavefrontReader::State::makeMeshObject()
 WavefrontReader::FaceVertex::FaceVertex(const String& str)
 {
 	auto tokens = str.split('/');
-	v = static_cast<IndexType>(tokens.at(0).toInteger());
-	vt = static_cast<IndexType>(tokens.at(1).toInteger());
-	vn = static_cast<IndexType>(tokens.at(2).toInteger());
+	v = tryParseIndex(tokens.at(0));
+	vt = tryParseIndex(tokens.at(1));
+	vn = tryParseIndex(tokens.at(2));
 }
 
 bool WavefrontReader::FaceVertex::operator<(const FaceVertex& other) const
