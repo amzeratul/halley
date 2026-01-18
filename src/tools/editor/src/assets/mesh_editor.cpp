@@ -71,7 +71,7 @@ Bytes MeshEditor::readAdditionalFile(const Path& filePath)
 
 void MeshEditor::updateCamera()
 {
-	const float distance = meshSize.length() * 1.0f;
+	const float distance = meshSize.length() * 1.5f;
 
 	const auto yaw = Angle1f::fromRadians(static_cast<float>(curTime));
 	const auto pitch = Angle1f::fromDegrees(30.0f);
@@ -84,7 +84,7 @@ void MeshEditor::updateCamera()
 		.setPosition(camPos)
 		.setRotation(rot)
 		.setCameraType(CameraType::Perspective)
-		.setFieldOfView(Angle1f::fromDegrees(60.0f))
+		.setFieldOfView(Angle1f::fromDegrees(45.0f))
 		.setClippingPlanes(distance * 0.002f, distance * 2.0f);
 
 	scene3d->setCamera(cam);
