@@ -16,6 +16,8 @@ namespace Halley
 	class MeshRenderer
 	{
 	public:
+		MeshRenderer(std::shared_ptr<const Mesh> mesh = {});
+
 		void update(Time t);
 		void render(Painter& painter) const;
 
@@ -24,6 +26,7 @@ namespace Halley
 		Vector3f getScale() const;
 		Quaternion getRotation() const;
 
+		void resetTransform();
 		MeshRenderer& setMesh(std::shared_ptr<const Mesh> mesh);
 		MeshRenderer& setPosition(Vector3f pos);
 		MeshRenderer& setScale(Vector3f scale);
@@ -36,7 +39,7 @@ namespace Halley
 		Vector3f scale;
 
 		std::shared_ptr<const Mesh> mesh;
-		std::shared_ptr<Material> material;
+		Vector<std::shared_ptr<Material>> materials;
 
 		bool dirty = true;
 		void updateMatrix();

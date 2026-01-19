@@ -173,19 +173,29 @@ namespace Halley {
 			return Vector2D<T>(y, z);
 		}
 
-		[[nodiscard]] Vector3D withX(T value) const
+		[[nodiscard]] constexpr Vector3D withX(T value) const
 		{
 			return Vector3D(value, y, z);
 		}
 
-		[[nodiscard]] Vector3D withY(T value) const
+		[[nodiscard]] constexpr Vector3D withY(T value) const
 		{
 			return Vector3D(x, value, z);
 		}
 
-		[[nodiscard]] Vector3D withZ(T value) const
+		[[nodiscard]] constexpr Vector3D withZ(T value) const
 		{
 			return Vector3D(x, y, value);
+		}
+
+		[[nodiscard]] static constexpr Vector3D min(Vector3D a, Vector3D<> b)
+		{
+			return Vector3D(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z));
+		}
+
+		[[nodiscard]] static constexpr Vector3D max(Vector3D a, Vector3D<> b)
+		{
+			return Vector3D(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
 		}
 	};
 

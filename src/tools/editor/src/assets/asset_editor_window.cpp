@@ -3,6 +3,7 @@
 #include "asset_editor.h"
 #include "asset_file_handler.h"
 #include "font_editor.h"
+#include "mesh_editor.h"
 #include "audio_editor/audio_event_editor.h"
 #include "audio_editor/audio_object_editor.h"
 #include "metadata_editor.h"
@@ -238,6 +239,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(AssetType type)
 		return std::make_shared<RenderGraphAssetEditor>(factory, project.getGameResources(), projectWindow);
 	case AssetType::Font:
 		return std::make_shared<FontEditor>(factory, project.getGameResources(), type, project, projectWindow);
+	case AssetType::Mesh:
+		return std::make_shared<MeshEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}
 	return {};
 }

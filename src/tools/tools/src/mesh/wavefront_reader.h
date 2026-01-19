@@ -1,17 +1,21 @@
 #pragma once
+#include "halley/file/path.h"
 #include "halley/graphics/mesh/mesh.h"
 
 namespace Halley
 {
+	class Path;
+	class IAddionalFileReader;
+
 	class WavefrontReader
 	{
 	public:
-		std::unique_ptr<Mesh> parse(const Bytes& data);
+		static std::unique_ptr<Mesh> parse(const Path& filename, const Bytes& data, IAddionalFileReader& reader);
 
 	private:
 		struct FaceVertex
 		{
-			FaceVertex();
+			FaceVertex() = default;
 			FaceVertex(const String& str);
 
 			bool operator<(const FaceVertex& other) const;
@@ -20,24 +24,60 @@ namespace Halley
 			IndexType vt = 0;
 			IndexType vn = 0;
 		};
-		
-		Vector<VertexData> vertices;
-		Vector<IndexType> indices;
-		
-		Vector<Vector3f> v;
-		Vector<Vector3f> vt;
-		Vector<Vector3f> vn;
 
-		std::map<FaceVertex, IndexType> vertexMap;
+		class WFMaterial {
+		public:
+			String name;
+			String diffuseTexture;
+		};
 
-		std::unique_ptr<Mesh> makeMesh();
-		void parseLine(const String& data);
+		class State {
+		public:
+			State(Path filename, IAddionalFileReader& additionalFileReader);
 
-		void parseV(Vector<String>& tokens);
-		void parseVN(Vector<String>& tokens);
-		void parseVT(Vector<String>& tokens);
-		void parseF(Vector<String>& tokens);
-		void makeTriangle(const FaceVertex& a, const FaceVertex& b, const FaceVertex& c);
-		IndexType getIndex(const FaceVertex& vert);
+			void parseLine(const String& data);
+			std::unique_ptr<Mesh> makeMesh();
+
+		private:
+			Vector<MeshObject::VertexData> vertices;
+			Vector<IndexType> indices;
+			std::map<FaceVertex, IndexType> vertexMap;
+
+			Vector<Vector3f> v;
+			Vector<Vector3f> vt;
+			Vector<Vector3f> vn;
+
+			String name;
+			String materialName;
+
+			WFMaterial curMaterial;
+			HashMap<String, WFMaterial> materials;
+
+			Vector<MeshObject> meshObjects;
+
+			Path filename;
+			IAddionalFileReader* addionalFileReader = nullptr;
+
+			void resetObject();
+
+			void parseV(gsl::span<const String> tokens);
+			void parseVN(gsl::span<const String> tokens);
+			void parseVT(gsl::span<const String> tokens);
+			void parseF(gsl::span<const String> tokens);
+			void makeTriangle(const FaceVertex& a, const FaceVertex& b, const FaceVertex& c);
+			IndexType getIndex(const FaceVertex& vert);
+
+			void setMaterialLib(gsl::span<const String> tokens);
+			void useMaterial(gsl::span<const String> tokens);
+			void parseMaterialLibrary(const Path& path);
+
+			void parseMtlLine(const String& line);
+			void parseMtlCommand(const String& cmd, gsl::span<const String> args);
+			void finishMaterial();
+
+			void startObject(gsl::span<const String> tokens);
+			void finishObject();
+			MeshObject makeMeshObject();
+		};
 	};
 }

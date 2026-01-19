@@ -8,6 +8,12 @@
 
 using namespace Halley;
 
+MeshRenderer::MeshRenderer(std::shared_ptr<const Mesh> mesh)
+{
+	resetTransform();
+	setMesh(std::move(mesh));
+}
+
 void MeshRenderer::update(Time t)
 {
 	updateMatrix();
@@ -15,7 +21,13 @@ void MeshRenderer::update(Time t)
 
 void MeshRenderer::render(Painter& painter) const
 {
-	painter.draw(material, mesh->getNumVertices(), mesh->getVertexData().data(), mesh->getIndices());
+	// TODO: multi-thread support?
+
+	const size_t n = mesh->getObjects().size();
+	for (size_t i = 0; i < n; ++i) {
+		const auto& object = mesh->getObjects()[i];
+		painter.draw(materials[i], object.getNumVertices(), object.getVertexData().data(), object.getIndices());
+	}
 }
 
 std::shared_ptr<const Mesh> MeshRenderer::getMesh() const
@@ -38,9 +50,21 @@ Quaternion MeshRenderer::getRotation() const
 	return rot;
 }
 
+void MeshRenderer::resetTransform()
+{
+	pos = {};
+	scale = Vector3f(1, 1, 1);
+	rot = Quaternion();
+}
+
 MeshRenderer& MeshRenderer::setMesh(std::shared_ptr<const Mesh> mesh)
 {
-	material = mesh->getMaterial()->clone();
+	const size_t n = mesh->getObjects().size();
+	materials.resize(n);
+	for (size_t i = 0; i < n; ++i) {
+		materials[i] = mesh->getObjects()[i].getMaterial()->clone();
+	}
+
 	this->mesh = std::move(mesh);
 	dirty = true;
 	return *this;
@@ -75,6 +99,9 @@ void MeshRenderer::updateMatrix()
 		matrix.rotate(rot);
 		matrix.scale(scale);
 		dirty = false;
-		material->set("u_modelMatrix", matrix);
+
+		for (auto& material : materials) {
+			material->set("u_modelMatrix", matrix);
+		}
 	}
 }
