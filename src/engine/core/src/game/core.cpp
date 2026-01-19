@@ -375,6 +375,7 @@ void Core::clearPresses()
 
 void Core::runStartFrame(Time time)
 {
+
 	if (currentStage) {
 		currentStage->onStartFrame(time, *frameDataUpdate);
 	}
@@ -402,6 +403,11 @@ void Core::updatePlatform()
 		ProfilerEvent event(ProfilerEventType::CoreUpdatePlatform);
 		api->platformInternal->update();
 	}
+}
+
+void Core::updateResources(Time time)
+{
+	resources->startFrame(time);
 }
 
 void Core::onTick(Time delta)
@@ -504,6 +510,7 @@ void Core::preUpdate(Time time)
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update(time);
 	}
+	updateResources(time);
 }
 
 void Core::postUpdate(Time time)

@@ -101,7 +101,10 @@ namespace Halley
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
 		gsl::span<const std::shared_ptr<const Texture>> getTextures() const;
 		size_t getNumTextureUnits() const;
+
 		bool areAllTexturesLoaded() const;
+		void markInActiveUse() const;
+		void markBackgroundLoaded() const;
 
 		gsl::span<const MaterialDataBlock> getDataBlocks() const;
 		gsl::span<MaterialDataBlock> getDataBlocks();

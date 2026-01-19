@@ -56,6 +56,10 @@ float Resource::getAge() const
 	return age;
 }
 
+void Resource::startFrame(Time dt) const
+{
+}
+
 void Resource::setUnloaded()
 {
 	unloaded = true;
@@ -118,6 +122,8 @@ const Resource* ResourceObserver::getResourceBeingObserved() const
 AsyncResource::AsyncResource() 
 	: failed(false)
 	, loadState(State::Unloaded)
+	, inUseThisFrame(false)
+	, inBackgroundThisFrame(false)
 {}
 
 AsyncResource::~AsyncResource()
@@ -164,7 +170,7 @@ void AsyncResource::startLoading()
 
 void AsyncResource::doneLoading()
 {
-	if (loadState == State::Loading) {
+	if (loadState != State::Loaded) {
 		Vector<Promise<void>> promises;
 		{
 			UniqueLock lock(loadMutex);
@@ -186,9 +192,7 @@ void AsyncResource::loadingFailed()
 
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
-	if (loadState == State::Unloaded) {
-		const_cast<AsyncResource*>(this)->requestLoading();
-	}
+	requestLoading();
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
 		while (loadState != State::Loaded) {
@@ -211,6 +215,37 @@ Future<void> AsyncResource::onLoad() const
 	}
 }
 
+void AsyncResource::startFrame(Time dt) const
+{
+	timeSinceInUse += dt;
+	timeSinceInBackground += dt;
+
+	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
+		timeSinceInBackground = 0;
+	}
+	if (inUseThisFrame.load(std::memory_order_relaxed)) {
+		timeSinceInUse = 0;
+	}
+
+	inUseThisFrame.store(false, std::memory_order_relaxed);
+	inBackgroundThisFrame.store(false, std::memory_order_relaxed);
+
+	if (loadState == State::Loaded && timeSinceInUse > 2.0) {
+		//Logger::logDev(String("Can probably unload resource [") + typeid(*this).name() + "] " + getAssetId(), true);
+	}
+}
+
+void AsyncResource::markActivelyInUse() const
+{
+	inUseThisFrame.store(true, std::memory_order_relaxed);
+	requestLoading();
+}
+
+void AsyncResource::markBackgroundLoaded() const
+{
+	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
+}
+
 bool AsyncResource::isLoaded() const
 {
 	return loadState == State::Loaded;
@@ -224,6 +259,11 @@ bool AsyncResource::hasSucceeded() const
 bool AsyncResource::hasFailed() const
 {
 	return failed;
+}
+
+void AsyncResource::requestLoading() const
+{
+	const_cast<AsyncResource*>(this)->requestLoading();
 }
 
 void AsyncResource::requestLoading()

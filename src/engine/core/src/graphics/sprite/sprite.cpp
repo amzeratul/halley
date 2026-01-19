@@ -367,6 +367,20 @@ bool Sprite::isLoaded() const
 	return material->areAllTexturesLoaded();
 }
 
+void Sprite::markInActiveUse() const
+{
+	if (material) {
+		material->markInActiveUse();
+	}
+}
+
+void Sprite::markBackgroundLoaded() const
+{
+	if (material) {
+		material->markBackgroundLoaded();
+	}
+}
+
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));
@@ -945,6 +959,8 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 			sprite.setColour(Colour4f::fromString(node["colour"].asStringView()));
 		}
 	}
+
+	sprite.markBackgroundLoaded();
 }
 
 void Sprite::copyFrom(const Sprite& other, bool enableHotReload)

@@ -185,6 +185,8 @@ namespace Halley {
 		void generateMemoryReport();
 		void generateDetailedMemoryReport(AssetType type, std::optional<int> limit = {});
 
+		void startFrame(Time t);
+
 	private:
 		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;

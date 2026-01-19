@@ -90,6 +90,8 @@ std::unique_ptr<IAudioClipStreamHandle> AudioClip::makeStreamHandle() const
 
 void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandle* streamHandle) const
 {
+	markActivelyInUse();
+
 	if (!streaming) {
 		return;
 	}

@@ -103,6 +103,7 @@ namespace Halley
 		void pumpAudio();
 		void updateSystem(Time time);
 		void updatePlatform();
+		void updateResources(Time time);
 
 		void onProfileData(std::shared_ptr<ProfilerData> data);
 		Time getProfileCaptureThreshold() const;

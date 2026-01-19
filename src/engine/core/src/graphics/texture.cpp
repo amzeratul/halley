@@ -129,7 +129,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	texture->setMeta(meta);
 	texture->retainPixelData = loader.getResources().getOptions().retainPixelData;
 	texture->loaderFunc = loader.getLoaderFunction(true);
-	texture->loadFromDisk();
+	//texture->loadFromDisk();
 
 	return texture;
 }

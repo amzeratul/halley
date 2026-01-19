@@ -190,6 +190,18 @@ void ResourceCollectionBase::age(float time)
 	}
 }
 
+void ResourceCollectionBase::startFrame(Time time)
+{
+	if (isAsync()) {
+		SharedLock lock(mutex);
+
+		for (auto& r: resources) {
+			const auto& resourcePtr = r.second.res;
+			resourcePtr->startFrame(time);
+		}
+	}
+}
+
 ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
 {
 	Vector<decltype(resources)::iterator> toDelete;

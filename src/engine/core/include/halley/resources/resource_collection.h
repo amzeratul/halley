@@ -10,6 +10,7 @@
 #include <halley/data_structures/hash_map.h>
 
 #include "halley/support/debug.h"
+#include "halley/time/halleytime.h"
 
 // Virtual resource get is necessary for proper editor functionality, but might incur a very small performance penalty
 #ifdef DEV_BUILD
@@ -18,6 +19,7 @@
 
 namespace Halley
 {
+	class AsyncResource;
 	enum class AssetType;
 	class Resource;
 	class Resources;
@@ -68,6 +70,8 @@ namespace Halley
 		void generateDetailedMemoryReport(std::optional<int> limit) const;
 		ResourceMemoryUsage getMemoryUsageAndAge(float time);
 		void age(float time);
+		void startFrame(Time time);
+		virtual bool isAsync() const = 0;
 
 		/// <returns>How much memory was freed</returns>
 		ResourceMemoryUsage clearOldResources(float maxAge);
@@ -122,6 +126,11 @@ namespace Halley
 	protected:
 		std::shared_ptr<Resource> loadResource(ResourceLoader& loader) override {
 			return T::loadResource(loader);
+		}
+
+		bool isAsync() const override
+		{
+			return std::is_base_of_v<AsyncResource, T>;
 		}
 	};
 }

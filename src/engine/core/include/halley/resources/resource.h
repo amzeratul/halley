@@ -7,6 +7,7 @@
 #include "metadata.h"
 #include "halley/concurrency/future.h"
 #include "halley/text/enum_names.h"
+#include "halley/time/halleytime.h"
 
 #if defined(DEV_BUILD) && !defined(NN_NINTENDO_SDK)
 #define ENABLE_HOT_RELOAD
@@ -215,6 +216,8 @@ namespace Halley
 		void resetAge();
 		float getAge() const;
 
+		virtual void startFrame(Time dt) const;
+
 		void setUnloaded();
 		bool isUnloaded() const;
 		virtual void onOtherResourcesUnloaded();
@@ -274,6 +277,10 @@ namespace Halley
 		void waitForLoad(bool acceptFailed = false) const;
 		Future<void> onLoad() const;
 
+		void startFrame(Time dt) const override;
+		void markActivelyInUse() const;
+		void markBackgroundLoaded() const;
+
 		bool isLoaded() const;
 		bool hasSucceeded() const;
 		bool hasFailed() const;
@@ -284,9 +291,17 @@ namespace Halley
 	private:
 		std::atomic<bool> failed;
 		std::atomic<State> loadState;
+
 		mutable ConditionVariable loadWait;
 		mutable Mutex loadMutex;
 		mutable Vector<Promise<void>> pendingPromises;
+
+		mutable Time timeSinceInUse = 0;
+		mutable Time timeSinceInBackground = 0;
+		mutable std::atomic<bool> inUseThisFrame;
+		mutable std::atomic<bool> inBackgroundThisFrame;
+		
+		void requestLoading() const;
 	};
 
 	struct ResourceOptions {

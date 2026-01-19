@@ -184,6 +184,7 @@ void Material::bind(int passNumber, Painter& painter) const
 	currentPass = passNumber;
 	currentHash = getFullHash();
 
+	markInActiveUse();
 	painter.setMaterialPass(*this, passNumber);
 }
 
@@ -271,6 +272,24 @@ bool Material::areAllTexturesLoaded() const
 		}
 	}
 	return true;
+}
+
+void Material::markInActiveUse() const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markActivelyInUse();
+		}
+	}
+}
+
+void Material::markBackgroundLoaded() const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markBackgroundLoaded();
+		}
+	}
 }
 
 bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)

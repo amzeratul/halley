@@ -115,3 +115,12 @@ void Resources::generateDetailedMemoryReport(AssetType type, std::optional<int> 
 		}
 	}
 }
+
+void Resources::startFrame(Time t)
+{
+	for (auto& res: resources) {
+		if (res) {
+			res->startFrame(t);
+		}
+	}
+}
