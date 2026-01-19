@@ -32,7 +32,7 @@ DX11Texture::DX11Texture(DX11Video& video, Vector2i size, ID3D11ShaderResourceVi
 
 DX11Texture::~DX11Texture()
 {
-	clear();
+	clearTexture();
 }
 
 DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
@@ -74,7 +74,7 @@ static D3D11_TEXTURE_ADDRESS_MODE getAddressMode(TextureAddressMode mode)
 
 void DX11Texture::doLoad(TextureDescriptor& descriptor)
 {
-	clear();
+	clearTexture();
 
 	int bpp = TextureDescriptor::getBytesPerPixel(descriptor.format);
 
@@ -320,7 +320,7 @@ void DX11Texture::copyToImageDirectly(Image& image) const
 	dc.Unmap(texture, 0);
 }
 
-void DX11Texture::clear()
+void DX11Texture::clearTexture()
 {
 	if (samplerState) {
 		samplerState->Release();
@@ -338,6 +338,9 @@ void DX11Texture::clear()
 		texture->Release();
 		texture = nullptr;
 	}
+
+	format = {};
+	vramUsage = 0;
 }
 
 DXGI_FORMAT DX11Texture::getFormat() const

@@ -83,10 +83,6 @@ ResourceMemoryUsage Texture::getMemoryUsage() const
 	return result;
 }
 
-void Texture::doLoad(TextureDescriptor& descriptor)
-{
-}
-
 void Texture::doCopyToTexture(Painter& painter, Texture& other) const
 {
 	Logger::logWarning("Copying to texture not implemented.");
@@ -113,6 +109,12 @@ void Texture::moveFrom(Texture& other)
 void Texture::doRequestLoading()
 {
 	loadFromDisk();
+}
+
+void Texture::doRequestUnloading()
+{
+	clearTexture();
+	doneUnloading();
 }
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)

@@ -18,6 +18,7 @@ namespace Halley
 		DX11Texture& operator=(DX11Texture&& other) noexcept;
 
 		void doLoad(TextureDescriptor& descriptor) override;
+		void clearTexture() override;
 		void reload(Resource&& resource) override;
 		void bind(DX11Video& video, int textureUnit, TextureSamplerType samplerType) const;
 		void generateMipMaps() override;
@@ -50,6 +51,5 @@ namespace Halley
 #endif
 
 		void copyToImageDirectly(Image& image) const;
-		void clear();
 	};
 }

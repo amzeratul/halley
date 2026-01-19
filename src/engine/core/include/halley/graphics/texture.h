@@ -57,14 +57,16 @@ namespace Halley
 		bool retainPixelData = false;
 		ResourceLoader::LoaderFunc loaderFunc;
 
-		virtual void doLoad(TextureDescriptor& descriptor);
+		virtual void doLoad(TextureDescriptor& descriptor) = 0;
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
 		virtual void doCopyToImage(Painter& painter, Image& image) const;
 		virtual size_t getVRamUsage() const;
+		virtual void clearTexture() = 0;
 
 		void moveFrom(Texture& other);
 		
 		void doRequestLoading() override;
+		void doRequestUnloading() override;
 
 	private:
 		void loadFromDisk();

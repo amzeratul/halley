@@ -22,10 +22,7 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 TextureOpenGL::~TextureOpenGL()
 {
 	waitForOpenGLLoad();
-	if (textureId != 0) {
-		glDeleteTextures(1, &textureId);
-		textureId = 0;
-	}
+	clearTexture();
 }
 
 TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
@@ -57,6 +54,14 @@ void TextureOpenGL::doLoad(TextureDescriptor& d)
 		updateImage(d.pixelData, d.format, d.useMipMap);
 	}
 	finishLoading();
+}
+
+void TextureOpenGL::clearTexture()
+{
+	if (textureId != 0) {
+		glDeleteTextures(1, &textureId);
+		textureId = 0;
+	}
 }
 
 void TextureOpenGL::reload(Resource&& resource)

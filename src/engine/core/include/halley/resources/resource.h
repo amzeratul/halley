@@ -280,8 +280,10 @@ namespace Halley
 
 		void startLoading(); // call from main thread before spinning worker thread
 		void doneLoading();  // call from worker thread when done loading
+		void doneUnloading(); // call from wherever when done unloading
 		void loadingFailed(); // Call from worker thread if loading fails
-		void requestLoading();
+		void requestLoading() const;
+		void requestUnloading() const;
 		void waitForLoad(bool acceptFailed = false) const;
 		Future<void> onLoad() const;
 
@@ -296,6 +298,7 @@ namespace Halley
 
 	protected:
 		virtual void doRequestLoading();
+		virtual void doRequestUnloading();
 
 	private:
 		std::atomic<bool> failed;
@@ -308,8 +311,6 @@ namespace Halley
 		mutable UsageData usageData;
 		mutable std::atomic<bool> inUseThisFrame;
 		mutable std::atomic<bool> inBackgroundThisFrame;
-		
-		void requestLoading() const;
 	};
 
 	struct ResourceOptions {

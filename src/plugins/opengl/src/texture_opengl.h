@@ -21,6 +21,7 @@ namespace Halley
 		unsigned int getNativeId() const;
 
 		void doLoad(TextureDescriptor& descriptor) override;
+		void clearTexture() override;
 		void reload(Resource&& resource) override;
 
 		void generateMipMaps() override;

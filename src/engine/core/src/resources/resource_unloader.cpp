@@ -36,7 +36,8 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		const auto usage = res.getUsageData();
 
 		if (usage.loaded && usage.timeSinceInUse > 1.0 && usage.timeSinceInBackground >= 1.0) {
-			Logger::logDev(String("Can probably unload resource [") + toString(collection.getAssetType()) + "] " + res.getAssetId(), true);
+			Logger::logDev(String("Unloading resource [") + toString(collection.getAssetType()) + "] " + res.getAssetId(), true);
+			res.requestUnloading();
 		}
 	});
 }

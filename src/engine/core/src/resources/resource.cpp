@@ -184,6 +184,15 @@ void AsyncResource::doneLoading()
 	}
 }
 
+void AsyncResource::doneUnloading()
+{
+	// Don't lock mutex here, it should already be locked
+	if (loadState == State::Loaded) {
+		loadState = State::Unloaded;
+		failed = false;
+	}
+}
+
 void AsyncResource::loadingFailed()
 {
 	failed = true;
@@ -269,17 +278,28 @@ bool AsyncResource::hasFailed() const
 
 void AsyncResource::requestLoading() const
 {
-	const_cast<AsyncResource*>(this)->requestLoading();
-}
-
-void AsyncResource::requestLoading()
-{
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
-		doRequestLoading();
+		if (loadState == State::Unloaded) {
+			const_cast<AsyncResource*>(this)->doRequestLoading();
+		}
+	}
+}
+
+void AsyncResource::requestUnloading() const
+{
+	if (loadState == State::Loaded) {
+		UniqueLock lock(loadMutex);
+		if (loadState == State::Loaded) {
+			const_cast<AsyncResource*>(this)->doRequestUnloading();
+		}
 	}
 }
 
 void AsyncResource::doRequestLoading()
+{
+}
+
+void AsyncResource::doRequestUnloading()
 {
 }
