@@ -588,10 +588,21 @@ Vector2i SpriteSheet::computeAtlasSize(const Vector<BinPackResult>& results, boo
 		h = std::max(h, r.rect.getBottom());
 	}
 
+	auto potSize = Vector2i(nextPowerOf2(w), nextPowerOf2(h));
+	
 	if (powerOfTwo) {
-		return Vector2i(nextPowerOf2(w), nextPowerOf2(h));
+		return potSize;
 	} else {
-		return Vector2i(w, h);
+		auto size = Vector2i(w, h);
+
+		if (results.size() > 1 && static_cast<float>(potSize.x) / static_cast<float>(size.x) < 1.05f) {
+			size.x = potSize.x; // Round width to power of two if close enough
+		}
+		if (size.y % 2 == 1 && size.y > 1) {
+			size.y += 1; // Round height to even
+		}
+		
+		return size;
 	}
 }
 
