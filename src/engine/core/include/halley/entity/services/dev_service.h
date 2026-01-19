@@ -100,7 +100,6 @@ namespace Halley {
 		Polygon sceneBoundaries;
 		Polygon safeSceneBoundaries;
 		Polygon altSceneBoundaries;
-		Prefab* currentEditorScene = nullptr;
 
 		bool allowCameraTargets = true;
 		bool darkenChunks = true;

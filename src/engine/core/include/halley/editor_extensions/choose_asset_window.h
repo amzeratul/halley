@@ -95,7 +95,6 @@ namespace Halley {
 		Vector<String> names;
 
     	UIFactory& factory;
-		UISizerType orientation;
 
 		Vector<DataSet> entries;
 		size_t curEntry = 0;

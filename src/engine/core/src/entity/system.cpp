@@ -198,7 +198,7 @@ void System::sendEntityMessageConfig(EntityId target, const String& messageType,
 void System::sendSystemMessageConfig(const String& targetSystem, const String& messageType, const ConfigNode& data)
 {
 	auto msg = world->deserializeSystemMessage(messageType, data);
-	auto destination = msg->getMessageDestination();
+	//auto destination = msg->getMessageDestination();
 
 	SystemMessageContext context;
 

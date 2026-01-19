@@ -129,7 +129,6 @@ namespace Halley
 		int64_t totalTimePerAudioBuffer = 0;
 		int64_t pendingVoiceRenderTime = 0;
 
-		bool capturing = true;
 		Page page = Page::ShortSummary;
 		bool drawBg = true;
 
