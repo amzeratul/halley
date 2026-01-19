@@ -246,7 +246,6 @@ DX12Texture::DX12Texture(DX12Video& video, Vector2i size)
     : Texture(size)
     , video(video)
 {
-    startLoading();
 }
 
 DX12Texture::~DX12Texture()

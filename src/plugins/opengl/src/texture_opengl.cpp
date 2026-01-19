@@ -17,7 +17,6 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 {
 	glGenTextures(1, &textureId);
 	assert(textureId != 0);
-	startLoading();
 }
 
 TextureOpenGL::~TextureOpenGL()

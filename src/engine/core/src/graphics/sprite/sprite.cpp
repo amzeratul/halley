@@ -429,7 +429,6 @@ Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_p
 		TextureDescriptor desc(image->getSize(), TextureFormat::RGBA);
 		desc.pixelData = std::move(image);
 		desc.useFiltering = filtering;
-		tex->startLoading();
 		tex->load(std::move(desc));
 
 		const auto matDef = resources.get<MaterialDefinition>(materialName.empty() ? MaterialDefinition::defaultMaterial : materialName);

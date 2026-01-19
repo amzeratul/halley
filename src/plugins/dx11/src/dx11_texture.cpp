@@ -263,7 +263,7 @@ void DX11Texture::doCopyToImage(Painter& painter, Image& image) const
 		temp->load(std::move(desc));
 		doCopyToTexture(painter, *temp);
 		dynamic_cast<DX11Texture&>(*temp).copyToImageDirectly(image);
-	}		
+	}
 }
 
 void DX11Texture::copyToImageDirectly(Image& image) const

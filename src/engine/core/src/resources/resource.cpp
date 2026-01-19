@@ -156,8 +156,10 @@ AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
 
 void AsyncResource::startLoading()
 {
-	loadState = State::Loading;
-	failed = false;
+	if (loadState == State::Unloaded) {
+		loadState = State::Loading;
+		failed = false;
+	}
 }
 
 void AsyncResource::doneLoading()
