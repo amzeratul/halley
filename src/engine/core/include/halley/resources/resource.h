@@ -262,6 +262,14 @@ namespace Halley
 			Loaded
 		};
 
+		struct UsageData {
+			Time timeSinceInUse = 0;
+			Time timeSinceInBackground = 0;
+			int framesSinceInUse = 0;
+			int framesSinceInBackground = 0;
+			bool loaded = false;
+		};
+
 		AsyncResource();
 		virtual ~AsyncResource();
 
@@ -280,6 +288,7 @@ namespace Halley
 		void startFrame(Time dt) const override;
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
+		const UsageData& getUsageData() const;
 
 		bool isLoaded() const;
 		bool hasSucceeded() const;
@@ -296,8 +305,7 @@ namespace Halley
 		mutable Mutex loadMutex;
 		mutable Vector<Promise<void>> pendingPromises;
 
-		mutable Time timeSinceInUse = 0;
-		mutable Time timeSinceInBackground = 0;
+		mutable UsageData usageData;
 		mutable std::atomic<bool> inUseThisFrame;
 		mutable std::atomic<bool> inBackgroundThisFrame;
 		

@@ -84,6 +84,7 @@ set(SOURCES
         "src/resources/resource_locator.cpp"
         "src/resources/resource_pack.cpp"
         "src/resources/resource_reference.cpp"
+        "src/resources/resource_unloader.cpp"
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
@@ -530,6 +531,7 @@ set(HEADERS
         "include/halley/resources/resource_collection.h"
         "include/halley/resources/resource_locator.h"
         "include/halley/resources/resource_reference.h"
+        "include/halley/resources/resource_unloader.h"
         "include/halley/resources/resources.h"
         "include/halley/resources/standard_resources.h"
 

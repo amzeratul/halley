@@ -27,6 +27,7 @@
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/halley_iostream.h"
+#include "halley/resources/resource_unloader.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -301,6 +302,8 @@ void Core::initResources()
 	StandardResources::initialize(*resources);
 	api->audioInternal->setResources(*resources);
 	api->inputInternal->setResources(*resources);
+
+	resourceUnloader = std::make_unique<ResourceUnloader>(*resources);
 }
 
 void Core::setOutRedirect(bool appendToExisting)
@@ -407,7 +410,8 @@ void Core::updatePlatform()
 
 void Core::updateResources(Time time)
 {
-	resources->startFrame(time);
+	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
+	resourceUnloader->update(time);
 }
 
 void Core::onTick(Time delta)

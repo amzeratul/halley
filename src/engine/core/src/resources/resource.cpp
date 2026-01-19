@@ -217,22 +217,23 @@ Future<void> AsyncResource::onLoad() const
 
 void AsyncResource::startFrame(Time dt) const
 {
-	timeSinceInUse += dt;
-	timeSinceInBackground += dt;
+	usageData.timeSinceInUse += dt;
+	usageData.timeSinceInBackground += dt;
+	usageData.framesSinceInUse++;
+	usageData.framesSinceInBackground++;
+	usageData.loaded = loadState == State::Loaded;
 
 	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
-		timeSinceInBackground = 0;
+		usageData.timeSinceInBackground = 0;
+		usageData.framesSinceInBackground = 0;
 	}
 	if (inUseThisFrame.load(std::memory_order_relaxed)) {
-		timeSinceInUse = 0;
+		usageData.timeSinceInUse = 0;
+		usageData.framesSinceInBackground = 0;
 	}
 
 	inUseThisFrame.store(false, std::memory_order_relaxed);
 	inBackgroundThisFrame.store(false, std::memory_order_relaxed);
-
-	if (loadState == State::Loaded && timeSinceInUse > 2.0) {
-		//Logger::logDev(String("Can probably unload resource [") + typeid(*this).name() + "] " + getAssetId(), true);
-	}
 }
 
 void AsyncResource::markActivelyInUse() const
@@ -244,6 +245,11 @@ void AsyncResource::markActivelyInUse() const
 void AsyncResource::markBackgroundLoaded() const
 {
 	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
+}
+
+const AsyncResource::UsageData& AsyncResource::getUsageData() const
+{
+	return usageData;
 }
 
 bool AsyncResource::isLoaded() const

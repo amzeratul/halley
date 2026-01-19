@@ -70,12 +70,21 @@ namespace Halley
 		void generateDetailedMemoryReport(std::optional<int> limit) const;
 		ResourceMemoryUsage getMemoryUsageAndAge(float time);
 		void age(float time);
-		void startFrame(Time time);
+
 		virtual bool isAsync() const = 0;
 
 		/// <returns>How much memory was freed</returns>
 		ResourceMemoryUsage clearOldResources(float maxAge);
 		void notifyResourcesUnloaded();
+
+		template<typename F>
+		void forEachResource(const F& f)
+		{
+			SharedLock lock(mutex);
+			for (auto& r: resources) {
+				f(r.second.res);
+			}
+		}
 
 #ifdef VIRTUAL_RESOURCE_GET
 		virtual std::shared_ptr<Resource> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal, bool allowFallback = true);

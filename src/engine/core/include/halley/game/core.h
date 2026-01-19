@@ -26,6 +26,7 @@ namespace Halley
 	class RenderTarget;
 	class Environment;
 	class DevConClient;
+	class ResourceUnloader;
 
 	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
 	{
@@ -148,5 +149,7 @@ namespace Halley
 		HalleyStatics statics;
 
 		ComputerData computerData;
+
+		std::unique_ptr<ResourceUnloader> resourceUnloader;
 	};
 }
