@@ -61,6 +61,7 @@ namespace Halley {
         public:
             bool alive = true;
         	bool hasAuthorityOnly = false;
+        	bool forceNextFastUpdate = false;
             Time timeSinceSend = 0;
             EntityNetworkId networkId = 0;
             EntityData data;
@@ -131,7 +132,7 @@ namespace Halley {
 
         void stripNestedNetworkComponents(EntityRef entity, int depth = 0);
 
-    	void updateRemoteEntityPosition(InboundEntity& inboundEntity, EntityRef entity, const Vector2f& position, int32_t timestamp, int32_t now);
+    	void updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp);
     	void interpolateRemoteEntityPositions(Time dt);
 	};
 }

@@ -310,13 +310,21 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			// This must be an outbound entity with "hasAuthorityOnly". If it just has been
     			// created, its previous journal is still empty.
     			Expects(remote.hasAuthorityOnly);
-    			// Just process and store the journal, but keep marked as "not modified".
+    			// Just process and store the journal, but keep marked as "not modified" ...
 		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
-    			// TODO: can this miss some intermediate, local modifications?
+    			// ... but set flag to force an update next tick, so we don't miss any changes.
+    			remote.forceNextFastUpdate = true;
     			Logger::logDev("populating outbound entity journal, authority-only");
     		} else {
     			modified = fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
     			modifiedInStructure = fastSerialize.hasEntityChanges(wantToLog);
+
+    			// If the forceNextFastUpdate flag is set, mark as modified and to be sent, even if
+    			// there is no change.
+    			if (!modified && remote.forceNextFastUpdate) {
+    				modified = true;
+    				remote.forceNextFastUpdate = false;
+    			}
     		}
 
     		wantToLog &= modified;
@@ -628,7 +636,6 @@ void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef e
 void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, EntityRef entity, const EntityNetworkMessageUpdate& msg)
 {
 	int32_t timestamp = msg.timestamp; // Time the peer sent this msg, using its approximation of our own local network time.
-	int32_t localTimestamp = parentSession->getSession().getLocalSessionTimeMs();
 
 	if (msg.fastSerialize) {
         //Logger::logDev("Receive Fast Update " + entity.getName() + " (" + toString(msg.bytes.size()) + " B)");
@@ -640,7 +647,7 @@ void EntityNetworkRemotePeer::updateRemoteEntity(InboundEntity& inboundEntity, E
 			// TODO: is this still required?
         	stripNestedNetworkComponents(entity);
         	if (result.position) {
-        		updateRemoteEntityPosition(inboundEntity, entity, result.position.value(), timestamp, localTimestamp);
+        		updateRemoteEntityPosition(inboundEntity, result.position.value(), timestamp);
         	}
         } catch (const std::exception& e) {
             Logger::logError("Exception while processing update entity from network");
@@ -910,12 +917,8 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 	}
 }
 
-void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundEntity, EntityRef entity, const Vector2f& position, int32_t timestamp, int32_t now)
+void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp)
 {
-	const auto& session = parentSession->getSession();
-
-	int32_t latency = session.getLatency(session.getIndexOfRemotePeer(peerId));
-
 	auto& entries = inboundEntity.positionUpdates;
 
 	if (entries.empty() || entries.back().second < timestamp) {
