@@ -49,19 +49,32 @@ void ResourcesView::paint(Painter& painter)
 		}
 	};
 	Vector<Stats> stats;
+	HashMap<ResourceDesiredLoadState, ResourceMemoryUsage> usage;
 
 	resources.ofType(AssetType::Texture).forEachResource([&] (const std::shared_ptr<Resource>& res) {
 		auto& resource = dynamic_cast<AsyncResource&>(*res);
 		stats += Stats{ resource.getAssetId(), resource.getMemoryUsage(), resource.getDesiredLoadState() };
+		usage[stats.back().loadState] += stats.back().usage;
 	});
 
 	std::sort(stats.begin(), stats.end());
 
 	const float lineHeight = text.getLineHeight();
-	const size_t nToShow = static_cast<size_t>(std::ceil(rect.getHeight() / lineHeight));
-	Vector2f cursorPos = rect.getTopLeft() + Vector2f(5, 5);
+	Vector2f startCursorPos = rect.getTopLeft() + Vector2f(5, 5);
+	Vector2f cursorPos = startCursorPos;
 
-	size_t i = 0;
+	for (auto state: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Stale }) {
+		text
+	        .setPosition(cursorPos)
+	        .setText(toString(state) + ": " + String::prettySize(usage[state].getTotal()))
+	        .setColour(getColour(state))
+			.setAlignment(0.0f)
+	        .draw(painter, rect);
+		auto extents = text.getExtents();
+		cursorPos += Vector2f(extents.x + 10, 0);
+	}
+	cursorPos = startCursorPos + Vector2f(0, lineHeight * 1.5f);
+
 	for (const auto& stat: stats) {
 		const auto colour = getColour(stat.loadState);
 
@@ -81,8 +94,7 @@ void ResourcesView::paint(Painter& painter)
 
 		cursorPos += Vector2f(0, lineHeight);
 
-		++i;
-		if (i >= nToShow) {
+		if (cursorPos.y > rect.getBottom()) {
 			break;
 		}
 	}
