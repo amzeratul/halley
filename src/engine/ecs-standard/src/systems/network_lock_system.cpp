@@ -227,17 +227,13 @@ private:
 			} else {
 				Logger::logDev("- release lock for me, but target entity not found, id=" + toString(targetId.value & 0xffffffff));
 			}*/
-			if (withAuthority) {
-				// On a peer, give up authority right away, no matter if the network message below
-				// is delivered successfully or not.
-				// This avoids some confusion with entity network updates working on "wrong" state
-				// while the message to change authority itself is still in flight.
-				changeAuthority(targetId, {});
-			}
 			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, getMyPeerId()), [=] (bool value) mutable
             {
-				if (!value && withAuthority) {
-	                Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId));
+				if (withAuthority) {
+					changeAuthority(targetId, {});
+					if (!value) {
+						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId));
+					}
 				}
             });
 		}

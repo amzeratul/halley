@@ -29,20 +29,17 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::serialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::serialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(locks)>::deserialize(locks, Halley::Vector<std::pair<Halley::EntityId, uint8_t>>{}, _context, _node, componentName, "locks", makeMask(Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(sendUpdates)>::deserialize(sendUpdates, bool{ false }, _context, _node, componentName, "sendUpdates", makeMask(Type::SaveData, Type::Dynamic, Type::Network));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
-		if ((_mask & makeMask(Type::Network)) == 0) _node.removeKey("locks");
 		if ((_mask & makeMask(Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("sendUpdates");
 	}
 
@@ -64,12 +61,10 @@ public:
 	}
 
 	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(locks)>::serialize(locks, _context, _serializer, componentIndex, "locks");
 		Halley::ByteSerializationHelper<decltype(sendUpdates)>::serialize(sendUpdates, _context, _serializer, componentIndex, "sendUpdates");
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(locks)>::deserialize(locks, _context, _deserializer, componentIndex, "locks");
 		Halley::ByteSerializationHelper<decltype(sendUpdates)>::deserialize(sendUpdates, _context, _deserializer, componentIndex, "sendUpdates");
 	}
 

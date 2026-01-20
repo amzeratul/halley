@@ -24,7 +24,6 @@ component:
       type: 'Halley::Vector<std::pair<Halley::EntityId, uint8_t>>'
       canSave: false
       canEdit: false
-      canNetwork: true
   - sendUpdates:
       type: bool
       canEdit: false
