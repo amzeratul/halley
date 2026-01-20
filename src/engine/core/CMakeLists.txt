@@ -156,6 +156,7 @@ set(SOURCES
         "src/diagnostics/audio_view.cpp"
         "src/diagnostics/frame_debugger.cpp"
         "src/diagnostics/performance_stats.cpp"
+        "src/diagnostics/resources_view.cpp"
         "src/diagnostics/stats_view.cpp"
         "src/diagnostics/world_stats.cpp"
 
@@ -627,6 +628,7 @@ set(HEADERS
         "include/halley/diagnostics/audio_view.h"
         "include/halley/diagnostics/frame_debugger.h"
         "include/halley/diagnostics/performance_stats.h"
+        "include/halley/diagnostics/resources_view.h"
         "include/halley/diagnostics/stats_view.h"
         "include/halley/diagnostics/world_stats.h"
 

@@ -34,6 +34,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "halley/diagnostics/audio_view.h"
 #include "halley/diagnostics/frame_debugger.h"
 #include "halley/diagnostics/performance_stats.h"
+#include "halley/diagnostics/resources_view.h"
 #include "halley/diagnostics/world_stats.h"
 
 #include "halley/scripting/script_environment.h"
