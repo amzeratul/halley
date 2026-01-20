@@ -105,6 +105,7 @@ namespace Halley
 		bool areAllTexturesLoaded() const;
 		void markInActiveUse() const;
 		void markBackgroundLoaded() const;
+		void markLowPriorityBackgroundLoaded() const;
 
 		gsl::span<const MaterialDataBlock> getDataBlocks() const;
 		gsl::span<MaterialDataBlock> getDataBlocks();

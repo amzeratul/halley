@@ -177,7 +177,14 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 	const int maxN = limit.value_or(std::numeric_limits<int>::max());
 
 	int i = 0;
-	for (auto loadState: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::Stale, ResourceDesiredLoadState::Undefined }) {
+	for (auto loadState: {
+		ResourceDesiredLoadState::Load,
+		ResourceDesiredLoadState::Preload,
+		ResourceDesiredLoadState::PreloadLowPriority,
+		ResourceDesiredLoadState::Stale,
+		ResourceDesiredLoadState::Unload,
+		ResourceDesiredLoadState::Undefined
+	}) {
 		const auto iter = usages.find(loadState);
 		if (iter == usages.end()) {
 			continue;

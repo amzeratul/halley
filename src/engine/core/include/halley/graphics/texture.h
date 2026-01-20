@@ -57,8 +57,8 @@ namespace Halley
 
 		bool retainPixelData = false;
 		bool unloadable = false;
-		ResourceLoader::LoaderFunc loaderFunc;
 		std::optional<TextureFormat> expectedTextureFormat;
+		ResourceLoader::LoaderFunc loaderFunc;
 
 		virtual void doLoad(TextureDescriptor& descriptor) = 0;
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;

@@ -6,7 +6,7 @@
 
 namespace Halley
 {
-	enum class TextureFormat
+	enum class TextureFormat : uint8_t
 	{
 		Indexed,
 		RGB,
@@ -38,13 +38,13 @@ namespace Halley
 		}
 	};
 
-	enum class PixelDataFormat
+	enum class PixelDataFormat : uint8_t
 	{
 		Image,
 		Precompiled
 	};
 
-	enum class TextureAddressMode
+	enum class TextureAddressMode : uint8_t
 	{
 		Repeat,
 		Clamp,  // Clamp to edge

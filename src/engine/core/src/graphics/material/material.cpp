@@ -292,6 +292,15 @@ void Material::markBackgroundLoaded() const
 	}
 }
 
+void Material::markLowPriorityBackgroundLoaded() const
+{
+	for (auto& tex: textures) {
+		if (tex) {
+			tex->markLowPriorityBackgroundLoaded();
+		}
+	}
+}
+
 bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data)
 {
 	if (dataBlocks[blockNumber].setUniform(offset, type, data)) {

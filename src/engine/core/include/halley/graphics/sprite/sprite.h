@@ -82,6 +82,7 @@ namespace Halley
 		bool isLoaded() const;
 		void markInActiveUse() const;
 		void markBackgroundLoaded() const;
+		void markLowPriorityBackgroundLoaded() const;
 
 		Sprite& setImage(Resources& resources, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);

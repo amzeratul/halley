@@ -381,6 +381,13 @@ void Sprite::markBackgroundLoaded() const
 	}
 }
 
+void Sprite::markLowPriorityBackgroundLoaded() const
+{
+	if (material) {
+		material->markLowPriorityBackgroundLoaded();
+	}
+}
+
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));
@@ -960,7 +967,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 	}
 
-	sprite.markBackgroundLoaded();
+	sprite.markLowPriorityBackgroundLoaded();
 }
 
 void Sprite::copyFrom(const Sprite& other, bool enableHotReload)

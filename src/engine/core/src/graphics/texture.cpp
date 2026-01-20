@@ -132,6 +132,8 @@ bool Texture::doRequestLoading()
 bool Texture::doRequestUnloading()
 {
 	clearTexture();
+	descriptor = {};
+	mask = {};
 	doneUnloading();
 	return true;
 }

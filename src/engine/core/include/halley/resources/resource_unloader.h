@@ -6,10 +6,12 @@
 namespace Halley {
     class ResourceUnloaderAssetTypeRules {
     public:
-        size_t budget = 1024 * 1024 * 1024;
+        size_t budget = 1024 * 1024 * 1024;     /// Total byte budget for this asset type; can preload to that amount, and tries to keep all resources below it
+        size_t staleBudget = 768 * 1024 * 1024; /// Unload stale objects when this usage is exceeded
 
         ResourceUnloaderAssetTypeRules() = default;
         ResourceUnloaderAssetTypeRules(size_t budget);
+        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget);
     };
 
     class ResourceUnloaderRules {

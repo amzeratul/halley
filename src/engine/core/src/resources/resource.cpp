@@ -130,8 +130,10 @@ AsyncResource::AsyncResource()
 	, inUseThisFrame(false)
 	, inBackgroundThisFrame(false)
 {
+	usageData.framesSinceInLowPriorityBackground = 1000;
 	usageData.framesSinceInBackground = 1000;
 	usageData.framesSinceInUse = 1000;
+	usageData.timeSinceInLowPriorityBackground = 1000.0;
 	usageData.timeSinceInBackground = 1000.0;
 	usageData.timeSinceInUse = 1000.0;
 	usageData.loaded = false;
@@ -240,21 +242,30 @@ void AsyncResource::startFrame(Time dt) const
 {
 	usageData.timeSinceInUse += dt;
 	usageData.timeSinceInBackground += dt;
+	usageData.timeSinceInLowPriorityBackground += dt;
+	
 	usageData.framesSinceInUse++;
 	usageData.framesSinceInBackground++;
+	usageData.framesSinceInLowPriorityBackground++;
+
 	usageData.loaded = loadState == State::Loaded;
 
-	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
-		usageData.timeSinceInBackground = 0;
-		usageData.framesSinceInBackground = 0;
-	}
 	if (inUseThisFrame.load(std::memory_order_relaxed)) {
 		usageData.timeSinceInUse = 0;
 		usageData.framesSinceInBackground = 0;
 	}
+	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
+		usageData.timeSinceInBackground = 0;
+		usageData.framesSinceInBackground = 0;
+	}
+	if (inLowPriorityBackgroundThisFrame.load(std::memory_order_relaxed)) {
+		usageData.timeSinceInLowPriorityBackground = 0;
+		usageData.framesSinceInLowPriorityBackground = 0;
+	}
 
 	inUseThisFrame.store(false, std::memory_order_relaxed);
 	inBackgroundThisFrame.store(false, std::memory_order_relaxed);
+	inLowPriorityBackgroundThisFrame.store(false, std::memory_order_relaxed);
 }
 
 void AsyncResource::markActivelyInUse() const
@@ -266,6 +277,11 @@ void AsyncResource::markActivelyInUse() const
 void AsyncResource::markBackgroundLoaded() const
 {
 	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
+}
+
+void AsyncResource::markLowPriorityBackgroundLoaded() const
+{
+	inLowPriorityBackgroundThisFrame.store(true, std::memory_order_relaxed);
 }
 
 const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const

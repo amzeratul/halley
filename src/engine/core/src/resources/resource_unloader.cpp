@@ -4,7 +4,14 @@ using namespace Halley;
 
 ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget)
 	: budget(budget)
+	, staleBudget((budget / 4) * 3)
 {
+}
+
+ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget)
+	: budget(budget)
+	, staleBudget(staleBudget)
+{	
 }
 
 bool ResourceUnloader::LoadStateInfo::operator<(const LoadStateInfo& other) const
@@ -52,6 +59,14 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	}
 	size_t curMemoryUsage = startMemoryUsage;
 
+	// If we've decided to unload those, do it
+	for (auto& s: states[ResourceDesiredLoadState::Unload].states) {
+		if (s.loaded) {
+			s.markAsUnloading = true;
+			curMemoryUsage -= s.memoryUsage;
+		}
+	}
+
 	// Mark all "Loaded" that aren't actually loaded as loading
 	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
 		if (!s.loaded) {
@@ -60,17 +75,22 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		}
 	}
 	
-	// Check preload
+	// Check preloads
 	size_t memoryUsageWithAllPreloads = curMemoryUsage;
 	for (auto& s: states[ResourceDesiredLoadState::Preload].states) {
 		if (!s.loaded) {
 			memoryUsageWithAllPreloads += s.memoryUsage;
 		}
 	}
+	for (auto& s: states[ResourceDesiredLoadState::PreloadLowPriority].states) {
+		if (!s.loaded) {
+			memoryUsageWithAllPreloads += s.memoryUsage;
+		}
+	}
 
-	// Unload
+	// Stale, might unload
 	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
-		if (s.loaded && memoryUsageWithAllPreloads > rules.budget) {
+		if (s.loaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
 			s.markAsUnloading = true;
 			memoryUsageWithAllPreloads -= s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
@@ -83,6 +103,17 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 			s.markAsLoading = true;
 			curMemoryUsage += s.memoryUsage;
 		}
+	}
+	for (auto& s: states[ResourceDesiredLoadState::PreloadLowPriority].states) {
+		if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+			s.markAsLoading = true;
+			curMemoryUsage += s.memoryUsage;
+		}
+	}
+
+	if (curMemoryUsage > rules.budget) {
+		Logger::logError("Memory budget for " + toString(collection.getAssetType()) + " exceeded: "
+			+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget));
 	}
 
 	// Do unloads
@@ -97,16 +128,23 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		}
 	}
 
-	// Do loads
-	for (auto& [type, stateCol]: states) {
-		for (auto& state: stateCol.states) {
+	// Do loads, in this specific order
+	for (auto& type: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+		const auto iter = states.find(type);
+		if (iter == states.end()) {
+			continue;
+		}
+
+		for (auto& state: iter->second.states) {
 			if (state.markAsLoading) {
 				const bool loading = state.res->requestLoading();
 				if (loading && verbose) {
 					if (state.desiredState == ResourceDesiredLoadState::Load) {
 						Logger::logDev(String("Loading [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
-					} else {
+					} else if (state.desiredState == ResourceDesiredLoadState::Preload) {
 						Logger::logDev(String("Preloading [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
+					} else if (state.desiredState == ResourceDesiredLoadState::PreloadLowPriority) {
+						Logger::logDev(String("Preloading Low-Priority [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
 					}
 				}
 			}
@@ -132,10 +170,14 @@ void ResourceUnloader::updateResourcesAndCollectStates(Time t, ResourceCollectio
 
 		if (!unloadable || usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1) {
 			state.desiredState = ResourceDesiredLoadState::Load;
-		} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 0.1) {
+		} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 1) {
 			state.desiredState = ResourceDesiredLoadState::Preload;
-		} else {
+		} else if (usagePattern.framesSinceInLowPriorityBackground <= 1 || usagePattern.timeSinceInLowPriorityBackground < 1) {
+			state.desiredState = ResourceDesiredLoadState::PreloadLowPriority;
+		} else if (usagePattern.timeSinceInUse < 15 || usagePattern.timeSinceInBackground < 10) {
 			state.desiredState = ResourceDesiredLoadState::Stale;
+		} else {
+			state.desiredState = ResourceDesiredLoadState::Unload;
 		}
 		res->setDesiredLoadState(state.desiredState);
 

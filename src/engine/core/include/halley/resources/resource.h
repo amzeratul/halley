@@ -258,17 +258,21 @@ namespace Halley
 		Undefined,
 	    Load,		// Used very recently, keep loaded no matter what
         Preload,    // Not in use, but likely to be used soon. Can be loaded if there's budget, or unloaded if we're running out
-        Stale      // Not in use, unlikely to be used soon. Unload if we go over budget
+        PreloadLowPriority,  // Not in use, might be used soon. Same as above, but lower priority for loading
+        Stale,      // Not in use, unlikely to be used soon. Unload if we go over budget
+		Unload		// Not in use
     };
 
 	template <>
 	struct EnumNames<ResourceDesiredLoadState> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 6> operator()() const {
 			return{{
 				"undefined",
 				"load",
 				"preload",
-				"stale"
+				"preloadLowPriority",
+				"stale",
+				"unload"
 			}};
 		}
 	};
@@ -285,8 +289,10 @@ namespace Halley
 		struct UsagePattern {
 			Time timeSinceInUse = 0;
 			Time timeSinceInBackground = 0;
+			Time timeSinceInLowPriorityBackground = 0;
 			int framesSinceInUse = 0;
 			int framesSinceInBackground = 0;
+			int framesSinceInLowPriorityBackground = 0;
 			bool loaded = false;
 		};
 
@@ -311,6 +317,7 @@ namespace Halley
 		void startFrame(Time dt) const override;
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
+		void markLowPriorityBackgroundLoaded() const;
 		const UsagePattern& getUsagePattern() const;
 
 		bool isLoaded() const;
@@ -336,6 +343,7 @@ namespace Halley
 		mutable UsagePattern usageData;
 		mutable std::atomic<bool> inUseThisFrame;
 		mutable std::atomic<bool> inBackgroundThisFrame;
+		mutable std::atomic<bool> inLowPriorityBackgroundThisFrame;
 	};
 
 	struct ResourceOptions {
