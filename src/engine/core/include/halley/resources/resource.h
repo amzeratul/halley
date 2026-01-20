@@ -210,7 +210,8 @@ namespace Halley
 		void increaseAssetVersion();
 		void reloadResource(Resource&& resource);
 
-		virtual ResourceMemoryUsage getMemoryUsage() const;
+		virtual ResourceMemoryUsage getMemoryUsage() const;          /// How much memory it's using right now
+		virtual ResourceMemoryUsage getEstimatedMemoryUsage() const; /// How much memory it'd use if it was loaded
 
 		void increaseAge(float time);
 		void resetAge();
@@ -253,6 +254,25 @@ namespace Halley
 		int assetVersion = 0;
 	};
 
+	enum class ResourceDesiredLoadState {
+		Undefined,
+	    Load,		// Used very recently, keep loaded no matter what
+        Preload,    // Not in use, but likely to be used soon. Can be loaded if there's budget, or unloaded if we're running out
+        Stale      // Not in use, unlikely to be used soon. Unload if we go over budget
+    };
+
+	template <>
+	struct EnumNames<ResourceDesiredLoadState> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"undefined",
+				"load",
+				"preload",
+				"stale"
+			}};
+		}
+	};
+
 	class AsyncResource : public Resource
 	{
 	public:
@@ -262,7 +282,7 @@ namespace Halley
 			Loaded
 		};
 
-		struct UsageData {
+		struct UsagePattern {
 			Time timeSinceInUse = 0;
 			Time timeSinceInBackground = 0;
 			int framesSinceInUse = 0;
@@ -282,33 +302,38 @@ namespace Halley
 		void doneLoading();  // call from worker thread when done loading
 		void doneUnloading(); // call from wherever when done unloading
 		void loadingFailed(); // Call from worker thread if loading fails
-		void requestLoading() const;
-		void requestUnloading() const;
+		bool requestLoading() const;
+		bool requestUnloading() const;
+		virtual bool canUnload() const;
 		void waitForLoad(bool acceptFailed = false) const;
 		Future<void> onLoad() const;
 
 		void startFrame(Time dt) const override;
 		void markActivelyInUse() const;
 		void markBackgroundLoaded() const;
-		const UsageData& getUsageData() const;
+		const UsagePattern& getUsagePattern() const;
 
 		bool isLoaded() const;
 		bool hasSucceeded() const;
 		bool hasFailed() const;
 
+		void setDesiredLoadState(ResourceDesiredLoadState state) const;
+		ResourceDesiredLoadState getDesiredLoadState() const;
+
 	protected:
-		virtual void doRequestLoading();
-		virtual void doRequestUnloading();
+		virtual bool doRequestLoading();
+		virtual bool doRequestUnloading();
 
 	private:
 		std::atomic<bool> failed;
 		std::atomic<State> loadState;
+		mutable ResourceDesiredLoadState desiredLoadState = ResourceDesiredLoadState::Undefined;
 
 		mutable ConditionVariable loadWait;
 		mutable Mutex loadMutex;
 		mutable Vector<Promise<void>> pendingPromises;
 
-		mutable UsageData usageData;
+		mutable UsagePattern usageData;
 		mutable std::atomic<bool> inUseThisFrame;
 		mutable std::atomic<bool> inBackgroundThisFrame;
 	};

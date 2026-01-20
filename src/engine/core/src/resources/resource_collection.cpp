@@ -154,23 +154,53 @@ void ResourceCollectionBase::generateDetailedMemoryReport(std::optional<int> lim
 		ResourceMemoryUsage usage;
 		int useCount = 0;
 	};
-	Vector<Info> usages;
+	HashMap<ResourceDesiredLoadState, Vector<Info>> usages;
 
 	{
 		SharedLock lock(mutex);
 		for (auto& r: resources) {
-			usages.emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), static_cast<int>(r.second.res.use_count()) });
+			const auto desiredState = isAsync() ?
+				dynamic_cast<AsyncResource&>(*r.second.res).getDesiredLoadState() :
+				ResourceDesiredLoadState::Undefined;
+			usages[desiredState].emplace_back(Info{ r.first, r.second.res->getMemoryUsage(), static_cast<int>(r.second.res.use_count()) });
 		}
 	}
 
-	std::sort(usages.begin(), usages.end(), [] (const auto& a, const auto& b) { return b.usage < a.usage; });
+	for (auto& [loadState, entries]: usages) {
+		std::sort(entries.begin(), entries.end(), [] (const Info& a, const Info& b) {
+			return b.usage < a.usage;
+		});
+	}
+
 	Logger::logInfo("Detailed memory report for " + toString(getAssetType()) + ":");
 
-	const int n = std::min(static_cast<int>(usages.size()), limit.value_or(std::numeric_limits<int>::max()));
-	for (int i = 0; i < n; ++i) {
-		Logger::logInfo("\t" + toString(i + 1, 10, 3, ' ') + ": "
-			+ usages[i].assetId + " [" + usages[i].useCount + "]: "
-			+ String::prettySize(usages[i].usage.getTotal()));
+	const int maxN = limit.value_or(std::numeric_limits<int>::max());
+
+	int i = 0;
+	for (auto loadState: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::Stale, ResourceDesiredLoadState::Undefined }) {
+		const auto iter = usages.find(loadState);
+		if (iter == usages.end()) {
+			continue;
+		}
+
+		const auto& entries = iter->second;
+		if (!entries.empty()) {
+			size_t totalUsage = 0;
+			for (auto& entry: entries) {
+				totalUsage += entry.usage.getTotal();
+			}
+			Logger::logInfo("  " + toString(loadState) + " (" + String::prettySize(totalUsage) + "):");
+
+			for (auto& entry: entries) {
+				Logger::logInfo("    " + toString(++i, 10, 3, ' ') + ": "
+					+ entry.assetId + " [" + entry.useCount + "]: "
+					+ String::prettySize(entry.usage.getTotal()));
+
+				if (i >= maxN) {
+					return;
+				}
+			}
+		}
 	}
 }
 

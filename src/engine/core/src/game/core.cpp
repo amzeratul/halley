@@ -411,7 +411,7 @@ void Core::updatePlatform()
 void Core::updateResources(Time time)
 {
 	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
-	resourceUnloader->update(time);
+	resourceUnloader->update(time, game->getResourceUnloaderRules());
 }
 
 void Core::onTick(Time delta)

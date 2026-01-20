@@ -83,6 +83,14 @@ ResourceMemoryUsage Texture::getMemoryUsage() const
 	return result;
 }
 
+ResourceMemoryUsage Texture::getEstimatedMemoryUsage() const
+{
+	const auto format = expectedTextureFormat.value_or(TextureFormat::RGBA);
+	ResourceMemoryUsage result;
+	result.vramUsage = size.x * size.y * TextureDescriptor::getBytesPerPixel(format);
+	return result;
+}
+
 void Texture::doCopyToTexture(Painter& painter, Texture& other) const
 {
 	Logger::logWarning("Copying to texture not implemented.");
@@ -104,17 +112,28 @@ void Texture::moveFrom(Texture& other)
 	size = other.size;
 	descriptor = std::move(other.descriptor);
 	mask = std::move(other.mask);
+	retainPixelData = other.retainPixelData;
+	unloadable = other.unloadable;
+	loaderFunc = std::move(other.loaderFunc);
+	expectedTextureFormat = other.expectedTextureFormat;
 }
 
-void Texture::doRequestLoading()
+bool Texture::canUnload() const
+{
+	return unloadable;
+}
+
+bool Texture::doRequestLoading()
 {
 	loadFromDisk();
+	return true;
 }
 
-void Texture::doRequestUnloading()
+bool Texture::doRequestUnloading()
 {
 	clearTexture();
 	doneUnloading();
+	return true;
 }
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
@@ -131,6 +150,8 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	texture->setMeta(meta);
 	texture->retainPixelData = loader.getResources().getOptions().retainPixelData;
 	texture->loaderFunc = loader.getLoaderFunction(true);
+	texture->unloadable = true;
+	texture->expectedTextureFormat = getTextureFormat(meta);
 	//texture->loadFromDisk();
 
 	return texture;
@@ -190,40 +211,47 @@ void Texture::loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool re
 		auto& alphaMask = imgPair.second;
 		auto& meta = texture->getMeta();
 
-		const auto imgFormat = fromString<Image::Format>(meta.getString("format", "rgba"));
-		TextureFormat format = TextureFormat::RGBA;
-		switch (imgFormat) {
-		case Image::Format::Indexed:
-			format = TextureFormat::Indexed;
-			break;
-		case Image::Format::RGB:
-			format = TextureFormat::RGB;
-			break;
-		case Image::Format::RGBA:
-		case Image::Format::RGBAPremultiplied:
-			format = TextureFormat::RGBA;
-			break;
-		case Image::Format::SingleChannel:
-			format = TextureFormat::Red;
-			break;
-		case Image::Format::Undefined:
-			format = TextureFormat::RGBA; // Hmm
-		}
-
 		const auto& compression = meta.getString("compression");
-		Vector2i size(meta.getInt("width"), meta.getInt("height"));
+		const auto size = Vector2i(meta.getInt("width"), meta.getInt("height"));
 		
 		TextureDescriptor descriptor(size);
 		descriptor.useFiltering = meta.getBool("filtering", false);
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.addressMode = fromString<TextureAddressMode>(meta.getString("addressMode", "clamp"));
-		descriptor.format = format;
+		descriptor.format = getTextureFormat(meta);
 		descriptor.pixelData = std::move(img);
 		descriptor.pixelFormat = compression == "png" || compression == "qoi" || compression == "hlif" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
 		descriptor.retainPixelData = retainPixelData;
 		texture->load(std::move(descriptor));
 		texture->setAlphaMask(std::move(alphaMask));
 	});
+}
+
+TextureFormat Texture::getTextureFormat(Image::Format imgFormat)
+{
+	switch (imgFormat) {
+	case Image::Format::Indexed:
+		return TextureFormat::Indexed;
+
+	case Image::Format::RGB:
+		return TextureFormat::RGB;
+
+	case Image::Format::RGBA:
+	case Image::Format::RGBAPremultiplied:
+		return TextureFormat::RGBA;
+
+	case Image::Format::SingleChannel:
+		return TextureFormat::Red;
+
+	case Image::Format::Undefined: // Hmm
+	default:
+		return TextureFormat::RGBA;
+	}
+}
+
+TextureFormat Texture::getTextureFormat(const Metadata& meta)
+{
+	return getTextureFormat(fromString<Image::Format>(meta.getString("format", "rgba")));
 }
 
 void Texture::setAlphaMask(ImageMask mask)

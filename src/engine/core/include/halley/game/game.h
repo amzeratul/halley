@@ -3,6 +3,7 @@
 #include "halley/stage/stage.h"
 #include "halley/game/scene_editor_interface.h"
 #include "frame_data.h"
+#include "halley/resources/resource_unloader.h"
 
 namespace Halley
 {
@@ -72,6 +73,9 @@ namespace Halley
 		virtual String getLocalisationFileCategory(const String& assetName);
 		virtual bool canCollectVideoPerformance();
 
+		virtual const ResourceUnloaderRules& getResourceUnloaderRules() const;
+		virtual ResourceUnloaderRules& getResourceUnloaderRules();
+
 		virtual String getDefaultColourScheme();
 
 		const HalleyAPI& getAPI() const;
@@ -88,5 +92,6 @@ namespace Halley
 		Resources* resources = nullptr;
 		UIDebugConsoleCommands baseCommands;
 		UIDebugConsoleCommands batchCommands;
+		ResourceUnloaderRules resourceUnloaderRules;
 	};
 }

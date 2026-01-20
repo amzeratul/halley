@@ -2,42 +2,149 @@
 
 using namespace Halley;
 
+ResourceUnloaderAssetTypeRules::ResourceUnloaderAssetTypeRules(size_t budget)
+	: budget(budget)
+{
+}
+
+bool ResourceUnloader::LoadStateInfo::operator<(const LoadStateInfo& other) const
+{
+	if (desiredState != other.desiredState) {
+		return desiredState > other.desiredState;
+	}
+
+	// Oldest first
+	return timeSinceUse > other.timeSinceUse;
+}
+
+void ResourceUnloader::StateCollection::sort()
+{
+	std::sort(states.begin(), states.end());
+}
+
 ResourceUnloader::ResourceUnloader(Resources& resources)
 	: resources(resources)
 {
-	// TODO: move to game code
-	constexpr auto mb = static_cast<size_t>(1024) * 1024;
-	setBudget(AssetType::Texture, 1024 * mb);
-	//setBudget(AssetType::AudioClip, 256 * mb);
 }
 
-void ResourceUnloader::setBudget(AssetType type, size_t maxSize)
+void ResourceUnloader::update(Time t, const ResourceUnloaderRules& rules)
 {
-	budgets[type] = maxSize;
-}
-
-void ResourceUnloader::update(Time t)
-{
-	for (auto& [type, budget]: budgets) {
-		updateCollection(t, resources.ofType(type), budget);
+	for (auto& [type, rule]: rules.rules) {
+		updateCollection(t, resources.ofType(type), rule);
 	}
 }
 
-void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collection, size_t sizeLimit)
+void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules)
 {
 	if (!collection.isAsync()) {
 		return;
 	}
 
-	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
-		auto& res = dynamic_cast<AsyncResource&>(*resource);
+	const bool verbose = false;
 
-		res.startFrame(t);
-		const auto usage = res.getUsageData();
+	HashMap<ResourceDesiredLoadState, StateCollection> states;
+	updateResourcesAndCollectStates(t, collection, states);
+	
+	size_t startMemoryUsage = 0;
+	for (auto& [type, stateCollection]: states) {
+		stateCollection.sort();
+		startMemoryUsage += stateCollection.curMemoryUsage;
+	}
+	size_t curMemoryUsage = startMemoryUsage;
 
-		if (usage.loaded && usage.timeSinceInUse > 1.0 && usage.timeSinceInBackground >= 1.0) {
-			Logger::logDev(String("Unloading resource [") + toString(collection.getAssetType()) + "] " + res.getAssetId(), true);
-			res.requestUnloading();
+	// Mark all "Loaded" that aren't actually loaded as loading
+	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
+		if (!s.loaded) {
+			s.markAsLoading = true;
+			curMemoryUsage += s.memoryUsage;
 		}
+	}
+	
+	// Check preload
+	size_t memoryUsageWithAllPreloads = curMemoryUsage;
+	for (auto& s: states[ResourceDesiredLoadState::Preload].states) {
+		if (!s.loaded) {
+			memoryUsageWithAllPreloads += s.memoryUsage;
+		}
+	}
+
+	// Unload
+	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
+		if (s.loaded && memoryUsageWithAllPreloads > rules.budget) {
+			s.markAsUnloading = true;
+			memoryUsageWithAllPreloads -= s.memoryUsage;
+			curMemoryUsage -= s.memoryUsage;
+		}
+	}
+
+	// Preload
+	for (auto& s: states[ResourceDesiredLoadState::Preload].states) {
+		if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+			s.markAsLoading = true;
+			curMemoryUsage += s.memoryUsage;
+		}
+	}
+
+	// Do unloads
+	for (auto& [type, stateCol]: states) {
+		for (auto& state: stateCol.states) {
+			if (state.markAsUnloading) {
+				const bool unloaded = state.res->requestUnloading();
+				if (unloaded && verbose) {
+					Logger::logDev(String("Unloaded [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
+				}
+			}
+		}
+	}
+
+	// Do loads
+	for (auto& [type, stateCol]: states) {
+		for (auto& state: stateCol.states) {
+			if (state.markAsLoading) {
+				const bool loading = state.res->requestLoading();
+				if (loading && verbose) {
+					if (state.desiredState == ResourceDesiredLoadState::Load) {
+						Logger::logDev(String("Loading [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
+					} else {
+						Logger::logDev(String("Preloading [") + toString(collection.getAssetType()) + "] " + state.res->getAssetId());
+					}
+				}
+			}
+		}
+	}
+}
+
+void ResourceUnloader::updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states)
+{
+	collection.forEachResource([&] (const std::shared_ptr<Resource>& resource) {
+		auto res = std::dynamic_pointer_cast<AsyncResource>(resource);
+
+		res->startFrame(t);
+
+		const bool unloadable = res->canUnload();
+		const auto usagePattern = res->getUsagePattern();
+		const auto memoryUsage = usagePattern.loaded ? res->getMemoryUsage() : res->getEstimatedMemoryUsage();
+
+		LoadStateInfo state;
+		state.loaded = usagePattern.loaded;
+		state.memoryUsage = memoryUsage.getTotal();
+		state.timeSinceUse = std::min(usagePattern.timeSinceInUse, usagePattern.timeSinceInBackground * 2.0); // Time spent in background counts as double
+
+		if (!unloadable || usagePattern.framesSinceInUse <= 1 || usagePattern.timeSinceInUse < 0.1) {
+			state.desiredState = ResourceDesiredLoadState::Load;
+		} else if (usagePattern.framesSinceInBackground <= 1 || usagePattern.timeSinceInBackground < 0.1) {
+			state.desiredState = ResourceDesiredLoadState::Preload;
+		} else {
+			state.desiredState = ResourceDesiredLoadState::Stale;
+		}
+		res->setDesiredLoadState(state.desiredState);
+
+		state.res = std::move(res);
+
+		auto& stateCollection = states[state.desiredState];
+		if (usagePattern.loaded) {
+			stateCollection.curMemoryUsage += memoryUsage.getTotal();
+		}
+		stateCollection.states += std::move(state);
 	});
 }

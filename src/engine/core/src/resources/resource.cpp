@@ -41,6 +41,11 @@ ResourceMemoryUsage Resource::getMemoryUsage() const
 	return ResourceMemoryUsage{};
 }
 
+ResourceMemoryUsage Resource::getEstimatedMemoryUsage() const
+{
+	return getMemoryUsage();
+}
+
 void Resource::increaseAge(float time)
 {
 	age += time;
@@ -124,7 +129,13 @@ AsyncResource::AsyncResource()
 	, loadState(State::Unloaded)
 	, inUseThisFrame(false)
 	, inBackgroundThisFrame(false)
-{}
+{
+	usageData.framesSinceInBackground = 1000;
+	usageData.framesSinceInUse = 1000;
+	usageData.timeSinceInBackground = 1000.0;
+	usageData.timeSinceInUse = 1000.0;
+	usageData.loaded = false;
+}
 
 AsyncResource::~AsyncResource()
 {
@@ -257,7 +268,7 @@ void AsyncResource::markBackgroundLoaded() const
 	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
 }
 
-const AsyncResource::UsageData& AsyncResource::getUsageData() const
+const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
 {
 	return usageData;
 }
@@ -277,31 +288,50 @@ bool AsyncResource::hasFailed() const
 	return failed;
 }
 
-void AsyncResource::requestLoading() const
+void AsyncResource::setDesiredLoadState(ResourceDesiredLoadState state) const
+{
+	desiredLoadState = state;
+}
+
+ResourceDesiredLoadState AsyncResource::getDesiredLoadState() const
+{
+	return desiredLoadState;
+}
+
+bool AsyncResource::requestLoading() const
 {
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
 		inUseThisFrame = true;
 		if (loadState == State::Unloaded) {
-			const_cast<AsyncResource*>(this)->doRequestLoading();
+			return const_cast<AsyncResource*>(this)->doRequestLoading();
 		}
 	}
+	return false;
 }
 
-void AsyncResource::requestUnloading() const
+bool AsyncResource::requestUnloading() const
 {
 	if (loadState == State::Loaded) {
 		UniqueLock lock(loadMutex);
 		if (loadState == State::Loaded && !inUseThisFrame) {
-			const_cast<AsyncResource*>(this)->doRequestUnloading();
+			return const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}
 	}
+	return false;
 }
 
-void AsyncResource::doRequestLoading()
+bool AsyncResource::canUnload() const
 {
+	return false;
 }
 
-void AsyncResource::doRequestUnloading()
+bool AsyncResource::doRequestLoading()
 {
+	return false;
+}
+
+bool AsyncResource::doRequestUnloading()
+{
+	return false;
 }
