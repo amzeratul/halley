@@ -201,7 +201,8 @@ void AsyncResource::loadingFailed()
 
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
-	requestLoading();
+	markActivelyInUse();
+
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
 		while (loadState != State::Loaded) {
@@ -280,6 +281,7 @@ void AsyncResource::requestLoading() const
 {
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
+		inUseThisFrame = true;
 		if (loadState == State::Unloaded) {
 			const_cast<AsyncResource*>(this)->doRequestLoading();
 		}
@@ -290,7 +292,7 @@ void AsyncResource::requestUnloading() const
 {
 	if (loadState == State::Loaded) {
 		UniqueLock lock(loadMutex);
-		if (loadState == State::Loaded) {
+		if (loadState == State::Loaded && !inUseThisFrame) {
 			const_cast<AsyncResource*>(this)->doRequestUnloading();
 		}
 	}
