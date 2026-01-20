@@ -497,30 +497,36 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 
         Expects(size > 0);
 
-        const auto& reflector = deserializer.getOptions().world->getReflection().getComponentReflector(componentId);
+        const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
-        if (auto component = reflector.tryGetComponent(entity)) {
-            if (result && componentId == Transform2DComponent::componentIndex) {
-                // Saves the current position before deserialization, and restores it afterward. Return the
-                // new position in the function result instead.
-                //
-                // Only done for transform components in root entities, skipped for child entities.
-                //
-                // TODO: for debugging, shouldn't be needed as it's updated later.
-                auto transform = reinterpret_cast<Transform2DComponent*>(component);
-                auto pos = transform->getLocalPosition();
+        if (reflector != nullptr) {
+            if (auto component = reflector->tryGetComponent(entity)) {
+                if (result && componentId == Transform2DComponent::componentIndex) {
+                    // Saves the current position before deserialization, and restores it afterward. Return the
+                    // new position in the function result instead.
+                    //
+                    // Only done for transform components in root entities, skipped for child entities.
+                    //
+                    // TODO: for debugging, shouldn't be needed as it's updated later.
+                    auto transform = reinterpret_cast<Transform2DComponent*>(component);
+                    auto pos = transform->getLocalPosition();
 
-                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+                    reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
 
-                result->position = transform->getLocalPosition();
-                transform->setLocalPosition(pos);
+                    result->position = transform->getLocalPosition();
+                    transform->setLocalPosition(pos);
+                } else {
+                    reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                }
             } else {
-                reflector.deserializeNetwork(byteSerializationContext, deserializer, *component);
+                deserializer.skipBytes(size);
+                Logger::logDev("No component " + toString(componentId) + " found in entity " +
+                    toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
             }
         } else {
             deserializer.skipBytes(size);
-            Logger::logDev("No component " + toString(componentId) + " found in entity " +
-                toString(entity.getEntityId().value & 0xffffffff) + ", " + entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
+            Logger::logDev("Invalid component type " + toString(componentId) + " found for " +
+                entity.getName() + " to deserialize into, skip " + toString(size) + " bytes");
         }
 
         fetchNextPage(deserializer, type, size);

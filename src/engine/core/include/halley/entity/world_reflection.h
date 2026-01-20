@@ -18,6 +18,7 @@ namespace Halley {
 		std::unique_ptr<SystemMessage> createSystemMessage(const String& name) const;
 
 		ComponentReflector& getComponentReflector(int id) const;
+		const ComponentReflector* tryGetComponentReflector(int id) const;
 		ComponentReflector& getComponentReflector(const String& name) const;
 		MessageReflector& getMessageReflector(int id) const;
 		SystemMessageReflector& getSystemMessageReflector(int id) const;
