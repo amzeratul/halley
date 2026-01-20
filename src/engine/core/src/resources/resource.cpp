@@ -219,6 +219,7 @@ void AsyncResource::waitForLoad(bool acceptFailed) const
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
 		while (loadState != State::Loaded) {
+			Logger::logDev("Waiting for asset load: " + getAssetId());
 			loadWait.wait(lock);
 		}
 	}
