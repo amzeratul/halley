@@ -967,7 +967,9 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 	}
 
-	sprite.markLowPriorityBackgroundLoaded();
+	if (!context.entityContext || context.entityContext->canPreloadAssets()) {
+		sprite.markLowPriorityBackgroundLoaded();
+	}
 }
 
 void Sprite::copyFrom(const Sprite& other, bool enableHotReload)

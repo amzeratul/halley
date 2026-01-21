@@ -91,11 +91,13 @@ namespace Halley {
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
 		void setNetworkFactory(bool network);
+		void setCanPreloadAssets(bool preload);
 
 	private:
 		World& world;
 		Resources& resources;
 		bool networkFactory = false;
+		bool preloadAssets = true;
 
 		void updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context);
@@ -128,11 +130,16 @@ namespace Halley {
 		virtual UUID getUUIDFromEntityId(EntityId id) const = 0;
 		virtual EntityId getCurrentEntityId() const { return EntityId(); }
 		virtual bool isHeadless() const { return false; }
+		virtual bool canPreloadAssets() const { return true; }
 	};
 
 	class EntityFactoryContext : public IEntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr, EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "");
+		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update,
+			std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr,
+			EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr,
+			IDataInterpolatorSetRetriever* interpolators = nullptr, String fallbackVariant = "",
+			bool preloadAssets = true);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -188,6 +195,7 @@ namespace Halley {
 		UUID getRootUUID() const;
 
 		bool isHeadless() const override;
+		bool canPreloadAssets() const override;
 
 
 		// TODO HACKFIX: Not sure how to fix the problem with reparenting when the hierachy deletes the child first.
@@ -207,6 +215,7 @@ namespace Halley {
 		EntityFactoryContext* parent;
 		Vector<EntityRef> entities;
 		bool update = false;
+		bool preloadAssets = false;
 		WorldPartitionId worldPartition = 0;
 		EntityId curEntity;
 		String fallbackVariant;
