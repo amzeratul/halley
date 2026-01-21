@@ -47,6 +47,7 @@ namespace Halley {
     private:
         Resources& resources;
         Time budgetMessageTimeout = 0;
+        Time unloadPreloadMessageTimeout = 0;
 
         void updateCollection(Time t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
         void updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);

@@ -86,8 +86,13 @@ ResourceMemoryUsage Texture::getMemoryUsage() const
 ResourceMemoryUsage Texture::getEstimatedMemoryUsage() const
 {
 	const auto format = expectedTextureFormat.value_or(TextureFormat::RGBA);
+
+	const auto estimatedMaskSize = size.x * size.y / 8;
+	const auto estimatedVRAM = size.x * size.y * TextureDescriptor::getBytesPerPixel(format);
+
 	ResourceMemoryUsage result;
-	result.vramUsage = size.x * size.y * TextureDescriptor::getBytesPerPixel(format);
+	result.ramUsage = sizeof(*this) + estimatedMaskSize;
+	result.vramUsage = estimatedVRAM;
 	return result;
 }
 

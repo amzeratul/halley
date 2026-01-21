@@ -25,7 +25,7 @@ void ResourcesView::paint(Painter& painter)
 	
 	const auto viewPort = Rect4f(painter.getViewPort());
 	const auto border = Vector2f(0, 0);
-	const auto size = Vector2f(viewPort.getWidth() / 2.5f, viewPort.getHeight() - border.y * 2);
+	const auto size = Vector2f(600.0f, viewPort.getHeight() - border.y * 2);
 	const auto origin = viewPort.getTopRight() + Vector2f(-border.x - size.x, border.y);
 	const auto rect = Rect4f(origin, origin + size);
 	
@@ -35,46 +35,99 @@ void ResourcesView::paint(Painter& painter)
 		.setColour(Colour4f(0, 0, 0, 0.5f))
 		.draw(painter);
 
-	struct Stats {
-		String name;
-		ResourceMemoryUsage usage;
-		ResourceDesiredLoadState loadState;
+	const auto stats = getStats(assetType);
 
-		bool operator<(const Stats& other) const
-		{
-			if (loadState != other.loadState) {
-				//return loadState < other.loadState;
-			}
-			return other.usage < usage;
-		}
-	};
+	drawSummary(painter, rect, stats);
+	drawStats(painter, rect, stats);
+}
+
+Colour4f ResourcesView::getColour(ResourceDesiredLoadState loadState) const
+{
+	switch (loadState) {
+	case ResourceDesiredLoadState::Load:
+		return Colour4f::fromHexString("#00FF80");
+	case ResourceDesiredLoadState::Preload:
+	case ResourceDesiredLoadState::PreloadLowPriority:
+		return Colour4f::fromHexString("#00D0FF");
+	case ResourceDesiredLoadState::Stale:
+		return Colour4f::fromHexString("#FFFF00");
+	case ResourceDesiredLoadState::Unload:
+		return Colour4f::fromHexString("#FF0000");
+	default:
+		return Colour4f::fromHexString("#FFFFFF");
+	}
+}
+
+Vector<ResourcesView::Stats> ResourcesView::getStats(AssetType type) const
+{
 	Vector<Stats> stats;
-	HashMap<ResourceDesiredLoadState, ResourceMemoryUsage> usage;
 
-	resources.ofType(AssetType::Texture).forEachResource([&] (const std::shared_ptr<Resource>& res) {
+	resources.ofType(type).forEachResource([&] (const std::shared_ptr<Resource>& res) {
 		auto& resource = dynamic_cast<AsyncResource&>(*res);
-		stats += Stats{ resource.getAssetId(), resource.getMemoryUsage(), resource.getDesiredLoadState() };
-		usage[stats.back().loadState] += stats.back().usage;
+		auto state = resource.getDesiredLoadState();
+		if (state == ResourceDesiredLoadState::PreloadLowPriority) {
+			state = ResourceDesiredLoadState::Preload;
+		}
+		stats += Stats{ resource.getAssetId(), resource.getMemoryUsage(), state };
 	});
 
 	std::sort(stats.begin(), stats.end());
+
+	return stats;
+}
+
+void ResourcesView::drawSummary(Painter& painter, Rect4f rect, const Vector<Stats>& stats) const
+{
+	HashMap<ResourceDesiredLoadState, ResourceMemoryUsage> usagePerState;
+	for (const auto& stat: stats) {
+		usagePerState[stat.loadState] += stat.usage;
+		usagePerState[ResourceDesiredLoadState::Undefined] += stat.usage;
+	}
+
+	auto states = std::array<ResourceDesiredLoadState, 4>{
+		ResourceDesiredLoadState::Undefined,
+		ResourceDesiredLoadState::Load,
+		ResourceDesiredLoadState::Preload,
+		ResourceDesiredLoadState::Stale
+	};
+	auto stateNames = std::array<String, 4> {
+		"Total",
+		"Use",
+		"Preloaded",
+		"Stale"
+	};
 
 	const float lineHeight = text.getLineHeight();
 	Vector2f startCursorPos = rect.getTopLeft() + Vector2f(5, 5);
 	Vector2f cursorPos = startCursorPos;
 
-	for (auto state: { ResourceDesiredLoadState::Load, ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Stale }) {
+	text
+        .setPosition(cursorPos)
+        .setText("Memory usage for " + toString(assetType))
+        .setColour(Colour4f::fromHexString("#FFFFFF"))
+		.setAlignment(0.0f)
+        .draw(painter, rect);
+	cursorPos += Vector2f(0, lineHeight);
+
+	for (int i = 0; i < static_cast<int>(states.size()); ++i) {
+		auto state = states[i];
 		text
 	        .setPosition(cursorPos)
-	        .setText(toString(state) + ": " + String::prettySize(usage[state].getTotal()))
+	        .setText(stateNames[i] + ": " + String::prettySize(usagePerState[state].getTotal()))
 	        .setColour(getColour(state))
 			.setAlignment(0.0f)
 	        .draw(painter, rect);
 		auto extents = text.getExtents();
 		cursorPos += Vector2f(extents.x + 10, 0);
 	}
-	cursorPos = startCursorPos + Vector2f(0, lineHeight * 1.5f);
+}
 
+void ResourcesView::drawStats(Painter& painter, Rect4f rect, const Vector<Stats>& stats) const
+{
+	const float lineHeight = text.getLineHeight();
+	const Vector2f startCursorPos = rect.getTopLeft() + Vector2f(5, 15 + 2 * lineHeight);
+	Vector2f cursorPos = startCursorPos;
+	
 	for (const auto& stat: stats) {
 		const auto colour = getColour(stat.loadState);
 
@@ -97,23 +150,5 @@ void ResourcesView::paint(Painter& painter)
 		if (cursorPos.y > rect.getBottom()) {
 			break;
 		}
-	}
-}
-
-Colour4f ResourcesView::getColour(ResourceDesiredLoadState loadState) const
-{
-	switch (loadState) {
-	case ResourceDesiredLoadState::Load:
-		return Colour4f::fromHexString("#00FF80");
-	case ResourceDesiredLoadState::Preload:
-		return Colour4f::fromHexString("#00FFFF");
-	case ResourceDesiredLoadState::PreloadLowPriority:
-		return Colour4f::fromHexString("#0080FF");
-	case ResourceDesiredLoadState::Stale:
-		return Colour4f::fromHexString("#FFFF00");
-	case ResourceDesiredLoadState::Unload:
-		return Colour4f::fromHexString("#FF0000");
-	default:
-		return Colour4f::fromHexString("#000000");
 	}
 }

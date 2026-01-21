@@ -50,6 +50,9 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	if (budgetMessageTimeout > 0) {
 		budgetMessageTimeout -= t;
 	}
+	if (unloadPreloadMessageTimeout > 0) {
+		unloadPreloadMessageTimeout -= t;
+	}
 
 	const bool verbose = false;
 
@@ -63,7 +66,9 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 	}
 	size_t curMemoryUsage = startMemoryUsage;
 
-	// If we've decided to unload those, do it
+	size_t unloadableKept = 0;
+
+	// Anything marked as "Unload" will be unloaded
 	for (auto& s: states[ResourceDesiredLoadState::Unload].states) {
 		if (s.loaded) {
 			s.markAsUnloading = true;
@@ -71,7 +76,7 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		}
 	}
 
-	// Mark all "Loaded" that aren't actually loaded as loading
+	// Anything marked as "Load" will be loaded
 	for (auto& s: states[ResourceDesiredLoadState::Load].states) {
 		if (!s.loaded) {
 			s.markAsLoading = true;
@@ -79,43 +84,63 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		}
 	}
 	
-	// Check preloads
+	// Figure out how much more memory we'd need if we wanted to load all preloads
 	size_t memoryUsageWithAllPreloads = curMemoryUsage;
-	for (auto& s: states[ResourceDesiredLoadState::Preload].states) {
-		if (!s.loaded) {
-			memoryUsageWithAllPreloads += s.memoryUsage;
-		}
-	}
-	for (auto& s: states[ResourceDesiredLoadState::PreloadLowPriority].states) {
-		if (!s.loaded) {
-			memoryUsageWithAllPreloads += s.memoryUsage;
+	for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+		for (auto& s: states[state].states) {
+			if (!s.loaded) {
+				memoryUsageWithAllPreloads += s.memoryUsage;
+			}
 		}
 	}
 
-	// Stale, might unload
+	// Stale, unload if it makes space for preloads, or if we're above the "stale budget" (normally ~75% of total budget, so we have some headroom)
+	// Otherwise it's OK to keep them around
 	for (auto& s: states[ResourceDesiredLoadState::Stale].states) {
 		if (s.loaded && (memoryUsageWithAllPreloads > rules.budget || curMemoryUsage > rules.staleBudget)) {
 			s.markAsUnloading = true;
 			memoryUsageWithAllPreloads -= s.memoryUsage;
 			curMemoryUsage -= s.memoryUsage;
+		} else {
+			++unloadableKept;
+		}
+	}
+
+	// Unload preloaded if we're still out of memory (this is not ideal)
+	bool preloadUnloaded = false;
+	for (const auto state: { ResourceDesiredLoadState::PreloadLowPriority, ResourceDesiredLoadState::Preload }) {
+		for (auto& s: states[state].states) {
+			if (s.loaded && curMemoryUsage > rules.budget) {
+				s.markAsUnloading = true;
+				curMemoryUsage -= s.memoryUsage;
+				preloadUnloaded = true;
+			} else {
+				++unloadableKept;
+			}
 		}
 	}
 
 	// Preload
-	for (auto& s: states[ResourceDesiredLoadState::Preload].states) {
-		if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
-			s.markAsLoading = true;
-			curMemoryUsage += s.memoryUsage;
-		}
-	}
-	for (auto& s: states[ResourceDesiredLoadState::PreloadLowPriority].states) {
-		if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
-			s.markAsLoading = true;
-			curMemoryUsage += s.memoryUsage;
+	for (const auto state: { ResourceDesiredLoadState::Preload, ResourceDesiredLoadState::PreloadLowPriority }) {
+		for (auto& s: states[state].states) {
+			if (!s.loaded && curMemoryUsage + s.memoryUsage <= rules.budget) {
+				s.markAsLoading = true;
+				curMemoryUsage += s.memoryUsage;
+			}
 		}
 	}
 
-	if (curMemoryUsage > static_cast<size_t>(rules.budget * 1.1f)) {
+	// If we had to unload any preloads, notify warning
+	if (preloadUnloaded) {
+		if (unloadPreloadMessageTimeout <= 0.001) {
+			Logger::logWarning("Memory budget for " + toString(collection.getAssetType()) + " under pressure: "
+				+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget) + " - preloaded resources had to be unloaded");
+			unloadPreloadMessageTimeout = 1.0;
+		}
+	}
+
+	// If we've run out of memory and there was nothing else we could have unloaded, notify error
+	if (curMemoryUsage > static_cast<size_t>(rules.budget * 1.1f) && unloadableKept > 0) {
 		if (budgetMessageTimeout <= 0.001) {
 			Logger::logError("Memory budget for " + toString(collection.getAssetType()) + " exceeded: "
 				+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget));
