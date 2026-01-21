@@ -29,21 +29,23 @@ void MetadataImporter::loadMetaData(Metadata& meta, const Path& path, bool isDir
 	const String inputFilePathStr = inputFilePath.toString();
 
 	if (isDirectoryMeta) {
-		for (const auto& rootList: root) {
-			bool matches = true;
-			if (rootList.hasKey("match")) {
-				matches = false;
-				for (auto& pattern: rootList["match"]) {
-					auto p = pattern.asString();
-					if (inputFilePathStr.contains(p)) {
-						matches = true;
-						break;
+		if (root.getType() == ConfigNodeType::Sequence) {
+			for (const auto& rootList: root) {
+				bool matches = true;
+				if (rootList.hasKey("match")) {
+					matches = false;
+					for (auto& pattern: rootList["match"]) {
+						auto p = pattern.asString();
+						if (inputFilePathStr.contains(p)) {
+							matches = true;
+							break;
+						}
 					}
 				}
-			}
-			if (matches && rootList.hasKey("data")) {
-				loadMetaTable(meta, rootList["data"], true);
-				return;
+				if (matches && rootList.hasKey("data")) {
+					loadMetaTable(meta, rootList["data"], true);
+					return;
+				}
 			}
 		}
 	} else {

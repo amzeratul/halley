@@ -35,6 +35,7 @@ namespace Halley {
 	public:
 		explicit DummyTexture(Vector2i size);
 		void doLoad(TextureDescriptor& descriptor) override;
+		void clearTexture() override;
 	};
 
 	class DummyShader : public Shader

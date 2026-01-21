@@ -246,12 +246,11 @@ DX12Texture::DX12Texture(DX12Video& video, Vector2i size)
     : Texture(size)
     , video(video)
 {
-    startLoading();
 }
 
 DX12Texture::~DX12Texture()
 {
-    video.addReleaseResource(resource);
+    clearTexture();
 }
 
 DX12Texture& DX12Texture::operator=(DX12Texture&& other) noexcept
@@ -277,6 +276,14 @@ void DX12Texture::doLoad(TextureDescriptor& descriptor)
     } else {
         video.addRecreateTexture(this);
     }
+}
+
+void DX12Texture::clearTexture()
+{
+    video.addReleaseResource(resource);
+    resourceDesc = {};
+    state = D3D12_RESOURCE_STATE_COMMON;
+    vramUsage = 0;
 }
 
 void DX12Texture::doCreateDeferred()

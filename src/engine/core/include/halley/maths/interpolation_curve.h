@@ -47,7 +47,7 @@ namespace Halley {
     private:
         constexpr static size_t nElements = 64;
         alignas(64) std::array<uint8_t, nElements> elements;
-        float scale = 1.0f;
+        //float scale = 1.0f;
     };
 
 	template<>

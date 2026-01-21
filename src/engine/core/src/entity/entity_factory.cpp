@@ -169,12 +169,16 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 	}
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, 
+	bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene,
+	EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant,
+	bool preloadAssets)
 	: world(&world)
 	, scene(scene)
 	, parent(parent)
 	, update(update)
 	, fallbackVariant(std::move(fallbackVariant))
+	, preloadAssets(preloadAssets)
 {
 	prefab = std::move(_prefab);
 	entitySerializationContext.resources = &resources;
@@ -321,6 +325,11 @@ bool EntityFactoryContext::isHeadless() const
 	return world->isHeadless();
 }
 
+bool EntityFactoryContext::canPreloadAssets() const
+{
+	return preloadAssets;
+}
+
 void EntityFactoryContext::addToDelete(EntityRef entityRef)
 {
 	toDelete.push_back(entityRef);
@@ -394,7 +403,8 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent, interpolators, fallbackVariant);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext,
+		getPrefab(existing, data), &data, scene, parent, interpolators, fallbackVariant, preloadAssets);
 
 	if (existing) {
 		context->notifyEntity(existing.value());
@@ -418,6 +428,11 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeStandaloneContext()
 void EntityFactory::setNetworkFactory(bool network)
 {
 	networkFactory = network;
+}
+
+void EntityFactory::setCanPreloadAssets(bool preload)
+{
+	preloadAssets = preload;
 }
 
 void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)

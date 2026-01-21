@@ -713,11 +713,19 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	case ProfilerEventType::CoreVSync:
 		return Colour4f(0.6f, 0.6f, 0.4f);
 	case ProfilerEventType::CoreUpdate:
+	case ProfilerEventType::CoreUpdatePlatform:
+	case ProfilerEventType::CoreUpdateResources:
+	case ProfilerEventType::CoreUpdateSystem:
+	case ProfilerEventType::CorePumpEvents:
+	case ProfilerEventType::CorePumpAudio:
+	case ProfilerEventType::CoreDevConClient:
+		return Colour4f(0.1f, 0.1f, 1.0f);
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
 	case ProfilerEventType::WorldSystemUpdate:
 	case ProfilerEventType::WorldFixedUpdate:
 	case ProfilerEventType::WorldVariableUpdate:
+	case ProfilerEventType::WorldSystemMessages:
 		return Colour4f(0.1f, 0.1f, 0.7f);
 	case ProfilerEventType::CoreRender:
 	case ProfilerEventType::WorldSystemRender:
@@ -742,6 +750,10 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(1.0f, 0.85f, 0.1f);
 	case ProfilerEventType::ExternalCode:
 		return Colour4f(0.8f, 0.4f, 0.8f);
+	case ProfilerEventType::DiskIO:
+		return Colour4f(1.0f, 0.5f, 0.13f);
+	case ProfilerEventType::Game:
+	case ProfilerEventType::UserDefined:
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}

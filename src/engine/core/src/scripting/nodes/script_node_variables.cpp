@@ -1368,10 +1368,10 @@ gsl::span<const IGraphNodeType::PinType> ScriptPackMap::getPinConfiguration(cons
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
 
-	static Vector<IGraphNodeType::PinType> result;
+	static Vector<PinType> result;
 	result.clear();
 	result.push_back(PinType{ ET::ReadDataPin, PD::Output });
-	for (const auto& key : keys) {
+	for (size_t i = 0; i < keys.size(); ++i) {
 		result.push_back(PinType{ ET::ReadDataPin, PD::Input });
 	}
 	return result.span();
@@ -1439,10 +1439,10 @@ gsl::span<const IGraphNodeType::PinType> ScriptUnpackMap::getPinConfiguration(co
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
 
-	static Vector<IGraphNodeType::PinType> result;
+	static Vector<PinType> result;
 	result.clear();
 	result.push_back(PinType{ ET::ReadDataPin, PD::Input });
-	for (const auto& key : keys) {
+	for (size_t i = 0; i < keys.size(); ++i) {
 		result.push_back(PinType{ ET::ReadDataPin, PD::Output });
 	}
 	return result.span();

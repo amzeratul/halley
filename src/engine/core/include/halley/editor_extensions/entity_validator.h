@@ -26,7 +26,6 @@ namespace Halley {
 
     private:
         World& world;
-        const ISceneEditorWindow& sceneEditorWindow;
         const EntityData* curEntity = nullptr;
 
         Vector<std::unique_ptr<IEntityValidator>> validators;

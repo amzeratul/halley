@@ -45,6 +45,7 @@ namespace Halley
 		virtual void generateMipMaps();
 
 		ResourceMemoryUsage getMemoryUsage() const override;
+		ResourceMemoryUsage getEstimatedMemoryUsage() const override;
 
 		void setAlphaMask(ImageMask mask);
 		bool hasOpaquePixels(Rect4i pixelBounds) const;
@@ -55,17 +56,27 @@ namespace Halley
 		ImageMask mask;
 
 		bool retainPixelData = false;
+		bool unloadable = false;
+		std::optional<TextureFormat> expectedTextureFormat;
 		ResourceLoader::LoaderFunc loaderFunc;
 
-		virtual void doLoad(TextureDescriptor& descriptor);
+		virtual void doLoad(TextureDescriptor& descriptor) = 0;
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
 		virtual void doCopyToImage(Painter& painter, Image& image) const;
 		virtual size_t getVRamUsage() const;
+		virtual void clearTexture() = 0;
 
 		void moveFrom(Texture& other);
+
+		bool canUnload() const override;
+		bool doRequestLoading() override;
+		bool doRequestUnloading() override;
 
 	private:
 		void loadFromDisk();
 		void loadFromDisk(const ResourceLoader::LoaderFunc& loaderFunc, bool retainPixelData);
+
+		static TextureFormat getTextureFormat(Image::Format format);
+		static TextureFormat getTextureFormat(const Metadata& meta);
 	};
 }

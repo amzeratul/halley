@@ -32,7 +32,7 @@ void ISceneData::reloadEntity(const String& id, const EntityData* data)
 
 EntityValidator::EntityValidator(World& world, const ISceneEditorWindow& sceneEditorWindow)
 	: world(world)
-	, sceneEditorWindow(sceneEditorWindow)
+	//, sceneEditorWindow(sceneEditorWindow)
 {
 }
 

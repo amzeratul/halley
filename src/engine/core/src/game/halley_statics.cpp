@@ -76,7 +76,7 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 
 	size_t nCPU = maxThreads;
 	size_t nAuxCPU = maxThreads;
-	size_t nDiskIO = 1;
+	size_t nDiskIO = maxThreads; // Setting this too low means that there's a lot of unnecessary waiting. DiskIO is its own thread pool since it's mostly parked threads.
 	if constexpr (getPlatform() == GamePlatform::Emscripten) {
 		nAuxCPU = 0;
 		nCPU = std::max(size_t(4), maxThreads - 4);

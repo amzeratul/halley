@@ -149,7 +149,6 @@ void DX11SwapChain::initDepthStencilViews()
 		descriptor.size = size;
 		descriptor.isDepthStencil = true;
 		descriptor.format = TextureFormat::Depth;
-		tex.startLoading();
 		tex.load(std::move(descriptor));
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;

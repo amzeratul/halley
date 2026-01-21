@@ -140,6 +140,16 @@ bool Game::canCollectVideoPerformance()
 	return true;
 }
 
+const ResourceUnloaderRules& Game::getResourceUnloaderRules() const
+{
+	return resourceUnloaderRules;
+}
+
+ResourceUnloaderRules& Game::getResourceUnloaderRules()
+{
+	return resourceUnloaderRules;
+}
+
 String Game::getDefaultColourScheme()
 {
 	return "";

@@ -150,7 +150,7 @@ float InterpolationCurve::getMaxAbsValue() const
 }
 
 PrecomputedInterpolationCurve::PrecomputedInterpolationCurve(const InterpolationCurve& src)
-	: scale(src.scale)
+	//: scale(src.scale)
 {
 	constexpr float mult = 1.0f / static_cast<float>(nElements);
 	for (size_t i = 0; i < nElements; ++i) {

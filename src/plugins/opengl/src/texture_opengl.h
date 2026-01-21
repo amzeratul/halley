@@ -7,7 +7,7 @@
 namespace Halley
 {
 	class VideoOpenGL;
-	enum class TextureFormat;
+	enum class TextureFormat : uint8_t;
 
 	class TextureOpenGL final : public Texture
 	{
@@ -21,6 +21,7 @@ namespace Halley
 		unsigned int getNativeId() const;
 
 		void doLoad(TextureDescriptor& descriptor) override;
+		void clearTexture() override;
 		void reload(Resource&& resource) override;
 
 		void generateMipMaps() override;

@@ -1,0 +1,55 @@
+#pragma once
+
+#include "resources.h"
+#include "halley/data_structures/hash_map.h"
+
+namespace Halley {
+    class ResourceUnloaderAssetTypeRules {
+    public:
+        size_t budget = 1024 * 1024 * 1024;     /// Total byte budget for this asset type; can preload to that amount, and tries to keep all resources below it
+        size_t staleBudget = 768 * 1024 * 1024; /// Unload stale objects when this usage is exceeded
+
+        ResourceUnloaderAssetTypeRules() = default;
+        ResourceUnloaderAssetTypeRules(size_t budget);
+        ResourceUnloaderAssetTypeRules(size_t budget, size_t staleBudget);
+    };
+
+    class ResourceUnloaderRules {
+    public:
+        HashMap<AssetType, ResourceUnloaderAssetTypeRules> rules;
+    };
+
+    class ResourceUnloader {
+		struct LoadStateInfo {
+            std::shared_ptr<const AsyncResource> res;
+            bool loaded = false;
+            bool markAsLoading = false;
+            bool markAsUnloading = false;
+			ResourceDesiredLoadState desiredState = ResourceDesiredLoadState::Load;
+            size_t memoryUsage;
+            Time timeSinceUse = 0;
+
+            bool operator<(const LoadStateInfo& other) const;
+		};
+
+        struct StateCollection {
+            size_t curMemoryUsage;
+	        Vector<LoadStateInfo> states;
+
+            void sort();
+        };
+
+    public:
+        ResourceUnloader(Resources& resources);
+
+        void update(Time t, const ResourceUnloaderRules& rules);
+
+    private:
+        Resources& resources;
+        Time budgetMessageTimeout = 0;
+        Time unloadPreloadMessageTimeout = 0;
+
+        void updateCollection(Time t, ResourceCollectionBase& collection, const ResourceUnloaderAssetTypeRules& rules);
+        void updateResourcesAndCollectStates(Time t, ResourceCollectionBase& collection, HashMap<ResourceDesiredLoadState, StateCollection>& states);
+    };
+}

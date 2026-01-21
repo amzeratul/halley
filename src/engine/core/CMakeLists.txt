@@ -84,6 +84,7 @@ set(SOURCES
         "src/resources/resource_locator.cpp"
         "src/resources/resource_pack.cpp"
         "src/resources/resource_reference.cpp"
+        "src/resources/resource_unloader.cpp"
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
@@ -155,6 +156,7 @@ set(SOURCES
         "src/diagnostics/audio_view.cpp"
         "src/diagnostics/frame_debugger.cpp"
         "src/diagnostics/performance_stats.cpp"
+        "src/diagnostics/resources_view.cpp"
         "src/diagnostics/stats_view.cpp"
         "src/diagnostics/world_stats.cpp"
 
@@ -530,6 +532,7 @@ set(HEADERS
         "include/halley/resources/resource_collection.h"
         "include/halley/resources/resource_locator.h"
         "include/halley/resources/resource_reference.h"
+        "include/halley/resources/resource_unloader.h"
         "include/halley/resources/resources.h"
         "include/halley/resources/standard_resources.h"
 
@@ -625,6 +628,7 @@ set(HEADERS
         "include/halley/diagnostics/audio_view.h"
         "include/halley/diagnostics/frame_debugger.h"
         "include/halley/diagnostics/performance_stats.h"
+        "include/halley/diagnostics/resources_view.h"
         "include/halley/diagnostics/stats_view.h"
         "include/halley/diagnostics/world_stats.h"
 

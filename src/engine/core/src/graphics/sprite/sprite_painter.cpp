@@ -290,6 +290,7 @@ void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBrea
 		addCopy(sprite, mask, layer, tieBreaker, clip);
 	} else {
 		Expects(mask >= 0);
+		sprite.markInActiveUse();
 		sprites.push_back(SpritePainterEntry(gsl::span<const Sprite>(&sprite, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 		dirty = true;
 	}
@@ -298,6 +299,7 @@ void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBrea
 void SpritePainter::add(Sprite&& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
+	sprite.markInActiveUse();
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedSprites.push_back(sprite.clone(false));
 	dirty = true;
@@ -306,6 +308,7 @@ void SpritePainter::add(Sprite&& sprite, int mask, int layer, float tieBreaker, 
 void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
+	sprite.markInActiveUse();
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedSprites.push_back(sprite.clone(false));
 	dirty = true;
@@ -318,6 +321,9 @@ void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, fl
 			addCopy(sprites, mask, layer, tieBreaker, clip);
 		} else {
 			Expects(mask >= 0);
+			for (auto& sprite: sprites) {
+				sprite.markInActiveUse();
+			}
 			this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
 			dirty = true;
 		}
@@ -328,6 +334,9 @@ void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer
 {
 	Expects(mask >= 0);
 	if (!sprites.empty()) {
+		for (auto& sprite: sprites) {
+			sprite.markInActiveUse();
+		}
 		this->sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), sprites.size(), mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
 		cachedSprites.reserve(cachedSprites.size() + sprites.size());
 		for (auto& s: sprites) {
@@ -574,6 +583,8 @@ void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect
 				} else {
 					sprite.draw(painter, clip);
 				}
+			} else {
+				sprite.markInActiveUse();
 			}
 		}
 	}

@@ -26,6 +26,7 @@ namespace Halley
 	class RenderTarget;
 	class Environment;
 	class DevConClient;
+	class ResourceUnloader;
 
 	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
 	{
@@ -103,6 +104,7 @@ namespace Halley
 		void pumpAudio();
 		void updateSystem(Time time);
 		void updatePlatform();
+		void updateResources(Time time);
 
 		void onProfileData(std::shared_ptr<ProfilerData> data);
 		Time getProfileCaptureThreshold() const;
@@ -147,5 +149,7 @@ namespace Halley
 		HalleyStatics statics;
 
 		ComputerData computerData;
+
+		std::unique_ptr<ResourceUnloader> resourceUnloader;
 	};
 }

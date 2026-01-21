@@ -24,7 +24,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	std::optional<Metadata> startMeta;
 
 	std::optional<String> palette;
-	bool powerOfTwo = true;
+	bool powerOfTwo = false;
 	
 	for (auto& inputFile: asset.inputFiles) {
 		auto fileInputId = Path(inputFile.name).dropFront(1);
@@ -57,8 +57,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		}
 
 		// Power of two
-		if (asset.inputFiles.size() == 1) {
-			powerOfTwo = meta.getBool("powerOfTwo", true);
+		if (meta.getBool("powerOfTwo", false)) {
+			powerOfTwo = true;
 		}
 
 		// Import image data

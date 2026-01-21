@@ -361,6 +361,7 @@ float AnimationPlayer::getPlaybackSpeed() const
 
 const Animation& AnimationPlayer::getAnimation() const
 {
+	assert(!!animation);
 	return *animation;
 }
 

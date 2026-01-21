@@ -367,6 +367,27 @@ bool Sprite::isLoaded() const
 	return material->areAllTexturesLoaded();
 }
 
+void Sprite::markInActiveUse() const
+{
+	if (material) {
+		material->markInActiveUse();
+	}
+}
+
+void Sprite::markBackgroundLoaded() const
+{
+	if (material) {
+		material->markBackgroundLoaded();
+	}
+}
+
+void Sprite::markLowPriorityBackgroundLoaded() const
+{
+	if (material) {
+		material->markLowPriorityBackgroundLoaded();
+	}
+}
+
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));
@@ -429,7 +450,6 @@ Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_p
 		TextureDescriptor desc(image->getSize(), TextureFormat::RGBA);
 		desc.pixelData = std::move(image);
 		desc.useFiltering = filtering;
-		tex->startLoading();
 		tex->load(std::move(desc));
 
 		const auto matDef = resources.get<MaterialDefinition>(materialName.empty() ? MaterialDefinition::defaultMaterial : materialName);
@@ -945,6 +965,10 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		} else {
 			sprite.setColour(Colour4f::fromString(node["colour"].asStringView()));
 		}
+	}
+
+	if (!context.entityContext || context.entityContext->canPreloadAssets()) {
+		sprite.markLowPriorityBackgroundLoaded();
 	}
 }
 

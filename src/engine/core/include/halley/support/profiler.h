@@ -19,6 +19,7 @@ namespace Halley {
 		CoreVariableUpdate,
 		CoreUpdateSystem,
 		CoreUpdatePlatform,
+		CoreUpdateResources,
 		CoreUpdate,
 		CoreStartRender,
 		CoreRender,
@@ -54,7 +55,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProfilerEventType> {
-		constexpr std::array<const char*, 29> operator()() const {
+		constexpr std::array<const char*, 30> operator()() const {
 			return{{
 			    "CorePumpEvents",
 				"CoreDevConClient",
@@ -63,6 +64,7 @@ namespace Halley {
 				"CoreVariableUpdate",
 				"CoreUpdateSystem",
 				"CoreUpdatePlatform",
+				"CoreUpdateResources",
 				"CoreUpdate",
 				"CoreStartRender",
 				"CoreRender",

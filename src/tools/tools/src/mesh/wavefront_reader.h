@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/file/path.h"
 #include "halley/graphics/mesh/mesh.h"
+#include "halley/maths/colour.h"
 
 namespace Halley
 {
@@ -28,7 +29,17 @@ namespace Halley
 		class WFMaterial {
 		public:
 			String name;
-			String diffuseTexture;
+
+			String texDiffuse;
+
+			Colour4f colAmbient = Colour4f(0, 0, 0);
+			Colour4f colDiffuse = Colour4f(1, 1, 1);
+			Colour4f colSpecular = Colour4f(0, 0, 0);
+			Colour4f colEmissive = Colour4f(0, 0, 0);
+			Colour4f colTransmissivity = Colour4f(0, 0, 0);
+
+			float alpha = 1.0f;
+			float specularExponent = 0;
 		};
 
 		class State {

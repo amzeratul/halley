@@ -246,7 +246,7 @@ namespace {
 	}
 #endif
 
-	void terminateHandler()
+	[[maybe_unused]] void terminateHandler()
 	{
 		std::cout << "std::terminate() invoked.\n";
 		std::cout << "[start of stack trace]\n";

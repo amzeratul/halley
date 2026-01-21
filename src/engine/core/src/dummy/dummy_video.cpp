@@ -88,6 +88,10 @@ void DummyTexture::doLoad(TextureDescriptor&)
 	doneLoading();
 }
 
+void DummyTexture::clearTexture()
+{
+}
+
 int DummyShader::getUniformLocation(const String&, ShaderType)
 {
 	return 0;

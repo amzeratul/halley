@@ -41,6 +41,11 @@ ResourceMemoryUsage Resource::getMemoryUsage() const
 	return ResourceMemoryUsage{};
 }
 
+ResourceMemoryUsage Resource::getEstimatedMemoryUsage() const
+{
+	return getMemoryUsage();
+}
+
 void Resource::increaseAge(float time)
 {
 	age += time;
@@ -54,6 +59,10 @@ void Resource::resetAge()
 float Resource::getAge() const
 {
 	return age;
+}
+
+void Resource::startFrame(Time dt) const
+{
 }
 
 void Resource::setUnloaded()
@@ -118,7 +127,17 @@ const Resource* ResourceObserver::getResourceBeingObserved() const
 AsyncResource::AsyncResource() 
 	: failed(false)
 	, loadState(State::Unloaded)
-{}
+	, inUseThisFrame(false)
+	, inBackgroundThisFrame(false)
+{
+	usageData.framesSinceInLowPriorityBackground = 1000;
+	usageData.framesSinceInBackground = 1000;
+	usageData.framesSinceInUse = 1000;
+	usageData.timeSinceInLowPriorityBackground = 1000.0;
+	usageData.timeSinceInBackground = 1000.0;
+	usageData.timeSinceInUse = 1000.0;
+	usageData.loaded = false;
+}
 
 AsyncResource::~AsyncResource()
 {
@@ -156,13 +175,15 @@ AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
 
 void AsyncResource::startLoading()
 {
-	loadState = State::Loading;
-	failed = false;
+	if (loadState == State::Unloaded) {
+		loadState = State::Loading;
+		failed = false;
+	}
 }
 
 void AsyncResource::doneLoading()
 {
-	if (loadState == State::Loading) {
+	if (loadState != State::Loaded) {
 		Vector<Promise<void>> promises;
 		{
 			UniqueLock lock(loadMutex);
@@ -176,6 +197,15 @@ void AsyncResource::doneLoading()
 	}
 }
 
+void AsyncResource::doneUnloading()
+{
+	// Don't lock mutex here, it should already be locked
+	if (loadState == State::Loaded) {
+		loadState = State::Unloaded;
+		failed = false;
+	}
+}
+
 void AsyncResource::loadingFailed()
 {
 	failed = true;
@@ -184,12 +214,12 @@ void AsyncResource::loadingFailed()
 
 void AsyncResource::waitForLoad(bool acceptFailed) const
 {
-	if (loadState == State::Unloaded) {
-		const_cast<AsyncResource*>(this)->requestLoading();
-	}
+	markActivelyInUse();
+
 	if (loadState == State::Loading) {
 		UniqueLock lock(loadMutex);
 		while (loadState != State::Loaded) {
+			Logger::logDev("Waiting for asset load: " + getAssetId());
 			loadWait.wait(lock);
 		}
 	}
@@ -209,6 +239,57 @@ Future<void> AsyncResource::onLoad() const
 	}
 }
 
+void AsyncResource::startFrame(Time dt) const
+{
+	usageData.timeSinceInUse += dt;
+	usageData.timeSinceInBackground += dt;
+	usageData.timeSinceInLowPriorityBackground += dt;
+	
+	usageData.framesSinceInUse++;
+	usageData.framesSinceInBackground++;
+	usageData.framesSinceInLowPriorityBackground++;
+
+	usageData.loaded = loadState == State::Loaded;
+
+	if (inUseThisFrame.load(std::memory_order_relaxed)) {
+		usageData.timeSinceInUse = 0;
+		usageData.framesSinceInBackground = 0;
+	}
+	if (inBackgroundThisFrame.load(std::memory_order_relaxed)) {
+		usageData.timeSinceInBackground = 0;
+		usageData.framesSinceInBackground = 0;
+	}
+	if (inLowPriorityBackgroundThisFrame.load(std::memory_order_relaxed)) {
+		usageData.timeSinceInLowPriorityBackground = 0;
+		usageData.framesSinceInLowPriorityBackground = 0;
+	}
+
+	inUseThisFrame.store(false, std::memory_order_relaxed);
+	inBackgroundThisFrame.store(false, std::memory_order_relaxed);
+	inLowPriorityBackgroundThisFrame.store(false, std::memory_order_relaxed);
+}
+
+void AsyncResource::markActivelyInUse() const
+{
+	inUseThisFrame.store(true, std::memory_order_relaxed);
+	requestLoading();
+}
+
+void AsyncResource::markBackgroundLoaded() const
+{
+	inBackgroundThisFrame.store(true, std::memory_order_relaxed);
+}
+
+void AsyncResource::markLowPriorityBackgroundLoaded() const
+{
+	inLowPriorityBackgroundThisFrame.store(true, std::memory_order_relaxed);
+}
+
+const AsyncResource::UsagePattern& AsyncResource::getUsagePattern() const
+{
+	return usageData;
+}
+
 bool AsyncResource::isLoaded() const
 {
 	return loadState == State::Loaded;
@@ -224,14 +305,50 @@ bool AsyncResource::hasFailed() const
 	return failed;
 }
 
-void AsyncResource::requestLoading()
+void AsyncResource::setDesiredLoadState(ResourceDesiredLoadState state) const
+{
+	desiredLoadState = state;
+}
+
+ResourceDesiredLoadState AsyncResource::getDesiredLoadState() const
+{
+	return desiredLoadState;
+}
+
+bool AsyncResource::requestLoading() const
 {
 	if (loadState == State::Unloaded) {
 		UniqueLock lock(loadMutex);
-		doRequestLoading();
+		inUseThisFrame = true;
+		if (loadState == State::Unloaded) {
+			return const_cast<AsyncResource*>(this)->doRequestLoading();
+		}
 	}
+	return false;
 }
 
-void AsyncResource::doRequestLoading()
+bool AsyncResource::requestUnloading() const
 {
+	if (loadState == State::Loaded) {
+		UniqueLock lock(loadMutex);
+		if (loadState == State::Loaded && !inUseThisFrame) {
+			return const_cast<AsyncResource*>(this)->doRequestUnloading();
+		}
+	}
+	return false;
+}
+
+bool AsyncResource::canUnload() const
+{
+	return false;
+}
+
+bool AsyncResource::doRequestLoading()
+{
+	return false;
+}
+
+bool AsyncResource::doRequestUnloading()
+{
+	return false;
 }
