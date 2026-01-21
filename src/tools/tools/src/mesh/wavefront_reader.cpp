@@ -85,6 +85,21 @@ namespace {
 		}
 		return 0;
 	}
+
+	Colour4f tryParseColour(gsl::span<const String> tokens)
+	{
+		if (tokens.size() == 1) {
+			return Colour4f(tryParseFloat(tokens, 0));
+		} else if (tokens.size() == 2) {
+			return Colour4f(tryParseFloat(tokens, 0), tryParseFloat(tokens, 1), 0);
+		} else if (tokens.size() == 3) {
+			return Colour4f(tryParseFloat(tokens, 0), tryParseFloat(tokens, 1), tryParseFloat(tokens, 2));
+		} else if (tokens.size() >= 3) {
+			return Colour4f(tryParseFloat(tokens, 0), tryParseFloat(tokens, 1), tryParseFloat(tokens, 2), tryParseFloat(tokens, 3));
+		} else {
+			return {};
+		}
+	}
 }
 
 void WavefrontReader::State::resetObject()
@@ -126,8 +141,8 @@ void WavefrontReader::State::parseF(gsl::span<const String> tokens)
 void WavefrontReader::State::makeTriangle(const FaceVertex& a, const FaceVertex& b, const FaceVertex& c)
 {
 	indices.push_back(getIndex(a));
-	indices.push_back(getIndex(c));
 	indices.push_back(getIndex(b));
+	indices.push_back(getIndex(c));
 }
 
 IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
@@ -142,8 +157,8 @@ IndexType WavefrontReader::State::getIndex(const FaceVertex& vert)
 		const auto idx = static_cast<IndexType>(vertices.size());
 
 		vertices.emplace_back(MeshObject::VertexData {
-			Vector4f(pos.x, pos.y, pos.z, 1.0f),
-			Vector4f(normal.x, normal.y, normal.z, 1.0f),
+			Vector4f(pos.x, pos.y, -pos.z, 1.0f),
+			Vector4f(normal.x, normal.y, -normal.z, 1.0f),
 			Vector4f(1, 1, 1, 1),
 			Vector4f(tex.x, tex.y, tex.z, 0.0f)
 		});
@@ -208,7 +223,23 @@ void WavefrontReader::State::parseMtlCommand(const String& cmd, gsl::span<const 
 		curMaterial = WFMaterial();
 		curMaterial.name = args[0];
 	} else if (cmd == "map_Kd") {
-		curMaterial.diffuseTexture = args[0];
+		curMaterial.texDiffuse = args[0];
+	} else if (cmd == "Ka") {
+		curMaterial.colAmbient = tryParseColour(args);
+	} else if (cmd == "Kd") {
+		curMaterial.colDiffuse = tryParseColour(args);
+	} else if (cmd == "Ke") {
+		curMaterial.colEmissive = tryParseColour(args);
+	} else if (cmd == "Ks") {
+		curMaterial.colSpecular = tryParseColour(args);
+	} else if (cmd == "Ns") {
+		curMaterial.specularExponent = tryParseFloat(args, 0);
+	} else if (cmd == "d") {
+		curMaterial.alpha = tryParseFloat(args, 0);
+	} else if (cmd == "Tr") {
+		curMaterial.alpha = 1.0f - tryParseFloat(args, 0);
+	} else if (cmd == "Tf") {
+		curMaterial.colTransmissivity = tryParseColour(args);
 	}
 }
 
@@ -243,7 +274,7 @@ MeshObject WavefrontReader::State::makeMeshObject()
 	if (matIter != materials.end()) {
 		const auto& matDef = matIter->second;
 		result.setMaterialName("Halley/StandardMesh"); // TODO?
-		result.setTextureNames({ matDef.diffuseTexture });
+		result.setTextureNames({ matDef.texDiffuse });
 	} else {
 		if (!materialName.isEmpty()) {
 			Logger::logWarning("Material not found while importing WaveFront Obj: " + materialName);
@@ -252,7 +283,6 @@ MeshObject WavefrontReader::State::makeMeshObject()
 		result.setTextureNames({});
 	}
 
-	
 	resetObject();
 
 	return result;
