@@ -116,7 +116,7 @@ void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int 
 		return;
 	}
 
-	if (world->isEntityNetworkRemote(e)) {
+	if (!world->isEntityNetworkAuthority(e)) {
 		world->sendNetworkMessage(entityId, id, std::move(msg));
 	} else {
 		outbox.emplace_back(std::make_pair(MessageEntry(std::move(msg), id, systemId), entityId));

@@ -766,19 +766,26 @@ bool EntityNetworkSession::isConnected() const
 	return session->getStatus() == ConnectionStatus::Connected;
 }
 
-bool EntityNetworkSession::isRemote(ConstEntityRef entity) const
+bool EntityNetworkSession::isOwner(ConstEntityRef entity) const
 {
-    auto entityOwner = entity.getAuthorityPeerId();
+	const auto peerId = entity.getOwnerPeerId();
 
-    if (!entityOwner) {
-        entityOwner = entity.getOwnerPeerId();
-    }
-
-	if (!entityOwner) {
-		return false;
+	if (peerId.has_value()) {
+		return peerId == session->getMyPeerId();
 	}
-	
-	return entityOwner != session->getMyPeerId();
+
+	return true;
+}
+
+bool EntityNetworkSession::isAuthority(ConstEntityRef entity) const
+{
+	const auto peerId = entity.getAuthorityPeerId();
+
+	if (peerId.has_value()) {
+		return peerId == session->getMyPeerId();
+	}
+
+	return isOwner(entity);
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

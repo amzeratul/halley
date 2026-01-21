@@ -38,11 +38,12 @@ namespace Halley {
 	public:
 		virtual ~IWorldNetworkInterface() = default;
 
-		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
 		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) = 0;
 		virtual bool isHost() const = 0;
 		virtual bool isConnected() const = 0;
+		virtual bool isOwner(ConstEntityRef entity) const = 0;
+		virtual bool isAuthority(ConstEntityRef entity) const = 0;
 	};
 
 	class World
@@ -153,9 +154,12 @@ namespace Halley {
 
 		void setNetworkInterface(IWorldNetworkInterface* interface);
 		bool isNetworkConnected() const;
-		bool isEntityNetworkRemote(EntityId entityId) const;
-		bool isEntityNetworkRemote(EntityRef entity) const;
-		bool isEntityNetworkRemote(ConstEntityRef entity) const;
+		bool isEntityNetworkOwner(EntityId entityId) const;
+		bool isEntityNetworkOwner(EntityRef entity) const;
+		bool isEntityNetworkOwner(ConstEntityRef entity) const;
+		bool isEntityNetworkAuthority(EntityId entityId) const;
+		bool isEntityNetworkAuthority(EntityRef entity) const;
+		bool isEntityNetworkAuthority(ConstEntityRef entity) const;
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
 		void sendNetworkSystemMessage(const String& targetSystem, const SystemMessageContext& context, SystemMessageDestination destination);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);

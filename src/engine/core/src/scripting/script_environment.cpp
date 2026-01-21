@@ -620,7 +620,7 @@ bool ScriptEnvironment::hasNetworkAuthorityOver(EntityId id)
 
 bool ScriptEnvironment::hasNetworkAuthorityOver(EntityRef entity) const
 {
-	return !world.isEntityNetworkRemote(entity);
+	return world.isEntityNetworkAuthority(entity);
 }
 
 bool ScriptEnvironment::hasHostNetworkAuthority() const

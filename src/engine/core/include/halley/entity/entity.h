@@ -158,7 +158,8 @@ namespace Halley {
 
 		bool isEmpty() const;
 
-		bool isRemote(const World& world) const;
+		bool isNetworkOwner(const World& world) const;
+		bool isNetworkAuthority(const World& world) const;
 
 		int getParentingDepth() const;
 
@@ -940,16 +941,22 @@ namespace Halley {
             return entity->getAuthorityPeerId();
         }
 
-		bool isRemote() const
-		{
-			Expects(entity);
-			return entity->isRemote(*world);
-		}
-
 		bool isLocal() const
 		{
 			Expects(entity);
-			return !entity->isRemote(*world);
+			return entity->isNetworkOwner(*world);
+		}
+
+		bool isNetworkOwner() const
+		{
+			Expects(entity);
+			return entity->isNetworkOwner(*world);
+		}
+
+		bool isNetworkAuthority() const
+		{
+			Expects(entity);
+			return entity->isNetworkAuthority(*world);
 		}
 
 		void setFromNetwork(bool fromNetwork)
@@ -1134,16 +1141,22 @@ namespace Halley {
             return entity->getAuthorityPeerId();
         }
 
-		bool isRemote() const
-		{
-			Expects(entity);
-			return entity->isRemote(*world);
-		}
-
 		bool isLocal() const
 		{
 			Expects(entity);
-			return !entity->isRemote(*world);
+			return entity->isNetworkOwner(*world);
+		}
+
+		bool isNetworkOwner() const
+		{
+			Expects(entity);
+			return entity->isNetworkOwner(*world);
+		}
+
+		bool isNetworkAuthority() const
+		{
+			Expects(entity);
+			return entity->isNetworkAuthority(*world);
 		}
 
 		template <typename T>

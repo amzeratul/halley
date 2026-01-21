@@ -93,7 +93,8 @@ namespace Halley {
 
 		bool isHost() const override;
 		bool isConnected() const override;
-		bool isRemote(ConstEntityRef entity) const override;
+		bool isOwner(ConstEntityRef entity) const override;
+		bool isAuthority(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
 		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;
 

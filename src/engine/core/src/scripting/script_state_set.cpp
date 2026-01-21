@@ -119,7 +119,7 @@ void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 	auto isLocal = [&]() -> bool
 	{
 		if (!isLocalCache) {
-			isLocalCache = world.getEntity(entityId).isLocal();
+			isLocalCache = world.getEntity(entityId).isNetworkAuthority();
 		}
 		return *isLocalCache;
 	};

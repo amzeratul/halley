@@ -333,9 +333,14 @@ bool Entity::isEmpty() const
 	return liveComponents == 0 && children.empty();
 }
 
-bool Entity::isRemote(const World& world) const
+bool Entity::isNetworkOwner(const World& world) const
 {
-	return world.isEntityNetworkRemote(ConstEntityRef(*this, world));
+	return world.isEntityNetworkOwner(ConstEntityRef(*this, world));
+}
+
+bool Entity::isNetworkAuthority(const World& world) const
+{
+	return world.isEntityNetworkAuthority(ConstEntityRef(*this, world));
 }
 
 int Entity::getParentingDepth() const

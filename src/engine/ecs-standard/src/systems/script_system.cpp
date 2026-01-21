@@ -272,7 +272,7 @@ private:
 		}
 
 		for (auto& e: scriptableFamily) {
-			const bool isLocalEntity = getWorld().getEntity(e.entityId).isLocal();
+			const bool isLocalEntity = getWorld().isEntityNetworkOwner(e.entityId);
 			for (const auto& script : e.scriptable.scripts) {
                 if (!script.hasValue()) {
                     Logger::logWarning("Found scriptable component with empty script resource reference", true);
@@ -392,7 +392,7 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		auto scriptOutbound = env.getOutboundScriptMessages();
 		for (auto& msg: scriptOutbound) {
-			if (getWorld().isEntityNetworkRemote(msg.first)) {
+			if (!getWorld().isEntityNetworkAuthority(msg.first)) {
 				sendRemoteMessage(msg.first, std::move(msg.second));
 			} else {
 				sendLocalMessage(msg.first, std::move(msg.second));

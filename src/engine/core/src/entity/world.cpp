@@ -946,28 +946,40 @@ void World::processSystemMessages(TimeLine timeline)
 	HALLEY_DEBUG_TRACE();
 }
 
-bool World::isEntityNetworkRemote(EntityId entityId) const
+bool World::isEntityNetworkOwner(EntityId entityId) const
 {
-	if (networkInterface) {
-		return isEntityNetworkRemote(getEntity(entityId));
-	}
-	return false;
+	return isEntityNetworkOwner(getEntity(entityId));
 }
 
-bool World::isEntityNetworkRemote(EntityRef entity) const
+bool World::isEntityNetworkOwner(EntityRef entity) const
 {
-	if (networkInterface) {
-		return networkInterface->isRemote(entity);
-	}
-	return false;
+	return isEntityNetworkOwner(ConstEntityRef(entity));
 }
 
-bool World::isEntityNetworkRemote(ConstEntityRef entity) const
+bool World::isEntityNetworkOwner(ConstEntityRef entity) const
 {
 	if (networkInterface) {
-		return networkInterface->isRemote(entity);
+		return networkInterface->isOwner(entity);
 	}
-	return false;
+	return true;
+}
+
+bool World::isEntityNetworkAuthority(EntityId entityId) const
+{
+	return isEntityNetworkAuthority(getEntity(entityId));
+}
+
+bool World::isEntityNetworkAuthority(EntityRef entity) const
+{
+	return isEntityNetworkAuthority(ConstEntityRef(entity));
+}
+
+bool World::isEntityNetworkAuthority(ConstEntityRef entity) const
+{
+	if (networkInterface) {
+		return networkInterface->isAuthority(entity);
+	}
+	return true;
 }
 
 void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg)
