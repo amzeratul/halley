@@ -47,6 +47,10 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		return;
 	}
 
+	if (budgetMessageTimeout > 0) {
+		budgetMessageTimeout -= t;
+	}
+
 	const bool verbose = false;
 
 	HashMap<ResourceDesiredLoadState, StateCollection> states;
@@ -111,9 +115,12 @@ void ResourceUnloader::updateCollection(Time t, ResourceCollectionBase& collecti
 		}
 	}
 
-	if (curMemoryUsage > rules.budget) {
-		Logger::logError("Memory budget for " + toString(collection.getAssetType()) + " exceeded: "
-			+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget));
+	if (curMemoryUsage > static_cast<size_t>(rules.budget * 1.1f)) {
+		if (budgetMessageTimeout <= 0.001) {
+			Logger::logError("Memory budget for " + toString(collection.getAssetType()) + " exceeded: "
+				+ String::prettySize(curMemoryUsage) + "/" + String::prettySize(rules.budget));
+			budgetMessageTimeout = 1.0;
+		}
 	}
 
 	// Do unloads
