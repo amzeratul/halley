@@ -274,13 +274,15 @@ MeshObject WavefrontReader::State::makeMeshObject()
 	if (matIter != materials.end()) {
 		const auto& matDef = matIter->second;
 		result.setMaterialName("Halley/StandardMesh"); // TODO?
-		result.setTextureNames({ matDef.texDiffuse });
+		if (!matDef.texDiffuse.isEmpty()) {
+			result.setTextureNames({ matDef.texDiffuse });
+		}
+		result.setMaterialParams(matDef.getParams());
 	} else {
 		if (!materialName.isEmpty()) {
 			Logger::logWarning("Material not found while importing WaveFront Obj: " + materialName);
 		}
 		result.setMaterialName("Halley/StandardMesh");
-		result.setTextureNames({});
 	}
 
 	resetObject();
@@ -305,4 +307,17 @@ bool WavefrontReader::FaceVertex::operator<(const FaceVertex& other) const
 		return vt < other.vt;
 	}
 	return vn < other.vn;
+}
+
+
+ConfigNode WavefrontReader::WFMaterial::getParams() const
+{
+	ConfigNode result;
+	result["u_colAmbient"] = colAmbient.toVector4();
+	result["u_colDiffuse"] = colDiffuse.toVector4();
+	result["u_colSpecular"] = colSpecular.toVector4();
+	result["u_colEmissive"] = colEmissive.toVector4();
+	result["u_colTransmissivity"] = colTransmissivity.withAlpha(alpha).toVector4();
+	result["u_specularExponent"] = specularExponent;
+	return result;
 }

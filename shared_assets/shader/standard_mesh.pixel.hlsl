@@ -10,6 +10,15 @@ struct VOut {
     float3 normal : NORMAL;
 };
 
+cbuffer MaterialProperties : register(b2) {
+    float4 u_colAmbient;
+    float4 u_colDiffuse;
+    float4 u_colSpecular;
+    float4 u_colEmissive;
+    float4 u_colTransmissivity;
+    float u_specularExponent;
+};
+
 float4 main(VOut input) : SV_TARGET {
     float3 lightPos = float3(2, 2, 2);
     float3 eyePos = float3(0, 0, -1);
@@ -24,11 +33,11 @@ float4 main(VOut input) : SV_TARGET {
     float3 r = normalize(-2 * dot(i, n) * n + i);
     float cosA = max(0, -dot(r, v));
 
-    float ambient = 0.5;
-    float diffuse = max(dot(n, i), 0) * intensity;
-    float specular = pow(cosA, 100) * intensity * 0.117;
-    float light = min(ambient + diffuse + specular, 1.0);
+    float3 ambientLight = u_colAmbient.rgb;
+    float3 diffuseLight = max(dot(n, i), 0) * intensity;
+    float3 specularLight = pow(cosA, u_specularExponent) * intensity * u_colSpecular.rgb;
+    float3 light = min(ambientLight + diffuseLight + specularLight, float3(1.0, 1.0, 1.0));
 
-    float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
-    return input.colour * col * light;
+    float4 col = input.colour * tex0.Sample(sampler0, input.texCoord0.xy) * u_colDiffuse;
+    return col * float4(light, 1.0);
 }

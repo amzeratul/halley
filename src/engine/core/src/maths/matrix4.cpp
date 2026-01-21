@@ -31,9 +31,12 @@ Matrix4f::Matrix4f()
 {
 }
 
-Matrix4f::Matrix4f(const float elems[])
+Matrix4f::Matrix4f(gsl::span<const float> elements)
 {
-	memcpy(getElements(), elems, sizeof(float) * 16);
+	if (elements.size() < 16) {
+		memset(getElements(), 0, sizeof(float) * (16 - elements.size()));
+	}
+	memcpy(getElements(), elements.data(), sizeof(float) * std::min<size_t>(elements.size(), 16));
 }
 
 Matrix4f& Matrix4f::operator*=(const Matrix4f& param)

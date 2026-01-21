@@ -40,6 +40,8 @@ namespace Halley
 
 			float alpha = 1.0f;
 			float specularExponent = 0;
+
+			ConfigNode getParams() const;
 		};
 
 		class State {

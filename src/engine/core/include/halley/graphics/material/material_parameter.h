@@ -34,6 +34,7 @@ namespace Halley
 		bool set(Vector4i p);
 		bool set(uint32_t p);
 		bool set(const Matrix4f& m);
+		bool set(const ConfigNode& node);
 
 	private:
 		MaterialParameter(Material& material, ShaderParameterType type, uint16_t blockNumber, uint32_t offset);

@@ -87,6 +87,12 @@ void MeshObject::loadDependencies(Resources& resources)
 		material->set("tex" + toString(i), texture);
 		++i;
 	}
+
+	for (const auto& [paramId, param]: materialParams.asMap()) {
+		if (material->hasParameter(paramId)) {
+			material->set(paramId, param);
+		}
+	}
 }
 
 size_t MeshObject::getNumVertices() const
@@ -139,6 +145,11 @@ void MeshObject::setName(String name)
 	this->name = std::move(name);
 }
 
+void MeshObject::setMaterialParams(ConfigNode params)
+{
+	this->materialParams = std::move(params);
+}
+
 std::pair<Vector3f, Vector3f> MeshObject::getBounds() const
 {
 	if (vertexData.empty()) {
@@ -163,6 +174,7 @@ void MeshObject::serialize(Serializer& s) const
 	s << indices;
 	s << materialName;
 	s << textureNames;
+	s << materialParams;
 }
 
 void MeshObject::deserialize(Deserializer& s)
@@ -172,6 +184,7 @@ void MeshObject::deserialize(Deserializer& s)
 	s >> indices;
 	s >> materialName;
 	s >> textureNames;
+	s >> materialParams;
 }
 
 

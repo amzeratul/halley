@@ -37,6 +37,7 @@ namespace Halley {
 		void setMaterialName(String name);
 		void setTextureNames(Vector<String> textureNames);
 		void setName(String name);
+		void setMaterialParams(ConfigNode params);
 
     	std::pair<Vector3f, Vector3f> getBounds() const;
 
@@ -49,6 +50,7 @@ namespace Halley {
 
 		String materialName;
 		Vector<String> textureNames;
+		ConfigNode materialParams;
 		std::shared_ptr<Material> material;
 
 		String name;

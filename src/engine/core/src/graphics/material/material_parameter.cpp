@@ -87,6 +87,40 @@ bool MaterialParameter::set(const Matrix4f& m)
 	}
 }
 
+bool MaterialParameter::set(const ConfigNode& node)
+{
+	switch (type) {
+	case ShaderParameterType::Float:
+		return set(node.asFloat({}));
+	case ShaderParameterType::Float2:
+		return set(node.asVector2f({}));
+	case ShaderParameterType::Float3:
+		return set(node.asVector3f({}));
+	case ShaderParameterType::Float4:
+		return set(node.asVector4f({}));
+	case ShaderParameterType::Int:
+		return set(node.asInt({}));
+	case ShaderParameterType::Int2:
+		return set(node.asVector2i({}));
+	case ShaderParameterType::Int3:
+		return set(node.asVector3i({}));
+	case ShaderParameterType::Int4:
+		return set(node.asVector4i({}));
+	case ShaderParameterType::Matrix2:
+		return false;
+	case ShaderParameterType::Matrix3:
+		return false;
+	case ShaderParameterType::Matrix4:
+		{
+			auto elems = node.asVector<float>({});
+			return set(Matrix4f(elems.const_span()));
+		}
+	case ShaderParameterType::UInt:
+		return set(node.asInt({}));
+	}
+	return false;
+}
+
 ConstMaterialParameter::ConstMaterialParameter(const Material& material, ShaderParameterType type, uint16_t blockNumber, uint32_t offset)
 	: material(&material)
 	, offset(offset)

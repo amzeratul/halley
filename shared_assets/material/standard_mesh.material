@@ -4,6 +4,13 @@ base: material_base.material
 uniforms:
   - ModelBlock:
     - u_modelMatrix: mat4
+  - MaterialProperties:
+    - u_colAmbient: float4
+    - u_colDiffuse: float4
+    - u_colSpecular: float4
+    - u_colEmissive: float4
+    - u_colTransmissivity: float4
+    - u_specularExponent: float
 textures:
   - tex0: sampler2D
 attributes:
