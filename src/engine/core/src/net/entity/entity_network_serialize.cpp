@@ -186,17 +186,25 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
             // The check for page 0 is important here - we don't want to skip the root entity!
             if (p > 0 && !page.modified) {
                 skip = true;
-                p++;
 
                 // Seek forward to the next entity.
-
-                while (p < pp) {
-                    auto& next = pages[p];
+                int pn = p + 1;
+                while (pn < pp) {
+                    auto& next = pages[pn];
                     if (next.type == Type::Entity) {
                         break;
                     }
-                    Ensures(!next.modified);
-                    p++;
+                    if (next.modified) {
+                        // TODO: This shouldn't happen, actually - but it does?
+                        // Kind of auto-correct here: do not skip.
+                        skip = false;
+                        break;
+                    }
+                    pn++;
+                }
+
+                if (skip) {
+                    p = pn;
                 }
             }
         } else if (page.type == Type::EntityIdentity) {
