@@ -195,6 +195,7 @@ void EntityNetworkRemotePeer::destroy()
 		}
 		
 		inboundEntities.clear();
+		tempInboundEntities.clear();
 		alive = false;
 	}
 }
@@ -347,7 +348,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     			Bytes bytes(outboundDataSize);
     			memcpy(bytes.data(), fastUpdateOutboundData.data(), outboundDataSize);
 
-    			send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true, sessionTimestamp));
+    			send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), true, remote.hasAuthorityOnly, sessionTimestamp));
     		}
 
     		if (modifiedInStructure) {
@@ -392,7 +393,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
         		Logger::logInfo("  - send EntityDataDelta, " + toString(bytes.size()) + " bytes");
         	}
 
-            send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false, sessionTimestamp));
+            send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes), false, remote.hasAuthorityOnly, sessionTimestamp));
         }
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
@@ -502,6 +503,18 @@ void EntityNetworkRemotePeer::receiveAssignEntity(const EntityNetworkMessageCrea
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)
 {
+	if (msg.forAuthorityOnly) {
+		// An update message for entity with changed authority.
+		if (const auto iter = tempInboundEntities.find(msg.entityId); iter != tempInboundEntities.end()) {
+			auto& remote = iter->second;
+			const auto entity = parentSession->getWorld().tryGetEntity(remote.worldId);
+			updateRemoteEntity(remote, entity, msg);
+		} else {
+			Logger::logWarning("No temporary inbound entity with network id " + toString(static_cast<int>(msg.entityId)) + " found", true);
+		}
+		return;
+	}
+
 	if (const auto iter = pendingEntities.find(msg.entityId); iter != pendingEntities.end()) {
 		updatePendingEntity(iter->second, msg);
 		return;
@@ -859,10 +872,10 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 				remote.debugName = "[temp authority]";
 				remote.forChangedAuthorityOnly = true;
 
-				if (!inboundEntities.contains(oe.networkId)) {
-					inboundEntities[oe.networkId] = std::move(remote);
+				if (!tempInboundEntities.contains(oe.networkId)) {
+					tempInboundEntities[oe.networkId] = std::move(remote);
 				} else {
-					Logger::logWarning("Entity with network id " + toString(static_cast<int>(oe.networkId)) + " already has an inbound entity");
+					Logger::logWarning("Entity with network id " + toString(static_cast<int>(oe.networkId)) + " already has a temporary inbound entity");
 				}
 			} else {
 				Logger::logWarning("No outbound entity found to create temporary inbound entity from");
@@ -895,7 +908,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 		if (myPeerId == ownerId) {
 			// I've been given back authority. Remove the temporary inbound entity.
 			//Logger::logDev("Recovered authority of " + toString(entityId.value & 0xffffffff));
-			const size_t found = std_ex::erase_if_value(inboundEntities, [&](const auto &value) {
+			const size_t found = std_ex::erase_if_value(tempInboundEntities, [&](const auto& value) {
 				if (value.worldId == entityId) {
 					Expects(value.forChangedAuthorityOnly);
 					return true;
@@ -949,6 +962,75 @@ void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundE
 	}
 }
 
+void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inboundEntity, int32_t now, int32_t latency)
+{
+	auto& entries = inboundEntity.positionUpdates;
+
+	size_t sz = entries.size();
+	size_t idx = 0;
+
+	// Remove entries with elapsed timestamps.
+	while (idx < sz) {
+		if (entries[idx].second >= now - latency * 3) {
+			break;
+		}
+		idx++;
+	}
+
+	if (idx != 0) {
+		entries.erase(entries.begin(), entries.begin() + static_cast<ptrdiff_t>(idx));
+		sz -= idx;
+	}
+
+	auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId);
+
+	if (!entity.isValid()) {
+		// Can happen if entity was just destroyed on local peer.
+		return;
+	}
+
+	auto transform = entity.tryGetComponent<Transform2DComponent>();
+	if (transform == nullptr) {
+		return;
+	}
+
+	auto pos = transform->getLocalPosition();
+
+	// If there are no more pending position updates, push local position at current timestamp.
+
+	if (sz == 0) {
+		entries.emplace_back(pos, now - latency);
+		return;
+	}
+
+	// Assuming the entries are sorted (which is done in updateRemoteEntityPosition()),
+	// look for the entries covering the current timestamp.
+
+	idx = 0;
+	while (idx + 1 < sz) {
+		if (entries.at(idx).second > now - latency) {
+			break;
+		}
+		idx++;
+	}
+
+	if (idx + 1 == sz) {
+		// At last position, or there's only one entry.
+		pos = entries.back().first;
+	} else {
+		// Actual interpolation.
+		const auto& e0 = entries.at(idx);
+		const auto& e1 = entries.at(idx + 1);
+
+		float t = static_cast<float>((now - latency) - e0.second) / static_cast<float>(e1.second - e0.second);
+
+		pos = (1.0f - t) * e0.first + t * e1.first;
+	}
+
+	Expects(pos.isValid());
+	transform->setLocalPosition(pos);
+}
+
 void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 {
 	if (dt < 0.001) return; // called more than once per frame
@@ -959,70 +1041,10 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPositions(Time dt)
 	int32_t latency = session.getLatency(session.getIndexOfRemotePeer(peerId));
 
 	for (auto& [_, inboundEntity] : inboundEntities) {
-		auto& entries = inboundEntity.positionUpdates;
+		interpolateRemoteEntityPosition(inboundEntity, now, latency);
+	}
 
-		size_t sz = entries.size();
-		size_t idx = 0;
-
-		// Remove entries with elapsed timestamps.
-		while (idx < sz) {
-			if (entries[idx].second >= now - latency * 3) {
-				break;
-			}
-			idx++;
-		}
-
-		if (idx != 0) {
-			entries.erase(entries.begin(), entries.begin() + static_cast<ptrdiff_t>(idx));
-			sz -= idx;
-		}
-
-		auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId);
-
-		if (!entity.isValid()) {
-			// Can happen if entity was just destroyed on local peer.
-			continue;
-		}
-
-		auto transform = entity.tryGetComponent<Transform2DComponent>();
-		if (transform == nullptr) {
-			continue;
-		}
-
-		auto pos = transform->getLocalPosition();
-
-		// If there are no more pending position updates, push local position at current timestamp.
-
-		if (sz == 0) {
-			entries.emplace_back(pos, now - latency);
-			continue;
-		}
-
-		// Assuming the entries are sorted (which is done in updateRemoteEntityPosition()),
-		// look for the entries covering the current timestamp.
-
-		idx = 0;
-		while (idx + 1 < sz) {
-			if (entries.at(idx).second > now - latency) {
-				break;
-			}
-			idx++;
-		}
-
-		if (idx + 1 == sz) {
-			// At last position, or there's only one entry.
-			pos = entries.back().first;
-		} else {
-			// Actual interpolation.
-			const auto& e0 = entries.at(idx);
-			const auto& e1 = entries.at(idx + 1);
-
-			float t = static_cast<float>((now - latency) - e0.second) / static_cast<float>(e1.second - e0.second);
-
-			pos = (1.0f - t) * e0.first + t * e1.first;
-		}
-
-		Expects(pos.isValid());
-		transform->setLocalPosition(pos);
+	for (auto& [_, inboundEntity] : tempInboundEntities) {
+		interpolateRemoteEntityPosition(inboundEntity, now, latency);
 	}
 }

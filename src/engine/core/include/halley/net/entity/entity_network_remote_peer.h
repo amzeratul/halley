@@ -95,6 +95,7 @@ namespace Halley {
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
+        HashMap<EntityNetworkId, InboundEntity> tempInboundEntities;
         HashMap<EntityNetworkId, PendingEntity> pendingEntities;
 
     	HashSet<EntityNetworkId> allocatedOutboundIds;
@@ -133,6 +134,7 @@ namespace Halley {
         void stripNestedNetworkComponents(EntityRef entity, int depth = 0);
 
     	void updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp);
+    	void interpolateRemoteEntityPosition(InboundEntity& inboundEntity, int32_t now, int32_t latency);
     	void interpolateRemoteEntityPositions(Time dt);
 	};
 }

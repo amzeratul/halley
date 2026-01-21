@@ -22,10 +22,20 @@ void EntityNetworkMessageCreate::deserialize(Deserializer& s)
 	s >> bytes;
 }
 
+EntityNetworkMessageUpdate::EntityNetworkMessageUpdate(EntityNetworkId id, Bytes bytes, bool fastSerialize, bool forAuthorityOnly, int32_t timestamp)
+	: entityId(id)
+	, bytes(std::move(bytes))
+	, fastSerialize(fastSerialize)
+	, forAuthorityOnly(forAuthorityOnly)
+	, timestamp(timestamp)
+{
+}
+
 void EntityNetworkMessageUpdate::serialize(Serializer& s) const
 {
 	s << entityId;
     s << fastSerialize;
+	s << forAuthorityOnly;
 	s << timestamp;
 	s << bytes;
 }
@@ -34,6 +44,7 @@ void EntityNetworkMessageUpdate::deserialize(Deserializer& s)
 {
 	s >> entityId;
     s >> fastSerialize;
+	s >> forAuthorityOnly;
 	s >> timestamp;
 	s >> bytes;
 }

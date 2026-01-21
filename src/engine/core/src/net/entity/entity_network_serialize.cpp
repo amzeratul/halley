@@ -89,8 +89,6 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
 
     serializer << entity.getName();
 
-    //serializer << entity.getPrefabAssetId();
-
     endPage(serializer, buffer, Type::EntityIdentity);
 }
 
@@ -482,10 +480,9 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         deserializer >> name;
         entity.setName(name);
 
-        //std::optional<String> prefabId;
-        //deserializer >> prefabId;
-
-        entity.setPrefab(prefabUUID.isValid() ? context.getPrefab() : std::shared_ptr<Prefab>(), prefabUUID);
+        if (prefabUUID.isValid() && prefabUUID != entity.getPrefabUUID()) {
+            throw Exception("Prefab UUID mismatch", HalleyExceptions::Network);
+        }
 
         fetchNextPage(deserializer, type, size);
     }
@@ -500,7 +497,9 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
         if (reflector != nullptr) {
-            if (auto component = reflector->tryGetComponent(entity)) {
+            if (const auto component = reflector->tryGetComponent(entity)) {
+                const size_t expectedEndPos = deserializer.getPosition() + size;
+
                 if (result && componentId == Transform2DComponent::componentIndex) {
                     // Saves the current position before deserialization, and restores it afterward. Return the
                     // new position in the function result instead.
@@ -517,6 +516,14 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
                     transform->setLocalPosition(pos);
                 } else {
                     reflector->deserializeNetwork(byteSerializationContext, deserializer, *component);
+                }
+
+                if (expectedEndPos < deserializer.getPosition()) {
+                    Logger::logError("Network stream read error, read past end of component page");
+                    deserializer.rewind(expectedEndPos);
+                } else if (expectedEndPos > deserializer.getPosition()) {
+                    Logger::logError("Network stream read error, component page not fully read");
+                    deserializer.skipBytes(expectedEndPos - deserializer.getPosition());
                 }
             } else {
                 deserializer.skipBytes(size);
@@ -774,19 +781,24 @@ size_t EntityNetworkSerialize::getBytesCapacity()
 
 void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNetworkChanges::Type& type, uint32_t& size)
 {
-    type = EntityNetworkChanges::Type::Unknown;
-    size = 0;
+    {
+        EntityNetworkChanges::Type nextType = EntityNetworkChanges::Type::Unknown;
 
-    if (deserializer.getBytesLeft() > 0) {
-        checkMagic(deserializer, SERIALIZE_CHECK_PARITY);
+        if (deserializer.getBytesLeft() > 0) {
+            checkMagic(deserializer, SERIALIZE_CHECK_PARITY);
 
-        uint8_t t;
-        deserializer >> t;
-        type = static_cast<EntityNetworkChanges::Type>(t);
+            uint8_t t;
+            deserializer >> t;
+            nextType = static_cast<EntityNetworkChanges::Type>(t);
+        }
+
+        type = nextType;
     }
 
     // Only fetch size for page types which actually contain data; keep size=0
     // for everything else.
+
+    size = 0;
 
     if (type == EntityNetworkChanges::Type::Entity ||
         type == EntityNetworkChanges::Type::EntityIdentity ||
