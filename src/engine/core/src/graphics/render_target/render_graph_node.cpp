@@ -46,7 +46,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphNodeDefinition& definition)
 			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
 	} else if (method == RenderGraphMethod::Overlay) {
-		overlayMethod = std::make_shared<Material>(definition.getMaterial());
+		overlayMethod = definition.getMaterial()->createMaterial();
 		if (pars.hasKey("colourClear")) {
 			colourClear = Colour4f::fromString(pars["colourClear"].asString());
 		}

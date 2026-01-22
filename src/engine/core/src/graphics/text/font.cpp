@@ -315,6 +315,6 @@ void Font::loadMaterial(Resources& resources) const
 {
 	auto texture = resources.get<Texture>(imageName);
 	auto matDef = resources.get<MaterialDefinition>(distanceField ? "Halley/Text" : MaterialDefinition::defaultMaterial);
-	material = std::make_unique<Material>(matDef);
+	material = matDef->createMaterial();
 	material->set(0, texture);
 }

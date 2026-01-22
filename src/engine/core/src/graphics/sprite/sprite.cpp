@@ -342,7 +342,7 @@ Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 
 Sprite& Sprite::setMaterial(std::shared_ptr<const MaterialDefinition> definition)
 {
-	setMaterial(std::make_shared<Material>(definition));
+	setMaterial(definition->createMaterial());
 	return *this;
 }
 
@@ -400,7 +400,7 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	Expects(image != nullptr);
 	Expects(materialDefinition != nullptr);
 
-	auto mat = std::make_shared<Material>(materialDefinition);
+	auto mat = materialDefinition->createMaterial();
 	mat->set(0, image);
 	setMaterial(mat);
 	return *this;
@@ -430,7 +430,7 @@ Sprite& Sprite::setImage(Resources& resources, std::string_view imageName, std::
 
 Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
-	auto mat = std::make_shared<Material>(materialDefinition);
+	auto mat = materialDefinition->createMaterial();
 	mat->set(0, sprite);
 	setMaterial(mat);
 	doSetSprite(sprite.getSprite(), true);

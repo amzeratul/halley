@@ -53,7 +53,7 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 	enabled = node["enabled"].asBool(true);
 
 	{
-		auto mat = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/Scanlines"));
+		auto mat = resources.get<MaterialDefinition>("Halley/Scanlines")->createMaterial();
 		mat
 			->set("u_col0", getColour("background0"))
 			.set("u_col1", getColour("background1"))

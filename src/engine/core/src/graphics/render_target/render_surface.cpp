@@ -21,7 +21,7 @@ RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String
 	: video(video)
 	, options(options)
 {
-	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
+	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
 	renderTarget = video.createTextureRenderTarget();
 }
 

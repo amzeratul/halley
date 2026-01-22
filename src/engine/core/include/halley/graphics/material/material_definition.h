@@ -280,7 +280,8 @@ namespace Halley
 		bool isColumnMajor() const;
 		bool hasAutoVariables() const;
 
-		virtual std::shared_ptr<Material> createMaterial() const;
+		virtual std::shared_ptr<Material> createMaterial(bool forceLocalBlocks = false) const; // forceLocalBlocks is for engine use only
+		virtual std::unique_ptr<Material> createMaterialUnique(bool forceLocalBlocks = false) const; // forceLocalBlocks is for engine use only
 
 	private:
 		String name;

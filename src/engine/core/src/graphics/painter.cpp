@@ -32,13 +32,13 @@ struct LineVertex {
 };
 
 Painter::Painter(VideoAPI& video, Resources& resources)
-	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
+	: halleyGlobalMaterial(resources.get<MaterialDefinition>("Halley/MaterialBase")->createMaterialUnique(true))
 	, resources(resources)
 	, video(video)
-	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
-	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
-	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
-	, blitDepthMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/BlitDepth")))
+	, solidLineMaterial(resources.get<MaterialDefinition>("Halley/SolidLine")->createMaterial())
+	, solidPolygonMaterial(resources.get<MaterialDefinition>("Halley/SolidPolygon")->createMaterial())
+	, blitMaterial(resources.get<MaterialDefinition>("Halley/Blit")->createMaterial())
+	, blitDepthMaterial(resources.get<MaterialDefinition>("Halley/BlitDepth")->createMaterial())
 {
 }
 

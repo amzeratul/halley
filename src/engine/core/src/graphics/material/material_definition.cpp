@@ -449,9 +449,14 @@ bool MaterialDefinition::hasAutoVariables() const
 	return autoVariables;
 }
 
-std::shared_ptr<Material> MaterialDefinition::createMaterial() const
+std::shared_ptr<Material> MaterialDefinition::createMaterial(bool forceLocalBlocks) const
 {
-	return std::make_shared<Material>(shared_from_this());
+	return std::make_shared<Material>(shared_from_this(), forceLocalBlocks);
+}
+
+std::unique_ptr<Material> MaterialDefinition::createMaterialUnique(bool forceLocalBlocks) const
+{
+	return std::make_unique<Material>(shared_from_this(), forceLocalBlocks);
 }
 
 void MaterialDefinition::updateUniformBlocks()

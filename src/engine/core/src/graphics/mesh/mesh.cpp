@@ -79,7 +79,7 @@ MeshObject::MeshObject(String name)
 void MeshObject::loadDependencies(Resources& resources)
 {
 	auto matDef = resources.get<MaterialDefinition>(materialName);
-	material = std::make_unique<Material>(matDef);
+	material = matDef->createMaterial();
 
 	int i = 0;
 	for (auto& t: textureNames) {

@@ -11,8 +11,8 @@ using namespace Halley;
 SelectedBoundsGizmo::SelectedBoundsGizmo(SnapRules snapRules, Resources& resources)
 	: SceneEditorGizmo(snapRules)
 {
-	stencilMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/SelectionStencil"));
-	outlineMaterial = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/SelectionOutline"));
+	stencilMaterial = resources.get<MaterialDefinition>("Halley/SelectionStencil")->createMaterial();
+	outlineMaterial = resources.get<MaterialDefinition>("Halley/SelectionOutline")->createMaterial();
 }
 
 void SelectedBoundsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)

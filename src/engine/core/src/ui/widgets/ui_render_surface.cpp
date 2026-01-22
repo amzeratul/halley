@@ -14,7 +14,7 @@ UIRenderSurface::UIRenderSurface(String id, Vector2f minSize, std::optional<UISi
 	, colour(1, 1, 1, 1)
 	, scale(1, 1)
 {
-	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
+	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
 }
 
 // Update thread
@@ -168,7 +168,7 @@ void UIRenderSurface::drawOnPainter(Painter& painter) const
 
 void UIRenderSurface::setMaterial(Resources& resources, const String& materialName)
 {
-	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
+	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
 }
 
 void UIRenderSurface::setColour(Colour4f col)
