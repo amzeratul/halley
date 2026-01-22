@@ -39,7 +39,7 @@ namespace Halley
 			Colour4f colTransmissivity = Colour4f(0, 0, 0);
 
 			float alpha = 1.0f;
-			float specularExponent = 0;
+			float specularExponent = 100;
 
 			ConfigNode getParams() const;
 		};
