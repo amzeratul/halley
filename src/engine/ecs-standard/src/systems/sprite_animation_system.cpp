@@ -85,32 +85,35 @@ private:
 			const auto seqDir = player.getCurrentDirectionId();
 			const auto seqFrame = player.getCurrentSequenceFrame();
 
-			bool changed = false;
+			SpriteAnimationEvent event;
+
 			if (animIdx != events.prevAnimIdx) {
 				events.prevAnimIdx = animIdx;
-				changed = true;
+				event.animationChanged = true;
 			}
 			if (seqId != events.prevSeqId) {
 				events.prevSeqId = seqId;
-				changed = true;
+				event.sequenceChanged = true;
 			}
 			if (seqDir != events.prevDir) {
 				events.prevDir = seqDir;
-				changed = true;
+				event.directionChanged = true;
 			}
 			if (seqFrame != events.prevFrame) {
 				events.prevFrame = seqFrame;
-				changed = true;
+				event.frameChanged = true;
 			}
 
-			if (changed && callback) {
-				SpriteAnimationEvent event;
+			if ((event.animationChanged || event.directionChanged || event.frameChanged || event.sequenceChanged) && callback) {
+
 				event.entityId = e.entityId;
 				event.tags = events.tags.const_span();
+				
 				event.animation = player.getAnimationPtr().get();
-				event.sequenceName = player.getAnimation().getName();
+				event.sequenceName = player.getCurrentSequenceName();
 				event.direction = seqDir;
 				event.frame = seqFrame;
+				
 				callback(event);
 			}
 		}

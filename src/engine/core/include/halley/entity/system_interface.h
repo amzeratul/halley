@@ -107,10 +107,16 @@ namespace Halley {
 	public:
 		EntityId entityId;
 		gsl::span<const String> tags;
+
 		const Animation* animation = nullptr;
 		std::string_view sequenceName;
 		int direction;
 		int frame;
+
+		bool animationChanged = false;
+		bool sequenceChanged = false;
+		bool directionChanged = false;
+		bool frameChanged = false;
 	};
 
 	class ISpriteAnimationSystemInterface : public ISystemInterface {
