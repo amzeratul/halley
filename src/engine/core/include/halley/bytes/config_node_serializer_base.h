@@ -98,7 +98,7 @@ namespace Halley {
     class ConfigNodeSerializerEnumUtils {
 	public:
 	    static T parseEnum(const ConfigNode& node);
-		static ConfigNode fromEnum(T value);
+		static ConfigNode fromEnum(T value, const EntitySerializationContext& context);
     };
 
     template <typename T>
@@ -107,7 +107,7 @@ namespace Halley {
         ConfigNode serialize(const T& src, const EntitySerializationContext& context)
         {
         	if constexpr (std::is_enum_v<T>) {
-        		return ConfigNodeSerializerEnumUtils<T>::fromEnum(src);
+        		return ConfigNodeSerializerEnumUtils<T>::fromEnum(src, context);
         	} else {
 	        	throw Exception("ConfigNodeSerializer unimplemented type: " + String(typeid(T).name()), HalleyExceptions::Utils);
             }

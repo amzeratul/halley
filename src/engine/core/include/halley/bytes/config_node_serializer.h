@@ -820,9 +820,12 @@ namespace Halley {
 	}
 
 	template <typename T>
-	ConfigNode ConfigNodeSerializerEnumUtils<T>::fromEnum(T value)
+	ConfigNode ConfigNodeSerializerEnumUtils<T>::fromEnum(T value, const EntitySerializationContext& context)
 	{
-		if constexpr (IsBitfieldEnum<T>::value) {
+		bool bitMask = IsBitfieldEnum<T>::value;
+		bitMask |= context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network));
+
+		if (bitMask) {
 			return ConfigNode(static_cast<int>(value));
 		} else {
 			return ConfigNode(toString(value));
