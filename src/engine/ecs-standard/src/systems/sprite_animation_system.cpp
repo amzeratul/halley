@@ -2,8 +2,13 @@
 
 using namespace Halley;
 
-class SpriteAnimationSystem final : public SpriteAnimationSystemBase<SpriteAnimationSystem> {
+class SpriteAnimationSystem final : public SpriteAnimationSystemBase<SpriteAnimationSystem>, ISpriteAnimationSystemInterface {
 public:
+	void init()
+	{
+		getWorld().setInterface(static_cast<ISpriteAnimationSystemInterface*>(this));
+	}
+
 	void update(Time time) {
 		updateAnimators(time);
 		updateReplicators();
@@ -39,7 +44,13 @@ public:
 		}
 	}
 
+	void setCallback(ISpriteAnimationSystemInterface::Callback callback) override
+	{
+		this->callback = std::move(callback);
+	}
+
 private:
+	ISpriteAnimationSystemInterface::Callback callback;
 
 	void updateAnimators(Time time)
 	{
@@ -47,6 +58,7 @@ private:
 		for (auto& e : mainFamily) {
 			e.spriteAnimation.player.update(time);
 			updateSprite(e, viewPort);
+			updateEvents(e);
 		}
 	}
 
@@ -58,6 +70,48 @@ private:
 			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(localBounds.getTopLeft()), e.transform2D.transformPointWithHeight(localBounds.getBottomRight()));
 			if (worldBounds.overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
+			}
+		}
+	}
+
+	void updateEvents(MainFamily& e)
+	{
+		auto& player = e.spriteAnimation.player;
+		if (e.spriteAnimationEvents && player.hasAnimation()) {
+			auto& events = *e.spriteAnimationEvents;
+
+			const auto animIdx = player.getAnimation().getAssetIdx();
+			const auto seqId = player.getCurrentSequenceId();
+			const auto seqDir = player.getCurrentDirectionId();
+			const auto seqFrame = player.getCurrentSequenceFrame();
+
+			bool changed = false;
+			if (animIdx != events.prevAnimIdx) {
+				events.prevAnimIdx = animIdx;
+				changed = true;
+			}
+			if (seqId != events.prevSeqId) {
+				events.prevSeqId = seqId;
+				changed = true;
+			}
+			if (seqDir != events.prevDir) {
+				events.prevDir = seqDir;
+				changed = true;
+			}
+			if (seqFrame != events.prevFrame) {
+				events.prevFrame = seqFrame;
+				changed = true;
+			}
+
+			if (changed && callback) {
+				SpriteAnimationEvent event;
+				event.entityId = e.entityId;
+				event.tags = events.tags.const_span();
+				event.animation = player.getAnimationPtr().get();
+				event.sequenceName = player.getAnimation().getName();
+				event.direction = seqDir;
+				event.frame = seqFrame;
+				callback(event);
 			}
 		}
 	}

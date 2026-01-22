@@ -308,6 +308,12 @@ const String& AnimationPlayer::getCurrentSequenceName() const
 	return curSeq ? curSeq->getName() : curSeqName;
 }
 
+int AnimationPlayer::getCurrentSequenceId() const
+{
+	updateResourceIfNeeded();
+	return curSeq ? curSeq->getId() : -1;
+}
+
 Time AnimationPlayer::getCurrentSequenceTime() const
 {
 	return curSeqTime;

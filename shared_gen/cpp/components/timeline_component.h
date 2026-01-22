@@ -12,7 +12,7 @@
 
 class TimelineComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 16 };
+	static constexpr int componentIndex{ 17 };
 	static const constexpr char* componentName{ "Timeline" };
 
 	Halley::Timeline timeline{};

@@ -148,6 +148,36 @@ component:
 
 ---
 
+component:
+  name: SpriteAnimationEvents
+  category: graphics
+  members:
+  - tags:
+      type: Halley::Vector<Halley::String>
+      canSave: false
+  - prevAnimIdx:
+      type: uint32_t
+      canEdit: false
+      canSave: false
+      defaultValue: 0
+  - prevSeqId:
+      type: int
+      canEdit: false
+      canSave: false
+      defaultValue: -1
+  - prevDir:
+      type: int
+      canEdit: false
+      canSave: false
+      defaultValue: -1
+  - prevFrame:
+      type: int
+      canEdit: false
+      canSave: false
+      defaultValue: -1
+
+---
+
 system:
   name: SpriteAnimation
   families:
@@ -155,6 +185,7 @@ system:
     - Transform2D: read
     - Sprite: write
     - SpriteAnimation: write
+    - SpriteAnimationEvents: optional write
   - replicator:
     - Sprite: write
     - SpriteAnimationReplicator: read

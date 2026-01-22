@@ -3,8 +3,10 @@
 #include "halley/api/audio_api.h"
 #include "halley/text/halleystring.h"
 #include "halley/concurrency/future.h"
+#include "halley/entity/entity_id.h"
 
 namespace Halley {
+	class Animation;
 	class WorldPosition;
 	struct alignas(8) EntityId;
 	class LuaState;
@@ -33,7 +35,7 @@ namespace Halley {
             AcquiredByOther
         };
 
-    	virtual ~INetworkLockSystemInterface() = default;
+    	virtual ~INetworkLockSystemInterface() override = default;
 
         virtual LockStatus getLockStatus(EntityId targetId) const = 0;
         virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const = 0;
@@ -48,7 +50,7 @@ namespace Halley {
 
 	class IScriptSystemInterface : public ISystemInterface {
 	public:
-		virtual ~IScriptSystemInterface() = default;
+		virtual ~IScriptSystemInterface() override = default;
 
 		virtual std::shared_ptr<ScriptState> addScript(EntityId target, const String& scriptId, Vector<String> tags, Vector<ConfigNode> params) = 0;
 		virtual bool stopScript(EntityId target, const String& scriptId, bool allThreads = false) = 0;
@@ -67,7 +69,7 @@ namespace Halley {
 	public:
 		using Callback = std::function<Vector<std::pair<EntityId, gsl::span<const String>>>()>;
 
-		virtual ~IScriptableQuerySystemInterface() = default;
+		virtual ~IScriptableQuerySystemInterface() override = default;
 
 		virtual Vector<EntityId> findEntities(WorldPosition pos, float radius, int limit, const Vector<String>& tags, const Vector<String>& components, const std::function<float(EntityId, WorldPosition)>& getDistance) const = 0;
 		virtual void setFindEntitiesCallback(Callback callback) = 0;
@@ -75,7 +77,7 @@ namespace Halley {
 
 	class IAudioSystemInterface : public ISystemInterface {
 	public:
-		virtual ~IAudioSystemInterface() = default;
+		virtual ~IAudioSystemInterface() override = default;
 
         virtual void playAudio(const String& event, EntityId entityId) = 0;
         virtual void playAudio(const String& event, WorldPosition position, std::optional<AudioRegionId> regionId) = 0;
@@ -89,15 +91,34 @@ namespace Halley {
 
 	class IExitGameInterface : public ISystemInterface {
 	public:
-		virtual ~IExitGameInterface() = default;
+		virtual ~IExitGameInterface() override = default;
 
 		virtual void exitGame() = 0;
 	};
 
 	class IEnableRulesSystemInterface : public ISystemInterface {
 	public:
-		virtual ~IEnableRulesSystemInterface() = default;
+		virtual ~IEnableRulesSystemInterface() override = default;
 
 		virtual void refreshEnabled() = 0;
+	};
+
+	class SpriteAnimationEvent {
+	public:
+		EntityId entityId;
+		gsl::span<const String> tags;
+		const Animation* animation = nullptr;
+		std::string_view sequenceName;
+		int direction;
+		int frame;
+	};
+
+	class ISpriteAnimationSystemInterface : public ISystemInterface {
+	public:
+		using Callback = std::function<void(const SpriteAnimationEvent&)>;
+
+		virtual ~ISpriteAnimationSystemInterface() override = default;
+
+		virtual void setCallback(Callback callback) = 0;
 	};
 }

@@ -203,7 +203,10 @@ namespace Halley
 		bool isMetaSet() const { return metaSet; }
 		
 		virtual void setAssetId(String name);
+		virtual void setAssetIdx(uint32_t idx);
 		const String& getAssetId() const { return assetId; }
+		uint32_t getAssetIdx() const { return assetIdx; }
+
 		virtual void onLoaded(Resources& resources);
 		
 		int getAssetVersion() const { return assetVersion; }
@@ -229,6 +232,7 @@ namespace Halley
 	private:
 		Metadata meta;
 		String assetId;
+		uint32_t assetIdx = 0;
 		int assetVersion = 0;
 		float age = 0;
 		bool metaSet = false;

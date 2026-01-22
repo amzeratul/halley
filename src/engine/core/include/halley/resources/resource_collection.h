@@ -103,6 +103,7 @@ namespace Halley
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
 		ResourceEnumeratorFunc resourceEnumerator;
+		uint32_t curIdx = 1;
 
 		mutable SharedRecursiveMutex mutex;
 		mutable SharedRecursiveMutex loadingMutex;

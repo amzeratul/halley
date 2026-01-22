@@ -11,6 +11,7 @@ using namespace Halley;
 #include "components/camera_component.h"
 #include "components/particles_component.h"
 #include "components/sprite_animation_replicator_component.h"
+#include "components/sprite_animation_events_component.h"
 #include "components/audio_listener_component.h"
 #include "components/audio_source_component.h"
 #include "components/scriptable_component.h"
@@ -67,7 +68,7 @@ public:
 	}
 	Vector<std::unique_ptr<ComponentReflector>> makeComponentReflectors() override {
 		Vector<std::unique_ptr<ComponentReflector>> result;
-		result.reserve(17);
+		result.reserve(18);
 		result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<VelocityComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
@@ -77,6 +78,7 @@ public:
 		result.push_back(std::make_unique<ComponentReflectorImpl<CameraComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<ParticlesComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteAnimationReplicatorComponent>>());
+		result.push_back(std::make_unique<ComponentReflectorImpl<SpriteAnimationEventsComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<AudioListenerComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<AudioSourceComponent>>());
 		result.push_back(std::make_unique<ComponentReflectorImpl<ScriptableComponent>>());

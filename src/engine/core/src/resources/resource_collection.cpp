@@ -92,11 +92,15 @@ void ResourceCollectionBase::reload(std::string_view assetId)
 	auto res = resources.find(assetId);
 	if (res != resources.end()) {
 		auto& resWrap = res->second;
+		auto& oldAsset = *resWrap.res;
 		try {
 			const auto [newAsset, loaded] = loadAsset(assetId, ResourceLoadPriority::High, false);
 			newAsset->setAssetId(assetId);
 			newAsset->onLoaded(parent);
-			resWrap.res->reloadResource(std::move(*newAsset));
+
+			const auto oldIdx = oldAsset.getAssetIdx();
+			oldAsset.reloadResource(std::move(*newAsset));
+			oldAsset.setAssetIdx(oldIdx);
 		} catch (std::exception& e) {
 			Logger::logError("Error while reloading " + String(assetId) + ": " + e.what());
 		} catch (...) {
@@ -403,6 +407,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId
 		// Store in cache
 		if (loaded) {
 			UniqueLock lock2(mutex);
+			newRes->setAssetIdx(curIdx++);
 			resources.emplace(assetId, Wrapper(newRes, 0));
 		}
 

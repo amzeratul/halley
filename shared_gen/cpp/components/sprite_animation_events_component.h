@@ -10,74 +10,71 @@
 #include "halley/support/exception.h"
 
 
-class ScriptTargetComponent final : public Halley::Component {
+class SpriteAnimationEventsComponent final : public Halley::Component {
 public:
-	static constexpr int componentIndex{ 14 };
-	static const constexpr char* componentName{ "ScriptTarget" };
+	static constexpr int componentIndex{ 9 };
+	static const constexpr char* componentName{ "SpriteAnimationEvents" };
 
-	Halley::String id{};
+	Halley::Vector<Halley::String> tags{};
+	uint32_t prevAnimIdx{ 0 };
+	int prevSeqId{ -1 };
+	int prevDir{ -1 };
+	int prevFrame{ -1 };
 
-	ScriptTargetComponent() {
+	SpriteAnimationEventsComponent() {
 	}
 
-	ScriptTargetComponent(Halley::String id)
-		: id(std::move(id))
+	SpriteAnimationEventsComponent(Halley::Vector<Halley::String> tags)
+		: tags(std::move(tags))
 	{
 	}
 
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& _context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode _node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(id)>::serialize(id, Halley::String{}, _context, _node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(tags)>::serialize(tags, Halley::Vector<Halley::String>{}, _context, _node, componentName, "tags", makeMask(Type::Prefab));
 		return _node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& _context, const Halley::ConfigNode& _node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(id)>::deserialize(id, Halley::String{}, _context, _node, componentName, "id", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(tags)>::deserialize(tags, Halley::Vector<Halley::String>{}, _context, _node, componentName, "tags", makeMask(Type::Prefab));
 	}
 
 	static void sanitize(Halley::ConfigNode& _node, int _mask) {
 		using namespace Halley::EntitySerialization;
-		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("id");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("tags");
 	}
 
 	Halley::ConfigNode serializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName) const {
-		using namespace Halley::EntitySerialization;
-		if (_fieldName == "id") {
-			return Halley::ConfigNodeHelper<decltype(id)>::serialize(id, _context);
-		}
+		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void deserializeField(const Halley::EntitySerializationContext& _context, std::string_view _fieldName, const Halley::ConfigNode& _node) {
-		using namespace Halley::EntitySerialization;
-		if (_fieldName == "id") {
-			Halley::ConfigNodeHelper<decltype(id)>::deserialize(id, _context, _node);
-			return;
-		}
+		
 		throw Halley::Exception("Unknown or non-serializable field \"" + Halley::String(_fieldName) + "\"", Halley::HalleyExceptions::Entity);
 	}
 
 	void serializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Serializer& _serializer) const {
-		Halley::ByteSerializationHelper<decltype(id)>::serialize(id, _context, _serializer, componentIndex, "id");
+		
 	}
 
 	void deserializeNetwork(const Halley::ByteSerializationContext& _context, Halley::Deserializer& _deserializer) {
-		Halley::ByteSerializationHelper<decltype(id)>::deserialize(id, _context, _deserializer, componentIndex, "id");
+		
 	}
 
 
 	void* operator new(std::size_t size, std::align_val_t align) {
-		return doNew<ScriptTargetComponent>(size, align);
+		return doNew<SpriteAnimationEventsComponent>(size, align);
 	}
 
 	void* operator new(std::size_t size) {
-		return doNew<ScriptTargetComponent>(size);
+		return doNew<SpriteAnimationEventsComponent>(size);
 	}
 
 	void operator delete(void* ptr) {
-		return doDelete<ScriptTargetComponent>(ptr);
+		return doDelete<SpriteAnimationEventsComponent>(ptr);
 	}
 
 };

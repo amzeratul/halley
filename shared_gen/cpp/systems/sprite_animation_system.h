@@ -7,6 +7,7 @@
 
 #include "components/sprite_component.h"
 #include "components/sprite_animation_component.h"
+#include "components/sprite_animation_events_component.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_animation_replicator_component.h"
 #include "messages/play_animation_message.h"
@@ -20,20 +21,23 @@ public:
 	public:
 		SpriteComponent& sprite;
 		SpriteAnimationComponent& spriteAnimation;
+		Halley::MaybeRef<SpriteAnimationEventsComponent> spriteAnimationEvents{};
 		const Transform2DComponent& transform2D;
 	
-		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, Transform2DComponent>;
+		using Type = Halley::FamilyType<SpriteComponent, SpriteAnimationComponent, Halley::MaybeRef<SpriteAnimationEventsComponent>, Transform2DComponent>;
 	
 		void prefetch() const {
 			prefetchL2(&sprite);
 			prefetchL2(&spriteAnimation);
+			prefetchL2(spriteAnimationEvents.tryGet());
 			prefetchL2(&transform2D);
 		}
 	
 	protected:
-		MainFamily(SpriteComponent& sprite, SpriteAnimationComponent& spriteAnimation, const Transform2DComponent& transform2D)
+		MainFamily(SpriteComponent& sprite, SpriteAnimationComponent& spriteAnimation, Halley::MaybeRef<SpriteAnimationEventsComponent> spriteAnimationEvents, const Transform2DComponent& transform2D)
 			: sprite(sprite)
 			, spriteAnimation(spriteAnimation)
+			, spriteAnimationEvents(spriteAnimationEvents)
 			, transform2D(transform2D)
 		{
 		}

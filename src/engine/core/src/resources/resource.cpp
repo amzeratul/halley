@@ -20,6 +20,11 @@ void Resource::setAssetId(String id)
 	assetId = std::move(id);
 }
 
+void Resource::setAssetIdx(uint32_t idx)
+{
+	assetIdx = idx;
+}
+
 void Resource::onLoaded(Resources& resources)
 {
 }

@@ -44,6 +44,7 @@ namespace Halley
 
 		bool isPlaying() const;
 		const String& getCurrentSequenceName() const;
+		int getCurrentSequenceId() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
 		Time getCurrentSequenceFrameTime() const;
