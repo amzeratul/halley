@@ -967,7 +967,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 	}
 
-	if (!context.entityContext || context.entityContext->canPreloadAssets()) {
+	if ((!context.entityContext || context.entityContext->canPreloadAssets()) && !context.entityHasEnableRules) {
 		sprite.markLowPriorityBackgroundLoaded();
 	}
 }

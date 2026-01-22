@@ -80,6 +80,7 @@ namespace Halley {
 		const IDataInterpolatorSetRetriever* interpolators = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 		mutable String debugCurrentContext;
+		mutable bool entityHasEnableRules = false;
 
 		// If true, avoid costly serialization of ConfigNodeType::Map, but use MapRef instead. See ConfigNodeSerializer<ConfigNode>::serialize().
 		// This should only be used for short-lived references, so that nobody can alter its source in the meantime.

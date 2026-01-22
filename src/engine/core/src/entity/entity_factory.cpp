@@ -496,6 +496,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcre
 	const size_t nComponents = data.getNumComponents();
 
 	context.getEntitySerializationContext().debugCurrentContext = entity.getName() + " [" + entity.getPrefabAssetId() + "]";
+	context.getEntitySerializationContext().entityHasEnableRules = !data.getEnableRules().isEmpty();
 
 	if (entity.getNumComponents() == 0) {
 		// Simple population
