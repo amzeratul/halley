@@ -1,4 +1,4 @@
 height: 1024
 width: 1024
-fallback: Noto Sans JP Regular
+fallback: Noto Sans JP Regular, Noto Sans KR Regular, Noto Sans SC Regular, Noto Sans TC Regular
 scripts: latin, latin-extended, greek, cyrillic
