@@ -93,7 +93,8 @@ namespace Halley {
 
 		LocalisedString get(const String& key) const override;
 		std::optional<LocalisedString> tryGet(const String& key) const override;
-		std::optional<LocalisedString> get(const String& key, const I18NLanguage& language) const;
+		LocalisedString get(const String& key, const I18NLanguage& language) const;
+		std::optional<LocalisedString> tryGet(const String& key, const I18NLanguage& language) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
 
 		template <typename T>

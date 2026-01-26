@@ -172,7 +172,20 @@ std::optional<LocalisedString> I18N::tryGet(const String& key) const
 	return std::nullopt;
 }
 
-std::optional<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
+LocalisedString I18N::get(const String& key, const I18NLanguage& language) const
+{
+	if (auto str = tryGet(key, language)) {
+		return *str;
+	}
+
+#ifdef DEV_BUILD
+	return LocalisedString(*this, key, "#MISSING:" + key + "#");
+#else
+	return LocalisedString(*this, key, "#MISSING#");
+#endif
+}
+
+std::optional<LocalisedString> I18N::tryGet(const String& key, const I18NLanguage& language) const
 {
 	auto curLang = strings.find(language);
 	if (curLang != strings.end()) {
