@@ -16,6 +16,13 @@ ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& asse
 	return {};
 }
 
+void Game::update(Time t)
+{
+	if (i18n) {
+		i18n->update();
+	}
+}
+
 String Game::getLogFileName() const
 {
     return "log.txt";
@@ -173,6 +180,32 @@ Resources& Game::getResources() const
 		throw Exception("Resources are only initialized on Game right before call to startGame()", HalleyExceptions::Core);
 	}
 	return *resources;
+}
+
+const I18N& Game::getI18N() const
+{
+	if (!i18n) {
+		throw Exception("Game I18N has not been initialised", HalleyExceptions::Core);
+	}
+	return *i18n;
+}
+
+const I18N* Game::tryGetI18N() const
+{
+	return i18n.get();
+}
+
+I18N& Game::getI18N()
+{
+	if (!i18n) {
+		throw Exception("Game I18N has not been initialised", HalleyExceptions::Core);
+	}
+	return *i18n;
+}
+
+void Game::setI18N(std::unique_ptr<I18N> i18n)
+{
+	this->i18n = std::move(i18n);
 }
 
 std::optional<int> Game::getCurrentDisplay() const

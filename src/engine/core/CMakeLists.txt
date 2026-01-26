@@ -383,6 +383,7 @@ set(SOURCES
         "src/text/encode.cpp"
         "src/text/fuzzy_text_matcher.cpp"
         "src/text/i18n.cpp"
+        "src/text/i18n_language.cpp"
         "src/text/halleystring.cpp"
         "src/text/string_serializer.cpp"
         
@@ -907,6 +908,7 @@ set(HEADERS
         "include/halley/text/halleystring.h"
         "include/halley/text/halleystring.natvis"
         "include/halley/text/i18n.h"
+        "include/halley/text/i18n_language.h"
         "include/halley/text/string_converter.h"
         "include/halley/text/string_serializer.h"
 

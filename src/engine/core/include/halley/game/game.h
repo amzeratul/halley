@@ -34,6 +34,8 @@ namespace Halley
 		virtual int initPlugins(IPluginRegistry &registry) = 0;
 		virtual ResourceOptions initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator);
 
+		virtual void update(Time t);
+
 		virtual String getName() const = 0;
 		virtual String getDataPath(const Vector<String>& args) const = 0;
         virtual String getLogFileName() const;
@@ -81,6 +83,11 @@ namespace Halley
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
 
+		const I18N& getI18N() const;
+		const I18N* tryGetI18N() const;
+		I18N& getI18N();
+		void setI18N(std::unique_ptr<I18N> i18n);
+
 		std::optional<int> getCurrentDisplay() const;
 		UIDebugConsoleCommands& initBaseCommands();
 		UIDebugConsoleCommands& initBatchCommands(IUIDebugConsoleController& controller);
@@ -93,5 +100,6 @@ namespace Halley
 		UIDebugConsoleCommands baseCommands;
 		UIDebugConsoleCommands batchCommands;
 		ResourceUnloaderRules resourceUnloaderRules;
+		std::unique_ptr<I18N> i18n;
 	};
 }

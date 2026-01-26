@@ -412,6 +412,14 @@ void Core::updateResources(Time time)
 {
 	ProfilerEvent event(ProfilerEventType::CoreUpdateResources);
 	resourceUnloader->update(time, game->getResourceUnloaderRules());
+
+	if (auto* i18n = game->tryGetI18N()) {
+		const auto language = i18n->getCurrentLanguage();
+		resources->of<Font>().forEachResource([&] (const std::shared_ptr<Resource>& font)
+		{
+			dynamic_cast<Font&>(*font).setPreferredLanguage(language);
+		});
+	}
 }
 
 void Core::onTick(Time delta)

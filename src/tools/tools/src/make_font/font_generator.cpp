@@ -229,6 +229,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 {
 	String fontName = meta.getString("fontName", font.getName());
 	String imageName = "fontTex/" + fontName;
+	const auto language = I18NLanguage(meta.getString("language", "en-GB"));
 
 	const float ascender = font.getAscender() + meta.getFloat("ascenderAdjustment", 0);
 	const float height = font.getHeight() + meta.getFloat("lineSpacing", 0);
@@ -245,7 +246,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 		}
 	}
 
-	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback, floorGlyphPosition);
+	std::unique_ptr<Font> result = std::make_unique<Font>(fontName, imageName, language, ascender, height, sizePt, replacementScale, imageSize, smoothRadius, fallback, floorGlyphPosition);
 
 	Vector<int> charcodes;
 	charcodes.reserve(entries.size());

@@ -78,7 +78,16 @@ namespace Halley
 		void notifyResourcesUnloaded();
 
 		template<typename F>
-		void forEachResource(const F& f)
+		void forEachResource(F& f)
+		{
+			SharedLock lock(mutex);
+			for (auto& r: resources) {
+				f(r.second.res);
+			}
+		}
+
+		template<typename F>
+		void forEachResource(const F& f) const
 		{
 			SharedLock lock(mutex);
 			for (auto& r: resources) {

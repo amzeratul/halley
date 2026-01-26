@@ -5,9 +5,11 @@
 #include "halley/graphics/texture.h"
 #include "halley/graphics/sprite/sprite.h"
 #include "halley/data_structures/hash_map.h"
+#include "halley/text/i18n_language.h"
 
 namespace Halley
 {
+	class I18NLanguage;
 	class Deserializer;
 	class Serializer;
 
@@ -40,13 +42,16 @@ namespace Halley
 		};
 
 		Font() = default;
-		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize);
-		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition);
+		Font(String name, String imageName, I18NLanguage language, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize);
+		Font(String name, String imageName, I18NLanguage language, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition);
 
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }
 		void reload(Resource&& resource) override;
 		void onLoaded(Resources& resources) override;
+
+		const I18NLanguage& getLanguage() const;
+		void setPreferredLanguage(const I18NLanguage& language);
 
 		std::pair<const Glyph&, const Font&> getGlyph(int code) const;
 		const Glyph& getGlyphHere(int code) const;
@@ -83,6 +88,7 @@ namespace Halley
 		Vector2i imageSize;
 		bool distanceField;
 		Vector<std::shared_ptr<const Font>> fallbackFonts;
+		Vector<std::shared_ptr<const Font>> fallbackFontsOrig;
 		Vector<String> fallback;
 		bool floorGlyphPosition;
 
@@ -90,6 +96,9 @@ namespace Halley
 		HashMap<int, Glyph> glyphs;
 
 		Resources* resources = nullptr;
+
+		I18NLanguage language;
+		std::optional<I18NLanguage> curPreferredLanguage;
 
 		void loadMaterial(Resources& resources) const;
 	};

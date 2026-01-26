@@ -107,6 +107,7 @@ void MetadataEditor::makeUI()
 	case AssetType::Font:
 		addFloatField("Font Size", "fontSize", 0);
 		addStringField("Font Name", "fontName", "");
+		addStringField("Language", "language", "en-GB");
 		addInt2Field("Image Size", "width", "height", Vector2i(512, 512));
 		addInt2Field("Range", "rangeStart", "rangeEnd", Vector2i(0, 255));
 		addStringField("Extra characters", "extraCharacters", "");

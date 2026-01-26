@@ -52,7 +52,7 @@ void Font::Glyph::deserialize(Deserializer& s)
 	s >> kerning;
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize)
+Font::Font(String name, String imageName, I18NLanguage language, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize)
 	: name(std::move(name))
 	, imageName(std::move(imageName))
 	, ascender(ascender)
@@ -63,10 +63,11 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, imageSize(imageSize)
 	, distanceField(false)
 	, floorGlyphPosition(false)
+	, language(std::move(language))
 {
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition)
+Font::Font(String name, String imageName, I18NLanguage language, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback, bool floorGlyphPosition)
 	: name(std::move(name))
 	, imageName(std::move(imageName))
 	, ascender(ascender)
@@ -78,6 +79,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 	, distanceField(true)
 	, fallback(std::move(fallback))
 	, floorGlyphPosition(floorGlyphPosition)
+	, language(std::move(language))
 {
 }
 
@@ -108,6 +110,36 @@ void Font::onLoaded(Resources& resources)
 		if (auto f = resources.tryGet<Font>(fontName)) {
 			fallbackFonts.push_back(f);
 		}
+	}
+	fallbackFontsOrig = fallbackFonts;
+}
+
+const I18NLanguage& Font::getLanguage() const
+{
+	return language;
+}
+
+void Font::setPreferredLanguage(const I18NLanguage& language)
+{
+	if (language != curPreferredLanguage) {
+		curPreferredLanguage = language;
+
+		fallbackFonts = fallbackFontsOrig;
+		std::stable_sort(fallbackFonts.begin(), fallbackFonts.end(), [&] (const std::shared_ptr<const Font>& a, const std::shared_ptr<const Font>& b) {
+			const int scoreA = a->getLanguage() == language ? 2 :
+				(a->getLanguage().getLanguageCode() == language.getLanguageCode() ? 1 : 0);
+			const int scoreB = b->getLanguage() == language ? 2 :
+				(b->getLanguage().getLanguageCode() == language.getLanguageCode() ? 1 : 0);
+			return scoreA > scoreB;
+		});
+
+		/*
+		Vector<String> names;
+		for (auto& f: fallbackFonts) {
+			names += f->getAssetId();
+		}
+		Logger::logDev("Fallback fonts for " + getAssetId() + ": " + String::concatList(names, ", "));
+		*/
 	}
 }
 
@@ -258,6 +290,7 @@ void Font::serialize(Serializer& s) const
 	s << glyphs;
 	s << fallback;
 	s << floorGlyphPosition;
+	s << language;
 }
 
 void Font::deserialize(Deserializer& s)
@@ -274,6 +307,7 @@ void Font::deserialize(Deserializer& s)
 	s >> glyphs;
 	s >> fallback;
 	s >> floorGlyphPosition;
+	s >> language;
 
 	for (auto& g: glyphs) {
 		g.second.charcode = g.first;
