@@ -243,6 +243,56 @@ void I18N::checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes) cons
 	}
 }
 
+Vector<uint32_t> I18N::getCodepointsUsedBy(const I18NLanguage& language) const
+{
+	std::set<uint32_t> characters;
+
+	if (const auto iter = strings.find(language); iter != strings.end()) {
+		for (const auto& [key, string]: iter->second) {
+			for (auto c: string.getUTF32()) {
+				characters.insert(c);
+			}
+		}
+	} else {
+		Logger::logError("Language not found: " + language.getISOCode());
+	}
+
+	Vector<uint32_t> result;
+	result.reserve(characters.size());
+	for (auto c: characters) {
+		result += c;
+	}
+
+	return result;
+}
+
+void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>> fonts) const
+{
+	HashMap<String, Vector<uint32_t>> codepointsPerLanguage;
+	for (auto& language: getLanguagesAvailable()) {
+		auto codepoints = getCodepointsUsedBy(language);
+		Logger::logInfo("[" + language.getISOCode() + "] " + toString(codepoints.size()) + " unique codepoints");
+		codepointsPerLanguage[language.getISOCode()] = std::move(codepoints);
+	}
+
+	for (const auto& font: fonts) {
+
+		for (const auto& [language, codepoints]: codepointsPerLanguage) {
+			String missing;
+			for (const auto& codepoint: codepoints) {
+				if (!font->tryGetFontForGlyph(static_cast<int>(codepoint))) {
+					missing += "\n  " + String(static_cast<int>(codepoint)) + " [0x" + toString(static_cast<int>(codepoint), 16, 4) + "]";
+				}
+			}
+
+			if (missing.isEmpty()) {
+				Logger::logInfo("[" + font->getAssetId() + "] [" + language + "] OK (" + codepoints.size() + " characters)");
+			} else {
+				Logger::logInfo("[" + font->getAssetId() + "] [" + language + "] Missing characters: " + missing);
+			}
+		}
+	}
+}
 
 
 LocalisedString::LocalisedString()

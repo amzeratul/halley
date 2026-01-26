@@ -145,6 +145,8 @@ namespace Halley {
 		char getDecimalSeparator() const;
 
 		void checkForDuplicatedStrings(const Vector<String>& ignoredPrefixes = {}) const;
+		Vector<uint32_t> getCodepointsUsedBy(const I18NLanguage& language) const;
+		void checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>> fonts) const;
 
 	private:
 		I18NLanguage currentLanguage;
