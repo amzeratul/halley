@@ -132,14 +132,6 @@ void Font::setPreferredLanguage(const I18NLanguage& language)
 				(b->getLanguage().getLanguageCode() == language.getLanguageCode() ? 1 : 0);
 			return scoreA > scoreB;
 		});
-
-		/*
-		Vector<String> names;
-		for (auto& f: fallbackFonts) {
-			names += f->getAssetId();
-		}
-		Logger::logDev("Fallback fonts for " + getAssetId() + ": " + String::concatList(names, ", "));
-		*/
 	}
 }
 
@@ -193,6 +185,7 @@ const Font& Font::getFontForGlyph(int code) const
 
 	// Glyph not found.
 	// Return whichever has the best empty glyph (because some fonts don't seem to have a visible one)
+	Logger::logError("[" + getAssetId() + "] Glyph not found: " + String(code) + " [U+" + toString(code, 16, 4) + "]", true);
 	float bestAdvance = 0;
 	const Font* bestFallbackFont = this;
 	if (const auto iter = glyphs.find(0); iter != glyphs.end()) {

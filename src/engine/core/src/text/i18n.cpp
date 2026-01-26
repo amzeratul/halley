@@ -294,7 +294,7 @@ void I18N::checkForCodepointsInFonts(gsl::span<const std::shared_ptr<const Font>
 			String missing;
 			for (const auto& codepoint: codepoints) {
 				if (!font->tryGetFontForGlyph(static_cast<int>(codepoint))) {
-					missing += "\n  " + String(static_cast<int>(codepoint)) + " [0x" + toString(static_cast<int>(codepoint), 16, 4) + "]";
+					missing += "\n  " + String(static_cast<int>(codepoint)) + " [U+" + toString(static_cast<int>(codepoint), 16, 4) + "]";
 				}
 			}
 
