@@ -825,7 +825,11 @@ void LocalisationEditor::downloadTranslations()
 							firstInChunk = false;
 						}
 
-						str << "  " << entry.getKey() << ": \"" << iter->second.getValue().replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
+						const auto value = iter->second.getValue()
+							.replaceAll("\"", "\\\"")
+							.replaceAll("\r\n", "\\n")
+							.replaceAll("\n", "\\n");
+						str << "  " << entry.getKey() << ": \"" << value << "\"\n";
 						++nEntries;
 					}
 				}
