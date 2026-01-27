@@ -142,7 +142,7 @@ bool LocalisationDataEntry::matchesSearchString(const String& searchString, cons
 {
 	return getKeyLowercase().contains(searchString, true)
 		|| getValueLowercase().contains(searchString, true)
-		|| (translation && translation->value.contains(searchString, false, searchStringIsLowerCase));
+		|| (translation && translation->getValueLowercase().contains(searchString, true));
 }
 
 LocOriginalDataChunk::LocOriginalDataChunk(String name, String category, Vector<LocalisationDataEntry> entries)
@@ -175,7 +175,7 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.getKey())) {
-			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->value);
+			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->getValue());
 			const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
 
 			result.wordsPerKey[entry.getKey()] = wordCount;
@@ -522,9 +522,28 @@ LocTranslationEntry::LocTranslationEntry(const ConfigNode& node)
 }
 
 LocTranslationEntry::LocTranslationEntry(String value, int32_t origVersion)
-	: value(std::move(value))
-	, origVersion(origVersion)
+	: origVersion(origVersion)
+	, value(std::move(value))
 {
+}
+
+const String& LocTranslationEntry::getValue() const
+{
+	return value;
+}
+
+const String& LocTranslationEntry::getValueLowercase() const
+{
+	if (!valueLowercase) {
+		valueLowercase = value.asciiLower();
+	}
+	return *valueLowercase;
+}
+
+void LocTranslationEntry::setValue(String value)
+{
+	this->value = std::move(value);
+	valueLowercase = {};
 }
 
 bool LocTranslationEntry::operator==(const LocTranslationEntry& other) const
@@ -580,8 +599,8 @@ bool LocTranslationData::setValue(const String& key, int32_t curVersion, String 
 		}
 	} else {
 		// Key exists
-		if (iter->second.value != value) {
-			iter->second.value = value;
+		if (iter->second.getValue() != value) {
+			iter->second.setValue(value);
 			iter->second.origVersion = curVersion;
 			return true;
 		}
@@ -684,7 +703,7 @@ bool LocTranslationData::updateLocalFromRemote(const LocTranslationData& remote)
 		}
 		auto& myEntry = iter->second;
 
-		if (remoteEntry.version > myEntry.version || myEntry.value.isEmpty()) {
+		if (remoteEntry.version > myEntry.version || myEntry.getValue().isEmpty()) {
 			if (remoteEntry != myEntry) {
 				myEntry = remoteEntry;
 				++nModified;
@@ -730,7 +749,7 @@ LocTranslationData LocTranslationData::makeDeltaFrom(const LocTranslationData& o
 
 	for (const auto& [key, myEntry]: entries) {
 		const auto* otherEntry = other.tryGetEntry(key);
-		if (!otherEntry || myEntry.value != otherEntry->value || myEntry.origVersion != otherEntry->origVersion) {
+		if (!otherEntry || myEntry.getValue() != otherEntry->getValue() || myEntry.origVersion != otherEntry->origVersion) {
 			result.entries[key] = myEntry;
 		}
 	}
@@ -746,7 +765,7 @@ LocTranslationData LocTranslationData::makeDeltaFrom(const LocTranslationData& o
 	for (const auto& key: keys) {
 		if (const auto* myEntry = tryGetEntry(key)) {
 			const auto* otherEntry = other.tryGetEntry(key);
-			if (!otherEntry || myEntry->value != otherEntry->value || myEntry->origVersion != otherEntry->origVersion) {
+			if (!otherEntry || myEntry->getValue() != otherEntry->getValue() || myEntry->origVersion != otherEntry->origVersion) {
 				result.entries[key] = *myEntry;
 			}
 		}

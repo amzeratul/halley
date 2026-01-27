@@ -367,7 +367,7 @@ ConfigNode LocalisationClient::getTranslationConfig(const LocTranslationData& da
 
 	for (const auto& [k, v]: data.entries) {
 		keys.push_back(ConfigNode(k));
-		values.push_back(ConfigNode(v.value));
+		values.push_back(ConfigNode(v.getValue()));
 		originalVersions.push_back(ConfigNode(v.origVersion));
 	}
 
@@ -402,7 +402,7 @@ LocStringSet LocalisationClient::toLocStringSet(I18NLanguage origLanguage, const
 		if (entryNode.hasKey("translations")) {
 			for (const auto& [lang, translationNode]: entryNode["translations"].asMap()) {
 				LocTranslationEntry translatedEntry;
-				translatedEntry.value = translationNode["value"].asString("");
+				translatedEntry.setValue(translationNode["value"].asString(""));
 				translatedEntry.version = translationNode["version"].asInt(0);
 				translatedEntry.origVersion = translationNode["origVersion"].asInt(0);
 

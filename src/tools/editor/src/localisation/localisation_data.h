@@ -183,7 +183,6 @@ namespace Halley {
 
 	class LocTranslationEntry {
 	public:
-		String value;
 		int32_t version = -1;
 		int32_t origVersion = -1;
 
@@ -191,10 +190,18 @@ namespace Halley {
 		LocTranslationEntry(const ConfigNode& node);
 		LocTranslationEntry(String value, int32_t origVersion);
 
+		[[nodiscard]] const String& getValue() const;
+		[[nodiscard]] const String& getValueLowercase() const;
+		void setValue(String value);
+
 		bool operator==(const LocTranslationEntry& other) const;
 		bool operator!=(const LocTranslationEntry& other) const;
 
 		ConfigNode toConfigNode() const;
+
+	private:
+		String value;
+		mutable std::optional<String> valueLowercase;
 	};
 
 	class LocTranslationData {

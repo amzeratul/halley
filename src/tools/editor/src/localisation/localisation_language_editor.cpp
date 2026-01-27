@@ -221,7 +221,7 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 
 		if (dstLanguage) {
 			const auto* dstEntry = dstLanguage->tryGetEntry(srcEntry.getKey());
-			dstCurLine->setText(dstEntry ? dstEntry->value : "");
+			dstCurLine->setText(dstEntry ? dstEntry->getValue() : "");
 			dstCurLine->setReadOnly(!canEdit);
 		}
 	} else {

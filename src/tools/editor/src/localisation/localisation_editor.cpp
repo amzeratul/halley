@@ -819,13 +819,13 @@ void LocalisationEditor::downloadTranslations()
 
 			for (const auto& entry: chunk.entries) {
 				if (const auto iter = localisedData.entries.find(entry.getKey()); iter != localisedData.entries.end()) {
-					if (!iter->second.value.isEmpty()) {
+					if (!iter->second.getValue().isEmpty()) {
 						if (firstInChunk) {
 							str << "\n  # " << chunk.name << "\n";
 							firstInChunk = false;
 						}
 
-						str << "  " << entry.getKey() << ": \"" << iter->second.value.replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
+						str << "  " << entry.getKey() << ": \"" << iter->second.getValue().replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
 						++nEntries;
 					}
 				}
@@ -922,7 +922,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Lo
 				csv.setCell(rowIdx, chunkIdx, chunk.name);
 
 				if (locEntry) {
-					csv.setCell(rowIdx, translationIdx, locEntry->value);
+					csv.setCell(rowIdx, translationIdx, locEntry->getValue());
 				}
 			}
 		}

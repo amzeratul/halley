@@ -95,7 +95,7 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 
 		if (translatedData) {
 			if (auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-				strs[4] = translatedEntry->value;
+				strs[4] = translatedEntry->getValue();
 				colours[4] = entry.getVersion() == translatedEntry->origVersion ? textCol : outdatedCol;
 			}
 		}
@@ -142,7 +142,7 @@ void LocalisationGrid::onRightClick(std::optional<int> line)
 			sendToClipboard(entry.getValue());
 		} else if (choice == "copyTranslation") {
 			if (auto* translated = translatedData ? translatedData->tryGetEntry(entry.getKey()) : nullptr) {
-				sendToClipboard(translated->value);
+				sendToClipboard(translated->getValue());
 			}
 		}
 	});
@@ -224,7 +224,7 @@ LocalisedString LocalisationGrid::getToolTip() const
 			return LocalisedString::fromUserString(entry.getValue());
 		} else if (colName == "Translated") {
 			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-				return LocalisedString::fromUserString(translatedEntry->value);
+				return LocalisedString::fromUserString(translatedEntry->getValue());
 			}
 		} else if (colName == "Rdy") {
 			return LocalisedString::fromUserString(isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate");

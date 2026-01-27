@@ -115,19 +115,19 @@ HashMap<String, String> LocalisationRemoteClientUpdater::makeTranslatedStringDel
 
 	if (filterKey) {
 		if (auto iter = src->entries.find(*filterKey); iter != src->entries.end()) {
-			result[*filterKey] = iter->second.value;
-			client.strings[*filterKey] = iter->second.value;
+			result[*filterKey] = iter->second.getValue();
+			client.strings[*filterKey] = iter->second.getValue();
 		}
 	} else {
 		for (const auto& [key, entry]: src->entries) {
 			if (const auto iter = client.strings.find(key); iter != client.strings.end()) {
-				if (iter->second != entry.value) {
-					client.strings[key] = entry.value;
-					result[key] = entry.value;
+				if (iter->second != entry.getValue()) {
+					client.strings[key] = entry.getValue();
+					result[key] = entry.getValue();
 				}
 			} else {
-				client.strings[key] = entry.value;
-				result[key] = entry.value;
+				client.strings[key] = entry.getValue();
+				result[key] = entry.getValue();
 			}
 		}
 	}

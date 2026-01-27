@@ -22,7 +22,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 		}
 	}
 
-	const bool isTranslated = translation && !translation->value.isEmpty();
+	const bool isTranslated = translation && !translation->getValue().isEmpty();
 
 	if (outdatedEnabled) {
 		const bool isOutOfDate = isTranslated && translation->origVersion < entry.getVersion();
