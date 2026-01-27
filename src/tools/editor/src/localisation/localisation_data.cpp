@@ -46,6 +46,84 @@ int LocalisationStats::getWordCount(const String& line)
 	return count;
 }
 
+const String& LocalisationDataEntry::getKey() const
+{
+	return key;
+}
+
+const String& LocalisationDataEntry::getKeyLowercase() const
+{
+	if (!keyLowercase) {
+		keyLowercase = key.asciiLower();
+	}
+	return *keyLowercase;
+}
+
+void LocalisationDataEntry::setKey(String key)
+{
+	this->key = std::move(key);
+	keyLowercase = {};
+}
+
+const String& LocalisationDataEntry::getValue() const
+{
+	return value;
+}
+
+const String& LocalisationDataEntry::getValueLowercase() const
+{
+	if (!valueLowercase) {
+		valueLowercase = value.asciiLower();
+	}
+	return *valueLowercase;
+}
+
+void LocalisationDataEntry::setValue(String value)
+{
+	this->value = std::move(value);
+	valueLowercase = {};
+}
+
+const String& LocalisationDataEntry::getContext() const
+{
+	return context;
+}
+
+void LocalisationDataEntry::setContext(String context)
+{
+	this->context = std::move(context);
+}
+
+const String& LocalisationDataEntry::getComment() const
+{
+	return comment;
+}
+
+void LocalisationDataEntry::setComment(String comment)
+{
+	this->comment = std::move(comment);
+}
+
+int LocalisationDataEntry::getVersion() const
+{
+	return version;
+}
+
+void LocalisationDataEntry::setVersion(int version)
+{
+	this->version = version;
+}
+
+LocPriority LocalisationDataEntry::getPriority() const
+{
+	return priority;
+}
+
+void LocalisationDataEntry::setPriority(LocPriority priority)
+{
+	this->priority = priority;
+}
+
 LocalisationDataEntry::LocalisationDataEntry(String key, String value, String context, String comment, LocPriority priority)
 	: key(std::move(key))
 	, value(std::move(value))
@@ -62,8 +140,8 @@ LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRule
 
 bool LocalisationDataEntry::matchesSearchString(const String& searchString, const LocTranslationEntry* translation, bool searchStringIsLowerCase) const
 {
-	return key.contains(searchString, false, searchStringIsLowerCase)
-		|| value.contains(searchString, false, searchStringIsLowerCase)
+	return getKeyLowercase().contains(searchString, true)
+		|| getValueLowercase().contains(searchString, true)
 		|| (translation && translation->value.contains(searchString, false, searchStringIsLowerCase));
 }
 
@@ -78,10 +156,10 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& 
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
-		const auto wordCount = LocalisationStats::getWordCount(entry.value);
+		const auto wordCount = LocalisationStats::getWordCount(entry.getValue());
 		const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
 
-		result.wordsPerKey[entry.key] = wordCount;
+		result.wordsPerKey[entry.getKey()] = wordCount;
 		result.totalKeys++;
 		result.keysPerCategory[category]++;
 		result.totalWords += wordCount;
@@ -96,11 +174,11 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
-		if (const auto* translatedEntry = translated.tryGetEntry(entry.key)) {
+		if (const auto* translatedEntry = translated.tryGetEntry(entry.getKey())) {
 			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->value);
 			const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
 
-			result.wordsPerKey[entry.key] = wordCount;
+			result.wordsPerKey[entry.getKey()] = wordCount;
 			result.totalKeys++;
 			result.keysPerCategory[category]++;
 			result.totalWords += wordCount;
@@ -146,12 +224,12 @@ bool LocOriginalDataChunk::hasKeyValueChanges(const LocOriginalDataChunk& other)
 
 	HashMap<String, String> myValues;
 	for (const auto& entry: entries) {
-		myValues[entry.key] = entry.value;
+		myValues[entry.getKey()] = entry.getValue();
 	}
 	for (const auto& entry: other.entries) {
-		auto iter = myValues.find(entry.key);
+		auto iter = myValues.find(entry.getKey());
 		if (iter != myValues.end()) {
-			if (iter->second != entry.value) {
+			if (iter->second != entry.getValue()) {
 				// Our key values don't match
 				return true;
 			}
@@ -220,7 +298,7 @@ std::optional<int32_t> LocOriginalData::tryGetVersion(const String& key) const
 {
 	const auto iter = keyMap.find(key);
 	if (iter != keyMap.end()) {
-		return getEntry(iter->second).version;
+		return getEntry(iter->second).getVersion();
 	}
 	return std::nullopt;
 }
@@ -274,7 +352,7 @@ const LocalisationDataEntry* LocOriginalData::tryGetEntry(const String& key) con
 bool LocOriginalData::setValue(const String& key, const String& value)
 {
 	if (auto* entry = tryGetEntry(key)) {
-		entry->value = value;
+		entry->setValue(value);
 		return true;
 	}
 	return false;
@@ -364,7 +442,7 @@ LocOriginalData LocOriginalData::generateFromProject(const I18NLanguage& languag
 
 		size_t i = 0;
 		for (const auto& entry: result.chunks.back().entries) {
-			result.keyMap[entry.key] = static_cast<int32_t>(result.keyIndices.size());
+			result.keyMap[entry.getKey()] = static_cast<int32_t>(result.keyIndices.size());
 			result.keyIndices.emplace_back(result.chunks.size() - 1, i++);
 		}
 	}
@@ -377,7 +455,7 @@ bool LocOriginalData::update(const LocOriginalData& other)
 	bool modified = false;
 	for (const auto& otherChunk: other.chunks) {
 		for (const auto& otherEntry: otherChunk.entries) {
-			if (auto* entry = tryGetEntry(otherEntry.key)) {
+			if (auto* entry = tryGetEntry(otherEntry.getKey())) {
 				*entry = otherEntry;
 				modified = true;
 			}
@@ -394,14 +472,14 @@ bool LocOriginalData::updateLocalFromRemote(const LocOriginalData& remote)
 	bool modified = false;
 	for (auto& chunk: chunks) {
 		for (auto& entry: chunk.entries) {
-			if (const auto* remoteEntry = remote.tryGetEntry(entry.key)) {
-				if (entry.version != remoteEntry->version) {
-					entry.version = remoteEntry->version;
+			if (const auto* remoteEntry = remote.tryGetEntry(entry.getKey())) {
+				if (entry.getVersion() != remoteEntry->getVersion()) {
+					entry.setVersion(remoteEntry->getVersion());
 					modified = true;
 				}
-				entry.comment = remoteEntry->comment;
-				entry.context = remoteEntry->context;
-				entry.priority = remoteEntry->priority;
+				entry.setComment(remoteEntry->getComment());
+				entry.setContext(remoteEntry->getContext());
+				entry.setPriority(remoteEntry->getPriority());
 			}
 		}
 	}
@@ -430,7 +508,7 @@ void LocOriginalData::indexData()
 	for (size_t j = 0; j < nChunks; ++j) {
 		const auto n = chunks[j].getNumEntries();
 		for (size_t i = 0; i < n; ++i) {
-			keyMap[chunks[j].getEntry(i).key] = static_cast<int32_t>(keyIndices.size());
+			keyMap[chunks[j].getEntry(i).getKey()] = static_cast<int32_t>(keyIndices.size());
 			keyIndices.emplace_back(j, i);
 		}
 	}
@@ -544,7 +622,7 @@ TranslationStats LocTranslationData::getTranslationStats(const LocOriginalData& 
 
 	for (const auto& entry: entries) {
 		if (auto* originalEntry = original.tryGetEntry(entry.first)) {
-			const auto version = originalEntry->version;
+			const auto version = originalEntry->getVersion();
 			const auto wordCount = origStats.wordsPerKey.value_or(entry.first, 0);
 
 			if (version == entry.second.origVersion) {
@@ -626,7 +704,7 @@ void LocTranslationData::updateOriginalVersions(const LocOriginalData& originalL
 	for (auto& [k, e]: entries) {
 		if (e.origVersion == -1) {
 			if (const auto* orig = originalLanguage.tryGetEntry(k)) {
-				e.origVersion = orig->version;
+				e.origVersion = orig->getVersion();
 			}
 		}
 	}
@@ -743,28 +821,28 @@ LocStringProperties::LocStringProperties(const LocalisationDataEntry& from, cons
 {
 	assert(from.key == to.key);
 
-	key = from.key;
-	if (from.comment != to.comment) {
-		comment = to.comment;
+	key = from.getKey();
+	if (from.getComment() != to.getComment()) {
+		comment = to.getComment();
 	}
-	if (from.context != to.context) {
-		context = to.context;
+	if (from.getContext() != to.getContext()) {
+		context = to.getContext();
 	}
-	if (from.priority != to.priority) {
-		priority = to.priority;
+	if (from.getPriority() != to.getPriority()) {
+		priority = to.getPriority();
 	}
 }
 
 void LocStringProperties::apply(LocalisationDataEntry& entry) const
 {
 	if (comment) {
-		entry.comment = *comment;
+		entry.setComment(*comment);
 	}
 	if (context) {
-		entry.context = *context;
+		entry.setContext(*context);
 	}
 	if (priority) {
-		entry.priority = *priority;
+		entry.setPriority(*priority);
 	}
 }
 

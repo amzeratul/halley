@@ -90,13 +90,13 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 
 		strs[0] = toString(idx + 1);
 		strs[1] = shortGroupName;
-		strs[2] = entry.key;
-		strs[3] = entry.value;
+		strs[2] = entry.getKey();
+		strs[3] = entry.getValue();
 
 		if (translatedData) {
-			if (auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+			if (auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
 				strs[4] = translatedEntry->value;
-				colours[4] = entry.version == translatedEntry->origVersion ? textCol : outdatedCol;
+				colours[4] = entry.getVersion() == translatedEntry->origVersion ? textCol : outdatedCol;
 			}
 		}
 
@@ -104,11 +104,11 @@ void LocalisationGrid::getLineDrawData(int idx, Vector<String>& strs, Vector<Col
 			if (isReadyToTranslate(entry)) {
 				sprites[firstIcon] = readyIcon;
 			}
-			sprites[firstIcon + 1] = priorityIcons.at(entry.priority);
-			if (!entry.comment.isEmpty()) {
+			sprites[firstIcon + 1] = priorityIcons.at(entry.getPriority());
+			if (!entry.getComment().isEmpty()) {
 				sprites[firstIcon + 2] = commentIcon;
 			}
-			if (!entry.context.isEmpty()) {
+			if (!entry.getContext().isEmpty()) {
 				sprites[firstIcon + 3] = contextIcon;
 			}
 		}
@@ -137,11 +137,11 @@ void LocalisationGrid::onRightClick(std::optional<int> line)
 		const auto& entry = origData->getEntry(*line);
 
 		if (choice == "copyKey") {
-			sendToClipboard(entry.key);
+			sendToClipboard(entry.getKey());
 		} else if (choice == "copyOriginal") {
-			sendToClipboard(entry.value);
+			sendToClipboard(entry.getValue());
 		} else if (choice == "copyTranslation") {
-			if (auto* translated = translatedData ? translatedData->tryGetEntry(entry.key) : nullptr) {
+			if (auto* translated = translatedData ? translatedData->tryGetEntry(entry.getKey()) : nullptr) {
 				sendToClipboard(translated->value);
 			}
 		}
@@ -159,8 +159,8 @@ void LocalisationGrid::copySelection()
 
 	for (const auto row: getSelectedLines()) {
 		const auto& entry = origData->getEntry(row);
-		result[entry.key] = entry.value;
-		keyOrder += entry.key;
+		result[entry.getKey()] = entry.getValue();
+		keyOrder += entry.getKey();
 	}
 
 	YAMLConvert::EmitOptions options;
@@ -183,7 +183,7 @@ bool LocalisationGrid::isReadyToTranslate(const LocalisationDataEntry& entry) co
 const String& LocalisationGrid::getKeyAt(int idx) const
 {
 	if (origData && idx >= 0 && idx < static_cast<int>(getSrcRowCount())) {
-		return origData->getEntry(idx).key;
+		return origData->getEntry(idx).getKey();
 	} else {
 		return String::emptyString();
 	}
@@ -206,34 +206,34 @@ LocalisedString LocalisationGrid::getToolTip() const
 		if (colName == "Group") {
 			return LocalisedString::fromUserString(origData->getGroupNameEntry(*lineUnderMouse));
 		} else if (colName == "Key") {
-			String tooltip = entry.key;
+			String tooltip = entry.getKey();
 
 			if (translatedData) {
-				if (const auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+				if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
 					tooltip += "\nv" + toString(translatedEntry->origVersion);
-					if (translatedEntry->origVersion != entry.version) {
-						tooltip += " (src at v" + toString(entry.version) + ")";
+					if (translatedEntry->origVersion != entry.getVersion()) {
+						tooltip += " (src at v" + toString(entry.getVersion()) + ")";
 					}
 				}
 			} else {
-				tooltip += "\nv" + toString(entry.version);
+				tooltip += "\nv" + toString(entry.getVersion());
 			}
 
 			return LocalisedString::fromUserString(tooltip);
 		} else if (colName == "Original") {
-			return LocalisedString::fromUserString(entry.value);
+			return LocalisedString::fromUserString(entry.getValue());
 		} else if (colName == "Translated") {
-			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.key)) {
+			if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
 				return LocalisedString::fromUserString(translatedEntry->value);
 			}
 		} else if (colName == "Rdy") {
 			return LocalisedString::fromUserString(isReadyToTranslate(entry) ? "Ready to Translate" : "Not Ready to Translate");
 		} else if (colName == "Pri") {
-			return LocalisedString::fromUserString("Priority: " + toString(entry.priority));
+			return LocalisedString::fromUserString("Priority: " + toString(entry.getPriority()));
 		} else if (colName == "Cmt") {
-			return LocalisedString::fromUserString(entry.comment);
+			return LocalisedString::fromUserString(entry.getComment());
 		} else if (colName == "Ctx") {
-			return LocalisedString::fromUserString(entry.context);
+			return LocalisedString::fromUserString(entry.getContext());
 		}
 	}
 	return {};

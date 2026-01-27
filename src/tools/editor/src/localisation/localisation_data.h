@@ -59,6 +59,29 @@ namespace Halley {
 
 	class LocalisationDataEntry {
 	public:
+		[[nodiscard]] const String& getKey() const;
+		[[nodiscard]] const String& getKeyLowercase() const;
+		[[nodiscard]] const String& getValue() const;
+		[[nodiscard]] const String& getValueLowercase() const;
+		[[nodiscard]] const String& getContext() const;
+		[[nodiscard]] const String& getComment() const;
+		[[nodiscard]] int getVersion() const;
+		[[nodiscard]] LocPriority getPriority() const;
+
+		void setKey(String key);
+		void setValue(String value);
+		void setContext(String context);
+		void setComment(String comment);
+		void setVersion(int version);
+		void setPriority(LocPriority priority);
+
+		LocalisationDataEntry() = default;
+		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
+
+		LocReadyStatus getReadyState(const LocalisationFilterRules& rules) const;
+		bool matchesSearchString(const String& searchString, const LocTranslationEntry* translation = nullptr, bool searchStringIsLowerCase = false) const;
+
+	private:
 		String key;
 		String value;
 		String context;
@@ -66,11 +89,8 @@ namespace Halley {
 		int version = 0;
 		LocPriority priority = LocPriority::Normal;
 
-		LocalisationDataEntry() = default;
-		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
-
-		LocReadyStatus getReadyState(const LocalisationFilterRules& rules) const;
-		bool matchesSearchString(const String& searchString, const LocTranslationEntry* translation = nullptr, bool searchStringIsLowerCase = false) const;
+		mutable std::optional<String> keyLowercase;
+		mutable std::optional<String> valueLowercase;
 	};
 
 	class ILocOriginalData {

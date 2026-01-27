@@ -818,14 +818,14 @@ void LocalisationEditor::downloadTranslations()
 			bool firstInChunk = true;
 
 			for (const auto& entry: chunk.entries) {
-				if (const auto iter = localisedData.entries.find(entry.key); iter != localisedData.entries.end()) {
+				if (const auto iter = localisedData.entries.find(entry.getKey()); iter != localisedData.entries.end()) {
 					if (!iter->second.value.isEmpty()) {
 						if (firstInChunk) {
 							str << "\n  # " << chunk.name << "\n";
 							firstInChunk = false;
 						}
 
-						str << "  " << entry.key << ": \"" << iter->second.value.replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
+						str << "  " << entry.getKey() << ": \"" << iter->second.value.replaceAll("\"", "\\\"").replaceAll("\n", "\\n") << "\"\n";
 						++nEntries;
 					}
 				}
@@ -905,20 +905,20 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Lo
 	for (const auto& chunk: orig.getChunks()) {
 		if (options.allChunks || options.chunksToInclude.contains(chunk.name)) {
 			for (const auto& origEntry: chunk.entries) {
-				const auto* locEntry = loc.tryGetEntry(origEntry.key);
+				const auto* locEntry = loc.tryGetEntry(origEntry.getKey());
 
 				if (!options.filters.shouldShow(origEntry, locEntry, filterRules)) {
 					continue;
 				}
 
 				auto rowIdx = csv.addRow();
-				csv.setCell(rowIdx, keyIdx, origEntry.key);
-				csv.setCell(rowIdx, versionIdx, toString(origEntry.version));
-				csv.setCell(rowIdx, commentIdx, origEntry.comment);
-				csv.setCell(rowIdx, contextIdx, origEntry.context);
+				csv.setCell(rowIdx, keyIdx, origEntry.getKey());
+				csv.setCell(rowIdx, versionIdx, toString(origEntry.getVersion()));
+				csv.setCell(rowIdx, commentIdx, origEntry.getComment());
+				csv.setCell(rowIdx, contextIdx, origEntry.getContext());
 				csv.setCell(rowIdx, readyIdx, toString(origEntry.getReadyState(filterRules)));
-				csv.setCell(rowIdx, priorityIdx, toString(origEntry.priority));
-				csv.setCell(rowIdx, originalIdx, origEntry.value);
+				csv.setCell(rowIdx, priorityIdx, toString(origEntry.getPriority()));
+				csv.setCell(rowIdx, originalIdx, origEntry.getValue());
 				csv.setCell(rowIdx, chunkIdx, chunk.name);
 
 				if (locEntry) {
@@ -1026,7 +1026,7 @@ void LocalisationEditor::importLanguageFromCSV(const I18NLanguage& language, con
 		if (versionCell && versionCell->isInteger()) {
 			version = versionCell->toInteger();
 		} else {
-			version = localStrings->originalLanguage->tryGetEntry(key)->version;
+			version = localStrings->originalLanguage->tryGetEntry(key)->getVersion();
 		}
 
 		if (!translatedValue.isEmpty()) {

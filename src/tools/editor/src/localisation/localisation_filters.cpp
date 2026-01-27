@@ -17,7 +17,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	}
 
 	if (priorityEnabled) {
-		if (entry.priority < minPriority || entry.priority > maxPriority) {
+		if (entry.getPriority() < minPriority || entry.getPriority() > maxPriority) {
 			return false;
 		}
 	}
@@ -25,7 +25,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	const bool isTranslated = translation && !translation->value.isEmpty();
 
 	if (outdatedEnabled) {
-		const bool isOutOfDate = isTranslated && translation->origVersion < entry.version;
+		const bool isOutOfDate = isTranslated && translation->origVersion < entry.getVersion();
 		const bool wantsOutOfDate = outdated == LocOutdatedStatus::OutOfDate;
 		if (isOutOfDate != wantsOutOfDate) {
 			return false;

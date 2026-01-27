@@ -345,8 +345,8 @@ ConfigNode LocalisationClient::getChunkConfig(const LocOriginalDataChunk& data) 
 	const auto n = data.getNumEntries();
 	for (int i = 0; i < n; ++i) {
 		const auto& entry = data.getEntry(i);
-		keys.push_back(ConfigNode(entry.key));
-		values.push_back(ConfigNode(entry.value));
+		keys.push_back(ConfigNode(entry.getKey()));
+		values.push_back(ConfigNode(entry.getValue()));
 	}
 
 	ConfigNode result;
@@ -391,12 +391,12 @@ LocStringSet LocalisationClient::toLocStringSet(I18NLanguage origLanguage, const
 		version = std::max(version, entryNode["version"].asInt(0));
 
 		LocalisationDataEntry entry;
-		entry.key = key;
-		entry.value = entryNode["originalValue"].asString("");
-		entry.version = entryNode["originalVersion"].asInt(0);
-		entry.comment = entryNode["comment"].asString("");
-		entry.context = entryNode["context"].asString("");
-		entry.priority = tryFromString<LocPriority>(entryNode["priority"].asString("")).value_or(LocPriority::Normal);
+		entry.setKey(key);
+		entry.setValue(entryNode["originalValue"].asString(""));
+		entry.setVersion(entryNode["originalVersion"].asInt(0));
+		entry.setComment(entryNode["comment"].asString(""));
+		entry.setContext(entryNode["context"].asString(""));
+		entry.setPriority(tryFromString<LocPriority>(entryNode["priority"].asString("")).value_or(LocPriority::Normal));
 		result.originalLanguage->getChunk(chunk).entries.push_back(entry);
 
 		if (entryNode.hasKey("translations")) {

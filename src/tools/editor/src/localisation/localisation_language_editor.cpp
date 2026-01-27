@@ -174,7 +174,7 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 	if (srcRemote) {
 		const auto n = srcRemote->getNumEntries();
 		for (size_t i = 0; i < n; ++i) {
-			srcRemoteDataIndex[srcRemote->getEntry(i).key] = i;
+			srcRemoteDataIndex[srcRemote->getEntry(i).getKey()] = i;
 		}
 	}
 
@@ -210,17 +210,17 @@ void LocalisationLanguageEditor::setSelectedLine(int idx, const String& key)
 		const auto& srcEntry = srcData->getEntry(idx);
 
 		curKey->setText(LocalisedString::fromUserString(key));
-		srcCurLine->setText(srcEntry.value);
+		srcCurLine->setText(srcEntry.getValue());
 		srcCurLine->setReadOnly(true);
 
 		if (canEdit) {
-			comment->setText(srcEntry.comment);
-			context->setText(srcEntry.context);
-			priority->setSelectedOption(toString(srcEntry.priority));
+			comment->setText(srcEntry.getComment());
+			context->setText(srcEntry.getContext());
+			priority->setSelectedOption(toString(srcEntry.getPriority()));
 		}
 
 		if (dstLanguage) {
-			const auto* dstEntry = dstLanguage->tryGetEntry(srcEntry.key);
+			const auto* dstEntry = dstLanguage->tryGetEntry(srcEntry.getKey());
 			dstCurLine->setText(dstEntry ? dstEntry->value : "");
 			dstCurLine->setReadOnly(!canEdit);
 		}
@@ -266,8 +266,8 @@ void LocalisationLanguageEditor::setComment(const String& comment)
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			if (entry->comment != comment) {
-				entry->comment = comment;
+			if (entry->getComment() != comment) {
+				entry->setComment(comment);
 				modified += key;
 			}
 		}
@@ -286,8 +286,8 @@ void LocalisationLanguageEditor::setContext(const String& context)
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			if (entry->context != context) {
-				entry->context = context;
+			if (entry->getContext() != context) {
+				entry->setContext(context);
 				modified += key;
 			}
 		}
@@ -306,8 +306,8 @@ void LocalisationLanguageEditor::setPriority(LocPriority priority)
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* entry = srcLanguage.tryGetEntry(key)) {
-			if (entry->priority != priority) {
-				entry->priority = priority;
+			if (entry->getPriority() != priority) {
+				entry->setPriority(priority);
 				modified += key;
 			}
 		}
@@ -323,7 +323,7 @@ bool LocalisationLanguageEditor::canEditProperties(int idx) const
 	}
 
 	const auto& localEntry = srcData->getEntry(idx);
-	const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.key);
+	const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.getKey());
 	if (!remoteEntry) {
 		return false;
 	}
@@ -359,8 +359,8 @@ void LocalisationLanguageEditor::markUpToDate()
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
-			if (srcEntry->version >= 0) {
-				if (dstLanguage->setVersion(key, srcEntry->version)) {
+			if (srcEntry->getVersion() >= 0) {
+				if (dstLanguage->setVersion(key, srcEntry->getVersion())) {
 					pendingTranslationModifiedKeys += key;
 				}
 			}
@@ -378,8 +378,8 @@ void LocalisationLanguageEditor::markOutOfDate()
 	for (const auto lineNumber: grid->getSelectedLines()) {
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* srcEntry = srcLanguage.tryGetEntry(key)) {
-			if (srcEntry->version > 0) {
-				if (dstLanguage->setVersion(key, srcEntry->version - 1)) {
+			if (srcEntry->getVersion() > 0) {
+				if (dstLanguage->setVersion(key, srcEntry->getVersion() - 1)) {
 					pendingTranslationModifiedKeys += key;
 				}
 			}
@@ -401,7 +401,7 @@ std::pair<int, int> LocalisationLanguageEditor::getOutOfDateAndUpToDateCountInSe
 		const auto& key = grid->getKeyAt(lineNumber);
 		if (auto* srcEntry = srcRemote->tryGetEntry(key)) {
 			if (auto* dstEntry = dstLanguage->tryGetEntry(key)) {
-				if (dstEntry->origVersion != srcEntry->version) {
+				if (dstEntry->origVersion != srcEntry->getVersion()) {
 					++outOfDate;
 				} else {
 					++upToDate;
@@ -516,7 +516,7 @@ void LocalisationLanguageEditor::applyFilters()
 
 	int wordCount = 0;
 	for (const auto idx: grid->getActiveRows()) {
-		wordCount += LocalisationStats::getWordCount(srcData->getEntry(idx).value);
+		wordCount += LocalisationStats::getWordCount(srcData->getEntry(idx).getValue());
 	}
 
 	const auto origLang = project.getProperties().getOriginalLanguage();
@@ -535,13 +535,13 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 {
 	if (srcRemote) {
 		const auto& localEntry = srcData->getEntry(idx);
-		const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.key);
+		const auto* remoteEntry = srcRemote->tryGetEntry(localEntry.getKey());
 
 		if (dstLanguage) {
 			// Editing translation
-			const auto* localTranslation = dstLanguage->tryGetEntry(localEntry.key);
+			const auto* localTranslation = dstLanguage->tryGetEntry(localEntry.getKey());
 			if (remoteEntry && localTranslation) {
-				if (localTranslation->origVersion < remoteEntry->version) {
+				if (localTranslation->origVersion < remoteEntry->getVersion()) {
 					// Outdated
 					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
 				}
@@ -549,7 +549,7 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 		} else {
 			// Editing original language
 			if (remoteEntry) {
-				if (remoteEntry->value != localEntry.value) {
+				if (remoteEntry->getValue() != localEntry.getValue()) {
 					// This entry is different from remote
 					return Colour4f(1.0f, 0.9f, 0.0f, 0.2f);
 				}
@@ -566,7 +566,7 @@ std::optional<Colour4f> LocalisationLanguageEditor::getRowColour(int idx) const
 bool LocalisationLanguageEditor::isRowVisible(int idx) const
 {
 	const auto& original = srcData->getEntry(idx);
-	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.key) : nullptr;
+	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.getKey()) : nullptr;
 
 	return filters.shouldShow(original, translated, filterRules);
 }
