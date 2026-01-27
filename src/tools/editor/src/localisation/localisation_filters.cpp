@@ -11,7 +11,7 @@ void LocalisationFilters::initialise(bool translating)
 bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules) const
 {
 	if (!searchString.isEmpty()) {
-		if (!entry.value.contains(searchString) && !entry.key.contains(searchString)) {
+		if (!entry.matchesSearchString(searchString, translation)) {
 			return false;
 		}
 	}

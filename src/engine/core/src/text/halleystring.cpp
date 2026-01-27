@@ -257,29 +257,25 @@ String& String::trimBoth()
 	return trim(true).trim(false);
 }
 
-bool String::contains(Character chr) const
-{
-	return str.find(chr) != npos;
-}
-
-
 size_t String::length() const
 {
 	return size();
 }
 
-
-bool String::contains(const std::string_view& string) const
+bool String::contains(Character chr) const
 {
-	return str.find(string) != npos;
+	return str.find(chr) != npos;
 }
 
+bool String::contains(const std::string_view& string, bool caseSensitive, bool paramIsPreLowercased) const
+{
+	return find(string, caseSensitive, paramIsPreLowercased) != npos;
+}
 
 String String::left(size_t n) const
 {
 	return String(str.substr(0,n));
 }
-
 
 String String::right(size_t n) const
 {
@@ -287,12 +283,10 @@ String String::right(size_t n) const
 	return String(str.substr(len-n,n));
 }
 
-
 String String::mid(size_t start,size_t count) const
 {
 	return String(str.substr(start,count));
 }
-
 
 bool String::startsWith(const std::string_view& string, bool caseSensitive) const
 {
@@ -1092,9 +1086,22 @@ void String::shrink()
 	str.shrink_to_fit();
 }
 
-size_t String::find(std::string_view s) const
+size_t String::find(std::string_view s, bool caseSensitive, bool paramIsPreLowercased) const
 {
-	return str.find(s);
+	if (s.length() > length()) {
+		return std::string::npos;
+	}
+
+	if (caseSensitive) {
+		// Case-sensitive
+		return str.find(s);
+	} else if (paramIsPreLowercased) {
+		// Case-insensitive, param  is lower case
+		return asciiLower().find(s);
+	} else {
+		// Case-insensitive, param is unknown
+		return asciiLower().find(String(s).asciiLower());
+	}
 }
 
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)

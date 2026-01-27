@@ -83,8 +83,8 @@ namespace Halley {
 		String& trimBoth();
 
 		[[nodiscard]] bool contains(Character chr) const;
-		[[nodiscard]] bool contains(const std::string_view& string) const;
-		[[nodiscard]] size_t find(std::string_view str) const;
+		[[nodiscard]] bool contains(const std::string_view& string, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
+		[[nodiscard]] size_t find(std::string_view str, bool caseSensitive = true, bool paramIsPreLowercased = false) const;
 
 		[[nodiscard]] String replaceAll(const std::string_view& before, const std::string_view& after) const;
 		[[nodiscard]] String replaceOne(const std::string_view& before, const std::string_view& after) const;

@@ -60,6 +60,13 @@ LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRule
 	return priority >= rules.minPriorityForReady ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
 }
 
+bool LocalisationDataEntry::matchesSearchString(const String& searchString, const LocTranslationEntry* translation, bool searchStringIsLowerCase) const
+{
+	return key.contains(searchString, false, searchStringIsLowerCase)
+		|| value.contains(searchString, false, searchStringIsLowerCase)
+		|| (translation && translation->value.contains(searchString, false, searchStringIsLowerCase));
+}
+
 LocOriginalDataChunk::LocOriginalDataChunk(String name, String category, Vector<LocalisationDataEntry> entries)
 	: name(std::move(name))
 	, category(std::move(category))

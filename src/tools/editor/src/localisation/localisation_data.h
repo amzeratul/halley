@@ -6,6 +6,7 @@
 #include "halley/tools/project/project_loc_options.h"
 
 namespace Halley {
+	class LocTranslationEntry;
 	using LocalisationHashType = uint64_t;
 	class LocTranslationData;
 
@@ -69,6 +70,7 @@ namespace Halley {
 		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
 
 		LocReadyStatus getReadyState(const LocalisationFilterRules& rules) const;
+		bool matchesSearchString(const String& searchString, const LocTranslationEntry* translation = nullptr, bool searchStringIsLowerCase = false) const;
 	};
 
 	class ILocOriginalData {

@@ -88,7 +88,7 @@ void LocalisationLanguageEditor::onMakeUI()
 
 	bindData("searchBar", filters.searchString, [this] (String value)
 	{
-		filters.searchString = std::move(value);
+		filters.searchString = value.asciiLower();
 		onFiltersUpdated();
 	});
 
