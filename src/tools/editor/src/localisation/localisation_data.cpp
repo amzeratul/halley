@@ -838,7 +838,7 @@ bool LocTranslationData::operator!=(const LocTranslationData& other) const
 
 LocStringProperties::LocStringProperties(const LocalisationDataEntry& from, const LocalisationDataEntry& to)
 {
-	assert(from.key == to.key);
+	assert(from.getKey() == to.getKey());
 
 	key = from.getKey();
 	if (from.getComment() != to.getComment()) {
