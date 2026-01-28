@@ -69,6 +69,9 @@ namespace Halley
 		void setTiming(int currentFrame, Time currentFrameTime);
 		void stepFrames(int amount);
 
+		void setVisibleOverride(std::optional<bool> visible);
+		std::optional<bool> getVisibleOverride() const;
+
 		std::optional<Vector2i> getCurrentActionPoint(const String& actionPointId) const;
 
 	private:
@@ -112,7 +115,8 @@ namespace Halley
 		bool dirFlip;
 		bool playing = false;
 		bool reverse = false;
-		std::optional<bool> visibleOverride;
+		std::optional<bool> visibleUserOverride;
+		std::optional<bool> visibleSyncOverride;
 
 		AnimationPlayId curPlayId = 0;
 

@@ -254,8 +254,8 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 			sprite.setPivot(spriteData->pivot + offsetPivot / sz);
 		}
 		sprite.setFlip(isFlipped());
-		if (visibleOverride) {
-			sprite.setVisible(visibleOverride.value());
+		if (visibleSyncOverride || visibleUserOverride) {
+			sprite.setVisible(visibleSyncOverride.value_or(true) && visibleUserOverride.value_or(true));
 		}
 		
 		hasUpdate = false;
@@ -398,14 +398,14 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 	setSequence(sequenceName);
 	setDirection(directionName);
 
-	const auto oldVisibleOverride = visibleOverride;
+	const auto oldVisibleOverride = visibleSyncOverride;
 	const auto oldCurFrame = curFrameN;
 	
-	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == sequenceName;
+	visibleSyncOverride = !hideIfNotSynchronized || getCurrentSequenceName() == sequenceName;
 	curFrameN = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
 
-	if (dirty || oldVisibleOverride != visibleOverride || oldCurFrame != curFrameN) {
+	if (dirty || oldVisibleOverride != visibleSyncOverride || oldCurFrame != curFrameN) {
 		dirty = false;
 		resolveSprite();
 	}
@@ -429,6 +429,16 @@ void AnimationPlayer::stepFrames(int amount)
 
 		resolveSprite();
 	}
+}
+
+void AnimationPlayer::setVisibleOverride(std::optional<bool> visible)
+{
+	this->visibleUserOverride = visible;
+}
+
+std::optional<bool> AnimationPlayer::getVisibleOverride() const
+{
+	return visibleUserOverride;
 }
 
 std::optional<Vector2i> AnimationPlayer::getCurrentActionPoint(const String& actionPointId) const
