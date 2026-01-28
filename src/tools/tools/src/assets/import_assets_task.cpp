@@ -103,6 +103,11 @@ void ImportAssetsTask::run()
 			}
 
 			if (packAfter) {
+				/*
+				for (const auto& asset: outputAssets) {
+					Logger::logInfo("Packing " + asset);
+				}
+				*/
 				addContinuation(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets)));
 			}
 		}

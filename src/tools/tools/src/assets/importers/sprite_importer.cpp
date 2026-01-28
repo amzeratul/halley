@@ -92,6 +92,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		}
 
 		auto oneAtlas = meta.getString("atlas", "");
+		oneAtlas.trimBoth();
 		
 		for (auto& frames : groupedFrames) {
 			// Update frames with pivot and slices
@@ -186,6 +187,7 @@ String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata
 {
 	if (metadata) {
 		String atlas = metadata->getString("atlas", "");
+		atlas.trimBoth();
 		if (atlas != "") {
 			return atlas;
 		}
