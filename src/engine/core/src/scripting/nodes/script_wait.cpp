@@ -3,18 +3,18 @@ using namespace Halley;
 
 void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data = ScriptWaitData(nodeData);
-	data.needsCheckInput = true;
+	data = ScriptWaitData(nodeData, node.getSettings()["time"].asFloat(0.0f));
 }
 
-ScriptWaitData::ScriptWaitData(const ConfigNode& node)
+ScriptWaitData::ScriptWaitData(const ConfigNode& node, float time)
 {
 	if (node.getType() == ConfigNodeType::Map) {
-		timeLeft = node["time"].asFloat(0);
+		timeLeft = std::max(node["time"].asFloat(0), 0.0f);
+	} else if (node.getType() != ConfigNodeType::Undefined) {
+		timeLeft = std::max(node.asFloat(0), 0.0f);
 	} else {
-		timeLeft = node.asFloat(0);
+		timeLeft = std::max(time, 0.0f);
 	}
-	timeLeft = std::max(timeLeft, 0.0f);
 }
 
 ConfigNode ScriptWaitData::toConfigNode(const EntitySerializationContext& context)
@@ -50,7 +50,6 @@ std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const B
 	str.append("Wait ");
 	if (node.getPin(2).hasConnection()) {
 		str.append(getConnectedNodeName(node, graph, 2), parameterColour);
-
 	} else {
 		str.append(toString(time), settingColour);
 	}

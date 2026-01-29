@@ -5,10 +5,10 @@ namespace Halley {
 	class ScriptWaitData : public ScriptStateData<ScriptWaitData> {
 	public:
 		float timeLeft = 0;
-		bool needsCheckInput = false;
+		bool needsCheckInput = true;
 
 		ScriptWaitData() = default;
-		ScriptWaitData(const ConfigNode& node);
+		ScriptWaitData(const ConfigNode& node, float time);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
 	
