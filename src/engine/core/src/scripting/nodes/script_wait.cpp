@@ -3,26 +3,23 @@ using namespace Halley;
 
 void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	if (nodeData.getType() == ConfigNodeType::Undefined) {
-		data.timeLeft = std::max(node.getSettings()["time"].asFloat(0.0f), 0.0f);
-	} else {
-		data.timeLeft = std::max(nodeData["time"].asFloat(0), 0.0f);
-		data.setFromInput = nodeData["setFromInput"].asBool(false);
-	}
+	data = ScriptWaitData(nodeData);
+	data.needsCheckInput = true;
 }
 
 ScriptWaitData::ScriptWaitData(const ConfigNode& node)
 {
-	timeLeft = node["time"].asFloat(0);
-	setFromInput = node["setFromInput"].asBool(false);
+	if (node.getType() == ConfigNodeType::Map) {
+		timeLeft = node["time"].asFloat(0);
+	} else {
+		timeLeft = node.asFloat(0);
+	}
+	timeLeft = std::max(timeLeft, 0.0f);
 }
 
 ConfigNode ScriptWaitData::toConfigNode(const EntitySerializationContext& context)
 {
-	ConfigNode::MapType node;
-	node["time"] = timeLeft;
-	node["setFromInput"] = setFromInput;
-	return node;
+	return ConfigNode(timeLeft);
 }
 
 String ScriptWait::getLabel(const BaseGraphNode& node) const
@@ -71,9 +68,12 @@ String ScriptWait::getPinDescription(const BaseGraphNode& node, PinType elementT
 
 IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
-	if (!curData.setFromInput && (readDataPin(environment, node, 2).getType() == ConfigNodeType::Float || readDataPin(environment, node, 2).getType() == ConfigNodeType::Int)) {
-		curData.setFromInput = true;
-		curData.timeLeft = std::max(readDataPin(environment, node, 2).asFloat(), 0.0f);
+	if (curData.needsCheckInput) {
+		curData.needsCheckInput = false;
+		auto value = readDataPin(environment, node, 2);
+		if (value.getType() == ConfigNodeType::Float || value.getType() == ConfigNodeType::Int) {
+			curData.timeLeft = std::max(value.asFloat(), 0.0f);
+		}
 	}
 
 	const float t = static_cast<float>(time);
