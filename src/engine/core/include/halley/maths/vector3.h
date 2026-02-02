@@ -111,13 +111,23 @@ namespace Halley {
 		constexpr inline Vector3D operator /= (const T p) { x /= p; y /= p; z /= p; return *this; }
 
 		// Get the normalized vector (unit vector)
-		inline Vector3D unit() const
+		[[nodiscard]] constexpr Vector3D unit() const
 		{
-			float len = length();
+			const float len = length();
 			if (len != 0) {
-				return (*this) * (1.0f / len);
+				return (*this) / len;
 			}
 			return Vector3D(T(0), T(0), T(0));
+		}
+
+		[[nodiscard]] constexpr std::pair<Vector3D, float> unitAndLength() const
+		{
+			const float len = length();
+			if (len != 0) {
+				return { (*this) / len, len };
+			} else {
+				return { Vector3D(T(0), T(0), T(0)), 0.0f };
+			}
 		}
 
 		// Cross product

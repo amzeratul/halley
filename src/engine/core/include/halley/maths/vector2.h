@@ -114,9 +114,9 @@ namespace Halley {
 		constexpr Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
 
 		// Get the normalized vector (unit vector)
-		[[nodiscard]] constexpr Vector2D unit () const
+		[[nodiscard]] constexpr Vector2D unit() const
 		{
-			float len = length();
+			const float len = length();
 			if (len != 0) {
 				return (*this) / len;
 			} else {
@@ -127,6 +127,16 @@ namespace Halley {
 		[[nodiscard]] constexpr Vector2D normalized() const
 		{
 			return unit();
+		}
+
+		[[nodiscard]] constexpr std::pair<Vector2D, float> unitAndLength() const
+		{
+			const float len = length();
+			if (len != 0) {
+				return { (*this) / len, len };
+			} else {
+				return { Vector2D(0, 0), 0.0f };
+			}
 		}
 
 		constexpr void normalize()
