@@ -141,6 +141,7 @@ namespace Halley {
 			for (const auto& k: config.getKeys<U>()) {
 				result.push_back(altPrefix + k);
 			}
+			std::sort(result.begin(), result.end());
 			return std::make_unique<EnumFieldFactory>(std::move(name), result, !result.empty() ? result.front() : "");
 		}
 
