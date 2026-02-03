@@ -50,6 +50,7 @@ systemMessage:
     - target: Halley::EntityId
     - lock: bool
     - withAuthority: bool
+    - destroyOnUnlock: bool
     - peerId: uint8_t
   destination: host
   serializable: true

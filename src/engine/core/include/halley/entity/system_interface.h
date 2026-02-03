@@ -40,6 +40,7 @@ namespace Halley {
         virtual LockStatus getLockStatus(EntityId targetId) const = 0;
         virtual bool isLockedByOrAvailableTo(EntityId playerId, EntityId targetId) const = 0;
         virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId, bool acquireAuthority) = 0;
+    	virtual void lockUpdate(EntityId targetId, bool destroyOnUnlock) = 0;
 	};
 
     class ILuaInterface : public ISystemInterface {

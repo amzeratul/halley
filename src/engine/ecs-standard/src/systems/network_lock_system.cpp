@@ -135,6 +135,14 @@ public:
 		});
 	}
 
+	void lockUpdate(EntityId targetId, bool destroyOnUnlock) override
+	{
+		const auto iter = myLocks.find(targetId);
+		if (iter != myLocks.end()) {
+			iter->second.destroyOnUnlock = destroyOnUnlock;
+		}
+	}
+
 	void lockRelease(EntityId playerId, EntityId targetId) override
 	{
 		const auto iter = myLocks.find(targetId);
@@ -143,7 +151,7 @@ public:
 			if (l.playerId == playerId) {
 				l.refCount--;
 				if (l.refCount == 0) {
-					doLockReleaseForMe(targetId, l.withAuthority);
+					doLockReleaseForMe(targetId, l.withAuthority, l.destroyOnUnlock);
 					myLocks.erase(iter);
 				}
 			} else {
@@ -156,7 +164,7 @@ public:
 
 	bool onMessageReceived(NetworkEntityLockSystemMessage msg) override
 	{
-		return doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority);
+		return doEntityLock(msg.target, msg.peerId, msg.lock, msg.withAuthority, msg.destroyOnUnlock);
 	}
 
 private:
@@ -164,6 +172,7 @@ private:
 		EntityId playerId;
 		int refCount = 0;
         bool withAuthority = false;
+		bool destroyOnUnlock = false;
 	};
 	HashMap<EntityId, LocalLock> myLocks;
 	ListenerSetToken sessionChangedToken;
@@ -195,7 +204,7 @@ private:
 	Future<bool> doLockAcquireForMe(EntityId targetId, bool withAuthority)
 	{
 		if (isHost()) {
-			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true, withAuthority));
+			return Future<bool>::makeImmediate(doEntityLock(targetId, getMyPeerId(), true, withAuthority, false));
 		} else {
 			/*auto target = getWorld().tryGetEntity(targetId);
 			if (target.isValid()) {
@@ -205,7 +214,7 @@ private:
 			}*/
 			Promise<bool> promise;
 			auto future = promise.getFuture();
-			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, true, withAuthority, false, getMyPeerId()), [=, promise = std::move(promise)] (bool value) mutable
 			{
                 if (value && withAuthority) {
                     changeAuthority(targetId, getMyPeerId());
@@ -216,10 +225,10 @@ private:
 		}
 	}
 
-	void doLockReleaseForMe(EntityId targetId, bool withAuthority)
+	void doLockReleaseForMe(EntityId targetId, bool withAuthority, bool destroyOnUnlock)
 	{
 		if (isHost()) {
-			doEntityLock(targetId, getMyPeerId(), false, withAuthority);
+			doEntityLock(targetId, getMyPeerId(), false, withAuthority, destroyOnUnlock);
 		} else {
 			/*auto target = getWorld().tryGetEntity(targetId);
 			if (target.isValid()) {
@@ -227,19 +236,19 @@ private:
 			} else {
 				Logger::logDev("- release lock for me, but target entity not found, id=" + toString(targetId.value & 0xffffffff));
 			}*/
-			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, getMyPeerId()), [=] (bool value) mutable
+			sendMessage(NetworkEntityLockSystemMessage(targetId, false, withAuthority, destroyOnUnlock, getMyPeerId()), [=] (bool value) mutable
             {
 				if (withAuthority) {
 					changeAuthority(targetId, {});
 					if (!value) {
-						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId));
+						Logger::logWarning("client failed to tell host to release lock, with authority, for entity ID " + toString(targetId.value & 0xffffffff));
 					}
 				}
             });
 		}
 	}
 
-	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority)
+	bool doEntityLock(EntityId targetId, NetworkSession::PeerId peerId, bool lock, bool withAuthority, bool destroyOnUnlock)
 	{
 		if (!targetId.isValid()) {
 			Logger::logDev("Peer attempted to lock invalid entity.");
@@ -249,7 +258,7 @@ private:
 		const auto* e = getRootEntity(targetId);
 		if (e) {
 			if (e->network.ownerId.value_or(0) != getMyPeerId()) {
-				Logger::logError("Peer attempted to lock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
+				Logger::logError("Peer attempted to lock or unlock entity " + getWorld().getEntity(targetId).getName() + " which isn't owned by host.");
 				return false;
 			}
 
@@ -277,6 +286,10 @@ private:
                     if (withAuthority) {
                         doChangeAuthority(e, {});
                     }
+					if (destroyOnUnlock) {
+						//Logger::logDev("Destroy entity " + toString(targetId.value & 0xffffffff) + " on unlock");
+						getWorld().destroyEntity(targetId);
+					}
 					return true;
 				} else {
 					// Wants to lock again
@@ -355,7 +368,7 @@ private:
         if (e) {
             doChangeAuthority(e, authorityId);
         } else {
-            Logger::logWarning("Trying to change authority of entity " + toString(targetId) + " which is unknown, or not a network entity");
+            Logger::logWarning("Trying to change authority of entity " + toString(targetId.value & 0xffffffff) + " which is unknown, or not a network entity");
         }
     }
 

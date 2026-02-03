@@ -414,8 +414,20 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote, EntityId entityId)
 {
 	if (remote.hasAuthorityOnly) {
-		// Don't want (and not allowed to) destroy this here.
+		// Don't want (and not allowed) to destroy this here.
 		Logger::logError("Attempt to destroy temporary outbound entity");
+		return;
+	}
+
+	const auto tempInboundIter = std_ex::find_if(tempInboundEntities, [&](const auto& kv) {
+		return kv.second.worldId == entityId;
+	});
+
+	if (tempInboundIter != tempInboundEntities.end()) {
+		// This "usually" happens, on the host, if an entity got destroyed before we got back authority.
+		// In scripts, network locks (with authority) are only released on exit, but script nodes or
+		// messages that trigger entity destruction in code can happen before that.
+		Logger::logWarning("Attempt to destroy outbound entity we don't have authority for right now");
 		return;
 	}
 
@@ -508,7 +520,11 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 		if (const auto iter = tempInboundEntities.find(msg.entityId); iter != tempInboundEntities.end()) {
 			auto& remote = iter->second;
 			const auto entity = parentSession->getWorld().tryGetEntity(remote.worldId);
-			updateRemoteEntity(remote, entity, msg);
+			if (entity.isValid()) {
+				updateRemoteEntity(remote, entity, msg);
+			} else {
+				Logger::logWarning("No entity found " + toString(remote.worldId.value & 0xffffffff) + " for inbound message with authority-only, dropping message");
+			}
 		} else {
 			Logger::logWarning("No temporary inbound entity with network id " + toString(static_cast<int>(msg.entityId)) + " found", true);
 		}
