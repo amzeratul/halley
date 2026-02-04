@@ -711,6 +711,28 @@ namespace Halley {
 			return std::find(begin(), end(), elem) != end();
 		}
 
+		template <typename C>
+		[[nodiscard]] bool contains_any_of(const C& container) const
+		{
+			for (const auto& e: container) {
+				if (contains(e)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		template <typename C>
+		[[nodiscard]] bool contains_all_of(const C& container) const
+		{
+			for (const auto& e: container) {
+				if (!contains(e)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		template <typename F>
 		[[nodiscard]] bool contains_if(F predicate)
 		{
