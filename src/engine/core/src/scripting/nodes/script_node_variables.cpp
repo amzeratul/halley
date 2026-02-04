@@ -562,7 +562,7 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 	const auto a = aOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(bOrig) : ConfigNode(aOrig);
 	const auto b = bOrig.getType() == ConfigNodeType::Undefined ? getTypeZero(aOrig) : ConfigNode(bOrig);
-	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true);
+	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true, op);
 
 	if (type == ConfigNodeType::String) {
 		if (op == MathOp::Add) {
@@ -584,9 +584,9 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 	} else if (type == ConfigNodeType::Int) {
 		return ConfigNode(MathOps::apply(op, a.asInt(0), b.asInt(0)));
 	} else if (type == ConfigNodeType::Float2) {
-		return ConfigNode(MathOps::apply(op, a.asVector2f({}), b.asVector2f({})));
+		return ConfigNode(MathOps::apply(op, a.asVector2f({}, true), b.asVector2f({}, true)));
 	} else if (type == ConfigNodeType::Int2) {
-		return ConfigNode(MathOps::apply(op, a.asVector2i({}), b.asVector2i({})));
+		return ConfigNode(MathOps::apply(op, a.asVector2i({}, true), b.asVector2i({}, true)));
 	} else {
 		Logger::logError("ScriptArithmetic node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType())
 			+ ". Requested operation: " + aOrig.asString("null") + toString(op) + bOrig.asString("null"));
@@ -871,7 +871,7 @@ IScriptNodeType::Result ScriptAdvanceTo::doUpdate(ScriptEnvironment& environment
 	const auto amount = readDataPin(environment, node, 7);
 	const auto var = readDataPin(environment, node, 8);
 
-	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 3>{ var.getType(), target.getType(), amount.getType() }, true);
+	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 3>{ var.getType(), target.getType(), amount.getType() }, true, MathOp::Add);
 	bool modified = false;
 	bool reached = false;
 	

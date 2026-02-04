@@ -855,12 +855,17 @@ bool ConfigNode::asBool() const
 
 Vector2i ConfigNode::asVector2i() const
 {
+	return doAsVector2i(false);
+}
+
+Vector2i ConfigNode::doAsVector2i(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Int2 || type == ConfigNodeType::Idx) {
 		return vec2iData;
 	} else if (type == ConfigNodeType::Float2) {
 		return Vector2i(vec2fData);
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector2i(asInt(), 0);
+		return Vector2i(asInt(), expandScalar ? asInt() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector2i(seq.at(0).asInt(), seq.at(1).asInt());
@@ -871,12 +876,17 @@ Vector2i ConfigNode::asVector2i() const
 
 Vector2f ConfigNode::asVector2f() const
 {
+	return doAsVector2f(false);
+}
+
+Vector2f ConfigNode::doAsVector2f(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Int2) {
 		return Vector2f(vec2iData);
 	} else if (type == ConfigNodeType::Float2) {
 		return vec2fData;
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector2f(asFloat(), 0);
+		return Vector2f(asFloat(), expandScalar ? asFloat() : 0);
 	} else if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
@@ -887,13 +897,20 @@ Vector2f ConfigNode::asVector2f() const
 
 Vector3i ConfigNode::asVector3i() const
 {
+	return doAsVector3i(false);
+}
+
+Vector3i ConfigNode::doAsVector3i(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector3i(seq.at(0).asInt(), seq.size() >= 2 ? seq.at(1).asInt() : 0, seq.size() >= 3 ? seq.at(2).asInt() : 0);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3i(asVector2i(), 0);
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector3i(asInt(), 0, 0);
+		auto v0 = asInt();
+		auto v1 = expandScalar ? v0 : 0;
+		return Vector3i(v0, v1, v1);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -901,13 +918,20 @@ Vector3i ConfigNode::asVector3i() const
 
 Vector3f ConfigNode::asVector3f() const
 {
+	return doAsVector3f(false);
+}
+
+Vector3f ConfigNode::doAsVector3f(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector3f(seq.at(0).asFloat(), seq.size() >= 2 ? seq.at(1).asFloat() : 0.0f, seq.size() >= 3 ? seq.at(2).asFloat() : 0.0f);
 	} else if (type == ConfigNodeType::Float2 || type == ConfigNodeType::Int2) {
 		return Vector3f(asVector2f(), 0);
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector3f(asFloat(), 0, 0);
+		auto v0 = asFloat();
+		auto v1 = expandScalar ? v0 : 0;
+		return Vector3f(v0, v1, v1);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
 	}
@@ -915,11 +939,18 @@ Vector3f ConfigNode::asVector3f() const
 
 Vector4i ConfigNode::asVector4i() const
 {
+	return doAsVector4i(false);
+}
+
+Vector4i ConfigNode::doAsVector4i(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector4i(seq.at(0).asInt(), seq.at(1).asInt(), seq.at(2).asInt(), seq.at(3).asInt());
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector4i(asInt(), 0, 0, 0);
+		auto v0 = asInt();
+		auto v1 = expandScalar ? v0 : 0;
+		return Vector4i(v0, v1, v1, v1);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
@@ -927,11 +958,18 @@ Vector4i ConfigNode::asVector4i() const
 
 Vector4f ConfigNode::asVector4f() const
 {
+	return doAsVector4f(false);
+}
+
+Vector4f ConfigNode::doAsVector4f(bool expandScalar) const
+{
 	if (type == ConfigNodeType::Sequence) {
 		auto& seq = asSequence();
 		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
 	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
-		return Vector4f(asFloat(), 0, 0, 0);
+		auto v0 = asFloat();
+		auto v1 = expandScalar ? v0 : 0;
+		return Vector4f(v0, v1, v1, v1);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
@@ -1000,57 +1038,57 @@ const Bytes& ConfigNode::asBytes() const
 	}
 }
 
-Vector2i ConfigNode::asVector2i(Vector2i defaultValue) const
+Vector2i ConfigNode::asVector2i(Vector2i defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector2i();
+		return doAsVector2i(expandScalar);
 	}
 }
 
-Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
+Vector2f ConfigNode::asVector2f(Vector2f defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector2f();
+		return doAsVector2f(expandScalar);
 	}
 }
 
-Vector3i ConfigNode::asVector3i(Vector3i defaultValue) const
+Vector3i ConfigNode::asVector3i(Vector3i defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector3i();
+		return doAsVector3i(expandScalar);
 	}
 }
 
-Vector3f ConfigNode::asVector3f(Vector3f defaultValue) const
+Vector3f ConfigNode::asVector3f(Vector3f defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector3f();
+		return doAsVector3f(expandScalar);
 	}
 }
 
-Vector4i ConfigNode::asVector4i(Vector4i defaultValue) const
+Vector4i ConfigNode::asVector4i(Vector4i defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector4i();
+		return doAsVector4i(expandScalar);
 	}
 }
 
-Vector4f ConfigNode::asVector4f(Vector4f defaultValue) const
+Vector4f ConfigNode::asVector4f(Vector4f defaultValue, bool expandScalar) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
 	} else {
-		return asVector4f();
+		return doAsVector4f(expandScalar);
 	}
 }
 
@@ -1987,7 +2025,50 @@ void ConfigNode::decayDeltaArtifacts()
 	}
 }
 
-ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined)
+namespace {
+	std::optional<ConfigNodeType> doGetPromotedType(ConfigNodeType a, ConfigNodeType b, bool promoteUndefined, MathOp op)
+	{
+		using T = ConfigNodeType;
+
+		if (ConfigNode::isScalarType(a, promoteUndefined) && ConfigNode::isScalarType(b, promoteUndefined)) {
+			// Promote scalars
+			return (a == T::Float || b == T::Float) 
+				? T::Float
+				: ((a == T::Int64 || b == T::Int64)
+					? T::Int64 
+					: T::Int);
+		}
+		
+		if (a == T::String || b == T::String) {
+			// Promote strings
+			return T::String;
+		}
+		
+		// Vec2
+		const bool aIsVec2 = ConfigNode::isVector2Type(a, promoteUndefined);
+		const bool bIsVec2 = ConfigNode::isVector2Type(b, promoteUndefined);
+
+		if (aIsVec2 && bIsVec2) {
+			// Two vec2s
+			return (a == T::Float2 || b == T::Float2)
+				? T::Float2
+				: T::Int2;
+		} else if ((aIsVec2 || bIsVec2) && (a == T::Sequence || b == T::Sequence)) {
+			// Convertible to vec2
+			return T::Float2;
+		} else if (aIsVec2 && (b == T::Int || b == T::Float) && (op == MathOp::Multiply || op == MathOp::Divide)) {
+			// One vec2 and one scalar
+			return a;
+		} else if (bIsVec2 && (a == T::Int || a == T::Float) && (op == MathOp::Multiply || op == MathOp::Divide)) {
+			// One vec2 and one scalar
+			return b;
+		}
+
+		return std::nullopt;
+	}
+}
+
+ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined, MathOp op)
 {
 	ConfigNodeType result = ConfigNodeType::Undefined;
 	
@@ -1998,21 +2079,10 @@ ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types
 			const auto b = types[i];
 
 			if (a != b) {
-				if (isScalarType(a, promoteUndefined) && isScalarType(b, promoteUndefined)) {
-					result = (a == ConfigNodeType::Float || b == ConfigNodeType::Float) ? ConfigNodeType::Float : ((a == ConfigNodeType::Int64 || b == ConfigNodeType::Int64) ? ConfigNodeType::Int64 : ConfigNodeType::Int);
-				} else if (a == ConfigNodeType::String || b == ConfigNodeType::String) {
-					result = a;
+				if (auto r = doGetPromotedType(a, b, promoteUndefined, op)) {
+					result = *r;
 				} else {
-					const bool aIsVec2 = isVector2Type(a, promoteUndefined);
-					const bool bIsVec2 = isVector2Type(b, promoteUndefined);
-
-					if (aIsVec2 && bIsVec2) {
-						result = (a == ConfigNodeType::Float2 || b == ConfigNodeType::Float2) ? ConfigNodeType::Float2 : ConfigNodeType::Int2;
-					} else if ((aIsVec2 || bIsVec2) && (a == ConfigNodeType::Sequence || b == ConfigNodeType::Sequence)) {
-						return ConfigNodeType::Float2;
-					} else {
-						return ConfigNodeType::Undefined;
-					}
+					return ConfigNodeType::Undefined;
 				}
 			}
 		}

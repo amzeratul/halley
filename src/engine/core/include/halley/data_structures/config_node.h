@@ -377,12 +377,12 @@ namespace Halley {
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;
 		std::string_view asStringView(const std::string_view& defaultValue) const;
-		Vector2i asVector2i(Vector2i defaultValue) const;
-		Vector2f asVector2f(Vector2f defaultValue) const;
-		Vector3i asVector3i(Vector3i defaultValue) const;
-		Vector3f asVector3f(Vector3f defaultValue) const;
-		Vector4i asVector4i(Vector4i defaultValue) const;
-		Vector4f asVector4f(Vector4f defaultValue) const;
+		Vector2i asVector2i(Vector2i defaultValue, bool expandScalar = false) const;
+		Vector2f asVector2f(Vector2f defaultValue, bool expandScalar = false) const;
+		Vector3i asVector3i(Vector3i defaultValue, bool expandScalar = false) const;
+		Vector3f asVector3f(Vector3f defaultValue, bool expandScalar = false) const;
+		Vector4i asVector4i(Vector4i defaultValue, bool expandScalar = false) const;
+		Vector4f asVector4f(Vector4f defaultValue, bool expandScalar = false) const;
 		Rect4i asRect4i(Rect4i defaultValue) const;
 		Rect4f asRect4f(Rect4f defaultValue) const;
 		Range<float> asFloatRange(Range<float> defaultValue) const;
@@ -632,7 +632,7 @@ namespace Halley {
 		void applyDelta(const ConfigNode& delta);
 		void decayDeltaArtifacts();
 		
-		static ConfigNodeType getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined);
+		static ConfigNodeType getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined, MathOp op);
 		static bool isScalarType(ConfigNodeType type, bool acceptUndefined);
 		static bool isVector2Type(ConfigNodeType type, bool acceptUndefined);
 
@@ -718,6 +718,13 @@ namespace Halley {
 		{
 			return asPair<P1, P2>();
 		}
+
+		Vector2i doAsVector2i(bool expandScalar) const;
+		Vector2f doAsVector2f(bool expandScalar) const;
+		Vector3i doAsVector3i(bool expandScalar) const;
+		Vector3f doAsVector3f(bool expandScalar) const;
+		Vector4i doAsVector4i(bool expandScalar) const;
+		Vector4f doAsVector4f(bool expandScalar) const;
 
 		bool isNullOrEmpty() const;
 
