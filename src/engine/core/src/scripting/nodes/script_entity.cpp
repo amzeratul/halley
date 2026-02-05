@@ -166,8 +166,10 @@ IScriptNodeType::Result ScriptDestroyEntity::doUpdate(ScriptEnvironment& environ
 		// In multiplayer, check if the local peer has authority, but is *not* the owner of this entity.
 		// In that case, don't destroy the entity right away. Instead, tell the Network lock system to
 		// destroy it as soon as the lock is released, and authority has been given back to the owner.
-		auto entityRef = environment.getWorld().getEntity(entityId);
-		if (!environment.getWorld().isEntityNetworkOwner(entityRef) && environment.getWorld().isEntityNetworkAuthority(entityRef)) {
+		auto entityRef = environment.getWorld().tryGetEntity(entityId);
+		if (entityRef.isValid() &&
+			!environment.getWorld().isEntityNetworkOwner(entityRef) &&
+			environment.getWorld().isEntityNetworkAuthority(entityRef)) {
 			environment.getInterface<INetworkLockSystemInterface>().lockUpdate(entityId, true);
 			return ScriptNodeExecutionState::Done;
 		}
