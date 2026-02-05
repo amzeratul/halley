@@ -14,12 +14,12 @@ public:
 		updateReplicators();
 	}
 
-	void onMessageReceived(const PlayAnimationMessage& msg, MainFamily& e)
+	void onMessageReceived(const PlayAnimationMessage& msg, MainFamily& e) override
 	{
 		e.spriteAnimation.player.setSequence(msg.sequence);
 	}
 
-	void onMessageReceived(const PlayAnimationOnceMessage& msg, MainFamily& e)
+	void onMessageReceived(const PlayAnimationOnceMessage& msg, MainFamily& e) override
 	{
 		e.spriteAnimation.player.playOnce(msg.sequence);
 	}
