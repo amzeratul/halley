@@ -243,9 +243,9 @@ IScriptNodeType::Result ScriptSpriteAlpha::doUpdate(ScriptEnvironment& environme
 
 	if (!e.isValid()) {
 		Logger::logError("Can't set sprite alpha for entityId " + toString(entityId) + " - entity not found");
-	} else if (auto* colour = e.tryGetComponent<ColourComponent>(entityId)) {
+	} else if (auto* colour = e.tryGetComponent<ColourComponent>(true)) {
 		colour->colour.a = value;
-	} else if (auto* sprite = e.tryGetComponent<SpriteComponent>(entityId)) {
+	} else if (auto* sprite = e.tryGetComponent<SpriteComponent>(true)) {
 		sprite->sprite.getColour().a = value;
 	} else {
 		Logger::logError("Can't set sprite alpha for entity \"" + e.getName() + "\" - no Colour or Sprite component");
