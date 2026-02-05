@@ -373,6 +373,11 @@ Vector4f Matrix4f::getColumn(size_t column) const
 	return columns[column];
 }
 
+String Matrix4f::toString() const
+{
+	return String("[") + getRow(0) + "\n " + getRow(1) + "\n " + getRow(2) + "\n" + getRow(3) + "]";
+}
+
 Matrix4f Matrix4f::makeZero()
 {
 	Matrix4f result;

@@ -177,8 +177,8 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 	, scene(scene)
 	, parent(parent)
 	, update(update)
-	, fallbackVariant(std::move(fallbackVariant))
 	, preloadAssets(preloadAssets)
+	, fallbackVariant(std::move(fallbackVariant))
 {
 	prefab = std::move(_prefab);
 	entitySerializationContext.resources = &resources;

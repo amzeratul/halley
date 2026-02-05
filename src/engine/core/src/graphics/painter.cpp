@@ -885,13 +885,17 @@ void Painter::updateProjection()
 {
 	ProfilerEvent event(ProfilerEventType::PainterUpdateProjection, "", reinterpret_cast<uint64_t>(this));
 	
-	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
+	const bool flip = activeRenderTarget->getProjectionFlipVertical();
+	camera.updateProjection(flip);
 	projection = camera.getProjection();
+
+	const auto clipSpaceScale = Vector2f(1.0f, flip ? 1.0f : -1.0f);
 
 	auto viewPortSize = (Vector2f(camera.getActiveViewPort().getSize()) / Vector2f(2, 2)).ceil() * Vector2f(2, 2);
 
 	const auto oldHash = halleyGlobalMaterial->getFullHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
+	halleyGlobalMaterial->set("u_clipSpaceScale", clipSpaceScale);
 	halleyGlobalMaterial->set("u_viewPortSize", viewPortSize);
 	onUpdateProjection(*halleyGlobalMaterial, oldHash != halleyGlobalMaterial->getFullHash());
 }

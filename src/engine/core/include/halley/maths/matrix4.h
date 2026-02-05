@@ -92,6 +92,8 @@ namespace Halley {
 		Vector4f getRow(size_t row) const;
 		Vector4f getColumn(size_t column) const;
 
+		String toString() const;
+
 	private:
 		std::array<Vector4f, 4> columns;
 	};

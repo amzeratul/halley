@@ -19,9 +19,7 @@ float2 getWorldPosition(float2 position, float2 pivot, float2 size, float2 vertP
     return position + mul(m, ((vertPos - pivot) * size));
 }
 
-void basicVertex(VIn input, out VOut output, bool premultiply) {
-    const float2 worldPos = getWorldPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
-
+void basicVertexAt(VIn input, out VOut output, bool premultiply, float2 worldPos) {
     output.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
     output.texCoord1 = getTexCoord(input.texCoord1, input.vertPos.zw, input.textureRotation);
     output.pixelTexCoord0 = output.texCoord0 * input.size;
@@ -40,4 +38,9 @@ void basicVertex(VIn input, out VOut output, bool premultiply) {
     output.size = input.size.xy;
     output.texCoord0Bounds = input.texCoord0;
     output.texCoord1Bounds = input.texCoord1;
+}
+
+void basicVertex(VIn input, out VOut output, bool premultiply) {
+    const float2 worldPos = getWorldPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
+    basicVertexAt(input, output, premultiply, worldPos);
 }
