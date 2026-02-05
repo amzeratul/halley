@@ -369,6 +369,8 @@ void World::doDestroyEntity(EntityId id)
 		}
 
 		doDestroyEntity(e);
+	} else if (id.isValid()) {
+		Logger::logWarning("Attempting to destroy entityId which doesn't match any entities. Has it already been destroyed?");
 	}
 }
 

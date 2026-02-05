@@ -243,6 +243,8 @@ IScriptNodeType::Result ScriptSpriteAlpha::doUpdate(ScriptEnvironment& environme
 		colour->colour.a = value;
 	} else if (auto* sprite = environment.tryGetComponent<SpriteComponent>(entityId)) {
 		sprite->sprite.getColour().a = value;
+	} else {
+		Logger::logError("Can't set sprite alpha for entityId " + toString(entityId) + " - it either doesn't exist or doesn't have a Colour or Sprite component");
 	}
 	return Result(ScriptNodeExecutionState::Done);
 }
