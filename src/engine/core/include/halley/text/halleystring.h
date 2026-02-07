@@ -56,6 +56,7 @@ namespace Halley {
 
 		explicit String(const wchar_t* utf16);
 		explicit String(std::wstring_view utf16);
+		explicit String(std::u32string_view utf32);
 		explicit String(const StringUTF32 &utf32);
 		explicit String(char character);
 		explicit String(wchar_t character);
@@ -151,9 +152,9 @@ namespace Halley {
 		[[nodiscard]] static size_t getUTF32Len(std::string_view str);
 
 		// Static unicode routines
-		[[nodiscard]] static size_t getUTF8Len(const wchar_t *utf16);
+		[[nodiscard]] static size_t getUTF8Len(std::u16string_view utf16);
 		[[nodiscard]] static size_t getUTF8Len(std::wstring_view utf16);
-		[[nodiscard]] static size_t getUTF8Len(const StringUTF32 &utf32);
+		[[nodiscard]] static size_t getUTF8Len(std::u32string_view utf32);
 		[[nodiscard]] static size_t getUTF16Len(const StringUTF32 &utf32);
 
 		[[nodiscard]] inline std::string& cppStr() { return str; }
@@ -214,9 +215,9 @@ namespace Halley {
 
 	private:
 		Character* getCharPointer(size_t pos);
-		static size_t UTF8toUTF16(const char *utf8, wchar_t *utf16);
-		static size_t UTF16toUTF8(const wchar_t *utf16, char *utf8);
-		static size_t UTF32toUTF8(const utf32type *utf32, char *utf8);
+		static size_t UTF8toUTF16(std::string_view, wchar_t *utf16);
+		static size_t UTF16toUTF8(std::wstring_view, char *utf8);
+		static size_t UTF32toUTF8(std::u32string_view utf32, char *utf8);
 
 		std::string str;
 	};

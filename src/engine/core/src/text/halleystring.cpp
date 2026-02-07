@@ -96,7 +96,16 @@ String::String(std::wstring_view utf16)
 	size_t len = getUTF8Len(utf16);
 	str.resize(len);
 	if (len > 0) {
-		UTF16toUTF8(utf16.data(), getCharPointer(0));
+		UTF16toUTF8(utf16, getCharPointer(0));
+	}
+}
+
+String::String(std::u32string_view utf32)
+{
+	size_t len = getUTF8Len(utf32);
+	str.resize(len);
+	if (len > 0) {
+		UTF32toUTF8(utf32, getCharPointer(0));
 	}
 }
 
@@ -105,7 +114,7 @@ String::String(const StringUTF32& utf32)
 	size_t len = getUTF8Len(utf32);
 	str.resize(len);
 	if (len > 0) {
-		UTF32toUTF8(utf32.data() ,getCharPointer(0));
+		UTF32toUTF8(utf32, getCharPointer(0));
 	}
 }
 
@@ -654,7 +663,7 @@ String String::prettyFloat(String src)
 
 ///////////////////////////////////////////////
 // Get the UTF-8 length out of a UTF-16 string
-size_t String::getUTF8Len(const wchar_t *utf16)
+size_t String::getUTF8Len(std::u16string_view utf16)
 {
 	size_t len = 0;
 	wchar_t curChar = utf16[0];
@@ -697,19 +706,25 @@ size_t String::getUTF8Len(std::wstring_view utf16)
 
 ///////////////////////////////////////////////
 // Get the UTF-8 length out of a UTF-32 string
-size_t String::getUTF8Len(const StringUTF32& str)
+size_t String::getUTF8Len(std::u32string_view str)
 {
-	if (str.empty()) {
-		return 0;
-	}
-
-	const utf32type *utf32 = &str[0];
+	const size_t srcLen = str.length();
 	size_t len = 0;
-	for (int curChar; (curChar = *utf32) != 0; utf32++) {
-		if (curChar <= 0x7F) len += 1;
-		else if (curChar <= 0x7FF) len += 2;
-		else if (curChar <= 0xFFFF) len += 3;
-		else if (curChar <= 0x10FFFF) len += 4;
+	for (size_t i = 0; i < srcLen; ++i) {
+		const auto curChar = str[i];
+		if (curChar == 0) {
+			break;
+		}
+
+		if (curChar <= 0x7F) {
+			len += 1;
+		} else if (curChar <= 0x7FF) {
+			len += 2;
+		} else if (curChar <= 0xFFFF) {
+			len += 3;
+		} else if (curChar <= 0x10FFFF) {
+			len += 4;
+		}
 	}
 
 	return len;
@@ -718,12 +733,14 @@ size_t String::getUTF8Len(const StringUTF32& str)
 
 ///////////////////////////
 // Convert UTF-16 to UTF-8
-size_t String::UTF16toUTF8(const wchar_t *utf16, char *utf8)
+size_t String::UTF16toUTF8(std::wstring_view utf16, char *utf8)
 {
 	wchar_t curChar = utf16[0];
 	size_t value;
 	size_t written = 0;
-	for (size_t i=0;;i++) {
+
+	const size_t len = utf16.length();
+	for (size_t i = 0; i < len; ++i) {
 		// 1 byte
 		if ((curChar & 0xFF80) == 0) {
 			utf8[written] = char(curChar);
@@ -770,10 +787,17 @@ size_t String::UTF16toUTF8(const wchar_t *utf16, char *utf8)
 
 ///////////////////////////
 // Convert UTF-32 to UTF-8
-size_t String::UTF32toUTF8(const utf32type *utf32,char *utf8)
+size_t String::UTF32toUTF8(std::u32string_view utf32, char *utf8)
 {
 	size_t written = 0;
-	for (int curChar; (curChar = *utf32) != 0; utf32++) {
+	const size_t len = utf32.length();
+
+	for (size_t i = 0; i < len; ++i) {
+		const auto curChar = utf32[i];
+		if (curChar == 0) {
+			break;
+		}
+
 		// 1 byte
 		if (curChar <= 0x7F) {
 			utf8[written] = char(curChar);
@@ -808,7 +832,7 @@ size_t String::UTF32toUTF8(const utf32type *utf32,char *utf8)
 	return written;
 }
 
-size_t String::UTF8toUTF16(const char *utf8, wchar_t *utf16)
+size_t String::UTF8toUTF16(std::string_view utf8, wchar_t *utf16)
 {
 	StringUTF32 str = String(utf8).getUTF32();
 	size_t written = 0;
