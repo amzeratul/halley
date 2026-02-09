@@ -687,7 +687,8 @@ size_t String::getUTF8Len(std::wstring_view utf16)
 {
 	size_t len = 0;
 	wchar_t curChar = utf16[0];
-	for (size_t i = 0; curChar && i < utf16.length(); curChar = utf16[++i]) {
+	for (size_t i = 0; curChar && i < utf16.length(); ++i) {
+		curChar = utf16[i];
 		if ((curChar & 0xFF80) == 0) {
 			len++;
 		} else if ((curChar & 0xFC00) == 0xD800) {
@@ -780,7 +781,9 @@ size_t String::UTF16toUTF8(std::wstring_view utf16, char *utf8)
 		}
 
 		// Get next
-		curChar = utf16[i+1];
+		if (i < len - 1) {
+			curChar = utf16[i+1];
+		}
 	}
 	return written;
 }
