@@ -93,6 +93,7 @@ namespace Halley
 		DevConServerConnection* tryGetConnection(size_t connId);
 
 		void setProject(IProject* project);
+		std::optional<String> getDeviceNameAt(const String& string) const;
 
 	protected:
 		void onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg);

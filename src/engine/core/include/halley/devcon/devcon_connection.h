@@ -38,10 +38,9 @@ namespace Halley {
 		virtual void onReceiveMessage(DevCon::RPCReplyMsg& msg);
 
 		std::shared_ptr<MessageQueue> queue;
-
-    private:
         std::shared_ptr<IConnection> connection;
 
+	private:
         HashMap<String, RPCHandle> rpcHandles;
 		uint64_t rpcId = 0;
 		HashMap<uint64_t, Promise<ConfigNode>> pendingRPC;

@@ -85,6 +85,11 @@ void DevConServerConnection::onReceiveMessage(DevCon::SetClientDataMsg& msg)
 	info.platform = msg.platform;
 	info.deviceName = msg.deviceName;
 	info.params = msg.params;
+
+	if (auto overrideName = parent.getDeviceNameAt(connection->getRemoteAddress())) {
+		info.deviceName = *overrideName;
+	}
+
 	clientInfo = std::move(info);
 }
 
@@ -176,6 +181,16 @@ DevConServerConnection* DevConServer::tryGetConnection(size_t connId)
 void DevConServer::setProject(IProject* project)
 {
 	this->project = project;
+}
+
+std::optional<String> DevConServer::getDeviceNameAt(const String& ipAddress) const
+{
+	if (project) {
+		if (auto name = project->getDeviceNameAt(ipAddress)) {
+			return name;
+		}
+	}
+	return std::nullopt;
 }
 
 void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg)

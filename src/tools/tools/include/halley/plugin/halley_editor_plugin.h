@@ -19,5 +19,6 @@ namespace Halley {
         virtual std::unique_ptr<Task> deployGame(GamePlatform platform, OS& os, const IProject& project) { return {}; }
         virtual std::unique_ptr<Task> buildGame(GamePlatform platform, OS& os, const IProject& project) { return {}; }
         virtual bool canDeployGame(GamePlatform platform) const { return false; }
+        virtual std::optional<String> getDeviceNameConnectingFrom(const String& ip) const { return std::nullopt; }
     };
 }

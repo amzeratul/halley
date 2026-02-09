@@ -194,6 +194,8 @@ namespace Halley
 
 		Vector<Path> enumerateDirectory(const Path& path) override;
 
+		std::optional<String> getDeviceNameAt(const String& ipAddress) override;
+
 		void onDLLLoaded();
 		void onDLLUnload();
 

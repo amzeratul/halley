@@ -473,6 +473,8 @@ namespace Halley {
 		virtual ImportAssetType getImportAssetType(const Path& filePath) = 0;
         virtual Vector<Path> enumerateDirectory(const Path& path) = 0;
 
+		virtual std::optional<String> getDeviceNameAt(const String& ipAddress) = 0;
+
 		template <typename T>
 		T* getGameEditorDataAs() const
 		{

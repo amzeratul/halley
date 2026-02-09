@@ -820,6 +820,16 @@ Vector<Path> Project::enumerateDirectory(const Path& path)
 	return FileSystem::enumerateDirectory(path);
 }
 
+std::optional<String> Project::getDeviceNameAt(const String& ipAddress)
+{
+	for (auto& plugin: editorPlugins) {
+		if (auto name = plugin->getDeviceNameConnectingFrom(ipAddress)) {
+			return name;
+		}
+	}
+	return std::nullopt;
+}
+
 void Project::onDLLLoaded()
 {
 	loadGameEditorData();
