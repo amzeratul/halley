@@ -668,6 +668,10 @@ size_t String::getUTF8Len(std::u16string_view utf16)
 	size_t len = 0;
 	wchar_t curChar = utf16[0];
 	for (size_t i = 0; curChar; curChar = utf16[++i]) {
+		if (curChar == 0) {
+			break;
+		}
+
 		if ((curChar & 0xFF80) == 0) {
 			len++;
 		} else if ((curChar & 0xFC00) == 0xD800) {
@@ -736,12 +740,16 @@ size_t String::getUTF8Len(std::u32string_view str)
 // Convert UTF-16 to UTF-8
 size_t String::UTF16toUTF8(std::wstring_view utf16, char *utf8)
 {
-	wchar_t curChar = utf16[0];
 	size_t value;
 	size_t written = 0;
 
 	const size_t len = utf16.length();
 	for (size_t i = 0; i < len; ++i) {
+		wchar_t curChar = utf16[i];
+		if (curChar == 0) {
+			break;
+		}
+
 		// 1 byte
 		if ((curChar & 0xFF80) == 0) {
 			utf8[written] = char(curChar);
@@ -778,11 +786,6 @@ size_t String::UTF16toUTF8(std::wstring_view utf16, char *utf8)
 			utf8[written+1] = char(((curChar & 0x0FC0) >> 6)  | 0x80);
 			utf8[written+2] = char((curChar & 0x003F)         | 0x80);
 			written += 3;
-		}
-
-		// Get next
-		if (i < len - 1) {
-			curChar = utf16[i+1];
 		}
 	}
 	return written;
