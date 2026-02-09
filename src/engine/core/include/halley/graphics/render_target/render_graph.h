@@ -104,6 +104,7 @@ namespace Halley {
 
 		String remapOutputNode;
 		Vector<std::pair<uint8_t, Vector<std::pair<String, uint8_t>>>> defaultOutputMapping;
+		std::optional<Vector2i> lastRenderSize;
 
 		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
 		int lastDefinitionVersion = 0;

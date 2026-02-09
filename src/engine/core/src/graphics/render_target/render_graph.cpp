@@ -101,13 +101,18 @@ RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional<Vector2i> requestedRenderSize)
 {
+	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
+	if (lastRenderSize != renderSize) {
+		lastRenderSize = renderSize;
+		unloadTextures();
+	}
+
 	update();
 
 	for (auto& node: nodes) {
 		node->startRender();
 	}
 
-	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
 	for (auto& node: nodes) {
 		if (node->enabled
 			&& (node->method == RenderGraphMethod::Output
