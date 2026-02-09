@@ -41,6 +41,7 @@ void RemoteConnectionWindow::onMakeUI()
 
 	console = std::make_shared<UIDebugConsole>("remoteConsole", factory, *this);
 	console->setUserTextColour(colourScheme->getColour("ui_consoleUserText"), colourScheme->getColour("ui_consoleResponse"));
+	console->setAutoHide(false);
 
 	auto inspector = std::make_shared<RemoteInspectorWindow>(factory, connection, projectWindow.getAPI());
 	auto profiler = std::make_shared<RemoteProfilerWindow>(factory, connection, projectWindow.getAPI());

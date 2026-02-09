@@ -515,7 +515,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 		}
 		inputField->setEnabled(true);
 		getRoot()->setFocus(inputField);
-		if (result.isCloseConsole()) {
+		if (result.isCloseConsole() && autoHide) {
 			hide();
 		}
 	});
@@ -538,6 +538,16 @@ void UIDebugConsole::setUserTextColour(Colour4f userInputColour, Colour4f respon
 {
 	this->userInputColour = userInputColour;
 	this->responseColour = responseColour;
+}
+
+bool UIDebugConsole::canAutoHide() const
+{
+	return autoHide;
+}
+
+void UIDebugConsole::setAutoHide(bool enabled)
+{
+	autoHide = enabled;
 }
 
 void UIDebugConsole::setForcePaintMask(int mask)

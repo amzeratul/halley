@@ -142,6 +142,9 @@ namespace Halley {
 		void addLine(const String& line, Colour colour);
 		void setUserTextColour(Colour4f userInputColour, Colour4f responseColour);
 
+		bool canAutoHide() const;
+		void setAutoHide(bool enabled);
+
     	void setForcePaintMask(int mask);
 
 		void onAddedToRoot(UIRoot& root) override;
@@ -159,6 +162,7 @@ namespace Halley {
 		Future<String> pendingCommand;
 		std::shared_ptr<UITextInput> inputField;
     	std::optional<int> forceMask;
+		bool autoHide = true;
 
 		Colour4f userInputColour;
 		Colour4f responseColour;
