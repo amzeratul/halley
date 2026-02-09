@@ -101,19 +101,24 @@ void RemoteConnectionWindow::makeCommands()
 		ConfigNode params;
 		params["name"] = args[0];
 		connection->sendRPC("pullSave", std::move(params)).then([this, file = args[0]] (ConfigNode result) {
-			saveRemoteSave(file, result.asBytes());
+			auto bytes = result.asBytes();
+			if (!bytes.empty()) {
+				saveRemoteSave(file, std::move(bytes));
+			}
 		});
 		return "";
-	});
+	}, { { { "saveName", "Halley::String" } } });
 	consoleCommands->addCommand("pushSave", [=] (Vector<String> args) -> String {
 		loadRemoteSave(args[0]).then([this, file = args[0]] (Bytes bytes) {
-			ConfigNode params;
-			params["name"] = file;
-			params["data"] = std::move(bytes);
-			connection->sendRPC("pushSave", std::move(params));
+			if (!bytes.empty()) {
+				ConfigNode params;
+				params["name"] = file;
+				params["data"] = std::move(bytes);
+				connection->sendRPC("pushSave", std::move(params));
+			}
 		});
 		return "";
-	});
+	}, { { { "saveName", "Halley::String" } } });
 }
 
 void RemoteConnectionWindow::saveRemoteSave(String name, Bytes data) const

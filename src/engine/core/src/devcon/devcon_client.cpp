@@ -112,7 +112,7 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 
 	setRPCHandle("pushSave", [=] (ConfigNode params) -> Future<ConfigNode> {
 		const auto name = params["name"].asString();
-		const auto data = params["name"].asBytes();
+		const auto data = params["data"].asBytes();
 
 		Logger::logInfo("Pushing save file \"" + name + "\": " + String::prettySize(data.size()));
 		api.system->getStorageContainer(SaveDataType::SaveRoaming)->setData(name, data, true);
