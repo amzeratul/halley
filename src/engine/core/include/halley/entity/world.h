@@ -75,8 +75,8 @@ namespace Halley {
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
 
-			const auto serviceName = typeid(T).name();
-			const auto rawService = doTryGetService(serviceName);
+			const auto* serviceName = typeid(T).name();
+			auto* rawService = doTryGetService(serviceName);
 			if (!rawService) {
 				if constexpr (std::is_default_constructible_v<T>) {
 					return dynamic_cast<T*>(&addService(std::make_shared<T>()));
@@ -258,7 +258,7 @@ namespace Halley {
 
 		//TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
 		Vector<std::unique_ptr<Family>> families;
-		TreeMap<String, std::shared_ptr<Service>> services;
+		HashMap<String, std::shared_ptr<Service>> services;
 
 		TreeMap<FamilyMaskType, Vector<Family*>> familyCache;
 
@@ -300,7 +300,7 @@ namespace Halley {
 		NOINLINE Family& addFamily(std::unique_ptr<Family> family) noexcept;
 		void onAddFamily(Family& family) noexcept;
 
-		Service* doTryGetService(const String& name) const;
+		Service* doTryGetService(std::string_view name) const;
 
 		const Vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 

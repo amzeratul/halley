@@ -206,7 +206,7 @@ Service& World::addService(std::shared_ptr<Service> service)
 	return ref;
 }
 
-Service* World::doTryGetService(const String& name) const
+Service* World::doTryGetService(std::string_view name) const
 {
 	const auto iter = services.find(name);
 	if (iter == services.end()) {
