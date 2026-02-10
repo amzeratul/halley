@@ -8,7 +8,7 @@ namespace Halley {
 
 	class UIFadeBehaviour final : public UIBehaviour {
 	public:
-		UIFadeBehaviour(Time delay, Time length, InterpolationCurve curve);
+		UIFadeBehaviour(Time delay, Time length, InterpolationCurve curve, bool reversed=false);
 
 		void init() override;
 		void update(Time time) override;

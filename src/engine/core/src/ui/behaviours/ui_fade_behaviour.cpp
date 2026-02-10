@@ -2,11 +2,12 @@
 #include "halley/ui/ui_widget.h"
 using namespace Halley;
 
-UIFadeBehaviour::UIFadeBehaviour(Time delay, Time length, InterpolationCurve curve)
+UIFadeBehaviour::UIFadeBehaviour(Time delay, Time length, InterpolationCurve curve, bool reversed)
 	: delay(delay)
 	, length(length)
 	, curve(std::move(curve))
 {
+	setReversed(reversed);
 }
 
 void UIFadeBehaviour::init()
@@ -17,9 +18,11 @@ void UIFadeBehaviour::init()
 void UIFadeBehaviour::update(Time time)
 {
 	curTime += time;
-	const auto alpha = static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0));
-	const auto t = curve.evaluate(isReversed() ? 1.0f - alpha : alpha);
-	getWidget()->setDynamicValue("alpha", ConfigNode(t));
+	if (curTime > delay) {
+		const auto alpha = static_cast<float>(clamp((curTime - delay) / std::max(length, 0.01), 0.0, 1.0));
+		const auto t = curve.evaluate(isReversed() ? 1.0f - alpha : alpha);
+		getWidget()->setDynamicValue("alpha", ConfigNode(t));
+	}
 }
 
 bool UIFadeBehaviour::isAlive() const

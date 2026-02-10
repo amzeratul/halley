@@ -1897,6 +1897,7 @@ UIFactoryWidgetProperties UIFactory::getFadeBehaviourProperties() const
 
 	result.entries.emplace_back("Delay", "delayIn", "Halley::Time", "0");
 	result.entries.emplace_back("Length", "lengthIn", "Halley::Time", "0");
+	result.entries.emplace_back("Reversed", "reversed", "bool", "false");
 	result.entries.emplace_back("Curve", "curveIn", "Halley::InterpolationCurveLerp", "");
 
 	return result;
@@ -1913,8 +1914,9 @@ std::shared_ptr<UIBehaviour> UIFactory::makeFadeBehaviour(const ConfigNode& node
 {
 	auto delay = node["delayIn"].asFloat(0);
 	auto length = node["lengthIn"].asFloat(0);
+	auto reversed = node["reversed"].asBool(false);
 	auto curve = InterpolationCurve(node["curveIn"]);
-	return std::make_shared<UIFadeBehaviour>(delay, length, curve);
+	return std::make_shared<UIFadeBehaviour>(delay, length, curve, reversed);
 }
 
 std::shared_ptr<UIBehaviour> UIFactory::makeFullscreenBehaviour(const ConfigNode& node)
