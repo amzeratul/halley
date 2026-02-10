@@ -172,6 +172,7 @@ system:
   families:
   - scriptable:
     - Scriptable: write
+    - Transform2D: optional read
   - embeddedScript:
     - Scriptable: write
     - EmbeddedScript: write

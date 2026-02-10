@@ -267,6 +267,11 @@ bool ScriptGraph::isNetworkRequired() const
 	return needsNetwork;
 }
 
+bool ScriptGraph::needsTransform() const
+{
+	return properties["needsTransform"].asBool(false);
+}
+
 ConfigNode ScriptGraph::toConfigNode() const
 {
 	ConfigNode::MapType result;

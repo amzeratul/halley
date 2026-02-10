@@ -87,6 +87,7 @@ namespace Halley {
 		bool isSupressDuplicateWarning() const;
 		bool isNetwork() const;
 		bool isNetworkRequired() const;
+		bool needsTransform() const;
 
 		ConfigNode& getProperties();
 		const ConfigNode& getProperties() const;

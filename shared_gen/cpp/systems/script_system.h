@@ -7,6 +7,7 @@
 #include "halley/entity/services/dev_service.h"
 
 #include "components/scriptable_component.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "components/embedded_script_component.h"
 #include "components/script_target_component.h"
 #include "messages/start_script_message.h"
@@ -26,16 +27,19 @@ public:
 	class ScriptableFamily : public Halley::FamilyBaseOf<ScriptableFamily> {
 	public:
 		ScriptableComponent& scriptable;
+		const Halley::MaybeRef<Transform2DComponent> transform2D{};
 	
-		using Type = Halley::FamilyType<ScriptableComponent>;
+		using Type = Halley::FamilyType<ScriptableComponent, Halley::MaybeRef<Transform2DComponent>>;
 	
 		void prefetch() const {
 			prefetchL2(&scriptable);
+			prefetchL2(transform2D.tryGet());
 		}
 	
 	protected:
-		ScriptableFamily(ScriptableComponent& scriptable)
+		ScriptableFamily(ScriptableComponent& scriptable, const Halley::MaybeRef<Transform2DComponent> transform2D)
 			: scriptable(scriptable)
+			, transform2D(transform2D)
 		{
 		}
 	};

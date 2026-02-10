@@ -312,27 +312,36 @@ private:
 
 	void updateScripts(Time t)
 	{
+		struct Entry {
+			EntityId entityId;
+			ScriptableComponent* scriptable;
+			bool hasTransform;
+		};
+
 		// Make a copy since script updates can result in World entity refresh, which invalidates iterators
-		auto scriptables = VectorTemp<std::pair<EntityId, ScriptableComponent*>>(getWorld().getUpdateMemoryPool());
+		auto scriptables = VectorTemp<Entry>(getWorld().getUpdateMemoryPool());
 		scriptables.reserve(scriptableFamily.size());
 		for (auto& e : scriptableFamily) {
-			scriptables.emplace_back(e.entityId, &e.scriptable);
+			scriptables.emplace_back(Entry{ e.entityId, &e.scriptable, e.transform2D.hasValue() });
 		}
 
 		auto& env = getScriptingService().getEnvironment();
 		for (auto& e: scriptables) {
-			const auto entityId = e.first;
+			const auto entityId = e.entityId;
 			if (!getWorld().tryGetEntity(entityId).isValid()) {
 				// Entity no longer valid, can't access ScriptableComponent
 				continue;
 			}
-			auto& scriptable = *e.second;
+			auto& scriptable = *e.scriptable;
+			bool hasTransform = e.hasTransform;
 
 			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
 
 			for (auto& state: scriptable.activeStates) {
 				if (!state->getFrameFlag()) {
-					env.update(t, *state, entityId, scriptable.variables);
+					if (hasTransform || !state->getScriptGraphPtr()->needsTransform()) {
+						env.update(t, *state, entityId, scriptable.variables);
+					}
 					state->setFrameFlag(true);
 				}
 
