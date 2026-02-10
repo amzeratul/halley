@@ -4,9 +4,13 @@
 #include <cstddef>
 #include <memory>
 
+#include <gsl/byte>
+#include <gsl/span>
+
 namespace Halley {
 	class TempMemoryPool {
 	public:
+		TempMemoryPool(gsl::span<std::byte> bytes);
 		TempMemoryPool(size_t capacity, bool allowPaging = true);
 		~TempMemoryPool();
 
@@ -23,6 +27,7 @@ namespace Halley {
 		char* data = nullptr;
 
 		bool allowPaging = false;
+		bool ownsData = true;
 		std::unique_ptr<TempMemoryPool> nextPage;
 
 		void allocBuffer();

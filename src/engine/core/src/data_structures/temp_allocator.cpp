@@ -6,6 +6,15 @@
 
 using namespace Halley;
 
+TempMemoryPool::TempMemoryPool(gsl::span<std::byte> bytes)
+	: capacity(bytes.size_bytes())
+	, pos(0)
+	, data(reinterpret_cast<char*>(bytes.data()))
+	, allowPaging(false)
+	, ownsData(false)
+{
+}
+
 TempMemoryPool::TempMemoryPool(size_t capacity, bool allowPaging)
 	: capacity(capacity)
 	, allowPaging(allowPaging)
@@ -49,6 +58,9 @@ void TempMemoryPool::deallocate(void* ptr, size_t n)
 	if (ptr >= data && ptr < data + capacity) {
 		if (allocated >= n) {
 			allocated -= n;
+			if (allocated == 0) {
+				reset();
+			}
 		} else {
 			Logger::logError("TempMemoryPool received invalid deallocate request.");
 		}
@@ -92,6 +104,8 @@ void TempMemoryPool::allocBuffer()
 
 void TempMemoryPool::freeBuffer()
 {
-	delete[] data;
+	if (ownsData) {
+		delete[] data;
+	}
 	data = nullptr;
 }
