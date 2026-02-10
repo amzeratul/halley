@@ -64,6 +64,8 @@ namespace Halley
 
 		void setI18N(I18N* i18n);
 
+		uint32_t getPushSaveFileVersion() const;
+
 	protected:
 		void onReceiveMessage(const DevCon::ReloadAssetsMsg& msg) override;
 		void onReceiveMessage(DevCon::RegisterInterestMsg& msg) override;
@@ -86,6 +88,8 @@ namespace Halley
 
 		I18N* i18n = nullptr;
 		Vector<DevCon::UpdateStringsMsg> pendingUpdateStringMessages;
+
+		std::atomic<uint32_t> pushSaveFileVersion;
 
 		void log(LoggerLevel level, const std::string_view msg) override;
 		void applyUpdateStrings(DevCon::UpdateStringsMsg& msg);

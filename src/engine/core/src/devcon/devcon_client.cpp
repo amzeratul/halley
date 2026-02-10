@@ -116,6 +116,7 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 
 		Logger::logInfo("Pushing save file \"" + name + "\": " + String::prettySize(data.size()));
 		api.system->getStorageContainer(SaveDataType::SaveRoaming)->setData(name, data, true);
+		++pushSaveFileVersion;
 
 		return Future<ConfigNode>::makeImmediate(ConfigNode(true));
 	});
@@ -206,6 +207,11 @@ void DevConClient::setI18N(I18N* newI18n)
 			pendingUpdateStringMessages.erase(pendingUpdateStringMessages.begin());
 		}
 	}
+}
+
+uint32_t DevConClient::getPushSaveFileVersion() const
+{
+	return pushSaveFileVersion.load();
 }
 
 void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
