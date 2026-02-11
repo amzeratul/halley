@@ -28,6 +28,7 @@ namespace Halley {
 			constexpr bool operator<(const Handle& h) const { return value < h.value; }
 
 			const RealType& getRealValue(MaskStorage& storage) const;
+			int getRawValue() const { return value; }
 			
 			Handle intersection(const Handle& h, MaskStorage& storage) const;
 			bool contains(const Handle& handle, MaskStorage& storage) const;
@@ -195,4 +196,15 @@ namespace Halley {
 	}
 
 	using FamilyMaskType = FamilyMask::HandleType;
+}
+
+namespace std {
+	//template <class T> struct hash;
+	template<> struct hash<Halley::FamilyMask::Handle>
+	{
+		std::size_t operator()(const Halley::FamilyMask::Handle& h) const noexcept
+		{
+			return std::hash<int>()(h.getRawValue());
+		}
+	};
 }

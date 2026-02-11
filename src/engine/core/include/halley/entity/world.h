@@ -258,7 +258,7 @@ namespace Halley {
 
 		Vector<std::unique_ptr<Family>> families;
 
-		TreeMap<FamilyMaskType, Vector<Family*>> familyCache;
+		HashMap<FamilyMaskType, Vector<Family*>> familyCache;
 
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
