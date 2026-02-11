@@ -721,6 +721,8 @@ void Painter::refreshConstantBufferCache()
 
 void Painter::startDrawCall(const std::shared_ptr<const Material>& material)
 {
+	material->markInActiveUse();
+
 	constexpr bool enableDynamicBatching = true;
 
 	if (material != materialPending || pendingDebugGroupStack != curDebugGroupStack) {
