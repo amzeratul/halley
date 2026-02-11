@@ -367,15 +367,18 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 	}
 
 	if (entityRef.isValid()) {
-		const auto type = ScriptComponentFieldType(node.getSettings()["field"]);
-		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(type.component);
+		std::string_view component;
+		std::string_view field;
+		ScriptComponentFieldType::parse(node.getSettings()["field"], component, field);
+
+		const auto& reflector = environment.getWorld().getReflection().getComponentReflector(component);
 		EntitySerializationContext context;
 		context.entityContext = &environment;
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
 		if (reflector.tryGetComponent(entityRef) != nullptr) {
-			return reflector.serializeField(context, entityRef, type.field);
+			return reflector.serializeField(context, entityRef, field);
 		} else {
 			return {};
 		}

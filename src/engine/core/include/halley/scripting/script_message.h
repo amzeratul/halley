@@ -67,6 +67,8 @@ namespace Halley {
         ConfigNode toConfig() const;
 
 		String getName() const;
+
+        static void parse(const ConfigNode& node, std::string_view& componentOut, std::string_view& fieldOut);
 	};
 	
 }

@@ -198,21 +198,12 @@ System& World::getSystem(const String& name)
 Service& World::addService(std::shared_ptr<Service> service)
 {
 	auto& ref = *service;
-	if (services.find(service->getName()) != services.end()) {
+	if (services.find(typeid(ref)) != services.end()) {
 		throw Exception("Service already registered: " + service->getName(), HalleyExceptions::Entity);
 	}
-	services[service->getName()] = std::move(service);
+	services[typeid(ref)] = std::move(service);
 	ref.onAddedToWorld(*this);
 	return ref;
-}
-
-Service* World::doTryGetService(std::string_view name) const
-{
-	const auto iter = services.find(name);
-	if (iter == services.end()) {
-		return nullptr;
-	}
-	return iter->second.get();
 }
 
 EntityRef World::createEntity(String name, std::optional<EntityRef> parent)
@@ -1108,7 +1099,7 @@ void World::generateMemoryReport() const
 	for (const auto& service: services) {
 		const auto usage = service.second->getMemoryUsage();
 		if (usage.getTotal() > 0) {
-			named.emplace_back(service.first, usage);
+			named.emplace_back(service.second->getName(), usage);
 			serviceTotal += usage;
 		}
 	}

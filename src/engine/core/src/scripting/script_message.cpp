@@ -132,6 +132,17 @@ String ScriptComponentFieldType::getName() const
 	return component + ":" + field;
 }
 
+void ScriptComponentFieldType::parse(const ConfigNode& node, std::string_view& componentOut, std::string_view& fieldOut)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		componentOut = node["component"].asStringView({});
+		fieldOut = node["field"].asStringView({});
+	} else {
+		componentOut = {};
+		fieldOut = {};
+	}
+}
+
 ConfigNode ConfigNodeSerializer<ScriptMessage>::serialize(const ScriptMessage& msg, const EntitySerializationContext& context)
 {
 	return msg.toConfig();

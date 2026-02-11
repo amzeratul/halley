@@ -71,26 +71,26 @@ namespace Halley {
 		void loadSystems(const ConfigNode& config, const std::optional<String>& systemTag = {}, bool devMode = false);
 		
 		template <typename T>
-		T* tryGetService(std::string_view systemName = "")
+		T* tryGetService([[maybe_unused]] std::string_view systemName = "")
 		{
 			static_assert(std::is_base_of<Service, T>::value, "Must extend Service");
 
-			const auto* serviceName = typeid(T).name();
-			auto* rawService = doTryGetService(serviceName);
-			if (!rawService) {
+			const auto iter = services.find(std::type_index(typeid(T)));
+
+			if (iter == services.end()) {
 				if constexpr (std::is_default_constructible_v<T>) {
 					return dynamic_cast<T*>(&addService(std::make_shared<T>()));
 				} else {
 					return nullptr;
 				}
 			}
-			return dynamic_cast<T*>(rawService);
+			return dynamic_cast<T*>(iter->second.get());
 		}
 		
 		template <typename T>
 		T& getService(std::string_view systemName = "")
 		{
-			if (T* service = tryGetService<T>(systemName)) {
+			if (T* service = tryGetService<T>()) {
 				return *service;
 			}
 			const auto serviceName = typeid(T).name();
@@ -256,9 +256,7 @@ namespace Halley {
 		std::shared_ptr<MappedPool<Entity*>> entityMap;
 		HashMap<UUID, Entity*> uuidMap;
 
-		//TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
 		Vector<std::unique_ptr<Family>> families;
-		HashMap<String, std::shared_ptr<Service>> services;
 
 		TreeMap<FamilyMaskType, Vector<Family*>> familyCache;
 
@@ -271,6 +269,7 @@ namespace Halley {
 		IWorldNetworkInterface* networkInterface = nullptr;
 		float transform2DAnisotropy = 1.0f;
 
+		HashMap<std::type_index, std::shared_ptr<Service>> services;
     	HashMap<std::type_index, ISystemInterface*> systemInterfaces;
 
 		std::unique_ptr<TempMemoryPool> updateMemoryPool;
@@ -299,8 +298,6 @@ namespace Halley {
 
 		NOINLINE Family& addFamily(std::unique_ptr<Family> family) noexcept;
 		void onAddFamily(Family& family) noexcept;
-
-		Service* doTryGetService(std::string_view name) const;
 
 		const Vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 

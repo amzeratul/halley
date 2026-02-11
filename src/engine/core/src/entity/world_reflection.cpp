@@ -23,7 +23,7 @@ WorldReflection::WorldReflection(CodegenFunctions& codegenFunctions)
 	makeMap(systemMessageMap, systemMessageReflectors);
 }
 
-CreateComponentFunctionResult WorldReflection::createComponent(const EntityFactoryContext& context, const String& componentName, EntityRef& entity, const ConfigNode& componentData) const
+CreateComponentFunctionResult WorldReflection::createComponent(const EntityFactoryContext& context, std::string_view componentName, EntityRef& entity, const ConfigNode& componentData) const
 {
 	const auto iter = componentMap.find(componentName);
 	if (iter != componentMap.end()) {
@@ -32,13 +32,13 @@ CreateComponentFunctionResult WorldReflection::createComponent(const EntityFacto
 	return {};
 }
 
-std::unique_ptr<System> WorldReflection::createSystem(const String& name) const
+std::unique_ptr<System> WorldReflection::createSystem(std::string_view name) const
 {
 	const auto iter = systemMap.find(name);
 	if (iter != systemMap.end()) {
 		return std::unique_ptr<System>(systemReflectors[iter->second].createSystem());
 	} else {
-		Logger::logError("Unknown system: " + name);
+		Logger::logError("Unknown system: " + String(name));
 		return {};
 	}
 }
@@ -48,13 +48,13 @@ std::unique_ptr<Message> WorldReflection::createMessage(int id) const
 	return messageReflectors.at(id)->createMessage();
 }
 
-std::unique_ptr<Message> WorldReflection::createMessage(const String& name) const
+std::unique_ptr<Message> WorldReflection::createMessage(std::string_view name) const
 {
 	auto iter = messageMap.find(name);
 	if (iter != messageMap.end()) {
 		return createMessage(iter->second);
 	} else {
-		throw Exception("Unknown Message \"" + name + "\"", HalleyExceptions::Entity);
+		throw Exception("Unknown Message \"" + String(name) + "\"", HalleyExceptions::Entity);
 	}
 }
 
@@ -63,13 +63,13 @@ std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(int id) cons
 	return systemMessageReflectors.at(id)->createSystemMessage();
 }
 
-std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(const String& name) const
+std::unique_ptr<SystemMessage> WorldReflection::createSystemMessage(std::string_view name) const
 {
-	auto iter = systemMessageMap.find(name);
+	const auto iter = systemMessageMap.find(name);
 	if (iter != systemMessageMap.end()) {
 		return createSystemMessage(iter->second);
 	} else {
-		throw Exception("Unknown SystemMessage \"" + name + "\"", HalleyExceptions::Entity);
+		throw Exception("Unknown SystemMessage \"" + String(name) + "\"", HalleyExceptions::Entity);
 	}
 }
 
@@ -83,9 +83,14 @@ const ComponentReflector* WorldReflection::tryGetComponentReflector(int id) cons
 	return componentReflectors[id].get();
 }
 
-ComponentReflector& WorldReflection::getComponentReflector(const String& name) const
+ComponentReflector& WorldReflection::getComponentReflector(std::string_view name) const
 {
-	return *componentReflectors[componentMap.at(name)];
+	const auto iter = componentMap.find(name);
+	if (iter != componentMap.end()) {
+		return *componentReflectors[iter->second];
+	} else {
+		throw Exception("Unknown Component \"" + String(name) + "\"", HalleyExceptions::Entity);
+	}
 }
 
 MessageReflector& WorldReflection::getMessageReflector(int id) const
