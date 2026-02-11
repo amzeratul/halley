@@ -513,6 +513,7 @@ void ScriptState::reset()
 	threads.clear();
 	nodeCounters.clear();
 	started = false;
+	terminated = false;
 	graphHash = 0;
 }
 

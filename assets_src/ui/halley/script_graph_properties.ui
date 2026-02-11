@@ -1,25 +1,74 @@
----
-widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow }
-sizer: { type: vertical }
-fill: centre
+uuid: d2e36555-5b13-44cd-9e3b-21f7d8edf7d7
 proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_popupWindow
+  image: $ui_title_capsule
+  innerBorder: [6, 3, 6, 6]
 children:
-- sizer: { type: horizontal }
-  children:
-  - widget: { class: label, id: title, text: "Script Properties" }
-    fill: centre
-    proportion: 1
-- sizer: { type: vertical, gap: 4 }
-  border: [10, 10, 10, 10]
-  children:
-  - widget: { class: checkbox, id: persistent, label: Persist state on entity despawn }
-  - widget: { class: checkbox, id: multiCopy, label: Allow multiple instances per entity }
-  - widget: { class: checkbox, id: supressDuplicateWarning, label: Supress warning when trying to add extra instances }
-  - widget: { class: checkbox, id: network, label: Synchronise over the network }
-- sizer: { type: horizontal, gap: 4 }
-  children:
-  - stretchSpacer: {}
-    proportion: 1
-  - widget: { id: ok, class: button, text: OK, size: [100, 22] }
-  - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
-...
+  - uuid: 5cae2f95-f4f1-4188-8672-8beafbd4ae01
+    sizer:
+      type: horizontal
+    children:
+      - uuid: 174d95e5-e216-4a41-83af-0fb79a32d966
+        proportion: 1
+        widget:
+          class: label
+          id: title
+          text: Script Properties
+        fill: centre
+  - uuid: 2f57202a-8028-42d5-9b19-78a6a5f91d88
+    border: [10, 10, 10, 10]
+    sizer:
+      gap: 4
+      type: vertical
+    children:
+      - uuid: ad454a97-3ad6-4a3f-80ab-65f742c7ea29
+        widget:
+          class: checkbox
+          id: persistent
+          label: Persist state on entity despawn
+      - uuid: ef003d81-f534-4f98-81d0-7798645becc2
+        widget:
+          class: checkbox
+          id: multiCopy
+          label: Allow multiple instances per entity
+      - uuid: 20a2e4bb-65d3-4c7b-bb4b-f9c5294164eb
+        widget:
+          class: checkbox
+          id: supressDuplicateWarning
+          label: Supress warning when trying to add extra instances
+      - uuid: 99592e74-4f24-4564-9c1f-27a1c51389bd
+        widget:
+          class: checkbox
+          id: network
+          label: Synchronise over the network
+      - uuid: 5d510bb8-8e94-4b68-9ed7-bb1f7b36e4c6
+        widget:
+          class: checkbox
+          id: needsTransform
+          label: Needs Transform
+  - uuid: dbf6ddbd-688e-4769-b7cb-1e22c79b5f4f
+    sizer:
+      gap: 4
+      type: horizontal
+    children:
+      - uuid: 079ce185-148f-4dc3-b262-5904e11b183b
+        proportion: 1
+        stretchSpacer: {}
+      - uuid: 326e38b2-485d-4dc5-a87f-219284fbd48c
+        widget:
+          class: button
+          id: ok
+          size: [100, 22]
+          text: OK
+      - uuid: a43b1ca3-a796-4018-94b1-0a2cb96202a1
+        widget:
+          class: button
+          id: cancel
+          size: [100, 22]
+          text: Cancel
+fill: centre

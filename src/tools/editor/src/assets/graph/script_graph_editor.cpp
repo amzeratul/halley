@@ -432,6 +432,11 @@ void ScriptGraphProperties::onMakeUI()
 		properties["network"] = value;
 	});
 
+	bindData("needsTransform", scriptGraph.needsTransform(), [=] (bool value)
+	{
+		properties["needsTransform"] = value;
+	});
+
 	getWidget("network")->setEnabled(!scriptGraph.isNetworkRequired());
 }
 

@@ -281,7 +281,7 @@ ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)
 		currentState->prepareStates(serializationContext, 0);
 	}
 
-	for (const auto s: thread.getStack()) {
+	for (const auto& s: thread.getStack()) {
 		auto& nThreads = currentState->getNodeState(s.node).threadCount;
 		assert(nThreads >= 1);
 		++nThreads;

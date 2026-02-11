@@ -337,12 +337,16 @@ private:
 
 			scriptable.activeStates.terminateMarkedDead(env, entityId, scriptable.variables);
 
-			for (auto& state: scriptable.activeStates) {
-				if (!state->getFrameFlag()) {
-					if (hasTransform || !state->getScriptGraphPtr()->needsTransform()) {
-						env.update(t, *state, entityId, scriptable.variables);
+			for (auto& statePtr: scriptable.activeStates) {
+				auto& state = *statePtr;
+				if (!state.getFrameFlag()) {
+					if (hasTransform || !state.getScriptGraphPtr()->needsTransform()) {
+						env.update(t, state, entityId, scriptable.variables);
+					} else if (state.hasStarted()) {
+						env.stopState(state, entityId, scriptable.variables, true);
+						state.reset(); // This makes sure it won't be auto-terminated, and will restart when needed
 					}
-					state->setFrameFlag(true);
+					state.setFrameFlag(true);
 				}
 
 				if (env.hasStopRequests()) {
