@@ -279,6 +279,10 @@ void Animation::setSpriteSheetName(const String& n)
 void Animation::addSequence(AnimationSequence sequence)
 {
 	sequence.id = static_cast<int>(sequences.size());
+	sequenceIndex[sequence.getName()] = sequence.id;
+	if (!sequenceFallbackIndex && sequence.isFallback()) {
+		sequenceFallbackIndex = sequence.id;
+	}
 	sequences.push_back(std::move(sequence));
 }
 
@@ -298,24 +302,22 @@ void Animation::addActionPoints(const ConfigNode& config)
 	}
 }
 
-const AnimationSequence& Animation::getSequence(const String& seqName) const
+void Animation::generateSequenceIndex()
 {
-	const AnimationSequence* fallback = nullptr;
-
-	for (auto& seq: sequences) {
-		if (seq.name == seqName) {
-			return seq;
-		}
-		if (seq.isFallback()) {
-			fallback = &seq;
+	sequenceFallbackIndex = {};
+	sequenceIndex.clear();
+	sequenceIndex.reserve(sequences.size());
+	for (int i = 0; i < int(sequences.size()); ++i) {
+		sequenceIndex[sequences[i].getName()] = i;
+		if (!sequenceFallbackIndex && sequences[i].isFallback()) {
+			sequenceFallbackIndex = i;
 		}
 	}
+}
 
-	if (fallback) {
-		return *fallback;
-	} else {
-		return sequences.at(0);
-	}
+const AnimationSequence& Animation::getSequence(std::string_view seqName) const
+{
+	return sequences.at(getSequenceIdx(seqName));
 }
 
 const AnimationSequence& Animation::getSequence(size_t idx) const
@@ -323,20 +325,23 @@ const AnimationSequence& Animation::getSequence(size_t idx) const
 	return sequences.at(idx);
 }
 
-size_t Animation::getSequenceIdx(const String& name) const
+size_t Animation::getSequenceIdx(std::string_view name) const
 {
-	size_t fallback = 0;
-	size_t i = 0;
-	for (const auto& seq: sequences) {
-		if (seq.name == name) {
-			return i;
+	if (sequences.size() <= 4) {
+		// With few sequences, avoid the string hashing and just check them all
+		for (const auto& seq: sequences) {
+			if (seq.getName() == name) {
+				return seq.getId();
+			}
 		}
-		if (seq.isFallback()) {
-			fallback = i;
+	} else {
+		const auto iter = sequenceIndex.find(name);
+		if (iter != sequenceIndex.end()) {
+			return iter->second;
 		}
 	}
 
-	return fallback;
+	return sequenceFallbackIndex.value_or(0);
 }
 
 const AnimationDirection& Animation::getDirection(const String& dirName) const
@@ -455,14 +460,9 @@ Rect4i Animation::getBounds() const
 	return bounds;
 }
 
-bool Animation::hasSequence(const String& seqName) const
+bool Animation::hasSequence(std::string_view seqName) const
 {
-	for (auto& s: sequences) {
-		if (s.getName() == seqName) {
-			return true;
-		}
-	}
-	return false;
+	return sequenceIndex.find(seqName) != sequenceIndex.end();
 }
 
 void Animation::serialize(Serializer& s) const
@@ -483,4 +483,6 @@ void Animation::deserialize(Deserializer& s)
 	s >> sequences;
 	s >> directions;
 	s >> actionPoints;
+
+	generateSequenceIndex();
 }

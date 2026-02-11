@@ -153,9 +153,9 @@ namespace Halley
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
 		std::shared_ptr<Material> getMaterial() const { return material; }
 
-		const AnimationSequence& getSequence(const String& name) const;
+		const AnimationSequence& getSequence(std::string_view name) const;
 		const AnimationSequence& getSequence(size_t idx) const;
-		size_t getSequenceIdx(const String& name) const;
+		size_t getSequenceIdx(std::string_view name) const;
 		const AnimationDirection& getDirection(const String& name) const;
 		const AnimationDirection& getDirection(int id) const;
 		Vector<String> getSequenceNames() const;
@@ -168,7 +168,7 @@ namespace Halley
 		Vector2i getPivot() const;
 		Rect4i getBounds() const;
 
-		bool hasSequence(const String& name) const;
+		bool hasSequence(std::string_view name) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -197,5 +197,10 @@ namespace Halley
 		String name;
 		String spriteSheetName;
 		String materialName;
+
+		HashMap<String, int> sequenceIndex;
+		std::optional<int> sequenceFallbackIndex;
+
+		void generateSequenceIndex();
 	};
 }
