@@ -86,8 +86,8 @@ namespace Halley {
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioFilterResample> resample;
 
-		std::array<float, 16> channelMix;
-		std::array<float, 16> prevChannelMix;
+		std::array<float, 16> channelMix = {};
+		std::array<float, 16> prevChannelMix = {};
 		float lastGain = 0;
 		float lastPostGain = 0;
 		float lastPitch = 1;
