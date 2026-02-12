@@ -29,7 +29,7 @@ public:
 		const auto viewPort = getViewPort();
 		for (auto& e: es) {
 			e.spriteAnimation.player.update(0.0f);
-			updateSprite(e, viewPort, true);
+			updateSprite(e, viewPort, false);
 		}
 	}
 
@@ -38,7 +38,7 @@ public:
 		const auto viewPort = getViewPort();
 		for (auto& e: es) {
 			e->spriteAnimation.player.update(0.0f);
-			updateSprite(*e, viewPort, true);
+			updateSprite(*e, viewPort, false);
 		}
 	}
 
@@ -69,11 +69,13 @@ private:
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
-			const auto curLocalBounds = e.sprite.sprite.getLocalAABB();
 			const auto nextBounds = Rect4f(player.getAnimation().getBounds());
-			const auto localBounds = curLocalBounds.merge(nextBounds);
-			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(localBounds.getTopLeft()), e.transform2D.transformPointWithHeight(localBounds.getBottomRight()));
-			if (ignoreBounds || worldBounds.overlaps(viewPort)) {
+			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(nextBounds.getTopLeft()), e.transform2D.transformPointWithHeight(nextBounds.getBottomRight()));
+
+			const auto curBounds = e.sprite.sprite.getAABB();
+			const auto mergedBounds = curBounds.merge(worldBounds);
+			
+			if (ignoreBounds || mergedBounds.overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
 			}
 		}
