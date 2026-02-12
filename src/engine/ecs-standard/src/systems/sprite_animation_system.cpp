@@ -26,35 +26,38 @@ public:
 
 	void onEntitiesAdded(Span<MainFamily> es)
 	{
+		const auto viewPort = getViewPort();
 		for (auto& e: es) {
 			e.spriteAnimation.player.update(0.0f);
-			if (e.spriteAnimation.updateSprite) {
-				e.spriteAnimation.player.updateSprite(e.sprite.sprite);
-			}
+			updateSprite(e, viewPort);
 		}
 	}
 
 	void onEntitiesReloaded(Span<MainFamily*> es)
 	{
-		for (auto& e : es) {
+		const auto viewPort = getViewPort();
+		for (auto& e: es) {
 			e->spriteAnimation.player.update(0.0f);
-			if (e->spriteAnimation.updateSprite) {
-				e->spriteAnimation.player.updateSprite(e->sprite.sprite);
-			}
+			updateSprite(*e, viewPort);
 		}
 	}
 
-	void setCallback(ISpriteAnimationSystemInterface::Callback callback) override
+	void setCallback(Callback callback) override
 	{
 		this->callback = std::move(callback);
 	}
 
 private:
-	ISpriteAnimationSystemInterface::Callback callback;
+	Callback callback;
+
+	Rect4f getViewPort() const
+	{
+		return getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
+	}
 
 	void updateAnimators(Time time)
 	{
-		const auto viewPort = getScreenService().getCameraViewPort().grow(10, 10, 10, 10);
+		const auto viewPort = getViewPort();
 		for (auto& e : mainFamily) {
 			e.spriteAnimation.player.update(time);
 			updateSprite(e, viewPort);
