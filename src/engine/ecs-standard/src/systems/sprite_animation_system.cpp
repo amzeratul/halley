@@ -29,7 +29,7 @@ public:
 		const auto viewPort = getViewPort();
 		for (auto& e: es) {
 			e.spriteAnimation.player.update(0.0f);
-			updateSprite(e, viewPort);
+			updateSprite(e, viewPort, true);
 		}
 	}
 
@@ -38,7 +38,7 @@ public:
 		const auto viewPort = getViewPort();
 		for (auto& e: es) {
 			e->spriteAnimation.player.update(0.0f);
-			updateSprite(*e, viewPort);
+			updateSprite(*e, viewPort, true);
 		}
 	}
 
@@ -60,12 +60,12 @@ private:
 		const auto viewPort = getViewPort();
 		for (auto& e : mainFamily) {
 			e.spriteAnimation.player.update(time);
-			updateSprite(e, viewPort);
+			updateSprite(e, viewPort, false);
 			updateEvents(e);
 		}
 	}
 
-	void updateSprite(MainFamily& e, Rect4f viewPort)
+	void updateSprite(MainFamily& e, Rect4f viewPort, bool ignoreBounds)
 	{
 		auto& player = e.spriteAnimation.player;
 		if (e.spriteAnimation.updateSprite && player.hasAnimation()) {
@@ -73,7 +73,7 @@ private:
 			const auto nextBounds = Rect4f(player.getAnimation().getBounds());
 			const auto localBounds = curLocalBounds.merge(nextBounds);
 			const auto worldBounds = Rect4f(e.transform2D.transformPointWithHeight(localBounds.getTopLeft()), e.transform2D.transformPointWithHeight(localBounds.getBottomRight()));
-			if (worldBounds.overlaps(viewPort)) {
+			if (ignoreBounds || worldBounds.overlaps(viewPort)) {
 				player.updateSprite(e.sprite.sprite);
 			}
 		}
