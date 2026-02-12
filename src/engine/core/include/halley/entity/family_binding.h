@@ -32,6 +32,8 @@ namespace Halley {
 		void onEntitiesRemoved(void* entities, size_t count);
 		void onEntitiesReloaded(void* entities, size_t count);
 
+		Family& getFamily() const { return *family; }
+
 		BindFamilyCallback bindFamily = nullptr;
 
 	private:
@@ -153,11 +155,17 @@ namespace Halley {
 
 		FamilyBindingIterator<T> begin()
 		{
+			if (getFamily().isDirty()) {
+				throw Exception("Attempting to iterate through a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
+			}
 			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
 		FamilyBindingIterator<T> begin() const
 		{
+			if (getFamily().isDirty()) {
+				throw Exception("Attempting to iterate through a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
+			}
 			return FamilyBindingIterator(getFamilyElement(0), 5, static_cast<uint32_t>(count()), *world);
 		}
 
@@ -176,6 +184,9 @@ namespace Halley {
 			if (count() != 1) {
 				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
 			}
+			if (getFamily().isDirty()) {
+				throw Exception("Attempting to access a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
+			}
 			return *getFamilyElement(0);
 		}
 
@@ -183,6 +194,9 @@ namespace Halley {
 		{
 			if (count() != 1) {
 				throw Exception(String("Attempting to access family of ") + typeid(T).name() + " as singleton, but it has " + toString(count()) + " elements.", HalleyExceptions::Entity);
+			}
+			if (getFamily().isDirty()) {
+				throw Exception("Attempting to access a family which is flagged as dirty. (Accessing other families is not allowed from onEntitiesAdded/etc context)", HalleyExceptions::Entity);
 			}
 			return *getFamilyElement(0);
 		}

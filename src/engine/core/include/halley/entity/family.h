@@ -42,6 +42,8 @@ namespace Halley {
 		void notifyRemove(void* entities, size_t count);
 		void notifyReload(void* entities, size_t count);
 
+		virtual bool isDirty() const = 0;
+
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		virtual void refreshEntity(Entity& entity) = 0;
@@ -112,7 +114,7 @@ namespace Halley {
 			: Family(T::Type::inclusionMask(storage), T::Type::optionalMask(storage))
 		{
 		}
-				
+			
 	protected:
 		void addEntity(Entity& entity) override
 		{
@@ -142,11 +144,11 @@ namespace Halley {
 				size_t curSize = entities.size();
 				updateElems();
 				Expects(curSize >= prevSize);
+				dirty = false;
+
 				if (curSize > prevSize) {
 					notifyAdd(entities.data() + prevSize, curSize - prevSize);
 				}
-
-				dirty = false;
 			}
 
 			if (!toReload.empty()) {
@@ -171,6 +173,11 @@ namespace Halley {
 			notifyRemove(entities.data(), entities.size());
 			entities.clear();
 			updateElems();
+		}
+
+		bool isDirty() const override
+		{
+			return dirty;
 		}
 
 	private:
