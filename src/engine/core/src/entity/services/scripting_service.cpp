@@ -145,6 +145,31 @@ LuaReference& ScriptingService::getLuaReference(const LuaExpression& luaExpressi
 	return *iter2->second;
 }
 
+std::function<std::shared_ptr<ScriptingService>()> ScriptingService::deferredClone(std::unique_ptr<ScriptEnvironment> environment) const
+{
+	// Script environment can't be passed as a unique_ptr, so we'll ferry it inside this container
+	struct EnvContainer {
+		std::unique_ptr<ScriptEnvironment> env;
+		EnvContainer(std::unique_ptr<ScriptEnvironment> env) : env(std::move(env)) {}
+	};
+
+	return [envContainer = std::make_shared<EnvContainer>(std::move(environment))
+			, resources = &resources
+			, initialModule = initialModule
+			, devMode = devMode
+			, globals = globals
+			, resultCache = resultCache
+			] () mutable -> std::shared_ptr<ScriptingService>
+	{
+		auto result = std::make_shared<ScriptingService>(std::move(envContainer->env), *resources, initialModule, devMode);
+		for (const auto& [key, value]: globals) {
+			result->setLuaGlobal(key, value);
+		}
+		result->resultCache = std::move(resultCache);
+		return result;
+	};
+}
+
 std::shared_ptr<ScriptingService> ScriptingService::clone(std::unique_ptr<ScriptEnvironment> environment) const
 {
 	auto result = std::make_shared<ScriptingService>(std::move(environment), resources, initialModule, devMode);

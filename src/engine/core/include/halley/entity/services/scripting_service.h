@@ -45,6 +45,7 @@ namespace Halley {
 		LuaState& getLuaState() const override;
 		LuaReference& getLuaReference(const LuaExpression& luaExpression) const override;
 
+		std::function<std::shared_ptr<ScriptingService>()> deferredClone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
 		std::shared_ptr<ScriptingService> clone(std::unique_ptr<ScriptEnvironment> environment = {}) const;
 
 	private:
