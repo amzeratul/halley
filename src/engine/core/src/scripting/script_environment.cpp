@@ -1007,16 +1007,20 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 				}
 			} else if (pinConfig.type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 				EntityId id;
-				if (pinConfig.direction == GraphNodePinDirection::Input) {
-					id = readInputEntityId(node, pinId);
+				if (nodeType.isPinConnected(node, pinId)) {
+					if (pinConfig.direction == GraphNodePinDirection::Input) {
+						id = readInputEntityId(node, pinId);
+					} else {
+						id = readOutputEntityId(node, pinId);
+					}
+					const auto entityRef = world.tryGetEntity(id);
+					if (id.isValid() && entityRef.isValid()) {
+						return ConfigNode("Entity \"" + entityRef.getName() + "\" (id " + toString(id.value) + ")");
+					} else {
+						return ConfigNode(String("Invalid entity"));
+					}
 				} else {
-					id = readOutputEntityId(node, pinId);
-				}
-				const auto entityRef = world.tryGetEntity(id);
-				if (id.isValid() && entityRef.isValid()) {
-					return ConfigNode("Entity \"" + entityRef.getName() + "\" (id " + toString(id.value) + ")");
-				} else {
-					return ConfigNode(String("Invalid entity"));
+					return ConfigNode(String("<empty>"));
 				}
 			} else {
 				// No relevant data

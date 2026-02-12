@@ -122,6 +122,12 @@ String IScriptNodeType::getConnectedNodeName(const BaseGraphNode& node, const Ba
 	return tryGetConnectedNodeName(node, graph, pinN).value_or("<empty>");
 }
 
+bool IScriptNodeType::isPinConnected(const BaseGraphNode& node, size_t pinN) const
+{
+	const auto& pin = node.getPin(pinN);
+	return !pin.connections.empty();
+}
+
 String IScriptNodeType::getPinTypeName(PinType type) const
 {
 	switch (static_cast<ScriptNodeElementType>(type.type)) {

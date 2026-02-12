@@ -66,6 +66,7 @@ namespace Halley {
 		EntityId readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		std::optional<String> tryGetConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
 		String getConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const;
+		[[nodiscard]] bool isPinConnected(const BaseGraphNode& node, size_t pinN) const;
 
 		String getPinTypeName(PinType type) const override;
 
