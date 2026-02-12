@@ -2,6 +2,7 @@
 
 #include "halleystring.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/utils/hash.h"
 
 namespace Halley {
    	class ConfigNode;
@@ -44,4 +45,20 @@ namespace Halley {
 		std::optional<String> countryCode;
 	};
 
+}
+
+namespace std {
+	template <>
+	struct hash<Halley::I18NLanguage> {
+	public:
+		size_t operator()(const Halley::I18NLanguage& lang) const
+		{
+			Halley::Hash::Hasher hasher;
+			hasher.feed(lang.getLanguageCode());
+			if (lang.getCountryCode()) {
+				hasher.feed(*lang.getCountryCode());
+			}
+			return hasher.digest();
+		}
+	};
 }

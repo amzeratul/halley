@@ -119,8 +119,8 @@ namespace Halley {
 	private:
 		I18NLanguage currentLanguage;
 		std::optional<I18NLanguage> fallbackLanguage;
-		std::map<I18NLanguage, std::map<String, String>> strings;
-		std::map<String, ConfigObserver> observers;
+		HashMap<I18NLanguage, HashMap<String, String>> strings;
+		HashMap<String, ConfigObserver> observers;
 		int version = 0;
 
 		void loadLocalisation(const ConfigNode& node, const String& assetId, bool allowUpdating);
