@@ -49,7 +49,7 @@ void LocalisationLanguageEditor::onMakeUI()
 		String name = chunk.name;
 
 		if (dstLanguage) {
-			const auto srcStats = chunk.getStats(filterRules);
+			const auto srcStats = chunk.getStats(filterRules, dstLanguage->language);
 			const auto dstStats = chunk.getStats(*dstLanguage, filterRules);
 			const int complete = srcStats.totalWords > 0 ? std::max(dstStats.totalWords * 100 / srcStats.totalWords, dstStats.totalWords > 0 ? 1 : 0) : 0;
 			name = "[" + toString(complete, 10, 3, ' ') + "%] " + name;
@@ -184,7 +184,7 @@ void LocalisationLanguageEditor::setChunk(const String& chunkId)
 	grid->setFilter([this] (int idx) -> bool {
 		return isRowVisible(idx);
 	}, false);
-	grid->setData(srcData, dstLanguage, srcRemote != nullptr);
+	grid->setData(srcData, dstLanguage, srcRemote != nullptr, dstLanguage ? dstLanguage -> language : srcLanguage.getLanguage());
 
 	applyFilters();
 }
@@ -568,5 +568,5 @@ bool LocalisationLanguageEditor::isRowVisible(int idx) const
 	const auto& original = srcData->getEntry(idx);
 	const auto* translated = dstLanguage ? dstLanguage->tryGetEntry(original.getKey()) : nullptr;
 
-	return filters.shouldShow(original, translated, filterRules);
+	return filters.shouldShow(original, translated, filterRules, dstLanguage ? dstLanguage->language : srcLanguage.getLanguage());
 }

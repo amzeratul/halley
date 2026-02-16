@@ -51,7 +51,7 @@ namespace Halley {
 
 		void initialise(bool translating);
 
-		bool shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules) const;
+		bool shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules, const I18NLanguage& language) const;
 		bool hasFiltersActive() const;
 		void clearFilters();
 

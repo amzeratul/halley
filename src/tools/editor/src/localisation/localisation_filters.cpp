@@ -8,7 +8,7 @@ void LocalisationFilters::initialise(bool translating)
 	readyEnabled = translating;
 }
 
-bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules) const
+bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const LocTranslationEntry* translation, const LocalisationFilterRules& rules, const I18NLanguage& language) const
 {
 	if (!searchString.isEmpty()) {
 		if (!entry.matchesSearchString(searchString, translation)) {
@@ -40,7 +40,7 @@ bool LocalisationFilters::shouldShow(const LocalisationDataEntry& entry, const L
 	}
 
 	if (readyEnabled) {
-		if (entry.getReadyState(rules) != ready) {
+		if (entry.getReadyState(rules, language) != ready) {
 			return false;
 		}
 	}

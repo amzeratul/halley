@@ -177,7 +177,7 @@ void LocalisationGrid::sendToClipboard(const String& str)
 
 bool LocalisationGrid::isReadyToTranslate(const LocalisationDataEntry& entry) const
 {
-	return entry.getReadyState(filterRules) == LocReadyStatus::Ready;
+	return entry.getReadyState(filterRules, language) == LocReadyStatus::Ready;
 }
 
 const String& LocalisationGrid::getKeyAt(int idx) const
@@ -189,11 +189,12 @@ const String& LocalisationGrid::getKeyAt(int idx) const
 	}
 }
 
-void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties)
+void LocalisationGrid::setData(const ILocOriginalData* origData, LocTranslationData* translatedData, bool showProperties, I18NLanguage language)
 {
 	this->origData = origData;
 	this->translatedData = translatedData;
 	this->showProperties = showProperties;
+	this->language = language;
 
 	onDataUpdated();
 }

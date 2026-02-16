@@ -78,7 +78,7 @@ namespace Halley {
 		LocalisationDataEntry() = default;
 		LocalisationDataEntry(String key, String value, String context = "", String comment = "", LocPriority priority = LocPriority::Normal);
 
-		LocReadyStatus getReadyState(const LocalisationFilterRules& rules) const;
+		LocReadyStatus getReadyState(const LocalisationFilterRules& rules, const I18NLanguage& language) const;
 		bool matchesSearchString(const String& searchString, const LocTranslationEntry* translation = nullptr, bool searchStringIsLowerCase = false) const;
 
 	private:
@@ -111,7 +111,7 @@ namespace Halley {
 		LocOriginalDataChunk() = default;
 		LocOriginalDataChunk(String name, String category, Vector<LocalisationDataEntry> entries);
 
-		LocalisationStats getStats(const LocalisationFilterRules& filterRules) const;
+		LocalisationStats getStats(const LocalisationFilterRules& filterRules, const I18NLanguage& origLanguage) const;
 		LocalisationStats getStats(const LocTranslationData& translated, const LocalisationFilterRules& filterRules) const;
 
 		size_t getNumEntries() const override;

@@ -133,9 +133,9 @@ LocalisationDataEntry::LocalisationDataEntry(String key, String value, String co
 {
 }
 
-LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRules& rules) const
+LocReadyStatus LocalisationDataEntry::getReadyState(const LocalisationFilterRules& rules, const I18NLanguage& language) const
 {
-	return priority >= rules.minPriorityForReady ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
+	return priority >= rules.getMinPriorityForReady(language) ? LocReadyStatus::Ready : LocReadyStatus::NotReady;
 }
 
 bool LocalisationDataEntry::matchesSearchString(const String& searchString, const LocTranslationEntry* translation, bool searchStringIsLowerCase) const
@@ -152,12 +152,12 @@ LocOriginalDataChunk::LocOriginalDataChunk(String name, String category, Vector<
 {
 }
 
-LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& filterRules) const
+LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& filterRules, const I18NLanguage& language) const
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		const auto wordCount = LocalisationStats::getWordCount(entry.getValue());
-		const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
+		const bool ready = entry.getReadyState(filterRules, language) == LocReadyStatus::Ready;
 
 		result.wordsPerKey[entry.getKey()] = wordCount;
 		result.totalKeys++;
@@ -176,7 +176,7 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.getKey())) {
 			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->getValue());
-			const bool ready = entry.getReadyState(filterRules) == LocReadyStatus::Ready;
+			const bool ready = entry.getReadyState(filterRules, translated.language) == LocReadyStatus::Ready;
 
 			result.wordsPerKey[entry.getKey()] = wordCount;
 			result.totalKeys++;
@@ -257,7 +257,7 @@ LocalisationStats LocOriginalData::getStats(const LocalisationFilterRules& filte
 {
 	LocalisationStats result;
 	for (auto& chunk: chunks) {
-		result += chunk.getStats(filterRules);
+		result += chunk.getStats(filterRules, language);
 	}
 	return result;
 }

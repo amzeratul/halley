@@ -4,6 +4,7 @@
 #include <array>
 
 namespace Halley {
+	class I18NLanguage;
 	class ConfigNode;
 
 	enum class LocPriority : uint8_t {
@@ -29,9 +30,12 @@ namespace Halley {
 
 	class LocalisationFilterRules {
 	public:
-		LocPriority minPriorityForReady = LocPriority::High;
-
 		LocalisationFilterRules() = default;
 		LocalisationFilterRules(const ConfigNode& node);
+
+		LocPriority getMinPriorityForReady(const I18NLanguage& language) const;
+
+	private:
+		HashMap<String, LocPriority> minPriorityForReady;
 	};
 }

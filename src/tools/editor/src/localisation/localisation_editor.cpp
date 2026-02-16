@@ -911,7 +911,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Lo
 			for (const auto& origEntry: chunk.entries) {
 				const auto* locEntry = loc.tryGetEntry(origEntry.getKey());
 
-				if (!options.filters.shouldShow(origEntry, locEntry, filterRules)) {
+				if (!options.filters.shouldShow(origEntry, locEntry, filterRules, language)) {
 					continue;
 				}
 
@@ -920,7 +920,7 @@ void LocalisationEditor::doExportLanguage(const I18NLanguage& language, const Lo
 				csv.setCell(rowIdx, versionIdx, toString(origEntry.getVersion()));
 				csv.setCell(rowIdx, commentIdx, origEntry.getComment());
 				csv.setCell(rowIdx, contextIdx, origEntry.getContext());
-				csv.setCell(rowIdx, readyIdx, toString(origEntry.getReadyState(filterRules)));
+				csv.setCell(rowIdx, readyIdx, toString(origEntry.getReadyState(filterRules, language)));
 				csv.setCell(rowIdx, priorityIdx, toString(origEntry.getPriority()));
 				csv.setCell(rowIdx, originalIdx, origEntry.getValue());
 				csv.setCell(rowIdx, chunkIdx, chunk.name);
