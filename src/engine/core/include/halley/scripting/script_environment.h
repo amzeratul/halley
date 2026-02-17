@@ -165,6 +165,12 @@ namespace Halley {
             return world.getInterface<T>();
 		}
 
+    	template <typename T>
+		T* tryGetInterface()
+		{
+			return world.tryGetInterface<T>();
+		}
+
         void setFutureNodeValue(const ScriptGraphNode& node, std::optional<Future<ConfigNode>> future);
         std::optional<Future<ConfigNode>> getFutureNodeValue(const ScriptGraphNode& node);
 
