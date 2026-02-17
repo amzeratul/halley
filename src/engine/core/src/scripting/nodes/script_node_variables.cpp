@@ -1480,13 +1480,17 @@ String ScriptUnpackMap::getPinDescription(const BaseGraphNode& node, PinType ele
 
 ConfigNode ScriptUnpackMap::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	auto keys = node.getSettings()["keys"].asVector<String>({});
+	std::string_view key = {};
+	const auto& keys = node.getSettings()["keys"];
+	if (keys.getType() == ConfigNodeType::Sequence) {
+		key = keys.asSequence().at(pinN - 1).asStringView();
+	}
 	
 	const auto config = readDataPin(environment, node, 0);
 	const auto type = config.getType();
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::MapRef) {
 		auto& map = config.asMap();
-		const auto iter = map.find(keys.at(pinN - 1));
+		const auto iter = map.find(key);
 		if (iter != map.end()) {
 			return ConfigNode(iter->second);
 		} else {
