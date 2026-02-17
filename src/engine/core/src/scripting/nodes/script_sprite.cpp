@@ -21,6 +21,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 		SettingType{ "loop", "bool", Vector<String>{"true"} },
 		SettingType{ "wait", "bool", Vector<String>{"true"} },
 		SettingType{ "reverse", "bool", Vector<String>{"false"} },
+		SettingType{ "sync", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -39,14 +40,17 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 	str.append(node.getSettings()["sequence"].asString("default"), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(node, graph, 2), parameterColour);
+	if (node.getSettings()["reverse"].asBool(false)) {
+		str.append(" in reverse ");
+	}
 	if (node.getSettings()["loop"].asBool(true)) {
 		str.append(" which loops ");
 	}
 	if (node.getSettings()["wait"].asBool(true)) {
 		str.append(" and wait for it to finish ");
 	}
-	if (node.getSettings()["reverse"].asBool(false)) {
-		str.append(". Also animation will play in reverse");
+	if (node.getSettings()["sync"].asBool(false)) {
+		str.append(". Animation will be synchronised over network");
 	}
 	return str.moveResults();
 }
@@ -59,17 +63,24 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 		const auto reverse = node.getSettings()["reverse"].asBool(false);
 
 		if (spriteAnimation) {
-			if (spriteAnimation->player.getCurrentSequenceName() != node.getSettings()["sequence"].asString("") || reverse != spriteAnimation->player.isPlayingReverse()) {
-				if (node.getSettings()["loop"].asBool(true)) {
-					spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
+			const auto& sequence = node.getSettings()["sequence"].asString("");
+			const bool loop = node.getSettings()["loop"].asBool(true);
+			if (spriteAnimation->player.getCurrentSequenceName() != sequence || reverse != spriteAnimation->player.isPlayingReverse()) {
+				if (loop) {
+					spriteAnimation->player.setSequence(sequence);
 				}
 				else {
-					spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""), {}, reverse);
+					spriteAnimation->player.playOnce(sequence, {}, reverse);
+				}
+				if (node.getSettings()["sync"].asBool(false)) {
+					if (environment.getWorld().isEntityNetworkOwner(entity)) {
+						environment.postAnimationEvent(sequence, reverse, !loop, entity.getEntityId());
+					}
 				}
 			}
 
 			if (node.getSettings()["wait"].asBool(true)) {
-				if (spriteAnimation->player.isPlaying() && spriteAnimation->player.getCurrentSequenceName() == node.getSettings()["sequence"].asString("")) {
+				if (spriteAnimation->player.isPlaying() && spriteAnimation->player.getCurrentSequenceName() == sequence) {
 					return Result(ScriptNodeExecutionState::Executing);
 				}
 			}
