@@ -245,8 +245,8 @@ namespace Halley {
 		void propagateEnabled(bool enabled, bool parentEnabled);
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
-		std::optional<uint8_t> getOwnerPeerId() const;
-        std::optional<uint8_t> getAuthorityPeerId() const;
+		std::optional<uint8_t> getOwnerPeerId(bool checkAncestors) const;
+        std::optional<uint8_t> getAuthorityPeerId(bool checkAncestors) const;
 		void setFromNetwork(bool fromNetwork);
 
 		void destroy(World& world);
@@ -929,16 +929,16 @@ namespace Halley {
 			return entity->setupNetwork(*this, peerId);
 		}
 
-		std::optional<uint8_t> getOwnerPeerId() const
+		std::optional<uint8_t> getOwnerPeerId(bool checkAncestors = true) const
 		{
 			Expects(entity);
-			return entity->getOwnerPeerId();
+			return entity->getOwnerPeerId(checkAncestors);
 		}
 
-        std::optional<uint8_t> getAuthorityPeerId() const
+        std::optional<uint8_t> getAuthorityPeerId(bool checkAncestors = true) const
         {
             Expects(entity);
-            return entity->getAuthorityPeerId();
+            return entity->getAuthorityPeerId(checkAncestors);
         }
 
 		bool isLocal() const
@@ -1129,16 +1129,16 @@ namespace Halley {
 			return entity != nullptr;
 		}
 
-		std::optional<uint8_t> getOwnerPeerId() const
+		std::optional<uint8_t> getOwnerPeerId(bool checkAncestors = true) const
 		{
 			Expects(entity);
-			return entity->getOwnerPeerId();
+			return entity->getOwnerPeerId(checkAncestors);
 		}
 
-        std::optional<uint8_t> getAuthorityPeerId() const
+        std::optional<uint8_t> getAuthorityPeerId(bool checkAncestors = true) const
         {
             Expects(entity);
-            return entity->getAuthorityPeerId();
+            return entity->getAuthorityPeerId(checkAncestors);
         }
 
 		bool isLocal() const

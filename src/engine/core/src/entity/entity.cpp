@@ -381,23 +381,23 @@ DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 	}
 }
 
-std::optional<uint8_t> Entity::getOwnerPeerId() const
+std::optional<uint8_t> Entity::getOwnerPeerId(bool checkAncestors) const
 {
 	if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
 		return networkComponent->ownerId;
-	} else if (parent) {
-		return parent->getOwnerPeerId();
+	} else if (checkAncestors && parent) {
+		return parent->getOwnerPeerId(checkAncestors);
 	} else {
 		return {};
 	}
 }
 
-std::optional<uint8_t> Entity::getAuthorityPeerId() const
+std::optional<uint8_t> Entity::getAuthorityPeerId(bool checkAncestors) const
 {
     if (const auto* networkComponent = tryGetComponent<NetworkComponent>()) {
         return networkComponent->authorityId;
-    } else if (parent) {
-        return parent->getAuthorityPeerId();
+    } else if (checkAncestors && parent) {
+        return parent->getAuthorityPeerId(checkAncestors);
     } else {
         return {};
     }
@@ -424,7 +424,7 @@ void Entity::doDestroy(World& world, bool updateParenting)
 		if (!world.isTerminating()) {
 			if (worldPartition == 0) {
 				throw Exception("Destroying entity that was created from network", HalleyExceptions::Entity);
-			} else if (getOwnerPeerId().value_or(0) != 0) {
+			} else if (getOwnerPeerId(true).value_or(0) != 0) {
 				Logger::logError("Destroying entity " + entityId.toString() + " that was created from network");
 			}
 		}

@@ -768,7 +768,7 @@ bool EntityNetworkSession::isConnected() const
 
 bool EntityNetworkSession::isOwner(ConstEntityRef entity) const
 {
-	const auto peerId = entity.getOwnerPeerId();
+	const auto peerId = entity.getOwnerPeerId(false);
 
 	if (peerId.has_value()) {
 		return peerId == session->getMyPeerId();
@@ -779,7 +779,7 @@ bool EntityNetworkSession::isOwner(ConstEntityRef entity) const
 
 bool EntityNetworkSession::isAuthority(ConstEntityRef entity) const
 {
-	const auto peerId = entity.getAuthorityPeerId();
+	const auto peerId = entity.getAuthorityPeerId(false);
 
 	if (peerId.has_value()) {
 		return peerId == session->getMyPeerId();
