@@ -147,6 +147,7 @@ systemMessage:
   members:
   - entity: Halley::EntityId
   - sequence: Halley::String
+  - reverse: bool
   - once: bool
   destination: remoteClients
   serializable: true

@@ -91,7 +91,7 @@ namespace Halley {
         EntityId readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN);
         EntityId readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN);
 
-    	void postAnimationEvent(const String& sequence, bool once, EntityId entityId);
+    	void postAnimationEvent(const String& sequence, bool reverse, bool once, EntityId entityId);
     	void postAudioEvent(const String& id, EntityId entityId);
 
         ScriptVariables& getVariables(ScriptVariableScope scope);

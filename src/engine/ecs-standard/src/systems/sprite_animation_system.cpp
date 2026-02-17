@@ -28,7 +28,7 @@ public:
 	{
 		if (const auto e = mainFamily.tryFind(msg.entity); e != nullptr) {
 			if (msg.once) {
-				e->spriteAnimation.player.playOnce(msg.sequence);
+				e->spriteAnimation.player.playOnce(msg.sequence, {}, msg.reverse);
 			} else {
 				e->spriteAnimation.player.setSequence(msg.sequence);
 			}

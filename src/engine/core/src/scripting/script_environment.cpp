@@ -906,10 +906,10 @@ EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, Grap
 	return node.getNodeType().getEntityId(*this, node, pinN, getNodeData(node.getId()));
 }
 
-void ScriptEnvironment::postAnimationEvent(const String& sequence, bool once, EntityId entityId)
+void ScriptEnvironment::postAnimationEvent(const String& sequence, bool reverse, bool once, EntityId entityId)
 {
 	if (!sequence.isEmpty()) {
-		auto msg = std::make_unique<PlayNetworkAnimationSystemMessage>(entityId, sequence, once);
+		auto msg = std::make_unique<PlayNetworkAnimationSystemMessage>(entityId, sequence, reverse, once);
 		const auto msgId = msg->getId();
 
 		SystemMessageContext context;
