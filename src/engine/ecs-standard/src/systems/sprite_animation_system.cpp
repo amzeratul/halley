@@ -24,6 +24,17 @@ public:
 		e.spriteAnimation.player.playOnce(msg.sequence);
 	}
 
+	void onMessageReceived(const PlayNetworkAnimationSystemMessage& msg) override
+	{
+		if (const auto e = mainFamily.tryFind(msg.entity); e != nullptr) {
+			if (msg.once) {
+				e->spriteAnimation.player.playOnce(msg.sequence);
+			} else {
+				e->spriteAnimation.player.setSequence(msg.sequence);
+			}
+		}
+	}
+
 	void onEntitiesAdded(Span<MainFamily> es)
 	{
 		const auto viewPort = getViewPort();

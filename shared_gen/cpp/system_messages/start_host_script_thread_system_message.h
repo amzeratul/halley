@@ -7,7 +7,7 @@
 
 class StartHostScriptThreadSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 2 };
+	static constexpr int messageIndex{ 3 };
 	static const constexpr char* messageName{ "StartHostScriptThread" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
 	using ReturnType = void;

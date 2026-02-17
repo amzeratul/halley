@@ -29,6 +29,7 @@ using namespace Halley;
 #include "messages/send_script_msg_message.h"
 #include "messages/return_host_script_thread_message.h"
 #include "messages/set_entity_variable_message.h"
+#include "system_messages/play_network_animation_system_message.h"
 #include "system_messages/play_network_sound_system_message.h"
 #include "system_messages/terminate_scripts_with_tag_system_message.h"
 #include "system_messages/start_host_script_thread_system_message.h"
@@ -105,7 +106,8 @@ public:
 	}
 	Vector<std::unique_ptr<SystemMessageReflector>> makeSystemMessageReflectors() override {
 		Vector<std::unique_ptr<SystemMessageReflector>> result;
-		result.reserve(6);
+		result.reserve(7);
+		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkAnimationSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<PlayNetworkSoundSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<TerminateScriptsWithTagSystemMessage>>());
 		result.push_back(std::make_unique<SystemMessageReflectorImpl<StartHostScriptThreadSystemMessage>>());

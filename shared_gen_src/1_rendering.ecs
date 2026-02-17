@@ -142,6 +142,18 @@ message:
 
 ---
 
+systemMessage:
+  name: PlayNetworkAnimation
+  members:
+  - entity: Halley::EntityId
+  - sequence: Halley::String
+  - once: bool
+  destination: remoteClients
+  serializable: true
+  multicast: true
+
+---
+
 component:
   name: SpriteAnimationReplicator
   category: graphics
@@ -196,6 +208,8 @@ system:
   messages:
   - PlayAnimation: receive
   - PlayAnimationOnce: receive
+  systemMessages:
+  - PlayNetworkAnimation: receive
   services:
   - ScreenService
 

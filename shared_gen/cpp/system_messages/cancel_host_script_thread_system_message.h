@@ -7,7 +7,7 @@
 
 class CancelHostScriptThreadSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 3 };
+	static constexpr int messageIndex{ 4 };
 	static const constexpr char* messageName{ "CancelHostScriptThread" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::Host };
 	using ReturnType = void;

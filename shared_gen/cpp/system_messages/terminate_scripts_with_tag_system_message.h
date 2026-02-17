@@ -7,7 +7,7 @@
 
 class TerminateScriptsWithTagSystemMessage final : public Halley::SystemMessage {
 public:
-	static constexpr int messageIndex{ 1 };
+	static constexpr int messageIndex{ 2 };
 	static const constexpr char* messageName{ "TerminateScriptsWithTag" };
 	static constexpr Halley::SystemMessageDestination messageDestination{ Halley::SystemMessageDestination::AllClients };
 	using ReturnType = void;

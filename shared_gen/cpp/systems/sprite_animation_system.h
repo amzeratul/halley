@@ -12,6 +12,7 @@
 #include "components/sprite_animation_replicator_component.h"
 #include "messages/play_animation_message.h"
 #include "messages/play_animation_once_message.h"
+#include "system_messages/play_network_animation_system_message.h"
 
 // Generated file; do not modify.
 template <typename T>
@@ -70,6 +71,8 @@ public:
 
 	virtual void onMessageReceived(const PlayAnimationOnceMessage& msg, MainFamily& e) = 0;
 
+	virtual void onMessageReceived(const PlayNetworkAnimationSystemMessage& msg) = 0;
+
 	SpriteAnimationSystemBase()
 		: System({&mainFamily, &replicatorFamily}, {PlayAnimationMessage::messageIndex, PlayAnimationOnceMessage::messageIndex})
 	{
@@ -120,5 +123,24 @@ private:
 		for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(*msgs[i], family[idx[i]]);
 	}
 
+	void onSystemMessageReceived(const Halley::SystemMessageContext& context) override final {
+		switch (context.msgId) {
+		case PlayNetworkAnimationSystemMessage::messageIndex: {
+		    auto& realMsg = reinterpret_cast<PlayNetworkAnimationSystemMessage&>(*context.msg);
+		    static_cast<T*>(this)->onMessageReceived(realMsg);
+		    if (context.callback) {
+		        context.callback(nullptr, {});
+		    }
+		    break;
+		}
+		}
+	}
+	bool canHandleSystemMessage(int msgIndex, const Halley::String& targetSystem) const override final {
+		if (!targetSystem.isEmpty() && targetSystem != getName()) return false;
+		switch (msgIndex) {
+		case PlayNetworkAnimationSystemMessage::messageIndex: return true;
+		}
+		return false;
+	}
 };
 

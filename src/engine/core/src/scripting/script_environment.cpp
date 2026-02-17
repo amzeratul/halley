@@ -21,6 +21,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/support/profiler.h"
 #include "nodes/script_network.h"
+#include "system_messages/play_network_animation_system_message.h"
 #include "system_messages/play_network_sound_system_message.h"
 
 using namespace Halley;
@@ -903,6 +904,22 @@ EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, Graph
 EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	return node.getNodeType().getEntityId(*this, node, pinN, getNodeData(node.getId()));
+}
+
+void ScriptEnvironment::postAnimationEvent(const String& sequence, bool once, EntityId entityId)
+{
+	if (!sequence.isEmpty()) {
+		auto msg = std::make_unique<PlayNetworkAnimationSystemMessage>(entityId, sequence, once);
+		const auto msgId = msg->getId();
+
+		SystemMessageContext context;
+		context.msg = std::move(msg);
+		context.msgId = msgId;
+		context.remote = false;
+		context.callback = nullptr;
+
+		world.sendSystemMessage(std::move(context), "SpriteAnimation", SystemMessageDestination::RemoteClients);
+	}
 }
 
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
