@@ -187,7 +187,8 @@ namespace Halley {
 		void reset();
 		void prepareStates(const EntitySerializationContext& context, Time t);
 
-    	NodeState& getNodeState(GraphNodeId nodeId);
+    	NodeState& getNodeState(GraphNodeId nodeId) { return nodeState[nodeId]; }
+
 		void startNode(const ScriptGraphNode& node, NodeState& state);
 		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	

@@ -865,8 +865,7 @@ ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, Grap
 	assert(pin.connections.size() == 1);
 
 	const auto& dst = pin.connections[0];
-	const auto& nodes = currentGraph->getNodes();
-	const auto& dstNode = nodes[dst.dstNode.value()];
+	const auto& dstNode = currentGraph->getNodes()[dst.dstNode.value()];
 	return dstNode.getNodeType().getData(*this, dstNode, dst.dstPin, getNodeData(dst.dstNode.value()));
 }
 

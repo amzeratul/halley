@@ -134,7 +134,7 @@ std::unique_ptr<BaseGraphNode> ScriptGraphNode::clone() const
 void ScriptGraphNode::assignType(const GraphNodeTypeCollection& nodeTypeCollection) const
 {
 	nodeType = dynamic_cast<const IScriptNodeType*>(nodeTypeCollection.tryGetGraphNodeType(type));
-	Ensures(nodeType != nullptr);
+	assert(nodeType != nullptr);
 }
 
 void ScriptGraphNode::clearType() const
@@ -144,13 +144,7 @@ void ScriptGraphNode::clearType() const
 
 const IGraphNodeType& ScriptGraphNode::getGraphNodeType() const
 {
-	Expects(nodeType != nullptr);
-	return *nodeType;
-}
-
-const IScriptNodeType& ScriptGraphNode::getNodeType() const
-{
-	Expects(nodeType != nullptr);
+	assert(nodeType != nullptr);
 	return *nodeType;
 }
 

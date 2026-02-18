@@ -672,11 +672,6 @@ std::optional<Future<ConfigNode>> ScriptState::getFutureNodeValue(GraphNodeId id
 	return std::nullopt;
 }
 
-ScriptState::NodeState& ScriptState::getNodeState(GraphNodeId nodeId)
-{
-	return nodeState.at(nodeId);
-}
-
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
 	assert(!state.hasPendingData);

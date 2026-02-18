@@ -25,8 +25,13 @@ namespace Halley {
 
 		void assignType(const GraphNodeTypeCollection& nodeTypeCollection) const override;
 		void clearType() const override;
+
 		const IGraphNodeType& getGraphNodeType() const override;
-		const IScriptNodeType& getNodeType() const;
+		const IScriptNodeType& getNodeType() const
+		{
+			assert(nodeType != nullptr);
+			return *nodeType;
+		}
 
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
 		void setParentNode(OptionalLite<GraphNodeId> id) { parentNode = id; }
