@@ -353,10 +353,12 @@ namespace Halley
 	struct ResourceOptions {
 		bool retainPixelData = false;
 		bool retainShaderData = false;
+		bool allowHotReload = true;
 		
-		ResourceOptions(bool retainPixelData = false, bool retainShaderData = false)
+		ResourceOptions(bool retainPixelData = false, bool retainShaderData = false, bool allowHotReload = true)
 			: retainPixelData(retainPixelData)
 			, retainShaderData(retainShaderData)
+			, allowHotReload(allowHotReload)
 		{}
 	};
 }

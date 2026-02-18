@@ -371,7 +371,10 @@ UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, std::sh
 void UIStyleSheet::load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	load(file.getRoot(), file.getAssetId(), colourScheme);
-	observers[file.getAssetId()] = ConfigObserver(file);
+
+	if (resources.getOptions().allowHotReload) {
+		observers[file.getAssetId()] = ConfigObserver(file);
+	}
 }
 
 bool UIStyleSheet::updateIfNeeded()
@@ -432,7 +435,9 @@ void UIStyleSheet::load(const ConfigNode& root, const String& assetId, std::shar
 			iter->second->reload(node.second);
 		} else {
 			styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, *this);
-			styleToObserver[node.first] = assetId;
+			if (resources.getOptions().allowHotReload) {
+				styleToObserver[node.first] = assetId;
+			}
 		}
 	}
 }

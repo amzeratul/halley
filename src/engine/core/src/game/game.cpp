@@ -13,7 +13,7 @@ void Game::init(const Environment&, const Vector<String>&)
 
 ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
-	return {};
+	return ResourceOptions(false, false, isDevMode());
 }
 
 void Game::update(Time t)
