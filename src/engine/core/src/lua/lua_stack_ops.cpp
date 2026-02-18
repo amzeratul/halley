@@ -29,14 +29,9 @@ void LuaStackOps::push(double v)
 	lua_pushnumber(state.getRawState(), v);
 }
 
-void LuaStackOps::push(const char* v)
+void LuaStackOps::push(std::string_view v)
 {
-	lua_pushstring(state.getRawState(), v);
-}
-
-void LuaStackOps::push(const String& v)
-{
-	lua_pushstring(state.getRawState(), v.c_str());
+	lua_pushlstring(state.getRawState(), v.data(), v.size());
 }
 
 void LuaStackOps::push(Vector2i v)
@@ -224,6 +219,12 @@ String LuaStackOps::popString()
 	String value = lua_tostring(state.getRawState(), -1);
 	pop();
 	return value;
+}
+
+std::string_view LuaStackOps::popStringView()
+{
+	tempString = popString();
+	return std::string_view(tempString);
 }
 
 Vector2i LuaStackOps::popVector2i()

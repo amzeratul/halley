@@ -39,6 +39,14 @@ namespace Halley {
 			stack.makeGlobal(key);
 		}
 
+		template <typename T, typename R, typename... Ps>
+		void setLuaGlobalCallback(const String& key, const T* obj, R (T::*f)(Ps...) const)
+		{
+			auto stack = LuaStackOps(*luaState);
+			stack.push(LuaCallbackBind(obj, f));
+			stack.makeGlobal(key);
+		}
+
 		ConfigNode getLuaGlobal(const String& key);
 		void copyLuaGlobal(const String& key, ScriptingService& source);
 

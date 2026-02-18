@@ -76,8 +76,26 @@ namespace Halley {
 			return applyTuple(obj, f, tuple, args..., std::get<sizeof...(As)>(tuple));
 		}
 
+		template <typename T, typename R, typename... Ps, typename... As>
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<Ps...>& tuple, As... args)
+		{
+			return (obj->*f)(args...);
+		}
+
+		template <typename T, typename R, typename... Ps, typename... As>
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<Ps...>& tuple, As... args)
+		{
+			return applyTuple(obj, f, tuple, args..., std::get<sizeof...(As)>(tuple));
+		}
+
 		template <typename T, typename R, typename... Ps>
 		inline R call(T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& args)
+		{
+			return applyTuple(obj, f, args);
+		}
+
+		template <typename T, typename R, typename... Ps>
+		inline R call(const T* obj, R (T::*f)(Ps...) const, std::tuple<Ps...>&& args)
 		{
 			return applyTuple(obj, f, args);
 		}
@@ -102,10 +120,37 @@ namespace Halley {
 				return 1;
 			};
 		}
+
+		template <typename T, typename R, typename... Ps>
+		inline LuaCallback bind(const T* obj, R (T::*f)(Ps...) const, std::enable_if_t<std::is_void<R>::value, int>)
+		{
+			return [=] (LuaState& state) -> int
+			{
+				call(obj, f, makeTuple<Ps...>(state));
+				return 0;
+			};
+		}
+
+		template <typename T, typename R, typename... Ps>
+		inline LuaCallback bind(const T* obj, R (T::*f)(Ps...) const, std::enable_if_t<!std::is_void<R>::value, int>)
+		{
+			return [=] (LuaState& state) -> int
+			{
+				R result = call(obj, f, makeTuple<Ps...>(state));
+				ToLua<R>()(state, result);
+				return 1;
+			};
+		}
 	}
 
 	template <typename T, typename R, typename... Ps>
 	LuaCallback LuaCallbackBind(T* obj, R (T::*f)(Ps...))
+	{
+		return LuaCallbackBindDetails::bind(obj, f, 0);
+	}
+
+	template <typename T, typename R, typename... Ps>
+	LuaCallback LuaCallbackBind(const T* obj, R (T::*f)(Ps...) const)
 	{
 		return LuaCallbackBindDetails::bind(obj, f, 0);
 	}

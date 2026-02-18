@@ -22,8 +22,7 @@ namespace Halley {
 		void push(int v);
 		void push(int64_t v);
 		void push(double v);
-		void push(const char* v);
-		void push(const String& v);
+		void push(std::string_view v);
 		void push(Vector2i v);
 		void push(Vector2f v);
 		void push(Vector3i v);
@@ -76,6 +75,7 @@ namespace Halley {
 		int64_t popInt64();
 		double popDouble();
 		String popString();
+		std::string_view popStringView();
 		Vector2i popVector2i();
 		Vector2f popVector2f();
 		ConfigNode popConfigNode();
@@ -86,6 +86,7 @@ namespace Halley {
 
 	private:
 		LuaState& state;
+		String tempString;
 	};
 
 	class LuaCustomSerialize {};
@@ -158,6 +159,11 @@ namespace Halley {
 	template <>
 	struct FromLua<String> {
 		inline String operator()(LuaState& state) const { return LuaStackOps(state).popString(); };
+	};
+
+	template <>
+	struct FromLua<std::string_view> {
+		inline std::string_view operator()(LuaState& state) const { return LuaStackOps(state).popStringView(); };
 	};
 
 	template <>
