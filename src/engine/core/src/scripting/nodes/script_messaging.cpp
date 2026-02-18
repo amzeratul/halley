@@ -590,19 +590,24 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 
 	std::function<void(std::byte*, Bytes)> callback;
 	if (!msgType.returnType.isEmpty()) {
-		if (msgType.returnType == "Halley::ConfigNode") {
+		auto baseType = msgType.returnType;
+		if (baseType.startsWith("Halley::Future<") && baseType.endsWith(">")) {
+			baseType = baseType.mid(15, baseType.size() - 16);
+		}
+
+		if (baseType == "Halley::ConfigNode") {
 			callback = makeCallback<ConfigNode>(environment, node);
-		} else if (msgType.returnType == "bool") {
+		} else if (baseType == "bool") {
 			callback = makeCallback<bool>(environment, node);
-		} else if (msgType.returnType == "int") {
+		} else if (baseType == "int") {
 			callback = makeCallback<int>(environment, node);
-		} else if (msgType.returnType == "float") {
+		} else if (baseType == "float") {
 			callback = makeCallback<float>(environment, node);
-		} else if (msgType.returnType == "Halley::String") {
+		} else if (baseType == "Halley::String") {
 			callback = makeCallback<String>(environment, node);
-		} else if (msgType.returnType == "Halley::Vector2f") {
+		} else if (baseType == "Halley::Vector2f") {
 			callback = makeCallback<Vector2f>(environment, node);
-		} else if (msgType.returnType == "Halley::EntityId") {
+		} else if (baseType == "Halley::EntityId") {
 			callback = makeCallback<EntityId>(environment, node);
 		}
 	}

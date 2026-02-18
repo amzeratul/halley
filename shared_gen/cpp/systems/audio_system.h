@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #include <halley.hpp>
@@ -101,10 +101,9 @@ private:
 		switch (context.msgId) {
 		case PlayNetworkSoundSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<PlayNetworkSoundSystemMessage&>(*context.msg);
+		    Halley::VoidWrapper result;
 		    static_cast<T*>(this)->onMessageReceived(realMsg);
-		    if (context.callback) {
-		        context.callback(nullptr, {});
-		    }
+		    context.setResult(result);
 		    break;
 		}
 		}

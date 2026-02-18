@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #include <halley.hpp>
@@ -89,13 +89,7 @@ private:
 		case NetworkEntityLockSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<NetworkEntityLockSystemMessage&>(*context.msg);
 		    auto result = static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
-		    if (context.callback) {
-		        if (context.remote) {
-		            context.callback(nullptr, Halley::Serializer::toBytes(result, Halley::SerializerOptions(Halley::SerializerOptions::maxVersion)));
-		        } else {
-		            context.callback(reinterpret_cast<std::byte*>(&result), {});
-		        }
-		    }
+		    context.setResult(result);
 		    break;
 		}
 		}

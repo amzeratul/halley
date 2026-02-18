@@ -7,6 +7,8 @@
 #include "message.h"
 #include "halley/utils/utils.h"
 #include "halley/text/enum_names.h"
+#include "halley/bytes/byte_serializer.h"
+#include "halley/concurrency/future.h"
 
 namespace Halley
 {
@@ -49,5 +51,39 @@ namespace Halley
 			, msg(std::move(msg))
 			, callback(std::move(callback))
 		{}
+
+		template <typename T>
+		void setResult(T& result) const
+		{
+			if (!callback) {
+				return;
+			}
+
+			if constexpr (std::is_same_v<T, VoidWrapper>) {
+				callback(nullptr, {});
+			} else {
+		        if (remote) {
+		            callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));
+		        } else {
+		            callback(reinterpret_cast<std::byte*>(&result), {});
+		        }
+			}
+		}
+
+		template <typename T>
+		void setResult(Future<T>& futureResult) const
+		{
+			if (!callback) {
+				return;
+			}
+
+			futureResult.then([callback = callback, remote = remote] (T result) {
+				if (remote) {
+		            callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));
+		        } else {
+		            callback(reinterpret_cast<std::byte*>(&result), {});
+		        }
+			});
+		}
 	};
 }

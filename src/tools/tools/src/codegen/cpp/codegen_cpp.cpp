@@ -741,22 +741,15 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				
 				onReceivedBody.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
 				onReceivedBody.emplace_back("    auto& realMsg = reinterpret_cast<" + msg.name + "SystemMessage&>(*context.msg);");
+				if (sysMsg.returnType == "void") {
+					onReceivedBody.emplace_back("    Halley::VoidWrapper result;");
+				}
 				if (sysMsg.multicast) {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(realMsg);");
 				} else {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(std::move(realMsg));");
 				}
-				onReceivedBody.emplace_back("    if (context.callback) {");
-				if (sysMsg.returnType == "void") {
-					onReceivedBody.emplace_back("        context.callback(nullptr, {});");
-				} else {
-					onReceivedBody.emplace_back("        if (context.remote) {");
-					onReceivedBody.emplace_back("            context.callback(nullptr, Halley::Serializer::toBytes(result, Halley::SerializerOptions(Halley::SerializerOptions::maxVersion)));");
-					onReceivedBody.emplace_back("        } else {");
-					onReceivedBody.emplace_back("            context.callback(reinterpret_cast<std::byte*>(&result), {});");
-					onReceivedBody.emplace_back("        }");
-				}
-				onReceivedBody.emplace_back("    }");
+				onReceivedBody.emplace_back("    context.setResult(result);");
 				onReceivedBody.emplace_back("    break;");
 				onReceivedBody.emplace_back("}");
 

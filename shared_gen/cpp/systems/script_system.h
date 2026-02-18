@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #include <halley.hpp>
@@ -210,26 +210,23 @@ private:
 		switch (context.msgId) {
 		case TerminateScriptsWithTagSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<TerminateScriptsWithTagSystemMessage&>(*context.msg);
+		    Halley::VoidWrapper result;
 		    static_cast<T*>(this)->onMessageReceived(realMsg);
-		    if (context.callback) {
-		        context.callback(nullptr, {});
-		    }
+		    context.setResult(result);
 		    break;
 		}
 		case StartHostScriptThreadSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<StartHostScriptThreadSystemMessage&>(*context.msg);
+		    Halley::VoidWrapper result;
 		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
-		    if (context.callback) {
-		        context.callback(nullptr, {});
-		    }
+		    context.setResult(result);
 		    break;
 		}
 		case CancelHostScriptThreadSystemMessage::messageIndex: {
 		    auto& realMsg = reinterpret_cast<CancelHostScriptThreadSystemMessage&>(*context.msg);
+		    Halley::VoidWrapper result;
 		    static_cast<T*>(this)->onMessageReceived(std::move(realMsg));
-		    if (context.callback) {
-		        context.callback(nullptr, {});
-		    }
+		    context.setResult(result);
 		    break;
 		}
 		}
