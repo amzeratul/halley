@@ -86,7 +86,6 @@ namespace Halley {
 
 	private:
 		LuaState& state;
-		String tempString;
 	};
 
 	class LuaCustomSerialize {};

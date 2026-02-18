@@ -223,8 +223,14 @@ String LuaStackOps::popString()
 
 std::string_view LuaStackOps::popStringView()
 {
-	tempString = popString();
-	return std::string_view(tempString);
+	size_t len = 0;
+	const char* str = lua_tolstring(state.getRawState(), -1, &len);
+
+	thread_local String tempString;
+	tempString = std::string_view(str, len);
+	pop();
+
+	return tempString;
 }
 
 Vector2i LuaStackOps::popVector2i()
