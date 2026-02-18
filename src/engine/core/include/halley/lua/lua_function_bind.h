@@ -46,6 +46,24 @@ namespace Halley {
 	};
 
 	namespace LuaCallbackBindDetails {
+		template <typename T>
+		struct ArgTransform {
+			using type = std::decay_t<T>;
+		};
+
+		template <>
+		struct ArgTransform<std::string_view> {
+			using type = String;
+		};
+
+		template <>
+		struct ArgTransform<const char*> {
+			using type = String;
+		};
+
+		template <typename T>
+		using ArgTransformT = typename ArgTransform<std::decay_t<T>>::type;
+
 		template <signed int pos, typename Tuple>
 		inline void doFillTuple(LuaState& state, Tuple& tuple)
 		{
@@ -57,45 +75,45 @@ namespace Halley {
 		}
 		
 		template <typename... Ps>
-		inline std::tuple<Ps...> makeTuple(LuaState& state)
+		inline std::tuple<ArgTransformT<Ps>...> makeTuple(LuaState& state)
 		{
-			std::tuple<Ps...> tuple;
-			doFillTuple<sizeof...(Ps), std::tuple<Ps...>>(state, tuple);
+			std::tuple<ArgTransformT<Ps>...> tuple;
+			doFillTuple<sizeof...(Ps), std::tuple<ArgTransformT<Ps>...>>(state, tuple);
 			return tuple;
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<Ps...>& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<ArgTransformT<Ps>...>& tuple, As... args)
 		{
 			return (obj->*f)(args...);
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<Ps...>& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), T*> obj, R (T::*f)(Ps...), std::tuple<ArgTransformT<Ps>...>& tuple, As... args)
 		{
 			return applyTuple(obj, f, tuple, args..., std::get<sizeof...(As)>(tuple));
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<Ps...>& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) == sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<ArgTransformT<Ps>...>& tuple, As... args)
 		{
 			return (obj->*f)(args...);
 		}
 
 		template <typename T, typename R, typename... Ps, typename... As>
-		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<Ps...>& tuple, As... args)
+		inline R applyTuple(std::enable_if_t<sizeof...(Ps) != sizeof...(As), const T*> obj, R (T::*f)(Ps...) const, std::tuple<ArgTransformT<Ps>...>& tuple, As... args)
 		{
 			return applyTuple(obj, f, tuple, args..., std::get<sizeof...(As)>(tuple));
 		}
 
 		template <typename T, typename R, typename... Ps>
-		inline R call(T* obj, R (T::*f)(Ps...), std::tuple<Ps...>&& args)
+		inline R call(T* obj, R (T::*f)(Ps...), std::tuple<ArgTransformT<Ps>...>&& args)
 		{
 			return applyTuple(obj, f, args);
 		}
 
 		template <typename T, typename R, typename... Ps>
-		inline R call(const T* obj, R (T::*f)(Ps...) const, std::tuple<Ps...>&& args)
+		inline R call(const T* obj, R (T::*f)(Ps...) const, std::tuple<ArgTransformT<Ps>...>&& args)
 		{
 			return applyTuple(obj, f, args);
 		}
