@@ -235,14 +235,14 @@ bool UIRenderSurface::isRendering() const
 	return isEnabled() && !bypass;
 }
 
-void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time, Time delay)
+void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time, Time delay, FadeCallback whenDone)
 {
-	fading = Fade{ from, to, time, -delay };
+	fading = Fade{ from, to, time, -delay, std::move(whenDone) };
 }
 
-void UIRenderSurface::fade(float from, float to, Time time, Time delay)
+void UIRenderSurface::fade(float from, float to, Time time, Time delay, FadeCallback whenDone)
 {
-	fade(Colour4f(1, 1, 1, from), Colour4f(1, 1, 1, to), time, delay);
+	fade(Colour4f(1, 1, 1, from), Colour4f(1, 1, 1, to), time, delay, std::move(whenDone));
 }
 
 void UIRenderSurface::update(Time t, bool moved)
@@ -253,6 +253,9 @@ void UIRenderSurface::update(Time t, bool moved)
 		setColour(lerp(fading->from, fading->to, v));
 		if (fading->curTime >= fading->length) {
 			setColour(fading->to);
+			if (fading->whenDone) {
+				fading->whenDone();
+			}
 			fading = {};
 		}
 	}

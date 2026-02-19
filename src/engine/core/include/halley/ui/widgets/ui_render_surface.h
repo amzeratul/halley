@@ -8,6 +8,8 @@
 namespace Halley {
     class UIRenderSurface : public UIWidget {
     public:
+        using FadeCallback = std::function<void()>;
+
         UIRenderSurface(String id, Vector2f minSize, std::optional<UISizer> sizer, const HalleyAPI& api, Resources& resources, const String& materialName, RenderSurfaceOptions options);
 
         void draw(UIPainter& painter) const override;
@@ -36,8 +38,8 @@ namespace Halley {
         void setAutoBypass(bool autoBypass);
         bool isRendering() const;
 
-    	void fade(Colour4f from, Colour4f to, Time time, Time delay = 0);
-    	void fade(float from, float to, Time time, Time delay = 0);
+    	void fade(Colour4f from, Colour4f to, Time time, Time delay = 0, FadeCallback whenDone = {});
+    	void fade(float from, float to, Time time, Time delay = 0, FadeCallback whenDone = {});
         void update(Time t, bool moved) override;
 
         bool ignoreClip() const override;
@@ -70,6 +72,7 @@ namespace Halley {
             Colour4f to;
             Time length;
             Time curTime = 0;
+            FadeCallback whenDone;
         };
         std::optional<Fade> fading;
 
