@@ -170,18 +170,7 @@ Bytes FileSystem::readFile(const Path& path)
 
 Vector<Path> FileSystem::enumerateDirectory(const Path& dir)
 {
-	Vector<Path> result;
-	if (exists(dir)) {
-		using RDI = recursive_directory_iterator;
-		RDI end;
-		for (RDI i(getNative(dir)); i != end; ++i) {
-			path fullPath = i->path();
-			if (is_regular_file(fullPath.native())) {
-				result.push_back(Path(fullPath.lexically_relative(getNative(dir)).string()));
-			}
-		}
-	}
-	return result;
+	return dir.enumerateDirectory(true);
 }
 
 Path FileSystem::getRelative(const Path& path, const Path& parentPath)

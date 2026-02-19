@@ -615,3 +615,55 @@ Path Path::getFront(size_t n) const
 	}
 	return Path(Vector<String>(pathParts.begin(), pathParts.begin() + n), true);
 }
+
+
+
+#if __has_include(<filesystem>)
+#include <filesystem>
+#ifdef __cpp_lib_filesystem
+#define HAS_FILESYSTEM
+#endif
+#endif
+
+#ifdef HAS_FILESYSTEM
+
+namespace {
+	std::filesystem::path getNative(const Path& p)
+	{
+#ifdef _WIN32
+		return std::filesystem::path(p.getNativeString().getUTF16().c_str());
+#else
+		return std::filesystem::path(p.string());
+#endif
+	}
+}
+
+Vector<Path> Path::enumerateDirectory(bool makeRelative) const
+{
+	Vector<Path> result;
+	if (exists(*this)) {
+		std::filesystem::recursive_directory_iterator end;
+		const auto dir = getNative(*this);
+		for (auto i = std::filesystem::recursive_directory_iterator(dir); i != end; ++i) {
+			std::filesystem::path fullPath = i->path();
+			if (std::filesystem::is_regular_file(fullPath.native())) {
+				if (makeRelative) {
+					result.push_back(Path(String(StringUTF32(fullPath.lexically_relative(dir).u32string()))));
+				} else {
+					result.push_back(Path(String(StringUTF32(fullPath.u32string()))));
+				}
+			}
+		}
+	}
+	return result;
+}
+
+#else
+
+Vector<Path> Path::enumerateDirectory() const
+{
+	Logger::logError("Path::enumerateDirectory() is not implemented due to missing filesystem library");
+	return {};
+}
+
+#endif

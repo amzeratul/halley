@@ -83,6 +83,8 @@ namespace Halley
 
 		size_t getHash() const;
 
+		Vector<Path> enumerateDirectory(bool makeRelative) const;
+
 	private:
 		Vector<String> pathParts;
 		void normalise();
