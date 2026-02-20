@@ -357,6 +357,16 @@ namespace std_ex {
 		source.clear();
 	};
 
+	template <typename C, typename S>
+	auto move_push_back(C& destination, S&& source)
+	{
+		destination.reserve(destination.size() + source.size());
+		for (const auto& s: source) {
+			destination.push_back(std::move(s));
+		}
+		source.clear();
+	};
+
 	template <typename C, typename F>
 	Halley::Vector<std::invoke_result_t<F, typename C::value_type>> transform(const C& container, const F& predicate)
 	{
