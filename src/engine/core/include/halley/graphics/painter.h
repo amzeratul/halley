@@ -91,6 +91,7 @@ namespace Halley
 
 		// Draws a line across all points (if no material is specified, use standard one)
 		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
+		void drawLine(gsl::span<const Vector2f> points, gsl::span<const float> widths, gsl::span<const Colour4f> colours, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});
 		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<const Material> material = {}, LineParameters params = {});

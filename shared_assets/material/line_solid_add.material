@@ -1,0 +1,10 @@
+---
+name: Halley/SolidLineAdd
+base: line_base.material
+passes:
+  - blend: Add Premultiplied
+    shader:
+    - language: hlsl
+      vertex: line.vertex.hlsl
+      pixel: line_solid.pixel.hlsl
+...

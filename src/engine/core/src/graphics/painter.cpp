@@ -266,12 +266,17 @@ void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, 
 
 void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<const Material> material, LineParameters params)
 {
+	drawLine(points, gsl::span(&width, 1), gsl::span(&colour, 1), loop, std::move(material), std::move(params));
+}
+
+void Painter::drawLine(gsl::span<const Vector2f> points, gsl::span<const float> widths, gsl::span<const Colour4f> colours, bool loop, std::shared_ptr<const Material> material, LineParameters params)
+{
 	if (!material) {
 		material = getSolidLineMaterial();
 	}
 
 	// Need at least two points to draw a line
-	if (points.size() < 2) {
+	if (points.size() < 2 || widths.empty() || colours.empty()) {
 		return;
 	}
 
@@ -308,7 +313,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	Vector2f normal = segmentNormal(0).value();
 
 	const float zoom = getCurrentCamera().getZoom();
-	const float pixelAlignOffset = params.pixelAlign ? std::fmod(width * zoom, 2.0f) / (2.0f * zoom) : 0.0f;
+	const float pixelAlignOffset = params.pixelAlign ? std::fmod(widths[0] * zoom, 2.0f) / (2.0f * zoom) : 0.0f;
 
 	float curLen = 0;
 	for (size_t i = 0; i < nSegments; ++i) {
@@ -324,11 +329,12 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 		for (size_t j = 0; j < 4; ++j) {
 			const size_t idx = i * 4 + j;
+			const auto pointIdx = (i + pointIdxOffset[j]) % nPoints;
 			auto& v = vertices[idx];
-			v.colour = colour.toVector4();
-			v.position = points[(i + pointIdxOffset[j]) % nPoints] + Vector2f(pixelAlignOffset, pixelAlignOffset);
+			v.colour = colours[std::min(pointIdx, colours.size() - 1)].toVector4();
+			v.position = points[pointIdx] + Vector2f(pixelAlignOffset, pixelAlignOffset);
 			v.normal = j <= 1 ? v0n : v1n;
-			v.width.x = width;
+			v.width.x = widths[std::min(pointIdx, colours.size() - 1)];
 			v.width.y = normalPos[j];
 			v.dashing = Vector4f(curLens[pointIdxOffset[j]], params.onLength, params.offLength, 0);
 		}
