@@ -660,7 +660,7 @@ Vector<Path> Path::enumerateDirectory(bool makeRelative) const
 
 #else
 
-Vector<Path> Path::enumerateDirectory() const
+Vector<Path> Path::enumerateDirectory(bool makeRelative) const
 {
 	Logger::logError("Path::enumerateDirectory() is not implemented due to missing filesystem library");
 	return {};
