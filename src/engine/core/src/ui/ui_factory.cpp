@@ -338,6 +338,11 @@ Resources& UIFactory::getResources() const
 	return resources;
 }
 
+const HalleyAPI& UIFactory::getAPI() const
+{
+	return api;
+}
+
 std::unique_ptr<UIFactory> UIFactory::clone() const
 {
 	return cloneWithResources(resources);
