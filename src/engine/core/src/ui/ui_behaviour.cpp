@@ -32,6 +32,10 @@ void UIBehaviour::onParentAboutToDraw()
 {
 }
 
+void UIBehaviour::onActiveChanged(bool active)
+{
+}
+
 bool UIBehaviour::isAlive() const
 {
 	return true;

@@ -18,6 +18,7 @@ namespace Halley {
 		virtual bool onParentDestroyRequested(); // Return true if OK, false to abort destruction
 		virtual void onParentDestroyed();
 		virtual void onParentAboutToDraw();
+		virtual void onActiveChanged(bool active);
 
 		virtual bool isAlive() const;
 		UIWidget* getWidget() const;

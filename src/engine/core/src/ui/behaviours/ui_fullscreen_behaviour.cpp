@@ -13,3 +13,10 @@ void UIFullscreenBehaviour::update(Time time)
 {
 	getWidget()->setMinSize(getWidget()->getRoot()->getRect().getSize());
 }
+
+void UIFullscreenBehaviour::onActiveChanged(bool active)
+{
+	if (active) {
+		getWidget()->setMinSize(getWidget()->getRoot()->getRect().getSize());
+	}
+}

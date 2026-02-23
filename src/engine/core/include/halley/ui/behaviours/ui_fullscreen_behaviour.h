@@ -9,5 +9,6 @@ namespace Halley {
 	public:
 		void onAddedToRoot(UIRoot& root) override;
 		void update(Time time) override;
+		void onActiveChanged(bool active) override;
 	};
 }
