@@ -89,9 +89,12 @@ component:
   - id:
       type: 'Halley::String'
       displayName: Id
-  - offset:
-      type: 'Halley::Vector2f'
-      displayName: Offset
+  - uiOffsets:
+      type: 'Halley::HashMap<Halley::String, Halley::Vector2f>'
+      displayName: UI-Space Offsets
+  - worldOffsets:
+      type: 'Halley::HashMap<Halley::String, Halley::Vector2f>'
+      displayName: World-Space Offsets
   - integerCoords:
       type: bool
       defaultValue: false

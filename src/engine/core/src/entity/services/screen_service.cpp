@@ -58,11 +58,6 @@ Vector2f ScreenService::worldToScreen(Vector2f pos) const
 	return (pos - cameraPosition) * getWorldZoomLevel() + Vector2f(getScreenResolution() / 2);
 }
 
-Vector2f ScreenService::worldToUI(Vector2f pos) const
-{
-	return (pos - cameraPosition) + Vector2f(getUIResolution() / 2);
-}
-
 Vector2f ScreenService::screenToWorld(Vector2f pos) const
 {
 	return (pos - Vector2f(getScreenResolution() / 2)) / getWorldZoomLevel() + cameraPosition;
@@ -76,6 +71,11 @@ Vector2f ScreenService::screenToUI(Vector2f pos) const
 Vector2f ScreenService::uiToScreen(Vector2f pos) const
 {
 	return pos * getUIZoomLevel();
+}
+
+Vector2f ScreenService::worldToUI(Vector2f pos) const
+{
+	return screenToUI(worldToScreen(pos));
 }
 
 Vector2f ScreenService::uiToWorld(Vector2f pos) const
