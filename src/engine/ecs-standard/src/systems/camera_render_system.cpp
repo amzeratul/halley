@@ -89,7 +89,9 @@ private:
 		renderGraph.clearCameras();
 
 		for (auto& [id, camera]: getPainterService().getFrameData().cameras) {
-			camera.setPosition(getScreenService().roundCameraPosition(camera.getPosition().xy(), size));
+			const bool uiCamera = id.startsWith("ui"); // HACK?
+			const auto pos = uiCamera ? getScreenService().roundUICameraPosition(camera.getPosition().xy(), size) : getScreenService().roundWorldCameraPosition(camera.getPosition().xy(), size);
+			camera.setPosition(pos);
 			renderGraph.setCamera(id, camera);
 		}
 	}
@@ -132,7 +134,7 @@ private:
 
 	void onImageCaptured(ScreenGrabMode mode, Image& image)
 	{
-		const int downscale = lroundl(getScreenService().getZoomLevel());
+		const int downscale = lroundl(getScreenService().getWorldZoomLevel());
 
 		for (auto& pc: pendingCaptures) {
 			if (pc.mode == mode) {

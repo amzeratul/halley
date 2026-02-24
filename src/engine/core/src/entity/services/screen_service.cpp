@@ -33,9 +33,14 @@ Vector2i ScreenService::getUIResolution() const
 	return interface->getUIResolution();
 }
 
-float ScreenService::getZoomLevel() const
+float ScreenService::getUIZoomLevel() const
 {
-	return interface->getZoomLevel();
+	return interface->getUIZoomLevel();
+}
+
+float ScreenService::getWorldZoomLevel() const
+{
+	return interface->getWorldZoomLevel();
 }
 
 void ScreenService::setCameraPosition(Vector2f camPos)
@@ -50,7 +55,7 @@ bool ScreenService::isVisible(const Rect4f& aabb) const
 
 Vector2f ScreenService::worldToScreen(Vector2f pos) const
 {
-	return (pos - cameraPosition) * getZoomLevel() + Vector2f(getScreenResolution() / 2);
+	return (pos - cameraPosition) * getWorldZoomLevel() + Vector2f(getScreenResolution() / 2);
 }
 
 Vector2f ScreenService::worldToUI(Vector2f pos) const
@@ -60,17 +65,17 @@ Vector2f ScreenService::worldToUI(Vector2f pos) const
 
 Vector2f ScreenService::screenToWorld(Vector2f pos) const
 {
-	return (pos - Vector2f(getScreenResolution() / 2)) / getZoomLevel() + cameraPosition;
+	return (pos - Vector2f(getScreenResolution() / 2)) / getWorldZoomLevel() + cameraPosition;
 }
 
 Vector2f ScreenService::screenToUI(Vector2f pos) const
 {
-	return pos / getZoomLevel();
+	return pos / getUIZoomLevel();
 }
 
 Vector2f ScreenService::uiToScreen(Vector2f pos) const
 {
-	return pos * getZoomLevel();
+	return pos * getUIZoomLevel();
 }
 
 Vector2f ScreenService::uiToWorld(Vector2f pos) const

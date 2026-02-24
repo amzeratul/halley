@@ -15,7 +15,8 @@ namespace Halley {
 		virtual Vector2i getGameResolution() const = 0;
 		virtual Vector2i getScreenResolution() const = 0;
 		virtual Vector2i getUIResolution() const = 0;
-		virtual float getZoomLevel() const = 0;
+		virtual float getWorldZoomLevel() const = 0;
+		virtual float getUIZoomLevel() const { return getWorldZoomLevel(); }
 	};
 
 	enum class ScreenGrabMode {
@@ -51,7 +52,8 @@ namespace Halley {
 		Vector2i getGameResolution() const;
 		Vector2i getScreenResolution() const;
 		Vector2i getUIResolution() const;
-		float getZoomLevel() const;
+		float getUIZoomLevel() const;
+		float getWorldZoomLevel() const;
 
 		Rect4f getCameraViewPort() const;
 		static Rect4f getCameraViewPort(Vector2f cameraPos, Vector2i gameRes);
@@ -65,9 +67,15 @@ namespace Halley {
 		Vector2f uiToScreen(Vector2f pos) const;
 		Vector2f uiToWorld(Vector2f pos) const;
 
-		Vector2f roundPosition(Vector2f pos) const
+		Vector2f roundUIPosition(Vector2f pos) const
 		{
-			const float zoom = std::max(1.0f, getZoomLevel());
+			const float zoom = std::max(1.0f, getUIZoomLevel());
+			return roundPosition(pos, zoom);
+		}
+
+		Vector2f roundWorldPosition(Vector2f pos) const
+		{
+			const float zoom = std::max(1.0f, getWorldZoomLevel());
 			return roundPosition(pos, zoom);
 		}
 
@@ -77,12 +85,17 @@ namespace Halley {
 			return (pos * effectiveZoom).floor() / effectiveZoom;
 		}
 
-		Vector2f roundCameraPosition(Vector2f pos, Vector2i screenResolution) const
+		Vector2f roundUICameraPosition(Vector2f pos, Vector2i screenResolution) const
 		{
-			return roundCameraPosition(pos, screenResolution, getZoomLevel());
+			return roundCameraPosition(pos, screenResolution, getUIZoomLevel());
 		}
 
-		static Vector2f roundCameraPosition(Vector2f pos, Vector2i screenResolution, float zoom)
+		Vector2f roundWorldCameraPosition(Vector2f pos, Vector2i screenResolution) const
+		{
+			return roundCameraPosition(pos, screenResolution, getWorldZoomLevel());
+		}
+
+		constexpr static Vector2f roundCameraPosition(Vector2f pos, Vector2i screenResolution, float zoom)
 		{
 			const float z = std::max(1.0f, zoom);
 			const auto offset = Vector2f(screenResolution % Vector2i(2, 2)) * 0.5f;
