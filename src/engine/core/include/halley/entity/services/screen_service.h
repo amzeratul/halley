@@ -17,6 +17,7 @@ namespace Halley {
 		virtual Vector2i getUIResolution() const = 0;
 		virtual float getWorldZoomLevel() const = 0;
 		virtual float getUIZoomLevel() const { return getWorldZoomLevel(); }
+		virtual void setWorldZoomMultiplier(float zoom) {}
 	};
 
 	enum class ScreenGrabMode {
@@ -107,6 +108,8 @@ namespace Halley {
 		Future<std::unique_ptr<Image>> requestGlobalScreenGrab(Rect4i worldRect, ScreenGrabMode mode = ScreenGrabMode::ComposedNoUI, float zoom = 1.0f) override;
 		bool isScreenGrabMode() const;
 		Rect4i getScreenGrabRect() const;
+
+		void setWorldZoomMultiplier(float zoom);
 
 		std::shared_ptr<IScreenServiceInterface> getInterfacePointer();
 

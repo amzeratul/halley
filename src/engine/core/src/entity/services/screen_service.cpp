@@ -116,6 +116,13 @@ Rect4i ScreenService::getScreenGrabRect() const
 	return screenGrabRect;
 }
 
+void ScreenService::setWorldZoomMultiplier(float zoom)
+{
+	if (interface) {
+		interface->setWorldZoomMultiplier(zoom);
+	}
+}
+
 std::shared_ptr<IScreenServiceInterface> ScreenService::getInterfacePointer()
 {
 	return interfacePtr;
