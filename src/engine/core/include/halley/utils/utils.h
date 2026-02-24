@@ -146,10 +146,38 @@ namespace Halley {
 		return clamp<T>(static_cast<float>(value - minVal) / static_cast<float>(maxVal - minVal), 0, 1);
 	}
 
+	// Dampened interpolation
 	template <typename T>
 	[[nodiscard]] constexpr inline T damp(T a, T b, float lambda, float dt)
 	{
 		return lerp<T>(a, b, 1.0f - std::exp(-lambda * dt));
+	}
+
+	// Advance a to b by up to inc
+	template<typename T>
+	[[nodiscard]] constexpr static T advance(T a, T b, T inc)
+	{
+		if (a < b) {
+			return std::min(a + inc, b);
+		} else {
+			return std::max(a - inc, b);
+		}
+	}
+
+	// Combination of damp and advance
+	template <typename T>
+	[[nodiscard]] constexpr static T dampAdvance(T a, T b, float lambda, T linearFactor, float dt)
+	{
+		return advance<T>(damp<T>(a, b, lambda, dt), b, linearFactor * dt);
+	}
+
+	template <typename T>
+	[[nodiscard]] constexpr static bool floatEquals(T a, T b, int nULPs = 4)
+	{
+		// Code is from https://en.cppreference.com/w/cpp/types/numeric_limits/epsilon.html
+		const auto m = std::min(std::fabs(a), std::fabs(b));
+		const auto exp = m < std::numeric_limits<T>::min() ? std::numeric_limits<T>::min_exponent - 1 : std::ilogb(m);
+		return std::fabs(a - b) <= nULPs * std::ldexp(std::numeric_limits<T>::epsilon(), exp);
 	}
 
 	namespace Detail {
@@ -265,17 +293,6 @@ namespace Halley {
 			return static_cast<int>(value);
 		}
 		return fastLog2Floor(value - 1) + 1;
-	}
-
-	// Advance a to b by up to inc
-	template<typename T>
-	[[nodiscard]] constexpr static T advance(T a, T b, T inc)
-	{
-		if (a < b) {
-			return std::min(a + inc, b);
-		} else {
-			return std::max(a - inc, b);
-		}
 	}
 
 	// Align address
