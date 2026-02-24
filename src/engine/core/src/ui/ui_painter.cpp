@@ -64,10 +64,10 @@ UIPainter UIPainter::withColour(Colour4f colour) const
 	return result;
 }
 
-UIPainter UIPainter::withMask(int mask) const
+UIPainter UIPainter::withMask(ConvertibleTo<int> mask) const
 {
 	auto result = clone();
-	result.mask = mask;
+	result.mask = mask.value;
 	return result;
 }
 

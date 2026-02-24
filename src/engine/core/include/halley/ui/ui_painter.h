@@ -2,6 +2,7 @@
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
+#include "halley/utils/convertible_to.h"
 
 namespace Halley {
 	class TextRenderer;
@@ -26,7 +27,7 @@ namespace Halley {
 		UIPainter clone() const;
 		UIPainter withAdjustedLayer(int delta) const;
 		UIPainter withClip(std::optional<Rect4f> clip) const;
-		UIPainter withMask(int mask) const;
+		UIPainter withMask(ConvertibleTo<int> mask) const;
 		UIPainter withNoClip() const;
 		UIPainter withAlpha(float alpha) const;
 		UIPainter withColour(Colour4f colour) const;
