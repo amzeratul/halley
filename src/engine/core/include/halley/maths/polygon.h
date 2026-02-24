@@ -134,6 +134,7 @@ namespace Halley {
 		static size_t pickRandomPolygonIdxByArea(gsl::span<const Polygon> polygons, Random& rng);
 		static const Polygon& pickRandomPolygonByArea(gsl::span<const Polygon> polygons, Random& rng);
 		Vector2f getRandomPoint(Random& rng) const;
+		Vector2f getRandomPointAtMinDistanceFromOthers(Random& rng, float minDistance, gsl::span<const Vector2f> otherPoints, size_t maxAttempts = 10) const;
 
 		Vector<Triangle> triangulate() const;
 		void triangulate(Vector<Triangle>& dst) const;

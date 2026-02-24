@@ -1478,6 +1478,36 @@ Vector2f Polygon::getRandomPoint(Random& rng) const
 	return getCentre();
 }
 
+Vector2f Polygon::getRandomPointAtMinDistanceFromOthers(Random& rng, float minDist, gsl::span<const Vector2f> otherPoints, size_t maxAttempts) const
+{
+	maxAttempts = std::max<size_t>(1, maxAttempts);
+
+	float minDist2 = minDist * minDist;
+	float bestDist2 = 0;
+	Vector2f bestPoint;
+
+	for (size_t i = 0; i < maxAttempts; ++i) {
+		Vector2f point = getRandomPoint(rng);
+		float closestDist2 = std::numeric_limits<float>::max();
+		for (const auto& other: otherPoints) {
+			closestDist2 = std::min(closestDist2, (point - other).squaredLength());
+		}
+
+		// Found a suitable one
+		if (closestDist2 > minDist2) {
+			return point;
+		}
+
+		// At least better than previous?
+		if (closestDist2 > bestDist2) {
+			bestDist2 = closestDist2;
+			bestPoint = point;
+		}
+	}
+
+	return bestPoint;
+}
+
 Vector<Triangle> Polygon::triangulate() const
 {
 	Vector<Triangle> result;
