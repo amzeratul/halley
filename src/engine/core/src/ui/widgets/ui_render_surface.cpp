@@ -171,6 +171,11 @@ void UIRenderSurface::setMaterial(Resources& resources, const String& materialNa
 	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
 }
 
+std::shared_ptr<Material> UIRenderSurface::getMaterial()
+{
+	return material;
+}
+
 void UIRenderSurface::setColour(Colour4f col)
 {
 	colour = col;

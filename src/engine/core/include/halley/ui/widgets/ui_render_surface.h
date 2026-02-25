@@ -23,7 +23,8 @@ namespace Halley {
         RenderContext getRenderContextForChildren(RenderContext& rc) override;
 
         void setMaterial(Resources& resources, const String& materialName);
-        
+        std::shared_ptr<Material> getMaterial();
+
         void setColour(Colour4f col);
         Colour4f getColour() const;
         void setScale(Vector2f scale);
