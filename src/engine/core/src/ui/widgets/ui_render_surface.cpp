@@ -245,6 +245,21 @@ void UIRenderSurface::fade(float from, float to, Time time, Time delay, FadeCall
 	fade(Colour4f(1, 1, 1, from), Colour4f(1, 1, 1, to), time, delay, std::move(whenDone));
 }
 
+void UIRenderSurface::fadeFromCurrent(Colour4f to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour, to, time, delay, std::move(whenDone));
+}
+
+void UIRenderSurface::fadeFromCurrent(float to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour.a, to, time, delay, std::move(whenDone));
+}
+
+void UIRenderSurface::fadeFromCurrentWithTimeAdjustment(float to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour.a, to, time * std::abs(colour.a - to), delay, std::move(whenDone));
+}
+
 void UIRenderSurface::update(Time t, bool moved)
 {
 	if (fading) {
