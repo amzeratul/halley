@@ -333,6 +333,16 @@ EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* sessi
     // and maximum network message split size in EntityNetworkSession.
     scratchpad.reserve(16 * 32 * 1024);
     scratchpad.resize_no_init(scratchpad.capacity());
+
+    // We lookup components by ID, need to translate from names.
+    // This is the same list of component types EntityFactory uses to compile deltas.
+    const auto& reflection = entity.getWorld().getReflection();
+    const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents;
+    componentsIgnored.reserve(ignoreComponents.size());
+    for (const auto& componentName : ignoreComponents) {
+        const auto& reflector = reflection.getComponentReflector(componentName);
+        componentsIgnored.emplace(reflector.getIndex());
+    }
 }
 
 bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& options)
@@ -381,6 +391,10 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     auto& reflection = serializer.getOptions().world->getReflection();
 
     for (auto [componentId, component] : entity) {
+        if (componentsIgnored.contains(componentId)) {
+            continue;
+        }
+
         const auto& reflector = reflection.getComponentReflector(componentId);
 
         journal.beginComponent(serializer, (uint16_t) componentId);
