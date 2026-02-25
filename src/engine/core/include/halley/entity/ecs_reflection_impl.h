@@ -93,6 +93,13 @@ namespace Halley {
 			return entity.tryGetComponent<T>();
 		}
 
+		Component* createComponent(EntityRef entity) const override
+		{
+			T component;
+			entity.addComponent<T>(std::move(component));
+			return entity.tryGetComponent<T>(false);
+		}
+
 		void rebindComponent(Component& component, EntityRef entity) const override
 		{
 			if constexpr (HasOnAddedToEntityMember<T>::value) {

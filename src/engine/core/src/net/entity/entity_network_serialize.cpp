@@ -505,7 +505,20 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
         if (reflector != nullptr) {
-            if (const auto component = reflector->tryGetComponent(entity)) {
+            auto component = reflector->tryGetComponent(entity);
+
+            if (component == nullptr && session->allowComponentAddedForFastUpdate(componentId)) {
+                // Create this component on demand if it's in the list of component types that are
+                // allowed to be added (on sender side) without triggering the "slow update" path.
+                //
+                // This doesn't honor per-entity byte data interpolators. As those are only used for
+                // the sending party, this would only be needed if ..
+                // - a component type with a per-entity interpolator is added here
+                // - a peer grabs authority of that entity later, flipping sender/receiver
+                component = reflector->createComponent(entity);
+            }
+
+            if (component != nullptr) {
                 const size_t expectedEndPos = deserializer.getPosition() + size;
 
                 if (result && componentId == Transform2DComponent::componentIndex) {

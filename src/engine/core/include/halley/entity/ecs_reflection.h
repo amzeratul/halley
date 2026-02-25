@@ -37,6 +37,7 @@ namespace Halley {
 		virtual Component* tryGetComponent(EntityRef entity) const = 0;
 		virtual const Component* tryGetComponent(ConstEntityRef entity) const = 0;
 
+		virtual Component* createComponent(EntityRef entity) const = 0;
 		virtual void rebindComponent(Component& component, EntityRef entity) const = 0;
 
 		virtual void sanitize(ConfigNode& data, int mask) const = 0;
