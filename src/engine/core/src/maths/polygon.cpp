@@ -1460,7 +1460,9 @@ const Polygon& Polygon::pickRandomPolygonByArea(gsl::span<const Polygon> polygon
 
 Vector2f Polygon::getRandomPoint(Random& rng) const
 {
-	Expects(isConvex());
+	if (!isConvex()) {
+		return getRandomPoint(splitIntoConvex(), rng);
+	}
 
 	const float areaPick = rng.getFloat(0, getArea());
 
@@ -1478,8 +1480,17 @@ Vector2f Polygon::getRandomPoint(Random& rng) const
 	return getCentre();
 }
 
+Vector2f Polygon::getRandomPoint(gsl::span<const Polygon> polygons, Random& rng)
+{
+	return pickRandomPolygonByArea(polygons, rng).getRandomPoint(rng);
+}
+
 Vector2f Polygon::getRandomPointAtMinDistanceFromOthers(Random& rng, float minDist, gsl::span<const Vector2f> otherPoints, size_t maxAttempts) const
 {
+	if (!isConvex()) {
+		return getRandomPointAtMinDistanceFromOthers(splitIntoConvex(), rng, minDist, otherPoints, maxAttempts);
+	}
+
 	maxAttempts = std::max<size_t>(1, maxAttempts);
 
 	float minDist2 = minDist * minDist;
@@ -1488,6 +1499,36 @@ Vector2f Polygon::getRandomPointAtMinDistanceFromOthers(Random& rng, float minDi
 
 	for (size_t i = 0; i < maxAttempts; ++i) {
 		Vector2f point = getRandomPoint(rng);
+		float closestDist2 = std::numeric_limits<float>::max();
+		for (const auto& other: otherPoints) {
+			closestDist2 = std::min(closestDist2, (point - other).squaredLength());
+		}
+
+		// Found a suitable one
+		if (closestDist2 > minDist2) {
+			return point;
+		}
+
+		// At least better than previous?
+		if (closestDist2 > bestDist2) {
+			bestDist2 = closestDist2;
+			bestPoint = point;
+		}
+	}
+
+	return bestPoint;
+}
+
+Vector2f Polygon::getRandomPointAtMinDistanceFromOthers(gsl::span<const Polygon> polygons, Random& rng, float minDist, gsl::span<const Vector2f> otherPoints, size_t maxAttempts)
+{
+	maxAttempts = std::max<size_t>(1, maxAttempts);
+
+	float minDist2 = minDist * minDist;
+	float bestDist2 = 0;
+	Vector2f bestPoint;
+
+	for (size_t i = 0; i < maxAttempts; ++i) {
+		Vector2f point = getRandomPoint(polygons, rng);
 		float closestDist2 = std::numeric_limits<float>::max();
 		for (const auto& other: otherPoints) {
 			closestDist2 = std::min(closestDist2, (point - other).squaredLength());

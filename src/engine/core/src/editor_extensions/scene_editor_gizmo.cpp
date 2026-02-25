@@ -280,6 +280,9 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t entity
 
 const ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t entityIdx) const
 {
+	if (entityDatas.empty()) {
+		return nullptr;
+	}
 	auto& components = (*entityDatas.at(entityIdx)).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
@@ -291,6 +294,9 @@ const ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t 
 
 bool SceneEditorGizmo::hasComponentData(const String& name, size_t entityIdx) const
 {
+	if (entityDatas.empty()) {
+		return false;
+	}
 	auto& components = (*entityDatas.at(entityIdx)).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
