@@ -171,6 +171,11 @@ void UIRenderSurface::setMaterial(Resources& resources, const String& materialNa
 	material = resources.get<MaterialDefinition>(materialName)->createMaterial();
 }
 
+std::shared_ptr<Material> UIRenderSurface::getMaterial()
+{
+	return material;
+}
+
 void UIRenderSurface::setColour(Colour4f col)
 {
 	colour = col;
@@ -243,6 +248,21 @@ void UIRenderSurface::fade(Colour4f from, Colour4f to, Time time, Time delay, Fa
 void UIRenderSurface::fade(float from, float to, Time time, Time delay, FadeCallback whenDone)
 {
 	fade(Colour4f(1, 1, 1, from), Colour4f(1, 1, 1, to), time, delay, std::move(whenDone));
+}
+
+void UIRenderSurface::fadeFromCurrent(Colour4f to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour, to, time, delay, std::move(whenDone));
+}
+
+void UIRenderSurface::fadeFromCurrent(float to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour.a, to, time, delay, std::move(whenDone));
+}
+
+void UIRenderSurface::fadeFromCurrentWithTimeAdjustment(float to, Time time, Time delay, FadeCallback whenDone)
+{
+	fade(colour.a, to, time * std::abs(colour.a - to), delay, std::move(whenDone));
 }
 
 void UIRenderSurface::update(Time t, bool moved)

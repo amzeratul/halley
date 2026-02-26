@@ -23,7 +23,8 @@ namespace Halley {
         RenderContext getRenderContextForChildren(RenderContext& rc) override;
 
         void setMaterial(Resources& resources, const String& materialName);
-        
+        std::shared_ptr<Material> getMaterial();
+
         void setColour(Colour4f col);
         Colour4f getColour() const;
         void setScale(Vector2f scale);
@@ -40,6 +41,9 @@ namespace Halley {
 
     	void fade(Colour4f from, Colour4f to, Time time, Time delay = 0, FadeCallback whenDone = {});
     	void fade(float from, float to, Time time, Time delay = 0, FadeCallback whenDone = {});
+    	void fadeFromCurrent(Colour4f to, Time time, Time delay = 0, FadeCallback whenDone = {});
+    	void fadeFromCurrent(float to, Time time, Time delay = 0, FadeCallback whenDone = {});
+    	void fadeFromCurrentWithTimeAdjustment(float to, Time time, Time delay = 0, FadeCallback whenDone = {});
         void update(Time t, bool moved) override;
 
         bool ignoreClip() const override;
