@@ -37,6 +37,7 @@
 #include "halley/ui/widgets/ui_render_surface.h"
 #include "halley/ui/widgets/ui_resize_divider.h"
 #include "halley/ui/widgets/ui_spin_control2.h"
+#include "halley/ui/widgets/ui_scene_3d.h"
 
 using namespace Halley;
 
@@ -100,6 +101,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("renderSurface", [=](const ConfigNode& node) { return makeRenderSurface(node); }, getRenderSurfaceProperties());
 	addFactory("customPaint", [=](const ConfigNode& node) { return makeCustomPaint(node); }, getCustomPaintProperties());
 	addFactory("resizeDivider", [=](const ConfigNode& node) { return makeResizeDivider(node); }, getResizeDividerProperties());
+	addFactory("scene3d", [=](const ConfigNode& node) { return makeScene3d(node); }, getScene3dProperties());
 
 	addBehaviourFactory("slide", [=](const ConfigNode& node) { return makeSlideBehaviour(node); }, getSlideBehaviourProperties());
 	addBehaviourFactory("fade", [=](const ConfigNode& node) { return makeFadeBehaviour(node); }, getFadeBehaviourProperties());
@@ -1872,6 +1874,21 @@ std::shared_ptr<UIWidget> UIFactory::makeResizeDivider(const ConfigNode& entryNo
 	return widget;
 }
 
+UIFactoryWidgetProperties UIFactory::getScene3dProperties() const
+{
+    UIFactoryWidgetProperties result;
+    result.name = "Scene 3D";
+    result.iconName = "widget_icons/widget.png";
+    return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeScene3d(const ConfigNode& entryNode)
+{
+    const auto& node = entryNode["widget"];
+    auto id = node["id"].asString("");
+    auto widget = std::make_shared<UIScene3D>(std::move(id), getAPI(), getResources());
+    return widget;
+}
 
 UIFactoryWidgetProperties UIFactory::getSlideBehaviourProperties() const
 {
