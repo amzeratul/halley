@@ -725,7 +725,7 @@ ConfigNode ScriptHasComponent::doGetData(ScriptEnvironment& environment, const S
 	}
 
 	for (const auto& r:reflectors) {
-		if (r->tryGetComponent(entity) == nullptr) {
+		if (r->tryGetComponent(entity, false) == nullptr) {
 			return ConfigNode(false);
 		}
 	}

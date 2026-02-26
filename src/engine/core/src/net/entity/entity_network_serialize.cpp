@@ -519,7 +519,9 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
         if (reflector != nullptr) {
-            auto component = reflector->tryGetComponent(entity);
+            // This checks with evenIfDisabled = true; the entity or its parent could have been
+            // disabled while a network update is still in flight.
+            auto component = reflector->tryGetComponent(entity, true);
 
             if (component == nullptr && session->allowComponentAddedForFastUpdate(componentId)) {
                 // Create this component on demand if it's in the list of component types that are

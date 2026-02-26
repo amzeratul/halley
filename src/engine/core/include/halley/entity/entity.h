@@ -1026,9 +1026,9 @@ namespace Halley {
 		}
 
 		template <typename T>
-		const T* tryGetComponent() const
+		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
-			return entity->tryGetComponent<T>();
+			return entity->tryGetComponent<T>(evenIfDisabled);
 		}
 
 		EntityId getEntityId() const

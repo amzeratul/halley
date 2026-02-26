@@ -36,7 +36,7 @@ namespace Halley {
 
 		ConfigNode serializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName) const override
 		{
-			if (const auto* component = tryGetComponent(entity)) {
+			if (const auto* component = tryGetComponent(entity, false)) {
 				return serializeField(context, *component, fieldName);
 			} else {
 				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
@@ -46,7 +46,7 @@ namespace Halley {
 		
 		ConfigNode serializeField(const EntitySerializationContext& context, ConstEntityRef entity, std::string_view fieldName) const override
 		{
-			if (const auto* component = tryGetComponent(entity)) {
+			if (const auto* component = tryGetComponent(entity, false)) {
 				return serializeField(context, *component, fieldName);
 			} else {
 				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
@@ -61,7 +61,7 @@ namespace Halley {
 
 		void deserializeField(const EntitySerializationContext& context, EntityRef entity, std::string_view fieldName, const ConfigNode& data) const override
 		{
-			if (auto* component = tryGetComponent(entity)) {
+			if (auto* component = tryGetComponent(entity, false)) {
 				deserializeField(context, *component, fieldName, data);
 			} else {
 				Logger::logError("Component " + String(T::componentName) + " not found in entity " + entity.getName());
@@ -83,14 +83,14 @@ namespace Halley {
             static_cast<T&>(component).deserializeNetwork(context, deserializer);
         }
 
-        Component* tryGetComponent(EntityRef entity) const override
+        Component* tryGetComponent(EntityRef entity, bool evenIfDisabled) const override
 		{
-			return entity.tryGetComponent<T>();
+			return entity.tryGetComponent<T>(evenIfDisabled);
 		}
 
-		const Component* tryGetComponent(ConstEntityRef entity) const override
+		const Component* tryGetComponent(ConstEntityRef entity, bool evenIfDisabled) const override
 		{
-			return entity.tryGetComponent<T>();
+			return entity.tryGetComponent<T>(evenIfDisabled);
 		}
 
 		Component* createComponent(EntityRef entity) const override
