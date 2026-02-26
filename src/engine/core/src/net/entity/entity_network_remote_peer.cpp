@@ -262,12 +262,22 @@ void EntityNetworkRemotePeer::sendCreateEntity(const EntityRef& entity)
 
 	result.data = parentSession->getFactory().serializeEntity(entity, parentSession->getEntitySerializationOptions());
 
-	if (!entity.getPrefab() && entity.getWorldPartition() != 0) {
+	const bool assignNetworkIdOnly = entity.getWorldPartition() != 0 && !entity.getPrefab();
+
+	if (assignNetworkIdOnly) {
 		// This is loaded as part of a world chunk - peers already got all the data, they only
 		// need to know about the networkId assigned.
-		const EntityNetworkInstanceInfo info = { entity.getInstanceUUID(), entity.getParent().getInstanceUUID() };
+		EntityNetworkInstanceInfo info = { entity.getInstanceUUID(), {} };
+		if (entity.hasParent()) {
+			info.parentUUID = entity.getParent().getInstanceUUID();
+		}
+
 		auto bytes = Serializer::toBytes(info, parentSession->getByteSerializationOptions());
 		send(EntityNetworkMessageCreate(result.networkId, std::move(bytes), entity.getWorldPartition(), true));
+
+		// Need to flag this one though, so that any host-side changes are sent through a first update.
+		// Without this, the peer wouldn't be notified about any modifications until the next actual change.
+		result.forceNextFastUpdate = true;
 	} else {
 		auto deltaData = parentSession->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parentSession->getEntityDeltaOptions());
 

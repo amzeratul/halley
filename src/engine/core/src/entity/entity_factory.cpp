@@ -8,7 +8,6 @@
 #include "halley/support/logger.h"
 #include "halley/entity/entity_data_instanced.h"
 #include "halley/entity/world.h"
-#include "halley/entity/registry.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/entity/services/enable_rules_service.h"
 #include "halley/file_formats/yaml_convert.h"
@@ -119,22 +118,16 @@ EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, st
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
 		if (const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID())) {
-			if (deltaOptions.instantiatePrefabs) {
-				const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
-				auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
-				delta.setInstanceUUID(entityData.getInstanceUUID());
-				delta.setPrefabUUID(entityData.getPrefabUUID());
+			const auto instancedData = prefabData->instantiatePrefabsAsCopy(entityData.getInstanceUUID(), resources);
+			auto delta = EntityDataDelta(instancedData, entityData, deltaOptions);
+			delta.setInstanceUUID(entityData.getInstanceUUID());
+			delta.setPrefabUUID(entityData.getPrefabUUID());
 
-				if (debugListener) {
-					debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
-				}
-
-				return delta;
-			} else {
-				auto delta = EntityDataDelta(*prefabData, entityData, deltaOptions);
-				delta.setPrefabUUID(entityData.getPrefabUUID());
-				return delta;
+			if (debugListener) {
+				debugListener->onSerializing(entityData, *prefabData, instancedData, delta);
 			}
+
+			return delta;
 		}
 	}
 	//Logger::logInfo("Entity " + entityData.getName() + " has no prefab or prefab data associated with it.");
