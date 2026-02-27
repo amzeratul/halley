@@ -18,16 +18,26 @@ namespace Halley {
 
 		Bytes readAdditionalFile(const Path& filePath) override;
 
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+		void onMouseOver(Vector2f mousePos) override;
+
 	private:
 		Project& project;
 		ProjectWindow& projectWindow;
 
 		std::shared_ptr<UIScene3D> scene3d;
 
-		Time curTime = 0;
 		Vector3f meshCentre;
 		Vector3f meshSize;
 
+		Vector2f yawAndPitch;
+
+		bool dragging = false;
+		std::optional<Vector2f> lastMousePos;
+
 		void updateCamera();
+
+		void onMouseDelta(Vector2f delta);
 	};
 }

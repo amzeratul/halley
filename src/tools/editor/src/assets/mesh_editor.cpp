@@ -11,6 +11,7 @@ MeshEditor::MeshEditor(UIFactory& factory, Resources& resources, AssetType type,
 	, project(project)
 	, projectWindow(projectWindow)
 {
+	setInteractWithMouse(true);
 }
 
 void MeshEditor::refreshAssets()
@@ -26,8 +27,6 @@ bool MeshEditor::isReadyToLoad() const
 void MeshEditor::update(Time t, bool moved)
 {
 	AssetEditor::update(t, moved);
-
-	curTime += t;
 
 	if (scene3d) {
 		updateCamera();
@@ -69,16 +68,37 @@ Bytes MeshEditor::readAdditionalFile(const Path& filePath)
 	return Path::readFile(project.getAssetsSrcPath() / filePath);
 }
 
+void MeshEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	dragging = true;
+	lastMousePos = mousePos;
+}
+
+void MeshEditor::releaseMouse(Vector2f mousePos, int button)
+{
+	lastMousePos = {};
+	dragging = false;
+}
+
+void MeshEditor::onMouseOver(Vector2f mousePos)
+{
+	if (dragging && lastMousePos) {
+		onMouseDelta(mousePos - *lastMousePos);
+		lastMousePos = mousePos;
+	}
+}
+
 void MeshEditor::updateCamera()
 {
 	const float distance = meshSize.length() * 1.5f;
 
-	const auto yaw = Angle1f::fromRadians(static_cast<float>(curTime));
-	const auto pitch = Angle1f::fromDegrees(30.0f);
+	const auto yaw = Angle1f::fromDegrees(yawAndPitch.x);
+	const auto pitch = Angle1f::fromDegrees(yawAndPitch.y);
 
-	const Vector3f camPos = meshCentre + Vector3f(distance * yaw.sin(), 0, distance * -yaw.cos()) * pitch.cos() + Vector3f(0, distance * pitch.sin(), 0);
+	const auto rot = Quaternion(Vector3f(0, 1, 0), -yaw) * Quaternion(Vector3f(1, 0, 0), pitch);
+	const Vector3f camDir = rot * Vector3f(0, 0, -1);
 	const Vector3f lookPos = meshCentre;
-	const auto rot = Quaternion::lookAt(lookPos - camPos, Vector3f(0, 1, 0));
+	const Vector3f camPos = lookPos + distance * camDir;
 
 	const auto cam = Camera()
 		.setPosition(camPos)
@@ -88,4 +108,10 @@ void MeshEditor::updateCamera()
 		.setClippingPlanes(distance * 0.002f, distance * 2.0f);
 
 	scene3d->setCamera(cam);
+}
+
+void MeshEditor::onMouseDelta(Vector2f delta)
+{
+	yawAndPitch.x = modulo(yawAndPitch.x - delta.x, 360.0f);
+	yawAndPitch.y = clamp(yawAndPitch.y + delta.y, -90.0f, 90.0f);
 }
