@@ -56,7 +56,7 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 	if (displaySlot < 0) {
 		displaySlot = targetDisplaySlot;
 	} else {
-		displaySlot = lerp(displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
+		displaySlot = dampAdvance(displaySlot, targetDisplaySlot, 10.0f, 0.05f, static_cast<float>(time));
 	}
 
 	bool visible = task->isVisible();
@@ -68,7 +68,7 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 			visible = false;
 		}
 	} else {
-		progressDisplay = lerp(progressDisplay, task->getProgress(), static_cast<float>(10 * time));
+		progressDisplay = dampAdvance(progressDisplay, task->getProgress(), 10.0f, 0.05f, static_cast<float>(time));
 	}
 
 	opacity = advance(opacity, visible ? 1.0f : 0.0f, static_cast<float>(time) * 2.0f);

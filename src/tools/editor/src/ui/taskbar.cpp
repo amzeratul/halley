@@ -61,7 +61,7 @@ void TaskBar::update(Time time, bool moved)
 	// Setup for tasks
 	const Vector2f anchor = getPosition() + Vector2f(0, 48.0f);
 	const Vector2f baseDrawPos = getPosition() + Vector2f(170.0f, 4.0f);
-	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40);
+	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40).round();
 	const float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
 
 	// Draw logo
@@ -70,7 +70,7 @@ void TaskBar::update(Time time, bool moved)
 	halleyLogo.setPos(anchor + Vector2f(80, -25));
 
 	for (const auto& t : tasks) {
-		const Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->getDisplaySlot(), 0);
+		const Vector2f drawPos = baseDrawPos + (Vector2f((size.x + 20) * t->getDisplaySlot(), 0)).round();
 		t->setPosition(drawPos);
 		t->setMinSize(size);
 		t->layout();

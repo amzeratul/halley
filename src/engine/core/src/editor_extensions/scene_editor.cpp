@@ -89,7 +89,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 	// Box selection
 	if (inputState.leftClickPressed || inputState.rightClickPressed || inputState.middleClickPressed) {
-		cameraPanAnimation.stop();
+		inertialDrag.stop();
 	}
 	if (mousePos) {
 		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3 / getZoom()) {
@@ -417,17 +417,8 @@ void SceneEditor::dragCamera(Vector2f amount)
 {
 	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
-	auto& transform = camera.getComponent<Transform2DComponent>();
-	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
 
-	cameraPanAnimation.deltas.emplace_back(amount / zoom, lastStepTime);
-	if (cameraPanAnimation.deltas.size() > 3) {
-		cameraPanAnimation.deltas.erase(cameraPanAnimation.deltas.begin());
-	}
-	cameraPanAnimation.inertiaVel.reset();
-	cameraPanAnimation.updatedLastFrame = true;
-
-	saveCameraPos();
+	inertialDrag.appendDelta(amount / zoom, lastStepTime);
 }
 
 void SceneEditor::moveCamera(Vector2f pos)
@@ -496,8 +487,7 @@ void SceneEditor::updateCameraPos(Time t)
 	bool changed = false;
 
 	if (cameraAnimation) {
-		cameraPanAnimation.inertiaVel = Vector2f();
-		cameraPanAnimation.deltas.clear();
+		inertialDrag.stop();
 
 		auto& ca = *cameraAnimation;
 		ca.t = advance(ca.t, 1.0f, static_cast<float>(t) * 4.0f);
@@ -513,28 +503,12 @@ void SceneEditor::updateCameraPos(Time t)
 		}
 	}
 
-	if (!cameraPanAnimation.updatedLastFrame) {
-		auto& vel = cameraPanAnimation.inertiaVel;
-		if (!vel && cameraPanAnimation.deltas.size() >= 3) {
-			Vector2f ds;
-			Time dt = 0;
-			for (const auto& d: cameraPanAnimation.deltas) {
-				ds += d.first;
-				dt += d.second;
-			}
-			vel = ds / static_cast<float>(dt);
-			cameraPanAnimation.deltas.clear();
-			if (vel->length() < 400.0f / getZoom()) {
-				vel.reset();
-			}
-		}
-
-		if (vel && vel->length() > 60.0f / getZoom()) {
-			transform.setGlobalPosition(transform.getGlobalPosition() + *vel * static_cast<float>(t));
-			vel = damp(*vel, Vector2f(), 5.0f, static_cast<float>(t));
+	if (t > 0.00001) {
+		if (auto inertialDelta = inertialDrag.update(t, 400.0f / getZoom(), 60.0f / getZoom())) {
+			transform.setGlobalPosition(transform.getGlobalPosition() + *inertialDelta);
+			changed = true;
 		}
 	}
-	cameraPanAnimation.updatedLastFrame = false;
 
 	if (changed) {
 		saveCameraPos();
@@ -744,12 +718,6 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 std::unique_ptr<BaseFrameData> SceneEditor::makeFrameData()
 {
 	return {};
-}
-
-void SceneEditor::CameraPanAnimation::stop()
-{
-	deltas.clear();
-	inertiaVel = Vector2f();
 }
 
 Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const

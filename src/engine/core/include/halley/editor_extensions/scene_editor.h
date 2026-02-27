@@ -5,6 +5,7 @@
 #include "halley/graphics/camera.h"
 #include "halley/entity/entity.h"
 #include "halley/graphics/text/text_renderer.h"
+#include "halley/ui/ui_inertial_drag.h"
 
 namespace Halley {
 	class UIDebugConsoleCommands;
@@ -14,7 +15,7 @@ namespace Halley {
 	class World;
 	class Painter;
 	class SceneEditorGizmoCollection;
-	
+
     class SceneEditor : public ISceneEditor {
     public:
 		SceneEditor();
@@ -135,13 +136,6 @@ namespace Halley {
 			float t = 0;
 		};
 
-		struct CameraPanAnimation {
-			Vector<std::pair<Vector2f, Time>> deltas;
-			std::optional<Vector2f> inertiaVel;
-			bool updatedLastFrame = false;
-			void stop();
-		};
-
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
 		Resources* editorResources = nullptr;
@@ -150,7 +144,7 @@ namespace Halley {
 
 		Vector<EntityId> cameraEntityIds;
 		std::optional<CameraAnimation> cameraAnimation;
-		CameraPanAnimation cameraPanAnimation;
+		UIInertialDrag inertialDrag;
 		Time lastStepTime = 0;
     	
 		Vector<EntityId> selectedEntityIds;

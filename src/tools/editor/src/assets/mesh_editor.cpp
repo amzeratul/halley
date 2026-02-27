@@ -28,6 +28,10 @@ void MeshEditor::update(Time t, bool moved)
 {
 	AssetEditor::update(t, moved);
 
+	if (auto delta = inertialDrag.update(t, 60.0f, 5.0f)) {
+		onMouseDelta(*delta);
+	}
+
 	if (scene3d) {
 		updateCamera();
 	}
@@ -70,21 +74,19 @@ Bytes MeshEditor::readAdditionalFile(const Path& filePath)
 
 void MeshEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
+	inertialDrag.stop();
 	dragging = true;
-	lastMousePos = mousePos;
 }
 
 void MeshEditor::releaseMouse(Vector2f mousePos, int button)
 {
-	lastMousePos = {};
 	dragging = false;
 }
 
 void MeshEditor::onMouseOver(Vector2f mousePos)
 {
-	if (dragging && lastMousePos) {
-		onMouseDelta(mousePos - *lastMousePos);
-		lastMousePos = mousePos;
+	if (dragging) {
+		inertialDrag.appendAbsolute(mousePos);
 	}
 }
 

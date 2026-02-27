@@ -13,6 +13,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui_event_handler.h"
 #include "ui_factory.h"
 #include "ui_factory_tester.h"
+#include "ui_inertial_drag.h"
 #include "ui_input.h"
 #include "ui_root.h"
 #include "ui_sizer.h"

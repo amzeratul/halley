@@ -34,7 +34,7 @@ namespace Halley {
 		Vector2f yawAndPitch;
 
 		bool dragging = false;
-		std::optional<Vector2f> lastMousePos;
+		UIInertialDrag inertialDrag;
 
 		void updateCamera();
 
