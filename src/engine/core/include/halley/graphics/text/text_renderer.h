@@ -23,10 +23,10 @@ namespace Halley
 	template <typename T, typename C = std::optional<T>>
 	class TextOverrideCursor {
 	public:
-		TextOverrideCursor(T defaultValue, const Vector<std::pair<size_t, C>>& data)
+		TextOverrideCursor(T defaultValue, gsl::span<const std::pair<size_t, C>> data)
 			: curValue(defaultValue)
 			, defaultValue(std::move(defaultValue))
-			, dataPtr(&data)
+			, data(data)
 		{}
 
 		const T& operator*() const
@@ -46,7 +46,6 @@ namespace Halley
 
 		void setPos(size_t i)
 		{
-			const auto& data = *dataPtr;
 			while (curIdx < data.size() && data[curIdx].first <= i) {
 				if constexpr (std::is_same_v<T, C>) {
 					curValue = data[curIdx].second ? data[curIdx].second : defaultValue;
@@ -61,7 +60,7 @@ namespace Halley
 		size_t curIdx = 0;
 		T curValue;
 		T defaultValue;
-		const Vector<std::pair<size_t, C>>* dataPtr = nullptr;
+		gsl::span<const std::pair<size_t, C>> data;
 	};
 
 	class TextRenderer
@@ -115,9 +114,15 @@ namespace Halley
 		size_t getCharacterAt(const Vector2f& position) const;
 
 		StringUTF32 split(const String& str, float width) const;
-		StringUTF32 split(const StringUTF32& str, float width, std::function<bool(int32_t)> filter = {}, const Vector<FontOverride>& fontOverrides = {}, const Vector<FontSizeOverride>& fontSizeOverrides = {}) const;
+		StringUTF32 split(const StringUTF32& str, float width, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}) const;
 		StringUTF32 split(float width) const;
 
+		struct SplitResult {
+			uint32_t pos;
+			uint32_t toConsume;
+		};
+		void calculateTextSplit(Vector<SplitResult>& output, std::u32string_view str, float width, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}) const;
+		
 		Vector2f getPosition() const;
 		String getText() const;
 		const StringUTF32& getTextUTF32() const;

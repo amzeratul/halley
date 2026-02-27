@@ -8,6 +8,8 @@
 #include "halley/text/string_converter.h"
 #include <iostream>
 
+#include "halley/graphics/text/unicode_data.h"
+
 using namespace Halley;
 
 Font::Glyph::Glyph() {}
@@ -133,6 +135,12 @@ void Font::setPreferredLanguage(const I18NLanguage& language)
 			return scoreA > scoreB;
 		});
 	}
+}
+
+const UnicodeData& Font::getUnicodeData() const
+{
+	static UnicodeData data;
+	return data;
 }
 
 std::pair<const Font::Glyph&, const Font&> Font::getGlyph(int code) const

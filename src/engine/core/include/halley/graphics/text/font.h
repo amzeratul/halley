@@ -7,6 +7,10 @@
 #include "halley/data_structures/hash_map.h"
 #include "halley/text/i18n_language.h"
 
+namespace Halley {
+	class UnicodeData;
+}
+
 namespace Halley
 {
 	class I18NLanguage;
@@ -52,6 +56,8 @@ namespace Halley
 
 		const I18NLanguage& getLanguage() const;
 		void setPreferredLanguage(const I18NLanguage& language);
+
+		const UnicodeData& getUnicodeData() const;
 
 		std::pair<const Glyph&, const Font&> getGlyph(int code) const;
 		const Glyph& getGlyphHere(int code) const;

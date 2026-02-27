@@ -58,6 +58,7 @@ set(SOURCES
         "src/graphics/sprite/sprite_sheet.cpp"
         "src/graphics/text/font.cpp"
         "src/graphics/text/text_renderer.cpp"
+        "src/graphics/text/unicode_data.cpp"
         "src/graphics/texture.cpp"
         "src/graphics/texture_descriptor.cpp"
 
@@ -505,6 +506,7 @@ set(HEADERS
         "include/halley/graphics/sprite/sprite_sheet.h"
         "include/halley/graphics/text/font.h"
         "include/halley/graphics/text/text_renderer.h"
+        "include/halley/graphics/text/unicode_data.h"
         "include/halley/graphics/texture_descriptor.h"
         "include/halley/graphics/texture.h"
         "include/halley/graphics/texture.natvis"

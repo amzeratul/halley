@@ -46,6 +46,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "halley/graphics/text/font.h"
 #include "halley/graphics/text/text_renderer.h"
+#include "halley/graphics/text/unicode_data.h"
 
 #include "halley/graphics/sprite/animation.h"
 #include "halley/graphics/sprite/animation_player.h"

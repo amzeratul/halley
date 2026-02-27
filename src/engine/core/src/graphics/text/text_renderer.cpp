@@ -1,10 +1,11 @@
-#include "halley/graphics/text/text_renderer.h"
+﻿#include "halley/graphics/text/text_renderer.h"
 #include "halley/graphics/text/font.h"
 #include "halley/graphics/painter.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_parameter.h"
 #include <gsl/assert>
 
+#include "halley/graphics/text/unicode_data.h"
 #include "halley/resources/resources.h"
 #include "halley/text/i18n.h"
 
@@ -341,8 +342,8 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 	const Font::Glyph* lastGlyph = nullptr;
 	const Font* lastFont = nullptr;
 
-	auto curFont = TextOverrideCursor(font, fontOverrides);
-	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides);
+	auto curFont = TextOverrideCursor(font, fontOverrides.const_span());
+	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides.const_span());
 
 	float minX = std::numeric_limits<float>::max();
 	float maxX = -std::numeric_limits<float>::max();
@@ -435,9 +436,9 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites, const Vector<GlyphLa
 
 	sprites.resize(getGlyphCount(text));
 
-	auto curCol = TextOverrideCursor(colour, colourOverrides);
-	auto curFont = TextOverrideCursor(font, fontOverrides);
-	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides);
+	auto curCol = TextOverrideCursor(colour, colourOverrides.const_span());
+	auto curFont = TextOverrideCursor(font, fontOverrides.const_span());
+	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides.const_span());
 
 	const size_t n = text.size();
 	for (size_t i = 0; i < n; i++) {
@@ -584,76 +585,80 @@ size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const
 
 StringUTF32 TextRenderer::split(float maxWidth) const
 {
-	return split(text, maxWidth, {}, fontOverrides, fontSizeOverrides);
+	return split(text, maxWidth, fontOverrides, fontSizeOverrides);
 }
 
 StringUTF32 TextRenderer::split(const String& str, float maxWidth) const
 {
-	return split(str.getUTF32(), maxWidth, {}, fontOverrides, fontSizeOverrides);
+	return split(str.getUTF32(), maxWidth, fontOverrides, fontSizeOverrides);
 }
 
-StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::function<bool(int32_t)> filter, const Vector<FontOverride>& fontOverrides, const Vector<FontSizeOverride>& fontSizeOverrides) const
+StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides) const
 {
-	StringUTF32 result;
+	Vector<SplitResult> outcome;
+	calculateTextSplit(outcome, str, maxWidth, fontOverrides, fontSizeOverrides);
 
-	gsl::span<const char32_t> src = str;
+	StringUTF32 result;
+	result.reserve(str.size() + outcome.size());
+
+	size_t pos = 0;
+	for (const auto& r: outcome) {
+		result += str.substr(pos, r.pos - pos - r.toConsume);
+		result += static_cast<char32_t>('\n');
+		pos = r.pos;
+	}
+	result += str.substr(pos);
+
+	return result;
+}
+
+void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32string_view src, float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides) const
+{
 	const Font::Glyph* lastGlyph = nullptr;
 	const Font* lastFont = nullptr;
 
 	auto curFont = TextOverrideCursor(font, fontOverrides);
 	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides);
 
-	// Keep doing this while src is not exhausted
-	while (!src.empty()) {
-		float curWidth = 0.0f;
-		std::optional<gsl::span<const char32_t>> lastValid;
+	float curWidth = 0;
 
-		for (size_t i = 0; i < src.size(); ++i) {
-			const int32_t c = src[i];
-			curFont.setPos(i);
-			curFontSize.setPos(i);
+	std::optional<SplitResult> bestSplitPoint;
+	int bestSplitPointScore = -1;
+	float bestSplitWidth = 0;
+	bool splittingSpaces = false;
 
-			const bool accepted = filter ? filter(c) : true;
+	auto lineBreaker = UnicodeLineBreaker(font->getUnicodeData());
 
-			const bool isLastChar = i == src.size() - 1;
-			if (isLastChar || (accepted && (c == '\n' || c == ' ' || c == '\t'))) {
-				lastValid = src.subspan(0, i + 1);
-			}
+	for (size_t i = 0; i < src.size(); ++i) {
+		const char32_t cur = src[i];
+		const char32_t next = i + 1 < src.size() ? src[i + 1] : 0;
 
-			const auto& [glyph, f] = curFont->getGlyph(c);
-			const float scale = getScale(f, *curFontSize);
-			const auto kerning = lastFont == &f && lastGlyph ? lastGlyph->getKerning(c) : Vector2f();
-			const float w = accepted ? (glyph.advance.x + kerning.x) * scale : 0.0f;
-			curWidth += w;
+		curFont.setPos(i);
+		curFontSize.setPos(i);
+		const auto& [glyph, f] = curFont->getGlyph(cur);
+		const float scale = getScale(f, *curFontSize);
+		const auto kerning = lastFont == &f && lastGlyph ? lastGlyph->getKerning(cur) : Vector2f();
+		const float w = (glyph.advance.x + kerning.x) * scale;
+		curWidth += w;
 
-			lastFont = &f;
-			lastGlyph = &glyph;
-
-			const bool firstCharInRun = i == 0; // It MUST fit at least the first character, or we'll infinite loop
-			if (c == '\n' || (!firstCharInRun && curWidth > maxWidth) || isLastChar) {
-				int advanceAdjust = isLastChar ? 0 : -1;
-				if (!lastValid) {
-					// lastValid won't be set if there were no suitable breaking spaces
-					if (isLastChar) {
-						lastValid = src.subspan(0, i + 1);
-					} else {
-						lastValid = src.subspan(0, i);
-					}
-					advanceAdjust = 0;
-				}
-				const int advance = int(lastValid->size());
-
-				if (!result.empty()) {
-					result.push_back('\n');
-				}
-				const int totalAdvance = std::max(advance + advanceAdjust, 0);
-				result += StringUTF32(lastValid->data(), totalAdvance);
-				src = src.subspan(advance);
-				break;
-			}
+		if (curWidth > maxWidth && bestSplitPoint && !splittingSpaces) {
+			// Split
+			output += *bestSplitPoint;
+			curWidth -= bestSplitWidth;
+			bestSplitPoint = {};
 		}
+
+		const auto breakResult = lineBreaker.feedCharacter(cur, next);
+		if (!bestSplitPoint || breakResult.priority >= bestSplitPointScore) {
+			bestSplitPointScore = breakResult.priority;
+			bestSplitPoint = SplitResult{ static_cast<uint32_t>(i + 1), breakResult.consumeSpace ? (bestSplitPoint ? bestSplitPoint->toConsume : 0) + 1 : 0 };
+			bestSplitWidth = curWidth;
+			splittingSpaces = breakResult.hasMoreSpaces;
+		}
+
+		lastFont = &f;
+		lastGlyph = &glyph;
 	}
-	return result;
 }
 
 Vector2f TextRenderer::getPosition() const
