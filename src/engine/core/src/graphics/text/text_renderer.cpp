@@ -583,42 +583,75 @@ size_t TextRenderer::getCharacterAt(const Vector2f& targetPos) const
 	return bestResult;
 }
 
+TextRenderer::SplitParams::SplitParams(float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides, gsl::span<ColourOverride> colourOverrides)
+	: maxWidth(maxWidth)
+	, fontOverrides(fontOverrides)
+	, fontSizeOverrides(fontSizeOverrides)
+	, colourOverrides(colourOverrides)
+{
+}
+
 StringUTF32 TextRenderer::split(float maxWidth) const
 {
-	return split(text, maxWidth, fontOverrides, fontSizeOverrides);
+	return split(text, SplitParams{ maxWidth, fontOverrides, fontSizeOverrides, {} });
 }
 
-StringUTF32 TextRenderer::split(const String& str, float maxWidth) const
+StringUTF32 TextRenderer::split(const String& str, float maxWidth, gsl::span<ColourOverride> colourOverrides) const
 {
-	return split(str.getUTF32(), maxWidth, fontOverrides, fontSizeOverrides);
+	return split(str.getUTF32(), SplitParams{ maxWidth, fontOverrides, fontSizeOverrides, colourOverrides });
 }
 
-StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides) const
+StringUTF32 TextRenderer::split(std::u32string_view str, float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides, gsl::span<ColourOverride> colourOverrides) const
+{
+	return split(str, SplitParams{ maxWidth, fontOverrides, fontSizeOverrides, colourOverrides });
+}
+
+StringUTF32 TextRenderer::split(std::u32string_view str, const SplitParams& params) const
 {
 	Vector<SplitResult> outcome;
-	calculateTextSplit(outcome, str, maxWidth, fontOverrides, fontSizeOverrides);
+	calculateTextSplit(outcome, str, params);
 
-	StringUTF32 result;
-	result.reserve(str.size() + outcome.size());
-
-	size_t pos = 0;
+	size_t sizeRequired = str.size();
 	for (const auto& r: outcome) {
-		result += str.substr(pos, r.pos - pos - r.toConsume);
-		result += static_cast<char32_t>('\n');
-		pos = r.pos;
+		// Watch out for unsigned, don't blindly combine
+		sizeRequired += 1;
+		sizeRequired -= r.toConsume;
 	}
-	result += str.substr(pos);
+
+	// This could probably be faster
+	StringUTF32 result;
+	result.reserve(sizeRequired);
+	size_t srcPos = 0;
+	for (const auto& r: outcome) {
+		result += str.substr(srcPos, r.pos - srcPos - r.toConsume);
+		result += static_cast<char32_t>('\n');
+		srcPos = r.pos;
+	}
+	result += str.substr(srcPos);
+
+	// Update colour overrides
+	if (!outcome.empty()) {
+		int64_t offset = 0;
+		size_t i = 0;
+		for (auto& col : params.colourOverrides) {
+			while (i < outcome.size() && col.first >= outcome[i].pos) {
+				offset += 1 - static_cast<int64_t>(outcome[i].toConsume);
+				++i;
+			}
+			col.first = static_cast<uint64_t>(static_cast<int64_t>(col.first) + offset);
+		}
+	}
 
 	return result;
 }
 
-void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32string_view src, float maxWidth, gsl::span<const FontOverride> fontOverrides, gsl::span<const FontSizeOverride> fontSizeOverrides) const
+void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32string_view str, const SplitParams& params) const
 {
 	const Font::Glyph* lastGlyph = nullptr;
 	const Font* lastFont = nullptr;
 
-	auto curFont = TextOverrideCursor(font, fontOverrides);
-	auto curFontSize = TextOverrideCursor(size, fontSizeOverrides);
+	auto curFont = TextOverrideCursor(font, params.fontOverrides);
+	auto curFontSize = TextOverrideCursor(size, params.fontSizeOverrides);
 
 	float curWidth = 0;
 
@@ -629,9 +662,9 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 
 	auto lineBreaker = UnicodeLineBreaker(font->getUnicodeData());
 
-	for (size_t i = 0; i < src.size(); ++i) {
-		const char32_t cur = src[i];
-		const char32_t next = i + 1 < src.size() ? src[i + 1] : 0;
+	for (size_t i = 0; i < str.size(); ++i) {
+		const char32_t cur = str[i];
+		const char32_t next = i + 1 < str.size() ? str[i + 1] : 0;
 
 		curFont.setPos(i);
 		curFontSize.setPos(i);
@@ -641,7 +674,7 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 		const float w = (glyph.advance.x + kerning.x) * scale;
 		curWidth += w;
 
-		if (curWidth > maxWidth && bestSplitPoint && !splittingSpaces) {
+		if (curWidth > params.maxWidth && bestSplitPoint && !splittingSpaces) {
 			// Split
 			output += *bestSplitPoint;
 			curWidth -= bestSplitWidth;

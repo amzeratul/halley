@@ -113,15 +113,25 @@ namespace Halley
 		Vector2f getCharacterPosition(size_t character) const;
 		size_t getCharacterAt(const Vector2f& position) const;
 
-		StringUTF32 split(const String& str, float width) const;
-		StringUTF32 split(const StringUTF32& str, float width, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}) const;
-		StringUTF32 split(float width) const;
+		struct SplitParams {
+			float maxWidth;
+			gsl::span<const FontOverride> fontOverrides;
+			gsl::span<const FontSizeOverride> fontSizeOverrides;
+			gsl::span<ColourOverride> colourOverrides;
 
+			SplitParams(float maxWidth, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}, gsl::span<ColourOverride> colourOverrides = {});
+		};
+		
 		struct SplitResult {
 			uint32_t pos;
 			uint32_t toConsume;
 		};
-		void calculateTextSplit(Vector<SplitResult>& output, std::u32string_view str, float width, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}) const;
+
+		StringUTF32 split(const String& str, float width, gsl::span<ColourOverride> colourOverrides = {}) const;
+		StringUTF32 split(std::u32string_view str, float width, gsl::span<const FontOverride> fontOverrides = {}, gsl::span<const FontSizeOverride> fontSizeOverrides = {}, gsl::span<ColourOverride> colourOverrides = {}) const;
+		StringUTF32 split(std::u32string_view str, const SplitParams& params) const;
+		StringUTF32 split(float width) const;
+		void calculateTextSplit(Vector<SplitResult>& output, std::u32string_view str, const SplitParams& params) const;
 		
 		Vector2f getPosition() const;
 		String getText() const;

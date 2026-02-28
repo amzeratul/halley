@@ -761,16 +761,15 @@ void BaseGraphGizmo::drawToolTip(Painter& painter, const String& text, const Vec
 	const float align = 0.5f;
 	const float curZoom = getZoom();
 	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
-	
+
+	auto cols = colours;
 	tooltipLabel
-		.setColourOverride(colours)
+		.setText(tooltipLabel.split(text, 250.0f / curZoom, cols))
+		.setColourOverride(cols)
 		.setPosition(pos)
 		.setAlignment(align)
 		.setSize(16 / curZoom)
 		.setOutline(4.0f / curZoom);
-
-	tooltipLabel
-		.setText(tooltipLabel.split(text, 250.0f / curZoom));
 
 	const auto extents = tooltipLabel.getExtents();
 	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-align, 0), pos + extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
