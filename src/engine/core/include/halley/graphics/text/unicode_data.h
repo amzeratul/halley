@@ -19,23 +19,26 @@ namespace Halley {
             bool prohibitLineBreakAfter: 1;
             bool isSpace: 1;
             bool consumeMoreSpace : 1;
+            bool forceLineBreakAfter : 1;
             Context context;
         };
 
         // The actual Unicode rules are a bit crazy, this is a simplified version
         enum class LineBreakClass : uint8_t {
             Unknown,
-            AL, // Alphabetic
-            SP, // Space
-	        BK, // Break
-            CL, // Close punctuation
-            OP, // Open punctuation
-            ID, // Ideographic
-            EB, // Emoji base
-            IS, // Infix numeric separator
-            NU, // Numeric
-            PO, // Postfix Numeric
-            PR, // Prefix Numeric
+            Alphabetic,
+            Space,
+	        Break,
+            CarriageReturn,
+            LineFeed,
+            ClosePunctuation,
+            OpenPunctuation,
+            Ideographic,
+            EmojiBase,
+            InfixNumericSeparator,
+            Numeric,
+            PostfixNumeric,
+            PrefixNumeric,
         };
 
         UnicodeData();
@@ -49,9 +52,11 @@ namespace Halley {
         static bool isEastAsianIdeographicCharacter(char32_t c);
 
     private:
+        std::array<LineBreakRules, 14> lineBreakRules;
         HashMap<char32_t, LineBreakClass> lineBreakClasses;
-        std::array<LineBreakRules, 12> lineBreakRules;
+        std::array<LineBreakClass, 256> lineBreakClassesAscii;
 
+        void setClass(char32_t c, LineBreakClass breakClass);
         void loadLineBreakRules();
     };
 
@@ -59,6 +64,7 @@ namespace Halley {
     public:
         struct Result {
             int priority = 0;
+            bool forceBreak = false;
             bool consumeSpace = false;
             bool hasMoreSpaces = false;
         };

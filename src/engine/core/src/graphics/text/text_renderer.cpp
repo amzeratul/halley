@@ -653,7 +653,7 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	auto curFont = TextOverrideCursor(font, params.fontOverrides);
 	auto curFontSize = TextOverrideCursor(size, params.fontSizeOverrides);
 
-	float curWidth = 0;
+	float curLineWidth = 0;
 
 	std::optional<SplitResult> bestSplitPoint;
 	int bestSplitPointScore = -1;
@@ -662,6 +662,25 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 
 	auto lineBreaker = UnicodeLineBreaker(font->getUnicodeData());
 
+	auto trySplit = [&] (bool force)
+	{
+		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth || force)) {
+			output += *bestSplitPoint;
+			curLineWidth -= bestSplitWidth;
+			bestSplitPoint = {};
+		}
+	};
+
+	auto onBreakResult = [&](size_t pos, UnicodeLineBreaker::Result result)
+	{
+		if (!bestSplitPoint || result.priority >= bestSplitPointScore) {
+			bestSplitPointScore = result.priority;
+			bestSplitPoint = SplitResult{ static_cast<uint32_t>(pos + 1), result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->toConsume : 0) + 1 : 0 };
+			bestSplitWidth = curLineWidth;
+			splittingSpaces = result.hasMoreSpaces;
+		}
+	};
+
 	for (size_t i = 0; i < str.size(); ++i) {
 		const char32_t cur = str[i];
 		const char32_t next = i + 1 < str.size() ? str[i + 1] : 0;
@@ -669,28 +688,22 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 		curFont.setPos(i);
 		curFontSize.setPos(i);
 		const auto& [glyph, f] = curFont->getGlyph(cur);
-		const float scale = getScale(f, *curFontSize);
 		const auto kerning = lastFont == &f && lastGlyph ? lastGlyph->getKerning(cur) : Vector2f();
-		const float w = (glyph.advance.x + kerning.x) * scale;
-		curWidth += w;
-
-		if (curWidth > params.maxWidth && bestSplitPoint && !splittingSpaces) {
-			// Split
-			output += *bestSplitPoint;
-			curWidth -= bestSplitWidth;
-			bestSplitPoint = {};
-		}
-
-		const auto breakResult = lineBreaker.feedCharacter(cur, next);
-		if (!bestSplitPoint || breakResult.priority >= bestSplitPointScore) {
-			bestSplitPointScore = breakResult.priority;
-			bestSplitPoint = SplitResult{ static_cast<uint32_t>(i + 1), breakResult.consumeSpace ? (bestSplitPoint ? bestSplitPoint->toConsume : 0) + 1 : 0 };
-			bestSplitWidth = curWidth;
-			splittingSpaces = breakResult.hasMoreSpaces;
-		}
-
 		lastFont = &f;
 		lastGlyph = &glyph;
+
+		const auto breakResult = lineBreaker.feedCharacter(cur, next);
+		curLineWidth += (glyph.advance.x + kerning.x) * getScale(f, *curFontSize);
+
+		if (breakResult.consumeSpace) {
+			// Spaces can go over the edge
+			onBreakResult(i, breakResult);
+			trySplit(breakResult.forceBreak);
+		} else {
+			// For everything else, we're over the edge, split before accepting new break point
+			trySplit(breakResult.forceBreak);
+			onBreakResult(i, breakResult);
+		}
 	}
 }
 
