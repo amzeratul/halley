@@ -10,15 +10,14 @@ namespace Halley {
 	public:
 		std::optional<Vector2f> update(Time dt, float minStartSpeed, float minSpeed);
 
-		void appendDelta(Vector2f deltaPos, std::optional<Time> deltaTime = {});
-		void appendAbsolute(Vector2f pos, std::optional<Time> deltaTime = {});
+		void appendDelta(Vector2f deltaPos);
+		void appendAbsolute(Vector2f pos);
 		void stop();
 
     private:
 		struct Entry {
 			Vector2f deltaPos;
-			Time deltaTime;
-			bool needsTime = false;
+			Time timeSinceAdded = 0;
 		};
         Vector<Entry> deltas;
 		std::optional<Vector2f> inertialVel;

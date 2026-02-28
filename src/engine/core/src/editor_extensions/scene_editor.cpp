@@ -418,7 +418,7 @@ void SceneEditor::dragCamera(Vector2f amount)
 	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
 
-	inertialDrag.appendDelta(amount / zoom, lastStepTime);
+	inertialDrag.appendDelta(amount / zoom);
 }
 
 void SceneEditor::moveCamera(Vector2f pos)
