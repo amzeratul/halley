@@ -133,7 +133,7 @@ namespace Halley {
 		{
 			assign(std::move(first), std::move(last));
 		}
-		
+
 		VectorStd(const VectorStd& other)
 		{
 			if constexpr (std::is_trivially_copyable_v<T>) {
@@ -152,6 +152,28 @@ namespace Halley {
 					std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
 				}
 				set_size(other.st_size());
+			}
+		}
+
+		template <typename U, typename US, bool UES, size_t UPad, typename UA>
+		VectorStd(const VectorStd<U, US, UES, UPad, UA>& other)
+		{
+			if constexpr (std::is_same_v<T, U> && std::is_trivially_copyable_v<T>) {
+				if (other.sbo_active() && (sbo_active() || empty())) {
+					memcpy(this, &other, sizeof(*this));
+				} else {
+					resize_no_init(other.size());
+					shrink_to_fit();
+					memcpy(data(), other.data(), other.size() * sizeof(T));
+				}
+			} else {
+				change_capacity(static_cast<SizeType>(other.capacity()));
+				auto* dst = data();
+				const auto iterEnd = other.end();
+				for (auto iter = other.begin(); iter != iterEnd; ++iter) {
+					std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
+				}
+				set_size(static_cast<SizeType>(other.size()));
 			}
 		}
 		
@@ -213,8 +235,8 @@ namespace Halley {
 			return *this;
 		}
 
-		template<typename A, typename S, bool SBO, size_t SBOP>
-		VectorStd& operator=(const VectorStd<T, S, SBO, SBOP, A>& other)
+		template<typename U, typename A, typename S, bool SBO, size_t SBOP>
+		VectorStd& operator=(const VectorStd<U, S, SBO, SBOP, A>& other)
 		{
 			if constexpr (std::is_same_v<decltype(this), decltype(&other)>) {
 				if (this == &other) {
@@ -223,8 +245,12 @@ namespace Halley {
 			}
 
 			if constexpr (std::is_trivially_copyable_v<T>) {
-				resize_no_init(other.size());
-				memcpy(data(), other.data(), other.size() * sizeof(T));
+				if (other.sbo_active() && (sbo_active() || empty())) {
+					memcpy(this, &other, sizeof(*this));
+				} else {
+					resize_no_init(other.size());
+					memcpy(data(), other.data(), other.size() * sizeof(T));
+				}
 			} else {
 				assign(other.begin(), other.end());
 			}
