@@ -31,6 +31,7 @@ namespace Halley {
         EntityDataDelta();
 		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options = Options());
 
 		bool hasChange() const;
 
