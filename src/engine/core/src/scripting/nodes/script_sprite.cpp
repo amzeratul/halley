@@ -360,7 +360,8 @@ ConfigNode ScriptSpriteActionPoint::doGetData(ScriptEnvironment& environment, co
 Vector<IGraphNodeType::SettingType> ScriptColourGradient::getSettingTypes() const
 {
 	return {
-		SettingType{ "gradient", "Halley::ColourGradient", Vector<String>{""} }
+		SettingType{ "gradient", "Halley::ColourGradient", Vector<String>{""} },
+		SettingType{ "bias", "Halley::Colour4f", Vector<String>{"#00000000"} }
 	};
 }
 
@@ -402,6 +403,7 @@ ConfigNode ScriptColourGradient::doGetData(ScriptEnvironment& environment, const
 {
 	const auto samplePos = clamp(readDataPin(environment, node, 0).asFloat(), 0.0f, 1.0f);
 	const auto gradient = ColourGradient(node.getSettings()["gradient"]);
-	return gradient.evaluatePrecomputed(samplePos).toConfigNode();
+	const auto bias = Colour4f(node.getSettings()["bias"]);
+	return (gradient.evaluatePrecomputed(samplePos) + bias).toConfigNode();
 }
 
