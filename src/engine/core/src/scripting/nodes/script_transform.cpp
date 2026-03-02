@@ -167,7 +167,8 @@ std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(
 String ScriptGetPosition::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1 || elementIdx == 3) {
-		return "Position of " + getConnectedNodeName(node, graph, 0) + " + " + getConnectedNodeName(node, graph, 2);
+		auto ref = tryGetConnectedNodeName(node, graph, 2);
+		return "Position of " + getConnectedNodeName(node, graph, 0) + (ref ? " + " + *ref : String(""));
 	} else if (elementIdx == 4) {
 		return "Subworld of " + getConnectedNodeName(node, graph, 0);
 	} else if (elementIdx == 6) {
