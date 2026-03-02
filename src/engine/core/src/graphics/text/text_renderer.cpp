@@ -664,7 +664,7 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 
 	auto trySplit = [&] (bool force)
 	{
-		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth || force)) {
+		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth + 0.5f || force)) {
 			output += *bestSplitPoint;
 			curLineWidth -= bestSplitWidth;
 			bestSplitPoint = {};
