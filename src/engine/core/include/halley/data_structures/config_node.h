@@ -719,6 +719,12 @@ namespace Halley {
 			return asPair<P1, P2>();
 		}
 
+		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
+		T convertTo(Tag<T> enumValue) const
+		{
+			return fromString<T>(asString());
+		}
+
 		Vector2i doAsVector2i(bool expandScalar) const;
 		Vector2f doAsVector2f(bool expandScalar) const;
 		Vector3i doAsVector3i(bool expandScalar) const;
