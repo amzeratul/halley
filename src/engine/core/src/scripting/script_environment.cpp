@@ -924,6 +924,26 @@ void ScriptEnvironment::postAnimationEvent(const String& sequence, bool reverse,
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (!id.isEmpty()) {
+		if (resources.exists<AudioEvent>(id)) {
+			// Check scope of actions stored in this audio event:
+			// If there are any actions that are not object-scoped, don't broadcast as a networked system message.
+			//
+			// NB: This is ambiguous - if an audio event uses actions in both global and object scope, it won't broadcast either.
+			const auto& actions = resources.get<AudioEvent>(id)->getActions();
+
+			size_t numObjectScoped = 0;
+			for (const auto& action : actions) {
+				if (action->getScope() == AudioEventScope::Object) {
+					numObjectScoped++;
+				}
+			}
+
+			if (numObjectScoped < actions.size()) {
+				getInterface<IAudioSystemInterface>().playAudio(id, entityId);
+				return;
+			}
+		}
+
 		auto msg = std::make_unique<PlayNetworkSoundSystemMessage>(entityId, id);
 		const auto msgId = msg->getId();
 
