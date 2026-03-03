@@ -120,6 +120,16 @@ component:
       type: 'Halley::ResourceReference<Halley::Animation>'
       displayName: Animation
       canSave: false
+  - sequence:
+      type: 'Halley::String'
+      displayName: Sequence
+      defualtValue: "default"
+      canSave: false
+  - direction:
+      type: 'Halley::String'
+      displayName: Direction
+      defualtValue: "default"
+      canSave: false
   - layer:
       type: int
       defaultValue: 0

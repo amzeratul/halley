@@ -372,9 +372,11 @@ void Particles::setSprites(Vector<Sprite> sprites)
 	baseSprites = std::move(sprites);
 }
 
-void Particles::setAnimation(std::shared_ptr<const Animation> animation)
+void Particles::setAnimation(std::shared_ptr<const Animation> animation, String seq, String dir)
 {
 	baseAnimation = std::move(animation);
+	animationSequence = seq;
+	animationDirection = dir;
 }
 
 bool Particles::isRandomisingAnimationTime() const
@@ -462,7 +464,7 @@ void Particles::spawn(size_t n, float time, Vector3f origin)
 		sprites.resize(size);
 	}
 	if (animationPlayers.size() < size && isAnimated()) {
-		animationPlayers.resize(size, AnimationPlayerLite(baseAnimation));
+		animationPlayers.resize(size, AnimationPlayerLite(baseAnimation, animationSequence, animationDirection));
 	}
 
 	const float timeSlice = time / n;

@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -18,16 +18,20 @@ public:
 	Halley::Particles particles{};
 	Halley::Vector<Halley::Sprite> sprites{};
 	Halley::ResourceReference<Halley::Animation> animation{};
+	Halley::String sequence{};
+	Halley::String direction{};
 	int layer{ 0 };
 	Halley::OptionalLite<Halley::SpriteMaskBase> mask{};
 
 	ParticlesComponent() {
 	}
 
-	ParticlesComponent(Halley::Particles particles, Halley::Vector<Halley::Sprite> sprites, Halley::ResourceReference<Halley::Animation> animation, int layer, Halley::OptionalLite<Halley::SpriteMaskBase> mask)
+	ParticlesComponent(Halley::Particles particles, Halley::Vector<Halley::Sprite> sprites, Halley::ResourceReference<Halley::Animation> animation, Halley::String sequence, Halley::String direction, int layer, Halley::OptionalLite<Halley::SpriteMaskBase> mask)
 		: particles(std::move(particles))
 		, sprites(std::move(sprites))
 		, animation(std::move(animation))
+		, sequence(std::move(sequence))
+		, direction(std::move(direction))
 		, layer(std::move(layer))
 		, mask(std::move(mask))
 	{
@@ -39,6 +43,8 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(particles)>::serialize(particles, Halley::Particles{}, _context, _node, componentName, "particles", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(sprites)>::serialize(sprites, Halley::Vector<Halley::Sprite>{}, _context, _node, componentName, "sprites", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(animation)>::serialize(animation, Halley::ResourceReference<Halley::Animation>{}, _context, _node, componentName, "animation", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(sequence)>::serialize(sequence, Halley::String{}, _context, _node, componentName, "sequence", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(direction)>::serialize(direction, Halley::String{}, _context, _node, componentName, "direction", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, Halley::OptionalLite<Halley::SpriteMaskBase>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
 		return _node;
@@ -49,6 +55,8 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(particles)>::deserialize(particles, Halley::Particles{}, _context, _node, componentName, "particles", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(sprites)>::deserialize(sprites, Halley::Vector<Halley::Sprite>{}, _context, _node, componentName, "sprites", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(animation)>::deserialize(animation, Halley::ResourceReference<Halley::Animation>{}, _context, _node, componentName, "animation", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(sequence)>::deserialize(sequence, Halley::String{}, _context, _node, componentName, "sequence", makeMask(Type::Prefab));
+		Halley::EntityConfigNodeSerializer<decltype(direction)>::deserialize(direction, Halley::String{}, _context, _node, componentName, "direction", makeMask(Type::Prefab));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, _context, _node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<Halley::SpriteMaskBase>{}, _context, _node, componentName, "mask", makeMask(Type::Prefab));
 	}
@@ -58,6 +66,8 @@ public:
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("particles");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("sprites");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("animation");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("sequence");
+		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("direction");
 		if ((_mask & makeMask(Type::Prefab, Type::SaveData, Type::Dynamic, Type::Network)) == 0) _node.removeKey("layer");
 		if ((_mask & makeMask(Type::Prefab)) == 0) _node.removeKey("mask");
 	}

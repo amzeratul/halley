@@ -58,7 +58,7 @@ private:
 		auto& particles = e.particles.particles;
 		particles.setSprites(e.particles.sprites);
 		if (e.particles.animation) {
-			particles.setAnimation(e.particles.animation.get());
+			particles.setAnimation(e.particles.animation.get(), e.particles.sequence, e.particles.direction);
 		}
 		particles.reset();
 	}

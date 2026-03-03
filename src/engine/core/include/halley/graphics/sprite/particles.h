@@ -105,7 +105,7 @@ namespace Halley {
 		void updateSprites(Time t);
 
 		void setSprites(Vector<Sprite> sprites);
-		void setAnimation(std::shared_ptr<const Animation> animation);
+		void setAnimation(std::shared_ptr<const Animation> animation, String sequence = "default", String direction = "default");
 
 		bool isRandomisingAnimationTime() const;
 		bool isAnimated() const;
@@ -177,6 +177,8 @@ namespace Halley {
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
+		String animationSequence;
+		String animationDirection;
 		Vector3f position;
 		Vector3f lastPosition;
 		Vector<EntityId> onSpawn;
