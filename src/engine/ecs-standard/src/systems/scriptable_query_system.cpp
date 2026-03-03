@@ -31,7 +31,7 @@ public:
 					if (!reflectors.empty()) {
 						auto e = getWorld().getEntity(entityId);
 						for (const auto& r: reflectors) {
-							if (r->tryGetComponent(e) == nullptr) {
+							if (r->tryGetComponent(e, false) == nullptr) {
 								return;
 							}
 						}

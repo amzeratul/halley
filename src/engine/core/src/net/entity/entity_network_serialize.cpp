@@ -333,6 +333,16 @@ EntityNetworkSerialize::EntityNetworkSerialize(const EntityNetworkSession* sessi
     // and maximum network message split size in EntityNetworkSession.
     scratchpad.reserve(16 * 32 * 1024);
     scratchpad.resize_no_init(scratchpad.capacity());
+
+    // We lookup components by ID, need to translate from names.
+    // This is the same list of component types EntityFactory uses to compile deltas.
+    const auto& reflection = entity.getWorld().getReflection();
+    const auto& ignoreComponents = session->getEntityDeltaOptions().ignoreComponents;
+    componentsIgnored.reserve(ignoreComponents.size());
+    for (const auto& componentName : ignoreComponents) {
+        const auto& reflector = reflection.getComponentReflector(componentName);
+        componentsIgnored.emplace(reflector.getIndex());
+    }
 }
 
 bool EntityNetworkSerialize::serializeEntityUpdate(const SerializerOptions& options)
@@ -381,6 +391,10 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     auto& reflection = serializer.getOptions().world->getReflection();
 
     for (auto [componentId, component] : entity) {
+        if (componentsIgnored.contains(componentId)) {
+            continue;
+        }
+
         const auto& reflector = reflection.getComponentReflector(componentId);
 
         journal.beginComponent(serializer, (uint16_t) componentId);
@@ -505,7 +519,22 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 
         if (reflector != nullptr) {
-            if (const auto component = reflector->tryGetComponent(entity)) {
+            // This checks with evenIfDisabled = true; the entity or its parent could have been
+            // disabled while a network update is still in flight.
+            auto component = reflector->tryGetComponent(entity, true);
+
+            if (component == nullptr && session->allowComponentAddedForFastUpdate(componentId)) {
+                // Create this component on demand if it's in the list of component types that are
+                // allowed to be added (on sender side) without triggering the "slow update" path.
+                //
+                // This doesn't honor per-entity byte data interpolators. As those are only used for
+                // the sending party, this would only be needed if ..
+                // - a component type with a per-entity interpolator is added here
+                // - a peer grabs authority of that entity later, flipping sender/receiver
+                component = reflector->createComponent(entity);
+            }
+
+            if (component != nullptr) {
                 const size_t expectedEndPos = deserializer.getPosition() + size;
 
                 if (result && componentId == Transform2DComponent::componentIndex) {

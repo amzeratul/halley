@@ -1,24 +1,18 @@
 #include "halley/entity/entity_data_delta.h"
 
-#include <cassert>
-
 #include "halley/net/interpolators/data_interpolator.h"
 #include "halley/entity/entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
 #include "halley/entity/world_reflection.h"
 #include "halley/file_formats/yaml_convert.h"
-#include "halley/support/logger.h"
 
 using namespace Halley;
 
 
-EntityDataDelta::Options::Options()
-{
-}
+EntityDataDelta::Options::Options() = default;
 
-EntityDataDelta::EntityDataDelta()
-{}
+EntityDataDelta::EntityDataDelta() = default;
 
 EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 	: EntityDataDelta(EntityData(), to, options)
@@ -26,6 +20,11 @@ EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 }
 
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
+	: EntityDataDelta(from, to, to.getInstanceUUID(), options)
+{
+}
+
+EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options)
 {
 	if (from.prefab != to.prefab) {
 		prefab = to.prefab;
@@ -66,18 +65,31 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Ignore non-serializables
 				continue;
 			}
-			const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e)
-			{
-				const auto combined = UUID::xorUUIDs(e.getPrefabUUID(), to.getInstanceUUID());
-			    return e.matchesUUID(toChild) || toChild.matchesUUID(combined);
-			});
-			if (fromIter != from.children.end()) {
-				// Potentially modified
-				auto delta = EntityDataDelta(*fromIter, toChild, options);
-				if (delta.hasChange()) {
-					childrenChanged.emplace_back(toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID, std::move(delta));
+			// Try to find a matching child in source data.
+			bool alreadyExists = false;
+			for (const auto& fromChild : from.children) {
+				if (fromChild.prefabUUID == toChild.prefabUUID) {
+					// This might be an instantiated prefab. Mirror the UUID generation in
+					// EntityData::doInstantiatePrefabs().
+					const auto combined = rootUUID ^ fromChild.prefabUUID;
+					alreadyExists = fromChild.matchesUUID(combined);
 				}
-			} else {
+
+				if (!alreadyExists) {
+					const auto combined = fromChild.prefabUUID ^ to.instanceUUID;
+					alreadyExists = fromChild.matchesUUID(toChild) || toChild.matchesUUID(combined);
+				}
+
+				if (alreadyExists) {
+					// Potentially modified
+					auto delta = EntityDataDelta(fromChild, toChild, rootUUID, options);
+					if (delta.hasChange()) {
+						childrenChanged.emplace_back(toChild.instanceUUID.isValid() ? toChild.instanceUUID : toChild.prefabUUID, std::move(delta));
+					}
+					break;
+				}
+			}
+			if (!alreadyExists) {
 				// Inserted
 				childrenAdded.emplace_back(toChild);
 				childrenAdded.back().postProcessAddedChild(options.ignoreComponents, options.omitEmptyComponents);
@@ -88,11 +100,24 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				// Ignore non-serializables
 				continue;
 			}
-			const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e)
-			{
-				const auto combined = UUID::xorUUIDs(fromChild.getPrefabUUID(), to.getInstanceUUID());
-			    return e.matchesUUID(fromChild) || e.matchesUUID(combined);
-			}) != to.children.end();
+			bool stillExists = false;
+			for (const auto& toChild : to.children) {
+				if (fromChild.prefabUUID == toChild.prefabUUID) {
+					// This might be an instantiated prefab. Mirror the UUID generation in
+					// EntityData::doInstantiatePrefabs().
+					const auto combined = rootUUID ^ fromChild.prefabUUID;
+					stillExists = fromChild.matchesUUID(combined);
+				}
+
+				if (!stillExists) {
+					const auto combined = fromChild.prefabUUID ^ to.instanceUUID;
+					stillExists = toChild.matchesUUID(fromChild) || toChild.matchesUUID(combined);
+				}
+
+				if (stillExists) {
+					break;
+				}
+			}
 			if (!stillExists) {
 				// Removed
 				childrenRemoved.emplace_back(fromChild.instanceUUID.isValid() ? fromChild.instanceUUID : fromChild.prefabUUID);

@@ -1,7 +1,6 @@
 #pragma once
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/uuid.h"
-#include <set>
 #include "entity_data.h"
 #include "halley/bytes/config_node_serializer_base.h"
 
@@ -23,7 +22,6 @@ namespace Halley {
 			bool allowNonSerializable = true;
 			bool omitEmptyComponents = false;
 			bool ignoreNameAndIconChangesInInstances = false;
-        	bool instantiatePrefabs = true;
         	HashSet<String> ignoreComponents;
         	HashSet<String> ignoreInsertComponents;
         	bool ignoreComponentsRemoved = false;
@@ -33,6 +31,7 @@ namespace Halley {
         EntityDataDelta();
 		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
 		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, const EntityData& to, const UUID& rootUUID, const Options& options = Options());
 
 		bool hasChange() const;
 

@@ -377,7 +377,7 @@ ConfigNode ScriptECSVariable::doGetData(ScriptEnvironment& environment, const Sc
 		context.resources = &environment.getResources();
 		context.entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Dynamic);
 		context.shallow = true;
-		if (reflector.tryGetComponent(entityRef) != nullptr) {
+		if (reflector.tryGetComponent(entityRef, false) != nullptr) {
 			return reflector.serializeField(context, entityRef, field);
 		} else {
 			return {};
