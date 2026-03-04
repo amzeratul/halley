@@ -97,11 +97,11 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data), environment.getNodeData(dst.dstNode.value()));
 }
 
-std::optional<String> IScriptNodeType::tryGetConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN) const
+std::optional<String> IScriptNodeType::tryGetConnectedNodeName(const BaseGraphNode& node, const BaseGraph& graph, size_t pinN, bool raw) const
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
-		if (dynamic_cast<const ScriptGraphNode&>(node).getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
+		if (!raw && dynamic_cast<const ScriptGraphNode&>(node).getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 			return "<current entity>";
 		} else {
 			return std::nullopt;
@@ -360,6 +360,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptComment>());
 	addScriptNode(std::make_unique<ScriptDebugDisplay>());
 	addScriptNode(std::make_unique<ScriptLog>());
+	addScriptNode(std::make_unique<ScriptCurEntity>());
+	addScriptNode(std::make_unique<ScriptNullEntity>());
 	addScriptNode(std::make_unique<ScriptHasTags>());
 	addScriptNode(std::make_unique<ScriptToVector>());
 	addScriptNode(std::make_unique<ScriptFromVector>());

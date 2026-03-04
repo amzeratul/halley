@@ -483,6 +483,70 @@ ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment
 
 
 
+gsl::span<const IGraphNodeType::PinType> ScriptCurEntity::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ 
+		PinType{ ET::TargetPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptCurEntity::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	return { "Current Entity", {} };
+}
+
+String ScriptCurEntity::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Current Entity";
+}
+
+EntityId ScriptCurEntity::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	return environment.getCurrentEntityId();
+}
+
+ConfigNode ScriptCurEntity::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	return ConfigNode(environment.getCurrentEntityId());
+}
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptNullEntity::getPinConfiguration(const BaseGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ 
+		PinType{ ET::TargetPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Output },
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptNullEntity::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
+{
+	return { "Null Entity", {} };
+}
+
+String ScriptNullEntity::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "Null Entity";
+}
+
+EntityId ScriptNullEntity::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	return {};
+}
+
+ConfigNode ScriptNullEntity::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	return ConfigNode(EntityId());
+}
+
+
 Vector<IGraphNodeType::SettingType> ScriptHasTags::getSettingTypes() const
 {
 	return {

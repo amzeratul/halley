@@ -44,7 +44,7 @@ namespace Halley {
 	class ScriptFindChildByName final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "findChildByName"; }
-		String getName() const override { return "Find E. Child"; }
+		String getName() const override { return "Find Child"; }
 		String getIconName(const BaseGraphNode& node) const override { return "script_icons/find_child.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
 
@@ -115,6 +115,36 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
 		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
 		String getLargeLabel(const BaseGraphNode& node) const override;
+
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
+	class ScriptCurEntity final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "curEntity"; }
+		String getName() const override { return "Current Entity"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/entity_ref.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
+
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+	};
+
+	class ScriptNullEntity final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "nullEntity"; }
+		String getName() const override { return "Null Entity"; }
+		String getIconName(const BaseGraphNode& node) const override { return "script_icons/null_entity.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Expression; }
+
+		gsl::span<const PinType> getPinConfiguration(const BaseGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const override;
+		String getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
 
 		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
