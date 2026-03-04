@@ -1876,18 +1876,23 @@ std::shared_ptr<UIWidget> UIFactory::makeResizeDivider(const ConfigNode& entryNo
 
 UIFactoryWidgetProperties UIFactory::getScene3dProperties() const
 {
-    UIFactoryWidgetProperties result;
-    result.name = "Scene 3D";
-    result.iconName = "widget_icons/widget.png";
-    return result;
+	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
+
+	result.name = "Scene 3D";
+	result.iconName = "widget_icons/widget.png";
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScene3d(const ConfigNode& entryNode)
 {
-    const auto& node = entryNode["widget"];
-    auto id = node["id"].asString("");
-    auto widget = std::make_shared<UIScene3D>(std::move(id), getAPI(), getResources());
-    return widget;
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
+	auto widget = std::make_shared<UIScene3D>(std::move(id), getAPI(), getResources());
+	if (node.hasKey("material")) {
+		widget->setMaterial(node["material"].asString());
+	}
+	return widget;
 }
 
 UIFactoryWidgetProperties UIFactory::getSlideBehaviourProperties() const

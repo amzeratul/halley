@@ -4,6 +4,7 @@
 #include "halley/graphics/render_context.h"
 #include "halley/graphics/render_target/render_surface.h"
 #include "halley/graphics/render_target/render_target_texture.h"
+#include "halley/graphics/material/material_definition.h"
 
 using namespace Halley;
 
@@ -39,8 +40,15 @@ void UIScene3D::draw(UIPainter& painter) const
 void UIScene3D::drawOnPainter(Painter& painter) const
 {
 	if (renderSurface->isReady()) {
-		auto sprite = renderSurface->getSurfaceSprite().clone()
-			.setPosition(getPosition());
+		Sprite sprite;
+		if (material) {
+			sprite = renderSurface->getSurfaceSprite(material).clone()
+				.setPosition(getPosition());
+		}
+		else {
+			sprite = renderSurface->getSurfaceSprite().clone()
+				.setPosition(getPosition());
+		}
 
 		sprite.draw(painter);
 	}
@@ -93,4 +101,9 @@ void UIScene3D::setBGColour(Colour4f colour)
 Colour4f UIScene3D::getBGColour() const
 {
 	return bgCol;
+}
+
+void UIScene3D::setMaterial(const String& material)
+{
+    this->material = resources.get<MaterialDefinition>(material)->createMaterial();
 }

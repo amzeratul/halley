@@ -26,8 +26,11 @@ namespace Halley {
 		void setBGColour(Colour4f colour);
 		Colour4f getBGColour() const;
 
+		void setMaterial(const String& material);
+
 	private:
 		Resources& resources;
+		std::shared_ptr<Material> material;
 
 		Colour4f bgCol;
 		Vector<std::unique_ptr<MeshRenderer>> renderers;
