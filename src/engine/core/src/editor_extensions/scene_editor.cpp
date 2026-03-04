@@ -400,7 +400,7 @@ Vector2f SceneEditor::getCameraPos() const
 
 float SceneEditor::getZoom() const
 {
-	return camera.getZoom();
+	return std::max(camera.getZoom(), 0.01f);
 }
 
 std::optional<Vector2f> SceneEditor::getWorldOffset() const
