@@ -102,10 +102,15 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				if (entry.authorityId != peerId) {
 					toUpdate.emplace_back(entity, &iter->second);
 				}
+				continue;
 			} else {
-				Logger::logError("No outbound entity found that is owned by local peer");
+				// No entry found for this entity in outboundEntities. This usually means that this
+				// particular peer is not in range.
+				if (entry.authorityId == peerId) {
+					Logger::logError("No outbound entity " + toString(entry.entityId.value & 0xffffffff) +
+						" found owned by local peer, with authority grabbed by " + toString(static_cast<int>(entry.authorityId)));
+				}
 			}
-			continue;
 		}
 
 		if (parentSession->isEntityInView(entity, clientData, peerId)) {
