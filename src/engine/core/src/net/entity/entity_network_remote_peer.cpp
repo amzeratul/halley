@@ -555,7 +555,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 
 	auto entity = parentSession->getWorld().tryGetEntity(remote.worldId);
 	if (!entity.isValid()) {
-		Logger::logWarning("Entity with network id (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId (" + toString(remote.worldId) + ") not alive in the world from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id (" + toString(static_cast<int>(msg.entityId)) + ") and EntityId (" + toString(remote.worldId.value & 0xffffffff) + ") not alive in the world from peer " + toString(static_cast<int>(peerId)));
 		if (!msg.fastSerialize) {
 			const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parentSession->getByteSerializationOptions());
 			Logger::logWarning("Caused by trying to update entity:\n" + delta.toYAML());

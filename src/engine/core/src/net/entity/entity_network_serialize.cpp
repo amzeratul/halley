@@ -597,7 +597,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         } else {
             // No child entity found, and we are at the root already. Something went wrong.
             // Let's skip this entity data and any components that follow.
-            Logger::logWarning("Entity '" + childInstanceUUID + "' not found while deserializing update, skip " + toString(size) + " bytes");
+            Logger::logWarning("Entity '" + childInstanceUUID + "' not found while deserializing update, skip " + toString(size) + " bytes", true);
 
             deserializer.rewind(marker);
             deserializer.skipBytes(size);
