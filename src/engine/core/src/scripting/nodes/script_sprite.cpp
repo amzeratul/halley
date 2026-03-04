@@ -22,6 +22,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 		SettingType{ "wait", "bool", Vector<String>{"true"} },
 		SettingType{ "reverse", "bool", Vector<String>{"false"} },
 		SettingType{ "sync", "bool", Vector<String>{"false"} },
+		SettingType{ "speed", "float", Vector<String>{"1"} },
 	};
 }
 
@@ -65,11 +66,12 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 		if (spriteAnimation) {
 			const auto& sequence = node.getSettings()["sequence"].asString("");
 			const bool loop = node.getSettings()["loop"].asBool(true);
+			const float speed = node.getSettings()["speed"].asFloat(1.0f);
+			spriteAnimation->player.setPlaybackSpeed(speed);
 			if (spriteAnimation->player.getCurrentSequenceName() != sequence || reverse != spriteAnimation->player.isPlayingReverse()) {
 				if (loop) {
 					spriteAnimation->player.setSequence(sequence);
-				}
-				else {
+				} else {
 					spriteAnimation->player.playOnce(sequence, {}, reverse);
 				}
 				if (node.getSettings()["sync"].asBool(false)) {
