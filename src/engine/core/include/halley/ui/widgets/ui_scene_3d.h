@@ -27,6 +27,9 @@ namespace Halley {
 		Colour4f getBGColour() const;
 
 		void setMaterial(const String& material);
+		std::shared_ptr<Material> getMaterial();
+
+		Sprite getSurfaceSprite() const;
 
 	private:
 		Resources& resources;

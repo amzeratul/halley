@@ -107,3 +107,16 @@ void UIScene3D::setMaterial(const String& material)
 {
     this->material = resources.get<MaterialDefinition>(material)->createMaterial();
 }
+
+Sprite UIScene3D::getSurfaceSprite() const
+{
+	if (material) {
+		return renderSurface->getSurfaceSprite(material);
+	}
+	return renderSurface->getSurfaceSprite();
+}
+
+std::shared_ptr<Halley::Material> UIScene3D::getMaterial()
+{
+	return material;
+}
