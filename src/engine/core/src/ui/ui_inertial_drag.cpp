@@ -20,7 +20,7 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 		result = deltas.back().deltaPos;
 	} else {
 		auto& vel = inertialVel;
-		if (!vel && deltas.size() >= 3) {
+		if (!vel && deltas.size() >= 3 && deltas.front().timeSinceAdded > 0.05) {
 			Vector2f ds;
 			for (const auto& d: deltas) {
 				ds += d.deltaPos;
