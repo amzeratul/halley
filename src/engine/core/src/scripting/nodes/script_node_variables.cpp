@@ -1797,7 +1797,7 @@ gsl::span<const IGraphNodeType::PinType> ScriptRandomNumber::getPinConfiguration
 
 String ScriptRandomNumber::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Random number";
+	return "rand(" + toString(node.getSettings()["min"].asFloat(0.0f)) + ", " + toString(node.getSettings()["max"].asFloat(1.0f)) + ")";
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptRandomNumber::getNodeDescription(const BaseGraphNode& node, const BaseGraph& graph) const
