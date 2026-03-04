@@ -16,7 +16,6 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 	std_ex::erase_if(deltas, [&](const Entry& d) { return d.timeSinceAdded > timeLimit; });
 
 	if (hasUpdateThisFrame) {
-		//Logger::logInfo("Read back: " + toString(deltas.back().deltaPos));
 		result = deltas.back().deltaPos;
 	} else {
 		auto& vel = inertialVel;
@@ -37,6 +36,11 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 			result = *vel * static_cast<float>(dt);
 			vel = damp(*vel, Vector2f(), 5.0f, static_cast<float>(dt));
 		}
+
+		// Safeguard
+		if (vel && !vel->isValid()) {
+			vel = {};
+		}
 	}
 	hasUpdateThisFrame = false;
 
@@ -45,10 +49,11 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 
 void UIInertialDrag::appendDelta(Vector2f deltaPos)
 {
-	//Logger::logInfo("Append: " + toString(deltaPos));
-	deltas.emplace_back(Entry{ deltaPos, 0.0 });
+	if (deltaPos.isValid()) {
+		deltas.emplace_back(Entry{ deltaPos, 0.0 });
+		hasUpdateThisFrame = true;
+	}
 	inertialVel.reset();
-	hasUpdateThisFrame = true;
 }
 
 void UIInertialDrag::appendAbsolute(Vector2f pos)
