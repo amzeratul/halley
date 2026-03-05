@@ -373,7 +373,9 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 			layout.ascender = curAscender;
 		}
 
-		curLineOffset.x += advance;
+		if (c != '\n') {
+			curLineOffset.x += advance;
+		}
 		curLineHeight = std::max(curLineHeight, getLineHeight(fontForGlyph, *curFontSize));
 		curAscender = std::max(curAscender, fontForGlyph.getAscenderDistance() * curScale);
 
