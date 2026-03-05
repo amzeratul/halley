@@ -656,6 +656,7 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	auto curFontSize = TextOverrideCursor(size, params.fontSizeOverrides);
 
 	float curLineWidth = 0;
+	float curLineSpaceWidth = 0;
 
 	std::optional<SplitResult> bestSplitPoint;
 	int bestSplitPointScore = -1;
@@ -668,7 +669,8 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	{
 		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth + 0.5f || force)) {
 			output += *bestSplitPoint;
-			curLineWidth -= bestSplitWidth;
+			curLineWidth = std::max(curLineWidth - bestSplitWidth, 0.0f);
+			curLineSpaceWidth = 0;
 			bestSplitPoint = {};
 		}
 	};
@@ -695,14 +697,17 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 		lastGlyph = &glyph;
 
 		const auto breakResult = lineBreaker.feedCharacter(cur, next);
-		curLineWidth += (glyph.advance.x + kerning.x) * getScale(f, *curFontSize);
+		const float width = (glyph.advance.x + kerning.x) * getScale(f, *curFontSize);
 
 		if (breakResult.consumeSpace) {
 			// Spaces can go over the edge
+			curLineSpaceWidth += width;
 			onBreakResult(i, breakResult);
 			trySplit(breakResult.forceBreak);
 		} else {
-			// For everything else, we're over the edge, split before accepting new break point
+			// For everything else, try splitting before accepting new break point
+			curLineWidth += width + curLineSpaceWidth;
+			curLineSpaceWidth = 0;
 			trySplit(breakResult.forceBreak);
 			onBreakResult(i, breakResult);
 		}
