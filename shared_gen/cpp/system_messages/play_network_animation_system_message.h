@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -16,15 +16,17 @@ public:
 	Halley::String sequence{};
 	bool reverse{};
 	bool once{};
+	Halley::String direction{};
 
 	PlayNetworkAnimationSystemMessage() {
 	}
 
-	PlayNetworkAnimationSystemMessage(Halley::EntityId entity, Halley::String sequence, bool reverse, bool once)
+	PlayNetworkAnimationSystemMessage(Halley::EntityId entity, Halley::String sequence, bool reverse, bool once, Halley::String direction)
 		: entity(std::move(entity))
 		, sequence(std::move(sequence))
 		, reverse(std::move(reverse))
 		, once(std::move(once))
+		, direction(std::move(direction))
 	{
 	}
 
@@ -45,6 +47,7 @@ public:
 		s << sequence;
 		s << reverse;
 		s << once;
+		s << direction;
 	}
 
 	void deserialize(Halley::Deserializer& s) override final {
@@ -52,6 +55,7 @@ public:
 		s >> sequence;
 		s >> reverse;
 		s >> once;
+		s >> direction;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) override final {
@@ -60,5 +64,6 @@ public:
 		Halley::EntityConfigNodeSerializer<decltype(sequence)>::deserialize(sequence, Halley::String{}, context, node, "", "sequence", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(reverse)>::deserialize(reverse, bool{}, context, node, "", "reverse", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(once)>::deserialize(once, bool{}, context, node, "", "once", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(direction)>::deserialize(direction, Halley::String{}, context, node, "", "direction", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 	}
 };
