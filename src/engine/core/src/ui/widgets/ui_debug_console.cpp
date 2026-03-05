@@ -119,7 +119,7 @@ void UIDebugConsoleCommands::addCommandBatches(const ConfigNode& node, IUIDebugC
 			if (outputs.empty()) {
 				return UIDebugConsoleResponse("Done");
 			} else {
-				return UIDebugConsoleResponse(String::concatList(outputs.const_span(), "\n"), false, true);
+				return UIDebugConsoleResponse("Done, but with errors:\n" + String::concatList(outputs.const_span(), "\n"), false, true);
 			}
 		}, { UIDebugConsoleSyntax() });
 	}
