@@ -33,7 +33,7 @@ bool SceneEditorGameBridge::isLoaded() const
 
 ISceneEditor& SceneEditorGameBridge::getInterface() const
 {
-	Expects(interface);
+	HalleyAssertDev(interface);
 	return *interface;
 }
 
@@ -369,7 +369,7 @@ Transform2DComponent* SceneEditorGameBridge::getTransform(const String& entityId
 
 void SceneEditorGameBridge::initializeEntityValidator(EntityValidator& validator)
 {
-	Expects(interfaceReady);
+	HalleyAssertDev(interfaceReady);
 	interface->initializeEntityValidator(validator);
 }
 

@@ -1,6 +1,6 @@
 #include "halley/entity/entity_factory.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 
 #include "halley/entity/ecs_reflection.h"
@@ -150,7 +150,7 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> entity, const IEntityData& data) const
 {
 	if (data.getType() == IEntityData::Type::Delta) {
-		assert(entity);
+		HalleyAssertDev(entity);
 		const auto& prefabId = dynamic_cast<const EntityDataDelta&>(data).getPrefab();
 		if (prefabId) {
 			return getPrefab(prefabId.value());
@@ -386,7 +386,7 @@ EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRe
 
 void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators, String fallbackVariant)
 {
-	Expects(entity.isValid());
+	HalleyAssertDev(entity.isValid());
 	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators, fallbackVariant);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 	for (auto& c : context->getToDeleteEntities()) {
@@ -430,7 +430,7 @@ void EntityFactory::setCanPreloadAssets(bool preload)
 
 void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	assert(entity.isValid());
+	HalleyAssertDev(entity.isValid());
 	if (parent) {
 		entity.setParent(parent.value());
 	}
@@ -628,7 +628,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		}
 	}
 	for (const auto& childData: delta.getChildrenAdded()) {
-		assert(childData.getInstanceUUID() != entity.getInstanceUUID());
+		HalleyAssertDev(childData.getInstanceUUID() != entity.getInstanceUUID());
 
 		context->removeDelete(childData.getInstanceUUID());
 
@@ -722,7 +722,7 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 
 EntityRef EntityFactory::tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
 {
-	Expects(instanceUUID.isValid());
+	HalleyAssertDev(instanceUUID.isValid());
 	const auto result = context.getEntity(instanceUUID, false, allowWorldLookup);
 	if (result.isValid()) {
 		return result;

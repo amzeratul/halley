@@ -70,12 +70,12 @@ static void setEndpointFromSockAddr(Endpoint& endpoint, const sockaddr* addr, in
 	endpoint.version = addr->sa_family == AF_INET6 ? IPVersion::IPv6 : IPVersion::IPv4;
 
 	if (endpoint.version == IPVersion::IPv6) {
-		Expects(addrLen >= sizeof(sockaddr_in6));
+		HalleyAssertDev(addrLen >= sizeof(sockaddr_in6));
 		const auto addr6 = reinterpret_cast<const sockaddr_in6 *>(addr);
 		endpoint.addr.v6 = addr6->sin6_addr;
 		endpoint.port = ntohs(addr6->sin6_port);
 	} else {
-		Expects(addrLen >= sizeof(sockaddr_in));
+		HalleyAssertDev(addrLen >= sizeof(sockaddr_in));
 		const auto addr4 = reinterpret_cast<const sockaddr_in *>(addr);
 		endpoint.addr.v4 = addr4->sin_addr;
 		endpoint.port = ntohs(addr4->sin_port);
@@ -351,7 +351,7 @@ bool SocketIOConnection::isSupported(TransmissionType type) const
 
 void SocketIOConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
-	Ensures(isSupported(type));
+	HalleyAssertDev(isSupported(type));
 
 	statsListener.onSendData(packet.getSize(), 1);
 
@@ -417,7 +417,7 @@ bool SocketIOConnection::receive(InboundNetworkPacket& packet)
 
 void SocketIOConnection::tryReceive()
 {
-	Expects(status == ConnectionStatus::Connected);
+	HalleyAssertDev(status == ConnectionStatus::Connected);
 
 	{
 		fd_set rd = {1};
@@ -560,8 +560,8 @@ void SocketIOConnection::disconnect(const String& reason)
 SocketIONetworkService::SocketIONetworkService(int port, NetworkProtocol protocol, IPVersion version)
 	: protocol(protocol)
 {
-	Expects(port == 0 || port > 1024);
-	Expects(port < 65536);
+	HalleyAssertDev(port == 0 || port > 1024);
+	HalleyAssertDev(port < 65536);
 
 	localEndpoint.port = static_cast<uint16_t>(port);
 	localEndpoint.version = version;
@@ -594,7 +594,7 @@ void SocketIONetworkService::update(Time t)
 
 String SocketIONetworkService::startListening(AcceptCallback callback)
 {
-	Ensures(!startedListening);
+	HalleyAssertDev(!startedListening);
 
 	// We don't know who we are going to talk to, so choose a network adapter
 	// by probing a well-known public address.
@@ -602,11 +602,11 @@ String SocketIONetworkService::startListening(AcceptCallback callback)
 	{
 		if (localEndpoint.version == IPVersion::IPv6) {
 			const Endpoint adapter = selectAdapterForIP("2606:4700:4700::1111", false);
-			Expects(isValidEndpoint(adapter, IPVersion::IPv6));
+			HalleyAssertDev(isValidEndpoint(adapter, IPVersion::IPv6));
 			localEndpoint.addr.v6 = adapter.addr.v6;
 		} else {
 			const Endpoint adapter = selectAdapterForIP("1.1.1.1", true);
-			Expects(isValidEndpoint(adapter, IPVersion::IPv4));
+			HalleyAssertDev(isValidEndpoint(adapter, IPVersion::IPv4));
 			localEndpoint.addr.v4 = adapter.addr.v4;
 		}
 	}
@@ -791,10 +791,10 @@ std::shared_ptr<IConnection> SocketIONetworkService::connect(const String& addre
 		Endpoint adapter = selectAdapterForIP(ip, localEndpoint.version == IPVersion::IPv4);
 
 		if (localEndpoint.version == IPVersion::IPv6) {
-			Expects(isValidEndpoint(adapter, IPVersion::IPv6));
+			HalleyAssertDev(isValidEndpoint(adapter, IPVersion::IPv6));
 			localEndpoint.addr.v6 = adapter.addr.v6;
 		} else {
-			Expects(isValidEndpoint(adapter, IPVersion::IPv4));
+			HalleyAssertDev(isValidEndpoint(adapter, IPVersion::IPv4));
 			localEndpoint.addr.v4 = adapter.addr.v4;
 		}
 	}
@@ -1006,7 +1006,7 @@ void SocketIONetworkService::receivePacket(const Endpoint& endpoint, gsl::span<s
 		try {
 			if (conn->first == 0) {
 				// Hold on, we're still on 0, re-bind to the id
-				Expects(id != 0);
+				HalleyAssertDev(id != 0);
 				connection->onConnect(id);
 
 				activeConnections[id] = connection;

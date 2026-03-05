@@ -149,7 +149,7 @@ AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples, bool zero)
 
 AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples, bool zero)
 {
-	Expects(n <= AudioConfig::maxChannels);
+	HalleyAssertDev(n <= AudioConfig::maxChannels);
 	std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
 	for (size_t i = 0; i < n; ++i) {
 		buffers[i] = &allocBuffer(numSamples);
@@ -163,7 +163,7 @@ AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples, bool ze
 
 AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 {
-	Expects(numSamples < 65536);
+	HalleyAssertDev(numSamples < 65536);
 
 	const size_t idx = fastLog2Ceil(std::max(static_cast<uint32_t>(16), static_cast<uint32_t>(numSamples)));
 	auto& buffers = buffersTable[idx];

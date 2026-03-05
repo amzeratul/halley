@@ -208,7 +208,7 @@ double Core::getTargetFPS()
 
 void Core::init()
 {
-	Expects(!initialized);
+	HalleyAssertDev(!initialized);
 	initialized = true;
 	
 	// Initialize API
@@ -468,7 +468,7 @@ void Core::tickFrame(Time time)
 			update(time, multithreaded);
 		});
 		if (frameDataRender) {
-			assert(curStageFrames > 0);
+			HalleyAssertDev(curStageFrames > 0);
 			BaseFrameData::setThreadFrameData(frameDataRender.get());
 			render();
 			waitForRenderEnd();
@@ -652,7 +652,7 @@ void Core::startFrameData(bool multithreaded, Time time)
 	}
 	if (!frameDataUpdate) {
 		frameDataUpdate = game->makeFrameData();
-		assert(!!frameDataUpdate);
+		HalleyAssertDev(!!frameDataUpdate);
 	}
 	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr, time);
 }
@@ -709,13 +709,13 @@ void Core::quit(int code)
 
 Resources& Core::getResources()
 {
-	Expects(resources != nullptr);
+	HalleyAssertDev(resources != nullptr);
 	return *resources;
 }
 
 const Environment& Core::getEnvironment()
 {
-	Expects(environment != nullptr);
+	HalleyAssertDev(environment != nullptr);
 	return *environment;
 }
 

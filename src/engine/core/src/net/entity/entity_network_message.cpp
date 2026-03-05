@@ -1,6 +1,6 @@
 #include "halley/net/entity/entity_network_message.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/bytes/byte_serializer.h"
 
@@ -229,7 +229,7 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		break;
 	}
 
-	assert(message && message->getType() == type);
+	HalleyAssertDev(message && message->getType() == type);
 
 	message->deserialize(s);
 }

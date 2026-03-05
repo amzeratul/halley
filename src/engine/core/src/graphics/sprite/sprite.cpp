@@ -7,7 +7,7 @@
 #include "halley/graphics/material/material_parameter.h"
 #include "halley/graphics/texture.h"
 #include "halley/resources/resources.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 #include "halley/api/video_api.h"
 #include "halley/entity/entity_factory.h"
@@ -69,7 +69,7 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	if (material && material->getDefinitionPtr()) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+		HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -81,7 +81,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
 	if (material && material->getDefinitionPtr()) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+		HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 		
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -104,7 +104,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
+	HalleyAssertDev(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
 	size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
 	char buffer[4096];
@@ -120,7 +120,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 
 	for (size_t i = 0; i < sprites.size(); i++) {
 		auto& sprite = sprites[i];
-		Expects(sprite.material == material);
+		HalleyAssertDev(sprite.material == material);
 		memcpy(&vertexData[i * spriteSize], sprite.getVertexAttrib(), spriteSize);
 	}
 
@@ -160,8 +160,8 @@ Rect4f Sprite::getAABB() const
 	
 	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 
-	//Expects(!std::isnan(sz.x));
-	//Expects(!std::isnan(sz.y));
+	//HalleyAssertDev(!std::isnan(sz.x));
+	//HalleyAssertDev(!std::isnan(sz.y));
 	
 	if (!rotated) {
 		// No rotation, give exact bounding box
@@ -272,7 +272,7 @@ Sprite& Sprite::setTexRect0(Vector4f texRect)
 
 Sprite& Sprite::setPivot(Vector2f v)
 {
-	Expects(v.isValid());
+	HalleyAssertDev(v.isValid());
 	
 	vertexAttrib.pivot = v;
 
@@ -290,7 +290,7 @@ Sprite& Sprite::setAbsolutePivot(Vector2f v)
 		vertexAttrib.pivot.y = 0;
 	}
 	
-	Ensures(vertexAttrib.pivot.isValid());
+	HalleyAssertDev(vertexAttrib.pivot.isValid());
 
 	return *this;
 }
@@ -325,7 +325,7 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 
 Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 {
-	Expects(m != nullptr);
+	HalleyAssertDev(m != nullptr);
 
 	const bool hadMaterial = static_cast<bool>(material);
 	material = std::move(m);
@@ -397,8 +397,8 @@ Sprite& Sprite::setImageData(const Texture& image)
 
 Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
-	Expects(image != nullptr);
-	Expects(materialDefinition != nullptr);
+	HalleyAssertDev(image != nullptr);
+	HalleyAssertDev(materialDefinition != nullptr);
 
 	auto mat = materialDefinition->createMaterial();
 	mat->set(0, image);
@@ -408,7 +408,7 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 
 Sprite& Sprite::setImage(Resources& resources, std::string_view imageName, std::string_view materialName)
 {
-	Expects (!imageName.empty());
+	HalleyAssertDev(!imageName.empty());
 
 	const auto sprite = resources.get<SpriteResource>(imageName);
 
@@ -472,8 +472,8 @@ Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
 
 Sprite& Sprite::setSprite(Resources& resources, std::string_view spriteSheetName, std::string_view imageName, std::string_view materialName)
 {
-	Expects (!spriteSheetName.empty());
-	Expects (!imageName.empty());
+	HalleyAssertDev(!spriteSheetName.empty());
+	HalleyAssertDev(!imageName.empty());
 
 	if (materialName.empty()) {
 		materialName = MaterialDefinition::defaultMaterial;
@@ -487,7 +487,7 @@ Sprite& Sprite::setSprite(Resources& resources, std::string_view spriteSheetName
 
 Sprite& Sprite::setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot)
 {
-	Expects (!name.empty());
+	HalleyAssertDev(!name.empty());
 	setSprite(sheet.getSprite(name), applyPivot);
 	return *this;
 }
@@ -512,7 +512,7 @@ void Sprite::doSetSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	sliced = slices.x != 0 || slices.y != 0 || slices.z != 0 || slices.w != 0;
 	setSize(entry.size);
 	if (applyPivot) {
-		Expects(entry.pivot.isValid());
+		HalleyAssertDev(entry.pivot.isValid());
 		vertexAttrib.pivot = entry.pivot;
 	}
 	vertexAttrib.texRect0 = entry.coords.toVector4();

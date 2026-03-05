@@ -72,12 +72,12 @@ namespace Halley {
 		// Getter
 		constexpr inline T& operator[](size_t n)
 		{
-			Expects(n <= 2);
+			HalleyAssertDev(n <= 2);
 			return (&x)[n];
 		}
 		constexpr inline T operator[](size_t n) const
 		{
-			Expects(n <= 2);
+			HalleyAssertDev(n <= 2);
 			return (&x)[n];
 		}
 

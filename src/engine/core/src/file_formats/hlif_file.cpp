@@ -172,8 +172,8 @@ void HLIFFile::decodeLines(Vector2i size, gsl::span<const uint8_t> lineData, gsl
 void HLIFFile::encodeLines(Vector2i size, gsl::span<uint8_t> lineData, gsl::span<uint8_t> pixelData, int bpp)
 {
 	const auto stride = bpp * size.x;
-	assert(lineData.size_bytes() == size.y);
-	assert(pixelData.size_bytes() == stride * size.y);
+	HalleyAssertDev(lineData.size_bytes() == size.y);
+	HalleyAssertDev(pixelData.size_bytes() == stride * size.y);
 
 	Bytes blankLine(stride, 0);
 	
@@ -420,7 +420,7 @@ void HLIFFile::optimizePalettes(gsl::span<Palette> palettes, gsl::span<uint8_t> 
 
 void HLIFFile::applyPalettes(gsl::span<const uint8_t> palettedImage, gsl::span<const Palette> palettes, gsl::span<int> dst)
 {
-	assert(palettedImage.size() == dst.size());
+	HalleyAssertDev(palettedImage.size() == dst.size());
 
 	size_t startPos = 0;
 	for (const auto& palette: palettes) {

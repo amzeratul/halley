@@ -1,6 +1,6 @@
 #include "halley/net/connection/network_packet.h"
 #include <halley/support/exception.h>
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/support/logger.h"
 
@@ -32,7 +32,7 @@ size_t NetworkPacketBase::copyTo(gsl::span<std::byte> dst) const
 
 size_t NetworkPacketBase::getSize() const
 {
-	Expects(data.size() >= dataStart);
+	HalleyAssertDev(data.size() >= dataStart);
 	return data.size() - dataStart;
 }
 
@@ -67,7 +67,7 @@ OutboundNetworkPacket::OutboundNetworkPacket(const Bytes& data)
 
 void OutboundNetworkPacket::addHeader(gsl::span<const std::byte> src)
 {
-	Expects(src.size_bytes() <= dataStart);
+	HalleyAssertDev(src.size_bytes() <= dataStart);
 	
 	dataStart -= src.size_bytes();
 	memcpy(data.data() + dataStart, src.data(), src.size_bytes());
@@ -99,7 +99,7 @@ InboundNetworkPacket::InboundNetworkPacket(gsl::span<const std::byte> data)
 
 void InboundNetworkPacket::extractHeader(gsl::span<std::byte> dst)
 {
-	Expects(dst.size_bytes() <= signed(data.size()));
+	HalleyAssertDev(dst.size_bytes() <= signed(data.size()));
 
 	memcpy(dst.data(), data.data() + dataStart, dst.size_bytes());
 	dataStart += dst.size_bytes();

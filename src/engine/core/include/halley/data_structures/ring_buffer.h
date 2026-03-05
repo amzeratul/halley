@@ -66,7 +66,7 @@ namespace Halley {
     	
         void writeOne(T e)
         {
-            assert(canWrite(1));
+            HalleyAssertDebug(canWrite(1));
 
             const auto pos = writePos.load(std::memory_order_relaxed);
             entries[pos % capacity()] = std::move(e);
@@ -75,7 +75,7 @@ namespace Halley {
 
     	T readOne()
     	{
-            assert(canRead(1));
+            HalleyAssertDebug(canRead(1));
 
             const auto pos = readPos.load(std::memory_order_relaxed);
             T v = std::move(entries[pos % capacity()]);
@@ -87,7 +87,7 @@ namespace Halley {
     	void write(gsl::span<const T> es)
     	{
             const size_t numToWrite = es.size();
-            assert(canWrite(numToWrite));
+            HalleyAssertDebug(canWrite(numToWrite));
 
             const auto startPos = writePos.load(std::memory_order_relaxed);
             const auto endPos = startPos + numToWrite;
@@ -106,7 +106,7 @@ namespace Halley {
     	void write(gsl::span<T> es)
     	{
             const size_t numToWrite = es.size();
-            assert(canWrite(numToWrite));
+            HalleyAssertDebug(canWrite(numToWrite));
 
             const auto startPos = writePos.load(std::memory_order_relaxed);
             const auto endPos = startPos + numToWrite;
@@ -125,7 +125,7 @@ namespace Halley {
     	void read(gsl::span<T> es)
     	{
             const size_t numToRead = es.size();
-            assert(canRead(numToRead));
+            HalleyAssertDebug(canRead(numToRead));
 
             const auto startPos = readPos.load(std::memory_order_relaxed);
             const auto endPos = startPos + numToRead;
@@ -161,13 +161,13 @@ namespace Halley {
 
         constexpr void moveData(gsl::span<T> dst, gsl::span<T> src)
         {
-            assert(dst.size() == src.size());
+            HalleyAssertDebug(dst.size() == src.size());
             std::move(src.data(), src.data() + src.size(), dst.data()); // Don't use gsl::span iterator as that's bounds checked and disables memcpy
         }
 
         constexpr void copyData(gsl::span<T> dst, gsl::span<const T> src)
         {
-            assert(dst.size() == src.size());
+            HalleyAssertDebug(dst.size() == src.size());
             std::copy(src.data(), src.data() + src.size(), dst.data()); // Don't use gsl::span iterator as that's bounds checked and disables memcpy
         }
     };

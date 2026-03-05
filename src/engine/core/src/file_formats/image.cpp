@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include <cassert>
+#include "halley/support/assert.h"
 #include "halley/file_formats/image.h"
 #include "../../../../contrib/stb_image/stb_image.h"
 #include "../../../../contrib/lodepng/lodepng.h"
@@ -92,7 +92,7 @@ void Image::setSize(Vector2i size, bool clear)
 	if (w > 0 && h > 0)	{
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(new unsigned char[dataLen], [](unsigned char* data) { delete[] data; });
 		if (getBytesPerPixel() == 4) {
-			Ensures(size_t(px.get()) % 4 == 0);
+			HalleyAssertDev(size_t(px.get()) % 4 == 0);
 		}
 		if (clear) {
 			memset(px.get(), 0, dataLen);
@@ -264,7 +264,7 @@ void Image::blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t
 
 void Image::blitFromRotated(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t bpp)
 {
-	Expects(getBytesPerPixel() == 4);
+	HalleyAssertDev(getBytesPerPixel() == 4);
 
 	Rect4i dstRect = Rect4i({}, w, h);
 	Rect4i srcRect = Rect4i(pos, int(height), int(width)); // Rotated
@@ -314,8 +314,8 @@ void Image::blitFrom(Vector2i dstPos, const Image& srcImg, Rect4i srcArea, bool 
 
 void Image::blitDownsampled(Image& srcImg, int scale)
 {
-	Expects(getBytesPerPixel() == 4);
-	Expects(scale >= 1);
+	HalleyAssertDev(getBytesPerPixel() == 4);
+	HalleyAssertDev(scale >= 1);
 
 	const auto srcSize = srcImg.getSize();
 	const auto dstSize = getSize();
@@ -479,7 +479,7 @@ void Image::load(gsl::span<const std::byte> bytes, Format targetFormat, const Pa
 
 void Image::preMultiply()
 {
-	Expects(format == Format::RGBA);
+	HalleyAssertDev(format == Format::RGBA);
 
 	size_t n = w * h;
 	unsigned int* data = reinterpret_cast<unsigned int*>(px.get());
@@ -542,32 +542,32 @@ gsl::span<const unsigned char> Image::getPixelBytesRow(int x0, int x1, int y) co
 
 gsl::span<unsigned char> Image::getPixels1BPP()
 {
-	Expects(getBytesPerPixel() == 1);
-	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+	HalleyAssertDev(getBytesPerPixel() == 1);
+	HalleyAssertDev(dataLen >= size_t(w) * size_t(h) * 1);
 
 	return gsl::span<unsigned char>(px.get(), w * h);
 }
 
 gsl::span<const unsigned char> Image::getPixels1BPP() const
 {
-	Expects(getBytesPerPixel() == 1);
-	Expects(dataLen >= size_t(w) * size_t(h) * 1);
+	HalleyAssertDev(getBytesPerPixel() == 1);
+	HalleyAssertDev(dataLen >= size_t(w) * size_t(h) * 1);
 
 	return gsl::span<const unsigned char>(px.get(), w * h);
 }
 
 gsl::span<int> Image::getPixels4BPP()
 {
-	Expects(getBytesPerPixel() == 4);
-	Expects(dataLen >= size_t(w) * size_t(h) * 4);
+	HalleyAssertDev(getBytesPerPixel() == 4);
+	HalleyAssertDev(dataLen >= size_t(w) * size_t(h) * 4);
 
 	return gsl::span<int>(reinterpret_cast<int*>(px.get()), w * h);
 }
 
 gsl::span<const int> Image::getPixels4BPP() const
 {
-	Expects(getBytesPerPixel() == 4);
-	Expects(dataLen >= size_t(w) * size_t(h) * 4);
+	HalleyAssertDev(getBytesPerPixel() == 4);
+	HalleyAssertDev(dataLen >= size_t(w) * size_t(h) * 4);
 
 	return gsl::span<const int>(reinterpret_cast<const int*>(px.get()), w * h);
 }

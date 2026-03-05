@@ -72,7 +72,7 @@ namespace Halley
 		MaterialUpdater getMutableMaterial();
 		const Material& getMaterial() const
 		{
-			Expects(material);
+			HalleyAssertDev(material);
 			return *material;
 		}
 		const std::shared_ptr<const Material>& getMaterialPtr() const { return material; }
@@ -95,9 +95,9 @@ namespace Halley
 		Sprite& setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true, bool enableHotReload = true);
 
-		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
-		Sprite& setPosition(Vector2f pos) & { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }
-		Sprite&& setPosition(Vector2f pos) && { Expects(pos.isValid()); vertexAttrib.pos = pos; return std::move(*this); }
+		Sprite& setPos(Vector2f pos) { HalleyAssertDev(pos.isValid()); vertexAttrib.pos = pos; return *this; }
+		Sprite& setPosition(Vector2f pos) & { HalleyAssertDev(pos.isValid()); vertexAttrib.pos = pos; return *this; }
+		Sprite&& setPosition(Vector2f pos) && { HalleyAssertDev(pos.isValid()); vertexAttrib.pos = pos; return std::move(*this); }
 		Vector2f getPosition() const { return vertexAttrib.pos; }
 		Vector2f& getPosition() { return vertexAttrib.pos; }
 

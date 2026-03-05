@@ -87,12 +87,12 @@ std::optional<LineSegment> LineSegment::clip(const Rect4f& rect) const
 	if (!hRange.contains(result.a.x)) {
 		// Clip horizontal A
 		result.a = *intersection(Line(orderHorizontal ? rect.getTopLeft() : rect.getTopRight(), Vector2f(0, 1)));
-		assert(orig.getDistance(result.a) < 0.1f);
+		HalleyAssertDev(orig.getDistance(result.a) < 0.1f);
 	}
 	if (!hRange.contains(result.b.x)) {
 		// Clip horizontal B
 		result.b = *intersection(Line(orderHorizontal ? rect.getTopRight() : rect.getTopLeft(), Vector2f(0, 1)));
-		assert(orig.getDistance(result.b) < 0.1f);
+		HalleyAssertDev(orig.getDistance(result.b) < 0.1f);
 	}
 
 	if (!vRange.overlaps(result.getVertical())) {
@@ -105,12 +105,12 @@ std::optional<LineSegment> LineSegment::clip(const Rect4f& rect) const
 	if (!vRange.contains(result.a.y)) {
 		// Clip vertical A
 		result.a = *result.intersection(Line(orderVertical ? rect.getTopLeft() : rect.getBottomLeft(), Vector2f(1, 0)));
-		assert(orig.getDistance(result.a) < 0.1f);
+		HalleyAssertDev(orig.getDistance(result.a) < 0.1f);
 	}
 	if (!vRange.contains(result.b.y)) {
 		// Clip vertical B
 		result.b = *result.intersection(Line(orderVertical ? rect.getBottomLeft() : rect.getTopLeft(), Vector2f(1, 0)));
-		assert(orig.getDistance(result.b) < 0.1f);
+		HalleyAssertDev(orig.getDistance(result.b) < 0.1f);
 	}
 
 	return result;

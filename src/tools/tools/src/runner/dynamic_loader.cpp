@@ -1,7 +1,7 @@
 #include "halley/tools/runner/dynamic_loader.h"
 #include <halley/game/halley_main.h>
 #include <halley/entry/entry_point.h>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "halley/support/console.h"
 #include "halley/tools/runner/memory_patcher.h"
 
@@ -21,7 +21,7 @@ DynamicGameLoader::~DynamicGameLoader()
 
 std::unique_ptr<Core> DynamicGameLoader::createCore(Vector<std::string> args)
 {
-	Expects(entry != nullptr);
+	HalleyAssertDev(entry != nullptr);
 	return entry->createCore(args);
 }
 

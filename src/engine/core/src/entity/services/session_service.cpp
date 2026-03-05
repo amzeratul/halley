@@ -9,7 +9,7 @@ SessionService::SessionService(std::shared_ptr<Session> session)
 
 Session& SessionService::getSession() const
 {
-	assert(session);
+	HalleyAssertDev(session);
 	return *session;
 }
 

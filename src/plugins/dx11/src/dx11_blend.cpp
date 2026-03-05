@@ -98,7 +98,7 @@ DX11Blend::~DX11Blend()
 
 void DX11Blend::bind(DX11Video& video)
 {
-	Expects(state);
+	HalleyAssertDev(state);
 	video.getDeviceContext().OMSetBlendState(state, nullptr, 0xFFFFFFFF);
 }
 

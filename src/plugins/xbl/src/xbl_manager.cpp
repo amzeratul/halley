@@ -15,7 +15,7 @@
 #include <winrt/Windows.Storage.Streams.h>
 #include "xsapi/services.h"
 #include <ppltasks.h>
-#include <assert.h>
+#include "halley/support/assert.h"
 
 #define GAME_SESSION_TEMPLATE_NAME L"Standard_game_session_without_matchmaking"
 #define LOBBY_TEMPLATE_NAME L"test_lobby_invite"
@@ -56,7 +56,7 @@ void XBLMPMOperationStateCtrl::reset()
 
 void XBLMPMOperationStateCtrl::setStateRequested()
 {
-	assert ( state==OpState::NotRequested );
+	HalleyAssertDev( state==OpState::NotRequested );
 
 	state = OpState::Requested;
 	renewTimeoutTime();
@@ -64,14 +64,14 @@ void XBLMPMOperationStateCtrl::setStateRequested()
 
 void XBLMPMOperationStateCtrl::setStateError()
 {
-	assert ( state==OpState::NotRequested || state==OpState::Requested );
+	HalleyAssertDev( state==OpState::NotRequested || state==OpState::Requested );
 
 	state = OpState::Error;
 }
 
 void XBLMPMOperationStateCtrl::setStateDoneOk()
 {
-	assert ( state==OpState::NotRequested || state==OpState::Requested );
+	HalleyAssertDev( state==OpState::NotRequested || state==OpState::Requested );
 
 	state = OpState::DoneOk;
 }

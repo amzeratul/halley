@@ -9,8 +9,8 @@ using namespace Halley;
 
 void HalleyAPI::assign()
 {
-	Expects(coreInternal != nullptr);
-	Expects(systemInternal != nullptr);
+	HalleyAssertDev(coreInternal != nullptr);
+	HalleyAssertDev(systemInternal != nullptr);
 
 	core = coreInternal;
 	system = systemInternal.get();

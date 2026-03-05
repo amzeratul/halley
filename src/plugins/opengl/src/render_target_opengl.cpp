@@ -3,7 +3,7 @@
 #include "render_target_opengl.h"
 #include <halley/graphics/texture.h>
 #include <halley/data_structures/flat_map.h>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "texture_opengl.h"
 
 using namespace Halley;
@@ -16,7 +16,7 @@ TextureRenderTargetOpenGL::~TextureRenderTargetOpenGL()
 void TextureRenderTargetOpenGL::onBind(Painter&)
 {
 	init();
-	Expects(fbo != 0);
+	HalleyAssertDev(fbo != 0);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glCheckError();

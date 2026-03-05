@@ -57,13 +57,13 @@ namespace Halley
 
 		[[nodiscard]] constexpr const T& value() const
 		{
-			Expects(has_value());
+			HalleyAssertDev(has_value());
 			return val;
 		}
 
 		[[nodiscard]] constexpr T& value()
 		{
-			Expects(has_value());
+			HalleyAssertDev(has_value());
 			return val;
 		}
 

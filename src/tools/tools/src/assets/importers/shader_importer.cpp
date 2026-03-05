@@ -237,7 +237,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 
 		for (const auto& pair : glsl410PSInputVariantsCount) {
 			size_t n = code.find(pair.first);
-			Ensures(n != String::npos);
+			HalleyAssertDev(n != String::npos);
 			size_t ne = n + pair.first.size();
 			while (n > 0 && code[n - 1] != '\n') n--;
 			while (code[ne] != '\n' && code[ne] != '\0') ne++;
@@ -259,7 +259,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 				size_t loc = code.find("location = ", n);
 				if (loc < ne) {
 					loc += 11;
-					Ensures(slot < 20);
+					HalleyAssertDev(slot < 20);
 					if (slot > 9) {
 						code[loc++] = '1';
 					}
@@ -332,7 +332,7 @@ void ShaderImporter::patchGLSL410(const String& name, ShaderType type, Bytes& da
 						size_t loc = code.find("location = ", n);
 						if (loc < ne) {
 							loc += 11;
-							Ensures(slot < 20);
+							HalleyAssertDev(slot < 20);
 							if (slot > 9) {
 								code[loc++] = '1';
 							}

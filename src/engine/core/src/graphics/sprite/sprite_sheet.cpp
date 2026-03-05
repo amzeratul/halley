@@ -38,8 +38,8 @@ ConfigNode SpriteSheetEntry::toConfigNode() const
 
 void SpriteSheetEntry::serialize(Serializer& s) const
 {
-	Expects(pivot.isValid());
-	Expects(size.isValid());
+	HalleyAssertDev(pivot.isValid());
+	HalleyAssertDev(size.isValid());
 	
 	s << pivot;
 	s << origPivot;
@@ -60,8 +60,8 @@ void SpriteSheetEntry::deserialize(Deserializer& s)
 	s >> trimBorder;
 	s >> slices;
 
-	Ensures(pivot.isValid());
-	Ensures(size.isValid());
+	HalleyAssertDev(pivot.isValid());
+	HalleyAssertDev(size.isValid());
 }
 
 void SpriteSheetFrameTag::serialize(Serializer& s) const
@@ -116,7 +116,7 @@ ConfigNode SpriteSheet::toConfigNode() const
 
 const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
 {
-	Expects(resources != nullptr);
+	HalleyAssertDev(resources != nullptr);
 	if (!texture) {
 		loadTexture(*resources);
 	}
@@ -125,7 +125,7 @@ const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
 
 const std::shared_ptr<const Texture>& SpriteSheet::getPaletteTexture() const
 {
-	Expects(resources != nullptr);
+	HalleyAssertDev(resources != nullptr);
 	if (!paletteTexture) {
 		loadPaletteTexture(*resources);
 	}
@@ -761,21 +761,21 @@ ResourceMemoryUsage SpriteResource::getMemoryUsage() const
 #ifdef ENABLE_HOT_RELOAD
 void SpriteHotReloader::addSprite(Sprite* sprite, uint32_t idx) const
 {
-	Expects(sprite != nullptr);
+	HalleyAssertDev(sprite != nullptr);
 	auto lock = UniqueLock(spriteMutex);
 	spriteRefs[sprite] = idx;
 }
 
 void SpriteHotReloader::removeSprite(Sprite* sprite) const
 {
-	Expects(sprite != nullptr);
+	HalleyAssertDev(sprite != nullptr);
 	auto lock = UniqueLock(spriteMutex);
 	spriteRefs.erase(sprite);
 }
 
 void SpriteHotReloader::updateSpriteIndex(Sprite* sprite, uint32_t idx) const
 {
-	Expects(sprite != nullptr);
+	HalleyAssertDev(sprite != nullptr);
 	auto lock = UniqueLock(spriteMutex);
 	spriteRefs.at(sprite) = idx;
 }

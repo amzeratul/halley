@@ -4,7 +4,7 @@
 #include <halley/utils/utils.h>
 #include "halley/entity/world.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/entity/system.h"
 #include "halley/entity/family.h"
@@ -429,7 +429,7 @@ std::optional<EntityRef> World::findEntity(const UUID& id)
 {
 	const auto result = uuidMap.find(id);
 	if (result != uuidMap.end()) {
-		Ensures(result->second->getInstanceUUID() == id);
+		HalleyAssertDev(result->second->getInstanceUUID() == id);
 		return EntityRef(*result->second, *this);
 	}
 	return {};
@@ -643,7 +643,7 @@ TempMemoryPool& World::getRenderMemoryPool() const
 
 void World::deleteEntity(Entity* entity)
 {
-	Expects (entity);
+	HalleyAssertDev(entity);
 	entityMap->freeId(entity->getEntityId().value);
 	entity->destroyComponents(*componentDeleterTable);
 	entity->~Entity();

@@ -57,7 +57,7 @@ ConnectionStatus AckUnreliableConnection::getStatus() const
 }
 
 void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet) {
-	Expects(type == TransmissionType::Unreliable);
+	HalleyAssertDev(type == TransmissionType::Unreliable);
 
 	auto status = parent->getStatus();
 	if (status != ConnectionStatus::Connected) {
@@ -85,7 +85,7 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool sma
     	}
 
         auto& slot = outbound.packets[outbound.curPacketIdx];
-        Ensures(slot.seqIdx == 0xffff);
+        HalleyAssertDev(slot.seqIdx == 0xffff);
 
     	if (small) {
     		// This is a small packet cache - need to copy parts of the cached header.
@@ -106,14 +106,14 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool sma
 
         outbound.curPacketIdx = (outbound.curPacketIdx + 1) % 256;
     } else {
-    	Ensures(!small);
+    	HalleyAssertDev(!small);
 
         size_t numSubPackets = size / maxSize;
         if (size % maxSize != 0) {
             numSubPackets++;
         }
 
-    	Ensures(numSubPackets > 1);
+    	HalleyAssertDev(numSubPackets > 1);
 
         if (numSubPackets > 16) {
             throw Exception("Packet size too large: " + toString(size) + " bytes", HalleyExceptions::Network);
@@ -126,7 +126,7 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool sma
 
         for (size_t i = 0; i < numSubPackets; i++) {
             auto& slot = outbound.packets[outbound.curPacketIdx];
-        	Ensures(slot.seqIdx == 0xffff);
+        	HalleyAssertDev(slot.seqIdx == 0xffff);
 
             slot.dataSize = std::min(packet.size(), maxSize);
             memcpy(slot.data.data() + headerSize, packet.data(), slot.dataSize);
@@ -145,7 +145,7 @@ void AckUnreliableConnection::doSend(gsl::span<const std::byte> packet, bool sma
 
     	networkStatsListener.onSendData(size, numSubPackets);
 
-        Expects(packet.empty());
+        HalleyAssertDev(packet.empty());
     }
 
     if (statsListener) {
@@ -188,8 +188,8 @@ bool AckUnreliableConnection::tryCacheSmallPacket(const OutboundNetworkPacket& p
 
 void AckUnreliableConnection::doSend(SubPacket& packet, int packetIdx)
 {
-	Expects(packet.seqIdx < 0x8000);
-    Expects(packetIdx >= 0 && packetIdx < 256);
+	HalleyAssertDev(packet.seqIdx < 0x8000);
+    HalleyAssertDev(packetIdx >= 0 && packetIdx < 256);
 
 	// Only patch parts of the header we need to update.
 
@@ -271,7 +271,7 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         			offset += sz;
         		}
 
-        		Ensures(offset == slot.dataSize);
+        		HalleyAssertDev(offset == slot.dataSize);
         		cache.dataSize = headerSize; // used as offset
 
         		// Return the first small packet
@@ -295,15 +295,15 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
         } else {
             // Check if all sub-packets have arrived.
             int numSubPackets = (slot.subIdx >> 4) + 1;
-            Expects(numSubPackets > 1 && (slot.subIdx & 15) == 0);
+            HalleyAssertDev(numSubPackets > 1 && (slot.subIdx & 15) == 0);
 
             bool isComplete = true;
             for (size_t i = 1; isComplete && i < numSubPackets; i++) {
                 const auto& sub = inbound.packets[(inbound.curPacketIdx + i) % 256];
             	if (sub.seqIdx == slot.seqIdx) {
-            		Expects((sub.subIdx & 15) == i);
-            		Expects((sub.subIdx >> 4) + 1 == numSubPackets);
-            		Expects(sub.parity == slot.parity);
+            		HalleyAssertDev((sub.subIdx & 15) == i);
+            		HalleyAssertDev((sub.subIdx >> 4) + 1 == numSubPackets);
+            		HalleyAssertDev(sub.parity == slot.parity);
             	}
             	isComplete &= sub.seqIdx == slot.seqIdx && sub.parity == slot.parity;
                 isComplete &= (sub.subIdx & 15) == i;
@@ -499,7 +499,7 @@ void AckUnreliableConnection::onAckPacketsReceive(gsl::span<const std::byte> dat
     auto ackData = reinterpret_cast<const uint8_t *>(data.data());
     size_t size = data.size();
 
-	Ensures(size > 0 && (size % 3) == 0);
+	HalleyAssertDev(size > 0 && (size % 3) == 0);
 
 	float avgLatencySum = 0.f;
 	size_t avgLatencyCount = 0;
@@ -669,6 +669,6 @@ bool AckUnreliableConnection::SeqIndex::isInValidRange(SeqIndex other, size_t ra
 
 AckUnreliableConnection::SeqIndex AckUnreliableConnection::SeqIndex::make(uint16_t seqIdx, uint8_t parity)
 {
-	Ensures(seqIdx < 0x8000);
+	HalleyAssertDev(seqIdx < 0x8000);
 	return { static_cast<size_t>(parity) << 15 | seqIdx };
 }

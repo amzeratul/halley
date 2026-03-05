@@ -525,7 +525,7 @@ void UISizer::setRectFree(Rect4f origRect, IUIElementListener* listener)
 
 void UISizer::computeGridSizes(Vector<float>& colSize, Vector<float>& rowSize) const
 {
-	Expects(gridProportions);
+	HalleyAssertDev(gridProportions);
 	auto nColumns = std::max(gridProportions->nColumns, 1);
 
 	int nRows = std::max(1, int((entries.size() + nColumns - 1) / nColumns));
@@ -602,7 +602,7 @@ Vector2f UISizer::computeMinimumSizeGrid() const
 
 void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 {
-	Expects(gridProportions);
+	HalleyAssertDev(gridProportions);
 	auto nColumns = std::max(gridProportions->nColumns, 1);
 	auto& columnProportions = gridProportions->columnProportions;
 	auto& rowProportions = gridProportions->rowProportions;
@@ -684,7 +684,7 @@ void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 
 float UISizer::getColumnProportion(int col) const
 {
-	Expects(gridProportions);
+	HalleyAssertDev(gridProportions);
 	auto& columnProportions = gridProportions->columnProportions;
 
 	if (col >= 0 && col < int(columnProportions.size())) {
@@ -695,7 +695,7 @@ float UISizer::getColumnProportion(int col) const
 
 float UISizer::getRowProportion(int row) const
 {
-	Expects(gridProportions);
+	HalleyAssertDev(gridProportions);
 	auto& rowProportions = gridProportions->rowProportions;
 
 	if (row >= 0 && row < int(rowProportions.size())) {

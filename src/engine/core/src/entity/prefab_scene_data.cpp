@@ -61,7 +61,7 @@ std::optional<ISceneData::ConstEntityNodeData> PrefabSceneData::tryGetEntityNode
 
 void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas)
 {
-	Expects(ids.size() == datas.size());
+	HalleyAssertDev(ids.size() == datas.size());
 
 	for (size_t i = 0; i < ids.size(); ++i) {
 		auto& id = ids[i];
@@ -121,8 +121,8 @@ void PrefabSceneData::fillEntityTree(const EntityData& node, EntityTree& tree) c
 
 std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, size_t childIndex)
 {
-	Expects(childIndex >= 0);
-	Expects(!entityId.isEmpty());
+	HalleyAssertDev(childIndex >= 0);
+	HalleyAssertDev(!entityId.isEmpty());
 	
 	const auto data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, entityId);
 	const auto oldParent = data.parent;

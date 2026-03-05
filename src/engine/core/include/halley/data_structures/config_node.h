@@ -595,8 +595,8 @@ namespace Halley {
 
 		inline void assertValid() const
 		{
-			Expects(intData != 0xCDCDCDCD);
-			Expects(intData != 0xDDDDDDDD);
+			HalleyAssertDev(intData != 0xCDCDCDCD);
+			HalleyAssertDev(intData != 0xDDDDDDDD);
 		}
 
 		size_t getSizeBytes() const;

@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 		}
 
 		try {
-			assert(!!tool);
+			HalleyAssertDev(!!tool);
 			std::cout << "halley-cmd running tool \"" << argv[1] << "\"..." << std::endl;
 			return tool->runRaw(argc, argv);
 		} catch (std::exception& e) {

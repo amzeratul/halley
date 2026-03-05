@@ -26,7 +26,7 @@ void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor)
 
 Window& DummyVideoAPI::getWindow() const
 {
-	Expects(window != nullptr);
+	HalleyAssertDev(window != nullptr);
 	return *window;
 }
 

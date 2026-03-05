@@ -22,7 +22,7 @@
 
 #include "halley/maths/polygon.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 #include <limits>
 
 #include "halley/file_formats/config_file.h"
@@ -216,7 +216,7 @@ void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output
 
 	auto pick = [&] (size_t n)
 	{
-		Expects(n >= 2);
+		HalleyAssertDev(n >= 2);
 		
 		VertexList vs(n + 1);
 		vs[0] = root;
@@ -238,20 +238,20 @@ void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output
 		if (remaining.size() <= maxPick) {
 			// Pick all remaining
 			pick(remaining.size());
-			assert(remaining.empty());
+			HalleyAssertDev(remaining.empty());
 		} else if (remaining.size() <= maxPick * 2 - 1) {
 			// Split as evenly as possible
 			// This case exists to avoid a situation where the next step doesn't have enough vertices to form a polygon
 			const size_t a = remaining.size() / 2 + 1; // +1 because one vertex will be repeated between them
 			const size_t b = remaining.size() - (a - 1);
 
-			assert(a == b || a == b + 1);
-			assert(a + b - 1 == remaining.size());
+			HalleyAssertDev(a == b || a == b + 1);
+			HalleyAssertDev(a + b - 1 == remaining.size());
 			
 			pick(a);
 			pick(b);
 			
-			assert(remaining.empty());
+			HalleyAssertDev(remaining.empty());
 		} else {
 			// Pick as many as we can
 			pick(maxPick);
@@ -456,7 +456,7 @@ bool Polygon::collideConvex(const Polygon& param, Vector2f* translation, Vector2
 
 Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 {
-	Expects(!vertices.empty());
+	HalleyAssertDev(!vertices.empty());
 
 	const auto scale = Vector2f(1.0f, 1.0f / anisotropy);
 	const auto point = rawPoint * scale;
@@ -480,8 +480,8 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 
 Polygon::SATClassification Polygon::classify(const Polygon& other, float epsilon) const
 {
-	Expects(convex);
-	Expects(other.convex);
+	HalleyAssertDev(convex);
+	HalleyAssertDev(other.convex);
 
 	// If bounding circles don't overlap, then the polygons definitely don't overlap
 	const float maxDist = circle.getRadius() + other.circle.getRadius();
@@ -537,7 +537,7 @@ Polygon::SATClassification Polygon::classify(const Polygon& other, float epsilon
 
 Polygon::SATClassification Polygon::classify(const LineSegment& line) const
 {
-	Expects(convex);
+	HalleyAssertDev(convex);
 
 	// If bounding circles don't overlap, then the polygons definitely don't overlap
 	const auto otherCircle = Circle(0.5f * (line.a + line.b), 0.5f * (line.a - line.b).length());
@@ -655,7 +655,7 @@ void Polygon::scale(Vector2f scale)
 
 void Polygon::expand(float amount, float truncateThreshold)
 {
-	Expects(convex);
+	HalleyAssertDev(convex);
 	
 	const float windingDir = clockwise ? -1.0f : 1.0f;
 
@@ -706,7 +706,7 @@ void Polygon::invertWinding()
 
 Polygon Polygon::convolution(const Polygon& other) const
 {
-	Expects(clockwise == other.clockwise);
+	HalleyAssertDev(clockwise == other.clockwise);
 	
 	VertexList result;
 
@@ -875,9 +875,9 @@ bool Polygon::splitIntoConvex(Vector<Polygon>& output, bool allowSimplify) const
 		std::swap(bestSplit.first, bestSplit.second);
 	}
 
-	assert(bestSplit.first != bestSplit.second);
-	assert(bestSplit.second > bestSplit.first + 1);
-	assert(bestSplit.first != 0 || bestSplit.second != vertices.size() - 1);
+	HalleyAssertDev(bestSplit.first != bestSplit.second);
+	HalleyAssertDev(bestSplit.second > bestSplit.first + 1);
+	HalleyAssertDev(bestSplit.first != 0 || bestSplit.second != vertices.size() - 1);
 
 	// Split and recurse
 	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second, {}, allowSimplify);
@@ -896,7 +896,7 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 		return doSplit(v1, v0, inserts, allowSimplify);
 	}
 
-	Expects(!insertVertices.empty() || v1 - v0 > 1);
+	HalleyAssertDev(!insertVertices.empty() || v1 - v0 > 1);
 
 	//auto vs = vertices;
 	//std::rotate(vs.begin(), vs.begin() + v0, vs.end());
@@ -922,9 +922,9 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 		}
 	}
 
-	Ensures(!vs0.empty());
-	Ensures(!vs1.empty());
-	Ensures(vs0.size() + vs1.size() == vertices.size() + (2 * insertVertices.size()) + 2);
+	HalleyAssertDev(!vs0.empty());
+	HalleyAssertDev(!vs1.empty());
+	HalleyAssertDev(vs0.size() + vs1.size() == vertices.size() + (2 * insertVertices.size()) + 2);
 
 	auto res = std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
 	if (allowSimplify) {
@@ -991,7 +991,7 @@ std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other
 {
 	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
 	
-	Expects(other.convex); // This method can accept concave polygons, but it requires an additional step outlined in the paper (insert a midpoint in "isolated" edges)
+	HalleyAssertDev(other.convex); // This method can accept concave polygons, but it requires an additional step outlined in the paper (insert a midpoint in "isolated" edges)
 
 	const bool allowSimplify = false;
 
@@ -1171,7 +1171,7 @@ Vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 		}
 	}
 
-	assert(bestChord.second != bestChord.first);
+	HalleyAssertDev(bestChord.second != bestChord.first);
 
 	if (bestChordDistance < 0) {
 		// Found a chord that goes right through the polygon, split there
@@ -1431,7 +1431,7 @@ std::optional<size_t> Polygon::getExitEdge(const Ray& ray, size_t startFromEdge)
 
 size_t Polygon::pickRandomPolygonIdxByArea(gsl::span<const Polygon> polygons, Random& rng)
 {
-	assert(!polygons.empty());
+	HalleyAssertDev(!polygons.empty());
 
 	float totalArea = 0;
 	for (const auto& poly: polygons) {

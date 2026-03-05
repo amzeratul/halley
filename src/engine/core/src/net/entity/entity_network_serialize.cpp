@@ -40,8 +40,8 @@ void EntityNetworkChanges::endPage(Serializer& serializer, Bytes& buffer, Type t
 {
     curPage.to = static_cast<uint32_t>(serializer.getPosition());
 
-    Ensures(curPage.type == type);
-    Ensures(curPage.to >= curPage.from);
+    HalleyAssertDev(curPage.type == type);
+    HalleyAssertDev(curPage.to >= curPage.from);
 
     size_t size = curPage.to - curPage.from;
 
@@ -161,8 +161,8 @@ bool EntityNetworkChanges::operator==(const EntityNetworkChanges& other) const
     if (eq && pp > 0) {
         // NOTE: this should be exhaustive. If any sub-page changes,
         // the content hash will change, too.
-        Expects(contentHash != 0);
-        Expects(other.contentHash != 0);
+        HalleyAssertDev(contentHash != 0);
+        HalleyAssertDev(other.contentHash != 0);
         eq = contentHash == other.contentHash;
     }
 
@@ -173,7 +173,7 @@ bool EntityNetworkChanges::operator==(const EntityNetworkChanges& other) const
 // output buffer. Tries to skip unmodified data along the way.
 void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buffer, bool log) const
 {
-    Expects(pp > 0);
+    HalleyAssertDev(pp > 0);
 
     int p = 0;
     while (p < pp) {
@@ -220,7 +220,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
         }
 
         if (!skip) {
-            Expects(page.type == Type::Entity ||
+            HalleyAssertDev(page.type == Type::Entity ||
                 page.type == Type::EntityIdentity ||
                 page.type == Type::Component);
 
@@ -234,7 +234,7 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
                 serializer << page.componentId;
             }
 
-            Expects(size > 0);
+            HalleyAssertDev(size > 0);
             auto span = buffer.const_byte_span().subspan(page.from, size);
             serializer << span;
 
@@ -281,9 +281,9 @@ void EntityNetworkChanges::enumerateEntities(const std::function<void (const Pag
 
 EntityNetworkChanges::Page* EntityNetworkChanges::getEntityIdentity(int pageIdx)
 {
-    Ensures(pageIdx + 1 < pp);
-    Ensures(pages[pageIdx].type == Type::Entity);
-    Ensures(pages[pageIdx + 1].type == Type::EntityIdentity);
+    HalleyAssertDev(pageIdx + 1 < pp);
+    HalleyAssertDev(pages[pageIdx].type == Type::Entity);
+    HalleyAssertDev(pages[pageIdx + 1].type == Type::EntityIdentity);
 
     return &pages[pageIdx + 1];
 }
@@ -447,7 +447,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
     const SerializationContext& context, Deserializer& deserializer,
     EntityRef& entity, const std::optional<EntityRef>& parent, InboundResult* result)
 {
-    Expects(entity.isValid());
+    HalleyAssertDev(entity.isValid());
 
     if (!entity.isSerializable()) {
         Logger::logDev("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
@@ -514,7 +514,7 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         uint16_t componentId;
         deserializer >> componentId;
 
-        Expects(size > 0);
+        HalleyAssertDev(size > 0);
 
         const auto* reflector = deserializer.getOptions().world->getReflection().tryGetComponentReflector(componentId);
 

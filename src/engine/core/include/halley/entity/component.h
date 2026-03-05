@@ -12,14 +12,14 @@ namespace Halley
 		template <typename T>
 		static void* doNew(size_t size, std::align_val_t alignment)
 		{
-			assert(size <= sizeof(T) && static_cast<size_t>(alignment) <= alignof(T));
+			HalleyAssertDebug(size <= sizeof(T) && static_cast<size_t>(alignment) <= alignof(T));
 			return getPool<T>().alloc();
 		}
 
 		template <typename T>
 		static void* doNew(size_t size)
 		{
-			assert(size <= sizeof(T));
+			HalleyAssertDebug(size <= sizeof(T));
 			return getPool<T>().alloc();
 		}
 

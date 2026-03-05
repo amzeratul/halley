@@ -1,6 +1,6 @@
 #include "halley/navigation/navmesh.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/data_structures/priority_queue.h"
 #include "halley/maths/random.h"
@@ -19,12 +19,12 @@ Navmesh::Navmesh(Vector<PolygonData> polys, const NavmeshBounds& bounds, int sub
 	, normalisedCoordinatesBase(bounds.base)
 	, scaleFactor(bounds.scaleFactor)
 {
-	Expects(polys.size() < static_cast<size_t>(std::numeric_limits<NodeId>::max()));
+	HalleyAssertDev(polys.size() < static_cast<size_t>(std::numeric_limits<NodeId>::max()));
 
 	// Generate nodes
 	nodes.resize(polys.size());
 	for (size_t nodeId = 0; nodeId < polys.size(); ++nodeId) {
-		assert(polys[nodeId].connections.size() == polys[nodeId].polygon.getNumSides());
+		HalleyAssertDev(polys[nodeId].connections.size() == polys[nodeId].polygon.getNumSides());
 
 		auto& node = nodes[nodeId];
 		
@@ -293,7 +293,7 @@ Navmesh::Node::Node(const ConfigNode& node)
 	}
 
 	nConnections = connNodes.size();
-	assert(nConnections <= Navmesh::MaxConnections);
+	HalleyAssertDev(nConnections <= Navmesh::MaxConnections);
 	for (size_t i = 0; i < connNodes.size(); ++i) {
 		const int conn = connNodes[i].asInt();
 		connections[i] = conn != -1 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(conn)) : OptionalLite<NodeId>();
@@ -619,8 +619,8 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(const Navmes
 				}
 			}
 		}
-		assert(intersection.has_value());
-		assert(intersection->isValid());
+		HalleyAssertDev(intersection.has_value());
+		HalleyAssertDev(intersection->isValid());
 
 		// Check how much more we have left to go and stop if we reach the destination
 		constexpr float epsilon = 0.1f;
@@ -872,7 +872,7 @@ void Navmesh::computeBoundingCircle()
 	for (const auto& poly: polygons) {
 		for (const auto& p: poly.getVertices()) {
 			if (!boundingCircle.contains(p)) {
-				assert(false);
+				HalleyAssertDev(false);
 			}
 		}
 	}

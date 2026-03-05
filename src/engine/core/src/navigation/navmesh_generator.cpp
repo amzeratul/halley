@@ -1,6 +1,6 @@
 #include "halley/navigation/navmesh_generator.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/navigation/navmesh_set.h"
 #include "halley/support/logger.h"
@@ -57,8 +57,8 @@ Vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<const P
 	}
 
 	for (const auto& p: output) {
-		assert(p.isClockwise());
-		assert(p.isConvex());
+		HalleyAssertDev(p.isClockwise());
+		HalleyAssertDev(p.isConvex());
 	}
 
 	// Subtract all obstacles
@@ -141,8 +141,8 @@ Polygon NavmeshGenerator::makeAgentMask(float agentSize)
 	}
 	Polygon agentMask(std::move(vertices));
 
-	Ensures(agentMask.isClockwise());
-	Ensures(agentMask.isValid());
+	HalleyAssertDev(agentMask.isClockwise());
+	HalleyAssertDev(agentMask.isValid());
 	return agentMask;
 }
 
@@ -261,7 +261,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 
 		for (size_t j = 0; j < polyA.connections.size(); ++j) {
 			const auto bIdx = polyA.connections[j];
-			assert(bIdx != aIdx);
+			HalleyAssertDev(bIdx != aIdx);
 
 			if (bIdx > aIdx) {
 				auto& polyB = polygons[bIdx];
@@ -271,7 +271,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
 				if (bEdgeIter == polyB.connections.end()) {
-					// assert(false);
+					// HalleyAssertDev(false);
 					continue;
 				}
 
@@ -284,8 +284,8 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 					}
 
 					for (auto& c: mergedPolygon.value().connections) {
-						assert(c != aIdx);
-						assert(c != bIdx);
+						HalleyAssertDev(c != aIdx);
+						HalleyAssertDev(c != bIdx);
 					}
 					
 					--aIdx;
@@ -338,8 +338,8 @@ void NavmeshGenerator::tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::spa
 
 std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification, const NavmeshBounds& bounds)
 {
-	Expects(a.polygon.isValid());
-	Expects(b.polygon.isValid());
+	HalleyAssertDev(a.polygon.isValid());
+	HalleyAssertDev(b.polygon.isValid());
 	
 	if (a.polygon.isClockwise() != b.polygon.isClockwise()) {
 		Logger::logWarning("Aborting NavmeshGenerator::merge: Winding of polygons don't match");
@@ -378,8 +378,8 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	// Merge connections
 	std::rotate(connA.begin(), connA.begin() + (aEdgeIdx + 1) % aSize, connA.end());
 	std::rotate(connB.begin(), connB.begin() + (bEdgeIdx + 1) % bSize, connB.end());
-	assert(connA.back() == bIdx);
-	assert(connB.back() == aIdx);
+	HalleyAssertDev(connA.back() == bIdx);
+	HalleyAssertDev(connB.back() == aIdx);
 	connA.pop_back();
 	connB.pop_back();
 	connA.insert(connA.end(), connB.begin(), connB.end());
@@ -416,7 +416,7 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold, const
 			const auto next = vs[nextI];
 
 			// Eligible for removal if the angle between the two segments is narrow enough, or if it's off by less than threshold
-			constexpr auto minCos = 0.99619469809174553229501040247389f; // cos(5°)
+			constexpr auto minCos = 0.99619469809174553229501040247389f; // cos(5ï¿½)
 			const auto dirA = (cur - prev).unit();
 			const auto dirB = (next - cur).unit();
 			const bool eligible = dirA.dot(dirB) > minCos || LineSegment(prev, next).contains(cur, threshold);
@@ -536,8 +536,8 @@ size_t NavmeshGenerator::split(Vector<NavmeshNode>& nodes, size_t idx, LineSegme
 
 	// Create new nodes
 	for (size_t i = 0; i < polys.size(); ++i) {
-		assert(polys[i].isValid());
-		//assert(polys[i].isConvex());
+		HalleyAssertDev(polys[i].isValid());
+		//HalleyAssertDev(polys[i].isConvex());
 		
 		auto& curNode = i == 0 ? node : nodes.emplace_back();
 		curNode.polygon = std::move(polys[i]);
@@ -706,7 +706,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 	// Establish remapping
 	int i = 0;
 	for (auto& node: nodes) {
-		assert (node.alive);
+		HalleyAssertDev(node.alive);
 		if (node.region == region) {
 			node.remap = i++;
 		} else {

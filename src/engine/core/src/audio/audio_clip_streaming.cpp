@@ -32,7 +32,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	UniqueLock lock(mutex);
 
 	std::array<float, 4096> tmp;
-	//assert(src.size() / numChannels < tmp.size());
+	//HalleyAssertDev(src.size() / numChannels < tmp.size());
 	const size_t nSamples = std::min(src.size() / numChannels, tmp.size());
 
 	for (size_t i = 0; i < numChannels; ++i) {

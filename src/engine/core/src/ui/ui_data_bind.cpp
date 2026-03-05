@@ -62,13 +62,13 @@ ConfigNode UIDataBind::getConfigData()
 
 void UIDataBind::pushData()
 {
-	Expects(widgetBound != nullptr);
+	HalleyAssertDev(widgetBound != nullptr);
 	widgetBound->readFromDataBind();
 }
 
 void UIDataBind::setWidget(UIWidget* widget)
 {
-	Expects((widgetBound == nullptr) ^ (widget == nullptr));
+	HalleyAssertDev((widgetBound == nullptr) ^ (widget == nullptr));
 	widgetBound = widget;
 }
 

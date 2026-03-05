@@ -146,7 +146,7 @@ Vector<Vector2f> BezierCubicSpline::toLineSegments() const
 	if (points.size() < 4) {
 		return Vector<Vector2f>{{ points.front(), }};
 	}
-	assert(points.size() % 3 == 1);
+	HalleyAssertDev(points.size() % 3 == 1);
 
 	Vector<Vector2f> result;
 	result.push_back(points.front());

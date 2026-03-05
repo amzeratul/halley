@@ -28,7 +28,7 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 
 int LocalisationStats::getWordCount(const String& line)
 {
-	constexpr char32_t delims[] = U" ,;.?!:\"¿¡[]{}()\n\t";
+	constexpr char32_t delims[] = U" ,;.?!:\"ï¿½ï¿½[]{}()\n\t";
 	const auto* start = std::begin(delims);
 	const auto* end = std::end(delims);
 
@@ -742,7 +742,7 @@ bool LocTranslationData::pruneKeys(const LocOriginalData& originalLanguage)
 
 LocTranslationData LocTranslationData::makeDeltaFrom(const LocTranslationData& other) const
 {
-	assert(this->language == other.language);
+	HalleyAssertDev(this->language == other.language);
 
 	LocTranslationData result;
 	result.language = language;
@@ -838,7 +838,7 @@ bool LocTranslationData::operator!=(const LocTranslationData& other) const
 
 LocStringProperties::LocStringProperties(const LocalisationDataEntry& from, const LocalisationDataEntry& to)
 {
-	assert(from.getKey() == to.getKey());
+	HalleyAssertDev(from.getKey() == to.getKey());
 
 	key = from.getKey();
 	if (from.getComment() != to.getComment()) {

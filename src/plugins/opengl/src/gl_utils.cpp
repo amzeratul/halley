@@ -23,7 +23,7 @@
 #include <set>
 #include "halley/support/exception.h"
 #include "halley/concurrency/concurrent.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "halley/text/string_converter.h"
 #include "halley_gl.h"
 
@@ -266,7 +266,7 @@ void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
 
 void GLUtils::setTextureUnit(int n)
 {
-	Expects(n >= 0 && n < 8);
+	HalleyAssertDev(n >= 0 && n < 8);
 
 	if (!checked || (state.curTexUnit != n)) {
 		glActiveTexture(GL_TEXTURE0 + n);

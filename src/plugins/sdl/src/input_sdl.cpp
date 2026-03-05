@@ -310,16 +310,16 @@ void InputSDL::addJoystick(int idx)
 			if (!useXInput || (type != SDL_CONTROLLER_TYPE_XBOXONE && type != SDL_CONTROLLER_TYPE_XBOX360)) {
 				const auto joy = std::make_shared<InputGameControllerSDL>(idx);
 				const auto id = joy->getSDLJoystickId();
-				assert(!sdlGameControllers.contains(id));
-				assert(!sdlJoys.contains(id));
+				HalleyAssertDev(!sdlGameControllers.contains(id));
+				HalleyAssertDev(!sdlJoys.contains(id));
 				sdlGameControllers[id] = joy;
 				joysticks.push_back(joy);
 			}
 		} else {
 			const auto joy = std::make_shared<InputJoystickSDL>(idx);
 			const auto id = joy->getSDLJoystickId();
-			assert(!sdlGameControllers.contains(id));
-			assert(!sdlJoys.contains(id));
+			HalleyAssertDev(!sdlGameControllers.contains(id));
+			HalleyAssertDev(!sdlJoys.contains(id));
 			sdlJoys[id] = joy;
 			joysticks.push_back(joy);
 		}

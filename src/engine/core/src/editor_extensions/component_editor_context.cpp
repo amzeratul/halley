@@ -17,13 +17,13 @@ ComponentEditorContext::ComponentEditorContext(IProjectWindow& projectWindow, IE
 
 Resources& ComponentEditorContext::getGameResources() const
 {
-	Expects(gameResources != nullptr);
+	HalleyAssertDev(gameResources != nullptr);
 	return *gameResources;
 }
 
 const HalleyAPI& ComponentEditorContext::getAPI() const
 {
-	Expects(api != nullptr);
+	HalleyAssertDev(api != nullptr);
 	return *api;
 }
 
@@ -34,31 +34,31 @@ IProjectWindow& ComponentEditorContext::getProjectWindow() const
 
 UIFactory& ComponentEditorContext::getUIFactory() const
 {
-	Expects(factory != nullptr);
+	HalleyAssertDev(factory != nullptr);
 	return *factory;
 }
 
 std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& label) const
 {
-	Expects(entityEditorFactory != nullptr);
+	HalleyAssertDev(entityEditorFactory != nullptr);
 	return entityEditorFactory->makeLabel(label);
 }
 
 std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
 {
-	Expects(entityEditorFactory != nullptr);
+	HalleyAssertDev(entityEditorFactory != nullptr);
 	return entityEditorFactory->makeField(fieldType, std::move(parameters), createLabel);
 }
 
 std::shared_ptr<UIWidget> ComponentEditorContext::makeNestedField(const String& label) const
 {
-	Expects(entityEditorFactory != nullptr);
+	HalleyAssertDev(entityEditorFactory != nullptr);
 	return entityEditorFactory->makeNestedField(label);
 }
 
 ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
 {
-	Expects(entityEditorFactory != nullptr);
+	HalleyAssertDev(entityEditorFactory != nullptr);
 	return entityEditorFactory->getDefaultNode(fieldType);
 }
 

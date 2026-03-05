@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include "halley/support/assert.h"
 #include <cstddef>
 #include <memory>
 
@@ -54,13 +54,13 @@ namespace Halley {
 
 		[[nodiscard]] T* allocate(std::size_t n)
 		{
-			assert(pool != nullptr);
+			HalleyAssertDebug(pool != nullptr);
 			return reinterpret_cast<T*>(pool->allocate(n * sizeof(T), alignof(T)));
 		}
 
 		void deallocate(T* p, std::size_t n) noexcept
 		{
-			assert(pool != nullptr);
+			HalleyAssertDebug(pool != nullptr);
 			return pool->deallocate(p, n * sizeof(T));
 		}
 

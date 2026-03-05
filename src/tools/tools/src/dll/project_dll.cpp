@@ -111,7 +111,7 @@ void ProjectDLL::removeReloadListener(IProjectDLLListener& listener)
 
 Game& ProjectDLL::getGame() const
 {
-	Expects(game != nullptr);
+	HalleyAssertDev(game != nullptr);
 	return *game;
 }
 

@@ -1,6 +1,6 @@
 #include "halley/concurrency/shared_recursive_mutex.h"
 #include <thread>
-#include <cassert>
+#include "halley/support/assert.h"
 
 using namespace Halley;
 
@@ -11,7 +11,7 @@ void SharedRecursiveMutex::lock()
 		++count;
 	} else {
 		mutex.lock();
-		assert(count == 0);
+		HalleyAssertDebug(count == 0);
 		owner = thisId;
 		count = 1;
 	}
@@ -35,7 +35,7 @@ bool SharedRecursiveMutex::try_lock()
 
 void SharedRecursiveMutex::unlock()
 {
-	assert(std::this_thread::get_id() == owner);
+	HalleyAssertDebug(std::this_thread::get_id() == owner);
 	if (count > 1) {
 		--count;
 	} else {

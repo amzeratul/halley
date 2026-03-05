@@ -1,6 +1,6 @@
 #pragma once
 #include <typeinfo>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include <gsl/span>
 #include <sstream>
 #include <algorithm>
@@ -27,7 +27,7 @@ namespace Halley
 	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
 	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.', bool fixed = true)
 	{
-		Expects(precisionDigits >= -1 && precisionDigits <= 20);
+		HalleyAssertDev(precisionDigits >= -1 && precisionDigits <= 20);
 		std::stringstream str;
 		if (precisionDigits != -1) {
 			if (fixed) {
@@ -54,7 +54,7 @@ namespace Halley
 	template <typename T, typename std::enable_if<std::is_integral_v<T> && !std::is_same_v<T, bool>, int>::type = 0>
 	String toString(T value, int base = 10, int width = 1, char fill = '0', char thousandsSeparator = 0)
 	{
-		Expects(base == 10 || base == 16 || base == 8);
+		HalleyAssertDev(base == 10 || base == 16 || base == 8);
 
 		std::stringstream ss;
 		if (base == 16) {

@@ -45,7 +45,7 @@ void NetworkService::sendHandshake(IConnection& connection)
 
 void NetworkService::sendHandshakeAccept(IConnection& connection, short id)
 {
-    Expects(id > 0);
+    HalleyAssertDev(id > 0);
 
     if (connection.getStatus() == ConnectionStatus::Connecting) {
         std::array<uint8_t, 10> packet = {};

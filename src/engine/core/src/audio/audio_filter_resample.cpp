@@ -52,14 +52,14 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 	// Resample
 	for (size_t channel = 0; channel < nChannels; ++channel) {
 		// First copy any leftovers
-		Expects(leftoverSamples[channel].n == nLeftOver);
+		HalleyAssertDev(leftoverSamples[channel].n == nLeftOver);
 		for (size_t i = 0; i < nLeftOver; ++i) {
 			tmp[i] = leftoverSamples[channel].samples[i];
 		}
 
 		auto result = resamplers[channel]->resample(srcs[channel].subspan(0, numSamplesSrc), tmp.subspan(nLeftOver), 0);
-		Expects(result.nRead == numSamplesSrc);
-		Expects(result.nWritten >= samplesToGenerate);
+		HalleyAssertDev(result.nRead == numSamplesSrc);
+		HalleyAssertDev(result.nWritten >= samplesToGenerate);
 
 		// Store left overs
 		size_t leftOver = result.nWritten + nLeftOver - numSamples;

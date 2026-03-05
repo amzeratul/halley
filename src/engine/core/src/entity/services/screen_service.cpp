@@ -90,13 +90,13 @@ void ScreenService::setScreenGrabInterface(IScreenGrabInterface* interface)
 
 Future<std::unique_ptr<Image>> ScreenService::requestScreenGrab(std::optional<Rect4i> rect, ScreenGrabMode mode)
 {
-	Expects(screenGrabInterface != nullptr);
+	HalleyAssertDev(screenGrabInterface != nullptr);
 	return screenGrabInterface->requestScreenGrab(rect, mode);
 }
 
 Future<std::unique_ptr<Image>> ScreenService::requestGlobalScreenGrab(Rect4i worldRect, ScreenGrabMode mode, float zoom)
 {
-	Expects(screenGrabInterface != nullptr);
+	HalleyAssertDev(screenGrabInterface != nullptr);
 	screenGrabMode = true;
 	screenGrabRect = worldRect;
 	return screenGrabInterface->requestGlobalScreenGrab(worldRect, mode, zoom).then([this] (std::unique_ptr<Image> img) -> std::unique_ptr<Image>

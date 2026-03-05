@@ -23,7 +23,7 @@ LocalisationEditorRoot::LocalisationEditorRoot(ProjectWindow& projectWindow, UIF
 
 void LocalisationEditorRoot::drillDown(std::shared_ptr<UIWidget> widget)
 {
-	assert(!curWidget);
+	HalleyAssertDev(!curWidget);
 
 	curWidget = widget;
 	add(curWidget, 1);
@@ -32,7 +32,7 @@ void LocalisationEditorRoot::drillDown(std::shared_ptr<UIWidget> widget)
 
 void LocalisationEditorRoot::returnToRoot()
 {
-	assert(!!curWidget);
+	HalleyAssertDev(!!curWidget);
 
 	curWidget->destroy();
 	curWidget = {};
@@ -63,7 +63,7 @@ void LocalisationEditorRoot::setupCountryNames()
 	countryNames["KR"] = "South Korea";
 	countryNames["TH"] = "Thailand";
 	countryNames["PL"] = "Poland";
-	countryNames["TR"] = u8"Türkiye";
+	countryNames["TR"] = u8"Tï¿½rkiye";
 	countryNames["UA"] = "Ukraine";
 	countryNames["AG"] = "Argentina";
 	countryNames["MX"] = "Mexico";

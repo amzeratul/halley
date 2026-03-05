@@ -209,7 +209,7 @@ FileSystemCache::DirEntry& FileSystemCache::getDirectory(const Path& path)
 FileSystemCache::DirEntry* FileSystemCache::tryGetDirectory(const Path& path)
 {
 	const auto& dirPath = path.isDirectory() ? path : path.parentPath();
-	assert(dirPath.isDirectory());
+	HalleyAssertDev(dirPath.isDirectory());
 	if (dirPath == lastDirCache.first) {
 		return lastDirCache.second;
 	}

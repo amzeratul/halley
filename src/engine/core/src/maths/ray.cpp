@@ -60,9 +60,9 @@ std::optional<Ray::RayCastResult> Ray::castCircle(Vector2f centre, float radius)
 
 	//Logger::logInfo(" circ [" + toString(dist) + ", " + dir + "] - " + normal);
 
-	Ensures(!std::isnan(dist));
-	Ensures(!std::isnan(normal.x));
-	Ensures(!std::isnan(normal.y));
+	HalleyAssertDev(!std::isnan(dist));
+	HalleyAssertDev(!std::isnan(normal.x));
+	HalleyAssertDev(!std::isnan(normal.y));
 	
 	return RayCastResult(dist, normal, intersectionPoint);
 }
@@ -123,9 +123,9 @@ std::optional<Ray::RayCastResult> Ray::castLineSegment(Vector2f a, Vector2f b) c
 
 	const Vector2f normal = vt.normalized();
 
-	Ensures(!std::isnan(s));
-	Ensures(!std::isnan(normal.x));
-	Ensures(!std::isnan(normal.y));
+	HalleyAssertDev(!std::isnan(s));
+	HalleyAssertDev(!std::isnan(normal.x));
+	HalleyAssertDev(!std::isnan(normal.y));
 
 	//Logger::logInfo(" line [" + toString(s) + ", " + dir + "] - " + normal);
 

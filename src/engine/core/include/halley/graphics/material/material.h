@@ -134,7 +134,7 @@ namespace Halley
 		template <typename T>
 		Material& set(std::string_view name, const T& value)
 		{
-			assert(!name.empty());
+			HalleyAssertDev(!name.empty());
 			getParameter(name).set(value);
 			return *this;
 		}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "family_type.h"
 #include "family_mask.h"
 #include "entity_id.h"
@@ -143,7 +143,7 @@ namespace Halley {
 				size_t prevSize = elemCount;
 				size_t curSize = entities.size();
 				updateElems();
-				Expects(curSize >= prevSize);
+				HalleyAssertDebug(curSize >= prevSize);
 				dirty = false;
 
 				if (curSize > prevSize) {
@@ -198,12 +198,12 @@ namespace Halley {
 			if (!toRemove.empty()) {
 				HALLEY_DEBUG_TRACE();
 				size_t removeCount = toRemove.size();
-				Expects(removeCount > 0);
-				Expects(removeCount <= entities.size());
+				HalleyAssertDebug(removeCount > 0);
+				HalleyAssertDebug(removeCount <= entities.size());
 				std::sort(toRemove.begin(), toRemove.end());
 
 				for (size_t i = 1; i < toRemove.size(); ++i) {
-					Expects(toRemove[i - 1] != toRemove[i]);
+					HalleyAssertDebug(toRemove[i - 1] != toRemove[i]);
 				}
 
 				// Move all entities to be removed to the back of the vector
@@ -226,21 +226,21 @@ namespace Halley {
 							}
 						}
 					}
-					Ensures(size_t(n) + removeCount == entities.size());
+					HalleyAssertDebug(size_t(n) + removeCount == entities.size());
 				}
 
-				Expects(toRemove.empty());
+				HalleyAssertDebug(toRemove.empty());
 
 				// Notify removal
 				size_t newSize = entities.size() - removeCount;
-				Ensures(newSize < entities.size());
+				HalleyAssertDebug(newSize < entities.size());
 				notifyRemove(entities.data() + newSize, removeCount);
 
 				// Remove them
 				entities.resize(newSize);
 				updateElems();
 			}
-			Ensures(toRemove.empty());
+			HalleyAssertDebug(toRemove.empty());
 		}
 	};
 }

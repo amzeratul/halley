@@ -106,7 +106,7 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 
 void NavigationPathFollower::nextSubPath()
 {
-	assert(path.has_value());
+	HalleyAssertDev(path.has_value());
 
 	doSetPath({});
 }

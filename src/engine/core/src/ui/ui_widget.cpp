@@ -120,7 +120,7 @@ void UIWidget::removeSizerDeadChildren()
 void UIWidget::collectWidgetsForUpdating(Vector<std::shared_ptr<UIWidget>>& dst)
 {
 	for (auto& c: getChildren()) {
-		assert(c->getRoot() == getRoot());
+		HalleyAssertDev(c->getRoot() == getRoot());
 		dst.push_back(c);
 	}
 }
@@ -450,7 +450,7 @@ bool UIWidget::ignoreClip() const
 
 void UIWidget::setPosition(Vector2f pos)
 {
-	Expects(pos.isValid());
+	HalleyAssertDev(pos.isValid());
 	
 	position = pos;
 	positionUpdated = true;
@@ -482,7 +482,7 @@ void UIWidget::setFillFlags(int fillFlags)
 
 void UIWidget::setMinSize(Vector2f size)
 {
-	Expects(size.isValid());
+	HalleyAssertDev(size.isValid());
 	
 	if (minSize != size) {
 		minSize = size;
@@ -680,7 +680,7 @@ void UIWidget::shrink()
 
 void UIWidget::forceLayout()
 {
-	Expects (lastInputType != UIInputType::Undefined);
+	HalleyAssertDev(lastInputType != UIInputType::Undefined);
 	forceAddChildren(lastInputType, true);
 	layout();
 }
@@ -774,7 +774,7 @@ void UIWidget::onParentChanged()
 
 void UIWidget::setParent(UIParent* p)
 {
-	Expects((parent == nullptr) ^ (p == nullptr));
+	HalleyAssertDev((parent == nullptr) ^ (p == nullptr));
 
 	if (p) {
 		if (!root) {

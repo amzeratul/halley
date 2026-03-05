@@ -486,7 +486,7 @@ void DX12Video::initDeviceAndSwapChain()
             ComPtr<IDXGIAdapter1> adapter1;
 
             hr = dxgiFactory->EnumAdapters1(adapterIndex, &adapter1);
-            Ensures(SUCCEEDED(hr) || (hr == DXGI_ERROR_NOT_FOUND));
+            HalleyAssertDev(SUCCEEDED(hr) || (hr == DXGI_ERROR_NOT_FOUND));
 
             if (FAILED(hr)) {
                 continue;

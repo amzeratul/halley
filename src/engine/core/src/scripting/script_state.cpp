@@ -605,7 +605,7 @@ bool ScriptState::processMessage(ScriptMessage& msg, Vector<GraphNodeId>& thread
 		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
 			const auto& node = scriptGraph->getNodes().at(*inboxId);
 			auto& state = getNodeState(*inboxId);
-			assert(state.data);
+			HalleyAssertDev(state.data);
 
 			ScriptReceiveMessage receiveMsgNode;
 			const bool accepted = receiveMsgNode.tryReceiveMessage(node, *dynamic_cast<ScriptReceiveMessageData*>(state.data), msg);
@@ -674,7 +674,7 @@ std::optional<Future<ConfigNode>> ScriptState::getFutureNodeValue(GraphNodeId id
 
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
-	assert(!state.hasPendingData);
+	HalleyAssertDev(!state.hasPendingData);
 
 	if (state.data) {
 		auto& nodeType = node.getNodeType();

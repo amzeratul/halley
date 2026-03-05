@@ -1,6 +1,6 @@
 #include "halley/entity/entity_scene.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
@@ -128,7 +128,7 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 	const auto& dataMap = prefab->getEntityDataMap();
 
 	if (!prefab->isScene()) {
-		assert(modified.size() == 1 && removed.empty());
+		HalleyAssertDev(modified.size() == 1 && removed.empty());
 	}
 
 	// Modified entities

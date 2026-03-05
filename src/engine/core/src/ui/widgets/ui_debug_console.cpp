@@ -260,7 +260,7 @@ void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet
 
 void UIDebugConsoleController::clearCommands()
 {
-	Expects(baseCommandSet != nullptr);
+	HalleyAssertDev(baseCommandSet != nullptr);
 	commands.clear();
 	addCommands(*baseCommandSet);
 }
@@ -387,7 +387,7 @@ UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const S
 
 UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const String& command, gsl::span<const String> args, bool validate) const
 {
-	Expects(variants.size() <= 8);
+	HalleyAssertDev(variants.size() <= 8);
 	
 	std::array<bool, 8> validVariant;
 	for (size_t i = 0; i < validVariant.size(); ++i) {

@@ -12,7 +12,7 @@ Internal::VariableBase::VariableBase(const VariableTable& parent, String key)
 
 void Internal::VariableBase::refresh() const
 {
-	Expects(parent);
+	HalleyAssertDev(parent);
 	if (parent->getAssetVersion() != parentVersion) {
 		parentVersion = parent->getAssetVersion();
 		storage = parent->getRawStorage(key);

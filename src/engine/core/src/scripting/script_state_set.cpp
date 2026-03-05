@@ -9,7 +9,7 @@ using namespace Halley;
 
 void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	assert(isValid());
+	HalleyAssertDev(isValid());
 
 	if (node.getType() == ConfigNodeType::Noop) {
 		return;
@@ -73,7 +73,7 @@ void ScriptStateSet::load(const ConfigNode& node, const EntitySerializationConte
 		}
 	}
 
-	assert(isValid());
+	HalleyAssertDev(isValid());
 }
 
 ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& context) const
@@ -97,7 +97,7 @@ ConfigNode ScriptStateSet::toConfigNode(const EntitySerializationContext& contex
 
 void ScriptStateSet::addState(std::shared_ptr<ScriptState> state)
 {
-	assert(!!state);
+	HalleyAssertDev(!!state);
 	states.push_back(State{ curId++, std::move(state) });
 }
 
@@ -113,7 +113,7 @@ bool ScriptStateSet::empty() const
 
 void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 {
-	assert(isValid());
+	HalleyAssertDev(isValid());
 	// Defer evaluation to when it's needed to avoid querying the world too much
 	std::optional<bool> isLocalCache;
 	auto isLocal = [&]() -> bool
@@ -128,12 +128,12 @@ void ScriptStateSet::removeDeadLocalStates(World& world, EntityId entityId)
 	{
 		return state.state->isDead() && isLocal();
 	});
-	assert(isValid());
+	HalleyAssertDev(isValid());
 }
 
 void ScriptStateSet::terminateMarkedDead(ScriptEnvironment& environment, EntityId entityId, ScriptVariables& entityVariables)
 {
-	assert(isValid());
+	HalleyAssertDev(isValid());
 	for (auto& state: states) {
 		if (state.dead) {
 			environment.terminateState(*state.state, entityId, entityVariables);

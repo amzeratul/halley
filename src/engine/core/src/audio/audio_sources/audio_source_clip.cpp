@@ -17,7 +17,7 @@ AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAud
 	, looping(looping)
 	, randomiseStart(randomiseStart)
 {
-	Expects(clip != nullptr);
+	HalleyAssertDev(clip != nullptr);
 }
 
 String AudioSourceClip::getName() const
@@ -54,7 +54,7 @@ bool AudioSourceClip::isLooping()
 
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
-	Expects(isReady());
+	HalleyAssertDev(isReady());
 
 	// Set stream end positions
 	const auto clipLength = clip->getLength();
@@ -144,7 +144,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 						for (size_t ch = 0; ch < nChannels; ++ch) {
 							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
 							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, dst);
-							assert(nCopied <= samplesRequested * sizeof(AudioSample));
+							HalleyAssertDev(nCopied <= samplesRequested * sizeof(AudioSample));
 						}
 						first = false;
 					} else {
@@ -153,7 +153,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
 							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, buffer.getSpan());
 							AudioMixer::mixAudio(buffer.getSpan(), dst, 1, 1);
-							assert(nCopied <= samplesRequested * sizeof(AudioSample));
+							HalleyAssertDev(nCopied <= samplesRequested * sizeof(AudioSample));
 						}
 					}
 

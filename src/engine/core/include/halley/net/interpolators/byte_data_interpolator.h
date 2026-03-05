@@ -26,7 +26,7 @@ namespace Halley {
 
         void serialize(const void* value, size_t size, Serializer& serializer) override
         {
-            Ensures(size == sizeof(T));
+            HalleyAssertDev(size == sizeof(T));
 
             serializer << enabled;
 
@@ -37,7 +37,7 @@ namespace Halley {
 
         void deserialize(void* value, size_t size, Deserializer& deserializer) override
         {
-            Ensures(size == sizeof(T));
+            HalleyAssertDev(size == sizeof(T));
 
             bool hasPayload; // TODO: should this set the 'enabled' flag?
             deserializer >> hasPayload;

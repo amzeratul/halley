@@ -279,14 +279,14 @@ void InputSDL3::addJoystick(SDL_JoystickID instanceId)
 	if (SDL_IsGamepad(instanceId)) {
 		if (!sdlGameControllers.contains(instanceId)) {
 			const auto joy = std::make_shared<InputGameControllerSDL3>(instanceId);
-			assert(!sdlJoys.contains(instanceId));
+			HalleyAssertDev(!sdlJoys.contains(instanceId));
 			sdlGameControllers[instanceId] = joy;
 			joysticks.push_back(joy);
 		}
 	} else {
 		if (!sdlJoys.contains(instanceId)) {
 			const auto joy = std::make_shared<InputJoystickSDL3>(instanceId);
-			assert(!sdlGameControllers.contains(instanceId));
+			HalleyAssertDev(!sdlGameControllers.contains(instanceId));
 			sdlJoys[instanceId] = joy;
 			joysticks.push_back(joy);
 		}

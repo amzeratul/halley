@@ -53,8 +53,8 @@ void AudioVoice::setMixingProperties(AudioMixingProperties mixingProperties)
 
 void AudioVoice::start()
 {
-	Expects(isReady());
-	Expects(!playing);
+	HalleyAssertDev(isReady());
+	HalleyAssertDev(!playing);
 
 	playing = true;
 	nChannels = source ? source->getNumberOfChannels() : 0;
@@ -192,7 +192,7 @@ size_t AudioVoice::getNumberOfChannels() const
 
 void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float busGain)
 {
-	Expects(playing);
+	HalleyAssertDev(playing);
 
 	if (!source) {
 		stop({});
@@ -280,7 +280,7 @@ void AudioVoice::render(size_t numSamplesRequested, AudioBufferPool& pool)
 
 void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 {
-	Expects(!dst.empty());
+	HalleyAssertDev(!dst.empty());
 
 	if (paused || !source || !hasMixOutput) {
 		return;
@@ -292,7 +292,7 @@ void AudioVoice::mixTo(gsl::span<AudioBuffer*> dst, float prevGain, float gain)
 	lastDstChannels = static_cast<uint8_t>(nDstChannels);
 	float totalMix = 0.0f;
 	const size_t nMixes = nSrcChannels * nDstChannels;
-	Expects (nMixes <= 16);
+	HalleyAssertDev(nMixes <= 16);
 	for (size_t i = 0; i < nMixes; ++i) {
 		totalMix += prevChannelMix[i] * prevGain + channelMix[i] * gain;
 	}

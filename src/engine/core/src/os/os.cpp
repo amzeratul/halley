@@ -34,7 +34,7 @@ using namespace Halley;
 
 OS& Halley::OS::get()
 {
-	assert(osInstance != nullptr);
+	HalleyAssertDev(osInstance != nullptr);
 	return *osInstance;
 }
 

@@ -28,7 +28,7 @@ SDLRWOps::SDLRWOps(SDL_RWops* _fp, int64_t _start, int64_t _end, bool _closeOnFi
 	, end(_end)
 	, closeOnFinish(_closeOnFinish)
 {
-	Expects(fp);
+	HalleyAssertDev(fp);
 
 	if (end == -1) {
 		SDL_RWseek(fp, 0, SEEK_END);

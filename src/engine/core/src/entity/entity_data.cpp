@@ -290,7 +290,7 @@ const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 
 const EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid) const
 {
-	Expects(uuid.isValid());
+	HalleyAssertDev(uuid.isValid());
 	
 	if (uuid == instanceUUID) {
 		return this;
@@ -308,7 +308,7 @@ const EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid) const
 
 EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid)
 {
-	Expects(uuid.isValid());
+	HalleyAssertDev(uuid.isValid());
 	
 	if (uuid == instanceUUID) {
 		return this;
@@ -524,7 +524,7 @@ EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
 
 bool EntityData::matchesUUID(const UUID& uuid) const
 {
-	Expects(uuid.isValid());
+	HalleyAssertDev(uuid.isValid());
 	return prefabUUID == uuid || instanceUUID == uuid; 
 }
 
@@ -553,7 +553,7 @@ void EntityData::instantiate(const UUID& uuid)
 void EntityData::instantiateWith(const EntityData& instance)
 {
 	// This should only be called on the root of prefab
-	Expects(instance.instanceUUID.isValid());
+	HalleyAssertDev(instance.instanceUUID.isValid());
 	
 	instanceUUID = instance.instanceUUID;
 

@@ -86,20 +86,20 @@ size_t LibVorbisDecoder::read(AudioMultiChannelSamples dst, size_t nChannels)
 
 size_t LibVorbisDecoder::getNumSamples() const
 {
-	Expects(handle);
+	HalleyAssertDev(handle);
 	return size_t(ov_pcm_total(handle, -1));
 }
 
 int LibVorbisDecoder::getSampleRate() const
 {
-	Expects(handle);
+	HalleyAssertDev(handle);
 	vorbis_info *info = ov_info(handle, -1);
 	return info->rate;
 }
 
 int LibVorbisDecoder::getNumChannels() const
 {
-	Expects(handle);
+	HalleyAssertDev(handle);
 	vorbis_info *info = ov_info(handle, -1);
 	return info->channels;
 }

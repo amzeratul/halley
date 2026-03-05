@@ -45,25 +45,25 @@ void BinaryFile::reload(Resource&& resource)
 
 const Bytes& BinaryFile::getBytes() const
 {
-	Expects(!streaming);
+	HalleyAssertDev(!streaming);
 	return data;
 }
 
 Bytes& BinaryFile::getBytes()
 {
-	Expects(!streaming);
+	HalleyAssertDev(!streaming);
 	return data;
 }
 
 gsl::span<const std::byte> BinaryFile::getSpan() const
 {
-	Expects(!streaming);
+	HalleyAssertDev(!streaming);
 	return gsl::as_bytes(gsl::span<const Byte>(data));
 }
 
 gsl::span<std::byte> BinaryFile::getSpan()
 {
-	Expects(!streaming);
+	HalleyAssertDev(!streaming);
 	return gsl::as_writable_bytes(gsl::span<Byte>(data));
 }
 

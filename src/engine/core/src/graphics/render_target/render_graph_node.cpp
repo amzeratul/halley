@@ -1,6 +1,6 @@
 #include "halley/graphics/render_target/render_graph_node.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/graphics/render_target/render_graph.h"
 #include "halley/api/video_api.h"
@@ -203,7 +203,7 @@ void RenderGraphNode::resetTextures()
 
 std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphElementType type)
 {
-	Expects (type == RenderGraphElementType::ColourBuffer || type == RenderGraphElementType::DepthStencilBuffer);
+	HalleyAssertDev(type == RenderGraphElementType::ColourBuffer || type == RenderGraphElementType::DepthStencilBuffer);
 
 	const auto size = Vector2i::max(currentSize, Vector2i(4, 4));
 	auto texture = video.createTexture(size);
@@ -371,7 +371,7 @@ void RenderGraphNode::renderNodeBlitTexture(std::shared_ptr<const Texture> textu
 RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) const
 {
 	if (renderTarget) {
-		assert(renderTarget->hasColourBuffer(0));
+		HalleyAssertDev(renderTarget->hasColourBuffer(0));
 		return rc.with(*renderTarget);
 	} else {
 		return rc;

@@ -293,7 +293,7 @@ void AudioObjectEditor::populateTreeData(const String& parentId, AudioSubObjectH
 	}
 
 	const auto& id = subObject.getId();
-	assert(!id.isEmpty());
+	HalleyAssertDev(!id.isEmpty());
 
 	// Add this item
 	treeData[id] = TreeData{ parentId, &subObject.getObject() };

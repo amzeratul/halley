@@ -67,7 +67,7 @@ namespace Halley {
 		}
 
 		void free(void* p) {
-			assert(ownsPointer(p));
+			HalleyAssertDebug(ownsPointer(p));
 
 			// Convert back to entry
 			Entry* entry = static_cast<Entry*>(p);

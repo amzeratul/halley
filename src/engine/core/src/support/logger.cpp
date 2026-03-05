@@ -1,6 +1,6 @@
 #include "halley/support/logger.h"
 #include "halley/text/halleystring.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include <iostream>
 #include "halley/support/console.h"
 #include "halley/utils/hash.h"
@@ -67,7 +67,7 @@ void Logger::setInstance(Logger& logger)
 
 void Logger::addSink(ILoggerSink& sink)
 {
-	Expects(instance);
+	HalleyAssertDev(instance);
 	if (!instance->interruptContext) {
 		instance->sinks.insert(&sink);
 	}
@@ -75,7 +75,7 @@ void Logger::addSink(ILoggerSink& sink)
 
 void Logger::removeSink(ILoggerSink& sink)
 {
-	Expects(instance);
+	HalleyAssertDev(instance);
 	instance->sinks.erase(&sink);
 }
 

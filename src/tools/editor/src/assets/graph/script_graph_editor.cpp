@@ -20,8 +20,8 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 ScriptGraphEditor::~ScriptGraphEditor()
 {
 	setListeningToClient(false);
-	assert(!scriptEnumHandle);
-	assert(!scriptStateHandle);
+	HalleyAssertDev(!scriptEnumHandle);
+	HalleyAssertDev(!scriptStateHandle);
 }
 
 void ScriptGraphEditor::init()
@@ -172,7 +172,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 {
 	auto* devConServer = project.getDevConServer();
 	if (!devConServer) {
-		assert(!scriptEnumHandle);
+		HalleyAssertDev(!scriptEnumHandle);
 		return;
 	}
 

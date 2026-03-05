@@ -3,7 +3,7 @@
 #include "halley_gl.h"
 #include "texture_opengl.h"
 #include "halley/graphics/texture_descriptor.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "video_opengl.h"
 #include "halley/game/game_platform.h"
 #include "halley/support/logger.h"
@@ -16,7 +16,7 @@ TextureOpenGL::TextureOpenGL(VideoOpenGL& parent, Vector2i size)
 	, parent(parent)
 {
 	glGenTextures(1, &textureId);
-	assert(textureId != 0);
+	HalleyAssertDev(textureId != 0);
 }
 
 TextureOpenGL::~TextureOpenGL()
@@ -131,10 +131,10 @@ void TextureOpenGL::bind(int textureUnit) const
 
 void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, bool useFiltering, TextureAddressMode addressMode, TextureDescriptorImageData& pixelData)
 {
-	Expects(size.x > 0);
-	Expects(size.y > 0);
-	//Expects(size.x <= 4096);
-	//Expects(size.y <= 4096);
+	HalleyAssertDev(size.x > 0);
+	HalleyAssertDev(size.y > 0);
+	//HalleyAssertDev(size.x <= 4096);
+	//HalleyAssertDev(size.y <= 4096);
 	glCheckError();
 
 #if defined (WITH_OPENGL)

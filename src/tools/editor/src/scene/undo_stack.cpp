@@ -74,8 +74,8 @@ void UndoStack::pushMoved(bool wasModified, gsl::span<const EntityChangeOperatio
 
 bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds, gsl::span<const EntityData*> before, gsl::span<const EntityData*> after)
 {
-	Expects(entityIds.size() == before.size());
-	Expects(entityIds.size() == after.size());
+	HalleyAssertDev(entityIds.size() == before.size());
+	HalleyAssertDev(entityIds.size() == after.size());
 	
 	if (!accepting) {
 		return true;

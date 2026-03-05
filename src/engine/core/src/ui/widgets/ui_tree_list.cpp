@@ -3,7 +3,7 @@
 
 #include "halley/ui/widgets/ui_tree_list.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 
 #include "halley/utils/algorithm.h"
@@ -510,7 +510,7 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 
 UITreeListItem& UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 {
-	Expects(!forceLeaf);
+	HalleyAssertDev(!forceLeaf);
 	
 	item->parentId = id;
 	item->parent = this;
@@ -522,7 +522,7 @@ UITreeListItem& UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, s
 
 std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 {
-	Expects(!forceLeaf);
+	HalleyAssertDev(!forceLeaf);
 
 	const size_t n = children.size();
 	for (size_t i = 0; i < n; ++i) {
@@ -539,7 +539,7 @@ std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 
 void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 {
-	Expects(!forceLeaf);
+	HalleyAssertDev(!forceLeaf);
 	
 	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
 	const size_t finalIndex = std::min(children.size() - 1, targetIndex > startIndex ? targetIndex - 1 : targetIndex);
@@ -669,7 +669,7 @@ std::optional<UITreeListItem::FindPositionResult> UITreeListItem::doFindPosition
 			} else if ((y > threshold1 && !isRootOfSingleRootTree) || forceLeaf) {
 				return FindPositionResult(PositionType::After, this, Rect4f(x0, y1, x1 - x0, 0));
 			} else {
-				assert(!forceLeaf);
+				HalleyAssertDev(!forceLeaf);
 				return FindPositionResult(PositionType::OnTop, this, Rect4f(x0, y0, x1 - x0, y1 - y0));
 			}
 		} else if (y >= y1 && isLastItem && !isSingleRootTree) {

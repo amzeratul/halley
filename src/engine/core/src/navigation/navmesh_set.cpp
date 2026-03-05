@@ -624,7 +624,7 @@ void NavmeshSet::simplifyPath(Vector<NavigationPath::Point>& points, NavigationQ
 	for (size_t i = 0; i < points.size(); ++i) {
 		auto& navmesh = navmeshes[points[i].navmeshId];
 		nodeIds[i] = navmesh.getNodeAt(points[i].pos.pos).value_or(static_cast<NodeId>(-1));
-		assert(nodeIds[i] != static_cast<NodeId>(-1));
+		HalleyAssertDev(nodeIds[i] != static_cast<NodeId>(-1));
 	}
 
 	constexpr size_t maxLookAhead = 30;

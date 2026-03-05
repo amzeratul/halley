@@ -1,7 +1,7 @@
 #include "halley/tools/distance_field/distance_field_generator.h"
-#include <cassert>
+#include "halley/support/assert.h"
 #include <halley/file_formats/image.h>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -47,8 +47,8 @@ namespace {
 
 	std::unique_ptr<Image> generateSDFInternal(Image& srcImg, Vector2i size, float radius)
 	{
-		Expects(!srcImg.getPixelBytes().empty());
-		Expects(srcImg.getFormat() == Image::Format::RGBA);
+		HalleyAssertDev(!srcImg.getPixelBytes().empty());
+		HalleyAssertDev(srcImg.getFormat() == Image::Format::RGBA);
 		const int srcW = srcImg.getWidth();
 		const int srcH = srcImg.getHeight();
 		const auto src = srcImg.getPixels4BPP();
@@ -89,7 +89,7 @@ namespace {
 
 		const auto dstPixels = result->getPixelBytes();
 		const auto srcPixels = gsl::span<const float>(src(0, 0), src.width() * src.height() * BPP);
-		assert(dstPixels.size() >= srcPixels.size());
+		HalleyAssertDev(dstPixels.size() >= srcPixels.size());
 
 		const auto n = srcPixels.size();
 		for (size_t i = 0; i < n; ++i) {

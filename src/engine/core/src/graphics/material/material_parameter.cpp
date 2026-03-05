@@ -3,7 +3,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "halley/api/halley_api.h"
 #include "halley/graphics/shader.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 using namespace Halley;
 
@@ -17,67 +17,67 @@ MaterialParameter::MaterialParameter(Material& material, ShaderParameterType typ
 
 bool MaterialParameter::set(Colour colour)
 {
-	Expects(type == ShaderParameterType::Float4);
+	HalleyAssertDev(type == ShaderParameterType::Float4);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &colour);
 }
 
 bool MaterialParameter::set(float p)
 {
-	Expects(type == ShaderParameterType::Float);
+	HalleyAssertDev(type == ShaderParameterType::Float);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float, &p);
 }
 
 bool MaterialParameter::set(Vector2f p)
 {
-	Expects(type == ShaderParameterType::Float2);
+	HalleyAssertDev(type == ShaderParameterType::Float2);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float2, &p);
 }
 
 bool MaterialParameter::set(Vector3f p)
 {
-	Expects(type == ShaderParameterType::Float3);
+	HalleyAssertDev(type == ShaderParameterType::Float3);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float3, &p);
 }
 
 bool MaterialParameter::set(Vector4f p)
 {
-	Expects(type == ShaderParameterType::Float4);
+	HalleyAssertDev(type == ShaderParameterType::Float4);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Float4, &p);
 }
 
 bool MaterialParameter::set(int p)
 {
-	Expects(type == ShaderParameterType::Int);
+	HalleyAssertDev(type == ShaderParameterType::Int);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int, &p);
 }
 
 bool MaterialParameter::set(Vector2i p)
 {
-	Expects(type == ShaderParameterType::Int2);
+	HalleyAssertDev(type == ShaderParameterType::Int2);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int2, &p);
 }
 
 bool MaterialParameter::set(Vector3i p)
 {
-	Expects(type == ShaderParameterType::Int3);
+	HalleyAssertDev(type == ShaderParameterType::Int3);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int3, &p);	
 }
 
 bool MaterialParameter::set(Vector4i p)
 {
-	Expects(type == ShaderParameterType::Int4);
+	HalleyAssertDev(type == ShaderParameterType::Int4);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::Int4, &p);	
 }
 
 bool MaterialParameter::set(uint32_t p)
 {
-	Expects(type == ShaderParameterType::UInt);
+	HalleyAssertDev(type == ShaderParameterType::UInt);
 	return material->setUniform(blockNumber, offset, ShaderParameterType::UInt, &p);
 }
 
 bool MaterialParameter::set(const Matrix4f& m)
 {
-	Expects(type == ShaderParameterType::Matrix4);
+	HalleyAssertDev(type == ShaderParameterType::Matrix4);
 	if (material->getDefinition().isColumnMajor()) {
 		auto transposed = m;
 		transposed.transpose();
@@ -130,67 +130,67 @@ ConstMaterialParameter::ConstMaterialParameter(const Material& material, ShaderP
 
 bool ConstMaterialParameter::isEqual(Colour colour)
 {
-	Expects(type == ShaderParameterType::Float4);
+	HalleyAssertDev(type == ShaderParameterType::Float4);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Float4, &colour);
 }
 
 bool ConstMaterialParameter::isEqual(float p)
 {
-	Expects(type == ShaderParameterType::Float);
+	HalleyAssertDev(type == ShaderParameterType::Float);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Float, &p);
 }
 
 bool ConstMaterialParameter::isEqual(Vector2f p)
 {
-	Expects(type == ShaderParameterType::Float2);
+	HalleyAssertDev(type == ShaderParameterType::Float2);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Float2, &p);
 }
 
 bool ConstMaterialParameter::isEqual(Vector3f p)
 {
-	Expects(type == ShaderParameterType::Float3);
+	HalleyAssertDev(type == ShaderParameterType::Float3);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Float3, &p);
 }
 
 bool ConstMaterialParameter::isEqual(Vector4f p)
 {
-	Expects(type == ShaderParameterType::Float4);
+	HalleyAssertDev(type == ShaderParameterType::Float4);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Float4, &p);
 }
 
 bool ConstMaterialParameter::isEqual(int p)
 {
-	Expects(type == ShaderParameterType::Int);
+	HalleyAssertDev(type == ShaderParameterType::Int);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Int, &p);
 }
 
 bool ConstMaterialParameter::isEqual(Vector2i p)
 {
-	Expects(type == ShaderParameterType::Int2);
+	HalleyAssertDev(type == ShaderParameterType::Int2);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Int2, &p);
 }
 
 bool ConstMaterialParameter::isEqual(Vector3i p)
 {
-	Expects(type == ShaderParameterType::Int3);
+	HalleyAssertDev(type == ShaderParameterType::Int3);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Int3, &p);	
 }
 
 bool ConstMaterialParameter::isEqual(Vector4i p)
 {
-	Expects(type == ShaderParameterType::Int4);
+	HalleyAssertDev(type == ShaderParameterType::Int4);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::Int4, &p);	
 }
 
 bool ConstMaterialParameter::isEqual(uint32_t p)
 {
-	Expects(type == ShaderParameterType::UInt);
+	HalleyAssertDev(type == ShaderParameterType::UInt);
 	return material->isUniformEqualTo(blockNumber, offset, ShaderParameterType::UInt, &p);
 }
 
 bool ConstMaterialParameter::isEqual(const Matrix4f& m)
 {
-	Expects(type == ShaderParameterType::Matrix4);
+	HalleyAssertDev(type == ShaderParameterType::Matrix4);
 	if (material->getDefinition().isColumnMajor()) {
 		auto transposed = m;
 		transposed.transpose();

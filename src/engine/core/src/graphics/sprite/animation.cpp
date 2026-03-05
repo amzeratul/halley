@@ -6,7 +6,7 @@
 #include "halley/api/halley_api.h"
 #include "halley/resources/resources.h"
 #include "halley/bytes/byte_serializer.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include <utility>
 
 #include "halley/graphics/sprite/animation_player.h"
@@ -346,7 +346,7 @@ size_t Animation::getSequenceIdx(std::string_view name) const
 
 const AnimationDirection& Animation::getDirection(const String& dirName) const
 {
-	Expects(directions.size() > 0);
+	HalleyAssertDev(directions.size() > 0);
 
 	for (auto& dir : directions) {
 		if (dir.name == dirName) {
@@ -358,8 +358,8 @@ const AnimationDirection& Animation::getDirection(const String& dirName) const
 
 const AnimationDirection& Animation::getDirection(int id) const
 {
-	Expects(id >= 0);
-	Expects(directions.size() > 0);
+	HalleyAssertDev(id >= 0);
+	HalleyAssertDev(directions.size() > 0);
 
 	if (id < int(directions.size())) {
 		return directions[id];

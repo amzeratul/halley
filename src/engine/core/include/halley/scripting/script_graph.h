@@ -29,7 +29,7 @@ namespace Halley {
 		const IGraphNodeType& getGraphNodeType() const override;
 		const IScriptNodeType& getNodeType() const
 		{
-			assert(nodeType != nullptr);
+			HalleyAssertDebug(nodeType != nullptr);
 			return *nodeType;
 		}
 

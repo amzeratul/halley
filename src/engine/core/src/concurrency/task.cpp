@@ -2,7 +2,7 @@
 #include "halley/concurrency/task.h"
 #include "halley/text/halleystring.h"
 #include <mutex>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "halley/concurrency/concurrent.h"
 #include <iostream>
 #include "halley/support/logger.h"
@@ -171,15 +171,15 @@ void Task::addPendingTask(std::unique_ptr<Task> task)
 	++pendingTaskCount;
 	pendingTasks.emplace_back(std::move(task));
 	hasPendingTasksOnQueue = true;
-	Ensures(pendingTaskCount > 0);
+	HalleyAssertDev(pendingTaskCount > 0);
 }
 
 void Task::onPendingTaskDone(size_t numContinuations)
 {
 	UniqueLock lock(mutex);
-	Expects(pendingTaskCount > 0);
+	HalleyAssertDev(pendingTaskCount > 0);
 	pendingTaskCount += static_cast<int>(numContinuations) - 1;
-	Ensures(pendingTaskCount >= 0);
+	HalleyAssertDev(pendingTaskCount >= 0);
 }
 
 Task* Task::getParent() const

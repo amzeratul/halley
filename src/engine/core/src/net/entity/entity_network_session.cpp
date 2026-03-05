@@ -1,6 +1,6 @@
 #include "halley/net/entity/entity_network_session.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/bytes/compression.h"
 #include "halley/net/interpolators/data_interpolator.h"
@@ -38,8 +38,8 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	, listener(listener)
 	, session(std::move(session))
 {
-	Expects(this->session);
-	Expects(this->listener);
+	HalleyAssertDev(this->session);
+	HalleyAssertDev(this->listener);
 	
 	this->session->addListener(this);
 
@@ -322,7 +322,7 @@ void EntityNetworkSession::receiveUpdates()
 			LargeMessageInfoHeader header;
 			packet.extractHeader(header);
 
-			Expects(largeSplitHeader == 0x1 || largeSplitHeader == 0x2);
+			HalleyAssertDev(largeSplitHeader == 0x1 || largeSplitHeader == 0x2);
 
 			size_t dstOffset = buffer.size();
 
@@ -354,7 +354,7 @@ void EntityNetworkSession::receiveUpdates()
 			} else if (largeSplitHeader == 0x2) {
 				// Uncompressed, just copy.
 				auto src = packet.getBytes();
-				Expects(src.size() == header.size);
+				HalleyAssertDev(src.size() == header.size);
 
 				//Logger::logDev("- rcv uncompressed, " + toString(header.size) + " bytes");
 
@@ -366,7 +366,7 @@ void EntityNetworkSession::receiveUpdates()
 				dstOffset += header.size;
 			}
 
-			Expects(dstOffset <= header.totalSize);
+			HalleyAssertDev(dstOffset <= header.totalSize);
 
 			if (dstOffset == header.totalSize) {
 				// Received the last part of this large message. Can process it now.
@@ -446,8 +446,8 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId, con
 
 void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg)
 {
-	Expects(factory);
-	Expects(messageBridge.isValid());
+	HalleyAssertDev(factory);
+	HalleyAssertDev(messageBridge.isValid());
 
 	auto& world = factory->getWorld();
 
@@ -467,7 +467,7 @@ void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, 
 
 void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback)
 {
-	Expects(destination != SystemMessageDestination::Local);
+	HalleyAssertDev(destination != SystemMessageDestination::Local);
 
 	// Only wait for responses from host
 	// In order to support responses from all players, this class needs to track which clients are in the session and probably include timeouts
@@ -481,12 +481,12 @@ void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageTyp
 	auto msg = EntityNetworkMessageSystemMsg(messageType, id, wantsResponse, std::move(targetSystem), destination, std::move(messageData));
 	if (wantsResponse) {
 		pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
-		assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
+		HalleyAssertDev(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
 	}
 
 	// Send
 	if (destination == SystemMessageDestination::Host) {
-		assert(!isHost());
+		HalleyAssertDev(!isHost());
 		sendToPeer(std::move(msg), 0);
 	} else {
 		sendToAll(std::move(msg));
@@ -495,8 +495,8 @@ void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageTyp
 
 void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg)
 {
-	Expects(factory);
-	Expects(messageBridge.isValid());
+	HalleyAssertDev(factory);
+	HalleyAssertDev(messageBridge.isValid());
 
 	const auto msgType = msg.messageType;
 	const auto msgId = msg.msgId;
@@ -568,7 +568,7 @@ void EntityNetworkSession::setupDictionary()
 
 void EntityNetworkSession::setupByteSerializationInterpolators()
 {
-	Expects(listener != nullptr);
+	HalleyAssertDev(listener != nullptr);
 	if (listener) {
 		listener->setupByteInterpolators(byteDataInterpolatorSet);
 	}
@@ -594,7 +594,7 @@ void EntityNetworkSession::sendUpdatedLobbyInfos(std::optional<NetworkSession::P
 
 World& EntityNetworkSession::getWorld() const
 {
-	Expects(factory);
+	HalleyAssertDev(factory);
 	return factory->getWorld();
 }
 
@@ -605,13 +605,13 @@ Resources& EntityNetworkSession::getResources() const
 
 EntityFactory& EntityNetworkSession::getFactory() const
 {
-	Expects(factory);
+	HalleyAssertDev(factory);
 	return *factory;
 }
 
 const EntityFactory::SerializationOptions& EntityNetworkSession::getEntitySerializationOptions() const
 {
-	Expects(factory);
+	HalleyAssertDev(factory);
 	return entitySerializationOptions;
 }
 
@@ -739,7 +739,7 @@ bool EntityNetworkSession::isLobbyReady() const
 
 bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData, NetworkSession::PeerId peerId) const
 {
-	Expects(listener);
+	HalleyAssertDev(listener);
 	return listener->isEntityInView(entity, clientData, peerId);
 }
 
@@ -789,7 +789,7 @@ bool EntityNetworkSession::isAuthority(ConstEntityRef entity) const
 
 NetworkSession& EntityNetworkSession::getSession() const
 {
-	Expects(session);
+	HalleyAssertDev(session);
 	return *session;
 }
 
@@ -861,7 +861,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 
 	if (authorityId.has_value()) {
 		// Authority is taken by someone.
-		Expects(!networkComponent.authorityId.has_value());
+		HalleyAssertDev(!networkComponent.authorityId.has_value());
 
 		if (ownerId == myPeerId) {
 			// Local peer is giving away authority.

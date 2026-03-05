@@ -38,7 +38,7 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 
 void UIList::setOrientation(UISizerType orientation, int nColumns)
 {
-	Expects(items.empty());
+	HalleyAssertDev(items.empty());
 	
 	if (orientation != this->orientation || nColumns != this->nColumns) {
 		setSizer(UISizer(orientation, styles.at(0).getFloat("gap"), nColumns));
@@ -891,7 +891,7 @@ void UIList::onGamepadInput(const UIInputResults& input, Time time)
 		return;
 	}
 
-	Expects(nColumns >= 1);
+	HalleyAssertDev(nColumns >= 1);
 
 	// Drag
 	if (dragEnabled && input.isButtonHeld(UIGamepadInput::Button::Hold)) {

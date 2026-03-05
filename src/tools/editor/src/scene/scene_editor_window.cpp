@@ -770,7 +770,7 @@ void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> orig
 void SceneEditorWindow::replaceEntities(gsl::span<const EntityChangeOperation> patches)
 {
 	// TODO
-	Expects(patches.size() == 1);
+	HalleyAssertDev(patches.size() == 1);
 	replaceEntity(patches.front().entityId, EntityData(dynamic_cast<const EntityData&>(*patches.front().data)));
 }
 
@@ -936,8 +936,8 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 
 void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<EntityData*> newDatas)
 {
-	Expects(ids.size() == prevDatas.size());
-	Expects(ids.size() == newDatas.size());
+	HalleyAssertDev(ids.size() == prevDatas.size());
+	HalleyAssertDev(ids.size() == newDatas.size());
 
 	auto constNewDatas = gsl::span<const EntityData*>(const_cast<const EntityData**>(newDatas.data()), newDatas.size());
 
@@ -1064,7 +1064,7 @@ String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 
 void SceneEditorWindow::pasteEntities(const String& stringData, const String& referenceId, bool childOfReference, bool moveToCursor)
 {
-	Expects(gameBridge);
+	HalleyAssertDev(gameBridge);
 	auto datas = deserializeEntities(stringData);
 	if (!datas.empty()) {
 		for (auto& data: datas) {
@@ -1291,8 +1291,8 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 
 void SceneEditorWindow::onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas)
 {
-	Expects(ids.size() == parents.size());
-	Expects(ids.size() == prevDatas.size());
+	HalleyAssertDev(ids.size() == parents.size());
+	HalleyAssertDev(ids.size() == prevDatas.size());
 	if (ids.empty()) {
 		return;
 	}

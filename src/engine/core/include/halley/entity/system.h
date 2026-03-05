@@ -117,13 +117,13 @@ namespace Halley {
 			if (returnLambda) {
 				context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data, Bytes serializedData) {
 					if constexpr (std::is_same_v<typename T::ReturnType, void>) {
-						Expects(data == nullptr);
-						Expects(serializedData.empty());
+						HalleyAssertDev(data == nullptr);
+						HalleyAssertDev(serializedData.empty());
 						static_cast<void>(data);
 						static_cast<void>(serializedData);
 						returnLambda();
 					} else {
-						Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+						HalleyAssertDev((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
 						if (data) {
 							returnLambda(std::move(*reinterpret_cast<typename T::ReturnType*>(data)));
 						} else {

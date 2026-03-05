@@ -19,7 +19,7 @@
 
 \*****************************************************************/
 
-#include <cassert>
+#include "halley/support/assert.h"
 #include "resource_filesystem.h"
 #include "halley/api/system_api.h"
 #include "halley/bytes/byte_serializer.h"

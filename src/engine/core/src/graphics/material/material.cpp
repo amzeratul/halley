@@ -66,11 +66,11 @@ bool MaterialDataBlock::operator!=(const MaterialDataBlock& other) const
 
 bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, const void* srcData)
 {
-	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
+	HalleyAssertDev(dataBlockType != MaterialDataBlockType::SharedExternal);
 
 	const size_t size = MaterialAttribute::getAttributeSize(type);
-	Expects(size + offset <= data.size());
-	Expects(offset % 4 == 0); // Alignment
+	HalleyAssertDev(size + offset <= data.size());
+	HalleyAssertDev(offset % 4 == 0); // Alignment
 
 	if (memcmp(data.data() + offset, srcData, size) != 0) {
 		memcpy(data.data() + offset, srcData, size);
@@ -83,11 +83,11 @@ bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, cons
 
 bool MaterialDataBlock::isEqualTo(size_t offset, ShaderParameterType type, const void* srcData) const
 {
-	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
+	HalleyAssertDev(dataBlockType != MaterialDataBlockType::SharedExternal);
 
 	const size_t size = MaterialAttribute::getAttributeSize(type);
-	Expects(size + offset <= data.size());
-	Expects(offset % 4 == 0); // Alignment
+	HalleyAssertDev(size + offset <= data.size());
+	HalleyAssertDev(offset % 4 == 0); // Alignment
 
 	return memcmp(data.data() + offset, srcData, size) == 0;
 }

@@ -113,7 +113,7 @@ namespace Halley {
 		
 		static BaseFrameData& getCurrent()
 		{
-			assert(hasCurrent());
+			HalleyAssertDebug(hasCurrent());
 			return *threadInstance;
 		}
 
@@ -129,7 +129,7 @@ namespace Halley {
 
 		static BaseFrameData& getCurrentBase()
 		{
-			assert(hasCurrent());
+			HalleyAssertDebug(hasCurrent());
 			return *threadInstance;
 		}
 
@@ -178,7 +178,7 @@ namespace Halley {
 
 		static T& getCurrent()
 		{
-			assert(hasCurrent());
+			HalleyAssertDebug(hasCurrent());
 			return static_cast<T&>(*threadInstance);
 		}
 

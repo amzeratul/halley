@@ -374,6 +374,7 @@ set(SOURCES
         "src/resources/resource.cpp"
         "src/resources/resource_data.cpp"
         
+        "src/support/assert.cpp"
         "src/support/console.cpp"
         "src/support/debug.cpp"
         "src/support/exception.cpp"
@@ -902,6 +903,7 @@ set(HEADERS
         "include/halley/support/console.h"
         "include/halley/support/debug.h"
         "include/halley/support/exception.h"
+        "include/halley/support/exception_type.h"
         "include/halley/support/logger.h"
         "include/halley/support/redirect_stream.h"
         "include/halley/support/profiler.h"

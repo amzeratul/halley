@@ -603,7 +603,7 @@ void Project::reloadCodegen()
 
 void Project::setCheckAssetTask(CheckAssetsTask* task)
 {
-	Expects(!checkAssetsTask ^ !task);
+	HalleyAssertDev(!checkAssetsTask ^ !task);
 	checkAssetsTask = task;
 }
 

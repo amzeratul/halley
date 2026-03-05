@@ -23,7 +23,7 @@
 #include "halley/audio/vorbis_dec.h"
 
 #include "halley/resources/resource_data.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 #include "lib_nogg_decoder.h"
 #include "lib_vorbis_decoder.h"
@@ -105,7 +105,7 @@ size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
 		return 0;
 	}
 
-	Expects(nChannels == getNumChannels());
+	HalleyAssertDev(nChannels == getNumChannels());
 
 	return decoder->read(dst, nChannels);
 }

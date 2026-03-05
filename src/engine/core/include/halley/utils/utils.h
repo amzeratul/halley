@@ -32,7 +32,7 @@
 #include <array>
 #include <functional>
 #include <halley/data_structures/vector.h>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 #include "type_traits.h"
 
@@ -252,7 +252,7 @@ namespace Halley {
 		// From https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
 		constexpr char tab32[32] = { 0, 9, 1, 10, 13, 21, 2, 29, 11, 14, 16, 18, 22, 25, 3, 30, 8, 12, 20, 28, 15, 17, 24, 7, 19, 27, 23, 6, 26, 5, 4, 31 };
 
-		Expects(value > 0);
+		HalleyAssertDev(value > 0);
 		value |= value >> 1;
 		value |= value >> 2;
 		value |= value >> 4;

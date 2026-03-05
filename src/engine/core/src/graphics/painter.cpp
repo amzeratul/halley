@@ -1,6 +1,6 @@
 #include "halley/graphics/painter.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 #include "halley/graphics/render_context.h"
 #include "halley/graphics/render_target/render_target.h"
@@ -8,7 +8,7 @@
 #include "halley/graphics/material/material_definition.h"
 #include "halley/graphics/material/material_parameter.h"
 #include <cstring> // memmove
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 
 #include "halley/api/video_api.h"
@@ -88,7 +88,7 @@ void Painter::resetState()
 Rect4f Painter::getWorldViewAABB() const
 {
 	Vector2f size = Vector2f(viewPort.getSize()) / camera.getZoom();
-	assert(camera.getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
+	HalleyAssertDev(camera.getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
 	auto camPos = camera.getPosition();
 	return Rect4f(Vector2f(camPos.x, camPos.y) - size * 0.5f, size.x, size.y);
 }
@@ -123,9 +123,9 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Mate
 		flushPending();
 	}
 
-	Expects(material != nullptr);
-	Expects(numVertices > 0);
-	Expects(numIndices >= numVertices);
+	HalleyAssertDev(material != nullptr);
+	HalleyAssertDev(numVertices > 0);
+	HalleyAssertDev(numIndices >= numVertices);
 
 	startDrawCall(material);
 
@@ -153,8 +153,8 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<const Mate
 
 void Painter::draw(const std::shared_ptr<const Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
-	Expects(primitiveType == PrimitiveType::Triangle);
-	Expects(indices.size() % 3 == 0);
+	HalleyAssertDev(primitiveType == PrimitiveType::Triangle);
+	HalleyAssertDev(indices.size() % 3 == 0);
 
 	const auto result = addDrawData(material, numVertices, indices.size(), false);
 
@@ -167,8 +167,8 @@ void Painter::draw(const std::shared_ptr<const Material>& material, size_t numVe
 
 void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t numVertices, const void* vertexData)
 {
-	Expects(numVertices % 4 == 0);
-	Expects(vertexData != nullptr);
+	HalleyAssertDev(numVertices % 4 == 0);
+	HalleyAssertDev(vertexData != nullptr);
 
 	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
 
@@ -178,7 +178,7 @@ void Painter::drawQuads(const std::shared_ptr<const Material>& material, size_t 
 
 void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_t totalNumSprites, const void* vertexData)
 {
-	Expects(vertexData != nullptr);
+	HalleyAssertDev(vertexData != nullptr);
 
 	constexpr size_t verticesPerSprite = 4;
 	constexpr size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
@@ -215,13 +215,13 @@ void Painter::drawSprites(const std::shared_ptr<const Material>& material, size_
 
 void Painter::drawSlicedSprite(const std::shared_ptr<const Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
-	Expects(vertexData != nullptr);
+	HalleyAssertDev(vertexData != nullptr);
 	if (scale.x < 0.00001f || scale.y < 0.00001f) {
 		//throw Exception("Scale is zero for material with texture " + material->getTexture(0)->getAssetId());
 		return;
 	}
-	//Expects(scale.x > 0.0001f);
-	//Expects(scale.y > 0.0001f);
+	//HalleyAssertDev(scale.x > 0.0001f);
+	//HalleyAssertDev(scale.y > 0.0001f);
 
 	//         a        c
 	//   00 -- 01 ----- 02 -- 03
@@ -682,7 +682,7 @@ void Painter::setClip(std::optional<Rect4i> rect)
 
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 {
-	Expects(activeRenderTarget);
+	HalleyAssertDev(activeRenderTarget);
 	int h = activeRenderTarget->getViewPort().getHeight();
 	if (activeRenderTarget->getViewportFlipVertical()) {
 		int y = h - r.getBottom();
@@ -765,7 +765,7 @@ void Painter::resetPending()
 
 void Painter::executeDrawPrimitives(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
-	Expects(primitiveType == PrimitiveType::Triangle);
+	HalleyAssertDev(primitiveType == PrimitiveType::Triangle);
 
 	ProfilerEvent event(ProfilerEventType::PainterDrawCall, "", reinterpret_cast<uint64_t>(this));
 
@@ -860,7 +860,7 @@ void Painter::generateQuadIndices(IndexType pos, size_t numQuads, IndexType* tar
 
 RenderTarget& Painter::getActiveRenderTarget()
 {
-	Expects(activeRenderTarget);
+	HalleyAssertDev(activeRenderTarget);
 	return *activeRenderTarget;
 }
 

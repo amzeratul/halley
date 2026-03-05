@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "vector.h"
 #include "halley/utils/algorithm.h"
 
@@ -17,7 +17,7 @@ namespace Halley {
     public:
         void startDrag(SelectionSetModifier modifier)
         {
-            Expects(!curDrag);
+            HalleyAssertDev(!curDrag);
             if (modifier == SelectionSetModifier::None) {
                 selected.clear();
             } else {
@@ -28,7 +28,7 @@ namespace Halley {
 
         void updateDrag(const Vector<T>& elements)
         {
-            Expects(curDrag);
+            HalleyAssertDev(curDrag);
             if (*curDrag == SelectionSetModifier::None) {
                 selected = elements;
             } else if (*curDrag == SelectionSetModifier::Add) {

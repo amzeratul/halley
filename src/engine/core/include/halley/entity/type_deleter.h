@@ -29,7 +29,7 @@ namespace Halley {
 
 		void set(int idx, TypeDeleterBase* deleter)
 		{
-			assert(idx < static_cast<int>(map.size()));
+			HalleyAssertDebug(idx < static_cast<int>(map.size()));
 			map[idx] = deleter;
 		}
 

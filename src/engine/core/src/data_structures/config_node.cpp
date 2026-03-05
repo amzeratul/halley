@@ -394,7 +394,7 @@ namespace {
 
 		const auto aType = a.getType();
 		const auto bType = b.getType();
-		Expects(aType < bType);
+		HalleyAssertDev(aType < bType);
 
 		if (aType == ConfigNodeType::Int && bType == ConfigNodeType::Float) {
 			return cmp.compare(a.asFloat(), b.asFloat());
@@ -2196,7 +2196,7 @@ void ConfigNode::applySequenceDelta(const ConfigNode& delta)
 			result.emplace_back(std::move(value));
 		} else {
 			// New value
-			Ensures(v.getType() != ConfigNodeType::Noop);
+			HalleyAssertDev(v.getType() != ConfigNodeType::Noop);
 			result.emplace_back(v);
 		}
 	}

@@ -32,7 +32,7 @@ void FrameDebugger::update(Time t)
 		api.core->requestRenderSnapshot().then(Executors::getMainUpdateThread(), [&](std::unique_ptr<RenderSnapshot> snapshot)
 		{
 			if (waiting) {
-				assert(!snapshot->hasPendingTimestamps());
+				HalleyAssertDev(!snapshot->hasPendingTimestamps());
 				renderSnapshot = std::move(snapshot);
 				framesToDraw = static_cast<int>(renderSnapshot->getNumCommands());
 				waiting = false;

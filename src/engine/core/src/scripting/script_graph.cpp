@@ -134,7 +134,7 @@ std::unique_ptr<BaseGraphNode> ScriptGraphNode::clone() const
 void ScriptGraphNode::assignType(const GraphNodeTypeCollection& nodeTypeCollection) const
 {
 	nodeType = dynamic_cast<const IScriptNodeType*>(nodeTypeCollection.tryGetGraphNodeType(type));
-	assert(nodeType != nullptr);
+	HalleyAssertDev(nodeType != nullptr);
 }
 
 void ScriptGraphNode::clearType() const
@@ -144,7 +144,7 @@ void ScriptGraphNode::clearType() const
 
 const IGraphNodeType& ScriptGraphNode::getGraphNodeType() const
 {
-	assert(nodeType != nullptr);
+	HalleyAssertDebug(nodeType != nullptr);
 	return *nodeType;
 }
 

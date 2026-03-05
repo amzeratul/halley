@@ -214,7 +214,7 @@ void DX12Pipeline::bind(DX12Video& video, const Material& material, int passN)
             elem.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
             elem.AlignedByteOffset = attr.offset;
 
-            Ensures(attr.offset % 4 == 0);
+            HalleyAssertDev(attr.offset % 4 == 0);
 
             layout.emplace_back(elem);
         }

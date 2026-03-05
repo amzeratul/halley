@@ -538,7 +538,7 @@ private:
 
 	std::shared_ptr<ScriptState> doAddScript(EntityId entityId, ScriptableComponent& scriptable, std::shared_ptr<ScriptState> state, Vector<String> tags, Vector<ConfigNode> params)
 	{
-		assert(!state->getScriptId().isEmpty());
+		HalleyAssertDev(!state->getScriptId().isEmpty());
 		scriptable.activeStates.addState(state);
 		state->setTags(std::move(tags));
 		state->setStartParams(std::move(params));

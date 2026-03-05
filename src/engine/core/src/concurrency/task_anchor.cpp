@@ -1,7 +1,7 @@
 #include "halley/concurrency/task_anchor.h"
 #include "halley/text/halleystring.h"
 #include <mutex>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "halley/concurrency/concurrent.h"
 #include <iostream>
 #include "halley/support/logger.h"
@@ -16,7 +16,7 @@ TaskAnchor::TaskAnchor(std::unique_ptr<Task> t, float delay)
 	, status(TaskStatus::WaitingToStart)
 	, timeToStart(delay)
 {
-	Expects(!!task);
+	HalleyAssertDev(!!task);
 }
 
 TaskAnchor::TaskAnchor(TaskAnchor&& other) noexcept = default;

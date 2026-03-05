@@ -46,12 +46,12 @@ public:
 
 					if (isHost) {
 						// The host always claims ownership.
-						Expects(myPeerId == 0);
+						HalleyAssertDev(myPeerId == 0);
 						e.network.ownerId = myPeerId;
 					} else {
 						// Entities created locally belong to this peer. Entities loaded from world chunks are
 						// supposed to be claimed by the host.
-						Expects(myPeerId != 0);
+						HalleyAssertDev(myPeerId != 0);
 						if (entity.getWorldPartition() == 0) {
 							//Logger::logDev("Peer " + toString((int) myPeerId) + " is claiming network ownership for " + entity.getName());
 							e.network.ownerId = myPeerId;

@@ -40,8 +40,8 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 
 void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<const EntityNetworkUpdateInfo> entityIds, const EntityClientSharedData& clientData)
 {
-	Expects(isAlive());
-	Expects(myPeerId != peerId);
+	HalleyAssertDev(isAlive());
+	HalleyAssertDev(myPeerId != peerId);
 
 	if (!isRemoteReady()) {
 		if (timeSinceSend > maxSendInterval) {
@@ -81,7 +81,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			// TODO: auto-release authority if goes out of view?
 			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
 				// Has an outbound entity assigned. Keep it alive and updating.
-				Expects(iter->second.hasAuthorityOnly);
+				HalleyAssertDev(iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				toUpdate.emplace_back(entity, &iter->second);
 			} else {
@@ -97,7 +97,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 			// We don't want to send updates to the peer who took authority, but we want to keep
 			// this outbound entity alive until authority is given back.
 			if (const auto iter = outboundEntities.find(entry.entityId); iter != outboundEntities.end()) {
-				Expects(!iter->second.hasAuthorityOnly);
+				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				if (entry.authorityId != peerId) {
 					toUpdate.emplace_back(entity, &iter->second);
@@ -118,7 +118,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				parentSession->setupOutboundInterpolators(entity);
 				toCreate.push_back(entity);
 			} else {
-				Expects(!iter->second.hasAuthorityOnly);
+				HalleyAssertDev(!iter->second.hasAuthorityOnly);
 				iter->second.alive = true;
 				toUpdate.emplace_back(entity, &iter->second);
 			}
@@ -177,8 +177,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 
 void EntityNetworkRemotePeer::receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
 {
-	Expects(isAlive());
-	Expects(fromPeerId == peerId);
+	HalleyAssertDev(isAlive());
+	HalleyAssertDev(fromPeerId == peerId);
 
 	if (msg.getType() == EntityNetworkHeaderType::Create) {
 		receiveCreateEntity(msg.getMessage<EntityNetworkMessageCreate>());
@@ -313,8 +313,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     bool canFastUpdate = !remote.fastUpdateJournal.empty() || remote.hasAuthorityOnly;
 
     if (canFastUpdate) {
-        Expects(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
-        Expects(!parentSession->getEntitySerializationOptions().serializeAsStub);
+        HalleyAssertDev(parentSession->getEntitySerializationOptions().type == EntitySerialization::Type::Network);
+        HalleyAssertDev(!parentSession->getEntitySerializationOptions().serializeAsStub);
 
         auto fastSerialize = EntityNetworkSerialize(parentSession, entity);
 
@@ -325,7 +325,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     		if (remote.fastUpdateJournal.empty()) {
     			// This must be an outbound entity with "hasAuthorityOnly". If it just has been
     			// created, its previous journal is still empty.
-    			Expects(remote.hasAuthorityOnly);
+    			HalleyAssertDev(remote.hasAuthorityOnly);
     			// Just process and store the journal, but keep marked as "not modified" ...
 		        fastSerialize.processEntityUpdateChanges(remote.fastUpdateJournal);
     			// ... but set flag to force an update next tick, so we don't miss any changes.
@@ -657,7 +657,7 @@ EntityRef EntityNetworkRemotePeer::createRemoteEntity(EntityNetworkId id, const 
 
 void EntityNetworkRemotePeer::assignRemoteEntity(EntityNetworkId id, EntityRef entity)
 {
-	Expects(entity.hasParent());
+	HalleyAssertDev(entity.hasParent());
 
 	//Logger::logDev("Assigning network id: " + toString(static_cast<int>(id)) + " to existing entity " + entity->getName());
 
@@ -795,7 +795,7 @@ void EntityNetworkRemotePeer::trySpawningPendingEntities()
 
 void EntityNetworkRemotePeer::createPendingEntity(const PendingEntity& pendingData)
 {
-	Expects(pendingData.data);
+	HalleyAssertDev(pendingData.data);
 
 	const auto entity = createRemoteEntity(pendingData.id, pendingData.data.value(), pendingData.worldPartition != 0);
 
@@ -811,7 +811,7 @@ void EntityNetworkRemotePeer::createPendingEntity(const PendingEntity& pendingDa
 
 void EntityNetworkRemotePeer::assignPendingEntity(const PendingEntity& pendingData, EntityRef entity)
 {
-	Expects(!pendingData.data);
+	HalleyAssertDev(!pendingData.data);
 
 	assignRemoteEntity(pendingData.id, entity);
 
@@ -941,7 +941,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 			//Logger::logDev("Recovered authority of " + toString(entityId.value & 0xffffffff));
 			const size_t found = std_ex::erase_if_value(tempInboundEntities, [&](const auto& value) {
 				if (value.worldId == entityId) {
-					Expects(value.forChangedAuthorityOnly);
+					HalleyAssertDev(value.forChangedAuthorityOnly);
 					return true;
 				}
 				return false;
@@ -1058,7 +1058,7 @@ void EntityNetworkRemotePeer::interpolateRemoteEntityPosition(InboundEntity& inb
 		pos = (1.0f - t) * e0.first + t * e1.first;
 	}
 
-	Expects(pos.isValid());
+	HalleyAssertDev(pos.isValid());
 	transform->setLocalPosition(pos);
 }
 

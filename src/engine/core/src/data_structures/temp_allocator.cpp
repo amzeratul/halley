@@ -33,7 +33,7 @@ char* TempMemoryPool::allocate(size_t n, size_t alignment)
 	auto p = alignUp(pos, alignment);
 	if (p + n < capacity) {
 		char* result = data + p;
-		assert(reinterpret_cast<size_t>(result) % alignment == 0);
+		HalleyAssertDebug(reinterpret_cast<size_t>(result) % alignment == 0);
 		pos = p + n;
 		allocated += n;
 		return result;

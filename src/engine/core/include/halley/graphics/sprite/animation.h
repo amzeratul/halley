@@ -26,7 +26,7 @@ namespace Halley
 
 		const SpriteSheetEntry& getSprite(int dir) const
 		{
-			Expects(dir >= 0 && dir < int(sprites.size()));
+			HalleyAssertDev(dir >= 0 && dir < int(sprites.size()));
 			return *sprites[dir];
 		}
 
@@ -68,7 +68,7 @@ namespace Halley
 		size_t numFrameDefinitions() const { return frameDefinitions.size(); }
 		const AnimationFrame& getFrame(size_t n) const
 		{
-			Expects(n < frames.size());
+			HalleyAssertDev(n < frames.size());
 			return frames[n];
 		}
 		const String& getName() const { return name; }

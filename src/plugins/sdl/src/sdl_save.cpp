@@ -117,7 +117,7 @@ bool SDLSaveData::isReady() const
 
 Bytes SDLSaveData::getData(const String& filename)
 {
-	Expects (!filename.isEmpty());
+	HalleyAssertDev(!filename.isEmpty());
 
 	auto path = dir / filename;
 	std::optional<Bytes> data = doGetData(path, filename);
@@ -136,7 +136,7 @@ Bytes SDLSaveData::getData(const String& filename)
 
 void SDLSaveData::removeData(const String& path)
 {
-	Expects (!path.isEmpty());
+	HalleyAssertDev(!path.isEmpty());
 	Path::removeFile(dir / path);
 	auto backupFile = dir / path;
 	backupFile = backupFile.replaceExtension(backupFile.getExtension() + ".bak");
@@ -158,7 +158,7 @@ Vector<String> SDLSaveData::enumerate(const String& root)
 
 void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit, bool log)
 {
-	Expects (!path.isEmpty());
+	HalleyAssertDev(!path.isEmpty());
 
 	Bytes finalData;
 
@@ -208,7 +208,7 @@ void SDLSaveData::commit()
 
 Vector<uint8_t> SDLSaveData::getKeyV2() const
 {
-	assert(key.has_value());
+	HalleyAssertDev(key.has_value());
 
 	Random rng;
 	auto key2 = *key + ":" + toString(type);
@@ -222,7 +222,7 @@ Vector<uint8_t> SDLSaveData::getKeyV2() const
 
 Vector<uint8_t> SDLSaveData::getKeyV1() const
 {
-	assert(key.has_value());
+	HalleyAssertDev(key.has_value());
 
 	Vector<uint8_t> result;
 	result.resize(16, 0);

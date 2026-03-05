@@ -80,8 +80,8 @@ int DX11Shader::getBlockLocation(const String& name, ShaderType stage)
 
 void DX11Shader::bind(DX11Video& video)
 {
-	Expects(vertexShader);
-	Expects(layout);
+	HalleyAssertDev(vertexShader);
+	HalleyAssertDev(layout);
 
 	auto& devCon = video.getDeviceContext();
 	devCon.VSSetShader(vertexShader, nullptr, 0);
@@ -121,7 +121,7 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const Vector<MaterialAttrib
 		return;
 	}
 
-	Expects(!vertexBlob.empty());
+	HalleyAssertDev(!vertexBlob.empty());
 
 	Vector<std::array<char, 64>> names(attributes.size());
 	Vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());

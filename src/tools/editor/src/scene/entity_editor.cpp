@@ -174,7 +174,7 @@ void EntityEditor::makeUI()
 
 bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
 {
-	Expects(ecsData);
+	HalleyAssertDev(ecsData);
 
 	gameResources = &resources;
 
@@ -692,7 +692,7 @@ void EntityEditor::swapComponents(int idxA, int idxB)
 
 void EntityEditor::setDefaultName(const String& name, const String& prevName)
 {
-	Expects(currentEntityData);
+	HalleyAssertDev(currentEntityData);
 
 	const auto oldName = getName();
 	if (oldName.isEmpty() || oldName == prevName) {
@@ -817,7 +817,7 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 
 EntityData& EntityEditor::getEntityData()
 {
-	Expects(currentEntityData);
+	HalleyAssertDev(currentEntityData);
 	return *currentEntityData;
 }
 

@@ -339,7 +339,7 @@ namespace Halley
 
 		void set()
 		{
-			Expects(futureData != nullptr);
+			HalleyAssertDev(futureData != nullptr);
 			futureData->set(VoidWrapper());
 		}
 

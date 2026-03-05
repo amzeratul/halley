@@ -161,7 +161,7 @@ void AudioSDL3::onAudioAvailable()
 void AudioSDL3::onCallback(SDL_AudioStream* sdlStream, int len)
 {
     if (len > 0) {
-        Ensures(sdlStream == stream);
+        HalleyAssertDev(sdlStream == stream);
         auto data = SDL_stack_alloc(std::byte, len);
         if (data) {
             const auto dst = gsl::span(data, len);

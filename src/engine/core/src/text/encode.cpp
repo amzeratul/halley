@@ -69,7 +69,7 @@ String Encode::encodeBase16(gsl::span<const std::byte> in)
 void Encode::encodeBase16(gsl::span<const std::byte> in, gsl::span<char> out)
 {
     size_t size = in.size();
-    Expects(out.size() == 2 * size);
+    HalleyAssertDev(out.size() == 2 * size);
 
     const std::byte* src = in.data();
     char* dst = out.data();
@@ -98,7 +98,7 @@ void Encode::decodeBase16(std::string_view in, gsl::span<std::byte> bytes)
 	
 	const size_t inSize = in.size();
 	const size_t outSize = (inSize + 1) / 2;
-	Expects(size_t(bytes.size()) >= outSize);
+	HalleyAssertDev(size_t(bytes.size()) >= outSize);
 
 	int readPos = inSize % 2 == 0 ? 0 : -1;
 	for (size_t i = 0; i < outSize; ++i) {
@@ -126,7 +126,7 @@ String Encode::encodeBase64(gsl::span<const std::byte> in, bool url)
 	for (size_t i=0; i<sz; i+=3) {
 		// Input bytes
 		int available = std::min(int(sz-i), 3);
-		assert (available >= 1);
+		HalleyAssertDev(available >= 1);
 		unsigned int inByte = (uint8_t(in[i]) << 16) | (available >= 2 ? uint8_t(in[i+1]) << 8 : 0u) | (available >= 3 ? uint8_t(in[i+2]) : 0u);
 
 		// Output bytes
@@ -208,7 +208,7 @@ size_t Encode::getBase64Length(std::string_view in)
 {
 	size_t sz = in.length();
 	sz = alignUp<size_t>(sz, 4);
-	assert(sz % 4 == 0);
+	HalleyAssertDev(sz % 4 == 0);
 
 	size_t resLen = sz * 3 / 4;
 	if (resLen > 0) {

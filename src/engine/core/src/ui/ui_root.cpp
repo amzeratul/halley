@@ -283,7 +283,7 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 {
 	widgetsCache.clear();
 	for (auto& c: getChildren()) {
-		assert(c->getRoot() == this);
+		HalleyAssertDev(c->getRoot() == this);
 		widgetsCache.push_back(c);
 	}
 
@@ -304,14 +304,14 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 				w->clear();
 			}
 		} else {
-			assert(w->getRoot() == this);
+			HalleyAssertDev(w->getRoot() == this);
 			w->doUpdate(type, t, activeInputType, joystickType, widgetsCache);
 		}
 	}
 
 	for (int i = static_cast<int>(widgetsCache.size()); --i >= 0; ) {
 		auto& w = widgetsCache[i];
-		assert(w->getRoot() == this);
+		HalleyAssertDev(w->getRoot() == this);
 		w->doPostUpdate();
 	}
 
@@ -750,7 +750,7 @@ UIRoot::WidgetUnderMouseResult UIRoot::getWidgetUnderMouse(const std::shared_ptr
 
 void UIRoot::setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction)
 {
-	Expects(remapFunction != nullptr);
+	HalleyAssertDev(remapFunction != nullptr);
 	mouseRemap = std::move(remapFunction);
 }
 

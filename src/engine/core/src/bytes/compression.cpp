@@ -37,8 +37,8 @@ Bytes Compression::decompress(const Bytes& bytes, size_t maxSize)
 
 Bytes Compression::decompress(gsl::span<const std::byte> bytes, size_t maxSize)
 {
-	Expects (sizeof(uint64_t) == 8);
-	Expects (bytes.size_bytes() >= 8);
+	HalleyAssertDev(sizeof(uint64_t) == 8);
+	HalleyAssertDev(bytes.size_bytes() >= 8);
 	uint64_t expectedOutSize;
 	memcpy(&expectedOutSize, bytes.data(), 8);
 	auto out = decompressRaw(bytes.subspan(8), false, maxSize, size_t(expectedOutSize));
@@ -75,13 +75,13 @@ Bytes Compression::compressRaw(gsl::span<const std::byte> bytes, bool insertLeng
 
 gsl::span<std::byte> Compression::compressRaw(gsl::span<const std::byte> inBytes, gsl::span<std::byte> outBytes, bool insertLength, int level)
 {
-	Expects (sizeof(uint64_t) == 8);
+	HalleyAssertDev(sizeof(uint64_t) == 8);
 
 	const uint64_t inSize = inBytes.size_bytes();
 	const size_t headerSize = insertLength ? 8 : 0;
 
 	if (insertLength) {
-		assert(outBytes.size_bytes() >= 8);
+		HalleyAssertDev(outBytes.size_bytes() >= 8);
 		memcpy(outBytes.data(), &inSize, 8);
 	}
 
@@ -266,7 +266,7 @@ std::shared_ptr<const char> Compression::lz4DecompressFileToSharedPtr(gsl::span<
 	if (!sz) {
 		throw Exception("Failed to decompress LZ4 file", HalleyExceptions::Utils);
 	}
-	assert(sz == lz4Header.size);
+	HalleyAssertDev(sz == lz4Header.size);
 	outSize = *sz;
 	return output;
 }

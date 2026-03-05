@@ -68,7 +68,7 @@ Sprite RenderSurface::getSurfaceSprite() const
 
 Sprite RenderSurface::getSurfaceSprite(std::shared_ptr<Material> material) const
 {
-	Expects(material);
+	HalleyAssertDev(material);
 	
 	const auto& tex = renderTarget->getTexture(0);
 	material->set(0, tex);

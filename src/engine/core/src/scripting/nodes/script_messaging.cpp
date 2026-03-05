@@ -419,7 +419,7 @@ bool ScriptReceiveMessage::canReceiveMessage(const ScriptGraphNode& node, const 
 
 bool ScriptReceiveMessage::tryReceiveMessage(const ScriptGraphNode& node, ScriptReceiveMessageData& data, ScriptMessage& msg) const
 {
-	Expects(msg.type.message == node.getSettings()["message"].asString(""));
+	HalleyAssertDev(msg.type.message == node.getSettings()["message"].asString(""));
 
 	if (data.hasMessageActive) {
 		return false;
@@ -549,7 +549,7 @@ std::function<void(std::byte*, Bytes)> ScriptSendSystemMessage::makeCallback(Scr
 	{
 		ConfigNode result;
 
-		Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+		HalleyAssertDev((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
 		if (data) {
 			result = ConfigNode(std::move(*reinterpret_cast<T*>(data)));
 		} else {

@@ -35,7 +35,7 @@ InterpolationCurve::InterpolationCurve(const ConfigNode& node, bool startFromZer
 		makeDefault(startFromZero);
 	}
 
-	assert(tweens.size() == points.size());
+	HalleyAssertDev(tweens.size() == points.size());
 }
 
 ConfigNode InterpolationCurve::toConfigNode() const
@@ -66,7 +66,7 @@ void InterpolationCurve::makeDefault(bool startFromZero)
 	tweens.push_back(TweenCurve::Linear);
 	tweens.push_back(TweenCurve::Linear);
 
-	assert(tweens.size() == points.size());
+	HalleyAssertDev(tweens.size() == points.size());
 }
 
 bool InterpolationCurve::operator==(const InterpolationCurve& other) const
@@ -94,7 +94,7 @@ void InterpolationCurve::deserialize(Deserializer& s)
 	s >> scale;
 	s >> baseline;
 
-	assert(tweens.size() == points.size());
+	HalleyAssertDev(tweens.size() == points.size());
 }
 
 float InterpolationCurve::evaluate(float val) const
@@ -120,8 +120,8 @@ float InterpolationCurve::evaluateRaw(float val) const
 
 		if (val >= prevX && val < nextX) {
 			const float t = (val - prevX) / (nextX - prevX);
-			assert(t >= 0.0f);
-			assert(t <= 1.0f);
+			HalleyAssertDev(t >= 0.0f);
+			HalleyAssertDev(t <= 1.0f);
 			return lerp(points[i - 1].y, points[i].y, Tween<float>::applyCurve(t, tweens[i]));
 		}
 	}

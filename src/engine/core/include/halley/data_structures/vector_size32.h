@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cassert>
+#include "halley/support/assert.h"
 #include <memory>
 #include <iterator>
 #include <cstdint>
@@ -380,25 +380,25 @@ namespace Halley {
 
 		[[nodiscard]] reference front()
 		{
-			assert(!empty());
+			HalleyAssertDebug(!empty());
 			return data()[0];
 		}
 
 		[[nodiscard]] reference back()
 		{
-			assert(!empty());
+			HalleyAssertDebug(!empty());
 			return data()[size() - 1];
 		}
 
 		[[nodiscard]] const_reference front() const
 		{
-			assert(!empty());
+			HalleyAssertDebug(!empty());
 			return data()[0];			
 		}
 
 		[[nodiscard]] const_reference back() const
 		{
-			assert(!empty());
+			HalleyAssertDebug(!empty());
 			return data()[size() - 1];			
 		}
 
@@ -523,7 +523,7 @@ namespace Halley {
 
 		iterator erase(const_iterator pos)
 		{
-			assert(pos != end());
+			HalleyAssertDebug(pos != end());
 			return erase(pos, pos + 1);
 		}
 
@@ -576,7 +576,7 @@ namespace Halley {
 
 		void pop_back()
 		{
-			assert(!empty());
+			HalleyAssertDebug(!empty());
 			std::allocator_traits<Allocator>::destroy(as_allocator(), &back());
 			set_size(st_size() - 1);
 		}
@@ -873,7 +873,7 @@ namespace Halley {
 		{
 			const auto size = st_size();
 			const auto capacity = st_capacity();
-			assert(newCapacity >= size);
+			HalleyAssertDebug(newCapacity >= size);
 			if (newCapacity != capacity) {
 				// Allocate new memory
 				const bool canUseSBO = sbo_enabled() && newCapacity <= sbo_max_objects() && (sbo_active() || capacity == 0); // Last check is to prevent going from allocated back to SBO
@@ -946,7 +946,7 @@ namespace Halley {
 
 		void resize_down(size_type newSize)
 		{
-			assert(newSize <= st_size());
+			HalleyAssertDebug(newSize <= st_size());
 			auto* d = data();
 			for (size_type i = newSize; i < st_size(); ++i) {
 				std::allocator_traits<Allocator>::destroy(as_allocator(), d + i);

@@ -258,14 +258,14 @@ void DevConClient::log(LoggerLevel level, const std::string_view msg)
 
 void DevConClient::applyUpdateStrings(DevCon::UpdateStringsMsg& msg)
 {
-	assert(i18n != nullptr);
+	HalleyAssertDev(i18n != nullptr);
 
 	i18n->updateStrings(msg.language, std::move(msg.strings));
 }
 
 void DevConClient::updateI18NInterest()
 {
-	assert(i18n != nullptr);
+	HalleyAssertDev(i18n != nullptr);
 
 	ConfigNode data;
 	data["languageCode"] = i18n->getCurrentLanguage().getISOCode();

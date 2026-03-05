@@ -99,7 +99,7 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& entryNode)
 {
-	Expects(projectWindow != nullptr);
+	HalleyAssertDev(projectWindow != nullptr);
 	return std::make_shared<MetadataEditor>(*this, *projectWindow);
 }
 
@@ -154,8 +154,8 @@ UIFactoryWidgetProperties EditorUIFactory::getSelectAssetProperties() const
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& entryNode)
 {
-	Expects(gameResources != nullptr);
-	Expects(projectWindow != nullptr);
+	HalleyAssertDev(gameResources != nullptr);
+	HalleyAssertDev(projectWindow != nullptr);
 	
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");

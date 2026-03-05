@@ -76,73 +76,73 @@ bool Stage::hasMultithreadedRendering() const
 
 InputAPI& Stage::getInputAPI() const
 {
-	Expects(api->input);
+	HalleyAssertDev(api->input);
 	return *api->input;
 }
 
 VideoAPI& Stage::getVideoAPI() const
 {
-	Expects(api->video);
+	HalleyAssertDev(api->video);
 	return *api->video;
 }
 
 AudioAPI& Stage::getAudioAPI() const
 {
-	Expects(api->audio);
+	HalleyAssertDev(api->audio);
 	return *api->audio;
 }
 
 CoreAPI& Stage::getCoreAPI() const
 {
-	Expects(api->core);
+	HalleyAssertDev(api->core);
 	return *api->core;
 }
 
 SystemAPI& Stage::getSystemAPI() const
 {
-	Expects(api->system);
+	HalleyAssertDev(api->system);
 	return *api->system;
 }
 
 NetworkAPI& Stage::getNetworkAPI() const
 {
-	Expects(api->network);
+	HalleyAssertDev(api->network);
 	return *api->network;
 }
 
 MovieAPI& Stage::getMovieAPI() const
 {
-	Expects(api->movie);
+	HalleyAssertDev(api->movie);
 	return *api->movie;
 }
 
 AnalyticsAPI& Stage::getAnalyticsAPI() const
 {
-	Expects(api->analytics);
+	HalleyAssertDev(api->analytics);
 	return *api->analytics;
 }
 
 WebAPI& Stage::getWebAPI() const
 {
-	Expects(api->web);
+	HalleyAssertDev(api->web);
 	return *api->web;
 }
 
 Resources& Stage::getResources() const
 {
-	Expects(resources);
+	HalleyAssertDev(resources);
 	return *resources;
 }
 
 PlatformAPI& Stage::getPlatformAPI() const
 {
-	Expects(api->platform);
+	HalleyAssertDev(api->platform);
 	return *api->platform;
 }
 
 Game& Stage::getGame() const
 {
-	Expects(game);
+	HalleyAssertDev(game);
 	return *game;
 }
 

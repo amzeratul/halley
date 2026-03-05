@@ -39,13 +39,13 @@ namespace {
 	String getCurrencyString(float value, const String& currency)
 	{
 		if (currency == "GBP") {
-			return u8"£" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+			return u8"ï¿½" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		if (currency == "USD") {
 			return u8"$" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		if (currency == "EUR") {
-			return u8"€" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+			return u8"ï¿½" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		return toString(value, 2) + " " + currency;
 	}
@@ -406,7 +406,7 @@ Vector<LocalisationEditor::CategoryInfo> LocalisationEditor::generateCategoryInf
 
 	for (const auto& [categoryId, nWords]: stats.wordsPerCategory) {
 		auto splitCategory = categoryId.split('/');
-		assert(splitCategory.size() >= 1 && splitCategory.size() <= 2);
+		HalleyAssertDev(splitCategory.size() >= 1 && splitCategory.size() <= 2);
 
 		CategoryInfo info;
 		info.id = splitCategory.back();
@@ -529,7 +529,7 @@ void LocalisationEditor::addTranslationData(UIWidget& container, const LocOrigin
 
 LocOriginalData& LocalisationEditor::getOriginalData()
 {
-	assert(remoteStrings || localStrings);
+	HalleyAssertDev(remoteStrings || localStrings);
 
 	return localStrings && localStrings->originalLanguage ? *localStrings->originalLanguage : *remoteStrings->originalLanguage;
 }
@@ -976,8 +976,8 @@ void LocalisationEditor::doImportLanguage(const I18NLanguage& language, const St
 
 void LocalisationEditor::importLanguageFromYAML(const I18NLanguage& language, const Bytes& data)
 {
-	assert(localStrings.has_value());
-	assert(remoteStrings.has_value());
+	HalleyAssertDev(localStrings.has_value());
+	HalleyAssertDev(remoteStrings.has_value());
 
 	const auto configFile = YAMLConvert::parseConfig(data, {});
 	const auto langId = language.getISOCode();

@@ -135,16 +135,16 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 
 void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 {
-	Expects(newParent != this);
+	HalleyAssertDev(newParent != this);
 	if (newParent) {
-		Expects(newParent->parent != this);
+		HalleyAssertDev(newParent->parent != this);
 	}
-	Expects(isAlive());
+	HalleyAssertDev(isAlive());
 	
 	if (parent != newParent) {
 		// Unparent from old
 		if (parent) {
-			Expects(parent->isAlive());
+			HalleyAssertDev(parent->isAlive());
 			
 			auto& siblings = parent->children;
 			siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
@@ -419,7 +419,7 @@ void Entity::destroy(World& world)
 
 void Entity::doDestroy(World& world, bool updateParenting)
 {
-	Expects(alive);
+	HalleyAssertDev(alive);
 
 	if (fromNetwork) {
 		if (!world.isTerminating()) {
@@ -473,7 +473,7 @@ size_t Entity::getMemoryUsage(ComponentDeleterTable& table) const
 
 void EntityRef::setReloaded()
 {
-	Expects(entity);
+	HalleyAssertDev(entity);
 	entity->reloaded = true;
 
 	world->setEntityReloaded();

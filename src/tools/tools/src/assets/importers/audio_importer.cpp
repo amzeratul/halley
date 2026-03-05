@@ -183,7 +183,7 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	size_t len = src[0].size();
 	while (!eos) {
 		// 5.1.
-		Expects(pos <= len);
+		HalleyAssertDev(pos <= len);
 		size_t samplesToWrite = std::min(len - pos, size_t(bufferSize));
 		float** buffers = vorbis_analysis_buffer(&v, bufferSize);
 		for (size_t i = 0; i < nChannels; ++i) {

@@ -1,5 +1,5 @@
 #include "halley/data_structures/nullable_reference.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 using namespace Halley;
 
@@ -107,7 +107,7 @@ void NullableReference::setReference(NullableReferenceAnchor* anchor)
 
 NullableReferenceAnchor& NullableReference::getRaw() const
 {
-	Expects(ref);
+	HalleyAssertDev(ref);
 	return *ref;
 }
 

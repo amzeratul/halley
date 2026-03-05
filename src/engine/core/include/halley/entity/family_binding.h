@@ -109,7 +109,7 @@ namespace Halley {
 			}
 #endif
 
-			assert(elemsLeft > 0);
+			HalleyAssertDebug(elemsLeft > 0);
 			++v;
 			--elemsLeft;
 			if (prefetchDist > 0 && elemsLeft > prefetchDist) {
@@ -144,12 +144,12 @@ namespace Halley {
 		}
 		
 		T& operator[](size_t index) {
-			assert(index < count());
+			HalleyAssertDebug(index < count());
 			return *getFamilyElement(index);
 		}
 		
 		const T& operator[](size_t index) const {
-			assert(index < count());
+			HalleyAssertDebug(index < count());
 			return *getFamilyElement(index);
 		}
 

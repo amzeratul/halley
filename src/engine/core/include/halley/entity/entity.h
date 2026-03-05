@@ -907,7 +907,7 @@ namespace Halley {
 		void setPrefab(std::shared_ptr<const Prefab> prefab, UUID prefabUUID)
 		{
 			validate();
-			Expects(!prefab || prefabUUID.isValid());
+			HalleyAssertDev(!prefab || prefabUUID.isValid());
 			entity->prefab = std::move(prefab);
 			entity->prefabUUID = prefabUUID;
 		}
@@ -925,43 +925,43 @@ namespace Halley {
 
 		DataInterpolatorSet& setupNetwork(uint8_t peerId)
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->setupNetwork(*this, peerId);
 		}
 
 		std::optional<uint8_t> getOwnerPeerId(bool checkAncestors = true) const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->getOwnerPeerId(checkAncestors);
 		}
 
         std::optional<uint8_t> getAuthorityPeerId(bool checkAncestors = true) const
         {
-            Expects(entity);
+            HalleyAssertDev(entity);
             return entity->getAuthorityPeerId(checkAncestors);
         }
 
 		bool isLocal() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkOwner() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkAuthority() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkAuthority(*world);
 		}
 
 		void setFromNetwork(bool fromNetwork)
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			entity->setFromNetwork(fromNetwork);
 		}
 
@@ -972,9 +972,9 @@ namespace Halley {
 
 		void validate() const
 		{
-			Expects(isValid());
+			HalleyAssertDev(isValid());
 #ifdef _DEBUG
-			Expects(entity->getEntityId() == entityId);
+			HalleyAssertDev(entity->getEntityId() == entityId);
 #endif
 		}
 
@@ -1096,31 +1096,31 @@ namespace Halley {
 
 		size_t getNumComponents() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return size_t(entity->liveComponents);
 		}
 
 		std::pair<int, Component*> getRawComponent(size_t idx) const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->components[idx];
 		}
 
 		Vector<std::pair<int, Component*>>::const_iterator begin() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->components.begin();
 		}
 
 		Vector<std::pair<int, Component*>>::const_iterator end() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->components.begin() + entity->liveComponents;
 		}
 
 		bool isSerializable() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->serializable;
 		}
 
@@ -1131,31 +1131,31 @@ namespace Halley {
 
 		std::optional<uint8_t> getOwnerPeerId(bool checkAncestors = true) const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->getOwnerPeerId(checkAncestors);
 		}
 
         std::optional<uint8_t> getAuthorityPeerId(bool checkAncestors = true) const
         {
-            Expects(entity);
+            HalleyAssertDev(entity);
             return entity->getAuthorityPeerId(checkAncestors);
         }
 
 		bool isLocal() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkOwner() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkOwner(*world);
 		}
 
 		bool isNetworkAuthority() const
 		{
-			Expects(entity);
+			HalleyAssertDev(entity);
 			return entity->isNetworkAuthority(*world);
 		}
 

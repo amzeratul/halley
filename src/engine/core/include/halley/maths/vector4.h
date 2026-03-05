@@ -27,7 +27,7 @@
 #include "vector2.h"
 #include "vector3.h"
 #include <halley/utils/utils.h>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 namespace Halley {
 	template <typename T=float, int Alignment=4>
@@ -103,13 +103,13 @@ namespace Halley {
 		// Getter
 		constexpr inline T& operator[](size_t n)
 		{
-			Expects(n <= 3);
+			HalleyAssertDev(n <= 3);
 			return (&x)[n];
 		}
 
 		constexpr inline const T& operator[](size_t n) const
 		{
-			Expects(n <= 3);
+			HalleyAssertDev(n <= 3);
 			return (&x)[n];
 		}
 

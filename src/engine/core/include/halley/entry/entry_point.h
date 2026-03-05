@@ -40,8 +40,8 @@ namespace Halley
 
 		std::unique_ptr<Core> createCore(const Vector<std::string>& args) override
 		{
-			Expects(args.size() >= 1);
-			Expects(args.size() < 1000);
+			HalleyAssertDev(args.size() >= 1);
+			HalleyAssertDev(args.size() < 1000);
 			return std::make_unique<Core>(std::make_unique<GameType>(), args);
 		}
 	};

@@ -104,7 +104,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		texture->bind(dx11Video, textureUnit, tex.getSamplerType());
 
 		// Remember which units are bound to render targets
-		Expects(textureUnit < textureUnitBoundToRenderTarget.size());
+		HalleyAssertDev(textureUnit < textureUnitBoundToRenderTarget.size());
 		textureUnitBoundToRenderTarget[textureUnit] = texture->getDescriptor().isRenderTarget;
 
 		++textureUnit;
@@ -202,7 +202,7 @@ DX11Blend& DX11Painter::getBlendMode(BlendType type)
 
 void DX11Painter::rotateBuffers()
 {
-	Expects (vertexBuffers.size() == indexBuffers.size());
+	HalleyAssertDev(vertexBuffers.size() == indexBuffers.size());
 	curBuffer = (curBuffer + 1) % vertexBuffers.size();
 	indexBuffers[curBuffer].reset();
 	vertexBuffers[curBuffer].reset();

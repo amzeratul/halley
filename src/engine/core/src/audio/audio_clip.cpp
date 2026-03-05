@@ -102,7 +102,7 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 	}
 
 	try {
-		Expects(pos + len <= sampleLength);
+		HalleyAssertDev(pos + len <= sampleLength);
 
 		if (buffer.size() != numChannels) {
 			buffer.resize(numChannels);
@@ -127,7 +127,7 @@ void AudioClip::prepareChannelData(size_t pos, size_t len, IAudioClipStreamHandl
 
 size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
-	Expects(pos + len <= sampleLength);
+	HalleyAssertDev(pos + len <= sampleLength);
 
 	if (streaming) {
 		AudioMixer::copy(dst, AudioSamples(buffer[channelN]).subspan(0, len), gain0, gain1);
@@ -139,7 +139,7 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float
 
 size_t AudioClip::getLength() const
 {
-	Expects(isLoaded());
+	HalleyAssertDev(isLoaded());
 	return sampleLength;
 }
 
@@ -150,7 +150,7 @@ uint8_t AudioClip::getNumberOfChannels() const
 
 size_t AudioClip::getLoopPoint() const
 {
-	Expects(isLoaded());
+	HalleyAssertDev(isLoaded());
 	return loopPoint;
 }
 

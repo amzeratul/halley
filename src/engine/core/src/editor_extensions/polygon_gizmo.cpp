@@ -240,7 +240,7 @@ ConfigNode& PolygonGizmo::getField(ConfigNode& node, const String& fieldName)
 {
 	if (fieldName.contains("[")) {
 		auto fieldWithIndex = fieldName.split('[');
-		Expects(fieldWithIndex.size() == 2);
+		HalleyAssertDev(fieldWithIndex.size() == 2);
 		const auto& name = fieldWithIndex.at(0);
 		const auto& key = fieldWithIndex.at(1).substr(0, fieldWithIndex.at(1).length() - 1);
 		auto& field = (node)[name];

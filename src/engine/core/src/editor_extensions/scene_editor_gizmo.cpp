@@ -308,7 +308,7 @@ bool SceneEditorGizmo::hasComponentData(const String& name, size_t entityIdx) co
 
 void SceneEditorGizmo::markModified(const String& component, const String& field, size_t entityIdx)
 {
-	Expects(outputState);
+	HalleyAssertDev(outputState);
 
 	outputState->fieldsChanged.emplace_back(SceneEditorOutputState::FieldChange{ component, field, entityDatas.at(entityIdx)->getInstanceUUID(), EntityData(oldEntityDatas.at(entityIdx)), entityDatas.at(entityIdx) });
 

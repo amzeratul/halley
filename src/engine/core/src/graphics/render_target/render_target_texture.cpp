@@ -1,6 +1,6 @@
 #include "halley/graphics/render_target/render_target_texture.h"
-#include <gsl/assert>
 #include "halley/graphics/texture.h"
+#include "halley/support/assert.h"
 
 using namespace Halley;
 
@@ -15,9 +15,9 @@ String TextureRenderTarget::getName() const
 
 void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Texture> tex)
 {
-	Expects(attachmentNumber >= 0);
-	Expects(attachmentNumber < 8);
-	Expects(tex);
+	HalleyAssertDev(attachmentNumber >= 0);
+	HalleyAssertDev(attachmentNumber < 8);
+	HalleyAssertDev(tex);
 
 	if (int(colourBuffer.size()) <= attachmentNumber) {
 		colourBuffer.resize(size_t(attachmentNumber) + 1);

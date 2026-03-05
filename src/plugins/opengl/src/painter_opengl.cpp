@@ -1,6 +1,6 @@
 #include "painter_opengl.h"
 #include "halley/graphics/material/material_definition.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
 #include "render_target_opengl.h"
@@ -192,10 +192,10 @@ void PainterOpenGL::onUpdateProjection(Material& material, bool hashChanged)
 
 void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly)
 {
-	Expects(numVertices > 0);
-	Expects(numIndices >= numVertices);
-	Expects(vertexData);
-	Expects(indices);
+	HalleyAssertDev(numVertices > 0);
+	HalleyAssertDev(numIndices >= numVertices);
+	HalleyAssertDev(vertexData);
+	HalleyAssertDev(indices);
 
 	// Load indices into VBO
 	if (standardQuadsOnly) {
@@ -269,9 +269,9 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, GLsizei(vertexStride), reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
 
-        Ensures(attribute.location < 16);
+        HalleyAssertDev(attribute.location < 16);
         uint32_t mask = 1u << attribute.location;
-        Ensures((unusedLocations & mask) != 0);
+        HalleyAssertDev((unusedLocations & mask) != 0);
         unusedLocations &= ~mask;
 	}
 
@@ -289,8 +289,8 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 
 void PainterOpenGL::drawTriangles(size_t numIndices)
 {
-	Expects(numIndices > 0);
-	Expects(numIndices % 3 == 0);
+	HalleyAssertDev(numIndices > 0);
+	HalleyAssertDev(numIndices % 3 == 0);
 
 	glDrawElements(GL_TRIANGLES, int(numIndices), GL_UNSIGNED_SHORT, nullptr);
 	glCheckError();

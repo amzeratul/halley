@@ -11,8 +11,8 @@ AsioUDPNetworkService::AsioUDPNetworkService(int port, IPVersion version)
 	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::udp::v4() : asio::ip::udp::v6(), static_cast<unsigned short>(port))
 	, socket(service, localEndpoint)
 {
-	Expects(port == 0 || port > 1024);
-	Expects(port < 65536);
+	HalleyAssertDev(port == 0 || port > 1024);
+	HalleyAssertDev(port < 65536);
 
     // Set to non-blocking!
     socket.non_blocking(true);
@@ -71,8 +71,8 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& addres
 	const auto addr = splitAddr.at(0);
 	const auto port = splitAddr.at(1).toInteger();
 	
-	assert(port > 1024);
-	assert(port < 65536);
+	HalleyAssertDev(port > 1024);
+	HalleyAssertDev(port < 65536);
 	auto remoteAddr = asio::ip::make_address(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, static_cast<unsigned short>(port)); 
 	auto conn = std::make_shared<AsioUDPConnection>(socket, remote);
@@ -171,7 +171,7 @@ void AsioUDPNetworkService::receivePacket(UDPEndpoint& endpoint, gsl::span<std::
 			try {
 				if (conn->first == 0) {
                     // Hold on, we're still on 0, re-bind to the id
-                    Expects(id != 0);
+                    HalleyAssertDev(id != 0);
                     connection->onConnect(id);
 
                     activeConnections[id] = connection;

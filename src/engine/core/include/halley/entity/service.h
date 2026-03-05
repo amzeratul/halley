@@ -35,7 +35,7 @@ namespace Halley
 	protected:
 		World& getWorld() const
 		{
-			assert(world != nullptr);
+			HalleyAssertDebug(world != nullptr);
 			return *world;
 		}
 

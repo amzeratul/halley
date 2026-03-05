@@ -62,10 +62,10 @@ SpritePainterEntryType SpritePainterEntry::getType() const
 
 gsl::span<const Sprite> SpritePainterEntry::getSprites(const Vector<Sprite>& cached) const
 {
-	assert(type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached);
+	HalleyAssertDebug(type == SpritePainterEntryType::SpriteRef || type == SpritePainterEntryType::SpriteCached);
 
 	if (type == SpritePainterEntryType::SpriteRef) {
-		assert(ptr != nullptr);
+		HalleyAssertDebug(ptr != nullptr);
 		return { static_cast<const Sprite*>(ptr), count };
 	} else {
 		return { cached.data() + index, count };
@@ -74,10 +74,10 @@ gsl::span<const Sprite> SpritePainterEntry::getSprites(const Vector<Sprite>& cac
 
 gsl::span<const TextRenderer> SpritePainterEntry::getTexts(const Vector<TextRenderer>& cached) const
 {
-	assert(type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached);
+	HalleyAssertDebug(type == SpritePainterEntryType::TextRef || type == SpritePainterEntryType::TextCached);
 
 	if (type == SpritePainterEntryType::TextRef) {
-		assert(ptr != nullptr);
+		HalleyAssertDebug(ptr != nullptr);
 		return { static_cast<const TextRenderer*>(ptr), count };
 	} else {
 		return { cached.data() + index, count };
@@ -86,7 +86,7 @@ gsl::span<const TextRenderer> SpritePainterEntry::getTexts(const Vector<TextRend
 
 uint32_t SpritePainterEntry::getIndex() const
 {
-	assert(ptr == nullptr);
+	HalleyAssertDebug(ptr == nullptr);
 	return index;
 }
 
@@ -289,7 +289,7 @@ void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBrea
 	if (forceCopy) {
 		addCopy(sprite, mask, layer, tieBreaker, clip);
 	} else {
-		Expects(mask >= 0);
+		HalleyAssertDev(mask >= 0);
 		sprite.markInActiveUse();
 		sprites.push_back(SpritePainterEntry(gsl::span<const Sprite>(&sprite, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 		dirty = true;
@@ -298,7 +298,7 @@ void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBrea
 
 void SpritePainter::add(Sprite&& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	sprite.markInActiveUse();
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedSprites.push_back(sprite.clone(false));
@@ -307,7 +307,7 @@ void SpritePainter::add(Sprite&& sprite, int mask, int layer, float tieBreaker, 
 
 void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	sprite.markInActiveUse();
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedSprites.push_back(sprite.clone(false));
@@ -320,7 +320,7 @@ void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, fl
 		if (forceCopy) {
 			addCopy(sprites, mask, layer, tieBreaker, clip);
 		} else {
-			Expects(mask >= 0);
+			HalleyAssertDev(mask >= 0);
 			for (auto& sprite: sprites) {
 				sprite.markInActiveUse();
 			}
@@ -332,7 +332,7 @@ void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, fl
 
 void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	if (!sprites.empty()) {
 		for (auto& sprite: sprites) {
 			sprite.markInActiveUse();
@@ -352,7 +352,7 @@ void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tie
 		text.generateSprites();
 		addCopy(text, mask, layer, tieBreaker, clip);
 	} else {
-		Expects(mask >= 0);
+		HalleyAssertDev(mask >= 0);
 		sprites.push_back(SpritePainterEntry(gsl::span<const TextRenderer>(&text, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 		dirty = true;
 	}
@@ -360,7 +360,7 @@ void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tie
 
 void SpritePainter::add(TextRenderer&& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedText.push_back(text);
 	dirty = true;
@@ -368,7 +368,7 @@ void SpritePainter::add(TextRenderer&& text, int mask, int layer, float tieBreak
 
 void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	cachedText.push_back(text);
 	dirty = true;
@@ -376,7 +376,7 @@ void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float
 
 void SpritePainter::add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
+	HalleyAssertDev(mask >= 0);
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::Callback, callbacks.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 	callbacks.push_back(std::move(callback));
 	dirty = true;

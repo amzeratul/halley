@@ -307,7 +307,7 @@ void BaseGraphGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 	if (!dragging) {
 		return;
 	}
-	Expects(dragging->nodeIds.size() == dragging->startPos.size());
+	HalleyAssertDev(dragging->nodeIds.size() == dragging->startPos.size());
 
 	if (inputState.mousePos) {
 		if (dragging->startMousePos) {
@@ -346,7 +346,7 @@ void BaseGraphGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 
 void BaseGraphGizmo::onPinClicked(bool leftClick, bool shiftHeld)
 {
-	Expects(nodeUnderMouse);
+	HalleyAssertDev(nodeUnderMouse);
 
 	const auto nodeId = nodeUnderMouse->nodeId;
 	const auto pinId = nodeUnderMouse->elementId;

@@ -234,7 +234,7 @@ bool ProfilerCapture::isRecording() const
 
 void ProfilerCapture::startFrame(bool rec, Time dt)
 {
-	Expects(state != State::FrameStarted);
+	HalleyAssertDev(state != State::FrameStarted);
 	
 	if (state == State::Idle) {
 		frameStartTime = std::chrono::steady_clock::now();
@@ -258,7 +258,7 @@ void ProfilerCapture::startFrame(bool rec, Time dt)
 
 void ProfilerCapture::endFrame()
 {
-	Expects(state == State::FrameStarted);
+	HalleyAssertDev(state == State::FrameStarted);
 	
 	frameEndTime = std::chrono::steady_clock::now();
 	state = State::FrameEnded;
@@ -266,7 +266,7 @@ void ProfilerCapture::endFrame()
 
 ProfilerData ProfilerCapture::getCapture(const HalleyAPI& api)
 {
-	Expects(state == State::FrameEnded);
+	HalleyAssertDev(state == State::FrameEnded);
 
 	const auto startIdx = startId % events.size();
 	const auto endIdx = curId % events.size();
@@ -289,7 +289,7 @@ ProfilerData ProfilerCapture::getCapture(const HalleyAPI& api)
 
 Time ProfilerCapture::getFrameTime() const
 {
-	Expects(state == State::FrameEnded);
+	HalleyAssertDev(state == State::FrameEnded);
 	
 	return std::chrono::duration<Time>(frameEndTime - frameStartTime).count();
 }

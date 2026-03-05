@@ -161,8 +161,8 @@ int32_t Random::get(int32_t min, int32_t max)
 	}
 
 	const auto value = getInt(min, max - 1);
-	Ensures(value >= min);
-	Ensures(value < max);
+	HalleyAssertDev(value >= min);
+	HalleyAssertDev(value < max);
 	return value;
 }
 

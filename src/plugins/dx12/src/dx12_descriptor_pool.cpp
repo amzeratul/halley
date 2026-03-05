@@ -51,7 +51,7 @@ DX12DescriptorPool::~DX12DescriptorPool()
 
 DX12DescriptorHandle DX12DescriptorPool::alloc(size_t count)
 {
-    Ensures(count > 0 && count <= 64);
+    HalleyAssertDev(count > 0 && count <= 64);
     DX12DescriptorHandle handle = InvalidDescriptorHandle;
 
     for (size_t i = 0; i < regions.size() && handle == InvalidDescriptorHandle; i++) {
@@ -82,7 +82,7 @@ DX12DescriptorHandle DX12DescriptorPool::alloc(size_t count)
         } while (bits != ~0ull);
     }
 
-    Ensures(handle != InvalidDescriptorHandle);
+    HalleyAssertDev(handle != InvalidDescriptorHandle);
 
     countInUse += count;
 
@@ -96,14 +96,14 @@ void DX12DescriptorPool::free(DX12DescriptorHandle handle)
 
     // Recover allocation size, and clear the stored one
     size_t count = region.refs[shift];
-    Ensures((count > 0) && (shift + count <= 64));
+    HalleyAssertDev((count > 0) && (shift + count <= 64));
     region.refs[shift] = 0;
 
     // Update mask to mark blocks as free
     uint64_t mask = ((1ull << count) - 1ull) << shift;
     region.mask &= ~mask;
 
-    Ensures(countInUse >= count);
+    HalleyAssertDev(countInUse >= count);
 
     countInUse -= count;
 }

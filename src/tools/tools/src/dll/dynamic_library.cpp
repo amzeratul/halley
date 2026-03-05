@@ -166,7 +166,7 @@ void* DynamicLibrary::getFunction(std::string name) const
 
 void* DynamicLibrary::getBaseAddress() const
 {
-	Expects(loaded);
+	HalleyAssertDev(loaded);
 	return handle;
 }
 

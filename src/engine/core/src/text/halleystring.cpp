@@ -37,7 +37,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
-#include <gsl/assert>
+#include "halley/support/assert.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -998,7 +998,7 @@ Vector<String> String::split(char delimiter, size_t limit) const
 		}
 	}
 
-	Ensures(result.size() > 0);
+	HalleyAssertDev(result.size() > 0);
 	return result;
 }
 
@@ -1021,7 +1021,7 @@ Vector<String> String::split(String delimiter, size_t limit) const
 		}
 	}
 
-	Ensures(result.size() > 0);
+	HalleyAssertDev(result.size() > 0);
 	return result;
 }
 

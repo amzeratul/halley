@@ -641,7 +641,7 @@ std::pair<uint32_t, uint32_t> InputVirtual::Bind::getPhysicalButtonIds() const
 		const auto idA = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(a);
 		if (b != -1) {
 			const auto idB = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(b);
-			assert(idB != 0); // If this is ever zero, it will conflict with "empty" id below
+			HalleyAssertDev(idB != 0); // If this is ever zero, it will conflict with "empty" id below
 			return { idA, idB };
 		} else {
 			return { idA, 0 };

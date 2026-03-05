@@ -36,14 +36,14 @@ void ChooseAssetWindow::Callback::operator()() const
 
 void ChooseAssetWindow::Callback::operator()(std::optional<String> result)
 {
-	assert(!!singleCallback);
+	HalleyAssertDev(!!singleCallback);
 	singleCallback(std::move(result));
 	singleCallback = {};
 }
 
 void ChooseAssetWindow::Callback::operator()(const Vector<String>& result)
 {
-	assert(!!multiCallback);
+	HalleyAssertDev(!!multiCallback);
 	multiCallback(result);
 	multiCallback = {};
 }

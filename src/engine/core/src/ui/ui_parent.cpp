@@ -18,8 +18,8 @@ std::optional<float> UIParent::getMaxChildWidth() const
 
 UIWidget& UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
-	Expects(widget);
-	Expects(widget->getParent() == nullptr || widget->getParent() == this);
+	HalleyAssertDev(widget);
+	HalleyAssertDev(widget->getParent() == nullptr || widget->getParent() == this);
 
 	if (widget->getParent() == nullptr) {
 		widget->setParent(this);
@@ -33,7 +33,7 @@ UIWidget& UIParent::addChild(std::shared_ptr<UIWidget> widget)
 
 void UIParent::removeChild(UIWidget& widget)
 {
-	Expects(widget.getParent() == this);
+	HalleyAssertDev(widget.getParent() == this);
 	widget.setParent(nullptr);
 
 	std_ex::erase_if(children, [&] (auto& c) { return c.get() == &widget; });
@@ -65,7 +65,7 @@ bool UIParent::addNewChildren(UIInputType inputType)
 	}
 
 	for (auto& c: childrenWaiting) {
-		assert(c->getRoot() == getRoot());
+		HalleyAssertDev(c->getRoot() == getRoot());
 		c->setInputType(inputType);
 		onChildAdded(*children.emplace_back(std::move(c)));
 	}

@@ -3,7 +3,7 @@
 #include "halley/graphics/painter.h"
 #include "halley/graphics/material/material.h"
 #include "halley/graphics/material/material_parameter.h"
-#include <gsl/assert>
+#include "halley/support/assert.h"
 
 #include "halley/graphics/text/unicode_data.h"
 #include "halley/resources/resources.h"

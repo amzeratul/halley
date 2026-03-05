@@ -140,7 +140,7 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 		thread.getCurNodeTime() += timeLeft;
 		timeLeft -= clamp(static_cast<float>(result.timeElapsed), 0.0f, timeLeft);
-		assert(result.timeElapsed >= 0);
+		HalleyAssertDev(result.timeElapsed >= 0);
 
 		if (result.outputsCancelled != 0) {
 			cancelOutputs(nodeId, result.outputsCancelled);
@@ -284,7 +284,7 @@ ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)
 
 	for (const auto& s: thread.getStack()) {
 		auto& nThreads = currentState->getNodeState(s.node).threadCount;
-		assert(nThreads >= 1);
+		HalleyAssertDev(nThreads >= 1);
 		++nThreads;
 	}
 
@@ -317,7 +317,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Gr
 
 void ScriptEnvironment::initNode(GraphNodeId nodeId, ScriptState::NodeState& nodeState)
 {
-	assert(nodeState.threadCount == 0);
+	HalleyAssertDev(nodeState.threadCount == 0);
 	nodeState.threadCount++;
 	currentState->startNode(currentGraph->getNodes()[nodeId], nodeState);
 }
@@ -372,11 +372,11 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 			}
 		}
 		
-		assert(nodeState.threadCount > 0);
+		HalleyAssertDev(nodeState.threadCount > 0);
 		nodeState.threadCount--;
 
 		if (thread.isWatcher()) {
-			assert(nodeState.watcherCount > 0);
+			HalleyAssertDev(nodeState.watcherCount > 0);
 			nodeState.watcherCount--;
 		}
 
@@ -413,10 +413,10 @@ void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 			if (newState) {
 				++nWatchers;
 			} else {
-				assert(nWatchers >= 1);
+				HalleyAssertDev(nWatchers >= 1);
 				--nWatchers;
 			}
-			assert(nWatchers <= nThreads);
+			HalleyAssertDev(nWatchers <= nThreads);
 		};
 
 		for (const auto s: thread.getStack()) {
@@ -437,7 +437,7 @@ void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 			if ((cancelMask & (1 << i)) != 0) {
 				auto& node = currentGraph->getNodes()[nodeId];
 				const auto pinIdx = node.getNodeType().getNthOutputPinIdx(node, i);
-				assert(node.getPinType(pinIdx).isCancellable);
+				HalleyAssertDev(node.getPinType(pinIdx).isCancellable);
 				abortCodePath(nodeId, pinIdx, false);
 			}
 		}
@@ -446,7 +446,7 @@ void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 
 void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin, bool includeCurNode)
 {
-	Expects(currentState != nullptr);
+	HalleyAssertDev(currentState != nullptr);
 
 	for (auto& thread: currentState->getThreads()) {
 		if (thread.stackGoesThrough(node, outputPin) || (includeCurNode && thread.getCurNode() == node)) {
@@ -687,7 +687,7 @@ void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage mess
 
 void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
 {
-	Expects(!message.messageName.isEmpty());
+	HalleyAssertDev(!message.messageName.isEmpty());
 
 	if (!message.targetEntity.isValid()) {
 		message.targetEntity = currentEntity;
@@ -866,7 +866,7 @@ ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, Grap
 	if (pin.connections.empty() || !pin.connections[0].dstNode) {
 		return {};
 	}
-	assert(pin.connections.size() == 1);
+	HalleyAssertDev(pin.connections.size() == 1);
 
 	const auto& dst = pin.connections[0];
 	const auto& dstNode = currentGraph->getNodes()[dst.dstNode.value()];

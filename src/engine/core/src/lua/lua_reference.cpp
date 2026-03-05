@@ -69,8 +69,8 @@ LuaReference& LuaReference::operator=(LuaReference&& other) noexcept
 
 void LuaReference::pushToLuaStack() const
 {
-	Expects (refId != LUA_NOREF);
-	Expects (lua);
+	HalleyAssertDev(refId != LUA_NOREF);
+	HalleyAssertDev(lua);
 
 	lua_rawgeti(lua->getRawState(), LUA_REGISTRYINDEX, refId);
 }

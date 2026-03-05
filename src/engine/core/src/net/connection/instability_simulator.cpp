@@ -112,7 +112,7 @@ void InstabilitySimulator::sendUnreliablePacket(gsl::span<const std::byte> packe
 		return;
 	}
 
-	Expects(getMaxUnreliablePacketSize() > 0);
+	HalleyAssertDev(getMaxUnreliablePacketSize() > 0);
 
 	auto& rng = Random::getGlobal();
 

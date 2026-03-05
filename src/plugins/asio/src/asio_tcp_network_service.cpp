@@ -7,8 +7,8 @@ AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
 	: localEndpoint(version == IPVersion::IPv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6(), static_cast<unsigned short>(port))
 	, acceptor(service, localEndpoint)
 {
-	Expects(port == 0 || port > 1024);
-	Expects(port < 65536);
+	HalleyAssertDev(port == 0 || port > 1024);
+	HalleyAssertDev(port < 65536);
 }
 
 void AsioTCPNetworkService::update(Time t)

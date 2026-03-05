@@ -65,13 +65,13 @@ namespace Halley {
 		// Getter
 		[[nodiscard]] constexpr T& operator[](size_t n)
 		{
-			Expects(n <= 1);
+			HalleyAssertDev(n <= 1);
 			return (&x)[n];
 		}
 
 		[[nodiscard]] constexpr T operator[](size_t n) const
 		{
-			Expects(n <= 1);
+			HalleyAssertDev(n <= 1);
 			return (&x)[n];
 		}
 

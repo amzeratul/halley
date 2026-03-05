@@ -90,7 +90,7 @@ void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 
 void HalleyStatics::setupGlobals() const
 {
-	Expects(sharedData);
+	HalleyAssertDev(sharedData);
 	
 	Logger::setInstance(*sharedData->logger);
 	OS::setInstance(sharedData->os);

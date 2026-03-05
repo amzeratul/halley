@@ -208,19 +208,19 @@ void SceneEditor::createWorld(const Prefab& prefab, std::shared_ptr<const UIColo
 
 World& SceneEditor::getWorld() const
 {
-	Expects(world);
+	HalleyAssertDev(world);
 	return *world;
 }
 
 Resources& SceneEditor::getResources() const
 {
-	Expects(resources);
+	HalleyAssertDev(resources);
 	return *resources;
 }
 
 void SceneEditor::spawnPending()
 {
-	Expects(world);
+	HalleyAssertDev(world);
 	world->spawnPending();
 }
 
@@ -519,7 +519,7 @@ void SceneEditor::updateCameraPos(Time t)
 
 void SceneEditor::saveCameraPos()
 {
-	Expects(editorInterface);
+	HalleyAssertDev(editorInterface);
 
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& camera = cameraEntity.getComponent<CameraComponent>();
@@ -538,7 +538,7 @@ void SceneEditor::pushThreadFrameData() const
 
 void SceneEditor::popThreadFrameData() const
 {
-	assert(curFrameDataDepth > 0);
+	HalleyAssertDev(curFrameDataDepth > 0);
 	--curFrameDataDepth;
 	if (curFrameDataDepth == 0) {
 		BaseFrameData::setThreadFrameData(nullptr);
@@ -547,7 +547,7 @@ void SceneEditor::popThreadFrameData() const
 
 bool SceneEditor::loadCameraPos()
 {
-	Expects(editorInterface);
+	HalleyAssertDev(editorInterface);
 	
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 
@@ -573,7 +573,7 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 
 void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> entityDatas)
 {
-	Expects(uuids.size() == entityDatas.size());
+	HalleyAssertDev(uuids.size() == entityDatas.size());
 
 	pushThreadFrameData();
 	auto guard = ScopedGuard([&] ()

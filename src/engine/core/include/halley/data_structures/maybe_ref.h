@@ -18,37 +18,37 @@ namespace Halley {
 
         T& get()
         {
-            assert(pointer != nullptr);
+            HalleyAssertDebug(pointer != nullptr);
             return *pointer;
         }
 
         const T& get() const
         {
-            assert(pointer != nullptr);
+            HalleyAssertDebug(pointer != nullptr);
             return *pointer;
         }
 
     	T* operator->()
         {
-        	assert(pointer != nullptr);
+        	HalleyAssertDebug(pointer != nullptr);
 			return pointer;
         }
 
     	const T* operator->() const
         {
-        	assert(pointer != nullptr);
+        	HalleyAssertDebug(pointer != nullptr);
 			return pointer;
         }
 
         T& operator*()
         {
-        	assert(pointer != nullptr);
+        	HalleyAssertDebug(pointer != nullptr);
             return *pointer;
         }
 
         const T& operator*() const
         {
-        	assert(pointer != nullptr);
+        	HalleyAssertDebug(pointer != nullptr);
             return *pointer;
         }
 

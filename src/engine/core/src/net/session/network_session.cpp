@@ -32,7 +32,7 @@ NetworkSession::~NetworkSession()
 
 void NetworkSession::host(uint16_t maxClients)
 {
-	Expects(type == NetworkSessionType::Undefined);
+	HalleyAssertDev(type == NetworkSessionType::Undefined);
 
 	this->maxClients = maxClients;
 	type = NetworkSessionType::Host;
@@ -46,7 +46,7 @@ void NetworkSession::host(uint16_t maxClients)
 
 void NetworkSession::join(const String& address)
 {
-	Expects(type == NetworkSessionType::Undefined);
+	HalleyAssertDev(type == NetworkSessionType::Undefined);
 
 	type = NetworkSessionType::Client;
 	peers.emplace_back(makePeer(0, service.connect(address)));
@@ -687,7 +687,7 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgPingReply& 
 
 void NetworkSession::setMyPeerId(PeerId id)
 {
-	Expects (!myPeerId);
+	HalleyAssertDev(!myPeerId);
 	myPeerId = id;
 	sharedData[id] = makePeerSharedData();
 
@@ -824,12 +824,12 @@ void NetworkSession::onConnection(NetworkService::Acceptor& acceptor)
 
 std::optional<NetworkSession::PeerId> NetworkSession::allocatePeerId() const
 {
-	Expects(type == NetworkSessionType::Host);
+	HalleyAssertDev(type == NetworkSessionType::Host);
 
 	auto avail = Vector<uint8_t>(maxClients, 1);
 	avail[0] = 0;
 	for (const auto& p: peers) {
-		assert(avail.at(p.peerId) == 1);
+		HalleyAssertDev(avail.at(p.peerId) == 1);
 		avail.at(p.peerId) = 0;
 	}
 

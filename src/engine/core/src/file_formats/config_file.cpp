@@ -137,12 +137,12 @@ ConfigObserver::ConfigObserver(const ConfigFile& file)
 	: file(&file)
 	, node(&file.getRoot())
 {
-	assert(node->getType() != ConfigNodeType::Undefined);
+	HalleyAssertDev(node->getType() != ConfigNodeType::Undefined);
 }
 
 const ConfigNode& ConfigObserver::getRoot() const
 {
-	Expects(node);
+	HalleyAssertDev(node);
 	return *node;
 }
 
@@ -156,7 +156,7 @@ void ConfigObserver::update()
 	if (file) {
 		assetVersion = file->getAssetVersion();
 		node = &file->getRoot();
-		assert(node->getType() == ConfigNodeType::Map);
+		HalleyAssertDev(node->getType() == ConfigNodeType::Map);
 	}
 }
 

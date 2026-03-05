@@ -1,6 +1,6 @@
 #include "halley/scripting/script_node_type.h"
 
-#include <cassert>
+#include "halley/support/assert.h"
 
 
 #include "halley/entity/world.h"
@@ -89,7 +89,7 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	if (pin.connections.empty() || !pin.connections[0].dstNode) {
 		return;
 	}
-	assert(pin.connections.size() == 1);
+	HalleyAssertDebug(pin.connections.size() == 1);
 
 	const auto& dst = pin.connections[0];
 	const auto& nodes = environment.getCurrentGraph()->getNodes();
@@ -107,7 +107,7 @@ std::optional<String> IScriptNodeType::tryGetConnectedNodeName(const BaseGraphNo
 			return std::nullopt;
 		}
 	}
-	assert(pin.connections.size() == 1);
+	HalleyAssertDebug(pin.connections.size() == 1);
 
 	if (pin.connections[0].dstNode) {
 		const auto& otherNode = dynamic_cast<const ScriptGraphNode&>(graph.getNode(pin.connections[0].dstNode.value()));

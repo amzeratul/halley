@@ -28,7 +28,7 @@ SDL3RWOps::SDL3RWOps(SDL_IOStream* _fp, int64_t _start, int64_t _end, bool _clos
 	, end(_end)
 	, closeOnFinish(_closeOnFinish)
 {
-	Expects(fp);
+	HalleyAssertDev(fp);
 
 	if (end == -1) {
 		SDL_SeekIO(fp, 0, SDL_IO_SEEK_END);

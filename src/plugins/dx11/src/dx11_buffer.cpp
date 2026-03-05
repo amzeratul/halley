@@ -33,7 +33,7 @@ DX11Buffer::~DX11Buffer()
 
 void DX11Buffer::setData(gsl::span<const std::byte> data)
 {
-	Expects(data.size_bytes() > 0);
+	HalleyAssertDev(data.size_bytes() > 0);
 
 	constexpr bool useImmutable = false;
 

@@ -195,19 +195,19 @@ String DX11Video::getShaderLanguage()
 
 ID3D11Device& DX11Video::getDevice()
 {
-	Expects(device != nullptr);
+	HalleyAssertDev(device != nullptr);
 	return *device;
 }
 
 ID3D11DeviceContext1& DX11Video::getDeviceContext()
 {
-	Expects(deviceContext);
+	HalleyAssertDev(deviceContext);
 	return *deviceContext;
 }
 
 DX11SwapChain& DX11Video::getSwapChain()
 {
-	Expects(swapChain != nullptr);
+	HalleyAssertDev(swapChain != nullptr);
 	return *swapChain;
 }
 

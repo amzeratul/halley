@@ -213,7 +213,7 @@ void AudioEngine::pause()
 
 const AudioProperties& AudioEngine::getAudioProperties() const
 {
-	assert(audioProperties != nullptr);
+	HalleyAssertDev(audioProperties != nullptr);
 	return *audioProperties;
 }
 

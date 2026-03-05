@@ -390,7 +390,7 @@ LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> 
 
 std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
 {
-	assert(toks.size() == colours.size());
+	HalleyAssertDev(toks.size() == colours.size());
 	if (toks.empty()) {
 		return { *this, {} };
 	}

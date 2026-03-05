@@ -121,8 +121,8 @@ size_t DX12Buffer::copyRows(
     size_t row_size = width * bytes_per_element;
     size_t total_size = row_size * height;
 
-    Ensures(row_size <= dst_row_stride);
-    Ensures(height * dst_row_stride <= dst_size);
+    HalleyAssertDev(row_size <= dst_row_stride);
+    HalleyAssertDev(height * dst_row_stride <= dst_size);
 
     while (total_size >= row_size) {
         memcpy(d, s, row_size);
@@ -213,7 +213,7 @@ std::pair<size_t, size_t> DX12Buffer::writeData(gsl::span<const std::byte> data)
     size_t align = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 
     /*if (type == Type::Constant)*/ {
-        Ensures((curWritePos % align) == 0);
+        HalleyAssertDev((curWritePos % align) == 0);
 
         auto dest = map();
         if ((curWritePos + size) > dest.size()) {
@@ -301,7 +301,7 @@ void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResou
 {
 	size_t bpp = TextureDescriptor::getBytesPerPixel(descriptor.format);
 
-	Ensures(!descriptor.useMipMap); // TODO: D3D12 doesn't feature mipmap auto-generation
+	HalleyAssertDev(!descriptor.useMipMap); // TODO: D3D12 doesn't feature mipmap auto-generation
 
 	if (keepResource) {
         /*
@@ -400,7 +400,7 @@ void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResou
         size_t rowPitchAlign = D3D12_TEXTURE_DATA_PITCH_ALIGNMENT;
 #endif
 
-        Ensures(size_t(bytes.data()) % rowPitchAlign == 0);
+        HalleyAssertDev(size_t(bytes.data()) % rowPitchAlign == 0);
         size_t rowPitch = alignUp(resourceDesc.Width * bpp, rowPitchAlign);
 
         size_t bytes_written = DX12Buffer::copyRows(
@@ -414,7 +414,7 @@ void DX12Texture::doCreateResource(TextureDescriptor& descriptor, bool keepResou
                 bpp);
 
         transient.unmap(0, bytes_written);
-        Ensures(bytes_written == rowPitch * resourceDesc.Height);
+        HalleyAssertDev(bytes_written == rowPitch * resourceDesc.Height);
 
         /*
          * Now issue upload command.
@@ -629,10 +629,10 @@ uint64_t DX12TextureView::getTextureHash(const Material& material)
 
 DX12Texture* DX12TextureView::getNthTexture(const Material& material, size_t n)
 {
-    Ensures(material.getTextures().size() > n);
+    HalleyAssertDev(material.getTextures().size() > n);
 
     auto& texture = material.getTexture(int(n));
-    Ensures(texture.get() != nullptr);
+    HalleyAssertDev(texture.get() != nullptr);
 
     return (DX12Texture*) texture.get();
 }

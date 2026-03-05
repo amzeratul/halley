@@ -45,7 +45,7 @@ void AudioAttenuation::deserialize(Deserializer& s)
 
 float AudioAttenuation::getProximity(float distance) const
 {
-	assert(rollOffFactor > 0.000001f);
+	HalleyAssertDev(rollOffFactor > 0.000001f);
 
 	distance = clamp(distance, referenceDistance, maximumDistance);
 	const float linearBit = clamp((1 - (distance / maximumDistance)) * 10, 0.0f, 1.0f);
