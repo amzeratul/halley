@@ -39,13 +39,13 @@ namespace {
 	String getCurrencyString(float value, const String& currency)
 	{
 		if (currency == "GBP") {
-			return u8"�" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+			return String(U'\u00A3') + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		if (currency == "USD") {
-			return u8"$" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+			return String(U'$') + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		if (currency == "EUR") {
-			return u8"�" + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
+			return String(U'\u20AC') + getNumberWithCommas((int)value) + "." + toString(int((value - (int)value) * 100), 10, 2);
 		}
 		return toString(value, 2) + " " + currency;
 	}
