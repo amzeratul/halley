@@ -796,10 +796,14 @@ std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui, Con
 	return {};
 }
 
-EntityId ScriptEnvironment::getScriptTarget(const String& id) const
+EntityId ScriptEnvironment::getScriptTarget(const String& id, bool warnIfMissing) const
 {
 	if (scriptTargetRetriever) {
-		return scriptTargetRetriever(id);
+		const EntityId target = scriptTargetRetriever(id);
+		if (warnIfMissing && !target.isValid()) {
+			Logger::logError("Unable to find entity with ScriptTarget id \"" + id + "\"", true);
+		}
+		return target;
 	} else {
 		Logger::logError("Unable to get script target: scriptTargetRetriever is not set.", true);
 	}

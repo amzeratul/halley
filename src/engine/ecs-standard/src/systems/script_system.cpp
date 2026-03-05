@@ -248,9 +248,6 @@ private:
 		getScriptingService().getEnvironment().setScriptTargetRetriever([this] (const String& id) -> EntityId
 		{
 			const auto* result = targetFamily.tryMatch([&] (const TargetFamily& e) { return e.scriptTarget.id == id; });
-			if (!result) {
-				Logger::logError("Unable to find entity with ScriptTarget id \"" + id + "\"", true);
-			}
 			return result ? result->entityId : EntityId();
 		});
 	}

@@ -152,7 +152,7 @@ namespace Halley {
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId, ConfigNode data);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
 
-        EntityId getScriptTarget(const String& id) const;
+        EntityId getScriptTarget(const String& id, bool warnIfMissing) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
 
         gsl::span<const ConfigNode> getStartParams() const;

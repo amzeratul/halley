@@ -421,7 +421,8 @@ ConfigNode ScriptEntityParameter::doGetData(ScriptEnvironment& environment, cons
 Vector<IGraphNodeType::SettingType> ScriptEntityTargetReference::getSettingTypes() const
 {
 	return {
-		SettingType{ "scriptTargetId", "Halley::ScriptTargetId", Vector<String>{""} }
+		SettingType{ "scriptTargetId", "Halley::ScriptTargetId", Vector<String>{""} },
+		SettingType{ "warnIfMissing", "bool", Vector<String>{"true"} },
 	};
 }
 
@@ -444,6 +445,9 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityTargetReference::getNodeDe
 	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
 	str.append(targetId != "<empty>" ? targetId :  node.getSettings()["scriptTargetId"].asString(""), settingColour);
+	if (node.getSettings()["warnIfMissing"].asBool(true)) {
+		str.append(" and warn if not found");
+	}
 	return str.moveResults();
 }
 
@@ -465,7 +469,8 @@ String ScriptEntityTargetReference::getLargeLabel(const BaseGraphNode& node) con
 EntityId ScriptEntityTargetReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	auto targetId = readDataPin(environment, node, 2).asString("");
-	return environment.getScriptTarget(targetId.isEmpty() ? node.getSettings()["scriptTargetId"].asString("") : targetId);
+	const bool warnIfMissing = node.getSettings()["warnIfMissing"].asBool(true);
+	return environment.getScriptTarget(targetId.isEmpty() ? node.getSettings()["scriptTargetId"].asString("") : targetId, warnIfMissing);
 }
 
 ConfigNode ScriptEntityTargetReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
