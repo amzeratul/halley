@@ -104,7 +104,7 @@ Vector<int> FontFace::getCharCodes() const
 Vector2i FontFace::getGlyphSize(int charCode) const
 {
 	int index = charCode == 0 ? 0 : FT_Get_Char_Index(pimpl->face, charCode);
-	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
+	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_NO_HINTING);
 	if (error) {
 		throw Exception("Unable to load glyph " + toString(charCode), HalleyExceptions::Graphics);
 	}
@@ -136,7 +136,7 @@ FontMetrics FontFace::getMetrics(int charcode, float scale) const
 {
 	int index = FT_Get_Char_Index(pimpl->face, charcode);
 
-	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_DEFAULT);
+	int error = FT_Load_Glyph(pimpl->face, index, FT_LOAD_NO_HINTING);
 	if (error) {
 		throw Exception("Unable to load glyph " + toString(charcode), HalleyExceptions::Graphics);
 	}
