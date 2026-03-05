@@ -162,6 +162,7 @@ systemMessage:
   - sequence: Halley::String
   - reverse: bool
   - once: bool
+  - direction: Halley::String
   destination: remoteClients
   serializable: true
   multicast: true
