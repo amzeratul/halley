@@ -125,10 +125,6 @@ void UILabel::updateMinSize()
 	if (textMinSize != oldTextMinSize) {
 		markAsNeedingLayout();
 	}
-
-	if (!floatEquals(renderer.getAngle().toRadians(), 0.0f)) {
-		Logger::logInfo("UILabel textExtents = " + toString(textExtents) + ", textMinSize = " + textMinSize);
-	}
 }
 
 void UILabel::updateText() {
