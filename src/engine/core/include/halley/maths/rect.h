@@ -394,7 +394,7 @@ namespace Halley {
 			}
 		}
 
-		static Rect2D getSpanningRect(gsl::span<const Vector2D<T>> points)
+		constexpr static Rect2D getSpanningRect(gsl::span<const Vector2D<T>> points)
 		{
 			if (points.empty()) {
 				return Rect2D(Vector2D<T>(), Vector2D<T>());
@@ -454,6 +454,18 @@ namespace Halley {
 		{
 			return Rect2D(p1.ceil(), p2.ceil());
 		}
+
+		template<typename U>
+		constexpr Rect2D rotate(const Angle<U>& angle)
+		{
+			std::array<Vector2D<T>, 4> ps;
+			ps[0] = getTopLeft().rotate(angle);
+			ps[1] = getTopRight().rotate(angle);
+			ps[2] = getBottomLeft().rotate(angle);
+			ps[3] = getBottomRight().rotate(angle);
+			return getSpanningRect(ps);
+		}
+
 	};
 
 	template <typename T>

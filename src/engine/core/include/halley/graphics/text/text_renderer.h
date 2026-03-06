@@ -146,6 +146,7 @@ namespace Halley
 		float getLineHeight(const Font& font, float size) const;
 		float getAlignment() const;
 		float getFontSize() const;
+		Angle1f getAngle() const;
 
 		bool empty() const;
 		Rect4f getAABB() const;

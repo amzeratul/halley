@@ -46,8 +46,10 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
+		void setFont(std::shared_ptr<const Font> font);
 		void setFontSize(float size);
 		Vector2f getMinimumSize() const override;
+		void setAngle(Angle1f angle);
 
 		void setDynamicValue(std::string_view key, ConfigNode value) override;
 
@@ -72,6 +74,8 @@ namespace Halley {
 		bool needsClipY = false;
 		bool flowLayout = false;
 		bool replayOnModified = false;
+
+		bool needsMinSize = true;
 
 		Time marqueeIdle = 0;
 		std::optional<float> marqueeSpeed;

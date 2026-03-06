@@ -64,10 +64,16 @@ void UILabel::update(Time t, bool moved)
 	}
 }
 
+void UILabel::setFont(std::shared_ptr<const Font> font)
+{
+	renderer.setFont(std::move(font));
+	needsMinSize = true;
+}
+
 void UILabel::setFontSize(float size)
 {
 	renderer.setSize(size);
-	updateMinSize();
+	needsMinSize = true;
 }
 
 void UILabel::setMarquee(std::optional<float> speed)
@@ -84,6 +90,8 @@ void UILabel::setMarquee(std::optional<float> speed)
 
 void UILabel::updateMinSize()
 {
+	needsMinSize = false;
+
 	lastCellWidth = getCellWidth();
 	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth.value_or(std::numeric_limits<float>::max()));
 
@@ -117,11 +125,15 @@ void UILabel::updateMinSize()
 	if (textMinSize != oldTextMinSize) {
 		markAsNeedingLayout();
 	}
+
+	if (!floatEquals(renderer.getAngle().toRadians(), 0.0f)) {
+		Logger::logInfo("UILabel textExtents = " + toString(textExtents) + ", textMinSize = " + textMinSize);
+	}
 }
 
 void UILabel::updateText() {
 	renderer.setText(text);
-	updateMinSize();
+	needsMinSize = true;
 	if (replayOnModified) {
 		replayInitialBehaviours();
 	}
@@ -217,7 +229,7 @@ void UILabel::setMaxWidth(std::optional<float> m)
 {
 	if (maxWidth != m) {
 		maxWidth = m;
-		updateMinSize();
+		needsMinSize = true;
 		updateText();
 	}
 }
@@ -226,7 +238,7 @@ void UILabel::setMaxHeight(std::optional<float> m)
 {
 	if (maxHeight != m) {
 		maxHeight = m;
-		updateMinSize();
+		needsMinSize = true;
 		updateText();
 	}
 }
@@ -245,7 +257,7 @@ void UILabel::setWordWrapped(bool wrapped)
 {
 	if (wordWrapped != wrapped) {
 		wordWrapped = wrapped;
-		updateMinSize();
+		needsMinSize = true;
 		updateText();
 	}
 }
@@ -290,7 +302,7 @@ void UILabel::setTextRenderer(TextRenderer r)
 {
 	r.setText(text).setPosition(renderer.getPosition());
 	renderer = std::move(r);
-	updateMinSize();
+	needsMinSize = true;
 }
 
 void UILabel::setColour(Colour4f colour)
@@ -393,7 +405,16 @@ void UILabel::onParentChanged()
 
 Vector2f UILabel::getMinimumSize() const
 {
+	if (needsMinSize) {
+		const_cast<UILabel*>(this)->updateMinSize();
+	}
 	return Vector2f::max(textMinSize, UIWidget::getMinimumSize());
+}
+
+void UILabel::setAngle(Angle1f angle)
+{
+	renderer.setAngle(angle);
+	needsMinSize = true;
 }
 
 void UILabel::setDynamicValue(std::string_view key, ConfigNode value)
