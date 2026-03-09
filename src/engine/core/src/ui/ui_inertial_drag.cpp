@@ -38,7 +38,8 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 		}
 
 		// Safeguard
-		if (vel && !vel->isValid()) {
+		if (vel && (!vel->isValid() || vel->length() > 1'000'000.0f)) {
+			result = {};
 			vel = {};
 		}
 	}
