@@ -794,7 +794,7 @@ Rect4f TextRenderer::getAABB() const
 {
 	const auto pos = getPosition();
 	const auto size = getExtents();
-	return pos + Rect4f(Vector2f(), size) - size * offset;
+	return pos + Rect4f(Vector2f(), size).rotate(angle) - size * offset;
 }
 
 bool TextRenderer::isCompatibleWith(const TextRenderer& other) const

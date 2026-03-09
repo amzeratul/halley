@@ -118,11 +118,9 @@ void UILabel::updateMinSize()
 
 	const auto textMinSize = (flowLayout ? Vector2f(0.0f, curExtents.y) : curExtents).ceil();
 	const auto oldTextBounds = textBounds;
-
-	const auto unrotatedBounds = Rect4f(Vector2f(), textMinSize);
-	textBounds = floatEquals(renderer.getAngle().getRadians(), 0.0f) ? unrotatedBounds : unrotatedBounds.rotate(renderer.getAngle());
-	
+	textBounds = Rect4f(Vector2f(), textMinSize).rotate(renderer.getAngle());
 	textExtents = curExtents;
+
 	if (textBounds != oldTextBounds) {
 		markAsNeedingLayout();
 	}

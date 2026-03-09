@@ -458,6 +458,10 @@ namespace Halley {
 		template<typename U>
 		constexpr Rect2D rotate(const Angle<U>& angle) const
 		{
+			if (floatEquals(angle.getRadians(), 0.0f)) {
+				return *this;
+			}
+
 			std::array<Vector2D<T>, 4> ps;
 			ps[0] = getTopLeft().rotate(angle);
 			ps[1] = getTopRight().rotate(angle);
