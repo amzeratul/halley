@@ -58,6 +58,8 @@ namespace Halley {
 		Vector<EntityInfo> getEntities() const override;
 		EntityInfo getEntityInfo(const UUID& uuid) const override;
 		void goToEntity(const UUID& uuid) override;
+
+		NonOwningAliveFlag getAliveFlag() override;
 		
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
@@ -93,6 +95,8 @@ namespace Halley {
 		Vector<String> highlightedComponents;
 
 		std::shared_ptr<EntityValidatorUI> entityValidatorUI;
+
+		AliveFlag aliveFlag;
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);

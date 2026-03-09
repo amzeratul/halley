@@ -73,6 +73,11 @@ void UIWidgetEditor::setUIEditor(UIEditor& editor, ProjectWindow& project)
 	entityFieldFactory = std::make_shared<EntityEditorFactory>(editor.isEditingHalleyUI() ? projectWindow->getHalleyEntityEditorFactoryRoot() : projectWindow->getEntityEditorFactoryRoot(), static_cast<IEntityEditorCallbacks*>(this));
 }
 
+NonOwningAliveFlag UIWidgetEditor::getAliveFlag()
+{
+	return aliveFlag;
+}
+
 void UIWidgetEditor::onEntityUpdated(bool temporary)
 {
 	uiEditor->onWidgetModified(curId, temporary);

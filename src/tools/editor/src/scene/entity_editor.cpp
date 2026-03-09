@@ -782,6 +782,7 @@ void EntityEditor::onEntityUpdated(bool temporary)
 	}
 }
 
+
 void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName)
 {
 	if (tool == "!scripting") {
@@ -897,6 +898,11 @@ void EntityEditor::goToEntity(const UUID& uuid)
 	sceneEditor->selectEntity(uuid.toString());
 }
 
+NonOwningAliveFlag EntityEditor::getAliveFlag()
+{
+	return aliveFlag;
+}
+
 void EntityEditor::setComponentHighlight(const String& name, UIWidget& component)
 {
 	return;
@@ -944,7 +950,6 @@ void EntityEditorFactoryRoot::setGameResources(Resources& resources, const Halle
 	gameResources = &resources;
 	this->api = &api;
 }
-
 
 
 EntityEditorFactory::EntityEditorFactory(EntityEditorFactoryRoot& root, IEntityEditorCallbacks* callbacks)

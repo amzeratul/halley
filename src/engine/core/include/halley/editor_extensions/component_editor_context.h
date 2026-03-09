@@ -33,6 +33,7 @@ namespace Halley {
 		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
+		virtual NonOwningAliveFlag getAliveFlag() = 0;
 
 		struct EntityInfo {
 			String name;

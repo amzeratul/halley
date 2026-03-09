@@ -14,6 +14,7 @@ namespace Halley {
     	void setSelectedWidget(const String& id, ConfigNode* node, const ConfigNode* parent);
         void setGameResources(Resources& resources);
         void setUIEditor(UIEditor& uiEditor, ProjectWindow& projectWindow);
+        NonOwningAliveFlag getAliveFlag() override;
 
     protected:
         void onMakeUI() override;
@@ -30,6 +31,7 @@ namespace Halley {
         UIEditor* uiEditor = nullptr;
         ProjectWindow* projectWindow = nullptr;
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;
+        AliveFlag aliveFlag;
 
         void refresh();
         void populateParentWidgetBox(UIWidget& root, ConfigNode& widgetNode, const UIFactoryWidgetProperties& properties);

@@ -65,7 +65,11 @@ ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
 void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const
 {
 	if (entityEditor) {
-		entityEditor->setTool(tool, componentName, fieldName);
+		Concurrent::execute(Executors::getMainUpdateThread(), [entityEditor = entityEditor, tool = tool, componentName = componentName, fieldName = fieldName, aliveFlag = entityEditor->getAliveFlag()] () {
+			if (aliveFlag) {
+				entityEditor->setTool(tool, componentName, fieldName);
+			}
+		});
 	}
 }
 
