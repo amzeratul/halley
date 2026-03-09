@@ -411,6 +411,19 @@ namespace Halley
 		}
 	};
 
+	template<typename T>
+	struct ToStringConverter<T*>
+	{
+		String operator()(const T* ptr) const
+		{
+			if constexpr (sizeof(T*) == sizeof(uint64_t)) {
+				return "0x" + toString(reinterpret_cast<uint64_t>(ptr), 16, sizeof(T*) * 2);
+			} else {
+				return "0x" + toString(reinterpret_cast<uint32_t>(ptr), 16, sizeof(T*) * 2);
+			}
+		}
+	};
+
 	inline std::optional<int> stringViewToInt(const std::string_view& input)
 	{
 	    int out;
