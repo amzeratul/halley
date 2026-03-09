@@ -419,16 +419,10 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		}
 	}
 
-	Vector2f rotateOffset;
 	extents = Vector2f(gotExtents ? maxX : 0.0f, std::max(getLineHeight(*font, size), height));
-	if (!floatEquals(angle.toRadians(), 0.0f)) {
-		auto rect = Rect4f(Vector2f(), extents).rotate(angle);
-		extents = rect.getSize();
-		rotateOffset = rect.getTopLeft().rotate(-angle);
-	}
 
 	if (layouts) {
-		const auto totalOffset = floorAlign(extents * offset + rotateOffset);
+		const auto totalOffset = floorAlign(extents * offset);
 		if (totalOffset != Vector2f(0, 0)) {
 			for (auto& p : *layouts) {
 				p.pos -= totalOffset;

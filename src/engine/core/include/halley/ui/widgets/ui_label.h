@@ -66,7 +66,7 @@ namespace Halley {
 		const std::shared_ptr<bool> aliveFlag;
 
 		Vector2f textExtents;
-		Vector2f textMinSize;
+		Rect4f textBounds;
 		std::optional<float> maxWidth;
 		std::optional<float> maxHeight;
 		bool wordWrapped = false;

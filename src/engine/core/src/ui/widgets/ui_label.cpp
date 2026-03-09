@@ -60,7 +60,7 @@ void UILabel::update(Time t, bool moved)
 		updateText();
 	}
 	if (moved || marqueeSpeed) {
-		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x - marqueePos, 0.0f));
+		renderer.setPosition(getPosition() + Vector2f(renderer.getAlignment() * textExtents.x - marqueePos, 0.0f) - textBounds.getTopLeft());
 	}
 }
 
@@ -96,33 +96,34 @@ void UILabel::updateMinSize()
 	const float effectiveMaxWidth = std::min(lastCellWidth, maxWidth.value_or(std::numeric_limits<float>::max()));
 
 	needsClipX = needsClipY = false;
-	textExtents = renderer.getExtents();
-	unclippedWidth = textExtents.x;
-	if (textExtents.x > effectiveMaxWidth) {
+	auto curExtents = renderer.getExtents();
+	unclippedWidth = curExtents.x;
+	if (curExtents.x > effectiveMaxWidth) {
 		if (wordWrapped || flowLayout) {
 			renderer.setText(renderer.split(effectiveMaxWidth));
-			textExtents = renderer.getExtents();
-			unclippedWidth = textExtents.x;
-			needsClipX = textExtents.x > effectiveMaxWidth;
+			curExtents = renderer.getExtents();
+			unclippedWidth = curExtents.x;
+			needsClipX = curExtents.x > effectiveMaxWidth;
 		} else {
-			unclippedWidth = textExtents.x;
-			textExtents.x = effectiveMaxWidth;
+			unclippedWidth = curExtents.x;
+			curExtents.x = effectiveMaxWidth;
 			needsClipX = true;
 		}
 	}
-	if (textExtents.y > maxHeight.value_or(std::numeric_limits<float>::max())) {
+	if (curExtents.y > maxHeight.value_or(std::numeric_limits<float>::max())) {
 		float maxLines = std::floor(maxHeight.value_or(std::numeric_limits<float>::max()) / renderer.getLineHeight());
-		textExtents.y = maxLines * renderer.getLineHeight();
+		curExtents.y = maxLines * renderer.getLineHeight();
 		needsClipY = true;
 	}
 
-	const auto oldTextMinSize = textMinSize;
-	if (flowLayout) {
-		textMinSize = Vector2f(0.0f, textExtents.y).ceil();
-	} else {
-		textMinSize = textExtents.ceil();
-	}
-	if (textMinSize != oldTextMinSize) {
+	const auto textMinSize = (flowLayout ? Vector2f(0.0f, curExtents.y) : curExtents).ceil();
+	const auto oldTextBounds = textBounds;
+
+	const auto unrotatedBounds = Rect4f(Vector2f(), textMinSize);
+	textBounds = floatEquals(renderer.getAngle().getRadians(), 0.0f) ? unrotatedBounds : unrotatedBounds.rotate(renderer.getAngle());
+	
+	textExtents = curExtents;
+	if (textBounds != oldTextBounds) {
 		markAsNeedingLayout();
 	}
 }
@@ -404,7 +405,7 @@ Vector2f UILabel::getMinimumSize() const
 	if (needsMinSize) {
 		const_cast<UILabel*>(this)->updateMinSize();
 	}
-	return Vector2f::max(textMinSize, UIWidget::getMinimumSize());
+	return Vector2f::max(textBounds.getSize(), UIWidget::getMinimumSize());
 }
 
 void UILabel::setAngle(Angle1f angle)
