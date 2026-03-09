@@ -311,8 +311,12 @@ void UIRoot::updateWidgets(UIWidgetUpdateType type, Time t, UIInputType activeIn
 
 	for (int i = static_cast<int>(widgetsCache.size()); --i >= 0; ) {
 		auto& w = widgetsCache[i];
-		HalleyAssertDev(w->getRoot() == this);
-		w->doPostUpdate();
+		if (w->getRoot() == this) {
+			w->doPostUpdate();
+		} else {
+			Logger::logError("Error on UIRoot::updateWidgets(), widget \"" + w->getId() + "\" (" + typeid(*w).name() +
+				") has different a root. This = " + toString(this) + ", root = " + toString(w->getRoot()), true);
+		}
 	}
 
 	widgetsCache.clear();
