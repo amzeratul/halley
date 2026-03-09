@@ -55,7 +55,7 @@ void AudioView::paint(Painter& painter)
 	}
 
 	const auto rect = Rect4f(painter.getViewPort());
-	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(rect.getSize())).setColour(Colour4f(0, 0, 0, 0.6f)).draw(painter);
 
 	Vector2f textPos = Vector2f(10, 90);
 
@@ -147,11 +147,13 @@ void AudioView::paint(Painter& painter)
 			}
 		}
 
-		auto results = str.moveResults();
+		auto [text, cols] = str.moveResults();
+		auto text2 = headerText.split(text, rect.getWidth() - 20, cols.span());
+
 		headerText
 			.setPosition(textPos)
-			.setText(results.first)
-			.setColourOverride(results.second)
+			.setText(text2)
+			.setColourOverride(cols)
 			.draw(painter);
 		auto extents = headerText.getExtents();
 		textPos.y += extents.y + 16;
