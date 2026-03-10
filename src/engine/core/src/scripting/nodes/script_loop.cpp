@@ -151,7 +151,7 @@ ConfigNode ScriptForEachLoopData::toConfigNode(const EntitySerializationContext&
 
 String ScriptForEachLoop::getShortDescription(const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "curLoopElement";
+	return getConnectedNodeName(node, graph, 3) + "[n]";
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptForEachLoop::getPinConfiguration(const BaseGraphNode& node) const
