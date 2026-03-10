@@ -909,7 +909,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 					Logger::logWarning("Entity with network id " + toString(static_cast<int>(oe.networkId)) + " already has a temporary inbound entity");
 				}
 			} else {
-				Logger::logWarning("No outbound entity found to create temporary inbound entity from");
+				Logger::logWarning("No outbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary inbound entity from", true);
 			}
 		} else if (myPeerId == authorityId) {
 			// I'm taking authority. Create a temporary outbound entity.
@@ -929,10 +929,10 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 				if (!outboundEntities.contains(entityId)) {
 					outboundEntities[entityId] = std::move(outbound);
 				} else {
-					Logger::logWarning("Entity id " + toString(static_cast<int>(entityId)) + " already has an outbound entity");
+					Logger::logWarning("Entity id " + toString(entityId.value & 0xffffffff) + " already has an outbound entity");
 				}
 			} else {
-				Logger::logWarning("No inbound entity found to create temporary outbound entity from");
+				Logger::logWarning("No inbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary outbound entity from", true);
 			}
 		}
 	} else {
@@ -955,7 +955,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 			if (outboundEntities.contains(entityId)) {
 				outboundEntities.erase(entityId);
 			} else {
-				Logger::logWarning("No temporary outbound entity found for deletion");
+				Logger::logWarning("No temporary outbound entity found to delete for " +  toString(entityId.value & 0xffffffff));
 			}
 		}
 	}
