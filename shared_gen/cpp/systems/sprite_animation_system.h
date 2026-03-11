@@ -82,6 +82,9 @@ protected:
 	Halley::World& getWorld() const {
 		return doGetWorld();
 	}
+	Halley::Resources& getResources() const {
+		return doGetResources();
+	}
 	Halley::TempMemoryPool& getTempMemoryPool() const {
 		return doGetWorld().getUpdateMemoryPool();
 	}

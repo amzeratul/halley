@@ -912,7 +912,7 @@ EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, Grap
 void ScriptEnvironment::postAnimationEvent(const String& sequence, bool reverse, bool once, EntityId entityId)
 {
 	if (!sequence.isEmpty()) {
-		auto msg = std::make_unique<PlayNetworkAnimationSystemMessage>(entityId, sequence, reverse, once, "default");
+		auto msg = std::make_unique<PlayNetworkAnimationSystemMessage>(entityId, std::nullopt, sequence, reverse, once, "default");
 		const auto msgId = msg->getId();
 
 		SystemMessageContext context;

@@ -159,6 +159,7 @@ systemMessage:
   name: PlayNetworkAnimation
   members:
   - entity: Halley::EntityId
+  - animation: std::optional<Halley::String>
   - sequence: Halley::String
   - reverse: bool
   - once: bool
@@ -220,6 +221,7 @@ system:
   strategy: global
   access:
   - world
+  - resources
   messages:
   - PlayAnimation: receive
   - PlayAnimationOnce: receive

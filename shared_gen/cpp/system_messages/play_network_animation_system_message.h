@@ -13,6 +13,7 @@ public:
 	using ReturnType = void;
 
 	Halley::EntityId entity{};
+	std::optional<Halley::String> animation{};
 	Halley::String sequence{};
 	bool reverse{};
 	bool once{};
@@ -21,8 +22,9 @@ public:
 	PlayNetworkAnimationSystemMessage() {
 	}
 
-	PlayNetworkAnimationSystemMessage(Halley::EntityId entity, Halley::String sequence, bool reverse, bool once, Halley::String direction)
+	PlayNetworkAnimationSystemMessage(Halley::EntityId entity, std::optional<Halley::String> animation, Halley::String sequence, bool reverse, bool once, Halley::String direction)
 		: entity(std::move(entity))
+		, animation(std::move(animation))
 		, sequence(std::move(sequence))
 		, reverse(std::move(reverse))
 		, once(std::move(once))
@@ -44,6 +46,7 @@ public:
 
 	void serialize(Halley::Serializer& s) const override final {
 		s << entity;
+		s << animation;
 		s << sequence;
 		s << reverse;
 		s << once;
@@ -52,6 +55,7 @@ public:
 
 	void deserialize(Halley::Deserializer& s) override final {
 		s >> entity;
+		s >> animation;
 		s >> sequence;
 		s >> reverse;
 		s >> once;
@@ -61,6 +65,7 @@ public:
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) override final {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(entity)>::deserialize(entity, Halley::EntityId{}, context, node, "", "entity", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
+		Halley::EntityConfigNodeSerializer<decltype(animation)>::deserialize(animation, std::optional<Halley::String>{}, context, node, "", "animation", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(sequence)>::deserialize(sequence, Halley::String{}, context, node, "", "sequence", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(reverse)>::deserialize(reverse, bool{}, context, node, "", "reverse", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));
 		Halley::EntityConfigNodeSerializer<decltype(once)>::deserialize(once, bool{}, context, node, "", "once", makeMask(Type::Prefab, Type::SaveData, Type::Network, Type::Dynamic));

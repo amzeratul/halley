@@ -27,6 +27,10 @@ public:
 	void onMessageReceived(const PlayNetworkAnimationSystemMessage& msg) override
 	{
 		if (const auto e = mainFamily.tryFind(msg.entity); e != nullptr) {
+			if (msg.animation) {
+				e->spriteAnimation.player.setAnimation(getResources().get<Animation>(*msg.animation));	
+			}
+
 			e->spriteAnimation.player.setDirection(msg.direction);
 			
 			if (msg.once) {
