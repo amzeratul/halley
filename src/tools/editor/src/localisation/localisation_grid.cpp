@@ -207,19 +207,17 @@ LocalisedString LocalisationGrid::getToolTip() const
 		if (colName == "Group") {
 			return LocalisedString::fromUserString(origData->getGroupNameEntry(*lineUnderMouse));
 		} else if (colName == "Key") {
-			String tooltip = entry.getKey();
+			String tooltip = entry.getKey() + "\nv" + toString(entry.getVersion());
 
 			if (translatedData) {
 				if (const auto* translatedEntry = translatedData->tryGetEntry(entry.getKey())) {
-					tooltip += "\nv" + toString(translatedEntry->origVersion);
 					if (translatedEntry->origVersion != entry.getVersion()) {
-						tooltip += " (src at v" + toString(entry.getVersion()) + ")";
+						tooltip += " (translation at v" + toString(translatedEntry->origVersion) + ")";
 					}
 				}
-			} else {
-				tooltip += "\nv" + toString(entry.getVersion());
 			}
 
+			Logger::logInfo(tooltip);
 			return LocalisedString::fromUserString(tooltip);
 		} else if (colName == "Original") {
 			return LocalisedString::fromUserString(entry.getValue());
