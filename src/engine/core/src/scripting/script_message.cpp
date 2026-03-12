@@ -89,7 +89,7 @@ void ScriptMessage::deserialize(Deserializer& s)
 
 String ScriptMessage::toString() const
 {
-	return type.message + "(" + params.asString() + ")";
+	return type.message + "(" + params.asString("") + ")";
 }
 
 
