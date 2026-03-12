@@ -671,17 +671,26 @@ void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage mess
 	}
 
 	const auto entity = tryGetEntity(dstEntity);
-	if (entity.isValid()) {
-		if (entity.hasComponent<ScriptableComponent>()) {
-			if (dstEntity == currentEntity && message.type.script == currentState->getScriptId() && message.delay <= 0.00001f) {
-				// Quick path for instant self messages
-				currentState->receiveMessage(std::move(message));
-			} else {
-				scriptOutbox.emplace_back(dstEntity, std::move(message));
-			}
-		} else {
-			Logger::logWarning("Trying to send message \"" + message.type.message + "\" to entity \"" + entity.getName() + "\", but it doesn't have a ScriptableComponent.");
-		}
+	if (!entity.isValid()) {
+		Logger::logError("Unable to send script message: could not find entity " + toString(dstEntity));
+		return;
+	}
+
+	if (!entity.isLocal()) {
+		getInterface<IScriptSystemInterface>().sendScriptMessage(dstEntity, std::move(message));
+		return;
+	}
+
+	if (!entity.hasComponent<ScriptableComponent>()) {
+		Logger::logError("Trying to send message \"" + message.type.message + "\" to entity \"" + entity.getName() + "\", but it doesn't have a ScriptableComponent.");
+		return;
+	}
+
+	if (dstEntity == currentEntity && message.type.script == currentState->getScriptId() && message.delay <= 0.00001f) {
+		// Quick path for instant self messages
+		currentState->receiveMessage(std::move(message));
+	} else {
+		scriptOutbox.emplace_back(dstEntity, std::move(message));
 	}
 }
 

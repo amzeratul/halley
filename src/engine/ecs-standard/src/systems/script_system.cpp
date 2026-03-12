@@ -240,6 +240,15 @@ public:
 		sendMessage(CancelHostScriptThreadSystemMessage(scriptId, entityId, nodeId));
 	}
 
+	void sendScriptMessage(EntityId entityId, ScriptMessage message) override
+	{
+		if (!getWorld().isEntityNetworkAuthority(entityId)) {
+			sendRemoteMessage(entityId, std::move(message));
+		} else {
+			sendLocalMessage(entityId, std::move(message));
+		}
+	}
+
 private:
 	Vector<std::pair<EntityId, ScriptMessage>> pendingMessages;
 
@@ -402,11 +411,7 @@ private:
 		auto& env = getScriptingService().getEnvironment();
 		auto scriptOutbound = env.getOutboundScriptMessages();
 		for (auto& msg: scriptOutbound) {
-			if (!getWorld().isEntityNetworkAuthority(msg.first)) {
-				sendRemoteMessage(msg.first, std::move(msg.second));
-			} else {
-				sendLocalMessage(msg.first, std::move(msg.second));
-			}
+			sendScriptMessage(msg.first, std::move(msg.second));
 		}
 
 		auto entityOutbound = env.getOutboundEntityMessages();

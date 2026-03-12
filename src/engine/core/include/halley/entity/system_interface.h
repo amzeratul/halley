@@ -4,6 +4,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/concurrency/future.h"
 #include "halley/entity/entity_id.h"
+#include "halley/scripting/script_message.h"
 
 namespace Halley {
 	class Animation;
@@ -64,6 +65,7 @@ namespace Halley {
 		virtual void sendReturnHostThread(EntityId target, const String& scriptId, int node, ConfigNode params) = 0;
 		virtual void startHostThread(EntityId entityId, const String& scriptId, int nodeId, ConfigNode params) = 0;
 		virtual void cancelHostThread(EntityId entityId, const String& scriptId, int nodeId) = 0;
+		virtual void sendScriptMessage(EntityId entityId, ScriptMessage message) = 0;
 	};
 
 	class IScriptableQuerySystemInterface : public ISystemInterface {
