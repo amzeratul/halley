@@ -305,6 +305,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 		return;
 	}
 
+	remote.timeSinceSend = 0;
+
 	bool wantToLog = USE_FAST_NETWORK_COMPONENT_UPDATES && log;
 
 #if USE_FAST_NETWORK_COMPONENT_UPDATES
@@ -350,8 +352,6 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
     		}
 
     		if (modified && !modifiedInStructure) {
-    			remote.timeSinceSend = 0;
-
     			fastUpdateOutboundData.reserve(EntityNetworkSerialize::getBytesCapacity());
     			size_t outboundDataSize = fastSerialize.getBytes(fastUpdateOutboundData, parentSession->getByteSerializationOptions(), wantToLog);
     			//Logger::logDev("Send Fast Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(outboundDataSize) + " B)");
@@ -398,7 +398,6 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, int32_t sessionTimestamp,
 
         if (deltaData.hasChange()) {
             remote.data = std::move(newData);
-            remote.timeSinceSend = 0;
 
             auto bytes = Serializer::toBytes(deltaData, parentSession->getByteSerializationOptions());
             //Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");

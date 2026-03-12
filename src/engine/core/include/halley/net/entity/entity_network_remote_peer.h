@@ -62,8 +62,8 @@ namespace Halley {
             bool alive = true;
         	bool hasAuthorityOnly = false;
         	bool forceNextFastUpdate = false;
-            Time timeSinceSend = 0;
             EntityNetworkId networkId = 0;
+            Time timeSinceSend = 0;
             EntityData data;
             Bytes fastUpdateJournal;
         };
