@@ -6,6 +6,7 @@
 
 using namespace Halley;
 
+#define INJECT_RUNTIME_CHECKS DEV_BUILD
 static constexpr uint16_t SERIALIZE_CHECK_PARITY = 0xbaad;
 
 static void injectMagic(Serializer& serializer, uint16_t n)
@@ -21,6 +22,24 @@ static void checkMagic(Deserializer& deserializer, uint16_t n)
     if (m != n) {
         throw Exception("Network stream error", HalleyExceptions::Network);
     }
+}
+
+static void injectSimpleStringChecksum(Serializer& serializer, const std::string_view& str)
+{
+    size_t m = str.length();
+    for (const char ch : str) {
+        m += ch;
+    }
+    injectMagic(serializer, m & 0xffff);
+}
+
+static void checkSimpleStringChecksum(Deserializer& deserializer, const std::string_view& str)
+{
+    size_t m = str.length();
+    for (const char ch : str) {
+        m += ch;
+    }
+    checkMagic(deserializer, m & 0xffff);
 }
 
 thread_local Bytes EntityNetworkSerialize::scratchpad;
@@ -87,7 +106,9 @@ void EntityNetworkChanges::pushEntity(Serializer& serializer, const EntityRef& e
     serializer << parentInstanceUUID;
     serializer << entity.getPrefabUUID();
 
-    serializer << entity.getName();
+#if INJECT_RUNTIME_CHECKS
+    injectSimpleStringChecksum(serializer, entity.getName());
+#endif
 
     endPage(serializer, buffer, Type::EntityIdentity);
 }
@@ -224,7 +245,9 @@ void EntityNetworkChanges::writeJournal(Serializer& serializer, const Bytes& buf
                 page.type == Type::EntityIdentity ||
                 page.type == Type::Component);
 
+#if INJECT_RUNTIME_CHECKS
             injectMagic(serializer, SERIALIZE_CHECK_PARITY);
+#endif
 
             serializer << static_cast<uint8_t>(page.type);
             serializer << static_cast<uint32_t>(size);
@@ -397,7 +420,7 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
 
         const auto& reflector = reflection.getComponentReflector(componentId);
 
-        journal.beginComponent(serializer, (uint16_t) componentId);
+        journal.beginComponent(serializer, static_cast<uint16_t>(componentId));
         reflector.serializeNetwork(byteSerializationContext, serializer, *component);
         journal.endComponent(serializer, scratchpad);
     }
@@ -498,9 +521,9 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         UUID prefabUUID;
         deserializer >> prefabUUID;
 
-        String name;
-        deserializer >> name;
-        entity.setName(name);
+#if INJECT_RUNTIME_CHECKS
+        checkSimpleStringChecksum(deserializer, entity.getName());
+#endif
 
         if (prefabUUID.isValid() && prefabUUID != entity.getPrefabUUID()) {
             throw Exception("Prefab UUID mismatch", HalleyExceptions::Network);
@@ -822,7 +845,9 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
         EntityNetworkChanges::Type nextType = EntityNetworkChanges::Type::Unknown;
 
         if (deserializer.getBytesLeft() > 0) {
+#if INJECT_RUNTIME_CHECKS
             checkMagic(deserializer, SERIALIZE_CHECK_PARITY);
+#endif
 
             uint8_t t;
             deserializer >> t;
