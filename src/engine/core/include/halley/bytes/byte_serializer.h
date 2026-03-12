@@ -742,7 +742,12 @@ namespace Halley {
     public:
         static void serialize(const ResourceReference<T>& value, const ByteSerializationContext& context, Serializer& serializer, int componentIndex, std::string_view fieldName)
         {
-            serializer << value.getAssetId();
+        	if (value.hasValue()) {
+        		const std::shared_ptr<const T>& resource = value.get();
+        		serializer << resource->getAssetId();
+        	} else {
+        		serializer << String();
+        	}
         }
 
         static void deserialize(ResourceReference<T>& dst, const ByteSerializationContext& context, Deserializer& deserializer, int componentIndex, std::string_view fieldName)
