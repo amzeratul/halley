@@ -602,6 +602,26 @@ namespace Halley {
 			return *this;
 		}
 
+		VectorStd operator+(const VectorStd& other) const
+		{
+			VectorStd result;
+			result.reserve(size() + other.size());
+			result.insert(result.end(), begin(), end());
+			result.insert(result.end(), other.begin(), other.end());
+			return result;
+		}
+
+		VectorStd operator+(VectorStd&& other) const
+		{
+			VectorStd result;
+			result.reserve(size() + other.size());
+			result.insert(result.end(), begin(), end());
+			for (auto& o: other) {
+				result.push_back(std::move(o));
+			}
+			return result;
+		}
+
 		VectorStd& operator+= (T&& value)
 		{
 			push_back(std::move(value));
