@@ -41,29 +41,29 @@ namespace Halley {
 		constexpr Angle(const Angle &angle) : value(angle.value) {}
 
 		// Comparison
-		constexpr bool operator== (const Angle &param) const { return value == param.value; }
-		constexpr bool operator!= (const Angle &param) const { return value != param.value; }
-		constexpr bool operator< (const Angle &param) const { return value < param.value; }
-		constexpr bool operator<= (const Angle &param) const { return value <= param.value; }
-		constexpr bool operator> (const Angle &param) const { return value > param.value; }
-		constexpr bool operator>= (const Angle &param) const { return value >= param.value; }
+		[[nodiscard]] constexpr bool operator== (const Angle &param) const { return value == param.value; }
+		[[nodiscard]] constexpr bool operator!= (const Angle &param) const { return value != param.value; }
+		[[nodiscard]] constexpr bool operator< (const Angle &param) const { return value < param.value; }
+		[[nodiscard]] constexpr bool operator<= (const Angle &param) const { return value <= param.value; }
+		[[nodiscard]] constexpr bool operator> (const Angle &param) const { return value > param.value; }
+		[[nodiscard]] constexpr bool operator>= (const Angle &param) const { return value >= param.value; }
 
 		// Basic arithmetics
-		constexpr Angle operator+ (const Angle &param) const
+		[[nodiscard]] constexpr Angle operator+ (const Angle &param) const
 		{
 			Angle final;
 			final.value = value + param.value;
 			final.limit();
 			return final;
 		}
-		constexpr Angle operator- (const Angle &param) const
+		[[nodiscard]] constexpr Angle operator- (const Angle &param) const
 		{
 			Angle final;
 			final.value = value - param.value;
 			final.limit();
 			return final;
 		}
-		constexpr Angle operator- () const
+		[[nodiscard]] constexpr Angle operator- () const
 		{
 			Angle final;
 			final.value = -value;
@@ -94,13 +94,13 @@ namespace Halley {
 			}
 		}
 
-		constexpr T getDegrees() const { return radToDeg(value); }
-		constexpr T getRadians() const { return value; }
-		constexpr T toDegrees() const { return radToDeg(value); }
-		constexpr T toRadians() const { return value; }
+		[[nodiscard]] constexpr T getDegrees() const { return radToDeg(value); }
+		[[nodiscard]] constexpr T getRadians() const { return value; }
+		[[nodiscard]] constexpr T toDegrees() const { return radToDeg(value); }
+		[[nodiscard]] constexpr T toRadians() const { return value; }
 
 		// Which side should it turn to to reach the parameter angle?
-		constexpr T turnSide(const Angle &param) const
+		[[nodiscard]] constexpr T turnSide(const Angle &param) const
 		{
 			float res = std::sin(param.value - value);
 			if (res > 0.0f) return 1.0f;
@@ -121,7 +121,7 @@ namespace Halley {
 		constexpr void turnDegreesTowards(const Angle &angle,const T degrees) { turnRadiansTowards(angle,degToRad(degrees)); }
 
 		// Distance to another angle
-		constexpr Angle distance(const Angle &param) const
+		[[nodiscard]] constexpr Angle distance(const Angle &param) const
 		{
 			float v = std::fabs(value - param.value);
 			if (v > PI_CONSTANT_F) v = 2.0f*PI_CONSTANT_F - v;
@@ -129,22 +129,22 @@ namespace Halley {
 		}
 
 		// Conversion
-		constexpr static T degToRad(const T degrees) noexcept { return degrees * 0.01745329252f; }
-		constexpr static T radToDeg(const T radians) noexcept { return radians * 57.295779513f; }
+		[[nodiscard]] constexpr static T degToRad(const T degrees) noexcept { return degrees * 0.01745329252f; }
+		[[nodiscard]] constexpr static T radToDeg(const T radians) noexcept { return radians * 57.295779513f; }
 
 		// Trigonometric functions
-		constexpr T sin() const noexcept { return std::sin(value); }
-		constexpr T cos() const noexcept { return std::cos(value); }
-		constexpr T tan() const noexcept { return std::tan(value); }
+		[[nodiscard]] constexpr T sin() const noexcept { return std::sin(value); }
+		[[nodiscard]] constexpr T cos() const noexcept { return std::cos(value); }
+		[[nodiscard]] constexpr T tan() const noexcept { return std::tan(value); }
 
 		// Builder methods
-		constexpr static Angle fromRadians (const T radians, bool wrap = true) noexcept
+		[[nodiscard]] constexpr static Angle fromRadians (const T radians, bool wrap = true) noexcept
 		{
 			Angle ang;
 			ang.setRadians(radians, wrap);
 			return ang;
 		}
-		constexpr static Angle fromDegrees (const T degrees, bool wrap = true) noexcept
+		[[nodiscard]] constexpr static Angle fromDegrees (const T degrees, bool wrap = true) noexcept
 		{
 			Angle ang;
 			ang.setDegrees(degrees, wrap);
@@ -162,10 +162,10 @@ namespace Halley {
 	};
 
 	template <typename T>
-	Angle<T> operator* (const Angle<T>& a, float b) { return Angle<T>(a.getRadians() * b); }
+	[[nodiscard]] Angle<T> operator* (const Angle<T>& a, float b) { return Angle<T>(a.getRadians() * b); }
 
 	template <typename T>
-	Angle<T> operator* (float a, const Angle<T>& b) { return Angle<T>(b.getRadians() * a); }
+	[[nodiscard]] Angle<T> operator* (float a, const Angle<T>& b) { return Angle<T>(b.getRadians() * a); }
 
 	// Typedefs
 	typedef Angle<double> Angle1d;
