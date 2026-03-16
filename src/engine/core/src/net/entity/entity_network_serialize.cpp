@@ -388,9 +388,11 @@ void EntityNetworkSerialize::doSerializeEntityUpdate(
     const SerializationContext& context, Serializer& serializer,
     const EntityRef& entity, const std::optional<EntityRef>& parent)
 {
+#if INJECT_RUNTIME_CHECKS
     if (!entity.isSerializable()) {
         Logger::logDev("Send network update for non-serializable entity " + entity.getPrefabAssetId(), true);
     }
+#endif
 
     context.setCurrentEntity(entity);
 
@@ -472,9 +474,11 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
 {
     HalleyAssertDev(entity.isValid());
 
+#if INJECT_RUNTIME_CHECKS
     if (!entity.isSerializable()) {
         Logger::logDev("Rcv network update for non-serializable entity " + entity.getPrefabAssetId(), true);
     }
+#endif
 
     if (parent) {
         entity.setParent(parent.value());

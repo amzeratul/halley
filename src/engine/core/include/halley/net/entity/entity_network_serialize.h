@@ -142,9 +142,9 @@ namespace Halley {
                 return entity.getEntityId();
             }
 
-            void setCurrentEntity(const EntityRef& entity) const
+            void setCurrentEntity(const EntityRef& current) const
             {
-                this->entity = entity;
+                this->entity = current;
             }
 
             const std::shared_ptr<const Prefab>& getPrefab() const
