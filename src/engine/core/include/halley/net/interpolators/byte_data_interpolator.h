@@ -1,4 +1,5 @@
 #pragma once
+
 #include "halley/entity/entity.h"
 #include "halley/bytes/byte_serializer.h"
 
@@ -22,7 +23,10 @@ namespace Halley {
     class ByteDataInterpolator : public IByteDataInterpolator
     {
     public:
-        void setEnabled(bool enabled) override { this->enabled = enabled; }
+        void setEnabled(bool enable) override
+        {
+            this->enabled = enable;
+        }
 
         void serialize(const void* value, size_t size, Serializer& serializer) override
         {
@@ -52,6 +56,18 @@ namespace Halley {
 
     protected:
         [[nodiscard]] bool isEnabled() const override { return enabled; }
+
+        template <typename Intermediate = T, typename Discrete = T>
+        static Discrete quantize(const Intermediate value, Intermediate granularity)
+        {
+            return static_cast<Discrete>(value * granularity);
+        }
+
+        template <typename Intermediate = T, typename Discrete = T>
+        static Intermediate dequantize(const Discrete value, Intermediate granularity)
+        {
+            return static_cast<Intermediate>(value) / granularity;
+        }
 
         template <typename Intermediate = T, typename Discrete = T>
         Discrete quantize(const Intermediate value, Intermediate minValue, Intermediate maxValue, Intermediate granularity)
