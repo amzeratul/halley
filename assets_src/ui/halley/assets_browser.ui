@@ -17,12 +17,22 @@ children:
         sizer:
           type: vertical
         children:
-          - uuid: 8f29ce39-e85d-44c2-b42a-e1c645d78293
-            border: [0, 0, 0, 6]
+          - uuid: b4745cfa-a0f0-4ff0-a2a9-caab8a8104f0
+            border: [0, 0, 0, 0]
+            sizer:
+              columnProportions: []
+              type: vertical
             widget:
-              class: button
-              id: collapseButton
-              text: << Collapse
+              childLayerAdjustment: 1
+              class: widget
+            children:
+              - uuid: 8f29ce39-e85d-44c2-b42a-e1c645d78293
+                proportion: 1
+                border: [0, 0, 0, 6]
+                widget:
+                  class: button
+                  id: collapseButton
+                  text: << Collapse
           - uuid: 29cf6930-f5fb-4eb3-b47a-40961a9cfb15
             proportion: 1
             sizer:
