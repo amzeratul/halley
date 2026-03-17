@@ -1716,6 +1716,11 @@ Vector4f ConfigNode::convertTo(Tag<Vector4f> tag) const
 	return asVector4f({});
 }
 
+Range<int> ConfigNode::convertTo(Tag<Range<int>> tag) const
+{
+	return asIntRange({});
+}
+
 Range<float> ConfigNode::convertTo(Tag<Range<float>> tag) const
 {
 	return asFloatRange({});
