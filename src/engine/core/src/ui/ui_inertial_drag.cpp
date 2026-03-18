@@ -45,6 +45,11 @@ std::optional<Vector2f> UIInertialDrag::update(Time dt, float minStartSpeed, flo
 	}
 	hasUpdateThisFrame = false;
 
+	// Safeguard
+	if (result && (!result->isValid() || result->length() > 1'000'000'000'000.0f)) {
+		result = {};
+	}
+
 	return result;
 }
 
