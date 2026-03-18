@@ -85,7 +85,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				iter->second.alive = true;
 				toUpdate.emplace_back(entity, &iter->second);
 			} else {
-				Logger::logWarning("No temporary outbound entity found for " + toString(entry.entityId & 0xffffffff));
+				Logger::logWarning("No temporary outbound entity found for " + entity.getName() + ", " +
+					entity.getInstanceUUID(), true);
 			}
 			continue;
 		}
@@ -107,8 +108,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, uint8_t myPeerId, gsl::span<c
 				// No entry found for this entity in outboundEntities. This usually means that this
 				// particular peer is not in range.
 				if (entry.authorityId == peerId) {
-					Logger::logError("No outbound entity " + toString(entry.entityId.value & 0xffffffff) +
-						" found owned by local peer, with authority grabbed by " + toString(static_cast<int>(entry.authorityId)));
+					Logger::logError("No outbound entity found for " + toString(entity.getName()) + ", " +
+						entity.getInstanceUUID() + " with authority grabbed by " + toString(static_cast<int>(entry.authorityId)), true);
 				}
 			}
 		}
@@ -885,7 +886,7 @@ void EntityNetworkRemotePeer::logUpdates()
 	log = !log;
 }
 
-void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
+bool EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
 	NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId)
 {
 	if (authorityId.has_value()) {
@@ -909,6 +910,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 				}
 			} else {
 				Logger::logWarning("No outbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary inbound entity from", true);
+				return false;
 			}
 		} else if (myPeerId == authorityId) {
 			// I'm taking authority. Create a temporary outbound entity.
@@ -932,6 +934,7 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 				}
 			} else {
 				Logger::logWarning("No inbound entity " + toString(entityId.value & 0xffffffff) + " found to create temporary outbound entity from", true);
+				return false;
 			}
 		}
 	} else {
@@ -958,6 +961,8 @@ void EntityNetworkRemotePeer::prepareChangeEntityAuthority(EntityId entityId, Ne
 			}
 		}
 	}
+
+	return true;
 }
 
 void EntityNetworkRemotePeer::updateRemoteEntityPosition(InboundEntity& inboundEntity, const Vector2f& position, int32_t timestamp)

@@ -377,7 +377,13 @@ private:
 		if (getSessionService().isMultiplayer()) {
 			auto entityNetworkSession = getSessionService().getMultiplayerSession().getEntityNetworkSession();
 			if (!entityNetworkSession->prepareChangeEntityAuthority(networkFamily->entityId, networkFamily->network, authorityId)) {
-				Logger::logWarning("Network session failed to change authority for local entity");
+				if (authorityId.has_value()) {
+		            Logger::logWarning("Failed to assign authority of entity " +
+		            	toString(networkFamily->entityId.value & 0xffffffff) + " to " +
+		            	toString(static_cast<int>(authorityId.value())));
+
+					authorityId = {};
+				}
 			}
 		}
 

@@ -858,6 +858,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 	// authority to what peer, and notifies the right EntityNetworkRemotePeer instance about it.
 	//
 	// This whole block could be shortened down a lot, but this wouldn't be very readable.
+	bool success = true;
 
 	if (authorityId.has_value()) {
 		// Authority is taken by someone.
@@ -867,7 +868,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is giving away authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == authorityId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -876,7 +877,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is taking authority.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -890,7 +891,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Local peer is losing authority. Revoke the outbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == ownerId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -899,7 +900,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 			// Authority returned to local peer. Revoke the inbound entity.
 			for (auto& peer: peers) {
 				if (peer.getPeerId() == networkComponent.authorityId) {
-					peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
+					success = peer.prepareChangeEntityAuthority(entityId, myPeerId, ownerId.value(), authorityId);
 					break;
 				}
 			}
@@ -909,7 +910,7 @@ bool EntityNetworkSession::prepareChangeEntityAuthority(EntityId entityId, const
 		}
 	}
 
-	return true;
+	return success;
 }
 
 bool EntityNetworkSession::allowComponentAddedForFastUpdate(uint16_t componentId) const

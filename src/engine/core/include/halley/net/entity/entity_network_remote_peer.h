@@ -53,7 +53,7 @@ namespace Halley {
 
     	void logUpdates();
 
-    	void prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
+    	[[nodiscard]] bool prepareChangeEntityAuthority(EntityId entityId, NetworkSession::PeerId myPeerId,
 			NetworkSession::PeerId ownerId, std::optional<NetworkSession::PeerId> authorityId);
 
     private:
