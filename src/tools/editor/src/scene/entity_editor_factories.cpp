@@ -1469,6 +1469,8 @@ public:
 		dynamicsContainer->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Minimum Height"));
 		dynamicsContainer->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
+		dynamicsContainer->add(context.makeLabel("Kill on Min Height"));
+		dynamicsContainer->add(context.makeField("bool", pars.withSubKey("killOnMinHeight", "true"), ComponentEditorLabelCreation::Never));
 		dynamicsContainer->add(context.makeLabel("Trail Spawn Interval"));
 		dynamicsContainer->add(context.makeField("Halley::Range<float>", pars.withSubKey("trailSpawnInterval", {"0.1", "0.1"}), ComponentEditorLabelCreation::Never));
 		systemContainer->add(context.makeLabel("Destroy When Done"));

@@ -89,6 +89,7 @@ void Particles::load(const ConfigNode& node, Resources& resources, const EntityS
 	relativePosition = node["relativePosition"].asBool(false);
 	velScale = node["velScale"].asVector3f(Vector3f(1, 1, 1));
 	minHeight = node["minHeight"].asOptional<float>();
+	killOnMinHeight = node["killOnMinHeight"].asBool(true);
 	startHeight = node["startHeight"].asFloat(0);
 	maxParticles = node["maxParticles"].asOptional<int>();
 	burst = node["burst"].asOptional<int>();
@@ -138,6 +139,7 @@ ConfigNode Particles::toConfigNode(const EntitySerializationContext& context) co
 	result["relativePosition"] = relativePosition;
 	result["velScale"] = velScale;
 	result["minHeight"] = minHeight;
+	result["killOnMinHeight"] = killOnMinHeight;
 	result["startHeight"] = startHeight;
 	result["maxParticles"] = maxParticles;
 	result["burst"] = burst;
@@ -316,6 +318,16 @@ void Particles::setMinHeight(std::optional<float> z)
 std::optional<float> Particles::getMinHeight() const
 {
 	return minHeight;
+}
+
+void Particles::setKillOnMinHeight(bool enabled)
+{
+	killOnMinHeight = enabled;
+}
+
+bool Particles::isKillOnMinHeight() const
+{
+	return killOnMinHeight;
 }
 
 void Particles::setSpawnHeight(float height)
@@ -550,7 +562,13 @@ void Particles::updateParticles(float time)
 			}
 
 			if (minHeight && particle.pos.z < minHeight) {
-				particle.alive = false;
+				if (killOnMinHeight) {
+					particle.alive = false;
+				} else {
+					particle.pos.z = *minHeight;
+					particle.vel = {};
+					particle.angSpeed = 0;
+				}
 			}
 
 			if (stopped) {

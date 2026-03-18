@@ -97,6 +97,8 @@ namespace Halley {
 
 		void setMinHeight(std::optional<float> minZ);
 		std::optional<float> getMinHeight() const;
+		void setKillOnMinHeight(bool enabled);
+		bool isKillOnMinHeight() const;
 		void setSpawnHeight(float height);
 		float getSpawnHeight() const;
 		void setSpawnPositionOffset(Vector2f offset);
@@ -169,6 +171,7 @@ namespace Halley {
 		bool randomiseAnimationTime = false;
 		bool burstOnSpawn = true;
 		bool fixedTriggerSpawnPosition = false;
+		bool killOnMinHeight = false;
 		std::optional<int> maxParticles;
 		std::optional<int> burst;
 		std::optional<float> minHeight;
