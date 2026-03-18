@@ -41,6 +41,7 @@ void GradientEditorButton::updateGradient()
 
 	gradientImage.setImage(factory.getResources(), video, image);
 	getSprite().getMutableMaterial().set(1, gradientImage.getMaterial().getTexture(0));
+	getSprite().setTexRect1(Rect4f(0, 0, 1, 1));
 }
 
 
