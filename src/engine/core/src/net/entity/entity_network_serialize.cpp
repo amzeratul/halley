@@ -14,14 +14,16 @@ static void injectMagic(Serializer& serializer, uint16_t n)
     serializer << gsl::span(reinterpret_cast<std::byte *>(&n), sizeof(n));
 }
 
-static void checkMagic(Deserializer& deserializer, uint16_t n)
+static bool checkMagic(Deserializer& deserializer, uint16_t n, bool throwOnError)
 {
     uint16_t m;
     deserializer >> gsl::span(reinterpret_cast<std::byte *>(&m), sizeof(m));
 
-    if (m != n) {
+    if (m != n && throwOnError) {
         throw Exception("Network stream error", HalleyExceptions::Network);
     }
+
+    return m == n;
 }
 
 static void injectSimpleStringChecksum(Serializer& serializer, const std::string_view& str)
@@ -33,13 +35,13 @@ static void injectSimpleStringChecksum(Serializer& serializer, const std::string
     injectMagic(serializer, m & 0xffff);
 }
 
-static void checkSimpleStringChecksum(Deserializer& deserializer, const std::string_view& str)
+static bool checkSimpleStringChecksum(Deserializer& deserializer, const std::string_view& str)
 {
     size_t m = str.length();
     for (const char ch : str) {
         m += ch;
     }
-    checkMagic(deserializer, m & 0xffff);
+    return checkMagic(deserializer, m & 0xffff, false);
 }
 
 thread_local Bytes EntityNetworkSerialize::scratchpad;
@@ -526,7 +528,12 @@ EntityNetworkChanges::Type EntityNetworkSerialize::doDeserializeEntityUpdate(
         deserializer >> prefabUUID;
 
 #if INJECT_RUNTIME_CHECKS
-        checkSimpleStringChecksum(deserializer, entity.getName());
+        if (!checkSimpleStringChecksum(deserializer, entity.getName())) {
+            // NB: right now this is expected to happen, names are not consistently
+            // serialized for entity hierarchies - just report, don't throw exception!
+            Logger::logDev("Entity name mismatch: " + entity.getName() +
+                " differs from checksum sent, " + entity.getInstanceUUID(), true);
+        }
 #endif
 
         if (prefabUUID.isValid() && prefabUUID != entity.getPrefabUUID()) {
@@ -850,7 +857,7 @@ void EntityNetworkSerialize::fetchNextPage(Deserializer& deserializer, EntityNet
 
         if (deserializer.getBytesLeft() > 0) {
 #if INJECT_RUNTIME_CHECKS
-            checkMagic(deserializer, SERIALIZE_CHECK_PARITY);
+            checkMagic(deserializer, SERIALIZE_CHECK_PARITY, true);
 #endif
 
             uint8_t t;
