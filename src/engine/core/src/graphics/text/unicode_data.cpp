@@ -13,13 +13,15 @@ UnicodeData::LineBreakClass UnicodeData::getLineBreakClass(char32_t code) const
 		return lineBreakClassesAscii[code];
 	}
 
-	if (isEastAsianIdeographicCharacter(code)) {
-		return LineBreakClass::Ideographic;
-	}
-
 	const auto iter = lineBreakClasses.find(code);
 	if (iter != lineBreakClasses.end()) {
 		return iter->second;
+	}
+	
+	// We check this AFTER the class check above, since they overlap, but line break classes must take priority
+	// (otherwise things like east asian punctuation will count as ideographic class)
+	if (isEastAsianIdeographicCharacter(code)) {
+		return LineBreakClass::Ideographic;
 	}
 
 	return LineBreakClass::Alphabetic;
