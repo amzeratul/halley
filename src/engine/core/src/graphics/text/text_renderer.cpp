@@ -678,8 +678,9 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 
 	auto onBreakResult = [&](size_t pos, UnicodeLineBreaker::Result result)
 	{
-		if (!bestSplitPoint || result.priority >= bestSplitPointScore) {
-			bestSplitPointScore = result.priority;
+		auto priority = result.decayPriority.value_or(result.priority); // TODO: use regular priority until x characters or distance have passed
+		if (!bestSplitPoint || priority >= bestSplitPointScore) {
+			bestSplitPointScore = priority;
 			bestSplitPoint = SplitResult{ static_cast<uint32_t>(pos + 1), result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->toConsume : 0) + 1 : 0 };
 			bestSplitWidth = curLineWidth;
 			splittingSpaces = result.hasMoreSpaces;

@@ -12,14 +12,19 @@ namespace Halley {
             Numeric
         };
 
+        enum class LineBreakType : uint8_t {
+	        Neutral,
+            Opportunity,
+            Prohibit,
+            ProhibitUnlessAfterSpace,
+            Force
+        };
+
     	struct LineBreakRules {
-            bool lineBreakOpportunityBefore : 1;
-            bool lineBreakOpportunityAfter : 1;
-            bool prohibitLineBreakBefore: 1;
-            bool prohibitLineBreakAfter: 1;
+            LineBreakType before;
+            LineBreakType after;
             bool isSpace: 1;
             bool consumeMoreSpace : 1;
-            bool forceLineBreakAfter : 1;
             Context context;
         };
 
@@ -34,6 +39,8 @@ namespace Halley {
             ClosePunctuation,
             OpenPunctuation,
             Ideographic,
+            ConditionalJaStarter,
+            NonStarter,
             EmojiBase,
             InfixNumericSeparator,
             Numeric,
@@ -52,7 +59,7 @@ namespace Halley {
         static bool isEastAsianIdeographicCharacter(char32_t c);
 
     private:
-        std::array<LineBreakRules, 14> lineBreakRules;
+        std::array<LineBreakRules, 16> lineBreakRules;
         HashMap<char32_t, LineBreakClass> lineBreakClasses;
         std::array<LineBreakClass, 256> lineBreakClassesAscii;
 
@@ -64,6 +71,7 @@ namespace Halley {
     public:
         struct Result {
             int priority = 0;
+            std::optional<int> decayPriority;
             bool forceBreak = false;
             bool consumeSpace = false;
             bool hasMoreSpaces = false;
