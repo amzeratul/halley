@@ -656,21 +656,23 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	auto curFont = TextOverrideCursor(font, params.fontOverrides);
 	auto curFontSize = TextOverrideCursor(size, params.fontSizeOverrides);
 
-	float curLineWidth = 0;
-	float curLineSpaceWidth = 0;
-
-	std::optional<SplitResult> bestSplitPoint;
-	int bestSplitPointScore = -1;
-	float bestSplitWidth = 0;
+	struct SplitPoint {
+		SplitResult result;
+		int score = -1;
+		float width = 0;
+	};
+	std::optional<SplitPoint> bestSplitPoint;
 	bool splittingSpaces = false;
 
 	auto lineBreaker = UnicodeLineBreaker(font->getUnicodeData());
+	float curLineWidth = 0;
+	float curLineSpaceWidth = 0;
 
 	auto trySplit = [&] (bool force)
 	{
 		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth + 0.5f || force)) {
-			output += *bestSplitPoint;
-			curLineWidth = std::max(curLineWidth - bestSplitWidth, 0.0f);
+			output += bestSplitPoint->result;
+			curLineWidth = std::max(curLineWidth - bestSplitPoint->width, 0.0f);
 			curLineSpaceWidth = 0;
 			bestSplitPoint = {};
 		}
@@ -679,10 +681,9 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	auto onBreakResult = [&](size_t pos, UnicodeLineBreaker::Result result)
 	{
 		auto priority = result.decayPriority.value_or(result.priority); // TODO: use regular priority until x characters or distance have passed
-		if (!bestSplitPoint || priority >= bestSplitPointScore) {
-			bestSplitPointScore = priority;
-			bestSplitPoint = SplitResult{ static_cast<uint32_t>(pos + 1), result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->toConsume : 0) + 1 : 0 };
-			bestSplitWidth = curLineWidth;
+		if (!bestSplitPoint || priority >= bestSplitPoint->score) {
+			const auto toConsume = result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->result.toConsume : 0) + 1 : 0;
+			bestSplitPoint = SplitPoint{ SplitResult{ static_cast<uint32_t>(pos + 1), toConsume }, priority, curLineWidth };
 			splittingSpaces = result.hasMoreSpaces;
 		}
 	};

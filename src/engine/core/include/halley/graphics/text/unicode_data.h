@@ -15,6 +15,7 @@ namespace Halley {
         enum class LineBreakType : uint8_t {
 	        Neutral,
             Opportunity,
+            OpportunityLowPriority,
             Prohibit,
             ProhibitUnlessAfterSpace,
             Force

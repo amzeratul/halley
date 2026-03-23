@@ -110,9 +110,9 @@ void UnicodeData::loadLineBreakRules()
 	lineBreakRules[static_cast<int>(LineBreakClass::InfixNumericSeparator)] = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     false, false, Context::Undefined };
 	lineBreakRules[static_cast<int>(LineBreakClass::ClosePunctuation)]      = LineBreakRules{ LineBreakType::Prohibit,    LineBreakType::Opportunity, false, false, Context::Undefined };
 	lineBreakRules[static_cast<int>(LineBreakClass::OpenPunctuation)]       = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Prohibit,    false, false, Context::Undefined };
-	lineBreakRules[static_cast<int>(LineBreakClass::Ideographic)]           = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Opportunity, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::ConditionalJaStarter)]  = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::Opportunity, false, false, Context::Text };
-	lineBreakRules[static_cast<int>(LineBreakClass::NonStarter)]            = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::Opportunity, false, false, Context::Text };
+	lineBreakRules[static_cast<int>(LineBreakClass::Ideographic)]           = LineBreakRules{ LineBreakType::OpportunityLowPriority, LineBreakType::OpportunityLowPriority, false, false, Context::Text };
+	lineBreakRules[static_cast<int>(LineBreakClass::ConditionalJaStarter)]  = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::OpportunityLowPriority, false, false, Context::Text };
+	lineBreakRules[static_cast<int>(LineBreakClass::NonStarter)]            = LineBreakRules{ LineBreakType::ProhibitUnlessAfterSpace,    LineBreakType::OpportunityLowPriority, false, false, Context::Text };
 	lineBreakRules[static_cast<int>(LineBreakClass::EmojiBase)]             = LineBreakRules{ LineBreakType::Opportunity, LineBreakType::Opportunity, false, false, Context::Text };
 	lineBreakRules[static_cast<int>(LineBreakClass::Numeric)]               = LineBreakRules{ LineBreakType::Neutral,     LineBreakType::Neutral,     false, false, Context::Numeric };
 	lineBreakRules[static_cast<int>(LineBreakClass::PostfixNumeric)]        = LineBreakRules{ LineBreakType::Prohibit,    LineBreakType::Opportunity, false, false, Context::Undefined };
@@ -152,10 +152,13 @@ UnicodeLineBreaker::Result UnicodeLineBreaker::feedCharacter(char32_t a, char32_
 		return { 2, 1, false, true, aRules.consumeMoreSpace && aClass == bClass };
 	} else if (aRules.after == UnicodeData::LineBreakType::Prohibit
 			|| bRules.before == UnicodeData::LineBreakType::Prohibit
-			|| (bRules.before == UnicodeData::LineBreakType::ProhibitUnlessAfterSpace && !aRules.isSpace))
-	{
+			|| (bRules.before == UnicodeData::LineBreakType::ProhibitUnlessAfterSpace && !aRules.isSpace)) {
 		return { 0, {}, false, false, false };
-	} else if (aRules.after == UnicodeData::LineBreakType::Opportunity || bRules.before == UnicodeData::LineBreakType::Opportunity) {
+	} else if (aRules.after == UnicodeData::LineBreakType::Opportunity
+			|| bRules.before == UnicodeData::LineBreakType::Opportunity) {
+		return { 2, 1, false, false, false };
+	} else if (aRules.after == UnicodeData::LineBreakType::OpportunityLowPriority
+			|| bRules.before == UnicodeData::LineBreakType::OpportunityLowPriority) {
 		return { 1, {}, false, false, false };
 	} else {
 		return { 0, {}, false, false, false };
