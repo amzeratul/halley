@@ -656,35 +656,77 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 	auto curFont = TextOverrideCursor(font, params.fontOverrides);
 	auto curFontSize = TextOverrideCursor(size, params.fontSizeOverrides);
 
+	// OK, this whole decaying priority thing warrants an explanation
+	// Some line break characters, like spaces, are higher priority and we prefer breaking there, so they're higher priority
+	// However, for languages such as Japanese and Chinese, it's perfectly reasonable to split between ideograms, and there's few, if any, spaces
+	// Therefore, a single space can void all subsequent line break opportunities and make it look terrible
+	// To account for this, regular line break opportunities are higher priority, but decay to the same priority as ideograms after some time (currently, 8 characters)
+	// This means that it will still try breaking on spaces, but after a little while, it'll drop the distinction
+
 	struct SplitPoint {
 		SplitResult result;
-		int score = -1;
+		int priority = -1;
+		std::optional<int> decayPriority;
 		float width = 0;
 	};
 	std::optional<SplitPoint> bestSplitPoint;
+	std::optional<SplitPoint> bestDecayingSplitPoint;
 	bool splittingSpaces = false;
 
 	auto lineBreaker = UnicodeLineBreaker(font->getUnicodeData());
 	float curLineWidth = 0;
 	float curLineSpaceWidth = 0;
 
-	auto trySplit = [&] (bool force)
+	auto getBestSplitPoint = [] (size_t pos, const std::optional<SplitPoint>& a, const std::optional<SplitPoint>& b) -> std::optional<SplitPoint>
 	{
-		if (bestSplitPoint && !splittingSpaces && (curLineWidth > params.maxWidth + 0.5f || force)) {
-			output += bestSplitPoint->result;
-			curLineWidth = std::max(curLineWidth - bestSplitPoint->width, 0.0f);
+		if (a && b) {
+			const auto aPri = a->priority;
+			const auto bPri = pos > b->result.pos + 8 ? *b->decayPriority : b->priority;
+
+			if (aPri > bPri) {
+				return a;
+			} else if (bPri > aPri) {
+				return b;
+			}
+			
+			if (aPri == bPri) {
+				return a->result.pos > b->result.pos ? a : b;
+			} else {
+				return aPri > bPri ? a : b;
+			}
+		}
+		return a ? a : b;
+	};
+
+	auto trySplit = [&] (size_t pos, bool force)
+	{
+		const std::optional<SplitPoint>& split = getBestSplitPoint(pos, bestSplitPoint, bestDecayingSplitPoint);
+
+		if (split && !splittingSpaces && (curLineWidth > params.maxWidth + 0.5f || force)) {
+			output += split->result;
+			curLineWidth = std::max(curLineWidth - split->width, 0.0f);
 			curLineSpaceWidth = 0;
 			bestSplitPoint = {};
+			bestDecayingSplitPoint = {};
 		}
 	};
 
 	auto onBreakResult = [&](size_t pos, UnicodeLineBreaker::Result result)
 	{
-		auto priority = result.decayPriority.value_or(result.priority); // TODO: use regular priority until x characters or distance have passed
-		if (!bestSplitPoint || priority >= bestSplitPoint->score) {
-			const auto toConsume = result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->result.toConsume : 0) + 1 : 0;
-			bestSplitPoint = SplitPoint{ SplitResult{ static_cast<uint32_t>(pos + 1), toConsume }, priority, curLineWidth };
-			splittingSpaces = result.hasMoreSpaces;
+		const auto toConsume = result.consumeSpace ? (bestSplitPoint ? bestSplitPoint->result.toConsume : 0) + 1 : 0;
+
+		// NB: this assumes that there is only one decay priority type
+
+		if (result.decayPriority) {
+			if (!bestDecayingSplitPoint || result.priority >= bestDecayingSplitPoint->priority) {
+				bestDecayingSplitPoint = SplitPoint{ SplitResult{ static_cast<uint32_t>(pos + 1), toConsume }, result.priority, result.decayPriority, curLineWidth };
+				splittingSpaces = result.hasMoreSpaces;
+			}
+		} else {
+			if (!bestSplitPoint || result.priority >= bestSplitPoint->priority) {
+				bestSplitPoint = SplitPoint{ SplitResult{ static_cast<uint32_t>(pos + 1), toConsume }, result.priority, result.decayPriority, curLineWidth };
+				splittingSpaces = result.hasMoreSpaces;
+			}
 		}
 	};
 
@@ -706,12 +748,12 @@ void TextRenderer::calculateTextSplit(Vector<SplitResult>& output, std::u32strin
 			// Spaces can go over the edge
 			curLineSpaceWidth += width;
 			onBreakResult(i, breakResult);
-			trySplit(breakResult.forceBreak);
+			trySplit(i, breakResult.forceBreak);
 		} else {
 			// For everything else, try splitting before accepting new break point
 			curLineWidth += width + curLineSpaceWidth;
 			curLineSpaceWidth = 0;
-			trySplit(breakResult.forceBreak);
+			trySplit(i, breakResult.forceBreak);
 			onBreakResult(i, breakResult);
 		}
 	}

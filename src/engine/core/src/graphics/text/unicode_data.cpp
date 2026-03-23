@@ -76,7 +76,7 @@ void UnicodeData::loadLineBreakRules()
 	for (char32_t c: { U'\n' }) {
 		setClass(c, LineBreakClass::LineFeed);
 	}
-	for (char32_t c: { U' ', U'\t' }) {
+	for (char32_t c: { U' ', U'\t', U'　' }) {
 		setClass(c, LineBreakClass::Space);
 	}
 	for (char32_t c: { U',', U'.', U';', U':' }) {
