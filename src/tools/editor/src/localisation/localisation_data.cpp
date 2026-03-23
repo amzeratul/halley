@@ -26,8 +26,14 @@ LocalisationStats& LocalisationStats::operator+=(const LocalisationStats& other)
 	return *this;
 }
 
-int LocalisationStats::getWordCount(const String& line)
+int LocalisationStats::getWordCount(const String& line, const I18NLanguage& language)
 {
+	const auto& lang = language.getLanguageCode();
+	if (lang == "ja" || lang == "zh" || lang == "ko" || lang == "th") {
+		// Not trivially computed
+		return 0;
+	}
+
 	constexpr char32_t delims[] = U" ,;.?!:\"��[]{}()\n\t";
 	const auto* start = std::begin(delims);
 	const auto* end = std::end(delims);
@@ -156,7 +162,7 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocalisationFilterRules& 
 {
 	LocalisationStats result;
 	for (const auto& entry: entries) {
-		const auto wordCount = LocalisationStats::getWordCount(entry.getValue());
+		const auto wordCount = LocalisationStats::getWordCount(entry.getValue(), language);
 		const bool ready = entry.getReadyState(filterRules, language) == LocReadyStatus::Ready;
 
 		result.wordsPerKey[entry.getKey()] = wordCount;
@@ -175,7 +181,7 @@ LocalisationStats LocOriginalDataChunk::getStats(const LocTranslationData& trans
 	LocalisationStats result;
 	for (const auto& entry: entries) {
 		if (const auto* translatedEntry = translated.tryGetEntry(entry.getKey())) {
-			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->getValue());
+			const auto wordCount = LocalisationStats::getWordCount(translatedEntry->getValue(), translated.language);
 			const bool ready = entry.getReadyState(filterRules, translated.language) == LocReadyStatus::Ready;
 
 			result.wordsPerKey[entry.getKey()] = wordCount;

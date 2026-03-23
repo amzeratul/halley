@@ -30,7 +30,7 @@ namespace Halley {
 
 		LocalisationStats& operator+=(const LocalisationStats& other);
 
-		static int getWordCount(const String& line);
+		static int getWordCount(const String& line, const I18NLanguage& language);
 	};
 
 	class TranslationStats {

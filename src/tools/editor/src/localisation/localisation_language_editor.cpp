@@ -514,19 +514,30 @@ void LocalisationLanguageEditor::applyFilters()
 	const auto activeRows = grid->getActiveRowCount();
 	const auto srcRows = grid->getSrcRowCount();
 
+	const auto origLang = project.getProperties().getOriginalLanguage();
 	int wordCount = 0;
+	int translatedWordCount = 0;
 	for (const auto idx: grid->getActiveRows()) {
-		wordCount += LocalisationStats::getWordCount(srcData->getEntry(idx).getValue());
+		const auto& entry = srcData->getEntry(idx);
+		wordCount += LocalisationStats::getWordCount(entry.getValue(), origLang);
+		if (dstLanguage) {
+			if (auto* translated = dstLanguage->tryGetEntry(entry.getKey())) {
+				translatedWordCount += LocalisationStats::getWordCount(translated->getValue(), dstLanguage->language);
+			}
+		}
 	}
 
-	const auto origLang = project.getProperties().getOriginalLanguage();
 	String showingString;
 	if (activeRows < srcRows) {
 		showingString = "Showing " + toString(activeRows) + " out of " + toString(srcRows) + " rows";
 	} else {
 		showingString = "Showing all " + toString(srcRows) + " rows";
 	}
-	showingString += " (" + toString(wordCount) + " " + root.getLanguageName(origLang, false) + " words)";
+	showingString += " (";
+	if (dstLanguage && translatedWordCount > 0) {
+		showingString += toString(translatedWordCount) + " " + root.getLanguageName(dstLanguage->language, false) + " words, ";
+	}
+	showingString += toString(wordCount) + " " + root.getLanguageName(origLang, false) + " words)";
 
 	getWidgetAs<UILabel>("showingLabel")->setText(LocalisedString::fromUserString(showingString));
 }
