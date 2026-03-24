@@ -29,7 +29,7 @@ UIWidget::~UIWidget()
 {
 	HALLEY_DEBUG_TRACE_COMMENT(getDebugId());
 
-	canSendEvents = false;
+	alive = false;
 	if (dataBind) {
 		dataBind->setWidget(nullptr);
 		dataBind.reset();
@@ -1111,6 +1111,9 @@ bool UIWidget::onDestroyRequested()
 
 void UIWidget::sendEvent(UIEvent event, bool includeSelf, bool originatesHere) const
 {
+	if (!alive) {
+		return;
+	}
 	if (canSendEvents || !originatesHere) {
 		if (includeSelf && eventHandler && eventHandler->canHandle(event)) {
 			eventHandler->queue(event, UIEventDirection::Up);
