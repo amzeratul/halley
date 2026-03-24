@@ -224,7 +224,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 
-	class MaterialDefinition final : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
+	class MaterialDefinition : public AsyncResource, public std::enable_shared_from_this<MaterialDefinition>
 	{
 		friend class Material;
 		friend class MaterialParameter;
@@ -306,6 +306,8 @@ namespace Halley
 		ShaderParameterType parseParameterType(const String& rawType) const;
 		TextureSamplerType parseSamplerType(const String& rawType) const;
 	};
+
+	static_assert(!std::is_final_v<MaterialDefinition>); // If MaterialDefinition is final, its virtual methods are disabled, and that causes issues with DLL hot reload
 
 	class MaterialDepthStencil
 	{
