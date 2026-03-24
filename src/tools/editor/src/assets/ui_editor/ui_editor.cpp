@@ -140,6 +140,10 @@ void UIEditor::onMakeUI()
 		infiniCanvas->setScrollPosition(display->getSize() / 2 * infiniCanvas->getZoomLevel());
 	});
 
+	bindData("testLabels", display->isTestingLabels(), [=] (bool value) {
+		display->setTestingLabels(value);
+	});
+
 	doLoadUI(false);
 	reselectWidget();
 }

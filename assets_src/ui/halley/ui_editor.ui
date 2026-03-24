@@ -9,6 +9,7 @@ children:
   - uuid: 75961144-9985-4e62-ba4b-a7e632118a74
     border: [0, -6, 0, 0]
     sizer:
+      columnProportions: []
       gap: 4
       type: horizontal
     widget:
@@ -78,6 +79,12 @@ children:
           size: [22, 22]
           style: buttonThin
           tooltip: Centre View
+      - uuid: 770b3f47-4403-4a57-a658-749a430bed4b
+        border: [10, 0, 0, 0]
+        widget:
+          class: checkbox
+          id: testLabels
+          label: Test Labels
   - uuid: 8bfb0281-86ba-4b90-9882-c25908ad43a6
     proportion: 1
     sizer:

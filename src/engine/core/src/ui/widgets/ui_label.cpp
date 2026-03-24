@@ -116,7 +116,11 @@ void UILabel::updateMinSize()
 		needsClipY = true;
 	}
 
-	const auto textMinSize = (flowLayout ? Vector2f(0.0f, curExtents.y) : curExtents).ceil();
+	auto textMinSize = (flowLayout ? Vector2f(0.0f, curExtents.y) : curExtents).ceil();
+	if (testMaxWidth && maxWidth) {
+		textMinSize.x = std::max(textMinSize.x, *maxWidth);
+	}
+
 	const auto oldTextBounds = textBounds;
 	textBounds = Rect4f(Vector2f(), textMinSize).rotate(renderer.getAngle());
 	textExtents = curExtents;
@@ -427,4 +431,15 @@ void UILabel::setReplayBehavioursOnModified(bool replayOnModified)
 void UILabel::setWorldClip(Rect4f rect)
 {
 	worldClip = rect;
+}
+
+void UILabel::setTestMaxWidth(bool test)
+{
+	testMaxWidth = test;
+	needsMinSize = true;
+}
+
+bool UILabel::isTestingMaxWidth() const
+{
+	return testMaxWidth;
 }

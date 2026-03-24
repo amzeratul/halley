@@ -57,6 +57,9 @@ namespace Halley {
 
 		void setWorldClip(Rect4f rect);
 
+		void setTestMaxWidth(bool test);
+		bool isTestingMaxWidth() const;
+
 	protected:
 		void onParentChanged() override;
 
@@ -76,6 +79,7 @@ namespace Halley {
 		bool replayOnModified = false;
 
 		bool needsMinSize = true;
+		bool testMaxWidth = false;
 
 		Time marqueeIdle = 0;
 		std::optional<float> marqueeSpeed;

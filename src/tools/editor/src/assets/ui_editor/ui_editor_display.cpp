@@ -95,6 +95,16 @@ void UIEditorDisplay::setCanvas(std::shared_ptr<BaseCanvas> canvas)
 	this->canvas = std::move(canvas);
 }
 
+void UIEditorDisplay::setTestingLabels(bool testing)
+{
+	testingLabels = testing;
+}
+
+bool UIEditorDisplay::isTestingLabels() const
+{
+	return testingLabels;
+}
+
 void UIEditorDisplay::update(Time time, bool moved)
 {
 	if (moved) {
@@ -102,6 +112,12 @@ void UIEditorDisplay::update(Time time, bool moved)
 	}
 
 	setPropagateMouseToChildren(keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl));
+
+	descend([testingLabels = testingLabels] (const std::shared_ptr<UIWidget>& w) {
+		if (auto* label = dynamic_cast<UILabel*>(w.get())) {
+			label->setTestMaxWidth(testingLabels);
+		}
+	});
 }
 
 void UIEditorDisplay::onLayout()

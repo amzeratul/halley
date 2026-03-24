@@ -32,6 +32,9 @@ namespace Halley {
 
 		void setCanvas(std::shared_ptr<BaseCanvas> canvas);
 
+		void setTestingLabels(bool testing);
+		bool isTestingLabels() const;
+
 	private:
 		UIEditor* editor = nullptr;
 		std::map<UUID, std::shared_ptr<IUIElement>> elements;
@@ -52,6 +55,8 @@ namespace Halley {
 
 		std::shared_ptr<BaseCanvas> canvas;
 		bool processingMouse = false;
+
+		bool testingLabels = false;
 
 		void updateCurWidget();
 		void doLayout();
