@@ -404,6 +404,10 @@ std::set<String> EntityEditor::getComponentsOnPrefab() const
 
 void EntityEditor::addComponent()
 {
+	if (!currentEntityData) {
+		return;
+	}
+
 	auto existingComponents = getComponentsOnEntity();
 	auto prefabComponents = getComponentsOnPrefab();
 
@@ -824,11 +828,13 @@ EntityData& EntityEditor::getEntityData()
 
 const EntityData& EntityEditor::getEntityData() const
 {
+	HalleyAssertDev(currentEntityData);
 	return *currentEntityData;
 }
 
 ConfigNode& EntityEditor::getComponentData(const String& componentName, const String& fieldName)
 {
+	HalleyAssertDev(currentEntityData);
 	for (auto& comp : currentEntityData->getComponents()) {
 		if (comp.first == componentName) {
 			return comp.second[fieldName];
