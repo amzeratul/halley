@@ -416,6 +416,12 @@ void UILabel::setAngle(Angle1f angle)
 	needsMinSize = true;
 }
 
+void UILabel::setLineSpacing(float spacing)
+{
+	renderer.setLineSpacing(spacing);
+	needsMinSize = true;
+}
+
 void UILabel::setDynamicValue(std::string_view key, ConfigNode value)
 {
 	if (key == "alpha") {

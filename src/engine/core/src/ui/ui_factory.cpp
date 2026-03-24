@@ -776,6 +776,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("angle")) {
 		label->setAngle(Angle1f::fromDegrees(node["angle"].asFloat(0)));
 	}
+	if (node.hasKey("lineSpacing")) {
+		label->setLineSpacing(node["lineSpacing"].asFloat(0));
+	}
 	label->setReplayBehavioursOnModified(node["replayBehavioursOnModified"].asBool(false));
 	return label;
 }
@@ -801,6 +804,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Shadow Colour", "shadowColour", "std::optional<Halley::Colour4f>", "");
 	result.entries.emplace_back("Replay Behaviours on Modified", "replayBehavioursOnModified", "bool", "false");
 	result.entries.emplace_back("Angle", "angle", "float", "0");
+	result.entries.emplace_back("Line Spacing", "lineSpacing", "float", "0");
 
 	result.name = "Label";
 	result.iconName = "widget_icons/label.png";

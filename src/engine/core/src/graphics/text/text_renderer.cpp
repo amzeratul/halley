@@ -376,7 +376,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		if (c != '\n') {
 			curLineOffset.x += advance;
 		}
-		curLineHeight = std::max(curLineHeight, getLineHeight(fontForGlyph, *curFontSize));
+		curLineHeight = std::max(curLineHeight, getLineHeight(fontForGlyph, *curFontSize, false));
 		curAscender = std::max(curAscender, fontForGlyph.getAscenderDistance() * curScale);
 
 		if (c != ' ' && c != '\n') {
@@ -388,7 +388,7 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		lastGlyph = &glyph;
 		lastFont = &fontForGlyph;
 
-		auto lineBreak = [&] {
+		auto lineBreak = [&] (bool finalBreak) {
 			// Line break, update previous characters!
 			if (layouts) {
 				const Vector2f lineOffset = floorAlign(position + Vector2f(0, curAscender) - curLineOffset * align);
@@ -401,8 +401,8 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 			}
 
 			// Move pen
-			lineStartPos.y += curLineHeight;
-			height += curLineHeight;
+			lineStartPos.y += curLineHeight + lineSpacing;
+			height += curLineHeight + (finalBreak ? 0.0f : lineSpacing);
 			curLineHeight = 0;
 			curAscender = 0;
 
@@ -412,14 +412,14 @@ void TextRenderer::generateLayout(const StringUTF32& text, Vector<GlyphLayout>* 
 		};
 
 		if (c == '\n') {
-			lineBreak();
+			lineBreak(false);
 		}
 		if (i == n - 1) {
-			lineBreak();
+			lineBreak(true);
 		}
 	}
 
-	extents = Vector2f(gotExtents ? maxX : 0.0f, std::max(getLineHeight(*font, size), height));
+	extents = Vector2f(gotExtents ? maxX : 0.0f, std::max(getLineHeight(*font, size, false), height));
 
 	if (layouts) {
 		const auto totalOffset = floorAlign(extents * offset);
@@ -804,14 +804,14 @@ std::optional<Rect4f> TextRenderer::getClip() const
 	return clip;
 }
 
-float TextRenderer::getLineHeight() const
+float TextRenderer::getLineHeight(bool includeSpacing) const
 {
-	return font ? getLineHeight(*font, size) : 1.0f;
+	return font ? getLineHeight(*font, size, includeSpacing) : 1.0f;
 }
 
-float TextRenderer::getLineHeight(const Font& font, float size) const
+float TextRenderer::getLineHeight(const Font& font, float size, bool includeSpacing) const
 {
-	return roundf(font.getHeight() * getScale(font, size) + lineSpacing);
+	return roundf(font.getHeight() * getScale(font, size) + (includeSpacing ? lineSpacing : 0));
 }
 
 float TextRenderer::getAlignment() const

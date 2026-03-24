@@ -50,6 +50,7 @@ namespace Halley {
 		void setFontSize(float size);
 		Vector2f getMinimumSize() const override;
 		void setAngle(Angle1f angle);
+		void setLineSpacing(float spacing);
 
 		void setDynamicValue(std::string_view key, ConfigNode value) override;
 

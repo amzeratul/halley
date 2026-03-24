@@ -142,8 +142,8 @@ namespace Halley
 		Colour getShadowColour() const;
 		float getSmoothness() const;
 		std::optional<Rect4f> getClip() const;
-		float getLineHeight() const;
-		float getLineHeight(const Font& font, float size) const;
+		float getLineHeight(bool includeSpacing = true) const;
+		float getLineHeight(const Font& font, float size, bool includeSpacing = true) const;
 		float getAlignment() const;
 		float getFontSize() const;
 		Angle1f getAngle() const;
