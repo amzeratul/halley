@@ -229,10 +229,14 @@ namespace Halley {
 	// Attack and release are linear interpolations
 	template <typename T>
 	[[nodiscard]] constexpr inline T asr(T x, T a, T s, T r) {
-		if (x < a) return x/a;
-		T as = a+s;
-		if (x < as) return 1;
-		return 1 - ((x-as)/r);
+		if (x < a) {
+			return floatEquals<T>(a, 0.0f) ? 0.0f : std::max<T>(x / a, 0.0f);
+		}
+		T as = a + s;
+		if (x < as || floatEquals<T>(r, 0.0f)) {
+			return 1;
+		}
+		return std::max<T>(1 - ((x - as) / r), 0.0f);
 	}
 
 	// Next power of 2
