@@ -424,7 +424,7 @@ bool Debug::isRunningFromDLL()
 	char name[1024];
 	GetModuleFileNameA(getCurrentModuleHandle(), name, sizeof(name));
 	auto str = std::string_view(name);
-	return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll";
+	return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll" && str.find("plugins") == std::string_view::npos;
 #else
 	return false;
 #endif
