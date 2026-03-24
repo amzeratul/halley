@@ -726,25 +726,8 @@ void EntityNetworkRemotePeer::destroyRemoteEntity(const InboundEntity& inboundEn
 {
 	auto entity = parentSession->getWorld().tryGetEntity(inboundEntity.worldId);
 	if (entity.isValid()) {
-		bool shouldBeDeleted = entity.getWorldPartition() == 0;
-
-		if (!shouldBeDeleted && !inboundEntity.appliedOnExistingEntity) {
-			// Don't delete non-prefab world entities.
-			// See sendCreateEntity() for the correlating check on network entity creation.
-			if (entity.getPrefab()) {
-				bool hasBeenAssignedToHost = false;
-				bool hasBeenCreatedByHost = false;
-				if (const auto networkComponent = entity.tryGetComponent<NetworkComponent>(); networkComponent) {
-					if (networkComponent->creatorId) {
-						// Checks if the entity was created locally, but network ownership assigned to host.
-						hasBeenAssignedToHost = networkComponent->creatorId != networkComponent->ownerId;
-					} else {
-						hasBeenCreatedByHost = networkComponent->ownerId.value() == 0;
-					}
-				}
-				shouldBeDeleted = hasBeenAssignedToHost || hasBeenCreatedByHost;
-			}
-		}
+		bool shouldBeDeleted = !inboundEntity.appliedOnExistingEntity // don't delete world entities (loaded from chunk)
+			&& !inboundEntity.forChangedAuthorityOnly; // local peer owns this, let nobody tell us what to delete
 
 		entity.setFromNetwork(false);
 
