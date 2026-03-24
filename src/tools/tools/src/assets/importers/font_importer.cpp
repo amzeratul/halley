@@ -49,6 +49,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	if (meta.hasKey("filtering")) {
 		result.imageMeta->set("filtering", meta.getBool("filtering"));
 	}
+	result.imageMeta->set("compressAs", "png");
 
 	ImportingAsset image;
 	image.assetId = "fontTex/" + fontName;
