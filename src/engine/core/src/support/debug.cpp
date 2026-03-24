@@ -395,6 +395,52 @@ void Debug::abort(std::string_view message)
 }
 
 
+
+
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+
+namespace {
+	HMODULE getCurrentModuleHandle()
+	{
+		HMODULE hMod = nullptr;
+		GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPCWSTR>(&getCurrentModuleHandle), &hMod);
+		return hMod;
+	}
+
+	constexpr bool checkForLoadingFromDLL = false;
+}
+
+bool Debug::isRunningFromDLL()
+{
+	if (!checkForLoadingFromDLL) {
+		return false;
+	}
+
+#ifdef DEV_BUILD
+	char name[1024];
+	GetModuleFileNameA(getCurrentModuleHandle(), name, sizeof(name));
+	auto str = std::string_view(name);
+	return str.length() > 4 && str.substr(str.length() - 4, 4) == ".dll";
+#else
+	return false;
+#endif
+}
+
+#else
+
+bool Debug::isRunningFromDLL()
+{
+	return false;
+}
+
+#endif
+
+
+
 String Debug::getCallStack(int skip)
 {
 #if defined(HAS_STACKWALKER)

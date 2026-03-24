@@ -191,7 +191,10 @@ void MaterialTexture::deserialize(Deserializer& s)
 	s >> samplerType;
 }
 
-MaterialDefinition::MaterialDefinition() = default;
+MaterialDefinition::MaterialDefinition()
+{
+	HalleyAssertDev(!Debug::isRunningFromDLL());
+}
 
 std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoader& loader)
 {
@@ -214,6 +217,8 @@ std::shared_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoa
 
 MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 {
+	HalleyAssertDev(!Debug::isRunningFromDLL());
+	
 	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	s >> *this;
@@ -451,11 +456,13 @@ bool MaterialDefinition::hasAutoVariables() const
 
 std::shared_ptr<Material> MaterialDefinition::createMaterial(bool forceLocalBlocks) const
 {
+	HalleyAssertDev(!Debug::isRunningFromDLL());
 	return std::make_shared<Material>(shared_from_this(), forceLocalBlocks);
 }
 
 std::unique_ptr<Material> MaterialDefinition::createMaterialUnique(bool forceLocalBlocks) const
 {
+	HalleyAssertDev(!Debug::isRunningFromDLL());
 	return std::make_unique<Material>(shared_from_this(), forceLocalBlocks);
 }
 

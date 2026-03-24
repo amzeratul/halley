@@ -60,6 +60,8 @@ namespace Halley {
 		static void abort();
 		static void abort(std::string_view message);
 
+		static bool isRunningFromDLL();
+
 	private:
 		Debug();
 		static bool debugging;
