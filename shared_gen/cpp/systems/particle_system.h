@@ -1,4 +1,4 @@
-// Halley codegen version 138
+// Halley codegen version 139
 #pragma once
 
 #include <halley.hpp>
@@ -82,7 +82,7 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(particleFamily, std::array<int, 1>{ StopParticlesMessage::messageIndex });
+		doProcessMessages(particleFamily, std::to_array({ StopParticlesMessage::messageIndex }));
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {

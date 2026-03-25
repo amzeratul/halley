@@ -697,7 +697,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		onMessagesReceivedBody.emplace_back("}");
 
 		for (const auto& [familyName, msgIds]: familiesReceived) {
-			processMessagesBody.push_back("doProcessMessages(" + familyName + "Family, std::array<int, " + toString(msgIds.size()) + ">{ " + toString(msgIds) + " });");
+			processMessagesBody.push_back("doProcessMessages(" + familyName + "Family, std::to_array({ " + toString(msgIds) + " }));");
 		}
 
 		sysClassGen

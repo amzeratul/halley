@@ -276,7 +276,7 @@ ComputerData OSWin32::getComputerData()
 	DWORD dwBufferSize2 = UNLEN + 1;
 	if (GetUserName(name, &dwBufferSize2)) data.userName = String(name);
 
-	auto osInfo = runWMIQuery("SELECT * FROM Win32_OperatingSystem", std::array<String, 4>({ "Caption", "CSDVersion", "OSArchitecture", "TotalVisibleMemorySize" }));
+	auto osInfo = runWMIQuery("SELECT * FROM Win32_OperatingSystem", std::to_array<String>({ "Caption", "CSDVersion", "OSArchitecture", "TotalVisibleMemorySize" }));
 
 	String servPack = osInfo[1];
 	data.osName = osInfo[0];

@@ -187,7 +187,7 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(scriptableFamily, std::array<int, 6>{ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex });
+		doProcessMessages(scriptableFamily, std::to_array({ StartScriptMessage::messageIndex, TerminateScriptMessage::messageIndex, TerminateScriptsWithTagMessage::messageIndex, SendScriptMsgMessage::messageIndex, ReturnHostScriptThreadMessage::messageIndex, SetEntityVariableMessage::messageIndex }));
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {

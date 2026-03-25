@@ -111,7 +111,7 @@ private:
 	}
 
 	void processMessages() override final {
-		doProcessMessages(mainFamily, std::array<int, 2>{ PlayAnimationMessage::messageIndex, PlayAnimationOnceMessage::messageIndex });
+		doProcessMessages(mainFamily, std::to_array({ PlayAnimationMessage::messageIndex, PlayAnimationOnceMessage::messageIndex }));
 	}
 
 	void onMessagesReceived(int msgIndex, Halley::Message** msgs, size_t* idx, size_t n, Halley::FamilyBindingBase& family) override final {
