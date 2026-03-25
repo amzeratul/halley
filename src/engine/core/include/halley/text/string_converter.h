@@ -209,7 +209,7 @@ namespace Halley
 		}
 	};
 
-#if __cplusplus >= 202002L
+#if __cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
 	template<size_t N>
 	struct ToStringConverter<char8_t[N]>
 	{

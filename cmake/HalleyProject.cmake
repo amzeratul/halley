@@ -54,14 +54,14 @@ endif()
 
 option(HALLEY_HAS_LIVEPP "Build with Live++ support" ${LIVEPP_FOUND})
 
-# C++17 support
-set(CMAKE_CXX_STANDARD 17)
+# C++20 support
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++") # Apparently Clang on Mac needs this...
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++") # Apparently Clang on Mac needs this...
 endif()
 if (EMSCRIPTEN)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++ -pthread -O2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -stdlib=libc++ -pthread -O2")
 	add_definitions(-sUSE_SDL=2 -pthread -g)
 	set(CMAKE_EXECUTABLE_SUFFIX ".html")
 endif()
@@ -75,7 +75,7 @@ if (MSVC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast /WX -D_ENABLE_EXTENDED_ALIGNED_STORAGE -Wno-unused-private-field -Wno-unused-variable -Wno-deprecated-declarations -Wno-microsoft-cast -Wno-switch -Wno-missing-declarations -Wno-string-plus-int -Wno-unused-function -Wno-assume")
 	endif()
 
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /permissive-")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20 /permissive-")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /sdl /Oi /Ot /Oy /Ob2 /Zi")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /sdl /Oi /Ot /Oy /Ob2 /Zi")
 
@@ -109,7 +109,7 @@ if (MSVC)
 			endif()
 		endif()
 	endif()
-	set(CMAKE_CXX_STANDARD 17)
+	set(CMAKE_CXX_STANDARD 20)
 
 	if (_GAMING_DESKTOP)
 		add_definitions(-D_GAMING_DESKTOP -DWINAPI_FAMILY=WINAPI_FAMILY_GAMES)
